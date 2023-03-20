@@ -89,7 +89,7 @@ def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt=''
         response = requests.post(API_URL, headers=headers, proxies=proxies,
                                 json=payload, stream=True, timeout=15)
     except:
-        chatbot.append(('', 'Requests Timeout, Network Error.'))
+        chatbot[-1] = ((chatbot[-1][0], 'Requests Timeout, Network Error.'))
         yield chatbot, history, "Requests Timeout"
         raise TimeoutError
 
