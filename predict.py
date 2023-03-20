@@ -6,10 +6,11 @@ import requests
 import importlib
 import os
 
-from config import proxies, API_URL, API_KEY
 if os.path.exists('config_private.py'):
     # 放自己的秘密如API和代理网址
     from config_private import proxies, API_URL, API_KEY
+else:
+    from config import proxies, API_URL, API_KEY
 
 
 
@@ -90,6 +91,7 @@ def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt=''
     except:
         chatbot.append(('', 'Requests Timeout, Network Error.'))
         yield chatbot, history, "Requests Timeout"
+        raise TimeoutError
 
     token_counter = 0
     partial_words = ""
