@@ -1,6 +1,15 @@
 # ChatGPT 学术优化
 
 **如果喜欢这个项目，请给它一个Star**
+<div align="center">
+<img src="公式.gif" width="700" >
+</div>
+
+<div align="center">
+<img src="润色.gif" width="700" >
+</div>
+
+
 
 ## 使用docker
 
