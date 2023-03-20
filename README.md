@@ -27,7 +27,7 @@ docker run --rm -it --net=host gpt-academic
 ```
 
 
-## 添加新的便捷按钮
+## 自定义新的便捷按钮
 打开functional.py，只需看一眼就知道怎么弄了
 例如
 ```
