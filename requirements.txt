@@ -1,0 +1,3 @@
+gradio
+requests[socks]
+mdtex2html
