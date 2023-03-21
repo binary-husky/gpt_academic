@@ -1,6 +1,15 @@
 # ChatGPT 学术优化
 
 **如果喜欢这个项目，请给它一个Star**
+
+<div align="center">
+<img src="demo2.jpg" width="500" >
+</div>
+
+<div align="center">
+<img src="demo.jpg" width="500" >
+</div>
+
 <div align="center">
 <img src="公式.gif" width="700" >
 </div>
@@ -9,9 +18,22 @@
 <img src="润色.gif" width="700" >
 </div>
 
+## 直接运行 (Windows or Linux)
+
+```
+# 下载项目
+git clone https://github.com/binary-husky/chatgpt_academic.git
+cd chatgpt_academic
+# 配置 海外Proxy 和 OpenAI API KEY
+config.py
+# 安装依赖
+python -m pip install -r requirements.txt
+# 运行
+python main.py
+```
 
 
-## 使用docker
+## 使用docker (Linux)
 
 ``` sh
 # 下载项目
