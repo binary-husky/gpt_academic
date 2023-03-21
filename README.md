@@ -2,18 +2,22 @@
 
 **如果喜欢这个项目，请给它一个Star**
 
+- 支持GPT输出的markdown表格
 <div align="center">
 <img src="demo2.jpg" width="500" >
 </div>
 
+- 如果输出包含公式，会同时以tex形式和渲染形式显示，方便复制和阅读
 <div align="center">
 <img src="demo.jpg" width="500" >
 </div>
 
+- 所有按钮都通过读取functional.py动态生成，可随意加自定义功能，解放粘贴板
 <div align="center">
 <img src="公式.gif" width="700" >
 </div>
 
+- 代码的显示自然也不在话下
 <div align="center">
 <img src="润色.gif" width="700" >
 </div>
