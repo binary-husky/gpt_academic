@@ -64,6 +64,11 @@ docker run --rm -it --net=host gpt-academic
 },
 ```
 
+## 配置代理
+
+修改端口与代理软件对应
+![image](https://user-images.githubusercontent.com/96192199/226571294-37a47cd9-4d40-4c16-97a2-d360845406f7.png)
+
 
 ## 参考项目
 ```
