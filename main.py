@@ -46,9 +46,6 @@ def markdown_convertion(txt):
     else:
         return markdown.markdown(txt,extensions=['fenced_code','tables'])
 
-# math_config = {'mdx_math': {'enable_dollar_delimiter': True}}
-# markdown.markdown(txt, extensions=['fenced_code', 'tables', 'mdx_math'], extension_configs=math_config)
-
 
 def format_io(self,y):
     if y is None:
