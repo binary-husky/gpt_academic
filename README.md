@@ -54,7 +54,7 @@ docker run --rm -it --net=host gpt-academic
 ```
 
 
-## 自定义新的便捷按钮
+## 自定义新的便捷按钮（学术快捷键自定义）
 打开functional.py，只需看一眼就知道怎么弄了
 例如
 ```
@@ -64,6 +64,7 @@ docker run --rm -it --net=host gpt-academic
     "Suffix": "",
 },
 ```
+如果你发明了更好用的学术快捷键，欢迎发issue或者pull requests！
 
 ## 配置代理
 
