@@ -28,8 +28,9 @@
 # 下载项目
 git clone https://github.com/binary-husky/chatgpt_academic.git
 cd chatgpt_academic
-# 配置 海外Proxy 和 OpenAI API KEY
-config.py
+# 在config.py中，配置 海外Proxy 和 OpenAI API KEY
+- 1.如果你在国内，需要设置海外代理才能够使用 OpenAI API，你可以通过 config.py 文件来进行设置。
+- 2.配置 OpenAI API KEY。你需要在 OpenAI 官网上注册并获取 API KEY。一旦你拿到了 API KEY，在 config.py 文件里配置好即可。
 # 安装依赖
 python -m pip install -r requirements.txt
 # 运行
