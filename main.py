@@ -3,6 +3,7 @@ import os
 import markdown, mdtex2html
 from predict import predict
 from show_math import convert as convert_math
+from config import proxies, WEB_PORT
 
 def find_free_port():
     import socket
@@ -11,8 +12,8 @@ def find_free_port():
         s.bind(('', 0))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return s.getsockname()[1]
-    
-PORT = find_free_port()
+
+PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
 
 initial_prompt = "Serve me as a writing and programming assistant."
 title_html = """<h1 align="center">ChatGPT 学术优化</h1>"""
@@ -81,8 +82,8 @@ with gr.Blocks() as demo:
                 for k in functional:
                     variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
                     functional[k]["Button"] = gr.Button(k, variant=variant)
-
-            statusDisplay = gr.Markdown("status: ready")
+            from check_proxy import check_proxy
+            statusDisplay = gr.Markdown(f"{check_proxy(proxies)}")
             systemPromptTxt = gr.Textbox(show_label=True, placeholder=f"System Prompt", label="System prompt", value=initial_prompt).style(container=True)
             #inputs, top_p, temperature, top_k, repetition_penalty
             with gr.Accordion("arguments", open=False):
