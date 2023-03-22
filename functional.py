@@ -12,7 +12,7 @@ def get_functionals():
 improve the spelling, grammar, clarity, concision and overall readability. When neccessary, rewrite the whole sentence. \
 Furthermore, list all modification and explain the reasons to do so in markdown table.\n\n",    # 前言
             "Suffix": "",   # 后语
-            "Color": "stop",    # 按钮颜色
+            "Color": "secondary",    # 按钮颜色
         },
         "中文学术润色": {
             "Prefix": "作为一名中文学术论文写作改进助理，你的任务是改进所提供文本的拼写、语法、清晰、简洁和整体可读性，同时分解长句，减少重复，并提供改进建议。请只提供文本的更正版本，避免包括解释。请编辑以下文本：\n\n",
@@ -35,7 +35,7 @@ For phrases or individual words that require translation, provide the source (di
 separate them using the | symbol.Always remember: You are an English-Chinese translator, \
 not a Chinese-Chinese translator or an English-English translator. Below is the text you need to translate: \n\n",
             "Suffix": "",
-            "Color": "stop",
+            "Color": "secondary",
         },
         "中译英": {
             "Prefix": "Please translate following sentence to English: \n\n",
@@ -52,7 +52,7 @@ not a Chinese-Chinese translator or an English-English translator. Below is the 
         "解释代码": {
             "Prefix": "请解释以下代码：\n```\n",
             "Suffix": "\n```\n",
-            "Color": "stop",
+            "Color": "secondary",
         },
     }
 

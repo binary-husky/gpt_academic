@@ -14,6 +14,13 @@ except: from config import proxies, API_URL, API_KEY, TIMEOUT_SECONDS
 
 timeout_bot_msg = 'Request timeout, network error. please check proxy settings in config.py.'
 
+def get_full_error(chunk, stream_response):
+    while True:
+        try:
+            chunk += next(stream_response)
+        except:
+            break
+    return chunk
 
 def predict_no_ui(inputs, top_p, temperature, history=[]):
     messages = [{"role": "system", "content": ""}]
@@ -60,10 +67,17 @@ def predict_no_ui(inputs, top_p, temperature, history=[]):
         # make a POST request to the API endpoint using the requests.post method, passing in stream=True
         response = requests.post(API_URL, headers=headers, proxies=proxies,
                                 json=payload, stream=True, timeout=TIMEOUT_SECONDS*2)
-    except:
+    except Exception as e:
+        traceback.print_exc()
         raise TimeoutError
-        
-    return json.loads(response.text)["choices"][0]["message"]["content"]
+
+    try:
+        result = json.loads(response.text)["choices"][0]["message"]["content"]
+        return result
+    except Exception as e:
+        if "choices" not in response.text: print(response.text)
+        raise ConnectionAbortedError("Json解析不合常规，可能是文本过长" + response.text)
+
 
 
 
@@ -163,11 +177,6 @@ def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt=''
                     if len(json.loads(chunk.decode()[6:])['choices'][0]["delta"]) == 0:
                         logging.info(f'[response] {chatbot[-1][-1]}')
                         break
-                except Exception as e:
-                    traceback.print_exc()
-                    print(chunk.decode())
-
-                try:
                     chunkjson = json.loads(chunk.decode()[6:])
                     status_text = f"finish_reason: {chunkjson['choices'][0]['finish_reason']}"
                     partial_words = partial_words + json.loads(chunk.decode()[6:])['choices'][0]["delta"]["content"]
@@ -181,5 +190,12 @@ def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt=''
 
                 except Exception as e:
                     traceback.print_exc()
-                    print(chunk.decode())
-                    yield chatbot, history, "Json解析不合常规"
+                    yield chatbot, history, "Json解析不合常规，很可能是文本过长"
+                    chunk = get_full_error(chunk, stream_response)
+                    error_msg = chunk.decode()
+                    if "reduce the length" in error_msg:
+                        chatbot[-1] = (history[-1], "老铁，输入的文本太长了")
+                    yield chatbot, history, "Json解析不合常规，很可能是文本过长" + error_msg
+                    return
+
+
