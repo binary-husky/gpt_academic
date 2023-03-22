@@ -55,10 +55,10 @@ docker run --rm -it --net=host gpt-academic
 
 
 ## 自定义新的便捷按钮（学术快捷键自定义）
-打开functional.py，只需看一眼就知道怎么弄了
+打开functional.py，只需看一眼就知道怎么弄了，
 例如
 ```
-"英译中": {
+"超级英译中": {
 
     # 前缀，会被加在你的输入之前。例如，用来描述你的要求，例如翻译、解释代码、润色等等
     "Prefix": "请翻译把下面一段内容成中文，然后用一个markdown表格逐一解释文中出现的专有名词：\n\n", 
@@ -68,7 +68,9 @@ docker run --rm -it --net=host gpt-academic
     
 },
 ```
-![image](https://user-images.githubusercontent.com/96192199/226899272-477c2134-ed71-4326-810c-29891fe4a508.png)
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/226899272-477c2134-ed71-4326-810c-29891fe4a508.png" width="500" >
+</div>
 
 
 如果你发明了更好用的学术快捷键，欢迎发issue或者pull requests！
@@ -76,8 +78,12 @@ docker run --rm -it --net=host gpt-academic
 ## 配置代理
 
 在```config.py```中修改端口与代理软件对应
-![image](https://user-images.githubusercontent.com/96192199/226571294-37a47cd9-4d40-4c16-97a2-d360845406f7.png)
-![image](https://user-images.githubusercontent.com/96192199/226838985-e5c95956-69c2-4c23-a4dd-cd7944eeb451.png)
+
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/226571294-37a47cd9-4d40-4c16-97a2-d360845406f7.png" width="500" >
+<img src="https://user-images.githubusercontent.com/96192199/226838985-e5c95956-69c2-4c23-a4dd-cd7944eeb451.png" width="500" >
+</div>
+
 配置完成后，你可以用以下命令测试代理是否工作，如果一切正常，下面的代码将输出你的代理服务器所在地：
 ```
 python check_proxy.py
