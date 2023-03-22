@@ -2,6 +2,9 @@
 
 **如果喜欢这个项目，请给它一个Star；如果你发明了更好用的学术快捷键，欢迎发issue或者pull requests**
 
+If you like this project, please give it a Star. If you've come up with more useful academic shortcuts, feel free to open an issue or pull request.
+
+
 - 支持GPT输出的markdown表格
 <div align="center">
 <img src="demo2.jpg" width="500" >
