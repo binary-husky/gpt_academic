@@ -1,3 +1,5 @@
+# This program is written by: https://github.com/polarwinkel/mdtex2html
+
 from latex2mathml.converter import convert as tex2mathml
 import re
 
