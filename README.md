@@ -91,7 +91,7 @@ python check_proxy.py
 
 ## 兼容性测试
 
-### 图片显示
+### 图片显示：
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/226906087-b5f1c127-2060-4db9-af05-487643b21ed9.png" width="500" >
 </div>
@@ -99,6 +99,20 @@ python check_proxy.py
 <img src="https://user-images.githubusercontent.com/96192199/226906703-7226495d-6a1f-4a53-9728-ce6778cbdd19.png" width="200" >
 </div>
 
+### 如果一个程序能够读懂并剖析自己，细思极恐：
+
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/226936850-c77d7183-0749-4c1c-9875-fd4891842d0c.png" width="700" >
+</div>
+
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/226936618-9b487e4b-ab5b-4b6e-84c6-16942102e917.png" width="700" >
+</div>
+
+### 其他任意Python项目剖析：
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/226935232-6b6a73ce-8900-4aee-93f9-733c7e6fef53.png" width="700" >
+</div>
 
 
 ## 参考项目
