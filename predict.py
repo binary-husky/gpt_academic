@@ -14,6 +14,59 @@ except: from config import proxies, API_URL, API_KEY, TIMEOUT_SECONDS
 
 timeout_bot_msg = 'Request timeout, network error. please check proxy settings in config.py.'
 
+
+def predict_no_ui(inputs, top_p, temperature, history=[]):
+    messages = [{"role": "system", "content": ""}]
+
+    # 
+    chat_counter = len(history) // 2
+    if chat_counter > 0:
+        for index in range(0, 2*chat_counter, 2):
+            what_i_have_asked = {}
+            what_i_have_asked["role"] = "user"
+            what_i_have_asked["content"] = history[index]
+            what_gpt_answer = {}
+            what_gpt_answer["role"] = "assistant"
+            what_gpt_answer["content"] = history[index+1]
+            if what_i_have_asked["content"] != "":
+                messages.append(what_i_have_asked)
+                messages.append(what_gpt_answer)
+            else:
+                messages[-1]['content'] = what_gpt_answer['content']
+
+    what_i_ask_now = {}
+    what_i_ask_now["role"] = "user"
+    what_i_ask_now["content"] = inputs
+    messages.append(what_i_ask_now)
+
+    # messages
+    payload = {
+        "model": "gpt-3.5-turbo",
+        # "model": "gpt-4",
+        "messages": messages, 
+        "temperature": temperature,  # 1.0,
+        "top_p": top_p,  # 1.0,
+        "n": 1,
+        "stream": False,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+    }
+    
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {API_KEY}"
+    }
+    try:
+        # make a POST request to the API endpoint using the requests.post method, passing in stream=True
+        response = requests.post(API_URL, headers=headers, proxies=proxies,
+                                json=payload, stream=True, timeout=TIMEOUT_SECONDS*2)
+    except:
+        raise TimeoutError
+        
+    return json.loads(response.text)["choices"][0]["message"]["content"]
+
+
+
 def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt='', retry=False, 
             stream = True, additional_fn=None):
 
