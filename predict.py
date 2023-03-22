@@ -4,23 +4,11 @@ import logging
 import traceback
 import requests
 import importlib
-import os
 
-if os.path.exists('config_private.py'):
-    # 放自己的秘密如API和代理网址
-    from config_private import proxies, API_URL, API_KEY, TIMEOUT_SECONDS
-else:
-    from config import proxies, API_URL, API_KEY, TIMEOUT_SECONDS
+try: from config_private import proxies, API_URL, API_KEY, TIMEOUT_SECONDS # 放自己的秘密如API和代理网址 os.path.exists('config_private.py')
+except: from config import proxies, API_URL, API_KEY, TIMEOUT_SECONDS
 
 timeout_bot_msg = 'Request timeout, network error. please check proxy settings in config.py.'
-
-def compose_system(system_prompt):
-    return {"role": "system", "content": system_prompt}
-
-
-def compose_user(user_input):
-    return {"role": "user", "content": user_input}
-
 
 def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt='', retry=False, 
             stream = True, additional_fn=None):
@@ -46,7 +34,7 @@ def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt=''
 
     print(f"chat_counter - {chat_counter}")
 
-    messages = [compose_system(system_prompt)]
+    messages = [{"role": "system", "content": system_prompt}]
     if chat_counter:
         for index in range(0, 2*chat_counter, 2):
             what_i_have_asked = {}
