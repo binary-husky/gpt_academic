@@ -56,9 +56,11 @@ def 解析一个Python项目(txt, top_p, temperature, chatbot, history, systemPr
     if os.path.exists(txt):
         project_folder = txt
     else:
-        chatbot.append((f"解析项目: {txt}", "找不到本地项目: {txt}"))
-        history.append(i_say_show_user); history.append(gpt_say)
-        return chatbot, history, '正常'
+        if txt == "": txt = '空空如也的输入栏'
+        chatbot.append((f"解析项目: {txt}", f"找不到本地项目: {txt}"))
+        history.append(f"解析项目: {txt}"); history.append(f"找不到本地项目: {txt}")
+        yield chatbot, history, '正常'
+        return
 
     file_manifest = [f for f in glob.glob(f'{project_folder}/*.py')]
     print('begin analysis on:', file_manifest)
