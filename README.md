@@ -68,6 +68,9 @@ docker run --rm -it --net=host gpt-academic
     
 },
 ```
+![image](https://user-images.githubusercontent.com/96192199/226899272-477c2134-ed71-4326-810c-29891fe4a508.png)
+
+
 如果你发明了更好用的学术快捷键，欢迎发issue或者pull requests！
 
 ## 配置代理
