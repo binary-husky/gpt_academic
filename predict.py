@@ -7,7 +7,9 @@ import traceback
 import requests
 import importlib
 
-try: from config_private import proxies, API_URL, API_KEY, TIMEOUT_SECONDS # 放自己的秘密如API和代理网址 os.path.exists('config_private.py')
+# config_private.py放自己的秘密如API和代理网址
+# 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
+try: from config_private import proxies, API_URL, API_KEY, TIMEOUT_SECONDS 
 except: from config import proxies, API_URL, API_KEY, TIMEOUT_SECONDS
 
 timeout_bot_msg = 'Request timeout, network error. please check proxy settings in config.py.'
