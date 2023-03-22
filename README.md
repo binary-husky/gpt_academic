@@ -1,6 +1,6 @@
 # ChatGPT 学术优化
 
-**如果喜欢这个项目，请给它一个Star**
+**如果喜欢这个项目，请给它一个Star；如果你发明了更好用的学术快捷键，欢迎发issue或者pull requests**
 
 - 支持GPT输出的markdown表格
 <div align="center">
