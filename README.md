@@ -22,6 +22,11 @@
 <img src="润色.gif" width="700" >
 </div>
 
+- 懒得看项目代码？整个工程直接给chatgpt炫嘴里
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/226935232-6b6a73ce-8900-4aee-93f9-733c7e6fef53.png" width="700" >
+</div>
+
 ## 直接运行 (Windows or Linux)
 
 ```
