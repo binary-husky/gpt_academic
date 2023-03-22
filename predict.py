@@ -1,3 +1,5 @@
+# 借鉴了 https://github.com/GaiZhenbiao/ChuanhuChatGPT 项目
+
 import json
 import gradio as gr
 import logging
