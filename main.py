@@ -20,8 +20,8 @@ title_html = """<h1 align="center">ChatGPT 学术优化</h1>"""
 
 import logging
 os.makedirs('gpt_log', exist_ok=True)
-logging.basicConfig(filename='gpt_log/predict.log', level=logging.INFO, encoding='utf-8')
-
+logging.basicConfig(filename='gpt_log/chat_secrets.log', level=logging.INFO, encoding='utf-8')
+print('所有问询记录将自动保存在本地目录./gpt_log/chat_secrets.log，请注意自我隐私保护哦！')
 
 from functional import get_functionals
 functional = get_functionals()
