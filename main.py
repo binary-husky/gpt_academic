@@ -1,5 +1,5 @@
+import os; os.environ['no_proxy'] = '*' 
 import gradio as gr 
-import os
 import markdown, mdtex2html
 from predict import predict
 from show_math import convert as convert_math
