@@ -68,6 +68,7 @@ docker run --rm -it --net=host gpt-academic
 
 在```config.py```中修改端口与代理软件对应
 ![image](https://user-images.githubusercontent.com/96192199/226571294-37a47cd9-4d40-4c16-97a2-d360845406f7.png)
+![image](https://user-images.githubusercontent.com/96192199/226838985-e5c95956-69c2-4c23-a4dd-cd7944eeb451.png)
 
 
 ## 参考项目
