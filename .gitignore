@@ -134,3 +134,4 @@ dmypy.json
 history
 ssr_conf
 config_private.py
+gpt_log

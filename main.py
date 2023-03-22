@@ -25,8 +25,14 @@ os.makedirs('gpt_log', exist_ok=True)
 logging.basicConfig(filename='gpt_log/chat_secrets.log', level=logging.INFO, encoding='utf-8')
 print('所有问询记录将自动保存在本地目录./gpt_log/chat_secrets.log，请注意自我隐私保护哦！')
 
+# 一些普通功能
 from functional import get_functionals
 functional = get_functionals()
+
+# 对一些丧心病狂的实验性功能进行测试
+from functional_crazy import get_crazy_functionals
+crazy_functional = get_crazy_functionals()
+
 def reset_textbox(): return gr.update(value='')
 
 def text_divide_paragraph(text):
@@ -69,7 +75,7 @@ with gr.Blocks() as demo:
     with gr.Row():
         with gr.Column(scale=2):
             chatbot = gr.Chatbot()
-            chatbot.style(height=700)
+            chatbot.style(height=1000)
             chatbot.style()
             history = gr.State([])
             TRUE = gr.State(True)
@@ -84,6 +90,9 @@ with gr.Blocks() as demo:
                 for k in functional:
                     variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
                     functional[k]["Button"] = gr.Button(k, variant=variant)
+                for k in crazy_functional:
+                    variant = crazy_functional[k]["Color"] if "Color" in crazy_functional[k] else "secondary"
+                    crazy_functional[k]["Button"] = gr.Button(k, variant=variant)
             from check_proxy import check_proxy
             statusDisplay = gr.Markdown(f"{check_proxy(proxies)}")
             systemPromptTxt = gr.Textbox(show_label=True, placeholder=f"System Prompt", label="System prompt", value=initial_prompt).style(container=True)
@@ -97,7 +106,10 @@ with gr.Blocks() as demo:
     # submitBtn.click(reset_textbox, [], [txt])
     for k in functional:
         functional[k]["Button"].click(predict, 
-            [txt, top_p, temperature, chatbot,history, systemPromptTxt, FALSE, TRUE, gr.State(k)], [chatbot, history, statusDisplay], show_progress=True)
+            [txt, top_p, temperature, chatbot, history, systemPromptTxt, FALSE, TRUE, gr.State(k)], [chatbot, history, statusDisplay], show_progress=True)
+    for k in crazy_functional:
+        crazy_functional[k]["Button"].click(crazy_functional[k]["Function"], 
+            [txt, top_p, temperature, chatbot, history, systemPromptTxt, gr.State(PORT)], [chatbot, history, statusDisplay])
 
 print(f"URL http://localhost:{PORT}")
 demo.title = "ChatGPT 学术优化"
