@@ -21,10 +21,6 @@ def check_proxy(proxies):
 
 
 if __name__ == '__main__':
-    import os
-    if os.path.exists('config_private.py'):
-        # 放自己的秘密如API和代理网址
-        from config_private import proxies
-    else:
-        from config import proxies
+    try: from config_private import proxies # 放自己的秘密如API和代理网址 os.path.exists('config_private.py')
+    except: from config import proxies
     check_proxy(proxies)

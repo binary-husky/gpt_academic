@@ -3,7 +3,9 @@ import os
 import markdown, mdtex2html
 from predict import predict
 from show_math import convert as convert_math
-from config import proxies, WEB_PORT
+
+try: from config_private import proxies, WEB_PORT # 放自己的秘密如API和代理网址 os.path.exists('config_private.py')
+except: from config import proxies, WEB_PORT
 
 def find_free_port():
     import socket
