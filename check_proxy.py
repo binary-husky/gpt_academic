@@ -5,12 +5,12 @@ ChatGPT:
 """
 def check_proxy(proxies):
     import requests
+    proxies_https = proxies['https'] if proxies is not None else '无'
     try:
         response = requests.get("https://ipapi.co/json/", proxies=proxies, timeout=4)
         data = response.json()
         country = data['country_name']
         # city = data['city']
-        proxies_https = proxies['https'] if proxies is not None else '无'
         result = f"代理配置 {proxies_https}, 代理所在地：{country}"
         print(result)
         return result
