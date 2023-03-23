@@ -194,7 +194,7 @@ def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt=''
                     chunk = get_full_error(chunk, stream_response)
                     error_msg = chunk.decode()
                     if "reduce the length" in error_msg:
-                        chatbot[-1] = (history[-1], "老铁，输入的文本太长了")
+                        chatbot[-1] = (history[-1], "输入的文本太长了，超过gpt的令牌数量限制")
                     yield chatbot, history, "Json解析不合常规，很可能是文本过长" + error_msg
                     return
 
