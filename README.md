@@ -30,7 +30,7 @@ If you like this project, please give it a Star. If you've come up with more use
 <img src="https://user-images.githubusercontent.com/96192199/226935232-6b6a73ce-8900-4aee-93f9-733c7e6fef53.png" width="700" >
 </div>
 
-## 直接运行 (Windows or Linux)
+## 直接运行 (Windows or Linux or MacOS)
 
 ```
 # 下载项目
