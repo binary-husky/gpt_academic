@@ -107,7 +107,7 @@ python check_proxy.py
 <img src="https://user-images.githubusercontent.com/96192199/226906703-7226495d-6a1f-4a53-9728-ce6778cbdd19.png" width="200" >
 </div>
 
-### 如果一个程序能够读懂并剖析自己，细思极恐：
+### 如果一个程序能够读懂并剖析自己：
 
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/226936850-c77d7183-0749-4c1c-9875-fd4891842d0c.png" width="800" >
