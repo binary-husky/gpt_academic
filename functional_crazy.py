@@ -175,7 +175,7 @@ def get_crazy_functionals():
             "Color": "stop",    # 按钮颜色
             "Function": 批量生成函数注释
         },
-        "[实验功能] 高阶功能模板函数": {
+        "[实验功能] 实验功能函数模板": {
             "Color": "stop",    # 按钮颜色
             "Function": 高阶功能模板函数
         },
