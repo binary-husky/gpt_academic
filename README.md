@@ -4,6 +4,25 @@
 
 If you like this project, please give it a Star. If you've come up with more useful academic shortcuts, feel free to open an issue or pull request.
 
+功能 | 描述
+--- | ---
+一键润色 | 支持一键润色、一键查找论文语法错误
+一键中英互译 | 一键中英互译
+一键代码解释 | 可以正确显示代码、解释代码
+自定义快捷键 | 支持自定义快捷键
+配置代理服务器 | 支持配置代理服务器
+模块化设计 | 支持自定义高阶的实验性功能
+自我程序剖析 | [实验性功能] 可以读懂自己的源代码
+程序剖析 | [实验性功能] 可以剖析其他Python/C++项目
+读论文 | [实验性功能] 解读latex论文写摘要
+批量注释生成 | [实验性功能] 批量生成函数注释
+公式显示 | 可以同时显示公式的tex形式和渲染形式
+图片显示 | 可以在markdown中显示图片
+支持GPT输出的markdown表格 | 可以输出支持GPT的markdown表格
+
+
+
+
 
 - 支持GPT输出的markdown表格
 <div align="center">
