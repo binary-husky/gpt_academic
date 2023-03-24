@@ -1,8 +1,3 @@
-# """
-# 'primary' for main call-to-action, 
-# 'secondary' for a more subdued style, 
-# 'stop' for a stop button.
-# """
 
 fast_debug = False
 
