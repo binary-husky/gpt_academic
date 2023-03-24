@@ -2,6 +2,20 @@ import markdown, mdtex2html
 from show_math import convert as convert_math
 from functools import wraps
 
+def write_results_to_file(history, file_name=None):
+    import os, time
+    if file_name is None:
+        file_name = time.strftime("chatGPT分析报告%Y-%m-%d-%H-%M-%S", time.localtime()) + '.md'
+    os.makedirs('./gpt_log/', exist_ok=True)
+    with open(f'./gpt_log/{file_name}', 'w') as f:
+        f.write('# chatGPT 分析报告\n')
+        for i, content in enumerate(history):
+            if i%2==0: f.write('## ')
+            f.write(content)
+            f.write('\n\n')
+    res ='以上材料已经被写入', f'./gpt_log/{file_name}' 
+    print(res)
+    return res
 
 def regular_txt_to_markdown(text):
     text = text.replace('\n', '\n\n')

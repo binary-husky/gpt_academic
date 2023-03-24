@@ -1,5 +1,5 @@
 from predict import predict_no_ui
-from toolbox import CatchException, report_execption
+from toolbox import CatchException, report_execption, write_results_to_file
 fast_debug = False
 
 
@@ -56,7 +56,9 @@ def 解析Paper(file_manifest, project_folder, top_p, temperature, chatbot, hist
         chatbot[-1] = (i_say, gpt_say)
         history.append(i_say); history.append(gpt_say)
         yield chatbot, history, msg
-
+        res = write_results_to_file(history)
+        chatbot.append(("完成了吗？", res))
+        yield chatbot, history, msg
 
 
 
