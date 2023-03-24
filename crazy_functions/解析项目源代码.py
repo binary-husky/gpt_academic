@@ -47,7 +47,7 @@ def 解析源代码(file_manifest, project_folder, top_p, temperature, chatbot, 
         while True:
             try:
                 # gpt_say = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature, history=history)
-                gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=history)   # 带超时倒计时
+                gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say, chatbot, top_p, temperature, history=history)   # 带超时倒计时
                 break
             except ConnectionAbortedError as e:
                 history = [his[len(his)//2:] for his in history]
@@ -97,7 +97,7 @@ def 解析项目本身(txt, top_p, temperature, chatbot, history, systemPromptTx
     if not fast_debug: 
         # ** gpt request **
         # gpt_say = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature, history=history)
-        gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=history)   # 带超时倒计时
+        gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say, chatbot, top_p, temperature, history=history)   # 带超时倒计时
 
         chatbot[-1] = (i_say, gpt_say)
         history.append(i_say); history.append(gpt_say)

@@ -46,7 +46,7 @@ def 解析Paper(file_manifest, project_folder, top_p, temperature, chatbot, hist
         # ** gpt request **
         while True:
             try:
-                gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=history)   # 带超时倒计时
+                gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say, chatbot, top_p, temperature, history=history)   # 带超时倒计时
                 break
             except ConnectionAbortedError as e:
                 history = [his[len(his)//2:] for his in history]
