@@ -6,4 +6,22 @@ To ensure the Cooperation Graph initialization has higher entropy,
 we will randomly generate multiple initial states, 
 rank by their entropy and then pick the one with maximum $H$."
 
+```
+FROM ubuntu:latest
 
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN echo '[global]' > /etc/pip.conf && \
+    echo 'index-url = https://mirrors.aliyun.com/pypi/simple/' >> /etc/pip.conf && \
+    echo 'trusted-host = mirrors.aliyun.com' >> /etc/pip.conf
+
+RUN pip3 install gradio requests[socks] mdtex2html
+
+COPY . /gpt
+WORKDIR /gpt
+
+
+CMD ["python3", "main.py"]
+```

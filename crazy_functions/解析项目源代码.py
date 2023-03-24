@@ -13,27 +13,17 @@ def 解析源代码(file_manifest, project_folder, top_p, temperature, chatbot, 
         i_say = 前言 + f'请对下面的程序文件做一个概述文件名是{os.path.relpath(fp, project_folder)}，文件代码是 ```{file_content}```'
         i_say_show_user = 前言 + f'[{index}/{len(file_manifest)}] 请对下面的程序文件做一个概述: {os.path.abspath(fp)}'
         chatbot.append((i_say_show_user, "[Local Message] waiting gpt response."))
-        print('[1] yield chatbot, history')
         yield chatbot, history, '正常'
 
         if not fast_debug: 
             msg = '正常'
-            # ** gpt request **
-            while True:
-                try:
-                    # gpt_say = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature)
-                    gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[])   # 带超时倒计时
-                    break
-                except ConnectionAbortedError as e:
-                    i_say = i_say[:len(i_say)//2]
-                    msg = '文件太长，进行了拦腰截断'
 
-            print('[2] end gpt req')
+            # ** gpt request **
+            gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[])   # 带超时倒计时
+
             chatbot[-1] = (i_say_show_user, gpt_say)
             history.append(i_say_show_user); history.append(gpt_say)
-            print('[3] yield chatbot, history')
             yield chatbot, history, msg
-            print('[4] next')
             if not fast_debug: time.sleep(2)
 
     all_file = ', '.join([os.path.relpath(fp, project_folder) for index, fp in enumerate(file_manifest)])
@@ -44,16 +34,8 @@ def 解析源代码(file_manifest, project_folder, top_p, temperature, chatbot, 
     if not fast_debug: 
         msg = '正常'
         # ** gpt request **
-        while True:
-            try:
-                # gpt_say = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature, history=history)
-                gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say, chatbot, top_p, temperature, history=history)   # 带超时倒计时
-                break
-            except ConnectionAbortedError as e:
-                history = [his[len(his)//2:] for his in history]
-                msg = '对话历史太长，每段历史拦腰截断'
+        gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say, chatbot, top_p, temperature, history=history)   # 带超时倒计时
         
-
         chatbot[-1] = (i_say, gpt_say)
         history.append(i_say); history.append(gpt_say)
         yield chatbot, history, msg

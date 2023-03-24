@@ -4,19 +4,33 @@ from functools import wraps
 
 def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[]):
     """
-        调用简单的predict_no_ui接口，但是依然保留了些许界面心跳功能
+        调用简单的predict_no_ui接口，但是依然保留了些许界面心跳功能，当对话太长时，会自动采用二分法截断
     """
     import time
     try: from config_private import TIMEOUT_SECONDS
     except: from config import TIMEOUT_SECONDS
     from predict import predict_no_ui
-    mutable = [None]
-    def mt(): mutable[0] = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature, history=history)
-    thread_name = threading.Thread(target=mt); thread_name.start()
+    mutable = [None, '']
+    def mt(i_say, history): 
+        while True:
+            try:
+                mutable[0] = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature, history=history)
+                break
+            except ConnectionAbortedError as e:
+                if len(history) > 0:
+                    history = [his[len(his)//2:] for his in history if his is not None]
+                    mutable[1] = 'Warning! History conversation is too long, cut into half. '
+                else:
+                    i_say = i_say[:len(i_say)//2]
+                    mutable[1] = 'Warning! Input file is too long, cut into half. '
+            except TimeoutError as e:
+                mutable[0] = '[Local Message] Failed with timeout'
+
+    thread_name = threading.Thread(target=mt, args=(i_say, history)); thread_name.start()
     cnt = 0
     while thread_name.is_alive():
         cnt += 1
-        chatbot[-1] = (i_say_show_user, f"[Local Message] waiting gpt response {cnt}/{TIMEOUT_SECONDS*2}"+''.join(['.']*(cnt%4)))
+        chatbot[-1] = (i_say_show_user, f"[Local Message] {mutable[1]}waiting gpt response {cnt}/{TIMEOUT_SECONDS*2}"+''.join(['.']*(cnt%4)))
         yield chatbot, history, '正常'
         time.sleep(1)
     gpt_say = mutable[0]

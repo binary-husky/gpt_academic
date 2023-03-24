@@ -19,13 +19,7 @@ def 生成函数注释(file_manifest, project_folder, top_p, temperature, chatbo
         if not fast_debug: 
             msg = '正常'
             # ** gpt request **
-            while True:
-                try:
-                    gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[])   # 带超时倒计时
-                    break
-                except ConnectionAbortedError as e:
-                    i_say = i_say[:len(i_say)//2]
-                    msg = '文件太长，进行了拦腰截断'
+            gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[])   # 带超时倒计时
 
             print('[2] end gpt req')
             chatbot[-1] = (i_say_show_user, gpt_say)

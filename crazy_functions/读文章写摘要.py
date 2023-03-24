@@ -20,13 +20,7 @@ def 解析Paper(file_manifest, project_folder, top_p, temperature, chatbot, hist
         if not fast_debug: 
             msg = '正常'
             # ** gpt request **
-            while True:
-                try:
-                    gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[])   # 带超时倒计时
-                    break
-                except ConnectionAbortedError as e:
-                    i_say = i_say[:len(i_say)//2]
-                    msg = '文件太长，进行了拦腰截断'
+            gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[])   # 带超时倒计时
 
             print('[2] end gpt req')
             chatbot[-1] = (i_say_show_user, gpt_say)
@@ -44,14 +38,7 @@ def 解析Paper(file_manifest, project_folder, top_p, temperature, chatbot, hist
     if not fast_debug: 
         msg = '正常'
         # ** gpt request **
-        while True:
-            try:
-                gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say, chatbot, top_p, temperature, history=history)   # 带超时倒计时
-                break
-            except ConnectionAbortedError as e:
-                history = [his[len(his)//2:] for his in history]
-                msg = '对话历史太长，每段历史拦腰截断'
-        
+        gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say, chatbot, top_p, temperature, history=history)   # 带超时倒计时
 
         chatbot[-1] = (i_say, gpt_say)
         history.append(i_say); history.append(gpt_say)
