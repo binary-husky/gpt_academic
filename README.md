@@ -3,6 +3,7 @@
 **如果喜欢这个项目，请给它一个Star；如果你发明了更好用的学术快捷键，欢迎发issue或者pull requests**
 
 If you like this project, please give it a Star. If you've come up with more useful academic shortcuts, feel free to open an issue or pull request.
+<div align="center">
 
 功能 | 描述
 --- | ---
@@ -21,8 +22,21 @@ chat分析报告生成 | [实验性功能] 运行后自动生成总结汇报
 图片显示 | 可以在markdown中显示图片
 支持GPT输出的markdown表格 | 可以输出支持GPT的markdown表格
 
+</div>
 
+- 新界面
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/227504406-86ab97cd-f208-41c3-8e4a-7000e51cf980.png" width="700" >
+</div>
+- 所有按钮都通过读取functional.py动态生成，可随意加自定义功能，解放粘贴板
+<div align="center">
+<img src="公式.gif" width="700" >
+</div>
 
+- 代码的显示自然也不在话下 https://www.bilibili.com/video/BV1F24y147PD/
+<div align="center">
+<img src="润色.gif" width="700" >
+</div>
 
 
 - 支持GPT输出的markdown表格
@@ -35,15 +49,6 @@ chat分析报告生成 | [实验性功能] 运行后自动生成总结汇报
 <img src="demo.jpg" width="500" >
 </div>
 
-- 所有按钮都通过读取functional.py动态生成，可随意加自定义功能，解放粘贴板
-<div align="center">
-<img src="公式.gif" width="700" >
-</div>
-
-- 代码的显示自然也不在话下 https://www.bilibili.com/video/BV1F24y147PD/
-<div align="center">
-<img src="润色.gif" width="700" >
-</div>
 
 - 懒得看项目代码？整个工程直接给chatgpt炫嘴里
 <div align="center">
@@ -147,17 +152,22 @@ python check_proxy.py
 </div>
 
 ### Latex论文一键阅读理解与摘要生成
-![image](https://user-images.githubusercontent.com/96192199/227504406-86ab97cd-f208-41c3-8e4a-7000e51cf980.png)
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/227504406-86ab97cd-f208-41c3-8e4a-7000e51cf980.png" width="800" >
+</div>
 
 ### 自动报告生成
-![image](https://user-images.githubusercontent.com/96192199/227503770-fe29ce2c-53fd-47b0-b0ff-93805f0c2ff4.png)
-![image](https://user-images.githubusercontent.com/96192199/227504617-7a497bb3-0a2a-4b50-9a8a-95ae60ea7afd.png)
-![image](https://user-images.githubusercontent.com/96192199/227504005-efeaefe0-b687-49d0-bf95-2d7b7e66c348.png)
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/227503770-fe29ce2c-53fd-47b0-b0ff-93805f0c2ff4.png" height="300" >
+<img src="https://user-images.githubusercontent.com/96192199/227504617-7a497bb3-0a2a-4b50-9a8a-95ae60ea7afd.png" height="300" >
+<img src="https://user-images.githubusercontent.com/96192199/227504005-efeaefe0-b687-49d0-bf95-2d7b7e66c348.png" height="300" >
+</div>
 
 ## 模块化功能设计
-![image](https://user-images.githubusercontent.com/96192199/227504981-4c6c39c0-ae79-47e6-bffe-0e6442d9da65.png)
-
-![image](https://user-images.githubusercontent.com/96192199/227504931-19955f78-45cd-4d1c-adac-e71e50957915.png)
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/227504981-4c6c39c0-ae79-47e6-bffe-0e6442d9da65.png" height="400" >
+<img src="https://user-images.githubusercontent.com/96192199/227504931-19955f78-45cd-4d1c-adac-e71e50957915.png" height="400" >
+</div>
 
 
 ## 参考项目
