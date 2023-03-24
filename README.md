@@ -26,8 +26,9 @@ chat分析报告生成 | [实验性功能] 运行后自动生成总结汇报
 
 - 新界面
 <div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/227508042-bd2add84-22ca-493b-bf8f-abdf6fbb5262.png" width="700" >
+<img src="https://user-images.githubusercontent.com/96192199/227528413-36ab42da-d589-4ef1-ba75-28aa02442d05.png" width="700" >
 </div>
+
 
 
 - 所有按钮都通过读取functional.py动态生成，可随意加自定义功能，解放粘贴板
