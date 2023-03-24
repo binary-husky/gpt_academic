@@ -1,5 +1,5 @@
 from predict import predict_no_ui
-from toolbox import CatchException, report_execption, write_results_to_file
+from toolbox import CatchException, report_execption, write_results_to_file, predict_no_ui_but_counting_down
 fast_debug = False
 
 
@@ -21,7 +21,7 @@ def 生成函数注释(file_manifest, project_folder, top_p, temperature, chatbo
             # ** gpt request **
             while True:
                 try:
-                    gpt_say = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature)
+                    gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[])   # 带超时倒计时
                     break
                 except ConnectionAbortedError as e:
                     i_say = i_say[:len(i_say)//2]
