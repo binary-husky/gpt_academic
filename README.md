@@ -12,10 +12,11 @@ If you like this project, please give it a Star. If you've come up with more use
 自定义快捷键 | 支持自定义快捷键
 配置代理服务器 | 支持配置代理服务器
 模块化设计 | 支持自定义高阶的实验性功能
-自我程序剖析 | [实验性功能] 可以读懂自己的源代码
-程序剖析 | [实验性功能] 可以剖析其他Python/C++项目
-读论文 | [实验性功能] 解读latex论文写摘要
-批量注释生成 | [实验性功能] 批量生成函数注释
+自我程序剖析 | [实验性功能] 一键读懂自己的源代码
+程序剖析 | [实验性功能] 一键可以剖析其他Python/C++项目
+读论文 | [实验性功能] 一键解读latex论文全文并生成摘要
+批量注释生成 | [实验性功能] 一键批量生成函数注释
+chat分析报告生成 | [实验性功能] 运行后自动生成总结汇报
 公式显示 | 可以同时显示公式的tex形式和渲染形式
 图片显示 | 可以在markdown中显示图片
 支持GPT输出的markdown表格 | 可以输出支持GPT的markdown表格
@@ -136,7 +137,7 @@ python check_proxy.py
 <img src="https://user-images.githubusercontent.com/96192199/226936618-9b487e4b-ab5b-4b6e-84c6-16942102e917.png" width="800" >
 </div>
 
-### 其他任意Python项目剖析：
+### 其他任意Python/Cpp项目剖析：
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/226935232-6b6a73ce-8900-4aee-93f9-733c7e6fef53.png" width="800" >
 </div>
@@ -144,6 +145,15 @@ python check_proxy.py
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/226969067-968a27c1-1b9c-486b-8b81-ab2de8d3f88a.png" width="800" >
 </div>
+
+### Latex论文一键阅读理解与摘要生成
+![image](https://user-images.githubusercontent.com/96192199/227504406-86ab97cd-f208-41c3-8e4a-7000e51cf980.png)
+
+### 自动报告生成
+![image](https://user-images.githubusercontent.com/96192199/227503770-fe29ce2c-53fd-47b0-b0ff-93805f0c2ff4.png)
+![image](https://user-images.githubusercontent.com/96192199/227504617-7a497bb3-0a2a-4b50-9a8a-95ae60ea7afd.png)
+![image](https://user-images.githubusercontent.com/96192199/227504005-efeaefe0-b687-49d0-bf95-2d7b7e66c348.png)
+
 
 
 ## 参考项目
