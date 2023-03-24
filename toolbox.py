@@ -7,8 +7,8 @@ def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temp
         调用简单的predict_no_ui接口，但是依然保留了些许界面心跳功能，当对话太长时，会自动采用二分法截断
     """
     import time
-    try: from config_private import TIMEOUT_SECONDS
-    except: from config import TIMEOUT_SECONDS
+    try: from config_private import TIMEOUT_SECONDS, MAX_RETRY
+    except: from config import TIMEOUT_SECONDS, MAX_RETRY
     from predict import predict_no_ui
     mutable = [None, '']
     def mt(i_say, history): 
@@ -30,7 +30,7 @@ def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temp
     cnt = 0
     while thread_name.is_alive():
         cnt += 1
-        chatbot[-1] = (i_say_show_user, f"[Local Message] {mutable[1]}waiting gpt response {cnt}/{TIMEOUT_SECONDS*2}"+''.join(['.']*(cnt%4)))
+        chatbot[-1] = (i_say_show_user, f"[Local Message] {mutable[1]}waiting gpt response {cnt}/{TIMEOUT_SECONDS*2*(MAX_RETRY+1)}"+''.join(['.']*(cnt%4)))
         yield chatbot, history, '正常'
         time.sleep(1)
     gpt_say = mutable[0]
