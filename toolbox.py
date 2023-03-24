@@ -1,6 +1,26 @@
-import markdown, mdtex2html
+import markdown, mdtex2html, threading
 from show_math import convert as convert_math
 from functools import wraps
+
+def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[]):
+    """
+        调用简单的predict_no_ui接口，但是依然保留了些许界面心跳功能
+    """
+    import time
+    try: from config_private import TIMEOUT_SECONDS
+    except: from config import TIMEOUT_SECONDS
+    from predict import predict_no_ui
+    mutable = [None]
+    def mt(): mutable[0] = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature, history=history)
+    thread_name = threading.Thread(target=mt); thread_name.start()
+    cnt = 0
+    while thread_name.is_alive():
+        cnt += 1
+        chatbot[-1] = (i_say_show_user, f"[Local Message] waiting gpt response {cnt}/{TIMEOUT_SECONDS*2}"+''.join(['.']*(cnt%4)))
+        yield chatbot, history, '正常'
+        time.sleep(1)
+    gpt_say = mutable[0]
+    return gpt_say
 
 def write_results_to_file(history, file_name=None):
     """
