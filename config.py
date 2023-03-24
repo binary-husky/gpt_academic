@@ -18,6 +18,9 @@ TIMEOUT_SECONDS = 20
 # 网页的端口, -1代表随机端口
 WEB_PORT = -1
 
+# 如果OpenAI不响应（网络卡顿、代理失败、KEY失效），重试的次数限制
+MAX_RETRY = 2
+
 # 检查一下是不是忘了改config
 if API_KEY == "sk-此处填API秘钥":
     assert False, "请在config文件中修改API密钥, 添加海外代理之后再运行"
