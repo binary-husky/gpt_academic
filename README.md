@@ -32,23 +32,23 @@ chat分析报告生成 | [实验性功能] 运行后自动生成总结汇报
 
 - 所有按钮都通过读取functional.py动态生成，可随意加自定义功能，解放粘贴板
 <div align="center">
-<img src="公式.gif" width="700" >
+<img src="img/公式.gif" width="700" >
 </div>
 
 - 代码的显示自然也不在话下 https://www.bilibili.com/video/BV1F24y147PD/
 <div align="center">
-<img src="润色.gif" width="700" >
+<img src="img/润色.gif" width="700" >
 </div>
 
 
 - 支持GPT输出的markdown表格
 <div align="center">
-<img src="demo2.jpg" width="500" >
+<img src="img/demo2.jpg" width="500" >
 </div>
 
 - 如果输出包含公式，会同时以tex形式和渲染形式显示，方便复制和阅读
 <div align="center">
-<img src="demo.jpg" width="500" >
+<img src="img/demo.jpg" width="500" >
 </div>
 
 
