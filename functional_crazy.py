@@ -30,7 +30,7 @@ def 解析项目本身(txt, top_p, temperature, chatbot, history, systemPromptTx
         前言 = "接下来请你分析自己的程序构成，别紧张，" if index==0 else ""
         i_say = 前言 + f'请对下面的程序文件做一个概述文件名是{fp}，文件代码是 ```{file_content}```'
         i_say_show_user = 前言 + f'[{index}/{len(file_manifest)}] 请对下面的程序文件做一个概述: {os.path.abspath(fp)}'
-        chatbot.append((i_say_show_user, "[waiting gpt response]"))
+        chatbot.append((i_say_show_user, "[local] waiting gpt response."))
         yield chatbot, history, '正常'
 
         if not fast_debug: 
@@ -43,7 +43,7 @@ def 解析项目本身(txt, top_p, temperature, chatbot, history, systemPromptTx
             time.sleep(2)
 
     i_say = f'根据以上你自己的分析，对程序的整体功能和构架做出概括。然后用一张markdown表格整理每个文件的功能（包括{file_manifest}）。'
-    chatbot.append((i_say, "[waiting gpt response]"))
+    chatbot.append((i_say, "[local] waiting gpt response."))
     yield chatbot, history, '正常'
 
     if not fast_debug: 
@@ -73,7 +73,7 @@ def 解析源代码(file_manifest, project_folder, top_p, temperature, chatbot, 
         前言 = "接下来请你逐文件分析下面的工程" if index==0 else ""
         i_say = 前言 + f'请对下面的程序文件做一个概述文件名是{os.path.relpath(fp, project_folder)}，文件代码是 ```{file_content}```'
         i_say_show_user = 前言 + f'[{index}/{len(file_manifest)}] 请对下面的程序文件做一个概述: {os.path.abspath(fp)}'
-        chatbot.append((i_say_show_user, "[waiting gpt response]"))
+        chatbot.append((i_say_show_user, "[local] waiting gpt response."))
         print('[1] yield chatbot, history')
         yield chatbot, history, '正常'
 
@@ -98,7 +98,7 @@ def 解析源代码(file_manifest, project_folder, top_p, temperature, chatbot, 
 
     all_file = ', '.join([os.path.relpath(fp, project_folder) for index, fp in enumerate(file_manifest)])
     i_say = f'根据以上你自己的分析，对程序的整体功能和构架做出概括。然后用一张markdown表格整理每个文件的功能（包括{all_file}）。'
-    chatbot.append((i_say, "[waiting gpt response]"))
+    chatbot.append((i_say, "[local] waiting gpt response."))
     yield chatbot, history, '正常'
 
     if not fast_debug: 

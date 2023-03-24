@@ -9,10 +9,10 @@ import importlib
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
-try: from config_private import proxies, API_URL, API_KEY, TIMEOUT_SECONDS 
-except: from config import proxies, API_URL, API_KEY, TIMEOUT_SECONDS
+try: from config_private import proxies, API_URL, API_KEY, TIMEOUT_SECONDS, MAX_RETRY
+except: from config import proxies, API_URL, API_KEY, TIMEOUT_SECONDS, MAX_RETRY
 
-timeout_bot_msg = 'Request timeout, network error. please check proxy settings in config.py.'
+timeout_bot_msg = '[local] Request timeout, network error. please check proxy settings in config.py.'
 
 def get_full_error(chunk, stream_response):
     while True:
@@ -63,13 +63,18 @@ def predict_no_ui(inputs, top_p, temperature, history=[]):
         "Content-Type": "application/json",
         "Authorization": f"Bearer {API_KEY}"
     }
-    try:
-        # make a POST request to the API endpoint using the requests.post method, passing in stream=True
-        response = requests.post(API_URL, headers=headers, proxies=proxies,
-                                json=payload, stream=True, timeout=TIMEOUT_SECONDS*2)
-    except Exception as e:
-        traceback.print_exc()
-        raise TimeoutError
+
+    retry = 0
+    while True:
+        try:
+            # make a POST request to the API endpoint using the requests.post method, passing in stream=True
+            response = requests.post(API_URL, headers=headers, proxies=proxies,
+                                    json=payload, stream=False, timeout=TIMEOUT_SECONDS*2); break
+        except TimeoutError as e:
+            retry += 1
+            traceback.print_exc()
+            if MAX_RETRY!=0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
+            if retry > MAX_RETRY: raise TimeoutError
 
     try:
         result = json.loads(response.text)["choices"][0]["message"]["content"]
@@ -146,14 +151,18 @@ def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt=''
 
     history.append(inputs)
 
-    try:
-        # make a POST request to the API endpoint using the requests.post method, passing in stream=True
-        response = requests.post(API_URL, headers=headers, proxies=proxies,
-                                json=payload, stream=True, timeout=TIMEOUT_SECONDS)
-    except:
-        chatbot[-1] = ((chatbot[-1][0], timeout_bot_msg))
-        yield chatbot, history, "请求超时"
-        raise TimeoutError
+    retry = 0
+    while True:
+        try:
+            # make a POST request to the API endpoint using the requests.post method, passing in stream=True
+            response = requests.post(API_URL, headers=headers, proxies=proxies,
+                                    json=payload, stream=True, timeout=TIMEOUT_SECONDS);break
+        except:
+            retry += 1
+            chatbot[-1] = ((chatbot[-1][0], timeout_bot_msg))
+            retry_msg = f"，正在重试 ({retry}/{MAX_RETRY}) ……" if MAX_RETRY > 0 else ""
+            yield chatbot, history, "请求超时"+retry_msg
+            if retry > MAX_RETRY: raise TimeoutError
 
     token_counter = 0
     partial_words = ""
@@ -194,7 +203,7 @@ def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt=''
                     chunk = get_full_error(chunk, stream_response)
                     error_msg = chunk.decode()
                     if "reduce the length" in error_msg:
-                        chatbot[-1] = (history[-1], "老铁，输入的文本太长了")
+                        chatbot[-1] = (history[-1], "[local] input is too long, reduce input or clear history.")
                     yield chatbot, history, "Json解析不合常规，很可能是文本过长" + error_msg
                     return
 
