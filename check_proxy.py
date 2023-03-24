@@ -1,8 +1,4 @@
 
-"""
-我：用python的requests库查询本机ip地址所在地
-ChatGPT:
-"""
 def check_proxy(proxies):
     import requests
     proxies_https = proxies['https'] if proxies is not None else '无'

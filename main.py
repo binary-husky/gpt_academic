@@ -1,19 +1,10 @@
 import os; os.environ['no_proxy'] = '*' 
 import gradio as gr 
-import markdown, mdtex2html
 from predict import predict
-from show_math import convert as convert_math
+from toolbox import format_io, find_free_port
 
 try: from config_private import proxies, WEB_PORT # 放自己的秘密如API和代理网址 os.path.exists('config_private.py')
 except: from config import proxies, WEB_PORT
-
-def find_free_port():
-    import socket
-    from contextlib import closing
-    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-        s.bind(('', 0))
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        return s.getsockname()[1]
 
 PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
 
@@ -33,41 +24,6 @@ functional = get_functionals()
 from functional_crazy import get_crazy_functionals
 crazy_functional = get_crazy_functionals()
 
-def reset_textbox(): return gr.update(value='')
-
-def text_divide_paragraph(text):
-    if '```' in text:
-        # careful input
-        return text
-    else:
-        # wtf input
-        lines = text.split("\n")
-        for i, line in enumerate(lines):
-            if i!=0: lines[i] = "<p>"+lines[i].replace(" ", "&nbsp;")+"</p>"
-        text = "".join(lines)
-        return text
-
-def markdown_convertion(txt):
-    if ('$' in txt) and ('```' not in txt):
-        math_config = {'mdx_math': {'enable_dollar_delimiter': True}}
-        return markdown.markdown(txt,extensions=['fenced_code','tables']) + '<br><br>' + \
-            markdown.markdown(convert_math(txt, splitParagraphs=False),extensions=['fenced_code','tables'])
-    else:
-        return markdown.markdown(txt,extensions=['fenced_code','tables'])
-
-
-def format_io(self,y):
-    if y is None:
-        return []
-    i_ask, gpt_reply = y[-1]
-    
-    i_ask = text_divide_paragraph(i_ask) # 输入部分太自由，预处理一波
-    
-    y[-1] = (
-        None if i_ask is None else markdown.markdown(i_ask, extensions=['fenced_code','tables']),
-        None if gpt_reply is None else markdown_convertion(gpt_reply)
-    )
-    return y
 gr.Chatbot.postprocess = format_io
 
 with gr.Blocks() as demo:
@@ -103,7 +59,6 @@ with gr.Blocks() as demo:
 
     txt.submit(predict, [txt, top_p, temperature, chatbot, history, systemPromptTxt], [chatbot, history, statusDisplay])
     submitBtn.click(predict, [txt, top_p, temperature, chatbot, history, systemPromptTxt], [chatbot, history, statusDisplay], show_progress=True)
-    # submitBtn.click(reset_textbox, [], [txt])
     for k in functional:
         functional[k]["Button"].click(predict, 
             [txt, top_p, temperature, chatbot, history, systemPromptTxt, TRUE, gr.State(k)], [chatbot, history, statusDisplay], show_progress=True)
@@ -111,15 +66,15 @@ with gr.Blocks() as demo:
         crazy_functional[k]["Button"].click(crazy_functional[k]["Function"], 
             [txt, top_p, temperature, chatbot, history, systemPromptTxt, gr.State(PORT)], [chatbot, history, statusDisplay])
 
-print(f"URL http://localhost:{PORT}")
-demo.title = "ChatGPT 学术优化"
 
 def auto_opentab_delay():
     import threading, webbrowser, time
+    print(f"URL http://localhost:{PORT}")
     def open(): time.sleep(2)
     webbrowser.open_new_tab(f'http://localhost:{PORT}')
     t = threading.Thread(target=open)
     t.daemon = True; t.start()
 
 auto_opentab_delay()
+demo.title = "ChatGPT 学术优化"
 demo.queue().launch(server_name="0.0.0.0", share=True, server_port=PORT)

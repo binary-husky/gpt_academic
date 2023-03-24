@@ -1,24 +1,7 @@
-from functools import wraps
 from predict import predict_no_ui
+from toolbox import CatchException, report_execption
 fast_debug = False
 
-
-def report_execption(chatbot, history, a, b):
-    chatbot.append((a, b))
-    history.append(a); history.append(b)
-
-# 捕获不能预料的异常
-def CatchException(f):
-    @wraps(f)
-    def decorated(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
-        try:
-            yield from f(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT)
-        except Exception as e:
-            import traceback
-            tb_str = traceback.format_exc()
-            chatbot[-1] = (chatbot[-1][0], f"[Local Message] something error occured: \n {tb_str}")
-            yield chatbot, history, f'异常 {e}'
-    return decorated
 
 def 解析Paper(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt):
     import time, glob, os
