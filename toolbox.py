@@ -3,6 +3,9 @@ from show_math import convert as convert_math
 from functools import wraps
 
 def write_results_to_file(history, file_name=None):
+    """
+        将对话记录history以Markdown格式写入文件中。如果没有指定文件名，则使用当前时间生成文件名。
+    """
     import os, time
     if file_name is None:
         file_name = time.strftime("chatGPT分析报告%Y-%m-%d-%H-%M-%S", time.localtime()) + '.md'
@@ -18,12 +21,18 @@ def write_results_to_file(history, file_name=None):
     return res
 
 def regular_txt_to_markdown(text):
+    """
+        将普通文本转换为Markdown格式的文本。
+    """
     text = text.replace('\n', '\n\n')
     text = text.replace('\n\n\n', '\n\n')
     text = text.replace('\n\n\n', '\n\n')
     return text
 
 def CatchException(f):
+    """
+        装饰器函数，捕捉函数f中的异常并封装到一个生成器中返回，并显示到聊天当中。
+    """
     @wraps(f)
     def decorated(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
         try:
@@ -39,10 +48,16 @@ def CatchException(f):
     return decorated
 
 def report_execption(chatbot, history, a, b):
+    """
+        向chatbot中添加错误信息
+    """
     chatbot.append((a, b))
     history.append(a); history.append(b)
 
 def text_divide_paragraph(text):
+    """
+        将文本按照段落分隔符分割开，生成带有段落标签的HTML代码。
+    """
     if '```' in text:
         # careful input
         return text
@@ -55,6 +70,9 @@ def text_divide_paragraph(text):
         return text
 
 def markdown_convertion(txt):
+    """
+        将Markdown格式的文本转换为HTML格式。如果包含数学公式，则先将公式转换为HTML格式。
+    """
     if ('$' in txt) and ('```' not in txt):
         return markdown.markdown(txt,extensions=['fenced_code','tables']) + '<br><br>' + \
             markdown.markdown(convert_math(txt, splitParagraphs=False),extensions=['fenced_code','tables'])
@@ -63,6 +81,9 @@ def markdown_convertion(txt):
 
 
 def format_io(self, y):
+    """
+        将输入和输出解析为HTML格式。将y中最后一项的输入部分段落化，并将输出部分的Markdown和数学公式转换为HTML格式。
+    """
     if y is None: return []
     i_ask, gpt_reply = y[-1]
     i_ask = text_divide_paragraph(i_ask) # 输入部分太自由，预处理一波
@@ -74,6 +95,9 @@ def format_io(self, y):
 
 
 def find_free_port():
+    """
+        返回当前系统中可用的未使用端口。
+    """
     import socket
     from contextlib import closing
     with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
