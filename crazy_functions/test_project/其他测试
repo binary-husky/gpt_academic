@@ -1,0 +1,9 @@
+"In practice, we found that a high-entropy initial state is more likely to increase the speed of training.
+The entropy is calculated by:
+$$H=-\sum_{k= 1}^{n_k} p(k) \cdot \log p(k), p(k)=\frac{|A_k|}{|\mathcal{A}|}$$
+where $H$ is the entropy, $|A_k|$ is the number of agent nodes in $k$-th cluster, $|\mathcal{A}|$ is the total number of agents.
+To ensure the Cooperation Graph initialization has higher entropy,
+we will randomly generate multiple initial states, 
+rank by their entropy and then pick the one with maximum $H$."
+
+

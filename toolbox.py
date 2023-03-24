@@ -13,7 +13,7 @@ def write_results_to_file(history, file_name=None):
             if i%2==0: f.write('## ')
             f.write(content)
             f.write('\n\n')
-    res ='以上材料已经被写入', f'./gpt_log/{file_name}' 
+    res = '以上材料已经被写入' + os.path.abspath(f'./gpt_log/{file_name}')
     print(res)
     return res
 
