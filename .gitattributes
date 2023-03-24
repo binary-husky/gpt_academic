@@ -1,2 +1,3 @@
 *.h linguist-detectable=false
 *.cpp linguist-detectable=false
+*.tex linguist-detectable=false
