@@ -1,7 +1,23 @@
+from functools import wraps
 from predict import predict_no_ui
 fast_debug = False
 
+def CatchException(f):
+    @wraps(f)
+    def decorated(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
+        try:
+            yield from f(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT)
+        except Exception as e:
+            import traceback
+            tb_str = traceback.format_exc()
+            chatbot[-1] = (chatbot[-1][0], f"[Local Message] something error occured: \n {tb_str}")
+            yield chatbot, history, f'异常 {e}'
+    return decorated
+
+
+@CatchException
 def 高阶功能模板函数(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
+    history = []    # 清空历史，以免输入溢出
     for i in range(5):
         i_say = f'我给出一个数字，你给出该数字的平方。我给出数字：{i}'
         chatbot.append((i_say, "[Local Message] waiting gpt response."))
@@ -14,10 +30,11 @@ def 高阶功能模板函数(txt, top_p, temperature, chatbot, history, systemPr
         yield chatbot, history, '正常'  # 显示
 
 
+@CatchException
 def 解析项目本身(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
+    history = []    # 清空历史，以免输入溢出
     import time, glob, os
     file_manifest = [f for f in glob.glob('*.py')]
-    
     for index, fp in enumerate(file_manifest):
         with open(fp, 'r', encoding='utf-8') as f:
             file_content = f.read()
@@ -113,7 +130,9 @@ def 解析源代码(file_manifest, project_folder, top_p, temperature, chatbot, 
 
 
 
+@CatchException
 def 解析一个Python项目(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
+    history = []    # 清空历史，以免输入溢出
     import glob, os
     if os.path.exists(txt):
         project_folder = txt
@@ -130,8 +149,9 @@ def 解析一个Python项目(txt, top_p, temperature, chatbot, history, systemPr
     yield from 解析源代码(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt)
 
 
-
+@CatchException
 def 解析一个C项目的头文件(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
+    history = []    # 清空历史，以免输入溢出
     import glob, os
     if os.path.exists(txt):
         project_folder = txt
@@ -150,20 +170,24 @@ def 解析一个C项目的头文件(txt, top_p, temperature, chatbot, history, s
     yield from 解析源代码(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt)
 
 
-
 def get_crazy_functionals():
+    from crazy_functions.读文章写摘要 import 读文章写摘要
     return {
         "[实验功能] 请解析并解构此项目本身": {
             "Color": "stop",    # 按钮颜色
             "Function": 解析项目本身
         },
-        "[实验功能] 解析一整个Python项目（输入栏给定项目完整目录）": {
+        "[实验功能] 解析整个Python项目（input输入项目根路径）": {
             "Color": "stop",    # 按钮颜色
             "Function": 解析一个Python项目
         },
-        "[实验功能] 解析一整个C++项目的头文件（输入栏给定项目完整目录）": {
+        "[实验功能] 解析整个C++项目的头文件（input输入项目根路径）": {
             "Color": "stop",    # 按钮颜色
             "Function": 解析一个C项目的头文件
+        },
+        "[实验功能] 解读latex论文写摘要（input输入项目根路径）": {
+            "Color": "stop",    # 按钮颜色
+            "Function": 读文章写摘要
         },
         "[实验功能] 高阶功能模板函数": {
             "Color": "stop",    # 按钮颜色
