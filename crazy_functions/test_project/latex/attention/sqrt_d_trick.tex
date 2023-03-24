@@ -1,0 +1,28 @@
+\section*{Justfication of the Scaling Factor in Dot-product Attention}
+
+In Section~\ref{sec:scaled-dot-prod}, we introduced Scaled dot-product attention, where we scale down the dot products by $\sqrt{d_k}$.   In this section, we will give a rough justification of this scaling factor.  If we assume that $q$ and $k$ are $d_k$-dimensional vectors whose components are independent random variables with mean $0$ and variance $1$, then their dot product, $q \cdot k = \sum_{i=1}^{d_k} u_iv_i$, has mean $0$ and variance $d_k$.  Since we would prefer these values to have variance $1$, we divide by $\sqrt{d_k}$.  
+
+
+
+%For any two $d_k$-dimension vectors $\vec{u}$ and $\vec{v}$, whose dimensions are independent, the mean and variance of the dot product will be the summation of the product of means and variances over the dimensions, that is, $E[<\vec{u},\vec{v}>] = \sum_{i=1}^{d_k} E[u_i]E[v_i]$, and $E[(<\vec{u},\vec{v}>-E[<\vec{u},\vec{v}>])^2] = \sum_{i=1}^{d_k} E[({u_i}-E[u_i])^2] E[({v_i}-E[v_i])^2]$. Layer norm encourages the mean and variance of each dimension to be $0$ and $1$ respectively, resultig in the dot product having mean $0$ and $d_k$ respectively. Therefore, scaling by $\sqrt{d_k}$ encourages the logits to be normalized as well. 
+
+\iffalse
+
+In this section, we will give a rough justification of this scaling factor, that is, we will show that for any two vectors, $\vec{u}$ and $\vec{v}$, whose variance and mean are $1$ and $0$ respectively, the variance and the mean of the dot product are $d_k$ and $0$ respectively. Therefore, dividing by $\sqrt{d_k}$ ensures that each component of the attention logits are normalized. The repeated layer norms at each transformer layer encourage $\vec{u}$ and $\vec{v}$ to be normalized. 
+
+
+\begin{align*}
+    E[<\vec{u},\vec{v}>] & =  \sum_k E[u_i v_i] &\text{By linearity of expectation} \\
+    & =\sum_k E[u_i]E[v_i] & \text{Assuming independence} \\
+    & = 0
+\end{align*}
+
+\begin{align*}
+    E[(<\vec{u},\vec{v}>-E[<\vec{u},\vec{v}>])^2]  & = E[(<\vec{u},\vec{v}>)^2] - E[<\vec{u},\vec{v}>]^2 \\
+    & = E[(<\vec{u},\vec{v}>)^2] \\
+    & =  \sum_k E[{u_i}^2] E[{v_i}^2] &\text{By linearity of expectation and indepedence} \\
+    & = d_k
+\end{align*}
+
+
+\fi
