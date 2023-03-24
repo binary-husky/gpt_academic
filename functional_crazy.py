@@ -1,18 +1,7 @@
-from functools import wraps
 from predict import predict_no_ui
+from toolbox import CatchException, report_execption
 fast_debug = False
 
-def CatchException(f):
-    @wraps(f)
-    def decorated(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
-        try:
-            yield from f(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT)
-        except Exception as e:
-            import traceback
-            tb_str = traceback.format_exc()
-            chatbot[-1] = (chatbot[-1][0], f"[Local Message] something error occured: \n {tb_str}")
-            yield chatbot, history, f'异常 {e}'
-    return decorated
 
 
 @CatchException
@@ -65,12 +54,6 @@ def 解析项目本身(txt, top_p, temperature, chatbot, history, systemPromptTx
         chatbot[-1] = (i_say, gpt_say)
         history.append(i_say); history.append(gpt_say)
         yield chatbot, history, '正常'
-
-def report_execption(chatbot, history, a, b):
-    chatbot.append((a, b))
-    history.append(a); history.append(b)
-
-
 
 
 
