@@ -109,7 +109,9 @@ def 解析项目本身(txt, top_p, temperature, chatbot, history, systemPromptTx
         chatbot[-1] = (i_say, gpt_say)
         history.append(i_say); history.append(gpt_say)
         yield chatbot, history, '正常'
-
+        res = write_results_to_file(history)
+        chatbot.append(("完成了吗？", res))
+        yield chatbot, history, '正常'
 
 @CatchException
 def 解析一个Python项目(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
