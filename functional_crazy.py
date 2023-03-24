@@ -2,61 +2,6 @@ from predict import predict_no_ui
 from toolbox import CatchException, report_execption, write_results_to_file
 fast_debug = False
 
-
-
-@CatchException
-def 高阶功能模板函数(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
-    history = []    # 清空历史，以免输入溢出
-    for i in range(5):
-        i_say = f'我给出一个数字，你给出该数字的平方。我给出数字：{i}'
-        chatbot.append((i_say, "[Local Message] waiting gpt response."))
-        yield chatbot, history, '正常'  # 由于请求gpt需要一段时间，我们先及时地做一次状态显示
-
-        gpt_say = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature) # 请求gpt，需要一段时间
-
-        chatbot[-1] = (i_say, gpt_say)
-        history.append(i_say);history.append(gpt_say)
-        yield chatbot, history, '正常'  # 显示
-
-
-@CatchException
-def 解析项目本身(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
-    history = []    # 清空历史，以免输入溢出
-    import time, glob, os
-    file_manifest = [f for f in glob.glob('*.py')]
-    for index, fp in enumerate(file_manifest):
-        with open(fp, 'r', encoding='utf-8') as f:
-            file_content = f.read()
-
-        前言 = "接下来请你分析自己的程序构成，别紧张，" if index==0 else ""
-        i_say = 前言 + f'请对下面的程序文件做一个概述文件名是{fp}，文件代码是 ```{file_content}```'
-        i_say_show_user = 前言 + f'[{index}/{len(file_manifest)}] 请对下面的程序文件做一个概述: {os.path.abspath(fp)}'
-        chatbot.append((i_say_show_user, "[Local Message] waiting gpt response."))
-        yield chatbot, history, '正常'
-
-        if not fast_debug: 
-            # ** gpt request **
-            gpt_say = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature)
-
-            chatbot[-1] = (i_say_show_user, gpt_say)
-            history.append(i_say_show_user); history.append(gpt_say)
-            yield chatbot, history, '正常'
-            time.sleep(2)
-
-    i_say = f'根据以上你自己的分析，对程序的整体功能和构架做出概括。然后用一张markdown表格整理每个文件的功能（包括{file_manifest}）。'
-    chatbot.append((i_say, "[Local Message] waiting gpt response."))
-    yield chatbot, history, '正常'
-
-    if not fast_debug: 
-        # ** gpt request **
-        gpt_say = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature, history=history)
-
-        chatbot[-1] = (i_say, gpt_say)
-        history.append(i_say); history.append(gpt_say)
-        yield chatbot, history, '正常'
-
-
-
 def 解析源代码(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt):
     import time, glob, os
     print('begin analysis on:', file_manifest)
@@ -113,6 +58,57 @@ def 解析源代码(file_manifest, project_folder, top_p, temperature, chatbot, 
         res = write_results_to_file(history)
         chatbot.append(("完成了吗？", res))
         yield chatbot, history, msg
+
+@CatchException
+def 高阶功能模板函数(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
+    history = []    # 清空历史，以免输入溢出
+    for i in range(5):
+        i_say = f'我给出一个数字，你给出该数字的平方。我给出数字：{i}'
+        chatbot.append((i_say, "[Local Message] waiting gpt response."))
+        yield chatbot, history, '正常'  # 由于请求gpt需要一段时间，我们先及时地做一次状态显示
+
+        gpt_say = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature) # 请求gpt，需要一段时间
+
+        chatbot[-1] = (i_say, gpt_say)
+        history.append(i_say);history.append(gpt_say)
+        yield chatbot, history, '正常'  # 显示
+
+
+@CatchException
+def 解析项目本身(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
+    history = []    # 清空历史，以免输入溢出
+    import time, glob, os
+    file_manifest = [f for f in glob.glob('*.py')]
+    for index, fp in enumerate(file_manifest):
+        with open(fp, 'r', encoding='utf-8') as f:
+            file_content = f.read()
+
+        前言 = "接下来请你分析自己的程序构成，别紧张，" if index==0 else ""
+        i_say = 前言 + f'请对下面的程序文件做一个概述文件名是{fp}，文件代码是 ```{file_content}```'
+        i_say_show_user = 前言 + f'[{index}/{len(file_manifest)}] 请对下面的程序文件做一个概述: {os.path.abspath(fp)}'
+        chatbot.append((i_say_show_user, "[Local Message] waiting gpt response."))
+        yield chatbot, history, '正常'
+
+        if not fast_debug: 
+            # ** gpt request **
+            gpt_say = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature)
+
+            chatbot[-1] = (i_say_show_user, gpt_say)
+            history.append(i_say_show_user); history.append(gpt_say)
+            yield chatbot, history, '正常'
+            time.sleep(2)
+
+    i_say = f'根据以上你自己的分析，对程序的整体功能和构架做出概括。然后用一张markdown表格整理每个文件的功能（包括{file_manifest}）。'
+    chatbot.append((i_say, "[Local Message] waiting gpt response."))
+    yield chatbot, history, '正常'
+
+    if not fast_debug: 
+        # ** gpt request **
+        gpt_say = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature, history=history)
+
+        chatbot[-1] = (i_say, gpt_say)
+        history.append(i_say); history.append(gpt_say)
+        yield chatbot, history, '正常'
 
 
 @CatchException
@@ -183,7 +179,6 @@ def get_crazy_functionals():
             "Color": "stop",    # 按钮颜色
             "Function": 高阶功能模板函数
         },
-
     }
 
 
