@@ -6,7 +6,6 @@ import logging
 import traceback
 import requests
 import importlib
-from colorful import *
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
