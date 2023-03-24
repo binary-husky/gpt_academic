@@ -16,7 +16,7 @@ def 自我程序解构简单案例(txt, top_p, temperature, chatbot, history, sy
         history.append(i_say)
         history.append(gpt_say)
         yield chatbot, history, '正常'
-        time.sleep(10)
+
 
 def 解析项目本身(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
     import time, glob, os
