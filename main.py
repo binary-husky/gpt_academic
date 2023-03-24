@@ -106,7 +106,7 @@ with gr.Blocks() as demo:
     # submitBtn.click(reset_textbox, [], [txt])
     for k in functional:
         functional[k]["Button"].click(predict, 
-            [txt, top_p, temperature, chatbot, history, systemPromptTxt, FALSE, TRUE, gr.State(k)], [chatbot, history, statusDisplay], show_progress=True)
+            [txt, top_p, temperature, chatbot, history, systemPromptTxt, TRUE, gr.State(k)], [chatbot, history, statusDisplay], show_progress=True)
     for k in crazy_functional:
         crazy_functional[k]["Button"].click(crazy_functional[k]["Function"], 
             [txt, top_p, temperature, chatbot, history, systemPromptTxt, gr.State(PORT)], [chatbot, history, statusDisplay])

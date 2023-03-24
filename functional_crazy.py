@@ -1,26 +1,18 @@
-# """
-# 'primary' for main call-to-action, 
-# 'secondary' for a more subdued style, 
-# 'stop' for a stop button.
-# """
-
+from predict import predict_no_ui
 fast_debug = False
 
-def 自我程序解构简单案例(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
-    import time
-    from predict import predict_no_ui_no_history
+def 高阶功能模板函数(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
     for i in range(5):
         i_say = f'我给出一个数字，你给出该数字的平方。我给出数字：{i}'
-        gpt_say = predict_no_ui_no_history(inputs=i_say, top_p=top_p, temperature=temperature)
+        gpt_say = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature)
         chatbot.append((i_say, gpt_say))
         history.append(i_say)
         history.append(gpt_say)
         yield chatbot, history, '正常'
-        time.sleep(10)
+
 
 def 解析项目本身(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
     import time, glob, os
-    from predict import predict_no_ui
     file_manifest = [f for f in glob.glob('*.py')]
     
     for index, fp in enumerate(file_manifest):
@@ -30,7 +22,7 @@ def 解析项目本身(txt, top_p, temperature, chatbot, history, systemPromptTx
         前言 = "接下来请你分析自己的程序构成，别紧张，" if index==0 else ""
         i_say = 前言 + f'请对下面的程序文件做一个概述文件名是{fp}，文件代码是 ```{file_content}```'
         i_say_show_user = 前言 + f'[{index}/{len(file_manifest)}] 请对下面的程序文件做一个概述: {os.path.abspath(fp)}'
-        chatbot.append((i_say_show_user, "[local] waiting gpt response."))
+        chatbot.append((i_say_show_user, "[waiting gpt response]"))
         yield chatbot, history, '正常'
 
         if not fast_debug: 
@@ -43,7 +35,7 @@ def 解析项目本身(txt, top_p, temperature, chatbot, history, systemPromptTx
             time.sleep(2)
 
     i_say = f'根据以上你自己的分析，对程序的整体功能和构架做出概括。然后用一张markdown表格整理每个文件的功能（包括{file_manifest}）。'
-    chatbot.append((i_say, "[local] waiting gpt response."))
+    chatbot.append((i_say, "[waiting gpt response]"))
     yield chatbot, history, '正常'
 
     if not fast_debug: 
@@ -64,7 +56,6 @@ def report_execption(chatbot, history, a, b):
 
 def 解析源代码(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt):
     import time, glob, os
-    from predict import predict_no_ui
     print('begin analysis on:', file_manifest)
     for index, fp in enumerate(file_manifest):
         with open(fp, 'r', encoding='utf-8') as f:
@@ -73,7 +64,7 @@ def 解析源代码(file_manifest, project_folder, top_p, temperature, chatbot, 
         前言 = "接下来请你逐文件分析下面的工程" if index==0 else ""
         i_say = 前言 + f'请对下面的程序文件做一个概述文件名是{os.path.relpath(fp, project_folder)}，文件代码是 ```{file_content}```'
         i_say_show_user = 前言 + f'[{index}/{len(file_manifest)}] 请对下面的程序文件做一个概述: {os.path.abspath(fp)}'
-        chatbot.append((i_say_show_user, "[local] waiting gpt response."))
+        chatbot.append((i_say_show_user, "[waiting gpt response]"))
         print('[1] yield chatbot, history')
         yield chatbot, history, '正常'
 
@@ -98,7 +89,7 @@ def 解析源代码(file_manifest, project_folder, top_p, temperature, chatbot, 
 
     all_file = ', '.join([os.path.relpath(fp, project_folder) for index, fp in enumerate(file_manifest)])
     i_say = f'根据以上你自己的分析，对程序的整体功能和构架做出概括。然后用一张markdown表格整理每个文件的功能（包括{all_file}）。'
-    chatbot.append((i_say, "[local] waiting gpt response."))
+    chatbot.append((i_say, "[waiting gpt response]"))
     yield chatbot, history, '正常'
 
     if not fast_debug: 
@@ -159,21 +150,21 @@ def 解析一个C项目的头文件(txt, top_p, temperature, chatbot, history, s
 
 def get_crazy_functionals():
     return {
-        "程序解构简单案例": {
-            "Color": "stop",    # 按钮颜色
-            "Function": 自我程序解构简单案例
-        },
-        "请解析并解构此项目本身": {
+        "[实验功能] 请解析并解构此项目本身": {
             "Color": "stop",    # 按钮颜色
             "Function": 解析项目本身
         },
-        "解析一整个Python项目（输入栏给定项目完整目录）": {
+        "[实验功能] 解析一整个Python项目（输入栏给定项目完整目录）": {
             "Color": "stop",    # 按钮颜色
             "Function": 解析一个Python项目
         },
-        "解析一整个C++项目的头文件（输入栏给定项目完整目录）": {
+        "[实验功能] 解析一整个C++项目的头文件（输入栏给定项目完整目录）": {
             "Color": "stop",    # 按钮颜色
             "Function": 解析一个C项目的头文件
+        },
+        "[实验功能] 高阶功能模板函数": {
+            "Color": "stop",    # 按钮颜色
+            "Function": 高阶功能模板函数
         },
 
     }
