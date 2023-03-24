@@ -70,6 +70,11 @@ cd chatgpt_academic
 python -m pip install -r requirements.txt
 # 运行
 python main.py
+
+# 测试实验性功能
+input区域 输入 ./crazy_functions/test_project/cpp/libJPG ， 然后点击 解析整个C++项目的头文件
+input区域 输入 ./crazy_functions/test_project/latex/attention ， 然后点击 解读latex论文写摘要
+input区域 输入 ./crazy_functions/test_project/python/dqn ， 然后点击 解析整个Python项目
 ```
 
 
@@ -86,6 +91,10 @@ docker build -t gpt-academic .
 # 运行
 docker run --rm -it --net=host gpt-academic
 
+# 测试实验性功能
+input区域 输入 ./crazy_functions/test_project/cpp/libJPG ， 然后点击 解析整个C++项目的头文件
+input区域 输入 ./crazy_functions/test_project/latex/attention ， 然后点击 解读latex论文写摘要
+input区域 输入 ./crazy_functions/test_project/python/dqn ， 然后点击 解析整个Python项目
 ```
 
 
