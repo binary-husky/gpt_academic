@@ -8,10 +8,10 @@ fast_debug = False
 
 def 自我程序解构简单案例(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
     import time
-    from predict import predict_no_ui_no_history
+    from predict import predict_no_ui
     for i in range(5):
         i_say = f'我给出一个数字，你给出该数字的平方。我给出数字：{i}'
-        gpt_say = predict_no_ui_no_history(inputs=i_say, top_p=top_p, temperature=temperature)
+        gpt_say = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature)
         chatbot.append((i_say, gpt_say))
         history.append(i_say)
         history.append(gpt_say)
