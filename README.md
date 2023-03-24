@@ -30,7 +30,7 @@ If you like this project, please give it a Star. If you've come up with more use
 <img src="https://user-images.githubusercontent.com/96192199/226935232-6b6a73ce-8900-4aee-93f9-733c7e6fef53.png" width="700" >
 </div>
 
-## 直接运行 (Windows or Linux)
+## 直接运行 (Windows or Linux or MacOS)
 
 ```
 # 下载项目
@@ -63,7 +63,7 @@ docker run --rm -it --net=host gpt-academic
 
 
 ## 自定义新的便捷按钮（学术快捷键自定义）
-打开functional.py，只需看一眼就知道怎么弄了，
+打开functional.py，添加条目如下，然后重启程序即可。（如果按钮已经添加成功并可见，那么前缀、后缀都支持热修改，无需重启程序即可生效。）
 例如
 ```
 "超级英译中": {
