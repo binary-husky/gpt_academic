@@ -2,8 +2,6 @@ import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 import gradio as gr 
 from predict import predict
 from toolbox import format_io, find_free_port
-#Gradio的分析功能
-gr.analytics_enabled = False
 
 # 建议您复制一个config_private.py放自己的秘密，如API和代理网址，避免不小心传github被别人看到
 try: from config_private import proxies, WEB_PORT 
@@ -31,7 +29,10 @@ crazy_functional = get_crazy_functionals()
 # 处理markdown文本格式的转变
 gr.Chatbot.postprocess = format_io
 
-with gr.Blocks(theme=gr.themes.Default(font=[ "Arial", "sans-serif","Microsoft YaHei"],font_mono=["Arial", "sans-serif","Microsoft YaHei"])) as demo:
+try: set_theme = gr.themes.Default(font=["Arial", "sans-serif","Microsoft YaHei"], font_mono=["Arial", "sans-serif","Microsoft YaHei"])
+except: set_theme = None
+
+with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
     gr.HTML(title_html)
     with gr.Row():
         with gr.Column(scale=2):
