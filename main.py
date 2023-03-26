@@ -26,7 +26,7 @@ crazy_functional = get_crazy_functionals()
 
 gr.Chatbot.postprocess = format_io
 
-with gr.Blocks() as demo:
+with gr.Blocks(theme=gr.themes.Default(font=[ "Arial", "sans-serif","Microsoft YaHei"],font_mono=["Arial", "sans-serif","Microsoft YaHei"])) as demo:
     gr.HTML(title_html)
     with gr.Row():
         with gr.Column(scale=2):
