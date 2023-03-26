@@ -13,9 +13,11 @@ PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
 initial_prompt = "Serve me as a writing and programming assistant."
 title_html = """<h1 align="center">ChatGPT 学术优化</h1>"""
 
+# 问询记录，python 版本建议3.9+（越新越好）
 import logging
 os.makedirs('gpt_log', exist_ok=True)
-logging.basicConfig(filename='gpt_log/chat_secrets.log', level=logging.INFO, encoding='utf-8') # python 版本建议3.9+（越新越好）
+try:logging.basicConfig(filename='gpt_log/chat_secrets.log', level=logging.INFO, encoding='utf-8') 
+except:logging.basicConfig(filename='gpt_log/chat_secrets.log', level=logging.INFO)
 print('所有问询记录将自动保存在本地目录./gpt_log/chat_secrets.log，请注意自我隐私保护哦！')
 
 # 一些普通功能模块
