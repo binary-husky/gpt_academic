@@ -2,6 +2,8 @@ import os; os.environ['no_proxy'] = '*'
 import gradio as gr 
 from predict import predict
 from toolbox import format_io, find_free_port
+#Gradio的分析功能
+gr.analytics_enabled = False
 
 try: from config_private import proxies, WEB_PORT # 放自己的秘密如API和代理网址 os.path.exists('config_private.py')
 except: from config import proxies, WEB_PORT
