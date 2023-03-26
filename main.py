@@ -29,8 +29,12 @@ crazy_functional = get_crazy_functionals()
 # 处理markdown文本格式的转变
 gr.Chatbot.postprocess = format_io
 
-try: set_theme = gr.themes.Default(font=["Arial", "sans-serif","Microsoft YaHei"], font_mono=["Arial", "sans-serif","Microsoft YaHei"])
-except: set_theme = None
+# 做一些样式上的调整
+try: set_theme = gr.themes.Default( primary_hue=gr.themes.utils.colors.orange,
+    font=["ui-sans-serif", "system-ui", "sans-serif", gr.themes.utils.fonts.GoogleFont("Source Sans Pro")], 
+    font_mono=["ui-monospace", "Consolas", "monospace", gr.themes.utils.fonts.GoogleFont("IBM Plex Mono")])
+except: 
+    set_theme = None; print('gradio 版本老旧，不能自定义字体和颜色')
 
 with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
     gr.HTML(title_html)
