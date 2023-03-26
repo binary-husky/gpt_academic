@@ -10,9 +10,9 @@ def 解析Paper(file_manifest, project_folder, top_p, temperature, chatbot, hist
         with open(fp, 'r', encoding='utf-8') as f:
             file_content = f.read()
 
-        前言 = "接下来请你逐文件分析下面的论文文件，概括其内容" if index==0 else ""
-        i_say = 前言 + f'请对下面的文章片段用中文做一个概述，文件名是{os.path.relpath(fp, project_folder)}，文章内容是 ```{file_content}```'
-        i_say_show_user = 前言 + f'[{index}/{len(file_manifest)}] 请对下面的文章片段做一个概述: {os.path.abspath(fp)}'
+        prefix = "接下来请你逐文件分析下面的论文文件，概括其内容" if index==0 else ""
+        i_say = prefix + f'请对下面的文章片段用中文做一个概述，文件名是{os.path.relpath(fp, project_folder)}，文章内容是 ```{file_content}```'
+        i_say_show_user = prefix + f'[{index}/{len(file_manifest)}] 请对下面的文章片段做一个概述: {os.path.abspath(fp)}'
         chatbot.append((i_say_show_user, "[Local Message] waiting gpt response."))
         print('[1] yield chatbot, history')
         yield chatbot, history, '正常'
