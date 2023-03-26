@@ -1,11 +1,13 @@
-import os; os.environ['no_proxy'] = '*' 
+import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 import gradio as gr 
 from predict import predict
 from toolbox import format_io, find_free_port
 
-try: from config_private import proxies, WEB_PORT # 放自己的秘密如API和代理网址 os.path.exists('config_private.py')
+# 建议您复制一个config_private.py放自己的秘密，如API和代理网址，避免不小心传github被别人看到
+try: from config_private import proxies, WEB_PORT 
 except: from config import proxies, WEB_PORT
 
+# 如果WEB_PORT是-1，则随机选取WEB端口
 PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
 
 initial_prompt = "Serve me as a writing and programming assistant."
@@ -13,20 +15,28 @@ title_html = """<h1 align="center">ChatGPT 学术优化</h1>"""
 
 import logging
 os.makedirs('gpt_log', exist_ok=True)
-logging.basicConfig(filename='gpt_log/chat_secrets.log', level=logging.INFO, encoding='utf-8')
+logging.basicConfig(filename='gpt_log/chat_secrets.log', level=logging.INFO, encoding='utf-8') # python 版本建议3.9+（越新越好）
 print('所有问询记录将自动保存在本地目录./gpt_log/chat_secrets.log，请注意自我隐私保护哦！')
 
-# 一些普通功能
+# 一些普通功能模块
 from functional import get_functionals
 functional = get_functionals()
 
-# 对一些丧心病狂的实验性功能进行测试
+# 对一些丧心病狂的实验性功能模块进行测试
 from functional_crazy import get_crazy_functionals
 crazy_functional = get_crazy_functionals()
 
+# 处理markdown文本格式的转变
 gr.Chatbot.postprocess = format_io
 
-with gr.Blocks() as demo:
+# 做一些样式上的调整
+try: set_theme = gr.themes.Default( primary_hue=gr.themes.utils.colors.orange,
+    font=["ui-sans-serif", "system-ui", "sans-serif", gr.themes.utils.fonts.GoogleFont("Source Sans Pro")], 
+    font_mono=["ui-monospace", "Consolas", "monospace", gr.themes.utils.fonts.GoogleFont("IBM Plex Mono")])
+except: 
+    set_theme = None; print('gradio版本较旧，不能自定义字体和颜色')
+
+with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
     gr.HTML(title_html)
     with gr.Row():
         with gr.Column(scale=2):
@@ -66,7 +76,7 @@ with gr.Blocks() as demo:
         crazy_functional[k]["Button"].click(crazy_functional[k]["Function"], 
             [txt, top_p, temperature, chatbot, history, systemPromptTxt, gr.State(PORT)], [chatbot, history, statusDisplay])
 
-
+# 延迟函数，做一些准备工作，最后尝试打开浏览器
 def auto_opentab_delay():
     import threading, webbrowser, time
     print(f"URL http://localhost:{PORT}")
