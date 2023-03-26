@@ -15,6 +15,9 @@ except: from config import proxies, API_URL, API_KEY, TIMEOUT_SECONDS, MAX_RETRY
 timeout_bot_msg = '[local] Request timeout, network error. please check proxy settings in config.py.'
 
 def get_full_error(chunk, stream_response):
+    """
+        获取完整的从Openai返回的报错
+    """
     while True:
         try:
             chunk += next(stream_response)
@@ -23,6 +26,16 @@ def get_full_error(chunk, stream_response):
     return chunk
 
 def predict_no_ui(inputs, top_p, temperature, history=[]):
+    """
+        发送至chatGPT，等待回复，一次性完成，不显示中间过程。
+        predict函数的简化版。
+        用于payload比较大的情况，或者用于实现多线、带嵌套的复杂功能。
+
+        inputs 是本次问询的输入
+        top_p, temperature是chatGPT的内部调优参数
+        history 是之前的对话列表
+        （注意无论是inputs还是history，内容太长了都会触发token数量溢出的错误，然后raise ConnectionAbortedError）
+    """
     headers, payload = generate_payload(inputs, top_p, temperature, history, system_prompt="", stream=False)
 
     retry = 0
@@ -47,7 +60,15 @@ def predict_no_ui(inputs, top_p, temperature, history=[]):
 
 def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt='', 
             stream = True, additional_fn=None):
-
+    """
+        发送至chatGPT，流式获取输出。
+        用于基础的对话功能。
+        inputs 是本次问询的输入
+        top_p, temperature是chatGPT的内部调优参数
+        history 是之前的对话列表（注意无论是inputs还是history，内容太长了都会触发token数量溢出的错误）
+        chatbot 为WebUI中显示的对话列表，修改它，然后yeild出去，可以直接修改对话界面内容
+        additional_fn代表点击的哪个按钮，按钮见functional.py
+    """
     if additional_fn is not None:
         import functional
         importlib.reload(functional)
@@ -115,6 +136,9 @@ def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt=''
                     return
 
 def generate_payload(inputs, top_p, temperature, history, system_prompt, stream):
+    """
+        整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
+    """
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {API_KEY}"
