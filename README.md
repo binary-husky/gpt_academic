@@ -60,7 +60,7 @@ chat分析报告生成 | [实验性功能] 运行后自动生成总结汇报
 
 ## 直接运行 (Windows or Linux or MacOS)
 
-```
+``` sh
 # 下载项目
 git clone https://github.com/binary-husky/chatgpt_academic.git
 cd chatgpt_academic
@@ -73,9 +73,16 @@ python -m pip install -r requirements.txt
 python main.py
 
 # 测试实验性功能
-input区域 输入 ./crazy_functions/test_project/cpp/libJPG ， 然后点击 解析整个C++项目的头文件
-input区域 输入 ./crazy_functions/test_project/latex/attention ， 然后点击 解读latex论文写摘要
-input区域 输入 ./crazy_functions/test_project/python/dqn ， 然后点击 解析整个Python项目
+## 测试C++项目头文件分析
+input区域 输入 ./crazy_functions/test_project/cpp/libJPG ， 然后点击 "[实验] 解析整个C++项目（input输入项目根路径）"
+## 测试给Latex项目写摘要
+input区域 输入 ./crazy_functions/test_project/latex/attention ， 然后点击 "[实验] 读tex论文写摘要（input输入项目根路径）"
+## 测试Python项目分析
+input区域 输入 ./crazy_functions/test_project/python/dqn ， 然后点击 "[实验] 解析整个py项目（input输入项目根路径）"
+## 测试自我代码解读
+点击 "[实验] 请解析并解构此项目本身"
+## 测试实验功能模板函数（要求gpt回答几个数的平方是什么），您可以根据此函数为模板，实现更复杂的功能
+点击 "[实验] 实验功能函数模板"
 ```
 
 
@@ -93,9 +100,18 @@ docker build -t gpt-academic .
 docker run --rm -it --net=host gpt-academic
 
 # 测试实验性功能
-input区域 输入 ./crazy_functions/test_project/cpp/libJPG ， 然后点击 解析整个C++项目的头文件
-input区域 输入 ./crazy_functions/test_project/latex/attention ， 然后点击 解读latex论文写摘要
-input区域 输入 ./crazy_functions/test_project/python/dqn ， 然后点击 解析整个Python项目
+## 测试自我代码解读
+点击 "[实验] 请解析并解构此项目本身"
+## 测试实验功能模板函数（要求gpt回答几个数的平方是什么），您可以根据此函数为模板，实现更复杂的功能
+点击 "[实验] 实验功能函数模板"
+##（请注意在docker中运行时，需要额外注意程序的文件访问权限问题）
+## 测试C++项目头文件分析
+input区域 输入 ./crazy_functions/test_project/cpp/libJPG ， 然后点击 "[实验] 解析整个C++项目（input输入项目根路径）"
+## 测试给Latex项目写摘要
+input区域 输入 ./crazy_functions/test_project/latex/attention ， 然后点击 "[实验] 读tex论文写摘要（input输入项目根路径）"
+## 测试Python项目分析
+input区域 输入 ./crazy_functions/test_project/python/dqn ， 然后点击 "[实验] 解析整个py项目（input输入项目根路径）"
+
 ```
 
 

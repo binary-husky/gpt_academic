@@ -10,7 +10,10 @@ def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temp
     try: from config_private import TIMEOUT_SECONDS, MAX_RETRY
     except: from config import TIMEOUT_SECONDS, MAX_RETRY
     from predict import predict_no_ui
+    # 多线程的时候，需要一个mutable结构在不同线程之间传递信息
+    # list就是最简单的mutable结构，我们第一个位置放gpt输出，第二个位置传递报错信息
     mutable = [None, '']
+    # multi-threading worker
     def mt(i_say, history): 
         while True:
             try:
@@ -25,14 +28,16 @@ def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temp
                     mutable[1] = 'Warning! Input file is too long, cut into half. '
             except TimeoutError as e:
                 mutable[0] = '[Local Message] Failed with timeout'
-
+    # 创建新线程发出http请求
     thread_name = threading.Thread(target=mt, args=(i_say, history)); thread_name.start()
+    # 原来的线程则负责持续更新UI，实现一个超时倒计时，并等待新线程的任务完成
     cnt = 0
     while thread_name.is_alive():
         cnt += 1
         chatbot[-1] = (i_say_show_user, f"[Local Message] {mutable[1]}waiting gpt response {cnt}/{TIMEOUT_SECONDS*2*(MAX_RETRY+1)}"+''.join(['.']*(cnt%4)))
         yield chatbot, history, '正常'
         time.sleep(1)
+    # 把gpt的输出从mutable中取出来
     gpt_say = mutable[0]
     return gpt_say
 
