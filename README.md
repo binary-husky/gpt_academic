@@ -46,7 +46,7 @@ chat分析报告生成 | [实验性功能] 运行后自动生成总结汇报
 <img src="img/公式.gif" width="700" >
 </div>
 
-- 代码的显示自然也不在话下 https://www.bilibili.com/video/BV1F24y147PD/
+- 润色/纠错
 <div align="center">
 <img src="img/润色.gif" width="700" >
 </div>
