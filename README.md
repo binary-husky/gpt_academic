@@ -5,6 +5,7 @@
 If you like this project, please give it a Star. If you've come up with more useful academic shortcuts, feel free to open an issue or pull request.
 <div align="center">
 
+
 功能 | 描述
 --- | ---
 一键润色 | 支持一键润色、一键查找论文语法错误
@@ -26,7 +27,7 @@ chat分析报告生成 | [实验性功能] 运行后自动生成总结汇报
 
 - 新界面
 <div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/227528413-36ab42da-d589-4ef1-ba75-28aa02442d05.png" width="700" >
+<img src="https://user-images.githubusercontent.com/96192199/227851398-fab5a158-aaf6-4151-95ac-a8172ce611c7.png" width="700" >
 </div>
 
 
