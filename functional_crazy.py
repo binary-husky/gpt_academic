@@ -33,4 +33,8 @@ def get_crazy_functionals():
         },
     }
 
-
+def on_file_uploaded(file):
+    with open(file[0].name,'r') as f: 
+        print(f.read())
+    print('uploaded')
+    pass
