@@ -25,7 +25,7 @@ from functional import get_functionals
 functional = get_functionals()
 
 # 对一些丧心病狂的实验性功能模块进行测试
-from functional_crazy import get_crazy_functionals, on_file_uploaded
+from functional_crazy import get_crazy_functionals, on_file_uploaded, on_report_generated
 crazy_functional = get_crazy_functionals()
 
 # 处理markdown文本格式的转变
@@ -59,15 +59,15 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
                     variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
                     functional[k]["Button"] = gr.Button(k, variant=variant)
             with gr.Row():
-                gr.Markdown("Input Directory Functions.")
+                gr.Markdown("以下部分实验性功能需读取路径.")
             with gr.Row():
                 for k in crazy_functional:
                     variant = crazy_functional[k]["Color"] if "Color" in crazy_functional[k] else "secondary"
                     crazy_functional[k]["Button"] = gr.Button(k, variant=variant)
             with gr.Row():
-                gr.Markdown("Upload Files Functions.")
+                gr.Markdown("上传本地文件,调用实验函数.")
             with gr.Row():
-                file_upload = gr.Files(file_count="multiple")
+                file_upload = gr.Files(label='任何文件,但推荐上传压缩文件(zip, tar)', file_count="multiple")
 
             from check_proxy import check_proxy
             statusDisplay = gr.Markdown(f"{check_proxy(proxies)}")
@@ -82,11 +82,15 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
     for k in functional:
         functional[k]["Button"].click(predict, 
             [txt, top_p, temperature, chatbot, history, systemPromptTxt, TRUE, gr.State(k)], [chatbot, history, statusDisplay], show_progress=True)
+    file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt], [chatbot, txt])
     for k in crazy_functional:
-        crazy_functional[k]["Button"].click(crazy_functional[k]["Function"], 
-            [txt, top_p, temperature, chatbot, history, systemPromptTxt, gr.State(PORT)], [chatbot, history, statusDisplay])
-    file_upload.upload(on_file_uploaded, [file_upload])
-                       
+        click_handle = crazy_functional[k]["Button"].click(crazy_functional[k]["Function"], 
+            [txt, top_p, temperature, chatbot, history, systemPromptTxt, gr.State(PORT)], [chatbot, history, statusDisplay]
+        )
+        try: click_handle.then(on_report_generated, [file_upload, chatbot], [file_upload, chatbot])
+        except: pass
+
+
 # 延迟函数，做一些准备工作，最后尝试打开浏览器
 def auto_opentab_delay():
     import threading, webbrowser, time

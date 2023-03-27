@@ -143,3 +143,43 @@ def find_free_port():
         s.bind(('', 0))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return s.getsockname()[1]
+    
+
+def extract_archive(file_path, dest_dir):
+    import zipfile
+    import tarfile
+    import os
+    # Get the file extension of the input file
+    file_extension = os.path.splitext(file_path)[1]
+
+    # Extract the archive based on its extension
+    if file_extension == '.zip':
+        with zipfile.ZipFile(file_path, 'r') as zipobj:
+            zipobj.extractall(path=dest_dir)
+            print("Successfully extracted zip archive to {}".format(dest_dir))
+
+    elif file_extension in ['.tar', '.gz', '.bz2']:
+        with tarfile.open(file_path, 'r:*') as tarobj:
+            tarobj.extractall(path=dest_dir)
+            print("Successfully extracted tar archive to {}".format(dest_dir))
+    else:
+        return
+    
+def find_recent_files(directory):
+    """
+        me: find files that is created with in one minutes under a directory with python, write a function
+        gpt: here it is!
+    """
+    import os
+    import time
+    current_time = time.time()
+    one_minute_ago = current_time - 60
+    recent_files = []
+
+    for filename in os.listdir(directory):
+        file_path = os.path.join(directory, filename)
+        created_time = os.path.getctime(file_path)
+        if created_time >= one_minute_ago:
+            recent_files.append(file_path)
+
+    return recent_files
