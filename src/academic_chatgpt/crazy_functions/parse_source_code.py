@@ -81,6 +81,7 @@ def parse_project(txt, top_p, temperature, chatbot, history, systemprompttxt, we
     import time
 
     file_manifest = list(Path(".").glob("*.py"))
+
     for index, fp in enumerate(file_manifest):
         with open(fp, encoding="utf-8") as f:
             file_content = f.read()
@@ -90,6 +91,7 @@ def parse_project(txt, top_p, temperature, chatbot, history, systemprompttxt, we
             if index == 0
             else ""
         )
+
         i_say = (
             prefix
             + f"please give an overview of the following program file. the file name is {Path(fp).name}, and the file code is ```{file_content}```"

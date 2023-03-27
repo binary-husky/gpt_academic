@@ -6,15 +6,13 @@ from .crazy_functions.parse_source_code import (
     parse_python_project,
 )
 
-
 from .crazy_functions.read_abstract import read_artical_write_abstract
+from .crazy_functions.generate_func_comment import (
+    generate_comment_for_function_for_batch,
+)
 
 
 def get_crazy_functionals():
-    from .crazy_functions.generate_func_comment import (
-        generate_comment_for_function_for_batch,
-    )
-
     return {
         "[Experiment] Please parse and deconstruct this project itself": {
             "Function": parse_project

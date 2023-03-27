@@ -157,7 +157,7 @@ def markdown_convertion(txt):
         return markdown.markdown(txt, extensions=["fenced_code", "tables"])
 
 
-def format_io(y):
+def format_io(_, y):
     """Parse the input and output into HTML format. Paragraphize the input part of the last item in y, and convert the Markdown and mathematical formulas in the output part to HTML format."""
     if y is None:
         return []
