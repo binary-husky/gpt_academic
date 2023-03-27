@@ -1,6 +1,6 @@
 """This module contains a function for checking the validity of a proxy server."""
-from loguru import logger
 import requests
+from loguru import logger
 
 
 def check_proxy(proxies):
@@ -14,14 +14,15 @@ def check_proxy(proxies):
     -------
         None
     """
-    proxies.get("https")
+
+    proxies_https = None if proxies is None else proxies.get("https")
 
     try:
         response = requests.get("https://ipapi.co/json/", proxies=proxies, timeout=4)
         response.raise_for_status()
         data = response.json()
-
-        data["country_name"]
+        country = data["country_name"]
+        logger.info(f"Proxy server {proxies_https} is located in {country}")
 
     except requests.exceptions.RequestException as e:
         logger.error(f"An error occurred: {e}")
@@ -29,9 +30,7 @@ def check_proxy(proxies):
 
 if __name__ == "__main__":
     try:
-        from config_private import (
-            proxies,
-        )
+        from config_private import proxies
     except ModuleNotFoundError:
         from config import proxies
 

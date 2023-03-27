@@ -1,7 +1,12 @@
+# TODO: Config should be another file depend on system <Yangyang Li yangyang.li@northwestern.edu>
+# ~/.config/chataca/config.toml
+
 from loguru import logger
 
-# API_KEY = "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" This key is invalid
-API_KEY = "sk-Insert API key here"
+import os
+
+# API_KEY = "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"
+API_KEY = os.environ.get("OPENAI_API_KEY")
 API_URL = "https://api.openai.com/v1/chat/completions"
 
 # Set to True to use a proxy

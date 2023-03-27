@@ -2,15 +2,14 @@
 
 import importlib
 import json
-from loguru import logger
 import traceback
 
 import requests
-
+from loguru import logger
 
 # config_private.py contains secrets such as API and proxy URLs
 try:
-    from config_private import (
+    from .config_private import (
         API_KEY,
         API_URL,
         LLM_MODEL,
@@ -19,7 +18,7 @@ try:
         proxies,
     )
 except ModuleNotFoundError:
-    from config import API_KEY, API_URL, LLM_MODEL, MAX_RETRY, TIMEOUT_SECONDS, proxies
+    from .config import API_KEY, API_URL, LLM_MODEL, MAX_RETRY, TIMEOUT_SECONDS, proxies
 
 timeout_bot_msg = (
     "[local] Request timeout, network error. please check proxy settings in config.py."
@@ -99,7 +98,7 @@ def predict(
     additional_fn represents which button was clicked. The buttons are in functional.py.
     """
     if additional_fn is not None:
-        import functional
+        from . import functional
 
         importlib.reload(functional)
         functional = functional.get_functionals()

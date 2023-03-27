@@ -1,8 +1,9 @@
 import os
 import time
 
-from toolbox import (
-    CatchException,
+from loguru import logger
+from ..utils import (
+    catch_exception,
     predict_no_ui_but_counting_down,
     report_execption,
     write_results_to_file,
@@ -30,13 +31,13 @@ def generate_comment_for_function(
                 i_say, i_say_show_user, chatbot, top_p, temperature, history=[]
             )  # with timeout countdown
 
-            print("[2] end gpt req")
+            logger.info("[2] end gpt req")
             chatbot[-1] = (i_say_show_user, gpt_say)
             history.append(i_say_show_user)
             history.append(gpt_say)
-            print("[3] yield chatbot, history")
+            logger.info("[3] yield chatbot, history")
             yield chatbot, history, msg
-            print("[4] next")
+            logger.info("[4] next")
             if not fast_debug:
                 time.sleep(2)
 
@@ -46,7 +47,7 @@ def generate_comment_for_function(
         yield chatbot, history, msg
 
 
-@CatchException
+@catch_exception
 def generate_comment_for_function_for_batch(
     txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT
 ):
@@ -66,7 +67,6 @@ def generate_comment_for_function_for_batch(
             b=f"Cannot find local project or have no access: {txt}",
         )
         yield chatbot, history, "normal"
-        return
     file_manifest = list(glob.glob(f"{project_folder}/**/*.py", recursive=True)) + list(
         glob.glob(f"{project_folder}/**/*.cpp", recursive=True)
     )
@@ -79,7 +79,6 @@ def generate_comment_for_function_for_batch(
             b=f"Cannot find any .tex files: {txt}",
         )
         yield chatbot, history, "normal"
-        return
     yield from generate_comment_for_function(
         file_manifest,
         project_folder,

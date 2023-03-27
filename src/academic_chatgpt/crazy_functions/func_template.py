@@ -1,10 +1,10 @@
-from predict import predict_no_ui
-from toolbox import CatchException
+from ..predict import predict_no_ui
+from ..utils import catch_exception
 
 FAST_DEBUG = False
 
 
-@CatchException
+@catch_exception
 def func_template(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
     history = []  # Clear the history to avoid input overflow
     for i in range(5):

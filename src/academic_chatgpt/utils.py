@@ -1,12 +1,11 @@
+import os
 import threading
+import time
 from functools import wraps
 
 import markdown
-from show_math import convert as convert_math
 from loguru import logger
-
-import os
-import time
+from .show_math import convert as convert_math
 
 
 def predict_no_ui_but_counting_down(
@@ -97,7 +96,7 @@ def regular_txt_to_markdown(text):
     return text
 
 
-def CatchException(f):
+def catch_exception(f):
     """Decorator function, catch the exception in function f and encapsulate it into a generator to return, and display it in the chat."""
 
     @wraps(f)

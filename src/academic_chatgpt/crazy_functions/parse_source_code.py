@@ -1,11 +1,12 @@
+from pathlib import Path
+
 from loguru import logger
-from toolbox import (
-    catchexception,
+from ..utils import (
+    catch_exception,
     predict_no_ui_but_counting_down,
     report_execption,
     write_results_to_file,
 )
-from pathlib import Path
 
 fast_debug = False
 
@@ -74,7 +75,7 @@ def parse_source_code(
         yield chatbot, history, msg
 
 
-@catchexception
+@catch_exception
 def parse_project(txt, top_p, temperature, chatbot, history, systemprompttxt, web_port):
     history = []  # clear history to avoid input overflow
     import time
@@ -131,7 +132,7 @@ def parse_project(txt, top_p, temperature, chatbot, history, systemprompttxt, we
         yield chatbot, history, "normal"
 
 
-@catchexception
+@catch_exception
 def parse_c_header(
     txt, top_p, temperature, chatbot, history, systemprompttxt, web_port
 ):
@@ -173,7 +174,7 @@ def parse_c_header(
     )
 
 
-@catchexception
+@catch_exception
 def parse_python_project(
     txt, top_p, temperature, chatbot, history, systemprompttxt, web_port
 ):
@@ -193,7 +194,10 @@ def parse_python_project(
             b=f"cannot find local project or access denied: {txt}",
         )
         yield chatbot, history, "normal"
+        return
+
     file_manifest = list(glob.glob(f"{project_folder}/**/*.py", recursive=True))
+
     if len(file_manifest) == 0:
         report_execption(
             chatbot,
@@ -202,6 +206,8 @@ def parse_python_project(
             b=f"cannot find any python files: {txt}",
         )
         yield chatbot, history, "normal"
+        return
+
     yield from parse_source_code(
         file_manifest,
         project_folder,

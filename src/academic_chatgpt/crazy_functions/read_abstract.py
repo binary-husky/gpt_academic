@@ -1,6 +1,6 @@
 from loguru import logger
-from toolbox import (
-    CatchException,
+from ..utils import (
+    catch_exception,
     predict_no_ui_but_counting_down,
     report_execption,
     write_results_to_file,
@@ -77,7 +77,7 @@ def parse_paper(
         yield chatbot, history, msg
 
 
-@CatchException
+@catch_exception
 def read_artical_write_abstract(
     txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT
 ):
