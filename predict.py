@@ -130,8 +130,10 @@ def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt=''
                     chunk = get_full_error(chunk, stream_response)
                     error_msg = chunk.decode()
                     if "reduce the length" in error_msg:
-                        chatbot[-1] = (history[-1], "[Local Message] Input (or history) is too long, please reduce input or clear history by refleshing this page.")
+                        chatbot[-1] = (chatbot[-1][0], "[Local Message] Input (or history) is too long, please reduce input or clear history by refleshing this page.")
                         history = []
+                    elif "Incorrect API key" in error_msg:
+                        chatbot[-1] = (chatbot[-1][0], "[Local Message] Incorrect API key provided.")
                     yield chatbot, history, "Json解析不合常规，很可能是文本过长" + error_msg
                     return
 
