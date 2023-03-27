@@ -5,7 +5,12 @@
 If you like this project, please give it a Star. If you've come up with more useful academic shortcuts, feel free to open an issue or pull request.
 
 ```
-Huggingface测试（仅做界面参考，使用Huggingface的服务器不稳定有隐私风险） https://huggingface.co/spaces/qingxu98/gpt-academic
+代码中参考了很多其他优秀项目中的设计，主要包括：
+# 借鉴项目1：借鉴了mdtex2html中公式处理的方法
+https://github.com/polarwinkel/mdtex2html
+
+# 借鉴项目2：借鉴了ChuanhuChatGPT中读取json的方法、记录历史问询记录的方法
+https://github.com/GaiZhenbiao/ChuanhuChatGPT
 ```
 
 <div align="center">
@@ -201,10 +206,4 @@ python check_proxy.py
 </div>
 
 
-## 参考项目
-```
-https://github.com/Python-Markdown/markdown
-https://github.com/gradio-app/gradio
-https://github.com/polarwinkel/mdtex2html
-https://github.com/GaiZhenbiao/ChuanhuChatGPT
-```
+
