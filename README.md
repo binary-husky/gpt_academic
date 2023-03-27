@@ -3,11 +3,12 @@
 **如果喜欢这个项目，请给它一个Star；如果你发明了更好用的学术快捷键，欢迎发issue或者pull requests**
 
 If you like this project, please give it a Star. If you've come up with more useful academic shortcuts, feel free to open an issue or pull request.
-<div align="center">
-    
+
 huggingface测试（仅测试，不稳定，若上传文件有隐私风险） https://huggingface.co/spaces/qingxu98/gpt-academic
 
 
+<div align="center">
+    
 功能 | 描述
 --- | ---
 一键润色 | 支持一键润色、一键查找论文语法错误
