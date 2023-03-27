@@ -15,6 +15,7 @@ mdtex2html = "^1.2.0"
 pydantic = "^1.10.7"
 toml = "^0.10.2"
 tenacity = "^8.2.2"
+latex2mathml = "^3.75.1"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.2.1"

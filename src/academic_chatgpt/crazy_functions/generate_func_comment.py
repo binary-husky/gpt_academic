@@ -15,6 +15,23 @@ fast_debug = False
 def generate_comment_for_function(
     file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt
 ):
+    """
+    Generates comments for all functions in the given file manifest using GPT-3.
+
+    Args:
+        file_manifest (list): A list of file paths to generate comments for.
+        project_folder (str): The path to the project folder.
+        top_p (float): The top_p value to use for GPT-3.
+        temperature (float): The temperature value to use for GPT-3.
+        chatbot (list): A list of chatbot messages.
+        history (list): A list of chatbot message history.
+        systemPromptTxt (str): The system prompt text to use for GPT-3.
+
+    Yields:
+        tuple: A tuple containing the updated chatbot messages, message history, and message type.
+
+    """
+
     for index, fp in enumerate(file_manifest):
         with open(fp, encoding="utf-8") as f:
             file_content = f.read()
@@ -51,6 +68,25 @@ def generate_comment_for_function(
 def generate_comment_for_function_for_batch(
     txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT
 ):
+    """
+        Function: generate_comment_for_function_for_batch
+
+    Parameters:
+    - txt: str, path to the project folder or an empty string
+    - top_p: float, top_p value for GPT-3 model
+    - temperature: float, temperature value for GPT-3 model
+    - chatbot: object, instance of the chatbot
+    - history: list, chat history
+    - systemPromptTxt: str, system prompt text
+    - WEB_PORT: int, port number for web server
+
+    Returns:
+    - yields chatbot, history, and "normal" status
+
+    Description:
+    This function generates comments for functions in a batch of files. It takes in the path to the project folder, top_p and temperature values for the GPT-3 model, an instance of the chatbot, chat history, system prompt text, and the port number for the web server. It clears the chat history to avoid input overflow and imports the necessary modules. If the path to the project folder is empty or cannot be found, it reports an exception and returns "normal" status. If the project folder exists, it generates a list of all .py and .cpp files in the project folder and its subfolders. If no files are found, it reports an exception and returns "normal" status. Otherwise, it yields from the generate_comment_for_function function.
+
+    """
     history = []  # clear history to avoid input overflow
     import glob
     import os
@@ -67,8 +103,6 @@ def generate_comment_for_function_for_batch(
             b=f"Cannot find local project or have no access: {txt}",
         )
         yield chatbot, history, "normal"
-        return
-
     file_manifest = list(glob.glob(f"{project_folder}/**/*.py", recursive=True)) + list(
         glob.glob(f"{project_folder}/**/*.cpp", recursive=True)
     )
@@ -81,8 +115,6 @@ def generate_comment_for_function_for_batch(
             b=f"Cannot find any .tex files: {txt}",
         )
         yield chatbot, history, "normal"
-        return
-
     yield from generate_comment_for_function(
         file_manifest,
         project_folder,
