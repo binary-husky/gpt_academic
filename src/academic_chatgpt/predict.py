@@ -6,23 +6,14 @@ import traceback
 
 import requests
 from loguru import logger
-
-# config_private.py contains secrets such as API and proxy URLs
-try:
-    from .config_private import (
-        API_KEY,
-        API_URL,
-        LLM_MODEL,
-        MAX_RETRY,
-        TIMEOUT_SECONDS,
-        proxies,
-    )
-except ModuleNotFoundError:
-    from .config import API_KEY, API_URL, LLM_MODEL, MAX_RETRY, TIMEOUT_SECONDS, proxies
+from .config import load_config
 
 timeout_bot_msg = (
     "[local] Request timeout, network error. please check proxy settings in config.py."
 )
+
+
+CONFIGS = load_config()
 
 
 def get_full_error(chunk, stream_response):
@@ -54,20 +45,24 @@ def predict_no_ui(inputs, top_p, temperature, history=[]):
         try:
             # make a POST request to the API endpoint, stream=False
             response = requests.post(
-                API_URL,
+                CONFIGS.API_URL,
                 headers=headers,
-                proxies=proxies,
+                proxies=CONFIGS.proxies,
                 json=payload,
                 stream=False,
-                timeout=TIMEOUT_SECONDS * 2,
+                timeout=CONFIGS.TIMEOUT_SECONDS * 2,
             )
             break
+
         except requests.exceptions.ReadTimeout:
             retry += 1
             traceback.print_exc()
-            if MAX_RETRY != 0:
-                logger.info(f"Request timed out, retrying ({retry}/{MAX_RETRY}) ……")
-            if retry > MAX_RETRY:
+            if CONFIGS.MAX_RETRY != 0:
+                logger.info(
+                    f"Request timed out, retrying ({retry}/{CONFIGS.MAX_RETRY}) ……"
+                )
+
+            if retry > CONFIGS.MAX_RETRY:
                 raise TimeoutError
 
     try:
@@ -125,20 +120,24 @@ def predict(
         try:
             # make a POST request to the API endpoint, stream=True
             response = requests.post(
-                API_URL,
+                CONFIGS.API_URL,
                 headers=headers,
-                proxies=proxies,
+                proxies=CONFIGS.proxies,
                 json=payload,
                 stream=True,
-                timeout=TIMEOUT_SECONDS,
+                timeout=CONFIGS.TIMEOUT_SECONDS,
             )
             break
         except Exception:
             retry += 1
             chatbot[-1] = (chatbot[-1][0], timeout_bot_msg)
-            retry_msg = f", retrying ({retry}/{MAX_RETRY}) ……" if MAX_RETRY > 0 else ""
+            retry_msg = (
+                f", retrying ({retry}/{CONFIGS.MAX_RETRY}) ……"
+                if CONFIGS.MAX_RETRY > 0
+                else ""
+            )
             yield chatbot, history, "Request timed out" + retry_msg
-            if retry > MAX_RETRY:
+            if retry > CONFIGS.MAX_RETRY:
                 raise TimeoutError
 
     gpt_replying_buffer = ""
@@ -192,7 +191,10 @@ def predict(
 
 def generate_payload(inputs, top_p, temperature, history, system_prompt, stream):
     """Integrate all information, select LLM model, generate http request, and prepare for sending requests."""
-    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {API_KEY}"}
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {CONFIGS.API_KEY}",
+    }
 
     conversation_cnt = len(history) // 2
 
@@ -221,7 +223,7 @@ def generate_payload(inputs, top_p, temperature, history, system_prompt, stream)
     messages.append(what_i_ask_now)
 
     payload = {
-        "model": LLM_MODEL,
+        "model": CONFIGS.LLM_MODEL,
         "messages": messages,
         "temperature": temperature,  # 1.0,
         "top_p": top_p,  # 1.0,
@@ -231,5 +233,5 @@ def generate_payload(inputs, top_p, temperature, history, system_prompt, stream)
         "frequency_penalty": 0,
     }
 
-    logger.info(f" {LLM_MODEL} : {conversation_cnt} : {inputs}")
+    logger.info(f" {CONFIGS.LLM_MODEL} : {conversation_cnt} : {inputs}")
     return headers, payload

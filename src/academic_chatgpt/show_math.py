@@ -18,6 +18,7 @@ def convert(mdtex, extensions=[], splitParagraphs=True):
         for part in parts:
             result += convert(part, extensions, splitParagraphs=False)
         return result
+
     # find first $$-formula:
     parts = re.split("\\${2}", mdtex, 2)
 
@@ -96,4 +97,5 @@ def convert(mdtex, extensions=[], splitParagraphs=True):
 
     if not found:
         result = mdtex
+
     return result

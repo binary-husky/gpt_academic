@@ -12,6 +12,9 @@ gradio = "^3.23.0"
 loguru = "^0.6.0"
 requests = "^2.28.2"
 mdtex2html = "^1.2.0"
+pydantic = "^1.10.7"
+toml = "^0.10.2"
+tenacity = "^8.2.2"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.2.1"

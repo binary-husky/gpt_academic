@@ -11,37 +11,35 @@ from loguru import logger
 
 from .predict import predict
 from .utils import find_free_port, format_io
+from .config import load_config
 
 
 def main():
     # It is recommended that you copy a config_private.py to your own secrets, such as API and proxy URLs, to avoid accidentally uploading to GitHub and being seen by others
-    try:
-        from .config_private import WEB_PORT, proxies
-    except ModuleNotFoundError:
-        from .config import WEB_PORT, proxies
+    configs = load_config()
 
     # If WEB_PORT is -1, select the WEB port randomly
-    PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
+    PORT = find_free_port() if configs.WEB_PORT <= 0 else configs.WEB_PORT
 
     initial_prompt = "Serve me as a writing and programming assistant."
     title_html = """<h1 align="center">ChatGPT Academic Optimization</h1>"""
     # Inquiry record, python version is recommended to be 3.9+ (the newer the better)
 
     Path("gpt_log").mkdir(parents=True, exist_ok=True)
+
     try:
         logger.add("gpt_log/chat_secrets.log", level="INFO", encoding="utf-8")
     except Exception:
         logger.add("gpt_log/chat_secrets.log", level="INFO")
+
     logger.info(
         "All inquiry records will be automatically saved in the local directory ./gpt_log/chat_secrets.log, please pay attention to self-privacy protection!"
     )
 
     # Some common functional modules
-
     functional = get_functionals()
 
     # Test some crazy experimental functional modules
-
     crazy_functional = get_crazy_functionals()
 
     # Process the transformation of markdown text format
@@ -66,7 +64,9 @@ def main():
         )
     except Exception:
         set_theme = None
-        logger.info("The gradio version is older and cannot customize fonts and colors")
+        logger.warning(
+            "The gradio version is older and cannot customize fonts and colors"
+        )
 
     with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
         gr.HTML(title_html)
@@ -102,7 +102,7 @@ def main():
                         )
                         crazy_functional[k]["Button"] = gr.Button(k, variant=variant)
 
-                statusDisplay = gr.Markdown(f"{check_proxy(proxies)}")
+                statusDisplay = gr.Markdown(f"{check_proxy(configs.proxies)}")
                 systemPromptTxt = gr.Textbox(
                     show_label=True,
                     placeholder="System Prompt",

@@ -67,6 +67,8 @@ def generate_comment_for_function_for_batch(
             b=f"Cannot find local project or have no access: {txt}",
         )
         yield chatbot, history, "normal"
+        return
+
     file_manifest = list(glob.glob(f"{project_folder}/**/*.py", recursive=True)) + list(
         glob.glob(f"{project_folder}/**/*.cpp", recursive=True)
     )
@@ -79,6 +81,8 @@ def generate_comment_for_function_for_batch(
             b=f"Cannot find any .tex files: {txt}",
         )
         yield chatbot, history, "normal"
+        return
+
     yield from generate_comment_for_function(
         file_manifest,
         project_folder,

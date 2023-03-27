@@ -26,12 +26,3 @@ def check_proxy(proxies):
 
     except requests.exceptions.RequestException as e:
         logger.error(f"An error occurred: {e}")
-
-
-if __name__ == "__main__":
-    try:
-        from config_private import proxies
-    except ModuleNotFoundError:
-        from config import proxies
-
-    check_proxy(proxies)

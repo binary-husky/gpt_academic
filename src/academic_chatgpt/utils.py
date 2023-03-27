@@ -7,6 +7,14 @@ import markdown
 from loguru import logger
 from .show_math import convert as convert_math
 
+import traceback
+from .check_proxy import check_proxy
+
+
+from .config import load_config
+
+CONFIGS = load_config()
+
 
 def predict_no_ui_but_counting_down(
     i_say, i_say_show_user, chatbot, top_p, temperature, history=[]
@@ -14,11 +22,7 @@ def predict_no_ui_but_counting_down(
     """Call the simple predict_no_ui interface, but still retain some interface heartbeat functionality. When the conversation is too long, binary truncation will be automatically used."""
     import time
 
-    try:
-        from config_private import MAX_RETRY, TIMEOUT_SECONDS
-    except ModuleNotFoundError:
-        from config import MAX_RETRY, TIMEOUT_SECONDS
-    from predict import predict_no_ui
+    from .predict import predict_no_ui
 
     # When using multi-threading, a mutable structure is needed to pass information between different threads
     # list is the simplest mutable structure, we put the gpt output in the first position, and pass the error message in the second position
@@ -55,7 +59,7 @@ def predict_no_ui_but_counting_down(
         cnt += 1
         chatbot[-1] = (
             i_say_show_user,
-            f"[Local Message] {mutable[1]}waiting gpt response {cnt}/{TIMEOUT_SECONDS*2*(MAX_RETRY+1)}"
+            f"[Local Message] {mutable[1]}waiting gpt response {cnt}/{CONFIGS.TIMEOUT_SECONDS*2*(CONFIGS.MAX_RETRY+1)}"
             + "".join(["."] * (cnt % 4)),
         )
         yield chatbot, history, "normal"
@@ -106,18 +110,10 @@ def catch_exception(f):
                 txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT
             )
         except Exception as e:
-            import traceback
-
-            from check_proxy import check_proxy
-
-            try:
-                from config_private import proxies
-            except ModuleNotFoundError:
-                from config import proxies
             tb_str = regular_txt_to_markdown(traceback.format_exc())
             chatbot[-1] = (
                 chatbot[-1][0],
-                f"[Local Message] Experimental function call error: \n\n {tb_str} \n\n Current proxy availability: \n\n {check_proxy(proxies)}",
+                f"[Local Message] Experimental function call error: \n\n {tb_str} \n\n Current proxy availability: \n\n {check_proxy(CONFIGS.proxies)}",
             )
             yield chatbot, history, f"exception {e}"
 
@@ -139,7 +135,7 @@ def text_divide_paragraph(text):
     else:
         # wtf input
         lines = text.split("\n")
-        for i, _line in enumerate(lines):
+        for i, _ in enumerate(lines):
             if i != 0:
                 lines[i] = "<p>" + lines[i].replace(" ", "&nbsp;") + "</p>"
         text = "".join(lines)
@@ -161,7 +157,7 @@ def markdown_convertion(txt):
         return markdown.markdown(txt, extensions=["fenced_code", "tables"])
 
 
-def format_io(self, y):
+def format_io(y):
     """Parse the input and output into HTML format. Paragraphize the input part of the last item in y, and convert the Markdown and mathematical formulas in the output part to HTML format."""
     if y is None:
         return []
