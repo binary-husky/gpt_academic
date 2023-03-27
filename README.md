@@ -22,7 +22,6 @@ chat分析报告生成 | [实验性功能] 运行后自动生成总结汇报
 公式显示 | 可以同时显示公式的tex形式和渲染形式
 图片显示 | 可以在markdown中显示图片
 支持GPT输出的markdown表格 | 可以输出支持GPT的markdown表格
-Huggingface测试版 | https://huggingface.co/spaces/qingxu98/gpt-academic
 
 </div>
 
