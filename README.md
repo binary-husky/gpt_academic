@@ -1,26 +1,27 @@
 # ChatGPT 学术优化
 
-**如果喜欢这个项目，请给它一个Star；如果你发明了更好用的学术快捷键，欢迎发issue或者pull requests**
+**如果喜欢这个项目，请给它一个 Star；如果你发明了更好用的学术快捷键，欢迎发 issue 或者 pull requests**
 
 If you like this project, please give it a Star. If you've come up with more useful academic shortcuts, feel free to open an issue or pull request.
+
 <div align="center">
 
-功能 | 描述
---- | ---
-一键润色 | 支持一键润色、一键查找论文语法错误
-一键中英互译 | 一键中英互译
-一键代码解释 | 可以正确显示代码、解释代码
-自定义快捷键 | 支持自定义快捷键
-配置代理服务器 | 支持配置代理服务器
-模块化设计 | 支持自定义高阶的实验性功能
-自我程序剖析 | [实验性功能] 一键读懂本项目的源代码
-程序剖析 | [实验性功能] 一键可以剖析其他Python/C++项目
-读论文 | [实验性功能] 一键解读latex论文全文并生成摘要
-批量注释生成 | [实验性功能] 一键批量生成函数注释
-chat分析报告生成 | [实验性功能] 运行后自动生成总结汇报
-公式显示 | 可以同时显示公式的tex形式和渲染形式
-图片显示 | 可以在markdown中显示图片
-支持GPT输出的markdown表格 | 可以输出支持GPT的markdown表格
+| 功能                          | 描述                                           |
+| ----------------------------- | ---------------------------------------------- |
+| 一键润色                      | 支持一键润色、一键查找论文语法错误             |
+| 一键中英互译                  | 一键中英互译                                   |
+| 一键代码解释                  | 可以正确显示代码、解释代码                     |
+| 自定义快捷键                  | 支持自定义快捷键                               |
+| 配置代理服务器                | 支持配置代理服务器                             |
+| 模块化设计                    | 支持自定义高阶的实验性功能                     |
+| 自我程序剖析                  | [实验性功能] 一键读懂本项目的源代码            |
+| 程序剖析                      | [实验性功能] 一键可以剖析其他 Python/C++项目   |
+| 读论文                        | [实验性功能] 一键解读 latex 论文全文并生成摘要 |
+| 批量注释生成                  | [实验性功能] 一键批量生成函数注释              |
+| chat 分析报告生成             | [实验性功能] 运行后自动生成总结汇报            |
+| 公式显示                      | 可以同时显示公式的 tex 形式和渲染形式          |
+| 图片显示                      | 可以在 markdown 中显示图片                     |
+| 支持 GPT 输出的 markdown 表格 | 可以输出支持 GPT 的 markdown 表格              |
 
 </div>
 
@@ -29,9 +30,7 @@ chat分析报告生成 | [实验性功能] 运行后自动生成总结汇报
 <img src="https://user-images.githubusercontent.com/96192199/227528413-36ab42da-d589-4ef1-ba75-28aa02442d05.png" width="700" >
 </div>
 
-
-
-- 所有按钮都通过读取functional.py动态生成，可随意加自定义功能，解放粘贴板
+- 所有按钮都通过读取 functional.py 动态生成，可随意加自定义功能，解放粘贴板
 <div align="center">
 <img src="img/公式.gif" width="700" >
 </div>
@@ -41,26 +40,24 @@ chat分析报告生成 | [实验性功能] 运行后自动生成总结汇报
 <img src="img/润色.gif" width="700" >
 </div>
 
-
-- 支持GPT输出的markdown表格
+- 支持 GPT 输出的 markdown 表格
 <div align="center">
 <img src="img/demo2.jpg" width="500" >
 </div>
 
-- 如果输出包含公式，会同时以tex形式和渲染形式显示，方便复制和阅读
+- 如果输出包含公式，会同时以 tex 形式和渲染形式显示，方便复制和阅读
 <div align="center">
 <img src="img/demo.jpg" width="500" >
 </div>
 
-
-- 懒得看项目代码？整个工程直接给chatgpt炫嘴里
+- 懒得看项目代码？整个工程直接给 chatgpt 炫嘴里
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/226935232-6b6a73ce-8900-4aee-93f9-733c7e6fef53.png" width="700" >
 </div>
 
 ## 直接运行 (Windows or Linux or MacOS)
 
-``` sh
+```sh
 # 下载项目
 git clone https://github.com/binary-husky/chatgpt_academic.git
 cd chatgpt_academic
@@ -85,10 +82,9 @@ input区域 输入 ./crazy_functions/test_project/python/dqn ， 然后点击 "[
 点击 "[实验] 实验功能函数模板"
 ```
 
+## 使用 docker (Linux)
 
-## 使用docker (Linux)
-
-``` sh
+```sh
 # 下载项目
 git clone https://github.com/binary-husky/chatgpt_academic.git
 cd chatgpt_academic
@@ -114,31 +110,32 @@ input区域 输入 ./crazy_functions/test_project/python/dqn ， 然后点击 "[
 
 ```
 
-
 ## 自定义新的便捷按钮（学术快捷键自定义）
-打开functional.py，添加条目如下，然后重启程序即可。（如果按钮已经添加成功并可见，那么前缀、后缀都支持热修改，无需重启程序即可生效。）
+
+打开 functional.py，添加条目如下，然后重启程序即可。（如果按钮已经添加成功并可见，那么前缀、后缀都支持热修改，无需重启程序即可生效。）
 例如
+
 ```
 "超级英译中": {
 
     # 前缀，会被加在你的输入之前。例如，用来描述你的要求，例如翻译、解释代码、润色等等
-    "Prefix": "请翻译把下面一段内容成中文，然后用一个markdown表格逐一解释文中出现的专有名词：\n\n", 
-    
+    "Prefix": "请翻译把下面一段内容成中文，然后用一个markdown表格逐一解释文中出现的专有名词：\n\n",
+
     # 后缀，会被加在你的输入之后。例如，配合前缀可以把你的输入内容用引号圈起来。
     "Suffix": "",
-    
+
 },
 ```
+
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/226899272-477c2134-ed71-4326-810c-29891fe4a508.png" width="500" >
 </div>
 
-
-如果你发明了更好用的学术快捷键，欢迎发issue或者pull requests！
+如果你发明了更好用的学术快捷键，欢迎发 issue 或者 pull requests！
 
 ## 配置代理
 
-在```config.py```中修改端口与代理软件对应
+在`config.py`中修改端口与代理软件对应
 
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/226571294-37a47cd9-4d40-4c16-97a2-d360845406f7.png" width="500" >
@@ -146,6 +143,7 @@ input区域 输入 ./crazy_functions/test_project/python/dqn ， 然后点击 "[
 </div>
 
 配置完成后，你可以用以下命令测试代理是否工作，如果一切正常，下面的代码将输出你的代理服务器所在地：
+
 ```
 python check_proxy.py
 ```
@@ -153,6 +151,7 @@ python check_proxy.py
 ## 兼容性测试
 
 ### 图片显示：
+
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/226906087-b5f1c127-2060-4db9-af05-487643b21ed9.png" height="200" >
 <img src="https://user-images.githubusercontent.com/96192199/226906703-7226495d-6a1f-4a53-9728-ce6778cbdd19.png" height="200" >
@@ -168,7 +167,8 @@ python check_proxy.py
 <img src="https://user-images.githubusercontent.com/96192199/226936618-9b487e4b-ab5b-4b6e-84c6-16942102e917.png" width="800" >
 </div>
 
-### 其他任意Python/Cpp项目剖析：
+### 其他任意 Python/Cpp 项目剖析：
+
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/226935232-6b6a73ce-8900-4aee-93f9-733c7e6fef53.png" width="800" >
 </div>
@@ -177,12 +177,14 @@ python check_proxy.py
 <img src="https://user-images.githubusercontent.com/96192199/226969067-968a27c1-1b9c-486b-8b81-ab2de8d3f88a.png" width="800" >
 </div>
 
-### Latex论文一键阅读理解与摘要生成
+### Latex 论文一键阅读理解与摘要生成
+
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/227504406-86ab97cd-f208-41c3-8e4a-7000e51cf980.png" width="800" >
 </div>
 
 ### 自动报告生成
+
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/227503770-fe29ce2c-53fd-47b0-b0ff-93805f0c2ff4.png" height="300" >
 <img src="https://user-images.githubusercontent.com/96192199/227504617-7a497bb3-0a2a-4b50-9a8a-95ae60ea7afd.png" height="300" >
@@ -190,13 +192,14 @@ python check_proxy.py
 </div>
 
 ### 模块化功能设计
+
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/227504981-4c6c39c0-ae79-47e6-bffe-0e6442d9da65.png" height="400" >
 <img src="https://user-images.githubusercontent.com/96192199/227504931-19955f78-45cd-4d1c-adac-e71e50957915.png" height="400" >
 </div>
 
-
 ## 参考项目
+
 ```
 https://github.com/Python-Markdown/markdown
 https://github.com/gradio-app/gradio

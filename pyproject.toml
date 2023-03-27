@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "academic-chatgpt"
+version = "0.1.0"
+description = ""
+authors = ["Yangyang Li <yangyang.li@northwestern.edu>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "academic_chatgpt"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+gradio = "^3.23.0"
+loguru = "^0.6.0"
+requests = "^2.28.2"
+mdtex2html = "^1.2.0"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.2.1"
+ruff = "^0.0.259"
+
+
+
+[tool.ruff]
+line-length = 120
+extend-ignore = ["E501"]
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
