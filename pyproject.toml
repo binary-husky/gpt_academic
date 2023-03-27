@@ -23,7 +23,7 @@ ruff = "^0.0.259"
 
 
 [tool.poetry.scripts]
-chataca = "academic_chatgpt.__main__:main"
+chataca = "academic_chatgpt.__main__:cli"
 
 
 [tool.ruff]

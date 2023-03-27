@@ -6,16 +6,19 @@ from ..utils import (
     write_results_to_file,
 )
 
-fast_debug = False
+from pathlib import Path
+import time
+import os
+
+
+FAST_DEBUG = False
 
 
 def parse_paper(
     file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt
 ):
-    import os
-    import time
+    logger.info(f"begin analysis on: {file_manifest}")
 
-    logger.info("begin analysis on: %s", file_manifest)
     for index, fp in enumerate(file_manifest):
         with open(fp, encoding="utf-8") as f:
             file_content = f.read()
@@ -37,7 +40,7 @@ def parse_paper(
         logger.info("[1] yield chatbot, history")
         yield chatbot, history, "normal"
 
-        if not fast_debug:
+        if not FAST_DEBUG:
             msg = "normal"
             # ** gpt request **
             gpt_say = yield from predict_no_ui_but_counting_down(
@@ -51,7 +54,7 @@ def parse_paper(
             logger.info("[3] yield chatbot, history")
             yield chatbot, history, msg
             logger.info("[4] next")
-            if not fast_debug:
+            if not FAST_DEBUG:
                 time.sleep(2)
 
     all_file = ", ".join(
@@ -61,7 +64,7 @@ def parse_paper(
     chatbot.append((i_say, "[Local Message] waiting gpt response."))
     yield chatbot, history, "normal"
 
-    if not fast_debug:
+    if not FAST_DEBUG:
         msg = "normal"
         # ** gpt request **
         gpt_say = yield from predict_no_ui_but_counting_down(
@@ -82,23 +85,20 @@ def read_artical_write_abstract(
     txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT
 ):
     history = []  # clear history to avoid input overflow
-    import glob
-    import os
 
-    if os.path.exists(txt):
-        project_folder = txt
-    else:
-        if txt == "":
-            txt = "Empty input field"
+    project_folder = Path(txt)
+    if not project_folder.exists or not project_folder.is_dir():
+        msg = "empty input field or path is not valid"
         report_execption(
             chatbot,
             history,
-            a=f"Parse project: {txt}",
-            b=f"Cannot find local project or have no access: {txt}",
+            a=f"parse project: {msg}",
+            b=f"cannot find local project or access denied: {msg}",
         )
         yield chatbot, history, "normal"
-        return
-    file_manifest = list(glob.glob(f"{project_folder}/**/*.tex", recursive=True))  # + \
+
+    file_manifest = list(project_folder.rglob("*.tex"))
+
     if len(file_manifest) == 0:
         report_execption(
             chatbot,
@@ -107,7 +107,7 @@ def read_artical_write_abstract(
             b=f"Cannot find any .tex files: {txt}",
         )
         yield chatbot, history, "normal"
-        return
+
     yield from parse_paper(
         file_manifest,
         project_folder,

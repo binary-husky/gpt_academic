@@ -7,6 +7,8 @@ import markdown
 from loguru import logger
 from .show_math import convert as convert_math
 
+from .predict import predict_no_ui
+
 import traceback
 from .check_proxy import check_proxy
 
@@ -19,10 +21,8 @@ CONFIGS = load_config()
 def predict_no_ui_but_counting_down(
     i_say, i_say_show_user, chatbot, top_p, temperature, history=[]
 ):
-    """Call the simple predict_no_ui interface, but still retain some interface heartbeat functionality. When the conversation is too long, binary truncation will be automatically used."""
-    import time
-
-    from .predict import predict_no_ui
+    """Call the simple predict_no_ui interface, but still retain some interface heartbeat functionality.
+    When the conversation is too long, binary truncation will be automatically used."""
 
     # When using multi-threading, a mutable structure is needed to pass information between different threads
     # list is the simplest mutable structure, we put the gpt output in the first position, and pass the error message in the second position
@@ -70,14 +70,17 @@ def predict_no_ui_but_counting_down(
 
 
 def write_results_to_file(history, file_name=None):
-    """Write the conversation record history to the file in Markdown format. If no file name is specified, the file name is generated using the current time."""
+    """Write the conversation record history to the file in Markdown format.
+    If no file name is specified, the file name is generated using the current time."""
 
     if file_name is None:
         file_name = (
             time.strftime("chatGPT analysis report%Y-%m-%d-%H-%M-%S", time.localtime())
             + ".md"
         )
+
     os.makedirs("./gpt_log/", exist_ok=True)
+
     with open(f"./gpt_log/{file_name}", "w") as f:
         f.write("# chatGPT analysis report\n")
         for i, content in enumerate(history):

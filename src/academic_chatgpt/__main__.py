@@ -24,7 +24,6 @@ def main():
     initial_prompt = "Serve me as a writing and programming assistant."
     title_html = """<h1 align="center">ChatGPT Academic Optimization</h1>"""
     # Inquiry record, python version is recommended to be 3.9+ (the newer the better)
-
     Path("gpt_log").mkdir(parents=True, exist_ok=True)
 
     try:
@@ -70,14 +69,16 @@ def main():
 
     with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
         gr.HTML(title_html)
+
         with gr.Row():
             with gr.Column(scale=2):
                 chatbot = gr.Chatbot()
-                chatbot.style(height=1000)
+                chatbot.style(height=1200)
                 chatbot.style()
                 history = gr.State([])
                 TRUE = gr.State(True)
                 gr.State(False)
+
             with gr.Column(scale=1):
                 with gr.Row():
                     with gr.Column(scale=12):
@@ -86,6 +87,7 @@ def main():
                         ).style(container=False)
                     with gr.Column(scale=1):
                         submitBtn = gr.Button("Ask", variant="primary")
+
                 with gr.Row():
                     for k in functional:
                         variant = (
@@ -93,14 +95,24 @@ def main():
                             if "Color" in functional[k]
                             else "secondary"
                         )
+
                         functional[k]["Button"] = gr.Button(k, variant=variant)
+
                     for k in crazy_functional:
-                        variant = (
-                            crazy_functional[k]["Color"]
-                            if "Color" in crazy_functional[k]
-                            else "secondary"
-                        )
-                        crazy_functional[k]["Button"] = gr.Button(k, variant=variant)
+                        with gr.Column(scale=12):
+                            crazy_functional[k]["Path"] = gr.Textbox(
+                                show_label=False, placeholder="project path."
+                            ).style(container=False)
+
+                        with gr.Column(scale=1):
+                            variant = (
+                                crazy_functional[k]["Color"]
+                                if "Color" in crazy_functional[k]
+                                else "secondary"
+                            )
+                            crazy_functional[k]["Button"] = gr.Button(
+                                k, variant=variant
+                            )
 
                 statusDisplay = gr.Markdown(f"{check_proxy(configs.proxies)}")
                 systemPromptTxt = gr.Textbox(
@@ -109,6 +121,7 @@ def main():
                     label="System prompt",
                     value=initial_prompt,
                 ).style(container=True)
+
                 # inputs, top_p, temperature, top_k, repetition_penalty
                 with gr.Accordion("arguments", open=False):
                     top_p = gr.Slider(
@@ -133,12 +146,14 @@ def main():
             [txt, top_p, temperature, chatbot, history, systemPromptTxt],
             [chatbot, history, statusDisplay],
         )
+
         submitBtn.click(
             predict,
             [txt, top_p, temperature, chatbot, history, systemPromptTxt],
             [chatbot, history, statusDisplay],
             show_progress=True,
         )
+
         for k in functional:
             functional[k]["Button"].click(
                 predict,
@@ -155,11 +170,13 @@ def main():
                 [chatbot, history, statusDisplay],
                 show_progress=True,
             )
+
         for k in crazy_functional:
             crazy_functional[k]["Button"].click(
                 crazy_functional[k]["Function"],
                 [
-                    txt,
+                    # txt,
+                    crazy_functional[k]["Path"],
                     top_p,
                     temperature,
                     chatbot,
@@ -185,6 +202,13 @@ def main():
     auto_opentab_delay()
     demo.title = "ChatGPT Academic Optimization"
     demo.queue().launch(server_name="0.0.0.0", share=True, server_port=PORT)
+
+
+def cli():
+    try:
+        main()
+    except KeyboardInterrupt:
+        gr.close_all()
 
 
 if __name__ == "__main__":

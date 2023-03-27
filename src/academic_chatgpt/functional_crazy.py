@@ -1,7 +1,6 @@
 from .crazy_functions.func_template import func_template
 
 from .crazy_functions.parse_source_code import (
-    parse_project,
     parse_c_header,
     parse_python_project,
 )
@@ -14,9 +13,6 @@ from .crazy_functions.generate_func_comment import (
 
 def get_crazy_functionals():
     return {
-        "[Experiment] Please parse and deconstruct this project itself": {
-            "Function": parse_project
-        },
         "[Experiment] Parse the entire py project (input the project root path)": {
             "Color": "stop",  # button color
             "Function": parse_python_project,

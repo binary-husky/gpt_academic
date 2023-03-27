@@ -1,6 +1,5 @@
 from pathlib import Path
 
-from loguru import logger
 from ..utils import (
     catch_exception,
     predict_no_ui_but_counting_down,
@@ -35,7 +34,6 @@ def parse_source_code(
     - history: A list of chatbot message history.
     - msg: A message indicating the status of the function.
     """
-    logger.info("begin analysis on:", file_manifest)
     for index, fp in enumerate(file_manifest):
         with open(fp, encoding="utf-8") as f:
             file_content = f.read()
@@ -72,8 +70,12 @@ def parse_source_code(
                 time.sleep(2)
 
     all_file = ", ".join(
-        [Path(fp).relative_to(project_folder) for index, fp in enumerate(file_manifest)]
+        [
+            Path(fp).relative_to(project_folder).as_posix()
+            for index, fp in enumerate(file_manifest)
+        ]
     )
+
     i_say = f"based on your analysis above, summarize the overall function and structure of the program. then use a markdown table to organize the function of each file (including {all_file})."
     chatbot.append((i_say, "[local message] waiting gpt response."))
     yield chatbot, history, "normal"
@@ -92,91 +94,6 @@ def parse_source_code(
         res = write_results_to_file(history)
         chatbot.append(("are you done?", res))
         yield chatbot, history, msg
-
-
-@catch_exception
-def parse_project(txt, top_p, temperature, chatbot, history, systemprompttxt, web_port):
-    """
-        parse_project(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT)
-
-    This function takes in several parameters and performs the following actions:
-    1. Clears the history to avoid input overflow
-    2. Imports necessary modules
-    3. Lists all python files in the current directory
-    4. For each file, prompts the user to give an overview of the file's content
-    5. Uses GPT to generate a response to the user's input
-    6. Asks the user to summarize the overall function and structure of the program and organize the function of each file in a markdown table
-    7. Uses GPT to generate a response to the user's input
-    8. Writes the results to a file
-    9. Asks the user if they are done
-
-    Parameters:
-    - txt: Not used in the function
-    - top_p: Float value between 0 and 1 representing the nucleus sampling top probability
-    - temperature: Float value representing the softmax temperature for sampling
-    - chatbot: A list of tuples representing the conversation between the user and the chatbot
-    - history: A list of strings representing the conversation history
-    - systemPromptTxt: Not used in the function
-    - WEB_PORT: Not used in the function
-
-    Returns:
-    - chatbot: A list of tuples representing the updated conversation between the user and the chatbot
-    - history: A list of strings representing the updated conversation history
-    - "normal": A string representing the status of the conversation
-    """
-    history = []  # clear history to avoid input overflow
-
-    file_manifest = list(Path(".").glob("*.py"))
-
-    for index, fp in enumerate(file_manifest):
-        with open(fp, encoding="utf-8") as f:
-            file_content = f.read()
-
-        prefix = (
-            "next, please analyze your program composition. don't be nervous,"
-            if index == 0
-            else ""
-        )
-        i_say = (
-            prefix
-            + f"please give an overview of the following program file. the file name is {Path(fp).name}, and the file code is ```{file_content}```"
-        )
-        i_say_show_user = (
-            prefix
-            + f"[{index}/{len(file_manifest)}] please give an overview of the following program file: {Path(fp).absolute()}"
-        )
-        chatbot.append((i_say_show_user, "[local message] waiting gpt response."))
-        yield chatbot, history, "normal"
-
-        if not FAST_DEBUG:
-            # ** gpt request **
-            gpt_say = yield from predict_no_ui_but_counting_down(
-                i_say, i_say_show_user, chatbot, top_p, temperature, history=[]
-            )  # with timeout countdown
-
-            chatbot[-1] = (i_say_show_user, gpt_say)
-            history.append(i_say_show_user)
-            history.append(gpt_say)
-            yield chatbot, history, "normal"
-            time.sleep(2)
-
-    i_say = f"based on your analysis above, summarize the overall function and structure of the program. then use a markdown table to organize the function of each file (including {file_manifest})."
-    chatbot.append((i_say, "[local message] waiting gpt response."))
-    yield chatbot, history, "normal"
-
-    if not FAST_DEBUG:
-        # ** gpt request **
-        gpt_say = yield from predict_no_ui_but_counting_down(
-            i_say, i_say, chatbot, top_p, temperature, history=history
-        )  # with timeout countdown
-
-        chatbot[-1] = (i_say, gpt_say)
-        history.append(i_say)
-        history.append(gpt_say)
-        yield chatbot, history, "normal"
-        res = write_results_to_file(history)
-        chatbot.append(("are you done?", res))
-        yield chatbot, history, "normal"
 
 
 @catch_exception
@@ -205,23 +122,22 @@ def parse_c_header(
 
     """
     history = []  # clear history to avoid input overflow
-    import glob
-    import os
 
-    if os.path.exists(txt):
-        project_folder = txt
-    else:
-        if txt == "":
-            txt = "empty input field"
+    project_folder = Path(txt)
+    if not project_folder.exists or not project_folder.is_dir():
+        msg = "empty input field or path is not valid"
         report_execption(
             chatbot,
             history,
-            a=f"parse project: {txt}",
-            b=f"cannot find local project or access denied: {txt}",
+            a=f"parse project: {msg}",
+            b=f"cannot find local project or access denied: {msg}",
         )
         yield chatbot, history, "normal"
-        return
-    file_manifest = list(glob.glob(f"{project_folder}/**/*.h", recursive=True))  # + \
+
+    c_file_manifest = list(project_folder.rglob("*.h"))
+    cpp_file_manifest = list(project_folder.rglob("*.hpp"))
+    file_manifest = c_file_manifest + cpp_file_manifest
+
     if len(file_manifest) == 0:
         report_execption(
             chatbot,
@@ -230,7 +146,7 @@ def parse_c_header(
             b=f"cannot find any .h header files: {txt}",
         )
         yield chatbot, history, "normal"
-        return
+
     yield from parse_source_code(
         file_manifest,
         project_folder,
@@ -269,24 +185,20 @@ def parse_python_project(
     """
 
     history = []  # clear history to avoid input overflow
-    import glob
-    import os
 
-    if os.path.exists(txt):
-        project_folder = txt
-    else:
-        if txt == "":
-            txt = "empty input field"
+    project_folder = Path(txt)
+    if not project_folder.exists or not project_folder.is_dir():
+        msg = "empty input field or path is not valid"
         report_execption(
             chatbot,
             history,
-            a=f"parse project: {txt}",
-            b=f"cannot find local project or access denied: {txt}",
+            a=f"parse project: {msg}",
+            b=f"cannot find local project or access denied: {msg}",
         )
         yield chatbot, history, "normal"
-        return
 
-    file_manifest = list(glob.glob(f"{project_folder}/**/*.py", recursive=True))
+    file_manifest = list(project_folder.rglob("*.py"))
+
     if len(file_manifest) == 0:
         report_execption(
             chatbot,

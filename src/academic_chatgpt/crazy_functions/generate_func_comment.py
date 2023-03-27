@@ -8,8 +8,9 @@ from ..utils import (
     report_execption,
     write_results_to_file,
 )
+from pathlib import Path
 
-fast_debug = False
+FAST_DEBUG = False
 
 
 def generate_comment_for_function(
@@ -41,7 +42,7 @@ def generate_comment_for_function(
         chatbot.append((i_say_show_user, "[Local Message] waiting gpt response."))
         yield chatbot, history, "normal"
 
-        if not fast_debug:
+        if not FAST_DEBUG:
             msg = "normal"
             # ** gpt request **
             gpt_say = yield from predict_no_ui_but_counting_down(
@@ -55,10 +56,10 @@ def generate_comment_for_function(
             logger.info("[3] yield chatbot, history")
             yield chatbot, history, msg
             logger.info("[4] next")
-            if not fast_debug:
+            if not FAST_DEBUG:
                 time.sleep(2)
 
-    if not fast_debug:
+    if not FAST_DEBUG:
         res = write_results_to_file(history)
         chatbot.append(("Are you done?", res))
         yield chatbot, history, msg
@@ -88,23 +89,20 @@ def generate_comment_for_function_for_batch(
 
     """
     history = []  # clear history to avoid input overflow
-    import glob
-    import os
 
-    if os.path.exists(txt):
-        project_folder = txt
-    else:
-        if txt == "":
-            txt = "empty input field"
+    project_folder = Path(txt)
+    if not project_folder.exists or not project_folder.is_dir():
+        msg = "empty input field or path is not valid"
         report_execption(
             chatbot,
             history,
-            a=f"Parse project: {txt}",
-            b=f"Cannot find local project or have no access: {txt}",
+            a=f"parse project: {msg}",
+            b=f"cannot find local project or access denied: {msg}",
         )
         yield chatbot, history, "normal"
-    file_manifest = list(glob.glob(f"{project_folder}/**/*.py", recursive=True)) + list(
-        glob.glob(f"{project_folder}/**/*.cpp", recursive=True)
+
+    file_manifest = list(project_folder.rglob("*.py")) + list(
+        project_folder.rglob("*cpp")
     )
 
     if len(file_manifest) == 0:
@@ -115,6 +113,7 @@ def generate_comment_for_function_for_batch(
             b=f"Cannot find any .tex files: {txt}",
         )
         yield chatbot, history, "normal"
+
     yield from generate_comment_for_function(
         file_manifest,
         project_folder,
