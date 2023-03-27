@@ -59,13 +59,13 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
                     variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
                     functional[k]["Button"] = gr.Button(k, variant=variant)
             with gr.Row():
-                gr.Markdown("以下部分实验性功能需读取路径.")
+                gr.Markdown("以下部分实验性功能需从input框读取路径.")
             with gr.Row():
                 for k in crazy_functional:
                     variant = crazy_functional[k]["Color"] if "Color" in crazy_functional[k] else "secondary"
                     crazy_functional[k]["Button"] = gr.Button(k, variant=variant)
             with gr.Row():
-                gr.Markdown("上传本地文件,调用实验函数.")
+                gr.Markdown("上传本地文件供上面的实验性功能调用.")
             with gr.Row():
                 file_upload = gr.Files(label='任何文件,但推荐上传压缩文件(zip, tar)', file_count="multiple")
 
