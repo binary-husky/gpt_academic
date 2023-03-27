@@ -4,8 +4,9 @@
 
 If you like this project, please give it a Star. If you've come up with more useful academic shortcuts, feel free to open an issue or pull request.
 
-Huggingface测试（使用Huggingface的服务器，不稳定，若上传文件有隐私风险） https://huggingface.co/spaces/qingxu98/gpt-academic
-
+```
+Huggingface测试（仅做界面参考，使用Huggingface的服务器，极不稳定，有隐私风险） https://huggingface.co/spaces/qingxu98/gpt-academic
+```
 
 <div align="center">
     
