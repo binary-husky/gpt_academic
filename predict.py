@@ -126,7 +126,7 @@ def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt=''
 
                 except Exception as e:
                     traceback.print_exc()
-                    yield chatbot, history, "Json解析不合常规，很可能是文本过长"
+                    yield chatbot, history, "Json解析不合常规"
                     chunk = get_full_error(chunk, stream_response)
                     error_msg = chunk.decode()
                     if "reduce the length" in error_msg:
@@ -134,7 +134,11 @@ def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt=''
                         history = []
                     elif "Incorrect API key" in error_msg:
                         chatbot[-1] = (chatbot[-1][0], "[Local Message] Incorrect API key provided.")
-                    yield chatbot, history, "Json解析不合常规，很可能是文本过长" + error_msg
+                    else:
+                        from toolbox import regular_txt_to_markdown
+                        tb_str = regular_txt_to_markdown(traceback.format_exc())
+                        chatbot[-1] = (chatbot[-1][0], f"[Local Message] Json Error \n\n {tb_str} \n\n {regular_txt_to_markdown(chunk.decode()[4:])}")
+                    yield chatbot, history, "Json解析不合常规" + error_msg
                     return
 
 def generate_payload(inputs, top_p, temperature, history, system_prompt, stream):
