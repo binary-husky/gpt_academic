@@ -53,8 +53,6 @@ coverage.xml
 # Translations
 *.mo
 *.pot
-github
-.github
 TEMP
 TRASH
 

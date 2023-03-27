@@ -1,0 +1,66 @@
+---
+# Labels names are important as they are used by Release Drafter to decide
+# regarding where to record them in changelog or if to skip them.
+#
+# The repository labels will be automatically configured using this file and
+# the GitHub Action https://github.com/marketplace/actions/github-labeler.
+- name: breaking
+  description: Breaking Changes
+  color: bfd4f2
+- name: bug
+  description: Something isn't working
+  color: d73a4a
+- name: build
+  description: Build System and Dependencies
+  color: bfdadc
+- name: ci
+  description: Continuous Integration
+  color: 4a97d6
+- name: dependencies
+  description: Pull requests that update a dependency file
+  color: 0366d6
+- name: documentation
+  description: Improvements or additions to documentation
+  color: 0075ca
+- name: duplicate
+  description: This issue or pull request already exists
+  color: cfd3d7
+- name: enhancement
+  description: New feature or request
+  color: a2eeef
+- name: github_actions
+  description: Pull requests that update Github_actions code
+  color: "000000"
+- name: good first issue
+  description: Good for newcomers
+  color: 7057ff
+- name: help wanted
+  description: Extra attention is needed
+  color: 008672
+- name: invalid
+  description: This doesn't seem right
+  color: e4e669
+- name: performance
+  description: Performance
+  color: "016175"
+- name: python
+  description: Pull requests that update Python code
+  color: 2b67c6
+- name: question
+  description: Further information is requested
+  color: d876e3
+- name: refactoring
+  description: Refactoring
+  color: ef67c4
+- name: removal
+  description: Removals and Deprecations
+  color: 9ae7ea
+- name: style
+  description: Style
+  color: c120e5
+- name: testing
+  description: Testing
+  color: b1fc6f
+- name: wontfix
+  description: This will not be worked on
+  color: ffffff
