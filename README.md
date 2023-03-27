@@ -4,6 +4,8 @@
 
 If you like this project, please give it a Star. If you've come up with more useful academic shortcuts, feel free to open an issue or pull request.
 <div align="center">
+    
+huggingface测试（仅测试，不稳定，若上传文件有隐私风险） https://huggingface.co/spaces/qingxu98/gpt-academic
 
 
 功能 | 描述
@@ -26,7 +28,6 @@ chat分析报告生成 | [实验性功能] 运行后自动生成总结汇报
 </div>
 
 - 新界面
-huggingface测试（仅测试，不稳定，若上传文件有隐私风险） https://huggingface.co/spaces/qingxu98/gpt-academic
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/227851398-fab5a158-aaf6-4151-95ac-a8172ce611c7.png" width="700" >
 </div>
