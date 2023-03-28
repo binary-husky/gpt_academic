@@ -1,10 +1,17 @@
 [tool.poetry]
 name = "academic-chatgpt"
 version = "0.2.0"
-description = ""
+description = "chatgpt for academic"
 authors = ["Yangyang Li <yangyang.li@northwestern.edu>"]
-license = "MIT"
+license = "GPLv3"
 readme = "README.md"
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Environment :: Console",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+
 
 [tool.poetry.dependencies]
 python = "^3.9"
