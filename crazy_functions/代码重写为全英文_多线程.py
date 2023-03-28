@@ -37,10 +37,24 @@ def 全项目切换英文(txt, top_p, temperature, chatbot, history, sys_prompt,
     for h in handles:
         h.daemon = True
         h.start()
+    chatbot.append(('开始了吗？', f'多线程操作已经开始'))
+    yield chatbot, history, '正常'
 
-    # 等待各个线程逐一完成
+    # 循环轮询各个线程是否执行完毕
+    cnt = 0
+    while True:
+        time.sleep(1)
+        th_alive = [h.is_alive() for h in handles]
+        if not any(th_alive): break
+        stat = ['执行中' if alive else '已完成' for alive in th_alive]
+        stat_str = '|'.join(stat)
+        cnt += 1
+        chatbot[-1] = (chatbot[-1][0], f'多线程操作已经开始，完成情况: {stat_str}' + ''.join(['.']*(cnt%4)))
+        yield chatbot, history, '正常'
+
+    # 把结果写入文件
     for index, h in enumerate(handles):
-        h.join()
+        h.join() # 这里其实不需要join了，肯定已经都结束了
         fp = file_manifest[index]
         gpt_say = mutable_return[index]
         i_say_show_user = i_say_show_user_buffer[index]
@@ -51,9 +65,9 @@ def 全项目切换英文(txt, top_p, temperature, chatbot, history, sys_prompt,
         chatbot.append((i_say_show_user, f'[Local Message] 已完成{os.path.abspath(fp)}的转化，\n\n存入{os.path.abspath(where_to_relocate)}'))
         history.append(i_say_show_user); history.append(gpt_say)
         yield chatbot, history, '正常'
-        time.sleep(2)
+        time.sleep(1)
 
-    # 结束
+    # 备份一个文件
     res = write_results_to_file(history)
-    chatbot.append(("完成了吗？", res))
+    chatbot.append(("给爷一份任务执行报告", res))
     yield chatbot, history, '正常'
