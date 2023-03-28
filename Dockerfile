@@ -5,16 +5,14 @@ ENV PYTHONFAULTHANDLER=1 \
     PYTHONHASHSEED=random \
     PYTHONUNBUFFERED=1
 
-RUN pip install "poetry==1.4"
+
+RUN mkdir /gpt
+COPY pyproject.toml ./gpt
 
 WORKDIR /gpt
+ENV PYTHONPATH=${PYTHONPATH}:${PWD}
 
-COPY poetry.lock ./gpt/
-COPY pyproject.toml ./gpt/
-
-RUN poetry install
-
-COPY . /gpt
+RUN pip3 install poetry
 RUN poetry install --no-dev
 
 CMD ["chataca"]
