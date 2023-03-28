@@ -98,12 +98,12 @@ def main():
 
                         functional[k]["Button"] = gr.Button(k, variant=variant)
 
-                    for k in crazy_functional:
-                        with gr.Column(scale=12):
-                            crazy_functional[k]["Path"] = gr.Textbox(
-                                show_label=False, placeholder="project path."
-                            ).style(container=False)
+                    with gr.Column(scale=12):
+                        project_path = gr.Textbox(
+                            show_label=False, placeholder="project path."
+                        ).style(container=False)
 
+                    for k in crazy_functional:
                         with gr.Column(scale=1):
                             variant = (
                                 crazy_functional[k]["Color"]
@@ -176,7 +176,8 @@ def main():
                 crazy_functional[k]["Function"],
                 [
                     # txt,
-                    crazy_functional[k]["Path"],
+                    # crazy_functional[k]["Path"],
+                    project_path,
                     top_p,
                     temperature,
                     chatbot,
