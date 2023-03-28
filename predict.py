@@ -25,7 +25,7 @@ def get_full_error(chunk, stream_response):
             break
     return chunk
 
-def predict_no_ui(inputs, top_p, temperature, history=[]):
+def predict_no_ui(inputs, top_p, temperature, history=[], sys_prompt=""):
     """
         发送至chatGPT，等待回复，一次性完成，不显示中间过程。
         predict函数的简化版。
@@ -36,7 +36,7 @@ def predict_no_ui(inputs, top_p, temperature, history=[]):
         history 是之前的对话列表
         （注意无论是inputs还是history，内容太长了都会触发token数量溢出的错误，然后raise ConnectionAbortedError）
     """
-    headers, payload = generate_payload(inputs, top_p, temperature, history, system_prompt="", stream=False)
+    headers, payload = generate_payload(inputs, top_p, temperature, history, system_prompt=sys_prompt, stream=False)
 
     retry = 0
     while True:
@@ -47,8 +47,8 @@ def predict_no_ui(inputs, top_p, temperature, history=[]):
         except requests.exceptions.ReadTimeout as e:
             retry += 1
             traceback.print_exc()
-            if MAX_RETRY!=0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
             if retry > MAX_RETRY: raise TimeoutError
+            if MAX_RETRY!=0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
 
     try:
         result = json.loads(response.text)["choices"][0]["message"]["content"]
@@ -56,6 +56,40 @@ def predict_no_ui(inputs, top_p, temperature, history=[]):
     except Exception as e:
         if "choices" not in response.text: print(response.text)
         raise ConnectionAbortedError("Json解析不合常规，可能是文本过长" + response.text)
+
+
+def predict_no_ui_long_connection(inputs, top_p, temperature, history=[], sys_prompt=""):
+    """
+        发送至chatGPT，等待回复，一次性完成，不显示中间过程。但内部用stream的方法避免有人中途掐网线。
+    """
+    headers, payload = generate_payload(inputs, top_p, temperature, history, system_prompt=sys_prompt, stream=True)
+
+    retry = 0
+    while True:
+        try:
+            # make a POST request to the API endpoint, stream=False
+            response = requests.post(API_URL, headers=headers, proxies=proxies,
+                                    json=payload, stream=True, timeout=TIMEOUT_SECONDS); break
+        except requests.exceptions.ReadTimeout as e:
+            retry += 1
+            traceback.print_exc()
+            if retry > MAX_RETRY: raise TimeoutError
+            if MAX_RETRY!=0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
+
+    stream_response =  response.iter_lines()
+    result = ''
+    while True:
+        try: chunk = next(stream_response).decode()
+        except StopIteration: break
+        if len(chunk)==0: continue
+        if not chunk.startswith('data:'): 
+            raise ConnectionAbortedError("OpenAI返回了错误:" + chunk)
+        delta = json.loads(chunk.lstrip('data:'))['choices'][0]["delta"]
+        if len(delta) == 0: break
+        if "role" in delta: continue
+        if "content" in delta: result += delta["content"]; print(delta["content"], end='')
+        else: raise RuntimeError("意外Json结构："+delta)
+    return result
 
 
 def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt='', 
