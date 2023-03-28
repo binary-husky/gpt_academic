@@ -1,29 +1,28 @@
 import gradio as gr 
 
 # gradio可用颜色列表
-
-# slate
-# gray
-# zinc
-# neutral
-# stone
-# red
-# orange
-# amber
-# yellow
-# lime
-# green
-# emerald
-# teal
-# cyan
-# sky
-# blue
-# indigo
-# violet
-# purple
-# fuchsia
-# pink
-# rose
+# gr.themes.utils.colors.slate (石板色)
+# gr.themes.utils.colors.gray (灰色)
+# gr.themes.utils.colors.zinc (锌色)
+# gr.themes.utils.colors.neutral (中性色)
+# gr.themes.utils.colors.stone (石头色)
+# gr.themes.utils.colors.red (红色)
+# gr.themes.utils.colors.orange (橙色)
+# gr.themes.utils.colors.amber (琥珀色)
+# gr.themes.utils.colors.yellow (黄色)
+# gr.themes.utils.colors.lime (酸橙色)
+# gr.themes.utils.colors.green (绿色)
+# gr.themes.utils.colors.emerald (祖母绿)
+# gr.themes.utils.colors.teal (青蓝色)
+# gr.themes.utils.colors.cyan (青色)
+# gr.themes.utils.colors.sky (天蓝色)
+# gr.themes.utils.colors.blue (蓝色)
+# gr.themes.utils.colors.indigo (靛蓝色)
+# gr.themes.utils.colors.violet (紫罗兰色)
+# gr.themes.utils.colors.purple (紫色)
+# gr.themes.utils.colors.fuchsia (洋红色)
+# gr.themes.utils.colors.pink (粉红色)
+# gr.themes.utils.colors.rose (玫瑰色)
 
 def adjust_theme():
     try: 
