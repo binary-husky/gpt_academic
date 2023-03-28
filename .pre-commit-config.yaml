@@ -3,7 +3,7 @@ repos:
     rev: v4.4.0
     hooks:
       - id: check-added-large-files
-        args: ["--maxkb=8000"]
+        args: ["--maxkb=15000"]
       - id: check-toml
         types: [toml]
       - id: check-yaml
