@@ -1,7 +1,7 @@
 import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 import gradio as gr 
 from predict import predict
-from toolbox import format_io, find_free_port
+from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated
 
 # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
 try: from config_private import proxies, WEB_PORT, LLM_MODEL
@@ -25,7 +25,7 @@ from functional import get_functionals
 functional = get_functionals()
 
 # 对一些丧心病狂的实验性功能模块进行测试
-from functional_crazy import get_crazy_functionals, on_file_uploaded, on_report_generated
+from functional_crazy import get_crazy_functionals
 crazy_functional = get_crazy_functionals()
 
 # 处理markdown文本格式的转变
@@ -43,8 +43,6 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
             chatbot.style(height=1000)
             chatbot.style()
             history = gr.State([])
-            TRUE = gr.State(True)
-            FALSE = gr.State(False)
         with gr.Column(scale=1):
             with gr.Row():
                 with gr.Column(scale=12):
@@ -68,36 +66,35 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
                 gr.Markdown("上传本地文件供上面的实验性功能调用.")
             with gr.Row():
                 file_upload = gr.Files(label='任何文件,但推荐上传压缩文件(zip, tar)', file_count="multiple")
-
-            systemPromptTxt = gr.Textbox(show_label=True, placeholder=f"System Prompt", label="System prompt", value=initial_prompt).style(container=True)
-            #inputs, top_p, temperature, top_k, repetition_penalty
+            system_prompt = gr.Textbox(show_label=True, placeholder=f"System Prompt", label="System prompt", value=initial_prompt).style(container=True)
             with gr.Accordion("arguments", open=False):
                 top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01,interactive=True, label="Top-p (nucleus sampling)",)
                 temperature = gr.Slider(minimum=-0, maximum=5.0, value=1.0, step=0.01, interactive=True, label="Temperature",)
 
-    txt.submit(predict, [txt, top_p, temperature, chatbot, history, systemPromptTxt], [chatbot, history, statusDisplay])
-    submitBtn.click(predict, [txt, top_p, temperature, chatbot, history, systemPromptTxt], [chatbot, history, statusDisplay], show_progress=True)
+    txt.submit(predict, [txt, top_p, temperature, chatbot, history, system_prompt], [chatbot, history, statusDisplay])
+    submitBtn.click(predict, [txt, top_p, temperature, chatbot, history, system_prompt], [chatbot, history, statusDisplay], show_progress=True)
     for k in functional:
         functional[k]["Button"].click(predict, 
-            [txt, top_p, temperature, chatbot, history, systemPromptTxt, TRUE, gr.State(k)], [chatbot, history, statusDisplay], show_progress=True)
+            [txt, top_p, temperature, chatbot, history, system_prompt, gr.State(True), gr.State(k)], [chatbot, history, statusDisplay], show_progress=True)
     file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt], [chatbot, txt])
     for k in crazy_functional:
         click_handle = crazy_functional[k]["Button"].click(crazy_functional[k]["Function"], 
-            [txt, top_p, temperature, chatbot, history, systemPromptTxt, gr.State(PORT)], [chatbot, history, statusDisplay]
+            [txt, top_p, temperature, chatbot, history, system_prompt, gr.State(PORT)], [chatbot, history, statusDisplay]
         )
         try: click_handle.then(on_report_generated, [file_upload, chatbot], [file_upload, chatbot])
         except: pass
-
 
 # 延迟函数, 做一些准备工作, 最后尝试打开浏览器
 def auto_opentab_delay():
     import threading, webbrowser, time
     print(f"URL http://localhost:{PORT}")
-    def open(): time.sleep(2)
+    def open_webbrowser(): time.sleep(2)
     webbrowser.open_new_tab(f'http://localhost:{PORT}')
-    t = threading.Thread(target=open)
+    t = threading.Thread(target=open_webbrowser)
     t.daemon = True; t.start()
 
 auto_opentab_delay()
 demo.title = "ChatGPT 学术优化"
 demo.queue().launch(server_name="0.0.0.0", share=True, server_port=PORT)
+
+# -> 代码控制在100行以内
