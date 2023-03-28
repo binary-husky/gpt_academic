@@ -51,7 +51,9 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
                 with gr.Column(scale=12):
                     txt = gr.Textbox(show_label=False, placeholder="Input question here.").style(container=False)
                 with gr.Column(scale=1):
-                    submitBtn = gr.Button("提交", variant="primary")
+                    with gr.Row():
+                        resetBtn = gr.Button("重置", variant="secondary")
+                        submitBtn = gr.Button("提交", variant="primary")
             with gr.Row():
                 from check_proxy import check_proxy
                 statusDisplay = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行. \nNetwork: {check_proxy(proxies)}\nModel: {LLM_MODEL}")
@@ -76,8 +78,14 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
                 top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01,interactive=True, label="Top-p (nucleus sampling)",)
                 temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature",)
 
-    txt.submit(predict, [txt, top_p, temperature, chatbot, history, systemPromptTxt], [chatbot, history, statusDisplay])
-    submitBtn.click(predict, [txt, top_p, temperature, chatbot, history, systemPromptTxt], [chatbot, history, statusDisplay], show_progress=True)
+    predict_args = dict(fn=predict, inputs=[txt, top_p, temperature, chatbot, history, systemPromptTxt], outputs=[chatbot, history, statusDisplay], show_progress=True)
+    empty_txt_args = dict(fn=lambda: "", inputs=[], outputs=[txt])
+
+    txt.submit(**predict_args)
+    txt.submit(**empty_txt_args)
+    submitBtn.click(**predict_args)
+    submitBtn.click(**empty_txt_args)
+    resetBtn.click(lambda: ([], [], "已重置"), None, [chatbot, history, statusDisplay])
     for k in functional:
         functional[k]["Button"].click(predict,
             [txt, top_p, temperature, chatbot, history, systemPromptTxt, TRUE, gr.State(k)], [chatbot, history, statusDisplay], show_progress=True)
