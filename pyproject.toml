@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "academic-chatgpt"
-version = "0.1.0"
+version = "0.2.0"
 description = ""
 authors = ["Yangyang Li <yangyang.li@northwestern.edu>"]
 license = "MIT"
