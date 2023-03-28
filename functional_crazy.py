@@ -7,13 +7,13 @@ def get_crazy_functionals():
     from crazy_functions.解析项目源代码 import 解析一个C项目的头文件
     from crazy_functions.解析项目源代码 import 解析一个C项目
     from crazy_functions.高级功能函数模板 import 高阶功能模板函数
-    from crazy_functions.全项目切换英文 import 全项目切换英文
+    from crazy_functions.代码重写为全英文_多线程 import 全项目切换英文
 
     return {
         "[实验] 请解析并解构此项目本身": {
             "Function": 解析项目本身
         },
-        "[实验] 把此项目代码切换成全英文": {
+        "[实验] 把本项目代码切换成全英文": {
             "Color": "stop",    # 按钮颜色
             "Function": 全项目切换英文
         },
