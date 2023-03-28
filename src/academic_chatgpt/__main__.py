@@ -12,6 +12,7 @@ from loguru import logger
 from .predict import predict
 from .utils import find_free_port, format_io
 from .config import load_config
+from .theme import adjust_theme
 
 
 def main():
@@ -44,28 +45,7 @@ def main():
     # Process the transformation of markdown text format
     gr.Chatbot.postprocess = format_io
 
-    # Make some style adjustments
-    try:
-        set_theme = gr.themes.Default(
-            primary_hue=gr.themes.utils.colors.orange,
-            font=[
-                "ui-sans-serif",
-                "system-ui",
-                "sans-serif",
-                gr.themes.utils.fonts.GoogleFont("Source Sans Pro"),
-            ],
-            font_mono=[
-                "ui-monospace",
-                "Consolas",
-                "monospace",
-                gr.themes.utils.fonts.GoogleFont("IBM Plex Mono"),
-            ],
-        )
-    except Exception:
-        set_theme = None
-        logger.warning(
-            "The gradio version is older and cannot customize fonts and colors"
-        )
+    set_theme = adjust_theme()
 
     with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
         gr.HTML(title_html)
@@ -86,7 +66,7 @@ def main():
                             show_label=False, placeholder="Input question here."
                         ).style(container=False)
                     with gr.Column(scale=1):
-                        submitBtn = gr.Button("Ask", variant="primary")
+                        submitBtn = gr.Button("Submmit", variant="primary")
 
                 with gr.Row():
                     for k in functional:

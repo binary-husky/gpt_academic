@@ -28,6 +28,7 @@ def get_full_error(chunk, stream_response):
 
 def predict_no_ui(inputs, top_p, temperature, history=[]):
     """Send to chatGPT, wait for reply, complete in one go, and do not display intermediate process.
+
     A simplified version of the predict function.
     Used for cases where the payload is relatively large, or for implementing complex functions with multiple threads and nesting.
 
@@ -176,7 +177,8 @@ def predict(
 
                 except Exception:
                     traceback.print_exc()
-                    yield chatbot, history, "Json parsing is not normal, it is likely that the text is too long"
+                    yield chatbot, history, "Json parsing is not normal."
+
                     chunk = get_full_error(chunk, stream_response)
                     error_msg = chunk.decode()
                     if "reduce the length" in error_msg:
@@ -185,7 +187,22 @@ def predict(
                             "[Local Message] Input (or history) is too long, please reduce input or clear history by refleshing this page.",
                         )
                         history = []
-                    yield chatbot, history, "Json parsing is not normal, it is likely that the text is too long" + error_msg
+                    elif "Incorrect API key" in error_msg:
+                        chatbot[-1] = (
+                            chatbot[-1][0],
+                            "[Local Message] Incorrect API key provided.",
+                        )
+
+                    else:
+                        from .utils import regular_txt_to_markdown
+
+                        tb_str = regular_txt_to_markdown(traceback.format_exc())
+                        chatbot[-1] = (
+                            chatbot[-1][0],
+                            f"[Local Message] Json Error \n\n {tb_str} \n\n {regular_txt_to_markdown(chunk.decode()[4:])}",
+                        )
+
+                    yield chatbot, history, "Json parsing is not normal" + error_msg
                     return
 
 
