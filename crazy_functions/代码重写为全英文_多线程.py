@@ -9,10 +9,13 @@ def 全项目切换英文(txt, top_p, temperature, chatbot, history, sys_prompt,
     history = []    # 清空历史，以免输入溢出
     # 集合文件
     import time, glob, os
-    file_manifest = [f for f in glob.glob('./**/*.py', recursive=True) if ('test_project' not in f) and ('gpt_log' not in f)]
+    os.makedirs('gpt_log/generated_english_version', exist_ok=True)
+    os.makedirs('gpt_log/generated_english_version/crazy_functions', exist_ok=True)
+    file_manifest = [f for f in glob.glob('./*.py') if ('test_project' not in f) and ('gpt_log' not in f)] + \
+                    [f for f in glob.glob('./crazy_functions/*.py') if ('test_project' not in f) and ('gpt_log' not in f)]
     i_say_show_user_buffer = []
 
-    # 随便显示点什么防止卡顿
+    # 随便显示点什么防止卡顿的感觉
     for index, fp in enumerate(file_manifest):
         # if 'test_project' in fp: continue
         with open(fp, 'r', encoding='utf-8') as f:
@@ -58,8 +61,7 @@ def 全项目切换英文(txt, top_p, temperature, chatbot, history, sys_prompt,
         fp = file_manifest[index]
         gpt_say = mutable_return[index]
         i_say_show_user = i_say_show_user_buffer[index]
-        os.makedirs('gpt_log/generated_english_version', exist_ok=True)
-        os.makedirs('gpt_log/generated_english_version/crazy_functions', exist_ok=True)
+
         where_to_relocate = f'gpt_log/generated_english_version/{fp}'
         with open(where_to_relocate, 'w+', encoding='utf-8') as f: f.write(gpt_say.lstrip('```').rstrip('```'))
         chatbot.append((i_say_show_user, f'[Local Message] 已完成{os.path.abspath(fp)}的转化，\n\n存入{os.path.abspath(where_to_relocate)}'))
