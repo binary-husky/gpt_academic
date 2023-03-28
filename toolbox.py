@@ -49,7 +49,7 @@ def write_results_to_file(history, file_name=None):
     if file_name is None:
         file_name = time.strftime("chatGPT分析报告%Y-%m-%d-%H-%M-%S", time.localtime()) + '.md'
     os.makedirs('./gpt_log/', exist_ok=True)
-    with open(f'./gpt_log/{file_name}', 'w') as f:
+    with open(f'./gpt_log/{file_name}', 'w', encoding = 'utf8') as f:
         f.write('# chatGPT 分析报告\n')
         for i, content in enumerate(history):
             if i%2==0: f.write('## ')
