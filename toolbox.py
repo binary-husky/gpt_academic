@@ -14,7 +14,7 @@ def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temp
     # list就是最简单的mutable结构，我们第一个位置放gpt输出，第二个位置传递报错信息
     mutable = [None, '']
     # multi-threading worker
-    def mt(i_say, history): 
+    def mt(i_say, history):
         while True:
             try:
                 mutable[0] = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature, history=history)
@@ -124,7 +124,7 @@ def format_io(self, y):
     """
         将输入和输出解析为HTML格式。将y中最后一项的输入部分段落化，并将输出部分的Markdown和数学公式转换为HTML格式。
     """
-    if y is None: return []
+    if y is None or y == []: return []
     i_ask, gpt_reply = y[-1]
     i_ask = text_divide_paragraph(i_ask) # 输入部分太自由，预处理一波
     y[-1] = (
@@ -144,7 +144,7 @@ def find_free_port():
         s.bind(('', 0))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return s.getsockname()[1]
-    
+
 
 def extract_archive(file_path, dest_dir):
     import zipfile
@@ -165,7 +165,7 @@ def extract_archive(file_path, dest_dir):
             print("Successfully extracted tar archive to {}".format(dest_dir))
     else:
         return
-    
+
 def find_recent_files(directory):
     """
         me: find files that is created with in one minutes under a directory with python, write a function
