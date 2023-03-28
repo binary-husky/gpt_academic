@@ -9,8 +9,10 @@ If you like this project, please give it a Star. If you've come up with more use
 # 借鉴项目1：借鉴了mdtex2html中公式处理的方法
 https://github.com/polarwinkel/mdtex2html
 
-# 借鉴项目2：借鉴了ChuanhuChatGPT中读取json的方法、记录历史问询记录的方法
+# 借鉴项目2：借鉴了ChuanhuChatGPT中读取OpenAI json的方法、记录历史问询记录的方法以及gradio queue的使用技巧
 https://github.com/GaiZhenbiao/ChuanhuChatGPT
+
+项目使用OpenAI的gpt-3.5-turbo模型，期待gpt-4早点放宽门槛😂
 ```
 
 <div align="center">
