@@ -89,15 +89,5 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
         except: pass
 
 
-# 延迟函数, 做一些准备工作, 最后尝试打开浏览器
-def auto_opentab_delay():
-    import threading, webbrowser, time
-    print(f"URL http://localhost:{PORT}")
-    def open(): time.sleep(2)
-    webbrowser.open_new_tab(f'http://localhost:{PORT}')
-    t = threading.Thread(target=open)
-    t.daemon = True; t.start()
-
-auto_opentab_delay()
 demo.title = "ChatGPT 学术优化"
-demo.queue().launch(server_name="0.0.0.0", share=True, server_port=PORT)
+demo.queue().launch(server_name="0.0.0.0", share=True, server_port=PORT, inbrowser=True)
