@@ -13,10 +13,6 @@ def get_crazy_functionals():
         "[实验] 请解析并解构此项目本身": {
             "Function": 解析项目本身
         },
-        "[实验] 把本项目代码切换成全英文": {
-            "Color": "stop",    # 按钮颜色
-            "Function": 全项目切换英文
-        },
         "[实验] 解析整个py项目（配合input输入框）": {
             "Color": "stop",    # 按钮颜色
             "Function": 解析一个Python项目
@@ -36,6 +32,10 @@ def get_crazy_functionals():
         "[实验] 批量生成函数注释（配合input输入框）": {
             "Color": "stop",    # 按钮颜色
             "Function": 批量生成函数注释
+        },
+        "[实验] 把本项目源代码切换成全英文（多线程）": {
+            "Color": "stop",    # 按钮颜色
+            "Function": 全项目切换英文
         },
         "[实验] 实验功能函数模板": {
             "Color": "stop",    # 按钮颜色
