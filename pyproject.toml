@@ -19,6 +19,7 @@ latex2mathml = "^3.75.1"
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.2.1"
 ruff = "^0.0.259"
+pip-tools = "^6.12.3"
 
 
 [tool.poetry.scripts]
