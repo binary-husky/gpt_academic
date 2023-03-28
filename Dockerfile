@@ -1,13 +1,20 @@
-FROM python:3.11
+# syntax=docker/dockerfile:1
 
-RUN echo '[global]' > /etc/pip.conf && \
-    echo 'index-url = https://mirrors.aliyun.com/pypi/simple/' >> /etc/pip.conf && \
-    echo 'trusted-host = mirrors.aliyun.com' >> /etc/pip.conf
+FROM python:3.10
 
-RUN pip3 install gradio requests[socks] mdtex2html
+ENV PYTHONFAULTHANDLER=1 \
+    PYTHONHASHSEED=random \
+    PYTHONUNBUFFERED=1
 
-COPY . /gpt
+RUN pip install "poetry==1.4"
+
 WORKDIR /gpt
 
+COPY poetry.lock pyproject.toml ./gpt/
 
-CMD ["python3", "main.py"]
+RUN poetry install --no-dev --no--ansi
+
+COPY . /gpt
+RUN poetry install --no-dev
+
+CMD ["chataca"]
