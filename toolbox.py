@@ -2,7 +2,7 @@ import markdown, mdtex2html, threading
 from show_math import convert as convert_math
 from functools import wraps
 
-def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[]):
+def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[], sys_prompt=''):
     """
         调用简单的predict_no_ui接口，但是依然保留了些许界面心跳功能，当对话太长时，会自动采用二分法截断
     """
@@ -17,7 +17,7 @@ def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temp
     def mt(i_say, history): 
         while True:
             try:
-                mutable[0] = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature, history=history)
+                mutable[0] = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature, history=history, sys_prompt=sys_prompt)
                 break
             except ConnectionAbortedError as e:
                 if len(history) > 0:
@@ -27,7 +27,8 @@ def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temp
                     i_say = i_say[:len(i_say)//2]
                     mutable[1] = 'Warning! Input file is too long, cut into half. '
             except TimeoutError as e:
-                mutable[0] = '[Local Message] Failed with timeout'
+                mutable[0] = '[Local Message] Failed with timeout.'
+                raise TimeoutError
     # 创建新线程发出http请求
     thread_name = threading.Thread(target=mt, args=(i_say, history)); thread_name.start()
     # 原来的线程则负责持续更新UI，实现一个超时倒计时，并等待新线程的任务完成
@@ -39,6 +40,7 @@ def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temp
         time.sleep(1)
     # 把gpt的输出从mutable中取出来
     gpt_say = mutable[0]
+    if gpt_say=='[Local Message] Failed with timeout.': raise TimeoutError
     return gpt_say
 
 def write_results_to_file(history, file_name=None):
