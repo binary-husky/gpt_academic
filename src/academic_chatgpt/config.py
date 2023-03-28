@@ -19,7 +19,10 @@ class Config(BaseModel):
     proxies: Optional[dict] = None
 
 
-def load_config():
+CACHE_CONFIGS = None
+
+
+def read_config():
     config_file = Path("chataca.toml")
 
     if not config_file.exists():
@@ -46,3 +49,10 @@ def load_config():
         )
 
     return configs
+
+
+def load_config():
+    global CACHE_CONFIGS
+    if CACHE_CONFIGS is None:
+        CACHE_CONFIGS = read_config()
+    return CACHE_CONFIGS
