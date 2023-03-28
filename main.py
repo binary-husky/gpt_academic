@@ -3,22 +3,22 @@ import gradio as gr
 from predict import predict
 from toolbox import format_io, find_free_port
 
-# 建议您复制一个config_private.py放自己的秘密，如API和代理网址，避免不小心传github被别人看到
-try: from config_private import proxies, WEB_PORT 
-except: from config import proxies, WEB_PORT
+# 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
+try: from config_private import proxies, WEB_PORT, LLM_MODEL
+except: from config import proxies, WEB_PORT, LLM_MODEL
 
-# 如果WEB_PORT是-1，则随机选取WEB端口
+# 如果WEB_PORT是-1, 则随机选取WEB端口
 PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
 
 initial_prompt = "Serve me as a writing and programming assistant."
 title_html = """<h1 align="center">ChatGPT 学术优化</h1>"""
 
-# 问询记录，python 版本建议3.9+（越新越好）
+# 问询记录, python 版本建议3.9+（越新越好）
 import logging
 os.makedirs('gpt_log', exist_ok=True)
 try:logging.basicConfig(filename='gpt_log/chat_secrets.log', level=logging.INFO, encoding='utf-8') 
 except:logging.basicConfig(filename='gpt_log/chat_secrets.log', level=logging.INFO)
-print('所有问询记录将自动保存在本地目录./gpt_log/chat_secrets.log，请注意自我隐私保护哦！')
+print('所有问询记录将自动保存在本地目录./gpt_log/chat_secrets.log, 请注意自我隐私保护哦！')
 
 # 一些普通功能模块
 from functional import get_functionals
@@ -31,12 +31,9 @@ crazy_functional = get_crazy_functionals()
 # 处理markdown文本格式的转变
 gr.Chatbot.postprocess = format_io
 
-# 做一些样式上的调整
-try: set_theme = gr.themes.Default( primary_hue=gr.themes.utils.colors.orange,
-    font=["ui-sans-serif", "system-ui", "sans-serif", gr.themes.utils.fonts.GoogleFont("Source Sans Pro")], 
-    font_mono=["ui-monospace", "Consolas", "monospace", gr.themes.utils.fonts.GoogleFont("IBM Plex Mono")])
-except: 
-    set_theme = None; print('gradio版本较旧，不能自定义字体和颜色')
+# 做一些外观色彩上的调整
+from theme import adjust_theme
+set_theme = adjust_theme()
 
 with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
     gr.HTML(title_html)
@@ -53,7 +50,10 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
                 with gr.Column(scale=12):
                     txt = gr.Textbox(show_label=False, placeholder="Input question here.").style(container=False)
                 with gr.Column(scale=1):
-                    submitBtn = gr.Button("Ask", variant="primary")
+                    submitBtn = gr.Button("提交", variant="primary")
+            with gr.Row():
+                from check_proxy import check_proxy
+                statusDisplay = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行. \nNetwork: {check_proxy(proxies)}\nModel: {LLM_MODEL}")
             with gr.Row():
                 for k in functional:
                     variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
@@ -69,8 +69,6 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
             with gr.Row():
                 file_upload = gr.Files(label='任何文件,但推荐上传压缩文件(zip, tar)', file_count="multiple")
 
-            from check_proxy import check_proxy
-            statusDisplay = gr.Markdown(f"{check_proxy(proxies)}")
             systemPromptTxt = gr.Textbox(show_label=True, placeholder=f"System Prompt", label="System prompt", value=initial_prompt).style(container=True)
             #inputs, top_p, temperature, top_k, repetition_penalty
             with gr.Accordion("arguments", open=False):
@@ -91,7 +89,7 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
         except: pass
 
 
-# 延迟函数，做一些准备工作，最后尝试打开浏览器
+# 延迟函数, 做一些准备工作, 最后尝试打开浏览器
 def auto_opentab_delay():
     import threading, webbrowser, time
     print(f"URL http://localhost:{PORT}")
