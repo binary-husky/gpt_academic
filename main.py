@@ -1,14 +1,15 @@
 import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
-import gradio as gr 
+import gradio as gr
 from predict import predict
 from toolbox import format_io, find_free_port
 
 # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
-try: from config_private import proxies, WEB_PORT, LLM_MODEL
-except: from config import proxies, WEB_PORT, LLM_MODEL
+try: from config_private import proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION
+except: from config import proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION
 
 # 如果WEB_PORT是-1, 则随机选取WEB端口
 PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
+AUTHENTICATION = None if AUTHENTICATION == [] else AUTHENTICATION
 
 initial_prompt = "Serve me as a writing and programming assistant."
 title_html = """<h1 align="center">ChatGPT 学术优化</h1>"""
@@ -16,7 +17,7 @@ title_html = """<h1 align="center">ChatGPT 学术优化</h1>"""
 # 问询记录, python 版本建议3.9+（越新越好）
 import logging
 os.makedirs('gpt_log', exist_ok=True)
-try:logging.basicConfig(filename='gpt_log/chat_secrets.log', level=logging.INFO, encoding='utf-8') 
+try:logging.basicConfig(filename='gpt_log/chat_secrets.log', level=logging.INFO, encoding='utf-8')
 except:logging.basicConfig(filename='gpt_log/chat_secrets.log', level=logging.INFO)
 print('所有问询记录将自动保存在本地目录./gpt_log/chat_secrets.log, 请注意自我隐私保护哦！')
 
@@ -78,11 +79,11 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
     txt.submit(predict, [txt, top_p, temperature, chatbot, history, systemPromptTxt], [chatbot, history, statusDisplay])
     submitBtn.click(predict, [txt, top_p, temperature, chatbot, history, systemPromptTxt], [chatbot, history, statusDisplay], show_progress=True)
     for k in functional:
-        functional[k]["Button"].click(predict, 
+        functional[k]["Button"].click(predict,
             [txt, top_p, temperature, chatbot, history, systemPromptTxt, TRUE, gr.State(k)], [chatbot, history, statusDisplay], show_progress=True)
     file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt], [chatbot, txt])
     for k in crazy_functional:
-        click_handle = crazy_functional[k]["Button"].click(crazy_functional[k]["Function"], 
+        click_handle = crazy_functional[k]["Button"].click(crazy_functional[k]["Function"],
             [txt, top_p, temperature, chatbot, history, systemPromptTxt, gr.State(PORT)], [chatbot, history, statusDisplay]
         )
         try: click_handle.then(on_report_generated, [file_upload, chatbot], [file_upload, chatbot])
@@ -90,4 +91,4 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
 
 
 demo.title = "ChatGPT 学术优化"
-demo.queue().launch(server_name="0.0.0.0", share=True, server_port=PORT, inbrowser=True)
+demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", share=True, server_port=PORT, inbrowser=True, auth=AUTHENTICATION)
