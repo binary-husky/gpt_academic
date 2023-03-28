@@ -131,6 +131,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+.vscode
+
 history
 ssr_conf
 config_private.py
