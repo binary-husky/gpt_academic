@@ -66,18 +66,6 @@ This is the forked version from [the project](https://github.com/binary-husky/ch
 <img src="https://user-images.githubusercontent.com/96192199/226935232-6b6a73ce-8900-4aee-93f9-733c7e6fef53.png" width="700" >
 </div>
 
-## Run directly (Windows or Linux or MacOS)
-
-```sh
-# Download project
-git clone https://github.com/binary-husky/chatgpt_academic.git
-cd chatgpt_academic
-# In config.py, configure overseas Proxy and OpenAI API KEY
- -
-# Install dependencies
-python -m pip install -r requirements
-```
-
 ## Usage
 
 ### Prerequisites
@@ -126,5 +114,3 @@ In the `project path` area, enter the project path and click on "[Experimental] 
 #### Python project analysis
 
 In the `project path` area, enter the project path and click on "[Experimental] Analyze entire Python project (input the root directory of the project)"
-
-## Using Docker (Linux)
