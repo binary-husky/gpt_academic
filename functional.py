@@ -1,9 +1,7 @@
-# """
-# 'primary' for main call-to-action, 
-# 'secondary' for a more subdued style, 
-# 'stop' for a stop button.
-# """
-
+# 'primary' 颜色对应 theme.py 中的 primary_hue
+# 'secondary' 颜色对应 theme.py 中的 neutral_hue
+# 'stop' 颜色对应 theme.py 中的 color_er
+# 默认按钮颜色是 secondary
 
 def get_functionals():
     return {
@@ -55,5 +53,3 @@ not a Chinese-Chinese translator or an English-English translator. Below is the 
             "Color": "secondary",
         },
     }
-
-
