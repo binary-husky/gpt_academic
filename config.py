@@ -24,12 +24,13 @@ MAX_RETRY = 2
 # 选择的OpenAI模型是（gpt4现在只对申请成功的人开放）
 LLM_MODEL = "gpt-3.5-turbo"
 
-# 检查一下是不是忘了改config
-if len(API_KEY) != 51:  # 正确的密钥是51位
-    assert False, "请在config文件中修改API密钥, 添加海外代理之后再运行"
-
 # 设置并行使用的线程数
 CONCURRENT_COUNT = 100
 
 # 设置用户名和密码
 AUTHENTICATION = [] # [("username", "password"), ("username2", "password2"), ...]
+
+# 检查一下是不是忘了改config
+if len(API_KEY) != 51:
+    assert False, "正确的API_KEY密钥是51位，请在config文件中修改API密钥, 添加海外代理之后再运行。" + \
+                  "（如果您刚更新过代码，请确保旧版config_private文件中没有遗留任何新增键值）"
