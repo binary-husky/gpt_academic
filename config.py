@@ -5,6 +5,13 @@ API_URL = "https://api.openai.com/v1/chat/completions"
 # 改为True应用代理
 USE_PROXY = False
 if USE_PROXY:
+
+    # 填写格式是 [协议]://  [地址] :[端口] ，
+    # 例如    "socks5h://localhost:11284"
+    # [协议] 常见协议无非socks5h/http，例如 v2*** 和 s** 的默认本地协议是socks5h，cl**h 的默认本地协议是http
+    # [地址] 懂的都懂，不懂就填localhost或者127.0.0.1肯定错不了（localhost意思是代理软件安装在本机上）
+    # [端口] 在代理软件的设置里，不同的代理软件界面不一样，但端口号都应该在最显眼的位置上
+
     # 代理网络的地址，打开你的科学上网软件查看代理的协议(socks5/http)、地址(localhost)和端口(11284)
     proxies = { "http": "socks5h://localhost:11284", "https": "socks5h://localhost:11284", }
     print('网络代理状态：运行。')
