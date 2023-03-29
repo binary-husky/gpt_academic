@@ -6,8 +6,11 @@ def check_proxy(proxies):
         response = requests.get("https://ipapi.co/json/", proxies=proxies, timeout=4)
         data = response.json()
         print(f'查询代理的地理位置，返回的结果是{data}')
-        country = data['country_name']
-        result = f"代理配置 {proxies_https}, 代理所在地：{country}"
+        if 'country_name' in data:
+            country = data['country_name']
+            result = f"代理配置 {proxies_https}, 代理所在地：{country}"
+        elif 'error' in data:
+            result = f"代理配置 {proxies_https}, 代理所在地：未知，IP查询频率受限"
         print(result)
         return result
     except:
@@ -17,6 +20,7 @@ def check_proxy(proxies):
 
 
 if __name__ == '__main__':
+    import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
     try: from config_private import proxies # 放自己的秘密如API和代理网址 os.path.exists('config_private.py')
     except: from config import proxies
     check_proxy(proxies)
