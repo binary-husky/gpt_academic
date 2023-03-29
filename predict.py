@@ -83,7 +83,8 @@ def predict_no_ui_long_connection(inputs, top_p, temperature, history=[], sys_pr
         except StopIteration: break
         if len(chunk)==0: continue
         if not chunk.startswith('data:'): 
-            raise ConnectionAbortedError("OpenAI返回了错误:" + chunk)
+            chunk = get_full_error(chunk.encode('utf8'), stream_response)
+            raise ConnectionAbortedError("OpenAI拒绝了请求:" + chunk.decode())
         delta = json.loads(chunk.lstrip('data:'))['choices'][0]["delta"]
         if len(delta) == 0: break
         if "role" in delta: continue
