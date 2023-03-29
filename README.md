@@ -45,7 +45,7 @@ chat分析报告生成 | [实验性功能] 运行后自动生成总结汇报
 
 - 新界面
 <div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/227851398-fab5a158-aaf6-4151-95ac-a8172ce611c7.png" width="700" >
+<img src="https://user-images.githubusercontent.com/96192199/228600410-7d44e34f-63f1-4046-acb8-045cb05da8bb.png" width="700" >
 </div>
 
 
