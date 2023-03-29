@@ -171,7 +171,7 @@ ip_proxy = subprocess.run(
         ).stdout.strip() # 获取windows的IP
 proxies = { "http": ip_proxy + ":51837", "https": ip_proxy + ":51837", } # 请自行修改
 ```
-在启动main.py后，可以在windows浏览器中访问服务。至此测试、使用与上面其他方法无异。
+在启动main.py后，可以在windows浏览器中访问服务。至此测试、使用与上面其他方法无异。 
 
 
 ## 自定义新的便捷按钮（学术快捷键自定义）
