@@ -1,4 +1,21 @@
+<div align="center">
+
 # ChatGPT Academic Optimizer
+
+[![pypi](https://img.shields.io/pypi/v/academic-chatgpt.svg)][pypi status]
+[![status](https://img.shields.io/pypi/status/academic-chatgpt.svg)][pypi status]
+[![python version](https://img.shields.io/pypi/pyversions/academic-chatgpt)][pypi status]
+[![license](https://img.shields.io/pypi/l/academic-chatgpt)][license]
+[![precommit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)][precommit]
+[![black](https://img.shields.io/badge/code%20style-black-000000.svg)][black]
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v1.json)](https://github.com/charliermarsh/ruff)
+
+[pypi status]: https://pypi.org/project/academic-chatgpt/
+[license]: https://opensource.org/licenses/GPLv3
+[precommit]: https://github.com/pre-commit/pre-commit
+[black]: https://github.com/psf/black
+
+</div>
 
 A simple web interface for academic research and experimentation using GPT-3.5.
 
