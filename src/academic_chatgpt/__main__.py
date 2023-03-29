@@ -1,6 +1,3 @@
-import threading
-import time
-import webbrowser
 from pathlib import Path
 
 import gradio as gr
@@ -14,26 +11,42 @@ from .utils import find_free_port, format_io
 from .config import load_config
 from .theme import adjust_theme
 
+import threading
+import webbrowser
+import time
+
+
+def auto_opentab_delay(port):
+    def open():
+        time.sleep(2)
+        webbrowser.open_new_tab(f"http://localhost:{port}")
+
+    t = threading.Thread(target=open)
+    t.daemon = True
+    t.start()
+
 
 def main():
     # It is recommended that you copy a config_private.py to your own secrets, such as API and proxy URLs, to avoid accidentally uploading to GitHub and being seen by others
     configs = load_config()
-
+    cancel_events = []
     # If WEB_PORT is -1, select the WEB port randomly
     PORT = find_free_port() if configs.WEB_PORT <= 0 else configs.WEB_PORT
 
     initial_prompt = "Serve me as a writing and programming assistant."
     title_html = """<h1 align="center">ChatGPT Academic Optimization</h1>"""
     # Inquiry record, python version is recommended to be 3.9+ (the newer the better)
-    Path("gpt_log").mkdir(parents=True, exist_ok=True)
+    log_path = Path("gpt_log")
+    log_path.mkdir(parents=True, exist_ok=True)
+    log_file = log_path / "chat_secrets.log"
 
     try:
-        logger.add("gpt_log/chat_secrets.log", level="INFO", encoding="utf-8")
+        logger.add(log_file, level="INFO", encoding="utf-8")
     except Exception:
-        logger.add("gpt_log/chat_secrets.log", level="INFO")
+        logger.add(log_file, level="INFO")
 
     logger.info(
-        "All inquiry records will be automatically saved in the local directory ./gpt_log/chat_secrets.log, please pay attention to self-privacy protection!"
+        f"All inquiry records will be automatically saved in the local directory {log_file.absolute()}, please pay attention to self-privacy protection!"
     )
 
     # Some common functional modules
@@ -58,15 +71,18 @@ def main():
                 history = gr.State([])
                 TRUE = gr.State(True)
                 gr.State(False)
-
             with gr.Column(scale=1):
                 with gr.Row():
-                    with gr.Column(scale=12):
-                        txt = gr.Textbox(
-                            show_label=False, placeholder="Input question here."
-                        ).style(container=False)
-                    with gr.Column(scale=1):
-                        submitBtn = gr.Button("Submmit", variant="primary")
+                    txt = gr.Textbox(
+                        show_label=False, placeholder="Input question here."
+                    ).style(container=False)
+                with gr.Row():
+                    submitBtn = gr.Button("Submmit", variant="primary")
+                with gr.Row():
+                    resetBtn = gr.Button("Reset", variant="secondary")
+                    resetBtn.style(size="sm")
+                    stopBtn = gr.Button("Stop", variant="secondary")
+                    stopBtn.style(size="sm")
 
                 with gr.Row():
                     for k in functional:
@@ -105,8 +121,8 @@ def main():
                 # inputs, top_p, temperature, top_k, repetition_penalty
                 with gr.Accordion("arguments", open=False):
                     top_p = gr.Slider(
-                        minimum=-0,
-                        maximum=1.0,
+                        minimum=0,
+                        maximum=2.0,
                         value=1.0,
                         step=0.01,
                         interactive=True,
@@ -121,21 +137,22 @@ def main():
                         label="Temperature",
                     )
 
-        txt.submit(
-            predict,
-            [txt, top_p, temperature, chatbot, history, systemPromptTxt],
-            [chatbot, history, statusDisplay],
-        )
-
-        submitBtn.click(
-            predict,
-            [txt, top_p, temperature, chatbot, history, systemPromptTxt],
-            [chatbot, history, statusDisplay],
+        predict_args = dict(
+            fn=predict,
+            inputs=[txt, top_p, temperature, chatbot, history, systemPromptTxt],
+            outputs=[chatbot, history, statusDisplay],
             show_progress=True,
+        )
+        dict(fn=lambda: "", inputs=[], outputs=[txt])
+
+        cancel_events.append(txt.submit(**predict_args))
+        cancel_events.append(submitBtn.click(**predict_args))
+        resetBtn.click(
+            lambda: ([], [], "Reset"), None, [chatbot, history, statusDisplay]
         )
 
         for k in functional:
-            functional[k]["Button"].click(
+            click_handle = functional[k]["Button"].click(
                 predict,
                 [
                     txt,
@@ -150,9 +167,9 @@ def main():
                 [chatbot, history, statusDisplay],
                 show_progress=True,
             )
-
+            cancel_events.append(click_handle)
         for k in crazy_functional:
-            crazy_functional[k]["Button"].click(
+            click_handle = crazy_functional[k]["Button"].click(
                 crazy_functional[k]["Function"],
                 [
                     # txt,
@@ -167,22 +184,17 @@ def main():
                 ],
                 [chatbot, history, statusDisplay],
             )
+            cancel_events.append(click_handle)
+        stopBtn.click(fn=None, inputs=None, outputs=None, cancels=cancel_events)
 
-    # Delay function, do some preparation work, and finally try to open the browser
-    def auto_opentab_delay():
-        logger.info(f"URL http://localhost:{PORT}")
-
-        def open():
-            time.sleep(2)
-
-        webbrowser.open_new_tab(f"http://localhost:{PORT}")
-        t = threading.Thread(target=open)
-        t.daemon = True
-        t.start()
-
-    auto_opentab_delay()
+    auto_opentab_delay(PORT)
     demo.title = "ChatGPT Academic Optimization"
-    demo.queue().launch(server_name="0.0.0.0", share=True, server_port=PORT)
+    demo.queue(concurrency_count=configs.THREADS).launch(
+        server_name="0.0.0.0",
+        share=True,
+        server_port=PORT,
+        auth=configs.AUTHENTICATION,
+    )
 
 
 def cli():
@@ -193,4 +205,4 @@ def cli():
 
 
 if __name__ == "__main__":
-    main()
+    cli()

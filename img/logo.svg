@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.2.2 (b0a84865, 2022-12-01)"
+   sodipodi:docname="logo.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="0.7500982"
+     inkscape:cx="395.94815"
+     inkscape:cy="497.26822"
+     inkscape:window-width="1892"
+     inkscape:window-height="994"
+     inkscape:window-x="1094"
+     inkscape:window-y="250"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2">
+    <rect
+       x="322.62442"
+       y="366.61866"
+       width="278.63018"
+       height="159.97905"
+       id="rect193" />
+    <symbol
+       id="CircleBalloon"
+       style="stroke-linejoin:miter;stroke-miterlimit:10">
+      <title
+         id="title5525">Circle Balloon</title>
+      <ellipse
+         cx="205"
+         cy="125"
+         rx="125"
+         ry="70"
+         style="stroke:none"
+         id="ellipse5527" />
+      <path
+         d="m 110,166 c 11,21 -10,30 -22,43 32,-3 59,-7 70,-26"
+         style="stroke:none"
+         id="path5529" />
+      <ellipse
+         cx="200"
+         cy="120"
+         rx="125"
+         ry="70"
+         style="fill:#eeeeee;stroke-width:3.5"
+         id="ellipse5531" />
+      <path
+         d="m 106,162 c 11,21 -10,30 -22,43 32,-3 59,-7 70,-26"
+         style="fill:#eeeeee;stroke-width:3.5"
+         id="path5533" />
+      <ellipse
+         cx="197"
+         cy="117"
+         rx="117"
+         ry="63"
+         style="fill:#ffffff;stroke:none"
+         id="ellipse5535" />
+      <path
+         d="m 103,149 c 14,25 9,34 -6,47 30,-3 50,-10 58,-31"
+         style="fill:#ffffff;stroke:none"
+         id="path5537" />
+    </symbol>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <text
+       xml:space="preserve"
+       transform="scale(0.26458333)"
+       id="text191"
+       style="font-size:14.6667px;line-height:40;font-family:Arial;-inkscape-font-specification:'Arial, Normal';white-space:pre;shape-inside:url(#rect193);display:inline;fill:#000000;fill-opacity:0.944444;stroke-width:2.26772;stroke-linecap:square;stroke-linejoin:round;paint-order:fill markers stroke;stop-color:#000000"><tspan
+         x="322.625"
+         y="823.97607"
+         id="tspan6317">C</tspan></text>
+    <use
+       xlink:href="#CircleBalloon"
+       style="fill:#000000;stroke:#000000"
+       id="use5649"
+       transform="matrix(0.26458333,0,0,0.26458333,51.653386,82.722125)" />
+  </g>
+</svg>

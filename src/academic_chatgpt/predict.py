@@ -184,7 +184,7 @@ def predict(
                     if "reduce the length" in error_msg:
                         chatbot[-1] = (
                             chatbot[-1][0],
-                            "[Local Message] Input (or history) is too long, please reduce input or clear history by refleshing this page.",
+                            "[Local Message] Input (or history) is too long, please reduce input or clear history by refreshing this page.",
                         )
                         history = []
                     elif "Incorrect API key" in error_msg:

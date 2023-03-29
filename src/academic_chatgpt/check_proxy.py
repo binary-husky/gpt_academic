@@ -21,8 +21,12 @@ def check_proxy(proxies):
         response = requests.get("https://ipapi.co/json/", proxies=proxies, timeout=4)
         response.raise_for_status()
         data = response.json()
-        country = data["country_name"]
-        logger.info(f"Proxy server {proxies_https} is located in {country}")
-
+        if "country_name" in data:
+            country = data["country_name"]
+            logger.info(f"Proxy server {proxies_https} is located in {country}")
+        elif "error" in data:
+            logger.warn(
+                f"Proxy configuration {proxies_https}, Proxy location: unknown, IP query frequency limited"
+            )
     except requests.exceptions.RequestException as e:
         logger.error(f"An error occurred: {e}")

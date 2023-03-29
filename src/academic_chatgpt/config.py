@@ -1,6 +1,6 @@
 import toml
 from loguru import logger
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from pathlib import Path
 from typing import Optional
 
@@ -10,13 +10,21 @@ class Config(BaseModel):
     API_URL: str = "https://api.openai.com/v1/chat/completions"
     USE_PROXY: bool = False
     # After sending the request to OpenAI, how long to wait before it times out
-    TIMEOUT_SECONDS: int = 20
+    TIMEOUT_SECONDS: int = 25
     # The port of the webpage, -1 means random port
     WEB_PORT: int = -1
     # If OpenAI does not respond (network congestion, proxy failure, KEY invalid), the number of retries is limited
     MAX_RETRY: int = 2
     LLM_MODEL: str = "gpt-3.5-turbo"
+    THREADS: int = 50
+    AUTHENTICATION: Optional[list[tuple[str, str]]] = None
     proxies: Optional[dict] = None
+
+    @validator("API_KEY")
+    def api_key_length(cls, v):
+        if len(v) != 51:
+            raise ValueError("API key length must be 51")
+        return v
 
 
 CACHE_CONFIGS = None

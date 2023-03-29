@@ -139,9 +139,8 @@ def text_divide_paragraph(text):
         # wtf input
         lines = text.split("\n")
         for i, _ in enumerate(lines):
-            if i != 0:
-                lines[i] = "<p>" + lines[i].replace(" ", "&nbsp;") + "</p>"
-        text = "".join(lines)
+            lines[i] = "<p>" + lines[i].replace(" ", "&nbsp;") + "</p>"
+        text = "\n".join(lines)
         return text
 
 
@@ -162,7 +161,7 @@ def markdown_convertion(txt):
 
 def format_io(_, y):
     """Parse the input and output into HTML format. Paragraphize the input part of the last item in y, and convert the Markdown and mathematical formulas in the output part to HTML format."""
-    if y is None:
+    if y is None or len(y) == 0:
         return []
     i_ask, gpt_reply = y[-1]
     i_ask = text_divide_paragraph(i_ask)  # The input part is too free, pre-processing
