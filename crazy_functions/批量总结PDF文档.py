@@ -4,13 +4,13 @@ fast_debug = False
 
 
 def 解析PDF(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt):
-    import time, glob, os, codecs, fitz
+    import time, glob, os, fitz
     print('begin analysis on:', file_manifest)
     for index, fp in enumerate(file_manifest):
         with fitz.open(fp) as doc:
             file_content = ""
             for page in doc:
-                file_content += page.getText()
+                file_content += page.get_text()
             print(file_content)
 
         prefix = "接下来请你逐文件分析下面的论文文件，概括其内容" if index==0 else ""
@@ -53,15 +53,28 @@ def 解析PDF(file_manifest, project_folder, top_p, temperature, chatbot, histor
 
 @CatchException
 def 批量总结PDF文档(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
+    import glob, os
+
+    # 基本信息：功能、贡献者
+    chatbot.append([
+        "函数插件功能？",
+        "批量总结PDF文档。函数插件贡献者: ValeriaWong"])
+    yield chatbot, history, '正常'
+
+    # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
-        import codecs, fitz
+        import fitz
     except:
-        report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"使用该模块需要额外用pip安装codecs和fitz包")
+        report_execption(chatbot, history, 
+            a = f"解析项目: {txt}", 
+            b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pymupdf```。")
         yield chatbot, history, '正常'
         return
 
-    history = []    # 清空历史，以免输入溢出
-    import glob, os
+    # 清空历史，以免输入溢出
+    history = []
+
+    # 检测输入参数，如没有给定输入参数，直接退出
     if os.path.exists(txt):
         project_folder = txt
     else:
@@ -70,12 +83,17 @@ def 批量总结PDF文档(txt, top_p, temperature, chatbot, history, systemPromp
         yield chatbot, history, '正常'
         return
 
+    # 搜索需要处理的文件清单
     file_manifest = [f for f in glob.glob(f'{project_folder}/**/*.pdf', recursive=True)] # + \
                     # [f for f in glob.glob(f'{project_folder}/**/*.tex', recursive=True)] + \
                     # [f for f in glob.glob(f'{project_folder}/**/*.cpp', recursive=True)] + \
                     # [f for f in glob.glob(f'{project_folder}/**/*.c', recursive=True)]
+    
+    # 如果没找到任何文件
     if len(file_manifest) == 0:
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何.tex或.pdf文件: {txt}")
         yield chatbot, history, '正常'
         return
+
+    # 开始正式执行任务
     yield from 解析PDF(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt)
