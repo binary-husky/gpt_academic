@@ -1,3 +1,7 @@
+> **Note**
+> 请注意只有“红颜色”标识的函数插件才支持文件/文件路径作为输入参数。目前暂不支持直接读取word和pdf（相关函数插件效果尚不理想）。
+
+
 # ChatGPT 学术优化
 
 **如果喜欢这个项目，请给它一个Star；如果你发明了更好用的学术快捷键，欢迎发issue或者pull requests**
@@ -15,9 +19,6 @@ https://github.com/polarwinkel/mdtex2html
 
 项目使用OpenAI的gpt-3.5-turbo模型，期待gpt-4早点放宽门槛😂
 ```
-
-> **Note**
-> 请注意只有“红颜色”标识的插件函数才支持文件/文件路径作为输入参数。目前暂不支持直接读取word和pdf（相关函数插件效果尚不理想）。
 
 <div align="center">
     
