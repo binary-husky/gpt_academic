@@ -57,6 +57,16 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
             with gr.Row():
                 from check_proxy import check_proxy
                 statusDisplay = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行. \nNetwork: {check_proxy(proxies)}\nModel: {LLM_MODEL}")
+                def status_display_change():
+                    import time
+                    value = statusDisplay.value
+                    if value == "已重置":
+                        time.sleep(1)
+                        return f"Tip: 按Enter提交, 按Shift+Enter换行. \nNetwork: {check_proxy(proxies)}\nModel: {LLM_MODEL}"
+                    else:
+                        return value
+                
+                statusDisplay.change(status_display_change, [], [statusDisplay])
             with gr.Row():
                 for k in functional:
                     variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
