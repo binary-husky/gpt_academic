@@ -107,8 +107,8 @@ def text_divide_paragraph(text):
         # wtf input
         lines = text.split("\n")
         for i, line in enumerate(lines):
-            if i!=0: lines[i] = "<p>"+lines[i].replace(" ", "&nbsp;")+"</p>"
-        text = "".join(lines)
+            lines[i] = "<p>"+lines[i].replace(" ", "&nbsp;")+"</p>"
+        text = "\n".join(lines)
         return text
 
 def markdown_convertion(txt):
