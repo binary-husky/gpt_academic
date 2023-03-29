@@ -42,18 +42,17 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
     with gr.Row():
         with gr.Column(scale=2):
             chatbot = gr.Chatbot()
-            chatbot.style(height=1000)
+            chatbot.style(height=1150)
             chatbot.style()
             history = gr.State([])
         with gr.Column(scale=1):
             with gr.Row():
-                with gr.Column(scale=12):
-                    txt = gr.Textbox(show_label=False, placeholder="Input question here.").style(container=False)
-                with gr.Column(scale=1):
-                    with gr.Row():
-                        resetBtn = gr.Button("重置", variant="secondary")
-                        stopBtn = gr.Button("停止", variant="secondary")
-                        submitBtn = gr.Button("提交", variant="primary")
+                txt = gr.Textbox(show_label=False, placeholder="Input question here.").style(container=False)
+            with gr.Row():
+                submitBtn = gr.Button("提交", variant="primary")
+            with gr.Row():
+                resetBtn = gr.Button("重置", variant="secondary"); resetBtn.style(size="sm")
+                stopBtn = gr.Button("停止", variant="secondary"); stopBtn.style(size="sm")
             with gr.Row():
                 from check_proxy import check_proxy
                 statusDisplay = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {check_proxy(proxies)}")
@@ -62,7 +61,7 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
                     variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
                     functional[k]["Button"] = gr.Button(k, variant=variant)
             with gr.Row():
-                gr.Markdown("注意：以下红颜色标识的函数插件需从input区读取路径作为参数.")
+                gr.Markdown("注意：以下“红颜色”标识的函数插件需从input区读取路径作为参数.")
             with gr.Row():
                 for k in crazy_functional:
                     variant = crazy_functional[k]["Color"] if "Color" in crazy_functional[k] else "secondary"
