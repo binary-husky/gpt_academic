@@ -1,5 +1,3 @@
-> **Note**
-> 请注意只有“红颜色”标识的函数插件（按钮）才支持读取文件。目前暂不能完善地支持pdf和word格式文献的翻译解读。
 
 
 # ChatGPT 学术优化
@@ -19,6 +17,10 @@ https://github.com/polarwinkel/mdtex2html
 
 项目使用OpenAI的gpt-3.5-turbo模型，期待gpt-4早点放宽门槛😂
 ```
+
+> **Note**
+> 请注意只有“红颜色”标识的函数插件（按钮）才支持读取文件。目前暂不能完善地支持pdf格式文献的翻译解读，尚不支持word格式文件的读取。
+
 
 <div align="center">
     
