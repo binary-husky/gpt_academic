@@ -1,5 +1,16 @@
 # 借鉴了 https://github.com/GaiZhenbiao/ChuanhuChatGPT 项目
 
+"""
+    该文件中主要包含三个函数
+
+    不具备多线程能力的函数：
+    1. predict: 正常对话时使用，具备完备的交互功能，不可多线程
+
+    具备多线程调用能力的函数
+    2. predict_no_ui：高级实验性功能模块调用，不会实时显示在界面上，参数简单，可以多线程并行，方便实现复杂的功能逻辑
+    3. predict_no_ui_long_connection：在实验过程中发现调用predict_no_ui处理长文档时，和openai的连接容易断掉，这个函数用stream的方式解决这个问题，同样支持多线程
+"""
+
 import json
 import gradio as gr
 import logging
