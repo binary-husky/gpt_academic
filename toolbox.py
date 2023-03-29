@@ -207,7 +207,7 @@ def on_file_uploaded(files, chatbot, txt):
     txt = f'private_upload/{time_tag}'
     moved_files_str = '\t\n\n'.join(moved_files)
     chatbot.append(['我上传了文件，请查收', 
-                    f'[Local Message] 收到以下文件: \n\n{moved_files_str}\n\n调用路径参数已自动修正到: \n\n{txt}\n\n现在您可以直接选择任意实现性功能'])
+                    f'[Local Message] 收到以下文件: \n\n{moved_files_str}\n\n调用路径参数已自动修正到: \n\n{txt}\n\n现在您点击任意实验功能时，以上文件将被作为输入参数'])
     return chatbot, txt
 
 
