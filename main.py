@@ -84,7 +84,6 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
     cancel_handles.append(submitBtn.click(**predict_args))
     # submitBtn.click(**empty_txt_args) 在提交后清空输入栏
     resetBtn.click(lambda: ([], [], "已重置"), None, [chatbot, history, statusDisplay])
-    stopBtn.click(fn=None, inputs=None, outputs=None, cancels=[submit_event])
     for k in functional:
         click_handle = functional[k]["Button"].click(predict,
             [txt, top_p, temperature, chatbot, history, system_prompt, gr.State(True), gr.State(k)], [chatbot, history, statusDisplay], show_progress=True)
