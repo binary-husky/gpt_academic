@@ -93,6 +93,16 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
         try: click_handle.then(on_report_generated, [file_upload, chatbot], [file_upload, chatbot])
         except: pass
 
+# gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
+def auto_opentab_delay():
+    import threading, webbrowser, time
+    print(f"URL http://localhost:{PORT}")
+    def open(): 
+        time.sleep(2)
+        webbrowser.open_new_tab(f'http://localhost:{PORT}')
+    t = threading.Thread(target=open)
+    t.daemon = True; t.start()
 
+auto_opentab_delay()
 demo.title = "ChatGPT 学术优化"
-demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", share=True, server_port=PORT, inbrowser=True, auth=AUTHENTICATION)
+demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", share=True, server_port=PORT, auth=AUTHENTICATION)
