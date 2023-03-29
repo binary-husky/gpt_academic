@@ -74,7 +74,7 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
                 top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01,interactive=True, label="Top-p (nucleus sampling)",)
                 temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature",)
 
-    predict_args = dict(fn=predict, inputs=[txt, top_p, temperature, chatbot, history, systemPromptTxt], outputs=[chatbot, history, statusDisplay], show_progress=True)
+    predict_args = dict(fn=predict, inputs=[txt, top_p, temperature, chatbot, history, system_prompt], outputs=[chatbot, history, statusDisplay], show_progress=True)
     empty_txt_args = dict(fn=lambda: "", inputs=[], outputs=[txt])
 
     txt.submit(**predict_args)
@@ -84,11 +84,11 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
     resetBtn.click(lambda: ([], [], "已重置"), None, [chatbot, history, statusDisplay])
     for k in functional:
         functional[k]["Button"].click(predict,
-            [txt, top_p, temperature, chatbot, history, systemPromptTxt, TRUE, gr.State(k)], [chatbot, history, statusDisplay], show_progress=True)
+            [txt, top_p, temperature, chatbot, history, system_prompt, gr.State(True), gr.State(k)], [chatbot, history, statusDisplay], show_progress=True)
     file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt], [chatbot, txt])
     for k in crazy_functional:
         click_handle = crazy_functional[k]["Button"].click(crazy_functional[k]["Function"],
-            [txt, top_p, temperature, chatbot, history, systemPromptTxt, gr.State(PORT)], [chatbot, history, statusDisplay]
+            [txt, top_p, temperature, chatbot, history, system_prompt, gr.State(PORT)], [chatbot, history, statusDisplay]
         )
         try: click_handle.then(on_report_generated, [file_upload, chatbot], [file_upload, chatbot])
         except: pass
