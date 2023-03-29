@@ -71,5 +71,5 @@ def 全项目切换英文(txt, top_p, temperature, chatbot, history, sys_prompt,
 
     # 备份一个文件
     res = write_results_to_file(history)
-    chatbot.append(("给爷一份任务执行报告", res))
+    chatbot.append(("生成一份任务执行报告", res))
     yield chatbot, history, '正常'
