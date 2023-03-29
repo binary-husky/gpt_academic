@@ -36,7 +36,7 @@ gr.Chatbot.postprocess = format_io
 from theme import adjust_theme
 set_theme = adjust_theme()
 
-can_cancel_events = []
+cancel_handles = []
 with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
     gr.HTML(title_html)
     with gr.Row():
@@ -77,18 +77,18 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
                 temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature",)
 
     predict_args = dict(fn=predict, inputs=[txt, top_p, temperature, chatbot, history, system_prompt], outputs=[chatbot, history, statusDisplay], show_progress=True)
-    empty_txt_args = dict(fn=lambda: "", inputs=[], outputs=[txt])
+    empty_txt_args = dict(fn=lambda: "", inputs=[], outputs=[txt]) # 用于在提交后清空输入栏
 
-    can_cancel_events.append(txt.submit(**predict_args))
-    txt.submit(**empty_txt_args)
-    can_cancel_events.append(submitBtn.click(**predict_args))
-    submitBtn.click(**empty_txt_args)
+    cancel_handles.append(txt.submit(**predict_args))
+    # txt.submit(**empty_txt_args) 在提交后清空输入栏
+    cancel_handles.append(submitBtn.click(**predict_args))
+    # submitBtn.click(**empty_txt_args) 在提交后清空输入栏
     resetBtn.click(lambda: ([], [], "已重置"), None, [chatbot, history, statusDisplay])
     stopBtn.click(fn=None, inputs=None, outputs=None, cancels=[submit_event])
     for k in functional:
         click_handle = functional[k]["Button"].click(predict,
             [txt, top_p, temperature, chatbot, history, system_prompt, gr.State(True), gr.State(k)], [chatbot, history, statusDisplay], show_progress=True)
-        can_cancel_events.append(click_handle)
+        cancel_handles.append(click_handle)
     file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt], [chatbot, txt])
     for k in crazy_functional:
         click_handle = crazy_functional[k]["Button"].click(crazy_functional[k]["Function"],
@@ -96,8 +96,8 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
         )
         try: click_handle.then(on_report_generated, [file_upload, chatbot], [file_upload, chatbot])
         except: pass
-        can_cancel_events.append(click_handle)
-    stopBtn.click(fn=None, inputs=None, outputs=None, cancels=can_cancel_events)
+        cancel_handles.append(click_handle)
+    stopBtn.click(fn=None, inputs=None, outputs=None, cancels=cancel_handles)
 
 # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
 def auto_opentab_delay():
