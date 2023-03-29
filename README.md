@@ -93,10 +93,10 @@ cp config.py config_private.py
 ```
 
 在`config_private.py`中，配置 海外Proxy 和 OpenAI API KEY
-
+```
 1. 如果你在国内，需要设置海外代理才能够使用 OpenAI API，你可以通过 config.py 文件来进行设置。
 2. 配置 OpenAI API KEY。你需要在 OpenAI 官网上注册并获取 API KEY。一旦你拿到了 API KEY，在 config.py 文件里配置好即可。
-
+```
 安装依赖
 
 ```sh
@@ -118,26 +118,18 @@ python main.py
 ```
 
 测试实验性功能
-
+```
 - 测试C++项目头文件分析
-
     input区域 输入 `./crazy_functions/test_project/cpp/libJPG` ， 然后点击 "[实验] 解析整个C++项目（input输入项目根路径）"
-
 - 测试给Latex项目写摘要
-  
     input区域 输入 `./crazy_functions/test_project/latex/attention` ， 然后点击 "[实验] 读tex论文写摘要（input输入项目根路径）"
-
 - 测试Python项目分析
-  
     input区域 输入 `./crazy_functions/test_project/python/dqn` ， 然后点击 "[实验] 解析整个py项目（input输入项目根路径）"
-
 - 测试自我代码解读
-  
     点击 "[实验] 请解析并解构此项目本身"
-- 测试实验功能模板函数（要求gpt回答几个数的平方是什么），您可以根据此函数为模板，实现更复杂的功能
-  
+- 测试实验功能模板函数（要求gpt回答历史上的今天发生了什么），您可以根据此函数为模板，实现更复杂的功能
     点击 "[实验] 实验功能函数模板"
-
+```
 ## 使用docker (Linux)
 
 ``` sh
@@ -154,7 +146,7 @@ docker run --rm -it --net=host gpt-academic
 # 测试实验性功能
 ## 测试自我代码解读
 点击 "[实验] 请解析并解构此项目本身"
-## 测试实验功能模板函数（要求gpt回答几个数的平方是什么），您可以根据此函数为模板，实现更复杂的功能
+## 测试实验功能模板函数（要求gpt回答历史上的今天发生了什么），您可以根据此函数为模板，实现更复杂的功能
 点击 "[实验] 实验功能函数模板"
 ##（请注意在docker中运行时，需要额外注意程序的文件访问权限问题）
 ## 测试C++项目头文件分析
