@@ -1,6 +1,7 @@
 
 def get_crazy_functionals():
     from crazy_functions.读文章写摘要 import 读文章写摘要
+    from crazy_functions.批量总结PDF文档 import 批量总结PDF文档
     from crazy_functions.生成函数注释 import 批量生成函数注释
     from crazy_functions.解析项目源代码 import 解析项目本身
     from crazy_functions.解析项目源代码 import 解析一个Python项目
@@ -27,6 +28,10 @@ def get_crazy_functionals():
         "[实验] 读tex论文写摘要（配合input输入框）": {
             "Color": "stop",    # 按钮颜色
             "Function": 读文章写摘要
+        },
+        "[实验] 批量总结pdf文档并生成双语摘要（配合input输入框）": {
+            "Color": "stop",    # 按钮颜色
+            "Function": 批量总结PDF文档
         },
         "[实验] 批量生成函数注释（配合input输入框）": {
             "Color": "stop",    # 按钮颜色
