@@ -25,7 +25,7 @@ MAX_RETRY = 2
 LLM_MODEL = "gpt-3.5-turbo"
 
 # 检查一下是不是忘了改config
-if len(API_KEY) != 51:
+if len(API_KEY) != 51:  # 正确的密钥是51位
     assert False, "请在config文件中修改API密钥, 添加海外代理之后再运行"
 
 # 设置并行使用的线程数
