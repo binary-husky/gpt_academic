@@ -52,8 +52,8 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
                 with gr.Column(scale=1):
                     with gr.Row():
                         resetBtn = gr.Button("重置", variant="secondary")
+                        stopBtn = gr.Button("停止", variant="secondary")
                         submitBtn = gr.Button("提交", variant="primary")
-                        stopBtn = gr.Button("停止", variant="stop")
             with gr.Row():
                 from check_proxy import check_proxy
                 statusDisplay = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {check_proxy(proxies)}")
