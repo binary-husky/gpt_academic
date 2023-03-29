@@ -15,4 +15,4 @@ ENV PYTHONPATH=${PYTHONPATH}:${PWD}
 RUN pip3 install poetry
 RUN poetry install --no-dev
 
-CMD ["chataca"]
+CMD ["poetry", "run","chataca"]
