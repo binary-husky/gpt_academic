@@ -1,7 +1,7 @@
 <div align="center">
 
 <img
-src="https://raw.githubusercontent.com/cauliyang/chatgpt_academic/master/img/logo.svg" width=50% alt="logo">
+src="https://raw.githubusercontent.com/cauliyang/chatgpt_academic/master/img/rect2.png" width=50% alt="logo">
 
 [![pypi](https://img.shields.io/pypi/v/academic-chatgpt.svg)][pypi status]
 [![status](https://img.shields.io/pypi/status/academic-chatgpt.svg)][pypi status]
