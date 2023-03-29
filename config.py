@@ -20,7 +20,7 @@ else:
     print('网络代理状态：未配置。无代理状态下很可能无法访问。')
 
 # 发送请求到OpenAI后，等待多久判定为超时
-TIMEOUT_SECONDS = 20
+TIMEOUT_SECONDS = 25
 
 # 网页的端口, -1代表随机端口
 WEB_PORT = -1
