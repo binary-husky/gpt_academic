@@ -158,6 +158,21 @@ input区域 输入 ./crazy_functions/test_project/python/dqn ， 然后点击 "[
 
 ```
 
+## 使用WSL2（Windows Subsystem for Linux 子系统）
+选择这种方式默认您已经具备一定基本知识，因此不再赘述多余步骤。如果不是这样，您可以从[这里](https://learn.microsoft.com/zh-cn/windows/wsl/about)或GPT处获取更多关于子系统的信息。
+
+WSL2可以配置使用Windows侧的代理上网，前置步骤可以参考[这里](https://www.cnblogs.com/tuilk/p/16287472.html)
+由于Windows相对WSL2的IP会发生变化，我们需要每次启动前先获取这个IP来保证顺利访问，将config.py中设置proxies的部分更改为如下代码：
+```python
+import subprocess
+cmd_get_ip = 'grep -oP  "(\d+\.)+(\d+)" /etc/resolv.conf'
+ip_proxy = subprocess.run(
+        cmd_get_ip, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True
+        ).stdout.strip() # 获取windows的IP
+proxies = { "http": ip_proxy + ":51837", "https": ip_proxy + ":51837", } # 请自行修改
+```
+至此测试、使用与上面其他方法无异。
+
 
 ## 自定义新的便捷按钮（学术快捷键自定义）
 打开functional.py，添加条目如下，然后重启程序即可。（如果按钮已经添加成功并可见，那么前缀、后缀都支持热修改，无需重启程序即可生效。）
