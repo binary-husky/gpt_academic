@@ -1,7 +1,7 @@
 import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 import gradio as gr
 from predict import predict
-from toolbox import format_io, find_free_port
+from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated
 
 # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
 try: from config_private import proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION
@@ -26,7 +26,7 @@ from functional import get_functionals
 functional = get_functionals()
 
 # 对一些丧心病狂的实验性功能模块进行测试
-from functional_crazy import get_crazy_functionals, on_file_uploaded, on_report_generated
+from functional_crazy import get_crazy_functionals
 crazy_functional = get_crazy_functionals()
 
 # 处理markdown文本格式的转变
@@ -44,8 +44,6 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
             chatbot.style(height=1000)
             chatbot.style()
             history = gr.State([])
-            TRUE = gr.State(True)
-            FALSE = gr.State(False)
         with gr.Column(scale=1):
             with gr.Row():
                 with gr.Column(scale=12):
@@ -71,9 +69,7 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
                 gr.Markdown("上传本地文件供上面的实验性功能调用.")
             with gr.Row():
                 file_upload = gr.Files(label='任何文件,但推荐上传压缩文件(zip, tar)', file_count="multiple")
-
-            systemPromptTxt = gr.Textbox(show_label=True, placeholder=f"System Prompt", label="System prompt", value=initial_prompt).style(container=True)
-            #inputs, top_p, temperature, top_k, repetition_penalty
+            system_prompt = gr.Textbox(show_label=True, placeholder=f"System Prompt", label="System prompt", value=initial_prompt).style(container=True)
             with gr.Accordion("arguments", open=False):
                 top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01,interactive=True, label="Top-p (nucleus sampling)",)
                 temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature",)
