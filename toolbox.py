@@ -184,6 +184,7 @@ def find_recent_files(directory):
         if file_path.endswith('.log'): continue
         created_time = os.path.getctime(file_path)
         if created_time >= one_minute_ago:
+            if os.path.isdir(file_path): continue
             recent_files.append(file_path)
 
     return recent_files
