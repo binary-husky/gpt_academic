@@ -2,7 +2,7 @@ import markdown, mdtex2html, threading
 from show_math import convert as convert_math
 from functools import wraps
 
-def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[]):
+def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[], sys_prompt=''):
     """
         调用简单的predict_no_ui接口，但是依然保留了些许界面心跳功能，当对话太长时，会自动采用二分法截断
     """
@@ -14,10 +14,10 @@ def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temp
     # list就是最简单的mutable结构，我们第一个位置放gpt输出，第二个位置传递报错信息
     mutable = [None, '']
     # multi-threading worker
-    def mt(i_say, history): 
+    def mt(i_say, history):
         while True:
             try:
-                mutable[0] = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature, history=history)
+                mutable[0] = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature, history=history, sys_prompt=sys_prompt)
                 break
             except ConnectionAbortedError as e:
                 if len(history) > 0:
@@ -27,7 +27,8 @@ def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temp
                     i_say = i_say[:len(i_say)//2]
                     mutable[1] = 'Warning! Input file is too long, cut into half. '
             except TimeoutError as e:
-                mutable[0] = '[Local Message] Failed with timeout'
+                mutable[0] = '[Local Message] Failed with timeout.'
+                raise TimeoutError
     # 创建新线程发出http请求
     thread_name = threading.Thread(target=mt, args=(i_say, history)); thread_name.start()
     # 原来的线程则负责持续更新UI，实现一个超时倒计时，并等待新线程的任务完成
@@ -39,6 +40,7 @@ def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temp
         time.sleep(1)
     # 把gpt的输出从mutable中取出来
     gpt_say = mutable[0]
+    if gpt_say=='[Local Message] Failed with timeout.': raise TimeoutError
     return gpt_say
 
 def write_results_to_file(history, file_name=None):
@@ -105,8 +107,8 @@ def text_divide_paragraph(text):
         # wtf input
         lines = text.split("\n")
         for i, line in enumerate(lines):
-            if i!=0: lines[i] = "<p>"+lines[i].replace(" ", "&nbsp;")+"</p>"
-        text = "".join(lines)
+            lines[i] = "<p>"+lines[i].replace(" ", "&nbsp;")+"</p>"
+        text = "\n".join(lines)
         return text
 
 def markdown_convertion(txt):
@@ -124,7 +126,7 @@ def format_io(self, y):
     """
         将输入和输出解析为HTML格式。将y中最后一项的输入部分段落化，并将输出部分的Markdown和数学公式转换为HTML格式。
     """
-    if y is None: return []
+    if y is None or y == []: return []
     i_ask, gpt_reply = y[-1]
     i_ask = text_divide_paragraph(i_ask) # 输入部分太自由，预处理一波
     y[-1] = (
@@ -144,7 +146,7 @@ def find_free_port():
         s.bind(('', 0))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return s.getsockname()[1]
-    
+
 
 def extract_archive(file_path, dest_dir):
     import zipfile
@@ -165,7 +167,7 @@ def extract_archive(file_path, dest_dir):
             print("Successfully extracted tar archive to {}".format(dest_dir))
     else:
         return
-    
+
 def find_recent_files(directory):
     """
         me: find files that is created with in one minutes under a directory with python, write a function
@@ -182,6 +184,37 @@ def find_recent_files(directory):
         if file_path.endswith('.log'): continue
         created_time = os.path.getctime(file_path)
         if created_time >= one_minute_ago:
+            if os.path.isdir(file_path): continue
             recent_files.append(file_path)
 
     return recent_files
+
+
+def on_file_uploaded(files, chatbot, txt):
+    if len(files) == 0: return chatbot, txt
+    import shutil, os, time, glob
+    from toolbox import extract_archive
+    try: shutil.rmtree('./private_upload/')
+    except: pass
+    time_tag = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+    os.makedirs(f'private_upload/{time_tag}', exist_ok=True)
+    for file in files:
+        file_origin_name = os.path.basename(file.orig_name)
+        shutil.copy(file.name, f'private_upload/{time_tag}/{file_origin_name}')
+        extract_archive(f'private_upload/{time_tag}/{file_origin_name}', 
+                        dest_dir=f'private_upload/{time_tag}/{file_origin_name}.extract')
+    moved_files = [fp for fp in glob.glob('private_upload/**/*', recursive=True)]
+    txt = f'private_upload/{time_tag}'
+    moved_files_str = '\t\n\n'.join(moved_files)
+    chatbot.append(['我上传了文件，请查收', 
+                    f'[Local Message] 收到以下文件: \n\n{moved_files_str}\n\n调用路径参数已自动修正到: \n\n{txt}\n\n现在您点击任意实验功能时，以上文件将被作为输入参数'])
+    return chatbot, txt
+
+
+def on_report_generated(files, chatbot):
+    from toolbox import find_recent_files
+    report_files = find_recent_files('gpt_log')
+    if len(report_files) == 0: return report_files, chatbot
+    # files.extend(report_files)
+    chatbot.append(['汇总报告如何远程获取？', '汇总报告已经添加到右侧文件上传区，请查收。'])
+    return report_files, chatbot
