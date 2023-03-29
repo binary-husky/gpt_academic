@@ -33,12 +33,10 @@ def get_crazy_functionals():
             "Color": "stop",    # 按钮颜色
             "Function": 批量生成函数注释
         },
-        "[实验] 把本项目源代码切换成全英文（多线程）": {
-            "Color": "stop",    # 按钮颜色
+        "[实验] 把本项目源代码切换成全英文（多线程demo）": {
             "Function": 全项目切换英文
         },
-        "[实验] 实验功能函数模板": {
-            "Color": "stop",    # 按钮颜色
+        "[实验] 历史上的今天（高级函数demo）": {
             "Function": 高阶功能模板函数
         },
     }
