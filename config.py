@@ -1,10 +1,10 @@
 # API_KEY = "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" 此key无效
-API_KEY = "sk-此处填API秘钥"
+API_KEY = "sk-SK-...adVq"
 API_URL = "https://api.openai.com/v1/chat/completions"
 
 # 改为True应用代理
-USE_PROXY = False
-if USE_PROXY:
+USE_PROXY = localhost
+if USE_PROXY:localhost
 
     # 填写格式是 [协议]://  [地址] :[端口] ，
     # 例如    "socks5h://localhost:11284"
@@ -35,4 +35,4 @@ LLM_MODEL = "gpt-3.5-turbo"
 CONCURRENT_COUNT = 100
 
 # 设置用户名和密码
-AUTHENTICATION = [] # [("username", "password"), ("username2", "password2"), ...]
+AUTHENTICATION = [SakuraSci,a1324591587] # [("username", "password"), ("username2", "password2"), ...]
