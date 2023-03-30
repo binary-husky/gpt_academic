@@ -20,10 +20,12 @@ import importlib
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
-try: from config_private import proxies, API_URL, API_KEY, TIMEOUT_SECONDS, MAX_RETRY, LLM_MODEL
-except: from config import proxies, API_URL, API_KEY, TIMEOUT_SECONDS, MAX_RETRY, LLM_MODEL
+from toolbox import get_conf
+proxies, API_URL, API_KEY, TIMEOUT_SECONDS, MAX_RETRY, LLM_MODEL = \
+    get_conf('proxies', 'API_URL', 'API_KEY', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'LLM_MODEL')
 
-timeout_bot_msg = '[local] Request timeout, network error. please check proxy settings in config.py.'
+timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check proxy settings in config.py.' + \
+                  '网络错误，检查代理服务器是否可用，以及代理设置的格式是否正确，格式须是[协议]://[地址]:[端口]，缺一不可。'
 
 def get_full_error(chunk, stream_response):
     """
@@ -117,8 +119,9 @@ def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt=''
     """
     if additional_fn is not None:
         import functional
-        importlib.reload(functional)
+        importlib.reload(functional)    # 热更新prompt
         functional = functional.get_functionals()
+        if "PreProcess" in functional[additional_fn]: inputs = functional[additional_fn]["PreProcess"](inputs)  # 获取预处理函数（如果有的话）
         inputs = functional[additional_fn]["Prefix"] + inputs + functional[additional_fn]["Suffix"]
 
     if stream:

@@ -1,3 +1,5 @@
+
+
 # ChatGPT 学术优化
 
 **如果喜欢这个项目，请给它一个Star；如果你发明了更好用的学术快捷键，欢迎发issue或者pull requests**
@@ -15,6 +17,14 @@ https://github.com/polarwinkel/mdtex2html
 
 项目使用OpenAI的gpt-3.5-turbo模型，期待gpt-4早点放宽门槛😂
 ```
+
+> **Note**
+>
+> 1.请注意只有“红颜色”标识的函数插件（按钮）才支持读取文件。目前暂不能完善地支持pdf格式文献的翻译解读，尚不支持word格式文件的读取。
+>
+> 2.本项目中每个文件的功能都在自译解[`project_self_analysis.md`](https://github.com/binary-husky/chatgpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A)详细说明。随着版本的迭代，您也可以随时自行点击相关函数插件，调用GPT重新生成项目的自我解析报告。常见问题汇总在[`wiki`](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98)当中。
+> 
+> 3.如果您不太习惯部分中文命名的函数，您可以随时点击相关函数插件，调用GPT一键生成纯英文的项目源代码。
 
 <div align="center">
     
@@ -34,12 +44,13 @@ chat分析报告生成 | [实验性功能] 运行后自动生成总结汇报
 公式显示 | 可以同时显示公式的tex形式和渲染形式
 图片显示 | 可以在markdown中显示图片
 支持GPT输出的markdown表格 | 可以输出支持GPT的markdown表格
+…… | ……
 
 </div>
 
 - 新界面
 <div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/227851398-fab5a158-aaf6-4151-95ac-a8172ce611c7.png" width="700" >
+<img src="https://user-images.githubusercontent.com/96192199/228600410-7d44e34f-63f1-4046-acb8-045cb05da8bb.png" width="700" >
 </div>
 
 
@@ -71,33 +82,56 @@ chat分析报告生成 | [实验性功能] 运行后自动生成总结汇报
 <img src="https://user-images.githubusercontent.com/96192199/226935232-6b6a73ce-8900-4aee-93f9-733c7e6fef53.png" width="700" >
 </div>
 
-## 直接运行 (Windows or Linux or MacOS)
+## 直接运行 (Windows, Linux or MacOS)
 
-``` sh
-# 下载项目
+### 1. 下载项目
+```sh
 git clone https://github.com/binary-husky/chatgpt_academic.git
 cd chatgpt_academic
-# 在config.py中，配置 海外Proxy 和 OpenAI API KEY
-- 1.如果你在国内，需要设置海外代理才能够使用 OpenAI API，你可以通过 config.py 文件来进行设置。
-- 2.配置 OpenAI API KEY。你需要在 OpenAI 官网上注册并获取 API KEY。一旦你拿到了 API KEY，在 config.py 文件里配置好即可。
-# 安装依赖
-python -m pip install -r requirements.txt
-# 运行
-python main.py
-
-# 测试实验性功能
-## 测试C++项目头文件分析
-input区域 输入 ./crazy_functions/test_project/cpp/libJPG ， 然后点击 "[实验] 解析整个C++项目（input输入项目根路径）"
-## 测试给Latex项目写摘要
-input区域 输入 ./crazy_functions/test_project/latex/attention ， 然后点击 "[实验] 读tex论文写摘要（input输入项目根路径）"
-## 测试Python项目分析
-input区域 输入 ./crazy_functions/test_project/python/dqn ， 然后点击 "[实验] 解析整个py项目（input输入项目根路径）"
-## 测试自我代码解读
-点击 "[实验] 请解析并解构此项目本身"
-## 测试实验功能模板函数（要求gpt回答几个数的平方是什么），您可以根据此函数为模板，实现更复杂的功能
-点击 "[实验] 实验功能函数模板"
 ```
 
+### 2. 配置API_KEY和代理设置
+我们建议将`config.py`复制为`config_private.py`并将后者用作个性化配置文件以避免`config.py`中的变更影响你的使用或不小心将包含你的OpenAI API KEY的`config.py`提交至本项目。
+
+在`config.py`或`config_private.py`中，配置 海外Proxy 和 OpenAI API KEY，说明如下
+```
+1. 如果你在国内，需要设置海外代理才能够顺利使用 OpenAI API，设置方法请仔细阅读config.py。
+2. 配置 OpenAI API KEY。你需要在 OpenAI 官网上注册并获取 API KEY。一旦你拿到了 API KEY，在 config.py 文件里配置好即可。
+3. 与代理网络有关的issue（网络超时、代理不起作用）汇总到 https://github.com/binary-husky/chatgpt_academic/issues/1
+```
+
+### 3. 安装依赖
+```sh
+# （选择一）推荐
+python -m pip install -r requirements.txt   
+
+# （选择二）如果您使用anaconda，步骤也是类似的：
+# （选择二.1）conda create -n gptac_venv python=3.11
+# （选择二.2）conda activate gptac_venv
+# （选择二.3）python -m pip install -r requirements.txt
+
+# 备注：使用官方pip源或者阿里pip源，其他pip源（如清华pip）有可能出问题，临时换源方法： 
+# python -m pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
+```
+
+### 4. 运行
+```sh
+python main.py
+```
+
+### 5. 测试实验性功能
+```
+- 测试C++项目头文件分析
+    input区域 输入 `./crazy_functions/test_project/cpp/libJPG` ， 然后点击 "[实验] 解析整个C++项目（input输入项目根路径）"
+- 测试给Latex项目写摘要
+    input区域 输入 `./crazy_functions/test_project/latex/attention` ， 然后点击 "[实验] 读tex论文写摘要（input输入项目根路径）"
+- 测试Python项目分析
+    input区域 输入 `./crazy_functions/test_project/python/dqn` ， 然后点击 "[实验] 解析整个py项目（input输入项目根路径）"
+- 测试自我代码解读
+    点击 "[实验] 请解析并解构此项目本身"
+- 测试实验功能模板函数（要求gpt回答历史上的今天发生了什么），您可以根据此函数为模板，实现更复杂的功能
+    点击 "[实验] 实验功能函数模板"
+```
 
 ## 使用docker (Linux)
 
@@ -115,7 +149,7 @@ docker run --rm -it --net=host gpt-academic
 # 测试实验性功能
 ## 测试自我代码解读
 点击 "[实验] 请解析并解构此项目本身"
-## 测试实验功能模板函数（要求gpt回答几个数的平方是什么），您可以根据此函数为模板，实现更复杂的功能
+## 测试实验功能模板函数（要求gpt回答历史上的今天发生了什么），您可以根据此函数为模板，实现更复杂的功能
 点击 "[实验] 实验功能函数模板"
 ##（请注意在docker中运行时，需要额外注意程序的文件访问权限问题）
 ## 测试C++项目头文件分析
@@ -126,6 +160,13 @@ input区域 输入 ./crazy_functions/test_project/latex/attention ， 然后点�
 input区域 输入 ./crazy_functions/test_project/python/dqn ， 然后点击 "[实验] 解析整个py项目（input输入项目根路径）"
 
 ```
+
+## 其他部署方式
+- 使用WSL2（Windows Subsystem for Linux 子系统）
+请访问[部署wiki-1](https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2)
+
+- nginx远程部署
+请访问[部署wiki-2](https://github.com/binary-husky/chatgpt_academic/wiki/%E8%BF%9C%E7%A8%8B%E9%83%A8%E7%BD%B2%E7%9A%84%E6%8C%87%E5%AF%BC)
 
 
 ## 自定义新的便捷按钮（学术快捷键自定义）
@@ -166,10 +207,11 @@ python check_proxy.py
 ## 兼容性测试
 
 ### 图片显示：
+
 <div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/226906087-b5f1c127-2060-4db9-af05-487643b21ed9.png" height="200" >
-<img src="https://user-images.githubusercontent.com/96192199/226906703-7226495d-6a1f-4a53-9728-ce6778cbdd19.png" height="200" >
+<img src="https://user-images.githubusercontent.com/96192199/228737599-bf0a9d9c-1808-4f43-ae15-dfcc7af0f295.png" width="800" >
 </div>
+
 
 ### 如果一个程序能够读懂并剖析自己：
 
