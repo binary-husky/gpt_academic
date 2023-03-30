@@ -13,6 +13,7 @@ def get_crazy_functionals():
     from crazy_functions.解析项目源代码 import 解析一个C项目
     from crazy_functions.高级功能函数模板 import 高阶功能模板函数
     from crazy_functions.代码重写为全英文_多线程 import 全项目切换英文
+    from crazy_functions.总结word文档 import 总结word文档
 
     function_plugins = {
         "请解析并解构此项目本身": {
@@ -43,6 +44,9 @@ def get_crazy_functionals():
         },
         "[函数插件模板demo] 历史上的今天": {
             "Function": 高阶功能模板函数
+        },
+        "[总结word文档demo] 解析word文档": {
+            "Function": 总结word文档
         },
     }
 
