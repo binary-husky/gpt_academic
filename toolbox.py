@@ -230,3 +230,9 @@ def get_conf(*args):
             assert False, "正确的API_KEY密钥是51位，请在config文件中修改API密钥, 添加海外代理之后再运行。" + \
                         "（如果您刚更新过代码，请确保旧版config_private文件中没有遗留任何新增键值）"
     return res
+
+def clear_line_break(txt):
+    txt = txt.replace('\n', ' ')
+    txt = txt.replace('  ', ' ')
+    txt = txt.replace('  ', ' ')
+    return txt

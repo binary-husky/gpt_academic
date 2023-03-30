@@ -119,8 +119,9 @@ def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt=''
     """
     if additional_fn is not None:
         import functional
-        importlib.reload(functional)
+        importlib.reload(functional)    # 热更新prompt
         functional = functional.get_functionals()
+        if "PreProcess" in functional[additional_fn]: inputs = functional[additional_fn]["PreProcess"](inputs)  # 获取预处理函数（如果有的话）
         inputs = functional[additional_fn]["Prefix"] + inputs + functional[additional_fn]["Suffix"]
 
     if stream:
