@@ -6,6 +6,7 @@ from functools import HotReload # HotReload 的意思是热更新，修改函数
 # 当 UserVisibleLevel >= 函数插件的 VisibleLevel 时，该函数插件才会被显示出来
 UserVisibleLevel = 1
 
+
 def get_crazy_functionals():
     from crazy_functions.读文章写摘要 import 读文章写摘要
     from crazy_functions.生成函数注释 import 批量生成函数注释
@@ -18,6 +19,7 @@ def get_crazy_functionals():
 
     function_plugins = {
         "请解析并解构此项目本身": {
+            # HotReload 的意思是热更新，修改函数插件后，不需要重启程序，代码直接生效
             "Function": 解析项目本身
         },
         "解析整个py项目": {
