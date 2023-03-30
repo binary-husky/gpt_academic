@@ -202,6 +202,7 @@ def extract_archive(file_path, dest_dir):
                 print("Successfully extracted 7z archive to {}".format(dest_dir))
         except:
             print("7z格式需要安装额外依赖")
+
     else:
         return
 
