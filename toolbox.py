@@ -1,4 +1,4 @@
-import markdown, mdtex2html, threading, importlib, traceback
+import markdown, mdtex2html, threading, importlib, traceback, importlib, inspect
 from show_math import convert as convert_math
 from functools import wraps
 
@@ -86,6 +86,17 @@ def CatchException(f):
             tb_str = regular_txt_to_markdown(traceback.format_exc())
             chatbot[-1] = (chatbot[-1][0], f"[Local Message] 实验性函数调用出错: \n\n {tb_str} \n\n 当前代理可用性: \n\n {check_proxy(proxies)}")
             yield chatbot, history, f'异常 {e}'
+    return decorated
+
+def HotReload(f):
+    """
+        装饰器函数，实现函数插件热更新
+    """
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        fn_name = f.__name__
+        f_hot_reload = getattr(importlib.reload(inspect.getmodule(f)), fn_name)
+        yield from f_hot_reload(*args, **kwargs)
     return decorated
 
 def report_execption(chatbot, history, a, b):

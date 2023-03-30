@@ -1,3 +1,5 @@
+from functools import HotReload # HotReload 的意思是热更新，修改函数插件后，不需要重启程序，代码直接生效
+
 # UserVisibleLevel是过滤器参数。
 # 由于UI界面空间有限，所以通过这种方式决定UI界面中显示哪些插件
 # 默认函数插件 VisibleLevel 是 0
@@ -39,10 +41,12 @@ def get_crazy_functionals():
             "Function": 批量生成函数注释
         },
         "[多线程demo] 把本项目源代码切换成全英文": {
-            "Function": 全项目切换英文
+            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
+            "Function": HotReload(全项目切换英文)
         },
         "[函数插件模板demo] 历史上的今天": {
-            "Function": 高阶功能模板函数
+            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
+            "Function": HotReload(高阶功能模板函数)
         },
     }
 
@@ -52,7 +56,8 @@ def get_crazy_functionals():
         function_plugins.update({
             "[仅供开发调试] 批量总结PDF文档": {
                 "Color": "stop",
-                "Function": 批量总结PDF文档
+                # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
+                "Function": HotReload(批量总结PDF文档)
             },
         })
 
