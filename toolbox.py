@@ -193,11 +193,13 @@ def extract_archive(file_path, dest_dir):
                 print("Successfully extracted rar archive to {}".format(dest_dir))
         except:
             print("rar格式需要安装额外依赖")
+
     elif file_extension == '.7z':
         try:
             import py7zr
             with py7zr.SevenZipFile(file_path, mode='r') as f:
                 f.extractall(path=dest_dir)
+                print("Successfully extracted 7z archive to {}".format(dest_dir))
         except:
             print("7z格式需要安装额外依赖")
     else:
