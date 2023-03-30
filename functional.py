@@ -20,10 +20,12 @@ def get_functionals():
             "Suffix":   r"",
         },
         "查找语法错误": {
-            "Prefix":   r"Below is a paragraph from an academic paper. "+
-                        r"Can you help me ensure that the grammar is correct? Please ignore punctuation errors. " +
-                        r"List mistakes you find in a two-column markdown table, the first column write the original text, " +
-                        r"the second column write the corrected text, only highlight the key words you have changed with bold font." + "\n\n",
+            "Prefix":   r"Below is a paragraph from an academic paper. " +
+                        r"Can you help me ensure that the grammar and the spelling is correct? " +
+                        r"If no mistake is found, tell me that this paragraph is good." + 
+                        r"If you find grammar mistakes,please list mistakes you find in a two-column markdown table, " + 
+                        r"put the original text the first column, " +
+                        r"put the corrected text in the second column and highlight the key words you fixed." + "\n\n",
             "Suffix":   r"",
         },
         "中译英": {
