@@ -130,6 +130,9 @@ python main.py
 - 测试实验功能模板函数（要求gpt回答历史上的今天发生了什么），您可以根据此函数为模板，实现更复杂的功能
     点击 "[实验] 实验功能函数模板"
 ```
+
+与代理网络有关的issue（网络超时、代理不起作用）汇总到 https://github.com/binary-husky/chatgpt_academic/issues/1
+
 ## 使用docker (Linux)
 
 ``` sh
