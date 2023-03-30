@@ -2,6 +2,7 @@ import markdown, mdtex2html, threading, importlib, traceback
 from show_math import convert as convert_math
 from functools import wraps
 
+
 def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[], sys_prompt=''):
     """
         调用简单的predict_no_ui接口，但是依然保留了些许界面心跳功能，当对话太长时，会自动采用二分法截断
@@ -13,35 +14,42 @@ def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temp
     # 多线程的时候，需要一个mutable结构在不同线程之间传递信息
     # list就是最简单的mutable结构，我们第一个位置放gpt输出，第二个位置传递报错信息
     mutable = [None, '']
+
     # multi-threading worker
     def mt(i_say, history):
         while True:
             try:
-                mutable[0] = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature, history=history, sys_prompt=sys_prompt)
+                mutable[0] = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature, history=history,
+                                           sys_prompt=sys_prompt)
                 break
             except ConnectionAbortedError as e:
                 if len(history) > 0:
-                    history = [his[len(his)//2:] for his in history if his is not None]
+                    history = [his[len(his) // 2:] for his in history if his is not None]
                     mutable[1] = 'Warning! History conversation is too long, cut into half. '
                 else:
-                    i_say = i_say[:len(i_say)//2]
+                    i_say = i_say[:len(i_say) // 2]
                     mutable[1] = 'Warning! Input file is too long, cut into half. '
             except TimeoutError as e:
                 mutable[0] = '[Local Message] Failed with timeout.'
                 raise TimeoutError
+
     # 创建新线程发出http请求
-    thread_name = threading.Thread(target=mt, args=(i_say, history)); thread_name.start()
+    thread_name = threading.Thread(target=mt, args=(i_say, history));
+    thread_name.start()
     # 原来的线程则负责持续更新UI，实现一个超时倒计时，并等待新线程的任务完成
     cnt = 0
     while thread_name.is_alive():
         cnt += 1
-        chatbot[-1] = (i_say_show_user, f"[Local Message] {mutable[1]}waiting gpt response {cnt}/{TIMEOUT_SECONDS*2*(MAX_RETRY+1)}"+''.join(['.']*(cnt%4)))
+        chatbot[-1] = (i_say_show_user,
+                       f"[Local Message] {mutable[1]}waiting gpt response {cnt}/{TIMEOUT_SECONDS * 2 * (MAX_RETRY + 1)}" + ''.join(
+                           ['.'] * (cnt % 4)))
         yield chatbot, history, '正常'
         time.sleep(1)
     # 把gpt的输出从mutable中取出来
     gpt_say = mutable[0]
-    if gpt_say=='[Local Message] Failed with timeout.': raise TimeoutError
+    if gpt_say == '[Local Message] Failed with timeout.': raise TimeoutError
     return gpt_say
+
 
 def write_results_to_file(history, file_name=None):
     """
@@ -52,15 +60,16 @@ def write_results_to_file(history, file_name=None):
         # file_name = time.strftime("chatGPT分析报告%Y-%m-%d-%H-%M-%S", time.localtime()) + '.md'
         file_name = 'chatGPT分析报告' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + '.md'
     os.makedirs('./gpt_log/', exist_ok=True)
-    with open(f'./gpt_log/{file_name}', 'w', encoding = 'utf8') as f:
+    with open(f'./gpt_log/{file_name}', 'w', encoding='utf8') as f:
         f.write('# chatGPT 分析报告\n')
         for i, content in enumerate(history):
-            if i%2==0: f.write('## ')
+            if i % 2 == 0: f.write('## ')
             f.write(content)
             f.write('\n\n')
     res = '以上材料已经被写入' + os.path.abspath(f'./gpt_log/{file_name}')
     print(res)
     return res
+
 
 def regular_txt_to_markdown(text):
     """
@@ -71,10 +80,12 @@ def regular_txt_to_markdown(text):
     text = text.replace('\n\n\n', '\n\n')
     return text
 
+
 def CatchException(f):
     """
         装饰器函数，捕捉函数f中的异常并封装到一个生成器中返回，并显示到聊天当中。
     """
+
     @wraps(f)
     def decorated(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
         try:
@@ -84,16 +95,21 @@ def CatchException(f):
             from toolbox import get_conf
             proxies, = get_conf('proxies')
             tb_str = regular_txt_to_markdown(traceback.format_exc())
-            chatbot[-1] = (chatbot[-1][0], f"[Local Message] 实验性函数调用出错: \n\n {tb_str} \n\n 当前代理可用性: \n\n {check_proxy(proxies)}")
+            chatbot[-1] = (
+                chatbot[-1][0], f"[Local Message] 实验性函数调用出错: \n\n {tb_str} \n\n 当前代理可用性: \n\n {check_proxy(proxies)}")
             yield chatbot, history, f'异常 {e}'
+
     return decorated
+
 
 def report_execption(chatbot, history, a, b):
     """
         向chatbot中添加错误信息
     """
     chatbot.append((a, b))
-    history.append(a); history.append(b)
+    history.append(a);
+    history.append(b)
+
 
 def text_divide_paragraph(text):
     """
@@ -110,15 +126,16 @@ def text_divide_paragraph(text):
         text = "</br>".join(lines)
         return text
 
+
 def markdown_convertion(txt):
     """
         将Markdown格式的文本转换为HTML格式。如果包含数学公式，则先将公式转换为HTML格式。
     """
     if ('$' in txt) and ('```' not in txt):
-        return markdown.markdown(txt,extensions=['fenced_code','tables']) + '<br><br>' + \
-            markdown.markdown(convert_math(txt, splitParagraphs=False),extensions=['fenced_code','tables'])
+        return markdown.markdown(txt, extensions=['fenced_code', 'tables']) + '<br><br>' + \
+               markdown.markdown(convert_math(txt, splitParagraphs=False), extensions=['fenced_code', 'tables'])
     else:
-        return markdown.markdown(txt,extensions=['fenced_code','tables'])
+        return markdown.markdown(txt, extensions=['fenced_code', 'tables'])
 
 
 def format_io(self, y):
@@ -127,9 +144,9 @@ def format_io(self, y):
     """
     if y is None or y == []: return []
     i_ask, gpt_reply = y[-1]
-    i_ask = text_divide_paragraph(i_ask) # 输入部分太自由，预处理一波
+    i_ask = text_divide_paragraph(i_ask)  # 输入部分太自由，预处理一波
     y[-1] = (
-        None if i_ask is None else markdown.markdown(i_ask, extensions=['fenced_code','tables']),
+        None if i_ask is None else markdown.markdown(i_ask, extensions=['fenced_code', 'tables']),
         None if gpt_reply is None else markdown_convertion(gpt_reply)
     )
     return y
@@ -151,6 +168,7 @@ def extract_archive(file_path, dest_dir):
     import zipfile
     import tarfile
     import os
+
     # Get the file extension of the input file
     file_extension = os.path.splitext(file_path)[1]
 
@@ -164,8 +182,27 @@ def extract_archive(file_path, dest_dir):
         with tarfile.open(file_path, 'r:*') as tarobj:
             tarobj.extractall(path=dest_dir)
             print("Successfully extracted tar archive to {}".format(dest_dir))
+
+    elif file_extension == '.rar':
+        # 这是个第三方库，需要预先pip install rarfile
+        # 此外，Windows上还需要安装winrar软件，配置其Path环境变量，如"C:\Program Files\WinRAR"才可以正常运行
+        try:
+            import rarfile
+            with rarfile.RarFile(file_path) as rf:
+                rf.extractall(path=dest_dir)
+                print("Successfully extracted rar archive to {}".format(dest_dir))
+        except:
+            print("rar格式需要安装额外依赖")
+    elif file_extension == '.7z':
+        try:
+            import py7zr
+            with py7zr.SevenZipFile(file_path, mode='r') as f:
+                f.extractall(path=dest_dir)
+        except:
+            print("7z格式需要安装额外依赖")
     else:
         return
+
 
 def find_recent_files(directory):
     """
@@ -193,19 +230,21 @@ def on_file_uploaded(files, chatbot, txt):
     if len(files) == 0: return chatbot, txt
     import shutil, os, time, glob
     from toolbox import extract_archive
-    try: shutil.rmtree('./private_upload/')
-    except: pass
+    try:
+        shutil.rmtree('./private_upload/')
+    except:
+        pass
     time_tag = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
     os.makedirs(f'private_upload/{time_tag}', exist_ok=True)
     for file in files:
         file_origin_name = os.path.basename(file.orig_name)
         shutil.copy(file.name, f'private_upload/{time_tag}/{file_origin_name}')
-        extract_archive(f'private_upload/{time_tag}/{file_origin_name}', 
+        extract_archive(f'private_upload/{time_tag}/{file_origin_name}',
                         dest_dir=f'private_upload/{time_tag}/{file_origin_name}.extract')
     moved_files = [fp for fp in glob.glob('private_upload/**/*', recursive=True)]
     txt = f'private_upload/{time_tag}'
     moved_files_str = '\t\n\n'.join(moved_files)
-    chatbot.append(['我上传了文件，请查收', 
+    chatbot.append(['我上传了文件，请查收',
                     f'[Local Message] 收到以下文件: \n\n{moved_files_str}\n\n调用路径参数已自动修正到: \n\n{txt}\n\n现在您点击任意实验功能时，以上文件将被作为输入参数'])
     return chatbot, txt
 
@@ -218,18 +257,22 @@ def on_report_generated(files, chatbot):
     chatbot.append(['汇总报告如何远程获取？', '汇总报告已经添加到右侧文件上传区，请查收。'])
     return report_files, chatbot
 
+
 def get_conf(*args):
     # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
     res = []
     for arg in args:
-        try: r = getattr(importlib.import_module('config_private'), arg)
-        except: r = getattr(importlib.import_module('config'), arg)
+        try:
+            r = getattr(importlib.import_module('config_private'), arg)
+        except:
+            r = getattr(importlib.import_module('config'), arg)
         res.append(r)
         # 在读取API_KEY时，检查一下是不是忘了改config
-        if arg=='API_KEY' and len(r) != 51:
+        if arg == 'API_KEY' and len(r) != 51:
             assert False, "正确的API_KEY密钥是51位，请在config文件中修改API密钥, 添加海外代理之后再运行。" + \
-                        "（如果您刚更新过代码，请确保旧版config_private文件中没有遗留任何新增键值）"
+                          "（如果您刚更新过代码，请确保旧版config_private文件中没有遗留任何新增键值）"
     return res
+
 
 def clear_line_break(txt):
     txt = txt.replace('\n', ' ')
