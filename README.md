@@ -161,20 +161,12 @@ input区域 输入 ./crazy_functions/test_project/python/dqn ， 然后点击 "[
 
 ```
 
-## 使用WSL2（Windows Subsystem for Linux 子系统）
-选择这种方式默认您已经具备一定基本知识，因此不再赘述多余步骤。如果不是这样，您可以从[这里](https://learn.microsoft.com/zh-cn/windows/wsl/about)或GPT处获取更多关于子系统的信息。
+## 其他部署方式
+- 使用WSL2（Windows Subsystem for Linux 子系统）
+请访问[部署wiki-1](https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2)
 
-WSL2可以配置使用Windows侧的代理上网，前置步骤可以参考[这里](https://www.cnblogs.com/tuilk/p/16287472.html)
-由于Windows相对WSL2的IP会发生变化，我们需要每次启动前先获取这个IP来保证顺利访问，将config.py中设置proxies的部分更改为如下代码：
-```python
-import subprocess
-cmd_get_ip = 'grep -oP  "(\d+\.)+(\d+)" /etc/resolv.conf'
-ip_proxy = subprocess.run(
-        cmd_get_ip, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True
-        ).stdout.strip() # 获取windows的IP
-proxies = { "http": ip_proxy + ":51837", "https": ip_proxy + ":51837", } # 请自行修改
-```
-在启动main.py后，可以在windows浏览器中访问服务。至此测试、使用与上面其他方法无异。 
+- nginx远程部署
+请访问[部署wiki-2](https://github.com/binary-husky/chatgpt_academic/wiki/%E8%BF%9C%E7%A8%8B%E9%83%A8%E7%BD%B2%E7%9A%84%E6%8C%87%E5%AF%BC)
 
 
 ## 自定义新的便捷按钮（学术快捷键自定义）
