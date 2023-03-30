@@ -84,45 +84,42 @@ chat分析报告生成 | [实验性功能] 运行后自动生成总结汇报
 
 ## 直接运行 (Windows, Linux or MacOS)
 
-下载项目
-
+### 1. 下载项目
 ```sh
 git clone https://github.com/binary-husky/chatgpt_academic.git
 cd chatgpt_academic
 ```
 
+### 2. 配置API_KEY和代理设置
 我们建议将`config.py`复制为`config_private.py`并将后者用作个性化配置文件以避免`config.py`中的变更影响你的使用或不小心将包含你的OpenAI API KEY的`config.py`提交至本项目。
 
-```sh
-cp config.py config_private.py
+在`config.py`或`config_private.py`中，配置 海外Proxy 和 OpenAI API KEY，说明如下
 ```
-
-在`config_private.py`中，配置 海外Proxy 和 OpenAI API KEY
-```
-1. 如果你在国内，需要设置海外代理才能够使用 OpenAI API，你可以通过 config.py 文件来进行设置。
+1. 如果你在国内，需要设置海外代理才能够顺利使用 OpenAI API，设置方法请仔细阅读config.py。
 2. 配置 OpenAI API KEY。你需要在 OpenAI 官网上注册并获取 API KEY。一旦你拿到了 API KEY，在 config.py 文件里配置好即可。
+3. 与代理网络有关的issue（网络超时、代理不起作用）汇总到 https://github.com/binary-husky/chatgpt_academic/issues/1
 ```
-安装依赖
 
+### 3. 安装依赖
 ```sh
-python -m pip install -r requirements.txt
+# （选择一）推荐
+python -m pip install -r requirements.txt   
+
+# （选择二）如果您使用anaconda，步骤也是类似的：
+# （选择二.1）conda create -n gptac_venv python=3.11
+# （选择二.2）conda activate gptac_venv
+# （选择二.3）python -m pip install -r requirements.txt
+
+# 备注：使用官方pip源或者阿里pip源，其他pip源（如清华pip）有可能出问题，临时换源方法： 
+# python -m pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 ```
 
-或者，如果你希望使用`conda`
-
-```sh
-conda create -n gptac 'gradio>=3.23' requests
-conda activate gptac
-python3 -m pip install mdtex2html
-```
-
-运行
-
+### 4. 运行
 ```sh
 python main.py
 ```
 
-测试实验性功能
+### 5. 测试实验性功能
 ```
 - 测试C++项目头文件分析
     input区域 输入 `./crazy_functions/test_project/cpp/libJPG` ， 然后点击 "[实验] 解析整个C++项目（input输入项目根路径）"
@@ -135,8 +132,6 @@ python main.py
 - 测试实验功能模板函数（要求gpt回答历史上的今天发生了什么），您可以根据此函数为模板，实现更复杂的功能
     点击 "[实验] 实验功能函数模板"
 ```
-
-与代理网络有关的issue（网络超时、代理不起作用）汇总到 https://github.com/binary-husky/chatgpt_academic/issues/1
 
 ## 使用docker (Linux)
 
