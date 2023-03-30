@@ -166,80 +166,12 @@ input区域 输入 ./crazy_functions/test_project/python/dqn ， 然后点击 "[
 
 ```
 
-## 使用WSL2（Windows Subsystem for Linux 子系统）
-选择这种方式默认您已经具备一定基本知识，因此不再赘述多余步骤。如果不是这样，您可以从[这里](https://learn.microsoft.com/zh-cn/windows/wsl/about)或GPT处获取更多关于子系统的信息。
+## 其他部署方式
+- 使用WSL2（Windows Subsystem for Linux 子系统）
+请访问[部署wiki-1](https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2)
 
-WSL2可以配置使用Windows侧的代理上网，前置步骤可以参考[这里](https://www.cnblogs.com/tuilk/p/16287472.html)
-由于Windows相对WSL2的IP会发生变化，我们需要每次启动前先获取这个IP来保证顺利访问，将config.py中设置proxies的部分更改为如下代码：
-```python
-import subprocess
-cmd_get_ip = 'grep -oP  "(\d+\.)+(\d+)" /etc/resolv.conf'
-ip_proxy = subprocess.run(
-        cmd_get_ip, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True
-        ).stdout.strip() # 获取windows的IP
-proxies = { "http": ip_proxy + ":51837", "https": ip_proxy + ":51837", } # 请自行修改
-```
-在启动main.py后，可以在windows浏览器中访问服务。至此测试、使用与上面其他方法无异。 
-
-## 远程部署
-如果您需要将本项目部署到公网服务器，请设置好`PORT`（固定端口）和`AUTHENTICATION`（避免您的`APIKEY`被滥用），并将`main.py`的最后一句话修改为：
-```python
-demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", share=False, server_port=PORT, auth=AUTHENTICATION) # 取消share
-```
-
-如果您打算使用域名，强烈建议用`nginx`配置反向代理。需要往配置文件增加的内容如下：
-```nginx
-http {
-    # 其他配置
-    #......
-    # 配置websocket
-    map $http_upgrade $connection_upgrade {
-    default upgrade;
-    ''      close;
-    }
-upstream my_chataca {
-	# 这里配置负载均衡策略
-    ip_hash; # 如果使用负载均衡，建议使用ip_hash
-    # 假设本项目运行的端口为8080
-	server 127.0.0.1:8080 max_fails=3 fail_timeout=10;
-}
-
-server {
-	listen 80;
-	listen [::]:80;
-	server_name yourdomain.com;
-	return 301 https://yourdomain.com$request_uri;# 强制使用https
-}
-
-server {
-	listen 443 ssl http2;
-	listen [::]:443 ssl http2;
-	server_name yourdomain.com;
-	ssl_protocols TLSv1.2 TLSv1.3;
-	ssl_prefer_server_ciphers on;
-	ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;
-	ssl_session_tickets off;
-	ssl_session_timeout 1d;
-	ssl_session_cache shared:SSL:10m;
-	add_header Strict-Transport-Security
-		"max-age=31536000; includeSubDomains"
-		always;
-	ssl_certificate xxxxxx.pem; # 证书文件
-	ssl_certificate_key xxxxxx.key; # 证书文件
-
-	location / {
-		proxy_pass http://my_chataca;
-		proxy_set_header Host $host;
-		proxy_set_header X-Real-IP $remote_addr;
-		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-		proxy_set_header X-Forwarded-Proto https;
-		proxy_set_header Upgrade $http_upgrade;
-		proxy_set_header Connection $connection_upgrade;
-	}
-}
-
-}
-```
+- nginx远程部署
+请访问[部署wiki-2](https://github.com/binary-husky/chatgpt_academic/wiki/%E8%BF%9C%E7%A8%8B%E9%83%A8%E7%BD%B2%E7%9A%84%E6%8C%87%E5%AF%BC)
 
 
 ## 自定义新的便捷按钮（学术快捷键自定义）
