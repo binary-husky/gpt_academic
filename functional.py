@@ -2,6 +2,7 @@
 # 'secondary' 颜色对应 theme.py 中的 neutral_hue
 # 'stop' 颜色对应 theme.py 中的 color_er
 # 默认按钮颜色是 secondary
+from toolbox import clear_line_break
 
 def get_functionals():
     return {
@@ -22,11 +23,12 @@ def get_functionals():
         "查找语法错误": {
             "Prefix":   r"Below is a paragraph from an academic paper. " +
                         r"Can you help me ensure that the grammar and the spelling is correct? " +
-                        r"If no mistake is found, tell me that this paragraph is good." + 
-                        r"If you find grammar mistakes,please list mistakes you find in a two-column markdown table, " + 
+                        r"Do not try to polish the text, if no mistake is found, tell me that this paragraph is good." + 
+                        r"If you find grammar or spelling mistakes, please list mistakes you find in a two-column markdown table, " + 
                         r"put the original text the first column, " +
                         r"put the corrected text in the second column and highlight the key words you fixed." + "\n\n",
             "Suffix":   r"",
+            "PreProcess": clear_line_break,    # 预处理：清除换行符
         },
         "中译英": {
             "Prefix":   r"Please translate following sentence to English:" + "\n\n",
