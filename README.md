@@ -212,10 +212,11 @@ python check_proxy.py
 ## 兼容性测试
 
 ### 图片显示：
+
 <div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/226906087-b5f1c127-2060-4db9-af05-487643b21ed9.png" height="200" >
-<img src="https://user-images.githubusercontent.com/96192199/226906703-7226495d-6a1f-4a53-9728-ce6778cbdd19.png" height="200" >
+<img src="https://user-images.githubusercontent.com/96192199/228737599-bf0a9d9c-1808-4f43-ae15-dfcc7af0f295.png" width="800" >
 </div>
+
 
 ### 如果一个程序能够读懂并剖析自己：
 
