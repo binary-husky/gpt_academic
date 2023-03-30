@@ -30,7 +30,7 @@ def get_crazy_functionals():
             "Color": "stop",    # 按钮颜色
             "Function": 解析一个C项目
         },
-        "读tex论文写摘要": {
+        "读tex or pdf论文写摘要": {
             "Color": "stop",    # 按钮颜色
             "Function": 读文章写摘要
         },
