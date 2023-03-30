@@ -181,6 +181,66 @@ proxies = { "http": ip_proxy + ":51837", "https": ip_proxy + ":51837", } # 请�
 ```
 在启动main.py后，可以在windows浏览器中访问服务。至此测试、使用与上面其他方法无异。 
 
+## 远程部署
+如果您需要将本项目部署到公网服务器，请设置好`PORT`（固定端口）和`AUTHENTICATION`（避免您的`APIKEY`被滥用），并将`main.py`的最后一句话修改为：
+```python
+demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", share=False, server_port=PORT, auth=AUTHENTICATION) # 取消share
+```
+
+如果您打算使用域名，强烈建议用`nginx`配置反向代理。需要往配置文件增加的内容如下：
+```nginx
+http {
+    # 其他配置
+    #......
+    # 配置websocket
+    map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+    }
+upstream my_chataca {
+	# 这里配置负载均衡策略
+    ip_hash; # 如果使用负载均衡，建议使用ip_hash
+    # 假设本项目运行的端口为8080
+	server 127.0.0.1:8080 max_fails=3 fail_timeout=10;
+}
+
+server {
+	listen 80;
+	listen [::]:80;
+	server_name yourdomain.com;
+	return 301 https://yourdomain.com$request_uri;# 强制使用https
+}
+
+server {
+	listen 443 ssl http2;
+	listen [::]:443 ssl http2;
+	server_name yourdomain.com;
+	ssl_protocols TLSv1.2 TLSv1.3;
+	ssl_prefer_server_ciphers on;
+	ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE:ECDH:AES:HIGH:!NULL:!aNULL:!MD5:!ADH:!RC4;
+	ssl_session_tickets off;
+	ssl_session_timeout 1d;
+	ssl_session_cache shared:SSL:10m;
+	add_header Strict-Transport-Security
+		"max-age=31536000; includeSubDomains"
+		always;
+	ssl_certificate xxxxxx.pem; # 证书文件
+	ssl_certificate_key xxxxxx.key; # 证书文件
+
+	location / {
+		proxy_pass http://my_chataca;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+		proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header X-Forwarded-Proto https;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection $connection_upgrade;
+	}
+}
+
+}
+```
+
 
 ## 自定义新的便捷按钮（学术快捷键自定义）
 打开functional.py，添加条目如下，然后重启程序即可。（如果按钮已经添加成功并可见，那么前缀、后缀都支持热修改，无需重启程序即可生效。）
