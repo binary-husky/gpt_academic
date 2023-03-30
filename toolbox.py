@@ -185,7 +185,7 @@ def extract_archive(file_path, dest_dir):
 
     elif file_extension == '.rar':
         # 这是个第三方库，需要预先pip install rarfile
-        # 此外，Windows上还需要安装winrar软件，配置其Path环境变量，如"C:\Program Files\WinRAR"才可以正常运行
+        # 此外，Windows上还需要安装winrar软件，配置其Path环境变量，如"C:\Program Files\WinRAR"才可以
         try:
             import rarfile
             with rarfile.RarFile(file_path) as rf:
