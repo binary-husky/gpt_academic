@@ -2,7 +2,14 @@ import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 import gradio as gr
 from predict import predict
 from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf
+import ctypes
+import sys
 
+if  not ctypes.windll.shell32.IsUserAnAdmin():
+    # 获取管理员权限,否则在终端外双击运行闪退，报错信息是某个文件夹拒绝访问
+    ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, __file__, None, 1) 
+else:
+    pass
 # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
 proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION = \
     get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION')

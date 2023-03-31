@@ -1,9 +1,19 @@
-# API_KEY = "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" 此key无效
-API_KEY = "sk-此处填API密钥"
+import json
+import os
+# 读取配置文件
+# 获取当前Python文件所在的目录
+dir_path = os.path.dirname(os.path.abspath(__file__))
+# 打开JSON文件，使用相对路径
+with open(os.path.join(dir_path, 'cfg.json')) as f:
+    config = json.load(f)
+    # 获取配置信息
+    API_KEY = config['key']
+    AGENT = config['agent']
 API_URL = "https://api.openai.com/v1/chat/completions"
 
+
 # 改为True应用代理
-USE_PROXY = False
+USE_PROXY = True
 if USE_PROXY:
 
     # 填写格式是 [协议]://  [地址] :[端口] ，
@@ -13,12 +23,11 @@ if USE_PROXY:
     # [端口] 在代理软件的设置里，不同的代理软件界面不一样，但端口号都应该在最显眼的位置上
 
     # 代理网络的地址，打开你的科学上网软件查看代理的协议(socks5/http)、地址(localhost)和端口(11284)
-    proxies = { "http": "socks5h://localhost:11284", "https": "socks5h://localhost:11284", }
+    proxies = AGENT
     print('网络代理状态：运行。')
 else:
     proxies = None
     print('网络代理状态：未配置。无代理状态下很可能无法访问。')
-
 # 发送请求到OpenAI后，等待多久判定为超时
 TIMEOUT_SECONDS = 25
 
