@@ -1,5 +1,5 @@
 from predict import predict_no_ui
-from toolbox import CatchException, report_execption, write_results_to_file, predict_no_ui_but_counting_down
+from toolbox import CatchException, report_execption, write_results_to_file, predict_no_ui_but_counting_down, clean_text
 fast_debug = False
 
 
@@ -11,6 +11,7 @@ def 解析PDF(file_manifest, project_folder, top_p, temperature, chatbot, histor
             file_content = ""
             for page in doc:
                 file_content += page.get_text()
+            file_content = clean_text(file_content)
             print(file_content)
 
         prefix = "接下来请你逐文件分析下面的论文文件，概括其内容" if index==0 else ""
