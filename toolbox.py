@@ -176,8 +176,32 @@ def extract_archive(file_path, dest_dir):
         with tarfile.open(file_path, 'r:*') as tarobj:
             tarobj.extractall(path=dest_dir)
             print("Successfully extracted tar archive to {}".format(dest_dir))
+
+    # 第三方库，需要预先pip install rarfile
+    # 此外，Windows上还需要安装winrar软件，配置其Path环境变量，如"C:\Program Files\WinRAR"才可以
+    elif file_extension == '.rar':
+        try:
+            import rarfile
+            with rarfile.RarFile(file_path) as rf:
+                rf.extractall(path=dest_dir)
+                print("Successfully extracted rar archive to {}".format(dest_dir))
+        except:
+            print("Rar format requires additional dependencies to install")
+            return '\n\n需要安装pip install rarfile来解压rar文件'
+
+    # 第三方库，需要预先pip install py7zr
+    elif file_extension == '.7z':
+        try:
+            import py7zr
+            with py7zr.SevenZipFile(file_path, mode='r') as f:
+                f.extractall(path=dest_dir)
+                print("Successfully extracted 7z archive to {}".format(dest_dir))
+        except:
+            print("7z format requires additional dependencies to install")
+            return '\n\n需要安装pip install py7zr来解压7z文件'
     else:
-        return
+        return ''
+    return ''
 
 def find_recent_files(directory):
     """
@@ -209,16 +233,19 @@ def on_file_uploaded(files, chatbot, txt):
     except: pass
     time_tag = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
     os.makedirs(f'private_upload/{time_tag}', exist_ok=True)
+    err_msg = ''
     for file in files:
         file_origin_name = os.path.basename(file.orig_name)
         shutil.copy(file.name, f'private_upload/{time_tag}/{file_origin_name}')
-        extract_archive(f'private_upload/{time_tag}/{file_origin_name}', 
+        err_msg += extract_archive(f'private_upload/{time_tag}/{file_origin_name}',
                         dest_dir=f'private_upload/{time_tag}/{file_origin_name}.extract')
     moved_files = [fp for fp in glob.glob('private_upload/**/*', recursive=True)]
     txt = f'private_upload/{time_tag}'
     moved_files_str = '\t\n\n'.join(moved_files)
-    chatbot.append(['我上传了文件，请查收', 
-                    f'[Local Message] 收到以下文件: \n\n{moved_files_str}\n\n调用路径参数已自动修正到: \n\n{txt}\n\n现在您点击任意实验功能时，以上文件将被作为输入参数'])
+    chatbot.append(['我上传了文件，请查收',
+                    f'[Local Message] 收到以下文件: \n\n{moved_files_str}'+
+                    f'\n\n调用路径参数已自动修正到: \n\n{txt}'+
+                    f'\n\n现在您点击任意实验功能时，以上文件将被作为输入参数'+err_msg])
     return chatbot, txt
 
 

@@ -56,6 +56,7 @@ def get_crazy_functionals():
     if UserVisibleLevel >= 1:
         from crazy_functions.批量总结PDF文档 import 批量总结PDF文档
         from crazy_functions.批量总结PDF文档pdfminer import 批量总结PDF文档pdfminer
+        from crazy_functions.总结word文档 import 总结word文档
         function_plugins.update({
             "[仅供开发调试] 批量总结PDF文档": {
                 "Color": "stop",
@@ -65,6 +66,10 @@ def get_crazy_functionals():
             "[仅供开发调试] 批量总结PDF文档pdfminer": {
                 "Color": "stop",
                 "Function": HotReload(批量总结PDF文档pdfminer)
+            },
+            "[仅供开发调试] 批量总结Word文档": {
+                "Color": "stop",
+                "Function": HotReload(总结word文档)
             },
         })
 
