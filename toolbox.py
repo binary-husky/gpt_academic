@@ -157,11 +157,12 @@ def markdown_convertion(txt):
     """
         将Markdown格式的文本转换为HTML格式。如果包含数学公式，则先将公式转换为HTML格式。
     """
+    pre = '<div class="markdown-body">'
+    suf = '</div>'
     if ('$' in txt) and ('```' not in txt):
-        return markdown.markdown(txt,extensions=['fenced_code','tables']) + '<br><br>' + \
-            markdown.markdown(convert_math(txt, splitParagraphs=False),extensions=['fenced_code','tables'])
+        return pre + markdown.markdown(txt,extensions=['fenced_code','tables']) + '<br><br>' + markdown.markdown(convert_math(txt, splitParagraphs=False),extensions=['fenced_code','tables']) + suf
     else:
-        return markdown.markdown(txt,extensions=['fenced_code','tables'])
+        return pre + markdown.markdown(txt,extensions=['fenced_code','tables']) + suf
 
 
 def format_io(self, y):
