@@ -57,12 +57,12 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
             with gr.Row():
                 from check_proxy import check_proxy
                 statusDisplay = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {check_proxy(proxies)}")
-            with gr.Accordion("基础功能区", open=True):
+            with gr.Accordion("基础功能区", open=True) as area_basic_fn:
                 with gr.Row():
                     for k in functional:
                         variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
                         functional[k]["Button"] = gr.Button(k, variant=variant)
-            with gr.Accordion("函数插件区", open=True):
+            with gr.Accordion("函数插件区", open=True) as area_crazy_fn:
                 with gr.Row():
                     gr.Markdown("注意：以下“红颜色”标识的函数插件需从input区读取路径作为参数.")
                 with gr.Row():
@@ -76,19 +76,18 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
                 system_prompt = gr.Textbox(show_label=True, placeholder=f"System Prompt", label="System prompt", value=initial_prompt)
                 top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01,interactive=True, label="Top-p (nucleus sampling)",)
                 temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature",)
-                checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区", "文件上传区"], value=["USA", "Japan", "Pakistan"], 
-                                                label="显示功能区")
-
-
+                checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区"], 
+                                        value=["基础功能区", "函数插件区"], label="显示哪些功能区")
 
     def what_is_this(a):
-        return a
+        ret = {}
+        # if area_basic_fn.visible != ("基础功能区" in a): 
+        ret.update({area_basic_fn: gr.update(visible=("基础功能区" in a))}) 
+        # if area_crazy_fn.visible != ("函数插件区" in a): 
+        ret.update({area_crazy_fn: gr.update(visible=("函数插件区" in a))}) 
+        return ret
 
-    checkboxes.select(what_is_this, [checkboxes], [checkboxes])
-
-
-
-
+    checkboxes.select(what_is_this, [checkboxes], [area_basic_fn, area_crazy_fn] )
 
     predict_args = dict(fn=predict, inputs=[txt, top_p, temperature, chatbot, history, system_prompt], outputs=[chatbot, history, statusDisplay], show_progress=True)
     empty_txt_args = dict(fn=lambda: "", inputs=[], outputs=[txt]) # 用于在提交后清空输入栏
