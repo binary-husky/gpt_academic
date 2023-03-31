@@ -46,7 +46,7 @@ else:
     # 自定义图标在图标文件中的位置（从0开始）
     custom_icon_index = '0'
     # 快捷方式文件名
-    shortcut_name = 'GPT.lnk'
+    shortcut_name = 'Hi_GPT.lnk'
     # 创建快捷方式
     shortcut = shell.CreateShortCut(os.path.join(desktop_path, shortcut_name))
     shortcut.Targetpath = target_file_path    
