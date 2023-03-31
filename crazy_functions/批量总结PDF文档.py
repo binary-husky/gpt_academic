@@ -59,7 +59,7 @@ def 批量总结PDF文档(txt, top_p, temperature, chatbot, history, systemPromp
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
-        "批量总结PDF文档。函数插件贡献者: ValeriaWong"])
+        "批量总结PDF文档。函数插件贡献者: ValeriaWong，Eralien"])
     yield chatbot, history, '正常'
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
