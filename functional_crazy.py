@@ -30,7 +30,7 @@ def get_crazy_functionals():
             "Color": "stop",    # 按钮颜色
             "Function": 解析一个C项目
         },
-        "读tex or pdf论文写摘要": {
+        "读tex论文写摘要": {
             "Color": "stop",    # 按钮颜色
             "Function": 读文章写摘要
         },
@@ -55,7 +55,13 @@ def get_crazy_functionals():
                 "Function": 批量总结PDF文档
             },
         })
-
+        from crazy_functions.批量总结PDF文档pdfminer import 批量总结PDF文档pdfminer
+        function_plugins.update({
+            "[仅供开发调试] 批量总结PDF文档pdfminer": {
+                "Color": "stop",
+                "Function": 批量总结PDF文档pdfminer
+            },
+        })
     # VisibleLevel=2 尚未充分测试的函数插件，放在这里
     if UserVisibleLevel >= 2:
         function_plugins.update({
