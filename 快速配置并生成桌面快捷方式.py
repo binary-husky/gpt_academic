@@ -29,6 +29,8 @@ else:
     script_dir = os.path.dirname(os.path.realpath(__file__))
     # 更改运行路径到脚本所在目录
     os.chdir(script_dir)
+    #为Winshell提供依赖
+    os.system("python -m pip install pywin32")
     # 使用相对路径安装软件包
     os.system("python -m pip install -r requirements.txt")
 
