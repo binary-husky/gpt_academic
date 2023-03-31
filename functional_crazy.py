@@ -55,11 +55,16 @@ def get_crazy_functionals():
     # VisibleLevel=1 经过测试，但功能未达到理想状态
     if UserVisibleLevel >= 1:
         from crazy_functions.批量总结PDF文档 import 批量总结PDF文档
+        from crazy_functions.批量总结PDF文档pdfminer import 批量总结PDF文档pdfminer
         function_plugins.update({
             "[仅供开发调试] 批量总结PDF文档": {
                 "Color": "stop",
                 # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
                 "Function": HotReload(批量总结PDF文档)
+            },
+            "[仅供开发调试] 批量总结PDF文档pdfminer": {
+                "Color": "stop",
+                "Function": HotReload(批量总结PDF文档pdfminer)
             },
         })
 
