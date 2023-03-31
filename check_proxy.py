@@ -21,6 +21,7 @@ def check_proxy(proxies):
 
 if __name__ == '__main__':
     import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
-    try: from config_private import proxies # 放自己的秘密如API和代理网址 os.path.exists('config_private.py')
-    except: from config import proxies
+    from toolbox import get_conf
+    proxies, = get_conf('proxies')
     check_proxy(proxies)
+    
