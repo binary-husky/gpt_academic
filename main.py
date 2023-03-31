@@ -101,7 +101,7 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
 # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
 def auto_opentab_delay():
     import threading, webbrowser, time
-    print(f"URL http://localhost:{PORT}")
+    print(f"如果浏览器没有自动打开，请复制并转到以下URL: http://localhost:{PORT}")
     def open(): 
         time.sleep(2)
         webbrowser.open_new_tab(f'http://localhost:{PORT}')
