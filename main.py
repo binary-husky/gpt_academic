@@ -36,8 +36,20 @@ gr.Chatbot.postprocess = format_io
 from theme import adjust_theme
 set_theme = adjust_theme()
 
+CSS = """
+.markdown-body table {
+    border: 1px solid #ddd; 
+    border-collapse: collapse;
+}
+
+.markdown-body th, .markdown-body td {
+    border: 1px solid #ddd; 
+    padding: 5px;
+}
+"""
+
 cancel_handles = []
-with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
+with gr.Blocks(theme=set_theme, analytics_enabled=False, css=CSS) as demo:
     gr.HTML(title_html)
     with gr.Row().style(equal_height=True):
         with gr.Column(scale=2):
