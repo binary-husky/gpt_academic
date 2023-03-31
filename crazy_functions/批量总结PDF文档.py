@@ -11,7 +11,6 @@ def 解析PDF(file_manifest, project_folder, top_p, temperature, chatbot, histor
             file_content = ""
             for page in doc:
                 file_content += page.get_text()
-                file_content = file_content.encode('gbk', 'ignore').decode('gbk')
             print(file_content)
 
         prefix = "接下来请你逐文件分析下面的论文文件，概括其内容" if index==0 else ""
