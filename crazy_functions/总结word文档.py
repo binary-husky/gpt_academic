@@ -82,6 +82,10 @@ def 解析docx(file_manifest, project_folder, top_p, temperature, chatbot, histo
 def 总结word文档(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
     import glob, os
 
+    # 基本信息：功能、贡献者
+    chatbot.append([
+        "函数插件功能？",
+        "批量总结Word文档。函数插件贡献者: JasonGuo1"])
     yield chatbot, history, '正常'
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
