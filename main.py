@@ -10,7 +10,7 @@ proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION = \
 
 # 如果WEB_PORT是-1, 则随机选取WEB端口
 PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
-AUTHENTICATION = None if AUTHENTICATION == [] else AUTHENTICATION
+if not AUTHENTICATION: AUTHENTICATION = None
 
 initial_prompt = "Serve me as a writing and programming assistant."
 title_html = """<h1 align="center">ChatGPT 学术优化</h1>"""
@@ -105,8 +105,7 @@ def auto_opentab_delay():
     def open(): 
         time.sleep(2)
         webbrowser.open_new_tab(f'http://localhost:{PORT}')
-    t = threading.Thread(target=open)
-    t.daemon = True; t.start()
+    threading.Thread(target=open, name="open-browser", daemon=True).start()
 
 auto_opentab_delay()
 demo.title = "ChatGPT 学术优化"
