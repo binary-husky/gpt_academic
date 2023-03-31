@@ -237,13 +237,10 @@ def get_conf(*args):
         except: r = getattr(importlib.import_module('config'), arg)
         res.append(r)
         # 在读取API_KEY时，检查一下是不是忘了改config
-        if arg=='API_KEY' and len(r) != 51:
-            assert False, "正确的API_KEY密钥是51位，请在config文件中修改API密钥, 添加海外代理之后再运行。" + \
+        assert arg != 'API_KEY' or len(r) == 51, "正确的API_KEY密钥是51位，请在config文件中修改API密钥, 添加海外代理之后再运行。" \
                         "（如果您刚更新过代码，请确保旧版config_private文件中没有遗留任何新增键值）"
     return res
 
 def clear_line_break(txt):
-    txt = txt.replace('\n', ' ')
-    txt = txt.replace('  ', ' ')
-    txt = txt.replace('  ', ' ')
-    return txt
+    import re
+    return re.sub(r"\s+", " ", txt)
