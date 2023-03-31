@@ -1,7 +1,6 @@
 # [step 1]>> 例如： API_KEY = "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" （此key无效）
 API_KEY = "sk-此处填API密钥"
 
-
 # [step 2]>> 改为True应用代理，如果直接在海外服务器部署，此处不修改
 USE_PROXY = False
 if USE_PROXY:
@@ -12,7 +11,11 @@ if USE_PROXY:
     # [端口] 在代理软件的设置里找。虽然不同的代理软件界面不一样，但端口号都应该在最显眼的位置上
 
     # 代理网络的地址，打开你的科学上网软件查看代理的协议(socks5/http)、地址(localhost)和端口(11284)
-    proxies = { "http": "socks5h://localhost:11284", "https": "socks5h://localhost:11284", }
+    proxies = { 
+        #          [协议]://  [地址]  :[端口]
+        "http":  "socks5h://localhost:11284", 
+        "https": "socks5h://localhost:11284", 
+    }
     print('网络代理状态：运行。')
 else:
     proxies = None
