@@ -1,4 +1,4 @@
-from functools import HotReload # HotReload 的意思是热更新，修改函数插件后，不需要重启程序，代码直接生效
+from toolbox import HotReload # HotReload 的意思是热更新，修改函数插件后，不需要重启程序，代码直接生效
 
 # UserVisibleLevel是过滤器参数。
 # 由于UI界面空间有限，所以通过这种方式决定UI界面中显示哪些插件
