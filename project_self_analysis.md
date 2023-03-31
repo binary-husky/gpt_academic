@@ -1,5 +1,5 @@
-# chatgpt-academic项目分析报告
-（Author补充：以下分析均由本项目调用ChatGPT一键生成，如果有不准确的地方全怪GPT）
+# chatgpt-academic项目自译解报告
+（Author补充：以下分析均由本项目调用ChatGPT一键生成，如果有不准确的地方，全怪GPT😄）
 
 ## [0/10] 程序摘要: check_proxy.py
 
