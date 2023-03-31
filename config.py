@@ -1,7 +1,11 @@
+import os
 # API_KEY = "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" 此key无效
 API_KEY = "sk-此处填API密钥"
 API_URL = "https://api.openai.com/v1/chat/completions"
-
+if os.getenv("API_KEY") != None:
+    API_KEY = os.getenv("API_KEY")
+if os.getenv("API_URL") != None:
+    API_URL = os.getenv("API_URL")
 # 改为True应用代理
 USE_PROXY = False
 if USE_PROXY:
@@ -19,6 +23,8 @@ else:
     proxies = None
     print('网络代理状态：未配置。无代理状态下很可能无法访问。')
 
+if os.getenv("PROXY") != None:
+    proxies = {os.getenv("PROXY")}
 # 发送请求到OpenAI后，等待多久判定为超时
 TIMEOUT_SECONDS = 25
 
@@ -36,3 +42,5 @@ CONCURRENT_COUNT = 100
 
 # 设置用户名和密码
 AUTHENTICATION = [] # [("username", "password"), ("username2", "password2"), ...]
+if os.getenv("PASSWORD") != None:
+    AUTHENTICATION= [("admin", os.getenv("PASSWORD"))]
