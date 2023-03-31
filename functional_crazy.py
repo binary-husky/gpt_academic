@@ -18,7 +18,7 @@ def get_crazy_functionals():
     from crazy_functions.代码重写为全英文_多线程 import 全项目切换英文
 
     function_plugins = {
-        "请解析并解构此项目本身": {
+        "请解析并解构此项目本身（源码自译解）": {
             "AsButton": False,  # 加入下拉菜单中
             "Function": 解析项目本身
         },
@@ -30,7 +30,7 @@ def get_crazy_functionals():
             "Color": "stop",    # 按钮颜色
             "Function": 解析一个C项目的头文件
         },
-        "解析整个C++项目": {
+        "解析整个C++项目（.cpp/.h）": {
             "Color": "stop",    # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
             "Function": 解析一个C项目
