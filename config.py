@@ -1,5 +1,5 @@
 # API_KEY = "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" 此key无效
-API_KEY = "sk-此处填API秘钥"
+API_KEY = "sk-此处填API密钥"
 API_URL = "https://api.openai.com/v1/chat/completions"
 
 # 改为True应用代理
@@ -36,8 +36,3 @@ CONCURRENT_COUNT = 100
 
 # 设置用户名和密码
 AUTHENTICATION = [] # [("username", "password"), ("username2", "password2"), ...]
-
-# 检查一下是不是忘了改config
-if len(API_KEY) != 51:
-    assert False, "正确的API_KEY密钥是51位，请在config文件中修改API密钥, 添加海外代理之后再运行。" + \
-                  "（如果您刚更新过代码，请确保旧版config_private文件中没有遗留任何新增键值）"

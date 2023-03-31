@@ -1,11 +1,12 @@
 import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 import gradio as gr
 from predict import predict
-from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated
+from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf
 
 # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
-try: from config_private import proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION
-except: from config import proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION
+proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION = \
+    get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION')
+
 
 # 如果WEB_PORT是-1, 则随机选取WEB端口
 PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
@@ -42,18 +43,17 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
     with gr.Row():
         with gr.Column(scale=2):
             chatbot = gr.Chatbot()
-            chatbot.style(height=1000)
+            chatbot.style(height=1150)
             chatbot.style()
             history = gr.State([])
         with gr.Column(scale=1):
             with gr.Row():
-                with gr.Column(scale=12):
-                    txt = gr.Textbox(show_label=False, placeholder="Input question here.").style(container=False)
-                with gr.Column(scale=1):
-                    with gr.Row():
-                        resetBtn = gr.Button("重置", variant="secondary")
-                        stopBtn = gr.Button("停止", variant="secondary")
-                        submitBtn = gr.Button("提交", variant="primary")
+                txt = gr.Textbox(show_label=False, placeholder="Input question here.").style(container=False)
+            with gr.Row():
+                submitBtn = gr.Button("提交", variant="primary")
+            with gr.Row():
+                resetBtn = gr.Button("重置", variant="secondary"); resetBtn.style(size="sm")
+                stopBtn = gr.Button("停止", variant="secondary"); stopBtn.style(size="sm")
             with gr.Row():
                 from check_proxy import check_proxy
                 statusDisplay = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {check_proxy(proxies)}")
@@ -62,7 +62,7 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
                     variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
                     functional[k]["Button"] = gr.Button(k, variant=variant)
             with gr.Row():
-                gr.Markdown("注意：以下红颜色标识的函数插件需从input区读取路径作为参数.")
+                gr.Markdown("注意：以下“红颜色”标识的函数插件需从input区读取路径作为参数.")
             with gr.Row():
                 for k in crazy_functional:
                     variant = crazy_functional[k]["Color"] if "Color" in crazy_functional[k] else "secondary"
@@ -101,7 +101,7 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
 # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
 def auto_opentab_delay():
     import threading, webbrowser, time
-    print(f"URL http://localhost:{PORT}")
+    print(f"如果浏览器没有自动打开，请复制并转到以下URL: http://localhost:{PORT}")
     def open(): 
         time.sleep(2)
         webbrowser.open_new_tab(f'http://localhost:{PORT}')

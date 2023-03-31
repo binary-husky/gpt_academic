@@ -1,15 +1,16 @@
-import markdown, mdtex2html, threading
+import markdown, mdtex2html, threading, importlib, traceback
 from show_math import convert as convert_math
 from functools import wraps
+import re
 
 def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[], sys_prompt=''):
     """
         调用简单的predict_no_ui接口，但是依然保留了些许界面心跳功能，当对话太长时，会自动采用二分法截断
     """
     import time
-    try: from config_private import TIMEOUT_SECONDS, MAX_RETRY
-    except: from config import TIMEOUT_SECONDS, MAX_RETRY
     from predict import predict_no_ui
+    from toolbox import get_conf
+    TIMEOUT_SECONDS, MAX_RETRY = get_conf('TIMEOUT_SECONDS', 'MAX_RETRY')
     # 多线程的时候，需要一个mutable结构在不同线程之间传递信息
     # list就是最简单的mutable结构，我们第一个位置放gpt输出，第二个位置传递报错信息
     mutable = [None, '']
@@ -80,10 +81,9 @@ def CatchException(f):
         try:
             yield from f(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT)
         except Exception as e:
-            import traceback
             from check_proxy import check_proxy
-            try: from config_private import proxies
-            except: from config import proxies
+            from toolbox import get_conf
+            proxies, = get_conf('proxies')
             tb_str = regular_txt_to_markdown(traceback.format_exc())
             chatbot[-1] = (chatbot[-1][0], f"[Local Message] 实验性函数调用出错: \n\n {tb_str} \n\n 当前代理可用性: \n\n {check_proxy(proxies)}")
             yield chatbot, history, f'异常 {e}'
@@ -107,8 +107,8 @@ def text_divide_paragraph(text):
         # wtf input
         lines = text.split("\n")
         for i, line in enumerate(lines):
-            lines[i] = "<p>"+lines[i].replace(" ", "&nbsp;")+"</p>"
-        text = "\n".join(lines)
+            lines[i] = lines[i].replace(" ", "&nbsp;")
+        text = "</br>".join(lines)
         return text
 
 def markdown_convertion(txt):
@@ -218,3 +218,27 @@ def on_report_generated(files, chatbot):
     # files.extend(report_files)
     chatbot.append(['汇总报告如何远程获取？', '汇总报告已经添加到右侧文件上传区，请查收。'])
     return report_files, chatbot
+
+def get_conf(*args):
+    # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
+    res = []
+    for arg in args:
+        try: r = getattr(importlib.import_module('config_private'), arg)
+        except: r = getattr(importlib.import_module('config'), arg)
+        res.append(r)
+        # 在读取API_KEY时，检查一下是不是忘了改config
+        if arg=='API_KEY':
+            # 正确的 API_KEY 是 "sk-" + 48 位大小写字母数字的组合
+            API_MATCH = re.match(r"sk-[a-zA-Z0-9]{48}$", r)
+            if API_MATCH:
+                print("您的 API_KEY 是: ", r, "\nAPI_KEY 导入成功")
+            else:
+                assert False, "正确的 API_KEY 是 'sk-' + '48 位大小写字母数字' 的组合，请在config文件中修改API密钥, 添加海外代理之后再运行。" + \
+                            "（如果您刚更新过代码，请确保旧版config_private文件中没有遗留任何新增键值）"
+    return res
+
+def clear_line_break(txt):
+    txt = txt.replace('\n', ' ')
+    txt = txt.replace('  ', ' ')
+    txt = txt.replace('  ', ' ')
+    return txt
