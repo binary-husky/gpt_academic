@@ -57,11 +57,11 @@ def predict_no_ui(inputs, top_p, temperature, history=[], sys_prompt=""):
             # make a POST request to the API endpoint, stream=False
             response = requests.post(API_URL, headers=headers, proxies=proxies,
                                     json=payload, stream=False, timeout=TIMEOUT_SECONDS*2); break
-        except requests.exceptions.ReadTimeout as e:
+        except:
             retry += 1
             traceback.print_exc()
             if retry > MAX_RETRY: raise TimeoutError
-            if MAX_RETRY!=0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
+            if MAX_RETRY!=0: print(f'请求失败，正在重试 ({retry}/{MAX_RETRY}) ……')
 
     try:
         result = json.loads(response.text)["choices"][0]["message"]["content"]
@@ -83,11 +83,11 @@ def predict_no_ui_long_connection(inputs, top_p, temperature, history=[], sys_pr
             # make a POST request to the API endpoint, stream=False
             response = requests.post(API_URL, headers=headers, proxies=proxies,
                                     json=payload, stream=True, timeout=TIMEOUT_SECONDS); break
-        except requests.exceptions.ReadTimeout as e:
+        except:
             retry += 1
             traceback.print_exc()
             if retry > MAX_RETRY: raise TimeoutError
-            if MAX_RETRY!=0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
+            if MAX_RETRY!=0: print(f'请求失败，正在重试 ({retry}/{MAX_RETRY}) ……')
 
     stream_response =  response.iter_lines()
     result = ''
@@ -143,7 +143,7 @@ def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt=''
             retry += 1
             chatbot[-1] = ((chatbot[-1][0], timeout_bot_msg))
             retry_msg = f"，正在重试 ({retry}/{MAX_RETRY}) ……" if MAX_RETRY > 0 else ""
-            yield chatbot, history, "请求超时"+retry_msg
+            yield chatbot, history, "请求失败"+retry_msg
             if retry > MAX_RETRY: raise TimeoutError
 
     gpt_replying_buffer = ""
