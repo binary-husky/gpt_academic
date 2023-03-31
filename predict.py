@@ -96,13 +96,19 @@ def predict_no_ui_long_connection(inputs, top_p, temperature, history=[], sys_pr
         except StopIteration: break
         if len(chunk)==0: continue
         if not chunk.startswith('data:'): 
-            chunk = get_full_error(chunk.encode('utf8'), stream_response)
-            raise ConnectionAbortedError("OpenAI拒绝了请求:" + chunk.decode())
-        delta = json.loads(chunk.lstrip('data:'))['choices'][0]["delta"]
+            error_msg = get_full_error(chunk.encode('utf8'), stream_response).decode()
+            if "reduce the length" in error_msg:
+                raise ConnectionAbortedError("OpenAI拒绝了请求:" + error_msg)
+            else:
+                raise RuntimeError("OpenAI拒绝了请求：" + error_msg)
+        json_data = json.loads(chunk.lstrip('data:'))['choices'][0]
+        delta = json_data["delta"]
         if len(delta) == 0: break
         if "role" in delta: continue
         if "content" in delta: result += delta["content"]; print(delta["content"], end='')
         else: raise RuntimeError("意外Json结构："+delta)
+    if json_data['finish_reason'] == 'length':
+        raise ConnectionAbortedError("正常结束，但显示Token不足。")
     return result
 
 
