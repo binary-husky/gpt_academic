@@ -1,1 +1,1 @@
-{"key": "4433", "agent": {"http": "socks5h://localhost:4433", "https": "socks5h://localhost:4433"}}
+{"key": "", "agent": {"http": "socks5h://localhost:", "https": "socks5h://localhost:"}}
