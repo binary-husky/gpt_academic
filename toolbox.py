@@ -1,6 +1,7 @@
-import markdown, mdtex2html, threading, importlib, traceback
+import markdown, mdtex2html, threading, importlib, traceback, importlib, inspect
 from show_math import convert as convert_math
 from functools import wraps
+import re
 
 def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[], sys_prompt=''):
     """
@@ -86,6 +87,17 @@ def CatchException(f):
             tb_str = regular_txt_to_markdown(traceback.format_exc())
             chatbot[-1] = (chatbot[-1][0], f"[Local Message] 实验性函数调用出错: \n\n {tb_str} \n\n 当前代理可用性: \n\n {check_proxy(proxies)}")
             yield chatbot, history, f'异常 {e}'
+    return decorated
+
+def HotReload(f):
+    """
+        装饰器函数，实现函数插件热更新
+    """
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        fn_name = f.__name__
+        f_hot_reload = getattr(importlib.reload(inspect.getmodule(f)), fn_name)
+        yield from f_hot_reload(*args, **kwargs)
     return decorated
 
 def report_execption(chatbot, history, a, b):
@@ -226,9 +238,14 @@ def get_conf(*args):
         except: r = getattr(importlib.import_module('config'), arg)
         res.append(r)
         # 在读取API_KEY时，检查一下是不是忘了改config
-        if arg=='API_KEY' and len(r) != 51:
-            assert False, "正确的API_KEY密钥是51位，请在config文件中修改API密钥, 添加海外代理之后再运行。" + \
-                        "（如果您刚更新过代码，请确保旧版config_private文件中没有遗留任何新增键值）"
+        if arg=='API_KEY':
+            # 正确的 API_KEY 是 "sk-" + 48 位大小写字母数字的组合
+            API_MATCH = re.match(r"sk-[a-zA-Z0-9]{48}$", r)
+            if API_MATCH:
+                print("您的 API_KEY 是: ", r, "\nAPI_KEY 导入成功")
+            else:
+                assert False, "正确的 API_KEY 是 'sk-' + '48 位大小写字母数字' 的组合，请在config文件中修改API密钥, 添加海外代理之后再运行。" + \
+                            "（如果您刚更新过代码，请确保旧版config_private文件中没有遗留任何新增键值）"
     return res
 
 def clear_line_break(txt):
