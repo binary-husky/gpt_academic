@@ -80,3 +80,15 @@ def adjust_theme():
     except: 
         set_theme = None; print('gradio版本较旧, 不能自定义字体和颜色')
     return set_theme
+
+advanced_css = """
+.markdown-body table {
+    border: 1px solid #ddd; 
+    border-collapse: collapse;
+}
+
+.markdown-body th, .markdown-body td {
+    border: 1px solid #ddd; 
+    padding: 5px;
+}
+"""
