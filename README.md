@@ -98,7 +98,7 @@ cd chatgpt_academic
 2. 配置 OpenAI API KEY。你需要在 OpenAI 官网上注册并获取 API KEY。一旦你拿到了 API KEY，在 config.py 文件里配置好即可。
 3. 与代理网络有关的issue（网络超时、代理不起作用）汇总到 https://github.com/binary-husky/chatgpt_academic/issues/1
 ```
-（P.S.我们建议将`config.py`复制为`config_private.py`，并将后者用作个性化配置文件以避免`config.py`中的变更影响你的使用，或不小心将包含你的OpenAI API KEY的`config.py`提交至github上。程序运行时`config_private.py`的读取优先级高于`config.py`。此外，如果出现任何异常的配置读取情况，请直接删除`config_private.py`，回归到只使用`config.py`的状态。）
+（P.S. 程序运行时会优先检查是否存在名为`config_private.py`的私密配置文件，并用其中的配置覆盖`config.py`的同名配置。因此，如果您能理解我们的配置读取逻辑，我们强烈建议您在`config.py`旁边创建一个名为`config_private.py`的新配置文件，并把`config.py`中的配置转移（复制）到`config_private.py`中。`config_private.py`不受git管控，可以让您的隐私信息更加安全。）
 
 
 ### 3. 安装依赖
