@@ -23,6 +23,8 @@ else:
 
 
 # [step 3]>> 以下配置可以优化体验，但大部分场合下并不需要修改
+# 对话窗的高度
+CHATBOT_HEIGHT = 1117
 
 # 发送请求到OpenAI后，等待多久判定为超时
 TIMEOUT_SECONDS = 25

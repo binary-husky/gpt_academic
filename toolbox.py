@@ -2,21 +2,21 @@ import markdown, mdtex2html, threading, importlib, traceback, importlib, inspect
 from show_math import convert as convert_math
 from functools import wraps
 
-def get_reduce_token_percent(e):
+def get_reduce_token_percent(text):
     try:
         # text = "maximum context length is 4097 tokens. However, your messages resulted in 4870 tokens"
         pattern = r"(\d+)\s+tokens\b"
         match = re.findall(pattern, text)
-        eps = 50 # 稍微留一点余地, 确保下次别再超过token
-        max_limit = float(match[0]) - eps
+        EXCEED_ALLO = 500 # 稍微留一点余地，否则在回复时会因余量太少出问题
+        max_limit = float(match[0]) - EXCEED_ALLO
         current_tokens = float(match[1])
         ratio = max_limit/current_tokens
         assert ratio > 0 and ratio < 1
-        return ratio
+        return ratio, str(int(current_tokens-max_limit))
     except:
-        return 0.5
+        return 0.5, '不详'
 
-def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[], sys_prompt='', long_connection=False):
+def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[], sys_prompt='', long_connection=True):
     """
         调用简单的predict_no_ui接口，但是依然保留了些许界面心跳功能，当对话太长时，会自动采用二分法截断
         i_say: 当前输入
@@ -45,19 +45,18 @@ def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temp
                 break
             except ConnectionAbortedError as token_exceeded_error:
                 # 尝试计算比例，尽可能多地保留文本
-                p_ratio = get_reduce_token_percent(str(token_exceeded_error))
+                p_ratio, n_exceed = get_reduce_token_percent(str(token_exceeded_error))
                 if len(history) > 0:
                     history = [his[     int(len(his)    *p_ratio):      ] for his in history if his is not None]
-                    mutable[1] = 'Warning! History conversation is too long, cut into half. '
                 else:
                     i_say = i_say[:     int(len(i_say)  *p_ratio)     ]
-                    mutable[1] = 'Warning! Input file is too long, cut into half. '
+                mutable[1] = f'警告，文本过长将进行截断，Token溢出数：{n_exceed}，截断比例：{(1-p_ratio):.0%}。'
             except TimeoutError as e:
-                mutable[0] = '[Local Message] Failed with timeout.'
+                mutable[0] = '[Local Message] 请求超时。'
                 raise TimeoutError
             except Exception as e:
-                mutable[0] = f'[Local Message] Failed with {str(e)}.'
-                raise RuntimeError(f'[Local Message] Failed with {str(e)}.')
+                mutable[0] = f'[Local Message] 异常：{str(e)}.'
+                raise RuntimeError(f'[Local Message] 异常：{str(e)}.')
     # 创建新线程发出http请求
     thread_name = threading.Thread(target=mt, args=(i_say, history)); thread_name.start()
     # 原来的线程则负责持续更新UI，实现一个超时倒计时，并等待新线程的任务完成
@@ -286,7 +285,7 @@ def on_report_generated(files, chatbot):
     report_files = find_recent_files('gpt_log')
     if len(report_files) == 0: return report_files, chatbot
     # files.extend(report_files)
-    chatbot.append(['汇总报告如何远程获取？', '汇总报告已经添加到右侧文件上传区，请查收。'])
+    chatbot.append(['汇总报告如何远程获取？', '汇总报告已经添加到右侧“文件上传区”（可能处于折叠状态），请查收。'])
     return report_files, chatbot
 
 def get_conf(*args):

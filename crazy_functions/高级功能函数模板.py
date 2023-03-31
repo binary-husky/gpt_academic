@@ -11,7 +11,7 @@ def 高阶功能模板函数(txt, top_p, temperature, chatbot, history, systemPr
     for i in range(5):
         currentMonth = (datetime.date.today() + datetime.timedelta(days=i)).month
         currentDay = (datetime.date.today() + datetime.timedelta(days=i)).day
-        i_say = f'历史中哪些事件发生在{currentMonth}月{currentDay}日？列举两条并发送相关图片。发送图片时，请使用Markdown，将Unsplash API中的PUT_YOUR_QUERY_HERE替换成描述改事件的三个最重要的单词。'
+        i_say = f'历史中哪些事件发生在{currentMonth}月{currentDay}日？列举两条并发送相关图片。发送图片时，请使用Markdown，将Unsplash API中的PUT_YOUR_QUERY_HERE替换成描述该事件的一个最重要的单词。'
         chatbot.append((i_say, "[Local Message] waiting gpt response."))
         yield chatbot, history, '正常'  # 由于请求gpt需要一段时间，我们先及时地做一次状态显示
 
