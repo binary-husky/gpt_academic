@@ -84,7 +84,10 @@ def write_results_to_file(history, file_name=None):
     with open(f'./gpt_log/{file_name}', 'w', encoding = 'utf8') as f:
         f.write('# chatGPT 分析报告\n')
         for i, content in enumerate(history):
-            if type(content) != str: content = str(content)
+            try:    # 这个bug没找到触发条件，暂时先这样顶一下
+                if type(content) != str: content = str(content)
+            except:
+                continue
             if i%2==0: f.write('## ')
             f.write(content)
             f.write('\n\n')
