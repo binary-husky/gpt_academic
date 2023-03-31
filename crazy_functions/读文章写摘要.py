@@ -11,7 +11,7 @@ def 解析Paper(file_manifest, project_folder, top_p, temperature, chatbot, hist
         if ".tex" in fp:
             with open(fp, 'r', encoding='utf-8') as f:
                 file_content = f.read()
-        if ".pdf" in fp:
+        if ".pdf" in fp.lower():
             file_content = readPdf(fp)
             file_content = BeautifulSoup(''.join(file_content), features="lxml").body.text.encode('gbk', 'ignore').decode('gbk')
 
