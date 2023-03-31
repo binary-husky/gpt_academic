@@ -57,24 +57,38 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False) as demo:
             with gr.Row():
                 from check_proxy import check_proxy
                 statusDisplay = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {check_proxy(proxies)}")
-            with gr.Row():
-                for k in functional:
-                    variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
-                    functional[k]["Button"] = gr.Button(k, variant=variant)
-            with gr.Row():
-                gr.Markdown("注意：以下“红颜色”标识的函数插件需从input区读取路径作为参数.")
-            with gr.Row():
-                for k in crazy_functional:
-                    variant = crazy_functional[k]["Color"] if "Color" in crazy_functional[k] else "secondary"
-                    crazy_functional[k]["Button"] = gr.Button(k, variant=variant)
-            with gr.Row():
-                gr.Markdown("上传本地文件，供上面的函数插件调用.")
-            with gr.Row():
-                file_upload = gr.Files(label='任何文件, 但推荐上传压缩文件(zip, tar)', file_count="multiple")
-            system_prompt = gr.Textbox(show_label=True, placeholder=f"System Prompt", label="System prompt", value=initial_prompt).style(container=True)
-            with gr.Accordion("arguments", open=False):
+            with gr.Accordion("基础功能区", open=True):
+                with gr.Row():
+                    for k in functional:
+                        variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
+                        functional[k]["Button"] = gr.Button(k, variant=variant)
+            with gr.Accordion("函数插件区", open=True):
+                with gr.Row():
+                    gr.Markdown("注意：以下“红颜色”标识的函数插件需从input区读取路径作为参数.")
+                with gr.Row():
+                    for k in crazy_functional:
+                        variant = crazy_functional[k]["Color"] if "Color" in crazy_functional[k] else "secondary"
+                        crazy_functional[k]["Button"] = gr.Button(k, variant=variant)
+                with gr.Row():
+                    with gr.Accordion("展开“文件上传区”。上传本地文件供“红颜色”的函数插件调用。", open=False):
+                        file_upload = gr.Files(label='任何文件, 但推荐上传压缩文件(zip, tar)', file_count="multiple")
+            with gr.Accordion("展开SysPrompt & GPT参数 & 交互界面布局", open=False):
+                system_prompt = gr.Textbox(show_label=True, placeholder=f"System Prompt", label="System prompt", value=initial_prompt)
                 top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01,interactive=True, label="Top-p (nucleus sampling)",)
                 temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature",)
+                checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区", "文件上传区"], value=["USA", "Japan", "Pakistan"], 
+                                                label="显示功能区")
+
+
+
+    def what_is_this(a):
+        return a
+
+    checkboxes.select(what_is_this, [checkboxes], [checkboxes])
+
+
+
+
 
     predict_args = dict(fn=predict, inputs=[txt, top_p, temperature, chatbot, history, system_prompt], outputs=[chatbot, history, statusDisplay], show_progress=True)
     empty_txt_args = dict(fn=lambda: "", inputs=[], outputs=[txt]) # 用于在提交后清空输入栏
