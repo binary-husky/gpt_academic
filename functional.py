@@ -21,12 +21,20 @@ def get_functionals():
             "Suffix":   r"",
         },
         "查找语法错误": {
-            "Prefix":   r"Below is a paragraph from an academic paper. " +
-                        r"Can you help me ensure that the grammar and the spelling is correct? " +
-                        r"Do not try to polish the text, if no mistake is found, tell me that this paragraph is good." + 
-                        r"If you find grammar or spelling mistakes, please list mistakes you find in a two-column markdown table, " + 
+            "Prefix":   r"Can you help me ensure that the grammar and the spelling is correct? " +
+                        r"Do not try to polish the text, if no mistake is found, tell me that this paragraph is good." +
+                        r"If you find grammar or spelling mistakes, please list mistakes you find in a two-column markdown table, " +
                         r"put the original text the first column, " +
-                        r"put the corrected text in the second column and highlight the key words you fixed." + "\n\n",
+                        r"put the corrected text in the second column and highlight the key words you fixed.""\n"
+                        r"Example:""\n"
+                        r"Paragraph: How is you? Do you knows what is it?""\n"
+                        r"| Original sentence | Corrected sentence |""\n"
+                        r"| :--- | :--- |""\n"
+                        r"| How **is** you? | How **are** you? |""\n"
+                        r"| Do you **knows** what **is** **it**? | Do you **know** what **it** **is** ? |""\n"
+                        r"Below is a paragraph from an academic paper. "
+                        r"You need to report all grammar and spelling mistakes as the example before."
+                        + "\n\n",
             "Suffix":   r"",
             "PreProcess": clear_line_break,    # 预处理：清除换行符
         },
@@ -34,9 +42,17 @@ def get_functionals():
             "Prefix":   r"Please translate following sentence to English:" + "\n\n",
             "Suffix":   r"",
         },
-        "学术中译英": {
-            "Prefix":   r"Please translate following sentence to English with academic writing, and provide some related authoritative examples:" + "\n\n",
-            "Suffix":   r"",
+        "学术中英互译": {
+            "Prefix":   r"I want you to act as a scientific English-Chinese translator, " +
+                        r"I will provide you with some paragraphs in one language " +
+                        r"and your task is to accurately and academically translate the paragraphs only into the other language. " +
+                        r"Do not repeat the original provided paragraphs after translation. " +
+                        r"You should use artificial intelligence tools, " +
+                        r"such as natural language processing, and rhetorical knowledge " +
+                        r"and experience about effective writing techniques to reply. " +
+                        r"I'll give you my paragraphs as follows, tell me what language it is written in, and then translate:" + "\n\n",
+            "Suffix": "",
+            "Color": "secondary",
         },
         "英译中": {
             "Prefix":   r"请翻译成中文：" + "\n\n",
