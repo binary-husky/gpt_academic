@@ -24,9 +24,9 @@ def random_hash():
     letters = string.ascii_lowercase + string.digits
     return ''.join(random.choice(letters) for i in range(9))
 
-async def run(context):
+async def run(context, max_token=512):
     params = {
-        'max_new_tokens': 512,
+        'max_new_tokens': max_token,
         'do_sample': True,
         'temperature': 0.5,
         'top_p': 0.9,
@@ -116,12 +116,15 @@ def predict_tgui(inputs, top_p, temperature, chatbot=[], history=[], system_prom
     prompt = inputs
     tgui_say = ""
 
-    mutable = [""]
+    mutable = ["", time.time()]
     def run_coorotine(mutable):
         async def get_result(mutable):
             async for response in run(prompt):
                 print(response[len(mutable[0]):])
                 mutable[0] = response
+                if (time.time() - mutable[1]) > 3: 
+                    print('exit when no listener')
+                    break
         asyncio.run(get_result(mutable))
 
     thread_listen = threading.Thread(target=run_coorotine, args=(mutable,), daemon=True)
@@ -129,6 +132,7 @@ def predict_tgui(inputs, top_p, temperature, chatbot=[], history=[], system_prom
 
     while thread_listen.is_alive():
         time.sleep(1)
+        mutable[1] = time.time()
         # Print intermediate steps
         if tgui_say != mutable[0]:
             tgui_say = mutable[0]
@@ -147,12 +151,17 @@ def predict_tgui_no_ui(inputs, top_p, temperature, history=[], sys_prompt=""):
     mutable = ["", time.time()]
     def run_coorotine(mutable):
         async def get_result(mutable):
-            async for response in run(prompt):
+            async for response in run(prompt, max_token=20):
                 print(response[len(mutable[0]):])
                 mutable[0] = response
+                if (time.time() - mutable[1]) > 3: 
+                    print('exit when no listener')
+                    break
         asyncio.run(get_result(mutable))
     thread_listen = threading.Thread(target=run_coorotine, args=(mutable,))
     thread_listen.start()
-    thread_listen.join()
+    while thread_listen.is_alive():
+        time.sleep(1)
+        mutable[1] = time.time()
     tgui_say = mutable[0]
     return tgui_say

@@ -11,8 +11,9 @@ proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT =
 PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
 if not AUTHENTICATION: AUTHENTICATION = None
 
+title = "ChatGPT 学术优化" if LLM_MODEL.startswith('gpt') else "ChatGPT / LLM 学术优化"
 initial_prompt = "Serve me as a writing and programming assistant."
-title_html = """<h1 align="center">ChatGPT 学术优化</h1>"""
+title_html = f"<h1 align=\"center\">{title}</h1>"
 
 # 问询记录, python 版本建议3.9+（越新越好）
 import logging
@@ -140,5 +141,5 @@ def auto_opentab_delay():
     threading.Thread(target=open, name="open-browser", daemon=True).start()
 
 auto_opentab_delay()
-demo.title = "ChatGPT 学术优化"
+demo.title = title
 demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", share=True, server_port=PORT, auth=AUTHENTICATION)
