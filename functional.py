@@ -9,7 +9,7 @@ def get_functionals():
         "英语学术润色": {
             # 前言
             "Prefix":   r"Below is a paragraph from an academic paper. Polish the writing to meet the academic style, " +
-                        r"improve the spelling, grammar, clarity, concision and overall readability. When neccessary, rewrite the whole sentence. " +
+                        r"improve the spelling, grammar, clarity, concision and overall readability. When necessary, rewrite the whole sentence. " +
                         r"Furthermore, list all modification and explain the reasons to do so in markdown table." + "\n\n",
             # 后语 
             "Suffix":   r"",
