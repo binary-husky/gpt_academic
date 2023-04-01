@@ -83,15 +83,23 @@ def adjust_theme():
 
 advanced_css = """
 .markdown-body table {
-    border: 1px solid #ddd; 
+    margin: 1em 0;
     border-collapse: collapse;
+    empty-cells: show;
 }
-
 .markdown-body th, .markdown-body td {
-    border: 1px solid #ddd; 
+    border: 1.2px solid var(--border-color-primary);
     padding: 5px;
 }
+.markdown-body thead {
+    background-color: rgba(175,184,193,0.2);
+}
+.markdown-body thead th {
+    padding: .5em .2em;
+}
+
 # 以下 CSS 来自对 https://github.com/GaiZhenbiao/ChuanhuChatGPT 的移植。
+
 /* list */
 ol:not(.options), ul:not(.options) {
     padding-inline-start: 2em !important;
@@ -115,22 +123,6 @@ ol:not(.options), ul:not(.options) {
     width: auto !important;
     border-bottom-right-radius: 0 !important;
 }
-/* 表格 
-table {
-    margin: 1em 0;
-    border-collapse: collapse;
-    empty-cells: show;
-}
-td,th {
-    border: 1.2px solid var(--border-color-primary) !important;
-    padding: 0.2em;
-}
-thead {
-    background-color: rgba(175,184,193,0.2);
-}
-thead th {
-    padding: .5em .2em;
-} */
 /* 行内代码 */
 code {
     display: inline;
