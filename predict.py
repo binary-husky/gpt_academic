@@ -244,7 +244,10 @@ def generate_payload(inputs, top_p, temperature, history, system_prompt, stream)
 
 
 if not LLM_MODEL.startswith('gpt'):
-    from request_llm.bridge_tgui import predict_tgui
+    # 函数重载到另一个文件
+    from request_llm.bridge_tgui import predict_tgui, predict_tgui_no_ui
     predict = predict_tgui
+    predict_no_ui = predict_tgui_no_ui
+    predict_no_ui_long_connection = predict_tgui_no_ui
 
     

@@ -11,6 +11,7 @@ import websockets
 import logging
 import time
 import threading
+import importlib
 from toolbox import get_conf
 LLM_MODEL, = get_conf('LLM_MODEL')
 
@@ -22,7 +23,7 @@ def random_hash():
 
 async def run(context):
     params = {
-        'max_new_tokens': 200,
+        'max_new_tokens': 1024,
         'do_sample': True,
         'temperature': 0.5,
         'top_p': 0.9,
@@ -103,9 +104,10 @@ def predict_tgui(inputs, top_p, temperature, chatbot=[], history=[], system_prom
         if "PreProcess" in functional[additional_fn]: inputs = functional[additional_fn]["PreProcess"](inputs)  # 获取预处理函数（如果有的话）
         inputs = functional[additional_fn]["Prefix"] + inputs + functional[additional_fn]["Suffix"]
 
-    raw_input = inputs
+    raw_input = "What I would like to say is the following: " + inputs
     logging.info(f'[raw_input] {raw_input}')
-    chatbot.append((inputs, ""))
+    history.extend([inputs, ""])
+    chatbot.append([inputs, ""])
     yield chatbot, history, "等待响应"
 
     prompt = inputs
@@ -113,11 +115,11 @@ def predict_tgui(inputs, top_p, temperature, chatbot=[], history=[], system_prom
 
     mutable = [""]
     def run_coorotine(mutable):
-        async def get_result():
+        async def get_result(mutable):
             async for response in run(prompt):
                 # Print intermediate steps
-                mutable += response
-        asyncio.run(get_result())
+                mutable[0] = response
+        asyncio.run(get_result(mutable))
 
     thread_listen = threading.Thread(target=run_coorotine, args=(mutable,))
     thread_listen.start()
@@ -129,9 +131,25 @@ def predict_tgui(inputs, top_p, temperature, chatbot=[], history=[], system_prom
             tgui_say = mutable[0]
             history[-1] = tgui_say
             chatbot[-1] = (history[-2], history[-1])
-            yield chatbot, history, status_text
+            yield chatbot, history, "status_text"
 
     logging.info(f'[response] {tgui_say}')
 
 
-    
+
+def predict_tgui_no_ui(inputs, top_p, temperature, history=[], sys_prompt=""):
+    raw_input = "What I would like to say is the following: " + inputs
+    prompt = inputs
+    tgui_say = ""
+    mutable = [""]
+    def run_coorotine(mutable):
+        async def get_result(mutable):
+            async for response in run(prompt):
+                # Print intermediate steps
+                mutable[0] = response
+        asyncio.run(get_result(mutable))
+    thread_listen = threading.Thread(target=run_coorotine, args=(mutable,))
+    thread_listen.start()
+    thread_listen.join()
+    tgui_say = mutable[0]
+    return tgui_say
