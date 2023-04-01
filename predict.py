@@ -112,8 +112,7 @@ def predict_no_ui_long_connection(inputs, top_p, temperature, history=[], sys_pr
     return result
 
 
-def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt='', 
-            stream = True, additional_fn=None):
+def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt='', stream = True, additional_fn=None):
     """
         发送至chatGPT，流式获取输出。
         用于基础的对话功能。
@@ -244,3 +243,8 @@ def generate_payload(inputs, top_p, temperature, history, system_prompt, stream)
     return headers,payload
 
 
+if not LLM_MODEL.startswith('gpt'):
+    from request_llm.bridge_tgui import predict_tgui
+    predict = predict_tgui
+
+    
