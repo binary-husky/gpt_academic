@@ -1,13 +1,34 @@
-import markdown, mdtex2html, threading, importlib, traceback
+import markdown, mdtex2html, threading, importlib, traceback, importlib, inspect, re
 from show_math import convert as convert_math
-from functools import wraps
+from functools import wraps, lru_cache
 
-def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[], sys_prompt=''):
+def get_reduce_token_percent(text):
+    try:
+        # text = "maximum context length is 4097 tokens. However, your messages resulted in 4870 tokens"
+        pattern = r"(\d+)\s+tokens\b"
+        match = re.findall(pattern, text)
+        EXCEED_ALLO = 500 # 稍微留一点余地，否则在回复时会因余量太少出问题
+        max_limit = float(match[0]) - EXCEED_ALLO
+        current_tokens = float(match[1])
+        ratio = max_limit/current_tokens
+        assert ratio > 0 and ratio < 1
+        return ratio, str(int(current_tokens-max_limit))
+    except:
+        return 0.5, '不详'
+
+def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[], sys_prompt='', long_connection=True):
     """
         调用简单的predict_no_ui接口，但是依然保留了些许界面心跳功能，当对话太长时，会自动采用二分法截断
+        i_say: 当前输入
+        i_say_show_user: 显示到对话界面上的当前输入，例如，输入整个文件时，你绝对不想把文件的内容都糊到对话界面上
+        chatbot: 对话界面句柄
+        top_p, temperature: gpt参数
+        history: gpt参数 对话历史
+        sys_prompt: gpt参数 sys_prompt
+        long_connection: 是否采用更稳定的连接方式（推荐）
     """
     import time
-    from predict import predict_no_ui
+    from predict import predict_no_ui, predict_no_ui_long_connection
     from toolbox import get_conf
     TIMEOUT_SECONDS, MAX_RETRY = get_conf('TIMEOUT_SECONDS', 'MAX_RETRY')
     # 多线程的时候，需要一个mutable结构在不同线程之间传递信息
@@ -17,18 +38,25 @@ def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temp
     def mt(i_say, history):
         while True:
             try:
-                mutable[0] = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature, history=history, sys_prompt=sys_prompt)
-                break
-            except ConnectionAbortedError as e:
-                if len(history) > 0:
-                    history = [his[len(his)//2:] for his in history if his is not None]
-                    mutable[1] = 'Warning! History conversation is too long, cut into half. '
+                if long_connection:
+                    mutable[0] = predict_no_ui_long_connection(inputs=i_say, top_p=top_p, temperature=temperature, history=history, sys_prompt=sys_prompt)
                 else:
-                    i_say = i_say[:len(i_say)//2]
-                    mutable[1] = 'Warning! Input file is too long, cut into half. '
+                    mutable[0] = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature, history=history, sys_prompt=sys_prompt)
+                break
+            except ConnectionAbortedError as token_exceeded_error:
+                # 尝试计算比例，尽可能多地保留文本
+                p_ratio, n_exceed = get_reduce_token_percent(str(token_exceeded_error))
+                if len(history) > 0:
+                    history = [his[     int(len(his)    *p_ratio):      ] for his in history if his is not None]
+                else:
+                    i_say = i_say[:     int(len(i_say)  *p_ratio)     ]
+                mutable[1] = f'警告，文本过长将进行截断，Token溢出数：{n_exceed}，截断比例：{(1-p_ratio):.0%}。'
             except TimeoutError as e:
-                mutable[0] = '[Local Message] Failed with timeout.'
+                mutable[0] = '[Local Message] 请求超时。'
                 raise TimeoutError
+            except Exception as e:
+                mutable[0] = f'[Local Message] 异常：{str(e)}.'
+                raise RuntimeError(f'[Local Message] 异常：{str(e)}.')
     # 创建新线程发出http请求
     thread_name = threading.Thread(target=mt, args=(i_say, history)); thread_name.start()
     # 原来的线程则负责持续更新UI，实现一个超时倒计时，并等待新线程的任务完成
@@ -92,6 +120,17 @@ def CatchException(f):
             yield chatbot, history, f'异常 {e}'
     return decorated
 
+def HotReload(f):
+    """
+        装饰器函数，实现函数插件热更新
+    """
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        fn_name = f.__name__
+        f_hot_reload = getattr(importlib.reload(inspect.getmodule(f)), fn_name)
+        yield from f_hot_reload(*args, **kwargs)
+    return decorated
+
 def report_execption(chatbot, history, a, b):
     """
         向chatbot中添加错误信息
@@ -118,11 +157,12 @@ def markdown_convertion(txt):
     """
         将Markdown格式的文本转换为HTML格式。如果包含数学公式，则先将公式转换为HTML格式。
     """
+    pre = '<div class="markdown-body">'
+    suf = '</div>'
     if ('$' in txt) and ('```' not in txt):
-        return markdown.markdown(txt,extensions=['fenced_code','tables']) + '<br><br>' + \
-            markdown.markdown(convert_math(txt, splitParagraphs=False),extensions=['fenced_code','tables'])
+        return pre + markdown.markdown(txt,extensions=['fenced_code','tables']) + '<br><br>' + markdown.markdown(convert_math(txt, splitParagraphs=False),extensions=['fenced_code','tables']) + suf
     else:
-        return markdown.markdown(txt,extensions=['fenced_code','tables'])
+        return pre + markdown.markdown(txt,extensions=['fenced_code','tables']) + suf
 
 
 def format_io(self, y):
@@ -168,8 +208,32 @@ def extract_archive(file_path, dest_dir):
         with tarfile.open(file_path, 'r:*') as tarobj:
             tarobj.extractall(path=dest_dir)
             print("Successfully extracted tar archive to {}".format(dest_dir))
+
+    # 第三方库，需要预先pip install rarfile
+    # 此外，Windows上还需要安装winrar软件，配置其Path环境变量，如"C:\Program Files\WinRAR"才可以
+    elif file_extension == '.rar':
+        try:
+            import rarfile
+            with rarfile.RarFile(file_path) as rf:
+                rf.extractall(path=dest_dir)
+                print("Successfully extracted rar archive to {}".format(dest_dir))
+        except:
+            print("Rar format requires additional dependencies to install")
+            return '\n\n需要安装pip install rarfile来解压rar文件'
+
+    # 第三方库，需要预先pip install py7zr
+    elif file_extension == '.7z':
+        try:
+            import py7zr
+            with py7zr.SevenZipFile(file_path, mode='r') as f:
+                f.extractall(path=dest_dir)
+                print("Successfully extracted 7z archive to {}".format(dest_dir))
+        except:
+            print("7z format requires additional dependencies to install")
+            return '\n\n需要安装pip install py7zr来解压7z文件'
     else:
-        return
+        return ''
+    return ''
 
 def find_recent_files(directory):
     """
@@ -201,16 +265,19 @@ def on_file_uploaded(files, chatbot, txt):
     except: pass
     time_tag = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
     os.makedirs(f'private_upload/{time_tag}', exist_ok=True)
+    err_msg = ''
     for file in files:
         file_origin_name = os.path.basename(file.orig_name)
         shutil.copy(file.name, f'private_upload/{time_tag}/{file_origin_name}')
-        extract_archive(f'private_upload/{time_tag}/{file_origin_name}', 
+        err_msg += extract_archive(f'private_upload/{time_tag}/{file_origin_name}',
                         dest_dir=f'private_upload/{time_tag}/{file_origin_name}.extract')
     moved_files = [fp for fp in glob.glob('private_upload/**/*', recursive=True)]
     txt = f'private_upload/{time_tag}'
     moved_files_str = '\t\n\n'.join(moved_files)
-    chatbot.append(['我上传了文件，请查收', 
-                    f'[Local Message] 收到以下文件: \n\n{moved_files_str}\n\n调用路径参数已自动修正到: \n\n{txt}\n\n现在您点击任意实验功能时，以上文件将被作为输入参数'])
+    chatbot.append(['我上传了文件，请查收',
+                    f'[Local Message] 收到以下文件: \n\n{moved_files_str}'+
+                    f'\n\n调用路径参数已自动修正到: \n\n{txt}'+
+                    f'\n\n现在您点击任意实验功能时，以上文件将被作为输入参数'+err_msg])
     return chatbot, txt
 
 
@@ -219,20 +286,36 @@ def on_report_generated(files, chatbot):
     report_files = find_recent_files('gpt_log')
     if len(report_files) == 0: return report_files, chatbot
     # files.extend(report_files)
-    chatbot.append(['汇总报告如何远程获取？', '汇总报告已经添加到右侧文件上传区，请查收。'])
+    chatbot.append(['汇总报告如何远程获取？', '汇总报告已经添加到右侧“文件上传区”（可能处于折叠状态），请查收。'])
     return report_files, chatbot
+
+@lru_cache
+def read_single_conf_with_lru_cache(arg):
+    try: r = getattr(importlib.import_module('config_private'), arg)
+    except: r = getattr(importlib.import_module('config'), arg)
+    # 在读取API_KEY时，检查一下是不是忘了改config
+    if arg=='API_KEY':
+        # 正确的 API_KEY 是 "sk-" + 48 位大小写字母数字的组合
+        API_MATCH = re.match(r"sk-[a-zA-Z0-9]{48}$", r)
+        if API_MATCH:
+            print(f"[API_KEY] 您的 API_KEY 是: {r[:15]}*** API_KEY 导入成功")
+        else:
+            assert False, "正确的 API_KEY 是 'sk-' + '48 位大小写字母数字' 的组合，请在config文件中修改API密钥, 添加海外代理之后再运行。" + \
+                        "（如果您刚更新过代码，请确保旧版config_private文件中没有遗留任何新增键值）"
+    if arg=='proxies':
+        if r is None: 
+            print('[PROXY] 网络代理状态：未配置。无代理状态下很可能无法访问。建议：检查USE_PROXY选项是否修改。')
+        else: 
+            print('[PROXY] 网络代理状态：已配置。配置信息如下：', r)
+            assert isinstance(r, dict), 'proxies格式错误，请注意proxies选项的格式，不要遗漏括号。'
+    return r
 
 def get_conf(*args):
     # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
     res = []
     for arg in args:
-        try: r = getattr(importlib.import_module('config_private'), arg)
-        except: r = getattr(importlib.import_module('config'), arg)
+        r = read_single_conf_with_lru_cache(arg)
         res.append(r)
-        # 在读取API_KEY时，检查一下是不是忘了改config
-        if arg=='API_KEY' and len(r) != 51:
-            assert False, "正确的API_KEY密钥是51位，请在config文件中修改API密钥, 添加海外代理之后再运行。" + \
-                        "（如果您刚更新过代码，请确保旧版config_private文件中没有遗留任何新增键值）"
     return res
 
 def clear_line_break(txt):
