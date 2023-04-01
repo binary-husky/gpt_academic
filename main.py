@@ -1,4 +1,5 @@
 import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
+import sys;sys.path.insert(0, os.path.split(os.path.realpath(__file__))[0]) # 将main.py所在的目录添加到sys.path
 import gradio as gr
 from predict import predict
 from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf
