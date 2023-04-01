@@ -38,6 +38,7 @@ def get_crazy_functionals():
         },
         "解析整个Go项目": {
             "Color": "stop",    # 按钮颜色
+            "AsButton": False,  # 加入下拉菜单中
             "Function": 解析一个Golang项目
         },
         "读Tex论文写摘要": {
