@@ -141,7 +141,7 @@ python main.py
 git clone https://github.com/binary-husky/chatgpt_academic.git
 cd chatgpt_academic
 # 配置 海外Proxy 和 OpenAI API KEY
-config.py
+用任意文本编辑器编辑 config.py
 # 安装
 docker build -t gpt-academic .
 # 运行
