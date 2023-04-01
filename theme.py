@@ -98,10 +98,10 @@ advanced_css = """
     padding: .5em .2em;
 }
 
-# 以下 CSS 来自对 https://github.com/GaiZhenbiao/ChuanhuChatGPT 的移植。
+/* 以下 CSS 来自对 https://github.com/GaiZhenbiao/ChuanhuChatGPT 的移植。*/
 
 /* list */
-ol:not(.options), ul:not(.options) {
+.markdown-body ol, .markdown-body ul {
     padding-inline-start: 2em !important;
 }
 /* 对话气泡 */
@@ -124,7 +124,7 @@ ol:not(.options), ul:not(.options) {
     border-bottom-right-radius: 0 !important;
 }
 /* 行内代码 */
-code {
+.markdown-body code {
     display: inline;
     white-space: break-spaces;
     border-radius: 6px;
@@ -133,7 +133,7 @@ code {
     background-color: rgba(175,184,193,0.2);
 }
 /* 代码块 */
-pre code {
+.markdown-body pre code {
     display: block;
     overflow: auto;
     white-space: pre;
