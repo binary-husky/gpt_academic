@@ -9,7 +9,7 @@ with open(os.path.join(dir_path, 'cfg.json')) as f:
     # 获取配置信息
     API_KEY = config['key']
     AGENT = config['agent']
-API_URL = "https://api.openai.com/v1/chat/completions"
+    API_URL = "https://api.openai.com/v1/chat/completions"
 
 
 # 改为True应用代理
