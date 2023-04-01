@@ -289,7 +289,7 @@ def on_report_generated(files, chatbot):
     chatbot.append(['汇总报告如何远程获取？', '汇总报告已经添加到右侧“文件上传区”（可能处于折叠状态），请查收。'])
     return report_files, chatbot
 
-@lru_cache
+@lru_cache(maxsize=128)
 def read_single_conf_with_lru_cache(arg):
     try: r = getattr(importlib.import_module('config_private'), arg)
     except: r = getattr(importlib.import_module('config'), arg)
