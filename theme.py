@@ -83,61 +83,12 @@ def adjust_theme():
 
 advanced_css = """
 .markdown-body table {
-    margin: 1em 0;
+    border: 1px solid #ddd; 
     border-collapse: collapse;
-    empty-cells: show;
 }
+
 .markdown-body th, .markdown-body td {
-    border: 1.2px solid var(--border-color-primary);
+    border: 1px solid #ddd; 
     padding: 5px;
-}
-.markdown-body thead {
-    background-color: rgba(175,184,193,0.2);
-}
-.markdown-body thead th {
-    padding: .5em .2em;
-}
-# 以下 CSS 来自对 https://github.com/GaiZhenbiao/ChuanhuChatGPT 的移植。
-/* list */
-ol:not(.options), ul:not(.options) {
-    padding-inline-start: 2em !important;
-}
-/* 对话气泡 */
-[class *= "message"] {
-    border-radius: var(--radius-xl) !important;
-    padding: var(--spacing-xl) !important;
-    font-size: var(--text-md) !important;
-    line-height: var(--line-md) !important;
-    min-height: calc(var(--text-md)*var(--line-md) + 2*var(--spacing-xl));
-    min-width: calc(var(--text-md)*var(--line-md) + 2*var(--spacing-xl));
-}
-[data-testid = "bot"] {
-    max-width: 85%;
-    width: auto !important;
-    border-bottom-left-radius: 0 !important;
-}
-[data-testid = "user"] {
-    max-width: 85%;
-    width: auto !important;
-    border-bottom-right-radius: 0 !important;
-}
-/* 行内代码 */
-code {
-    display: inline;
-    white-space: break-spaces;
-    border-radius: 6px;
-    margin: 0 2px 0 2px;
-    padding: .2em .4em .1em .4em;
-    background-color: rgba(175,184,193,0.2);
-}
-/* 代码块 */
-pre code {
-    display: block;
-    overflow: auto;
-    white-space: pre;
-    background-color: rgba(175,184,193,0.2);
-    border-radius: 10px;
-    padding: 1em;
-    margin: 1em 2em 1em 0.5em;
 }
 """
