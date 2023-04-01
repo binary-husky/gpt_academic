@@ -14,6 +14,7 @@ def get_crazy_functionals():
     from crazy_functions.解析项目源代码 import 解析一个Python项目
     from crazy_functions.解析项目源代码 import 解析一个C项目的头文件
     from crazy_functions.解析项目源代码 import 解析一个C项目
+    from crazy_functions.解析项目源代码 import 解析一个Golang项目
     from crazy_functions.高级功能函数模板 import 高阶功能模板函数
     from crazy_functions.代码重写为全英文_多线程 import 全项目切换英文
 
@@ -34,6 +35,11 @@ def get_crazy_functionals():
             "Color": "stop",    # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
             "Function": 解析一个C项目
+        },
+        "解析整个Go项目": {
+            "Color": "stop",    # 按钮颜色
+            "AsButton": False,  # 加入下拉菜单中
+            "Function": 解析一个Golang项目
         },
         "读Tex论文写摘要": {
             "Color": "stop",    # 按钮颜色
