@@ -26,7 +26,7 @@ def random_hash():
 
 async def run(context):
     params = {
-        'max_new_tokens': 1024,
+        'max_new_tokens': 512,
         'do_sample': True,
         'temperature': 0.5,
         'top_p': 0.9,
@@ -39,7 +39,7 @@ async def run(context):
         'num_beams': 1,
         'penalty_alpha': 0,
         'length_penalty': 1,
-        'early_stopping': False,
+        'early_stopping': True,
         'seed': -1,
     }
     session = random_hash()
@@ -144,7 +144,7 @@ def predict_tgui_no_ui(inputs, top_p, temperature, history=[], sys_prompt=""):
     raw_input = "What I would like to say is the following: " + inputs
     prompt = inputs
     tgui_say = ""
-    mutable = [""]
+    mutable = ["", time.time()]
     def run_coorotine(mutable):
         async def get_result(mutable):
             async for response in run(prompt):
