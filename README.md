@@ -36,16 +36,14 @@ https://github.com/polarwinkel/mdtex2html
 自定义快捷键 | 支持自定义快捷键
 配置代理服务器 | 支持配置代理服务器
 模块化设计 | 支持自定义高阶的实验性功能
-自我程序剖析 | [函数插件] 一键读懂本项目的源代码
-程序剖析 | [函数插件] 一键可以剖析其他Python/C++等项目
-读论文 | [函数插件] 一键解读latex论文全文并生成摘要
-arxiv小助手 | [函数插件] 输入url一键翻译摘要+下载论文
-批量注释生成 | [函数插件] 一键批量生成函数注释
-chat分析报告生成 | [函数插件] 运行后自动生成总结汇报
+自我程序剖析 | [实验性功能] 一键读懂本项目的源代码
+程序剖析 | [实验性功能] 一键可以剖析其他Python/C++项目
+读论文 | [实验性功能] 一键解读latex论文全文并生成摘要
+批量注释生成 | [实验性功能] 一键批量生成函数注释
+chat分析报告生成 | [实验性功能] 运行后自动生成总结汇报
 公式显示 | 可以同时显示公式的tex形式和渲染形式
 图片显示 | 可以在markdown中显示图片
 支持GPT输出的markdown表格 | 可以输出支持GPT的markdown表格
-本地大语言模型接口 | 借助[TGUI](https://github.com/oobabooga/text-generation-webui)接入galactica等本地语言模型
 …… | ……
 
 </div>
@@ -194,7 +192,7 @@ input区域 输入 ./crazy_functions/test_project/python/dqn ， 然后点击 "[
 如果你发明了更好用的学术快捷键，欢迎发issue或者pull requests！
 
 ## 配置代理
-
+### 方法一：常规方法
 在```config.py```中修改端口与代理软件对应
 
 <div align="center">
@@ -206,6 +204,8 @@ input区域 输入 ./crazy_functions/test_project/python/dqn ， 然后点击 "[
 ```
 python check_proxy.py
 ```
+### 方法二：纯新手教程
+[纯新手教程](https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BB%A3%E7%90%86%E8%BD%AF%E4%BB%B6%E9%97%AE%E9%A2%98%E7%9A%84%E6%96%B0%E6%89%8B%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95%EF%BC%88%E6%96%B9%E6%B3%95%E5%8F%AA%E9%80%82%E7%94%A8%E4%BA%8E%E6%96%B0%E6%89%8B%EF%BC%89)
 
 ## 兼容性测试
 

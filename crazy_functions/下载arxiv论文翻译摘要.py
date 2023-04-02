@@ -134,8 +134,7 @@ def get_name(_url_):
 @CatchException
 def 下载arxiv论文并翻译摘要(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
 
-    CRAZY_FUNCTION_INFO = "下载arxiv论文并翻译摘要，作者 binary-husky。正在提取摘要并下载PDF文档……"
-    raise RuntimeError()
+    CRAZY_FUNCTION_INFO = "下载arxiv论文并翻译摘要，函数插件作者[binary-husky]。正在提取摘要并下载PDF文档……"
     import glob
     import os
 
@@ -180,8 +179,8 @@ def 下载arxiv论文并翻译摘要(txt, top_p, temperature, chatbot, history, 
     # 写入文件
     import shutil
     # 重置文件的创建时间
-    shutil.copyfile(pdf_path, pdf_path.replace('.pdf', '.autodownload.pdf')); os.remove(pdf_path)
+    shutil.copyfile(pdf_path, f'./gpt_log/{os.path.basename(pdf_path)}'); os.remove(pdf_path)
     res = write_results_to_file(history)
-    chatbot.append(("完成了吗？", res))
+    chatbot.append(("完成了吗？", res + "\n\nPDF文件也已经下载"))
     yield chatbot, history, msg
 
