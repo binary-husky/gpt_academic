@@ -259,5 +259,5 @@ python check_proxy.py
 
 - (Top Priority) 调用另一个开源项目text-generation-webui的web接口，使用其他llm模型
 - 总结大工程源代码时，文本过长、token溢出的问题（目前的方法是直接二分丢弃处理溢出，过于粗暴，有效信息大量丢失）
-- UI不够美观
+
 
