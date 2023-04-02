@@ -11,9 +11,8 @@ proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT =
 PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
 if not AUTHENTICATION: AUTHENTICATION = None
 
-title = "ChatGPT 学术优化" if LLM_MODEL.startswith('gpt') else "ChatGPT / LLM 学术优化"
 initial_prompt = "Serve me as a writing and programming assistant."
-title_html = f"<h1 align=\"center\">{title}</h1>"
+title_html = """<h1 align="center">ChatGPT 学术优化</h1>"""
 
 # 问询记录, python 版本建议3.9+（越新越好）
 import logging
@@ -120,7 +119,7 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False, css=advanced_css) as de
     dropdown.select(on_dropdown_changed, [dropdown], [switchy_bt] )
     # 随变按钮的回调函数注册
     def route(k, *args, **kwargs):
-        if k in [r"打开插件列表", r"先从插件列表中选择"]: return 
+        if k in [r"打开插件列表", r"请先从插件列表中选择"]: return 
         yield from crazy_fns[k]["Function"](*args, **kwargs)
     click_handle = switchy_bt.click(route,[switchy_bt, *input_combo, gr.State(PORT)], output_combo)
     click_handle.then(on_report_generated, [file_upload, chatbot], [file_upload, chatbot])
@@ -141,5 +140,5 @@ def auto_opentab_delay():
     threading.Thread(target=open, name="open-browser", daemon=True).start()
 
 auto_opentab_delay()
-demo.title = title
+demo.title = "ChatGPT 学术优化"
 demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", share=True, server_port=PORT, auth=AUTHENTICATION)
