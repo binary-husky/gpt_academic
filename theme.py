@@ -107,20 +107,20 @@ advanced_css = """
 /* 对话气泡 */
 [class *= "message"] {
     border-radius: var(--radius-xl) !important;
-    padding: var(--spacing-xl) !important;
-    font-size: var(--text-md) !important;
-    line-height: var(--line-md) !important;
-    min-height: calc(var(--text-md)*var(--line-md) + 2*var(--spacing-xl));
-    min-width: calc(var(--text-md)*var(--line-md) + 2*var(--spacing-xl));
+    /* padding: var(--spacing-xl) !important; */
+    /* font-size: var(--text-md) !important; */
+    /* line-height: var(--line-md) !important; */
+    /* min-height: calc(var(--text-md)*var(--line-md) + 2*var(--spacing-xl)); */
+    /* min-width: calc(var(--text-md)*var(--line-md) + 2*var(--spacing-xl)); */
 }
 [data-testid = "bot"] {
-    max-width: 85%;
-    width: auto !important;
+    max-width: 95%;
+    /* width: auto !important; */
     border-bottom-left-radius: 0 !important;
 }
 [data-testid = "user"] {
-    max-width: 85%;
-    width: auto !important;
+    max-width: 100%;
+    /* width: auto !important; */
     border-bottom-right-radius: 0 !important;
 }
 /* 行内代码 */
