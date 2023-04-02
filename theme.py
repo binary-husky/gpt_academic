@@ -82,29 +82,35 @@ def adjust_theme():
     return set_theme
 
 advanced_css = """
+/* 设置表格的外边距为1em，内部单元格之间边框合并，空单元格显示. */
 .markdown-body table {
     margin: 1em 0;
     border-collapse: collapse;
     empty-cells: show;
 }
+
+/* 设置表格单元格的内边距为5px，边框粗细为1.2px，颜色为--border-color-primary. */
 .markdown-body th, .markdown-body td {
     border: 1.2px solid var(--border-color-primary);
     padding: 5px;
 }
+
+/* 设置表头背景颜色为rgba(175,184,193,0.2)，透明度为0.2. */
 .markdown-body thead {
     background-color: rgba(175,184,193,0.2);
 }
+
+/* 设置表头单元格的内边距为0.5em和0.2em. */
 .markdown-body thead th {
     padding: .5em .2em;
 }
 
-/* 以下 CSS 来自对 https://github.com/GaiZhenbiao/ChuanhuChatGPT 的移植。*/
-
-/* list */
+/* 去掉列表前缀的默认间距，使其与文本线对齐. */
 .markdown-body ol, .markdown-body ul {
     padding-inline-start: 2em !important;
 }
-/* 对话气泡 */
+
+/* 设定聊天气泡的样式，包括圆角、最大宽度和阴影等. */
 [class *= "message"] {
     border-radius: var(--radius-xl) !important;
     /* padding: var(--spacing-xl) !important; */
@@ -123,7 +129,8 @@ advanced_css = """
     /* width: auto !important; */
     border-bottom-right-radius: 0 !important;
 }
-/* 行内代码 */
+
+/* 行内代码的背景设为淡灰色，设定圆角和间距. */
 .markdown-body code {
     display: inline;
     white-space: break-spaces;
@@ -132,7 +139,7 @@ advanced_css = """
     padding: .2em .4em .1em .4em;
     background-color: rgba(175,184,193,0.2);
 }
-/* 代码块 */
+/* 设定代码块的样式，包括背景颜色、内、外边距、圆角。 */
 .markdown-body pre code {
     display: block;
     overflow: auto;
