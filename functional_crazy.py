@@ -17,6 +17,7 @@ def get_crazy_functionals():
     from crazy_functions.解析项目源代码 import 解析一个Golang项目
     from crazy_functions.解析项目源代码 import 解析一个Java项目
     from crazy_functions.解析项目源代码 import 解析一个Rect项目
+    from crazy_functions.解析项目源代码 import 解析一个txt文本项目
     from crazy_functions.高级功能函数模板 import 高阶功能模板函数
     from crazy_functions.代码重写为全英文_多线程 import 全项目切换英文
 
@@ -48,10 +49,15 @@ def get_crazy_functionals():
             "AsButton": False,  # 加入下拉菜单中
             "Function": 解析一个Java项目
         },
-        "解析整个Java项目": {
+        "解析整个Rect项目": {
             "Color": "stop",  # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
             "Function": 解析一个Rect项目
+        },
+        "总结整个txt项目": {
+            "Color": "stop",  # 按钮颜色
+            "AsButton": False,  # 加入下拉菜单中
+            "Function": 解析一个txt文本项目
         },
         "读Tex论文写摘要": {
             "Color": "stop",    # 按钮颜色
