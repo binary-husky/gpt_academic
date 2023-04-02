@@ -1,13 +1,8 @@
 from toolbox import HotReload # HotReload 的意思是热更新，修改函数插件后，不需要重启程序，代码直接生效
 
-# UserVisibleLevel是过滤器参数。
-# 由于UI界面空间有限，所以通过这种方式决定UI界面中显示哪些插件
-# 默认函数插件 VisibleLevel 是 0
-# 当 UserVisibleLevel >= 函数插件的 VisibleLevel 时，该函数插件才会被显示出来
-UserVisibleLevel = 1
-
-
 def get_crazy_functionals():
+    ###################### 第一组插件 ###########################
+    # [第一组插件]: 最早期编写的项目插件和一些demo
     from crazy_functions.读文章写摘要 import 读文章写摘要
     from crazy_functions.生成函数注释 import 批量生成函数注释
     from crazy_functions.解析项目源代码 import 解析项目本身
@@ -70,33 +65,44 @@ def get_crazy_functionals():
             "Function": HotReload(高阶功能模板函数)
         },
     }
+    ###################### 第二组插件 ###########################
+    # [第二组插件]: 经过充分测试，但功能上距离达到完美状态还差一点点
+    from crazy_functions.批量总结PDF文档 import 批量总结PDF文档
+    from crazy_functions.批量总结PDF文档pdfminer import 批量总结PDF文档pdfminer
+    from crazy_functions.总结word文档 import 总结word文档
+    function_plugins.update({
+        "[仅供开发调试] 批量总结PDF文档": {
+            "Color": "stop",
+            "Function": HotReload(批量总结PDF文档) # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
+        },
+        "[仅供开发调试] 批量总结PDF文档pdfminer": {
+            "Color": "stop",
+            "AsButton": False,  # 加入下拉菜单中
+            "Function": HotReload(批量总结PDF文档pdfminer)
+        },
+        "[仅供开发调试] 批量总结Word文档": {
+            "Color": "stop",
+            "Function": HotReload(总结word文档)
+        },
+    })
 
-    # VisibleLevel=1 经过测试，但功能上距离达到完美状态还差一点点
-    if UserVisibleLevel >= 1:
-        from crazy_functions.批量总结PDF文档 import 批量总结PDF文档
-        from crazy_functions.批量总结PDF文档pdfminer import 批量总结PDF文档pdfminer
-        from crazy_functions.总结word文档 import 总结word文档
+    ###################### 第三组插件 ###########################
+    # [第三组插件]: 尚未充分测试的函数插件，放在这里
+    try:
+        from crazy_functions.下载arxiv论文翻译摘要 import 下载arxiv论文并翻译摘要
         function_plugins.update({
-            "[仅供开发调试] 批量总结PDF文档": {
-                "Color": "stop",
-                "Function": HotReload(批量总结PDF文档) # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
-            },
-            "[仅供开发调试] 批量总结PDF文档pdfminer": {
+            "下载arxiv论文并翻译摘要": {
                 "Color": "stop",
                 "AsButton": False,  # 加入下拉菜单中
-                "Function": HotReload(批量总结PDF文档pdfminer)
-            },
-            "[仅供开发调试] 批量总结Word文档": {
-                "Color": "stop",
-                "Function": HotReload(总结word文档)
-            },
+                "Function": HotReload(下载arxiv论文并翻译摘要)
+            }
         })
+    except Exception as err:
+        print(f'[下载arxiv论文并翻译摘要] 插件导入失败 {str(err)}')
 
-    # VisibleLevel=2 尚未充分测试的函数插件，放在这里
-    if UserVisibleLevel >= 2:
-        function_plugins.update({
-        })
 
+
+    ###################### 第n组插件 ###########################
     return function_plugins
 
 
