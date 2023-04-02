@@ -12,7 +12,8 @@ PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
 if not AUTHENTICATION: AUTHENTICATION = None
 
 initial_prompt = "Serve me as a writing and programming assistant."
-title_html = """<h1 align="center">ChatGPT 学术优化</h1>"""
+title_html = "<h1 align=\"center\">ChatGPT 学术优化</h1>"
+description =  """代码开源和更新[地址🚀](https://github.com/binary-husky/chatgpt_academic)，感谢热情的[开发者们❤️](https://github.com/binary-husky/chatgpt_academic/graphs/contributors)"""
 
 # 问询记录, python 版本建议3.9+（越新越好）
 import logging
@@ -78,12 +79,12 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False, css=advanced_css) as de
                 with gr.Row():
                     with gr.Accordion("点击展开“文件上传区”。上传本地文件可供红色函数插件调用。", open=False) as area_file_up:
                         file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)", file_count="multiple")
-            with gr.Accordion("展开SysPrompt & GPT参数 & 交互界面布局", open=False):
+            with gr.Accordion("展开SysPrompt & 交互界面布局 & Github地址", open=False):
                 system_prompt = gr.Textbox(show_label=True, placeholder=f"System Prompt", label="System prompt", value=initial_prompt)
                 top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01,interactive=True, label="Top-p (nucleus sampling)",)
                 temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature",)
                 checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区"], value=["基础功能区", "函数插件区"], label="显示/隐藏功能区")
-
+                gr.Markdown(description)
     # 功能区显示开关与功能区的互动
     def fn_area_visibility(a):
         ret = {}
