@@ -2,9 +2,9 @@
 
 # ChatGPT 学术优化
 
-**如果喜欢这个项目，请给它一个Star；如果你发明了更好用的学术快捷键，欢迎发issue或者pull requests（dev分支）**
+**如果喜欢这个项目，请给它一个Star；如果你发明了更好用的快捷键或函数插件，欢迎发issue或者pull requests（dev分支）**
 
-If you like this project, please give it a Star. If you've come up with more useful academic shortcuts, feel free to open an issue or pull request （to `dev` branch）.
+If you like this project, please give it a Star. If you've come up with more useful academic shortcuts or functional plugins, feel free to open an issue or pull request （to `dev` branch）.
 
 ```
 代码中参考了很多其他优秀项目中的设计，主要包括：
