@@ -91,7 +91,7 @@ def get_crazy_functionals():
     try:
         from crazy_functions.下载arxiv论文翻译摘要 import 下载arxiv论文并翻译摘要
         function_plugins.update({
-            "下载arxiv论文并翻译摘要": {
+            "一键下载arxiv论文并翻译摘要（先在input输入编号，如1812.10695）": {
                 "Color": "stop",
                 "AsButton": False,  # 加入下拉菜单中
                 "Function": HotReload(下载arxiv论文并翻译摘要)
