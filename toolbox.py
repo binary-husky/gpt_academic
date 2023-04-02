@@ -176,7 +176,7 @@ def close_up_code_segment_during_stream(gpt_reply):
     segments = gpt_reply.split('```')
     n_mark = len(segments) - 1
     if n_mark % 2 == 1:
-        print('输出代码片段中！')
+        # print('输出代码片段中！')
         return gpt_reply+'\n```'
     else:
         return gpt_reply
