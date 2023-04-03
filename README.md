@@ -115,7 +115,7 @@ python -m pip install -r requirements.txt
 # （选择二.2）conda activate gptac_venv
 # （选择二.3）python -m pip install -r requirements.txt
 
-# 备注：使用官方pip源或者阿里pip源，其他pip源（如清华pip）有可能出问题，临时换源方法： 
+# 备注：使用官方pip源或者阿里pip源，其他pip源（如一些大学的pip）有可能出问题，临时换源方法： 
 # python -m pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 ```
 
