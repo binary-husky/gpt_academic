@@ -43,7 +43,7 @@ def get_crazy_functionals():
             "AsButton": False,  # 加入下拉菜单中
             "Function": 解析一个Java项目
         },
-        "解析整个Java项目": {
+        "解析整个React项目": {
             "Color": "stop",  # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
             "Function": 解析一个Rect项目
