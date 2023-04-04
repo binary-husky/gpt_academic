@@ -26,7 +26,7 @@ import gradio as gr
 
 def adjust_theme():
     try: 
-        color_er = gr.themes.utils.colors.pink
+        color_er = gr.themes.utils.colors.fuchsia
         set_theme = gr.themes.Default( 
                         primary_hue=gr.themes.utils.colors.orange,
                         neutral_hue=gr.themes.utils.colors.gray,
