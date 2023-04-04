@@ -146,7 +146,7 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False, css=advanced_css) as de
     # 随变按钮的回调函数注册
     def route(k, *args, **kwargs):
         if k in [r"打开插件列表", r"请先从插件列表中选择"]: return 
-        yield from ArgsGeneralWrapper(crazy_fns[k])["Function"](*args, **kwargs)
+        yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(*args, **kwargs)
     click_handle = switchy_bt.click(route,[switchy_bt, *input_combo, gr.State(PORT)], output_combo)
     click_handle.then(on_report_generated, [file_upload, chatbot], [file_upload, chatbot])
     # def expand_file_area(file_upload, area_file_up):
