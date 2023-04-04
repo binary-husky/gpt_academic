@@ -1,5 +1,5 @@
 {
   "version": 2.3,
-  "show_feature": false,
+  "show_feature": true,
   "new_feature": "修复多线程插件Bug；加入版本检查功能。"
 }
