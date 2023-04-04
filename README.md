@@ -257,6 +257,13 @@ python check_proxy.py
 <img src="https://user-images.githubusercontent.com/96192199/227504931-19955f78-45cd-4d1c-adac-e71e50957915.png" height="400" >
 </div>
 
+
+### 源代码转译英文
+
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/229720562-fe6c3508-6142-4635-a83d-21eb3669baee.png" height="400" >
+</div>
+
 ## Todo:
 
 - (Top Priority) 调用另一个开源项目text-generation-webui的web接口，使用其他llm模型
