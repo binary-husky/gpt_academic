@@ -4,8 +4,8 @@ from predict import predict
 from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf
 
 # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
-proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT = \
-    get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT')
+proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, TITLE_HTML, TIP_MD  = \
+    get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'TITLE_HTML', 'TIP_MD',)
 
 # 如果WEB_PORT是-1, 则随机选取WEB端口
 PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
@@ -39,6 +39,9 @@ set_theme = adjust_theme()
 cancel_handles = []
 with gr.Blocks(theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
     gr.HTML(title_html)
+    from check_proxy import check_proxy
+    if 0 == len(TIP_MD): TIP_MD = f"<div align='center'>Tip: 按`Enter`提交, 按`Shift+Enter`换行<br>当前模型: {LLM_MODEL}<br>{check_proxy(proxies)}</div>"
+    gr.Markdown(TIP_MD)
     with gr.Row().style(equal_height=True):
         with gr.Column(scale=2):
             chatbot = gr.Chatbot()
@@ -52,9 +55,6 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False, css=advanced_css) as de
             with gr.Row():
                 resetBtn = gr.Button("重置", variant="secondary"); resetBtn.style(size="sm")
                 stopBtn = gr.Button("停止", variant="secondary"); stopBtn.style(size="sm")
-            with gr.Row():
-                from check_proxy import check_proxy
-                status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {check_proxy(proxies)}")
             with gr.Accordion("基础功能区", open=True) as area_basic_fn:
                 with gr.Row():
                     for k in functional:
@@ -93,7 +93,7 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False, css=advanced_css) as de
     checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn] )
     # 整理反复出现的控件句柄组合
     input_combo = [txt, top_p, temperature, chatbot, history, system_prompt]
-    output_combo = [chatbot, history, status]
+    output_combo = [chatbot, history]
     predict_args = dict(fn=predict, inputs=input_combo, outputs=output_combo)
     empty_txt_args = dict(fn=lambda: "", inputs=[], outputs=[txt]) # 用于在提交后清空输入栏
     # 提交按钮、重置按钮
@@ -140,5 +140,6 @@ def auto_opentab_delay():
     threading.Thread(target=open, name="open-browser", daemon=True).start()
 
 auto_opentab_delay()
-demo.title = "ChatGPT 学术优化"
+if 0 == len(TITLE_HTML): TITLE_HTML = "ChatGPT 学术优化"
+demo.title = TITLE_HTML
 demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", share=True, server_port=PORT, auth=AUTHENTICATION)

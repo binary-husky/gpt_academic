@@ -44,3 +44,9 @@ CONCURRENT_COUNT = 100
 
 # 设置用户名和密码
 AUTHENTICATION = [] # [("username", "password"), ("username2", "password2"), ...]
+
+# title_html
+TITLE_HTML = ""
+
+# title_html下面的TIP(markdown格式)
+TIP_MD = ""
