@@ -2,6 +2,18 @@ import markdown, mdtex2html, threading, importlib, traceback, importlib, inspect
 from show_math import convert as convert_math
 from functools import wraps, lru_cache
 
+def ArgsGeneralWrapper(f):
+    """
+        装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
+    """
+    def decorated(txt, txt2, top_p, temperature, chatbot, history, system_prompt, *args, **kwargs):
+        txt_passon = txt
+        if txt == "" and txt2 != "": txt_passon = txt2
+        yield from f(txt_passon, top_p, temperature, chatbot, history, system_prompt, *args, **kwargs)
+
+    return decorated
+
+
 def get_reduce_token_percent(text):
     try:
         # text = "maximum context length is 4097 tokens. However, your messages resulted in 4870 tokens"
@@ -116,7 +128,7 @@ def CatchException(f):
             from toolbox import get_conf
             proxies, = get_conf('proxies')
             tb_str = '```\n' + traceback.format_exc() + '```'
-            if len(chatbot) == 0: chatbot.append(["插件调度异常","异常原因"])
+            if chatbot is None or len(chatbot) == 0: chatbot = [["插件调度异常","异常原因"]]
             chatbot[-1] = (chatbot[-1][0], f"[Local Message] 实验性函数调用出错: \n\n{tb_str} \n\n当前代理可用性: \n\n{check_proxy(proxies)}")
             yield chatbot, history, f'异常 {e}'
     return decorated
@@ -129,7 +141,7 @@ def HotReload(f):
     def decorated(*args, **kwargs):
         fn_name = f.__name__
         f_hot_reload = getattr(importlib.reload(inspect.getmodule(f)), fn_name)
-        yield from f_hot_reload(*args, **kwargs)
+        yield from ArgsGeneralWrapper(f_hot_reload)(*args, **kwargs)
     return decorated
 
 def report_execption(chatbot, history, a, b):
