@@ -135,7 +135,7 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False, css=advanced_css) as de
     # 函数插件-固定按钮区
     for k in crazy_fns:
         if not crazy_fns[k].get("AsButton", True): continue
-        click_handle = crazy_fns[k]["Button"].click(crazy_fns[k]["Function"], [*input_combo, gr.State(PORT)], output_combo)
+        click_handle = crazy_fns[k]["Button"].click(ArgsGeneralWrapper(crazy_fns[k]["Function"]), [*input_combo, gr.State(PORT)], output_combo)
         click_handle.then(on_report_generated, [file_upload, chatbot], [file_upload, chatbot])
         cancel_handles.append(click_handle)
     # 函数插件-下拉菜单与随变按钮的互动
