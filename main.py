@@ -41,7 +41,7 @@ cancel_handles = []
 with gr.Blocks(theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
     gr.HTML(title_html)
     from check_proxy import check_proxy
-    if 0 == len(TIP_MD): TIP_MD = f"<div align='center'>Tip: 按`Enter`提交, 按`Shift+Enter`换行<br>当前模型: {LLM_MODEL}<br>{check_proxy(proxies)}</div>"
+    if 0 == len(TIP_MD): TIP_MD = f"<div align='center'>Tip: 按Enter提交, 按Shift+Enter换行<br>当前模型: {LLM_MODEL}<br>{check_proxy(proxies)}</div>"
     gr.Markdown(TIP_MD)
     with gr.Row().style(equal_height=True):
         with gr.Column(scale=2):
