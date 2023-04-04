@@ -354,3 +354,9 @@ def clear_line_break(txt):
     txt = txt.replace('  ', ' ')
     txt = txt.replace('  ', ' ')
     return txt
+
+class DummyWith():
+    def __enter__(self):
+        return self
+    def __exit__(self, exc_type, exc_value, traceback):
+        return
