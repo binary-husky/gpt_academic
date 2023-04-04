@@ -18,43 +18,43 @@ def get_crazy_functionals():
     function_plugins = {
         "请解析并解构此项目本身（源码自译解）": {
             "AsButton": False,  # 加入下拉菜单中
-            "Function": 解析项目本身
+            "Function": HotReload(解析项目本身)
         },
         "解析整个Py项目": {
             "Color": "stop",    # 按钮颜色
-            "Function": 解析一个Python项目
+            "Function": HotReload(解析一个Python项目)
         },
         "解析整个C++项目头文件": {
             "Color": "stop",    # 按钮颜色
-            "Function": 解析一个C项目的头文件
+            "Function": HotReload(解析一个C项目的头文件)
         },
         "解析整个C++项目（.cpp/.h）": {
             "Color": "stop",    # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
-            "Function": 解析一个C项目
+            "Function": HotReload(解析一个C项目)
         },
         "解析整个Go项目": {
             "Color": "stop",    # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
-            "Function": 解析一个Golang项目
+            "Function": HotReload(解析一个Golang项目)
         },
         "解析整个Java项目": {
             "Color": "stop",  # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
-            "Function": 解析一个Java项目
+            "Function": HotReload(解析一个Java项目)
         },
         "解析整个React项目": {
             "Color": "stop",  # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
-            "Function": 解析一个Rect项目
+            "Function": HotReload(解析一个Rect项目)
         },
         "读Tex论文写摘要": {
             "Color": "stop",    # 按钮颜色
-            "Function": 读文章写摘要
+            "Function": HotReload(读文章写摘要)
         },
         "批量生成函数注释": {
             "Color": "stop",    # 按钮颜色
-            "Function": 批量生成函数注释
+            "Function": HotReload(批量生成函数注释)
         },
         "[多线程demo] 把本项目源代码切换成全英文": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
