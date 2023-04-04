@@ -37,6 +37,11 @@ gr.Chatbot.postprocess = format_io
 from theme import adjust_theme, advanced_css
 set_theme = adjust_theme()
 
+# 代理与自动更新
+from check_proxy import check_proxy, auto_update
+proxy_info = check_proxy(proxies)
+
+
 cancel_handles = []
 with gr.Blocks(theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
     gr.HTML(title_html)
@@ -54,8 +59,7 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False, css=advanced_css) as de
                 resetBtn = gr.Button("重置", variant="secondary"); resetBtn.style(size="sm")
                 stopBtn = gr.Button("停止", variant="secondary"); stopBtn.style(size="sm")
             with gr.Row():
-                from check_proxy import check_proxy
-                status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {check_proxy(proxies)}")
+                status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {proxy_info}")
             with gr.Accordion("基础功能区", open=True) as area_basic_fn:
                 with gr.Row():
                     for k in functional:
@@ -139,6 +143,8 @@ def auto_opentab_delay():
     print(f"\t（暗色主体）: http://localhost:{PORT}/?__dark-theme=true")
     def open(): 
         time.sleep(2)
+        try: auto_update()  # 检查新版本
+        except: pass
         webbrowser.open_new_tab(f"http://localhost:{PORT}/?__dark-theme=true")
     threading.Thread(target=open, name="open-browser", daemon=True).start()
 
