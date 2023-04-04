@@ -115,8 +115,9 @@ def CatchException(f):
             from check_proxy import check_proxy
             from toolbox import get_conf
             proxies, = get_conf('proxies')
-            tb_str = regular_txt_to_markdown(traceback.format_exc())
-            chatbot[-1] = (chatbot[-1][0], f"[Local Message] 实验性函数调用出错: \n\n {tb_str} \n\n 当前代理可用性: \n\n {check_proxy(proxies)}")
+            tb_str = '```\n' + traceback.format_exc() + '```'
+            if len(chatbot) == 0: chatbot.append(["插件调度异常","异常原因"])
+            chatbot[-1] = (chatbot[-1][0], f"[Local Message] 实验性函数调用出错: \n\n{tb_str} \n\n当前代理可用性: \n\n{check_proxy(proxies)}")
             yield chatbot, history, f'异常 {e}'
     return decorated
 
@@ -164,6 +165,23 @@ def markdown_convertion(txt):
     else:
         return pre + markdown.markdown(txt,extensions=['fenced_code','tables']) + suf
 
+def close_up_code_segment_during_stream(gpt_reply):
+    """
+        在gpt输出代码的中途（输出了前面的```，但还没输出完后面的```），补上后面的```
+    """
+    if '```' not in gpt_reply: return gpt_reply
+    if gpt_reply.endswith('```'): return gpt_reply
+
+    # 排除了以上两个情况，我们
+    segments = gpt_reply.split('```')
+    n_mark = len(segments) - 1
+    if n_mark % 2 == 1:
+        # print('输出代码片段中！')
+        return gpt_reply+'\n```'
+    else:
+        return gpt_reply
+ 
+
 
 def format_io(self, y):
     """
@@ -172,6 +190,7 @@ def format_io(self, y):
     if y is None or y == []: return []
     i_ask, gpt_reply = y[-1]
     i_ask = text_divide_paragraph(i_ask) # 输入部分太自由，预处理一波
+    gpt_reply = close_up_code_segment_during_stream(gpt_reply)  # 当代码输出半截的时候，试着补上后个```
     y[-1] = (
         None if i_ask is None else markdown.markdown(i_ask, extensions=['fenced_code','tables']),
         None if gpt_reply is None else markdown_convertion(gpt_reply)
@@ -284,7 +303,7 @@ def on_file_uploaded(files, chatbot, txt):
 def on_report_generated(files, chatbot):
     from toolbox import find_recent_files
     report_files = find_recent_files('gpt_log')
-    if len(report_files) == 0: return report_files, chatbot
+    if len(report_files) == 0: return files, chatbot
     # files.extend(report_files)
     chatbot.append(['汇总报告如何远程获取？', '汇总报告已经添加到右侧“文件上传区”（可能处于折叠状态），请查收。'])
     return report_files, chatbot

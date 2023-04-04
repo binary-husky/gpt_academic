@@ -71,9 +71,10 @@ def predict_no_ui(inputs, top_p, temperature, history=[], sys_prompt=""):
         raise ConnectionAbortedError("Json解析不合常规，可能是文本过长" + response.text)
 
 
-def predict_no_ui_long_connection(inputs, top_p, temperature, history=[], sys_prompt=""):
+def predict_no_ui_long_connection(inputs, top_p, temperature, history=[], sys_prompt="", observe_window=None):
     """
         发送至chatGPT，等待回复，一次性完成，不显示中间过程。但内部用stream的方法避免有人中途掐网线。
+        observe_window：用于负责跨越线程传递已经输出的部分，大部分时候仅仅为了fancy的视觉效果，留空即可
     """
     headers, payload = generate_payload(inputs, top_p, temperature, history, system_prompt=sys_prompt, stream=True)
 
@@ -105,7 +106,10 @@ def predict_no_ui_long_connection(inputs, top_p, temperature, history=[], sys_pr
         delta = json_data["delta"]
         if len(delta) == 0: break
         if "role" in delta: continue
-        if "content" in delta: result += delta["content"]; print(delta["content"], end='')
+        if "content" in delta: 
+            result += delta["content"]
+            print(delta["content"], end='')
+            if observe_window is not None: observe_window[0] += delta["content"]
         else: raise RuntimeError("意外Json结构："+delta)
     if json_data['finish_reason'] == 'length':
         raise ConnectionAbortedError("正常结束，但显示Token不足。")
@@ -186,14 +190,16 @@ def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt=''
                     error_msg = chunk.decode()
                     if "reduce the length" in error_msg:
                         chatbot[-1] = (chatbot[-1][0], "[Local Message] Input (or history) is too long, please reduce input or clear history by refreshing this page.")
-                        history = []
+                        history = []    # 清除历史
                     elif "Incorrect API key" in error_msg:
                         chatbot[-1] = (chatbot[-1][0], "[Local Message] Incorrect API key provided.")
+                    elif "exceeded your current quota" in error_msg:
+                        chatbot[-1] = (chatbot[-1][0], "[Local Message] You exceeded your current quota. OpenAI以账户额度不足为由，拒绝服务.")
                     else:
                         from toolbox import regular_txt_to_markdown
-                        tb_str = regular_txt_to_markdown(traceback.format_exc())
-                        chatbot[-1] = (chatbot[-1][0], f"[Local Message] Json Error \n\n {tb_str} \n\n {regular_txt_to_markdown(chunk.decode()[4:])}")
-                    yield chatbot, history, "Json解析不合常规" + error_msg
+                        tb_str = '```\n' + traceback.format_exc() + '```'
+                        chatbot[-1] = (chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str} \n\n{regular_txt_to_markdown(chunk.decode()[4:])}")
+                    yield chatbot, history, "Json异常" + error_msg
                     return
 
 def generate_payload(inputs, top_p, temperature, history, system_prompt, stream):

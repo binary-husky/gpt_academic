@@ -22,7 +22,7 @@ else:
 
 # [step 3]>> 以下配置可以优化体验，但大部分场合下并不需要修改
 # 对话窗的高度
-CHATBOT_HEIGHT = 1116
+CHATBOT_HEIGHT = 1115
 
 # 发送请求到OpenAI后，等待多久判定为超时
 TIMEOUT_SECONDS = 25
@@ -42,7 +42,7 @@ API_URL = "https://api.openai.com/v1/chat/completions"
 # 设置并行使用的线程数
 CONCURRENT_COUNT = 100
 
-# 设置用户名和密码
+# 设置用户名和密码（相关功能不稳定，与gradio版本和网络都相关，如果本地使用不建议加这个）
 AUTHENTICATION = [] # [("username", "password"), ("username2", "password2"), ...]
 
 # title_html
