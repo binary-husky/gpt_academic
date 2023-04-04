@@ -1,7 +1,7 @@
 import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 import gradio as gr
 from predict import predict
-from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf
+from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper
 
 # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
 proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT = \
@@ -87,8 +87,12 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False, css=advanced_css) as de
                 system_prompt = gr.Textbox(show_label=True, placeholder=f"System Prompt", label="System prompt", value=initial_prompt)
                 top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01,interactive=True, label="Top-p (nucleus sampling)",)
                 temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature",)
-                checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区"], value=["基础功能区", "函数插件区"], label="显示/隐藏功能区")
+                checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区", "输入区2"], value=["基础功能区", "函数插件区"], label="显示/隐藏功能区")
                 gr.Markdown(description)
+            with gr.Accordion("输入区", open=True, visible=False) as input_crazy_fn:
+                with gr.Row():
+                    txt2 = gr.Textbox(show_label=False, placeholder="Input question here.", label="输入区2").style(container=False)
+
     # 功能区显示开关与功能区的互动
     def fn_area_visibility(a):
         ret = {}
@@ -97,17 +101,16 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False, css=advanced_css) as de
         return ret
     checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn] )
     # 整理反复出现的控件句柄组合
-    input_combo = [txt, top_p, temperature, chatbot, history, system_prompt]
+    input_combo = [txt, txt2, top_p, temperature, chatbot, history, system_prompt]
     output_combo = [chatbot, history, status]
-    predict_args = dict(fn=predict, inputs=input_combo, outputs=output_combo)
-    empty_txt_args = dict(fn=lambda: "", inputs=[], outputs=[txt]) # 用于在提交后清空输入栏
+    predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=input_combo, outputs=output_combo)
     # 提交按钮、重置按钮
-    cancel_handles.append(txt.submit(**predict_args)) #; txt.submit(**empty_txt_args) 在提交后清空输入栏
-    cancel_handles.append(submitBtn.click(**predict_args)) #; submitBtn.click(**empty_txt_args) 在提交后清空输入栏
+    cancel_handles.append(txt.submit(**predict_args))
+    cancel_handles.append(submitBtn.click(**predict_args))
     resetBtn.click(lambda: ([], [], "已重置"), None, output_combo)
     # 基础功能区的回调函数注册
     for k in functional:
-        click_handle = functional[k]["Button"].click(predict, [*input_combo, gr.State(True), gr.State(k)], output_combo)
+        click_handle = functional[k]["Button"].click(fn=ArgsGeneralWrapper(predict), inputs=[*input_combo, gr.State(True), gr.State(k)], outputs=output_combo)
         cancel_handles.append(click_handle)
     # 文件上传区，接收文件后与chatbot的互动
     file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt], [chatbot, txt])
