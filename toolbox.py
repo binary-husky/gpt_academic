@@ -10,7 +10,6 @@ def ArgsGeneralWrapper(f):
         txt_passon = txt
         if txt == "" and txt2 != "": txt_passon = txt2
         yield from f(txt_passon, *args, **kwargs)
-
     return decorated
 
 
@@ -141,7 +140,7 @@ def HotReload(f):
     def decorated(*args, **kwargs):
         fn_name = f.__name__
         f_hot_reload = getattr(importlib.reload(inspect.getmodule(f)), fn_name)
-        yield from ArgsGeneralWrapper(f_hot_reload)(*args, **kwargs)
+        yield from f_hot_reload(*args, **kwargs)
     return decorated
 
 def report_execption(chatbot, history, a, b):
