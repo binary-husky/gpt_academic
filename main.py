@@ -56,6 +56,8 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False, css=advanced_css) as de
             with gr.Row():
                 resetBtn = gr.Button("重置", variant="secondary"); resetBtn.style(size="sm")
                 stopBtn = gr.Button("停止", variant="secondary"); stopBtn.style(size="sm")
+            with gr.Row():
+                status = gr.Markdown("status")
             with gr.Accordion("基础功能区", open=True) as area_basic_fn:
                 with gr.Row():
                     for k in functional:
@@ -94,7 +96,7 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False, css=advanced_css) as de
     checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn] )
     # 整理反复出现的控件句柄组合
     input_combo = [txt, top_p, temperature, chatbot, history, system_prompt]
-    output_combo = [chatbot, history]
+    output_combo = [chatbot, history, status]
     predict_args = dict(fn=predict, inputs=input_combo, outputs=output_combo)
     empty_txt_args = dict(fn=lambda: "", inputs=[], outputs=[txt]) # 用于在提交后清空输入栏
     # 提交按钮、重置按钮
