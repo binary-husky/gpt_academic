@@ -6,18 +6,6 @@
 
 If you like this project, please give it a Star. If you've come up with more useful academic shortcuts or functional plugins, feel free to open an issue or pull request （to `dev` branch）.
 
-```
-代码中参考了很多其他优秀项目中的设计，主要包括：
-
-# 借鉴项目1：借鉴了ChuanhuChatGPT中读取OpenAI json的方法、记录历史问询记录的方法以及gradio queue的使用技巧
-https://github.com/GaiZhenbiao/ChuanhuChatGPT
-
-# 借鉴项目2：借鉴了mdtex2html中公式处理的方法
-https://github.com/polarwinkel/mdtex2html
-
-项目使用OpenAI的gpt-3.5-turbo模型，期待gpt-4早点放宽门槛😂
-```
-
 > **Note**
 >
 > 1.请注意只有“红颜色”标识的函数插件（按钮）才支持读取文件。目前对pdf/word格式文件的支持插件正在逐步完善中，需要更多developer的帮助。
@@ -25,6 +13,8 @@ https://github.com/polarwinkel/mdtex2html
 > 2.本项目中每个文件的功能都在自译解[`self_analysis.md`](https://github.com/binary-husky/chatgpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A)详细说明。随着版本的迭代，您也可以随时自行点击相关函数插件，调用GPT重新生成项目的自我解析报告。常见问题汇总在[`wiki`](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98)当中。
 > 
 > 3.如果您不太习惯部分中文命名的函数、注释或者界面，您可以随时点击相关函数插件，调用ChatGPT一键生成纯英文的项目源代码。
+>
+> 4.项目使用OpenAI的gpt-3.5-turbo模型，期待gpt-4早点放宽门槛😂
 
 <div align="center">
     
@@ -33,15 +23,15 @@ https://github.com/polarwinkel/mdtex2html
 一键润色 | 支持一键润色、一键查找论文语法错误
 一键中英互译 | 一键中英互译
 一键代码解释 | 可以正确显示代码、解释代码
-自定义快捷键 | 支持自定义快捷键
-配置代理服务器 | 支持配置代理服务器
+[自定义快捷键](https://www.bilibili.com/video/BV14s4y1E7jN) | 支持自定义快捷键
+[配置代理服务器](https://www.bilibili.com/video/BV1rc411W7Dr) | 支持配置代理服务器
 模块化设计 | 支持自定义高阶的实验性功能与[函数插件]，插件支持[热更新](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)
-自我程序剖析 | [函数插件] 一键读懂本项目的源代码
-程序剖析 | [函数插件] 一键可以剖析其他Python/C/C++/Java项目树
+[自我程序剖析](https://www.bilibili.com/video/BV1cj411A7VW) | [函数插件] 一键读懂本项目的源代码
+[程序剖析](https://www.bilibili.com/video/BV1cj411A7VW) | [函数插件] 一键可以剖析其他Python/C/C++/Java项目树
 读论文 | [函数插件] 一键解读latex论文全文并生成摘要
 批量注释生成 | [函数插件] 一键批量生成函数注释
 chat分析报告生成 | [函数插件] 运行后自动生成总结汇报
-arxiv小助手 | [函数插件] 输入arxiv文章url即可一键翻译摘要+下载PDF
+[arxiv小助手](https://www.bilibili.com/video/BV1LM4y1279X) | [函数插件] 输入arxiv文章url即可一键翻译摘要+下载PDF
 公式显示 | 可以同时显示公式的tex形式和渲染形式
 图片显示 | 可以在markdown中显示图片
 多线程函数插件支持 | 支持多线调用chatgpt，一键处理海量文本或程序
@@ -278,3 +268,18 @@ python check_proxy.py
 - version 2.1: 可折叠式布局
 - version 2.0: 引入模块化函数插件
 - version 1.0: 基础功能
+
+## 参考与学习
+
+
+```
+代码中参考了很多其他优秀项目中的设计，主要包括：
+
+# 借鉴项目1：借鉴了ChuanhuChatGPT中读取OpenAI json的方法、记录历史问询记录的方法以及gradio queue的使用技巧
+https://github.com/GaiZhenbiao/ChuanhuChatGPT
+
+# 借鉴项目2：借鉴了mdtex2html中公式处理的方法
+https://github.com/polarwinkel/mdtex2html
+
+
+```

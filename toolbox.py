@@ -314,7 +314,7 @@ def on_file_uploaded(files, chatbot, txt):
 def on_report_generated(files, chatbot):
     from toolbox import find_recent_files
     report_files = find_recent_files('gpt_log')
-    if len(report_files) == 0: return files, chatbot
+    if len(report_files) == 0: return None, chatbot
     # files.extend(report_files)
     chatbot.append(['汇总报告如何远程获取？', '汇总报告已经添加到右侧“文件上传区”（可能处于折叠状态），请查收。'])
     return report_files, chatbot
