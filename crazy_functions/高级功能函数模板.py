@@ -1,4 +1,4 @@
-from predict import predict_no_ui_long_connection
+from request_llm.bridge_chatgpt import predict_no_ui_long_connection
 from toolbox import CatchException, report_execption, write_results_to_file
 import datetime
 
