@@ -192,7 +192,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(inputs, inputs_show_user, top_
         yield chatbot, [], msg
     return future.result()
 
-def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(inputs_array, inputs_show_user_array, top_p, temperature, chatbot, history_array, sys_prompt_array, refresh_interval, max_workers=10, scroller_max_len=30):
+def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(inputs_array, inputs_show_user_array, top_p, temperature, chatbot, history_array, sys_prompt_array, refresh_interval=0.2, max_workers=10, scroller_max_len=30):
     import time
     from concurrent.futures import ThreadPoolExecutor
     from request_llm.bridge_chatgpt import predict_no_ui_long_connection
@@ -275,7 +275,8 @@ def 解析PDF(file_manifest, project_folder, top_p, temperature, chatbot, histor
             max_workers=16 # OpenAI所允许的最大并行过载
         )
 
-        final = ["", paper_meta_info + '\n\n---\n\n---\n\n---\n\n'].extend(gpt_response_collection)
+        final = ["", paper_meta_info + '\n\n---\n\n---\n\n---\n\n']
+        final.extend(gpt_response_collection)
         res = write_results_to_file(final)
         chatbot.append((f"{fp}完成了吗？", res)); msg = "完成"
         yield chatbot, history, msg
