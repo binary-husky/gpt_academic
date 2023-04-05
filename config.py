@@ -45,8 +45,11 @@ CONCURRENT_COUNT = 100
 # 设置用户名和密码（相关功能不稳定，与gradio版本和网络都相关，如果本地使用不建议加这个）
 AUTHENTICATION = [] # [("username", "password"), ("username2", "password2"), ...]
 
-# title_html
-TITLE_HTML = ""
+# 标签名
+TITLE = "ChatGPT 学术优化"
 
-# title_html下面的TIP(markdown格式)
-TIP_MD = ""
+# 大标题
+TITLE_HTML = "<h1 align=\"center\">ChatGPT 学术优化</h1>"
+
+# 大标题下面的 TIP(markdown格式)
+TIP_MD = f"<div align='center'>Tip: 按Enter提交, 按Shift+Enter换行<br>当前模型: {LLM_MODEL}</div>"

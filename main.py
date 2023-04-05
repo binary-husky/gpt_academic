@@ -4,15 +4,15 @@ from predict import predict
 from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf
 
 # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
-proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, TITLE_HTML, TIP_MD  = \
-    get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'TITLE_HTML', 'TIP_MD',)
+proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, TITLE, TITLE_HTML, TIP_MD  = \
+    get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'TITLE', 'TITLE_HTML', 'TIP_MD',)
 
 # 如果WEB_PORT是-1, 则随机选取WEB端口
 PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
 if not AUTHENTICATION: AUTHENTICATION = None
 
 initial_prompt = "Serve me as a writing and programming assistant."
-title_html = "<h1 align=\"center\">ChatGPT 学术优化</h1>"
+title_html = TITLE_HTML # "<h1 align=\"center\">ChatGPT 学术优化</h1>"
 description =  """代码开源和更新[地址🚀](https://github.com/binary-husky/chatgpt_academic)，感谢热情的[开发者们❤️](https://github.com/binary-husky/chatgpt_academic/graphs/contributors)"""
 
 # 问询记录, python 版本建议3.9+（越新越好）
@@ -41,7 +41,6 @@ cancel_handles = []
 with gr.Blocks(theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
     gr.HTML(title_html)
     from check_proxy import check_proxy
-    if 0 == len(TIP_MD): TIP_MD = f"<div align='center'>Tip: 按Enter提交, 按Shift+Enter换行<br>当前模型: {LLM_MODEL}</div>"
     gr.Markdown(TIP_MD)
     with gr.Row().style(equal_height=True):
         with gr.Column(scale=2):
@@ -145,6 +144,5 @@ def auto_opentab_delay():
     threading.Thread(target=open, name="open-browser", daemon=True).start()
 
 auto_opentab_delay()
-if 0 == len(TITLE_HTML): TITLE_HTML = "ChatGPT 学术优化"
-demo.title = TITLE_HTML
+demo.title = TITLE # "ChatGPT 学术优化"
 demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", share=True, server_port=PORT, auth=AUTHENTICATION)
