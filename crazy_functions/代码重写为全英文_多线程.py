@@ -1,5 +1,5 @@
 import threading
-from predict import predict_no_ui_long_connection
+from request_llm.bridge_chatgpt import predict_no_ui_long_connection
 from toolbox import CatchException, write_results_to_file, report_execption
 
 def extract_code_block_carefully(txt):

@@ -39,7 +39,7 @@ def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temp
         long_connection: 是否采用更稳定的连接方式（推荐）
     """
     import time
-    from predict import predict_no_ui, predict_no_ui_long_connection
+    from request_llm.bridge_chatgpt import predict_no_ui, predict_no_ui_long_connection
     from toolbox import get_conf
     TIMEOUT_SECONDS, MAX_RETRY = get_conf('TIMEOUT_SECONDS', 'MAX_RETRY')
     # 多线程的时候，需要一个mutable结构在不同线程之间传递信息
