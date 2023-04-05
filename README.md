@@ -33,11 +33,11 @@ https://github.com/polarwinkel/mdtex2html
 一键润色 | 支持一键润色、一键查找论文语法错误
 一键中英互译 | 一键中英互译
 一键代码解释 | 可以正确显示代码、解释代码
-自定义快捷键 | 支持自定义快捷键
-配置代理服务器 | 支持配置代理服务器
+[自定义快捷键](https://www.bilibili.com/video/BV14s4y1E7jN/?spm_id_from=333.788&vd_source=e3bc3eddd1d2414cb64ae72b6a64df55) | 支持自定义快捷键
+[配置代理服务器](https://www.bilibili.com/video/BV1rc411W7Dr/?spm_id_from=333.788&vd_source=e3bc3eddd1d2414cb64ae72b6a64df55) | 支持配置代理服务器
 模块化设计 | 支持自定义高阶的实验性功能与[函数插件]，插件支持[热更新](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)
-自我程序剖析 | [函数插件] 一键读懂本项目的源代码
-程序剖析 | [函数插件] 一键可以剖析其他Python/C/C++/Java项目树
+[自我程序剖析](https://www.bilibili.com/video/BV1cj411A7VW/?spm_id_from=333.999.0.0&vd_source=e3bc3eddd1d2414cb64ae72b6a64df55) | [函数插件] 一键读懂本项目的源代码
+[程序剖析](https://www.bilibili.com/video/BV1cj411A7VW/?spm_id_from=333.999.0.0&vd_source=e3bc3eddd1d2414cb64ae72b6a64df55) | [函数插件] 一键可以剖析其他Python/C/C++/Java项目树
 读论文 | [函数插件] 一键解读latex论文全文并生成摘要
 批量注释生成 | [函数插件] 一键批量生成函数注释
 chat分析报告生成 | [函数插件] 运行后自动生成总结汇报
