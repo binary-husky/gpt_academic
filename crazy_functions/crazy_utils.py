@@ -37,6 +37,7 @@ def breakdown_txt_to_satisfy_token_limit_for_pdf(txt, get_token_fn, limit):
             lines = txt_tocut.split('\n')
             estimated_line_cut = limit / get_token_fn(txt_tocut)  * len(lines)
             estimated_line_cut = int(estimated_line_cut)
+            cnt = 0
             for cnt in reversed(range(estimated_line_cut)):
                 if must_break_at_empty_line: 
                     if lines[cnt] != "": continue
@@ -45,7 +46,7 @@ def breakdown_txt_to_satisfy_token_limit_for_pdf(txt, get_token_fn, limit):
                 post = "\n".join(lines[cnt:])
                 if get_token_fn(prev) < limit: break
             if cnt == 0:
-                print('what the fuck ?')
+                # print('what the fuck ? 存在一行极长的文本！')
                 raise RuntimeError("存在一行极长的文本！")
             # print(len(post))
             # 列表递归接龙
@@ -55,4 +56,10 @@ def breakdown_txt_to_satisfy_token_limit_for_pdf(txt, get_token_fn, limit):
     try:
         return cut(txt, must_break_at_empty_line=True)
     except RuntimeError:
-        return cut(txt, must_break_at_empty_line=False)
+        try:
+            return cut(txt, must_break_at_empty_line=False)
+        except RuntimeError:
+            # 这个中文的句号是故意的，作为一个标识而存在
+            res = cut(txt.replace('.', '。\n'), must_break_at_empty_line=False)
+            return [r.replace('。\n', '.') for r in res]
+
