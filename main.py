@@ -40,7 +40,6 @@ set_theme = adjust_theme()
 cancel_handles = []
 with gr.Blocks(theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
     gr.HTML(title_html)
-    from check_proxy import check_proxy
     gr.Markdown(TIP_MD)
     with gr.Row().style(equal_height=True):
         with gr.Column(scale=2):
@@ -56,6 +55,7 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False, css=advanced_css) as de
                 resetBtn = gr.Button("重置", variant="secondary"); resetBtn.style(size="sm")
                 stopBtn = gr.Button("停止", variant="secondary"); stopBtn.style(size="sm")
             with gr.Row():
+                from check_proxy import check_proxy
                 status = gr.Markdown(f"status<br>{check_proxy(proxies)}")
             with gr.Accordion("基础功能区", open=True) as area_basic_fn:
                 with gr.Row():
