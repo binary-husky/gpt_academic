@@ -5,3 +5,4 @@ Markdown
 latex2mathml
 openai
 transformers
+numpy

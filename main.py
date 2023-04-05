@@ -23,12 +23,12 @@ except:logging.basicConfig(filename="gpt_log/chat_secrets.log", level=logging.IN
 print("所有问询记录将自动保存在本地目录./gpt_log/chat_secrets.log, 请注意自我隐私保护哦！")
 
 # 一些普通功能模块
-from functional import get_functionals
-functional = get_functionals()
+from core_functional import get_core_functions
+functional = get_core_functions()
 
 # 高级函数插件
-from functional_crazy import get_crazy_functionals
-crazy_fns = get_crazy_functionals()
+from crazy_functional import get_crazy_functions
+crazy_fns = get_crazy_functions()
 
 # 处理markdown文本格式的转变
 gr.Chatbot.postprocess = format_io

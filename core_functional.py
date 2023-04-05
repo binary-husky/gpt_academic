@@ -4,7 +4,7 @@
 # 默认按钮颜色是 secondary
 from toolbox import clear_line_break
 
-def get_functionals():
+def get_core_functions():
     return {
         "英语学术润色": {
             # 前言

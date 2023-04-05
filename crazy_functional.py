@@ -1,6 +1,6 @@
 from toolbox import HotReload # HotReload 的意思是热更新，修改函数插件后，不需要重启程序，代码直接生效
 
-def get_crazy_functionals():
+def get_crazy_functions():
     ###################### 第一组插件 ###########################
     # [第一组插件]: 最早期编写的项目插件和一些demo
     from crazy_functions.读文章写摘要 import 读文章写摘要
@@ -95,6 +95,14 @@ def get_crazy_functionals():
                 "Color": "stop",
                 "AsButton": False,  # 加入下拉菜单中
                 "Function": HotReload(下载arxiv论文并翻译摘要)
+            }
+        })
+        from crazy_functions.批量翻译PDF文档_多线程 import 批量翻译PDF文档
+        function_plugins.update({
+            "批量翻译PDF文档（多线程）": {
+                "Color": "stop",
+                "AsButton": False,  # 加入下拉菜单中
+                "Function": HotReload(批量翻译PDF文档)
             }
         })
     except Exception as err:
