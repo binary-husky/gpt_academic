@@ -101,11 +101,11 @@ def predict_tgui(inputs, top_p, temperature, chatbot=[], history=[], system_prom
         additional_fn代表点击的哪个按钮，按钮见functional.py
     """
     if additional_fn is not None:
-        import functional
-        importlib.reload(functional)    # 热更新prompt
-        functional = functional.get_functionals()
-        if "PreProcess" in functional[additional_fn]: inputs = functional[additional_fn]["PreProcess"](inputs)  # 获取预处理函数（如果有的话）
-        inputs = functional[additional_fn]["Prefix"] + inputs + functional[additional_fn]["Suffix"]
+        import core_functional
+        importlib.reload(core_functional)    # 热更新prompt
+        core_functional = core_functional.get_functions()
+        if "PreProcess" in core_functional[additional_fn]: inputs = core_functional[additional_fn]["PreProcess"](inputs)  # 获取预处理函数（如果有的话）
+        inputs = core_functional[additional_fn]["Prefix"] + inputs + core_functional[additional_fn]["Suffix"]
 
     raw_input = "What I would like to say is the following: " + inputs
     logging.info(f'[raw_input] {raw_input}')

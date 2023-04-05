@@ -12,6 +12,7 @@
 """
 
 import json
+import time
 import gradio as gr
 import logging
 import traceback
@@ -73,11 +74,20 @@ def predict_no_ui(inputs, top_p, temperature, history=[], sys_prompt=""):
 
 def predict_no_ui_long_connection(inputs, top_p, temperature, history=[], sys_prompt="", observe_window=None):
     """
-        发送至chatGPT，等待回复，一次性完成，不显示中间过程。但内部用stream的方法避免有人中途掐网线。
-        observe_window：用于负责跨越线程传递已经输出的部分，大部分时候仅仅为了fancy的视觉效果，留空即可
+        发送至chatGPT，等待回复，一次性完成，不显示中间过程。但内部用stream的方法避免中途网线被掐。
+        inputs：
+            是本次问询的输入
+        sys_prompt:
+            系统静默prompt
+        top_p, temperature：
+            chatGPT的内部调优参数
+        history：
+            是之前的对话列表
+        observe_window = None：
+            用于负责跨越线程传递已经输出的部分，大部分时候仅仅为了fancy的视觉效果，留空即可。observe_window[0]：观测窗。observe_window[1]：看门狗
     """
+    watch_dog_patience = 5 # 看门狗的耐心, 设置5秒即可
     headers, payload = generate_payload(inputs, top_p, temperature, history, system_prompt=sys_prompt, stream=True)
-
     retry = 0
     while True:
         try:
@@ -109,10 +119,16 @@ def predict_no_ui_long_connection(inputs, top_p, temperature, history=[], sys_pr
         if "content" in delta: 
             result += delta["content"]
             print(delta["content"], end='')
-            if observe_window is not None: observe_window[0] += delta["content"]
+            if observe_window is not None: 
+                # 观测窗，把已经获取的数据显示出去
+                if len(observe_window) >= 1: observe_window[0] += delta["content"]
+                # 看门狗，如果超过期限没有喂狗，则终止
+                if len(observe_window) >= 2:  
+                    if (time.time()-observe_window[1]) > watch_dog_patience:
+                        raise RuntimeError("程序终止。")
         else: raise RuntimeError("意外Json结构："+delta)
     if json_data['finish_reason'] == 'length':
-        raise ConnectionAbortedError("正常结束，但显示Token不足。")
+        raise ConnectionAbortedError("正常结束，但显示Token不足，导致输出不完整，请削减单次输入的文本量。")
     return result
 
 
@@ -128,11 +144,11 @@ def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt=''
         additional_fn代表点击的哪个按钮，按钮见functional.py
     """
     if additional_fn is not None:
-        import functional
-        importlib.reload(functional)    # 热更新prompt
-        functional = functional.get_functionals()
-        if "PreProcess" in functional[additional_fn]: inputs = functional[additional_fn]["PreProcess"](inputs)  # 获取预处理函数（如果有的话）
-        inputs = functional[additional_fn]["Prefix"] + inputs + functional[additional_fn]["Suffix"]
+        import core_functional
+        importlib.reload(core_functional)    # 热更新prompt
+        core_functional = core_functional.get_functions()
+        if "PreProcess" in core_functional[additional_fn]: inputs = core_functional[additional_fn]["PreProcess"](inputs)  # 获取预处理函数（如果有的话）
+        inputs = core_functional[additional_fn]["Prefix"] + inputs + core_functional[additional_fn]["Suffix"]
 
     if stream:
         raw_input = inputs
@@ -189,10 +205,10 @@ def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt=''
                     chunk = get_full_error(chunk, stream_response)
                     error_msg = chunk.decode()
                     if "reduce the length" in error_msg:
-                        chatbot[-1] = (chatbot[-1][0], "[Local Message] Input (or history) is too long, please reduce input or clear history by refreshing this page.")
+                        chatbot[-1] = (chatbot[-1][0], "[Local Message] Reduce the length. 本次输入过长，或历史数据过长. 历史缓存数据现已释放，您可以请再次尝试.")
                         history = []    # 清除历史
                     elif "Incorrect API key" in error_msg:
-                        chatbot[-1] = (chatbot[-1][0], "[Local Message] Incorrect API key provided.")
+                        chatbot[-1] = (chatbot[-1][0], "[Local Message] Incorrect API key. OpenAI以提供了不正确的API_KEY为由，拒绝服务.")
                     elif "exceeded your current quota" in error_msg:
                         chatbot[-1] = (chatbot[-1][0], "[Local Message] You exceeded your current quota. OpenAI以账户额度不足为由，拒绝服务.")
                     else:
