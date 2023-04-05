@@ -6,18 +6,6 @@
 
 If you like this project, please give it a Star. If you've come up with more useful academic shortcuts or functional plugins, feel free to open an issue or pull request （to `dev` branch）.
 
-```
-代码中参考了很多其他优秀项目中的设计，主要包括：
-
-# 借鉴项目1：借鉴了ChuanhuChatGPT中读取OpenAI json的方法、记录历史问询记录的方法以及gradio queue的使用技巧
-https://github.com/GaiZhenbiao/ChuanhuChatGPT
-
-# 借鉴项目2：借鉴了mdtex2html中公式处理的方法
-https://github.com/polarwinkel/mdtex2html
-
-项目使用OpenAI的gpt-3.5-turbo模型，期待gpt-4早点放宽门槛😂
-```
-
 > **Note**
 >
 > 1.请注意只有“红颜色”标识的函数插件（按钮）才支持读取文件。目前对pdf/word格式文件的支持插件正在逐步完善中，需要更多developer的帮助。
@@ -25,6 +13,8 @@ https://github.com/polarwinkel/mdtex2html
 > 2.本项目中每个文件的功能都在自译解[`self_analysis.md`](https://github.com/binary-husky/chatgpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A)详细说明。随着版本的迭代，您也可以随时自行点击相关函数插件，调用GPT重新生成项目的自我解析报告。常见问题汇总在[`wiki`](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98)当中。
 > 
 > 3.如果您不太习惯部分中文命名的函数、注释或者界面，您可以随时点击相关函数插件，调用ChatGPT一键生成纯英文的项目源代码。
+>
+> 4.项目使用OpenAI的gpt-3.5-turbo模型，期待gpt-4早点放宽门槛😂
 
 <div align="center">
     
@@ -278,3 +268,18 @@ python check_proxy.py
 - version 2.1: 可折叠式布局
 - version 2.0: 引入模块化函数插件
 - version 1.0: 基础功能
+
+## 参考与学习
+
+
+```
+代码中参考了很多其他优秀项目中的设计，主要包括：
+
+# 借鉴项目1：借鉴了ChuanhuChatGPT中读取OpenAI json的方法、记录历史问询记录的方法以及gradio queue的使用技巧
+https://github.com/GaiZhenbiao/ChuanhuChatGPT
+
+# 借鉴项目2：借鉴了mdtex2html中公式处理的方法
+https://github.com/polarwinkel/mdtex2html
+
+
+```
