@@ -1,11 +1,10 @@
-from request_llm.bridge_chatgpt import predict_no_ui_long_connection
 from toolbox import CatchException
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 import datetime
 @CatchException
 def 高阶功能模板函数(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
     history = []    # 清空历史，以免输入溢出
-    chatbot.append(("这是什么功能？", "[Local Message] 请注意，您正在调用一个[函数插件]的模板，该函数面向希望实现更多有趣功能的开发者，它可以作为创建新功能函数的模板（该函数只有21行代码）。此外我们也提供可同步处理大量文件的多线程Demo供您参考。您若希望分享新的功能模组，请不吝PR！"))
+    chatbot.append(("这是什么功能？", "[Local Message] 请注意，您正在调用一个[函数插件]的模板，该函数面向希望实现更多有趣功能的开发者，它可以作为创建新功能函数的模板（该函数只有20行代码）。此外我们也提供可同步处理大量文件的多线程Demo供您参考。您若希望分享新的功能模组，请不吝PR！"))
     yield chatbot, history, '正常'  # 由于请求gpt需要一段时间，我们先及时地做一次状态显示
     for i in range(5):
         currentMonth = (datetime.date.today() + datetime.timedelta(days=i)).month
