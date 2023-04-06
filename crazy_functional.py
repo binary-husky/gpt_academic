@@ -70,9 +70,17 @@ def get_crazy_functions():
     from crazy_functions.批量总结PDF文档 import 批量总结PDF文档
     from crazy_functions.批量总结PDF文档pdfminer import 批量总结PDF文档pdfminer
     from crazy_functions.总结word文档 import 总结word文档
+    from crazy_functions.批量翻译PDF文档_多线程 import 批量翻译PDF文档
+
     function_plugins.update({
+        "批量翻译PDF文档（多线程）": {
+            "Color": "stop",
+            "AsButton": True,  # 加入下拉菜单中
+            "Function": HotReload(批量翻译PDF文档)
+        },
         "[仅供开发调试] 批量总结PDF文档": {
             "Color": "stop",
+            "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(批量总结PDF文档) # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
         },
         "[仅供开发调试] 批量总结PDF文档pdfminer": {
@@ -97,14 +105,7 @@ def get_crazy_functions():
                 "Function": HotReload(下载arxiv论文并翻译摘要)
             }
         })
-        from crazy_functions.批量翻译PDF文档_多线程 import 批量翻译PDF文档
-        function_plugins.update({
-            "批量翻译PDF文档（多线程）": {
-                "Color": "stop",
-                "AsButton": False,  # 加入下拉菜单中
-                "Function": HotReload(批量翻译PDF文档)
-            }
-        })
+
     except Exception as err:
         print(f'[下载arxiv论文并翻译摘要] 插件导入失败 {str(err)}')
 
