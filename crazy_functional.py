@@ -20,7 +20,7 @@ def get_crazy_functions():
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(解析项目本身)
         },
-        "解析整个Py项目": {
+        "解析整个Python项目": {
             "Color": "stop",    # 按钮颜色
             "Function": HotReload(解析一个Python项目)
         },
@@ -88,7 +88,7 @@ def get_crazy_functions():
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(批量总结PDF文档pdfminer)
         },
-        "[仅供开发调试] 批量总结Word文档": {
+        "批量总结Word文档": {
             "Color": "stop",
             "Function": HotReload(总结word文档)
         },
