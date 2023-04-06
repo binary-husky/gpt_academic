@@ -46,8 +46,9 @@ huggingface免科学上网[在线体验](https://huggingface.co/spaces/qingxu98/
 <!-- - 新界面（左：master主分支, 右：dev开发前沿） -->
 - 新界面
 <div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/229222589-b30ff298-adb1-4e1e-8352-466085919bfb.png" width="700" >
+<img src="https://user-images.githubusercontent.com/96192199/230361456-61078362-a966-4eb5-b49e-3c62ef18b860.gif" width="700" >
 </div>
+
 
 
 - 所有按钮都通过读取functional.py动态生成，可随意加自定义功能，解放粘贴板
