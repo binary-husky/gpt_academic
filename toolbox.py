@@ -279,7 +279,7 @@ def find_recent_files(directory):
     for filename in os.listdir(directory):
         file_path = os.path.join(directory, filename)
         if file_path.endswith('.log'): continue
-        created_time = os.path.getctime(file_path)
+        created_time = os.path.getmtime(file_path)
         if created_time >= one_minute_ago:
             if os.path.isdir(file_path): continue
             recent_files.append(file_path)
