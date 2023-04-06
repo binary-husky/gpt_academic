@@ -260,11 +260,12 @@ python check_proxy.py
 
 - version 3 (Todo): 
 - - 支持gpt4和其他更多llm
-- version 2.3+ (Todo): 
+- version 2.4+ (Todo): 
 - - 总结大工程源代码时文本过长、token溢出的问题
 - - 实现项目打包部署
 - - 函数插件参数接口优化
 - - 自更新
+- version 2.4: (1)新增PDF全文翻译功能; (2)新增输入区切换位置的功能; (3)新增垂直布局选项; (4)多线程函数插件优化。
 - version 2.3: 增强多线程交互性
 - version 2.2: 函数插件支持热重载
 - version 2.1: 可折叠式布局
