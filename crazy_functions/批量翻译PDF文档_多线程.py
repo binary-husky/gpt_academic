@@ -2,6 +2,7 @@ from toolbox import CatchException, report_execption, write_results_to_file
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 
+
 def read_and_clean_pdf_text(fp):
     """
     **输入参数说明**
@@ -20,7 +21,8 @@ def read_and_clean_pdf_text(fp):
     - 清除重复的换行
     - 将每个换行符替换为两个换行符，使每个段落之间有两个换行符分隔
     """
-    import fitz, re
+    import fitz
+    import re
     import numpy as np
     # file_content = ""
     with fitz.open(fp) as doc:
@@ -31,10 +33,13 @@ def read_and_clean_pdf_text(fp):
             text_areas = page.get_text("dict")  # 获取页面上的文本信息
 
             # 块元提取                           for each word segment with in line                       for each line         cross-line words                          for each block
-            meta_txt.extend( [   " ".join(["".join(     [wtf['text'] for wtf in l['spans'] ])          for l in t['lines']   ]).replace('- ','')               for t in text_areas['blocks'] if 'lines' in t])
-            meta_font.extend([   np.mean( [     np.mean([wtf['size'] for wtf in l['spans'] ])          for l in t['lines']   ])                                for t in text_areas['blocks'] if 'lines' in t])
-            if index==0:
-                page_one_meta = [" ".join(["".join(     [wtf['text'] for wtf in l['spans'] ])          for l in t['lines']   ]).replace('- ','')               for t in text_areas['blocks'] if 'lines' in t]
+            meta_txt.extend([" ".join(["".join([wtf['text'] for wtf in l['spans']]) for l in t['lines']]).replace(
+                '- ', '') for t in text_areas['blocks'] if 'lines' in t])
+            meta_font.extend([np.mean([np.mean([wtf['size'] for wtf in l['spans']])
+                             for l in t['lines']]) for t in text_areas['blocks'] if 'lines' in t])
+            if index == 0:
+                page_one_meta = [" ".join(["".join([wtf['text'] for wtf in l['spans']]) for l in t['lines']]).replace(
+                    '- ', '') for t in text_areas['blocks'] if 'lines' in t]
 
         def 把字符太少的块清除为回车(meta_txt):
             for index, block_txt in enumerate(meta_txt):
@@ -61,8 +66,10 @@ def read_and_clean_pdf_text(fp):
             for _ in range(100):
                 for index, block_txt in enumerate(meta_txt):
                     if starts_with_lowercase_word(block_txt):
-                        if meta_txt[index-1]!='\n': meta_txt[index-1] += ' '
-                        else: meta_txt[index-1] = ''
+                        if meta_txt[index-1] != '\n':
+                            meta_txt[index-1] += ' '
+                        else:
+                            meta_txt[index-1] = ''
                         meta_txt[index-1] += meta_txt[index]
                         meta_txt[index] = '\n'
             return meta_txt
@@ -72,12 +79,13 @@ def read_and_clean_pdf_text(fp):
         meta_txt = '\n'.join(meta_txt)
         # 清除重复的换行
         for _ in range(5):
-            meta_txt = meta_txt.replace('\n\n','\n')
+            meta_txt = meta_txt.replace('\n\n', '\n')
 
         # 换行 -> 双换行
         meta_txt = meta_txt.replace('\n', '\n\n')
 
     return meta_txt, page_one_meta
+
 
 @CatchException
 def 批量翻译PDF文档(txt, top_p, temperature, chatbot, history, sys_prompt, WEB_PORT):
@@ -92,7 +100,8 @@ def 批量翻译PDF文档(txt, top_p, temperature, chatbot, history, sys_prompt,
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
-        import fitz, tiktoken
+        import fitz
+        import tiktoken
     except:
         report_execption(chatbot, history,
                          a=f"解析项目: {txt}",
@@ -129,13 +138,8 @@ def 批量翻译PDF文档(txt, top_p, temperature, chatbot, history, sys_prompt,
     yield from 解析PDF(file_manifest, project_folder, top_p, temperature, chatbot, history, sys_prompt)
 
 
-
-
 def 解析PDF(file_manifest, project_folder, top_p, temperature, chatbot, history, sys_prompt):
-    import time
-    import glob
     import os
-    import fitz
     import tiktoken
     TOKEN_LIMIT_PER_FRAGMENT = 1600
     generated_conclusion_files = []
@@ -145,39 +149,44 @@ def 解析PDF(file_manifest, project_folder, top_p, temperature, chatbot, histor
         # 递归地切割PDF文件
         from .crazy_utils import breakdown_txt_to_satisfy_token_limit_for_pdf
         enc = tiktoken.get_encoding("gpt2")
-        get_token_num = lambda txt: len(enc.encode(txt))
+        def get_token_num(txt): return len(enc.encode(txt))
         # 分解文本
-        paper_fragments    = breakdown_txt_to_satisfy_token_limit_for_pdf(
+        paper_fragments = breakdown_txt_to_satisfy_token_limit_for_pdf(
             txt=file_content,  get_token_fn=get_token_num, limit=TOKEN_LIMIT_PER_FRAGMENT)
         page_one_fragments = breakdown_txt_to_satisfy_token_limit_for_pdf(
             txt=str(page_one), get_token_fn=get_token_num, limit=TOKEN_LIMIT_PER_FRAGMENT//4)
         # 为了更好的效果，我们剥离Introduction之后的部分
-        paper_meta = page_one_fragments[0].split('introduction')[0].split('Introduction')[0].split('INTRODUCTION')[0]
+        paper_meta = page_one_fragments[0].split('introduction')[0].split(
+            'Introduction')[0].split('INTRODUCTION')[0]
         # 单线，获取文章meta信息
         paper_meta_info = yield from request_gpt_model_in_new_thread_with_ui_alive(
-            inputs=f"以下是一篇学术论文的基础信息，请从中提取出“标题”、“收录会议或期刊”、“作者”、“摘要”、“编号”、“作者邮箱”这六个部分。请用markdown格式输出，最后用中文翻译摘要部分。请提取：{paper_meta}", 
-            inputs_show_user=f"请从{fp}中提取出“标题”、“收录会议或期刊”等基本信息。", 
+            inputs=f"以下是一篇学术论文的基础信息，请从中提取出“标题”、“收录会议或期刊”、“作者”、“摘要”、“编号”、“作者邮箱”这六个部分。请用markdown格式输出，最后用中文翻译摘要部分。请提取：{paper_meta}",
+            inputs_show_user=f"请从{fp}中提取出“标题”、“收录会议或期刊”等基本信息。",
             top_p=top_p, temperature=temperature,
             chatbot=chatbot, history=[],
             sys_prompt="Your job is to collect information from materials。",
         )
         # 多线，翻译
         gpt_response_collection = yield from request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
-            inputs_array = [f"以下是你需要翻译的文章段落：\n{frag}" for frag in paper_fragments],
-            inputs_show_user_array = [f""  for _ in paper_fragments],
+            inputs_array=[
+                f"以下是你需要翻译的文章段落：\n{frag}" for frag in paper_fragments],
+            inputs_show_user_array=[f"" for _ in paper_fragments],
             top_p=top_p, temperature=temperature,
             chatbot=chatbot,
             history_array=[[paper_meta] for _ in paper_fragments],
-            sys_prompt_array=["请你作为一个学术翻译，把整个段落翻译成中文，要求语言简洁，禁止重复输出原文。" for _ in paper_fragments],
-            max_workers=16 # OpenAI所允许的最大并行过载
+            sys_prompt_array=[
+                "请你作为一个学术翻译，把整个段落翻译成中文，要求语言简洁，禁止重复输出原文。" for _ in paper_fragments],
+            max_workers=16  # OpenAI所允许的最大并行过载
         )
 
         final = ["", paper_meta_info + '\n\n---\n\n---\n\n---\n\n']
         final.extend(gpt_response_collection)
         create_report_file_name = f"{os.path.basename(fp)}.trans.md"
         res = write_results_to_file(final, file_name=create_report_file_name)
-        generated_conclusion_files.append(f'./gpt_log/{create_report_file_name}')
-        chatbot.append((f"{fp}完成了吗？", res)); msg = "完成"
+        generated_conclusion_files.append(
+            f'./gpt_log/{create_report_file_name}')
+        chatbot.append((f"{fp}完成了吗？", res))
+        msg = "完成"
         yield chatbot, history, msg
 
     # 准备文件的下载
@@ -185,8 +194,10 @@ def 解析PDF(file_manifest, project_folder, top_p, temperature, chatbot, histor
     for pdf_path in generated_conclusion_files:
         # 重命名文件
         rename_file = f'./gpt_log/总结论文-{os.path.basename(pdf_path)}'
-        if os.path.exists(rename_file): os.remove(rename_file)
-        shutil.copyfile(pdf_path, rename_file); 
-        if os.path.exists(pdf_path): os.remove(pdf_path)
+        if os.path.exists(rename_file):
+            os.remove(rename_file)
+        shutil.copyfile(pdf_path, rename_file)
+        if os.path.exists(pdf_path):
+            os.remove(pdf_path)
     chatbot.append(("给出输出文件清单", str(generated_conclusion_files)))
     yield chatbot, history, msg
