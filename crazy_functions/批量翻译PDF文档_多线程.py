@@ -1,66 +1,25 @@
-from toolbox import CatchException, report_execption, write_results_to_file, predict_no_ui_but_counting_down
-import re
-import unicodedata
-
-
-def is_paragraph_break(match):
-    """
-    根据给定的匹配结果来判断换行符是否表示段落分隔。
-    如果换行符前为句子结束标志（句号，感叹号，问号），且下一个字符为大写字母，则换行符更有可能表示段落分隔。
-    也可以根据之前的内容长度来判断段落是否已经足够长。
-    """
-    prev_char, next_char = match.groups()
-
-    # 句子结束标志
-    sentence_endings = ".!?"
-
-    # 设定一个最小段落长度阈值
-    min_paragraph_length = 140
-
-    if prev_char in sentence_endings and next_char.isupper() and len(match.string[:match.start(1)]) > min_paragraph_length:
-        return "\n\n"
-    else:
-        return " "
-
-
-def normalize_text(text):
-    """
-    通过把连字（ligatures）等文本特殊符号转换为其基本形式来对文本进行归一化处理。
-    例如，将连字 "fi" 转换为 "f" 和 "i"。
-    """
-    # 对文本进行归一化处理，分解连字
-    normalized_text = unicodedata.normalize("NFKD", text)
-
-    # 替换其他特殊字符
-    cleaned_text = re.sub(r'[^\x00-\x7F]+', '', normalized_text)
-
-    return cleaned_text
-
-
-def clean_text(raw_text):
-    """
-    对从 PDF 提取出的原始文本进行清洗和格式化处理。
-    1. 对原始文本进行归一化处理。
-    2. 替换跨行的连词，例如 “Espe-\ncially” 转换为 “Especially”。
-    3. 根据 heuristic 规则判断换行符是否是段落分隔，并相应地进行替换。
-    """
-    # 对文本进行归一化处理
-    normalized_text = normalize_text(raw_text)
-
-    # 替换跨行的连词
-    text = re.sub(r'(\w+-\n\w+)',
-                  lambda m: m.group(1).replace('-\n', ''), normalized_text)
-
-    # 根据前后相邻字符的特点，找到原文本中的换行符
-    newlines = re.compile(r'(\S)\n(\S)')
-
-    # 根据 heuristic 规则，用空格或段落分隔符替换原换行符
-    final_text = re.sub(newlines, lambda m: m.group(
-        1) + is_paragraph_break(m) + m.group(2), text)
-
-    return final_text.strip()
+from toolbox import CatchException, report_execption, write_results_to_file
+from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 
 def read_and_clean_pdf_text(fp):
+    """
+    **输入参数说明**
+    - `fp`：需要读取和清理文本的pdf文件路径
+
+    **输出参数说明**
+    - `meta_txt`：清理后的文本内容字符串
+    - `page_one_meta`：第一页清理后的文本内容列表
+
+    **函数功能**
+    读取pdf文件并清理其中的文本内容，清理规则包括：
+    - 提取所有块元的文本信息，并合并为一个字符串
+    - 去除短块（字符数小于100）并替换为回车符
+    - 清理多余的空行
+    - 合并小写字母开头的段落块并替换为空格
+    - 清除重复的换行
+    - 将每个换行符替换为两个换行符，使每个段落之间有两个换行符分隔
+    """
     import fitz, re
     import numpy as np
     # file_content = ""
@@ -170,69 +129,7 @@ def 批量翻译PDF文档(txt, top_p, temperature, chatbot, history, sys_prompt,
     yield from 解析PDF(file_manifest, project_folder, top_p, temperature, chatbot, history, sys_prompt)
 
 
-def request_gpt_model_in_new_thread_with_ui_alive(inputs, inputs_show_user, top_p, temperature, chatbot, history, sys_prompt, refresh_interval=0.2):
-    import time
-    from concurrent.futures import ThreadPoolExecutor
-    from request_llm.bridge_chatgpt import predict_no_ui_long_connection
-    # 用户反馈
-    chatbot.append([inputs_show_user, ""]); msg = '正常'
-    yield chatbot, [], msg
-    executor = ThreadPoolExecutor(max_workers=16)
-    mutable = ["", time.time()]
-    future = executor.submit(lambda:
-        predict_no_ui_long_connection(inputs=inputs, top_p=top_p, temperature=temperature, history=history, sys_prompt=sys_prompt, observe_window=mutable)
-    )
-    while True:
-        # yield一次以刷新前端页面
-        time.sleep(refresh_interval)
-        # “喂狗”（看门狗）
-        mutable[1] = time.time()
-        if future.done(): break
-        chatbot[-1] = [chatbot[-1][0], mutable[0]]; msg = "正常"
-        yield chatbot, [], msg
-    return future.result()
 
-def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(inputs_array, inputs_show_user_array, top_p, temperature, chatbot, history_array, sys_prompt_array, refresh_interval=0.2, max_workers=10, scroller_max_len=30):
-    import time
-    from concurrent.futures import ThreadPoolExecutor
-    from request_llm.bridge_chatgpt import predict_no_ui_long_connection
-    assert len(inputs_array) == len(history_array)
-    assert len(inputs_array) == len(sys_prompt_array)
-    executor = ThreadPoolExecutor(max_workers=max_workers)
-    n_frag = len(inputs_array)
-    # 异步原子
-    mutable = [["", time.time()] for _ in range(n_frag)]
-    def _req_gpt(index, inputs, history, sys_prompt):
-        gpt_say = predict_no_ui_long_connection(
-            inputs=inputs, top_p=top_p, temperature=temperature, history=history, sys_prompt=sys_prompt, observe_window=mutable[index]
-        )
-        return gpt_say
-    # 异步任务开始
-    futures = [executor.submit(_req_gpt, index, inputs, history, sys_prompt) for index, inputs, history, sys_prompt in zip(range(len(inputs_array)), inputs_array, history_array, sys_prompt_array)]
-    cnt = 0
-    while True:
-        # yield一次以刷新前端页面
-        time.sleep(refresh_interval); cnt += 1
-        worker_done = [h.done() for h in futures]
-        if all(worker_done): executor.shutdown(); break
-        # 更好的UI视觉效果
-        observe_win = []
-        # 每个线程都要“喂狗”（看门狗）
-        for thread_index, _ in enumerate(worker_done): mutable[thread_index][1] = time.time()
-        # 在前端打印些好玩的东西
-        for thread_index, _ in enumerate(worker_done): 
-            print_something_really_funny = "[ ...`"+mutable[thread_index][0][-scroller_max_len:].\
-                replace('\n','').replace('```','...').replace(' ','.').replace('<br/>','.....').replace('$','.')+"`... ]"
-            observe_win.append(print_something_really_funny)
-        stat_str = ''.join([f'执行中: {obs}\n\n' if not done else '已完成\n\n' for done, obs in zip(worker_done, observe_win)])
-        chatbot[-1] = [chatbot[-1][0], f'多线程操作已经开始，完成情况: \n\n{stat_str}' + ''.join(['.']*(cnt%10+1))]; msg = "正常"
-        yield chatbot, [], msg
-    # 异步任务结束
-    gpt_response_collection = []
-    for inputs_show_user, f in zip(inputs_show_user_array, futures):
-        gpt_res = f.result()
-        gpt_response_collection.extend([inputs_show_user, gpt_res])
-    return gpt_response_collection
 
 def 解析PDF(file_manifest, project_folder, top_p, temperature, chatbot, history, sys_prompt):
     import time
@@ -241,7 +138,7 @@ def 解析PDF(file_manifest, project_folder, top_p, temperature, chatbot, histor
     import fitz
     import tiktoken
     TOKEN_LIMIT_PER_FRAGMENT = 1600
-    
+    generated_conclusion_files = []
     for index, fp in enumerate(file_manifest):
         # 读取PDF文件
         file_content, page_one = read_and_clean_pdf_text(fp)
@@ -277,7 +174,19 @@ def 解析PDF(file_manifest, project_folder, top_p, temperature, chatbot, histor
 
         final = ["", paper_meta_info + '\n\n---\n\n---\n\n---\n\n']
         final.extend(gpt_response_collection)
-        res = write_results_to_file(final)
+        create_report_file_name = f"{os.path.basename(fp)}.trans.md"
+        res = write_results_to_file(final, file_name=create_report_file_name)
+        generated_conclusion_files.append(f'./gpt_log/{create_report_file_name}')
         chatbot.append((f"{fp}完成了吗？", res)); msg = "完成"
         yield chatbot, history, msg
 
+    # 准备文件的下载
+    import shutil
+    for pdf_path in generated_conclusion_files:
+        # 重命名文件
+        rename_file = f'./gpt_log/总结论文-{os.path.basename(pdf_path)}'
+        if os.path.exists(rename_file): os.remove(rename_file)
+        shutil.copyfile(pdf_path, rename_file); 
+        if os.path.exists(pdf_path): os.remove(pdf_path)
+    chatbot.append(("给出输出文件清单", str(generated_conclusion_files)))
+    yield chatbot, history, msg
