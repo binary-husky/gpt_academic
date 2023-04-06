@@ -137,7 +137,7 @@ def 批量翻译PDF文档(txt, top_p, temperature, chatbot, history, sys_prompt,
     except:
         report_execption(chatbot, history,
                          a=f"解析项目: {txt}",
-                         b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pymupdf```。")
+                         b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pymupdf tiktoken```。")
         yield chatbot, history, '正常'
         return
 
