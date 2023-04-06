@@ -1,4 +1,4 @@
-import gradio as gr 
+import gradio as gr
 
 # gradio可用颜色列表
 # gr.themes.utils.colors.slate (石板色)
@@ -24,14 +24,16 @@ import gradio as gr
 # gr.themes.utils.colors.pink (粉红色)
 # gr.themes.utils.colors.rose (玫瑰色)
 
+
 def adjust_theme():
-    try: 
+    try:
         color_er = gr.themes.utils.colors.fuchsia
-        set_theme = gr.themes.Default( 
-                        primary_hue=gr.themes.utils.colors.orange,
-                        neutral_hue=gr.themes.utils.colors.gray,
-                        font=["sans-serif", "Microsoft YaHei", "ui-sans-serif", "system-ui", "sans-serif", gr.themes.utils.fonts.GoogleFont("Source Sans Pro")], 
-                        font_mono=["ui-monospace", "Consolas", "monospace", gr.themes.utils.fonts.GoogleFont("IBM Plex Mono")])
+        set_theme = gr.themes.Default(
+            primary_hue=gr.themes.utils.colors.orange,
+            neutral_hue=gr.themes.utils.colors.gray,
+            font=["sans-serif", "Microsoft YaHei", "ui-sans-serif", "system-ui",
+                  "sans-serif", gr.themes.utils.fonts.GoogleFont("Source Sans Pro")],
+            font_mono=["ui-monospace", "Consolas", "monospace", gr.themes.utils.fonts.GoogleFont("IBM Plex Mono")])
         set_theme.set(
             # Colors
             input_background_fill_dark="*neutral_800",
@@ -77,9 +79,11 @@ def adjust_theme():
             button_cancel_text_color=color_er.c600,
             button_cancel_text_color_dark="white",
         )
-    except: 
-        set_theme = None; print('gradio版本较旧, 不能自定义字体和颜色')
+    except:
+        set_theme = None
+        print('gradio版本较旧, 不能自定义字体和颜色')
     return set_theme
+
 
 advanced_css = """
 /* 设置表格的外边距为1em，内部单元格之间边框合并，空单元格显示. */

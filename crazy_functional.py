@@ -1,4 +1,5 @@
-from toolbox import HotReload # HotReload 的意思是热更新，修改函数插件后，不需要重启程序，代码直接生效
+from toolbox import HotReload  # HotReload 的意思是热更新，修改函数插件后，不需要重启程序，代码直接生效
+
 
 def get_crazy_functions():
     ###################### 第一组插件 ###########################
@@ -81,7 +82,8 @@ def get_crazy_functions():
         "[仅供开发调试] 批量总结PDF文档": {
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
-            "Function": HotReload(批量总结PDF文档) # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
+            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
+            "Function": HotReload(批量总结PDF文档)
         },
         "[仅供开发调试] 批量总结PDF文档pdfminer": {
             "Color": "stop",
@@ -109,9 +111,5 @@ def get_crazy_functions():
     except Exception as err:
         print(f'[下载arxiv论文并翻译摘要] 插件导入失败 {str(err)}')
 
-
-
     ###################### 第n组插件 ###########################
     return function_plugins
-
-
