@@ -15,6 +15,7 @@ def get_crazy_functions():
     from crazy_functions.解析项目源代码 import 解析一个Rect项目
     from crazy_functions.高级功能函数模板 import 高阶功能模板函数
     from crazy_functions.代码重写为全英文_多线程 import 全项目切换英文
+    from crazy_functions.理解PDF文档内容 import 理解PDF文档内容
 
     function_plugins = {
         "请解析并解构此项目本身（源码自译解）": {
@@ -64,6 +65,10 @@ def get_crazy_functions():
         "[函数插件模板demo] 历史上的今天": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Function": HotReload(高阶功能模板函数)
+        },
+        "理解PDF文档内容（直接点击按钮，将会弹出文件选择窗口）": {
+            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
+            "Function": HotReload(理解PDF文档内容)
         },
     }
     ###################### 第二组插件 ###########################
