@@ -1,4 +1,4 @@
-import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
+import os, json; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 import gradio as gr
 from request_llm.bridge_chatgpt import predict
 from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, DummyWith
@@ -163,11 +163,10 @@ def auto_opentab_delay():
     print(f"\t（亮色主体）: http://localhost:{PORT}")
     print(f"\t（暗色主体）: http://localhost:{PORT}/?__dark-theme=true")
     def open(): 
-        time.sleep(2)
-        try: auto_update()  # 检查新版本
-        except: pass
+        time.sleep(2)       # 打开浏览器
         webbrowser.open_new_tab(f"http://localhost:{PORT}/?__dark-theme=true")
     threading.Thread(target=open, name="open-browser", daemon=True).start()
+    threading.Thread(target=auto_update, name="self-upgrade", daemon=True).start()
 
 auto_opentab_delay()
 demo.title = "ChatGPT 学术优化"
