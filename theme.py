@@ -1,5 +1,6 @@
 import gradio as gr
-
+from toolbox import get_conf
+CODE_HIGHLIGHT, = get_conf('CODE_HIGHLIGHT')
 # gradio可用颜色列表
 # gr.themes.utils.colors.slate (石板色)
 # gr.themes.utils.colors.gray (灰色)
@@ -155,7 +156,8 @@ advanced_css = """
 }
 """
 
-advanced_css += """
+if CODE_HIGHLIGHT:
+    advanced_css += """
 .hll { background-color: #ffffcc }
 .c { color: #3D7B7B; font-style: italic } /* Comment */
 .err { border: 1px solid #FF0000 } /* Error */
