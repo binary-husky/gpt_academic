@@ -224,7 +224,7 @@ def markdown_convertion(txt):
             content = content.replace('\n', '</br>')
             return f"<font color=\"#00FF00\">$$</font><font color=\"#FF00FF\">{content}</font><font color=\"#00FF00\">$$</font>"
         else:
-            return f"<font color=\"#00FF00\">$</font><font color=\"#FF00FF\">${content}</font><font color=\"#00FF00\">$</font>"
+            return f"<font color=\"#00FF00\">$</font><font color=\"#FF00FF\">{content}</font><font color=\"#00FF00\">$</font>"
 
     def replace_math_render(match):
         content = match.group(1)
