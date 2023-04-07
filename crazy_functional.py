@@ -72,6 +72,7 @@ def get_crazy_functions():
     from crazy_functions.批量总结PDF文档pdfminer import 批量总结PDF文档pdfminer
     from crazy_functions.总结word文档 import 总结word文档
     from crazy_functions.批量翻译PDF文档_多线程 import 批量翻译PDF文档
+    from crazy_functions.谷歌检索小助手 import 谷歌检索小助手
 
     function_plugins.update({
         "批量翻译PDF文档（多线程）": {
@@ -89,6 +90,11 @@ def get_crazy_functions():
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(批量总结PDF文档pdfminer)
+        },
+        "谷歌学术检索助手（输入谷歌学术搜索页url）": {
+            "Color": "stop",
+            "AsButton": False,  # 加入下拉菜单中
+            "Function": HotReload(谷歌检索小助手)
         },
         "批量总结Word文档": {
             "Color": "stop",
