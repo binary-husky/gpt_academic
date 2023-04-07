@@ -1,4 +1,4 @@
-import gradio as gr 
+import gradio as gr
 
 # gradio可用颜色列表
 # gr.themes.utils.colors.slate (石板色)
@@ -24,14 +24,16 @@ import gradio as gr
 # gr.themes.utils.colors.pink (粉红色)
 # gr.themes.utils.colors.rose (玫瑰色)
 
+
 def adjust_theme():
-    try: 
-        color_er = gr.themes.utils.colors.pink
-        set_theme = gr.themes.Default( 
-                        primary_hue=gr.themes.utils.colors.orange,
-                        neutral_hue=gr.themes.utils.colors.gray,
-                        font=["sans-serif", "Microsoft YaHei", "ui-sans-serif", "system-ui", "sans-serif", gr.themes.utils.fonts.GoogleFont("Source Sans Pro")], 
-                        font_mono=["ui-monospace", "Consolas", "monospace", gr.themes.utils.fonts.GoogleFont("IBM Plex Mono")])
+    try:
+        color_er = gr.themes.utils.colors.fuchsia
+        set_theme = gr.themes.Default(
+            primary_hue=gr.themes.utils.colors.orange,
+            neutral_hue=gr.themes.utils.colors.gray,
+            font=["sans-serif", "Microsoft YaHei", "ui-sans-serif", "system-ui",
+                  "sans-serif", gr.themes.utils.fonts.GoogleFont("Source Sans Pro")],
+            font_mono=["ui-monospace", "Consolas", "monospace", gr.themes.utils.fonts.GoogleFont("IBM Plex Mono")])
         set_theme.set(
             # Colors
             input_background_fill_dark="*neutral_800",
@@ -77,6 +79,78 @@ def adjust_theme():
             button_cancel_text_color=color_er.c600,
             button_cancel_text_color_dark="white",
         )
-    except: 
-        set_theme = None; print('gradio版本较旧, 不能自定义字体和颜色')
+    except:
+        set_theme = None
+        print('gradio版本较旧, 不能自定义字体和颜色')
     return set_theme
+
+
+advanced_css = """
+/* 设置表格的外边距为1em，内部单元格之间边框合并，空单元格显示. */
+.markdown-body table {
+    margin: 1em 0;
+    border-collapse: collapse;
+    empty-cells: show;
+}
+
+/* 设置表格单元格的内边距为5px，边框粗细为1.2px，颜色为--border-color-primary. */
+.markdown-body th, .markdown-body td {
+    border: 1.2px solid var(--border-color-primary);
+    padding: 5px;
+}
+
+/* 设置表头背景颜色为rgba(175,184,193,0.2)，透明度为0.2. */
+.markdown-body thead {
+    background-color: rgba(175,184,193,0.2);
+}
+
+/* 设置表头单元格的内边距为0.5em和0.2em. */
+.markdown-body thead th {
+    padding: .5em .2em;
+}
+
+/* 去掉列表前缀的默认间距，使其与文本线对齐. */
+.markdown-body ol, .markdown-body ul {
+    padding-inline-start: 2em !important;
+}
+
+/* 设定聊天气泡的样式，包括圆角、最大宽度和阴影等. */
+[class *= "message"] {
+    border-radius: var(--radius-xl) !important;
+    /* padding: var(--spacing-xl) !important; */
+    /* font-size: var(--text-md) !important; */
+    /* line-height: var(--line-md) !important; */
+    /* min-height: calc(var(--text-md)*var(--line-md) + 2*var(--spacing-xl)); */
+    /* min-width: calc(var(--text-md)*var(--line-md) + 2*var(--spacing-xl)); */
+}
+[data-testid = "bot"] {
+    max-width: 95%;
+    /* width: auto !important; */
+    border-bottom-left-radius: 0 !important;
+}
+[data-testid = "user"] {
+    max-width: 100%;
+    /* width: auto !important; */
+    border-bottom-right-radius: 0 !important;
+}
+
+/* 行内代码的背景设为淡灰色，设定圆角和间距. */
+.markdown-body code {
+    display: inline;
+    white-space: break-spaces;
+    border-radius: 6px;
+    margin: 0 2px 0 2px;
+    padding: .2em .4em .1em .4em;
+    background-color: rgba(175,184,193,0.2);
+}
+/* 设定代码块的样式，包括背景颜色、内、外边距、圆角。 */
+.markdown-body pre code {
+    display: block;
+    overflow: auto;
+    white-space: pre;
+    background-color: rgba(175,184,193,0.2);
+    border-radius: 10px;
+    padding: 1em;
+    margin: 1em 2em 1em 0.5em;
+}
+"""
