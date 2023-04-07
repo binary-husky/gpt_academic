@@ -237,10 +237,21 @@ def markdown_convertion(txt):
             return content
         else:
             return tex2mathml_catch_exception(content)
+        
+    def markdown_bug_hunt(content):
+        """
+        解决一个mdx_math的bug（单$包裹begin命令时多余<script>）
+        """
+        content = content.replace('<script type="math/tex">\n<script type="math/tex; mode=display">', '<script type="math/tex; mode=display">')
+        content = content.replace('</script>\n</script>', '</script>')
+        return content
+    
+
     if ('$' in txt) and ('```' not in txt):  # 有$标识的公式符号，且没有代码段```的标识
         # convert everything to html format
         split = markdown.markdown(text='---')
         convert_stage_1 = markdown.markdown(text=txt, extensions=['mdx_math', 'fenced_code', 'tables', 'sane_lists'], extension_configs=markdown_extension_configs)
+        convert_stage_1 = markdown_bug_hunt(convert_stage_1)
         # re.DOTALL: Make the '.' special character match any character at all, including a newline; without this flag, '.' will match anything except a newline. Corresponds to the inline flag (?s).
         # 1. convert to easy-to-copy tex (do not render math)
         convert_stage_2_1, n = re.subn(find_equation_pattern, replace_math_no_render, convert_stage_1, flags=re.DOTALL)
