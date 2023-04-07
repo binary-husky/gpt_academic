@@ -1,4 +1,4 @@
-
+import traceback
 
 def request_gpt_model_in_new_thread_with_ui_alive(inputs, inputs_show_user, top_p, temperature, chatbot, history, sys_prompt, refresh_interval=0.2):
     import time
@@ -43,10 +43,16 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(inp
     mutable = [["", time.time()] for _ in range(n_frag)]
 
     def _req_gpt(index, inputs, history, sys_prompt):
-        gpt_say = predict_no_ui_long_connection(
-            inputs=inputs, top_p=top_p, temperature=temperature, history=history, sys_prompt=sys_prompt, observe_window=mutable[
-                index]
-        )
+        try:
+            gpt_say = predict_no_ui_long_connection(
+                inputs=inputs, top_p=top_p, temperature=temperature, history=history, sys_prompt=sys_prompt, observe_window=mutable[index]
+            )
+        except:
+            # 收拾残局
+            tb_str = '```\n' + traceback.format_exc() + '```'
+            gpt_say = f"[Local Message] 线程{index}在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
+            if len(mutable[index][0]) > 0:
+                gpt_say += "此线程失败前收到的回答：" + mutable[index][0]
         return gpt_say
     # 异步任务开始
     futures = [executor.submit(_req_gpt, index, inputs, history, sys_prompt) for index, inputs, history, sys_prompt in zip(
