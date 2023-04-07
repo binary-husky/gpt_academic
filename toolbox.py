@@ -240,7 +240,7 @@ def markdown_convertion(txt):
     if ('$' in txt) and ('```' not in txt):  # 有$标识的公式符号，且没有代码段```的标识
         # convert everything to html format
         split = markdown.markdown(text='---')
-        convert_stage_1 = markdown.markdown(text=txt, extensions=['mdx_math', 'fenced_code', 'tables'], extension_configs=markdown_extension_configs)
+        convert_stage_1 = markdown.markdown(text=txt, extensions=['mdx_math', 'fenced_code', 'tables', 'sane_lists'], extension_configs=markdown_extension_configs)
         # re.DOTALL: Make the '.' special character match any character at all, including a newline; without this flag, '.' will match anything except a newline. Corresponds to the inline flag (?s).
         # 1. convert to easy-to-copy tex (do not render math)
         convert_stage_2_1, n = re.subn(find_equation_pattern, replace_math_no_render, convert_stage_1, flags=re.DOTALL)
@@ -249,7 +249,7 @@ def markdown_convertion(txt):
         # cat them together
         return pre + convert_stage_2_1 + f'{split}' + convert_stage_2_2 + suf
     else:
-        return pre + markdown.markdown(txt, extensions=['fenced_code', 'tables']) + suf
+        return pre + markdown.markdown(txt, extensions=['fenced_code', 'tables', 'sane_lists']) + suf
 
 
 def close_up_code_segment_during_stream(gpt_reply):
