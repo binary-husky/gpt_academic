@@ -19,20 +19,26 @@ def check_proxy(proxies):
         print(result)
         return result
 
+
 def backup_and_download(current_version, remote_version):
     """
     一键更新协议：备份和下载
     """
     from toolbox import get_conf
-    import shutil, os, requests, zipfile
+    import shutil
+    import os
+    import requests
+    import zipfile
     os.makedirs(f'./history', exist_ok=True)
     backup_dir = f'./history/backup-{current_version}/'
     new_version_dir = f'./history/new-version-{remote_version}/'
-    if os.path.exists(new_version_dir): return new_version_dir
+    if os.path.exists(new_version_dir):
+        return new_version_dir
     os.makedirs(new_version_dir)
-    shutil.copytree('./', backup_dir, ignore=lambda x,y: ['history'])
+    shutil.copytree('./', backup_dir, ignore=lambda x, y: ['history'])
     proxies, = get_conf('proxies')
-    r = requests.get('https://github.com/binary-husky/chatgpt_academic/archive/refs/heads/master.zip', proxies=proxies, stream=True)
+    r = requests.get(
+        'https://github.com/binary-husky/chatgpt_academic/archive/refs/heads/master.zip', proxies=proxies, stream=True)
     zip_file_path = backup_dir+'/master.zip'
     with open(zip_file_path, 'wb+') as f:
         f.write(r.content)
@@ -45,11 +51,16 @@ def backup_and_download(current_version, remote_version):
             zip_ref.extract(zip_info, dst_path)
     return new_version_dir
 
+
 def patch_and_restart(path):
     """
     一键更新协议：覆盖和重启
     """
-    import distutils, shutil, os, sys, time
+    import distutils
+    import shutil
+    import os
+    import sys
+    import time
     # if not using config_private, move origin config.py as config_private.py
     if not os.path.exists('config_private.py'):
         print('由于您没有设置config_private.py私密配置，现将您的现有配置移动至config_private.py以防止配置丢失，',
@@ -58,18 +69,21 @@ def patch_and_restart(path):
     distutils.dir_util.copy_tree(path+'/chatgpt_academic-master', './')
     print('更新完成，您可以随时在history子文件夹下找回旧版的程序，5s之后重启')
     for i in reversed(range(5)):
-        time.sleep(1); print(i)
+        time.sleep(1)
+        print(i)
     print(' ------------------------------ -----------------------------------')
     os.execl(sys.executable, 'python', 'main.py')
+
 
 def get_current_version():
     import json
     try:
-        with open('./version', 'r', encoding='utf8') as f: 
+        with open('./version', 'r', encoding='utf8') as f:
             current_version = json.loads(f.read())['version']
     except:
         current_version = ""
     return current_version
+
 
 def auto_update():
     """
@@ -81,7 +95,8 @@ def auto_update():
         import time
         import json
         proxies, = get_conf('proxies')
-        response = requests.get("https://raw.githubusercontent.com/binary-husky/chatgpt_academic/master/version", proxies=proxies, timeout=1)
+        response = requests.get(
+            "https://raw.githubusercontent.com/binary-husky/chatgpt_academic/master/version", proxies=proxies, timeout=1)
         remote_json_data = json.loads(response.text)
         remote_version = remote_json_data['version']
         if remote_json_data["show_feature"]:
@@ -98,14 +113,18 @@ def auto_update():
             user_instruction = input('（2）是否一键更新代码（Y/y+回车=确认，输入其他/无输入+回车=不更新）？')
             if user_instruction in ['Y', 'y']:
                 path = backup_and_download(current_version, remote_version)
-                try: patch_and_restart(path)
-                except: print('更新失败。')
+                try:
+                    patch_and_restart(path)
+                except:
+                    print('更新失败。')
             else:
+                print('自动更新程序：已禁用')
                 return
         else:
             return
     except:
-        print('自动更新程序未正常工作。')
+        print('自动更新程序：已禁用')
+
 
 if __name__ == '__main__':
     import os
