@@ -68,6 +68,7 @@ def get_crazy_functions():
         },
         "理解PDF文档内容（直接点击按钮，将会弹出文件选择窗口）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
+            "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(理解PDF文档内容)
         },
     }
