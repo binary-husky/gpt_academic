@@ -162,7 +162,13 @@ def CatchException(f):
 
 def HotReload(f):
     """
-        装饰器函数，实现函数插件热更新
+    HotReload的装饰器函数，用于实现Python函数插件的热更新。
+    函数热更新是指在不停止程序运行的情况下，更新函数代码，从而达到实时更新功能。
+    在装饰器内部，使用wraps(f)来保留函数的元信息，并定义了一个名为decorated的内部函数。
+    内部函数通过使用importlib模块的reload函数和inspect模块的getmodule函数来重新加载并获取函数模块，
+    然后通过getattr函数获取函数名，并在新模块中重新加载函数。
+    最后，使用yield from语句返回重新加载过的函数，并在被装饰的函数上执行。
+    最终，装饰器函数返回内部函数。这个内部函数可以将函数的原始定义更新为最新版本，并执行函数的新版本。
     """
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -265,7 +271,14 @@ def markdown_convertion(txt):
 
 def close_up_code_segment_during_stream(gpt_reply):
     """
-        在gpt输出代码的中途（输出了前面的```，但还没输出完后面的```），补上后面的```
+    在gpt输出代码的中途（输出了前面的```，但还没输出完后面的```），补上后面的```
+    
+    Args:
+        gpt_reply (str): GPT模型返回的回复字符串。
+
+    Returns:
+        str: 返回一个新的字符串，将输出代码片段的“后面的```”补上。
+
     """
     if '```' not in gpt_reply:
         return gpt_reply
@@ -463,6 +476,15 @@ def clear_line_break(txt):
 
 
 class DummyWith():
+    """
+    这段代码定义了一个名为DummyWith的空上下文管理器，
+    它的作用是……额……没用，即在代码结构不变得情况下取代其他的上下文管理器。
+    上下文管理器是一种Python对象，用于与with语句一起使用，
+    以确保一些资源在代码块执行期间得到正确的初始化和清理。
+    上下文管理器必须实现两个方法，分别为 __enter__()和 __exit__()。 
+    在上下文执行开始的情况下，__enter__()方法会在代码块被执行前被调用，
+    而在上下文执行结束时，__exit__()方法则会被调用。
+    """
     def __enter__(self):
         return self
 
