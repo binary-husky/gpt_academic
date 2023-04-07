@@ -15,7 +15,6 @@ def get_crazy_functions():
     from crazy_functions.解析项目源代码 import 解析一个Rect项目
     from crazy_functions.高级功能函数模板 import 高阶功能模板函数
     from crazy_functions.代码重写为全英文_多线程 import 全项目切换英文
-    from crazy_functions.理解PDF文档内容 import 理解PDF文档内容
 
     function_plugins = {
         "请解析并解构此项目本身（源码自译解）": {
@@ -66,11 +65,7 @@ def get_crazy_functions():
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Function": HotReload(高阶功能模板函数)
         },
-        "理解PDF文档内容（直接点击按钮，将会弹出文件选择窗口）": {
-            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
-            "AsButton": False,  # 加入下拉菜单中
-            "Function": HotReload(理解PDF文档内容)
-        },
+
     }
     ###################### 第二组插件 ###########################
     # [第二组插件]: 经过充分测试，但功能上距离达到完美状态还差一点点
@@ -79,6 +74,8 @@ def get_crazy_functions():
     from crazy_functions.总结word文档 import 总结word文档
     from crazy_functions.批量翻译PDF文档_多线程 import 批量翻译PDF文档
     from crazy_functions.谷歌检索小助手 import 谷歌检索小助手
+    from crazy_functions.理解PDF文档内容 import 理解PDF文档内容
+    from crazy_functions.理解PDF文档内容 import 理解PDF文档内容标准文件输入
 
     function_plugins.update({
         "批量翻译PDF文档（多线程）": {
@@ -105,6 +102,17 @@ def get_crazy_functions():
         "批量总结Word文档": {
             "Color": "stop",
             "Function": HotReload(总结word文档)
+        },
+        "理解PDF文档内容（Tk文件选择接口，仅本地）": {
+            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
+            "AsButton": False,  # 加入下拉菜单中
+            "Function": HotReload(理解PDF文档内容)
+        },
+        "理解PDF文档内容（通用接口，读取文件输入区）": {
+            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
+            "Color": "stop",
+            "AsButton": False,  # 加入下拉菜单中
+            "Function": HotReload(理解PDF文档内容标准文件输入)
         },
     })
 
