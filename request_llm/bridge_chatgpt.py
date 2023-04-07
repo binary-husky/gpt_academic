@@ -104,7 +104,10 @@ def predict_no_ui_long_connection(inputs, top_p, temperature, history=[], sys_pr
     result = ''
     while True:
         try: chunk = next(stream_response).decode()
-        except StopIteration: break
+        except StopIteration: 
+            break
+        except requests.exceptions.ConnectionError:
+            chunk = next(stream_response).decode() # 失败了，重试一次？再失败就没办法了。
         if len(chunk)==0: continue
         if not chunk.startswith('data:'): 
             error_msg = get_full_error(chunk.encode('utf8'), stream_response).decode()
