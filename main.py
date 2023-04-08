@@ -50,7 +50,7 @@ if LAYOUT == "TOP-DOWN":
     CHATBOT_HEIGHT /= 2
 
 cancel_handles = []
-with gr.Blocks(theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
+with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
     gr.HTML(title_html)
     with gr_L1():
         with gr_L2(scale=2):
@@ -170,5 +170,4 @@ def auto_opentab_delay():
     threading.Thread(target=auto_update, name="self-upgrade", daemon=True).start()
 
 auto_opentab_delay()
-demo.title = "ChatGPT 学术优化"
 demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", share=True, server_port=PORT, auth=AUTHENTICATION)
