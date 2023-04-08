@@ -1,4 +1,4 @@
-import os, json; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
+import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 import gradio as gr
 from request_llm.bridge_chatgpt import predict
 from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, DummyWith
