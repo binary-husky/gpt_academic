@@ -161,8 +161,8 @@ with gr.Blocks(theme=set_theme, analytics_enabled=False, css=advanced_css) as de
 def auto_opentab_delay():
     import threading, webbrowser, time
     print(f"如果浏览器没有自动打开，请复制并转到以下URL：")
-    print(f"\t（亮色主体）: http://localhost:{PORT}")
-    print(f"\t（暗色主体）: http://localhost:{PORT}/?__dark-theme=true")
+    print(f"\t（亮色主题）: http://localhost:{PORT}")
+    print(f"\t（暗色主题）: http://localhost:{PORT}/?__dark-theme=true")
     def open(): 
         time.sleep(2)       # 打开浏览器
         webbrowser.open_new_tab(f"http://localhost:{PORT}/?__dark-theme=true")
