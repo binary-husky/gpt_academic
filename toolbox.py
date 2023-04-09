@@ -43,7 +43,7 @@ def ArgsGeneralWrapper(f):
         plugin_kwargs = {
         }
         chatbot_with_cookie = ChatBotWithCookies(cookies)
-        chatbot_with_cookie.write_list(txt_passon)
+        chatbot_with_cookie.write_list(chatbot)
         yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
     return decorated
 

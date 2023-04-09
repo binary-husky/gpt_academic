@@ -126,8 +126,8 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
     cancel_handles.append(txt2.submit(**predict_args))
     cancel_handles.append(submitBtn.click(**predict_args))
     cancel_handles.append(submitBtn2.click(**predict_args))
-    resetBtn.click(lambda: ([], [], "已重置"), None, output_combo)
-    resetBtn2.click(lambda: ([], [], "已重置"), None, output_combo)
+    resetBtn.click(lambda: ([], [], "已重置"), None, [chatbot, history, status])
+    resetBtn2.click(lambda: ([], [], "已重置"), None, [chatbot, history, status])
     # 基础功能区的回调函数注册
     for k in functional:
         click_handle = functional[k]["Button"].click(fn=ArgsGeneralWrapper(predict), inputs=[*input_combo, gr.State(True), gr.State(k)], outputs=output_combo)
