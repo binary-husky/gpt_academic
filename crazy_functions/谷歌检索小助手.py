@@ -56,16 +56,16 @@ def get_meta_information(url, chatbot, history):
         })
 
         chatbot[-1] = [chatbot[-1][0], title + f'\n\n是否在arxiv中（不在arxiv中无法获取完整摘要）:{is_paper_in_arxiv}\n\n' + abstract]
-        yield from update_ui(chatbot=chatbot, history=[])
+        yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
     return profile
 
 @CatchException
-def 谷歌检索小助手(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
+def 谷歌检索小助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
         "分析用户提供的谷歌学术（google scholar）搜索页面中，出现的所有文章: binary-husky，插件初始化中..."])
-    yield from update_ui(chatbot=chatbot, history=history)
+    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
@@ -75,7 +75,7 @@ def 谷歌检索小助手(txt, top_p, temperature, chatbot, history, systemPromp
         report_execption(chatbot, history, 
             a = f"解析项目: {txt}", 
             b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade beautifulsoup4 arxiv```。")
-        yield from update_ui(chatbot=chatbot, history=history)
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
 
     # 清空历史，以免输入溢出
@@ -91,7 +91,7 @@ def 谷歌检索小助手(txt, top_p, temperature, chatbot, history, systemPromp
         inputs_show_user = f"请分析此页面中出现的所有文章：{txt}"
         gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
             inputs=i_say, inputs_show_user=inputs_show_user, 
-            top_p=top_p, temperature=temperature, chatbot=chatbot, history=[], 
+            llm_kwargs=llm_kwargs, chatbot=chatbot, history=[], 
             sys_prompt="你是一个学术翻译，请从数据中提取信息。你必须使用Markdown格式。你必须逐个文献进行处理。"
         )
 
@@ -100,7 +100,7 @@ def 谷歌检索小助手(txt, top_p, temperature, chatbot, history, systemPromp
 
     chatbot.append(["状态？", "已经全部完成"])
     msg = '正常'
-    yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg)
+    yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg) # 刷新界面
     res = write_results_to_file(history)
     chatbot.append(("完成了吗？", res)); 
-    yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg)
+    yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg) # 刷新界面

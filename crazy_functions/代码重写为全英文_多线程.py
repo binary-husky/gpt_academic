@@ -23,7 +23,7 @@ def break_txt_into_half_at_some_linebreak(txt):
 
 
 @CatchException
-def 全项目切换英文(txt, top_p, temperature, chatbot, history, sys_prompt, WEB_PORT):
+def 全项目切换英文(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys_prompt, web_port):
     # 第1步：清空历史，以免输入溢出
     history = []
 
@@ -34,7 +34,7 @@ def 全项目切换英文(txt, top_p, temperature, chatbot, history, sys_prompt,
         report_execption(chatbot, history, 
             a = f"解析项目: {txt}", 
             b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade openai transformers```。")
-        yield from update_ui(chatbot=chatbot, history=history)
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
 
     # 第3步：集合文件
@@ -54,7 +54,7 @@ def 全项目切换英文(txt, top_p, temperature, chatbot, history, sys_prompt,
         i_say_show_user =f'[{index}/{len(file_manifest)}] 接下来请将以下代码中包含的所有中文转化为英文，只输出转化后的英文代码，请用代码块输出代码: {os.path.abspath(fp)}'
         i_say_show_user_buffer.append(i_say_show_user)
         chatbot.append((i_say_show_user, "[Local Message] 等待多线程操作，中间过程不予显示."))
-        yield from update_ui(chatbot=chatbot, history=history)
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
 
     # 第5步：Token限制下的截断与处理
@@ -82,7 +82,7 @@ def 全项目切换英文(txt, top_p, temperature, chatbot, history, sys_prompt,
             for file_content_partial in file_content_breakdown:
                 i_say = i_say_template(fp, file_content_partial)
                 # # ** gpt request **
-                gpt_say_partial = predict_no_ui_long_connection(inputs=i_say, top_p=top_p, temperature=temperature, history=[], sys_prompt=sys_prompt, observe_window=observe_window[index])
+                gpt_say_partial = predict_no_ui_long_connection(inputs=i_say, llm_kwargs=llm_kwargs, history=[], sys_prompt=sys_prompt, observe_window=observe_window[index])
                 gpt_say_partial = extract_code_block_carefully(gpt_say_partial)
                 gpt_say += gpt_say_partial
             mutable_return[index] = gpt_say
@@ -97,7 +97,7 @@ def 全项目切换英文(txt, top_p, temperature, chatbot, history, sys_prompt,
         h.daemon = True
         h.start()
     chatbot.append(('开始了吗？', f'多线程操作已经开始'))
-    yield from update_ui(chatbot=chatbot, history=history)
+    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # 第8步：循环轮询各个线程是否执行完毕
     cnt = 0
@@ -113,7 +113,7 @@ def 全项目切换英文(txt, top_p, temperature, chatbot, history, sys_prompt,
         stat = [f'执行中: {obs}\n\n' if alive else '已完成\n\n' for alive, obs in zip(th_alive, observe_win)]
         stat_str = ''.join(stat)
         chatbot[-1] = (chatbot[-1][0], f'多线程操作已经开始，完成情况: \n\n{stat_str}' + ''.join(['.']*(cnt%10+1)))
-        yield from update_ui(chatbot=chatbot, history=history)
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # 第9步：把结果写入文件
     for index, h in enumerate(handles):
@@ -130,10 +130,10 @@ def 全项目切换英文(txt, top_p, temperature, chatbot, history, sys_prompt,
             shutil.copyfile(file_manifest[index], where_to_relocate)
         chatbot.append((i_say_show_user, f'[Local Message] 已完成{os.path.abspath(fp)}的转化，\n\n存入{os.path.abspath(where_to_relocate)}'))
         history.append(i_say_show_user); history.append(gpt_say)
-        yield from update_ui(chatbot=chatbot, history=history)
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         time.sleep(1)
 
     # 第10步：备份一个文件
     res = write_results_to_file(history)
     chatbot.append(("生成一份任务执行报告", res))
-    yield from update_ui(chatbot=chatbot, history=history)
+    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
