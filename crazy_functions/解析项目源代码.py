@@ -2,92 +2,96 @@ from request_llm.bridge_chatgpt import predict_no_ui
 from toolbox import CatchException, report_execption, write_results_to_file, predict_no_ui_but_counting_down
 fast_debug = False
 
-def 解析源代码(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt):
-    import time, glob, os
-    print('begin analysis on:', file_manifest)
+
+def 解析源代码新(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt):
+    import os, copy
+    from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
+    from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, WithRetry
+    msg = '正常'
+    inputs_array = []
+    inputs_show_user_array = []
+    history_array = []
+    sys_prompt_array = []
+    report_part_1 = []
+
+    ############################## <第一步，逐个文件分析，多线程> ##################################
     for index, fp in enumerate(file_manifest):
         with open(fp, 'r', encoding='utf-8') as f:
             file_content = f.read()
-
         prefix = "接下来请你逐文件分析下面的工程" if index==0 else ""
         i_say = prefix + f'请对下面的程序文件做一个概述文件名是{os.path.relpath(fp, project_folder)}，文件代码是 ```{file_content}```'
         i_say_show_user = prefix + f'[{index}/{len(file_manifest)}] 请对下面的程序文件做一个概述: {os.path.abspath(fp)}'
-        chatbot.append((i_say_show_user, "[Local Message] waiting gpt response."))
-        yield chatbot, history, '正常'
+        # 装载请求内容
+        inputs_array.append(i_say)
+        inputs_show_user_array.append(i_say_show_user)
+        history_array.append([])
+        sys_prompt_array.append("你是一个程序架构分析师，正在分析一个源代码项目。你的回答必须简单明了。")
 
-        if not fast_debug: 
-            msg = '正常'
+    gpt_response_collection = yield from request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
+        inputs_array = inputs_array,
+        inputs_show_user_array = inputs_show_user_array,
+        history_array = history_array,
+        sys_prompt_array = sys_prompt_array,
+        top_p = top_p,
+        temperature = temperature,
+        chatbot = chatbot,
+        show_user_at_complete = True
+    )
 
-            # ** gpt request **
-            gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[])   # 带超时倒计时
+    report_part_1 = copy.deepcopy(gpt_response_collection)
+    history_to_return = report_part_1
+    res = write_results_to_file(report_part_1)
+    chatbot.append(("完成？", "逐个文件分析已完成。" + res + "\n\n正在开始汇总。"))
+    yield chatbot, history_to_return, msg
 
-            chatbot[-1] = (i_say_show_user, gpt_say)
-            history.append(i_say_show_user); history.append(gpt_say)
-            yield chatbot, history, msg
-            if not fast_debug: time.sleep(2)
+    ############################## <第二步，综合，单线程，分组+迭代处理> ##################################
+    batchsize = 16  # 10个文件为一组
+    report_part_2 = []
+    previous_iteration_files = []
+    while True:
+        if len(file_manifest) == 0: break
+        this_iteration_file_manifest = file_manifest[:batchsize]
+        this_iteration_gpt_response_collection = gpt_response_collection[:batchsize*2]
+        file_rel_path = [os.path.relpath(fp, project_folder) for index, fp in enumerate(this_iteration_file_manifest)]
+        # 把“请对下面的程序文件做一个概述” 替换成 精简的 "文件名：{all_file[index]}"
+        for index, content in enumerate(this_iteration_gpt_response_collection):
+            if index%2==0: this_iteration_gpt_response_collection[index] = f"文件名：{file_rel_path[index//2]}"
+        previous_iteration_files.extend([os.path.relpath(fp, project_folder) for index, fp in enumerate(this_iteration_file_manifest)])
+        previous_iteration_files_string = ', '.join(previous_iteration_files)
+        current_iteration_focus = ', '.join([os.path.relpath(fp, project_folder) for index, fp in enumerate(this_iteration_file_manifest)])
+        i_say = f'根据以上分析，对程序的整体功能和构架重新做出概括。然后用一张markdown表格整理每个文件的功能（包括{previous_iteration_files_string}）。'
+        inputs_show_user = f'根据以上分析，对程序的整体功能和构架重新做出概括，由于输入长度限制，可能需要分组处理，本组文件为 {current_iteration_focus} + 已经汇总的文件组。'
+        this_iteration_history = copy.deepcopy(this_iteration_gpt_response_collection) 
+        this_iteration_history.extend(report_part_2)
+        result = yield from request_gpt_model_in_new_thread_with_ui_alive(
+            inputs=i_say, inputs_show_user=inputs_show_user, top_p=top_p, temperature=temperature, chatbot=chatbot, 
+            history=this_iteration_history,   # 迭代之前的分析
+            sys_prompt="你是一个程序架构分析师，正在分析一个源代码项目。")
+        report_part_2.extend([i_say, result])
 
-    all_file = ', '.join([os.path.relpath(fp, project_folder) for index, fp in enumerate(file_manifest)])
-    i_say = f'根据以上你自己的分析，对程序的整体功能和构架做出概括。然后用一张markdown表格整理每个文件的功能（包括{all_file}）。'
-    chatbot.append((i_say, "[Local Message] waiting gpt response."))
-    yield chatbot, history, '正常'
+        file_manifest = file_manifest[batchsize:]
+        gpt_response_collection = gpt_response_collection[batchsize*2:]
 
-    if not fast_debug: 
-        msg = '正常'
-        # ** gpt request **
-        gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say, chatbot, top_p, temperature, history=history)   # 带超时倒计时
-        
-        chatbot[-1] = (i_say, gpt_say)
-        history.append(i_say); history.append(gpt_say)
-        yield chatbot, history, msg
-        res = write_results_to_file(history)
-        chatbot.append(("完成了吗？", res))
-        yield chatbot, history, msg
-
-
+    ############################## <END> ##################################
+    history_to_return.extend(report_part_2)
+    res = write_results_to_file(history_to_return)
+    chatbot.append(("完成了吗？", res))
+    yield chatbot, history_to_return, msg
 
 
 @CatchException
 def 解析项目本身(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
     history = []    # 清空历史，以免输入溢出
-    import time, glob, os
+    import glob
     file_manifest = [f for f in glob.glob('./*.py') if ('test_project' not in f) and ('gpt_log' not in f)] + \
-                    [f for f in glob.glob('./crazy_functions/*.py') if ('test_project' not in f) and ('gpt_log' not in f)]
-    for index, fp in enumerate(file_manifest):
-        # if 'test_project' in fp: continue
-        with open(fp, 'r', encoding='utf-8') as f:
-            file_content = f.read()
-
-        prefix = "接下来请你分析自己的程序构成，别紧张，" if index==0 else ""
-        i_say = prefix + f'请对下面的程序文件做一个概述文件名是{fp}，文件代码是 ```{file_content}```'
-        i_say_show_user = prefix + f'[{index}/{len(file_manifest)}] 请对下面的程序文件做一个概述: {os.path.abspath(fp)}'
-        chatbot.append((i_say_show_user, "[Local Message] waiting gpt response."))
+                    [f for f in glob.glob('./crazy_functions/*.py') if ('test_project' not in f) and ('gpt_log' not in f)]+ \
+                    [f for f in glob.glob('./request_llm/*.py') if ('test_project' not in f) and ('gpt_log' not in f)]
+    project_folder = './'
+    if len(file_manifest) == 0:
+        report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何python文件: {txt}")
         yield chatbot, history, '正常'
-
-        if not fast_debug: 
-            # ** gpt request **
-            # gpt_say = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature)
-            gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[], long_connection=True)   # 带超时倒计时
-
-            chatbot[-1] = (i_say_show_user, gpt_say)
-            history.append(i_say_show_user); history.append(gpt_say)
-            yield chatbot, history, '正常'
-            time.sleep(2)
-
-    i_say = f'根据以上你自己的分析，对程序的整体功能和构架做出概括。然后用一张markdown表格整理每个文件的功能（包括{file_manifest}）。'
-    chatbot.append((i_say, "[Local Message] waiting gpt response."))
-    yield chatbot, history, '正常'
-
-    if not fast_debug: 
-        # ** gpt request **
-        # gpt_say = predict_no_ui(inputs=i_say, top_p=top_p, temperature=temperature, history=history)
-        gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say, chatbot, top_p, temperature, history=history, long_connection=True)   # 带超时倒计时
-
-        chatbot[-1] = (i_say, gpt_say)
-        history.append(i_say); history.append(gpt_say)
-        yield chatbot, history, '正常'
-        res = write_results_to_file(history)
-        chatbot.append(("完成了吗？", res))
-        yield chatbot, history, '正常'
+        return
+    yield from 解析源代码新(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt)
 
 @CatchException
 def 解析一个Python项目(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
@@ -105,7 +109,7 @@ def 解析一个Python项目(txt, top_p, temperature, chatbot, history, systemPr
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何python文件: {txt}")
         yield chatbot, history, '正常'
         return
-    yield from 解析源代码(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt)
+    yield from 解析源代码新(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt)
 
 
 @CatchException
@@ -126,7 +130,7 @@ def 解析一个C项目的头文件(txt, top_p, temperature, chatbot, history, s
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何.h头文件: {txt}")
         yield chatbot, history, '正常'
         return
-    yield from 解析源代码(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt)
+    yield from 解析源代码新(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt)
 
 @CatchException
 def 解析一个C项目(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
@@ -147,7 +151,7 @@ def 解析一个C项目(txt, top_p, temperature, chatbot, history, systemPromptT
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何.h头文件: {txt}")
         yield chatbot, history, '正常'
         return
-    yield from 解析源代码(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt)
+    yield from 解析源代码新(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt)
 
 
 @CatchException
@@ -169,7 +173,7 @@ def 解析一个Java项目(txt, top_p, temperature, chatbot, history, systemProm
         report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"找不到任何java文件: {txt}")
         yield chatbot, history, '正常'
         return
-    yield from 解析源代码(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt)
+    yield from 解析源代码新(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt)
 
 
 @CatchException
@@ -192,7 +196,7 @@ def 解析一个Rect项目(txt, top_p, temperature, chatbot, history, systemProm
         report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"找不到任何Rect文件: {txt}")
         yield chatbot, history, '正常'
         return
-    yield from 解析源代码(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt)
+    yield from 解析源代码新(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt)
 
 
 @CatchException
@@ -211,4 +215,4 @@ def 解析一个Golang项目(txt, top_p, temperature, chatbot, history, systemPr
         report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"找不到任何golang文件: {txt}")
         yield chatbot, history, '正常'
         return
-    yield from 解析源代码(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt)
+    yield from 解析源代码新(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt)

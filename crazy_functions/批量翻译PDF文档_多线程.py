@@ -148,7 +148,8 @@ def 解析PDF(file_manifest, project_folder, top_p, temperature, chatbot, histor
         file_content, page_one = read_and_clean_pdf_text(fp)
         # 递归地切割PDF文件
         from .crazy_utils import breakdown_txt_to_satisfy_token_limit_for_pdf
-        enc = tiktoken.get_encoding("gpt2")
+        from toolbox import get_conf
+        enc = tiktoken.encoding_for_model(*get_conf('LLM_MODEL'))
         def get_token_num(txt): return len(enc.encode(txt))
         # 分解文本
         paper_fragments = breakdown_txt_to_satisfy_token_limit_for_pdf(

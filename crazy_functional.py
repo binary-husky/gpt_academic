@@ -29,7 +29,7 @@ def get_crazy_functions():
             "Color": "stop",    # 按钮颜色
             "Function": HotReload(解析一个C项目的头文件)
         },
-        "解析整个C++项目（.cpp/.h）": {
+        "解析整个C++项目（.cpp/.hpp/.c/.h）": {
             "Color": "stop",    # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(解析一个C项目)

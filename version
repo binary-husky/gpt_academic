@@ -1,5 +1,5 @@
 {
-  "version": 2.5,
+  "version": 2.6,
   "show_feature": true,
-  "new_feature": "新增一键更新程序<->高亮代码<->高亮公式<->新增垂直布局选项"
+  "new_feature": "增强多线程稳定性（涉及代码解析、PDF翻译等）<->修复Token计数错误（解决PDF翻译的分割不合理的问题）"
 }
