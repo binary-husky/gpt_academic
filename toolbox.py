@@ -25,6 +25,9 @@ def update_ui(chatbot, history, msg='正常', *args, **kwargs):
     yield chatbot, history, msg
 
 def get_reduce_token_percent(text):
+    """
+        * 此函数未来将被弃用
+    """
     try:
         # text = "maximum context length is 4097 tokens. However, your messages resulted in 4870 tokens"
         pattern = r"(\d+)\s+tokens\b"
@@ -41,6 +44,8 @@ def get_reduce_token_percent(text):
 
 def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[], sys_prompt='', long_connection=True):
     """
+        * 此函数未来将被弃用（替代函数 request_gpt_model_in_new_thread_with_ui_alive 文件 chatgpt_academic/crazy_functions/crazy_utils）
+
         调用简单的predict_no_ui接口，但是依然保留了些许界面心跳功能，当对话太长时，会自动采用二分法截断
         i_say: 当前输入
         i_say_show_user: 显示到对话界面上的当前输入，例如，输入整个文件时，你绝对不想把文件的内容都糊到对话界面上
