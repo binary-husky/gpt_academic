@@ -82,7 +82,7 @@ def 多文件润色(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
         inputs_array = [f"以下是一篇学术论文中的一段内容，请将此部分润色以满足学术标准，提高语法、清晰度和整体可读性，不要修改任何LaTeX命令，例如\section，\cite和方程式：" + 
                         f"\n\n{frag}" for frag in pfg.sp_file_contents]
         inputs_show_user_array = [f"润色 {f}" for f in pfg.sp_file_tag]
-        sys_prompt_array=["你是一位专业的学术论文作家。" for _ in range(n_split)]
+        sys_prompt_array=["你是一位专业的中文学术论文作家。" for _ in range(n_split)]
 
 
     gpt_response_collection = yield from request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
