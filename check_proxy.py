@@ -72,7 +72,7 @@ def patch_and_restart(path):
         time.sleep(1)
         print(i)
     print(' ------------------------------ -----------------------------------')
-    os.execl(sys.executable, 'python', 'main.py')
+    os.execl(sys.executable, *sys.argv)
 
 
 def get_current_version():

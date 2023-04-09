@@ -45,6 +45,7 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
     batchsize = 16  # 10个文件为一组
     report_part_2 = []
     previous_iteration_files = []
+    last_iteration_result = ""
     while True:
         if len(file_manifest) == 0: break
         this_iteration_file_manifest = file_manifest[:batchsize]
@@ -59,12 +60,13 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
         i_say = f'根据以上分析，对程序的整体功能和构架重新做出概括。然后用一张markdown表格整理每个文件的功能（包括{previous_iteration_files_string}）。'
         inputs_show_user = f'根据以上分析，对程序的整体功能和构架重新做出概括，由于输入长度限制，可能需要分组处理，本组文件为 {current_iteration_focus} + 已经汇总的文件组。'
         this_iteration_history = copy.deepcopy(this_iteration_gpt_response_collection) 
-        this_iteration_history.extend(report_part_2)
+        this_iteration_history.extend(last_iteration_result)
         result = yield from request_gpt_model_in_new_thread_with_ui_alive(
             inputs=i_say, inputs_show_user=inputs_show_user, llm_kwargs=llm_kwargs, chatbot=chatbot, 
             history=this_iteration_history,   # 迭代之前的分析
-            sys_prompt="你是一个程序架构分析师，正在分析一个源代码项目。")
+            sys_prompt="你是一个程序架构分析师，正在分析一个项目的源代码。")
         report_part_2.extend([i_say, result])
+        last_iteration_result = result
 
         file_manifest = file_manifest[batchsize:]
         gpt_response_collection = gpt_response_collection[batchsize*2:]
