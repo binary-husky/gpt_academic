@@ -9,23 +9,52 @@ import re
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
 
+############################### 插件输入输出接驳区 #######################################
+class ChatBotWithCookies(list):
+    def __init__(self, cookie):
+        self._cookie = cookie
+
+    def write_list(self, list):
+        for t in list:
+            self.append(t)
+
+    def get_list(self):
+        return [t for t in self]
+
+    def get_cookies(self):
+        return self._cookie
 
 def ArgsGeneralWrapper(f):
     """
         装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
-    def decorated(txt, txt2, *args, **kwargs):
+    def decorated(cookies, txt, txt2, top_p, temperature, chatbot, history, system_prompt, *args):
         txt_passon = txt
-        if txt == "" and txt2 != "":
-            txt_passon = txt2
-        yield from f(txt_passon, *args, **kwargs)
+        if txt == "" and txt2 != "": txt_passon = txt2
+        # 引入一个有cookie的chatbot
+        cookies.update({
+            'top_p':top_p, 
+            'temperature':temperature,
+        })
+        llm_kwargs = {
+            'top_p':top_p, 
+            'temperature':temperature,
+        }
+        plugin_kwargs = {
+        }
+        chatbot_with_cookie = ChatBotWithCookies(cookies)
+        chatbot_with_cookie.write_list(txt_passon)
+        yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
     return decorated
 
-def update_ui(chatbot, history, msg='正常', *args, **kwargs):
+def update_ui(chatbot, history, msg='正常', **kwargs):  # 刷新界面
     """
     刷新用户界面
     """
-    yield chatbot, history, msg
+    assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时，可用clear将其清空，然后用for+append循环重新赋值。"
+    yield chatbot.get_cookies(), chatbot.get_list(), history, msg
+############################### ################## #######################################
+##########################################################################################
 
 def get_reduce_token_percent(text):
     """
@@ -102,7 +131,7 @@ def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temp
         cnt += 1
         chatbot[-1] = (i_say_show_user,
                        f"[Local Message] {mutable[1]}waiting gpt response {cnt}/{TIMEOUT_SECONDS*2*(MAX_RETRY+1)}"+''.join(['.']*(cnt % 4)))
-        yield from update_ui(chatbot=chatbot, history=history)
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         time.sleep(1)
     # 把gpt的输出从mutable中取出来
     gpt_say = mutable[0]
@@ -166,7 +195,7 @@ def CatchException(f):
                 chatbot = [["插件调度异常", "异常原因"]]
             chatbot[-1] = (chatbot[-1][0],
                            f"[Local Message] 实验性函数调用出错: \n\n{tb_str} \n\n当前代理可用性: \n\n{check_proxy(proxies)}")
-            yield from update_ui(chatbot=chatbot, history=history, msg=f'异常 {e}')
+            yield from update_ui(chatbot=chatbot, history=history, msg=f'异常 {e}') # 刷新界面
     return decorated
 
 

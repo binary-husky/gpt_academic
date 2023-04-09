@@ -52,6 +52,7 @@ if LAYOUT == "TOP-DOWN":
 cancel_handles = []
 with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
     gr.HTML(title_html)
+    cookies = gr.State({})
     with gr_L1():
         with gr_L2(scale=2):
             chatbot = gr.Chatbot()
@@ -117,8 +118,8 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
         return ret
     checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn, area_input_primary, area_input_secondary, txt, txt2] )
     # 整理反复出现的控件句柄组合
-    input_combo = [txt, txt2, top_p, temperature, chatbot, history, system_prompt]
-    output_combo = [chatbot, history, status]
+    input_combo = [cookies, txt, txt2, top_p, temperature, chatbot, history, system_prompt]
+    output_combo = [cookies, chatbot, history, status]
     predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=input_combo, outputs=output_combo)
     # 提交按钮、重置按钮
     cancel_handles.append(txt.submit(**predict_args))

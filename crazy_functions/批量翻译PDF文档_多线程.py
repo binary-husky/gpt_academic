@@ -89,7 +89,7 @@ def read_and_clean_pdf_text(fp):
 
 
 @CatchException
-def 批量翻译PDF文档(txt, top_p, temperature, chatbot, history, sys_prompt, WEB_PORT):
+def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys_prompt, web_port):
     import glob
     import os
 
@@ -97,7 +97,7 @@ def 批量翻译PDF文档(txt, top_p, temperature, chatbot, history, sys_prompt,
     chatbot.append([
         "函数插件功能？",
         "批量总结PDF文档。函数插件贡献者: Binary-Husky（二进制哈士奇）"])
-    yield from update_ui(chatbot=chatbot, history=history)
+    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
@@ -107,7 +107,7 @@ def 批量翻译PDF文档(txt, top_p, temperature, chatbot, history, sys_prompt,
         report_execption(chatbot, history,
                          a=f"解析项目: {txt}",
                          b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pymupdf tiktoken```。")
-        yield from update_ui(chatbot=chatbot, history=history)
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
 
     # 清空历史，以免输入溢出
@@ -121,7 +121,7 @@ def 批量翻译PDF文档(txt, top_p, temperature, chatbot, history, sys_prompt,
             txt = '空空如也的输入栏'
         report_execption(chatbot, history,
                          a=f"解析项目: {txt}", b=f"找不到本地项目或无权访问: {txt}")
-        yield from update_ui(chatbot=chatbot, history=history)
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
 
     # 搜索需要处理的文件清单
@@ -132,14 +132,14 @@ def 批量翻译PDF文档(txt, top_p, temperature, chatbot, history, sys_prompt,
     if len(file_manifest) == 0:
         report_execption(chatbot, history,
                          a=f"解析项目: {txt}", b=f"找不到任何.tex或.pdf文件: {txt}")
-        yield from update_ui(chatbot=chatbot, history=history)
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
 
     # 开始正式执行任务
-    yield from 解析PDF(file_manifest, project_folder, top_p, temperature, chatbot, history, sys_prompt)
+    yield from 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, sys_prompt)
 
 
-def 解析PDF(file_manifest, project_folder, top_p, temperature, chatbot, history, sys_prompt):
+def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, sys_prompt):
     import os
     import tiktoken
     TOKEN_LIMIT_PER_FRAGMENT = 1600
@@ -164,7 +164,7 @@ def 解析PDF(file_manifest, project_folder, top_p, temperature, chatbot, histor
         paper_meta_info = yield from request_gpt_model_in_new_thread_with_ui_alive(
             inputs=f"以下是一篇学术论文的基础信息，请从中提取出“标题”、“收录会议或期刊”、“作者”、“摘要”、“编号”、“作者邮箱”这六个部分。请用markdown格式输出，最后用中文翻译摘要部分。请提取：{paper_meta}",
             inputs_show_user=f"请从{fp}中提取出“标题”、“收录会议或期刊”等基本信息。",
-            top_p=top_p, temperature=temperature,
+            llm_kwargs=llm_kwargs,
             chatbot=chatbot, history=[],
             sys_prompt="Your job is to collect information from materials。",
         )
@@ -173,7 +173,7 @@ def 解析PDF(file_manifest, project_folder, top_p, temperature, chatbot, histor
             inputs_array=[
                 f"以下是你需要翻译的文章段落：\n{frag}" for frag in paper_fragments],
             inputs_show_user_array=[f"" for _ in paper_fragments],
-            top_p=top_p, temperature=temperature,
+            llm_kwargs=llm_kwargs,
             chatbot=chatbot,
             history_array=[[paper_meta] for _ in paper_fragments],
             sys_prompt_array=[
@@ -189,7 +189,7 @@ def 解析PDF(file_manifest, project_folder, top_p, temperature, chatbot, histor
             f'./gpt_log/{create_report_file_name}')
         chatbot.append((f"{fp}完成了吗？", res))
         msg = "完成"
-        yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg)
+        yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg) # 刷新界面
 
     # 准备文件的下载
     import shutil
@@ -202,4 +202,4 @@ def 解析PDF(file_manifest, project_folder, top_p, temperature, chatbot, histor
         if os.path.exists(pdf_path):
             os.remove(pdf_path)
     chatbot.append(("给出输出文件清单", str(generated_conclusion_files)))
-    yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg)
+    yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg) # 刷新界面

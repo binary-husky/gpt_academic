@@ -90,7 +90,7 @@ async def run(context, max_token=512):
 
 
 
-def predict_tgui(inputs, top_p, temperature, chatbot=[], history=[], system_prompt='', stream = True, additional_fn=None):
+def predict_tgui(inputs, top_p, temperature, chatbot, history=[], system_prompt='', stream = True, additional_fn=None):
     """
         发送至chatGPT，流式获取输出。
         用于基础的对话功能。
@@ -111,7 +111,7 @@ def predict_tgui(inputs, top_p, temperature, chatbot=[], history=[], system_prom
     logging.info(f'[raw_input] {raw_input}')
     history.extend([inputs, ""])
     chatbot.append([inputs, ""])
-    yield from update_ui(chatbot=chatbot, history=history, msg="等待响应")
+    yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
 
     prompt = inputs
     tgui_say = ""
@@ -138,7 +138,7 @@ def predict_tgui(inputs, top_p, temperature, chatbot=[], history=[], system_prom
             tgui_say = mutable[0]
             history[-1] = tgui_say
             chatbot[-1] = (history[-2], history[-1])
-            yield from update_ui(chatbot=chatbot, history=history)
+            yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     logging.info(f'[response] {tgui_say}')
 

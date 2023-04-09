@@ -133,7 +133,7 @@ def get_name(_url_):
 
 
 @CatchException
-def 下载arxiv论文并翻译摘要(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
+def 下载arxiv论文并翻译摘要(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
 
     CRAZY_FUNCTION_INFO = "下载arxiv论文并翻译摘要，函数插件作者[binary-husky]。正在提取摘要并下载PDF文档……"
     import glob
@@ -141,7 +141,7 @@ def 下载arxiv论文并翻译摘要(txt, top_p, temperature, chatbot, history, 
 
     # 基本信息：功能、贡献者
     chatbot.append(["函数插件功能？", CRAZY_FUNCTION_INFO])
-    yield from update_ui(chatbot=chatbot, history=history)
+    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
@@ -150,7 +150,7 @@ def 下载arxiv论文并翻译摘要(txt, top_p, temperature, chatbot, history, 
         report_execption(chatbot, history, 
             a = f"解析项目: {txt}", 
             b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pdfminer beautifulsoup4```。")
-        yield from update_ui(chatbot=chatbot, history=history)
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
 
     # 清空历史，以免输入溢出
@@ -163,25 +163,25 @@ def 下载arxiv论文并翻译摘要(txt, top_p, temperature, chatbot, history, 
         report_execption(chatbot, history, 
             a = f"解析项目: {txt}", 
             b = f"下载pdf文件未成功")
-        yield from update_ui(chatbot=chatbot, history=history)
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
     
     # 翻译摘要等
     i_say =            f"请你阅读以下学术论文相关的材料，提取摘要，翻译为中文。材料如下：{str(info)}"
     i_say_show_user =  f'请你阅读以下学术论文相关的材料，提取摘要，翻译为中文。论文：{pdf_path}'
     chatbot.append((i_say_show_user, "[Local Message] waiting gpt response."))
-    yield from update_ui(chatbot=chatbot, history=history)
+    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
     msg = '正常'
     # ** gpt request **
-    gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[])   # 带超时倒计时
+    gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, llm_kwargs, plugin_kwargs, history=[])   # 带超时倒计时
     chatbot[-1] = (i_say_show_user, gpt_say)
     history.append(i_say_show_user); history.append(gpt_say)
-    yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg)
+    yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg) # 刷新界面
     # 写入文件
     import shutil
     # 重置文件的创建时间
     shutil.copyfile(pdf_path, f'./gpt_log/{os.path.basename(pdf_path)}'); os.remove(pdf_path)
     res = write_results_to_file(history)
     chatbot.append(("完成了吗？", res + "\n\nPDF文件也已经下载"))
-    yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg)
+    yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg) # 刷新界面
 

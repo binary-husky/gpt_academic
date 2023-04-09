@@ -37,7 +37,7 @@ def input_clipping(inputs, history, max_token_limit):
     return inputs, history
 
 def request_gpt_model_in_new_thread_with_ui_alive(
-        inputs, inputs_show_user, top_p, temperature, 
+        inputs, inputs_show_user, llm_kwargs, 
         chatbot, history, sys_prompt, refresh_interval=0.2,
         handle_token_exceed=True, 
         retry_times_at_unknown_error=2,
@@ -66,7 +66,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
     # 用户反馈
     chatbot.append([inputs_show_user, ""])
     msg = '正常'
-    yield from update_ui(chatbot=chatbot, history=[])
+    yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
     executor = ThreadPoolExecutor(max_workers=16)
     mutable = ["", time.time()]
     def _req_gpt(inputs, history, sys_prompt):
@@ -76,7 +76,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
             try:
                 # 【第一种情况】：顺利完成
                 result = predict_no_ui_long_connection(
-                    inputs=inputs, top_p=top_p, temperature=temperature, 
+                    inputs=inputs, llm_kwargs=llm_kwargs, 
                     history=history, sys_prompt=sys_prompt, observe_window=mutable)
                 return result
             except ConnectionAbortedError as token_exceeded_error:
@@ -118,12 +118,12 @@ def request_gpt_model_in_new_thread_with_ui_alive(
         if future.done():
             break
         chatbot[-1] = [chatbot[-1][0], mutable[0]]
-        yield from update_ui(chatbot=chatbot, history=[])
+        yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
     return future.result()
 
 
 def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
-        inputs_array, inputs_show_user_array, top_p, temperature, 
+        inputs_array, inputs_show_user_array, llm_kwargs, 
         chatbot, history_array, sys_prompt_array, 
         refresh_interval=0.2, max_workers=10, scroller_max_len=30,
         handle_token_exceed=True, show_user_at_complete=False,
@@ -141,8 +141,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     输入参数 Args （以_array结尾的输入变量都是列表，列表长度为子任务的数量，执行时，会把列表拆解，放到每个子线程中分别执行）:
         inputs_array (list): List of inputs （每个子任务的输入）
         inputs_show_user_array (list): List of inputs to show user（每个子任务展现在报告中的输入，借助此参数，在汇总报告中隐藏啰嗦的真实输入，增强报告的可读性）
-        top_p (float): Top p value for sampling from model distribution （GPT参数，浮点数）
-        temperature (float): Temperature value for sampling from model distribution（GPT参数，浮点数）
+        llm_kwargs: llm_kwargs参数
         chatbot: chatbot （用户界面对话窗口句柄，用于数据流可视化）
         history_array (list): List of chat history （历史对话输入，双层列表，第一层列表是子任务分解，第二层列表是对话历史）
         sys_prompt_array (list): List of system prompts （系统输入，列表，用于输入给GPT的前提提示，比如你是翻译官怎样怎样）
@@ -167,7 +166,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     # 用户反馈
     chatbot.append(["请开始多线程操作。", ""])
     msg = '正常'
-    yield from update_ui(chatbot=chatbot, history=[])
+    yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
     # 异步原子
     mutable = [["", time.time(), "等待中"] for _ in range(n_frag)]
 
@@ -181,7 +180,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                 # 【第一种情况】：顺利完成
                 # time.sleep(10); raise RuntimeError("测试")
                 gpt_say = predict_no_ui_long_connection(
-                    inputs=inputs, top_p=top_p, temperature=temperature, history=history, 
+                    inputs=inputs, llm_kwargs=llm_kwargs, history=history, 
                     sys_prompt=sys_prompt, observe_window=mutable[index], console_slience=True
                 )
                 mutable[index][2] = "已成功"
@@ -253,7 +252,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                             for thread_index, done, obs in zip(range(len(worker_done)), worker_done, observe_win)])
         chatbot[-1] = [chatbot[-1][0], f'多线程操作已经开始，完成情况: \n\n{stat_str}' + ''.join(['.']*(cnt % 10+1))]
         msg = "正常"
-        yield from update_ui(chatbot=chatbot, history=[])
+        yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
     # 异步任务结束
     gpt_response_collection = []
     for inputs_show_user, f in zip(inputs_show_user_array, futures):
@@ -264,7 +263,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         for inputs_show_user, f in zip(inputs_show_user_array, futures):
             gpt_res = f.result()
             chatbot.append([inputs_show_user, gpt_res])
-            yield from update_ui(chatbot=chatbot, history=[])
+            yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
             time.sleep(1)
     return gpt_response_collection
 
