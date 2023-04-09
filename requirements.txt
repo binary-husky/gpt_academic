@@ -5,6 +5,7 @@ python-markdown-math
 beautifulsoup4
 latex2mathml
 mdtex2html
+colorama
 tiktoken
 Markdown
 pygments

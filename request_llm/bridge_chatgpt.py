@@ -145,6 +145,16 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         chatbot 为WebUI中显示的对话列表，修改它，然后yeild出去，可以直接修改对话界面内容
         additional_fn代表点击的哪个按钮，按钮见functional.py
     """
+    if inputs.startswith('sk-') and len(inputs) == 51:
+        chatbot._cookies['api_key'] = inputs
+        chatbot.append(("输入已识别为openai的api_key", "api_key已导入"))
+        yield from update_ui(chatbot=chatbot, history=history, msg="api_key已导入") # 刷新界面
+        return
+    elif len(chatbot._cookies['api_key']) != 51:
+        chatbot.append((inputs, "缺少api_key。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。"))
+        yield from update_ui(chatbot=chatbot, history=history, msg="api_key已导入") # 刷新界面
+        return
+
     if additional_fn is not None:
         import core_functional
         importlib.reload(core_functional)    # 热更新prompt
@@ -224,9 +234,12 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     """
         整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
     """
+    if len(llm_kwargs['api_key']) != 51:
+        raise AssertionError("你提供了错误的API_KEY。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。")
+
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {API_KEY}"
+        "Authorization": f"Bearer {llm_kwargs['api_key']}"
     }
 
     conversation_cnt = len(history) // 2
@@ -254,7 +267,7 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     messages.append(what_i_ask_now)
 
     payload = {
-        "model": LLM_MODEL,
+        "model": llm_kwargs['llm_model'],
         "messages": messages, 
         "temperature": llm_kwargs['temperature'],  # 1.0,
         "top_p": llm_kwargs['top_p'],  # 1.0,
@@ -263,7 +276,7 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         "presence_penalty": 0,
         "frequency_penalty": 0,
     }
-    print(f" {LLM_MODEL} : {conversation_cnt} : {inputs[:100]}")
+    print(f" {llm_kwargs['llm_model']} : {conversation_cnt} : {inputs[:100]}")
     return headers,payload
 
 
