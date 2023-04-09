@@ -96,7 +96,7 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys_
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
-        "批量总结PDF文档。函数插件贡献者: Binary-Husky（二进制哈士奇）"])
+        "批量总结PDF文档。函数插件贡献者: Binary-Husky"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
@@ -185,11 +185,9 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
         final.extend(gpt_response_collection)
         create_report_file_name = f"{os.path.basename(fp)}.trans.md"
         res = write_results_to_file(final, file_name=create_report_file_name)
-        generated_conclusion_files.append(
-            f'./gpt_log/{create_report_file_name}')
+        generated_conclusion_files.append(f'./gpt_log/{create_report_file_name}')
         chatbot.append((f"{fp}完成了吗？", res))
-        msg = "完成"
-        yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg) # 刷新界面
+        yield from update_ui(chatbot=chatbot, history=chatbot) # 刷新界面
 
     # 准备文件的下载
     import shutil

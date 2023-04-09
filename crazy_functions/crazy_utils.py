@@ -80,7 +80,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
                     history=history, sys_prompt=sys_prompt, observe_window=mutable)
                 return result
             except ConnectionAbortedError as token_exceeded_error:
-                # 【第二种情况】：Token溢出，
+                # 【第二种情况】：Token溢出
                 if handle_token_exceed:
                     exceeded_cnt += 1
                     # 【选择处理】 尝试计算比例，尽可能多地保留文本
@@ -97,7 +97,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
                     mutable[0] += f"[Local Message] 警告，在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                     return mutable[0] # 放弃
             except:
-                # 【第三种情况】：其他错误
+                # 【第三种情况】：其他错误：重试几次
                 tb_str = '```\n' + traceback.format_exc() + '```'
                 mutable[0] += f"[Local Message] 警告，在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                 if retry_op > 0: 
@@ -119,7 +119,11 @@ def request_gpt_model_in_new_thread_with_ui_alive(
             break
         chatbot[-1] = [chatbot[-1][0], mutable[0]]
         yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
-    return future.result()
+
+    final_result = future.result()
+    chatbot[-1] = [chatbot[-1][0], final_result]
+    yield from update_ui(chatbot=chatbot, history=[]) # 如果最后成功了，则删除报错信息
+    return final_result
 
 
 def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(

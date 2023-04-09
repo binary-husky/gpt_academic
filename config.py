@@ -31,7 +31,7 @@ CODE_HIGHLIGHT = True
 LAYOUT = "LEFT-RIGHT"  # "LEFT-RIGHT"（左右布局） # "TOP-DOWN"（上下布局）
 
 # 发送请求到OpenAI后，等待多久判定为超时
-TIMEOUT_SECONDS = 25
+TIMEOUT_SECONDS = 30
 
 # 网页的端口, -1代表随机端口
 WEB_PORT = -1

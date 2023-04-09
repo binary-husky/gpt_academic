@@ -154,10 +154,12 @@ advanced_css = """
     padding: 1em;
     margin: 1em 2em 1em 0.5em;
 }
+
 """
 
 if CODE_HIGHLIGHT:
     advanced_css += """
+
 .hll { background-color: #ffffcc }
 .c { color: #3D7B7B; font-style: italic } /* Comment */
 .err { border: 1px solid #FF0000 } /* Error */
