@@ -58,11 +58,10 @@ def 全项目切换英文(txt, top_p, temperature, chatbot, history, sys_prompt,
 
     # 第5步：Token限制下的截断与处理
     MAX_TOKEN = 3000
-    from transformers import GPT2TokenizerFast
-    print('加载tokenizer中')
-    tokenizer = GPT2TokenizerFast.from_pretrained("gpt2")
-    get_token_fn = lambda txt: len(tokenizer(txt)["input_ids"])
-    print('加载tokenizer结束')
+    import tiktoken
+    from toolbox import get_conf
+    enc = tiktoken.encoding_for_model(*get_conf('LLM_MODEL'))
+    def get_token_fn(txt): return len(enc.encode(txt))
 
 
     # 第6步：任务函数

@@ -21,6 +21,8 @@ def ArgsGeneralWrapper(f):
         yield from f(txt_passon, *args, **kwargs)
     return decorated
 
+def update_ui(chatbot, history, msg='正常', *args, **kwargs):
+    yield chatbot, history, msg
 
 def get_reduce_token_percent(text):
     try:

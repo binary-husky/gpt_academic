@@ -72,7 +72,7 @@ def predict_no_ui(inputs, top_p, temperature, history=[], sys_prompt=""):
         raise ConnectionAbortedError("Json解析不合常规，可能是文本过长" + response.text)
 
 
-def predict_no_ui_long_connection(inputs, top_p, temperature, history=[], sys_prompt="", observe_window=None):
+def predict_no_ui_long_connection(inputs, top_p, temperature, history=[], sys_prompt="", observe_window=None, console_slience=False):
     """
         发送至chatGPT，等待回复，一次性完成，不显示中间过程。但内部用stream的方法避免中途网线被掐。
         inputs：
@@ -121,7 +121,7 @@ def predict_no_ui_long_connection(inputs, top_p, temperature, history=[], sys_pr
         if "role" in delta: continue
         if "content" in delta: 
             result += delta["content"]
-            print(delta["content"], end='')
+            if not console_slience: print(delta["content"], end='')
             if observe_window is not None: 
                 # 观测窗，把已经获取的数据显示出去
                 if len(observe_window) >= 1: observe_window[0] += delta["content"]
@@ -264,8 +264,7 @@ def generate_payload(inputs, top_p, temperature, history, system_prompt, stream)
         "presence_penalty": 0,
         "frequency_penalty": 0,
     }
-    
-    print(f" {LLM_MODEL} : {conversation_cnt} : {inputs}")
+    print(f" {LLM_MODEL} : {conversation_cnt} : {inputs[:100]}")
     return headers,payload
 
 
