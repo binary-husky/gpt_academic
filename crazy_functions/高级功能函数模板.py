@@ -1,11 +1,11 @@
-from toolbox import CatchException
+from toolbox import CatchException, update_ui
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 import datetime
 @CatchException
 def 高阶功能模板函数(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
     history = []    # 清空历史，以免输入溢出
     chatbot.append(("这是什么功能？", "[Local Message] 请注意，您正在调用一个[函数插件]的模板，该函数面向希望实现更多有趣功能的开发者，它可以作为创建新功能函数的模板（该函数只有20行代码）。此外我们也提供可同步处理大量文件的多线程Demo供您参考。您若希望分享新的功能模组，请不吝PR！"))
-    yield chatbot, history, '正常'  # 由于请求gpt需要一段时间，我们先及时地做一次状态显示
+    yield from update_ui(chatbot=chatbot, history=history) # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
     for i in range(5):
         currentMonth = (datetime.date.today() + datetime.timedelta(days=i)).month
         currentDay = (datetime.date.today() + datetime.timedelta(days=i)).day
@@ -17,4 +17,4 @@ def 高阶功能模板函数(txt, top_p, temperature, chatbot, history, systemPr
         )
         chatbot[-1] = (i_say, gpt_say)
         history.append(i_say);history.append(gpt_say)
-        yield chatbot, history, '正常' 
+        yield from update_ui(chatbot=chatbot, history=history) # 界面更新

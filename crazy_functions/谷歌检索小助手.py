@@ -1,5 +1,6 @@
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from toolbox import CatchException, report_execption, write_results_to_file
+from toolbox import update_ui
 
 def get_meta_information(url, chatbot, history):
     import requests
@@ -55,8 +56,7 @@ def get_meta_information(url, chatbot, history):
         })
 
         chatbot[-1] = [chatbot[-1][0], title + f'\n\n是否在arxiv中（不在arxiv中无法获取完整摘要）:{is_paper_in_arxiv}\n\n' + abstract]
-        msg = "正常"
-        yield chatbot, [], msg 
+        yield from update_ui(chatbot=chatbot, history=[])
     return profile
 
 @CatchException
@@ -65,7 +65,7 @@ def 谷歌检索小助手(txt, top_p, temperature, chatbot, history, systemPromp
     chatbot.append([
         "函数插件功能？",
         "分析用户提供的谷歌学术（google scholar）搜索页面中，出现的所有文章: binary-husky，插件初始化中..."])
-    yield chatbot, history, '正常'
+    yield from update_ui(chatbot=chatbot, history=history)
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
@@ -75,7 +75,7 @@ def 谷歌检索小助手(txt, top_p, temperature, chatbot, history, systemPromp
         report_execption(chatbot, history, 
             a = f"解析项目: {txt}", 
             b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade beautifulsoup4 arxiv```。")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
 
     # 清空历史，以免输入溢出
@@ -100,7 +100,7 @@ def 谷歌检索小助手(txt, top_p, temperature, chatbot, history, systemPromp
 
     chatbot.append(["状态？", "已经全部完成"])
     msg = '正常'
-    yield chatbot, history, msg
+    yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg)
     res = write_results_to_file(history)
     chatbot.append(("完成了吗？", res)); 
-    yield chatbot, history, msg
+    yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg)

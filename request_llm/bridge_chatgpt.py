@@ -21,7 +21,7 @@ import importlib
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
-from toolbox import get_conf
+from toolbox import get_conf, update_ui
 proxies, API_URL, API_KEY, TIMEOUT_SECONDS, MAX_RETRY, LLM_MODEL = \
     get_conf('proxies', 'API_URL', 'API_KEY', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'LLM_MODEL')
 
@@ -157,7 +157,7 @@ def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt=''
         raw_input = inputs
         logging.info(f'[raw_input] {raw_input}')
         chatbot.append((inputs, ""))
-        yield chatbot, history, "等待响应"
+        yield from update_ui(chatbot=chatbot, history=history, msg="等待响应")
 
     headers, payload = generate_payload(inputs, top_p, temperature, history, system_prompt, stream)
     history.append(inputs); history.append(" ")
@@ -172,7 +172,7 @@ def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt=''
             retry += 1
             chatbot[-1] = ((chatbot[-1][0], timeout_bot_msg))
             retry_msg = f"，正在重试 ({retry}/{MAX_RETRY}) ……" if MAX_RETRY > 0 else ""
-            yield chatbot, history, "请求超时"+retry_msg
+            yield from update_ui(chatbot=chatbot, history=history, msg="请求超时"+retry_msg)
             if retry > MAX_RETRY: raise TimeoutError
 
     gpt_replying_buffer = ""
@@ -200,11 +200,11 @@ def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt=''
                     gpt_replying_buffer = gpt_replying_buffer + json.loads(chunk.decode()[6:])['choices'][0]["delta"]["content"]
                     history[-1] = gpt_replying_buffer
                     chatbot[-1] = (history[-2], history[-1])
-                    yield chatbot, history, status_text
+                    yield from update_ui(chatbot=chatbot, history=history, msg=status_text)
 
                 except Exception as e:
                     traceback.print_exc()
-                    yield chatbot, history, "Json解析不合常规"
+                    yield from update_ui(chatbot=chatbot, history=history, msg="Json解析不合常规")
                     chunk = get_full_error(chunk, stream_response)
                     error_msg = chunk.decode()
                     if "reduce the length" in error_msg:
@@ -218,7 +218,7 @@ def predict(inputs, top_p, temperature, chatbot=[], history=[], system_prompt=''
                         from toolbox import regular_txt_to_markdown
                         tb_str = '```\n' + traceback.format_exc() + '```'
                         chatbot[-1] = (chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str} \n\n{regular_txt_to_markdown(chunk.decode()[4:])}")
-                    yield chatbot, history, "Json异常" + error_msg
+                    yield from update_ui(chatbot=chatbot, history=history, msg="Json异常" + error_msg)
                     return
 
 def generate_payload(inputs, top_p, temperature, history, system_prompt, stream):

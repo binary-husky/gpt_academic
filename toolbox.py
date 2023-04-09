@@ -22,6 +22,9 @@ def ArgsGeneralWrapper(f):
     return decorated
 
 def update_ui(chatbot, history, msg='正常', *args, **kwargs):
+    """
+    刷新用户界面
+    """
     yield chatbot, history, msg
 
 def get_reduce_token_percent(text):
@@ -99,7 +102,7 @@ def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temp
         cnt += 1
         chatbot[-1] = (i_say_show_user,
                        f"[Local Message] {mutable[1]}waiting gpt response {cnt}/{TIMEOUT_SECONDS*2*(MAX_RETRY+1)}"+''.join(['.']*(cnt % 4)))
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         time.sleep(1)
     # 把gpt的输出从mutable中取出来
     gpt_say = mutable[0]
@@ -163,7 +166,7 @@ def CatchException(f):
                 chatbot = [["插件调度异常", "异常原因"]]
             chatbot[-1] = (chatbot[-1][0],
                            f"[Local Message] 实验性函数调用出错: \n\n{tb_str} \n\n当前代理可用性: \n\n{check_proxy(proxies)}")
-            yield chatbot, history, f'异常 {e}'
+            yield from update_ui(chatbot=chatbot, history=history, msg=f'异常 {e}')
     return decorated
 
 
