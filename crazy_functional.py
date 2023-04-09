@@ -78,6 +78,8 @@ def get_crazy_functions():
     from crazy_functions.理解PDF文档内容 import 理解PDF文档内容标准文件输入
     from crazy_functions.Latex全文润色 import Latex英文润色
     from crazy_functions.Latex全文润色 import Latex中文润色
+    from crazy_functions.Latex全文翻译 import Latex中译英
+    from crazy_functions.Latex全文翻译 import Latex英译中
 
     function_plugins.update({
         "批量翻译PDF文档（多线程）": {
@@ -128,6 +130,21 @@ def get_crazy_functions():
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(Latex中文润色)
         },
+
+        "Latex项目全文中译英（输入路径或上传压缩包）": {
+            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
+            "Color": "stop",
+            "AsButton": False,  # 加入下拉菜单中
+            "Function": HotReload(Latex中译英)
+        },
+        "Latex项目全文英译中（输入路径或上传压缩包）": {
+            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
+            "Color": "stop",
+            "AsButton": False,  # 加入下拉菜单中
+            "Function": HotReload(Latex英译中)
+        },
+
+        
     })
 
     ###################### 第三组插件 ###########################
