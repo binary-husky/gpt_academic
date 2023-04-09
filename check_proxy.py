@@ -61,19 +61,20 @@ def patch_and_restart(path):
     import os
     import sys
     import time
+    from colorful import print亮黄, print亮绿, print亮红
     # if not using config_private, move origin config.py as config_private.py
     if not os.path.exists('config_private.py'):
-        print('由于您没有设置config_private.py私密配置，现将您的现有配置移动至config_private.py以防止配置丢失，',
+        print亮黄('由于您没有设置config_private.py私密配置，现将您的现有配置移动至config_private.py以防止配置丢失，',
               '另外您可以随时在history子文件夹下找回旧版的程序。')
         shutil.copyfile('config.py', 'config_private.py')
     distutils.dir_util.copy_tree(path+'/chatgpt_academic-master', './')
     import subprocess
-    print('更新包依赖中……')
+    print亮绿('更新包依赖中……')
+    for i in reversed(range(5)): time.sleep(1); print(i)
     subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt'])
-    print('更新完成，您可以随时在history子文件夹下找回旧版的程序，5s之后重启，如果没能重启成功，您需要手动安装新增的依赖库 `python -m pip install -r requirements.txt` ')
-    for i in reversed(range(5)):
-        time.sleep(1)
-        print(i)
+    print亮绿('更新完成，您可以随时在history子文件夹下找回旧版的程序，5s之后重启')
+    print亮红('假如重启失败，您可能需要手动安装新增的依赖库 `python -m pip install -r requirements.txt`，然后在用常规的`python main.py`的方式启动。')
+    for i in reversed(range(5)): time.sleep(1); print(i)
     print(' ------------------------------ -----------------------------------')
     os.execl(sys.executable, sys.executable, *sys.argv)
 
