@@ -56,7 +56,7 @@ def get_core_functions():
             "Color": "secondary",
         },
         "英译中": {
-            "Prefix":   r"请翻译成中文：" + "\n\n",
+            "Prefix":   r"翻译成地道的中文：" + "\n\n",
             "Suffix":   r"",
         },
         "找图片": {
