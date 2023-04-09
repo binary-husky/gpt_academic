@@ -29,16 +29,16 @@ def 全项目切换英文(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys_
 
     # 第2步：尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
-        import openai, transformers
+        import tiktoken
     except:
         report_execption(chatbot, history, 
             a = f"解析项目: {txt}", 
-            b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade openai transformers```。")
+            b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade tiktoken```。")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
 
     # 第3步：集合文件
-    import time, glob, os, shutil, re, openai
+    import time, glob, os, shutil, re
     os.makedirs('gpt_log/generated_english_version', exist_ok=True)
     os.makedirs('gpt_log/generated_english_version/crazy_functions', exist_ok=True)
     file_manifest = [f for f in glob.glob('./*.py') if ('test_project' not in f) and ('gpt_log' not in f)] + \

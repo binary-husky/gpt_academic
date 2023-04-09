@@ -12,7 +12,7 @@ from functools import wraps, lru_cache
 ############################### 插件输入输出接驳区 #######################################
 class ChatBotWithCookies(list):
     def __init__(self, cookie):
-        self._cookie = cookie
+        self._cookies = cookie
 
     def write_list(self, list):
         for t in list:
@@ -22,7 +22,7 @@ class ChatBotWithCookies(list):
         return [t for t in self]
 
     def get_cookies(self):
-        return self._cookie
+        return self._cookies
 
 def ArgsGeneralWrapper(f):
     """
@@ -37,10 +37,13 @@ def ArgsGeneralWrapper(f):
             'temperature':temperature,
         })
         llm_kwargs = {
+            'api_key': cookies['api_key'],
+            'llm_model': cookies['llm_model'],
             'top_p':top_p, 
             'temperature':temperature,
         }
         plugin_kwargs = {
+            # 目前还没有
         }
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
@@ -473,27 +476,30 @@ def on_report_generated(files, chatbot):
     chatbot.append(['汇总报告如何远程获取？', '汇总报告已经添加到右侧“文件上传区”（可能处于折叠状态），请查收。'])
     return report_files, chatbot
 
+def is_openai_api_key(key):
+    # 正确的 API_KEY 是 "sk-" + 48 位大小写字母数字的组合
+    API_MATCH = re.match(r"sk-[a-zA-Z0-9]{48}$", key)
+    return API_MATCH
 
 @lru_cache(maxsize=128)
 def read_single_conf_with_lru_cache(arg):
+    from colorful import print亮红, print亮绿
     try:
         r = getattr(importlib.import_module('config_private'), arg)
     except:
         r = getattr(importlib.import_module('config'), arg)
     # 在读取API_KEY时，检查一下是不是忘了改config
     if arg == 'API_KEY':
-        # 正确的 API_KEY 是 "sk-" + 48 位大小写字母数字的组合
-        API_MATCH = re.match(r"sk-[a-zA-Z0-9]{48}$", r)
-        if API_MATCH:
-            print(f"[API_KEY] 您的 API_KEY 是: {r[:15]}*** API_KEY 导入成功")
+        if is_openai_api_key(r):
+            print亮绿(f"[API_KEY] 您的 API_KEY 是: {r[:15]}*** API_KEY 导入成功")
         else:
-            assert False, "正确的 API_KEY 是 'sk-' + '48 位大小写字母数字' 的组合，请在config文件中修改API密钥, 添加海外代理之后再运行。" + \
-                "（如果您刚更新过代码，请确保旧版config_private文件中没有遗留任何新增键值）"
+            print亮红( "[API_KEY] 正确的 API_KEY 是 'sk-' + '48 位大小写字母数字' 的组合，请在config文件中修改API密钥, 添加海外代理之后再运行。" + \
+                "（如果您刚更新过代码，请确保旧版config_private文件中没有遗留任何新增键值）")
     if arg == 'proxies':
         if r is None:
-            print('[PROXY] 网络代理状态：未配置。无代理状态下很可能无法访问。建议：检查USE_PROXY选项是否修改。')
+            print亮红('[PROXY] 网络代理状态：未配置。无代理状态下很可能无法访问。建议：检查USE_PROXY选项是否修改。')
         else:
-            print('[PROXY] 网络代理状态：已配置。配置信息如下：', r)
+            print亮绿('[PROXY] 网络代理状态：已配置。配置信息如下：', r)
             assert isinstance(r, dict), 'proxies格式错误，请注意proxies选项的格式，不要遗漏括号。'
     return r
 
