@@ -122,12 +122,12 @@ def get_crazy_functions():
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(Latex英文润色)
         },
-        # "中文Latex项目全文润色（输入路径或上传压缩包）": {
-        #     # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
-        #     "Color": "stop",
-        #     "AsButton": False,  # 加入下拉菜单中
-        #     "Function": HotReload(Latex中文润色)
-        # },
+        "中文Latex项目全文润色（输入路径或上传压缩包）": {
+            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
+            "Color": "stop",
+            "AsButton": False,  # 加入下拉菜单中
+            "Function": HotReload(Latex中文润色)
+        },
     })
 
     ###################### 第三组插件 ###########################
