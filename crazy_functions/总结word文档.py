@@ -1,4 +1,5 @@
 from request_llm.bridge_chatgpt import predict_no_ui
+from toolbox import update_ui
 from toolbox import CatchException, report_execption, write_results_to_file, predict_no_ui_but_counting_down
 fast_debug = False
 
@@ -35,7 +36,7 @@ def 解析docx(file_manifest, project_folder, top_p, temperature, chatbot, histo
                          f'文章内容是 ```{file_content}```'
         i_say_show_user = prefix + f'[{index+1}/{len(file_manifest)}] 假设你是论文审稿专家，请对下面的文章片段做概述: {os.path.abspath(fp)}'
         chatbot.append((i_say_show_user, "[Local Message] waiting gpt response."))
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
 
         if not fast_debug:
             msg = '正常'
@@ -45,21 +46,21 @@ def 解析docx(file_manifest, project_folder, top_p, temperature, chatbot, histo
             chatbot[-1] = (i_say_show_user, gpt_say)
             history.append(i_say_show_user);
             history.append(gpt_say)
-            yield chatbot, history, msg
+            yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg)
             if not fast_debug: time.sleep(2)
 
     """
     # 可按需启用
     i_say = f'根据你上述的分析，对全文进行概括，用学术性语言写一段中文摘要，然后再写一篇英文的。'
     chatbot.append((i_say, "[Local Message] waiting gpt response."))
-    yield chatbot, history, '正常'
+    yield from update_ui(chatbot=chatbot, history=history)
 
 
     i_say = f'我想让你做一个论文写作导师。您的任务是使用人工智能工具（例如自然语言处理）提供有关如何改进其上述文章的反馈。' \
             f'您还应该利用您在有效写作技巧方面的修辞知识和经验来建议作者可以更好地以书面形式表达他们的想法和想法的方法。' \
             f'根据你之前的分析，提出建议'
     chatbot.append((i_say, "[Local Message] waiting gpt response."))
-    yield chatbot, history, '正常'
+    yield from update_ui(chatbot=chatbot, history=history)
   
     """
 
@@ -72,10 +73,10 @@ def 解析docx(file_manifest, project_folder, top_p, temperature, chatbot, histo
         chatbot[-1] = (i_say, gpt_say)
         history.append(i_say)
         history.append(gpt_say)
-        yield chatbot, history, msg
+        yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg)
         res = write_results_to_file(history)
         chatbot.append(("完成了吗？", res))
-        yield chatbot, history, msg
+        yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg)
 
 
 @CatchException
@@ -86,7 +87,7 @@ def 总结word文档(txt, top_p, temperature, chatbot, history, systemPromptTxt,
     chatbot.append([
         "函数插件功能？",
         "批量总结Word文档。函数插件贡献者: JasonGuo1"])
-    yield chatbot, history, '正常'
+    yield from update_ui(chatbot=chatbot, history=history)
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
@@ -95,7 +96,7 @@ def 总结word文档(txt, top_p, temperature, chatbot, history, systemPromptTxt,
         report_execption(chatbot, history,
                          a=f"解析项目: {txt}",
                          b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade python-docx pywin32```。")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
 
     # 清空历史，以免输入溢出
@@ -107,7 +108,7 @@ def 总结word文档(txt, top_p, temperature, chatbot, history, systemPromptTxt,
     else:
         if txt == "": txt = '空空如也的输入栏'
         report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"找不到本地项目或无权访问: {txt}")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
 
     # 搜索需要处理的文件清单
@@ -120,7 +121,7 @@ def 总结word文档(txt, top_p, temperature, chatbot, history, systemPromptTxt,
     # 如果没找到任何文件
     if len(file_manifest) == 0:
         report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"找不到任何.docx或doc文件: {txt}")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
 
     # 开始正式执行任务

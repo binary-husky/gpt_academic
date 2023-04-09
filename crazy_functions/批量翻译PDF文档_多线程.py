@@ -1,4 +1,5 @@
 from toolbox import CatchException, report_execption, write_results_to_file
+from toolbox import update_ui
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 
@@ -96,7 +97,7 @@ def 批量翻译PDF文档(txt, top_p, temperature, chatbot, history, sys_prompt,
     chatbot.append([
         "函数插件功能？",
         "批量总结PDF文档。函数插件贡献者: Binary-Husky（二进制哈士奇）"])
-    yield chatbot, history, '正常'
+    yield from update_ui(chatbot=chatbot, history=history)
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
@@ -106,7 +107,7 @@ def 批量翻译PDF文档(txt, top_p, temperature, chatbot, history, sys_prompt,
         report_execption(chatbot, history,
                          a=f"解析项目: {txt}",
                          b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pymupdf tiktoken```。")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
 
     # 清空历史，以免输入溢出
@@ -120,7 +121,7 @@ def 批量翻译PDF文档(txt, top_p, temperature, chatbot, history, sys_prompt,
             txt = '空空如也的输入栏'
         report_execption(chatbot, history,
                          a=f"解析项目: {txt}", b=f"找不到本地项目或无权访问: {txt}")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
 
     # 搜索需要处理的文件清单
@@ -131,7 +132,7 @@ def 批量翻译PDF文档(txt, top_p, temperature, chatbot, history, sys_prompt,
     if len(file_manifest) == 0:
         report_execption(chatbot, history,
                          a=f"解析项目: {txt}", b=f"找不到任何.tex或.pdf文件: {txt}")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
 
     # 开始正式执行任务
@@ -188,7 +189,7 @@ def 解析PDF(file_manifest, project_folder, top_p, temperature, chatbot, histor
             f'./gpt_log/{create_report_file_name}')
         chatbot.append((f"{fp}完成了吗？", res))
         msg = "完成"
-        yield chatbot, history, msg
+        yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg)
 
     # 准备文件的下载
     import shutil
@@ -201,4 +202,4 @@ def 解析PDF(file_manifest, project_folder, top_p, temperature, chatbot, histor
         if os.path.exists(pdf_path):
             os.remove(pdf_path)
     chatbot.append(("给出输出文件清单", str(generated_conclusion_files)))
-    yield chatbot, history, msg
+    yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg)

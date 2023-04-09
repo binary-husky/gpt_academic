@@ -118,8 +118,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
         if future.done():
             break
         chatbot[-1] = [chatbot[-1][0], mutable[0]]
-        msg = "正常"
-        yield chatbot, [], msg
+        yield from update_ui(chatbot=chatbot, history=[])
     return future.result()
 
 
@@ -168,7 +167,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     # 用户反馈
     chatbot.append(["请开始多线程操作。", ""])
     msg = '正常'
-    yield chatbot, [], msg
+    yield from update_ui(chatbot=chatbot, history=[])
     # 异步原子
     mutable = [["", time.time(), "等待中"] for _ in range(n_frag)]
 
@@ -254,7 +253,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                             for thread_index, done, obs in zip(range(len(worker_done)), worker_done, observe_win)])
         chatbot[-1] = [chatbot[-1][0], f'多线程操作已经开始，完成情况: \n\n{stat_str}' + ''.join(['.']*(cnt % 10+1))]
         msg = "正常"
-        yield chatbot, [], msg
+        yield from update_ui(chatbot=chatbot, history=[])
     # 异步任务结束
     gpt_response_collection = []
     for inputs_show_user, f in zip(inputs_show_user_array, futures):
@@ -265,7 +264,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         for inputs_show_user, f in zip(inputs_show_user_array, futures):
             gpt_res = f.result()
             chatbot.append([inputs_show_user, gpt_res])
-            yield chatbot, [], msg
+            yield from update_ui(chatbot=chatbot, history=[])
             time.sleep(1)
     return gpt_response_collection
 

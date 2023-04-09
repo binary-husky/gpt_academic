@@ -1,7 +1,5 @@
-from request_llm.bridge_chatgpt import predict_no_ui
+from toolbox import update_ui
 from toolbox import CatchException, report_execption, write_results_to_file, predict_no_ui_but_counting_down
-fast_debug = False
-
 
 def 解析源代码新(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt):
     import os, copy
@@ -42,7 +40,7 @@ def 解析源代码新(file_manifest, project_folder, top_p, temperature, chatbo
     history_to_return = report_part_1
     res = write_results_to_file(report_part_1)
     chatbot.append(("完成？", "逐个文件分析已完成。" + res + "\n\n正在开始汇总。"))
-    yield chatbot, history_to_return, msg
+    yield from update_ui(chatbot=chatbot, history=history_to_return)
 
     ############################## <第二步，综合，单线程，分组+迭代处理> ##################################
     batchsize = 16  # 10个文件为一组
@@ -76,7 +74,7 @@ def 解析源代码新(file_manifest, project_folder, top_p, temperature, chatbo
     history_to_return.extend(report_part_2)
     res = write_results_to_file(history_to_return)
     chatbot.append(("完成了吗？", res))
-    yield chatbot, history_to_return, msg
+    yield from update_ui(chatbot=chatbot, history=history_to_return)
 
 
 @CatchException
@@ -89,7 +87,7 @@ def 解析项目本身(txt, top_p, temperature, chatbot, history, systemPromptTx
     project_folder = './'
     if len(file_manifest) == 0:
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何python文件: {txt}")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
     yield from 解析源代码新(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt)
 
@@ -102,12 +100,12 @@ def 解析一个Python项目(txt, top_p, temperature, chatbot, history, systemPr
     else:
         if txt == "": txt = '空空如也的输入栏'
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
     file_manifest = [f for f in glob.glob(f'{project_folder}/**/*.py', recursive=True)]
     if len(file_manifest) == 0:
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何python文件: {txt}")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
     yield from 解析源代码新(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt)
 
@@ -121,14 +119,14 @@ def 解析一个C项目的头文件(txt, top_p, temperature, chatbot, history, s
     else:
         if txt == "": txt = '空空如也的输入栏'
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
     file_manifest = [f for f in glob.glob(f'{project_folder}/**/*.h', recursive=True)]  + \
                     [f for f in glob.glob(f'{project_folder}/**/*.hpp', recursive=True)] #+ \
                     # [f for f in glob.glob(f'{project_folder}/**/*.c', recursive=True)]
     if len(file_manifest) == 0:
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何.h头文件: {txt}")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
     yield from 解析源代码新(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt)
 
@@ -141,7 +139,7 @@ def 解析一个C项目(txt, top_p, temperature, chatbot, history, systemPromptT
     else:
         if txt == "": txt = '空空如也的输入栏'
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
     file_manifest = [f for f in glob.glob(f'{project_folder}/**/*.h', recursive=True)]  + \
                     [f for f in glob.glob(f'{project_folder}/**/*.cpp', recursive=True)] + \
@@ -149,7 +147,7 @@ def 解析一个C项目(txt, top_p, temperature, chatbot, history, systemPromptT
                     [f for f in glob.glob(f'{project_folder}/**/*.c', recursive=True)]
     if len(file_manifest) == 0:
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何.h头文件: {txt}")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
     yield from 解析源代码新(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt)
 
@@ -163,7 +161,7 @@ def 解析一个Java项目(txt, top_p, temperature, chatbot, history, systemProm
     else:
         if txt == "": txt = '空空如也的输入栏'
         report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"找不到本地项目或无权访问: {txt}")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
     file_manifest = [f for f in glob.glob(f'{project_folder}/**/*.java', recursive=True)] + \
                     [f for f in glob.glob(f'{project_folder}/**/*.jar', recursive=True)] + \
@@ -171,7 +169,7 @@ def 解析一个Java项目(txt, top_p, temperature, chatbot, history, systemProm
                     [f for f in glob.glob(f'{project_folder}/**/*.sh', recursive=True)]
     if len(file_manifest) == 0:
         report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"找不到任何java文件: {txt}")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
     yield from 解析源代码新(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt)
 
@@ -185,7 +183,7 @@ def 解析一个Rect项目(txt, top_p, temperature, chatbot, history, systemProm
     else:
         if txt == "": txt = '空空如也的输入栏'
         report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"找不到本地项目或无权访问: {txt}")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
     file_manifest = [f for f in glob.glob(f'{project_folder}/**/*.ts', recursive=True)] + \
                     [f for f in glob.glob(f'{project_folder}/**/*.tsx', recursive=True)] + \
@@ -194,7 +192,7 @@ def 解析一个Rect项目(txt, top_p, temperature, chatbot, history, systemProm
                     [f for f in glob.glob(f'{project_folder}/**/*.jsx', recursive=True)]
     if len(file_manifest) == 0:
         report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"找不到任何Rect文件: {txt}")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
     yield from 解析源代码新(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt)
 
@@ -208,11 +206,11 @@ def 解析一个Golang项目(txt, top_p, temperature, chatbot, history, systemPr
     else:
         if txt == "": txt = '空空如也的输入栏'
         report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"找不到本地项目或无权访问: {txt}")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
     file_manifest = [f for f in glob.glob(f'{project_folder}/**/*.go', recursive=True)]
     if len(file_manifest) == 0:
         report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"找不到任何golang文件: {txt}")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
     yield from 解析源代码新(file_manifest, project_folder, top_p, temperature, chatbot, history, systemPromptTxt)

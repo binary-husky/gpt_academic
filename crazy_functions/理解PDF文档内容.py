@@ -1,4 +1,5 @@
 from request_llm.bridge_chatgpt import predict_no_ui
+from toolbox import update_ui
 from toolbox import CatchException, report_execption, write_results_to_file, predict_no_ui_but_counting_down
 import re
 import unicodedata
@@ -89,18 +90,18 @@ def 解析PDF(file_name, top_p, temperature, chatbot, history, systemPromptTxt):
             time.sleep(1)
         chatbot[-1] = (i_say_show_user, gpt_say)
         history.append(i_say_show_user); history.append(gpt_say)
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         time.sleep(2)
 
     i_say = f'接下来，请你扮演一名专业的学术教授，利用你的所有知识并且结合这篇文章，回答我的问题。（请牢记：1.直到我说“退出”，你才能结束任务；2.所有问题需要紧密围绕文章内容;3.如果有公式，请使用tex渲染)'
     chatbot.append((i_say, "[Local Message] waiting gpt response."))
-    yield chatbot, history, '正常'
+    yield from update_ui(chatbot=chatbot, history=history)
 
     # ** gpt request **
     gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say, chatbot, top_p, temperature, history=history)   # 带超时倒计时
     chatbot[-1] = (i_say, gpt_say)
     history.append(i_say); history.append(gpt_say)
-    yield chatbot, history, '正常'
+    yield from update_ui(chatbot=chatbot, history=history)
 
 
 @CatchException
@@ -111,7 +112,7 @@ def 理解PDF文档内容(txt, top_p, temperature, chatbot, history, systemPromp
     chatbot.append([
         "函数插件功能？",
         "理解PDF论文内容，并且将结合上下文内容，进行学术解答。函数插件贡献者: Hanzoe。"])
-    yield chatbot, history, '正常'
+    yield from update_ui(chatbot=chatbot, history=history)
 
     import tkinter as tk
     from tkinter import filedialog
@@ -127,7 +128,7 @@ def 理解PDF文档内容(txt, top_p, temperature, chatbot, history, systemPromp
         report_execption(chatbot, history, 
             a = f"解析项目: {txt}", 
             b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pymupdf```。")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
 
     # 清空历史，以免输入溢出
@@ -146,7 +147,7 @@ def 理解PDF文档内容标准文件输入(txt, top_p, temperature, chatbot, hi
     chatbot.append([
         "函数插件功能？",
         "理解PDF论文内容，并且将结合上下文内容，进行学术解答。函数插件贡献者: Hanzoe。"])
-    yield chatbot, history, '正常'
+    yield from update_ui(chatbot=chatbot, history=history)
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
@@ -155,7 +156,7 @@ def 理解PDF文档内容标准文件输入(txt, top_p, temperature, chatbot, hi
         report_execption(chatbot, history, 
             a = f"解析项目: {txt}", 
             b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pymupdf```。")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
 
     # 清空历史，以免输入溢出
@@ -169,7 +170,7 @@ def 理解PDF文档内容标准文件输入(txt, top_p, temperature, chatbot, hi
             txt = '空空如也的输入栏'
         report_execption(chatbot, history,
                          a=f"解析项目: {txt}", b=f"找不到本地项目或无权访问: {txt}")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
 
     # 搜索需要处理的文件清单
@@ -178,7 +179,7 @@ def 理解PDF文档内容标准文件输入(txt, top_p, temperature, chatbot, hi
     if len(file_manifest) == 0:
         report_execption(chatbot, history,
                          a=f"解析项目: {txt}", b=f"找不到任何.tex或.pdf文件: {txt}")
-        yield chatbot, history, '正常'
+        yield from update_ui(chatbot=chatbot, history=history)
         return
     txt = file_manifest[0]
     # 开始正式执行任务

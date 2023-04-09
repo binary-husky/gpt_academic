@@ -12,7 +12,7 @@ import logging
 import time
 import threading
 import importlib
-from toolbox import get_conf
+from toolbox import get_conf, update_ui
 LLM_MODEL, = get_conf('LLM_MODEL')
 
 # "TGUI:galactica-1.3b@localhost:7860"
@@ -111,7 +111,7 @@ def predict_tgui(inputs, top_p, temperature, chatbot=[], history=[], system_prom
     logging.info(f'[raw_input] {raw_input}')
     history.extend([inputs, ""])
     chatbot.append([inputs, ""])
-    yield chatbot, history, "等待响应"
+    yield from update_ui(chatbot=chatbot, history=history, msg="等待响应")
 
     prompt = inputs
     tgui_say = ""
@@ -138,7 +138,7 @@ def predict_tgui(inputs, top_p, temperature, chatbot=[], history=[], system_prom
             tgui_say = mutable[0]
             history[-1] = tgui_say
             chatbot[-1] = (history[-2], history[-1])
-            yield chatbot, history, "status_text"
+            yield from update_ui(chatbot=chatbot, history=history)
 
     logging.info(f'[response] {tgui_say}')
 
