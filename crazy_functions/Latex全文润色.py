@@ -72,11 +72,10 @@ def 多文件润色(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
     #     sys_prompt="Your job is to collect information from materials。",
     # )
 
-    #  <-------- 多线程润色开始（第一次） ----------> 
+    #  <-------- 多线程润色开始 ----------> 
     if language == 'en':
-        inputs_array = [f"Below is an academic paper, polish the writing to meet the academic style, "+
-                        f"improve the spelling, grammar, clarity, concision and overall readability. " + 
-                        f"The paper begins now: \n{frag}" for frag in pfg.sp_file_contents]
+        inputs_array = ["Below is a section from an academic paper, polish this section to meet the academic standard, improve the grammar, clarity and overall readability, do not modify any latex command such as \section, \cite and equations:" + 
+                        f"\n\n{frag}" for frag in pfg.sp_file_contents]
         inputs_show_user_array = [f"Polish {f}" for f in pfg.sp_file_tag]
         sys_prompt_array = ["You are a professional academic paper writer." for _ in range(n_split)]
     elif language == 'zh':
@@ -97,6 +96,7 @@ def 多文件润色(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
         scroller_max_len = 80
     )
 
+    #  <-------- 整理结果，退出 ----------> 
     create_report_file_name = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + f"-chatgpt.polish.md"
     res = write_results_to_file(gpt_response_collection, file_name=create_report_file_name)
     history = gpt_response_collection
