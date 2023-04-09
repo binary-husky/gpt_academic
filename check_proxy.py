@@ -69,13 +69,16 @@ def patch_and_restart(path):
         shutil.copyfile('config.py', 'config_private.py')
     distutils.dir_util.copy_tree(path+'/chatgpt_academic-master', './')
     import subprocess
-    print亮绿('更新包依赖中……')
+    print亮绿('代码已经更新，即将更新pip包依赖……')
     for i in reversed(range(5)): time.sleep(1); print(i)
-    subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt'])
+    try: 
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt'])
+    except:
+        print亮红('pip包依赖安装出现问题，需要手动安装新增的依赖库 `python -m pip install -r requirements.txt`，然后在用常规的`python main.py`的方式启动。')
     print亮绿('更新完成，您可以随时在history子文件夹下找回旧版的程序，5s之后重启')
     print亮红('假如重启失败，您可能需要手动安装新增的依赖库 `python -m pip install -r requirements.txt`，然后在用常规的`python main.py`的方式启动。')
-    for i in reversed(range(5)): time.sleep(1); print(i)
     print(' ------------------------------ -----------------------------------')
+    for i in reversed(range(8)): time.sleep(1); print(i)
     os.execl(sys.executable, sys.executable, *sys.argv)
 
 
