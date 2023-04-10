@@ -12,3 +12,4 @@ pygments
 pymupdf
 openai
 numpy
+python-docx

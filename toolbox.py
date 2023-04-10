@@ -3,7 +3,6 @@ import mdtex2html
 import threading
 import importlib
 import traceback
-import importlib
 import inspect
 import re
 from latex2mathml.converter import convert as tex2mathml
