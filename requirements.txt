@@ -12,3 +12,4 @@ pymupdf
 openai
 numpy
 python-docx
+urllib3==1.25.11
