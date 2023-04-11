@@ -76,7 +76,7 @@ def get_reduce_token_percent(text):
         return 0.5, '不详'
 
 
-def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temperature, history=[], sys_prompt='', long_connection=True):
+def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, llm_kwargs, history=[], sys_prompt='', long_connection=True):
     """
         * 此函数未来将被弃用（替代函数 request_gpt_model_in_new_thread_with_ui_alive 文件 chatgpt_academic/crazy_functions/crazy_utils）
 
@@ -102,7 +102,7 @@ def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temp
         while True:
             try:
                 mutable[0] = predict_no_ui_long_connection(
-                    inputs=i_say, top_p=top_p, temperature=temperature, history=history, sys_prompt=sys_prompt)
+                    inputs=i_say, llm_kwargs=llm_kwargs, history=history, sys_prompt=sys_prompt)
 
             except ConnectionAbortedError as token_exceeded_error:
                 # 尝试计算比例，尽可能多地保留文本
