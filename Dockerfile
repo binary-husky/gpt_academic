@@ -5,9 +5,10 @@ RUN echo '[global]' > /etc/pip.conf && \
     echo 'trusted-host = mirrors.aliyun.com' >> /etc/pip.conf
 
 
-COPY . /gpt
 WORKDIR /gpt
+COPY requirements.txt .
 RUN pip3 install -r requirements.txt
 
+COPY . .
 
-CMD ["python3", "main.py"]
+CMD ["python3", "-u", "main.py"]
