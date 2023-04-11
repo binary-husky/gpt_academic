@@ -280,7 +280,7 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
         # 更新UI
         generated_conclusion_files.append(f'./gpt_log/{create_report_file_name}')
         chatbot.append((f"{fp}完成了吗？", res))
-        yield from update_ui(chatbot=chatbot, history=chatbot) # 刷新界面
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # 准备文件的下载
     import shutil
@@ -293,4 +293,4 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
         if os.path.exists(pdf_path):
             os.remove(pdf_path)
     chatbot.append(("给出输出文件清单", str(generated_conclusion_files)))
-    yield from update_ui(chatbot=chatbot, history=chatbot) # 刷新界面
+    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
