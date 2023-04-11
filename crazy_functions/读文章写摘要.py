@@ -34,7 +34,7 @@ def 解析Paper(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbo
     if not fast_debug: 
         msg = '正常'
         # ** gpt request **
-        gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say, chatbot, llm_kwargs, plugin_kwargs, history=history)   # 带超时倒计时
+        gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say, chatbot, llm_kwargs, history=history)   # 带超时倒计时
 
         chatbot[-1] = (i_say, gpt_say)
         history.append(i_say); history.append(gpt_say)
