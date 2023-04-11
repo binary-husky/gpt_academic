@@ -52,7 +52,7 @@ def 解析docx(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot
             chatbot[-1] = (i_say_show_user, gpt_say)
             history.append(i_say_show_user)
             history.append(gpt_say)
-            yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg) # 刷新界面
+            yield from update_ui(chatbot=chatbot, history=history, msg=msg) # 刷新界面
             if not fast_debug: time.sleep(2)
 
     """
@@ -84,10 +84,10 @@ def 解析docx(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot
         chatbot[-1] = (i_say, gpt_say)
         history.append(i_say)
         history.append(gpt_say)
-        yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg) # 刷新界面
+        yield from update_ui(chatbot=chatbot, history=history, msg=msg) # 刷新界面
         res = write_results_to_file(history)
         chatbot.append(("完成了吗？", res))
-        yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg) # 刷新界面
+        yield from update_ui(chatbot=chatbot, history=history, msg=msg) # 刷新界面
 
 
 @CatchException
