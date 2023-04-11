@@ -100,7 +100,7 @@ def 谷歌检索小助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
 
     chatbot.append(["状态？", "已经全部完成"])
     msg = '正常'
-    yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg) # 刷新界面
+    yield from update_ui(chatbot=chatbot, history=history, msg=msg) # 刷新界面
     res = write_results_to_file(history)
     chatbot.append(("完成了吗？", res)); 
-    yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg) # 刷新界面
+    yield from update_ui(chatbot=chatbot, history=history, msg=msg) # 刷新界面
