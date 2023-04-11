@@ -1,5 +1,4 @@
 from toolbox import update_ui
-from request_llm.bridge_chatgpt import predict_no_ui
 from toolbox import CatchException, report_execption, write_results_to_file, predict_no_ui_but_counting_down, get_conf
 import re, requests, unicodedata, os
 

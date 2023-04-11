@@ -87,10 +87,10 @@ def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temp
         top_p, temperature: gpt参数
         history: gpt参数 对话历史
         sys_prompt: gpt参数 sys_prompt
-        long_connection: 是否采用更稳定的连接方式（推荐）
+        long_connection: 是否采用更稳定的连接方式（推荐）（已弃用）
     """
     import time
-    from request_llm.bridge_chatgpt import predict_no_ui, predict_no_ui_long_connection
+    from request_llm.bridge_chatgpt import predict_no_ui_long_connection
     from toolbox import get_conf
     TIMEOUT_SECONDS, MAX_RETRY = get_conf('TIMEOUT_SECONDS', 'MAX_RETRY')
     # 多线程的时候，需要一个mutable结构在不同线程之间传递信息
@@ -101,13 +101,9 @@ def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, top_p, temp
     def mt(i_say, history):
         while True:
             try:
-                if long_connection:
-                    mutable[0] = predict_no_ui_long_connection(
-                        inputs=i_say, top_p=top_p, temperature=temperature, history=history, sys_prompt=sys_prompt)
-                else:
-                    mutable[0] = predict_no_ui(
-                        inputs=i_say, top_p=top_p, temperature=temperature, history=history, sys_prompt=sys_prompt)
-                break
+                mutable[0] = predict_no_ui_long_connection(
+                    inputs=i_say, top_p=top_p, temperature=temperature, history=history, sys_prompt=sys_prompt)
+
             except ConnectionAbortedError as token_exceeded_error:
                 # 尝试计算比例，尽可能多地保留文本
                 p_ratio, n_exceed = get_reduce_token_percent(
