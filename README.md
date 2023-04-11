@@ -44,7 +44,8 @@ chat分析报告生成 | [函数插件] 运行后自动生成总结汇报
 支持GPT输出的markdown表格 | 可以输出支持GPT的markdown表格
 启动暗色gradio[主题](https://github.com/binary-husky/chatgpt_academic/issues/173) | 在浏览器url后面添加```/?__dark-theme=true```可以切换dark主题
 huggingface免科学上网[在线体验](https://huggingface.co/spaces/qingxu98/gpt-academic) | 登陆huggingface后复制[此空间](https://huggingface.co/spaces/qingxu98/gpt-academic)
-多LLM大语言模型混合支持（[v3.0分支](https://github.com/binary-husky/chatgpt_academic/tree/v3.0)测试中） | 同时被ChatGPT和ChatGLM伺候的感觉一定会很不错吧？
+[多LLM模型](https://www.bilibili.com/video/BV1EM411K7VH/)混合支持（[v3.0分支](https://github.com/binary-husky/chatgpt_academic/tree/v3.0)测试中） | 同时被ChatGPT和[清华ChatGLM](https://github.com/THUDM/ChatGLM-6B)伺候的感觉一定会很不错吧？
+兼容[TGUI](https://github.com/oobabooga/text-generation-webui)接入更多样的语言模型 | 接入opt-1.3b, galactica-1.3b等模型（[v3.0分支](https://github.com/binary-husky/chatgpt_academic/tree/v3.0)测试中）
 …… | ……
 
 </div>
