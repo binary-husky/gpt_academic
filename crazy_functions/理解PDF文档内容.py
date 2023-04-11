@@ -1,7 +1,8 @@
 from toolbox import update_ui
-from toolbox import CatchException, report_execption, write_results_to_file, predict_no_ui_but_counting_down
+from toolbox import CatchException, report_execption
 import re
 import unicodedata
+from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 fast_debug = False
 
 def is_paragraph_break(match):
@@ -81,11 +82,11 @@ def 解析PDF(file_name, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
             i_say = f'你只需要回答“接受完成”。文章内容第{i+1}/{split_group}部分是 ```{file_content[i*split_number:(i+1)*split_number]}```'
             i_say_show_user = f'当前发送{i+1}/{split_group}部分'
         chatbot.append((i_say_show_user, "[Local Message] waiting gpt response."))
-        gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, llm_kwargs, history=[])   # 带超时倒计时
+        gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(i_say, i_say_show_user, llm_kwargs, chatbot, history=[], sys_prompt="")   # 带超时倒计时
         while "完成" not in gpt_say:
             i_say = f'你只需要回答“接受完成”。文章内容第{i+1}/{split_group}部分是 ```{file_content[i*split_number:(i+1)*split_number]}```'
             i_say_show_user = f'出现error，重新发送{i+1}/{split_group}部分'
-            gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, llm_kwargs, history=[])   # 带超时倒计时
+            gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(i_say, i_say_show_user, llm_kwargs, chatbot, history=[], sys_prompt="")   # 带超时倒计时
             time.sleep(1)
         chatbot[-1] = (i_say_show_user, gpt_say)
         history.append(i_say_show_user); history.append(gpt_say)
@@ -97,7 +98,7 @@ def 解析PDF(file_name, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # ** gpt request **
-    gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say, chatbot, llm_kwargs, history=history)   # 带超时倒计时
+    gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(i_say, i_say, llm_kwargs, chatbot, history=history, sys_prompt="")   # 带超时倒计时
     chatbot[-1] = (i_say, gpt_say)
     history.append(i_say); history.append(gpt_say)
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
