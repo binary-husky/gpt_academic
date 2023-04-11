@@ -113,7 +113,7 @@ def auto_update():
         with open('./version', 'r', encoding='utf8') as f:
             current_version = f.read()
             current_version = json.loads(current_version)['version']
-        if (remote_version - current_version) >= 0.05:
+        if (remote_version - current_version) >= 0.01:
             from colorful import print亮黄
             print亮黄(
                 f'\n新版本可用。新版本:{remote_version}，当前版本:{current_version}。{new_feature}')
