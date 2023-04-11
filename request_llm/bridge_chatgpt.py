@@ -39,38 +39,6 @@ def get_full_error(chunk, stream_response):
             break
     return chunk
 
-def predict_no_ui(inputs, top_p, temperature, history=[], sys_prompt=""):
-    """
-        发送至chatGPT，等待回复，一次性完成，不显示中间过程。
-        predict函数的简化版。
-        用于payload比较大的情况，或者用于实现多线、带嵌套的复杂功能。
-
-        inputs 是本次问询的输入
-        top_p, temperature是chatGPT的内部调优参数
-        history 是之前的对话列表
-        （注意无论是inputs还是history，内容太长了都会触发token数量溢出的错误，然后raise ConnectionAbortedError）
-    """
-    headers, payload = generate_payload(inputs, top_p, temperature, history, system_prompt=sys_prompt, stream=False)
-
-    retry = 0
-    while True:
-        try:
-            # make a POST request to the API endpoint, stream=False
-            response = requests.post(API_URL, headers=headers, proxies=proxies,
-                                    json=payload, stream=False, timeout=TIMEOUT_SECONDS*2); break
-        except requests.exceptions.ReadTimeout as e:
-            retry += 1
-            traceback.print_exc()
-            if retry > MAX_RETRY: raise TimeoutError
-            if MAX_RETRY!=0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
-
-    try:
-        result = json.loads(response.text)["choices"][0]["message"]["content"]
-        return result
-    except Exception as e:
-        if "choices" not in response.text: print(response.text)
-        raise ConnectionAbortedError("Json解析不合常规，可能是文本过长" + response.text)
-
 
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=None, console_slience=False):
     """
@@ -276,7 +244,10 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         "presence_penalty": 0,
         "frequency_penalty": 0,
     }
-    print(f" {llm_kwargs['llm_model']} : {conversation_cnt} : {inputs[:100]}")
+    try:
+        print(f" {llm_kwargs['llm_model']} : {conversation_cnt} : {inputs[:100]}")
+    except:
+        print('输入中可能存在乱码。')
     return headers,payload
 
 
