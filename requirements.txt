@@ -4,6 +4,7 @@ transformers
 python-markdown-math
 beautifulsoup4
 latex2mathml
+python-docx
 mdtex2html
 colorama
 tiktoken
@@ -12,4 +13,4 @@ pygments
 pymupdf
 openai
 numpy
-python-docx
+arxiv

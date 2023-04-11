@@ -76,7 +76,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
             try:
                 # 【第一种情况】：顺利完成
                 result = predict_no_ui_long_connection(
-                    inputs=inputs, llm_kwargs=llm_kwargs, 
+                    inputs=inputs, llm_kwargs=llm_kwargs,
                     history=history, sys_prompt=sys_prompt, observe_window=mutable)
                 return result
             except ConnectionAbortedError as token_exceeded_error:
