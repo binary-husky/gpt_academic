@@ -181,7 +181,7 @@ def 下载arxiv论文并翻译摘要(txt, llm_kwargs, plugin_kwargs, chatbot, hi
         sys_prompt="Your job is to collect information from materials and translate to Chinese。",
     )
 
-    # gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, llm_kwargs, plugin_kwargs, history=[])   # 带超时倒计时
+    # gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, llm_kwargs, history=[])   # 带超时倒计时
     chatbot[-1] = (i_say_show_user, gpt_say)
     history.append(i_say_show_user); history.append(gpt_say)
     yield from update_ui(chatbot=chatbot, history=chatbot, msg=msg) # 刷新界面

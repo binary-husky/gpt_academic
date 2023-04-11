@@ -40,7 +40,7 @@ def 解析docx(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot
         if not fast_debug:
             msg = '正常'
             # ** gpt request **
-            gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, llm_kwargs, plugin_kwargs, history=[])  # 带超时倒计时
+            gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, llm_kwargs, history=[])  # 带超时倒计时
             chatbot[-1] = (i_say_show_user, gpt_say)
             history.append(i_say_show_user);
             history.append(gpt_say)
