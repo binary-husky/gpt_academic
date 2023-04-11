@@ -54,7 +54,7 @@ def update_ui(chatbot, history, msg='正常', **kwargs):  # 刷新界面
     刷新用户界面
     """
     assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时，可用clear将其清空，然后用for+append循环重新赋值。"
-    yield chatbot.get_cookies(), chatbot.get_list(), history, msg
+    yield chatbot.get_cookies(), chatbot, history, msg
 ############################### ################## #######################################
 ##########################################################################################
 
@@ -340,11 +340,9 @@ def format_io(self, y):
         return []
     i_ask, gpt_reply = y[-1]
     i_ask = text_divide_paragraph(i_ask)  # 输入部分太自由，预处理一波
-    gpt_reply = close_up_code_segment_during_stream(
-        gpt_reply)  # 当代码输出半截的时候，试着补上后个```
+    gpt_reply = close_up_code_segment_during_stream(gpt_reply)  # 当代码输出半截的时候，试着补上后个```
     y[-1] = (
-        None if i_ask is None else markdown.markdown(
-            i_ask, extensions=['fenced_code', 'tables']),
+        None if i_ask is None else markdown.markdown(i_ask, extensions=['fenced_code', 'tables']),
         None if gpt_reply is None else markdown_convertion(gpt_reply)
     )
     return y
