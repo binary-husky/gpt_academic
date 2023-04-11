@@ -1,5 +1,6 @@
 from toolbox import update_ui
-from toolbox import CatchException, report_execption, write_results_to_file, predict_no_ui_but_counting_down
+from toolbox import CatchException, report_execption, write_results_to_file
+from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 fast_debug = False
 
 
@@ -19,7 +20,7 @@ def 解析Paper(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbo
         if not fast_debug: 
             msg = '正常'
             # ** gpt request **
-            gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, llm_kwargs, history=[])   # 带超时倒计时
+            gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(i_say, i_say_show_user, llm_kwargs, chatbot, history=[], sys_prompt=system_prompt)   # 带超时倒计时
 
             chatbot[-1] = (i_say_show_user, gpt_say)
             history.append(i_say_show_user); history.append(gpt_say)
@@ -34,7 +35,7 @@ def 解析Paper(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbo
     if not fast_debug: 
         msg = '正常'
         # ** gpt request **
-        gpt_say = yield from predict_no_ui_but_counting_down(i_say, i_say, chatbot, llm_kwargs, history=history)   # 带超时倒计时
+        gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(i_say, i_say, llm_kwargs, chatbot, history=history, sys_prompt=system_prompt)   # 带超时倒计时
 
         chatbot[-1] = (i_say, gpt_say)
         history.append(i_say); history.append(gpt_say)

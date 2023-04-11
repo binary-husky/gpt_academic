@@ -1,10 +1,10 @@
 from toolbox import update_ui
-from toolbox import CatchException, report_execption, write_results_to_file, predict_no_ui_but_counting_down
+from toolbox import CatchException, report_execption, write_results_to_file
 
 def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
     import os, copy
     from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
-    from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, WithRetry
+    from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
     msg = '正常'
     inputs_array = []
     inputs_show_user_array = []
