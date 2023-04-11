@@ -41,6 +41,22 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
     chatbot.append(("完成？", "逐个文件分析已完成。" + res + "\n\n正在开始汇总。"))
     yield from update_ui(chatbot=chatbot, history=history_to_return) # 刷新界面
 
+    ############################## <存储中间数据进行调试> ##################################
+        
+    # def objdump(obj):
+    #     import pickle
+    #     with open('objdump.tmp', 'wb+') as f:
+    #         pickle.dump(obj, f)
+    #     return
+
+    # def objload():
+    #     import pickle, os
+    #     if not os.path.exists('objdump.tmp'): 
+    #         return
+    #     with open('objdump.tmp', 'rb') as f:
+    #         return pickle.load(f)
+    # objdump([report_part_1, gpt_response_collection, history_to_return, file_manifest, project_folder, fp, llm_kwargs, chatbot])
+    
     ############################## <第二步，综合，单线程，分组+迭代处理> ##################################
     batchsize = 16  # 10个文件为一组
     report_part_2 = []
@@ -53,14 +69,14 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
         file_rel_path = [os.path.relpath(fp, project_folder) for index, fp in enumerate(this_iteration_file_manifest)]
         # 把“请对下面的程序文件做一个概述” 替换成 精简的 "文件名：{all_file[index]}"
         for index, content in enumerate(this_iteration_gpt_response_collection):
-            if index%2==0: this_iteration_gpt_response_collection[index] = f"文件名：{file_rel_path[index//2]}"
+            if index%2==0: this_iteration_gpt_response_collection[index] = f"{file_rel_path[index//2]}" # 只保留文件名节省token
         previous_iteration_files.extend([os.path.relpath(fp, project_folder) for index, fp in enumerate(this_iteration_file_manifest)])
         previous_iteration_files_string = ', '.join(previous_iteration_files)
         current_iteration_focus = ', '.join([os.path.relpath(fp, project_folder) for index, fp in enumerate(this_iteration_file_manifest)])
         i_say = f'根据以上分析，对程序的整体功能和构架重新做出概括。然后用一张markdown表格整理每个文件的功能（包括{previous_iteration_files_string}）。'
         inputs_show_user = f'根据以上分析，对程序的整体功能和构架重新做出概括，由于输入长度限制，可能需要分组处理，本组文件为 {current_iteration_focus} + 已经汇总的文件组。'
         this_iteration_history = copy.deepcopy(this_iteration_gpt_response_collection) 
-        this_iteration_history.extend(last_iteration_result)
+        this_iteration_history.append(last_iteration_result)
         result = yield from request_gpt_model_in_new_thread_with_ui_alive(
             inputs=i_say, inputs_show_user=inputs_show_user, llm_kwargs=llm_kwargs, chatbot=chatbot, 
             history=this_iteration_history,   # 迭代之前的分析
