@@ -245,7 +245,7 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         "frequency_penalty": 0,
     }
     try:
-        print(f" {llm_kwargs['llm_model']} : {conversation_cnt} : {inputs[:100]}")
+        print(f" {llm_kwargs['llm_model']} : {conversation_cnt} : {inputs[:100]} ..........")
     except:
         print('输入中可能存在乱码。')
     return headers,payload
