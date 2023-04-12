@@ -162,6 +162,15 @@ def get_crazy_functions():
 
     except Exception as err:
         print(f'[下载arxiv论文并翻译摘要] 插件导入失败 {str(err)}')
+        
+    from crazy_functions.解析项目源代码 import 解析一个Lua项目
+    function_plugins.update({
+        "解析整个Lua项目": {
+            "Color": "stop",    # 按钮颜色
+            "AsButton": False,  # 加入下拉菜单中
+            "Function": HotReload(解析一个Lua项目)
+        },
+    })        
 
     ###################### 第n组插件 ###########################
     return function_plugins
