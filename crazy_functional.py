@@ -1,3 +1,4 @@
+from crazy_functions.解析项目源代码 import 解析一个Vue项目, 解析一个js项目
 from toolbox import HotReload  # HotReload 的意思是热更新，修改函数插件后，不需要重启程序，代码直接生效
 
 
@@ -18,55 +19,60 @@ def get_crazy_functions():
     from crazy_functions.Latex全文润色 import Latex英文润色
 
     function_plugins = {
-
-        "解析整个Python项目": {
-            "Color": "stop",    # 按钮颜色
-            "Function": HotReload(解析一个Python项目)
+        "解析整个Vue项目": {
+            "Color": "stop",  # 按钮颜色
+            "Function": HotReload(解析一个Vue项目)
         },
-        "解析整个C++项目头文件": {
-            "Color": "stop",    # 按钮颜色
-            "Function": HotReload(解析一个C项目的头文件)
+        "解析整个js项目": {
+            "Color": "stop",  # 按钮颜色
+            "Function": HotReload(解析一个js项目)
         },
-        "解析整个C++项目（.cpp/.hpp/.c/.h）": {
-            "Color": "stop",    # 按钮颜色
-            "AsButton": False,  # 加入下拉菜单中
-            "Function": HotReload(解析一个C项目)
-        },
-        "解析整个Go项目": {
-            "Color": "stop",    # 按钮颜色
-            "AsButton": False,  # 加入下拉菜单中
-            "Function": HotReload(解析一个Golang项目)
-        },
+        # "解析整个Python项目": {
+        #     "Color": "stop",    # 按钮颜色
+        #     "Function": HotReload(解析一个Python项目)
+        # },
+        # "解析整个C++项目头文件": {
+        #     "Color": "stop",    # 按钮颜色
+        #     "Function": HotReload(解析一个C项目的头文件)
+        # },
+        # "解析整个C++项目（.cpp/.hpp/.c/.h）": {
+        #     "Color": "stop",    # 按钮颜色
+        #     "AsButton": False,  # 加入下拉菜单中
+        #     "Function": HotReload(解析一个C项目)
+        # },
+        # "解析整个Go项目": {
+        #     "Color": "stop",    # 按钮颜色
+        #     "AsButton": False,  # 加入下拉菜单中
+        #     "Function": HotReload(解析一个Golang项目)
+        # },
         "解析整个Java项目": {
             "Color": "stop",  # 按钮颜色
-            "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(解析一个Java项目)
         },
         "解析整个React项目": {
             "Color": "stop",  # 按钮颜色
-            "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(解析一个Rect项目)
         },
         "读Tex论文写摘要": {
-            "Color": "stop",    # 按钮颜色
+            "Color": "stop",  # 按钮颜色
             "Function": HotReload(读文章写摘要)
         },
-        "批量生成函数注释": {
-            "Color": "stop",    # 按钮颜色
-            "Function": HotReload(批量生成函数注释)
-        },
-        "[多线程Demo] 解析此项目本身（源码自译解）": {
-            "Function": HotReload(解析项目本身)
-        },
-        "[多线程demo] 把本项目源代码切换成全英文": {
-            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
-            "AsButton": False,  # 加入下拉菜单中
-            "Function": HotReload(全项目切换英文)
-        },
-        "[函数插件模板Demo] 历史上的今天": {
-            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
-            "Function": HotReload(高阶功能模板函数)
-        },
+        # "批量生成函数注释": {
+        #     "Color": "stop",    # 按钮颜色
+        #     "Function": HotReload(批量生成函数注释)
+        # },
+        # "[多线程Demo] 解析此项目本身（源码自译解）": {
+        #     "Function": HotReload(解析项目本身)
+        # },
+        # "[多线程demo] 把本项目源代码切换成全英文": {
+        #     # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
+        #     "AsButton": False,  # 加入下拉菜单中
+        #     "Function": HotReload(全项目切换英文)
+        # },
+        # "[函数插件模板Demo] 历史上的今天": {
+        #     # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
+        #     "Function": HotReload(高阶功能模板函数)
+        # },
 
     }
     ###################### 第二组插件 ###########################
@@ -145,7 +151,6 @@ def get_crazy_functions():
             "Function": HotReload(Latex英译中)
         },
 
-        
     })
 
     ###################### 第三组插件 ###########################
