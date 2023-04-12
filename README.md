@@ -12,7 +12,7 @@ If you like this project, please give it a Star. If you've come up with more use
 
 > **Note**
 >
-> 1.请注意只有“红颜色”标识的函数插件（按钮）才支持读取文件。目前对pdf/word格式文件的支持插件正在逐步完善中，需要更多developer的帮助。
+> 1.请注意只有“红颜色”标识的函数插件（按钮）才支持读取文件，部分插件位于插件区的“下拉菜单”中。另外我们会以最高优先级欢迎和处理任何新插件功能的PR！
 >
 > 2.本项目中每个文件的功能都在自译解[`self_analysis.md`](https://github.com/binary-husky/chatgpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A)详细说明。随着版本的迭代，您也可以随时自行点击相关函数插件，调用GPT重新生成项目的自我解析报告。常见问题汇总在[`wiki`](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98)当中。
 > 
