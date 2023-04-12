@@ -49,7 +49,7 @@ def 全项目切换英文(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys_
     # 第4步：随便显示点什么防止卡顿的感觉
     for index, fp in enumerate(file_manifest):
         # if 'test_project' in fp: continue
-        with open(fp, 'r', encoding='utf-8') as f:
+        with open(fp, 'r', encoding='utf-8', errors='replace') as f:
             file_content = f.read()
         i_say_show_user =f'[{index}/{len(file_manifest)}] 接下来请将以下代码中包含的所有中文转化为英文，只输出转化后的英文代码，请用代码块输出代码: {os.path.abspath(fp)}'
         i_say_show_user_buffer.append(i_say_show_user)
@@ -72,7 +72,7 @@ def 全项目切换英文(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys_
         if index > 10: 
             time.sleep(60)
             print('Openai 限制免费用户每分钟20次请求，降低请求频率中。')
-        with open(fp, 'r', encoding='utf-8') as f:
+        with open(fp, 'r', encoding='utf-8', errors='replace') as f:
             file_content = f.read()
         i_say_template = lambda fp, file_content: f'接下来请将以下代码中包含的所有中文转化为英文，只输出代码，文件名是{fp}，文件代码是 ```{file_content}```'
         try:

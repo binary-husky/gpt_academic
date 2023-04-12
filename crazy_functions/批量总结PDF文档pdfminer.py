@@ -68,7 +68,7 @@ def 解析Paper(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbo
     print('begin analysis on:', file_manifest)
     for index, fp in enumerate(file_manifest):
         if ".tex" in fp:
-            with open(fp, 'r', encoding='utf-8') as f:
+            with open(fp, 'r', encoding='utf-8', errors='replace') as f:
                 file_content = f.read()
         if ".pdf" in fp.lower():
             file_content = readPdf(fp)
