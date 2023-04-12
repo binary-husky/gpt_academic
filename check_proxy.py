@@ -12,13 +12,11 @@ def check_proxy(proxies):
             result = f"代理配置 {proxies_https}, 代理所在地：{country}"
         elif 'error' in data:
             result = f"代理配置 {proxies_https}, 代理所在地：未知，IP查询频率受限"
-        print(result)
-        return result
     except:
         result = f"代理配置 {proxies_https}, 代理所在地查询超时，代理可能无效"
-        print(result)
-        return result
-
+    
+    print(result)
+    return result
 
 def backup_and_download(current_version, remote_version):
     """
