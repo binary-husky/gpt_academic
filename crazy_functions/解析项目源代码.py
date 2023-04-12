@@ -14,7 +14,7 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
 
     ############################## <第一步，逐个文件分析，多线程> ##################################
     for index, fp in enumerate(file_manifest):
-        with open(fp, 'r', encoding='utf-8') as f:
+        with open(fp, 'r', encoding='utf-8', errors='replace') as f:
             file_content = f.read()
         prefix = "接下来请你逐文件分析下面的工程" if index==0 else ""
         i_say = prefix + f'请对下面的程序文件做一个概述文件名是{os.path.relpath(fp, project_folder)}，文件代码是 ```{file_content}```'

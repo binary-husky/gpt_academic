@@ -8,7 +8,7 @@ def 解析Paper(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbo
     import time, glob, os
     print('begin analysis on:', file_manifest)
     for index, fp in enumerate(file_manifest):
-        with open(fp, 'r', encoding='utf-8') as f:
+        with open(fp, 'r', encoding='utf-8', errors='replace') as f:
             file_content = f.read()
 
         prefix = "接下来请你逐文件分析下面的论文文件，概括其内容" if index==0 else ""

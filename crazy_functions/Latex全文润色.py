@@ -45,7 +45,7 @@ def 多文件润色(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
     pfg = PaperFileGroup()
 
     for index, fp in enumerate(file_manifest):
-        with open(fp, 'r', encoding='utf-8') as f:
+        with open(fp, 'r', encoding='utf-8', errors='replace') as f:
             file_content = f.read()
             # 定义注释的正则表达式
             comment_pattern = r'%.*'

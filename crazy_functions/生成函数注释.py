@@ -7,7 +7,7 @@ def 生成函数注释(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
     import time, os
     print('begin analysis on:', file_manifest)
     for index, fp in enumerate(file_manifest):
-        with open(fp, 'r', encoding='utf-8') as f:
+        with open(fp, 'r', encoding='utf-8', errors='replace') as f:
             file_content = f.read()
 
         i_say = f'请对下面的程序文件做一个概述，并对文件中的所有函数生成注释，使用markdown表格输出结果，文件名是{os.path.relpath(fp, project_folder)}，文件内容是 ```{file_content}```'
