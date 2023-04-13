@@ -32,13 +32,11 @@ Latex全文翻译、润色 | [函数插件] 一键翻译或润色latex论文
 chat分析报告生成 | [函数插件] 运行后自动生成总结汇报
 [arxiv小助手](https://www.bilibili.com/video/BV1LM4y1279X) | [函数插件] 输入arxiv文章url即可一键翻译摘要+下载PDF
 [PDF论文全文翻译功能](https://www.bilibili.com/video/BV1KT411x7Wn) | [函数插件] PDF论文提取题目&摘要+翻译全文（多线程）
-[谷歌学术统合小助手](https://www.bilibili.com/video/BV19L411U7ia) (Version>=2.45) | [函数插件] 给定任意谷歌学术搜索页面URL，让gpt帮你选择有趣的文章
-公式显示 | 可以同时显示公式的tex形式和渲染形式
-图片显示 | 可以在markdown中显示图片
+[谷歌学术统合小助手](https://www.bilibili.com/video/BV19L411U7ia) | [函数插件] 给定任意谷歌学术搜索页面URL，让gpt帮你选择有趣的文章
+公式/图片/表格显示 | 可以同时显示公式的tex形式和渲染形式，支持公式、代码高亮
 多线程函数插件支持 | 支持多线调用chatgpt，一键处理海量文本或程序
-支持GPT输出的markdown表格 | 可以输出支持GPT的markdown表格
 启动暗色gradio[主题](https://github.com/binary-husky/chatgpt_academic/issues/173) | 在浏览器url后面添加```/?__dark-theme=true```可以切换dark主题
-[多LLM模型](https://www.bilibili.com/video/BV1EM411K7VH/)混合支持（[v3.0分支](https://github.com/binary-husky/chatgpt_academic/tree/v3.0)测试中） | 同时被ChatGPT和[清华ChatGLM](https://github.com/THUDM/ChatGLM-6B)伺候的感觉一定会很不错吧？
+[多LLM模型](https://www.bilibili.com/video/BV1EM411K7VH/)支持（[v3.0分支](https://github.com/binary-husky/chatgpt_academic/tree/v3.0)） | 同时被ChatGPT和[清华ChatGLM](https://github.com/THUDM/ChatGLM-6B)伺候的感觉一定会很不错吧？
 兼容[TGUI](https://github.com/oobabooga/text-generation-webui)接入更多样的语言模型 | 接入opt-1.3b, galactica-1.3b等模型（[v3.0分支](https://github.com/binary-husky/chatgpt_academic/tree/v3.0)测试中）
 huggingface免科学上网[在线体验](https://huggingface.co/spaces/qingxu98/gpt-academic) | 登陆huggingface后复制[此空间](https://huggingface.co/spaces/qingxu98/gpt-academic)
 …… | ……
