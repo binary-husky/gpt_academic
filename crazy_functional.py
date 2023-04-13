@@ -107,7 +107,7 @@ def get_crazy_functions():
             "Color": "stop",
             "Function": HotReload(总结word文档)
         },
-        "[测试功能] 理解PDF文档内容（通用接口，读取文件输入区）": {
+        "理解PDF文档内容 （模仿ChatPDF）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
