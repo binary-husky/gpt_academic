@@ -10,6 +10,7 @@ def 解析PDF(file_name, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     print('begin analysis on:', file_name)
     file_content, page_one = read_and_clean_pdf_text(file_name)
 
+    ############################## <第零步，从摘要中提取高价值信息，放到history中> ##################################
     # 递归地切割PDF文件，每一块（尽量是完整的一个section，比如introduction，experiment等，必要时再进行切割）
     # 的长度必须小于 2500 个 Token
     TOKEN_LIMIT_PER_FRAGMENT = 2500
