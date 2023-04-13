@@ -387,12 +387,15 @@ def read_and_clean_pdf_text(fp):
     import re
     import numpy as np
     from colorful import print亮黄, print亮绿
-    fc = 0
-    fs = 1
-    fb = 2
-    REMOVE_FOOT_NOTE = True
-    REMOVE_FOOT_FFSIZE_PERCENT = 0.95 
+    fc = 0  # Index 0 文本
+    fs = 1  # Index 1 字体
+    fb = 2  # Index 2 框框
+    REMOVE_FOOT_NOTE = True # 是否丢弃掉 不是正文的内容 （比正文字体小，如参考文献、脚注、图注等）
+    REMOVE_FOOT_FFSIZE_PERCENT = 0.95 # 小于正文的？时，判定为不是正文（有些文章的正文部分字体大小不是100%统一的，有肉眼不可见的小变化）
     def primary_ffsize(l):
+        """
+        提取文本块主字体
+        """
         fsize_statiscs = {}
         for wtf in l['spans']:
             if wtf['size'] not in fsize_statiscs: fsize_statiscs[wtf['size']] = 0
@@ -400,14 +403,18 @@ def read_and_clean_pdf_text(fp):
         return max(fsize_statiscs, key=fsize_statiscs.get)
         
     def ffsize_same(a,b):
+        """
+        提取字体大小是否近似相等
+        """
         return abs((a-b)/max(a,b)) < 0.02
-    # file_content = ""
+
     with fitz.open(fp) as doc:
         meta_txt = []
         meta_font = []
 
         meta_line = []
         meta_span = []
+        ############################## <第 1 步，搜集初始信息> ##################################
         for index, page in enumerate(doc):
             # file_content += page.get_text()
             text_areas = page.get_text("dict")  # 获取页面上的文本信息
@@ -429,7 +436,8 @@ def read_and_clean_pdf_text(fp):
             if index == 0:
                 page_one_meta = [" ".join(["".join([wtf['text'] for wtf in l['spans']]) for l in t['lines']]).replace(
                     '- ', '') for t in text_areas['blocks'] if 'lines' in t]
-        # 获取正文主字体
+                
+        ############################## <第 2 步，获取正文主字体> ##################################
         fsize_statiscs = {}
         for span in meta_span:
             if span[1] not in fsize_statiscs: fsize_statiscs[span[1]] = 0
@@ -438,7 +446,7 @@ def read_and_clean_pdf_text(fp):
         if REMOVE_FOOT_NOTE:
             give_up_fize_threshold = main_fsize * REMOVE_FOOT_FFSIZE_PERCENT
 
-        # 切分和重新整合
+        ############################## <第 3 步，切分和重新整合> ##################################
         mega_sec = []
         sec = []
         for index, line in enumerate(meta_line):
@@ -480,6 +488,7 @@ def read_and_clean_pdf_text(fp):
             finals.append(final)
         meta_txt = finals
 
+        ############################## <第 4 步，乱七八糟的后处理> ##################################
         def 把字符太少的块清除为回车(meta_txt):
             for index, block_txt in enumerate(meta_txt):
                 if len(block_txt) < 100:
@@ -523,6 +532,7 @@ def read_and_clean_pdf_text(fp):
         # 换行 -> 双换行
         meta_txt = meta_txt.replace('\n', '\n\n')
 
+        ############################## <第 5 步，展示分割效果> ##################################
         for f in finals:
             print亮黄(f)
             print亮绿('***************************')
