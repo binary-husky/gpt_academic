@@ -1,9 +1,3 @@
-
-> **Note**
->
-> 紧急：很抱歉2.60版本的一部分代码重构出错，目前2.67及以上版本已经解决，请您及时更新。
->
-
 # ChatGPT 学术优化
 
 **如果喜欢这个项目，请给它一个Star；如果你发明了更好用的快捷键或函数插件，欢迎发issue或者pull requests（dev分支）**
@@ -31,7 +25,7 @@ If you like this project, please give it a Star. If you've come up with more use
 [配置代理服务器](https://www.bilibili.com/video/BV1rc411W7Dr) | 支持配置代理服务器
 模块化设计 | 支持自定义高阶的实验性功能与[函数插件]，插件支持[热更新](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)
 [自我程序剖析](https://www.bilibili.com/video/BV1cj411A7VW) | [函数插件] [一键读懂](https://github.com/binary-husky/chatgpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A)本项目的源代码
-[程序剖析](https://www.bilibili.com/video/BV1cj411A7VW) | [函数插件] 一键可以剖析其他Python/C/C++/Java项目树
+[程序剖析](https://www.bilibili.com/video/BV1cj411A7VW) | [函数插件] 一键可以剖析其他Python/C/C++/Java/Golang/Lua/Rect项目树
 读论文 | [函数插件] 一键解读latex论文全文并生成摘要
 Latex全文翻译、润色 | [函数插件] 一键翻译或润色latex论文
 批量注释生成 | [函数插件] 一键批量生成函数注释
@@ -52,7 +46,7 @@ huggingface免科学上网[在线体验](https://huggingface.co/spaces/qingxu98/
 </div>
 
 <!-- - 新界面（左：master主分支, 右：dev开发前沿） -->
-- 新界面
+- 新界面（修改config.py中的LAYOUT选项即可实现“左右布局”和“上下布局”的切换）
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/230361456-61078362-a966-4eb5-b49e-3c62ef18b860.gif" width="700" >
 </div>
