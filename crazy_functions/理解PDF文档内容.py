@@ -8,11 +8,12 @@ fast_debug = False
 def 解析PDF(file_name, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
     import tiktoken
     print('begin analysis on:', file_name)
-    file_content, page_one = read_and_clean_pdf_text(file_name)
 
-    ############################## <第零步，从摘要中提取高价值信息，放到history中> ##################################
+    ############################## <第 0 步，切割PDF> ##################################
     # 递归地切割PDF文件，每一块（尽量是完整的一个section，比如introduction，experiment等，必要时再进行切割）
     # 的长度必须小于 2500 个 Token
+    file_content, page_one = read_and_clean_pdf_text(file_name) # （尝试）按照章节切割PDF
+
     TOKEN_LIMIT_PER_FRAGMENT = 2500
 
     from .crazy_utils import breakdown_txt_to_satisfy_token_limit_for_pdf
@@ -26,11 +27,11 @@ def 解析PDF(file_name, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     # 为了更好的效果，我们剥离Introduction之后的部分（如果有）
     paper_meta = page_one_fragments[0].split('introduction')[0].split('Introduction')[0].split('INTRODUCTION')[0]
     
-    ############################## <第一步，从摘要中提取高价值信息，放到history中> ##################################
+    ############################## <第 1 步，从摘要中提取高价值信息，放到history中> ##################################
     final_results = []
     final_results.append(paper_meta)
 
-    ############################## <第二步，迭代地历遍整个文章，提取精炼信息> ##################################
+    ############################## <第 2 步，迭代地历遍整个文章，提取精炼信息> ##################################
     i_say_show_user = f'首先你在英文语境下通读整篇论文。'; gpt_say = "[Local Message] 收到。"           # 用户提示
     chatbot.append([i_say_show_user, gpt_say]); yield from update_ui(chatbot=chatbot, history=[])    # 更新UI
 
@@ -51,14 +52,14 @@ def 解析PDF(file_name, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
         iteration_results.append(gpt_say)
         last_iteration_result = gpt_say
 
-    ############################## <第三步，整理history> ##################################
+    ############################## <第 3 步，整理history> ##################################
     final_results.extend(iteration_results)
     final_results.append(f'接下来，你是一名专业的学术教授，利用以上信息，使用中文回答我的问题。')
     # 接下来两句话只显示在界面上，不起实际作用
     i_say_show_user = f'接下来，你是一名专业的学术教授，利用以上信息，使用中文回答我的问题。'; gpt_say = "[Local Message] 收到。"
     chatbot.append([i_say_show_user, gpt_say])
 
-    ############################## <第四步，设置一个token上限，防止回答时Token溢出> ##################################
+    ############################## <第 4 步，设置一个token上限，防止回答时Token溢出> ##################################
     from .crazy_utils import input_clipping
     _, final_results = input_clipping("", final_results, max_token_limit=3200)
     yield from update_ui(chatbot=chatbot, history=final_results) # 注意这里的历史记录被替代了

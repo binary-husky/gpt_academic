@@ -16,7 +16,7 @@ def get_crazy_functions():
     from crazy_functions.高级功能函数模板 import 高阶功能模板函数
     from crazy_functions.代码重写为全英文_多线程 import 全项目切换英文
     from crazy_functions.Latex全文润色 import Latex英文润色
-
+    from crazy_functions.解析项目源代码 import 解析一个Lua项目
     function_plugins = {
 
         "解析整个Python项目": {
@@ -46,6 +46,11 @@ def get_crazy_functions():
             "Color": "stop",  # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(解析一个Rect项目)
+        },
+        "解析整个Lua项目": {
+            "Color": "stop",    # 按钮颜色
+            "AsButton": False,  # 加入下拉菜单中
+            "Function": HotReload(解析一个Lua项目)
         },
         "读Tex论文写摘要": {
             "Color": "stop",    # 按钮颜色
@@ -156,14 +161,7 @@ def get_crazy_functions():
     except Exception as err:
         print(f'[下载arxiv论文并翻译摘要] 插件导入失败 {str(err)}')
         
-    from crazy_functions.解析项目源代码 import 解析一个Lua项目
-    function_plugins.update({
-        "解析整个Lua项目": {
-            "Color": "stop",    # 按钮颜色
-            "AsButton": False,  # 加入下拉菜单中
-            "Function": HotReload(解析一个Lua项目)
-        },
-    })        
+
 
     ###################### 第n组插件 ###########################
     return function_plugins
