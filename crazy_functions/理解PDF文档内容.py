@@ -1,142 +1,66 @@
 from toolbox import update_ui
 from toolbox import CatchException, report_execption
-import re
-import unicodedata
+from .crazy_utils import read_and_clean_pdf_text
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 fast_debug = False
 
-def is_paragraph_break(match):
-    """
-    根据给定的匹配结果来判断换行符是否表示段落分隔。
-    如果换行符前为句子结束标志（句号，感叹号，问号），且下一个字符为大写字母，则换行符更有可能表示段落分隔。
-    也可以根据之前的内容长度来判断段落是否已经足够长。
-    """
-    prev_char, next_char = match.groups()
-
-    # 句子结束标志
-    sentence_endings = ".!?"
-
-    # 设定一个最小段落长度阈值
-    min_paragraph_length = 140
-
-    if prev_char in sentence_endings and next_char.isupper() and len(match.string[:match.start(1)]) > min_paragraph_length:
-        return "\n\n" 
-    else:
-        return " "
-
-def normalize_text(text):
-    """
-    通过把连字（ligatures）等文本特殊符号转换为其基本形式来对文本进行归一化处理。
-    例如，将连字 "fi" 转换为 "f" 和 "i"。
-    """
-    # 对文本进行归一化处理，分解连字
-    normalized_text = unicodedata.normalize("NFKD", text)
-
-    # 替换其他特殊字符
-    cleaned_text = re.sub(r'[^\x00-\x7F]+', '', normalized_text)
-
-    return cleaned_text
-
-def clean_text(raw_text):
-    """
-    对从 PDF 提取出的原始文本进行清洗和格式化处理。
-    1. 对原始文本进行归一化处理。
-    2. 替换跨行的连词，例如 “Espe-\ncially” 转换为 “Especially”。
-    3. 根据 heuristic 规则判断换行符是否是段落分隔，并相应地进行替换。
-    """
-    # 对文本进行归一化处理
-    normalized_text = normalize_text(raw_text)
-
-    # 替换跨行的连词
-    text = re.sub(r'(\w+-\n\w+)', lambda m: m.group(1).replace('-\n', ''), normalized_text)
-
-    # 根据前后相邻字符的特点，找到原文本中的换行符
-    newlines = re.compile(r'(\S)\n(\S)')
-
-    # 根据 heuristic 规则，用空格或段落分隔符替换原换行符
-    final_text = re.sub(newlines, lambda m: m.group(1) + is_paragraph_break(m) + m.group(2), text)
-
-    return final_text.strip()
 
 def 解析PDF(file_name, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
-    import time, glob, os, fitz
+    import tiktoken
     print('begin analysis on:', file_name)
+    file_content, page_one = read_and_clean_pdf_text(file_name)
 
-    with fitz.open(file_name) as doc:
-        file_content = ""
-        for page in doc:
-            file_content += page.get_text()
-        file_content = clean_text(file_content)
-        # print(file_content)
-    split_number = 10000
-    split_group = (len(file_content)//split_number)+1
-    for i in range(0,split_group):
-        if i==0:
-            prefix = "接下来请你仔细分析下面的论文，学习里面的内容（专业术语、公式、数学概念）.并且注意：由于论文内容较多，将分批次发送，每次发送完之后，你只需要回答“接受完成”"
-            i_say = prefix + f'文件名是{file_name}，文章内容第{i+1}部分是 ```{file_content[i*split_number:(i+1)*split_number]}```'
-            i_say_show_user = f'文件名是：\n{file_name},\n由于论文内容过长，将分批请求（共{len(file_content)}字符，将分为{split_group}批，每批{split_number}字符）。\n当前发送{i+1}/{split_group}部分'
-        elif i==split_group-1:
-            i_say = f'你只需要回答“所有论文接受完成，请进行下一步”。文章内容第{i+1}/{split_group}部分是 ```{file_content[i*split_number:]}```'
-            i_say_show_user = f'当前发送{i+1}/{split_group}部分'
-        else:
-            i_say = f'你只需要回答“接受完成”。文章内容第{i+1}/{split_group}部分是 ```{file_content[i*split_number:(i+1)*split_number]}```'
-            i_say_show_user = f'当前发送{i+1}/{split_group}部分'
-        chatbot.append((i_say_show_user, "[Local Message] waiting gpt response."))
-        gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(i_say, i_say_show_user, llm_kwargs, chatbot, history=[], sys_prompt="")   # 带超时倒计时
-        while "完成" not in gpt_say:
-            i_say = f'你只需要回答“接受完成”。文章内容第{i+1}/{split_group}部分是 ```{file_content[i*split_number:(i+1)*split_number]}```'
-            i_say_show_user = f'出现error，重新发送{i+1}/{split_group}部分'
-            gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(i_say, i_say_show_user, llm_kwargs, chatbot, history=[], sys_prompt="")   # 带超时倒计时
-            time.sleep(1)
-        chatbot[-1] = (i_say_show_user, gpt_say)
-        history.append(i_say_show_user); history.append(gpt_say)
-        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-        time.sleep(2)
+    # 递归地切割PDF文件，每一块（尽量是完整的一个section，比如introduction，experiment等，必要时再进行切割）
+    # 的长度必须小于 2500 个 Token
+    TOKEN_LIMIT_PER_FRAGMENT = 2500
 
-    i_say = f'接下来，请你扮演一名专业的学术教授，利用你的所有知识并且结合这篇文章，回答我的问题。（请牢记：1.直到我说“退出”，你才能结束任务；2.所有问题需要紧密围绕文章内容;3.如果有公式，请使用tex渲染)'
-    chatbot.append((i_say, "[Local Message] waiting gpt response."))
-    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+    from .crazy_utils import breakdown_txt_to_satisfy_token_limit_for_pdf
+    from toolbox import get_conf
+    enc = tiktoken.encoding_for_model(*get_conf('LLM_MODEL'))
+    def get_token_num(txt): return len(enc.encode(txt))
+    paper_fragments = breakdown_txt_to_satisfy_token_limit_for_pdf(
+        txt=file_content,  get_token_fn=get_token_num, limit=TOKEN_LIMIT_PER_FRAGMENT)
+    page_one_fragments = breakdown_txt_to_satisfy_token_limit_for_pdf(
+        txt=str(page_one), get_token_fn=get_token_num, limit=TOKEN_LIMIT_PER_FRAGMENT//4)
+    # 为了更好的效果，我们剥离Introduction之后的部分（如果有）
+    paper_meta = page_one_fragments[0].split('introduction')[0].split('Introduction')[0].split('INTRODUCTION')[0]
+    
+    ############################## <第一步，从摘要中提取高价值信息，放到history中> ##################################
+    final_results = []
+    final_results.append(paper_meta)
 
-    # ** gpt request **
-    gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(i_say, i_say, llm_kwargs, chatbot, history=history, sys_prompt="")   # 带超时倒计时
-    chatbot[-1] = (i_say, gpt_say)
-    history.append(i_say); history.append(gpt_say)
-    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+    ############################## <第二步，迭代地历遍整个文章，提取精炼信息> ##################################
+    i_say_show_user = f'首先你在英文语境下通读整篇论文。'; gpt_say = "[Local Message] 收到。"           # 用户提示
+    chatbot.append([i_say_show_user, gpt_say]); yield from update_ui(chatbot=chatbot, history=[])    # 更新UI
 
+    iteration_results = []
+    last_iteration_result = paper_meta  # 初始值是摘要
+    MAX_WORD_TOTAL = 4096
+    n_fragment = len(paper_fragments)
+    if n_fragment >= 20: print('文章极长，不能达到预期效果')
+    for i in range(n_fragment):
+        NUM_OF_WORD = MAX_WORD_TOTAL // n_fragment
+        i_say = f"Read this section, recapitulate the content of this section with less than {NUM_OF_WORD} words: {paper_fragments[i]}"
+        i_say_show_user = f"[{i+1}/{n_fragment}] Read this section, recapitulate the content of this section with less than {NUM_OF_WORD} words: {paper_fragments[i][:200]}"
+        gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(i_say, i_say_show_user,  # i_say=真正给chatgpt的提问， i_say_show_user=给用户看的提问
+                                                                           llm_kwargs, chatbot, 
+                                                                           history=["The main idea of the previous section is?", last_iteration_result], # 迭代上一次的结果
+                                                                           sys_prompt="Extract the main idea of this section."  # 提示
+                                                                        ) 
+        iteration_results.append(gpt_say)
+        last_iteration_result = gpt_say
 
-@CatchException
-def 理解PDF文档内容(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    import glob, os
+    ############################## <第三步，整理history> ##################################
+    final_results.extend(iteration_results)
+    final_results.append(f'接下来，你是一名专业的学术教授，利用以上信息，使用中文回答我的问题。')
+    # 接下来两句话只显示在界面上，不起实际作用
+    i_say_show_user = f'接下来，你是一名专业的学术教授，利用以上信息，使用中文回答我的问题。'; gpt_say = "[Local Message] 收到。"
+    chatbot.append([i_say_show_user, gpt_say])
 
-    # 基本信息：功能、贡献者
-    chatbot.append([
-        "函数插件功能？",
-        "理解PDF论文内容，并且将结合上下文内容，进行学术解答。函数插件贡献者: Hanzoe。"])
-    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-
-    import tkinter as tk
-    from tkinter import filedialog
-
-    root = tk.Tk()
-    root.withdraw()
-    txt = filedialog.askopenfilename()
-
-    # 尝试导入依赖，如果缺少依赖，则给出安装建议
-    try:
-        import fitz
-    except:
-        report_execption(chatbot, history, 
-            a = f"解析项目: {txt}", 
-            b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pymupdf```。")
-        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-        return
-
-    # 清空历史，以免输入溢出
-    history = []
-
-    # 开始正式执行任务
-    yield from 解析PDF(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt)
-
+    ############################## <第四步，设置一个token上限，防止回答时Token溢出> ##################################
+    from .crazy_utils import input_clipping
+    _, final_results = input_clipping("", final_results, max_token_limit=3200)
+    yield from update_ui(chatbot=chatbot, history=final_results) # 注意这里的历史记录被替代了
 
 
 @CatchException
@@ -146,7 +70,7 @@ def 理解PDF文档内容标准文件输入(txt, llm_kwargs, plugin_kwargs, chat
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
-        "理解PDF论文内容，并且将结合上下文内容，进行学术解答。函数插件贡献者: Hanzoe。"])
+        "理解PDF论文内容，并且将结合上下文内容，进行学术解答。函数插件贡献者: Hanzoe, binary-husky"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
