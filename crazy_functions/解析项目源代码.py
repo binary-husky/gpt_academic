@@ -12,7 +12,7 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
     sys_prompt_array = []
     report_part_1 = []
     
-    assert len(file_manifest) <= 1024, "源文件太多, 请缩减输入文件的数量, 或者删除此行并拆分file_manifest以保证结果能被分批存储。"
+    assert len(file_manifest) <= 1024, "源文件太多（超过1024个）, 请缩减输入文件的数量。或者，您也可以选择删除此行警告，并修改代码拆分file_manifest列表，从而实现分批次处理。"
     ############################## <第一步，逐个文件分析，多线程> ##################################
     for index, fp in enumerate(file_manifest):
         with open(fp, 'r', encoding='utf-8', errors='replace') as f:
