@@ -100,10 +100,13 @@ def request_gpt_model_in_new_thread_with_ui_alive(
             except:
                 # 【第三种情况】：其他错误：重试几次
                 tb_str = '```\n' + traceback.format_exc() + '```'
+                print(tb_str)
                 mutable[0] += f"[Local Message] 警告，在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
-                if retry_op > 0: 
+                if retry_op > 0:
                     retry_op -= 1
                     mutable[0] += f"[Local Message] 重试中 {retry_times_at_unknown_error-retry_op}/{retry_times_at_unknown_error}：\n\n"
+                    if "Rate limit reached" in tb_str:
+                        time.sleep(30)
                     time.sleep(5)
                     continue # 返回重试
                 else:
