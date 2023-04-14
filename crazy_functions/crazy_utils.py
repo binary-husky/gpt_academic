@@ -65,7 +65,6 @@ def request_gpt_model_in_new_thread_with_ui_alive(
     from request_llm.bridge_chatgpt import predict_no_ui_long_connection
     # 用户反馈
     chatbot.append([inputs_show_user, ""])
-    msg = '正常'
     yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
     executor = ThreadPoolExecutor(max_workers=16)
     mutable = ["", time.time()]
@@ -73,6 +72,9 @@ def request_gpt_model_in_new_thread_with_ui_alive(
         retry_op = retry_times_at_unknown_error
         exceeded_cnt = 0
         while True:
+            # watchdog error
+            if len(mutable) >= 2 and (time.time()-mutable[1]) > 5: 
+                raise RuntimeError("检测到程序终止。")
             try:
                 # 【第一种情况】：顺利完成
                 result = predict_no_ui_long_connection(
@@ -109,6 +111,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
                     time.sleep(5)
                     return mutable[0] # 放弃
 
+    # 提交任务
     future = executor.submit(_req_gpt, inputs, history, sys_prompt)
     while True:
         # yield一次以刷新前端页面
@@ -169,17 +172,20 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     n_frag = len(inputs_array)
     # 用户反馈
     chatbot.append(["请开始多线程操作。", ""])
-    msg = '正常'
     yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
-    # 异步原子
+    # 跨线程传递
     mutable = [["", time.time(), "等待中"] for _ in range(n_frag)]
 
+    # 
     def _req_gpt(index, inputs, history, sys_prompt):
         gpt_say = ""
         retry_op = retry_times_at_unknown_error
         exceeded_cnt = 0
         mutable[index][2] = "执行中"
         while True:
+            # watchdog error
+            if len(mutable[index]) >= 2 and (time.time()-mutable[index][1]) > 5: 
+                raise RuntimeError("检测到程序终止。")
             try:
                 # 【第一种情况】：顺利完成
                 # time.sleep(10); raise RuntimeError("测试")
@@ -241,7 +247,6 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
             break
         # 更好的UI视觉效果
         observe_win = []
-        # print([mutable[thread_index][2] for thread_index, _ in enumerate(worker_done)])
         # 每个线程都要“喂狗”（看门狗）
         for thread_index, _ in enumerate(worker_done):
             mutable[thread_index][1] = time.time()
@@ -251,47 +256,28 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                 replace('\n', '').replace('```', '...').replace(
                     ' ', '.').replace('<br/>', '.....').replace('$', '.')+"`... ]"
             observe_win.append(print_something_really_funny)
+        # 在前端打印些好玩的东西
         stat_str = ''.join([f'`{mutable[thread_index][2]}`: {obs}\n\n' 
                             if not done else f'`{mutable[thread_index][2]}`\n\n' 
                             for thread_index, done, obs in zip(range(len(worker_done)), worker_done, observe_win)])
+        # 在前端打印些好玩的东西
         chatbot[-1] = [chatbot[-1][0], f'多线程操作已经开始，完成情况: \n\n{stat_str}' + ''.join(['.']*(cnt % 10+1))]
-        msg = "正常"
         yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
+    
     # 异步任务结束
     gpt_response_collection = []
     for inputs_show_user, f in zip(inputs_show_user_array, futures):
         gpt_res = f.result()
         gpt_response_collection.extend([inputs_show_user, gpt_res])
-
+    
+    # 是否在结束时，在界面上显示结果
     if show_user_at_complete:
         for inputs_show_user, f in zip(inputs_show_user_array, futures):
             gpt_res = f.result()
             chatbot.append([inputs_show_user, gpt_res])
             yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
-            time.sleep(1)
+            time.sleep(0.3)
     return gpt_response_collection
-
-
-def WithRetry(f):
-    """
-        装饰器函数，用于自动重试。
-    """
-    def decorated(retry, res_when_fail, *args, **kwargs):
-        assert retry >= 0
-        while True:
-            try:
-                res = yield from f(*args, **kwargs)
-                return res
-            except:
-                retry -= 1
-                if retry<0:
-                    print("达到最大重试次数")
-                    break
-                else:
-                    print("重试中……")
-                    continue
-        return res_when_fail
-    return decorated
 
 
 def breakdown_txt_to_satisfy_token_limit(txt, get_token_fn, limit):
