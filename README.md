@@ -43,17 +43,16 @@ huggingface免科学上网[在线体验](https://huggingface.co/spaces/qingxu98/
 
 </div>
 
-<!-- - 新界面（左：master主分支, 右：dev开发前沿） -->
+
 - 新界面（修改config.py中的LAYOUT选项即可实现“左右布局”和“上下布局”的切换）
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/230361456-61078362-a966-4eb5-b49e-3c62ef18b860.gif" width="700" >
 </div>
 
 
-
 - 所有按钮都通过读取functional.py动态生成，可随意加自定义功能，解放粘贴板
 <div align="center">
-<img src="img/公式.gif" width="700" >
+<img src="https://user-images.githubusercontent.com/96192199/231975334-b4788e91-4887-412f-8b43-2b9c5f41d248.gif" width="700" >
 </div>
 
 - 润色/纠错
@@ -61,17 +60,10 @@ huggingface免科学上网[在线体验](https://huggingface.co/spaces/qingxu98/
 <img src="img/润色.gif" width="700" >
 </div>
 
-
-- 支持GPT输出的markdown表格
-<div align="center">
-<img src="img/demo2.jpg" width="500" >
-</div>
-
 - 如果输出包含公式，会同时以tex形式和渲染形式显示，方便复制和阅读
 <div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/231975334-b4788e91-4887-412f-8b43-2b9c5f41d248.gif" width="700" >
+<img src="https://user-images.githubusercontent.com/96192199/230598842-1d7fcddd-815d-40ee-af60-baf488a199df.png" width="700" >
 </div>
-
 
 - 懒得看项目代码？整个工程直接给chatgpt炫嘴里
 <div align="center">
@@ -79,7 +71,6 @@ huggingface免科学上网[在线体验](https://huggingface.co/spaces/qingxu98/
 </div>
 
 - 多种大语言模型混合调用（[v3.0分支](https://github.com/binary-husky/chatgpt_academic/tree/v3.0)测试中）
-
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/231222778-34776885-a7f0-4f2c-b5f4-7cc2ef3ecb58.png" width="700" >
 </div>
