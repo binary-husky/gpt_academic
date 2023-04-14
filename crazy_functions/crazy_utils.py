@@ -1,10 +1,9 @@
 import traceback
-from toolbox import update_ui
+from toolbox import update_ui, get_conf
 
 def input_clipping(inputs, history, max_token_limit):
     import tiktoken
     import numpy as np
-    from toolbox import get_conf
     enc = tiktoken.encoding_for_model(*get_conf('LLM_MODEL'))
     def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))
 
@@ -132,7 +131,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
 def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         inputs_array, inputs_show_user_array, llm_kwargs, 
         chatbot, history_array, sys_prompt_array, 
-        refresh_interval=0.2, max_workers=5, scroller_max_len=30,
+        refresh_interval=0.2, max_workers=-1, scroller_max_len=30,
         handle_token_exceed=True, show_user_at_complete=False,
         retry_times_at_unknown_error=2,
         ):
@@ -153,7 +152,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         history_array (list): List of chat history （历史对话输入，双层列表，第一层列表是子任务分解，第二层列表是对话历史）
         sys_prompt_array (list): List of system prompts （系统输入，列表，用于输入给GPT的前提提示，比如你是翻译官怎样怎样）
         refresh_interval (float, optional): Refresh interval for UI (default: 0.2) （刷新时间间隔频率，建议低于1，不可高于3，仅仅服务于视觉效果）
-        max_workers (int, optional): Maximum number of threads (default: 10) （最大线程数，如果子任务非常多，需要用此选项防止高频地请求openai导致错误）
+        max_workers (int, optional): Maximum number of threads (default: see config.py) （最大线程数，如果子任务非常多，需要用此选项防止高频地请求openai导致错误）
         scroller_max_len (int, optional): Maximum length for scroller (default: 30)（数据流的显示最后收到的多少个字符，仅仅服务于视觉效果）
         handle_token_exceed (bool, optional): （是否在输入过长时，自动缩减文本）
         handle_token_exceed：是否自动处理token溢出的情况，如果选择自动处理，则会在溢出时暴力截断，默认开启
@@ -168,6 +167,10 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     from request_llm.bridge_chatgpt import predict_no_ui_long_connection
     assert len(inputs_array) == len(history_array)
     assert len(inputs_array) == len(sys_prompt_array)
+    if max_workers == -1: # 读取配置文件
+        try: max_workers, = get_conf('DEFAULT_WORKER_NUM')
+        except: max_workers = 8
+        if max_workers <= 0 or max_workers >= 20: max_workers = 8
     executor = ThreadPoolExecutor(max_workers=max_workers)
     n_frag = len(inputs_array)
     # 用户反馈
@@ -176,7 +179,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     # 跨线程传递
     mutable = [["", time.time(), "等待中"] for _ in range(n_frag)]
 
-    # 
+    # 子线程任务
     def _req_gpt(index, inputs, history, sys_prompt):
         gpt_say = ""
         retry_op = retry_times_at_unknown_error
