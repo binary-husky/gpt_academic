@@ -104,7 +104,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
                 mutable[0] += f"[Local Message] 警告，在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                 if retry_op > 0:
                     retry_op -= 1
-                    mutable[0] += f"[Local Message] 重试中 {retry_times_at_unknown_error-retry_op}/{retry_times_at_unknown_error}：\n\n"
+                    mutable[0] += f"[Local Message] 重试中，请稍等 {retry_times_at_unknown_error-retry_op}/{retry_times_at_unknown_error}：\n\n"
                     if "Rate limit reached" in tb_str:
                         time.sleep(30)
                     time.sleep(5)
@@ -312,7 +312,6 @@ def breakdown_txt_to_satisfy_token_limit(txt, get_token_fn, limit):
                 if get_token_fn(prev) < limit:
                     break
             if cnt == 0:
-                print('what the fuck ?')
                 raise RuntimeError("存在一行极长的文本！")
             # print(len(post))
             # 列表递归接龙
@@ -325,8 +324,18 @@ def breakdown_txt_to_satisfy_token_limit(txt, get_token_fn, limit):
         return cut(txt, must_break_at_empty_line=False)
 
 
+def force_breakdown(txt, limit, get_token_fn):
+    """
+    当无法用标点、空行分割时，我们用最暴力的方法切割
+    """
+    for i in reversed(range(len(txt))):
+        if get_token_fn(txt[:i]) < limit:
+            return txt[:i], txt[i:]
+    return "Tiktoken未知错误", "Tiktoken未知错误"
+
 def breakdown_txt_to_satisfy_token_limit_for_pdf(txt, get_token_fn, limit):
-    def cut(txt_tocut, must_break_at_empty_line):  # 递归
+    # 递归
+    def cut(txt_tocut, must_break_at_empty_line, break_anyway=False):  
         if get_token_fn(txt_tocut) <= limit:
             return [txt_tocut]
         else:
@@ -338,28 +347,40 @@ def breakdown_txt_to_satisfy_token_limit_for_pdf(txt, get_token_fn, limit):
                 if must_break_at_empty_line:
                     if lines[cnt] != "":
                         continue
-                print(cnt)
                 prev = "\n".join(lines[:cnt])
                 post = "\n".join(lines[cnt:])
                 if get_token_fn(prev) < limit:
                     break
             if cnt == 0:
-                # print('what the fuck ? 存在一行极长的文本！')
-                raise RuntimeError("存在一行极长的文本！")
+                if break_anyway:
+                    prev, post = force_breakdown(txt_tocut, limit, get_token_fn)
+                else:
+                    raise RuntimeError(f"存在一行极长的文本！{txt_tocut}")
             # print(len(post))
             # 列表递归接龙
             result = [prev]
-            result.extend(cut(post, must_break_at_empty_line))
+            result.extend(cut(post, must_break_at_empty_line, break_anyway=break_anyway))
             return result
     try:
+        # 第1次尝试，将双空行（\n\n）作为切分点
         return cut(txt, must_break_at_empty_line=True)
     except RuntimeError:
         try:
+            # 第2次尝试，将单空行（\n）作为切分点
             return cut(txt, must_break_at_empty_line=False)
         except RuntimeError:
-            # 这个中文的句号是故意的，作为一个标识而存在
-            res = cut(txt.replace('.', '。\n'), must_break_at_empty_line=False)
-            return [r.replace('。\n', '.') for r in res]
+            try:
+                # 第3次尝试，将英文句号（.）作为切分点
+                res = cut(txt.replace('.', '。\n'), must_break_at_empty_line=False) # 这个中文的句号是故意的，作为一个标识而存在
+                return [r.replace('。\n', '.') for r in res]
+            except RuntimeError as e:
+                try:
+                    # 第4次尝试，将中文句号（。）作为切分点
+                    res = cut(txt.replace('。', '。。\n'), must_break_at_empty_line=False)
+                    return [r.replace('。。\n', '。') for r in res]
+                except RuntimeError as e:
+                    # 第5次尝试，没办法了，随便切一下敷衍吧
+                    return cut(txt, must_break_at_empty_line=False, break_anyway=True)
 
 
 
