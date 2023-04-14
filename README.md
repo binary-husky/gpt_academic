@@ -55,7 +55,7 @@ huggingface免科学上网[在线体验](https://huggingface.co/spaces/qingxu98/
 
 - 润色/纠错
 <div align="center">
-<img src="img/润色.gif" width="700" >
+<img src="https://user-images.githubusercontent.com/96192199/231980294-f374bdcb-3309-4560-b424-38ef39f04ebd.gif" width="700" >
 </div>
 
 - 如果输出包含公式，会同时以tex形式和渲染形式显示，方便复制和阅读
