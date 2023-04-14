@@ -42,22 +42,6 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
     chatbot.append(("完成？", "逐个文件分析已完成。" + res + "\n\n正在开始汇总。"))
     yield from update_ui(chatbot=chatbot, history=history_to_return) # 刷新界面
 
-    ############################## <存储中间数据进行调试> ##################################
-        
-    # def objdump(obj):
-    #     import pickle
-    #     with open('objdump.tmp', 'wb+') as f:
-    #         pickle.dump(obj, f)
-    #     return
-
-    # def objload():
-    #     import pickle, os
-    #     if not os.path.exists('objdump.tmp'): 
-    #         return
-    #     with open('objdump.tmp', 'rb') as f:
-    #         return pickle.load(f)
-    # objdump([report_part_1, gpt_response_collection, history_to_return, file_manifest, project_folder, fp, llm_kwargs, chatbot])
-    
     ############################## <第二步，综合，单线程，分组+迭代处理> ##################################
     batchsize = 16  # 10个文件为一组
     report_part_2 = []
