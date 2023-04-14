@@ -62,7 +62,7 @@ def 全项目切换英文(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys_
     import tiktoken
     from toolbox import get_conf
     enc = tiktoken.encoding_for_model(*get_conf('LLM_MODEL'))
-    def get_token_fn(txt): return len(enc.encode(txt))
+    def get_token_fn(txt): return len(enc.encode(txt, disallowed_special=()))
 
 
     # 第6步：任务函数

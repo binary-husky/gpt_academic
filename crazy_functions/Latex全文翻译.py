@@ -14,7 +14,7 @@ class PaperFileGroup():
         import tiktoken
         from toolbox import get_conf
         enc = tiktoken.encoding_for_model(*get_conf('LLM_MODEL'))
-        def get_token_num(txt): return len(enc.encode(txt))
+        def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))
         self.get_token_num = get_token_num
 
     def run_file_split(self, max_token_limit=1900):

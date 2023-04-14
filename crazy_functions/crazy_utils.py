@@ -6,7 +6,7 @@ def input_clipping(inputs, history, max_token_limit):
     import numpy as np
     from toolbox import get_conf
     enc = tiktoken.encoding_for_model(*get_conf('LLM_MODEL'))
-    def get_token_num(txt): return len(enc.encode(txt))
+    def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))
 
     mode = 'input-and-history'
     # 当 输入部分的token占比 小于 全文的一半时，只裁剪历史
@@ -23,7 +23,7 @@ def input_clipping(inputs, history, max_token_limit):
         
     while n_token > max_token_limit:
         where = np.argmax(everything_token)
-        encoded = enc.encode(everything[where])
+        encoded = enc.encode(everything[where], disallowed_special=())
         clipped_encoded = encoded[:len(encoded)-delta]
         everything[where] = enc.decode(clipped_encoded)[:-1]    # -1 to remove the may-be illegal char
         everything_token[where] = get_token_num(everything[where])
