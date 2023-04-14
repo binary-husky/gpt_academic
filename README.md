@@ -69,9 +69,8 @@ huggingface免科学上网[在线体验](https://huggingface.co/spaces/qingxu98/
 
 - 如果输出包含公式，会同时以tex形式和渲染形式显示，方便复制和阅读
 <div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/230598842-1d7fcddd-815d-40ee-af60-baf488a199df.png" width="700" >
+<img src="https://user-images.githubusercontent.com/96192199/231975334-b4788e91-4887-412f-8b43-2b9c5f41d248.gif" width="700" >
 </div>
-
 
 
 - 懒得看项目代码？整个工程直接给chatgpt炫嘴里
