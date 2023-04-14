@@ -55,6 +55,7 @@ coverage.xml
 *.pot
 github
 .github
+.idea/
 TEMP
 TRASH
 
@@ -132,6 +133,7 @@ dmypy.json
 .pyre/
 
 .vscode
+.idea
 
 history
 ssr_conf
