@@ -98,7 +98,7 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
             history_array=[[paper_meta] for _ in paper_fragments],
             sys_prompt_array=[
                 "请你作为一个学术翻译，负责把学术论文的片段准确翻译成中文。" for _ in paper_fragments],
-            max_workers=16  # OpenAI所允许的最大并行过载
+            max_workers=5  # OpenAI所允许的最大并行过载
         )
 
         # 整理报告的格式
