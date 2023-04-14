@@ -19,6 +19,10 @@ if USE_PROXY:
 else:
     proxies = None
 
+# 多线程函数插件中，默认允许多少路线程同时访问OpenAI。Free trial users的限制是每分钟3次，提高限制请查询：
+# https://platform.openai.com/docs/guides/rate-limits/overview
+DEFAULT_WORKER_NUM = 3
+
 
 # [step 3]>> 以下配置可以优化体验，但大部分场合下并不需要修改
 # 对话窗的高度
@@ -32,9 +36,6 @@ LAYOUT = "LEFT-RIGHT"  # "LEFT-RIGHT"（左右布局） # "TOP-DOWN"（上下布
 
 # 发送请求到OpenAI后，等待多久判定为超时
 TIMEOUT_SECONDS = 30
-
-# 多线程函数插件中，默认允许多少路线程同时访问OpenAI。OpenAI的限制是不能超过20
-DEFAULT_WORKER_NUM = 8
 
 # 网页的端口, -1代表随机端口
 WEB_PORT = -1

@@ -221,13 +221,21 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
             except:
                 # 【第三种情况】：其他错误
                 tb_str = '```\n' + traceback.format_exc() + '```'
+                print(tb_str)
                 gpt_say += f"[Local Message] 警告，线程{index}在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                 if len(mutable[index][0]) > 0: gpt_say += "此线程失败前收到的回答：\n\n" + mutable[index][0]
                 if retry_op > 0: 
                     retry_op -= 1
                     wait = random.randint(5, 20)
-                    for i in range(wait):# 也许等待十几秒后，情况会好转
-                        mutable[index][2] = f"等待重试 {wait-i}"; time.sleep(1)
+                    if "Rate limit reached" in tb_str: 
+                        wait = wait * 5
+                        fail_info = "OpenAI请求速率限制 "
+                    else:
+                        fail_info = ""
+                    # 也许等待十几秒后，情况会好转
+                    for i in range(wait):
+                        mutable[index][2] = f"{fail_info}等待重试 {wait-i}"; time.sleep(1)
+                    # 开始重试
                     mutable[index][2] = f"重试中 {retry_times_at_unknown_error-retry_op}/{retry_times_at_unknown_error}"
                     continue # 返回重试
                 else:
