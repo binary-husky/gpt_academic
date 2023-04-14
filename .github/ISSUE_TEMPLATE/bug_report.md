@@ -7,11 +7,17 @@ assignees: ''
 
 ---
 
-**Describe the bug 简述**
+- **(1) Describe the bug 简述**
 
-**Screen Shot 截图**
 
-**Terminal Traceback 终端traceback（如果有）**
+- **(2) Screen Shot 截图**
+
+
+- **(3) Terminal Traceback 终端traceback（如有）**
+
+
+- **(4) Material to Help Reproduce Bugs 帮助我们复现的测试材料样本（如有）**
+
 
 
 Before submitting an issue 提交issue之前：
