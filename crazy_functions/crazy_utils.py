@@ -228,7 +228,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     retry_op -= 1
                     wait = random.randint(5, 20)
                     if "Rate limit reached" in tb_str: 
-                        wait = wait * 5
+                        wait = wait * 3
                         fail_info = "OpenAI请求速率限制 "
                     else:
                         fail_info = ""
