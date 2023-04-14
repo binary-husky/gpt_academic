@@ -164,7 +164,7 @@ input区域 输入 ./crazy_functions/test_project/python/dqn ， 然后点击 "[
 请访问[部署wiki-1](https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2)
 
 ## 自定义新的便捷按钮（学术快捷键自定义）
-打开functional.py，添加条目如下，然后重启程序即可。（如果按钮已经添加成功并可见，那么前缀、后缀都支持热修改，无需重启程序即可生效。）
+任意文本编辑器打开`core_functional.py`，添加条目如下，然后重启程序即可。（如果按钮已经添加成功并可见，那么前缀、后缀都支持热修改，无需重启程序即可生效。）
 例如
 ```
 "超级英译中": {
@@ -182,7 +182,7 @@ input区域 输入 ./crazy_functions/test_project/python/dqn ， 然后点击 "[
 </div>
 
 
-如果你发明了更好用的学术快捷键，欢迎发issue或者pull requests！
+如果你发明了更好用的快捷键，欢迎发issue或者pull requests！
 
 ## 配置代理
 ### 方法一：常规方法
@@ -200,7 +200,7 @@ python check_proxy.py
 ### 方法二：纯新手教程
 [纯新手教程](https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BB%A3%E7%90%86%E8%BD%AF%E4%BB%B6%E9%97%AE%E9%A2%98%E7%9A%84%E6%96%B0%E6%89%8B%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95%EF%BC%88%E6%96%B9%E6%B3%95%E5%8F%AA%E9%80%82%E7%94%A8%E4%BA%8E%E6%96%B0%E6%89%8B%EF%BC%89)
 
-## 兼容性测试
+## 功能测试
 
 ### 图片显示：
 
