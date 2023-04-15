@@ -24,7 +24,7 @@ RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.8
 
 # 下载分支
 WORKDIR /gpt
-RUN $useProxyNetwork git clone https://github.com/binary-husky/chatgpt_academic.git -b v3.0
+RUN $useProxyNetwork git clone https://github.com/binary-husky/chatgpt_academic.git -b v3.1
 WORKDIR /gpt/chatgpt_academic
 RUN $useProxyNetwork python3 -m pip install -r requirements.txt
 RUN $useProxyNetwork python3 -m pip install -r request_llm/requirements_chatglm.txt

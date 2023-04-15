@@ -66,7 +66,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
     chatbot.append([inputs_show_user, ""])
     yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
     executor = ThreadPoolExecutor(max_workers=16)
-    mutable = ["", time.time()]
+    mutable = ["", time.time(), ""]
     def _req_gpt(inputs, history, sys_prompt):
         retry_op = retry_times_at_unknown_error
         exceeded_cnt = 0
