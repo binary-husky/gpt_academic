@@ -68,6 +68,7 @@ def main():
                     with gr.Row():
                         resetBtn = gr.Button("重置", variant="secondary"); resetBtn.style(size="sm")
                         stopBtn = gr.Button("停止", variant="secondary"); stopBtn.style(size="sm")
+                        clearBtn = gr.Button("清除", variant="secondary", visible=False); clearBtn.style(size="sm")
                     with gr.Row():
                         status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {proxy_info}")
                 with gr.Accordion("基础功能区", open=True) as area_basic_fn:
@@ -99,7 +100,7 @@ def main():
                     top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01,interactive=True, label="Top-p (nucleus sampling)",)
                     temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature",)
                     max_length_sl = gr.Slider(minimum=256, maximum=4096, value=512, step=1, interactive=True, label="MaxLength",)
-                    checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区", "底部输入区"], value=["基础功能区", "函数插件区"], label="显示/隐藏功能区")
+                    checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区", "底部输入区", "输入清除键"], value=["基础功能区", "函数插件区"], label="显示/隐藏功能区")
                     md_dropdown = gr.Dropdown(["gpt-3.5-turbo", "chatglm"], value=LLM_MODEL, label="").style(container=False)
 
                     gr.Markdown(description)
@@ -111,6 +112,7 @@ def main():
                     with gr.Row():
                         resetBtn2 = gr.Button("重置", variant="secondary"); resetBtn.style(size="sm")
                         stopBtn2 = gr.Button("停止", variant="secondary"); stopBtn.style(size="sm")
+                        clearBtn2 = gr.Button("清除", variant="secondary", visible=False); clearBtn.style(size="sm")
         # 功能区显示开关与功能区的互动
         def fn_area_visibility(a):
             ret = {}
@@ -118,9 +120,11 @@ def main():
             ret.update({area_crazy_fn: gr.update(visible=("函数插件区" in a))})
             ret.update({area_input_primary: gr.update(visible=("底部输入区" not in a))})
             ret.update({area_input_secondary: gr.update(visible=("底部输入区" in a))})
+            ret.update({clearBtn: gr.update(visible=("输入清除键" in a))})
+            ret.update({clearBtn2: gr.update(visible=("输入清除键" in a))})
             if "底部输入区" in a: ret.update({txt: gr.update(value="")})
             return ret
-        checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn, area_input_primary, area_input_secondary, txt, txt2] )
+        checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn, area_input_primary, area_input_secondary, txt, txt2, clearBtn, clearBtn2] )
         # 整理反复出现的控件句柄组合
         input_combo = [cookies, max_length_sl, md_dropdown, txt, txt2, top_p, temperature, chatbot, history, system_prompt]
         output_combo = [cookies, chatbot, history, status]
@@ -132,6 +136,8 @@ def main():
         cancel_handles.append(submitBtn2.click(**predict_args))
         resetBtn.click(lambda: ([], [], "已重置"), None, [chatbot, history, status])
         resetBtn2.click(lambda: ([], [], "已重置"), None, [chatbot, history, status])
+        clearBtn.click(lambda: ("",""), None, [txt, txt2])
+        clearBtn2.click(lambda: ("",""), None, [txt, txt2])
         # 基础功能区的回调函数注册
         for k in functional:
             click_handle = functional[k]["Button"].click(fn=ArgsGeneralWrapper(predict), inputs=[*input_combo, gr.State(True), gr.State(k)], outputs=output_combo)
