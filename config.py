@@ -45,7 +45,10 @@ WEB_PORT = -1
 MAX_RETRY = 2
 
 # OpenAI模型选择是（gpt4现在只对申请成功的人开放）
-LLM_MODEL = "gpt-3.5-turbo"
+LLM_MODEL = "gpt-3.5-turbo" # 可选 "chatglm", "tgui:anymodel@localhost:7865"
+
+# 本地LLM模型如ChatGLM的执行方式 CPU/GPU
+LOCAL_MODEL_DEVICE = "cpu" # 可选 "cuda"
 
 # OpenAI的API_URL
 API_URL = "https://api.openai.com/v1/chat/completions"

@@ -1,6 +1,6 @@
 import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 import gradio as gr
-from request_llm.bridge_chatgpt import predict
+from request_llm.bridge_all import predict
 from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, DummyWith
 
 # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
@@ -97,7 +97,10 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
                 system_prompt = gr.Textbox(show_label=True, placeholder=f"System Prompt", label="System prompt", value=initial_prompt)
                 top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01,interactive=True, label="Top-p (nucleus sampling)",)
                 temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature",)
+                max_length_sl = gr.Slider(minimum=256, maximum=4096, value=512, step=1, interactive=True, label="MaxLength",)
                 checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区", "底部输入区"], value=["基础功能区", "函数插件区"], label="显示/隐藏功能区")
+                md_dropdown = gr.Dropdown(["gpt-3.5-turbo", "chatglm"], value=LLM_MODEL, label="").style(container=False)
+
                 gr.Markdown(description)
             with gr.Accordion("备选输入区", open=True, visible=False) as area_input_secondary:
                 with gr.Row():
@@ -118,7 +121,7 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
         return ret
     checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn, area_input_primary, area_input_secondary, txt, txt2] )
     # 整理反复出现的控件句柄组合
-    input_combo = [cookies, txt, txt2, top_p, temperature, chatbot, history, system_prompt]
+    input_combo = [cookies, max_length_sl, md_dropdown, txt, txt2, top_p, temperature, chatbot, history, system_prompt]
     output_combo = [cookies, chatbot, history, status]
     predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=input_combo, outputs=output_combo)
     # 提交按钮、重置按钮

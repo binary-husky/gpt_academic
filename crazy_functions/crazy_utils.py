@@ -61,7 +61,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
     """
     import time
     from concurrent.futures import ThreadPoolExecutor
-    from request_llm.bridge_chatgpt import predict_no_ui_long_connection
+    from request_llm.bridge_all import predict_no_ui_long_connection
     # 用户反馈
     chatbot.append([inputs_show_user, ""])
     yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
@@ -167,13 +167,17 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     """
     import time, random
     from concurrent.futures import ThreadPoolExecutor
-    from request_llm.bridge_chatgpt import predict_no_ui_long_connection
+    from request_llm.bridge_all import predict_no_ui_long_connection
     assert len(inputs_array) == len(history_array)
     assert len(inputs_array) == len(sys_prompt_array)
     if max_workers == -1: # 读取配置文件
         try: max_workers, = get_conf('DEFAULT_WORKER_NUM')
         except: max_workers = 8
         if max_workers <= 0 or max_workers >= 20: max_workers = 8
+    # 屏蔽掉 chatglm的多线程，可能会导致严重卡顿
+    if not llm_kwargs['llm_model'].startswith('gpt-'):
+        max_workers = 1
+        
     executor = ThreadPoolExecutor(max_workers=max_workers)
     n_frag = len(inputs_array)
     # 用户反馈
