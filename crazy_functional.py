@@ -17,6 +17,7 @@ def get_crazy_functions():
     from crazy_functions.代码重写为全英文_多线程 import 全项目切换英文
     from crazy_functions.Latex全文润色 import Latex英文润色
     from crazy_functions.解析项目源代码 import 解析一个Lua项目
+    from crazy_functions.解析项目源代码 import 解析一个CSharp项目
     function_plugins = {
 
         "解析整个Python项目": {
@@ -51,6 +52,11 @@ def get_crazy_functions():
             "Color": "stop",    # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(解析一个Lua项目)
+        },
+        "解析整个CSharp项目": {
+            "Color": "stop",    # 按钮颜色
+            "AsButton": False,  # 加入下拉菜单中
+            "Function": HotReload(解析一个CSharp项目)
         },
         "读Tex论文写摘要": {
             "Color": "stop",    # 按钮颜色
