@@ -27,7 +27,7 @@ def ArgsGeneralWrapper(f):
     """
         装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
-    def decorated(cookies, txt, txt2, top_p, temperature, chatbot, history, system_prompt, *args):
+    def decorated(cookies, max_length, llm_model, txt, txt2, top_p, temperature, chatbot, history, system_prompt, *args):
         txt_passon = txt
         if txt == "" and txt2 != "": txt_passon = txt2
         # 引入一个有cookie的chatbot
@@ -37,8 +37,9 @@ def ArgsGeneralWrapper(f):
         })
         llm_kwargs = {
             'api_key': cookies['api_key'],
-            'llm_model': cookies['llm_model'],
+            'llm_model': llm_model,
             'top_p':top_p, 
+            'max_length': max_length,
             'temperature':temperature,
         }
         plugin_kwargs = {
@@ -75,66 +76,6 @@ def get_reduce_token_percent(text):
     except:
         return 0.5, '不详'
 
-def predict_no_ui_but_counting_down(i_say, i_say_show_user, chatbot, llm_kwargs, history=[], sys_prompt='', long_connection=True):
-    """
-        * 此函数未来将被弃用（替代函数 request_gpt_model_in_new_thread_with_ui_alive 文件 chatgpt_academic/crazy_functions/crazy_utils）
-
-        调用简单的predict_no_ui接口，但是依然保留了些许界面心跳功能，当对话太长时，会自动采用二分法截断
-        i_say: 当前输入
-        i_say_show_user: 显示到对话界面上的当前输入，例如，输入整个文件时，你绝对不想把文件的内容都糊到对话界面上
-        chatbot: 对话界面句柄
-        top_p, temperature: gpt参数
-        history: gpt参数 对话历史
-        sys_prompt: gpt参数 sys_prompt
-        long_connection: 是否采用更稳定的连接方式（推荐）（已弃用）
-    """
-    import time
-    from request_llm.bridge_chatgpt import predict_no_ui_long_connection
-    from toolbox import get_conf
-    TIMEOUT_SECONDS, MAX_RETRY = get_conf('TIMEOUT_SECONDS', 'MAX_RETRY')
-    # 多线程的时候，需要一个mutable结构在不同线程之间传递信息
-    # list就是最简单的mutable结构，我们第一个位置放gpt输出，第二个位置传递报错信息
-    mutable = [None, '']
-    # multi-threading worker
-
-    def mt(i_say, history):
-        while True:
-            try:
-                mutable[0] = predict_no_ui_long_connection(
-                    inputs=i_say, llm_kwargs=llm_kwargs, history=history, sys_prompt=sys_prompt)
-
-            except ConnectionAbortedError as token_exceeded_error:
-                # 尝试计算比例，尽可能多地保留文本
-                p_ratio, n_exceed = get_reduce_token_percent(
-                    str(token_exceeded_error))
-                if len(history) > 0:
-                    history = [his[int(len(his) * p_ratio):]
-                               for his in history if his is not None]
-                else:
-                    i_say = i_say[:     int(len(i_say) * p_ratio)]
-                mutable[1] = f'警告，文本过长将进行截断，Token溢出数：{n_exceed}，截断比例：{(1-p_ratio):.0%}。'
-            except TimeoutError as e:
-                mutable[0] = '[Local Message] 请求超时。'
-                raise TimeoutError
-            except Exception as e:
-                mutable[0] = f'[Local Message] 异常：{str(e)}.'
-                raise RuntimeError(f'[Local Message] 异常：{str(e)}.')
-    # 创建新线程发出http请求
-    thread_name = threading.Thread(target=mt, args=(i_say, history))
-    thread_name.start()
-    # 原来的线程则负责持续更新UI，实现一个超时倒计时，并等待新线程的任务完成
-    cnt = 0
-    while thread_name.is_alive():
-        cnt += 1
-        chatbot[-1] = (i_say_show_user,
-                       f"[Local Message] {mutable[1]}waiting gpt response {cnt}/{TIMEOUT_SECONDS*2*(MAX_RETRY+1)}"+''.join(['.']*(cnt % 4)))
-        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-        time.sleep(1)
-    # 把gpt的输出从mutable中取出来
-    gpt_say = mutable[0]
-    if gpt_say == '[Local Message] Failed with timeout.':
-        raise TimeoutError
-    return gpt_say
 
 
 def write_results_to_file(history, file_name=None):

@@ -1,5 +1,5 @@
 import threading
-from request_llm.bridge_chatgpt import predict_no_ui_long_connection
+from request_llm.bridge_all import predict_no_ui_long_connection
 from toolbox import update_ui
 from toolbox import CatchException, write_results_to_file, report_execption
 from .crazy_utils import breakdown_txt_to_satisfy_token_limit

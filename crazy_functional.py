@@ -16,15 +16,20 @@ def get_crazy_functions():
     from crazy_functions.高级功能函数模板 import 高阶功能模板函数
     from crazy_functions.代码重写为全英文_多线程 import 全项目切换英文
     from crazy_functions.Latex全文润色 import Latex英文润色
+    from crazy_functions.询问多个大语言模型 import 同时问询
     from crazy_functions.解析项目源代码 import 解析一个Lua项目
     function_plugins = {
-
+        "询问多个GPT模型": {
+            "Color": "stop",    # 按钮颜色
+            "Function": HotReload(同时问询)
+        },
         "解析整个Python项目": {
             "Color": "stop",    # 按钮颜色
             "Function": HotReload(解析一个Python项目)
         },
         "解析整个C++项目头文件": {
             "Color": "stop",    # 按钮颜色
+            "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(解析一个C项目的头文件)
         },
         "解析整个C++项目（.cpp/.hpp/.c/.h）": {

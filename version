@@ -1,5 +1,5 @@
 {
-  "version": 2.68,
+  "version": 3.0,
   "show_feature": true,
-  "new_feature": "改善理解pdf（chatpdf）功能 <-> 修复读取罕见字符的BUG <-> 如果一键更新失败，可前往github手动更新"
+  "new_feature": "支持ChatGLM <-> 支持多LLM模型同时对话"
 }
