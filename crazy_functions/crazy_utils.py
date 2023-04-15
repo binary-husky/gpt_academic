@@ -236,7 +236,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     wait = random.randint(5, 20)
                     if "Rate limit reached" in tb_str: 
                         wait = wait * 3
-                        fail_info = "OpenAI请求速率限制 "
+                        fail_info = "OpenAI绑定信用卡可解除频率限制 "
                     else:
                         fail_info = ""
                     # 也许等待十几秒后，情况会好转
