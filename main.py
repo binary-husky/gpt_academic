@@ -85,7 +85,7 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
                         crazy_fns[k]["Button"].style(size="sm")
                 with gr.Row():
                     with gr.Accordion("解析任意code项目", open=True):
-                        gr.Markdown("输入的文件后缀用空格或逗号隔开, 可混合使用空格逗号")
+                        gr.Markdown("输入的文件后缀用空格或逗号隔开,可混合使用空格逗号, 其中`.`可省略<br>例如:`.c, cpp py .go, .toml, json`")
                         with gr.Row():
                             gr.Markdown("将要匹配文件的后缀, 不输入则代表解析所有文件")
                             txt_pattern_include = gr.Textbox(show_label=False, placeholder="例如: .c .cpp .py").style(container=False)
