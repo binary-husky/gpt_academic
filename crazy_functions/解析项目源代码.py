@@ -11,7 +11,7 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
     history_array = []
     sys_prompt_array = []
     report_part_1 = []
-    
+
     assert len(file_manifest) <= 1024, "源文件太多（超过1024个）, 请缩减输入文件的数量。或者，您也可以选择删除此行警告，并修改代码拆分file_manifest列表，从而实现分批次处理。"
     ############################## <第一步，逐个文件分析，多线程> ##################################
     for index, fp in enumerate(file_manifest):
@@ -63,10 +63,10 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
         current_iteration_focus = ', '.join([os.path.relpath(fp, project_folder) for index, fp in enumerate(this_iteration_file_manifest)])
         i_say = f'根据以上分析，对程序的整体功能和构架重新做出概括。然后用一张markdown表格整理每个文件的功能（包括{previous_iteration_files_string}）。'
         inputs_show_user = f'根据以上分析，对程序的整体功能和构架重新做出概括，由于输入长度限制，可能需要分组处理，本组文件为 {current_iteration_focus} + 已经汇总的文件组。'
-        this_iteration_history = copy.deepcopy(this_iteration_gpt_response_collection) 
+        this_iteration_history = copy.deepcopy(this_iteration_gpt_response_collection)
         this_iteration_history.append(last_iteration_result)
         result = yield from request_gpt_model_in_new_thread_with_ui_alive(
-            inputs=i_say, inputs_show_user=inputs_show_user, llm_kwargs=llm_kwargs, chatbot=chatbot, 
+            inputs=i_say, inputs_show_user=inputs_show_user, llm_kwargs=llm_kwargs, chatbot=chatbot,
             history=this_iteration_history,   # 迭代之前的分析
             sys_prompt="你是一个程序架构分析师，正在分析一个项目的源代码。")
         report_part_2.extend([i_say, result])
@@ -222,8 +222,8 @@ def 解析一个Golang项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
     yield from 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt)
-    
-    
+
+
 @CatchException
 def 解析一个Lua项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     history = []    # 清空历史，以免输入溢出
@@ -243,9 +243,9 @@ def 解析一个Lua项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何lua文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
-    yield from 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt)    
-    
-        
+    yield from 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt)
+
+
 @CatchException
 def 解析一个CSharp项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     history = []    # 清空历史，以免输入溢出
@@ -263,4 +263,35 @@ def 解析一个CSharp项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何CSharp文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
-    yield from 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt)    
+    yield from 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt)
+
+
+@CatchException
+def 解析任意code项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    txt_include = plugin_kwargs.get("txt_include")
+    txt_except = plugin_kwargs.get("txt_except")
+    # 将要匹配的后缀
+    pattern_include = [_.lstrip(" .,，").rstrip(" ,，") for _ in txt_include.split(" ") if _ != ""]
+    pattern_include = [_.lstrip(" .,，").rstrip(" ,，") for __ in pattern_include for _ in __.split(",") if _ != ""]
+    pattern_include = [_.lstrip(" .,，").rstrip(" ,，") for __ in pattern_include for _ in __.split("，") if _ != ""]
+    # 将要忽略匹配的后缀
+    pattern_except = [_.lstrip(" .,，").rstrip(" ,，") for _ in txt_except.split(" ") if _ != ""]
+    pattern_except = [_.lstrip(" .,，").rstrip(" ,，") for __ in pattern_except for _ in __.split(",") if _ != ""]
+    pattern_except = [_.lstrip(" .,，").rstrip(" ,，") for __ in pattern_except for _ in __.split("，") if _ != ""]
+    pattern_except += ['zip', 'rar', '7z', 'tar', 'gz'] # 避免解析上传的压缩文件
+    history = []    # 清空历史，以免输入溢出
+    import glob, os
+    if os.path.exists(txt):
+        project_folder = txt
+    else:
+        if txt == "": txt = '空空如也的输入栏'
+        report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+        return
+    file_manifest = [f for f in glob.glob(f'{project_folder}/**/*.*', recursive=True) if os.path.isfile(f) and \
+                     ([] == pattern_include or f.split(".")[-1] in pattern_include) and f.split(".")[-1] not in pattern_except]
+    if len(file_manifest) == 0:
+        report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何文件: {txt}")
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+        return
+    yield from 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt)
