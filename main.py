@@ -44,7 +44,7 @@ proxy_info = check_proxy(proxies)
 
 gr_L1 = lambda: gr.Row().style()
 gr_L2 = lambda scale: gr.Column(scale=scale)
-if LAYOUT == "TOP-DOWN": 
+if LAYOUT == "TOP-DOWN":
     gr_L1 = lambda: DummyWith()
     gr_L2 = lambda scale: gr.Row()
     CHATBOT_HEIGHT /= 2
@@ -84,8 +84,22 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
                         crazy_fns[k]["Button"] = gr.Button(k, variant=variant)
                         crazy_fns[k]["Button"].style(size="sm")
                 with gr.Row():
+                    with gr.Accordion("解析任意code项目", open=True):
+                        gr.Markdown("输入的文件后缀用空格或逗号隔开, 可混合使用空格逗号")
+                        with gr.Row():
+                            gr.Markdown("将要匹配文件的后缀, 不输入则代表解析所有文件")
+                            txt_pattern_include = gr.Textbox(show_label=False, placeholder="例如: .c .cpp .py").style(container=False)
+                        with gr.Row():
+                            gr.Markdown("将要忽略匹配文件的后缀")
+                            txt_pattern_except = gr.Textbox(show_label=False, placeholder="例如: .png, .jpg wav flac").style(container=False)
+                        code_plugin_name = "解析任意code项目"
+                        variant = crazy_fns[code_plugin_name]["Color"] if "Color" in crazy_fns[code_plugin_name] else "secondary"
+                        crazy_fns[code_plugin_name]["Button"] = gr.Button(code_plugin_name, variant=variant)
+                        crazy_fns[code_plugin_name]["Button"].style(size="sm")
+                with gr.Row():
                     with gr.Accordion("更多函数插件", open=True):
                         dropdown_fn_list = [k for k in crazy_fns.keys() if not crazy_fns[k].get("AsButton", True)]
+                        dropdown_fn_list.remove(code_plugin_name)
                         with gr.Column(scale=1):
                             dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="").style(container=False)
                         with gr.Column(scale=1):
@@ -118,7 +132,8 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
         return ret
     checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn, area_input_primary, area_input_secondary, txt, txt2] )
     # 整理反复出现的控件句柄组合
-    input_combo = [cookies, txt, txt2, top_p, temperature, chatbot, history, system_prompt]
+    add_input_combo = (txt_pattern_include, txt_pattern_except)
+    input_combo = [cookies, txt, txt2, top_p, temperature, chatbot, history, system_prompt, *add_input_combo]
     output_combo = [cookies, chatbot, history, status]
     predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=input_combo, outputs=output_combo)
     # 提交按钮、重置按钮
@@ -140,6 +155,10 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
         click_handle = crazy_fns[k]["Button"].click(ArgsGeneralWrapper(crazy_fns[k]["Function"]), [*input_combo, gr.State(PORT)], output_combo)
         click_handle.then(on_report_generated, [file_upload, chatbot], [file_upload, chatbot])
         cancel_handles.append(click_handle)
+    # 函数插件-解析任意code项目
+    click_handle = crazy_fns[code_plugin_name]["Button"].click(ArgsGeneralWrapper(crazy_fns[code_plugin_name]["Function"]), [*input_combo, gr.State(PORT)], output_combo)
+    click_handle.then(on_report_generated, [file_upload, chatbot], [file_upload, chatbot])
+    cancel_handles.append(click_handle)
     # 函数插件-下拉菜单与随变按钮的互动
     def on_dropdown_changed(k):
         variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
@@ -147,7 +166,7 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
     dropdown.select(on_dropdown_changed, [dropdown], [switchy_bt] )
     # 随变按钮的回调函数注册
     def route(k, *args, **kwargs):
-        if k in [r"打开插件列表", r"请先从插件列表中选择"]: return 
+        if k in [r"打开插件列表", r"请先从插件列表中选择"]: return
         yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(*args, **kwargs)
     click_handle = switchy_bt.click(route,[switchy_bt, *input_combo, gr.State(PORT)], output_combo)
     click_handle.then(on_report_generated, [file_upload, chatbot], [file_upload, chatbot])
@@ -164,7 +183,7 @@ def auto_opentab_delay():
     print(f"如果浏览器没有自动打开，请复制并转到以下URL：")
     print(f"\t（亮色主题）: http://localhost:{PORT}")
     print(f"\t（暗色主题）: http://localhost:{PORT}/?__dark-theme=true")
-    def open(): 
+    def open():
         time.sleep(2)       # 打开浏览器
         webbrowser.open_new_tab(f"http://localhost:{PORT}/?__dark-theme=true")
     threading.Thread(target=open, name="open-browser", daemon=True).start()

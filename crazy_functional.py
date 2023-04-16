@@ -162,7 +162,7 @@ def get_crazy_functions():
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(Markdown英译中)
         },
-        
+
     })
 
     ###################### 第三组插件 ###########################
@@ -179,8 +179,16 @@ def get_crazy_functions():
 
     except Exception as err:
         print(f'[下载arxiv论文并翻译摘要] 插件导入失败 {str(err)}')
-        
 
+
+    from crazy_functions.解析项目源代码 import 解析任意code项目
+    function_plugins.update({
+        "解析任意code项目": {
+            "Color": "stop",
+            "AsButton": False,
+            "Function": HotReload(解析任意code项目)
+        },
+    })
 
     ###################### 第n组插件 ###########################
     return function_plugins
