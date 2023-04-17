@@ -36,7 +36,6 @@ def ArgsGeneralWrapper(f):
         llm_kwargs = {
             'api_key': cookies['api_key'],
             'llm_model': llm_model,
-            'endpoint': model_info[llm_model]['endpoint'],
             'top_p':top_p, 
             'max_length': max_length,
             'temperature':temperature,

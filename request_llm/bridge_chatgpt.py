@@ -60,7 +60,9 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     while True:
         try:
             # make a POST request to the API endpoint, stream=False
-            response = requests.post(llm_kwargs['endpoint'], headers=headers, proxies=proxies,
+            from .bridge_all import model_info
+            endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
+            response = requests.post(endpoint, headers=headers, proxies=proxies,
                                     json=payload, stream=True, timeout=TIMEOUT_SECONDS); break
         except requests.exceptions.ReadTimeout as e:
             retry += 1
@@ -148,7 +150,9 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     while True:
         try:
             # make a POST request to the API endpoint, stream=True
-            response = requests.post(llm_kwargs['endpoint'], headers=headers, proxies=proxies,
+            from .bridge_all import model_info
+            endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
+            response = requests.post(endpoint, headers=headers, proxies=proxies,
                                     json=payload, stream=True, timeout=TIMEOUT_SECONDS);break
         except:
             retry += 1
