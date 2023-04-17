@@ -175,7 +175,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         except: max_workers = 8
         if max_workers <= 0 or max_workers >= 20: max_workers = 8
     # 屏蔽掉 chatglm的多线程，可能会导致严重卡顿
-    if not llm_kwargs['llm_model'].startswith('gpt-'):
+    if not (llm_kwargs['llm_model'].startswith('gpt-') or llm_kwargs['llm_model'].startswith('api2d-')):
         max_workers = 1
         
     executor = ThreadPoolExecutor(max_workers=max_workers)
