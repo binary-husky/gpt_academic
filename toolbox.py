@@ -370,7 +370,7 @@ def find_recent_files(directory):
     return recent_files
 
 
-def on_file_uploaded(files, chatbot, txt):
+def on_file_uploaded(files, chatbot, txt, txt2, checkboxes):
     if len(files) == 0:
         return chatbot, txt
     import shutil
@@ -392,13 +392,18 @@ def on_file_uploaded(files, chatbot, txt):
                                    dest_dir=f'private_upload/{time_tag}/{file_origin_name}.extract')
     moved_files = [fp for fp in glob.glob(
         'private_upload/**/*', recursive=True)]
-    txt = f'private_upload/{time_tag}'
+    if "底部输入区" in checkboxes:
+        txt = ""
+        txt2 = f'private_upload/{time_tag}'
+    else:
+        txt = f'private_upload/{time_tag}'
+        txt2 = ""
     moved_files_str = '\t\n\n'.join(moved_files)
     chatbot.append(['我上传了文件，请查收',
                     f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
                     f'\n\n调用路径参数已自动修正到: \n\n{txt}' +
                     f'\n\n现在您点击任意实验功能时，以上文件将被作为输入参数'+err_msg])
-    return chatbot, txt
+    return chatbot, txt, txt2
 
 
 def on_report_generated(files, chatbot):
