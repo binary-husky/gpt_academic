@@ -130,13 +130,18 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         if "PreProcess" in core_functional[additional_fn]: inputs = core_functional[additional_fn]["PreProcess"](inputs)  # 获取预处理函数（如果有的话）
         inputs = core_functional[additional_fn]["Prefix"] + inputs + core_functional[additional_fn]["Suffix"]
 
-    if stream:
-        raw_input = inputs
-        logging.info(f'[raw_input] {raw_input}')
-        chatbot.append((inputs, ""))
-        yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
+    raw_input = inputs
+    logging.info(f'[raw_input] {raw_input}')
+    chatbot.append((inputs, ""))
+    yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
 
-    headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt, stream)
+    try:
+        headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt, stream)
+    except RuntimeError as e:
+        chatbot[-1] = (inputs, f"您提供的api-key不满足要求，不包含任何可用于{llm_kwargs['llm_model']}的api-key。")
+        yield from update_ui(chatbot=chatbot, history=history, msg="api-key不满足要求") # 刷新界面
+        return
+        
     history.append(inputs); history.append(" ")
 
     retry = 0
