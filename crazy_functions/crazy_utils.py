@@ -105,7 +105,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
                 if retry_op > 0:
                     retry_op -= 1
                     mutable[0] += f"[Local Message] 重试中，请稍等 {retry_times_at_unknown_error-retry_op}/{retry_times_at_unknown_error}：\n\n"
-                    if "Rate limit reached" in tb_str:
+                    if ("Rate limit reached" in tb_str) or ("Too Many Requests" in tb_str):
                         time.sleep(30)
                     time.sleep(5)
                     continue # 返回重试
@@ -234,7 +234,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                 if retry_op > 0: 
                     retry_op -= 1
                     wait = random.randint(5, 20)
-                    if "Rate limit reached" in tb_str: 
+                    if ("Rate limit reached" in tb_str) or ("Too Many Requests" in tb_str):
                         wait = wait * 3
                         fail_info = "OpenAI绑定信用卡可解除频率限制 "
                     else:
