@@ -5,8 +5,8 @@ def main():
     from request_llm.bridge_all import predict
     from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, DummyWith
     # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
-    proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT, API_KEY = \
-        get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'LAYOUT', 'API_KEY')
+    proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT, API_KEY, AVAIL_LLM_MODELS = \
+        get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'LAYOUT', 'API_KEY', 'AVAIL_LLM_MODELS')
 
     # 如果WEB_PORT是-1, 则随机选取WEB端口
     PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
@@ -101,7 +101,7 @@ def main():
                     temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature",)
                     max_length_sl = gr.Slider(minimum=256, maximum=4096, value=512, step=1, interactive=True, label="MaxLength",)
                     checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区", "底部输入区", "输入清除键"], value=["基础功能区", "函数插件区"], label="显示/隐藏功能区")
-                    md_dropdown = gr.Dropdown(["gpt-3.5-turbo", "chatglm"], value=LLM_MODEL, label="").style(container=False)
+                    md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="").style(container=False)
 
                     gr.Markdown(description)
                 with gr.Accordion("备选输入区", open=True, visible=False) as area_input_secondary:
@@ -143,7 +143,7 @@ def main():
             click_handle = functional[k]["Button"].click(fn=ArgsGeneralWrapper(predict), inputs=[*input_combo, gr.State(True), gr.State(k)], outputs=output_combo)
             cancel_handles.append(click_handle)
         # 文件上传区，接收文件后与chatbot的互动
-        file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt], [chatbot, txt])
+        file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt, txt2, checkboxes], [chatbot, txt, txt2])
         # 函数插件-固定按钮区
         for k in crazy_fns:
             if not crazy_fns[k].get("AsButton", True): continue

@@ -8,6 +8,7 @@
     具备多线程调用能力的函数
     2. predict_no_ui_long_connection：在实验过程中发现调用predict_no_ui处理长文档时，和openai的连接容易断掉，这个函数用stream的方式解决这个问题，同样支持多线程
 """
+import tiktoken
 
 from concurrent.futures import ThreadPoolExecutor
 
@@ -20,20 +21,63 @@ from .bridge_chatglm import predict as chatglm_ui
 from .bridge_tgui import predict_no_ui_long_connection as tgui_noui
 from .bridge_tgui import predict as tgui_ui
 
-methods = {
-    "openai-no-ui": chatgpt_noui,
-    "openai-ui": chatgpt_ui,
+colors = ['#FF00FF', '#00FFFF', '#FF0000', '#990099', '#009999', '#990044']
 
-    "chatglm-no-ui": chatglm_noui,
-    "chatglm-ui": chatglm_ui,
+model_info = {
+    # openai
+    "gpt-3.5-turbo": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": "https://api.openai.com/v1/chat/completions",
+        "max_token": 4096,
+        "tokenizer": tiktoken.encoding_for_model("gpt-3.5-turbo"),
+        "token_cnt": lambda txt: len(tiktoken.encoding_for_model("gpt-3.5-turbo").encode(txt, disallowed_special=())),
+    },
 
-    "tgui-no-ui": tgui_noui,
-    "tgui-ui": tgui_ui,
+    "gpt-4": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": "https://api.openai.com/v1/chat/completions",
+        "max_token": 8192,
+        "tokenizer": tiktoken.encoding_for_model("gpt-4"),
+        "token_cnt": lambda txt: len(tiktoken.encoding_for_model("gpt-4").encode(txt, disallowed_special=())),
+    },
+
+    # api_2d
+    "api2d-gpt-3.5-turbo": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": "https://openai.api2d.net/v1/chat/completions",
+        "max_token": 4096,
+        "tokenizer": tiktoken.encoding_for_model("gpt-3.5-turbo"),
+        "token_cnt": lambda txt: len(tiktoken.encoding_for_model("gpt-3.5-turbo").encode(txt, disallowed_special=())),
+    },
+
+    "api2d-gpt-4": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": "https://openai.api2d.net/v1/chat/completions",
+        "max_token": 8192,
+        "tokenizer": tiktoken.encoding_for_model("gpt-4"),
+        "token_cnt": lambda txt: len(tiktoken.encoding_for_model("gpt-4").encode(txt, disallowed_special=())),
+    },
+
+    # chatglm
+    "chatglm": {
+        "fn_with_ui": chatglm_ui,
+        "fn_without_ui": chatglm_noui,
+        "endpoint": None,
+        "max_token": 1024,
+        "tokenizer": tiktoken.encoding_for_model("gpt-3.5-turbo"),
+        "token_cnt": lambda txt: len(tiktoken.encoding_for_model("gpt-3.5-turbo").encode(txt, disallowed_special=())),
+    },
+
 }
+
 
 def LLM_CATCH_EXCEPTION(f):
     """
-        装饰器函数，将错误显示出来
+    装饰器函数，将错误显示出来
     """
     def decorated(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience):
         try:
@@ -47,21 +91,20 @@ def LLM_CATCH_EXCEPTION(f):
             return tb_str
     return decorated
 
-colors = ['#FF00FF', '#00FFFF', '#FF0000''#990099', '#009999', '#990044']
 
 def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience=False):
     """
-        发送至LLM，等待回复，一次性完成，不显示中间过程。但内部用stream的方法避免中途网线被掐。
-        inputs：
-            是本次问询的输入
-        sys_prompt:
-            系统静默prompt
-        llm_kwargs：
-            LLM的内部调优参数
-        history：
-            是之前的对话列表
-        observe_window = None：
-            用于负责跨越线程传递已经输出的部分，大部分时候仅仅为了fancy的视觉效果，留空即可。observe_window[0]：观测窗。observe_window[1]：看门狗
+    发送至LLM，等待回复，一次性完成，不显示中间过程。但内部用stream的方法避免中途网线被掐。
+    inputs：
+        是本次问询的输入
+    sys_prompt:
+        系统静默prompt
+    llm_kwargs：
+        LLM的内部调优参数
+    history：
+        是之前的对话列表
+    observe_window = None：
+        用于负责跨越线程传递已经输出的部分，大部分时候仅仅为了fancy的视觉效果，留空即可。observe_window[0]：观测窗。observe_window[1]：看门狗
     """
     import threading, time, copy
 
@@ -71,12 +114,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
         assert not model.startswith("tgui"), "TGUI不支持函数插件的实现"
 
         # 如果只询问1个大语言模型：
-        if model.startswith('gpt'):
-            method = methods['openai-no-ui']
-        elif model == 'chatglm':
-            method = methods['chatglm-no-ui']
-        elif model.startswith('tgui'):
-            method = methods['tgui-no-ui']
+        method = model_info[model]["fn_without_ui"]
         return method(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience)
     else:
         # 如果同时询问多个大语言模型：
@@ -91,12 +129,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
         futures = []
         for i in range(n_model):
             model = models[i]
-            if model.startswith('gpt'):
-                method = methods['openai-no-ui']
-            elif model == 'chatglm':
-                method = methods['chatglm-no-ui']
-            elif model.startswith('tgui'):
-                method = methods['tgui-no-ui']
+            method = model_info[model]["fn_without_ui"]
             llm_kwargs_feedin = copy.deepcopy(llm_kwargs)
             llm_kwargs_feedin['llm_model'] = model
             future = executor.submit(LLM_CATCH_EXCEPTION(method), inputs, llm_kwargs_feedin, history, sys_prompt, window_mutex[i], console_slience)
@@ -138,20 +171,15 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
 
 def predict(inputs, llm_kwargs, *args, **kwargs):
     """
-        发送至LLM，流式获取输出。
-        用于基础的对话功能。
-        inputs 是本次问询的输入
-        top_p, temperature是LLM的内部调优参数
-        history 是之前的对话列表（注意无论是inputs还是history，内容太长了都会触发token数量溢出的错误）
-        chatbot 为WebUI中显示的对话列表，修改它，然后yeild出去，可以直接修改对话界面内容
-        additional_fn代表点击的哪个按钮，按钮见functional.py
+    发送至LLM，流式获取输出。
+    用于基础的对话功能。
+    inputs 是本次问询的输入
+    top_p, temperature是LLM的内部调优参数
+    history 是之前的对话列表（注意无论是inputs还是history，内容太长了都会触发token数量溢出的错误）
+    chatbot 为WebUI中显示的对话列表，修改它，然后yeild出去，可以直接修改对话界面内容
+    additional_fn代表点击的哪个按钮，按钮见functional.py
     """
-    if llm_kwargs['llm_model'].startswith('gpt'):
-        method = methods['openai-ui']
-    elif llm_kwargs['llm_model'] == 'chatglm':
-        method = methods['chatglm-ui']
-    elif llm_kwargs['llm_model'].startswith('tgui'):
-        method = methods['tgui-ui']
 
+    method = model_info[llm_kwargs['llm_model']]["fn_with_ui"]
     yield from method(inputs, llm_kwargs, *args, **kwargs)
 
