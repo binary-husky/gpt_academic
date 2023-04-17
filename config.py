@@ -19,10 +19,8 @@ if USE_PROXY:
 else:
     proxies = None
 
-# [step 3]>> 多线程函数插件中，默认允许多少路线程同时访问OpenAI。
-# Free trial users的限制是每分钟3次，Pay-as-you-go users的限制是每分钟3500次。提高限制请查询：
-# https://platform.openai.com/docs/guides/rate-limits/overview
-# 一言以蔽之：免费用户填3，OpenAI绑了信用卡的用户可以填 16 或者更高
+# [step 3]>> 多线程函数插件中，默认允许多少路线程同时访问OpenAI。Free trial users的限制是每分钟3次，Pay-as-you-go users的限制是每分钟3500次
+# 一言以蔽之：免费用户填3，OpenAI绑了信用卡的用户可以填 16 或者更高。提高限制请查询：https://platform.openai.com/docs/guides/rate-limits/overview
 DEFAULT_WORKER_NUM = 3
 
 
