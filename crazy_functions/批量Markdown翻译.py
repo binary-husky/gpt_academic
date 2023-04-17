@@ -13,7 +13,7 @@ class PaperFileGroup():
         # count_token
         import tiktoken
         from toolbox import get_conf
-        enc = tiktoken.encoding_for_model(*get_conf('LLM_MODEL'))
+        enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
         def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))
         self.get_token_num = get_token_num
 
