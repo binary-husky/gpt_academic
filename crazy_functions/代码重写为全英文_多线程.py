@@ -61,7 +61,7 @@ def 全项目切换英文(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys_
     MAX_TOKEN = 3000
     import tiktoken
     from toolbox import get_conf
-    enc = tiktoken.encoding_for_model(*get_conf('LLM_MODEL'))
+    enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
     def get_token_fn(txt): return len(enc.encode(txt, disallowed_special=()))
 
 

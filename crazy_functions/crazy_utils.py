@@ -4,7 +4,7 @@ from toolbox import update_ui, get_conf
 def input_clipping(inputs, history, max_token_limit):
     import tiktoken
     import numpy as np
-    enc = tiktoken.encoding_for_model(*get_conf('LLM_MODEL'))
+    enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
     def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))
 
     mode = 'input-and-history'
