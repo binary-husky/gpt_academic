@@ -18,6 +18,7 @@ def get_crazy_functions():
     from crazy_functions.Latex全文润色 import Latex英文润色
     from crazy_functions.询问多个大语言模型 import 同时问询
     from crazy_functions.解析项目源代码 import 解析一个Lua项目
+    from crazy_functions.解析项目源代码 import 解析一个CSharp项目
     function_plugins = {
         "询问多个GPT模型": {
             "Color": "stop",    # 按钮颜色
@@ -56,6 +57,11 @@ def get_crazy_functions():
             "Color": "stop",    # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(解析一个Lua项目)
+        },
+        "解析整个CSharp项目": {
+            "Color": "stop",    # 按钮颜色
+            "AsButton": False,  # 加入下拉菜单中
+            "Function": HotReload(解析一个CSharp项目)
         },
         "读Tex论文写摘要": {
             "Color": "stop",    # 按钮颜色
