@@ -8,6 +8,7 @@
     具备多线程调用能力的函数
     2. predict_no_ui_long_connection：在实验过程中发现调用predict_no_ui处理长文档时，和openai的连接容易断掉，这个函数用stream的方式解决这个问题，同样支持多线程
 """
+import tiktoken
 
 from concurrent.futures import ThreadPoolExecutor
 
@@ -31,6 +32,43 @@ methods = {
     "tgui-ui": tgui_ui,
 }
 
+model_info = {
+    # openai
+    "gpt-3.5-turbo": {
+        "max_token": 4096,
+        "tokenizer": tiktoken.encoding_for_model("gpt-3.5-turbo"),
+        "token_cnt": lambda txt: len(tiktoken.encoding_for_model("gpt-3.5-turbo").encode(txt, disallowed_special=())),
+    },
+
+    "gpt-4": {
+        "max_token": 4096,
+        "tokenizer": tiktoken.encoding_for_model("gpt-4"),
+        "token_cnt": lambda txt: len(tiktoken.encoding_for_model("gpt-4").encode(txt, disallowed_special=())),
+    },
+    # api_2d
+    "gpt-3.5-turbo-api2d": {
+        "max_token": 4096,
+        "tokenizer": tiktoken.encoding_for_model("gpt-3.5-turbo"),
+        "token_cnt": lambda txt: len(tiktoken.encoding_for_model("gpt-3.5-turbo").encode(txt, disallowed_special=())),
+    },
+
+    "gpt-4-api2d": {
+        "max_token": 4096,
+        "tokenizer": tiktoken.encoding_for_model("gpt-4"),
+        "token_cnt": lambda txt: len(tiktoken.encoding_for_model("gpt-4").encode(txt, disallowed_special=())),
+    },
+
+    # chatglm
+    "chatglm": {
+        "max_token": 1024,
+        "tokenizer": tiktoken.encoding_for_model("gpt-3.5-turbo"),
+        "token_cnt": lambda txt: len(tiktoken.encoding_for_model("gpt-3.5-turbo").encode(txt, disallowed_special=())),
+    },
+
+
+}
+
+
 def LLM_CATCH_EXCEPTION(f):
     """
         装饰器函数，将错误显示出来
@@ -47,7 +85,7 @@ def LLM_CATCH_EXCEPTION(f):
             return tb_str
     return decorated
 
-colors = ['#FF00FF', '#00FFFF', '#FF0000''#990099', '#009999', '#990044']
+colors = ['#FF00FF', '#00FFFF', '#FF0000', '#990099', '#009999', '#990044']
 
 def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience=False):
     """
