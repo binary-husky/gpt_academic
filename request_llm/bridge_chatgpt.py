@@ -169,7 +169,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         while True:
             chunk = next(stream_response)
             # print(chunk.decode()[6:])
-            if is_head_of_the_stream:
+            if is_head_of_the_stream and (r'"object":"error"' not in chunk.decode()):
                 # 数据流的第一帧不携带content
                 is_head_of_the_stream = False; continue
             
