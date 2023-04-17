@@ -42,17 +42,17 @@ def get_full_error(chunk, stream_response):
 
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=None, console_slience=False):
     """
-        发送至chatGPT，等待回复，一次性完成，不显示中间过程。但内部用stream的方法避免中途网线被掐。
-        inputs：
-            是本次问询的输入
-        sys_prompt:
-            系统静默prompt
-        llm_kwargs：
-            chatGPT的内部调优参数
-        history：
-            是之前的对话列表
-        observe_window = None：
-            用于负责跨越线程传递已经输出的部分，大部分时候仅仅为了fancy的视觉效果，留空即可。observe_window[0]：观测窗。observe_window[1]：看门狗
+    发送至chatGPT，等待回复，一次性完成，不显示中间过程。但内部用stream的方法避免中途网线被掐。
+    inputs：
+        是本次问询的输入
+    sys_prompt:
+        系统静默prompt
+    llm_kwargs：
+        chatGPT的内部调优参数
+    history：
+        是之前的对话列表
+    observe_window = None：
+        用于负责跨越线程传递已经输出的部分，大部分时候仅仅为了fancy的视觉效果，留空即可。observe_window[0]：观测窗。observe_window[1]：看门狗
     """
     watch_dog_patience = 5 # 看门狗的耐心, 设置5秒即可
     headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt=sys_prompt, stream=True)
@@ -105,13 +105,13 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
 
 def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream = True, additional_fn=None):
     """
-        发送至chatGPT，流式获取输出。
-        用于基础的对话功能。
-        inputs 是本次问询的输入
-        top_p, temperature是chatGPT的内部调优参数
-        history 是之前的对话列表（注意无论是inputs还是history，内容太长了都会触发token数量溢出的错误）
-        chatbot 为WebUI中显示的对话列表，修改它，然后yeild出去，可以直接修改对话界面内容
-        additional_fn代表点击的哪个按钮，按钮见functional.py
+    发送至chatGPT，流式获取输出。
+    用于基础的对话功能。
+    inputs 是本次问询的输入
+    top_p, temperature是chatGPT的内部调优参数
+    history 是之前的对话列表（注意无论是inputs还是history，内容太长了都会触发token数量溢出的错误）
+    chatbot 为WebUI中显示的对话列表，修改它，然后yeild出去，可以直接修改对话界面内容
+    additional_fn代表点击的哪个按钮，按钮见functional.py
     """
     if is_any_api_key(inputs):
         chatbot._cookies['api_key'] = inputs
@@ -205,7 +205,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
 
 def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     """
-        整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
+    整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
     """
     if not is_any_api_key(llm_kwargs['api_key']):
         raise AssertionError("你提供了错误的API_KEY。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。")
