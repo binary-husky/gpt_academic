@@ -27,7 +27,7 @@ def ArgsGeneralWrapper(f):
     """
         装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
-    def decorated(cookies, txt, txt2, top_p, temperature, chatbot, history, system_prompt, txt_include, txt_except, *args):
+    def decorated(cookies, txt, txt2, top_p, temperature, chatbot, history, system_prompt, txt_pattern, *args):
         txt_passon = txt
         if txt == "" and txt2 != "": txt_passon = txt2
         # 引入一个有cookie的chatbot
@@ -44,7 +44,7 @@ def ArgsGeneralWrapper(f):
         # plugin_kwargs = {
         #     # 目前还没有
         # }
-        plugin_kwargs = dict(txt_include = txt_include, txt_except = txt_except)
+        plugin_kwargs = dict(txt_pattern = txt_pattern)
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
         yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
