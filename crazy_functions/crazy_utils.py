@@ -555,8 +555,8 @@ def read_and_clean_pdf_text(fp):
         meta_txt = meta_txt.replace('\n', '\n\n')
 
         ############################## <第 5 步，展示分割效果> ##################################
-        for f in finals:
-            print亮黄(f)
-            print亮绿('***************************')
+        # for f in finals:
+        #    print亮黄(f)
+        #    print亮绿('***************************')
 
     return meta_txt, page_one_meta
