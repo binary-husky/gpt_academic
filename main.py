@@ -85,13 +85,9 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
                         crazy_fns[k]["Button"].style(size="sm")
                 with gr.Row():
                     with gr.Accordion("解析任意code项目", open=True):
-                        gr.Markdown("输入的文件后缀用空格或逗号隔开,可混合使用空格逗号, 其中`.`可省略<br>例如:`.c, cpp py .go, .toml, json`")
+                        gr.Markdown("输入时用逗号隔开, `*`代表通配符, 加了`^`代表不匹配<br>例如: `*.c, ^*.cpp, config.toml, ^README.md`")
                         with gr.Row():
-                            gr.Markdown("将要匹配文件的后缀, 不输入则代表解析所有文件")
-                            txt_pattern_include = gr.Textbox(show_label=False, placeholder="例如: .c .cpp .py").style(container=False)
-                        with gr.Row():
-                            gr.Markdown("将要忽略匹配文件的后缀")
-                            txt_pattern_except = gr.Textbox(show_label=False, placeholder="例如: .png, .jpg wav flac").style(container=False)
+                            txt_pattern = gr.Textbox(show_label=False, placeholder="输入框为空则代表匹配所有文件").style(container=False)
                         code_plugin_name = "解析任意code项目"
                         variant = crazy_fns[code_plugin_name]["Color"] if "Color" in crazy_fns[code_plugin_name] else "secondary"
                         crazy_fns[code_plugin_name]["Button"] = gr.Button(code_plugin_name, variant=variant)
@@ -132,8 +128,7 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
         return ret
     checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn, area_input_primary, area_input_secondary, txt, txt2] )
     # 整理反复出现的控件句柄组合
-    add_input_combo = (txt_pattern_include, txt_pattern_except)
-    input_combo = [cookies, txt, txt2, top_p, temperature, chatbot, history, system_prompt, *add_input_combo]
+    input_combo = [cookies, txt, txt2, top_p, temperature, chatbot, history, system_prompt, txt_pattern]
     output_combo = [cookies, chatbot, history, status]
     predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=input_combo, outputs=output_combo)
     # 提交按钮、重置按钮
