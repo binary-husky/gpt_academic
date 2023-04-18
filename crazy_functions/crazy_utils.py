@@ -444,6 +444,7 @@ def read_and_clean_pdf_text(fp):
                     pf = 998
                     for l in t['lines']:
                         txt_line = "".join([wtf['text'] for wtf in l['spans']])
+                        if len(txt_line) == 0: continue
                         pf = primary_ffsize(l)
                         meta_line.append([txt_line, pf, l['bbox'], l])
                         for wtf in l['spans']: # for l in t['lines']:
