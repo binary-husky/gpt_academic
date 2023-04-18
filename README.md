@@ -1,4 +1,6 @@
-# ChatGPT 学术优化
+
+
+# <img src="docs/logo.png" width="40" > ChatGPT 学术优化
 
 **如果喜欢这个项目，请给它一个Star；如果你发明了更好用的快捷键或函数插件，欢迎发issue或者pull requests**
 
@@ -68,10 +70,12 @@ huggingface免科学上网[在线体验](https://huggingface.co/spaces/qingxu98/
 <img src="https://user-images.githubusercontent.com/96192199/226935232-6b6a73ce-8900-4aee-93f9-733c7e6fef53.png" width="700" >
 </div>
 
-- 多种大语言模型混合调用（[v3.1分支](https://github.com/binary-husky/chatgpt_academic/tree/v3.1)测试中）
+- 多种大语言模型混合调用（ChatGLM + OpenAI-GPT3.5 + [API2D](https://api2d.com/)-GPT4， [v3.1分支](https://github.com/binary-husky/chatgpt_academic/tree/v3.1)测试中）
 <div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/231222778-34776885-a7f0-4f2c-b5f4-7cc2ef3ecb58.png" width="700" >
+<img src="https://user-images.githubusercontent.com/96192199/232537274-deca0563-7aa6-4b5d-94a2-b7c453c47794.png" width="700" >
 </div>
+
+v3.1的[huggingface测试版](https://huggingface.co/spaces/qingxu98/academic-chatgpt-beta)（huggingface版不支持chatglm）
 
 
 
