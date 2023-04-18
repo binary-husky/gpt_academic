@@ -13,7 +13,7 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys_
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
-        "批量总结PDF文档。函数插件贡献者: Binary-Husky"])
+        "批量翻译PDF文档。函数插件贡献者: Binary-Husky"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
@@ -59,7 +59,7 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys_
 def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, sys_prompt):
     import os
     import tiktoken
-    TOKEN_LIMIT_PER_FRAGMENT = 1600
+    TOKEN_LIMIT_PER_FRAGMENT = 1280
     generated_conclusion_files = []
     for index, fp in enumerate(file_manifest):
 
@@ -91,13 +91,13 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
         # 多线，翻译
         gpt_response_collection = yield from request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
             inputs_array=[
-                f"以下是你需要翻译的论文片段：\n{frag}" for frag in paper_fragments],
+                f"你需要翻译以下内容：\n{frag}" for frag in paper_fragments],
             inputs_show_user_array=[f"\n---\n 原文： \n\n {frag.replace('#', '')}  \n---\n 翻译：\n " for frag in paper_fragments],
             llm_kwargs=llm_kwargs,
             chatbot=chatbot,
             history_array=[[paper_meta] for _ in paper_fragments],
             sys_prompt_array=[
-                "请你作为一个学术翻译，负责把学术论文的片段准确翻译成中文。" for _ in paper_fragments],
+                "请你作为一个学术翻译，负责把学术论文准确翻译成中文。注意文章中的每一句话都要翻译。" for _ in paper_fragments],
             # max_workers=5  # OpenAI所允许的最大并行过载
         )
 
