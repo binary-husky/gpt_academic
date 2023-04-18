@@ -268,19 +268,22 @@ def 解析一个CSharp项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
 
 @CatchException
 def 解析任意code项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    txt_include = plugin_kwargs.get("txt_include")
-    txt_except = plugin_kwargs.get("txt_except")
-    # 将要匹配的后缀
-    pattern_include = [_.lstrip(" .,，").rstrip(" ,，") for _ in txt_include.split(" ") if _ != ""]
-    pattern_include = [_.lstrip(" .,，").rstrip(" ,，") for __ in pattern_include for _ in __.split(",") if _ != ""]
-    pattern_include = [_.lstrip(" .,，").rstrip(" ,，") for __ in pattern_include for _ in __.split("，") if _ != ""]
-    # 将要忽略匹配的后缀
-    pattern_except = [_.lstrip(" .,，").rstrip(" ,，") for _ in txt_except.split(" ") if _ != ""]
-    pattern_except = [_.lstrip(" .,，").rstrip(" ,，") for __ in pattern_except for _ in __.split(",") if _ != ""]
-    pattern_except = [_.lstrip(" .,，").rstrip(" ,，") for __ in pattern_except for _ in __.split("，") if _ != ""]
-    pattern_except += ['zip', 'rar', '7z', 'tar', 'gz'] # 避免解析上传的压缩文件
-    history = []    # 清空历史，以免输入溢出
-    import glob, os
+    txt_pattern = plugin_kwargs.get("txt_pattern")
+    txt_pattern = txt_pattern.replace("，", ",")
+    # 将要匹配的模式(例如: *.c, *.cpp, *.py, config.toml)
+    pattern_include = [_.lstrip(" ,").rstrip(" ,") for _ in txt_pattern.split(",") if _ != "" and not _.strip().startswith("^")]
+    if not pattern_include: pattern_include = ["*"] # 不输入即全部匹配
+    # 将要忽略匹配的文件后缀(例如: ^*.c, ^*.cpp, ^*.py)
+    pattern_except_suffix = [_.lstrip(" ^*.,").rstrip(" ,") for _ in txt_pattern.split(" ") if _ != "" and _.strip().startswith("^*.")]
+    pattern_except_suffix += ['zip', 'rar', '7z', 'tar', 'gz'] # 避免解析压缩文件
+    # 将要忽略匹配的文件名(例如: ^README.md)
+    pattern_except_name = [_.lstrip(" ^*,").rstrip(" ,").replace(".", "\.") for _ in txt_pattern.split(" ") if _ != "" and _.strip().startswith("^") and not _.strip().startswith("^*.")]
+    # 生成正则表达式
+    pattern_except = '/[^/]+\.(' + "|".join(pattern_except_suffix) + ')$'
+    pattern_except += '|/(' + "|".join(pattern_except_name) + ')$' if pattern_except_name != [] else ''
+
+    history.clear()
+    import glob, os, re
     if os.path.exists(txt):
         project_folder = txt
     else:
@@ -288,8 +291,13 @@ def 解析任意code项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
-    file_manifest = [f for f in glob.glob(f'{project_folder}/**/*.*', recursive=True) if os.path.isfile(f) and \
-                     ([] == pattern_include or f.split(".")[-1] in pattern_include) and f.split(".")[-1] not in pattern_except]
+    # 若上传压缩文件, 先寻找到解压的文件夹路径, 从而避免解析压缩文件
+    maybe_dir = [f for f in glob.glob(f'{project_folder}/**') if os.path.isdir(f)]
+    extract_folder_path = maybe_dir[0].replace('\\', '/') if len(maybe_dir) != 0 else ""
+    # 按输入的匹配模式寻找上传的非压缩文件和已解压的文件
+    file_manifest = [f for f in glob.glob(f'{project_folder}/**') if os.path.isfile(f) and not re.search(pattern_except, f)] + \
+                    [f for _ in pattern_include for f in glob.glob(f'{extract_folder_path}/**/{_}', recursive=True) if \
+                     "" != extract_folder_path and os.path.isfile(f) and not re.search(pattern_except, f)]
     if len(file_manifest) == 0:
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
