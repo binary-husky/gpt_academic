@@ -13,7 +13,7 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys_
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
-        "批量总结PDF文档。函数插件贡献者: Binary-Husky"])
+        "批量翻译PDF文档。函数插件贡献者: Binary-Husky"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
