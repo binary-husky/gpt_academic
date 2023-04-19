@@ -11,11 +11,11 @@ RUN apt-get install -y git python python3 python-dev python3-dev --fix-missing
 
 # 配置代理网络（构建Docker镜像时使用）
 # # comment out below if you do not need proxy network | 如果不需要翻墙 - 从此行向下删除
-RUN $useProxyNetwork curl cip.cc
-RUN sed -i '$ d' /etc/proxychains.conf
-RUN sed -i '$ d' /etc/proxychains.conf
-RUN echo "socks5 127.0.0.1 10880" >> /etc/proxychains.conf
-ARG useProxyNetwork=proxychains
+# RUN $useProxyNetwork curl cip.cc
+# RUN sed -i '$ d' /etc/proxychains.conf
+# RUN sed -i '$ d' /etc/proxychains.conf
+# RUN echo "socks5 127.0.0.1 10880" >> /etc/proxychains.conf
+# ARG useProxyNetwork=proxychains
 # # comment out above if you do not need proxy network | 如果不需要翻墙 - 从此行向上删除
 
 
@@ -42,11 +42,14 @@ ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
 RUN $useProxyNetwork git pull
 
 # 为chatgpt-academic配置代理和API-KEY （非必要 可选步骤）
+# 可同时填写多个API-KEY，支持openai的key和api2d的key共存，用英文逗号分割，例如API_KEY = "sk-openaikey1,sk-openaikey2,fkxxxx-api2dkey1,fkxxxx-api2dkey2"
+# LLM_MODEL 是选择初始的模型
+# LOCAL_MODEL_DEVICE 是选择chatglm等本地模型运行的设备，可选 cpu 和 cuda
 RUN echo ' \n\
 API_KEY = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" \n\
 USE_PROXY = True \n\
 LLM_MODEL = "chatglm" \n\
-LOCAL_MODEL_DEVICE = "cuda" \n\
+LOCAL_MODEL_DEVICE = "cpu" \n\
 proxies = { "http": "socks5h://localhost:10880", "https": "socks5h://localhost:10880", } ' >> config_private.py
 
 # 启动
