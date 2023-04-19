@@ -27,7 +27,9 @@ def ArgsGeneralWrapper(f):
     """
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
-    def decorated(cookies, max_length, llm_model, txt, top_p, temperature, chatbot, history, system_prompt, models, ipaddr:gr.Request,  *args):
+    def decorated(cookies, max_length, llm_model, txt, top_p, temperature,
+                  chatbot, history, system_prompt, models, ipaddr:gr.Request,  *args):
+        """"""
         txt_passon = txt
         if 'input加密' in models: txt_passon = func_box.encryption_str(txt)
         # 引入一个有cookie的chatbot

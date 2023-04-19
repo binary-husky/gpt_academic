@@ -126,8 +126,8 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
                                             label="Temperature", )
                     max_length_sl = gr.Slider(minimum=256, maximum=4096, value=512, step=1, interactive=True, label="MaxLength",)
 
-                    models_box = gr.CheckboxGroup(["input加密", "prompt提示"],
-                                                  value=["input加密", "prompt提示"], label="对话模式")
+                    models_box = gr.CheckboxGroup(["input加密"],
+                                                  value=["input加密"], label="对话模式")
                     checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区"],
                                                   value=["基础功能区", "函数插件区"], label="显示/隐藏功能区")
                     md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(
