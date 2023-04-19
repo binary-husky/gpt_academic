@@ -56,7 +56,7 @@ def main():
         cookies = gr.State({'api_key': API_KEY, 'llm_model': LLM_MODEL})
         with gr_L1():
             with gr_L2(scale=2):
-                chatbot = gr.Chatbot()
+                chatbot = gr.Chatbot(label=f"当前模型：{LLM_MODEL}")
                 chatbot.style(height=CHATBOT_HEIGHT)
                 history = gr.State([])
             with gr_L2(scale=1):
@@ -155,6 +155,9 @@ def main():
             variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
             return {switchy_bt: gr.update(value=k, variant=variant)}
         dropdown.select(on_dropdown_changed, [dropdown], [switchy_bt] )
+        def on_md_dropdown_changed(k):
+            return {chatbot: gr.update(label="当前模型："+k)}
+        md_dropdown.select(on_md_dropdown_changed, [md_dropdown], [chatbot] )
         # 随变按钮的回调函数注册
         def route(k, *args, **kwargs):
             if k in [r"打开插件列表", r"请先从插件列表中选择"]: return 
