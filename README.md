@@ -36,8 +36,7 @@ chat分析报告生成 | [函数插件] 运行后自动生成总结汇报
 公式/图片/表格显示 | 可以同时显示公式的tex形式和渲染形式，支持公式、代码高亮
 多线程函数插件支持 | 支持多线调用chatgpt，一键处理海量文本或程序
 启动暗色gradio[主题](https://github.com/binary-husky/chatgpt_academic/issues/173) | 在浏览器url后面添加```/?__dark-theme=true```可以切换dark主题
-[多LLM模型](https://www.bilibili.com/video/BV1EM411K7VH/)支持（[v3.1分支](https://github.com/binary-husky/chatgpt_academic/tree/v3.1)） | 同时被ChatGPT和[清华ChatGLM](https://github.com/THUDM/ChatGLM-6B)伺候的感觉一定会很不错吧？
-兼容[TGUI](https://github.com/oobabooga/text-generation-webui)接入更多样的语言模型 | 接入opt-1.3b, galactica-1.3b等模型（[v3.1分支](https://github.com/binary-husky/chatgpt_academic/tree/v3.0)测试中）
+[多LLM模型](https://www.bilibili.com/video/BV1EM411K7VH/)支持 | 同时被ChatGPT和[清华ChatGLM](https://github.com/THUDM/ChatGLM-6B)伺候的感觉一定会很不错吧？
 huggingface免科学上网[在线体验](https://huggingface.co/spaces/qingxu98/gpt-academic) | 登陆huggingface后复制[此空间](https://huggingface.co/spaces/qingxu98/gpt-academic)
 …… | ……
 
@@ -70,12 +69,12 @@ huggingface免科学上网[在线体验](https://huggingface.co/spaces/qingxu98/
 <img src="https://user-images.githubusercontent.com/96192199/226935232-6b6a73ce-8900-4aee-93f9-733c7e6fef53.png" width="700" >
 </div>
 
-- 多种大语言模型混合调用（ChatGLM + OpenAI-GPT3.5 + [API2D](https://api2d.com/)-GPT4， [v3.1分支](https://github.com/binary-husky/chatgpt_academic/tree/v3.1)测试中）
+- 多种大语言模型混合调用（ChatGLM + OpenAI-GPT3.5 + [API2D](https://api2d.com/)-GPT4）
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/232537274-deca0563-7aa6-4b5d-94a2-b7c453c47794.png" width="700" >
 </div>
 
-v3.1的[huggingface测试版](https://huggingface.co/spaces/qingxu98/academic-chatgpt-beta)（huggingface版不支持chatglm）
+多种大语言模型混合调用[huggingface测试版](https://huggingface.co/spaces/qingxu98/academic-chatgpt-beta)（huggingface版不支持chatglm）
 
 
 ---
