@@ -23,6 +23,9 @@ from .bridge_tgui import predict as tgui_ui
 
 colors = ['#FF00FF', '#00FFFF', '#FF0000', '#990099', '#009999', '#990044']
 
+get_token_num_gpt35 = lambda txt: len(tiktoken.encoding_for_model("gpt-3.5-turbo").encode(txt, disallowed_special=()))
+get_token_num_gpt4 = lambda txt: len(tiktoken.encoding_for_model("gpt-4").encode(txt, disallowed_special=()))
+
 model_info = {
     # openai
     "gpt-3.5-turbo": {
@@ -31,7 +34,7 @@ model_info = {
         "endpoint": "https://api.openai.com/v1/chat/completions",
         "max_token": 4096,
         "tokenizer": tiktoken.encoding_for_model("gpt-3.5-turbo"),
-        "token_cnt": lambda txt: len(tiktoken.encoding_for_model("gpt-3.5-turbo").encode(txt, disallowed_special=())),
+        "token_cnt": get_token_num_gpt35,
     },
 
     "gpt-4": {
@@ -40,7 +43,7 @@ model_info = {
         "endpoint": "https://api.openai.com/v1/chat/completions",
         "max_token": 8192,
         "tokenizer": tiktoken.encoding_for_model("gpt-4"),
-        "token_cnt": lambda txt: len(tiktoken.encoding_for_model("gpt-4").encode(txt, disallowed_special=())),
+        "token_cnt": get_token_num_gpt4,
     },
 
     # api_2d
@@ -50,7 +53,7 @@ model_info = {
         "endpoint": "https://openai.api2d.net/v1/chat/completions",
         "max_token": 4096,
         "tokenizer": tiktoken.encoding_for_model("gpt-3.5-turbo"),
-        "token_cnt": lambda txt: len(tiktoken.encoding_for_model("gpt-3.5-turbo").encode(txt, disallowed_special=())),
+        "token_cnt": get_token_num_gpt35,
     },
 
     "api2d-gpt-4": {
@@ -59,7 +62,7 @@ model_info = {
         "endpoint": "https://openai.api2d.net/v1/chat/completions",
         "max_token": 8192,
         "tokenizer": tiktoken.encoding_for_model("gpt-4"),
-        "token_cnt": lambda txt: len(tiktoken.encoding_for_model("gpt-4").encode(txt, disallowed_special=())),
+        "token_cnt": get_token_num_gpt4,
     },
 
     # chatglm
@@ -69,7 +72,7 @@ model_info = {
         "endpoint": None,
         "max_token": 1024,
         "tokenizer": tiktoken.encoding_for_model("gpt-3.5-turbo"),
-        "token_cnt": lambda txt: len(tiktoken.encoding_for_model("gpt-3.5-turbo").encode(txt, disallowed_special=())),
+        "token_cnt": get_token_num_gpt35,
     },
 
 }
