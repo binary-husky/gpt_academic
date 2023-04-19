@@ -1,6 +1,16 @@
+---
+title: academic-chatgpt
+emoji: 😻
+colorFrom: blue
+colorTo: blue
+sdk: gradio
+sdk_version: 3.25.0
+python_version: 3.11
+app_file: main.py
+pinned: false
+---
 
-
-# <img src="docs/logo.png" width="40" > ChatGPT 学术优化
+# ChatGPT 学术优化
 
 **如果喜欢这个项目，请给它一个Star；如果你发明了更好用的快捷键或函数插件，欢迎发issue或者pull requests**
 
@@ -275,8 +285,6 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 - version 2.1: 可折叠式布局
 - version 2.0: 引入模块化函数插件
 - version 1.0: 基础功能
-
-chatgpt_academic开发者QQ群：734063350
 
 ## 参考与学习
 

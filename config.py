@@ -43,9 +43,9 @@ WEB_PORT = -1
 # 如果OpenAI不响应（网络卡顿、代理失败、KEY失效），重试的次数限制
 MAX_RETRY = 2
 
-# OpenAI模型选择是（gpt4现在只对申请成功的人开放，体验gpt-4可以试试api2d）
-LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
-AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm"]
+# OpenAI模型选择是（gpt4现在只对申请成功的人开放）
+LLM_MODEL = "gpt-3.5-turbo" # 可选 "chatglm"
+AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "api2d-gpt-3.5-turbo"]
 
 # 本地LLM模型如ChatGLM的执行方式 CPU/GPU
 LOCAL_MODEL_DEVICE = "cpu" # 可选 "cuda"
