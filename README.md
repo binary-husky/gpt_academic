@@ -182,10 +182,10 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 
 
 ## 安装-代理配置
-### 方法一：常规方法
+1. 常规方法
 [配置代理](https://github.com/binary-husky/chatgpt_academic/issues/1)
 
-### 方法二：纯新手教程
+2. 纯新手教程
 [纯新手教程](https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BB%A3%E7%90%86%E8%BD%AF%E4%BB%B6%E9%97%AE%E9%A2%98%E7%9A%84%E6%96%B0%E6%89%8B%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95%EF%BC%88%E6%96%B9%E6%B3%95%E5%8F%AA%E9%80%82%E7%94%A8%E4%BA%8E%E6%96%B0%E6%89%8B%EF%BC%89)
 
 
