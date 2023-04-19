@@ -59,7 +59,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     retry = 0
     while True:
         try:
-            # make a POST request to the API endpoint, stream=False
+            # make a POST requests to the API endpoint, stream=False
             response = requests.post(API_URL, headers=headers, proxies=proxies,
                                     json=payload, stream=True, timeout=TIMEOUT_SECONDS); break
         except requests.exceptions.ReadTimeout as e:
@@ -103,7 +103,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     return result
 
 
-def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream = True, additional_fn=None):
+def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', ipaddr='', stream = True, additional_fn=None):
     """
         发送至chatGPT，流式获取输出。
         用于基础的对话功能。
@@ -132,17 +132,17 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
 
     if stream:
         raw_input = inputs
-        logging.info(f'[raw_input] {raw_input}')
+        logging.info(f'[raw_input]_{ipaddr} {raw_input}')
         chatbot.append((inputs, ""))
         yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
 
-    headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt, stream)
+    headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt, stream, ipaddr)
     history.append(inputs); history.append(" ")
 
     retry = 0
     while True:
         try:
-            # make a POST request to the API endpoint, stream=True
+            # make a POST requests to the API endpoint, stream=True
             response = requests.post(API_URL, headers=headers, proxies=proxies,
                                     json=payload, stream=True, timeout=TIMEOUT_SECONDS);break
         except:
@@ -168,7 +168,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                 try:
                     if len(json.loads(chunk.decode()[6:])['choices'][0]["delta"]) == 0:
                         # 判定为数据流的结束，gpt_replying_buffer也写完了
-                        logging.info(f'[response] {gpt_replying_buffer}')
+                        logging.info(f'[response]_{ipaddr} {gpt_replying_buffer}')
                         break
                     # 处理数据流的主体
                     chunkjson = json.loads(chunk.decode()[6:])
@@ -198,7 +198,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     yield from update_ui(chatbot=chatbot, history=history, msg="Json异常" + error_msg) # 刷新界面
                     return
 
-def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
+def generate_payload(inputs, llm_kwargs, history, system_prompt, stream, ipaddr):
     """
         整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
     """
@@ -245,9 +245,8 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         "frequency_penalty": 0,
     }
     try:
-        print(f" {llm_kwargs['llm_model']} : {conversation_cnt} : {inputs[:100]} ..........")
+        print("\033[1;35m", f"{llm_kwargs['llm_model']}_{ipaddr} :", "\033[0m", f"{conversation_cnt} : {inputs[:100]} ..........")
     except:
         print('输入中可能存在乱码。')
-    return headers,payload
-
+    return headers, payload
 
