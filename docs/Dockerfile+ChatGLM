@@ -41,6 +41,9 @@ RUN python3 -u warm_up_chatglm.py
 ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
 RUN $useProxyNetwork git pull
 
+# 预热Tiktoken模块
+RUN python3  -c 'from check_proxy import warm_up_modules; warm_up_modules()'
+
 # 为chatgpt-academic配置代理和API-KEY （非必要 可选步骤）
 # 可同时填写多个API-KEY，支持openai的key和api2d的key共存，用英文逗号分割，例如API_KEY = "sk-openaikey1,sk-openaikey2,fkxxxx-api2dkey1,fkxxxx-api2dkey2"
 # LLM_MODEL 是选择初始的模型
