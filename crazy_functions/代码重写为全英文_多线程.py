@@ -59,9 +59,8 @@ def 全项目切换英文(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys_
 
     # 第5步：Token限制下的截断与处理
     MAX_TOKEN = 3000
-    import tiktoken
-    from toolbox import get_conf
-    enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
+    from request_llm.bridge_all import model_info
+    enc = model_info["gpt-3.5-turbo"]['tokenizer']
     def get_token_fn(txt): return len(enc.encode(txt, disallowed_special=()))
 
 
