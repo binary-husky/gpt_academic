@@ -9,7 +9,7 @@
     2. predict_no_ui_long_connection：在实验过程中发现调用predict_no_ui处理长文档时，和openai的连接容易断掉，这个函数用stream的方式解决这个问题，同样支持多线程
 """
 import tiktoken
-
+from functools import wraps, lru_cache
 from concurrent.futures import ThreadPoolExecutor
 
 from .bridge_chatgpt import predict_no_ui_long_connection as chatgpt_noui
@@ -18,13 +18,31 @@ from .bridge_chatgpt import predict as chatgpt_ui
 from .bridge_chatglm import predict_no_ui_long_connection as chatglm_noui
 from .bridge_chatglm import predict as chatglm_ui
 
-from .bridge_tgui import predict_no_ui_long_connection as tgui_noui
-from .bridge_tgui import predict as tgui_ui
+# from .bridge_tgui import predict_no_ui_long_connection as tgui_noui
+# from .bridge_tgui import predict as tgui_ui
 
 colors = ['#FF00FF', '#00FFFF', '#FF0000', '#990099', '#009999', '#990044']
 
-get_token_num_gpt35 = lambda txt: len(tiktoken.encoding_for_model("gpt-3.5-turbo").encode(txt, disallowed_special=()))
-get_token_num_gpt4 = lambda txt: len(tiktoken.encoding_for_model("gpt-4").encode(txt, disallowed_special=()))
+class LazyloadTiktoken(object):
+    def __init__(self, model):
+        self.model = model
+
+    @staticmethod
+    @lru_cache(maxsize=128)
+    def get_encoder(model):
+        print('正在加载tokenizer，如果是第一次运行，可能需要一点时间下载参数')
+        tmp = tiktoken.encoding_for_model(model)
+        print('加载tokenizer完毕')
+        return tmp
+    
+    def encode(self, *args, **kwargs):
+        encoder = self.get_encoder(self.model) 
+        return encoder.encode(*args, **kwargs)
+
+tokenizer_gpt35 = LazyloadTiktoken("gpt-3.5-turbo")
+tokenizer_gpt4 = LazyloadTiktoken("gpt-4")
+get_token_num_gpt35 = lambda txt: len(tokenizer_gpt35.encode(txt, disallowed_special=()))
+get_token_num_gpt4 = lambda txt: len(tokenizer_gpt4.encode(txt, disallowed_special=()))
 
 model_info = {
     # openai
@@ -33,7 +51,7 @@ model_info = {
         "fn_without_ui": chatgpt_noui,
         "endpoint": "https://api.openai.com/v1/chat/completions",
         "max_token": 4096,
-        "tokenizer": tiktoken.encoding_for_model("gpt-3.5-turbo"),
+        "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
 
@@ -42,7 +60,7 @@ model_info = {
         "fn_without_ui": chatgpt_noui,
         "endpoint": "https://api.openai.com/v1/chat/completions",
         "max_token": 8192,
-        "tokenizer": tiktoken.encoding_for_model("gpt-4"),
+        "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
     },
 
@@ -52,7 +70,7 @@ model_info = {
         "fn_without_ui": chatgpt_noui,
         "endpoint": "https://openai.api2d.net/v1/chat/completions",
         "max_token": 4096,
-        "tokenizer": tiktoken.encoding_for_model("gpt-3.5-turbo"),
+        "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
 
@@ -61,7 +79,7 @@ model_info = {
         "fn_without_ui": chatgpt_noui,
         "endpoint": "https://openai.api2d.net/v1/chat/completions",
         "max_token": 8192,
-        "tokenizer": tiktoken.encoding_for_model("gpt-4"),
+        "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
     },
 
@@ -71,7 +89,7 @@ model_info = {
         "fn_without_ui": chatglm_noui,
         "endpoint": None,
         "max_token": 1024,
-        "tokenizer": tiktoken.encoding_for_model("gpt-3.5-turbo"),
+        "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
 

@@ -40,7 +40,7 @@ def main():
     set_theme = adjust_theme()
 
     # 代理与自动更新
-    from check_proxy import check_proxy, auto_update
+    from check_proxy import check_proxy, auto_update, warm_up_modules
     proxy_info = check_proxy(proxies)
 
     gr_L1 = lambda: gr.Row().style()
@@ -180,6 +180,7 @@ def main():
             webbrowser.open_new_tab(f"http://localhost:{PORT}/?__dark-theme=true")
         threading.Thread(target=open, name="open-browser", daemon=True).start()
         threading.Thread(target=auto_update, name="self-upgrade", daemon=True).start()
+        threading.Thread(target=warm_up_modules, name="warm-up", daemon=True).start()
 
     auto_opentab_delay()
     demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, favicon_path="docs/logo.png")

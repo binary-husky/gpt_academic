@@ -11,9 +11,8 @@ class PaperFileGroup():
         self.sp_file_tag = []
 
         # count_token
-        import tiktoken
-        from toolbox import get_conf
-        enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
+        from request_llm.bridge_all import model_info
+        enc = model_info["gpt-3.5-turbo"]['tokenizer']
         def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))
         self.get_token_num = get_token_num
 

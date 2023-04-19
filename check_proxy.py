@@ -103,7 +103,7 @@ def auto_update():
         import json
         proxies, = get_conf('proxies')
         response = requests.get(
-            "https://raw.githubusercontent.com/binary-husky/chatgpt_academic/master/version", proxies=proxies, timeout=1)
+            "https://raw.githubusercontent.com/binary-husky/chatgpt_academic/master/version", proxies=proxies, timeout=5)
         remote_json_data = json.loads(response.text)
         remote_version = remote_json_data['version']
         if remote_json_data["show_feature"]:
@@ -133,6 +133,13 @@ def auto_update():
     except:
         print('自动更新程序：已禁用')
 
+def warm_up_modules():
+    print('正在执行一些模块的预热...')
+    from request_llm.bridge_all import model_info
+    enc = model_info["gpt-3.5-turbo"]['tokenizer']
+    enc.encode("模块预热", disallowed_special=())
+    enc = model_info["gpt-4"]['tokenizer']
+    enc.encode("模块预热", disallowed_special=())
 
 if __name__ == '__main__':
     import os
