@@ -1,5 +1,4 @@
-import os;
-
+import os
 os.environ['no_proxy'] = '*'  # 避免代理网络产生意外污染
 import gradio as gr
 from request_llm.bridge_chatgpt import predict
@@ -50,7 +49,7 @@ from theme import adjust_theme, advanced_css
 set_theme = adjust_theme()
 
 # 代理与自动更新
-from check_proxy import check_proxy, auto_update
+from check_proxy import check_proxy, auto_update, warm_up_modules
 
 proxy_info = check_proxy(proxies)
 
@@ -125,8 +124,7 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
                                       label="Top-p (nucleus sampling)", )
                     temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True,
                                             label="Temperature", )
-                    max_length_sl = gr.Slider(minimum=256, maximum=4096, value=512, step=1, interactive=True,
-                                              label="Local LLM MaxLength", )
+                    max_length_sl = gr.Slider(minimum=256, maximum=4096, value=512, step=1, interactive=True, label="MaxLength",)
 
                     models_box = gr.CheckboxGroup(["input加密", "prompt提示"],
                                                   value=["input加密", "prompt提示"], label="对话模式")
@@ -167,7 +165,7 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
                                                      outputs=output_combo)
         cancel_handles.append(click_handle)
     # 文件上传区，接收文件后与chatbot的互动
-    file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt], [chatbot, txt])
+    file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt, checkboxes], [chatbot, txt])
     # 函数插件-固定按钮区
     for k in crazy_fns:
         if not crazy_fns[k].get("AsButton", True): continue
@@ -215,6 +213,7 @@ def auto_opentab_delay():
 
     threading.Thread(target=open, name="open-browser", daemon=True).start()
     threading.Thread(target=auto_update, name="self-upgrade", daemon=True).start()
+     #threading.Thread(target=warm_up_modules, name="warm-up", daemon=True).start()
 
 
 auto_opentab_delay()

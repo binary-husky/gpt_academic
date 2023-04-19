@@ -60,7 +60,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     while True:
         try:
             # make a POST request to the API endpoint, stream=False
-            from .bridge_all import model_info
+            from bridge_all import model_info
             endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
             response = requests.post(endpoint, headers=headers, proxies=proxies,
                                     json=payload, stream=True, timeout=TIMEOUT_SECONDS); break
@@ -154,7 +154,9 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             from .bridge_all import model_info
             endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
             response = requests.post(endpoint, headers=headers, proxies=proxies,
-                                    json=payload, stream=True, timeout=TIMEOUT_SECONDS);break
+                                    json=payload, stream=True, timeout=TIMEOUT_SECONDS);
+            print(response)
+            break
         except:
             retry += 1
             chatbot[-1] = ((chatbot[-1][0], timeout_bot_msg))
@@ -269,3 +271,15 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         print('输入中可能存在乱码。')
     return headers, payload
 
+if __name__ == '__main__':
+    llm_kwargs = {
+        'api_key': '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',
+        'llm_model': 'gpt-3.5-turbo',
+        'top_p': 1,
+        'max_length': 512,
+        'temperature': 1,
+        # 'ipaddr': ipaddr.client.host
+    }
+    chat = []
+    predict('你好', llm_kwargs=llm_kwargs, chatbot=chat, plugin_kwargs={})
+    print(chat)
