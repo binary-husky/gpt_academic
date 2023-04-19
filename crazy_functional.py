@@ -3,7 +3,6 @@ from toolbox import HotReload  # HotReload 的意思是热更新，修改函数�
 
 def get_crazy_functions():
     ###################### 第一组插件 ###########################
-    # [第一组插件]: 最早期编写的项目插件和一些demo
     from crazy_functions.读文章写摘要 import 读文章写摘要
     from crazy_functions.生成函数注释 import 批量生成函数注释
     from crazy_functions.解析项目源代码 import 解析项目本身
@@ -19,14 +18,16 @@ def get_crazy_functions():
     from crazy_functions.询问多个大语言模型 import 同时问询
     from crazy_functions.解析项目源代码 import 解析一个Lua项目
     from crazy_functions.解析项目源代码 import 解析一个CSharp项目
+    from crazy_functions.总结word文档 import 总结word文档
     function_plugins = {
-        "询问多个GPT模型": {
-            "Color": "stop",    # 按钮颜色
-            "Function": HotReload(同时问询)
-        },
+
         "解析整个Python项目": {
             "Color": "stop",    # 按钮颜色
             "Function": HotReload(解析一个Python项目)
+        },
+        "批量总结Word文档": {
+            "Color": "stop",
+            "Function": HotReload(总结word文档)
         },
         "解析整个C++项目头文件": {
             "Color": "stop",    # 按钮颜色
@@ -86,10 +87,9 @@ def get_crazy_functions():
 
     }
     ###################### 第二组插件 ###########################
-    # [第二组插件]: 经过充分测试，但功能上距离达到完美状态还差一点点
+    # [第二组插件]: 经过充分测试
     from crazy_functions.批量总结PDF文档 import 批量总结PDF文档
     from crazy_functions.批量总结PDF文档pdfminer import 批量总结PDF文档pdfminer
-    from crazy_functions.总结word文档 import 总结word文档
     from crazy_functions.批量翻译PDF文档_多线程 import 批量翻译PDF文档
     from crazy_functions.谷歌检索小助手 import 谷歌检索小助手
     from crazy_functions.理解PDF文档内容 import 理解PDF文档内容标准文件输入
@@ -104,6 +104,10 @@ def get_crazy_functions():
             "Color": "stop",
             "AsButton": True,  # 加入下拉菜单中
             "Function": HotReload(批量翻译PDF文档)
+        },
+        "询问多个GPT模型": {
+            "Color": "stop",    # 按钮颜色
+            "Function": HotReload(同时问询)
         },
         "[测试功能] 批量总结PDF文档": {
             "Color": "stop",
@@ -121,10 +125,7 @@ def get_crazy_functions():
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(谷歌检索小助手)
         },
-        "批量总结Word文档": {
-            "Color": "stop",
-            "Function": HotReload(总结word文档)
-        },
+
         "理解PDF文档内容 （模仿ChatPDF）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "stop",
