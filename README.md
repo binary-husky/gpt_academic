@@ -36,7 +36,7 @@ chat分析报告生成 | [函数插件] 运行后自动生成总结汇报
 公式/图片/表格显示 | 可以同时显示公式的tex形式和渲染形式，支持公式、代码高亮
 多线程函数插件支持 | 支持多线调用chatgpt，一键处理海量文本或程序
 启动暗色gradio[主题](https://github.com/binary-husky/chatgpt_academic/issues/173) | 在浏览器url后面添加```/?__dark-theme=true```可以切换dark主题
-[多LLM模型](https://www.bilibili.com/video/BV1EM411K7VH/)支持 | 同时被ChatGPT和[清华ChatGLM](https://github.com/THUDM/ChatGLM-6B)伺候的感觉一定会很不错吧？
+[多LLM模型](https://www.bilibili.com/video/BV1wT411p7yf)支持，[API2D](https://api2d.com/)接口支持 | 同时被GPT3.5、GPT4和[清华ChatGLM](https://github.com/THUDM/ChatGLM-6B)伺候的感觉一定会很不错吧？
 huggingface免科学上网[在线体验](https://huggingface.co/spaces/qingxu98/gpt-academic) | 登陆huggingface后复制[此空间](https://huggingface.co/spaces/qingxu98/gpt-academic)
 …… | ……
 
