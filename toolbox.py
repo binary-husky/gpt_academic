@@ -376,7 +376,7 @@ def find_recent_files(directory):
     return recent_files
 
 
-def on_file_uploaded(files, chatbot, txt, txt2, checkboxes):
+def on_file_uploaded(files, chatbot, txt, checkboxes):
     if len(files) == 0:
         return chatbot, txt
     import shutil
