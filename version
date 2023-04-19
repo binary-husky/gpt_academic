@@ -1,5 +1,5 @@
 {
   "version": 3.1,
   "show_feature": true,
-  "new_feature": "添加支持清华ChatGLM和GPT-4 <-> 添加支持API2D（国内不需要代理） <-> 改进架构，支持与多个LLM模型同时对话  <-> 支持多API-KEY负载均衡（并列填写，逗号分割） <-> 添加输入区文本清除按键"
+  "new_feature": "添加支持清华ChatGLM和GPT-4 <-> 改进架构，支持与多个LLM模型同时对话 <-> 添加支持API2D（国内，可支持gpt4）<-> 支持多API-KEY负载均衡（并列填写，逗号分割） <-> 添加输入区文本清除按键"
 }
