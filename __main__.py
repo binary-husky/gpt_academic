@@ -7,9 +7,9 @@ from toolbox import format_io, find_free_port, on_file_uploaded, on_report_gener
     DummyWith
 
 # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
-proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT, API_KEY = \
+proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT, API_KEY, AVAIL_LLM_MODELS = \
     get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'LAYOUT',
-             'API_KEY')
+             'API_KEY', 'AVAIL_LLM_MODELS')
 
 # 如果WEB_PORT是-1, 则随机选取WEB端口
 PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
@@ -125,10 +125,15 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
                                       label="Top-p (nucleus sampling)", )
                     temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True,
                                             label="Temperature", )
+                    max_length_sl = gr.Slider(minimum=256, maximum=4096, value=512, step=1, interactive=True,
+                                              label="Local LLM MaxLength", )
+
                     models_box = gr.CheckboxGroup(["input加密", "prompt提示"],
                                                   value=["input加密", "prompt提示"], label="对话模式")
                     checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区"],
                                                   value=["基础功能区", "函数插件区"], label="显示/隐藏功能区")
+                    md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(
+                        container=False)
 
                     gr.Markdown(description)
 
@@ -148,7 +153,7 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
                       [area_basic_fn, area_crazy_fn, area_input_primary, txt])
     # 整理反复出现的控件句柄组合
     # submitBtn.info
-    input_combo = [cookies, txt, top_p, temperature, chatbot, history, system_prompt, models_box]
+    input_combo = [cookies, max_length_sl, md_dropdown, txt, top_p, temperature, chatbot, history, system_prompt, models_box]
     output_combo = [cookies, chatbot, history, status]
     predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=input_combo, outputs=output_combo)
     # 提交按钮、重置按钮
