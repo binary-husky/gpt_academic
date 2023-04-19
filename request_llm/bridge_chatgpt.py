@@ -195,10 +195,13 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     traceback.print_exc()
                     yield from update_ui(chatbot=chatbot, history=history, msg="Json解析不合常规") # 刷新界面
                     chunk = get_full_error(chunk, stream_response)
+                    chunk_decoded = chunk.decode()
                     error_msg = chunk_decoded
                     if "reduce the length" in error_msg:
                         chatbot[-1] = (chatbot[-1][0], "[Local Message] Reduce the length. 本次输入过长，或历史数据过长. 历史缓存数据现已释放，您可以请再次尝试.")
                         history = []    # 清除历史
+                    elif "does not exist" in error_msg:
+                        chatbot[-1] = (chatbot[-1][0], f"[Local Message] Model {llm_kwargs['llm_model']} does not exist. 模型不存在，或者您没有获得体验资格.")
                     elif "Incorrect API key" in error_msg:
                         chatbot[-1] = (chatbot[-1][0], "[Local Message] Incorrect API key. OpenAI以提供了不正确的API_KEY为由，拒绝服务.")
                     elif "exceeded your current quota" in error_msg:
