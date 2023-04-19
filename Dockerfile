@@ -1,3 +1,6 @@
+# 此Dockerfile适用于“无本地模型”的环境构建，如果需要使用chatglm等本地模型，请参考 docs/Dockerfile+ChatGLM
+# 如何构建 docker build -t gpt-academic .
+# 如何运行 docker run --rm -it --net=host gpt-academic
 FROM python:3.11
 
 RUN echo '[global]' > /etc/pip.conf && \
