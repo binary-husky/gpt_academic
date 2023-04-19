@@ -37,6 +37,12 @@ def test_解析一个Python项目():
     for cookies, cb, hist, msg in 解析一个Python项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
         print(cb)
 
+def test_解析一个Cpp项目():
+    from crazy_functions.解析项目源代码 import 解析一个C项目
+    txt = "crazy_functions/test_project/cpp/cppipc"
+    for cookies, cb, hist, msg in 解析一个C项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+        print(cb)
+
 def test_Latex英文润色():
     from crazy_functions.Latex全文润色 import Latex英文润色
     txt = "crazy_functions/test_project/latex/attention"
@@ -80,6 +86,7 @@ test_批量翻译PDF文档()
 test_谷歌检索小助手()
 test_总结word文档()
 test_下载arxiv论文并翻译摘要()
+test_解析一个Cpp项目()
 
 input("程序完成，回车退出。")
 print("退出。")
