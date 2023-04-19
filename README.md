@@ -4,7 +4,7 @@
 
 **如果喜欢这个项目，请给它一个Star；如果你发明了更好用的快捷键或函数插件，欢迎发issue或者pull requests**
 
-If you like this project, please give it a Star. If you've come up with more useful academic shortcuts or functional plugins, feel free to open an issue or pull request. We also have a [README in English](img/README_EN.md) translated by this project itself.
+If you like this project, please give it a Star. If you've come up with more useful academic shortcuts or functional plugins, feel free to open an issue or pull request. We also have a README in [English|](docs/README_EN.md)[Japanese|](docs/README_JP.md)[Russian|](docs/README_RS.md)[French](docs/README_FR.md) translated by this project itself.
 
 > **Note**
 >
