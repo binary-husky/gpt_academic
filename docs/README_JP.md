@@ -5,214 +5,217 @@
 
 # <img src="logo.png" width="40" > ChatGPT 学術最適化
 
-**このプロジェクトが気に入ったらスターを付けてください。また、より便利な学術用ショートカットまたは機能プラグインを考案された場合は、問題を開いたり、プルリクエストを投げたりすることができます。さらに、このプロジェクト自体によって翻訳された[README（英語）](docs/README_EN.md)もあります。**
+**このプロジェクトが好きだったら、スターをつけてください。もし、より使いやすい学術用のショートカットキーまたはファンクションプラグインを発明した場合は、issueを発行するかpull requestを作成してください。また、このプロジェクト自体によって翻訳されたREADMEは[英語説明書|](docs/README_EN.md)[日本語説明書|](docs/README_JP.md)[ロシア語説明書|](docs/README_RS.md)[フランス語説明書](docs/README_FR.md)もあります。**
 
-> **注意**
+> **注意事項**
 >
-> 1. 取り込まれたファイルを読み込むことができるのは、**赤色**で表示されている関数プラグイン（ボタン）のみであり、一部のプラグインはプラグイン領域の**ドロップダウンメニュー**にあります。さらに、新しいプラグインに関するいかなるPRでも、最優先で歓迎・処理いたします。
+> 1. **赤色**のラベルが付いているファンクションプラグイン（ボタン）のみファイルを読み込めます。一部のプラグインはプラグインエリアのドロップダウンメニューにあります。新しいプラグインのPRを歓迎いたします！
 >
-> 2. このプロジェクトの各ファイルの機能に関しては、[`self_analysis.md`](https://github.com/binary-husky/chatgpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A)で詳しく説明されています。バージョンが進化するにつれて、関連する関数プラグインをクリックしてChatGPTを呼び出し、プロジェクトの自己解析レポートを再生成することもいつでもできます。一般的な問題は[`wiki`](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98)にまとめられています。
+> 2. このプロジェクトの各ファイルの機能は`self_analysis.md`（自己解析レポート）で詳しく説明されています。バージョンが追加されると、関連するファンクションプラグインをクリックして、GPTを呼び出して自己解析レポートを再生成することができます。一般的な質問は`wiki`にまとめられています。(`https://github.com/binary-husky/chatgpt_academic/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98`)
 
 
 <div align="center">
     
 機能 | 説明
 --- | ---
-一键修正 | 一键で論文の文法エラーを検索・修正できます
-一键日英翻訳 | 一键で英日の相互翻訳ができます。
-コードの自動解釈 | コードが正しく表示され、解釈できます。
-[カスタムショートカット](https://www.bilibili.com/video/BV14s4y1E7jN) | カスタムショートカットがサポートされます。
-[プロキシサーバーの設定](https://www.bilibili.com/video/BV1rc411W7Dr) | プロキシサーバーの設定ができます。
-モジュール化されたデザイン | 任意の高次の関数プラグインと[関数プラグイン]がカスタムされ、プラグインは[ホットアップデート](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)をサポートします。
-[自己解析プログラム](https://www.bilibili.com/video/BV1cj411A7VW) | [関数プラグイン][一键分析](https://github.com/binary-husky/chatgpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A)はこのプロジェクトのソースコードを解析することができます。
-[プログラムの解析](https://www.bilibili.com/video/BV1cj411A7VW) | [関数プラグイン] 一件で他のPython/C/C++/Java/Lua/...プロジェクトツリーを解析できます。
-論文の読解 | [関数プラグイン] 一件でLaTeX論文全文を解読し、要旨を生成できます。
-LaTeX全文翻訳、修正 | [関数プラグイン] 一键でLaTeX論文を翻訳または修正できます。
-一括コードコメント生成 | [関数プラグイン] 一件で関数コメントを自動生成できます。
-chatレポートの自動生成 | [関数プラグイン] 実行後、自動的にサマリーレポートを生成します。
-[arxivアシスタント](https://www.bilibili.com/video/BV1LM4y1279X) | [関数プラグイン] arxiv記事URLを入力すると、要約を自動翻訳+PDFをダウンロードできます。
-[PDF論文全文翻訳機能](https://www.bilibili.com/video/BV1KT411x7Wn) | [関数プラグイン] PDF論文のタイトルと要旨を抽出しながら、全文を翻訳できます（マルチスレッド）。
-[Google Scholar統合アシスタント](https://www.bilibili.com/video/BV19L411U7ia) | [関数プラグイン] Google Scholarの検索ページURLを入力すると、gptが興味深い記事を選択します。
-数式、画像、表の表示 | 数式のtex形式とレンダリング形式を同時に表示し、公式、コードのハイライトがサポートされます。
-マルチスレッド関数プラグインサポート | chatgptのマルチスレッド呼び出しがサポートされ、大量のテキストまたはプログラムを一括で処理できます。
-Dark gradioスタイルの起動（https://github.com/binary-husky/chatgpt_academic/issues/173） | ブラウザのURLに```/?__dark-theme=true```を追加すると、ダークテーマに切り替えることができます。
-[多数のLLMモデル](https://www.bilibili.com/video/BV1wT411p7yf)のサポート、[API2D](https://api2d.com/)インターフェースのサポート | 同時に、GPT3.5、GPT4、[清華ChatGLM](https://github.com/THUDM/ChatGLM-6B)がサポートされている感覚は、きっと素晴らしいはずですね？
-huggingfaceが提供する科学技術ウェブ[体験版](https://huggingface.co/spaces/qingxu98/gpt-academic) | huggingfaceにログインした後[このスペース](https://huggingface.co/spaces/qingxu98/gpt-academic)をコピーしてください。
-…… | ……
+ワンクリック整形 | 論文の文法エラーを一括で正確に修正できます。
+ワンクリック日英翻訳 | 日英翻訳には、ワンクリックで対応できます。
+ワンクリックコード説明 | コードの正しい表示と説明が可能です。
+[カスタムショートカットキー](https://www.bilibili.com/video/BV14s4y1E7jN) | カスタムショートカットキーをサポートします。
+[プロキシサーバーの設定](https://www.bilibili.com/video/BV1rc411W7Dr) | プロキシサーバーの設定をサポートします。
+モジュラーデザイン | カスタム高階関数プラグインと[関数プラグイン]、プラグイン[ホット更新]のサポートが可能です。詳細は[こちら](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)
+[自己プログラム解析](https://www.bilibili.com/video/BV1cj411A7VW) | [関数プラグイン][ワンクリック理解](https://github.com/binary-husky/chatgpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A)このプロジェクトのソースコード
+[プログラム解析機能](https://www.bilibili.com/video/BV1cj411A7VW) | [関数プラグイン] ワンクリックで別のPython/C/C++/Java/Lua/...プロジェクトツリーを解析できます。
+論文読解 | [関数プラグイン] LaTeX論文の全文をワンクリックで解読し、要約を生成します。
+LaTeX全文翻訳、整形 | [関数プラグイン] ワンクリックでLaTeX論文を翻訳または整形できます。
+注釈生成 | [関数プラグイン] ワンクリックで関数の注釈を大量に生成できます。
+チャット分析レポート生成 | [関数プラグイン] 実行後、まとめレポートを自動生成します。
+[arxivヘルパー](https://www.bilibili.com/video/BV1LM4y1279X) | [関数プラグイン] 入力したarxivの記事URLで要約をワンクリック翻訳+PDFダウンロードができます。
+[PDF論文全文翻訳機能](https://www.bilibili.com/video/BV1KT411x7Wn) | [関数プラグイン] PDF論文タイトルと要約を抽出し、全文を翻訳します（マルチスレッド）。
+[Google Scholar Integratorヘルパー](https://www.bilibili.com/video/BV19L411U7ia) | [関数プラグイン] 任意のGoogle Scholar検索ページURLを指定すると、gptが興味深い記事を選択します。
+数式/画像/テーブル表示 | 数式のTex形式とレンダリング形式を同時に表示できます。数式、コードのハイライトをサポートしています。
+マルチスレッド関数プラグインサポート | ChatGPTをマルチスレッドで呼び出すことができ、大量のテキストやプログラムを簡単に処理できます。
+ダークグラジオ[テーマ](https://github.com/binary-husky/chatgpt_academic/issues/173)の起動 | 「/?__dark-theme=true」というURLをブラウザに追加することで、ダークテーマに切り替えることができます。
+[多数のLLMモデル](https://www.bilibili.com/video/BV1wT411p7yf)をサポート、[API2D](https://api2d.com/)インターフェースをサポート | GPT3.5、GPT4、[清華ChatGLM](https://github.com/THUDM/ChatGLM-6B)による同時サポートは、とても素晴らしいですね！
+huggingface免科学上网[オンライン版](https://huggingface.co/spaces/qingxu98/gpt-academic) | huggingfaceにログイン後、[このスペース](https://huggingface.co/spaces/qingxu98/gpt-academic)をコピーしてください。
+...... | ......
+
 
 </div>
 
-- 新しいインターフェース（config.pyのLAYOUTオプションを変更すると、左右のレイアウトと上下のレイアウトを切り替えることができます）。
 
+- 新しいインターフェース（config.pyのLAYOUTオプションを変更するだけで、「左右レイアウト」と「上下レイアウト」を切り替えることができます）
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/230361456-61078362-a966-4eb5-b49e-3c62ef18b860.gif" width="700" >
 </div>
 
 
-- All buttons are dynamically generated by reading functional.py, and custom functions can be added, freeing up the clipboard.
+- すべてのボタンは、functional.pyを読み込んで動的に生成されます。カスタム機能を自由に追加して、クリップボードを解放します
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/231975334-b4788e91-4887-412f-8b43-2b9c5f41d248.gif" width="700" >
 </div>
 
-- Polishing/Error Correction
+- 色を修正/修正
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/231980294-f374bdcb-3309-4560-b424-38ef39f04ebd.gif" width="700" >
 </div>
 
-- If the output contains formulas, it will be displayed in both tex form and rendering form at the same time for easy copying and reading.
+- 出力に数式が含まれている場合、TeX形式とレンダリング形式の両方が表示され、コピーと読み取りが容易になります
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/230598842-1d7fcddd-815d-40ee-af60-baf488a199df.png" width="700" >
 </div>
 
-- Tired of looking at the project code? Just show chatgpt's mouth the whole project
+- プロジェクトのコードを見るのが面倒？chatgptに整備されたプロジェクトを直接与えましょう
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/226935232-6b6a73ce-8900-4aee-93f9-733c7e6fef53.png" width="700" >
 </div>
 
-- Various large language models are mixed and called (ChatGLM + OpenAI-GPT3.5 + [API2D](https://api2d.com/)-GPT4)
+- 多数の大規模言語モデルの混合呼び出し(ChatGLM + OpenAI-GPT3.5 + [API2D](https://api2d.com/)-GPT4)
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/232537274-deca0563-7aa6-4b5d-94a2-b7c453c47794.png" width="700" >
 </div>
 
-Multiple large language models mixed call [huggingface beta](https://huggingface.co/spaces/qingxu98/academic-chatgpt-beta) (huggingface version does not support chatglm)
+多数の大規模言語モデルの混合呼び出し[huggingfaceテスト版](https://huggingface.co/spaces/qingxu98/academic-chatgpt-beta)(huggigface版はchatglmをサポートしていません)
 
 
 ---
 
-## Installation-Method 1: Run Directly (Windows, Linux or MacOS)
+## インストール-方法1：直接運転 (Windows、LinuxまたはMacOS)
 
-1. Download the project
+1. プロジェクトをダウンロードします。
 ```sh
 git clone https://github.com/binary-husky/chatgpt_academic.git
 cd chatgpt_academic
 ```
 
-2. Configure API_KEY and proxy settings
+2. API_KEYとプロキシ設定を構成する
 
-In `config.py`, configure the overseas proxy and OpenAI API KEY, as explained below.
+`config.py`で、海外のProxyとOpenAI API KEYを構成して説明します。
 ```
-1. If you are in China, you need to set up overseas proxies to use the OpenAI API smoothly. Please read config.py carefully for the setting method (1. Change USE_PROXY to True; 2. Modify the proxies according to the instructions).
-2. Configure OpenAI API KEY. You need to register and obtain the API KEY on the OpenAI official website. Once you have the API KEY, configure it in the config.py file.
-3. Issues related to proxy networks (network timeout, proxies not working) are summarized at https://github.com/binary-husky/chatgpt_academic/issues/1
+1.あなたが中国にいる場合、OpenAI APIをスムーズに使用するには海外プロキシを設定する必要があります。構成の詳細については、config.py（1.その中のUSE_PROXYをTrueに変更し、2.手順に従ってプロキシを変更する）を詳細に読んでください。
+2. OpenAI API KEYを構成する。OpenAIのウェブサイトでAPI KEYを取得してください。一旦API KEYを手に入れると、config.pyファイルで設定するだけです。
+3.プロキシネットワークに関連する問題(ネットワークタイムアウト、プロキシが動作しない）をhttps://github.com/binary-husky/chatgpt_academic/issues/1にまとめました。
 ```
-(P.S. When the program is running, it will first check whether there is a private configuration file named `config_private.py` and use the configuration therein to override the same-named configuration in `config.py`. Therefore, if you can understand our configuration reading logic, we strongly recommend that you create a new configuration file named `config_private.py` next to `config.py` and transfer (copy) the configuration in `config.py` to `config_private.py`. `config_private.py` is not controlled by git, which can make your privacy information more secure.)
+(P.S. プログラム実行時にconfig.pyの隣にconfig_private.pyという名前のプライバシー設定ファイルを作成し、同じ名前の設定を上書きするconfig_private.pyが存在するかどうかを優先的に確認します。そのため、私たちの構成読み取りロジックを理解できる場合は、config.pyの隣にconfig_private.pyという名前の新しい設定ファイルを作成し、その中のconfig.pyから設定を移動してください。config_private.pyはgitで保守されていないため、プライバシー情報をより安全にすることができます。)
 
-3. Install dependencies
+3. 依存関係をインストールします。
 ```sh
-# (Option 1) Recommended
-python -m pip install -r requirements.txt   
+# 選択肢があります。
+python -m pip install -r requirements.txt
 
-# (Option 2) If you use anaconda, the steps are similar:
-# (Option 2.1) conda create -n gptac_venv python=3.11
-# (Option 2.2) conda activate gptac_venv
-# (Option 2.3) python -m pip install -r requirements.txt
 
-# Note: Use the official pip source or Ali pip source. Other pip sources (such as some universities' pip) may have problems. Temporary switching source method:
+# (選択肢2) もしAnacondaを使用する場合、手順は同様です：
+# (選択肢2.1) conda create -n gptac_venv python=3.11
+# (選択肢2.2) conda activate gptac_venv
+# (選択肢2.3) python -m pip install -r requirements.txt
+
+# 注: 公式のpipソースまたはAlibabaのpipソースを使用してください。 別のpipソース（例：一部の大学のpip）は問題が発生する可能性があります。 一時的なソースの切り替え方法： 
 # python -m pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 ```
 
-If you need to support Tsinghua ChatGLM, you need to install more dependencies separately (if you are not familiar with Python or your computer configuration is not good, it is not recommended to try):
+もしあなたが清華ChatGLMをサポートする必要がある場合、さらに多くの依存関係をインストールする必要があります（Pythonに慣れない方やコンピューターの設定が十分でない方は、試みないことをお勧めします）：
 ```sh
 python -m pip install -r request_llm/requirements_chatglm.txt
 ```
 
-4. Run
+4. 実行
 ```sh
 python main.py
 ```
 
-5. Test function plugin
+5. 関数プラグインのテスト
 ```
-- Test Python project analysis
-    In the input area, enter `./crazy_functions/test_project/python/dqn`, and then click "Analyze the Entire Python Project"
-- Test self-code interpretation
-    Click "[Multi-threaded Demo] Analyze this Project Itself (Self-Translating Source Code)"
-- Test experimental functional template function (requires gpt to answer what happened in history today), you can use this function as a template to implement more complex functions
-    Click "[Function Plugin Template Demo] In History Today"
-- There are more features to choose from in the function plugin dropdown menu
+- Pythonプロジェクト分析のテスト
+    入力欄に `./crazy_functions/test_project/python/dqn` と入力し、「Pythonプロジェクト全体の解析」をクリックします。
+- 自己コード解読のテスト
+    「[マルチスレッドデモ] このプロジェクト自体を解析します（ソースを翻訳して解読します）」をクリックします。
+- 実験的な機能テンプレート関数のテスト（GPTが「今日の歴史」に何が起こったかを回答することが求められます）。この関数をテンプレートとして使用して、より複雑な機能を実装できます。
+    「[関数プラグインテンプレートデモ] 今日の歴史」をクリックします。
+- 関数プラグインエリアのドロップダウンメニューには他にも選択肢があります。
 ```
 
-## Installation-Method 2: Using Docker (Linux)
+## インストール方法2：Dockerを使用する（Linux）
 
-
-あなたは、プロの学術論文翻訳者です。
-
-1. ChatGPTのみを使用（一般的にはこのオプションが推奨されます）
+1. ChatGPTのみ（大多数の人にお勧めです）
 ``` sh
-# プロジェクトをダウンロードします
+# プロジェクトのダウンロード
 git clone https://github.com/binary-husky/chatgpt_academic.git
 cd chatgpt_academic
-# 海外ProxyとOpenAI API KEYを構成する
-config.pyをテキストエディタで開いて編集します。
+# 海外プロキシとOpenAI API KEYの設定
+config.pyを任意のテキストエディタで編集する
 # インストール
 docker build -t gpt-academic .
 # 実行
 docker run --rm -it --net=host gpt-academic
 
 # 関数プラグインのテスト
-## 関数プラグインテンプレート関数をテストします（gptが「今日の歴史で何が起こったか」と答えるように要求します）。この関数をテンプレートとして使用して、より複雑な機能を実装できます。
-[関数プラグインテンプレートDemo]をクリックしてください。
-## LaTexプロジェクトの要約を書くテスト
-入力エリアに./crazy_functions/test_project/latex/attentionを入力し、「LaTex論文を読んで要約を書く」をクリックします。
-## Pythonプロジェクトの解析をテストする
-入力エリアに./crazy_functions/test_project/python/dqnを入力して、「Pythonプロジェクトを解析する」をクリックします。
+## 関数プラグインテンプレート関数のテスト（GPTが「今日の歴史」に何が起こったかを回答することが求められます）。この関数をテンプレートとして使用して、より複雑な機能を実装できます。
+「[関数プラグインテンプレートデモ] 今日の歴史」をクリックします。
+## Latexプロジェクトの要約を書くテスト
+入力欄に./crazy_functions/test_project/latex/attentionと入力し、「テックス論文を読んで要約を書く」をクリックします。
+## Pythonプロジェクト分析のテスト
+入力欄に./crazy_functions/test_project/python/dqnと入力し、[Pythonプロジェクトの全解析]をクリックします。
 
-より多くの機能が関数プラグインエリアのドロップダウンメニューで利用可能です。
+関数プラグインエリアのドロップダウンメニューには他にも選択肢があります。
 ```
 
-2. ChatGPT+ChatGLMを使用する（Dockerに非常に詳しい必要があります + コンピュータの構成が十分に強力な必要があります）
+2. ChatGPT + ChatGLM（Dockerに非常に詳しい人+十分なコンピューター設定が必要）
 
-``` sh
-# dockerfileを変更する
+
+
+```sh
+# Dockerfileの編集
 cd docs && nano Dockerfile+ChatGLM
-# How to build | 構築方法（Dockerfile+ChatGLMはdocsのパスにありますので、まずcd docsを実行してください）
+# ビルド方法
 docker build -t gpt-academic --network=host -f Dockerfile+ChatGLM .
-# How to run | 実行方法 (1) 直接実行： 
+# 実行方法 (1) 直接実行: 
 docker run --rm -it --net=host --gpus=all gpt-academic
-# How to run | 実行方法 (2) コンテナに入って調整することを予め行いたい場合： 
+# 実行方法 (2) コンテナに入って調整する:
 docker run --rm -it --net=host --gpus=all gpt-academic bash
 ```
 
+## インストール方法3：その他のデプロイ方法
 
-## Installation-Method 3: その他のデプロイ方法
+1. クラウドサーバーデプロイ
+[デプロイwiki-1](https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BF%9C%E7%A8%8B%E9%83%A8%E7%BD%B2%E6%8C%87%E5%8D%97)
 
-1. クラウドサーバーにリモートでインストールする
-[デプロイwiki-1]（https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BF%9C%E7%A8%8B%E9%83%A8%E7%BD%B2%E6%8C%87%E5%8D%97）
-
-2. WSL2を使用する（Windows Subsystem for Linuxサブシステム）
-[デプロイwiki-2]（https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2）
+2. WSL2を使用 (Windows Subsystem for Linux)
+[デプロイwiki-2](https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2)
 
 
-## Installation-プロキシ構成
-### 方法1: 標準的な方法
-[プロキシの構成]（https://github.com/binary-husky/chatgpt_academic/issues/1）
+## インストール-プロキシ設定
+1. 通常の方法
+[プロキシを設定する](https://github.com/binary-husky/chatgpt_academic/issues/1)
 
-### 方法2：初心者向けのチュートリアル
-[初心者向けチュートリアル]（https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BB%A3%E7%90%86%E8%BD%AF%E4%BB%B6%E9%97%AE%E9%A2%98%E7%9A%84%E6%96%B0%E6%89%8B%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95%EF%BC%88%E6%96%B9%E6%B3%95%E5%8F%AA%E9%80%82%E7%94%A8%E4%BA%8E%E6%96%B0%E6%89%8B%EF%BC%89）
+2. 初心者向けチュートリアル
+[初心者向けチュートリアル](https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BB%A3%E7%90%86%E8%BD%AF%E4%BB%B6%E9%97%AE%E9%A2%98%E7%9A%84%E6%96%B0%E6%89%8B%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95%EF%BC%88%E6%96%B9%E6%B3%95%E5%8F%AA%E9%80%82%E7%94%A8%E4%BA%8E%E6%96%B0%E6%89%8B%EF%BC%89)
 
 
 ---
 
-## カスタムコンビニエンスボタンの作成方法（学術用ショートカットキーをカスタマイズする）
-任意のテキストエディタで`core_functional.py`を開き、以下のエントリを追加し、プログラムを再起動します。 （ボタンが正常に追加されて表示されている場合、プレフィックスとサフィックスは両方ともリアルタイムで変更できるため、プログラムを再起動する必要はありません。）
-例えば
+## カスタムボタンの追加(学術ショートカットキー)
+
+`core_functional.py`を任意のテキストエディタで開き、以下のエントリーを追加し、プログラムを再起動してください。(ボタンが追加されて表示される場合、前置詞と後置詞はホット編集がサポートされているため、プログラムを再起動せずに即座に有効になります。)
+
+例:
 ```
 "超级英译中": {
-    # プレフィックス、あなたの要求を説明するために使用されます。翻訳、コードの解析、精緻化など。
-    "Prefix": "以下の内容を中国語に翻訳し、専門用語が含まれる場合はマークダウン表で1つずつ説明してください：\n\n", 
+    # 前置詞 - あなたの要求を説明するために使用されます。翻訳、コードの説明、編集など。
+    "Prefix": "以下のコンテンツを中国語に翻訳して、マークダウンテーブルを使用して専門用語を説明してください。\n\n", 
     
-    #サフィックス、プレフィックスと組み合わせて、入力内容を引用符で囲むことができます。
+    # 後置詞 - プレフィックスと共に使用すると、入力内容を引用符で囲むことができます。
     "Suffix": "",
 },
 ```
+
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/226899272-477c2134-ed71-4326-810c-29891fe4a508.png" width="500" >
 </div>
 
+
 ---
 
-
-## 一部の機能のデモ
+## いくつかの機能の例
 
 ### 画像表示：
 
@@ -221,7 +224,7 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 </div>
 
 
-### プログラムが自分自身を読み取り、分解できる場合：
+### プログラムが自己解析できる場合：
 
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/226936850-c77d7183-0749-4c1c-9875-fd4891842d0c.png" width="800" >
@@ -231,8 +234,8 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 <img src="https://user-images.githubusercontent.com/96192199/226936618-9b487e4b-ab5b-4b6e-84c6-16942102e917.png" width="800" >
 </div>
 
+### 他のPython/Cppプロジェクトの解析：
 
-### 他のPython/Cppプロジェクトの分析：
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/226935232-6b6a73ce-8900-4aee-93f9-733c7e6fef53.png" width="800" >
 </div>
@@ -241,54 +244,59 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 <img src="https://user-images.githubusercontent.com/96192199/226969067-968a27c1-1b9c-486b-8b81-ab2de8d3f88a.png" width="800" >
 </div>
 
-### LaTeX論文の読解と要約の自動生成
+### Latex論文の一括読解と要約生成
+
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/227504406-86ab97cd-f208-41c3-8e4a-7000e51cf980.png" width="800" >
 </div>
 
-### 自動レポート生成
+### 自動報告生成
+
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/227503770-fe29ce2c-53fd-47b0-b0ff-93805f0c2ff4.png" height="300" >
 <img src="https://user-images.githubusercontent.com/96192199/227504617-7a497bb3-0a2a-4b50-9a8a-95ae60ea7afd.png" height="300" >
 <img src="https://user-images.githubusercontent.com/96192199/227504005-efeaefe0-b687-49d0-bf95-2d7b7e66c348.png" height="300" >
 </div>
 
-### モジュール化された機能設計
+### モジュール化された機能デザイン
+
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/229288270-093643c1-0018-487a-81e6-1d7809b6e90f.png" height="400" >
 <img src="https://user-images.githubusercontent.com/96192199/227504931-19955f78-45cd-4d1c-adac-e71e50957915.png" height="400" >
 </div>
 
 
-### ソースコードを英語に変換する
+### ソースコードの英語翻訳
 
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/229720562-fe6c3508-6142-4635-a83d-21eb3669baee.png" height="400" >
 </div>
 
-## タスクとバージョン計画:
-- version 3.2+ (todo): 関数プラグインがより多くのパラメーターインターフェースをサポート
-- version 3.1: 複数のgptモデルを同時に問い合わせるサポート！ api2dをサポートし、複数のapikeyの負荷分散をサポート
-- version 3.0: chatglmおよびその他の小規模llmのサポート
-- version 2.6: プラグイン構造を再構築し、対話性を強化し、さらに多くのプラグインを追加
-- version 2.5: 自動更新、長い文章、トークンのオーバーフローを解決する
-- version 2.4: (1) PDF全文翻訳機能を追加。 (2)位置の切り替え機能を追加。 (3)垂直レイアウトオプションを追加。 (4)マルチスレッド関数プラグインの最適化。
-- version 2.3: マルチスレッドの相互作用の強化
-- version 2.2: 関数プラグインのホットリロードをサポート
+## Todo およびバージョン計画:
+- version 3.2+ (todo): 関数プラグインがより多くのパラメーターインターフェースをサポートするようになります。
+- version 3.1: 複数のgptモデルを同時にクエリし、api2dをサポートし、複数のapikeyの負荷分散をサポートします。
+- version 3.0: chatglmおよび他の小型llmのサポート
+- version 2.6: プラグイン構造を再構成し、相互作用性を高め、より多くのプラグインを追加しました。
+- version 2.5: 自己更新。総括的な大規模プロジェクトのソースコードをまとめた場合、テキストが長すぎる、トークンがオーバーフローする問題を解決します。
+- version 2.4: (1)PDF全文翻訳機能を追加。(2)入力エリアの位置を切り替える機能を追加。(3)垂直レイアウトオプションを追加。(4)マルチスレッド関数プラグインの最適化。
+- version 2.3: 多スレッドの相互作用性を向上させました。
+- version 2.2: 関数プラグインでホットリロードをサポート
 - version 2.1: 折りたたみ式レイアウト
 - version 2.0: モジュール化された関数プラグインを導入
 - version 1.0: 基本機能
 
-## 参考と学習
+## 参考および学習
+
+
+以下は中国語のマークダウンファイルです。日本語に翻訳してください。既存のマークダウンコマンドを変更しないでください：
 
 ```
-多くの優れたプロジェクトの設計を参考にしています：
+多くの優秀なプロジェクトの設計を参考にしています。主なものは以下の通りです：
 
-# 参考プロジェクト1：ChuanhuChatGPTから多くの技術を借りました
+# 参考プロジェクト1：ChuanhuChatGPTから多くのテクニックを借用
 https://github.com/GaiZhenbiao/ChuanhuChatGPT
 
 # 参考プロジェクト2：清華ChatGLM-6B：
 https://github.com/THUDM/ChatGLM-6B
 ```
-
 
