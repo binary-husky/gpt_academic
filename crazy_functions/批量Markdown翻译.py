@@ -50,7 +50,7 @@ def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
             pfg.file_contents.append(file_content)
 
     #  <-------- 拆分过长的Markdown文件 ----------> 
-    pfg.run_file_split(max_token_limit=2048)
+    pfg.run_file_split(max_token_limit=1500)
     n_split = len(pfg.sp_file_contents)
 
     #  <-------- 多线程润色开始 ----------> 
