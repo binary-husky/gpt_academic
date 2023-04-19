@@ -1,5 +1,5 @@
 # [step 1]>> 例如： API_KEY = "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" （此key无效）
-API_KEY = "sk-此处填API密钥"
+API_KEY = "sk-此处填API密钥"    # 可同时填写多个API-KEY，用英文逗号分割，例如API_KEY = "sk-openaikey1,sk-openaikey2,fkxxxx-api2dkey1,fkxxxx-api2dkey2"
 
 # [step 2]>> 改为True应用代理，如果直接在海外服务器部署，此处不修改
 USE_PROXY = False
@@ -19,13 +19,12 @@ if USE_PROXY:
 else:
     proxies = None
 
-# 多线程函数插件中，默认允许多少路线程同时访问OpenAI。
-# Free trial users的限制是每分钟3次，Pay-as-you-go users的限制是每分钟3500次。提高限制请查询：
-# https://platform.openai.com/docs/guides/rate-limits/overview
+# [step 3]>> 多线程函数插件中，默认允许多少路线程同时访问OpenAI。Free trial users的限制是每分钟3次，Pay-as-you-go users的限制是每分钟3500次
+# 一言以蔽之：免费用户填3，OpenAI绑了信用卡的用户可以填 16 或者更高。提高限制请查询：https://platform.openai.com/docs/guides/rate-limits/overview
 DEFAULT_WORKER_NUM = 3
 
 
-# [step 3]>> 以下配置可以优化体验，但大部分场合下并不需要修改
+# [step 4]>> 以下配置可以优化体验，但大部分场合下并不需要修改
 # 对话窗的高度
 CHATBOT_HEIGHT = 1115
 
@@ -45,14 +44,15 @@ WEB_PORT = -1
 MAX_RETRY = 2
 
 # OpenAI模型选择是（gpt4现在只对申请成功的人开放）
-LLM_MODEL = "gpt-3.5-turbo"
+LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
+AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm"]
 
-# OpenAI的API_URL
-API_URL = "https://api.openai.com/v1/chat/completions"
+# 本地LLM模型如ChatGLM的执行方式 CPU/GPU
+LOCAL_MODEL_DEVICE = "cpu" # 可选 "cuda"
 
-# 设置并行使用的线程数
+# 设置gradio的并行线程数（不需要修改）
 CONCURRENT_COUNT = 100
 
-# 设置用户名和密码（相关功能不稳定，与gradio版本和网络都相关，如果本地使用不建议加这个）
+# 设置用户名和密码（不需要修改）（相关功能不稳定，与gradio版本和网络都相关，如果本地使用不建议加这个）
 # [("username", "password"), ("username2", "password2"), ...]
 AUTHENTICATION = []
