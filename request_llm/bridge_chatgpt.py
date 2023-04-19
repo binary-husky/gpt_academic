@@ -175,15 +175,17 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             
             if chunk:
                 try:
-                    if len(json.loads(chunk.decode()[6:])['choices'][0]["delta"]) == 0:
+                    chunk_decoded = chunk.decode()
+                    # 前者API2D的
+                    if ('data: [DONE]' in chunk_decoded) or (len(json.loads(chunk_decoded[6:])['choices'][0]["delta"]) == 0):
                         # 判定为数据流的结束，gpt_replying_buffer也写完了
                         logging.info(f'[response] {gpt_replying_buffer}')
                         break
                     # 处理数据流的主体
-                    chunkjson = json.loads(chunk.decode()[6:])
+                    chunkjson = json.loads(chunk_decoded[6:])
                     status_text = f"finish_reason: {chunkjson['choices'][0]['finish_reason']}"
                     # 如果这里抛出异常，一般是文本过长，详情见get_full_error的输出
-                    gpt_replying_buffer = gpt_replying_buffer + json.loads(chunk.decode()[6:])['choices'][0]["delta"]["content"]
+                    gpt_replying_buffer = gpt_replying_buffer + json.loads(chunk_decoded[6:])['choices'][0]["delta"]["content"]
                     history[-1] = gpt_replying_buffer
                     chatbot[-1] = (history[-2], history[-1])
                     yield from update_ui(chatbot=chatbot, history=history, msg=status_text) # 刷新界面
@@ -192,7 +194,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     traceback.print_exc()
                     yield from update_ui(chatbot=chatbot, history=history, msg="Json解析不合常规") # 刷新界面
                     chunk = get_full_error(chunk, stream_response)
-                    error_msg = chunk.decode()
+                    error_msg = chunk_decoded
                     if "reduce the length" in error_msg:
                         chatbot[-1] = (chatbot[-1][0], "[Local Message] Reduce the length. 本次输入过长，或历史数据过长. 历史缓存数据现已释放，您可以请再次尝试.")
                         history = []    # 清除历史
@@ -205,7 +207,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     else:
                         from toolbox import regular_txt_to_markdown
                         tb_str = '```\n' + traceback.format_exc() + '```'
-                        chatbot[-1] = (chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str} \n\n{regular_txt_to_markdown(chunk.decode()[4:])}")
+                        chatbot[-1] = (chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str} \n\n{regular_txt_to_markdown(chunk_decoded[4:])}")
                     yield from update_ui(chatbot=chatbot, history=history, msg="Json异常" + error_msg) # 刷新界面
                     return
 
