@@ -2,9 +2,9 @@ import traceback
 from toolbox import update_ui, get_conf
 
 def input_clipping(inputs, history, max_token_limit):
-    import tiktoken
     import numpy as np
-    enc = tiktoken.encoding_for_model(*get_conf('LLM_MODEL'))
+    from request_llm.bridge_all import model_info
+    enc = model_info["gpt-3.5-turbo"]['tokenizer']
     def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))
 
     mode = 'input-and-history'
@@ -61,12 +61,12 @@ def request_gpt_model_in_new_thread_with_ui_alive(
     """
     import time
     from concurrent.futures import ThreadPoolExecutor
-    from request_llm.bridge_chatgpt import predict_no_ui_long_connection
+    from request_llm.bridge_all import predict_no_ui_long_connection
     # 用户反馈
     chatbot.append([inputs_show_user, ""])
     yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
     executor = ThreadPoolExecutor(max_workers=16)
-    mutable = ["", time.time()]
+    mutable = ["", time.time(), ""]
     def _req_gpt(inputs, history, sys_prompt):
         retry_op = retry_times_at_unknown_error
         exceeded_cnt = 0
@@ -105,7 +105,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
                 if retry_op > 0:
                     retry_op -= 1
                     mutable[0] += f"[Local Message] 重试中，请稍等 {retry_times_at_unknown_error-retry_op}/{retry_times_at_unknown_error}：\n\n"
-                    if "Rate limit reached" in tb_str:
+                    if ("Rate limit reached" in tb_str) or ("Too Many Requests" in tb_str):
                         time.sleep(30)
                     time.sleep(5)
                     continue # 返回重试
@@ -167,13 +167,17 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     """
     import time, random
     from concurrent.futures import ThreadPoolExecutor
-    from request_llm.bridge_chatgpt import predict_no_ui_long_connection
+    from request_llm.bridge_all import predict_no_ui_long_connection
     assert len(inputs_array) == len(history_array)
     assert len(inputs_array) == len(sys_prompt_array)
     if max_workers == -1: # 读取配置文件
         try: max_workers, = get_conf('DEFAULT_WORKER_NUM')
         except: max_workers = 8
         if max_workers <= 0 or max_workers >= 20: max_workers = 8
+    # 屏蔽掉 chatglm的多线程，可能会导致严重卡顿
+    if not (llm_kwargs['llm_model'].startswith('gpt-') or llm_kwargs['llm_model'].startswith('api2d-')):
+        max_workers = 1
+        
     executor = ThreadPoolExecutor(max_workers=max_workers)
     n_frag = len(inputs_array)
     # 用户反馈
@@ -230,9 +234,9 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                 if retry_op > 0: 
                     retry_op -= 1
                     wait = random.randint(5, 20)
-                    if "Rate limit reached" in tb_str: 
+                    if ("Rate limit reached" in tb_str) or ("Too Many Requests" in tb_str):
                         wait = wait * 3
-                        fail_info = "OpenAI请求速率限制 "
+                        fail_info = "OpenAI绑定信用卡可解除频率限制 "
                     else:
                         fail_info = ""
                     # 也许等待十几秒后，情况会好转
@@ -444,6 +448,7 @@ def read_and_clean_pdf_text(fp):
                     pf = 998
                     for l in t['lines']:
                         txt_line = "".join([wtf['text'] for wtf in l['spans']])
+                        if len(txt_line) == 0: continue
                         pf = primary_ffsize(l)
                         meta_line.append([txt_line, pf, l['bbox'], l])
                         for wtf in l['spans']: # for l in t['lines']:
@@ -554,8 +559,8 @@ def read_and_clean_pdf_text(fp):
         meta_txt = meta_txt.replace('\n', '\n\n')
 
         ############################## <第 5 步，展示分割效果> ##################################
-        for f in finals:
-            print亮黄(f)
-            print亮绿('***************************')
+        # for f in finals:
+        #    print亮黄(f)
+        #    print亮绿('***************************')
 
     return meta_txt, page_one_meta

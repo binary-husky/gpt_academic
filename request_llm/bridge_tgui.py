@@ -13,23 +13,18 @@ import time
 import threading
 import importlib
 from toolbox import get_conf, update_ui
-LLM_MODEL, = get_conf('LLM_MODEL')
 
-# "TGUI:galactica-1.3b@localhost:7860"
-model_name, addr_port = LLM_MODEL.split('@')
-assert ':' in addr_port, "LLM_MODEL 格式不正确！" + LLM_MODEL
-addr, port = addr_port.split(':')
 
 def random_hash():
     letters = string.ascii_lowercase + string.digits
     return ''.join(random.choice(letters) for i in range(9))
 
-async def run(context, max_token=512):
+async def run(context, max_token, temperature, top_p, addr, port):
     params = {
         'max_new_tokens': max_token,
         'do_sample': True,
-        'temperature': 0.5,
-        'top_p': 0.9,
+        'temperature': temperature,
+        'top_p': top_p,
         'typical_p': 1,
         'repetition_penalty': 1.05,
         'encoder_repetition_penalty': 1.0,
@@ -90,7 +85,7 @@ async def run(context, max_token=512):
 
 
 
-def predict_tgui(inputs, top_p, temperature, chatbot, history=[], system_prompt='' , stream = True, additional_fn=None):
+def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream = True, additional_fn=None):
     """
         发送至chatGPT，流式获取输出。
         用于基础的对话功能。
@@ -108,18 +103,26 @@ def predict_tgui(inputs, top_p, temperature, chatbot, history=[], system_prompt=
         inputs = core_functional[additional_fn]["Prefix"] + inputs + core_functional[additional_fn]["Suffix"]
 
     raw_input = "What I would like to say is the following: " + inputs
-    logging.info(f'[raw_input] {raw_input}')
     history.extend([inputs, ""])
     chatbot.append([inputs, ""])
     yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
 
-    prompt = inputs
+    prompt = raw_input
     tgui_say = ""
+
+    model_name, addr_port = llm_kwargs['llm_model'].split('@')
+    assert ':' in addr_port, "LLM_MODEL 格式不正确！" + llm_kwargs['llm_model']
+    addr, port = addr_port.split(':')
+
 
     mutable = ["", time.time()]
     def run_coorotine(mutable):
         async def get_result(mutable):
-            async for response in run(prompt):
+            # "tgui:galactica-1.3b@localhost:7860"
+
+            async for response in run(context=prompt, max_token=llm_kwargs['max_length'], 
+                                      temperature=llm_kwargs['temperature'], 
+                                      top_p=llm_kwargs['top_p'], addr=addr, port=port):
                 print(response[len(mutable[0]):])
                 mutable[0] = response
                 if (time.time() - mutable[1]) > 3: 
@@ -140,28 +143,29 @@ def predict_tgui(inputs, top_p, temperature, chatbot, history=[], system_prompt=
             chatbot[-1] = (history[-2], history[-1])
             yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
-    logging.info(f'[response] {tgui_say}')
 
 
 
-def predict_tgui_no_ui(inputs, top_p, temperature, history=[], sys_prompt=""):
+def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience=False):
     raw_input = "What I would like to say is the following: " + inputs
-    prompt = inputs
+    prompt = raw_input
     tgui_say = ""
-    mutable = ["", time.time()]
-    def run_coorotine(mutable):
-        async def get_result(mutable):
-            async for response in run(prompt, max_token=20):
-                print(response[len(mutable[0]):])
-                mutable[0] = response
-                if (time.time() - mutable[1]) > 3: 
+    model_name, addr_port = llm_kwargs['llm_model'].split('@')
+    assert ':' in addr_port, "LLM_MODEL 格式不正确！" + llm_kwargs['llm_model']
+    addr, port = addr_port.split(':')
+
+
+    def run_coorotine(observe_window):
+        async def get_result(observe_window):
+            async for response in run(context=prompt, max_token=llm_kwargs['max_length'], 
+                                      temperature=llm_kwargs['temperature'], 
+                                      top_p=llm_kwargs['top_p'], addr=addr, port=port):
+                print(response[len(observe_window[0]):])
+                observe_window[0] = response
+                if (time.time() - observe_window[1]) > 5: 
                     print('exit when no listener')
                     break
-        asyncio.run(get_result(mutable))
-    thread_listen = threading.Thread(target=run_coorotine, args=(mutable,))
+        asyncio.run(get_result(observe_window))
+    thread_listen = threading.Thread(target=run_coorotine, args=(observe_window,))
     thread_listen.start()
-    while thread_listen.is_alive():
-        time.sleep(1)
-        mutable[1] = time.time()
-    tgui_say = mutable[0]
-    return tgui_say
+    return observe_window[0]

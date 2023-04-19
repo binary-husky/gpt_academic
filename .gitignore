@@ -55,7 +55,6 @@ coverage.xml
 *.pot
 github
 .github
-.idea/
 TEMP
 TRASH
 
@@ -144,3 +143,5 @@ private_upload
 other_llms
 cradle*
 debug*
+private*
+crazy_functions/test_project/pdf_and_word
