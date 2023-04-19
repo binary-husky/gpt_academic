@@ -116,28 +116,19 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
                                 switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
 
             with gr.Tab('Setting'):
-                with gr.Accordion("展开SysPrompt & 交互界面布局 & Github地址", open=(LAYOUT == "TOP-DOWN")):
+                with gr.Accordion("展开SysPrompt & 交互界面布局 & Github地址", open=True):
                     system_prompt = gr.Textbox(show_label=True, placeholder=f"System Prompt", label="System prompt",
                                                value=initial_prompt)
                     top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01, interactive=True,
                                       label="Top-p (nucleus sampling)", )
                     temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True,
                                             label="Temperature", )
+                    models_box = gr.CheckboxGroup(["input加密"],
+                                                  value=["input加密"], label="输入模式")
                     checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区"],
                                                   value=["基础功能区", "函数插件区"], label="显示/隐藏功能区")
-                    gr.Markdown(description)
 
-            with gr.Accordion("备选输入区", open=True, visible=False) as area_input_secondary:
-                with gr.Row():
-                    txt2 = gr.Textbox(show_label=False, placeholder="Input question here.", label="输入区2").style(
-                        container=False)
-                with gr.Row():
-                    submitBtn2 = gr.Button("提交", variant="primary")
-                with gr.Row():
-                    resetBtn2 = gr.Button("重置", variant="secondary");
-                    resetBtn.style(size="sm")
-                    stopBtn2 = gr.Button("停止", variant="secondary");
-                    stopBtn.style(size="sm")
+                    gr.Markdown(description)
 
 
     # 功能区显示开关与功能区的互动
@@ -152,19 +143,16 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
 
 
     checkboxes.select(fn_area_visibility, [checkboxes],
-                      [area_basic_fn, area_crazy_fn, area_input_primary, txt, txt2])
+                      [area_basic_fn, area_crazy_fn, area_input_primary, txt])
     # 整理反复出现的控件句柄组合
     # submitBtn.info
-    input_combo = [cookies, txt, txt2, top_p, temperature, chatbot, history, system_prompt]
+    input_combo = [cookies, txt, top_p, temperature, chatbot, history, system_prompt, models_box]
     output_combo = [cookies, chatbot, history, status]
     predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=input_combo, outputs=output_combo)
     # 提交按钮、重置按钮
     cancel_handles.append(txt.submit(**predict_args))
-    cancel_handles.append(txt2.submit(**predict_args))
     cancel_handles.append(submitBtn.click(**predict_args))
-    cancel_handles.append(submitBtn2.click(**predict_args))
     resetBtn.click(lambda: ([], [], "已重置"), None, [chatbot, history, status])
-    resetBtn2.click(lambda: ([], [], "已重置"), None, [chatbot, history, status])
     # 基础功能区的回调函数注册
     for k in functional:
         click_handle = functional[k]["Button"].click(fn=ArgsGeneralWrapper(predict),
@@ -205,15 +193,14 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
     cancel_handles.append(click_handle)
     # 终止按钮的回调函数注册
     stopBtn.click(fn=None, inputs=None, outputs=None, cancels=cancel_handles)
-    stopBtn2.click(fn=None, inputs=None, outputs=None, cancels=cancel_handles)
 
 
 # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
 def auto_opentab_delay():
-    import threading, webbrowser, time
+    import threading, webbrowser, time, func_box
     print(f"如果浏览器没有自动打开，请复制并转到以下URL：")
-    print(f"\t（亮色主题）: http://localhost:{PORT}")
-    print(f"\t（暗色主题）: http://localhost:{PORT}/?__dark-theme=true")
+    print(f"\t（亮色主题）: http://{func_box.ipaddr()}:{PORT}")
+    print(f"\t（暗色主题）: http://{func_box.ipaddr()}:{PORT}/?__dark-theme=true")
 
     def open():
         time.sleep(2)  # 打开浏览器

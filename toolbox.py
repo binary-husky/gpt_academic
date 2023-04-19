@@ -6,7 +6,7 @@ import traceback
 import inspect
 import re
 import gradio as gr
-import hashlib
+import func_box
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
 
@@ -29,9 +29,9 @@ def ArgsGeneralWrapper(f):
     """
         装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
-    def decorated(cookies, txt, txt2, top_p, temperature, chatbot, history, system_prompt, request: gr.Request, *args):
+    def decorated(cookies, txt, top_p, temperature, chatbot, history, system_prompt, models, request: gr.Request, *args):
         txt_passon = txt
-        if txt == "" and txt2 != "": txt_passon = txt2
+        if 'input加密' in models: txt_passon = func_box.encryption_str(txt)
         # 引入一个有cookie的chatbot
         cookies.update({
             'top_p':top_p, 
