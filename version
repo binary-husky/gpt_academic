@@ -1,5 +1,5 @@
 {
-  "version": 2.7,
+  "version": 3.1,
   "show_feature": true,
-  "new_feature": "修复BUG <-> 改善理解pdf（chatpdf）功能 <-> 如果一键更新失败，可前往github手动更新"
+  "new_feature": "添加支持清华ChatGLM和GPT-4 <-> 改进架构，支持与多个LLM模型同时对话 <-> 添加支持API2D（国内，可支持gpt4）<-> 支持多API-KEY负载均衡（并列填写，逗号分割） <-> 添加输入区文本清除按键"
 }

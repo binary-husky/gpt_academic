@@ -1,5 +1,5 @@
 import threading
-from request_llm.bridge_chatgpt import predict_no_ui_long_connection
+from request_llm.bridge_all import predict_no_ui_long_connection
 from toolbox import update_ui
 from toolbox import CatchException, write_results_to_file, report_execption
 from .crazy_utils import breakdown_txt_to_satisfy_token_limit
@@ -59,9 +59,8 @@ def 全项目切换英文(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys_
 
     # 第5步：Token限制下的截断与处理
     MAX_TOKEN = 3000
-    import tiktoken
-    from toolbox import get_conf
-    enc = tiktoken.encoding_for_model(*get_conf('LLM_MODEL'))
+    from request_llm.bridge_all import model_info
+    enc = model_info["gpt-3.5-turbo"]['tokenizer']
     def get_token_fn(txt): return len(enc.encode(txt, disallowed_special=()))
 
 
