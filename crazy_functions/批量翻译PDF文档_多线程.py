@@ -13,7 +13,7 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys_
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
-        "批量总结PDF文档。函数插件贡献者: Binary-Husky"])
+        "批量翻译PDF文档。函数插件贡献者: Binary-Husky"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
@@ -68,8 +68,8 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
 
         # 递归地切割PDF文件
         from .crazy_utils import breakdown_txt_to_satisfy_token_limit_for_pdf
-        from toolbox import get_conf
-        enc = tiktoken.encoding_for_model(*get_conf('LLM_MODEL'))
+        from request_llm.bridge_all import model_info
+        enc = model_info["gpt-3.5-turbo"]['tokenizer']
         def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))
         paper_fragments = breakdown_txt_to_satisfy_token_limit_for_pdf(
             txt=file_content,  get_token_fn=get_token_num, limit=TOKEN_LIMIT_PER_FRAGMENT)
