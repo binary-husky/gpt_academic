@@ -17,7 +17,7 @@ if not AUTHENTICATION: AUTHENTICATION = None
 from check_proxy import get_current_version
 
 initial_prompt = "Serve me as a writing and programming assistant."
-title_html = f"<h1 align=\"center\">ChatGPT 学术优化 {get_current_version()}</h1>"
+title_html = f"<h1 align=\"center\">ChatGPT For Tester {get_current_version()}</h1>"
 description = """代码开源和更新[地址🚀](https://github.com/binary-husky/chatgpt_academic)，感谢热情的[开发者们❤️](https://github.com/binary-husky/chatgpt_academic/graphs/contributors)"""
 
 # 问询记录, python 版本建议3.9+（越新越好）
@@ -128,27 +128,12 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
 
                     models_box = gr.CheckboxGroup(["input加密"],
                                                   value=["input加密"], label="对话模式")
-                    checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区"],
-                                                  value=["基础功能区", "函数插件区"], label="显示/隐藏功能区")
                     md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(
                         container=False)
 
                     gr.Markdown(description)
 
 
-    # 功能区显示开关与功能区的互动
-    def fn_area_visibility(a):
-        ret = {}
-        ret.update({area_basic_fn: gr.update(visible=("基础功能区" in a))})
-        ret.update({area_crazy_fn: gr.update(visible=("函数插件区" in a))})
-        ret.update({area_input_primary: gr.update(visible=("底部输入区" not in a))})
-        # ret.update({area_input_secondary: gr.update(visible=("底部输入区" in a))})
-        if "底部输入区" in a: ret.update({txt: gr.update(value="")})
-        return ret
-
-
-    checkboxes.select(fn_area_visibility, [checkboxes],
-                      [area_basic_fn, area_crazy_fn, area_input_primary, txt])
     # 整理反复出现的控件句柄组合
     # submitBtn.info
     input_combo = [cookies, max_length_sl, md_dropdown, txt, top_p, temperature, chatbot, history, system_prompt, models_box]
@@ -165,7 +150,7 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
                                                      outputs=output_combo)
         cancel_handles.append(click_handle)
     # 文件上传区，接收文件后与chatbot的互动
-    file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt, checkboxes], [chatbot, txt])
+    file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt], [chatbot, txt])
     # 函数插件-固定按钮区
     for k in crazy_fns:
         if not crazy_fns[k].get("AsButton", True): continue
