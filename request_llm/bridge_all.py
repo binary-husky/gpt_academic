@@ -38,7 +38,11 @@ class LazyloadTiktoken(object):
     def encode(self, *args, **kwargs):
         encoder = self.get_encoder(self.model) 
         return encoder.encode(*args, **kwargs)
-
+    
+    def decode(self, *args, **kwargs):
+        encoder = self.get_encoder(self.model) 
+        return encoder.decode(*args, **kwargs)
+    
 tokenizer_gpt35 = LazyloadTiktoken("gpt-3.5-turbo")
 tokenizer_gpt4 = LazyloadTiktoken("gpt-4")
 get_token_num_gpt35 = lambda txt: len(tokenizer_gpt35.encode(txt, disallowed_special=()))
