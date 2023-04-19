@@ -9,6 +9,7 @@ import gradio as gr
 import func_box
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
+import logging
 
 ############################### 插件输入输出接驳区 #######################################
 class ChatBotWithCookies(list):
@@ -29,7 +30,7 @@ def ArgsGeneralWrapper(f):
     """
         装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
-    def decorated(cookies, txt, top_p, temperature, chatbot, history, system_prompt, models, request: gr.Request, *args):
+    def decorated(cookies, txt, top_p, temperature, chatbot, history, system_prompt, models , adder: gr.Request, *args):
         txt_passon = txt
         if 'input加密' in models: txt_passon = func_box.encryption_str(txt)
         # 引入一个有cookie的chatbot
@@ -48,8 +49,8 @@ def ArgsGeneralWrapper(f):
         }
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
-        ipaddr = request.client.host
-        yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, ipaddr, *args)
+        logging.info(f'[user_click]_{adder.client.host} {txt_passon} ----')
+        yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
     return decorated
 
 def update_ui(chatbot, history, msg='正常', **kwargs):  # 刷新界面
@@ -213,7 +214,11 @@ def HotReload(f):
     def decorated(*args, **kwargs):
         fn_name = f.__name__
         f_hot_reload = getattr(importlib.reload(inspect.getmodule(f)), fn_name)
-        yield from f_hot_reload(*args, **kwargs)
+        try:
+            yield from f_hot_reload(*args, **kwargs)
+        except TypeError:
+            args = tuple(args[element] for element in range(len(args)) if element != 6)
+            yield from f_hot_reload(*args, **kwargs)
     return decorated
 
 

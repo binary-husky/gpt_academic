@@ -67,7 +67,8 @@ def get_crazy_functions():
             "Function": HotReload(批量生成函数注释)
         },
         "[多线程Demo] 解析此项目本身（源码自译解）": {
-            "Function": HotReload(解析项目本身)
+            "Function": HotReload(解析项目本身),
+            "AsButton": False,  # 加入下拉菜单中
         },
         "[多线程demo] 把本项目源代码切换成全英文": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
@@ -123,7 +124,7 @@ def get_crazy_functions():
         "理解PDF文档内容 （模仿ChatPDF）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "stop",
-            "AsButton": False,  # 加入下拉菜单中
+            "AsButton": True,  # 加入下拉菜单中
             "Function": HotReload(理解PDF文档内容标准文件输入)
         },
         "[测试功能] 英文Latex项目全文润色（输入路径或上传压缩包）": {

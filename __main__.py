@@ -71,6 +71,8 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
                 chatbot = gr.Chatbot()
                 chatbot.style(height=CHATBOT_HEIGHT)
                 history = gr.State([])
+                with gr.Row(visible=False):
+                    assist = None
                 with gr.Row():
                     status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {proxy_info}")
 
@@ -123,8 +125,8 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
                                       label="Top-p (nucleus sampling)", )
                     temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True,
                                             label="Temperature", )
-                    models_box = gr.CheckboxGroup(["input加密"],
-                                                  value=["input加密"], label="输入模式")
+                    models_box = gr.CheckboxGroup(["input加密", "prompt提示"],
+                                                  value=["input加密", "prompt提示"], label="对话模式")
                     checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区"],
                                                   value=["基础功能区", "函数插件区"], label="显示/隐藏功能区")
 
