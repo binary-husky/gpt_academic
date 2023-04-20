@@ -70,14 +70,14 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     history = []
 
     # ------------- < 第2步：依次访问网页 > -------------
-    max_search_result = 5
+    max_search_result = 4   # 最多收纳多少个网页的结果
     for index, url in enumerate(urls[:max_search_result]):
         res = scrape_text(url['link'], proxies)
-        history.extend([f"第{index}份搜索结果", res])
-        chatbot.append([f"第{index}份搜索结果", res])
+        history.extend([f"第{index}份搜索结果：", res])
+        chatbot.append([f"第{index}份搜索结果：", res[:500]])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
 
-    # ------------- < 第3步：综合 > -------------
+    # ------------- < 第3步：ChatGPT综合 > -------------
     i_say = f"从以上搜索结果中抽取信息，然后回答问题：{txt}"
     i_say, history = input_clipping(inputs=i_say, history=history, max_token_limit=model_info[llm_kwargs['llm_model']]['max_token']//2)
     gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
