@@ -1,9 +1,11 @@
 import os
+
 os.environ['no_proxy'] = '*'  # 避免代理网络产生意外污染
 import gradio as gr
 from request_llm.bridge_chatgpt import predict
-from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, \
-    DummyWith
+from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_user_upload, get_conf, \
+    ArgsGeneralWrapper, DummyWith
+
 
 # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
 proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT, API_KEY, AVAIL_LLM_MODELS = \
@@ -61,7 +63,7 @@ if LAYOUT == "TOP-DOWN":
     CHATBOT_HEIGHT /= 2
 
 cancel_handles = []
-with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
+with gr.Blocks(title="ChatGPT For Tester", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
     gr.HTML(title_html)
     cookies = gr.State({'api_key': API_KEY, 'llm_model': LLM_MODEL})
     with gr_L1():
@@ -76,67 +78,96 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
                     status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {proxy_info}")
 
         with gr_L2(scale=1):
-            with gr.Accordion("输入区", open=True) as area_input_primary:
-                with gr.Row():
-                    txt = gr.Textbox(show_label=False, placeholder="Input question here.").style(container=False)
-                with gr.Row():
-                    submitBtn = gr.Button("提交", variant="primary")
-                with gr.Row():
-                    resetBtn = gr.Button("重置", variant="secondary");
-                    resetBtn.style(size="sm")
-                    stopBtn = gr.Button("停止", variant="secondary");
-                    stopBtn.style(size="sm")
+            with gr.Tab('对话模式'):
+                with gr.Accordion("输入区", open=True) as area_input_primary:
+                    with gr.Row():
+                        txt = gr.Textbox(show_label=False, placeholder="Input question here.").style(container=False)
+                    with gr.Row():
+                        submitBtn = gr.Button("提交", variant="primary")
+                    with gr.Row():
+                        resetBtn = gr.Button("重置", variant="secondary");
+                        resetBtn.style(size="sm")
+                        stopBtn = gr.Button("停止", variant="secondary");
+                        stopBtn.style(size="sm")
 
-            with gr.Tab('Function'):
-                with gr.Accordion("基础功能区", open=True) as area_basic_fn:
-                    with gr.Row():
-                        for k in functional:
-                            variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
-                            functional[k]["Button"] = gr.Button(k, variant=variant)
-            with gr.Tab('Public'):
+                with gr.Tab('Function'):
+                    with gr.Accordion("基础功能区", open=True) as area_basic_fn:
+                        with gr.Row():
+                            for k in functional:
+                                variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
+                                functional[k]["Button"] = gr.Button(k, variant=variant)
+                with gr.Tab('Public'):
+                    with gr.Box():
+                        with gr.Accordion("上传本地文件可供高亮函数插件调用",
+                                          open=False) as area_file_up:
+                            file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)",
+                                                   file_count="multiple")
+                            file_upload.style()
+                        with gr.Row():
+                            upload_history = submitBtn = gr.Button("Get Upload History", variant="primary")
+                    with gr.Accordion("函数插件区", open=True) as area_crazy_fn:
+                        with gr.Row():
+                            gr.Markdown("注意：以下“高亮”标识的函数插件需从输入区读取路径作为参数.")
+                        with gr.Row():
+                            for k in crazy_fns:
+                                if not crazy_fns[k].get("AsButton", True): continue
+                                variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
+                                crazy_fns[k]["Button"] = gr.Button(k, variant=variant)
+                                crazy_fns[k]["Button"].style(size="sm")
+                        with gr.Row():
+                            with gr.Accordion("更多函数插件", open=True):
+                                dropdown_fn_list = [k for k in crazy_fns.keys() if
+                                                    not crazy_fns[k].get("AsButton", True)]
+                                with gr.Column(scale=1):
+                                    dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="").style(
+                                        container=False)
+                                with gr.Column(scale=1):
+                                    switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
+
+                with gr.Tab('Setting'):
+                    with gr.Accordion("展开SysPrompt & 交互界面布局 & Github地址", open=True):
+                        system_prompt = gr.Textbox(show_label=True, placeholder=f"System Prompt", label="System prompt",
+                                                   value=initial_prompt)
+                        top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01, interactive=True,
+                                          label="Top-p (nucleus sampling)", )
+                        temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True,
+                                                label="Temperature", )
+                        max_length_sl = gr.Slider(minimum=256, maximum=4096, value=512, step=1, interactive=True,
+                                                  label="MaxLength", )
+
+                        models_box = gr.CheckboxGroup(["input加密"],
+                                                      value=["input加密"], label="对话模式")
+                        md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(
+                            container=False)
+
+                        gr.Markdown(description)
+            with gr.Tab('Auto-GPT'):
                 with gr.Row():
-                    with gr.Accordion("点击展开“文件上传区”。上传本地文件可供高亮函数插件调用。",
-                                      open=False) as area_file_up:
-                        file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)", file_count="multiple")
-                with gr.Accordion("函数插件区", open=True) as area_crazy_fn:
-                    with gr.Row():
-                        gr.Markdown("注意：以下“高亮”标识的函数插件需从输入区读取路径作为参数.")
-                    with gr.Row():
-                        for k in crazy_fns:
-                            if not crazy_fns[k].get("AsButton", True): continue
-                            variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
-                            crazy_fns[k]["Button"] = gr.Button(k, variant=variant)
-                            crazy_fns[k]["Button"].style(size="sm")
-                    with gr.Row():
-                        with gr.Accordion("更多函数插件", open=True):
-                            dropdown_fn_list = [k for k in crazy_fns.keys() if not crazy_fns[k].get("AsButton", True)]
-                            with gr.Column(scale=1):
-                                dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="").style(
-                                    container=False)
-                            with gr.Column(scale=1):
-                                switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
-
-            with gr.Tab('Setting'):
-                with gr.Accordion("展开SysPrompt & 交互界面布局 & Github地址", open=True):
-                    system_prompt = gr.Textbox(show_label=True, placeholder=f"System Prompt", label="System prompt",
-                                               value=initial_prompt)
-                    top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01, interactive=True,
-                                      label="Top-p (nucleus sampling)", )
-                    temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True,
-                                            label="Temperature", )
-                    max_length_sl = gr.Slider(minimum=256, maximum=4096, value=512, step=1, interactive=True, label="MaxLength",)
-
-                    models_box = gr.CheckboxGroup(["input加密"],
-                                                  value=["input加密"], label="对话模式")
-                    md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(
+                    ai_name = gr.Textbox(show_label=False, placeholder="Give AI a name.").style(container=False)
+                with gr.Row():
+                    user_input = gr.Textbox(lines=5, show_label=False, placeholder="Describe your AI's role.").style(
                         container=False)
+                with gr.Box():
+                    with gr.Row() as goal_list:
+                        goal_array = []
+                        for text in range(4):
+                            goal_array.append(gr.Textbox(show_label=False, placeholder="Enter up to 1 goals.").style(container=False))
+                    with gr.Row():
+                        submit_add = gr.Button("Adding goals", variant="secondary")
+                with gr.Row():
+                    __l = [str(i) for i in range(10, 101, 10)]
+                    __l.insert(0, '1')
+                    submit_numer = gr.Dropdown(__l, value='1', interactive=True, label='Number of Next').style(
+                        container=False)
+                with gr.Row():
+                    submit_next = gr.Button("Next", variant="primary")
+                    submit_auto = gr.Button("Continuous", variant="secondary")
+                    submit_stop = gr.Button("Stop", variant="stop")
 
-                    gr.Markdown(description)
-
-
-    # 整理反复出现的控件句柄组合
+    # 整理反复出现的控件句柄组合,
     # submitBtn.info
-    input_combo = [cookies, max_length_sl, md_dropdown, txt, top_p, temperature, chatbot, history, system_prompt, models_box]
+    input_combo = [cookies, max_length_sl, md_dropdown, txt, top_p, temperature, chatbot, history, system_prompt,
+                   models_box]
     output_combo = [cookies, chatbot, history, status]
     predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=input_combo, outputs=output_combo)
     # 提交按钮、重置按钮
@@ -151,6 +182,7 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
         cancel_handles.append(click_handle)
     # 文件上传区，接收文件后与chatbot的互动
     file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt], [chatbot, txt])
+    upload_history.click(get_user_upload, [chatbot], outputs=[])
     # 函数插件-固定按钮区
     for k in crazy_fns:
         if not crazy_fns[k].get("AsButton", True): continue
@@ -164,8 +196,6 @@ with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=
     def on_dropdown_changed(k):
         variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
         return {switchy_bt: gr.update(value=k, variant=variant)}
-
-
     dropdown.select(on_dropdown_changed, [dropdown], [switchy_bt])
 
 
@@ -198,7 +228,7 @@ def auto_opentab_delay():
 
     threading.Thread(target=open, name="open-browser", daemon=True).start()
     threading.Thread(target=auto_update, name="self-upgrade", daemon=True).start()
-     #threading.Thread(target=warm_up_modules, name="warm-up", daemon=True).start()
+    # threading.Thread(target=warm_up_modules, name="warm-up", daemon=True).start()
 
 
 auto_opentab_delay()
