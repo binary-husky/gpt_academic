@@ -44,7 +44,7 @@ huggingface免科学上网[在线体验](https://huggingface.co/spaces/qingxu98/
 </div>
 
 
-- 新界面（修改config.py中的LAYOUT选项即可实现“左右布局”和“上下布局”的切换）
+- 新界面（修改`config.py`中的LAYOUT选项即可实现“左右布局”和“上下布局”的切换）
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/230361456-61078362-a966-4eb5-b49e-3c62ef18b860.gif" width="700" >
 </div>
