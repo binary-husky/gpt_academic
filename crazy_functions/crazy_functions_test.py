@@ -79,14 +79,23 @@ def test_下载arxiv论文并翻译摘要():
     for cookies, cb, hist, msg in 下载arxiv论文并翻译摘要(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
         print(cb)
 
-test_解析一个Python项目()
-test_Latex英文润色()
-test_Markdown中译英()
-test_批量翻译PDF文档()
-test_谷歌检索小助手()
-test_总结word文档()
-test_下载arxiv论文并翻译摘要()
-test_解析一个Cpp项目()
+def test_联网回答问题():
+    from crazy_functions.联网的ChatGPT import 连接网络回答问题
+    txt = "“我们称之为高效”是什么梗？"
+    for cookies, cb, hist, msg in 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+        print(cb)
+
+# test_解析一个Python项目()
+# test_Latex英文润色()
+# test_Markdown中译英()
+# test_批量翻译PDF文档()
+# test_谷歌检索小助手()
+# test_总结word文档()
+# test_下载arxiv论文并翻译摘要()
+# test_解析一个Cpp项目()
+
+test_联网回答问题()
+
 
 input("程序完成，回车退出。")
 print("退出。")
