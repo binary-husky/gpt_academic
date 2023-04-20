@@ -1,11 +1,11 @@
 import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 import gradio as gr
 from request_llm.bridge_chatgpt import predict
-from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, DummyWith
+from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, custom_path_check, DummyWith
 
 # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
-proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT, API_KEY = \
-    get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'LAYOUT', 'API_KEY')
+proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT, API_KEY, CUSTOM_PATH = \
+    get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'LAYOUT', 'API_KEY', 'CUSTOM_PATH')
 
 # 如果WEB_PORT是-1, 则随机选取WEB端口
 PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
@@ -171,21 +171,22 @@ def auto_opentab_delay():
     threading.Thread(target=auto_update, name="self-upgrade", daemon=True).start()
 
 auto_opentab_delay()
-# demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION)
 demo.queue(concurrency_count=CONCURRENT_COUNT)
 
-CUSTOM_PATH = '/chatgpt'
+if custom_path_check(CUSTOM_PATH):
+    import uvicorn
+    from fastapi import FastAPI
 
-import uvicorn
-from fastapi import FastAPI
+    app = FastAPI()
 
-app = FastAPI()
+    @app.get("/")
+    def read_main():
+        return {"message": "NULL"}
 
-@app.get("/")
-def read_main():
-    return {"message": "NULL"}
+    app = gr.mount_gradio_app(app, demo, path=CUSTOM_PATH)
 
-app = gr.mount_gradio_app(app, demo, path=CUSTOM_PATH)
-
-if __name__ == '__main__':
     uvicorn.run(app, host="0.0.0.0", port=PORT)
+else:
+    demo.launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION)
+
+
