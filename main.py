@@ -112,7 +112,7 @@ def main():
                     with gr.Row():
                         resetBtn2 = gr.Button("重置", variant="secondary"); resetBtn2.style(size="sm")
                         stopBtn2 = gr.Button("停止", variant="secondary"); stopBtn2.style(size="sm")
-                        clearBtn2 = gr.Button("清除", variant="secondary", visible=False); clearBtn.style(size="sm")
+                        clearBtn2 = gr.Button("清除", variant="secondary", visible=False); clearBtn2.style(size="sm")
         # 功能区显示开关与功能区的互动
         def fn_area_visibility(a):
             ret = {}
