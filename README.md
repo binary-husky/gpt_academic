@@ -124,7 +124,9 @@ python main.py
 5. 测试函数插件
 ```
 - 测试Python项目分析
-    input区域 输入 `./crazy_functions/test_project/python/dqn` ， 然后点击 "解析整个Python项目"
+    （选择1）input区域 输入 `./crazy_functions/test_project/python/dqn` ， 然后点击 "解析整个Python项目"
+    （选择2）展开文件上传区，将python文件/包含python文件的压缩包拖拽进去，在出现反馈提示后， 然后点击 "解析整个Python项目"
+
 - 测试自我代码解读
     点击 "[多线程Demo] 解析此项目本身（源码自译解）"
 - 测试实验功能模板函数（要求gpt回答历史上的今天发生了什么），您可以根据此函数为模板，实现更复杂的功能
