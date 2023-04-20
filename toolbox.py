@@ -527,3 +527,22 @@ class DummyWith():
 
     def __exit__(self, exc_type, exc_value, traceback):
         return
+
+def custom_path_check(path: str)->bool:
+    '''
+    check path for sub url
+    
+    path: path to check
+    
+    return value: do sub url wrap
+    '''
+    if len(path) == 0:
+        print("ilegal custom path: {}\npath must not be empty\ndeploy on root url".format(path))
+        return False
+    if path[0] == '/':
+        if path[1] != '/':
+            print("deploy on sub-path {}".format(path))
+            return True
+        return False
+    print("ilegal custom path: {}\npath should begin with \'/\'\ndeploy on root url".format(path))
+    return False
