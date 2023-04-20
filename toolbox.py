@@ -540,6 +540,9 @@ def custom_path_check(path: str)->bool:
         print("ilegal custom path: {}\npath must not be empty\ndeploy on root url".format(path))
         return False
     if path[0] == '/':
+        if len(path) == 1:
+            print("deploy on root url")
+            return False
         if path[1] != '/':
             print("deploy on sub-path {}".format(path))
             return True
