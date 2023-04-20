@@ -86,7 +86,7 @@ def main():
                             crazy_fns[k]["Button"] = gr.Button(k, variant=variant)
                             crazy_fns[k]["Button"].style(size="sm")
                     with gr.Row():
-                        with gr.Accordion("解析任意code项目", open=True):
+                        with gr.Accordion("解析任意code项目", open=False):
                             gr.Markdown("输入时用逗号隔开, `*`代表通配符, 加了`^`代表不匹配<br>例如: `*.c, ^*.cpp, config.toml, ^README.md`")
                             with gr.Row():
                                 txt_pattern = gr.Textbox(show_label=False, placeholder="输入框为空则代表匹配所有文件").style(container=False)
