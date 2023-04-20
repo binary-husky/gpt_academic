@@ -36,8 +36,15 @@ def scrape_text(url, proxies) -> str:
     Returns:
         str: The scraped text
     """
-    headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36'}
-    response = requests.get(url, headers=headers, proxies=proxies)
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36',
+        'Content-Type': 'text/plain',
+    }
+    try: 
+        response = requests.get(url, headers=headers, proxies=proxies, timeout=8)
+        if response.encoding == "ISO-8859-1": response.encoding = response.apparent_encoding
+    except: 
+        return "无法连接到该网页"
     soup = BeautifulSoup(response.text, "html.parser")
     for script in soup(["script", "style"]):
         script.extract()
@@ -70,20 +77,24 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     history = []
 
     # ------------- < 第2步：依次访问网页 > -------------
-    max_search_result = 4   # 最多收纳多少个网页的结果
+    max_search_result = 5   # 最多收纳多少个网页的结果
     for index, url in enumerate(urls[:max_search_result]):
         res = scrape_text(url['link'], proxies)
         history.extend([f"第{index}份搜索结果：", res])
-        chatbot.append([f"第{index}份搜索结果：", res[:500]])
+        chatbot.append([f"第{index}份搜索结果：", res[:500]+"......"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
 
     # ------------- < 第3步：ChatGPT综合 > -------------
     i_say = f"从以上搜索结果中抽取信息，然后回答问题：{txt}"
-    i_say, history = input_clipping(inputs=i_say, history=history, max_token_limit=model_info[llm_kwargs['llm_model']]['max_token']//2)
+    i_say, history = input_clipping(    # 裁剪输入，从最长的条目开始裁剪，防止爆token
+        inputs=i_say, 
+        history=history, 
+        max_token_limit=model_info[llm_kwargs['llm_model']]['max_token']*3//4
+    )
     gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
         inputs=i_say, inputs_show_user=i_say, 
         llm_kwargs=llm_kwargs, chatbot=chatbot, history=history, 
-        sys_prompt="请从给定文本中抽取信息"
+        sys_prompt="请从给定的若干条搜索结果中抽取信息，对最相关的两个搜索结果进行总结，然后回答问题。"
     )
     chatbot[-1] = (i_say, gpt_say)
     history.append(i_say);history.append(gpt_say)
