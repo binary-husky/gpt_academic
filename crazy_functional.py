@@ -19,9 +19,9 @@ def get_crazy_functions():
     from crazy_functions.解析项目源代码 import 解析一个Lua项目
     from crazy_functions.解析项目源代码 import 解析一个CSharp项目
     from crazy_functions.总结word文档 import 总结word文档
-    from crazy_functions.三千问 import 猜你想问
+    from crazy_functions.辅助回答 import 猜你想问
     function_plugins = {
-        "三千问：猜你想问": {
+        "猜你想问": {
             "Function": HotReload(猜你想问)
         },
         "解析整个Python项目": {

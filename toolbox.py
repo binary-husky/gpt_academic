@@ -8,6 +8,10 @@ import func_box
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
 import logging
+import shutil
+import os
+import time
+import glob
 ############################### 插件输入输出接驳区 #######################################
 class ChatBotWithCookies(list):
     def __init__(self, cookie):
@@ -378,29 +382,32 @@ def find_recent_files(directory):
     return recent_files
 
 
-def on_file_uploaded(files, chatbot, txt):
+def get_user_upload(chatbot, ipaddr: gr.Request):
+    private_upload = './private_upload'
+    user_history = os.path.join(private_upload, ipaddr.client.host)
+    history = ''
+    for root, d, file in os.walk(private_upload):
+        history += f'目录：{root} 文件: {file}\n'
+    chatbot.append(['我检查了之前上传的文件: ',
+                    '[Local Message] 请自行复制以下目录or目录/文件, 供以高亮插件使用\n'
+                    f'{history}'
+                    ])
+
+def on_file_uploaded(files, chatbot, txt, ipaddr: gr.Request):
     if len(files) == 0:
         return chatbot, txt
-    import shutil
-    import os
-    import time
-    import glob
-    from toolbox import extract_archive
-    try:
-        shutil.rmtree('./private_upload/')
-    except:
-        pass
-    time_tag = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
-    os.makedirs(f'private_upload/{time_tag}', exist_ok=True)
+    private_upload = './private_upload'
+    #     shutil.rmtree('./private_upload/')  不需要删除文件
+    time_tag_path = os.path.join(private_upload, ipaddr.client.host, time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()))
+    os.makedirs(f'{time_tag_path}', exist_ok=True)
     err_msg = ''
     for file in files:
         file_origin_name = os.path.basename(file.orig_name)
-        shutil.copy(file.name, f'private_upload/{time_tag}/{file_origin_name}')
-        err_msg += extract_archive(f'private_upload/{time_tag}/{file_origin_name}',
-                                   dest_dir=f'private_upload/{time_tag}/{file_origin_name}.extract')
-    moved_files = [fp for fp in glob.glob(
-        'private_upload/**/*', recursive=True)]
-    txt = f'private_upload/{time_tag}'
+        shutil.copy(file.name, f'{time_tag_path}/{file_origin_name}')
+        err_msg += extract_archive(f'{time_tag_path}/{file_origin_name}',
+                                   dest_dir=f'{time_tag_path}/{file_origin_name}.extract')
+    moved_files = [fp for fp in glob.glob(f'{time_tag_path}/**/*', recursive=True)]
+    txt = f'{time_tag_path}'
     moved_files_str = '\t\n\n'.join(moved_files)
     chatbot.append(['我上传了文件，请查收',
                     f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
@@ -510,3 +517,9 @@ class DummyWith():
 
     def __exit__(self, exc_type, exc_value, traceback):
         return
+
+
+if __name__ == '__main__':
+    private_upload = './private_upload'
+    for r, d, f in os.walk(private_upload):
+        print(r, f)
