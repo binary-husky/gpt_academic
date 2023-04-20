@@ -296,8 +296,9 @@ def 解析任意code项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys
     extract_folder_path = maybe_dir[0].replace('\\', '/') if len(maybe_dir) != 0 else ""
     # 按输入的匹配模式寻找上传的非压缩文件和已解压的文件
     file_manifest = [f for f in glob.glob(f'{project_folder}/**') if os.path.isfile(f) and not re.search(pattern_except, f)] + \
-                    [f for _ in pattern_include for f in glob.glob(f'{extract_folder_path}/**/{_}', recursive=True) if \
-                     "" != extract_folder_path and os.path.isfile(f) and not re.search(pattern_except, f)]
+                    [f for _ in pattern_include for f in glob.glob(f'{extract_folder_path}/**/{_}', recursive=True) if "" != extract_folder_path and \
+                      os.path.isfile(f) and (not re.search(pattern_except, f) or _.endswith('.' + re.search(pattern_except, f).group().split('.')[-1]))]
+
     if len(file_manifest) == 0:
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
