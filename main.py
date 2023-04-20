@@ -171,4 +171,21 @@ def auto_opentab_delay():
     threading.Thread(target=auto_update, name="self-upgrade", daemon=True).start()
 
 auto_opentab_delay()
-demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION)
+# demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION)
+demo.queue(concurrency_count=CONCURRENT_COUNT)
+
+CUSTOM_PATH = '/chatgpt'
+
+import uvicorn
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def read_main():
+    return {"message": "NULL"}
+
+app = gr.mount_gradio_app(app, demo, path=CUSTOM_PATH)
+
+if __name__ == '__main__':
+    uvicorn.run(app, host="0.0.0.0", port=PORT)
