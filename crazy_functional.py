@@ -19,11 +19,17 @@ def get_crazy_functions():
     from crazy_functions.解析项目源代码 import 解析一个Lua项目
     from crazy_functions.解析项目源代码 import 解析一个CSharp项目
     from crazy_functions.总结word文档 import 总结word文档
+    from crazy_functions.解析JupyterNotebook import 解析ipynb文件
     function_plugins = {
 
         "解析整个Python项目": {
             "Color": "stop",    # 按钮颜色
             "Function": HotReload(解析一个Python项目)
+        },
+        "解析Jupyter Notebook文件": {
+            "Color": "stop",
+            "AsButton":False,
+            "Function": HotReload(解析ipynb文件),
         },
         "批量总结Word文档": {
             "Color": "stop",
