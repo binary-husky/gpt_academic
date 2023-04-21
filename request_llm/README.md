@@ -1,4 +1,4 @@
-# 如何使用其他大语言模型（v3.0分支测试中）
+# 如何使用其他大语言模型
 
 ## ChatGLM
 
@@ -15,7 +15,7 @@ LLM_MODEL = "chatglm"
 
 
 ---
-## Text-Generation-UI (TGUI)
+## Text-Generation-UI (TGUI，调试中，暂不可用)
 
 ### 1. 部署TGUI
 ``` sh

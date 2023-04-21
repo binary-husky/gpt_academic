@@ -111,7 +111,7 @@ python -m pip install -r requirements.txt
 # （II-3）python -m pip install -r requirements.txt
 ```
 
-如果需要支持清华ChatGLM后端，需要额外安装更多依赖（不熟悉python、电脑配置不佳者，建议不要尝试）：
+如果需要支持清华ChatGLM后端，需要额外安装更多依赖（前提条件：熟悉python + 电脑配置够强）：
 ```sh
 python -m pip install -r request_llm/requirements_chatglm.txt
 ```
@@ -133,22 +133,25 @@ python main.py
 - 函数插件区下拉菜单中有更多功能可供选择
 ```
 
-## 安装-方法2：使用Docker (Linux)
+## 安装-方法2：使用Docker
 
 1. 仅ChatGPT（推荐大多数人选择）
+
 ``` sh
 # 下载项目
 git clone https://github.com/binary-husky/chatgpt_academic.git
 cd chatgpt_academic
-# 配置 海外Proxy 和 OpenAI API KEY
+# 配置 “海外Proxy”， “API_KEY” 以及 “WEB_PORT” (例如50923) 等
 用任意文本编辑器编辑 config.py
 # 安装
 docker build -t gpt-academic .
-# 运行
+#（最后一步-选择1）在Linux环境下，用`--net=host`更方便快捷
 docker run --rm -it --net=host gpt-academic
+#（最后一步-选择2）在macOS/windows环境下，只能用-p选项将容器上的端口(例如50923)暴露给主机上的端口
+docker run --rm -it -p 50923:50923 gpt-academic
 ```
 
-2. ChatGPT+ChatGLM（需要对docker熟悉 + 读懂Dockerfile + 电脑配置够强）
+2. ChatGPT+ChatGLM（需要对Docker熟悉 + 读懂Dockerfile + 电脑配置够强）
 
 ``` sh
 # 修改Dockerfile
@@ -260,6 +263,14 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/229720562-fe6c3508-6142-4635-a83d-21eb3669baee.png" height="400" >
 </div>
+
+8. 互联网在线信息综合
+
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/233575247-fb00819e-6d1b-4bb7-bd54-1d7528f03dd9.png" width="800" >
+</div>
+
+
 
 ## Todo 与 版本规划:
 - version 3.2+ (todo): 函数插件支持更多参数接口
