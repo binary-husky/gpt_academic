@@ -12,10 +12,10 @@ from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_
 def 猜你想问(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     if txt:
         show_say = txt
-        prompt = txt+'\nAfter answering the questions, list three more questions that users may ask.'
+        prompt = txt+'\n回答完问题后，再列出用户可能提出的三个问题。'
     else:
-        prompt = history[-1]+"\nAnalyze the above answers and list three more questions that users may ask."
-        show_say = 'Analyze the above answers and list three more questions that users may ask.'
+        prompt = history[-1]+"\n分析上述回答，再列出用户可能提出的三个问题。"
+        show_say = '分析上述回答，再列出用户可能提出的三个问题。'
     gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
         inputs=prompt,
         inputs_show_user=show_say,
