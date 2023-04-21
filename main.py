@@ -186,7 +186,7 @@ def main():
         threading.Thread(target=warm_up_modules, name="warm-up", daemon=True).start()
 
     auto_opentab_delay()
-    demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, favicon_path="docs/logo.png", share=True)
+    demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, favicon_path="docs/logo.png")
 
 if __name__ == "__main__":
     main()
