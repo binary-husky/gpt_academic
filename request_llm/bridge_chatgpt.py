@@ -21,7 +21,7 @@ import importlib
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
-from toolbox import get_conf, update_ui, is_any_api_key, select_api_key
+from toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys
 proxies, API_KEY, TIMEOUT_SECONDS, MAX_RETRY = \
     get_conf('proxies', 'API_KEY', 'TIMEOUT_SECONDS', 'MAX_RETRY')
 
@@ -118,7 +118,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     """
     if is_any_api_key(inputs):
         chatbot._cookies['api_key'] = inputs
-        chatbot.append(("输入已识别为openai的api_key", "api_key已导入"))
+        chatbot.append(("输入已识别为openai的api_key", what_keys(inputs)))
         yield from update_ui(chatbot=chatbot, history=history, msg="api_key已导入") # 刷新界面
         return
     elif not is_any_api_key(chatbot._cookies['api_key']):

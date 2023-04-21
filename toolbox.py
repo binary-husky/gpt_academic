@@ -432,6 +432,19 @@ def is_any_api_key(key):
     else:
         return is_openai_api_key(key) or is_api2d_key(key)
 
+def what_keys(keys):
+    avail_key_list = {'OpenAI Key':0, "API2D Key":0}
+    key_list = keys.split(',')
+
+    for k in key_list:
+        if is_openai_api_key(k): 
+            avail_key_list['OpenAI Key'] += 1
+
+    for k in key_list:
+        if is_api2d_key(k): 
+            avail_key_list['API2D Key'] += 1
+
+    return f"检测到： OpenAI Key {avail_key_list['OpenAI Key']} 个，API2D Key {avail_key_list['API2D Key']} 个"
 
 def select_api_key(keys, llm_model):
     import random
