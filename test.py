@@ -46,6 +46,26 @@ class ChatGPTForTester:
         self.book()
         self.demo.launch()
 
+
+
+class MyClass:
+
+    def __init__(self):
+        self.my_attribute1 = ''
+
+    def __getattribute__(self, name):
+        try:
+            return object.__getattribute__(self, name)
+        except AttributeError:
+            return []
+
+    def my_method(self):
+        self.test = '12312312312'
+        print("This is my method.")
+
 if __name__ == "__main__":
-    ChatGPTForTester().main()
+    __url = gr.State(f'https://')
+    print(__url)
+
+
 
