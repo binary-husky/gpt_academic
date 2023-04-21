@@ -92,8 +92,8 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
 
     # chatglm 没有 sys_prompt 接口，因此把prompt加入 history
     history_feedin = []
+    history_feedin.append(["What can I do?", sys_prompt])
     for i in range(len(history)//2):
-        history_feedin.append(["What can I do?", sys_prompt] )
         history_feedin.append([history[2*i], history[2*i+1]] )
 
     watch_dog_patience = 5 # 看门狗 (watchdog) 的耐心, 设置5秒即可
@@ -131,10 +131,13 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         inputs = core_functional[additional_fn]["Prefix"] + inputs + core_functional[additional_fn]["Suffix"]
 
     history_feedin = []
+    history_feedin.append(["What can I do?", system_prompt] )
     for i in range(len(history)//2):
-        history_feedin.append(["What can I do?", system_prompt] )
         history_feedin.append([history[2*i], history[2*i+1]] )
 
     for response in glm_handle.stream_chat(query=inputs, history=history_feedin, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
         chatbot[-1] = (inputs, response)
         yield from update_ui(chatbot=chatbot, history=history)
+
+    history.extend([inputs, response])
+    yield from update_ui(chatbot=chatbot, history=history)
