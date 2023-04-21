@@ -17,4 +17,6 @@ COPY . .
 # 可选步骤，用于预热模块
 RUN python3  -c 'from check_proxy import warm_up_modules; warm_up_modules()'
 
+EXPOSE 3001
+
 CMD ["python3", "-u", "main.py"]
