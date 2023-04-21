@@ -264,6 +264,14 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 <img src="https://user-images.githubusercontent.com/96192199/229720562-fe6c3508-6142-4635-a83d-21eb3669baee.png" height="400" >
 </div>
 
+8. 互联网在线信息综合
+
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/233575247-fb00819e-6d1b-4bb7-bd54-1d7528f03dd9.png" height="400" >
+</div>
+
+
+
 ## Todo 与 版本规划:
 - version 3.2+ (todo): 函数插件支持更多参数接口
 - version 3.1: 支持同时问询多个gpt模型！支持api2d，支持多个apikey负载均衡
