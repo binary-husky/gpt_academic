@@ -267,7 +267,7 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 8. 互联网在线信息综合
 
 <div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/233575247-fb00819e-6d1b-4bb7-bd54-1d7528f03dd9.png" height="400" >
+<img src="https://user-images.githubusercontent.com/96192199/233575247-fb00819e-6d1b-4bb7-bd54-1d7528f03dd9.png" width="800" >
 </div>
 
 
