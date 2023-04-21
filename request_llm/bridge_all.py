@@ -9,8 +9,9 @@
     2. predict_no_ui_long_connection：在实验过程中发现调用predict_no_ui处理长文档时，和openai的连接容易断掉，这个函数用stream的方式解决这个问题，同样支持多线程
 """
 import tiktoken
-from functools import wraps, lru_cache
+from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor
+from toolbox import get_conf
 
 from .bridge_chatgpt import predict_no_ui_long_connection as chatgpt_noui
 from .bridge_chatgpt import predict as chatgpt_ui
@@ -42,18 +43,37 @@ class LazyloadTiktoken(object):
     def decode(self, *args, **kwargs):
         encoder = self.get_encoder(self.model) 
         return encoder.decode(*args, **kwargs)
-    
+
+# Endpoint 重定向
+API_URL_REDIRECT, = get_conf("API_URL_REDIRECT")
+openai_endpoint = "https://api.openai.com/v1/chat/completions"
+api2d_endpoint = "https://openai.api2d.net/v1/chat/completions"
+# 兼容旧版的配置
+try:
+    API_URL, = get_conf("API_URL")
+    if API_URL != "https://api.openai.com/v1/chat/completions": 
+        openai_endpoint = API_URL
+        print("警告！API_URL配置选项将被弃用，请更换为API_URL_REDIRECT配置")
+except:
+    pass
+# 新版配置
+if openai_endpoint in API_URL_REDIRECT: openai_endpoint = API_URL_REDIRECT[openai_endpoint]
+if api2d_endpoint in API_URL_REDIRECT: api2d_endpoint = API_URL_REDIRECT[api2d_endpoint]
+
+
+# 获取tokenizer
 tokenizer_gpt35 = LazyloadTiktoken("gpt-3.5-turbo")
 tokenizer_gpt4 = LazyloadTiktoken("gpt-4")
 get_token_num_gpt35 = lambda txt: len(tokenizer_gpt35.encode(txt, disallowed_special=()))
 get_token_num_gpt4 = lambda txt: len(tokenizer_gpt4.encode(txt, disallowed_special=()))
+
 
 model_info = {
     # openai
     "gpt-3.5-turbo": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
-        "endpoint": "https://api.openai.com/v1/chat/completions",
+        "endpoint": openai_endpoint,
         "max_token": 4096,
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
@@ -62,7 +82,7 @@ model_info = {
     "gpt-4": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
-        "endpoint": "https://api.openai.com/v1/chat/completions",
+        "endpoint": openai_endpoint,
         "max_token": 8192,
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
@@ -72,7 +92,7 @@ model_info = {
     "api2d-gpt-3.5-turbo": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
-        "endpoint": "https://openai.api2d.net/v1/chat/completions",
+        "endpoint": api2d_endpoint,
         "max_token": 4096,
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
@@ -81,7 +101,7 @@ model_info = {
     "api2d-gpt-4": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
-        "endpoint": "https://openai.api2d.net/v1/chat/completions",
+        "endpoint": api2d_endpoint,
         "max_token": 8192,
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
