@@ -137,34 +137,21 @@ python main.py
 
 1. 仅ChatGPT（推荐大多数人选择）
 
-在 Linux 环境下
 ``` sh
 # 下载项目
 git clone https://github.com/binary-husky/chatgpt_academic.git
 cd chatgpt_academic
-# 配置 海外Proxy 和 OpenAI API KEY
+# 配置 “海外Proxy”， “API_KEY” 以及 “WEB_PORT” (例如50923) 等
 用任意文本编辑器编辑 config.py
 # 安装
 docker build -t gpt-academic .
-# 运行 
+#（最后一步-选择1）在Linux环境下，用`--net=host`更方便快捷
 docker run --rm -it --net=host gpt-academic
-```
-
-在 macOS 环境下
-``` sh
-# 下载项目
-git clone https://github.com/binary-husky/chatgpt_academic.git
-cd chatgpt_academic
-# 配置 海外Proxy 和 OpenAI API KEY
-# 把 WEB_PORT 设置为一个端口固定端口 (例如 50923)
-用任意文本编辑器编辑 config.py
-# 安装
-docker build -t gpt-academic .
-# 运行时用 -p 将容器上的端口 (例如 50923) 暴露给主机上的端口
+#（最后一步-选择2）在macOS/windows环境下，只能用-p选项将容器上的端口(例如50923)暴露给主机上的端口
 docker run --rm -it -p 50923:50923 gpt-academic
 ```
 
-1. ChatGPT+ChatGLM（需要对docker熟悉 + 读懂Dockerfile + 电脑配置够强）
+2. ChatGPT+ChatGLM（需要对Docker熟悉 + 读懂Dockerfile + 电脑配置够强）
 
 ``` sh
 # 修改Dockerfile
