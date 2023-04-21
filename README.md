@@ -111,7 +111,7 @@ python -m pip install -r requirements.txt
 # （II-3）python -m pip install -r requirements.txt
 ```
 
-如果需要支持清华ChatGLM后端，需要额外安装更多依赖（不熟悉python、电脑配置不佳者，建议不要尝试）：
+如果需要支持清华ChatGLM后端，需要额外安装更多依赖（前提条件：熟悉python + 电脑配置够强）：
 ```sh
 python -m pip install -r request_llm/requirements_chatglm.txt
 ```
