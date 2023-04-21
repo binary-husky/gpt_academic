@@ -447,7 +447,7 @@ def select_api_key(keys, llm_model):
             if is_api2d_key(k): avail_key_list.append(k)
 
     if len(avail_key_list) == 0:
-        raise RuntimeError(f"您提供的api-key不满足要求，不包含任何可用于{llm_model}的api-key。")
+        raise RuntimeError(f"您提供的api-key不满足要求，不包含任何可用于{llm_model}的api-key。您可能选择了错误的模型或请求源。")
 
     api_key = random.choice(avail_key_list) # 随机负载均衡
     return api_key
