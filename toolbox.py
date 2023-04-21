@@ -382,16 +382,41 @@ def find_recent_files(directory):
     return recent_files
 
 
+
 def get_user_upload(chatbot, ipaddr: gr.Request):
     private_upload = './private_upload'
     user_history = os.path.join(private_upload, ipaddr.client.host)
     history = ''
-    for root, d, file in os.walk(private_upload):
-        history += f'目录：{root} 文件: {file}\n'
+    for root, d, file in os.walk(user_history):
+        for f in file:
+            history += f'{os.path.join(root, f)}\n\n'
     chatbot.append(['我检查了之前上传的文件: ',
-                    '[Local Message] 请自行复制以下目录or目录/文件, 供以高亮插件使用\n'
-                    f'{history}'
+                    '[Local Message] 请自行复制以下目录or目录/文件, 供以高亮插件使用\n\n'
+                    f'> {history}'
                     ])
+    return chatbot
+
+
+def get_user_download(chatbot, link, file):
+    for file_handle in str(file).split('\n'):
+        if os.path.isfile(file_handle):
+            # temp_file = func_box.copy_temp_file(file_handle) 无法使用外部的临时目录
+            temp_file = os.path.abspath(file_handle)
+            if temp_file:
+                dir_file, file_name = ('/'.join(str(file_handle).split('/')[-2:]), os.path.basename(file_handle))
+                chatbot.append(['Convert the file address to a download link at：',
+                                f'[Local Message] Successful conversion\n\n '
+                                f'<a href="{link["local"]}/file={temp_file}" target="_blank" download="{dir_file}" class="svelte-xrr240">{file_name}</a>'])
+            else:
+                chatbot.append(['Convert the file address to a download link at：',
+                                f'[Local Message] Conversion failed, file or not exist.'])
+        elif os.path.isdir(file_handle):
+            chatbot.append(['Convert the file address to a download link at：',
+                            '[Local Message] Cannot convert directory to download link, please try again.'])
+        elif file_handle == '':
+            pass
+    return chatbot, file
+
 
 def on_file_uploaded(files, chatbot, txt, ipaddr: gr.Request):
     if len(files) == 0:
