@@ -210,7 +210,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
             return_string_collect.append( f"【{str(models[i])} 说】: <font color=\"{colors[i]}\"> {future.result()} </font>" )
 
         window_mutex[-1] = False # stop mutex thread
-        res = '<br/>\n\n---\n\n'.join(return_string_collect)
+        res = '<br/><br/>\n\n---\n\n'.join(return_string_collect)
         return res
 
 
