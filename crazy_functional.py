@@ -177,20 +177,23 @@ def get_crazy_functions():
 
     ###################### 第三组插件 ###########################
     # [第三组插件]: 尚未充分测试的函数插件，放在这里
-    try:
-        from crazy_functions.下载arxiv论文翻译摘要 import 下载arxiv论文并翻译摘要
-        function_plugins.update({
-            "一键下载arxiv论文并翻译摘要（先在input输入编号，如1812.10695）": {
-                "Color": "stop",
-                "AsButton": False,  # 加入下拉菜单中
-                "Function": HotReload(下载arxiv论文并翻译摘要)
-            }
-        })
-
-    except Exception as err:
-        print(f'[下载arxiv论文并翻译摘要] 插件导入失败 {str(err)}')
+    from crazy_functions.下载arxiv论文翻译摘要 import 下载arxiv论文并翻译摘要
+    function_plugins.update({
+        "一键下载arxiv论文并翻译摘要（先在input输入编号，如1812.10695）": {
+            "Color": "stop",
+            "AsButton": False,  # 加入下拉菜单中
+            "Function": HotReload(下载arxiv论文并翻译摘要)
+        }
+    })
         
-
+    from crazy_functions.联网的ChatGPT import 连接网络回答问题
+    function_plugins.update({
+        "连接网络回答问题（先输入问题，再点击按钮，需要访问谷歌）": {
+            "Color": "stop",
+            "AsButton": False,  # 加入下拉菜单中
+            "Function": HotReload(连接网络回答问题)
+        }
+    })
 
     ###################### 第n组插件 ###########################
     return function_plugins
