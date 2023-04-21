@@ -96,7 +96,6 @@ class ChatBot(ChatBotFrame):
     def draw_function_chat(self):
         with gr.Tab('Function'):
             with gr.Accordion("基础功能区", open=True) as self.area_basic_fn:
-                gr.Markdown('> 以下功能依赖输入区内容')
                 with gr.Row():
                     for k in functional:
                         variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"

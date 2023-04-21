@@ -32,10 +32,8 @@ def ArgsGeneralWrapper(f):
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
     def decorated(cookies, max_length, llm_model, txt, top_p, temperature,
-                  chatbot, history, system_prompt, models, ipaddr:gr.Request,  *args):
+                  chatbot, history, system_prompt, models, ipaddr: gr.Request, *args):
         """"""
-        txt_passon = txt
-        if 'input加密' in models: txt_passon = func_box.encryption_str(txt)
         # 引入一个有cookie的chatbot
         cookies.update({
             'top_p':top_p, 
@@ -54,6 +52,13 @@ def ArgsGeneralWrapper(f):
         }
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
+        txt_passon = txt
+        if 'input加密' in models: txt_passon = func_box.encryption_str(txt)
+        if txt_passon == '' and len(args) > 1:
+            msgs = '### Warning 输入框为空\n' \
+                   'tips: 使用基础功能时，请在输入栏内输入需要处理的文本内容'
+            yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=msgs)  # 刷新界面
+            return
         yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
     return decorated
 
@@ -105,7 +110,6 @@ def HotReload(f):
             args = tuple(args[element] for element in range(len(args)) if element != 6)
             yield from f_hot_reload(*args, **kwargs)
     return decorated
-
 
 ####################################### 其他小工具 #####################################
 
