@@ -173,6 +173,8 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 2. 使用WSL2（Windows Subsystem for Linux 子系统）
 请访问[部署wiki-2](https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2)
 
+3. 如何在二级网址（ 如http://localhost/subpath ）下运行
+请访问[FastAPI运行说明](docs/WithFastapi.md)
 
 ## 安装-代理配置
 1. 常规方法
