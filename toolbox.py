@@ -24,23 +24,23 @@ def ArgsGeneralWrapper(f):
     """
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
-    def decorated(cookies, max_length, llm_model, txt, txt2, top_p, temperature, chatbot, history, system_prompt, *args):
+    def decorated(cookies, max_length, llm_model, txt, txt2, top_p, temperature, chatbot, history, system_prompt, plugin_advanced_arg, *args):
         txt_passon = txt
         if txt == "" and txt2 != "": txt_passon = txt2
         # 引入一个有cookie的chatbot
         cookies.update({
-            'top_p':top_p, 
+            'top_p':top_p,
             'temperature':temperature,
         })
         llm_kwargs = {
             'api_key': cookies['api_key'],
             'llm_model': llm_model,
-            'top_p':top_p, 
+            'top_p':top_p,
             'max_length': max_length,
             'temperature':temperature,
         }
         plugin_kwargs = {
-            # 目前还没有
+            "advanced_arg": plugin_advanced_arg,
         }
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
@@ -219,7 +219,7 @@ def markdown_convertion(txt):
             return content
         else:
             return tex2mathml_catch_exception(content)
-        
+
     def markdown_bug_hunt(content):
         """
         解决一个mdx_math的bug（单$包裹begin命令时多余<script>）
@@ -227,7 +227,7 @@ def markdown_convertion(txt):
         content = content.replace('<script type="math/tex">\n<script type="math/tex; mode=display">', '<script type="math/tex; mode=display">')
         content = content.replace('</script>\n</script>', '</script>')
         return content
-    
+
 
     if ('$' in txt) and ('```' not in txt):  # 有$标识的公式符号，且没有代码段```的标识
         # convert everything to html format
@@ -248,7 +248,7 @@ def markdown_convertion(txt):
 def close_up_code_segment_during_stream(gpt_reply):
     """
     在gpt输出代码的中途（输出了前面的```，但还没输出完后面的```），补上后面的```
-    
+
     Args:
         gpt_reply (str): GPT模型返回的回复字符串。
 
@@ -511,7 +511,7 @@ class DummyWith():
     它的作用是……额……没用，即在代码结构不变得情况下取代其他的上下文管理器。
     上下文管理器是一种Python对象，用于与with语句一起使用，
     以确保一些资源在代码块执行期间得到正确的初始化和清理。
-    上下文管理器必须实现两个方法，分别为 __enter__()和 __exit__()。 
+    上下文管理器必须实现两个方法，分别为 __enter__()和 __exit__()。
     在上下文执行开始的情况下，__enter__()方法会在代码块被执行前被调用，
     而在上下文执行结束时，__exit__()方法则会被调用。
     """
