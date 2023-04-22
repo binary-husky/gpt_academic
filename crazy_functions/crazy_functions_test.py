@@ -108,6 +108,13 @@ def test_联网回答问题():
         print("当前问答：", cb[-1][-1].replace("\n"," "))
     for i, it in enumerate(cb): print亮蓝(it[0]); print亮黄(it[1])
 
+def test_解析ipynb文件():
+    from crazy_functions.解析JupyterNotebook import 解析ipynb文件
+    txt = "crazy_functions/test_samples"
+    for cookies, cb, hist, msg in 解析ipynb文件(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+        print(cb)
+
+
 # test_解析一个Python项目()
 # test_Latex英文润色()
 # test_Markdown中译英()
@@ -116,9 +123,8 @@ def test_联网回答问题():
 # test_总结word文档()
 # test_下载arxiv论文并翻译摘要()
 # test_解析一个Cpp项目()
-
-test_联网回答问题()
-
+# test_联网回答问题()
+test_解析ipynb文件()
 
 input("程序完成，回车退出。")
 print("退出。")
