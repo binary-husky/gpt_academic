@@ -293,7 +293,7 @@ def 解析任意code项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys
         return
     # 若上传压缩文件, 先寻找到解压的文件夹路径, 从而避免解析压缩文件
     maybe_dir = [f for f in glob.glob(f'{project_folder}/*') if os.path.isdir(f)]
-    if maybe_dir[0].endswith('.extract'):
+    if len(maybe_dir)>0 and maybe_dir[0].endswith('.extract'):
         extract_folder_path = maybe_dir[0]
     else:
         extract_folder_path = project_folder
