@@ -292,13 +292,14 @@ def 解析任意code项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
     # 若上传压缩文件, 先寻找到解压的文件夹路径, 从而避免解析压缩文件
-    maybe_dir = [f for f in glob.glob(f'{project_folder}/**') if os.path.isdir(f)]
-    extract_folder_path = maybe_dir[0].replace('\\', '/') if len(maybe_dir) != 0 else ""
+    maybe_dir = [f for f in glob.glob(f'{project_folder}/*') if os.path.isdir(f)]
+    if maybe_dir[0].endswith('.extract'):
+        extract_folder_path = maybe_dir[0]
+    else:
+        extract_folder_path = project_folder
     # 按输入的匹配模式寻找上传的非压缩文件和已解压的文件
-    file_manifest = [f for f in glob.glob(f'{project_folder}/**') if os.path.isfile(f) and not re.search(pattern_except, f)] + \
-                    [f for _ in pattern_include for f in glob.glob(f'{extract_folder_path}/**/{_}', recursive=True) if "" != extract_folder_path and \
-                      os.path.isfile(f) and (not re.search(pattern_except, f) or _.endswith('.' + re.search(pattern_except, f).group().split('.')[-1]))]
-
+    file_manifest = [f for pattern in pattern_include for f in glob.glob(f'{extract_folder_path}/**/{pattern}', recursive=True) if "" != extract_folder_path and \
+                      os.path.isfile(f) and (not re.search(pattern_except, f) or pattern.endswith('.' + re.search(pattern_except, f).group().split('.')[-1]))]
     if len(file_manifest) == 0:
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
