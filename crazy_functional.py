@@ -203,7 +203,7 @@ def get_crazy_functions():
             "Color": "stop",
             "AsButton": False,
             "AdvancedArgs": True, # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "输入时用逗号隔开, *代表通配符, 加了^代表不匹配。例如: \"*.c, ^*.cpp, config.toml, ^README.md\"", # 高级参数输入区的显示提示
+            "ArgsReminder": "输入时用逗号隔开, *代表通配符, 加了^代表不匹配; 不输入代表全部匹配。例如: \"*.c, ^*.cpp, config.toml, ^*.json\"", # 高级参数输入区的显示提示
             "Function": HotReload(解析任意code项目)
         },
     })
