@@ -107,7 +107,7 @@ def ipynb解释(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbo
 def 解析ipynb文件(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     chatbot.append([
         "函数插件功能？",
-        "对IPynb文件进行解析"])
+        "对IPynb文件进行解析。Contributor: codycjy."])
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
     history = []    # 清空历史
