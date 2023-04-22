@@ -91,8 +91,8 @@ def main():
                             with gr.Row():
                                 dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="").style(container=False)
                             with gr.Row():
-                                with gr.Accordion("高级函数插件参数区：", open=True, visible=False) as area_fn_kwargs:
-                                    plugin_advanced_arg = gr.Textbox(show_label=False, placeholder="输入框为空则代表匹配所有文件").style(container=False)
+                                plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False, 
+                                                                 placeholder="这里是特殊函数插件的高级参数输入区").style(container=False)
                             with gr.Row():
                                 switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
                     with gr.Row():
@@ -125,10 +125,10 @@ def main():
             ret.update({area_input_secondary: gr.update(visible=("底部输入区" in a))})
             ret.update({clearBtn: gr.update(visible=("输入清除键" in a))})
             ret.update({clearBtn2: gr.update(visible=("输入清除键" in a))})
-            ret.update({area_fn_kwargs: gr.update(visible=("插件参数区" in a))})
+            ret.update({plugin_advanced_arg: gr.update(visible=("插件参数区" in a))})
             if "底部输入区" in a: ret.update({txt: gr.update(value="")})
             return ret
-        checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn, area_input_primary, area_input_secondary, txt, txt2, clearBtn, clearBtn2, area_fn_kwargs] )
+        checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn, area_input_primary, area_input_secondary, txt, txt2, clearBtn, clearBtn2, plugin_advanced_arg] )
         # 整理反复出现的控件句柄组合
         input_combo = [cookies, max_length_sl, md_dropdown, txt, txt2, top_p, temperature, chatbot, history, system_prompt, plugin_advanced_arg]
         output_combo = [cookies, chatbot, history, status]
@@ -159,11 +159,11 @@ def main():
             variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
             ret = {switchy_bt: gr.update(value=k, variant=variant)}
             if crazy_fns[k].get("AdvancedArgs", False): # 是否唤起高级插件参数区
-                ret.update({area_fn_kwargs: gr.update(visible=True,  label=f"插件{k}的高级参数说明：" + crazy_fns[k].get("ArgsReminder", [f"没有提供高级参数功能说明"]))})
+                ret.update({plugin_advanced_arg: gr.update(visible=True,  label=f"插件[{k}]的高级参数说明：" + crazy_fns[k].get("ArgsReminder", [f"没有提供高级参数功能说明"]))})
             else:
-                ret.update({area_fn_kwargs: gr.update(visible=False, label=f"插件{k}不需要高级参数。")})
+                ret.update({plugin_advanced_arg: gr.update(visible=False, label=f"插件[{k}]不需要高级参数。")})
             return ret
-        dropdown.select(on_dropdown_changed, [dropdown], [switchy_bt, area_fn_kwargs] )
+        dropdown.select(on_dropdown_changed, [dropdown], [switchy_bt, plugin_advanced_arg] )
         def on_md_dropdown_changed(k):
             return {chatbot: gr.update(label="当前模型："+k)}
         md_dropdown.select(on_md_dropdown_changed, [md_dropdown], [chatbot] )
