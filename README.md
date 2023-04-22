@@ -270,6 +270,8 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/233575247-fb00819e-6d1b-4bb7-bd54-1d7528f03dd9.png" width="800" >
+<img src="https://user-images.githubusercontent.com/96192199/233779501-5ce826f0-6cca-4d59-9e5f-b4eacb8cc15f.png" width="800" >
+
 </div>
 
 
