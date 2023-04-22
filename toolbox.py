@@ -521,7 +521,7 @@ class DummyWith():
     def __exit__(self, exc_type, exc_value, traceback):
         return
 
-def run_gradio(demo, auth, port, custom_path):
+def run_gradio_in_subpath(demo, auth, port, custom_path):
     def is_path_legal(path: str)->bool:
         '''
         check path for sub url
