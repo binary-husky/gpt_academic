@@ -26,7 +26,7 @@ def get_crazy_functions():
             "Color": "stop",    # 按钮颜色
             "Function": HotReload(解析一个Python项目)
         },
-        "解析Jupyter Notebook文件": {
+        "[测试功能] 解析Jupyter Notebook文件": {
             "Color": "stop",
             "AsButton":False,
             "Function": HotReload(解析ipynb文件),
