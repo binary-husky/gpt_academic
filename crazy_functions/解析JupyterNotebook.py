@@ -67,11 +67,16 @@ def parseNotebook(filename, enable_markdown=1):
 def ipynb解释(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
     from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 
+    enable_markdown = plugin_kwargs.get("advanced_arg", "1")
+    try:
+        enable_markdown = int(enable_markdown)
+    except ValueError:
+        enable_markdown = 1
+
     pfg = PaperFileGroup()
 
-    print(file_manifest)
     for fp in file_manifest:
-        file_content = parseNotebook(fp, enable_markdown=1)
+        file_content = parseNotebook(fp, enable_markdown=enable_markdown)
         pfg.file_paths.append(fp)
         pfg.file_contents.append(file_content)
 
