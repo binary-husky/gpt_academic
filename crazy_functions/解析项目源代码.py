@@ -268,7 +268,7 @@ def 解析一个CSharp项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
 
 @CatchException
 def 解析任意code项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    txt_pattern = plugin_kwargs.get("txt_pattern")
+    txt_pattern = plugin_kwargs.get("advanced_arg")
     txt_pattern = txt_pattern.replace("，", ",")
     # 将要匹配的模式(例如: *.c, *.cpp, *.py, config.toml)
     pattern_include = [_.lstrip(" ,").rstrip(" ,") for _ in txt_pattern.split(",") if _ != "" and not _.strip().startswith("^")]
