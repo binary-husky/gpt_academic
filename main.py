@@ -188,7 +188,7 @@ def main():
     auto_opentab_delay()
     demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, favicon_path="docs/logo.png")
 
-    # 如果需要在二级路径下运行gradio
+    # 如果需要在二级路径下运行
     # CUSTOM_PATH, = get_conf('CUSTOM_PATH')
     # if CUSTOM_PATH != "/": 
     #     from toolbox import run_gradio_in_subpath
