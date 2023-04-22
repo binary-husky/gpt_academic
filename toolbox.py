@@ -520,3 +520,14 @@ class DummyWith():
 
     def __exit__(self, exc_type, exc_value, traceback):
         return
+
+def run_gradio(demo, auth, favicon_path, port, custom_path):
+    import uvicorn
+    import gradio as gr
+    from fastapi import FastAPI
+    app = FastAPI()
+    @app.get("/")
+    def read_main(): 
+        return {"message": "NULL"}
+    app = gr.mount_gradio_app(app, demo, path=custom_path, auth=auth, favicon_path=favicon_path)
+    uvicorn.run(app, host="0.0.0.0", port=port)

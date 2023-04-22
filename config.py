@@ -60,3 +60,6 @@ AUTHENTICATION = []
 # 重新URL重新定向，实现更换API_URL的作用（常规情况下，不要修改！！）
 # 格式 {"https://api.openai.com/v1/chat/completions": "重定向的URL"}
 API_URL_REDIRECT = {}
+
+# 如果你需要把网址放在二级地址下（常规情况下，不要修改！！）
+CUSTOM_PATH = "/"
