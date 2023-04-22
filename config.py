@@ -62,4 +62,4 @@ AUTHENTICATION = []
 API_URL_REDIRECT = {}
 
 # 如果你需要把网址放在二级地址下（常规情况下，不要修改！！）
-CUSTOM_PATH = "/"
+CUSTOM_PATH = "/gra"
