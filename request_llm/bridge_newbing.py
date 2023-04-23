@@ -435,7 +435,7 @@ class GetNewBingHandle(Process):
         try:
             self.success = False
             import rich
-            self.info = "依赖检测通过，等待NewBing响应。注意目前不能多人同时调用NewBing接口，否则将导致每个人的NewBing问询历史互相渗透。调用NewBing时，会自动使用已配置的代理。"
+            self.info = "依赖检测通过，等待NewBing响应。注意目前不能多人同时调用NewBing接口（有线程锁），否则将导致每个人的NewBing问询历史互相渗透。调用NewBing时，会自动使用已配置的代理。"
             self.success = True
         except:
             self.info = "缺少的依赖，如果要使用Newbing，除了基础的pip依赖以外，您还需要运行`pip install -r request_llm/requirements_newbing.txt`安装Newbing的依赖。"
