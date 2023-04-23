@@ -415,6 +415,7 @@ load_message = "等待NewBing响应。"
 """
 import time
 import importlib
+import threading
 from toolbox import update_ui, get_conf, trimmed_format_exc
 from multiprocessing import Process, Pipe
 
@@ -428,6 +429,7 @@ class GetNewBingHandle(Process):
         self.local_history = []
         self.check_dependency()
         self.start()
+        self.threadLock = threading.Lock()
         
     def check_dependency(self):
         try:
@@ -543,6 +545,7 @@ class GetNewBingHandle(Process):
         """
         这个函数运行在主进程
         """
+        self.threadLock.acquire()
         self.parent.send(kwargs)    # 发送请求到子进程
         while True:
             res = self.parent.recv()    # 等待newbing回复的片段
@@ -553,7 +556,7 @@ class GetNewBingHandle(Process):
                 break
             else:
                 yield res   # newbing回复的片段
-        return
+        self.threadLock.release()
     
 
 def preprocess_newbing_out(s):
@@ -599,6 +602,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
 
     watch_dog_patience = 5 # 看门狗 (watchdog) 的耐心, 设置5秒即可
     response = ""
+    observe_window[0] = "[Local Message]: 等待NewBing响应中 ..."
     for response in newbing_handle.stream_chat(query=inputs, history=history_feedin, system_prompt=sys_prompt, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
         observe_window[0] = preprocess_newbing_out_simple(response)
         if len(observe_window) >= 2:  
