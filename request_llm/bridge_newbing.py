@@ -406,7 +406,7 @@ class Chatbot:
 
 
 
-load_message = ""
+load_message = "等待NewBing响应。"
 
 """
 ========================================================================
@@ -574,13 +574,16 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     watch_dog_patience = 5 # 看门狗 (watchdog) 的耐心, 设置5秒即可
     response = ""
     for response in newbing_handle.stream_chat(query=inputs, history=history_feedin, system_prompt=sys_prompt, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
-        observe_window[0] = response
+        observe_window[0] = preprocess_newbing_out_simple(response)
         if len(observe_window) >= 2:  
             if (time.time()-observe_window[1]) > watch_dog_patience:
                 raise RuntimeError("程序终止。")
-    return response
+    return preprocess_newbing_out_simple(response)
 
-
+def preprocess_newbing_out_simple(result):
+    if '[1]' in result:
+        result += '\n\n```\n' + "\n".join([r for r in result.split('\n') if r.startswith('[')]) + '\n```\n'
+    return result
 
 def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream = True, additional_fn=None):
     """
@@ -609,6 +612,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     for i in range(len(history)//2):
         history_feedin.append([history[2*i], history[2*i+1]] )
 
+    chatbot[-1] = (inputs, preprocess_newbing_out(response))
     yield from update_ui(chatbot=chatbot, history=history, msg="NewBing响应缓慢，尚未完成全部响应，请耐心完成后再提交新问题。")
     for response in newbing_handle.stream_chat(query=inputs, history=history_feedin, system_prompt=system_prompt, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
         chatbot[-1] = (inputs, preprocess_newbing_out(response))
