@@ -555,23 +555,26 @@ def run_gradio_in_subpath(demo, auth, port, custom_path):
 
 def clip_history(inputs, history, tokenizer, max_token_limit):
     """
-    reduce the length of input/history by clipping.
+    reduce the length of history by clipping.
     this function search for the longest entries to clip, little by little,
-    until the number of token of input/history is reduced under threshold.
-    通过剪辑来缩短输入/历史记录的长度。 
+    until the number of token of history is reduced under threshold.
+    通过裁剪来缩短历史记录的长度。 
     此函数逐渐地搜索最长的条目进行剪辑，
-    直到输入/历史记录的标记数量降低到阈值以下。
+    直到历史记录的标记数量降低到阈值以下。
     """
     import numpy as np
     from request_llm.bridge_all import model_info
     def get_token_num(txt): 
         return len(tokenizer.encode(txt, disallowed_special=()))
     input_token_num = get_token_num(inputs)
-    if input_token_num < max_token_limit * 3 / 4: 
-        # 当输入部分的token占比小于限制的3/4时，在裁剪时把input的余量留出来
+    if input_token_num < max_token_limit * 3 / 4:
+        # 当输入部分的token占比小于限制的3/4时，裁剪时
+        # 1. 把input的余量留出来
         max_token_limit = max_token_limit - input_token_num
+        # 2. 把输出用的余量留出来
+        max_token_limit = max_token_limit - 128
+        # 3. 如果余量太小了，直接清除历史
         if max_token_limit < 128:
-            # 余量太小了，直接清除历史
             history = []
             return history
     else:
