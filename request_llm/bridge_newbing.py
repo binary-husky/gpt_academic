@@ -431,6 +431,7 @@ class GetNewBingHandle(Process):
         
     def check_dependency(self):
         try:
+            self.success = False
             import rich
             self.info = "依赖检测通过，等待NewBing响应。注意目前不能多人同时调用NewBing接口，否则将导致每个人的NewBing问询历史互相渗透。调用NewBing时，会自动使用已配置的代理。"
             self.success = True
@@ -497,39 +498,47 @@ class GetNewBingHandle(Process):
         这个函数运行在子进程
         """
         # 第一次运行，加载参数
-        retry = 0
+        self.success = False
         self.local_history = []
-        while True:
+        if (self.newbing_model is None) or (not self.success):
+            # 代理设置
+            proxies, = get_conf('proxies')
+            if proxies is None: 
+                self.proxies_https = None
+            else: 
+                self.proxies_https = proxies['https']
+            # cookie
+            NEWBING_COOKIES, = get_conf('NEWBING_COOKIES')
             try:
-                if self.newbing_model is None:
-                    # 代理设置
-                    proxies, = get_conf('proxies')
-                    if proxies is None: 
-                        self.proxies_https = None
-                    else: 
-                        self.proxies_https = proxies['https']
-
-                    NEWBING_COOKIES, = get_conf('NEWBING_COOKIES')
-                    cookies = json.loads(NEWBING_COOKIES)
-                    self.newbing_model = Chatbot(proxy=self.proxies_https, cookies=cookies)
-                    break
-                else:
-                    break
+                cookies = json.loads(NEWBING_COOKIES)
             except:
-                retry += 1
-                if retry > 3: 
-                    self.child.send('[Local Message] 不能加载Newbing组件。')
-                    self.success = False
-                    raise RuntimeError("不能加载Newbing组件。")
+                self.success = False
+                tb_str = '\n```\n' + trimmed_format_exc() + '\n```\n'
+                self.child.send(f'[Local Message] 不能加载Newbing组件。NEWBING_COOKIES未填写或有格式错误。')
+                self.child.send('[Fail]')
+                self.child.send('[Finish]')
+                raise RuntimeError(f"不能加载Newbing组件。NEWBING_COOKIES未填写或有格式错误。")
 
-        # 进入任务等待状态
+            try:
+                self.newbing_model = Chatbot(proxy=self.proxies_https, cookies=cookies)
+            except:
+                self.success = False
+                tb_str = '\n```\n' + trimmed_format_exc() + '\n```\n'
+                self.child.send(f'[Local Message] 不能加载Newbing组件。{tb_str}')
+                self.child.send('[Fail]')
+                self.child.send('[Finish]')
+                raise RuntimeError(f"不能加载Newbing组件。")
+
+        self.success = True
         try:
+            # 进入任务等待状态
             asyncio.run(self.async_run())
         except Exception:
             tb_str = '```\n' + trimmed_format_exc() + '```'
             self.child.send(f'[Local Message] Newbing失败 {tb_str}.')
+            self.child.send('[Fail]')
             self.child.send('[Finish]')
-
+        
     def stream_chat(self, **kwargs):
         """
         这个函数运行在主进程
@@ -537,12 +546,29 @@ class GetNewBingHandle(Process):
         self.parent.send(kwargs)    # 发送请求到子进程
         while True:
             res = self.parent.recv()    # 等待newbing回复的片段
-            if res != '[Finish]':
-                yield res   # newbing回复的片段
-            else:
+            if res == '[Finish]':
                 break       # 结束
+            elif res == '[Fail]':
+                self.success = False
+                break
+            else:
+                yield res   # newbing回复的片段
         return
     
+
+def preprocess_newbing_out(s):
+    pattern = r'\^(\d+)\^' # 匹配^数字^
+    sub = lambda m: '\['+m.group(1)+'\]' # 将匹配到的数字作为替换值
+    result = re.sub(pattern, sub, s) # 替换操作
+    if '[1]' in result:
+        result += '\n\n```\n' + "\n".join([r for r in result.split('\n') if r.startswith('[')]) + '\n```\n'
+    return result
+
+def preprocess_newbing_out_simple(result):
+    if '[1]' in result:
+        result += '\n\n```\n' + "\n".join([r for r in result.split('\n') if r.startswith('[')]) + '\n```\n'
+    return result
+
 
 """
 ========================================================================
@@ -558,7 +584,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
         函数的说明请见 request_llm/bridge_all.py
     """
     global newbing_handle
-    if newbing_handle is None or (not newbing_handle.success):
+    if (newbing_handle is None) or (not newbing_handle.success):
         newbing_handle = GetNewBingHandle()
         observe_window[0] = load_message + "\n\n" + newbing_handle.info
         if not newbing_handle.success: 
@@ -580,11 +606,6 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
                 raise RuntimeError("程序终止。")
     return preprocess_newbing_out_simple(response)
 
-def preprocess_newbing_out_simple(result):
-    if '[1]' in result:
-        result += '\n\n```\n' + "\n".join([r for r in result.split('\n') if r.startswith('[')]) + '\n```\n'
-    return result
-
 def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream = True, additional_fn=None):
     """
         单线程方法
@@ -593,7 +614,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     chatbot.append((inputs, "[Local Message]: 等待Bing响应 ..."))
 
     global newbing_handle
-    if newbing_handle is None or (not newbing_handle.success):
+    if (newbing_handle is None) or (not newbing_handle.success):
         newbing_handle = GetNewBingHandle()
         chatbot[-1] = (inputs, load_message + "\n\n" + newbing_handle.info)
         yield from update_ui(chatbot=chatbot, history=[])
@@ -621,12 +642,3 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     history.extend([inputs, preprocess_newbing_out(response)])
     yield from update_ui(chatbot=chatbot, history=history, msg="完成全部响应，请提交新问题。")
 
-def preprocess_newbing_out(s):
-    pattern = r'\^(\d+)\^' # 匹配^数字^
-    sub = lambda m: '\['+m.group(1)+'\]' # 将匹配到的数字作为替换值
-    result = re.sub(pattern, sub, s) # 替换操作
-
-    if '[1]' in result:
-        result += '\n\n```\n' + "\n".join([r for r in result.split('\n') if r.startswith('[')]) + '\n```\n'
-
-    return result
