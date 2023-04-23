@@ -612,7 +612,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     for i in range(len(history)//2):
         history_feedin.append([history[2*i], history[2*i+1]] )
 
-    chatbot[-1] = (inputs, preprocess_newbing_out(response))
+    chatbot[-1] = (inputs, "[Local Message]: 等待Bing响应 ...")
     yield from update_ui(chatbot=chatbot, history=history, msg="NewBing响应缓慢，尚未完成全部响应，请耐心完成后再提交新问题。")
     for response in newbing_handle.stream_chat(query=inputs, history=history_feedin, system_prompt=system_prompt, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
         chatbot[-1] = (inputs, preprocess_newbing_out(response))
