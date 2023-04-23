@@ -5,11 +5,7 @@ https://github.com/acheong08/EdgeGPT
 ========================================================================
 """
 
-from transformers import AutoModel, AutoTokenizer
-import time
-import importlib
-from toolbox import update_ui, get_conf
-from multiprocessing import Process, Pipe
+
 import argparse
 import asyncio
 import json
@@ -28,13 +24,6 @@ from typing import Union
 import certifi
 import httpx
 import websockets.client as websockets
-from prompt_toolkit import PromptSession
-from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
-from prompt_toolkit.completion import WordCompleter
-from prompt_toolkit.history import InMemoryHistory
-from prompt_toolkit.key_binding import KeyBindings
-from rich.live import Live
-from rich.markdown import Markdown
 
 DELIMITER = "\x1e"
 
@@ -146,9 +135,9 @@ class _ChatHubRequest:
 
     def update(
         self,
-        prompt: str,
-        conversation_style: CONVERSATION_STYLE_TYPE,
-        options: list | None = None,
+        prompt,
+        conversation_style,
+        options,
     ) -> None:
         """
         Updates request object
@@ -214,8 +203,8 @@ class _Conversation:
 
     def __init__(
         self,
-        cookies: dict,
-        proxy: str | None = None,
+        cookies,
+        proxy,
     ) -> None:
         self.struct: dict = {
             "conversationId": None,
@@ -271,8 +260,8 @@ class _ChatHub:
     Chat API
     """
 
-    def __init__(self, conversation: _Conversation) -> None:
-        self.wss: websockets.WebSocketClientProtocol | None = None
+    def __init__(self, conversation) -> None:
+        self.wss = None
         self.request: _ChatHubRequest
         self.loop: bool
         self.task: asyncio.Task
@@ -351,21 +340,13 @@ class Chatbot:
 
     def __init__(
         self,
-        cookies: dict = None,
-        proxy: str | None = None,
-        cookie_path: str = None,
+        cookies,
+        proxy
     ) -> None:
         if cookies is None:
             cookies = {}
-        if cookie_path is not None:
-            try:
-                with open(cookie_path, encoding="utf-8") as f:
-                    self.cookies = json.load(f)
-            except FileNotFoundError as exc:
-                raise FileNotFoundError("Cookie file not found") from exc
-        else:
-            self.cookies = cookies
-        self.proxy: str | None = proxy
+        self.cookies = cookies
+        self.proxy = proxy
         self.chat_hub: _ChatHub = _ChatHub(
             _Conversation(self.cookies, self.proxy),
         )
@@ -425,43 +406,6 @@ class Chatbot:
         self.chat_hub = _ChatHub(_Conversation(self.cookies))
 
 
-async def _get_input_async(
-    session: PromptSession = None,
-    completer: WordCompleter = None,
-) -> str:
-    """
-    Multiline input function.
-    """
-    return await session.prompt_async(
-        completer=completer,
-        multiline=True,
-        auto_suggest=AutoSuggestFromHistory(),
-    )
-
-
-def _create_session() -> PromptSession:
-    kb = KeyBindings()
-
-    @kb.add("enter")
-    def _(event):
-        buffer_text = event.current_buffer.text
-        if buffer_text.startswith("!"):
-            event.current_buffer.validate_and_handle()
-        else:
-            event.current_buffer.insert_text("\n")
-
-    @kb.add("escape")
-    def _(event):
-        if event.current_buffer.complete_state:
-            # event.current_buffer.cancel_completion()
-            event.current_buffer.text = ""
-
-    return PromptSession(key_bindings=kb, history=InMemoryHistory())
-
-
-def _create_completer(commands: list, pattern_str: str = "$"):
-    return WordCompleter(words=commands, pattern=re.compile(pattern_str))
-
 
 load_message = ""
 
@@ -470,7 +414,10 @@ load_message = ""
 第二部分：子进程Worker
 ========================================================================
 """
-
+import time
+import importlib
+from toolbox import update_ui, get_conf, trimmed_format_exc
+from multiprocessing import Process, Pipe
 class GetNewBingHandle(Process):
     def __init__(self):
         super().__init__(daemon=True)
@@ -484,7 +431,6 @@ class GetNewBingHandle(Process):
         
     def check_dependency(self):
         try:
-            import rich
             self.info = "依赖检测通过"
             self.success = True
         except:
@@ -538,6 +484,7 @@ class GetNewBingHandle(Process):
             try:
                 asyncio.run(self.async_run(question=kwargs['query'], history=kwargs['history']))
             except:
+                tb_str = '```\n' + trimmed_format_exc() + '```'
                 self.child.send('[Local Message] Newbing失败.')
             self.child.send('[Finish]')
 

@@ -65,7 +65,7 @@ API_URL_REDIRECT = {}
 CUSTOM_PATH = "/"
 
 # 如果需要使用newbing，把newbing的长长的cookie放到这里
-NEWBING_STYLE = "creative",  # ["creative", "balanced", "precise"]
+NEWBING_STYLE = "creative"  # ["creative", "balanced", "precise"]
 NEWBING_COOKIES = """
 your bing cookies here
 """
