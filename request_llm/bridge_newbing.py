@@ -49,7 +49,7 @@ class NewBingHandle(Process):
     def check_dependency(self):
         try:
             self.success = False
-            import rich
+            import certifi, httpx, rich
             self.info = "依赖检测通过，等待NewBing响应。注意目前不能多人同时调用NewBing接口（有线程锁），否则将导致每个人的NewBing问询历史互相渗透。调用NewBing时，会自动使用已配置的代理。"
             self.success = True
         except:
