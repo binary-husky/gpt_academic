@@ -192,7 +192,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
 
         def mutex_manager(window_mutex, observe_window):
             while True:
-                time.sleep(0.5)
+                time.sleep(0.25)
                 if not window_mutex[-1]: break
                 # 看门狗（watchdog）
                 for i in range(n_model): 
