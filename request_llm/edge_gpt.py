@@ -19,8 +19,6 @@ from typing import Generator
 from typing import Literal
 from typing import Optional
 from typing import Union
-import certifi
-import httpx
 import websockets.client as websockets
 
 DELIMITER = "\x1e"
@@ -78,8 +76,12 @@ HEADERS_INIT_CONVER = {
     "x-forwarded-for": FORWARDED_IP,
 }
 
-ssl_context = ssl.create_default_context()
-ssl_context.load_verify_locations(certifi.where())
+def get_ssl_context():
+    import certifi
+    ssl_context = ssl.create_default_context()
+    ssl_context.load_verify_locations(certifi.where())
+    return ssl_context
+
 
 
 class NotAllowedToAccess(Exception):
@@ -210,6 +212,7 @@ class _Conversation:
             "conversationSignature": None,
             "result": {"value": "Success", "message": None},
         }
+        import httpx
         self.proxy = proxy
         proxy = (
             proxy
@@ -288,7 +291,7 @@ class _ChatHub:
             wss_link,
             extra_headers=HEADERS,
             max_size=None,
-            ssl=ssl_context,
+            ssl=get_ssl_context()
         )
         await self._initial_handshake()
         # Construct a ChatHub request
