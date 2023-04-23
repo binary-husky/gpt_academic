@@ -103,11 +103,10 @@ class ChatBot(ChatBotFrame):
 
     def draw_public_chat(self):
         with gr.Tab('Public'):
-            with gr.Tab('Public'):
-                with gr.Accordion("上传本地文件可供高亮函数插件调用", open=False) as self.area_file_up:
-                    self.file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)",
-                                                file_count="multiple")
-                    self.file_upload.style()
+            with gr.Accordion("上传本地文件可供高亮函数插件调用", open=False) as self.area_file_up:
+                self.file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)",
+                                            file_count="multiple")
+                self.file_upload.style()
                 with gr.Row():
                     self.upload_history = gr.Button("Get Upload History", variant="secondary")
                     self.get_download = gr.Button('Get Download Link', variant='stop')
@@ -123,16 +122,14 @@ class ChatBot(ChatBotFrame):
                 with gr.Accordion("更多函数插件", open=True):
                     dropdown_fn_list = [k for k in crazy_fns.keys() if
                                         not crazy_fns[k].get("AsButton", True)]
-                    with gr.Column(scale=1):
-                        self.dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="").style(
+                    self.dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="").style(
                             container=False)
-                    with gr.Column(scale=1):
-                        self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
+                    self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
 
     def draw_setting_chat(self):
         with gr.Tab('Setting'):
             with gr.Accordion("展开SysPrompt & 交互界面布局 & Github地址", open=True):
-                self.system_prompt = gr.Textbox(show_label=True, placeholder=f"System Prompt", label="System prompt", value=self.initial_prompt)
+                self.system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt", label="System prompt", value=self.initial_prompt)
                 self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01, interactive=True, label="Top-p (nucleus sampling)", )
                 self.temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature", )
                 self.max_length_sl = gr.Slider(minimum=256, maximum=4096, value=512, step=1, interactive=True, label="MaxLength", )
@@ -234,10 +231,10 @@ class ChatBot(ChatBotFrame):
             # 绘制一个ROW，row会让底下的元素自动排部
             with gr.Row():
                 # 绘制列2
-                with gr.Column(scale=2):
+                with gr.Column(scale=100):
                     self.draw_chatbot()
                 # 绘制列1
-                with gr.Column(scale=1):
+                with gr.Column(scale=51):
                     # 绘制对话模组
                     with gr.Tab('对话模式'):
                         self.draw_input_chat()

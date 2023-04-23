@@ -32,7 +32,7 @@ def ArgsGeneralWrapper(f):
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
     def decorated(cookies, max_length, llm_model, txt, top_p, temperature,
-                  chatbot, history, system_prompt, plugin_advanced_arg, models, ipaddr: gr.Request, *args):
+                  chatbot, history, system_prompt, models, ipaddr: gr.Request, *args):
         """"""
         # 引入一个有cookie的chatbot
         cookies.update({
@@ -48,7 +48,7 @@ def ArgsGeneralWrapper(f):
             'ipaddr': ipaddr.client.host
         }
         plugin_kwargs = {
-            "advanced_arg": plugin_advanced_arg,
+            # "advanced_arg": plugin_advanced_arg,   意义不明的功能，后续再解决冲突
         }
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
