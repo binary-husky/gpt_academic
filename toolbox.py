@@ -32,23 +32,23 @@ def ArgsGeneralWrapper(f):
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
     def decorated(cookies, max_length, llm_model, txt, top_p, temperature,
-                  chatbot, history, system_prompt, models, ipaddr: gr.Request, *args):
+                  chatbot, history, system_prompt, plugin_advanced_arg, models, ipaddr: gr.Request, *args):
         """"""
         # 引入一个有cookie的chatbot
         cookies.update({
-            'top_p':top_p, 
+            'top_p':top_p,
             'temperature':temperature,
         })
         llm_kwargs = {
             'api_key': cookies['api_key'],
             'llm_model': llm_model,
-            'top_p':top_p, 
+            'top_p':top_p,
             'max_length': max_length,
             'temperature': temperature,
             'ipaddr': ipaddr.client.host
         }
         plugin_kwargs = {
-            # 目前还没有
+            "advanced_arg": plugin_advanced_arg,
         }
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
@@ -237,7 +237,7 @@ def markdown_convertion(txt):
             return content
         else:
             return tex2mathml_catch_exception(content)
-        
+
     def markdown_bug_hunt(content):
         """
         解决一个mdx_math的bug（单$包裹begin命令时多余<script>）
@@ -245,7 +245,7 @@ def markdown_convertion(txt):
         content = content.replace('<script type="math/tex">\n<script type="math/tex; mode=display">', '<script type="math/tex; mode=display">')
         content = content.replace('</script>\n</script>', '</script>')
         return content
-    
+
 
     if ('$' in txt) and ('```' not in txt):  # 有$标识的公式符号，且没有代码段```的标识
         # convert everything to html format
@@ -266,7 +266,7 @@ def markdown_convertion(txt):
 def close_up_code_segment_during_stream(gpt_reply):
     """
     在gpt输出代码的中途（输出了前面的```，但还没输出完后面的```），补上后面的```
-    
+
     Args:
         gpt_reply (str): GPT模型返回的回复字符串。
 
@@ -473,6 +473,19 @@ def is_any_api_key(key):
     else:
         return is_openai_api_key(key) or is_api2d_key(key)
 
+def what_keys(keys):
+    avail_key_list = {'OpenAI Key':0, "API2D Key":0}
+    key_list = keys.split(',')
+
+    for k in key_list:
+        if is_openai_api_key(k): 
+            avail_key_list['OpenAI Key'] += 1
+
+    for k in key_list:
+        if is_api2d_key(k): 
+            avail_key_list['API2D Key'] += 1
+
+    return f"检测到： OpenAI Key {avail_key_list['OpenAI Key']} 个，API2D Key {avail_key_list['API2D Key']} 个"
 
 def select_api_key(keys, llm_model):
     import random
@@ -488,7 +501,7 @@ def select_api_key(keys, llm_model):
             if is_api2d_key(k): avail_key_list.append(k)
 
     if len(avail_key_list) == 0:
-        raise RuntimeError(f"您提供的api-key不满足要求，不包含任何可用于{llm_model}的api-key。")
+        raise RuntimeError(f"您提供的api-key不满足要求，不包含任何可用于{llm_model}的api-key。您可能选择了错误的模型或请求源。")
 
     api_key = random.choice(avail_key_list) # 随机负载均衡
     return api_key
@@ -539,7 +552,7 @@ class DummyWith():
     它的作用是……额……没用，即在代码结构不变得情况下取代其他的上下文管理器。
     上下文管理器是一种Python对象，用于与with语句一起使用，
     以确保一些资源在代码块执行期间得到正确的初始化和清理。
-    上下文管理器必须实现两个方法，分别为 __enter__()和 __exit__()。 
+    上下文管理器必须实现两个方法，分别为 __enter__()和 __exit__()。
     在上下文执行开始的情况下，__enter__()方法会在代码块被执行前被调用，
     而在上下文执行结束时，__exit__()方法则会被调用。
     """
@@ -550,7 +563,33 @@ class DummyWith():
         return
 
 
-if __name__ == '__main__':
-    private_upload = './private_upload'
-    for r, d, f in os.walk(private_upload):
-        print(r, f)
+def run_gradio_in_subpath(demo, auth, port, custom_path):
+    def is_path_legal(path: str)->bool:
+        '''
+        check path for sub url
+        path: path to check
+        return value: do sub url wrap
+        '''
+        if path == "/": return True
+        if len(path) == 0:
+            print("ilegal custom path: {}\npath must not be empty\ndeploy on root url".format(path))
+            return False
+        if path[0] == '/':
+            if path[1] != '/':
+                print("deploy on sub-path {}".format(path))
+                return True
+            return False
+        print("ilegal custom path: {}\npath should begin with \'/\'\ndeploy on root url".format(path))
+        return False
+
+    if not is_path_legal(custom_path): raise RuntimeError('Ilegal custom path')
+    import uvicorn
+    import gradio as gr
+    from fastapi import FastAPI
+    app = FastAPI()
+    if custom_path != "/":
+        @app.get("/")
+        def read_main(): 
+            return {"message": f"Gradio is running at: {custom_path}"}
+    app = gr.mount_gradio_app(app, demo, path=custom_path)
+    uvicorn.run(app, host="0.0.0.0", port=port) # , auth=auth

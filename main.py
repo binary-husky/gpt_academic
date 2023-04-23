@@ -45,7 +45,7 @@ def main():
 
     gr_L1 = lambda: gr.Row().style()
     gr_L2 = lambda scale: gr.Column(scale=scale)
-    if LAYOUT == "TOP-DOWN": 
+    if LAYOUT == "TOP-DOWN":
         gr_L1 = lambda: DummyWith()
         gr_L2 = lambda scale: gr.Row()
         CHATBOT_HEIGHT /= 2
@@ -88,9 +88,12 @@ def main():
                     with gr.Row():
                         with gr.Accordion("更多函数插件", open=True):
                             dropdown_fn_list = [k for k in crazy_fns.keys() if not crazy_fns[k].get("AsButton", True)]
-                            with gr.Column(scale=1):
+                            with gr.Row():
                                 dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="").style(container=False)
-                            with gr.Column(scale=1):
+                            with gr.Row():
+                                plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False, 
+                                                                 placeholder="这里是特殊函数插件的高级参数输入区").style(container=False)
+                            with gr.Row():
                                 switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
                     with gr.Row():
                         with gr.Accordion("点击展开“文件上传区”。上传本地文件可供红色函数插件调用。", open=False) as area_file_up:
@@ -100,7 +103,7 @@ def main():
                     top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01,interactive=True, label="Top-p (nucleus sampling)",)
                     temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature",)
                     max_length_sl = gr.Slider(minimum=256, maximum=4096, value=512, step=1, interactive=True, label="Local LLM MaxLength",)
-                    checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区", "底部输入区", "输入清除键"], value=["基础功能区", "函数插件区"], label="显示/隐藏功能区")
+                    checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区", "底部输入区", "输入清除键", "插件参数区"], value=["基础功能区", "函数插件区"], label="显示/隐藏功能区")
                     md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(container=False)
 
                     gr.Markdown(description)
@@ -122,11 +125,12 @@ def main():
             ret.update({area_input_secondary: gr.update(visible=("底部输入区" in a))})
             ret.update({clearBtn: gr.update(visible=("输入清除键" in a))})
             ret.update({clearBtn2: gr.update(visible=("输入清除键" in a))})
+            ret.update({plugin_advanced_arg: gr.update(visible=("插件参数区" in a))})
             if "底部输入区" in a: ret.update({txt: gr.update(value="")})
             return ret
-        checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn, area_input_primary, area_input_secondary, txt, txt2, clearBtn, clearBtn2] )
+        checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn, area_input_primary, area_input_secondary, txt, txt2, clearBtn, clearBtn2, plugin_advanced_arg] )
         # 整理反复出现的控件句柄组合
-        input_combo = [cookies, max_length_sl, md_dropdown, txt, txt2, top_p, temperature, chatbot, history, system_prompt]
+        input_combo = [cookies, max_length_sl, md_dropdown, txt, txt2, top_p, temperature, chatbot, history, system_prompt, plugin_advanced_arg]
         output_combo = [cookies, chatbot, history, status]
         predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=input_combo, outputs=output_combo)
         # 提交按钮、重置按钮
@@ -153,14 +157,19 @@ def main():
         # 函数插件-下拉菜单与随变按钮的互动
         def on_dropdown_changed(k):
             variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
-            return {switchy_bt: gr.update(value=k, variant=variant)}
-        dropdown.select(on_dropdown_changed, [dropdown], [switchy_bt] )
+            ret = {switchy_bt: gr.update(value=k, variant=variant)}
+            if crazy_fns[k].get("AdvancedArgs", False): # 是否唤起高级插件参数区
+                ret.update({plugin_advanced_arg: gr.update(visible=True,  label=f"插件[{k}]的高级参数说明：" + crazy_fns[k].get("ArgsReminder", [f"没有提供高级参数功能说明"]))})
+            else:
+                ret.update({plugin_advanced_arg: gr.update(visible=False, label=f"插件[{k}]不需要高级参数。")})
+            return ret
+        dropdown.select(on_dropdown_changed, [dropdown], [switchy_bt, plugin_advanced_arg] )
         def on_md_dropdown_changed(k):
             return {chatbot: gr.update(label="当前模型："+k)}
         md_dropdown.select(on_md_dropdown_changed, [md_dropdown], [chatbot] )
         # 随变按钮的回调函数注册
         def route(k, *args, **kwargs):
-            if k in [r"打开插件列表", r"请先从插件列表中选择"]: return 
+            if k in [r"打开插件列表", r"请先从插件列表中选择"]: return
             yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(*args, **kwargs)
         click_handle = switchy_bt.click(route,[switchy_bt, *input_combo, gr.State(PORT)], output_combo)
         click_handle.then(on_report_generated, [file_upload, chatbot], [file_upload, chatbot])
@@ -178,7 +187,7 @@ def main():
         print(f"如果浏览器没有自动打开，请复制并转到以下URL：")
         print(f"\t（亮色主题）: http://localhost:{PORT}")
         print(f"\t（暗色主题）: http://localhost:{PORT}/?__dark-theme=true")
-        def open(): 
+        def open():
             time.sleep(2)       # 打开浏览器
             webbrowser.open_new_tab(f"http://localhost:{PORT}/?__dark-theme=true")
         threading.Thread(target=open, name="open-browser", daemon=True).start()
@@ -187,6 +196,14 @@ def main():
 
     auto_opentab_delay()
     demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, favicon_path="docs/logo.png")
+
+    # 如果需要在二级路径下运行
+    # CUSTOM_PATH, = get_conf('CUSTOM_PATH')
+    # if CUSTOM_PATH != "/": 
+    #     from toolbox import run_gradio_in_subpath
+    #     run_gradio_in_subpath(demo, auth=AUTHENTICATION, port=PORT, custom_path=CUSTOM_PATH)
+    # else: 
+    #     demo.launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, favicon_path="docs/logo.png")
 
 if __name__ == "__main__":
     main()
