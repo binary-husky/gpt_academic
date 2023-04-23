@@ -1,6 +1,7 @@
 gradio==3.25.0
 tiktoken>=0.3.3
 requests[socks]
+httpx[socks]
 transformers
 python-markdown-math
 beautifulsoup4
@@ -11,6 +12,7 @@ colorama
 Markdown
 pygments
 pymupdf
+certifi
 openai
 numpy
 arxiv
