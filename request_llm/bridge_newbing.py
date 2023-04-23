@@ -1,5 +1,8 @@
 """
-Main.py
+========================================================================
+第一部分：来自EdgeGPT.py
+https://github.com/acheong08/EdgeGPT
+========================================================================
 """
 
 from transformers import AutoModel, AutoTokenizer
@@ -273,6 +276,7 @@ class _ChatHub:
         self.request: _ChatHubRequest
         self.loop: bool
         self.task: asyncio.Task
+        print(conversation.struct)
         self.request = _ChatHubRequest(
             conversation_signature=conversation.struct["conversationSignature"],
             client_id=conversation.struct["clientId"],
@@ -461,20 +465,20 @@ def _create_completer(commands: list, pattern_str: str = "$"):
 
 load_message = ""
 
-#################################################################################
-#################################################################################
-#################################################################################
-#################################################################################
-#################################################################################
-#################################################################################
+"""
+========================================================================
+第二部分：子进程Worker
+========================================================================
+"""
+
 class GetNewBingHandle(Process):
     def __init__(self):
         super().__init__(daemon=True)
         self.parent, self.child = Pipe()
-        self.chatglm_model = None
-        self.chatglm_tokenizer = None
+        self.newbing_model = None
         self.info = ""
         self.success = True
+        self.local_history = []
         self.check_dependency()
         self.start()
         
@@ -488,28 +492,36 @@ class GetNewBingHandle(Process):
             self.success = False
 
     def ready(self):
-        return self.chatglm_model is not None
+        return self.newbing_model is not None
 
-    async def async_run(self, question):
-        async for final, response in self.chatglm_model.ask_stream(
+    async def async_run(self, question, history):
+        # 读取配置
+        NEWBING_STYLE, = get_conf('NEWBING_STYLE')
+        from request_llm.bridge_all import model_info
+        endpoint = model_info['newbing']['endpoint']
+        
+        # 开始问问题
+        self.local_history.append(question)
+        async for final, response in self.newbing_model.ask_stream(
             prompt=question,
-            conversation_style="balanced",                      # ["creative", "balanced", "precise"]
-            wss_link="wss://sydney.bing.com/sydney/ChatHub",    # "wss://sydney.bing.com/sydney/ChatHub"
+            conversation_style=NEWBING_STYLE,     # ["creative", "balanced", "precise"]
+            wss_link=endpoint,                      # "wss://sydney.bing.com/sydney/ChatHub"
         ):
             if not final:
-                self.child.send(response)
+                self.child.send(str(response))
                 print(response)
 
     def run(self):
         # 第一次运行，加载参数
         retry = 0
+        self.local_history = []
         while True:
             try:
-                if self.chatglm_model is None:
+                if self.newbing_model is None:
                     proxies, = get_conf('proxies')
-                    newbing_cookies, = get_conf('newbing_cookies')
-                    cookies = json.loads(newbing_cookies)
-                    self.chatglm_model = Chatbot(proxy=proxies['https'], cookies=cookies)
+                    NEWBING_COOKIES, = get_conf('NEWBING_COOKIES')
+                    cookies = json.loads(NEWBING_COOKIES)
+                    self.newbing_model = Chatbot(proxy=proxies['https'], cookies=cookies)
                     break
                 else:
                     break
@@ -517,13 +529,14 @@ class GetNewBingHandle(Process):
                 retry += 1
                 if retry > 3: 
                     self.child.send('[Local Message] 不能加载Newbing组件。')
+                    self.success = False
                     raise RuntimeError("不能加载Newbing组件。")
 
         # 进入任务等待状态
         while True:
             kwargs = self.child.recv()
             try:
-                asyncio.run(self.async_run(question=kwargs['query']))
+                asyncio.run(self.async_run(question=kwargs['query'], history=kwargs['history']))
             except:
                 self.child.send('[Local Message] Newbing失败.')
             self.child.send('[Finish]')
@@ -538,24 +551,30 @@ class GetNewBingHandle(Process):
                 break
         return
     
-global glm_handle
-glm_handle = None
-#################################################################################
+
+"""
+========================================================================
+第三部分：主进程统一调用函数接口
+========================================================================
+"""
+global newbing_handle
+newbing_handle = None
+
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=None, console_slience=False):
     """
         多线程方法
         函数的说明请见 request_llm/bridge_all.py
     """
-    global glm_handle
-    if glm_handle is None:
-        glm_handle = GetNewBingHandle()
-        observe_window[0] = load_message + "\n\n" + glm_handle.info
-        if not glm_handle.success: 
-            error = glm_handle.info
-            glm_handle = None
+    global newbing_handle
+    if newbing_handle is None or (not newbing_handle.success):
+        newbing_handle = GetNewBingHandle()
+        observe_window[0] = load_message + "\n\n" + newbing_handle.info
+        if not newbing_handle.success: 
+            error = newbing_handle.info
+            newbing_handle = None
             raise RuntimeError(error)
 
-    # chatglm 没有 sys_prompt 接口，因此把prompt加入 history
+    # 没有 sys_prompt 接口，因此把prompt加入 history
     history_feedin = []
     history_feedin.append(["What can I do?", sys_prompt])
     for i in range(len(history)//2):
@@ -563,7 +582,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
 
     watch_dog_patience = 5 # 看门狗 (watchdog) 的耐心, 设置5秒即可
     response = ""
-    for response in glm_handle.stream_chat(query=inputs, history=history_feedin, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
+    for response in newbing_handle.stream_chat(query=inputs, history=history_feedin, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
         observe_window[0] = response
         if len(observe_window) >= 2:  
             if (time.time()-observe_window[1]) > watch_dog_patience:
@@ -579,13 +598,13 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     """
     chatbot.append((inputs, ""))
 
-    global glm_handle
-    if glm_handle is None:
-        glm_handle = GetNewBingHandle()
-        chatbot[-1] = (inputs, load_message + "\n\n" + glm_handle.info)
+    global newbing_handle
+    if newbing_handle is None or (not newbing_handle.success):
+        newbing_handle = GetNewBingHandle()
+        chatbot[-1] = (inputs, load_message + "\n\n" + newbing_handle.info)
         yield from update_ui(chatbot=chatbot, history=[])
-        if not glm_handle.success: 
-            glm_handle = None
+        if not newbing_handle.success: 
+            newbing_handle = None
             return
 
     if additional_fn is not None:
@@ -600,7 +619,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     for i in range(len(history)//2):
         history_feedin.append([history[2*i], history[2*i+1]] )
 
-    for response in glm_handle.stream_chat(query=inputs, history=history_feedin, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
+    for response in newbing_handle.stream_chat(query=inputs, history=history_feedin, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
         chatbot[-1] = (inputs, response)
         yield from update_ui(chatbot=chatbot, history=history)
 
