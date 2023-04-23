@@ -8,11 +8,14 @@ from functools import wraps, lru_cache
 
 """
 ========================================================================
+第一部分
 函数插件输入输出接驳区
     - ChatBotWithCookies:   带Cookies的Chatbot类，为实现更多强大的功能做基础
     - ArgsGeneralWrapper:   装饰器函数，用于重组输入参数，改变输入参数的顺序与结构
     - update_ui:            刷新界面用 yield from update_ui(chatbot, history)
     - CatchException:       将插件中出的所有问题显示在界面上
+    - HotReload:            实现插件的热更新
+    - trimmed_format_exc:   打印traceback，为了安全而隐藏绝对地址
 ========================================================================
 """
 
@@ -112,9 +115,22 @@ def HotReload(f):
         yield from f_hot_reload(*args, **kwargs)
     return decorated
 
+
 """
 ========================================================================
-其他小工具
+第二部分
+其他小工具:
+    - write_results_to_file:    将结果写入markdown文件中
+    - regular_txt_to_markdown:  将普通文本转换为Markdown格式的文本。
+    - report_execption:         向chatbot中添加简单的意外错误信息
+    - text_divide_paragraph:    将文本按照段落分隔符分割开，生成带有段落标签的HTML代码。
+    - markdown_convertion:      用多种方式组合，将markdown转化为好看的html
+    - format_io:                接管gradio默认的markdown处理方式
+    - on_file_uploaded:         处理文件的上传（自动解压）
+    - on_report_generated:      将生成的报告自动投射到文件上传区
+    - clip_history:             当历史上下文过长时，自动截断
+    - get_conf:                 获取设置
+    - select_api_key:           根据当前的模型类别，抽取可用的api-key
 ========================================================================
 """
 
@@ -391,6 +407,9 @@ def find_recent_files(directory):
 
 
 def on_file_uploaded(files, chatbot, txt, txt2, checkboxes):
+    """
+    当文件被上传时的回调函数
+    """
     if len(files) == 0:
         return chatbot, txt
     import shutil
@@ -410,8 +429,7 @@ def on_file_uploaded(files, chatbot, txt, txt2, checkboxes):
         shutil.copy(file.name, f'private_upload/{time_tag}/{file_origin_name}')
         err_msg += extract_archive(f'private_upload/{time_tag}/{file_origin_name}',
                                    dest_dir=f'private_upload/{time_tag}/{file_origin_name}.extract')
-    moved_files = [fp for fp in glob.glob(
-        'private_upload/**/*', recursive=True)]
+    moved_files = [fp for fp in glob.glob('private_upload/**/*', recursive=True)]
     if "底部输入区" in checkboxes:
         txt = ""
         txt2 = f'private_upload/{time_tag}'
@@ -530,7 +548,7 @@ def clear_line_break(txt):
 class DummyWith():
     """
     这段代码定义了一个名为DummyWith的空上下文管理器，
-    它的作用是……额……没用，即在代码结构不变得情况下取代其他的上下文管理器。
+    它的作用是……额……就是不起作用，即在代码结构不变得情况下取代其他的上下文管理器。
     上下文管理器是一种Python对象，用于与with语句一起使用，
     以确保一些资源在代码块执行期间得到正确的初始化和清理。
     上下文管理器必须实现两个方法，分别为 __enter__()和 __exit__()。
@@ -544,6 +562,9 @@ class DummyWith():
         return
 
 def run_gradio_in_subpath(demo, auth, port, custom_path):
+    """
+    把gradio的运行地址更改到指定的二次路径上
+    """
     def is_path_legal(path: str)->bool:
         '''
         check path for sub url
