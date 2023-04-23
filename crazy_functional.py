@@ -20,11 +20,16 @@ def get_crazy_functions():
     from crazy_functions.解析项目源代码 import 解析一个CSharp项目
     from crazy_functions.总结word文档 import 总结word文档
     from crazy_functions.解析JupyterNotebook import 解析ipynb文件
+    from crazy_functions.对话历史存档 import 对话历史存档
     function_plugins = {
 
         "解析整个Python项目": {
             "Color": "stop",    # 按钮颜色
             "Function": HotReload(解析一个Python项目)
+        },
+        "保存当前的对话": {
+            "AsButton":False,
+            "Function": HotReload(对话历史存档)
         },
         "[测试功能] 解析Jupyter Notebook文件": {
             "Color": "stop",
