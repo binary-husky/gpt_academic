@@ -5,7 +5,17 @@ import inspect
 import re
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
-############################### 插件输入输出接驳区 #######################################
+
+"""
+========================================================================
+函数插件输入输出接驳区
+    - ChatBotWithCookies:   带Cookies的Chatbot类，为实现更多强大的功能做基础
+    - ArgsGeneralWrapper:   装饰器函数，用于重组输入参数，改变输入参数的顺序与结构
+    - update_ui:            刷新界面用 yield from update_ui(chatbot, history)
+    - CatchException:       将插件中出的所有问题显示在界面上
+========================================================================
+"""
+
 class ChatBotWithCookies(list):
     def __init__(self, cookie):
         self._cookies = cookie
@@ -19,6 +29,7 @@ class ChatBotWithCookies(list):
 
     def get_cookies(self):
         return self._cookies
+
 
 def ArgsGeneralWrapper(f):
     """
@@ -47,6 +58,7 @@ def ArgsGeneralWrapper(f):
         yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
     return decorated
 
+
 def update_ui(chatbot, history, msg='正常', **kwargs):  # 刷新界面
     """
     刷新用户界面
@@ -54,10 +66,18 @@ def update_ui(chatbot, history, msg='正常', **kwargs):  # 刷新界面
     assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时，可用clear将其清空，然后用for+append循环重新赋值。"
     yield chatbot.get_cookies(), chatbot, history, msg
 
+def trimmed_format_exc():
+    import os, traceback
+    str = traceback.format_exc()
+    current_path = os.getcwd()
+    replace_path = "."
+    return str.replace(current_path, replace_path)
+
 def CatchException(f):
     """
     装饰器函数，捕捉函数f中的异常并封装到一个生成器中返回，并显示到聊天当中。
     """
+
     @wraps(f)
     def decorated(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
         try:
@@ -66,7 +86,7 @@ def CatchException(f):
             from check_proxy import check_proxy
             from toolbox import get_conf
             proxies, = get_conf('proxies')
-            tb_str = '```\n' + traceback.format_exc() + '```'
+            tb_str = '```\n' + trimmed_format_exc() + '```'
             if chatbot is None or len(chatbot) == 0:
                 chatbot = [["插件调度异常", "异常原因"]]
             chatbot[-1] = (chatbot[-1][0],
@@ -92,8 +112,11 @@ def HotReload(f):
         yield from f_hot_reload(*args, **kwargs)
     return decorated
 
-
-####################################### 其他小工具 #####################################
+"""
+========================================================================
+其他小工具
+========================================================================
+"""
 
 def get_reduce_token_percent(text):
     """
@@ -111,7 +134,6 @@ def get_reduce_token_percent(text):
         return ratio, str(int(current_tokens-max_limit))
     except:
         return 0.5, '不详'
-
 
 
 def write_results_to_file(history, file_name=None):

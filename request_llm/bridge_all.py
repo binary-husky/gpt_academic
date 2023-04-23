@@ -11,7 +11,7 @@
 import tiktoken
 from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor
-from toolbox import get_conf
+from toolbox import get_conf, trimmed_format_exc
 
 from .bridge_chatgpt import predict_no_ui_long_connection as chatgpt_noui
 from .bridge_chatgpt import predict as chatgpt_ui
@@ -128,10 +128,7 @@ def LLM_CATCH_EXCEPTION(f):
         try:
             return f(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience)
         except Exception as e:
-            from toolbox import get_conf
-            import traceback
-            proxies, = get_conf('proxies')
-            tb_str = '\n```\n' + traceback.format_exc() + '\n```\n'
+            tb_str = '\n```\n' + trimmed_format_exc() + '\n```\n'
             observe_window[0] = tb_str
             return tb_str
     return decorated

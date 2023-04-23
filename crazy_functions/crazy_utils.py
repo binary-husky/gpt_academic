@@ -1,5 +1,4 @@
-import traceback
-from toolbox import update_ui, get_conf
+from toolbox import update_ui, get_conf, trimmed_format_exc
 
 def input_clipping(inputs, history, max_token_limit):
     import numpy as np
@@ -94,12 +93,12 @@ def request_gpt_model_in_new_thread_with_ui_alive(
                     continue # 返回重试
                 else:
                     # 【选择放弃】
-                    tb_str = '```\n' + traceback.format_exc() + '```'
+                    tb_str = '```\n' + trimmed_format_exc() + '```'
                     mutable[0] += f"[Local Message] 警告，在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                     return mutable[0] # 放弃
             except:
                 # 【第三种情况】：其他错误：重试几次
-                tb_str = '```\n' + traceback.format_exc() + '```'
+                tb_str = '```\n' + trimmed_format_exc() + '```'
                 print(tb_str)
                 mutable[0] += f"[Local Message] 警告，在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                 if retry_op > 0:
@@ -220,14 +219,14 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     continue # 返回重试
                 else:
                     # 【选择放弃】
-                    tb_str = '```\n' + traceback.format_exc() + '```'
+                    tb_str = '```\n' + trimmed_format_exc() + '```'
                     gpt_say += f"[Local Message] 警告，线程{index}在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                     if len(mutable[index][0]) > 0: gpt_say += "此线程失败前收到的回答：\n\n" + mutable[index][0]
                     mutable[index][2] = "输入过长已放弃"
                     return gpt_say # 放弃
             except:
                 # 【第三种情况】：其他错误
-                tb_str = '```\n' + traceback.format_exc() + '```'
+                tb_str = '```\n' + trimmed_format_exc() + '```'
                 print(tb_str)
                 gpt_say += f"[Local Message] 警告，线程{index}在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                 if len(mutable[index][0]) > 0: gpt_say += "此线程失败前收到的回答：\n\n" + mutable[index][0]
