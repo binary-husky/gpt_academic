@@ -111,6 +111,8 @@ class ChatBot(ChatBotFrame):
                 with gr.Row():
                     self.upload_history = gr.Button("Get Upload History", variant="secondary")
                     self.get_download = gr.Button('Get Download Link', variant='stop')
+                    self.upload_history.style(size='sm')
+                    self.get_download.style(size='sm')
             with gr.Accordion("函数插件区", open=True) as self.area_crazy_fn:
                 with gr.Row():
                     for k in crazy_fns:
@@ -139,22 +141,20 @@ class ChatBot(ChatBotFrame):
                 gr.Markdown(self.description)
 
     def draw_goals_auto(self):
-        with gr.Row():
-            self.ai_name = gr.Textbox(show_label=False, placeholder="Give AI a name.").style(container=False)
-        with gr.Row():
-            self.user_input = gr.Textbox(lines=5, show_label=False, placeholder="Describe your AI's role.").style(container=False)
         with gr.Box():
-            with gr.Row() as self.goal_list:
-                self.goal_array = []
-                for text in range(4):
-                    self.goal_array.append(gr.Textbox(show_label=False, placeholder="Enter up to 1 goals.").style(container=False))
             with gr.Row():
-                self.submit_add = gr.Button("Adding goals", variant="secondary")
-        with gr.Row():
-            __l = [str(i) for i in range(10, 101, 10)]
-            __l.insert(0, '1')
-            self.submit_numer = gr.Dropdown(__l, value='1', interactive=True, label='Number of Next').style(
-                container=False)
+                self.ai_name = gr.Textbox(show_label=False, placeholder="Give AI a name.").style(container=False)
+            with gr.Row():
+                self.user_input = gr.Textbox(lines=5, show_label=False, placeholder="Describe your AI's role.").style(container=False)
+            with gr.Row():
+                self.goal_list = gr.Dataframe(label='Adding goals', headers=['Goals'], interactive=True,
+                                                row_count=4, col_count=(1, 'fixed'),  type='array')
+                self.goal_list.style()
+            with gr.Row():
+                __l = [str(i) for i in range(10, 101, 10)]
+                __l.insert(0, '1')
+                self.submit_numer = gr.Dropdown(__l, value='1', interactive=True, label='Number of Next').style(
+                    container=False)
 
     def draw_next_auto(self):
         with gr.Row():
