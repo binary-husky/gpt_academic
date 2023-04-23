@@ -51,6 +51,7 @@ class LazyloadTiktoken(object):
 API_URL_REDIRECT, = get_conf("API_URL_REDIRECT")
 openai_endpoint = "https://api.openai.com/v1/chat/completions"
 api2d_endpoint = "https://openai.api2d.net/v1/chat/completions"
+newbing_endpoint = "wss://sydney.bing.com/sydney/ChatHub"
 # 兼容旧版的配置
 try:
     API_URL, = get_conf("API_URL")
@@ -62,6 +63,7 @@ except:
 # 新版配置
 if openai_endpoint in API_URL_REDIRECT: openai_endpoint = API_URL_REDIRECT[openai_endpoint]
 if api2d_endpoint in API_URL_REDIRECT: api2d_endpoint = API_URL_REDIRECT[api2d_endpoint]
+if newbing_endpoint in API_URL_REDIRECT: newbing_endpoint = API_URL_REDIRECT[newbing_endpoint]
 
 
 # 获取tokenizer
@@ -123,7 +125,7 @@ model_info = {
     "newbing": {
         "fn_with_ui": newbing_ui,
         "fn_without_ui": newbing_noui,
-        "endpoint": None,
+        "endpoint": newbing_endpoint,
         "max_token": 4096,
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
