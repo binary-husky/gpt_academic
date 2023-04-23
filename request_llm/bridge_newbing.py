@@ -21,6 +21,19 @@ import threading
 from toolbox import update_ui, get_conf, trimmed_format_exc
 from multiprocessing import Process, Pipe
 
+def preprocess_newbing_out(s):
+    pattern = r'\^(\d+)\^' # 匹配^数字^
+    sub = lambda m: '\['+m.group(1)+'\]' # 将匹配到的数字作为替换值
+    result = re.sub(pattern, sub, s) # 替换操作
+    if '[1]' in result:
+        result += '\n\n```\n' + "\n".join([r for r in result.split('\n') if r.startswith('[')]) + '\n```\n'
+    return result
+
+def preprocess_newbing_out_simple(result):
+    if '[1]' in result:
+        result += '\n\n```\n' + "\n".join([r for r in result.split('\n') if r.startswith('[')]) + '\n```\n'
+    return result
+
 class NewBingHandle(Process):
     def __init__(self):
         super().__init__(daemon=True)
@@ -159,20 +172,6 @@ class NewBingHandle(Process):
             else:
                 yield res   # newbing回复的片段
         self.threadLock.release()
-    
-
-def preprocess_newbing_out(s):
-    pattern = r'\^(\d+)\^' # 匹配^数字^
-    sub = lambda m: '\['+m.group(1)+'\]' # 将匹配到的数字作为替换值
-    result = re.sub(pattern, sub, s) # 替换操作
-    if '[1]' in result:
-        result += '\n\n```\n' + "\n".join([r for r in result.split('\n') if r.startswith('[')]) + '\n```\n'
-    return result
-
-def preprocess_newbing_out_simple(result):
-    if '[1]' in result:
-        result += '\n\n```\n' + "\n".join([r for r in result.split('\n') if r.startswith('[')]) + '\n```\n'
-    return result
 
 
 """
