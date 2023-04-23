@@ -22,7 +22,7 @@ If you like this project, please give it a Star. If you've come up with more use
 一键中英互译 | 一键中英互译
 一键代码解释 | 可以正确显示代码、解释代码
 [自定义快捷键](https://www.bilibili.com/video/BV14s4y1E7jN) | 支持自定义快捷键
-[配置代理服务器](https://www.bilibili.com/video/BV1rc411W7Dr) | 支持代理连接OpenAI/Google等，秒解锁ChatGPT互联网实时信息聚合能力
+[配置代理服务器](https://www.bilibili.com/video/BV1rc411W7Dr) | 支持代理连接OpenAI/Google等，秒解锁ChatGPT互联网[实时信息聚合](https://www.bilibili.com/video/BV1om4y127ck/)能力
 模块化设计 | 支持自定义强大的[函数插件](https://github.com/binary-husky/chatgpt_academic/tree/master/crazy_functions)，插件支持[热更新](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)
 [自我程序剖析](https://www.bilibili.com/video/BV1cj411A7VW) | [函数插件] [一键读懂](https://github.com/binary-husky/chatgpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A)本项目的源代码
 [程序剖析](https://www.bilibili.com/video/BV1cj411A7VW) | [函数插件] 一键可以剖析其他Python/C/C++/Java/Lua/...项目树
