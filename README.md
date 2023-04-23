@@ -277,7 +277,8 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 
 
 ## Todo 与 版本规划:
-- version 3.2+ (todo): 函数插件支持更多参数接口
+- version 3.3+ (todo): NewBing支持
+- version 3.2: 函数插件支持更多参数接口 (保存对话功能, 解读任意语言代码+同时询问任意的LLM组合)
 - version 3.1: 支持同时问询多个gpt模型！支持api2d，支持多个apikey负载均衡
 - version 3.0: 对chatglm和其他小型llm的支持
 - version 2.6: 重构了插件结构，提高了交互性，加入更多插件
