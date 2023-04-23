@@ -44,8 +44,8 @@ WEB_PORT = -1
 MAX_RETRY = 2
 
 # OpenAI模型选择是（gpt4现在只对申请成功的人开放，体验gpt-4可以试试api2d）
-LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
-AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm"]
+LLM_MODEL = "newbing" # 可选 ↓↓↓
+AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "newbing"]
 
 # 本地LLM模型如ChatGLM的执行方式 CPU/GPU
 LOCAL_MODEL_DEVICE = "cpu" # 可选 "cuda"
@@ -63,3 +63,6 @@ API_URL_REDIRECT = {}
 
 # 如果需要在二级路径下运行（常规情况下，不要修改!!）（需要配合修改main.py才能生效!）
 CUSTOM_PATH = "/"
+
+
+newbing_cookies = """your bing cookies here"""

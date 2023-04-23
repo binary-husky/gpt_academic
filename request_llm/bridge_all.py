@@ -19,6 +19,9 @@ from .bridge_chatgpt import predict as chatgpt_ui
 from .bridge_chatglm import predict_no_ui_long_connection as chatglm_noui
 from .bridge_chatglm import predict as chatglm_ui
 
+from .bridge_newbing import predict_no_ui_long_connection as newbing_noui
+from .bridge_newbing import predict as newbing_ui
+
 # from .bridge_tgui import predict_no_ui_long_connection as tgui_noui
 # from .bridge_tgui import predict as tgui_ui
 
@@ -116,7 +119,15 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
-
+    # newbing
+    "newbing": {
+        "fn_with_ui": newbing_ui,
+        "fn_without_ui": newbing_noui,
+        "endpoint": None,
+        "max_token": 4096,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
 }
 
 
