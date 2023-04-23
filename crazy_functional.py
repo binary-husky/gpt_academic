@@ -35,6 +35,8 @@ def get_crazy_functions():
             "Color": "stop",
             "AsButton":False,
             "Function": HotReload(解析ipynb文件),
+            "AdvancedArgs": True, # 调用时，唤起高级参数输入区（默认False）
+            "ArgsReminder": "若输入0，则不解析notebook中的Markdown块", # 高级参数输入区的显示提示
         },
         "批量总结Word文档": {
             "Color": "stop",
