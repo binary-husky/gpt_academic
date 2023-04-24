@@ -4,6 +4,8 @@ API_KEY = "sk-此处填API密钥"    # 可同时填写多个API-KEY，用英文�
 import os
 
 API_KEY = os.environ.get('API_KEY')
+
+print(API_KEY)
 # [step 2]>> 改为True应用代理，如果直接在海外服务器部署，此处不修改
 USE_PROXY = False
 if USE_PROXY:
