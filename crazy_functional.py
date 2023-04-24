@@ -21,6 +21,7 @@ def get_crazy_functions():
     from crazy_functions.总结word文档 import 总结word文档
     from crazy_functions.辅助回答 import 猜你想问
     from crazy_functions.解析JupyterNotebook import 解析ipynb文件
+    from crazy_functions.对话历史存档 import 对话历史存档
     function_plugins = {
         "猜你想问": {
             "Function": HotReload(猜你想问)
@@ -29,10 +30,16 @@ def get_crazy_functions():
             "Color": "stop",    # 按钮颜色
             "Function": HotReload(解析一个Python项目)
         },
+        "保存当前的对话": {
+            "AsButton":False,
+            "Function": HotReload(对话历史存档)
+        },
         "[测试功能] 解析Jupyter Notebook文件": {
             "Color": "stop",
             "AsButton":False,
             "Function": HotReload(解析ipynb文件),
+            "AdvancedArgs": True, # 调用时，唤起高级参数输入区（默认False）
+            "ArgsReminder": "若输入0，则不解析notebook中的Markdown块", # 高级参数输入区的显示提示
         },
         "批量总结Word文档": {
             "Color": "stop",
