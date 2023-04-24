@@ -11,6 +11,14 @@ pinned: false
 ---
 
 # ChatGPT 学术优化
+> **Note**
+>
+> 本项目依赖的Gradio组件的新版pip包(Gradio 3.26~3.27)有严重bug。所以，请在安装时严格选择requirements.txt中**指定的版本**。 
+> 
+> `pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/`
+>
+
+# <img src="docs/logo.png" width="40" > ChatGPT 学术优化
 
 **如果喜欢这个项目，请给它一个Star；如果你发明了更好用的快捷键或函数插件，欢迎发issue或者pull requests**
 
