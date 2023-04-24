@@ -11,13 +11,16 @@
 import tiktoken
 from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor
-from toolbox import get_conf
+from toolbox import get_conf, trimmed_format_exc
 
 from .bridge_chatgpt import predict_no_ui_long_connection as chatgpt_noui
 from .bridge_chatgpt import predict as chatgpt_ui
 
 from .bridge_chatglm import predict_no_ui_long_connection as chatglm_noui
 from .bridge_chatglm import predict as chatglm_ui
+
+from .bridge_newbing import predict_no_ui_long_connection as newbing_noui
+from .bridge_newbing import predict as newbing_ui
 
 # from .bridge_tgui import predict_no_ui_long_connection as tgui_noui
 # from .bridge_tgui import predict as tgui_ui
@@ -48,6 +51,7 @@ class LazyloadTiktoken(object):
 API_URL_REDIRECT, = get_conf("API_URL_REDIRECT")
 openai_endpoint = "https://api.openai.com/v1/chat/completions"
 api2d_endpoint = "https://openai.api2d.net/v1/chat/completions"
+newbing_endpoint = "wss://sydney.bing.com/sydney/ChatHub"
 # 兼容旧版的配置
 try:
     API_URL, = get_conf("API_URL")
@@ -59,6 +63,7 @@ except:
 # 新版配置
 if openai_endpoint in API_URL_REDIRECT: openai_endpoint = API_URL_REDIRECT[openai_endpoint]
 if api2d_endpoint in API_URL_REDIRECT: api2d_endpoint = API_URL_REDIRECT[api2d_endpoint]
+if newbing_endpoint in API_URL_REDIRECT: newbing_endpoint = API_URL_REDIRECT[newbing_endpoint]
 
 
 # 获取tokenizer
@@ -116,7 +121,15 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
-
+    # newbing
+    "newbing": {
+        "fn_with_ui": newbing_ui,
+        "fn_without_ui": newbing_noui,
+        "endpoint": newbing_endpoint,
+        "max_token": 4096,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
 }
 
 
@@ -128,10 +141,7 @@ def LLM_CATCH_EXCEPTION(f):
         try:
             return f(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience)
         except Exception as e:
-            from toolbox import get_conf
-            import traceback
-            proxies, = get_conf('proxies')
-            tb_str = '\n```\n' + traceback.format_exc() + '\n```\n'
+            tb_str = '\n```\n' + trimmed_format_exc() + '\n```\n'
             observe_window[0] = tb_str
             return tb_str
     return decorated
@@ -182,7 +192,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
 
         def mutex_manager(window_mutex, observe_window):
             while True:
-                time.sleep(0.5)
+                time.sleep(0.25)
                 if not window_mutex[-1]: break
                 # 看门狗（watchdog）
                 for i in range(n_model): 
