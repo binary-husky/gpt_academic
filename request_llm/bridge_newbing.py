@@ -245,7 +245,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     for response in newbing_handle.stream_chat(query=inputs, history=history_feedin, system_prompt=system_prompt, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
         chatbot[-1] = (inputs, preprocess_newbing_out(response))
         yield from update_ui(chatbot=chatbot, history=history, msg="NewBing响应缓慢，尚未完成全部响应，请耐心完成后再提交新问题。")
-
+    if response == "[Local Message]: 等待NewBing响应中 ...": response = "[Local Message]: NewBing响应异常，请刷新界面重试 ..."
     history.extend([inputs, response])
     yield from update_ui(chatbot=chatbot, history=history, msg="完成全部响应，请提交新问题。")
 

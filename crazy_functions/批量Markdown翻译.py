@@ -98,6 +98,7 @@ def Markdown英译中(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
         import tiktoken
+        import glob, os
     except:
         report_execption(chatbot, history,
                          a=f"解析项目: {txt}",
@@ -105,19 +106,38 @@ def Markdown英译中(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
     history = []    # 清空历史，以免输入溢出
-    import glob, os
-    if os.path.exists(txt):
+
+    if txt.startswith('http'):
+        # 网络的远程文件
+        txt = txt.replace("https://github.com/", "https://raw.githubusercontent.com/")
+        txt = txt.replace("/blob/", "/")
+        import requests
+        from toolbox import get_conf
+        proxies, = get_conf('proxies')
+        r = requests.get(txt, proxies=proxies)
+        with open('./gpt_log/temp.md', 'wb+') as f: f.write(r.content)
+        project_folder = './gpt_log/'
+        file_manifest = ['./gpt_log/temp.md']
+    elif txt.endswith('.md'):
+        # 直接给定文件
+        file_manifest = [txt]
+        project_folder = os.path.dirname(txt)
+    elif os.path.exists(txt):
+        # 本地路径，递归搜索
         project_folder = txt
+        file_manifest = [f for f in glob.glob(f'{project_folder}/**/*.md', recursive=True)]
     else:
+        # 什么都没有
         if txt == "": txt = '空空如也的输入栏'
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
-    file_manifest = [f for f in glob.glob(f'{project_folder}/**/*.md', recursive=True)]
+
     if len(file_manifest) == 0:
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何.md文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
+
     yield from 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, language='en->zh')
 
 
