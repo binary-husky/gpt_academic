@@ -32,6 +32,7 @@ class GetGLMHandle(Process):
         return self.chatglm_model is not None
 
     def run(self):
+        # 子进程执行
         # 第一次运行，加载参数
         retry = 0
         while True:
@@ -53,17 +54,24 @@ class GetGLMHandle(Process):
                     self.child.send('[Local Message] Call ChatGLM fail 不能正常加载ChatGLM的参数。')
                     raise RuntimeError("不能正常加载ChatGLM的参数！")
 
-        # 进入任务等待状态
         while True:
+            # 进入任务等待状态
             kwargs = self.child.recv()
+            # 收到消息，开始请求
             try:
                 for response, history in self.chatglm_model.stream_chat(self.chatglm_tokenizer, **kwargs):
                     self.child.send(response)
+                    # # 中途接收可能的终止指令（如果有的话）
+                    # if self.child.poll(): 
+                    #     command = self.child.recv()
+                    #     if command == '[Terminate]': break
             except:
                 self.child.send('[Local Message] Call ChatGLM fail.')
+            # 请求处理结束，开始下一个循环
             self.child.send('[Finish]')
 
     def stream_chat(self, **kwargs):
+        # 主进程执行
         self.parent.send(kwargs)
         while True:
             res = self.parent.recv()
@@ -130,14 +138,17 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         if "PreProcess" in core_functional[additional_fn]: inputs = core_functional[additional_fn]["PreProcess"](inputs)  # 获取预处理函数（如果有的话）
         inputs = core_functional[additional_fn]["Prefix"] + inputs + core_functional[additional_fn]["Suffix"]
 
+    # 处理历史信息
     history_feedin = []
     history_feedin.append(["What can I do?", system_prompt] )
     for i in range(len(history)//2):
         history_feedin.append([history[2*i], history[2*i+1]] )
 
+    # 开始接收chatglm的回复
     for response in glm_handle.stream_chat(query=inputs, history=history_feedin, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
         chatbot[-1] = (inputs, response)
         yield from update_ui(chatbot=chatbot, history=history)
 
+    # 总结输出
     history.extend([inputs, response])
     yield from update_ui(chatbot=chatbot, history=history)
