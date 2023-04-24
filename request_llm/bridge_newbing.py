@@ -95,7 +95,7 @@ class NewBingHandle(Process):
             # 问题
             prompt += question
             self.local_history.append(question)
-            print('question:', question)
+            print('question:', prompt)
             # 提交
             async for final, response in self.newbing_model.ask_stream(
                 prompt=question,
