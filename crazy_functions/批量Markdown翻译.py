@@ -134,7 +134,7 @@ def Markdown英译中(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
     history = []    # 清空历史，以免输入溢出
 
     success, file_manifest, project_folder = get_files_from_everything(txt)
-    
+
     if not success:
         # 什么都没有
         if txt == "": txt = '空空如也的输入栏'
@@ -164,6 +164,7 @@ def Markdown中译英(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
         import tiktoken
+        import glob, os
     except:
         report_execption(chatbot, history,
                          a=f"解析项目: {txt}",
@@ -171,18 +172,13 @@ def Markdown中译英(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
     history = []    # 清空历史，以免输入溢出
-    import glob, os
-    if os.path.exists(txt):
-        project_folder = txt
-    else:
+    success, file_manifest, project_folder = get_files_from_everything(txt)
+    if not success:
+        # 什么都没有
         if txt == "": txt = '空空如也的输入栏'
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
-    if txt.endswith('.md'):
-        file_manifest = [txt]
-    else:
-        file_manifest = [f for f in glob.glob(f'{project_folder}/**/*.md', recursive=True)]
     if len(file_manifest) == 0:
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何.md文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
