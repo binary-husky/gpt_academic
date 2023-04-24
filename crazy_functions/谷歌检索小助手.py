@@ -100,7 +100,7 @@ def 谷歌检索小助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
             meta_paper_info_list = meta_paper_info_list[batchsize:]
 
     chatbot.append(["状态？", 
-        "已经全部完成，您可以试试让AI写一个Related Works，例如您可以继续输入Write a \"Related Works\" section about \"你搜索的研究领域\" for me."])
+        "已经全部完成，您可以试试让AI写一个Related Works，例如您可以继续输入Write an academic \"Related Works\" section about \"你搜索的研究领域\" for me."])
     msg = '正常'
     yield from update_ui(chatbot=chatbot, history=history, msg=msg) # 刷新界面
     res = write_results_to_file(history)
