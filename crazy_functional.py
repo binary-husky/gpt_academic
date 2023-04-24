@@ -19,11 +19,24 @@ def get_crazy_functions():
     from crazy_functions.解析项目源代码 import 解析一个Lua项目
     from crazy_functions.解析项目源代码 import 解析一个CSharp项目
     from crazy_functions.总结word文档 import 总结word文档
+    from crazy_functions.解析JupyterNotebook import 解析ipynb文件
+    from crazy_functions.对话历史存档 import 对话历史存档
     function_plugins = {
 
         "解析整个Python项目": {
             "Color": "stop",    # 按钮颜色
             "Function": HotReload(解析一个Python项目)
+        },
+        "保存当前的对话": {
+            "AsButton":False,
+            "Function": HotReload(对话历史存档)
+        },
+        "[测试功能] 解析Jupyter Notebook文件": {
+            "Color": "stop",
+            "AsButton":False,
+            "Function": HotReload(解析ipynb文件),
+            "AdvancedArgs": True, # 调用时，唤起高级参数输入区（默认False）
+            "ArgsReminder": "若输入0，则不解析notebook中的Markdown块", # 高级参数输入区的显示提示
         },
         "批量总结Word文档": {
             "Color": "stop",
@@ -168,7 +181,7 @@ def get_crazy_functions():
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(Markdown英译中)
         },
-        
+
     })
 
     ###################### 第三组插件 ###########################
@@ -181,7 +194,7 @@ def get_crazy_functions():
             "Function": HotReload(下载arxiv论文并翻译摘要)
         }
     })
-        
+
     from crazy_functions.联网的ChatGPT import 连接网络回答问题
     function_plugins.update({
         "连接网络回答问题（先输入问题，再点击按钮，需要访问谷歌）": {
@@ -191,5 +204,25 @@ def get_crazy_functions():
         }
     })
 
+    from crazy_functions.解析项目源代码 import 解析任意code项目
+    function_plugins.update({
+        "解析项目源代码（手动指定和筛选源代码文件类型）": {
+            "Color": "stop",
+            "AsButton": False,
+            "AdvancedArgs": True, # 调用时，唤起高级参数输入区（默认False）
+            "ArgsReminder": "输入时用逗号隔开, *代表通配符, 加了^代表不匹配; 不输入代表全部匹配。例如: \"*.c, ^*.cpp, config.toml, ^*.toml\"", # 高级参数输入区的显示提示
+            "Function": HotReload(解析任意code项目)
+        },
+    })
+    from crazy_functions.询问多个大语言模型 import 同时问询_指定模型
+    function_plugins.update({
+        "询问多个GPT模型（手动指定询问哪些模型）": {
+            "Color": "stop",
+            "AsButton": False,
+            "AdvancedArgs": True, # 调用时，唤起高级参数输入区（默认False）
+            "ArgsReminder": "支持任意数量的llm接口，用&符号分隔。例如chatglm&gpt-3.5-turbo&api2d-gpt-4", # 高级参数输入区的显示提示
+            "Function": HotReload(同时问询_指定模型)
+        },
+    })
     ###################### 第n组插件 ###########################
     return function_plugins

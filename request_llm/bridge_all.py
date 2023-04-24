@@ -1,12 +1,12 @@
 
 """
-    该文件中主要包含2个函数
+    该文件中主要包含2个函数，是所有LLM的通用接口，它们会继续向下调用更底层的LLM模型，处理多模型并行等细节
 
-    不具备多线程能力的函数：
-    1. predict: 正常对话时使用，具备完备的交互功能，不可多线程
+    不具备多线程能力的函数：正常对话时使用，具备完备的交互功能，不可多线程
+    1. predict(...)
 
-    具备多线程调用能力的函数
-    2. predict_no_ui_long_connection：在实验过程中发现调用predict_no_ui处理长文档时，和openai的连接容易断掉，这个函数用stream的方式解决这个问题，同样支持多线程
+    具备多线程调用能力的函数：在函数插件中被调用，灵活而简洁
+    2. predict_no_ui_long_connection(...)
 """
 import tiktoken
 from functools import lru_cache
@@ -210,7 +210,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
             return_string_collect.append( f"【{str(models[i])} 说】: <font color=\"{colors[i]}\"> {future.result()} </font>" )
 
         window_mutex[-1] = False # stop mutex thread
-        res = '<br/>\n\n---\n\n'.join(return_string_collect)
+        res = '<br/><br/>\n\n---\n\n'.join(return_string_collect)
         return res
 
 

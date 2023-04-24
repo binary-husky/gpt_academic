@@ -57,6 +57,9 @@ CONCURRENT_COUNT = 100
 # [("username", "password"), ("username2", "password2"), ...]
 AUTHENTICATION = []
 
-# 重新URL重新定向，实现更换API_URL的作用（常规情况下，不要修改！！）
+# 重新URL重新定向，实现更换API_URL的作用（常规情况下，不要修改!!）
 # 格式 {"https://api.openai.com/v1/chat/completions": "重定向的URL"}
 API_URL_REDIRECT = {}
+
+# 如果需要在二级路径下运行（常规情况下，不要修改!!）（需要配合修改main.py才能生效!）
+CUSTOM_PATH = "/"
