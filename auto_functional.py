@@ -4,3 +4,12 @@
 # @Author : Spike
 # @Descr   :
 
+
+
+
+
+def chat_with_ai(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt):
+
+    history = []
+
+    pass

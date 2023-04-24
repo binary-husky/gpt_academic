@@ -144,7 +144,7 @@ class ChatBot(ChatBotFrame):
             with gr.Row():
                 self.user_input = gr.Textbox(lines=5, show_label=False, placeholder="Describe your AI's role.").style(container=False)
             with gr.Row():
-                self.goal_list = gr.Dataframe(label='Adding goals', headers=['Goals'], interactive=True,
+                self.goal_list = gr.Dataframe(headers=['Goals'], interactive=True,
                                                 row_count=4, col_count=(1, 'fixed'),  type='array')
                 self.goal_list.style()
             with gr.Row():
