@@ -88,14 +88,14 @@ class NewBingHandle(Process):
                 if a not in self.local_history:
                     self.local_history.append(a)
                     prompt += a + '\n'
-                if b not in self.local_history:
-                    self.local_history.append(b)
-                    prompt += b + '\n'
+                # if b not in self.local_history:
+                #     self.local_history.append(b)
+                #     prompt += b + '\n'
 
             # 问题
             prompt += question
             self.local_history.append(question)
-            
+            print('question:', question)
             # 提交
             async for final, response in self.newbing_model.ask_stream(
                 prompt=question,
@@ -108,7 +108,8 @@ class NewBingHandle(Process):
                 else:
                     print('-------- receive final ---------')
                     self.child.send('[Finish]')
-            
+                    # self.local_history.append(response)
+
     
     def run(self):
         """
@@ -245,6 +246,6 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         chatbot[-1] = (inputs, preprocess_newbing_out(response))
         yield from update_ui(chatbot=chatbot, history=history, msg="NewBing响应缓慢，尚未完成全部响应，请耐心完成后再提交新问题。")
 
-    history.extend([inputs, preprocess_newbing_out(response)])
+    history.extend([inputs, response])
     yield from update_ui(chatbot=chatbot, history=history, msg="完成全部响应，请提交新问题。")
 
