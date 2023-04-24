@@ -70,6 +70,7 @@ def 谷歌检索小助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
         import arxiv
+        import math
         from bs4 import BeautifulSoup
     except:
         report_execption(chatbot, history, 
@@ -80,10 +81,9 @@ def 谷歌检索小助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
 
     # 清空历史，以免输入溢出
     history = []
-
     meta_paper_info_list = yield from get_meta_information(txt, chatbot, history)
-    batchsize = 7
-    for batch in range(len(meta_paper_info_list)//batchsize):
+    batchsize = 5
+    for batch in range(math.ceil(len(meta_paper_info_list)/batchsize)):
         if len(meta_paper_info_list[:batchsize]) > 0:
             i_say = "下面是一些学术文献的数据，提取出以下内容：" + \
             "1、英文题目；2、中文题目翻译；3、作者；4、arxiv公开（is_paper_in_arxiv）；4、引用数量（cite）；5、中文摘要翻译。" + \
