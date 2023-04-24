@@ -143,6 +143,7 @@ advanced_css = """
     margin: 0 2px 0 2px;
     padding: .2em .4em .1em .4em;
     background-color: rgba(13, 17, 23, 0.95);
+    color: #c9d1d9;
 }
 
 .dark .markdown-body code {
