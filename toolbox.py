@@ -55,7 +55,7 @@ def ArgsGeneralWrapper(f):
         txt_passon = txt
         if 'input加密' in models: txt_passon = func_box.encryption_str(txt)
         if txt_passon == '' and len(args) > 1:
-            msgs = '### Warning 输入框为空\n' \
+            msgs = f'### {args[1]} Warning 输入框为空\n' \
                    'tips: 使用基础功能时，请在输入栏内输入需要处理的文本内容'
             yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=msgs)  # 刷新界面
             return
