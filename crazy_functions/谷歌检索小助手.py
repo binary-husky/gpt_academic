@@ -85,7 +85,7 @@ def 谷歌检索小助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     batchsize = 7
     for batch in range(len(meta_paper_info_list)//batchsize):
         if len(meta_paper_info_list[:batchsize]) > 0:
-            i_say = "下面是一些学术文献的数据，提取出以下内容，使用Markdown格式输出：" + \
+            i_say = "下面是一些学术文献的数据，提取出以下内容：" + \
             "1、英文题目；2、中文题目翻译；3、作者；4、arxiv公开（is_paper_in_arxiv）；4、引用数量（cite）；5、中文摘要翻译。" + \
             f"以下是信息源：{str(meta_paper_info_list[:batchsize])}" 
 
@@ -93,7 +93,7 @@ def 谷歌检索小助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
             gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
                 inputs=i_say, inputs_show_user=inputs_show_user,
                 llm_kwargs=llm_kwargs, chatbot=chatbot, history=[],
-                sys_prompt="你是一个学术翻译，请从数据中提取信息。你必须使用Markdown格式。你必须逐个文献进行处理。"
+                sys_prompt="你是一个学术翻译，请从数据中提取信息。你必须使用Markdown表格。你必须逐个文献进行处理。"
             )
 
             history.extend([ f"第{batch+1}批", gpt_say ])
