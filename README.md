@@ -45,7 +45,6 @@ chat分析报告生成 | [函数插件] 运行后自动生成总结汇报
 启动暗色gradio[主题](https://github.com/binary-husky/chatgpt_academic/issues/173) | 在浏览器url后面添加```/?__dark-theme=true```可以切换dark主题
 [多LLM模型](https://www.bilibili.com/video/BV1wT411p7yf)支持，[API2D](https://api2d.com/)接口支持 | 同时被GPT3.5、GPT4和[清华ChatGLM](https://github.com/THUDM/ChatGLM-6B)伺候的感觉一定会很不错吧？
 更多LLM模型接入 | 新加入Newbing测试接口(新必应AI)
-huggingface免科学上网[在线体验](https://huggingface.co/spaces/qingxu98/gpt-academic) | 登陆huggingface后复制[此空间](https://huggingface.co/spaces/qingxu98/gpt-academic)
 …… | ……
 
 </div>
@@ -82,9 +81,6 @@ huggingface免科学上网[在线体验](https://huggingface.co/spaces/qingxu98/
 <img src="https://user-images.githubusercontent.com/96192199/232537274-deca0563-7aa6-4b5d-94a2-b7c453c47794.png" width="700" >
 </div>
 
-多种大语言模型混合调用[huggingface测试版](https://huggingface.co/spaces/qingxu98/academic-chatgpt-beta)（huggingface版不支持chatglm）
-
-
 ---
 
 ## 安装-方法1：直接运行 (Windows, Linux or MacOS)
@@ -97,12 +93,7 @@ cd chatgpt_academic
 
 2. 配置API_KEY和代理设置
 
-在`config.py`中，配置 海外Proxy 和 OpenAI API KEY，说明如下
-```
-1. 如果你在国内，需要设置海外代理才能够顺利使用OpenAI API，设置方法请仔细阅读config.py（1.修改其中的USE_PROXY为True; 2.按照说明修改其中的proxies）。
-2. 配置 OpenAI API KEY。支持任意数量的OpenAI的密钥和API2D的密钥共存/负载均衡，多个KEY用英文逗号分隔即可，例如输入 API_KEY="OpenAI密钥1,API2D密钥2,OpenAI密钥3,OpenAI密钥4"
-3. 与代理网络有关的issue（网络超时、代理不起作用）汇总到 https://github.com/binary-husky/chatgpt_academic/issues/1
-```
+在`config.py`中，配置 Proxy 和 OpenAI API KEY，说明如下
 （P.S. 程序运行时会优先检查是否存在名为`config_private.py`的私密配置文件，并用其中的配置覆盖`config.py`的同名配置。因此，如果您能理解我们的配置读取逻辑，我们强烈建议您在`config.py`旁边创建一个名为`config_private.py`的新配置文件，并把`config.py`中的配置转移（复制）到`config_private.py`中。`config_private.py`不受git管控，可以让您的隐私信息更加安全。）
 
 
@@ -130,14 +121,8 @@ python main.py
 
 5. 测试函数插件
 ```
-- 测试Python项目分析
-    （选择1）input区域 输入 `./crazy_functions/test_project/python/dqn` ， 然后点击 "解析整个Python项目"
-    （选择2）展开文件上传区，将python文件/包含python文件的压缩包拖拽进去，在出现反馈提示后， 然后点击 "解析整个Python项目"
-- 测试自我代码解读（本项目自译解）
-    点击 "[多线程Demo] 解析此项目本身（源码自译解）"
 - 测试函数插件模板函数（要求gpt回答历史上的今天发生了什么），您可以根据此函数为模板，实现更复杂的功能
     点击 "[函数插件模板Demo] 历史上的今天"
-- 函数插件区下拉菜单中有更多功能可供选择
 ```
 
 ## 安装-方法2：使用Docker
@@ -171,7 +156,6 @@ docker run --rm -it --net=host --gpus=all gpt-academic
 docker run --rm -it --net=host --gpus=all gpt-academic bash
 ```
 
-
 ## 安装-方法3：其他部署方式（需要云服务器知识与经验）
 
 1. 远程云服务器部署
@@ -182,14 +166,6 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 
 3. 如何在二级网址（如`http://localhost/subpath`）下运行
 请访问[FastAPI运行说明](docs/WithFastapi.md)
-
-## 安装-代理配置
-1. 常规方法
-[配置代理](https://github.com/binary-husky/chatgpt_academic/issues/1)
-
-2. 纯新手教程
-[纯新手教程](https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BB%A3%E7%90%86%E8%BD%AF%E4%BB%B6%E9%97%AE%E9%A2%98%E7%9A%84%E6%96%B0%E6%89%8B%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95%EF%BC%88%E6%96%B9%E6%B3%95%E5%8F%AA%E9%80%82%E7%94%A8%E4%BA%8E%E6%96%B0%E6%89%8B%EF%BC%89)
-
 
 ---
 
@@ -218,73 +194,8 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 详情请参考[函数插件指南](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)。
 
 
----
 
-
-## 部分功能展示
-
-1. 图片显示：
-
-<div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/228737599-bf0a9d9c-1808-4f43-ae15-dfcc7af0f295.png" width="800" >
-</div>
-
-2. 本项目的代码自译解（如果一个程序能够读懂并剖析自己）：
-
-<div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/226936850-c77d7183-0749-4c1c-9875-fd4891842d0c.png" width="800" >
-</div>
-
-<div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/226936618-9b487e4b-ab5b-4b6e-84c6-16942102e917.png" width="800" >
-</div>
-
-3. 其他任意Python/Cpp/Java/Go/Rect/...项目剖析：
-<div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/226935232-6b6a73ce-8900-4aee-93f9-733c7e6fef53.png" width="800" >
-</div>
-
-<div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/226969067-968a27c1-1b9c-486b-8b81-ab2de8d3f88a.png" width="800" >
-</div>
-
-4. Latex论文一键阅读理解与摘要生成
-<div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/227504406-86ab97cd-f208-41c3-8e4a-7000e51cf980.png" width="800" >
-</div>
-
-5. 自动报告生成
-<div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/227503770-fe29ce2c-53fd-47b0-b0ff-93805f0c2ff4.png" height="300" >
-<img src="https://user-images.githubusercontent.com/96192199/227504617-7a497bb3-0a2a-4b50-9a8a-95ae60ea7afd.png" height="300" >
-<img src="https://user-images.githubusercontent.com/96192199/227504005-efeaefe0-b687-49d0-bf95-2d7b7e66c348.png" height="300" >
-</div>
-
-6. 模块化功能设计
-<div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/229288270-093643c1-0018-487a-81e6-1d7809b6e90f.png" height="400" >
-<img src="https://user-images.githubusercontent.com/96192199/227504931-19955f78-45cd-4d1c-adac-e71e50957915.png" height="400" >
-</div>
-
-
-7. 源代码转译英文
-
-<div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/229720562-fe6c3508-6142-4635-a83d-21eb3669baee.png" height="400" >
-</div>
-
-8. 互联网在线信息综合
-
-<div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/233575247-fb00819e-6d1b-4bb7-bd54-1d7528f03dd9.png" width="800" >
-<img src="https://user-images.githubusercontent.com/96192199/233779501-5ce826f0-6cca-4d59-9e5f-b4eacb8cc15f.png" width="800" >
-
-</div>
-
-
-
-## Todo 与 版本规划:
-- version 3.3+ (todo): NewBing支持
+## 版本:
 - version 3.2: 函数插件支持更多参数接口 (保存对话功能, 解读任意语言代码+同时询问任意的LLM组合)
 - version 3.1: 支持同时问询多个gpt模型！支持api2d，支持多个apikey负载均衡
 - version 3.0: 对chatglm和其他小型llm的支持
