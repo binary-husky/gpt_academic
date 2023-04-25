@@ -133,7 +133,7 @@ python main.py
 # 下载项目
 git clone https://github.com/binary-husky/chatgpt_academic.git
 cd chatgpt_academic
-# 配置 “海外Proxy”， “API_KEY” 以及 “WEB_PORT” (例如50923) 等
+# 配置 “Proxy”， “API_KEY” 以及 “WEB_PORT” (例如50923) 等
 用任意文本编辑器编辑 config.py
 # 安装
 docker build -t gpt-academic .
