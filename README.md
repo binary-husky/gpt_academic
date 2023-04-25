@@ -208,7 +208,6 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 - version 2.0: 引入模块化函数插件
 - version 1.0: 基础功能
 
-chatgpt_academic开发者QQ群：734063350
 
 ## 参考与学习
 
