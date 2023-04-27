@@ -56,26 +56,24 @@ def patch_and_restart(path):
     """
     一键更新协议：覆盖和重启
     """
-    import distutils
+    from distutils import dir_util
     import shutil
     import os
     import sys
     import time
+    import glob
     from colorful import print亮黄, print亮绿, print亮红
     # if not using config_private, move origin config.py as config_private.py
     if not os.path.exists('config_private.py'):
         print亮黄('由于您没有设置config_private.py私密配置，现将您的现有配置移动至config_private.py以防止配置丢失，',
               '另外您可以随时在history子文件夹下找回旧版的程序。')
         shutil.copyfile('config.py', 'config_private.py')
-    try:
-        distutils.dir_util.copy_tree(path+'/gpt_academic-master', './')
-    except:
-        from distutils import dir_util
-        dir_util.copy_tree(path+'/gpt_academic-master', './')
-    import subprocess
+    path_new_version = glob.glob(path + '/*-master')[0]
+    dir_util.copy_tree(path_new_version, './')
     print亮绿('代码已经更新，即将更新pip包依赖……')
     for i in reversed(range(5)): time.sleep(1); print(i)
     try: 
+        import subprocess
         subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt'])
     except:
         print亮红('pip包依赖安装出现问题，需要手动安装新增的依赖库 `python -m pip install -r requirements.txt`，然后在用常规的`python main.py`的方式启动。')
