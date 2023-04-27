@@ -99,7 +99,7 @@ cd chatgpt_academic
 
 3. 安装依赖
 ```sh
-# （选择I: 如熟悉python）推荐
+# （选择I: 如熟悉python）（python版本3.9以上，越新越好）
 python -m pip install -r requirements.txt
 # 备注：使用官方pip源或者阿里pip源，其他pip源（如一些大学的pip）有可能出问题，临时换源方法：python -m pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 
