@@ -33,6 +33,7 @@ CODE_HIGHLIGHT = True
 
 # 窗口布局
 LAYOUT = "LEFT-RIGHT"  # "LEFT-RIGHT"（左右布局） # "TOP-DOWN"（上下布局）
+DARK_MODE = True  # "LEFT-RIGHT"（左右布局） # "TOP-DOWN"（上下布局）
 
 # 发送请求到OpenAI后，等待多久判定为超时
 TIMEOUT_SECONDS = 30
