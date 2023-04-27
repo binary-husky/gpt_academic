@@ -196,6 +196,8 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 
 
 ## 版本:
+- version 3.4(Todo): 完善chatglm本地大模型的多线支持
+- version 3.3: +互联网信息综合功能
 - version 3.2: 函数插件支持更多参数接口 (保存对话功能, 解读任意语言代码+同时询问任意的LLM组合)
 - version 3.1: 支持同时问询多个gpt模型！支持api2d，支持多个apikey负载均衡
 - version 3.0: 对chatglm和其他小型llm的支持
@@ -207,6 +209,8 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 - version 2.1: 可折叠式布局
 - version 2.0: 引入模块化函数插件
 - version 1.0: 基础功能
+
+gpt_academic开发者QQ群：734063350
 
 
 ## 参考与学习
