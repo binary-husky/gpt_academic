@@ -1,5 +1,5 @@
 {
-  "version": 3.3,
+  "version": 3.31,
   "show_feature": true,
-  "new_feature": "支持NewBing <-> Markdown翻译功能支持直接输入Readme文件网址 <-> 保存对话功能 <-> 解读任意语言代码+同时询问任意的LLM组合 <-> 添加联网（Google）回答问题插件 <-> 修复ChatGLM上下文BUG <-> 添加支持清华ChatGLM和GPT-4 <-> 改进架构，支持与多个LLM模型同时对话 <-> 添加支持API2D（国内，可支持gpt4）"
+  "new_feature": "ChatGLM加线程锁提高并发稳定性 <-> 支持NewBing <-> Markdown翻译功能支持直接输入Readme文件网址 <-> 保存对话功能 <-> 解读任意语言代码+同时询问任意的LLM组合 <-> 添加联网（Google）回答问题插件 <-> 修复ChatGLM上下文BUG <-> 添加支持清华ChatGLM"
 }
