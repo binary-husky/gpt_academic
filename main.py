@@ -186,7 +186,9 @@ def main():
         print(f"\t（暗色主题）: http://localhost:{PORT}/?__dark-theme=true")
         def open():
             time.sleep(2)       # 打开浏览器
-            webbrowser.open_new_tab(f"http://localhost:{PORT}/?__dark-theme=true")
+            DARK_MODE, = get_conf('DARK_MODE')
+            if DARK_MODE: webbrowser.open_new_tab(f"http://localhost:{PORT}/?__dark-theme=true")
+            else: webbrowser.open_new_tab(f"http://localhost:{PORT}")
         threading.Thread(target=open, name="open-browser", daemon=True).start()
         threading.Thread(target=auto_update, name="self-upgrade", daemon=True).start()
         threading.Thread(target=warm_up_modules, name="warm-up", daemon=True).start()
