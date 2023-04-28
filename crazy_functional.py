@@ -29,10 +29,11 @@ def get_crazy_functions():
         },
         "解析整个Python项目": {
             "Color": "stop",    # 按钮颜色
+            "AsButton": False,
             "Function": HotReload(解析一个Python项目)
         },
         "保存当前的对话": {
-            "AsButton":False,
+            "AsButton": True,
             "Function": HotReload(对话历史存档)
         },
         "[测试功能] 解析Jupyter Notebook文件": {
@@ -204,7 +205,7 @@ def get_crazy_functions():
     function_plugins.update({
         "连接网络回答问题（先输入问题，再点击按钮，需要访问谷歌）": {
             "Color": "stop",
-            "AsButton": False,  # 加入下拉菜单中
+            "AsButton": True,  # 加入下拉菜单中
             "Function": HotReload(连接网络回答问题)
         }
     })
