@@ -10,7 +10,7 @@ if USE_PROXY:
     # [地址] 懂的都懂，不懂就填localhost或者127.0.0.1肯定错不了（localhost意思是代理软件安装在本机上）
     # [端口] 在代理软件的设置里找。虽然不同的代理软件界面不一样，但端口号都应该在最显眼的位置上
 
-    # 代理网络的地址，打开你的科学上网软件查看代理的协议(socks5/http)、地址(localhost)和端口(11284)
+    # 代理网络的地址，打开你的*学*网软件查看代理的协议(socks5/http)、地址(localhost)和端口(11284)
     proxies = {
         #          [协议]://  [地址]  :[端口]
         "http":  "socks5h://localhost:11284",
@@ -59,7 +59,9 @@ CONCURRENT_COUNT = 100
 AUTHENTICATION = []
 
 # 重新URL重新定向，实现更换API_URL的作用（常规情况下，不要修改!!）
-# 格式 {"https://api.openai.com/v1/chat/completions": "在这里填写重定向的api.openai.com的URL"}
+# （高危设置！通过修改此设置，您将把您的API-KEY和对话隐私完全暴露给您设定的中间人！）
+# 格式 {"https://api.openai.com/v1/chat/completions": "在这里填写重定向的api.openai.com的URL"} 
+# 例如 API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "https://ai.open.com/api/conversation"}
 API_URL_REDIRECT = {}
 
 # 如果需要在二级路径下运行（常规情况下，不要修改!!）（需要配合修改main.py才能生效!）
