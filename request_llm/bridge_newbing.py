@@ -27,12 +27,12 @@ def preprocess_newbing_out(s):
     sub = lambda m: '\['+m.group(1)+'\]' # 将匹配到的数字作为替换值
     result = re.sub(pattern, sub, s) # 替换操作
     if '[1]' in result:
-        result += '\n\n<hr style="border-top: dotted 1px #44ac5c;">\n\n' + "\n\n".join(['`'+r+'`' for r in result.split('\n') if r.startswith('[')])
+        result += '\n\n```reference\n' + "\n".join([r for r in result.split('\n') if r.startswith('[')]) + '\n```\n'
     return result
 
 def preprocess_newbing_out_simple(result):
     if '[1]' in result:
-        result += '\n\n```\n' + "\n".join([r for r in result.split('\n') if r.startswith('[')]) + '\n```\n'
+        result += '\n\n```reference\n' + "\n".join([r for r in result.split('\n') if r.startswith('[')]) + '\n```\n'
     return result
 
 class NewBingHandle(Process):

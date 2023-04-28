@@ -271,8 +271,14 @@ def markdown_convertion(txt):
         content = content.replace('</script>\n</script>', '</script>')
         return content
 
+    def no_code(txt):
+        if '```' not in txt: 
+            return True
+        else:
+            if '```reference' in txt: return True    # newbing
+            else: return False
 
-    if ('$' in txt) and ('```' not in txt):  # 有$标识的公式符号，且没有代码段```的标识
+    if ('$' in txt) and no_code(txt):  # 有$标识的公式符号，且没有代码段```的标识
         # convert everything to html format
         split = markdown.markdown(text='---')
         convert_stage_1 = markdown.markdown(text=txt, extensions=['mdx_math', 'fenced_code', 'tables', 'sane_lists'], extension_configs=markdown_extension_configs)
