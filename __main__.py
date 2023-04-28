@@ -1,6 +1,4 @@
 import os
-
-
 import gradio as gr
 from request_llm.bridge_chatgpt import predict
 from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_user_upload, \
@@ -135,36 +133,39 @@ class ChatBot(ChatBotFrame):
                 self.max_length_sl = gr.Slider(minimum=256, maximum=4096, value=512, step=1, interactive=True, label="MaxLength", )
                 self.models_box = gr.CheckboxGroup(["input加密"], value=["input加密"], label="对话模式")
                 self.md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(container=False)
-                gr.Markdown(self.description)
+                # temp = gr.Markdown(self.description)
 
     def draw_goals_auto(self):
-        with gr.Box():
+        with gr.Tab('Ai Prompt'):
             with gr.Row():
-                self.ai_name = gr.Textbox(show_label=False, placeholder="Give AI a name.").style(container=False)
+                self.ai_name = gr.Textbox(show_label=False, placeholder="给Ai一个名字").style(container=False)
             with gr.Row():
-                self.user_input = gr.Textbox(lines=5, show_label=False, placeholder="Describe your AI's role.").style(container=False)
+                self.ai_role = gr.Textbox(lines=5, show_label=False, placeholder="请输入你的需求").style(container=False)
             with gr.Row():
-                self.goal_list = gr.Dataframe(headers=['Goals'], interactive=True,
-                                                row_count=4, col_count=(1, 'fixed'),  type='array')
-                self.goal_list.style()
+                self.ai_goal_list = gr.Dataframe(headers=['Goals'], interactive=True, row_count=4, col_count=(1, 'fixed'),  type='array')
             with gr.Row():
-                __l = [str(i) for i in range(10, 101, 10)]
-                __l.insert(0, '1')
-                self.submit_numer = gr.Dropdown(__l, value='1', interactive=True, label='Number of Next').style(
-                    container=False)
+                self.ai_budget = gr.Number(show_label=False, value=0.0, info="关于本次项目的预算，超过预算自动停止，默认无限").style(container=False)
+                # self.ai_goal_list.style()
+
+        with gr.Tab('Ai Settings'):
+            pass
 
     def draw_next_auto(self):
         with gr.Row():
-            self.submit_next = gr.Button("Next", variant="primary")
-            self.submit_auto = gr.Button("Continuous", variant="secondary")
+            self.text_continue = gr.Textbox(visible=False, show_label=False, placeholder="请根据提示输入执行命令").style(container=False)
+        with gr.Row():
+            self.submit_start = gr.Button("Start", variant='primary')
+            self.submit_next = gr.Button("Next", visible=False, variant='primary')
             self.submit_stop = gr.Button("Stop", variant="stop")
+            self.agent_obj = gr.State({'obj': None, "start": self.submit_start,
+                                       "next": self.submit_next, "text": self.text_continue})
 
     def signals_input_setting(self):
         # 注册input
         self.input_combo = [self.cookies, self.max_length_sl, self.md_dropdown,
                        self.txt, self.top_p, self.temperature, self.chatbot, self.history,
                        self.system_prompt, self.models_box]
-        self.output_combo = [self.cookies, self.chatbot, self.history, self.status]
+        self.output_combo = [self.cookies, self.chatbot, self.history, self.status, self.txt]
         self.predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=self.input_combo, outputs=self.output_combo)
         # 提交按钮、重置按钮
         self.cancel_handles.append(self.txt.submit(**self.predict_args))
@@ -208,6 +209,17 @@ class ChatBot(ChatBotFrame):
         # 终止按钮的回调函数注册
         self.stopBtn.click(fn=None, inputs=None, outputs=None, cancels=self.cancel_handles)
 
+
+    def signals_auto_input(self):
+        from autogpt.cli import agent_main
+        self.auto_input_combo = [self.ai_name, self.ai_role, self.ai_goal_list, self.ai_budget,
+                                self.cookies, self.chatbot, self.history,
+                                self.agent_obj]
+        self.auto_output_combo = [self.cookies, self.chatbot, self.history, self.status,
+                                  self.agent_obj, self.submit_start, self.submit_next, self.text_continue]
+        self.submit_start.click(fn=agent_main, inputs=self.auto_input_combo, outputs=self.auto_output_combo)
+
+
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay(self):
         import threading, webbrowser, time
@@ -224,16 +236,17 @@ class ChatBot(ChatBotFrame):
         threading.Thread(target=auto_update, name="self-upgrade", daemon=True).start()
         # threading.Thread(target=warm_up_modules, name="warm-up", daemon=True).start()
 
+
     def main(self):
         with gr.Blocks(title="ChatGPT For Tester", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
             # 绘制页面title
             self.draw_title()
             # 绘制一个ROW，row会让底下的元素自动排部
             with gr.Row():
-                # 绘制列2
-                with gr.Column(scale=100):
-                    self.draw_chatbot()
                 # 绘制列1
+                with gr.Column(scale=100) as chat:
+                    pass
+                # 绘制列2
                 with gr.Column(scale=51):
                     # 绘制对话模组
                     with gr.Tab('对话模式'):
@@ -243,18 +256,19 @@ class ChatBot(ChatBotFrame):
                         self.draw_setting_chat()
                     # 绘制autogpt模组
                     with gr.Tab('Auto-GPT'):
-                        self.draw_goals_auto()
                         self.draw_next_auto()
+                        self.draw_goals_auto()
+                with chat:
+                    self.draw_chatbot()
             # 函数注册，需要在Blocks下进行
             self.signals_input_setting()
             self.signals_function()
             self.signals_public()
+            self.signals_auto_input()
         # Start
         self.auto_opentab_delay()
         demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION)
 
-
 if __name__ == '__main__':
-    tester = ChatBot()
-    tester.main()
+    ChatBot().main()
 

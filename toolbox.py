@@ -54,20 +54,22 @@ def ArgsGeneralWrapper(f):
         chatbot_with_cookie.write_list(chatbot)
         txt_passon = txt
         if 'input加密' in models: txt_passon = func_box.encryption_str(txt)
-        if txt_passon == '' and len(args) > 1:
+        if txt_passon == '' and txt_passon == ' ' and len(args) > 1:
             msgs = f'### {args[1]} Warning 输入框为空\n' \
-                   'tips: 使用基础功能时，请在输入栏内输入需要处理的文本内容'
+                   'tips: 使用基础功能时，请在输入区输入需要处理的文本内容'
             yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=msgs)  # 刷新界面
             return
         yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
     return decorated
 
-def update_ui(chatbot, history, msg='正常', **kwargs):  # 刷新界面
+
+def update_ui(chatbot, history, msg='正常', txt=' ', *args):  # 刷新界面
     """
     刷新用户界面
     """
+
     assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时，可用clear将其清空，然后用for+append循环重新赋值。"
-    yield chatbot.get_cookies(), chatbot, history, msg
+    yield chatbot.get_cookies(), chatbot, history, msg, txt
 
 def CatchException(f):
     """
@@ -419,7 +421,7 @@ def get_user_download(chatbot, link, file):
                             '[Local Message] Cannot convert directory to download link, please try again.'])
         elif file_handle == '':
             pass
-    return chatbot, file
+    return chatbot, ''
 
 
 def on_file_uploaded(files, chatbot, txt, ipaddr: gr.Request):
@@ -593,3 +595,7 @@ def run_gradio_in_subpath(demo, auth, port, custom_path):
             return {"message": f"Gradio is running at: {custom_path}"}
     app = gr.mount_gradio_app(app, demo, path=custom_path)
     uvicorn.run(app, host="0.0.0.0", port=port) # , auth=auth
+
+
+if __name__ == '__main__':
+    print(ChatBotWithCookies())

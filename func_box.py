@@ -123,6 +123,7 @@ def ipaddr():  # 获取本地ipx
             return ip[i][0][1]
 
 def encryption_str(txt: str):
+    txt = str(txt)
     """(关键字)(加密间隔)匹配机制（关键字间隔）"""
     pattern = re.compile(rf"(Authorization|WPS-Sid|Cookie)(:|\s+)\s*(\S+)[\s\S]*?(?=\n|$|\s)", re.IGNORECASE)
     result = pattern.sub(lambda x: x.group(1) + ": XXXXXXXX", txt)
@@ -142,12 +143,26 @@ def tree_out(dir=os.path.dirname(__file__), line=2, more=''):
         f.write('```\n')
 
 
+def chat_history(log: list, split=0):
+    if split:
+        log = log[split:]
+    chat = ''
+    history = ''
+    for i in log:
+        chat += f'{i[0]}\n\n'
+        history += f'{i[1]}\n\n'
+    return chat, history
+
+
+
 if __name__ == '__main__':
 
     txt = "Authorization: WPS-2:AqY7ik9XQ92tvO7+NlCRvA==:b2f626f496de9c256605a15985c855a8b3e4be99\nwps-Sid: V02SgISzdeWrYdwvW_xbib-fGlqUIIw00afc5b890008c1976f\nCookie: wpsua=V1BTVUEvMS4wIChhbmRyb2lkLW9mZmljZToxNy41O2FuZHJvaWQ6MTA7ZjIwZDAyNWQzYTM5MmExMDBiYzgxNWI2NmI3Y2E5ODI6ZG1sMmJ5QldNakF5TUVFPSl2aXZvL1YyMDIwQQ=="
     txt = "Authorization: WPS-2:AqY7ik9XQ92tvO7+NlCRvA==:b2f626f496de9c256605a15985c855a8b3e4be99"
     print(encryption_str(txt))
-    tree_out()
 
+    def update_ui(chatbot, history, msg='正常', txt='', obj=None, btn1=None, btn2=None, au_text=None, *args):
+        print(chatbot, history, msg, txt, obj)
 
-
+    ll = [4,5, 6]
+    update_ui(chatbot=1, history=2, *ll)
