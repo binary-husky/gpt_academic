@@ -13,6 +13,20 @@ import os
 import time
 import glob
 ############################### 插件输入输出接驳区 #######################################
+
+"""
+========================================================================
+第一部分
+函数插件输入输出接驳区
+    - ChatBotWithCookies:   带Cookies的Chatbot类，为实现更多强大的功能做基础
+    - ArgsGeneralWrapper:   装饰器函数，用于重组输入参数，改变输入参数的顺序与结构
+    - update_ui:            刷新界面用 yield from update_ui(chatbot, history)
+    - CatchException:       将插件中出的所有问题显示在界面上
+    - HotReload:            实现插件的热更新
+    - trimmed_format_exc:   打印traceback，为了安全而隐藏绝对地址
+========================================================================
+"""
+
 class ChatBotWithCookies(list):
     def __init__(self, cookie):
         self._cookies = cookie
@@ -26,6 +40,7 @@ class ChatBotWithCookies(list):
 
     def get_cookies(self):
         return self._cookies
+
 
 def ArgsGeneralWrapper(f):
     """
@@ -71,10 +86,18 @@ def update_ui(chatbot, history, msg='正常', txt=' ', *args):  # 刷新界面
     assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时，可用clear将其清空，然后用for+append循环重新赋值。"
     yield chatbot.get_cookies(), chatbot, history, msg, txt
 
+def trimmed_format_exc():
+    import os, traceback
+    str = traceback.format_exc()
+    current_path = os.getcwd()
+    replace_path = "."
+    return str.replace(current_path, replace_path)
+
 def CatchException(f):
     """
     装饰器函数，捕捉函数f中的异常并封装到一个生成器中返回，并显示到聊天当中。
     """
+
     @wraps(f)
     def decorated(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
         try:
@@ -83,7 +106,7 @@ def CatchException(f):
             from check_proxy import check_proxy
             from toolbox import get_conf
             proxies, = get_conf('proxies')
-            tb_str = '```\n' + traceback.format_exc() + '```'
+            tb_str = '```\n' + trimmed_format_exc() + '```'
             if chatbot is None or len(chatbot) == 0:
                 chatbot = [["插件调度异常", "异常原因"]]
             chatbot[-1] = (chatbot[-1][0],
@@ -115,6 +138,24 @@ def HotReload(f):
 
 ####################################### 其他小工具 #####################################
 
+"""
+========================================================================
+第二部分
+其他小工具:
+    - write_results_to_file:    将结果写入markdown文件中
+    - regular_txt_to_markdown:  将普通文本转换为Markdown格式的文本。
+    - report_execption:         向chatbot中添加简单的意外错误信息
+    - text_divide_paragraph:    将文本按照段落分隔符分割开，生成带有段落标签的HTML代码。
+    - markdown_convertion:      用多种方式组合，将markdown转化为好看的html
+    - format_io:                接管gradio默认的markdown处理方式
+    - on_file_uploaded:         处理文件的上传（自动解压）
+    - on_report_generated:      将生成的报告自动投射到文件上传区
+    - clip_history:             当历史上下文过长时，自动截断
+    - get_conf:                 获取设置
+    - select_api_key:           根据当前的模型类别，抽取可用的api-key
+========================================================================
+"""
+
 def get_reduce_token_percent(text):
     """
         * 此函数未来将被弃用
@@ -131,7 +172,6 @@ def get_reduce_token_percent(text):
         return ratio, str(int(current_tokens-max_limit))
     except:
         return 0.5, '不详'
-
 
 
 def write_results_to_file(history, file_name=None):
@@ -425,6 +465,9 @@ def get_user_download(chatbot, link, file):
 
 
 def on_file_uploaded(files, chatbot, txt, ipaddr: gr.Request):
+    """
+    当文件被上传时的回调函数
+    """
     if len(files) == 0:
         return chatbot, txt
     private_upload = './private_upload'
@@ -551,7 +594,7 @@ def clear_line_break(txt):
 class DummyWith():
     """
     这段代码定义了一个名为DummyWith的空上下文管理器，
-    它的作用是……额……没用，即在代码结构不变得情况下取代其他的上下文管理器。
+    它的作用是……额……就是不起作用，即在代码结构不变得情况下取代其他的上下文管理器。
     上下文管理器是一种Python对象，用于与with语句一起使用，
     以确保一些资源在代码块执行期间得到正确的初始化和清理。
     上下文管理器必须实现两个方法，分别为 __enter__()和 __exit__()。
@@ -566,6 +609,9 @@ class DummyWith():
 
 
 def run_gradio_in_subpath(demo, auth, port, custom_path):
+    """
+    把gradio的运行地址更改到指定的二次路径上
+    """
     def is_path_legal(path: str)->bool:
         '''
         check path for sub url
@@ -597,5 +643,50 @@ def run_gradio_in_subpath(demo, auth, port, custom_path):
     uvicorn.run(app, host="0.0.0.0", port=port) # , auth=auth
 
 
-if __name__ == '__main__':
-    print(ChatBotWithCookies())
+def clip_history(inputs, history, tokenizer, max_token_limit):
+    """
+    reduce the length of history by clipping.
+    this function search for the longest entries to clip, little by little,
+    until the number of token of history is reduced under threshold.
+    通过裁剪来缩短历史记录的长度。 
+    此函数逐渐地搜索最长的条目进行剪辑，
+    直到历史记录的标记数量降低到阈值以下。
+    """
+    import numpy as np
+    from request_llm.bridge_all import model_info
+    def get_token_num(txt): 
+        return len(tokenizer.encode(txt, disallowed_special=()))
+    input_token_num = get_token_num(inputs)
+    if input_token_num < max_token_limit * 3 / 4:
+        # 当输入部分的token占比小于限制的3/4时，裁剪时
+        # 1. 把input的余量留出来
+        max_token_limit = max_token_limit - input_token_num
+        # 2. 把输出用的余量留出来
+        max_token_limit = max_token_limit - 128
+        # 3. 如果余量太小了，直接清除历史
+        if max_token_limit < 128:
+            history = []
+            return history
+    else:
+        # 当输入部分的token占比 > 限制的3/4时，直接清除历史
+        history = []
+        return history
+
+    everything = ['']
+    everything.extend(history)
+    n_token = get_token_num('\n'.join(everything))
+    everything_token = [get_token_num(e) for e in everything]
+
+    # 截断时的颗粒度
+    delta = max(everything_token) // 16
+
+    while n_token > max_token_limit:
+        where = np.argmax(everything_token)
+        encoded = tokenizer.encode(everything[where], disallowed_special=())
+        clipped_encoded = encoded[:len(encoded)-delta]
+        everything[where] = tokenizer.decode(clipped_encoded)[:-1]    # -1 to remove the may-be illegal char
+        everything_token[where] = get_token_num(everything[where])
+        n_token = get_token_num('\n'.join(everything))
+
+    history = everything[1:]
+    return history
