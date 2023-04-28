@@ -90,8 +90,9 @@ def CatchException(f):
             from toolbox import get_conf
             proxies, = get_conf('proxies')
             tb_str = '```\n' + trimmed_format_exc() + '```'
-            if chatbot is None or len(chatbot) == 0:
-                chatbot = [["插件调度异常", "异常原因"]]
+            if len(chatbot) == 0:
+                chatbot.clear()
+                chatbot.append(["插件调度异常", "异常原因"])
             chatbot[-1] = (chatbot[-1][0],
                            f"[Local Message] 实验性函数调用出错: \n\n{tb_str} \n\n当前代理可用性: \n\n{check_proxy(proxies)}")
             yield from update_ui(chatbot=chatbot, history=history, msg=f'异常 {e}') # 刷新界面
