@@ -30,7 +30,8 @@ def get_crazy_functions():
             "Color": "stop",    # 按钮颜色
             "Function": HotReload(解析一个Python项目)
         },
-        "载入对话历史存档": {
+        "载入对话历史存档（先上传存档或输入路径）": {
+            "Color": "stop",
             "AsButton":False,
             "Function": HotReload(载入对话历史存档)
         },
