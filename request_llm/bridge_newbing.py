@@ -24,7 +24,7 @@ from multiprocessing import Process, Pipe
 
 def preprocess_newbing_out(s):
     pattern = r'\^(\d+)\^' # 匹配^数字^
-    sub = lambda m: '\['+m.group(1)+'\]' # 将匹配到的数字作为替换值
+    sub = lambda m: '('+m.group(1)+')' # 将匹配到的数字作为替换值
     result = re.sub(pattern, sub, s) # 替换操作
     if '[1]' in result:
         result += '\n\n```reference\n' + "\n".join([r for r in result.split('\n') if r.startswith('[')]) + '\n```\n'
