@@ -174,9 +174,6 @@ def main():
             yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(*args, **kwargs)
         click_handle = switchy_bt.click(route,[switchy_bt, *input_combo, gr.State(PORT)], output_combo)
         click_handle.then(on_report_generated, [file_upload, chatbot], [file_upload, chatbot])
-        # def expand_file_area(file_upload, area_file_up):
-        #     if len(file_upload)>0: return {area_file_up: gr.update(open=True)}
-        # click_handle.then(expand_file_area, [file_upload, area_file_up], [area_file_up])
         cancel_handles.append(click_handle)
         # 终止按钮的回调函数注册
         stopBtn.click(fn=None, inputs=None, outputs=None, cancels=cancel_handles)
@@ -190,7 +187,9 @@ def main():
         print(f"\t（暗色主题）: http://localhost:{PORT}/?__dark-theme=true")
         def open():
             time.sleep(2)       # 打开浏览器
-            webbrowser.open_new_tab(f"http://localhost:{PORT}/?__dark-theme=true")
+            DARK_MODE, = get_conf('DARK_MODE')
+            if DARK_MODE: webbrowser.open_new_tab(f"http://localhost:{PORT}/?__dark-theme=true")
+            else: webbrowser.open_new_tab(f"http://localhost:{PORT}")
         threading.Thread(target=open, name="open-browser", daemon=True).start()
         threading.Thread(target=auto_update, name="self-upgrade", daemon=True).start()
         threading.Thread(target=warm_up_modules, name="warm-up", daemon=True).start()

@@ -1,6 +1,7 @@
 
 from transformers import AutoModel, AutoTokenizer
 import time
+import threading
 import importlib
 from toolbox import update_ui, get_conf
 from multiprocessing import Process, Pipe
@@ -18,6 +19,7 @@ class GetGLMHandle(Process):
         self.success = True
         self.check_dependency()
         self.start()
+        self.threadLock = threading.Lock()
         
     def check_dependency(self):
         try:
@@ -72,6 +74,7 @@ class GetGLMHandle(Process):
 
     def stream_chat(self, **kwargs):
         # 主进程执行
+        self.threadLock.acquire()
         self.parent.send(kwargs)
         while True:
             res = self.parent.recv()
@@ -79,7 +82,7 @@ class GetGLMHandle(Process):
                 yield res
             else:
                 break
-        return
+        self.threadLock.release()
     
 global glm_handle
 glm_handle = None
@@ -145,10 +148,13 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         history_feedin.append([history[2*i], history[2*i+1]] )
 
     # 开始接收chatglm的回复
+    response = "[Local Message]: 等待ChatGLM响应中 ..."
     for response in glm_handle.stream_chat(query=inputs, history=history_feedin, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
         chatbot[-1] = (inputs, response)
         yield from update_ui(chatbot=chatbot, history=history)
 
     # 总结输出
+    if response == "[Local Message]: 等待ChatGLM响应中 ...":
+        response = "[Local Message]: ChatGLM响应异常 ..."
     history.extend([inputs, response])
     yield from update_ui(chatbot=chatbot, history=history)

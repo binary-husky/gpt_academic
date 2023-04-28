@@ -1,5 +1,4 @@
-import traceback
-from toolbox import update_ui, get_conf
+from toolbox import update_ui, get_conf, trimmed_format_exc
 
 def input_clipping(inputs, history, max_token_limit):
     import numpy as np
@@ -94,12 +93,12 @@ def request_gpt_model_in_new_thread_with_ui_alive(
                     continue # 返回重试
                 else:
                     # 【选择放弃】
-                    tb_str = '```\n' + traceback.format_exc() + '```'
+                    tb_str = '```\n' + trimmed_format_exc() + '```'
                     mutable[0] += f"[Local Message] 警告，在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                     return mutable[0] # 放弃
             except:
                 # 【第三种情况】：其他错误：重试几次
-                tb_str = '```\n' + traceback.format_exc() + '```'
+                tb_str = '```\n' + trimmed_format_exc() + '```'
                 print(tb_str)
                 mutable[0] += f"[Local Message] 警告，在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                 if retry_op > 0:
@@ -173,7 +172,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     if max_workers == -1: # 读取配置文件
         try: max_workers, = get_conf('DEFAULT_WORKER_NUM')
         except: max_workers = 8
-        if max_workers <= 0 or max_workers >= 20: max_workers = 8
+        if max_workers <= 0: max_workers = 3
     # 屏蔽掉 chatglm的多线程，可能会导致严重卡顿
     if not (llm_kwargs['llm_model'].startswith('gpt-') or llm_kwargs['llm_model'].startswith('api2d-')):
         max_workers = 1
@@ -220,14 +219,14 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     continue # 返回重试
                 else:
                     # 【选择放弃】
-                    tb_str = '```\n' + traceback.format_exc() + '```'
+                    tb_str = '```\n' + trimmed_format_exc() + '```'
                     gpt_say += f"[Local Message] 警告，线程{index}在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                     if len(mutable[index][0]) > 0: gpt_say += "此线程失败前收到的回答：\n\n" + mutable[index][0]
                     mutable[index][2] = "输入过长已放弃"
                     return gpt_say # 放弃
             except:
                 # 【第三种情况】：其他错误
-                tb_str = '```\n' + traceback.format_exc() + '```'
+                tb_str = '```\n' + trimmed_format_exc() + '```'
                 print(tb_str)
                 gpt_say += f"[Local Message] 警告，线程{index}在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                 if len(mutable[index][0]) > 0: gpt_say += "此线程失败前收到的回答：\n\n" + mutable[index][0]
@@ -564,3 +563,46 @@ def read_and_clean_pdf_text(fp):
         #    print亮绿('***************************')
 
     return meta_txt, page_one_meta
+
+
+def get_files_from_everything(txt, type): # type='.md'
+    """
+    这个函数是用来获取指定目录下所有指定类型（如.md）的文件，并且对于网络上的文件，也可以获取它。
+    下面是对每个参数和返回值的说明：
+    参数 
+    - txt: 路径或网址，表示要搜索的文件或者文件夹路径或网络上的文件。 
+    - type: 字符串，表示要搜索的文件类型。默认是.md。
+    返回值 
+    - success: 布尔值，表示函数是否成功执行。 
+    - file_manifest: 文件路径列表，里面包含以指定类型为后缀名的所有文件的绝对路径。 
+    - project_folder: 字符串，表示文件所在的文件夹路径。如果是网络上的文件，就是临时文件夹的路径。
+    该函数详细注释已添加，请确认是否满足您的需要。
+    """
+    import glob, os
+
+    success = True
+    if txt.startswith('http'):
+        # 网络的远程文件
+        import requests
+        from toolbox import get_conf
+        proxies, = get_conf('proxies')
+        r = requests.get(txt, proxies=proxies)
+        with open('./gpt_log/temp'+type, 'wb+') as f: f.write(r.content)
+        project_folder = './gpt_log/'
+        file_manifest = ['./gpt_log/temp'+type]
+    elif txt.endswith(type):
+        # 直接给定文件
+        file_manifest = [txt]
+        project_folder = os.path.dirname(txt)
+    elif os.path.exists(txt):
+        # 本地路径，递归搜索
+        project_folder = txt
+        file_manifest = [f for f in glob.glob(f'{project_folder}/**/*'+type, recursive=True)]
+        if len(file_manifest) == 0:
+            success = False
+    else:
+        project_folder = None
+        file_manifest = []
+        success = False
+
+    return success, file_manifest, project_folder
