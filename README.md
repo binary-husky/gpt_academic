@@ -156,15 +156,18 @@ docker run --rm -it --net=host --gpus=all gpt-academic
 docker run --rm -it --net=host --gpus=all gpt-academic bash
 ```
 
-## 安装-方法3：其他部署方式（需要云服务器知识与经验）
+## 安装-方法3：其他部署姿势
 
-1. 远程云服务器部署
+1. 如何使用反代URL/AzureAPI
+按照`config.py`中的说明配置API_URL_REDIRECT即可。
+
+2. 远程云服务器部署（需要云服务器知识与经验）
 请访问[部署wiki-1](https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BF%9C%E7%A8%8B%E9%83%A8%E7%BD%B2%E6%8C%87%E5%8D%97)
 
-2. 使用WSL2（Windows Subsystem for Linux 子系统）
+3. 使用WSL2（Windows Subsystem for Linux 子系统）
 请访问[部署wiki-2](https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2)
 
-3. 如何在二级网址（如`http://localhost/subpath`）下运行
+4. 如何在二级网址（如`http://localhost/subpath`）下运行
 请访问[FastAPI运行说明](docs/WithFastapi.md)
 
 ---
@@ -201,6 +204,7 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/235222390-24a9acc0-680f-49f5-bc81-2f3161f1e049.png" width="500" >
 </div>
+
 在函数插件区（下拉菜单）调用 `载入对话历史存档` ，即可还原之前的会话。
 
 2. 生成报告。大部分插件都会在执行结束后，生成工作报告
