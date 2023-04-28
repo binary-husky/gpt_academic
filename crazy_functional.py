@@ -106,7 +106,7 @@ def get_crazy_functions():
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(解析项目本身)
         },
-        "[多线程demo] 把本项目源代码切换成全英文": {
+        "[老旧的Demo] 把本项目源代码切换成全英文": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(全项目切换英文)
@@ -174,19 +174,19 @@ def get_crazy_functions():
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(Latex中文润色)
         },
-        "[测试功能] Latex项目全文中译英（输入路径或上传压缩包）": {
+        "Latex项目全文中译英（输入路径或上传压缩包）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(Latex中译英)
         },
-        "[测试功能] Latex项目全文英译中（输入路径或上传压缩包）": {
+        "Latex项目全文英译中（输入路径或上传压缩包）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(Latex英译中)
         },
-        "[测试功能] 批量Markdown中译英（输入路径或上传压缩包）": {
+        "批量Markdown中译英（输入路径或上传压缩包）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
