@@ -1,6 +1,6 @@
 import os
 import gradio as gr
-from request_llm.bridge_chatgpt import predict
+from request_llm.bridge_all import predict
 from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_user_upload, \
     get_user_download, get_conf, ArgsGeneralWrapper, DummyWith
 
@@ -55,7 +55,7 @@ class ChatBotFrame:
 
     def __init__(self):
         self.cancel_handles = []
-        self.initial_prompt = "Serve me as a writing and programming assistant."
+        self.initial_prompt = "In answer to my question, Think about what are some alternative perspectives"
         self.title_html = f"<h1 align=\"center\">ChatGPT For Tester {get_current_version()}</h1>"
         self.description = """代码开源和更新[地址🚀](https://github.com/binary-husky/chatgpt_academic)，感谢热情的[开发者们❤️](https://github.com/binary-husky/chatgpt_academic/graphs/contributors)"""
 
@@ -73,7 +73,7 @@ class ChatBot(ChatBotFrame):
 
     def draw_chatbot(self):
         with gr.Box():
-            self.chatbot = gr.Chatbot()
+            self.chatbot = gr.Chatbot(label=f"当前模型：{LLM_MODEL}")
             self.chatbot.style(height=CHATBOT_HEIGHT)
             self.history = gr.State([])
             with gr.Row():
@@ -117,7 +117,7 @@ class ChatBot(ChatBotFrame):
                         self.variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
                         crazy_fns[k]["Button"] = gr.Button(k, variant=self.variant)
                         crazy_fns[k]["Button"].style(size="sm")
-                with gr.Accordion("更多函数插件", open=True):
+                with gr.Accordion("更多函数插件", open=False):
                     dropdown_fn_list = [k for k in crazy_fns.keys() if
                                         not crazy_fns[k].get("AsButton", True)]
                     self.dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="").style(
@@ -126,14 +126,15 @@ class ChatBot(ChatBotFrame):
 
     def draw_setting_chat(self):
         with gr.Tab('Setting'):
-            with gr.Accordion("展开SysPrompt & 交互界面布局 & Github地址", open=True):
-                self.system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt", label="System prompt", value=self.initial_prompt)
-                self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01, interactive=True, label="Top-p (nucleus sampling)", )
-                self.temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature", )
-                self.max_length_sl = gr.Slider(minimum=256, maximum=4096, value=512, step=1, interactive=True, label="MaxLength", )
-                self.models_box = gr.CheckboxGroup(["input加密"], value=["input加密"], label="对话模式")
-                self.md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(container=False)
-                # temp = gr.Markdown(self.description)
+            self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01, interactive=True, label="Top-p (nucleus sampling)", )
+            self.temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature", )
+            self.max_length_sl = gr.Slider(minimum=256, maximum=4096, value=512, step=1, interactive=True, label="MaxLength", )
+            self.models_box = gr.CheckboxGroup(["input加密"], value=["input加密"], label="对话模式")
+            self.system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt", label="System prompt", value=self.initial_prompt)
+            self.md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(container=False)
+
+
+            # temp = gr.Markdown(self.description)
 
     def draw_goals_auto(self):
         with gr.Tab('Ai Prompt'):
@@ -202,12 +203,15 @@ class ChatBot(ChatBotFrame):
         # 随变按钮的回调函数注册
         def route(k, *args, **kwargs):
             if k in [r"打开插件列表", r"请先从插件列表中选择"]: return
-            yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(*args, **kwargs)
-        self.click_handle = self.switchy_bt.click(route, [self.switchy_bt, *self.input_combo, gr.State(PORT)], self.output_combo)
+            yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(*args , **kwargs)
+        self.click_handle = self.switchy_bt.click(route, [self.switchy_bt, *self.input_combo], self.output_combo)
         self.click_handle.then(on_report_generated, [self.file_upload, self.chatbot], [self.file_upload, self.chatbot])
         self.cancel_handles.append(self.click_handle)
         # 终止按钮的回调函数注册
         self.stopBtn.click(fn=None, inputs=None, outputs=None, cancels=self.cancel_handles)
+        def on_md_dropdown_changed(k):
+            return {self.chatbot: gr.update(label="当前模型："+k)}
+        self.md_dropdown.select(on_md_dropdown_changed, [self.md_dropdown], [self.chatbot])
 
 
     def signals_auto_input(self):
@@ -231,7 +235,6 @@ class ChatBot(ChatBotFrame):
         def open():
             time.sleep(2)  # 打开浏览器
             webbrowser.open_new_tab(f"http://localhost:{PORT}/?__dark-theme=true")
-    
         threading.Thread(target=open, name="open-browser", daemon=True).start()
         threading.Thread(target=auto_update, name="self-upgrade", daemon=True).start()
         # threading.Thread(target=warm_up_modules, name="warm-up", daemon=True).start()

@@ -111,3 +111,4 @@ def 理解PDF文档内容标准文件输入(txt, llm_kwargs, plugin_kwargs, chat
     txt = file_manifest[0]
     # 开始正式执行任务
     yield from 解析PDF(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt)
+

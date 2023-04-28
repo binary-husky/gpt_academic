@@ -78,7 +78,7 @@ def ArgsGeneralWrapper(f):
     return decorated
 
 
-def update_ui(chatbot, history, msg='正常', txt=' ', *args):  # 刷新界面
+def update_ui(chatbot, history, msg='正常', txt='', *args):  # 刷新界面
     """
     刷新用户界面
     """
