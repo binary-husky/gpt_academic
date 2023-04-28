@@ -193,7 +193,42 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 本项目的插件编写、调试难度很低，只要您具备一定的python基础知识，就可以仿照我们提供的模板实现自己的插件功能。
 详情请参考[函数插件指南](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)。
 
+---
 
+## 其他功能说明
+
+1. 对话保存功能。在函数插件区调用`保存当前的对话`即可将当前对话保存为可读+可复原的html文件，如图：
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/235222390-24a9acc0-680f-49f5-bc81-2f3161f1e049.png" width="500" >
+</div>
+在函数插件区（下拉菜单）调用`载入对话历史存档`，即可还原之前的会话。
+
+2. 生成报告。大部分插件都会在执行结束后，生成工作报告
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/227503770-fe29ce2c-53fd-47b0-b0ff-93805f0c2ff4.png" height="300" >
+<img src="https://user-images.githubusercontent.com/96192199/227504617-7a497bb3-0a2a-4b50-9a8a-95ae60ea7afd.png" height="300" >
+<img src="https://user-images.githubusercontent.com/96192199/227504005-efeaefe0-b687-49d0-bf95-2d7b7e66c348.png" height="300" >
+</div>
+
+3. 模块化功能设计，简单的接口却能支持强大的功能
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/229288270-093643c1-0018-487a-81e6-1d7809b6e90f.png" height="400" >
+<img src="https://user-images.githubusercontent.com/96192199/227504931-19955f78-45cd-4d1c-adac-e71e50957915.png" height="400" >
+</div>
+
+4. 这是一个能够“自我译解”的开源项目
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/226936850-c77d7183-0749-4c1c-9875-fd4891842d0c.png" width="800" >
+</div>
+
+5. 译解其他开源项目，不在话下
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/226935232-6b6a73ce-8900-4aee-93f9-733c7e6fef53.png" width="800" >
+</div>
+
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/226969067-968a27c1-1b9c-486b-8b81-ab2de8d3f88a.png" width="800" >
+</div>
 
 ## 版本:
 - version 3.5(Todo): 使用自然语言调用本项目的所有函数插件（高优先级）
