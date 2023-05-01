@@ -545,13 +545,11 @@ def read_single_conf_from_env(arg, default_value):
         # 格式为：username1:password1;username2:password2
         for item in os.environ[env_arg].split(";"):
             r.append(tuple(item.split(":")))
-    elif arg == "API_URL_REDIRECT":
-        r = {}
-        # 对于API_URL_REDIRECT的环境变量配置，我们允许用户使用;分隔转发地址
-        # 格式为：url1:redirect1;url2:redirect2
-        for item in os.environ[env_arg].split(";"):
-            k, v = item.split(":")
-            r[k] = v
+    elif arg == "API_URL_REDIRECT": 
+        # 对于API_URL_REDIRECT的环境变量，我们允许用户使用json格式配置多个url重定向
+        # 格式为一个json字符串，例如：{"https://api.openai.com/v1/chat/completions": "https://ai.open.com/api/conversation"}
+        import json
+        r = json.loads(os.environ[env_arg])
     elif isinstance(default_value, bool):
         r = bool(os.environ[env_arg])
     elif isinstance(default_value, int):
