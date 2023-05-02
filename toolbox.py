@@ -3,6 +3,7 @@ import importlib
 import traceback
 import inspect
 import re
+import os
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
 
@@ -517,13 +518,61 @@ def select_api_key(keys, llm_model):
     api_key = random.choice(avail_key_list) # 随机负载均衡
     return api_key
 
+def read_single_conf_from_env(arg, default_value):
+    ENV_PREFIX = "GPT_ACADEMIC_" # 环境变量的前缀
+    env_arg = ENV_PREFIX + arg # 环境变量的KEY
+    if arg == "proxies":
+        # 对于proxies，我们使用多个环境变量来配置
+        # HTTP_PROXY: 对应http代理
+        # HTTPS_PROXY: 对应https代理
+        # ALL_PROXY: 对应http和https代理，优先级较HTTP_PROXY和HTTPS_PROXY更低
+        http_proxy = os.environ.get(ENV_PREFIX + "HTTP_PROXY") or os.environ.get("ALL_PROXY")
+        assert http_proxy is not None, f"请设置环境变量{ENV_PREFIX + 'HTTP_PROXY'}"
+        https_proxy = os.environ.get(ENV_PREFIX + "HTTPS_PROXY") or os.environ.get("ALL_PROXY")
+        assert https_proxy is not None, f"请设置环境变量{ENV_PREFIX + 'HTTPS_PROXY'}"
+        r = {
+            "http": http_proxy,
+            "https": https_proxy
+        }
+    elif arg == "AVAIL_LLM_MODELS":
+        r = []
+        # 对于AVAIL_LLM_MODELS的环境变量配置，我们允许用户使用;分隔多个模型
+        for item in os.environ[env_arg].split(";"):
+            r.append(item)
+    elif arg == "AUTHENTICATION":
+        r = []
+        # 对于AUTHENTICATION的环境变量配置，我们允许用户使用;分隔多个账号
+        # 格式为：username1:password1;username2:password2
+        for item in os.environ[env_arg].split(";"):
+            r.append(tuple(item.split(":")))
+    elif arg == "API_URL_REDIRECT": 
+        # 对于API_URL_REDIRECT的环境变量，我们允许用户使用json格式配置多个url重定向
+        # 格式为一个json字符串，例如：{"https://api.openai.com/v1/chat/completions": "https://ai.open.com/api/conversation"}
+        import json
+        r = json.loads(os.environ[env_arg])
+    elif isinstance(default_value, bool):
+        r = bool(os.environ[env_arg])
+    elif isinstance(default_value, int):
+        r = int(os.environ[env_arg])
+    elif isinstance(default_value, float):
+        r = float(os.environ[env_arg])
+    elif isinstance(default_value, str):
+        r = os.environ[env_arg]
+    else:
+        raise RuntimeError(f"[CONFIG] 环境变量{arg}不支持自动转换到{type(default_value)}类型")
+    return r
+
 @lru_cache(maxsize=128)
 def read_single_conf_with_lru_cache(arg):
     from colorful import print亮红, print亮绿, print亮蓝
+    default_r = getattr(importlib.import_module('config'), arg)
     try:
-        r = getattr(importlib.import_module('config_private'), arg)
+        r = read_single_conf_from_env(arg, default_r) # 优先获取环境变量作为配置
     except:
-        r = getattr(importlib.import_module('config'), arg)
+        try:
+            r = getattr(importlib.import_module('config_private'), arg)
+        except:
+            r = default_r
     # 在读取API_KEY时，检查一下是不是忘了改config
     if arg == 'API_KEY':
         print亮蓝(f"[API_KEY] 本项目现已支持OpenAI和API2D的api-key。也支持同时填写多个api-key，如API_KEY=\"openai-key1,openai-key2,api2d-key3\"")
