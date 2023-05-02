@@ -536,28 +536,36 @@ def read_env_variable(arg, default_value):
     """
     from colorful import print亮红, print亮绿
     arg_with_prefix = "GPT_ACADEMIC_" + arg 
-    if arg_with_prefix in os.environ: env_arg = os.environ[arg_with_prefix]
-    elif arg in os.environ: env_arg = os.environ[arg]
+    if arg_with_prefix in os.environ: 
+        env_arg = os.environ[arg_with_prefix]
+    elif arg in os.environ: 
+        env_arg = os.environ[arg]
     else:
         raise KeyError
-    if isinstance(default_value, bool):
-        r = bool(env_arg)
-    elif isinstance(default_value, int):
-        r = int(env_arg)
-    elif isinstance(default_value, float):
-        r = float(env_arg)
-    elif isinstance(default_value, str):
-        r = env_arg
-    elif isinstance(default_value, dict):
-        r = eval(env_arg)
-    elif isinstance(default_value, list):
-        r = eval(env_arg)
-    elif default_value is None:
-        assert arg == "proxies"
-        r = eval(env_arg)
-    else:
-        print亮红(f"[ENV_VAR] 环境变量{arg}不支持通过环境变量设置！{default_value}")
-        raise KeyError
+    print(f"[ENV_VAR] 尝试加载{arg}，默认值：{default_value} --> 修正值：{env_arg}")
+    try:
+        if isinstance(default_value, bool):
+            r = bool(env_arg)
+        elif isinstance(default_value, int):
+            r = int(env_arg)
+        elif isinstance(default_value, float):
+            r = float(env_arg)
+        elif isinstance(default_value, str):
+            r = env_arg
+        elif isinstance(default_value, dict):
+            r = eval(env_arg)
+        elif isinstance(default_value, list):
+            r = eval(env_arg)
+        elif default_value is None:
+            assert arg == "proxies"
+            r = eval(env_arg)
+        else:
+            print亮红(f"[ENV_VAR] 环境变量{arg}不支持通过环境变量设置! ")
+            raise KeyError
+    except:
+        print亮红(f"[ENV_VAR] 环境变量{arg}加载失败! ")
+        raise KeyError(f"[ENV_VAR] 环境变量{arg}加载失败! ")
+
     print亮绿(f"[ENV_VAR] 成功读取环境变量{arg}")
     return r
 
