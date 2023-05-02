@@ -158,7 +158,7 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 
 ## 安装-方法3：其他部署姿势
 
-1. 如何使用反代URL/AzureAPI
+1. 如何使用反代URL/微软云AzureAPI
 按照`config.py`中的说明配置API_URL_REDIRECT即可。
 
 2. 远程云服务器部署（需要云服务器知识与经验）
