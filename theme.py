@@ -1,6 +1,6 @@
 import gradio as gr
 from toolbox import get_conf
-CODE_HIGHLIGHT, = get_conf('CODE_HIGHLIGHT')
+CODE_HIGHLIGHT, ADD_WAIFU = get_conf('CODE_HIGHLIGHT', 'ADD_WAIFU')
 # gradio可用颜色列表
 # gr.themes.utils.colors.slate (石板色)
 # gr.themes.utils.colors.gray (灰色)
@@ -27,6 +27,7 @@ CODE_HIGHLIGHT, = get_conf('CODE_HIGHLIGHT')
 
 
 def adjust_theme():
+
     try:
         color_er = gr.themes.utils.colors.fuchsia
         set_theme = gr.themes.Default(
@@ -80,6 +81,21 @@ def adjust_theme():
             button_cancel_text_color=color_er.c600,
             button_cancel_text_color_dark="white",
         )
+
+        # 添加一个萌萌的看板娘
+        if ADD_WAIFU:
+            js = """
+                <script src="file=docs/waifu_plugin/jquery.min.js"></script>
+                <script src="file=docs/waifu_plugin/jquery-ui.min.js"></script>
+                <script src="file=docs/waifu_plugin/autoload.js"></script>
+            """
+            gradio_original_template_fn = gr.routes.templates.TemplateResponse
+            def gradio_new_template_fn(*args, **kwargs):
+                res = gradio_original_template_fn(*args, **kwargs)
+                res.body = res.body.replace(b'</html>', f'{js}</html>'.encode("utf8"))
+                res.init_headers()
+                return res
+            gr.routes.templates.TemplateResponse = gradio_new_template_fn   # override gradio template
     except:
         set_theme = None
         print('gradio版本较旧, 不能自定义字体和颜色')
