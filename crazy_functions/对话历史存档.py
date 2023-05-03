@@ -13,7 +13,7 @@ def write_chat_to_file(chatbot, history=None, file_name=None):
     os.makedirs('./gpt_log/', exist_ok=True)
     with open(f'./gpt_log/{file_name}', 'w', encoding='utf8') as f:
         from theme import advanced_css
-        f.write(f'<head><title>对话历史</title><style>{advanced_css}</style></head>')
+        f.write(f'<!DOCTYPE html><head><meta charset="utf-8"><title>对话历史</title><style>{advanced_css}</style></head>')
         for i, contents in enumerate(chatbot):
             for j, content in enumerate(contents):
                 try:    # 这个bug没找到触发条件，暂时先这样顶一下
