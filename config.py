@@ -54,6 +54,9 @@ LOCAL_MODEL_DEVICE = "cpu" # 可选 "cuda"
 # 设置gradio的并行线程数（不需要修改）
 CONCURRENT_COUNT = 100
 
+# 加一个看板娘装饰
+ADD_WAIFU = False
+
 # 设置用户名和密码（不需要修改）（相关功能不稳定，与gradio版本和网络都相关，如果本地使用不建议加这个）
 # [("username", "password"), ("username2", "password2"), ...]
 AUTHENTICATION = []
