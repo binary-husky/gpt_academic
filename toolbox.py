@@ -551,7 +551,7 @@ def read_env_variable(arg, default_value):
         elif isinstance(default_value, float):
             r = float(env_arg)
         elif isinstance(default_value, str):
-            r = env_arg
+            r = env_arg.strip()
         elif isinstance(default_value, dict):
             r = eval(env_arg)
         elif isinstance(default_value, list):
