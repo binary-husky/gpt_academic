@@ -160,9 +160,9 @@ docker run --rm -it --net=host --gpus=all gpt-academic
 docker run --rm -it --net=host --gpus=all gpt-academic bash
 ```
 
-3. ChatGPT + LLAMA + 盘古 + RWKV（需要精通Docker + 电脑配置够强）
+3. ChatGPT + LLAMA + 盘古 + RWKV（需要精通Docker）
 ``` sh
-# 1. 修改docker-compose.yml，删除方案一和方案二，保留方案三
+# 1. 修改docker-compose.yml，删除方案一和方案二，保留方案三（基于jittor）
 # 2. 修改docker-compose.yml中方案三的配置，参考其中注释即可
 # 3. 终端运行 docker-compose up
 ```
