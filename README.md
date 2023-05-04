@@ -20,7 +20,7 @@ If you like this project, please give it a Star. If you've come up with more use
 > 3.本项目兼容并鼓励尝试国产大语言模型chatglm等。已支持OpenAI和API2D的api-key共存，可在配置文件中填写如`API_KEY="openai-key1,openai-key2,api2d-key3"`。需要临时更换`API_KEY`时，在输入区输入临时的`API_KEY`然后回车键提交后即可生效。
 
 <div align="center">
-    
+
 功能 | 描述
 --- | ---
 一键润色 | 支持一键润色、一键查找论文语法错误
@@ -112,6 +112,10 @@ python -m pip install -r requirements.txt
 如果需要支持清华ChatGLM后端，需要额外安装更多依赖（前提条件：熟悉python + 电脑配置够强）：
 ```sh
 python -m pip install -r request_llm/requirements_chatglm.txt
+
+# 备注：如果遇到"Call ChatGLM fail 不能正常加载ChatGLM的参数" 错误，参考如下：
+# 1：以上默认安装的为torch+cpu版，使用cuda需要卸载torch重新安装torch+cuda
+# 2：如因本机配置不够无法加载模型，可以修改request_llm/bridge_chatglm.py中的模型精度, 将 AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) 都修改为 AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
 ```
 
 4. 运行
