@@ -17,7 +17,7 @@ If you like this project, please give it a Star. If you've come up with more use
 >
 > 2.本项目中每个文件的功能都在自译解[`self_analysis.md`](https://github.com/binary-husky/chatgpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A)详细说明。随着版本的迭代，您也可以随时自行点击相关函数插件，调用GPT重新生成项目的自我解析报告。常见问题汇总在[`wiki`](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98)当中。
 > 
-> 3.本项目兼容并鼓励尝试国产大语言模型chatglm等。已支持OpenAI和API2D的api-key共存，可在配置文件中填写如`API_KEY="openai-key1,openai-key2,api2d-key3"`。需要临时更换`API_KEY`时，在输入区输入临时的`API_KEY`然后回车键提交后即可生效。
+> 3.本项目兼容并鼓励尝试国产大语言模型chatglm和RWKV, 盘古等等。已支持OpenAI和API2D的api-key共存，可在配置文件中填写如`API_KEY="openai-key1,openai-key2,api2d-key3"`。需要临时更换`API_KEY`时，在输入区输入临时的`API_KEY`然后回车键提交后即可生效。
 
 <div align="center">
 
@@ -159,6 +159,14 @@ docker run --rm -it --net=host --gpus=all gpt-academic
 # 运行 (2) 我想运行之前进容器做一些调整: 
 docker run --rm -it --net=host --gpus=all gpt-academic bash
 ```
+
+3. ChatGPT + LLAMA + 盘古 + RWKV（需要精通Docker + 电脑配置够强）
+``` sh
+# 1. 修改docker-compose.yml，删除方案一和方案二，保留方案三
+# 2. 修改docker-compose.yml中方案三的配置，参考其中注释即可
+# 3. 终端运行 docker-compose up
+```
+
 
 ## 安装-方法3：其他部署姿势
 
