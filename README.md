@@ -174,6 +174,8 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 4. 如何在二级网址（如`http://localhost/subpath`）下运行
 请访问[FastAPI运行说明](docs/WithFastapi.md)
 
+5. 使用docker-compose运行
+请阅读docker-compose.yml后，按照其中的提示操作即可
 ---
 
 ## 自定义新的便捷按钮 / 自定义函数插件
