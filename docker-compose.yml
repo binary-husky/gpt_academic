@@ -113,7 +113,6 @@ services:
     #                   python3 -u main.py"
 
     # 不使用代理网络拉取最新代码
-
     command: >
       bash -c "       echo '[gpt-academic] 正在从github拉取最新代码...' &&
                       git pull &&
