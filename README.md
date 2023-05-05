@@ -248,6 +248,12 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 <img src="https://user-images.githubusercontent.com/96192199/226969067-968a27c1-1b9c-486b-8b81-ab2de8d3f88a.png" width="500" >
 </div>
 
+6. 装饰[live2d](https://github.com/fghrsh/live2d_demo)的小功能（ADD_WAIFU，默认关闭）
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/236432361-67739153-73e8-43fe-8111-b61296edabd9.png" width="500" >
+</div>
+
+
 ## 版本:
 - version 3.5(Todo): 使用自然语言调用本项目的所有函数插件（高优先级）
 - version 3.4(Todo): 完善chatglm本地大模型的多线支持
