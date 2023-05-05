@@ -5,6 +5,7 @@ import inspect
 import re
 import gradio as gr
 import func_box
+import os
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
 import logging
@@ -107,8 +108,9 @@ def CatchException(f):
             from toolbox import get_conf
             proxies, = get_conf('proxies')
             tb_str = '```\n' + trimmed_format_exc() + '```'
-            if chatbot is None or len(chatbot) == 0:
-                chatbot = [["插件调度异常", "异常原因"]]
+            if len(chatbot) == 0:
+                chatbot.clear()
+                chatbot.append(["插件调度异常", "异常原因"])
             chatbot[-1] = (chatbot[-1][0],
                            f"[Local Message] 实验性函数调用出错: \n\n{tb_str} \n\n当前代理可用性: \n\n{check_proxy(proxies)}")
             yield from update_ui(chatbot=chatbot, history=history, msg=f'异常 {e}') # 刷新界面
@@ -238,13 +240,17 @@ def text_divide_paragraph(text):
         text = "</br>".join(lines)
         return text
 
-
+@lru_cache(maxsize=128) # 使用 lru缓存 加快转换速度
 def markdown_convertion(txt):
     """
     将Markdown格式的文本转换为HTML格式。如果包含数学公式，则先将公式转换为HTML格式。
     """
     pre = '<div class="markdown-body">'
     suf = '</div>'
+    if txt.startswith(pre) and txt.endswith(suf):
+        # print('警告，输入了已经经过转化的字符串，二次转化可能出问题')
+        return txt # 已经被转化过，不需要再次转化
+    
     markdown_extension_configs = {
         'mdx_math': {
             'enable_dollar_delimiter': True,
@@ -288,8 +294,14 @@ def markdown_convertion(txt):
         content = content.replace('</script>\n</script>', '</script>')
         return content
 
+    def no_code(txt):
+        if '```' not in txt: 
+            return True
+        else:
+            if '```reference' in txt: return True    # newbing
+            else: return False
 
-    if ('$' in txt) and ('```' not in txt):  # 有$标识的公式符号，且没有代码段```的标识
+    if ('$' in txt) and no_code(txt):  # 有$标识的公式符号，且没有代码段```的标识
         # convert everything to html format
         split = markdown.markdown(text='---')
         convert_stage_1 = markdown.markdown(text=txt, extensions=['mdx_math', 'fenced_code', 'tables', 'sane_lists'], extension_configs=markdown_extension_configs)
@@ -500,8 +512,9 @@ def on_report_generated(files, chatbot):
     return report_files, chatbot
 
 def is_openai_api_key(key):
-    API_MATCH = re.match(r"sk-[a-zA-Z0-9]{48}$", key)
-    return bool(API_MATCH)
+    API_MATCH_ORIGINAL = re.match(r"sk-[a-zA-Z0-9]{48}$", key)
+    API_MATCH_AZURE = re.match(r"[a-zA-Z0-9]{32}$", key)
+    return bool(API_MATCH_ORIGINAL) or bool(API_MATCH_AZURE)
 
 def is_api2d_key(key):
     if key.startswith('fk') and len(key) == 41:
@@ -551,13 +564,72 @@ def select_api_key(keys, llm_model):
     api_key = random.choice(avail_key_list) # 随机负载均衡
     return api_key
 
+def read_env_variable(arg, default_value):
+    """
+    环境变量可以是 `GPT_ACADEMIC_CONFIG`(优先)，也可以直接是`CONFIG`
+    例如在windows cmd中，既可以写：
+        set USE_PROXY=True
+        set API_KEY=sk-j7caBpkRoxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+        set proxies={"http":"http://127.0.0.1:10085", "https":"http://127.0.0.1:10085",}
+        set AVAIL_LLM_MODELS=["gpt-3.5-turbo", "chatglm"]
+        set AUTHENTICATION=[("username", "password"), ("username2", "password2")]
+    也可以写：
+        set GPT_ACADEMIC_USE_PROXY=True
+        set GPT_ACADEMIC_API_KEY=sk-j7caBpkRoxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+        set GPT_ACADEMIC_proxies={"http":"http://127.0.0.1:10085", "https":"http://127.0.0.1:10085",}
+        set GPT_ACADEMIC_AVAIL_LLM_MODELS=["gpt-3.5-turbo", "chatglm"]
+        set GPT_ACADEMIC_AUTHENTICATION=[("username", "password"), ("username2", "password2")]
+    """
+    from colorful import print亮红, print亮绿
+    arg_with_prefix = "GPT_ACADEMIC_" + arg 
+    if arg_with_prefix in os.environ: 
+        env_arg = os.environ[arg_with_prefix]
+    elif arg in os.environ: 
+        env_arg = os.environ[arg]
+    else:
+        raise KeyError
+    print(f"[ENV_VAR] 尝试加载{arg}，默认值：{default_value} --> 修正值：{env_arg}")
+    try:
+        if isinstance(default_value, bool):
+            r = bool(env_arg)
+        elif isinstance(default_value, int):
+            r = int(env_arg)
+        elif isinstance(default_value, float):
+            r = float(env_arg)
+        elif isinstance(default_value, str):
+            r = env_arg.strip()
+        elif isinstance(default_value, dict):
+            r = eval(env_arg)
+        elif isinstance(default_value, list):
+            r = eval(env_arg)
+        elif default_value is None:
+            assert arg == "proxies"
+            r = eval(env_arg)
+        else:
+            print亮红(f"[ENV_VAR] 环境变量{arg}不支持通过环境变量设置! ")
+            raise KeyError
+    except:
+        print亮红(f"[ENV_VAR] 环境变量{arg}加载失败! ")
+        raise KeyError(f"[ENV_VAR] 环境变量{arg}加载失败! ")
+
+    print亮绿(f"[ENV_VAR] 成功读取环境变量{arg}")
+    return r
+
 @lru_cache(maxsize=128)
 def read_single_conf_with_lru_cache(arg):
     from colorful import print亮红, print亮绿, print亮蓝
     try:
-        r = getattr(importlib.import_module('config_private'), arg)
+        # 优先级1. 获取环境变量作为配置
+        default_ref = getattr(importlib.import_module('config'), arg)   # 读取默认值作为数据类型转换的参考
+        r = read_env_variable(arg, default_ref) 
     except:
-        r = getattr(importlib.import_module('config'), arg)
+        try:
+            # 优先级2. 获取config_private中的配置
+            r = getattr(importlib.import_module('config_private'), arg)
+        except:
+            # 优先级3. 获取config中的配置
+            r = getattr(importlib.import_module('config'), arg)
+
     # 在读取API_KEY时，检查一下是不是忘了改config
     if arg == 'API_KEY':
         print亮蓝(f"[API_KEY] 本项目现已支持OpenAI和API2D的api-key。也支持同时填写多个api-key，如API_KEY=\"openai-key1,openai-key2,api2d-key3\"")

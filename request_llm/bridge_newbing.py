@@ -15,6 +15,7 @@ load_message = "等待NewBing响应。"
 import time
 import json
 import re
+import logging
 import asyncio
 import importlib
 import threading
@@ -23,15 +24,15 @@ from multiprocessing import Process, Pipe
 
 def preprocess_newbing_out(s):
     pattern = r'\^(\d+)\^' # 匹配^数字^
-    sub = lambda m: '\['+m.group(1)+'\]' # 将匹配到的数字作为替换值
+    sub = lambda m: '('+m.group(1)+')' # 将匹配到的数字作为替换值
     result = re.sub(pattern, sub, s) # 替换操作
     if '[1]' in result:
-        result += '\n\n```\n' + "\n".join([r for r in result.split('\n') if r.startswith('[')]) + '\n```\n'
+        result += '\n\n```reference\n' + "\n".join([r for r in result.split('\n') if r.startswith('[')]) + '\n```\n'
     return result
 
 def preprocess_newbing_out_simple(result):
     if '[1]' in result:
-        result += '\n\n```\n' + "\n".join([r for r in result.split('\n') if r.startswith('[')]) + '\n```\n'
+        result += '\n\n```reference\n' + "\n".join([r for r in result.split('\n') if r.startswith('[')]) + '\n```\n'
     return result
 
 class NewBingHandle(Process):
@@ -247,5 +248,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         yield from update_ui(chatbot=chatbot, history=history, msg="NewBing响应缓慢，尚未完成全部响应，请耐心完成后再提交新问题。")
     if response == "[Local Message]: 等待NewBing响应中 ...": response = "[Local Message]: NewBing响应异常，请刷新界面重试 ..."
     history.extend([inputs, response])
+    logging.info(f'[raw_input] {inputs}')
+    logging.info(f'[response] {response}')
     yield from update_ui(chatbot=chatbot, history=history, msg="完成全部响应，请提交新问题。")
 

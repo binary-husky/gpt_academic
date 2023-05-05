@@ -1,0 +1,117 @@
+【请在修改完参数后，删除此行】请在以下方案中选择一种，然后删除其他的方案，最后docker-compose up运行
+
+## ===================================================
+## 【方案一】 如果不需要运行本地模型（仅chatgpt类远程服务）
+## ===================================================
+version: '3'
+services:
+  gpt_academic_nolocalllms:
+    image: fuqingxu/gpt_academic:no-local-llms        
+    environment:
+      # 请查阅 `config.py` 以查看所有的配置信息
+      API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx,fkxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  '
+      USE_PROXY:                '    True                                                                                           '
+      proxies:                  '    { "http": "socks5h://localhost:10880", "https": "socks5h://localhost:10880", }                 '
+      LLM_MODEL:                '    gpt-3.5-turbo                                                                                  '
+      AVAIL_LLM_MODELS:         '    ["gpt-3.5-turbo", "api2d-gpt-4"]                                                               '
+      DEFAULT_WORKER_NUM:       '    10                                                                                             '
+      WEB_PORT:                 '    22303                                                                                          '
+      ADD_WAIFU:                '    True                                                                                           '
+      AUTHENTICATION:           '    [("username", "passwd"), ("username2", "passwd2")]                                             '
+
+    # 与宿主的网络融合
+    network_mode: "host"
+
+    # 不使用代理网络拉取最新代码
+    command: >
+      bash -c " echo '[gpt-academic] 正在从github拉取最新代码...' &&
+                git checkout master --force &&
+                git remote set-url origin https://github.com/binary-husky/chatgpt_academic.git &&
+                git pull &&
+                python3 -u main.py"
+
+
+### ===================================================
+### 【方案二】 如果需要运行ChatGLM本地模型
+### ===================================================
+version: '3'
+services:
+  gpt_academic_with_chatglm:
+    image: fuqingxu/gpt_academic:chatgpt-chatglm-newbing    # [option 2] 如果需要运行ChatGLM本地模型
+    environment:
+      # 请查阅 `config.py` 以查看所有的配置信息
+      API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx,fkxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  '
+      USE_PROXY:                '    True                                                                                           '
+      proxies:                  '    { "http": "socks5h://localhost:10880", "https": "socks5h://localhost:10880", }                 '
+      LLM_MODEL:                '    gpt-3.5-turbo                                                                                  '
+      AVAIL_LLM_MODELS:         '    ["gpt-3.5-turbo", "api2d-gpt-4", "chatglm"]                                                    '
+      LOCAL_MODEL_DEVICE:       '    cuda                                                                                           '
+      DEFAULT_WORKER_NUM:       '    10                                                                                             '
+      WEB_PORT:                 '    12303                                                                                          '
+      ADD_WAIFU:                '    True                                                                                           '
+      AUTHENTICATION:           '    [("username", "passwd"), ("username2", "passwd2")]                                             '
+
+    # 显卡的使用，nvidia0指第0个GPU
+    runtime: nvidia
+    devices:
+      - /dev/nvidia0:/dev/nvidia0
+      
+    # 与宿主的网络融合
+    network_mode: "host"
+
+    # 使用代理网络拉取最新代码
+    # command: >
+    #   bash -c "       echo '[gpt-academic] 正在从github拉取最新代码...' &&
+    #                   truncate -s -1 /etc/proxychains.conf &&
+    #                   echo \"socks5 127.0.0.1 10880\" >> /etc/proxychains.conf &&
+    #                   proxychains git pull &&
+    #                   python3 -u main.py "
+
+    # 不使用代理网络拉取最新代码
+    command: >
+      bash -c " echo '[gpt-academic] 正在从github拉取最新代码...' &&
+                git pull &&
+                python3 -u main.py"
+
+
+### ===================================================
+### 【方案三】 如果需要运行ChatGPT + LLAMA + 盘古 + RWKV本地模型
+### ===================================================
+version: '3'
+services:
+  gpt_academic_with_rwkv:
+    image: fuqingxu/gpt_academic:jittorllms    # [option 2] 如果需要运行ChatGPT + LLAMA + 盘古 + RWKV本地模型
+    environment:
+      # 请查阅 `config.py` 以查看所有的配置信息
+      API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx,fkxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  '
+      USE_PROXY:                '    True                                                                                           '
+      proxies:                  '    { "http": "socks5h://localhost:10880", "https": "socks5h://localhost:10880", }                 '
+      LLM_MODEL:                '    gpt-3.5-turbo                                                                                  '
+      AVAIL_LLM_MODELS:         '    ["gpt-3.5-turbo", "api2d-gpt-4", "newbing", "jittorllms_rwkv", "jittorllms_llama", "jittorllms_pangualpha"]                '
+      LOCAL_MODEL_DEVICE:       '    cuda                                                                                           '
+      DEFAULT_WORKER_NUM:       '    10                                                                                             '
+      WEB_PORT:                 '    32303                                                                                          '
+      ADD_WAIFU:                '    True                                                                                           '
+      AUTHENTICATION:           '    [("username", "passwd"), ("username2", "passwd2")]                                             '
+
+    # 显卡的使用，nvidia0指第0个GPU
+    runtime: nvidia
+    devices:
+      - /dev/nvidia0:/dev/nvidia0
+      
+    # 与宿主的网络融合
+    network_mode: "host"
+
+    # 使用代理网络拉取最新代码
+    # command: >
+    #   bash -c "       echo '[gpt-academic] 正在从github拉取最新代码...' &&
+    #                   truncate -s -1 /etc/proxychains.conf &&
+    #                   echo \"socks5 127.0.0.1 10880\" >> /etc/proxychains.conf &&
+    #                   proxychains git pull &&
+    #                   python3 -u main.py "
+
+    # 不使用代理网络拉取最新代码
+    command: >
+      bash -c " echo '[gpt-academic] 正在从github拉取最新代码...' &&
+                git pull &&
+                python3 -u main.py"

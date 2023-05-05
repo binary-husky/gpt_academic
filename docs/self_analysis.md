@@ -157,7 +157,7 @@
 
 ## [22/31] 请对下面的程序文件做一个概述: H:\chatgpt_academic_resolve\crazy_functions\解析项目源代码.py
 
-这个程序文件实现了对一个源代码项目进行分析的功能。其中，函数`解析项目本身`、`解析一个Python项目`、`解析一个C项目的头文件`、`解析一个C项目`、`解析一个Java项目`和`解析一个Rect项目`分别用于解析不同类型的项目。函数`解析源代码新`实现了对每一个源代码文件的分析，并将分析结果汇总，同时还实现了分组和迭代处理，提高了效率。最后，函数`write_results_to_file`将所有分析结果写入文件。中间，还用到了`request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency`和`request_gpt_model_in_new_thread_with_ui_alive`来完成请求和响应，并用`update_ui`实时更新界面。
+这个程序文件实现了对一个源代码项目进行分析的功能。其中，函数`解析项目本身`、`解析一个Python项目`、`解析一个C项目的头文件`、`解析一个C项目`、`解析一个Java项目`和`解析前端项目`分别用于解析不同类型的项目。函数`解析源代码新`实现了对每一个源代码文件的分析，并将分析结果汇总，同时还实现了分组和迭代处理，提高了效率。最后，函数`write_results_to_file`将所有分析结果写入文件。中间，还用到了`request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency`和`request_gpt_model_in_new_thread_with_ui_alive`来完成请求和响应，并用`update_ui`实时更新界面。
 
 ## [23/31] 请对下面的程序文件做一个概述: H:\chatgpt_academic_resolve\crazy_functions\询问多个大语言模型.py
 

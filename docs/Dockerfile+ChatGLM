@@ -1,6 +1,6 @@
 # How to build | 如何构建: docker build -t gpt-academic --network=host  -f Dockerfile+ChatGLM .
-# How to run | 如何运行 (1) 直接运行（选择0号GPU）: docker run --rm -it --net=host --gpus="0" gpt-academic
-# How to run | 如何运行 (2) 我想运行之前进容器做一些调整: docker run --rm -it --net=host --gpus="0" gpt-academic bash
+# How to run | (1) 我想直接一键运行（选择0号GPU）: docker run --rm -it --net=host --gpus \"device=0\" gpt-academic
+# How to run | (2) 我想运行之前进容器做一些调整（选择1号GPU）: docker run --rm -it --net=host --gpus \"device=1\" gpt-academic bash
  
 # 从NVIDIA源，从而支持显卡运损（检查宿主的nvidia-smi中的cuda版本必须>=11.3）
 FROM nvidia/cuda:11.3.1-runtime-ubuntu20.04
@@ -14,6 +14,7 @@ RUN apt-get install -y git python python3 python-dev python3-dev --fix-missing
 RUN $useProxyNetwork curl cip.cc
 RUN sed -i '$ d' /etc/proxychains.conf
 RUN sed -i '$ d' /etc/proxychains.conf
+# 在这里填写主机的代理协议（用于从github拉取代码）
 RUN echo "socks5 127.0.0.1 10880" >> /etc/proxychains.conf
 ARG useProxyNetwork=proxychains
 # # comment out above if you do not need proxy network | 如果不需要翻墙 - 从此行向上删除
@@ -49,6 +50,7 @@ RUN python3  -c 'from check_proxy import warm_up_modules; warm_up_modules()'
 # 可同时填写多个API-KEY，支持openai的key和api2d的key共存，用英文逗号分割，例如API_KEY = "sk-openaikey1,fkxxxx-api2dkey2,........"
 # LLM_MODEL 是选择初始的模型
 # LOCAL_MODEL_DEVICE 是选择chatglm等本地模型运行的设备，可选 cpu 和 cuda
+# [说明: 以下内容与`config.py`一一对应，请查阅config.py来完成一下配置的填写]
 RUN echo ' \n\
 API_KEY = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx,fkxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" \n\
 USE_PROXY = True \n\
