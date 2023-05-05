@@ -1,4 +1,4 @@
-【请在修改完参数后，删除此行】请在以下方案中选择一种，然后删除其他的方案，最后docker-compose up运行
+【请修改完参数后，删除此行】请在以下方案中选择一种，然后删除其他的方案，最后docker-compose up运行 | Please choose from one of these options below, delete other options as well as This Line
 
 ## ===================================================
 ## 【方案一】 如果不需要运行本地模型（仅chatgpt类远程服务）
