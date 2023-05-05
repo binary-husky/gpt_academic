@@ -1,0 +1,4 @@
+jittor >= 1.3.7.9
+jtorch >= 0.1.3
+torch
+torchvision
