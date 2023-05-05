@@ -13,8 +13,8 @@ if USE_PROXY:
     # 代理网络的地址，打开你的*学*网软件查看代理的协议(socks5/http)、地址(localhost)和端口(11284)
     proxies = {
         #          [协议]://  [地址]  :[端口]
-        "http":  "socks5h://localhost:11284",
-        "https": "socks5h://localhost:11284",
+        "http":  "socks5h://localhost:11284",  # 再例如  "http":  "http://127.0.0.1:7890",
+        "https": "socks5h://localhost:11284",  # 再例如  "https": "http://127.0.0.1:7890",
     }
 else:
     proxies = None
@@ -53,6 +53,9 @@ LOCAL_MODEL_DEVICE = "cpu" # 可选 "cuda"
 
 # 设置gradio的并行线程数（不需要修改）
 CONCURRENT_COUNT = 100
+
+# 加一个看板娘装饰
+ADD_WAIFU = False
 
 # 设置用户名和密码（不需要修改）（相关功能不稳定，与gradio版本和网络都相关，如果本地使用不建议加这个）
 # [("username", "password"), ("username2", "password2"), ...]

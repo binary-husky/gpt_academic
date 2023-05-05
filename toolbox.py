@@ -3,6 +3,7 @@ import importlib
 import traceback
 import inspect
 import re
+import os
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
 
@@ -517,13 +518,72 @@ def select_api_key(keys, llm_model):
     api_key = random.choice(avail_key_list) # 随机负载均衡
     return api_key
 
+def read_env_variable(arg, default_value):
+    """
+    环境变量可以是 `GPT_ACADEMIC_CONFIG`(优先)，也可以直接是`CONFIG`
+    例如在windows cmd中，既可以写：
+        set USE_PROXY=True
+        set API_KEY=sk-j7caBpkRoxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+        set proxies={"http":"http://127.0.0.1:10085", "https":"http://127.0.0.1:10085",}
+        set AVAIL_LLM_MODELS=["gpt-3.5-turbo", "chatglm"]
+        set AUTHENTICATION=[("username", "password"), ("username2", "password2")]
+    也可以写：
+        set GPT_ACADEMIC_USE_PROXY=True
+        set GPT_ACADEMIC_API_KEY=sk-j7caBpkRoxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+        set GPT_ACADEMIC_proxies={"http":"http://127.0.0.1:10085", "https":"http://127.0.0.1:10085",}
+        set GPT_ACADEMIC_AVAIL_LLM_MODELS=["gpt-3.5-turbo", "chatglm"]
+        set GPT_ACADEMIC_AUTHENTICATION=[("username", "password"), ("username2", "password2")]
+    """
+    from colorful import print亮红, print亮绿
+    arg_with_prefix = "GPT_ACADEMIC_" + arg 
+    if arg_with_prefix in os.environ: 
+        env_arg = os.environ[arg_with_prefix]
+    elif arg in os.environ: 
+        env_arg = os.environ[arg]
+    else:
+        raise KeyError
+    print(f"[ENV_VAR] 尝试加载{arg}，默认值：{default_value} --> 修正值：{env_arg}")
+    try:
+        if isinstance(default_value, bool):
+            r = bool(env_arg)
+        elif isinstance(default_value, int):
+            r = int(env_arg)
+        elif isinstance(default_value, float):
+            r = float(env_arg)
+        elif isinstance(default_value, str):
+            r = env_arg.strip()
+        elif isinstance(default_value, dict):
+            r = eval(env_arg)
+        elif isinstance(default_value, list):
+            r = eval(env_arg)
+        elif default_value is None:
+            assert arg == "proxies"
+            r = eval(env_arg)
+        else:
+            print亮红(f"[ENV_VAR] 环境变量{arg}不支持通过环境变量设置! ")
+            raise KeyError
+    except:
+        print亮红(f"[ENV_VAR] 环境变量{arg}加载失败! ")
+        raise KeyError(f"[ENV_VAR] 环境变量{arg}加载失败! ")
+
+    print亮绿(f"[ENV_VAR] 成功读取环境变量{arg}")
+    return r
+
 @lru_cache(maxsize=128)
 def read_single_conf_with_lru_cache(arg):
     from colorful import print亮红, print亮绿, print亮蓝
     try:
-        r = getattr(importlib.import_module('config_private'), arg)
+        # 优先级1. 获取环境变量作为配置
+        default_ref = getattr(importlib.import_module('config'), arg)   # 读取默认值作为数据类型转换的参考
+        r = read_env_variable(arg, default_ref) 
     except:
-        r = getattr(importlib.import_module('config'), arg)
+        try:
+            # 优先级2. 获取config_private中的配置
+            r = getattr(importlib.import_module('config_private'), arg)
+        except:
+            # 优先级3. 获取config中的配置
+            r = getattr(importlib.import_module('config'), arg)
+
     # 在读取API_KEY时，检查一下是不是忘了改config
     if arg == 'API_KEY':
         print亮蓝(f"[API_KEY] 本项目现已支持OpenAI和API2D的api-key。也支持同时填写多个api-key，如API_KEY=\"openai-key1,openai-key2,api2d-key3\"")

@@ -13,16 +13,16 @@ pinned: false
 # ChatGPT 学术优化
 > **Note**
 >
-> 本项目依赖的Gradio组件的新版pip包(Gradio 3.26~3.27)有严重bug。所以，请在安装时严格选择requirements.txt中**指定的版本**。 
+> 安装依赖时，请严格选择requirements.txt中**指定的版本**。 
 > 
 > `pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/`
 >
 
-# <img src="docs/logo.png" width="40" > GPT 学术优化 (ChatGPT Academic)
+# <img src="docs/logo.png" width="40" > GPT 学术优化 (GPT Academic)
 
 **如果喜欢这个项目，请给它一个Star；如果你发明了更好用的快捷键或函数插件，欢迎发pull requests**
 
-If you like this project, please give it a Star. If you've come up with more useful academic shortcuts or functional plugins, feel free to open an issue or pull request. We also have a README in [English|](docs/README_EN.md)[日本語|](docs/README_JP.md)[Русский|](docs/README_RS.md)[Français](docs/README_FR.md) translated by this project itself.
+If you like this project, please give it a Star. If you've come up with more useful academic shortcuts or functional plugins, feel free to open an issue or pull request. We also have a README in [English|](docs/README_EN.md)[日本語|](docs/README_JP.md)[한국어|](https://github.com/mldljyh/ko_gpt_academic)[Русский|](docs/README_RS.md)[Français](docs/README_FR.md) translated by this project itself.
 
 > **Note**
 >
@@ -30,10 +30,10 @@ If you like this project, please give it a Star. If you've come up with more use
 >
 > 2.本项目中每个文件的功能都在自译解[`self_analysis.md`](https://github.com/binary-husky/chatgpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A)详细说明。随着版本的迭代，您也可以随时自行点击相关函数插件，调用GPT重新生成项目的自我解析报告。常见问题汇总在[`wiki`](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98)当中。
 > 
-> 3.已支持OpenAI和API2D的api-key共存，可在配置文件中填写如`API_KEY="openai-key1,openai-key2,api2d-key3"`。需要临时更换`API_KEY`时，在输入区输入临时的`API_KEY`然后回车键提交后即可生效。
+> 3.本项目兼容并鼓励尝试国产大语言模型chatglm和RWKV, 盘古等等。已支持OpenAI和API2D的api-key共存，可在配置文件中填写如`API_KEY="openai-key1,openai-key2,api2d-key3"`。需要临时更换`API_KEY`时，在输入区输入临时的`API_KEY`然后回车键提交后即可生效。
 
 <div align="center">
-    
+
 功能 | 描述
 --- | ---
 一键润色 | 支持一键润色、一键查找论文语法错误
@@ -105,7 +105,7 @@ cd chatgpt_academic
 
 2. 配置API_KEY
 
-在`config.py`中，配置API KEY等[设置](https://github.com/binary-husky/gpt_academic/issues/1) 。
+在`config.py`中，配置API KEY等设置，[特殊网络环境设置](https://github.com/binary-husky/gpt_academic/issues/1) 。
 
 （P.S. 程序运行时会优先检查是否存在名为`config_private.py`的私密配置文件，并用其中的配置覆盖`config.py`的同名配置。因此，如果您能理解我们的配置读取逻辑，我们强烈建议您在`config.py`旁边创建一个名为`config_private.py`的新配置文件，并把`config.py`中的配置转移（复制）到`config_private.py`中。`config_private.py`不受git管控，可以让您的隐私信息更加安全。）
 
@@ -125,6 +125,10 @@ python -m pip install -r requirements.txt
 如果需要支持清华ChatGLM后端，需要额外安装更多依赖（前提条件：熟悉python + 电脑配置够强）：
 ```sh
 python -m pip install -r request_llm/requirements_chatglm.txt
+
+# 备注：如果遇到"Call ChatGLM fail 不能正常加载ChatGLM的参数" 错误，参考如下：
+# 1：以上默认安装的为torch+cpu版，使用cuda需要卸载torch重新安装torch+cuda
+# 2：如因本机配置不够无法加载模型，可以修改request_llm/bridge_chatglm.py中的模型精度, 将 AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) 都修改为 AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
 ```
 
 4. 运行
@@ -169,9 +173,17 @@ docker run --rm -it --net=host --gpus=all gpt-academic
 docker run --rm -it --net=host --gpus=all gpt-academic bash
 ```
 
+3. ChatGPT + LLAMA + 盘古 + RWKV（需要精通Docker）
+``` sh
+1. 修改docker-compose.yml，删除方案一和方案二，保留方案三（基于jittor）
+2. 修改docker-compose.yml中方案三的配置，参考其中注释即可
+3. 终端运行 docker-compose up
+```
+
+
 ## 安装-方法3：其他部署姿势
 
-1. 如何使用反代URL/AzureAPI
+1. 如何使用反代URL/微软云AzureAPI
 按照`config.py`中的说明配置API_URL_REDIRECT即可。
 
 2. 远程云服务器部署（需要云服务器知识与经验）
@@ -183,6 +195,8 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 4. 如何在二级网址（如`http://localhost/subpath`）下运行
 请访问[FastAPI运行说明](docs/WithFastapi.md)
 
+5. 使用docker-compose运行
+请阅读docker-compose.yml后，按照其中的提示操作即可
 ---
 
 ## 自定义新的便捷按钮 / 自定义函数插件
@@ -213,12 +227,14 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 
 ## 其他功能说明
 
-1. 对话保存功能。在函数插件区调用 `保存当前的对话` 即可将当前对话保存为可读+可复原的html文件，如图：
+1. 对话保存功能。在函数插件区调用 `保存当前的对话` 即可将当前对话保存为可读+可复原的html文件，
+另外在函数插件区（下拉菜单）调用 `载入对话历史存档` ，即可还原之前的会话。
+Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史html存档缓存，点击 `删除所有本地对话历史记录` 可以删除所有html存档缓存。
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/235222390-24a9acc0-680f-49f5-bc81-2f3161f1e049.png" width="500" >
 </div>
 
-在函数插件区（下拉菜单）调用 `载入对话历史存档` ，即可还原之前的会话。
+
 
 2. 生成报告。大部分插件都会在执行结束后，生成工作报告
 <div align="center">
@@ -246,6 +262,12 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/226969067-968a27c1-1b9c-486b-8b81-ab2de8d3f88a.png" width="500" >
 </div>
+
+6. 装饰[live2d](https://github.com/fghrsh/live2d_demo)的小功能（默认关闭，需要修改`config.py`）
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/236432361-67739153-73e8-43fe-8111-b61296edabd9.png" width="500" >
+</div>
+
 
 ## 版本:
 - version 3.5(Todo): 使用自然语言调用本项目的所有函数插件（高优先级）

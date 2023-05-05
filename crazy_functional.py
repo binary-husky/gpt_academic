@@ -11,7 +11,7 @@ def get_crazy_functions():
     from crazy_functions.解析项目源代码 import 解析一个C项目
     from crazy_functions.解析项目源代码 import 解析一个Golang项目
     from crazy_functions.解析项目源代码 import 解析一个Java项目
-    from crazy_functions.解析项目源代码 import 解析一个Rect项目
+    from crazy_functions.解析项目源代码 import 解析一个前端项目
     from crazy_functions.高级功能函数模板 import 高阶功能模板函数
     from crazy_functions.代码重写为全英文_多线程 import 全项目切换英文
     from crazy_functions.Latex全文润色 import Latex英文润色
@@ -30,7 +30,8 @@ def get_crazy_functions():
             "Color": "stop",    # 按钮颜色
             "Function": HotReload(解析一个Python项目)
         },
-        "载入对话历史存档": {
+        "载入对话历史存档（先上传存档或输入路径）": {
+            "Color": "stop",
             "AsButton":False,
             "Function": HotReload(载入对话历史存档)
         },
@@ -69,10 +70,10 @@ def get_crazy_functions():
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(解析一个Java项目)
         },
-        "解析整个React项目": {
+        "解析整个前端项目（js,ts,css等）": {
             "Color": "stop",  # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
-            "Function": HotReload(解析一个Rect项目)
+            "Function": HotReload(解析一个前端项目)
         },
         "解析整个Lua项目": {
             "Color": "stop",    # 按钮颜色
@@ -105,7 +106,7 @@ def get_crazy_functions():
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(解析项目本身)
         },
-        "[多线程demo] 把本项目源代码切换成全英文": {
+        "[老旧的Demo] 把本项目源代码切换成全英文": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(全项目切换英文)
@@ -173,19 +174,19 @@ def get_crazy_functions():
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(Latex中文润色)
         },
-        "[测试功能] Latex项目全文中译英（输入路径或上传压缩包）": {
+        "Latex项目全文中译英（输入路径或上传压缩包）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(Latex中译英)
         },
-        "[测试功能] Latex项目全文英译中（输入路径或上传压缩包）": {
+        "Latex项目全文英译中（输入路径或上传压缩包）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(Latex英译中)
         },
-        "[测试功能] 批量Markdown中译英（输入路径或上传压缩包）": {
+        "批量Markdown中译英（输入路径或上传压缩包）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
