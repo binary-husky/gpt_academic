@@ -173,7 +173,19 @@ if "jittorllms_pangualpha" in AVAIL_LLM_MODELS:
             "token_cnt": get_token_num_gpt35,
         },
     })
-
+if "moss" in AVAIL_LLM_MODELS:
+    from .bridge_moss import predict_no_ui_long_connection as moss_noui
+    from .bridge_moss import predict as moss_ui
+    model_info.update({
+        "moss": {
+            "fn_with_ui": moss_ui,
+            "fn_without_ui": moss_noui,
+            "endpoint": None,
+            "max_token": 1024,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
 
 
 
