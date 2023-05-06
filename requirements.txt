@@ -14,3 +14,4 @@ pymupdf
 openai
 numpy
 arxiv
+pymupdf
