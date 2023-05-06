@@ -272,7 +272,7 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 - version 2.0: 引入模块化函数插件
 - version 1.0: 基础功能
 
-gpt_academic开发者QQ群：734063350
+gpt_academic开发者QQ群-2：610599535
 
 
 ## 参考与学习
@@ -280,9 +280,15 @@ gpt_academic开发者QQ群：734063350
 ```
 代码中参考了很多其他优秀项目中的设计，主要包括：
 
-# 借鉴项目1：借鉴了ChuanhuChatGPT中诸多技巧
+# 项目1：清华ChatGLM-6B：
+https://github.com/THUDM/ChatGLM-6B
+
+# 项目2：清华JittorLLMs：
+https://github.com/Jittor/JittorLLMs
+
+# 项目3：借鉴了ChuanhuChatGPT中诸多技巧
 https://github.com/GaiZhenbiao/ChuanhuChatGPT
 
-# 借鉴项目2：清华ChatGLM-6B：
-https://github.com/THUDM/ChatGLM-6B
+# 项目4：ChatPaper
+https://github.com/kaixindelele/ChatPaper
 ```
