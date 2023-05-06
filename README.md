@@ -262,6 +262,11 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 <img src="https://user-images.githubusercontent.com/96192199/236432361-67739153-73e8-43fe-8111-b61296edabd9.png" width="500" >
 </div>
 
+7. 新增MOSS大语言模型支持
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/236639178-92836f37-13af-4fdd-984d-b4450fe30336.png" width="500" >
+</div>
+
 
 ## 版本:
 - version 3.5(Todo): 使用自然语言调用本项目的所有函数插件（高优先级）
