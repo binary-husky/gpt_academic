@@ -291,4 +291,8 @@ https://github.com/GaiZhenbiao/ChuanhuChatGPT
 
 # 项目4：ChatPaper
 https://github.com/kaixindelele/ChatPaper
+
+# 更多：
+https://github.com/gradio-app/gradio
+https://github.com/fghrsh/live2d_demo
 ```
