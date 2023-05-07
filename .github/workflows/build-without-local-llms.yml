@@ -39,6 +39,6 @@ jobs:
         with:
           context: .
           push: true
-          file: docs/Dockerfile+NoLocal
+          file: docs/GithubAction+NoLocal
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
