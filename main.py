@@ -183,7 +183,7 @@ def main():
         import threading, webbrowser, time
         print(f"如果浏览器没有自动打开，请复制并转到以下URL：")
         print(f"\t（亮色主题）: http://localhost:{PORT}")
-        print(f"\t（暗色主题）: http://localhost:{PORT}/?__dark-theme=true")
+        print(f"\t（暗色主题）: http://localhost:{PORT}/?__theme=dark")
         def open():
             time.sleep(2)       # 打开浏览器
             DARK_MODE, = get_conf('DARK_MODE')
