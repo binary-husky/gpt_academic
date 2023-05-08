@@ -87,7 +87,7 @@ class GetGLMHandle(Process):
 global glm_handle
 glm_handle = None
 #################################################################################
-def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=None, console_slience=False):
+def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=[], console_slience=False):
     """
         多线程方法
         函数的说明请见 request_llm/bridge_all.py
@@ -95,7 +95,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     global glm_handle
     if glm_handle is None:
         glm_handle = GetGLMHandle()
-        observe_window[0] = load_message + "\n\n" + glm_handle.info
+        if len(observe_window) >= 1: observe_window[0] = load_message + "\n\n" + glm_handle.info
         if not glm_handle.success: 
             error = glm_handle.info
             glm_handle = None
@@ -110,7 +110,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     watch_dog_patience = 5 # 看门狗 (watchdog) 的耐心, 设置5秒即可
     response = ""
     for response in glm_handle.stream_chat(query=inputs, history=history_feedin, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
-        observe_window[0] = response
+        if len(observe_window) >= 1:  observe_window[0] = response
         if len(observe_window) >= 2:  
             if (time.time()-observe_window[1]) > watch_dog_patience:
                 raise RuntimeError("程序终止。")
