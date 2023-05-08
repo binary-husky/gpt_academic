@@ -68,7 +68,8 @@ class GetGLMHandle(Process):
                     #     command = self.child.recv()
                     #     if command == '[Terminate]': break
             except:
-                self.child.send('[Local Message] Call ChatGLM fail.')
+                from toolbox import trimmed_format_exc
+                self.child.send('[Local Message] Call ChatGLM fail.' + '\n```\n' + trimmed_format_exc() + '\n```\n')
             # 请求处理结束，开始下一个循环
             self.child.send('[Finish]')
 
