@@ -99,23 +99,20 @@ cd chatgpt_academic
 
 3. 安装依赖
 ```sh
-# （选择I: 如熟悉python）（python版本3.9以上，越新越好）
+# （选择I: 如熟悉python）（python版本3.9以上，越新越好），备注：使用官方pip源或者阿里pip源,临时换源方法：python -m pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 python -m pip install -r requirements.txt
-# 备注：使用官方pip源或者阿里pip源，其他pip源（如一些大学的pip）有可能出问题，临时换源方法：python -m pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 
-# （选择II: 如不熟悉python）使用anaconda，步骤也是类似的：
-# （II-1）conda create -n gptac_venv python=3.11
-# （II-2）conda activate gptac_venv
-# （II-3）python -m pip install -r requirements.txt
+# （选择II: 如不熟悉python）使用anaconda，步骤也是类似的 (https://www.bilibili.com/video/BV1rc411W7Dr)：
+conda create -n gptac_venv python=3.11
+conda activate gptac_venv
+python -m pip install -r requirements.txt
 ```
 
 【非必要可选步骤】如果需要支持清华ChatGLM/复旦MOSS作为后端，需要额外安装更多依赖（前提条件：熟悉Python + 用过Pytorch + 电脑配置够强）：
 ```sh
 # 【非必要可选步骤I】支持清华ChatGLM
 python -m pip install -r request_llm/requirements_chatglm.txt  
-## 清华ChatGLM备注：如果遇到"Call ChatGLM fail 不能正常加载ChatGLM的参数" 错误，参考如下：
-## 1：以上默认安装的为torch+cpu版，使用cuda需要卸载torch重新安装torch+cuda
-## 2：如因本机配置不够无法加载模型，可以修改request_llm/bridge_chatglm.py中的模型精度, 将 AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) 都修改为 AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
+## 清华ChatGLM备注：如果遇到"Call ChatGLM fail 不能正常加载ChatGLM的参数" 错误，参考如下： 1：以上默认安装的为torch+cpu版，使用cuda需要卸载torch重新安装torch+cuda； 2：如因本机配置不够无法加载模型，可以修改request_llm/bridge_chatglm.py中的模型精度, 将 AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) 都修改为 AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
 
 # 【非必要可选步骤II】支持复旦MOSS
 python -m pip install -r request_llm/requirements_moss.txt
