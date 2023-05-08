@@ -1,0 +1,35 @@
+
+# 从NVIDIA源，从而支持显卡运损（检查宿主的nvidia-smi中的cuda版本必须>=11.3）
+FROM nvidia/cuda:11.3.1-runtime-ubuntu20.04
+ARG useProxyNetwork=''
+RUN apt-get update
+RUN apt-get install -y curl proxychains curl 
+RUN apt-get install -y git python python3 python-dev python3-dev --fix-missing
+
+
+# use python3 as the system default python
+RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.8
+# 下载pytorch
+RUN python3 -m pip install torch --extra-index-url https://download.pytorch.org/whl/cu113
+# 下载分支
+WORKDIR /gpt
+RUN git clone https://github.com/binary-husky/chatgpt_academic.git
+WORKDIR /gpt/chatgpt_academic
+RUN git clone https://github.com/OpenLMLab/MOSS.git request_llm/moss
+RUN python3 -m pip install -r requirements.txt
+RUN python3 -m pip install -r request_llm/requirements_moss.txt
+RUN python3 -m pip install -r request_llm/requirements_chatglm.txt
+RUN python3 -m pip install -r request_llm/requirements_newbing.txt
+
+# # 预热CHATGLM参数（非必要 可选步骤）
+# RUN echo ' \n\
+# from transformers import AutoModel, AutoTokenizer \n\
+# chatglm_tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) \n\
+# chatglm_model = AutoModel.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True).float() ' >> warm_up_chatglm.py
+# RUN python3 -u warm_up_chatglm.py
+
+# 预热Tiktoken模块
+RUN python3  -c 'from check_proxy import warm_up_modules; warm_up_modules()'
+
+# 启动
+CMD ["python3", "-u", "main.py"]

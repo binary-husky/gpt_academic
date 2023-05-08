@@ -1,0 +1,10 @@
+torch
+transformers==4.25.1
+sentencepiece
+datasets
+accelerate
+matplotlib
+huggingface_hub
+triton
+streamlit
+
