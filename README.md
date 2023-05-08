@@ -5,7 +5,7 @@
 > `pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/`
 >
 
-# <img src="docs/logo.png" width="40" > GPT 学术优化 (ChatGPT Academic)
+# <img src="docs/logo.png" width="40" > GPT 学术优化 (GPT Academic)
 
 **如果喜欢这个项目，请给它一个Star；如果你发明了更好用的快捷键或函数插件，欢迎发pull requests**
 
@@ -41,9 +41,9 @@ chat分析报告生成 | [函数插件] 运行后自动生成总结汇报
 互联网信息聚合+GPT | [函数插件] 一键[让GPT先从互联网获取信息](https://www.bilibili.com/video/BV1om4y127ck)，再回答问题，让信息永不过时
 公式/图片/表格显示 | 可以同时显示公式的[tex形式和渲染形式](https://user-images.githubusercontent.com/96192199/230598842-1d7fcddd-815d-40ee-af60-baf488a199df.png)，支持公式、代码高亮
 多线程函数插件支持 | 支持多线调用chatgpt，一键处理[海量文本](https://www.bilibili.com/video/BV1FT411H7c5/)或程序
-启动暗色gradio[主题](https://github.com/binary-husky/chatgpt_academic/issues/173) | 在浏览器url后面添加```/?__dark-theme=true```可以切换dark主题
-[多LLM模型](https://www.bilibili.com/video/BV1wT411p7yf)支持，[API2D](https://api2d.com/)接口支持 | 同时被GPT3.5、GPT4和[清华ChatGLM](https://github.com/THUDM/ChatGLM-6B)伺候的感觉一定会很不错吧？
-更多LLM模型接入，支持[huggingface部署](https://huggingface.co/spaces/qingxu98/gpt-academic) | 新加入Newbing测试接口(新必应AI)
+启动暗色gradio[主题](https://github.com/binary-husky/chatgpt_academic/issues/173) | 在浏览器url后面添加```/?__theme=dark```可以切换dark主题
+[多LLM模型](https://www.bilibili.com/video/BV1wT411p7yf)支持，[API2D](https://api2d.com/)接口支持 | 同时被GPT3.5、GPT4、[清华ChatGLM](https://github.com/THUDM/ChatGLM-6B)、[复旦MOSS](https://github.com/OpenLMLab/MOSS)同时伺候的感觉一定会很不错吧？
+更多LLM模型接入，支持[huggingface部署](https://huggingface.co/spaces/qingxu98/gpt-academic) | 加入Newbing接口(新必应)，引入清华[Jittorllms](https://github.com/Jittor/JittorLLMs)支持[LLaMA](https://github.com/facebookresearch/llama)，[RWKV](https://github.com/BlinkDL/ChatRWKV)和[盘古α](https://openi.org.cn/pangu/)
 …… | ……
 
 </div>
@@ -94,7 +94,7 @@ cd chatgpt_academic
 
 在`config.py`中，配置API KEY等设置，[特殊网络环境设置](https://github.com/binary-husky/gpt_academic/issues/1) 。
 
-（P.S. 程序运行时会优先检查是否存在名为`config_private.py`的私密配置文件，并用其中的配置覆盖`config.py`的同名配置。因此，如果您能理解我们的配置读取逻辑，我们强烈建议您在`config.py`旁边创建一个名为`config_private.py`的新配置文件，并把`config.py`中的配置转移（复制）到`config_private.py`中。`config_private.py`不受git管控，可以让您的隐私信息更加安全。）
+（P.S. 程序运行时会优先检查是否存在名为`config_private.py`的私密配置文件，并用其中的配置覆盖`config.py`的同名配置。因此，如果您能理解我们的配置读取逻辑，我们强烈建议您在`config.py`旁边创建一个名为`config_private.py`的新配置文件，并把`config.py`中的配置转移（复制）到`config_private.py`中。`config_private.py`不受git管控，可以让您的隐私信息更加安全。P.S.项目同样支持通过环境变量配置大多数选项，详情可以参考docker-compose文件。）
 
 
 3. 安装依赖
@@ -109,13 +109,20 @@ python -m pip install -r requirements.txt
 # （II-3）python -m pip install -r requirements.txt
 ```
 
-如果需要支持清华ChatGLM后端，需要额外安装更多依赖（前提条件：熟悉python + 电脑配置够强）：
+【非必要可选步骤】如果需要支持清华ChatGLM/复旦MOSS作为后端，需要额外安装更多依赖（前提条件：熟悉Python + 用过Pytorch + 电脑配置够强）：
 ```sh
-python -m pip install -r request_llm/requirements_chatglm.txt
+# 【非必要可选步骤I】支持清华ChatGLM
+python -m pip install -r request_llm/requirements_chatglm.txt  
+## 清华ChatGLM备注：如果遇到"Call ChatGLM fail 不能正常加载ChatGLM的参数" 错误，参考如下：
+## 1：以上默认安装的为torch+cpu版，使用cuda需要卸载torch重新安装torch+cuda
+## 2：如因本机配置不够无法加载模型，可以修改request_llm/bridge_chatglm.py中的模型精度, 将 AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) 都修改为 AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
 
-# 备注：如果遇到"Call ChatGLM fail 不能正常加载ChatGLM的参数" 错误，参考如下：
-# 1：以上默认安装的为torch+cpu版，使用cuda需要卸载torch重新安装torch+cuda
-# 2：如因本机配置不够无法加载模型，可以修改request_llm/bridge_chatglm.py中的模型精度, 将 AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) 都修改为 AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
+# 【非必要可选步骤II】支持复旦MOSS
+python -m pip install -r request_llm/requirements_moss.txt
+git clone https://github.com/OpenLMLab/MOSS.git request_llm/moss  # 注意执行此行代码时，必须处于项目根路径
+
+# 【非必要可选步骤III】确保config.py配置文件的AVAIL_LLM_MODELS包含了期望的模型，目前支持的全部模型如下(jittorllms系列目前仅支持docker方案)：
+AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "newbing", "moss", "jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
 ```
 
 4. 运行
@@ -214,12 +221,14 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 
 ## 其他功能说明
 
-1. 对话保存功能。在函数插件区调用 `保存当前的对话` 即可将当前对话保存为可读+可复原的html文件，如图：
+1. 对话保存功能。在函数插件区调用 `保存当前的对话` 即可将当前对话保存为可读+可复原的html文件，
+另外在函数插件区（下拉菜单）调用 `载入对话历史存档` ，即可还原之前的会话。
+Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史html存档缓存，点击 `删除所有本地对话历史记录` 可以删除所有html存档缓存。
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/235222390-24a9acc0-680f-49f5-bc81-2f3161f1e049.png" width="500" >
 </div>
 
-在函数插件区（下拉菜单）调用 `载入对话历史存档` ，即可还原之前的会话。
+
 
 2. 生成报告。大部分插件都会在执行结束后，生成工作报告
 <div align="center">
@@ -248,6 +257,17 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 <img src="https://user-images.githubusercontent.com/96192199/226969067-968a27c1-1b9c-486b-8b81-ab2de8d3f88a.png" width="500" >
 </div>
 
+6. 装饰[live2d](https://github.com/fghrsh/live2d_demo)的小功能（默认关闭，需要修改`config.py`）
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/236432361-67739153-73e8-43fe-8111-b61296edabd9.png" width="500" >
+</div>
+
+7. 新增MOSS大语言模型支持
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/236639178-92836f37-13af-4fdd-984d-b4450fe30336.png" width="500" >
+</div>
+
+
 ## 版本:
 - version 3.5(Todo): 使用自然语言调用本项目的所有函数插件（高优先级）
 - version 3.4(Todo): 完善chatglm本地大模型的多线支持
@@ -264,7 +284,7 @@ docker run --rm -it --net=host --gpus=all gpt-academic bash
 - version 2.0: 引入模块化函数插件
 - version 1.0: 基础功能
 
-gpt_academic开发者QQ群：734063350
+gpt_academic开发者QQ群-2：610599535
 
 
 ## 参考与学习
@@ -272,9 +292,19 @@ gpt_academic开发者QQ群：734063350
 ```
 代码中参考了很多其他优秀项目中的设计，主要包括：
 
-# 借鉴项目1：借鉴了ChuanhuChatGPT中诸多技巧
+# 项目1：清华ChatGLM-6B：
+https://github.com/THUDM/ChatGLM-6B
+
+# 项目2：清华JittorLLMs：
+https://github.com/Jittor/JittorLLMs
+
+# 项目3：借鉴了ChuanhuChatGPT中诸多技巧
 https://github.com/GaiZhenbiao/ChuanhuChatGPT
 
-# 借鉴项目2：清华ChatGLM-6B：
-https://github.com/THUDM/ChatGLM-6B
+# 项目4：ChatPaper
+https://github.com/kaixindelele/ChatPaper
+
+# 更多：
+https://github.com/gradio-app/gradio
+https://github.com/fghrsh/live2d_demo
 ```

@@ -133,6 +133,63 @@ model_info = {
 }
 
 
+AVAIL_LLM_MODELS, = get_conf("AVAIL_LLM_MODELS")
+if "jittorllms_rwkv" in AVAIL_LLM_MODELS:
+    from .bridge_jittorllms_rwkv import predict_no_ui_long_connection as rwkv_noui
+    from .bridge_jittorllms_rwkv import predict as rwkv_ui
+    model_info.update({
+        "jittorllms_rwkv": {
+            "fn_with_ui": rwkv_ui,
+            "fn_without_ui": rwkv_noui,
+            "endpoint": None,
+            "max_token": 1024,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
+if "jittorllms_llama" in AVAIL_LLM_MODELS:
+    from .bridge_jittorllms_llama import predict_no_ui_long_connection as llama_noui
+    from .bridge_jittorllms_llama import predict as llama_ui
+    model_info.update({
+        "jittorllms_llama": {
+            "fn_with_ui": llama_ui,
+            "fn_without_ui": llama_noui,
+            "endpoint": None,
+            "max_token": 1024,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
+if "jittorllms_pangualpha" in AVAIL_LLM_MODELS:
+    from .bridge_jittorllms_pangualpha import predict_no_ui_long_connection as pangualpha_noui
+    from .bridge_jittorllms_pangualpha import predict as pangualpha_ui
+    model_info.update({
+        "jittorllms_pangualpha": {
+            "fn_with_ui": pangualpha_ui,
+            "fn_without_ui": pangualpha_noui,
+            "endpoint": None,
+            "max_token": 1024,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
+if "moss" in AVAIL_LLM_MODELS:
+    from .bridge_moss import predict_no_ui_long_connection as moss_noui
+    from .bridge_moss import predict as moss_ui
+    model_info.update({
+        "moss": {
+            "fn_with_ui": moss_ui,
+            "fn_without_ui": moss_noui,
+            "endpoint": None,
+            "max_token": 1024,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
+
+
+
+
 def LLM_CATCH_EXCEPTION(f):
     """
     装饰器函数，将错误显示出来

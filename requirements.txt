@@ -1,4 +1,4 @@
-gradio==3.25.0
+gradio==3.28.3
 tiktoken>=0.3.3
 requests[socks]
 transformers
@@ -14,3 +14,4 @@ pymupdf
 openai
 numpy
 arxiv
+pymupdf
