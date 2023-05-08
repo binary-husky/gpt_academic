@@ -8,14 +8,14 @@ body:
     attributes:
       label: Installation Method | 安装方法与平台
       options:
-        - Pip (please confirm: used latest requirements.txt)
-        - Anaconda (please confirm: used latest requirements.txt)
+        - Pip Install (I used latest requirements.txt and python>=3.8)
+        - Anaconda (I used latest requirements.txt and python>=3.8)
         - Docker（Windows/Mac）
         - Docker（Linux）
         - Docker-Compose（Windows/Mac）
         - Docker-Compose（Linux）
         - Huggingface
-        - Others
+        - Others (Please Describe)
     validations:
       required: true
     
