@@ -154,7 +154,7 @@ docker run --rm -it --net=host gpt-academic
 docker run --rm -it -p 50923:50923 gpt-academic
 ```
 
-2. ChatGPT+ChatGLM（需要对Docker熟悉 + 读懂Dockerfile + 电脑配置够强）
+2. ChatGPT+ChatGLM+MOSS（需要熟悉Docker）
 
 ``` sh
 1. 修改docker-compose.yml，删除方案二和方案三，保留方案二
@@ -162,7 +162,7 @@ docker run --rm -it -p 50923:50923 gpt-academic
 3. 终端运行 docker-compose up
 ```
 
-3. ChatGPT + LLAMA + 盘古 + RWKV（需要精通Docker）
+3. ChatGPT + LLAMA + 盘古 + RWKV（需要熟悉Docker）
 ``` sh
 1. 修改docker-compose.yml，删除方案一和方案二，保留方案三（基于jittor）
 2. 修改docker-compose.yml中方案三的配置，参考其中注释即可
