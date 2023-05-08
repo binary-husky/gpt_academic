@@ -12,7 +12,11 @@ import tempfile
 import shutil
 from contextlib import ExitStack
 import logging
+import yaml
 logger = logging
+from sklearn.feature_extraction.text import CountVectorizer
+import numpy as np
+from scipy.linalg import norm
 """contextlib 是 Python 标准库中的一个模块，提供了一些工具函数和装饰器，用于支持编写上下文管理器和处理上下文的常见任务，例如资源管理、异常处理等。
 官网：https://docs.python.org/3/library/contextlib.html"""
 
@@ -123,8 +127,8 @@ def ipaddr():  # 获取本地ipx
             return ip[i][0][1]
 
 def encryption_str(txt: str):
-    txt = str(txt)
     """(关键字)(加密间隔)匹配机制（关键字间隔）"""
+    txt = str(txt)
     pattern = re.compile(rf"(Authorization|WPS-Sid|Cookie)(:|\s+)\s*(\S+)[\s\S]*?(?=\n|$|\s)", re.IGNORECASE)
     result = pattern.sub(lambda x: x.group(1) + ": XXXXXXXX", txt)
     return result
@@ -154,15 +158,65 @@ def chat_history(log: list, split=0):
     return chat, history
 
 
+def df_similarity(s1, s2):
+    """弃用，会警告，这个库不会用"""
+    def add_space(s):
+        return ' '.join(list(s))
+    # 将字中间加入空格
+    s1, s2 = add_space(s1), add_space(s2)
+    # 转化为TF矩阵
+    cv = CountVectorizer(tokenizer=lambda s: s.split())
+    corpus = [s1, s2]
+    vectors = cv.fit_transform(corpus).toarray()
+    # 计算TF系数
+    return np.dot(vectors[0], vectors[1]) / (norm(vectors[0]) * norm(vectors[1]))
+
+
+def diff_list(lst: list, percent=0.70):
+    import difflib
+    count_dict = {}
+    for i in lst:
+        found = False
+        for key in count_dict.keys():
+            if difflib.SequenceMatcher(None, i, key).ratio() >= percent:
+                if len(i) > len(key):
+                    count_dict[i] = count_dict[key] + 1
+                    count_dict.pop(key)
+                else:
+                    count_dict[key] += 1
+                found = True
+                break
+        if not found:
+            count_dict[i] = 1
+    return
+
+
+class YamlHandle:
+
+    def __init__(self, file='/Users/kilig/Job/Python-project/academic_gpt/logs/ai_prompt.yaml'):
+        self.file = file
+
+    def load(self) -> dict:
+        with open(file=self.file, mode='r') as f:
+            data = yaml.safe_load(f)
+            return data
+
+    def update(self, key, value):
+        date = self.load()
+        if not date:
+            date = {}
+        date[key] = value
+        with open(file=self.file, mode='w') as f:
+            yaml.dump(date, f, allow_unicode=True)
+        return date
+
+
 
 if __name__ == '__main__':
 
     txt = "Authorization: WPS-2:AqY7ik9XQ92tvO7+NlCRvA==:b2f626f496de9c256605a15985c855a8b3e4be99\nwps-Sid: V02SgISzdeWrYdwvW_xbib-fGlqUIIw00afc5b890008c1976f\nCookie: wpsua=V1BTVUEvMS4wIChhbmRyb2lkLW9mZmljZToxNy41O2FuZHJvaWQ6MTA7ZjIwZDAyNWQzYTM5MmExMDBiYzgxNWI2NmI3Y2E5ODI6ZG1sMmJ5QldNakF5TUVFPSl2aXZvL1YyMDIwQQ=="
     txt = "Authorization: WPS-2:AqY7ik9XQ92tvO7+NlCRvA==:b2f626f496de9c256605a15985c855a8b3e4be99"
-    print(encryption_str(txt))
 
-    def update_ui(chatbot, history, msg='正常', txt='', obj=None, btn1=None, btn2=None, au_text=None, *args):
-        print(chatbot, history, msg, txt, obj)
+    # print(YamlHandle().update(123123213, 2131231231))
 
-    ll = [4,5, 6]
-    update_ui(chatbot=1, history=2, *ll)
+    diff_list(YamlHandle().load())
