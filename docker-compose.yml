@@ -70,7 +70,7 @@ services:
       USE_PROXY:                '    True                                                                                           '
       proxies:                  '    { "http": "socks5h://localhost:10880", "https": "socks5h://localhost:10880", }                 '
       LLM_MODEL:                '    gpt-3.5-turbo                                                                                  '
-      AVAIL_LLM_MODELS:         '    ["gpt-3.5-turbo", "api2d-gpt-4", "jittorllms_rwkv"]                                 '
+      AVAIL_LLM_MODELS:         '    ["gpt-3.5-turbo", "newbing", "jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]   '
       LOCAL_MODEL_DEVICE:       '    cuda                                                                                           '
       DEFAULT_WORKER_NUM:       '    10                                                                                             '
       WEB_PORT:                 '    12305                                                                                          '
