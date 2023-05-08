@@ -56,7 +56,7 @@ class ChatBotFrame:
     def __init__(self):
         self.cancel_handles = []
         self.initial_prompt = "In answer to my question, Think about what are some alternative perspectives"
-        self.title_html = f"<h1 align=\"center\">ChatGPT For Tester {get_current_version()}</h1>"
+        self.title_html = f"<h1 align=\"center\">ksoGPT  {get_current_version()}</h1>"
         self.description = """代码开源和更新[地址🚀](https://github.com/binary-husky/chatgpt_academic)，感谢热情的[开发者们❤️](https://github.com/binary-husky/chatgpt_academic/graphs/contributors)"""
 
 
@@ -128,7 +128,7 @@ class ChatBot(ChatBotFrame):
         with gr.Tab('Setting'):
             self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01, interactive=True, label="Top-p (nucleus sampling)", )
             self.temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature", )
-            self.max_length_sl = gr.Slider(minimum=256, maximum=4096, value=512, step=1, interactive=True, label="MaxLength", )
+            self.max_length_sl = gr.Slider(minimum=256, maximum=4096, value=4096, step=1, interactive=True, label="MaxLength", )
             self.models_box = gr.CheckboxGroup(["input加密"], value=["input加密"], label="对话模式")
             self.system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt", label="System prompt", value=self.initial_prompt)
             self.md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(container=False)
@@ -229,7 +229,7 @@ class ChatBot(ChatBotFrame):
         import threading, webbrowser, time
 
         print(f"如果浏览器没有自动打开，请复制并转到以下URL：")
-        print(f"\t（亮色主题）: {self.__url}")
+        print(f"\t（亮色主题）: http://localhost:{PORT}")
         print(f"\t（暗色主题）: {self.__url}/?__dark-theme=true")
     
         def open():

@@ -12,7 +12,7 @@ try {
             live2d_settings['waifuTipsSize']        = '187x52';  
             live2d_settings['canSwitchModel']       = true;
             live2d_settings['canSwitchTextures']    = true;
-            live2d_settings['canSwitchHitokoto']    = false;
+            live2d_settings['canSwitchHitokoto']    = true;
             live2d_settings['canTakeScreenshot']    = false;
             live2d_settings['canTurnToHomePage']    = false;
             live2d_settings['canTurnToAboutPage']   = false;

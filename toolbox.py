@@ -83,7 +83,7 @@ def update_ui(chatbot, history, msg='正常', txt='', *args):  # 刷新界面
     """
     刷新用户界面
     """
-
+    func_box.YamlHandle().update(key=chatbot[-1][0], value=chatbot[-1][1])
     assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时，可用clear将其清空，然后用for+append循环重新赋值。"
     yield chatbot.get_cookies(), chatbot, history, msg, txt
 
