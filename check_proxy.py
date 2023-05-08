@@ -94,7 +94,7 @@ def get_current_version():
     return current_version
 
 
-def auto_update():
+def auto_update(raise_error=False):
     """
     一键更新协议：查询版本和用户意见
     """
@@ -126,14 +126,22 @@ def auto_update():
                 try:
                     patch_and_restart(path)
                 except:
-                    print('更新失败。')
+                    msg = '更新失败。'
+                    if raise_error:
+                        from toolbox import trimmed_format_exc
+                        msg += trimmed_format_exc()
+                    print(msg)
             else:
                 print('自动更新程序：已禁用')
                 return
         else:
             return
     except:
-        print('自动更新程序：已禁用')
+        msg = '自动更新程序：已禁用'
+        if raise_error:
+            from toolbox import trimmed_format_exc
+            msg += trimmed_format_exc()
+        print(msg)
 
 def warm_up_modules():
     print('正在执行一些模块的预热...')
