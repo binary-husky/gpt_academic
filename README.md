@@ -157,14 +157,9 @@ docker run --rm -it -p 50923:50923 gpt-academic
 2. ChatGPT+ChatGLM（需要对Docker熟悉 + 读懂Dockerfile + 电脑配置够强）
 
 ``` sh
-# 修改Dockerfile
-cd docs && nano Dockerfile+ChatGLM
-# 构建 （Dockerfile+ChatGLM在docs路径下，请先cd docs）
-docker build -t gpt-academic --network=host -f Dockerfile+ChatGLM .
-# 运行 (1) 直接运行: 
-docker run --rm -it --net=host --gpus=all gpt-academic
-# 运行 (2) 我想运行之前进容器做一些调整: 
-docker run --rm -it --net=host --gpus=all gpt-academic bash
+1. 修改docker-compose.yml，删除方案二和方案三，保留方案二
+2. 修改docker-compose.yml中方案二的配置，参考其中注释即可
+3. 终端运行 docker-compose up
 ```
 
 3. ChatGPT + LLAMA + 盘古 + RWKV（需要精通Docker）
