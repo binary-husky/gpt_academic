@@ -154,7 +154,7 @@ docker run --rm -it --net=host gpt-academic         #（最后一步-选择1）�
 docker run --rm -it -p 50923:50923 gpt-academic     #（最后一步-选择2）在macOS/windows环境下，只能用-p选项将容器上的端口(例如50923)暴露给主机上的端口
 ```
 
-2. ChatGPT+ChatGLM+MOSS（需要熟悉Docker）
+2. ChatGPT + ChatGLM + MOSS（需要熟悉Docker）
 
 ``` sh
 # 修改docker-compose.yml，删除方案1和方案3，保留方案2。修改docker-compose.yml中方案2的配置，参考其中注释即可
