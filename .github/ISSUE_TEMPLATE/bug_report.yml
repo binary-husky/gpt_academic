@@ -1,0 +1,54 @@
+name: Report Bug | 报告BUG
+description: "Report bug"
+title: "[Bug]: "
+labels: []
+body:
+  - type: dropdown
+    id: download
+    attributes:
+      label: Installation Method | 安装方法与平台
+      options:
+        - Pip (我确认使用了最新的requirements.txt安装依赖)
+        - Anaconda (我确认使用了最新的requirements.txt安装依赖)
+        - Docker（Windows/Mac）
+        - Docker（Linux）
+        - Docker-Compose（Windows/Mac）
+        - Docker-Compose（Linux）
+    validations:
+      required: true
+    
+  - type: textarea
+    id: logs
+    attributes:
+      label: Describe the bug | 简述
+      description: Describe the bug | 简述
+    validations:
+      required: true
+    
+  - type: textarea
+    id: logs
+    attributes:
+      label: Screen Shot | 截图
+      description: Screen Shot | 截图
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Terminal Traceback 终端traceback（如有）
+      description: Terminal Traceback 终端traceback（如有）
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Material to Help Reproduce Bugs 帮助我们复现的测试材料样本（如有）
+      description: Material to Help Reproduce Bugs 帮助我们复现的测试材料样本（如有）
+
+
+
+
+
+
+
+
+
+
