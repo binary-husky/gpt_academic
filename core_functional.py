@@ -21,6 +21,15 @@ def get_core_functions():
                         r"同时分解长句，减少重复，并提供改进建议。请只提供文本的更正版本，避免包括解释。请编辑以下文本" + "\n\n",
             "Suffix":   r"",
         },
+        "中译英": {
+            "Prefix":   r"Please translate following sentence to English:" + "\n\n",
+            "Suffix":   r"",
+        },
+        
+        "英译中": {
+            "Prefix":   r"翻译成地道的中文：" + "\n\n",
+            "Suffix":   r"",
+        },
         "查找语法错误": {
             "Prefix":   r"Can you help me ensure that the grammar and the spelling is correct? " +
                         r"Do not try to polish the text, if no mistake is found, tell me that this paragraph is good." +
@@ -39,10 +48,14 @@ def get_core_functions():
             "Suffix":   r"",
             "PreProcess": clear_line_break,    # 预处理：清除换行符
         },
-        "中译英": {
-            "Prefix":   r"Please translate following sentence to English:" + "\n\n",
+        "查标点错误": {
+            "Prefix":   r"Could you please help me to ensure that the punctuation marks are correct in the following text? " + 
+                        r"Do not try to improve the text, if no mistake is found, tell me that this paragraph is good. " + 
+                        r"If you find mistakes in punctuation marks, please list the mistakes you find in a two-column markdown table, " + 
+                        r"put the original text in the first column and put the corrected text in the second column, " + 
+                        r"please only list the mistakes and provide the corrected text in the end." + "\n\n",
             "Suffix":   r"",
-        },
+        },        
         "学术中英互译": {
             "Prefix":   r"I want you to act as a scientific English-Chinese translator, " +
                         r"I will provide you with some paragraphs in one language " +
@@ -55,9 +68,16 @@ def get_core_functions():
             "Suffix": "",
             "Color": "secondary",
         },
-        "英译中": {
-            "Prefix":   r"翻译成地道的中文：" + "\n\n",
-            "Suffix":   r"",
+        "修改参考文献": {
+            "Prefix":   r"I'd like you to serve as a reference editor for a research manuscript. " +
+                        r"I will supply you with five reference templates that you should use as guidelines. " +
+                        r"Following that, I will provide additional references for which you'll need to examine formatting aspects such as punctuation placement and spacing. " +
+                        r"It is essential that the provided references align cohesively with the five initial templates. " +
+                        r"Provide me with any necessary corrections or suggestions for improve the text. " + 
+                        r"Give a markdown table with three columns where the first is the original text, " + 
+                        r"second is the fixed text, explanation  in the third column, and then provide all fixed references. " + 
+                        r"Below are the five example templates and references needed to be fixed:" + "\n\n",
+            "Suffix":   "\n\n",
         },
         "找图片": {
             "Prefix":   r"我需要你找一张网络图片。使用Unsplash API(https://source.unsplash.com/960x640/?<英语关键词>)获取图片URL，" +
