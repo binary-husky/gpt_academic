@@ -56,7 +56,7 @@ class ChatBotFrame:
     def __init__(self):
         self.cancel_handles = []
         self.initial_prompt = "In answer to my question, Think about what are some alternative perspectives"
-        self.title_html = f"<h1 align=\"center\">ksoGPT  {get_current_version()}</h1>"
+        self.title_html = f"<h1 align=\"center\">Chatbot for KSO {get_current_version()}</h1>"
         self.description = """代码开源和更新[地址🚀](https://github.com/binary-husky/chatgpt_academic)，感谢热情的[开发者们❤️](https://github.com/binary-husky/chatgpt_academic/graphs/contributors)"""
 
 
@@ -72,12 +72,56 @@ class ChatBot(ChatBotFrame):
         self.cookies = gr.State({'api_key': API_KEY, 'llm_model': LLM_MODEL, 'local': self.__url})
 
     def draw_chatbot(self):
+        self.chatbot = gr.Chatbot(label=f"当前模型：{LLM_MODEL}")
+        self.chatbot.style(height=CHATBOT_HEIGHT)
+        self.history = gr.State([])
+        with gr.Row():
+            self.status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {proxy_info}")
+
+    def draw_prompt(self):
+        with gr.Row():
+            self.pro_search_txt = gr.Textbox(show_label=False, placeholder="Enter the prompt you want.").style(container=False)
+            self.pro_entry_btn = gr.Button("搜索", variant="secondary").style(full_width=False, size="sm")
+        with gr.Row():
+            self.pro_prompt_list = gr.Dataset(components=[gr.HTML(visible=False)], samples_per_page=10,
+                                              label="Prompt usage frequency",
+                                              samples=[[". . ."] for i in range(20)], type='index')
+            self.pro_prompt_state = gr.State(self.pro_prompt_list)
+
+    def draw_temp_edit(self):
         with gr.Box():
-            self.chatbot = gr.Chatbot(label=f"当前模型：{LLM_MODEL}")
-            self.chatbot.style(height=CHATBOT_HEIGHT)
-            self.history = gr.State([])
             with gr.Row():
-                self.status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {proxy_info}")
+                with gr.Column(scale=50):
+                    self.pro_results = gr.Chatbot(label='Prompt and result').style(height=400)
+                with gr.Column(scale=45):
+                    Tips = "用 BORF 分析法设计chat GPT prompt:\n" \
+                           "1、阐述背景 B(Background): 说明背景，为chatGPT提供充足的信息\n" \
+                           "2、定义目标 O(Objectives):“我们希望实现什么”\n" \
+                           "3、定义关键结果 R(key Result):“我要什么具体效果”\n" \
+                           "4、试验并调整，改进 E(Evolve):三种改进方法自由组合\n" \
+                           "\t 改进输入：从答案的不足之处着手改进背景B,目标O与关键结果R\n" \
+                           "\t 改进答案：在后续对话中指正chatGPT答案缺点\n" \
+                           "\t 重新生成：尝试在prompt不变的情况下多次生成结果，优中选优\n"
+                    self.pro_edit_txt = gr.Textbox(show_label=False, info='Prompt编辑区', lines=15, placeholder=Tips).style(container=False)
+                    with gr.Row():
+                        self.pro_name_txt = gr.Textbox(show_label=False, placeholder='prompt功能名',).style(container=False)
+                        self.pro_new_btn = gr.Button("保存Prompt", variant="primary").style(size='sm')
+
+
+    def signals_prompt_edit(self):
+        self.prompt_tab.select(fn=func_box.draw_results,
+                               inputs=[self.pro_search_txt, self.pro_prompt_state, self.pro_tf_slider, self.pro_private_check],
+                               outputs=[self.pro_prompt_list, self.pro_prompt_state])
+        self.pro_entry_btn.click(fn=func_box.draw_results,
+                                 inputs=[self.pro_search_txt, self.pro_prompt_state, self.pro_tf_slider, self.pro_private_check],
+                                 outputs=[self.pro_prompt_list, self.pro_prompt_state])
+        self.pro_prompt_list.click(fn=func_box.show_prompt_result,
+                                   inputs=[self.pro_prompt_list, self.pro_prompt_state, self.pro_results],
+                                   outputs=[self.pro_results])
+        self.pro_new_btn.click(fn=func_box.prompt_save,
+                               inputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_private_check, self.pro_fp_state],
+                               outputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_private_check, self.pro_func_prompt, self.pro_fp_state])
+
 
     def draw_input_chat(self):
         with gr.Accordion("输入区", open=True) as self.area_input_primary:
@@ -86,18 +130,37 @@ class ChatBot(ChatBotFrame):
             with gr.Row():
                 self.submitBtn = gr.Button("提交", variant="primary")
             with gr.Row():
-                self.resetBtn = gr.Button("重置", variant="secondary");
-                self.stopBtn = gr.Button("停止", variant="secondary");
-                self.resetBtn.style(size="sm")
-                self.stopBtn.style(size="sm")
+                self.resetBtn = gr.Button("复制回答", variant="secondary").style(size="sm")
+                self.stopBtn = gr.Button("停止", variant="secondary").style(size="sm")
 
     def draw_function_chat(self):
+        prompt_list, devs_document = get_conf('prompt_list', 'devs_document')
         with gr.Tab('Function'):
-            with gr.Accordion("基础功能区", open=True) as self.area_basic_fn:
+            with gr.Accordion("基础功能区", open=False) as self.area_basic_fn:
                 with gr.Row():
                     for k in functional:
                         variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
                         functional[k]["Button"] = gr.Button(k, variant=variant)
+            with gr.Accordion("上传你的Prompt", open=False) as self.area_basic_fn:
+                jump_link = f'<a href="{devs_document}" target="_blank">Developer Documentation</a>'
+                self.pro_devs_link = gr.HTML(jump_link)
+                self.pro_upload_btn = gr.File(file_count='single', file_types=['.yaml', '.json'],
+                                          label=f'上传你的Prompt文件, 编写格式请遵循上述开发者文档格式',)
+            self.pro_private_check = gr.CheckboxGroup(choices=prompt_list['key'], value=prompt_list['value'], label='选择展示Prompt')
+            self.pro_func_prompt = gr.Dataset(components=[gr.HTML()], label="All Prompt", visible=False,
+                                              samples=[['...', ""] for i in range(20)], type='index', samples_per_page=10)
+            self.pro_fp_state = gr.State(self.pro_func_prompt)
+
+    def signals_prompt_func(self):
+            self.pro_private_check.select(fn=func_box.prompt_reduce,
+                                          inputs=[self.pro_private_check, self.pro_fp_state],
+                                          outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check])
+            self.pro_func_prompt.select(fn=func_box.prompt_input,
+                                        inputs=[self.txt, self.pro_func_prompt, self.pro_fp_state],
+                                        outputs=[self.txt])
+            self.pro_upload_btn.upload(fn=func_box.prompt_upload_refresh,
+                                       inputs=[self.pro_upload_btn, self.pro_prompt_state],
+                                       outputs=[self.pro_func_prompt, self.pro_prompt_state, self.pro_private_check])
 
     def draw_public_chat(self):
         with gr.Tab('Public'):
@@ -125,19 +188,19 @@ class ChatBot(ChatBotFrame):
                     self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
 
     def draw_setting_chat(self):
+        switch_model = get_conf('switch_model')[0]
         with gr.Tab('Setting'):
-            self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01, interactive=True, label="Top-p (nucleus sampling)", )
-            self.temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature", )
-            self.max_length_sl = gr.Slider(minimum=256, maximum=4096, value=4096, step=1, interactive=True, label="MaxLength", )
-            self.models_box = gr.CheckboxGroup(["input加密"], value=["input加密"], label="对话模式")
+            self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01, interactive=True, label="Top-p (nucleus sampling)", ).style(container=False)
+            self.temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature", ).style(container=False)
+            self.max_length_sl = gr.Slider(minimum=256, maximum=4096, value=4096, step=1, interactive=True, label="MaxLength", ).style(container=False)
+            self.pro_tf_slider = gr.Slider(minimum=0.01, maximum=1.0, value=0.70, step=0.01, interactive=True, label="Term Frequency系数").style(container=False)
+            self.models_box = gr.CheckboxGroup(choices=switch_model['key'], value=switch_model['value'], label="Switch Model")
             self.system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt", label="System prompt", value=self.initial_prompt)
             self.md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(container=False)
-
-
             # temp = gr.Markdown(self.description)
 
     def draw_goals_auto(self):
-        with gr.Tab('Ai Prompt'):
+        with gr.Tab('Ai Prompt--未完成的作品--敬请期待---'):
             with gr.Row():
                 self.ai_name = gr.Textbox(show_label=False, placeholder="给Ai一个名字").style(container=False)
             with gr.Row():
@@ -171,7 +234,7 @@ class ChatBot(ChatBotFrame):
         # 提交按钮、重置按钮
         self.cancel_handles.append(self.txt.submit(**self.predict_args))
         self.cancel_handles.append(self.submitBtn.click(**self.predict_args))
-        self.resetBtn.click(lambda: ([], [], "已重置"), None, [self.chatbot, self.history, self.status])
+        self.resetBtn.click(fn=func_box.copy_result, inputs=[self.history], outputs=[self.status])
 
     def signals_function(self):
         # 基础功能区的回调函数注册
@@ -239,16 +302,31 @@ class ChatBot(ChatBotFrame):
         threading.Thread(target=auto_update, name="self-upgrade", daemon=True).start()
         # threading.Thread(target=warm_up_modules, name="warm-up", daemon=True).start()
 
+    def check_proxy_free(self):
+        proxy_state = func_box.Shell(f'lsof -i :{PORT}').read()[1].splitlines()
+        if proxy_state != ["", ""]:
+            print('Kill Old Server')
+            for i in proxy_state[1:]:
+                func_box.Shell(f'kill -9 {i.split()[1]}').read()
+            import time
+            time.sleep(5)
+
+
+
 
     def main(self):
-        with gr.Blocks(title="ChatGPT For Tester", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
+        with gr.Blocks(title="Chatbot for KSO ", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
             # 绘制页面title
             self.draw_title()
             # 绘制一个ROW，row会让底下的元素自动排部
             with gr.Row():
                 # 绘制列1
-                with gr.Column(scale=100) as chat:
-                    pass
+                with gr.Column(scale=100):
+                    with gr.Tab('Chatbot') as self.chat_tab:
+                        # self.draw_chatbot()
+                        pass
+                    with gr.Tab('Prompt检索/编辑') as self.prompt_tab:
+                        self.draw_prompt()
                 # 绘制列2
                 with gr.Column(scale=51):
                     # 绘制对话模组
@@ -261,13 +339,18 @@ class ChatBot(ChatBotFrame):
                     with gr.Tab('Auto-GPT'):
                         self.draw_next_auto()
                         self.draw_goals_auto()
-                with chat:
+                with self.chat_tab:   # 使用 gr.State()对组件进行拷贝时，如果之前绘制了Markdown格式，会导致启动崩溃,所以将 markdown相关绘制放在最后
                     self.draw_chatbot()
+                with self.prompt_tab:
+                    self.draw_temp_edit()
             # 函数注册，需要在Blocks下进行
             self.signals_input_setting()
             self.signals_function()
+            self.signals_prompt_func()
             self.signals_public()
             self.signals_auto_input()
+            self.signals_prompt_edit()
+
         # Start
         self.auto_opentab_delay()
         demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION)
