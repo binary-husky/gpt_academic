@@ -85,7 +85,7 @@ def 总结word文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pr
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
-        "批量总结Word文档。函数插件贡献者: JasonGuo1"])
+        "批量总结Word文档。函数插件贡献者: JasonGuo1。注意, 如果是.doc文件, 请先转化为.docx格式。"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
