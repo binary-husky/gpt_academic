@@ -58,7 +58,9 @@ def 图片生成(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     resolution = plugin_kwargs.get("advanced_arg", '256x256')
     image_url, image_path = gen_image(llm_kwargs, prompt, resolution)
     chatbot.append([prompt,  
-        f'`{image_url}`\n\n'+
-        f'<div align="center"><img src="file={image_path}"></div>'
+        f'图像中转网址: <br/>`{image_url}`<br/>'+
+        f'中转网址预览: <br/><div align="center"><img src="{image_url}"></div>'
+        f'本地文件地址: <br/>`{image_path}`<br/>'+
+        f'本地文件预览: <br/><div align="center"><img src="file={image_path}"></div>'
     ])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
