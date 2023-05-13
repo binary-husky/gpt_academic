@@ -22,7 +22,7 @@ def gen_image(llm_kwargs, prompt, resolution="256x256"):
     data = {
         'prompt': prompt,
         'n': 1,
-        'size': '256x256',
+        'size': resolution,
         'response_format': 'url'
     }
     response = requests.post(url, headers=headers, json=data, proxies=proxies)
