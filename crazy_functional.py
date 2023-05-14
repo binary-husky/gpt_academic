@@ -50,7 +50,7 @@ def get_crazy_functions():
         },
         "[测试功能] 解析Jupyter Notebook文件": {
             "Color": "stop",
-            "AsButton":False,
+            "AsButton": False,
             "Function": HotReload(解析ipynb文件),
             "AdvancedArgs": True, # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": "若输入0，则不解析notebook中的Markdown块", # 高级参数输入区的显示提示
@@ -96,6 +96,7 @@ def get_crazy_functions():
         },
         "读Tex论文写摘要": {
             "Color": "stop",    # 按钮颜色
+            "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(读文章写摘要)
         },
         "Markdown/Readme英译中": {
@@ -249,7 +250,7 @@ def get_crazy_functions():
     function_plugins.update({
         "图片生成（先切换模型到openai或api2d）": {
             "Color": "stop",
-            "AsButton": False,
+            "AsButton": True,
             "AdvancedArgs": True, # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": "在这里输入分辨率, 如256x256（默认）", # 高级参数输入区的显示提示
             "Function": HotReload(图片生成)
