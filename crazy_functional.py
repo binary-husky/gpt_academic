@@ -245,5 +245,15 @@ def get_crazy_functions():
             "Function": HotReload(同时问询_指定模型)
         },
     })
+    from crazy_functions.图片生成 import 图片生成
+    function_plugins.update({
+        "图片生成（先切换模型到openai或api2d）": {
+            "Color": "stop",
+            "AsButton": False,
+            "AdvancedArgs": True, # 调用时，唤起高级参数输入区（默认False）
+            "ArgsReminder": "在这里输入分辨率, 如256x256（默认）", # 高级参数输入区的显示提示
+            "Function": HotReload(图片生成)
+        },
+    })
     ###################### 第n组插件 ###########################
     return function_plugins

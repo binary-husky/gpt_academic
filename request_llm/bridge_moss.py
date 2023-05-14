@@ -153,7 +153,8 @@ class GetGLMHandle(Process):
                     print(response.lstrip('\n'))
                     self.child.send(response.lstrip('\n'))
             except:
-                self.child.send('[Local Message] Call MOSS fail.')
+                from toolbox import trimmed_format_exc
+                self.child.send('[Local Message] Call MOSS fail.' + '\n```\n' + trimmed_format_exc() + '\n```\n')
             # 请求处理结束，开始下一个循环
             self.child.send('[Finish]')
 
@@ -217,6 +218,10 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         if not moss_handle.success: 
             moss_handle = None
             return
+    else:
+        response = "[Local Message]: 等待MOSS响应中 ..."
+        chatbot[-1] = (inputs, response)
+        yield from update_ui(chatbot=chatbot, history=history)
 
     if additional_fn is not None:
         import core_functional
@@ -231,15 +236,12 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         history_feedin.append([history[2*i], history[2*i+1]] )
 
     # 开始接收chatglm的回复
-    response = "[Local Message]: 等待MOSS响应中 ..."
-    chatbot[-1] = (inputs, response)
-    yield from update_ui(chatbot=chatbot, history=history)
     for response in moss_handle.stream_chat(query=inputs, history=history_feedin, sys_prompt=system_prompt, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
-        chatbot[-1] = (inputs, response)
+        chatbot[-1] = (inputs, response.strip('<|MOSS|>: '))
         yield from update_ui(chatbot=chatbot, history=history)
 
     # 总结输出
     if response == "[Local Message]: 等待MOSS响应中 ...":
         response = "[Local Message]: MOSS响应异常 ..."
-    history.extend([inputs, response])
+    history.extend([inputs, response.strip('<|MOSS|>: ')])
     yield from update_ui(chatbot=chatbot, history=history)
