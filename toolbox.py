@@ -545,7 +545,10 @@ def read_env_variable(arg, default_value):
     print(f"[ENV_VAR] 尝试加载{arg}，默认值：{default_value} --> 修正值：{env_arg}")
     try:
         if isinstance(default_value, bool):
-            r = bool(env_arg)
+            env_arg = env_arg.strip()
+            if env_arg == 'True': r = True
+            elif env_arg == 'False': r = False
+            else: print('enter True or False, but have:', env_arg); r = default_value
         elif isinstance(default_value, int):
             r = int(env_arg)
         elif isinstance(default_value, float):
