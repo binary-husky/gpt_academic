@@ -51,8 +51,6 @@ def ArgsGeneralWrapper(f):
                   chatbot, history, system_prompt, models, ipaddr: gr.Request, *args):
         """"""
         # 引入一个有cookie的chatbot
-        if ipaddr: ipaddr = ipaddr.client.host
-        else: ipaddr = '127.0.0.1'
         cookies.update({
             'top_p':top_p,
             'temperature':temperature,
@@ -63,7 +61,7 @@ def ArgsGeneralWrapper(f):
             'top_p':top_p,
             'max_length': max_length,
             'temperature': temperature,
-            'ipaddr': ipaddr
+            'ipaddr': ipaddr.client.host
         }
         plugin_kwargs = {
             # "advanced_arg": plugin_advanced_arg,   意义不明的功能，后续再解决冲突
@@ -72,9 +70,9 @@ def ArgsGeneralWrapper(f):
         private_key = get_conf('private_key')[0]
         if private in models:
             if chatbot == []:
-                chatbot.append([f'隐私模式, 你的对话记录无法被他人检索 <p style="display:none;">\n{private_key}\n{ipaddr}\n</p>', None])
+                chatbot.append([f'隐私模式, 你的对话记录无法被他人检索 <p style="display:none;">\n{private_key}\n{ipaddr.client.host}\n</p>', None])
             else:
-                chatbot[0] = [f'隐私模式, 你的对话记录无法被他人检索 <p style="display:none;">\n{private_key}\n{ipaddr}\n</p>', None]
+                chatbot[0] = [f'隐私模式, 你的对话记录无法被他人检索 <p style="display:none;">\n{private_key}\n{ipaddr.client.host}\n</p>', None]
         else:
             if chatbot == []:
                 chatbot.append(['正常对话模式, 你接来下的对话将会被记录并且可以被所有人检索', None])
@@ -84,6 +82,7 @@ def ArgsGeneralWrapper(f):
         chatbot_with_cookie.write_list(chatbot)
         txt_passon = txt
         if encrypt in models: txt_passon = func_box.encryption_str(txt)
+        if args == (): args = (ipaddr.client.port, )
         if txt_passon == '' and txt_passon == ' ' and len(args) > 1:
             msgs = f'### {args[1]} Warning 输入框为空\n' \
                    'tips: 使用基础功能时，请在输入区输入需要处理的文本内容'

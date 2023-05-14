@@ -108,7 +108,6 @@ class ChatBot(ChatBotFrame):
                     with gr.Row():
                         self.pro_name_txt = gr.Textbox(show_label=False, placeholder='prompt功能名', ).style(
                             container=False)
-                        self.pro_clear_btn = gr.Button("重置Result", variant="primary").style(size='sm')
                         self.pro_new_btn = gr.Button("保存Prompt", variant="primary").style(size='sm')
 
     def signals_prompt_edit(self):
@@ -135,8 +134,10 @@ class ChatBot(ChatBotFrame):
             with gr.Row():
                 self.submitBtn = gr.Button("提交", variant="primary")
             with gr.Row():
-                self.resetBtn = gr.Button("复制回答", variant="secondary").style(size="sm")
+                self.cpopyBtn = gr.Button("复制回答", variant="secondary").style(size="sm")
+                # self.resetBtn = gr.Button("重置", variant="secondary").style(size="sm")
                 self.stopBtn = gr.Button("停止", variant="secondary").style(size="sm")
+
 
     def draw_function_chat(self):
         prompt_list, devs_document = get_conf('prompt_list', 'devs_document')
@@ -190,7 +191,12 @@ class ChatBot(ChatBotFrame):
                                         not crazy_fns[k].get("AsButton", True)]
                     self.dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="").style(
                         container=False)
+                    with gr.Row():
+                        self.plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False,
+                                                         placeholder="这里是特殊函数插件的高级参数输入区").style(
+                            container=False)
                     self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
+
 
     def draw_setting_chat(self):
         switch_model = get_conf('switch_model')[0]
@@ -250,7 +256,7 @@ class ChatBot(ChatBotFrame):
         # 提交按钮、重置按钮
         self.cancel_handles.append(self.txt.submit(**self.predict_args))
         self.cancel_handles.append(self.submitBtn.click(**self.predict_args))
-        self.resetBtn.click(fn=func_box.copy_result, inputs=[self.history], outputs=[self.status])
+        self.cpopyBtn.click(fn=func_box.copy_result, inputs=[self.history], outputs=[self.status])
 
     def signals_function(self):
         # 基础功能区的回调函数注册
@@ -277,15 +283,23 @@ class ChatBot(ChatBotFrame):
 
         # 函数插件-下拉菜单与随变按钮的互动
         def on_dropdown_changed(k):
+            # variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
+            # return {self.switchy_bt: gr.update(value=k, variant=variant)}
+
             variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
-            return {self.switchy_bt: gr.update(value=k, variant=variant)}
+            ret = {self.switchy_bt: gr.update(value=k, variant=variant)}
+            if crazy_fns[k].get("AdvancedArgs", False): # 是否唤起高级插件参数区
+                ret.update({self.plugin_advanced_arg: gr.update(visible=True,  label=f"插件[{k}]的高级参数说明：" + crazy_fns[k].get("ArgsReminder", [f"没有提供高级参数功能说明"]))})
+            else:
+                ret.update({self.plugin_advanced_arg: gr.update(visible=False, label=f"插件[{k}]不需要高级参数。")})
+            return ret
 
         self.dropdown.select(on_dropdown_changed, [self.dropdown], [self.switchy_bt])
 
         # 随变按钮的回调函数注册
-        def route(k, *args, **kwargs):
+        def route(k, ipaddr: gr.Request, *args, **kwargs):
             if k in [r"打开插件列表", r"请先从插件列表中选择"]: return
-            yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(*args, **kwargs)
+            yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(ipaddr=ipaddr, *args, **kwargs)
 
         self.click_handle = self.switchy_bt.click(route, [self.switchy_bt, *self.input_combo], self.output_combo)
         self.click_handle.then(on_report_generated, [self.file_upload, self.chatbot], [self.file_upload, self.chatbot])
@@ -313,11 +327,11 @@ class ChatBot(ChatBotFrame):
 
         print(f"如果浏览器没有自动打开，请复制并转到以下URL：")
         print(f"\t（亮色主题）: http://localhost:{PORT}")
-        print(f"\t（暗色主题）: {self.__url}/?__dark-theme=true")
+        print(f"\t（暗色主题）: {self.__url}/?__theme=dark")
 
         def open():
             time.sleep(2)  # 打开浏览器
-            webbrowser.open_new_tab(f"http://localhost:{PORT}/?__dark-theme=true")
+            webbrowser.open_new_tab(f"http://localhost:{PORT}/?__theme=dark")
 
         threading.Thread(target=open, name="open-browser", daemon=True).start()
         threading.Thread(target=auto_update, name="self-upgrade", daemon=True).start()
