@@ -16,6 +16,13 @@ try {
             live2d_settings['canTakeScreenshot']    = false;
             live2d_settings['canTurnToHomePage']    = false;
             live2d_settings['canTurnToAboutPage']   = false;
+            live2d_settings['showHitokoto']         = false;         // 显示一言
+            live2d_settings['showF12Status']        = false;         // 显示加载状态
+            live2d_settings['showF12Message']       = false;        // 显示看板娘消息
+            live2d_settings['showF12OpenMsg']       = false;         // 显示控制台打开提示
+            live2d_settings['showCopyMessage']      = false;         // 显示 复制内容 提示
+            live2d_settings['showWelcomeMessage']   = true;         // 显示进入面页欢迎词
+
             /* 在 initModel 前添加 */
             initModel("file=docs/waifu_plugin/waifu-tips.json");
         }});
