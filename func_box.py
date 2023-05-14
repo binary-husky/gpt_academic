@@ -206,15 +206,19 @@ def draw_results(txt, prompt: gr.Dataset, percent, switch, ipaddr: gr.Request):
     prompt.samples = data
     return prompt.update(samples=data, samples_per_page=10), prompt
 
+
 def diff_list(txt='', percent=0.70, switch: list = None, lst: list = None, sp=15, hosts=''):
     import difflib
     count_dict = {}
-    if not lst: lst = YamlHandle().load()
+    if not lst:
+        lst = YamlHandle().load()
+        lst.update(YamlHandle(os.path.join(prompt_path, f"ai_private_{hosts}.yaml")).load())
     # diff 数据，根据precent系数归类数据
     for i in lst:
         found = False
         for key in count_dict.keys():
-            if difflib.SequenceMatcher(None, i, key).ratio() >= percent:
+            str_tf = difflib.SequenceMatcher(None, i, key).ratio()
+            if str_tf >= percent:
                 if len(i) > len(key):
                     count_dict[i] = count_dict[key] + 1
                     count_dict.pop(key)
@@ -314,18 +318,17 @@ def prompt_reduce(is_all, prompt: gr.Dataset, ipaddr: gr.Request): # is_all, ipa
     return prompt.update(samples=data, samples_per_page=10, visible=True), prompt, is_all
 
 
-def prompt_save(txt, name, checkbox, prompt, ipaddr: gr.Request):
+def prompt_save(txt, name, checkbox, prompt: gr.Dataset, ipaddr: gr.Request):
     if txt and name:
         yaml_obj = YamlHandle(os.path.join(prompt_path, f'prompt_{ipaddr.client.host}.yaml'))
-        prompt_data = yaml_obj.load()                                                               
-        prompt_data.update({name: txt})
         yaml_obj.update(name, txt)
         result = prompt_retrieval(is_all=checkbox, hosts=ipaddr.client.host)
         prompt.samples = result
-        return "", "", ['个人'], prompt.samples, prompt
+        return "", "", ['个人'], prompt.update(samples=result, samples_per_page=10, visible=True), prompt
     if not txt or not name:
+        result = [[f'{html_tag_color("编辑框 or 名称不能为空!!!!!", color="red")}', '']]
         prompt.samples = [[f'{html_tag_color("编辑框 or 名称不能为空!!!!!", color="red")}', '']]
-        return txt, name, checkbox, prompt.samples, prompt
+        return txt, name, checkbox, prompt.update(samples=result, samples_per_page=10, visible=True), prompt
 
 def prompt_input(txt, index, data: gr.Dataset):
     data_str = str(data.samples[index][1])
@@ -342,6 +345,7 @@ def copy_result(history):
     else:
         return "无对话记录，复制错误！！"
 
+
 def show_prompt_result(index, data: gr.Dataset, chatbot):
     click = data.samples[index]
     chatbot.append((click[1], click[2]))
@@ -349,9 +353,10 @@ def show_prompt_result(index, data: gr.Dataset, chatbot):
 
 base_path = os.path.dirname(__file__)
 prompt_path = os.path.join(base_path, 'prompt_users')
+
 class YamlHandle:
 
-    def __init__(self, file=os.path.join(prompt_path, 'ai_prompt.yaml')):
+    def __init__(self, file=os.path.join(prompt_path, 'ai_common.yaml')):
         if not os.path.exists(file):
             Shell(f'touch {file}').read()
         self.file = file
@@ -407,10 +412,6 @@ class FileHandle:
         name = link.split('/')[3]+link.split('/')[-1]
         new_file = os.path.join(base_path, 'gpt_log', name)
         response = requests.get(url=link, verify=False)
-        # with open(file=new_file, mode='w') as file:
-        #     for i in response.iter_content(chunk_size=1024):
-        #         print(i)
-        #         file.write(i.decode(''))
         with open(new_file, "wb") as f:
             f.write(response.content)
 
@@ -420,6 +421,6 @@ if __name__ == '__main__':
     txt = "Authorization: WPS-2:AqY7ik9XQ92tvO7+NlCRvA==:b2f626f496de9c256605a15985c855a8b3e4be99\nwps-Sid: V02SgISzdeWrYdwvW_xbib-fGlqUIIw00afc5b890008c1976f\nCookie: wpsua=V1BTVUEvMS4wIChhbmRyb2lkLW9mZmljZToxNy41O2FuZHJvaWQ6MTA7ZjIwZDAyNWQzYTM5MmExMDBiYzgxNWI2NmI3Y2E5ODI6ZG1sMmJ5QldNakF5TUVFPSl2aXZvL1YyMDIwQQ=="
     txt = "Authorization: WPS-2:AqY7ik9XQ92tvO7+NlCRvA==:b2f626f496de9c256605a15985c855a8b3e4be99 客户发顺丰啦 这是其他文本哦"
 
-    # json_convert_dict()
-    tree_out()
+    print(YamlHandle().load())
+
 

@@ -51,6 +51,8 @@ def ArgsGeneralWrapper(f):
                   chatbot, history, system_prompt, models, ipaddr: gr.Request, *args):
         """"""
         # 引入一个有cookie的chatbot
+        if ipaddr: ipaddr = ipaddr.client.host
+        else: ipaddr = '127.0.0.1'
         cookies.update({
             'top_p':top_p,
             'temperature':temperature,
@@ -61,15 +63,27 @@ def ArgsGeneralWrapper(f):
             'top_p':top_p,
             'max_length': max_length,
             'temperature': temperature,
-            'ipaddr': ipaddr.client.host
+            'ipaddr': ipaddr
         }
         plugin_kwargs = {
             # "advanced_arg": plugin_advanced_arg,   意义不明的功能，后续再解决冲突
         }
+        encrypt, private = get_conf('switch_model')[0]['key']
+        private_key = get_conf('private_key')[0]
+        if private in models:
+            if chatbot == []:
+                chatbot.append([f'隐私模式, 你的对话记录无法被他人检索 <p style="display:none;">\n{private_key}\n{ipaddr}\n</p>', None])
+            else:
+                chatbot[0] = [f'隐私模式, 你的对话记录无法被他人检索 <p style="display:none;">\n{private_key}\n{ipaddr}\n</p>', None]
+        else:
+            if chatbot == []:
+                chatbot.append(['正常对话模式, 你接来下的对话将会被记录并且可以被所有人检索', None])
+            else:
+                chatbot[0] = ['正常对话模式, 你接下来的对话将会被记录并且可以被所有人检索', None]
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
         txt_passon = txt
-        if 'input加密' in models: txt_passon = func_box.encryption_str(txt)
+        if encrypt in models: txt_passon = func_box.encryption_str(txt)
         if txt_passon == '' and txt_passon == ' ' and len(args) > 1:
             msgs = f'### {args[1]} Warning 输入框为空\n' \
                    'tips: 使用基础功能时，请在输入区输入需要处理的文本内容'
@@ -83,7 +97,14 @@ def update_ui(chatbot, history, msg='正常', txt='', *args):  # 刷新界面
     """
     刷新用户界面
     """
-    func_box.YamlHandle().update(key=chatbot[-1][0], value=chatbot[-1][1])
+    private_key = get_conf('private_key')[0]
+    chat_title = chatbot[0][0].split()
+    if private_key in chat_title:
+        private_path = os.path.join(func_box.prompt_path, f"ai_private_{chat_title[-2]}.yaml")
+        func_box.YamlHandle(private_path).update(key=chatbot[-1][0], value=chatbot[-1][1])
+    else:
+        func_box.YamlHandle().update(key=chatbot[-1][0], value=chatbot[-1][1])
+
     assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时，可用clear将其清空，然后用for+append循环重新赋值。"
     yield chatbot.get_cookies(), chatbot, history, msg, txt
 
@@ -446,10 +467,9 @@ def get_user_upload(chatbot, ipaddr: gr.Request):
     user_history = os.path.join(private_upload, ipaddr.client.host)
     history = ''
     for root, d, file in os.walk(user_history):
-        for f in file:
-            history += f'{os.path.join(root, f)}\n\n'
-    chatbot.append(['我检查了之前上传的文件: ',
-                    '[Local Message] 请自行复制以下目录or目录/文件, 供以高亮插件使用\n\n'
+        history += f'目录:\t {root} \t\t 目录内文件: {file}\n\n'
+    chatbot.append(['Loading....',
+                    '[Local Message] 请自行复制以下目录 or 目录+文件, 输入以供函数区高亮按钮使用\n\n'
                     f'> {history}'
                     ])
     return chatbot
@@ -469,8 +489,13 @@ def get_user_download(chatbot, link, file):
                 chatbot.append(['Convert the file address to a download link at：',
                                 f'[Local Message] Conversion failed, file or not exist.'])
         elif os.path.isdir(file_handle):
-            chatbot.append(['Convert the file address to a download link at：',
-                            '[Local Message] Cannot convert directory to download link, please try again.'])
+            for root, dirs, files in os.walk(file_handle):
+                for f in files:
+                    temp_ = os.path.abspath(os.path.join(root, f))
+                    dir_file, file_name = ('/'.join(str(file_handle).split('/')[-2:]), os.path.basename(temp_))
+                    chatbot.append(['Convert the file address to a download link at：',
+                                    f'[Local Message] Successful conversion\n\n '
+                                    f'<a href="{link["local"]}/file={temp_}" target="_blank" download="{dir_file}" class="svelte-xrr240">{file_name}</a>'])
         elif file_handle == '':
             pass
     return chatbot, ''
