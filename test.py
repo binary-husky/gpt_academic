@@ -62,7 +62,46 @@ class ChatBot:
 
 
 if __name__ == '__main__':
-    ChatBot().draw_test()
+    from flask import Flask, render_template
+    import gradio as gr
+
+    app = Flask(__name__)
+
+
+    # 第一个 Gradio 实例，用于页面1
+    def greet(name):
+        return f"Hello, {name}!"
+
+
+    gr_interface1 = gr.Interface(fn=greet, inputs="text", outputs="text")
+
+
+    # 第二个 Gradio 实例，用于页面2
+    def square(x):
+        return x * x
+
+
+    gr_interface2 = gr.Interface(fn=square, inputs="number", outputs="number")
+
+
+    @app.route('/')
+    def index():
+        return render_template('index.html')
+
+
+    @app.route('/page1')
+    def page1():
+        return gr_interface1.launch()
+
+
+    @app.route('/page2')
+    def page2():
+        return gr_interface2.launch()
+
+
+    if __name__ == '__main__':
+        app.run()
+
 
 
 
