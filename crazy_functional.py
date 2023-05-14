@@ -246,5 +246,15 @@ def get_crazy_functions():
             "Function": HotReload(图片生成)
         },
     })
+    from crazy_functions.总结音视频 import 总结音视频
+    function_plugins.update({
+        "批量总结音视频（输入路径或上传压缩包）": {
+            "Color": "stop",
+            "AsButton": False,
+            "AdvancedArgs": True,
+            "ArgsReminder": "调用openai api 使用whisper-1模型, 目前支持的格式:mp4, m4a, wav, mpga, mpeg, mp3, 此处无需输入参数",
+            "Function": HotReload(总结音视频)
+        }
+    })
     ###################### 第n组插件 ###########################
     return function_plugins
