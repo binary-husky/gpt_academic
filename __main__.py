@@ -186,15 +186,14 @@ class ChatBot(ChatBotFrame):
                         self.variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
                         crazy_fns[k]["Button"] = gr.Button(k, variant=self.variant)
                         crazy_fns[k]["Button"].style(size="sm")
-                with gr.Accordion("更多函数插件", open=False):
+                with gr.Accordion("更多函数插件/高级用法", open=False):
                     dropdown_fn_list = [k for k in crazy_fns.keys() if
                                         not crazy_fns[k].get("AsButton", True)]
                     self.dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="").style(
                         container=False)
-                    with gr.Row():
-                        self.plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False,
-                                                         placeholder="这里是特殊函数插件的高级参数输入区").style(
-                            container=False)
+                    self.plugin_advanced_arg = gr.Textbox(show_label=False, label="高级参数输入区", visible=True,
+                                                     placeholder="这里是特殊函数插件的高级参数输入区").style(
+                        container=False)
                     self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
 
 
@@ -285,16 +284,15 @@ class ChatBot(ChatBotFrame):
         def on_dropdown_changed(k):
             # variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
             # return {self.switchy_bt: gr.update(value=k, variant=variant)}
-
             variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
             ret = {self.switchy_bt: gr.update(value=k, variant=variant)}
             if crazy_fns[k].get("AdvancedArgs", False): # 是否唤起高级插件参数区
-                ret.update({self.plugin_advanced_arg: gr.update(visible=True,  label=f"插件[{k}]的高级参数说明：" + crazy_fns[k].get("ArgsReminder", [f"没有提供高级参数功能说明"]))})
+                ret.update({self.plugin_advanced_arg: gr.update(visible=True,  interactive=True, label=f"插件[{k}]的高级参数说明：" + crazy_fns[k].get("ArgsReminder", [f"没有提供高级参数功能说明"]))})
             else:
                 ret.update({self.plugin_advanced_arg: gr.update(visible=False, label=f"插件[{k}]不需要高级参数。")})
             return ret
 
-        self.dropdown.select(on_dropdown_changed, [self.dropdown], [self.switchy_bt])
+        self.dropdown.select(on_dropdown_changed, [self.dropdown], [self.switchy_bt, self.plugin_advanced_arg])
 
         # 随变按钮的回调函数注册
         def route(k, ipaddr: gr.Request, *args, **kwargs):
