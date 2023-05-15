@@ -168,7 +168,15 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     if stream:
         stream_response =  response.iter_lines()
         while True:
-            chunk = next(stream_response)
+            try:
+                chunk = next(stream_response)
+            except StopIteration:
+                # 非OpenAI官方接口的出现这样的报错，OpenAI和API2D不会走这里
+                from toolbox import regular_txt_to_markdown; tb_str = '```\n' + trimmed_format_exc() + '```'
+                chatbot[-1] = (chatbot[-1][0], f"[Local Message] 远程返回错误: \n\n{tb_str} \n\n{regular_txt_to_markdown(chunk.decode())}")
+                yield from update_ui(chatbot=chatbot, history=history, msg="远程返回错误:" + chunk.decode()) # 刷新界面
+                return
+            
             # print(chunk.decode()[6:])
             if is_head_of_the_stream and (r'"object":"error"' not in chunk.decode()):
                 # 数据流的第一帧不携带content
