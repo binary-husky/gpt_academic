@@ -82,7 +82,6 @@ def ArgsGeneralWrapper(f):
         chatbot_with_cookie.write_list(chatbot)
         txt_passon = txt
         if encrypt in models: txt_passon = func_box.encryption_str(txt)
-        if args == (): args = (ipaddr.client.port, )
         if txt_passon == '' and txt_passon == ' ' and len(args) > 1:
             msgs = f'### {args[1]} Warning 输入框为空\n' \
                    'tips: 使用基础功能时，请在输入区输入需要处理的文本内容'

@@ -191,7 +191,7 @@ class ChatBot(ChatBotFrame):
                                         not crazy_fns[k].get("AsButton", True)]
                     self.dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="").style(
                         container=False)
-                    self.plugin_advanced_arg = gr.Textbox(show_label=False, label="高级参数输入区", visible=True,
+                    self.plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False,
                                                      placeholder="这里是特殊函数插件的高级参数输入区").style(
                         container=False)
                     self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
@@ -297,9 +297,12 @@ class ChatBot(ChatBotFrame):
         # 随变按钮的回调函数注册
         def route(k, ipaddr: gr.Request, *args, **kwargs):
             if k in [r"打开插件列表", r"请先从插件列表中选择"]: return
-            yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(ipaddr=ipaddr, *args, **kwargs)
+            append = list(args)
+            append.insert(10, ipaddr)
+            args = tuple(append)
+            yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(*args, **kwargs)
 
-        self.click_handle = self.switchy_bt.click(route, [self.switchy_bt, *self.input_combo], self.output_combo)
+        self.click_handle = self.switchy_bt.click(route, [self.switchy_bt, *self.input_combo, gr.State(PORT)], self.output_combo)
         self.click_handle.then(on_report_generated, [self.file_upload, self.chatbot], [self.file_upload, self.chatbot])
         self.cancel_handles.append(self.click_handle)
         # 终止按钮的回调函数注册

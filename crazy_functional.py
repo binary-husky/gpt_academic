@@ -56,6 +56,7 @@ def get_crazy_functions():
             "ArgsReminder": "若输入0，则不解析notebook中的Markdown块", # 高级参数输入区的显示提示
         },
         "批量总结Word文档": {
+            "AsButton": False,
             "Color": "stop",
             "Function": HotReload(总结word文档)
         },
@@ -102,6 +103,7 @@ def get_crazy_functions():
         "Markdown/Readme英译中": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "stop",
+            "AsButton": False,
             "Function": HotReload(Markdown英译中)
         },
         "批量生成函数注释": {
@@ -219,7 +221,7 @@ def get_crazy_functions():
 
     from crazy_functions.联网的ChatGPT import 连接网络回答问题
     function_plugins.update({
-        "连接网络回答问题（先输入问题，再点击按钮，需要访问谷歌）": {
+        "连接网络回答问题": {
             "Color": "stop",
             "AsButton": True,  # 加入下拉菜单中
             "Function": HotReload(连接网络回答问题)
