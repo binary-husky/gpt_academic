@@ -116,7 +116,7 @@ class ClaudeHandle(Process):
 
             # 是否重置
             if len(self.local_history) > 0 and len(history) == 0:
-                await self.claude_model.reset()
+                # await self.claude_model.reset()
                 self.local_history = []
 
             # 开始问问题
