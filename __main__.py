@@ -187,8 +187,12 @@ class ChatBot(ChatBotFrame):
                         crazy_fns[k]["Button"] = gr.Button(k, variant=self.variant)
                         crazy_fns[k]["Button"].style(size="sm")
                 with gr.Accordion("更多函数插件/高级用法", open=False):
-                    dropdown_fn_list = [k for k in crazy_fns.keys() if
-                                        not crazy_fns[k].get("AsButton", True)]
+                    dropdown_fn_list = []
+                    for k in crazy_fns.keys():
+                        if not crazy_fns[k].get("AsButton", True):
+                            dropdown_fn_list.append(k)
+                        elif crazy_fns[k].get('AdvancedArgs', False):
+                            dropdown_fn_list.append(k)
                     self.dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="").style(
                         container=False)
                     self.plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False,
@@ -217,7 +221,7 @@ class ChatBot(ChatBotFrame):
             # temp = gr.Markdown(self.description)
 
     def draw_goals_auto(self):
-        with gr.Tab('Ai Prompt--未完成的作品--敬请期待---'):
+        with gr.Tab('Ai Prompt--未完成--敬请期待'):
             with gr.Row():
                 self.ai_name = gr.Textbox(show_label=False, placeholder="给Ai一个名字").style(container=False)
             with gr.Row():
