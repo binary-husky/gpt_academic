@@ -151,3 +151,4 @@ crazy_functions/test_samples
 request_llm/jittorllms
 !prompt_users/.keep
 prompt_users/*
+.__test.py
