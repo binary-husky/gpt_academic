@@ -13,6 +13,7 @@ import shutil
 import os
 import time
 import glob
+from concurrent.futures import ThreadPoolExecutor
 ############################### 插件输入输出接驳区 #######################################
 
 """
@@ -91,20 +92,14 @@ def ArgsGeneralWrapper(f):
     return decorated
 
 
+pool = ThreadPoolExecutor(200)
 def update_ui(chatbot, history, msg='正常', txt='', *args):  # 刷新界面
     """
     刷新用户界面
     """
-    private_key = get_conf('private_key')[0]
-    chat_title = chatbot[0][0].split()
-    if private_key in chat_title:
-        private_path = os.path.join(func_box.prompt_path, f"ai_private_{chat_title[-2]}.yaml")
-        func_box.YamlHandle(private_path).update(key=chatbot[-1][0], value=chatbot[-1][1])
-    else:
-        func_box.YamlHandle().update(key=chatbot[-1][0], value=chatbot[-1][1])
-
     assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时，可用clear将其清空，然后用for+append循环重新赋值。"
     yield chatbot.get_cookies(), chatbot, history, msg, txt
+    pool.submit(func_box.thread_write_chat, chatbot)
 
 def trimmed_format_exc():
     import os, traceback
@@ -254,8 +249,8 @@ def text_divide_paragraph(text):
     else:
         # wtf input
         lines = text.split("\n")
-        for i, line in enumerate(lines):
-            lines[i] = lines[i].replace(" ", "&nbsp;")
+        # for i, line in enumerate(lines):
+        #     lines[i] = lines[i].replace(" ", "&nbsp;")
         text = "</br>".join(lines)
         return text
 
@@ -373,6 +368,7 @@ def format_io(self, y):
     gpt_reply = close_up_code_segment_during_stream(gpt_reply)  # 当代码输出半截的时候，试着补上后个```
     y[-1] = (
         None if i_ask is None else markdown.markdown(i_ask, extensions=['fenced_code', 'tables']),
+        #None if i_ask is None else markdown_convertion(i_ask),
         None if gpt_reply is None else markdown_convertion(gpt_reply)
     )
     return y
