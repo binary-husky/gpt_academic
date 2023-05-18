@@ -342,14 +342,6 @@ class ChatBot(ChatBotFrame):
         threading.Thread(target=auto_update, name="self-upgrade", daemon=True).start()
         # threading.Thread(target=warm_up_modules, name="warm-up", daemon=True).start()
 
-    def check_proxy_free(self):
-        proxy_state = func_box.Shell(f'lsof -i :{PORT}').read()[1].splitlines()
-        if proxy_state != ["", ""]:
-            print('Kill Old Server')
-            for i in proxy_state[1:]:
-                func_box.Shell(f'kill -9 {i.split()[1]}').read()
-            import time
-            time.sleep(5)
 
     def main(self):
         with gr.Blocks(title="Chatbot for KSO ", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
@@ -391,9 +383,22 @@ class ChatBot(ChatBotFrame):
         # Start
         self.auto_opentab_delay()
         demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT,
-                                                              auth=AUTHENTICATION)
 
+                                                              auth=AUTHENTICATION)
+def check_proxy_free():
+    proxy_state = func_box.Shell(f'lsof -i :{PORT}').read()[1].splitlines()
+    if proxy_state != ["", ""]:
+        print('Kill Old Server')
+        for i in proxy_state[1:]:
+            func_box.Shell(f'kill -9 {i.split()[1]}').read()
+        import time
+        time.sleep(5)
 
 if __name__ == '__main__':
+    # PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
+    PORT = 7891 if WEB_PORT <= 0 else WEB_PORT
+    check_proxy_free()
     ChatBot().main()
+    gr.close_all()
+    check_proxy_free()
 
