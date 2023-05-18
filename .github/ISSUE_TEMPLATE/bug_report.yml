@@ -8,6 +8,7 @@ body:
     attributes:
       label: Installation Method | 安装方法与平台
       options:
+        - Please choose | 请选择
         - Pip Install (I used latest requirements.txt and python>=3.8)
         - Anaconda (I used latest requirements.txt and python>=3.8)
         - Docker（Windows/Mac）
@@ -22,11 +23,19 @@ body:
   - type: textarea
     id: describe
     attributes:
-      label: Describe the bug & Screen Shot | 简述 与 有帮助的截图
-      description: Describe the bug & Screen Shot | 简述 与 有帮助的截图
+      label: Describe the bug | 简述
+      description: Describe the bug | 简述
     validations:
       required: true
-
+      
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screen Shot | 有帮助的截图
+      description: Screen Shot | 有帮助的截图
+    validations:
+      required: true
+      
   - type: textarea
     id: traceback
     attributes:
