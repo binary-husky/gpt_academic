@@ -15,3 +15,7 @@ openai
 numpy
 arxiv
 pymupdf
+pyperclip
+scikit-learn
+psutil
+distro
