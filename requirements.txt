@@ -19,3 +19,5 @@ pyperclip
 scikit-learn
 psutil
 distro
+dotenv
+python-dotenv
