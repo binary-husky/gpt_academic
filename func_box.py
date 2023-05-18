@@ -55,6 +55,7 @@ class Shell(object):
         else:
             sysout = self.subp.stdout.read()
             syserr = self.subp.stderr.read()
+            self.subp.stdin
             if sysout:
                 logger.debug(f"{self.args} \n{sysout}")
                 return 1, sysout
@@ -218,7 +219,7 @@ def json_convert_dict():
 def draw_results(txt, prompt: gr.Dataset, percent, switch, ipaddr: gr.Request):
     data = diff_list(txt, percent=percent, switch=switch, hosts=ipaddr.client.host)
     prompt.samples = data
-    return prompt.update(samples=data, samples_per_page=10), prompt
+    return prompt.update(samples=data, samples_per_page=10, visible=True), prompt
 
 
 def diff_list(txt='', percent=0.70, switch: list = None, lst: list = None, sp=15, hosts=''):
@@ -330,13 +331,13 @@ def prompt_save(txt, name, checkbox, prompt: gr.Dataset, ipaddr: gr.Request):
     if txt and name:
         yaml_obj = SqliteHandle(f'prompt_{ipaddr.client.host}')
         yaml_obj.inset_prompt({name: txt})
-        result = prompt_retrieval(is_all=checkbox, hosts=ipaddr.client.host)
+        result = prompt_retrieval(is_all=checkbox+['个人'], hosts=ipaddr.client.host)
         prompt.samples = result
         return "", "", ['个人'], prompt.update(samples=result, samples_per_page=10, visible=True), prompt
-    if not txt or not name:
+    elif not txt or not name:
         result = [[f'{html_tag_color("编辑框 or 名称不能为空!!!!!", color="red")}', '']]
         prompt.samples = [[f'{html_tag_color("编辑框 or 名称不能为空!!!!!", color="red")}', '']]
-        return txt, name, checkbox, prompt.update(samples=result, samples_per_page=10, visible=True), prompt
+        return txt, name, [], prompt.update(samples=result, visible=True), prompt
 
 def prompt_input(txt, index, data: gr.Dataset):
     data_str = str(data.samples[index][1])
