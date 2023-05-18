@@ -219,7 +219,7 @@ def json_convert_dict():
 def draw_results(txt, prompt: gr.Dataset, percent, switch, ipaddr: gr.Request):
     data = diff_list(txt, percent=percent, switch=switch, hosts=ipaddr.client.host)
     prompt.samples = data
-    return prompt.update(samples=data, samples_per_page=10, visible=True), prompt
+    return prompt.update(samples=data, visible=True), prompt
 
 
 def diff_list(txt='', percent=0.70, switch: list = None, lst: list = None, sp=15, hosts=''):
@@ -292,7 +292,7 @@ def prompt_upload_refresh(file, prompt, ipaddr: gr.Request):
     if upload_data != {}:
         SqliteHandle(f'prompt_{hosts}').inset_prompt(upload_data)
         ret_data = prompt_retrieval(is_all=['个人'], hosts=hosts)
-        return prompt.update(samples=ret_data, samples_per_page=10, visible=True), prompt, ['个人']
+        return prompt.update(samples=ret_data, visible=True), prompt, ['个人']
     else:
         prompt.samples = [[f'{html_tag_color("数据解析失败，请检查文件是否符合规范", color="red")}', '']]
         return prompt.samples, prompt, []
@@ -324,7 +324,7 @@ def prompt_retrieval(is_all, hosts='', search=False):
 def prompt_reduce(is_all, prompt: gr.Dataset, ipaddr: gr.Request): # is_all, ipaddr: gr.Request
     data = prompt_retrieval(is_all=is_all, hosts=ipaddr.client.host)
     prompt.samples = data
-    return prompt.update(samples=data, samples_per_page=10, visible=True), prompt, is_all
+    return prompt.update(samples=data, visible=True), prompt, is_all
 
 
 def prompt_save(txt, name, checkbox, prompt: gr.Dataset, ipaddr: gr.Request):
@@ -333,7 +333,7 @@ def prompt_save(txt, name, checkbox, prompt: gr.Dataset, ipaddr: gr.Request):
         yaml_obj.inset_prompt({name: txt})
         result = prompt_retrieval(is_all=checkbox+['个人'], hosts=ipaddr.client.host)
         prompt.samples = result
-        return "", "", ['个人'], prompt.update(samples=result, samples_per_page=10, visible=True), prompt
+        return "", "", ['个人'], prompt.update(samples=result, visible=True), prompt
     elif not txt or not name:
         result = [[f'{html_tag_color("编辑框 or 名称不能为空!!!!!", color="red")}', '']]
         prompt.samples = [[f'{html_tag_color("编辑框 or 名称不能为空!!!!!", color="red")}', '']]
