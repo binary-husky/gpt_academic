@@ -13,6 +13,7 @@ import shutil
 import os
 import time
 import glob
+import sys
 from concurrent.futures import ThreadPoolExecutor
 ############################### 插件输入输出接驳区 #######################################
 
@@ -647,6 +648,12 @@ def read_single_conf_with_lru_cache(arg):
     except:
         try:
             # 优先级2. 获取config_private中的配置
+            # 获取当前文件所在目录的路径
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            # 获取上一层目录的路径
+            parent_dir = os.path.dirname(current_dir)
+            # 将上一层目录添加到Python的搜索路径中
+            sys.path.append(parent_dir)
             r = getattr(importlib.import_module('config_private'), arg)
         except:
             # 优先级3. 获取config中的配置
