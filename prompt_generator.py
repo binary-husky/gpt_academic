@@ -68,8 +68,6 @@ class SqliteHandle:
 
 sqlite_handle = SqliteHandle
 if __name__ == '__main__':
+    test = func_box.YamlHandle('/Users/kilig/Job/Python-project/academic_gpt/prompt_users/prompt_127.0.0.1.yaml').load()
 
-
-    # print(sqlite_handle('ai_common').inset_prompt(test))
-    # sqlite_handle('ai_common').delete_prompt()
-    print(sqlite_handle('ai_common').get_prompt_value())
+    sqlite_handle('prompt_127.0.0.1').inset_prompt(test)
