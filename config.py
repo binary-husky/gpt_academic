@@ -44,9 +44,10 @@ WEB_PORT = -1
 # 如果OpenAI不响应（网络卡顿、代理失败、KEY失效），重试的次数限制
 MAX_RETRY = 2
 
-# OpenAI模型选择是（gpt4现在只对申请成功的人开放，体验gpt-4可以试试api2d）
+# 模型选择是
 LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
-AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "claude"]
+AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "stack-claude"]
+# P.S. 其他可用的模型还包括 ["jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
 
 # 本地LLM模型如ChatGLM的执行方式 CPU/GPU
 LOCAL_MODEL_DEVICE = "cpu" # 可选 "cuda"
@@ -76,7 +77,6 @@ NEWBING_COOKIES = """
 your bing cookies here
 """
 
-# slack-claude bot
-# 下面的id怎么填写具体参见https://zhuanlan.zhihu.com/p/627485689
-CLAUDE_BOT_ID = '' 
-SLACK_USER_TOKEN = ''
+# Slack Claude bot， 使用教程详情见 request_llm/README.md
+SLACK_CLAUDE_BOT_ID = ''   
+SLACK_CLAUDE_USER_TOKEN = ''

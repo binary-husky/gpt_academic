@@ -22,9 +22,6 @@ from .bridge_chatglm import predict as chatglm_ui
 from .bridge_newbing import predict_no_ui_long_connection as newbing_noui
 from .bridge_newbing import predict as newbing_ui
 
-from .bridge_claude import predict_no_ui_long_connection as claude_noui
-from .bridge_claude import predict as claude_ui
-
 # from .bridge_tgui import predict_no_ui_long_connection as tgui_noui
 # from .bridge_tgui import predict as tgui_ui
 
@@ -133,15 +130,7 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
-    # claude
-    "claude": {
-        "fn_with_ui": claude_ui,
-        "fn_without_ui": claude_noui,
-        "endpoint": None,
-        "max_token": 4096,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
+
 }
 
 
@@ -198,8 +187,20 @@ if "moss" in AVAIL_LLM_MODELS:
             "token_cnt": get_token_num_gpt35,
         },
     })
-
-
+if "stack-claude" in AVAIL_LLM_MODELS:
+    from .bridge_stackclaude import predict_no_ui_long_connection as claude_noui
+    from .bridge_stackclaude import predict as claude_ui
+    # claude
+    model_info.update({
+        "stack-claude": {
+            "fn_with_ui": claude_ui,
+            "fn_without_ui": claude_noui,
+            "endpoint": None,
+            "max_token": 8192,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        }
+    })
 
 
 def LLM_CATCH_EXCEPTION(f):

@@ -9,8 +9,6 @@ from toolbox import get_conf
 from slack_sdk.errors import SlackApiError
 from slack_sdk.web.async_client import AsyncWebClient
 import asyncio
-import sys
-sys.path.append('..')
 
 
 """
@@ -38,7 +36,7 @@ class SlackClient(AsyncWebClient):
     CHANNEL_ID = None
 
     async def open_channel(self):
-        response = await self.conversations_open(users=get_conf('CLAUDE_BOT_ID')[0])
+        response = await self.conversations_open(users=get_conf('SLACK_CLAUDE_BOT_ID')[0])
         self.CHANNEL_ID = response["channel"]["id"]
 
     async def chat(self, text):
@@ -53,7 +51,7 @@ class SlackClient(AsyncWebClient):
             # TODO：暂时不支持历史消息，因为在同一个频道里存在多人使用时历史消息渗透问题
             resp = await self.conversations_history(channel=self.CHANNEL_ID, oldest=self.LAST_TS, limit=1)
             msg = [msg for msg in resp["messages"]
-                if msg.get("user") == get_conf('CLAUDE_BOT_ID')[0]]
+                if msg.get("user") == get_conf('SLACK_CLAUDE_BOT_ID')[0]]
             return msg
         except (SlackApiError, KeyError) as e:
             raise RuntimeError(f"获取Slack消息失败。")
@@ -174,8 +172,8 @@ class ClaudeHandle(Process):
                 self.proxies_https = proxies['https']
 
             try:
-                SLACK_USER_TOKEN, = get_conf('SLACK_USER_TOKEN')
-                self.claude_model = SlackClient(token=SLACK_USER_TOKEN, proxy=self.proxies_https)
+                SLACK_CLAUDE_USER_TOKEN, = get_conf('SLACK_CLAUDE_USER_TOKEN')
+                self.claude_model = SlackClient(token=SLACK_CLAUDE_USER_TOKEN, proxy=self.proxies_https)
                 print('Claude组件初始化成功。')
             except:
                 self.success = False
@@ -190,7 +188,7 @@ class ClaudeHandle(Process):
             # 进入任务等待状态
             asyncio.run(self.async_run())
         except Exception:
-            tb_str = '```\n' + trimmed_format_exc() + '```'
+            tb_str = '\n```\n' + trimmed_format_exc() + '\n```\n'
             self.child.send(f'[Local Message] Claude失败 {tb_str}.')
             self.child.send('[Fail]')
             self.child.send('[Finish]')
