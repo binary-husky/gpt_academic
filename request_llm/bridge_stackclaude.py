@@ -6,70 +6,71 @@ import importlib
 import logging
 import time
 from toolbox import get_conf
-from slack_sdk.errors import SlackApiError
-from slack_sdk.web.async_client import AsyncWebClient
 import asyncio
-
-
-"""
-========================================================================
-第一部分：Slack API Client
-https://github.com/yokonsan/claude-in-slack-api
-========================================================================
-"""
 load_message = "正在加载Claude组件，请稍候..."
 
-
-class SlackClient(AsyncWebClient):
-    """SlackClient类用于与Slack API进行交互，实现消息发送、接收等功能。
-
-        属性：
-        - CHANNEL_ID：str类型，表示频道ID。
-
-        方法：
-        - open_channel()：异步方法。通过调用conversations_open方法打开一个频道，并将返回的频道ID保存在属性CHANNEL_ID中。
-        - chat(text: str)：异步方法。向已打开的频道发送一条文本消息。
-        - get_slack_messages()：异步方法。获取已打开频道的最新消息并返回消息列表，目前不支持历史消息查询。
-        - get_reply()：异步方法。循环监听已打开频道的消息，如果收到"Typing…_"结尾的消息说明Claude还在继续输出，否则结束循环。
-
+try:
     """
-    CHANNEL_ID = None
+    ========================================================================
+    第一部分：Slack API Client
+    https://github.com/yokonsan/claude-in-slack-api
+    ========================================================================
+    """
 
-    async def open_channel(self):
-        response = await self.conversations_open(users=get_conf('SLACK_CLAUDE_BOT_ID')[0])
-        self.CHANNEL_ID = response["channel"]["id"]
+    from slack_sdk.errors import SlackApiError
+    from slack_sdk.web.async_client import AsyncWebClient
 
-    async def chat(self, text):
-        if not self.CHANNEL_ID:
-            raise Exception("Channel not found.")
+    class SlackClient(AsyncWebClient):
+        """SlackClient类用于与Slack API进行交互，实现消息发送、接收等功能。
 
-        resp = await self.chat_postMessage(channel=self.CHANNEL_ID, text=text)
-        self.LAST_TS = resp["ts"]
+            属性：
+            - CHANNEL_ID：str类型，表示频道ID。
 
-    async def get_slack_messages(self):
-        try:
-            # TODO：暂时不支持历史消息，因为在同一个频道里存在多人使用时历史消息渗透问题
-            resp = await self.conversations_history(channel=self.CHANNEL_ID, oldest=self.LAST_TS, limit=1)
-            msg = [msg for msg in resp["messages"]
-                if msg.get("user") == get_conf('SLACK_CLAUDE_BOT_ID')[0]]
-            return msg
-        except (SlackApiError, KeyError) as e:
-            raise RuntimeError(f"获取Slack消息失败。")
-    
-    async def get_reply(self):
-        while True:
-            slack_msgs = await self.get_slack_messages()
-            if len(slack_msgs) == 0:
-                await asyncio.sleep(0.5)
-                continue
-            
-            msg = slack_msgs[-1]
-            if msg["text"].endswith("Typing…_"):
-                yield False, msg["text"]
-            else:
-                yield True, msg["text"]
-                break
+            方法：
+            - open_channel()：异步方法。通过调用conversations_open方法打开一个频道，并将返回的频道ID保存在属性CHANNEL_ID中。
+            - chat(text: str)：异步方法。向已打开的频道发送一条文本消息。
+            - get_slack_messages()：异步方法。获取已打开频道的最新消息并返回消息列表，目前不支持历史消息查询。
+            - get_reply()：异步方法。循环监听已打开频道的消息，如果收到"Typing…_"结尾的消息说明Claude还在继续输出，否则结束循环。
 
+        """
+        CHANNEL_ID = None
+
+        async def open_channel(self):
+            response = await self.conversations_open(users=get_conf('SLACK_CLAUDE_BOT_ID')[0])
+            self.CHANNEL_ID = response["channel"]["id"]
+
+        async def chat(self, text):
+            if not self.CHANNEL_ID:
+                raise Exception("Channel not found.")
+
+            resp = await self.chat_postMessage(channel=self.CHANNEL_ID, text=text)
+            self.LAST_TS = resp["ts"]
+
+        async def get_slack_messages(self):
+            try:
+                # TODO：暂时不支持历史消息，因为在同一个频道里存在多人使用时历史消息渗透问题
+                resp = await self.conversations_history(channel=self.CHANNEL_ID, oldest=self.LAST_TS, limit=1)
+                msg = [msg for msg in resp["messages"]
+                    if msg.get("user") == get_conf('SLACK_CLAUDE_BOT_ID')[0]]
+                return msg
+            except (SlackApiError, KeyError) as e:
+                raise RuntimeError(f"获取Slack消息失败。")
+        
+        async def get_reply(self):
+            while True:
+                slack_msgs = await self.get_slack_messages()
+                if len(slack_msgs) == 0:
+                    await asyncio.sleep(0.5)
+                    continue
+                
+                msg = slack_msgs[-1]
+                if msg["text"].endswith("Typing…_"):
+                    yield False, msg["text"]
+                else:
+                    yield True, msg["text"]
+                    break
+except:
+    pass
 
 """
 ========================================================================
@@ -87,8 +88,9 @@ class ClaudeHandle(Process):
         self.success = True
         self.local_history = []
         self.check_dependency()
-        self.start()
-        self.threadLock = threading.Lock()
+        if self.success: 
+            self.start()
+            self.threadLock = threading.Lock()
 
     def check_dependency(self):
         try:
@@ -97,7 +99,7 @@ class ClaudeHandle(Process):
             self.info = "依赖检测通过，等待Claude响应。注意目前不能多人同时调用Claude接口（有线程锁），否则将导致每个人的Claude问询历史互相渗透。调用Claude时，会自动使用已配置的代理。"
             self.success = True
         except:
-            self.info = "缺少的依赖，如果要使用Claude，除了基础的pip依赖以外，您还需要运行`pip install -r request_llm/requirements_claude.txt`安装Claude的依赖。"
+            self.info = "缺少的依赖，如果要使用Claude，除了基础的pip依赖以外，您还需要运行`pip install -r request_llm/requirements_slackclaude.txt`安装Claude的依赖。"
             self.success = False
 
     def ready(self):
