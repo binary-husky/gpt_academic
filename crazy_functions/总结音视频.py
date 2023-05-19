@@ -1,6 +1,41 @@
 from toolbox import CatchException, report_execption, select_api_key, update_ui, write_results_to_file
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, split_audio_file
+from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 
+def split_audio_file(filename, split_duration=1000):
+    """
+    根据给定的切割时长将音频文件切割成多个片段。
+
+    Args:
+        filename (str): 需要被切割的音频文件名。
+        split_duration (int, optional): 每个切割音频片段的时长（以秒为单位）。默认值为1000。
+
+    Returns:
+        filelist (list): 一个包含所有切割音频片段文件路径的列表。
+
+    """
+    from moviepy.editor import AudioFileClip
+    import os
+    os.makedirs('gpt_log/mp3/cut/', exist_ok=True)  # 创建存储切割音频的文件夹
+
+    # 读取音频文件
+    audio = AudioFileClip(filename)
+
+    # 计算文件总时长和切割点
+    total_duration = audio.duration
+    split_points = list(range(0, int(total_duration), split_duration))
+    split_points.append(int(total_duration))
+    filelist = []
+
+    # 切割音频文件
+    for i in range(len(split_points) - 1):
+        start_time = split_points[i]
+        end_time = split_points[i + 1]
+        split_audio = audio.subclip(start_time, end_time)
+        split_audio.write_audiofile(f"gpt_log/mp3/cut/{filename[0]}_{i}.mp3")
+        filelist.append(f"gpt_log/mp3/cut/{filename[0]}_{i}.mp3")
+
+    audio.close()
+    return filelist
 
 def AnalyAudio(file_manifest, llm_kwargs, chatbot, history):
     import os, requests
