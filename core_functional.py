@@ -73,5 +73,6 @@ def get_core_functions():
                         r"Note that, reference styles maybe more than one kind, you should transform each item correctly." +
                         r"Items need to be transformed:",
             "Suffix":   r"",
+            "Visible": False,
         }
     }
