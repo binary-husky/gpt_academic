@@ -382,9 +382,9 @@ class ChatBot(ChatBotFrame):
 
         # Start
         self.auto_opentab_delay()
-        demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT,
+        demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION)
 
-                                                              auth=AUTHENTICATION)
+
 def check_proxy_free():
     proxy_state = func_box.Shell(f'lsof -i :{PORT}').read()[1].splitlines()
     if proxy_state != ["", ""]:
