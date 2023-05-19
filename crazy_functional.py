@@ -252,7 +252,7 @@ def get_crazy_functions():
             "Color": "stop",
             "AsButton": False,
             "AdvancedArgs": True,
-            "ArgsReminder": "调用openai api 使用whisper-1模型, 目前支持的格式:mp4, m4a, wav, mpga, mpeg, mp3, 此处无需输入参数",
+            "ArgsReminder": "调用openai api 使用whisper-1模型, 目前支持的格式:mp4, m4a, wav, mpga, mpeg, mp3。此处可以输入解析提示，例如：解析为简体中文（默认）。",
             "Function": HotReload(总结音视频)
         }
     })

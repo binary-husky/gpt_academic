@@ -1,4 +1,4 @@
-from toolbox import CatchException, report_execption, select_api_key, update_ui, write_results_to_file
+from toolbox import CatchException, report_execption, select_api_key, update_ui, write_results_to_file, get_conf
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 
 def split_audio_file(filename, split_duration=1000):
@@ -37,7 +37,7 @@ def split_audio_file(filename, split_duration=1000):
     audio.close()
     return filelist
 
-def AnalyAudio(file_manifest, llm_kwargs, chatbot, history):
+def AnalyAudio(parse_prompt, file_manifest, llm_kwargs, chatbot, history):
     import os, requests
     from moviepy.editor import AudioFileClip
     from request_llm.bridge_all import model_info
@@ -72,11 +72,20 @@ def AnalyAudio(file_manifest, llm_kwargs, chatbot, history):
                 }
                 data = {
                     "model": "whisper-1",
+                    "prompt": parse_prompt,
                     'response_format': "text"
                 }
-            response = requests.post(url, headers=headers, files=files, data=data).text
 
-            i_say = f'请对下面的文章片段做概述，文章内容是 ```{response}```'
+            chatbot.append([f"将 {i} 发送到openai音频解析终端 (whisper)，当前参数：{parse_prompt}", "正在处理 ..."])
+            yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
+            proxies, = get_conf('proxies')
+            response = requests.post(url, headers=headers, files=files, data=data, proxies=proxies).text
+
+            chatbot.append(["音频解析结果", response])
+            history.extend(["音频解析结果", response])
+            yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
+
+            i_say = f'请对下面的音频片段做概述，音频内容是 ```{response}```'
             i_say_show_user = f'第{index + 1}段音频的第{j + 1} / {len(voice)}片段。'
             gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
                 inputs=i_say,
@@ -84,17 +93,17 @@ def AnalyAudio(file_manifest, llm_kwargs, chatbot, history):
                 llm_kwargs=llm_kwargs,
                 chatbot=chatbot,
                 history=[],
-                sys_prompt="总结文章。"
+                sys_prompt=f"总结音频。音频文件名{fp}"
             )
 
             chatbot[-1] = (i_say_show_user, gpt_say)
             history.extend([i_say_show_user, gpt_say])
             audio_history.extend([i_say_show_user, gpt_say])
 
-        # 已经对该文章的所有片段总结完毕，如果文章被切分了，
+        # 已经对该文章的所有片段总结完毕，如果文章被切分了
         result = "".join(audio_history)
         if len(audio_history) > 1:
-            i_say = f"根据以上的对话，使用中文总结文章{result}的主要内容。"
+            i_say = f"根据以上的对话，使用中文总结音频“{result}”的主要内容。"
             i_say_show_user = f'第{index + 1}段音频的主要内容：'
             gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
                 inputs=i_say,
@@ -127,7 +136,7 @@ def 总结音视频(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
-        "总结音视频内容，函数插件贡献者: dalvqw"])
+        "总结音视频内容，函数插件贡献者: dalvqw & BinaryHusky"])
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
     try:
@@ -168,6 +177,8 @@ def 总结音视频(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
         return
 
     # 开始正式执行任务
-    yield from AnalyAudio(file_manifest, llm_kwargs, chatbot, history)
+    if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
+    parse_prompt = plugin_kwargs.get("advanced_arg", '将音频解析为简体中文')
+    yield from AnalyAudio(parse_prompt, file_manifest, llm_kwargs, chatbot, history)
 
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
