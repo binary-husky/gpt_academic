@@ -236,5 +236,25 @@ def get_crazy_functions():
             "Function": HotReload(同时问询_指定模型)
         },
     })
+    from crazy_functions.图片生成 import 图片生成
+    function_plugins.update({
+        "图片生成（先切换模型到openai或api2d）": {
+            "Color": "stop",
+            "AsButton": False,
+            "AdvancedArgs": True, # 调用时，唤起高级参数输入区（默认False）
+            "ArgsReminder": "在这里输入分辨率, 如256x256（默认）", # 高级参数输入区的显示提示
+            "Function": HotReload(图片生成)
+        },
+    })
+    from crazy_functions.总结音视频 import 总结音视频
+    function_plugins.update({
+        "批量总结音视频（输入路径或上传压缩包）": {
+            "Color": "stop",
+            "AsButton": False,
+            "AdvancedArgs": True,
+            "ArgsReminder": "调用openai api 使用whisper-1模型, 目前支持的格式:mp4, m4a, wav, mpga, mpeg, mp3。此处可以输入解析提示，例如：解析为简体中文（默认）。",
+            "Function": HotReload(总结音视频)
+        }
+    })
     ###################### 第n组插件 ###########################
     return function_plugins

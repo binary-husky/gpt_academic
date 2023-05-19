@@ -36,14 +36,18 @@ def get_meta_information(url, chatbot, history):
             max_results = 1,
             sort_by = arxiv.SortCriterion.Relevance,
         )
-        paper = next(search.results())
-        if string_similar(title, paper.title) > 0.90: # same paper
-            abstract = paper.summary.replace('\n', ' ')
-            is_paper_in_arxiv = True
-        else:   # different paper
+        try:
+            paper = next(search.results())
+            if string_similar(title, paper.title) > 0.90: # same paper
+                abstract = paper.summary.replace('\n', ' ')
+                is_paper_in_arxiv = True
+            else:   # different paper
+                abstract = abstract
+                is_paper_in_arxiv = False
+            paper = next(search.results())
+        except:
             abstract = abstract
             is_paper_in_arxiv = False
-        paper = next(search.results())
         print(title)
         print(author)
         print(citation)

@@ -75,6 +75,7 @@ def main():
                 with gr.Accordion("基础功能区", open=True) as area_basic_fn:
                     with gr.Row():
                         for k in functional:
+                            if ("Visible" in functional[k]) and (not functional[k]["Visible"]): continue
                             variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
                             functional[k]["Button"] = gr.Button(k, variant=variant)
                 with gr.Accordion("函数插件区", open=True) as area_crazy_fn:
@@ -145,6 +146,7 @@ def main():
         clearBtn2.click(lambda: ("",""), None, [txt, txt2])
         # 基础功能区的回调函数注册
         for k in functional:
+            if ("Visible" in functional[k]) and (not functional[k]["Visible"]): continue
             click_handle = functional[k]["Button"].click(fn=ArgsGeneralWrapper(predict), inputs=[*input_combo, gr.State(True), gr.State(k)], outputs=output_combo)
             cancel_handles.append(click_handle)
         # 文件上传区，接收文件后与chatbot的互动
@@ -184,11 +186,11 @@ def main():
         import threading, webbrowser, time
         print(f"如果浏览器没有自动打开，请复制并转到以下URL：")
         print(f"\t（亮色主题）: http://localhost:{PORT}")
-        print(f"\t（暗色主题）: http://localhost:{PORT}/?__dark-theme=true")
+        print(f"\t（暗色主题）: http://localhost:{PORT}/?__theme=dark")
         def open():
             time.sleep(2)       # 打开浏览器
             DARK_MODE, = get_conf('DARK_MODE')
-            if DARK_MODE: webbrowser.open_new_tab(f"http://localhost:{PORT}/?__dark-theme=true")
+            if DARK_MODE: webbrowser.open_new_tab(f"http://localhost:{PORT}/?__theme=dark")
             else: webbrowser.open_new_tab(f"http://localhost:{PORT}")
         threading.Thread(target=open, name="open-browser", daemon=True).start()
         threading.Thread(target=auto_update, name="self-upgrade", daemon=True).start()

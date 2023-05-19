@@ -75,3 +75,7 @@ NEWBING_STYLE = "creative"  # ["creative", "balanced", "precise"]
 NEWBING_COOKIES = """
 your bing cookies here
 """
+
+# Slack Claude bot， 使用教程详情见 request_llm/README.md
+SLACK_CLAUDE_BOT_ID = ''   
+SLACK_CLAUDE_USER_TOKEN = ''

@@ -13,6 +13,31 @@ LLM_MODEL = "chatglm"
 `python main.py`
 ``` 
 
+## Claude-Stack
+
+- 请参考此教程获取  https://zhuanlan.zhihu.com/p/627485689
+    - 1、SLACK_CLAUDE_BOT_ID 
+    - 2、SLACK_CLAUDE_USER_TOKEN
+
+- 把token加入config.py
+
+## Newbing
+
+- 使用cookie editor获取cookie（json）
+- 把cookie（json）加入config.py （NEWBING_COOKIES）
+
+## Moss
+- 使用docker-compose
+
+## RWKV
+- 使用docker-compose
+
+## LLAMA
+- 使用docker-compose
+
+## 盘古
+- 使用docker-compose
+
 
 ---
 ## Text-Generation-UI (TGUI，调试中，暂不可用)

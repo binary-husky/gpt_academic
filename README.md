@@ -54,10 +54,10 @@ chat分析报告生成 | [函数插件] 运行后自动生成总结汇报
 互联网信息聚合+GPT | [函数插件] 一键[让GPT先从互联网获取信息](https://www.bilibili.com/video/BV1om4y127ck)，再回答问题，让信息永不过时
 公式/图片/表格显示 | 可以同时显示公式的[tex形式和渲染形式](https://user-images.githubusercontent.com/96192199/230598842-1d7fcddd-815d-40ee-af60-baf488a199df.png)，支持公式、代码高亮
 多线程函数插件支持 | 支持多线调用chatgpt，一键处理[海量文本](https://www.bilibili.com/video/BV1FT411H7c5/)或程序
-启动暗色gradio[主题](https://github.com/binary-husky/chatgpt_academic/issues/173) | 在浏览器url后面添加```/?__dark-theme=true```可以切换dark主题
-[多LLM模型](https://www.bilibili.com/video/BV1wT411p7yf)支持，[API2D](https://api2d.com/)接口支持 | 同时被GPT3.5、GPT4和[清华ChatGLM](https://github.com/THUDM/ChatGLM-6B)伺候的感觉一定会很不错吧？
-更多LLM模型接入，支持[huggingface部署](https://huggingface.co/spaces/qingxu98/gpt-academic) | 新加入Newbing测试接口(新必应AI)
-…… | ……
+启动暗色gradio[主题](https://github.com/binary-husky/chatgpt_academic/issues/173) | 在浏览器url后面添加```/?__theme=dark```可以切换dark主题
+[多LLM模型](https://www.bilibili.com/video/BV1wT411p7yf)支持，[API2D](https://api2d.com/)接口支持 | 同时被GPT3.5、GPT4、[清华ChatGLM](https://github.com/THUDM/ChatGLM-6B)、[复旦MOSS](https://github.com/OpenLMLab/MOSS)同时伺候的感觉一定会很不错吧？
+更多LLM模型接入，支持[huggingface部署](https://huggingface.co/spaces/qingxu98/gpt-academic) | 加入Newbing接口(新必应)，引入清华[Jittorllms](https://github.com/Jittor/JittorLLMs)支持[LLaMA](https://github.com/facebookresearch/llama)，[RWKV](https://github.com/BlinkDL/ChatRWKV)和[盘古α](https://openi.org.cn/pangu/)
+更多新功能展示(图像生成等) …… | 见本文档结尾处 ……
 
 </div>
 
@@ -107,29 +107,40 @@ cd chatgpt_academic
 
 在`config.py`中，配置API KEY等设置，[特殊网络环境设置](https://github.com/binary-husky/gpt_academic/issues/1) 。
 
-（P.S. 程序运行时会优先检查是否存在名为`config_private.py`的私密配置文件，并用其中的配置覆盖`config.py`的同名配置。因此，如果您能理解我们的配置读取逻辑，我们强烈建议您在`config.py`旁边创建一个名为`config_private.py`的新配置文件，并把`config.py`中的配置转移（复制）到`config_private.py`中。`config_private.py`不受git管控，可以让您的隐私信息更加安全。）
+（P.S. 程序运行时会优先检查是否存在名为`config_private.py`的私密配置文件，并用其中的配置覆盖`config.py`的同名配置。因此，如果您能理解我们的配置读取逻辑，我们强烈建议您在`config.py`旁边创建一个名为`config_private.py`的新配置文件，并把`config.py`中的配置转移（复制）到`config_private.py`中。`config_private.py`不受git管控，可以让您的隐私信息更加安全。P.S.项目同样支持通过环境变量配置大多数选项，详情可以参考docker-compose文件。）
 
 
 3. 安装依赖
 ```sh
-# （选择I: 如熟悉python）（python版本3.9以上，越新越好）
+# （选择I: 如熟悉python）（python版本3.9以上，越新越好），备注：使用官方pip源或者阿里pip源,临时换源方法：python -m pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 python -m pip install -r requirements.txt
-# 备注：使用官方pip源或者阿里pip源，其他pip源（如一些大学的pip）有可能出问题，临时换源方法：python -m pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 
-# （选择II: 如不熟悉python）使用anaconda，步骤也是类似的：
-# （II-1）conda create -n gptac_venv python=3.11
-# （II-2）conda activate gptac_venv
-# （II-3）python -m pip install -r requirements.txt
+# （选择II: 如不熟悉python）使用anaconda，步骤也是类似的 (https://www.bilibili.com/video/BV1rc411W7Dr)：
+conda create -n gptac_venv python=3.11    # 创建anaconda环境
+conda activate gptac_venv                 # 激活anaconda环境
+python -m pip install -r requirements.txt # 这个步骤和pip安装一样的步骤
 ```
 
-如果需要支持清华ChatGLM后端，需要额外安装更多依赖（前提条件：熟悉python + 电脑配置够强）：
+<details><summary>如果需要支持清华ChatGLM/复旦MOSS作为后端，请点击展开此处</summary>
+<p>
+
+【可选步骤】如果需要支持清华ChatGLM/复旦MOSS作为后端，需要额外安装更多依赖（前提条件：熟悉Python + 用过Pytorch + 电脑配置够强）：
 ```sh
-python -m pip install -r request_llm/requirements_chatglm.txt
+# 【可选步骤I】支持清华ChatGLM。清华ChatGLM备注：如果遇到"Call ChatGLM fail 不能正常加载ChatGLM的参数" 错误，参考如下： 1：以上默认安装的为torch+cpu版，使用cuda需要卸载torch重新安装torch+cuda； 2：如因本机配置不够无法加载模型，可以修改request_llm/bridge_chatglm.py中的模型精度, 将 AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) 都修改为 AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
+python -m pip install -r request_llm/requirements_chatglm.txt  
 
-# 备注：如果遇到"Call ChatGLM fail 不能正常加载ChatGLM的参数" 错误，参考如下：
-# 1：以上默认安装的为torch+cpu版，使用cuda需要卸载torch重新安装torch+cuda
-# 2：如因本机配置不够无法加载模型，可以修改request_llm/bridge_chatglm.py中的模型精度, 将 AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) 都修改为 AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
+# 【可选步骤II】支持复旦MOSS
+python -m pip install -r request_llm/requirements_moss.txt
+git clone https://github.com/OpenLMLab/MOSS.git request_llm/moss  # 注意执行此行代码时，必须处于项目根路径
+
+# 【可选步骤III】确保config.py配置文件的AVAIL_LLM_MODELS包含了期望的模型，目前支持的全部模型如下(jittorllms系列目前仅支持docker方案)：
+AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "newbing", "moss"] # + ["jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
 ```
+
+</p>
+</details>
+
+
 
 4. 运行
 ```sh
@@ -147,37 +158,28 @@ python main.py
 1. 仅ChatGPT（推荐大多数人选择）
 
 ``` sh
-# 下载项目
-git clone https://github.com/binary-husky/chatgpt_academic.git
-cd chatgpt_academic
-# 配置 “Proxy”， “API_KEY” 以及 “WEB_PORT” (例如50923) 等
-用任意文本编辑器编辑 config.py
-# 安装
-docker build -t gpt-academic .
+git clone https://github.com/binary-husky/chatgpt_academic.git  # 下载项目
+cd chatgpt_academic                                 # 进入路径
+nano config.py                                      # 用任意文本编辑器编辑config.py, 配置 “Proxy”， “API_KEY” 以及 “WEB_PORT” (例如50923) 等
+docker build -t gpt-academic .                      # 安装
+
 #（最后一步-选择1）在Linux环境下，用`--net=host`更方便快捷
 docker run --rm -it --net=host gpt-academic
 #（最后一步-选择2）在macOS/windows环境下，只能用-p选项将容器上的端口(例如50923)暴露给主机上的端口
-docker run --rm -it -p 50923:50923 gpt-academic
+docker run --rm -it -e WEB_PORT=50923 -p 50923:50923 gpt-academic
 ```
 
-2. ChatGPT+ChatGLM（需要对Docker熟悉 + 读懂Dockerfile + 电脑配置够强）
+2. ChatGPT + ChatGLM + MOSS（需要熟悉Docker）
 
 ``` sh
-# 修改Dockerfile
-cd docs && nano Dockerfile+ChatGLM
-# 构建 （Dockerfile+ChatGLM在docs路径下，请先cd docs）
-docker build -t gpt-academic --network=host -f Dockerfile+ChatGLM .
-# 运行 (1) 直接运行: 
-docker run --rm -it --net=host --gpus=all gpt-academic
-# 运行 (2) 我想运行之前进容器做一些调整: 
-docker run --rm -it --net=host --gpus=all gpt-academic bash
+# 修改docker-compose.yml，删除方案1和方案3，保留方案2。修改docker-compose.yml中方案2的配置，参考其中注释即可
+docker-compose up
 ```
 
-3. ChatGPT + LLAMA + 盘古 + RWKV（需要精通Docker）
+3. ChatGPT + LLAMA + 盘古 + RWKV（需要熟悉Docker）
 ``` sh
-1. 修改docker-compose.yml，删除方案一和方案二，保留方案三（基于jittor）
-2. 修改docker-compose.yml中方案三的配置，参考其中注释即可
-3. 终端运行 docker-compose up
+# 修改docker-compose.yml，删除方案1和方案2，保留方案3。修改docker-compose.yml中方案3的配置，参考其中注释即可
+docker-compose up
 ```
 
 
@@ -267,6 +269,22 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/236432361-67739153-73e8-43fe-8111-b61296edabd9.png" width="500" >
 </div>
+
+7. 新增MOSS大语言模型支持
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/236639178-92836f37-13af-4fdd-984d-b4450fe30336.png" width="500" >
+</div>
+
+8. OpenAI图像生成
+<div align="center">
+<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/bc7ab234-ad90-48a0-8d62-f703d9e74665" width="500" >
+</div>
+
+9. OpenAI音频解析与总结
+<div align="center">
+<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/709ccf95-3aee-498a-934a-e1c22d3d5d5b" width="500" >
+</div>
+
 
 
 ## 版本:
