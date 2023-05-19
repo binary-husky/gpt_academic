@@ -130,6 +130,7 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
+
 }
 
 
@@ -186,8 +187,20 @@ if "moss" in AVAIL_LLM_MODELS:
             "token_cnt": get_token_num_gpt35,
         },
     })
-
-
+if "stack-claude" in AVAIL_LLM_MODELS:
+    from .bridge_stackclaude import predict_no_ui_long_connection as claude_noui
+    from .bridge_stackclaude import predict as claude_ui
+    # claude
+    model_info.update({
+        "stack-claude": {
+            "fn_with_ui": claude_ui,
+            "fn_without_ui": claude_noui,
+            "endpoint": None,
+            "max_token": 8192,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        }
+    })
 
 
 def LLM_CATCH_EXCEPTION(f):

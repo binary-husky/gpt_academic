@@ -153,7 +153,7 @@ class NewBingHandle(Process):
             # 进入任务等待状态
             asyncio.run(self.async_run())
         except Exception:
-            tb_str = '```\n' + trimmed_format_exc() + '```'
+            tb_str = '\n```\n' + trimmed_format_exc() + '\n```\n'
             self.child.send(f'[Local Message] Newbing失败 {tb_str}.')
             self.child.send('[Fail]')
             self.child.send('[Finish]')
