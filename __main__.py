@@ -171,7 +171,7 @@ class ChatBot(ChatBotFrame):
                                    outputs=[self.pro_func_prompt, self.pro_prompt_state, self.pro_private_check])
 
     def draw_public_chat(self):
-        with gr.Tab('Public'):
+        with gr.Tab('Plugins'):
             with gr.Accordion("上传本地文件可供高亮函数插件调用", open=False) as self.area_file_up:
                 self.file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)",
                                             file_count="multiple")
