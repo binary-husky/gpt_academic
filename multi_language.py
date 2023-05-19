@@ -1,6 +1,6 @@
 import os
 import functools
-import os
+import re
 import pickle
 import time
 
@@ -79,22 +79,26 @@ def lru_file_cache(maxsize=128, ttl=None, filename=None):
     return decorator_function
 
 
+def contains_chinese(string):
+    """
+    Returns True if the given string contains Chinese characters, False otherwise.
+    """
+    chinese_regex = re.compile(u'[\u4e00-\u9fff]+')
+    return chinese_regex.search(string) is not None
 
 def extract_chinese_characters(file_path):
+    syntax = []
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
-        chinese_characters = [] 
-        sentence = {'file':file_path, 'begin':-1, 'end':-1, 'word': ""} 
-        for index, char in enumerate(content):
-            if 0x4e00 <= ord(char) <= 0x9fff:
-                sentence['word'] += char
-                if sentence['begin'] == -1: sentence['begin'] = index
-                sentence['end'] = index
-            else:
-                if len(sentence['word'])>0:
-                    chinese_characters.append(sentence)
-                    sentence = {'file':file_path, 'begin':-1, 'end':-1, 'word': ""} 
-        return chinese_characters
+        import ast
+        root = ast.parse(content)
+        for node in ast.walk(root):
+            if isinstance(node, ast.Name):
+                if contains_chinese(node.id):
+                    print(node.id)
+                    syntax.append(node)
+
+        return syntax
 
 def extract_chinese_characters_from_directory(directory_path):
     chinese_characters = []
