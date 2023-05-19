@@ -93,7 +93,7 @@ class ChatBot(ChatBotFrame):
         with gr.Box():
             with gr.Row():
                 with gr.Column(scale=100):
-                    self.pro_results = gr.Chatbot(label='Prompt and result').style(height=400)
+                    self.pro_results = gr.Chatbot(label='Prompt and result').style(height=422)
                 with gr.Column(scale=10):
                     Tips = "用 BORF 分析法设计chat GPT prompt:\n" \
                            "1、阐述背景 B(Background): 说明背景，为chatGPT提供充足的信息\n" \
@@ -103,7 +103,7 @@ class ChatBot(ChatBotFrame):
                            "\t 改进输入：从答案的不足之处着手改进背景B,目标O与关键结果R\n" \
                            "\t 改进答案：在后续对话中指正chatGPT答案缺点\n" \
                            "\t 重新生成：尝试在prompt不变的情况下多次生成结果，优中选优\n"
-                    self.pro_edit_txt = gr.Textbox(show_label=False, info='Prompt编辑区', lines=15,
+                    self.pro_edit_txt = gr.Textbox(show_label=False, info='Prompt编辑区', lines=14,
                                                    placeholder=Tips).style(container=False)
                     with gr.Row():
                         self.pro_name_txt = gr.Textbox(show_label=False, placeholder='prompt功能名', ).style(
@@ -396,7 +396,7 @@ def check_proxy_free():
 
 if __name__ == '__main__':
     # PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
-    PORT = 7891 if WEB_PORT <= 0 else WEB_PORT
+    # PORT = 7891 if WEB_PORT <= 0 else WEB_PORT
     check_proxy_free()
     ChatBot().main()
     gr.close_all()
