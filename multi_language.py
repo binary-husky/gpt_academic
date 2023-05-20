@@ -109,13 +109,33 @@ def map_to_json(map, language):
 def read_map_from_json(language):
     if os.path.exists(f'docs/translate_{language.lower()}.json'):
         with open(f'docs/translate_{language.lower()}.json', 'r', encoding='utf8') as f: 
-            return json.load(f)
+            res = json.load(f)
+            res = {k:v for k, v in res.items() if v is not None}
+            return res
     return {}
+
+def advanced_split(splitted_string, spliter, include_spliter=False):
+    splitted_string_tmp = []
+    for string_ in splitted_string:
+        if spliter in string_:
+            splitted = string_.split(spliter)
+            for i, s in enumerate(splitted):
+                if include_spliter:
+                    if i != len(splitted)-1:
+                        splitted[i] += spliter
+                splitted[i] = splitted[i].strip()
+            for i in reversed(range(len(splitted))):
+                if not contains_chinese(splitted[i]): 
+                    splitted.pop(i)
+            splitted_string_tmp.extend(splitted)
+        else:
+            splitted_string_tmp.append(string_)
+    splitted_string = splitted_string_tmp
+    return splitted_string_tmp
 
 cached_translation = {}
 cached_translation = read_map_from_json(language=LANG)
 
-@lru_file_cache(maxsize=10, ttl=1e40, filename="translation_cache")
 def trans(word_to_translate, language, special=False):
     if len(word_to_translate) == 0: return {}
     from crazy_functions.crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
@@ -127,9 +147,10 @@ def trans(word_to_translate, language, special=False):
         'llm_model': LLM_MODEL,
         'top_p':1.0, 
         'max_length': None,
-        'temperature':0.0,
+        'temperature':0.4,
     }
-    N_EACH_REQ = 16
+    import random
+    N_EACH_REQ = random.randint(16, 32)
     word_to_translate_split = split_list(word_to_translate, N_EACH_REQ)
     inputs_array = [str(s) for s in word_to_translate_split]
     inputs_show_user_array = inputs_array
@@ -137,7 +158,7 @@ def trans(word_to_translate, language, special=False):
     if special: #  to English using CamelCase Naming Convention
         sys_prompt_array = [f"Translate following names to English with CamelCase naming convention. Keep original format" for _ in inputs_array]
     else:
-        sys_prompt_array = [f"Translate following sentences to {LANG}. Keep original format." for _ in inputs_array]
+        sys_prompt_array = [f"Translate following sentences to {LANG}. E.g., You should translate sentences to the following format ['translation of sentence 1', 'translation of sentence 2']. Do NOT answer with Chinese!" for _ in inputs_array]
     chatbot = ChatBotWithCookies(llm_kwargs)
     gpt_say_generator = request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         inputs_array, 
@@ -163,16 +184,16 @@ def trans(word_to_translate, language, special=False):
                 for a,b in zip(res_before_trans, res_after_trans):
                     translated_result[a] = b
             except:
-                try:
-                    res_before_trans = eval(result[i-1])
-                    result[i] = result[i].strip('[\']')
-                    res_after_trans = [s for s in result[i].split("', '")]
-                    for a,b in zip(res_before_trans, res_after_trans):
-                        translated_result[a] = b
-                except:
-                    res_before_trans = eval(result[i-1])
-                    for a in res_before_trans:
-                        translated_result[a] = None
+                # try:
+                    # res_before_trans = word_to_translate_split[(i-1)//2]
+                    # res_after_trans = [s for s in result[i].split("', '")]
+                #     for a,b in zip(res_before_trans, res_after_trans):
+                #         translated_result[a] = b
+                # except:
+                print('GPT输出格式错误，稍后可能需要再试一次')
+                res_before_trans = eval(result[i-1])
+                for a in res_before_trans:
+                    translated_result[a] = None
     return translated_result
 
 def step_1_core_key_translate():
@@ -227,6 +248,7 @@ def step_1_core_key_translate():
     chinese_core_keys_norepeat_mapping = {}
     for k in chinese_core_keys_norepeat:
         chinese_core_keys_norepeat_mapping.update({k:cached_translation[k]})
+    chinese_core_keys_norepeat_mapping = dict(sorted(chinese_core_keys_norepeat_mapping.items(), key=lambda x: -len(x[0])))
 
     # ===============================================
     # copy
@@ -268,24 +290,52 @@ def step_2_core_key_translate():
     # =================================================================================================
     # step2 
     # =================================================================================================
+
+    def load_string(strings, string_input):
+        string_ = string_input.strip().strip(',').strip().strip('.').strip()
+        if string_.startswith('[Local Message]'):
+            string_ = string_.replace('[Local Message]', '')
+            string_ = string_.strip().strip(',').strip().strip('.').strip()
+        splitted_string = [string_]
+        # --------------------------------------
+        splitted_string = advanced_split(splitted_string, spliter="，", include_spliter=False)
+        splitted_string = advanced_split(splitted_string, spliter="。", include_spliter=False)
+        splitted_string = advanced_split(splitted_string, spliter="）", include_spliter=False)
+        splitted_string = advanced_split(splitted_string, spliter="（", include_spliter=False)
+        splitted_string = advanced_split(splitted_string, spliter="(", include_spliter=False)
+        splitted_string = advanced_split(splitted_string, spliter=")", include_spliter=False)
+        splitted_string = advanced_split(splitted_string, spliter="<", include_spliter=False)
+        splitted_string = advanced_split(splitted_string, spliter=">", include_spliter=False)
+        splitted_string = advanced_split(splitted_string, spliter="[", include_spliter=False)
+        splitted_string = advanced_split(splitted_string, spliter="]", include_spliter=False)
+        splitted_string = advanced_split(splitted_string, spliter="【", include_spliter=False)
+        splitted_string = advanced_split(splitted_string, spliter="】", include_spliter=False)
+        splitted_string = advanced_split(splitted_string, spliter="：", include_spliter=False)
+        splitted_string = advanced_split(splitted_string, spliter=":", include_spliter=False)
+        splitted_string = advanced_split(splitted_string, spliter=",", include_spliter=False)
+        splitted_string = advanced_split(splitted_string, spliter="#", include_spliter=False)
+        splitted_string = advanced_split(splitted_string, spliter="\n", include_spliter=False)
+        splitted_string = advanced_split(splitted_string, spliter=";", include_spliter=False)
+        splitted_string = advanced_split(splitted_string, spliter="`", include_spliter=False)
+        splitted_string = advanced_split(splitted_string, spliter="   ", include_spliter=False)
+        # --------------------------------------
+        for j, s in enumerate(splitted_string): # .com
+            if '.com' in s: continue
+            if '\'' in s: continue
+            if '\"' in s: continue
+            strings.append([s,0])
+
+
     def get_strings(node):
         strings = []
-
         # recursively traverse the AST
         for child in ast.iter_child_nodes(node):
+            node = child
             if isinstance(child, ast.Str):
                 if contains_chinese(child.s):
-                    string_ = child.s.strip().strip(',').strip().strip('.').strip()
-                    if string_.startswith('[Local Message]'):
-                        string_ = string_.replace('[Local Message]', '')
-                        string_ = string_.strip().strip(',').strip().strip('.').strip()
-                    strings.append([
-                        string_, 
-                        child.lineno*10000+child.col_offset
-                    ])
+                    load_string(strings=strings, string_input=child.s)
             elif isinstance(child, ast.AST):
                 strings.extend(get_strings(child))
-
         return strings
 
     string_literals = []
@@ -297,11 +347,21 @@ def step_2_core_key_translate():
                 syntax = []
                 with open(file_path, 'r', encoding='utf-8') as f:
                     content = f.read()
+                    # comments
+                    comments_arr = []
+                    for code_sp in content.splitlines():
+                        comments = re.findall(r'#.*$', code_sp)
+                        for comment in comments: 
+                            load_string(strings=comments_arr, string_input=comment)
+                    string_literals.extend(comments_arr)
+
+                    # strings
                     import ast
                     tree = ast.parse(content)
-                    res = get_strings(tree)
+                    res = get_strings(tree, )
                     string_literals.extend(res)
 
+    [print(s) for s in string_literals]
     chinese_literal_names = []
     chinese_literal_names_norepeat = []
     for string, offset in string_literals:
@@ -336,11 +396,22 @@ def step_2_core_key_translate():
                     content = f.read()
                 
                 for k, v in cached_translation.items():
+                    if v is None: continue
+                    if '"' in v: 
+                        v = v.replace('"', "`")
+                    if '\'' in v: 
+                        v = v.replace('\'', "`")
                     content = content.replace(k, v)
 
                 with open(file_path, 'w', encoding='utf-8') as f:
                     f.write(content)
-
+                
+                if file.strip('.py') in cached_translation:
+                    file_new = cached_translation[file.strip('.py')] + '.py'
+                    file_path_new = os.path.join(root, file_new)
+                    with open(file_path_new, 'w', encoding='utf-8') as f:
+                        f.write(content)
+                    os.remove(file_path)
 
 step_1_core_key_translate()
 step_2_core_key_translate()
