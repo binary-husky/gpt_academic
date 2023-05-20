@@ -41,8 +41,8 @@ def clean_text(raw_text):
     """
     对从 PDF 提取出的原始文本进行清洗和格式化处理。
     1. 对原始文本进行归一化处理。
-    2. 替换跨行的连词，例如 “Espe-\ncially” 转换为 “Especially”。
-    3. 根据 heuristic 规则判断换行符是否是段落分隔，并相应地进行替换。
+    2. 替换跨行的连词
+    3. 根据 heuristic 规则判断换行符是否是段落分隔，并相应地进行替换
     """
     # 对文本进行归一化处理
     normalized_text = normalize_text(raw_text)
