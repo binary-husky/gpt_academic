@@ -110,7 +110,7 @@ def read_map_from_json(language):
     if os.path.exists(f'docs/translate_{language.lower()}.json'):
         with open(f'docs/translate_{language.lower()}.json', 'r', encoding='utf8') as f: 
             res = json.load(f)
-            res = {k:v for k, v in res.items() if v is not None}
+            res = {k:v for k, v in res.items() if v is not None and contains_chinese(k)}
             return res
     return {}
 
@@ -181,6 +181,8 @@ def trans(word_to_translate, language, special=False):
             try:
                 res_before_trans = eval(result[i-1])
                 res_after_trans = eval(result[i])
+                if len(res_before_trans) != len(res_after_trans): 
+                    raise RuntimeError
                 for a,b in zip(res_before_trans, res_after_trans):
                     translated_result[a] = b
             except:
@@ -195,6 +197,57 @@ def trans(word_to_translate, language, special=False):
                 for a in res_before_trans:
                     translated_result[a] = None
     return translated_result
+
+
+def trans_json(word_to_translate, language, special=False):
+    if len(word_to_translate) == 0: return {}
+    from crazy_functions.crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
+    from toolbox import get_conf, ChatBotWithCookies
+    proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT, API_KEY = \
+        get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'LAYOUT', 'API_KEY')
+    llm_kwargs = {
+        'api_key': API_KEY,
+        'llm_model': LLM_MODEL,
+        'top_p':1.0, 
+        'max_length': None,
+        'temperature':0.1,
+    }
+    import random
+    N_EACH_REQ = random.randint(16, 32)
+    random.shuffle(word_to_translate)
+    word_to_translate_split = split_list(word_to_translate, N_EACH_REQ)
+    inputs_array = [{k:"#" for k in s} for s in word_to_translate_split]
+    inputs_array = [ json.dumps(i, ensure_ascii=False)  for i in inputs_array]
+    
+    inputs_show_user_array = inputs_array
+    history_array = [[] for _ in inputs_array]
+    sys_prompt_array = [f"Replace each json value `#` with translated results in {LANG}, e.g., \"原始文本\":\"TranslatedText\". Keep Json format. Do not answer #." for _ in inputs_array]
+    chatbot = ChatBotWithCookies(llm_kwargs)
+    gpt_say_generator = request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
+        inputs_array, 
+        inputs_show_user_array, 
+        llm_kwargs, 
+        chatbot, 
+        history_array, 
+        sys_prompt_array, 
+    )
+    while True:
+        try:
+            gpt_say = next(gpt_say_generator)
+            print(gpt_say[1][0][1])
+        except StopIteration as e:
+            result = e.value
+            break
+    translated_result = {}
+    for i, r in enumerate(result):
+        if i%2 == 1:
+            try:
+                translated_result.update(json.loads(result[i]))
+            except:
+                print(result[i])
+    print(result)
+    return translated_result
+
 
 def step_1_core_key_translate():
     def extract_chinese_characters(file_path):
@@ -310,6 +363,7 @@ def step_2_core_key_translate():
         splitted_string = advanced_split(splitted_string, spliter="]", include_spliter=False)
         splitted_string = advanced_split(splitted_string, spliter="【", include_spliter=False)
         splitted_string = advanced_split(splitted_string, spliter="】", include_spliter=False)
+        splitted_string = advanced_split(splitted_string, spliter="？", include_spliter=False)
         splitted_string = advanced_split(splitted_string, spliter="：", include_spliter=False)
         splitted_string = advanced_split(splitted_string, spliter=":", include_spliter=False)
         splitted_string = advanced_split(splitted_string, spliter=",", include_spliter=False)
@@ -318,6 +372,9 @@ def step_2_core_key_translate():
         splitted_string = advanced_split(splitted_string, spliter=";", include_spliter=False)
         splitted_string = advanced_split(splitted_string, spliter="`", include_spliter=False)
         splitted_string = advanced_split(splitted_string, spliter="   ", include_spliter=False)
+        splitted_string = advanced_split(splitted_string, spliter="- ", include_spliter=False)
+        splitted_string = advanced_split(splitted_string, spliter="---", include_spliter=False)
+        
         # --------------------------------------
         for j, s in enumerate(splitted_string): # .com
             if '.com' in s: continue
@@ -377,7 +434,7 @@ def step_2_core_key_translate():
             need_translate.append(d)
 
 
-    up = trans(need_translate, language=LANG, special=False)
+    up = trans_json(need_translate, language=LANG, special=False)
     map_to_json(up, language=LANG)
     cached_translation = read_map_from_json(language=LANG)
     cached_translation = dict(sorted(cached_translation.items(), key=lambda x: -len(x[0])))
