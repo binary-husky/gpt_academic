@@ -112,39 +112,18 @@ class ClaudeHandle(Process):
             kwargs = self.child.recv()
             question = kwargs['query']
             history = kwargs['history']
-            # system_prompt=kwargs['system_prompt']
-
-            # 是否重置
-            if len(self.local_history) > 0 and len(history) == 0:
-                # await self.claude_model.reset()
-                self.local_history = []
 
             # 开始问问题
             prompt = ""
-            # Slack API最好不要添加系统提示
-            # if system_prompt not in self.local_history:
-            #     self.local_history.append(system_prompt)
-            #     prompt += system_prompt + '\n'
-
-            # 追加历史
-            for ab in history:
-                a, b = ab
-                if a not in self.local_history:
-                    self.local_history.append(a)
-                    prompt += a + '\n'
-                # if b not in self.local_history:
-                #     self.local_history.append(b)
-                #     prompt += b + '\n'
 
             # 问题
             prompt += question
-            self.local_history.append(question)
             print('question:', prompt)
+
             # 提交
             await self.claude_model.chat(prompt)
+            
             # 获取回复
-            # async for final, response in self.claude_model.get_reply():
-            #     await self.handle_claude_response(final, response)
             async for final, response in self.claude_model.get_reply():                
                 if not final:
                     print(response)
