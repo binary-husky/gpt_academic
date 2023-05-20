@@ -6,8 +6,17 @@ import pickle
 import time
 
 CACHE_FOLDER = "gpt_log"
-blacklist = ['multi-language', 'gpt_log', '.git', 'private_upload']
-LANG = "English"
+blacklist = ['multi-language', 'gpt_log', '.git', 'private_upload', 'multi_language.py']
+
+LANG = "TraditionalChinese"
+TransPrompt = f"Replace each json value `#` with translated results in Traditional Chinese, e.g., \"原始文本\":\"翻譯後文字\". Keep Json format. Do not answer #."
+
+# LANG = "Japanese"
+# TransPrompt = f"Replace each json value `#` with translated results in Japanese, e.g., \"原始文本\":\"テキストの翻訳\". Keep Json format. Do not answer #."
+
+# LANG = "English"
+# TransPrompt = f"Replace each json value `#` with translated results in English, e.g., \"原始文本\":\"TranslatedText\". Keep Json format. Do not answer #."
+
 
 if not os.path.exists(CACHE_FOLDER):
     os.makedirs(CACHE_FOLDER)
@@ -221,7 +230,7 @@ def trans_json(word_to_translate, language, special=False):
     
     inputs_show_user_array = inputs_array
     history_array = [[] for _ in inputs_array]
-    sys_prompt_array = [f"Replace each json value `#` with translated results in {LANG}, e.g., \"原始文本\":\"TranslatedText\". Keep Json format. Do not answer #." for _ in inputs_array]
+    sys_prompt_array = [TransPrompt for _ in inputs_array]
     chatbot = ChatBotWithCookies(llm_kwargs)
     gpt_say_generator = request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         inputs_array, 
