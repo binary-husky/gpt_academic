@@ -1,3 +1,19 @@
+"""
+    Translate this project to Other languages
+    Usage:
+    1. modify LANG
+        LANG = "English"
+
+    2. modify TransPrompt
+        TransPrompt = f"Replace each json value `#` with translated results in English, e.g., \"原始文本\":\"TranslatedText\". Keep Json format. Do not answer #."
+
+    3. Run `python multi_language.py`. 
+        Note: You need to run it multiple times to increase translation coverage because GPT makes mistakes sometimes.
+
+    4. Find translated program in `multi-language\English\*`
+    
+"""
+
 import os
 import json
 import functools
