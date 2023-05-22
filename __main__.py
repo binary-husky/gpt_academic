@@ -203,7 +203,7 @@ class ChatBot(ChatBotFrame):
 
     def draw_setting_chat(self):
         switch_model = get_conf('switch_model')[0]
-        with gr.Tab('Setting'):
+        with gr.Tab('Settings'):
             self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01, interactive=True,
                                    label="Top-p (nucleus sampling)", ).style(container=False)
             self.temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True,
