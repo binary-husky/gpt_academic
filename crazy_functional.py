@@ -10,6 +10,7 @@ def get_crazy_functions():
     from crazy_functions.解析项目源代码 import 解析一个C项目的头文件
     from crazy_functions.解析项目源代码 import 解析一个C项目
     from crazy_functions.解析项目源代码 import 解析一个Golang项目
+    from crazy_functions.解析项目源代码 import 解析一个Rust项目
     from crazy_functions.解析项目源代码 import 解析一个Java项目
     from crazy_functions.解析项目源代码 import 解析一个前端项目
     from crazy_functions.高级功能函数模板 import 高阶功能模板函数
@@ -64,6 +65,11 @@ def get_crazy_functions():
             "Color": "stop",    # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(解析一个Golang项目)
+        },
+        "解析整个Rust项目": {
+            "Color": "stop",    # 按钮颜色
+            "AsButton": False,  # 加入下拉菜单中
+            "Function": HotReload(解析一个Rust项目)
         },
         "解析整个Java项目": {
             "Color": "stop",  # 按钮颜色
