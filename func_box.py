@@ -364,10 +364,12 @@ def show_prompt_result(index, data: gr.Dataset, chatbot):
 def thread_write_chat(chatbot):
     private_key = toolbox.get_conf('private_key')[0]
     chat_title = chatbot[0][0].split()
+    i_say = chatbot[-1][0].strip("<p>/p")
+    gpt_result = chatbot[-1][1].strip('<div class="markdown-body">/div')
     if private_key in chat_title:
-        SqliteHandle(f'ai_private_{chat_title[-2]}').inset_prompt({chatbot[-1][0]: chatbot[-1][1]})
+        SqliteHandle(f'ai_private_{chat_title[-2]}').inset_prompt({i_say: gpt_result})
     else:
-        SqliteHandle(f'ai_common').inset_prompt({chatbot[-1][0]: chatbot[-1][1]})
+        SqliteHandle(f'ai_common').inset_prompt({i_say: gpt_result})
 
 
 base_path = os.path.dirname(__file__)

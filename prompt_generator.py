@@ -41,7 +41,7 @@ class SqliteHandle:
         self.__connect.close()
 
     def create_tab(self):
-        self.__cursor.execute(f"CREATE TABLE `{self.__table}` ('id' INTEGER PRIMARY KEY AUTOINCREMENT, 'prompt' TEXT, 'result' TEXT)")
+        self.__cursor.execute(f"CREATE TABLE `{self.__table}` ( 'prompt' TEXT, 'result' TEXT)")
 
     def get_tables(self):
         all_tab = []
