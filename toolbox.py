@@ -458,6 +458,9 @@ def find_recent_files(directory):
 
 
 def get_user_upload(chatbot, ipaddr: gr.Request):
+    """
+    获取用户上传过的文件
+    """
     private_upload = './private_upload'
     user_history = os.path.join(private_upload, ipaddr.client.host)
     history = ''
@@ -471,6 +474,9 @@ def get_user_upload(chatbot, ipaddr: gr.Request):
 
 
 def get_user_download(chatbot, link, file):
+    """
+    将短路径转换为下载链接
+    """
     for file_handle in str(file).split('\n'):
         if os.path.isfile(file_handle):
             # temp_file = func_box.copy_temp_file(file_handle) 无法使用外部的临时目录
