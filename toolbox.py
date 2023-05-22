@@ -77,9 +77,9 @@ def ArgsGeneralWrapper(f):
                 chatbot[0] = [f'隐私模式, 你的对话记录无法被他人检索 <p style="display:none;">\n{private_key}\n{ipaddr.client.host}\n</p>', None]
         else:
             if chatbot == []:
-                chatbot.append(['正常对话模式, 你接来下的对话将会被记录并且可以被所有人检索', None])
+                chatbot.append(['正常对话模式, 你接来下的对话将会被记录并且可以被所有人检索，你可以到Settings中选择隐私模式', None])
             else:
-                chatbot[0] = ['正常对话模式, 你接下来的对话将会被记录并且可以被所有人检索', None]
+                chatbot[0] = ['正常对话模式, 你接来下的对话将会被记录并且可以被所有人检索，你可以到Settings中选择隐私模式', None]
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
         txt_passon = txt
