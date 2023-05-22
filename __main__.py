@@ -123,7 +123,7 @@ class ChatBot(ChatBotFrame):
                                    inputs=[self.pro_prompt_list, self.pro_prompt_state, self.pro_results],
                                    outputs=[self.pro_results])
         self.pro_new_btn.click(fn=func_box.prompt_save,
-                               inputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_private_check, self.pro_fp_state],
+                               inputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_fp_state],
                                outputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_private_check,
                                         self.pro_func_prompt, self.pro_fp_state])
 
