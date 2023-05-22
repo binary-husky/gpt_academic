@@ -55,7 +55,7 @@ class ChatBotFrame:
 
     def __init__(self):
         self.cancel_handles = []
-        self.initial_prompt = "In answer to my question, Think about what are some alternative perspectives"
+        self.initial_prompt = "You will play a professional to answer me according to my needs."
         self.title_html = f"<h1 align=\"center\">Chatbot for KSO {get_current_version()}</h1>"
         self.description = """代码开源和更新[地址🚀](https://github.com/binary-husky/chatgpt_academic)，感谢热情的[开发者们❤️](https://github.com/binary-husky/chatgpt_academic/graphs/contributors)"""
 
@@ -213,7 +213,7 @@ class ChatBot(ChatBotFrame):
             self.pro_tf_slider = gr.Slider(minimum=0.01, maximum=1.0, value=0.70, step=0.01, interactive=True,
                                            label="Term Frequency系数").style(container=False)
             self.models_box = gr.CheckboxGroup(choices=switch_model['key'], value=switch_model['value'],
-                                               label="Switch Model")
+                                               label="对话模式")
             self.system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt",
                                             label="System prompt", value=self.initial_prompt)
             self.md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(
@@ -347,8 +347,8 @@ class ChatBot(ChatBotFrame):
         with gr.Blocks(title="Chatbot for KSO ", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
             # 绘制页面title
             self.draw_title()
-            # 绘制一个ROW，row会让底下的元素自动排部
-            with gr.Row():
+            # 绘制一个ROW，row会让底下的元素自动排成一行
+            with gr.Row().style(justify='between'):
                 # 绘制列1
                 with gr.Column(scale=100):
                     with gr.Tab('Chatbot') as self.chat_tab:
@@ -359,7 +359,7 @@ class ChatBot(ChatBotFrame):
                 # 绘制列2
                 with gr.Column(scale=51):
                     # 绘制对话模组
-                    with gr.Tab('对话模式'):
+                    with gr.Tab('Chat-GPT'):
                         self.draw_input_chat()
                         self.draw_function_chat()
                         self.draw_public_chat()
