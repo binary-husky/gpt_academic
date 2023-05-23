@@ -19,6 +19,17 @@ body:
         - Others (Please Describe)
     validations:
       required: true
+
+  - type: dropdown
+    id: version
+    attributes:
+      label: Version | 版本
+      options:
+        - Please choose | 请选择
+        - Latest | 最新版
+        - Others | 非最新版
+    validations:
+      required: true
     
   - type: textarea
     id: describe
