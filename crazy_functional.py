@@ -118,11 +118,11 @@ def get_crazy_functions():
             "Function": HotReload(解析项目本身),
             "AsButton": False,  # 加入下拉菜单中
         },
-        "[老旧的Demo] 把本项目源代码切换成全英文": {
-            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
-            "AsButton": False,  # 加入下拉菜单中
-            "Function": HotReload(全项目切换英文)
-        },
+        # "[老旧的Demo] 把本项目源代码切换成全英文": {
+        #     # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
+        #     "AsButton": False,  # 加入下拉菜单中
+        #     "Function": HotReload(全项目切换英文)
+        # },
         "[插件demo] 历史上的今天": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Function": HotReload(高阶功能模板函数)

@@ -395,8 +395,8 @@ def check_proxy_free():
         time.sleep(5)
 
 if __name__ == '__main__':
-    # PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
-    PORT = 7891 if WEB_PORT <= 0 else WEB_PORT
+    PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
+    # PORT = 7891 if WEB_PORT <= 0 else WEB_PORT
     check_proxy_free()
     ChatBot().main()
     gr.close_all()
