@@ -254,7 +254,7 @@ def get_crazy_functions():
             "Color": "stop",
             "AsButton": True,
             "AdvancedArgs": True, # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "在这里输入分辨率, 如256x256（默认）", # 高级参数输入区的显示提示
+            "ArgsReminder": "在这里输入分辨率, 如'256x256'（默认）, '512x512', '1024x1024'", # 高级参数输入区的显示提示
             "Function": HotReload(图片生成)
         },
     })

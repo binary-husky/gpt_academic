@@ -253,7 +253,7 @@ class ChatBot(ChatBotFrame):
         # 注册input
         self.input_combo = [self.cookies, self.max_length_sl, self.md_dropdown,
                             self.txt, self.top_p, self.temperature, self.chatbot, self.history,
-                            self.system_prompt, self.models_box]
+                            self.system_prompt, self.models_box, self.plugin_advanced_arg]
         self.output_combo = [self.cookies, self.chatbot, self.history, self.status, self.txt]
         self.predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=self.input_combo, outputs=self.output_combo)
         # 提交按钮、重置按钮
@@ -302,7 +302,7 @@ class ChatBot(ChatBotFrame):
         def route(k, ipaddr: gr.Request, *args, **kwargs):
             if k in [r"打开插件列表", r"请先从插件列表中选择"]: return
             append = list(args)
-            append.insert(10, ipaddr)
+            append.insert(-1, ipaddr)
             args = tuple(append)
             yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(*args, **kwargs)
 
