@@ -33,7 +33,7 @@ def adjust_theme():
         set_theme = gr.themes.Default(
             primary_hue=gr.themes.utils.colors.orange,
             neutral_hue=gr.themes.utils.colors.gray,
-            font=["sans-serif", "Microsoft YaHei", "ui-sans-serif", "system-ui",
+            font=["sans-serif", "PingFang SC", "ui-sans-serif", "system-ui",
                   "sans-serif", gr.themes.utils.fonts.GoogleFont("Source Sans Pro")],
             font_mono=["ui-monospace", "Consolas", "monospace", gr.themes.utils.fonts.GoogleFont("IBM Plex Mono")])
         set_theme.set(
@@ -137,11 +137,15 @@ advanced_css = """
 }
 [data-testid = "bot"] {
     max-width: 95%;
+    color: #ccd2db !important;
+    letter-spacing: 0.5px;
+     font-weight: normal;
     /* width: auto !important; */
     border-bottom-left-radius: 0 !important;
 }
 [data-testid = "user"] {
     max-width: 100%;
+    letter-spacing: 0.5px;
     /* width: auto !important; */
     border-bottom-right-radius: 0 !important;
 }
@@ -154,7 +158,7 @@ advanced_css = """
     margin: 0 2px 0 2px;
     padding: .2em .4em .1em .4em;
     background-color: rgba(13, 17, 23, 0.95);
-    color: #c9d1d9;
+    color: #eff0f2;
 }
 
 .dark .markdown-body code {

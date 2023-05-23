@@ -4,6 +4,7 @@
 # @Author : Spike
 # @Descr   :
 import hashlib
+import io
 import json
 import os.path
 import subprocess
@@ -480,8 +481,8 @@ def thread_write_chat(chatbot):
     """
     private_key = toolbox.get_conf('private_key')[0]
     chat_title = chatbot[0][0].split()
-    i_say = chatbot[-1][0].strip("<p>/p")
-    gpt_result = chatbot[-1][1].strip('<div class="markdown-body">/div')
+    i_say = chatbot[-1][0].strip("<p>/p").strip('<div class="markdown-body">/div')
+    gpt_result = chatbot[-1][1].strip("<p>/p").strip('<div class="markdown-body">/div')
     if private_key in chat_title:
         SqliteHandle(f'ai_private_{chat_title[-2]}').inset_prompt({i_say: gpt_result})
     else:
@@ -526,17 +527,20 @@ class YamlHandle:
 
 class JsonHandle:
 
-    def __init__(self, file=os.path.join(prompt_path, 'prompts-PlexPt.json')):
-        if not os.path.exists(file):
-            Shell(f'touch {file}').read()
-        self.file = file
+    def __init__(self, file):
+        if os.path.exists(file):
+            with open(file=file, mode='r') as self.file_obj:
+                pass
+        else:
+            self.file_obj = io.StringIO()  # 创建空白文本对象
+            self.file_obj.write('{}')  # 向文本对象写入有有效 JSON 格式的数据
+            self.file_obj.seek(0)  # 将文本对象的光标重置到开头
 
     def load(self):
-        with open(file=self.file, mode='r') as f:
-            data = json.load(f)
-            return data
+        data = json.load(self.file_obj)
+        return data
 
 
 
 if __name__ == '__main__':
-    pass
+    print(JsonHandle('/Users/kilig/Job/Python-project/academic_gpt/test.json').load())

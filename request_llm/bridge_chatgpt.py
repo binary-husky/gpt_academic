@@ -282,7 +282,7 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
 
 if __name__ == '__main__':
     llm_kwargs = {
-        'api_key': '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',
+        'api_key': 'sk-',
         'llm_model': 'gpt-3.5-turbo',
         'top_p': 1,
         'max_length': 512,
