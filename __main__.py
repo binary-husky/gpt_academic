@@ -134,8 +134,8 @@ class ChatBot(ChatBotFrame):
             with gr.Row():
                 self.submitBtn = gr.Button("提交", variant="primary")
             with gr.Row():
-                self.cpopyBtn = gr.Button("复制回答", variant="secondary").style(size="sm")
-                # self.resetBtn = gr.Button("重置", variant="secondary").style(size="sm")
+                # self.cpopyBtn = gr.Button("复制回答", variant="secondary").style(size="sm")
+                self.resetBtn = gr.Button("重置Chatbot", variant="secondary").style(size="sm")
                 self.stopBtn = gr.Button("停止", variant="secondary").style(size="sm")
 
 
@@ -259,7 +259,8 @@ class ChatBot(ChatBotFrame):
         # 提交按钮、重置按钮
         self.cancel_handles.append(self.txt.submit(**self.predict_args))
         self.cancel_handles.append(self.submitBtn.click(**self.predict_args))
-        self.cpopyBtn.click(fn=func_box.copy_result, inputs=[self.history], outputs=[self.status])
+        # self.cpopyBtn.click(fn=func_box.copy_result, inputs=[self.history], outputs=[self.status])
+        self.resetBtn.click(lambda: ([], [], "已重置"), None, [self.chatbot, self.history, self.status])
 
     def signals_function(self):
         # 基础功能区的回调函数注册
