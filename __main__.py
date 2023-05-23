@@ -327,19 +327,19 @@ class ChatBot(ChatBotFrame):
         self.submit_start.click(fn=agent_main, inputs=self.auto_input_combo, outputs=self.auto_output_combo)
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
-    def auto_opentab_delay(self):
+    def auto_opentab_delay(self, is_open=False):
         import threading, webbrowser, time
 
         print(f"如果浏览器没有自动打开，请复制并转到以下URL：")
         print(f"\t（亮色主题）: http://localhost:{PORT}")
         print(f"\t（暗色主题）: {self.__url}/?__theme=dark")
+        if is_open:
+            def open():
+                time.sleep(2)  # 打开浏览器
+                webbrowser.open_new_tab(f"http://localhost:{PORT}/?__theme=dark")
 
-        def open():
-            time.sleep(2)  # 打开浏览器
-            webbrowser.open_new_tab(f"http://localhost:{PORT}/?__theme=dark")
-
-        threading.Thread(target=open, name="open-browser", daemon=True).start()
-        threading.Thread(target=auto_update, name="self-upgrade", daemon=True).start()
+            threading.Thread(target=open, name="open-browser", daemon=True).start()
+            threading.Thread(target=auto_update, name="self-upgrade", daemon=True).start()
         # threading.Thread(target=warm_up_modules, name="warm-up", daemon=True).start()
 
 
