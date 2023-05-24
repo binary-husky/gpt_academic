@@ -131,6 +131,7 @@ def get_crazy_functions():
     from crazy_functions.谷歌检索小助手 import 谷歌检索小助手
     from crazy_functions.理解PDF文档内容 import 理解PDF文档内容标准文件输入
     from crazy_functions.Latex全文润色 import Latex中文润色
+    from crazy_functions.Latex全文润色 import Latex英文纠错
     from crazy_functions.Latex全文翻译 import Latex中译英
     from crazy_functions.Latex全文翻译 import Latex英译中
     from crazy_functions.批量Markdown翻译 import Markdown中译英
@@ -168,11 +169,17 @@ def get_crazy_functions():
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(理解PDF文档内容标准文件输入)
         },
-        "[测试功能] 英文Latex项目全文润色（输入路径或上传压缩包）": {
+        "英文Latex项目全文润色（输入路径或上传压缩包）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(Latex英文润色)
+        },
+        "英文Latex项目全文纠错（输入路径或上传压缩包）": {
+            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
+            "Color": "stop",
+            "AsButton": False,  # 加入下拉菜单中
+            "Function": HotReload(Latex英文纠错)
         },
         "[测试功能] 中文Latex项目全文润色（输入路径或上传压缩包）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
