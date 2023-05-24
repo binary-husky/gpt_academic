@@ -7,6 +7,7 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
     from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
     from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
     msg = '正常'
+    summary_batch_isolation = True
     inputs_array = []
     inputs_show_user_array = []
     history_array = []
@@ -59,10 +60,17 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
         # 把“请对下面的程序文件做一个概述” 替换成 精简的 "文件名：{all_file[index]}"
         for index, content in enumerate(this_iteration_gpt_response_collection):
             if index%2==0: this_iteration_gpt_response_collection[index] = f"{file_rel_path[index//2]}" # 只保留文件名节省token
-        previous_iteration_files.extend([os.path.relpath(fp, project_folder) for index, fp in enumerate(this_iteration_file_manifest)])
+        this_iteration_files = [os.path.relpath(fp, project_folder) for index, fp in enumerate(this_iteration_file_manifest)]
+        previous_iteration_files.extend(this_iteration_files)
         previous_iteration_files_string = ', '.join(previous_iteration_files)
-        current_iteration_focus = ', '.join([os.path.relpath(fp, project_folder) for index, fp in enumerate(this_iteration_file_manifest)])
-        i_say = f'用一张Markdown表格简要描述以下文件的功能：{previous_iteration_files_string}。根据以上分析，用一句话概括程序的整体功能。'
+        current_iteration_focus = ', '.join(this_iteration_files)
+        if summary_batch_isolation: focus = current_iteration_focus
+        else:                       focus = previous_iteration_files_string
+        i_say = f'用一张Markdown表格简要描述以下文件的功能：{focus}。根据以上分析，用一句话概括程序的整体功能。'
+        if last_iteration_result != "":
+            sys_prompt_additional = "已知某些代码的局部作用是:" + last_iteration_result + "\n请继续分析其他源代码，从而更全面地理解项目的整体功能。"
+        else:
+            sys_prompt_additional = ""
         inputs_show_user = f'根据以上分析，对程序的整体功能和构架重新做出概括，由于输入长度限制，可能需要分组处理，本组文件为 {current_iteration_focus} + 已经汇总的文件组。'
         this_iteration_history = copy.deepcopy(this_iteration_gpt_response_collection)
         this_iteration_history.append(last_iteration_result)
@@ -71,10 +79,19 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
         result = yield from request_gpt_model_in_new_thread_with_ui_alive(
             inputs=inputs, inputs_show_user=inputs_show_user, llm_kwargs=llm_kwargs, chatbot=chatbot,
             history=this_iteration_history_feed,   # 迭代之前的分析
-            sys_prompt="你是一个程序架构分析师，正在分析一个项目的源代码。")
-        report_part_2.extend([i_say, result])
-        last_iteration_result = result
+            sys_prompt="你是一个程序架构分析师，正在分析一个项目的源代码。" + sys_prompt_additional)
+        
+        summary = "请用一句话概括这些文件的整体功能"
+        summary_result = yield from request_gpt_model_in_new_thread_with_ui_alive(
+            inputs=summary, 
+            inputs_show_user=summary, 
+            llm_kwargs=llm_kwargs, 
+            chatbot=chatbot,
+            history=[i_say, result],   # 迭代之前的分析
+            sys_prompt="你是一个程序架构分析师，正在分析一个项目的源代码。" + sys_prompt_additional)
 
+        report_part_2.extend([i_say, result])
+        last_iteration_result = summary_result
         file_manifest = file_manifest[batchsize:]
         gpt_response_collection = gpt_response_collection[batchsize*2:]
 
