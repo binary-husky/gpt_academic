@@ -301,16 +301,19 @@ gpt_academic开发者QQ群-2：610599535
 ```
 代码中参考了很多其他优秀项目中的设计，主要包括：
 
-# 项目1：清华ChatGLM-6B：
+# 项目1：清华ChatGLM-6B:
 https://github.com/THUDM/ChatGLM-6B
 
-# 项目2：清华JittorLLMs：
+# 项目2：清华JittorLLMs:
 https://github.com/Jittor/JittorLLMs
 
-# 项目3：借鉴了ChuanhuChatGPT中诸多技巧
+# 项目3：Edge-GPT:
+https://github.com/acheong08/EdgeGPT
+
+# 项目4：ChuanhuChatGPT:
 https://github.com/GaiZhenbiao/ChuanhuChatGPT
 
-# 项目4：ChatPaper
+# 项目5：ChatPaper:
 https://github.com/kaixindelele/ChatPaper
 
 # 更多：
