@@ -201,7 +201,20 @@ if "stack-claude" in AVAIL_LLM_MODELS:
             "token_cnt": get_token_num_gpt35,
         }
     })
-
+if "newbing-free" in AVAIL_LLM_MODELS:
+    from .bridge_newbingfree import predict_no_ui_long_connection as newbingfree_noui
+    from .bridge_newbingfree import predict as newbingfree_ui
+    # claude
+    model_info.update({
+        "newbing-free": {
+            "fn_with_ui": newbingfree_ui,
+            "fn_without_ui": newbingfree_noui,
+            "endpoint": newbing_endpoint,
+            "max_token": 4096,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        }
+    })
 
 def LLM_CATCH_EXCEPTION(f):
     """

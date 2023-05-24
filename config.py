@@ -47,7 +47,7 @@ MAX_RETRY = 2
 # 模型选择是
 LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
 AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "stack-claude"]
-# P.S. 其他可用的模型还包括 ["jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
+# P.S. 其他可用的模型还包括 ["newbing-free", "jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
 
 # 本地LLM模型如ChatGLM的执行方式 CPU/GPU
 LOCAL_MODEL_DEVICE = "cpu" # 可选 "cuda"
@@ -73,6 +73,7 @@ CUSTOM_PATH = "/"
 
 # 如果需要使用newbing，把newbing的长长的cookie放到这里
 NEWBING_STYLE = "creative"  # ["creative", "balanced", "precise"]
+# 从现在起，如果您调用"newbing-free"模型，则无需填写NEWBING_COOKIES
 NEWBING_COOKIES = """
 your bing cookies here
 """
