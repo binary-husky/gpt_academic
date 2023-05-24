@@ -190,7 +190,7 @@ docker-compose up
 5. 使用docker-compose运行
 请阅读docker-compose.yml后，按照其中的提示操作即可
 ---
-
+# Advanced Usage
 ## 自定义新的便捷按钮 / 自定义函数插件
 
 1. 自定义新的便捷按钮（学术快捷键）
@@ -216,8 +216,8 @@ docker-compose up
 详情请参考[函数插件指南](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)。
 
 ---
-
-## 其他功能说明
+# Latest Update
+## 新功能动态
 
 1. 对话保存功能。在函数插件区调用 `保存当前的对话` 即可将当前对话保存为可读+可复原的html文件，
 另外在函数插件区（下拉菜单）调用 `载入对话历史存档` ，即可还原之前的会话。
