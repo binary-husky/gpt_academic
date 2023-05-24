@@ -1,6 +1,6 @@
-from toolbox import update_ui
-from toolbox import CatchException, report_execption, write_results_to_file
-fast_debug = False
+from toolbox import update_ui, trimmed_format_exc
+from toolbox import CatchException, report_execption, write_results_to_file, zip_folder
+
 
 class PaperFileGroup():
     def __init__(self):
@@ -34,8 +34,27 @@ class PaperFileGroup():
                     self.sp_file_tag.append(self.file_paths[index] + f".part-{j}.tex")
 
         print('Segmentation: done')
+    def merge_result(self):
+        self.file_result = ["" for _ in range(len(self.file_paths))]
+        for r, k in zip(self.sp_file_result, self.sp_file_index):
+            self.file_result[k] += r
 
-def 多文件润色(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, language='en'):
+    def write_result(self):
+        manifest = []
+        for path, res in zip(self.file_paths, self.file_result):
+            with open(path + '.polish.tex', 'w', encoding='utf8') as f:
+                manifest.append(path + '.polish.tex')
+                f.write(res)
+        return manifest
+    
+    def zip_result(self):
+        import os, time
+        folder = os.path.dirname(self.file_paths[0])
+        t = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+        zip_folder(folder, './gpt_log/', f'{t}-polished.zip')
+
+
+def 多文件润色(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, language='en', mode='polish'):
     import time, os, re
     from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 
@@ -58,28 +77,27 @@ def 多文件润色(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
     pfg.run_file_split(max_token_limit=1024)
     n_split = len(pfg.sp_file_contents)
 
-    #  <-------- 抽取摘要 ----------> 
-    # if language == 'en':
-    #     abs_extract_inputs = f"Please write an abstract for this paper"
-
-    # # 单线，获取文章meta信息
-    # paper_meta_info = yield from request_gpt_model_in_new_thread_with_ui_alive(
-    #     inputs=abs_extract_inputs,
-    #     inputs_show_user=f"正在抽取摘要信息。",
-    #     llm_kwargs=llm_kwargs,
-    #     chatbot=chatbot, history=[],
-    #     sys_prompt="Your job is to collect information from materials。",
-    # )
 
     #  <-------- 多线程润色开始 ----------> 
     if language == 'en':
-        inputs_array = ["Below is a section from an academic paper, polish this section to meet the academic standard, improve the grammar, clarity and overall readability, do not modify any latex command such as \section, \cite and equations:" + 
+        if mode == 'polish':
+            inputs_array = ["Below is a section from an academic paper, polish this section to meet the academic standard, " + 
+                            "improve the grammar, clarity and overall readability, do not modify any latex command such as \section, \cite and equations:" + 
+                            f"\n\n{frag}" for frag in pfg.sp_file_contents]
+        else:
+            inputs_array = [r"Below is a section from an academic paper, proofread this section." + 
+                            r"Do not modify any latex command such as \section, \cite, \begin, \item and equations. " + 
+                            r"Answer me only with the revised text:" + 
                         f"\n\n{frag}" for frag in pfg.sp_file_contents]
         inputs_show_user_array = [f"Polish {f}" for f in pfg.sp_file_tag]
         sys_prompt_array = ["You are a professional academic paper writer." for _ in range(n_split)]
     elif language == 'zh':
-        inputs_array = [f"以下是一篇学术论文中的一段内容，请将此部分润色以满足学术标准，提高语法、清晰度和整体可读性，不要修改任何LaTeX命令，例如\section，\cite和方程式：" + 
-                        f"\n\n{frag}" for frag in pfg.sp_file_contents]
+        if mode == 'polish':
+            inputs_array = [f"以下是一篇学术论文中的一段内容，请将此部分润色以满足学术标准，提高语法、清晰度和整体可读性，不要修改任何LaTeX命令，例如\section，\cite和方程式：" + 
+                            f"\n\n{frag}" for frag in pfg.sp_file_contents]
+        else:
+            inputs_array = [f"以下是一篇学术论文中的一段内容，请对这部分内容进行语法矫正。不要修改任何LaTeX命令，例如\section，\cite和方程式：" + 
+                            f"\n\n{frag}" for frag in pfg.sp_file_contents] 
         inputs_show_user_array = [f"润色 {f}" for f in pfg.sp_file_tag]
         sys_prompt_array=["你是一位专业的中文学术论文作家。" for _ in range(n_split)]
 
@@ -94,6 +112,18 @@ def 多文件润色(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
         # max_workers=5,  # 并行任务数量限制，最多同时执行5个，其他的排队等待
         scroller_max_len = 80
     )
+
+    pfg.sp_file_result = []
+    for i_say, gpt_say in zip(gpt_response_collection[0::2], gpt_response_collection[1::2]):
+        pfg.sp_file_result.append(gpt_say)
+
+    #  <-------- 文本碎片重组为完整的tex文件，整理结果为压缩包 ----------> 
+    try:
+        pfg.merge_result()
+        pfg.write_result()
+        pfg.zip_result()
+    except:
+        print(trimmed_format_exc())
 
     #  <-------- 整理结果，退出 ----------> 
     create_report_file_name = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + f"-chatgpt.polish.md"
@@ -173,3 +203,41 @@ def Latex中文润色(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
     yield from 多文件润色(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, language='zh')
+
+
+
+
+@CatchException
+def Latex英文纠错(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    # 基本信息：功能、贡献者
+    chatbot.append([
+        "函数插件功能？",
+        "对整个Latex项目进行纠错。函数插件贡献者: Binary-Husky"])
+    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+
+    # 尝试导入依赖，如果缺少依赖，则给出安装建议
+    try:
+        import tiktoken
+    except:
+        report_execption(chatbot, history,
+                         a=f"解析项目: {txt}",
+                         b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade tiktoken```。")
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+        return
+    history = []    # 清空历史，以免输入溢出
+    import glob, os
+    if os.path.exists(txt):
+        project_folder = txt
+    else:
+        if txt == "": txt = '空空如也的输入栏'
+        report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+        return
+    file_manifest = [f for f in glob.glob(f'{project_folder}/**/*.tex', recursive=True)]
+    if len(file_manifest) == 0:
+        report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何.tex文件: {txt}")
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+        return
+    yield from 多文件润色(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, language='en', mode='proofread')
+
+

@@ -465,7 +465,7 @@ def on_report_generated(files, chatbot):
     if len(report_files) == 0:
         return None, chatbot
     # files.extend(report_files)
-    chatbot.append(['汇总报告如何远程获取？', '汇总报告已经添加到右侧“文件上传区”（可能处于折叠状态），请查收。'])
+    chatbot.append(['报告如何远程获取？', '报告已经添加到右侧“文件上传区”（可能处于折叠状态），请查收。'])
     return report_files, chatbot
 
 def is_openai_api_key(key):
@@ -721,3 +721,43 @@ def clip_history(inputs, history, tokenizer, max_token_limit):
 
     history = everything[1:]
     return history
+
+"""
+========================================================================
+第三部分
+其他小工具:
+    - zip_folder:    把某个路径下所有文件压缩，然后转移到指定的另一个路径中（gpt写的）
+========================================================================
+"""
+
+def zip_folder(source_folder, dest_folder, zip_name):
+    import zipfile
+    import os
+    # Make sure the source folder exists
+    if not os.path.exists(source_folder):
+        print(f"{source_folder} does not exist")
+        return
+
+    # Make sure the destination folder exists
+    if not os.path.exists(dest_folder):
+        print(f"{dest_folder} does not exist")
+        return
+
+    # Create the name for the zip file
+    zip_file = os.path.join(dest_folder, zip_name)
+
+    # Create a ZipFile object
+    with zipfile.ZipFile(zip_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        # Walk through the source folder and add files to the zip file
+        for foldername, subfolders, filenames in os.walk(source_folder):
+            for filename in filenames:
+                filepath = os.path.join(foldername, filename)
+                zipf.write(filepath, arcname=os.path.relpath(filepath, source_folder))
+
+    # Move the zip file to the destination folder (if it wasn't already there)
+    if os.path.dirname(zip_file) != dest_folder:
+        os.rename(zip_file, os.path.join(dest_folder, os.path.basename(zip_file)))
+        zip_file = os.path.join(dest_folder, os.path.basename(zip_file))
+
+    print(f"Zip file created at {zip_file}")
+
