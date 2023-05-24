@@ -18,7 +18,7 @@
 | crazy_functions\crazy_utils.py | 工具函数，用于字符串处理、异常检测、Markdown 格式转换等 |
 | crazy_functions\Latex全文润色.py | 对整个 Latex 项目进行润色和纠错 |
 | crazy_functions\Latex全文翻译.py | 对整个 Latex 项目进行翻译 |
-| crazy_functions\__init__.py | 模块初始化文件，标识 `crazy_functions` 是一个包 |
+| crazy_functions\\_\_init\_\_.py | 模块初始化文件，标识 `crazy_functions` 是一个包 |
 | crazy_functions\下载arxiv论文翻译摘要.py | 下载 `arxiv` 论文的 PDF 文件，并提取摘要和翻译 |
 | crazy_functions\代码重写为全英文_多线程.py | 将Python源代码文件中的中文内容转化为英文 |
 | crazy_functions\图片生成.py | 根据激励文本使用GPT模型生成相应的图像 |
