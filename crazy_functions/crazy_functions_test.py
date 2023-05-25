@@ -111,7 +111,7 @@ def test_Markdown多语言():
     from crazy_functions.批量Markdown翻译 import Markdown翻译指定语言
     txt = "README.md"
     history = []
-    for lang in ["English", "Spanish", "French", "German", "Italian", "Chinese", "Japanese", "Korean", "Portuguese", "Russian", "Arabic"]:
+    for lang in ["English", "French", "Japanese", "Korean", "Russian", "Italian", "German", "Portuguese", "Arabic"]:
         plugin_kwargs = {"advanced_arg": lang}
         for cookies, cb, hist, msg in Markdown翻译指定语言(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
             print(cb)
