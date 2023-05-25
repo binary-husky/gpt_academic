@@ -727,6 +727,7 @@ def clip_history(inputs, history, tokenizer, max_token_limit):
 第三部分
 其他小工具:
     - zip_folder:    把某个路径下所有文件压缩，然后转移到指定的另一个路径中（gpt写的）
+    - gen_time_str:  生成时间戳
 ========================================================================
 """
 
@@ -761,3 +762,6 @@ def zip_folder(source_folder, dest_folder, zip_name):
 
     print(f"Zip file created at {zip_file}")
 
+def gen_time_str():
+    import time
+    return time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())

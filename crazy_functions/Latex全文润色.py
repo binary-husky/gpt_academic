@@ -113,12 +113,11 @@ def 多文件润色(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
         scroller_max_len = 80
     )
 
-    pfg.sp_file_result = []
-    for i_say, gpt_say in zip(gpt_response_collection[0::2], gpt_response_collection[1::2]):
-        pfg.sp_file_result.append(gpt_say)
-
     #  <-------- 文本碎片重组为完整的tex文件，整理结果为压缩包 ----------> 
     try:
+        pfg.sp_file_result = []
+        for i_say, gpt_say in zip(gpt_response_collection[0::2], gpt_response_collection[1::2]):
+            pfg.sp_file_result.append(gpt_say)
         pfg.merge_result()
         pfg.write_result()
         pfg.zip_result()
