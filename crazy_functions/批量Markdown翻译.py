@@ -42,7 +42,7 @@ class PaperFileGroup():
     def write_result(self):
         manifest = []
         for path, res in zip(self.file_paths, self.file_result):
-            with open(path + f'{gen_time_str()}.trans.md', 'w', encoding='utf8') as f:
+            with open(path + f'.{gen_time_str()}.trans.md', 'w', encoding='utf8') as f:
                 manifest.append(path + '.trans.md')
                 f.write(res)
         return manifest
