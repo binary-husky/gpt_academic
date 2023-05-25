@@ -33,15 +33,15 @@ def eval_manim(code):
     try: 
         subprocess.check_output([sys.executable, '-c', f"from gpt_log.MyAnimation import {class_name}; {class_name}().render()"])
         shutil.copyfile('media/videos/1080p60/MyAnimation.mp4', f'gpt_log/{gen_time_str()}.mp4')
+        return f'gpt_log/{gen_time_str()}.mp4'
     except subprocess.CalledProcessError as e:
         output = e.output.decode()
-        print(f"Command returned non-zero exit status {e.returncode}: {output}")
-        return "Evaluating python script failed"
+        print(f"Command returned non-zero exit status {e.returncode}: {output}.")
+        return f"Evaluating python script failed: {e.output}."
     except: 
         print('generating mp4 failed')
-        return "Generating mp4 failed"
+        return "Generating mp4 failed."
 
-    return f'gpt_log/{gen_time_str()}.mp4'
 
 def get_code_block(reply):
     import re
