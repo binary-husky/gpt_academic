@@ -21,7 +21,9 @@ GPTを使った任意の言語にこのプロジェクトを翻訳するには�
 > 3. このプロジェクトは、chatglmやRWKV、パンクなど、国内の大規模自然言語モデルを利用することをサポートし、試みることを奨励します。複数のAPIキーを共存することができ、設定ファイルに`API_KEY="openai-key1,openai-key2,api2d-key3"`のように記入することができます。`API_KEY`を一時的に変更する場合は、入力エリアに一時的な`API_KEY`を入力してEnterキーを押せば、それが有効になります。
 
 
-<div align="center">機能 | 説明
+<div align="center">
+
+機能 | 説明
 --- | ---
 一键校正 | 一键で校正可能、論文の文法エラーを検索することができる
 一键中英翻訳 | 一键で中英翻訳可能
@@ -45,6 +47,7 @@ Markdown[中英翻訳](https://www.bilibili.com/video/BV1yo4y157jV/) | [関数�
 [多数のLLMモデル](https://www.bilibili.com/video/BV1wT411p7yf)がサポートされ、[API2D](https://api2d.com/)がサポートされている | 同時にGPT3.5、GPT4、[清華ChatGLM](https://github.com/THUDM/ChatGLM-6B)、[復旦MOSS](https://github.com/OpenLMLab/MOSS)に対応
 より多くのLLMモデルが接続され、[huggingfaceデプロイ](https://huggingface.co/spaces/qingxu98/gpt-academic)がサポートされている | Newbingインターフェイス（Newbing）、清華大学の[Jittorllm](https://github.com/Jittor/JittorLLMs)のサポート[LLaMA](https://github.com/facebookresearch/llama), [RWKV](https://github.com/BlinkDL/ChatRWKV)と[盘古α](https://openi.org.cn/pangu/)
 さらに多くの新機能（画像生成など）を紹介する... | この文書の最後に示す... 
+</div>
 
 - 新しいインターフェース（`config.py`のLAYOUTオプションを変更することで、「左右配置」と「上下配置」を切り替えることができます）
 <div align="center">

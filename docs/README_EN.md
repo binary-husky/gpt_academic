@@ -17,7 +17,9 @@ To translate this project to arbitary language with GPT, read and run [`multi_la
 > 2. The function of each file in this project is detailed in the self-translation analysis [`self_analysis.md`](https://github.com/binary-husky/chatgpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A). With version iteration, you can also click on related function plugins at any time to call GPT to regenerate the project's self-analysis report. Common questions are summarized in the [`wiki`](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98). [Installation method](#installation).
 > 3. This project is compatible with and encourages trying domestic large language models such as chatglm, RWKV, Pangu, etc. Multiple API keys are supported and can be filled in the configuration file like `API_KEY="openai-key1,openai-key2,api2d-key3"`. When temporarily changing `API_KEY`, enter the temporary `API_KEY` in the input area and press enter to submit, which will take effect. 
 
-<div align="center">Function | Description
+<div align="center">
+
+Function | Description
 --- | ---
 One-click polishing | Supports one-click polishing and one-click searching for grammar errors in papers.
 One-click Chinese-English translation | One-click Chinese-English translation.
@@ -41,6 +43,7 @@ Start Dark Gradio [theme](https://github.com/binary-husky/chatgpt_academic/issue
 [Multiple LLM models](https://www.bilibili.com/video/BV1wT411p7yf) support, [API2D](https://api2d.com/) interface support | The feeling of being served by GPT3.5, GPT4, [Tsinghua ChatGLM](https://github.com/THUDM/ChatGLM-6B), and [Fudan MOSS](https://github.com/OpenLMLab/MOSS) at the same time must be great, right?
 More LLM model access, support [huggingface deployment](https://huggingface.co/spaces/qingxu98/gpt-academic) | Add Newbing interface (New Bing), introduce Tsinghua [Jittorllms](https://github.com/Jittor/JittorLLMs) to support [LLaMA](https://github.com/facebookresearch/llama), [RWKV](https://github.com/BlinkDL/ChatRWKV) and [Panguα](https://openi.org.cn/pangu/)
 More new feature displays (image generation, etc.)…… | See the end of this document for more... 
+</div>
 
 - New interface (modify the LAYOUT option in `config.py` to switch between "left and right layout" and "up and down layout")
 <div align="center">
