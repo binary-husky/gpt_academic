@@ -196,9 +196,9 @@ class _ChatHubRequest:
         self,
         prompt: str,
         conversation_style: CONVERSATION_STYLE_TYPE,
-        options: list | None = None,
-        webpage_context: str | None = None,
-        search_result: bool = False,
+        options = None,
+        webpage_context = None,
+        search_result = False,
     ) -> None:
         """
         Updates request object
@@ -294,9 +294,9 @@ class _Conversation:
 
     def __init__(
         self,
-        proxy: str | None = None,
-        async_mode: bool = False,
-        cookies: list[dict] | None = None,
+        proxy = None,
+        async_mode = False,
+        cookies = None,
     ) -> None:
         if async_mode:
             return
@@ -350,8 +350,8 @@ class _Conversation:
 
     @staticmethod
     async def create(
-        proxy: str | None = None,
-        cookies: list[dict] | None = None,
+        proxy = None,
+        cookies = None,
     ):
         self = _Conversation(async_mode=True)
         self.struct = {
@@ -418,11 +418,11 @@ class _ChatHub:
     def __init__(
         self,
         conversation: _Conversation,
-        proxy: str = None,
-        cookies: list[dict] | None = None,
+        proxy = None,
+        cookies = None,
     ) -> None:
-        self.session: aiohttp.ClientSession | None = None
-        self.wss: aiohttp.ClientWebSocketResponse | None = None
+        self.session = None
+        self.wss = None
         self.request: _ChatHubRequest
         self.loop: bool
         self.task: asyncio.Task
@@ -441,7 +441,7 @@ class _ChatHub:
         conversation_style: CONVERSATION_STYLE_TYPE = None,
         raw: bool = False,
         options: dict = None,
-        webpage_context: str | None = None,
+        webpage_context = None,
         search_result: bool = False,
     ) -> Generator[str, None, None]:
         """
@@ -611,10 +611,10 @@ class Chatbot:
 
     def __init__(
         self,
-        proxy: str | None = None,
-        cookies: list[dict] | None = None,
+        proxy = None,
+        cookies = None,
     ) -> None:
-        self.proxy: str | None = proxy
+        self.proxy = proxy
         self.chat_hub: _ChatHub = _ChatHub(
             _Conversation(self.proxy, cookies=cookies),
             proxy=self.proxy,
@@ -623,8 +623,8 @@ class Chatbot:
 
     @staticmethod
     async def create(
-        proxy: str | None = None,
-        cookies: list[dict] | None = None,
+        proxy = None,
+        cookies = None,
     ):
         self = Chatbot.__new__(Chatbot)
         self.proxy = proxy
@@ -641,7 +641,7 @@ class Chatbot:
         wss_link: str = "wss://sydney.bing.com/sydney/ChatHub",
         conversation_style: CONVERSATION_STYLE_TYPE = None,
         options: dict = None,
-        webpage_context: str | None = None,
+        webpage_context = None,
         search_result: bool = False,
     ) -> dict:
         """
@@ -667,7 +667,7 @@ class Chatbot:
         conversation_style: CONVERSATION_STYLE_TYPE = None,
         raw: bool = False,
         options: dict = None,
-        webpage_context: str | None = None,
+        webpage_context = None,
         search_result: bool = False,
     ) -> Generator[str, None, None]:
         """
