@@ -5,9 +5,9 @@
 > `pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/`
 >
 
-# <img src="docs/logo.png" width="40" > Otimização acadêmica GPT (GPT Academic)
+# <img src="logo.png" width="40" > Otimização acadêmica GPT (GPT Academic)
 
-**Se você gostou deste projeto, por favor dê um Star. Se você criou atalhos acadêmicos mais úteis ou plugins funcionais, sinta-se livre para abrir uma issue ou pull request. Nós também temos um README em [Inglês|](docs/README_EN.md)[日本語|](docs/README_JP.md)[한국어|](https://github.com/mldljyh/ko_gpt_academic)[Русский|](docs/README_RS.md)[Français](docs/README_FR.md) traduzidos por este próprio projeto.
+**Se você gostou deste projeto, por favor dê um Star. Se você criou atalhos acadêmicos mais úteis ou plugins funcionais, sinta-se livre para abrir uma issue ou pull request. Nós também temos um README em [Inglês|](README_EN.md)[日本語|](README_JP.md)[한국어|](https://github.com/mldljyh/ko_gpt_academic)[Русский|](README_RS.md)[Français](README_FR.md) traduzidos por este próprio projeto.
 Para traduzir este projeto para qualquer idioma com o GPT, leia e execute [`multi_language.py`](multi_language.py) (experimental).
 
 > **Nota**
