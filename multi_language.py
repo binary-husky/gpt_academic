@@ -228,7 +228,7 @@ def trans(word_to_translate, language, special=False):
                 #     for a,b in zip(res_before_trans, res_after_trans):
                 #         translated_result[a] = b
                 # except:
-                print('GPT输出格式错误，稍后可能需要再试一次')
+                print('GPT answers with unexpected format, some words may not be translated, but you can try again later to increase translation coverage.')
                 res_before_trans = eval(result[i-1])
                 for a in res_before_trans:
                     translated_result[a] = None
