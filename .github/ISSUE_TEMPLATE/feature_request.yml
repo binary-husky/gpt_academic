@@ -1,0 +1,28 @@
+name: Feature Request | 功能请求
+description: "Feature Request"
+title: "[Feature]: "
+labels: []
+body:
+  - type: dropdown
+    id: download
+    attributes:
+      label: Class | 类型
+      options:
+        - Please choose | 请选择
+        - 函数插件
+        - 大语言模型
+        - 项目主体
+        - 其他
+    validations:
+      required: false
+
+  - type: textarea
+    id: traceback
+    attributes:
+      label: Feature Request | Feature Request
+      description: Feature Request | Feature Request
+
+
+
+
+
