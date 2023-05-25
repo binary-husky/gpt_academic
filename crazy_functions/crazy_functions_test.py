@@ -99,6 +99,12 @@ def test_解析ipynb文件():
         print(cb)
 
 
+def test_数学动画生成manim():
+    from crazy_functions.数学动画生成manim import 动画生成
+    txt = "A ball split into 2, and then split into 4, and finally split into 8."
+    for cookies, cb, hist, msg in 动画生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+        print(cb)
+
 # test_解析一个Python项目()
 # test_Latex英文润色()
 # test_Markdown中译英()
@@ -108,7 +114,8 @@ def test_解析ipynb文件():
 # test_下载arxiv论文并翻译摘要()
 # test_解析一个Cpp项目()
 # test_联网回答问题()
-test_解析ipynb文件()
+# test_解析ipynb文件()
+test_数学动画生成manim()
 
 input("程序完成，回车退出。")
 print("退出。")
