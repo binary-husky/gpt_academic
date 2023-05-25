@@ -269,5 +269,16 @@ def get_crazy_functions():
             "Function": HotReload(总结音视频)
         }
     })
+    try:
+        from crazy_functions.数学动画生成manim import 动画生成
+        function_plugins.update({
+            "数学动画生成（Manim）": {
+                "Color": "stop",
+                "AsButton": False,
+                "Function": HotReload(动画生成)
+            }
+        })
+    except:
+        print('Load function plugin failed')
     ###################### 第n组插件 ###########################
     return function_plugins
