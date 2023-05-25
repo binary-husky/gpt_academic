@@ -20,7 +20,9 @@ Pour traduire ce projet dans une langue arbitraire avec GPT, lisez et exécutez 
 >
 > 3. Ce projet est compatible avec et encourage l'utilisation de grands modèles de langage nationaux tels que chatglm, RWKV, Pangu, etc. La coexistence de plusieurs clés API est prise en charge et peut être remplie dans le fichier de configuration, tel que `API_KEY="openai-key1,openai-key2,api2d-key3"`. Lorsque vous souhaitez remplacer temporairement `API_KEY`, saisissez temporairement `API_KEY` dans la zone de saisie, puis appuyez sur Entrée pour soumettre et activer. 
 
-<div align="center">Functionnalité | Description
+<div align="center">
+
+Functionnalité | Description
 --- | ---
 Révision en un clic | prend en charge la révision en un clic et la recherche d'erreurs de syntaxe dans les articles
 Traduction chinois-anglais en un clic | Traduction chinois-anglais en un clic
