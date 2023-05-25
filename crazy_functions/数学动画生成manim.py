@@ -119,7 +119,7 @@ class MyAnimation(Scene):
 
 
 ```
-# Moving FrameBox
+# Plot function and moving framebox
 class MyAnimation(Scene):
     def construct(self):
         text=MathTex(
