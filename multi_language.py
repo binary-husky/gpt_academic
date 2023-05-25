@@ -1,5 +1,7 @@
 """
-    Translate this project to other languages
+    Translate this project to other languages (experimental, please open an issue if there is any bug)
+    
+    
     Usage:
         1. modify LANG
             LANG = "English"
