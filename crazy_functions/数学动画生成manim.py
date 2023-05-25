@@ -25,14 +25,14 @@ def eval_manim(code):
     def get_class_name(class_string):
         import re
         # Use regex to extract the class name
-        class_name = re.search(r'class (\w+)\(Scene\)', class_string).group(1)
+        class_name = re.search(r'class (\w+)\(', class_string).group(1)
         return class_name
 
     class_name = get_class_name(code)
 
     try: 
         subprocess.check_output([sys.executable, '-c', f"from gpt_log.MyAnimation import {class_name}; {class_name}().render()"])
-        shutil.copyfile('media/videos/1080p60/MyAnimation.mp4', f'gpt_log/{gen_time_str()}.mp4')
+        shutil.move('media/videos/1080p60/{class_name}.mp4', f'gpt_log/{class_name}-{gen_time_str()}.mp4')
         return f'gpt_log/{gen_time_str()}.mp4'
     except subprocess.CalledProcessError as e:
         output = e.output.decode()
@@ -68,7 +68,7 @@ def 动画生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
-        "生成数学动画, 作者: binary-husky, 插件初始化中 ..."
+        "生成数学动画, 此插件处于开发阶段, 建议暂时不要使用, 作者: binary-husky, 插件初始化中 ..."
     ])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
