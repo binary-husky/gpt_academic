@@ -105,6 +105,19 @@ def test_数学动画生成manim():
     for cookies, cb, hist, msg in 动画生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
         print(cb)
 
+
+
+def test_Markdown多语言():
+    from crazy_functions.批量Markdown翻译 import Markdown翻译指定语言
+    txt = "README.md"
+    history = []
+    for lang in ["English", "Spanish", "French", "German", "Italian", "Chinese", "Japanese", "Korean", "Portuguese", "Russian", "Arabic"]:
+        plugin_kwargs = {"advanced_arg": lang}
+        for cookies, cb, hist, msg in Markdown翻译指定语言(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+            print(cb)
+
+
+
 # test_解析一个Python项目()
 # test_Latex英文润色()
 # test_Markdown中译英()
@@ -115,7 +128,8 @@ def test_数学动画生成manim():
 # test_解析一个Cpp项目()
 # test_联网回答问题()
 # test_解析ipynb文件()
-test_数学动画生成manim()
+# test_数学动画生成manim()
+test_Markdown多语言()
 
 input("程序完成，回车退出。")
 print("退出。")

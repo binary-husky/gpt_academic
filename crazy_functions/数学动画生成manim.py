@@ -1,4 +1,4 @@
-from toolbox import CatchException, update_ui
+from toolbox import CatchException, update_ui, gen_time_str
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import input_clipping
 
@@ -11,10 +11,6 @@ def inspect_dependency(chatbot, history):
         chatbot.append(["导入依赖失败", "使用该模块需要额外依赖，安装方法:```pip install manimgl```"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return False
-
-def gen_time_str():
-    import time
-    return time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
 
 def eval_manim(code):
     import subprocess, sys, os, shutil
