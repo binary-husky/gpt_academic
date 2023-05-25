@@ -44,7 +44,7 @@ WEB_PORT = -1
 # 如果OpenAI不响应（网络卡顿、代理失败、KEY失效），重试的次数限制
 MAX_RETRY = 2
 
-# 模型选择是
+# 模型选择是 (注意: LLM_MODEL是默认选中的模型, 同时它必须被包含在AVAIL_LLM_MODELS切换列表中 )
 LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
 AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "stack-claude"]
 # P.S. 其他可用的模型还包括 ["newbing-free", "jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
