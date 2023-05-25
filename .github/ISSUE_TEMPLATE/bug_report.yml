@@ -9,8 +9,10 @@ body:
       label: Installation Method | 安装方法与平台
       options:
         - Please choose | 请选择
-        - Pip Install (I used latest requirements.txt and python>=3.8)
-        - Anaconda (I used latest requirements.txt and python>=3.8)
+        - Pip Install (I ignored requirements.txt)
+        - Pip Install (I used latest requirements.txt)
+        - Anaconda (I ignored requirements.txt)
+        - Anaconda (I used latest requirements.txt)
         - Docker（Windows/Mac）
         - Docker（Linux）
         - Docker-Compose（Windows/Mac）
@@ -19,7 +21,31 @@ body:
         - Others (Please Describe)
     validations:
       required: true
-    
+
+  - type: dropdown
+    id: version
+    attributes:
+      label: Version | 版本
+      options:
+        - Please choose | 请选择
+        - Latest | 最新版
+        - Others | 非最新版
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: os
+    attributes:
+      label: OS | 操作系统
+      options:
+        - Please choose | 请选择
+        - Windows
+        - Mac
+        - Linux
+        - Docker
+    validations:
+      required: true
+      
   - type: textarea
     id: describe
     attributes:
