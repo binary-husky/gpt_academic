@@ -14,7 +14,7 @@
    
     P.S.
     
-        - The translation mapping will be stored in `docs/translation_xxxx.json`
+        - The translation mapping will be stored in `docs/translation_xxxx.json`, you can revised mistaken translation there.
         
         - If you would like to share your `docs/translation_xxxx.json`, (so that everyone can use the cached & revised translation mapping), please open a Pull Request
 
