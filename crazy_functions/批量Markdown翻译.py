@@ -39,11 +39,11 @@ class PaperFileGroup():
         for r, k in zip(self.sp_file_result, self.sp_file_index):
             self.file_result[k] += r
 
-    def write_result(self):
+    def write_result(self, language):
         manifest = []
         for path, res in zip(self.file_paths, self.file_result):
-            with open(path + f'.{gen_time_str()}.trans.md', 'w', encoding='utf8') as f:
-                manifest.append(path + '.trans.md')
+            with open(path + f'.{gen_time_str()}.{language}.md', 'w', encoding='utf8') as f:
+                manifest.append(path + f'.{gen_time_str()}.{language}.md')
                 f.write(res)
         return manifest
 
@@ -97,7 +97,7 @@ def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
         for i_say, gpt_say in zip(gpt_response_collection[0::2], gpt_response_collection[1::2]):
             pfg.sp_file_result.append(gpt_say)
         pfg.merge_result()
-        pfg.write_result()
+        pfg.write_result(language)
     except:
         print(trimmed_format_exc())
 
