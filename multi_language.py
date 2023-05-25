@@ -11,7 +11,16 @@
             Note: You need to run it multiple times to increase translation coverage because GPT makes mistakes sometimes.
 
         4. Find the translated program in `multi-language\English\*`
+   
+    P.S.
     
+        - The translation mapping will be stored in `docs/translation_xxxx.json`
+        
+        - If you would like to share your `docs/translation_xxxx.json`, (so that everyone can use the cached & revised translation mapping), please open a Pull Request
+
+        - If there is any translation error in `docs/translation_xxxx.json`, please open a Pull Request
+        
+        - Welcome any Pull Request, regardless of language
 """
 
 import os
