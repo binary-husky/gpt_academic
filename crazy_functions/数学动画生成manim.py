@@ -102,7 +102,7 @@ def 动画生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
 
 # 在这里放一些网上搜集的demo，辅助gpt生成代码
 def examples_of_manim():
-    return """
+    return r"""
 
 
 ```
