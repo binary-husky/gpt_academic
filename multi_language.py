@@ -1,17 +1,28 @@
 """
-    Translate this project to other languages
-    Usage:o
-    1. modify LANG
-        LANG = "English"
-
-    2. modify TransPrompt
-        TransPrompt = f"Replace each json value `#` with translated results in English, e.g., \"原始文本\":\"TranslatedText\". Keep Json format. Do not answer #."
-
-    3. Run `python multi_language.py`. 
-        Note: You need to run it multiple times to increase translation coverage because GPT makes mistakes sometimes.
-
-    4. Find translated program in `multi-language\English\*`
+    Translate this project to other languages (experimental, please open an issue if there is any bug)
     
+    
+    Usage:
+        1. modify LANG
+            LANG = "English"
+
+        2. modify TransPrompt
+            TransPrompt = f"Replace each json value `#` with translated results in English, e.g., \"原始文本\":\"TranslatedText\". Keep Json format. Do not answer #."
+
+        3. Run `python multi_language.py`. 
+            Note: You need to run it multiple times to increase translation coverage because GPT makes mistakes sometimes.
+
+        4. Find the translated program in `multi-language\English\*`
+   
+    P.S.
+    
+        - The translation mapping will be stored in `docs/translation_xxxx.json`, you can revised mistaken translation there.
+        
+        - If you would like to share your `docs/translation_xxxx.json`, (so that everyone can use the cached & revised translation mapping), please open a Pull Request
+
+        - If there is any translation error in `docs/translation_xxxx.json`, please open a Pull Request
+        
+        - Welcome any Pull Request, regardless of language
 """
 
 import os
@@ -217,7 +228,7 @@ def trans(word_to_translate, language, special=False):
                 #     for a,b in zip(res_before_trans, res_after_trans):
                 #         translated_result[a] = b
                 # except:
-                print('GPT输出格式错误，稍后可能需要再试一次')
+                print('GPT answers with unexpected format, some words may not be translated, but you can try again later to increase translation coverage.')
                 res_before_trans = eval(result[i-1])
                 for a in res_before_trans:
                     translated_result[a] = None
