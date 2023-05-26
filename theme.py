@@ -137,12 +137,21 @@ advanced_css = """
 }
 [data-testid = "bot"] {
     max-width: 95%;
+    letter-spacing: 0.5px;
+     font-weight: normal;
+    /* width: auto !important; */
+    border-bottom-left-radius: 0 !important;
+}
+
+.dark [data-testid = "bot"] {
+    max-width: 95%;
     color: #ccd2db !important;
     letter-spacing: 0.5px;
      font-weight: normal;
     /* width: auto !important; */
     border-bottom-left-radius: 0 !important;
 }
+
 [data-testid = "user"] {
     max-width: 100%;
     letter-spacing: 0.5px;
