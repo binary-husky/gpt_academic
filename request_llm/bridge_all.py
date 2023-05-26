@@ -16,8 +16,16 @@ from toolbox import get_conf, trimmed_format_exc
 from request_llm.bridge_chatgpt import predict_no_ui_long_connection as chatgpt_noui
 from request_llm.bridge_chatgpt import predict as chatgpt_ui
 
+<<<<<<< HEAD
 from request_llm.bridge_chatgpt import predict_no_ui_long_connection as chatglm_noui
 from request_llm.bridge_chatgpt import predict as chatglm_ui
+=======
+from .bridge_azure_test import predict_no_ui_long_connection as azure_noui
+from .bridge_azure_test import predict as azure_ui
+
+from .bridge_chatglm import predict_no_ui_long_connection as chatglm_noui
+from .bridge_chatglm import predict as chatglm_ui
+>>>>>>> f320599 (增加azure openai api的支持)
 
 from .bridge_newbing import predict_no_ui_long_connection as newbing_noui
 from .bridge_newbing import predict as newbing_ui
@@ -103,32 +111,14 @@ model_info = {
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
     },
-
-    "proxy-gpt-35-turbo-version-0301": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": proxy_endpoint.replace('%v', 'gpt-35-turbo-version-0301'),
-        "max_token": 8192,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
-    },
-
-    "proxy-gpt-4": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": proxy_endpoint.replace('%v', 'gpt-4'),
-        "max_token": 8192,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
-    },
-
-    "proxy-gpt-4-32k": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": proxy_endpoint.replace('%v', 'gpt-4-32k'),
-        "max_token": 32000,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
+    # azure openai
+    "azure-gpt35":{
+        "fn_with_ui": azure_ui,
+        "fn_without_ui": azure_noui,
+        "endpoint": get_conf("AZURE_ENDPOINT"),
+        "max_token": 4096,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
     },
 
     # api_2d
