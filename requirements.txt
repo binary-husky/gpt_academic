@@ -4,6 +4,7 @@ requests[socks]
 transformers
 python-markdown-math
 beautifulsoup4
+prompt_toolkit
 latex2mathml
 python-docx
 mdtex2html
@@ -20,3 +21,4 @@ scikit-learn
 psutil
 distro
 python-dotenv
+rich

@@ -10,14 +10,18 @@
 **如果喜欢这个项目，请给它一个Star；如果你发明了更好用的快捷键或函数插件，欢迎发pull requests**
 
 If you like this project, please give it a Star. If you've come up with more useful academic shortcuts or functional plugins, feel free to open an issue or pull request. We also have a README in [English|](docs/README_EN.md)[日本語|](docs/README_JP.md)[한국어|](https://github.com/mldljyh/ko_gpt_academic)[Русский|](docs/README_RS.md)[Français](docs/README_FR.md) translated by this project itself.
+To translate this project to arbitary language with GPT, read and run [`multi_language.py`](multi_language.py) (experimental).
 
 > **Note**
 >
 > 1.请注意只有**红颜色**标识的函数插件（按钮）才支持读取文件，部分插件位于插件区的**下拉菜单**中。另外我们以**最高优先级**欢迎和处理任何新插件的PR！
 >
-> 2.本项目中每个文件的功能都在自译解[`self_analysis.md`](https://github.com/binary-husky/chatgpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A)详细说明。随着版本的迭代，您也可以随时自行点击相关函数插件，调用GPT重新生成项目的自我解析报告。常见问题汇总在[`wiki`](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98)当中。
+> 2.本项目中每个文件的功能都在自译解[`self_analysis.md`](https://github.com/binary-husky/chatgpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A)详细说明。随着版本的迭代，您也可以随时自行点击相关函数插件，调用GPT重新生成项目的自我解析报告。常见问题汇总在[`wiki`](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98)当中。[安装方法](#installation)。
 > 
-> 3.本项目兼容并鼓励尝试国产大语言模型chatglm和RWKV, 盘古等等。已支持OpenAI和API2D的api-key共存，可在配置文件中填写如`API_KEY="openai-key1,openai-key2,api2d-key3"`。需要临时更换`API_KEY`时，在输入区输入临时的`API_KEY`然后回车键提交后即可生效。
+> 3.本项目兼容并鼓励尝试国产大语言模型chatglm和RWKV, 盘古等等。支持多个api-key共存，可在配置文件中填写如`API_KEY="openai-key1,openai-key2,api2d-key3"`。需要临时更换`API_KEY`时，在输入区输入临时的`API_KEY`然后回车键提交后即可生效。
+
+
+ 
 
 <div align="center">
 
@@ -81,8 +85,8 @@ chat分析报告生成 | [函数插件] 运行后自动生成总结汇报
 </div>
 
 ---
-
-## 安装-方法1：直接运行 (Windows, Linux or MacOS)
+# Installation
+## 安装-方法1：直接运行 (Windows, Linux or MacOS) 
 
 1. 下载项目
 ```sh
@@ -94,7 +98,7 @@ cd chatgpt_academic
 
 在`config.py`中，配置API KEY等设置，[特殊网络环境设置](https://github.com/binary-husky/gpt_academic/issues/1) 。
 
-（P.S. 程序运行时会优先检查是否存在名为`config_private.py`的私密配置文件，并用其中的配置覆盖`config.py`的同名配置。因此，如果您能理解我们的配置读取逻辑，我们强烈建议您在`config.py`旁边创建一个名为`config_private.py`的新配置文件，并把`config.py`中的配置转移（复制）到`config_private.py`中。`config_private.py`不受git管控，可以让您的隐私信息更加安全。P.S.项目同样支持通过环境变量配置大多数选项，详情可以参考docker-compose文件。）
+(P.S. 程序运行时会优先检查是否存在名为`config_private.py`的私密配置文件，并用其中的配置覆盖`config.py`的同名配置。因此，如果您能理解我们的配置读取逻辑，我们强烈建议您在`config.py`旁边创建一个名为`config_private.py`的新配置文件，并把`config.py`中的配置转移（复制）到`config_private.py`中。`config_private.py`不受git管控，可以让您的隐私信息更加安全。P.S.项目同样支持通过`环境变量`配置大多数选项，环境变量的书写格式参考`docker-compose`文件。读取优先级: `环境变量` > `config_private.py` > `config.py`)
 
 
 3. 安装依赖
@@ -187,7 +191,7 @@ docker-compose up
 5. 使用docker-compose运行
 请阅读docker-compose.yml后，按照其中的提示操作即可
 ---
-
+# Advanced Usage
 ## 自定义新的便捷按钮 / 自定义函数插件
 
 1. 自定义新的便捷按钮（学术快捷键）
@@ -213,8 +217,8 @@ docker-compose up
 详情请参考[函数插件指南](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)。
 
 ---
-
-## 其他功能说明
+# Latest Update
+## 新功能动态
 
 1. 对话保存功能。在函数插件区调用 `保存当前的对话` 即可将当前对话保存为可读+可复原的html文件，
 另外在函数插件区（下拉菜单）调用 `载入对话历史存档` ，即可还原之前的会话。
@@ -272,6 +276,10 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 <img src="https://github.com/binary-husky/gpt_academic/assets/96192199/709ccf95-3aee-498a-934a-e1c22d3d5d5b" width="500" >
 </div>
 
+10. Latex全文校对纠错
+<div align="center">
+<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/651ccd98-02c9-4464-91e1-77a6b7d1b033" width="500" >
+</div>
 
 
 ## 版本:
@@ -292,22 +300,28 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 
 gpt_academic开发者QQ群-2：610599535
 
+- 已知问题
+    - 某些浏览器翻译插件干扰此软件前端的运行
+    - gradio版本过高或过低，都会导致多种异常
 
 ## 参考与学习
 
 ```
 代码中参考了很多其他优秀项目中的设计，主要包括：
 
-# 项目1：清华ChatGLM-6B：
+# 项目1：清华ChatGLM-6B:
 https://github.com/THUDM/ChatGLM-6B
 
-# 项目2：清华JittorLLMs：
+# 项目2：清华JittorLLMs:
 https://github.com/Jittor/JittorLLMs
 
-# 项目3：借鉴了ChuanhuChatGPT中诸多技巧
+# 项目3：Edge-GPT:
+https://github.com/acheong08/EdgeGPT
+
+# 项目4：ChuanhuChatGPT:
 https://github.com/GaiZhenbiao/ChuanhuChatGPT
 
-# 项目4：ChatPaper
+# 项目5：ChatPaper:
 https://github.com/kaixindelele/ChatPaper
 
 # 更多：

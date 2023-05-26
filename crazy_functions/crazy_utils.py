@@ -259,9 +259,6 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         time.sleep(refresh_interval)
         cnt += 1
         worker_done = [h.done() for h in futures]
-        if all(worker_done):
-            executor.shutdown()
-            break
         # 更好的UI视觉效果
         observe_win = []
         # 每个线程都要“喂狗”（看门狗）
@@ -280,7 +277,10 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         # 在前端打印些好玩的东西
         chatbot[-1] = [chatbot[-1][0], f'多线程操作已经开始，完成情况: \n\n{stat_str}' + ''.join(['.']*(cnt % 10+1))]
         yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
-    
+        if all(worker_done):
+            executor.shutdown()
+            break
+
     # 异步任务结束
     gpt_response_collection = []
     for inputs_show_user, f in zip(inputs_show_user_array, futures):
