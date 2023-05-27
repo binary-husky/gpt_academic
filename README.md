@@ -1,6 +1,6 @@
 > **Note**
 >
-> 安装依赖时，请严格选择requirements.txt中**指定的版本**，并使用官方pip源： 
+> 5月27日部分gradio代码升级后报错，现已修复，请及时更新到最新版代码。安装依赖时，请严格选择requirements.txt中**指定的版本**： 
 > 
 > `pip install -r requirements.txt -i https://pypi.org/simple`
 >
