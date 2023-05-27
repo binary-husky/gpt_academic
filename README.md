@@ -2,7 +2,7 @@
 >
 > 安装依赖时，请严格选择requirements.txt中**指定的版本**。 
 > 
-> `pip install -r requirements.txt`
+> `pip install -r requirements.txt -i https://pypi.org/simple`
 >
 
 # <img src="docs/logo.png" width="40" > GPT 学术优化 (GPT Academic)
