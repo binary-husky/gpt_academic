@@ -1,6 +1,6 @@
 > **Note**
 >
-> 安装依赖时，请严格选择requirements.txt中**指定的版本**。 
+> 安装依赖时，请严格选择requirements.txt中**指定的版本**，并使用官方pip源： 
 > 
 > `pip install -r requirements.txt -i https://pypi.org/simple`
 >
