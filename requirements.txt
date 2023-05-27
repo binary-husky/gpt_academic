@@ -1,4 +1,4 @@
-gradio-version-freeze>=3.32.1.3.40
+git+https://github.com/binary-husky/gradio-fix.git
 tiktoken>=0.3.3
 requests[socks]
 transformers
