@@ -1,6 +1,6 @@
 > **Note**
 >
-> 5月27日对gradio依赖进行了较大的修复和调整，如果27日当天进行了更新，可能导致代码报错，请及时更新到最新版代码并重新安装pip依赖即可。若给您带来困扰还请谅解。安装依赖时，请严格选择requirements.txt中**指定的版本**： 
+> 5月27日对gradio依赖进行了较大的修复和调整，fork并解决了官方Gradio的一系列bug。但如果27日当天进行了更新，可能会导致代码报错（依赖缺失，卡在loading界面等），请及时更新到最新版代码并重新安装pip依赖即可。若给您带来困扰还请谅解。安装依赖时，请严格选择requirements.txt中**指定的版本**： 
 > 
 > `pip install -r requirements.txt -i https://pypi.org/simple`
 >
