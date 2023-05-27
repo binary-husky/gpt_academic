@@ -302,7 +302,7 @@ gpt_academic开发者QQ群-2：610599535
 
 - 已知问题
     - 某些浏览器翻译插件干扰此软件前端的运行
-    - gradio版本过高或过低，都会导致多种异常
+    - 官方Gradio目前有很多兼容性Bug，请务必使用requirement.txt安装Gradio
 
 ## 参考与学习
 
