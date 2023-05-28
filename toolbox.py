@@ -168,14 +168,17 @@ def write_results_to_file(history, file_name=None):
     with open(f'./gpt_log/{file_name}', 'w', encoding='utf8') as f:
         f.write('# chatGPT 分析报告\n')
         for i, content in enumerate(history):
-            try:    # 这个bug没找到触发条件，暂时先这样顶一下
-                if type(content) != str:
-                    content = str(content)
+            try:    
+                if type(content) != str: content = str(content)
             except:
                 continue
             if i % 2 == 0:
                 f.write('## ')
-            f.write(content)
+            try:
+                f.write(content)
+            except:
+                # remove everything that cannot be handled by utf8
+                f.write(content.encode('utf-8', 'ignore').decode())
             f.write('\n\n')
     res = '以上材料已经被写入' + os.path.abspath(f'./gpt_log/{file_name}')
     print(res)
@@ -462,7 +465,7 @@ def on_report_generated(files, chatbot):
     if len(report_files) == 0:
         return None, chatbot
     # files.extend(report_files)
-    chatbot.append(['汇总报告如何远程获取？', '汇总报告已经添加到右侧“文件上传区”（可能处于折叠状态），请查收。'])
+    chatbot.append(['报告如何远程获取？', '报告已经添加到右侧“文件上传区”（可能处于折叠状态），请查收。'])
     return report_files, chatbot
 
 def is_openai_api_key(key):
@@ -718,3 +721,66 @@ def clip_history(inputs, history, tokenizer, max_token_limit):
 
     history = everything[1:]
     return history
+
+"""
+========================================================================
+第三部分
+其他小工具:
+    - zip_folder:    把某个路径下所有文件压缩，然后转移到指定的另一个路径中（gpt写的）
+    - gen_time_str:  生成时间戳
+========================================================================
+"""
+
+def zip_folder(source_folder, dest_folder, zip_name):
+    import zipfile
+    import os
+    # Make sure the source folder exists
+    if not os.path.exists(source_folder):
+        print(f"{source_folder} does not exist")
+        return
+
+    # Make sure the destination folder exists
+    if not os.path.exists(dest_folder):
+        print(f"{dest_folder} does not exist")
+        return
+
+    # Create the name for the zip file
+    zip_file = os.path.join(dest_folder, zip_name)
+
+    # Create a ZipFile object
+    with zipfile.ZipFile(zip_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        # Walk through the source folder and add files to the zip file
+        for foldername, subfolders, filenames in os.walk(source_folder):
+            for filename in filenames:
+                filepath = os.path.join(foldername, filename)
+                zipf.write(filepath, arcname=os.path.relpath(filepath, source_folder))
+
+    # Move the zip file to the destination folder (if it wasn't already there)
+    if os.path.dirname(zip_file) != dest_folder:
+        os.rename(zip_file, os.path.join(dest_folder, os.path.basename(zip_file)))
+        zip_file = os.path.join(dest_folder, os.path.basename(zip_file))
+
+    print(f"Zip file created at {zip_file}")
+
+def gen_time_str():
+    import time
+    return time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+
+
+class ProxyNetworkActivate():
+    """
+    这段代码定义了一个名为TempProxy的空上下文管理器, 用于给一小段代码上代理
+    """
+    def __enter__(self):
+        from toolbox import get_conf
+        proxies, = get_conf('proxies')
+        if 'no_proxy' in os.environ: os.environ.pop('no_proxy')
+        os.environ['HTTP_PROXY'] = proxies['http']
+        os.environ['HTTPS_PROXY'] = proxies['https']
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        os.environ['no_proxy'] = '*'
+        if 'HTTP_PROXY' in os.environ: os.environ.pop('HTTP_PROXY')
+        if 'HTTPS_PROXY' in os.environ: os.environ.pop('HTTPS_PROXY')
+        return
