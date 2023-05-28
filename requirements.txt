@@ -1,4 +1,3 @@
-gradio-stable-fork
 tiktoken>=0.3.3
 requests[socks]
 transformers
