@@ -1,6 +1,6 @@
 > **Note**
 >
-> 安装依赖时，请严格选择requirements.txt中**指定的版本**，并使用官方pip源： 
+> 5月27日对gradio依赖进行了较大的修复和调整，fork并解决了官方Gradio的一系列bug。但如果27日当天进行了更新，可能会导致代码报错（依赖缺失，卡在loading界面等），请及时更新到**最新版代码**并重新安装pip依赖即可。若给您带来困扰还请谅解。安装依赖时，请严格选择requirements.txt中**指定的版本**： 
 > 
 > `pip install -r requirements.txt -i https://pypi.org/simple`
 >
@@ -302,7 +302,7 @@ gpt_academic开发者QQ群-2：610599535
 
 - 已知问题
     - 某些浏览器翻译插件干扰此软件前端的运行
-    - gradio版本过高或过低，都会导致多种异常
+    - 官方Gradio目前有很多兼容性Bug，请务必使用requirement.txt安装Gradio
 
 ## 参考与学习
 
