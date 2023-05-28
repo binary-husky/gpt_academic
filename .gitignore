@@ -5,7 +5,7 @@ __pycache__/
 
 # C extensions
 *.so
-
+.tree*
 # Distribution / packaging
 .Python
 build/
@@ -112,6 +112,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.DS_Store
 
 # Spyder project settings
 .spyderproject
@@ -127,13 +128,10 @@ venv.bak/
 .mypy_cache/
 .dmypy.json
 dmypy.json
-
 # Pyre type checker
 .pyre/
-
 .vscode
 .idea
-
 history
 ssr_conf
 config_private.py
@@ -145,8 +143,12 @@ cradle*
 debug*
 private*
 crazy_functions/test_project/pdf_and_word
+crazy_fun
+ctions/test_samples
 crazy_functions/test_samples
 request_llm/jittorllms
+prompt_users/*
+request_llm/moss
 multi-language
 request_llm/moss
 media

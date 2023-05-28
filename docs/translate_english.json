@@ -263,7 +263,7 @@
     "例如chatglm&gpt-3.5-turbo&api2d-gpt-4": "e.g. chatglm&gpt-3.5-turbo&api2d-gpt-4",
     "先切换模型到openai或api2d": "Switch the model to openai or api2d first",
     "在这里输入分辨率": "Enter the resolution here",
-    "如256x256": "e.g. 256x256",
+    "如'256x256', '512x512', '1024x1024'": "e.g. '256x256', '512x512', '1024x1024'",
     "默认": "Default",
     "建议您复制一个config_private.py放自己的秘密": "We suggest you to copy a config_private.py file to keep your secrets, such as API and proxy URLs, from being accidentally uploaded to Github and seen by others.",
     "如API和代理网址": "Such as API and proxy URLs",
