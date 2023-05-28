@@ -1,8 +1,10 @@
 import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 
 def main():
+    import subprocess, sys
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt'])
     import gradio as gr
-    if gr.__version__ not in ['3.28.3','3.32.2']: assert False, "请用 pip install -r requirements.txt 安装依赖"
+    if gr.__version__ not in ['3.28.3','3.32.3']: assert False, "请用 pip install -r requirements.txt 安装依赖"
     from request_llm.bridge_all import predict
     from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, DummyWith
     # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
