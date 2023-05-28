@@ -3,9 +3,19 @@ import importlib
 import traceback
 import inspect
 import re
+import gradio as gr
+import func_box
 import os
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
+import logging
+import shutil
+import os
+import time
+import glob
+import sys
+from concurrent.futures import ThreadPoolExecutor
+############################### 插件输入输出接驳区 #######################################
 
 """
 ========================================================================
@@ -39,9 +49,9 @@ def ArgsGeneralWrapper(f):
     """
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
-    def decorated(cookies, max_length, llm_model, txt, txt2, top_p, temperature, chatbot, history, system_prompt, plugin_advanced_arg, *args):
-        txt_passon = txt
-        if txt == "" and txt2 != "": txt_passon = txt2
+    def decorated(cookies, max_length, llm_model, txt, top_p, temperature,
+                  chatbot, history, system_prompt, models, plugin_advanced_arg, ipaddr: gr.Request, *args):
+        """"""
         # 引入一个有cookie的chatbot
         cookies.update({
             'top_p':top_p,
@@ -52,23 +62,45 @@ def ArgsGeneralWrapper(f):
             'llm_model': llm_model,
             'top_p':top_p,
             'max_length': max_length,
-            'temperature':temperature,
+            'temperature': temperature,
+            'ipaddr': ipaddr.client.host
         }
         plugin_kwargs = {
-            "advanced_arg": plugin_advanced_arg,
+            "advanced_arg": plugin_advanced_arg
         }
+        encrypt, private = get_conf('switch_model')[0]['key']
+        private_key = get_conf('private_key')[0]
+        if private in models:
+            if chatbot == []:
+                chatbot.append([f'隐私模式, 你的对话记录无法被他人检索 <p style="display:none;">\n{private_key}\n{ipaddr.client.host}\n</p>', None])
+            else:
+                chatbot[0] = [f'隐私模式, 你的对话记录无法被他人检索 <p style="display:none;">\n{private_key}\n{ipaddr.client.host}\n</p>', None]
+        else:
+            if chatbot == []:
+                chatbot.append(['正常对话模式, 你接来下的对话将会被记录并且可以被所有人检索，你可以到Settings中选择隐私模式', None])
+            else:
+                chatbot[0] = ['正常对话模式, 你接来下的对话将会被记录并且可以被所有人检索，你可以到Settings中选择隐私模式', None]
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
+        txt_passon = txt
+        if encrypt in models: txt_passon = func_box.encryption_str(txt)
+        if txt_passon == '' and txt_passon == ' ' and len(args) > 1:
+            msgs = f'### {args[1]} Warning 输入框为空\n' \
+                   'tips: 使用基础功能时，请在输入区输入需要处理的文本内容'
+            yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=msgs)  # 刷新界面
+            return
         yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
     return decorated
 
 
-def update_ui(chatbot, history, msg='正常', **kwargs):  # 刷新界面
+pool = ThreadPoolExecutor(200)
+def update_ui(chatbot, history, msg='正常', txt='', *args):  # 刷新界面
     """
     刷新用户界面
     """
     assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时，可用clear将其清空，然后用for+append循环重新赋值。"
-    yield chatbot.get_cookies(), chatbot, history, msg
+    yield chatbot.get_cookies(), chatbot, history, msg, txt
+    pool.submit(func_box.thread_write_chat, chatbot)
 
 def trimmed_format_exc():
     import os, traceback
@@ -114,9 +146,14 @@ def HotReload(f):
     def decorated(*args, **kwargs):
         fn_name = f.__name__
         f_hot_reload = getattr(importlib.reload(inspect.getmodule(f)), fn_name)
-        yield from f_hot_reload(*args, **kwargs)
+        try:
+            yield from f_hot_reload(*args, **kwargs)
+        except TypeError:
+            args = tuple(args[element] for element in range(len(args)) if element != 6)
+            yield from f_hot_reload(*args, **kwargs)
     return decorated
 
+####################################### 其他小工具 #####################################
 
 """
 ========================================================================
@@ -215,10 +252,10 @@ def text_divide_paragraph(text):
         return text
     else:
         # wtf input
-        lines = text.split("\n")
-        for i, line in enumerate(lines):
-            lines[i] = lines[i].replace(" ", "&nbsp;")
-        text = "</br>".join(lines)
+        # lines = text.split("\n")
+        # for i, line in enumerate(lines):
+        #     lines[i] = lines[i].replace(" ", "&nbsp;")
+        # text = "</br>".join(lines)
         return text
 
 @lru_cache(maxsize=128) # 使用 lru缓存 加快转换速度
@@ -331,10 +368,11 @@ def format_io(self, y):
     if y is None or y == []:
         return []
     i_ask, gpt_reply = y[-1]
-    i_ask = text_divide_paragraph(i_ask)  # 输入部分太自由，预处理一波
+    # i_ask = text_divide_paragraph(i_ask)  # 输入部分太自由，预处理一波
     gpt_reply = close_up_code_segment_during_stream(gpt_reply)  # 当代码输出半截的时候，试着补上后个```
     y[-1] = (
-        None if i_ask is None else markdown.markdown(i_ask, extensions=['fenced_code', 'tables']),
+        # None if i_ask is None else markdown.markdown(i_ask, extensions=['fenced_code', 'tables']),
+        None if i_ask is None else markdown_convertion(i_ask),
         None if gpt_reply is None else markdown_convertion(gpt_reply)
     )
     return y
@@ -421,42 +459,76 @@ def find_recent_files(directory):
     return recent_files
 
 
-def on_file_uploaded(files, chatbot, txt, txt2, checkboxes):
+
+def get_user_upload(chatbot, ipaddr: gr.Request):
+    """
+    获取用户上传过的文件
+    """
+    private_upload = './private_upload'
+    user_history = os.path.join(private_upload, ipaddr.client.host)
+    history = ''
+    for root, d, file in os.walk(user_history):
+        history += f'目录:\t {root} \t\t 目录内文件: {file}\n\n'
+    chatbot.append(['Loading....',
+                    '[Local Message] 请自行复制以下目录 or 目录+文件, 输入以供函数区高亮按钮使用\n\n'
+                    f'> {history}'
+                    ])
+    return chatbot
+
+
+def get_user_download(chatbot, link, file):
+    """
+    将短路径转换为下载链接
+    """
+    for file_handle in str(file).split('\n'):
+        if os.path.isfile(file_handle):
+            # temp_file = func_box.copy_temp_file(file_handle) 无法使用外部的临时目录
+            temp_file = os.path.abspath(file_handle)
+            if temp_file:
+                dir_file, file_name = ('/'.join(str(file_handle).split('/')[-2:]), os.path.basename(file_handle))
+                chatbot.append(['Convert the file address to a download link at：',
+                                f'[Local Message] Successful conversion\n\n '
+                                f'<a href="{link["local"]}/file={temp_file}" target="_blank" download="{dir_file}" class="svelte-xrr240">{file_name}</a>'])
+            else:
+                chatbot.append(['Convert the file address to a download link at：',
+                                f'[Local Message] Conversion failed, file or not exist.'])
+        elif os.path.isdir(file_handle):
+            for root, dirs, files in os.walk(file_handle):
+                for f in files:
+                    temp_ = os.path.abspath(os.path.join(root, f))
+                    dir_file, file_name = ('/'.join(str(file_handle).split('/')[-2:]), os.path.basename(temp_))
+                    chatbot.append(['Convert the file address to a download link at：',
+                                    f'[Local Message] Successful conversion\n\n '
+                                    f'<a href="{link["local"]}/file={temp_}" target="_blank" download="{dir_file}" class="svelte-xrr240">{file_name}</a>'])
+        elif file_handle == '':
+            pass
+    return chatbot, ''
+
+
+def on_file_uploaded(files, chatbot, txt, ipaddr: gr.Request):
     """
     当文件被上传时的回调函数
     """
     if len(files) == 0:
         return chatbot, txt
-    import shutil
-    import os
-    import time
-    import glob
-    from toolbox import extract_archive
-    try:
-        shutil.rmtree('./private_upload/')
-    except:
-        pass
-    time_tag = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
-    os.makedirs(f'private_upload/{time_tag}', exist_ok=True)
+    private_upload = './private_upload'
+    #     shutil.rmtree('./private_upload/')  不需要删除文件
+    time_tag_path = os.path.join(private_upload, ipaddr.client.host, time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()))
+    os.makedirs(f'{time_tag_path}', exist_ok=True)
     err_msg = ''
     for file in files:
         file_origin_name = os.path.basename(file.orig_name)
-        shutil.copy(file.name, f'private_upload/{time_tag}/{file_origin_name}')
-        err_msg += extract_archive(f'private_upload/{time_tag}/{file_origin_name}',
-                                   dest_dir=f'private_upload/{time_tag}/{file_origin_name}.extract')
-    moved_files = [fp for fp in glob.glob('private_upload/**/*', recursive=True)]
-    if "底部输入区" in checkboxes:
-        txt = ""
-        txt2 = f'private_upload/{time_tag}'
-    else:
-        txt = f'private_upload/{time_tag}'
-        txt2 = ""
+        shutil.copy(file.name, f'{time_tag_path}/{file_origin_name}')
+        err_msg += extract_archive(f'{time_tag_path}/{file_origin_name}',
+                                   dest_dir=f'{time_tag_path}/{file_origin_name}.extract')
+    moved_files = [fp for fp in glob.glob(f'{time_tag_path}/**/*', recursive=True)]
+    txt = f'{time_tag_path}'
     moved_files_str = '\t\n\n'.join(moved_files)
     chatbot.append(['我上传了文件，请查收',
                     f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
                     f'\n\n调用路径参数已自动修正到: \n\n{txt}' +
-                    f'\n\n现在您点击任意“红颜色”标识的函数插件时，以上文件将被作为输入参数'+err_msg])
-    return chatbot, txt, txt2
+                    f'\n\n现在您点击任意“高亮”标识的函数插件时，以上文件将被作为输入参数'+err_msg])
+    return chatbot, txt
 
 
 def on_report_generated(files, chatbot):
@@ -585,6 +657,12 @@ def read_single_conf_with_lru_cache(arg):
     except:
         try:
             # 优先级2. 获取config_private中的配置
+            # 获取当前文件所在目录的路径
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            # 获取上一层目录的路径
+            parent_dir = os.path.dirname(current_dir)
+            # 将上一层目录添加到Python的搜索路径中
+            sys.path.append(parent_dir)
             r = getattr(importlib.import_module('config_private'), arg)
         except:
             # 优先级3. 获取config中的配置
@@ -638,6 +716,7 @@ class DummyWith():
 
     def __exit__(self, exc_type, exc_value, traceback):
         return
+
 
 def run_gradio_in_subpath(demo, auth, port, custom_path):
     """

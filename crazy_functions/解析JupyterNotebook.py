@@ -144,3 +144,13 @@ def 解析ipynb文件(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
         return
     yield from ipynb解释(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, )
+
+
+if __name__ == '__main__':
+    import json
+    filename = ''
+    code = parseNotebook(filename)
+    print(code)
+    with open(filename, 'r', encoding='utf-8', errors='replace') as f:
+        notebook = f.read()
+        print(notebook)

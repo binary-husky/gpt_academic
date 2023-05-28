@@ -34,10 +34,10 @@
             "2": ["来自 Potion Maker 的 Tia 酱 ~"]  
         },
         "hitokoto_api_message": {
-            "lwl12.com": ["这句一言来自 <span style=\"color:#0099cc;\">『{source}』</span>", "，是 <span style=\"color:#0099cc;\">{creator}</span> 投稿的", "。"],
-            "fghrsh.net": ["这句一言出处是 <span style=\"color:#0099cc;\">『{source}』</span>，是 <span style=\"color:#0099cc;\">FGHRSH</span> 在 {date} 收藏的！"],
-            "jinrishici.com": ["这句诗词出自 <span style=\"color:#0099cc;\">《{title}》</span>，是 {dynasty}诗人 {author} 创作的！"],
-            "hitokoto.cn": ["这句一言来自 <span style=\"color:#0099cc;\">『{source}』</span>，是 <span style=\"color:#0099cc;\">{creator}</span> 在 hitokoto.cn 投稿的。"]
+            "lwl12.com": ["这句一言来自 <span style=\"color:#ff99da;\">『{source}』</span>", "，是 <span style=\"color:#ff99da;\">{creator}</span> 投稿的", "。"],
+            "fghrsh.net": ["这句一言出处是 <span style=\"color:#ff99da;\">『{source}』</span>，是 <span style=\"color:#ff99da;\">FGHRSH</span> 在 {date} 收藏的！"],
+            "jinrishici.com": ["这句诗词出自 <span style=\"color:#ff99da;\">《{title}》</span>，是 {dynasty}诗人 {author} 创作的！"],
+            "hitokoto.cn": ["这句一言来自 <span style=\"color:#ff99da;\">『{source}』</span>，是 <span style=\"color:#ff99da;\">{creator}</span> 在 hitokoto.cn 投稿的。"]
         }
     },
     "mouseover": [

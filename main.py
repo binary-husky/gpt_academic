@@ -130,9 +130,9 @@ def main():
             ret.update({plugin_advanced_arg: gr.update(visible=("插件参数区" in a))})
             if "底部输入区" in a: ret.update({txt: gr.update(value="")})
             return ret
-        checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn, area_input_primary, area_input_secondary, txt, txt2, clearBtn, clearBtn2, plugin_advanced_arg] )
+        checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn, area_input_primary, area_input_secondary, txt, clearBtn, clearBtn2, plugin_advanced_arg] )
         # 整理反复出现的控件句柄组合
-        input_combo = [cookies, max_length_sl, md_dropdown, txt, txt2, top_p, temperature, chatbot, history, system_prompt, plugin_advanced_arg]
+        input_combo = [cookies, max_length_sl, md_dropdown, txt, top_p, temperature, chatbot, history, system_prompt, plugin_advanced_arg]
         output_combo = [cookies, chatbot, history, status]
         predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=input_combo, outputs=output_combo)
         # 提交按钮、重置按钮
@@ -150,7 +150,7 @@ def main():
             click_handle = functional[k]["Button"].click(fn=ArgsGeneralWrapper(predict), inputs=[*input_combo, gr.State(True), gr.State(k)], outputs=output_combo)
             cancel_handles.append(click_handle)
         # 文件上传区，接收文件后与chatbot的互动
-        file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt, txt2, checkboxes], [chatbot, txt, txt2])
+        file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt ], [chatbot, txt])
         # 函数插件-固定按钮区
         for k in crazy_fns:
             if not crazy_fns[k].get("AsButton", True): continue
@@ -169,7 +169,7 @@ def main():
         dropdown.select(on_dropdown_changed, [dropdown], [switchy_bt, plugin_advanced_arg] )
         def on_md_dropdown_changed(k):
             return {chatbot: gr.update(label="当前模型："+k)}
-        md_dropdown.select(on_md_dropdown_changed, [md_dropdown], [chatbot] )
+        md_dropdown.select(on_md_dropdown_changed, [md_dropdown], [chatbot])
         # 随变按钮的回调函数注册
         def route(k, *args, **kwargs):
             if k in [r"打开插件列表", r"请先从插件列表中选择"]: return

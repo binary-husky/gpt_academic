@@ -60,7 +60,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     while True:
         try:
             # make a POST request to the API endpoint, stream=False
-            from .bridge_all import model_info
+            from request_llm.bridge_all import model_info
             endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
             response = requests.post(endpoint, headers=headers, proxies=proxies,
                                     json=payload, stream=True, timeout=TIMEOUT_SECONDS); break
@@ -106,7 +106,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     return result
 
 
-def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream = True, additional_fn=None):
+def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream=True, additional_fn=None):
     """
     发送至chatGPT，流式获取输出。
     用于基础的对话功能。
@@ -134,7 +134,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         inputs = core_functional[additional_fn]["Prefix"] + inputs + core_functional[additional_fn]["Suffix"]
 
     raw_input = inputs
-    logging.info(f'[raw_input] {raw_input}')
+    logging.info(f'[raw_input]_{llm_kwargs["ipaddr"]} {raw_input}')
     chatbot.append((inputs, ""))
     yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
 
@@ -144,14 +144,12 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         chatbot[-1] = (inputs, f"您提供的api-key不满足要求，不包含任何可用于{llm_kwargs['llm_model']}的api-key。您可能选择了错误的模型或请求源。")
         yield from update_ui(chatbot=chatbot, history=history, msg="api-key不满足要求") # 刷新界面
         return
-        
     history.append(inputs); history.append("")
-
     retry = 0
     while True:
         try:
             # make a POST request to the API endpoint, stream=True
-            from .bridge_all import model_info
+            from request_llm.bridge_all import model_info
             endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
             response = requests.post(endpoint, headers=headers, proxies=proxies,
                                     json=payload, stream=True, timeout=TIMEOUT_SECONDS);break
@@ -163,7 +161,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             if retry > MAX_RETRY: raise TimeoutError
 
     gpt_replying_buffer = ""
-    
+
     is_head_of_the_stream = True
     if stream:
         stream_response =  response.iter_lines()
@@ -181,14 +179,14 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             if is_head_of_the_stream and (r'"object":"error"' not in chunk.decode()):
                 # 数据流的第一帧不携带content
                 is_head_of_the_stream = False; continue
-            
+
             if chunk:
                 try:
                     chunk_decoded = chunk.decode()
                     # 前者API2D的
                     if ('data: [DONE]' in chunk_decoded) or (len(json.loads(chunk_decoded[6:])['choices'][0]["delta"]) == 0):
                         # 判定为数据流的结束，gpt_replying_buffer也写完了
-                        logging.info(f'[response] {gpt_replying_buffer}')
+                        logging.info(f'[response]_{llm_kwargs["ipaddr"]} {gpt_replying_buffer}')
                         break
                     # 处理数据流的主体
                     chunkjson = json.loads(chunk_decoded[6:])
@@ -277,9 +275,20 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         "frequency_penalty": 0,
     }
     try:
-        print(f" {llm_kwargs['llm_model']} : {conversation_cnt} : {inputs[:100]} ..........")
+        print("\033[1;35m", f"{llm_kwargs['llm_model']}_{llm_kwargs['ipaddr']} :", "\033[0m", f"{conversation_cnt} : {inputs[:100]} ..........")
     except:
         print('输入中可能存在乱码。')
-    return headers,payload
+    return headers, payload
 
-
+if __name__ == '__main__':
+    llm_kwargs = {
+        'api_key': 'sk-',
+        'llm_model': 'gpt-3.5-turbo',
+        'top_p': 1,
+        'max_length': 512,
+        'temperature': 1,
+        # 'ipaddr': ipaddr.client.host
+    }
+    chat = []
+    predict('你好', llm_kwargs=llm_kwargs, chatbot=chat, plugin_kwargs={})
+    print(chat)
