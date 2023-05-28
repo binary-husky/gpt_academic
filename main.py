@@ -197,7 +197,9 @@ def main():
         threading.Thread(target=warm_up_modules, name="warm-up", daemon=True).start()
 
     auto_opentab_delay()
-    demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, favicon_path="docs/logo.png")
+    demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
+        server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION,
+        favicon_path="docs/logo.png", blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile"])
 
     # 如果需要在二级路径下运行
     # CUSTOM_PATH, = get_conf('CUSTOM_PATH')
