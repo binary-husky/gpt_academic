@@ -1,12 +1,11 @@
 ---
-title: academic-chatgpt
+title: ChatImprovement
 emoji: 😻
 colorFrom: blue
 colorTo: blue
 sdk: gradio
-sdk_version: 3.28.3
-python_version: 3.11
-app_file: main.py
+sdk_version: 3.32.0
+app_file: app.py
 pinned: false
 ---
 
