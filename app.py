@@ -2,7 +2,7 @@ import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 
 def main():
     import subprocess, sys
-    subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt'])
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'gradio-stable-fork'])
     import gradio as gr
     if gr.__version__ not in ['3.28.3','3.32.3']: assert False, "请用 pip install -r requirements.txt 安装依赖"
     from request_llm.bridge_all import predict
