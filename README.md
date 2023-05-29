@@ -175,21 +175,26 @@ docker-compose up
 
 
 ## 安装-方法3：其他部署姿势
+1. 一键运行脚本。
+完全不熟悉python环境的Windows用户可以下载[Release](https://github.com/binary-husky/gpt_academic/releases)中发布的一键运行脚本安装无本地模型的版本，
+不建议电脑上已有python的用户采用此方法（在此基础上安装插件的依赖很麻烦）。
+脚本的贡献来源是[oobabooga](https://github.com/oobabooga/one-click-installers)。
 
-1. 如何使用反代URL/微软云AzureAPI
+2. 使用docker-compose运行。
+请阅读docker-compose.yml后，按照其中的提示操作即可
+
+3. 如何使用反代URL/微软云AzureAPI。
 按照`config.py`中的说明配置API_URL_REDIRECT即可。
 
-2. 远程云服务器部署（需要云服务器知识与经验）
+4. 远程云服务器部署（需要云服务器知识与经验）。
 请访问[部署wiki-1](https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BF%9C%E7%A8%8B%E9%83%A8%E7%BD%B2%E6%8C%87%E5%8D%97)
 
-3. 使用WSL2（Windows Subsystem for Linux 子系统）
+5. 使用WSL2（Windows Subsystem for Linux 子系统）。
 请访问[部署wiki-2](https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2)
 
-4. 如何在二级网址（如`http://localhost/subpath`）下运行
+6. 如何在二级网址（如`http://localhost/subpath`）下运行。
 请访问[FastAPI运行说明](docs/WithFastapi.md)
 
-5. 使用docker-compose运行
-请阅读docker-compose.yml后，按照其中的提示操作即可
 ---
 # Advanced Usage
 ## 自定义新的便捷按钮 / 自定义函数插件
