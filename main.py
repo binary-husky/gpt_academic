@@ -2,6 +2,7 @@ import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 
 def main():
     import gradio as gr
+    if gr.__version__ not in ['3.28.3','3.32.2']: assert False, "请用 pip install -r requirements.txt 安装依赖"
     from request_llm.bridge_all import predict
     from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, DummyWith
     # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
@@ -196,7 +197,10 @@ def main():
         threading.Thread(target=warm_up_modules, name="warm-up", daemon=True).start()
 
     auto_opentab_delay()
-    demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, favicon_path="docs/logo.png")
+    demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
+        server_name="0.0.0.0", server_port=PORT,
+        favicon_path="docs/logo.png", auth=AUTHENTICATION,
+        blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile"])
 
     # 如果需要在二级路径下运行
     # CUSTOM_PATH, = get_conf('CUSTOM_PATH')
@@ -204,7 +208,8 @@ def main():
     #     from toolbox import run_gradio_in_subpath
     #     run_gradio_in_subpath(demo, auth=AUTHENTICATION, port=PORT, custom_path=CUSTOM_PATH)
     # else: 
-    #     demo.launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, favicon_path="docs/logo.png")
+    #     demo.launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, favicon_path="docs/logo.png",
+    #                 blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile"])
 
 if __name__ == "__main__":
     main()

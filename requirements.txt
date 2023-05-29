@@ -1,4 +1,4 @@
-gradio==3.28.3
+./docs/gradio-3.32.2-py3-none-any.whl
 tiktoken>=0.3.3
 requests[socks]
 transformers
