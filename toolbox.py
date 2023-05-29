@@ -369,6 +369,7 @@ def format_io(self, y):
         return []
     i_ask, gpt_reply = y[-1]
     # i_ask = text_divide_paragraph(i_ask)  # 输入部分太自由，预处理一波
+    i_ask = re.sub(r'\n+', '\n\n', i_ask)
     gpt_reply = close_up_code_segment_during_stream(gpt_reply)  # 当代码输出半截的时候，试着补上后个```
     y[-1] = (
         # None if i_ask is None else markdown.markdown(i_ask, extensions=['fenced_code', 'tables']),
