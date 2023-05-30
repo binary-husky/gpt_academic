@@ -1,9 +1,6 @@
 """ A module for generating custom prompt strings."""
 import json
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
-
-if TYPE_CHECKING:
-    from autogpt.commands.command import CommandRegistry
+from typing import Any, Callable, Dict, List, Optional
 
 
 class PromptGenerator:
@@ -22,7 +19,7 @@ class PromptGenerator:
         self.resources = []
         self.performance_evaluation = []
         self.goals = []
-        self.command_registry: CommandRegistry | None = None
+        self.command_registry = None
         self.name = "Bob"
         self.role = "AI"
         self.response_format = {
@@ -130,7 +127,7 @@ class PromptGenerator:
                     for item in self.command_registry.commands.values()
                     if item.enabled
                 ]
-            # terminate command is added manually
+            # These are the commands that are added manually, do_nothing and terminate
             command_strings += [self._generate_command_string(item) for item in items]
             return "\n".join(f"{i+1}. {item}" for i, item in enumerate(command_strings))
         else:

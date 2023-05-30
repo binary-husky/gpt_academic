@@ -2,13 +2,9 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING
 
 from autogpt.commands.command import command
-from autogpt.llm.utils import call_ai_function
-
-if TYPE_CHECKING:
-    from autogpt.config import Config
+from autogpt.llm_utils import call_ai_function
 
 
 @command(
@@ -16,7 +12,7 @@ if TYPE_CHECKING:
     "Write Tests",
     '"code": "<full_code_string>", "focus": "<list_of_focus_areas>"',
 )
-def write_tests(code: str, focus: list[str], config: Config) -> str:
+def write_tests(code: str, focus: list[str]) -> str:
     """
     A function that takes in code and focus topics and returns a response from create
       chat completion api call.
@@ -38,4 +34,4 @@ def write_tests(code: str, focus: list[str], config: Config) -> str:
         " specific areas if required."
     )
 
-    return call_ai_function(function_string, args, description_string, config=config)
+    return call_ai_function(function_string, args, description_string)

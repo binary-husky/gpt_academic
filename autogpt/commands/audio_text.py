@@ -1,25 +1,22 @@
 """Commands for converting audio to text."""
 import json
-from typing import TYPE_CHECKING
 
 import requests
 
 from autogpt.commands.command import command
 from autogpt.config import Config
 
-if TYPE_CHECKING:
-    from autogpt.config import Config
+CFG = Config()
 
 
 @command(
     "read_audio_from_file",
     "Convert Audio to text",
     '"filename": "<filename>"',
-    lambda config: config.huggingface_audio_to_text_model
-    and config.huggingface_api_token,
-    "Configure huggingface_audio_to_text_model and Hugging Face api token.",
+    CFG.huggingface_audio_to_text_model,
+    "Configure huggingface_audio_to_text_model.",
 )
-def read_audio_from_file(filename: str, config: Config) -> str:
+def read_audio_from_file(filename: str) -> str:
     """
     Convert audio to text.
 
@@ -31,10 +28,10 @@ def read_audio_from_file(filename: str, config: Config) -> str:
     """
     with open(filename, "rb") as audio_file:
         audio = audio_file.read()
-    return read_audio(audio, config)
+    return read_audio(audio)
 
 
-def read_audio(audio: bytes, config: Config) -> str:
+def read_audio(audio: bytes) -> str:
     """
     Convert audio to text.
 
@@ -44,9 +41,9 @@ def read_audio(audio: bytes, config: Config) -> str:
     Returns:
         str: The text from the audio
     """
-    model = config.huggingface_audio_to_text_model
+    model = CFG.huggingface_audio_to_text_model
     api_url = f"https://api-inference.huggingface.co/models/{model}"
-    api_token = config.huggingface_api_token
+    api_token = CFG.huggingface_api_token
     headers = {"Authorization": f"Bearer {api_token}"}
 
     if api_token is None:

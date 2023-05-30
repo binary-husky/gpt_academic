@@ -1,21 +1,20 @@
 """Handles loading of plugins."""
 
-import importlib.util
+import importlib
 import json
 import os
 import zipfile
 from pathlib import Path
-from typing import List
+from typing import List, Optional, Tuple
 from urllib.parse import urlparse
 from zipimport import zipimporter
 
 import openapi_python_client
 import requests
 from auto_gpt_plugin_template import AutoGPTPluginTemplate
-from openapi_python_client.config import Config as OpenAPIConfig
+from openapi_python_client.cli import Config as OpenAPIConfig
 
 from autogpt.config import Config
-from autogpt.logs import logger
 from autogpt.models.base_open_ai_plugin import BaseOpenAIPlugin
 
 
@@ -33,11 +32,12 @@ def inspect_zip_for_modules(zip_path: str, debug: bool = False) -> list[str]:
     result = []
     with zipfile.ZipFile(zip_path, "r") as zfile:
         for name in zfile.namelist():
-            if name.endswith("__init__.py") and not name.startswith("__MACOSX"):
-                logger.debug(f"Found module '{name}' in the zipfile at: {name}")
+            if name.endswith("__init__.py"):
+                if debug:
+                    print(f"Found module '{name}' in the zipfile at: {name}")
                 result.append(name)
-    if len(result) == 0:
-        logger.debug(f"Module '__init__.py' not found in the zipfile @ {zip_path}.")
+    if debug and len(result) == 0:
+        print(f"Module '__init__.py' not found in the zipfile @ {zip_path}.")
     return result
 
 
@@ -71,12 +71,12 @@ def fetch_openai_plugins_manifest_and_spec(cfg: Config) -> dict:
                 if response.status_code == 200:
                     manifest = response.json()
                     if manifest["schema_version"] != "v1":
-                        logger.warn(
+                        print(
                             f"Unsupported manifest version: {manifest['schem_version']} for {url}"
                         )
                         continue
                     if manifest["api"]["type"] != "openapi":
-                        logger.warn(
+                        print(
                             f"Unsupported API type: {manifest['api']['type']} for {url}"
                         )
                         continue
@@ -84,13 +84,11 @@ def fetch_openai_plugins_manifest_and_spec(cfg: Config) -> dict:
                         manifest, f"{openai_plugin_client_dir}/ai-plugin.json"
                     )
                 else:
-                    logger.warn(
-                        f"Failed to fetch manifest for {url}: {response.status_code}"
-                    )
+                    print(f"Failed to fetch manifest for {url}: {response.status_code}")
             except requests.exceptions.RequestException as e:
-                logger.warn(f"Error while requesting manifest from {url}: {e}")
+                print(f"Error while requesting manifest from {url}: {e}")
         else:
-            logger.info(f"Manifest for {url} already exists")
+            print(f"Manifest for {url} already exists")
             manifest = json.load(open(f"{openai_plugin_client_dir}/ai-plugin.json"))
         if not os.path.exists(f"{openai_plugin_client_dir}/openapi.json"):
             openapi_spec = openapi_python_client._get_document(
@@ -100,7 +98,7 @@ def fetch_openai_plugins_manifest_and_spec(cfg: Config) -> dict:
                 openapi_spec, f"{openai_plugin_client_dir}/openapi.json"
             )
         else:
-            logger.info(f"OpenAPI spec for {url} already exists")
+            print(f"OpenAPI spec for {url} already exists")
             openapi_spec = json.load(open(f"{openai_plugin_client_dir}/openapi.json"))
         manifests[url] = {"manifest": manifest, "openapi_spec": openapi_spec}
     return manifests
@@ -117,13 +115,13 @@ def create_directory_if_not_exists(directory_path: str) -> bool:
     if not os.path.exists(directory_path):
         try:
             os.makedirs(directory_path)
-            logger.debug(f"Created directory: {directory_path}")
+            print(f"Created directory: {directory_path}")
             return True
         except OSError as e:
-            logger.warn(f"Error creating directory {directory_path}: {e}")
+            print(f"Error creating directory {directory_path}: {e}")
             return False
     else:
-        logger.info(f"Directory {directory_path} already exists")
+        print(f"Directory {directory_path} already exists")
         return True
 
 
@@ -152,7 +150,7 @@ def initialize_openai_plugins(
             )
             prev_cwd = Path.cwd()
             os.chdir(openai_plugin_client_dir)
-
+            Path("ai-plugin.json")
             if not os.path.exists("client"):
                 client_results = openapi_python_client.create_new_client(
                     url=manifest_spec["manifest"]["api"]["url"],
@@ -161,7 +159,7 @@ def initialize_openai_plugins(
                     config=_config,
                 )
                 if client_results:
-                    logger.warn(
+                    print(
                         f"Error creating OpenAPI client: {client_results[0].header} \n"
                         f" details: {client_results[0].detail}"
                     )
@@ -170,13 +168,9 @@ def initialize_openai_plugins(
                 "client", "client/client/client.py"
             )
             module = importlib.util.module_from_spec(spec)
-
-            try:
-                spec.loader.exec_module(module)
-            finally:
-                os.chdir(prev_cwd)
-
+            spec.loader.exec_module(module)
             client = module.Client(base_url=url)
+            os.chdir(prev_cwd)
             manifest_spec["client"] = client
     return manifests_specs
 
@@ -213,16 +207,13 @@ def scan_plugins(cfg: Config, debug: bool = False) -> List[AutoGPTPluginTemplate
     loaded_plugins = []
     # Generic plugins
     plugins_path_path = Path(cfg.plugins_dir)
-
-    logger.debug(f"Allowlisted Plugins: {cfg.plugins_allowlist}")
-    logger.debug(f"Denylisted Plugins: {cfg.plugins_denylist}")
-
     for plugin in plugins_path_path.glob("*.zip"):
         if moduleList := inspect_zip_for_modules(str(plugin), debug):
             for module in moduleList:
                 plugin = Path(plugin)
                 module = Path(module)
-                logger.debug(f"Plugin: {plugin} Module: {module}")
+                if debug:
+                    print(f"Plugin: {plugin} Module: {module}")
                 zipped_package = zipimporter(str(plugin))
                 zipped_module = zipped_package.load_module(str(module.parent))
                 for key in dir(zipped_module):
@@ -249,9 +240,9 @@ def scan_plugins(cfg: Config, debug: bool = False) -> List[AutoGPTPluginTemplate
                     loaded_plugins.append(plugin)
 
     if loaded_plugins:
-        logger.info(f"\nPlugins found: {len(loaded_plugins)}\n" "--------------------")
+        print(f"\nPlugins found: {len(loaded_plugins)}\n" "--------------------")
     for plugin in loaded_plugins:
-        logger.info(f"{plugin._name}: {plugin._version} - {plugin._description}")
+        print(f"{plugin._name}: {plugin._version} - {plugin._description}")
     return loaded_plugins
 
 
@@ -265,19 +256,12 @@ def denylist_allowlist_check(plugin_name: str, cfg: Config) -> bool:
     Returns:
         True or False
     """
-    logger.debug(f"Checking if plugin {plugin_name} should be loaded")
-    if (
-        plugin_name in cfg.plugins_denylist
-        or "all" in cfg.plugins_denylist
-        or "none" in cfg.plugins_allowlist
-    ):
-        logger.debug(f"Not loading plugin {plugin_name} as it was in the denylist.")
+    if plugin_name in cfg.plugins_denylist:
         return False
-    if plugin_name in cfg.plugins_allowlist or "all" in cfg.plugins_allowlist:
-        logger.debug(f"Loading plugin {plugin_name} as it was in the allowlist.")
+    if plugin_name in cfg.plugins_allowlist:
         return True
     ack = input(
         f"WARNING: Plugin {plugin_name} found. But not in the"
-        f" allowlist... Load? ({cfg.authorise_key}/{cfg.exit_key}): "
+        " allowlist... Load? (y/n): "
     )
-    return ack.lower() == cfg.authorise_key
+    return ack.lower() == "y"
