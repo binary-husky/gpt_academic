@@ -17,7 +17,9 @@ Per tradurre questo progetto in qualsiasi lingua con GPT, leggere e eseguire [`m
 >
 > 3. Questo progetto è compatibile e incoraggia l'utilizzo di grandi modelli di linguaggio di produzione nazionale come chatglm, RWKV, Pangu ecc. Supporta la coesistenza di più api-key e può essere compilato nel file di configurazione come `API_KEY="openai-key1,openai-key2,api2d-key3"`. Per sostituire temporaneamente `API_KEY`, inserire `API_KEY` temporaneo nell'area di input e premere Invio per renderlo effettivo. 
 
-<div align="center">Funzione | Descrizione
+<div align="center">
+
+Funzione | Descrizione
 --- | ---
 Correzione immediata | Supporta correzione immediata e ricerca degli errori di grammatica del documento con un solo clic
 Traduzione cinese-inglese immediata | Traduzione cinese-inglese immediata con un solo clic
@@ -206,7 +208,9 @@ La difficoltà di scrittura e debug dei plugin del nostro progetto è molto bass
 
 ---
 # Ultimo aggiornamento
-## Nuove funzionalità dinamiche1. Funzionalità di salvataggio della conversazione. Nell'area dei plugin della funzione, fare clic su "Salva la conversazione corrente" per salvare la conversazione corrente come file html leggibile e ripristinabile, inoltre, nell'area dei plugin della funzione (menu a discesa), fare clic su "Carica la cronologia della conversazione archiviata" per ripristinare la conversazione precedente. Suggerimento: fare clic su "Carica la cronologia della conversazione archiviata" senza specificare il file consente di visualizzare la cache degli archivi html di cronologia, fare clic su "Elimina tutti i record di cronologia delle conversazioni locali" per eliminare tutte le cache degli archivi html.
+## Nuove funzionalità dinamiche
+ 
+1. Funzionalità di salvataggio della conversazione. Nell'area dei plugin della funzione, fare clic su "Salva la conversazione corrente" per salvare la conversazione corrente come file html leggibile e ripristinabile, inoltre, nell'area dei plugin della funzione (menu a discesa), fare clic su "Carica la cronologia della conversazione archiviata" per ripristinare la conversazione precedente. Suggerimento: fare clic su "Carica la cronologia della conversazione archiviata" senza specificare il file consente di visualizzare la cache degli archivi html di cronologia, fare clic su "Elimina tutti i record di cronologia delle conversazioni locali" per eliminare tutte le cache degli archivi html.
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/235222390-24a9acc0-680f-49f5-bc81-2f3161f1e049.png" width="500" >
 </div>
