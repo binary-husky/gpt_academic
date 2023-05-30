@@ -2,7 +2,7 @@
 >
 > Ao instalar as dependências, por favor, selecione rigorosamente as versões **especificadas** no arquivo requirements.txt.
 >
-> `pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/`
+> `pip install -r requirements.txt`
 >
 
 # <img src="logo.png" width="40" > Otimização acadêmica GPT (GPT Academic)
@@ -18,7 +18,9 @@ Para traduzir este projeto para qualquer idioma com o GPT, leia e execute [`mult
 >
 > 3. Este projeto é compatível com e incentiva o uso de modelos de linguagem nacionais, como chatglm e RWKV, Pangolin, etc. Suporta a coexistência de várias chaves de API e pode ser preenchido no arquivo de configuração como `API_KEY="openai-key1,openai-key2,api2d-key3"`. Quando precisar alterar temporariamente o `API_KEY`, basta digitar o `API_KEY` temporário na área de entrada e pressionar Enter para que ele entre em vigor. 
 
-<div align="center">Funcionalidade | Descrição
+<div align="center">
+
+Funcionalidade | Descrição
 --- | ---
 Um clique de polimento | Suporte a um clique polimento, um clique encontrar erros de gramática no artigo
 Tradução chinês-inglês de um clique | Tradução chinês-inglês de um clique
@@ -216,7 +218,9 @@ Para mais detalhes, consulte o [Guia do plug-in de função.](https://github.com
 
 ---
 # Última atualização
-## Novas funções dinâmicas.1. Função de salvamento de diálogo. Ao chamar o plug-in de função "Salvar diálogo atual", é possível salvar o diálogo atual em um arquivo html legível e reversível. Além disso, ao chamar o plug-in de função "Carregar arquivo de histórico de diálogo" no menu suspenso da área de plug-in, é possível restaurar uma conversa anterior. Dica: clicar em "Carregar arquivo de histórico de diálogo" sem especificar um arquivo permite visualizar o cache do arquivo html de histórico. Clicar em "Excluir todo o registro de histórico de diálogo local" permite excluir todo o cache de arquivo html. 
+## Novas funções dinâmicas.
+
+1. Função de salvamento de diálogo. Ao chamar o plug-in de função "Salvar diálogo atual", é possível salvar o diálogo atual em um arquivo html legível e reversível. Além disso, ao chamar o plug-in de função "Carregar arquivo de histórico de diálogo" no menu suspenso da área de plug-in, é possível restaurar uma conversa anterior. Dica: clicar em "Carregar arquivo de histórico de diálogo" sem especificar um arquivo permite visualizar o cache do arquivo html de histórico. Clicar em "Excluir todo o registro de histórico de diálogo local" permite excluir todo o cache de arquivo html. 
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/235222390-24a9acc0-680f-49f5-bc81-2f3161f1e049.png" width="500" >
 </div>
