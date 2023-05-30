@@ -59,7 +59,15 @@ def ArgsGeneralWrapper(f):
         }
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
-        yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
+
+        if 'lock_plugin' in cookies and cookies['lock_plugin'] is not None:
+            # 处理插件锁定状态
+            module, fn_name = cookies['lock_plugin'].split('->')
+            f_hot_reload = getattr(importlib.import_module(module, fn_name), fn_name)
+            yield from HotReload(f_hot_reload)(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
+        else:
+            # 正常状态
+            yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
     return decorated
 
 
@@ -83,7 +91,7 @@ def CatchException(f):
     """
 
     @wraps(f)
-    def decorated(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
+    def decorated(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT=-1):
         try:
             yield from f(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT)
         except Exception as e:
