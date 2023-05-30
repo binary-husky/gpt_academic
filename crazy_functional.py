@@ -295,5 +295,17 @@ def get_crazy_functions():
     except:
         print('Load function plugin failed')
 
+    try:
+        from crazy_functions.Langchain知识库 import 知识库问答
+        function_plugins.update({
+            "构建知识库（请先上传文件素材）": {
+                "Color": "stop",
+                "AsButton": False,
+                "Function": HotReload(知识库问答)
+            }
+        })
+    except:
+        print('Load function plugin failed')
+
     ###################### 第n组插件 ###########################
     return function_plugins
