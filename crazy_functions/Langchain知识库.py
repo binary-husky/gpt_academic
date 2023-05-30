@@ -29,9 +29,14 @@ def 知识库问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
         )
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
+    
+    # < --------------------读取参数--------------- >
+    if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
+    kai_id = plugin_kwargs.get("advanced_arg", 'default')
+
     # < --------------------读取文件--------------- >
     file_manifest = []
-    spl = ["doc", "docx", "email", "epub", "html", "image", "json", "md", "msg", "odt", "pdf", "ppt", "pptx", "rtf", "text"]
+    spl = ["txt", "doc", "docx", "email", "epub", "html", "image", "json", "md", "msg", "odt", "pdf", "ppt", "pptx", "rtf", "text"]
     for sp in spl:
         _, file_manifest_tmp, _ = get_files_from_everything(txt, type=f'.{sp}')
         file_manifest += file_manifest_tmp
@@ -55,13 +60,15 @@ def 知识库问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     print('Establishing knowledge archive ...')
     with ProxyNetworkActivate():    # 临时地激活代理网络
         kai = knowledge_archive_interface()
-        kai.feed_archive(file_manifest=file_manifest, id="default")
-
-    chatbot.append(['知识库构建成功', "正在将知识库存储至cookie中"])
-    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-    chatbot._cookies['langchain_plugin_embedding'] = kai.get_current_archive_id()
-    chatbot._cookies['lock_plugin'] = 'crazy_functions.Langchain知识库->读取知识库作答'
-    chatbot.append(['完成', "“根据知识库作答”函数插件已经接管问答系统, 提问吧! 但注意, 您接下来不能再使用其他插件了，刷新页面即可以退出知识库问答模式。"])
+        kai.feed_archive(file_manifest=file_manifest, id=kai_id)
+    kai_files = kai.get_loaded_file()
+    kai_files = '<br/>'.join(kai_files)
+    # chatbot.append(['知识库构建成功', "正在将知识库存储至cookie中"])
+    # yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+    # chatbot._cookies['langchain_plugin_embedding'] = kai.get_current_archive_id()
+    # chatbot._cookies['lock_plugin'] = 'crazy_functions.Langchain知识库->读取知识库作答'
+    # chatbot.append(['完成', "“根据知识库作答”函数插件已经接管问答系统, 提问吧! 但注意, 您接下来不能再使用其他插件了，刷新页面即可以退出知识库问答模式。"])
+    chatbot.append(['构建完成', f"当前知识库内的文件：\n\n---\n\n{kai_files}\n\n---\n\n请切换至“知识库问答”插件进行知识库访问, 或者使用此插件继续上传更多文件。"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
 
 @CatchException
