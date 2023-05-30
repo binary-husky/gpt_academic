@@ -99,6 +99,7 @@ services:
     command: >
       bash -c "       echo '[gpt-academic] 正在从github拉取最新代码...' &&
                       git pull &&
+                      pip install -r requirements.txt &&
                       echo '[jittorllms] 正在从github拉取最新代码...' &&
                       git --git-dir=request_llm/jittorllms/.git --work-tree=request_llm/jittorllms pull --force &&
                       python3 -u main.py"
