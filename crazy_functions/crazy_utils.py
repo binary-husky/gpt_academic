@@ -661,6 +661,9 @@ class knowledge_archive_interface():
 
     def get_current_archive_id(self):
         return self.current_id
+    
+    def get_loaded_file(self):
+        return self.qa_handle.get_loaded_file()
 
     def answer_with_archive_by_id(self, txt, id):
         self.threadLock.acquire()
