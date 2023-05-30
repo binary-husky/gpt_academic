@@ -2,11 +2,11 @@
 >
 > Durante l'installazione delle dipendenze, selezionare rigorosamente le **versioni specificate** nel file requirements.txt.
 >
-> ` pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/`
+> ` pip install -r requirements.txt`
 
-# <img src="docs/logo.png" width="40" > GPT Ottimizzazione Accademica (GPT Academic)
+# <img src="logo.png" width="40" > GPT Ottimizzazione Accademica (GPT Academic)
 
-**Se ti piace questo progetto, ti preghiamo di dargli una stella. Se hai sviluppato scorciatoie accademiche o plugin funzionali più utili, non esitare ad aprire una issue o pull request. Abbiamo anche una README in [Inglese|](docs/README_EN.md)[Giapponese|](docs/README_JP.md)[Coreano|](https://github.com/mldljyh/ko_gpt_academic)[Russo|](docs/README_RS.md)[Francese](docs/README_FR.md) tradotta da questo stesso progetto.
+**Se ti piace questo progetto, ti preghiamo di dargli una stella. Se hai sviluppato scorciatoie accademiche o plugin funzionali più utili, non esitare ad aprire una issue o pull request. Abbiamo anche una README in [Inglese|](README_EN.md)[Giapponese|](README_JP.md)[Coreano|](https://github.com/mldljyh/ko_gpt_academic)[Russo|](README_RS.md)[Francese](README_FR.md) tradotta da questo stesso progetto.
 Per tradurre questo progetto in qualsiasi lingua con GPT, leggere e eseguire [`multi_language.py`](multi_language.py) (sperimentale).
 
 > **Nota**
@@ -43,6 +43,8 @@ Avvia il tema di gradio [scuro](https://github.com/binary-husky/chatgpt_academic
 Supporto per maggiori modelli LLM, supporto API2D | Sentirsi serviti simultaneamente da GPT3.5, GPT4, [Tsinghua ChatGLM](https://github.com/THUDM/ChatGLM-6B), [Fudan MOSS](https://github.com/OpenLMLab/MOSS) deve essere una grande sensazione, giusto?
 Ulteriori modelli LLM supportat,i supporto per l'implementazione di Huggingface | Aggiunta di un'interfaccia Newbing (Nuovo Bing), introdotta la compatibilità con Tsinghua [Jittorllms](https://github.com/Jittor/JittorLLMs), [LLaMA](https://github.com/facebookresearch/llama), [RWKV](https://github.com/BlinkDL/ChatRWKV) e [PanGu-α](https://openi.org.cn/pangu/)
 Ulteriori dimostrazioni di nuove funzionalità (generazione di immagini, ecc.)... | Vedere la fine di questo documento...
+ </div>
+ 
  
 - Nuova interfaccia (modificare l'opzione LAYOUT in `config.py` per passare dal layout a sinistra e a destra al layout superiore e inferiore)
 <div align="center">
@@ -204,7 +206,7 @@ ad esempio
 2. Plugin di funzione personalizzati
 
 Scrivi plugin di funzione personalizzati e esegui tutte le attività che desideri o non hai mai pensato di fare.
-La difficoltà di scrittura e debug dei plugin del nostro progetto è molto bassa. Se si dispone di una certa conoscenza di base di Python, è possibile realizzare la propria funzione del plugin seguendo il nostro modello. Per maggiori dettagli, consultare la [guida al plugin per funzioni] (https://github.com/binary-husky/chatgpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97).
+La difficoltà di scrittura e debug dei plugin del nostro progetto è molto bassa. Se si dispone di una certa conoscenza di base di Python, è possibile realizzare la propria funzione del plugin seguendo il nostro modello. Per maggiori dettagli, consultare la [guida al plugin per funzioni](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97).
 
 ---
 # Ultimo aggiornamento
