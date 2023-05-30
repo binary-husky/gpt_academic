@@ -366,9 +366,9 @@ class ChatBot(ChatBotFrame):
                         self.draw_public_chat()
                         self.draw_setting_chat()
                     # 绘制autogpt模组
-                    with gr.Tab('Auto-GPT'):
-                        self.draw_next_auto()
-                        self.draw_goals_auto()
+                    # with gr.Tab('Auto-GPT'):
+                    #     self.draw_next_auto()
+                    #     self.draw_goals_auto()
                 with self.chat_tab:  # 使用 gr.State()对组件进行拷贝时，如果之前绘制了Markdown格式，会导致启动崩溃,所以将 markdown相关绘制放在最后
                     self.draw_chatbot()
                 with self.prompt_tab:
@@ -378,8 +378,8 @@ class ChatBot(ChatBotFrame):
             self.signals_function()
             self.signals_prompt_func()
             self.signals_public()
-            self.signals_auto_input()
             self.signals_prompt_edit()
+            # self.signals_auto_input()
 
         # Start
         self.auto_opentab_delay()
