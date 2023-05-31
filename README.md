@@ -1,8 +1,8 @@
 > **Note**
 >
-> 5月27日对gradio依赖进行了较大的修复和调整，fork并解决了官方Gradio的一系列bug。但如果27日当天进行了更新，可能会导致代码报错（依赖缺失，卡在loading界面等），请及时更新到**最新版代码**并重新安装pip依赖即可。若给您带来困扰还请谅解。安装依赖时，请严格选择requirements.txt中**指定的版本**： 
+> 2023.5.27 对Gradio依赖进行了调整，Fork并解决了官方Gradio的若干Bugs。请及时**更新代码**并重新更新pip依赖。安装依赖时，请严格选择`requirements.txt`中**指定的版本**： 
 > 
-> `pip install -r requirements.txt -i https://pypi.org/simple`
+> `pip install -r requirements.txt`
 >
 
 # <img src="docs/logo.png" width="40" > GPT 学术优化 (GPT Academic)
@@ -332,4 +332,5 @@ https://github.com/kaixindelele/ChatPaper
 # 更多：
 https://github.com/gradio-app/gradio
 https://github.com/fghrsh/live2d_demo
+https://github.com/oobabooga/one-click-installers
 ```
