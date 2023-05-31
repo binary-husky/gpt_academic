@@ -247,16 +247,13 @@ def text_divide_paragraph(text):
     """
     将文本按照段落分隔符分割开，生成带有段落标签的HTML代码。
     """
-    if '```' in text:
-        # careful input
-        return text
-    else:
-        # wtf input
-        # lines = text.split("\n")
-        # for i, line in enumerate(lines):
-        #     lines[i] = lines[i].replace(" ", "&nbsp;")
-        # text = "</br>".join(lines)
-        return text
+    regex = r'```[\s\S]*?```(?:(?!```).)*$'
+    codeblock_matches = re.findall(regex, text)
+    for match in codeblock_matches:
+        text = text.replace(match, match.replace('\n\n\n\n', '\n\n'))
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    return text.strip()
+
 
 @lru_cache(maxsize=128) # 使用 lru缓存 加快转换速度
 def markdown_convertion(txt):
@@ -368,8 +365,7 @@ def format_io(self, y):
     if y is None or y == []:
         return []
     i_ask, gpt_reply = y[-1]
-    # i_ask = text_divide_paragraph(i_ask)  # 输入部分太自由，预处理一波
-    i_ask = re.sub(r'\n+', '\n\n', i_ask)
+    i_ask = text_divide_paragraph(i_ask)  # 输入部分太自由，预处理一波
     gpt_reply = close_up_code_segment_during_stream(gpt_reply)  # 当代码输出半截的时候，试着补上后个```
     y[-1] = (
         # None if i_ask is None else markdown.markdown(i_ask, extensions=['fenced_code', 'tables']),
