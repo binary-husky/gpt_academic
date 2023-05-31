@@ -243,16 +243,19 @@ def report_execption(chatbot, history, a, b):
     history.append(b)
 
 
-def text_divide_paragraph(text):
+def text_divide_paragraph(input_str):
     """
     将文本按照段落分隔符分割开，生成带有段落标签的HTML代码。
     """
-    regex = r'```[\s\S]*?```(?:(?!```).)*$'
-    codeblock_matches = re.findall(regex, text)
-    for match in codeblock_matches:
-        text = text.replace(match, match.replace('\n\n\n\n', '\n\n'))
-    text = re.sub(r'\n{3,}', '\n\n', text)
-    return text.strip()
+    code_blocks = re.findall('```.*?```', input_str, re.DOTALL)
+    for block in code_blocks:
+        input_str = input_str.replace(block, f'{{{{{{{{{{{code_blocks.index(block)}}}}}}}}}}}')
+    # 将除了三个反引号之间的文本块以外的 "\n" 替换为 "\n\n"
+    input_str = re.sub(r'(?!```)(?<!\n)\n(?!(\n|^)( {0,3}[\*\+\-]|[0-9]+\.))', '\n\n', input_str)
+    # 还原未处理的文本块
+    for i, block in enumerate(code_blocks):
+        input_str = input_str.replace(f'{{{{{{{{{{{i}}}}}}}}}}}', block)
+    return input_str
 
 
 @lru_cache(maxsize=128) # 使用 lru缓存 加快转换速度
