@@ -38,13 +38,13 @@ def 知识库问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
 
     # < --------------------读取文件--------------- >
     file_manifest = []
-    spl = ["txt", "doc", "docx", "email", "epub", "html", "image", "json", "md", "msg", "odt", "pdf", "ppt", "pptx", "rtf", "text"]
+    spl = ["txt", "doc", "docx", "email", "epub", "html", "json", "md", "msg", "pdf", "ppt", "pptx", "rtf"]
     for sp in spl:
         _, file_manifest_tmp, _ = get_files_from_everything(txt, type=f'.{sp}')
         file_manifest += file_manifest_tmp
     
     if len(file_manifest) == 0:
-        chatbot.append(["没有找到任何可读取文件", "当前支持的格式包括: txt, md, tex"])
+        chatbot.append(["没有找到任何可读取文件", "当前支持的格式包括: txt, md, docx, pptx, pdf, json等"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
     
