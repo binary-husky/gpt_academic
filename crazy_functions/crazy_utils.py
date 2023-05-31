@@ -638,7 +638,7 @@ class knowledge_archive_interface():
             print('Checking Text2vec ...')
             from langchain.embeddings.huggingface import HuggingFaceEmbeddings
             with ProxyNetworkActivate():    # 临时地激活代理网络
-                self.text2vec_large_chinese = HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese", model_kwargs={'device': 'cpu'})
+                self.text2vec_large_chinese = HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
 
         return self.text2vec_large_chinese
 
@@ -694,3 +694,7 @@ class knowledge_archive_interface():
         self.threadLock.release()
         return resp, prompt
 
+def try_install_deps(deps):
+    for dep in deps:
+        import subprocess, sys
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--user', dep])

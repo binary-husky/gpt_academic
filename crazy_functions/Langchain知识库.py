@@ -18,17 +18,19 @@ def 知识库问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     chatbot.append(("这是什么功能？", "[Local Message] 从一批文件(txt, md, tex)中读取数据构建知识库, 然后进行问答。"))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
+    # resolve deps
     try:
-        import zh_langchain
+        from zh_langchain import construct_vector_store
         from langchain.embeddings.huggingface import HuggingFaceEmbeddings
         from .crazy_utils import knowledge_archive_interface
     except Exception as e:
         chatbot.append(
             ["依赖不足", 
-             "导入依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade langchain zh_langchain```。"]
+             "导入依赖失败。正在尝试自动安装，请查看终端的输出或耐心等待..."]
         )
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-        return
+        from .crazy_utils import try_install_deps
+        try_install_deps(['zh_langchain==0.1.9'])
     
     # < --------------------读取参数--------------- >
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
@@ -52,7 +54,7 @@ def 知识库问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     print('Checking Text2vec ...')
     from langchain.embeddings.huggingface import HuggingFaceEmbeddings
     with ProxyNetworkActivate():    # 临时地激活代理网络
-        HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese", model_kwargs={'device': 'cpu'})
+        HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
 
     # < -------------------构建知识库--------------- >
     chatbot.append(['<br/>'.join(file_manifest), "正在构建知识库..."])
@@ -86,6 +88,7 @@ def 读取知识库作答(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
         resp, prompt = kai.answer_with_archive_by_id(txt, kai_id)
 
     chatbot.append((txt, '[Local Message] ' + prompt))
+    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
     gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
         inputs=prompt, inputs_show_user=txt, 
         llm_kwargs=llm_kwargs, chatbot=chatbot, history=[], 
