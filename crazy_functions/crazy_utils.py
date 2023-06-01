@@ -1,4 +1,5 @@
 from toolbox import update_ui, get_conf, trimmed_format_exc
+import threading
 
 def input_clipping(inputs, history, max_token_limit):
     import numpy as np
@@ -606,3 +607,94 @@ def get_files_from_everything(txt, type): # type='.md'
         success = False
 
     return success, file_manifest, project_folder
+
+
+
+
+def Singleton(cls):
+    _instance = {}
+ 
+    def _singleton(*args, **kargs):
+        if cls not in _instance:
+            _instance[cls] = cls(*args, **kargs)
+        return _instance[cls]
+ 
+    return _singleton
+
+
+@Singleton
+class knowledge_archive_interface():
+    def __init__(self) -> None:
+        self.threadLock = threading.Lock()
+        self.current_id = ""
+        self.kai_path = None
+        self.qa_handle = None
+        self.text2vec_large_chinese = None
+
+    def get_chinese_text2vec(self):
+        if self.text2vec_large_chinese is None:
+            # < -------------------预热文本向量化模组--------------- >
+            from toolbox import ProxyNetworkActivate
+            print('Checking Text2vec ...')
+            from langchain.embeddings.huggingface import HuggingFaceEmbeddings
+            with ProxyNetworkActivate():    # 临时地激活代理网络
+                self.text2vec_large_chinese = HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
+
+        return self.text2vec_large_chinese
+
+
+    def feed_archive(self, file_manifest, id="default"):
+        self.threadLock.acquire()
+        # import uuid
+        self.current_id = id
+        from zh_langchain import construct_vector_store
+        self.qa_handle, self.kai_path = construct_vector_store(   
+            vs_id=self.current_id, 
+            files=file_manifest, 
+            sentence_size=100,
+            history=[],
+            one_conent="",
+            one_content_segmentation="",
+            text2vec = self.get_chinese_text2vec(),
+        )
+        self.threadLock.release()
+
+    def get_current_archive_id(self):
+        return self.current_id
+    
+    def get_loaded_file(self):
+        return self.qa_handle.get_loaded_file()
+
+    def answer_with_archive_by_id(self, txt, id):
+        self.threadLock.acquire()
+        if not self.current_id == id:
+            self.current_id = id
+            from zh_langchain import construct_vector_store
+            self.qa_handle, self.kai_path = construct_vector_store(   
+                vs_id=self.current_id, 
+                files=[], 
+                sentence_size=100,
+                history=[],
+                one_conent="",
+                one_content_segmentation="",
+                text2vec = self.get_chinese_text2vec(),
+            )
+        VECTOR_SEARCH_SCORE_THRESHOLD = 0
+        VECTOR_SEARCH_TOP_K = 4
+        CHUNK_SIZE = 512
+        resp, prompt = self.qa_handle.get_knowledge_based_conent_test(
+            query = txt,
+            vs_path = self.kai_path,
+            score_threshold=VECTOR_SEARCH_SCORE_THRESHOLD,
+            vector_search_top_k=VECTOR_SEARCH_TOP_K, 
+            chunk_conent=True,
+            chunk_size=CHUNK_SIZE,
+            text2vec = self.get_chinese_text2vec(),
+        )
+        self.threadLock.release()
+        return resp, prompt
+
+def try_install_deps(deps):
+    for dep in deps:
+        import subprocess, sys
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--user', dep])
