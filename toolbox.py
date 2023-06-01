@@ -83,7 +83,7 @@ def CatchException(f):
     """
 
     @wraps(f)
-    def decorated(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
+    def decorated(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT=-1):
         try:
             yield from f(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT)
         except Exception as e:
@@ -775,8 +775,9 @@ class ProxyNetworkActivate():
         from toolbox import get_conf
         proxies, = get_conf('proxies')
         if 'no_proxy' in os.environ: os.environ.pop('no_proxy')
-        os.environ['HTTP_PROXY'] = proxies['http']
-        os.environ['HTTPS_PROXY'] = proxies['https']
+        if proxies is not None:
+            if 'http' in proxies: os.environ['HTTP_PROXY'] = proxies['http']
+            if 'https' in proxies: os.environ['HTTPS_PROXY'] = proxies['https']
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
