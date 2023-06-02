@@ -68,13 +68,16 @@ class ChatBot(ChatBotFrame):
         # self.__gr_url = gr.State(self.__url)
 
     def draw_title(self):
-        self.title = gr.HTML(self.title_html)
+        # self.title = gr.HTML(self.title_html)
         self.cookies = gr.State({'api_key': API_KEY, 'llm_model': LLM_MODEL, 'local': self.__url})
 
     def draw_chatbot(self):
-        self.chatbot = gr.Chatbot(label=f"当前模型：{LLM_MODEL}")
+        self.chatbot = gr.Chatbot(elem_id='main_chatbot', label=f"当前模型：{LLM_MODEL}")
         self.chatbot.style(height=CHATBOT_HEIGHT)
         self.history = gr.State([])
+        with gr.Row():
+            self.txt = gr.Textbox(show_label=False, placeholder="Input question here.").style(container=False)
+            self.submitBtn = gr.Button("提交", variant="primary").style(full_width=False)
         with gr.Row():
             self.status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {proxy_info}")
 
@@ -82,7 +85,7 @@ class ChatBot(ChatBotFrame):
         with gr.Row():
             self.pro_search_txt = gr.Textbox(show_label=False, placeholder="Enter the prompt you want.").style(
                 container=False)
-            self.pro_entry_btn = gr.Button("搜索", variant="secondary").style(full_width=False, size="sm")
+            self.pro_entry_btn = gr.Button("搜索", variant="primary").style(full_width=False, size="sm")
         with gr.Row():
             self.pro_prompt_list = gr.Dataset(components=[gr.HTML(visible=False)], samples_per_page=10,
                                               label="Prompt usage frequency",
@@ -127,22 +130,14 @@ class ChatBot(ChatBotFrame):
                                outputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_private_check,
                                         self.pro_func_prompt, self.pro_fp_state])
 
-    def draw_input_chat(self):
-        with gr.Accordion("输入区", open=True) as self.area_input_primary:
-            with gr.Row():
-                self.txt = gr.Textbox(show_label=False, placeholder="Input question here.").style(container=False)
-            with gr.Row():
-                self.submitBtn = gr.Button("提交", variant="primary")
-            with gr.Row():
-                # self.cpopyBtn = gr.Button("复制回答", variant="secondary").style(size="sm")
-                self.resetBtn = gr.Button("重置Chatbot", variant="secondary").style(size="sm")
-                self.stopBtn = gr.Button("停止", variant="secondary").style(size="sm")
-
-
     def draw_function_chat(self):
         prompt_list, devs_document = get_conf('prompt_list', 'devs_document')
+        with gr.Row():
+            # self.cpopyBtn = gr.Button("复制回答", variant="secondary").style(size="sm")
+            self.resetBtn = gr.Button("重置Chatbot", variant="secondary").style(size="sm")
+            self.stopBtn = gr.Button("停止", variant="stop").style(size="sm")
         with gr.Tab('Function'):
-            with gr.Accordion("基础功能区", open=False) as self.area_basic_fn:
+            with gr.Accordion("基础功能区", open=True) as self.area_basic_fn:
                 with gr.Row():
                     for k in functional:
                         variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
@@ -351,20 +346,20 @@ class ChatBot(ChatBotFrame):
             # 绘制一个ROW，row会让底下的元素自动排成一行
             with gr.Row().style(justify='between'):
                 # 绘制列1
+                with gr.Column(scale=46):
+                    # 绘制对话模组
+                    with gr.Tab('Chat-Copilot'):
+                        self.draw_function_chat()
+                        self.draw_public_chat()
+                        self.draw_setting_chat()
+                # 绘制列2
                 with gr.Column(scale=100):
                     with gr.Tab('Chatbot') as self.chat_tab:
                         # self.draw_chatbot()
                         pass
                     with gr.Tab('Prompt检索/编辑') as self.prompt_tab:
                         self.draw_prompt()
-                # 绘制列2
-                with gr.Column(scale=51):
-                    # 绘制对话模组
-                    with gr.Tab('Chat-GPT'):
-                        self.draw_input_chat()
-                        self.draw_function_chat()
-                        self.draw_public_chat()
-                        self.draw_setting_chat()
+
                     # 绘制autogpt模组
                     # with gr.Tab('Auto-GPT'):
                     #     self.draw_next_auto()

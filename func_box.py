@@ -156,14 +156,14 @@ def md5_str(st):
     return result
 
 
-def html_tag_color(tag, color=None):
+def html_tag_color(tag, color=None, font='black'):
     """
     将文本转换为带有高亮提示的html代码
     """
     if not color:
         rgb = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
         color = f"rgb{rgb}"
-    tag = f'<span style="background-color: {color}; font-weight: bold; color: black">&nbsp;{tag}&ensp;</span>'
+    tag = f'<span style="background-color: {color}; font-weight: bold; color: {font}">&nbsp;{tag}&ensp;</span>'
     return tag
 
 
