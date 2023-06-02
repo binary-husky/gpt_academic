@@ -3,19 +3,36 @@ from toolbox import CatchException, report_execption, write_results_to_file, zip
 import os
 import re
 
+def 寻找Latex主文件(file_manifest, mode):
+    for texf in file_manifest:
+        if os.path.basename(texf).startswith('merge'):
+            continue
+        with open(texf, 'r', encoding='utf8') as f:
+            file_content = f.read()
+        if r'\documentclass' in file_content:
+            return texf
+        else:
+            continue
+    raise RuntimeError('无法找到一个主Tex文件（包含documentclass关键字）')
 
-
-def merge_tex_files(project_foler, main_file):
-    # Get the directory of the main tex file
-
-    # re.findall(r"\\input\{(.*?)\}", main_file, re.M)
+def merge_tex_files_(project_foler, main_file, mode):
     for s in reversed([q for q in re.finditer(r"\\input\{(.*?)\}", main_file, re.M)]):
         f = s.group(1)
         fp = os.path.join(project_foler, f)
         with open(fp, 'r', encoding='utf-8', errors='replace') as fx:
             c = fx.read()
-        c = merge_tex_files(project_foler, c)
+        c = merge_tex_files_(project_foler, c, mode)
         main_file = main_file[:s.span()[0]] + c + main_file[s.span()[1]:]
+    return main_file
+
+def merge_tex_files(project_foler, main_file, mode):
+    main_file = merge_tex_files_(project_foler, main_file, mode)
+
+    if mode == 'translate_zh':
+        pattern = re.compile(r'\\documentclass.*\n')
+        match = pattern.search(main_file)
+        position = match.end()
+        main_file = main_file[:position] + '\\usepackage{CTEX}\n' + main_file[position:]
 
     return main_file
 
@@ -25,24 +42,28 @@ class LinkTable():
         self.preserve = preserve
         self.next = None
 
+
+def fix_content(final_tex):
+    """
+        fix common GPT errors to increase success rate
+    """
+    final_tex = final_tex.replace('%', 'Percent')
+    final_tex = re.sub(r"\\([a-z]{2,10}) {", repl=r"\\$1{", string=final_tex)
+    return final_tex
+
 class LatexPaperSplit():
     def __init__(self) -> None:
         self.root = None
 
     def merge_result(self, arr):
-        def remove_special_chars(s):
-            s.replace('%', 'Percent')
-            return s
-        
         result_string = ""
-        
         node = self.root
         p = 0
         while True:
             if node.preserve:
                 result_string += node.string
             else:
-                result_string += remove_special_chars(arr[p])
+                result_string += fix_content(arr[p])
                 p += 1
             node = node.next
             if node is None: break
@@ -64,14 +85,18 @@ class LatexPaperSplit():
                         this = res.group(0)
                         # core = res.group(1)
                         after = res.string[res.span()[1]:]
-                        
-                        lt.string = before
-                        tmp  = lt.next
                         # ======
+                        if before.endswith('\n'):
+                            this = '\n' + this
+                            before = before[:-1]
                         if after.startswith('\n'):
                             # move \n
                             this = this + '\n'
                             after = after[1:]
+                        # ======
+                        lt.string = before
+                        tmp  = lt.next
+                        # ======
                         mid = LinkTable(this, True)
                         lt.next = mid
                         # ======
@@ -95,6 +120,11 @@ class LatexPaperSplit():
         split_worker(root, r"\\begin\{figure\*\}(.*?)\\end\{figure\*\}", re.DOTALL)
         split_worker(root, r"\\begin\{table\}(.*?)\\end\{table\}", re.DOTALL)
         split_worker(root, r"\\begin\{table\*\}(.*?)\\end\{table\*\}", re.DOTALL)
+        split_worker(root, r"\\begin\{align\*\}(.*?)\\end\{align\*\}", re.DOTALL)
+        split_worker(root, r"\\begin\{align\}(.*?)\\end\{align\}", re.DOTALL)
+        split_worker(root, r"\\begin\{equation\}(.*?)\\end\{equation\}", re.DOTALL)
+        split_worker(root, r"\\begin\{equation\*\}(.*?)\\end\{equation\*\}", re.DOTALL)
+        split_worker(root, r"\$\$(.*?)\$\$", re.DOTALL)
         split_worker(root, r"\\item ")
         split_worker(root, r"\\begin\{(.*?)\}")
         split_worker(root, r"\\end\{(.*?)\}")
@@ -108,17 +138,16 @@ class LatexPaperSplit():
             node = node.next
             if node is None: break
 
-        print('======================================')
-        res_to_t = []
-        node = root
-        while True:
-            if not node.preserve:
-                print(node.string)
-                res_to_t.append(node.string)
-            print('======================================')
-            node = node.next
-            if node is None: break
-        print('======================================')
+        with open('debug_log', 'w', encoding='utf8') as f:
+            res_to_t = []
+            node = root
+            while True:
+                if not node.preserve:
+                    res_to_t.append(node.string)
+                    f.write(node.string + '\n ========================= \n')
+                node = node.next
+                if node is None: break
+
         self.root = root
         self.sp = res_to_t
         return self.sp
