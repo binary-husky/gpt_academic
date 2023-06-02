@@ -84,9 +84,9 @@ def ArgsGeneralWrapper(f):
         chatbot_with_cookie.write_list(chatbot)
         txt_passon = txt
         if encrypt in models: txt_passon = func_box.encryption_str(txt)
-        if txt_passon == '' and txt_passon == ' ' and len(args) > 1:
-            msgs = f'### {args[1]} Warning 输入框为空\n' \
-                   'tips: 使用基础功能时，请在输入区输入需要处理的文本内容'
+        if txt_passon == '' and len(args) > 1:
+            msgs = f'### Warning 输入框为空\n' \
+                   f'tips: 使用基础功能或{func_box.html_tag_color("高亮插件", "#b522c5", "ffffff")}功能时，请在输入区输入需要处理的内容'
             yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=msgs)  # 刷新界面
             return
         yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
@@ -346,9 +346,9 @@ def close_up_code_segment_during_stream(gpt_reply):
         str: 返回一个新的字符串，将输出代码片段的“后面的```”补上。
 
     """
-    if '```' not in gpt_reply:
+    if '```' not in str(gpt_reply):
         return gpt_reply
-    if gpt_reply.endswith('```'):
+    if str(gpt_reply).endswith('```'):
         return gpt_reply
 
     # 排除了以上两个情况，我们

@@ -103,6 +103,20 @@ def adjust_theme():
 
 
 advanced_css = """
+#main_chatbot{
+    height: 100vh;
+    max-height: 75vh;
+    overflow: hidden !important;
+}
+.app.svelte-1mya07g.svelte-1mya07g {
+    max-width: 100%;
+    position: relative;
+    /* margin: auto; */
+    padding: var(--size-4);
+    width: 100%;
+    height: 100%;
+}
+
 .markdown-body table {
     margin: 1em 0;
     border-collapse: collapse;
@@ -128,6 +142,7 @@ advanced_css = """
 
 /* chat box. */
 [class *= "message"] {
+    gap: 7px !important;
     border-radius: var(--radius-xl) !important;
     /* padding: var(--spacing-xl) !important; */
     /* font-size: var(--text-md) !important; */
