@@ -183,6 +183,7 @@ def test_Latex():
     from crazy_functions.Latex输出PDF结果 import Latex预处理, 编译Latex, Latex英文纠错加PDF对比, Latex翻译中文并重新编译PDF
     txt = "C:/Users/fuqingxu/Desktop/proofread"
     txt = "C:/Users/fuqingxu/Desktop/旧文件/gpt/paperx"
+    txt = "C:/Users/fuqingxu/Desktop/旧文件/gpt/papery"
     
     for cookies, cb, hist, msg in (Latex翻译中文并重新编译PDF)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
         cli_printer.print(cb)   #  print(cb)
