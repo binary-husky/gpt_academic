@@ -180,13 +180,19 @@ def test_Langchain知识库读取():
         cli_printer.print(cb)   #  print(cb)
 
 def test_Latex():
-    from crazy_functions.Latex输出PDF结果 import Latex预处理, 编译Latex
-    txt = "2302.02948.tar"
-    print(txt)
-    main_tex, work_folder = Latex预处理(txt)
-    print('main tex:', main_tex)
-    res = 编译Latex(main_tex, work_folder)
-    # for cookies, cb, hist, msg in silence_stdout(编译Latex)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    from crazy_functions.Latex输出PDF结果 import Latex预处理, 编译Latex, Latex英文纠错加PDF对比
+    txt = "C:/Users/fuqingxu/Desktop/proofread"
+    for cookies, cb, hist, msg in (Latex英文纠错加PDF对比)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+        cli_printer.print(cb)   #  print(cb)
+
+
+
+    # txt = "2302.02948.tar"
+    # print(txt)
+    # main_tex, work_folder = Latex预处理(txt)
+    # print('main tex:', main_tex)
+    # res = 编译Latex(main_tex, work_folder)
+    # # for cookies, cb, hist, msg in silence_stdout(编译Latex)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     #     cli_printer.print(cb)   #  print(cb)
 
 
