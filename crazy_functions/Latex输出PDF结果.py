@@ -1,7 +1,7 @@
 from toolbox import update_ui, trimmed_format_exc, objdump, objload
 from toolbox import CatchException, report_execption, write_results_to_file, zip_folder
 import glob, copy, os
-
+pj = os.path.join
 
 
 def confirm_answer_is_health(bufo, buf, llm_kwargs, default = True):
@@ -65,10 +65,10 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
     with open(project_folder + f'/merge_{mode}.tex', 'w', encoding='utf-8', errors='replace') as f:
         f.write(final_tex)
     #  <-------- 整理结果，退出 ----------> 
-    create_report_file_name = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + f"-chatgpt.polish.md"
-    res = write_results_to_file(gpt_response_collection, file_name=create_report_file_name)
-    history = gpt_response_collection
-    chatbot.append((f"完成了吗？", res))
+    # create_report_file_name = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + f"-chatgpt.polish.md"
+    # res = write_results_to_file(gpt_response_collection, file_name=create_report_file_name)
+    # history = gpt_response_collection
+    chatbot.append((f"完成了吗？", 'GPT结果已输出，正在编译PDF'))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
     return project_folder + f'/merge_{mode}.tex'
 
@@ -104,7 +104,7 @@ def 编译Latex(main_tex, work_folder):
     os.system(f'pdflatex {main_file}.tex')
     os.system(f'pdflatex {main_file}.tex')
     os.chdir(current_dir)
-    pdf_output = os.path.join(work_folder, f'{main_file}.pdf')
+    pdf_output = pj(work_folder, f'{main_file}.pdf')
 
     assert os.path.exists(pdf_output)
     return pdf_output
@@ -132,28 +132,66 @@ def Latex预处理(tar_file):
 def 编译Latex差别(main_file_original, main_file_modified, work_folder_original, work_folder_modified, work_folder):
     import os
     current_dir = os.getcwd()
-    # <--------------------->
-    import os, shutil
+    n_fix = 0
+    while True:
+        # <--------------------->
+        import os, shutil
 
-    # https://stackoverflow.com/questions/738755/dont-make-me-manually-abort-a-latex-compile-when-theres-an-error
-    os.chdir(work_folder_original); os.system(f'pdflatex -interaction=batchmode {main_file_original}.tex'); os.chdir(current_dir)
-    os.chdir(work_folder_modified); os.system(f'pdflatex -interaction=batchmode {main_file_modified}.tex'); os.chdir(current_dir)
-    os.chdir(work_folder_original); os.system(f'bibtex  {main_file_original}.aux'); os.chdir(current_dir)
-    os.chdir(work_folder_modified); os.system(f'bibtex  {main_file_modified}.aux'); os.chdir(current_dir)
+        # https://stackoverflow.com/questions/738755/dont-make-me-manually-abort-a-latex-compile-when-theres-an-error
+        os.chdir(work_folder_original); os.system(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex'); os.chdir(current_dir)
+        os.chdir(work_folder_modified); os.system(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex'); os.chdir(current_dir)
+        os.chdir(work_folder_original); os.system(f'bibtex  {main_file_original}.aux'); os.chdir(current_dir)
+        os.chdir(work_folder_modified); os.system(f'bibtex  {main_file_modified}.aux'); os.chdir(current_dir)
+        os.chdir(work_folder_original); os.system(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex'); os.chdir(current_dir)
+        os.chdir(work_folder_modified); os.system(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex'); os.chdir(current_dir)
+        os.chdir(work_folder_original); os.system(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex'); os.chdir(current_dir)
+        os.chdir(work_folder_modified); os.system(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex'); os.chdir(current_dir)
 
-    print(    f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
-    os.system(f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
+        print(    f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
+        os.system(f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
 
-    os.chdir(work_folder); os.system(f'pdflatex  -interaction=batchmode merge_diff.tex'); os.chdir(current_dir)
-    os.chdir(work_folder); os.system(f'bibtex    merge_diff.aux'); os.chdir(current_dir)
-    os.chdir(work_folder); os.system(f'pdflatex  -interaction=batchmode merge_diff.tex'); os.chdir(current_dir)
-    os.chdir(work_folder); os.system(f'pdflatex  -interaction=batchmode merge_diff.tex'); os.chdir(current_dir)
+        os.chdir(work_folder); os.system(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
+        os.chdir(work_folder); os.system(f'bibtex    merge_diff.aux'); os.chdir(current_dir)
+        os.chdir(work_folder); os.system(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
+        os.chdir(work_folder); os.system(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
 
-    # <--------------------->
-    os.chdir(current_dir)
-    return f'{work_folder}/diff.pdf'
+        # <--------------------->
+        os.chdir(current_dir)
 
+        if os.path.exists(pj(work_folder_modified, f'{main_file_modified}.pdf')):
+            return pj(work_folder_modified, f'{main_file_modified}.pdf')
+        else:
+            if n_fix>=10: break
+            n_fix += 1
+            can_retry, main_file_modified = remove_buggy_lines(file_path=pj(work_folder_modified, f'{main_file_modified}.tex'), 
+                                           log_path=pj(work_folder_modified, f'{main_file_modified}.log'),
+                                           tex_name=f'{main_file_modified}.tex',
+                                           tex_name_pure=f'{main_file_modified}',
+                                           n_fix=n_fix,
+                                           work_folder_modified=work_folder_modified,
+                                           )
+            if not can_retry: break
 
+    return "失败"
+
+def remove_buggy_lines(file_path, log_path, tex_name, tex_name_pure, n_fix, work_folder_modified):
+    try:
+        with open(log_path, 'r', encoding='utf-8', errors='replace') as f:
+            log = f.read()
+        with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
+            file_lines = f.readlines()
+        import re
+        buggy_lines = re.findall(tex_name+':([0-9]{1,5}):', log)
+        buggy_lines = [int(l) for l in buggy_lines]
+        buggy_lines = sorted(buggy_lines)
+        print("removing lines that has errors", buggy_lines)
+        file_lines.pop(buggy_lines[0]-1)
+        with open(pj(work_folder_modified, f"{tex_name_pure}_fix_{n_fix}.tex"), 'w', encoding='utf-8', errors='replace') as f:
+            f.writelines(file_lines)
+        return True, f"{tex_name_pure}_fix_{n_fix}"
+    except:
+        return False, 0
+    
 def Latex预处理(pfg, project_folder):
     import shutil, os
     work_folder = 'private_upload/latex_workshop_temp'
@@ -170,7 +208,7 @@ def Latex预处理(pfg, project_folder):
 
     for path, result in zip(pfg.file_paths, pfg.file_result):
         path_old = os.path.relpath(path, start=project_folder)
-        path_new = os.path.join(work_folder_modified, path_old)
+        path_new = pj(work_folder_modified, path_old)
         with open(path_new, 'w', encoding='utf-8') as f:
             f.write(result)
 

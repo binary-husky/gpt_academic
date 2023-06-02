@@ -42,13 +42,26 @@ class LinkTable():
         self.preserve = preserve
         self.next = None
 
+def mod_inbraket(match):
+    # get the matched string
+    cmd = match.group(1)
+    str_to_modify = match.group(2)
+
+    # modify the matched string
+    str_to_modify = str_to_modify.replace('：', ':')
+    str_to_modify = str_to_modify.replace('，', ',')
+    # str_to_modify = 'BOOM'
+    # return the modified string as the replacement
+    return "\\" + cmd + "{" + str_to_modify + "}"
 
 def fix_content(final_tex):
     """
         fix common GPT errors to increase success rate
     """
-    final_tex = final_tex.replace('%', 'Percent')
-    final_tex = re.sub(r"\\([a-z]{2,10}) {", repl=r"\\$1{", string=final_tex)
+    final_tex = final_tex.replace('%', r'\%')
+    final_tex = final_tex.replace(r'\%', r'\\%')
+    final_tex = re.sub(r"\\([a-z]{2,10})\ \{", r"\\\1{", string=final_tex)
+    final_tex = re.sub(r"\\([a-z]{2,10})\{([^\}]*?)\}", mod_inbraket, string=final_tex)
     return final_tex
 
 class LatexPaperSplit():
