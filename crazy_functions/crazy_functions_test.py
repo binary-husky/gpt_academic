@@ -179,6 +179,16 @@ def test_Langchain知识库读取():
     for cookies, cb, hist, msg in silence_stdout(读取知识库作答)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
         cli_printer.print(cb)   #  print(cb)
 
+def test_Latex():
+    from crazy_functions.Latex输出PDF结果 import Latex预处理, 编译Latex
+    txt = "2302.02948.tar"
+    print(txt)
+    main_tex, work_folder = Latex预处理(txt)
+    print('main tex:', main_tex)
+    res = 编译Latex(main_tex, work_folder)
+    # for cookies, cb, hist, msg in silence_stdout(编译Latex)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    #     cli_printer.print(cb)   #  print(cb)
+
 
 
 # test_解析一个Python项目()
@@ -192,8 +202,8 @@ def test_Langchain知识库读取():
 # test_联网回答问题()
 # test_解析ipynb文件()
 # test_数学动画生成manim()
-test_Langchain知识库()
+# test_Langchain知识库()
 # test_Langchain知识库读取()
-
+test_Latex()
 input("程序完成，回车退出。")
 print("退出。")
