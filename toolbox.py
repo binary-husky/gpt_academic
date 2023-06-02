@@ -736,6 +736,8 @@ def clip_history(inputs, history, tokenizer, max_token_limit):
 其他小工具:
     - zip_folder:    把某个路径下所有文件压缩，然后转移到指定的另一个路径中（gpt写的）
     - gen_time_str:  生成时间戳
+    - ProxyNetworkActivate: 临时地启动代理网络（如果有）
+    - objdump/objload: 快捷的调试函数
 ========================================================================
 """
 
@@ -774,7 +776,6 @@ def gen_time_str():
     import time
     return time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
 
-
 class ProxyNetworkActivate():
     """
     这段代码定义了一个名为TempProxy的空上下文管理器, 用于给一小段代码上代理
@@ -793,3 +794,16 @@ class ProxyNetworkActivate():
         if 'HTTP_PROXY' in os.environ: os.environ.pop('HTTP_PROXY')
         if 'HTTPS_PROXY' in os.environ: os.environ.pop('HTTPS_PROXY')
         return
+
+def objdump(obj):
+    import pickle
+    with open('objdump.tmp', 'wb+') as f:
+        pickle.dump(obj, f)
+    return
+
+def objload():
+    import pickle, os
+    if not os.path.exists('objdump.tmp'): 
+        return
+    with open('objdump.tmp', 'rb') as f:
+        return pickle.load(f)
