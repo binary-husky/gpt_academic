@@ -94,12 +94,12 @@ def ArgsGeneralWrapper(f):
 
 
 pool = ThreadPoolExecutor(200)
-def update_ui(chatbot, history, msg='正常', txt='', *args):  # 刷新界面
+def update_ui(chatbot, history, msg='正常', *args):  # 刷新界面
     """
     刷新用户界面
     """
     assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时，可用clear将其清空，然后用for+append循环重新赋值。"
-    yield chatbot.get_cookies(), chatbot, history, msg, txt
+    yield chatbot.get_cookies(), chatbot, history, msg
     pool.submit(func_box.thread_write_chat, chatbot)
 
 def trimmed_format_exc():
