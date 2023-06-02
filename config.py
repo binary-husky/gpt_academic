@@ -34,7 +34,7 @@ else:
 DEFAULT_WORKER_NUM = 3
 
 
-# [step 4]>> 以下配置可以优化体验，但大部分场合下并不需要修改
+# [step 3]>> 以下配置可以优化体验，但大部分场合下并不需要修改  # 废弃了，移步到theme.py 的 #main_chatbot中修改
 # 对话窗的高度
 CHATBOT_HEIGHT = 1115
 
