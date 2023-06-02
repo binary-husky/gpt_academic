@@ -103,10 +103,35 @@ def adjust_theme():
 
 
 advanced_css = """
-#main_chatbot{
-    height: 100vh;
-    max-height: 75vh;
-    overflow: hidden !important;
+#debug_mes {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1; /* 设置更高的 z-index 值 */
+    margin-bottom: 10px !important;
+}
+#chat_txt {
+    display: flex;
+    flex-direction: column-reverse;
+    overflow-y: auto !important;
+    z-index: 3;
+    flex-grow: 1; /* 自动填充剩余空间 */
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    margin-bottom: 35px !important;
+}
+textarea {
+    resize: none;
+    height: 100%; /* 填充父元素的高度 */
+}
+#main_chatbot {
+    height: 75vh !important;
+    max-height: 75vh !important;
+    overflow: auto !important;
+    z-index: 2;
 }
 .app.svelte-1mya07g.svelte-1mya07g {
     max-width: 100%;
@@ -153,7 +178,7 @@ advanced_css = """
 [data-testid = "bot"] {
     max-width: 95%;
     letter-spacing: 0.5px;
-     font-weight: normal;
+    font-weight: normal;
     /* width: auto !important; */
     border-bottom-left-radius: 0 !important;
 }
