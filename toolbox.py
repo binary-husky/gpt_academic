@@ -1,6 +1,6 @@
 import markdown
 import importlib
-import traceback
+import time
 import inspect
 import re
 import os
@@ -69,6 +69,17 @@ def update_ui(chatbot, history, msg='正常', **kwargs):  # 刷新界面
     """
     assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时，可用clear将其清空，然后用for+append循环重新赋值。"
     yield chatbot.get_cookies(), chatbot, history, msg
+
+def update_ui_lastest_msg(lastmsg, chatbot, history, delay=1):  # 刷新界面
+    """
+    刷新用户界面
+    """
+    if len(chatbot) == 0: chatbot.append(["update_ui_last_msg", lastmsg])
+    chatbot[-1] = list(chatbot[-1])
+    chatbot[-1][-1] = lastmsg
+    yield from update_ui(chatbot=chatbot, history=history)
+    time.sleep(delay)
+
 
 def trimmed_format_exc():
     import os, traceback
@@ -728,6 +739,8 @@ def clip_history(inputs, history, tokenizer, max_token_limit):
 其他小工具:
     - zip_folder:    把某个路径下所有文件压缩，然后转移到指定的另一个路径中（gpt写的）
     - gen_time_str:  生成时间戳
+    - ProxyNetworkActivate: 临时地启动代理网络（如果有）
+    - objdump/objload: 快捷的调试函数
 ========================================================================
 """
 
@@ -762,10 +775,14 @@ def zip_folder(source_folder, dest_folder, zip_name):
 
     print(f"Zip file created at {zip_file}")
 
+def zip_result(folder):
+    import time
+    t = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+    zip_folder(folder, './gpt_log/', f'{t}-result.zip')
+    
 def gen_time_str():
     import time
     return time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
-
 
 class ProxyNetworkActivate():
     """
@@ -785,3 +802,17 @@ class ProxyNetworkActivate():
         if 'HTTP_PROXY' in os.environ: os.environ.pop('HTTP_PROXY')
         if 'HTTPS_PROXY' in os.environ: os.environ.pop('HTTPS_PROXY')
         return
+
+def objdump(obj):
+    import pickle
+    with open('objdump.tmp', 'wb+') as f:
+        pickle.dump(obj, f)
+    return
+
+def objload():
+    import pickle, os
+    if not os.path.exists('objdump.tmp'): 
+        return
+    with open('objdump.tmp', 'rb') as f:
+        return pickle.load(f)
+    
