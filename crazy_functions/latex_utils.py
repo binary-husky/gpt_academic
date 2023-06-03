@@ -200,7 +200,7 @@ class LatexPaperSplit():
                             for res in pattern_compile.finditer(target_string):
                                 cmd = res.group(1) # begin{what}
                                 this = res.group(2) # content between begin and end
-                                white_list = ['document', 'abstract', 'lemma', 'definition', 'sproof']
+                                white_list = ['document', 'abstract', 'lemma', 'definition', 'sproof', 'em', 'emph', 'textit', 'textbf']
                                 if cmd in white_list or this.count('\n') > 25:
                                     sub_res = search_with_line_limit(this)
                                     if not sub_res: continue
@@ -239,25 +239,12 @@ class LatexPaperSplit():
                 if lt is None: break
 
 
-
         # root 是链表的头
         print('正在分解Latex源文件，构建链表结构')
 
+        # 吸收在25行以内的begin-end组合
         split_worker_begin_end(root, r"\\begin\{([a-z\*]*)\}(.*?)\\end\{\1\}", re.DOTALL, limit_n_lines=25)
-        # 将分解结果返回 res_to_t
-        with open(pj(project_folder, 'debug_log.html'), 'w', encoding='utf8') as f:
-            res_to_t = []
-            node = root
-            while True:
-                show_html = node.string.replace('\n','<br/>')
-                if not node.preserve:
-                    res_to_t.append(node.string)
-                    f.write(f'<p style="color:black;">{show_html}</p>')
-                else:
-                    f.write(f'<p style="color:red;">{show_html}</p>')
-                node = node.next
-                if node is None: break
-
+        # 吸收其他杂项
         split_worker(root, r"(.*?)\\maketitle", re.DOTALL)
         split_worker(root, r"\\section\{(.*?)\}")
         split_worker(root, r"\\section\*\{(.*?)\}")
@@ -284,7 +271,10 @@ class LatexPaperSplit():
         split_worker(root, r"\\begin\{equation\*\}(.*?)\\end\{equation\*\}", re.DOTALL)
         split_worker(root, r"\$\$(.*?)\$\$", re.DOTALL)
         split_worker(root, r"\\item ")
+        split_worker(root, r"\\label\{(.*?)\}")
         split_worker(root, r"\\begin\{(.*?)\}")
+        split_worker(root, r"\\vspace\{(.*?)\}")
+        split_worker(root, r"\\hspace\{(.*?)\}")
         split_worker(root, r"\\end\{(.*?)\}")
 
         node = root
@@ -335,9 +325,26 @@ class LatexPaperSplit():
 
         node = root
         while True:
-            
             if len(node.string.strip('\n').strip(''))==0: node.preserve = True
             if len(node.string.strip('\n').strip(''))<50: node.preserve = True
+            node = node.next
+            if node is None: break
+
+        # 将前后断行符脱离
+        node = root
+        prev_node = None
+        while True:
+            if not node.preserve:
+                lstriped_ = node.string.lstrip().lstrip('\n')
+                if (prev_node is not None) and (prev_node.preserve) and (len(lstriped_)!=len(node.string)):
+                    prev_node.string += node.string[:-len(lstriped_)]
+                    node.string = lstriped_
+                rstriped_ = node.string.rstrip().rstrip('\n')
+                if (node.next is not None) and (node.next.preserve) and (len(rstriped_)!=len(node.string)):
+                    node.next.string = node.string[len(rstriped_):] + node.next.string
+                    node.string = rstriped_
+            # =====
+            prev_node = node
             node = node.next
             if node is None: break
 
