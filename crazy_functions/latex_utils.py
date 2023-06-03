@@ -20,8 +20,14 @@ def merge_tex_files_(project_foler, main_file, mode):
     for s in reversed([q for q in re.finditer(r"\\input\{(.*?)\}", main_file, re.M)]):
         f = s.group(1)
         fp = os.path.join(project_foler, f)
-        with open(fp, 'r', encoding='utf-8', errors='replace') as fx:
-            c = fx.read()
+        if os.path.exists(fp):  
+            # e.g., \input{srcs/07_appendix.tex}
+            with open(fp, 'r', encoding='utf-8', errors='replace') as fx:
+                c = fx.read()
+        else:  
+            # e.g., \input{srcs/07_appendix}
+            with open(fp+'.tex', 'r', encoding='utf-8', errors='replace') as fx:
+                c = fx.read()
         c = merge_tex_files_(project_foler, c, mode)
         main_file = main_file[:s.span()[0]] + c + main_file[s.span()[1]:]
     return main_file
