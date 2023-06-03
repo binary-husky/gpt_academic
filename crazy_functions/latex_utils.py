@@ -35,10 +35,6 @@ def merge_tex_files(project_foler, main_file, mode):
         position = match.end()
         main_file = main_file[:position] + '\\usepackage{CTEX}\n' + main_file[position:]
 
-        pattern = re.compile(r'\\begin\{abstract\}.*\n')
-        match = pattern.search(main_file)
-        position = match.end()
-        main_file = main_file[:position] + '声明：该PDF由Github的gpt-academic开源项目latex翻译插件一键生成，请认真 \n\n' + main_file[position:]
 
     return main_file
 
@@ -74,7 +70,7 @@ class LatexPaperSplit():
     def __init__(self) -> None:
         self.root = None
 
-    def merge_result(self, arr):
+    def merge_result(self, arr, mode):
         result_string = ""
         node = self.root
         p = 0
@@ -86,7 +82,18 @@ class LatexPaperSplit():
                 p += 1
             node = node.next
             if node is None: break
-
+        if mode == 'translate_zh':
+            try:
+                pattern = re.compile(r'\\begin\{abstract\}.*\n')
+                match = pattern.search(result_string)
+                position = match.end()
+                result_string = result_string[:position] + \
+                    "警告：该PDF由Github的GPT-Academic开源项目调用大语言模型+Latex翻译插件一键生成，其内容可靠性没有任何保障，请仔细鉴别，并以arxiv原文为准。" + \
+                    "项目Github地址 https://github.com/binary-husky/gpt_academic/。"            + \
+                    "为了防止大语言模型的意外谬误产生扩散影响，禁止任何人移除或修改此警告。 \n\n"    + \
+                    result_string[position:]
+            except:
+                pass
         return result_string
 
     def split(self, txt):
@@ -285,7 +292,7 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
     # pfg = objload()
 
     #  <-------- 写出文件 ----------> 
-    final_tex = lps.merge_result(pfg.sp_file_result)
+    final_tex = lps.merge_result(pfg.sp_file_result, mode)
     with open(project_folder + f'/merge_{mode}.tex', 'w', encoding='utf-8', errors='replace') as f:
         f.write(final_tex)
 
