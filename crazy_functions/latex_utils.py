@@ -49,8 +49,8 @@ def mod_inbraket(match):
     str_to_modify = match.group(2)
 
     # modify the matched string
-    str_to_modify = str_to_modify.replace('：', ':')
-    str_to_modify = str_to_modify.replace(', ', ',')
+    str_to_modify = str_to_modify.replace('：', ':')    # 前面是中文冒号，后面是英文冒号
+    str_to_modify = str_to_modify.replace('，', ',')    # 前面是中文逗号，后面是英文逗号
     # str_to_modify = 'BOOM'
     # return the modified string as the replacement
     return "\\" + cmd + "{" + str_to_modify + "}"
@@ -366,6 +366,19 @@ def remove_buggy_lines(file_path, log_path, tex_name, tex_name_pure, n_fix, work
         return False, 0
     
 
+def compile_latex_with_timeout(command, timeout=90):
+    import subprocess
+    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        stdout, stderr = process.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        stdout, stderr = process.communicate()
+        print("Process timed out!")
+
+    print(stdout)
+    print(stderr)
+
 
 def 编译Latex差别(chatbot, history, main_file_original, main_file_modified, work_folder_original, work_folder_modified, work_folder):
     import os, time
@@ -378,30 +391,30 @@ def 编译Latex差别(chatbot, history, main_file_original, main_file_modified, 
         import os
         # https://stackoverflow.com/questions/738755/dont-make-me-manually-abort-a-latex-compile-when-theres-an-error
         yield from update_ui_lastest_msg(f'尝试第{n_fix}编译, 编译原始PDF ...', chatbot, history)   # 刷新Gradio前端界面
-        os.chdir(work_folder_original); os.system(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex'); os.chdir(current_dir)
+        os.chdir(work_folder_original); compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex'); os.chdir(current_dir)
 
         yield from update_ui_lastest_msg(f'尝试第{n_fix}编译, 编译转化后的PDF ...', chatbot, history)   # 刷新Gradio前端界面
-        os.chdir(work_folder_modified); os.system(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex'); os.chdir(current_dir)
+        os.chdir(work_folder_modified); compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex'); os.chdir(current_dir)
 
         yield from update_ui_lastest_msg(f'尝试第{n_fix}编译, 编译BibTex ...', chatbot, history)    # 刷新Gradio前端界面
-        os.chdir(work_folder_original); os.system(f'bibtex  {main_file_original}.aux'); os.chdir(current_dir)
-        os.chdir(work_folder_modified); os.system(f'bibtex  {main_file_modified}.aux'); os.chdir(current_dir)
+        os.chdir(work_folder_original); compile_latex_with_timeout(f'bibtex  {main_file_original}.aux'); os.chdir(current_dir)
+        os.chdir(work_folder_modified); compile_latex_with_timeout(f'bibtex  {main_file_modified}.aux'); os.chdir(current_dir)
 
         yield from update_ui_lastest_msg(f'尝试第{n_fix}编译, 编译文献交叉引用 ...', chatbot, history)  # 刷新Gradio前端界面
-        os.chdir(work_folder_original); os.system(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex'); os.chdir(current_dir)
-        os.chdir(work_folder_modified); os.system(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex'); os.chdir(current_dir)
-        os.chdir(work_folder_original); os.system(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex'); os.chdir(current_dir)
-        os.chdir(work_folder_modified); os.system(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex'); os.chdir(current_dir)
+        os.chdir(work_folder_original); compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex'); os.chdir(current_dir)
+        os.chdir(work_folder_modified); compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex'); os.chdir(current_dir)
+        os.chdir(work_folder_original); compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex'); os.chdir(current_dir)
+        os.chdir(work_folder_modified); compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex'); os.chdir(current_dir)
 
         yield from update_ui_lastest_msg(f'尝试第{n_fix}编译, 使用latexdiff生成论文转化前后对比 ...', chatbot, history) # 刷新Gradio前端界面
         print(    f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
-        os.system(f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
+        compile_latex_with_timeout(f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
 
         yield from update_ui_lastest_msg(f'尝试第{n_fix}编译, 正在编译对比PDF ...', chatbot, history)   # 刷新Gradio前端界面
-        os.chdir(work_folder); os.system(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
-        os.chdir(work_folder); os.system(f'bibtex    merge_diff.aux'); os.chdir(current_dir)
-        os.chdir(work_folder); os.system(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
-        os.chdir(work_folder); os.system(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
+        os.chdir(work_folder); compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
+        os.chdir(work_folder); compile_latex_with_timeout(f'bibtex    merge_diff.aux'); os.chdir(current_dir)
+        os.chdir(work_folder); compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
+        os.chdir(work_folder); compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
 
         # <--------------------->
         os.chdir(current_dir)
