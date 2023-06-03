@@ -62,7 +62,7 @@ def mod_inbraket(match):
     # return the modified string as the replacement
     return "\\" + cmd + "{" + str_to_modify + "}"
 
-def fix_content(final_tex):
+def fix_content(final_tex, node_string):
     """
         fix common GPT errors to increase success rate
     """
@@ -85,7 +85,7 @@ class LatexPaperSplit():
             if node.preserve:
                 result_string += node.string
             else:
-                result_string += fix_content(arr[p])
+                result_string += fix_content(arr[p], node.string)
                 p += 1
             node = node.next
             if node is None: break
@@ -141,7 +141,7 @@ class LatexPaperSplit():
                         lt = aft
                 lt = lt.next
                 cnt += 1
-                print(cnt)
+                # print(cnt)
                 if lt is None: break
 
         # root 是链表的头
@@ -184,7 +184,7 @@ class LatexPaperSplit():
             while True:
                 if not node.preserve:
                     res_to_t.append(node.string)
-                    f.write(node.string + '\n ========================= \n')
+                f.write(node.string)
                 node = node.next
                 if node is None: break
 
@@ -313,7 +313,7 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
 
     #  <-------- 写出文件 ----------> 
     msg = f"当前大语言模型: {llm_kwargs['llm_model']}，当前语言模型温度设定: {llm_kwargs['temperature']}。"
-    final_tex = lps.merge_result(pfg.sp_file_result, mode, msg)
+    final_tex = lps.merge_result(pfg.file_result, mode, msg)
     with open(project_folder + f'/merge_{mode}.tex', 'w', encoding='utf-8', errors='replace') as f:
         f.write(final_tex)
 

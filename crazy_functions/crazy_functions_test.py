@@ -186,6 +186,7 @@ def test_Latex():
     txt = "C:/Users/fuqingxu/Desktop/旧文件/gpt/papery"
     txt = r"C:\Users\fuqingxu\Desktop\旧文件\gpt\latex2pdf\2023-06-03-14-57-06"
     txt = r"C:\Users\fuqingxu\Desktop\旧文件\gpt\latex2pdf\2023-06-03-15-40-20"
+    txt = r"C:\Users\fuqingxu\Desktop\旧文件\gpt\latex2pdf\2023-06-03-17-14-40"
     for cookies, cb, hist, msg in (Latex翻译中文并重新编译PDF)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
         cli_printer.print(cb)   #  print(cb)
 
