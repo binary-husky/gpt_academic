@@ -30,7 +30,7 @@ def 知识库问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
         )
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         from .crazy_utils import try_install_deps
-        try_install_deps(['zh_langchain==0.1.9'])
+        try_install_deps(['zh_langchain==0.2.0'])
     
     # < --------------------读取参数--------------- >
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
