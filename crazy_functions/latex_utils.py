@@ -1,6 +1,6 @@
 from toolbox import update_ui, update_ui_lastest_msg    # 刷新Gradio前端界面
 from toolbox import zip_folder, objdump, objload
-import os
+import os, shutil
 import re
 pj = os.path.join
 
@@ -96,6 +96,12 @@ def fix_content(final_tex, node_string):
     final_tex = re.sub(r"\\([a-z]{2,10})\ \{", r"\\\1{", string=final_tex)
     final_tex = re.sub(r"\\\ ([a-z]{2,10})\{", r"\\\1{", string=final_tex)
     final_tex = re.sub(r"\\([a-z]{2,10})\{([^\}]*?)\}", mod_inbraket, string=final_tex)
+    if node_string.count('{') != node_string.count('}'):
+        if final_tex.count('{') != node_string.count('{'):
+            final_tex = node_string # 出问题了，还原原文
+        if final_tex.count('}') != node_string.count('}'):
+            final_tex = node_string # 出问题了，还原原文
+
     return final_tex
 
 class LatexPaperSplit():
@@ -138,7 +144,7 @@ class LatexPaperSplit():
                 pass
         return result_string
 
-    def split(self, txt):
+    def split(self, txt, project_folder):
         """
         将Latex文档分解到一个链表中，每个链表节点用preserve的标志位提示它是否应当被GPT处理
         """
@@ -146,10 +152,11 @@ class LatexPaperSplit():
         def split_worker(root, pattern, flags=0):
             lt = root
             cnt = 0
+            pattern_compile = re.compile(pattern, flags)
             while True:
                 if not lt.preserve:
                     while True:
-                        res = re.search(pattern, lt.string, flags)
+                        res = pattern_compile.search(lt.string)
                         if not res: break
                         before = res.string[:res.span()[0]]
                         this = res.group(0)
@@ -180,20 +187,93 @@ class LatexPaperSplit():
                 # print(cnt)
                 if lt is None: break
 
+        def split_worker_begin_end(root, pattern, flags=0, limit_n_lines=25):
+            lt = root
+            cnt = 0
+            pattern_compile = re.compile(pattern, flags)
+            while True:
+                if not lt.preserve:
+                    while True:
+                        target_string = lt.string
+
+                        def search_with_line_limit(target_string):
+                            for res in pattern_compile.finditer(target_string):
+                                cmd = res.group(1) # begin{what}
+                                this = res.group(2) # content between begin and end
+                                white_list = ['document', 'abstract', 'lemma', 'definition', 'sproof']
+                                if cmd in white_list or this.count('\n') > 25:
+                                    sub_res = search_with_line_limit(this)
+                                    if not sub_res: continue
+                                    else: return sub_res
+                                else:
+                                    return res.group(0)
+                            return False
+                        # ======
+                        # search for first encounter of \begin \end pair with less than 25 lines in the middle
+                        this = search_with_line_limit(target_string) 
+                        if not this: break
+                        before, after = target_string.split(this)
+                        # ======
+                        if before.endswith('\n'):
+                            this = '\n' + this
+                            before = before[:-1]
+                        if after.startswith('\n'):
+                            # move \n
+                            this = this + '\n'
+                            after = after[1:]
+                        # ======
+                        lt.string = before
+                        tmp  = lt.next
+                        # ======
+                        mid = LinkedListNode(this, True)
+                        lt.next = mid
+                        # ======
+                        aft = LinkedListNode(after, False)
+                        mid.next = aft
+                        aft.next = tmp
+                        # ======
+                        lt = aft
+                lt = lt.next
+                cnt += 1
+                # print(cnt)
+                if lt is None: break
+
+
+
         # root 是链表的头
         print('正在分解Latex源文件，构建链表结构')
+
+        split_worker_begin_end(root, r"\\begin\{([a-z\*]*)\}(.*?)\\end\{\1\}", re.DOTALL, limit_n_lines=25)
+        # 将分解结果返回 res_to_t
+        with open(pj(project_folder, 'debug_log.html'), 'w', encoding='utf8') as f:
+            res_to_t = []
+            node = root
+            while True:
+                show_html = node.string.replace('\n','<br/>')
+                if not node.preserve:
+                    res_to_t.append(node.string)
+                    f.write(f'<p style="color:black;">{show_html}</p>')
+                else:
+                    f.write(f'<p style="color:red;">{show_html}</p>')
+                node = node.next
+                if node is None: break
+
         split_worker(root, r"(.*?)\\maketitle", re.DOTALL)
         split_worker(root, r"\\section\{(.*?)\}")
+        split_worker(root, r"\\section\*\{(.*?)\}")
         split_worker(root, r"\\subsection\{(.*?)\}")
         split_worker(root, r"\\subsubsection\{(.*?)\}")
         split_worker(root, r"\\bibliography\{(.*?)\}")
         split_worker(root, r"\\bibliographystyle\{(.*?)\}")
         split_worker(root, r"\\begin\{lstlisting\}(.*?)\\end\{lstlisting\}", re.DOTALL)
+        split_worker(root, r"\\begin\{wraptable\}(.*?)\\end\{wraptable\}", re.DOTALL)
         split_worker(root, r"\\begin\{algorithm\}(.*?)\\end\{algorithm\}", re.DOTALL)
         split_worker(root, r"\\begin\{wrapfigure\}(.*?)\\end\{wrapfigure\}", re.DOTALL)
         split_worker(root, r"\\begin\{wrapfigure\*\}(.*?)\\end\{wrapfigure\*\}", re.DOTALL)
         split_worker(root, r"\\begin\{figure\}(.*?)\\end\{figure\}", re.DOTALL)
         split_worker(root, r"\\begin\{figure\*\}(.*?)\\end\{figure\*\}", re.DOTALL)
+        split_worker(root, r"\\begin\{multline\}(.*?)\\end\{multline\}", re.DOTALL)
+        split_worker(root, r"\\begin\{multline\*\}(.*?)\\end\{multline\*\}", re.DOTALL)
         split_worker(root, r"\\begin\{table\}(.*?)\\end\{table\}", re.DOTALL)
         split_worker(root, r"\\begin\{table\*\}(.*?)\\end\{table\*\}", re.DOTALL)
         split_worker(root, r"\\begin\{minipage\}(.*?)\\end\{minipage\}", re.DOTALL)
@@ -207,17 +287,62 @@ class LatexPaperSplit():
         split_worker(root, r"\\begin\{(.*?)\}")
         split_worker(root, r"\\end\{(.*?)\}")
 
-        res = []
         node = root
         while True:
-            res.append((node.string, node.preserve))
+            if len(node.string.strip('\n').strip(''))==0: node.preserve = True
+            if len(node.string.strip('\n').strip(''))<50: node.preserve = True
+            node = node.next
+            if node is None: break
+
+        # 修复括号
+        node = root
+        while True:
+            string = node.string
+            if node.preserve: 
+                node = node.next
+                if node is None: break
+                continue
+            def break_check(string):
+                str_stack = [""] # (lv, index)
+                for i, c in enumerate(string):
+                    if c == '{':
+                        str_stack.append('{')
+                    elif c == '}':
+                        if len(str_stack) == 1:
+                            print('stack kill')
+                            return i
+                        str_stack.pop(-1)
+                    else:
+                        str_stack[-1] += c
+                return -1
+            bp = break_check(string)
+
+            if bp == -1:
+                pass
+            elif bp == 0:
+                node.string = string[:1]
+                q = LinkedListNode(string[1:], False)
+                q.next = node.next
+                node.next = q
+            else:
+                node.string = string[:bp]
+                q = LinkedListNode(string[bp:], False)
+                q.next = node.next
+                node.next = q
+
+            node = node.next
+            if node is None: break
+
+        node = root
+        while True:
+            
             if len(node.string.strip('\n').strip(''))==0: node.preserve = True
             if len(node.string.strip('\n').strip(''))<50: node.preserve = True
             node = node.next
             if node is None: break
 
         # 将分解结果返回 res_to_t
-        with open('debug_log.html', 'w', encoding='utf8') as f:
+        with open(pj(project_folder, 'debug_log.html'), 'w', encoding='utf8') as f:
             res_to_t = []
             node = root
             while True:
@@ -299,6 +424,15 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
     time.sleep(5)
 
     #  <-------- 读取Latex文件, 将多文件tex工程融合为一个巨型tex ----------> 
+    main_tex_basename = os.path.basename(maintex)
+    assert main_tex_basename.endswith('.tex')
+    main_tex_basename_bare = main_tex_basename[:-4]
+    may_exist_bbl = pj(project_folder, f'{main_tex_basename_bare}.bbl')
+    if os.path.exists(may_exist_bbl):
+        shutil.copyfile(may_exist_bbl, pj(project_folder, f'merge.bbl'))
+        shutil.copyfile(may_exist_bbl, pj(project_folder, f'merge_{mode}.bbl'))
+        shutil.copyfile(may_exist_bbl, pj(project_folder, f'merge_diff.bbl'))
+
     with open(maintex, 'r', encoding='utf-8', errors='replace') as f:
         content = f.read()
         merged_content = merge_tex_files(project_folder, content, mode)
@@ -308,7 +442,7 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
 
     #  <-------- 精细切分latex文件 ----------> 
     lps = LatexPaperSplit()
-    res = lps.split(merged_content)
+    res = lps.split(merged_content, project_folder)
 
     #  <-------- 拆分过长的latex片段 ----------> 
     pfg = LatexPaperFileGroup()
