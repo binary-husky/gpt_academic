@@ -358,7 +358,7 @@ def get_crazy_functions():
         })
         from crazy_functions.Latex输出PDF结果 import Latex翻译中文并重新编译PDF
         function_plugins.update({
-            "[功能尚不稳定] Latex翻译中文+生成PDF": {
+            "[功能尚不稳定] Latex翻译/Arixv翻译+重构PDF": {
                 "Color": "stop",
                 "AsButton": False,
                 # "AdvancedArgs": True,
