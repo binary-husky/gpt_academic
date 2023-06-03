@@ -803,16 +803,16 @@ class ProxyNetworkActivate():
         if 'HTTPS_PROXY' in os.environ: os.environ.pop('HTTPS_PROXY')
         return
 
-def objdump(obj):
+def objdump(obj, file='objdump.tmp'):
     import pickle
-    with open('objdump.tmp', 'wb+') as f:
+    with open(file, 'wb+') as f:
         pickle.dump(obj, f)
     return
 
-def objload():
+def objload(file='objdump.tmp'):
     import pickle, os
-    if not os.path.exists('objdump.tmp'): 
+    if not os.path.exists(file): 
         return
-    with open('objdump.tmp', 'rb') as f:
+    with open(file, 'rb') as f:
         return pickle.load(f)
     

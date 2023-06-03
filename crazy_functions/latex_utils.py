@@ -1,5 +1,5 @@
 from toolbox import update_ui, update_ui_lastest_msg    # 刷新Gradio前端界面
-from toolbox import zip_folder
+from toolbox import zip_folder, objdump, objload
 import os
 import re
 pj = os.path.join
@@ -33,7 +33,7 @@ def merge_tex_files(project_foler, main_file, mode):
         pattern = re.compile(r'\\documentclass.*\n')
         match = pattern.search(main_file)
         position = match.end()
-        main_file = main_file[:position] + '\\usepackage{CTEX}\n' + main_file[position:]
+        main_file = main_file[:position] + '\\usepackage{CTEX}\n\\usepackage{url}\n' + main_file[position:]
 
 
     return main_file
@@ -63,6 +63,7 @@ def fix_content(final_tex):
     final_tex = final_tex.replace('%', r'\%')
     final_tex = final_tex.replace(r'\%', r'\\%')
     final_tex = re.sub(r"\\([a-z]{2,10})\ \{", r"\\\1{", string=final_tex)
+    final_tex = re.sub(r"\\\ ([a-z]{2,10})\{", r"\\\1{", string=final_tex)
     final_tex = re.sub(r"\\([a-z]{2,10})\{([^\}]*?)\}", mod_inbraket, string=final_tex)
     return final_tex
 
@@ -70,7 +71,7 @@ class LatexPaperSplit():
     def __init__(self) -> None:
         self.root = None
 
-    def merge_result(self, arr, mode):
+    def merge_result(self, arr, mode, msg):
         result_string = ""
         node = self.root
         p = 0
@@ -88,9 +89,10 @@ class LatexPaperSplit():
                 match = pattern.search(result_string)
                 position = match.end()
                 result_string = result_string[:position] + \
-                    "警告：该PDF由Github的GPT-Academic开源项目调用大语言模型+Latex翻译插件一键生成，其内容可靠性没有任何保障，请仔细鉴别，并以arxiv原文为准。" + \
-                    "项目Github地址 https://github.com/binary-husky/gpt_academic/。"            + \
-                    "为了防止大语言模型的意外谬误产生扩散影响，禁止任何人移除或修改此警告。 \n\n"    + \
+                    "\\textbf{警告：该PDF由Github的GPT-Academic开源项目调用大语言模型+Latex翻译插件一键生成，其内容可靠性没有任何保障，请仔细鉴别，并以arxiv原文为准。" + \
+                    "项目Github地址 \\url{https://github.com/binary-husky/gpt_academic/}。"            + \
+                    msg + \
+                    "为了防止大语言模型的意外谬误产生扩散影响，禁止任何人移除或修改此警告。}\\\\"    + \
                     result_string[position:]
             except:
                 pass
@@ -142,6 +144,8 @@ class LatexPaperSplit():
         split_worker(root, r"\\section\{(.*?)\}")
         split_worker(root, r"\\subsection\{(.*?)\}")
         split_worker(root, r"\\subsubsection\{(.*?)\}")
+        split_worker(root, r"\\bibliography\{(.*?)\}")
+        split_worker(root, r"\\bibliographystyle\{(.*?)\}")
         split_worker(root, r"\\begin\{figure\}(.*?)\\end\{figure\}", re.DOTALL)
         split_worker(root, r"\\begin\{figure\*\}(.*?)\\end\{figure\*\}", re.DOTALL)
         split_worker(root, r"\\begin\{table\}(.*?)\\end\{table\}", re.DOTALL)
@@ -258,7 +262,7 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
     #  <-------- 拆分过长的latex片段 ----------> 
     pfg = LatexPaperFileGroup()
     for index, r in enumerate(res):
-        pfg.file_paths.append(index)
+        pfg.file_paths.append('segment-' + str(index))
         pfg.file_contents.append(r)
 
     pfg.run_file_split(max_token_limit=1024)
@@ -268,31 +272,38 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
     inputs_array, sys_prompt_array = switch_prompt(pfg, mode)
     inputs_show_user_array = [f"{mode} {f}" for f in pfg.sp_file_tag]
 
-    #  <-------- gpt 多线程请求 ----------> 
-    gpt_response_collection = yield from request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
-        inputs_array=inputs_array,
-        inputs_show_user_array=inputs_show_user_array,
-        llm_kwargs=llm_kwargs,
-        chatbot=chatbot,
-        history_array=[[""] for _ in range(n_split)],
-        sys_prompt_array=sys_prompt_array,
-        # max_workers=5,  # 并行任务数量限制, 最多同时执行5个, 其他的排队等待
-        scroller_max_len = 80
-    )
+    if os.path.exists(pj(project_folder,'temp.pkl')):
 
-    #  <-------- 文本碎片重组为完整的tex片段 ----------> 
-    pfg.sp_file_result = []
-    for i_say, gpt_say, orig_content in zip(gpt_response_collection[0::2], gpt_response_collection[1::2], pfg.sp_file_contents):
-        pfg.sp_file_result.append(gpt_say)
-    pfg.merge_result()
+        #  <-------- 【仅调试】如果存在调试缓存文件，则跳过GPT请求环节 ----------> 
+        pfg = objload(file=pj(project_folder,'temp.pkl'))
 
-    # #  <-------- 临时存储用于调试 ----------> 
-    # pfg.get_token_num = None
-    # objdump(pfg)
-    # pfg = objload()
+    else:
+        #  <-------- gpt 多线程请求 ----------> 
+        gpt_response_collection = yield from request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
+            inputs_array=inputs_array,
+            inputs_show_user_array=inputs_show_user_array,
+            llm_kwargs=llm_kwargs,
+            chatbot=chatbot,
+            history_array=[[""] for _ in range(n_split)],
+            sys_prompt_array=sys_prompt_array,
+            # max_workers=5,  # 并行任务数量限制, 最多同时执行5个, 其他的排队等待
+            scroller_max_len = 40
+        )
+
+        #  <-------- 文本碎片重组为完整的tex片段 ----------> 
+        pfg.sp_file_result = []
+        for i_say, gpt_say, orig_content in zip(gpt_response_collection[0::2], gpt_response_collection[1::2], pfg.sp_file_contents):
+            pfg.sp_file_result.append(gpt_say)
+        pfg.merge_result()
+
+        # <-------- 临时存储用于调试 ----------> 
+        pfg.get_token_num = None
+        objdump(pfg, file=pj(project_folder,'temp.pkl'))
+
 
     #  <-------- 写出文件 ----------> 
-    final_tex = lps.merge_result(pfg.sp_file_result, mode)
+    msg = f"当前大语言模型: {llm_kwargs['llm_model']}，当前语言模型温度设定: {llm_kwargs['temperature']}。"
+    final_tex = lps.merge_result(pfg.sp_file_result, mode, msg)
     with open(project_folder + f'/merge_{mode}.tex', 'w', encoding='utf-8', errors='replace') as f:
         f.write(final_tex)
 
@@ -302,58 +313,6 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
 
     #  <-------- 返回 ----------> 
     return project_folder + f'/merge_{mode}.tex'
-
-
-# def Latex预处理(pfg, project_folder):
-#     import shutil, os
-#     work_folder = 'private_upload/latex_workshop_temp'
-
-#     try:
-#         shutil.rmtree(work_folder)
-#     except:
-#         pass
-#     finally:
-#         work_folder_original = 'private_upload/latex_workshop_temp/original'
-#         work_folder_modified = 'private_upload/latex_workshop_temp/modified'
-#         shutil.copytree(project_folder, work_folder_original, ignore=lambda a,b: ['.git'])
-#         shutil.copytree(project_folder, work_folder_modified, ignore=lambda a,b: ['.git'])
-
-#     for path, result in zip(pfg.file_paths, pfg.file_result):
-#         path_old = os.path.relpath(path, start=project_folder)
-#         path_new = pj(work_folder_modified, path_old)
-#         with open(path_new, 'w', encoding='utf-8') as f:
-#             f.write(result)
-
-#     for main_file_original in glob.glob('private_upload/latex_workshop_temp/original/*.tex'):
-#         with open(main_file_original, 'r', encoding='utf8') as f:
-#             file_content = f.read()
-#         if r'\documentclass' in file_content:
-#             path_old = os.path.relpath(main_file_original, start=work_folder_original)
-#             main_file_modified = os.path.relpath(work_folder_modified, start=work_folder_original)
-#             return main_file_original, main_file_modified, work_folder_original, work_folder_modified, work_folder
-#         else:
-#             continue
-#     raise RuntimeError('无法找到一个主Tex文件, 本程序寻找主Tex文件的方法是查找文件中的documentclass关键字。')
-
-
-# def Latex预处理(tar_file):
-#     from toolbox import extract_archive
-#     import shutil
-#     work_folder = 'private_upload/latex_workshop_temp'
-#     try:
-#         shutil.rmtree(work_folder)
-#     except:
-#         pass
-#     res = extract_archive(tar_file, dest_dir=work_folder)
-#     for texf in glob.glob('private_upload/latex_workshop_temp/*.tex'):
-#         with open(texf, 'r', encoding='utf8') as f:
-#             file_content = f.read()
-#         if r'\documentclass' in file_content:
-#             return texf, work_folder
-#         else:
-#             continue
-#     raise RuntimeError('无法找到一个主Tex文件（包含documentclass关键字）')
-
 
 
 
@@ -400,27 +359,27 @@ def 编译Latex差别(chatbot, history, main_file_original, main_file_modified, 
     while True:
         import os
         # https://stackoverflow.com/questions/738755/dont-make-me-manually-abort-a-latex-compile-when-theres-an-error
-        yield from update_ui_lastest_msg(f'尝试第{n_fix}编译, 编译原始PDF ...', chatbot, history)   # 刷新Gradio前端界面
+        yield from update_ui_lastest_msg(f'尝试第{n_fix}次编译, 编译原始PDF ...', chatbot, history)   # 刷新Gradio前端界面
         os.chdir(work_folder_original); compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex'); os.chdir(current_dir)
 
-        yield from update_ui_lastest_msg(f'尝试第{n_fix}编译, 编译转化后的PDF ...', chatbot, history)   # 刷新Gradio前端界面
+        yield from update_ui_lastest_msg(f'尝试第{n_fix}次编译, 编译转化后的PDF ...', chatbot, history)   # 刷新Gradio前端界面
         os.chdir(work_folder_modified); compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex'); os.chdir(current_dir)
 
-        yield from update_ui_lastest_msg(f'尝试第{n_fix}编译, 编译BibTex ...', chatbot, history)    # 刷新Gradio前端界面
+        yield from update_ui_lastest_msg(f'尝试第{n_fix}次编译, 编译BibTex ...', chatbot, history)    # 刷新Gradio前端界面
         os.chdir(work_folder_original); compile_latex_with_timeout(f'bibtex  {main_file_original}.aux'); os.chdir(current_dir)
         os.chdir(work_folder_modified); compile_latex_with_timeout(f'bibtex  {main_file_modified}.aux'); os.chdir(current_dir)
 
-        yield from update_ui_lastest_msg(f'尝试第{n_fix}编译, 编译文献交叉引用 ...', chatbot, history)  # 刷新Gradio前端界面
+        yield from update_ui_lastest_msg(f'尝试第{n_fix}次编译, 编译文献交叉引用 ...', chatbot, history)  # 刷新Gradio前端界面
         os.chdir(work_folder_original); compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex'); os.chdir(current_dir)
         os.chdir(work_folder_modified); compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex'); os.chdir(current_dir)
         os.chdir(work_folder_original); compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex'); os.chdir(current_dir)
         os.chdir(work_folder_modified); compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex'); os.chdir(current_dir)
 
-        yield from update_ui_lastest_msg(f'尝试第{n_fix}编译, 使用latexdiff生成论文转化前后对比 ...', chatbot, history) # 刷新Gradio前端界面
+        yield from update_ui_lastest_msg(f'尝试第{n_fix}次编译, 使用latexdiff生成论文转化前后对比 ...', chatbot, history) # 刷新Gradio前端界面
         print(    f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
         compile_latex_with_timeout(f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
 
-        yield from update_ui_lastest_msg(f'尝试第{n_fix}编译, 正在编译对比PDF ...', chatbot, history)   # 刷新Gradio前端界面
+        yield from update_ui_lastest_msg(f'尝试第{n_fix}次编译, 正在编译对比PDF ...', chatbot, history)   # 刷新Gradio前端界面
         os.chdir(work_folder); compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
         os.chdir(work_folder); compile_latex_with_timeout(f'bibtex    merge_diff.aux'); os.chdir(current_dir)
         os.chdir(work_folder); compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
