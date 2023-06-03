@@ -145,13 +145,15 @@ class LatexPaperSplit():
                 if lt is None: break
 
         # root 是链表的头
-        print('正在分解Latex源文件')
+        print('正在分解Latex源文件，构建链表结构')
         split_worker(root, r"(.*?)\\maketitle", re.DOTALL)
         split_worker(root, r"\\section\{(.*?)\}")
         split_worker(root, r"\\subsection\{(.*?)\}")
         split_worker(root, r"\\subsubsection\{(.*?)\}")
         split_worker(root, r"\\bibliography\{(.*?)\}")
         split_worker(root, r"\\bibliographystyle\{(.*?)\}")
+        split_worker(root, r"\\begin\{wrapfigure\}(.*?)\\end\{wrapfigure\}", re.DOTALL)
+        split_worker(root, r"\\begin\{wrapfigure\*\}(.*?)\\end\{wrapfigure\*\}", re.DOTALL)
         split_worker(root, r"\\begin\{figure\}(.*?)\\end\{figure\}", re.DOTALL)
         split_worker(root, r"\\begin\{figure\*\}(.*?)\\end\{figure\*\}", re.DOTALL)
         split_worker(root, r"\\begin\{table\}(.*?)\\end\{table\}", re.DOTALL)
@@ -413,7 +415,7 @@ def 编译Latex差别(chatbot, history, main_file_original, main_file_modified, 
             os.chdir(current_dir)
             return True # 成功啦
         else:
-            if n_fix>=10: break
+            if n_fix>=7: break
             n_fix += 1
             can_retry, main_file_modified, buggy_lines = remove_buggy_lines(
                 file_path=pj(work_folder_modified, f'{main_file_modified}.tex'), 
