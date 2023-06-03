@@ -348,7 +348,7 @@ def get_crazy_functions():
     try:
         from crazy_functions.Latex输出PDF结果 import Latex英文纠错加PDF对比
         function_plugins.update({
-            "Latex英文纠错+LatexDiff高亮修正位置": {
+            "[功能尚不稳定] Latex英文纠错+LatexDiff高亮修正位置": {
                 "Color": "stop",
                 "AsButton": False,
                 # "AdvancedArgs": True,
@@ -358,7 +358,7 @@ def get_crazy_functions():
         })
         from crazy_functions.Latex输出PDF结果 import Latex翻译中文并重新编译PDF
         function_plugins.update({
-            "Latex翻译中文+生成PDF": {
+            "[功能尚不稳定] Latex翻译中文+生成PDF": {
                 "Color": "stop",
                 "AsButton": False,
                 # "AdvancedArgs": True,
