@@ -35,6 +35,11 @@ def merge_tex_files(project_foler, main_file, mode):
         position = match.end()
         main_file = main_file[:position] + '\\usepackage{CTEX}\n' + main_file[position:]
 
+        pattern = re.compile(r'\\begin\{abstract\}.*\n')
+        match = pattern.search(main_file)
+        position = match.end()
+        main_file = main_file[:position] + '声明：该PDF由Github的gpt-academic开源项目latex翻译插件一键生成，请认真 \n\n' + main_file[position:]
+
     return main_file
 
 class LinkTable():
@@ -347,7 +352,6 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
 
 def remove_buggy_lines(file_path, log_path, tex_name, tex_name_pure, n_fix, work_folder_modified):
     try:
-
         with open(log_path, 'r', encoding='utf-8', errors='replace') as f:
             log = f.read()
         with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
@@ -361,9 +365,8 @@ def remove_buggy_lines(file_path, log_path, tex_name, tex_name_pure, n_fix, work
         with open(pj(work_folder_modified, f"{tex_name_pure}_fix_{n_fix}.tex"), 'w', encoding='utf-8', errors='replace') as f:
             f.writelines(file_lines)
         return True, f"{tex_name_pure}_fix_{n_fix}", buggy_lines
-    
     except:
-        return False, 0
+        return False, 0, [0]
     
 
 def compile_latex_with_timeout(command, timeout=90):
