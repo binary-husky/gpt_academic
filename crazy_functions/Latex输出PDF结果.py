@@ -3,7 +3,8 @@ from toolbox import CatchException, report_execption, update_ui_lastest_msg, zip
 import glob, os, requests, time
 pj = os.path.join
 
-# =================================== 工具函数 ===============================================    
+# =================================== 工具函数 ===============================================
+沙雕GPT啊别犯这些低级翻译错误  = 'You must to translate "agent" to "智能体". '
 def switch_prompt(pfg, mode):
     """
     Generate prompts and system prompts based on the mode for proofreading or translating.
@@ -23,7 +24,7 @@ def switch_prompt(pfg, mode):
                         f"\n\n{frag}" for frag in pfg.sp_file_contents]
         sys_prompt_array = ["You are a professional academic paper writer." for _ in range(n_split)]
     elif mode == 'translate_zh':
-        inputs_array = [r"Below is a section from an English academic paper, translate it into Chinese." + 
+        inputs_array = [r"Below is a section from an English academic paper, translate it into Chinese." + 沙雕GPT啊别犯这些低级翻译错误 + 
                         r"Do not modify any latex command such as \section, \cite, \begin, \item and equations. " + 
                         r"Answer me only with the translated text:" + 
                         f"\n\n{frag}" for frag in pfg.sp_file_contents]
@@ -85,13 +86,15 @@ def arxiv_download(chatbot, history, txt):
     os.makedirs(download_dir, exist_ok=True)
     
     # <-------------- download arxiv source file ------------->
-    yield from update_ui_lastest_msg("开始下载", chatbot=chatbot, history=history)  # 刷新界面
-    proxies, = get_conf('proxies')
-    r = requests.get(url_tar, proxies=proxies)
     dst = pj(download_dir, arxiv_id+'.tar')
-    with open(dst, 'wb+') as f:
-        f.write(r.content)
-
+    if os.path.exists(dst):
+        yield from update_ui_lastest_msg("调用缓存", chatbot=chatbot, history=history)  # 刷新界面
+    else:
+        yield from update_ui_lastest_msg("开始下载", chatbot=chatbot, history=history)  # 刷新界面
+        proxies, = get_conf('proxies')
+        r = requests.get(url_tar, proxies=proxies)
+        with open(dst, 'wb+') as f:
+            f.write(r.content)
     # <-------------- extract file ------------->
     yield from update_ui_lastest_msg("下载完成", chatbot=chatbot, history=history)  # 刷新界面
     from toolbox import extract_archive
