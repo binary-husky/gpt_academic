@@ -1,6 +1,6 @@
 import markdown
 import importlib
-import traceback
+import time
 import inspect
 import re
 import os
@@ -77,6 +77,17 @@ def update_ui(chatbot, history, msg='正常', **kwargs):  # 刷新界面
     """
     assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时，可用clear将其清空，然后用for+append循环重新赋值。"
     yield chatbot.get_cookies(), chatbot, history, msg
+
+def update_ui_lastest_msg(lastmsg, chatbot, history, delay=1):  # 刷新界面
+    """
+    刷新用户界面
+    """
+    if len(chatbot) == 0: chatbot.append(["update_ui_last_msg", lastmsg])
+    chatbot[-1] = list(chatbot[-1])
+    chatbot[-1][-1] = lastmsg
+    yield from update_ui(chatbot=chatbot, history=history)
+    time.sleep(delay)
+
 
 def trimmed_format_exc():
     import os, traceback
@@ -772,6 +783,11 @@ def zip_folder(source_folder, dest_folder, zip_name):
 
     print(f"Zip file created at {zip_file}")
 
+def zip_result(folder):
+    import time
+    t = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+    zip_folder(folder, './gpt_log/', f'{t}-result.zip')
+    
 def gen_time_str():
     import time
     return time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
@@ -807,3 +823,4 @@ def objload():
         return
     with open('objdump.tmp', 'rb') as f:
         return pickle.load(f)
+    
