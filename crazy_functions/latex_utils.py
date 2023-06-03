@@ -156,6 +156,8 @@ class LatexPaperSplit():
         split_worker(root, r"\\begin\{figure\*\}(.*?)\\end\{figure\*\}", re.DOTALL)
         split_worker(root, r"\\begin\{table\}(.*?)\\end\{table\}", re.DOTALL)
         split_worker(root, r"\\begin\{table\*\}(.*?)\\end\{table\*\}", re.DOTALL)
+        split_worker(root, r"\\begin\{minipage\}(.*?)\\end\{minipage\}", re.DOTALL)
+        split_worker(root, r"\\begin\{minipage\*\}(.*?)\\end\{minipage\*\}", re.DOTALL)
         split_worker(root, r"\\begin\{align\*\}(.*?)\\end\{align\*\}", re.DOTALL)
         split_worker(root, r"\\begin\{align\}(.*?)\\end\{align\}", re.DOTALL)
         split_worker(root, r"\\begin\{equation\}(.*?)\\end\{equation\}", re.DOTALL)
@@ -341,7 +343,7 @@ def remove_buggy_lines(file_path, log_path, tex_name, tex_name_pure, n_fix, work
         return False, 0, [0]
     
 
-def compile_latex_with_timeout(command, timeout=90):
+def compile_latex_with_timeout(command, timeout=60):
     import subprocess
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
