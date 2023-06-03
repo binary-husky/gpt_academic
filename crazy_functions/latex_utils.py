@@ -95,10 +95,10 @@ class LatexPaperSplit():
                 match = pattern.search(result_string)
                 position = match.end()
                 result_string = result_string[:position] + \
-                    "\\textbf{警告：该PDF由Github的GPT-Academic开源项目调用大语言模型+Latex翻译插件一键生成，其内容可靠性没有任何保障，请仔细鉴别，并以arxiv原文为准。" + \
+                    "\\textbf{警告：该PDF由GPT-Academic开源项目调用大语言模型+Latex翻译插件一键生成，其内容可靠性没有任何保障，请仔细鉴别并以原文为准。" + \
                     "项目Github地址 \\url{https://github.com/binary-husky/gpt_academic/}。"            + \
                     msg + \
-                    "为了防止大语言模型的意外谬误产生扩散影响，禁止任何人移除或修改此警告。}\\\\"    + \
+                    "为了防止大语言模型的意外谬误产生扩散影响，禁止移除或修改此警告。}\\\\"    + \
                     result_string[position:]
             except:
                 pass
@@ -352,46 +352,48 @@ def compile_latex_with_timeout(command, timeout=60):
         process.kill()
         stdout, stderr = process.communicate()
         print("Process timed out!")
-
-    print(stdout)
+        return False
     print(stderr)
-
+    return True
 
 def 编译Latex差别(chatbot, history, main_file_original, main_file_modified, work_folder_original, work_folder_modified, work_folder):
     import os, time
     current_dir = os.getcwd()
     n_fix = 0
-    chatbot.append([f"正在编译PDF文档", '编译已经开始...']); yield from update_ui(chatbot=chatbot, history=history); time.sleep(1); chatbot[-1] = list(chatbot[-1]) # 刷新界面
+    chatbot.append([f"正在编译PDF文档", '编译已经开始。当前工作路径为{work_folder}，如果程序停顿5分钟以上，则大概率是卡死在Latex里面了。不幸卡死时请直接去该路径下取回翻译结果，或者重启之后再度尝试 ...']); yield from update_ui(chatbot=chatbot, history=history)
+    chatbot.append([f"正在编译PDF文档", '...']); yield from update_ui(chatbot=chatbot, history=history); time.sleep(1); chatbot[-1] = list(chatbot[-1]) # 刷新界面
     yield from update_ui_lastest_msg('编译已经开始...', chatbot, history)   # 刷新Gradio前端界面
 
     while True:
         import os
         # https://stackoverflow.com/questions/738755/dont-make-me-manually-abort-a-latex-compile-when-theres-an-error
         yield from update_ui_lastest_msg(f'尝试第{n_fix}次编译, 编译原始PDF ...', chatbot, history)   # 刷新Gradio前端界面
-        os.chdir(work_folder_original); compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex'); os.chdir(current_dir)
+        os.chdir(work_folder_original); ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex'); os.chdir(current_dir)
 
         yield from update_ui_lastest_msg(f'尝试第{n_fix}次编译, 编译转化后的PDF ...', chatbot, history)   # 刷新Gradio前端界面
-        os.chdir(work_folder_modified); compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex'); os.chdir(current_dir)
+        os.chdir(work_folder_modified); ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex'); os.chdir(current_dir)
+        
+        if ok:
+            # 只有第二步成功，才能继续下面的步骤
+            yield from update_ui_lastest_msg(f'尝试第{n_fix}次编译, 编译BibTex ...', chatbot, history)    # 刷新Gradio前端界面
+            os.chdir(work_folder_original); ok = compile_latex_with_timeout(f'bibtex  {main_file_original}.aux'); os.chdir(current_dir)
+            os.chdir(work_folder_modified); ok = compile_latex_with_timeout(f'bibtex  {main_file_modified}.aux'); os.chdir(current_dir)
 
-        yield from update_ui_lastest_msg(f'尝试第{n_fix}次编译, 编译BibTex ...', chatbot, history)    # 刷新Gradio前端界面
-        os.chdir(work_folder_original); compile_latex_with_timeout(f'bibtex  {main_file_original}.aux'); os.chdir(current_dir)
-        os.chdir(work_folder_modified); compile_latex_with_timeout(f'bibtex  {main_file_modified}.aux'); os.chdir(current_dir)
+            yield from update_ui_lastest_msg(f'尝试第{n_fix}次编译, 编译文献交叉引用 ...', chatbot, history)  # 刷新Gradio前端界面
+            os.chdir(work_folder_original); ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex'); os.chdir(current_dir)
+            os.chdir(work_folder_modified); ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex'); os.chdir(current_dir)
+            os.chdir(work_folder_original); ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex'); os.chdir(current_dir)
+            os.chdir(work_folder_modified); ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex'); os.chdir(current_dir)
 
-        yield from update_ui_lastest_msg(f'尝试第{n_fix}次编译, 编译文献交叉引用 ...', chatbot, history)  # 刷新Gradio前端界面
-        os.chdir(work_folder_original); compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex'); os.chdir(current_dir)
-        os.chdir(work_folder_modified); compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex'); os.chdir(current_dir)
-        os.chdir(work_folder_original); compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex'); os.chdir(current_dir)
-        os.chdir(work_folder_modified); compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex'); os.chdir(current_dir)
+            yield from update_ui_lastest_msg(f'尝试第{n_fix}次编译, 使用latexdiff生成论文转化前后对比 ...', chatbot, history) # 刷新Gradio前端界面
+            print(    f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
+            ok = compile_latex_with_timeout(f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
 
-        yield from update_ui_lastest_msg(f'尝试第{n_fix}次编译, 使用latexdiff生成论文转化前后对比 ...', chatbot, history) # 刷新Gradio前端界面
-        print(    f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
-        compile_latex_with_timeout(f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
-
-        yield from update_ui_lastest_msg(f'尝试第{n_fix}次编译, 正在编译对比PDF ...', chatbot, history)   # 刷新Gradio前端界面
-        os.chdir(work_folder); compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
-        os.chdir(work_folder); compile_latex_with_timeout(f'bibtex    merge_diff.aux'); os.chdir(current_dir)
-        os.chdir(work_folder); compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
-        os.chdir(work_folder); compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
+            yield from update_ui_lastest_msg(f'尝试第{n_fix}次编译, 正在编译对比PDF ...', chatbot, history)   # 刷新Gradio前端界面
+            os.chdir(work_folder); ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
+            os.chdir(work_folder); ok = compile_latex_with_timeout(f'bibtex    merge_diff.aux'); os.chdir(current_dir)
+            os.chdir(work_folder); ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
+            os.chdir(work_folder); ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
 
         # <--------------------->
         os.chdir(current_dir)
