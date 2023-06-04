@@ -1,90 +1,166 @@
-""" AutoGPT """
-beautifulsoup4>=4.12.2
-colorama==0.4.6
-distro==1.8.0
-openai==0.27.2
-playsound==1.2.2
-python-dotenv==1.0.0
-pyyaml==6.0
-PyPDF2
-python-docx
-markdown
-pylatexenc
-readability-lxml==0.8.1
-requests
-tiktoken==0.3.3
-gTTS==2.3.1
-docker
-duckduckgo-search==3.0.2
-google-api-python-client #(https://developers.google.com/custom-search/v1/overview)
-pinecone-client==2.2.1
-redis
-orjson==3.8.10
-Pillow
-selenium==4.1.4
-webdriver-manager
-jsonschema
-click
-charset-normalizer>=3.1.0
-spacy>=3.0.0,<4.0.0
-en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0-py3-none-any.whl
+# <<<<<<< HEAD
+## Original ignores
+autogpt/keys.py
+autogpt/*json
+autogpt/node_modules/
+autogpt/__pycache__/keys.cpython-310.pyc
+autogpt/auto_gpt_workspace
+package-lock.json
+*.pyc
+auto_gpt_workspace/*
+*.mpeg
+.env
+azure.yaml
+ai_settings.yaml
+last_run_ai_settings.yaml
+.vscode
+.idea/*
+auto-gpt.json
+log.txt
+log-ingestion.txt
+logs
+*.log
+*.mp3
+mem.sqlite3
+venvAutoGPT
 
-##Dev
-coverage
-flake8
-numpy
-pre-commit
-black
-isort
-gitpython==3.1.31
-auto-gpt-plugin-template @ git+https://github.com/Significant-Gravitas/Auto-GPT-Plugin-Template@0.1.0
-mkdocs
-pymdown-extensions
-mypy
-types-Markdown
-types-beautifulsoup4
-types-colorama
-types-Pillow
-
-# OpenAI and Generic plugins import
-openapi-python-client==0.13.4
-
-# Items below this point will not be included in the Docker Image
-
-# Testing dependencies
-pytest
-asynctest
-pytest-asyncio
-pytest-benchmark
-pytest-cov
-pytest-integration
-pytest-mock
-vcrpy @ git+https://github.com/Significant-Gravitas/vcrpy.git@master
-pytest-recording
-pytest-xdist
-
-""" 学术优化 """
-./docs/gradio-3.32.2-py3-none-any.whl
-tiktoken>=0.3.3
-requests[socks]
-transformers
-python-markdown-math
-beautifulsoup4
-prompt_toolkit
-latex2mathml
-python-docx
-mdtex2html
-colorama
-Markdown
-pygments
-pymupdf
-openai
-numpy
-arxiv
-pymupdf
-pyperclip
-scikit-learn
-psutil
-distro
-python-dotenv
-rich
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+# C extensions
+*.so
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+plugins/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+# Translations
+*.mo
+*.pot
+# Django stuff:
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+# Flask stuff:
+instance/
+.webassets-cache
+# Scrapy stuff:
+.scrapy
+# Sphinx documentation
+docs/_build/
+site/
+# PyBuilder
+target/
+# Jupyter Notebook
+.ipynb_checkpoints
+# IPython
+profile_default/
+ipython_config.py
+# pyenv
+.python-version
+# pipenv
+#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
+#   However, in case of collaboration, if having platform-specific dependencies or dependencies
+#   having no cross-platform support, pipenv may install dependencies that don't work, or not
+#   install all needed dependencies.
+#Pipfile.lock
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow
+__pypackages__/
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+# SageMath parsed files
+*.sage.py
+# Environments
+.direnv/
+.venv
+env/
+venv*/
+ENV/
+env.bak/
+# Spyder project settings
+.spyderproject
+.spyproject
+# Rope project settings
+.ropeproject
+# mkdocs documentation
+/site
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+# Pyre type checker
+.pyre/
+llama-*
+vicuna-*
+# mac
+.DS_Store
+openai/
+# news
+CURRENT_BULLETIN.md
+.tree*
+github
+.github
+TEMP
+TRASH
+venv/
+venv.bak/
+.idea
+history
+ssr_conf
+config_private.py
+gpt_log
+private.md
+private_upload
+other_llms
+cradle*
+debug*
+private*
+crazy_functions/test_project/pdf_and_word
+crazy_fun
+ctions/test_samples
+crazy_functions/test_samples
+request_llm/jittorllms
+prompt_users/*
+request_llm/moss
+multi-language
+media
+__test.py
