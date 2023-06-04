@@ -1,7 +1,8 @@
-from toolbox import update_ui, trimmed_format_exc, get_conf, objdump, objload
+from toolbox import update_ui, trimmed_format_exc, get_conf, objdump, objload, promote_file_to_downloadzone
 from toolbox import CatchException, report_execption, update_ui_lastest_msg, zip_result, gen_time_str
 import glob, os, requests, time
 pj = os.path.join
+ARXIV_CACHE_DIR = os.path.expanduser(f"~/arxiv_cache/")
 
 # =================================== 工具函数 ===============================================
 沙雕GPT啊别犯这些低级翻译错误  = 'You must to translate "agent" to "智能体". '
@@ -48,7 +49,7 @@ def desend_to_extracted_folder_if_exist(project_folder):
     if maybe_dir[0].endswith('.extract'): return maybe_dir[0]
     return project_folder
 
-def move_project(project_folder):
+def move_project(project_folder, arxiv_id=None):
     """ 
     Create a new work folder and copy the project folder to it.
 
@@ -60,13 +61,26 @@ def move_project(project_folder):
     """
     import shutil, time
     time.sleep(2)   # avoid time string conflict
-    new_workfolder = f'gpt_log/{gen_time_str()}'
+    if arxiv_id is not None:
+        new_workfolder = pj(ARXIV_CACHE_DIR, arxiv_id, 'workfolder')
+    else:
+        new_workfolder = f'gpt_log/{gen_time_str()}'
     shutil.copytree(src=project_folder, dst=new_workfolder)
     return new_workfolder
 
 def arxiv_download(chatbot, history, txt):
+    def check_cached_translation_pdf(arxiv_id):
+        translation_dir = pj(ARXIV_CACHE_DIR, arxiv_id, 'translation')
+        if not os.path.exists(translation_dir):
+            os.makedirs(translation_dir)
+        target_file = pj(translation_dir, 'translate_zh.pdf')
+        if os.path.exists(target_file):
+            promote_file_to_downloadzone(target_file)
+            return target_file
+        return False
+    
     if not txt.startswith('https://arxiv.org'): 
-        return txt
+        return txt, None
     
     # <-------------- inspect format ------------->
     chatbot.append([f"检测到arxiv文档连接", '尝试下载 ...']) 
@@ -77,16 +91,19 @@ def arxiv_download(chatbot, history, txt):
     if not txt.startswith('https://arxiv.org/abs/'): 
         msg = f"解析arxiv网址失败, 期望格式例如: https://arxiv.org/abs/1707.06690。实际得到格式: {url_}"
         yield from update_ui_lastest_msg(msg, chatbot=chatbot, history=history) # 刷新界面
-        return msg
-    
+        return msg, None
     # <-------------- set format ------------->
     arxiv_id = url_.split('/abs/')[-1]
+    cached_translation_pdf = check_cached_translation_pdf(arxiv_id)
+    if cached_translation_pdf: return cached_translation_pdf, arxiv_id
+
     url_tar = url_.replace('/abs/', '/e-print/')
-    download_dir = './gpt_log/arxiv/'
-    os.makedirs(download_dir, exist_ok=True)
+    translation_dir = pj(ARXIV_CACHE_DIR, arxiv_id, 'e-print')
+    extract_dst = pj(ARXIV_CACHE_DIR, arxiv_id, 'extract')
+    os.makedirs(translation_dir, exist_ok=True)
     
     # <-------------- download arxiv source file ------------->
-    dst = pj(download_dir, arxiv_id+'.tar')
+    dst = pj(translation_dir, arxiv_id+'.tar')
     if os.path.exists(dst):
         yield from update_ui_lastest_msg("调用缓存", chatbot=chatbot, history=history)  # 刷新界面
     else:
@@ -98,9 +115,8 @@ def arxiv_download(chatbot, history, txt):
     # <-------------- extract file ------------->
     yield from update_ui_lastest_msg("下载完成", chatbot=chatbot, history=history)  # 刷新界面
     from toolbox import extract_archive
-    extract_dst = f'gpt_log/{gen_time_str()}'
     extract_archive(file_path=dst, dest_dir=extract_dst)
-    return extract_dst
+    return extract_dst, arxiv_id
 # ========================================= 插件主程序1 =====================================================    
 
 
@@ -126,7 +142,6 @@ def Latex英文纠错加PDF对比(txt, llm_kwargs, plugin_kwargs, chatbot, histo
 
     # <-------------- clear history and read input ------------->
     history = []
-    txt = yield from arxiv_download(chatbot, history, txt)
     if os.path.exists(txt):
         project_folder = txt
     else:
@@ -146,7 +161,7 @@ def Latex英文纠错加PDF对比(txt, llm_kwargs, plugin_kwargs, chatbot, histo
 
 
     # <-------------- move latex project away from temp folder ------------->
-    project_folder = move_project(project_folder)
+    project_folder = move_project(project_folder, arxiv_id=None)
 
 
     # <-------------- if merge_translate_zh is already generated, skip gpt req ------------->
@@ -197,7 +212,11 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
 
     # <-------------- clear history and read input ------------->
     history = []
-    txt = yield from arxiv_download(chatbot, history, txt)
+    txt, arxiv_id = yield from arxiv_download(chatbot, history, txt)
+    if txt.endswith('.pdf'):
+        report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"发现已经存在翻译好的PDF文档")
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+        return
     if os.path.exists(txt):
         project_folder = txt
     else:
@@ -217,7 +236,7 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
 
 
     # <-------------- move latex project away from temp folder ------------->
-    project_folder = move_project(project_folder)
+    project_folder = move_project(project_folder, arxiv_id)
 
 
     # <-------------- if merge_translate_zh is already generated, skip gpt req ------------->
