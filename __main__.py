@@ -40,8 +40,8 @@ except:
 print("所有问询记录将自动保存在本地目录./gpt_log/chat_secrets.log, 请注意自我隐私保护哦！")
 
 # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
-proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT, API_KEY, AVAIL_LLM_MODELS = \
-    get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'LAYOUT',
+proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, LAYOUT, API_KEY, AVAIL_LLM_MODELS = \
+    get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'LAYOUT',
              'API_KEY', 'AVAIL_LLM_MODELS')
 
 proxy_info = check_proxy(proxies)
@@ -73,7 +73,7 @@ class ChatBot(ChatBotFrame):
 
     def draw_chatbot(self):
         self.chatbot = gr.Chatbot(elem_id='main_chatbot', label=f"当前模型：{LLM_MODEL}")
-        self.chatbot.style(height=CHATBOT_HEIGHT)
+        self.chatbot.style()
         self.history = gr.State([])
         temp_draw = [gr.HTML() for i in range(4)]
         with gr.Row():

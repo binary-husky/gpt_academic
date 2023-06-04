@@ -480,10 +480,10 @@ def thread_write_chat(chatbot):
     对话记录写入数据库
     """
     private_key = toolbox.get_conf('private_key')[0]
-    chat_title = chatbot[0][0].split()
-
-    i_say = re.sub(r'^<div class="markdown-body"><p>|<\/p><\/div>$', '', chatbot[-1][0])
-    gpt_result = re.sub(r'^<div class="markdown-body"><p>|<\/p><\/div>$', '', chatbot[-1][1])
+    chat_title = chatbot[0][1].split()
+    pattern = re.compile(r'^<div class="markdown-body"><p>|<\/p><\/div>$')
+    i_say = pattern.sub('', chatbot[-1][0])
+    gpt_result = pattern.sub('', chatbot[-1][1])
     if private_key in chat_title:
         SqliteHandle(f'ai_private_{chat_title[-2]}').inset_prompt({i_say: gpt_result})
     else:

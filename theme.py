@@ -130,8 +130,14 @@ textarea {
 #main_chatbot {
     height: 75vh !important;
     max-height: 75vh !important;
-    overflow: auto !important;
+    /* overflow: auto !important; */
     z-index: 2;
+}
+.wrap.svelte-18telvq.svelte-18telvq {
+    padding: var(--block-padding) !important;
+    height: 100% !important;
+    max-height: 95% !important;
+    overflow-y: auto !important;
 }
 .app.svelte-1mya07g.svelte-1mya07g {
     max-width: 100%;
@@ -187,7 +193,7 @@ textarea {
     max-width: 95%;
     color: #ccd2db !important;
     letter-spacing: 0.5px;
-     font-weight: normal;
+    font-weight: normal;
     /* width: auto !important; */
     border-bottom-left-radius: 0 !important;
 }
