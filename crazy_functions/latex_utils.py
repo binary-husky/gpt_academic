@@ -228,7 +228,8 @@ class LatexPaperSplit():
 
         # root 是链表的头
         print('正在分解Latex源文件，构建链表结构')
-
+        # 删除iffalse注释
+        split_worker(root, r"\\iffalse(.*?)\\fi", re.DOTALL)
         # 吸收在25行以内的begin-end组合
         split_worker_begin_end(root, r"\\begin\{([a-z\*]*)\}(.*?)\\end\{\1\}", re.DOTALL, limit_n_lines=25)
         # 吸收其他杂项
@@ -239,7 +240,6 @@ class LatexPaperSplit():
         split_worker(root, r"\\subsubsection\{(.*?)\}")
         split_worker(root, r"\\bibliography\{(.*?)\}")
         split_worker(root, r"\\bibliographystyle\{(.*?)\}")
-        split_worker(root, r"\\iffalse(.*?)\\fi", re.DOTALL)
         split_worker(root, r"\\begin\{lstlisting\}(.*?)\\end\{lstlisting\}", re.DOTALL)
         split_worker(root, r"\\begin\{wraptable\}(.*?)\\end\{wraptable\}", re.DOTALL)
         split_worker(root, r"\\begin\{algorithm\}(.*?)\\end\{algorithm\}", re.DOTALL)
