@@ -30,12 +30,13 @@ def extract_char_position(error_message: str) -> int:
         raise ValueError("Character position not found in the error message.")
 
 
-def validate_json(json_object: object, schema_name: str) -> dict | None:
+def validate_json(json_object: object, schema_name: str):
     """
     :type schema_name: object
     :param schema_name: str
     :type json_object: object
     """
+    # with open(f"/Users/kilig/Job/Python-project/auto-gpt/autogpt/json_utils/{schema_name}.json", "r") as f:
     scheme_file = os.path.join(os.path.dirname(__file__), f"{schema_name}.json")
     with open(scheme_file, "r") as f:
         schema = json.load(f)
@@ -57,7 +58,7 @@ def validate_json(json_object: object, schema_name: str) -> dict | None:
     return json_object
 
 
-def validate_json_string(json_string: str, schema_name: str) -> dict | None:
+def validate_json_string(json_string: str, schema_name: str):
     """
     :type schema_name: object
     :param schema_name: str

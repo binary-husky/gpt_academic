@@ -25,7 +25,7 @@ class Command:
         description: str,
         method: Callable[..., Any],
         signature: str = "",
-        enabled: bool | Callable[[Config], bool] = True,
+        enabled: bool  = True,
         disabled_reason: Optional[str] = None,
     ):
         self.name = name
@@ -139,7 +139,8 @@ def command(
     name: str,
     description: str,
     signature: str,
-    enabled: bool | Callable[[Config], bool] = True,
+    enabled: bool  = True,
+
     disabled_reason: Optional[str] = None,
 ) -> Callable[..., Any]:
     """The command decorator is used to create Command objects from ordinary functions."""

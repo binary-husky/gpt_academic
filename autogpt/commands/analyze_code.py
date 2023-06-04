@@ -9,7 +9,6 @@ from autogpt.llm.utils import call_ai_function
 if TYPE_CHECKING:
     from autogpt.config import Config
 
-
 @command(
     "analyze_code",
     "Analyze Code",

@@ -23,10 +23,11 @@ class AgentManager(metaclass=Singleton):
     def create_agent(
         self, task: str, creation_prompt: str, model: str
     ) -> tuple[int, str]:
+
         """Create a new agent and return its key
 
         Args:
-            task: The task to perform
+            task: The task to perfor
             creation_prompt: Prompt passed to the LLM at creation
             model: The model to use to run this agent
 
@@ -45,6 +46,7 @@ class AgentManager(metaclass=Singleton):
 
         messages.add("assistant", agent_reply)
 
+
         plugins_reply = ""
         for i, plugin in enumerate(self.cfg.plugins):
             if not plugin.can_handle_on_instruction():
@@ -59,7 +61,6 @@ class AgentManager(metaclass=Singleton):
         # This is done instead of len(agents) to make keys unique even if agents
         # are deleted
         self.next_key += 1
-
         self.agents[key] = (task, list(messages), model)
 
         for plugin in self.cfg.plugins:
@@ -95,6 +96,7 @@ class AgentManager(metaclass=Singleton):
         agent_reply = create_chat_completion(prompt=messages)
 
         messages.add("assistant", agent_reply)
+
 
         plugins_reply = agent_reply
         for i, plugin in enumerate(self.cfg.plugins):

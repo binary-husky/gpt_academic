@@ -124,3 +124,9 @@ def safe_google_results(results: str | list) -> str:
     else:
         safe_message = results.encode("utf-8", "ignore").decode("utf-8")
     return safe_message
+
+
+if __name__ == '__main__':
+    print(google_search('你是谁？'))
+    results = ddg('你是谁', max_results=8)
+    print(results)

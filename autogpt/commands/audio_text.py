@@ -1,11 +1,13 @@
 """Commands for converting audio to text."""
 import json
+
 from typing import TYPE_CHECKING
 
 import requests
 
 from autogpt.commands.command import command
 from autogpt.config import Config
+
 
 if TYPE_CHECKING:
     from autogpt.config import Config
@@ -20,6 +22,7 @@ if TYPE_CHECKING:
     "Configure huggingface_audio_to_text_model and Hugging Face api token.",
 )
 def read_audio_from_file(filename: str, config: Config) -> str:
+
     """
     Convert audio to text.
 
@@ -35,6 +38,7 @@ def read_audio_from_file(filename: str, config: Config) -> str:
 
 
 def read_audio(audio: bytes, config: Config) -> str:
+
     """
     Convert audio to text.
 

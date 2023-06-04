@@ -1,3 +1,4 @@
+""" AutoGPT """
 beautifulsoup4>=4.12.2
 colorama==0.4.6
 distro==1.8.0
@@ -61,3 +62,29 @@ pytest-mock
 vcrpy @ git+https://github.com/Significant-Gravitas/vcrpy.git@master
 pytest-recording
 pytest-xdist
+
+""" 学术优化 """
+./docs/gradio-3.32.2-py3-none-any.whl
+tiktoken>=0.3.3
+requests[socks]
+transformers
+python-markdown-math
+beautifulsoup4
+prompt_toolkit
+latex2mathml
+python-docx
+mdtex2html
+colorama
+Markdown
+pygments
+pymupdf
+openai
+numpy
+arxiv
+pymupdf
+pyperclip
+scikit-learn
+psutil
+distro
+python-dotenv
+rich

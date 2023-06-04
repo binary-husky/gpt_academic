@@ -1,4 +1,5 @@
 """Logging module for Auto-GPT."""
+
 import logging
 import os
 import random
@@ -102,6 +103,16 @@ class Logger(metaclass=Singleton):
         self.typing_logger.log(
             level, content, extra={"title": title, "color": title_color}
         )
+# =======
+#         try:
+#             msg = f'<span style="color:{self.color_compar[title_color]};font-weight:bold;">{title}：</span><span style="font-weight:normal;">{content}</span>'
+#             self.output_content.append([msg, title+": "+content])
+#             return msg
+#         except Exception as e:
+#             msg = f'<span style="font-weight:bold;">{title}：</span><span style="font-weight:normal;">{content}</span>'
+#             self.output_content.append([msg, title+": "+content])
+#             return
+# >>>>>>> wps_i18n
 
     def debug(
         self,
@@ -235,7 +246,6 @@ class AutoGptFormatter(logging.Formatter):
 
         # Add this line to set 'title' to an empty string if it doesn't exist
         record.title = getattr(record, "title", "")
-
         if hasattr(record, "msg"):
             record.message_no_color = remove_color_codes(getattr(record, "msg"))
         else:
@@ -292,3 +302,11 @@ def print_assistant_thoughts(
             say_text(assistant_thoughts_speak)
         else:
             logger.typewriter_log("SPEAK:", Fore.YELLOW, f"{assistant_thoughts_speak}")
+
+
+
+if __name__ == '__main__':
+
+    ff = logger.typewriter_log('ahhahaha', Fore.GREEN, speak_text=True)
+    # print(Fore.GREEN)
+    # print(logger.color_compar)
