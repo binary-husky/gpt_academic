@@ -65,6 +65,8 @@ def move_project(project_folder, arxiv_id=None):
         new_workfolder = pj(ARXIV_CACHE_DIR, arxiv_id, 'workfolder')
     else:
         new_workfolder = f'gpt_log/{gen_time_str()}'
+    try: shutil.rmtree(new_workfolder)
+    except: pass
     shutil.copytree(src=project_folder, dst=new_workfolder)
     return new_workfolder
 
