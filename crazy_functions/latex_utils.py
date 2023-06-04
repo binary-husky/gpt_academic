@@ -239,6 +239,7 @@ class LatexPaperSplit():
         split_worker(root, r"\\subsubsection\{(.*?)\}")
         split_worker(root, r"\\bibliography\{(.*?)\}")
         split_worker(root, r"\\bibliographystyle\{(.*?)\}")
+        split_worker(root, r"\\iffalse(.*?)\\fi", re.DOTALL)
         split_worker(root, r"\\begin\{lstlisting\}(.*?)\\end\{lstlisting\}", re.DOTALL)
         split_worker(root, r"\\begin\{wraptable\}(.*?)\\end\{wraptable\}", re.DOTALL)
         split_worker(root, r"\\begin\{algorithm\}(.*?)\\end\{algorithm\}", re.DOTALL)
