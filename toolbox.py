@@ -53,6 +53,7 @@ def ArgsGeneralWrapper(f):
                   chatbot, history, system_prompt, models, plugin_advanced_arg, ipaddr: gr.Request, *args):
         """"""
         # 引入一个有cookie的chatbot
+        start_time = time.time()
         cookies.update({
             'top_p':top_p,
             'temperature':temperature,
@@ -63,7 +64,8 @@ def ArgsGeneralWrapper(f):
             'top_p':top_p,
             'max_length': max_length,
             'temperature': temperature,
-            'ipaddr': ipaddr.client.host
+            'ipaddr': ipaddr.client.host,
+            'start_time': start_time
         }
         plugin_kwargs = {
             "advanced_arg": plugin_advanced_arg
