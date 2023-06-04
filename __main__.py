@@ -225,22 +225,18 @@ class ChatBot(ChatBotFrame):
             # temp = gr.Markdown(self.description)
 
     def draw_goals_auto(self):
-        with gr.Tab('Ai Prompt--未完成--敬请期待'):
-            with gr.Row():
-                self.ai_name = gr.Textbox(show_label=False, placeholder="给Ai一个名字").style(container=False)
-            with gr.Row():
-                self.ai_role = gr.Textbox(lines=5, show_label=False, placeholder="请输入你的需求").style(
-                    container=False)
-            with gr.Row():
-                self.ai_goal_list = gr.Dataframe(headers=['Goals'], interactive=True, row_count=4,
-                                                 col_count=(1, 'fixed'), type='array')
-            with gr.Row():
-                self.ai_budget = gr.Number(show_label=False, value=0.0,
-                                           info="关于本次项目的预算，超过预算自动停止，默认无限").style(container=False)
-                # self.ai_goal_list.style()
+        with gr.Row():
+            self.ai_name = gr.Textbox(show_label=False, placeholder="给Ai一个名字").style(container=False)
+        with gr.Row():
+            self.ai_role = gr.Textbox(lines=5, show_label=False, placeholder="请输入你的需求").style(
+                container=False)
+        with gr.Row():
+            self.ai_goal_list = gr.Dataframe(headers=['Goals'], interactive=True, row_count=4,
+                                             col_count=(1, 'fixed'), type='array')
+        with gr.Row():
+            self.ai_budget = gr.Number(show_label=False, value=0.0,
+                                       info="关于本次项目的预算，超过预算自动停止，默认无限").style(container=False)
 
-        with gr.Tab('Ai Settings'):
-            pass
 
     def draw_next_auto(self):
         with gr.Row():
@@ -359,11 +355,17 @@ class ChatBot(ChatBotFrame):
             with gr.Row().style(justify='between'):
                 # 绘制列1
                 with gr.Column(scale=46):
-                    # 绘制对话模组
-                    with gr.Tab('Chat-Copilot'):
-                        self.draw_function_chat()
-                        self.draw_public_chat()
-                        self.draw_setting_chat()
+                    with gr.Tabs() as self.tabs_copilot:
+                        # 绘制对话模组
+                        with gr.TabItem('Chat-Copilot'):
+                            self.draw_function_chat()
+                            self.draw_public_chat()
+                            self.draw_setting_chat()
+
+                        # 绘制autogpt模组
+                        with gr.TabItem('Auto-GPT'):
+                            self.draw_next_auto()
+                            self.draw_goals_auto()
                 # 绘制列2
                 with gr.Column(scale=100):
                     with gr.Tab('Chatbot') as self.chat_tab:
@@ -372,10 +374,7 @@ class ChatBot(ChatBotFrame):
                     with gr.Tab('Prompt检索/编辑') as self.prompt_tab:
                         self.draw_prompt()
 
-                    # 绘制autogpt模组
-                    # with gr.Tab('Auto-GPT'):
-                    #     self.draw_next_auto()
-                    #     self.draw_goals_auto()
+
                 with self.chat_tab:  # 使用 gr.State()对组件进行拷贝时，如果之前绘制了Markdown格式，会导致启动崩溃,所以将 markdown相关绘制放在最后
                     self.draw_chatbot()
                 with self.prompt_tab:
