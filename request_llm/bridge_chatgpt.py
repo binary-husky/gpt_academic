@@ -18,6 +18,7 @@ import logging
 import traceback
 import requests
 import importlib
+import func_box
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
@@ -190,11 +191,14 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                         break
                     # 处理数据流的主体
                     chunkjson = json.loads(chunk_decoded[6:])
-                    status_text = f"finish_reason: {chunkjson['choices'][0]['finish_reason']}"
+
                     # 如果这里抛出异常，一般是文本过长，详情见get_full_error的输出
                     gpt_replying_buffer = gpt_replying_buffer + json.loads(chunk_decoded[6:])['choices'][0]["delta"]["content"]
                     history[-1] = gpt_replying_buffer
                     chatbot[-1] = (history[-2], history[-1])
+                    count_time = round(time.time() - llm_kwargs['start_time'], 3)
+                    status_text = f"finish_reason: {chunkjson['choices'][0]['finish_reason']}\t" \
+                                  f"本次对话耗时: {func_box.html_tag_color(tag=f'{count_time}s')}"
                     yield from update_ui(chatbot=chatbot, history=history, msg=status_text) # 刷新界面
 
                 except Exception as e:
