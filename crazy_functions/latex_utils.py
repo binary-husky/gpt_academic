@@ -50,7 +50,14 @@ def merge_tex_files(project_foler, main_file, mode):
         pattern = re.compile(r'\\documentclass.*\n')
         match = pattern.search(main_file)
         position = match.end()
-        main_file = main_file[:position] + '\\usepackage{CTEX}\n\\usepackage{url}\n' + main_file[position:]
+        add_ctex = '\\usepackage{ctex}\n'
+        add_url = '\\usepackage{url}\n' if '{url}' not in main_file else ''
+        main_file = main_file[:position] + add_ctex + add_url + main_file[position:]
+        # 2 fontset=windows
+        import platform
+        if platform.system() != 'Windows':
+            main_file = re.sub(r"\\documentclass\[(.*?)\]{(.*?)}", r"\\documentclass[\1,fontset=windows]{\2}",main_file)
+            main_file = re.sub(r"\\documentclass{(.*?)}", r"\\documentclass[fontset=windows]{\1}",main_file)
 
     new_file_remove_comment_lines = []
     for l in main_file.splitlines():
@@ -135,7 +142,7 @@ class LatexPaperSplit():
                 match = pattern.search(result_string)
                 position = match.end()
                 result_string = result_string[:position] + \
-                    "{\\scriptsize\\textbf{警告：该PDF由GPT-Academic开源项目调用大语言模型+Latex翻译插件一键生成，其内容可靠性没有任何保障，请仔细鉴别并以原文为准。" + \
+                    "{\\scriptsize\\textbf{警告：该PDF由GPT-Academic开源项目调用大语言模型+Latex翻译插件一键生成，版权归原文作者所有。翻译内容可靠性无任何保障，请仔细鉴别并以原文为准。" + \
                     "项目Github地址 \\url{https://github.com/binary-husky/gpt_academic/}。"            + \
                     msg + \
                     "为了防止大语言模型的意外谬误产生扩散影响，禁止移除或修改此警告。}}\\\\"    + \
