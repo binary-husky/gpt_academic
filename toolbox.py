@@ -1,6 +1,6 @@
 import markdown
 import importlib
-import traceback
+import time
 import inspect
 import re
 import gradio as gr
@@ -102,6 +102,17 @@ def update_ui(chatbot, history, msg='正常', *args):  # 刷新界面
     yield chatbot.get_cookies(), chatbot, history, msg
     pool.submit(func_box.thread_write_chat, chatbot)
 
+def update_ui_lastest_msg(lastmsg, chatbot, history, delay=1):  # 刷新界面
+    """
+    刷新用户界面
+    """
+    if len(chatbot) == 0: chatbot.append(["update_ui_last_msg", lastmsg])
+    chatbot[-1] = list(chatbot[-1])
+    chatbot[-1][-1] = lastmsg
+    yield from update_ui(chatbot=chatbot, history=history)
+    time.sleep(delay)
+
+
 def trimmed_format_exc():
     import os, traceback
     str = traceback.format_exc()
@@ -115,7 +126,7 @@ def CatchException(f):
     """
 
     @wraps(f)
-    def decorated(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT):
+    def decorated(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT=-1):
         try:
             yield from f(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT)
         except Exception as e:
@@ -458,6 +469,13 @@ def find_recent_files(directory):
 
     return recent_files
 
+def promote_file_to_downloadzone(file, rename_file=None):
+    # 将文件复制一份到下载区
+    import shutil
+    if rename_file is None: rename_file = f'{gen_time_str()}-{os.path.basename(file)}'
+    new_path = os.path.join(f'./gpt_log/', rename_file)
+    if os.path.exists(new_path): os.remove(new_path)
+    shutil.copyfile(file, new_path)
 
 
 def get_user_upload(chatbot, ipaddr: gr.Request):
@@ -807,6 +825,8 @@ def clip_history(inputs, history, tokenizer, max_token_limit):
 其他小工具:
     - zip_folder:    把某个路径下所有文件压缩，然后转移到指定的另一个路径中（gpt写的）
     - gen_time_str:  生成时间戳
+    - ProxyNetworkActivate: 临时地启动代理网络（如果有）
+    - objdump/objload: 快捷的调试函数
 ========================================================================
 """
 
@@ -841,10 +861,14 @@ def zip_folder(source_folder, dest_folder, zip_name):
 
     print(f"Zip file created at {zip_file}")
 
+def zip_result(folder):
+    import time
+    t = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+    zip_folder(folder, './gpt_log/', f'{t}-result.zip')
+    
 def gen_time_str():
     import time
     return time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
-
 
 class ProxyNetworkActivate():
     """
@@ -854,8 +878,9 @@ class ProxyNetworkActivate():
         from toolbox import get_conf
         proxies, = get_conf('proxies')
         if 'no_proxy' in os.environ: os.environ.pop('no_proxy')
-        os.environ['HTTP_PROXY'] = proxies['http']
-        os.environ['HTTPS_PROXY'] = proxies['https']
+        if proxies is not None:
+            if 'http' in proxies: os.environ['HTTP_PROXY'] = proxies['http']
+            if 'https' in proxies: os.environ['HTTPS_PROXY'] = proxies['https']
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -863,3 +888,17 @@ class ProxyNetworkActivate():
         if 'HTTP_PROXY' in os.environ: os.environ.pop('HTTP_PROXY')
         if 'HTTPS_PROXY' in os.environ: os.environ.pop('HTTPS_PROXY')
         return
+
+def objdump(obj, file='objdump.tmp'):
+    import pickle
+    with open(file, 'wb+') as f:
+        pickle.dump(obj, f)
+    return
+
+def objload(file='objdump.tmp'):
+    import pickle, os
+    if not os.path.exists(file): 
+        return
+    with open(file, 'rb') as f:
+        return pickle.load(f)
+    

@@ -138,7 +138,7 @@ def get_crazy_functions():
     ###################### 第二组插件 ###########################
     # [第二组插件]: 经过充分测试
     from crazy_functions.批量总结PDF文档 import 批量总结PDF文档
-    from crazy_functions.批量总结PDF文档pdfminer import 批量总结PDF文档pdfminer
+    # from crazy_functions.批量总结PDF文档pdfminer import 批量总结PDF文档pdfminer
     from crazy_functions.批量翻译PDF文档_多线程 import 批量翻译PDF文档
     from crazy_functions.谷歌检索小助手 import 谷歌检索小助手
     from crazy_functions.理解PDF文档内容 import 理解PDF文档内容标准文件输入
@@ -164,17 +164,16 @@ def get_crazy_functions():
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Function": HotReload(批量总结PDF文档)
         },
-        "[测试功能] 批量总结PDF文档pdfminer": {
-            "Color": "stop",
-            "AsButton": False,  # 加入下拉菜单中
-            "Function": HotReload(批量总结PDF文档pdfminer)
-        },
+        # "[测试功能] 批量总结PDF文档pdfminer": {
+        #     "Color": "stop",
+        #     "AsButton": False,  # 加入下拉菜单中
+        #     "Function": HotReload(批量总结PDF文档pdfminer)
+        # },
         "谷歌学术检索助手（输入谷歌学术搜索页url）": {
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(谷歌检索小助手)
         },
-
         "理解PDF文档内容 （模仿ChatPDF）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "stop",
@@ -193,7 +192,7 @@ def get_crazy_functions():
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(Latex英文纠错)
         },
-        "[测试功能] 中文Latex项目全文润色（输入路径或上传压缩包）": {
+        "中文Latex项目全文润色（输入路径或上传压缩包）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
@@ -222,15 +221,7 @@ def get_crazy_functions():
     })
 
     ###################### 第三组插件 ###########################
-    # [第三组插件]: 尚未充分测试的函数插件，放在这里
-    from crazy_functions.下载arxiv论文翻译摘要 import 下载arxiv论文并翻译摘要
-    function_plugins.update({
-        "一键下载arxiv论文并翻译摘要（先在input输入编号，如1812.10695）": {
-            "Color": "stop",
-            "AsButton": False,  # 加入下拉菜单中
-            "Function": HotReload(下载arxiv论文并翻译摘要)
-        }
-    })
+    # [第三组插件]: 尚未充分测试的函数插件
 
     from crazy_functions.联网的ChatGPT import 连接网络回答问题
     function_plugins.update({
@@ -307,5 +298,56 @@ def get_crazy_functions():
     except:
         print('Load function plugin failed')
 
+    try:
+        from crazy_functions.Langchain知识库 import 知识库问答
+        function_plugins.update({
+            "[功能尚不稳定] 构建知识库（请先上传文件素材）": {
+                "Color": "stop",
+                "AsButton": False,
+                "AdvancedArgs": True,
+                "ArgsReminder": "待注入的知识库名称id, 默认为default",
+                "Function": HotReload(知识库问答)
+            }
+        })
+    except:
+        print('Load function plugin failed')
+
+    try:
+        from crazy_functions.Langchain知识库 import 读取知识库作答
+        function_plugins.update({
+            "[功能尚不稳定] 知识库问答": {
+                "Color": "stop",
+                "AsButton": False,
+                "AdvancedArgs": True,
+                "ArgsReminder": "待提取的知识库名称id, 默认为default, 您需要首先调用构建知识库",
+                "Function": HotReload(读取知识库作答)
+            }
+        })
+    except:
+        print('Load function plugin failed')
+
+    try:
+        from crazy_functions.Latex输出PDF结果 import Latex英文纠错加PDF对比
+        function_plugins.update({
+            "[功能尚不稳定] Latex英文纠错+LatexDiff高亮修正位置": {
+                "Color": "stop",
+                "AsButton": False,
+                # "AdvancedArgs": True,
+                # "ArgsReminder": "",
+                "Function": HotReload(Latex英文纠错加PDF对比)
+            }
+        })
+        from crazy_functions.Latex输出PDF结果 import Latex翻译中文并重新编译PDF
+        function_plugins.update({
+            "[功能尚不稳定] Latex翻译/Arixv翻译+重构PDF": {
+                "Color": "stop",
+                "AsButton": False,
+                # "AdvancedArgs": True,
+                # "ArgsReminder": "",
+                "Function": HotReload(Latex翻译中文并重新编译PDF)
+            }
+        })
+    except:
+        print('Load function plugin failed')
     ###################### 第n组插件 ###########################
     return function_plugins
