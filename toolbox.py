@@ -431,6 +431,13 @@ def find_recent_files(directory):
 
     return recent_files
 
+def promote_file_to_downloadzone(file, rename_file=None):
+    # 将文件复制一份到下载区
+    import shutil
+    if rename_file is None: rename_file = f'{gen_time_str()}-{os.path.basename(file)}'
+    new_path = os.path.join(f'./gpt_log/', rename_file)
+    if os.path.exists(new_path): os.remove(new_path)
+    shutil.copyfile(file, new_path)
 
 def on_file_uploaded(files, chatbot, txt, txt2, checkboxes):
     """
