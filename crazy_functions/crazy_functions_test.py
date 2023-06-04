@@ -3,6 +3,8 @@
     这个文件用于函数插件的单元测试
     运行方法 python crazy_functions/crazy_functions_test.py
 """
+    
+# ==============================================================================================================================
 
 def validate_path():
     import os, sys
@@ -10,10 +12,16 @@ def validate_path():
     root_dir_assume = os.path.abspath(os.path.dirname(__file__) +  '/..')
     os.chdir(root_dir_assume)
     sys.path.append(root_dir_assume)
-    
 validate_path() # validate path so you can run from base directory
+
+# ==============================================================================================================================
+
 from colorful import *
 from toolbox import get_conf, ChatBotWithCookies
+import contextlib
+import os
+import sys
+from functools import wraps
 proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT, API_KEY = \
     get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'LAYOUT', 'API_KEY')
 
@@ -30,7 +38,43 @@ history = []
 system_prompt = "Serve me as a writing and programming assistant."
 web_port = 1024
 
+# ==============================================================================================================================
 
+def silence_stdout(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        _original_stdout = sys.stdout
+        sys.stdout = open(os.devnull, 'w')
+        for q in func(*args, **kwargs):
+            sys.stdout = _original_stdout
+            yield q
+            sys.stdout = open(os.devnull, 'w')
+        sys.stdout.close()
+        sys.stdout = _original_stdout
+    return wrapper
+
+class CLI_Printer():
+    def __init__(self) -> None:
+        self.pre_buf = ""
+
+    def print(self, buf):
+        bufp = ""
+        for index, chat in enumerate(buf):
+            a, b = chat
+            bufp += sprint亮靛('[Me]:' + a) + '\n'
+            bufp += '[GPT]:' + b
+            if index < len(buf)-1: 
+                bufp += '\n'
+
+        if self.pre_buf!="" and bufp.startswith(self.pre_buf):
+            print(bufp[len(self.pre_buf):], end='')
+        else:
+            print('\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n'+bufp, end='')
+        self.pre_buf = bufp
+        return
+    
+cli_printer = CLI_Printer()
+# ==============================================================================================================================
 def test_解析一个Python项目():
     from crazy_functions.解析项目源代码 import 解析一个Python项目
     txt = "crazy_functions/test_project/python/dqn"
@@ -116,6 +160,52 @@ def test_Markdown多语言():
         for cookies, cb, hist, msg in Markdown翻译指定语言(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
             print(cb)
 
+def test_Langchain知识库():
+    from crazy_functions.Langchain知识库 import 知识库问答
+    txt = "./"
+    chatbot = ChatBotWithCookies(llm_kwargs)
+    for cookies, cb, hist, msg in silence_stdout(知识库问答)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+        cli_printer.print(cb)   #  print(cb)
+    
+    chatbot = ChatBotWithCookies(cookies)
+    from crazy_functions.Langchain知识库 import 读取知识库作答
+    txt = "What is the installation method？"
+    for cookies, cb, hist, msg in silence_stdout(读取知识库作答)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+        cli_printer.print(cb)   #  print(cb)
+
+def test_Langchain知识库读取():
+    from crazy_functions.Langchain知识库 import 读取知识库作答
+    txt = "远程云服务器部署？"
+    for cookies, cb, hist, msg in silence_stdout(读取知识库作答)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+        cli_printer.print(cb)   #  print(cb)
+
+def test_Latex():
+    from crazy_functions.Latex输出PDF结果 import Latex英文纠错加PDF对比, Latex翻译中文并重新编译PDF
+    txt = "C:/Users/fuqingxu/Desktop/proofread"
+    txt = "C:/Users/fuqingxu/Desktop/旧文件/gpt/paperx"
+    txt = "C:/Users/fuqingxu/Desktop/旧文件/gpt/papery"
+    txt = r"C:\Users\fuqingxu\Desktop\旧文件\gpt\latex2pdf\2023-06-03-14-57-06"
+    txt = r"C:\Users\fuqingxu\Desktop\旧文件\gpt\latex2pdf\2023-06-03-15-40-20"
+    txt = r"https://arxiv.org/abs/1902.03185"
+    txt = r"C:\Users\fuqingxu\Desktop\旧文件\gpt\latex2pdf\2023-06-03-17-14-40"
+    txt = r"https://arxiv.org/abs/2305.18290"
+    txt = r"https://arxiv.org/abs/2305.17608"
+    # txt = r"https://arxiv.org/abs/2306.00324"
+    txt = r"https://arxiv.org/abs/2211.16068"
+    
+    for cookies, cb, hist, msg in (Latex翻译中文并重新编译PDF)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+        cli_printer.print(cb)   #  print(cb)
+
+
+
+    # txt = "2302.02948.tar"
+    # print(txt)
+    # main_tex, work_folder = Latex预处理(txt)
+    # print('main tex:', main_tex)
+    # res = 编译Latex(main_tex, work_folder)
+    # # for cookies, cb, hist, msg in silence_stdout(编译Latex)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    #     cli_printer.print(cb)   #  print(cb)
+
 
 
 # test_解析一个Python项目()
@@ -129,7 +219,8 @@ def test_Markdown多语言():
 # test_联网回答问题()
 # test_解析ipynb文件()
 # test_数学动画生成manim()
-test_Markdown多语言()
-
+# test_Langchain知识库()
+# test_Langchain知识库读取()
+test_Latex()
 input("程序完成，回车退出。")
 print("退出。")
