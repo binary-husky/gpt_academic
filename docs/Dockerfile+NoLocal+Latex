@@ -1,8 +1,7 @@
 # 此Dockerfile适用于“无本地模型”的环境构建，如果需要使用chatglm等本地模型，请参考 docs/Dockerfile+ChatGLM
 # - 1 修改 `config.py`
-# - 2 下载 simhei.ttf, simkai.ttf, simsun.ttc 三种字体置于目录下
-# - 3 构建 docker build -t gpt-academic-nolocal-latex -f docs/Dockerfile+NoLocal+Latex .
-# - 4 运行 docker run --rm -it --net=host gpt-academic-nolocal-latex
+# - 2 构建 docker build -t gpt-academic-nolocal-latex -f docs/Dockerfile+NoLocal+Latex .
+# - 3 运行 docker run -v /home/fuqingxu/arxiv_cache:/root/arxiv_cache --rm -it --net=host gpt-academic-nolocal-latex
 
 FROM fuqingxu/python311_texlive_ctex:latest
 
@@ -12,8 +11,23 @@ WORKDIR /gpt
 # 装载项目文件
 COPY . .
 
+ARG useProxyNetwork=''
+
+
+# # # comment out below if you do not need proxy network | 如果不需要翻墙 - 从此行向下删除
+# RUN apt-get update
+# RUN apt-get install -y curl proxychains
+# RUN $useProxyNetwork curl cip.cc
+# RUN sed -i '$ d' /etc/proxychains.conf
+# RUN sed -i '$ d' /etc/proxychains.conf
+# RUN echo "socks5 127.0.0.1 10880" >> /etc/proxychains.conf
+# ARG useProxyNetwork=proxychains
+# # # comment out above if you do not need proxy network | 如果不需要翻墙 - 从此行向上删除
+
+
+
 # 安装依赖
-RUN pip3 install -r requirements.txt
+RUN $useProxyNetwork pip3 install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple
 
 # 可选步骤，用于预热模块
 RUN python3  -c 'from check_proxy import warm_up_modules; warm_up_modules()'
