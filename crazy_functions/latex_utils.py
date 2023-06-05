@@ -189,6 +189,10 @@ class LatexPaperSplit():
         root是链表的根节点
         """
         self.root = None
+        self.msg = "{\\scriptsize\\textbf{警告：该PDF由GPT-Academic开源项目调用大语言模型+Latex翻译插件一键生成，" + \
+            "版权归原文作者所有。翻译内容可靠性无任何保障，请仔细鉴别并以原文为准。" + \
+            "项目Github地址 \\url{https://github.com/binary-husky/gpt_academic/}。"
+        self.msg_declare = "为了防止大语言模型的意外谬误产生扩散影响，禁止移除或修改此警告。}}\\\\" 
 
     def merge_result(self, arr, mode, msg):
         """
@@ -206,18 +210,10 @@ class LatexPaperSplit():
             node = node.next
             if node is None: break
         if mode == 'translate_zh':
-            try:
-                pattern = re.compile(r'\\begin\{abstract\}.*\n')
-                match = pattern.search(result_string)
-                position = match.end()
-                result_string = result_string[:position] + \
-                    "{\\scriptsize\\textbf{警告：该PDF由GPT-Academic开源项目调用大语言模型+Latex翻译插件一键生成，版权归原文作者所有。翻译内容可靠性无任何保障，请仔细鉴别并以原文为准。" + \
-                    "项目Github地址 \\url{https://github.com/binary-husky/gpt_academic/}。"            + \
-                    msg + \
-                    "为了防止大语言模型的意外谬误产生扩散影响，禁止移除或修改此警告。}}\\\\"    + \
-                    result_string[position:]
-            except:
-                pass
+            pattern = re.compile(r'\\begin\{abstract\}.*\n')
+            match = pattern.search(result_string)
+            position = match.end()
+            result_string = result_string[:position] + self.msg + msg + self.msg_declare + result_string[position:]
         return result_string
 
     def split(self, txt, project_folder):
@@ -487,7 +483,8 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
     msg = f"当前大语言模型: {llm_kwargs['llm_model']}，当前语言模型温度设定: {llm_kwargs['temperature']}。"
     final_tex = lps.merge_result(pfg.file_result, mode, msg)
     with open(project_folder + f'/merge_{mode}.tex', 'w', encoding='utf-8', errors='replace') as f:
-        f.write(final_tex)
+        if mode != 'translate_zh' or "binary" in final_tex: f.write(final_tex)
+        
 
     #  <-------- 整理结果, 退出 ----------> 
     chatbot.append((f"完成了吗？", 'GPT结果已输出, 正在编译PDF'))
