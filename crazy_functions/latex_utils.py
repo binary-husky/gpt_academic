@@ -7,26 +7,36 @@ pj = os.path.join
 
 """
 ========================================================================
-第一部分
-Latex 文件切分到一个链表中
+Part One
+Latex segmentation to a linklist
 ========================================================================
 """
 PRESERVE = 0
 TRANSFORM = 1
 
 def split_worker(text, mask, pattern, flags=0):
+    """
+    Add a preserve text area in this paper
+    """
     pattern_compile = re.compile(pattern, flags)
     for res in pattern_compile.finditer(text):
         mask[res.span()[0]:res.span()[1]] = PRESERVE
     return text, mask
 
 def split_worker_reverse_caption(text, mask, pattern, flags=0):
+    """
+    Move caption area out of preserve area 
+    """
     pattern_compile = re.compile(pattern, flags)
     for res in pattern_compile.finditer(text):
         mask[res.regs[1][0]:res.regs[1][1]] = TRANSFORM
     return text, mask
 
-def split_worker_begin_end(text, mask, pattern, flags=0, limit_n_lines=25):
+def split_worker_begin_end(text, mask, pattern, flags=0, limit_n_lines=42):
+    """
+    Find all \begin{} ... \end{} text block that with less than limit_n_lines lines.
+    Add it to preserve area
+    """
     pattern_compile = re.compile(pattern, flags)
     def search_with_line_limit(text, mask):
         for res in pattern_compile.finditer(text):
@@ -35,7 +45,7 @@ def split_worker_begin_end(text, mask, pattern, flags=0, limit_n_lines=25):
             this_mask = mask[res.regs[2][0]:res.regs[2][1]]
             white_list = ['document', 'abstract', 'lemma', 'definition', 'sproof', 
                           'em', 'emph', 'textit', 'textbf', 'itemize', 'enumerate']
-            if (cmd in white_list) or this.count('\n') >= 42: # use a magical number 42
+            if (cmd in white_list) or this.count('\n') >= limit_n_lines: # use a magical number 42
                 this, this_mask = search_with_line_limit(this, this_mask)
                 mask[res.regs[2][0]:res.regs[2][1]] = this_mask
             else:
@@ -45,7 +55,7 @@ def split_worker_begin_end(text, mask, pattern, flags=0, limit_n_lines=25):
 
 class LinkedListNode():
     """
-    链表单元
+    Linked List Node
     """
     def __init__(self, string, preserve=True) -> None:
         self.string = string
@@ -68,7 +78,7 @@ def convert_to_linklist(text, mask):
     return root
 """
 ========================================================================
-Latex 文件融合
+Latex Merge File
 ========================================================================
 """
 
@@ -90,7 +100,7 @@ def 寻找Latex主文件(file_manifest, mode):
 
 def merge_tex_files_(project_foler, main_file, mode):
     """
-    递归地把多Tex工程整合为一个Tex文档
+    Merge Tex project recrusively
     """
     for s in reversed([q for q in re.finditer(r"\\input\{(.*?)\}", main_file, re.M)]):
         f = s.group(1)
@@ -109,7 +119,7 @@ def merge_tex_files_(project_foler, main_file, mode):
 
 def merge_tex_files(project_foler, main_file, mode):
     """
-    递归地把多Tex工程整合为一个Tex文档（递归外层）
+    Merge Tex project recrusively
     P.S. 顺便把CTEX塞进去以支持中文
     P.S. 顺便把Latex的注释去除
     """
@@ -142,7 +152,7 @@ def merge_tex_files(project_foler, main_file, mode):
 
 """
 ========================================================================
-后处理
+Post process
 ========================================================================
 """
 def mod_inbraket(match):
@@ -182,7 +192,9 @@ def fix_content(final_tex, node_string):
 
 class LatexPaperSplit():
     """
-    将Latex文档分解到一个链表中，每个链表节点用preserve的标志位提示它是否应当被GPT处理
+    break down latex file to a linked list,
+    each node use a preserve flag to indicate whether it should
+    be proccessed by GPT.
     """
     def __init__(self) -> None:
         """
@@ -192,11 +204,12 @@ class LatexPaperSplit():
         self.msg = "{\\scriptsize\\textbf{警告：该PDF由GPT-Academic开源项目调用大语言模型+Latex翻译插件一键生成，" + \
             "版权归原文作者所有。翻译内容可靠性无任何保障，请仔细鉴别并以原文为准。" + \
             "项目Github地址 \\url{https://github.com/binary-husky/gpt_academic/}。"
+        # 请您不要删除或修改这行警告，除非您是论文的原作者（如果您是论文原作者，欢迎加REAME中的QQ联系开发者）
         self.msg_declare = "为了防止大语言模型的意外谬误产生扩散影响，禁止移除或修改此警告。}}\\\\" 
 
     def merge_result(self, arr, mode, msg):
         """
-        将GPT处理后的结果融合
+        Merge the result after the GPT process completed
         """
         result_string = ""
         node = self.root
@@ -218,7 +231,9 @@ class LatexPaperSplit():
 
     def split(self, txt, project_folder):
         """
-        将Latex文档分解到一个链表中，每个链表节点用preserve的标志位提示它是否应当被GPT处理
+        break down latex file to a linked list,
+        each node use a preserve flag to indicate whether it should
+        be proccessed by GPT.
         """
         text = txt
         mask = np.zeros(len(txt), dtype=np.uint8) + TRANSFORM
@@ -263,19 +278,7 @@ class LatexPaperSplit():
         text, mask = split_worker(text, mask, r"\\end\{(.*?)\}")
         # text, mask = split_worker_reverse_caption(text, mask, r"\\caption\{(.*?)\}", re.DOTALL)
         root = convert_to_linklist(text, mask)
-        # 将分解结果返回 res_to_t
-        with open(pj(project_folder, 'debug_log.html'), 'w', encoding='utf8') as f:
-            res_to_t = []
-            node = root
-            while True:
-                show_html = node.string.replace('\n','<br/>')
-                if not node.preserve:
-                    res_to_t.append(node.string)
-                    f.write(f'<p style="color:black;">#{show_html}#</p>')
-                else:
-                    f.write(f'<p style="color:red;">{show_html}</p>')
-                node = node.next
-                if node is None: break
+
         # 修复括号
         node = root
         while True:
@@ -340,25 +343,26 @@ class LatexPaperSplit():
             node = node.next
             if node is None: break
 
-        # 将分解结果返回 res_to_t
         with open(pj(project_folder, 'debug_log.html'), 'w', encoding='utf8') as f:
-            res_to_t = []
+            segment_parts_for_gpt = []
             node = root
             while True:
                 show_html = node.string.replace('\n','<br/>')
                 if not node.preserve:
-                    res_to_t.append(node.string)
+                    segment_parts_for_gpt.append(node.string)
                     f.write(f'<p style="color:black;">#{show_html}#</p>')
                 else:
                     f.write(f'<p style="color:red;">{show_html}</p>')
                 node = node.next
                 if node is None: break
-
         self.root = root
-        self.sp = res_to_t
+        self.sp = segment_parts_for_gpt
         return self.sp
 
 class LatexPaperFileGroup():
+    """
+    use tokenizer to break down text according to max_token_limit
+    """
     def __init__(self):
         self.file_paths = []
         self.file_contents = []
@@ -374,7 +378,7 @@ class LatexPaperFileGroup():
 
     def run_file_split(self, max_token_limit=1900):
         """
-        将长文本分离开来
+        use tokenizer to break down text according to max_token_limit
         """
         for index, file_content in enumerate(self.file_contents):
             if self.get_token_num(file_content) < max_token_limit:
