@@ -181,13 +181,9 @@ def test_Langchain知识库读取():
 
 def test_Latex():
     from crazy_functions.Latex输出PDF结果 import Latex英文纠错加PDF对比, Latex翻译中文并重新编译PDF
-    txt = "C:/Users/fuqingxu/Desktop/proofread"
-    txt = "C:/Users/fuqingxu/Desktop/旧文件/gpt/paperx"
-    txt = "C:/Users/fuqingxu/Desktop/旧文件/gpt/papery"
-    txt = r"C:\Users\fuqingxu\Desktop\旧文件\gpt\latex2pdf\2023-06-03-14-57-06"
-    txt = r"C:\Users\fuqingxu\Desktop\旧文件\gpt\latex2pdf\2023-06-03-15-40-20"
-    txt = r"C:\Users\fuqingxu\Desktop\旧文件\gpt\latex2pdf\2023-06-03-17-14-40"
-    txt = r"https://arxiv.org/abs/1902.03185"
+
+    txt = r"https://arxiv.org/abs/1706.03762"
+    # txt = r"https://arxiv.org/abs/1902.03185"
     # txt = r"https://arxiv.org/abs/2305.18290"
     # txt = r"https://arxiv.org/abs/2305.17608"
     # txt = r"https://arxiv.org/abs/2211.16068"   #  ACE
