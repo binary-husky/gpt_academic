@@ -65,8 +65,10 @@ def move_project(project_folder, arxiv_id=None):
         new_workfolder = pj(ARXIV_CACHE_DIR, arxiv_id, 'workfolder')
     else:
         new_workfolder = f'gpt_log/{gen_time_str()}'
-    try: shutil.rmtree(new_workfolder)
-    except: pass
+    try:
+        shutil.rmtree(new_workfolder)
+    except:
+        pass
     shutil.copytree(src=project_folder, dst=new_workfolder)
     return new_workfolder
 
@@ -134,7 +136,7 @@ def Latex英文纠错加PDF对比(txt, llm_kwargs, plugin_kwargs, chatbot, histo
     try:
         import glob, os, time
         os.system(f'pdflatex -version')
-        from .latex_utils import Latex精细分解与转化, 编译Latex差别
+        from .latex_utils import Latex精细分解与转化, 编译Latex
     except Exception as e:
         chatbot.append([ f"解析项目: {txt}",
             f"尝试执行Latex指令失败。Latex没有安装, 或者不在环境变量PATH中。报错信息\n\n```\n\n{trimmed_format_exc()}\n\n```\n\n"])
@@ -172,7 +174,7 @@ def Latex英文纠错加PDF对比(txt, llm_kwargs, plugin_kwargs, chatbot, histo
 
 
     # <-------------- compile PDF ------------->
-    success = yield from 编译Latex差别(chatbot, history, main_file_original='merge', main_file_modified='merge_proofread', 
+    success = yield from 编译Latex(chatbot, history, main_file_original='merge', main_file_modified='merge_proofread', 
                              work_folder_original=project_folder, work_folder_modified=project_folder, work_folder=project_folder)
     
 
@@ -204,7 +206,7 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
     try:
         import glob, os, time
         os.system(f'pdflatex -version')
-        from .latex_utils import Latex精细分解与转化, 编译Latex差别
+        from .latex_utils import Latex精细分解与转化, 编译Latex
     except Exception as e:
         chatbot.append([ f"解析项目: {txt}",
             f"尝试执行Latex指令失败。Latex没有安装, 或者不在环境变量PATH中。报错信息\n\n```\n\n{trimmed_format_exc()}\n\n```\n\n"])
@@ -247,7 +249,7 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
 
 
     # <-------------- compile PDF ------------->
-    success = yield from 编译Latex差别(chatbot, history, main_file_original='merge', main_file_modified='merge_translate_zh', 
+    success = yield from 编译Latex(chatbot, history, main_file_original='merge', main_file_modified='merge_translate_zh', 
                              work_folder_original=project_folder, work_folder_modified=project_folder, work_folder=project_folder)
 
     # <-------------- zip PDF ------------->
