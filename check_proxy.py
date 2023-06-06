@@ -1,10 +1,10 @@
 
-def check_proxy(proxies):
+def check_proxy(proxies: dict):
     import requests
-    proxies_https = proxies['https'] if proxies is not None else '无'
+    proxies_https = proxies.get('https') if proxies is not None else '无'
     try:
         response = requests.get("https://ipapi.co/json/",
-                                proxies=proxies, timeout=4)
+                                proxies=proxies, timeout=30)
         data = response.json()
         print(f'查询代理的地理位置，返回的结果是{data}')
         if 'country_name' in data:
@@ -14,8 +14,8 @@ def check_proxy(proxies):
             result = f"代理配置 {proxies_https}, 代理所在地：未知，IP查询频率受限"
         print(result)
         return result
-    except:
-        result = f"代理配置 {proxies_https}, 代理所在地查询超时，代理可能无效"
+    except Exception as e:
+        result = f"代理 {proxies_https} 查询出现异常: {e}，代理可能无效"
         print(result)
         return result
 
