@@ -17,3 +17,4 @@ numpy
 arxiv
 rich
 langchain
+zh_langchain
