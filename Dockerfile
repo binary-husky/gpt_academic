@@ -10,12 +10,14 @@ RUN echo '[global]' > /etc/pip.conf && \
 
 WORKDIR /gpt
 
-# 装载项目文件
-COPY . .
+
+
 
 # 安装依赖
+COPY requirements.txt ./
 RUN pip3 install -r requirements.txt
-
+# 装载项目文件
+COPY . .
 
 # 可选步骤，用于预热模块
 RUN python3  -c 'from check_proxy import warm_up_modules; warm_up_modules()'
