@@ -287,8 +287,8 @@ def diff_list(txt='', percent=0.70, switch: list = None, lst: list = None, sp=15
     import difflib
     count_dict = {}
     if not lst:
-        lst = SqliteHandle('ai_common').get_prompt_value()
-        lst.update(SqliteHandle(f"ai_private_{hosts}").get_prompt_value())
+        lst = SqliteHandle('ai_common').get_prompt_value(txt)
+        lst.update(SqliteHandle(f"ai_private_{hosts}").get_prompt_value(txt))
     # diff 数据，根据precent系数归类数据
     for i in lst:
         found = False
@@ -378,10 +378,10 @@ def prompt_retrieval(is_all, hosts='', search=False):
     if '所有人' in is_all:
         for tab in SqliteHandle('ai_common').get_tables():
             if tab.startswith('prompt'):
-                data = SqliteHandle(tab).get_prompt_value()
+                data = SqliteHandle(tab).get_prompt_value(None)
                 if data: count_dict.update(data)
     elif '个人' in is_all:
-        data = SqliteHandle(f'prompt_{hosts}').get_prompt_value()
+        data = SqliteHandle(f'prompt_{hosts}').get_prompt_value(None)
         if data: count_dict.update(data)
     retrieval = []
     if count_dict != {}:

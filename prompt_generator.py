@@ -41,7 +41,7 @@ class SqliteHandle:
         self.__connect.close()
 
     def create_tab(self):
-        self.__cursor.execute(f"CREATE TABLE `{self.__table}` ( 'prompt' TEXT, 'result' TEXT)")
+        self.__cursor.execute(f"CREATE TABLE `{self.__table}` ('prompt' TEXT UNIQUE, 'result' TEXT)")
 
     def get_tables(self):
         all_tab = []
@@ -50,16 +50,19 @@ class SqliteHandle:
             all_tab.append(tab[0])
         return all_tab
 
-    def get_prompt_value(self):
+    def get_prompt_value(self, find):
         temp_all = {}
-        result = self.__cursor.execute(f"SELECT prompt, result FROM `{self.__table}`").fetchall()
+        if find:
+            result = self.__cursor.execute(f"SELECT prompt, result FROM `{self.__table}` WHERE prompt LIKE '%{find}%'").fetchall()
+        else:
+            result = self.__cursor.execute(f"SELECT prompt, result FROM `{self.__table}`").fetchall()
         for row in result:
             temp_all[row[0]] = row[1]
         return temp_all
 
     def inset_prompt(self, prompt: dict):
         for key in prompt:
-            self.__cursor.execute(f"INSERT INTO `{self.__table}` (prompt, result) VALUES (?, ?);", (str(key), str(prompt[key])))
+            self.__cursor.execute(f"REPLACE INTO `{self.__table}` (prompt, result) VALUES (?, ?);", (str(key), str(prompt[key])))
         self.__connect.commit()
 
     def delete_prompt(self):
