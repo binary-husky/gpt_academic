@@ -101,7 +101,7 @@ class ChatBot(ChatBotFrame):
         with gr.Box():
             with gr.Row():
                 with gr.Column(scale=100):
-                    self.pro_results = gr.Chatbot(label='Prompt and result').style(height=422)
+                    self.pro_results = gr.Chatbot(label='Prompt and result', elem_id='prompt_result').style()
                 with gr.Column(scale=10):
                     Tips = "用 BORF 分析法设计chat GPT prompt:\n" \
                            "1、阐述背景 B(Background): 说明背景，为chatGPT提供充足的信息\n" \

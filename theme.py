@@ -139,6 +139,10 @@ textarea {
     /* overflow: auto !important; */
     z-index: 2;
 }
+#prompt_result{
+    height: 50vh !important;
+    max-height: 50vh !important;
+}
 .wrap.svelte-18telvq.svelte-18telvq {
     padding: var(--block-padding) !important;
     height: 100% !important;
@@ -153,7 +157,6 @@ textarea {
     width: 100%;
     height: 100%;
 }
-
 .markdown-body table {
     margin: 1em 0;
     border-collapse: collapse;
