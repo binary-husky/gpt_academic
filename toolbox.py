@@ -90,11 +90,11 @@ def trimmed_format_exc():
     replace_path = "."
     return str.replace(current_path, replace_path)
 
+
 def CatchException(f):
     """
     装饰器函数，捕捉函数f中的异常并封装到一个生成器中返回，并显示到聊天当中。
     """
-
     @wraps(f)
     def decorated(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT=-1):
         try:
@@ -148,6 +148,7 @@ def HotReload(f):
     - select_api_key:           根据当前的模型类别，抽取可用的api-key
 ========================================================================
 """
+
 
 def get_reduce_token_percent(text):
     """
@@ -208,8 +209,6 @@ def regular_txt_to_markdown(text):
     return text
 
 
-
-
 def report_execption(chatbot, history, a, b):
     """
     向chatbot中添加错误信息
@@ -233,6 +232,7 @@ def text_divide_paragraph(text):
             lines[i] = lines[i].replace(" ", "&nbsp;")
         text = "</br>".join(lines)
         return text
+
 
 @lru_cache(maxsize=128) # 使用 lru缓存 加快转换速度
 def markdown_convertion(txt):
@@ -433,6 +433,7 @@ def find_recent_files(directory):
 
     return recent_files
 
+
 def promote_file_to_downloadzone(file, rename_file=None):
     # 将文件复制一份到下载区
     import shutil
@@ -440,6 +441,7 @@ def promote_file_to_downloadzone(file, rename_file=None):
     new_path = os.path.join(f'./gpt_log/', rename_file)
     if os.path.exists(new_path): os.remove(new_path)
     shutil.copyfile(file, new_path)
+
 
 def on_file_uploaded(files, chatbot, txt, txt2, checkboxes):
     """
@@ -488,16 +490,19 @@ def on_report_generated(files, chatbot):
     chatbot.append(['报告如何远程获取？', '报告已经添加到右侧“文件上传区”（可能处于折叠状态），请查收。'])
     return report_files, chatbot
 
+
 def is_openai_api_key(key):
     API_MATCH_ORIGINAL = re.match(r"sk-[a-zA-Z0-9]{48}$", key)
     API_MATCH_AZURE = re.match(r"[a-zA-Z0-9]{32}$", key)
     return bool(API_MATCH_ORIGINAL) or bool(API_MATCH_AZURE)
+
 
 def is_api2d_key(key):
     if key.startswith('fk') and len(key) == 41:
         return True
     else:
         return False
+
 
 def is_any_api_key(key):
     if ',' in key:
@@ -507,6 +512,7 @@ def is_any_api_key(key):
         return False
     else:
         return is_openai_api_key(key) or is_api2d_key(key)
+
 
 def what_keys(keys):
     avail_key_list = {'OpenAI Key':0, "API2D Key":0}
@@ -521,6 +527,7 @@ def what_keys(keys):
             avail_key_list['API2D Key'] += 1
 
     return f"检测到： OpenAI Key {avail_key_list['OpenAI Key']} 个，API2D Key {avail_key_list['API2D Key']} 个"
+
 
 def select_api_key(keys, llm_model):
     import random
@@ -540,6 +547,7 @@ def select_api_key(keys, llm_model):
 
     api_key = random.choice(avail_key_list) # 随机负载均衡
     return api_key
+
 
 def read_env_variable(arg, default_value):
     """
@@ -594,6 +602,7 @@ def read_env_variable(arg, default_value):
 
     print亮绿(f"[ENV_VAR] 成功读取环境变量{arg}")
     return r
+
 
 @lru_cache(maxsize=128)
 def read_single_conf_with_lru_cache(arg):
@@ -658,6 +667,7 @@ class DummyWith():
 
     def __exit__(self, exc_type, exc_value, traceback):
         return
+
 
 def run_gradio_in_subpath(demo, auth, port, custom_path):
     """
@@ -753,6 +763,7 @@ def clip_history(inputs, history, tokenizer, max_token_limit):
 ========================================================================
 """
 
+
 def zip_folder(source_folder, dest_folder, zip_name):
     import zipfile
     import os
@@ -784,14 +795,17 @@ def zip_folder(source_folder, dest_folder, zip_name):
 
     print(f"Zip file created at {zip_file}")
 
+
 def zip_result(folder):
     import time
     t = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
     zip_folder(folder, './gpt_log/', f'{t}-result.zip')
-    
+
+
 def gen_time_str():
     import time
     return time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+
 
 class ProxyNetworkActivate():
     """
@@ -812,11 +826,13 @@ class ProxyNetworkActivate():
         if 'HTTPS_PROXY' in os.environ: os.environ.pop('HTTPS_PROXY')
         return
 
+
 def objdump(obj, file='objdump.tmp'):
     import pickle
     with open(file, 'wb+') as f:
         pickle.dump(obj, f)
     return
+
 
 def objload(file='objdump.tmp'):
     import pickle, os
