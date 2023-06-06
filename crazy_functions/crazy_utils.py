@@ -1,6 +1,7 @@
 from toolbox import update_ui, get_conf, trimmed_format_exc
 import threading
 
+
 def input_clipping(inputs, history, max_token_limit):
     import numpy as np
     from request_llm.bridge_all import model_info
@@ -35,6 +36,7 @@ def input_clipping(inputs, history, max_token_limit):
     history = everything[1:]
     return inputs, history
 
+
 def request_gpt_model_in_new_thread_with_ui_alive(
         inputs, inputs_show_user, llm_kwargs, 
         chatbot, history, sys_prompt, refresh_interval=0.2,
@@ -64,9 +66,10 @@ def request_gpt_model_in_new_thread_with_ui_alive(
     from request_llm.bridge_all import predict_no_ui_long_connection
     # 用户反馈
     chatbot.append([inputs_show_user, ""])
-    yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
+    yield from update_ui(chatbot=chatbot, history=[])  # 刷新界面
     executor = ThreadPoolExecutor(max_workers=16)
     mutable = ["", time.time(), ""]
+
     def _req_gpt(inputs, history, sys_prompt):
         retry_op = retry_times_at_unknown_error
         exceeded_cnt = 0
@@ -222,15 +225,17 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     # 【选择放弃】
                     tb_str = '```\n' + trimmed_format_exc() + '```'
                     gpt_say += f"[Local Message] 警告，线程{index}在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
-                    if len(mutable[index][0]) > 0: gpt_say += "此线程失败前收到的回答：\n\n" + mutable[index][0]
+                    if len(mutable[index][0]) > 0:
+                        gpt_say += "此线程失败前收到的回答：\n\n" + mutable[index][0]
                     mutable[index][2] = "输入过长已放弃"
-                    return gpt_say # 放弃
-            except:
+                    return gpt_say  # 放弃
+            except Exception as e:
                 # 【第三种情况】：其他错误
                 tb_str = '```\n' + trimmed_format_exc() + '```'
-                print(tb_str)
+                print(f"发生异常：{e}, 调用栈信息：{tb_str}")
                 gpt_say += f"[Local Message] 警告，线程{index}在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
-                if len(mutable[index][0]) > 0: gpt_say += "此线程失败前收到的回答：\n\n" + mutable[index][0]
+                if len(mutable[index][0]) > 0:
+                    gpt_say += "此线程失败前收到的回答：\n\n" + mutable[index][0]
                 if retry_op > 0: 
                     retry_op -= 1
                     wait = random.randint(5, 20)
@@ -244,7 +249,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                         mutable[index][2] = f"{fail_info}等待重试 {wait-i}"; time.sleep(1)
                     # 开始重试
                     mutable[index][2] = f"重试中 {retry_times_at_unknown_error-retry_op}/{retry_times_at_unknown_error}"
-                    continue # 返回重试
+                    continue  # 返回重试
                 else:
                     mutable[index][2] = "已失败"
                     wait = 5
