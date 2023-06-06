@@ -51,7 +51,8 @@ def 读文章写摘要(txt, llm_kwargs, plugin_kwargs, chatbot, system_prompt, w
     # history = []    # 清空历史，以免输入溢出
     if history is None:
         history = []  # 清空历史，以免输入溢出
-    import glob, os
+    import glob
+    import os
     if os.path.exists(txt):
         project_folder = txt
     else:
