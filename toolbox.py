@@ -84,11 +84,12 @@ def update_ui_lastest_msg(lastmsg, chatbot, history, delay=1):  # 刷新界面
 
 
 def trimmed_format_exc():
-    import os, traceback
-    str = traceback.format_exc()
+    import os
+    import traceback
+    _str = traceback.format_exc()
     current_path = os.getcwd()
     replace_path = "."
-    return str.replace(current_path, replace_path)
+    return _str.replace(current_path, replace_path)
 
 
 def CatchException(f):
@@ -101,7 +102,7 @@ def CatchException(f):
             yield from f(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT)
         except Exception as e:
             from check_proxy import check_proxy
-            from toolbox import get_conf
+            # from toolbox import get_conf  # 不需要导入本文件内容
             proxies, = get_conf('proxies')
             tb_str = '```\n' + trimmed_format_exc() + '```'
             if len(chatbot) == 0:
@@ -109,7 +110,7 @@ def CatchException(f):
                 chatbot.append(["插件调度异常", "异常原因"])
             chatbot[-1] = (chatbot[-1][0],
                            f"[Local Message] 实验性函数调用出错: \n\n{tb_str} \n\n当前代理可用性: \n\n{check_proxy(proxies)}")
-            yield from update_ui(chatbot=chatbot, history=history, msg=f'异常 {e}') # 刷新界面
+            yield from update_ui(chatbot=chatbot, history=history, msg=f'异常 {e}')  # 刷新界面
     return decorated
 
 
