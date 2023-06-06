@@ -374,7 +374,6 @@ def prompt_retrieval(is_all, hosts='', search=False):
         返回一个列表
     """
     count_dict = {}
-    user_path = os.path.join(prompt_path, f'prompt_{hosts}.yaml')
     if '所有人' in is_all:
         for tab in SqliteHandle('ai_common').get_tables():
             if tab.startswith('prompt'):
