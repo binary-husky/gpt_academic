@@ -10,6 +10,8 @@ import os.path
 import subprocess
 import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
+import Levenshtein
 import psutil
 import re
 import tempfile
@@ -284,25 +286,30 @@ def diff_list(txt='', percent=0.70, switch: list = None, lst: list = None, sp=15
     Returns:
         返回一个列表
     """
-    import difflib
     count_dict = {}
     if not lst:
         lst = SqliteHandle('ai_common').get_prompt_value(txt)
         lst.update(SqliteHandle(f"ai_private_{hosts}").get_prompt_value(txt))
     # diff 数据，根据precent系数归类数据
-    for i in lst:
+    str_ = time.time()
+
+    def tf_factor_calcul(i):
         found = False
-        for key in count_dict.keys():
-            str_tf = difflib.SequenceMatcher(None, i, key).ratio()
+        dict_copy = count_dict.copy()
+        for key in dict_copy.keys():
+            str_tf = Levenshtein.jaro_winkler(i, key)
             if str_tf >= percent:
                 if len(i) > len(key):
-                    count_dict[i] = count_dict[key] + 1
+                    count_dict[i] = count_dict.copy()[key] + 1
                     count_dict.pop(key)
                 else:
                     count_dict[key] += 1
                 found = True
                 break
         if not found: count_dict[i] = 1
+    with ThreadPoolExecutor(1000) as executor:
+        executor.map(tf_factor_calcul, lst)
+    print('计算耗时', time.time()-str_)
     sorted_dict = sorted(count_dict.items(), key=lambda x: x[1], reverse=True)
     if switch:
         sorted_dict += prompt_retrieval(is_all=switch, hosts=hosts, search=True)
