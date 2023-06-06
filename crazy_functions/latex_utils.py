@@ -61,8 +61,8 @@ class LinkedListNode():
         self.string = string
         self.preserve = preserve
         self.next = None
-        self.begin_line = 0
-        self.begin_char = 0
+        # self.begin_line = 0
+        # self.begin_char = 0
 
 def convert_to_linklist(text, mask):
     root = LinkedListNode("", preserve=True)
@@ -97,11 +97,22 @@ def 寻找Latex主文件(file_manifest, mode):
         else:
             continue
     raise RuntimeError('无法找到一个主Tex文件（包含documentclass关键字）')
-
+def rm_comments(main_file):
+    new_file_remove_comment_lines = []
+    for l in main_file.splitlines():
+        # 删除整行的空注释
+        if l.startswith("%") or (l.startswith(" ") and l.lstrip().startswith("%")):
+            pass
+        else:
+            new_file_remove_comment_lines.append(l)
+    main_file = '\n'.join(new_file_remove_comment_lines)
+    main_file = re.sub(r'(?<!\\)%.*', '', main_file)  # 使用正则表达式查找半行注释, 并替换为空字符串
+    return main_file
 def merge_tex_files_(project_foler, main_file, mode):
     """
     Merge Tex project recrusively
     """
+    main_file = rm_comments(main_file)
     for s in reversed([q for q in re.finditer(r"\\input\{(.*?)\}", main_file, re.M)]):
         f = s.group(1)
         fp = os.path.join(project_foler, f)
@@ -124,6 +135,8 @@ def merge_tex_files(project_foler, main_file, mode):
     P.S. 顺便把Latex的注释去除
     """
     main_file = merge_tex_files_(project_foler, main_file, mode)
+    main_file = rm_comments(main_file)
+
     if mode == 'translate_zh':
         pattern = re.compile(r'\\documentclass.*\n')
         match = pattern.search(main_file)
@@ -136,16 +149,6 @@ def merge_tex_files(project_foler, main_file, mode):
         if platform.system() != 'Windows':
             main_file = re.sub(r"\\documentclass\[(.*?)\]{(.*?)}", r"\\documentclass[\1,fontset=windows]{\2}",main_file)
             main_file = re.sub(r"\\documentclass{(.*?)}", r"\\documentclass[fontset=windows]{\1}",main_file)
-
-    new_file_remove_comment_lines = []
-    for l in main_file.splitlines():
-        # 删除整行的空注释
-        if l.startswith("%") or (l.startswith(" ") and l.lstrip().startswith("%")):
-            pass
-        else:
-            new_file_remove_comment_lines.append(l)
-    main_file = '\n'.join(new_file_remove_comment_lines)
-    main_file = re.sub(r'(?<!\\)%.*', '', main_file)  # 使用正则表达式查找半行注释, 并替换为空字符串
     return main_file
 
 
@@ -197,10 +200,7 @@ class LatexPaperSplit():
     be proccessed by GPT.
     """
     def __init__(self) -> None:
-        """
-        root是链表的根节点
-        """
-        self.root = None
+        self.nodes = None
         self.msg = "{\\scriptsize\\textbf{警告：该PDF由GPT-Academic开源项目调用大语言模型+Latex翻译插件一键生成，" + \
             "版权归原文作者所有。翻译内容可靠性无任何保障，请仔细鉴别并以原文为准。" + \
             "项目Github地址 \\url{https://github.com/binary-husky/gpt_academic/}。"
@@ -212,16 +212,13 @@ class LatexPaperSplit():
         Merge the result after the GPT process completed
         """
         result_string = ""
-        node = self.root
         p = 0
-        while True:
+        for node in self.nodes:
             if node.preserve:
                 result_string += node.string
             else:
                 result_string += fix_content(arr[p], node.string)
                 p += 1
-            node = node.next
-            if node is None: break
         if mode == 'translate_zh':
             pattern = re.compile(r'\\begin\{abstract\}.*\n')
             match = pattern.search(result_string)
@@ -229,7 +226,27 @@ class LatexPaperSplit():
             result_string = result_string[:position] + self.msg + msg + self.msg_declare + result_string[position:]
         return result_string
 
-    def split(self, txt, project_folder):
+    def split(self, txt, project_folder): 
+        """
+        break down latex file to a linked list,
+        each node use a preserve flag to indicate whether it should
+        be proccessed by GPT.
+        P.S. use multiprocessing to avoid timeout error
+        """
+        import multiprocessing
+        manager = multiprocessing.Manager()
+        return_dict = manager.dict()
+        p = multiprocessing.Process(
+            target=lambda lps, txt, project_folder, return_dict: 
+            lps.split_subprocess(txt, project_folder, return_dict), 
+            args=(self, txt, project_folder, return_dict))
+        p.start()
+        p.join()
+        self.nodes = return_dict['nodes']
+        self.sp = return_dict['segment_parts_for_gpt']
+        return self.sp
+
+    def split_subprocess(self, txt, project_folder, return_dict):
         """
         break down latex file to a linked list,
         each node use a preserve flag to indicate whether it should
@@ -318,10 +335,18 @@ class LatexPaperSplit():
             node = node.next
             if node is None: break
 
+        # 屏蔽空行和太短的句子
         node = root
         while True:
             if len(node.string.strip('\n').strip(''))==0: node.preserve = True
             if len(node.string.strip('\n').strip(''))<42: node.preserve = True
+            node = node.next
+            if node is None: break
+        node = root
+        while True:
+            if node.next and node.preserve and node.next.preserve:
+                node.string += node.next.string
+                node.next = node.next.next
             node = node.next
             if node is None: break
 
@@ -345,8 +370,10 @@ class LatexPaperSplit():
 
         with open(pj(project_folder, 'debug_log.html'), 'w', encoding='utf8') as f:
             segment_parts_for_gpt = []
+            nodes = []
             node = root
             while True:
+                nodes.append(node)
                 show_html = node.string.replace('\n','<br/>')
                 if not node.preserve:
                     segment_parts_for_gpt.append(node.string)
@@ -355,9 +382,11 @@ class LatexPaperSplit():
                     f.write(f'<p style="color:red;">{show_html}</p>')
                 node = node.next
                 if node is None: break
-        self.root = root
-        self.sp = segment_parts_for_gpt
-        return self.sp
+
+        for n in nodes: n.next = None   # break
+        return_dict['nodes'] = nodes
+        return_dict['segment_parts_for_gpt'] = segment_parts_for_gpt
+        return return_dict
 
 class LatexPaperFileGroup():
     """
@@ -439,7 +468,7 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
 
     #  <-------- 精细切分latex文件 ----------> 
     lps = LatexPaperSplit()
-    res = lps.split(merged_content, project_folder)
+    res = lps.split(merged_content, project_folder) # 消耗时间的函数
 
     #  <-------- 拆分过长的latex片段 ----------> 
     pfg = LatexPaperFileGroup()
@@ -515,7 +544,8 @@ def remove_buggy_lines(file_path, log_path, tex_name, tex_name_pure, n_fix, work
             f.writelines(file_lines)
         return True, f"{tex_name_pure}_fix_{n_fix}", buggy_lines
     except:
-        return False, 0, [0]
+        print("Fatal error occurred, but we cannot identify error, please download zip, read latex log, and compile manually.")
+        return False, -1, [-1]
     
 
 def compile_latex_with_timeout(command, timeout=60):
