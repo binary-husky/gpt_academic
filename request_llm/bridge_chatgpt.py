@@ -28,6 +28,7 @@ proxies, API_KEY, TIMEOUT_SECONDS, MAX_RETRY = \
 timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check proxy settings in config.py.' + \
                   '网络错误，检查代理服务器是否可用，以及代理设置的格式是否正确，格式须是[协议]://[地址]:[端口]，缺一不可。'
 
+
 def get_full_error(chunk, stream_response):
     """
         获取完整的从Openai返回的报错
@@ -40,7 +41,7 @@ def get_full_error(chunk, stream_response):
     return chunk
 
 
-def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=None, console_slience=False):
+def predict_no_ui_long_connection(inputs, llm_kwargs, history=None, sys_prompt="", observe_window=None, console_slience=False):
     """
     发送至chatGPT，等待回复，一次性完成，不显示中间过程。但内部用stream的方法避免中途网线被掐。
     inputs：
@@ -54,7 +55,9 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     observe_window = None：
         用于负责跨越线程传递已经输出的部分，大部分时候仅仅为了fancy的视觉效果，留空即可。observe_window[0]：观测窗。observe_window[1]：看门狗
     """
-    watch_dog_patience = 5 # 看门狗的耐心, 设置5秒即可
+    if history is None:
+        history = []
+    watch_dog_patience = 5  # 看门狗的耐心, 设置5秒即可
     headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt=sys_prompt, stream=True)
     retry = 0
     while True:
@@ -63,14 +66,14 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
             from .bridge_all import model_info
             endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
             response = requests.post(endpoint, headers=headers, proxies=proxies,
-                                    json=payload, stream=True, timeout=TIMEOUT_SECONDS); break
+                                     json=payload, stream=True, timeout=TIMEOUT_SECONDS); break
         except requests.exceptions.ReadTimeout as e:
             retry += 1
             traceback.print_exc()
             if retry > MAX_RETRY: raise TimeoutError
             if MAX_RETRY!=0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
 
-    stream_response =  response.iter_lines()
+    stream_response = response.iter_lines()
     result = ''
     while True:
         try: chunk = next(stream_response).decode()
@@ -100,7 +103,8 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
                 if len(observe_window) >= 2:  
                     if (time.time()-observe_window[1]) > watch_dog_patience:
                         raise RuntimeError("用户取消了程序。")
-        else: raise RuntimeError("意外Json结构："+delta)
+        else:
+            raise RuntimeError("意外Json结构："+delta)
     if json_data['finish_reason'] == 'length':
         raise ConnectionAbortedError("正常结束，但显示Token不足，导致输出不完整，请削减单次输入的文本量。")
     return result
