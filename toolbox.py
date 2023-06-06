@@ -260,11 +260,11 @@ def text_divide_paragraph(input_str):
     """
     将文本按照段落分隔符分割开，生成带有段落标签的HTML代码。
     """
-    code_blocks = re.findall('```.*?```', input_str, re.DOTALL)
+    code_blocks = re.findall('```.*?```', str(input_str), re.DOTALL)
     for block in code_blocks:
         input_str = input_str.replace(block, f'{{{{{{{{{{{code_blocks.index(block)}}}}}}}}}}}')
     # 将除了三个反引号之间的文本块以外的 "\n" 替换为 "\n\n"
-    input_str = re.sub(r'(?!```)(?<!\n)\n(?!(\n|^)( {0,3}[\*\+\-]|[0-9]+\.))', '\n\n', input_str)
+    input_str = re.sub(r'(?!```)(?<!\n)\n(?!(\n|^)( {0,3}[\*\+\-]|[0-9]+\.))', '\n\n', str(input_str))
     # 还原未处理的文本块
     for i, block in enumerate(code_blocks):
         input_str = input_str.replace(f'{{{{{{{{{{{i}}}}}}}}}}}', block)
