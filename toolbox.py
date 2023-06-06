@@ -20,6 +20,7 @@ from functools import wraps, lru_cache
 ========================================================================
 """
 
+
 class ChatBotWithCookies(list):
     def __init__(self, cookie):
         self._cookies = cookie
@@ -69,6 +70,7 @@ def update_ui(chatbot, history, msg='正常', **kwargs):  # 刷新界面
     """
     assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时，可用clear将其清空，然后用for+append循环重新赋值。"
     yield chatbot.get_cookies(), chatbot, history, msg
+
 
 def update_ui_lastest_msg(lastmsg, chatbot, history, delay=1):  # 刷新界面
     """
