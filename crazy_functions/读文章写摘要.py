@@ -1,11 +1,12 @@
-from toolbox import update_ui
 from toolbox import CatchException, report_execption, write_results_to_file
+from toolbox import update_ui
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+
 fast_debug = False
 
 
 def 解析Paper(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
-    import time, glob, os
+    import time, os
     print('begin analysis on:', file_manifest)
     for index, fp in enumerate(file_manifest):
         with open(fp, 'r', encoding='utf-8', errors='replace') as f:
@@ -45,10 +46,11 @@ def 解析Paper(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbo
         yield from update_ui(chatbot=chatbot, history=history, msg=msg) # 刷新界面
 
 
-
 @CatchException
-def 读文章写摘要(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    history = []    # 清空历史，以免输入溢出
+def 读文章写摘要(txt, llm_kwargs, plugin_kwargs, chatbot, system_prompt, web_port, history=None):
+    # history = []    # 清空历史，以免输入溢出
+    if history is None:
+        history = []  # 清空历史，以免输入溢出
     import glob, os
     if os.path.exists(txt):
         project_folder = txt
