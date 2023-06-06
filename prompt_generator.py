@@ -24,8 +24,9 @@ def connect_db_close(cls_method):
 
 
 class SqliteHandle:
-    def __init__(self, table='ai_common'):
-        self.__connect = sqlite3.connect(os.path.join(prompt_path, 'ai_prompt.db'))
+    def __init__(self, table='ai_common', database='ai_prompt.db'):
+        self.__database = database
+        self.__connect = sqlite3.connect(os.path.join(prompt_path, self.__database))
         self.__cursor = self.__connect.cursor()
         self.__table = table
         if self.__table not in self.get_tables():
@@ -33,7 +34,7 @@ class SqliteHandle:
 
     def new_connect_db(self):
         """多线程操作时，每个线程新建独立的connect"""
-        self.__connect = sqlite3.connect(os.path.join(prompt_path, 'ai_prompt.db'))
+        self.__connect = sqlite3.connect(os.path.join(prompt_path, self.__database))
         self.__cursor = self.__connect.cursor()
 
     def new_close_db(self):
@@ -50,7 +51,7 @@ class SqliteHandle:
             all_tab.append(tab[0])
         return all_tab
 
-    def get_prompt_value(self, find):
+    def get_prompt_value(self, find=None):
         temp_all = {}
         if find:
             result = self.__cursor.execute(f"SELECT prompt, result FROM `{self.__table}` WHERE prompt LIKE '%{find}%'").fetchall()
@@ -71,6 +72,8 @@ class SqliteHandle:
 
 sqlite_handle = SqliteHandle
 if __name__ == '__main__':
-    test = func_box.YamlHandle('/Users/kilig/Job/Python-project/academic_gpt/prompt_users/prompt_127.0.0.1.yaml').load()
-
-    sqlite_handle('prompt_127.0.0.1').inset_prompt(test)
+    sql_ll = sqlite_handle(database='ai_prompt_cp.db')
+    tabs = sql_ll.get_tables()
+    for i in tabs:
+        old_data = sqlite_handle(table=i, database='ai_prompt_cp.db').get_prompt_value()
+        sqlite_handle(table=i).inset_prompt(old_data)
