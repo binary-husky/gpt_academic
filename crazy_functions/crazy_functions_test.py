@@ -182,13 +182,13 @@ def test_Langchain知识库读取():
 def test_Latex():
     from crazy_functions.Latex输出PDF结果 import Latex英文纠错加PDF对比, Latex翻译中文并重新编译PDF
 
-    txt = r"https://arxiv.org/abs/1706.03762"
+    # txt = r"https://arxiv.org/abs/1706.03762"
     # txt = r"https://arxiv.org/abs/1902.03185"
     # txt = r"https://arxiv.org/abs/2305.18290"
     # txt = r"https://arxiv.org/abs/2305.17608"
-    # txt = r"https://arxiv.org/abs/2211.16068"   #  ACE
-    # txt = r"C:\Users\fuqingxu\arxiv_cache\2211.16068\workfolder"   #  ACE
-    
+    # txt = r"https://arxiv.org/abs/2211.16068"                     #  ACE
+    # txt = r"C:\Users\x\arxiv_cache\2211.16068\workfolder"  #  ACE
+    txt = r"https://arxiv.org/abs/2002.09253"
     for cookies, cb, hist, msg in (Latex翻译中文并重新编译PDF)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
         cli_printer.print(cb)   #  print(cb)
 

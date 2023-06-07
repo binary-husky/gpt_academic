@@ -61,8 +61,8 @@ class LinkedListNode():
         self.string = string
         self.preserve = preserve
         self.next = None
-        self.begin_line = 0
-        self.begin_char = 0
+        # self.begin_line = 0
+        # self.begin_char = 0
 
 def convert_to_linklist(text, mask):
     root = LinkedListNode("", preserve=True)
@@ -97,11 +97,22 @@ def 寻找Latex主文件(file_manifest, mode):
         else:
             continue
     raise RuntimeError('无法找到一个主Tex文件（包含documentclass关键字）')
-
+def rm_comments(main_file):
+    new_file_remove_comment_lines = []
+    for l in main_file.splitlines():
+        # 删除整行的空注释
+        if l.startswith("%") or (l.startswith(" ") and l.lstrip().startswith("%")):
+            pass
+        else:
+            new_file_remove_comment_lines.append(l)
+    main_file = '\n'.join(new_file_remove_comment_lines)
+    main_file = re.sub(r'(?<!\\)%.*', '', main_file)  # 使用正则表达式查找半行注释, 并替换为空字符串
+    return main_file
 def merge_tex_files_(project_foler, main_file, mode):
     """
     Merge Tex project recrusively
     """
+    main_file = rm_comments(main_file)
     for s in reversed([q for q in re.finditer(r"\\input\{(.*?)\}", main_file, re.M)]):
         f = s.group(1)
         fp = os.path.join(project_foler, f)
@@ -124,6 +135,8 @@ def merge_tex_files(project_foler, main_file, mode):
     P.S. 顺便把Latex的注释去除
     """
     main_file = merge_tex_files_(project_foler, main_file, mode)
+    main_file = rm_comments(main_file)
+
     if mode == 'translate_zh':
         pattern = re.compile(r'\\documentclass.*\n')
         match = pattern.search(main_file)
@@ -136,16 +149,6 @@ def merge_tex_files(project_foler, main_file, mode):
         if platform.system() != 'Windows':
             main_file = re.sub(r"\\documentclass\[(.*?)\]{(.*?)}", r"\\documentclass[\1,fontset=windows]{\2}",main_file)
             main_file = re.sub(r"\\documentclass{(.*?)}", r"\\documentclass[fontset=windows]{\1}",main_file)
-
-    new_file_remove_comment_lines = []
-    for l in main_file.splitlines():
-        # 删除整行的空注释
-        if l.startswith("%") or (l.startswith(" ") and l.lstrip().startswith("%")):
-            pass
-        else:
-            new_file_remove_comment_lines.append(l)
-    main_file = '\n'.join(new_file_remove_comment_lines)
-    main_file = re.sub(r'(?<!\\)%.*', '', main_file)  # 使用正则表达式查找半行注释, 并替换为空字符串
     return main_file
 
 
@@ -189,6 +192,149 @@ def fix_content(final_tex, node_string):
             final_tex = node_string # 出问题了，还原原文
     return final_tex
 
+def split_subprocess(txt, project_folder, return_dict):
+    """
+    break down latex file to a linked list,
+    each node use a preserve flag to indicate whether it should
+    be proccessed by GPT.
+    """
+    text = txt
+    mask = np.zeros(len(txt), dtype=np.uint8) + TRANSFORM
+
+    # 吸收title与作者以上的部分
+    text, mask = split_worker(text, mask, r"(.*?)\\maketitle", re.DOTALL)
+    # 删除iffalse注释
+    text, mask = split_worker(text, mask, r"\\iffalse(.*?)\\fi", re.DOTALL)
+    # 吸收在25行以内的begin-end组合
+    text, mask = split_worker_begin_end(text, mask, r"\\begin\{([a-z\*]*)\}(.*?)\\end\{\1\}", re.DOTALL, limit_n_lines=25)
+    # 吸收匿名公式
+    text, mask = split_worker(text, mask, r"\$\$(.*?)\$\$", re.DOTALL)
+    # 吸收其他杂项
+    text, mask = split_worker(text, mask, r"\\section\{(.*?)\}")
+    text, mask = split_worker(text, mask, r"\\section\*\{(.*?)\}")
+    text, mask = split_worker(text, mask, r"\\subsection\{(.*?)\}")
+    text, mask = split_worker(text, mask, r"\\subsubsection\{(.*?)\}")
+    text, mask = split_worker(text, mask, r"\\bibliography\{(.*?)\}")
+    text, mask = split_worker(text, mask, r"\\bibliographystyle\{(.*?)\}")
+    text, mask = split_worker(text, mask, r"\\begin\{lstlisting\}(.*?)\\end\{lstlisting\}", re.DOTALL)
+    text, mask = split_worker(text, mask, r"\\begin\{wraptable\}(.*?)\\end\{wraptable\}", re.DOTALL)
+    text, mask = split_worker(text, mask, r"\\begin\{algorithm\}(.*?)\\end\{algorithm\}", re.DOTALL)
+    text, mask = split_worker(text, mask, r"\\begin\{wrapfigure\}(.*?)\\end\{wrapfigure\}", re.DOTALL)
+    text, mask = split_worker(text, mask, r"\\begin\{wrapfigure\*\}(.*?)\\end\{wrapfigure\*\}", re.DOTALL)
+    text, mask = split_worker(text, mask, r"\\begin\{figure\}(.*?)\\end\{figure\}", re.DOTALL)
+    text, mask = split_worker(text, mask, r"\\begin\{figure\*\}(.*?)\\end\{figure\*\}", re.DOTALL)
+    text, mask = split_worker(text, mask, r"\\begin\{multline\}(.*?)\\end\{multline\}", re.DOTALL)
+    text, mask = split_worker(text, mask, r"\\begin\{multline\*\}(.*?)\\end\{multline\*\}", re.DOTALL)
+    text, mask = split_worker(text, mask, r"\\begin\{table\}(.*?)\\end\{table\}", re.DOTALL)
+    text, mask = split_worker(text, mask, r"\\begin\{table\*\}(.*?)\\end\{table\*\}", re.DOTALL)
+    text, mask = split_worker(text, mask, r"\\begin\{minipage\}(.*?)\\end\{minipage\}", re.DOTALL)
+    text, mask = split_worker(text, mask, r"\\begin\{minipage\*\}(.*?)\\end\{minipage\*\}", re.DOTALL)
+    text, mask = split_worker(text, mask, r"\\begin\{align\*\}(.*?)\\end\{align\*\}", re.DOTALL)
+    text, mask = split_worker(text, mask, r"\\begin\{align\}(.*?)\\end\{align\}", re.DOTALL)
+    text, mask = split_worker(text, mask, r"\\begin\{equation\}(.*?)\\end\{equation\}", re.DOTALL)
+    text, mask = split_worker(text, mask, r"\\begin\{equation\*\}(.*?)\\end\{equation\*\}", re.DOTALL)
+    text, mask = split_worker(text, mask, r"\\item ")
+    text, mask = split_worker(text, mask, r"\\label\{(.*?)\}")
+    text, mask = split_worker(text, mask, r"\\begin\{(.*?)\}")
+    text, mask = split_worker(text, mask, r"\\vspace\{(.*?)\}")
+    text, mask = split_worker(text, mask, r"\\hspace\{(.*?)\}")
+    text, mask = split_worker(text, mask, r"\\end\{(.*?)\}")
+    # text, mask = split_worker_reverse_caption(text, mask, r"\\caption\{(.*?)\}", re.DOTALL)
+    root = convert_to_linklist(text, mask)
+
+    # 修复括号
+    node = root
+    while True:
+        string = node.string
+        if node.preserve: 
+            node = node.next
+            if node is None: break
+            continue
+        def break_check(string):
+            str_stack = [""] # (lv, index)
+            for i, c in enumerate(string):
+                if c == '{':
+                    str_stack.append('{')
+                elif c == '}':
+                    if len(str_stack) == 1:
+                        print('stack fix')
+                        return i
+                    str_stack.pop(-1)
+                else:
+                    str_stack[-1] += c
+            return -1
+        bp = break_check(string)
+
+        if bp == -1:
+            pass
+        elif bp == 0:
+            node.string = string[:1]
+            q = LinkedListNode(string[1:], False)
+            q.next = node.next
+            node.next = q
+        else:
+            node.string = string[:bp]
+            q = LinkedListNode(string[bp:], False)
+            q.next = node.next
+            node.next = q
+
+        node = node.next
+        if node is None: break
+
+    # 屏蔽空行和太短的句子
+    node = root
+    while True:
+        if len(node.string.strip('\n').strip(''))==0: node.preserve = True
+        if len(node.string.strip('\n').strip(''))<42: node.preserve = True
+        node = node.next
+        if node is None: break
+    node = root
+    while True:
+        if node.next and node.preserve and node.next.preserve:
+            node.string += node.next.string
+            node.next = node.next.next
+        node = node.next
+        if node is None: break
+
+    # 将前后断行符脱离
+    node = root
+    prev_node = None
+    while True:
+        if not node.preserve:
+            lstriped_ = node.string.lstrip().lstrip('\n')
+            if (prev_node is not None) and (prev_node.preserve) and (len(lstriped_)!=len(node.string)):
+                prev_node.string += node.string[:-len(lstriped_)]
+                node.string = lstriped_
+            rstriped_ = node.string.rstrip().rstrip('\n')
+            if (node.next is not None) and (node.next.preserve) and (len(rstriped_)!=len(node.string)):
+                node.next.string = node.string[len(rstriped_):] + node.next.string
+                node.string = rstriped_
+        # =====
+        prev_node = node
+        node = node.next
+        if node is None: break
+
+    with open(pj(project_folder, 'debug_log.html'), 'w', encoding='utf8') as f:
+        segment_parts_for_gpt = []
+        nodes = []
+        node = root
+        while True:
+            nodes.append(node)
+            show_html = node.string.replace('\n','<br/>')
+            if not node.preserve:
+                segment_parts_for_gpt.append(node.string)
+                f.write(f'<p style="color:black;">#{show_html}#</p>')
+            else:
+                f.write(f'<p style="color:red;">{show_html}</p>')
+            node = node.next
+            if node is None: break
+
+    for n in nodes: n.next = None   # break
+    return_dict['nodes'] = nodes
+    return_dict['segment_parts_for_gpt'] = segment_parts_for_gpt
+    return return_dict
+
+
 
 class LatexPaperSplit():
     """
@@ -197,10 +343,7 @@ class LatexPaperSplit():
     be proccessed by GPT.
     """
     def __init__(self) -> None:
-        """
-        root是链表的根节点
-        """
-        self.root = None
+        self.nodes = None
         self.msg = "{\\scriptsize\\textbf{警告：该PDF由GPT-Academic开源项目调用大语言模型+Latex翻译插件一键生成，" + \
             "版权归原文作者所有。翻译内容可靠性无任何保障，请仔细鉴别并以原文为准。" + \
             "项目Github地址 \\url{https://github.com/binary-husky/gpt_academic/}。"
@@ -212,16 +355,13 @@ class LatexPaperSplit():
         Merge the result after the GPT process completed
         """
         result_string = ""
-        node = self.root
         p = 0
-        while True:
+        for node in self.nodes:
             if node.preserve:
                 result_string += node.string
             else:
                 result_string += fix_content(arr[p], node.string)
                 p += 1
-            node = node.next
-            if node is None: break
         if mode == 'translate_zh':
             pattern = re.compile(r'\\begin\{abstract\}.*\n')
             match = pattern.search(result_string)
@@ -229,135 +369,26 @@ class LatexPaperSplit():
             result_string = result_string[:position] + self.msg + msg + self.msg_declare + result_string[position:]
         return result_string
 
-    def split(self, txt, project_folder):
+    def split(self, txt, project_folder): 
         """
         break down latex file to a linked list,
         each node use a preserve flag to indicate whether it should
         be proccessed by GPT.
+        P.S. use multiprocessing to avoid timeout error
         """
-        text = txt
-        mask = np.zeros(len(txt), dtype=np.uint8) + TRANSFORM
-
-        # 吸收title与作者以上的部分
-        text, mask = split_worker(text, mask, r"(.*?)\\maketitle", re.DOTALL)
-        # 删除iffalse注释
-        text, mask = split_worker(text, mask, r"\\iffalse(.*?)\\fi", re.DOTALL)
-        # 吸收在25行以内的begin-end组合
-        text, mask = split_worker_begin_end(text, mask, r"\\begin\{([a-z\*]*)\}(.*?)\\end\{\1\}", re.DOTALL, limit_n_lines=25)
-        # 吸收匿名公式
-        text, mask = split_worker(text, mask, r"\$\$(.*?)\$\$", re.DOTALL)
-        # 吸收其他杂项
-        text, mask = split_worker(text, mask, r"\\section\{(.*?)\}")
-        text, mask = split_worker(text, mask, r"\\section\*\{(.*?)\}")
-        text, mask = split_worker(text, mask, r"\\subsection\{(.*?)\}")
-        text, mask = split_worker(text, mask, r"\\subsubsection\{(.*?)\}")
-        text, mask = split_worker(text, mask, r"\\bibliography\{(.*?)\}")
-        text, mask = split_worker(text, mask, r"\\bibliographystyle\{(.*?)\}")
-        text, mask = split_worker(text, mask, r"\\begin\{lstlisting\}(.*?)\\end\{lstlisting\}", re.DOTALL)
-        text, mask = split_worker(text, mask, r"\\begin\{wraptable\}(.*?)\\end\{wraptable\}", re.DOTALL)
-        text, mask = split_worker(text, mask, r"\\begin\{algorithm\}(.*?)\\end\{algorithm\}", re.DOTALL)
-        text, mask = split_worker(text, mask, r"\\begin\{wrapfigure\}(.*?)\\end\{wrapfigure\}", re.DOTALL)
-        text, mask = split_worker(text, mask, r"\\begin\{wrapfigure\*\}(.*?)\\end\{wrapfigure\*\}", re.DOTALL)
-        text, mask = split_worker(text, mask, r"\\begin\{figure\}(.*?)\\end\{figure\}", re.DOTALL)
-        text, mask = split_worker(text, mask, r"\\begin\{figure\*\}(.*?)\\end\{figure\*\}", re.DOTALL)
-        text, mask = split_worker(text, mask, r"\\begin\{multline\}(.*?)\\end\{multline\}", re.DOTALL)
-        text, mask = split_worker(text, mask, r"\\begin\{multline\*\}(.*?)\\end\{multline\*\}", re.DOTALL)
-        text, mask = split_worker(text, mask, r"\\begin\{table\}(.*?)\\end\{table\}", re.DOTALL)
-        text, mask = split_worker(text, mask, r"\\begin\{table\*\}(.*?)\\end\{table\*\}", re.DOTALL)
-        text, mask = split_worker(text, mask, r"\\begin\{minipage\}(.*?)\\end\{minipage\}", re.DOTALL)
-        text, mask = split_worker(text, mask, r"\\begin\{minipage\*\}(.*?)\\end\{minipage\*\}", re.DOTALL)
-        text, mask = split_worker(text, mask, r"\\begin\{align\*\}(.*?)\\end\{align\*\}", re.DOTALL)
-        text, mask = split_worker(text, mask, r"\\begin\{align\}(.*?)\\end\{align\}", re.DOTALL)
-        text, mask = split_worker(text, mask, r"\\begin\{equation\}(.*?)\\end\{equation\}", re.DOTALL)
-        text, mask = split_worker(text, mask, r"\\begin\{equation\*\}(.*?)\\end\{equation\*\}", re.DOTALL)
-        text, mask = split_worker(text, mask, r"\\item ")
-        text, mask = split_worker(text, mask, r"\\label\{(.*?)\}")
-        text, mask = split_worker(text, mask, r"\\begin\{(.*?)\}")
-        text, mask = split_worker(text, mask, r"\\vspace\{(.*?)\}")
-        text, mask = split_worker(text, mask, r"\\hspace\{(.*?)\}")
-        text, mask = split_worker(text, mask, r"\\end\{(.*?)\}")
-        # text, mask = split_worker_reverse_caption(text, mask, r"\\caption\{(.*?)\}", re.DOTALL)
-        root = convert_to_linklist(text, mask)
-
-        # 修复括号
-        node = root
-        while True:
-            string = node.string
-            if node.preserve: 
-                node = node.next
-                if node is None: break
-                continue
-            def break_check(string):
-                str_stack = [""] # (lv, index)
-                for i, c in enumerate(string):
-                    if c == '{':
-                        str_stack.append('{')
-                    elif c == '}':
-                        if len(str_stack) == 1:
-                            print('stack fix')
-                            return i
-                        str_stack.pop(-1)
-                    else:
-                        str_stack[-1] += c
-                return -1
-            bp = break_check(string)
-
-            if bp == -1:
-                pass
-            elif bp == 0:
-                node.string = string[:1]
-                q = LinkedListNode(string[1:], False)
-                q.next = node.next
-                node.next = q
-            else:
-                node.string = string[:bp]
-                q = LinkedListNode(string[bp:], False)
-                q.next = node.next
-                node.next = q
-
-            node = node.next
-            if node is None: break
-
-        node = root
-        while True:
-            if len(node.string.strip('\n').strip(''))==0: node.preserve = True
-            if len(node.string.strip('\n').strip(''))<42: node.preserve = True
-            node = node.next
-            if node is None: break
-
-        # 将前后断行符脱离
-        node = root
-        prev_node = None
-        while True:
-            if not node.preserve:
-                lstriped_ = node.string.lstrip().lstrip('\n')
-                if (prev_node is not None) and (prev_node.preserve) and (len(lstriped_)!=len(node.string)):
-                    prev_node.string += node.string[:-len(lstriped_)]
-                    node.string = lstriped_
-                rstriped_ = node.string.rstrip().rstrip('\n')
-                if (node.next is not None) and (node.next.preserve) and (len(rstriped_)!=len(node.string)):
-                    node.next.string = node.string[len(rstriped_):] + node.next.string
-                    node.string = rstriped_
-            # =====
-            prev_node = node
-            node = node.next
-            if node is None: break
-
-        with open(pj(project_folder, 'debug_log.html'), 'w', encoding='utf8') as f:
-            segment_parts_for_gpt = []
-            node = root
-            while True:
-                show_html = node.string.replace('\n','<br/>')
-                if not node.preserve:
-                    segment_parts_for_gpt.append(node.string)
-                    f.write(f'<p style="color:black;">#{show_html}#</p>')
-                else:
-                    f.write(f'<p style="color:red;">{show_html}</p>')
-                node = node.next
-                if node is None: break
-        self.root = root
-        self.sp = segment_parts_for_gpt
+        import multiprocessing
+        manager = multiprocessing.Manager()
+        return_dict = manager.dict()
+        p = multiprocessing.Process(
+            target=split_subprocess, 
+            args=(txt, project_folder, return_dict))
+        p.start()
+        p.join()
+        self.nodes = return_dict['nodes']
+        self.sp = return_dict['segment_parts_for_gpt']
         return self.sp
+
+
 
 class LatexPaperFileGroup():
     """
@@ -439,7 +470,7 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
 
     #  <-------- 精细切分latex文件 ----------> 
     lps = LatexPaperSplit()
-    res = lps.split(merged_content, project_folder)
+    res = lps.split(merged_content, project_folder) # 消耗时间的函数
 
     #  <-------- 拆分过长的latex片段 ----------> 
     pfg = LatexPaperFileGroup()
@@ -515,7 +546,8 @@ def remove_buggy_lines(file_path, log_path, tex_name, tex_name_pure, n_fix, work
             f.writelines(file_lines)
         return True, f"{tex_name_pure}_fix_{n_fix}", buggy_lines
     except:
-        return False, 0, [0]
+        print("Fatal error occurred, but we cannot identify error, please download zip, read latex log, and compile manually.")
+        return False, -1, [-1]
     
 
 def compile_latex_with_timeout(command, timeout=60):
