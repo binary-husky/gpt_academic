@@ -113,10 +113,11 @@ class ChatBot(ChatBotFrame):
                            "\t 重新生成：尝试在prompt不变的情况下多次生成结果，优中选优\n"
                     self.pro_edit_txt = gr.Textbox(show_label=False, info='Prompt编辑区', lines=14,
                                                    placeholder=Tips).style(container=False)
-                    with gr.Row():
-                        self.pro_name_txt = gr.Textbox(show_label=False, placeholder='prompt功能名', ).style(
-                            container=False)
-                        self.pro_new_btn = gr.Button("保存Prompt", variant="primary").style(size='sm')
+                    self.pro_name_txt = gr.Textbox(show_label=False, placeholder='prompt功能名', ).style(
+                        container=False)
+                    with gr.Row(elem_id='sm_btn'):
+                        self.pro_reuse_btn = gr.Button("复用Prompt", variant="secondary").style(size='sm').style(full_width=False)
+                        self.pro_new_btn = gr.Button("保存Prompt", variant="primary").style(size='sm').style(full_width=False)
 
     def signals_prompt_edit(self):
         self.prompt_tab.select(fn=func_box.draw_results,
@@ -138,6 +139,11 @@ class ChatBot(ChatBotFrame):
                                inputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_fp_state],
                                outputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_private_check,
                                         self.pro_func_prompt, self.pro_fp_state])
+        self.pro_reuse_btn.click(
+            fn=func_box.reuse_chat,
+            inputs=[self.pro_results, self.chatbot, self.history],
+            outputs=[self.chatbot, self.history, self.txt, self.tabs_chatbot]
+        )
 
     def draw_function_chat(self):
         prompt_list, devs_document = get_conf('prompt_list', 'devs_document')
@@ -368,11 +374,12 @@ class ChatBot(ChatBotFrame):
                             self.draw_goals_auto()
                 # 绘制列2
                 with gr.Column(scale=100):
-                    with gr.Tab('Chatbot') as self.chat_tab:
-                        # self.draw_chatbot()
-                        pass
-                    with gr.Tab('Prompt检索/编辑') as self.prompt_tab:
-                        self.draw_prompt()
+                    with gr.Tabs() as self.tabs_chatbot:
+                        with gr.TabItem('Chatbot', id='chatbot') as self.chat_tab:
+                            # self.draw_chatbot()
+                            pass
+                        with gr.TabItem('Prompt检索/编辑') as self.prompt_tab:
+                            self.draw_prompt()
 
 
                 with self.chat_tab:  # 使用 gr.State()对组件进行拷贝时，如果之前绘制了Markdown格式，会导致启动崩溃,所以将 markdown相关绘制放在最后

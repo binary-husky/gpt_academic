@@ -123,6 +123,12 @@ advanced_css = """
     width: 100%;
     margin-bottom: 35px !important;
 }
+#sm_btn {
+    display: flex;
+    flex-wrap: unset !important; 
+    gap: 5px !important;
+    width: var(--size-full);
+}
 textarea {
     resize: none;
     height: 100%; /* 填充父元素的高度 */
