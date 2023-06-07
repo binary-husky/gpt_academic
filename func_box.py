@@ -475,6 +475,7 @@ def show_prompt_result(index, data: gr.Dataset, chatbot):
     return chatbot
 
 
+
 def thread_write_chat(chatbot):
     """
     对话记录写入数据库
@@ -492,6 +493,18 @@ def thread_write_chat(chatbot):
 
 base_path = os.path.dirname(__file__)
 prompt_path = os.path.join(base_path, 'prompt_users')
+
+
+def reuse_chat(result, chatbot, history):
+    """复用对话记录"""
+    if result is None or result == []:
+        pass
+    else:
+        chatbot.append(result[-1])
+        history += result[-1]
+        pattern = re.compile(r'^<div class="markdown-body"><p>|<\/p><\/div>$')
+        i_say = pattern.sub('', chatbot[-1][0])
+        return chatbot, history, i_say, gr.Tabs.update(selected='chatbot')
 
 
 class YamlHandle:

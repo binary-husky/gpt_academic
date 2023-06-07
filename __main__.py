@@ -224,6 +224,31 @@ class ChatBot(ChatBotFrame):
                 container=False)
             # temp = gr.Markdown(self.description)
 
+    def draw_goals_auto(self):
+        with gr.Row():
+            self.ai_name = gr.Textbox(show_label=False, placeholder="给Ai一个名字").style(container=False)
+        with gr.Row():
+            self.ai_role = gr.Textbox(lines=5, show_label=False, placeholder="请输入你的需求").style(
+                container=False)
+        with gr.Row():
+            self.ai_goal_list = gr.Dataframe(headers=['Goals'], interactive=True, row_count=4,
+                                             col_count=(1, 'fixed'), type='array')
+        with gr.Row():
+            self.ai_budget = gr.Number(show_label=False, value=0.0,
+                                       info="关于本次项目的预算，超过预算自动停止，默认无限").style(container=False)
+
+
+    def draw_next_auto(self):
+        with gr.Row():
+            self.text_continue = gr.Textbox(visible=False, show_label=False,
+                                            placeholder="请根据提示输入执行命令").style(container=False)
+        with gr.Row():
+            self.submit_start = gr.Button("Start", variant='primary')
+            self.submit_next = gr.Button("Next", visible=False, variant='primary')
+            self.submit_stop = gr.Button("Stop", variant="stop")
+            self.agent_obj = gr.State({'obj': None, "start": self.submit_start,
+                                       "next": self.submit_next, "text": self.text_continue})
+
 
     def signals_input_setting(self):
         # 注册input
@@ -296,6 +321,15 @@ class ChatBot(ChatBotFrame):
 
         self.md_dropdown.select(on_md_dropdown_changed, [self.md_dropdown], [self.chatbot])
 
+    def signals_auto_input(self):
+        from autogpt.cli import agent_main
+        self.auto_input_combo = [self.ai_name, self.ai_role, self.ai_goal_list, self.ai_budget,
+                                 self.cookies, self.chatbot, self.history,
+                                 self.agent_obj]
+        self.auto_output_combo = [self.cookies, self.chatbot, self.history, self.status,
+                                  self.agent_obj, self.submit_start, self.submit_next, self.text_continue]
+        self.submit_start.click(fn=agent_main, inputs=self.auto_input_combo, outputs=self.auto_output_combo)
+
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay(self, is_open=False):
         import threading, webbrowser, time
@@ -327,14 +361,18 @@ class ChatBot(ChatBotFrame):
                             self.draw_function_chat()
                             self.draw_public_chat()
                             self.draw_setting_chat()
+
+                        # 绘制autogpt模组
+                        with gr.TabItem('Auto-GPT'):
+                            self.draw_next_auto()
+                            self.draw_goals_auto()
                 # 绘制列2
                 with gr.Column(scale=100):
-                    with gr.Tabs() as self.tabs_chat:
-                        with gr.TabItem('Chatbot') as self.chat_tab:
-                            # self.draw_chatbot()
-                            pass
-                        with gr.TabItem('Prompt检索/编辑') as self.prompt_tab:
-                            self.draw_prompt()
+                    with gr.Tab('Chatbot') as self.chat_tab:
+                        # self.draw_chatbot()
+                        pass
+                    with gr.Tab('Prompt检索/编辑') as self.prompt_tab:
+                        self.draw_prompt()
 
 
                 with self.chat_tab:  # 使用 gr.State()对组件进行拷贝时，如果之前绘制了Markdown格式，会导致启动崩溃,所以将 markdown相关绘制放在最后
@@ -347,6 +385,7 @@ class ChatBot(ChatBotFrame):
             self.signals_prompt_func()
             self.signals_public()
             self.signals_prompt_edit()
+            # self.signals_auto_input()
 
         # Start
         self.auto_opentab_delay()
