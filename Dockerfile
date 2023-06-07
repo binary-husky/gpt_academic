@@ -15,6 +15,7 @@ WORKDIR /gpt
 
 # 安装依赖
 COPY requirements.txt ./
+COPY ./docs/gradio-3.32.2-py3-none-any.whl ./docs/gradio-3.32.2-py3-none-any.whl
 RUN pip3 install -r requirements.txt
 # 装载项目文件
 COPY . .
