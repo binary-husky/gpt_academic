@@ -196,7 +196,7 @@ class ChatBot(ChatBotFrame):
                         self.variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
                         crazy_fns[k]["Button"] = gr.Button(k, variant=self.variant)
                         crazy_fns[k]["Button"].style(size="sm")
-                with gr.Accordion("更多函数插件/高级用法", open=False):
+                with gr.Accordion("更多函数插件/高级用法", open=True):
                     dropdown_fn_list = []
                     for k in crazy_fns.keys():
                         if not crazy_fns[k].get("AsButton", True):
