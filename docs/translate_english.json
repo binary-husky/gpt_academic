@@ -58,6 +58,8 @@
     "连接网络回答问题": "ConnectToNetworkToAnswerQuestions",
     "联网的ChatGPT": "ChatGPTConnectedToNetwork",
     "解析任意code项目": "ParseAnyCodeProject",
+    "读取知识库作答": "ReadKnowledgeArchiveAnswerQuestions",
+    "知识库问答": "UpdateKnowledgeArchive",
     "同时问询_指定模型": "InquireSimultaneously_SpecifiedModel",
     "图片生成": "ImageGeneration",
     "test_解析ipynb文件": "Test_ParseIpynbFile",
