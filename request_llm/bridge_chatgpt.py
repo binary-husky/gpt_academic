@@ -200,7 +200,6 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     status_text = f"finish_reason: {chunkjson['choices'][0]['finish_reason']}\t" \
                                   f"本次对话耗时: {func_box.html_tag_color(tag=f'{count_time}s')}"
                     yield from update_ui(chatbot=chatbot, history=history, msg=status_text) # 刷新界面
-
                 except Exception as e:
                     traceback.print_exc()
                     yield from update_ui(chatbot=chatbot, history=history, msg="Json解析不合常规") # 刷新界面
@@ -229,6 +228,9 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                         chatbot[-1] = (chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str} \n\n{regular_txt_to_markdown(chunk_decoded)}")
                     yield from update_ui(chatbot=chatbot, history=history, msg="Json异常" + error_msg) # 刷新界面
                     return
+    count_tokens = func_box.num_tokens_from_string(listing=history)
+    status_text += f'\t 本次对话使用tokens: {func_box.html_tag_color(count_tokens)}'
+    yield from update_ui(chatbot=chatbot, history=history, msg=status_text)  # 刷新界面
 
 def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     """
