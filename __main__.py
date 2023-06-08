@@ -113,7 +113,7 @@ class ChatBot(ChatBotFrame):
                            "\t 重新生成：尝试在prompt不变的情况下多次生成结果，优中选优\n"
                     self.pro_edit_txt = gr.Textbox(show_label=False, info='Prompt编辑区', lines=14,
                                                    placeholder=Tips).style(container=False)
-                    self.pro_name_txt = gr.Textbox(show_label=False, placeholder='prompt功能名', ).style(
+                    self.pro_name_txt = gr.Textbox(show_label=False, placeholder='是否全复用prompt/prompt功能名', ).style(
                         container=False)
                     with gr.Row(elem_id='sm_btn'):
                         self.pro_reuse_btn = gr.Button("复用Prompt", variant="secondary").style(size='sm').style(full_width=False)
@@ -141,8 +141,8 @@ class ChatBot(ChatBotFrame):
                                         self.pro_func_prompt, self.pro_fp_state])
         self.pro_reuse_btn.click(
             fn=func_box.reuse_chat,
-            inputs=[self.pro_results, self.chatbot, self.history],
-            outputs=[self.chatbot, self.history, self.txt, self.tabs_chatbot]
+            inputs=[self.pro_results, self.chatbot, self.history, self.pro_name_txt],
+            outputs=[self.chatbot, self.history, self.txt, self.tabs_chatbot, self.pro_name_txt]
         )
 
     def draw_function_chat(self):
