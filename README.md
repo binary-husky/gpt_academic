@@ -43,6 +43,7 @@ chat分析报告生成 | [函数插件] 运行后自动生成总结汇报
 [Arxiv小助手](https://www.bilibili.com/video/BV1LM4y1279X) | [函数插件] 输入arxiv文章url即可一键翻译摘要+下载PDF
 [谷歌学术统合小助手](https://www.bilibili.com/video/BV19L411U7ia) | [函数插件] 给定任意谷歌学术搜索页面URL，让gpt帮你[写relatedworks](https://www.bilibili.com/video/BV1GP411U7Az/)
 互联网信息聚合+GPT | [函数插件] 一键[让GPT先从互联网获取信息](https://www.bilibili.com/video/BV1om4y127ck)，再回答问题，让信息永不过时
+Arxiv论文精密翻译 | [函数插件] 一键[以超高质量翻译arxiv论文](https://www.bilibili.com/video/BV1dz4y1v77A/)，迄今为止最好的论文翻译工具
 公式/图片/表格显示 | 可以同时显示公式的[tex形式和渲染形式](https://user-images.githubusercontent.com/96192199/230598842-1d7fcddd-815d-40ee-af60-baf488a199df.png)，支持公式、代码高亮
 多线程函数插件支持 | 支持多线调用chatgpt，一键处理[海量文本](https://www.bilibili.com/video/BV1FT411H7c5/)或程序
 启动暗色gradio[主题](https://github.com/binary-husky/chatgpt_academic/issues/173) | 在浏览器url后面添加```/?__theme=dark```可以切换dark主题
@@ -285,11 +286,18 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 <div align="center">
 <img src="https://github.com/binary-husky/gpt_academic/assets/96192199/651ccd98-02c9-4464-91e1-77a6b7d1b033" width="500" >
 </div>
+<div align="center">
+<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/476f66d9-7716-4537-b5c1-735372c25adb" width="200">
+</div>
 
+10. Latex/Arxiv论文翻译功能
+<div align="center">
+<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/9fdcc391-f823-464f-9322-f8719677043b" width="500" >
+</div>
 
 ## 版本:
 - version 3.5(Todo): 使用自然语言调用本项目的所有函数插件（高优先级）
-- version 3.4(Todo): 完善chatglm本地大模型的多线支持
+- version 3.4: +arxiv论文翻译、latex论文批改功能
 - version 3.3: +互联网信息综合功能
 - version 3.2: 函数插件支持更多参数接口 (保存对话功能, 解读任意语言代码+同时询问任意的LLM组合)
 - version 3.1: 支持同时问询多个gpt模型！支持api2d，支持多个apikey负载均衡
