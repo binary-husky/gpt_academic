@@ -3,6 +3,7 @@
 # @Time   : 2023/4/18
 # @Author : Spike
 # @Descr   :
+import ast
 import hashlib
 import io
 import json
@@ -292,7 +293,6 @@ def diff_list(txt='', percent=0.70, switch: list = None, lst: list = None, sp=15
         lst.update(SqliteHandle(f"ai_private_{hosts}").get_prompt_value(txt))
     # diff 数据，根据precent系数归类数据
     str_ = time.time()
-
     def tf_factor_calcul(i):
         found = False
         dict_copy = count_dict.copy()
@@ -466,6 +466,14 @@ def copy_result(history):
         return "无对话记录，复制错误！！"
 
 
+def str_is_list(s):
+    try:
+        list_ast = ast.literal_eval(s)
+        return isinstance(list_ast, list)
+    except (SyntaxError, ValueError):
+        return False
+
+
 def show_prompt_result(index, data: gr.Dataset, chatbot):
     """
     查看Prompt的对话记录结果
@@ -477,12 +485,20 @@ def show_prompt_result(index, data: gr.Dataset, chatbot):
         返回注册函数所需的对象
     """
     click = data.samples[index]
-    chatbot.append((click[1], click[2]))
+    if str_is_list(click[2]):
+        list_copy = eval(click[2])
+        for i in range(0, len(list_copy), 2):
+            if i + 1 >= len(list_copy):  # 如果下标越界了，单独处理最后一个元素
+                chatbot.append([list_copy[i]])
+            else:
+                chatbot.append([list_copy[i], list_copy[i + 1]])
+    else:
+        chatbot.append((click[1], click[2]))
     return chatbot
 
 
 
-def thread_write_chat(chatbot):
+def thread_write_chat(chatbot, history):
     """
     对话记录写入数据库
     """
@@ -490,7 +506,7 @@ def thread_write_chat(chatbot):
     chat_title = chatbot[0][1].split()
     pattern = re.compile(r'^<div class="markdown-body"><p>|<\/p><\/div>$')
     i_say = pattern.sub('', chatbot[-1][0])
-    gpt_result = pattern.sub('', chatbot[-1][1])
+    gpt_result = history
     if private_key in chat_title:
         SqliteHandle(f'ai_private_{chat_title[-2]}').inset_prompt({i_say: gpt_result})
     else:
