@@ -208,7 +208,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     error_msg = chunk_decoded
                     if "reduce the length" in error_msg:
                         if len(history) >= 2: history[-1] = ""; history[-2] = "" # 清除当前溢出的输入：history[-2] 是本次输入, history[-1] 是本次输出
-                        history = clip_history(inputs=inputs, history=history, tokenizer=model_info[llm_kwargs['llm_model']]['tokenizer'], 
+                        history = clip_history(inputs=inputs, history=history, tokenizer=model_info[llm_kwargs['llm_model']]['tokenizer'],
                                                max_token_limit=(model_info[llm_kwargs['llm_model']]['max_token'])) # history至少释放二分之一
                         chatbot[-1] = (chatbot[-1][0], "[Local Message] Reduce the length. 本次输入过长, 或历史数据过长. 历史缓存数据已部分释放, 您可以请再次尝试. (若再次失败则更可能是因为输入过长.)")
                         # history = []    # 清除历史
@@ -238,13 +238,18 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     """
     if not is_any_api_key(llm_kwargs['api_key']):
         raise AssertionError("你提供了错误的API_KEY。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。")
-
-    api_key = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
-
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {api_key}"
-    }
+    if llm_kwargs['llm_model'].startswith('proxy-'):
+        api_key = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
+        headers = {
+            "Content-Type": "application/json",
+            "api-key": f"{api_key}"
+        }
+    else:
+        api_key = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}"
+        }
 
     conversation_cnt = len(history) // 2
 
