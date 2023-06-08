@@ -8,7 +8,7 @@ def inspect_dependency(chatbot, history):
         import manim
         return True
     except:
-        chatbot.append(["导入依赖失败", "使用该模块需要额外依赖，安装方法:```pip install manimgl```"])
+        chatbot.append(["导入依赖失败", "使用该模块需要额外依赖，安装方法:```pip install manim manimgl```"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return False
 
