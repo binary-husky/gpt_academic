@@ -233,27 +233,31 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 <img src="https://user-images.githubusercontent.com/96192199/235222390-24a9acc0-680f-49f5-bc81-2f3161f1e049.png" width="500" >
 </div>
 
+2. Latex/Arxiv论文翻译功能
+<div align="center">
+<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/002a1a75-ace0-4e6a-94e2-ec1406a746f1" height="250" >
+<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/9fdcc391-f823-464f-9322-f8719677043b" height="250" >
+</div>
 
-
-2. 生成报告。大部分插件都会在执行结束后，生成工作报告
+3. 生成报告。大部分插件都会在执行结束后，生成工作报告
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/227503770-fe29ce2c-53fd-47b0-b0ff-93805f0c2ff4.png" height="300" >
 <img src="https://user-images.githubusercontent.com/96192199/227504617-7a497bb3-0a2a-4b50-9a8a-95ae60ea7afd.png" height="300" >
 <img src="https://user-images.githubusercontent.com/96192199/227504005-efeaefe0-b687-49d0-bf95-2d7b7e66c348.png" height="300" >
 </div>
 
-3. 模块化功能设计，简单的接口却能支持强大的功能
+4. 模块化功能设计，简单的接口却能支持强大的功能
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/229288270-093643c1-0018-487a-81e6-1d7809b6e90f.png" height="400" >
 <img src="https://user-images.githubusercontent.com/96192199/227504931-19955f78-45cd-4d1c-adac-e71e50957915.png" height="400" >
 </div>
 
-4. 这是一个能够“自我译解”的开源项目
+5. 这是一个能够“自我译解”的开源项目
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/226936850-c77d7183-0749-4c1c-9875-fd4891842d0c.png" width="500" >
 </div>
 
-5. 译解其他开源项目，不在话下
+6. 译解其他开源项目，不在话下
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/226935232-6b6a73ce-8900-4aee-93f9-733c7e6fef53.png" width="500" >
 </div>
@@ -262,37 +266,33 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 <img src="https://user-images.githubusercontent.com/96192199/226969067-968a27c1-1b9c-486b-8b81-ab2de8d3f88a.png" width="500" >
 </div>
 
-6. 装饰[live2d](https://github.com/fghrsh/live2d_demo)的小功能（默认关闭，需要修改`config.py`）
+7. 装饰[live2d](https://github.com/fghrsh/live2d_demo)的小功能（默认关闭，需要修改`config.py`）
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/236432361-67739153-73e8-43fe-8111-b61296edabd9.png" width="500" >
 </div>
 
-7. 新增MOSS大语言模型支持
+8. 新增MOSS大语言模型支持
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/236639178-92836f37-13af-4fdd-984d-b4450fe30336.png" width="500" >
 </div>
 
-8. OpenAI图像生成
+9. OpenAI图像生成
 <div align="center">
 <img src="https://github.com/binary-husky/gpt_academic/assets/96192199/bc7ab234-ad90-48a0-8d62-f703d9e74665" width="500" >
 </div>
 
-9. OpenAI音频解析与总结
+10. OpenAI音频解析与总结
 <div align="center">
 <img src="https://github.com/binary-husky/gpt_academic/assets/96192199/709ccf95-3aee-498a-934a-e1c22d3d5d5b" width="500" >
 </div>
 
-10. Latex全文校对纠错
+11. Latex全文校对纠错
 <div align="center">
 <img src="https://github.com/binary-husky/gpt_academic/assets/96192199/651ccd98-02c9-4464-91e1-77a6b7d1b033" height="200" > ===>
 <img src="https://github.com/binary-husky/gpt_academic/assets/96192199/476f66d9-7716-4537-b5c1-735372c25adb" height="200">
 </div>
 
-10. Latex/Arxiv论文翻译功能
-<div align="center">
-<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/002a1a75-ace0-4e6a-94e2-ec1406a746f1" height="250" >
-<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/9fdcc391-f823-464f-9322-f8719677043b" height="250" >
-</div>
+
 
 ## 版本:
 - version 3.5(Todo): 使用自然语言调用本项目的所有函数插件（高优先级）
