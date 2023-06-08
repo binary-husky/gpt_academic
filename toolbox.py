@@ -54,10 +54,13 @@ def ArgsGeneralWrapper(f):
         """"""
         # 引入一个有cookie的chatbot
         start_time = time.time()
+        encrypt, private = get_conf('switch_model')[0]['key']
+        private_key, = get_conf('private_key')
         cookies.update({
             'top_p':top_p,
             'temperature':temperature,
         })
+
         llm_kwargs = {
             'api_key': cookies['api_key'],
             'llm_model': llm_model,
@@ -70,8 +73,6 @@ def ArgsGeneralWrapper(f):
         plugin_kwargs = {
             "advanced_arg": plugin_advanced_arg
         }
-        encrypt, private = get_conf('switch_model')[0]['key']
-        private_key = get_conf('private_key')[0]
         if private in models:
             if chatbot == []:
                 chatbot.append([None, f'隐私模式, 你的对话记录无法被他人检索 <p style="display:none;">\n{private_key}\n{ipaddr.client.host}\n</p>'])
@@ -573,6 +574,12 @@ def is_api2d_key(key):
     else:
         return False
 
+def is_proxy_key(key):
+    if 'proxy' in key:
+        return True
+    else:
+        return False
+
 def is_any_api_key(key):
     if ',' in key:
         keys = key.split(',')
@@ -580,7 +587,7 @@ def is_any_api_key(key):
             if is_any_api_key(k): return True
         return False
     else:
-        return is_openai_api_key(key) or is_api2d_key(key)
+        return is_openai_api_key(key) or is_api2d_key(key) or is_proxy_key(key)
 
 def what_keys(keys):
     avail_key_list = {'OpenAI Key':0, "API2D Key":0}
@@ -608,6 +615,10 @@ def select_api_key(keys, llm_model):
     if llm_model.startswith('api2d-'):
         for k in key_list:
             if is_api2d_key(k): avail_key_list.append(k)
+
+    if llm_model.startswith('proxy'):
+        for k in key_list:
+            if is_proxy_key(k): avail_key_list.append(k.replace('proxy-', ''))
 
     if len(avail_key_list) == 0:
         raise RuntimeError(f"您提供的api-key不满足要求，不包含任何可用于{llm_model}的api-key。您可能选择了错误的模型或请求源。")
@@ -905,4 +916,3 @@ def objload(file='objdump.tmp'):
         return
     with open(file, 'rb') as f:
         return pickle.load(f)
-    
