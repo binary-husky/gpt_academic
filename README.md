@@ -235,7 +235,7 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 
 2. Latex/Arxiv论文翻译功能
 <div align="center">
-<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/002a1a75-ace0-4e6a-94e2-ec1406a746f1" height="250" >
+<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/002a1a75-ace0-4e6a-94e2-ec1406a746f1" height="250" > ===>
 <img src="https://github.com/binary-husky/gpt_academic/assets/96192199/9fdcc391-f823-464f-9322-f8719677043b" height="250" >
 </div>
 
