@@ -517,16 +517,20 @@ base_path = os.path.dirname(__file__)
 prompt_path = os.path.join(base_path, 'prompt_users')
 
 
-def reuse_chat(result, chatbot, history):
+def reuse_chat(result, chatbot, history, pro_numb):
     """复用对话记录"""
+    pattern = re.compile(r'^<div class="markdown-body"><p>|<\/p><\/div>$')
     if result is None or result == []:
         pass
     else:
-        chatbot.append(result[-1])
-        history += result[-1]
-        pattern = re.compile(r'^<div class="markdown-body"><p>|<\/p><\/div>$')
+        if pro_numb:
+            chatbot.append(result)
+            history += [pattern.sub('', i) for i in result]
+        else:
+            chatbot.append(result[-1])
+            history += [pattern.sub('', i) for i in result[-2:]]
         i_say = pattern.sub('', chatbot[-1][0])
-        return chatbot, history, i_say, gr.Tabs.update(selected='chatbot')
+        return chatbot, history, i_say, gr.Tabs.update(selected='chatbot'), ''
 
 
 class YamlHandle:
