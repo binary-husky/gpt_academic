@@ -113,13 +113,17 @@ class ChatBot(ChatBotFrame):
                            "\t 重新生成：尝试在prompt不变的情况下多次生成结果，优中选优\n"
                     self.pro_edit_txt = gr.Textbox(show_label=False, info='Prompt编辑区', lines=14,
                                                    placeholder=Tips).style(container=False)
-                    self.pro_name_txt = gr.Textbox(show_label=False, placeholder='是否全复用prompt/prompt功能名', ).style(
-                        container=False)
+                    with gr.Row():
+                        self.pro_name_txt = gr.Textbox(show_label=False, placeholder='是否全复用prompt / prompt功能名', ).style(
+                            container=False)
+                        self.pro_new_btn = gr.Button("保存Prompt", variant="primary").style(size='sm').style()
                     with gr.Row(elem_id='sm_btn'):
-                        self.pro_reuse_btn = gr.Button("复用Prompt", variant="secondary").style(size='sm').style(full_width=False)
-                        self.pro_new_btn = gr.Button("保存Prompt", variant="primary").style(size='sm').style(full_width=False)
+                        self.pro_reuse_btn = gr.Button("复用Result", variant="secondary").style(size='sm').style(full_width=False)
+                        self.pro_clear_btn = gr.Button("重置Result", variant="stop").style(size='sm').style(full_width=False)
+
 
     def signals_prompt_edit(self):
+        self.pro_clear_btn.click(fn=lambda: [], inputs=None, outputs=self.pro_results)
         self.prompt_tab.select(fn=func_box.draw_results,
                                inputs=[self.pro_search_txt, self.pro_prompt_state, self.pro_tf_slider,
                                        self.pro_private_check],
