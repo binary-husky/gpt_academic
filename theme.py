@@ -140,8 +140,8 @@ textarea {
     z-index: 2;
 }
 #prompt_result{
-    height: 50vh !important;
-    max-height: 50vh !important;
+    height: 60vh !important;
+    max-height: 60vh !important;
 }
 .wrap.svelte-18telvq.svelte-18telvq {
     padding: var(--block-padding) !important;
