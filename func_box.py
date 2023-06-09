@@ -532,7 +532,7 @@ def reuse_chat(result, chatbot, history, pro_numb):
         i_say = pattern.sub('', chatbot[-1][0])
         return chatbot, history, i_say, gr.Tabs.update(selected='chatbot'), ''
 
-@timeStatistics
+
 def num_tokens_from_string(listing: list, encoding_name: str = 'cl100k_base') -> int:
     """Returns the number of tokens in a text string."""
     count_tokens = 0
