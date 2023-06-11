@@ -29,7 +29,15 @@ def split_worker_reverse_caption(text, mask, pattern, flags=0):
     """
     pattern_compile = re.compile(pattern, flags)
     for res in pattern_compile.finditer(text):
-        mask[res.regs[1][0]:res.regs[1][1]] = TRANSFORM
+        brace_level = 0
+        p = begin = end = res.regs[1][0]
+        for _ in range(1024*16):
+            if text[p] == '}' and brace_level == 0: break
+            elif text[p] == '}':  brace_level -= 1
+            elif text[p] == '{':  brace_level += 1
+            p += 1
+        end = p
+        mask[begin:end] = TRANSFORM
     return text, mask
 
 def split_worker_begin_end(text, mask, pattern, flags=0, limit_n_lines=42):
@@ -97,6 +105,7 @@ def 寻找Latex主文件(file_manifest, mode):
         else:
             continue
     raise RuntimeError('无法找到一个主Tex文件（包含documentclass关键字）')
+
 def rm_comments(main_file):
     new_file_remove_comment_lines = []
     for l in main_file.splitlines():
@@ -108,6 +117,7 @@ def rm_comments(main_file):
     main_file = '\n'.join(new_file_remove_comment_lines)
     main_file = re.sub(r'(?<!\\)%.*', '', main_file)  # 使用正则表达式查找半行注释, 并替换为空字符串
     return main_file
+
 def merge_tex_files_(project_foler, main_file, mode):
     """
     Merge Tex project recrusively
@@ -185,14 +195,39 @@ def fix_content(final_tex, node_string):
     if node_string.count('\_') > 0 and node_string.count('\_') > final_tex.count('\_'):
         # walk and replace any _ without \
         final_tex = re.sub(r"(?<!\\)_", "\\_", final_tex)
-    if node_string.count('{') != node_string.count('}'):
-        if final_tex.count('{') != node_string.count('{'):
-            final_tex = node_string # 出问题了，还原原文
-        if final_tex.count('}') != node_string.count('}'):
-            final_tex = node_string # 出问题了，还原原文
+
+    def compute_brace_level(string):
+        # this function count the number of { and }
+        brace_level = 0
+        for c in string:
+            if c == "{": brace_level += 1
+            elif c == "}": brace_level -= 1
+        return brace_level
+    def join_most(tex_t, tex_o):
+        # this function join translated string and original string when something goes wrong
+        p_t = 0
+        p_o = 0
+        def find_next(string, chars, begin):
+            p = begin
+            while p < len(string):
+                if string[p] in chars: return p, string[p]
+                p += 1
+            return None, None
+        while True:
+            res1, char = find_next(tex_o, ['{','}'], p_o)
+            if res1 is None: break
+            res2, char = find_next(tex_t, [char], p_t)
+            if res2 is None: break
+            p_o = res1 + 1
+            p_t = res2 + 1
+        return tex_t[:p_t] + tex_o[p_o:]
+
+    if compute_brace_level(final_tex) != compute_brace_level(node_string):
+        # 出问题了，还原部分原文，保证括号正确
+        final_tex = join_most(final_tex, node_string)
     return final_tex
 
-def split_subprocess(txt, project_folder, return_dict):
+def split_subprocess(txt, project_folder, return_dict, opts):
     """
     break down latex file to a linked list,
     each node use a preserve flag to indicate whether it should
@@ -239,7 +274,7 @@ def split_subprocess(txt, project_folder, return_dict):
     text, mask = split_worker(text, mask, r"\\vspace\{(.*?)\}")
     text, mask = split_worker(text, mask, r"\\hspace\{(.*?)\}")
     text, mask = split_worker(text, mask, r"\\end\{(.*?)\}")
-    # text, mask = split_worker_reverse_caption(text, mask, r"\\caption\{(.*?)\}", re.DOTALL)
+    text, mask = split_worker_reverse_caption(text, mask, r"\\caption\{(.*?)\}", re.DOTALL)
     root = convert_to_linklist(text, mask)
 
     # 修复括号
@@ -369,7 +404,7 @@ class LatexPaperSplit():
             result_string = result_string[:position] + self.msg + msg + self.msg_declare + result_string[position:]
         return result_string
 
-    def split(self, txt, project_folder): 
+    def split(self, txt, project_folder, opts): 
         """
         break down latex file to a linked list,
         each node use a preserve flag to indicate whether it should
@@ -381,7 +416,7 @@ class LatexPaperSplit():
         return_dict = manager.dict()
         p = multiprocessing.Process(
             target=split_subprocess, 
-            args=(txt, project_folder, return_dict))
+            args=(txt, project_folder, return_dict, opts))
         p.start()
         p.join()
         self.nodes = return_dict['nodes']
@@ -440,7 +475,7 @@ class LatexPaperFileGroup():
 
 
 
-def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, mode='proofread', switch_prompt=None):
+def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, mode='proofread', switch_prompt=None, opts=[]):
     import time, os, re
     from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
     from .latex_utils import LatexPaperFileGroup, merge_tex_files, LatexPaperSplit, 寻找Latex主文件
@@ -470,7 +505,7 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
 
     #  <-------- 精细切分latex文件 ----------> 
     lps = LatexPaperSplit()
-    res = lps.split(merged_content, project_folder) # 消耗时间的函数
+    res = lps.split(merged_content, project_folder, opts) # 消耗时间的函数
 
     #  <-------- 拆分过长的latex片段 ----------> 
     pfg = LatexPaperFileGroup()
