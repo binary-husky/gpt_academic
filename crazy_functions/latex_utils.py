@@ -23,9 +23,26 @@ def split_worker(text, mask, pattern, flags=0):
         mask[res.span()[0]:res.span()[1]] = PRESERVE
     return text, mask
 
-def split_worker_reverse_caption(text, mask, pattern, flags=0):
+def split_worker_careful_brace(text, mask, pattern, flags=0):
     """
-    Move caption area out of preserve area 
+    Move area into preserve area 
+    """
+    pattern_compile = re.compile(pattern, flags)
+    for res in pattern_compile.finditer(text):
+        brace_level = -1
+        p = begin = end = res.regs[0][0]
+        for _ in range(1024*16):
+            if text[p] == '}' and brace_level == 0: break
+            elif text[p] == '}':  brace_level -= 1
+            elif text[p] == '{':  brace_level += 1
+            p += 1
+        end = p+1
+        mask[begin:end] = PRESERVE
+    return text, mask
+
+def split_worker_reverse_careful_brace(text, mask, pattern, flags=0):
+    """
+    Move area out of preserve area 
     """
     pattern_compile = re.compile(pattern, flags)
     for res in pattern_compile.finditer(text):
@@ -274,7 +291,8 @@ def split_subprocess(txt, project_folder, return_dict, opts):
     text, mask = split_worker(text, mask, r"\\vspace\{(.*?)\}")
     text, mask = split_worker(text, mask, r"\\hspace\{(.*?)\}")
     text, mask = split_worker(text, mask, r"\\end\{(.*?)\}")
-    text, mask = split_worker_reverse_caption(text, mask, r"\\caption\{(.*?)\}", re.DOTALL)
+    text, mask = split_worker_careful_brace(text, mask, r"\\hl\{(.*?)\}", re.DOTALL)
+    text, mask = split_worker_reverse_careful_brace(text, mask, r"\\caption\{(.*?)\}", re.DOTALL)
     root = convert_to_linklist(text, mask)
 
     # 修复括号
@@ -504,6 +522,8 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
         f.write(merged_content)
 
     #  <-------- 精细切分latex文件 ----------> 
+    chatbot.append((f"Latex文件融合完成", f'[Local Message] 正在精细切分latex文件，这需要一段时间计算，文档越长耗时越长，请耐心等待。'))
+    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
     lps = LatexPaperSplit()
     res = lps.split(merged_content, project_folder, opts) # 消耗时间的函数
 
@@ -602,7 +622,7 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
     current_dir = os.getcwd()
     n_fix = 1
     max_try = 32
-    chatbot.append([f"正在编译PDF文档", f'编译已经开始。当前工作路径为{work_folder}，如果程序停顿5分钟以上，则大概率是卡死在Latex里面了。不幸卡死时请直接去该路径下取回翻译结果，或者重启之后再度尝试 ...']); yield from update_ui(chatbot=chatbot, history=history)
+    chatbot.append([f"正在编译PDF文档", f'编译已经开始。当前工作路径为{work_folder}，如果程序停顿5分钟以上，请直接去该路径下取回翻译结果，或者重启之后再度尝试 ...']); yield from update_ui(chatbot=chatbot, history=history)
     chatbot.append([f"正在编译PDF文档", '...']); yield from update_ui(chatbot=chatbot, history=history); time.sleep(1); chatbot[-1] = list(chatbot[-1]) # 刷新界面
     yield from update_ui_lastest_msg('编译已经开始...', chatbot, history)   # 刷新Gradio前端界面
 
