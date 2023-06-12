@@ -1,0 +1,508 @@
+:root {
+    --chatbot-color-light: #000000;
+    --chatbot-color-dark: #FFFFFF;
+    --chatbot-background-color-light: #F3F3F3;
+    --chatbot-background-color-dark: #121111;
+    --message-user-background-color-light: #95EC69;
+    --message-user-background-color-dark: #26B561;
+    --message-bot-background-color-light: #FFFFFF;
+    --message-bot-background-color-dark: #2C2C2C;
+}
+
+#app_title {
+    font-weight: var(--prose-header-text-weight);
+    font-size: var(--text-xxl);
+    line-height: 1.3;
+    text-align: left;
+    margin-top: 6px;
+    white-space: nowrap;
+}
+#description {
+    text-align: center;
+    margin: 32px 0 4px 0;
+}
+
+/* gradio的页脚信息 */
+footer {
+    /* display: none !important; */
+    margin-top: .2em !important;
+    font-size: 85%;
+}
+#footer {
+    text-align: center;
+}
+#footer div {
+    display: inline-block;
+}
+#footer .versions{
+    font-size: 85%;
+    opacity: 0.60;
+}
+
+#float_display {
+    position: absolute;
+    max-height: 30px;
+}
+/* user_info */
+#user_info {
+    white-space: nowrap;
+    position: absolute; left: 8em; top: .2em;
+    z-index: var(--layer-2);
+    box-shadow: var(--block-shadow);
+    border: none; border-radius: var(--block-label-radius);
+    background: var(--color-accent);
+    padding: var(--block-label-padding);
+    font-size: var(--block-label-text-size); line-height: var(--line-sm);
+    width: auto; min-height: 30px!important;
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
+}
+#user_info .wrap {
+    opacity: 0;
+}
+#user_info p {
+    color: white;
+    font-weight: var(--block-label-text-weight);
+}
+#user_info.hideK {
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+}
+
+/* status_display */
+#status_display {
+    display: flex;
+    min-height: 2em;
+    align-items: flex-end;
+    justify-content: flex-end;
+}
+#status_display p {
+    font-size: .85em;
+    font-family: ui-monospace, "SF Mono", "SFMono-Regular", "Menlo", "Consolas", "Liberation Mono", "Microsoft Yahei UI", "Microsoft Yahei", monospace;
+    /* Windows下中文的monospace会fallback为新宋体，实在太丑，这里折中使用微软雅黑 */
+    color: var(--body-text-color-subdued);
+}
+
+#status_display {
+    transition: all 0.6s;
+}
+#chuanhu_chatbot {
+    transition: height 0.3s ease;
+}
+
+/* usage_display */
+.insert_block {
+    position: relative;
+    margin: 0;
+    padding: .5em 1em;
+    box-shadow: var(--block-shadow);
+    border-width: var(--block-border-width);
+    border-color: var(--block-border-color);
+    border-radius: var(--block-radius);
+    background: var(--block-background-fill);
+    width: 100%;
+    line-height: var(--line-sm);
+    min-height: 2em;
+}
+#usage_display p, #usage_display span {
+    margin: 0;
+    font-size: .85em;
+    color: var(--body-text-color-subdued);
+}
+.progress-bar {
+    background-color: var(--input-background-fill);;
+    margin: .5em 0 !important;
+    height: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.progress {
+    background-color: var(--block-title-background-fill);
+    height: 100%;
+    border-radius: 10px;
+    text-align: right;
+    transition: width 0.5s ease-in-out;
+}
+.progress-text {
+    /* color: white; */
+    color: var(--color-accent) !important;
+    font-size: 1em !important;
+    font-weight: bold;
+    padding-right: 10px;
+    line-height: 20px;
+}
+
+.apSwitch {
+    top: 2px;
+    display: inline-block;
+    height: 24px;
+    position: relative;
+    width: 48px;
+    border-radius: 12px;
+}
+.apSwitch input {
+    display: none !important;
+}
+.apSlider {
+    background-color: var(--neutral-200);
+    bottom: 0;
+    cursor: pointer;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transition: .4s;
+    font-size: 18px;
+    border-radius: 12px;
+}
+.apSlider::before {
+    bottom: -1.5px;
+    left: 1px;
+    position: absolute;
+    transition: .4s;
+    content: "🌞";
+}
+input:checked + .apSlider {
+    background-color: var(--primary-600);
+}
+input:checked + .apSlider::before {
+    transform: translateX(23px);
+    content:"🌚";
+}
+
+/* Override Slider Styles (for webkit browsers like Safari and Chrome)
+ * 好希望这份提案能早日实现 https://github.com/w3c/csswg-drafts/issues/4410
+ * 进度滑块在各个平台还是太不统一了
+ */
+input[type="range"] {
+    -webkit-appearance: none;
+    height: 4px;
+    background: var(--input-background-fill);
+    border-radius: 5px;
+    background-image: linear-gradient(var(--primary-500),var(--primary-500));
+    background-size: 0% 100%;
+    background-repeat: no-repeat;
+}
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    border: solid 0.5px #ddd;
+    background-color: white;
+    cursor: ew-resize;
+    box-shadow: var(--input-shadow);
+    transition: background-color .1s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: var(--neutral-50);
+}
+input[type=range]::-webkit-slider-runnable-track {
+    -webkit-appearance: none;
+    box-shadow: none;
+    border: none;
+    background: transparent;
+}
+
+#submit_btn, #cancel_btn {
+    height: 42px !important;
+}
+#submit_btn::before {
+    content: url("data:image/svg+xml, %3Csvg width='21px' height='20px' viewBox='0 0 21 20' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'%3E %3Cg id='page' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'%3E %3Cg id='send' transform='translate(0.435849, 0.088463)' fill='%23FFFFFF' fill-rule='nonzero'%3E %3Cpath d='M0.579148261,0.0428666046 C0.301105539,-0.0961547561 -0.036517765,0.122307382 0.0032026237,0.420210298 L1.4927172,18.1553639 C1.5125774,18.4334066 1.79062012,18.5922882 2.04880264,18.4929872 L8.24518329,15.8913017 L11.6412765,19.7441794 C11.8597387,19.9825018 12.2370824,19.8832008 12.3165231,19.5852979 L13.9450591,13.4882182 L19.7839562,11.0255541 C20.0619989,10.8865327 20.0818591,10.4694687 19.7839562,10.3105871 L0.579148261,0.0428666046 Z M11.6138902,17.0883151 L9.85385903,14.7195502 L0.718169621,0.618812241 L12.69945,12.9346347 L11.6138902,17.0883151 Z' id='shape'%3E%3C/path%3E %3C/g%3E %3C/g%3E %3C/svg%3E");
+    height: 21px;
+}
+#cancel_btn::before {
+    content: url("data:image/svg+xml,%3Csvg width='21px' height='21px' viewBox='0 0 21 21' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'%3E %3Cg id='pg' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'%3E %3Cpath d='M10.2072007,20.088463 C11.5727865,20.088463 12.8594566,19.8259823 14.067211,19.3010209 C15.2749653,18.7760595 16.3386126,18.0538087 17.2581528,17.1342685 C18.177693,16.2147282 18.8982283,15.1527965 19.4197586,13.9484733 C19.9412889,12.7441501 20.202054,11.4557644 20.202054,10.0833163 C20.202054,8.71773046 19.9395733,7.43106036 19.4146119,6.22330603 C18.8896505,5.01555169 18.1673997,3.95018885 17.2478595,3.0272175 C16.3283192,2.10424615 15.2646719,1.3837109 14.0569176,0.865611739 C12.8491633,0.34751258 11.5624932,0.088463 10.1969073,0.088463 C8.83132146,0.088463 7.54636692,0.34751258 6.34204371,0.865611739 C5.1377205,1.3837109 4.07407321,2.10424615 3.15110186,3.0272175 C2.22813051,3.95018885 1.5058797,5.01555169 0.984349419,6.22330603 C0.46281914,7.43106036 0.202054,8.71773046 0.202054,10.0833163 C0.202054,11.4557644 0.4645347,12.7441501 0.9894961,13.9484733 C1.5144575,15.1527965 2.23670831,16.2147282 3.15624854,17.1342685 C4.07578877,18.0538087 5.1377205,18.7760595 6.34204371,19.3010209 C7.54636692,19.8259823 8.83475258,20.088463 10.2072007,20.088463 Z M10.2072007,18.2562448 C9.07493099,18.2562448 8.01471483,18.0452309 7.0265522,17.6232031 C6.03838956,17.2011753 5.17031614,16.6161693 4.42233192,15.8681851 C3.6743477,15.1202009 3.09105726,14.2521274 2.67246059,13.2639648 C2.25386392,12.2758022 2.04456558,11.215586 2.04456558,10.0833163 C2.04456558,8.95104663 2.25386392,7.89083047 2.67246059,6.90266784 C3.09105726,5.9145052 3.6743477,5.04643178 4.42233192,4.29844756 C5.17031614,3.55046334 6.036674,2.9671729 7.02140552,2.54857623 C8.00613703,2.12997956 9.06463763,1.92068122 10.1969073,1.92068122 C11.329177,1.92068122 12.3911087,2.12997956 13.3827025,2.54857623 C14.3742962,2.9671729 15.2440852,3.55046334 15.9920694,4.29844756 C16.7400537,5.04643178 17.3233441,5.9145052 17.7419408,6.90266784 C18.1605374,7.89083047 18.3698358,8.95104663 18.3698358,10.0833163 C18.3698358,11.215586 18.1605374,12.2758022 17.7419408,13.2639648 C17.3233441,14.2521274 16.7400537,15.1202009 15.9920694,15.8681851 C15.2440852,16.6161693 14.3760118,17.2011753 13.3878492,17.6232031 C12.3996865,18.0452309 11.3394704,18.2562448 10.2072007,18.2562448 Z M7.65444721,13.6242324 L12.7496608,13.6242324 C13.0584616,13.6242324 13.3003556,13.5384544 13.4753427,13.3668984 C13.6503299,13.1953424 13.7378234,12.9585951 13.7378234,12.6566565 L13.7378234,7.49968276 C13.7378234,7.19774418 13.6503299,6.96099688 13.4753427,6.78944087 C13.3003556,6.61788486 13.0584616,6.53210685 12.7496608,6.53210685 L7.65444721,6.53210685 C7.33878414,6.53210685 7.09345904,6.61788486 6.91847191,6.78944087 C6.74348478,6.96099688 6.65599121,7.19774418 6.65599121,7.49968276 L6.65599121,12.6566565 C6.65599121,12.9585951 6.74348478,13.1953424 6.91847191,13.3668984 C7.09345904,13.5384544 7.33878414,13.6242324 7.65444721,13.6242324 Z' id='shape' fill='%23FF3B30' fill-rule='nonzero'%3E%3C/path%3E %3C/g%3E %3C/svg%3E");
+    height: 21px;
+}
+/* list */
+ol:not(.options), ul:not(.options) {
+    padding-inline-start: 2em !important;
+}
+
+/* 亮色（默认） */
+#chuanhu_chatbot {
+    background-color: var(--chatbot-background-color-light) !important;
+    color: var(--chatbot-color-light) !important;
+}
+[data-testid = "bot"] {
+    background-color: var(--message-bot-background-color-light) !important;
+}
+[data-testid = "user"] {
+    background-color: var(--message-user-background-color-light) !important;
+}
+/* 暗色 */
+.dark #chuanhu_chatbot {
+    background-color: var(--chatbot-background-color-dark) !important;
+    color: var(--chatbot-color-dark) !important;
+}
+.dark [data-testid = "bot"] {
+    background-color: var(--message-bot-background-color-dark) !important;
+}
+.dark [data-testid = "user"] {
+    background-color: var(--message-user-background-color-dark) !important;
+}
+
+/* 屏幕宽度大于等于500px的设备 */
+/* update on 2023.4.8: 高度的细致调整已写入JavaScript */
+@media screen and (min-width: 500px) {
+    #chuanhu_chatbot {
+        height: calc(100vh - 200px);
+    }
+    #chuanhu_chatbot .wrap {
+        max-height: calc(100vh - 200px - var(--line-sm)*1rem - 2*var(--block-label-margin) );
+    }
+}
+/* 屏幕宽度小于500px的设备 */
+@media screen and (max-width: 499px) {
+    #chuanhu_chatbot {
+        height: calc(100vh - 140px);
+    }
+    #chuanhu_chatbot .wrap {
+        max-height: calc(100vh - 140px - var(--line-sm)*1rem - 2*var(--block-label-margin) );
+    }
+    [data-testid = "bot"] {
+        max-width: 95% !important;
+    }
+    #app_title h1{
+        letter-spacing: -1px; font-size: 22px;
+    }
+}
+#chuanhu_chatbot .wrap {
+    overflow-x: hidden;
+}
+/* 对话气泡 */
+.message {
+    border-radius: var(--radius-xl) !important;
+    border: none;
+    padding: var(--spacing-xl) !important;
+    font-size: var(--text-md) !important;
+    line-height: var(--line-md) !important;
+    min-height: calc(var(--text-md)*var(--line-md) + 2*var(--spacing-xl));
+    min-width: calc(var(--text-md)*var(--line-md) + 2*var(--spacing-xl));
+}
+[data-testid = "bot"] {
+    max-width: 85%;
+    border-bottom-left-radius: 0 !important;
+}
+[data-testid = "user"] {
+    max-width: 85%;
+    width: auto !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+.message p {
+    margin-top: 0.6em !important;
+    margin-bottom: 0.6em !important;
+}
+.message p:first-child { margin-top: 0 !important; }
+.message p:last-of-type { margin-bottom: 0 !important; }
+
+.message .md-message {
+    display: block;
+    padding: 0 !important;
+}
+.message .raw-message {
+    display: block;
+    padding: 0 !important;
+    white-space: pre-wrap;
+}
+.raw-message.hideM, .md-message.hideM {
+    display: none;
+}
+
+/* custom buttons */
+.chuanhu-btn {
+    border-radius: 5px;
+    /* background-color: #E6E6E6 !important; */
+    color: rgba(120, 120, 120, 0.64) !important;
+    padding: 4px !important;
+    position: absolute;
+    right: -22px;
+    cursor: pointer !important;
+    transition: color .2s ease, background-color .2s ease;
+}
+.chuanhu-btn:hover {
+    background-color: rgba(167, 167, 167, 0.25) !important;
+    color: unset !important;
+}
+.chuanhu-btn:active {
+    background-color: rgba(167, 167, 167, 0.5) !important;
+}
+.chuanhu-btn:focus {
+    outline: none;
+}
+.copy-bot-btn {
+    /* top: 18px; */
+    bottom: 0;
+}
+.toggle-md-btn {
+    /* top: 0; */
+    bottom: 20px;
+}
+.copy-code-btn {
+    position: relative;
+    float: right;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+.message-wrap>div img{
+    border-radius: 10px !important;
+}
+
+/* history message */
+.wrap>.history-message {
+    padding: 10px !important;
+}
+.history-message {
+    /* padding: 0 !important; */
+    opacity: 80%;
+    display: flex;
+    flex-direction: column;
+}
+.history-message>.history-message {
+    padding: 0 !important;
+}
+.history-message>.message-wrap {
+    padding: 0 !important;
+    margin-bottom: 16px;
+}
+.history-message>.message {
+    margin-bottom: 16px;
+}
+.wrap>.history-message::after {
+    content: "";
+    display: block;
+    height: 2px;
+    background-color: var(--body-text-color-subdued);
+    margin-bottom: 10px;
+    margin-top: -10px;
+    clear: both;
+}
+.wrap>.history-message>:last-child::after {
+    content: "仅供查看";
+    display: block;
+    text-align: center;
+    color: var(--body-text-color-subdued);
+    font-size: 0.8em;
+}
+
+/* 表格 */
+table {
+    margin: 1em 0;
+    border-collapse: collapse;
+    empty-cells: show;
+}
+td,th {
+    border: 1.2px solid var(--border-color-primary) !important;
+    padding: 0.2em;
+}
+thead {
+    background-color: rgba(175,184,193,0.2);
+}
+thead th {
+    padding: .5em .2em;
+}
+/* 行内代码 */
+.message :not(pre) code {
+    display: inline;
+    white-space: break-spaces;
+    border-radius: 6px;
+    margin: 0 2px 0 2px;
+    padding: .2em .4em .1em .4em;
+    background-color: rgba(175,184,193,0.2);
+}
+/* 代码块 */
+.message pre code {
+    display: block;
+    overflow: auto;
+    white-space: pre;
+    background-color: hsla(0, 0%, 0%, 80%)!important;
+    border-radius: 10px;
+    padding: 1.2em 1em 0em .5em;
+    margin: 0.6em 2em 1em 0.2em;
+    color: #FFF;
+    box-shadow: 6px 6px 16px hsla(0, 0%, 0%, 0.2);
+}
+.message pre {
+    padding: 0 !important;
+}
+.message pre code div.highlight {
+    background-color: unset !important;
+}
+
+button.copy-button {
+    display: none;
+}
+
+/* 代码高亮样式 */
+.highlight .hll { background-color: #49483e !important }
+.highlight .c { color: #75715e !important } /* Comment */
+.highlight .err { color: #960050 !important; background-color: #1e0010 } /* Error */
+.highlight .k { color: #66d9ef  !important} /* Keyword */
+.highlight .l { color: #ae81ff  !important} /* Literal */
+.highlight .n { color: #f8f8f2  !important} /* Name */
+.highlight .o { color: #f92672  !important} /* Operator */
+.highlight .p { color: #f8f8f2  !important} /* Punctuation */
+.highlight .ch { color: #75715e  !important} /* Comment.Hashbang */
+.highlight .cm { color: #75715e  !important} /* Comment.Multiline */
+.highlight .cp { color: #75715e  !important} /* Comment.Preproc */
+.highlight .cpf { color: #75715e  !important} /* Comment.PreprocFile */
+.highlight .c1 { color: #75715e  !important} /* Comment.Single */
+.highlight .cs { color: #75715e  !important} /* Comment.Special */
+.highlight .gd { color: #f92672  !important} /* Generic.Deleted */
+.highlight .ge { font-style: italic  !important} /* Generic.Emph */
+.highlight .gi { color: #a6e22e  !important} /* Generic.Inserted */
+.highlight .gs { font-weight: bold  !important} /* Generic.Strong */
+.highlight .gu { color: #75715e  !important} /* Generic.Subheading */
+.highlight .kc { color: #66d9ef  !important} /* Keyword.Constant */
+.highlight .kd { color: #66d9ef  !important} /* Keyword.Declaration */
+.highlight .kn { color: #f92672  !important} /* Keyword.Namespace */
+.highlight .kp { color: #66d9ef  !important} /* Keyword.Pseudo */
+.highlight .kr { color: #66d9ef  !important} /* Keyword.Reserved */
+.highlight .kt { color: #66d9ef  !important} /* Keyword.Type */
+.highlight .ld { color: #e6db74  !important} /* Literal.Date */
+.highlight .m { color: #ae81ff  !important} /* Literal.Number */
+.highlight .s { color: #e6db74  !important} /* Literal.String */
+.highlight .na { color: #a6e22e  !important} /* Name.Attribute */
+.highlight .nb { color: #f8f8f2  !important} /* Name.Builtin */
+.highlight .nc { color: #a6e22e  !important} /* Name.Class */
+.highlight .no { color: #66d9ef  !important} /* Name.Constant */
+.highlight .nd { color: #a6e22e  !important} /* Name.Decorator */
+.highlight .ni { color: #f8f8f2  !important} /* Name.Entity */
+.highlight .ne { color: #a6e22e  !important} /* Name.Exception */
+.highlight .nf { color: #a6e22e  !important} /* Name.Function */
+.highlight .nl { color: #f8f8f2  !important} /* Name.Label */
+.highlight .nn { color: #f8f8f2  !important} /* Name.Namespace */
+.highlight .nx { color: #a6e22e  !important} /* Name.Other */
+.highlight .py { color: #f8f8f2  !important} /* Name.Property */
+.highlight .nt { color: #f92672  !important} /* Name.Tag */
+.highlight .nv { color: #f8f8f2  !important} /* Name.Variable */
+.highlight .ow { color: #f92672  !important} /* Operator.Word */
+.highlight .w { color: #f8f8f2  !important} /* Text.Whitespace */
+.highlight .mb { color: #ae81ff  !important} /* Literal.Number.Bin */
+.highlight .mf { color: #ae81ff  !important} /* Literal.Number.Float */
+.highlight .mh { color: #ae81ff  !important} /* Literal.Number.Hex */
+.highlight .mi { color: #ae81ff  !important} /* Literal.Number.Integer */
+.highlight .mo { color: #ae81ff  !important} /* Literal.Number.Oct */
+.highlight .sa { color: #e6db74  !important} /* Literal.String.Affix */
+.highlight .sb { color: #e6db74  !important} /* Literal.String.Backtick */
+.highlight .sc { color: #e6db74  !important} /* Literal.String.Char */
+.highlight .dl { color: #e6db74  !important} /* Literal.String.Delimiter */
+.highlight .sd { color: #e6db74  !important} /* Literal.String.Doc */
+.highlight .s2 { color: #e6db74  !important} /* Literal.String.Double */
+.highlight .se { color: #ae81ff  !important} /* Literal.String.Escape */
+.highlight .sh { color: #e6db74  !important} /* Literal.String.Heredoc */
+.highlight .si { color: #e6db74  !important} /* Literal.String.Interpol */
+.highlight .sx { color: #e6db74  !important} /* Literal.String.Other */
+.highlight .sr { color: #e6db74  !important} /* Literal.String.Regex */
+.highlight .s1 { color: #e6db74  !important} /* Literal.String.Single */
+.highlight .ss { color: #e6db74  !important} /* Literal.String.Symbol */
+.highlight .bp { color: #f8f8f2  !important} /* Name.Builtin.Pseudo */
+.highlight .fm { color: #a6e22e  !important} /* Name.Function.Magic */
+.highlight .vc { color: #f8f8f2  !important} /* Name.Variable.Class */
+.highlight .vg { color: #f8f8f2  !important} /* Name.Variable.Global */
+.highlight .vi { color: #f8f8f2  !important} /* Name.Variable.Instance */
+.highlight .vm { color: #f8f8f2  !important} /* Name.Variable.Magic */
+.highlight .il { color: #ae81ff  !important} /* Literal.Number.Integer.Long */
