@@ -15,6 +15,7 @@ import time
 import glob
 import sys
 from concurrent.futures import ThreadPoolExecutor
+import html
 ############################### 插件输入输出接驳区 #######################################
 
 """
@@ -348,7 +349,8 @@ def markdown_convertion(txt):
         # cat them together
         return pre + convert_stage_2_1 + f'{split}' + convert_stage_2_2 + suf
     else:
-        return pre + markdown.markdown(txt, extensions=['fenced_code', 'codehilite', 'tables', 'sane_lists']) + suf
+        context = markdown.markdown(txt, extensions=['fenced_code', 'codehilite', 'tables', 'sane_lists'])
+        return pre + context + suf
 
 
 def close_up_code_segment_during_stream(gpt_reply):
