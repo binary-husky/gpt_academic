@@ -5,7 +5,7 @@ pj = os.path.join
 ARXIV_CACHE_DIR = os.path.expanduser(f"~/arxiv_cache/")
 
 # =================================== 工具函数 ===============================================
-沙雕GPT啊别犯这些低级翻译错误  = 'You must to translate "agent" to "智能体". '
+专业词汇声明  = 'If the term "agent" is used in this section, it should be translated to "智能体". '
 def switch_prompt(pfg, mode):
     """
     Generate prompts and system prompts based on the mode for proofreading or translating.
@@ -25,7 +25,7 @@ def switch_prompt(pfg, mode):
                         f"\n\n{frag}" for frag in pfg.sp_file_contents]
         sys_prompt_array = ["You are a professional academic paper writer." for _ in range(n_split)]
     elif mode == 'translate_zh':
-        inputs_array = [r"Below is a section from an English academic paper, translate it into Chinese." + 沙雕GPT啊别犯这些低级翻译错误 + 
+        inputs_array = [r"Below is a section from an English academic paper, translate it into Chinese. " + 专业词汇声明 + 
                         r"Do not modify any latex command such as \section, \cite, \begin, \item and equations. " + 
                         r"Answer me only with the translated text:" + 
                         f"\n\n{frag}" for frag in pfg.sp_file_contents]
