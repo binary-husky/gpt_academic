@@ -43,6 +43,9 @@ textarea {
     max-height: 75vh !important;
     /* overflow: auto !important; */
     z-index: 2;
+    transform: translateZ(0) !important;
+    backface-visibility: hidden !important;
+    will-change: transform !important;
 }
 #prompt_result{
     height: 60vh !important;

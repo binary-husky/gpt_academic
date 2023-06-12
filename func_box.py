@@ -278,7 +278,7 @@ def diff_list(txt='', percent=0.70, switch: list = None, lst: list = None, sp=15
     dateset_list = []
     for key in sorted_dict:
         # 开始匹配关键字
-        index = key[0].find(txt)
+        index = str(key[0]).lower().find(txt.lower())
         if index != -1:
             # sp=split 用于判断在哪里启动、在哪里断开
             if index - sp > 0:
@@ -485,11 +485,12 @@ def reuse_chat(result, chatbot, history, pro_numb):
         pass
     else:
         if pro_numb:
-            chatbot.append(result)
+            chatbot += result
             history += [pattern_markdown.sub('', _) for i in result for _ in i]
         else:
             chatbot.append(result[-1])
             history += [pattern_markdown.sub('', _) for i in result[-2:] for _ in i]
+        print(chatbot[-1][0])
         i_say = pattern_markdown.sub('', chatbot[-1][0])
         return chatbot, history, i_say, gr.Tabs.update(selected='chatbot'), ''
 
