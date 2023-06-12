@@ -168,8 +168,6 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         stream_response =  response.iter_lines()
         while True:
             try:
-                loading_msg = func_box.spinner_chatbot_loading(chatbot)
-                yield from update_ui(chatbot=loading_msg, history=history)
                 chunk = next(stream_response)
             except StopIteration:
                 # 非OpenAI官方接口的出现这样的报错，OpenAI和API2D不会走这里
