@@ -486,10 +486,10 @@ def reuse_chat(result, chatbot, history, pro_numb):
     else:
         if pro_numb:
             chatbot.append(result)
-            history += [pattern_markdown.sub('', i) for i in result]
+            history += [pattern_markdown.sub('', _) for i in result for _ in i]
         else:
             chatbot.append(result[-1])
-            history += [pattern_markdown.sub('', i) for i in result[-2:]]
+            history += [pattern_markdown.sub('', _) for i in result[-2:] for _ in i]
         i_say = pattern_markdown.sub('', chatbot[-1][0])
         return chatbot, history, i_say, gr.Tabs.update(selected='chatbot'), ''
 
@@ -565,5 +565,6 @@ class JsonHandle:
 
 
 if __name__ == '__main__':
-    loading = [''.join(['.' * random.randint(1, 5)])]
-    print(loading)
+    result = [['214214', '5657'], ['fasfaf', '41241'],['kkkgh', '1`31`3'],]
+    ff = [pattern_markdown.sub('', _) for i in result[-2:] for _ in i]
+    print(ff)
