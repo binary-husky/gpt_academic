@@ -127,7 +127,7 @@ def rm_comments(main_file):
     new_file_remove_comment_lines = []
     for l in main_file.splitlines():
         # 删除整行的空注释
-        if l.startswith("%") or (l.startswith(" ") and l.lstrip().startswith("%")):
+        if l.lstrip().startswith("%"):
             pass
         else:
             new_file_remove_comment_lines.append(l)
