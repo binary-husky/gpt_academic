@@ -12,6 +12,7 @@
 """
 
 import json
+import random
 import time
 import gradio as gr
 import logging
@@ -137,8 +138,8 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     raw_input = inputs
     logging.info(f'[raw_input]_{llm_kwargs["ipaddr"]} {raw_input}')
     chatbot.append((inputs, ""))
-    yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
-
+    loading_msg = func_box.spinner_chatbot_loading(chatbot)
+    yield from update_ui(chatbot=loading_msg, history=history, msg="等待响应") # 刷新界面
     try:
         headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt, stream)
     except RuntimeError as e:
@@ -162,12 +163,13 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             if retry > MAX_RETRY: raise TimeoutError
 
     gpt_replying_buffer = ""
-
     is_head_of_the_stream = True
     if stream:
         stream_response =  response.iter_lines()
         while True:
             try:
+                loading_msg = func_box.spinner_chatbot_loading(chatbot)
+                yield from update_ui(chatbot=loading_msg, history=history)
                 chunk = next(stream_response)
             except StopIteration:
                 # 非OpenAI官方接口的出现这样的报错，OpenAI和API2D不会走这里
