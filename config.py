@@ -56,11 +56,15 @@ MAX_RETRY = 2
 
 # 模型选择是 (注意: LLM_MODEL是默认选中的模型, 同时它必须被包含在AVAIL_LLM_MODELS切换列表中 )
 LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
-AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "newbing-free", "stack-claude"]
+AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", 'proxy-gpt-4', "api2d-gpt-4", "chatglm", "moss", "newbing", "newbing-free", "stack-claude"]
 # P.S. 其他可用的模型还包括 ["newbing-free", "jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
 
 # 本地LLM模型如ChatGLM的执行方式 CPU/GPU
 LOCAL_MODEL_DEVICE = "cpu" # 可选 "cuda"
+
+# OpenAI的API_URL
+API_URL = "https://api.openai.com/v1/chat/completions"
+PROXY_API_URL = '' # 你的网关应用
 
 # 设置gradio的并行线程数（不需要修改）
 CONCURRENT_COUNT = 100
