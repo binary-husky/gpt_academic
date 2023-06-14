@@ -5,7 +5,7 @@ pj = os.path.join
 ARXIV_CACHE_DIR = os.path.expanduser(f"~/arxiv_cache/")
 
 # =================================== 工具函数 ===============================================
-沙雕GPT啊别犯这些低级翻译错误  = 'You must to translate "agent" to "智能体". '
+专业词汇声明  = 'If the term "agent" is used in this section, it should be translated to "智能体". '
 def switch_prompt(pfg, mode):
     """
     Generate prompts and system prompts based on the mode for proofreading or translating.
@@ -25,7 +25,7 @@ def switch_prompt(pfg, mode):
                         f"\n\n{frag}" for frag in pfg.sp_file_contents]
         sys_prompt_array = ["You are a professional academic paper writer." for _ in range(n_split)]
     elif mode == 'translate_zh':
-        inputs_array = [r"Below is a section from an English academic paper, translate it into Chinese." + 沙雕GPT啊别犯这些低级翻译错误 + 
+        inputs_array = [r"Below is a section from an English academic paper, translate it into Chinese. " + 专业词汇声明 + 
                         r"Do not modify any latex command such as \section, \cite, \begin, \item and equations. " + 
                         r"Answer me only with the translated text:" + 
                         f"\n\n{frag}" for frag in pfg.sp_file_contents]
@@ -65,8 +65,10 @@ def move_project(project_folder, arxiv_id=None):
         new_workfolder = pj(ARXIV_CACHE_DIR, arxiv_id, 'workfolder')
     else:
         new_workfolder = f'gpt_log/{gen_time_str()}'
-    try: shutil.rmtree(new_workfolder)
-    except: pass
+    try:
+        shutil.rmtree(new_workfolder)
+    except:
+        pass
     shutil.copytree(src=project_folder, dst=new_workfolder)
     return new_workfolder
 
@@ -80,7 +82,14 @@ def arxiv_download(chatbot, history, txt):
             promote_file_to_downloadzone(target_file)
             return target_file
         return False
-    
+    def is_float(s):
+        try:
+            float(s)
+            return True
+        except ValueError:
+            return False
+    if ('.' in txt) and ('/' not in txt) and is_float(txt):
+        txt = 'https://arxiv.org/abs/' + txt
     if not txt.startswith('https://arxiv.org'): 
         return txt, None
     
@@ -132,12 +141,12 @@ def Latex英文纠错加PDF对比(txt, llm_kwargs, plugin_kwargs, chatbot, histo
 
     # <-------------- check deps ------------->
     try:
-        import glob, os, time
-        os.system(f'pdflatex -version')
-        from .latex_utils import Latex精细分解与转化, 编译Latex差别
+        import glob, os, time, subprocess
+        subprocess.Popen(['pdflatex', '-version'])
+        from .latex_utils import Latex精细分解与转化, 编译Latex
     except Exception as e:
         chatbot.append([ f"解析项目: {txt}",
-            f"尝试执行Latex指令失败。Latex没有安装, 或者不在环境变量PATH中。报错信息\n\n```\n\n{trimmed_format_exc()}\n\n```\n\n"])
+            f"尝试执行Latex指令失败。Latex没有安装, 或者不在环境变量PATH中。安装方法https://tug.org/texlive/。报错信息\n\n```\n\n{trimmed_format_exc()}\n\n```\n\n"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
     
@@ -172,7 +181,7 @@ def Latex英文纠错加PDF对比(txt, llm_kwargs, plugin_kwargs, chatbot, histo
 
 
     # <-------------- compile PDF ------------->
-    success = yield from 编译Latex差别(chatbot, history, main_file_original='merge', main_file_modified='merge_proofread', 
+    success = yield from 编译Latex(chatbot, history, main_file_original='merge', main_file_modified='merge_proofread', 
                              work_folder_original=project_folder, work_folder_modified=project_folder, work_folder=project_folder)
     
 
@@ -196,18 +205,18 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
     # <-------------- information about this plugin ------------->
     chatbot.append([
         "函数插件功能？",
-        "对整个Latex项目进行翻译, 生成中文PDF。函数插件贡献者: Binary-Husky。注意事项: 目前仅支持GPT3.5/GPT4，其他模型转化效果未知。目前对机器学习类文献转化效果最好，其他类型文献转化效果未知。仅在Windows系统进行了测试，其他操作系统表现未知。"])
+        "对整个Latex项目进行翻译, 生成中文PDF。函数插件贡献者: Binary-Husky。注意事项: 目前仅支持GPT3.5/GPT4，其他模型转化效果未知。目前对机器学习类文献转化效果最好，其他类型文献转化效果未知。"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
 
     # <-------------- check deps ------------->
     try:
-        import glob, os, time
-        os.system(f'pdflatex -version')
-        from .latex_utils import Latex精细分解与转化, 编译Latex差别
+        import glob, os, time, subprocess
+        subprocess.Popen(['pdflatex', '-version'])
+        from .latex_utils import Latex精细分解与转化, 编译Latex
     except Exception as e:
         chatbot.append([ f"解析项目: {txt}",
-            f"尝试执行Latex指令失败。Latex没有安装, 或者不在环境变量PATH中。报错信息\n\n```\n\n{trimmed_format_exc()}\n\n```\n\n"])
+            f"尝试执行Latex指令失败。Latex没有安装, 或者不在环境变量PATH中。安装方法https://tug.org/texlive/。报错信息\n\n```\n\n{trimmed_format_exc()}\n\n```\n\n"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
     
@@ -219,6 +228,8 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"发现已经存在翻译好的PDF文档")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
+    
+
     if os.path.exists(txt):
         project_folder = txt
     else:
@@ -226,6 +237,7 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
+    
     file_manifest = [f for f in glob.glob(f'{project_folder}/**/*.tex', recursive=True)]
     if len(file_manifest) == 0:
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何.tex文件: {txt}")
@@ -247,7 +259,7 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
 
 
     # <-------------- compile PDF ------------->
-    success = yield from 编译Latex差别(chatbot, history, main_file_original='merge', main_file_modified='merge_translate_zh', 
+    success = yield from 编译Latex(chatbot, history, main_file_original='merge', main_file_modified='merge_translate_zh', 
                              work_folder_original=project_folder, work_folder_modified=project_folder, work_folder=project_folder)
 
     # <-------------- zip PDF ------------->
@@ -258,6 +270,7 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
     else:
         chatbot.append((f"失败了", '虽然PDF生成失败了, 但请查收结果（压缩包）, 内含已经翻译的Tex文档, 也是可读的, 您可以到Github Issue区, 用该压缩包+对话历史存档进行反馈 ...'))
         yield from update_ui(chatbot=chatbot, history=history); time.sleep(1) # 刷新界面
+
 
     # <-------------- we are done ------------->
     return success

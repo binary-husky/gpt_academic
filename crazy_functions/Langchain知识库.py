@@ -75,9 +75,18 @@ def 知识库问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
 
 @CatchException
 def 读取知识库作答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port=-1):
+    # resolve deps
+    try:
+        from zh_langchain import construct_vector_store
+        from langchain.embeddings.huggingface import HuggingFaceEmbeddings
+        from .crazy_utils import knowledge_archive_interface
+    except Exception as e:
+        chatbot.append(["依赖不足", "导入依赖失败。正在尝试自动安装，请查看终端的输出或耐心等待..."])
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+        from .crazy_utils import try_install_deps
+        try_install_deps(['zh_langchain==0.2.0'])
 
     # < -------------------  --------------- >
-    from .crazy_utils import knowledge_archive_interface
     kai = knowledge_archive_interface()
 
     if 'langchain_plugin_embedding' in chatbot._cookies:

@@ -1,0 +1,27 @@
+# 此Dockerfile适用于“无本地模型”的环境构建，如果需要使用chatglm等本地模型，请参考 docs/Dockerfile+ChatGLM
+# - 1 修改 `config.py`
+# - 2 构建 docker build -t gpt-academic-nolocal-latex -f docs/Dockerfile+NoLocal+Latex .
+# - 3 运行 docker run -v /home/fuqingxu/arxiv_cache:/root/arxiv_cache --rm -it --net=host gpt-academic-nolocal-latex
+
+FROM fuqingxu/python311_texlive_ctex:latest
+
+# 指定路径
+WORKDIR /gpt
+
+ARG useProxyNetwork=''
+
+RUN $useProxyNetwork pip3 install gradio openai numpy arxiv rich -i https://pypi.douban.com/simple/
+RUN $useProxyNetwork pip3 install colorama Markdown pygments pymupdf -i https://pypi.douban.com/simple/
+
+# 装载项目文件
+COPY . .
+
+
+# 安装依赖
+RUN $useProxyNetwork pip3 install -r requirements.txt -i https://pypi.douban.com/simple/
+
+# 可选步骤，用于预热模块
+RUN python3  -c 'from check_proxy import warm_up_modules; warm_up_modules()'
+
+# 启动
+CMD ["python3", "-u", "main.py"]

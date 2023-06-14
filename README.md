@@ -193,10 +193,11 @@ chat分析报告生成 | [函数插件] 运行后自动生成总结汇报
 [Arxiv小助手](https://www.bilibili.com/video/BV1LM4y1279X) | [函数插件] 输入arxiv文章url即可一键翻译摘要+下载PDF
 [谷歌学术统合小助手](https://www.bilibili.com/video/BV19L411U7ia) | [函数插件] 给定任意谷歌学术搜索页面URL，让gpt帮你[写relatedworks](https://www.bilibili.com/video/BV1GP411U7Az/)
 互联网信息聚合+GPT | [函数插件] 一键[让GPT先从互联网获取信息](https://www.bilibili.com/video/BV1om4y127ck)，再回答问题，让信息永不过时
+⭐Arxiv论文精细翻译 | [函数插件] 一键[以超高质量翻译arxiv论文](https://www.bilibili.com/video/BV1dz4y1v77A/)，迄今为止最好的论文翻译工具⭐
 公式/图片/表格显示 | 可以同时显示公式的[tex形式和渲染形式](https://user-images.githubusercontent.com/96192199/230598842-1d7fcddd-815d-40ee-af60-baf488a199df.png)，支持公式、代码高亮
 多线程函数插件支持 | 支持多线调用chatgpt，一键处理[海量文本](https://www.bilibili.com/video/BV1FT411H7c5/)或程序
 启动暗色gradio[主题](https://github.com/binary-husky/chatgpt_academic/issues/173) | 在浏览器url后面添加```/?__theme=dark```可以切换dark主题
-[多LLM模型](https://www.bilibili.com/video/BV1wT411p7yf)支持，[API2D](https://api2d.com/)接口支持 | 同时被GPT3.5、GPT4、[清华ChatGLM](https://github.com/THUDM/ChatGLM-6B)、[复旦MOSS](https://github.com/OpenLMLab/MOSS)同时伺候的感觉一定会很不错吧？
+[多LLM模型](https://www.bilibili.com/video/BV1wT411p7yf)支持 | 同时被GPT3.5、GPT4、[清华ChatGLM](https://github.com/THUDM/ChatGLM-6B)、[复旦MOSS](https://github.com/OpenLMLab/MOSS)同时伺候的感觉一定会很不错吧？
 更多LLM模型接入，支持[huggingface部署](https://huggingface.co/spaces/qingxu98/gpt-academic) | 加入Newbing接口(新必应)，引入清华[Jittorllms](https://github.com/Jittor/JittorLLMs)支持[LLaMA](https://github.com/facebookresearch/llama)，[RWKV](https://github.com/BlinkDL/ChatRWKV)和[盘古α](https://openi.org.cn/pangu/)
 更多新功能展示(图像生成等) …… | 见本文档结尾处 ……
 
@@ -377,38 +378,33 @@ docker-compose up
 
 1. 对话保存功能。在函数插件区调用 `保存当前的对话` 即可将当前对话保存为可读+可复原的html文件，
 另外在函数插件区（下拉菜单）调用 `载入对话历史存档` ，即可还原之前的会话。
-Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史html存档缓存，点击 `删除所有本地对话历史记录` 可以删除所有html存档缓存。
+Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史html存档缓存。
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/235222390-24a9acc0-680f-49f5-bc81-2f3161f1e049.png" width="500" >
 </div>
 
-
-
-2. 生成报告。大部分插件都会在执行结束后，生成工作报告
+2. ⭐Latex/Arxiv论文翻译功能⭐
 <div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/227503770-fe29ce2c-53fd-47b0-b0ff-93805f0c2ff4.png" height="300" >
-<img src="https://user-images.githubusercontent.com/96192199/227504617-7a497bb3-0a2a-4b50-9a8a-95ae60ea7afd.png" height="300" >
-<img src="https://user-images.githubusercontent.com/96192199/227504005-efeaefe0-b687-49d0-bf95-2d7b7e66c348.png" height="300" >
+<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/002a1a75-ace0-4e6a-94e2-ec1406a746f1" height="250" > ===>
+<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/9fdcc391-f823-464f-9322-f8719677043b" height="250" >
 </div>
 
-3. 模块化功能设计，简单的接口却能支持强大的功能
+3. 生成报告。大部分插件都会在执行结束后，生成工作报告
+<div align="center">
+<img src="https://user-images.githubusercontent.com/96192199/227503770-fe29ce2c-53fd-47b0-b0ff-93805f0c2ff4.png" height="250" >
+<img src="https://user-images.githubusercontent.com/96192199/227504617-7a497bb3-0a2a-4b50-9a8a-95ae60ea7afd.png" height="250" >
+</div>
+
+4. 模块化功能设计，简单的接口却能支持强大的功能
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/229288270-093643c1-0018-487a-81e6-1d7809b6e90f.png" height="400" >
 <img src="https://user-images.githubusercontent.com/96192199/227504931-19955f78-45cd-4d1c-adac-e71e50957915.png" height="400" >
 </div>
 
-4. 这是一个能够“自我译解”的开源项目
+5. 译解其他开源项目
 <div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/226936850-c77d7183-0749-4c1c-9875-fd4891842d0c.png" width="500" >
-</div>
-
-5. 译解其他开源项目，不在话下
-<div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/226935232-6b6a73ce-8900-4aee-93f9-733c7e6fef53.png" width="500" >
-</div>
-
-<div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/226969067-968a27c1-1b9c-486b-8b81-ab2de8d3f88a.png" width="500" >
+<img src="https://user-images.githubusercontent.com/96192199/226935232-6b6a73ce-8900-4aee-93f9-733c7e6fef53.png" height="250" >
+<img src="https://user-images.githubusercontent.com/96192199/226969067-968a27c1-1b9c-486b-8b81-ab2de8d3f88a.png" height="250" >
 </div>
 
 6. 装饰[live2d](https://github.com/fghrsh/live2d_demo)的小功能（默认关闭，需要修改`config.py`）
@@ -433,13 +429,15 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 
 10. Latex全文校对纠错
 <div align="center">
-<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/651ccd98-02c9-4464-91e1-77a6b7d1b033" width="500" >
+<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/651ccd98-02c9-4464-91e1-77a6b7d1b033" height="200" > ===>
+<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/476f66d9-7716-4537-b5c1-735372c25adb" height="200">
 </div>
+
 
 
 ## 版本:
 - version 3.5(Todo): 使用自然语言调用本项目的所有函数插件（高优先级）
-- version 3.4(Todo): 完善chatglm本地大模型的多线支持
+- version 3.4: +arxiv论文翻译、latex论文批改功能
 - version 3.3: +互联网信息综合功能
 - version 3.2: 函数插件支持更多参数接口 (保存对话功能, 解读任意语言代码+同时询问任意的LLM组合)
 - version 3.1: 支持同时问询多个gpt模型！支持api2d，支持多个apikey负载均衡
@@ -457,31 +455,33 @@ gpt_academic开发者QQ群-2：610599535
 
 - 已知问题
     - 某些浏览器翻译插件干扰此软件前端的运行
-    - 官方Gradio目前有很多兼容性Bug，请务必使用requirement.txt安装Gradio
+    - 官方Gradio目前有很多兼容性Bug，请务必使用`requirement.txt`安装Gradio
 
 ## 参考与学习
 
 ```
-代码中参考了很多其他优秀项目中的设计，主要包括：
+代码中参考了很多其他优秀项目中的设计，顺序不分先后：
 
-# 项目1：清华ChatGLM-6B:
+# 清华ChatGLM-6B:
 https://github.com/THUDM/ChatGLM-6B
 
-# 项目2：清华JittorLLMs:
+# 清华JittorLLMs:
 https://github.com/Jittor/JittorLLMs
 
-# 项目3：Edge-GPT:
-https://github.com/acheong08/EdgeGPT
-
-# 项目4：ChuanhuChatGPT:
-https://github.com/GaiZhenbiao/ChuanhuChatGPT
-
-# 项目5：ChatPaper:
+# ChatPaper:
 https://github.com/kaixindelele/ChatPaper
 
-# 更多：
+# Edge-GPT:
+https://github.com/acheong08/EdgeGPT
+
+# ChuanhuChatGPT:
+https://github.com/GaiZhenbiao/ChuanhuChatGPT
+
+# Oobabooga one-click installer:
+https://github.com/oobabooga/one-click-installers
+
+# More：
 https://github.com/gradio-app/gradio
 https://github.com/fghrsh/live2d_demo
-https://github.com/oobabooga/one-click-installers
 ```
 >>>>>>> wps_i18n
