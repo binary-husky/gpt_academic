@@ -21,7 +21,7 @@ crazy_fns = get_crazy_functions()
 gr.Chatbot.postprocess = format_io
 
 # 做一些外观色彩上的调整
-from theme import adjust_theme, advanced_css, small_and_beautiful_theme
+from theme import adjust_theme, advanced_css, custom_css, small_and_beautiful_theme
 
 set_theme = adjust_theme()
 
@@ -358,9 +358,8 @@ class ChatBot(ChatBotFrame):
 
 
     def main(self):
-        with open("docs/assets/custom.css", "r", encoding="utf-8") as f:
-            customCSS = f.read()
-        with gr.Blocks(title="Chatbot for KSO ", theme=set_theme, analytics_enabled=False, css=customCSS) as demo:
+
+        with gr.Blocks(title="Chatbot for KSO ", theme=set_theme, analytics_enabled=False, css=custom_css) as demo:
             # 绘制页面title
             self.draw_title()
             # 绘制一个ROW，row会让底下的元素自动排成一行
