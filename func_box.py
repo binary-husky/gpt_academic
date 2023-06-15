@@ -292,10 +292,12 @@ def diff_list(txt='', percent=0.70, switch: list = None, lst: list = None, sp=15
             # 判断有没有传需要匹配的字符串，有则筛选、无则全返
             if txt == '' and len(key[0]) >= sp:
                 show = key[0][0:sp] + " . . . " + end
+                show = show.replace('<', '')
             elif txt == '' and len(key[0]) < sp:
                 show = key[0][0:sp]
+                show = show.replace('<', '')
             else:
-                show = str(key[0][start:index + sp]).replace(txt, html_tag_color(txt))
+                show = str(key[0][start:index + sp]).replace('<', '').replace(txt, html_tag_color(txt))
             show += f"  {html_tag_color(' X ' + str(key[1]))}"
             if lst.get(key[0]):
                 be_value = lst[key[0]]
