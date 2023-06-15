@@ -8,6 +8,7 @@
     --message-bot-background-color-light: #FFFFFF;
     --message-bot-background-color-dark: #2C2C2C;
 }
+
 #debug_mes {
     position: absolute;
     bottom: 0;
@@ -134,6 +135,10 @@ footer {
 }
 #main_chatbot {
     transition: height 0.3s ease;
+}
+
+span.svelte-1gfkn6j {
+    background: unset !important;
 }
 
 .wrap.svelte-18telvq.svelte-18telvq {
