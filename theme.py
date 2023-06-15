@@ -135,6 +135,9 @@ def adjust_theme():
     return set_theme
 
 
+with open("docs/assets/custom.css", "r", encoding="utf-8") as f:
+    customCSS = f.read()
+custom_css = customCSS
 advanced_css = """
 #debug_mes {
     position: absolute;
