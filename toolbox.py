@@ -232,8 +232,7 @@ def write_results_to_file(history, file_name=None):
                 # remove everything that cannot be handled by utf8
                 f.write(content.encode('utf-8', 'ignore').decode())
             f.write('\n\n')
-    res = '以上材料已经被写入' + os.path.abspath(f'./gpt_log/{file_name}')
-    print(res)
+    res = '以上材料已经被写入' + f'./gpt_log/{file_name}'
     return res
 
 
@@ -257,6 +256,8 @@ def report_execption(chatbot, history, a, b):
     history.append(a)
     history.append(b)
 
+
+import re
 
 def text_divide_paragraph(input_str):
     if input_str:
@@ -283,11 +284,12 @@ def text_divide_paragraph(input_str):
         else:
             # 对于没有反引号的字符串，针对四个空格之前的换行符进行处理
             lines = input_str.split('\n')
-            for idx, line in enumerate(lines[:-1]):
-                if not line.strip():
-                    continue
-                if not (lines[idx + 1].startswith('    ') or lines[idx + 1].startswith('\t')):
-                    pass
+            if not any(line.startswith('    ') for line in lines):
+                for idx, line in enumerate(lines[:-1]):
+                    if not line.strip():
+                        continue
+                    if not (lines[idx + 1].startswith('    ') or lines[idx + 1].startswith('\t')):
+                        lines[idx] += '\n'  # 将一个换行符替换为两个换行符
             input_str = '\n'.join(lines)
     return input_str
 
@@ -539,9 +541,10 @@ def get_user_download(chatbot, link, file):
                 for f in files:
                     temp_ = os.path.abspath(os.path.join(root, f))
                     dir_file, file_name = ('/'.join(str(file_handle).split('/')[-2:]), os.path.basename(temp_))
+                    link_href = f'{link["local"]} / file = {temp_}'
                     chatbot.append(['Convert the file address to a download link at：',
                                     f'[Local Message] Successful conversion\n\n '
-                                    f'<a href="{link["local"]}/file={temp_}" target="_blank" download="{dir_file}" class="svelte-xrr240">{file_name}</a>'])
+                                    f'{func_box.html_a_blank(__href=link_href, dir_name=dir_file, file_name=file_name)}'])
         elif file_handle == '':
             pass
     return chatbot, ''
