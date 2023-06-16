@@ -61,7 +61,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
     """
     import time
     from concurrent.futures import ThreadPoolExecutor
-    from request_llm.bridge_all import predict_no_ui_long_connection
+    from request_llm.bridge_all import predict_no_ui_long_connection, model_info
     # 用户反馈
     chatbot.append([inputs_show_user, ""])
     yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
@@ -81,16 +81,25 @@ def request_gpt_model_in_new_thread_with_ui_alive(
                     history=history, sys_prompt=sys_prompt, observe_window=mutable)
                 return result
             except ConnectionAbortedError as token_exceeded_error:
+                model = llm_kwargs.get('llm_model', None)
                 # 【第二种情况】：Token溢出
-                if handle_token_exceed:
+                if handle_token_exceed and model == 'gpt-3.5-turbo':
+                    # 【选择处理】，且使用4k 3.5模型，尝试更换为16k 3.5模型
+                    llm_kwargs['llm_model'] = 'gpt-3.5-turbo-16k'
+                    from toolbox import get_reduce_token_percent
+                    p_ratio, n_exceed = get_reduce_token_percent(str(token_exceeded_error))
+                    MAX_TOKEN = model_info[model]['max_token']
+                    mutable[0] += f'[Local Message] 警告，当前模型：{model}，最大长度为：{MAX_TOKEN}，文本过长，Token溢出数：{n_exceed}，使用gpt-3.5-turbo-16k重试。\n\n'
+                    continue
+                elif handle_token_exceed:
                     exceeded_cnt += 1
                     # 【选择处理】 尝试计算比例，尽可能多地保留文本
                     from toolbox import get_reduce_token_percent
                     p_ratio, n_exceed = get_reduce_token_percent(str(token_exceeded_error))
-                    MAX_TOKEN = 4096
+                    MAX_TOKEN = model_info[model]['max_token']
                     EXCEED_ALLO = 512 + 512 * exceeded_cnt
                     inputs, history = input_clipping(inputs, history, max_token_limit=MAX_TOKEN-EXCEED_ALLO)
-                    mutable[0] += f'[Local Message] 警告，文本过长将进行截断，Token溢出数：{n_exceed}。\n\n'
+                    mutable[0] += f'[Local Message] 警告，当前模型：{model}，最大长度为：{MAX_TOKEN}，文本过长将进行截断，Token溢出数：{n_exceed}。\n\n'
                     continue # 返回重试
                 else:
                     # 【选择放弃】
@@ -167,7 +176,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     """
     import time, random
     from concurrent.futures import ThreadPoolExecutor
-    from request_llm.bridge_all import predict_no_ui_long_connection
+    from request_llm.bridge_all import predict_no_ui_long_connection, model_info
     assert len(inputs_array) == len(history_array)
     assert len(inputs_array) == len(sys_prompt_array)
     if max_workers == -1: # 读取配置文件
@@ -206,17 +215,25 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                 mutable[index][2] = "已成功"
                 return gpt_say
             except ConnectionAbortedError as token_exceeded_error:
-                # 【第二种情况】：Token溢出，
-                if handle_token_exceed:
+                model = llm_kwargs.get('llm_model', None)
+                # 【第二种情况】：Token溢出
+                if handle_token_exceed and model == 'gpt-3.5-turbo':
+                    # 【选择处理】，且使用4k 3.5模型，尝试更换为16k 3.5模型
+                    llm_kwargs['llm_model'] = 'gpt-3.5-turbo-16k'
+                    from toolbox import get_reduce_token_percent
+                    p_ratio, n_exceed = get_reduce_token_percent(str(token_exceeded_error))
+                    MAX_TOKEN = model_info[model]['max_token']
+                    mutable[0] += f'[Local Message] 警告，当前模型：{model}，最大长度为：{MAX_TOKEN}，文本过长，Token溢出数：{n_exceed}，使用gpt-3.5-turbo-16k重试。\n\n'
+                    continue
+                elif handle_token_exceed:
                     exceeded_cnt += 1
                     # 【选择处理】 尝试计算比例，尽可能多地保留文本
                     from toolbox import get_reduce_token_percent
                     p_ratio, n_exceed = get_reduce_token_percent(str(token_exceeded_error))
-                    MAX_TOKEN = 4096
+                    MAX_TOKEN = model_info[model]['max_token']
                     EXCEED_ALLO = 512 + 512 * exceeded_cnt
                     inputs, history = input_clipping(inputs, history, max_token_limit=MAX_TOKEN-EXCEED_ALLO)
-                    gpt_say += f'[Local Message] 警告，文本过长将进行截断，Token溢出数：{n_exceed}。\n\n'
-                    mutable[index][2] = f"截断重试"
+                    mutable[0] += f'[Local Message] 警告，当前模型：{model}，最大长度为：{MAX_TOKEN}，文本过长将进行截断，Token溢出数：{n_exceed}。\n\n'
                     continue # 返回重试
                 else:
                     # 【选择放弃】
