@@ -22,6 +22,7 @@ def Kdocs_轻文档批量操作(link, llm_kwargs, plugin_kwargs, chatbot, histor
                              f'\n\n【金山文档】 xxxx https://kdocs.cn/l/xxxxxxxxxx'
                              f'\n\n https://kdocs.cn/l/xxxxxxxxxx'))
         yield from update_ui(chatbot, history)
+        return
     docs_file_content = []
     temp_num = 0
     for url in links:
@@ -36,7 +37,6 @@ def Kdocs_轻文档批量操作(link, llm_kwargs, plugin_kwargs, chatbot, histor
             chatbot.append([f'啊哦，爬虫歇菜了！ {url}', f'{func_box.html_a_blank(url)} 请检查一下哦，这个链接我们访问不了，是否开启分享？是否设置密码？'])
             yield from update_ui(chatbot, history)
     yield from Kdocs轻文档转Markdown(docs_file_content, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
-
 
 
 def Kdocs轻文档转Markdown(file_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):

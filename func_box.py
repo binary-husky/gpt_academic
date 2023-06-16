@@ -410,7 +410,7 @@ def prompt_save(txt, name, prompt: gr.Dataset, ipaddr: gr.Request):
         return txt, name, [], prompt.update(samples=result, visible=True), prompt
 
 
-def prompt_input(txt, index, data: gr.Dataset):
+def prompt_input(txt: str, index, data: gr.Dataset, tabs_index):
     """
     点击dataset的值使用Prompt
     Args:
@@ -421,11 +421,18 @@ def prompt_input(txt, index, data: gr.Dataset):
         返回注册函数所需的对象
     """
     data_str = str(data.samples[index][1])
-    if txt:
-        txt = data_str + '\n' + txt
+    data_name = str(data.samples[index][0])
+    rp_str = '"""{v}"""'
+    if data_str.find(rp_str) != -1:
+        new_txt = data_str.replace(rp_str, txt)
+    elif txt and tabs_index == 0:
+        new_txt = data_str + '\n' + txt
     else:
-        txt = data_str
-    return txt
+        new_txt = data_str
+    if tabs_index == 1:
+        return txt, new_txt, data_name
+    else:
+        return new_txt, '', ''
 
 
 def copy_result(history):
@@ -491,7 +498,7 @@ prompt_path = os.path.join(base_path, 'prompt_users')
 def reuse_chat(result, chatbot, history, pro_numb):
     """复用对话记录"""
     if result is None or result == []:
-        pass
+        return chatbot, history, gr.update(), gr.update(), ''
     else:
         if pro_numb:
             chatbot += result

@@ -177,12 +177,15 @@ class ChatBot(ChatBotFrame):
         self.pro_private_check.select(fn=func_box.prompt_reduce,
                                       inputs=[self.pro_private_check, self.pro_fp_state],
                                       outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check])
+        self.tabs_code = gr.State(0)
         self.pro_func_prompt.select(fn=func_box.prompt_input,
-                                    inputs=[self.txt, self.pro_func_prompt, self.pro_fp_state],
-                                    outputs=[self.txt])
+                                    inputs=[self.txt, self.pro_func_prompt, self.pro_fp_state, self.tabs_code],
+                                    outputs=[self.txt, self.pro_edit_txt, self.pro_name_txt])
         self.pro_upload_btn.upload(fn=func_box.prompt_upload_refresh,
                                    inputs=[self.pro_upload_btn, self.pro_prompt_state],
                                    outputs=[self.pro_func_prompt, self.pro_prompt_state, self.pro_private_check])
+        self.chat_tab.select(fn=lambda: 0, inputs=None, outputs=self.tabs_code)
+        self.prompt_tab.select(fn=lambda: 1, inputs=None, outputs=self.tabs_code)
 
     def draw_public_chat(self):
         with gr.Tab('Plugins'):
@@ -363,7 +366,7 @@ class ChatBot(ChatBotFrame):
 
     def main(self):
 
-        with gr.Blocks(title="Chatbot for KSO ", theme=set_theme, analytics_enabled=False, css=custom_css) as demo:
+        with gr.Blocks(title="Chatbot for KSO ", theme=set_theme, analytics_enabled=False, css=custom_css) as self.demo:
             # 绘制页面title
             self.draw_title()
             # 绘制一个ROW，row会让底下的元素自动排成一行
@@ -390,7 +393,6 @@ class ChatBot(ChatBotFrame):
                         with gr.TabItem('Prompt检索/编辑') as self.prompt_tab:
                             self.draw_prompt()
 
-
                 with self.chat_tab:  # 使用 gr.State()对组件进行拷贝时，如果之前绘制了Markdown格式，会导致启动崩溃,所以将 markdown相关绘制放在最后
                     self.draw_chatbot()
                 with self.prompt_tab:
@@ -405,7 +407,8 @@ class ChatBot(ChatBotFrame):
 
         # Start
         self.auto_opentab_delay()
-        demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION,
+        self.demo.queue_enabled_for_fn()
+        self.demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION,
         blocked_paths=["config.py", "config_private.py", "docker-compose.yml", "Dockerfile"])
 
 

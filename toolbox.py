@@ -259,18 +259,15 @@ def report_execption(chatbot, history, a, b):
 
 import re
 
+
 def text_divide_paragraph(input_str):
     if input_str:
-        # 提取所有的代码块
         code_blocks = re.findall(r'```[\s\S]*?```', input_str)
 
-        # 将提取到的代码块用占位符替换
         for i, block in enumerate(code_blocks):
             input_str = input_str.replace(block, f'{{{{CODE_BLOCK_{i}}}}}')
 
-        # 判断输入文本是否有反引号
         if code_blocks:
-            # 将非代码块部分的单个换行符替换为双换行符，并处理四个空格的行
             sections = re.split(r'({{{{\w+}}}})', input_str)
             for idx, section in enumerate(sections):
                 if 'CODE_BLOCK' in section or section.startswith('    '):
@@ -278,19 +275,17 @@ def text_divide_paragraph(input_str):
                 sections[idx] = re.sub(r'(?!```)(?<!\n)\n(?!(\n|^)( {0,3}[\*\+\-]|[0-9]+\.))', '\n\n', section)
             input_str = ''.join(sections)
 
-            # 将占位符替换回原代码块
             for i, block in enumerate(code_blocks):
                 input_str = input_str.replace(f'{{{{CODE_BLOCK_{i}}}}}', block.replace('\n', '\n'))
         else:
-            # 对于没有反引号的字符串，针对四个空格之前的换行符进行处理
             lines = input_str.split('\n')
-            if not any(line.startswith('    ') for line in lines):
-                for idx, line in enumerate(lines[:-1]):
-                    if not line.strip():
-                        continue
-                    if not (lines[idx + 1].startswith('    ') or lines[idx + 1].startswith('\t')):
-                        lines[idx] += '\n'  # 将一个换行符替换为两个换行符
+            for idx, line in enumerate(lines[:-1]):
+                if not line.strip():
+                    continue
+                if not (lines[idx + 1].startswith('    ') or lines[idx + 1].startswith('\t')):
+                    lines[idx] += '\n'  # 将一个换行符替换为两个换行符
             input_str = '\n'.join(lines)
+
     return input_str
 
 

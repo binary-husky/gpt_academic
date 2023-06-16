@@ -51,10 +51,9 @@ def get_crazy_functions():
             "AsButton": True,
             "Function": HotReload(Kdocs_轻文档批量操作),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "is_show 显示",  # 高级参数输入区的显示提示
+            "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
             "Parameters": {
-                "Color": "stop",
-                "AsButton": True,
+                "is_show": False,
             }
         },
 
