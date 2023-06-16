@@ -51,8 +51,11 @@ def get_crazy_functions():
             "AsButton": True,
             "Function": HotReload(Kdocs_轻文档批量操作),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "若输入0，则不解析notebook中的Markdown块",  # 高级参数输入区的显示提示
-            "ArgsParameters": ''
+            "ArgsReminder": "is_show 显示",  # 高级参数输入区的显示提示
+            "Parameters": {
+                "Color": "stop",
+                "AsButton": True,
+            }
         },
 
         "删除所有本地对话历史记录（请谨慎操作）": {

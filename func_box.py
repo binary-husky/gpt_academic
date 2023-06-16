@@ -512,6 +512,7 @@ def num_tokens_from_string(listing: list, encoding_name: str = 'cl100k_base') ->
         count_tokens += len(encoding.encode(i))
     return count_tokens
 
+
 def spinner_chatbot_loading(chatbot):
     loading = [''.join(['.' * random.randint(1, 5)])]
     # 将元组转换为列表并修改元素
@@ -524,6 +525,21 @@ def spinner_chatbot_loading(chatbot):
     # 将列表转换回元组并替换原始元组
     loading_msg[-1] = tuple(temp_list)
     return loading_msg
+
+
+def txt_converter_json(input_string):
+    try:
+        if input_string.startswith("{") and input_string.endswith("}"):
+            # 尝试将字符串形式的字典转换为字典对象
+            dict_object = ast.literal_eval(input_string)
+        else:
+            # 尝试将字符串解析为JSON对象
+            dict_object = json.loads(input_string)
+        formatted_json_string = json.dumps(dict_object, indent=4, ensure_ascii=False)
+        return formatted_json_string
+    except (ValueError, SyntaxError):
+        return input_string
+
 
 class YamlHandle:
 

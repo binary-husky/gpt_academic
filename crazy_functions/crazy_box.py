@@ -145,6 +145,4 @@ def get_docs_content(url):
 
 
 if __name__ == '__main__':
-    from request_llm.bridge_all import model_info
-    enc = model_info["proxy-gpt-4-32k"]['token_cnt']
-    print(enc('123123123123213'))
+    print(get_docs_content('https://kdocs.cn/l/cvsdEWbiqhVH'))

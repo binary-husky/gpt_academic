@@ -210,8 +210,7 @@ class ChatBot(ChatBotFrame):
                     self.dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="").style(
                         container=False)
                     self.plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False,
-                                                     placeholder="这里是特殊函数插件的高级参数输入区").style(
-                        container=False)
+                                                     placeholder="这里是特殊函数插件的高级参数输入区").style(container=False)
                     self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
 
 
@@ -300,12 +299,16 @@ class ChatBot(ChatBotFrame):
 
         # 函数插件-下拉菜单与随变按钮的互动
         def on_dropdown_changed(k):
-            # variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
-            # return {self.switchy_bt: gr.update(value=k, variant=variant)}
+            # 按钮颜色随变
             variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
             ret = {self.switchy_bt: gr.update(value=k, variant=variant)}
-            if crazy_fns[k].get("AdvancedArgs", False): # 是否唤起高级插件参数区
-                ret.update({self.plugin_advanced_arg: gr.update(visible=True,  interactive=True, label=f"插件[{k}]的高级参数说明：" + crazy_fns[k].get("ArgsReminder", [f"没有提供高级参数功能说明"]))})
+            # 参数取随变
+            fns_value = func_box.txt_converter_json(str(crazy_fns[k].get('Parameters', '')))
+            fns_lable = f"插件[{k}]的高级参数说明：\n" + crazy_fns[k].get("ArgsReminder", f"没有提供高级参数功能说明")
+            temp_dict = dict(visible=True, interactive=True, value=str(fns_value), label=fns_lable)
+            #  是否唤起高级插件参数区
+            if crazy_fns[k].get("AdvancedArgs", False):
+                ret.update({self.plugin_advanced_arg: gr.update(**temp_dict)})
             else:
                 ret.update({self.plugin_advanced_arg: gr.update(visible=False, label=f"插件[{k}]不需要高级参数。")})
             return ret
@@ -316,6 +319,7 @@ class ChatBot(ChatBotFrame):
         def route(k, ipaddr: gr.Request, *args, **kwargs):
             if k in [r"打开插件列表", r"请先从插件列表中选择"]: return
             append = list(args)
+            append[-1] = func_box.txt_converter_json(append[-1])
             append.insert(-1, ipaddr)
             args = tuple(append)
             yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(*args, **kwargs)
