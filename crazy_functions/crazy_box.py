@@ -50,9 +50,21 @@ class Utils:
                     for item in value:
                         if isinstance(item, dict):
                             self.find_all_text_keys(item, current_type, text_values, filter_type)
-        context_ = [i[_] for i in text_values for _ in i if _ == self.find_keys_tags and i[_] != '' f'{self.find_keys_tags}:'+i[_]]
+        context_ = []
+        for i in text_values:
+            for key, value in i.items():
+                if key == self.find_keys_tags and value != '':
+                    context_.append(f'{self.find_keys_tags}描述: ')
+                context_.append(value)
         context_ = '\n'.join(context_)
         return text_values, context_
+
+    def file_limit_split(self, dictionary, max_tokens):
+        if dictionary is list:
+            pass
+        elif dictionary is dict:
+            for _d in dictionary:
+                pass
 
 
 WPS_COOKIES, WPS_HEADERS, WPS_PARM, WPS_URL_OTL = get_conf('WPS_COOKIES', 'WPS_HEADERS', 'WPS_PARM', 'WPS_URL_OTL')
@@ -125,11 +137,14 @@ class Kdocs:
         else:
             return None
 
-
+def get_docs_content(url):
+    json_data = Kdocs(url).get_file_content()
+    dict_data = json.loads(json_data)
+    _all, content = Utils().find_all_text_keys(dict_data, filter_type='')
+    return content
 
 
 if __name__ == '__main__':
-    json_data = Kdocs('https://kdocs.cn/l/cfNEKXKfEZNn').get_file_content()
-    dict_data = json.loads(json_data)
-    context = Utils().find_all_text_keys(dict_data, filter_type='')
-    print(context)
+    from request_llm.bridge_all import model_info
+    enc = model_info["proxy-gpt-4-32k"]['token_cnt']
+    print(enc('123123123123213'))

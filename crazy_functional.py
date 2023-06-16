@@ -25,7 +25,7 @@ def get_crazy_functions():
     from crazy_functions.对话历史存档 import 对话历史存档
     from crazy_functions.对话历史存档 import 载入对话历史存档
     from crazy_functions.对话历史存档 import 删除所有本地对话历史记录
-    
+    from crazy_functions.KDOCS_轻文档分析 import Kdocs_轻文档批量操作
     from crazy_functions.批量Markdown翻译 import Markdown英译中
     function_plugins = {
         "猜你想问": {
@@ -36,6 +36,7 @@ def get_crazy_functions():
             "AsButton": False,
             "Function": HotReload(解析一个Python项目)
         },
+
         "保存当前的对话": {
             "AsButton": True,
             "Function": HotReload(对话历史存档)
@@ -45,10 +46,20 @@ def get_crazy_functions():
             "AsButton":False,
             "Function": HotReload(载入对话历史存档)
         },
+        "Kdocs_多文件解析(输入框输入文档链接)": {
+            "Color": "stop",
+            "AsButton": True,
+            "Function": HotReload(Kdocs_轻文档批量操作),
+            "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+            "ArgsReminder": "若输入0，则不解析notebook中的Markdown块",  # 高级参数输入区的显示提示
+            "ArgsParameters": ''
+        },
+
         "删除所有本地对话历史记录（请谨慎操作）": {
             "AsButton":False,
             "Function": HotReload(删除所有本地对话历史记录)
         },
+
         "[测试功能] 解析Jupyter Notebook文件": {
             "Color": "stop",
             "AsButton": False,
