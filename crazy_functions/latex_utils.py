@@ -165,17 +165,23 @@ def merge_tex_files(project_foler, main_file, mode):
     main_file = rm_comments(main_file)
 
     if mode == 'translate_zh':
+        # find paper documentclass
         pattern = re.compile(r'\\documentclass.*\n')
         match = pattern.search(main_file)
+        assert match is not None, "Cannot find documentclass statement!"
         position = match.end()
         add_ctex = '\\usepackage{ctex}\n'
         add_url = '\\usepackage{url}\n' if '{url}' not in main_file else ''
         main_file = main_file[:position] + add_ctex + add_url + main_file[position:]
-        # 2 fontset=windows
+        # fontset=windows
         import platform
         if platform.system() != 'Windows':
             main_file = re.sub(r"\\documentclass\[(.*?)\]{(.*?)}", r"\\documentclass[\1,fontset=windows]{\2}",main_file)
             main_file = re.sub(r"\\documentclass{(.*?)}", r"\\documentclass[fontset=windows]{\1}",main_file)
+        # find paper abstract
+        pattern = re.compile(r'\\begin\{abstract\}.*\n')
+        match = pattern.search(main_file)
+        assert match is not None, "Cannot find paper abstract section!"
     return main_file
 
 
@@ -418,6 +424,7 @@ class LatexPaperSplit():
         if mode == 'translate_zh':
             pattern = re.compile(r'\\begin\{abstract\}.*\n')
             match = pattern.search(result_string)
+            assert match is not None, "Cannot find paper abstract section!"
             position = match.end()
             result_string = result_string[:position] + self.msg + msg + self.msg_declare + result_string[position:]
         return result_string
