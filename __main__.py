@@ -407,7 +407,6 @@ class ChatBot(ChatBotFrame):
 
         # Start
         self.auto_opentab_delay()
-        self.demo.queue_enabled_for_fn()
         self.demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION,
         blocked_paths=["config.py", "config_private.py", "docker-compose.yml", "Dockerfile"])
 
