@@ -21,7 +21,7 @@ crazy_fns = get_crazy_functions()
 gr.Chatbot.postprocess = format_io
 
 # 做一些外观色彩上的调整
-from theme import adjust_theme, advanced_css, small_and_beautiful_theme
+from theme import adjust_theme, advanced_css, custom_css, small_and_beautiful_theme
 
 set_theme = adjust_theme()
 
@@ -210,8 +210,7 @@ class ChatBot(ChatBotFrame):
                     self.dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="").style(
                         container=False)
                     self.plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False,
-                                                     placeholder="这里是特殊函数插件的高级参数输入区").style(
-                        container=False)
+                                                     placeholder="这里是特殊函数插件的高级参数输入区").style(container=False)
                     self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
 
 
@@ -233,6 +232,32 @@ class ChatBot(ChatBotFrame):
             self.md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(
                 container=False)
             # temp = gr.Markdown(self.description)
+
+    def draw_goals_auto(self):
+        with gr.Row():
+            self.ai_name = gr.Textbox(show_label=False, placeholder="给Ai一个名字").style(container=False)
+        with gr.Row():
+            self.ai_role = gr.Textbox(lines=5, show_label=False, placeholder="请输入你的需求").style(
+                container=False)
+        with gr.Row():
+            self.ai_goal_list = gr.Dataframe(headers=['Goals'], interactive=True, row_count=4,
+                                             col_count=(1, 'fixed'), type='array')
+        with gr.Row():
+            self.ai_budget = gr.Number(show_label=False, value=0.0,
+                                       info="关于本次项目的预算，超过预算自动停止，默认无限").style(container=False)
+
+
+    def draw_next_auto(self):
+        with gr.Row():
+            self.text_continue = gr.Textbox(visible=False, show_label=False,
+                                            placeholder="请根据提示输入执行命令").style(container=False)
+        with gr.Row():
+            self.submit_start = gr.Button("Start", variant='primary')
+            self.submit_next = gr.Button("Next", visible=False, variant='primary')
+            self.submit_stop = gr.Button("Stop", variant="stop")
+            self.agent_obj = gr.State({'obj': None, "start": self.submit_start,
+                                       "next": self.submit_next, "text": self.text_continue})
+
 
     def signals_input_setting(self):
         # 注册input
@@ -274,12 +299,16 @@ class ChatBot(ChatBotFrame):
 
         # 函数插件-下拉菜单与随变按钮的互动
         def on_dropdown_changed(k):
-            # variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
-            # return {self.switchy_bt: gr.update(value=k, variant=variant)}
+            # 按钮颜色随变
             variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
             ret = {self.switchy_bt: gr.update(value=k, variant=variant)}
-            if crazy_fns[k].get("AdvancedArgs", False): # 是否唤起高级插件参数区
-                ret.update({self.plugin_advanced_arg: gr.update(visible=True,  interactive=True, label=f"插件[{k}]的高级参数说明：" + crazy_fns[k].get("ArgsReminder", [f"没有提供高级参数功能说明"]))})
+            # 参数取随变
+            fns_value = func_box.txt_converter_json(str(crazy_fns[k].get('Parameters', '')))
+            fns_lable = f"插件[{k}]的高级参数说明：\n" + crazy_fns[k].get("ArgsReminder", f"没有提供高级参数功能说明")
+            temp_dict = dict(visible=True, interactive=True, value=str(fns_value), label=fns_lable)
+            #  是否唤起高级插件参数区
+            if crazy_fns[k].get("AdvancedArgs", False):
+                ret.update({self.plugin_advanced_arg: gr.update(**temp_dict)})
             else:
                 ret.update({self.plugin_advanced_arg: gr.update(visible=False, label=f"插件[{k}]不需要高级参数。")})
             return ret
@@ -290,6 +319,7 @@ class ChatBot(ChatBotFrame):
         def route(k, ipaddr: gr.Request, *args, **kwargs):
             if k in [r"打开插件列表", r"请先从插件列表中选择"]: return
             append = list(args)
+            append[-1] = func_box.txt_converter_json(append[-1])
             append.insert(-1, ipaddr)
             args = tuple(append)
             yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(*args, **kwargs)
@@ -304,6 +334,7 @@ class ChatBot(ChatBotFrame):
             return {self.chatbot: gr.update(label="当前模型：" + k)}
 
         self.md_dropdown.select(on_md_dropdown_changed, [self.md_dropdown], [self.chatbot])
+
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay(self, is_open=False):
@@ -323,9 +354,8 @@ class ChatBot(ChatBotFrame):
 
 
     def main(self):
-        with open("docs/assets/custom.css", "r", encoding="utf-8") as f:
-            customCSS = f.read()
-        with gr.Blocks(title="Chatbot for KSO ", theme=set_theme, analytics_enabled=False, css=customCSS) as demo:
+
+        with gr.Blocks(title="Chatbot for KSO ", theme=set_theme, analytics_enabled=False, css=custom_css) as demo:
             # 绘制页面title
             self.draw_title()
             # 绘制一个ROW，row会让底下的元素自动排成一行
