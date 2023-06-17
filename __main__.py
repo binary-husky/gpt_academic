@@ -153,8 +153,8 @@ class ChatBot(ChatBotFrame):
         prompt_list, devs_document = get_conf('prompt_list', 'devs_document')
         with gr.Row():
             # self.cpopyBtn = gr.Button("复制回答", variant="secondary").style(size="sm")
-            self.resetBtn = gr.Button("重置Chatbot", variant="secondary", elem_id='empty_btn').style(size="sm")
-            self.stopBtn = gr.Button("停止", variant="stop").style(size="sm")
+            self.resetBtn = gr.Button("新建对话", variant="secondary", elem_id='empty_btn').style(size="sm")
+            self.stopBtn = gr.Button("中止对话", variant="stop").style(size="sm")
         with gr.Tab('Function'):
             with gr.Accordion("基础功能区", open=True) as self.area_basic_fn:
                 with gr.Row():
@@ -404,6 +404,7 @@ class ChatBot(ChatBotFrame):
             self.signals_public()
             self.signals_prompt_edit()
             # self.signals_auto_input()
+            self.demo.load(fn=func_box.refresh_load_data, postprocess=False, inputs=[self.chatbot, self.history, self.pro_fp_state], outputs=[self.pro_func_prompt, self.pro_fp_state, self.chatbot,  self.history, ])
 
         # Start
         self.auto_opentab_delay()
