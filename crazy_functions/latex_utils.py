@@ -424,7 +424,9 @@ class LatexPaperSplit():
         if mode == 'translate_zh':
             pattern = re.compile(r'\\begin\{abstract\}.*\n')
             match = pattern.search(result_string)
-            assert match is not None, "Cannot find paper abstract section!"
+            if not match:
+                pattern = re.compile(r'\\abstract\{')
+                match = pattern.search(result_string)
             position = match.end()
             result_string = result_string[:position] + self.msg + msg + self.msg_declare + result_string[position:]
         return result_string
