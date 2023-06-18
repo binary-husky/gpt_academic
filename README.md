@@ -113,10 +113,15 @@ conda activate gptac_venv                 # 激活anaconda环境
 python -m pip install -r requirements.txt # 这个步骤和pip安装一样的步骤
 ```
 
-P.S. 如果需要依赖Latex的插件功能，请见Wiki
-
 <details><summary>如果需要支持清华ChatGLM/复旦MOSS作为后端，请点击展开此处</summary>
 <p>
+
+
+<details><summary>如果需要依赖Latex的插件功能（如Arxiv文献翻译），请点击展开此处</summary>
+<p>
+ 请见[Wiki](https://github.com/binary-husky/gpt_academic/wiki/%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8Latex%E7%9B%B8%E5%85%B3%E6%8F%92%E4%BB%B6%EF%BC%88arxiv%E6%96%87%E7%AB%A0%E7%BF%BB%E8%AF%91%EF%BC%89)
+</p>
+</details>
 
 【可选步骤】如果需要支持清华ChatGLM/复旦MOSS作为后端，需要额外安装更多依赖（前提条件：熟悉Python + 用过Pytorch + 电脑配置够强）：
 ```sh
