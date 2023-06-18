@@ -23,38 +23,67 @@ def split_worker(text, mask, pattern, flags=0):
         mask[res.span()[0]:res.span()[1]] = PRESERVE
     return text, mask
 
-def split_worker_careful_brace(text, mask, pattern, flags=0):
+def set_transform_area(text, mask, pattern, flags=0):
     """
-    Move area into preserve area 
+    Add a transform text area in this paper
     """
     pattern_compile = re.compile(pattern, flags)
     for res in pattern_compile.finditer(text):
-        brace_level = -1
-        p = begin = end = res.regs[0][0]
-        for _ in range(1024*16):
-            if text[p] == '}' and brace_level == 0: break
-            elif text[p] == '}':  brace_level -= 1
-            elif text[p] == '{':  brace_level += 1
-            p += 1
-        end = p+1
-        mask[begin:end] = PRESERVE
+        mask[res.span()[0] : res.span()[1]] = TRANSFORM
     return text, mask
+
+
+def split_worker_careful_brace(text, mask, pattern, flags=0):
+    """
+    Move area into preserve area.
+    It is better to wrap the curly braces in the capture group, e.g., r"\\captioin(\{.*\})".
+    """
+    pattern_compile = re.compile(pattern, flags)
+    res = pattern_compile.search(text)
+
+    # 确保捕获组存在
+    if res and len(res.regs) > 1:
+        brace_level = 0
+        p = begin = end = res.regs[1][0]
+        for _ in range(1024 * 16):
+            if text[p] == "}" and brace_level == 1:
+                break
+            elif text[p] == "}":
+                brace_level -= 1
+            elif text[p] == "{":
+                brace_level += 1
+            p += 1
+        end = p
+        mask[begin + 1 : end] = PRESERVE
+        split_worker_careful_brace(text[end:], mask[end:], pattern, flags=flags)
+
+    return text, mask
+
 
 def split_worker_reverse_careful_brace(text, mask, pattern, flags=0):
     """
-    Move area out of preserve area 
+    Move area out of preserve area.
+    It is better to wrap the curly braces in the capture group, e.g., r"\\captioin(\{.*\})".
     """
     pattern_compile = re.compile(pattern, flags)
-    for res in pattern_compile.finditer(text):
+    res = pattern_compile.search(text)
+
+    # 确保捕获组存在
+    if res and len(res.regs) > 1:
         brace_level = 0
         p = begin = end = res.regs[1][0]
-        for _ in range(1024*16):
-            if text[p] == '}' and brace_level == 0: break
-            elif text[p] == '}':  brace_level -= 1
-            elif text[p] == '{':  brace_level += 1
+        for _ in range(1024 * 16):
+            if text[p] == "}" and brace_level == 1:
+                break
+            elif text[p] == "}":
+                brace_level -= 1
+            elif text[p] == "{":
+                brace_level += 1
             p += 1
         end = p
-        mask[begin:end] = TRANSFORM
+        mask[begin + 1 : end] = TRANSFORM
+        split_worker_reverse_careful_brace(text[end:], mask[end:], pattern, flags=flags)
+
     return text, mask
 
 def split_worker_begin_end(text, mask, pattern, flags=0, limit_n_lines=42):
@@ -260,13 +289,14 @@ def split_subprocess(txt, project_folder, return_dict, opts):
     mask = np.zeros(len(txt), dtype=np.uint8) + TRANSFORM
 
     # 吸收title与作者以上的部分
-    text, mask = split_worker(text, mask, r"(.*?)\\maketitle", re.DOTALL)
+    text, mask = split_worker(text, mask, r".*?\\begin\{document\}", re.DOTALL)
     # 删除iffalse注释
     text, mask = split_worker(text, mask, r"\\iffalse(.*?)\\fi", re.DOTALL)
     # 吸收在25行以内的begin-end组合
     text, mask = split_worker_begin_end(text, mask, r"\\begin\{([a-z\*]*)\}(.*?)\\end\{\1\}", re.DOTALL, limit_n_lines=25)
     # 吸收匿名公式
     text, mask = split_worker(text, mask, r"\$\$(.*?)\$\$", re.DOTALL)
+    text, mask = split_worker(text, mask, r"\\\[.*?\\\]", re.DOTALL)
     # 吸收其他杂项
     text, mask = split_worker(text, mask, r"\\section\{(.*?)\}")
     text, mask = split_worker(text, mask, r"\\section\*\{(.*?)\}")
@@ -274,6 +304,7 @@ def split_subprocess(txt, project_folder, return_dict, opts):
     text, mask = split_worker(text, mask, r"\\subsubsection\{(.*?)\}")
     text, mask = split_worker(text, mask, r"\\bibliography\{(.*?)\}")
     text, mask = split_worker(text, mask, r"\\bibliographystyle\{(.*?)\}")
+    text, mask = split_worker(text, mask, r"\\begin\{thebibliography\}.*?\\end\{thebibliography\}", re.DOTALL)
     text, mask = split_worker(text, mask, r"\\begin\{lstlisting\}(.*?)\\end\{lstlisting\}", re.DOTALL)
     text, mask = split_worker(text, mask, r"\\begin\{wraptable\}(.*?)\\end\{wraptable\}", re.DOTALL)
     text, mask = split_worker(text, mask, r"\\begin\{algorithm\}(.*?)\\end\{algorithm\}", re.DOTALL)
@@ -293,12 +324,18 @@ def split_subprocess(txt, project_folder, return_dict, opts):
     text, mask = split_worker(text, mask, r"\\begin\{equation\*\}(.*?)\\end\{equation\*\}", re.DOTALL)
     text, mask = split_worker(text, mask, r"\\item ")
     text, mask = split_worker(text, mask, r"\\label\{(.*?)\}")
-    text, mask = split_worker(text, mask, r"\\begin\{(.*?)\}")
     text, mask = split_worker(text, mask, r"\\vspace\{(.*?)\}")
     text, mask = split_worker(text, mask, r"\\hspace\{(.*?)\}")
+
+    text, mask = set_transform_area(text, mask, r"\\begin\{abstract\}.*?\\end\{abstract\}", re.DOTALL)
+
+    text, mask = split_worker_careful_brace(text, mask, r"\\hl(\{.*\})", re.DOTALL)
+    text, mask = split_worker_reverse_careful_brace(text, mask, r"\\caption(\{.*\})", re.DOTALL)
+    text, mask = split_worker_reverse_careful_brace(text, mask, r"\\abstract(\{.*\})", re.DOTALL)
+
+    text, mask = split_worker(text, mask, r"\\begin\{(.*?)\}")
     text, mask = split_worker(text, mask, r"\\end\{(.*?)\}")
-    text, mask = split_worker_careful_brace(text, mask, r"\\hl\{(.*?)\}", re.DOTALL)
-    text, mask = split_worker_reverse_careful_brace(text, mask, r"\\caption\{(.*?)\}", re.DOTALL)
+
     root = convert_to_linklist(text, mask)
 
     # 修复括号
