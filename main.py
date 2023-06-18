@@ -1,5 +1,5 @@
 import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
-
+from itertools import chain
 def main():
     import gradio as gr
     if gr.__version__ not in ['3.28.3','3.32.2']: assert False, "需要特殊依赖，请务必用 pip install -r requirements.txt 指令安装依赖，详情信息见requirements.txt"
@@ -100,6 +100,19 @@ def main():
                     with gr.Row():
                         with gr.Accordion("点击展开“文件上传区”。上传本地文件可供红色函数插件调用。", open=False) as area_file_up:
                             file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)", file_count="multiple")
+                with gr.Accordion("函数分类筛选", open=False) as area_crazy_fn:
+                    
+                    with gr.Row():
+                        tags = []
+                        for v in chain(functional.values(), crazy_fns.values()):
+                            v:dict
+                            tags.extend(v.get('Tags',[]))
+                        tags = list(set(tags)) + ['未分类']
+                    with gr.Row():
+                        tag_selector = gr.Radio(tags, label="Tags")
+                    with gr.Row():
+                        gr.Text("函数配置中加入了Tags属性，根据代码、论文、文档等场景进行了分类。相关Issue和PR在"+"https://github.com/binary-husky/gpt_academic/issues/829"+"，具体筛选功能的实现希望得到社区力量帮助")
+                    
                 with gr.Accordion("更换模型 & SysPrompt & 交互界面布局", open=(LAYOUT == "TOP-DOWN")):
                     system_prompt = gr.Textbox(show_label=True, placeholder=f"System Prompt", label="System prompt", value=initial_prompt)
                     top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01,interactive=True, label="Top-p (nucleus sampling)",)
@@ -181,6 +194,13 @@ def main():
         stopBtn.click(fn=None, inputs=None, outputs=None, cancels=cancel_handles)
         stopBtn2.click(fn=None, inputs=None, outputs=None, cancels=cancel_handles)
 
+        def on_tag_selected(tag):
+            # TODO: Add Select Event
+            if tag =="未分类":
+                pass
+            else:
+                pass
+            pass
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay():
         import threading, webbrowser, time

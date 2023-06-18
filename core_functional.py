@@ -15,11 +15,13 @@ def get_core_functions():
             # 后语
             "Suffix":   r"",
             "Color":    r"secondary",    # 按钮颜色
+            "Tags": ['论文'],
         },
         "中文学术润色": {
             "Prefix":   r"作为一名中文学术论文写作改进助理，你的任务是改进所提供文本的拼写、语法、清晰、简洁和整体可读性，" +
                         r"同时分解长句，减少重复，并提供改进建议。请只提供文本的更正版本，避免包括解释。请编辑以下文本" + "\n\n",
             "Suffix":   r"",
+            "Tags": ['论文'],
         },
         "查找语法错误": {
             "Prefix":   r"Can you help me ensure that the grammar and the spelling is correct? " +
@@ -38,10 +40,12 @@ def get_core_functions():
                         + "\n\n",
             "Suffix":   r"",
             "PreProcess": clear_line_break,    # 预处理：清除换行符
+            "Tags": ['论文'],
         },
         "中译英": {
             "Prefix":   r"Please translate following sentence to English:" + "\n\n",
             "Suffix":   r"",
+            "Tags": ['论文'],
         },
         "学术中英互译": {
             "Prefix":   r"I want you to act as a scientific English-Chinese translator, " +
@@ -54,10 +58,12 @@ def get_core_functions():
                         r"I'll give you my paragraphs as follows, tell me what language it is written in, and then translate:" + "\n\n",
             "Suffix": "",
             "Color": "secondary",
+            "Tags": ['论文'],
         },
         "英译中": {
             "Prefix":   r"翻译成地道的中文：" + "\n\n",
             "Suffix":   r"",
+            "Tags": ['论文'],
         },
         "找图片": {
             "Prefix":   r"我需要你找一张网络图片。使用Unsplash API(https://source.unsplash.com/960x640/?<英语关键词>)获取图片URL，" +
@@ -67,6 +73,7 @@ def get_core_functions():
         "解释代码": {
             "Prefix":   r"请解释以下代码：" + "\n```\n",
             "Suffix":   "\n```\n",
+            "Tags": ['代码解析'],
         },
         "参考文献转Bib": {
             "Prefix":   r"Here are some bibliography items, please transform them into bibtex style." +
