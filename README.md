@@ -160,6 +160,7 @@ docker run --rm -it --net=host gpt-academic
 #（最后一步-选择2）在macOS/windows环境下，只能用-p选项将容器上的端口(例如50923)暴露给主机上的端口
 docker run --rm -it -e WEB_PORT=50923 -p 50923:50923 gpt-academic
 ```
+P.S. 如果需要Latex功能，请见另一个[Dockerfile](https://github.com/binary-husky/gpt_academic/blob/master/docs/Dockerfile%2BNoLocal%2BLatex)
 
 2. ChatGPT + ChatGLM + MOSS（需要熟悉Docker）
 
