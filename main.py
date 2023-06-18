@@ -32,6 +32,11 @@ def main():
     # 高级函数插件
     from crazy_functional import get_crazy_functions
     crazy_fns = get_crazy_functions()
+    
+    # 核心功能和插件合并
+    all_functional = {}
+    all_functional.update(functional)
+    all_functional.update(crazy_fns)
 
     # 处理markdown文本格式的转变
     gr.Chatbot.postprocess = format_io
@@ -107,9 +112,11 @@ def main():
                         for v in chain(functional.values(), crazy_fns.values()):
                             v:dict
                             tags.extend(v.get('Tags',[]))
-                        tags = list(set(tags)) + ['未分类']
+                        tags = list(set(tags)) + ['未分类',"所有函数"]
                     with gr.Row():
                         tag_selector = gr.Radio(tags, label="Tags")
+                    with gr.Row():
+                        selected_funcs_area = gr.Text("")
                     with gr.Row():
                         gr.Text("函数配置中加入了Tags属性，根据代码、论文、文档等场景进行了分类。相关Issue和PR在"+"https://github.com/binary-husky/gpt_academic/issues/829"+"，具体筛选功能的实现希望得到社区力量帮助")
                     
@@ -195,12 +202,26 @@ def main():
         stopBtn2.click(fn=None, inputs=None, outputs=None, cancels=cancel_handles)
 
         def on_tag_selected(tag):
-            # TODO: Add Select Event
+            """选择Tags事件处理，需要渲染出函数功能按钮
+
+            Args:
+                tag (_type_): _description_
+
+            Returns:
+                _type_: _description_
+            """
             if tag =="未分类":
-                pass
+                selected_funcs = {k:v for k,v in all_functional.items() if v.get('Tags',[]).__len__()==0}
+            elif tag=="所有函数":
+                selected_funcs = all_functional.copy()  
             else:
-                pass
-            pass
+                selected_funcs = {k:v for k,v in all_functional.items() if tag in  v.get('Tags',[])}
+            return {
+                selected_funcs_area:gr.update(
+                    value ="当前Tag下的函数：（运行函数功能尚未实现）\n"+ "\n".join(sorted(selected_funcs.keys())), 		# 临时把函数列表输出在文本框，TODO: 渲染出函数按钮
+                )
+            }
+        tag_selector.change(on_tag_selected, [tag_selector], [selected_funcs_area])
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay():
         import threading, webbrowser, time
