@@ -113,6 +113,7 @@ conda activate gptac_venv                 # 激活anaconda环境
 python -m pip install -r requirements.txt # 这个步骤和pip安装一样的步骤
 ```
 
+
 <details><summary>如果需要支持清华ChatGLM/复旦MOSS作为后端，请点击展开此处</summary>
 <p>
 
@@ -160,6 +161,7 @@ docker run --rm -it --net=host gpt-academic
 #（最后一步-选择2）在macOS/windows环境下，只能用-p选项将容器上的端口(例如50923)暴露给主机上的端口
 docker run --rm -it -e WEB_PORT=50923 -p 50923:50923 gpt-academic
 ```
+P.S. 如果需要依赖Latex的插件功能，请见Wiki
 
 2. ChatGPT + ChatGLM + MOSS（需要熟悉Docker）
 
