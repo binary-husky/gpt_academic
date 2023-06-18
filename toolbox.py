@@ -308,7 +308,6 @@ def markdown_convertion(txt):
             'use_gitlab_delimiters': False,
         },
     }
-    find_equation_pattern = r'<script type="math/tex(?:.*?)>(.*?)</script>'
 
     def tex2mathml_catch_exception(content, *args, **kwargs):
         try:
@@ -352,9 +351,10 @@ def markdown_convertion(txt):
             if '```reference' in txt: return True    # newbing
             else: return False
 
-    if ('$' in txt) and no_code(txt):  # 有$标识的公式符号，且没有代码段```的标识
+    if ('$$' in txt) and no_code(txt):  # 有$标识的公式符号，且没有代码段```的标识
         # convert everything to html format
         split = markdown.markdown(text='---')
+        find_equation_pattern = r'<script type="math/tex(?:.*?)>(.*?)</script>'
         convert_stage_1 = markdown.markdown(text=txt, extensions=['mdx_math', 'fenced_code', 'tables', 'sane_lists'], extension_configs=markdown_extension_configs)
         convert_stage_1 = markdown_bug_hunt(convert_stage_1)
         # re.DOTALL: Make the '.' special character match any character at all, including a newline; without this flag, '.' will match anything except a newline. Corresponds to the inline flag (?s).

@@ -3,11 +3,13 @@
 # @Time   : 2023/6/15
 # @Author : Spike
 # @Descr   :
+import json
 import func_box
 from crazy_functions import crazy_box
 from toolbox import update_ui, trimmed_format_exc
 from toolbox import CatchException, report_execption, write_results_to_file, zip_folder
-
+from crazy_functions import crazy_utils
+from request_llm import bridge_all
 
 @CatchException
 def Kdocs_轻文档批量操作(link, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
@@ -36,37 +38,44 @@ def Kdocs_轻文档批量操作(link, llm_kwargs, plugin_kwargs, chatbot, histor
         except:
             chatbot.append([f'啊哦，爬虫歇菜了！ {url}', f'{func_box.html_a_blank(url)} 请检查一下哦，这个链接我们访问不了，是否开启分享？是否设置密码？'])
             yield from update_ui(chatbot, history)
-    yield from Kdocs轻文档转Markdown(docs_file_content, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
+        gpt_response_collection = yield from 需求转Markdown(docs_file_content, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
 
 
-def Kdocs轻文档转Markdown(file_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    import time, os, re
-    from crazy_functions import crazy_utils
-    from request_llm import bridge_all
+def 需求转测试用例(file_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    pass
+
+
+def split_dict_limit(file_limit: list, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     model = llm_kwargs['llm_model']
     max_length = llm_kwargs['max_length']/2  # 考虑到对话+回答会超过tokens,所以/2
     get_token_num = bridge_all.model_info[model]['token_cnt']
     temp_dict_limit = {}
     temp_chat_context = ''
     # 分批次+分词
-    prompt = '上述需求文档内容，请按照语意使用markdown格式进行段落排版，并将结果返回。'
-    prompt_us = 'For the above requirements document, please use markdown format for paragraph layout according to the semantics and return the result.'
+    prompt = '以上三个双引号内的需求文档请使用Markdown格式进行段落排版，我不需要你的任何建议或提示，你只需要将我提供的文档转换为Markdown格式并返回给我。'
+    prompt_us = "Please use Markdown format for paragraph layout for the above three double-quoted requirement documents. I don't need any suggestions or tips from you, you just need to convert the text I provide to Markdown format and return it to me."
     for job_dict in file_limit:
         for k, v in job_dict.items():
             temp_chat_context += f'{func_box.html_tag_color(k)} 开始分词,分好词才能避免对话超出tokens错误...\n\n'
             chatbot[-1] = [chatbot[-1][0], temp_chat_context]
-            yield from update_ui(chatbot, history)
             if get_token_num(v) > max_length:
                 temp_chat_context += f'{func_box.html_tag_color(k)} 超过tokens限制...准备拆分后再提交\n\n'
+                chatbot[-1] = [chatbot[-1][0], temp_chat_context]
                 segments = crazy_utils.breakdown_txt_to_satisfy_token_limit(v, get_token_num, max_length)
                 for i in range(len(segments)):
                     temp_dict_limit[k+f'_{i}'] = f'"""{segments[i]}""""\n{prompt}'
             else:
-                temp_dict_limit[k] = f'"""{v}""""\n{prompt}'
+                temp_dict_limit[k] = f'"""\n{v}\n""""\n{prompt}'
                 temp_chat_context += f'{func_box.html_tag_color(k)} 准备就绪...\n\n'
-    yield from update_ui(chatbot, history)
+                chatbot[-1] = [chatbot[-1][0], temp_chat_context]
     # 提交多线程任务
     inputs_array, inputs_show_user_array = list(temp_dict_limit.values()), list(temp_dict_limit.keys())
+    return inputs_array, inputs_show_user_array
+
+
+def 需求转Markdown(file_limit: list, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    inputs_array, inputs_show_user_array  = split_dict_limit(file_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
+    yield from update_ui(chatbot, history)
     gpt_response_collection = yield from crazy_utils.request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         inputs_array=inputs_array,
         inputs_show_user_array=inputs_show_user_array,
@@ -78,9 +87,13 @@ def Kdocs轻文档转Markdown(file_limit, llm_kwargs, plugin_kwargs, chatbot, hi
         scroller_max_len=80
     )
     # 展示任务结果
-    for results in list(zip(gpt_response_collection[0::2], gpt_response_collection[1::2])):
-        chatbot.append(results)
-        yield from update_ui(chatbot, history)
+    kwargs_json = json.loads(plugin_kwargs['advanced_arg'])
+    if kwargs_json['is_show']:
+        for results in list(zip(gpt_response_collection[0::2], gpt_response_collection[1::2])):
+            chatbot.append(results)
+            history.extend(results)
+            yield from update_ui(chatbot, history)
+    return gpt_response_collection
 
 
 

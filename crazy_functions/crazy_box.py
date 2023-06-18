@@ -67,6 +67,7 @@ class Utils:
                 pass
 
 
+
 WPS_COOKIES, WPS_HEADERS, WPS_PARM, WPS_URL_OTL = get_conf('WPS_COOKIES', 'WPS_HEADERS', 'WPS_PARM', 'WPS_URL_OTL')
 class Kdocs:
 
@@ -142,6 +143,8 @@ def get_docs_content(url):
     dict_data = json.loads(json_data)
     _all, content = Utils().find_all_text_keys(dict_data, filter_type='')
     return content
+
+
 
 
 if __name__ == '__main__':
