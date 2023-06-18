@@ -305,13 +305,6 @@ def markdown_convertion(txt):
     }
     find_equation_pattern = r'<script type="math/tex(?:.*?)>(.*?)</script>'
 
-    def tex2mathml_catch_exception(content, *args, **kwargs):
-        try:
-            content = tex2mathml(content, *args, **kwargs)
-        except:
-            content = content
-        return content
-
     def replace_math_no_render(match):
         content = match.group(1)
         if 'mode=display' in match.group(0):
@@ -327,10 +320,10 @@ def markdown_convertion(txt):
                 content = content.replace('\\begin{aligned}', '\\begin{array}')
                 content = content.replace('\\end{aligned}', '\\end{array}')
                 content = content.replace('&', ' ')
-            content = tex2mathml_catch_exception(content, display="block")
+            content = tex2mathml(content, display="block")
             return content
         else:
-            return tex2mathml_catch_exception(content)
+            return tex2mathml(content)
 
     def markdown_bug_hunt(content):
         """
@@ -350,17 +343,18 @@ def markdown_convertion(txt):
             else:
                 return False
 
-    if ('$' in txt) and no_code(txt):  # 有$标识的公式符号，且没有代码段```的标识
+    if ('$$' in txt) and no_code(txt):  # 有$标识的公式符号，且没有代码段```的标识
         # convert everything to html format
         split = markdown.markdown(text='---')
-        convert_stage_1 = markdown.markdown(text=txt, extensions=['mdx_math', 'fenced_code', 'tables', 'sane_lists'],
-                                            extension_configs=markdown_extension_configs)
+        txt = re.sub(r'\$\$((?:.|\n)*?)\$\$', lambda match: '$$' + re.sub(r'\n+', '</br>', match.group(1)) + '$$', txt)
+        convert_stage_1 = markdown.markdown(text=txt, extensions=['mdx_math', 'fenced_code', 'tables', 'sane_lists'], extension_configs=markdown_extension_configs)
         convert_stage_1 = markdown_bug_hunt(convert_stage_1)
         # re.DOTALL: Make the '.' special character match any character at all, including a newline; without this flag, '.' will match anything except a newline. Corresponds to the inline flag (?s).
         # 1. convert to easy-to-copy tex (do not render math)
         convert_stage_2_1, n = re.subn(find_equation_pattern, replace_math_no_render, convert_stage_1, flags=re.DOTALL)
         # 2. convert to rendered equation
-        convert_stage_2_2, n = re.subn(find_equation_pattern, replace_math_render, convert_stage_1, flags=re.DOTALL)
+        convert_stage_1_resp = convert_stage_1.replace('</br>', '')
+        convert_stage_2_2, n = re.subn(find_equation_pattern, replace_math_render, convert_stage_1_resp, flags=re.DOTALL)
         # cat them together
         return pre + convert_stage_2_1 + f'{split}' + convert_stage_2_2 + suf
     else:
