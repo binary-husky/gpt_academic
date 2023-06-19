@@ -23,13 +23,38 @@ def split_worker(text, mask, pattern, flags=0):
         mask[res.span()[0]:res.span()[1]] = PRESERVE
     return text, mask
 
-def split_worker_reverse_caption(text, mask, pattern, flags=0):
+def split_worker_careful_brace(text, mask, pattern, flags=0):
     """
-    Move caption area out of preserve area 
+    Move area into preserve area 
     """
     pattern_compile = re.compile(pattern, flags)
     for res in pattern_compile.finditer(text):
-        mask[res.regs[1][0]:res.regs[1][1]] = TRANSFORM
+        brace_level = -1
+        p = begin = end = res.regs[0][0]
+        for _ in range(1024*16):
+            if text[p] == '}' and brace_level == 0: break
+            elif text[p] == '}':  brace_level -= 1
+            elif text[p] == '{':  brace_level += 1
+            p += 1
+        end = p+1
+        mask[begin:end] = PRESERVE
+    return text, mask
+
+def split_worker_reverse_careful_brace(text, mask, pattern, flags=0):
+    """
+    Move area out of preserve area 
+    """
+    pattern_compile = re.compile(pattern, flags)
+    for res in pattern_compile.finditer(text):
+        brace_level = 0
+        p = begin = end = res.regs[1][0]
+        for _ in range(1024*16):
+            if text[p] == '}' and brace_level == 0: break
+            elif text[p] == '}':  brace_level -= 1
+            elif text[p] == '{':  brace_level += 1
+            p += 1
+        end = p
+        mask[begin:end] = TRANSFORM
     return text, mask
 
 def split_worker_begin_end(text, mask, pattern, flags=0, limit_n_lines=42):
@@ -97,17 +122,19 @@ def 寻找Latex主文件(file_manifest, mode):
         else:
             continue
     raise RuntimeError('无法找到一个主Tex文件（包含documentclass关键字）')
+
 def rm_comments(main_file):
     new_file_remove_comment_lines = []
     for l in main_file.splitlines():
         # 删除整行的空注释
-        if l.startswith("%") or (l.startswith(" ") and l.lstrip().startswith("%")):
+        if l.lstrip().startswith("%"):
             pass
         else:
             new_file_remove_comment_lines.append(l)
     main_file = '\n'.join(new_file_remove_comment_lines)
     main_file = re.sub(r'(?<!\\)%.*', '', main_file)  # 使用正则表达式查找半行注释, 并替换为空字符串
     return main_file
+
 def merge_tex_files_(project_foler, main_file, mode):
     """
     Merge Tex project recrusively
@@ -138,17 +165,23 @@ def merge_tex_files(project_foler, main_file, mode):
     main_file = rm_comments(main_file)
 
     if mode == 'translate_zh':
+        # find paper documentclass
         pattern = re.compile(r'\\documentclass.*\n')
         match = pattern.search(main_file)
+        assert match is not None, "Cannot find documentclass statement!"
         position = match.end()
         add_ctex = '\\usepackage{ctex}\n'
         add_url = '\\usepackage{url}\n' if '{url}' not in main_file else ''
         main_file = main_file[:position] + add_ctex + add_url + main_file[position:]
-        # 2 fontset=windows
+        # fontset=windows
         import platform
         if platform.system() != 'Windows':
             main_file = re.sub(r"\\documentclass\[(.*?)\]{(.*?)}", r"\\documentclass[\1,fontset=windows]{\2}",main_file)
             main_file = re.sub(r"\\documentclass{(.*?)}", r"\\documentclass[fontset=windows]{\1}",main_file)
+        # find paper abstract
+        pattern = re.compile(r'\\begin\{abstract\}.*\n')
+        match = pattern.search(main_file)
+        assert match is not None, "Cannot find paper abstract section!"
     return main_file
 
 
@@ -185,14 +218,39 @@ def fix_content(final_tex, node_string):
     if node_string.count('\_') > 0 and node_string.count('\_') > final_tex.count('\_'):
         # walk and replace any _ without \
         final_tex = re.sub(r"(?<!\\)_", "\\_", final_tex)
-    if node_string.count('{') != node_string.count('}'):
-        if final_tex.count('{') != node_string.count('{'):
-            final_tex = node_string # 出问题了，还原原文
-        if final_tex.count('}') != node_string.count('}'):
-            final_tex = node_string # 出问题了，还原原文
+
+    def compute_brace_level(string):
+        # this function count the number of { and }
+        brace_level = 0
+        for c in string:
+            if c == "{": brace_level += 1
+            elif c == "}": brace_level -= 1
+        return brace_level
+    def join_most(tex_t, tex_o):
+        # this function join translated string and original string when something goes wrong
+        p_t = 0
+        p_o = 0
+        def find_next(string, chars, begin):
+            p = begin
+            while p < len(string):
+                if string[p] in chars: return p, string[p]
+                p += 1
+            return None, None
+        while True:
+            res1, char = find_next(tex_o, ['{','}'], p_o)
+            if res1 is None: break
+            res2, char = find_next(tex_t, [char], p_t)
+            if res2 is None: break
+            p_o = res1 + 1
+            p_t = res2 + 1
+        return tex_t[:p_t] + tex_o[p_o:]
+
+    if compute_brace_level(final_tex) != compute_brace_level(node_string):
+        # 出问题了，还原部分原文，保证括号正确
+        final_tex = join_most(final_tex, node_string)
     return final_tex
 
-def split_subprocess(txt, project_folder, return_dict):
+def split_subprocess(txt, project_folder, return_dict, opts):
     """
     break down latex file to a linked list,
     each node use a preserve flag to indicate whether it should
@@ -239,7 +297,8 @@ def split_subprocess(txt, project_folder, return_dict):
     text, mask = split_worker(text, mask, r"\\vspace\{(.*?)\}")
     text, mask = split_worker(text, mask, r"\\hspace\{(.*?)\}")
     text, mask = split_worker(text, mask, r"\\end\{(.*?)\}")
-    # text, mask = split_worker_reverse_caption(text, mask, r"\\caption\{(.*?)\}", re.DOTALL)
+    text, mask = split_worker_careful_brace(text, mask, r"\\hl\{(.*?)\}", re.DOTALL)
+    text, mask = split_worker_reverse_careful_brace(text, mask, r"\\caption\{(.*?)\}", re.DOTALL)
     root = convert_to_linklist(text, mask)
 
     # 修复括号
@@ -365,11 +424,12 @@ class LatexPaperSplit():
         if mode == 'translate_zh':
             pattern = re.compile(r'\\begin\{abstract\}.*\n')
             match = pattern.search(result_string)
+            assert match is not None, "Cannot find paper abstract section!"
             position = match.end()
             result_string = result_string[:position] + self.msg + msg + self.msg_declare + result_string[position:]
         return result_string
 
-    def split(self, txt, project_folder): 
+    def split(self, txt, project_folder, opts): 
         """
         break down latex file to a linked list,
         each node use a preserve flag to indicate whether it should
@@ -381,7 +441,7 @@ class LatexPaperSplit():
         return_dict = manager.dict()
         p = multiprocessing.Process(
             target=split_subprocess, 
-            args=(txt, project_folder, return_dict))
+            args=(txt, project_folder, return_dict, opts))
         p.start()
         p.join()
         self.nodes = return_dict['nodes']
@@ -440,7 +500,7 @@ class LatexPaperFileGroup():
 
 
 
-def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, mode='proofread', switch_prompt=None):
+def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, mode='proofread', switch_prompt=None, opts=[]):
     import time, os, re
     from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
     from .latex_utils import LatexPaperFileGroup, merge_tex_files, LatexPaperSplit, 寻找Latex主文件
@@ -469,8 +529,10 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
         f.write(merged_content)
 
     #  <-------- 精细切分latex文件 ----------> 
+    chatbot.append((f"Latex文件融合完成", f'[Local Message] 正在精细切分latex文件，这需要一段时间计算，文档越长耗时越长，请耐心等待。'))
+    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
     lps = LatexPaperSplit()
-    res = lps.split(merged_content, project_folder) # 消耗时间的函数
+    res = lps.split(merged_content, project_folder, opts) # 消耗时间的函数
 
     #  <-------- 拆分过长的latex片段 ----------> 
     pfg = LatexPaperFileGroup()
@@ -567,7 +629,7 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
     current_dir = os.getcwd()
     n_fix = 1
     max_try = 32
-    chatbot.append([f"正在编译PDF文档", f'编译已经开始。当前工作路径为{work_folder}，如果程序停顿5分钟以上，则大概率是卡死在Latex里面了。不幸卡死时请直接去该路径下取回翻译结果，或者重启之后再度尝试 ...']); yield from update_ui(chatbot=chatbot, history=history)
+    chatbot.append([f"正在编译PDF文档", f'编译已经开始。当前工作路径为{work_folder}，如果程序停顿5分钟以上，请直接去该路径下取回翻译结果，或者重启之后再度尝试 ...']); yield from update_ui(chatbot=chatbot, history=history)
     chatbot.append([f"正在编译PDF文档", '...']); yield from update_ui(chatbot=chatbot, history=history); time.sleep(1); chatbot[-1] = list(chatbot[-1]) # 刷新界面
     yield from update_ui_lastest_msg('编译已经开始...', chatbot, history)   # 刷新Gradio前端界面
 
