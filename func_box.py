@@ -437,7 +437,7 @@ def prompt_input(txt: str, index, data: gr.Dataset, tabs_index):
     """
     data_str = str(data.samples[index][1])
     data_name = str(data.samples[index][0])
-    rp_str = '"""{v}"""'
+    rp_str = '{{{v}}}'
     if data_str.find(rp_str) != -1:
         new_txt = data_str.replace(rp_str, txt)
     elif txt and tabs_index == 0:
@@ -615,16 +615,11 @@ class YamlHandle:
 class JsonHandle:
 
     def __init__(self, file):
-        if os.path.exists(file):
-            with open(file=file, mode='r') as self.file_obj:
-                pass
-        else:
-            self.file_obj = io.StringIO()  # 创建空白文本对象
-            self.file_obj.write('{}')  # 向文本对象写入有有效 JSON 格式的数据
-            self.file_obj.seek(0)  # 将文本对象的光标重置到开头
+        self.file = file
 
-    def load(self):
-        data = json.load(self.file_obj)
+    def load(self) -> object:
+        with open(self.file, 'r') as f:
+            data = json.load(f)
         return data
 
 

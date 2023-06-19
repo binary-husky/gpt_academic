@@ -55,9 +55,10 @@ def get_crazy_functions():
             "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
             "Parameters": {
                 "is_show": False,
+                "prompt": '文档转测试用例'
             }
         },
-        "需求文档转测试用例(输入框输入文档链接)": {
+        "需求文档转测试用例(输入框输入需求文档)": {
             "Color": "stop",
             "AsButton": True,
             "Function": HotReload(需求转测试用例),
@@ -65,6 +66,7 @@ def get_crazy_functions():
             "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
             "Parameters": {
                 "is_show": False,
+                "prompt": '文档转测试用例'
             }
         },
 

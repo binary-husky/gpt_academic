@@ -66,13 +66,21 @@ class SqliteHandle:
             self.__cursor.execute(f"REPLACE INTO `{self.__table}` (prompt, result) VALUES (?, ?);", (str(key), str(prompt[key])))
         self.__connect.commit()
 
-    def delete_prompt(self):
-        self.__cursor.execute(f"DELETE from `{self.__table}` where id BETWEEN 1 AND 21")
+    def delete_prompt(self, name):
+        self.__cursor.execute(f"DELETE from `{self.__table}` where prompt LIKE '{name}'")
         self.__connect.commit()
 
     def delete_tabls(self, tab):
         self.__cursor.execute(f"DROP TABLE `{tab}`;")
         self.__connect.commit()
+
+    def find_prompt_result(self, name):
+        query = self.__cursor.execute(f"SELECT result FROM `{self.__table}` WHERE prompt LIKE '{name}'").fetchall()
+        if query == []:
+            query = self.__cursor.execute(f"SELECT result FROM `prompt_127.0.0.1` WHERE prompt LIKE '{name}'").fetchall()
+            return query[0][0]
+        else:
+            return query[0][0]
 
 def cp_db_data(incloud_tab='prompt'):
     sql_ll = sqlite_handle(database='ai_prompt_cp.db')
@@ -82,7 +90,13 @@ def cp_db_data(incloud_tab='prompt'):
             old_data = sqlite_handle(table=i, database='ai_prompt_cp.db').get_prompt_value()
             sqlite_handle(table=i).inset_prompt(old_data)
 
+def inset_127_prompt():
+    sql_handle = sqlite_handle(table='prompt_127.0.0.1')
+    prompt_json = os.path.join(prompt_path, 'prompts-PlexPt.json')
+    data_list = func_box.JsonHandle(prompt_json).load()
+    for i in data_list:
+        sql_handle.inset_prompt(prompt={i['act']: i['prompt']})
 
 sqlite_handle = SqliteHandle
 if __name__ == '__main__':
-    cp_db_data()
+    print(sqlite_handle().find_prompt_result('文档转Markdown'))
