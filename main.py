@@ -155,7 +155,7 @@ def main():
         for k in crazy_fns:
             if not crazy_fns[k].get("AsButton", True): continue
             click_handle = crazy_fns[k]["Button"].click(ArgsGeneralWrapper(crazy_fns[k]["Function"]), [*input_combo, gr.State(PORT)], output_combo)
-            click_handle.then(on_report_generated, [file_upload, chatbot], [file_upload, chatbot])
+            click_handle.then(on_report_generated, [cookies, file_upload, chatbot], [cookies, file_upload, chatbot])
             cancel_handles.append(click_handle)
         # 函数插件-下拉菜单与随变按钮的互动
         def on_dropdown_changed(k):
@@ -175,7 +175,7 @@ def main():
             if k in [r"打开插件列表", r"请先从插件列表中选择"]: return
             yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(*args, **kwargs)
         click_handle = switchy_bt.click(route,[switchy_bt, *input_combo, gr.State(PORT)], output_combo)
-        click_handle.then(on_report_generated, [file_upload, chatbot], [file_upload, chatbot])
+        click_handle.then(on_report_generated, [cookies, file_upload, chatbot], [cookies, file_upload, chatbot])
         cancel_handles.append(click_handle)
         # 终止按钮的回调函数注册
         stopBtn.click(fn=None, inputs=None, outputs=None, cancels=cancel_handles)

@@ -520,13 +520,15 @@ def find_recent_files(directory):
 
     return recent_files
 
-def promote_file_to_downloadzone(file, rename_file=None):
+def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
     # 将文件复制一份到下载区
     import shutil
     if rename_file is None: rename_file = f'{gen_time_str()}-{os.path.basename(file)}'
     new_path = os.path.join(f'./gpt_log/', rename_file)
     if os.path.exists(new_path): os.remove(new_path)
     shutil.copyfile(file, new_path)
+    if chatbot:
+        chatbot._cookies.update({'file_to_promote': [new_path]})
 
 
 def get_user_upload(chatbot, ipaddr: gr.Request):
@@ -601,16 +603,20 @@ def on_file_uploaded(files, chatbot, txt, ipaddr: gr.Request):
     return chatbot, txt
 
 
-def on_report_generated(files, chatbot):
+def on_report_generated(cookies, files, chatbot):
     from toolbox import find_recent_files
-    report_files = find_recent_files('gpt_log')
+    if 'file_to_promote' in cookies:
+        report_files = cookies['file_to_promote']
+        cookies.pop('file_to_promote')
+    else:
+        report_files = find_recent_files('gpt_log')
     if len(report_files) == 0:
         return None, chatbot
     # files.extend(report_files)
     file_links = ''
     for f in report_files: file_links += f'<br/><a href="file={os.path.abspath(f)}" target="_blank">{f}</a>'
     chatbot.append(['报告如何远程获取？', f'报告已经添加到右侧“文件上传区”（可能处于折叠状态），请查收。{file_links}'])
-    return report_files, chatbot
+    return cookies, report_files, chatbot
 
 def is_openai_api_key(key):
     API_MATCH_ORIGINAL = re.match(r"sk-[a-zA-Z0-9]{48}$", key)
