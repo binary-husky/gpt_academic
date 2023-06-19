@@ -8,85 +8,65 @@ pj = os.path.join
 """
 ========================================================================
 Part One
-Latex segmentation to a linklist
+Latex segmentation with a binary mask (PRESERVE=0, TRANSFORM=1)
 ========================================================================
 """
 PRESERVE = 0
 TRANSFORM = 1
 
-def split_worker(text, mask, pattern, flags=0):
+def set_forbidden_text(text, mask, pattern, flags=0):
     """
     Add a preserve text area in this paper
+    e.g. with pattern = r"\\begin\{algorithm\}(.*?)\\end\{algorithm\}"
+    you can mask out (mask = PRESERVE so that text become untouchable for GPT) 
+    everything between "\begin{equation}" and "\end{equation}"
     """
     pattern_compile = re.compile(pattern, flags)
     for res in pattern_compile.finditer(text):
         mask[res.span()[0]:res.span()[1]] = PRESERVE
     return text, mask
 
-def set_transform_area(text, mask, pattern, flags=0):
+def set_forbidden_text_careful_brace(text, mask, pattern, flags=0):
     """
-    Add a transform text area in this paper
+    Add a preserve text area in this paper (text become untouchable for GPT).
+    count the number of the braces so as to catch compelete text area. 
+    e.g.
+    \caption{blablablablabla\texbf{blablabla}blablabla.} 
     """
     pattern_compile = re.compile(pattern, flags)
     for res in pattern_compile.finditer(text):
-        mask[res.span()[0] : res.span()[1]] = TRANSFORM
+        brace_level = -1
+        p = begin = end = res.regs[0][0]
+        for _ in range(1024*16):
+            if text[p] == '}' and brace_level == 0: break
+            elif text[p] == '}':  brace_level -= 1
+            elif text[p] == '{':  brace_level += 1
+            p += 1
+        end = p+1
+        mask[begin:end] = PRESERVE
     return text, mask
 
-
-def split_worker_careful_brace(text, mask, pattern, flags=0):
+def reverse_forbidden_text_careful_brace(text, mask, pattern, flags=0):
     """
-    Move area into preserve area.
-    It is better to wrap the curly braces in the capture group, e.g., r"\\captioin(\{.*\})".
+    Move area out of preserve area (make text editable for GPT)
+    count the number of the braces so as to catch compelete text area. 
+    e.g.
+    \caption{blablablablabla\texbf{blablabla}blablabla.} 
     """
     pattern_compile = re.compile(pattern, flags)
-    res = pattern_compile.search(text)
-
-    # 确保捕获组存在
-    if res and len(res.regs) > 1:
+    for res in pattern_compile.finditer(text):
         brace_level = 0
         p = begin = end = res.regs[1][0]
-        for _ in range(1024 * 16):
-            if text[p] == "}" and brace_level == 1:
-                break
-            elif text[p] == "}":
-                brace_level -= 1
-            elif text[p] == "{":
-                brace_level += 1
+        for _ in range(1024*16):
+            if text[p] == '}' and brace_level == 0: break
+            elif text[p] == '}':  brace_level -= 1
+            elif text[p] == '{':  brace_level += 1
             p += 1
         end = p
-        mask[begin + 1 : end] = PRESERVE
-        split_worker_careful_brace(text[end:], mask[end:], pattern, flags=flags)
-
+        mask[begin:end] = TRANSFORM
     return text, mask
 
-
-def split_worker_reverse_careful_brace(text, mask, pattern, flags=0):
-    """
-    Move area out of preserve area.
-    It is better to wrap the curly braces in the capture group, e.g., r"\\captioin(\{.*\})".
-    """
-    pattern_compile = re.compile(pattern, flags)
-    res = pattern_compile.search(text)
-
-    # 确保捕获组存在
-    if res and len(res.regs) > 1:
-        brace_level = 0
-        p = begin = end = res.regs[1][0]
-        for _ in range(1024 * 16):
-            if text[p] == "}" and brace_level == 1:
-                break
-            elif text[p] == "}":
-                brace_level -= 1
-            elif text[p] == "{":
-                brace_level += 1
-            p += 1
-        end = p
-        mask[begin + 1 : end] = TRANSFORM
-        split_worker_reverse_careful_brace(text[end:], mask[end:], pattern, flags=flags)
-
-    return text, mask
-
-def split_worker_begin_end(text, mask, pattern, flags=0, limit_n_lines=42):
+def set_forbidden_text_begin_end(text, mask, pattern, flags=0, limit_n_lines=42):
     """
     Find all \begin{} ... \end{} text block that with less than limit_n_lines lines.
     Add it to preserve area
@@ -289,53 +269,48 @@ def split_subprocess(txt, project_folder, return_dict, opts):
     mask = np.zeros(len(txt), dtype=np.uint8) + TRANSFORM
 
     # 吸收title与作者以上的部分
-    text, mask = split_worker(text, mask, r".*?\\begin\{document\}", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"(.*?)\\maketitle", re.DOTALL)
     # 删除iffalse注释
-    text, mask = split_worker(text, mask, r"\\iffalse(.*?)\\fi", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"\\iffalse(.*?)\\fi", re.DOTALL)
     # 吸收在25行以内的begin-end组合
-    text, mask = split_worker_begin_end(text, mask, r"\\begin\{([a-z\*]*)\}(.*?)\\end\{\1\}", re.DOTALL, limit_n_lines=25)
+    text, mask = set_forbidden_text_begin_end(text, mask, r"\\begin\{([a-z\*]*)\}(.*?)\\end\{\1\}", re.DOTALL, limit_n_lines=42)
     # 吸收匿名公式
-    text, mask = split_worker(text, mask, r"\$\$(.*?)\$\$", re.DOTALL)
-    text, mask = split_worker(text, mask, r"\\\[.*?\\\]", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"\$\$(.*?)\$\$", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"\\\[.*?\\\]", re.DOTALL)
     # 吸收其他杂项
-    text, mask = split_worker(text, mask, r"\\section\{(.*?)\}")
-    text, mask = split_worker(text, mask, r"\\section\*\{(.*?)\}")
-    text, mask = split_worker(text, mask, r"\\subsection\{(.*?)\}")
-    text, mask = split_worker(text, mask, r"\\subsubsection\{(.*?)\}")
-    text, mask = split_worker(text, mask, r"\\bibliography\{(.*?)\}")
-    text, mask = split_worker(text, mask, r"\\bibliographystyle\{(.*?)\}")
-    text, mask = split_worker(text, mask, r"\\begin\{thebibliography\}.*?\\end\{thebibliography\}", re.DOTALL)
-    text, mask = split_worker(text, mask, r"\\begin\{lstlisting\}(.*?)\\end\{lstlisting\}", re.DOTALL)
-    text, mask = split_worker(text, mask, r"\\begin\{wraptable\}(.*?)\\end\{wraptable\}", re.DOTALL)
-    text, mask = split_worker(text, mask, r"\\begin\{algorithm\}(.*?)\\end\{algorithm\}", re.DOTALL)
-    text, mask = split_worker(text, mask, r"\\begin\{wrapfigure\}(.*?)\\end\{wrapfigure\}", re.DOTALL)
-    text, mask = split_worker(text, mask, r"\\begin\{wrapfigure\*\}(.*?)\\end\{wrapfigure\*\}", re.DOTALL)
-    text, mask = split_worker(text, mask, r"\\begin\{figure\}(.*?)\\end\{figure\}", re.DOTALL)
-    text, mask = split_worker(text, mask, r"\\begin\{figure\*\}(.*?)\\end\{figure\*\}", re.DOTALL)
-    text, mask = split_worker(text, mask, r"\\begin\{multline\}(.*?)\\end\{multline\}", re.DOTALL)
-    text, mask = split_worker(text, mask, r"\\begin\{multline\*\}(.*?)\\end\{multline\*\}", re.DOTALL)
-    text, mask = split_worker(text, mask, r"\\begin\{table\}(.*?)\\end\{table\}", re.DOTALL)
-    text, mask = split_worker(text, mask, r"\\begin\{table\*\}(.*?)\\end\{table\*\}", re.DOTALL)
-    text, mask = split_worker(text, mask, r"\\begin\{minipage\}(.*?)\\end\{minipage\}", re.DOTALL)
-    text, mask = split_worker(text, mask, r"\\begin\{minipage\*\}(.*?)\\end\{minipage\*\}", re.DOTALL)
-    text, mask = split_worker(text, mask, r"\\begin\{align\*\}(.*?)\\end\{align\*\}", re.DOTALL)
-    text, mask = split_worker(text, mask, r"\\begin\{align\}(.*?)\\end\{align\}", re.DOTALL)
-    text, mask = split_worker(text, mask, r"\\begin\{equation\}(.*?)\\end\{equation\}", re.DOTALL)
-    text, mask = split_worker(text, mask, r"\\begin\{equation\*\}(.*?)\\end\{equation\*\}", re.DOTALL)
-    text, mask = split_worker(text, mask, r"\\item ")
-    text, mask = split_worker(text, mask, r"\\label\{(.*?)\}")
-    text, mask = split_worker(text, mask, r"\\vspace\{(.*?)\}")
-    text, mask = split_worker(text, mask, r"\\hspace\{(.*?)\}")
-
-    text, mask = set_transform_area(text, mask, r"\\begin\{abstract\}.*?\\end\{abstract\}", re.DOTALL)
-
-    text, mask = split_worker_careful_brace(text, mask, r"\\hl(\{.*\})", re.DOTALL)
-    text, mask = split_worker_reverse_careful_brace(text, mask, r"\\caption(\{.*\})", re.DOTALL)
-    text, mask = split_worker_reverse_careful_brace(text, mask, r"\\abstract(\{.*\})", re.DOTALL)
-
-    text, mask = split_worker(text, mask, r"\\begin\{(.*?)\}")
-    text, mask = split_worker(text, mask, r"\\end\{(.*?)\}")
-
+    text, mask = set_forbidden_text(text, mask, r"\\section\{(.*?)\}")
+    text, mask = set_forbidden_text(text, mask, r"\\section\*\{(.*?)\}")
+    text, mask = set_forbidden_text(text, mask, r"\\subsection\{(.*?)\}")
+    text, mask = set_forbidden_text(text, mask, r"\\subsubsection\{(.*?)\}")
+    text, mask = set_forbidden_text(text, mask, r"\\bibliography\{(.*?)\}")
+    text, mask = set_forbidden_text(text, mask, r"\\bibliographystyle\{(.*?)\}")
+    text, mask = set_forbidden_text(text, mask, r"\\begin\{thebibliography\}.*?\\end\{thebibliography\}", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"\\begin\{lstlisting\}(.*?)\\end\{lstlisting\}", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"\\begin\{wraptable\}(.*?)\\end\{wraptable\}", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"\\begin\{algorithm\}(.*?)\\end\{algorithm\}", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"\\begin\{wrapfigure\}(.*?)\\end\{wrapfigure\}", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"\\begin\{wrapfigure\*\}(.*?)\\end\{wrapfigure\*\}", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"\\begin\{figure\}(.*?)\\end\{figure\}", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"\\begin\{figure\*\}(.*?)\\end\{figure\*\}", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"\\begin\{multline\}(.*?)\\end\{multline\}", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"\\begin\{multline\*\}(.*?)\\end\{multline\*\}", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"\\begin\{table\}(.*?)\\end\{table\}", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"\\begin\{table\*\}(.*?)\\end\{table\*\}", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"\\begin\{minipage\}(.*?)\\end\{minipage\}", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"\\begin\{minipage\*\}(.*?)\\end\{minipage\*\}", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"\\begin\{align\*\}(.*?)\\end\{align\*\}", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"\\begin\{align\}(.*?)\\end\{align\}", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"\\begin\{equation\}(.*?)\\end\{equation\}", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"\\begin\{equation\*\}(.*?)\\end\{equation\*\}", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"\\item ")
+    text, mask = set_forbidden_text(text, mask, r"\\label\{(.*?)\}")
+    text, mask = set_forbidden_text(text, mask, r"\\begin\{(.*?)\}")
+    text, mask = set_forbidden_text(text, mask, r"\\vspace\{(.*?)\}")
+    text, mask = set_forbidden_text(text, mask, r"\\hspace\{(.*?)\}")
+    text, mask = set_forbidden_text(text, mask, r"\\end\{(.*?)\}")
+    text, mask = set_forbidden_text_careful_brace(text, mask, r"\\hl\{(.*?)\}", re.DOTALL)
+    # reverse 操作必须放在最后
+    text, mask = reverse_forbidden_text_careful_brace(text, mask, r"\\caption\{(.*?)\}", re.DOTALL)
     root = convert_to_linklist(text, mask)
 
     # 修复括号
