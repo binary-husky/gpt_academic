@@ -47,7 +47,7 @@ def get_crazy_functions():
             "AsButton":False,
             "Function": HotReload(载入对话历史存档)
         },
-        "Kdocs_多文件解析(输入框输入文档链接)": {
+        "Kdocs_多文件转测试用例(输入框输入文档链接)": {
             "Color": "stop",
             "AsButton": True,
             "Function": HotReload(Kdocs_轻文档批量操作),

@@ -74,14 +74,15 @@ class SqliteHandle:
         self.__cursor.execute(f"DROP TABLE `{tab}`;")
         self.__connect.commit()
 
-def cp_db_data():
+def cp_db_data(incloud_tab='prompt'):
     sql_ll = sqlite_handle(database='ai_prompt_cp.db')
     tabs = sql_ll.get_tables()
     for i in tabs:
-        old_data = sqlite_handle(table=i, database='ai_prompt_cp.db').get_prompt_value()
-        sqlite_handle(table=i).inset_prompt(old_data)
+        if str(i).startswith(incloud_tab):
+            old_data = sqlite_handle(table=i, database='ai_prompt_cp.db').get_prompt_value()
+            sqlite_handle(table=i).inset_prompt(old_data)
 
 
 sqlite_handle = SqliteHandle
 if __name__ == '__main__':
-    pass
+    cp_db_data()

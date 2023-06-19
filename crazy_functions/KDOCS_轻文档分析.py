@@ -59,8 +59,14 @@ Markdown表格返回，表头标题：功能点｜验证点｜前置条件｜操
         inputs_array = [prompt.replace('{v}', inputs) for inputs in file_limit[1::2]]
         inputs_show_user_array = file_limit[0::2]
     elif type(file_limit) is str:
-        inputs_array = [prompt.replace('{v}',file_limit)]
-        inputs_show_user_array = [str(file_limit).splitlines()[0]]
+        if file_limit:
+            inputs_show_user_array = [str(file_limit).splitlines()[0]]
+            inputs_array = [prompt.replace('{v}',file_limit)]
+        else:
+            chatbot.append((None, f'输入框空空如也？{link}\n\n'
+                                '请在输入框中输入你的需求文档，然后再点击需求转测试用例'))
+            yield from update_ui(chatbot, history)
+            return
     else:
         return
     gpt_response_collection = yield from crazy_utils.request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
@@ -73,13 +79,12 @@ Markdown表格返回，表头标题：功能点｜验证点｜前置条件｜操
         # max_workers=5,  # OpenAI所允许的最大并行过载
         scroller_max_len=80
     )
-    kwargs_json = crazy_box.json_pars_true(plugin_kwargs['advanced_arg'])
-    if kwargs_json:
-        if kwargs_json['is_show']:
-            for results in list(zip(gpt_response_collection[0::2], gpt_response_collection[1::2])):
-                chatbot.append(results)
-                history.extend(results)
-                yield from update_ui(chatbot, history)
+    kwargs_is_show,  = crazy_box.json_args_true(plugin_kwargs['advanced_arg'], ['is_show'])
+    if kwargs_is_show:
+        for results in list(zip(gpt_response_collection[0::2], gpt_response_collection[1::2])):
+            chatbot.append(results)
+            history.extend(results)
+            yield from update_ui(chatbot, history)
     gpt_response = gpt_response_collection[1::2]
     chat_file_list = ''
     for k in range(len(gpt_response)):
@@ -135,13 +140,12 @@ def 需求转Markdown(file_limit: list, llm_kwargs, plugin_kwargs, chatbot, hist
         scroller_max_len=80
     )
     # 展示任务结果
-    kwargs_json = crazy_box.json_pars_true(plugin_kwargs['advanced_arg'])
-    if kwargs_json:
-        if kwargs_json['is_show']:
-            for results in list(zip(gpt_response_collection[0::2], gpt_response_collection[1::2])):
-                chatbot.append(results)
-                history.extend(results)
-                yield from update_ui(chatbot, history)
+    kwargs_is_show,  = crazy_box.json_args_true(plugin_kwargs['advanced_arg'], ['is_show'])
+    if kwargs_is_show:
+        for results in list(zip(gpt_response_collection[0::2], gpt_response_collection[1::2])):
+            chatbot.append(results)
+            history.extend(results)
+            yield from update_ui(chatbot, history)
     return gpt_response_collection
 
 

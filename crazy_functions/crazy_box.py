@@ -7,6 +7,9 @@ import re, os
 import json, time
 from bs4 import BeautifulSoup
 import requests
+import sys
+job_path = os.path.dirname(os.path.dirname(__file__))
+sys.path.append(job_path)
 import func_box
 from toolbox import get_conf, update_ui
 from openpyxl import load_workbook
@@ -177,11 +180,17 @@ def get_docs_content(url):
 
 
 
-def json_pars_true(txt):
+def json_args_return(kwargs, keys: list) -> list: 
+    temp = [False for i in range(len(keys))]
     try:
-        return json.loads(txt)
-    except:
-        return False
+        for i in range(len(keys)):
+            temp[i] = json.loads(kwargs)[keys[i]]
+        return temp
+    except Exception as f:
+        return temp
 
 if __name__ == '__main__':
-    print(get_docs_content('https://kdocs.cn/l/cvsdEWbiqhVH'))
+
+    # print(get_docs_content('https://kdocs.cn/l/cvsdEWbiqhVH'))
+    kw = {'advanced_arg': '{"is_show": true}'}
+    print(json_args_return(kwargs=kw['advanced_arg'], keys=['is2_show']))
