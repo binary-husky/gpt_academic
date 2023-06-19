@@ -131,13 +131,20 @@ def html_tag_color(tag, color=None, font='black'):
     tag = f'<span style="background-color: {color}; font-weight: bold; color: {font}">&nbsp;{tag}&ensp;</span>'
     return tag
 
-def html_a_blank(__href, file_name='', dir_name=''):
-    if not file_name:
-        file_name = __href
-    if not dir_name:
+def html_a_blank(__href, name=''):
+    if not name:
         dir_name = __href
+    a = f'<a href="{__href}" target="_blank" class="svelte-xrr240">{name}</a>'
+    return a
+
+def html_download_blank(__href, file_name='temp', dir_name=''):
+    if os.path.exists(__href):
+        __href = f'/file={__href}'
+    if not dir_name:
+        dir_name = file_name
     a = f'<a href="{__href}" target="_blank" download="{dir_name}" class="svelte-xrr240">{file_name}</a>'
     return a
+
 
 def ipaddr():
     # 获取本地ipx

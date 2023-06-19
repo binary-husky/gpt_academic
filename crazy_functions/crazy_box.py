@@ -3,12 +3,13 @@
 # @Time   : 2023/6/14
 # @Author : Spike
 # @Descr   :
-import re
-import json
+import re, os
+import json, time
 from bs4 import BeautifulSoup
 import requests
-from toolbox import get_conf
-
+import func_box
+from toolbox import get_conf, update_ui
+from openpyxl import load_workbook
 
 class Utils:
 
@@ -66,6 +67,36 @@ class Utils:
             for _d in dictionary:
                 pass
 
+
+class ExcelHandle:
+
+    def __init__(self, ipaddr):
+        self.template_excel = os.path.join(func_box.base_path, 'docs/template/【Temp】测试要点.xlsx')
+        self.user_path = os.path.join(func_box.base_path, 'private_upload', ipaddr, 'test_case')
+        os.makedirs(f'{self.user_path}', exist_ok=True)
+
+    def lpvoid_lpbuffe(self, data_list: list, filename=None, decs=''):
+        # 加载现有的 Excel 文件
+        workbook = load_workbook(self.template_excel)
+        # 选择要操作的工作表
+        worksheet = workbook['测试要点']
+        decs_sheet = workbook['说明']
+        decs_sheet['C2'] = decs
+        # 定义起始行号
+        start_row = 4
+        # 遍历数据列表
+        for row_data in data_list:
+            # 写入每一行的数据到指定的单元格范围
+            for col_num, value in enumerate(row_data, start=1):
+                cell = worksheet.cell(row=start_row, column=col_num)
+                cell.value = value
+            # 增加起始行号
+            start_row += 1
+        # 保存 Excel 文件
+        if not filename: filename = time.strftime("%Y-%m-%d-%H", time.localtime()) + '_temp'
+        test_case_path = f'{os.path.join(self.user_path, filename)}.xlsx'
+        workbook.save(test_case_path)
+        return test_case_path
 
 
 WPS_COOKIES, WPS_HEADERS, WPS_PARM, WPS_URL_OTL = get_conf('WPS_COOKIES', 'WPS_HEADERS', 'WPS_PARM', 'WPS_URL_OTL')
@@ -146,6 +177,11 @@ def get_docs_content(url):
 
 
 
+def json_pars_true(txt):
+    try:
+        return json.loads(txt)
+    except:
+        return False
 
 if __name__ == '__main__':
     print(get_docs_content('https://kdocs.cn/l/cvsdEWbiqhVH'))

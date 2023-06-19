@@ -8,7 +8,9 @@
     --message-bot-background-color-light: #FFFFFF;
     --message-bot-background-color-dark: #2C2C2C;
 }
-
+mspace {
+    display: block;
+}
 #debug_mes {
     position: absolute;
     bottom: 0;

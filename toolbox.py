@@ -513,6 +513,7 @@ def get_user_download(chatbot, link, file):
     """
     将短路径转换为下载链接
     """
+    file = file.rstrip()
     for file_handle in str(file).split('\n'):
         if os.path.isfile(file_handle):
             # temp_file = func_box.copy_temp_file(file_handle) 无法使用外部的临时目录
@@ -521,19 +522,18 @@ def get_user_download(chatbot, link, file):
                 dir_file, file_name = ('/'.join(str(file_handle).split('/')[-2:]), os.path.basename(file_handle))
                 chatbot.append(['Convert the file address to a download link at：',
                                 f'[Local Message] Successful conversion\n\n '
-                                f'<a href="{link["local"]}/file={temp_file}" target="_blank" download="{dir_file}" class="svelte-xrr240">{file_name}</a>'])
+                                f'{func_box.html_download_blank(__href=temp_file, dir_name=file_name, file_name=file_name)}'])
             else:
                 chatbot.append(['Convert the file address to a download link at：',
                                 f'[Local Message] Conversion failed, file or not exist.'])
         elif os.path.isdir(file_handle):
             for root, dirs, files in os.walk(file_handle):
                 for f in files:
-                    temp_ = os.path.abspath(os.path.join(root, f))
-                    dir_file, file_name = ('/'.join(str(file_handle).split('/')[-2:]), os.path.basename(temp_))
-                    link_href = f'{link["local"]} / file = {temp_}'
+                    temp_file = os.path.abspath(os.path.join(root, f))
+                    dir_file, file_name = ('/'.join(str(file_handle).split('/')[-2:]), os.path.basename(temp_file))
                     chatbot.append(['Convert the file address to a download link at：',
                                     f'[Local Message] Successful conversion\n\n '
-                                    f'{func_box.html_a_blank(__href=link_href, dir_name=dir_file, file_name=file_name)}'])
+                                    f'{func_box.html_download_blank(__href=temp_file, dir_name=file_name, file_name=file_name)}'])
         elif file_handle == '':
             pass
     return chatbot, ''

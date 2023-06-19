@@ -26,6 +26,7 @@ def get_crazy_functions():
     from crazy_functions.对话历史存档 import 载入对话历史存档
     from crazy_functions.对话历史存档 import 删除所有本地对话历史记录
     from crazy_functions.KDOCS_轻文档分析 import Kdocs_轻文档批量操作
+    from crazy_functions.KDOCS_轻文档分析 import 需求转测试用例
     from crazy_functions.批量Markdown翻译 import Markdown英译中
     function_plugins = {
         "猜你想问": {
@@ -50,6 +51,16 @@ def get_crazy_functions():
             "Color": "stop",
             "AsButton": True,
             "Function": HotReload(Kdocs_轻文档批量操作),
+            "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+            "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
+            "Parameters": {
+                "is_show": False,
+            }
+        },
+        "需求文档转测试用例(输入框输入文档链接)": {
+            "Color": "stop",
+            "AsButton": True,
+            "Function": HotReload(需求转测试用例),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
             "Parameters": {
