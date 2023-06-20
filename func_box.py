@@ -301,6 +301,7 @@ def diff_list(txt='', percent=0.70, switch: list = None, lst: dict = None, sp=15
     for key in sorted_dict:
         # 开始匹配关键字
         index = str(key[0]).lower().find(txt.lower())
+
         if index != -1:
             # sp=split 用于判断在哪里启动、在哪里断开
             if index - sp > 0:
@@ -425,7 +426,7 @@ def prompt_save(txt, name, prompt: gr.Dataset, ipaddr: gr.Request):
         return txt, name, [], prompt.update(samples=result, visible=True), prompt
 
 
-def prompt_input(txt: str, index, data: gr.Dataset, tabs_index):
+def prompt_input(txt: str, prompt_str, name_str,  index, data: gr.Dataset, tabs_index):
     """
     点击dataset的值使用Prompt
     Args:
@@ -438,16 +439,21 @@ def prompt_input(txt: str, index, data: gr.Dataset, tabs_index):
     data_str = str(data.samples[index][1])
     data_name = str(data.samples[index][0])
     rp_str = '{{{v}}}'
-    if data_str.find(rp_str) != -1:
-        new_txt = data_str.replace(rp_str, txt)
-    elif txt and tabs_index == 0:
-        new_txt = data_str + '\n' + txt
-    else:
-        new_txt = data_str
+
+    def str_v_handle(__str):
+        if data_str.find(rp_str) != -1 and __str:
+            txt_temp = data_str.replace(rp_str, __str)
+        elif __str:
+            txt_temp = data_str + '\n' + __str
+        else:
+            txt_temp = data_str
+        return txt_temp
     if tabs_index == 1:
+        new_txt = str_v_handle(prompt_str)
         return txt, new_txt, data_name
     else:
-        return new_txt, '', ''
+        new_txt = str_v_handle(txt)
+        return new_txt, prompt_str, name_str
 
 
 def copy_result(history):
@@ -580,6 +586,10 @@ def txt_converter_json(input_string):
         return input_string
 
 
+def clean_br_string(s):
+    s = re.sub('<\s*br\s*/?>', '\n', s)  # 使用正则表达式同时匹配<br>、<br/>、<br />、< br>和< br/>
+    return s
+
 class YamlHandle:
 
     def __init__(self, file=os.path.join(prompt_path, 'ai_common.yaml')):
@@ -625,6 +635,4 @@ class JsonHandle:
 
 
 if __name__ == '__main__':
-    result = [['214214', '5657'], ['fasfaf', '41241'],['kkkgh', '1`31`3'],]
-    ff = [pattern_markdown.sub('', _) for i in result[-2:] for _ in i]
-    print(ff)
+    pass

@@ -13,8 +13,8 @@ from request_llm import bridge_all
 import prompt_generator
 
 @CatchException
-def Kdocs_轻文档批量操作(link, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    link = str(link).split()
+def Kdocs_轻文档批量操作(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    link = str(link_limit).split()
     links = []
     for i in link:
         if i.startswith('http'):
@@ -31,7 +31,7 @@ def Kdocs_轻文档批量操作(link, llm_kwargs, plugin_kwargs, chatbot, histor
     for url in links:
         try:
             temp_num += 1
-            chatbot.append([f'爬虫开始工作了！ {url}', None])
+            chatbot.append([link_limit, None])
             content = crazy_box.get_docs_content(url)
             title = content.splitlines()[0]+f'_{temp_num}'
             docs_file_content.append({title: content})
@@ -47,11 +47,13 @@ def 需求转测试用例(file_limit, llm_kwargs, plugin_kwargs, chatbot, histor
     kwargs_is_show,  kwargs_prompt = crazy_box.json_args_return(plugin_kwargs['advanced_arg'], ['is_show', 'prompt'])
     if not kwargs_prompt: kwargs_prompt = '文档转测试用例'
     prompt = prompt_generator.SqliteHandle(table=f'prompt_{llm_kwargs["ipaddr"]}').find_prompt_result(kwargs_prompt)
+    chatbot.append([f'接下来使用的Prompt是 {func_box.html_tag_color(kwargs_prompt)} ，你可以在Prompt编辑/检索中进行私人定制哦～', None])
+    yield from update_ui(chatbot, history)
     if type(file_limit) is list:
         inputs_array = [prompt.replace('{{{v}}}', inputs) for inputs in file_limit[1::2]]
         inputs_show_user_array = file_limit[0::2]
     elif type(file_limit) is str:
-        if file_limit:
+        if file_limit: 
             inputs_show_user_array = [str(file_limit).splitlines()[0]]
             inputs_array = [prompt.replace('{v}',file_limit)]
         else:
@@ -81,7 +83,7 @@ def 需求转测试用例(file_limit, llm_kwargs, plugin_kwargs, chatbot, histor
     for k in range(len(gpt_response)):
         test_case = []
         for i in gpt_response[k].splitlines():
-            test_case.append(i.split('|')[1:])
+            test_case.append([func_box.clean_br_string(i) for i in i.split('|')[1:]])
         file_path = crazy_box.ExcelHandle(ipaddr=llm_kwargs['ipaddr']).lpvoid_lpbuffe(test_case[2:], filename=inputs_show_user_array[k])
         chat_file_list += f'{inputs_show_user_array[k]}生成结果如下:\t {func_box.html_download_blank(__href=file_path, file_name=file_path.split("/")[-1])}\n\n'
     chatbot.append(['Done', chat_file_list])
@@ -95,9 +97,11 @@ def split_dict_limit(file_limit: list, llm_kwargs, plugin_kwargs, chatbot, histo
     temp_dict_limit = {}
     temp_chat_context = ''
     # 分批次+分词
-    kwargs_is_show,  kwargs_prompt = crazy_box.json_args_return(plugin_kwargs['advanced_arg'], ['is_show', 'prompt'])
-    if not kwargs_prompt: kwargs_prompt = '文档转Markdown'
+    kwargs_is_show, = crazy_box.json_args_return(plugin_kwargs['advanced_arg'], ['is_show'])
+    kwargs_prompt = '文档转Markdown'
     prompt = prompt_generator.SqliteHandle(table=f'prompt_{llm_kwargs["ipaddr"]}').find_prompt_result(kwargs_prompt)
+    chatbot.append([f'接下来使用的Prompt是 {func_box.html_tag_color(kwargs_prompt)} ，你可以在Prompt编辑/检索中进行私人定制哦～', None])
+    yield from update_ui(chatbot, history)
     for job_dict in file_limit:
         for k, v in job_dict.items():
             temp_chat_context += f'{func_box.html_tag_color(k)} 开始分词,分好词才能避免对话超出tokens错误...\n\n'
@@ -110,7 +114,6 @@ def split_dict_limit(file_limit: list, llm_kwargs, plugin_kwargs, chatbot, histo
                     temp_dict_limit[k+f'_{i}'] = prompt.replace('{{{v}}}', segments[i])
             else:
                 temp_dict_limit[k] = prompt.replace('{{{v}}}', v)
-                temp_chat_context += f'{func_box.html_tag_color(k)} 准备就绪...\n\n'
                 temp_chat_context += f'{func_box.html_tag_color(k)} 准备就绪...\n\n'
                 chatbot[-1] = [chatbot[-1][0], temp_chat_context]
     yield from update_ui(chatbot, history)

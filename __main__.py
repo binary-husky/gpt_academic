@@ -102,7 +102,7 @@ class ChatBot(ChatBotFrame):
             with gr.Row():
                 with gr.Column(scale=100):
                     self.pro_results = gr.Chatbot(label='Prompt and result', elem_id='prompt_result').style()
-                with gr.Column(scale=10):
+                with gr.Column(scale=11):
                     Tips = "用 BORF 分析法设计chat GPT prompt:\n" \
                            "1、阐述背景 B(Background): 说明背景，为chatGPT提供充足的信息\n" \
                            "2、定义目标 O(Objectives):“我们希望实现什么”\n" \
@@ -110,7 +110,8 @@ class ChatBot(ChatBotFrame):
                            "4、试验并调整，改进 E(Evolve):三种改进方法自由组合\n" \
                            "\t 改进输入：从答案的不足之处着手改进背景B,目标O与关键结果R\n" \
                            "\t 改进答案：在后续对话中指正chatGPT答案缺点\n" \
-                           "\t 重新生成：尝试在prompt不变的情况下多次生成结果，优中选优\n"
+                           "\t 重新生成：尝试在prompt不变的情况下多次生成结果，优中选优\n" \
+                           "\t 熟练使用占位符{{{v}}}:  当Prompt存在占位符，则优先将{{{v}}}替换为预期文本"
                     self.pro_edit_txt = gr.Textbox(show_label=False, info='Prompt编辑区', lines=14,
                                                    placeholder=Tips).style(container=False)
                     with gr.Row():
@@ -179,7 +180,7 @@ class ChatBot(ChatBotFrame):
                                       outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check])
         self.tabs_code = gr.State(0)
         self.pro_func_prompt.select(fn=func_box.prompt_input,
-                                    inputs=[self.txt, self.pro_func_prompt, self.pro_fp_state, self.tabs_code],
+                                    inputs=[self.txt, self.pro_edit_txt, self.pro_name_txt, self.pro_func_prompt, self.pro_fp_state, self.tabs_code],
                                     outputs=[self.txt, self.pro_edit_txt, self.pro_name_txt])
         self.pro_upload_btn.upload(fn=func_box.prompt_upload_refresh,
                                    inputs=[self.pro_upload_btn, self.pro_prompt_state],
