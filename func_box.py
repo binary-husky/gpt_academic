@@ -301,8 +301,9 @@ def diff_list(txt='', percent=0.70, switch: list = None, lst: dict = None, sp=15
     for key in sorted_dict:
         # 开始匹配关键字
         index = str(key[0]).lower().find(txt.lower())
-
-        if index != -1:
+        index_ = str(key[1]).lower().find(txt.lower())
+        if index != -1 or index_ != -1:
+            if index == -1: index = index_  # 增加搜索prompt 名称
             # sp=split 用于判断在哪里启动、在哪里断开
             if index - sp > 0:
                 start = index - sp

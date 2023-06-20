@@ -175,6 +175,7 @@ class Kdocs:
 def get_docs_content(url):
     json_data = Kdocs(url).get_file_content()
     dict_data = json.loads(json_data)
+    print(json_data)
     _all, content = Utils().find_all_text_keys(dict_data, filter_type='')
     return content
 
@@ -190,7 +191,4 @@ def json_args_return(kwargs, keys: list) -> list:
         return temp
 
 if __name__ == '__main__':
-
-    # print(get_docs_content('https://kdocs.cn/l/cvsdEWbiqhVH'))
-    kw = {'advanced_arg': '{"is_show": true}'}
-    print(json_args_return(kwargs=kw['advanced_arg'], keys=['is2_show']))
+    pass

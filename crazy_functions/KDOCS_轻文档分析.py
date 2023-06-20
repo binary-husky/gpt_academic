@@ -97,7 +97,6 @@ def split_dict_limit(file_limit: list, llm_kwargs, plugin_kwargs, chatbot, histo
     temp_dict_limit = {}
     temp_chat_context = ''
     # 分批次+分词
-    kwargs_is_show, = crazy_box.json_args_return(plugin_kwargs['advanced_arg'], ['is_show'])
     kwargs_prompt = '文档转Markdown'
     prompt = prompt_generator.SqliteHandle(table=f'prompt_{llm_kwargs["ipaddr"]}').find_prompt_result(kwargs_prompt)
     chatbot.append([f'接下来使用的Prompt是 {func_box.html_tag_color(kwargs_prompt)} ，你可以在Prompt编辑/检索中进行私人定制哦～', None])
