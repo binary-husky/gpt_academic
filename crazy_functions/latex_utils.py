@@ -175,9 +175,8 @@ def merge_tex_files(project_foler, main_file, mode):
         main_file = main_file[:position] + add_ctex + add_url + main_file[position:]
         # fontset=windows
         import platform
-        if platform.system() != 'Windows':
-            main_file = re.sub(r"\\documentclass\[(.*?)\]{(.*?)}", r"\\documentclass[\1,fontset=windows]{\2}",main_file)
-            main_file = re.sub(r"\\documentclass{(.*?)}", r"\\documentclass[fontset=windows]{\1}",main_file)
+        main_file = re.sub(r"\\documentclass\[(.*?)\]{(.*?)}", r"\\documentclass[\1,fontset=windows,UTF8]{\2}",main_file)
+        main_file = re.sub(r"\\documentclass{(.*?)}", r"\\documentclass[fontset=windows,UTF8]{\1}",main_file)
         # find paper abstract
         pattern = re.compile(r'\\begin\{abstract\}.*\n')
         match = pattern.search(main_file)
