@@ -444,8 +444,8 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
     import shutil
     if rename_file is None: rename_file = f'{gen_time_str()}-{os.path.basename(file)}'
     new_path = os.path.join(f'./gpt_log/', rename_file)
-    if os.path.exists(new_path): os.remove(new_path)
-    shutil.copyfile(file, new_path)
+    if os.path.exists(new_path) and not os.path.samefile(new_path, file): os.remove(new_path)
+    if not os.path.exists(new_path): shutil.copyfile(file, new_path)
     if chatbot:
         chatbot._cookies.update({'file_to_promote': [new_path]})
 
