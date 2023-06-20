@@ -1,4 +1,4 @@
-from toolbox import CatchException, update_ui
+from toolbox import CatchException, update_ui, promote_file_to_downloadzone
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 import re
 
@@ -29,9 +29,8 @@ def write_chat_to_file(chatbot, history=None, file_name=None):
         for h in history:
             f.write("\n>>>" + h)
         f.write('</code>')
-    res = '对话历史写入：' + os.path.abspath(f'./gpt_log/{file_name}')
-    print(res)
-    return res
+    promote_file_to_downloadzone(f'./gpt_log/{file_name}', rename_file=file_name, chatbot=chatbot)
+    return '对话历史写入：' + os.path.abspath(f'./gpt_log/{file_name}')
 
 def gen_file_preview(file_name):
     try:
