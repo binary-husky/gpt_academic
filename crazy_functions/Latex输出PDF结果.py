@@ -89,7 +89,7 @@ def arxiv_download(chatbot, history, txt):
         except ValueError:
             return False
     if ('.' in txt) and ('/' not in txt) and is_float(txt):
-        txt = 'https://arxiv.org/abs/' + txt
+        txt = 'https://arxiv.org/abs/' + txt.strip()
     if not txt.startswith('https://arxiv.org'): 
         return txt, None
     
