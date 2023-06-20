@@ -32,7 +32,6 @@ import random
 import gradio as gr
 import toolbox
 from prompt_generator import SqliteHandle
-from bs4 import BeautifulSoup
 
 """contextlib 是 Python 标准库中的一个模块，提供了一些工具函数和装饰器，用于支持编写上下文管理器和处理上下文的常见任务，例如资源管理、异常处理等。
 官网：https://docs.python.org/3/library/contextlib.html"""
@@ -134,7 +133,7 @@ def html_tag_color(tag, color=None, font='black'):
 
 def html_a_blank(__href, name=''):
     if not name:
-        name = __href
+        dir_name = __href
     a = f'<a href="{__href}" target="_blank" class="svelte-xrr240">{name}</a>'
     return a
 
@@ -146,6 +145,7 @@ def html_download_blank(__href, file_name='temp', dir_name=''):
     a = f'<a href="{__href}" target="_blank" download="{dir_name}" class="svelte-xrr240">{file_name}</a>'
     return a
 
+
 def ipaddr():
     # 获取本地ipx
     ip = psutil.net_if_addrs()
@@ -153,9 +153,6 @@ def ipaddr():
         if ip[i][0][3]:
             return ip[i][0][1]
 
-def html_local_img(__file):
-    a = f'<div align="center"><img src="file={__file}"></div>'
-    return a
 
 def encryption_str(txt: str):
     """(关键字)(加密间隔)匹配机制（关键字间隔）"""
@@ -499,22 +496,16 @@ def show_prompt_result(index, data: gr.Dataset, chatbot):
     return chatbot
 
 
-
-def pattern_html(html):
-    bs = BeautifulSoup(html, 'html.parser')
-    return bs.get_text(separator='')
-
+pattern_markdown = re.compile(r'^<div class="markdown-body"><p>|<\/p><\/div>$')
+pattern_markdown_p = re.compile(r'^<div class="markdown-body">|<\/div>$')
 def thread_write_chat(chatbot, history):
     """
     对话记录写入数据库
     """
     private_key = toolbox.get_conf('private_key')[0]
     chat_title = chatbot[0][1].split()
-    i_say = pattern_html(chatbot[-1][0])
-    if history:
-        gpt_result = history
-    else:  # 如果历史对话不存在，那么读取对话框
-        gpt_result = [pattern_html(v) for i in chatbot for v in i]
+    i_say = pattern_markdown.sub('', chatbot[-1][0])
+    gpt_result = history
     if private_key in chat_title:
         SqliteHandle(f'ai_private_{chat_title[-2]}').inset_prompt({i_say: gpt_result})
     else:
@@ -522,21 +513,23 @@ def thread_write_chat(chatbot, history):
 
 
 base_path = os.path.dirname(__file__)
-prompt_path = os.path.join(base_path, 'users_data')
+prompt_path = os.path.join(base_path, 'prompt_users')
 
-def reuse_chat(result, chatbot, history, pro_numb, say):
+
+def reuse_chat(result, chatbot, history, pro_numb):
     """复用对话记录"""
     if result is None or result == []:
-        return chatbot, history, gr.update(), gr.update(), '', gr.Column.update()
+        return chatbot, history, gr.update(), gr.update(), ''
     else:
         if pro_numb:
             chatbot += result
-            history += [pattern_html(_) for i in result for _ in i]
+            history += [pattern_markdown.sub('', _) for i in result for _ in i]
         else:
             chatbot.append(result[-1])
-            history += [pattern_html(_) for i in result[-2:] for _ in i]
+            history += [pattern_markdown.sub('', _) for i in result[-2:] for _ in i]
         print(chatbot[-1][0])
-        return chatbot, history, say, gr.Tabs.update(selected='chatbot'), '', gr.Column.update(visible=False)
+        i_say = pattern_markdown.sub('', chatbot[-1][0])
+        return chatbot, history, i_say, gr.Tabs.update(selected='chatbot'), ''
 
 
 def num_tokens_from_string(listing: list, encoding_name: str = 'cl100k_base') -> int:
@@ -547,20 +540,20 @@ def num_tokens_from_string(listing: list, encoding_name: str = 'cl100k_base') ->
         count_tokens += len(encoding.encode(i))
     return count_tokens
 
-
 def spinner_chatbot_loading(chatbot):
     loading = [''.join(['.' * random.randint(1, 5)])]
     # 将元组转换为列表并修改元素
     loading_msg = copy.deepcopy(chatbot)
     temp_list = list(loading_msg[-1])
-
-    temp_list[1] = pattern_html(temp_list[1]) + f'{random.choice(loading)}'
+    if pattern_markdown.match(temp_list[1]):
+        temp_list[1] = pattern_markdown.sub('', temp_list[1]) + f'{random.choice(loading)}'
+    else:
+        temp_list[1] = pattern_markdown_p.sub('', temp_list[1]) + f'{random.choice(loading)}'
     # 将列表转换回元组并替换原始元组
     loading_msg[-1] = tuple(temp_list)
     return loading_msg
 
-
-def refresh_load_data(chat, history, prompt, crazy_list):
+def refresh_load_data(chat, history, prompt):
     """
     Args:
         chat: 聊天组件
@@ -573,8 +566,7 @@ def refresh_load_data(chat, history, prompt, crazy_list):
     is_all = toolbox.get_conf('prompt_list')[0]['key'][0]
     data = prompt_retrieval(is_all=[is_all])
     prompt.samples = data
-    selected = random.sample(crazy_list, 4)
-    return prompt.update(samples=data, visible=True), prompt, chat, history, gr.Dataset.update(samples=[[i] for i in selected]), selected
+    return prompt.update(samples=data, visible=True), prompt, chat, history
 
 
 
@@ -595,74 +587,6 @@ def txt_converter_json(input_string):
 def clean_br_string(s):
     s = re.sub('<\s*br\s*/?>', '\n', s)  # 使用正则表达式同时匹配<br>、<br/>、<br />、< br>和< br/>
     return s
-
-
-def update_btn(self,
-    value:  str = None,
-    variant:  str = None,
-    visible:  bool = None,
-    interactive: bool = None,
-    elem_id: str = None,
-    label: str = None
-):
-    if not variant: variant = self.variant
-    if not visible: visible = self.visible
-    if not value: value = self.value
-    if not interactive: interactive = self.interactive
-    if not elem_id: elem_id = self.elem_id
-    if not elem_id: label = self.label
-    return {
-        "variant": variant,
-        "visible": visible,
-        "value": value,
-        "interactive": interactive,
-        'elem_id': elem_id,
-        'label': label,
-        "__type__": "update",
-    }
-
-def update_txt(self,
-        value: str = None,
-        lines: int  = None,
-        max_lines: int  = None,
-        placeholder: str  = None,
-        label: str  = None,
-        show_label: bool  = None,
-        visible: bool  = None,
-        interactive: bool  = None,
-        type: str  = None,
-        elem_id: str = None
-    ):
-
-        return {
-            "lines": self.lines,
-            "max_lines": self.max_lines,
-            "placeholder": self.placeholder,
-            "label": self.label,
-            "show_label": self.show_label,
-            "visible": self.visible,
-            "value": self.value,
-            "type": self.type,
-            "interactive": self.interactive,
-            "elem_id": elem_id,
-            "__type__": "update",
-
-        }
-
-
-def get_html(filename):
-    path = os.path.join(base_path, "docs/assets", "html", filename)
-    if os.path.exists(path):
-        with open(path, encoding="utf8") as file:
-            return file.read()
-    return ""
-
-
-def git_log_list():
-    ll = Shell("git log --pretty=format:'%s | %h' -n 10").read()[1].splitlines()
-
-    return [i.split('|') for i in ll if 'branch' not in i][:5]
-
 
 class YamlHandle:
 
@@ -709,4 +633,4 @@ class JsonHandle:
 
 
 if __name__ == '__main__':
-    html_local_img("docs/imgs/openai-api-key-billing-paid-account.png")
+    pass

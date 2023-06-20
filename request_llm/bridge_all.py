@@ -130,9 +130,9 @@ model_info = {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
         "endpoint": api2d_endpoint,
-        "max_token": 8192,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
+        "max_token": 4096,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
     },
 
     # chatglm

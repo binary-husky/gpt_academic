@@ -1,5 +1,3 @@
-import html
-
 import markdown
 import importlib
 import inspect
@@ -14,7 +12,6 @@ import glob
 import sys
 from concurrent.futures import ThreadPoolExecutor
 ############################### 插件输入输出接驳区 #######################################
-pj = os.path.join
 
 """
 ========================================================================
@@ -258,39 +255,16 @@ def report_execption(chatbot, history, a, b):
 
 
 import re
-def text_divide_paragraph(text):
-    """
-    将文本按照段落分隔符分割开，生成带有段落标签的HTML代码。
-    """
-    pre = '<div class="markdown-body">'
-    suf = '</div>'
-    if text.startswith(pre) and text.endswith(suf):
-        return text
-    
-    if '```' in text:
-        # careful input
-        return pre + text + suf
-    else:
-        # wtf input
-        lines = text.split("\n")
-        for i, line in enumerate(lines):
-            lines[i] = lines[i].replace(" ", "&nbsp;")
-        text = "</br>".join(lines)
-        return pre + text + suf
 
 
 def text_divide_paragraph(input_str):
     if input_str:
-        # 提取所有的代码块
         code_blocks = re.findall(r'```[\s\S]*?```', input_str)
 
-        # 将提取到的代码块用占位符替换
         for i, block in enumerate(code_blocks):
             input_str = input_str.replace(block, f'{{{{CODE_BLOCK_{i}}}}}')
 
-        # 判断输入文本是否有反引号
         if code_blocks:
-            # 将非代码块部分的单个换行符替换为双换行符，并处理四个空格的行
             sections = re.split(r'({{{{\w+}}}})', input_str)
             for idx, section in enumerate(sections):
                 if 'CODE_BLOCK' in section or section.startswith('    '):
@@ -298,11 +272,9 @@ def text_divide_paragraph(input_str):
                 sections[idx] = re.sub(r'(?!```)(?<!\n)\n(?!(\n|^)( {0,3}[\*\+\-]|[0-9]+\.))', '\n\n', section)
             input_str = ''.join(sections)
 
-            # 将占位符替换回原代码块
             for i, block in enumerate(code_blocks):
                 input_str = input_str.replace(f'{{{{CODE_BLOCK_{i}}}}}', block.replace('\n', '\n'))
         else:
-            # 对于没有反引号的字符串，针对四个空格之前的换行符进行处理
             lines = input_str.split('\n')
             for idx, line in enumerate(lines[:-1]):
                 if not line.strip():
@@ -319,9 +291,8 @@ def markdown_convertion(txt):
     """
     将Markdown格式的文本转换为HTML格式。如果包含数学公式，则先将公式转换为HTML格式。
     """
-    pre = '<div class="md-message">'
+    pre = '<div class="markdown-body">'
     suf = '</div>'
-    raw_hide = f'<div class="raw-message hideM">%s</div>'
     if txt.startswith(pre) and txt.endswith(suf):
         # print('警告，输入了已经经过转化的字符串，二次转化可能出问题')
         return txt  # 已经被转化过，不需要再次转化
@@ -333,6 +304,13 @@ def markdown_convertion(txt):
         },
     }
     find_equation_pattern = r'<script type="math/tex(?:.*?)>(.*?)</script>'
+
+    def tex2mathml_catch_exception(content, *args, **kwargs):
+        try:
+            content = tex2mathml(content, *args, **kwargs)
+        except:
+            content = content
+        return content
 
     def replace_math_no_render(match):
         content = match.group(1)
@@ -349,10 +327,10 @@ def markdown_convertion(txt):
                 content = content.replace('\\begin{aligned}', '\\begin{array}')
                 content = content.replace('\\end{aligned}', '\\end{array}')
                 content = content.replace('&', ' ')
-            content = tex2mathml(content, display="block")
+            content = tex2mathml_catch_exception(content, display="block")
             return content
         else:
-            return tex2mathml(content)
+            return tex2mathml_catch_exception(content)
 
     def markdown_bug_hunt(content):
         """
@@ -363,6 +341,7 @@ def markdown_convertion(txt):
         content = content.replace('</script>\n</script>', '</script>')
         return content
 
+
     def no_code(txt):
         if '```' not in txt:
             return True
@@ -372,24 +351,21 @@ def markdown_convertion(txt):
             else:
                 return False
 
-    if ('$$' in txt) and no_code(txt):  # 有$标识的公式符号，且没有代码段```的标识
+    if ('$' in txt) and no_code(txt):  # 有$标识的公式符号，且没有代码段```的标识
         # convert everything to html format
         split = markdown.markdown(text='---')
-        txt = re.sub(r'\$\$((?:.|\n)*?)\$\$', lambda match: '$$' + re.sub(r'\n+', '</br>', match.group(1)) + '$$', txt)
-        convert_stage_1 = markdown.markdown(text=txt, extensions=['mdx_math', 'fenced_code', 'tables', 'sane_lists'], extension_configs=markdown_extension_configs)
+        convert_stage_1 = markdown.markdown(text=txt, extensions=['mdx_math', 'fenced_code', 'tables', 'sane_lists'],
+                                            extension_configs=markdown_extension_configs)
         convert_stage_1 = markdown_bug_hunt(convert_stage_1)
         # re.DOTALL: Make the '.' special character match any character at all, including a newline; without this flag, '.' will match anything except a newline. Corresponds to the inline flag (?s).
         # 1. convert to easy-to-copy tex (do not render math)
         convert_stage_2_1, n = re.subn(find_equation_pattern, replace_math_no_render, convert_stage_1, flags=re.DOTALL)
         # 2. convert to rendered equation
-        convert_stage_1_resp = convert_stage_1.replace('</br>', '')
-        convert_stage_2_2, n = re.subn(find_equation_pattern, replace_math_render, convert_stage_1_resp, flags=re.DOTALL)
+        convert_stage_2_2, n = re.subn(find_equation_pattern, replace_math_render, convert_stage_1, flags=re.DOTALL)
         # cat them together
-        context = convert_stage_2_1 + f'{split}' + convert_stage_2_2
-        return raw_hide.replace('%s', func_box.pattern_html(context)) + pre + context + suf
+        return pre + convert_stage_2_1 + f'{split}' + convert_stage_2_2 + suf
     else:
-        context = markdown.markdown(txt, extensions=['fenced_code', 'codehilite', 'tables', 'sane_lists'])
-        return raw_hide.replace('%s', func_box.pattern_html(context)) + pre + context + suf
+        return pre + markdown.markdown(txt, extensions=['fenced_code', 'codehilite', 'tables', 'sane_lists']) + suf
 
 
 def close_up_code_segment_during_stream(gpt_reply):
@@ -425,11 +401,8 @@ def format_io(self, y):
     if y is None or y == []:
         return []
     i_ask, gpt_reply = y[-1]
-    # 输入部分太自由，预处理一波
-    if i_ask is not None: i_ask = text_divide_paragraph(i_ask)
-    # 当代码输出半截的时候，试着补上后个```
-    if gpt_reply is not None: gpt_reply = close_up_code_segment_during_stream(gpt_reply)
-    # process
+    i_ask = text_divide_paragraph(i_ask)  # 输入部分太自由，预处理一波
+    gpt_reply = close_up_code_segment_during_stream(gpt_reply)  # 当代码输出半截的时候，试着补上后个```
     y[-1] = (
         # None if i_ask is None else markdown.markdown(i_ask, extensions=['fenced_code', 'tables']),
         None if i_ask is None else markdown_convertion(i_ask),
@@ -478,7 +451,7 @@ def extract_archive(file_path, dest_dir):
                 print("Successfully extracted rar archive to {}".format(dest_dir))
         except:
             print("Rar format requires additional dependencies to install")
-            return '\n\n解压失败! 需要安装pip install rarfile来解压rar文件'
+            return '\n\n需要安装pip install rarfile来解压rar文件'
 
     # 第三方库，需要预先pip install py7zr
     elif file_extension == '.7z':
@@ -489,7 +462,7 @@ def extract_archive(file_path, dest_dir):
                 print("Successfully extracted 7z archive to {}".format(dest_dir))
         except:
             print("7z format requires additional dependencies to install")
-            return '\n\n解压失败! 需要安装pip install py7zr来解压7z文件'
+            return '\n\n需要安装pip install py7zr来解压7z文件'
     else:
         return ''
     return ''
@@ -518,17 +491,13 @@ def find_recent_files(directory):
 
     return recent_files
 
-def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
+def promote_file_to_downloadzone(file, rename_file=None):
     # 将文件复制一份到下载区
     import shutil
     if rename_file is None: rename_file = f'{gen_time_str()}-{os.path.basename(file)}'
     new_path = os.path.join(f'./gpt_log/', rename_file)
-    if os.path.exists(new_path) and not os.path.samefile(new_path, file): os.remove(new_path)
-    if not os.path.exists(new_path): shutil.copyfile(file, new_path)
-    if chatbot:
-        if 'file_to_promote' in chatbot._cookies: current = chatbot._cookies['file_to_promote']
-        else: current = []
-        chatbot._cookies.update({'file_to_promote': [new_path] + current})
+    if os.path.exists(new_path): os.remove(new_path)
+    shutil.copyfile(file, new_path)
 
 
 def get_user_upload(chatbot, ipaddr: gr.Request):
@@ -603,20 +572,16 @@ def on_file_uploaded(files, chatbot, txt, ipaddr: gr.Request):
     return chatbot, txt
 
 
-def on_report_generated(cookies, files, chatbot):
+def on_report_generated(files, chatbot):
     from toolbox import find_recent_files
-    if 'file_to_promote' in cookies:
-        report_files = cookies['file_to_promote']
-        cookies.pop('file_to_promote')
-    else:
-        report_files = find_recent_files('gpt_log')
+    report_files = find_recent_files('gpt_log')
     if len(report_files) == 0:
         return None, chatbot
     # files.extend(report_files)
     file_links = ''
     for f in report_files: file_links += f'<br/><a href="file={os.path.abspath(f)}" target="_blank">{f}</a>'
     chatbot.append(['报告如何远程获取？', f'报告已经添加到右侧“文件上传区”（可能处于折叠状态），请查收。{file_links}'])
-    return cookies, report_files, chatbot
+    return report_files, chatbot
 
 def is_openai_api_key(key):
     API_MATCH_ORIGINAL = re.match(r"sk-[a-zA-Z0-9]{48}$", key)
@@ -630,11 +595,10 @@ def is_api2d_key(key):
         return False
 
 def is_proxy_key(key):
-    if key.startswith('proxy-') and len(key) == 38:
+    if 'proxy' in key:
         return True
     else:
         return False
-
 
 def is_any_api_key(key):
     if ',' in key:
@@ -657,14 +621,7 @@ def what_keys(keys):
         if is_api2d_key(k): 
             avail_key_list['API2D Key'] += 1
 
-    for k in key_list:
-        if is_proxy_key(k):
-            avail_key_list['Proxy Key'] += 1
-
-    return f"检测到： \n" \
-           f"OpenAI Key {avail_key_list['OpenAI Key']} 个\n" \
-           f"API2D Key {avail_key_list['API2D Key']} 个\n" \
-           f"Proxy Key {avail_key_list['API2D Key']} 个\n"
+    return f"检测到： OpenAI Key {avail_key_list['OpenAI Key']} 个，API2D Key {avail_key_list['API2D Key']} 个"
 
 def select_api_key(keys, llm_model):
     import random
@@ -679,7 +636,7 @@ def select_api_key(keys, llm_model):
         for k in key_list:
             if is_api2d_key(k): avail_key_list.append(k)
 
-    if llm_model.startswith('proxy-'):
+    if llm_model.startswith('proxy'):
         for k in key_list:
             if is_proxy_key(k): avail_key_list.append(k.replace('proxy-', ''))
 
@@ -943,8 +900,7 @@ def zip_result(folder):
     import time
     t = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
     zip_folder(folder, './gpt_log/', f'{t}-result.zip')
-    return pj('./gpt_log/', f'{t}-result.zip')
-
+    
 def gen_time_str():
     import time
     return time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
