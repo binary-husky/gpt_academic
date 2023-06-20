@@ -14,6 +14,7 @@ import glob
 import sys
 from concurrent.futures import ThreadPoolExecutor
 ############################### 插件输入输出接驳区 #######################################
+pj = os.path.join
 
 """
 ========================================================================
@@ -256,9 +257,7 @@ def report_execption(chatbot, history, a, b):
     history.append(b)
 
 
-<<<<<<< HEAD
 import re
-=======
 def text_divide_paragraph(text):
     """
     将文本按照段落分隔符分割开，生成带有段落标签的HTML代码。
@@ -278,7 +277,6 @@ def text_divide_paragraph(text):
             lines[i] = lines[i].replace(" ", "&nbsp;")
         text = "</br>".join(lines)
         return pre + text + suf
->>>>>>> ce0d8b9 (虚空终端插件雏形)
 
 
 def text_divide_paragraph(input_str):
@@ -480,7 +478,7 @@ def extract_archive(file_path, dest_dir):
                 print("Successfully extracted rar archive to {}".format(dest_dir))
         except:
             print("Rar format requires additional dependencies to install")
-            return '\n\n需要安装pip install rarfile来解压rar文件'
+            return '\n\n解压失败! 需要安装pip install rarfile来解压rar文件'
 
     # 第三方库，需要预先pip install py7zr
     elif file_extension == '.7z':
@@ -491,7 +489,7 @@ def extract_archive(file_path, dest_dir):
                 print("Successfully extracted 7z archive to {}".format(dest_dir))
         except:
             print("7z format requires additional dependencies to install")
-            return '\n\n需要安装pip install py7zr来解压7z文件'
+            return '\n\n解压失败! 需要安装pip install py7zr来解压7z文件'
     else:
         return ''
     return ''
@@ -528,7 +526,9 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
     if os.path.exists(new_path) and not os.path.samefile(new_path, file): os.remove(new_path)
     if not os.path.exists(new_path): shutil.copyfile(file, new_path)
     if chatbot:
-        chatbot._cookies.update({'file_to_promote': [new_path]})
+        if 'file_to_promote' in chatbot._cookies: current = chatbot._cookies['file_to_promote']
+        else: current = []
+        chatbot._cookies.update({'file_to_promote': [new_path] + current})
 
 
 def get_user_upload(chatbot, ipaddr: gr.Request):
@@ -943,7 +943,8 @@ def zip_result(folder):
     import time
     t = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
     zip_folder(folder, './gpt_log/', f'{t}-result.zip')
-    
+    return pj('./gpt_log/', f'{t}-result.zip')
+
 def gen_time_str():
     import time
     return time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())

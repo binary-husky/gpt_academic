@@ -108,6 +108,7 @@ def arxiv_download(chatbot, history, txt):
         return msg, None
     # <-------------- set format ------------->
     arxiv_id = url_.split('/abs/')[-1]
+    if 'v' in arxiv_id: arxiv_id = arxiv_id[:10]
     cached_translation_pdf = check_cached_translation_pdf(arxiv_id)
     if cached_translation_pdf: return cached_translation_pdf, arxiv_id
 
@@ -190,13 +191,14 @@ def Latex英文纠错加PDF对比(txt, llm_kwargs, plugin_kwargs, chatbot, histo
     
 
     # <-------------- zip PDF ------------->
-    zip_result(project_folder)
+    zip_res = zip_result(project_folder)
     if success:
         chatbot.append((f"成功啦", '请查收结果（压缩包）...'))
         yield from update_ui(chatbot=chatbot, history=history); time.sleep(1) # 刷新界面
     else:
         chatbot.append((f"失败了", '虽然PDF生成失败了, 但请查收结果（压缩包）, 内含已经翻译的Tex文档, 也是可读的, 您可以到Github Issue区, 用该压缩包+对话历史存档进行反馈 ...'))
         yield from update_ui(chatbot=chatbot, history=history); time.sleep(1) # 刷新界面
+        promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
 
     # <-------------- we are done ------------->
     return success
@@ -272,13 +274,14 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
                              work_folder_original=project_folder, work_folder_modified=project_folder, work_folder=project_folder)
 
     # <-------------- zip PDF ------------->
-    zip_result(project_folder)
+    zip_res = zip_result(project_folder)
     if success:
         chatbot.append((f"成功啦", '请查收结果（压缩包）...'))
         yield from update_ui(chatbot=chatbot, history=history); time.sleep(1) # 刷新界面
     else:
         chatbot.append((f"失败了", '虽然PDF生成失败了, 但请查收结果（压缩包）, 内含已经翻译的Tex文档, 也是可读的, 您可以到Github Issue区, 用该压缩包+对话历史存档进行反馈 ...'))
         yield from update_ui(chatbot=chatbot, history=history); time.sleep(1) # 刷新界面
+        promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
 
 
     # <-------------- we are done ------------->
