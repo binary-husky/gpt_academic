@@ -11,6 +11,31 @@
 mspace {
     display: block;
 }
+.gradio-container-3-32-2 h1 {
+    font-weight: 700 !important;
+    font-size: 28px !important;
+}
+.gradio-container-3-32-2 h2 {
+    font-weight: 600 !important;
+    font-size: 24px !important;
+}
+.gradio-container-3-32-2 h3 {
+    font-weight: 500 !important;
+    font-size: 20px !important;
+}
+.gradio-container-3-32-2 h4 {
+    font-weight: 400 !important;
+    font-size: 16px !important;
+}
+.gradio-container-3-32-2 h5 {
+    font-weight: 300 !important;
+    font-size: 14px !important;
+}
+.gradio-container-3-32-2 h6 {
+    font-weight: 200 !important;
+    font-size: 12px !important;
+}
+
 #debug_mes {
     position: absolute;
     bottom: 0;
