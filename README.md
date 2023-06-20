@@ -91,7 +91,7 @@ chat分析报告生成 | [函数插件] 运行后自动生成总结汇报
 
 1. 下载项目
 ```sh
-git clone https://github.com/binary-husky/.git
+git clone https://github.com/binary-husky/gpt_academic.git
 cd gpt_academic
 ```
 
