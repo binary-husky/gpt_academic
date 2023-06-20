@@ -6,6 +6,7 @@ import re
 import os
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
+pj = os.path.join
 
 """
 ========================================================================
@@ -399,7 +400,7 @@ def extract_archive(file_path, dest_dir):
                 print("Successfully extracted rar archive to {}".format(dest_dir))
         except:
             print("Rar format requires additional dependencies to install")
-            return '\n\n需要安装pip install rarfile来解压rar文件'
+            return '\n\n解压失败! 需要安装pip install rarfile来解压rar文件'
 
     # 第三方库，需要预先pip install py7zr
     elif file_extension == '.7z':
@@ -410,7 +411,7 @@ def extract_archive(file_path, dest_dir):
                 print("Successfully extracted 7z archive to {}".format(dest_dir))
         except:
             print("7z format requires additional dependencies to install")
-            return '\n\n需要安装pip install py7zr来解压7z文件'
+            return '\n\n解压失败! 需要安装pip install py7zr来解压7z文件'
     else:
         return ''
     return ''
@@ -447,7 +448,9 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
     if os.path.exists(new_path) and not os.path.samefile(new_path, file): os.remove(new_path)
     if not os.path.exists(new_path): shutil.copyfile(file, new_path)
     if chatbot:
-        chatbot._cookies.update({'file_to_promote': [new_path]})
+        if 'file_to_promote' in chatbot._cookies: current = chatbot._cookies['file_to_promote']
+        else: current = []
+        chatbot._cookies.update({'file_to_promote': [new_path] + current})
 
 def on_file_uploaded(files, chatbot, txt, txt2, checkboxes):
     """
@@ -802,7 +805,8 @@ def zip_result(folder):
     import time
     t = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
     zip_folder(folder, './gpt_log/', f'{t}-result.zip')
-    
+    return pj('./gpt_log/', f'{t}-result.zip')
+
 def gen_time_str():
     import time
     return time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
