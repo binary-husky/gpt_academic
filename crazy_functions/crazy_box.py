@@ -78,7 +78,7 @@ class ExcelHandle:
         self.user_path = os.path.join(func_box.base_path, 'private_upload', ipaddr, 'test_case')
         os.makedirs(f'{self.user_path}', exist_ok=True)
 
-    def lpvoid_lpbuffe(self, data_list: list, filename=None, decs=''):
+    def lpvoid_lpbuffe(self, data_list: list, filename='', decs=''):
         # 加载现有的 Excel 文件
         workbook = load_workbook(self.template_excel)
         # 选择要操作的工作表
@@ -96,7 +96,7 @@ class ExcelHandle:
             # 增加起始行号
             start_row += 1
         # 保存 Excel 文件
-        if not filename: filename = time.strftime("%Y-%m-%d-%H", time.localtime()) + '_temp'
+        if filename == '': filename = time.strftime("%Y-%m-%d-%H", time.localtime()) + '_temp'
         test_case_path = f'{os.path.join(self.user_path, filename)}.xlsx'
         workbook.save(test_case_path)
         return test_case_path
