@@ -212,6 +212,8 @@ def fix_content(final_tex, node_string):
     final_tex = re.sub(r"\\\ ([a-z]{2,10})\{", r"\\\1{", string=final_tex)
     final_tex = re.sub(r"\\([a-z]{2,10})\{([^\}]*?)\}", mod_inbraket, string=final_tex)
 
+    if "Traceback" in final_tex and "[Local Message]" in final_tex:
+        final_tex = node_string # 出问题了，还原原文
     if node_string.count('\\begin') != final_tex.count('\\begin'):
         final_tex = node_string # 出问题了，还原原文
     if node_string.count('\_') > 0 and node_string.count('\_') > final_tex.count('\_'):
