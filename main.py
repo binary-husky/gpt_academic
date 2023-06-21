@@ -105,7 +105,7 @@ def main():
                     with gr.Row():
                         with gr.Accordion("点击展开“文件上传区”。上传本地文件可供红色函数插件调用。", open=False) as area_file_up:
                             file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)", file_count="multiple")
-                with gr.Accordion("函数分类筛选", open=False) as area_crazy_fn:
+                with gr.Accordion("函数分类筛选", open=False) as area_tag_select:
                     
                     with gr.Row():
                         tags = []
@@ -116,9 +116,15 @@ def main():
                     with gr.Row():
                         tag_selector = gr.Radio(tags, label="Tags")
                     with gr.Row():
-                        selected_funcs_area = gr.Text("")
+                        # selected_funcs_area = gr.Text("")
+                        for k,v in all_functional.items():
+                            if ("Visible" in v) and (not v["Visible"]): continue
+                            variant = v["Color"] if "Color" in v else "secondary"
+                            v["Button"] = gr.Button(k, variant=variant)
                     with gr.Row():
-                        gr.Text("函数配置中加入了Tags属性，根据代码、论文、文档等场景进行了分类。相关Issue和PR在"+"https://github.com/binary-husky/gpt_academic/issues/829"+"，具体筛选功能的实现希望得到社区力量帮助")
+                        with gr.Accordion("点击展开“文件上传区”。上传本地文件可供红色函数插件调用。", open=False) as area_file_up:
+                            file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)", file_count="multiple")
+                    
                     
                 with gr.Accordion("更换模型 & SysPrompt & 交互界面布局", open=(LAYOUT == "TOP-DOWN")):
                     system_prompt = gr.Textbox(show_label=True, placeholder=f"System Prompt", label="System prompt", value=initial_prompt)
@@ -216,12 +222,19 @@ def main():
                 selected_funcs = all_functional.copy()  
             else:
                 selected_funcs = {k:v for k,v in all_functional.items() if tag in  v.get('Tags',[])}
-            return {
-                selected_funcs_area:gr.update(
-                    value ="当前Tag下的函数：（运行函数功能尚未实现）\n"+ "\n".join(sorted(selected_funcs.keys())), 		# 临时把函数列表输出在文本框，TODO: 渲染出函数按钮
-                )
+                
+            # 如果一个函数在selected_funcs中，则设置visible为True，否则为False
+            ret= {
+                v.get('Button'): gr.update(visible=(k in selected_funcs))
+                for k,v in all_functional.items() if 'Button' in v
             }
-        tag_selector.change(on_tag_selected, [tag_selector], [selected_funcs_area])
+            return ret
+            
+        tag_selector.change(
+            on_tag_selected, 
+            inputs=[tag_selector], 
+            outputs=[v['Button'] for k,v in all_functional.items() if 'Button' in v] # Tag选择区的所有button
+        )
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay():
         import threading, webbrowser, time
