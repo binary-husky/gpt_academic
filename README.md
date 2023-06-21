@@ -186,16 +186,19 @@ docker-compose up
 2. 使用docker-compose运行。
 请阅读docker-compose.yml后，按照其中的提示操作即可
 
-3. 如何使用反代URL/微软云AzureAPI。
+3. 如何使用反代URL
 按照`config.py`中的说明配置API_URL_REDIRECT即可。
 
-4. 远程云服务器部署（需要云服务器知识与经验）。
+4. 微软云AzureAPI
+按照`config.py`中的说明配置即可（AZURE_ENDPOINT等四个配置）
+
+5. 远程云服务器部署（需要云服务器知识与经验）。
 请访问[部署wiki-1](https://github.com/binary-husky/gpt_academic/wiki/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BF%9C%E7%A8%8B%E9%83%A8%E7%BD%B2%E6%8C%87%E5%8D%97)
 
-5. 使用WSL2（Windows Subsystem for Linux 子系统）。
+6. 使用WSL2（Windows Subsystem for Linux 子系统）。
 请访问[部署wiki-2](https://github.com/binary-husky/gpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2)
 
-6. 如何在二级网址（如`http://localhost/subpath`）下运行。
+7. 如何在二级网址（如`http://localhost/subpath`）下运行。
 请访问[FastAPI运行说明](docs/WithFastapi.md)
 
 ---
