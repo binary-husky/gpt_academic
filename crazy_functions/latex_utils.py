@@ -175,9 +175,8 @@ def merge_tex_files(project_foler, main_file, mode):
         main_file = main_file[:position] + add_ctex + add_url + main_file[position:]
         # fontset=windows
         import platform
-        if platform.system() != 'Windows':
-            main_file = re.sub(r"\\documentclass\[(.*?)\]{(.*?)}", r"\\documentclass[\1,fontset=windows]{\2}",main_file)
-            main_file = re.sub(r"\\documentclass{(.*?)}", r"\\documentclass[fontset=windows]{\1}",main_file)
+        main_file = re.sub(r"\\documentclass\[(.*?)\]{(.*?)}", r"\\documentclass[\1,fontset=windows,UTF8]{\2}",main_file)
+        main_file = re.sub(r"\\documentclass{(.*?)}", r"\\documentclass[fontset=windows,UTF8]{\1}",main_file)
         # find paper abstract
         pattern = re.compile(r'\\begin\{abstract\}.*\n')
         match = pattern.search(main_file)
@@ -213,6 +212,8 @@ def fix_content(final_tex, node_string):
     final_tex = re.sub(r"\\\ ([a-z]{2,10})\{", r"\\\1{", string=final_tex)
     final_tex = re.sub(r"\\([a-z]{2,10})\{([^\}]*?)\}", mod_inbraket, string=final_tex)
 
+    if "Traceback" in final_tex and "[Local Message]" in final_tex:
+        final_tex = node_string # 出问题了，还原原文
     if node_string.count('\\begin') != final_tex.count('\\begin'):
         final_tex = node_string # 出问题了，还原原文
     if node_string.count('\_') > 0 and node_string.count('\_') > final_tex.count('\_'):
@@ -404,7 +405,7 @@ class LatexPaperSplit():
     def __init__(self) -> None:
         self.nodes = None
         self.msg = "{\\scriptsize\\textbf{警告：该PDF由GPT-Academic开源项目调用大语言模型+Latex翻译插件一键生成，" + \
-            "版权归原文作者所有。翻译内容可靠性无任何保障，请仔细鉴别并以原文为准。" + \
+            "版权归原文作者所有。翻译内容可靠性无保障，请仔细鉴别并以原文为准。" + \
             "项目Github地址 \\url{https://github.com/binary-husky/gpt_academic/}。"
         # 请您不要删除或修改这行警告，除非您是论文的原作者（如果您是论文原作者，欢迎加REAME中的QQ联系开发者）
         self.msg_declare = "为了防止大语言模型的意外谬误产生扩散影响，禁止移除或修改此警告。}}\\\\" 
@@ -498,7 +499,32 @@ class LatexPaperFileGroup():
                 f.write(res)
         return manifest
 
+def write_html(sp_file_contents, sp_file_result, chatbot):
 
+    # write html
+    try:
+        import copy
+        from .crazy_utils import construct_html
+        from toolbox import gen_time_str
+        ch = construct_html() 
+        orig = ""
+        trans = ""
+        final = []
+        for c,r in zip(sp_file_contents, sp_file_result): 
+            final.append(c)
+            final.append(r)
+        for i, k in enumerate(final): 
+            if i%2==0:
+                orig = k
+            if i%2==1:
+                trans = k
+                ch.add_row(a=orig, b=trans)
+        create_report_file_name = f"{gen_time_str()}.trans.html"
+        ch.save_file(create_report_file_name)
+        promote_file_to_downloadzone(file=f'./gpt_log/{create_report_file_name}', chatbot=chatbot)
+    except:
+        from toolbox import trimmed_format_exc
+        print('writing html result failed:', trimmed_format_exc())
 
 def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, mode='proofread', switch_prompt=None, opts=[]):
     import time, os, re
@@ -575,6 +601,7 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
         pfg.get_token_num = None
         objdump(pfg, file=pj(project_folder,'temp.pkl'))
 
+    write_html(pfg.sp_file_contents, pfg.sp_file_result, chatbot=chatbot)
 
     #  <-------- 写出文件 ----------> 
     msg = f"当前大语言模型: {llm_kwargs['llm_model']}，当前语言模型温度设定: {llm_kwargs['temperature']}。"
@@ -624,7 +651,7 @@ def compile_latex_with_timeout(command, timeout=60):
         return False
     return True
 
-def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_folder_original, work_folder_modified, work_folder):
+def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_folder_original, work_folder_modified, work_folder, mode='default'):
     import os, time
     current_dir = os.getcwd()
     n_fix = 1
@@ -635,6 +662,7 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
 
     while True:
         import os
+
         # https://stackoverflow.com/questions/738755/dont-make-me-manually-abort-a-latex-compile-when-theres-an-error
         yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 编译原始PDF ...', chatbot, history)   # 刷新Gradio前端界面
         os.chdir(work_folder_original); ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex'); os.chdir(current_dir)
@@ -656,15 +684,16 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
             os.chdir(work_folder_original); ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex'); os.chdir(current_dir)
             os.chdir(work_folder_modified); ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex'); os.chdir(current_dir)
 
-            yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 使用latexdiff生成论文转化前后对比 ...', chatbot, history) # 刷新Gradio前端界面
-            print(    f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
-            ok = compile_latex_with_timeout(f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
+            if mode!='translate_zh':
+                yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 使用latexdiff生成论文转化前后对比 ...', chatbot, history) # 刷新Gradio前端界面
+                print(    f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
+                ok = compile_latex_with_timeout(f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
 
-            yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 正在编译对比PDF ...', chatbot, history)   # 刷新Gradio前端界面
-            os.chdir(work_folder); ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
-            os.chdir(work_folder); ok = compile_latex_with_timeout(f'bibtex    merge_diff.aux'); os.chdir(current_dir)
-            os.chdir(work_folder); ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
-            os.chdir(work_folder); ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
+                yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 正在编译对比PDF ...', chatbot, history)   # 刷新Gradio前端界面
+                os.chdir(work_folder); ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
+                os.chdir(work_folder); ok = compile_latex_with_timeout(f'bibtex    merge_diff.aux'); os.chdir(current_dir)
+                os.chdir(work_folder); ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
+                os.chdir(work_folder); ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
 
         # <--------------------->
         os.chdir(current_dir)
@@ -685,7 +714,7 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
             result_pdf = pj(work_folder_modified, f'{main_file_modified}.pdf')
             if os.path.exists(pj(work_folder, '..', 'translation')):
                 shutil.copyfile(result_pdf, pj(work_folder, '..', 'translation', 'translate_zh.pdf'))
-            promote_file_to_downloadzone(result_pdf)
+            promote_file_to_downloadzone(result_pdf, rename_file=None, chatbot=chatbot)
             return True # 成功啦
         else:
             if n_fix>=max_try: break
