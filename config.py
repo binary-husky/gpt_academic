@@ -1,6 +1,13 @@
 # [step 1]>> 例如： API_KEY = "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" （此key无效）
 API_KEY = "sk-此处填API密钥"    # 可同时填写多个API-KEY，用英文逗号分割，例如API_KEY = "sk-openaikey1,sk-openaikey2,fkxxxx-api2dkey1,fkxxxx-api2dkey2"
 
+#增加关于AZURE的配置信息， 可以在AZURE网页中找到
+AZURE_ENDPOINT = "https://你的api名称.openai.azure.com/"
+AZURE_API_KEY = "填入azure openai api的密钥"
+AZURE_API_VERSION = "填入api版本"
+AZURE_ENGINE = "填入ENGINE"
+
+
 # [step 2]>> 改为True应用代理，如果直接在海外服务器部署，此处不修改
 USE_PROXY = False
 if USE_PROXY:
