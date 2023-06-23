@@ -13,7 +13,7 @@ from request_llm import bridge_all
 import prompt_generator
 
 @CatchException
-def Kdocs_轻文档批量操作(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     link = str(link_limit).split()
     links = []
     for i in link:
@@ -32,15 +32,29 @@ def Kdocs_轻文档批量操作(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
         try:
             temp_num += 1
             chatbot.append([link_limit, None])
-            content = crazy_box.get_docs_content(url)
-            title = content.splitlines()[0]+f'_{temp_num}'
+            ovs_data, content, empty_picture_count = crazy_box.get_docs_content(url)
+            title = content.splitlines()[0]
+            if empty_picture_count > 5:
+                chatbot[-1][1] = f'\n\n 需求文档中没有{func_box.html_tag_color("描述")}的图片数量' \
+                                  f'有{func_box.html_tag_color(empty_picture_count)}张，生成的测试用例可能存在遗漏点，可以参考以下对图片进行描述补充\n\n' \
+                                  f'{func_box.html_local_img("docs/imgs/pic_desc.png")}'
             docs_file_content.append({title: content})
             yield from update_ui(chatbot, history)
-        except:
-            chatbot.append([f'啊哦，爬虫歇菜了！ {url}', f'{func_box.html_a_blank(url)} 请检查一下哦，这个链接我们访问不了，是否开启分享？是否设置密码？'])
+        except Exception as e:
+            chatbot.append([None, f'{func_box.html_a_blank(url)} \n\n请检查一下哦，这个链接我们访问不了，是否开启分享？是否设置密码？\n\n ```\n{str(e)}\n```'])
             yield from update_ui(chatbot, history)
-    gpt_response_collection = yield from 需求转Markdown(docs_file_content, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
+    return docs_file_content
+
+
+def KDocs_转测试用例(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    gpt_response_collection = KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
     yield from 需求转测试用例(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
+
+
+def KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    docs_file_content = Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
+    gpt_response_collection = yield from 需求转Markdown(docs_file_content, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
+    return gpt_response_collection
 
 
 def 需求转测试用例(file_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
@@ -63,6 +77,7 @@ def 需求转测试用例(file_limit, llm_kwargs, plugin_kwargs, chatbot, histor
             return
     else:
         return
+
     gpt_response_collection = yield from crazy_utils.request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         inputs_array=inputs_array,
         inputs_show_user_array=inputs_show_user_array,

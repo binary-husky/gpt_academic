@@ -18,7 +18,7 @@ class Utils:
 
     def __init__(self):
         self.find_keys_type = 'type'
-        self.find_keys_value = ['text', 'caption']
+        self.find_keys_value = {'text': 0, 'caption': 0}
         self.find_keys_tags = 'picture'
 
     def find_all_text_keys(self, dictionary, parent_type=None, text_values=None, filter_type=''):
@@ -175,9 +175,9 @@ class Kdocs:
 def get_docs_content(url):
     json_data = Kdocs(url).get_file_content()
     dict_data = json.loads(json_data)
-    print(json_data)
     _all, content = Utils().find_all_text_keys(dict_data, filter_type='')
-    return content
+    empty_picture_count = sum(1 for item in _all if 'picture' in item and not item['picture'])
+    return _all, content, empty_picture_count
 
 
 
@@ -191,4 +191,4 @@ def json_args_return(kwargs, keys: list) -> list:
         return temp
 
 if __name__ == '__main__':
-    pass
+    print(get_docs_content('https://kdocs.cn/l/ca1FQfQ6LiAx'))

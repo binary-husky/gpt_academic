@@ -76,3 +76,7 @@ def get_core_functions():
             "Visible": False,
         }
     }
+
+
+def get_guidance():
+    pass

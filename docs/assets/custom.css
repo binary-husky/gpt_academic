@@ -11,29 +11,36 @@
 mspace {
     display: block;
 }
-.gradio-container-3-32-2 h1 {
-    font-weight: 700 !important;
-    font-size: 28px !important;
+
+@keyframes highlight {
+  0%, 100% {
+    border: 2px solid transparent;
+  }
+  50% {
+    border-color: yellow;
+  }
 }
-.gradio-container-3-32-2 h2 {
-    font-weight: 600 !important;
-    font-size: 24px !important;
+
+#highlight_update {
+  animation-name: highlight;
+  animation-duration: 0.75s;
+  animation-iteration-count: 3;
 }
-.gradio-container-3-32-2 h3 {
-    font-weight: 500 !important;
-    font-size: 20px !important;
+
+.table-wrap.svelte-13hsdno.svelte-13hsdno.svelte-13hsdno {
+    border: 0px solid var(--border-color-primary) !important;
 }
-.gradio-container-3-32-2 h4 {
-    font-weight: 400 !important;
-    font-size: 16px !important;
+
+#examples_col {
+    z-index: 3;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    margin-bottom: 30% !important;
 }
-.gradio-container-3-32-2 h5 {
-    font-weight: 300 !important;
-    font-size: 14px !important;
-}
-.gradio-container-3-32-2 h6 {
-    font-weight: 200 !important;
-    font-size: 12px !important;
+#hide_examples {
+    z-index: 0;
 }
 
 #debug_mes {
@@ -42,7 +49,7 @@ mspace {
     left: 0;
     width: 100%;
     z-index: 1; /* 设置更高的 z-index 值 */
-    margin-bottom: 10px !important;
+    margin-bottom: -4px !important;
 }
 #chat_txt {
     display: flex;
@@ -54,8 +61,24 @@ mspace {
     bottom: 0;
     left: 0;
     width: 100%;
-    margin-bottom: 35px !important;
+    margin-bottom: 20px !important;
 }
+
+.submit_btn {
+    display: flex;
+    flex-direction: column-reverse;
+    overflow-y: auto !important;
+    z-index: 3;
+    flex-grow: 1; /* 自动填充剩余空间 */
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    margin-bottom: 20px !important;
+    min-width: min(50px,100%) !important;
+}
+
+
 #sm_btn {
     display: flex;
     flex-wrap: unset !important;
@@ -183,6 +206,33 @@ span.svelte-1gfkn6j {
     height: 100%;
 }
 
+.gradio-container-3-32-2 h1 {
+    font-weight: 700 !important;
+    font-size: 28px !important;
+}
+
+
+.gradio-container-3-32-2 h2 {
+    font-weight: 600 !important;
+    font-size: 24px !important;
+}
+.gradio-container-3-32-2 h3 {
+    font-weight: 500 !important;
+    font-size: 20px !important;
+}
+.gradio-container-3-32-2 h4 {
+    font-weight: 400 !important;
+    font-size: 16px !important;
+}
+.gradio-container-3-32-2 h5 {
+    font-weight: 300 !important;
+    font-size: 14px !important;
+}
+.gradio-container-3-32-2 h6 {
+    font-weight: 200 !important;
+    font-size: 12px !important;
+}
+
 /* usage_display */
 .insert_block {
     position: relative;
@@ -297,10 +347,10 @@ input[type=range]::-webkit-slider-runnable-track {
     background: transparent;
 }
 
-#submit_btn, #cancel_btn {
+.submit_btn, #cancel_btn {
     height: 42px !important;
 }
-#submit_btn::before {
+.submit_btn::before {
     content: url("data:image/svg+xml, %3Csvg width='21px' height='20px' viewBox='0 0 21 20' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'%3E %3Cg id='page' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'%3E %3Cg id='send' transform='translate(0.435849, 0.088463)' fill='%23FFFFFF' fill-rule='nonzero'%3E %3Cpath d='M0.579148261,0.0428666046 C0.301105539,-0.0961547561 -0.036517765,0.122307382 0.0032026237,0.420210298 L1.4927172,18.1553639 C1.5125774,18.4334066 1.79062012,18.5922882 2.04880264,18.4929872 L8.24518329,15.8913017 L11.6412765,19.7441794 C11.8597387,19.9825018 12.2370824,19.8832008 12.3165231,19.5852979 L13.9450591,13.4882182 L19.7839562,11.0255541 C20.0619989,10.8865327 20.0818591,10.4694687 19.7839562,10.3105871 L0.579148261,0.0428666046 Z M11.6138902,17.0883151 L9.85385903,14.7195502 L0.718169621,0.618812241 L12.69945,12.9346347 L11.6138902,17.0883151 Z' id='shape'%3E%3C/path%3E %3C/g%3E %3C/g%3E %3C/svg%3E");
     height: 21px;
 }
