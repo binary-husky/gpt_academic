@@ -181,7 +181,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     executor = ThreadPoolExecutor(max_workers=max_workers)
     n_frag = len(inputs_array)
     # 用户反馈
-    chatbot.append(["请开始多线程操作。", ""])
+    chatbot.append([None, ""])
     yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
     # 跨线程传递
     mutable = [[f"", time.time(), "等待中"] for _ in range(n_frag)]

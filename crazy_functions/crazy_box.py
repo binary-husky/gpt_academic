@@ -134,8 +134,7 @@ class Kdocs:
         except ValueError:
             return None
         html_content = self.get_file_info()
-        file_info = self.bs4_file_info(html_content)  # 调用 bs4_file_info() 方法解析 html_content，获取文件信息
-        self.parm_data.update(file_info)  # 更新类的一个参数 parm_data
+        self.bs4_file_info(html_content)  # 调用 bs4_file_info() 方法解析 html_content，获取文件信息# 更新类的parm_data 和 headers
         json_data = json.dumps(self.parm_data)
         response = requests.post(
             str(self.tol_url).replace('%v', otl_url_str),
@@ -167,7 +166,9 @@ class Kdocs:
             file_connid = json_data['conn_id']
             file_group = json_data['user_group']
             file_front_ver = json_data['file_version']
-            return {'connid': file_connid, 'group': file_group, 'front_ver': file_front_ver}
+            self.headers['x-csrf-rand'] = json_data['csrf_token']
+            self.parm_data.update({'connid': file_connid, 'group': file_group, 'front_ver': file_front_ver})
+            return True
         else:
             return None
 
