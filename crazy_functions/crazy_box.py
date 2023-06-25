@@ -102,11 +102,10 @@ class ExcelHandle:
         return test_case_path
 
 
-WPS_COOKIES, WPS_HEADERS, WPS_PARM, WPS_URL_OTL = get_conf('WPS_COOKIES', 'WPS_HEADERS', 'WPS_PARM', 'WPS_URL_OTL')
 class Kdocs:
 
     def __init__(self, url):
-
+        WPS_COOKIES, WPS_HEADERS, WPS_PARM, WPS_URL_OTL = get_conf('WPS_COOKIES', 'WPS_HEADERS', 'WPS_PARM','WPS_URL_OTL')
         self.url = url
         self.cookies = WPS_COOKIES
         self.headers = WPS_HEADERS

@@ -58,6 +58,9 @@ def KDocs_转测试用例(link_limit, llm_kwargs, plugin_kwargs, chatbot, histor
 @CatchException
 def KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     docs_file_content = yield from Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
+    if docs_file_content == []:
+        yield from update_ui(chatbot=chatbot, history=history, msg='无法获取需求文档内容，暂停运行')
+        return
     gpt_response_collection = yield from 需求转Markdown(docs_file_content, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
     return gpt_response_collection
 
