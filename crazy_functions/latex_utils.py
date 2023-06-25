@@ -314,6 +314,7 @@ def split_subprocess(txt, project_folder, return_dict, opts):
     text, mask = split_worker(text, mask, r"\\begin\{align\}(.*?)\\end\{align\}", re.DOTALL)
     text, mask = split_worker(text, mask, r"\\begin\{equation\}(.*?)\\end\{equation\}", re.DOTALL)
     text, mask = split_worker(text, mask, r"\\begin\{equation\*\}(.*?)\\end\{equation\*\}", re.DOTALL)
+    text, mask = split_worker(text, mask, r"\\includepdf\[(.*?)\]\{(.*?)\}")
     text, mask = split_worker(text, mask, r"\\item ")
     text, mask = split_worker(text, mask, r"\\label\{(.*?)\}")
     text, mask = split_worker(text, mask, r"\\begin\{(.*?)\}")
