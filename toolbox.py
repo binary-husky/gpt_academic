@@ -588,7 +588,7 @@ def is_api2d_key(key):
         return False
 
 def is_proxy_key(key):
-    if 'proxy' in key:
+    if key.startswith('proxy'):
         return True
     else:
         return False

@@ -46,26 +46,15 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
     return docs_file_content
 
 
-@CatchException
-def KDocs_转测试用例(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    gpt_response_collection = yield from KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
-    if gpt_response_collection == []:
-        yield from update_ui(chatbot=chatbot, history=history, msg='多线程一个都没有通过，暂停运行')
-        return
-    yield from 需求转测试用例(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
-
-
-@CatchException
 def KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     docs_file_content = yield from Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
-    if docs_file_content == []:
+    if not docs_file_content:
         yield from update_ui(chatbot=chatbot, history=history, msg='无法获取需求文档内容，暂停运行')
         return
     gpt_response_collection = yield from 需求转Markdown(docs_file_content, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
     return gpt_response_collection
 
 
-@CatchException
 def 需求转测试用例(file_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     kwargs_is_show,  kwargs_prompt = crazy_box.json_args_return(plugin_kwargs['advanced_arg'], ['is_show', 'prompt'])
     if not kwargs_prompt: kwargs_prompt = '文档转测试用例'
@@ -166,6 +155,14 @@ def 需求转Markdown(file_limit: list, llm_kwargs, plugin_kwargs, chatbot, hist
             history.extend(results)
             yield from update_ui(chatbot, history)
     return gpt_response_collection
+
+@CatchException
+def KDocs_转测试用例(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    gpt_response_collection = yield from KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
+    if not gpt_response_collection:
+        yield from update_ui(chatbot=chatbot, history=history, msg='多线程一个都没有通过，暂停运行')
+        return
+    yield from 需求转测试用例(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
 
 
 
