@@ -190,7 +190,6 @@ def test_Latex():
     # txt = r"C:\Users\x\arxiv_cache\2211.16068\workfolder"  #  ACE
     # txt = r"https://arxiv.org/abs/2002.09253"
     # txt = r"https://arxiv.org/abs/2306.07831"
-    # txt = r"C:\Users\fuqingxu\Desktop\2023-06-18-13-56-57-result"
     # txt = r"https://arxiv.org/abs/2212.10156"
     txt = r"https://arxiv.org/abs/2211.11559"
     
