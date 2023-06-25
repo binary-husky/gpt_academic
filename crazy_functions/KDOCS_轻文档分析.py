@@ -34,7 +34,7 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
             chatbot.append([link_limit, None])
             ovs_data, content, empty_picture_count = crazy_box.get_docs_content(url)
             title = content.splitlines()[0]
-            if empty_picture_count > 5:
+            if empty_picture_count >= 5:
                 chatbot[-1][1] = f'\n\n 需求文档中没有{func_box.html_tag_color("描述")}的图片数量' \
                                   f'有{func_box.html_tag_color(empty_picture_count)}张，生成的测试用例可能存在遗漏点，可以参考以下对图片进行描述补充\n\n' \
                                   f'{func_box.html_local_img("docs/imgs/pic_desc.png")}'
