@@ -25,42 +25,61 @@ CODE_HIGHLIGHT, ADD_WAIFU = get_conf('CODE_HIGHLIGHT', 'ADD_WAIFU')
 # gr.themes.utils.colors.pink (粉红色)
 # gr.themes.utils.colors.rose (玫瑰色)
 
-small_and_beautiful_theme = gr.themes.Soft(
-    ).set(
-        # button_primary_background_fill="*primary_500",
-        button_primary_background_fill_dark="*primary_600",
-        # button_primary_background_fill_hover="*primary_400",
-        # button_primary_border_color="*primary_500",
-        button_primary_border_color_dark="*primary_600",
-        button_primary_text_color="wihte",
-        button_primary_text_color_dark="white",
-        button_secondary_background_fill="*neutral_100",
-        button_secondary_background_fill_hover="*neutral_50",
-        button_secondary_background_fill_dark="*neutral_900",
-        button_secondary_text_color="*neutral_800",
-        button_secondary_text_color_dark="white",
-        # background_fill_primary="#F7F7F7",
-        # background_fill_primary_dark="#1F1F1F",
-        # block_title_text_color="*primary_500",
-        block_title_background_fill_dark="*primary_900",
-        block_label_background_fill_dark="*primary_900",
-        input_background_fill="#F6F6F6",
-    )
-
 
 def adjust_theme():
 
     try:
-        color_er = gr.themes.utils.colors.fuchsia
-        set_theme = gr.themes.Default(
-            primary_hue=gr.themes.utils.colors.orange,
-            neutral_hue=gr.themes.utils.colors.gray,
-            font=["sans-serif", "PingFang SC", "ui-sans-serif", "system-ui",
-                  "sans-serif", gr.themes.utils.fonts.GoogleFont("Source Sans Pro")],
-            font_mono=["ui-monospace", "Consolas", "monospace", gr.themes.utils.fonts.GoogleFont("IBM Plex Mono")])
-        set_theme.set(
-            # Colors
+        set_theme = gr.themes.Soft(
+            primary_hue=gr.themes.Color(
+                c50="#EBFAF2",
+                c100="#CFF3E1",
+                c200="#A8EAC8",
+                c300="#77DEA9",
+                c400="#3FD086",
+                c500="#02C160",
+                c600="#06AE56",
+                c700="#05974E",
+                c800="#057F45",
+                c900="#04673D",
+                c950="#2E5541",
+                name="small_and_beautiful",
+            ),
+            secondary_hue=gr.themes.Color(
+                c50="#576b95",
+                c100="#576b95",
+                c200="#576b95",
+                c300="#576b95",
+                c400="#576b95",
+                c500="#576b95",
+                c600="#576b95",
+                c700="#576b95",
+                c800="#576b95",
+                c900="#576b95",
+                c950="#576b95",
+            ),
+            neutral_hue=gr.themes.Color(
+                name="gray",
+                c50="#f6f7f8",
+                # c100="#f3f4f6",
+                c100="#F2F2F2",
+                c200="#e5e7eb",
+                c300="#d1d5db",
+                c400="#B2B2B2",
+                c500="#808080",
+                c600="#636363",
+                c700="#515151",
+                c800="#393939",
+                # c900="#272727",
+                c900="#2B2B2B",
+                c950="#171717",
+            ),
+
+            radius_size=gr.themes.sizes.radius_sm,
+        ).set(
+            button_primary_background_fill="*primary_500",
             button_primary_background_fill_dark="*primary_600",
+            button_primary_background_fill_hover="*primary_400",
+            button_primary_border_color="*primary_500",
             button_primary_border_color_dark="*primary_600",
             button_primary_text_color="wihte",
             button_primary_text_color_dark="white",
@@ -69,51 +88,14 @@ def adjust_theme():
             button_secondary_background_fill_dark="*neutral_900",
             button_secondary_text_color="*neutral_800",
             button_secondary_text_color_dark="white",
-            block_title_background_fill_dark="*neutral_900",
-            block_label_background_fill_dark="*neutral_900",
+            background_fill_primary="#F7F7F7",
+            background_fill_primary_dark="#1F1F1F",
+            block_title_text_color="*primary_500",
+            block_title_background_fill_dark="*primary_900",
+            block_label_background_fill_dark="*primary_900",
             input_background_fill="#F6F6F6",
-            input_background_fill_dark="*neutral_800",
-            # Transition
-            button_transition="none",
-            # Shadows
-            button_shadow="*shadow_drop",
-            button_shadow_hover="*shadow_drop_lg",
-            button_shadow_active="*shadow_inset",
-            input_shadow="0 0 0 *shadow_spread transparent, *shadow_inset",
-            input_shadow_focus="0 0 0 *shadow_spread *secondary_50, *shadow_inset",
-            input_shadow_focus_dark="0 0 0 *shadow_spread *neutral_700, *shadow_inset",
-            checkbox_label_shadow="*shadow_drop",
-            block_shadow="*shadow_drop",
-            form_gap_width="1px",
-            # Button borders
-            input_border_width="1px",
-            ##### input_background_fill="white",
-            # Gradients
-            stat_background_fill="linear-gradient(to right, *primary_400, *primary_200)",
-            stat_background_fill_dark="linear-gradient(to right, *primary_400, *primary_600)",
-            error_background_fill=f"linear-gradient(to right, {color_er.c100}, *background_fill_secondary)",
-            error_background_fill_dark="*background_fill_primary",
-            checkbox_label_background_fill="linear-gradient(to top, *neutral_50, white)",
-            checkbox_label_background_fill_dark="linear-gradient(to top, *neutral_900, *neutral_800)",
-            checkbox_label_background_fill_hover="linear-gradient(to top, *neutral_100, white)",
-            checkbox_label_background_fill_hover_dark="linear-gradient(to top, *neutral_900, *neutral_800)",
-            button_primary_background_fill="linear-gradient(to bottom right, *primary_100, *primary_300)",
-            ##### button_primary_background_fill_dark="linear-gradient(to bottom right, *primary_500, *primary_600)",
-            button_primary_background_fill_hover="linear-gradient(to bottom right, *primary_100, *primary_200)",
-            button_primary_background_fill_hover_dark="linear-gradient(to bottom right, *primary_500, *primary_500)",
-            ##### button_primary_border_color_dark="*primary_500",
-            ##### button_secondary_background_fill="linear-gradient(to bottom right, *neutral_100, *neutral_200)",
-            ##### button_secondary_background_fill_dark="linear-gradient(to bottom right, *neutral_600, *neutral_700)",
-            ##### button_secondary_background_fill_hover="linear-gradient(to bottom right, *neutral_100, *neutral_100)",
-            button_secondary_background_fill_hover_dark="linear-gradient(to bottom right, *neutral_600, *neutral_600)",
-            button_cancel_background_fill=f"linear-gradient(to bottom right, {color_er.c100}, {color_er.c200})",
-            button_cancel_background_fill_dark=f"linear-gradient(to bottom right, {color_er.c600}, {color_er.c700})",
-            button_cancel_background_fill_hover=f"linear-gradient(to bottom right, {color_er.c100}, {color_er.c100})",
-            button_cancel_background_fill_hover_dark=f"linear-gradient(to bottom right, {color_er.c600}, {color_er.c600})",
-            button_cancel_border_color=color_er.c200,
-            button_cancel_border_color_dark=color_er.c600,
-            button_cancel_text_color=color_er.c600,
-            button_cancel_text_color_dark="white",
+            chatbot_code_background_color="*neutral_950",
+            chatbot_code_background_color_dark="*neutral_950",
         )
         # 添加一个萌萌的看板娘
         if ADD_WAIFU:

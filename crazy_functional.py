@@ -25,7 +25,6 @@ def get_crazy_functions():
     from crazy_functions.对话历史存档 import 对话历史存档
     from crazy_functions.对话历史存档 import 载入对话历史存档
     from crazy_functions.对话历史存档 import 删除所有本地对话历史记录
-    
     from crazy_functions.批量Markdown翻译 import Markdown英译中
     function_plugins = {
         "猜你想问": {
@@ -36,6 +35,7 @@ def get_crazy_functions():
             "AsButton": False,
             "Function": HotReload(解析一个Python项目)
         },
+
         "保存当前的对话": {
             "AsButton": True,
             "Function": HotReload(对话历史存档)
@@ -49,6 +49,7 @@ def get_crazy_functions():
             "AsButton":False,
             "Function": HotReload(删除所有本地对话历史记录)
         },
+
         "[测试功能] 解析Jupyter Notebook文件": {
             "Color": "stop",
             "AsButton": False,

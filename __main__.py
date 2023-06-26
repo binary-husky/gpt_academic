@@ -75,13 +75,14 @@ class ChatBot(ChatBotFrame):
         self.chatbot = gr.Chatbot(elem_id='main_chatbot', label=f"当前模型：{LLM_MODEL}")
         self.chatbot.style()
         self.history = gr.State([])
-        temp_draw = [gr.HTML() for i in range(4)]
+        temp_draw = [gr.HTML() for i in range(2)]
         with gr.Row():
             self.txt = gr.Textbox(show_label=False,  placeholder="Input question here.", elem_id='chat_txt').style(container=False)
             self.input_copy = gr.State('')
-            self.submitBtn = gr.Button("提交", variant="primary", visible=False).style(full_width=False)
-        with gr.Row(elem_id='debug_mes'):
-            self.status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {proxy_info}")
+            self.submitBtn = gr.Button("", variant="primary", elem_classes='submit_btn').style(full_width=False)
+        with gr.Row():
+            self.status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行\n {proxy_info}", elem_id='debug_mes')
+
 
     def draw_examples(self):
         with gr.Column(elem_id='examples_col') as self.examples_column:
@@ -119,7 +120,7 @@ class ChatBot(ChatBotFrame):
                                                       self.area_crazy_fn])
 
     def __clear_input(self, inputs):
-        return '', inputs
+        return '', inputs, self.examples_column.update(visible=False)
 
     def draw_prompt(self):
         with gr.Row():
@@ -137,7 +138,7 @@ class ChatBot(ChatBotFrame):
             with gr.Row():
                 with gr.Column(scale=100):
                     self.pro_results = gr.Chatbot(label='Prompt and result', elem_id='prompt_result').style()
-                with gr.Column(scale=11):
+                with gr.Column(scale=16):
                     Tips = "用 BORF 分析法设计chat GPT prompt:\n" \
                            "1、阐述背景 B(Background): 说明背景，为chatGPT提供充足的信息\n" \
                            "2、定义目标 O(Objectives):“我们希望实现什么”\n" \
@@ -182,16 +183,12 @@ class ChatBot(ChatBotFrame):
         self.pro_reuse_btn.click(
             fn=func_box.reuse_chat,
             inputs=[self.pro_results, self.chatbot, self.history, self.pro_name_txt],
-            outputs=[self.chatbot, self.history, self.txt, self.tabs_chatbot, self.pro_name_txt]
+            outputs=[self.chatbot, self.history, self.txt, self.tabs_chatbot, self.pro_name_txt, self.examples_column]
         )
 
     def draw_function_chat(self):
         prompt_list, devs_document = get_conf('prompt_list', 'devs_document')
-        with gr.Row():
-            # self.cpopyBtn = gr.Button("复制回答", variant="secondary").style(size="sm")
-            self.resetBtn = gr.Button("新建对话", variant="secondary", elem_id='empty_btn').style(size="sm")
-            self.stopBtn = gr.Button("中止对话", variant="stop").style(size="sm")
-        with gr.Tab('Function'):
+        with gr.TabItem('Function', id='func_tab'):
             with gr.Accordion("基础功能区", open=False) as self.area_basic_fn:
                 with gr.Row():
                     for k in functional:
@@ -224,7 +221,7 @@ class ChatBot(ChatBotFrame):
         self.prompt_tab.select(fn=lambda: 1, inputs=None, outputs=self.tabs_code)
 
     def draw_public_chat(self):
-        with gr.Tab('Plugins'):
+        with gr.TabItem('Plugins', id='plug_tab'):
             with gr.Accordion("上传本地文件可供高亮函数插件调用", open=False) as self.area_file_up:
                 self.file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)",
                                             file_count="multiple")
@@ -255,7 +252,7 @@ class ChatBot(ChatBotFrame):
 
     def draw_setting_chat(self):
         switch_model = get_conf('switch_model')[0]
-        with gr.Tab('Settings'):
+        with gr.TabItem('Settings', id='sett_tab'):
             self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01, interactive=True,
                                    label="Top-p (nucleus sampling)", ).style(container=False)
             self.temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True,
@@ -305,7 +302,8 @@ class ChatBot(ChatBotFrame):
                             self.system_prompt, self.models_box, self.plugin_advanced_arg]
         self.output_combo = [self.cookies, self.chatbot, self.history, self.status]
         self.predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=self.input_combo, outputs=self.output_combo)
-        self.clear_agrs = dict(fn=self.__clear_input, inputs=[self.txt], outputs=[self.txt, self.input_copy])
+        self.clear_agrs = dict(fn=self.__clear_input, inputs=[self.txt], outputs=[self.txt, self.input_copy,
+                                                                                  self.examples_column])
         # 提交按钮、重置按钮
         self.cancel_handles.append(self.txt.submit(**self.clear_agrs).then(**self.predict_args))
         self.cancel_handles.append(self.submitBtn.click(**self.clear_agrs).then(**self.predict_args))
@@ -340,7 +338,7 @@ class ChatBot(ChatBotFrame):
         def on_dropdown_changed(k):
             # 按钮颜色随变
             variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
-            ret = {self.switchy_bt: gr.update(value=k, variant=variant)}
+            ret = {self.switchy_bt: self.switchy_bt.update(value=k, variant=variant)}
             # 参数取随变
             fns_value = func_box.txt_converter_json(str(crazy_fns[k].get('Parameters', '')))
             fns_lable = f"插件[{k}]的高级参数说明：\n" + crazy_fns[k].get("ArgsReminder", f"没有提供高级参数功能说明")
@@ -375,13 +373,12 @@ class ChatBot(ChatBotFrame):
         self.md_dropdown.select(on_md_dropdown_changed, [self.md_dropdown], [self.chatbot])
 
     def signals_auto_input(self):
-        from autogpt.cli import agent_main
         self.auto_input_combo = [self.ai_name, self.ai_role, self.ai_goal_list, self.ai_budget,
                                  self.cookies, self.chatbot, self.history,
                                  self.agent_obj]
         self.auto_output_combo = [self.cookies, self.chatbot, self.history, self.status,
                                   self.agent_obj, self.submit_start, self.submit_next, self.text_continue]
-        self.submit_start.click(fn=agent_main, inputs=self.auto_input_combo, outputs=self.auto_output_combo)
+
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay(self, is_open=False):
@@ -408,13 +405,19 @@ class ChatBot(ChatBotFrame):
             # 绘制一个ROW，row会让底下的元素自动排成一行
             with gr.Row().style(justify='between'):
                 # 绘制列1
-                with gr.Column(scale=46):
+                with gr.Column(scale=44):
                     with gr.Tabs() as self.tabs_copilot:
                         # 绘制对话模组
                         with gr.TabItem('Chat-Copilot'):
-                            self.draw_function_chat()
-                            self.draw_public_chat()
-                            self.draw_setting_chat()
+                            with gr.Row():
+                                # self.cpopyBtn = gr.Button("复制回答", variant="secondary").style(size="sm")
+                                self.resetBtn = gr.Button("新建对话", variant="secondary", elem_id='empty_btn').style(
+                                    size="sm")
+                                self.stopBtn = gr.Button("中止对话", variant="stop").style(size="sm")
+                            with gr.Tabs() as self.tabs_inputs:
+                                self.draw_function_chat()
+                                self.draw_public_chat()
+                                self.draw_setting_chat()
 
                         # 绘制autogpt模组
                         with gr.TabItem('Auto-GPT'):
@@ -431,6 +434,7 @@ class ChatBot(ChatBotFrame):
 
                 with self.chat_tab:  # 使用 gr.State()对组件进行拷贝时，如果之前绘制了Markdown格式，会导致启动崩溃,所以将 markdown相关绘制放在最后
                     self.draw_chatbot()
+                    self.draw_examples()
                 with self.prompt_tab:
                     self.draw_temp_edit()
             # 函数注册，需要在Blocks下进行
@@ -440,7 +444,10 @@ class ChatBot(ChatBotFrame):
             self.signals_public()
             self.signals_prompt_edit()
             # self.signals_auto_input()
-            self.demo.load(fn=func_box.refresh_load_data, postprocess=False, inputs=[self.chatbot, self.history, self.pro_fp_state], outputs=[self.pro_func_prompt, self.pro_fp_state, self.chatbot,  self.history, ])
+            adv_plugins = gr.State([i for i in crazy_fns])
+            self.demo.load(fn=func_box.refresh_load_data, postprocess=False,
+                           inputs=[self.chatbot, self.history, self.pro_fp_state, adv_plugins],
+                           outputs=[self.pro_func_prompt, self.pro_fp_state, self.chatbot,  self.history, self.guidance_plugins, self.guidance_plugins_state])
 
         # Start
         self.auto_opentab_delay()
