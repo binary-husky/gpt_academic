@@ -588,10 +588,11 @@ def is_api2d_key(key):
         return False
 
 def is_proxy_key(key):
-    if key.startswith('proxy-') and len(key) == 37:
+    if key.startswith('proxy-') and len(key) == 38:
         return True
     else:
         return False
+
 
 def is_any_api_key(key):
     if ',' in key:

@@ -21,7 +21,7 @@ crazy_fns = get_crazy_functions()
 gr.Chatbot.postprocess = format_io
 
 # 做一些外观色彩上的调整
-from theme import adjust_theme, advanced_css, custom_css, small_and_beautiful_theme
+from theme import adjust_theme, advanced_css, custom_css
 
 set_theme = adjust_theme()
 
@@ -81,7 +81,7 @@ class ChatBot(ChatBotFrame):
             self.input_copy = gr.State('')
             self.submitBtn = gr.Button("", variant="primary", elem_classes='submit_btn').style(full_width=False)
         with gr.Row():
-            self.status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {proxy_info}", elem_id='debug_mes')
+            self.status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行\n {proxy_info}", elem_id='debug_mes')
 
 
     def draw_examples(self):
@@ -236,14 +236,14 @@ class ChatBot(ChatBotFrame):
                         self.variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
                         crazy_fns[k]["Button"] = gr.Button(k, variant=self.variant)
                         crazy_fns[k]["Button"].style(size="sm")
-            with gr.Accordion("更多函数插件/高级用法", open=True):
+            with gr.Accordion("更多函数插件/高级用法", open=True, ):
                 dropdown_fn_list = []
                 for k in crazy_fns.keys():
                     if not crazy_fns[k].get("AsButton", True):
                         dropdown_fn_list.append(k)
                     elif crazy_fns[k].get('AdvancedArgs', False):
                         dropdown_fn_list.append(k)
-                self.dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="").style(
+                self.dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", show_label=False, label="").style(
                     container=False)
                 self.plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False,
                                                  placeholder="这里是特殊函数插件的高级参数输入区").style(container=False)

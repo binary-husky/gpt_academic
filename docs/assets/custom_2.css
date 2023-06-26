@@ -32,12 +32,12 @@ mspace {
 }
 
 #examples_col {
-    z-index: 2;
+    z-index: 3;
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    margin-bottom: 20% !important;
+    margin-bottom: 30% !important;
 }
 #hide_examples {
     z-index: 0;
@@ -48,6 +48,7 @@ mspace {
     display: flex;
     bottom: 0;
     left: 0;
+    width: 100%;
     z-index: 1; /* 设置更高的 z-index 值 */
     margin-bottom: -4px !important;
 }
@@ -147,24 +148,9 @@ footer {
     background: var(--color-accent);
     padding: var(--block-label-padding);
     font-size: var(--block-label-text-size); line-height: var(--line-sm);
-    width: auto; min-height: 30px !important;
+    width: auto; min-height: 30px!important;
     opacity: 1;
     transition: opacity 0.3s ease-in-out;
-}
-textarea.svelte-1pie7s6 {
-    background: #e7e6e6 !important;
-}
-
-.dark textarea.svelte-1pie7s6 {
-    background: var(--input-background-fill) !important;
-}
-
-.dark input[type=number].svelte-1cl284s {
-    background: #393939 !important;
-    border: var(--input-border-width) solid var(--input-border-color) !important;
-}
-.dark input[type="range"] {
-    background: #393939 !important;
 }
 #user_info .wrap {
     opacity: 0;
@@ -181,27 +167,29 @@ textarea.svelte-1pie7s6 {
     gap: 7px !important;
     border-radius: var(--radius-xl) !important
 }
-/* debug_mes */
-#debug_mes {
+/* status_display */
+#status_display {
+    display: flex;
     min-height: 2em;
     align-items: flex-end;
     justify-content: flex-end;
 }
-#debug_mes p {
+#status_display p {
     font-size: .85em;
     font-family: ui-monospace, "SF Mono", "SFMono-Regular", "Menlo", "Consolas", "Liberation Mono", "Microsoft Yahei UI", "Microsoft Yahei", monospace;
     /* Windows下中文的monospace会fallback为新宋体，实在太丑，这里折中使用微软雅黑 */
-    color: #000000;
-}
-.dark #debug_mes p {
-    color: #ee65ed;
+    color: var(--body-text-color-subdued);
 }
 
-#debug_mes {
+#status_display {
     transition: all 0.6s;
 }
 #main_chatbot {
     transition: height 0.3s ease;
+}
+
+span.svelte-1gfkn6j {
+    background: unset !important;
 }
 
 .wrap.svelte-18telvq.svelte-18telvq {
@@ -360,6 +348,45 @@ input[type=range]::-webkit-slider-runnable-track {
     background: transparent;
 }
 
+hr.append-display {
+    margin: 8px 0;
+    border: none;
+    height: 1px;
+    border-top-width: 0;
+    background-image: linear-gradient(to right, rgba(50,50,50, 0.1), rgba(150, 150, 150, 0.8), rgba(50,50,50, 0.1));
+}
+.source-a {
+    font-size: 0.8em;
+    max-width: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    /* background-color: #dddddd88; */
+    border-radius: 1.5rem;
+    padding: 0.2em;
+}
+.source-a a {
+    display: inline-block;
+    background-color: #aaaaaa50;
+    border-radius: 1rem;
+    padding: 0.5em;
+    text-align: center;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    min-width: 20%;
+    white-space: nowrap;
+    margin: 0.2rem 0.1rem;
+    text-decoration: none !important;
+    flex: 1;
+    transition: flex 0.5s;
+}
+.source-a a:hover {
+    background-color: #aaaaaa20;
+    flex: 2;
+}
+
 .submit_btn, #cancel_btn {
     height: 42px !important;
 }
@@ -381,10 +408,22 @@ ol:not(.options), ul:not(.options) {
     background-color: var(--chatbot-background-color-light) !important;
     color: var(--chatbot-color-light) !important;
 }
+[data-testid = "bot"] {
+    background-color: var(--message-bot-background-color-light) !important;
+}
+[data-testid = "user"] {
+    background-color: var(--message-user-background-color-light) !important;
+}
 /* 暗色 */
 .dark #main_chatbot {
-    background-color: var(--block-background-fill) !important;
+    background-color: var(--chatbot-background-color-dark) !important;
     color: var(--chatbot-color-dark) !important;
+}
+.dark [data-testid = "bot"] {
+    background-color: var(--message-bot-background-color-dark) !important;
+}
+.dark [data-testid = "user"] {
+    background-color: var(--message-user-background-color-dark) !important;
 }
 
 /* 屏幕宽度大于等于500px的设备 */
@@ -413,7 +452,7 @@ ol:not(.options), ul:not(.options) {
     }
 }
 #main_chatbot .wrap {
-    overflow-x: hidden
+    overflow-x: hidden;
 }
 /* 对话气泡 */
 .message {
@@ -435,16 +474,28 @@ ol:not(.options), ul:not(.options) {
     border-bottom-right-radius: 0 !important;
 }
 
-.message p {
+.message.user p {
+    white-space: pre-wrap;
+}
+.message .user-message {
+    display: block;
+    padding: 0 !important;
+    white-space: pre-wrap;
+}
+
+.message .md-message p {
     margin-top: 0.6em !important;
     margin-bottom: 0.6em !important;
 }
-.message p:first-child { margin-top: 0 !important; }
-.message p:last-of-type { margin-bottom: 0 !important; }
+.message .md-message p:first-child { margin-top: 0 !important; }
+.message .md-message p:last-of-type { margin-bottom: 0 !important; }
 
 .message .md-message {
     display: block;
     padding: 0 !important;
+}
+.message .raw-message p {
+    margin:0 !important;
 }
 .message .raw-message {
     display: block;
@@ -552,32 +603,51 @@ thead th {
 .message :not(pre) code {
     display: inline;
     white-space: break-spaces;
+    font-family: var(--font-mono);
     border-radius: 6px;
     margin: 0 2px 0 2px;
     padding: .2em .4em .1em .4em;
     background-color: rgba(175,184,193,0.2);
 }
 /* 代码块 */
-.message pre code {
-    display: block;
-    overflow: auto;
-    white-space: pre;
-    background-color: hsla(0, 0%, 20%, 70%)!important;
-    border-radius: 10px;
-    padding: 1.2em 1em 0em .5em;
-    margin: 0.6em 2em 1em 0.2em;
-    color: #FFF;
-    box-shadow: 6px 6px 16px hsla(0, 0%, 0%, 0.2);
+.message pre,
+.message pre[class*=language-] {
+    color: #fff;
+    overflow-x: auto;
+    overflow-y: hidden;
+    margin: .8em 1em 1em 0em !important;
+    padding: var(--spacing-xl) 1.2em !important;
+    border-radius: var(--radius-lg) !important;
 }
-.message pre {
-    padding: 0 !important;
+.message pre code,
+.message pre code[class*=language-] {
+    color: #fff;
+    padding: 0;
+    margin: 0;
+    background-color: unset;
+    text-shadow: none;
+    font-family: var(--font-mono);
 }
-.message pre code div.highlight {
-    background-color: unset !important;
+/* 覆盖 gradio 丑陋的复制按钮样式 */
+pre button[title="copy"] {
+    border-radius: 5px;
+    transition: background-color .2s ease;
+}
+pre button[title="copy"]:hover {
+    background-color: #333232;
+}
+pre button .check {
+    color: #fff !important;
+    background: var(--neutral-950) !important;
 }
 
-button.copy-button {
-    display: none;
+/* 覆盖prism.css */
+.language-css .token.string,
+.style .token.string,
+.token.entity,
+.token.operator,
+.token.url {
+    background: none !important;
 }
 
 /* 代码高亮样式 */
