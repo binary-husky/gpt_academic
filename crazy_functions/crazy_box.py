@@ -13,17 +13,18 @@ sys.path.append(job_path)
 import func_box
 from toolbox import get_conf, update_ui
 from openpyxl import load_workbook
+import urllib.parse
+
 
 class Utils:
 
     def __init__(self):
         self.find_keys_type = 'type'
-        self.find_keys_value = {'text': 0, 'caption': 0}
-        self.find_keys_tags = 'picture'
+        self.find_picture_source = {'caption': '', 'imgID': '', 'sourceKey': ''}
+        self.find_keys_tags = ['picture', 'processon']
 
     def find_all_text_keys(self, dictionary, parent_type=None, text_values=None, filter_type=''):
         """
-        嵌套查找self.find_keys_value相关的key和value
         Args:
             dictionary: 字典或列表
             parent_type: 匹配的type，作为新列表的key，用于分类
@@ -41,10 +42,15 @@ class Utils:
         # 获取当前层级的 type 值
         current_type = dictionary.get(self.find_keys_type, parent_type)
         # 如果字典中包含 'text' 或 'caption' 键，将对应的值添加到 text_values 列表中
-        for key in self.find_keys_value:
-            if key in dictionary:
-                content_value = dictionary.get(key, None)
-                text_values.append({current_type: content_value})
+        if 'text' in dictionary:
+            content_value = dictionary.get('text', None)
+            text_values.append({current_type: content_value})
+        if 'caption' in dictionary:
+            temp = {}
+            for key in self.find_picture_source:
+                temp[key] = dictionary.get(key, None)
+            text_values.append({current_type: temp})
+
         # 如果当前类型不等于 filter_type，则继续遍历子级属性
         if current_type != filter_type:
             for key, value in dictionary.items():
@@ -55,20 +61,17 @@ class Utils:
                         if isinstance(item, dict):
                             self.find_all_text_keys(item, current_type, text_values, filter_type)
         context_ = []
+        pic_dict = {}
         for i in text_values:
             for key, value in i.items():
-                if key == self.find_keys_tags and value != '':
-                    context_.append(f'{self.find_keys_tags}描述: ')
-                context_.append(value)
+                if key in self.find_keys_tags:
+                    mark = '{{{%s}}}' % value['sourceKey']
+                    context_.append(f'{key}OCR结果: """{mark}"""\n{key}描述: {value["caption"]}\n')
+                    pic_dict[value['sourceKey']] = value['imgID']
+                else:
+                    context_.append(value)
         context_ = '\n'.join(context_)
-        return text_values, context_
-
-    def file_limit_split(self, dictionary, max_tokens):
-        if dictionary is list:
-            pass
-        elif dictionary is dict:
-            for _d in dictionary:
-                pass
+        return text_values, context_, pic_dict
 
 
 class ExcelHandle:
@@ -105,12 +108,16 @@ class ExcelHandle:
 class Kdocs:
 
     def __init__(self, url):
-        WPS_COOKIES, WPS_HEADERS, WPS_PARM, WPS_URL_OTL = get_conf('WPS_COOKIES', 'WPS_HEADERS', 'WPS_PARM','WPS_URL_OTL')
+        WPS_COOKIES, WPS_HEADERS, WPS_OTL_PARM, \
+        WPS_URL_OTL, WPS_SHAPES_PARM, WPS_URL_SHAPES = get_conf('WPS_COOKIES', 'WPS_HEADERS', 'WPS_OTL_PARM',
+                                                                'WPS_URL_OTL', 'WPS_SHAPES_PARM', 'WPS_URL_SHAPES')
         self.url = url
         self.cookies = WPS_COOKIES
         self.headers = WPS_HEADERS
-        self.parm_data = WPS_PARM
+        self.parm_otl_data = WPS_OTL_PARM
+        self.parm_shapes_data = WPS_SHAPES_PARM
         self.tol_url = WPS_URL_OTL
+        self.shapes_url = WPS_URL_SHAPES
 
     def get_file_info(self):
         """
@@ -121,27 +128,56 @@ class Kdocs:
         response = requests.get(self.url, cookies=self.cookies, headers=self.headers)
         return response.text
 
+    def split_link_tags(self):
+        url_parts = self.url.split('/')
+        try:
+            l_index = url_parts.index('l')
+            otl_url_str = url_parts[l_index + 1]
+            return otl_url_str
+        except ValueError:
+            return None
+
     def get_file_content(self):
         """
         爬虫解析文档内容
         Returns:
             文档内容
         """
-        url_parts = self.url.split('/')
-        try:
-            l_index = url_parts.index('l')
-            otl_url_str = url_parts[l_index + 1]
-        except ValueError:
-            return None
+        otl_url_str = self.split_link_tags()
+        if otl_url_str is None: return
         html_content = self.get_file_info()
         self.bs4_file_info(html_content)  # 调用 bs4_file_info() 方法解析 html_content，获取文件信息# 更新类的parm_data 和 headers
-        json_data = json.dumps(self.parm_data)
+        json_data = json.dumps(self.parm_otl_data)
         response = requests.post(
             str(self.tol_url).replace('%v', otl_url_str),
             cookies=self.cookies,
             headers=self.headers,
             data=json_data,)
         return response.text
+
+    def get_file_pic_url(self, pic_dict: dict):
+        otl_url_str = self.split_link_tags()
+        if otl_url_str is None: return
+        for pic in pic_dict:
+            pic_parm = {'attachment_id': pic, "imgId": pic_dict[pic], "max_edge": 1180, "source": ""}
+            self.parm_shapes_data['objects'].append(pic_parm)
+        json_data = json.dumps(self.parm_shapes_data)
+        response = requests.post(
+            str(self.shapes_url).replace('%v', otl_url_str),
+            cookies=self.cookies,
+            headers=self.headers,
+            data=json_data,)
+        url_data = response.json()['data']
+        for pic in url_data:
+            pic_dict[pic] = self.url_decode(url_data[pic]['url'])
+        return pic_dict
+
+
+    @staticmethod
+    def url_decode(url):
+        decoded_url = urllib.parse.unquote(url)
+        return decoded_url
+
 
     def bs4_file_info(self, html_str):
         """
@@ -167,17 +203,19 @@ class Kdocs:
             file_group = json_data['user_group']
             file_front_ver = json_data['file_version']
             self.headers['x-csrf-rand'] = json_data['csrf_token']
-            self.parm_data.update({'connid': file_connid, 'group': file_group, 'front_ver': file_front_ver})
+            self.parm_otl_data.update({'connid': file_connid, 'group': file_group, 'front_ver': file_front_ver})
             return True
         else:
             return None
 
 def get_docs_content(url):
-    json_data = Kdocs(url).get_file_content()
+    kdocs = Kdocs(url)
+    json_data = kdocs.get_file_content()
     dict_data = json.loads(json_data)
-    _all, content = Utils().find_all_text_keys(dict_data, filter_type='')
-    empty_picture_count = sum(1 for item in _all if 'picture' in item and not item['picture'])
-    return _all, content, empty_picture_count
+    _all, content, pic_dict = Utils().find_all_text_keys(dict_data, filter_type='')
+    pic_dict_convert = kdocs.get_file_pic_url(pic_dict)
+    empty_picture_count = sum(1 for item in _all if 'picture' in item and not item['picture']['caption'])
+    return _all, content, empty_picture_count, pic_dict_convert
 
 
 
