@@ -13,7 +13,9 @@ def 解析PDF(file_name, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     # 递归地切割PDF文件，每一块（尽量是完整的一个section，比如introduction，experiment等，必要时再进行切割）
     # 的长度必须小于 2500 个 Token
     file_content, page_one = read_and_clean_pdf_text(file_name) # （尝试）按照章节切割PDF
-
+    file_content = file_content.encode('utf-8', 'ignore').decode()   # avoid reading non-utf8 chars
+    page_one = str(page_one).encode('utf-8', 'ignore').decode()  # avoid reading non-utf8 chars
+    
     TOKEN_LIMIT_PER_FRAGMENT = 2500
 
     from .crazy_utils import breakdown_txt_to_satisfy_token_limit_for_pdf
