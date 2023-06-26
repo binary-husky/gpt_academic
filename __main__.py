@@ -189,7 +189,7 @@ class ChatBot(ChatBotFrame):
     def draw_function_chat(self):
         prompt_list, devs_document = get_conf('prompt_list', 'devs_document')
         with gr.TabItem('Function', id='func_tab'):
-            with gr.Accordion("基础功能区", open=True) as self.area_basic_fn:
+            with gr.Accordion("基础功能区", open=False) as self.area_basic_fn:
                 with gr.Row():
                     for k in functional:
                         variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
@@ -201,7 +201,7 @@ class ChatBot(ChatBotFrame):
                                               label=f'上传你的Prompt文件, 编写格式请遵循上述开发者文档', )
             self.pro_private_check = gr.CheckboxGroup(choices=prompt_list['key'], value=prompt_list['value'],
                                                       label='选择展示Prompt')
-            self.pro_func_prompt = gr.Dataset(components=[gr.HTML()], label="All Prompt", visible=False,
+            self.pro_func_prompt = gr.Dataset(components=[gr.HTML()], label="Prompt List", visible=False,
                                               samples=[['...', ""] for i in range(20)], type='index',
                                               samples_per_page=10)
             self.pro_fp_state = gr.State(self.pro_func_prompt)
@@ -236,18 +236,18 @@ class ChatBot(ChatBotFrame):
                         self.variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
                         crazy_fns[k]["Button"] = gr.Button(k, variant=self.variant)
                         crazy_fns[k]["Button"].style(size="sm")
-                with gr.Accordion("更多函数插件/高级用法", open=True):
-                    dropdown_fn_list = []
-                    for k in crazy_fns.keys():
-                        if not crazy_fns[k].get("AsButton", True):
-                            dropdown_fn_list.append(k)
-                        elif crazy_fns[k].get('AdvancedArgs', False):
-                            dropdown_fn_list.append(k)
-                    self.dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="").style(
-                        container=False)
-                    self.plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False,
-                                                     placeholder="这里是特殊函数插件的高级参数输入区").style(container=False)
-                    self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
+            with gr.Accordion("更多函数插件/高级用法", open=True, ):
+                dropdown_fn_list = []
+                for k in crazy_fns.keys():
+                    if not crazy_fns[k].get("AsButton", True):
+                        dropdown_fn_list.append(k)
+                    elif crazy_fns[k].get('AdvancedArgs', False):
+                        dropdown_fn_list.append(k)
+                self.dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", show_label=False, label="").style(
+                    container=False)
+                self.plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False,
+                                                 placeholder="这里是特殊函数插件的高级参数输入区").style(container=False)
+                self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
 
 
     def draw_setting_chat(self):
@@ -349,10 +349,14 @@ class ChatBot(ChatBotFrame):
             else:
                 ret.update({self.plugin_advanced_arg: gr.update(visible=False, label=f"插件[{k}]不需要高级参数。")})
             return ret
+
+        self.dropdown.select(on_dropdown_changed, [self.dropdown], [self.switchy_bt, self.plugin_advanced_arg])
+
         # 随变按钮的回调函数注册
         def route(k, ipaddr: gr.Request, *args, **kwargs):
             if k in [r"打开插件列表", r"请先从插件列表中选择"]: return
             append = list(args)
+            append[-2] = func_box.txt_converter_json(append[-2])
             append.insert(-1, ipaddr)
             args = tuple(append)
             yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(*args, **kwargs)

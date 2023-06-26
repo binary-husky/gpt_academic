@@ -6,10 +6,9 @@ const MAX_HISTORY_LENGTH = 32;
 var key_down_history = [];
 var currentIndex = -1;
 var user_input_ta;
-
 var gradioContainer = null;
 var user_input_ta = null;
-var user_input_tb = null;
+var chat_txt = null;
 var userInfoDiv = null;
 var appTitleDiv = null;
 var chatbot = null;
@@ -55,7 +54,7 @@ function gradioLoaded(mutations) {
         if (mutations[i].addedNodes.length) {
             loginUserForm = document.querySelector(".gradio-container > .main > .wrap > .panel > .form")
             gradioContainer = document.querySelector(".gradio-container");
-            user_input_tb = document.getElementById('user_input_tb');
+            chat_txt = document.getElementById('chat_txt');
             userInfoDiv = document.getElementById("user_info");
             appTitleDiv = document.getElementById("app_title");
             chatbot = document.querySelector('#main_chatbot');
@@ -70,7 +69,7 @@ function gradioLoaded(mutations) {
             if (gradioContainer && apSwitch) {  // gradioCainter 加载出来了没?
                 adjustDarkMode();
             }
-            if (user_input_tb) {  // user_input_tb 加载出来了没?
+            if (chat_txt) {  // chat_txt 加载出来了没?
             }
             if (userInfoDiv && appTitleDiv) {  // userInfoDiv 和 appTitleDiv 加载出来了没?
                 if (!usernameGotten) {
@@ -386,7 +385,6 @@ var mObserver = new MutationObserver(function (mutationsList) {
     }
 });
 mObserver.observe(document.documentElement, { attributes: true, childList: true, subtree: true });
-
 
 // 监视页面内部 DOM 变动
 var observer = new MutationObserver(function (mutations) {
