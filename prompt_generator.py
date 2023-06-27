@@ -99,4 +99,4 @@ def inset_127_prompt():
 
 sqlite_handle = SqliteHandle
 if __name__ == '__main__':
-    print(sqlite_handle().find_prompt_result('文档转Markdown'))
+    cp_db_data()

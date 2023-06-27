@@ -45,6 +45,7 @@ mspace {
 
 #debug_mes {
     position: absolute;
+    display: flex;
     bottom: 0;
     left: 0;
     width: 100%;

@@ -594,7 +594,7 @@ def is_api2d_key(key):
         return False
 
 def is_proxy_key(key):
-    if 'proxy' in key:
+    if key.startswith('proxy-') and len(key) == 37:
         return True
     else:
         return False
@@ -620,7 +620,14 @@ def what_keys(keys):
         if is_api2d_key(k): 
             avail_key_list['API2D Key'] += 1
 
-    return f"检测到： OpenAI Key {avail_key_list['OpenAI Key']} 个，API2D Key {avail_key_list['API2D Key']} 个"
+    for k in key_list:
+        if is_proxy_key(k):
+            avail_key_list['Proxy Key'] += 1
+
+    return f"检测到： \n" \
+           f"OpenAI Key {avail_key_list['OpenAI Key']} 个\n" \
+           f"API2D Key {avail_key_list['API2D Key']} 个\n" \
+           f"Proxy Key {avail_key_list['API2D Key']} 个\n"
 
 def select_api_key(keys, llm_model):
     import random
@@ -635,7 +642,7 @@ def select_api_key(keys, llm_model):
         for k in key_list:
             if is_api2d_key(k): avail_key_list.append(k)
 
-    if llm_model.startswith('proxy'):
+    if llm_model.startswith('proxy-'):
         for k in key_list:
             if is_proxy_key(k): avail_key_list.append(k.replace('proxy-', ''))
 
