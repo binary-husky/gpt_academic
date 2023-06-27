@@ -504,7 +504,12 @@ def show_prompt_result(index, data: gr.Dataset, chatbot):
 
 def pattern_html(html):
     bs = BeautifulSoup(html, 'html.parser')
-    return bs.get_text(separator='')
+    md_message = bs.find('div', {'class': 'md-message'})
+    if md_message:
+        return md_message.get_text(separator='')
+    else:
+        return ""
+
 
 def thread_write_chat(chatbot, history):
     """
@@ -709,4 +714,4 @@ class JsonHandle:
 
 
 if __name__ == '__main__':
-    html_local_img("docs/imgs/openai-api-key-billing-paid-account.png")
+    print(pattern_html('<div class="raw-message hideM">很抱歉，作为一个文</div><div class="md-message"><p>很抱歉，作为一个文</p></div>'))

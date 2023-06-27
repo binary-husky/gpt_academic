@@ -79,6 +79,7 @@ class ChatBot(ChatBotFrame):
         with gr.Box(elem_id='chat_box'):
             with gr.Row():
                 self.sm_upload = gr.UploadButton(label='🔗Upload', file_count='multiple', elem_classes='sm_btn').style(size='sm', full_width=False)
+                self.sm_code_block = gr.Button(value='⚛︎Code', elem_classes='sm_btn').style(size='sm', full_width=False)
                 gr.HTML(func_box.get_html("appearance_switcher.html").format(label=""), elem_id='user_input_tb', elem_classes="insert_block")
             with gr.Row():
                 self.txt = gr.Textbox(show_label=False,  placeholder="Input question here.", elem_classes='chat_input').style(container=False)
@@ -91,6 +92,7 @@ class ChatBot(ChatBotFrame):
         self.sm_upload.upload(on_file_uploaded, [self.sm_upload, self.chatbot, self.txt], [self.chatbot, self.txt]).then(
             fn=lambda: [gr.Tabs.update(selected='plug_tab'), gr.Column.update(visible=False)], inputs=None, outputs=[self.tabs_inputs, self.examples_column]
         )
+        self.sm_code_block.click(fn=lambda x: x+'\n```\n\n```', inputs=[self.txt], outputs=[self.txt])
 
     def draw_examples(self):
         with gr.Column(elem_id='examples_col') as self.examples_column:
