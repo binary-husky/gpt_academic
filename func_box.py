@@ -330,9 +330,9 @@ def diff_list(txt='', percent=0.70, switch: list = None, lst: dict = None, sp=15
             if lst.get(key[0]):
                 be_value = lst[key[0]]
             else:
-                be_value = "这个prompt还没有对话过呢，快去试试吧～"
+                be_value = None
             value = be_value
-            dateset_list.append([show, key[0], value])
+            dateset_list.append([show, key[0], value, key[1]])
     return dateset_list
 
 
@@ -478,7 +478,7 @@ def str_is_list(s):
         return False
 
 
-def show_prompt_result(index, data: gr.Dataset, chatbot):
+def show_prompt_result(index, data: gr.Dataset, chatbot, pro_edit, pro_name):
     """
     查看Prompt的对话记录结果
     Args:
@@ -496,9 +496,12 @@ def show_prompt_result(index, data: gr.Dataset, chatbot):
                 chatbot.append([list_copy[i]])
             else:
                 chatbot.append([list_copy[i], list_copy[i + 1]])
+    elif click[2] is None and pro_edit == '':
+        pro_edit = click[1]
+        pro_name = click[3]
     else:
         chatbot.append((click[1], click[2]))
-    return chatbot
+    return chatbot, pro_edit, pro_name
 
 
 
