@@ -6,6 +6,7 @@ const MAX_HISTORY_LENGTH = 32;
 var key_down_history = [];
 var currentIndex = -1;
 var user_input_ta;
+
 var gradioContainer = null;
 var user_input_ta = null;
 var chat_txt = null;
@@ -70,17 +71,20 @@ function gradioLoaded(mutations) {
                 adjustDarkMode();
             }
             if (chat_txt) {  // chat_txt 加载出来了没?
+                selectHistory();
             }
             if (userInfoDiv && appTitleDiv) {  // userInfoDiv 和 appTitleDiv 加载出来了没?
                 if (!usernameGotten) {
                     getUserInfo();
                 }
+                setTimeout(showOrHideUserInfo(), 2000);
             }
             if (chatbot) {  // chatbot 加载出来了没?
                 setChatbotHeight();
             }
             if (chatbotWrap) {
                 if (!historyLoaded) {
+                    loadHistoryHtml();
                 }
                 setChatbotScroll();
             }
@@ -112,6 +116,54 @@ function showConfirmationDialog(a, file, c) {
     return [a, "CANCELED", c];
 }
 
+function selectHistory() {
+    user_input_ta = chat_txt.querySelector("textarea");
+    if (user_input_ta) {
+        observer.disconnect(); // 停止监听
+        // 在 textarea 上监听 keydown 事件
+        user_input_ta.addEventListener("keydown", function (event) {
+            var value = user_input_ta.value.trim();
+            // 判断按下的是否为方向键
+            if (event.code === 'ArrowUp' || event.code === 'ArrowDown') {
+                // 如果按下的是方向键，且输入框中有内容，且历史记录中没有该内容，则不执行操作
+                if (value && key_down_history.indexOf(value) === -1)
+                    return;
+                // 对于需要响应的动作，阻止默认行为。
+                event.preventDefault();
+                var length = key_down_history.length;
+                if (length === 0) {
+                    currentIndex = -1; // 如果历史记录为空，直接将当前选中的记录重置
+                    return;
+                }
+                if (currentIndex === -1) {
+                    currentIndex = length;
+                }
+                if (event.code === 'ArrowUp' && currentIndex > 0) {
+                    currentIndex--;
+                    user_input_ta.value = key_down_history[currentIndex];
+                } else if (event.code === 'ArrowDown' && currentIndex < length - 1) {
+                    currentIndex++;
+                    user_input_ta.value = key_down_history[currentIndex];
+                }
+                user_input_ta.selectionStart = user_input_ta.value.length;
+                user_input_ta.selectionEnd = user_input_ta.value.length;
+                const input_event = new InputEvent("input", { bubbles: true, cancelable: true });
+                user_input_ta.dispatchEvent(input_event);
+            } else if (event.code === "Enter") {
+                if (value) {
+                    currentIndex = -1;
+                    if (key_down_history.indexOf(value) === -1) {
+                        key_down_history.push(value);
+                        if (key_down_history.length > MAX_HISTORY_LENGTH) {
+                            key_down_history.shift();
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+
 var username = null;
 function getUserInfo() {
     if (usernameGotten) {
@@ -134,6 +186,7 @@ function getUserInfo() {
                 username = username.match(/User:\s*(.*)/)[1] || username;
                 localStorage.setItem("username", username);
                 usernameGotten = true;
+                clearHistoryHtml();
             }
         }
     }
@@ -360,6 +413,7 @@ var mObserver = new MutationObserver(function (mutationsList) {
         if (mmutation.type === 'childList') {
             for (var node of mmutation.addedNodes) {
                 if (node.nodeType === 1 && node.classList.contains('message') && node.getAttribute('data-testid') === 'bot') {
+                    saveHistoryHtml();
                     document.querySelectorAll('#main_chatbot>.wrap>.message-wrap .message.bot').forEach(addChuanhuButton);
                 }
                 if (node.tagName === 'INPUT' && node.getAttribute('type') === 'range') {
@@ -368,6 +422,7 @@ var mObserver = new MutationObserver(function (mutationsList) {
             }
             for (var node of mmutation.removedNodes) {
                 if (node.nodeType === 1 && node.classList.contains('message') && node.getAttribute('data-testid') === 'bot') {
+                    saveHistoryHtml();
                     document.querySelectorAll('#main_chatbot>.wrap>.message-wrap .message.bot').forEach(addChuanhuButton);
                 }
             }
@@ -379,6 +434,7 @@ var mObserver = new MutationObserver(function (mutationsList) {
                 timeoutId = setTimeout(() => {
                     isThrottled = false;
                     document.querySelectorAll('#main_chatbot>.wrap>.message-wrap .message.bot').forEach(addChuanhuButton);
+                    saveHistoryHtml();
                 }, 500);
             }
         }
@@ -386,12 +442,71 @@ var mObserver = new MutationObserver(function (mutationsList) {
 });
 mObserver.observe(document.documentElement, { attributes: true, childList: true, subtree: true });
 
+var loadhistorytime = 0; // for debugging
+function saveHistoryHtml() {
+    var historyHtml = document.querySelector('#main_chatbot > .wrap');
+    localStorage.setItem('chatHistory', historyHtml.innerHTML);
+    // console.log("History Saved")
+    historyLoaded = false;
+}
+function loadHistoryHtml() {
+    var historyHtml = localStorage.getItem('chatHistory');
+    if (!historyHtml) {
+        historyLoaded = true;
+        return; // no history, do nothing
+    }
+    userLogged = localStorage.getItem('userLogged');
+    if (userLogged){
+        historyLoaded = true;
+        return; // logged in, do nothing
+    }
+    if (!historyLoaded) {
+        var tempDiv = document.createElement('div');
+        tempDiv.innerHTML = historyHtml;
+        var buttons = tempDiv.querySelectorAll('button.chuanhu-btn');
+        var gradioCopyButtons = tempDiv.querySelectorAll('button.copy_code_button');
+        for (var i = 0; i < buttons.length; i++) {
+            buttons[i].parentNode.removeChild(buttons[i]);
+        }
+        for (var i = 0; i < gradioCopyButtons.length; i++) {
+            gradioCopyButtons[i].parentNode.removeChild(gradioCopyButtons[i]);
+        }
+        var fakeHistory = document.createElement('div');
+        fakeHistory.classList.add('history-message');
+        fakeHistory.innerHTML = tempDiv.innerHTML;
+        webLocale();
+        chatbotWrap.insertBefore(fakeHistory, chatbotWrap.firstChild);
+        // var fakeHistory = document.createElement('div');
+        // fakeHistory.classList.add('history-message');
+        // fakeHistory.innerHTML = historyHtml;
+        // chatbotWrap.insertBefore(fakeHistory, chatbotWrap.firstChild);
+        historyLoaded = true;
+        console.log("History Loaded");
+        loadhistorytime += 1; // for debugging
+    } else {
+        historyLoaded = false;
+    }
+}
+function clearHistoryHtml() {
+    localStorage.removeItem("chatHistory");
+    historyMessages = chatbotWrap.querySelector('.history-message');
+    if (historyMessages) {
+        chatbotWrap.removeChild(historyMessages);
+        console.log("History Cleared");
+    }
+}
+
 // 监视页面内部 DOM 变动
 var observer = new MutationObserver(function (mutations) {
     gradioLoaded(mutations);
 });
 observer.observe(targetNode, { childList: true, subtree: true });
 
+// 监视页面变化
+window.addEventListener("DOMContentLoaded", function () {
+    isInIframe = (window.self !== window.top);
+    historyLoaded = false;
+});
 window.addEventListener('resize', setChatbotHeight);
 window.addEventListener('scroll', setChatbotHeight);
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", adjustDarkMode);
