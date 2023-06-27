@@ -563,7 +563,7 @@ def on_file_uploaded(files, chatbot, txt, ipaddr: gr.Request):
     moved_files = [fp for fp in glob.glob(f'{time_tag_path}/**/*', recursive=True)]
     txt = f'{time_tag_path}'
     moved_files_str = '\t\n\n'.join(moved_files)
-    chatbot.append(['我上传了文件，请查收',
+    chatbot.append([None,
                     f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
                     f'\n\n调用路径参数已自动修正到: \n\n{txt}' +
                     f'\n\n现在您点击任意“高亮”标识的函数插件时，以上文件将被作为输入参数'+err_msg])

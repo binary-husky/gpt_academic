@@ -23,7 +23,7 @@ class Utils:
         self.find_picture_source = {'caption': '', 'imgID': '', 'sourceKey': ''}
         self.find_keys_tags = ['picture', 'processon']
 
-    def find_all_text_keys(self, dictionary, parent_type=None, text_values=None, filter_type=''):
+    def find_all_text_keys(self, dictionary, parent_type=None, text_values=None, filter_type='', img_proce=False):
         """
         Args:
             dictionary: 字典或列表
@@ -65,9 +65,13 @@ class Utils:
         for i in text_values:
             for key, value in i.items():
                 if key in self.find_keys_tags:
-                    mark = '{{{%s}}}' % value['sourceKey']
-                    context_.append(f'{key}OCR结果: """{mark}"""\n{key}描述: {value["caption"]}\n')
-                    pic_dict[value['sourceKey']] = value['imgID']
+                    if img_proce:
+                        mark = '{{{%s}}}' % value['sourceKey']
+                        context_.append(f'{key}OCR结果: """{mark}"""\n{key}描述: {value["caption"]}\n')
+                        pic_dict[value['sourceKey']] = value['imgID']
+                    else:
+                        if value["caption"]: context_.append(f'{key}描述: {value["caption"]}\n')
+                        pic_dict[value['sourceKey']] = value['imgID']
                 else:
                     context_.append(value)
         context_ = '\n'.join(context_)
@@ -208,11 +212,11 @@ class Kdocs:
         else:
             return None
 
-def get_docs_content(url):
+def get_docs_content(url, image_processing=False):
     kdocs = Kdocs(url)
     json_data = kdocs.get_file_content()
     dict_data = json.loads(json_data)
-    _all, content, pic_dict = Utils().find_all_text_keys(dict_data, filter_type='')
+    _all, content, pic_dict = Utils().find_all_text_keys(dict_data, filter_type='', img_proce=image_processing)
     pic_dict_convert = kdocs.get_file_pic_url(pic_dict)
     empty_picture_count = sum(1 for item in _all if 'picture' in item and not item['picture']['caption'])
     return _all, content, empty_picture_count, pic_dict_convert

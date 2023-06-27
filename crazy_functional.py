@@ -54,7 +54,8 @@ def get_crazy_functions():
             "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
             "Parameters": {
                 "is_show": False,
-                "prompt": '文档转测试用例'
+                "prompt": '文档转测试用例',
+                'img_ocr': False
             }
         },
         "需求文档转测试用例(输入框输入需求文档)": {
@@ -65,7 +66,8 @@ def get_crazy_functions():
             "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
             "Parameters": {
                 "is_show": False,
-                "prompt": '文档转测试用例'
+                "prompt": '文档转测试用例',
+                'img_ocr': False
             }
         },
 
@@ -141,9 +143,6 @@ def get_crazy_functions():
             "Color": "primary",    # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(批量生成函数注释)
-        },
-        "保存当前的对话": {
-            "Function": HotReload(对话历史存档)
         },
         "[多线程Demo] 解析此项目本身（源码自译解）": {
             "Function": HotReload(解析项目本身),
