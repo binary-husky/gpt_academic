@@ -79,6 +79,7 @@ class ChatBot(ChatBotFrame):
         with gr.Box(elem_id='chat_box'):
             with gr.Row():
                 gr.Button(elem_classes='sm_btn').style(size='sm', full_width=False)
+                gr.HTML(func_box.get_html("appearance_switcher.html").format(label=""), elem_classes="insert_block")
             with gr.Row():
                 self.txt = gr.Textbox(show_label=False,  placeholder="Input question here.", elem_classes='chat_input').style(container=False)
                 self.input_copy = gr.State('')

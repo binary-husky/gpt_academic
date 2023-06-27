@@ -1,6 +1,6 @@
 import gradio as gr
 from toolbox import get_conf
-CODE_HIGHLIGHT, ADD_WAIFU = get_conf('CODE_HIGHLIGHT', 'ADD_WAIFU')
+CODE_HIGHLIGHT, ADD_WAIFU, ADD_CHUANHU = get_conf('CODE_HIGHLIGHT', 'ADD_WAIFU', 'ADD_CHUANHU')
 # gradio可用颜色列表
 # gr.themes.utils.colors.slate (石板色)
 # gr.themes.utils.colors.gray (灰色)
@@ -97,20 +97,27 @@ def adjust_theme():
             chatbot_code_background_color="*neutral_950",
             chatbot_code_background_color_dark="*neutral_950",
         )
+        js = ''
+        if ADD_CHUANHU:
+            with open("./docs/assets/custom.js", "r", encoding="utf-8") as f, \
+                    open("./docs/assets/external-scripts.js", "r", encoding="utf-8") as f1:
+                customJS = f.read()
+                externalScripts = f1.read()
+            js += f'<script>{customJS}</script><script async>{externalScripts}</script>'
         # 添加一个萌萌的看板娘
         if ADD_WAIFU:
-            js = """
+            js += """
                 <script src="file=docs/waifu_plugin/jquery.min.js"></script>
                 <script src="file=docs/waifu_plugin/jquery-ui.min.js"></script>
                 <script src="file=docs/waifu_plugin/autoload.js"></script>
             """
-            gradio_original_template_fn = gr.routes.templates.TemplateResponse
-            def gradio_new_template_fn(*args, **kwargs):
-                res = gradio_original_template_fn(*args, **kwargs)
-                res.body = res.body.replace(b'</html>', f'{js}</html>'.encode("utf8"))
-                res.init_headers()
-                return res
-            gr.routes.templates.TemplateResponse = gradio_new_template_fn   # override gradio template
+        gradio_original_template_fn = gr.routes.templates.TemplateResponse
+        def gradio_new_template_fn(*args, **kwargs):
+            res = gradio_original_template_fn(*args, **kwargs)
+            res.body = res.body.replace(b'</html>', f'{js}</html>'.encode("utf8"))
+            res.init_headers()
+            return res
+        gr.routes.templates.TemplateResponse = gradio_new_template_fn   # override gradio template
     except:
         set_theme = None
         print('gradio版本较旧, 不能自定义字体和颜色')
