@@ -83,6 +83,41 @@ class ChatBot(ChatBotFrame):
         with gr.Row(elem_id='debug_mes'):
             self.status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {proxy_info}")
 
+    def draw_examples(self):
+        with gr.Column(elem_id='examples_col') as self.examples_column:
+            gr.Markdown('# Get Started Quickly')
+            with gr.Row():
+                hide_components = gr.Textbox(visible=False)
+                gr.Button.update = func_box.update_btn
+                self.example = [['今天伦敦天气怎么样？', '对2021年以后的世界和事件了解有限', self.submitBtn.update(elem_id='highlight_update')],
+                                ['今夕何夕，明月何月？', '偶尔会产生不正确的信息', self.submitBtn.update(elem_id='highlight_update')],
+                                ['怎么才能把学校给炸了？', '经过训练，会拒绝不适当的请求', self.submitBtn.update(elem_id='highlight_update')]]
+                self.example_inputs = [self.txt, hide_components, self.submitBtn]
+                self.guidance_example = gr.Examples(examples=self.example, inputs=self.example_inputs, label='基础对话')
+                self.guidance_plugins = gr.Dataset(components=[gr.HTML(visible=False)], samples=[['...'] for i in range(4)], label='高级功能', type='index')
+                self.guidance_plugins_state = gr.State()
+                self.guidance_news = gr.Examples(examples=func_box.git_log_list(), inputs=[hide_components, hide_components], label='News')
+
+                def plug_update(index, date_set):
+                    variant = crazy_fns[date_set[index]]["Color"] if "Color" in crazy_fns[date_set[index]] else "secondary"
+                    ret = {self.switchy_bt:  self.switchy_bt.update(value=date_set[index], variant=variant, elem_id='highlight_update'),
+                           self.tabs_inputs: gr.Tabs.update(selected='plug_tab'),
+                           self.area_crazy_fn: self.area_crazy_fn.update(open=True)}
+                    fns_value = func_box.txt_converter_json(str(crazy_fns[date_set[index]].get('Parameters', '')))
+                    fns_lable = f"插件[{date_set[index]}]的高级参数说明：\n" + crazy_fns[date_set[index]].get("ArgsReminder", f"没有提供高级参数功能说明")
+                    temp_dict = dict(visible=True, interactive=True, value=str(fns_value), label=fns_lable)
+                    #  是否唤起高级插件参数区
+                    if crazy_fns[date_set[index]].get("AdvancedArgs", False):
+                        ret.update({self.plugin_advanced_arg: gr.update(**temp_dict)})
+                        ret.update({self.area_crazy_fn: self.area_crazy_fn.update(open=False)})
+                    else:
+                        ret.update({self.plugin_advanced_arg: gr.update(visible=False, label=f"插件[{date_set[index]}]不需要高级参数。")})
+                    return ret
+
+                self.guidance_plugins.select(fn=plug_update, inputs=[self.guidance_plugins, self.guidance_plugins_state],
+                                             outputs=[self.switchy_bt, self.plugin_advanced_arg, self.tabs_inputs,
+                                                      self.area_crazy_fn])
+
     def __clear_input(self, inputs):
         return '', inputs
 
@@ -102,7 +137,7 @@ class ChatBot(ChatBotFrame):
             with gr.Row():
                 with gr.Column(scale=100):
                     self.pro_results = gr.Chatbot(label='Prompt and result', elem_id='prompt_result').style()
-                with gr.Column(scale=10):
+                with gr.Column(scale=11):
                     Tips = "用 BORF 分析法设计chat GPT prompt:\n" \
                            "1、阐述背景 B(Background): 说明背景，为chatGPT提供充足的信息\n" \
                            "2、定义目标 O(Objectives):“我们希望实现什么”\n" \
@@ -110,7 +145,8 @@ class ChatBot(ChatBotFrame):
                            "4、试验并调整，改进 E(Evolve):三种改进方法自由组合\n" \
                            "\t 改进输入：从答案的不足之处着手改进背景B,目标O与关键结果R\n" \
                            "\t 改进答案：在后续对话中指正chatGPT答案缺点\n" \
-                           "\t 重新生成：尝试在prompt不变的情况下多次生成结果，优中选优\n"
+                           "\t 重新生成：尝试在prompt不变的情况下多次生成结果，优中选优\n" \
+                           "\t 熟练使用占位符{{{v}}}:  当Prompt存在占位符，则优先将{{{v}}}替换为预期文本"
                     self.pro_edit_txt = gr.Textbox(show_label=False, info='Prompt编辑区', lines=14,
                                                    placeholder=Tips).style(container=False)
                     with gr.Row():
@@ -179,7 +215,7 @@ class ChatBot(ChatBotFrame):
                                       outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check])
         self.tabs_code = gr.State(0)
         self.pro_func_prompt.select(fn=func_box.prompt_input,
-                                    inputs=[self.txt, self.pro_func_prompt, self.pro_fp_state, self.tabs_code],
+                                    inputs=[self.txt, self.pro_edit_txt, self.pro_name_txt, self.pro_func_prompt, self.pro_fp_state, self.tabs_code],
                                     outputs=[self.txt, self.pro_edit_txt, self.pro_name_txt])
         self.pro_upload_btn.upload(fn=func_box.prompt_upload_refresh,
                                    inputs=[self.pro_upload_btn, self.pro_prompt_state],
@@ -338,6 +374,15 @@ class ChatBot(ChatBotFrame):
 
         self.md_dropdown.select(on_md_dropdown_changed, [self.md_dropdown], [self.chatbot])
 
+    def signals_auto_input(self):
+        from autogpt.cli import agent_main
+        self.auto_input_combo = [self.ai_name, self.ai_role, self.ai_goal_list, self.ai_budget,
+                                 self.cookies, self.chatbot, self.history,
+                                 self.agent_obj]
+        self.auto_output_combo = [self.cookies, self.chatbot, self.history, self.status,
+                                  self.agent_obj, self.submit_start, self.submit_next, self.text_continue]
+        self.submit_start.click(fn=agent_main, inputs=self.auto_input_combo, outputs=self.auto_output_combo)
+
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay(self, is_open=False):
         import threading, webbrowser, time
@@ -399,7 +444,6 @@ class ChatBot(ChatBotFrame):
 
         # Start
         self.auto_opentab_delay()
-        self.demo.queue_enabled_for_fn()
         self.demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION,
         blocked_paths=["config.py", "config_private.py", "docker-compose.yml", "Dockerfile"])
 
