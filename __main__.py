@@ -21,7 +21,7 @@ crazy_fns = get_crazy_functions()
 gr.Chatbot.postprocess = format_io
 
 # 做一些外观色彩上的调整
-from theme import adjust_theme, advanced_css, custom_css, small_and_beautiful_theme
+from theme import adjust_theme, advanced_css, custom_css
 
 set_theme = adjust_theme()
 
@@ -78,7 +78,7 @@ class ChatBot(ChatBotFrame):
         temp_draw = [gr.HTML() for i in range(7)]
         with gr.Box(elem_id='chat_box'):
             with gr.Row():
-                gr.Button(elem_classes='sm_btn').style(size='sm', full_width=False)
+                self.sm_upload = gr.UploadButton(label='🔗Upload', file_count='multiple', elem_classes='sm_btn').style(size='sm', full_width=False)
                 gr.HTML(func_box.get_html("appearance_switcher.html").format(label=""), elem_id='user_input_tb', elem_classes="insert_block")
             with gr.Row():
                 self.txt = gr.Textbox(show_label=False,  placeholder="Input question here.", elem_classes='chat_input').style(container=False)
@@ -87,6 +87,10 @@ class ChatBot(ChatBotFrame):
         with gr.Row():
             self.status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行\n {proxy_info}", elem_id='debug_mes')
 
+    def signals_sm_btn(self):
+        self.sm_upload.upload(on_file_uploaded, [self.sm_upload, self.chatbot, self.txt], [self.chatbot, self.txt]).then(
+            fn=lambda: [gr.Tabs.update(selected='plug_tab'), gr.Column.update(visible=False)], inputs=None, outputs=[self.tabs_inputs, self.examples_column]
+        )
 
     def draw_examples(self):
         with gr.Column(elem_id='examples_col') as self.examples_column:
@@ -313,7 +317,7 @@ class ChatBot(ChatBotFrame):
         self.cancel_handles.append(self.txt.submit(**self.clear_agrs).then(**self.predict_args))
         self.cancel_handles.append(self.submitBtn.click(**self.clear_agrs).then(**self.predict_args))
         # self.cpopyBtn.click(fn=func_box.copy_result, inputs=[self.history], outputs=[self.status])
-        self.resetBtn.click(lambda: ([], [], "已重置"), None, [self.chatbot, self.history, self.status], _js='()=>{clearHistoryHtml();}')
+        self.resetBtn.click(lambda: ([], [], "已重置"), None, [self.chatbot, self.history, self.status])
 
     def signals_function(self):
         # 基础功能区的回调函数注册
@@ -416,8 +420,7 @@ class ChatBot(ChatBotFrame):
                         with gr.TabItem('Chat-Copilot'):
                             with gr.Row():
                                 # self.cpopyBtn = gr.Button("复制回答", variant="secondary").style(size="sm")
-                                self.resetBtn = gr.Button("新建对话", variant="primary", elem_id='empty_btn').style(
-                                    size="sm")
+                                self.resetBtn = gr.Button("新建对话", variant="primary", elem_id='empty_btn').style(size="sm")
                                 self.stopBtn = gr.Button("中止对话", variant="stop").style(size="sm")
                             with gr.Tabs() as self.tabs_inputs:
                                 self.draw_function_chat()
@@ -443,6 +446,7 @@ class ChatBot(ChatBotFrame):
                 with self.prompt_tab:
                     self.draw_temp_edit()
             # 函数注册，需要在Blocks下进行
+            self.signals_sm_btn()
             self.signals_input_setting()
             self.signals_function()
             self.signals_prompt_func()
