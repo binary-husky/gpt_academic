@@ -190,9 +190,11 @@ def test_Latex():
     # txt = r"C:\Users\x\arxiv_cache\2211.16068\workfolder"  #  ACE
     # txt = r"https://arxiv.org/abs/2002.09253"
     # txt = r"https://arxiv.org/abs/2306.07831"
-    # txt = r"https://arxiv.org/abs/2212.10156"
+    txt = r"https://arxiv.org/abs/2212.10156"
     # txt = r"https://arxiv.org/abs/2211.11559"
-    txt = r"https://arxiv.org/abs/2303.08774"
+    # txt = r"https://arxiv.org/abs/2303.08774"
+    # txt = r"https://arxiv.org/abs/2303.12712"
+    # txt = r"C:\Users\fuqingxu\arxiv_cache\2303.12712\workfolder"
     
 
     for cookies, cb, hist, msg in (Latex翻译中文并重新编译PDF)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
