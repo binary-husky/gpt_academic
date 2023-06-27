@@ -493,7 +493,7 @@ def thread_write_chat(chatbot, history):
 
 
 base_path = os.path.dirname(__file__)
-prompt_path = os.path.join(base_path, 'prompt_users')
+prompt_path = os.path.join(base_path, 'users_data')
 
 
 def reuse_chat(result, chatbot, history, pro_numb):

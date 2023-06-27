@@ -10,7 +10,7 @@ import functools
 import func_box
 # 连接到数据库
 base_path = os.path.dirname(__file__)
-prompt_path = os.path.join(base_path, 'prompt_users')
+prompt_path = os.path.join(base_path, 'users_data')
 
 
 def connect_db_close(cls_method):
