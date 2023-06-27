@@ -31,7 +31,7 @@ def get_crazy_functions():
             "Function": HotReload(猜你想问)
         },
         "解析整个Python项目": {
-            "Color": "stop",    # 按钮颜色
+            "Color": "primary",    # 按钮颜色
             "AsButton": False,
             "Function": HotReload(解析一个Python项目)
         },
@@ -41,7 +41,7 @@ def get_crazy_functions():
             "Function": HotReload(对话历史存档)
         },
         "载入对话历史存档（先上传存档或输入路径）": {
-            "Color": "stop",
+            "Color": "primary",
             "AsButton":False,
             "Function": HotReload(载入对话历史存档)
         },
@@ -51,7 +51,7 @@ def get_crazy_functions():
         },
 
         "[测试功能] 解析Jupyter Notebook文件": {
-            "Color": "stop",
+            "Color": "primary",
             "AsButton": False,
             "Function": HotReload(解析ipynb文件),
             "AdvancedArgs": True, # 调用时，唤起高级参数输入区（默认False）
@@ -59,62 +59,62 @@ def get_crazy_functions():
         },
         "批量总结Word文档": {
             "AsButton": False,
-            "Color": "stop",
+            "Color": "primary",
             "Function": HotReload(总结word文档)
         },
         "解析整个C++项目头文件": {
-            "Color": "stop",    # 按钮颜色
+            "Color": "primary",    # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(解析一个C项目的头文件)
         },
         "解析整个C++项目（.cpp/.hpp/.c/.h）": {
-            "Color": "stop",    # 按钮颜色
+            "Color": "primary",    # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(解析一个C项目)
         },
         "解析整个Go项目": {
-            "Color": "stop",    # 按钮颜色
+            "Color": "primary",    # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(解析一个Golang项目)
         },
         "解析整个Rust项目": {
-            "Color": "stop",    # 按钮颜色
+            "Color": "primary",    # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(解析一个Rust项目)
         },
         "解析整个Java项目": {
-            "Color": "stop",  # 按钮颜色
+            "Color": "primary",  # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(解析一个Java项目)
         },
         "解析整个前端项目（js,ts,css等）": {
-            "Color": "stop",  # 按钮颜色
+            "Color": "primary",  # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(解析一个前端项目)
         },
         "解析整个Lua项目": {
-            "Color": "stop",    # 按钮颜色
+            "Color": "primary",    # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(解析一个Lua项目)
         },
         "解析整个CSharp项目": {
-            "Color": "stop",    # 按钮颜色
+            "Color": "primary",    # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(解析一个CSharp项目)
         },
         "读Tex论文写摘要": {
-            "Color": "stop",    # 按钮颜色
+            "Color": "primary",    # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(读文章写摘要)
         },
         "Markdown/Readme英译中": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
-            "Color": "stop",
+            "Color": "primary",
             "AsButton": False,
             "Function": HotReload(Markdown英译中)
         },
         "批量生成函数注释": {
-            "Color": "stop",    # 按钮颜色
+            "Color": "primary",    # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(批量生成函数注释)
         },
@@ -151,69 +151,69 @@ def get_crazy_functions():
 
     function_plugins.update({
         "批量翻译PDF文档（多线程）": {
-            "Color": "stop",
+            "Color": "primary",
             "AsButton": True,  # 加入下拉菜单中
             "Function": HotReload(批量翻译PDF文档)
         },
         "询问多个GPT模型": {
-            "Color": "stop",    # 按钮颜色
+            "Color": "primary",    # 按钮颜色
             "Function": HotReload(同时问询)
         },
         "[测试功能] 批量总结PDF文档": {
-            "Color": "stop",
+            "Color": "primary",
             "AsButton": False,  # 加入下拉菜单中
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Function": HotReload(批量总结PDF文档)
         },
         # "[测试功能] 批量总结PDF文档pdfminer": {
-        #     "Color": "stop",
+        #     "Color": "primary",
         #     "AsButton": False,  # 加入下拉菜单中
         #     "Function": HotReload(批量总结PDF文档pdfminer)
         # },
         "谷歌学术检索助手（输入谷歌学术搜索页url）": {
-            "Color": "stop",
+            "Color": "primary",
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(谷歌检索小助手)
         },
         "理解PDF文档内容 （模仿ChatPDF）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
-            "Color": "stop",
+            "Color": "primary",
             "AsButton": True,  # 加入下拉菜单中
             "Function": HotReload(理解PDF文档内容标准文件输入)
         },
         "英文Latex项目全文润色（输入路径或上传压缩包）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
-            "Color": "stop",
+            "Color": "primary",
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(Latex英文润色)
         },
         "英文Latex项目全文纠错（输入路径或上传压缩包）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
-            "Color": "stop",
+            "Color": "primary",
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(Latex英文纠错)
         },
         "中文Latex项目全文润色（输入路径或上传压缩包）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
-            "Color": "stop",
+            "Color": "primary",
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(Latex中文润色)
         },
         "Latex项目全文中译英（输入路径或上传压缩包）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
-            "Color": "stop",
+            "Color": "primary",
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(Latex中译英)
         },
         "Latex项目全文英译中（输入路径或上传压缩包）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
-            "Color": "stop",
+            "Color": "primary",
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(Latex英译中)
         },
         "批量Markdown中译英（输入路径或上传压缩包）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
-            "Color": "stop",
+            "Color": "primary",
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(Markdown中译英)
         },
@@ -227,7 +227,7 @@ def get_crazy_functions():
     from crazy_functions.联网的ChatGPT import 连接网络回答问题
     function_plugins.update({
         "连接网络回答问题": {
-            "Color": "stop",
+            "Color": "primary",
             "AsButton": True,  # 加入下拉菜单中
             "Function": HotReload(连接网络回答问题)
         }
@@ -236,7 +236,7 @@ def get_crazy_functions():
     from crazy_functions.解析项目源代码 import 解析任意code项目
     function_plugins.update({
         "解析项目源代码（手动指定和筛选源代码文件类型）": {
-            "Color": "stop",
+            "Color": "primary",
             "AsButton": False,
             "AdvancedArgs": True, # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": "输入时用逗号隔开, *代表通配符, 加了^代表不匹配; 不输入代表全部匹配。例如: \"*.c, ^*.cpp, config.toml, ^*.toml\"", # 高级参数输入区的显示提示
@@ -246,7 +246,7 @@ def get_crazy_functions():
     from crazy_functions.询问多个大语言模型 import 同时问询_指定模型
     function_plugins.update({
         "询问多个GPT模型（手动指定询问哪些模型）": {
-            "Color": "stop",
+            "Color": "primary",
             "AsButton": False,
             "AdvancedArgs": True, # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": "支持任意数量的llm接口，用&符号分隔。例如chatglm&gpt-3.5-turbo&api2d-gpt-4", # 高级参数输入区的显示提示
@@ -256,7 +256,7 @@ def get_crazy_functions():
     from crazy_functions.图片生成 import 图片生成
     function_plugins.update({
         "图片生成（先切换模型到openai或api2d）": {
-            "Color": "stop",
+            "Color": "primary",
             "AsButton": True,
             "AdvancedArgs": True, # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": "在这里输入分辨率, 如'256x256'（默认）, '512x512', '1024x1024'", # 高级参数输入区的显示提示
@@ -266,7 +266,7 @@ def get_crazy_functions():
     from crazy_functions.总结音视频 import 总结音视频
     function_plugins.update({
         "批量总结音视频（输入路径或上传压缩包）": {
-            "Color": "stop",
+            "Color": "primary",
             "AsButton": False,
             "AdvancedArgs": True,
             "ArgsReminder": "调用openai api 使用whisper-1模型, 目前支持的格式:mp4, m4a, wav, mpga, mpeg, mp3。此处可以输入解析提示，例如：解析为简体中文（默认）。",
@@ -277,7 +277,7 @@ def get_crazy_functions():
         from crazy_functions.数学动画生成manim import 动画生成
         function_plugins.update({
             "数学动画生成（Manim）": {
-                "Color": "stop",
+                "Color": "primary",
                 "AsButton": False,
                 "Function": HotReload(动画生成)
             }
@@ -289,7 +289,7 @@ def get_crazy_functions():
         from crazy_functions.批量Markdown翻译 import Markdown翻译指定语言
         function_plugins.update({
             "Markdown翻译（手动指定语言）": {
-                "Color": "stop",
+                "Color": "primary",
                 "AsButton": False,
                 "AdvancedArgs": True,
                 "ArgsReminder": "请输入要翻译成哪种语言，默认为Chinese。",
@@ -303,7 +303,7 @@ def get_crazy_functions():
         from crazy_functions.Langchain知识库 import 知识库问答
         function_plugins.update({
             "[功能尚不稳定] 构建知识库（请先上传文件素材）": {
-                "Color": "stop",
+                "Color": "primary",
                 "AsButton": False,
                 "AdvancedArgs": True,
                 "ArgsReminder": "待注入的知识库名称id, 默认为default",
@@ -317,7 +317,7 @@ def get_crazy_functions():
         from crazy_functions.Langchain知识库 import 读取知识库作答
         function_plugins.update({
             "[功能尚不稳定] 知识库问答": {
-                "Color": "stop",
+                "Color": "primary",
                 "AsButton": False,
                 "AdvancedArgs": True,
                 "ArgsReminder": "待提取的知识库名称id, 默认为default, 您需要首先调用构建知识库",
@@ -331,7 +331,7 @@ def get_crazy_functions():
         from crazy_functions.Latex输出PDF结果 import Latex英文纠错加PDF对比
         function_plugins.update({
             "[功能尚不稳定] Latex英文纠错+LatexDiff高亮修正位置": {
-                "Color": "stop",
+                "Color": "primary",
                 "AsButton": False,
                 # "AdvancedArgs": True,
                 # "ArgsReminder": "",
@@ -341,7 +341,7 @@ def get_crazy_functions():
         from crazy_functions.Latex输出PDF结果 import Latex翻译中文并重新编译PDF
         function_plugins.update({
             "[功能尚不稳定] Latex翻译/Arixv翻译+重构PDF": {
-                "Color": "stop",
+                "Color": "primary",
                 "AsButton": False,
                 # "AdvancedArgs": True,
                 # "ArgsReminder": "",
