@@ -132,10 +132,11 @@ class ChatBot(ChatBotFrame):
                 container=False)
             self.pro_entry_btn = gr.Button("搜索", variant="primary").style(full_width=False, size="sm")
         with gr.Row():
-            self.pro_prompt_list = gr.Dataset(components=[gr.HTML(visible=False)], samples_per_page=10,
-                                              label="Prompt usage frequency",
-                                              samples=[[". . ."] for i in range(20)], type='index')
-            self.pro_prompt_state = gr.State(self.pro_prompt_list)
+            with gr.Accordion(label='Prompt usage frequency'):
+                self.pro_prompt_list = gr.Dataset(components=[gr.HTML(visible=False)], samples_per_page=10,
+                                                  label='Results',
+                                                  samples=[[". . ."] for i in range(20)], type='index')
+                self.pro_prompt_state = gr.State(self.pro_prompt_list)
 
     def draw_temp_edit(self):
         with gr.Box():
