@@ -50,10 +50,11 @@ mspace {
     left: 0;
     z-index: 1; /* 设置更高的 z-index 值 */
     margin-bottom: -4px !important;
+    align-self: flex-end;
 }
-#chat_txt {
+#chat_box {
     display: flex;
-    flex-direction: column-reverse;
+    flex-direction: column;
     overflow-y: auto !important;
     z-index: 3;
     flex-grow: 1; /* 自动填充剩余空间 */
@@ -61,20 +62,26 @@ mspace {
     bottom: 0;
     left: 0;
     width: 100%;
-    margin-bottom: 20px !important;
+    margin-bottom: 30px !important;
+    border: 1px solid var(--border-color-primary);
+}
+
+.chat_input {
+
+}
+.sm_btn {
+    position: relative;
+    bottom: 5px;
+    min-width: min(110px,100%) !important;
 }
 
 .submit_btn {
-    display: flex;
     flex-direction: column-reverse;
     overflow-y: auto !important;
-    z-index: 3;
-    flex-grow: 1; /* 自动填充剩余空间 */
     position: absolute;
     bottom: 0;
-    right: 0;
-    width: 100%;
-    margin-bottom: 20px !important;
+    right: 10px;
+    margin-bottom: 10px !important;
     min-width: min(50px,100%) !important;
 }
 
@@ -317,6 +324,44 @@ textarea.svelte-1pie7s6 {
     position: absolute;
     transition: .4s;
     content: "🌞";
+}
+hr.append-display {
+    margin: 8px 0;
+    border: none;
+    height: 1px;
+    border-top-width: 0;
+    background-image: linear-gradient(to right, rgba(50,50,50, 0.1), rgba(150, 150, 150, 0.8), rgba(50,50,50, 0.1));
+}
+.source-a {
+    font-size: 0.8em;
+    max-width: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    /* background-color: #dddddd88; */
+    border-radius: 1.5rem;
+    padding: 0.2em;
+}
+.source-a a {
+    display: inline-block;
+    background-color: #aaaaaa50;
+    border-radius: 1rem;
+    padding: 0.5em;
+    text-align: center;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    min-width: 20%;
+    white-space: nowrap;
+    margin: 0.2rem 0.1rem;
+    text-decoration: none !important;
+    flex: 1;
+    transition: flex 0.5s;
+}
+.source-a a:hover {
+    background-color: #aaaaaa20;
+    flex: 2;
 }
 input:checked + .apSlider {
     background-color: var(--primary-600);
@@ -568,6 +613,9 @@ thead th {
     margin: 0.6em 2em 1em 0.2em;
     color: #FFF;
     box-shadow: 6px 6px 16px hsla(0, 0%, 0%, 0.2);
+}
+.dark .message pre code {
+    background-color: hsla(0, 0%, 20%, 300%)!important;
 }
 .message pre {
     padding: 0 !important;

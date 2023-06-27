@@ -75,11 +75,14 @@ class ChatBot(ChatBotFrame):
         self.chatbot = gr.Chatbot(elem_id='main_chatbot', label=f"当前模型：{LLM_MODEL}")
         self.chatbot.style()
         self.history = gr.State([])
-        temp_draw = [gr.HTML() for i in range(2)]
-        with gr.Row():
-            self.txt = gr.Textbox(show_label=False,  placeholder="Input question here.", elem_id='chat_txt').style(container=False)
-            self.input_copy = gr.State('')
-            self.submitBtn = gr.Button("", variant="primary", elem_classes='submit_btn').style(full_width=False)
+        temp_draw = [gr.HTML() for i in range(7)]
+        with gr.Box(elem_id='chat_box'):
+            with gr.Row():
+                gr.Button(elem_classes='sm_btn').style(size='sm', full_width=False)
+            with gr.Row():
+                self.txt = gr.Textbox(show_label=False,  placeholder="Input question here.", elem_classes='chat_input').style(container=False)
+                self.input_copy = gr.State('')
+                self.submitBtn = gr.Button("", variant="primary", elem_classes='submit_btn').style(full_width=False)
         with gr.Row():
             self.status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行\n {proxy_info}", elem_id='debug_mes')
 
@@ -411,7 +414,7 @@ class ChatBot(ChatBotFrame):
                         with gr.TabItem('Chat-Copilot'):
                             with gr.Row():
                                 # self.cpopyBtn = gr.Button("复制回答", variant="secondary").style(size="sm")
-                                self.resetBtn = gr.Button("新建对话", variant="secondary", elem_id='empty_btn').style(
+                                self.resetBtn = gr.Button("新建对话", variant="primary", elem_id='empty_btn').style(
                                     size="sm")
                                 self.stopBtn = gr.Button("中止对话", variant="stop").style(size="sm")
                             with gr.Tabs() as self.tabs_inputs:
