@@ -58,8 +58,8 @@ function gradioLoaded(mutations) {
             chat_txt = document.getElementById('chat_txt');
             userInfoDiv = document.getElementById("user_info");
             appTitleDiv = document.getElementById("app_title");
-            chatbot = document.querySelector('#main_chatbot');
-            chatbotWrap = document.querySelector('#main_chatbot > .wrap');
+            chatbot = document.querySelector('#废弃');
+            chatbotWrap = document.querySelector('#废弃 > .wrap');
             apSwitch = document.querySelector('.apSwitch input[type="checkbox"]');
 
             if (loginUserForm) {
@@ -414,7 +414,7 @@ var mObserver = new MutationObserver(function (mutationsList) {
             for (var node of mmutation.addedNodes) {
                 if (node.nodeType === 1 && node.classList.contains('message') && node.getAttribute('data-testid') === 'bot') {
                     saveHistoryHtml();
-                    document.querySelectorAll('#main_chatbot>.wrap>.message-wrap .message.bot').forEach(addChuanhuButton);
+                    document.querySelectorAll('#废弃>.wrap>.message-wrap .message.bot').forEach(addChuanhuButton);
                 }
                 if (node.tagName === 'INPUT' && node.getAttribute('type') === 'range') {
                     setSlider();
@@ -423,7 +423,7 @@ var mObserver = new MutationObserver(function (mutationsList) {
             for (var node of mmutation.removedNodes) {
                 if (node.nodeType === 1 && node.classList.contains('message') && node.getAttribute('data-testid') === 'bot') {
                     saveHistoryHtml();
-                    document.querySelectorAll('#main_chatbot>.wrap>.message-wrap .message.bot').forEach(addChuanhuButton);
+                    document.querySelectorAll('#废弃>.wrap>.message-wrap .message.bot').forEach(addChuanhuButton);
                 }
             }
         } else if (mmutation.type === 'attributes') {
@@ -433,7 +433,7 @@ var mObserver = new MutationObserver(function (mutationsList) {
                 clearTimeout(timeoutId);
                 timeoutId = setTimeout(() => {
                     isThrottled = false;
-                    document.querySelectorAll('#main_chatbot>.wrap>.message-wrap .message.bot').forEach(addChuanhuButton);
+                    document.querySelectorAll('#废弃>.wrap>.message-wrap .message.bot').forEach(addChuanhuButton);
                     saveHistoryHtml();
                 }, 500);
             }
@@ -444,7 +444,7 @@ mObserver.observe(document.documentElement, { attributes: true, childList: true,
 
 var loadhistorytime = 0; // for debugging
 function saveHistoryHtml() {
-    var historyHtml = document.querySelector('#main_chatbot > .wrap');
+    var historyHtml = document.querySelector('#废弃 > .wrap');
     localStorage.setItem('chatHistory', historyHtml.innerHTML);
     // console.log("History Saved")
     historyLoaded = false;

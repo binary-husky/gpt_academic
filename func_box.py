@@ -651,8 +651,12 @@ def update_txt(self,
         }
 
 
-def txtx(f, q):
-    return f
+def get_html(filename):
+    path = os.path.join(base_path, "docs/assets", "html", filename)
+    if os.path.exists(path):
+        with open(path, encoding="utf8") as file:
+            return file.read()
+    return ""
 
 
 def git_log_list():

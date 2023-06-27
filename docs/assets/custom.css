@@ -72,6 +72,14 @@ mspace {
 .sm_btn {
     position: relative;
     bottom: 5px;
+    height: 10%;
+    border-radius: 20px!important;
+    min-width: min(10%,100%) !important;
+}
+/* usage_display */
+.insert_block {
+    position: relative;
+    bottom: 2px;
     min-width: min(110px,100%) !important;
 }
 
@@ -253,20 +261,7 @@ textarea.svelte-1pie7s6 {
     font-size: 12px !important;
 }
 
-/* usage_display */
-.insert_block {
-    position: relative;
-    margin: 0;
-    padding: .5em 1em;
-    box-shadow: var(--block-shadow);
-    border-width: var(--block-border-width);
-    border-color: var(--block-border-color);
-    border-radius: var(--block-radius);
-    background: var(--block-background-fill);
-    width: 100%;
-    line-height: var(--line-sm);
-    min-height: 2em;
-}
+
 #usage_display p, #usage_display span {
     margin: 0;
     font-size: .85em;
