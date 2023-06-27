@@ -13,6 +13,8 @@ devs_document = "/file="+os.path.join(func_box.base_path, 'README.md')
 
 # [step 2]>> 改为True应用代理，如果直接在海外服务器部署，此处不修改
 USE_PROXY = False
+
+LOCAL_PORT = 7891
 if USE_PROXY:
     # 填写格式是 [协议]://  [地址] :[端口]，填写之前不要忘记把USE_PROXY改成True，如果直接在海外服务器部署，此处不修改
     # 例如    "socks5h://localhost:11284"
@@ -73,6 +75,9 @@ CONCURRENT_COUNT = 100
 
 # 加一个live2d装饰
 ADD_WAIFU = False
+
+# 川虎JS
+ADD_CHUANHU = True
 
 # 设置用户名和密码（不需要修改）（相关功能不稳定，与gradio版本和网络都相关，如果本地使用不建议加这个）
 # [("username", "password"), ("username2", "password2"), ...]
