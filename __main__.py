@@ -177,12 +177,15 @@ class ChatBot(ChatBotFrame):
         self.pro_private_check.select(fn=func_box.prompt_reduce,
                                       inputs=[self.pro_private_check, self.pro_fp_state],
                                       outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check])
+        self.tabs_code = gr.State(0)
         self.pro_func_prompt.select(fn=func_box.prompt_input,
-                                    inputs=[self.txt, self.pro_func_prompt, self.pro_fp_state],
-                                    outputs=[self.txt])
+                                    inputs=[self.txt, self.pro_func_prompt, self.pro_fp_state, self.tabs_code],
+                                    outputs=[self.txt, self.pro_edit_txt, self.pro_name_txt])
         self.pro_upload_btn.upload(fn=func_box.prompt_upload_refresh,
                                    inputs=[self.pro_upload_btn, self.pro_prompt_state],
                                    outputs=[self.pro_func_prompt, self.pro_prompt_state, self.pro_private_check])
+        self.chat_tab.select(fn=lambda: 0, inputs=None, outputs=self.tabs_code)
+        self.prompt_tab.select(fn=lambda: 1, inputs=None, outputs=self.tabs_code)
 
     def draw_public_chat(self):
         with gr.Tab('Plugins'):
@@ -335,7 +338,6 @@ class ChatBot(ChatBotFrame):
 
         self.md_dropdown.select(on_md_dropdown_changed, [self.md_dropdown], [self.chatbot])
 
-
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay(self, is_open=False):
         import threading, webbrowser, time
@@ -355,7 +357,7 @@ class ChatBot(ChatBotFrame):
 
     def main(self):
 
-        with gr.Blocks(title="Chatbot for KSO ", theme=set_theme, analytics_enabled=False, css=custom_css) as demo:
+        with gr.Blocks(title="Chatbot for KSO ", theme=set_theme, analytics_enabled=False, css=custom_css) as self.demo:
             # 绘制页面title
             self.draw_title()
             # 绘制一个ROW，row会让底下的元素自动排成一行
@@ -369,6 +371,10 @@ class ChatBot(ChatBotFrame):
                             self.draw_public_chat()
                             self.draw_setting_chat()
 
+                        # 绘制autogpt模组
+                        with gr.TabItem('Auto-GPT'):
+                            self.draw_next_auto()
+                            self.draw_goals_auto()
                 # 绘制列2
                 with gr.Column(scale=100):
                     with gr.Tabs() as self.tabs_chatbot:
@@ -388,10 +394,12 @@ class ChatBot(ChatBotFrame):
             self.signals_prompt_func()
             self.signals_public()
             self.signals_prompt_edit()
+            # self.signals_auto_input()
 
         # Start
         self.auto_opentab_delay()
-        demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION,
+        self.demo.queue_enabled_for_fn()
+        self.demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION,
         blocked_paths=["config.py", "config_private.py", "docker-compose.yml", "Dockerfile"])
 
 
