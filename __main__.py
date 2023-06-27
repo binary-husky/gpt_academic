@@ -79,7 +79,7 @@ class ChatBot(ChatBotFrame):
         with gr.Box(elem_id='chat_box'):
             with gr.Row():
                 gr.Button(elem_classes='sm_btn').style(size='sm', full_width=False)
-                gr.HTML(func_box.get_html("appearance_switcher.html").format(label=""), elem_classes="insert_block")
+                gr.HTML(func_box.get_html("appearance_switcher.html").format(label=""), elem_id='user_input_tb', elem_classes="insert_block")
             with gr.Row():
                 self.txt = gr.Textbox(show_label=False,  placeholder="Input question here.", elem_classes='chat_input').style(container=False)
                 self.input_copy = gr.State('')
@@ -186,7 +186,7 @@ class ChatBot(ChatBotFrame):
                                         self.pro_func_prompt, self.pro_fp_state])
         self.pro_reuse_btn.click(
             fn=func_box.reuse_chat,
-            inputs=[self.pro_results, self.chatbot, self.history, self.pro_name_txt],
+            inputs=[self.pro_results, self.chatbot, self.history, self.pro_name_txt, self.txt],
             outputs=[self.chatbot, self.history, self.txt, self.tabs_chatbot, self.pro_name_txt, self.examples_column]
         )
 
@@ -312,7 +312,7 @@ class ChatBot(ChatBotFrame):
         self.cancel_handles.append(self.txt.submit(**self.clear_agrs).then(**self.predict_args))
         self.cancel_handles.append(self.submitBtn.click(**self.clear_agrs).then(**self.predict_args))
         # self.cpopyBtn.click(fn=func_box.copy_result, inputs=[self.history], outputs=[self.status])
-        self.resetBtn.click(lambda: ([], [], "已重置"), None, [self.chatbot, self.history, self.status])
+        self.resetBtn.click(lambda: ([], [], "已重置"), None, [self.chatbot, self.history, self.status], _js='()=>{clearHistoryHtml();}')
 
     def signals_function(self):
         # 基础功能区的回调函数注册
