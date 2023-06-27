@@ -69,8 +69,11 @@ def ArgsGeneralWrapper(f):
             'start_time': start_time
         }
         plugin_kwargs = {
-            "advanced_arg": plugin_advanced_arg
+            "advanced_arg": plugin_advanced_arg,
+            "parameters_def": ''
         }
+        if len(args) > 1:
+            plugin_kwargs.update({'parameters_def': args[1]})
         transparent_address_private = f'<p style="display:none;">\n{private_key}\n{ipaddr.client.host}\n</p>'
         transparent_address = f'<p style="display:none;">\n{ipaddr.client.host}\n</p>'
         if private in models:

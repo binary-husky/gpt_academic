@@ -70,7 +70,6 @@ class ChatBot(ChatBotFrame):
     def draw_title(self):
         # self.title = gr.HTML(self.title_html)
         self.cookies = gr.State({'api_key': API_KEY, 'llm_model': LLM_MODEL, 'local': self.__url})
-
     def draw_chatbot(self):
         self.chatbot = gr.Chatbot(elem_id='main_chatbot', label=f"当前模型：{LLM_MODEL}")
         self.chatbot.style()
@@ -260,7 +259,6 @@ class ChatBot(ChatBotFrame):
                                                  placeholder="这里是特殊函数插件的高级参数输入区").style(container=False)
                 self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
 
-
     def draw_setting_chat(self):
         switch_model = get_conf('switch_model')[0]
         with gr.TabItem('Settings', id='sett_tab'):
@@ -339,9 +337,11 @@ class ChatBot(ChatBotFrame):
         for k in crazy_fns:
             if not crazy_fns[k].get("AsButton", True): continue
             self.click_handle = crazy_fns[k]["Button"].click(**self.clear_agrs).then(
-                ArgsGeneralWrapper(crazy_fns[k]["Function"]), [*self.input_combo, gr.State(PORT)], self.output_combo)
-            self.click_handle.then(on_report_generated, [self.file_upload, self.chatbot],
-                                   [self.file_upload, self.chatbot])
+                ArgsGeneralWrapper(crazy_fns[k]["Function"]),
+                [*self.input_combo, gr.State(PORT), gr.State(crazy_fns[k].get('Parameters', False))],
+                self.output_combo)
+            self.click_handle.then(on_report_generated, [self.cookies, self.file_upload, self.chatbot],
+                                   [self.cookies, self.file_upload, self.chatbot])
             # self.click_handle.then(fn=lambda x: '', inputs=[], outputs=self.txt)
             self.cancel_handles.append(self.click_handle)
 
@@ -373,7 +373,8 @@ class ChatBot(ChatBotFrame):
             yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(*args, **kwargs)
 
         self.click_handle = self.switchy_bt.click(**self.clear_agrs).then(route, [self.switchy_bt, *self.input_combo, gr.State(PORT)], self.output_combo)
-        self.click_handle.then(on_report_generated, [self.file_upload, self.chatbot], [self.file_upload, self.chatbot])
+        self.click_handle.then(on_report_generated, [self.cookies, self.file_upload, self.chatbot],
+                               [self.cookies, self.file_upload, self.chatbot])
         self.cancel_handles.append(self.click_handle)
         # 终止按钮的回调函数注册
         self.stopBtn.click(fn=None, inputs=None, outputs=None, cancels=self.cancel_handles)

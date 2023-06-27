@@ -78,7 +78,7 @@ def get_crazy_functions():
             "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
             "Parameters": {
                 "is_show": True,
-                "prompt": '文档转测试用例',
+                "prompt": '需求分析对话',
                 'img_ocr': False
             }
         },

@@ -225,12 +225,15 @@ def get_docs_content(url, image_processing=False):
 
 def json_args_return(kwargs, keys: list) -> list: 
     temp = [False for i in range(len(keys))]
-    try:
-        for i in range(len(keys)):
-            temp[i] = json.loads(kwargs)[keys[i]]
-        return temp
-    except Exception as f:
-        return temp
+    for i in range(len(keys)):
+        try:
+            temp[i] = json.loads(kwargs[['advanced_arg']])[keys[i]]
+        except Exception as f:
+            try:
+                temp[i] = kwargs['parameters_def'][keys[i]]
+            except Exception as f:
+                temp[i] = False
+    return temp
 
 if __name__ == '__main__':
     print(get_docs_content('https://kdocs.cn/l/ca1FQfQ6LiAx'))

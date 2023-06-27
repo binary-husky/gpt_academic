@@ -86,14 +86,6 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
-    "gpt-3.5-turbo-16k": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": openai_endpoint,
-        "max_token": 1024*16,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
     "gpt-3.5-turbo-0613": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
@@ -122,6 +114,9 @@ model_info = {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
         "endpoint": proxy_endpoint.replace('%v', 'gpt-35-turbo-version-0301'),
+        "max_token": 4096,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
     },
     # azure openai
     "azure-gpt35":{
@@ -140,7 +135,6 @@ model_info = {
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
     },
-
     "proxy-gpt-4-32k": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,

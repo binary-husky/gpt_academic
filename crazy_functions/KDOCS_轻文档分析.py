@@ -102,7 +102,7 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
         scroller_max_len=80
     )
     # 是否展示任务结果
-    kwargs_is_show,  = crazy_box.json_args_return(plugin_kwargs['advanced_arg'], ['is_show'])
+    kwargs_is_show,  = crazy_box.json_args_return(plugin_kwargs, ['is_show'])
     if kwargs_is_show:
         for results in list(zip(gpt_response_collection[0::2], gpt_response_collection[1::2])):
             chatbot.append(results)
@@ -111,7 +111,7 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
     return gpt_response_collection
 
 
-def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs,  default_prompt: str = False):
+def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history, default_prompt: str = False):
     """
     Args:
         gpt_response_collection:  多线程GPT的返回结果
@@ -122,13 +122,15 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
         inputs_array， inputs_show_user_array
     """
     if default_prompt:
-        kwargs_prompt, = crazy_box.json_args_return(plugin_kwargs['advanced_arg'], ['prompt'])
+        kwargs_prompt, = crazy_box.json_args_return(plugin_kwargs, ['prompt'])
         if not kwargs_prompt: kwargs_prompt = default_prompt
         prompt = prompt_generator.SqliteHandle(table=f'prompt_{llm_kwargs["ipaddr"]}').find_prompt_result(kwargs_prompt)
         inputs_array = [prompt.replace('{{{v}}}', inputs) for inputs in gpt_response_collection[1::2]]
+        chatbot.append([f'接下来使用的Prompt是 {func_box.html_tag_color(kwargs_prompt)} ，你可以在Prompt编辑/检索中进行私人定制哦～',None])
+        yield from update_ui(chatbot, history)
     else:
         inputs_array = gpt_response_collection[1::2]
-    inputs_show_user_array = gpt_response_collection[0::2]
+    inputs_show_user_array = default_prompt + ': ' + gpt_response_collection[0::2]
     return inputs_array, inputs_show_user_array
 
 
@@ -148,8 +150,8 @@ def 需求转测试用例(file_limit, llm_kwargs, plugin_kwargs, chatbot, histor
     if file_limit:
         inputs_show_user_array = [str(file_limit).splitlines()[0]]
         file_limit = [inputs_show_user_array, file_limit]
-        inputs_array, inputs_show_user_array = input_output_processing(file_limit, llm_kwargs, plugin_kwargs,
-                                                                       default_prompt='需求转测试用例')
+        inputs_array, inputs_show_user_array = yield from input_output_processing(file_limit, llm_kwargs, plugin_kwargs,
+                                                                       chatbot, history, default_prompt='需求转测试用例')
     else:
         chatbot.append((None, f'输入框空空如也？\n\n'
                             '请在输入框中输入你的需求文档，然后再点击需求转测试用例'))
@@ -165,8 +167,8 @@ def KDocs_转测试用例(link_limit, llm_kwargs, plugin_kwargs, chatbot, histor
     if not gpt_response_collection:
         yield from update_ui(chatbot=chatbot, history=history, msg='多线程一个都没有通过，暂停运行')
         return
-    inputs_array, inputs_show_user_array = input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs,
-                                                                   default_prompt='需求转测试用例')
+    inputs_array, inputs_show_user_array = yield from input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs,
+                                                                   chatbot, history, default_prompt='需求转测试用例')
     gpt_response_collection = yield from submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
     write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history)
 
@@ -177,8 +179,8 @@ def KDocs_需求分析问答(link_limit, llm_kwargs, plugin_kwargs, chatbot, his
     if not gpt_response_collection:
         yield from update_ui(chatbot=chatbot, history=history, msg='多线程一个都没有通过，暂停运行')
         return
-    inputs_array, inputs_show_user_array = input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs,
-                                                                   default_prompt='需求分析对话')
+    inputs_array, inputs_show_user_array = yield from input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs,
+                                                                   chatbot, history, default_prompt='需求分析对话')
     yield from submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
 
 
