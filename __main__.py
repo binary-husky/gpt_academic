@@ -40,9 +40,9 @@ except:
 print("所有问询记录将自动保存在本地目录./gpt_log/chat_secrets.log, 请注意自我隐私保护哦！")
 
 # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
-proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, LAYOUT, API_KEY, AVAIL_LLM_MODELS = \
+proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, LAYOUT, API_KEY, AVAIL_LLM_MODELS, LOCAL_PORT= \
     get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'LAYOUT',
-             'API_KEY', 'AVAIL_LLM_MODELS')
+             'API_KEY', 'AVAIL_LLM_MODELS', 'LOCAL_PORT')
 
 proxy_info = check_proxy(proxies)
 # 如果WEB_PORT是-1, 则随机选取WEB端口
@@ -415,7 +415,7 @@ def check_proxy_free():
 
 if __name__ == '__main__':
     # PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
-    PORT = 7891 if WEB_PORT <= 0 else WEB_PORT
+    PORT = LOCAL_PORT if WEB_PORT <= 0 else WEB_PORT
     check_proxy_free()
     ChatBot().main()
     gr.close_all()
