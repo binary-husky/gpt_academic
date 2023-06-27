@@ -16,16 +16,11 @@ from toolbox import get_conf, trimmed_format_exc
 from request_llm.bridge_chatgpt import predict_no_ui_long_connection as chatgpt_noui
 from request_llm.bridge_chatgpt import predict as chatgpt_ui
 
-<<<<<<< HEAD
-from request_llm.bridge_chatgpt import predict_no_ui_long_connection as chatglm_noui
-from request_llm.bridge_chatgpt import predict as chatglm_ui
-=======
 from .bridge_azure_test import predict_no_ui_long_connection as azure_noui
 from .bridge_azure_test import predict as azure_ui
 
 from .bridge_chatglm import predict_no_ui_long_connection as chatglm_noui
 from .bridge_chatglm import predict as chatglm_ui
->>>>>>> f320599 (增加azure openai api的支持)
 
 from .bridge_newbing import predict_no_ui_long_connection as newbing_noui
 from .bridge_newbing import predict as newbing_ui

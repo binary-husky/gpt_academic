@@ -341,11 +341,6 @@ def get_crazy_functions():
         })
         from crazy_functions.Latex输出PDF结果 import Latex翻译中文并重新编译PDF
         function_plugins.update({
-            "Arixv论文精细翻译": {
-                "Color": "stop",
-                "AsButton": True,
-                # "AdvancedArgs": True,
-
             "Arixv翻译（输入arxivID） [需Latex]": {
                 "Color": "stop",
                 "AsButton": False,
@@ -355,7 +350,7 @@ def get_crazy_functions():
                     "例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: " + 'If the term "agent" is used in this section, it should be translated to "智能体". ',
                 "Function": HotReload(Latex翻译中文并重新编译PDF)
             }
-        }})
+        })
 
         function_plugins.update({
             "本地论文翻译（上传Latex压缩包） [需Latex]": {
