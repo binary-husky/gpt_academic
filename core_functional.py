@@ -80,3 +80,7 @@ def get_core_functions():
 
 def get_guidance():
     pass
+
+
+def get_guidance():
+    pass

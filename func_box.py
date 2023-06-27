@@ -133,7 +133,7 @@ def html_tag_color(tag, color=None, font='black'):
 
 def html_a_blank(__href, name=''):
     if not name:
-        dir_name = __href
+        name = __href
     a = f'<a href="{__href}" target="_blank" class="svelte-xrr240">{name}</a>'
     return a
 
@@ -145,6 +145,9 @@ def html_download_blank(__href, file_name='temp', dir_name=''):
     a = f'<a href="{__href}" target="_blank" download="{dir_name}" class="svelte-xrr240">{file_name}</a>'
     return a
 
+def html_local_img(__file):
+    a = f'<div align="center"><img src="file={__file}"></div>'
+    return a
 
 def ipaddr():
     # 获取本地ipx
@@ -301,8 +304,9 @@ def diff_list(txt='', percent=0.70, switch: list = None, lst: dict = None, sp=15
     for key in sorted_dict:
         # 开始匹配关键字
         index = str(key[0]).lower().find(txt.lower())
-
-        if index != -1:
+        index_ = str(key[1]).lower().find(txt.lower())
+        if index != -1 or index_ != -1:
+            if index == -1: index = index_  # 增加搜索prompt 名称
             # sp=split 用于判断在哪里启动、在哪里断开
             if index - sp > 0:
                 start = index - sp
@@ -505,7 +509,10 @@ def thread_write_chat(chatbot, history):
     private_key = toolbox.get_conf('private_key')[0]
     chat_title = chatbot[0][1].split()
     i_say = pattern_markdown.sub('', chatbot[-1][0])
-    gpt_result = history
+    if history:
+        gpt_result = history
+    else:  # 如果历史对话不存在，那么读取对话框
+        gpt_result = [pattern_markdown.sub('', v) for i in chatbot for v in i]
     if private_key in chat_title:
         SqliteHandle(f'ai_private_{chat_title[-2]}').inset_prompt({i_say: gpt_result})
     else:
@@ -515,11 +522,10 @@ def thread_write_chat(chatbot, history):
 base_path = os.path.dirname(__file__)
 prompt_path = os.path.join(base_path, 'prompt_users')
 
-
 def reuse_chat(result, chatbot, history, pro_numb):
     """复用对话记录"""
     if result is None or result == []:
-        return chatbot, history, gr.update(), gr.update(), ''
+        return chatbot, history, gr.update(), gr.update(), '', gr.Column.update()
     else:
         if pro_numb:
             chatbot += result
@@ -529,7 +535,7 @@ def reuse_chat(result, chatbot, history, pro_numb):
             history += [pattern_markdown.sub('', _) for i in result[-2:] for _ in i]
         print(chatbot[-1][0])
         i_say = pattern_markdown.sub('', chatbot[-1][0])
-        return chatbot, history, i_say, gr.Tabs.update(selected='chatbot'), ''
+        return chatbot, history, i_say, gr.Tabs.update(selected='chatbot'), '', gr.Column.update(visible=False)
 
 
 def num_tokens_from_string(listing: list, encoding_name: str = 'cl100k_base') -> int:
@@ -553,7 +559,7 @@ def spinner_chatbot_loading(chatbot):
     loading_msg[-1] = tuple(temp_list)
     return loading_msg
 
-def refresh_load_data(chat, history, prompt):
+def refresh_load_data(chat, history, prompt, crazy_list):
     """
     Args:
         chat: 聊天组件
@@ -566,7 +572,8 @@ def refresh_load_data(chat, history, prompt):
     is_all = toolbox.get_conf('prompt_list')[0]['key'][0]
     data = prompt_retrieval(is_all=[is_all])
     prompt.samples = data
-    return prompt.update(samples=data, visible=True), prompt, chat, history
+    selected = random.sample(crazy_list, 4)
+    return prompt.update(samples=data, visible=True), prompt, chat, history, gr.Dataset.update(samples=[[i] for i in selected]), selected
 
 
 
@@ -587,6 +594,70 @@ def txt_converter_json(input_string):
 def clean_br_string(s):
     s = re.sub('<\s*br\s*/?>', '\n', s)  # 使用正则表达式同时匹配<br>、<br/>、<br />、< br>和< br/>
     return s
+
+
+def update_btn(self,
+    value:  str = None,
+    variant:  str = None,
+    visible:  bool = None,
+    interactive: bool = None,
+    elem_id: str = None,
+    label: str = None
+):
+    if not variant: variant = self.variant
+    if not visible: visible = self.visible
+    if not value: value = self.value
+    if not interactive: interactive = self.interactive
+    if not elem_id: elem_id = self.elem_id
+    if not elem_id: label = self.label
+    return {
+        "variant": variant,
+        "visible": visible,
+        "value": value,
+        "interactive": interactive,
+        'elem_id': elem_id,
+        'label': label,
+        "__type__": "update",
+    }
+
+def update_txt(self,
+        value: str = None,
+        lines: int  = None,
+        max_lines: int  = None,
+        placeholder: str  = None,
+        label: str  = None,
+        show_label: bool  = None,
+        visible: bool  = None,
+        interactive: bool  = None,
+        type: str  = None,
+        elem_id: str = None
+    ):
+
+        return {
+            "lines": self.lines,
+            "max_lines": self.max_lines,
+            "placeholder": self.placeholder,
+            "label": self.label,
+            "show_label": self.show_label,
+            "visible": self.visible,
+            "value": self.value,
+            "type": self.type,
+            "interactive": self.interactive,
+            "elem_id": elem_id,
+            "__type__": "update",
+
+        }
+
+
+def txtx(f, q):
+    return f
+
+
+def git_log_list():
+    ll = Shell("git log --pretty=format:'%s | %h' -n 10").read()[1].splitlines()
+
+    return [i.split('|') for i in ll if 'branch' not in i][:5]
+
 
 class YamlHandle:
 
@@ -633,4 +704,4 @@ class JsonHandle:
 
 
 if __name__ == '__main__':
-    pass
+    html_local_img("docs/imgs/openai-api-key-billing-paid-account.png")
