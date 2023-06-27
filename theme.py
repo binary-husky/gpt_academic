@@ -182,26 +182,26 @@ textarea {
     width: 100%;
     height: 100%;
 }
-.markdown-body table {
+.md-message table {
     margin: 1em 0;
     border-collapse: collapse;
     empty-cells: show;
 }
 
-.markdown-body th, .markdown-body td {
+.md-message th, .md-message td {
     border: 1.2px solid var(--border-color-primary);
     padding: 5px;
 }
 
-.markdown-body thead {
+.md-message thead {
     background-color: rgba(175,184,193,0.2);
 }
 
-.markdown-body thead th {
+.md-message thead th {
     padding: .5em .2em;
 }
 
-.markdown-body ol, .markdown-body ul {
+.md-message ol, .md-message ul {
     padding-inline-start: 2em !important;
 }
 
@@ -240,7 +240,7 @@ textarea {
 }
 
 /* linein code block. */
-.markdown-body code {
+.md-message code {
     display: inline;
     white-space: break-spaces;
     border-radius: 6px;
@@ -250,7 +250,7 @@ textarea {
     color: #eff0f2;
 }
 
-.dark .markdown-body code {
+.dark .md-message code {
     display: inline;
     white-space: break-spaces;
     border-radius: 6px;
@@ -260,7 +260,7 @@ textarea {
 }
 
 /* code block css */
-.markdown-body pre code {
+.md-message pre code {
     display: block;
     overflow: auto;
     white-space: pre;
@@ -270,7 +270,7 @@ textarea {
     margin: 1em 2em 1em 0.5em;
 }
 
-.dark .markdown-body pre code {
+.dark .md-message pre code {
     display: block;
     overflow: auto;
     white-space: pre;

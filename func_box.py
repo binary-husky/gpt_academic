@@ -32,6 +32,7 @@ import random
 import gradio as gr
 import toolbox
 from prompt_generator import SqliteHandle
+from bs4 import BeautifulSoup
 
 """contextlib 是 Python 标准库中的一个模块，提供了一些工具函数和装饰器，用于支持编写上下文管理器和处理上下文的常见任务，例如资源管理、异常处理等。
 官网：https://docs.python.org/3/library/contextlib.html"""
@@ -498,19 +499,22 @@ def show_prompt_result(index, data: gr.Dataset, chatbot):
     return chatbot
 
 
-pattern_markdown = re.compile(r'^<div class="markdown-body"><p>|<\/p><\/div>$')
-pattern_markdown_p = re.compile(r'^<div class="markdown-body">|<\/div>$')
+
+def pattern_html(html):
+    bs = BeautifulSoup(html, 'html.parser')
+    return bs.get_text(separator='')
+
 def thread_write_chat(chatbot, history):
     """
     对话记录写入数据库
     """
     private_key = toolbox.get_conf('private_key')[0]
     chat_title = chatbot[0][1].split()
-    i_say = pattern_markdown.sub('', chatbot[-1][0])
+    i_say = pattern_html(chatbot[-1][0])
     if history:
         gpt_result = history
     else:  # 如果历史对话不存在，那么读取对话框
-        gpt_result = [pattern_markdown.sub('', v) for i in chatbot for v in i]
+        gpt_result = [pattern_html(v) for i in chatbot for v in i]
     if private_key in chat_title:
         SqliteHandle(f'ai_private_{chat_title[-2]}').inset_prompt({i_say: gpt_result})
     else:
@@ -520,20 +524,19 @@ def thread_write_chat(chatbot, history):
 base_path = os.path.dirname(__file__)
 prompt_path = os.path.join(base_path, 'users_data')
 
-def reuse_chat(result, chatbot, history, pro_numb):
+def reuse_chat(result, chatbot, history, pro_numb, say):
     """复用对话记录"""
     if result is None or result == []:
         return chatbot, history, gr.update(), gr.update(), '', gr.Column.update()
     else:
         if pro_numb:
             chatbot += result
-            history += [pattern_markdown.sub('', _) for i in result for _ in i]
+            history += [pattern_html(_) for i in result for _ in i]
         else:
             chatbot.append(result[-1])
-            history += [pattern_markdown.sub('', _) for i in result[-2:] for _ in i]
+            history += [pattern_html(_) for i in result[-2:] for _ in i]
         print(chatbot[-1][0])
-        i_say = pattern_markdown.sub('', chatbot[-1][0])
-        return chatbot, history, i_say, gr.Tabs.update(selected='chatbot'), '', gr.Column.update(visible=False)
+        return chatbot, history, say, gr.Tabs.update(selected='chatbot'), '', gr.Column.update(visible=False)
 
 
 def num_tokens_from_string(listing: list, encoding_name: str = 'cl100k_base') -> int:
@@ -550,10 +553,8 @@ def spinner_chatbot_loading(chatbot):
     # 将元组转换为列表并修改元素
     loading_msg = copy.deepcopy(chatbot)
     temp_list = list(loading_msg[-1])
-    if pattern_markdown.match(temp_list[1]):
-        temp_list[1] = pattern_markdown.sub('', temp_list[1]) + f'{random.choice(loading)}'
-    else:
-        temp_list[1] = pattern_markdown_p.sub('', temp_list[1]) + f'{random.choice(loading)}'
+
+    temp_list[1] = pattern_html(temp_list[1]) + f'{random.choice(loading)}'
     # 将列表转换回元组并替换原始元组
     loading_msg[-1] = tuple(temp_list)
     return loading_msg

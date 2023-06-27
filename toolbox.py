@@ -1,3 +1,5 @@
+import html
+
 import markdown
 import importlib
 import inspect
@@ -297,8 +299,9 @@ def markdown_convertion(txt):
     """
     将Markdown格式的文本转换为HTML格式。如果包含数学公式，则先将公式转换为HTML格式。
     """
-    pre = '<div class="markdown-body">'
+    pre = '<div class="md-message">'
     suf = '</div>'
+    raw_hide = f'<div class="raw-message hideM">%s</div>'
     if txt.startswith(pre) and txt.endswith(suf):
         # print('警告，输入了已经经过转化的字符串，二次转化可能出问题')
         return txt  # 已经被转化过，不需要再次转化
@@ -362,9 +365,11 @@ def markdown_convertion(txt):
         convert_stage_1_resp = convert_stage_1.replace('</br>', '')
         convert_stage_2_2, n = re.subn(find_equation_pattern, replace_math_render, convert_stage_1_resp, flags=re.DOTALL)
         # cat them together
-        return pre + convert_stage_2_1 + f'{split}' + convert_stage_2_2 + suf
+        context = convert_stage_2_1 + f'{split}' + convert_stage_2_2
+        return raw_hide.replace('%s', func_box.pattern_html(context)) + pre + context + suf
     else:
-        return pre + markdown.markdown(txt, extensions=['fenced_code', 'codehilite', 'tables', 'sane_lists']) + suf
+        context = markdown.markdown(txt, extensions=['fenced_code', 'codehilite', 'tables', 'sane_lists'])
+        return raw_hide.replace('%s', func_box.pattern_html(context)) + pre + context + suf
 
 
 def close_up_code_segment_during_stream(gpt_reply):
