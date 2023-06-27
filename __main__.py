@@ -319,7 +319,7 @@ class ChatBot(ChatBotFrame):
         self.cancel_handles.append(self.txt.submit(**self.clear_agrs).then(**self.predict_args))
         self.cancel_handles.append(self.submitBtn.click(**self.clear_agrs).then(**self.predict_args))
         # self.cpopyBtn.click(fn=func_box.copy_result, inputs=[self.history], outputs=[self.status])
-        self.resetBtn.click(lambda: ([], [], "已重置"), None, [self.chatbot, self.history, self.status], _js='()=>{clearHistoryHtml();}')
+        self.resetBtn.click(lambda: ([], [], "已重置"), None, [self.chatbot, self.history, self.status])
 
     def signals_function(self):
         # 基础功能区的回调函数注册

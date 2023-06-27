@@ -32,7 +32,7 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
         try:
             temp_num += 1
             chatbot.append([link_limit, None])
-            ovs_data, content, empty_picture_count = crazy_box.get_docs_content(url)
+            ovs_data, content, empty_picture_count, pic_dict = crazy_box.get_docs_content(url)
             title = content.splitlines()[0]
             if empty_picture_count >= 5:
                 chatbot[-1][1] = f'\n\n 需求文档中没有{func_box.html_tag_color("描述")}的图片数量' \
