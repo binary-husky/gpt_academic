@@ -111,7 +111,7 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
     return gpt_response_collection
 
 
-def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history, default_prompt: str = False):
+def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history, default_prompt: str = False, all_chat: bool = True):
     """
     Args:
         gpt_response_collection:  多线程GPT的返回结果
@@ -130,7 +130,10 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
         yield from update_ui(chatbot, history)
     else:
         inputs_array = gpt_response_collection[1::2]
-    inputs_show_user_array = default_prompt + ': ' + gpt_response_collection[0::2]
+    if all_chat:
+        inputs_show_user_array = gpt_response_collection[1::2]
+    else:
+        inputs_show_user_array = default_prompt + ': ' + gpt_response_collection[0::2]
     return inputs_array, inputs_show_user_array
 
 
