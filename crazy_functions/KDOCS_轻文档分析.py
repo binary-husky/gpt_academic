@@ -26,11 +26,9 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
                              f'\n\n https://kdocs.cn/l/xxxxxxxxxx'))
         yield from update_ui(chatbot, history)
         return
-    docs_file_content = []
-    temp_num = 0
+    file_limit = []
     for url in links:
         try:
-            temp_num += 1
             chatbot.append([link_limit, None])
             ovs_data, content, empty_picture_count, pic_dict = crazy_box.get_docs_content(url)
             title = content.splitlines()[0]
@@ -38,12 +36,12 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
                 chatbot[-1][1] = f'\n\n 需求文档中没有{func_box.html_tag_color("描述")}的图片数量' \
                                   f'有{func_box.html_tag_color(empty_picture_count)}张，生成的测试用例可能存在遗漏点，可以参考以下方法对图片进行描述补充\n\n' \
                                   f'{func_box.html_local_img("docs/imgs/pic_desc.png")}'
-            docs_file_content.append({title: content})
+            file_limit.extend([title, content])
             yield from update_ui(chatbot, history)
         except Exception as e:
             chatbot.append([None, f'{func_box.html_a_blank(url)} \n\n请检查一下哦，这个链接我们访问不了，是否开启分享？是否设置密码？是否是轻文档？下面是什么错误？\n\n ```\n{str(e)}\n```'])
             yield from update_ui(chatbot, history)
-    return docs_file_content
+    return file_limit
 
 
 def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history):
@@ -59,56 +57,17 @@ def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs
     yield from update_ui(chatbot, history)
 
 
-def split_dict_limit(file_limit: list, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
     model = llm_kwargs['llm_model']
     max_length = llm_kwargs['max_length']/2  # 考虑到对话+回答会超过tokens,所以/2
     get_token_num = bridge_all.model_info[model]['token_cnt']
-    temp_dict_limit = {}
-    temp_chat_context = ''
-    # 分批次+分词
-    kwargs_prompt = '文档转Markdown'
-    prompt = prompt_generator.SqliteHandle(table=f'prompt_{llm_kwargs["ipaddr"]}').find_prompt_result(kwargs_prompt)
-    chatbot.append([f'接下来使用的Prompt是 {func_box.html_tag_color(kwargs_prompt)} ，你可以在Prompt编辑/检索中进行私人定制哦～', None])
-    yield from update_ui(chatbot, history)
-    for job_dict in file_limit:
-        for k, v in job_dict.items():
-            temp_chat_context += f'{func_box.html_tag_color(k)} 开始统计分词,分好词才能避免对话超出tokens错误...\n\n'
-            chatbot[-1] = [chatbot[-1][0], temp_chat_context]
-            if get_token_num(v) > max_length:
-                temp_chat_context += f'{func_box.html_tag_color(k)} 超过tokens限制...准备拆分后再提交\n\n'
-                chatbot[-1] = [chatbot[-1][0], temp_chat_context]
-                segments = crazy_utils.breakdown_txt_to_satisfy_token_limit(v, get_token_num, max_length)
-                for i in range(len(segments)):
-                    temp_dict_limit[k+f'_{i}'] = prompt.replace('{{{v}}}', segments[i])
-            else:
-                temp_dict_limit[k] = prompt.replace('{{{v}}}', v)
-                temp_chat_context += f'{func_box.html_tag_color(k)} 准备就绪...\n\n'
-                chatbot[-1] = [chatbot[-1][0], temp_chat_context]
-    yield from update_ui(chatbot, history)
-    inputs_array, inputs_show_user_array = list(temp_dict_limit.values()), list(temp_dict_limit.keys())
-    return inputs_array, inputs_show_user_array
-
-
-def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs):
-    # 提交多线程任务
-    gpt_response_collection = yield from crazy_utils.request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
-        inputs_array=inputs_array,
-        inputs_show_user_array=inputs_show_user_array,
-        llm_kwargs=llm_kwargs,
-        chatbot=chatbot,
-        history_array=[[""] for _ in range(len(inputs_array))],
-        sys_prompt_array=["" for _ in range(len(inputs_array))],
-        # max_workers=5,  # OpenAI所允许的最大并行过载
-        scroller_max_len=80
-    )
-    # 是否展示任务结果
-    kwargs_is_show,  = crazy_box.json_args_return(plugin_kwargs, ['is_show'])
-    if kwargs_is_show:
-        for results in list(zip(gpt_response_collection[0::2], gpt_response_collection[1::2])):
-            chatbot.append(results)
-            history.extend(results)
-            yield from update_ui(chatbot, history)
-    return gpt_response_collection
+    if get_token_num(inputs) > max_length:
+        chatbot.append(None, f'{func_box.html_tag_color(inputs[:10])}...对话预计超出tokens限制, 拆分中...')
+        yield from update_ui(chatbot, history)
+        segments = crazy_utils.breakdown_txt_to_satisfy_token_limit(inputs, get_token_num, max_length)
+    else:
+        segments = [inputs]
+    return segments
 
 
 def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history, default_prompt: str = False, all_chat: bool = True):
@@ -121,15 +80,18 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     Returns: 下次使用？
         inputs_array， inputs_show_user_array
     """
-    if default_prompt:
-        kwargs_prompt, = crazy_box.json_args_return(plugin_kwargs, ['prompt'])
-        if not kwargs_prompt: kwargs_prompt = default_prompt
-        prompt = prompt_generator.SqliteHandle(table=f'prompt_{llm_kwargs["ipaddr"]}').find_prompt_result(kwargs_prompt)
-        inputs_array = [prompt.replace('{{{v}}}', inputs) for inputs in gpt_response_collection[1::2]]
-        chatbot.append([f'接下来使用的Prompt是 {func_box.html_tag_color(kwargs_prompt)} ，你可以在Prompt编辑/检索中进行私人定制哦～',None])
-        yield from update_ui(chatbot, history)
-    else:
-        inputs_array = gpt_response_collection[1::2]
+    inputs_array = []
+    inputs_show_user_array = []
+    kwargs_prompt, = crazy_box.json_args_return(plugin_kwargs, ['prompt'])
+    if default_prompt: kwargs_prompt = default_prompt
+    chatbot.append([f'接下来使用的Prompt是 {func_box.html_tag_color(kwargs_prompt)} ，你可以在Prompt编辑/检索中进行私人定制哦～',None])
+    prompt = prompt_generator.SqliteHandle(table=f'prompt_{llm_kwargs["ipaddr"]}').find_prompt_result(kwargs_prompt)
+    for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
+        content_limit = yield from split_content_limit(inputs, llm_kwargs, chatbot, history)
+        for limit in content_limit:
+            inputs_array.append(prompt.replace('{{{v}}}', limit))
+            inputs_show_user_array.append(you_say)
+    yield from update_ui(chatbot, history)
     if all_chat:
         inputs_show_user_array = inputs_array
     else:
@@ -137,13 +99,43 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     return inputs_array, inputs_show_user_array
 
 
+def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs):
+    # 提交多线程任务
+    if len(inputs_array) == 1:
+        gpt_say = yield from crazy_utils.request_gpt_model_in_new_thread_with_ui_alive(
+            inputs=inputs_array[0], inputs_show_user=inputs_array[0],
+            llm_kwargs=llm_kwargs, chatbot=chatbot, history=history,
+            sys_prompt="请从给定的若干条搜索结果中抽取信息，对最相关的两个搜索结果进行总结，然后回答问题。"
+        )
+        gpt_response_collection = [inputs_show_user_array[0], gpt_say]
+    else:
+        gpt_response_collection = yield from crazy_utils.request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
+            inputs_array=inputs_array,
+            inputs_show_user_array=inputs_show_user_array,
+            llm_kwargs=llm_kwargs,
+            chatbot=chatbot,
+            history_array=[[""] for _ in range(len(inputs_array))],
+            sys_prompt_array=["" for _ in range(len(inputs_array))],
+            # max_workers=5,  # OpenAI所允许的最大并行过载
+            scroller_max_len=80
+        )
+        # 是否展示任务结果
+    kwargs_is_show,  = crazy_box.json_args_return(plugin_kwargs, ['is_show'])
+    if kwargs_is_show:
+        for results in list(zip(gpt_response_collection[0::2], gpt_response_collection[1::2])):
+            chatbot.append(results)
+            history.extend(results)
+            yield from update_ui(chatbot, history)
+    return gpt_response_collection
+
+
 def KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    docs_file_content = yield from Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
-    if not docs_file_content:
+    file_limit = yield from Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
+    if not file_limit:
         yield from update_ui(chatbot=chatbot, history=history, msg='无法获取需求文档内容，暂停运行')
         return
-    inputs_array, inputs_show_user_array = yield from split_dict_limit(docs_file_content, llm_kwargs, plugin_kwargs, chatbot,
-                                                                       history, system_prompt, web_port)
+    inputs_array, inputs_show_user_array = yield from input_output_processing(file_limit, llm_kwargs, plugin_kwargs,
+                                                                       chatbot, history, default_prompt='文档转Markdown')
     gpt_response_collection = yield from submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
     return gpt_response_collection
 
@@ -154,7 +146,7 @@ def 需求转测试用例(file_limit, llm_kwargs, plugin_kwargs, chatbot, histor
         inputs_show_user_array = [str(file_limit).splitlines()[0]]
         file_limit = [inputs_show_user_array, file_limit]
         inputs_array, inputs_show_user_array = yield from input_output_processing(file_limit, llm_kwargs, plugin_kwargs,
-                                                                       chatbot, history, default_prompt='需求转测试用例')
+                                                                       chatbot, history)
     else:
         chatbot.append((None, f'输入框空空如也？\n\n'
                             '请在输入框中输入你的需求文档，然后再点击需求转测试用例'))
@@ -171,7 +163,7 @@ def KDocs_转测试用例(link_limit, llm_kwargs, plugin_kwargs, chatbot, histor
         yield from update_ui(chatbot=chatbot, history=history, msg='多线程一个都没有通过，暂停运行')
         return
     inputs_array, inputs_show_user_array = yield from input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs,
-                                                                   chatbot, history, default_prompt='需求转测试用例')
+                                                                   chatbot, history)
     gpt_response_collection = yield from submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
     write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history)
 
@@ -183,7 +175,7 @@ def KDocs_需求分析问答(link_limit, llm_kwargs, plugin_kwargs, chatbot, his
         yield from update_ui(chatbot=chatbot, history=history, msg='多线程一个都没有通过，暂停运行')
         return
     inputs_array, inputs_show_user_array = yield from input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs,
-                                                                   chatbot, history, default_prompt='需求分析对话')
+                                                                   chatbot, history)
     yield from submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
 
 

@@ -79,7 +79,8 @@ def get_crazy_functions():
             "Parameters": {
                 "is_show": True,
                 "prompt": '需求分析对话',
-                'img_ocr': False
+                'img_ocr': False,
+                'to_markdown': False,
             }
         },
 

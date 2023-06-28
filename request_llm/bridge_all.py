@@ -16,12 +16,12 @@ from toolbox import get_conf, trimmed_format_exc
 from request_llm.bridge_chatgpt import predict_no_ui_long_connection as chatgpt_noui
 from request_llm.bridge_chatgpt import predict as chatgpt_ui
 
-from .bridge_azure_test import predict_no_ui_long_connection as azure_noui
-from .bridge_azure_test import predict as azure_ui
-from .bridge_chatglm import predict_no_ui_long_connection as chatglm_noui
-from .bridge_chatglm import predict as chatglm_ui
-from .bridge_newbing import predict_no_ui_long_connection as newbing_noui
-from .bridge_newbing import predict as newbing_ui
+from request_llm.bridge_azure_test import predict_no_ui_long_connection as azure_noui
+from request_llm.bridge_azure_test import predict as azure_ui
+from request_llm.bridge_chatglm import predict_no_ui_long_connection as chatglm_noui
+from request_llm.bridge_chatglm import predict as chatglm_ui
+from request_llm.bridge_newbing import predict_no_ui_long_connection as newbing_noui
+from request_llm.bridge_newbing import predict as newbing_ui
 
 # from .bridge_tgui import predict_no_ui_long_connection as tgui_noui
 # from .bridge_tgui import predict as tgui_ui
@@ -223,8 +223,8 @@ if "jittorllms_pangualpha" in AVAIL_LLM_MODELS:
         },
     })
 if "moss" in AVAIL_LLM_MODELS:
-    from .bridge_moss import predict_no_ui_long_connection as moss_noui
-    from .bridge_moss import predict as moss_ui
+    from request_llm.bridge_moss import predict_no_ui_long_connection as moss_noui
+    from request_llm.bridge_moss import predict as moss_ui
     model_info.update({
         "moss": {
             "fn_with_ui": moss_ui,
@@ -236,8 +236,8 @@ if "moss" in AVAIL_LLM_MODELS:
         },
     })
 if "stack-claude" in AVAIL_LLM_MODELS:
-    from .bridge_stackclaude import predict_no_ui_long_connection as claude_noui
-    from .bridge_stackclaude import predict as claude_ui
+    from request_llm.bridge_stackclaude import predict_no_ui_long_connection as claude_noui
+    from request_llm.bridge_stackclaude import predict as claude_ui
     # claude
     model_info.update({
         "stack-claude": {
@@ -251,8 +251,8 @@ if "stack-claude" in AVAIL_LLM_MODELS:
     })
 if "newbing-free" in AVAIL_LLM_MODELS:
     try:
-        from .bridge_newbingfree import predict_no_ui_long_connection as newbingfree_noui
-        from .bridge_newbingfree import predict as newbingfree_ui
+        from request_llm.bridge_newbingfree import predict_no_ui_long_connection as newbingfree_noui
+        from request_llm.bridge_newbingfree import predict as newbingfree_ui
         # claude
         model_info.update({
             "newbing-free": {
@@ -371,4 +371,3 @@ def predict(inputs, llm_kwargs, *args, **kwargs):
 
     method = model_info[llm_kwargs['llm_model']]["fn_with_ui"]
     yield from method(inputs, llm_kwargs, *args, **kwargs)
-

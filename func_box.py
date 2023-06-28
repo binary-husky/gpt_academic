@@ -424,7 +424,7 @@ def prompt_save(txt, name, prompt: gr.Dataset, ipaddr: gr.Request):
         yaml_obj.inset_prompt({name: txt})
         result = prompt_retrieval(is_all=['个人'], hosts=ipaddr.client.host)
         prompt.samples = result
-        return "", "", ['个人'], prompt.update(samples=result, visible=True), prompt
+        return "", "", ['个人'], prompt.update(samples=result, visible=True), prompt, gr.Tabs.update(selected='chatbot')
     elif not txt or not name:
         result = [[f'{html_tag_color("编辑框 or 名称不能为空!!!!!", color="red")}', '']]
         prompt.samples = [[f'{html_tag_color("编辑框 or 名称不能为空!!!!!", color="red")}', '']]

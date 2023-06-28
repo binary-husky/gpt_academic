@@ -65,7 +65,9 @@ mspace {
     margin-bottom: 30px !important;
     border: 1px solid var(--border-color-primary);
 }
-
+.toast-body {
+    z-index: 5 !important;
+}
 .chat_input {
 
 }

@@ -72,7 +72,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
         exceeded_cnt = 0
         while True:
             # watchdog error
-            if len(mutable) >= 2 and (time.time()-mutable[1]) > 5: 
+            if len(mutable) >= 2 and (time.time()-mutable[1]) > 10:
                 raise RuntimeError("检测到程序终止。")
             try:
                 # 【第一种情况】：顺利完成
@@ -136,7 +136,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         chatbot, history_array, sys_prompt_array, 
         refresh_interval=0.2, max_workers=-1, scroller_max_len=30,
         handle_token_exceed=True, show_user_at_complete=False,
-        retry_times_at_unknown_error=2,
+        retry_times_at_unknown_error=2, return_dict=False
         ):
     """
     Request GPT model using multiple threads with UI and high efficiency
@@ -185,7 +185,6 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
     # 跨线程传递
     mutable = [[f"", time.time(), "等待中"] for _ in range(n_frag)]
-
     # 子线程任务
     def _req_gpt(index, inputs, history, sys_prompt):
         gpt_say = ""
@@ -284,11 +283,20 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
             break
 
     # 异步任务结束
-    gpt_response_collection = []
-    for inputs_show_user, f in zip(inputs_show_user_array, futures):
-        gpt_res = f.result()
-        gpt_response_collection.extend([inputs_show_user, gpt_res])
-    
+    if return_dict:
+        gpt_response_collection = {}
+        count = 1
+        for inputs_show_user, response in zip(inputs_show_user_array, futures):
+            if gpt_response_collection.get(inputs_show_user_array, None):
+                inputs_show_user = f'{inputs_show_user}_{count}'
+                count += 1
+            gpt_response_collection[inputs_show_user] = response.result()
+    else:
+        gpt_response_collection = []
+        for inputs_show_user, f in zip(inputs_show_user_array, futures):
+            gpt_res = f.result()
+            gpt_response_collection.extend([inputs_show_user, gpt_res])
+
     # 是否在结束时，在界面上显示结果
     if show_user_at_complete:
         for inputs_show_user, f in zip(inputs_show_user_array, futures):

@@ -56,7 +56,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     observe_window = None：
         用于负责跨越线程传递已经输出的部分，大部分时候仅仅为了fancy的视觉效果，留空即可。observe_window[0]：观测窗。observe_window[1]：看门狗
     """
-    watch_dog_patience = 5 # 看门狗的耐心, 设置5秒即可
+    watch_dog_patience = 10 # 看门狗的耐心, 设置5秒即可
     headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt=sys_prompt, stream=True)
     retry = 0
     while True:
@@ -99,7 +99,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
                 # 观测窗，把已经获取的数据显示出去
                 if len(observe_window) >= 1: observe_window[0] += delta["content"]
                 # 看门狗，如果超过期限没有喂狗，则终止
-                if len(observe_window) >= 2:  
+                if len(observe_window) >= 2:
                     if (time.time()-observe_window[1]) > watch_dog_patience:
                         raise RuntimeError("用户取消了程序。")
         else: raise RuntimeError("意外Json结构："+delta)
@@ -290,16 +290,3 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     except:
         print('输入中可能存在乱码。')
     return headers, payload
-
-if __name__ == '__main__':
-    llm_kwargs = {
-        'api_key': 'sk-',
-        'llm_model': 'gpt-3.5-turbo',
-        'top_p': 1,
-        'max_length': 512,
-        'temperature': 1,
-        # 'ipaddr': ipaddr.client.host
-    }
-    chat = []
-    predict('你好', llm_kwargs=llm_kwargs, chatbot=chat, plugin_kwargs={})
-    print(chat)
