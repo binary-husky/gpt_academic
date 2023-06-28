@@ -122,7 +122,7 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
         # 是否展示任务结果
     kwargs_is_show,  = crazy_box.json_args_return(plugin_kwargs, ['is_show'])
     if kwargs_is_show:
-        for results in list(zip(gpt_response_collection[0::2], gpt_response_collection[1::2])):
+        for results, say in list(zip(gpt_response_collection[0::2], gpt_response_collection[1::2])):
             chatbot.append(results)
             history.extend(results)
             yield from update_ui(chatbot, history)

@@ -90,6 +90,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
         if ('data: [DONE]' in chunk): break # api2d 正常完成
         json_data = json.loads(chunk.lstrip('data:'))['choices'][0]
         delta = json_data["delta"]
+        out_time = 0
         if len(delta) == 0: break
         if "role" in delta: continue
         if "content" in delta: 
@@ -101,7 +102,9 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
                 # 看门狗，如果超过期限没有喂狗，则终止
                 if len(observe_window) >= 2:
                     if (time.time()-observe_window[1]) > watch_dog_patience:
-                        raise RuntimeError("用户取消了程序。")
+                        out_time+=1
+                        if out_time > 3: # 增加保障，超时3次再取消
+                            raise RuntimeError("用户取消了程序。")
         else: raise RuntimeError("意外Json结构："+delta)
     if json_data['finish_reason'] == 'length':
         raise ConnectionAbortedError("正常结束，但显示Token不足，导致输出不完整，请削减单次输入的文本量。")
