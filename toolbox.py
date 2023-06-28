@@ -586,7 +586,7 @@ def on_report_generated(cookies, files, chatbot):
     else:
         report_files = find_recent_files('gpt_log')
     if len(report_files) == 0:
-        return None, chatbot
+        return cookies, None, chatbot
     # files.extend(report_files)
     file_links = ''
     for f in report_files: file_links += f'<br/><a href="file={os.path.abspath(f)}" target="_blank">{f}</a>'

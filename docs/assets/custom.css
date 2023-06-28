@@ -83,7 +83,12 @@ mspace {
     width: 20% !important;
     border-radius: 20px!important;
 }
-
+.sm_checkbox {
+    position: relative !important;
+    z-index: 5 !important;
+    bottom: 5px;
+    padding: 0 !important;
+}
 .sm_select .wrap-inner.svelte-aqlk7e.svelte-aqlk7e.svelte-aqlk7e {
     padding: 0 !important;
 }
