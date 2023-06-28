@@ -76,10 +76,15 @@ class ChatBot(ChatBotFrame):
         self.history = gr.State([])
         temp_draw = [gr.HTML() for i in range(7)]
         with gr.Box(elem_id='chat_box'):
+            self.state_users = gr.HTML(value='', visible=False, elem_id='state_users')
             with gr.Row():
-                self.sm_upload = gr.UploadButton(label='🔗Upload', file_count='multiple', elem_classes='sm_btn').style(size='sm', full_width=False)
-                self.sm_code_block = gr.Button(value='⚛︎Code', elem_classes='sm_btn').style(size='sm', full_width=False)
+                self.sm_upload = gr.UploadButton(label='UPLOAD', file_count='multiple', elem_classes='sm_btn').style(size='sm', full_width=False)
+                self.sm_code_block = gr.Button(value='CODE', elem_classes='sm_btn').style(size='sm', full_width=False)
                 gr.HTML(func_box.get_html("appearance_switcher.html").format(label=""), elem_id='user_input_tb', elem_classes="insert_block")
+                with gr.Column(scale=100):
+                    self.md_dropdown = gr.Dropdown(choices=AVAIL_LLM_MODELS,
+                                                      value=LLM_MODEL, show_label=False, interactive=True,
+                                                      elem_classes='sm_select', elem_id='change-font-size').style(container=False)
             with gr.Row():
                 self.txt = gr.Textbox(show_label=False,  placeholder="Input question here.", elem_classes='chat_input').style(container=False)
                 self.input_copy = gr.State('')
@@ -91,7 +96,8 @@ class ChatBot(ChatBotFrame):
         self.sm_upload.upload(on_file_uploaded, [self.sm_upload, self.chatbot, self.txt], [self.chatbot, self.txt]).then(
             fn=lambda: [gr.Tabs.update(selected='plug_tab'), gr.Column.update(visible=False)], inputs=None, outputs=[self.tabs_inputs, self.examples_column]
         )
-        self.sm_code_block.click(fn=lambda x: x+'\n```\n\n```', inputs=[self.txt], outputs=[self.txt])
+        self.sm_code_block.click(fn=lambda x: x+'```\n\n```', inputs=[self.txt], outputs=[self.txt])
+        # self.sm_select_font.select(fn=lambda x: gr.HTML.update(value=f"{x}px"), inputs=[self.sm_select_font], outputs=[self.state_users])
 
     def draw_examples(self):
         with gr.Column(elem_id='examples_col') as self.examples_column:
@@ -189,7 +195,7 @@ class ChatBot(ChatBotFrame):
         self.pro_new_btn.click(fn=func_box.prompt_save,
                                inputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_fp_state],
                                outputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_private_check,
-                                        self.pro_func_prompt, self.pro_fp_state])
+                                        self.pro_func_prompt, self.pro_fp_state, self.tabs_chatbot])
         self.pro_reuse_btn.click(
             fn=func_box.reuse_chat,
             inputs=[self.pro_results, self.chatbot, self.history, self.pro_name_txt, self.txt],
@@ -274,8 +280,6 @@ class ChatBot(ChatBotFrame):
                                                label="对话模式")
             self.system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt",
                                             label="System prompt", value=self.initial_prompt)
-            self.md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(
-                container=False)
             # temp = gr.Markdown(self.description)
 
     def draw_goals_auto(self):

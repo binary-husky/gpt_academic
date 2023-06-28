@@ -41,7 +41,7 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
             docs_file_content.append({title: content})
             yield from update_ui(chatbot, history)
         except Exception as e:
-            chatbot.append([None, f'{func_box.html_a_blank(url)} \n\n请检查一下哦，这个链接我们访问不了，是否开启分享？是否设置密码？是否是轻文档？\n\n ```\n{str(e)}\n```'])
+            chatbot.append([None, f'{func_box.html_a_blank(url)} \n\n请检查一下哦，这个链接我们访问不了，是否开启分享？是否设置密码？是否是轻文档？下面是什么错误？\n\n ```\n{str(e)}\n```'])
             yield from update_ui(chatbot, history)
     return docs_file_content
 
@@ -131,7 +131,7 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     else:
         inputs_array = gpt_response_collection[1::2]
     if all_chat:
-        inputs_show_user_array = gpt_response_collection[1::2]
+        inputs_show_user_array = inputs_array
     else:
         inputs_show_user_array = default_prompt + ': ' + gpt_response_collection[0::2]
     return inputs_array, inputs_show_user_array

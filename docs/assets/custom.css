@@ -55,7 +55,7 @@ mspace {
 #chat_box {
     display: flex;
     flex-direction: column;
-    overflow-y: auto !important;
+    overflow-y: visible !important;
     z-index: 3;
     flex-grow: 1; /* 自动填充剩余空间 */
     position: absolute;
@@ -76,11 +76,26 @@ mspace {
     border-radius: 20px!important;
     min-width: min(10%,100%) !important;
 }
+.sm_select {
+    position: relative !important;
+    z-index: 5 !important;
+    bottom: 5px;
+    width: 20% !important;
+    border-radius: 20px!important;
+}
+
+.sm_select .wrap-inner.svelte-aqlk7e.svelte-aqlk7e.svelte-aqlk7e {
+    padding: 0 !important;
+}
+.sm_select .block.svelte-mppz8v {
+    width: 10% !important;
+}
+
 /* usage_display */
 .insert_block {
     position: relative;
     bottom: 2px;
-    min-width: min(110px,100%) !important;
+    min-width: min(55px,100%) !important;
 }
 
 .submit_btn {
@@ -311,7 +326,7 @@ textarea.svelte-1pie7s6 {
     top: 0;
     transition: .4s;
     font-size: 18px;
-    border-radius: 12px;
+    border-radius: 7px;
 }
 .apSlider::before {
     bottom: -1.5px;
@@ -461,7 +476,7 @@ ol:not(.options), ul:not(.options) {
     border-radius: var(--radius-xl) !important;
     border: none;
     padding: var(--spacing-xl) !important;
-    font-size: var(--text-md) !important;
+    font-size: 15px !important;
     line-height: var(--line-md) !important;
     min-height: calc(var(--text-md)*var(--line-md) + 2*var(--spacing-xl));
     min-width: calc(var(--text-md)*var(--line-md) + 2*var(--spacing-xl));
@@ -603,7 +618,7 @@ thead th {
     display: block;
     overflow: auto;
     white-space: pre;
-    background-color: hsla(0, 0%, 20%, 70%)!important;
+    background-color: hsla(0, 0%, 7%, 70%)!important;
     border-radius: 10px;
     padding: 1.2em 1em 0em .5em;
     margin: 0.6em 2em 1em 0.2em;

@@ -428,7 +428,7 @@ def prompt_save(txt, name, prompt: gr.Dataset, ipaddr: gr.Request):
     elif not txt or not name:
         result = [[f'{html_tag_color("编辑框 or 名称不能为空!!!!!", color="red")}', '']]
         prompt.samples = [[f'{html_tag_color("编辑框 or 名称不能为空!!!!!", color="red")}', '']]
-        return txt, name, [], prompt.update(samples=result, visible=True), prompt
+        return txt, name, [], prompt.update(samples=result, visible=True), prompt, gr.Tabs.update(selected='chatbot')
 
 
 def prompt_input(txt: str, prompt_str, name_str,  index, data: gr.Dataset, tabs_index):
