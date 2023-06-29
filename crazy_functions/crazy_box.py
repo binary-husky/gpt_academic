@@ -133,7 +133,7 @@ class Kdocs:
         return response.text
 
     def split_link_tags(self):
-        url_parts = self.url.split('/')
+        url_parts = re.split('[/\?&#]+', self.url)
         try:
             l_index = url_parts.index('l')
             otl_url_str = url_parts[l_index + 1]

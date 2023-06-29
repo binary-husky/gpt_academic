@@ -210,7 +210,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                 # time.sleep(10); raise RuntimeError("测试")
                 gpt_say = predict_no_ui_long_connection(
                     inputs=inputs, llm_kwargs=llm_kwargs, history=history,
-                    sys_prompt=sys_prompt, observe_window=mutable[index], console_slience=True
+                    sys_prompt=sys_prompt, observe_window=mutable[index], console_slience=False
                 )
                 mutable[index][2] = "已成功"
                 return gpt_say

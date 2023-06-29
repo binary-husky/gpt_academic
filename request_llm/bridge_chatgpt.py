@@ -72,7 +72,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
             if retry > MAX_RETRY: raise TimeoutError
             if MAX_RETRY!=0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
 
-    stream_response =  response.iter_lines()
+    stream_response = response.iter_lines()
     result = ''
     while True:
         try: chunk = next(stream_response).decode()

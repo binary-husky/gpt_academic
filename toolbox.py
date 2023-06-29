@@ -11,7 +11,7 @@ import os
 import time
 import glob
 import sys
-from concurrent.futures import ThreadPoolExecutor
+import threading
 ############################### 插件输入输出接驳区 #######################################
 pj = os.path.join
 
@@ -99,14 +99,15 @@ def ArgsGeneralWrapper(f):
     return decorated
 
 
-pool = ThreadPoolExecutor(200)
+
 def update_ui(chatbot, history, msg='正常', *args):  # 刷新界面
     """
     刷新用户界面
     """
     assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时，可用clear将其清空，然后用for+append循环重新赋值。"
     yield chatbot.get_cookies(), chatbot, history, msg
-    pool.submit(func_box.thread_write_chat, chatbot, history)
+    # threading.Thread(target=func_box.thread_write_chat, args=(chatbot, history)).start()
+    # func_box.thread_write_chat(chatbot, history)
 
 def update_ui_lastest_msg(lastmsg, chatbot, history, delay=1):  # 刷新界面
     """

@@ -33,6 +33,7 @@ import gradio as gr
 import toolbox
 from prompt_generator import SqliteHandle
 from bs4 import BeautifulSoup
+import copy
 
 """contextlib 是 Python 标准库中的一个模块，提供了一些工具函数和装饰器，用于支持编写上下文管理器和处理上下文的常见任务，例如资源管理、异常处理等。
 官网：https://docs.python.org/3/library/contextlib.html"""
@@ -506,7 +507,7 @@ def show_prompt_result(index, data: gr.Dataset, chatbot, pro_edit, pro_name):
 
 
 def pattern_html(html):
-    bs = BeautifulSoup(html, 'html.parser')
+    bs = BeautifulSoup(str(html), 'html.parser')
     md_message = bs.find('div', {'class': 'md-message'})
     if md_message:
         return md_message.get_text(separator='')
@@ -518,6 +519,7 @@ def thread_write_chat(chatbot, history):
     """
     对话记录写入数据库
     """
+    chatbot, history = copy.copy(chatbot), copy.copy(history)
     private_key = toolbox.get_conf('private_key')[0]
     chat_title = chatbot[0][1].split()
     i_say = pattern_html(chatbot[-1][0])

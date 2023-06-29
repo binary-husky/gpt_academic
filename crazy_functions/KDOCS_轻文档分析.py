@@ -4,6 +4,8 @@
 # @Author : Spike
 # @Descr   :
 import json
+import time
+
 import func_box
 from crazy_functions import crazy_box
 from toolbox import update_ui, trimmed_format_exc
@@ -11,6 +13,7 @@ from toolbox import CatchException, report_execption, write_results_to_file, zip
 from crazy_functions import crazy_utils
 from request_llm import bridge_all
 import prompt_generator
+import traceback
 
 
 def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
@@ -29,17 +32,20 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
     file_limit = []
     for url in links:
         try:
-            chatbot.append([link_limit, None])
+            chatbot.append([link_limit+"\n\n网页爬虫准备工作中～", None])
+            yield from update_ui(chatbot, history)  #增加中间过渡
             ovs_data, content, empty_picture_count, pic_dict = crazy_box.get_docs_content(url)
             title = content.splitlines()[0]
             if empty_picture_count >= 5:
-                chatbot[-1][1] = f'\n\n 需求文档中没有{func_box.html_tag_color("描述")}的图片数量' \
+                chatbot.append([None, f'\n\n 需求文档中没有{func_box.html_tag_color("描述")}的图片数量' \
                                   f'有{func_box.html_tag_color(empty_picture_count)}张，生成的测试用例可能存在遗漏点，可以参考以下方法对图片进行描述补充\n\n' \
-                                  f'{func_box.html_local_img("docs/imgs/pic_desc.png")}'
+                                  f'{func_box.html_local_img("docs/imgs/pic_desc.png")}'])
             file_limit.extend([title, content])
             yield from update_ui(chatbot, history)
+            time.sleep(1)
         except Exception as e:
-            chatbot.append([None, f'{func_box.html_a_blank(url)} \n\n请检查一下哦，这个链接我们访问不了，是否开启分享？是否设置密码？是否是轻文档？下面是什么错误？\n\n ```\n{str(e)}\n```'])
+            error_str = traceback.format_exc()
+            chatbot.append([None, f'{func_box.html_a_blank(url)} \n\n请检查一下哦，这个链接我们访问不了，是否开启分享？是否设置密码？是否是轻文档？下面是什么错误？\n\n ```\n{str(error_str)}\n```'])
             yield from update_ui(chatbot, history)
     return file_limit
 
@@ -48,11 +54,17 @@ def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs
     gpt_response = gpt_response_collection[1::2]
     chat_file_list = ''
     for k in range(len(gpt_response)):
+        file_name = inputs_show_user_array[k]
+        if len(file_name) > 20:
+            if file_name.find('""""') != -1:
+                file_name = file_name.split('""""')[1].splitlines()[0]
+            else:
+                file_name = file_name[:20]
         test_case = []
         for i in gpt_response[k].splitlines():
             test_case.append([func_box.clean_br_string(i) for i in i.split('|')[1:]])
-        file_path = crazy_box.ExcelHandle(ipaddr=llm_kwargs['ipaddr']).lpvoid_lpbuffe(test_case[2:], filename=inputs_show_user_array[k])
-        chat_file_list += f'{inputs_show_user_array[k]}生成结果如下:\t {func_box.html_download_blank(__href=file_path, file_name=file_path.split("/")[-1])}\n\n'
+        file_path = crazy_box.ExcelHandle(ipaddr=llm_kwargs['ipaddr']).lpvoid_lpbuffe(test_case[2:], filename=file_name)
+        chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_download_blank(__href=file_path, file_name=file_path.split("/")[-1])}\n\n'
     chatbot.append(['Done', chat_file_list])
     yield from update_ui(chatbot, history)
 
@@ -102,12 +114,16 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
 def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs):
     # 提交多线程任务
     if len(inputs_array) == 1:
-        gpt_say = yield from crazy_utils.request_gpt_model_in_new_thread_with_ui_alive(
-            inputs=inputs_array[0], inputs_show_user=inputs_array[0],
-            llm_kwargs=llm_kwargs, chatbot=chatbot, history=history,
-            sys_prompt="请从给定的若干条搜索结果中抽取信息，对最相关的两个搜索结果进行总结，然后回答问题。"
-        )
-        gpt_response_collection = [inputs_show_user_array[0], gpt_say]
+        yield from bridge_all.predict(inputs_array[0], llm_kwargs, plugin_kwargs, chatbot, history)
+        gpt_response_collection = [inputs_show_user_array[0], history[-1]]
+        # 下面的方法有内存泄漏?的风险（加载完所有数据后，还在不知道轮询什么东西），暂时屏蔽
+        # gpt_say = yield from crazy_utils.request_gpt_model_in_new_thread_with_ui_alive(
+        #     inputs=inputs_array[0], inputs_show_user=inputs_array[0],
+        #     llm_kwargs=llm_kwargs, chatbot=chatbot, history=[],
+        #     sys_prompt="" , refresh_interval=0.1
+        # )
+        # gpt_response_collection = [inputs_show_user_array[0], gpt_say]
+        # history.extend(gpt_response_collection)
     else:
         gpt_response_collection = yield from crazy_utils.request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
             inputs_array=inputs_array,
@@ -134,9 +150,12 @@ def KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, s
     if not file_limit:
         yield from update_ui(chatbot=chatbot, history=history, msg='无法获取需求文档内容，暂停运行')
         return
-    inputs_array, inputs_show_user_array = yield from input_output_processing(file_limit, llm_kwargs, plugin_kwargs,
-                                                                       chatbot, history, default_prompt='文档转Markdown')
-    gpt_response_collection = yield from submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
+    kwargs_to_mark, = crazy_box.json_args_return(plugin_kwargs, ['to_markdown'])
+    if kwargs_to_mark:
+        inputs_array, inputs_show_user_array = yield from input_output_processing(file_limit, llm_kwargs, plugin_kwargs,
+                                                                           chatbot, history, default_prompt='文档转Markdown')
+        gpt_response_collection = yield from submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
+    else: gpt_response_collection = file_limit
     return gpt_response_collection
 
 
@@ -165,7 +184,8 @@ def KDocs_转测试用例(link_limit, llm_kwargs, plugin_kwargs, chatbot, histor
     inputs_array, inputs_show_user_array = yield from input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs,
                                                                    chatbot, history)
     gpt_response_collection = yield from submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
-    write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history)
+    yield from write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history)
+    yield from update_ui(chatbot, history, '插件执行成功')
 
 
 @CatchException
@@ -176,6 +196,7 @@ def KDocs_需求分析问答(link_limit, llm_kwargs, plugin_kwargs, chatbot, his
         return
     inputs_array, inputs_show_user_array = yield from input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs,
                                                                    chatbot, history)
-    yield from submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
+    gpt_response_collection = yield from submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
+    yield from update_ui(chatbot, history, '插件执行成功')
 
 

@@ -301,10 +301,9 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
     n_model = 1
     if '&' not in model:
         assert not model.startswith("tgui"), "TGUI不支持函数插件的实现"
-
         # 如果只询问1个大语言模型：
         method = model_info[model]["fn_without_ui"]
-        return method(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience)
+        return LLM_CATCH_EXCEPTION(method)(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience)
     else:
         # 如果同时询问多个大语言模型：
         executor = ThreadPoolExecutor(max_workers=4)
