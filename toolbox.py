@@ -360,7 +360,7 @@ def markdown_convertion(txt):
         convert_stage_1_resp = convert_stage_1.replace('</br>', '')
         convert_stage_2_2, n = re.subn(find_equation_pattern, replace_math_render, convert_stage_1_resp, flags=re.DOTALL)
         # cat them together
-        context =  pre + convert_stage_2_1 + f'{split}' + convert_stage_2_2 + suf
+        context = pre + convert_stage_2_1 + f'{split}' + convert_stage_2_2 + suf
         return raw_hide.replace('%s', func_box.pattern_html(context)) + context
     else:
         context = pre + markdown.markdown(txt, extensions=['fenced_code', 'codehilite', 'tables', 'sane_lists']) + suf

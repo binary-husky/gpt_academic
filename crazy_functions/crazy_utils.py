@@ -125,10 +125,11 @@ def request_gpt_model_in_new_thread_with_ui_alive(
         time.sleep(refresh_interval)
         # “喂狗”（看门狗）
         mutable[1] = time.time()
+        gpt_say = mutable[0]
         if future.done():
             break
-        chatbot[-1] = [chatbot[-1][0], mutable[0]]
-        yield from update_ui(chatbot=chatbot, history=[])  # 刷新界面
+        chatbot[-1] = [chatbot[-1][0], gpt_say]
+        yield from update_ui(chatbot=chatbot, history=[], msg='数据加载中')  # 刷新界面
 
     final_result = future.result()
     chatbot[-1] = [chatbot[-1][0], final_result]
@@ -294,19 +295,10 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         break
 
     # 异步任务结束
-    if return_dict:
-        gpt_response_collection = {}
-        count = 1
-        for inputs_show_user, response in zip(inputs_show_user_array, futures):
-            if gpt_response_collection.get(inputs_show_user_array, None):
-                inputs_show_user = f'{inputs_show_user}_{count}'
-                count += 1
-            gpt_response_collection[inputs_show_user] = response.result()
-    else:
-        gpt_response_collection = []
-        for inputs_show_user, f in zip(inputs_show_user_array, futures):
-            gpt_res = f.result()
-            gpt_response_collection.extend([inputs_show_user, gpt_res])
+    gpt_response_collection = []
+    for inputs_show_user, f in zip(inputs_show_user_array, futures):
+        gpt_res = f.result()
+        gpt_response_collection.extend([inputs_show_user, gpt_res])
 
     # 是否在结束时，在界面上显示结果
     if show_user_at_complete:
