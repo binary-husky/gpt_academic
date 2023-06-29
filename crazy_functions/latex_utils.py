@@ -532,11 +532,11 @@ class LatexPaperFileGroup():
                 f.write(res)
         return manifest
 
-def write_html(sp_file_contents, sp_file_result, chatbot):
+def write_html(sp_file_contents, sp_file_result, chatbot, project_folder):
 
     # write html
     try:
-        import copy
+        import shutil
         from .crazy_utils import construct_html
         from toolbox import gen_time_str
         ch = construct_html() 
@@ -554,6 +554,7 @@ def write_html(sp_file_contents, sp_file_result, chatbot):
                 ch.add_row(a=orig, b=trans)
         create_report_file_name = f"{gen_time_str()}.trans.html"
         ch.save_file(create_report_file_name)
+        shutil.copyfile(pj('./gpt_log/', create_report_file_name), pj(project_folder, create_report_file_name))
         promote_file_to_downloadzone(file=f'./gpt_log/{create_report_file_name}', chatbot=chatbot)
     except:
         from toolbox import trimmed_format_exc
@@ -634,7 +635,7 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
         pfg.get_token_num = None
         objdump(pfg, file=pj(project_folder,'temp.pkl'))
 
-    write_html(pfg.sp_file_contents, pfg.sp_file_result, chatbot=chatbot)
+    write_html(pfg.sp_file_contents, pfg.sp_file_result, chatbot=chatbot, project_folder=project_folder)
 
     #  <-------- 写出文件 ----------> 
     msg = f"当前大语言模型: {llm_kwargs['llm_model']}，当前语言模型温度设定: {llm_kwargs['temperature']}。"
