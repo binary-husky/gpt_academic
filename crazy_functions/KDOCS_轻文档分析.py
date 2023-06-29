@@ -204,8 +204,9 @@ def KDocs_需求分析问答(link_limit, llm_kwargs, plugin_kwargs, chatbot, his
 
 def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
     for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
-        md, html, code = crazy_box.Utils().markdown_to_flow_chart(data=inputs, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(you_say))
-        chatbot.append(("View", func_box.html_view_blank(md), '\n\n View: '+func_box.html_view_blank(html)))
+        md, html = crazy_box.Utils().markdown_to_flow_chart(data=inputs, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(you_say))
+        chatbot.append(("View: "+func_box.html_view_blank(md), f'{func_box.html_iframe_code(html_file=html)}'
+                                                              '\n\n--- \n\n View: '+func_box.html_view_blank(html)))
         yield from update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
 
 @CatchException
