@@ -430,7 +430,7 @@ class LatexPaperSplit():
     """
     def __init__(self) -> None:
         self.nodes = None
-        self.msg = "{\\scriptsize\\textbf{警告：该PDF由GPT-Academic开源项目调用大语言模型+Latex翻译插件一键生成，" + \
+        self.msg = "*{\\scriptsize\\textbf{警告：该PDF由GPT-Academic开源项目调用大语言模型+\Latex 翻译插件一键生成，" + \
             "版权归原文作者所有。翻译内容可靠性无保障，请仔细鉴别并以原文为准。" + \
             "项目Github地址 \\url{https://github.com/binary-husky/gpt_academic/}。"
         # 请您不要删除或修改这行警告，除非您是论文的原作者（如果您是论文原作者，欢迎加REAME中的QQ联系开发者）
@@ -741,13 +741,15 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
         results_ += f"对比PDF编译是否成功: {diff_pdf_success};" 
         yield from update_ui_lastest_msg(f'第{n_fix}编译结束:<br/>{results_}...', chatbot, history) # 刷新Gradio前端界面
 
+        if diff_pdf_success:
+            result_pdf = pj(work_folder_modified, f'merge_diff.pdf')    # get pdf path
+            promote_file_to_downloadzone(result_pdf, rename_file=None, chatbot=chatbot)  # promote file to web UI
         if modified_pdf_success:
             yield from update_ui_lastest_msg(f'转化PDF编译已经成功, 即将退出 ...', chatbot, history)    # 刷新Gradio前端界面
-            os.chdir(current_dir)
-            result_pdf = pj(work_folder_modified, f'{main_file_modified}.pdf')
+            result_pdf = pj(work_folder_modified, f'{main_file_modified}.pdf') # get pdf path
             if os.path.exists(pj(work_folder, '..', 'translation')):
                 shutil.copyfile(result_pdf, pj(work_folder, '..', 'translation', 'translate_zh.pdf'))
-            promote_file_to_downloadzone(result_pdf, rename_file=None, chatbot=chatbot)
+            promote_file_to_downloadzone(result_pdf, rename_file=None, chatbot=chatbot)  # promote file to web UI
             return True # 成功啦
         else:
             if n_fix>=max_try: break

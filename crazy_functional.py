@@ -348,17 +348,17 @@ def get_crazy_functions():
     try:
         from crazy_functions.Latex输出PDF结果 import Latex英文纠错加PDF对比
         function_plugins.update({
-            "[功能尚不稳定] Latex英文纠错+LatexDiff高亮修正位置": {
+            "Latex英文纠错+高亮修正位置 [需Latex]": {
                 "Color": "stop",
                 "AsButton": False,
-                # "AdvancedArgs": True,
-                # "ArgsReminder": "",
+                "AdvancedArgs": True,
+                "ArgsReminder": "如果有必要, 请在此处追加更细致的矫错指令（使用英文）。",
                 "Function": HotReload(Latex英文纠错加PDF对比)
             }
         })
         from crazy_functions.Latex输出PDF结果 import Latex翻译中文并重新编译PDF
         function_plugins.update({
-            "Arixv翻译（输入arxivID） [需Latex]": {
+            "Arixv翻译（输入arxivID）[需Latex]": {
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,
@@ -368,17 +368,17 @@ def get_crazy_functions():
                 "Function": HotReload(Latex翻译中文并重新编译PDF)
             }
         })
-        # function_plugins.update({
-        #     "本地论文翻译（上传Latex压缩包） [需Latex]": {
-        #         "Color": "stop",
-        #         "AsButton": False,
-        #         "AdvancedArgs": True,
-        #         "ArgsReminder": 
-        #             "如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "+ 
-        #             "例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: " + 'If the term "agent" is used in this section, it should be translated to "智能体". ',
-        #         "Function": HotReload(Latex翻译中文并重新编译PDF)
-        #     }
-        # })
+        function_plugins.update({
+            "本地论文翻译（上传Latex压缩包）[需Latex]": {
+                "Color": "stop",
+                "AsButton": False,
+                "AdvancedArgs": True,
+                "ArgsReminder": 
+                    "如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "+ 
+                    "例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: " + 'If the term "agent" is used in this section, it should be translated to "智能体". ',
+                "Function": HotReload(Latex翻译中文并重新编译PDF)
+            }
+        })
     except:
         print('Load function plugin failed')
 
