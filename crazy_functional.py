@@ -226,10 +226,18 @@ def get_crazy_functions():
     try:
         from crazy_functions.联网的ChatGPT import 连接网络回答问题
         function_plugins.update({
-            "连接网络回答问题（先输入问题，再点击按钮，需要访问谷歌）": {
+            "连接网络回答问题（输入问题后点击该插件，需要访问谷歌）": {
                 "Color": "stop",
                 "AsButton": False,  # 加入下拉菜单中
                 "Function": HotReload(连接网络回答问题)
+            }
+        })
+        from crazy_functions.联网的ChatGPT_bing版 import 连接bing搜索回答问题
+        function_plugins.update({
+            "连接网络回答问题（中文Bing版，输入问题后点击该插件）": {
+                "Color": "stop",
+                "AsButton": False,  # 加入下拉菜单中
+                "Function": HotReload(连接bing搜索回答问题)
             }
         })
     except:
