@@ -77,6 +77,17 @@ class Utils:
         context_ = '\n'.join(context_)
         return text_values, context_, pic_dict
 
+    def markdown_to_flow_chart(self, data, hosts, file_name):
+        user_path = os.path.join(func_box.users_path, hosts)
+        md_file = os.path.join(user_path, f"{file_name}.md")
+        html_file = os.path.join(user_path, f"{file_name}.html")
+        with open(file=md_file, mode='w') as f:
+            f.write(data)
+        func_box.Shell(f'npx markmap-cli --no-open "{md_file}" -o "{html_file}"').read()
+        with open(file=html_file, mode='r') as f:
+            html_code = f.read()
+        return md_file, html_file, html_code
+
 
 class ExcelHandle:
 

@@ -49,17 +49,20 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
             yield from update_ui(chatbot, history)
     return file_limit
 
+def long_name_processing(file_name):
+    if len(file_name) > 20:
+        if file_name.find('""""') != -1:
+            file_name = file_name.split('""""')[1].splitlines()[0]
+        else:
+            file_name = file_name[:20]
+    return file_name
+
 
 def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history):
     gpt_response = gpt_response_collection[1::2]
     chat_file_list = ''
     for k in range(len(gpt_response)):
-        file_name = inputs_show_user_array[k]
-        if len(file_name) > 20:
-            if file_name.find('""""') != -1:
-                file_name = file_name.split('""""')[1].splitlines()[0]
-            else:
-                file_name = file_name[:20]
+        file_name = long_name_processing(inputs_show_user_array[k])
         test_case = []
         for i in gpt_response[k].splitlines():
             test_case.append([func_box.clean_br_string(i) for i in i.split('|')[1:]])
@@ -199,4 +202,18 @@ def KDocs_需求分析问答(link_limit, llm_kwargs, plugin_kwargs, chatbot, his
     gpt_response_collection = yield from submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
     yield from update_ui(chatbot, history, '插件执行成功')
 
+def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
+    for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
+        md, html, code = crazy_box.Utils().markdown_to_flow_chart(data=inputs, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(you_say))
+        chatbot.append(("View", func_box.html_view_blank(md), '\n\n View: '+func_box.html_view_blank(html)))
+        yield from update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
+
+@CatchException
+def KDocs_文档转流程图(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    gpt_response_collection = yield from KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
+    if not gpt_response_collection:
+        yield from update_ui(chatbot=chatbot, history=history, msg='多线程一个都没有通过，暂停运行')
+        return
+    yield from transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history)
+    yield from update_ui(chatbot, history, '插件执行成功')
 

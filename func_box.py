@@ -139,6 +139,14 @@ def html_a_blank(__href, name=''):
     a = f'<a href="{__href}" target="_blank" class="svelte-xrr240">{name}</a>'
     return a
 
+def html_view_blank(__href, file_name=''):
+    if os.path.exists(__href):
+        __href = f'/file={__href}'
+    if not file_name:
+        file_name = __href.split('/')[-1]
+    a = f'<a href="{__href}" target="_blank" class="svelte-xrr240">{file_name}</a>'
+    return a
+
 def html_download_blank(__href, file_name='temp', dir_name=''):
     if os.path.exists(__href):
         __href = f'/file={__href}'
@@ -535,6 +543,7 @@ def thread_write_chat(chatbot, history):
 
 base_path = os.path.dirname(__file__)
 prompt_path = os.path.join(base_path, 'users_data')
+users_path = os.path.join(base_path, 'private_upload')
 
 def reuse_chat(result, chatbot, history, pro_numb, say):
     """复用对话记录"""

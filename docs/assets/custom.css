@@ -190,10 +190,12 @@ footer {
 }
 textarea.svelte-1pie7s6 {
     background: #e7e6e6 !important;
+    width: 96% !important;
 }
 
 .dark textarea.svelte-1pie7s6 {
     background: var(--input-background-fill) !important;
+    width: 96% !important;
 }
 
 .dark input[type=number].svelte-1cl284s {

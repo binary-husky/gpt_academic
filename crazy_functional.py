@@ -84,6 +84,16 @@ def get_crazy_functions():
                 'to_markdown': False,
             }
         },
+        "KDocs文档转流程图": {
+            "Color": "primary",
+            "AsButton": True,
+            "Function": HotReload(KDOCS_轻文档分析.KDocs_文档转流程图),
+            "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+            "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
+            "Parameters": {
+                'to_markdown': True,
+            }
+        },
 
         "删除所有本地对话历史记录（请谨慎操作）": {
             "AsButton":False,
@@ -169,7 +179,8 @@ def get_crazy_functions():
         # },
         "[插件demo] 历史上的今天": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
-            "Function": HotReload(高阶功能模板函数)
+            "Function": HotReload(高阶功能模板函数),
+            "AsButton": False,
         },
 
     }
