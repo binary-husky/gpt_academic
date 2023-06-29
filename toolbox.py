@@ -90,11 +90,6 @@ def ArgsGeneralWrapper(f):
         chatbot_with_cookie.write_list(chatbot)
         txt_passon = txt
         if encrypt in models: txt_passon = func_box.encryption_str(txt)
-        if txt_passon == '' and len(args) > 1:
-            msgs = f'### Warning 输入框为空\n' \
-                   f'tips: 使用基础功能或{func_box.html_tag_color("高亮插件", "#b522c5", "ffffff")}功能时，请在输入区输入需要处理的内容'
-            yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=msgs)  # 刷新界面
-            return
         yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
     return decorated
 
