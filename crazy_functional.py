@@ -236,6 +236,18 @@ def get_crazy_functions():
         print('Load function plugin failed')
 
     try:
+        from crazy_functions.联网的ChatGPT_bing版 import 连接bing搜索回答问题
+        function_plugins.update({
+            "连接网络回答问题_bing搜索（先输入问题，再点击按钮，搜索引擎为cn.bing.com,国内可用）": {
+                "Color": "stop",
+                "AsButton": False,  # 加入下拉菜单中
+                "Function": HotReload(连接bing搜索回答问题)
+            }
+        })
+    except:
+        print('Load function plugin failed')
+
+    try:
         from crazy_functions.解析项目源代码 import 解析任意code项目
         function_plugins.update({
             "解析项目源代码（手动指定和筛选源代码文件类型）": {
