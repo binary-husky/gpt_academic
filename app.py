@@ -2,7 +2,7 @@ import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 
 def main():
     import subprocess, sys
-    subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt'])
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'gradio-stable-fork'])
     import gradio as gr
     if gr.__version__ not in ['3.28.3','3.32.3']: assert False, "请用 pip install -r requirements.txt 安装依赖"
     from request_llm.bridge_all import predict
@@ -158,7 +158,7 @@ def main():
         for k in crazy_fns:
             if not crazy_fns[k].get("AsButton", True): continue
             click_handle = crazy_fns[k]["Button"].click(ArgsGeneralWrapper(crazy_fns[k]["Function"]), [*input_combo, gr.State(PORT)], output_combo)
-            click_handle.then(on_report_generated, [file_upload, chatbot], [file_upload, chatbot])
+            click_handle.then(on_report_generated, [cookies, file_upload, chatbot], [cookies, file_upload, chatbot])
             cancel_handles.append(click_handle)
         # 函数插件-下拉菜单与随变按钮的互动
         def on_dropdown_changed(k):
@@ -178,7 +178,7 @@ def main():
             if k in [r"打开插件列表", r"请先从插件列表中选择"]: return
             yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(*args, **kwargs)
         click_handle = switchy_bt.click(route,[switchy_bt, *input_combo, gr.State(PORT)], output_combo)
-        click_handle.then(on_report_generated, [file_upload, chatbot], [file_upload, chatbot])
+        click_handle.then(on_report_generated, [cookies, file_upload, chatbot], [cookies, file_upload, chatbot])
         cancel_handles.append(click_handle)
         # 终止按钮的回调函数注册
         stopBtn.click(fn=None, inputs=None, outputs=None, cancels=cancel_handles)

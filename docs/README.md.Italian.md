@@ -2,11 +2,11 @@
 >
 > Durante l'installazione delle dipendenze, selezionare rigorosamente le **versioni specificate** nel file requirements.txt.
 >
-> ` pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/`
+> ` pip install -r requirements.txt`
 
-# <img src="docs/logo.png" width="40" > GPT Ottimizzazione Accademica (GPT Academic)
+# <img src="logo.png" width="40" > GPT Ottimizzazione Accademica (GPT Academic)
 
-**Se ti piace questo progetto, ti preghiamo di dargli una stella. Se hai sviluppato scorciatoie accademiche o plugin funzionali più utili, non esitare ad aprire una issue o pull request. Abbiamo anche una README in [Inglese|](docs/README_EN.md)[Giapponese|](docs/README_JP.md)[Coreano|](https://github.com/mldljyh/ko_gpt_academic)[Russo|](docs/README_RS.md)[Francese](docs/README_FR.md) tradotta da questo stesso progetto.
+**Se ti piace questo progetto, ti preghiamo di dargli una stella. Se hai sviluppato scorciatoie accademiche o plugin funzionali più utili, non esitare ad aprire una issue o pull request. Abbiamo anche una README in [Inglese|](README_EN.md)[Giapponese|](README_JP.md)[Coreano|](https://github.com/mldljyh/ko_gpt_academic)[Russo|](README_RS.md)[Francese](README_FR.md) tradotta da questo stesso progetto.
 Per tradurre questo progetto in qualsiasi lingua con GPT, leggere e eseguire [`multi_language.py`](multi_language.py) (sperimentale).
 
 > **Nota**
@@ -17,7 +17,9 @@ Per tradurre questo progetto in qualsiasi lingua con GPT, leggere e eseguire [`m
 >
 > 3. Questo progetto è compatibile e incoraggia l'utilizzo di grandi modelli di linguaggio di produzione nazionale come chatglm, RWKV, Pangu ecc. Supporta la coesistenza di più api-key e può essere compilato nel file di configurazione come `API_KEY="openai-key1,openai-key2,api2d-key3"`. Per sostituire temporaneamente `API_KEY`, inserire `API_KEY` temporaneo nell'area di input e premere Invio per renderlo effettivo. 
 
-<div align="center">Funzione | Descrizione
+<div align="center">
+
+Funzione | Descrizione
 --- | ---
 Correzione immediata | Supporta correzione immediata e ricerca degli errori di grammatica del documento con un solo clic
 Traduzione cinese-inglese immediata | Traduzione cinese-inglese immediata con un solo clic
@@ -41,6 +43,8 @@ Avvia il tema di gradio [scuro](https://github.com/binary-husky/chatgpt_academic
 Supporto per maggiori modelli LLM, supporto API2D | Sentirsi serviti simultaneamente da GPT3.5, GPT4, [Tsinghua ChatGLM](https://github.com/THUDM/ChatGLM-6B), [Fudan MOSS](https://github.com/OpenLMLab/MOSS) deve essere una grande sensazione, giusto?
 Ulteriori modelli LLM supportat,i supporto per l'implementazione di Huggingface | Aggiunta di un'interfaccia Newbing (Nuovo Bing), introdotta la compatibilità con Tsinghua [Jittorllms](https://github.com/Jittor/JittorLLMs), [LLaMA](https://github.com/facebookresearch/llama), [RWKV](https://github.com/BlinkDL/ChatRWKV) e [PanGu-α](https://openi.org.cn/pangu/)
 Ulteriori dimostrazioni di nuove funzionalità (generazione di immagini, ecc.)... | Vedere la fine di questo documento...
+ </div>
+ 
  
 - Nuova interfaccia (modificare l'opzione LAYOUT in `config.py` per passare dal layout a sinistra e a destra al layout superiore e inferiore)
 <div align="center">
@@ -202,11 +206,13 @@ ad esempio
 2. Plugin di funzione personalizzati
 
 Scrivi plugin di funzione personalizzati e esegui tutte le attività che desideri o non hai mai pensato di fare.
-La difficoltà di scrittura e debug dei plugin del nostro progetto è molto bassa. Se si dispone di una certa conoscenza di base di Python, è possibile realizzare la propria funzione del plugin seguendo il nostro modello. Per maggiori dettagli, consultare la [guida al plugin per funzioni] (https://github.com/binary-husky/chatgpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97).
+La difficoltà di scrittura e debug dei plugin del nostro progetto è molto bassa. Se si dispone di una certa conoscenza di base di Python, è possibile realizzare la propria funzione del plugin seguendo il nostro modello. Per maggiori dettagli, consultare la [guida al plugin per funzioni](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97).
 
 ---
 # Ultimo aggiornamento
-## Nuove funzionalità dinamiche1. Funzionalità di salvataggio della conversazione. Nell'area dei plugin della funzione, fare clic su "Salva la conversazione corrente" per salvare la conversazione corrente come file html leggibile e ripristinabile, inoltre, nell'area dei plugin della funzione (menu a discesa), fare clic su "Carica la cronologia della conversazione archiviata" per ripristinare la conversazione precedente. Suggerimento: fare clic su "Carica la cronologia della conversazione archiviata" senza specificare il file consente di visualizzare la cache degli archivi html di cronologia, fare clic su "Elimina tutti i record di cronologia delle conversazioni locali" per eliminare tutte le cache degli archivi html.
+## Nuove funzionalità dinamiche
+ 
+1. Funzionalità di salvataggio della conversazione. Nell'area dei plugin della funzione, fare clic su "Salva la conversazione corrente" per salvare la conversazione corrente come file html leggibile e ripristinabile, inoltre, nell'area dei plugin della funzione (menu a discesa), fare clic su "Carica la cronologia della conversazione archiviata" per ripristinare la conversazione precedente. Suggerimento: fare clic su "Carica la cronologia della conversazione archiviata" senza specificare il file consente di visualizzare la cache degli archivi html di cronologia, fare clic su "Elimina tutti i record di cronologia delle conversazioni locali" per eliminare tutte le cache degli archivi html.
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/235222390-24a9acc0-680f-49f5-bc81-2f3161f1e049.png" width="500" >
 </div>

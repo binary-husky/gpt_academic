@@ -1,5 +1,5 @@
 {
-  "version": 3.37,
+  "version": 3.42,
   "show_feature": true,
-  "new_feature": "修复gradio复制按钮BUG <-> 修复PDF翻译的BUG, 新增HTML中英双栏对照 <-> 添加了OpenAI图片生成插件 <-> 添加了OpenAI音频转文本总结插件 <-> 通过Slack添加对Claude的支持 <-> 提供复旦MOSS模型适配（启用需额外依赖） <-> 提供docker-compose方案兼容LLAMA盘古RWKV等模型的后端 <-> 新增Live2D装饰 <-> 完善对话历史的保存/载入/删除 <-> 保存对话功能"
+  "new_feature": "完善本地Latex矫错和翻译功能 <-> 增加gpt-3.5-16k的支持 <-> 新增最强Arxiv论文翻译插件 <-> 修复gradio复制按钮BUG <-> 修复PDF翻译的BUG, 新增HTML中英双栏对照 <-> 添加了OpenAI图片生成插件 <-> 添加了OpenAI音频转文本总结插件 <-> 通过Slack添加对Claude的支持"
 }
