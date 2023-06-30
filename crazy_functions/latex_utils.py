@@ -203,6 +203,7 @@ def merge_tex_files_(project_foler, main_file, mode):
                 c = fx.read()
         else:  
             # e.g., \input{srcs/07_appendix}
+            assert os.path.exists(fp+'.tex'), f'即找不到{fp}，也找不到{fp}.tex，Tex源文件缺失！'
             with open(fp+'.tex', 'r', encoding='utf-8', errors='replace') as fx:
                 c = fx.read()
         c = merge_tex_files_(project_foler, c, mode)
