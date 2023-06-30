@@ -508,7 +508,9 @@ def get_user_upload(chatbot, ipaddr: gr.Request):
     """
     private_upload = './private_upload'
     user_history = os.path.join(private_upload, ipaddr.client.host)
-    history = ''
+    history = """
+    | 编号 | 字段2 | 字段2 |
+    """
     for root, d, file in os.walk(user_history):
         history += f'目录:\t {root} \t\t 目录内文件: {file}\n\n'
     chatbot.append(['Loading....',

@@ -149,21 +149,22 @@ def html_view_blank(__href, file_name=''):
 
 def html_iframe_code(html_file):
     proxy, = toolbox.get_conf('LOCAL_PORT')
-    if os.path.exists(html_file):
-        html_file = f'http://{ipaddr()}:{proxy}/file={html_file}'
+    html_file = f'http://{ipaddr()}:{proxy}/file={html_file}'
     ifr = f'<iframe width="100%" height="500px" frameborder="0" src="{html_file}"></iframe>'
     return ifr
 
 
 def html_download_blank(__href, file_name='temp', dir_name=''):
-    if os.path.exists(__href):
-        __href = f'/file={__href}'
+    proxy, = toolbox.get_conf('LOCAL_PORT')
+    __href = f'http://{ipaddr()}:{proxy}/file={__href}'
     if not dir_name:
         dir_name = file_name
     a = f'<a href="{__href}" target="_blank" download="{dir_name}" class="svelte-xrr240">{file_name}</a>'
     return a
 
 def html_local_img(__file):
+    proxy, = toolbox.get_conf('LOCAL_PORT')
+    __file = f'http://{ipaddr()}:{proxy}/file={__file}'
     a = f'<div align="center"><img src="file={__file}"></div>'
     return a
 
