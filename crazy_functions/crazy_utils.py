@@ -1,19 +1,16 @@
 from toolbox import update_ui, get_conf, trimmed_format_exc
 import threading
 
-
 def input_clipping(inputs, history, max_token_limit):
     import numpy as np
     from request_llm.bridge_all import model_info
     enc = model_info["gpt-3.5-turbo"]['tokenizer']
-
-    def get_token_num(txt):
-        return len(enc.encode(txt, disallowed_special=()))
+    def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))
 
     mode = 'input-and-history'
     # 当 输入部分的token占比 小于 全文的一半时，只裁剪历史
     input_token_num = get_token_num(inputs)
-    if input_token_num < max_token_limit // 2:
+    if input_token_num < max_token_limit//2: 
         mode = 'only-history'
         max_token_limit = max_token_limit - input_token_num
 
@@ -21,13 +18,13 @@ def input_clipping(inputs, history, max_token_limit):
     everything.extend(history)
     n_token = get_token_num('\n'.join(everything))
     everything_token = [get_token_num(e) for e in everything]
-    delta = max(everything_token) // 16  # 截断时的颗粒度
-
+    delta = max(everything_token) // 16 # 截断时的颗粒度
+        
     while n_token > max_token_limit:
         where = np.argmax(everything_token)
         encoded = enc.encode(everything[where], disallowed_special=())
-        clipped_encoded = encoded[:len(encoded) - delta]
-        everything[where] = enc.decode(clipped_encoded)[:-1]  # -1 to remove the may-be illegal char
+        clipped_encoded = encoded[:len(encoded)-delta]
+        everything[where] = enc.decode(clipped_encoded)[:-1]    # -1 to remove the may-be illegal char
         everything_token[where] = get_token_num(everything[where])
         n_token = get_token_num('\n'.join(everything))
 
@@ -38,13 +35,12 @@ def input_clipping(inputs, history, max_token_limit):
     history = everything[1:]
     return inputs, history
 
-
 def request_gpt_model_in_new_thread_with_ui_alive(
-        inputs, inputs_show_user, llm_kwargs,
+        inputs, inputs_show_user, llm_kwargs, 
         chatbot, history, sys_prompt, refresh_interval=0.2,
-        handle_token_exceed=True,
+        handle_token_exceed=True, 
         retry_times_at_unknown_error=2,
-):
+        ):
     """
     Request GPT model，请求GPT模型同时维持用户界面活跃。
 
@@ -68,7 +64,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
     from request_llm.bridge_all import predict_no_ui_long_connection
     # 用户反馈
     chatbot.append([inputs_show_user, ""])
-    yield from update_ui(chatbot=chatbot, history=[])  # 刷新界面
+    yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
     executor = ThreadPoolExecutor(max_workers=16)
     mutable = ["", time.time(), ""]
     def _req_gpt(inputs, history, sys_prompt):
@@ -76,7 +72,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
         exceeded_cnt = 0
         while True:
             # watchdog error
-            if len(mutable) >= 2 and (time.time() - mutable[1]) > 10:
+            if len(mutable) >= 2 and (time.time()-mutable[1]) > 5: 
                 raise RuntimeError("检测到程序终止。")
             try:
                 # 【第一种情况】：顺利完成
@@ -93,14 +89,14 @@ def request_gpt_model_in_new_thread_with_ui_alive(
                     p_ratio, n_exceed = get_reduce_token_percent(str(token_exceeded_error))
                     MAX_TOKEN = 4096
                     EXCEED_ALLO = 512 + 512 * exceeded_cnt
-                    inputs, history = input_clipping(inputs, history, max_token_limit=MAX_TOKEN - EXCEED_ALLO)
+                    inputs, history = input_clipping(inputs, history, max_token_limit=MAX_TOKEN-EXCEED_ALLO)
                     mutable[0] += f'[Local Message] 警告，文本过长将进行截断，Token溢出数：{n_exceed}。\n\n'
-                    continue  # 返回重试
+                    continue # 返回重试
                 else:
                     # 【选择放弃】
                     tb_str = '```\n' + trimmed_format_exc() + '```'
                     mutable[0] += f"[Local Message] 警告，在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
-                    return mutable[0]  # 放弃
+                    return mutable[0] # 放弃
             except:
                 # 【第三种情况】：其他错误：重试几次
                 tb_str = '```\n' + trimmed_format_exc() + '```'
@@ -108,15 +104,14 @@ def request_gpt_model_in_new_thread_with_ui_alive(
                 mutable[0] += f"[Local Message] 警告，在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                 if retry_op > 0:
                     retry_op -= 1
-                    mutable[
-                        0] += f"[Local Message] 重试中，请稍等 {retry_times_at_unknown_error - retry_op}/{retry_times_at_unknown_error}：\n\n"
+                    mutable[0] += f"[Local Message] 重试中，请稍等 {retry_times_at_unknown_error-retry_op}/{retry_times_at_unknown_error}：\n\n"
                     if ("Rate limit reached" in tb_str) or ("Too Many Requests" in tb_str):
                         time.sleep(30)
                     time.sleep(5)
-                    continue  # 返回重试
+                    continue # 返回重试
                 else:
                     time.sleep(5)
-                    return mutable[0]  # 放弃
+                    return mutable[0] # 放弃
 
     # 提交任务
     future = executor.submit(_req_gpt, inputs, history, sys_prompt)
@@ -125,25 +120,24 @@ def request_gpt_model_in_new_thread_with_ui_alive(
         time.sleep(refresh_interval)
         # “喂狗”（看门狗）
         mutable[1] = time.time()
-        gpt_say = mutable[0]
         if future.done():
             break
-        chatbot[-1] = [chatbot[-1][0], gpt_say]
-        yield from update_ui(chatbot=chatbot, history=[], msg='数据加载中')  # 刷新界面
+        chatbot[-1] = [chatbot[-1][0], mutable[0]]
+        yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
 
     final_result = future.result()
     chatbot[-1] = [chatbot[-1][0], final_result]
-    yield from update_ui(chatbot=chatbot, history=[])  # 如果最后成功了，则删除报错信息
+    yield from update_ui(chatbot=chatbot, history=[]) # 如果最后成功了，则删除报错信息
     return final_result
 
 
 def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
-        inputs_array, inputs_show_user_array, llm_kwargs,
-        chatbot, history_array, sys_prompt_array,
+        inputs_array, inputs_show_user_array, llm_kwargs, 
+        chatbot, history_array, sys_prompt_array, 
         refresh_interval=0.2, max_workers=-1, scroller_max_len=30,
         handle_token_exceed=True, show_user_at_complete=False,
-        retry_times_at_unknown_error=2, return_dict=False
-):
+        retry_times_at_unknown_error=2,
+        ):
     """
     Request GPT model using multiple threads with UI and high efficiency
     请求GPT模型的[多线程]版。
@@ -176,22 +170,19 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     from request_llm.bridge_all import predict_no_ui_long_connection
     assert len(inputs_array) == len(history_array)
     assert len(inputs_array) == len(sys_prompt_array)
-    if max_workers == -1:  # 读取配置文件
-        try:
-            max_workers, = get_conf('DEFAULT_WORKER_NUM')
-        except:
-            max_workers = 8
+    if max_workers == -1: # 读取配置文件
+        try: max_workers, = get_conf('DEFAULT_WORKER_NUM')
+        except: max_workers = 8
         if max_workers <= 0: max_workers = 3
     # 屏蔽掉 chatglm的多线程，可能会导致严重卡顿
-    if not (llm_kwargs['llm_model'].startswith('gpt-') or llm_kwargs['llm_model'].startswith('api2d-') or llm_kwargs[
-        'llm_model'].startswith('proxy-gpt')):
+    if not (llm_kwargs['llm_model'].startswith('gpt-') or llm_kwargs['llm_model'].startswith('api2d-') or llm_kwargs['llm_model'].startswith('proxy-gpt')):
         max_workers = 1
-
+        
     executor = ThreadPoolExecutor(max_workers=max_workers)
     n_frag = len(inputs_array)
     # 用户反馈
     chatbot.append([None, ""])
-    yield from update_ui(chatbot=chatbot, history=[])  # 刷新界面
+    yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
     # 跨线程传递
     mutable = [[f"", time.time(), "等待中"] for _ in range(n_frag)]
 
@@ -203,14 +194,14 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         mutable[index][2] = "执行中"
         while True:
             # watchdog error
-            if len(mutable[index]) >= 2 and (time.time() - mutable[index][1]) > 5:
+            if len(mutable[index]) >= 2 and (time.time()-mutable[index][1]) > 5: 
                 raise RuntimeError("检测到程序终止。")
             try:
                 # 【第一种情况】：顺利完成
                 # time.sleep(10); raise RuntimeError("测试")
                 gpt_say = predict_no_ui_long_connection(
-                    inputs=inputs, llm_kwargs=llm_kwargs, history=history,
-                    sys_prompt=sys_prompt, observe_window=mutable[index], console_slience=False
+                    inputs=inputs, llm_kwargs=llm_kwargs, history=history, 
+                    sys_prompt=sys_prompt, observe_window=mutable[index], console_slience=True
                 )
                 mutable[index][2] = "已成功"
                 return gpt_say
@@ -223,24 +214,24 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     p_ratio, n_exceed = get_reduce_token_percent(str(token_exceeded_error))
                     MAX_TOKEN = 4096
                     EXCEED_ALLO = 512 + 512 * exceeded_cnt
-                    inputs, history = input_clipping(inputs, history, max_token_limit=MAX_TOKEN - EXCEED_ALLO)
+                    inputs, history = input_clipping(inputs, history, max_token_limit=MAX_TOKEN-EXCEED_ALLO)
                     gpt_say += f'[Local Message] 警告，文本过长将进行截断，Token溢出数：{n_exceed}。\n\n'
                     mutable[index][2] = f"截断重试"
-                    continue  # 返回重试
+                    continue # 返回重试
                 else:
                     # 【选择放弃】
                     tb_str = '```\n' + trimmed_format_exc() + '```'
                     gpt_say += f"[Local Message] 警告，线程{index}在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                     if len(mutable[index][0]) > 0: gpt_say += "此线程失败前收到的回答：\n\n" + mutable[index][0]
                     mutable[index][2] = "输入过长已放弃"
-                    return gpt_say  # 放弃
+                    return gpt_say # 放弃
             except:
                 # 【第三种情况】：其他错误
                 tb_str = '```\n' + trimmed_format_exc() + '```'
                 print(tb_str)
                 gpt_say += f"[Local Message] 警告，线程{index}在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                 if len(mutable[index][0]) > 0: gpt_say += "此线程失败前收到的回答：\n\n" + mutable[index][0]
-                if retry_op > 0:
+                if retry_op > 0: 
                     retry_op -= 1
                     wait = random.randint(5, 20)
                     if ("Rate limit reached" in tb_str) or ("Too Many Requests" in tb_str):
@@ -250,22 +241,19 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                         fail_info = ""
                     # 也许等待十几秒后，情况会好转
                     for i in range(wait):
-                        mutable[index][2] = f"{fail_info}等待重试 {wait - i}";
-                        time.sleep(1)
+                        mutable[index][2] = f"{fail_info}等待重试 {wait-i}"; time.sleep(1)
                     # 开始重试
-                    mutable[index][
-                        2] = f"重试中 {retry_times_at_unknown_error - retry_op}/{retry_times_at_unknown_error}"
-                    continue  # 返回重试
+                    mutable[index][2] = f"重试中 {retry_times_at_unknown_error-retry_op}/{retry_times_at_unknown_error}"
+                    continue # 返回重试
                 else:
                     mutable[index][2] = "已失败"
                     wait = 5
                     time.sleep(5)
-                    return gpt_say  # 放弃
+                    return gpt_say # 放弃
 
     # 异步任务开始
-    futures = [executor.submit(_req_gpt, index, inputs, history, sys_prompt) for index, inputs, history, sys_prompt in
-               zip(
-                   range(len(inputs_array)), inputs_array, history_array, sys_prompt_array)]
+    futures = [executor.submit(_req_gpt, index, inputs, history, sys_prompt) for index, inputs, history, sys_prompt in zip(
+        range(len(inputs_array)), inputs_array, history_array, sys_prompt_array)]
     cnt = 0
     while True:
         # yield一次以刷新前端页面
@@ -279,33 +267,34 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
             mutable[thread_index][1] = time.time()
         # 在前端打印些好玩的东西
         for thread_index, _ in enumerate(worker_done):
-            print_something_really_funny = "[ ...`" + mutable[thread_index][0][-scroller_max_len:]. \
+            print_something_really_funny = "[ ...`"+mutable[thread_index][0][-scroller_max_len:].\
                 replace('\n', '').replace('```', '...').replace(
-                ' ', '.').replace('<br/>', '.....').replace('$', '.') + "`... ]"
+                    ' ', '.').replace('<br/>', '.....').replace('$', '.')+"`... ]"
             observe_win.append(print_something_really_funny)
         # 在前端打印些好玩的东西
-        stat_str = ''.join(
-            [f'`{inputs_show_user_array[thread_index][0:5]}...{inputs_show_user_array[thread_index][-5:]}`\t'
-             f'`{mutable[thread_index][2]}`: {obs}\n\n'
-             if not done else f'`{mutable[thread_index][2]}`\n\n'
-             for thread_index, done, obs in zip(range(len(worker_done)), worker_done, observe_win)])
+        stat_str = ''.join([f'`{inputs_show_user_array[thread_index][0:5]}...{inputs_show_user_array[thread_index][-5:]}`\t'
+                            f'`{mutable[thread_index][2]}`: {obs}\n\n'
+                            if not done else f'`{mutable[thread_index][2]}`\n\n' 
+                            for thread_index, done, obs in zip(range(len(worker_done)), worker_done, observe_win)])
         # 在前端打印些好玩的东西
-        chatbot[-1] = [chatbot[-1][0], f'多线程操作已经开始，完成情况: \n\n{stat_str}' + ''.join(['.'] * (cnt % 10 + 1))]
-        yield from update_ui(chatbot=chatbot, history=[])  # 刷新界面
-        break
+        chatbot[-1] = [chatbot[-1][0], f'多线程操作已经开始，完成情况: \n\n{stat_str}' + ''.join(['.']*(cnt % 10+1))]
+        yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
+        if all(worker_done):
+            executor.shutdown()
+            break
 
     # 异步任务结束
     gpt_response_collection = []
     for inputs_show_user, f in zip(inputs_show_user_array, futures):
         gpt_res = f.result()
         gpt_response_collection.extend([inputs_show_user, gpt_res])
-
+    
     # 是否在结束时，在界面上显示结果
     if show_user_at_complete:
         for inputs_show_user, f in zip(inputs_show_user_array, futures):
             gpt_res = f.result()
             chatbot.append([inputs_show_user, gpt_res])
-            yield from update_ui(chatbot=chatbot, history=[])  # 刷新界面
+            yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
             time.sleep(0.3)
     return gpt_response_collection
 
@@ -334,7 +323,6 @@ def breakdown_txt_to_satisfy_token_limit(txt, get_token_fn, limit):
             result = [prev]
             result.extend(cut(post, must_break_at_empty_line))
             return result
-
     try:
         return cut(txt, must_break_at_empty_line=True)
     except RuntimeError:
@@ -350,10 +338,9 @@ def force_breakdown(txt, limit, get_token_fn):
             return txt[:i], txt[i:]
     return "Tiktoken未知错误", "Tiktoken未知错误"
 
-
 def breakdown_txt_to_satisfy_token_limit_for_pdf(txt, get_token_fn, limit):
     # 递归
-    def cut(txt_tocut, must_break_at_empty_line, break_anyway=False):
+    def cut(txt_tocut, must_break_at_empty_line, break_anyway=False):  
         if get_token_fn(txt_tocut) <= limit:
             return [txt_tocut]
         else:
@@ -379,7 +366,6 @@ def breakdown_txt_to_satisfy_token_limit_for_pdf(txt, get_token_fn, limit):
             result = [prev]
             result.extend(cut(post, must_break_at_empty_line, break_anyway=break_anyway))
             return result
-
     try:
         # 第1次尝试，将双空行（\n\n）作为切分点
         return cut(txt, must_break_at_empty_line=True)
@@ -390,7 +376,7 @@ def breakdown_txt_to_satisfy_token_limit_for_pdf(txt, get_token_fn, limit):
         except RuntimeError:
             try:
                 # 第3次尝试，将英文句号（.）作为切分点
-                res = cut(txt.replace('.', '。\n'), must_break_at_empty_line=False)  # 这个中文的句号是故意的，作为一个标识而存在
+                res = cut(txt.replace('.', '。\n'), must_break_at_empty_line=False) # 这个中文的句号是故意的，作为一个标识而存在
                 return [r.replace('。\n', '.') for r in res]
             except RuntimeError as e:
                 try:
@@ -400,6 +386,7 @@ def breakdown_txt_to_satisfy_token_limit_for_pdf(txt, get_token_fn, limit):
                 except RuntimeError as e:
                     # 第5次尝试，没办法了，随便切一下敷衍吧
                     return cut(txt, must_break_at_empty_line=False, break_anyway=True)
+
 
 
 def read_and_clean_pdf_text(fp):
@@ -429,9 +416,8 @@ def read_and_clean_pdf_text(fp):
     fc = 0  # Index 0 文本
     fs = 1  # Index 1 字体
     fb = 2  # Index 2 框框
-    REMOVE_FOOT_NOTE = True  # 是否丢弃掉 不是正文的内容 （比正文字体小，如参考文献、脚注、图注等）
-    REMOVE_FOOT_FFSIZE_PERCENT = 0.95  # 小于正文的？时，判定为不是正文（有些文章的正文部分字体大小不是100%统一的，有肉眼不可见的小变化）
-
+    REMOVE_FOOT_NOTE = True # 是否丢弃掉 不是正文的内容 （比正文字体小，如参考文献、脚注、图注等）
+    REMOVE_FOOT_FFSIZE_PERCENT = 0.95 # 小于正文的？时，判定为不是正文（有些文章的正文部分字体大小不是100%统一的，有肉眼不可见的小变化）
     def primary_ffsize(l):
         """
         提取文本块主字体
@@ -441,12 +427,12 @@ def read_and_clean_pdf_text(fp):
             if wtf['size'] not in fsize_statiscs: fsize_statiscs[wtf['size']] = 0
             fsize_statiscs[wtf['size']] += len(wtf['text'])
         return max(fsize_statiscs, key=fsize_statiscs.get)
-
-    def ffsize_same(a, b):
+        
+    def ffsize_same(a,b):
         """
         提取字体大小是否近似相等
         """
-        return abs((a - b) / max(a, b)) < 0.02
+        return abs((a-b)/max(a,b)) < 0.02
 
     with fitz.open(fp) as doc:
         meta_txt = []
@@ -466,18 +452,18 @@ def read_and_clean_pdf_text(fp):
                         if len(txt_line) == 0: continue
                         pf = primary_ffsize(l)
                         meta_line.append([txt_line, pf, l['bbox'], l])
-                        for wtf in l['spans']:  # for l in t['lines']:
+                        for wtf in l['spans']: # for l in t['lines']:
                             meta_span.append([wtf['text'], wtf['size'], len(wtf['text'])])
                     # meta_line.append(["NEW_BLOCK", pf])
             # 块元提取                           for each word segment with in line                       for each line         cross-line words                          for each block
             meta_txt.extend([" ".join(["".join([wtf['text'] for wtf in l['spans']]) for l in t['lines']]).replace(
                 '- ', '') for t in text_areas['blocks'] if 'lines' in t])
             meta_font.extend([np.mean([np.mean([wtf['size'] for wtf in l['spans']])
-                                       for l in t['lines']]) for t in text_areas['blocks'] if 'lines' in t])
+                             for l in t['lines']]) for t in text_areas['blocks'] if 'lines' in t])
             if index == 0:
                 page_one_meta = [" ".join(["".join([wtf['text'] for wtf in l['spans']]) for l in t['lines']]).replace(
                     '- ', '') for t in text_areas['blocks'] if 'lines' in t]
-
+                
         ############################## <第 2 步，获取正文主字体> ##################################
         fsize_statiscs = {}
         for span in meta_span:
@@ -491,33 +477,32 @@ def read_and_clean_pdf_text(fp):
         mega_sec = []
         sec = []
         for index, line in enumerate(meta_line):
-            if index == 0:
+            if index == 0: 
                 sec.append(line[fc])
                 continue
             if REMOVE_FOOT_NOTE:
                 if meta_line[index][fs] <= give_up_fize_threshold:
                     continue
-            if ffsize_same(meta_line[index][fs], meta_line[index - 1][fs]):
+            if ffsize_same(meta_line[index][fs], meta_line[index-1][fs]):
                 # 尝试识别段落
-                if meta_line[index][fc].endswith('.') and \
-                        (meta_line[index - 1][fc] != 'NEW_BLOCK') and \
-                        (meta_line[index][fb][2] - meta_line[index][fb][0]) < (
-                        meta_line[index - 1][fb][2] - meta_line[index - 1][fb][0]) * 0.7:
+                if meta_line[index][fc].endswith('.') and\
+                    (meta_line[index-1][fc] != 'NEW_BLOCK') and \
+                    (meta_line[index][fb][2] - meta_line[index][fb][0]) < (meta_line[index-1][fb][2] - meta_line[index-1][fb][0]) * 0.7:
                     sec[-1] += line[fc]
                     sec[-1] += "\n\n"
                 else:
                     sec[-1] += " "
                     sec[-1] += line[fc]
             else:
-                if (index + 1 < len(meta_line)) and \
-                        meta_line[index][fs] > main_fsize:
+                if (index+1 < len(meta_line)) and \
+                    meta_line[index][fs] > main_fsize:
                     # 单行 + 字体大
                     mega_sec.append(copy.deepcopy(sec))
                     sec = []
                     sec.append("# " + line[fc])
                 else:
                     # 尝试识别section
-                    if meta_line[index - 1][fs] > meta_line[index][fs]:
+                    if meta_line[index-1][fs] > meta_line[index][fs]:
                         sec.append("\n" + line[fc])
                     else:
                         sec.append(line[fc])
@@ -536,15 +521,13 @@ def read_and_clean_pdf_text(fp):
                 if len(block_txt) < 100:
                     meta_txt[index] = '\n'
             return meta_txt
-
         meta_txt = 把字符太少的块清除为回车(meta_txt)
 
         def 清理多余的空行(meta_txt):
             for index in reversed(range(1, len(meta_txt))):
-                if meta_txt[index] == '\n' and meta_txt[index - 1] == '\n':
+                if meta_txt[index] == '\n' and meta_txt[index-1] == '\n':
                     meta_txt.pop(index)
             return meta_txt
-
         meta_txt = 清理多余的空行(meta_txt)
 
         def 合并小写开头的段落块(meta_txt):
@@ -555,18 +538,16 @@ def read_and_clean_pdf_text(fp):
                     return True
                 else:
                     return False
-
             for _ in range(100):
                 for index, block_txt in enumerate(meta_txt):
                     if starts_with_lowercase_word(block_txt):
-                        if meta_txt[index - 1] != '\n':
-                            meta_txt[index - 1] += ' '
+                        if meta_txt[index-1] != '\n':
+                            meta_txt[index-1] += ' '
                         else:
-                            meta_txt[index - 1] = ''
-                        meta_txt[index - 1] += meta_txt[index]
+                            meta_txt[index-1] = ''
+                        meta_txt[index-1] += meta_txt[index]
                         meta_txt[index] = '\n'
             return meta_txt
-
         meta_txt = 合并小写开头的段落块(meta_txt)
         meta_txt = 清理多余的空行(meta_txt)
 
@@ -586,7 +567,7 @@ def read_and_clean_pdf_text(fp):
     return meta_txt, page_one_meta
 
 
-def get_files_from_everything(txt, type):  # type='.md'
+def get_files_from_everything(txt, type): # type='.md'
     """
     这个函数是用来获取指定目录下所有指定类型（如.md）的文件，并且对于网络上的文件，也可以获取它。
     下面是对每个参数和返回值的说明：
@@ -608,10 +589,9 @@ def get_files_from_everything(txt, type):  # type='.md'
         from toolbox import get_conf
         proxies, = get_conf('proxies')
         r = requests.get(txt, proxies=proxies)
-        with open('./gpt_log/temp' + type, 'wb+') as f:
-            f.write(r.content)
+        with open('./gpt_log/temp'+type, 'wb+') as f: f.write(r.content)
         project_folder = './gpt_log/'
-        file_manifest = ['./gpt_log/temp' + type]
+        file_manifest = ['./gpt_log/temp'+type]
     elif txt.endswith(type):
         # 直接给定文件
         file_manifest = [txt]
@@ -619,7 +599,7 @@ def get_files_from_everything(txt, type):  # type='.md'
     elif os.path.exists(txt):
         # 本地路径，递归搜索
         project_folder = txt
-        file_manifest = [f for f in glob.glob(f'{project_folder}/**/*' + type, recursive=True)]
+        file_manifest = [f for f in glob.glob(f'{project_folder}/**/*'+type, recursive=True)]
         if len(file_manifest) == 0:
             success = False
     else:
@@ -630,14 +610,16 @@ def get_files_from_everything(txt, type):  # type='.md'
     return success, file_manifest, project_folder
 
 
+
+
 def Singleton(cls):
     _instance = {}
-
+ 
     def _singleton(*args, **kargs):
         if cls not in _instance:
             _instance[cls] = cls(*args, **kargs)
         return _instance[cls]
-
+ 
     return _singleton
 
 
@@ -656,30 +638,31 @@ class knowledge_archive_interface():
             from toolbox import ProxyNetworkActivate
             print('Checking Text2vec ...')
             from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-            with ProxyNetworkActivate():  # 临时地激活代理网络
+            with ProxyNetworkActivate():    # 临时地激活代理网络
                 self.text2vec_large_chinese = HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
 
         return self.text2vec_large_chinese
+
 
     def feed_archive(self, file_manifest, id="default"):
         self.threadLock.acquire()
         # import uuid
         self.current_id = id
         from zh_langchain import construct_vector_store
-        self.qa_handle, self.kai_path = construct_vector_store(
-            vs_id=self.current_id,
-            files=file_manifest,
+        self.qa_handle, self.kai_path = construct_vector_store(   
+            vs_id=self.current_id, 
+            files=file_manifest, 
             sentence_size=100,
             history=[],
             one_conent="",
             one_content_segmentation="",
-            text2vec=self.get_chinese_text2vec(),
+            text2vec = self.get_chinese_text2vec(),
         )
         self.threadLock.release()
 
     def get_current_archive_id(self):
         return self.current_id
-
+    
     def get_loaded_file(self):
         return self.qa_handle.get_loaded_file()
 
@@ -688,30 +671,29 @@ class knowledge_archive_interface():
         if not self.current_id == id:
             self.current_id = id
             from zh_langchain import construct_vector_store
-            self.qa_handle, self.kai_path = construct_vector_store(
-                vs_id=self.current_id,
-                files=[],
+            self.qa_handle, self.kai_path = construct_vector_store(   
+                vs_id=self.current_id, 
+                files=[], 
                 sentence_size=100,
                 history=[],
                 one_conent="",
                 one_content_segmentation="",
-                text2vec=self.get_chinese_text2vec(),
+                text2vec = self.get_chinese_text2vec(),
             )
         VECTOR_SEARCH_SCORE_THRESHOLD = 0
         VECTOR_SEARCH_TOP_K = 4
         CHUNK_SIZE = 512
         resp, prompt = self.qa_handle.get_knowledge_based_conent_test(
-            query=txt,
-            vs_path=self.kai_path,
+            query = txt,
+            vs_path = self.kai_path,
             score_threshold=VECTOR_SEARCH_SCORE_THRESHOLD,
-            vector_search_top_k=VECTOR_SEARCH_TOP_K,
+            vector_search_top_k=VECTOR_SEARCH_TOP_K, 
             chunk_conent=True,
             chunk_size=CHUNK_SIZE,
-            text2vec=self.get_chinese_text2vec(),
+            text2vec = self.get_chinese_text2vec(),
         )
         self.threadLock.release()
         return resp, prompt
-
 
 def try_install_deps(deps):
     for dep in deps:
@@ -747,6 +729,7 @@ class construct_html():
         """
         self.html_string = f'<!DOCTYPE html><head><meta charset="utf-8"><title>翻译结果</title><style>{self.css}</style></head>'
 
+
     def add_row(self, a, b):
         tmp = """
 <div class="row table-row">
@@ -759,6 +742,8 @@ class construct_html():
         tmp = tmp.replace('REPLACE_B', markdown_convertion(b))
         self.html_string += tmp
 
+
     def save_file(self, file_name):
         with open(f'./gpt_log/{file_name}', 'w', encoding='utf8') as f:
             f.write(self.html_string.encode('utf-8', 'ignore').decode())
+

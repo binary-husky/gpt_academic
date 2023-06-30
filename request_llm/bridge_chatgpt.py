@@ -56,7 +56,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     observe_window = None：
         用于负责跨越线程传递已经输出的部分，大部分时候仅仅为了fancy的视觉效果，留空即可。observe_window[0]：观测窗。observe_window[1]：看门狗
     """
-    watch_dog_patience = 10 # 看门狗的耐心, 设置5秒即可
+    watch_dog_patience = 5 # 看门狗的耐心, 设置5秒即可
     headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt=sys_prompt, stream=True)
     retry = 0
     while True:
@@ -72,7 +72,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
             if retry > MAX_RETRY: raise TimeoutError
             if MAX_RETRY!=0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
 
-    stream_response = response.iter_lines()
+    stream_response =  response.iter_lines()
     result = ''
     while True:
         try: chunk = next(stream_response).decode()
@@ -90,7 +90,6 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
         if ('data: [DONE]' in chunk): break # api2d 正常完成
         json_data = json.loads(chunk.lstrip('data:'))['choices'][0]
         delta = json_data["delta"]
-        out_time = 0
         if len(delta) == 0: break
         if "role" in delta: continue
         if "content" in delta: 
@@ -100,11 +99,9 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
                 # 观测窗，把已经获取的数据显示出去
                 if len(observe_window) >= 1: observe_window[0] += delta["content"]
                 # 看门狗，如果超过期限没有喂狗，则终止
-                if len(observe_window) >= 2:
+                if len(observe_window) >= 2:  
                     if (time.time()-observe_window[1]) > watch_dog_patience:
-                        out_time+=1
-                        if out_time > 3: # 增加保障，超时3次再取消
-                            raise RuntimeError("用户取消了程序。")
+                        raise RuntimeError("用户取消了程序。")
         else: raise RuntimeError("意外Json结构："+delta)
     if json_data['finish_reason'] == 'length':
         raise ConnectionAbortedError("正常结束，但显示Token不足，导致输出不完整，请削减单次输入的文本量。")
@@ -293,3 +290,16 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     except:
         print('输入中可能存在乱码。')
     return headers, payload
+
+if __name__ == '__main__':
+    llm_kwargs = {
+        'api_key': 'sk-',
+        'llm_model': 'gpt-3.5-turbo',
+        'top_p': 1,
+        'max_length': 512,
+        'temperature': 1,
+        # 'ipaddr': ipaddr.client.host
+    }
+    chat = []
+    predict('你好', llm_kwargs=llm_kwargs, chatbot=chat, plugin_kwargs={})
+    print(chat)
