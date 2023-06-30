@@ -508,14 +508,15 @@ def get_user_upload(chatbot, ipaddr: gr.Request):
     """
     private_upload = './private_upload'
     user_history = os.path.join(private_upload, ipaddr.client.host)
-    history = """| 编号 | 目录 | 目录内文件 |\n| --- | -------------------------------------------- | -------------------------------------------- |\n"""
+    history = """| 编号 | 目录 | 目录内文件 |\n| :---: | :---: | :---: |\n"""
     count_num = 1
     for root, d, file in os.walk(user_history):
         file_link = "<br>".join([f'{func_box.html_view_blank(f"{root}/{i}")}' for i in file])
         history += f'| {count_num} | {root} | {file_link} |\n'
         count_num += 1
     chatbot.append(['Loading....',
-                    '[Local Message] 请自行复制以下目录 or 目录+文件, 填入输入框以供函数区高亮按钮使用\n\n'
+                    f'[Local Message] 请自行复制以下目录 or 目录+文件, 填入输入框以供函数区高亮按钮使用，'
+                    f'{func_box.html_tag_color("提交前记得请检查头尾空格哦～")}\n\n'
                     f'{history}'
                     ])
     return chatbot

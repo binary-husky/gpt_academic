@@ -48,6 +48,11 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
             yield from update_ui(chatbot, history)
     return file_limit
 
+import re
+def replace_special_chars(file_name):
+    # 正则表达式中[^0-9A-Za-z_.\s]表示任意一个不是数字、字母、下划线、.、空格的字符
+    return re.sub(r'[^0-9A-Za-z_.\s]', '_', file_name)
+
 
 def long_name_processing(file_name):
     if len(file_name) > 50:
@@ -55,7 +60,7 @@ def long_name_processing(file_name):
             temp = file_name.split('"""')[1].splitlines()
             for i in temp:
                 if i:
-                    file_name = i
+                    file_name = replace_special_chars(i)
                     break
         else:
             file_name = file_name[:20]
@@ -209,8 +214,10 @@ def KDocs_需求分析问答(link_limit, llm_kwargs, plugin_kwargs, chatbot, his
 
 def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
     for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
+        chatbot.append([None, f'{long_name_processing(you_say)} 🏃🏻‍正在努力将Markdown转换为流程图~'])
         md, html = crazy_box.Utils().markdown_to_flow_chart(data=inputs, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(you_say))
         chatbot.append(("View: "+func_box.html_view_blank(md), f'{func_box.html_iframe_code(html_file=html)}'
+                                                               f'tips: 双击空白处可以放大～'
                                                                f'\n\n--- \n\n Download: {func_box.html_download_blank(html)}' 
                                                               '\n\n--- \n\n View: '+func_box.html_view_blank(html)))
         yield from update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
