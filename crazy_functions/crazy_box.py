@@ -83,7 +83,7 @@ class Utils:
         html_file = os.path.join(user_path, f"{file_name}.html")
         with open(file=md_file, mode='w') as f:
             f.write(data)
-        func_box.Shell(f'npx markmap-cli --no-toolbar --no-open "{md_file}" -o "{html_file}"').read()
+        func_box.Shell(f'npx markmap-cli --no-open "{md_file}" -o "{html_file}"').read()
         return md_file, html_file
 
 
