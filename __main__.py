@@ -2,7 +2,7 @@ import os
 import gradio as gr
 from request_llm.bridge_all import predict
 from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_user_upload, \
-    get_user_download, get_conf, ArgsGeneralWrapper, DummyWith
+     get_conf, ArgsGeneralWrapper, DummyWith
 
 # 问询记录, python 版本建议3.9+（越新越好）
 import logging
@@ -70,29 +70,34 @@ class ChatBot(ChatBotFrame):
     def draw_title(self):
         # self.title = gr.HTML(self.title_html)
         self.cookies = gr.State({'api_key': API_KEY, 'llm_model': LLM_MODEL, 'local': self.__url})
-
     def draw_chatbot(self):
         self.chatbot = gr.Chatbot(elem_id='main_chatbot', label=f"当前模型：{LLM_MODEL}")
         self.chatbot.style()
         self.history = gr.State([])
         temp_draw = [gr.HTML() for i in range(7)]
         with gr.Box(elem_id='chat_box'):
+            self.state_users = gr.HTML(value='', visible=False, elem_id='state_users')
             with gr.Row():
-                self.sm_upload = gr.UploadButton(label='🔗Upload', file_count='multiple', elem_classes='sm_btn').style(size='sm', full_width=False)
-                self.sm_code_block = gr.Button(value='⚛︎Code', elem_classes='sm_btn').style(size='sm', full_width=False)
+                self.sm_upload = gr.UploadButton(label='UPLOAD', file_count='multiple', elem_classes='sm_btn').style(size='sm', full_width=False)
+                self.sm_code_block = gr.Button(value='CODE', elem_classes='sm_btn').style(size='sm', full_width=False)
                 gr.HTML(func_box.get_html("appearance_switcher.html").format(label=""), elem_id='user_input_tb', elem_classes="insert_block")
+                with gr.Column(scale=100):
+                    self.md_dropdown = gr.Dropdown(choices=AVAIL_LLM_MODELS,
+                                                      value=LLM_MODEL, show_label=False, interactive=True,
+                                                      elem_classes='sm_select', elem_id='change-font-size').style(container=False)
             with gr.Row():
                 self.txt = gr.Textbox(show_label=False,  placeholder="Input question here.", elem_classes='chat_input').style(container=False)
                 self.input_copy = gr.State('')
                 self.submitBtn = gr.Button("", variant="primary", elem_classes='submit_btn').style(full_width=False)
         with gr.Row():
-            self.status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {proxy_info}", elem_id='debug_mes')
+            self.status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行\n {proxy_info}", elem_id='debug_mes')
 
     def signals_sm_btn(self):
         self.sm_upload.upload(on_file_uploaded, [self.sm_upload, self.chatbot, self.txt], [self.chatbot, self.txt]).then(
             fn=lambda: [gr.Tabs.update(selected='plug_tab'), gr.Column.update(visible=False)], inputs=None, outputs=[self.tabs_inputs, self.examples_column]
         )
-        self.sm_code_block.click(fn=lambda x: x+'\n```\n\n```', inputs=[self.txt], outputs=[self.txt])
+        self.sm_code_block.click(fn=lambda x: x+'```\n\n```', inputs=[self.txt], outputs=[self.txt])
+        # self.sm_select_font.select(fn=lambda x: gr.HTML.update(value=f"{x}px"), inputs=[self.sm_select_font], outputs=[self.state_users])
 
     def draw_examples(self):
         with gr.Column(elem_id='examples_col') as self.examples_column:
@@ -185,12 +190,12 @@ class ChatBot(ChatBotFrame):
                                          self.pro_private_check],
                                  outputs=[self.pro_prompt_list, self.pro_prompt_state])
         self.pro_prompt_list.click(fn=func_box.show_prompt_result,
-                                   inputs=[self.pro_prompt_list, self.pro_prompt_state, self.pro_results],
-                                   outputs=[self.pro_results])
+                                   inputs=[self.pro_prompt_list, self.pro_prompt_state, self.pro_results, self.pro_edit_txt, self.pro_name_txt],
+                                   outputs=[self.pro_results, self.pro_edit_txt, self.pro_name_txt])
         self.pro_new_btn.click(fn=func_box.prompt_save,
                                inputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_fp_state],
                                outputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_private_check,
-                                        self.pro_func_prompt, self.pro_fp_state])
+                                        self.pro_func_prompt, self.pro_fp_state, self.tabs_chatbot])
         self.pro_reuse_btn.click(
             fn=func_box.reuse_chat,
             inputs=[self.pro_results, self.chatbot, self.history, self.pro_name_txt, self.txt],
@@ -260,7 +265,6 @@ class ChatBot(ChatBotFrame):
                                                  placeholder="这里是特殊函数插件的高级参数输入区").style(container=False)
                 self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
 
-
     def draw_setting_chat(self):
         switch_model = get_conf('switch_model')[0]
         with gr.TabItem('Settings', id='sett_tab'):
@@ -272,12 +276,9 @@ class ChatBot(ChatBotFrame):
                                            label="MaxLength", ).style(container=False)
             self.pro_tf_slider = gr.Slider(minimum=0.01, maximum=1.0, value=0.70, step=0.01, interactive=True,
                                            label="Term Frequency系数").style(container=False)
-            self.models_box = gr.CheckboxGroup(choices=switch_model['key'], value=switch_model['value'],
-                                               label="对话模式")
+            self.models_box = gr.CheckboxGroup(choices=switch_model['key'], value=switch_model['value'], label="对话模式")
             self.system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt",
                                             label="System prompt", value=self.initial_prompt)
-            self.md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(
-                container=False)
             # temp = gr.Markdown(self.description)
 
     def draw_goals_auto(self):
@@ -319,7 +320,7 @@ class ChatBot(ChatBotFrame):
         self.cancel_handles.append(self.txt.submit(**self.clear_agrs).then(**self.predict_args))
         self.cancel_handles.append(self.submitBtn.click(**self.clear_agrs).then(**self.predict_args))
         # self.cpopyBtn.click(fn=func_box.copy_result, inputs=[self.history], outputs=[self.status])
-        self.resetBtn.click(lambda: ([], [], "已重置"), None, [self.chatbot, self.history, self.status], _js='()=>{clearHistoryHtml();}')
+        self.resetBtn.click(lambda: ([], [], "已重置"), None, [self.chatbot, self.history, self.status])
 
     def signals_function(self):
         # 基础功能区的回调函数注册
@@ -339,7 +340,9 @@ class ChatBot(ChatBotFrame):
         for k in crazy_fns:
             if not crazy_fns[k].get("AsButton", True): continue
             self.click_handle = crazy_fns[k]["Button"].click(**self.clear_agrs).then(
-                ArgsGeneralWrapper(crazy_fns[k]["Function"]), [*self.input_combo, gr.State(PORT)], self.output_combo)
+                ArgsGeneralWrapper(crazy_fns[k]["Function"]),
+                [*self.input_combo, gr.State(PORT), gr.State(crazy_fns[k].get('Parameters', False))],
+                self.output_combo)
             self.click_handle.then(on_report_generated, [self.cookies, self.file_upload, self.chatbot],
                                    [self.cookies, self.file_upload, self.chatbot])
             # self.click_handle.then(fn=lambda x: '', inputs=[], outputs=self.txt)
@@ -373,7 +376,8 @@ class ChatBot(ChatBotFrame):
             yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(*args, **kwargs)
 
         self.click_handle = self.switchy_bt.click(**self.clear_agrs).then(route, [self.switchy_bt, *self.input_combo, gr.State(PORT)], self.output_combo)
-        self.click_handle.then(on_report_generated, [self.cookies, self.file_upload, self.chatbot], [self.file_upload, self.chatbot])
+        self.click_handle.then(on_report_generated, [self.cookies, self.file_upload, self.chatbot],
+                               [self.cookies, self.file_upload, self.chatbot])
         self.cancel_handles.append(self.click_handle)
         # 终止按钮的回调函数注册
         self.stopBtn.click(fn=None, inputs=None, outputs=None, cancels=self.cancel_handles)

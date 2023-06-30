@@ -1,5 +1,4 @@
 import html
-
 import markdown
 import importlib
 import inspect
@@ -12,7 +11,7 @@ import os
 import time
 import glob
 import sys
-from concurrent.futures import ThreadPoolExecutor
+import threading
 ############################### 插件输入输出接驳区 #######################################
 pj = os.path.join
 
@@ -70,8 +69,11 @@ def ArgsGeneralWrapper(f):
             'start_time': start_time
         }
         plugin_kwargs = {
-            "advanced_arg": plugin_advanced_arg
+            "advanced_arg": plugin_advanced_arg,
+            "parameters_def": ''
         }
+        if len(args) > 1:
+            plugin_kwargs.update({'parameters_def': args[1]})
         transparent_address_private = f'<p style="display:none;">\n{private_key}\n{ipaddr.client.host}\n</p>'
         transparent_address = f'<p style="display:none;">\n{ipaddr.client.host}\n</p>'
         if private in models:
@@ -88,23 +90,19 @@ def ArgsGeneralWrapper(f):
         chatbot_with_cookie.write_list(chatbot)
         txt_passon = txt
         if encrypt in models: txt_passon = func_box.encryption_str(txt)
-        if txt_passon == '' and len(args) > 1:
-            msgs = f'### Warning 输入框为空\n' \
-                   f'tips: 使用基础功能或{func_box.html_tag_color("高亮插件", "#b522c5", "ffffff")}功能时，请在输入区输入需要处理的内容'
-            yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=msgs)  # 刷新界面
-            return
         yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
     return decorated
 
 
-pool = ThreadPoolExecutor(200)
+
 def update_ui(chatbot, history, msg='正常', *args):  # 刷新界面
     """
     刷新用户界面
     """
     assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时，可用clear将其清空，然后用for+append循环重新赋值。"
     yield chatbot.get_cookies(), chatbot, history, msg
-    pool.submit(func_box.thread_write_chat, chatbot, history)
+    threading.Thread(target=func_box.thread_write_chat, args=(chatbot, history)).start()
+    # func_box.thread_write_chat(chatbot, history)
 
 def update_ui_lastest_msg(lastmsg, chatbot, history, delay=1):  # 刷新界面
     """
@@ -307,13 +305,6 @@ def markdown_convertion(txt):
     }
     find_equation_pattern = r'<script type="math/tex(?:.*?)>(.*?)</script>'
 
-    def tex2mathml_catch_exception(content, *args, **kwargs):
-        try:
-            content = tex2mathml(content, *args, **kwargs)
-        except:
-            content = content
-        return content
-
     def replace_math_no_render(match):
         content = match.group(1)
         if 'mode=display' in match.group(0):
@@ -329,10 +320,10 @@ def markdown_convertion(txt):
                 content = content.replace('\\begin{aligned}', '\\begin{array}')
                 content = content.replace('\\end{aligned}', '\\end{array}')
                 content = content.replace('&', ' ')
-            content = tex2mathml_catch_exception(content, display="block")
+            content = tex2mathml(content, display="block")
             return content
         else:
-            return tex2mathml_catch_exception(content)
+            return tex2mathml(content)
 
     def markdown_bug_hunt(content):
         """
@@ -343,7 +334,6 @@ def markdown_convertion(txt):
         content = content.replace('</script>\n</script>', '</script>')
         return content
 
-
     def no_code(txt):
         if '```' not in txt:
             return True
@@ -353,23 +343,24 @@ def markdown_convertion(txt):
             else:
                 return False
 
-    if ('$' in txt) and no_code(txt):  # 有$标识的公式符号，且没有代码段```的标识
+    if ('$$' in txt) and no_code(txt):  # 有$标识的公式符号，且没有代码段```的标识
         # convert everything to html format
         split = markdown.markdown(text='---')
-        convert_stage_1 = markdown.markdown(text=txt, extensions=['mdx_math', 'fenced_code', 'tables', 'sane_lists'],
-                                            extension_configs=markdown_extension_configs)
+        txt = re.sub(r'\$\$((?:.|\n)*?)\$\$', lambda match: '$$' + re.sub(r'\n+', '</br>', match.group(1)) + '$$', txt)
+        convert_stage_1 = markdown.markdown(text=txt, extensions=['mdx_math', 'fenced_code', 'tables', 'sane_lists'], extension_configs=markdown_extension_configs)
         convert_stage_1 = markdown_bug_hunt(convert_stage_1)
         # re.DOTALL: Make the '.' special character match any character at all, including a newline; without this flag, '.' will match anything except a newline. Corresponds to the inline flag (?s).
         # 1. convert to easy-to-copy tex (do not render math)
         convert_stage_2_1, n = re.subn(find_equation_pattern, replace_math_no_render, convert_stage_1, flags=re.DOTALL)
         # 2. convert to rendered equation
-        convert_stage_2_2, n = re.subn(find_equation_pattern, replace_math_render, convert_stage_1, flags=re.DOTALL)
+        convert_stage_1_resp = convert_stage_1.replace('</br>', '')
+        convert_stage_2_2, n = re.subn(find_equation_pattern, replace_math_render, convert_stage_1_resp, flags=re.DOTALL)
         # cat them together
-        context = convert_stage_2_1 + f'{split}' + convert_stage_2_2
-        return raw_hide.replace('%s', func_box.pattern_html(context)) + pre + context + suf
+        context = pre + convert_stage_2_1 + f'{split}' + convert_stage_2_2 + suf
+        return raw_hide.replace('%s', func_box.pattern_html(context)) + context
     else:
-        context = markdown.markdown(txt, extensions=['fenced_code', 'codehilite', 'tables', 'sane_lists'])
-        return raw_hide.replace('%s', func_box.pattern_html(context)) + pre + context + suf
+        context = pre + markdown.markdown(txt, extensions=['fenced_code', 'codehilite', 'tables', 'sane_lists']) + suf
+        return raw_hide.replace('%s', func_box.pattern_html(context)) + context
 
 
 def close_up_code_segment_during_stream(gpt_reply):
@@ -517,7 +508,9 @@ def get_user_upload(chatbot, ipaddr: gr.Request):
     """
     private_upload = './private_upload'
     user_history = os.path.join(private_upload, ipaddr.client.host)
-    history = ''
+    history = """
+    | 编号 | 字段2 | 字段2 |
+    """
     for root, d, file in os.walk(user_history):
         history += f'目录:\t {root} \t\t 目录内文件: {file}\n\n'
     chatbot.append(['Loading....',
