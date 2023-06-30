@@ -2,7 +2,7 @@ import os
 import gradio as gr
 from request_llm.bridge_all import predict
 from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_user_upload, \
-    get_user_download, get_conf, ArgsGeneralWrapper, DummyWith
+    get_conf, ArgsGeneralWrapper, DummyWith
 
 # 问询记录, python 版本建议3.9+（越新越好）
 import logging
@@ -80,6 +80,7 @@ class ChatBot(ChatBotFrame):
             with gr.Row():
                 self.sm_upload = gr.UploadButton(label='UPLOAD', file_count='multiple', elem_classes='sm_btn').style(size='sm', full_width=False)
                 self.sm_code_block = gr.Button(value='CODE', elem_classes='sm_btn').style(size='sm', full_width=False)
+                self.sm_upload_history = gr.Button("SPASE", variant="primary", elem_classes='sm_btn').style(size='sm', full_width=False)
                 gr.HTML(func_box.get_html("appearance_switcher.html").format(label=""), elem_id='user_input_tb', elem_classes="insert_block")
                 with gr.Column(scale=100):
                     self.md_dropdown = gr.Dropdown(choices=AVAIL_LLM_MODELS,
@@ -97,6 +98,7 @@ class ChatBot(ChatBotFrame):
             fn=lambda: [gr.Tabs.update(selected='plug_tab'), gr.Column.update(visible=False)], inputs=None, outputs=[self.tabs_inputs, self.examples_column]
         )
         self.sm_code_block.click(fn=lambda x: x+'```\n\n```', inputs=[self.txt], outputs=[self.txt])
+        self.sm_upload_history.click(get_user_upload, [self.chatbot], outputs=[self.chatbot]).then(fn=lambda: gr.Column.update(visible=False), inputs=None, outputs=self.examples_column)
         # self.sm_select_font.select(fn=lambda x: gr.HTML.update(value=f"{x}px"), inputs=[self.sm_select_font], outputs=[self.state_users])
 
     def draw_examples(self):
@@ -242,9 +244,6 @@ class ChatBot(ChatBotFrame):
                 self.file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)",
                                             file_count="multiple")
                 self.file_upload.style()
-                with gr.Row():
-                    self.upload_history = gr.Button("Get Upload History", variant="secondary").style(size='sm')
-                    self.get_download = gr.Button('Get Download Link', variant='stop').style(size='sm')
             with gr.Accordion("函数插件区", open=True) as self.area_crazy_fn:
                 with gr.Row():
                     for k in crazy_fns:
@@ -333,9 +332,6 @@ class ChatBot(ChatBotFrame):
     def signals_public(self):
         # 文件上传区，接收文件后与chatbot的互动
         self.file_upload.upload(on_file_uploaded, [self.file_upload, self.chatbot, self.txt], [self.chatbot, self.txt])
-        self.upload_history.click(get_user_upload, [self.chatbot], outputs=[self.chatbot])
-        self.get_download.click(get_user_download, [self.chatbot, self.cookies, self.txt],
-                                outputs=[self.chatbot, self.txt])
         # 函数插件-固定按钮区
         for k in crazy_fns:
             if not crazy_fns[k].get("AsButton", True): continue
