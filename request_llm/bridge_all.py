@@ -19,6 +19,9 @@ from request_llm.bridge_chatgpt import predict as chatgpt_ui
 from .bridge_azure_test import predict_no_ui_long_connection as azure_noui
 from .bridge_azure_test import predict as azure_ui
 
+from .bridge_azure_test import predict_no_ui_long_connection as azure_noui
+from .bridge_azure_test import predict as azure_ui
+
 from .bridge_chatglm import predict_no_ui_long_connection as chatglm_noui
 from .bridge_chatglm import predict as chatglm_ui
 
@@ -98,6 +101,24 @@ model_info = {
         "token_cnt": get_token_num_gpt35,
     },
 
+    "gpt-3.5-turbo-0613": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": openai_endpoint,
+        "max_token": 4096,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+
+    "gpt-3.5-turbo-16k-0613": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": openai_endpoint,
+        "max_token": 1024 * 16,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+
     "gpt-4": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
@@ -106,6 +127,16 @@ model_info = {
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
     },
+    # azure openai
+    "azure-gpt35":{
+        "fn_with_ui": azure_ui,
+        "fn_without_ui": azure_noui,
+        "endpoint": get_conf("AZURE_ENDPOINT"),
+        "max_token": 4096,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+
     # azure openai
     "azure-gpt35":{
         "fn_with_ui": azure_ui,
@@ -135,7 +166,7 @@ model_info = {
         "token_cnt": get_token_num_gpt35,
     },
 
-    # chatglm
+    # 将 chatglm 直接对齐到 chatglm2
     "chatglm": {
         "fn_with_ui": chatglm_ui,
         "fn_without_ui": chatglm_noui,
@@ -144,6 +175,15 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
+    "chatglm2": {
+        "fn_with_ui": chatglm_ui,
+        "fn_without_ui": chatglm_noui,
+        "endpoint": None,
+        "max_token": 1024,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+    
     # newbing
     "newbing": {
         "fn_with_ui": newbing_ui,

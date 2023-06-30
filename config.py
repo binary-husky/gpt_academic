@@ -19,8 +19,6 @@ AZURE_API_KEY = "填入azure openai api的密钥"
 AZURE_API_VERSION = "填入api版本"
 AZURE_ENGINE = "填入ENGINE"
 
-
-
 # [step 2]>> 改为True应用代理，如果直接在海外服务器部署，此处不修改
 USE_PROXY = False
 

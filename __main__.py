@@ -340,8 +340,8 @@ class ChatBot(ChatBotFrame):
             if not crazy_fns[k].get("AsButton", True): continue
             self.click_handle = crazy_fns[k]["Button"].click(**self.clear_agrs).then(
                 ArgsGeneralWrapper(crazy_fns[k]["Function"]), [*self.input_combo, gr.State(PORT)], self.output_combo)
-            self.click_handle.then(on_report_generated, [self.file_upload, self.chatbot],
-                                   [self.file_upload, self.chatbot])
+            self.click_handle.then(on_report_generated, [self.cookies, self.file_upload, self.chatbot],
+                                   [self.cookies, self.file_upload, self.chatbot])
             # self.click_handle.then(fn=lambda x: '', inputs=[], outputs=self.txt)
             self.cancel_handles.append(self.click_handle)
 
@@ -373,7 +373,7 @@ class ChatBot(ChatBotFrame):
             yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(*args, **kwargs)
 
         self.click_handle = self.switchy_bt.click(**self.clear_agrs).then(route, [self.switchy_bt, *self.input_combo, gr.State(PORT)], self.output_combo)
-        self.click_handle.then(on_report_generated, [self.file_upload, self.chatbot], [self.file_upload, self.chatbot])
+        self.click_handle.then(on_report_generated, [self.cookies, self.file_upload, self.chatbot], [self.file_upload, self.chatbot])
         self.cancel_handles.append(self.click_handle)
         # 终止按钮的回调函数注册
         self.stopBtn.click(fn=None, inputs=None, outputs=None, cancels=self.cancel_handles)
