@@ -79,6 +79,7 @@ class Utils:
 
     def markdown_to_flow_chart(self, data, hosts, file_name):
         user_path = os.path.join(func_box.users_path, hosts)
+        os.makedirs(user_path, exist_ok=True)
         md_file = os.path.join(user_path, f"{file_name}.md")
         html_file = os.path.join(user_path, f"{file_name}.html")
         with open(file=md_file, mode='w') as f:

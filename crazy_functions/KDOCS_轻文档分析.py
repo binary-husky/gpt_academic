@@ -53,7 +53,6 @@ def replace_special_chars(file_name):
     # 正则表达式中[^0-9A-Za-z_.\s]表示任意一个不是数字、字母、下划线、.、空格的字符
     return re.sub(r'[^0-9A-Za-z_.\s]', '_', file_name)
 
-
 def long_name_processing(file_name):
     if len(file_name) > 50:
         if file_name.find('"""') != -1:
