@@ -42,7 +42,6 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
                                   f'{func_box.html_local_img("docs/imgs/pic_desc.png")}'])
             file_limit.extend([title, content])
             yield from update_ui(chatbot, history)
-            time.sleep(1)
         except Exception as e:
             error_str = traceback.format_exc()
             chatbot.append([None, f'{func_box.html_a_blank(url)} \n\n请检查一下哦，这个链接我们访问不了，是否开启分享？是否设置密码？是否是轻文档？下面是什么错误？\n\n ```\n{str(error_str)}\n```'])
@@ -100,6 +99,7 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     kwargs_prompt, = crazy_box.json_args_return(plugin_kwargs, ['prompt'])
     if default_prompt: kwargs_prompt = default_prompt
     chatbot.append([f'接下来使用的Prompt是 {func_box.html_tag_color(kwargs_prompt)} ，你可以在Prompt编辑/检索中进行私人定制哦～',None])
+    time.sleep(1)
     prompt = prompt_generator.SqliteHandle(table=f'prompt_{llm_kwargs["ipaddr"]}').find_prompt_result(kwargs_prompt)
     for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
         content_limit = yield from split_content_limit(inputs, llm_kwargs, chatbot, history)

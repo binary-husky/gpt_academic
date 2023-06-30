@@ -148,8 +148,9 @@ def html_view_blank(__href, file_name=''):
     return a
 
 def html_iframe_code(html_file):
+    proxy, = toolbox.get_conf('LOCAL_PORT')
     if os.path.exists(html_file):
-        html_file = f'/file={html_file}'
+        html_file = f'http://{ipaddr()}:{proxy}/file={html_file}'
     ifr = f'<iframe width="100%" height="500px" frameborder="0" src="{html_file}"></iframe>'
     return ifr
 
