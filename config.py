@@ -56,6 +56,9 @@ LOCAL_MODEL_DEVICE = "cpu" # 可选 "cuda"
 # 设置gradio的并行线程数（不需要修改）
 CONCURRENT_COUNT = 100
 
+# 是否在提交时自动清空输入框
+AUTO_CLEAR_TXT = False
+
 # 加一个live2d装饰
 ADD_WAIFU = False
 
