@@ -76,7 +76,7 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
     max_length = llm_kwargs['max_length']/2  # 考虑到对话+回答会超过tokens,所以/2
     get_token_num = bridge_all.model_info[model]['token_cnt']
     if get_token_num(inputs) > max_length:
-        chatbot.append(None, f'{func_box.html_tag_color(inputs[:10])}...对话预计超出tokens限制, 拆分中...')
+        chatbot.append([None, f'{func_box.html_tag_color(inputs[:10])}...对话预计超出tokens限制, 拆分中...'])
         yield from update_ui(chatbot, history)
         segments = crazy_utils.breakdown_txt_to_satisfy_token_limit(inputs, get_token_num, max_length)
     else:

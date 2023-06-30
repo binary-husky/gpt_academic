@@ -182,7 +182,10 @@ class Kdocs:
             data=json_data,)
         url_data = response.json()['data']
         for pic in url_data:
-            pic_dict[pic] = self.url_decode(url_data[pic]['url'])
+            try:
+                pic_dict[pic] = self.url_decode(url_data[pic]['url'])
+            except Exception as f:
+                pass
         return pic_dict
 
 
