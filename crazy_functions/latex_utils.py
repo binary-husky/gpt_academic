@@ -27,6 +27,24 @@ def set_forbidden_text(text, mask, pattern, flags=0):
         mask[res.span()[0]:res.span()[1]] = PRESERVE
     return text, mask
 
+def reverse_forbidden_text(text, mask, pattern, flags=0, forbid_wrapper=True):
+    """
+    Move area out of preserve area (make text editable for GPT)
+    count the number of the braces so as to catch compelete text area. 
+    e.g.
+    \begin{abstract} blablablablablabla. \end{abstract} 
+    """
+    if isinstance(pattern, list): pattern = '|'.join(pattern)
+    pattern_compile = re.compile(pattern, flags)
+    for res in pattern_compile.finditer(text):
+        if not forbid_wrapper:
+            mask[res.span()[0]:res.span()[1]] = TRANSFORM
+        else:
+            mask[res.regs[0][0]: res.regs[1][0]] = PRESERVE   # '\\begin{abstract}'
+            mask[res.regs[1][0]: res.regs[1][1]] = TRANSFORM   # abstract
+            mask[res.regs[1][1]: res.regs[0][1]] = PRESERVE   # abstract
+    return text, mask
+
 def set_forbidden_text_careful_brace(text, mask, pattern, flags=0):
     """
     Add a preserve text area in this paper (text become untouchable for GPT).
@@ -326,6 +344,7 @@ def split_subprocess(txt, project_folder, return_dict, opts):
     # reverse 操作必须放在最后
     text, mask = reverse_forbidden_text_careful_brace(text, mask, r"\\caption\{(.*?)\}", re.DOTALL, forbid_wrapper=True)
     text, mask = reverse_forbidden_text_careful_brace(text, mask, r"\\abstract\{(.*?)\}", re.DOTALL, forbid_wrapper=True)
+    text, mask = reverse_forbidden_text(text, mask, r"\\begin\{abstract\}(.*?)\\end\{abstract\}", re.DOTALL, forbid_wrapper=True)
     root = convert_to_linklist(text, mask)
 
     # 修复括号
@@ -672,10 +691,9 @@ def remove_buggy_lines(file_path, log_path, tex_name, tex_name_pure, n_fix, work
         print("Fatal error occurred, but we cannot identify error, please download zip, read latex log, and compile manually.")
         return False, -1, [-1]
     
-
-def compile_latex_with_timeout(command, timeout=60):
+def compile_latex_with_timeout(command, cwd, timeout=60):
     import subprocess
-    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd)
     try:
         stdout, stderr = process.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
@@ -699,24 +717,24 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
 
         # https://stackoverflow.com/questions/738755/dont-make-me-manually-abort-a-latex-compile-when-theres-an-error
         yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 编译原始PDF ...', chatbot, history)   # 刷新Gradio前端界面
-        os.chdir(work_folder_original); ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex'); os.chdir(current_dir)
+        ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex', work_folder_original)
 
         yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 编译转化后的PDF ...', chatbot, history)   # 刷新Gradio前端界面
-        os.chdir(work_folder_modified); ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex'); os.chdir(current_dir)
+        ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex', work_folder_modified)
         
         if ok and os.path.exists(pj(work_folder_modified, f'{main_file_modified}.pdf')):
             # 只有第二步成功，才能继续下面的步骤
             yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 编译BibTex ...', chatbot, history)    # 刷新Gradio前端界面
             if not os.path.exists(pj(work_folder_original, f'{main_file_original}.bbl')):
-                os.chdir(work_folder_original); ok = compile_latex_with_timeout(f'bibtex  {main_file_original}.aux'); os.chdir(current_dir)
+                ok = compile_latex_with_timeout(f'bibtex  {main_file_original}.aux', work_folder_original)
             if not os.path.exists(pj(work_folder_modified, f'{main_file_modified}.bbl')):
-                os.chdir(work_folder_modified); ok = compile_latex_with_timeout(f'bibtex  {main_file_modified}.aux'); os.chdir(current_dir)
+                ok = compile_latex_with_timeout(f'bibtex  {main_file_modified}.aux', work_folder_modified)
 
             yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 编译文献交叉引用 ...', chatbot, history)  # 刷新Gradio前端界面
-            os.chdir(work_folder_original); ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex'); os.chdir(current_dir)
-            os.chdir(work_folder_modified); ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex'); os.chdir(current_dir)
-            os.chdir(work_folder_original); ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex'); os.chdir(current_dir)
-            os.chdir(work_folder_modified); ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex'); os.chdir(current_dir)
+            ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex', work_folder_original)
+            ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex', work_folder_modified)
+            ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex', work_folder_original)
+            ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex', work_folder_modified)
 
             if mode!='translate_zh':
                 yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 使用latexdiff生成论文转化前后对比 ...', chatbot, history) # 刷新Gradio前端界面
@@ -724,13 +742,11 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
                 ok = compile_latex_with_timeout(f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
 
                 yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 正在编译对比PDF ...', chatbot, history)   # 刷新Gradio前端界面
-                os.chdir(work_folder); ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
-                os.chdir(work_folder); ok = compile_latex_with_timeout(f'bibtex    merge_diff.aux'); os.chdir(current_dir)
-                os.chdir(work_folder); ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
-                os.chdir(work_folder); ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex'); os.chdir(current_dir)
+                ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex', work_folder)
+                ok = compile_latex_with_timeout(f'bibtex    merge_diff.aux', work_folder)
+                ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex', work_folder)
+                ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex', work_folder)
 
-        # <--------------------->
-        os.chdir(current_dir)
 
         # <---------- 检查结果 ----------->
         results_ = ""
@@ -766,7 +782,6 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
             yield from update_ui_lastest_msg(f'由于最为关键的转化PDF编译失败, 将根据报错信息修正tex源文件并重试, 当前报错的latex代码处于第{buggy_lines}行 ...', chatbot, history)   # 刷新Gradio前端界面
             if not can_retry: break
 
-    os.chdir(current_dir)
     return False # 失败啦
 
 
