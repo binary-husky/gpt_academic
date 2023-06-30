@@ -48,10 +48,15 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
             yield from update_ui(chatbot, history)
     return file_limit
 
+
 def long_name_processing(file_name):
-    if len(file_name) > 20:
-        if file_name.find('""""') != -1:
-            file_name = file_name.split('""""')[1].splitlines()[0]
+    if len(file_name) > 50:
+        if file_name.find('"""') != -1:
+            temp = file_name.split('"""')[1].splitlines()
+            for i in temp:
+                if i:
+                    file_name = i
+                    break
         else:
             file_name = file_name[:20]
     return file_name
