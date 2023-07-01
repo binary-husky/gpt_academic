@@ -33,6 +33,7 @@ import gradio as gr
 import toolbox
 from prompt_generator import SqliteHandle
 from bs4 import BeautifulSoup
+import copy
 
 """contextlib 是 Python 标准库中的一个模块，提供了一些工具函数和装饰器，用于支持编写上下文管理器和处理上下文的常见任务，例如资源管理、异常处理等。
 官网：https://docs.python.org/3/library/contextlib.html"""
@@ -137,6 +138,21 @@ def html_a_blank(__href, name=''):
         name = __href
     a = f'<a href="{__href}" target="_blank" class="svelte-xrr240">{name}</a>'
     return a
+
+def html_view_blank(__href, file_name=''):
+    if os.path.exists(__href):
+        __href = f'/file={__href}'
+    if not file_name:
+        file_name = __href.split('/')[-1]
+    a = f'<a href="{__href}" target="_blank" class="svelte-xrr240">{file_name}</a>'
+    return a
+
+def html_iframe_code(html_file):
+    proxy, = toolbox.get_conf('LOCAL_PORT')
+    html_file = f'http://{ipaddr()}:{proxy}/file={html_file}'
+    ifr = f'<iframe width="100%" height="500px" frameborder="0" src="{html_file}"></iframe>'
+    return ifr
+
 
 def html_download_blank(__href, file_name='temp', dir_name=''):
     if os.path.exists(__href):
@@ -330,9 +346,9 @@ def diff_list(txt='', percent=0.70, switch: list = None, lst: dict = None, sp=15
             if lst.get(key[0]):
                 be_value = lst[key[0]]
             else:
-                be_value = "这个prompt还没有对话过呢，快去试试吧～"
+                be_value = None
             value = be_value
-            dateset_list.append([show, key[0], value])
+            dateset_list.append([show, key[0], value, key[1]])
     return dateset_list
 
 
@@ -424,11 +440,11 @@ def prompt_save(txt, name, prompt: gr.Dataset, ipaddr: gr.Request):
         yaml_obj.inset_prompt({name: txt})
         result = prompt_retrieval(is_all=['个人'], hosts=ipaddr.client.host)
         prompt.samples = result
-        return "", "", ['个人'], prompt.update(samples=result, visible=True), prompt
+        return "", "", ['个人'], prompt.update(samples=result, visible=True), prompt, gr.Tabs.update(selected='chatbot')
     elif not txt or not name:
         result = [[f'{html_tag_color("编辑框 or 名称不能为空!!!!!", color="red")}', '']]
         prompt.samples = [[f'{html_tag_color("编辑框 or 名称不能为空!!!!!", color="red")}', '']]
-        return txt, name, [], prompt.update(samples=result, visible=True), prompt
+        return txt, name, [], prompt.update(samples=result, visible=True), prompt, gr.Tabs.update(selected='chatbot')
 
 
 def prompt_input(txt: str, prompt_str, name_str,  index, data: gr.Dataset, tabs_index):
@@ -478,7 +494,7 @@ def str_is_list(s):
         return False
 
 
-def show_prompt_result(index, data: gr.Dataset, chatbot):
+def show_prompt_result(index, data: gr.Dataset, chatbot, pro_edit, pro_name):
     """
     查看Prompt的对话记录结果
     Args:
@@ -496,14 +512,17 @@ def show_prompt_result(index, data: gr.Dataset, chatbot):
                 chatbot.append([list_copy[i]])
             else:
                 chatbot.append([list_copy[i], list_copy[i + 1]])
+    elif click[2] is None and pro_edit == '':
+        pro_edit = click[1]
+        pro_name = click[3]
     else:
         chatbot.append((click[1], click[2]))
-    return chatbot
+    return chatbot, pro_edit, pro_name
 
 
 
 def pattern_html(html):
-    bs = BeautifulSoup(html, 'html.parser')
+    bs = BeautifulSoup(str(html), 'html.parser')
     md_message = bs.find('div', {'class': 'md-message'})
     if md_message:
         return md_message.get_text(separator='')
@@ -515,6 +534,7 @@ def thread_write_chat(chatbot, history):
     """
     对话记录写入数据库
     """
+    chatbot, history = copy.copy(chatbot), copy.copy(history)
     private_key = toolbox.get_conf('private_key')[0]
     chat_title = chatbot[0][1].split()
     i_say = pattern_html(chatbot[-1][0])
@@ -529,7 +549,8 @@ def thread_write_chat(chatbot, history):
 
 
 base_path = os.path.dirname(__file__)
-prompt_path = os.path.join(base_path, 'prompt_users')
+prompt_path = os.path.join(base_path, 'users_data')
+users_path = os.path.join(base_path, 'private_upload')
 
 def reuse_chat(result, chatbot, history, pro_numb, say):
     """复用对话记录"""
@@ -554,6 +575,7 @@ def num_tokens_from_string(listing: list, encoding_name: str = 'cl100k_base') ->
         count_tokens += len(encoding.encode(i))
     return count_tokens
 
+
 def spinner_chatbot_loading(chatbot):
     loading = [''.join(['.' * random.randint(1, 5)])]
     # 将元组转换为列表并修改元素
@@ -564,6 +586,7 @@ def spinner_chatbot_loading(chatbot):
     # 将列表转换回元组并替换原始元组
     loading_msg[-1] = tuple(temp_list)
     return loading_msg
+
 
 def refresh_load_data(chat, history, prompt, crazy_list):
     """
