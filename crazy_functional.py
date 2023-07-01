@@ -45,55 +45,6 @@ def get_crazy_functions():
             "AsButton":False,
             "Function": HotReload(载入对话历史存档)
         },
-        "Kdocs_多文件转测试用例(输入框输入文档链接)": {
-            "Color": "primary",
-            "AsButton": True,
-            "Function": HotReload(KDOCS_轻文档分析.KDocs_转测试用例),
-            "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
-            "Parameters": {
-                "is_show": False,
-                "prompt": '文档转测试用例',
-                'img_ocr': False
-            }
-        },
-        "需求文档转测试用例(输入框输入需求文档)": {
-            "Color": "primary",
-            "AsButton": True,
-            "Function": HotReload(KDOCS_轻文档分析.需求转测试用例),
-            "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
-            "Parameters": {
-                "is_show": False,
-                "prompt": '文档转测试用例',
-                'img_ocr': False,
-                'to_markdown': False,
-            }
-        },
-        "KDocs需求分析问答": {
-            "Color": "primary",
-            "AsButton": True,
-            "Function": HotReload(KDOCS_轻文档分析.KDocs_需求分析问答),
-            "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
-            "Parameters": {
-                "is_show": True,
-                "prompt": '需求分析对话',
-                'img_ocr': False,
-                'to_markdown': False,
-            }
-        },
-        "KDocs文档转流程图": {
-            "Color": "primary",
-            "AsButton": True,
-            "Function": HotReload(KDOCS_轻文档分析.KDocs_文档转流程图),
-            "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
-            "Parameters": {
-                'to_markdown': True,
-            }
-        },
-
         "删除所有本地对话历史记录（请谨慎操作）": {
             "AsButton":False,
             "Function": HotReload(删除所有本地对话历史记录)
@@ -274,7 +225,7 @@ def get_crazy_functions():
         from crazy_functions.下载arxiv论文翻译摘要 import 下载arxiv论文并翻译摘要
         function_plugins.update({
             "一键下载arxiv论文并翻译摘要（先在input输入编号，如1812.10695）": {
-                "Color": "stop",
+                "Color": "primary",
                 "AsButton": False,  # 加入下拉菜单中
                 "Function": HotReload(下载arxiv论文并翻译摘要)
             }
@@ -286,7 +237,7 @@ def get_crazy_functions():
         from crazy_functions.联网的ChatGPT import 连接网络回答问题
         function_plugins.update({
             "连接网络回答问题（输入问题后点击该插件，需要访问谷歌）": {
-                "Color": "stop",
+                "Color": "primary",
                 "AsButton": False,  # 加入下拉菜单中
                 "Function": HotReload(连接网络回答问题)
             }
@@ -294,7 +245,7 @@ def get_crazy_functions():
         from crazy_functions.联网的ChatGPT_bing版 import 连接bing搜索回答问题
         function_plugins.update({
             "连接网络回答问题（中文Bing版，输入问题后点击该插件）": {
-                "Color": "stop",
+                "Color": "primary",
                 "AsButton": False,  # 加入下拉菜单中
                 "Function": HotReload(连接bing搜索回答问题)
             }
@@ -306,7 +257,7 @@ def get_crazy_functions():
         from crazy_functions.解析项目源代码 import 解析任意code项目
         function_plugins.update({
             "解析项目源代码（手动指定和筛选源代码文件类型）": {
-                "Color": "stop",
+                "Color": "primary",
                 "AsButton": False,
                 "AdvancedArgs": True, # 调用时，唤起高级参数输入区（默认False）
                 "ArgsReminder": "输入时用逗号隔开, *代表通配符, 加了^代表不匹配; 不输入代表全部匹配。例如: \"*.c, ^*.cpp, config.toml, ^*.toml\"", # 高级参数输入区的显示提示
@@ -320,7 +271,7 @@ def get_crazy_functions():
         from crazy_functions.询问多个大语言模型 import 同时问询_指定模型
         function_plugins.update({
             "询问多个GPT模型（手动指定询问哪些模型）": {
-                "Color": "stop",
+                "Color": "primary",
                 "AsButton": False,
                 "AdvancedArgs": True, # 调用时，唤起高级参数输入区（默认False）
                 "ArgsReminder": "支持任意数量的llm接口，用&符号分隔。例如chatglm&gpt-3.5-turbo&api2d-gpt-4", # 高级参数输入区的显示提示
@@ -334,7 +285,7 @@ def get_crazy_functions():
         from crazy_functions.图片生成 import 图片生成
         function_plugins.update({
             "图片生成（先切换模型到openai或api2d）": {
-                "Color": "stop",
+                "Color": "primary",
                 "AsButton": False,
                 "AdvancedArgs": True, # 调用时，唤起高级参数输入区（默认False）
                 "ArgsReminder": "在这里输入分辨率, 如256x256（默认）", # 高级参数输入区的显示提示
@@ -348,7 +299,7 @@ def get_crazy_functions():
         from crazy_functions.总结音视频 import 总结音视频
         function_plugins.update({
             "批量总结音视频（输入路径或上传压缩包）": {
-                "Color": "stop",
+                "Color": "primary",
                 "AsButton": False,
                 "AdvancedArgs": True,
                 "ArgsReminder": "调用openai api 使用whisper-1模型, 目前支持的格式:mp4, m4a, wav, mpga, mpeg, mp3。此处可以输入解析提示，例如：解析为简体中文（默认）。",
@@ -456,7 +407,7 @@ def get_crazy_functions():
         from crazy_functions.Latex输出PDF结果 import Latex英文纠错加PDF对比
         function_plugins.update({
             "Latex英文纠错+高亮修正位置 [需Latex]": {
-                "Color": "stop",
+                "Color": "primary",
                 "AsButton": False,
                 "AdvancedArgs": True,
                 "ArgsReminder": "如果有必要, 请在此处追加更细致的矫错指令（使用英文）。",
@@ -466,7 +417,7 @@ def get_crazy_functions():
         from crazy_functions.Latex输出PDF结果 import Latex翻译中文并重新编译PDF
         function_plugins.update({
             "Arixv翻译（输入arxivID）[需Latex]": {
-                "Color": "stop",
+                "Color": "primary",
                 "AsButton": False,
                 "AdvancedArgs": True,
                 "ArgsReminder":
@@ -477,7 +428,7 @@ def get_crazy_functions():
         })
         function_plugins.update({
             "本地论文翻译（上传Latex压缩包）[需Latex]": {
-                "Color": "stop",
+                "Color": "primary",
                 "AsButton": False,
                 "AdvancedArgs": True,
                 "ArgsReminder":
@@ -493,7 +444,7 @@ def get_crazy_functions():
     #     from crazy_functions.虚空终端 import 终端
     #     function_plugins.update({
     #         "超级终端": {
-    #             "Color": "stop",
+    #             "Color": "primary",
     #             "AsButton": False,
     #             # "AdvancedArgs": True,
     #             # "ArgsReminder": "",
