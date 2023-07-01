@@ -508,46 +508,18 @@ def get_user_upload(chatbot, ipaddr: gr.Request):
     """
     private_upload = './private_upload'
     user_history = os.path.join(private_upload, ipaddr.client.host)
-    history = """
-    | 编号 | 字段2 | 字段2 |
-    """
+    history = """| 编号 | 目录 | 目录内文件 |\n| --- | --- | --- |\n"""
+    count_num = 1
     for root, d, file in os.walk(user_history):
-        history += f'目录:\t {root} \t\t 目录内文件: {file}\n\n'
+        file_link = "<br>".join([f'{func_box.html_view_blank(f"{root}/{i}")}' for i in file])
+        history += f'| {count_num} | {root} | {file_link} |\n'
+        count_num += 1
     chatbot.append(['Loading....',
-                    '[Local Message] 请自行复制以下目录 or 目录+文件, 输入以供函数区高亮按钮使用\n\n'
-                    f'> {history}'
+                    f'[Local Message] 请自行复制以下目录 or 目录+文件, 填入输入框以供函数区高亮按钮使用，'
+                    f'{func_box.html_tag_color("提交前记得请检查头尾空格哦～")}\n\n'
+                    f'{history}'
                     ])
     return chatbot
-
-
-def get_user_download(chatbot, link, file):
-    """
-    将短路径转换为下载链接
-    """
-    file = file.rstrip()
-    for file_handle in str(file).split('\n'):
-        if os.path.isfile(file_handle):
-            # temp_file = func_box.copy_temp_file(file_handle) 无法使用外部的临时目录
-            temp_file = os.path.abspath(file_handle)
-            if temp_file:
-                dir_file, file_name = ('/'.join(str(file_handle).split('/')[-2:]), os.path.basename(file_handle))
-                chatbot.append(['Convert the file address to a download link at：',
-                                f'[Local Message] Successful conversion\n\n '
-                                f'{func_box.html_download_blank(__href=temp_file, dir_name=file_name, file_name=file_name)}'])
-            else:
-                chatbot.append(['Convert the file address to a download link at：',
-                                f'[Local Message] Conversion failed, file or not exist.'])
-        elif os.path.isdir(file_handle):
-            for root, dirs, files in os.walk(file_handle):
-                for f in files:
-                    temp_file = os.path.abspath(os.path.join(root, f))
-                    dir_file, file_name = ('/'.join(str(file_handle).split('/')[-2:]), os.path.basename(temp_file))
-                    chatbot.append(['Convert the file address to a download link at：',
-                                    f'[Local Message] Successful conversion\n\n '
-                                    f'{func_box.html_download_blank(__href=temp_file, dir_name=file_name, file_name=file_name)}'])
-        elif file_handle == '':
-            pass
-    return chatbot, ''
 
 
 def on_file_uploaded(files, chatbot, txt, ipaddr: gr.Request):
