@@ -53,7 +53,7 @@ mspace {
     bottom: 0;
     left: 0;
     z-index: 1; /* 设置更高的 z-index 值 */
-    margin-bottom: -4px !important;
+    margin-bottom: -2% !important;
     align-self: flex-end;
 }
 #chat_box {
@@ -66,7 +66,7 @@ mspace {
     bottom: 0;
     left: 0;
     width: 100%;
-    margin-bottom: 30px !important;
+    margin-bottom: 25px !important;
     border: 1px solid var(--border-color-primary);
 }
 .toast-body {
@@ -77,7 +77,7 @@ mspace {
 }
 .sm_btn {
     position: relative;
-    bottom: 5px;
+    /*bottom: 5px;*/
     height: 10%;
     border-radius: 20px!important;
     min-width: min(10%,100%) !important;
@@ -86,9 +86,21 @@ mspace {
 .sm_select {
     position: relative !important;
     z-index: 5 !important;
-    bottom: 5px;
+    /*bottom: 5px;*/
     min-width: min(20%,100%) !important;
     border-radius: 20px!important;
+}
+.sm_select .svelte-1gfkn6j {
+    float: left;
+    width: auto;
+}
+.sm_select .wrap .svelte-aqlk7e {
+    border-radius: var(--block-title-radius);;
+    width: auto;
+    background-color: #f6f6f6 !important;
+}
+.dark .sm_select .wrap .svelte-aqlk7e {
+    background-color: #515151 !important;
 }
 .sm_checkbox {
     position: relative !important;
@@ -106,7 +118,6 @@ mspace {
 /* usage_display */
 .insert_block {
     position: relative;
-    bottom: 2px;
     min-width: min(55px,100%) !important;
 }
 

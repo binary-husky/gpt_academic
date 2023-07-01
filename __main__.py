@@ -82,9 +82,9 @@ class ChatBot(ChatBotFrame):
                 self.sm_code_block = gr.Button(value='CODE', elem_classes='sm_btn').style(size='sm', full_width=False)
                 self.sm_upload_history = gr.Button("SPASE", variant="primary", elem_classes='sm_btn').style(size='sm', full_width=False)
                 self.md_dropdown = gr.Dropdown(choices=AVAIL_LLM_MODELS, value=LLM_MODEL,
-                                               show_label=False, interactive=True,
+                                               show_label=True, interactive=True, label='LLMs',
                                                elem_classes='sm_select', elem_id='change-font-size').style(container=False)
-                gr.HTML(func_box.get_html("appearance_switcher.html").format(label=""), elem_id='user_input_tb', elem_classes="insert_block")
+                gr.HTML(func_box.get_html("appearance_switcher.html").format(label=""), elem_classes="insert_block")
 
 
             with gr.Row():
@@ -259,7 +259,7 @@ class ChatBot(ChatBotFrame):
                         dropdown_fn_list.append(k)
                     elif crazy_fns[k].get('AdvancedArgs', False):
                         dropdown_fn_list.append(k)
-                self.dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", show_label=False, label="").style(
+                self.dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", interactive=True, show_label=False, label="").style(
                     container=False)
                 self.plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False,
                                                  placeholder="这里是特殊函数插件的高级参数输入区").style(container=False)
