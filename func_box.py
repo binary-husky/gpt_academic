@@ -606,11 +606,15 @@ def refresh_load_data(chat, history, prompt, crazy_list, request: gr.Request):
     user_agent = request.kwargs['headers']['user-agent'].lower()
     if user_agent.find('android') != -1 or user_agent.find('iphone') != -1:
         hied_elem = gr.update(visible=False)
+        MOBILE_SHOW, = toolbox.get_conf('MOBILE_SHOW')
+        show_elem = gr.update(visible=MOBILE_SHOW)
     else:
         hied_elem = gr.update()
+        show_elem = gr.update()
+
     outputs = [prompt.update(samples=data, visible=True), prompt,
                chat, history, gr.Dataset.update(samples=[[i] for i in selected]), selected,
-               hied_elem, hied_elem]
+               hied_elem, hied_elem, show_elem]
     return outputs
 
 

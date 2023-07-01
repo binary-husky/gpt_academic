@@ -408,9 +408,7 @@ class ChatBot(ChatBotFrame):
             threading.Thread(target=auto_update, name="self-upgrade", daemon=True).start()
         # threading.Thread(target=warm_up_modules, name="warm-up", daemon=True).start()
 
-
     def main(self):
-
         with gr.Blocks(title="Chatbot for KSO ", theme=set_theme, analytics_enabled=False, css=custom_css) as self.demo:
             # 绘制页面title
             self.draw_title()
@@ -420,17 +418,14 @@ class ChatBot(ChatBotFrame):
                 with gr.Column(scale=44, elem_id='colum_1') as self.cloum_1:
                     with gr.Tabs() as self.tabs_copilot:
                         # 绘制对话模组
-                        with gr.TabItem('Chat-Copilot'):
+                        with gr.TabItem('Chat-Copilot') as self.Chat_Copilot:
                             with gr.Row():
-                                # self.cpopyBtn = gr.Button("复制回答", variant="secondary").style(size="sm")
-                                self.resetBtn = gr.Button("新建对话", variant="primary", elem_id='empty_btn').style(
-                                    size="sm")
+                                self.resetBtn = gr.Button("新建对话", variant="primary", elem_id='empty_btn').style(size="sm")
                                 self.stopBtn = gr.Button("中止对话", variant="stop").style(size="sm")
                             with gr.Tabs() as self.tabs_inputs:
                                 self.draw_function_chat()
                                 self.draw_public_chat()
                                 self.draw_setting_chat()
-
                         # 绘制autogpt模组
                         with gr.TabItem('Auto-GPT'):
                             self.draw_next_auto()
@@ -443,6 +438,15 @@ class ChatBot(ChatBotFrame):
                             pass
                         with gr.TabItem('Prompt检索/编辑') as self.prompt_tab:
                             self.draw_prompt()
+
+                        with gr.Column(visible=False) as self.mobile_column:
+                            with gr.Row():
+                                self.resetBtn = gr.Button("新建对话", variant="primary", elem_id='empty_btn').style(size="sm")
+                                self.stopBtn = gr.Button("中止对话", variant="stop").style(size="sm")
+                            with gr.Tabs() as self.tabs_inputs:
+                                self.draw_function_chat()
+                                self.draw_public_chat()
+                                self.draw_setting_chat()
 
                 with self.chat_tab:  # 使用 gr.State()对组件进行拷贝时，如果之前绘制了Markdown格式，会导致启动崩溃,所以将 markdown相关绘制放在最后
                     self.draw_chatbot()
@@ -462,12 +466,12 @@ class ChatBot(ChatBotFrame):
                            inputs=[self.chatbot, self.history, self.pro_fp_state, adv_plugins],
                            outputs=[self.pro_func_prompt, self.pro_fp_state, self.chatbot,
                                     self.history, self.guidance_plugins, self.guidance_plugins_state,
-                                    self.cloum_1, self.examples_column])
+                                    self.cloum_1, self.examples_column, self.mobile_column])
 
         # Start
         self.auto_opentab_delay()
-        self.demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION,
-        blocked_paths=["config.py", "config_private.py", "docker-compose.yml", "Dockerfile"])
+        self.demo.queue(concurrency_count=CONCURRENT_COUNT,).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION,
+        blocked_paths=["config.py", "config_private.py", "docker-compose.yml", "Dockerfile"], show_api=False)
 
 
 def check_proxy_free():

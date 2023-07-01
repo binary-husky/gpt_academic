@@ -31,6 +31,7 @@ else:
 
 # [step 3]>> 多线程函数插件中，默认允许多少路线程同时访问OpenAI。Free trial users的限制是每分钟3次，Pay-as-you-go users的限制是每分钟3500次
 # 一言以蔽之：免费用户填3，OpenAI绑了信用卡的用户可以填 16 或者更高。提高限制请查询：https://platform.openai.com/docs/guides/rate-limits/overview
+# https://platform.openai.com/docs/guides/rate-limits/overview
 DEFAULT_WORKER_NUM = 3
 
 
@@ -72,8 +73,12 @@ CONCURRENT_COUNT = 100
 # 是否在提交时自动清空输入框
 AUTO_CLEAR_TXT = False
 
-# 加一个live2d装饰
-ADD_WAIFU = False
+# 加一个看板娘装饰
+ADD_WAIFU = True
+# 川虎 js
+ADD_CHUANHU = True
+# 手机是否展示高级插件
+MOBILE_SHOW = True
 
 # 设置用户名和密码（不需要修改）（相关功能不稳定，与gradio版本和网络都相关，如果本地使用不建议加这个）
 # [("username", "password"), ("username2", "password2"), ...]
