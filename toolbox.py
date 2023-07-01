@@ -6,6 +6,7 @@ import re
 import os
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
+pj = os.path.join
 
 """
 ========================================================================
@@ -224,16 +225,21 @@ def text_divide_paragraph(text):
     """
     将文本按照段落分隔符分割开，生成带有段落标签的HTML代码。
     """
+    pre = '<div class="markdown-body">'
+    suf = '</div>'
+    if text.startswith(pre) and text.endswith(suf):
+        return text
+    
     if '```' in text:
         # careful input
-        return text
+        return pre + text + suf
     else:
         # wtf input
         lines = text.split("\n")
         for i, line in enumerate(lines):
             lines[i] = lines[i].replace(" ", "&nbsp;")
         text = "</br>".join(lines)
-        return text
+        return pre + text + suf
 
 
 @lru_cache(maxsize=128) # 使用 lru缓存 加快转换速度
@@ -346,8 +352,11 @@ def format_io(self, y):
     if y is None or y == []:
         return []
     i_ask, gpt_reply = y[-1]
-    i_ask = text_divide_paragraph(i_ask)  # 输入部分太自由，预处理一波
-    gpt_reply = close_up_code_segment_during_stream(gpt_reply)  # 当代码输出半截的时候，试着补上后个```
+    # 输入部分太自由，预处理一波
+    if i_ask is not None: i_ask = text_divide_paragraph(i_ask)
+    # 当代码输出半截的时候，试着补上后个```
+    if gpt_reply is not None: gpt_reply = close_up_code_segment_during_stream(gpt_reply)
+    # process
     y[-1] = (
         None if i_ask is None else markdown.markdown(i_ask, extensions=['fenced_code', 'tables']),
         None if gpt_reply is None else markdown_convertion(gpt_reply)
@@ -395,7 +404,7 @@ def extract_archive(file_path, dest_dir):
                 print("Successfully extracted rar archive to {}".format(dest_dir))
         except:
             print("Rar format requires additional dependencies to install")
-            return '\n\n需要安装pip install rarfile来解压rar文件'
+            return '\n\n解压失败! 需要安装pip install rarfile来解压rar文件'
 
     # 第三方库，需要预先pip install py7zr
     elif file_extension == '.7z':
@@ -406,7 +415,7 @@ def extract_archive(file_path, dest_dir):
                 print("Successfully extracted 7z archive to {}".format(dest_dir))
         except:
             print("7z format requires additional dependencies to install")
-            return '\n\n需要安装pip install py7zr来解压7z文件'
+            return '\n\n解压失败! 需要安装pip install py7zr来解压7z文件'
     else:
         return ''
     return ''
@@ -436,13 +445,17 @@ def find_recent_files(directory):
     return recent_files
 
 
-def promote_file_to_downloadzone(file, rename_file=None):
+def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
     # 将文件复制一份到下载区
     import shutil
     if rename_file is None: rename_file = f'{gen_time_str()}-{os.path.basename(file)}'
     new_path = os.path.join(f'./gpt_log/', rename_file)
-    if os.path.exists(new_path): os.remove(new_path)
-    shutil.copyfile(file, new_path)
+    if os.path.exists(new_path) and not os.path.samefile(new_path, file): os.remove(new_path)
+    if not os.path.exists(new_path): shutil.copyfile(file, new_path)
+    if chatbot:
+        if 'file_to_promote' in chatbot._cookies: current = chatbot._cookies['file_to_promote']
+        else: current = []
+        chatbot._cookies.update({'file_to_promote': [new_path] + current})
 
 
 def on_file_uploaded(files, chatbot, txt, txt2, checkboxes):
@@ -483,14 +496,20 @@ def on_file_uploaded(files, chatbot, txt, txt2, checkboxes):
     return chatbot, txt, txt2
 
 
-def on_report_generated(files, chatbot):
+def on_report_generated(cookies, files, chatbot):
     from toolbox import find_recent_files
-    report_files = find_recent_files('gpt_log')
+    if 'file_to_promote' in cookies:
+        report_files = cookies['file_to_promote']
+        cookies.pop('file_to_promote')
+    else:
+        report_files = find_recent_files('gpt_log')
     if len(report_files) == 0:
-        return None, chatbot
+        return cookies, None, chatbot
     # files.extend(report_files)
-    chatbot.append(['报告如何远程获取？', '报告已经添加到右侧“文件上传区”（可能处于折叠状态），请查收。'])
-    return report_files, chatbot
+    file_links = ''
+    for f in report_files: file_links += f'<br/><a href="file={os.path.abspath(f)}" target="_blank">{f}</a>'
+    chatbot.append(['报告如何远程获取？', f'报告已经添加到右侧“文件上传区”（可能处于折叠状态），请查收。{file_links}'])
+    return cookies, report_files, chatbot
 
 
 def is_openai_api_key(key):
@@ -802,7 +821,7 @@ def zip_result(folder):
     import time
     t = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
     zip_folder(folder, './gpt_log/', f'{t}-result.zip')
-
+    return pj('./gpt_log/', f'{t}-result.zip')
 
 def gen_time_str():
     import time

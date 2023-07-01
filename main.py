@@ -6,8 +6,8 @@ def main():
     from request_llm.bridge_all import predict
     from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, DummyWith
     # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
-    proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT, API_KEY, AVAIL_LLM_MODELS = \
-        get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'LAYOUT', 'API_KEY', 'AVAIL_LLM_MODELS')
+    proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT, API_KEY, AVAIL_LLM_MODELS, AUTO_CLEAR_TXT = \
+        get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'LAYOUT', 'API_KEY', 'AVAIL_LLM_MODELS', 'AUTO_CLEAR_TXT')
 
     # 如果WEB_PORT是-1, 则随机选取WEB端口
     PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
@@ -104,7 +104,7 @@ def main():
                     system_prompt = gr.Textbox(show_label=True, placeholder=f"System Prompt", label="System prompt", value=initial_prompt)
                     top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01,interactive=True, label="Top-p (nucleus sampling)",)
                     temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature",)
-                    max_length_sl = gr.Slider(minimum=256, maximum=4096, value=512, step=1, interactive=True, label="Local LLM MaxLength",)
+                    max_length_sl = gr.Slider(minimum=256, maximum=8192, value=4096, step=1, interactive=True, label="Local LLM MaxLength",)
                     checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区", "底部输入区", "输入清除键", "插件参数区"], value=["基础功能区", "函数插件区"], label="显示/隐藏功能区")
                     md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(container=False)
 
@@ -144,6 +144,11 @@ def main():
         resetBtn2.click(lambda: ([], [], "已重置"), None, [chatbot, history, status])
         clearBtn.click(lambda: ("",""), None, [txt, txt2])
         clearBtn2.click(lambda: ("",""), None, [txt, txt2])
+        if AUTO_CLEAR_TXT:
+            submitBtn.click(lambda: ("",""), None, [txt, txt2])
+            submitBtn2.click(lambda: ("",""), None, [txt, txt2])
+            txt.submit(lambda: ("",""), None, [txt, txt2])
+            txt2.submit(lambda: ("",""), None, [txt, txt2])
         # 基础功能区的回调函数注册
         for k in functional:
             if ("Visible" in functional[k]) and (not functional[k]["Visible"]): continue
@@ -155,7 +160,7 @@ def main():
         for k in crazy_fns:
             if not crazy_fns[k].get("AsButton", True): continue
             click_handle = crazy_fns[k]["Button"].click(ArgsGeneralWrapper(crazy_fns[k]["Function"]), [*input_combo, gr.State(PORT)], output_combo)
-            click_handle.then(on_report_generated, [file_upload, chatbot], [file_upload, chatbot])
+            click_handle.then(on_report_generated, [cookies, file_upload, chatbot], [cookies, file_upload, chatbot])
             cancel_handles.append(click_handle)
         # 函数插件-下拉菜单与随变按钮的互动
         def on_dropdown_changed(k):
@@ -175,7 +180,7 @@ def main():
             if k in [r"打开插件列表", r"请先从插件列表中选择"]: return
             yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(*args, **kwargs)
         click_handle = switchy_bt.click(route,[switchy_bt, *input_combo, gr.State(PORT)], output_combo)
-        click_handle.then(on_report_generated, [file_upload, chatbot], [file_upload, chatbot])
+        click_handle.then(on_report_generated, [cookies, file_upload, chatbot], [cookies, file_upload, chatbot])
         cancel_handles.append(click_handle)
         # 终止按钮的回调函数注册
         stopBtn.click(fn=None, inputs=None, outputs=None, cancels=cancel_handles)
