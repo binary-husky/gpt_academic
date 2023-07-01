@@ -40,6 +40,7 @@ def ArgsGeneralWrapper(f):
     """
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
+    ENABLE_AUDIO, = get_conf('ENABLE_AUDIO')
     def decorated(cookies, max_length, llm_model, txt, txt2, top_p, temperature, chatbot, history, system_prompt, plugin_advanced_arg, *args):
         txt_passon = txt
         if txt == "" and txt2 != "": txt_passon = txt2
@@ -58,6 +59,7 @@ def ArgsGeneralWrapper(f):
         plugin_kwargs = {
             "advanced_arg": plugin_advanced_arg,
         }
+        if ENABLE_AUDIO: plugin_kwargs.update({'audio': args[0]})
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
         yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
