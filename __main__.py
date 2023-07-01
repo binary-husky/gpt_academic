@@ -81,11 +81,12 @@ class ChatBot(ChatBotFrame):
                 self.sm_upload = gr.UploadButton(label='UPLOAD', file_count='multiple', elem_classes='sm_btn').style(size='sm', full_width=False)
                 self.sm_code_block = gr.Button(value='CODE', elem_classes='sm_btn').style(size='sm', full_width=False)
                 self.sm_upload_history = gr.Button("SPASE", variant="primary", elem_classes='sm_btn').style(size='sm', full_width=False)
+                self.md_dropdown = gr.Dropdown(choices=AVAIL_LLM_MODELS, value=LLM_MODEL,
+                                               show_label=False, interactive=True,
+                                               elem_classes='sm_select', elem_id='change-font-size').style(container=False)
                 gr.HTML(func_box.get_html("appearance_switcher.html").format(label=""), elem_id='user_input_tb', elem_classes="insert_block")
-                with gr.Column(scale=100):
-                    self.md_dropdown = gr.Dropdown(choices=AVAIL_LLM_MODELS,
-                                                      value=LLM_MODEL, show_label=False, interactive=True,
-                                                      elem_classes='sm_select', elem_id='change-font-size').style(container=False)
+
+
             with gr.Row():
                 self.txt = gr.Textbox(show_label=False,  placeholder="Input question here.", elem_classes='chat_input').style(container=False)
                 self.input_copy = gr.State('')
@@ -416,7 +417,7 @@ class ChatBot(ChatBotFrame):
             # 绘制一个ROW，row会让底下的元素自动排成一行
             with gr.Row().style(justify='between'):
                 # 绘制列1
-                with gr.Column(scale=44):
+                with gr.Column(scale=44, elem_id='colum_1') as self.cloum_1:
                     with gr.Tabs() as self.tabs_copilot:
                         # 绘制对话模组
                         with gr.TabItem('Chat-Copilot'):
@@ -459,7 +460,9 @@ class ChatBot(ChatBotFrame):
             adv_plugins = gr.State([i for i in crazy_fns])
             self.demo.load(fn=func_box.refresh_load_data, postprocess=False,
                            inputs=[self.chatbot, self.history, self.pro_fp_state, adv_plugins],
-                           outputs=[self.pro_func_prompt, self.pro_fp_state, self.chatbot,  self.history, self.guidance_plugins, self.guidance_plugins_state])
+                           outputs=[self.pro_func_prompt, self.pro_fp_state, self.chatbot,
+                                    self.history, self.guidance_plugins, self.guidance_plugins_state,
+                                    self.cloum_1, self.examples_column])
 
         # Start
         self.auto_opentab_delay()

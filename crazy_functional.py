@@ -279,3 +279,5 @@ def get_crazy_functions():
             "Function": HotReload(连接网络回答问题)
         }
     })
+    ###################### 第n组插件 ###########################
+    return function_plugins

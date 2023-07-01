@@ -588,7 +588,7 @@ def spinner_chatbot_loading(chatbot):
     return loading_msg
 
 
-def refresh_load_data(chat, history, prompt, crazy_list):
+def refresh_load_data(chat, history, prompt, crazy_list, request: gr.Request):
     """
     Args:
         chat: 聊天组件
@@ -602,7 +602,15 @@ def refresh_load_data(chat, history, prompt, crazy_list):
     data = prompt_retrieval(is_all=[is_all])
     prompt.samples = data
     selected = random.sample(crazy_list, 4)
-    return prompt.update(samples=data, visible=True), prompt, chat, history, gr.Dataset.update(samples=[[i] for i in selected]), selected
+    user_agent = request.kwargs['headers']['user-agent'].lower()
+    if user_agent.find('android') != -1 or user_agent.find('iphone') != -1:
+        hied_elem = gr.update(visible=False)
+    else:
+        hied_elem = gr.update()
+    outputs = [prompt.update(samples=data, visible=True), prompt,
+               chat, history, gr.Dataset.update(samples=[[i] for i in selected]), selected,
+               hied_elem, hied_elem]
+    return outputs
 
 
 

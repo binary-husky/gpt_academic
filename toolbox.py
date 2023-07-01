@@ -285,18 +285,21 @@ def text_divide_paragraph(input_str):
     return input_str
 
 
-@lru_cache(maxsize=128)  # 使用 lru缓存 加快转换速度
+# @lru_cache(maxsize=128)  # 使用 lru缓存 加快转换速度
 def markdown_convertion(txt):
     """
     将Markdown格式的文本转换为HTML格式。如果包含数学公式，则先将公式转换为HTML格式。
     """
     pre = '<div class="md-message">'
     suf = '</div>'
-    raw_hide = f'<div class="raw-message hideM">%s</div>'
+    raw_pre = '<div class="raw-message hideM">'
+    raw_suf = '</div>'
     if txt.startswith(pre) and txt.endswith(suf):
         # print('警告，输入了已经经过转化的字符串，二次转化可能出问题')
         return txt  # 已经被转化过，不需要再次转化
-
+    if txt.startswith(raw_pre) and txt.endswith(raw_suf):
+        return txt  # 已经被转化过，不需要再次转化
+    raw_hide = raw_pre + txt + raw_suf
     markdown_extension_configs = {
         'mdx_math': {
             'enable_dollar_delimiter': True,
@@ -357,10 +360,10 @@ def markdown_convertion(txt):
         convert_stage_2_2, n = re.subn(find_equation_pattern, replace_math_render, convert_stage_1_resp, flags=re.DOTALL)
         # cat them together
         context = pre + convert_stage_2_1 + f'{split}' + convert_stage_2_2 + suf
-        return raw_hide.replace('%s', txt) + context
+        return raw_hide + context   # 破坏html 结构，并显示源码
     else:
         context = pre + markdown.markdown(txt, extensions=['fenced_code', 'codehilite', 'tables', 'sane_lists']) + suf
-        return raw_hide.replace('%s', txt) + context
+        return raw_hide + context  # 破坏html 结构，并显示源码
 
 
 def close_up_code_segment_during_stream(gpt_reply):
