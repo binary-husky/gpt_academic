@@ -195,7 +195,7 @@ def test_Latex():
     # txt = r"https://arxiv.org/abs/2303.08774"
     # txt = r"https://arxiv.org/abs/2303.12712"
     # txt = r"C:\Users\fuqingxu\arxiv_cache\2303.12712\workfolder"
-    txt = r"C:\Users\fuqingxu\Desktop\9"
+    txt = r"2306.17157" # 这个paper有个input命令文件名大小写错误！
     
 
     for cookies, cb, hist, msg in (Latex翻译中文并重新编译PDF)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):

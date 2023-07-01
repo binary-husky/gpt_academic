@@ -27,7 +27,12 @@ def gen_image(llm_kwargs, prompt, resolution="256x256"):
     }
     response = requests.post(url, headers=headers, json=data, proxies=proxies)
     print(response.content)
-    image_url = json.loads(response.content.decode('utf8'))['data'][0]['url']
+
+    try:
+        image_url = json.loads(response.content.decode('utf8'))['data'][0]['url']
+    except:
+        raise RuntimeError(response.content.decode())
+
     # 文件保存到本地
     r = requests.get(image_url, proxies=proxies)
     file_path = 'gpt_log/image_gen/'
