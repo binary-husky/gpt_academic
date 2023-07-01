@@ -29,6 +29,9 @@ DEFAULT_WORKER_NUM = 3
 # 对话窗的高度
 CHATBOT_HEIGHT = 1115
 
+# 主题
+THEME = "Default"
+
 # 代码高亮
 CODE_HIGHLIGHT = True
 
