@@ -175,16 +175,16 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         except: max_workers = 8
         if max_workers <= 0: max_workers = 3
     # 屏蔽掉 chatglm的多线程，可能会导致严重卡顿
-    if not (llm_kwargs['llm_model'].startswith('gpt-') or llm_kwargs['llm_model'].startswith('api2d-')):
+    if not (llm_kwargs['llm_model'].startswith('gpt-') or llm_kwargs['llm_model'].startswith('api2d-') or llm_kwargs['llm_model'].startswith('proxy-gpt')):
         max_workers = 1
         
     executor = ThreadPoolExecutor(max_workers=max_workers)
     n_frag = len(inputs_array)
     # 用户反馈
-    chatbot.append(["请开始多线程操作。", ""])
+    chatbot.append([None, ""])
     yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
     # 跨线程传递
-    mutable = [["", time.time(), "等待中"] for _ in range(n_frag)]
+    mutable = [[f"", time.time(), "等待中"] for _ in range(n_frag)]
 
     # 子线程任务
     def _req_gpt(index, inputs, history, sys_prompt):
@@ -272,7 +272,8 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     ' ', '.').replace('<br/>', '.....').replace('$', '.')+"`... ]"
             observe_win.append(print_something_really_funny)
         # 在前端打印些好玩的东西
-        stat_str = ''.join([f'`{mutable[thread_index][2]}`: {obs}\n\n' 
+        stat_str = ''.join([f'`{inputs_show_user_array[thread_index][0:5]}...{inputs_show_user_array[thread_index][-5:]}`\t'
+                            f'`{mutable[thread_index][2]}`: {obs}\n\n'
                             if not done else f'`{mutable[thread_index][2]}`\n\n' 
                             for thread_index, done, obs in zip(range(len(worker_done)), worker_done, observe_win)])
         # 在前端打印些好玩的东西

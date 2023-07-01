@@ -657,6 +657,7 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
 
     write_html(pfg.sp_file_contents, pfg.sp_file_result, chatbot=chatbot, project_folder=project_folder)
 
+
     #  <-------- 写出文件 ----------> 
     msg = f"当前大语言模型: {llm_kwargs['llm_model']}，当前语言模型温度设定: {llm_kwargs['temperature']}。"
     final_tex = lps.merge_result(pfg.file_result, mode, msg)
@@ -743,6 +744,7 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
                 ok = compile_latex_with_timeout(f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
 
                 yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 正在编译对比PDF ...', chatbot, history)   # 刷新Gradio前端界面
+
                 ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex', work_folder)
                 ok = compile_latex_with_timeout(f'bibtex    merge_diff.aux', work_folder)
                 ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex', work_folder)
@@ -767,6 +769,7 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
             result_pdf = pj(work_folder_modified, f'{main_file_modified}.pdf') # get pdf path
             if os.path.exists(pj(work_folder, '..', 'translation')):
                 shutil.copyfile(result_pdf, pj(work_folder, '..', 'translation', 'translate_zh.pdf'))
+
             promote_file_to_downloadzone(result_pdf, rename_file=None, chatbot=chatbot)  # promote file to web UI
             return True # 成功啦
         else:

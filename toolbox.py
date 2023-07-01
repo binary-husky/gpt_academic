@@ -1,11 +1,18 @@
+import html
 import markdown
 import importlib
-import time
 import inspect
-import re
-import os
+import gradio as gr
+import func_box
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
+import shutil
+import os
+import time
+import glob
+import sys
+import threading
+############################### 插件输入输出接驳区 #######################################
 pj = os.path.join
 
 """
@@ -40,36 +47,62 @@ def ArgsGeneralWrapper(f):
     """
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
-    def decorated(cookies, max_length, llm_model, txt, txt2, top_p, temperature, chatbot, history, system_prompt, plugin_advanced_arg, *args):
-        txt_passon = txt
-        if txt == "" and txt2 != "": txt_passon = txt2
+    def decorated(cookies, max_length, llm_model, txt, top_p, temperature,
+                  chatbot, history, system_prompt, models, plugin_advanced_arg, ipaddr: gr.Request, *args):
+        """"""
         # 引入一个有cookie的chatbot
+        start_time = time.time()
+        encrypt, private = get_conf('switch_model')[0]['key']
+        private_key, = get_conf('private_key')
         cookies.update({
             'top_p':top_p,
             'temperature':temperature,
         })
+
         llm_kwargs = {
             'api_key': cookies['api_key'],
             'llm_model': llm_model,
             'top_p':top_p,
             'max_length': max_length,
-            'temperature':temperature,
+            'temperature': temperature,
+            'ipaddr': ipaddr.client.host,
+            'start_time': start_time
         }
         plugin_kwargs = {
             "advanced_arg": plugin_advanced_arg,
+            "parameters_def": ''
         }
+        if len(args) > 1:
+            plugin_kwargs.update({'parameters_def': args[1]})
+        transparent_address_private = f'<p style="display:none;">\n{private_key}\n{ipaddr.client.host}\n</p>'
+        transparent_address = f'<p style="display:none;">\n{ipaddr.client.host}\n</p>'
+        if private in models:
+            if chatbot == []:
+                chatbot.append([None, f'隐私模式, 你的对话记录无法被他人检索 {transparent_address_private}'])
+            else:
+                chatbot[0] = [None, f'隐私模式, 你的对话记录无法被他人检索 {transparent_address_private}']
+        else:
+            if chatbot == []:
+                chatbot.append([None, f'正常对话模式, 你接来下的对话将会被记录并且可以被所有人检索，你可以到Settings中选择隐私模式 {transparent_address}'])
+            else:
+                chatbot[0] = [None, f'正常对话模式, 你接来下的对话将会被记录并且可以被所有人检索，你可以到Settings中选择隐私模式 {transparent_address}']
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
+        txt_passon = txt
+        if encrypt in models: txt_passon = func_box.encryption_str(txt)
         yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
     return decorated
 
 
-def update_ui(chatbot, history, msg='正常', **kwargs):  # 刷新界面
+
+def update_ui(chatbot, history, msg='正常', *args):  # 刷新界面
     """
     刷新用户界面
     """
     assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时，可用clear将其清空，然后用for+append循环重新赋值。"
     yield chatbot.get_cookies(), chatbot, history, msg
+    threading.Thread(target=func_box.thread_write_chat, args=(chatbot, history)).start()
+    # func_box.thread_write_chat(chatbot, history)
 
 def update_ui_lastest_msg(lastmsg, chatbot, history, delay=1):  # 刷新界面
     """
@@ -126,9 +159,14 @@ def HotReload(f):
     def decorated(*args, **kwargs):
         fn_name = f.__name__
         f_hot_reload = getattr(importlib.reload(inspect.getmodule(f)), fn_name)
-        yield from f_hot_reload(*args, **kwargs)
+        try:
+            yield from f_hot_reload(*args, **kwargs)
+        except TypeError:
+            args = tuple(args[element] for element in range(len(args)) if element != 6)
+            yield from f_hot_reload(*args, **kwargs)
     return decorated
 
+####################################### 其他小工具 #####################################
 
 """
 ========================================================================
@@ -192,8 +230,7 @@ def write_results_to_file(history, file_name=None):
                 # remove everything that cannot be handled by utf8
                 f.write(content.encode('utf-8', 'ignore').decode())
             f.write('\n\n')
-    res = '以上材料已经被写入' + os.path.abspath(f'./gpt_log/{file_name}')
-    print(res)
+    res = '以上材料已经被写入' + f'./gpt_log/{file_name}'
     return res
 
 
@@ -218,37 +255,51 @@ def report_execption(chatbot, history, a, b):
     history.append(b)
 
 
-def text_divide_paragraph(text):
-    """
-    将文本按照段落分隔符分割开，生成带有段落标签的HTML代码。
-    """
-    pre = '<div class="markdown-body">'
-    suf = '</div>'
-    if text.startswith(pre) and text.endswith(suf):
-        return text
-    
-    if '```' in text:
-        # careful input
-        return pre + text + suf
-    else:
-        # wtf input
-        lines = text.split("\n")
-        for i, line in enumerate(lines):
-            lines[i] = lines[i].replace(" ", "&nbsp;")
-        text = "</br>".join(lines)
-        return pre + text + suf
+import re
+def text_divide_paragraph(input_str):
+    if input_str:
+        code_blocks = re.findall(r'```[\s\S]*?```', input_str)
 
-@lru_cache(maxsize=128) # 使用 lru缓存 加快转换速度
+        for i, block in enumerate(code_blocks):
+            input_str = input_str.replace(block, f'{{{{CODE_BLOCK_{i}}}}}')
+
+        if code_blocks:
+            sections = re.split(r'({{{{\w+}}}})', input_str)
+            for idx, section in enumerate(sections):
+                if 'CODE_BLOCK' in section or section.startswith('    '):
+                    continue
+                sections[idx] = re.sub(r'(?!```)(?<!\n)\n(?!(\n|^)( {0,3}[\*\+\-]|[0-9]+\.))', '\n\n', section)
+            input_str = ''.join(sections)
+
+            for i, block in enumerate(code_blocks):
+                input_str = input_str.replace(f'{{{{CODE_BLOCK_{i}}}}}', block.replace('\n', '\n'))
+        else:
+            lines = input_str.split('\n')
+            for idx, line in enumerate(lines[:-1]):
+                if not line.strip():
+                    continue
+                if not (lines[idx + 1].startswith('    ') or lines[idx + 1].startswith('\t')):
+                    lines[idx] += '\n'  # 将一个换行符替换为两个换行符
+            input_str = '\n'.join(lines)
+
+    return input_str
+
+
+@lru_cache(maxsize=128)  # 使用 lru缓存 加快转换速度
 def markdown_convertion(txt):
     """
     将Markdown格式的文本转换为HTML格式。如果包含数学公式，则先将公式转换为HTML格式。
     """
-    pre = '<div class="markdown-body">'
+    pre = '<div class="md-message">'
     suf = '</div>'
+    raw_pre = '<div class="raw-message hideM">'
+    raw_suf = '</div>'
     if txt.startswith(pre) and txt.endswith(suf):
         # print('警告，输入了已经经过转化的字符串，二次转化可能出问题')
-        return txt # 已经被转化过，不需要再次转化
-    
+        return txt  # 已经被转化过，不需要再次转化
+    if txt.startswith(raw_pre) and txt.endswith(raw_suf):
+        return txt  # 已经被转化过，不需要再次转化
+    raw_hide = raw_pre + txt + raw_suf
     markdown_extension_configs = {
         'mdx_math': {
             'enable_dollar_delimiter': True,
@@ -256,13 +307,6 @@ def markdown_convertion(txt):
         },
     }
     find_equation_pattern = r'<script type="math/tex(?:.*?)>(.*?)</script>'
-
-    def tex2mathml_catch_exception(content, *args, **kwargs):
-        try:
-            content = tex2mathml(content, *args, **kwargs)
-        except:
-            content = content
-        return content
 
     def replace_math_no_render(match):
         content = match.group(1)
@@ -279,40 +323,47 @@ def markdown_convertion(txt):
                 content = content.replace('\\begin{aligned}', '\\begin{array}')
                 content = content.replace('\\end{aligned}', '\\end{array}')
                 content = content.replace('&', ' ')
-            content = tex2mathml_catch_exception(content, display="block")
+            content = tex2mathml(content, display="block")
             return content
         else:
-            return tex2mathml_catch_exception(content)
+            return tex2mathml(content)
 
     def markdown_bug_hunt(content):
         """
         解决一个mdx_math的bug（单$包裹begin命令时多余<script>）
         """
-        content = content.replace('<script type="math/tex">\n<script type="math/tex; mode=display">', '<script type="math/tex; mode=display">')
+        content = content.replace('<script type="math/tex">\n<script type="math/tex; mode=display">',
+                                  '<script type="math/tex; mode=display">')
         content = content.replace('</script>\n</script>', '</script>')
         return content
 
     def no_code(txt):
-        if '```' not in txt: 
+        if '```' not in txt:
             return True
         else:
-            if '```reference' in txt: return True    # newbing
-            else: return False
+            if '```reference' in txt:
+                return True  # newbing
+            else:
+                return False
 
-    if ('$' in txt) and no_code(txt):  # 有$标识的公式符号，且没有代码段```的标识
+    if ('$$' in txt) and no_code(txt):  # 有$标识的公式符号，且没有代码段```的标识
         # convert everything to html format
         split = markdown.markdown(text='---')
+        txt = re.sub(r'\$\$((?:.|\n)*?)\$\$', lambda match: '$$' + re.sub(r'\n+', '</br>', match.group(1)) + '$$', txt)
         convert_stage_1 = markdown.markdown(text=txt, extensions=['mdx_math', 'fenced_code', 'tables', 'sane_lists'], extension_configs=markdown_extension_configs)
         convert_stage_1 = markdown_bug_hunt(convert_stage_1)
         # re.DOTALL: Make the '.' special character match any character at all, including a newline; without this flag, '.' will match anything except a newline. Corresponds to the inline flag (?s).
         # 1. convert to easy-to-copy tex (do not render math)
         convert_stage_2_1, n = re.subn(find_equation_pattern, replace_math_no_render, convert_stage_1, flags=re.DOTALL)
         # 2. convert to rendered equation
-        convert_stage_2_2, n = re.subn(find_equation_pattern, replace_math_render, convert_stage_1, flags=re.DOTALL)
+        convert_stage_1_resp = convert_stage_1.replace('</br>', '')
+        convert_stage_2_2, n = re.subn(find_equation_pattern, replace_math_render, convert_stage_1_resp, flags=re.DOTALL)
         # cat them together
-        return pre + convert_stage_2_1 + f'{split}' + convert_stage_2_2 + suf
+        context = pre + convert_stage_2_1 + f'{split}' + convert_stage_2_2 + suf
+        return raw_hide + context   # 破坏html 结构，并显示源码
     else:
-        return pre + markdown.markdown(txt, extensions=['fenced_code', 'codehilite', 'tables', 'sane_lists']) + suf
+        context = pre + markdown.markdown(txt, extensions=['fenced_code', 'codehilite', 'tables', 'sane_lists']) + suf
+        return raw_hide + context  # 破坏html 结构，并显示源码
 
 
 def close_up_code_segment_during_stream(gpt_reply):
@@ -326,9 +377,9 @@ def close_up_code_segment_during_stream(gpt_reply):
         str: 返回一个新的字符串，将输出代码片段的“后面的```”补上。
 
     """
-    if '```' not in gpt_reply:
+    if '```' not in str(gpt_reply):
         return gpt_reply
-    if gpt_reply.endswith('```'):
+    if str(gpt_reply).endswith('```'):
         return gpt_reply
 
     # 排除了以上两个情况，我们
@@ -354,7 +405,8 @@ def format_io(self, y):
     if gpt_reply is not None: gpt_reply = close_up_code_segment_during_stream(gpt_reply)
     # process
     y[-1] = (
-        None if i_ask is None else markdown.markdown(i_ask, extensions=['fenced_code', 'tables']),
+        # None if i_ask is None else markdown.markdown(i_ask, extensions=['fenced_code', 'tables']),
+        None if i_ask is None else markdown_convertion(i_ask),
         None if gpt_reply is None else markdown_convertion(gpt_reply)
     )
     return y
@@ -452,42 +504,51 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
         else: current = []
         chatbot._cookies.update({'file_to_promote': [new_path] + current})
 
-def on_file_uploaded(files, chatbot, txt, txt2, checkboxes):
+
+def get_user_upload(chatbot, ipaddr: gr.Request):
+    """
+    获取用户上传过的文件
+    """
+    private_upload = './private_upload'
+    user_history = os.path.join(private_upload, ipaddr.client.host)
+    history = """| 编号 | 目录 | 目录内文件 |\n| --- | --- | --- |\n"""
+    count_num = 1
+    for root, d, file in os.walk(user_history):
+        file_link = "<br>".join([f'{func_box.html_view_blank(f"{root}/{i}")}' for i in file])
+        history += f'| {count_num} | {root} | {file_link} |\n'
+        count_num += 1
+    chatbot.append(['Load Submission History....',
+                    f'[Local Message] 请自行复制以下目录 or 目录+文件, 填入输入框以供函数区高亮按钮使用\n\n'
+                    f'{func_box.html_tag_color("提交前记得请检查头尾空格哦～")}\n\n'
+                    f'{history}'
+                    ])
+    return chatbot
+
+
+def on_file_uploaded(files, chatbot, txt, ipaddr: gr.Request):
     """
     当文件被上传时的回调函数
     """
     if len(files) == 0:
         return chatbot, txt
-    import shutil
-    import os
-    import time
-    import glob
-    from toolbox import extract_archive
-    try:
-        shutil.rmtree('./private_upload/')
-    except:
-        pass
-    time_tag = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
-    os.makedirs(f'private_upload/{time_tag}', exist_ok=True)
+    private_upload = './private_upload'
+    #     shutil.rmtree('./private_upload/')  不需要删除文件
+    time_tag_path = os.path.join(private_upload, ipaddr.client.host, time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()))
+    os.makedirs(f'{time_tag_path}', exist_ok=True)
     err_msg = ''
     for file in files:
         file_origin_name = os.path.basename(file.orig_name)
-        shutil.copy(file.name, f'private_upload/{time_tag}/{file_origin_name}')
-        err_msg += extract_archive(f'private_upload/{time_tag}/{file_origin_name}',
-                                   dest_dir=f'private_upload/{time_tag}/{file_origin_name}.extract')
-    moved_files = [fp for fp in glob.glob('private_upload/**/*', recursive=True)]
-    if "底部输入区" in checkboxes:
-        txt = ""
-        txt2 = f'private_upload/{time_tag}'
-    else:
-        txt = f'private_upload/{time_tag}'
-        txt2 = ""
+        shutil.copy(file.name, f'{time_tag_path}/{file_origin_name}')
+        err_msg += extract_archive(f'{time_tag_path}/{file_origin_name}',
+                                   dest_dir=f'{time_tag_path}/{file_origin_name}.extract')
+    moved_files = [fp for fp in glob.glob(f'{time_tag_path}/**/*', recursive=True)]
+    txt = f'{time_tag_path}'
     moved_files_str = '\t\n\n'.join(moved_files)
-    chatbot.append(['我上传了文件，请查收',
+    chatbot.append([None,
                     f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
                     f'\n\n调用路径参数已自动修正到: \n\n{txt}' +
-                    f'\n\n现在您点击任意“红颜色”标识的函数插件时，以上文件将被作为输入参数'+err_msg])
-    return chatbot, txt, txt2
+                    f'\n\n现在您点击任意“高亮”标识的函数插件时，以上文件将被作为输入参数'+err_msg])
+    return chatbot, txt
 
 
 def on_report_generated(cookies, files, chatbot):
@@ -516,6 +577,13 @@ def is_api2d_key(key):
     else:
         return False
 
+def is_proxy_key(key):
+    if key.startswith('proxy-') and len(key) == 38:
+        return True
+    else:
+        return False
+
+
 def is_any_api_key(key):
     if ',' in key:
         keys = key.split(',')
@@ -523,7 +591,7 @@ def is_any_api_key(key):
             if is_any_api_key(k): return True
         return False
     else:
-        return is_openai_api_key(key) or is_api2d_key(key)
+        return is_openai_api_key(key) or is_api2d_key(key) or is_proxy_key(key)
 
 def what_keys(keys):
     avail_key_list = {'OpenAI Key':0, "API2D Key":0}
@@ -537,7 +605,14 @@ def what_keys(keys):
         if is_api2d_key(k): 
             avail_key_list['API2D Key'] += 1
 
-    return f"检测到： OpenAI Key {avail_key_list['OpenAI Key']} 个，API2D Key {avail_key_list['API2D Key']} 个"
+    for k in key_list:
+        if is_proxy_key(k):
+            avail_key_list['Proxy Key'] += 1
+
+    return f"检测到： \n" \
+           f"OpenAI Key {avail_key_list['OpenAI Key']} 个\n" \
+           f"API2D Key {avail_key_list['API2D Key']} 个\n" \
+           f"Proxy Key {avail_key_list['API2D Key']} 个\n"
 
 def select_api_key(keys, llm_model):
     import random
@@ -551,6 +626,10 @@ def select_api_key(keys, llm_model):
     if llm_model.startswith('api2d-'):
         for k in key_list:
             if is_api2d_key(k): avail_key_list.append(k)
+
+    if llm_model.startswith('proxy-'):
+        for k in key_list:
+            if is_proxy_key(k): avail_key_list.append(k.replace('proxy-', ''))
 
     if len(avail_key_list) == 0:
         raise RuntimeError(f"您提供的api-key不满足要求，不包含任何可用于{llm_model}的api-key。您可能选择了错误的模型或请求源。")
@@ -622,6 +701,12 @@ def read_single_conf_with_lru_cache(arg):
     except:
         try:
             # 优先级2. 获取config_private中的配置
+            # 获取当前文件所在目录的路径
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            # 获取上一层目录的路径
+            parent_dir = os.path.dirname(current_dir)
+            # 将上一层目录添加到Python的搜索路径中
+            sys.path.append(parent_dir)
             r = getattr(importlib.import_module('config_private'), arg)
         except:
             # 优先级3. 获取config中的配置
@@ -675,6 +760,7 @@ class DummyWith():
 
     def __exit__(self, exc_type, exc_value, traceback):
         return
+
 
 def run_gradio_in_subpath(demo, auth, port, custom_path):
     """
@@ -842,4 +928,3 @@ def objload(file='objdump.tmp'):
         return
     with open(file, 'rb') as f:
         return pickle.load(f)
-    

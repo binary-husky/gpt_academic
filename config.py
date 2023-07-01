@@ -2,8 +2,27 @@
 API_KEY = "sk-此处填API密钥"    # 可同时填写多个API-KEY，用英文逗号分割，例如API_KEY = "sk-openaikey1,sk-openaikey2,fkxxxx-api2dkey1,fkxxxx-api2dkey2"
 
 
+
+prompt_list = {'key': ['所有人', '个人'], 'value': []}
+
+switch_model = {'key': ['input加密', '隐私模式'], 'value': ['input加密']}
+
+private_key = 'uhA51pHtjisfjij'
+
+import func_box
+import os
+devs_document = "/file="+os.path.join(func_box.base_path, 'README.md')
+
+#增加关于AZURE的配置信息， 可以在AZURE网页中找到
+AZURE_ENDPOINT = "https://你的api名称.openai.azure.com/"
+AZURE_API_KEY = "填入azure openai api的密钥"
+AZURE_API_VERSION = "填入api版本"
+AZURE_ENGINE = "填入ENGINE"
+
 # [step 2]>> 改为True应用代理，如果直接在海外服务器部署，此处不修改
 USE_PROXY = False
+
+LOCAL_PORT = 7891
 if USE_PROXY:
     # 填写格式是 [协议]://  [地址] :[端口]，填写之前不要忘记把USE_PROXY改成True，如果直接在海外服务器部署，此处不修改
     # 例如    "socks5h://localhost:11284"
@@ -25,7 +44,7 @@ else:
 DEFAULT_WORKER_NUM = 3
 
 
-# [step 4]>> 以下配置可以优化体验，但大部分场合下并不需要修改
+# [step 3]>> 以下配置可以优化体验，但大部分场合下并不需要修改  # 废弃了，移步到theme.py 的 #main_chatbot中修改
 # 对话窗的高度
 CHATBOT_HEIGHT = 1115
 
@@ -50,11 +69,16 @@ MAX_RETRY = 2
 
 # 模型选择是 (注意: LLM_MODEL是默认选中的模型, 同时它必须被包含在AVAIL_LLM_MODELS切换列表中 )
 LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
+
 AVAIL_LLM_MODELS = ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt35", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "newbing-free", "stack-claude"]
-# P.S. 其他可用的模型还包括 ["gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613", "newbing-free", "jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
+# P.S. 其他可用的模型还包括 ["newbing-free", "jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
 
 # 本地LLM模型如ChatGLM的执行方式 CPU/GPU
 LOCAL_MODEL_DEVICE = "cpu" # 可选 "cuda"
+
+# OpenAI的API_URL
+API_URL = "https://api.openai.com/v1/chat/completions"
+PROXY_API_URL = '' # 你的网关应用
 
 # 设置gradio的并行线程数（不需要修改）
 CONCURRENT_COUNT = 100
@@ -64,6 +88,9 @@ AUTO_CLEAR_TXT = False
 
 # 加一个live2d装饰
 ADD_WAIFU = False
+
+# 川虎JS
+ADD_CHUANHU = True
 
 # 设置用户名和密码（不需要修改）（相关功能不稳定，与gradio版本和网络都相关，如果本地使用不建议加这个）
 # [("username", "password"), ("username2", "password2"), ...]

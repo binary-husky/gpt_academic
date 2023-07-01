@@ -13,8 +13,11 @@ from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor
 from toolbox import get_conf, trimmed_format_exc
 
-from .bridge_chatgpt import predict_no_ui_long_connection as chatgpt_noui
-from .bridge_chatgpt import predict as chatgpt_ui
+from request_llm.bridge_chatgpt import predict_no_ui_long_connection as chatgpt_noui
+from request_llm.bridge_chatgpt import predict as chatgpt_ui
+
+from .bridge_azure_test import predict_no_ui_long_connection as azure_noui
+from .bridge_azure_test import predict as azure_ui
 
 from .bridge_azure_test import predict_no_ui_long_connection as azure_noui
 from .bridge_azure_test import predict as azure_ui
@@ -51,10 +54,11 @@ class LazyloadTiktoken(object):
         return encoder.decode(*args, **kwargs)
 
 # Endpoint 重定向
-API_URL_REDIRECT, = get_conf("API_URL_REDIRECT")
+API_URL_REDIRECT, PROXY_API_URL = get_conf("API_URL_REDIRECT", 'PROXY_API_URL')
 openai_endpoint = "https://api.openai.com/v1/chat/completions"
 api2d_endpoint = "https://openai.api2d.net/v1/chat/completions"
 newbing_endpoint = "wss://sydney.bing.com/sydney/ChatHub"
+proxy_endpoint = PROXY_API_URL
 # 兼容旧版的配置
 try:
     API_URL, = get_conf("API_URL")
@@ -67,6 +71,7 @@ except:
 if openai_endpoint in API_URL_REDIRECT: openai_endpoint = API_URL_REDIRECT[openai_endpoint]
 if api2d_endpoint in API_URL_REDIRECT: api2d_endpoint = API_URL_REDIRECT[api2d_endpoint]
 if newbing_endpoint in API_URL_REDIRECT: newbing_endpoint = API_URL_REDIRECT[newbing_endpoint]
+
 
 
 # 获取tokenizer
@@ -122,6 +127,15 @@ model_info = {
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
     },
+    # azure openai
+    "azure-gpt35":{
+        "fn_with_ui": azure_ui,
+        "fn_without_ui": azure_noui,
+        "endpoint": get_conf("AZURE_ENDPOINT"),
+        "max_token": 4096,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
 
     # azure openai
     "azure-gpt35":{
@@ -147,9 +161,9 @@ model_info = {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
         "endpoint": api2d_endpoint,
-        "max_token": 8192,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
+        "max_token": 4096,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
     },
 
     # 将 chatglm 直接对齐到 chatglm2
