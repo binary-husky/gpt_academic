@@ -285,7 +285,7 @@ def text_divide_paragraph(input_str):
     return input_str
 
 
-# @lru_cache(maxsize=128)  # 使用 lru缓存 加快转换速度
+@lru_cache(maxsize=128)  # 使用 lru缓存 加快转换速度
 def markdown_convertion(txt):
     """
     将Markdown格式的文本转换为HTML格式。如果包含数学公式，则先将公式转换为HTML格式。

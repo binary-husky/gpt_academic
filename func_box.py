@@ -551,6 +551,7 @@ def thread_write_chat(chatbot, history):
 base_path = os.path.dirname(__file__)
 prompt_path = os.path.join(base_path, 'users_data')
 users_path = os.path.join(base_path, 'private_upload')
+logs_path = os.path.join(base_path, 'gpt_log')
 
 def reuse_chat(result, chatbot, history, pro_numb, say):
     """复用对话记录"""
@@ -699,6 +700,35 @@ def git_log_list():
 
     return [i.split('|') for i in ll if 'branch' not in i][:5]
 
+import qrcode
+from PIL import Image, ImageDraw
+def qr_code_generation(data, icon_path=None, file_name='qc_icon.png'):
+    # 创建qrcode对象
+    qr = qrcode.QRCode(version=2, error_correction=qrcode.constants.ERROR_CORRECT_Q, box_size=10, border=2,)
+    qr.add_data(data)
+    # 创建二维码图片
+    img = qr.make_image()
+    # 图片转换为RGBA格式
+    img = img.convert('RGBA')
+    # 返回二维码图片的大小
+    img_w, img_h = img.size
+    # 打开logo
+    if not icon_path:
+        icon_path = os.path.join(base_path, 'docs/assets/PLAI.jpeg')
+    logo = Image.open(icon_path)
+    # logo大小为二维码的四分之一
+    logo_w = img_w // 4
+    logo_h = img_w // 4
+    # 修改logo图片大小
+    logo = logo.resize((logo_w, logo_h), Image.LANCZOS)  # or Image.Resampling.LANCZOS
+    # 把logo放置在二维码中间
+    w = (img_w - logo_w) // 2
+    h = (img_h - logo_h) // 2
+    img.paste(logo, (w, h))
+    qr_path = os.path.join(logs_path, 'file_name')
+    img.save()
+    return qr_path
+
 
 class YamlHandle:
 
@@ -745,4 +775,4 @@ class JsonHandle:
 
 
 if __name__ == '__main__':
-    print(pattern_html('<div class="raw-message hideM">很抱歉，作为一个文</div><div class="md-message"><p>很抱歉，作为一个文</p></div>'))
+    pass
