@@ -357,10 +357,10 @@ def markdown_convertion(txt):
         convert_stage_2_2, n = re.subn(find_equation_pattern, replace_math_render, convert_stage_1_resp, flags=re.DOTALL)
         # cat them together
         context = pre + convert_stage_2_1 + f'{split}' + convert_stage_2_2 + suf
-        return raw_hide.replace('%s', func_box.pattern_html(context)) + context
+        return raw_hide.replace('%s', txt) + context
     else:
         context = pre + markdown.markdown(txt, extensions=['fenced_code', 'codehilite', 'tables', 'sane_lists']) + suf
-        return raw_hide.replace('%s', func_box.pattern_html(context)) + context
+        return raw_hide.replace('%s', txt) + context
 
 
 def close_up_code_segment_during_stream(gpt_reply):
@@ -514,8 +514,8 @@ def get_user_upload(chatbot, ipaddr: gr.Request):
         file_link = "<br>".join([f'{func_box.html_view_blank(f"{root}/{i}")}' for i in file])
         history += f'| {count_num} | {root} | {file_link} |\n'
         count_num += 1
-    chatbot.append(['Loading....',
-                    f'[Local Message] 请自行复制以下目录 or 目录+文件, 填入输入框以供函数区高亮按钮使用，'
+    chatbot.append(['Load Submission History....',
+                    f'[Local Message] 请自行复制以下目录 or 目录+文件, 填入输入框以供函数区高亮按钮使用\n\n'
                     f'{func_box.html_tag_color("提交前记得请检查头尾空格哦～")}\n\n'
                     f'{history}'
                     ])
