@@ -59,6 +59,9 @@ CONCURRENT_COUNT = 100
 # 是否在提交时自动清空输入框
 AUTO_CLEAR_TXT = False
 
+# 色彩主体，可选： "Default", "Green"
+THEME = "Green"
+
 # 加一个live2d装饰
 ADD_WAIFU = False
 
