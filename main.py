@@ -37,7 +37,7 @@ def main():
     gr.Chatbot.postprocess = format_io
 
     # 做一些外观色彩上的调整
-    from theme import adjust_theme, advanced_css
+    from theme.theme import adjust_theme, advanced_css
     set_theme = adjust_theme()
 
     # 代理与自动更新
