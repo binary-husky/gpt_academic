@@ -160,7 +160,7 @@ model_info = {
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
     },
-    # chatglm
+    # 将 chatglm 直接对齐到 chatglm2
     "chatglm": {
         "fn_with_ui": chatglm_ui,
         "fn_without_ui": chatglm_noui,
@@ -169,6 +169,15 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
+    "chatglm2": {
+        "fn_with_ui": chatglm_ui,
+        "fn_without_ui": chatglm_noui,
+        "endpoint": None,
+        "max_token": 1024,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+    
     # newbing
     "newbing": {
         "fn_with_ui": newbing_ui,
