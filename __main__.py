@@ -2,7 +2,7 @@ import os
 import gradio as gr
 from request_llm.bridge_all import predict
 from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_user_upload, \
-     get_conf, ArgsGeneralWrapper, DummyWith
+    get_conf, ArgsGeneralWrapper, DummyWith
 
 # 问询记录, python 版本建议3.9+（越新越好）
 import logging
@@ -80,12 +80,12 @@ class ChatBot(ChatBotFrame):
             with gr.Row():
                 self.sm_upload = gr.UploadButton(label='UPLOAD', file_count='multiple', elem_classes='sm_btn').style(size='sm', full_width=False)
                 self.sm_code_block = gr.Button(value='CODE', elem_classes='sm_btn').style(size='sm', full_width=False)
-                self.sm_upload_history = gr.Button("SPASE", variant="primary", elem_classes='sm_btn').style(size='sm')
+                self.sm_upload_history = gr.Button("SPASE", variant="primary", elem_classes='sm_btn').style(size='sm', full_width=False)
+                self.md_dropdown = gr.Dropdown(choices=AVAIL_LLM_MODELS, value=LLM_MODEL,
+                                               show_label=False, interactive=True,
+                                               elem_classes='sm_select', elem_id='change-font-size').style(container=False)
                 gr.HTML(func_box.get_html("appearance_switcher.html").format(label=""), elem_id='user_input_tb', elem_classes="insert_block")
-                with gr.Column(scale=100):
-                    self.md_dropdown = gr.Dropdown(choices=AVAIL_LLM_MODELS,
-                                                      value=LLM_MODEL, show_label=False, interactive=True,
-                                                      elem_classes='sm_select', elem_id='change-font-size').style(container=False)
+
             with gr.Row():
                 self.txt = gr.Textbox(show_label=False,  placeholder="Input question here.", elem_classes='chat_input').style(container=False)
                 self.input_copy = gr.State('')
@@ -98,8 +98,8 @@ class ChatBot(ChatBotFrame):
             fn=lambda: [gr.Tabs.update(selected='plug_tab'), gr.Column.update(visible=False)], inputs=None, outputs=[self.tabs_inputs, self.examples_column]
         )
         self.sm_code_block.click(fn=lambda x: x+'```\n\n```', inputs=[self.txt], outputs=[self.txt])
-        self.sm_upload_history.click(get_user_upload, [self.chatbot], outputs=[self.chatbot]).then(
-            fn=lambda : self.examples_column.update(visible=False), inputs=None, outputs=[self.examples_column])
+        self.sm_upload_history.click(get_user_upload, [self.chatbot], outputs=[self.chatbot]).then(fn=lambda: gr.Column.update(visible=False), inputs=None, outputs=self.examples_column)
+        # self.sm_select_font.select(fn=lambda x: gr.HTML.update(value=f"{x}px"), inputs=[self.sm_select_font], outputs=[self.state_users])
 
     def draw_examples(self):
         with gr.Column(elem_id='examples_col') as self.examples_column:

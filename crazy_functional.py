@@ -45,6 +45,55 @@ def get_crazy_functions():
             "AsButton":False,
             "Function": HotReload(载入对话历史存档)
         },
+        "Kdocs_多文件转测试用例(输入框输入文档链接)": {
+            "Color": "primary",
+            "AsButton": True,
+            "Function": HotReload(KDOCS_轻文档分析.KDocs_转测试用例),
+            "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+            "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
+            "Parameters": {
+                "is_show": False,
+                "prompt": '文档转测试用例',
+                'img_ocr': False
+            }
+        },
+        "需求文档转测试用例(输入框输入需求文档)": {
+            "Color": "primary",
+            "AsButton": True,
+            "Function": HotReload(KDOCS_轻文档分析.需求转测试用例),
+            "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+            "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
+            "Parameters": {
+                "is_show": False,
+                "prompt": '文档转测试用例',
+                'img_ocr': False,
+                'to_markdown': False,
+            }
+        },
+        "KDocs需求分析问答": {
+            "Color": "primary",
+            "AsButton": True,
+            "Function": HotReload(KDOCS_轻文档分析.KDocs_需求分析问答),
+            "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+            "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
+            "Parameters": {
+                "is_show": True,
+                "prompt": '需求分析对话',
+                'img_ocr': False,
+                'to_markdown': False,
+            }
+        },
+        "KDocs文档转流程图": {
+            "Color": "primary",
+            "AsButton": True,
+            "Function": HotReload(KDOCS_轻文档分析.KDocs_文档转流程图),
+            "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+            "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
+            "Parameters": {
+                'to_markdown': True,
+            }
+        },
+
         "删除所有本地对话历史记录（请谨慎操作）": {
             "AsButton":False,
             "Function": HotReload(删除所有本地对话历史记录)
@@ -118,9 +167,6 @@ def get_crazy_functions():
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(批量生成函数注释)
         },
-        "保存当前的对话": {
-            "Function": HotReload(对话历史存档)
-        },
         "[多线程Demo] 解析此项目本身（源码自译解）": {
             "Function": HotReload(解析项目本身),
             "AsButton": False,  # 加入下拉菜单中
@@ -132,7 +178,8 @@ def get_crazy_functions():
         # },
         "[插件demo] 历史上的今天": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
-            "Function": HotReload(高阶功能模板函数)
+            "Function": HotReload(高阶功能模板函数),
+            "AsButton": False,
         },
 
     }
@@ -152,7 +199,7 @@ def get_crazy_functions():
     function_plugins.update({
         "批量翻译PDF文档（多线程）": {
             "Color": "primary",
-            "AsButton": True,  # 加入下拉菜单中
+            "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(批量翻译PDF文档)
         },
         "询问多个GPT模型": {
@@ -422,8 +469,8 @@ def get_crazy_functions():
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,
-                "ArgsReminder": 
-                    "如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "+ 
+                "ArgsReminder":
+                    "如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "+
                     "例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: " + 'If the term "agent" is used in this section, it should be translated to "智能体". ',
                 "Function": HotReload(Latex翻译中文并重新编译PDF)
             }
@@ -433,8 +480,8 @@ def get_crazy_functions():
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,
-                "ArgsReminder": 
-                    "如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "+ 
+                "ArgsReminder":
+                    "如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "+
                     "例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: " + 'If the term "agent" is used in this section, it should be translated to "智能体". ',
                 "Function": HotReload(Latex翻译中文并重新编译PDF)
             }
@@ -456,4 +503,5 @@ def get_crazy_functions():
     # except:
     #     print('Load function plugin failed')
 
+    ###################### 第n组插件 ###########################
     return function_plugins

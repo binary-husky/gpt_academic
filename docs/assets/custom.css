@@ -11,7 +11,11 @@
 mspace {
     display: block;
 }
-
+@media only screen and (max-width: 767px) {
+  #column_1 {
+    display: none !important;
+  }
+}
 @keyframes highlight {
   0%, 100% {
     border: 2px solid transparent;
@@ -37,7 +41,7 @@ mspace {
     bottom: 0;
     left: 0;
     width: 100%;
-    margin-bottom: 20% !important;
+    margin-bottom: 30% !important;
 }
 #hide_examples {
     z-index: 0;
@@ -77,12 +81,13 @@ mspace {
     height: 10%;
     border-radius: 20px!important;
     min-width: min(10%,100%) !important;
+    overflow: hidden;
 }
 .sm_select {
     position: relative !important;
     z-index: 5 !important;
     bottom: 5px;
-    width: 20% !important;
+    min-width: min(20%,100%) !important;
     border-radius: 20px!important;
 }
 .sm_checkbox {
@@ -115,13 +120,6 @@ mspace {
     min-width: min(50px,100%) !important;
 }
 
-
-#sm_btn {
-    display: flex;
-    flex-wrap: unset !important;
-    gap: 5px !important;
-    width: var(--size-full);
-}
 textarea {
     resize: none;
     height: 100%; /* 填充父元素的高度 */
