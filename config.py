@@ -60,7 +60,9 @@ CONCURRENT_COUNT = 100
 AUTO_CLEAR_TXT = False
 
 # 色彩主体，可选： "Default", "Green"
-THEME = "Green"
+THEME = "Default"
+
+ENABLE_AUDIO = True
 
 # 加一个live2d装饰
 ADD_WAIFU = False
