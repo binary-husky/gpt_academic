@@ -390,6 +390,19 @@ def get_crazy_functions():
     except:
         print('Load function plugin failed')
 
+
+    try:
+        from crazy_functions.辅助面试 import 辅助面试
+        function_plugins.update({
+            "面试助手 [实时音频采集]": {
+                "Color": "stop",
+                "AsButton": False,
+                "Function": HotReload(辅助面试)
+            }
+        })
+    except:
+        print('Load function plugin failed')
+        
     # try:
     #     from crazy_functions.虚空终端 import 终端
     #     function_plugins.update({

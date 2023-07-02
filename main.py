@@ -19,7 +19,7 @@ def main():
     description =  """代码开源和更新[地址🚀](https://github.com/binary-husky/chatgpt_academic)，感谢热情的[开发者们❤️](https://github.com/binary-husky/chatgpt_academic/graphs/contributors)"""
 
     # 问询记录, python 版本建议3.9+（越新越好）
-    import logging
+    import logging, uuid
     os.makedirs("gpt_log", exist_ok=True)
     try:logging.basicConfig(filename="gpt_log/chat_secrets.log", level=logging.INFO, encoding="utf-8")
     except:logging.basicConfig(filename="gpt_log/chat_secrets.log", level=logging.INFO)
@@ -57,7 +57,9 @@ def main():
         cookies = gr.State({'api_key': API_KEY, 'llm_model': LLM_MODEL})
         with gr_L1():
             with gr_L2(scale=2):
-                if ENABLE_AUDIO: audio = gr.Audio(source="microphone", streaming=True)
+                if ENABLE_AUDIO: 
+                    audio_mic = gr.Audio(source="microphone", type="numpy", streaming=True)
+
                 chatbot = gr.Chatbot(label=f"当前模型：{LLM_MODEL}")
                 chatbot.style(height=CHATBOT_HEIGHT)
                 history = gr.State([])
@@ -134,7 +136,6 @@ def main():
         checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn, area_input_primary, area_input_secondary, txt, txt2, clearBtn, clearBtn2, plugin_advanced_arg] )
         # 整理反复出现的控件句柄组合
         input_combo = [cookies, max_length_sl, md_dropdown, txt, txt2, top_p, temperature, chatbot, history, system_prompt, plugin_advanced_arg]
-        if ENABLE_AUDIO: input_combo.append(audio)
         output_combo = [cookies, chatbot, history, status]
         predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=input_combo, outputs=output_combo)
         # 提交按钮、重置按钮
@@ -188,7 +189,18 @@ def main():
         stopBtn.click(fn=None, inputs=None, outputs=None, cancels=cancel_handles)
         stopBtn2.click(fn=None, inputs=None, outputs=None, cancels=cancel_handles)
 
-        demo.load()
+        def init_cookie(cookies, chatbot):
+            # 为每一位访问的用户赋予一个独一无二的uuid编码
+            cookies.update({'uuid': uuid.uuid4()})
+            return cookies
+        demo.load(init_cookie, inputs=[cookies, chatbot], outputs=[cookies])
+
+        if ENABLE_AUDIO: 
+            from crazy_functions.live_audio.audio_io import RealtimeAudioDistribution
+            rad = RealtimeAudioDistribution()
+            def deal_audio(audio, cookies):
+                rad.feed(cookies['uuid'].hex, audio)
+            audio_mic.stream(deal_audio, inputs=[audio_mic, cookies])
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay():

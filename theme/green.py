@@ -73,12 +73,6 @@ def adjust_theme():
             chatbot_code_background_color_dark="*neutral_950",
         )
         js = ''
-        # if ADD_CHUANHU:
-        #     with open("./docs/assets/custom.js", "r", encoding="utf-8") as f, \
-        #             open("./docs/assets/external-scripts.js", "r", encoding="utf-8") as f1:
-        #         customJS = f.read()
-        #         externalScripts = f1.read()
-        #     js += f'<script>{customJS}</script><script async>{externalScripts}</script>'
         # 添加一个萌萌的看板娘
         if ADD_WAIFU:
             js += """
