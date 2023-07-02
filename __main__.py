@@ -415,7 +415,7 @@ class ChatBot(ChatBotFrame):
             # 绘制一个ROW，row会让底下的元素自动排成一行
             with gr.Row().style(justify='between'):
                 # 绘制列1
-                with gr.Column(scale=44, elem_id='colum_1') as self.cloum_1:
+                with gr.Column(scale=44, elem_id='colum_chat') as self.cloum_1:
                     with gr.Tabs() as self.tabs_copilot:
                         # 绘制对话模组
                         with gr.TabItem('Chat-Copilot') as self.Chat_Copilot:
@@ -431,22 +431,21 @@ class ChatBot(ChatBotFrame):
                             self.draw_next_auto()
                             self.draw_goals_auto()
                 # 绘制列2
-                with gr.Column(scale=100):
+                with gr.Column(scale=100, elem_id='colum_func'):
                     with gr.Tabs() as self.tabs_chatbot:
                         with gr.TabItem('Chatbot', id='chatbot') as self.chat_tab:
                             # self.draw_chatbot()
                             pass
                         with gr.TabItem('Prompt检索/编辑') as self.prompt_tab:
                             self.draw_prompt()
-
-                        with gr.Column(visible=False) as self.mobile_column:
-                            with gr.Row():
-                                self.resetBtn = gr.Button("新建对话", variant="primary", elem_id='empty_btn').style(size="sm")
-                                self.stopBtn = gr.Button("中止对话", variant="stop").style(size="sm")
-                            with gr.Tabs() as self.tabs_inputs:
-                                self.draw_function_chat()
-                                self.draw_public_chat()
-                                self.draw_setting_chat()
+                        # with gr.Column(visible=False) as self.mobile_column:
+                        #     with gr.Row():
+                        #         self.resetBtn = gr.Button("新建对话", variant="primary", elem_id='empty_btn').style(size="sm")
+                        #         self.stopBtn = gr.Button("中止对话", variant="stop").style(size="sm")
+                        #     with gr.Tabs() as self.tabs_inputs:
+                        #         self.draw_function_chat()
+                        #         self.draw_public_chat()
+                        #         self.draw_setting_chat()
 
                 with self.chat_tab:  # 使用 gr.State()对组件进行拷贝时，如果之前绘制了Markdown格式，会导致启动崩溃,所以将 markdown相关绘制放在最后
                     self.draw_chatbot()
@@ -466,7 +465,7 @@ class ChatBot(ChatBotFrame):
                            inputs=[self.chatbot, self.history, self.pro_fp_state, adv_plugins],
                            outputs=[self.pro_func_prompt, self.pro_fp_state, self.chatbot,
                                     self.history, self.guidance_plugins, self.guidance_plugins_state,
-                                    self.cloum_1, self.examples_column, self.mobile_column])
+                                    self.cloum_1, self.examples_column])
 
         # Start
         self.auto_opentab_delay()
