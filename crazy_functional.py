@@ -396,7 +396,7 @@ def get_crazy_functions():
         function_plugins.update({
             "面试助手 [实时音频采集]": {
                 "Color": "stop",
-                "AsButton": False,
+                "AsButton": True,
                 "Function": HotReload(辅助面试)
             }
         })

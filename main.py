@@ -58,7 +58,7 @@ def main():
         with gr_L1():
             with gr_L2(scale=2):
                 if ENABLE_AUDIO: 
-                    audio_mic = gr.Audio(source="microphone", type="numpy", streaming=True)
+                    audio_mic = gr.Audio(source="microphone", type="numpy")
 
                 chatbot = gr.Chatbot(label=f"当前模型：{LLM_MODEL}")
                 chatbot.style(height=CHATBOT_HEIGHT)
