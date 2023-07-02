@@ -1,11 +1,11 @@
-from toolbox import update_ui
-from toolbox import CatchException, report_execption, write_results_to_file
+from comm_tools.toolbox import update_ui
+from comm_tools.toolbox import CatchException, report_execption, write_results_to_file
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 fast_debug = False
 
 
 def 解析docx(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
-    import time, os
+    import os
     # pip install python-docx 用于docx格式，跨平台
     # pip install pywin32 用于doc格式，仅支持Win平台
     for index, fp in enumerate(file_manifest):

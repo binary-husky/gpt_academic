@@ -1,4 +1,4 @@
-from toolbox import update_ui, get_conf, trimmed_format_exc
+from comm_tools.toolbox import update_ui, get_conf, trimmed_format_exc
 import threading
 
 def input_clipping(inputs, history, max_token_limit):
@@ -85,7 +85,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
                 if handle_token_exceed:
                     exceeded_cnt += 1
                     # 【选择处理】 尝试计算比例，尽可能多地保留文本
-                    from toolbox import get_reduce_token_percent
+                    from comm_tools.toolbox import get_reduce_token_percent
                     p_ratio, n_exceed = get_reduce_token_percent(str(token_exceeded_error))
                     MAX_TOKEN = 4096
                     EXCEED_ALLO = 512 + 512 * exceeded_cnt
@@ -210,7 +210,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                 if handle_token_exceed:
                     exceeded_cnt += 1
                     # 【选择处理】 尝试计算比例，尽可能多地保留文本
-                    from toolbox import get_reduce_token_percent
+                    from comm_tools.toolbox import get_reduce_token_percent
                     p_ratio, n_exceed = get_reduce_token_percent(str(token_exceeded_error))
                     MAX_TOKEN = 4096
                     EXCEED_ALLO = 512 + 512 * exceeded_cnt
@@ -412,7 +412,6 @@ def read_and_clean_pdf_text(fp):
     import fitz, copy
     import re
     import numpy as np
-    from colorful import print亮黄, print亮绿
     fc = 0  # Index 0 文本
     fs = 1  # Index 1 字体
     fb = 2  # Index 2 框框
@@ -586,7 +585,7 @@ def get_files_from_everything(txt, type): # type='.md'
     if txt.startswith('http'):
         # 网络的远程文件
         import requests
-        from toolbox import get_conf
+        from comm_tools.toolbox import get_conf
         proxies, = get_conf('proxies')
         r = requests.get(txt, proxies=proxies)
         with open('./gpt_log/temp'+type, 'wb+') as f: f.write(r.content)
@@ -635,7 +634,7 @@ class knowledge_archive_interface():
     def get_chinese_text2vec(self):
         if self.text2vec_large_chinese is None:
             # < -------------------预热文本向量化模组--------------- >
-            from toolbox import ProxyNetworkActivate
+            from comm_tools.toolbox import ProxyNetworkActivate
             print('Checking Text2vec ...')
             from langchain.embeddings.huggingface import HuggingFaceEmbeddings
             with ProxyNetworkActivate():    # 临时地激活代理网络
@@ -737,7 +736,7 @@ class construct_html():
     <div class="column table-cell">REPLACE_B</div>
 </div>
         """
-        from toolbox import markdown_convertion
+        from comm_tools.toolbox import markdown_convertion
         tmp = tmp.replace('REPLACE_A', markdown_convertion(a))
         tmp = tmp.replace('REPLACE_B', markdown_convertion(b))
         self.html_string += tmp

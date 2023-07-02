@@ -1,5 +1,5 @@
-from toolbox import update_ui
-from toolbox import CatchException, report_execption, write_results_to_file
+from comm_tools.toolbox import update_ui
+from comm_tools.toolbox import CatchException, report_execption, write_results_to_file
 fast_debug = False
 
 class PaperFileGroup():
@@ -36,7 +36,7 @@ class PaperFileGroup():
         print('Segmentation: done')
 
 def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, language='en'):
-    import time, os, re
+    import time, re
     from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 
     #  <-------- 读取Latex文件，删除其中的所有注释 ----------> 

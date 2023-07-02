@@ -1,6 +1,6 @@
-from toolbox import update_ui
-from toolbox import CatchException, report_execption, write_results_to_file, get_conf
-import re, requests, unicodedata, os
+from comm_tools.toolbox import update_ui
+from comm_tools.toolbox import CatchException, report_execption, write_results_to_file, get_conf
+import re, requests, os
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 def download_arxiv_(url_pdf):
     if 'arxiv.org' not in url_pdf:
@@ -65,7 +65,6 @@ def download_arxiv_(url_pdf):
 
 
 def get_name(_url_):
-    import os
     from bs4 import BeautifulSoup
     print('正在获取文献名！')
     print(_url_)
@@ -135,7 +134,6 @@ def get_name(_url_):
 def 下载arxiv论文并翻译摘要(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
 
     CRAZY_FUNCTION_INFO = "下载arxiv论文并翻译摘要，函数插件作者[binary-husky]。正在提取摘要并下载PDF文档……"
-    import glob
     import os
 
     # 基本信息：功能、贡献者

@@ -1,13 +1,13 @@
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-from toolbox import CatchException, report_execption, write_results_to_file
-from toolbox import update_ui
+from comm_tools.toolbox import CatchException, report_execption, write_results_to_file
+from comm_tools.toolbox import update_ui
 
 def get_meta_information(url, chatbot, history):
     import requests
     import arxiv
     import difflib
     from bs4 import BeautifulSoup
-    from toolbox import get_conf
+    from comm_tools.toolbox import get_conf
     proxies, = get_conf('proxies')
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',

@@ -1,9 +1,8 @@
-import html
 import markdown
 import importlib
 import inspect
 import gradio as gr
-import func_box
+from comm_tools import func_box
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
 import shutil
@@ -119,7 +118,7 @@ def trimmed_format_exc():
     import os, traceback
     str = traceback.format_exc()
     current_path = os.getcwd()
-    replace_path = "."
+    replace_path = ".."
     return str.replace(current_path, replace_path)
 
 def CatchException(f):
@@ -214,7 +213,7 @@ def write_results_to_file(history, file_name=None):
         # file_name = time.strftime("chatGPT分析报告%Y-%m-%d-%H-%M-%S", time.localtime()) + '.md'
         file_name = 'chatGPT分析报告' + \
             time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + '.md'
-    os.makedirs('./gpt_log/', exist_ok=True)
+    os.makedirs('../gpt_log/', exist_ok=True)
     with open(f'./gpt_log/{file_name}', 'w', encoding='utf8') as f:
         f.write('# chatGPT 分析报告\n')
         for i, content in enumerate(history):
@@ -496,7 +495,7 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
     # 将文件复制一份到下载区
     import shutil
     if rename_file is None: rename_file = f'{gen_time_str()}-{os.path.basename(file)}'
-    new_path = os.path.join(f'./gpt_log/', rename_file)
+    new_path = os.path.join(f'../gpt_log/', rename_file)
     if os.path.exists(new_path) and not os.path.samefile(new_path, file): os.remove(new_path)
     if not os.path.exists(new_path): shutil.copyfile(file, new_path)
     if chatbot:
@@ -693,7 +692,7 @@ def read_env_variable(arg, default_value):
 
 @lru_cache(maxsize=128)
 def read_single_conf_with_lru_cache(arg):
-    from colorful import print亮红, print亮绿, print亮蓝
+    from comm_tools.colorful import print亮红, print亮绿, print亮蓝
     try:
         # 优先级1. 获取环境变量作为配置
         default_ref = getattr(importlib.import_module('config'), arg)   # 读取默认值作为数据类型转换的参考
@@ -807,8 +806,7 @@ def clip_history(inputs, history, tokenizer, max_token_limit):
     直到历史记录的标记数量降低到阈值以下。
     """
     import numpy as np
-    from request_llm.bridge_all import model_info
-    def get_token_num(txt): 
+    def get_token_num(txt):
         return len(tokenizer.encode(txt, disallowed_special=()))
     input_token_num = get_token_num(inputs)
     if input_token_num < max_token_limit * 3 / 4:
@@ -891,7 +889,7 @@ def zip_result(folder):
     import time
     t = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
     zip_folder(folder, './gpt_log/', f'{t}-result.zip')
-    return pj('./gpt_log/', f'{t}-result.zip')
+    return pj('../gpt_log/', f'{t}-result.zip')
 
 def gen_time_str():
     import time

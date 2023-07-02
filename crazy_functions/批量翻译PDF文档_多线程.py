@@ -1,9 +1,9 @@
-from toolbox import CatchException, report_execption, write_results_to_file
-from toolbox import update_ui, promote_file_to_downloadzone
+from comm_tools.toolbox import CatchException, report_execption, write_results_to_file
+from comm_tools.toolbox import update_ui, promote_file_to_downloadzone
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 from .crazy_utils import read_and_clean_pdf_text
-from colorful import *
+
 
 @CatchException
 def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys_prompt, web_port):
@@ -59,7 +59,6 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys_
 def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, sys_prompt):
     import os
     import copy
-    import tiktoken
     TOKEN_LIMIT_PER_FRAGMENT = 1280
     generated_conclusion_files = []
     generated_html_files = []
@@ -143,7 +142,7 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
             ch.save_file(create_report_file_name)
             generated_html_files.append(f'./gpt_log/{create_report_file_name}')
         except:
-            from toolbox import trimmed_format_exc
+            from comm_tools.toolbox import trimmed_format_exc
             print('writing html result failed:', trimmed_format_exc())
 
     # 准备文件的下载
@@ -195,7 +194,7 @@ class construct_html():
     <div class="column table-cell">REPLACE_B</div>
 </div>
         """
-        from toolbox import markdown_convertion
+        from comm_tools.toolbox import markdown_convertion
         tmp = tmp.replace('REPLACE_A', markdown_convertion(a))
         tmp = tmp.replace('REPLACE_B', markdown_convertion(b))
         self.html_string += tmp

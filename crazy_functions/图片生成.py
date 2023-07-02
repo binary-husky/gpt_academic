@@ -1,6 +1,4 @@
-from toolbox import CatchException, update_ui, get_conf, select_api_key
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-import datetime
+from comm_tools.toolbox import CatchException, update_ui, get_conf, select_api_key
 
 
 def gen_image(llm_kwargs, prompt, resolution="256x256"):

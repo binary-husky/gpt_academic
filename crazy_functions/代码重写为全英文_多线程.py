@@ -1,7 +1,7 @@
 import threading
 from request_llm.bridge_all import predict_no_ui_long_connection
-from toolbox import update_ui
-from toolbox import CatchException, write_results_to_file, report_execption
+from comm_tools.toolbox import update_ui
+from comm_tools.toolbox import CatchException, write_results_to_file, report_execption
 from .crazy_utils import breakdown_txt_to_satisfy_token_limit
 
 def extract_code_block_carefully(txt):
@@ -38,7 +38,7 @@ def 全项目切换英文(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys_
         return
 
     # 第3步：集合文件
-    import time, glob, os, shutil, re
+    import time, glob, os, shutil
     os.makedirs('gpt_log/generated_english_version', exist_ok=True)
     os.makedirs('gpt_log/generated_english_version/crazy_functions', exist_ok=True)
     file_manifest = [f for f in glob.glob('./*.py') if ('test_project' not in f) and ('gpt_log' not in f)] + \

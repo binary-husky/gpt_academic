@@ -1,5 +1,5 @@
-from toolbox import update_ui, update_ui_lastest_msg    # 刷新Gradio前端界面
-from toolbox import zip_folder, objdump, objload, promote_file_to_downloadzone
+from comm_tools.toolbox import update_ui, update_ui_lastest_msg    # 刷新Gradio前端界面
+from comm_tools.toolbox import objdump, objload, promote_file_to_downloadzone
 import os, shutil
 import re
 import numpy as np
@@ -229,7 +229,6 @@ def merge_tex_files(project_foler, main_file, mode):
         add_url = '\\usepackage{url}\n' if '{url}' not in main_file else ''
         main_file = main_file[:position] + add_ctex + add_url + main_file[position:]
         # fontset=windows
-        import platform
         main_file = re.sub(r"\\documentclass\[(.*?)\]{(.*?)}", r"\\documentclass[\1,fontset=windows,UTF8]{\2}",main_file)
         main_file = re.sub(r"\\documentclass{(.*?)}", r"\\documentclass[fontset=windows,UTF8]{\1}",main_file)
         # find paper abstract
@@ -558,7 +557,7 @@ def write_html(sp_file_contents, sp_file_result, chatbot, project_folder):
     try:
         import shutil
         from .crazy_utils import construct_html
-        from toolbox import gen_time_str
+        from comm_tools.toolbox import gen_time_str
         ch = construct_html() 
         orig = ""
         trans = ""
@@ -577,11 +576,11 @@ def write_html(sp_file_contents, sp_file_result, chatbot, project_folder):
         shutil.copyfile(pj('./gpt_log/', create_report_file_name), pj(project_folder, create_report_file_name))
         promote_file_to_downloadzone(file=f'./gpt_log/{create_report_file_name}', chatbot=chatbot)
     except:
-        from toolbox import trimmed_format_exc
+        from comm_tools.toolbox import trimmed_format_exc
         print('writing html result failed:', trimmed_format_exc())
 
 def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, mode='proofread', switch_prompt=None, opts=[]):
-    import time, os, re
+    import time, os
     from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
     from .latex_utils import LatexPaperFileGroup, merge_tex_files, LatexPaperSplit, 寻找Latex主文件
 

@@ -3,7 +3,7 @@ from transformers import AutoModel, AutoTokenizer
 import time
 import threading
 import importlib
-from toolbox import update_ui, get_conf
+from comm_tools.toolbox import update_ui, get_conf
 from multiprocessing import Process, Pipe
 
 load_message = "ChatGLM尚未加载，加载需要一段时间。注意，取决于`config.py`的配置，ChatGLM消耗大量的内存（CPU）或显存（GPU），也许会导致低配计算机卡死 ……"
@@ -68,7 +68,7 @@ class GetGLMHandle(Process):
                     #     command = self.child.recv()
                     #     if command == '[Terminate]': break
             except:
-                from toolbox import trimmed_format_exc
+                from comm_tools.toolbox import trimmed_format_exc
                 self.child.send('[Local Message] Call ChatGLM fail.' + '\n```\n' + trimmed_format_exc() + '\n```\n')
             # 请求处理结束，开始下一个循环
             self.child.send('[Finish]')
@@ -136,7 +136,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             return
 
     if additional_fn is not None:
-        import core_functional
+        from comm_tools import core_functional
         importlib.reload(core_functional)    # 热更新prompt
         core_functional = core_functional.get_core_functions()
         if "PreProcess" in core_functional[additional_fn]: inputs = core_functional[additional_fn]["PreProcess"](inputs)  # 获取预处理函数（如果有的话）

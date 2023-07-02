@@ -160,7 +160,7 @@ We look forward to connecting with you and hearing your thoughts, ideas, and exp
 **如果喜欢这个项目，请给它一个Star；如果你发明了更好用的快捷键或函数插件，欢迎发pull requests**
 
 If you like this project, please give it a Star. If you've come up with more useful academic shortcuts or functional plugins, feel free to open an issue or pull request. We also have a README in [English|](docs/README_EN.md)[日本語|](docs/README_JP.md)[한국어|](https://github.com/mldljyh/ko_gpt_academic)[Русский|](docs/README_RS.md)[Français](docs/README_FR.md) translated by this project itself.
-To translate this project to arbitary language with GPT, read and run [`multi_language.py`](multi_language.py) (experimental).
+To translate this project to arbitary language with GPT, read and run [`multi_language.py`](comm_tools/multi_language.py) (experimental).
 
 > **Note**
 >

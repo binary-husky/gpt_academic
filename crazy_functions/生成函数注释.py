@@ -1,5 +1,5 @@
-from toolbox import update_ui
-from toolbox import CatchException, report_execption, write_results_to_file
+from comm_tools.toolbox import update_ui
+from comm_tools.toolbox import CatchException, report_execption, write_results_to_file
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 fast_debug = False
 

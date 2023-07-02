@@ -10,8 +10,8 @@ import requests
 import sys
 job_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(job_path)
-import func_box
-from toolbox import get_conf, update_ui
+from comm_tools import func_box
+from comm_tools.toolbox import get_conf
 from openpyxl import load_workbook
 import urllib.parse
 

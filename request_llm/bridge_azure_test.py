@@ -17,7 +17,7 @@ import time
 
 
 # 读取config.py文件中关于AZURE OPENAI API的信息
-from toolbox import get_conf, update_ui, clip_history, trimmed_format_exc
+from comm_tools.toolbox import get_conf, update_ui, trimmed_format_exc
 TIMEOUT_SECONDS, MAX_RETRY, AZURE_ENGINE, AZURE_ENDPOINT, AZURE_API_VERSION, AZURE_API_KEY = \
     get_conf('TIMEOUT_SECONDS', 'MAX_RETRY',"AZURE_ENGINE","AZURE_ENDPOINT", "AZURE_API_VERSION", "AZURE_API_KEY")
 
@@ -46,7 +46,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     print(llm_kwargs["llm_model"])    
 
     if additional_fn is not None:
-        import core_functional
+        from comm_tools import core_functional
         importlib.reload(core_functional)    # 热更新prompt
         core_functional = core_functional.get_core_functions()
         if "PreProcess" in core_functional[additional_fn]: inputs = core_functional[additional_fn]["PreProcess"](inputs)  # 获取预处理函数（如果有的话）
@@ -90,7 +90,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                 chunk = next(stream_response)
                     
             except StopIteration:                
-                from toolbox import regular_txt_to_markdown; tb_str = '```\n' + trimmed_format_exc() + '```'
+                from comm_tools.toolbox import regular_txt_to_markdown; tb_str = '```\n' + trimmed_format_exc() + '```'
                 chatbot[-1] = (chatbot[-1][0], f"[Local Message] 远程返回错误: \n\n{tb_str} \n\n{regular_txt_to_markdown(chunk)}")
                 yield from update_ui(chatbot=chatbot, history=history, msg="远程返回错误:" + chunk) # 刷新界面
                 return            

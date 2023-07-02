@@ -1,5 +1,5 @@
-from toolbox import update_ui
-from toolbox import CatchException, report_execption, write_results_to_file
+from comm_tools.toolbox import update_ui
+from comm_tools.toolbox import CatchException, report_execption, write_results_to_file
 import re
 import unicodedata
 fast_debug = False
@@ -59,7 +59,7 @@ def clean_text(raw_text):
     return final_text.strip()
 
 def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
-    import time, glob, os, fitz
+    import time, os, fitz
     print('begin analysis on:', file_manifest)
     for index, fp in enumerate(file_manifest):
         with fitz.open(fp) as doc:

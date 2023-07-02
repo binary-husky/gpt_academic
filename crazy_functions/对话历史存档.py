@@ -1,5 +1,4 @@
-from toolbox import CatchException, update_ui, promote_file_to_downloadzone
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from comm_tools.toolbox import CatchException, update_ui, promote_file_to_downloadzone
 import re
 
 def write_chat_to_file(chatbot, history=None, file_name=None):
@@ -12,7 +11,7 @@ def write_chat_to_file(chatbot, history=None, file_name=None):
         file_name = 'chatGPT对话历史' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + '.html'
     os.makedirs('./gpt_log/', exist_ok=True)
     with open(f'./gpt_log/{file_name}', 'w', encoding='utf8') as f:
-        from theme import advanced_css
+        from comm_tools.theme import advanced_css
         f.write(f'<!DOCTYPE html><head><meta charset="utf-8"><title>对话历史</title><style>{advanced_css}</style></head>')
         for i, contents in enumerate(chatbot):
             for j, content in enumerate(contents):

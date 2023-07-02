@@ -1,7 +1,5 @@
-from toolbox import CatchException, update_ui, gen_time_str
+from comm_tools.toolbox import CatchException, update_ui
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-from .crazy_utils import input_clipping
-
 
 prompt = """
 I have to achieve some functionalities by calling one of the functions below.
@@ -68,7 +66,7 @@ def inspect_dependency(chatbot, history):
     return True
 
 def eval_code(code, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    import subprocess, sys, os, shutil, importlib
+    import importlib
 
     with open('gpt_log/void_terminal_runtime.py', 'w', encoding='utf8') as f:
         f.write(code)
@@ -83,7 +81,7 @@ def eval_code(code, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, 
         fn_plugin = getattr(importlib.import_module(fp, fn), fn)
         yield from fn_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
     except:
-        from toolbox import trimmed_format_exc
+        from comm_tools.toolbox import trimmed_format_exc
         chatbot.append(["执行错误", f"\n```\n{trimmed_format_exc()}\n```\n"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 

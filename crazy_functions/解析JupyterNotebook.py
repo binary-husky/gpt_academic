@@ -1,5 +1,5 @@
-from toolbox import update_ui
-from toolbox import CatchException, report_execption, write_results_to_file
+from comm_tools.toolbox import update_ui
+from comm_tools.toolbox import CatchException, report_execption, write_results_to_file
 fast_debug = True
 
 

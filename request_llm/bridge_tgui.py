@@ -8,11 +8,10 @@ import json
 import random
 import string
 import websockets
-import logging
 import time
 import threading
 import importlib
-from toolbox import get_conf, update_ui
+from comm_tools.toolbox import update_ui
 
 
 def random_hash():
@@ -96,7 +95,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         additional_fn代表点击的哪个按钮，按钮见functional.py
     """
     if additional_fn is not None:
-        import core_functional
+        from comm_tools import core_functional
         importlib.reload(core_functional)    # 热更新prompt
         core_functional = core_functional.get_core_functions()
         if "PreProcess" in core_functional[additional_fn]: inputs = core_functional[additional_fn]["PreProcess"](inputs)  # 获取预处理函数（如果有的话）

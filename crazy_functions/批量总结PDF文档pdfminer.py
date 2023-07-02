@@ -1,5 +1,5 @@
-from toolbox import update_ui
-from toolbox import CatchException, report_execption, write_results_to_file
+from comm_tools.toolbox import update_ui
+from comm_tools.toolbox import CatchException, report_execption, write_results_to_file
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 
 fast_debug = False
@@ -13,7 +13,6 @@ def readPdf(pdfPath):
     from pdfminer.pdfdocument import PDFDocument
     from pdfminer.pdfpage import PDFPage, PDFTextExtractionNotAllowed
     from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
-    from pdfminer.pdfdevice import PDFDevice
     from pdfminer.layout import LAParams
     from pdfminer.converter import PDFPageAggregator
 
@@ -63,7 +62,7 @@ def readPdf(pdfPath):
 
 
 def 解析Paper(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
-    import time, glob, os
+    import time, os
     from bs4 import BeautifulSoup
     print('begin analysis on:', file_manifest)
     for index, fp in enumerate(file_manifest):

@@ -1,5 +1,7 @@
+import os.path
+from comm_tools import func_box
 import gradio as gr
-from toolbox import get_conf
+from comm_tools.toolbox import get_conf
 CODE_HIGHLIGHT, ADD_WAIFU, ADD_CHUANHU = get_conf('CODE_HIGHLIGHT', 'ADD_WAIFU', 'ADD_CHUANHU')
 # gradio可用颜色列表
 # gr.themes.utils.colors.slate (石板色)
@@ -27,7 +29,6 @@ CODE_HIGHLIGHT, ADD_WAIFU, ADD_CHUANHU = get_conf('CODE_HIGHLIGHT', 'ADD_WAIFU',
 
 
 def adjust_theme():
-
     try:
         set_theme = gr.themes.Soft(
             primary_hue=gr.themes.Color(
@@ -99,8 +100,8 @@ def adjust_theme():
         )
         js = ''
         if ADD_CHUANHU:
-            with open("./docs/assets/custom.js", "r", encoding="utf-8") as f, \
-                    open("./docs/assets/external-scripts.js", "r", encoding="utf-8") as f1:
+            with open(os.path.join(func_box.base_path, "docs/assets/custom.js"), "r", encoding="utf-8") as f, \
+                    open(os.path.join(func_box.base_path, "docs/assets/external-scripts.js"), "r", encoding="utf-8") as f1:
                 customJS = f.read()
                 externalScripts = f1.read()
             js += f'<script>{customJS}</script><script async>{externalScripts}</script>'
@@ -124,7 +125,7 @@ def adjust_theme():
     return set_theme
 
 
-with open("docs/assets/custom.css", "r", encoding="utf-8") as f:
+with open(os.path.join(func_box.base_path, 'docs/assets/custom.css'), "r", encoding="utf-8") as f:
     customCSS = f.read()
 custom_css = customCSS
 advanced_css = """

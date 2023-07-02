@@ -1,4 +1,4 @@
-from toolbox import CatchException, update_ui, ProxyNetworkActivate
+from comm_tools.toolbox import CatchException, update_ui, ProxyNetworkActivate
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, get_files_from_everything
 
 

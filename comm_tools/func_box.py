@@ -4,13 +4,10 @@
 # @Author : Spike
 # @Descr   :
 import ast
-import copy
 import hashlib
-import io
 import json
 import os.path
 import subprocess
-import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 import Levenshtein
@@ -18,10 +15,8 @@ import psutil
 import re
 import tempfile
 import shutil
-from contextlib import ExitStack
 import logging
 import yaml
-import requests
 import tiktoken
 logger = logging
 from sklearn.feature_extraction.text import CountVectorizer
@@ -30,8 +25,8 @@ from scipy.linalg import norm
 import pyperclip
 import random
 import gradio as gr
-import toolbox
-from prompt_generator import SqliteHandle
+from comm_tools import toolbox
+from comm_tools.prompt_generator import SqliteHandle
 from bs4 import BeautifulSoup
 import copy
 
@@ -548,10 +543,10 @@ def thread_write_chat(chatbot, history):
         SqliteHandle(f'ai_common_{chat_title[-2]}').inset_prompt({i_say: gpt_result})
 
 
-base_path = os.path.dirname(__file__)
-prompt_path = os.path.join(base_path, 'users_data')
-users_path = os.path.join(base_path, 'private_upload')
-logs_path = os.path.join(base_path, 'gpt_log')
+base_path = os.path.dirname(os.path.dirname(__file__))
+prompt_path = os.path.join(base_path, '../users_data')
+users_path = os.path.join(base_path, '../private_upload')
+logs_path = os.path.join(base_path, '../gpt_log')
 
 def reuse_chat(result, chatbot, history, pro_numb, say):
     """复用对话记录"""
@@ -692,7 +687,7 @@ def update_txt(self,
 
 
 def get_html(filename):
-    path = os.path.join(base_path, "docs/assets", "html", filename)
+    path = os.path.join(base_path, "../docs/assets", "html", filename)
     if os.path.exists(path):
         with open(path, encoding="utf8") as file:
             return file.read()
@@ -705,7 +700,9 @@ def git_log_list():
     return [i.split('|') for i in ll if 'branch' not in i][:5]
 
 import qrcode
-from PIL import Image, ImageDraw
+from PIL import Image
+
+
 def qr_code_generation(data, icon_path=None, file_name='qc_icon.png'):
     # 创建qrcode对象
     qr = qrcode.QRCode(version=2, error_correction=qrcode.constants.ERROR_CORRECT_Q, box_size=10, border=2,)
@@ -718,7 +715,7 @@ def qr_code_generation(data, icon_path=None, file_name='qc_icon.png'):
     img_w, img_h = img.size
     # 打开logo
     if not icon_path:
-        icon_path = os.path.join(base_path, 'docs/assets/PLAI.jpeg')
+        icon_path = os.path.join(base_path, '../docs/assets/PLAI.jpeg')
     logo = Image.open(icon_path)
     # logo大小为二维码的四分之一
     logo_w = img_w // 4

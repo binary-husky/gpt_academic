@@ -16,9 +16,8 @@ validate_path() # validate path so you can run from base directory
 
 # ==============================================================================================================================
 
-from colorful import *
-from toolbox import get_conf, ChatBotWithCookies
-import contextlib
+from comm_tools.colorful import *
+from comm_tools.toolbox import get_conf, ChatBotWithCookies
 import os
 import sys
 from functools import wraps
@@ -180,7 +179,7 @@ def test_Langchain知识库读取():
         cli_printer.print(cb)   #  print(cb)
 
 def test_Latex():
-    from crazy_functions.Latex输出PDF结果 import Latex英文纠错加PDF对比, Latex翻译中文并重新编译PDF
+    from crazy_functions.Latex输出PDF结果 import Latex翻译中文并重新编译PDF
 
     # txt = r"https://arxiv.org/abs/1706.03762"
     # txt = r"https://arxiv.org/abs/1902.03185"

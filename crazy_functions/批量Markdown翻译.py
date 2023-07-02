@@ -1,5 +1,5 @@
-from toolbox import update_ui, trimmed_format_exc, gen_time_str
-from toolbox import CatchException, report_execption, write_results_to_file
+from comm_tools.toolbox import update_ui, trimmed_format_exc, gen_time_str
+from comm_tools.toolbox import CatchException, report_execption, write_results_to_file
 fast_debug = False
 
 class PaperFileGroup():
@@ -48,7 +48,7 @@ class PaperFileGroup():
         return manifest
 
 def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, language='en'):
-    import time, os, re
+    import time
     from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 
     #  <-------- 读取Markdown文件，删除其中的所有注释 ----------> 
@@ -118,7 +118,7 @@ def get_files_from_everything(txt):
         txt = txt.replace("https://github.com/", "https://raw.githubusercontent.com/")
         txt = txt.replace("/blob/", "/")
         import requests
-        from toolbox import get_conf
+        from comm_tools.toolbox import get_conf
         proxies, = get_conf('proxies')
         r = requests.get(txt, proxies=proxies)
         with open('./gpt_log/temp.md', 'wb+') as f: f.write(r.content)

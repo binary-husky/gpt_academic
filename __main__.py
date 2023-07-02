@@ -1,19 +1,19 @@
 import os
 import gradio as gr
 from request_llm.bridge_all import predict
-from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_user_upload, \
-    get_conf, ArgsGeneralWrapper, DummyWith
+from comm_tools.toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_user_upload, \
+    get_conf, ArgsGeneralWrapper
 
 # 问询记录, python 版本建议3.9+（越新越好）
 import logging
 
 # 一些普通功能模块
-from core_functional import get_core_functions
+from comm_tools.core_functional import get_core_functions
 
 functional = get_core_functions()
 
 # 高级函数插件
-from crazy_functional import get_crazy_functions
+from comm_tools.crazy_functional import get_crazy_functions
 
 crazy_fns = get_crazy_functions()
 
@@ -21,16 +21,16 @@ crazy_fns = get_crazy_functions()
 gr.Chatbot.postprocess = format_io
 
 # 做一些外观色彩上的调整
-from theme import adjust_theme, advanced_css, custom_css
+from comm_tools.theme import adjust_theme, custom_css
 
 set_theme = adjust_theme()
 
 # 代理与自动更新
-from check_proxy import check_proxy, auto_update, warm_up_modules
+from comm_tools.check_proxy import check_proxy, auto_update
 
-import func_box
+from comm_tools import func_box
 
-from check_proxy import get_current_version
+from comm_tools.check_proxy import get_current_version
 
 os.makedirs("gpt_log", exist_ok=True)
 try:
@@ -185,9 +185,9 @@ class ChatBot(ChatBotFrame):
                                        self.pro_private_check],
                                outputs=[self.pro_prompt_list, self.pro_prompt_state])
         self.pro_search_txt.submit(fn=func_box.draw_results,
-                                 inputs=[self.pro_search_txt, self.pro_prompt_state, self.pro_tf_slider,
+                                   inputs=[self.pro_search_txt, self.pro_prompt_state, self.pro_tf_slider,
                                          self.pro_private_check],
-                                 outputs=[self.pro_prompt_list, self.pro_prompt_state])
+                                   outputs=[self.pro_prompt_list, self.pro_prompt_state])
         self.pro_entry_btn.click(fn=func_box.draw_results,
                                  inputs=[self.pro_search_txt, self.pro_prompt_state, self.pro_tf_slider,
                                          self.pro_private_check],

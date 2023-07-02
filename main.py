@@ -4,7 +4,7 @@ def main():
     import gradio as gr
     if gr.__version__ not in ['3.28.3','3.32.2']: assert False, "需要特殊依赖，请务必用 pip install -r requirements.txt 指令安装依赖，详情信息见requirements.txt"
     from request_llm.bridge_all import predict
-    from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, DummyWith
+    from comm_tools.toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, DummyWith
     # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
     proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT, API_KEY, AVAIL_LLM_MODELS, AUTO_CLEAR_TXT = \
         get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'LAYOUT', 'API_KEY', 'AVAIL_LLM_MODELS', 'AUTO_CLEAR_TXT')
@@ -13,7 +13,7 @@ def main():
     PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
     if not AUTHENTICATION: AUTHENTICATION = None
 
-    from check_proxy import get_current_version
+    from comm_tools.check_proxy import get_current_version
     initial_prompt = "Serve me as a writing and programming assistant."
     title_html = f"<h1 align=\"center\">ChatGPT 学术优化 {get_current_version()}</h1>"
     description =  """代码开源和更新[地址🚀](https://github.com/binary-husky/chatgpt_academic)，感谢热情的[开发者们❤️](https://github.com/binary-husky/chatgpt_academic/graphs/contributors)"""
@@ -26,22 +26,22 @@ def main():
     print("所有问询记录将自动保存在本地目录./gpt_log/chat_secrets.log, 请注意自我隐私保护哦！")
 
     # 一些普通功能模块
-    from core_functional import get_core_functions
+    from comm_tools.core_functional import get_core_functions
     functional = get_core_functions()
 
     # 高级函数插件
-    from crazy_functional import get_crazy_functions
+    from comm_tools.crazy_functional import get_crazy_functions
     crazy_fns = get_crazy_functions()
 
     # 处理markdown文本格式的转变
     gr.Chatbot.postprocess = format_io
 
     # 做一些外观色彩上的调整
-    from theme import adjust_theme, advanced_css
+    from comm_tools.theme import adjust_theme, advanced_css
     set_theme = adjust_theme()
 
     # 代理与自动更新
-    from check_proxy import check_proxy, auto_update, warm_up_modules
+    from comm_tools.check_proxy import check_proxy, auto_update, warm_up_modules
     proxy_info = check_proxy(proxies)
 
     gr_L1 = lambda: gr.Row().style()

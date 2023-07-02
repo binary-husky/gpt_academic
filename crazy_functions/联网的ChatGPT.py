@@ -1,4 +1,4 @@
-from toolbox import CatchException, update_ui
+from comm_tools.toolbox import CatchException, update_ui
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, input_clipping
 import requests
 from bs4 import BeautifulSoup
@@ -71,7 +71,7 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
 
     # ------------- < 第1步：爬取搜索引擎的结果 > -------------
-    from toolbox import get_conf
+    from comm_tools.toolbox import get_conf
     proxies, = get_conf('proxies')
     urls = google(txt, proxies)
     history = []

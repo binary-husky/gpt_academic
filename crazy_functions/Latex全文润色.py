@@ -1,5 +1,5 @@
-from toolbox import update_ui, trimmed_format_exc
-from toolbox import CatchException, report_execption, write_results_to_file, zip_folder
+from comm_tools.toolbox import update_ui, trimmed_format_exc
+from comm_tools.toolbox import CatchException, report_execption, write_results_to_file, zip_folder
 
 
 class PaperFileGroup():
@@ -55,7 +55,7 @@ class PaperFileGroup():
 
 
 def 多文件润色(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, language='en', mode='polish'):
-    import time, os, re
+    import time, re
     from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 
 

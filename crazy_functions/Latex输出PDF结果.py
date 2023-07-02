@@ -1,5 +1,5 @@
-from toolbox import update_ui, trimmed_format_exc, get_conf, objdump, objload, promote_file_to_downloadzone
-from toolbox import CatchException, report_execption, update_ui_lastest_msg, zip_result, gen_time_str
+from comm_tools.toolbox import update_ui, trimmed_format_exc, get_conf, promote_file_to_downloadzone
+from comm_tools.toolbox import CatchException, report_execption, update_ui_lastest_msg, zip_result, gen_time_str
 from functools import partial
 import glob, os, requests, time
 pj = os.path.join
@@ -135,7 +135,7 @@ def arxiv_download(chatbot, history, txt):
             f.write(r.content)
     # <-------------- extract file ------------->
     yield from update_ui_lastest_msg("下载完成", chatbot=chatbot, history=history)  # 刷新界面
-    from toolbox import extract_archive
+    from comm_tools.toolbox import extract_archive
     extract_archive(file_path=dst, dest_dir=extract_dst)
     return extract_dst, arxiv_id
 # ========================================= 插件主程序1 =====================================================    

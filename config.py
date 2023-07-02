@@ -7,7 +7,7 @@ switch_model = {'key': ['input加密', '隐私模式'], 'value': ['input加密']
 
 private_key = 'uhA51pHtjisfjij'
 
-import func_box
+from comm_tools import func_box
 import os
 devs_document = "/file="+os.path.join(func_box.base_path, 'README.md')
 

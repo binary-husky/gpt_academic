@@ -3,16 +3,14 @@
 # @Time   : 2023/6/15
 # @Author : Spike
 # @Descr   :
-import json
 import time
 
-import func_box
 from crazy_functions import crazy_box
-from toolbox import update_ui, trimmed_format_exc
-from toolbox import CatchException, report_execption, write_results_to_file, zip_folder
+from comm_tools.toolbox import update_ui
+from comm_tools.toolbox import CatchException
 from crazy_functions import crazy_utils
 from request_llm import bridge_all
-import prompt_generator
+from comm_tools import prompt_generator, func_box
 import traceback
 
 
@@ -107,7 +105,7 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     inputs_show_user_array = []
     kwargs_prompt, = crazy_box.json_args_return(plugin_kwargs, ['prompt'])
     if default_prompt: kwargs_prompt = default_prompt
-    chatbot.append([f'接下来使用的Prompt是 {func_box.html_tag_color(kwargs_prompt)} ，你可以在Prompt编辑/检索中进行私人定制哦～',None])
+    chatbot.append([f'接下来使用的Prompt是 {func_box.html_tag_color(kwargs_prompt)} ，你可以在Prompt编辑/检索中进行私人定制哦～', None])
     time.sleep(1)
     prompt = prompt_generator.SqliteHandle(table=f'prompt_{llm_kwargs["ipaddr"]}').find_prompt_result(kwargs_prompt)
     for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
@@ -215,10 +213,10 @@ def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
     for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
         chatbot.append([None, f'{long_name_processing(you_say)} 🏃🏻‍正在努力将Markdown转换为流程图~'])
         md, html = crazy_box.Utils().markdown_to_flow_chart(data=inputs, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(you_say))
-        chatbot.append(("View: "+func_box.html_view_blank(md), f'{func_box.html_iframe_code(html_file=html)}'
+        chatbot.append(("View: " + func_box.html_view_blank(md), f'{func_box.html_iframe_code(html_file=html)}'
                                                                f'tips: 双击空白处可以放大～'
                                                                f'\n\n--- \n\n Download: {func_box.html_download_blank(html)}' 
-                                                              '\n\n--- \n\n View: '+func_box.html_view_blank(html)))
+                                                              '\n\n--- \n\n View: ' + func_box.html_view_blank(html)))
         yield from update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
 
 @CatchException

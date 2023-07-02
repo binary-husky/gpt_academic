@@ -13,13 +13,12 @@ load_message = "等待NewBing响应。"
 ========================================================================
 """
 import time
-import json
 import re
 import logging
 import asyncio
 import importlib
 import threading
-from toolbox import update_ui, get_conf, trimmed_format_exc
+from comm_tools.toolbox import update_ui, get_conf, trimmed_format_exc
 from multiprocessing import Process, Pipe
 
 def preprocess_newbing_out(s):
@@ -219,7 +218,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             return
 
     if additional_fn is not None:
-        import core_functional
+        from comm_tools import core_functional
         importlib.reload(core_functional)    # 热更新prompt
         core_functional = core_functional.get_core_functions()
         if "PreProcess" in core_functional[additional_fn]: inputs = core_functional[additional_fn]["PreProcess"](inputs)  # 获取预处理函数（如果有的话）

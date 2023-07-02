@@ -316,7 +316,7 @@ def step_1_core_key_translate():
                     chinese_characters.extend(extract_chinese_characters(file_path))
         return chinese_characters
 
-    directory_path = './'
+    directory_path = '../'
     chinese_core_names = extract_chinese_characters_from_directory(directory_path)
     chinese_core_keys = [name for name in chinese_core_names]
     chinese_core_keys_norepeat = []
@@ -351,7 +351,7 @@ def step_1_core_key_translate():
         except: pass
         os.makedirs(f'./multi-language', exist_ok=True)
         backup_dir = f'./multi-language/{LANG}/'
-        shutil.copytree('./', backup_dir, ignore=lambda x, y: blacklist)
+        shutil.copytree('../', backup_dir, ignore=lambda x, y: blacklist)
     copy_source_code()
 
     # ===============================================

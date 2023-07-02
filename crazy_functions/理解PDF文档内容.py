@@ -1,12 +1,11 @@
-from toolbox import update_ui
-from toolbox import CatchException, report_execption
+from comm_tools.toolbox import update_ui
+from comm_tools.toolbox import CatchException, report_execption
 from .crazy_utils import read_and_clean_pdf_text
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 fast_debug = False
 
 
 def 解析PDF(file_name, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
-    import tiktoken
     print('begin analysis on:', file_name)
 
     ############################## <第 0 步，切割PDF> ##################################

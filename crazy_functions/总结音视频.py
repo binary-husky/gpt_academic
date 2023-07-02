@@ -1,4 +1,4 @@
-from toolbox import CatchException, report_execption, select_api_key, update_ui, write_results_to_file, get_conf
+from comm_tools.toolbox import CatchException, report_execption, select_api_key, update_ui, write_results_to_file, get_conf
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 
 def split_audio_file(filename, split_duration=1000):
