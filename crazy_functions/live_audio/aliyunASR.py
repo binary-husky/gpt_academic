@@ -1,7 +1,35 @@
-import time, threading
+import time, threading, json
 
 
 class AliyunASR():
+
+    def test_on_sentence_begin(self, message, *args):
+        print("test_on_sentence_begin:{}".format(message))
+
+    def test_on_sentence_end(self, message, *args):
+        print("test_on_sentence_end:{}".format(message))
+        message = json.loads(message)
+        self.parsed_sentence = message['payload']['result']
+        self.event_on_entence_end.set()
+
+    def test_on_start(self, message, *args):
+        print("test_on_start:{}".format(message))
+
+    def test_on_error(self, message, *args):
+        print("on_error args=>{}".format(args))
+
+    def test_on_close(self, *args):
+        print("on_close: args=>{}".format(args))
+
+    def test_on_result_chg(self, message, *args):
+        print("test_on_chg:{}".format(message))
+        message = json.loads(message)
+        self.parsed_text = message['payload']['result']
+        self.event_on_result_chg.set()
+
+    def test_on_completed(self, message, *args):
+        print("on_completed:args=>{} message=>{}".format(args, message))
+
 
     def audio_convertion_thread(self, uuid):
         # 在一个异步线程中采集音频
