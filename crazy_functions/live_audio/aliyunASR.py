@@ -34,17 +34,17 @@ class AliyunASR():
     def audio_convertion_thread(self, uuid):
         # 在一个异步线程中采集音频
         import nls  # pip install git+https://github.com/aliyun/alibabacloud-nls-python-sdk.git
-        from scipy import io
-        from .audio_io import change_sample_rate
-        NEW_SAMPLERATE = 16000
-        from .audio_io import RealtimeAudioDistribution
-        rad = RealtimeAudioDistribution()
         import tempfile
+        from scipy import io
+        from toolbox import get_conf
+        from .audio_io import change_sample_rate
+        from .audio_io import RealtimeAudioDistribution
+        NEW_SAMPLERATE = 16000
+        rad = RealtimeAudioDistribution()
         temp_folder = tempfile.gettempdir()
+        TOKEN, APPKEY = get_conf('ALIYUN_TOKEN', 'ALIYUN_APPKEY')
 
         URL="wss://nls-gateway.cn-shanghai.aliyuncs.com/ws/v1"
-        TOKEN="f37f30e0f9934c34a992f6f64f7eba4f"    # 参考https://help.aliyun.com/document_detail/450255.html获取token
-        APPKEY="RoPlZrM88DnAFkZK"                   # 获取Appkey请前往控制台：https://nls-portal.console.aliyun.com/applist
         sr = nls.NlsSpeechTranscriber(
                     url=URL,
                     token=TOKEN,

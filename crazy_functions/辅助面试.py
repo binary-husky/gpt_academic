@@ -1,5 +1,5 @@
 from toolbox import update_ui
-from toolbox import CatchException, report_execption, write_results_to_file
+from toolbox import CatchException, get_conf, write_results_to_file
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from request_llm.bridge_all import predict_no_ui_long_connection
 import threading, time
@@ -107,6 +107,21 @@ def 辅助面试(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     # pip install -U openai-whisper
     chatbot.append(["函数插件功能：辅助面试", "辅助面试助手, 正在监听音频 ..."])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+
+    # 尝试导入依赖，如果缺少依赖，则给出安装建议
+    try:
+        import nls
+        from scipy import io
+    except:
+        chatbot.append(["导入依赖失败", "使用该模块需要额外依赖, 安装方法:```pip install scipy git+https://github.com/aliyun/alibabacloud-nls-python-sdk.git```"])
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+        return
+
+    TOKEN, APPKEY = get_conf('ALIYUN_TOKEN', 'ALIYUN_APPKEY')
+    if TOKEN == "" or APPKEY == "":
+        chatbot.append(["导入依赖失败", "没有阿里云语音识别APPKEY和TOKEN, 详情见https://help.aliyun.com/document_detail/450255.html"])
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+        return
 
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
     ia = InterviewAssistant()
