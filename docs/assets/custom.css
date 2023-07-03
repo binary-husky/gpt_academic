@@ -53,7 +53,7 @@ mspace {
     bottom: 0;
     left: 0;
     z-index: 1; /* 设置更高的 z-index 值 */
-    margin-bottom: -6px !important;
+    margin-bottom: -2% !important;
     align-self: flex-end;
 }
 #chat_box {
@@ -144,11 +144,6 @@ textarea {
     backface-visibility: hidden !important;
     will-change: transform !important;
 }
-#colum_func {
-}
-#colum_chat {
-}
-
 #prompt_result{
     height: 60vh !important;
     max-height: 60vh !important;
@@ -506,7 +501,6 @@ ol:not(.options), ul:not(.options) {
     line-height: var(--line-md) !important;
     min-height: calc(var(--text-md)*var(--line-md) + 2*var(--spacing-xl));
     min-width: calc(var(--text-md)*var(--line-md) + 2*var(--spacing-xl));
-    scroll-behavior: auto;
 }
 [data-testid = "bot"] {
     max-width: 85%;
@@ -549,16 +543,12 @@ ol:not(.options), ul:not(.options) {
     cursor: pointer !important;
     transition: color .2s ease, background-color .2s ease;
 }
-.user .chuanhu-btn {
-    left: -22px;
-}
-
 .chuanhu-btn:hover {
-    /*background-color: rgba(167, 167, 167, 0.25) !important;*/
+    background-color: rgba(167, 167, 167, 0.25) !important;
     color: unset !important;
 }
 .chuanhu-btn:active {
-    /*background-color: rgba(167, 167, 167, 0.5) !important;*/
+    background-color: rgba(167, 167, 167, 0.5) !important;
 }
 .chuanhu-btn:focus {
     outline: none;

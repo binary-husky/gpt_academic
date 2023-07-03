@@ -76,16 +76,15 @@ function gradioLoaded(mutations) {
                 if (!usernameGotten) {
                     getUserInfo();
                 }
-                setTimeout(showOrHideUserInfo(), 2000);
             }
             if (chatbot) {  // chatbot 加载出来了没?
                 setChatbotHeight();
             }
-            // if (chatbotWrap) {
-            //     if (!historyLoaded) {
-            //     }
-            //     setChatbotScroll();
-            // }
+            if (chatbotWrap) {
+                if (!historyLoaded) {
+                }
+                setChatbotScroll();
+            }
         }
     }
 }
@@ -304,38 +303,19 @@ function addChuanhuButton(botElement) {
     copyButton.classList.add('copy-bot-btn');
     copyButton.setAttribute('aria-label', 'Copy');
     copyButton.innerHTML = copyIcon;
-    copyButton.addEventListener('click', async () => {
+    copyButton.addEventListener('click', () => {
         const textToCopy = rawMessage.innerText;
-
-        try {
-            if ("clipboard" in navigator) {
-                await navigator.clipboard.writeText(textToCopy);
+        navigator.clipboard
+            .writeText(textToCopy)
+            .then(() => {
                 copyButton.innerHTML = copiedIcon;
                 setTimeout(() => {
                     copyButton.innerHTML = copyIcon;
                 }, 1500);
-            } else {
-                const textArea = document.createElement("textarea");
-                textArea.value = textToCopy;
-
-                document.body.appendChild(textArea);
-                textArea.select();
-
-                try {
-                    document.execCommand('copy');
-                    copyButton.innerHTML = copiedIcon;
-                    setTimeout(() => {
-                        copyButton.innerHTML = copyIcon;
-                    }, 1500);
-                } catch (error) {
-                    console.error("Copy failed: ", error);
-                }
-
-                document.body.removeChild(textArea);
-            }
-        } catch (error) {
-            console.error("Copy failed: ", error);
-        }
+            })
+            .catch(() => {
+                console.error("copy failed");
+            });
     });
     botElement.appendChild(copyButton);
 
@@ -376,51 +356,34 @@ let timeoutId;
 let isThrottled = false;
 var mmutation
 // 监听所有元素中 bot message 的变化，为 bot 消息添加复制按钮。
-var mObserver = new MutationObserver(function(mutationsList) {
-  for (mmutation of mutationsList) {
-    if (mmutation.type === 'childList') {
-      for (var node of mmutation.addedNodes) {
-        if (
-          node.nodeType === 1 &&
-          node.classList.contains('message') &&
-          (node.getAttribute('data-testid') === 'bot' || node.getAttribute('data-testid') === 'user')
-        ) {
-          document.querySelectorAll('#main_chatbot > .wrap > .message-wrap .message.bot, #main_chatbot > .wrap > .message-wrap .message.user')
-            .forEach(addChuanhuButton);
+var mObserver = new MutationObserver(function (mutationsList) {
+    for (mmutation of mutationsList) {
+        if (mmutation.type === 'childList') {
+            for (var node of mmutation.addedNodes) {
+                if (node.nodeType === 1 && node.classList.contains('message') && node.getAttribute('data-testid') === 'bot') {
+                    document.querySelectorAll('#main_chatbot>.wrap>.message-wrap .message.bot').forEach(addChuanhuButton);
+                }
+                if (node.tagName === 'INPUT' && node.getAttribute('type') === 'range') {
+                    setSlider();
+                }
+            }
+            for (var node of mmutation.removedNodes) {
+                if (node.nodeType === 1 && node.classList.contains('message') && node.getAttribute('data-testid') === 'bot') {
+                    document.querySelectorAll('#main_chatbot>.wrap>.message-wrap .message.bot').forEach(addChuanhuButton);
+                }
+            }
+        } else if (mmutation.type === 'attributes') {
+            if (mmutation.target.nodeType === 1 && mmutation.target.classList.contains('message') && mmutation.target.getAttribute('data-testid') === 'bot') {
+                if (isThrottled) break; // 为了防止重复不断疯狂渲染，加上等待_(:з」∠)_
+                isThrottled = true;
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => {
+                    isThrottled = false;
+                    document.querySelectorAll('#main_chatbot>.wrap>.message-wrap .message.bot').forEach(addChuanhuButton);
+                }, 500);
+            }
         }
-        if (node.tagName === 'INPUT' && node.getAttribute('type') === 'range') {
-          setSlider();
-        }
-      }
-      for (var node of mmutation.removedNodes) {
-        if (
-          node.nodeType === 1 &&
-          node.classList.contains('message') &&
-          (node.getAttribute('data-testid') === 'bot' || node.getAttribute('data-testid') === 'user')
-        ) {
-          document.querySelectorAll('#main_chatbot > .wrap > .message-wrap .message.bot, #main_chatbot > .wrap > .message-wrap .message.user')
-            .forEach(addChuanhuButton);
-        }
-      }
-    } else if (mmutation.type === 'attributes') {
-      if (
-        mmutation.target.nodeType === 1 &&
-        mmutation.target.classList.contains('message') &&
-        (mmutation.target.getAttribute('data-testid') === 'bot' || mmutation.target.getAttribute('data-testid') === 'user')
-      ) {
-        if (isThrottled) break;
-        isThrottled = true;
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-          isThrottled = false;
-          document.querySelectorAll(
-              '#main_chatbot > .wrap > .message-wrap .message.bot, #main_chatbot > .wrap > .message-wrap .message.user'
-            )
-            .forEach(addChuanhuButton);
-        }, 500);
-      }
     }
-  }
 });
 mObserver.observe(document.documentElement, { attributes: true, childList: true, subtree: true });
 

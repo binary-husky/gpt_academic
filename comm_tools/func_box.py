@@ -610,7 +610,7 @@ def refresh_load_data(chat, history, prompt, crazy_list, request: gr.Request):
 
     outputs = [prompt.update(samples=data, visible=True), prompt,
                chat, history, gr.Dataset.update(samples=[[i] for i in selected]), selected,
-               hied_elem, hied_elem]
+               hied_elem, hied_elem, show_elem]
     return outputs
 
 
