@@ -544,9 +544,10 @@ def thread_write_chat(chatbot, history):
 
 
 base_path = os.path.dirname(os.path.dirname(__file__))
-prompt_path = os.path.join(base_path, '../users_data')
-users_path = os.path.join(base_path, '../private_upload')
-logs_path = os.path.join(base_path, '../gpt_log')
+html_covert_path = os.path.basename(base_path)
+prompt_path = os.path.join(base_path, 'users_data')
+users_path = os.path.join(base_path, 'private_upload')
+logs_path = os.path.join(base_path, 'gpt_log')
 
 def reuse_chat(result, chatbot, history, pro_numb, say):
     """复用对话记录"""
@@ -687,7 +688,7 @@ def update_txt(self,
 
 
 def get_html(filename):
-    path = os.path.join(base_path, "../docs/assets", "html", filename)
+    path = os.path.join(base_path, "docs/assets", "html", filename)
     if os.path.exists(path):
         with open(path, encoding="utf8") as file:
             return file.read()
@@ -715,7 +716,7 @@ def qr_code_generation(data, icon_path=None, file_name='qc_icon.png'):
     img_w, img_h = img.size
     # 打开logo
     if not icon_path:
-        icon_path = os.path.join(base_path, '../docs/assets/PLAI.jpeg')
+        icon_path = os.path.join(base_path, '/docs/assets/PLAI.jpeg')
     logo = Image.open(icon_path)
     # logo大小为二维码的四分之一
     logo_w = img_w // 4
@@ -730,6 +731,10 @@ def qr_code_generation(data, icon_path=None, file_name='qc_icon.png'):
     img.save()
     return qr_path
 
+
+def created_at():
+    import datetime
+    return datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
 class YamlHandle:
 
@@ -776,4 +781,4 @@ class JsonHandle:
 
 
 if __name__ == '__main__':
-    pass
+    print(os.path.exists(users_path))

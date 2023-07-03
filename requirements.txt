@@ -23,3 +23,6 @@ distro
 python-dotenv
 rich
 Levenshtein
+paddleocr
+qrcode
+paddleclas
