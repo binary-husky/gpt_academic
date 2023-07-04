@@ -10,10 +10,12 @@ import requests
 import sys
 job_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(job_path)
-from comm_tools import func_box
+from comm_tools import func_box, ocr_tools, toolbox
 from comm_tools.toolbox import get_conf
 from openpyxl import load_workbook
 import urllib.parse
+import gradio as gr
+
 
 
 class Utils:
@@ -22,6 +24,7 @@ class Utils:
         self.find_keys_type = 'type'
         self.find_picture_source = {'caption': '', 'imgID': '', 'sourceKey': ''}
         self.find_keys_tags = ['picture', 'processon']
+        self.picture_format = ['.JPEG', '.PNG', '.GIF', '.BMP', '.TIFF']
 
     def find_all_text_keys(self, dictionary, parent_type=None, text_values=None, filter_type='', img_proce=False):
         """
@@ -87,6 +90,24 @@ class Utils:
             f.write(data)
         func_box.Shell(f'npx markmap-cli --no-open "{md_file}" -o "{html_file}"').read()
         return md_file, html_file
+
+    def split_startswith_txt(self, link_limit, start='http'):
+        link = str(link_limit).split()
+        links = []
+        for i in link:
+            if i.startswith(start):
+                links.append(i)
+        return links
+
+    def global_search_for_files(self, file_path, matching: list):
+        file_list = []
+        for root, dirs, files in os.walk(file_path):
+            for file in files:
+                for math in matching:
+                    if str(math).lower() in str(file).lower():
+                        file_list.append(os.path.join(root, file))
+        return file_list
+
 
 
 class ExcelHandle:
@@ -236,7 +257,6 @@ def get_docs_content(url, image_processing=False):
     return _all, content, empty_picture_count, pic_dict_convert
 
 
-
 def json_args_return(kwargs, keys: list) -> list: 
     temp = [False for i in range(len(keys))]
     for i in range(len(keys)):
@@ -248,6 +268,47 @@ def json_args_return(kwargs, keys: list) -> list:
             except Exception as f:
                 temp[i] = False
     return temp
+
+
+def ocr_batch_processing(file_manifest, chatbot, history, llm_kwargs):
+    ocr_process = f'> 红框为采用的文案,可信度低于 {llm_kwargs["ocr"]} 将不采用, 可在Setting 中进行配置\n\n'
+    i_say = 'ORC开始工作'
+    chatbot.append([i_say, ocr_process])
+    for pic_path in file_manifest:
+        yield from toolbox.update_ui(chatbot, history, '正在调用OCR组件，图片多可能会比较慢')
+        img_content, img_result = ocr_tools.Paddle_ocr_select(ipaddr=llm_kwargs['ipaddr'],
+                                                              trust_value=llm_kwargs['ocr']
+                                                              ).img_def_content(img_path=pic_path)
+        ocr_process += f'{pic_path} 识别完成，识别效果如下 {func_box.html_local_img(img_result)} \n\n' \
+                       f'```\n{img_content}\n```'
+        chatbot[-1] = [i_say, ocr_process]
+        yield from toolbox.update_ui(chatbot, history)
+    ocr_process += f'\n\n--- 解析成功，现在我已理解上述内容，有什么不懂得地方你可以问我～'
+    chatbot[-1] = [i_say, ocr_process]
+    history.extend([i_say, ocr_process])
+    yield from toolbox.update_ui(chatbot, history)
+
+
+
+def ocr_batch_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    chatbot_with_cookie = toolbox.ChatBotWithCookies(chatbot)
+    chatbot_with_cookie.write_list(chatbot)
+    file_handle = Utils()
+    file_manifest = file_handle.split_startswith_txt(txt, start='http')
+    correction_copy = f'如果是本地文件，请点击【UPLOAD】先上传，多个文件请上传压缩包'\
+                      f'如果是网络文件，请粘贴到输入框，'\
+                      f'多个文件{func_box.html_tag_color("请使用换行或空格区分")}'
+    if txt:
+        if os.path.exists(txt):
+            file_manifest = file_handle.global_search_for_files(txt, matching=file_handle.picture_format)
+            yield from ocr_batch_processing(file_manifest, chatbot, history, llm_kwargs=llm_kwargs)
+        elif file_manifest != []:
+            yield from ocr_batch_processing(file_manifest, chatbot, history, llm_kwargs=llm_kwargs)
+        else:
+            yield from toolbox.update_ui(chatbot, history, msg=correction_copy)
+    else:
+        yield from toolbox.update_ui(chatbot, history, msg=f'空空如也的输入框{correction_copy}')
+
 
 if __name__ == '__main__':
     print(get_docs_content('https://kdocs.cn/l/ca1FQfQ6LiAx'))

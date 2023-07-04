@@ -1,5 +1,7 @@
 import os
 import gradio as gr
+
+import crazy_functions.crazy_box
 from request_llm.bridge_all import predict
 from comm_tools.toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_user_upload, \
     get_conf, ArgsGeneralWrapper
@@ -81,6 +83,7 @@ class ChatBot(ChatBotFrame):
                 self.sm_upload = gr.UploadButton(label='UPLOAD', file_count='multiple', elem_classes='sm_btn').style(size='sm', full_width=False)
                 self.sm_code_block = gr.Button(value='CODE', elem_classes='sm_btn').style(size='sm', full_width=False)
                 self.sm_upload_history = gr.Button("SPASE", variant="primary", elem_classes='sm_btn').style(size='sm', full_width=False)
+                self.sm_ocr_result = gr.Button("OCR", variant="primary", elem_classes='sm_btn').style(size='sm', full_width=False)
                 self.md_dropdown = gr.Dropdown(choices=AVAIL_LLM_MODELS, value=LLM_MODEL,
                                                show_label=True, interactive=True, label='LLMs',
                                                elem_classes='sm_select', elem_id='change-font-size').style(container=False)
@@ -96,10 +99,13 @@ class ChatBot(ChatBotFrame):
 
     def signals_sm_btn(self):
         self.sm_upload.upload(on_file_uploaded, [self.sm_upload, self.chatbot, self.txt], [self.chatbot, self.txt]).then(
-            fn=lambda: [gr.Tabs.update(selected='plug_tab'), gr.Column.update(visible=False)], inputs=None, outputs=[self.tabs_inputs, self.examples_column]
-        )
+            fn=lambda: [gr.Tabs.update(selected='plug_tab'), gr.Column.update(visible=False)], inputs=None, outputs=[self.tabs_inputs, self.examples_column])
         self.sm_code_block.click(fn=lambda x: x+'```\n\n```', inputs=[self.txt], outputs=[self.txt])
-        self.sm_upload_history.click(get_user_upload, [self.chatbot], outputs=[self.chatbot]).then(fn=lambda: gr.Column.update(visible=False), inputs=None, outputs=self.examples_column)
+        self.sm_upload_history.click(get_user_upload, [self.chatbot], outputs=[self.chatbot]).then(
+            fn=lambda: gr.Column.update(visible=False), inputs=None, outputs=self.examples_column)
+        self.sm_ocr_result.click(**self.clear_agrs).then(fn=ArgsGeneralWrapper(crazy_functions.crazy_box.ocr_batch_plugin),
+                                 inputs=[*self.input_combo, gr.State(PORT)],
+                                 outputs=[*self.output_combo])
         # self.sm_select_font.select(fn=lambda x: gr.HTML.update(value=f"{x}px"), inputs=[self.sm_select_font], outputs=[self.state_users])
 
     def draw_examples(self):
@@ -457,8 +463,8 @@ class ChatBot(ChatBotFrame):
                 with self.prompt_tab:
                     self.draw_temp_edit()
             # 函数注册，需要在Blocks下进行
-            self.signals_sm_btn()
             self.signals_input_setting()
+            self.signals_sm_btn()
             self.signals_function()
             self.signals_prompt_func()
             self.signals_public()
