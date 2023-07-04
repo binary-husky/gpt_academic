@@ -173,7 +173,7 @@ class ChatBot(ChatBotFrame):
                         self.pro_name_txt = gr.Textbox(show_label=False, placeholder='是否全复用prompt / prompt功能名', ).style(
                             container=False)
                         self.pro_new_btn = gr.Button("保存Prompt", variant="primary").style(size='sm').style()
-                    with gr.Row(elem_id='sm_btn'):
+                    with gr.Row(elem_id='sm_row'):
                         self.pro_reuse_btn = gr.Button("复用Result", variant="secondary").style(size='sm').style(full_width=False)
                         self.pro_clear_btn = gr.Button("重置Result", variant="stop").style(size='sm').style(full_width=False)
 
@@ -442,14 +442,14 @@ class ChatBot(ChatBotFrame):
                         with gr.TabItem('Prompt检索/编辑') as self.prompt_tab:
                             self.draw_prompt()
 
-                        with gr.Column(visible=False) as self.mobile_column:
-                            with gr.Row():
-                                self.resetBtn = gr.Button("新建对话", variant="primary", elem_id='empty_btn').style(size="sm")
-                                self.stopBtn = gr.Button("中止对话", variant="stop").style(size="sm")
-                            with gr.Tabs() as self.tabs_inputs:
-                                self.draw_function_chat()
-                                self.draw_public_chat()
-                                self.draw_setting_chat()
+                        # with gr.Column(visible=False) as self.mobile_column:
+                        #     with gr.Row():
+                        #         self.resetBtn = gr.Button("新建对话", variant="primary", elem_id='empty_btn').style(size="sm")
+                        #         self.stopBtn = gr.Button("中止对话", variant="stop").style(size="sm")
+                        #     with gr.Tabs() as self.tabs_inputs:
+                        #         self.draw_function_chat()
+                        #         self.draw_public_chat()
+                        #         self.draw_setting_chat()
 
                 with self.chat_tab:  # 使用 gr.State()对组件进行拷贝时，如果之前绘制了Markdown格式，会导致启动崩溃,所以将 markdown相关绘制放在最后
                     self.draw_chatbot()
@@ -469,7 +469,7 @@ class ChatBot(ChatBotFrame):
                            inputs=[self.chatbot, self.history, self.pro_fp_state, adv_plugins],
                            outputs=[self.pro_func_prompt, self.pro_fp_state, self.chatbot,
                                     self.history, self.guidance_plugins, self.guidance_plugins_state,
-                                    self.cloum_1, self.examples_column, self.mobile_column])
+                                    self.cloum_1, self.examples_column])
 
         # Start
         self.auto_opentab_delay()

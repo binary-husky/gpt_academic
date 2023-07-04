@@ -72,9 +72,13 @@ mspace {
 .toast-body {
     z-index: 5 !important;
 }
-.chat_input {
-
+#sm_row {
+    display: flex;
+    flex-wrap: unset !important;
+    gap: 5px !important;
+    width: var(--size-full);
 }
+
 .sm_btn {
     position: relative;
     /*bottom: 5px;*/
