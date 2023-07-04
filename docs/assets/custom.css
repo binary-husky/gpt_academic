@@ -53,7 +53,7 @@ mspace {
     bottom: 0;
     left: 0;
     z-index: 1; /* 设置更高的 z-index 值 */
-    margin-bottom: -2% !important;
+    margin-bottom: -6px !important;
     align-self: flex-end;
 }
 #chat_box {
