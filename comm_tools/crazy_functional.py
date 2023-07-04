@@ -92,6 +92,7 @@ def get_crazy_functions():
             "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
             "Parameters": {
                 'to_markdown': True,
+                'img_ocr': True,
             }
         },
 
