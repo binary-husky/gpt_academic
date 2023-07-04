@@ -46,7 +46,7 @@ def ArgsGeneralWrapper(f):
     """
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
-    def decorated(cookies, max_length, llm_model, txt, top_p, temperature,
+    def decorated(cookies, max_length, llm_model, txt, top_p, temperature, ocr,
                   chatbot, history, system_prompt, models, plugin_advanced_arg, ipaddr: gr.Request, *args):
         """"""
         # 引入一个有cookie的chatbot
@@ -65,7 +65,8 @@ def ArgsGeneralWrapper(f):
             'max_length': max_length,
             'temperature': temperature,
             'ipaddr': ipaddr.client.host,
-            'start_time': start_time
+            'start_time': start_time,
+            'ocr': ocr
         }
         plugin_kwargs = {
             "advanced_arg": plugin_advanced_arg,
@@ -551,7 +552,6 @@ def on_file_uploaded(files, chatbot, txt, ipaddr: gr.Request):
 
 
 def on_report_generated(cookies, files, chatbot):
-    from toolbox import find_recent_files
     if 'file_to_promote' in cookies:
         report_files = cookies['file_to_promote']
         cookies.pop('file_to_promote')

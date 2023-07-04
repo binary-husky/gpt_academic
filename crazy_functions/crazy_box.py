@@ -66,8 +66,9 @@ class Utils:
             for key, value in i.items():
                 if key in self.find_keys_tags:
                     if img_proce:
-                        mark = '{{{%s}}}' % value['sourceKey']
-                        context_.append(f'{key}OCR结果: """{mark}"""\n{key}描述: {value["caption"]}\n')
+                        mark = f'{key}OCR结果: """{value["sourceKey"]}"""\n'
+                        if value["caption"]: mark += '{key}描述: {value["caption"]}\n'
+                        context_.append(mark)
                         pic_dict[value['sourceKey']] = value['imgID']
                     else:
                         if value["caption"]: context_.append(f'{key}描述: {value["caption"]}\n')

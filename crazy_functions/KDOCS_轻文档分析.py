@@ -10,7 +10,7 @@ from comm_tools.toolbox import update_ui
 from comm_tools.toolbox import CatchException
 from crazy_functions import crazy_utils
 from request_llm import bridge_all
-from comm_tools import prompt_generator, func_box
+from comm_tools import prompt_generator, func_box, ocr_tools
 import traceback
 
 
@@ -28,28 +28,42 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
         yield from update_ui(chatbot, history)
         return
     file_limit = []
+    img_ocr,  = crazy_box.json_args_return(plugin_kwargs, ['img_ocr'])
     for url in links:
         try:
             chatbot.append([link_limit+"\n\n网页爬虫准备工作中～", None])
             yield from update_ui(chatbot, history)  #增加中间过渡
-            ovs_data, content, empty_picture_count, pic_dict = crazy_box.get_docs_content(url)
+            ovs_data, content, empty_picture_count, pic_dict = crazy_box.get_docs_content(url, image_processing=img_ocr)
+            if img_ocr:
+                ocr_process = f'检测到轻文档中存在{func_box.html_tag_color(empty_picture_count)}张图片，为了产出结果不存在遗漏，正在逐一进行识别\n\n' \
+                              f'> 红框为采用的文案,可信度低于 {llm_kwargs["ocr"]} 将不采用, 可在Setting 中进行配置\n\n'
+                chatbot.append([None, ocr_process])
+                for i in pic_dict:
+                    yield from update_ui(chatbot, history, '正在调用OCR组件，图片多可能会比较慢')
+                    img_content, img_result = ocr_tools.Paddle_ocr_select(ipaddr=llm_kwargs['ipaddr'], trust_value=llm_kwargs['ocr']).img_def_content(img_path=pic_dict[i])
+                    content = str(content).replace(f"{i}", f"{func_box.html_local_img(img_result)}\n```{img_content}```")
+                    ocr_process += f'{i} 识别完成，识别效果如下 {func_box.html_local_img(img_result)} \n\n'
+                    chatbot[-1] = [None, ocr_process]
+                    yield from update_ui(chatbot, history)
+            else:
+                if empty_picture_count >= 5:
+                    chatbot.append([None, f'\n\n 需求文档中没有{func_box.html_tag_color("描述")}的图片数量' \
+                                          f'有{func_box.html_tag_color(empty_picture_count)}张，生成的测试用例可能存在遗漏点，可以参考以下方法对图片进行描述补充，或在插件高级参数中启用OCR\n\n' \
+                                          f'{func_box.html_local_img("docs/imgs/pic_desc.png")}'])
+                yield from update_ui(chatbot, history)
             title = content.splitlines()[0]
-            if empty_picture_count >= 5:
-                chatbot.append([None, f'\n\n 需求文档中没有{func_box.html_tag_color("描述")}的图片数量' \
-                                  f'有{func_box.html_tag_color(empty_picture_count)}张，生成的测试用例可能存在遗漏点，可以参考以下方法对图片进行描述补充\n\n' \
-                                  f'{func_box.html_local_img("docs/imgs/pic_desc.png")}'])
             file_limit.extend([title, content])
-            yield from update_ui(chatbot, history)
         except Exception as e:
             error_str = traceback.format_exc()
             chatbot.append([None, f'{func_box.html_a_blank(url)} \n\n请检查一下哦，这个链接我们访问不了，是否开启分享？是否设置密码？是否是轻文档？下面是什么错误？\n\n ```\n{str(error_str)}\n```'])
             yield from update_ui(chatbot, history)
+
     return file_limit
 
 import re
 def replace_special_chars(file_name):
-    # 正则表达式中[^0-9A-Za-z_.\s]表示任意一个不是数字、字母、下划线、.、空格的字符
-    return re.sub(r'[^0-9A-Za-z_.\s]', '_', file_name)
+    # 除了中文外，该正则表达式匹配任何一个不是数字、字母、下划线、.、空格的字符
+    return re.sub(r'[^\u4e00-\u9fa5\d\w\s\.\_]', '_', file_name)
 
 def long_name_processing(file_name):
     if len(file_name) > 50:

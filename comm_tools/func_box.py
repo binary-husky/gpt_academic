@@ -157,8 +157,8 @@ def html_download_blank(__href, dir_name=''):
     a = f'<a href="{__href}" target="_blank" download="{dir_name}" class="svelte-xrr240">{__href}</a>'
     return a
 
-def html_local_img(__file):
-    a = f'<div align="center"><img src="file={__file}"></div>'
+def html_local_img(__file, layout='left'):
+    a = f'<div align="{layout}"><img src="file={__file}"></div>'
     return a
 
 def ipaddr():

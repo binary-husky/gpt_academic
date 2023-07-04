@@ -276,6 +276,9 @@ class ChatBot(ChatBotFrame):
                                            label="MaxLength", ).style(container=False)
             self.pro_tf_slider = gr.Slider(minimum=0.01, maximum=1.0, value=0.70, step=0.01, interactive=True,
                                            label="Term Frequency系数").style(container=False)
+            self.ocr_identifying_trust = gr.Slider(minimum=0.01, maximum=1.0, value=0.90, step=0.01, interactive=True,
+                                           label="OCR 识别信任度").style(container=False)
+
             self.models_box = gr.CheckboxGroup(choices=switch_model['key'], value=switch_model['value'], label="对话模式")
             self.system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt",
                                             label="System prompt", value=self.initial_prompt)
@@ -310,7 +313,7 @@ class ChatBot(ChatBotFrame):
     def signals_input_setting(self):
         # 注册input
         self.input_combo = [self.cookies, self.max_length_sl, self.md_dropdown,
-                            self.input_copy, self.top_p, self.temperature, self.chatbot, self.history,
+                            self.input_copy, self.top_p, self.temperature, self.ocr_identifying_trust, self.chatbot, self.history,
                             self.system_prompt, self.models_box, self.plugin_advanced_arg]
         self.output_combo = [self.cookies, self.chatbot, self.history, self.status]
         self.predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=self.input_combo, outputs=self.output_combo)
