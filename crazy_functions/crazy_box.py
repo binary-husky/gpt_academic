@@ -289,13 +289,12 @@ def ocr_batch_processing(file_manifest, chatbot, history, llm_kwargs):
     yield from toolbox.update_ui(chatbot, history)
 
 
-
 def ocr_batch_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     chatbot_with_cookie = toolbox.ChatBotWithCookies(chatbot)
     chatbot_with_cookie.write_list(chatbot)
     file_handle = Utils()
     file_manifest = file_handle.split_startswith_txt(txt, start='http')
-    correction_copy = f'如果是本地文件，请点击【UPLOAD】先上传，多个文件请上传压缩包'\
+    correction_copy = f'如果是本地文件，请点击【UPLOAD】先上传，多个文件请上传压缩包，'\
                       f'如果是网络文件，请粘贴到输入框，'\
                       f'多个文件{func_box.html_tag_color("请使用换行或空格区分")}'
     if txt:
@@ -305,9 +304,11 @@ def ocr_batch_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pr
         elif file_manifest != []:
             yield from ocr_batch_processing(file_manifest, chatbot, history, llm_kwargs=llm_kwargs)
         else:
-            yield from toolbox.update_ui(chatbot, history, msg=correction_copy)
+            chatbot.append([correction_copy, None])
+            yield from toolbox.update_ui(chatbot, history)
     else:
-        yield from toolbox.update_ui(chatbot, history, msg=f'空空如也的输入框{correction_copy}')
+        chatbot.append([f'空空如也的输入框，{correction_copy}', None])
+        yield from toolbox.update_ui(chatbot, history)
 
 
 if __name__ == '__main__':
