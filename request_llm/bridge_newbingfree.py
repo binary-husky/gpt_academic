@@ -143,7 +143,7 @@ class NewBingHandle(Process):
             asyncio.run(self.async_run())
         except Exception:
             tb_str = '\n```\n' + trimmed_format_exc() + '\n```\n'
-            self.child.send(f'[Local Message] Newbing失败 {tb_str}.')
+            self.child.send(f'[Local Message] Newbing 请求失败，报错信息如下. 如果是与网络相关的问题，建议更换代理协议（推荐http）或代理节点 {tb_str}.')
             self.child.send('[Fail]')
             self.child.send('[Finish]')
         
