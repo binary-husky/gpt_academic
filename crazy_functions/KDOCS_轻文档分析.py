@@ -15,7 +15,7 @@ import traceback
 
 
 def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    links = crazy_box.split_http_txt(link_limit)
+    links = crazy_box.Utils().split_startswith_txt(link_limit)
     if not links:
         chatbot.append((None, f'输入框空空如也？{link_limit}\n\n'
                               '请在输入框中输入需要解析的轻文档链接，点击插件按钮，链接需要是可访问的，如以下格式，如果有多个文档则用换行或空格隔开'

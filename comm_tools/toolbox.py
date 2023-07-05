@@ -132,8 +132,7 @@ def CatchException(f):
         try:
             yield from f(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT)
         except Exception as e:
-            from check_proxy import check_proxy
-            from toolbox import get_conf
+            from comm_tools.check_proxy import check_proxy
             proxies, = get_conf('proxies')
             tb_str = '```\n' + trimmed_format_exc() + '```'
             if len(chatbot) == 0:
