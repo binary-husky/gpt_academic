@@ -47,7 +47,7 @@ MAX_RETRY = 2
 
 # 模型选择是 (注意: LLM_MODEL是默认选中的模型, 同时它必须被包含在AVAIL_LLM_MODELS切换列表中 )
 LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
-AVAIL_LLM_MODELS = ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt35", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "newbing-free", "stack-claude"]
+AVAIL_LLM_MODELS = ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt35", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "stack-claude"]
 # P.S. 其他可用的模型还包括 ["gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613", "newbing-free", "jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
 
 # 本地LLM模型如ChatGLM的执行方式 CPU/GPU
@@ -75,12 +75,8 @@ API_URL_REDIRECT = {}
 # 如果需要在二级路径下运行（常规情况下，不要修改!!）（需要配合修改main.py才能生效!）
 CUSTOM_PATH = "/"
 
-# 如果需要使用newbing，把newbing的长长的cookie放到这里
+# 使用Newbing
 NEWBING_STYLE = "creative"  # ["creative", "balanced", "precise"]
-# 从现在起，如果您调用"newbing-free"模型，则无需填写NEWBING_COOKIES
-NEWBING_COOKIES = """
-your bing cookies here
-"""
 
 # 如果需要使用Slack Claude，使用教程详情见 request_llm/README.md
 SLACK_CLAUDE_BOT_ID = ''   
