@@ -32,7 +32,7 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
             ovs_data, content, empty_picture_count, pic_dict = crazy_box.get_docs_content(url, image_processing=img_ocr)
             if img_ocr:
                 ocr_process = f'检测到轻文档中存在{func_box.html_tag_color(empty_picture_count)}张图片，为了产出结果不存在遗漏，正在逐一进行识别\n\n' \
-                              f'> 红框为采用的文案,可信度低于 {llm_kwargs["ocr"]} 将不采用, 可在Setting 中进行配置\n\n'
+                              f'>> 红框为采用的文案,可信度低于 {func_box.html_tag_color(llm_kwargs["ocr"])} 将不采用, 可在Setting 中进行配置\n\n'
                 chatbot.append([None, ocr_process])
                 for i in pic_dict:
                     yield from update_ui(chatbot, history, '正在调用OCR组件，图片多可能会比较慢')
@@ -222,6 +222,7 @@ def KDocs_需求分析问答(link_limit, llm_kwargs, plugin_kwargs, chatbot, his
 def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
     for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
         chatbot.append([None, f'{long_name_processing(you_say)} 🏃🏻‍正在努力将Markdown转换为流程图~'])
+        yield from update_ui(chatbot=chatbot, history=history)
         md, html = crazy_box.Utils().markdown_to_flow_chart(data=inputs, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(you_say))
         chatbot.append(("View: " + func_box.html_view_blank(md), f'{func_box.html_iframe_code(html_file=html)}'
                                                                f'tips: 双击空白处可以放大～'

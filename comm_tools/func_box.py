@@ -142,9 +142,13 @@ def html_view_blank(__href, file_name=''):
     a = f'<a href="{__href}" target="_blank" class="svelte-xrr240">{file_name}</a>'
     return a
 
-def html_iframe_code(html_file):
+def html_local_file(html_file):
     proxy, = toolbox.get_conf('LOCAL_PORT')
     html_file = f'http://{ipaddr()}:{proxy}/file={html_file}'
+    return html_file
+
+def html_iframe_code(html_file):
+    html_file = html_local_file(html_file)
     ifr = f'<iframe width="100%" height="500px" frameborder="0" src="{html_file}"></iframe>'
     return ifr
 

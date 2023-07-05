@@ -271,7 +271,7 @@ def json_args_return(kwargs, keys: list) -> list:
 
 
 def ocr_batch_processing(file_manifest, chatbot, history, llm_kwargs):
-    ocr_process = f'> 红框为采用的文案,可信度低于 {llm_kwargs["ocr"]} 将不采用, 可在Setting 中进行配置\n\n'
+    ocr_process = f'> 红框为采用的文案,可信度低于 {func_box.html_tag_color(llm_kwargs["ocr"])} 将不采用, 可在Setting 中进行配置\n\n'
     i_say = 'ORC开始工作'
     chatbot.append([i_say, ocr_process])
     for pic_path in file_manifest:
@@ -283,7 +283,7 @@ def ocr_batch_processing(file_manifest, chatbot, history, llm_kwargs):
                        f'```\n{img_content}\n```'
         chatbot[-1] = [i_say, ocr_process]
         yield from toolbox.update_ui(chatbot, history)
-    ocr_process += f'\n\n--- 解析成功，现在我已理解上述内容，有什么不懂得地方你可以问我～'
+    ocr_process += f'\n\n---\n\n解析成功，现在我已理解上述内容，有什么不懂得地方你可以问我～'
     chatbot[-1] = [i_say, ocr_process]
     history.extend([i_say, ocr_process])
     yield from toolbox.update_ui(chatbot, history)

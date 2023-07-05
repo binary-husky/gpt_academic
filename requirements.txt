@@ -25,4 +25,3 @@ rich
 Levenshtein
 paddleocr
 qrcode
-paddleclas

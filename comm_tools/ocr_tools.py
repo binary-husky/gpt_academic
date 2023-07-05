@@ -23,10 +23,6 @@ class Paddle_ocr_select():
     def img_def_content(self, img_path, show_result: bool=True):
         ocr = PaddleOCR(use_angle_cls=True)  # need to run only once to download and load model into memory
         result = ocr.ocr(img_path, cls=True)
-        for idx in range(len(result)):
-            res = result[idx]
-            for line in res:
-                print(line)
         save_path = os.path.join(func_box.users_path, self.ipaddr, 'ocr_temp')
         save_file = os.path.join(save_path, f'{func_box.created_at()}.jpeg')
         os.makedirs(save_path, exist_ok=True)
