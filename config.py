@@ -75,8 +75,6 @@ API_URL_REDIRECT = {}
 # 如果需要在二级路径下运行（常规情况下，不要修改!!）（需要配合修改main.py才能生效!）
 CUSTOM_PATH = "/"
 
-# 使用Newbing
-NEWBING_STYLE = "creative"  # ["creative", "balanced", "precise"]
 
 # 如果需要使用Slack Claude，使用教程详情见 request_llm/README.md
 SLACK_CLAUDE_BOT_ID = ''   
@@ -88,3 +86,10 @@ AZURE_ENDPOINT = "https://你的api名称.openai.azure.com/"
 AZURE_API_KEY = "填入azure openai api的密钥"
 AZURE_API_VERSION = "填入api版本"
 AZURE_ENGINE = "填入ENGINE"
+
+
+# 使用Newbing
+NEWBING_STYLE = "creative"  # ["creative", "balanced", "precise"]
+NEWBING_COOKIES = """
+put your new bing cookies here
+"""
