@@ -246,7 +246,7 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         "Content-Type": "application/json",
         "Authorization": f"Bearer {api_key}"
     }
-    if API_ORG.startswith('org-'): headers.update({"org": API_ORG})
+    if API_ORG.startswith('org-'): headers.update({"OpenAI-Organization": API_ORG})
 
     conversation_cnt = len(history) // 2
 
