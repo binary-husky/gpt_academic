@@ -99,6 +99,10 @@ AUTHENTICATION = []
 CUSTOM_PATH = "/"
 
 
+# 极少数情况下，openai的官方KEY需要伴随组织编码（格式如org-xxxxxxxxxxxxxxxxxxxxxxxx）使用
+API_ORG = ""
+
+
 # 如果需要使用Slack Claude，使用教程详情见 request_llm/README.md
 SLACK_CLAUDE_BOT_ID = ''   
 SLACK_CLAUDE_USER_TOKEN = ''
