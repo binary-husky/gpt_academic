@@ -86,7 +86,7 @@ chat分析报告生成 | [函数插件] 运行后自动生成总结汇报
 </div>
 
 # Installation
-### 安装-方法1：直接运行 (Windows, Linux or MacOS) 
+### 安装方法I：直接运行 (Windows, Linux or MacOS) 
 
 1. 下载项目
 ```sh
@@ -139,7 +139,7 @@ AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-
 python main.py
 ```
 
-### 安装-方法2：使用Docker
+### 安装方法II：使用Docker
 
 1. 仅ChatGPT（推荐大多数人选择，等价于docker-compose方案1）
 
@@ -170,7 +170,7 @@ docker-compose up
 ```
 
 
-### 安装-方法3：其他部署姿势
+### 安装方法III：其他部署姿势
 1. 一键运行脚本。
 完全不熟悉python环境的Windows用户可以下载[Release](https://github.com/binary-husky/gpt_academic/releases)中发布的一键运行脚本安装无本地模型的版本。
 脚本的贡献来源是[oobabooga](https://github.com/oobabooga/one-click-installers)。
@@ -195,9 +195,7 @@ docker-compose up
 
 
 # Advanced Usage
-### 自定义新的便捷按钮 / 自定义函数插件
-
-1. 自定义新的便捷按钮（学术快捷键）
+### I：自定义新的便捷按钮（学术快捷键）
 任意文本编辑器打开`core_functional.py`，添加条目如下，然后重启程序即可。（如果按钮已经添加成功并可见，那么前缀、后缀都支持热修改，无需重启程序即可生效。）
 例如
 ```
@@ -213,7 +211,7 @@ docker-compose up
 <img src="https://user-images.githubusercontent.com/96192199/226899272-477c2134-ed71-4326-810c-29891fe4a508.png" width="500" >
 </div>
 
-2. 自定义函数插件
+### II：自定义函数插件
 
 编写强大的函数插件来执行任何你想得到的和想不到的任务。
 本项目的插件编写、调试难度很低，只要您具备一定的python基础知识，就可以仿照我们提供的模板实现自己的插件功能。
@@ -221,7 +219,7 @@ docker-compose up
 
 
 # Latest Update
-### 新功能动态
+### I：新功能动态
 
 1. 对话保存功能。在函数插件区调用 `保存当前的对话` 即可将当前对话保存为可读+可复原的html文件，
 另外在函数插件区（下拉菜单）调用 `载入对话历史存档` ，即可还原之前的会话。
@@ -282,7 +280,7 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 
 
 
-### 版本:
+### II：版本:
 - version 3.5(Todo): 使用自然语言调用本项目的所有函数插件（高优先级）
 - version 3.4: +arxiv论文翻译、latex论文批改功能
 - version 3.3: +互联网信息综合功能
@@ -304,7 +302,7 @@ gpt_academic开发者QQ群-2：610599535
     - 某些浏览器翻译插件干扰此软件前端的运行
     - 官方Gradio目前有很多兼容性Bug，请务必使用`requirement.txt`安装Gradio
 
-### 参考与学习
+### III：参考与学习
 
 ```
 代码中参考了很多其他优秀项目中的设计，顺序不分先后：
