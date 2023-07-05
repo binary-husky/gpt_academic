@@ -1,8 +1,8 @@
 """
-    以下所有配置也都支持使用利用环境变量配置，环境变量配置格式见docker-compose.yml。
+    以下所有配置也都支持利用环境变量覆写，环境变量配置格式见docker-compose.yml。
     读取优先级：环境变量 > config_private.py > config.py
     --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
-    All the following configurations also support using environment variables to configure, 
+    All the following configurations also support using environment variables to override, 
     and the environment variable configuration format can be seen in docker-compose.yml. 
     Configuration reading priority: environment variable > config_private.py > config.py
 """
