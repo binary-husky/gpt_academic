@@ -87,7 +87,7 @@ class ChatBot(ChatBotFrame):
                 self.md_dropdown = gr.Dropdown(choices=AVAIL_LLM_MODELS, value=LLM_MODEL,
                                                show_label=True, interactive=True, label='LLMs',
                                                elem_classes='sm_select', elem_id='change-font-size').style(container=False)
-                gr.HTML(func_box.get_html("appearance_switcher.html").format(label=""), elem_classes="insert_block", visible=True)
+                self.switcher_drak = gr.HTML(func_box.get_html("appearance_switcher.html").format(), elem_classes="insert_block")
 
 
             with gr.Row():

@@ -28,6 +28,27 @@ var targetNode = ga[0];
 var isInIframe = (window.self !== window.top);
 var language = navigator.language.slice(0,2);
 
+var forView_i18n = {
+    'zh': "仅供查看",
+    'en': "For viewing only",
+    'ja': "閲覧専用",
+    'fr': "Pour consultation seulement",
+    'es': "Solo para visualización",
+};
+
+var deleteConfirm_i18n_pref = {
+    'zh': "你真的要删除 ",
+    'en': "Are you sure you want to delete ",
+    'ja': "本当に ",
+};
+var deleteConfirm_i18n_suff = {
+    'zh': " 吗？",
+    'en': " ?",
+    'ja': " を削除してもよろしいですか？",
+};
+var deleteConfirm_msg_pref = "Are you sure you want to delete ";
+var deleteConfirm_msg_suff = " ?";
+
 // gradio 页面加载好了么??? 我能动你的元素了么??
 function gradioLoaded(mutations) {
     for (var i = 0; i < mutations.length; i++) {
@@ -45,11 +66,144 @@ function gradioLoaded(mutations) {
                 localStorage.setItem("userLogged", true);
                 userLogged = true;
             }
+
             if (gradioContainer && apSwitch) {  // gradioCainter 加载出来了没?
                 adjustDarkMode();
             }
+            if (user_input_tb) {  // user_input_tb 加载出来了没?
+            }
+            if (userInfoDiv && appTitleDiv) {  // userInfoDiv 和 appTitleDiv 加载出来了没?
+                if (!usernameGotten) {
+                    getUserInfo();
+                }
+                setTimeout(showOrHideUserInfo(), 2000);
+            }
+            if (chatbot) {  // chatbot 加载出来了没?
+                setChatbotHeight();
+            }
+            // if (chatbotWrap) {
+            //     if (!historyLoaded) {
+            //     }
+            //     setChatbotScroll();
+            // }
         }
     }
+}
+
+function webLocale() {
+    // console.log("webLocale", language);
+    if (forView_i18n.hasOwnProperty(language)) {
+        var forView = forView_i18n[language];
+        var forViewStyle = document.createElement('style');
+        forViewStyle.innerHTML = '.wrap>.history-message>:last-child::after { content: "' + forView + '"!important; }';
+        document.head.appendChild(forViewStyle);
+    }
+    if (deleteConfirm_i18n_pref.hasOwnProperty(language)) {
+        deleteConfirm_msg_pref = deleteConfirm_i18n_pref[language];
+        deleteConfirm_msg_suff = deleteConfirm_i18n_suff[language];
+    }
+}
+
+function showConfirmationDialog(a, file, c) {
+    if (file != "") {
+        var result = confirm(deleteConfirm_msg_pref + file + deleteConfirm_msg_suff);
+        if (result) {
+            return [a, file, c];
+        }
+    }
+    return [a, "CANCELED", c];
+}
+
+var username = null;
+function getUserInfo() {
+    if (usernameGotten) {
+        return;
+    }
+    userLogged = localStorage.getItem('userLogged');
+    if (userLogged) {
+        username = userInfoDiv.innerText;
+        if (username) {
+            if (username.includes("getting user info…")) {
+                setTimeout(getUserInfo, 500);
+                return;
+            } else if (username === " ") {
+                localStorage.removeItem("username");
+                localStorage.removeItem("userLogged")
+                userLogged = false;
+                usernameGotten = true;
+                return;
+            } else {
+                username = username.match(/User:\s*(.*)/)[1] || username;
+                localStorage.setItem("username", username);
+                usernameGotten = true;
+            }
+        }
+    }
+}
+
+function toggleUserInfoVisibility(shouldHide) {
+    if (userInfoDiv) {
+        if (shouldHide) {
+            userInfoDiv.classList.add("hideK");
+        } else {
+            userInfoDiv.classList.remove("hideK");
+        }
+    }
+}
+function showOrHideUserInfo() {
+    var sendBtn = document.getElementById("submit_btn");
+
+    // Bind mouse/touch events to show/hide user info
+    appTitleDiv.addEventListener("mouseenter", function () {
+        toggleUserInfoVisibility(false);
+    });
+    userInfoDiv.addEventListener("mouseenter", function () {
+        toggleUserInfoVisibility(false);
+    });
+    sendBtn.addEventListener("mouseenter", function () {
+        toggleUserInfoVisibility(false);
+    });
+
+    appTitleDiv.addEventListener("mouseleave", function () {
+        toggleUserInfoVisibility(true);
+    });
+    userInfoDiv.addEventListener("mouseleave", function () {
+        toggleUserInfoVisibility(true);
+    });
+    sendBtn.addEventListener("mouseleave", function () {
+        toggleUserInfoVisibility(true);
+    });
+
+    appTitleDiv.ontouchstart = function () {
+        toggleUserInfoVisibility(false);
+    };
+    userInfoDiv.ontouchstart = function () {
+        toggleUserInfoVisibility(false);
+    };
+    sendBtn.ontouchstart = function () {
+        toggleUserInfoVisibility(false);
+    };
+
+    appTitleDiv.ontouchend = function () {
+        setTimeout(function () {
+            toggleUserInfoVisibility(true);
+        }, 3000);
+    };
+    userInfoDiv.ontouchend = function () {
+        setTimeout(function () {
+            toggleUserInfoVisibility(true);
+        }, 3000);
+    };
+    sendBtn.ontouchend = function () {
+        setTimeout(function () {
+            toggleUserInfoVisibility(true);
+        }, 3000); // Delay 1 second to hide user info
+    };
+
+    // Hide user info after 2 second
+    setTimeout(function () {
+        toggleUserInfoVisibility(true);
+    }, 2000);
 }
 
 function toggleDarkMode(isEnabled) {
@@ -78,7 +232,33 @@ function adjustDarkMode() {
     });
 }
 
-
+function setChatbotHeight() {
+    const screenWidth = window.innerWidth;
+    const statusDisplay = document.querySelector('#status_display');
+    const statusDisplayHeight = statusDisplay ? statusDisplay.offsetHeight : 0;
+    const wrap = chatbot.querySelector('.wrap');
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+    if (isInIframe) {
+        chatbot.style.height = `700px`;
+        wrap.style.maxHeight = `calc(700px - var(--line-sm) * 1rem - 2 * var(--block-label-margin))`
+    } else {
+        if (screenWidth <= 320) {
+            chatbot.style.height = `calc(var(--vh, 1vh) * 100 - ${statusDisplayHeight + 150}px)`;
+            wrap.style.maxHeight = `calc(var(--vh, 1vh) * 100 - ${statusDisplayHeight + 150}px - var(--line-sm) * 1rem - 2 * var(--block-label-margin))`;
+        } else if (screenWidth <= 499) {
+            chatbot.style.height = `calc(var(--vh, 1vh) * 100 - ${statusDisplayHeight + 100}px)`;
+            wrap.style.maxHeight = `calc(var(--vh, 1vh) * 100 - ${statusDisplayHeight + 100}px - var(--line-sm) * 1rem - 2 * var(--block-label-margin))`;
+        } else {
+            chatbot.style.height = `calc(var(--vh, 1vh) * 100 - ${statusDisplayHeight + 160}px)`;
+            wrap.style.maxHeight = `calc(var(--vh, 1vh) * 100 - ${statusDisplayHeight + 160}px - var(--line-sm) * 1rem - 2 * var(--block-label-margin))`;
+        }
+    }
+}
+function setChatbotScroll() {
+    var scrollHeight = chatbotWrap.scrollHeight;
+    chatbotWrap.scrollTo(0,scrollHeight)
+}
 var rangeInputs = null;
 var numberInputs = null;
 function setSlider() {
