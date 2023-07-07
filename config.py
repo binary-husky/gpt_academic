@@ -62,8 +62,6 @@ AUTO_CLEAR_TXT = False
 # 色彩主体，可选： "Default", "Green"
 THEME = "Default"
 
-ENABLE_AUDIO = True
-
 # 加一个live2d装饰
 ADD_WAIFU = False
 
@@ -91,9 +89,13 @@ your bing cookies here
 SLACK_CLAUDE_BOT_ID = ''   
 SLACK_CLAUDE_USER_TOKEN = ''
 
-
 # 如果需要使用AZURE 详情请见额外文档 docs\use_azure.md
 AZURE_ENDPOINT = "https://你的api名称.openai.azure.com/"
 AZURE_API_KEY = "填入azure openai api的密钥"
 AZURE_API_VERSION = "填入api版本"
 AZURE_ENGINE = "填入ENGINE"
+
+# 阿里云实时语音识别 配置门槛较高 限高级用户使用 参考 https://help.aliyun.com/document_detail/450255.html
+ENABLE_AUDIO = True
+ALIYUN_TOKEN=""    # 例如 f37f30e0f9934c34a992f6f64f7eba4f
+ALIYUN_APPKEY=""   # 例如 RoPlZrM88DnAFkZK

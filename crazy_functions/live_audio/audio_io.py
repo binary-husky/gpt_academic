@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import interpolate
 
 def Singleton(cls):
     _instance = {}
@@ -15,12 +16,12 @@ def Singleton(cls):
 class RealtimeAudioDistribution():
     def __init__(self) -> None:
         self.data = {}
-        self.max_len = 1024*64
+        self.max_len = 1024*1024
         self.rate = 48000   # 只读，每秒采样数量
 
     def feed(self, uuid, audio):
-        print('feed')
         self.rate, audio_ = audio
+        print('feed', len(audio_), audio_[-25:])
         if uuid not in self.data:
             self.data[uuid] = audio_
         else:
@@ -31,7 +32,17 @@ class RealtimeAudioDistribution():
     def read(self, uuid):
         if uuid in self.data:
             res = self.data.pop(uuid)
-            print('read', len(res))
+            print('read', len(res), res)
         else:
             res = None
         return res
+    
+def change_sample_rate(audio, old_sr, new_sr):
+    duration = audio.shape[0] / old_sr
+
+    time_old  = np.linspace(0, duration, audio.shape[0])
+    time_new  = np.linspace(0, duration, int(audio.shape[0] * new_sr / old_sr))
+
+    interpolator = interpolate.interp1d(time_old, audio.T)
+    new_audio = interpolator(time_new).T
+    return new_audio.astype(np.int16)
