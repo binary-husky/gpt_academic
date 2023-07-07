@@ -105,10 +105,10 @@ SLACK_CLAUDE_USER_TOKEN = ''
 
 
 # 如果需要使用AZURE 详情请见额外文档 docs\use_azure.md
-AZURE_ENDPOINT = "https://你的api名称.openai.azure.com/"
+AZURE_ENDPOINT = "https://你亲手写的api名称.openai.azure.com/"
 AZURE_API_KEY = "填入azure openai api的密钥"
-AZURE_API_VERSION = "填入api版本"
-AZURE_ENGINE = "填入ENGINE"
+AZURE_API_VERSION = "2023-05-15"        # 一般不修改
+AZURE_ENGINE = "填入你亲手写的部署名"     # 读 docs\use_azure.md
 
 
 # 使用Newbing
