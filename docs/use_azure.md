@@ -102,10 +102,10 @@
 ```
 LLM_MODEL = "azure-gpt-3.5"  # 指定启动时的默认模型，当然事后从下拉菜单选也ok
 
-AZURE_ENDPOINT = "填入终结点"
+AZURE_ENDPOINT = "填入终结点" # 见上述图片
 AZURE_API_KEY = "填入azure openai api的密钥"
 AZURE_API_VERSION = "2023-05-15"  # 默认使用 2023-05-15 版本，无需修改
-AZURE_ENGINE = "填入部署名" # 见上图
+AZURE_ENGINE = "填入部署名" # 见上述图片
 
 ```
 
