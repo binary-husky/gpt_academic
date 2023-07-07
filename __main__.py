@@ -150,39 +150,32 @@ class ChatBot(ChatBotFrame):
         with gr.Row():
             self.pro_search_txt = gr.Textbox(show_label=False, placeholder="Enter the prompt you want.").style(
                 container=False)
-            self.pro_entry_btn = gr.Button("搜索", variant="primary").style(full_width=False, size="sm")
+            self.pro_entry_btn = gr.Button("搜索", variant="primary", elem_classes='short_btn ').style(full_width=False, size="sm")
+            self.pro_reuse_btn = gr.Button("复用Result", variant="secondary", elem_classes='short_btn ').style(full_width=False, size="sm")
+            self.pro_clear_btn = gr.Button("重置Result", variant="stop", elem_classes='short_btn ').style(full_width=False, size="sm")
         with gr.Row():
-            with gr.Accordion(label='Prompt usage frequency'):
-                self.pro_prompt_list = gr.Dataset(components=[gr.HTML(visible=False)], samples_per_page=10,
-                                                  label='Results',
-                                                  samples=[[". . ."] for i in range(20)], type='index')
-                self.pro_prompt_state = gr.State(self.pro_prompt_list)
+            self.pro_prompt_list = gr.Dataset(components=[gr.HTML(visible=False)], samples_per_page=10,
+                                              label='Results',
+                                              samples=[[". . ."] for i in range(20)], type='index')
+            self.pro_prompt_state = gr.State(self.pro_prompt_list)
+        with gr.Row():
+            self.pro_results = gr.Chatbot(label='Prompt and result', elem_id='prompt_result').style()
 
     def draw_temp_edit(self):
-        with gr.Box():
-            with gr.Row():
-                with gr.Column(scale=100):
-                    self.pro_results = gr.Chatbot(label='Prompt and result', elem_id='prompt_result').style()
-                with gr.Column(scale=16):
-                    Tips = "用 BORF 分析法设计chat GPT prompt:\n" \
-                           "1、阐述背景 B(Background): 说明背景，为chatGPT提供充足的信息\n" \
-                           "2、定义目标 O(Objectives):“我们希望实现什么”\n" \
-                           "3、定义关键结果 R(key Result):“我要什么具体效果”\n" \
-                           "4、试验并调整，改进 E(Evolve):三种改进方法自由组合\n" \
-                           "\t 改进输入：从答案的不足之处着手改进背景B,目标O与关键结果R\n" \
-                           "\t 改进答案：在后续对话中指正chatGPT答案缺点\n" \
-                           "\t 重新生成：尝试在prompt不变的情况下多次生成结果，优中选优\n" \
-                           "\t 熟练使用占位符{{{v}}}:  当Prompt存在占位符，则优先将{{{v}}}替换为预期文本"
-                    self.pro_edit_txt = gr.Textbox(show_label=False, info='Prompt编辑区', lines=14,
-                                                   placeholder=Tips).style(container=False)
-                    with gr.Row():
-                        self.pro_name_txt = gr.Textbox(show_label=False, placeholder='是否全复用prompt / prompt功能名', ).style(
-                            container=False)
-                        self.pro_new_btn = gr.Button("保存Prompt", variant="primary").style(size='sm').style()
-                    with gr.Row(elem_id='sm_row'):
-                        self.pro_reuse_btn = gr.Button("复用Result", variant="secondary").style(size='sm').style(full_width=False)
-                        self.pro_clear_btn = gr.Button("重置Result", variant="stop").style(size='sm').style(full_width=False)
-
+        Tips = "用 BORF 分析法设计chat GPT `提示词`:\n" \
+               "1、阐述背景 B(Background): 说明背景，为chatGPT提供充足的信息\n" \
+               "2、定义目标 O(Objectives):“我们希望实现什么”\n" \
+               "3、定义关键结果 R(key Result):“我要什么具体效果”\n" \
+               "4、试验并调整，改进 E(Evolve):三种改进方法自由组合\n" \
+               "\t 改进输入：从答案的不足之处着手改进背景B,目标O与关键结果R\n" \
+               "\t 改进答案：在后续对话中指正chatGPT答案缺点\n" \
+               "\t 重新生成：尝试在`提示词`不变的情况下多次生成结果，优中选优\n" \
+               "\t 熟练使用占位符{{{v}}}:  当Prompt存在占位符，则优先将{{{v}}}替换为预期文本"
+        self.pro_edit_txt = gr.Textbox(show_label=False, info='Prompt编辑区', lines=8,
+                                       placeholder=Tips).style(container=False)
+        with gr.Row():
+            self.pro_name_txt = gr.Textbox(show_label=False, placeholder='提示词名称').style(container=False)
+            self.pro_new_btn = gr.Button("保存提示词", variant="primary").style(size='sm', full_width=True)
 
     def signals_prompt_edit(self):
         self.pro_clear_btn.click(fn=lambda: [], inputs=None, outputs=self.pro_results)
@@ -214,11 +207,12 @@ class ChatBot(ChatBotFrame):
     def draw_function_chat(self):
         prompt_list, devs_document = get_conf('prompt_list', 'devs_document')
         with gr.TabItem('Function', id='func_tab'):
-            with gr.Accordion("基础功能区", open=False) as self.area_basic_fn:
-                with gr.Row():
-                    for k in functional:
-                        variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
-                        functional[k]["Button"] = gr.Button(k, variant=variant)
+            with gr.Accordion("Prompt编辑保存", open=False) as self.prompt_edit_area:
+                pass
+                # with gr.Row():
+                #     for k in functional:
+                #         variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
+                #         functional[k]["Button"] = gr.Button(k, variant=variant)
             with gr.Accordion("上传你的Prompt", open=False) as self.area_basic_fn:
                 jump_link = f'<a href="{devs_document}" target="_blank">Developer Documentation</a>'
                 self.pro_devs_link = gr.HTML(jump_link)
@@ -424,7 +418,7 @@ class ChatBot(ChatBotFrame):
             # 绘制一个ROW，row会让底下的元素自动排成一行
             with gr.Row().style(justify='between'):
                 # 绘制列1
-                with gr.Column(scale=44, elem_id='colum_1') as self.cloum_1:
+                with gr.Column(scale=40, elem_id='colum_1') as self.cloum_1:
                     with gr.Tabs() as self.tabs_copilot:
                         # 绘制对话模组
                         with gr.TabItem('Chat-Copilot') as self.Chat_Copilot:
@@ -445,33 +439,24 @@ class ChatBot(ChatBotFrame):
                         with gr.TabItem('Chatbot', id='chatbot') as self.chat_tab:
                             # self.draw_chatbot()
                             pass
-                        with gr.TabItem('Prompt检索/编辑') as self.prompt_tab:
+                        with gr.TabItem('Prompt、对话记录搜索') as self.prompt_tab:
                             self.draw_prompt()
-
-                        # with gr.Column(visible=False) as self.mobile_column:
-                        #     with gr.Row():
-                        #         self.resetBtn = gr.Button("新建对话", variant="primary", elem_id='empty_btn').style(size="sm")
-                        #         self.stopBtn = gr.Button("中止对话", variant="stop").style(size="sm")
-                        #     with gr.Tabs() as self.tabs_inputs:
-                        #         self.draw_function_chat()
-                        #         self.draw_public_chat()
-                        #         self.draw_setting_chat()
 
                 with self.chat_tab:  # 使用 gr.State()对组件进行拷贝时，如果之前绘制了Markdown格式，会导致启动崩溃,所以将 markdown相关绘制放在最后
                     self.draw_chatbot()
                     self.draw_examples()
-                with self.prompt_tab:
+                with self.prompt_edit_area:
                     self.draw_temp_edit()
             # 函数注册，需要在Blocks下进行
             self.signals_input_setting()
             self.signals_sm_btn()
-            self.signals_function()
+            # self.signals_function()
             self.signals_prompt_func()
             self.signals_public()
             self.signals_prompt_edit()
             # self.signals_auto_input()
             adv_plugins = gr.State([i for i in crazy_fns])
-            self.demo.load(fn=func_box.refresh_load_data, postprocess=False,
+            self.demo.load(fn=func_box.refresh_load_data,
                            inputs=[self.chatbot, self.history, self.pro_fp_state, adv_plugins],
                            outputs=[self.pro_func_prompt, self.pro_fp_state, self.chatbot,
                                     self.history, self.guidance_plugins, self.guidance_plugins_state,

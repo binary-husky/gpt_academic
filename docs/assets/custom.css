@@ -89,6 +89,11 @@ mspace {
     min-width: min(10%,100%) !important;
     overflow: hidden;
 }
+.short_btn {
+    position: relative;
+    min-width: min(10%,100%) !important;
+    overflow: hidden;
+}
 .sm_select {
     position: relative !important;
     z-index: 5 !important;
@@ -208,14 +213,15 @@ footer {
     opacity: 1;
     transition: opacity 0.3s ease-in-out;
 }
-textarea.svelte-1pie7s6 {
-    background: #e7e6e6 !important;
+/*输入框*/
+.chat_input textarea.svelte-1pie7s6 {
     width: 96% !important;
 }
-
+textarea.svelte-1pie7s6 {
+    background: #e7e6e6 !important;
+}
 .dark textarea.svelte-1pie7s6 {
     background: var(--input-background-fill) !important;
-    width: 96% !important;
 }
 
 .dark input[type=number].svelte-1cl284s {

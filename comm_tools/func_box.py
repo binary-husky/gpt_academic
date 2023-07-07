@@ -529,18 +529,20 @@ def pattern_html(html):
         return ""
 
 
-def thread_write_chat(chatbot, history):
+def thread_write_chat(chatbot):
     """
     对话记录写入数据库
     """
-    chatbot, history = copy.copy(chatbot), copy.copy(history)
+    chatbot = copy.copy(chatbot)
     private_key = toolbox.get_conf('private_key')[0]
     chat_title = chatbot[0][1].split()
     i_say = pattern_html(chatbot[-1][0])
-    if history:
-        gpt_result = history
-    else:  # 如果历史对话不存在，那么读取对话框
-        gpt_result = [pattern_html(v) for i in chatbot for v in i]
+    gpt_result = []
+    for i in chatbot[1:]:
+        for v in i:
+            if v is None: pass
+            else: v = pattern_html(v)
+            gpt_result.append(v)
     if private_key in chat_title:
         SqliteHandle(f'ai_private_{chat_title[-2]}').inset_prompt({i_say: gpt_result})
     else:
