@@ -167,6 +167,7 @@ footer {
     font-size: 85%;
     opacity: 0.60;
 }
+/* user_info */
 
 #float_display {
     position: absolute;
@@ -241,16 +242,15 @@ textarea.svelte-1pie7s6 {
     transition: height 0.3s ease;
 }
 
-.wrap.svelte-18telvq.svelte-18telvq {
+/* .wrap.svelte-18telvq.svelte-18telvq {
     padding: var(--block-padding) !important;
     height: 100% !important;
     max-height: 95% !important;
     overflow-y: auto !important;
-}
+}*/
 .app.svelte-1mya07g.svelte-1mya07g {
     max-width: 100%;
     position: relative;
-    /* margin: auto; */
     padding: var(--size-4);
     width: 100%;
     height: 100%;
