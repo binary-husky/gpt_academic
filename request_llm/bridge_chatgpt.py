@@ -22,8 +22,8 @@ import importlib
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
 from toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history, trimmed_format_exc
-proxies, API_KEY, TIMEOUT_SECONDS, MAX_RETRY = \
-    get_conf('proxies', 'API_KEY', 'TIMEOUT_SECONDS', 'MAX_RETRY')
+proxies, API_KEY, TIMEOUT_SECONDS, MAX_RETRY, API_ORG = \
+    get_conf('proxies', 'API_KEY', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'API_ORG')
 
 timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check proxy settings in config.py.' + \
                   '网络错误，检查代理服务器是否可用，以及代理设置的格式是否正确，格式须是[协议]://[地址]:[端口]，缺一不可。'
@@ -246,6 +246,7 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         "Content-Type": "application/json",
         "Authorization": f"Bearer {api_key}"
     }
+    if API_ORG.startswith('org-'): headers.update({"OpenAI-Organization": API_ORG})
 
     conversation_cnt = len(history) // 2
 
