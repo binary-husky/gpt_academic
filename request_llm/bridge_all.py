@@ -121,7 +121,7 @@ model_info = {
     },
 
     # azure openai
-    "azure-gpt35":{
+    "azure-gpt-3.5":{
         "fn_with_ui": azure_ui,
         "fn_without_ui": azure_noui,
         "endpoint": get_conf("AZURE_ENDPOINT"),
