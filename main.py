@@ -1,5 +1,5 @@
 import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
-
+from itertools import chain
 def main():
     import gradio as gr
     if gr.__version__ not in ['3.28.3','3.32.2']: assert False, "需要特殊依赖，请务必用 pip install -r requirements.txt 指令安装依赖，详情信息见requirements.txt"
@@ -32,6 +32,11 @@ def main():
     # 高级函数插件
     from crazy_functional import get_crazy_functions
     crazy_fns = get_crazy_functions()
+    
+    # 核心功能和插件合并
+    all_functional = {}
+    all_functional.update(functional)
+    all_functional.update(crazy_fns)
 
     # 处理markdown文本格式的转变
     gr.Chatbot.postprocess = format_io
@@ -100,6 +105,27 @@ def main():
                     with gr.Row():
                         with gr.Accordion("点击展开“文件上传区”。上传本地文件可供红色函数插件调用。", open=False) as area_file_up:
                             file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)", file_count="multiple")
+                with gr.Accordion("函数分类筛选", open=False) as area_tag_select:
+                    
+                    with gr.Row():
+                        tags = []
+                        for v in chain(functional.values(), crazy_fns.values()):
+                            v:dict
+                            tags.extend(v.get('Tags',[]))
+                        tags = list(set(tags)) + ['未分类',"所有函数"]
+                    with gr.Row():
+                        tag_selector = gr.Radio(tags, label="Tags")
+                    with gr.Row():
+                        # selected_funcs_area = gr.Text("")
+                        for k,v in all_functional.items():
+                            if ("Visible" in v) and (not v["Visible"]): continue
+                            variant = v["Color"] if "Color" in v else "secondary"
+                            v["Button"] = gr.Button(k, variant=variant)
+                    with gr.Row():
+                        with gr.Accordion("点击展开“文件上传区”。上传本地文件可供红色函数插件调用。", open=False) as area_file_up:
+                            file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)", file_count="multiple")
+                    
+                    
                 with gr.Accordion("更换模型 & SysPrompt & 交互界面布局", open=(LAYOUT == "TOP-DOWN")):
                     system_prompt = gr.Textbox(show_label=True, placeholder=f"System Prompt", label="System prompt", value=initial_prompt)
                     top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01,interactive=True, label="Top-p (nucleus sampling)",)
@@ -186,6 +212,34 @@ def main():
         stopBtn.click(fn=None, inputs=None, outputs=None, cancels=cancel_handles)
         stopBtn2.click(fn=None, inputs=None, outputs=None, cancels=cancel_handles)
 
+        def on_tag_selected(tag):
+            """选择Tags事件处理，需要渲染出函数功能按钮
+
+            Args:
+                tag (_type_): _description_
+
+            Returns:
+                _type_: _description_
+            """
+            if tag =="未分类":
+                selected_funcs = {k:v for k,v in all_functional.items() if v.get('Tags',[]).__len__()==0}
+            elif tag=="所有函数":
+                selected_funcs = all_functional.copy()  
+            else:
+                selected_funcs = {k:v for k,v in all_functional.items() if tag in  v.get('Tags',[])}
+                
+            # 如果一个函数在selected_funcs中，则设置visible为True，否则为False
+            ret= {
+                v.get('Button'): gr.update(visible=(k in selected_funcs))
+                for k,v in all_functional.items() if 'Button' in v
+            }
+            return ret
+            
+        tag_selector.change(
+            on_tag_selected, 
+            inputs=[tag_selector], 
+            outputs=[v['Button'] for k,v in all_functional.items() if 'Button' in v] # Tag选择区的所有button
+        )
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay():
         import threading, webbrowser, time
