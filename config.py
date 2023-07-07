@@ -60,7 +60,7 @@ CONCURRENT_COUNT = 100
 AUTO_CLEAR_TXT = False
 
 # 色彩主体，可选 ["Default", "Chuanhu-Keldos-Green"]
-THEME = "Default"
+THEME = "Chuanhu-Keldos-Green"
 
 # 加一个live2d装饰
 ADD_WAIFU = False

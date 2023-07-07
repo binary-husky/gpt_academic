@@ -305,6 +305,10 @@ gpt_academic开发者QQ群-2：610599535
     - 某些浏览器翻译插件干扰此软件前端的运行
     - 官方Gradio目前有很多兼容性Bug，请务必使用`requirement.txt`安装Gradio
 
+## 主题
+
+1. `Chuanhu-Keldos-Green` [网址](https://github.com/GaiZhenbiao/ChuanhuChatGPT/)
+
 ## 参考与学习
 
 ```
