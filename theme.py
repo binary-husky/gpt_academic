@@ -1,6 +1,6 @@
 import gradio as gr
 from toolbox import get_conf
-CODE_HIGHLIGHT, ADD_WAIFU = get_conf('CODE_HIGHLIGHT', 'ADD_WAIFU')
+CODE_HIGHLIGHT, ADD_WAIFU, LAYOUT = get_conf('CODE_HIGHLIGHT', 'ADD_WAIFU', 'LAYOUT')
 # gradio可用颜色列表
 # gr.themes.utils.colors.slate (石板色)
 # gr.themes.utils.colors.gray (灰色)
@@ -82,20 +82,76 @@ def adjust_theme():
             button_cancel_text_color_dark="white",
         )
 
+        # Layout = "LEFT-RIGHT"
+        js = """
+            <script>
+            function ChatBotHeight() {
+                function update_height(){
+                    var { panel_height_target, chatbot_height, chatbot } = get_elements();
+                    if (panel_height_target!=chatbot_height)
+                    {
+                        var pixelString = panel_height_target.toString() + 'px';
+                        chatbot.style.maxHeight = pixelString; chatbot.style.height = pixelString; 
+                    }
+                }
+
+                function update_height_slow(){
+                    var { panel_height_target, chatbot_height, chatbot } = get_elements();
+                    if (panel_height_target!=chatbot_height)
+                    {
+                        new_panel_height = (panel_height_target - chatbot_height)*0.5 + chatbot_height;
+                        if (Math.abs(new_panel_height - panel_height_target) < 10){
+                            new_panel_height = panel_height_target;
+                        }
+                        // console.log(chatbot_height, panel_height_target, new_panel_height);
+                        var pixelString = new_panel_height.toString() + 'px';
+                        chatbot.style.maxHeight = pixelString; chatbot.style.height = pixelString; 
+                    }
+                }
+
+                update_height();
+                setInterval(function() {
+                    update_height_slow()
+                }, 50); // 每100毫秒执行一次
+            }
+
+            function get_elements() {
+                var chatbot = document.querySelector('#gpt-chatbot > div.wrap.svelte-18telvq');
+                if (!chatbot) {
+                    chatbot = document.querySelector('#gpt-chatbot');
+                }
+                const panel1 = document.querySelector('#input-panel');
+                const panel2 = document.querySelector('#basic-panel');
+                const panel3 = document.querySelector('#plugin-panel');
+                const panel4 = document.querySelector('#interact-panel');
+                const panel5 = document.querySelector('#input-panel2');
+                const panel_active = document.querySelector('#state-panel');
+                var panel_height_target = (20-panel_active.offsetHeight) + panel1.offsetHeight + panel2.offsetHeight + panel3.offsetHeight + panel4.offsetHeight + panel5.offsetHeight + 21;
+                var panel_height_target = parseInt(panel_height_target);
+                var chatbot_height = chatbot.style.height;
+                var chatbot_height = parseInt(chatbot_height);
+                return { panel_height_target, chatbot_height, chatbot };
+            }
+            </script>
+        """
+
+        if LAYOUT=="TOP-DOWN": 
+            js = ""
+            
         # 添加一个萌萌的看板娘
         if ADD_WAIFU:
-            js = """
+            js += """
                 <script src="file=docs/waifu_plugin/jquery.min.js"></script>
                 <script src="file=docs/waifu_plugin/jquery-ui.min.js"></script>
                 <script src="file=docs/waifu_plugin/autoload.js"></script>
             """
-            gradio_original_template_fn = gr.routes.templates.TemplateResponse
-            def gradio_new_template_fn(*args, **kwargs):
-                res = gradio_original_template_fn(*args, **kwargs)
-                res.body = res.body.replace(b'</html>', f'{js}</html>'.encode("utf8"))
-                res.init_headers()
-                return res
-            gr.routes.templates.TemplateResponse = gradio_new_template_fn   # override gradio template
+        gradio_original_template_fn = gr.routes.templates.TemplateResponse
+        def gradio_new_template_fn(*args, **kwargs):
+            res = gradio_original_template_fn(*args, **kwargs)
+            res.body = res.body.replace(b'</html>', f'{js}</html>'.encode("utf8"))
+            res.init_headers()
+            return res
+        gr.routes.templates.TemplateResponse = gradio_new_template_fn   # override gradio template
     except:
         set_theme = None
         print('gradio版本较旧, 不能自定义字体和颜色')

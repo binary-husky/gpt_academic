@@ -352,6 +352,18 @@ def get_crazy_functions():
         })
     except:
         print('Load function plugin failed')
+        
+    try:
+        from crazy_functions.交互功能函数模板 import 交互功能模板函数
+        function_plugins.update({
+            "交互功能模板函数": {
+                "Color": "stop",
+                "AsButton": False,
+                "Function": HotReload(交互功能模板函数)
+            }
+        })
+    except:
+        print('Load function plugin failed')
 
     try:
         from crazy_functions.Latex输出PDF结果 import Latex英文纠错加PDF对比
