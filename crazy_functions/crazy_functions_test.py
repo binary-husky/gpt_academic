@@ -211,22 +211,30 @@ def test_Latex():
     # # for cookies, cb, hist, msg in silence_stdout(编译Latex)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     #     cli_printer.print(cb)   #  print(cb)
 
+def test_chatglm_finetune():
+    from crazy_functions.chatglm微调工具 import 微调数据集生成
+    txt = 'build/dev.json'
+    plugin_kwargs = {"advanced_arg":"--llm_to_learn=gpt-3.5-turbo --prompt_prefix='根据下面的服装类型提示，想象一个穿着者，对这个人外貌、身处的环境、内心世界、人设进行描写。要求：100字以内，用第二人称。' --system_prompt=''" }
+
+    for cookies, cb, hist, msg in (微调数据集生成)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+        cli_printer.print(cb)
 
 
-# test_解析一个Python项目()
-# test_Latex英文润色()
-# test_Markdown中译英()
-# test_批量翻译PDF文档()
-# test_谷歌检索小助手()
-# test_总结word文档()
-# test_下载arxiv论文并翻译摘要()
-# test_解析一个Cpp项目()
-# test_联网回答问题()
-# test_解析ipynb文件()
-# test_数学动画生成manim()
-# test_Langchain知识库()
-# test_Langchain知识库读取()
 if __name__ == "__main__":
-    test_Latex()
+    # test_解析一个Python项目()
+    # test_Latex英文润色()
+    # test_Markdown中译英()
+    # test_批量翻译PDF文档()
+    # test_谷歌检索小助手()
+    # test_总结word文档()
+    # test_下载arxiv论文并翻译摘要()
+    # test_解析一个Cpp项目()
+    # test_联网回答问题()
+    # test_解析ipynb文件()
+    # test_数学动画生成manim()
+    # test_Langchain知识库()
+    # test_Langchain知识库读取()
+    # test_Latex()
+    test_chatglm_finetune()
     input("程序完成，回车退出。")
     print("退出。")
