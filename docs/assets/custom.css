@@ -557,12 +557,14 @@ ol:not(.options), ul:not(.options) {
     color: rgba(120, 120, 120, 0.64) !important;
     padding: 4px !important;
     position: absolute;
-    right: -22px;
     cursor: pointer !important;
     transition: color .2s ease, background-color .2s ease;
 }
 .user .chuanhu-btn {
     left: -22px;
+}
+.bot .chuanhu-btn {
+    right: -22px;
 }
 
 .chuanhu-btn:hover {

@@ -110,7 +110,7 @@ class ChatBot(ChatBotFrame):
 
     def draw_examples(self):
         with gr.Column(elem_id='examples_col') as self.examples_column:
-            gr.Markdown('# Get Started Quickly')
+            gr.Markdown('#  🤩 快速开始体验Ai功能')
             with gr.Row():
                 hide_components = gr.Textbox(visible=False)
                 gr.Button.update = func_box.update_btn
@@ -159,7 +159,7 @@ class ChatBot(ChatBotFrame):
                                               samples=[[". . ."] for i in range(20)], type='index')
             self.pro_prompt_state = gr.State(self.pro_prompt_list)
         with gr.Row():
-            self.pro_results = gr.Chatbot(label='Prompt and result', elem_id='prompt_result').style()
+            self.pro_results = gr.Chatbot(label='提示词和对话记录', elem_id='prompt_result').style()
 
     def draw_temp_edit(self):
         Tips = "用 BORF 分析法设计chat GPT `提示词`:\n" \
@@ -170,8 +170,8 @@ class ChatBot(ChatBotFrame):
                "\t 改进输入：从答案的不足之处着手改进背景B,目标O与关键结果R\n" \
                "\t 改进答案：在后续对话中指正chatGPT答案缺点\n" \
                "\t 重新生成：尝试在`提示词`不变的情况下多次生成结果，优中选优\n" \
-               "\t 熟练使用占位符{{{v}}}:  当Prompt存在占位符，则优先将{{{v}}}替换为预期文本"
-        self.pro_edit_txt = gr.Textbox(show_label=False, info='Prompt编辑区', lines=8,
+               "\t 熟练使用占位符{{{v}}}:  当`提示词`存在占位符，则优先将{{{v}}}替换为预期文本"
+        self.pro_edit_txt = gr.Textbox(show_label=False, info='提示词编辑区', lines=8,
                                        placeholder=Tips).style(container=False)
         with gr.Row():
             self.pro_name_txt = gr.Textbox(show_label=False, placeholder='提示词名称').style(container=False)
@@ -206,20 +206,20 @@ class ChatBot(ChatBotFrame):
 
     def draw_function_chat(self):
         prompt_list, devs_document = get_conf('prompt_list', 'devs_document')
-        with gr.TabItem('Function', id='func_tab'):
-            with gr.Accordion("Prompt编辑保存", open=False) as self.prompt_edit_area:
+        with gr.TabItem('基础功能', id='func_tab'):
+            with gr.Accordion("`提示词`编辑保存", open=False) as self.prompt_edit_area:
                 pass
                 # with gr.Row():
                 #     for k in functional:
                 #         variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
                 #         functional[k]["Button"] = gr.Button(k, variant=variant)
-            with gr.Accordion("上传你的Prompt", open=False) as self.area_basic_fn:
+            with gr.Accordion("`提示词`上传", open=False) as self.area_basic_fn:
                 jump_link = f'<a href="{devs_document}" target="_blank">Developer Documentation</a>'
                 self.pro_devs_link = gr.HTML(jump_link)
                 self.pro_upload_btn = gr.File(file_count='single', file_types=['.yaml', '.json'],
-                                              label=f'上传你的Prompt文件, 编写格式请遵循上述开发者文档', )
+                                              label=f'上传你的`提示词`文件, 编写格式请遵循上述开发者文档', )
             self.pro_private_check = gr.CheckboxGroup(choices=prompt_list['key'], value=prompt_list['value'],
-                                                      label='选择展示Prompt')
+                                                      label='`提示词`展示')
             self.pro_func_prompt = gr.Dataset(components=[gr.HTML()], label="Prompt List", visible=False,
                                               samples=[['...', ""] for i in range(20)], type='index',
                                               samples_per_page=10)
@@ -240,7 +240,7 @@ class ChatBot(ChatBotFrame):
         self.prompt_tab.select(fn=lambda: 1, inputs=None, outputs=self.tabs_code)
 
     def draw_public_chat(self):
-        with gr.TabItem('Plugins', id='plug_tab'):
+        with gr.TabItem('高级功能', id='plug_tab'):
             with gr.Accordion("上传本地文件可供高亮函数插件调用", open=False) as self.area_file_up:
                 self.file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)",
                                             file_count="multiple")
@@ -267,7 +267,7 @@ class ChatBot(ChatBotFrame):
 
     def draw_setting_chat(self):
         switch_model = get_conf('switch_model')[0]
-        with gr.TabItem('Settings', id='sett_tab'):
+        with gr.TabItem('对话设置', id='sett_tab'):
             self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01, interactive=True,
                                    label="Top-p (nucleus sampling)", ).style(container=False)
             self.temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True,
@@ -439,7 +439,7 @@ class ChatBot(ChatBotFrame):
                         with gr.TabItem('Chatbot', id='chatbot') as self.chat_tab:
                             # self.draw_chatbot()
                             pass
-                        with gr.TabItem('Prompt、对话记录搜索') as self.prompt_tab:
+                        with gr.TabItem('提示词、对话记录搜索') as self.prompt_tab:
                             self.draw_prompt()
 
                 with self.chat_tab:  # 使用 gr.State()对组件进行拷贝时，如果之前绘制了Markdown格式，会导致启动崩溃,所以将 markdown相关绘制放在最后
