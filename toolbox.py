@@ -505,16 +505,24 @@ def on_report_generated(cookies, files, chatbot):
     chatbot.append(['报告如何远程获取？', f'报告已经添加到右侧“文件上传区”（可能处于折叠状态），请查收。{file_links}'])
     return cookies, report_files, chatbot
 
+def load_chat_cookies():
+    API_KEY, LLM_MODEL, AZURE_API_KEY = get_conf('API_KEY', 'LLM_MODEL', 'AZURE_API_KEY')
+    if is_any_api_key(AZURE_API_KEY):
+        if is_any_api_key(API_KEY): API_KEY = API_KEY + ',' + AZURE_API_KEY
+        else: API_KEY = AZURE_API_KEY
+    return {'api_key': API_KEY, 'llm_model': LLM_MODEL}
+
 def is_openai_api_key(key):
     API_MATCH_ORIGINAL = re.match(r"sk-[a-zA-Z0-9]{48}$", key)
+    return bool(API_MATCH_ORIGINAL)
+
+def is_azure_api_key(key):
     API_MATCH_AZURE = re.match(r"[a-zA-Z0-9]{32}$", key)
-    return bool(API_MATCH_ORIGINAL) or bool(API_MATCH_AZURE)
+    return bool(API_MATCH_AZURE)
 
 def is_api2d_key(key):
-    if key.startswith('fk') and len(key) == 41:
-        return True
-    else:
-        return False
+    API_MATCH_API2D = re.match(r"fk[a-zA-Z0-9]{6}-[a-zA-Z0-9]{32}$", key)
+    return bool(API_MATCH_API2D)
 
 def is_any_api_key(key):
     if ',' in key:
@@ -523,10 +531,10 @@ def is_any_api_key(key):
             if is_any_api_key(k): return True
         return False
     else:
-        return is_openai_api_key(key) or is_api2d_key(key)
+        return is_openai_api_key(key) or is_api2d_key(key) or is_azure_api_key(key)
 
 def what_keys(keys):
-    avail_key_list = {'OpenAI Key':0, "API2D Key":0}
+    avail_key_list = {'OpenAI Key':0, "Azure Key":0, "API2D Key":0}
     key_list = keys.split(',')
 
     for k in key_list:
@@ -537,7 +545,11 @@ def what_keys(keys):
         if is_api2d_key(k): 
             avail_key_list['API2D Key'] += 1
 
-    return f"检测到： OpenAI Key {avail_key_list['OpenAI Key']} 个，API2D Key {avail_key_list['API2D Key']} 个"
+    for k in key_list:
+        if is_azure_api_key(k): 
+            avail_key_list['Azure Key'] += 1
+
+    return f"检测到： OpenAI Key {avail_key_list['OpenAI Key']} 个, Azure Key {avail_key_list['Azure Key']} 个, API2D Key {avail_key_list['API2D Key']} 个"
 
 def select_api_key(keys, llm_model):
     import random
@@ -552,8 +564,12 @@ def select_api_key(keys, llm_model):
         for k in key_list:
             if is_api2d_key(k): avail_key_list.append(k)
 
+    if llm_model.startswith('azure-'):
+        for k in key_list:
+            if is_azure_api_key(k): avail_key_list.append(k)
+
     if len(avail_key_list) == 0:
-        raise RuntimeError(f"您提供的api-key不满足要求，不包含任何可用于{llm_model}的api-key。您可能选择了错误的模型或请求源。")
+        raise RuntimeError(f"您提供的api-key不满足要求，不包含任何可用于{llm_model}的api-key。您可能选择了错误的模型或请求源（右下角更换模型菜单中可切换openai,azure和api2d请求源）")
 
     api_key = random.choice(avail_key_list) # 随机负载均衡
     return api_key
