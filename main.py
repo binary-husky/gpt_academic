@@ -4,10 +4,10 @@ def main():
     import gradio as gr
     if gr.__version__ not in ['3.28.3','3.32.2']: assert False, "需要特殊依赖，请务必用 pip install -r requirements.txt 指令安装依赖，详情信息见requirements.txt"
     from request_llm.bridge_all import predict
-    from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, DummyWith
+    from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, load_chat_cookies, DummyWith
     # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
-    proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT, API_KEY, AVAIL_LLM_MODELS, AUTO_CLEAR_TXT = \
-        get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'LAYOUT', 'API_KEY', 'AVAIL_LLM_MODELS', 'AUTO_CLEAR_TXT')
+    proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT, AVAIL_LLM_MODELS, AUTO_CLEAR_TXT = \
+        get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'LAYOUT', 'AVAIL_LLM_MODELS', 'AUTO_CLEAR_TXT')
 
     # 如果WEB_PORT是-1, 则随机选取WEB端口
     PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
@@ -54,7 +54,7 @@ def main():
     cancel_handles = []
     with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
         gr.HTML(title_html)
-        cookies = gr.State({'api_key': API_KEY, 'llm_model': LLM_MODEL})
+        cookies = gr.State(load_chat_cookies())
         with gr_L1():
             with gr_L2(scale=2):
                 chatbot = gr.Chatbot(label=f"当前模型：{LLM_MODEL}")

@@ -8,7 +8,7 @@
 """
 
 # [step 1]>> API_KEY = "sk-123456789xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx123456789"。极少数情况下，还需要填写组织（格式如org-123456789abcdefghijklmno的），请向下翻，找 API_ORG 设置项
-API_KEY = "sk-此处填API密钥"    # 可同时填写多个API-KEY，用英文逗号分割，例如API_KEY = "sk-openaikey1,sk-openaikey2,fkxxxx-api2dkey1,fkxxxx-api2dkey2"
+API_KEY = "此处填API密钥"    # 可同时填写多个API-KEY，用英文逗号分割，例如API_KEY = "sk-openaikey1,sk-openaikey2,fkxxxx-api2dkey3,azure-apikey4"
 
 
 # [step 2]>> 改为True应用代理，如果直接在海外服务器部署，此处不修改
@@ -110,9 +110,8 @@ SLACK_CLAUDE_USER_TOKEN = ''
 
 # 如果需要使用AZURE 详情请见额外文档 docs\use_azure.md
 AZURE_ENDPOINT = "https://你亲手写的api名称.openai.azure.com/"
-AZURE_API_KEY = "填入azure openai api的密钥"
-AZURE_API_VERSION = "2023-05-15"        # 一般不修改
-AZURE_ENGINE = "填入你亲手写的部署名"     # 读 docs\use_azure.md
+AZURE_API_KEY = "填入azure openai api的密钥"    # 建议直接在API_KEY处填写，该选项即将被弃用
+AZURE_ENGINE = "填入你亲手写的部署名"            # 读 docs\use_azure.md
 
 
 # 使用Newbing
