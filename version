@@ -1,5 +1,5 @@
 {
   "version": 3.44,
   "show_feature": true,
-  "new_feature": "改善UI <->  修复Azure接口的BUG <-> 完善多语言模块 <-> 完善本地Latex矫错和翻译功能 <-> 增加gpt-3.5-16k的支持 <-> 新增最强Arxiv论文翻译插件 <-> 修复gradio复制按钮BUG <-> 修复PDF翻译的BUG, 新增HTML中英双栏对照 <-> 添加了OpenAI图片生成插件"
+  "new_feature": "[改善UI] 动态ChatBot窗口高度 <-> 修复Azure接口的BUG <-> 完善多语言模块 <-> 完善本地Latex矫错和翻译功能 <-> 增加gpt-3.5-16k的支持 <-> 新增最强Arxiv论文翻译插件 <-> 修复gradio复制按钮BUG <-> 修复PDF翻译的BUG, 新增HTML中英双栏对照 <-> 添加了OpenAI图片生成插件"
 }
