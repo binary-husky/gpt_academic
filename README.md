@@ -1,8 +1,8 @@
 > **Note**
 >
-> 2023.7.5: Gradio依赖调整。请及时**更新代码**。安装依赖时，请严格选择`requirements.txt`中**指定的版本**
+> 2023.7.5: Gradio依赖调整。请及时**更新代码**
 >
-> 2023.7.8: pydantic新版本严重故障，已修改 `requirements.txt`。安装依赖时，请严格选择`requirements.txt`中**指定的版本**
+> 2023.7.8: pydantic出现兼容问题，已修改 `requirements.txt`。安装依赖时，请严格选择`requirements.txt`中**指定的版本**
 >
 > `pip install -r requirements.txt`
 
