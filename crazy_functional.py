@@ -418,12 +418,12 @@ def get_crazy_functions():
 
 
     try:
-        from crazy_functions.辅助面试 import 辅助面试
+        from crazy_functions.语音助手 import 语音助手
         function_plugins.update({
             "实时音频采集": {
                 "Color": "stop",
                 "AsButton": True,
-                "Function": HotReload(辅助面试)
+                "Function": HotReload(语音助手)
             }
         })
     except:
