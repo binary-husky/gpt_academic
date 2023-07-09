@@ -306,7 +306,7 @@ gpt_academic开发者QQ群-2：610599535
 
 ### III：主题
 
-1. `Chuanhu-Keldos-Green` [网址](https://github.com/GaiZhenbiao/ChuanhuChatGPT/)
+1. `Chuanhu-Small-and-Beautiful` [网址](https://github.com/GaiZhenbiao/ChuanhuChatGPT/)
 
 
 ### IV：参考与学习
