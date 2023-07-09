@@ -269,6 +269,24 @@ if "newbing" in AVAIL_LLM_MODELS:   # same with newbing-free
         })
     except:
         print(trimmed_format_exc())
+if "chatglmft" in AVAIL_LLM_MODELS:   # same with newbing-free
+    try:
+        from .bridge_chatglmft import predict_no_ui_long_connection as chatglmft_noui
+        from .bridge_chatglmft import predict as chatglmft_ui
+        # claude
+        model_info.update({
+            "chatglmft": {
+                "fn_with_ui": chatglmft_ui,
+                "fn_without_ui": chatglmft_noui,
+                "endpoint": None,
+                "max_token": 4096,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            }
+        })
+    except:
+        print(trimmed_format_exc())
+
 
 def LLM_CATCH_EXCEPTION(f):
     """
@@ -372,6 +390,6 @@ def predict(inputs, llm_kwargs, *args, **kwargs):
     additional_fn代表点击的哪个按钮，按钮见functional.py
     """
 
-    method = model_info[llm_kwargs['llm_model']]["fn_with_ui"]
+    method = model_info[llm_kwargs['llm_model']]["fn_with_ui"]  # 如果这里报错，检查config中的AVAIL_LLM_MODELS选项
     yield from method(inputs, llm_kwargs, *args, **kwargs)
 
