@@ -4,31 +4,37 @@ import time, threading, json
 class AliyunASR():
 
     def test_on_sentence_begin(self, message, *args):
-        print("test_on_sentence_begin:{}".format(message))
+        # print("test_on_sentence_begin:{}".format(message))
+        pass
 
     def test_on_sentence_end(self, message, *args):
-        print("test_on_sentence_end:{}".format(message))
+        # print("test_on_sentence_end:{}".format(message))
         message = json.loads(message)
         self.parsed_sentence = message['payload']['result']
         self.event_on_entence_end.set()
+        print(self.parsed_sentence)
 
     def test_on_start(self, message, *args):
-        print("test_on_start:{}".format(message))
+        # print("test_on_start:{}".format(message))
+        pass
 
     def test_on_error(self, message, *args):
-        print("on_error args=>{}".format(args))
+        # print("on_error args=>{}".format(args))
+        pass
 
     def test_on_close(self, *args):
-        print("on_close: args=>{}".format(args))
+        # print("on_close: args=>{}".format(args))
+        pass
 
     def test_on_result_chg(self, message, *args):
-        print("test_on_chg:{}".format(message))
+        # print("test_on_chg:{}".format(message))
         message = json.loads(message)
         self.parsed_text = message['payload']['result']
         self.event_on_result_chg.set()
 
     def test_on_completed(self, message, *args):
-        print("on_completed:args=>{} message=>{}".format(args, message))
+        # print("on_completed:args=>{} message=>{}".format(args, message))
+        pass
 
 
     def audio_convertion_thread(self, uuid):
@@ -41,10 +47,11 @@ class AliyunASR():
         from .audio_io import RealtimeAudioDistribution
         NEW_SAMPLERATE = 16000
         rad = RealtimeAudioDistribution()
+        rad.clean_up()
         temp_folder = tempfile.gettempdir()
         TOKEN, APPKEY = get_conf('ALIYUN_TOKEN', 'ALIYUN_APPKEY')
 
-        URL="wss://nls-gateway.cn-shanghai.aliyuncs.com/ws/v1"
+        URL="wss://nls-gateway.aliyuncs.com/ws/v1"
         sr = nls.NlsSpeechTranscriber(
                     url=URL,
                     token=TOKEN,
@@ -74,7 +81,7 @@ class AliyunASR():
                 io.wavfile.write(temp_file, NEW_SAMPLERATE, dsdata)
                 # read pcm binary
                 with open(temp_file, "rb") as f: data = f.read()
-                print('audio len:', len(audio), '\t ds len:', len(dsdata), '\t need n send:', len(data)//640)
+                # print('audio len:', len(audio), '\t ds len:', len(dsdata), '\t need n send:', len(data)//640)
                 slices = zip(*(iter(data),) * 640)    # 640个字节为一组
                 for i in slices: sr.send_audio(bytes(i))
             else:
