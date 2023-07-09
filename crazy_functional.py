@@ -352,6 +352,32 @@ def get_crazy_functions():
         })
     except:
         print('Load function plugin failed')
+        
+    try:
+        from crazy_functions.交互功能函数模板 import 交互功能模板函数
+        function_plugins.update({
+            "交互功能模板函数": {
+                "Color": "stop",
+                "AsButton": False,
+                "Function": HotReload(交互功能模板函数)
+            }
+        })
+    except:
+        print('Load function plugin failed')
+
+    # try:
+    #     from crazy_functions.chatglm微调工具 import 微调数据集生成
+    #     function_plugins.update({
+    #         "黑盒模型学习: 微调数据集生成 (先上传数据集)": {
+    #             "Color": "stop",
+    #             "AsButton": False,
+    #             "AdvancedArgs": True,
+    #             "ArgsReminder": "针对数据集输入（如 绿帽子*深蓝色衬衫*黑色运动裤）给出指令，例如您可以将以下命令复制到下方: --llm_to_learn=azure-gpt-3.5 --prompt_prefix='根据下面的服装类型提示，想象一个穿着者，对这个人外貌、身处的环境、内心世界、过去经历进行描写。要求：100字以内，用第二人称。' --system_prompt=''",
+    #             "Function": HotReload(微调数据集生成)
+    #         }
+    #     })
+    # except:
+    #     print('Load function plugin failed')
 
     try:
         from crazy_functions.Latex输出PDF结果 import Latex英文纠错加PDF对比

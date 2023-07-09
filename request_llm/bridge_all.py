@@ -16,14 +16,8 @@ from toolbox import get_conf, trimmed_format_exc
 from .bridge_chatgpt import predict_no_ui_long_connection as chatgpt_noui
 from .bridge_chatgpt import predict as chatgpt_ui
 
-from .bridge_azure_test import predict_no_ui_long_connection as azure_noui
-from .bridge_azure_test import predict as azure_ui
-
 from .bridge_chatglm import predict_no_ui_long_connection as chatglm_noui
 from .bridge_chatglm import predict as chatglm_ui
-
-from .bridge_newbing import predict_no_ui_long_connection as newbing_noui
-from .bridge_newbing import predict as newbing_ui
 
 # from .bridge_tgui import predict_no_ui_long_connection as tgui_noui
 # from .bridge_tgui import predict as tgui_ui
@@ -51,10 +45,11 @@ class LazyloadTiktoken(object):
         return encoder.decode(*args, **kwargs)
 
 # Endpoint 重定向
-API_URL_REDIRECT, = get_conf("API_URL_REDIRECT")
+API_URL_REDIRECT, AZURE_ENDPOINT, AZURE_ENGINE = get_conf("API_URL_REDIRECT", "AZURE_ENDPOINT", "AZURE_ENGINE")
 openai_endpoint = "https://api.openai.com/v1/chat/completions"
 api2d_endpoint = "https://openai.api2d.net/v1/chat/completions"
 newbing_endpoint = "wss://sydney.bing.com/sydney/ChatHub"
+azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
 # 兼容旧版的配置
 try:
     API_URL, = get_conf("API_URL")
@@ -124,10 +119,10 @@ model_info = {
     },
 
     # azure openai
-    "azure-gpt35":{
-        "fn_with_ui": azure_ui,
-        "fn_without_ui": azure_noui,
-        "endpoint": get_conf("AZURE_ENDPOINT"),
+    "azure-gpt-3.5":{
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": azure_endpoint,
         "max_token": 4096,
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
@@ -166,16 +161,6 @@ model_info = {
         "fn_without_ui": chatglm_noui,
         "endpoint": None,
         "max_token": 1024,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-    
-    # newbing
-    "newbing": {
-        "fn_with_ui": newbing_ui,
-        "fn_without_ui": newbing_noui,
-        "endpoint": newbing_endpoint,
-        "max_token": 4096,
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
@@ -257,6 +242,23 @@ if "newbing-free" in AVAIL_LLM_MODELS:
         # claude
         model_info.update({
             "newbing-free": {
+                "fn_with_ui": newbingfree_ui,
+                "fn_without_ui": newbingfree_noui,
+                "endpoint": newbing_endpoint,
+                "max_token": 4096,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            }
+        })
+    except:
+        print(trimmed_format_exc())
+if "newbing" in AVAIL_LLM_MODELS:   # same with newbing-free
+    try:
+        from .bridge_newbingfree import predict_no_ui_long_connection as newbingfree_noui
+        from .bridge_newbingfree import predict as newbingfree_ui
+        # claude
+        model_info.update({
+            "newbing": {
                 "fn_with_ui": newbingfree_ui,
                 "fn_without_ui": newbingfree_noui,
                 "endpoint": newbing_endpoint,
