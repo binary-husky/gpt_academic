@@ -19,9 +19,12 @@ class RealtimeAudioDistribution():
         self.max_len = 1024*1024
         self.rate = 48000   # 只读，每秒采样数量
 
+    def clean_up(self):
+        self.data = {}
+
     def feed(self, uuid, audio):
         self.rate, audio_ = audio
-        print('feed', len(audio_), audio_[-25:])
+        # print('feed', len(audio_), audio_[-25:])
         if uuid not in self.data:
             self.data[uuid] = audio_
         else:
@@ -32,7 +35,7 @@ class RealtimeAudioDistribution():
     def read(self, uuid):
         if uuid in self.data:
             res = self.data.pop(uuid)
-            print('read', len(res), res)
+            print('\r read-', len(res), '-', max(res), end='', flush=True)
         else:
             res = None
         return res
