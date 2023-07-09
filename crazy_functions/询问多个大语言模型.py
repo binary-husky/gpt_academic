@@ -6,7 +6,7 @@ def 同时问询(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     """
     txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数，如温度和top_p等，一般原样传递下去就行
-    plugin_kwargs   插件模型的参数，如温度和top_p等，一般原样传递下去就行
+    plugin_kwargs   插件模型的参数，用于灵活调整复杂功能的各种参数
     chatbot         聊天显示框的句柄，用于显示给用户
     history         聊天历史，前情提要
     system_prompt   给gpt的静默提醒
@@ -35,7 +35,7 @@ def 同时问询_指定模型(txt, llm_kwargs, plugin_kwargs, chatbot, history, 
     """
     txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数，如温度和top_p等，一般原样传递下去就行
-    plugin_kwargs   插件模型的参数，如温度和top_p等，一般原样传递下去就行
+    plugin_kwargs   插件模型的参数，用于灵活调整复杂功能的各种参数
     chatbot         聊天显示框的句柄，用于显示给用户
     history         聊天历史，前情提要
     system_prompt   给gpt的静默提醒
