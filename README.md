@@ -43,6 +43,7 @@ Markdown[中英互译](https://www.bilibili.com/video/BV1yo4y157jV/) | [函数�
 chat分析报告生成 | [函数插件] 运行后自动生成总结汇报
 [PDF论文全文翻译功能](https://www.bilibili.com/video/BV1KT411x7Wn) | [函数插件] PDF论文提取题目&摘要+翻译全文（多线程）
 [Arxiv小助手](https://www.bilibili.com/video/BV1LM4y1279X) | [函数插件] 输入arxiv文章url即可一键翻译摘要+下载PDF
+Latex论文一键校对 | [函数插件] 仿Grammarly对Latex文章进行语法、拼写纠错+输出对照PDF
 [谷歌学术统合小助手](https://www.bilibili.com/video/BV19L411U7ia) | [函数插件] 给定任意谷歌学术搜索页面URL，让gpt帮你[写relatedworks](https://www.bilibili.com/video/BV1GP411U7Az/)
 互联网信息聚合+GPT | [函数插件] 一键[让GPT从互联网获取信息](https://www.bilibili.com/video/BV1om4y127ck)回答问题，让信息永不过时
 ⭐Arxiv论文精细翻译 | [函数插件] 一键[以超高质量翻译arxiv论文](https://www.bilibili.com/video/BV1dz4y1v77A/)，目前最好的论文翻译工具
@@ -50,8 +51,9 @@ chat分析报告生成 | [函数插件] 运行后自动生成总结汇报
 多线程函数插件支持 | 支持多线调用chatgpt，一键处理[海量文本](https://www.bilibili.com/video/BV1FT411H7c5/)或程序
 启动暗色[主题](https://github.com/binary-husky/gpt_academic/issues/173) | 在浏览器url后面添加```/?__theme=dark```可以切换dark主题
 [多LLM模型](https://www.bilibili.com/video/BV1wT411p7yf)支持 | 同时被GPT3.5、GPT4、[清华ChatGLM](https://github.com/THUDM/ChatGLM-6B)、[复旦MOSS](https://github.com/OpenLMLab/MOSS)同时伺候的感觉一定会很不错吧？
+ChatGLM2微调模型 | 支持加载ChatGLM2微调模型，提供ChatGLM2微调插件
 更多LLM模型接入，支持[huggingface部署](https://huggingface.co/spaces/qingxu98/gpt-academic) | 加入Newbing接口(新必应)，引入清华[Jittorllms](https://github.com/Jittor/JittorLLMs)支持[LLaMA](https://github.com/facebookresearch/llama)和[盘古α](https://openi.org.cn/pangu/)
-更多新功能展示(图像生成等) …… | 见本文档结尾处 ……
+更多新功能展示 (图像生成等) …… | 见本文档结尾处 ……
 
 </div>
 
@@ -151,9 +153,9 @@ cd gpt_academic                                 # 进入路径
 nano config.py                                      # 用任意文本编辑器编辑config.py, 配置 “Proxy”， “API_KEY” 以及 “WEB_PORT” (例如50923) 等
 docker build -t gpt-academic .                      # 安装
 
-#（最后一步-选择1）在Linux环境下，用`--net=host`更方便快捷
+#（最后一步-Linux操作系统）用`--net=host`更方便快捷
 docker run --rm -it --net=host gpt-academic
-#（最后一步-选择2）在macOS/windows环境下，只能用-p选项将容器上的端口(例如50923)暴露给主机上的端口
+#（最后一步-MacOS/Windows操作系统）只能用-p选项将容器上的端口(例如50923)暴露给主机上的端口
 docker run --rm -it -e WEB_PORT=50923 -p 50923:50923 gpt-academic
 ```
 P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以直接使用docker-compose获取Latex功能（修改docker-compose.yml，保留方案4并删除其他方案）。
@@ -284,6 +286,8 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 
 ### II：版本:
 - version 3.5(Todo): 使用自然语言调用本项目的所有函数插件（高优先级）
+- version 3.45: 支持自定义ChatGLM2微调模型
+- version 3.44: 正式支持Azure，优化界面易用性
 - version 3.4: +arxiv论文翻译、latex论文批改功能
 - version 3.3: +互联网信息综合功能
 - version 3.2: 函数插件支持更多参数接口 (保存对话功能, 解读任意语言代码+同时询问任意的LLM组合)
