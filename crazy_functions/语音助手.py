@@ -1,6 +1,6 @@
 from toolbox import update_ui
 from toolbox import CatchException, get_conf, markdown_convertion
-from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from crazy_functions.crazy_utils import input_clipping
 from request_llm.bridge_all import predict_no_ui_long_connection
 import threading, time
 import numpy as np
@@ -32,7 +32,13 @@ class WatchDog():
     def feed(self):
         self.last_feed = time.time()
 
-
+def chatbot2history(chatbot):
+    history = []
+    for c in chatbot:
+        for q in c:
+            if q not in ["[请讲话]", "[等待GPT响应]"]:
+                history.append(q.strip('<div class="markdown-body">').strip('</div>').strip('<p>').strip('</p>'))
+    return history
 
 class AsyncGptTask():
     def __init__(self) -> None:
@@ -41,7 +47,9 @@ class AsyncGptTask():
 
     def gpt_thread_worker(self, i_say, llm_kwargs, history, sys_prompt, observe_window, index):
         try:
-            gpt_say_partial = predict_no_ui_long_connection(inputs=i_say, llm_kwargs=llm_kwargs, history=[], sys_prompt=sys_prompt, 
+            MAX_TOKEN_ALLO = 2560
+            i_say, history = input_clipping(i_say, history, max_token_limit=MAX_TOKEN_ALLO)
+            gpt_say_partial = predict_no_ui_long_connection(inputs=i_say, llm_kwargs=llm_kwargs, history=history, sys_prompt=sys_prompt, 
                                                             observe_window=observe_window[index], console_slience=True)
         except ConnectionAbortedError as token_exceed_err:
             print('至少一个线程任务Token溢出而失败', e)
@@ -114,6 +122,7 @@ class InterviewAssistant(AliyunASR):
         while True:
             self.event_on_result_chg.wait(timeout=0.25)  # run once every 0.25 second
             chatbot = self.agt.update_chatbot(chatbot)   # 将子线程的gpt结果写入chatbot
+            history = chatbot2history(chatbot)
             yield from update_ui(chatbot=chatbot, history=history)      # 刷新界面
             self.plugin_wd.feed()
 
@@ -122,6 +131,7 @@ class InterviewAssistant(AliyunASR):
                 self.event_on_result_chg.clear()
                 chatbot[-1] = list(chatbot[-1])
                 chatbot[-1][0] = self.buffered_sentence + self.parsed_text
+                history = chatbot2history(chatbot)
                 yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
                 self.commit_wd.feed()
 
@@ -138,9 +148,10 @@ class InterviewAssistant(AliyunASR):
 
                 self.commit_wd.begin_watch()
                 chatbot[-1] = list(chatbot[-1])
-                chatbot[-1] = [self.buffered_sentence, "[waiting gpt reply]"]
+                chatbot[-1] = [self.buffered_sentence, "[等待GPT响应]"]
                 yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
                 # add gpt task 创建子线程请求gpt，避免线程阻塞
+                history = chatbot2history(chatbot)
                 self.agt.add_async_gpt_task(self.buffered_sentence, len(chatbot)-1, llm_kwargs, history, system_prompt)
                 
                 self.buffered_sentence = ""
