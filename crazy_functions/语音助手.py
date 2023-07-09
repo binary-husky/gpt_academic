@@ -36,7 +36,7 @@ def chatbot2history(chatbot):
     history = []
     for c in chatbot:
         for q in c:
-            if q not in ["[请讲话]", "[等待GPT响应]"]:
+            if q not in ["[请讲话]", "[等待GPT响应]", "[正在等您说完问题]"]:
                 history.append(q.strip('<div class="markdown-body">').strip('</div>').strip('<p>').strip('</p>'))
     return history
 
@@ -112,7 +112,7 @@ class InterviewAssistant(AliyunASR):
     def begin(self, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
         # main plugin function
         self.init(chatbot)
-        chatbot.append(["[请讲话]", "[等待GPT响应]"])
+        chatbot.append(["[请讲话]", "[正在等您说完问题]"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         self.plugin_wd.begin_watch()
         self.agt = AsyncGptTask()
@@ -155,7 +155,7 @@ class InterviewAssistant(AliyunASR):
                 self.agt.add_async_gpt_task(self.buffered_sentence, len(chatbot)-1, llm_kwargs, history, system_prompt)
                 
                 self.buffered_sentence = ""
-                chatbot.append(["[请讲话]", "[等待GPT响应]"])
+                chatbot.append(["[请讲话]", "[正在等您说完问题]"])
                 yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
 
