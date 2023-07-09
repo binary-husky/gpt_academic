@@ -418,14 +418,17 @@ def get_crazy_functions():
 
 
     try:
-        from crazy_functions.语音助手 import 语音助手
-        function_plugins.update({
-            "实时音频采集": {
-                "Color": "stop",
-                "AsButton": True,
-                "Function": HotReload(语音助手)
-            }
-        })
+        from toolbox import get_conf
+        ENABLE_AUDIO, = get_conf('ENABLE_AUDIO')
+        if ENABLE_AUDIO:
+            from crazy_functions.语音助手 import 语音助手
+            function_plugins.update({
+                "实时音频采集": {
+                    "Color": "stop",
+                    "AsButton": True,
+                    "Function": HotReload(语音助手)
+                }
+            })
     except:
         print('Load function plugin failed')
         
