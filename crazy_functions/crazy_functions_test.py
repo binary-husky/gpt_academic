@@ -212,11 +212,17 @@ def test_Latex():
     #     cli_printer.print(cb)   #  print(cb)
 
 def test_chatglm_finetune():
-    from crazy_functions.chatglm微调工具 import 微调数据集生成
+    from crazy_functions.chatglm微调工具 import 微调数据集生成, 启动微调
     txt = 'build/dev.json'
     plugin_kwargs = {"advanced_arg":"--llm_to_learn=gpt-3.5-turbo --prompt_prefix='根据下面的服装类型提示，想象一个穿着者，对这个人外貌、身处的环境、内心世界、人设进行描写。要求：100字以内，用第二人称。' --system_prompt=''" }
 
-    for cookies, cb, hist, msg in (微调数据集生成)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    # for cookies, cb, hist, msg in (微调数据集生成)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    #     cli_printer.print(cb)
+
+    plugin_kwargs = {"advanced_arg":
+    "      --pre_seq_len=128 --learning_rate=2e-2 --num_gpus=1 --json_dataset='t_code.json' --ptuning_directory='/home/hmp/ChatGLM2-6B/ptuning'     " }
+
+    for cookies, cb, hist, msg in (启动微调)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
         cli_printer.print(cb)
 
 
