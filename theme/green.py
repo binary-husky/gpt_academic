@@ -1,6 +1,6 @@
 import gradio as gr
 from toolbox import get_conf
-CODE_HIGHLIGHT, ADD_WAIFU = get_conf('CODE_HIGHLIGHT', 'ADD_WAIFU')
+CODE_HIGHLIGHT, ADD_WAIFU, LAYOUT = get_conf('CODE_HIGHLIGHT', 'ADD_WAIFU', 'LAYOUT')
 
 def adjust_theme():
     try:
@@ -72,7 +72,14 @@ def adjust_theme():
             chatbot_code_background_color="*neutral_950",
             chatbot_code_background_color_dark="*neutral_950",
         )
+
         js = ''
+        if LAYOUT=="TOP-DOWN":
+            js = ""
+        else:
+            with open('theme/common.js', 'r', encoding='utf8') as f:
+                js = f"<script>{f.read()}</script>"
+
         # 添加一个萌萌的看板娘
         if ADD_WAIFU:
             js += """

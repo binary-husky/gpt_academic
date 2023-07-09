@@ -420,7 +420,7 @@ def get_crazy_functions():
     try:
         from crazy_functions.辅助面试 import 辅助面试
         function_plugins.update({
-            "面试助手 [实时音频采集]": {
+            "实时音频采集": {
                 "Color": "stop",
                 "AsButton": True,
                 "Function": HotReload(辅助面试)
