@@ -1,33 +1,6 @@
-"""
-gradio可用颜色列表
-gr.themes.utils.colors.slate (石板色)
-gr.themes.utils.colors.gray (灰色)
-gr.themes.utils.colors.zinc (锌色)
-gr.themes.utils.colors.neutral (中性色)
-gr.themes.utils.colors.stone (石头色)
-gr.themes.utils.colors.red (红色)
-gr.themes.utils.colors.orange (橙色)
-gr.themes.utils.colors.amber (琥珀色)
-gr.themes.utils.colors.yellow (黄色)
-gr.themes.utils.colors.lime (酸橙色)
-gr.themes.utils.colors.green (绿色)
-gr.themes.utils.colors.emerald (祖母绿)
-gr.themes.utils.colors.teal (青蓝色)
-gr.themes.utils.colors.cyan (青色)
-gr.themes.utils.colors.sky (天蓝色)
-gr.themes.utils.colors.blue (蓝色)
-gr.themes.utils.colors.indigo (靛蓝色)
-gr.themes.utils.colors.violet (紫罗兰色)
-gr.themes.utils.colors.purple (紫色)
-gr.themes.utils.colors.fuchsia (洋红色)
-gr.themes.utils.colors.pink (粉红色)
-gr.themes.utils.colors.rose (玫瑰色)
-"""
-
-
 import gradio as gr
 from toolbox import get_conf
-CODE_HIGHLIGHT, ADD_WAIFU = get_conf('CODE_HIGHLIGHT', 'ADD_WAIFU')
+CODE_HIGHLIGHT, ADD_WAIFU, LAYOUT = get_conf('CODE_HIGHLIGHT', 'ADD_WAIFU', 'LAYOUT')
 
 def adjust_theme():
 
@@ -36,7 +9,8 @@ def adjust_theme():
         set_theme = gr.themes.Default(
             primary_hue=gr.themes.utils.colors.orange,
             neutral_hue=gr.themes.utils.colors.gray,
-            font=["sans-serif", "Microsoft YaHei", "ui-sans-serif", "system-ui"],
+            font=["sans-serif", "Microsoft YaHei", "ui-sans-serif", "system-ui",
+                  "sans-serif", gr.themes.utils.fonts.GoogleFont("Source Sans Pro")],
             font_mono=["ui-monospace", "Consolas", "monospace", gr.themes.utils.fonts.GoogleFont("IBM Plex Mono")])
         set_theme.set(
             # Colors
@@ -84,20 +58,26 @@ def adjust_theme():
             button_cancel_text_color_dark="white",
         )
 
+        if LAYOUT=="TOP-DOWN": 
+            js = ""
+        else:
+            with open('theme/common.js', 'r', encoding='utf8') as f: 
+                js = f"<script>{f.read()}</script>"
+            
         # 添加一个萌萌的看板娘
         if ADD_WAIFU:
-            js = """
+            js += """
                 <script src="file=docs/waifu_plugin/jquery.min.js"></script>
                 <script src="file=docs/waifu_plugin/jquery-ui.min.js"></script>
                 <script src="file=docs/waifu_plugin/autoload.js"></script>
             """
-            gradio_original_template_fn = gr.routes.templates.TemplateResponse
-            def gradio_new_template_fn(*args, **kwargs):
-                res = gradio_original_template_fn(*args, **kwargs)
-                res.body = res.body.replace(b'</html>', f'{js}</html>'.encode("utf8"))
-                res.init_headers()
-                return res
-            gr.routes.templates.TemplateResponse = gradio_new_template_fn   # override gradio template
+        gradio_original_template_fn = gr.routes.templates.TemplateResponse
+        def gradio_new_template_fn(*args, **kwargs):
+            res = gradio_original_template_fn(*args, **kwargs)
+            res.body = res.body.replace(b'</html>', f'{js}</html>'.encode("utf8"))
+            res.init_headers()
+            return res
+        gr.routes.templates.TemplateResponse = gradio_new_template_fn   # override gradio template
     except:
         set_theme = None
         print('gradio版本较旧, 不能自定义字体和颜色')
