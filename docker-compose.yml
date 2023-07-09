@@ -6,7 +6,7 @@
 version: '3'
 services:
   gpt_academic_nolocalllms:
-    image: ghcr.io/binary-husky/gpt_academic_nolocal:master
+    image: ghcr.io/binary-husky/gpt_academic_nolocal:master # (Auto Built by Dockerfile: docs/GithubAction+NoLocal)
     environment:
       # 请查阅 `config.py` 以查看所有的配置信息
       API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                                            '
@@ -33,7 +33,7 @@ services:
 version: '3'
 services:
   gpt_academic_with_chatglm:
-    image: ghcr.io/binary-husky/gpt_academic_chatglm_moss:master
+    image: ghcr.io/binary-husky/gpt_academic_chatglm_moss:master  # (Auto Built by Dockerfile: docs/Dockerfile+ChatGLM)
     environment:
       # 请查阅 `config.py` 以查看所有的配置信息
       API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx,fkxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  '
@@ -63,7 +63,7 @@ services:
 version: '3'
 services:
   gpt_academic_with_rwkv:
-    image: fuqingxu/gpt_academic:jittorllms    # [option 2] 如果需要运行ChatGLM本地模型
+    image: fuqingxu/gpt_academic:jittorllms
     environment:
       # 请查阅 `config.py` 以查看所有的配置信息
       API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx,fkxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  '
@@ -111,7 +111,7 @@ services:
 version: '3'
 services:
   gpt_academic_with_latex:
-    image: ghcr.io/binary-husky/gpt_academic_with_latex:master
+    image: ghcr.io/binary-husky/gpt_academic_with_latex:master  # (Auto Built by Dockerfile: docs/GithubAction+NoLocal+Latex)
     environment:
       # 请查阅 `config.py` 以查看所有的配置信息
       API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                              '

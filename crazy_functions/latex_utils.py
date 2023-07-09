@@ -189,6 +189,18 @@ def rm_comments(main_file):
     main_file = re.sub(r'(?<!\\)%.*', '', main_file)  # 使用正则表达式查找半行注释, 并替换为空字符串
     return main_file
 
+def find_tex_file_ignore_case(fp):
+    dir_name = os.path.dirname(fp)
+    base_name = os.path.basename(fp)
+    if not base_name.endswith('.tex'): base_name+='.tex'
+    if os.path.exists(pj(dir_name, base_name)): return pj(dir_name, base_name)
+    # go case in-sensitive
+    import glob
+    for f in glob.glob(dir_name+'/*.tex'):
+        base_name_s = os.path.basename(fp)
+        if base_name_s.lower() == base_name.lower(): return f
+    return None
+
 def merge_tex_files_(project_foler, main_file, mode):
     """
     Merge Tex project recrusively
@@ -197,15 +209,11 @@ def merge_tex_files_(project_foler, main_file, mode):
     for s in reversed([q for q in re.finditer(r"\\input\{(.*?)\}", main_file, re.M)]):
         f = s.group(1)
         fp = os.path.join(project_foler, f)
-        if os.path.exists(fp):  
-            # e.g., \input{srcs/07_appendix.tex}
-            with open(fp, 'r', encoding='utf-8', errors='replace') as fx:
-                c = fx.read()
-        else:  
-            # e.g., \input{srcs/07_appendix}
-            assert os.path.exists(fp+'.tex'), f'即找不到{fp}，也找不到{fp}.tex，Tex源文件缺失！'
-            with open(fp+'.tex', 'r', encoding='utf-8', errors='replace') as fx:
-                c = fx.read()
+        fp = find_tex_file_ignore_case(fp)
+        if fp:
+            with open(fp, 'r', encoding='utf-8', errors='replace') as fx: c = fx.read()
+        else:
+            raise RuntimeError(f'找不到{fp}，Tex源文件缺失！')
         c = merge_tex_files_(project_foler, c, mode)
         main_file = main_file[:s.span()[0]] + c + main_file[s.span()[1]:]
     return main_file
@@ -324,7 +332,7 @@ def split_subprocess(txt, project_folder, return_dict, opts):
     # 吸收在42行以内的begin-end组合
     text, mask = set_forbidden_text_begin_end(text, mask, r"\\begin\{([a-z\*]*)\}(.*?)\\end\{\1\}", re.DOTALL, limit_n_lines=42)
     # 吸收匿名公式
-    text, mask = set_forbidden_text(text, mask, [ r"\$\$(.*?)\$\$",  r"\\\[.*?\\\]" ], re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, [ r"\$\$([^$]+)\$\$",  r"\\\[.*?\\\]" ], re.DOTALL)
     # 吸收其他杂项
     text, mask = set_forbidden_text(text, mask, [ r"\\section\{(.*?)\}", r"\\section\*\{(.*?)\}", r"\\subsection\{(.*?)\}", r"\\subsubsection\{(.*?)\}" ])
     text, mask = set_forbidden_text(text, mask, [ r"\\bibliography\{(.*?)\}", r"\\bibliographystyle\{(.*?)\}" ])
