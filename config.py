@@ -85,7 +85,7 @@ CONCURRENT_COUNT = 100
 # 是否在提交时自动清空输入框
 AUTO_CLEAR_TXT = False
 
-# 色彩主体，可选 ["Default", "Chuanhu-Keldos-Green"]
+# 色彩主体，可选 ["Default", "Chuanhu-Small-and-Beautiful"]
 THEME = "Default"
 
 # 加一个live2d装饰
@@ -124,6 +124,6 @@ put your new bing cookies here
 
 
 # 阿里云实时语音识别 配置门槛较高 限高级用户使用 参考 https://help.aliyun.com/document_detail/450255.html
-ENABLE_AUDIO = True
+ENABLE_AUDIO = False
 ALIYUN_TOKEN=""    # 例如 f37f30e0f9934c34a992f6f64f7eba4f
 ALIYUN_APPKEY=""   # 例如 RoPlZrM88DnAFkZK
