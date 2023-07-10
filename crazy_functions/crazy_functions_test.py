@@ -17,7 +17,7 @@ validate_path() # validate path so you can run from base directory
 # ==============================================================================================================================
 
 from colorful import *
-from toolbox import get_conf, ChatBotWithCookies
+from toolbox import get_conf, ChatBotWithCookies, load_chat_cookies
 import contextlib
 import os
 import sys
@@ -32,6 +32,7 @@ llm_kwargs = {
     'max_length': None,
     'temperature':1.0,
 }
+llm_kwargs.update(load_chat_cookies())
 plugin_kwargs = { }
 chatbot = ChatBotWithCookies(llm_kwargs)
 history = []
@@ -226,6 +227,15 @@ def test_chatglm_finetune():
         cli_printer.print(cb)
 
 
+def 三维生成():
+    from crazy_functions.Three场景交互3D import 三维生成
+    txt = "Generate 10 boxes to form a triangle formation with random color."
+    plugin_kwargs = {"advanced_arg":""}
+
+    for cookies, cb, hist, msg in (三维生成)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+        cli_printer.print(cb)
+
+
 if __name__ == "__main__":
     # test_解析一个Python项目()
     # test_Latex英文润色()
@@ -241,6 +251,6 @@ if __name__ == "__main__":
     # test_Langchain知识库()
     # test_Langchain知识库读取()
     # test_Latex()
-    test_chatglm_finetune()
+    三维生成()
     input("程序完成，回车退出。")
     print("退出。")

@@ -416,6 +416,19 @@ def get_crazy_functions():
     except:
         print('Load function plugin failed')
 
+    try:
+        from crazy_functions.Three场景交互3D import 三维生成
+        function_plugins.update({
+            "ThreeJS 三维交互": {
+                "Color": "stop",
+                "AsButton": False,
+                "Function": HotReload(三维生成)
+            }
+        })
+    except:
+        print('Load function plugin failed')
+
+
     # try:
     #     from crazy_functions.虚空终端 import 终端
     #     function_plugins.update({

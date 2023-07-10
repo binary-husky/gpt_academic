@@ -40,6 +40,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
         chatbot, history, sys_prompt, refresh_interval=0.2,
         handle_token_exceed=True, 
         retry_times_at_unknown_error=2,
+        on_reply_update=None
         ):
     """
     Request GPT model，请求GPT模型同时维持用户界面活跃。
@@ -123,6 +124,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
         if future.done():
             break
         chatbot[-1] = [chatbot[-1][0], mutable[0]]
+        if on_reply_update: on_reply_update(mutable[0])
         yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
 
     final_result = future.result()

@@ -1,0 +1,39 @@
+[
+    {
+        "name": "Box-1",
+        "width": 1,
+        "height": 1,
+        "depth": 1,
+        "location_x": 1,
+        "location_y": 0,
+        "location_z": 0
+    },
+    {
+        "name": "Box-2",
+        "width": 1,
+        "height": 1,
+        "depth": 1,
+        "location_x": -1,
+        "location_y": 0,
+        "location_z": 0
+    },
+    {
+        "name": "Box-3",
+        "width": 1,
+        "height": 1,
+        "depth": 1,
+        "location_x": 0,
+        "location_y": 1,
+        "location_z": 0
+    },
+    {
+        "name": "Box-4",
+        "width": 1,
+        "height": 1,
+        "depth": 1,
+        "location_x": 0,
+        "location_y": -1,
+        "location_z": 0
+    }
+
+]
