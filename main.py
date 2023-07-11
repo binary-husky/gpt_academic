@@ -14,8 +14,8 @@ def main():
     if not AUTHENTICATION: AUTHENTICATION = None
 
     from check_proxy import get_current_version
-    initial_prompt = "Serve me as a writing and programming assistant."
-    title_html = f"<h1 align=\"center\">ChatGPT 学术优化 {get_current_version()}</h1>"
+    initial_prompt = "你的名字叫zyy，Serve me as a writing and programming assistant."
+    title_html = f"<h1 align=\"center\">zyyai 大学生专用  </h1>"
     description =  """代码开源和更新[地址🚀](https://github.com/binary-husky/chatgpt_academic)，感谢热情的[开发者们❤️](https://github.com/binary-husky/chatgpt_academic/graphs/contributors)"""
 
     # 问询记录, python 版本建议3.9+（越新越好）

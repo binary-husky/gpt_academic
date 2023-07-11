@@ -1,0 +1,28 @@
+{
+    "name": "gpt_academic",
+    "version": "1.0.0",
+    "dependencies": {
+        "react-scripts": "^4.0.3",
+        "gradio": "2.3.6",
+        "tiktokapi": "3.8.0",
+        "requests": "2.26.0",
+        "transformers": "4.11.3",
+        "python-markdown-math": "0.7",
+        "beautifulsoup4": "4.10.0",
+        "prompt-toolkit": "3.0.20",
+        "latex2mathml": "1.0.3",
+        "python-docx": "0.8.11",
+        "mdtex2html": "0.2.1",
+        "colorama": "0.4.4",
+        "Markdown": "3.3.4",
+        "pygments": "2.10.0",
+        "pymupdf": "1.18.17",
+        "openai": "0.10.5",
+        "numpy": "1.21.2",
+        "arxiv": "1.4.2",
+        "rich": "10.12.0"
+      }
+    "scripts": {
+      "start": "uvicorn main:app --host 0.0.0.0 --port 7890"
+    }
+  }
