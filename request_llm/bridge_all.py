@@ -168,7 +168,8 @@ model_info = {
 }
 
 
-AVAIL_LLM_MODELS, = get_conf("AVAIL_LLM_MODELS")
+AVAIL_LLM_MODELS, LLM_MODEL = get_conf("AVAIL_LLM_MODELS", "LLM_MODEL")
+AVAIL_LLM_MODELS = AVAIL_LLM_MODELS + [LLM_MODEL]
 if "jittorllms_rwkv" in AVAIL_LLM_MODELS:
     from .bridge_jittorllms_rwkv import predict_no_ui_long_connection as rwkv_noui
     from .bridge_jittorllms_rwkv import predict as rwkv_ui
