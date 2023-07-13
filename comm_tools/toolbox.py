@@ -42,6 +42,24 @@ class ChatBotWithCookies(list):
         return self._cookies
 
 
+def write_private(ipaddr, models, chatbot):
+    encrypt, private = get_conf('switch_model')[0]['key']
+    private_key = get_conf('private_key')
+    transparent_address_private = f'<p style="display:none;">\n{private_key}\n{ipaddr.client.host}\n</p>'
+    transparent_address = f'<p style="display:none;">\n{ipaddr.client.host}\n</p>'
+    if private in models:
+        if chatbot == []:
+            chatbot.append([None, f'隐私模式, 你的对话记录无法被他人检索 {transparent_address_private}'])
+        else:
+            chatbot[0] = [None, f'隐私模式, 你的对话记录无法被他人检索 {transparent_address_private}']
+    else:
+        if chatbot == []:
+            chatbot.append([None,
+                            f'正常对话模式, 你接来下的对话将会被记录并且可以被所有人检索，你可以到Settings中选择隐私模式 {transparent_address}'])
+        else:
+            chatbot[0] = [None,
+                          f'正常对话模式, 你接来下的对话将会被记录并且可以被所有人检索，你可以到Settings中选择隐私模式 {transparent_address}']
+
 def ArgsGeneralWrapper(f):
     """
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
@@ -52,7 +70,6 @@ def ArgsGeneralWrapper(f):
         # 引入一个有cookie的chatbot
         start_time = time.time()
         encrypt, private = get_conf('switch_model')[0]['key']
-        private_key, = get_conf('private_key')
         cookies.update({
             'top_p':top_p,
             'temperature':temperature,
@@ -74,23 +91,13 @@ def ArgsGeneralWrapper(f):
         }
         if len(args) > 1:
             plugin_kwargs.update({'parameters_def': args[1]})
-        transparent_address_private = f'<p style="display:none;">\n{private_key}\n{ipaddr.client.host}\n</p>'
-        transparent_address = f'<p style="display:none;">\n{ipaddr.client.host}\n</p>'
-        if private in models:
-            if chatbot == []:
-                chatbot.append([None, f'隐私模式, 你的对话记录无法被他人检索 {transparent_address_private}'])
-            else:
-                chatbot[0] = [None, f'隐私模式, 你的对话记录无法被他人检索 {transparent_address_private}']
-        else:
-            if chatbot == []:
-                chatbot.append([None, f'正常对话模式, 你接来下的对话将会被记录并且可以被所有人检索，你可以到Settings中选择隐私模式 {transparent_address}'])
-            else:
-                chatbot[0] = [None, f'正常对话模式, 你接来下的对话将会被记录并且可以被所有人检索，你可以到Settings中选择隐私模式 {transparent_address}']
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
+        write_private(ipaddr, models, chatbot_with_cookie)
         txt_passon = txt
         if encrypt in models: txt_passon = func_box.encryption_str(txt)
         yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
+        threading.Thread(target=func_box.thread_write_chat, args=(chatbot_with_cookie,)).start()
     return decorated
 
 
@@ -101,7 +108,6 @@ def update_ui(chatbot, history, msg='正常', *args):  # 刷新界面
     """
     assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时，可用clear将其清空，然后用for+append循环重新赋值。"
     yield chatbot.get_cookies(), chatbot, history, msg
-    threading.Thread(target=func_box.thread_write_chat, args=(chatbot, )).start()
 
 def update_ui_lastest_msg(lastmsg, chatbot, history, delay=1):  # 刷新界面
     """
@@ -297,7 +303,7 @@ def markdown_convertion(txt):
         return txt  # 已经被转化过，不需要再次转化
     if txt.startswith(raw_pre) and txt.endswith(raw_suf):
         return txt  # 已经被转化过，不需要再次转化
-    raw_hide = raw_pre + txt + raw_suf
+    raw_hide = raw_pre + re.sub(r"\n+", "\n", txt) + raw_suf
     markdown_extension_configs = {
         'mdx_math': {
             'enable_dollar_delimiter': True,
@@ -898,7 +904,6 @@ class ProxyNetworkActivate():
     这段代码定义了一个名为TempProxy的空上下文管理器, 用于给一小段代码上代理
     """
     def __enter__(self):
-        from toolbox import get_conf
         proxies, = get_conf('proxies')
         if 'no_proxy' in os.environ: os.environ.pop('no_proxy')
         if proxies is not None:

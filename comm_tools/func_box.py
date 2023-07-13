@@ -468,12 +468,12 @@ def prompt_input(txt: str, prompt_str, name_str,  index, data: gr.Dataset, tabs_
         else:
             txt_temp = data_str
         return txt_temp
-    if tabs_index == 1:
+    if tabs_index == 1 or txt == '':
         new_txt = str_v_handle(prompt_str)
-        return txt, new_txt, data_name
+        return new_txt, new_txt, data_name, gr.Accordion.update(open=True)
     else:
         new_txt = str_v_handle(txt)
-        return new_txt, prompt_str, name_str
+        return new_txt, prompt_str, name_str, gr.update()
 
 
 def copy_result(history):
@@ -511,12 +511,10 @@ def show_prompt_result(index, data: gr.Dataset, chatbot, pro_edit, pro_name):
                 chatbot.append([list_copy[i]])
             else:
                 chatbot.append([list_copy[i], list_copy[i + 1]])
-    elif click[2] is None and pro_edit == '':
+    elif click[2] is None:
         pro_edit = click[1]
         pro_name = click[3]
-    else:
-        chatbot.append((click[1], click[2]))
-    return chatbot, pro_edit, pro_name
+    return chatbot, pro_edit, pro_name, gr.Tabs.update(selected='func_tab'), gr.Accordion.update(open=True)
 
 
 
@@ -555,18 +553,13 @@ prompt_path = os.path.join(base_path, 'users_data')
 users_path = os.path.join(base_path, 'private_upload')
 logs_path = os.path.join(base_path, 'gpt_log')
 
-def reuse_chat(result, chatbot, history, pro_numb, say):
+def reuse_chat(result, chatbot, history, say):
     """复用对话记录"""
     if result is None or result == []:
         return chatbot, history, gr.update(), gr.update(), '', gr.Column.update()
     else:
-        if pro_numb:
-            chatbot += result
-            history += [pattern_html(_) for i in result for _ in i]
-        else:
-            chatbot.append(result[-1])
-            history += [pattern_html(_) for i in result[-2:] for _ in i]
-        print(chatbot[-1][0])
+        chatbot += result
+        history += [pattern_html(_) for i in result for _ in i]
         return chatbot, history, say, gr.Tabs.update(selected='chatbot'), '', gr.Column.update(visible=False)
 
 

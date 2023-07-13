@@ -689,7 +689,7 @@ class knowledge_archive_interface():
             vector_search_top_k=VECTOR_SEARCH_TOP_K, 
             chunk_conent=True,
             chunk_size=CHUNK_SIZE,
-            text2vec = self.get_chinese_text2vec(),
+            text2vec=self.get_chinese_text2vec(),
         )
         self.threadLock.release()
         return resp, prompt

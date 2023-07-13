@@ -22,11 +22,13 @@ class Utils:
 
     def __init__(self):
         self.find_keys_type = 'type'
-        self.find_picture_source = {'caption': '', 'imgID': '', 'sourceKey': ''}
-        self.find_keys_tags = ['picture', 'processon']
+        self.find_picture_source = ['caption', 'imgID', 'sourceKey']
+        self.find_document_source = ['wpsDocumentLink', 'wpsDocumentName', 'wpsDocumentType']
+        self.find_document_tags = ['WPSDocument']
+        self.find_picture_tags = ['picture', 'processon']
         self.picture_format = ['.JPEG', '.PNG', '.GIF', '.BMP', '.TIFF']
 
-    def find_all_text_keys(self, dictionary, parent_type=None, text_values=None, filter_type='', img_proce=False):
+    def find_all_text_keys(self, dictionary, parent_type=None, text_values=None, filter_type=''):
         """
         Args:
             dictionary: 字典或列表
@@ -53,7 +55,11 @@ class Utils:
             for key in self.find_picture_source:
                 temp[key] = dictionary.get(key, None)
             text_values.append({current_type: temp})
-
+        if 'wpsDocumentId' in dictionary:
+            temp = {}
+            for key in self.find_document_source:
+                temp[key] = dictionary.get(key, None)
+            text_values.append({current_type: temp})
         # 如果当前类型不等于 filter_type，则继续遍历子级属性
         if current_type != filter_type:
             for key, value in dictionary.items():
@@ -63,23 +69,30 @@ class Utils:
                     for item in value:
                         if isinstance(item, dict):
                             self.find_all_text_keys(item, current_type, text_values, filter_type)
+        return text_values
+
+    def statistical_results(self, text_values, img_proce=False):
         context_ = []
         pic_dict = {}
+        file_dict = {}
         for i in text_values:
             for key, value in i.items():
-                if key in self.find_keys_tags:
+                if key in self.find_picture_tags:
                     if img_proce:
                         mark = f'{key}OCR结果: """{value["sourceKey"]}"""\n'
-                        if value["caption"]: mark += '{key}描述: {value["caption"]}\n'
+                        if value["caption"]: mark += f'{key}描述: {value["caption"]}\n'
                         context_.append(mark)
                         pic_dict[value['sourceKey']] = value['imgID']
                     else:
                         if value["caption"]: context_.append(f'{key}描述: {value["caption"]}\n')
                         pic_dict[value['sourceKey']] = value['imgID']
+                elif key in self.find_document_tags:
+                    mark = f'{value["wpsDocumentName"]}: {value["wpsDocumentLink"]}'
+                    context_.append(mark)
                 else:
                     context_.append(value)
         context_ = '\n'.join(context_)
-        return text_values, context_, pic_dict
+        return text_values, context_, pic_dict, file_dict
 
     def markdown_to_flow_chart(self, data, hosts, file_name):
         user_path = os.path.join(func_box.users_path, hosts)
@@ -189,7 +202,7 @@ class Kdocs:
             cookies=self.cookies,
             headers=self.headers,
             data=json_data,)
-        return response.text
+        return response.json(), response.text
 
     def get_file_pic_url(self, pic_dict: dict):
         otl_url_str = self.split_link_tags()
@@ -241,17 +254,21 @@ class Kdocs:
             file_connid = json_data['conn_id']
             file_group = json_data['user_group']
             file_front_ver = json_data['file_version']
+            file_id = json_data['root_file_id']
+            group_id = json_data['file_info']['file']['group_id']
             self.headers['x-csrf-rand'] = json_data['csrf_token']
-            self.parm_otl_data.update({'connid': file_connid, 'group': file_group, 'front_ver': file_front_ver})
+            self.parm_otl_data.update({'connid': file_connid, 'group': file_group, 'front_ver': file_front_ver,
+                                       'file_id': file_id, 'group_id':group_id})
             return True
         else:
             return None
 
 def get_docs_content(url, image_processing=False):
     kdocs = Kdocs(url)
-    json_data = kdocs.get_file_content()
-    dict_data = json.loads(json_data)
-    _all, content, pic_dict = Utils().find_all_text_keys(dict_data, filter_type='', img_proce=image_processing)
+    utils = Utils()
+    json_data, json_dict = kdocs.get_file_content()
+    text_values = utils.find_all_text_keys(json_data, filter_type='')
+    _all, content, pic_dict, file_dict = utils.statistical_results(text_values, img_proce=image_processing)
     pic_dict_convert = kdocs.get_file_pic_url(pic_dict)
     empty_picture_count = sum(1 for item in _all if 'picture' in item and not item['picture']['caption'])
     return _all, content, empty_picture_count, pic_dict_convert
@@ -312,4 +329,4 @@ def ocr_batch_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pr
 
 
 if __name__ == '__main__':
-    print(get_docs_content('https://kdocs.cn/l/ca1FQfQ6LiAx'))
+    print(get_docs_content('https://kdocs.cn/l/cvkgbXmPdx2K'))
