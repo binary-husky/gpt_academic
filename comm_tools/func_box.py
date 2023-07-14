@@ -463,17 +463,15 @@ def prompt_input(txt: str, prompt_str, name_str,  index, data: gr.Dataset, tabs_
     def str_v_handle(__str):
         if data_str.find(rp_str) != -1 and __str:
             txt_temp = data_str.replace(rp_str, __str)
-        elif __str:
-            txt_temp = data_str + '\n' + __str
         else:
-            txt_temp = data_str
+            txt_temp = data_str + txt
         return txt_temp
     if tabs_index == 1 or txt == '':
         new_txt = str_v_handle(prompt_str)
-        return new_txt, new_txt, data_name, gr.Accordion.update(open=True)
+        return new_txt, prompt_str, data_name
     else:
         new_txt = str_v_handle(txt)
-        return new_txt, prompt_str, name_str, gr.update()
+        return new_txt, prompt_str, name_str
 
 
 def copy_result(history):

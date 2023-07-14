@@ -219,7 +219,7 @@ class ChatBot(ChatBotFrame):
                                               label=f'上传你的`提示词`文件, 编写格式请遵循上述开发者文档', )
             self.pro_private_check = gr.Dropdown(choices=prompt_list['key'], value=prompt_list['value'], multiselect=True,
                                                  label='`提示词`选择', ).style()
-            self.pro_func_prompt = gr.Dataset(components=[gr.HTML()], label="Prompt List", visible=False,
+            self.pro_func_prompt = gr.Dataset(components=[gr.HTML()], label="提示词列表", visible=False,
                                               samples=[['...', ""] for i in range(20)], type='index',
                                               samples_per_page=10)
             self.pro_fp_state = gr.State({'samples': None})
@@ -231,7 +231,7 @@ class ChatBot(ChatBotFrame):
         self.tabs_code = gr.State(0)
         self.pro_func_prompt.select(fn=func_box.prompt_input,
                                     inputs=[self.txt, self.pro_edit_txt, self.pro_name_txt, self.pro_func_prompt, self.pro_fp_state, self.tabs_code],
-                                    outputs=[self.txt, self.pro_edit_txt, self.pro_name_txt, self.prompt_edit_area])
+                                    outputs=[self.txt, self.pro_edit_txt, self.pro_name_txt])
         self.pro_upload_btn.upload(fn=func_box.prompt_upload_refresh,
                                    inputs=[self.pro_upload_btn, self.pro_prompt_state],
                                    outputs=[self.pro_func_prompt, self.pro_prompt_state, self.pro_private_check])
@@ -270,7 +270,6 @@ class ChatBot(ChatBotFrame):
             with gr.Row():
                 pass
 
-
     def draw_setting_chat(self):
         switch_model = get_conf('switch_model')[0]
         with gr.TabItem('对话设置', id='sett_tab'):
@@ -307,6 +306,7 @@ class ChatBot(ChatBotFrame):
         self.cancel_handles.append(self.submitBtn.click(**self.clear_agrs).then(**self.predict_args).then(**self.stop_args))
         # self.cpopyBtn.click(fn=func_box.copy_result, inputs=[self.history], outputs=[self.status])
         self.resetBtn.click(lambda: ([], [], "已重置"), None, [self.chatbot, self.history, self.status])
+
 
     def signals_function(self):
         # 基础功能区的回调函数注册
