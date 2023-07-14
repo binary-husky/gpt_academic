@@ -278,7 +278,7 @@ def json_args_return(kwargs, keys: list) -> list:
     temp = [False for i in range(len(keys))]
     for i in range(len(keys)):
         try:
-            temp[i] = json.loads(kwargs[['advanced_arg']])[keys[i]]
+            temp[i] = json.loads(kwargs['advanced_arg'])[keys[i]]
         except Exception as f:
             try:
                 temp[i] = kwargs['parameters_def'][keys[i]]
@@ -329,4 +329,7 @@ def ocr_batch_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pr
 
 
 if __name__ == '__main__':
-    print(get_docs_content('https://kdocs.cn/l/coQeHUdxYOTo'))
+    # print(get_docs_content('https://kdocs.cn/l/coQeHUdxYOTo'))
+    ksw = {'advanced_arg': '{\n    "is_show": false,\n    "prompt": "文档转测试用例",\n    "img_ocr": true\n}',
+     'parameters_def': ''}
+    print(json_args_return(kwargs=ksw, keys=['prompt']))
