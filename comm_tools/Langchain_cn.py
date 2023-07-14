@@ -1,10 +1,8 @@
 from comm_tools.toolbox import CatchException, update_ui, ProxyNetworkActivate
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, get_files_from_everything
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, get_files_from_everything
 
 
-
-@CatchException
-def 知识库问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def knowledge_base_writing(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     """
     txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数, 如温度和top_p等, 一般原样传递下去就行
@@ -14,25 +12,19 @@ def 知识库问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     system_prompt   给gpt的静默提醒
     web_port        当前软件运行的端口号
     """
-    history = []    # 清空历史，以免输入溢出
-    chatbot.append(("这是什么功能？", "[Local Message] 从一批文件(txt, md, tex)中读取数据构建知识库, 然后进行问答。"))
-    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-
-    # resolve deps
     try:
         from zh_langchain import construct_vector_store
         from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-        from .crazy_utils import knowledge_archive_interface
+        from crazy_functions.crazy_utils import knowledge_archive_interface
     except Exception as e:
         chatbot.append(
             ["依赖不足", 
              "导入依赖失败。正在尝试自动安装，请查看终端的输出或耐心等待..."])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-        from .crazy_utils import try_install_deps
+        from crazy_functions.crazy_utils import try_install_deps
         try_install_deps(['zh_langchain==0.2.1'])
     # < --------------------读取参数--------------- >
-    if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
-    kai_id = plugin_kwargs.get("advanced_arg", 'default')
+    kai_id = ''
     # < --------------------读取文件--------------- >
     file_manifest = []
     spl = ["txt", "doc", "docx", "email", "epub", "html", "json", "md", "msg", "pdf", "ppt", "pptx", "rtf"]
@@ -67,11 +59,11 @@ def 读取知识库作答(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     try:
         from zh_langchain import construct_vector_store
         from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-        from .crazy_utils import knowledge_archive_interface
+        from crazy_functions.crazy_utils import knowledge_archive_interface
     except Exception as e:
         chatbot.append(["依赖不足", "导入依赖失败。正在尝试自动安装，请查看终端的输出或耐心等待..."])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-        from .crazy_utils import try_install_deps
+        from crazy_functions.crazy_utils import try_install_deps
         try_install_deps(['zh_langchain==0.2.1'])
 
     # < -------------------  --------------- >

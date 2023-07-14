@@ -252,7 +252,7 @@ def json_convert_dict(file):
     return new_dict
 
 
-def draw_results(txt, prompt: gr.Dataset, percent, switch, ipaddr: gr.Request):
+def draw_results(txt, prompt: dict, percent, switch, ipaddr: gr.Request):
     """
     绘制搜索结果
     Args:
@@ -265,8 +265,8 @@ def draw_results(txt, prompt: gr.Dataset, percent, switch, ipaddr: gr.Request):
         注册函数所需的元祖对象
     """
     data = diff_list(txt, percent=percent, switch=switch, hosts=ipaddr.client.host)
-    prompt.samples = data
-    return prompt.update(samples=data, visible=True), prompt
+    prompt['samples'] = data
+    return gr.Dataset.update(samples=data, visible=True), prompt
 
 
 def diff_list(txt='', percent=0.70, switch: list = None, lst: dict = None, sp=15, hosts=''):
@@ -371,10 +371,10 @@ def prompt_upload_refresh(file, prompt, ipaddr: gr.Request):
     if upload_data != {}:
         SqliteHandle(f'prompt_{hosts}').inset_prompt(upload_data)
         ret_data = prompt_retrieval(is_all=['个人'], hosts=hosts)
-        return prompt.update(samples=ret_data, visible=True), prompt, ['个人']
+        return gr.Dataset.update(samples=ret_data, visible=True), prompt, ['个人']
     else:
-        prompt.samples = [[f'{html_tag_color("数据解析失败，请检查文件是否符合规范", color="red")}', '']]
-        return prompt.samples, prompt, []
+        prompt['samples'] = [[f'{html_tag_color("数据解析失败，请检查文件是否符合规范", color="red")}', '']]
+        return prompt['samples'], prompt, []
 
 
 def prompt_retrieval(is_all, hosts='', search=False):
@@ -419,8 +419,8 @@ def prompt_reduce(is_all, prompt: gr.Dataset, ipaddr: gr.Request):  # is_all, ip
         返回注册函数所需的对象
     """
     data = prompt_retrieval(is_all=is_all, hosts=ipaddr.client.host)
-    prompt.samples = data
-    return prompt.update(samples=data, visible=True), prompt, is_all
+    prompt['samples'] = data
+    return gr.Dataset.update(samples=data, visible=True), prompt, is_all
 
 
 def prompt_save(txt, name, prompt: gr.Dataset, ipaddr: gr.Request):
@@ -438,12 +438,12 @@ def prompt_save(txt, name, prompt: gr.Dataset, ipaddr: gr.Request):
         yaml_obj = SqliteHandle(f'prompt_{ipaddr.client.host}')
         yaml_obj.inset_prompt({name: txt})
         result = prompt_retrieval(is_all=['个人'], hosts=ipaddr.client.host)
-        prompt.samples = result
-        return "", "", ['个人'], prompt.update(samples=result, visible=True), prompt, gr.Tabs.update(selected='chatbot')
+        prompt['samples'] = result
+        return "", "", ['个人'], gr.Dataset.update(samples=result, visible=True), prompt, gr.Tabs.update(selected='chatbot')
     elif not txt or not name:
         result = [[f'{html_tag_color("编辑框 or 名称不能为空!!!!!", color="red")}', '']]
-        prompt.samples = [[f'{html_tag_color("编辑框 or 名称不能为空!!!!!", color="red")}', '']]
-        return txt, name, [], prompt.update(samples=result, visible=True), prompt, gr.Tabs.update(selected='chatbot')
+        prompt['samples'] = [[f'{html_tag_color("编辑框 or 名称不能为空!!!!!", color="red")}', '']]
+        return txt, name, [], gr.Dataset.update(samples=result, visible=True), prompt, gr.Tabs.update(selected='chatbot')
 
 
 def prompt_input(txt: str, prompt_str, name_str,  index, data: gr.Dataset, tabs_index):
@@ -456,8 +456,8 @@ def prompt_input(txt: str, prompt_str, name_str,  index, data: gr.Dataset, tabs_
     Returns:
         返回注册函数所需的对象
     """
-    data_str = str(data.samples[index][1])
-    data_name = str(data.samples[index][0])
+    data_str = str(data['samples'][index][1])
+    data_name = str(data['samples'][index][0])
     rp_str = '{{{v}}}'
 
     def str_v_handle(__str):
@@ -503,7 +503,7 @@ def show_prompt_result(index, data: gr.Dataset, chatbot, pro_edit, pro_name):
     Returns:
         返回注册函数所需的对象
     """
-    click = data.samples[index]
+    click = data['samples'][index]
     if str_is_list(click[2]):
         list_copy = eval(click[2])
         for i in range(0, len(list_copy), 2):
@@ -596,7 +596,7 @@ def refresh_load_data(chat, history, prompt, crazy_list, request: gr.Request):
     """
     is_all = toolbox.get_conf('prompt_list')[0]['key'][0]
     data = prompt_retrieval(is_all=[is_all])
-    prompt.samples = data
+    prompt['samples'] = data
     selected = random.sample(crazy_list, 4)
     user_agent = request.kwargs['headers']['user-agent'].lower()
     if user_agent.find('android') != -1 or user_agent.find('iphone') != -1:
@@ -607,7 +607,7 @@ def refresh_load_data(chat, history, prompt, crazy_list, request: gr.Request):
         hied_elem = gr.update()
         show_elem = gr.update()
 
-    outputs = [prompt.update(samples=data, visible=True), prompt,
+    outputs = [gr.Dataset.update(samples=data, visible=True), prompt,
                chat, history, gr.Dataset.update(samples=[[i] for i in selected]), selected,
                hied_elem, hied_elem]
     return outputs

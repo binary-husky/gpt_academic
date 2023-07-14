@@ -329,4 +329,4 @@ def ocr_batch_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pr
 
 
 if __name__ == '__main__':
-    print(get_docs_content('https://kdocs.cn/l/cvkgbXmPdx2K'))
+    print(get_docs_content('https://kdocs.cn/l/coQeHUdxYOTo'))
