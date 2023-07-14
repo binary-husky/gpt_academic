@@ -112,7 +112,6 @@ class ChatBot(ChatBotFrame):
         self.sm_ocr_result.click(**self.clear_agrs).then(fn=ArgsGeneralWrapper(crazy_functions.crazy_box.ocr_batch_plugin),
                                  inputs=[*self.input_combo, gr.State(PORT)],
                                  outputs=[*self.output_combo]).then(**self.stop_args)
-        # self.sm_select_font.select(fn=lambda x: gr.HTML.update(value=f"{x}px"), inputs=[self.sm_select_font], outputs=[self.state_users])
 
     def draw_examples(self):
         with gr.Column(elem_id='examples_col') as self.examples_column:
@@ -363,8 +362,10 @@ class ChatBot(ChatBotFrame):
                                [self.cookies, self.file_upload, self.chatbot]).then(**self.stop_args)
         self.cancel_handles.append(self.click_handle)
         # 终止按钮的回调函数注册
-        self.stopBtn.click(fn=lambda: (self.submitBtn.update(visible=True), self.stopBtn.update(visible=False)),
+        self.stopBtn.click(fn=lambda: (self.submitBtn.update(visible=True, interactive=True),
+                                       self.stopBtn.update(visible=False, interactive=True)),
                            inputs=None, outputs=[self.submitBtn, self.stopBtn], cancels=self.cancel_handles)
+
 
         def on_llms_dropdown_changed(k):
             return {self.chatbot: gr.update(label="当前模型：" + k)}
@@ -405,14 +406,10 @@ class ChatBot(ChatBotFrame):
                 with gr.Column(scale=100):
                     with gr.Tabs() as self.tabs_chatbot:
                         with gr.TabItem('Chatbot', id='chatbot') as self.chat_tab:
-                            # self.draw_chatbot()
-                            pass
+                            self.draw_chatbot()
+                            self.draw_examples()
                         with gr.TabItem('提示词、对话记录搜索') as self.prompt_tab:
                             self.draw_prompt()
-
-                with self.chat_tab:  # 使用 gr.State()对组件进行拷贝时，如果之前绘制了Markdown格式，会导致启动崩溃,所以将 markdown相关绘制放在最后
-                    self.draw_chatbot()
-                    self.draw_examples()
 
             # 函数注册，需要在Blocks下进行
             self.signals_input_setting()
