@@ -1,6 +1,6 @@
 import os
 import gradio as gr
-
+import time
 import crazy_functions.crazy_box
 from request_llm.bridge_all import predict
 from comm_tools.toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_user_upload, \
@@ -109,9 +109,13 @@ class ChatBot(ChatBotFrame):
         self.sm_code_block.click(fn=lambda x: x+'```\n\n```', inputs=[self.txt], outputs=[self.txt])
         self.sm_upload_history.click(get_user_upload, [self.chatbot], outputs=[self.chatbot]).then(
             fn=lambda: gr.Column.update(visible=False), inputs=None, outputs=self.examples_column)
-        self.sm_ocr_result.click(**self.clear_agrs).then(fn=ArgsGeneralWrapper(crazy_functions.crazy_box.ocr_batch_plugin),
+        ocr_handle = self.sm_ocr_result.click(**self.clear_agrs)
+        ocr_handle.then(fn=ArgsGeneralWrapper(crazy_functions.crazy_box.ocr_batch_plugin),
                                  inputs=[*self.input_combo, gr.State(PORT)],
-                                 outputs=[*self.output_combo]).then(**self.stop_args)
+                                 outputs=[*self.output_combo])
+        self.cancel_handles.append(ocr_handle)
+        ocr_handle.then(**self.stop_args)
+
 
     def draw_examples(self):
         with gr.Column(elem_id='examples_col') as self.examples_column:
@@ -298,22 +302,29 @@ class ChatBot(ChatBotFrame):
         self.clear_agrs = dict(fn=self.__clear_input, inputs=[self.txt], outputs=[self.txt, self.input_copy,
                                                                                   self.stopBtn, self.submitBtn,
                                                                                   self.examples_column])
-        self.stop_args = dict(fn=lambda: (self.stopBtn.update(visible=False), self.submitBtn.update(visible=True)),
+
+        self.stop_args = dict(fn=lambda: (gr.Button.update(visible=False), gr.Button.update(visible=False)),
                               inputs=None, outputs=[self.stopBtn, self.submitBtn])
         # 提交按钮、重置按钮
-        self.cancel_handles.append(self.txt.submit(**self.clear_agrs).then(**self.predict_args).then(**self.stop_args))
-        self.cancel_handles.append(self.submitBtn.click(**self.clear_agrs).then(**self.predict_args).then(**self.stop_args))
+        submit_handle = self.txt.submit(**self.clear_agrs)
+        click_handle = self.submitBtn.click(**self.clear_agrs)
+        self.cancel_handles.append(submit_handle.then(**self.predict_args))
+        self.cancel_handles.append(click_handle.then(**self.predict_args))
         # self.cpopyBtn.click(fn=func_box.copy_result, inputs=[self.history], outputs=[self.status])
+        submit_handle.then(**self.stop_args)
+        click_handle.then(**self.stop_args)
         self.resetBtn.click(lambda: ([], [], "已重置"), None, [self.chatbot, self.history, self.status])
 
 
     def signals_function(self):
         # 基础功能区的回调函数注册
         for k in functional:
-            self.click_handle = functional[k]["Button"].click(**self.clear_agrs).then(fn=ArgsGeneralWrapper(predict).then(**self.stop_args),
+            click_handle = functional[k]["Button"].click(**self.clear_agrs)
+            
+            self.cancel_handles.append(click_handle.then(fn=ArgsGeneralWrapper(predict),
                                                               inputs=[*self.input_combo, gr.State(True), gr.State(k)],
-                                                              outputs=self.output_combo)
-            self.cancel_handles.append(self.click_handle)
+                                                              outputs=self.output_combo))
+            click_handle.then(**self.stop_args)
 
     def signals_public(self):
         # 文件上传区，接收文件后与chatbot的互动
@@ -321,14 +332,15 @@ class ChatBot(ChatBotFrame):
         # 函数插件-固定按钮区
         for k in crazy_fns:
             if not crazy_fns[k].get("AsButton", True): continue
-            self.click_handle = crazy_fns[k]["Button"].click(**self.clear_agrs).then(
-                ArgsGeneralWrapper(crazy_fns[k]["Function"]),
-                [*self.input_combo, gr.State(PORT), gr.State(crazy_fns[k].get('Parameters', False))],
-                self.output_combo).then(**self.stop_args)
-            self.click_handle.then(on_report_generated, [self.cookies, self.file_upload, self.chatbot],
+            click_handle = crazy_fns[k]["Button"].click(**self.clear_agrs)
+            click_handle.then(ArgsGeneralWrapper(crazy_fns[k]["Function"]),
+                              [*self.input_combo, gr.State(PORT), gr.State(crazy_fns[k].get('Parameters', False))],
+                              self.output_combo)
+            click_handle.then(on_report_generated, [self.cookies, self.file_upload, self.chatbot],
                                    [self.cookies, self.file_upload, self.chatbot])
-            # self.click_handle.then(fn=lambda x: '', inputs=[], outputs=self.txt)
-            self.cancel_handles.append(self.click_handle)
+            # click_handle.then(fn=lambda x: '', inputs=[], outputs=self.txt)
+            self.cancel_handles.append(click_handle)
+            click_handle.then(**self.stop_args)
 
         # 函数插件-下拉菜单与随变按钮的互动
         def on_dropdown_changed(k):
@@ -357,19 +369,18 @@ class ChatBot(ChatBotFrame):
             args = tuple(append)
             yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(*args, **kwargs)
 
-        self.click_handle = self.switchy_bt.click(**self.clear_agrs).then(route, [self.switchy_bt, *self.input_combo, gr.State(PORT)], self.output_combo)
-        self.click_handle.then(on_report_generated, [self.cookies, self.file_upload, self.chatbot],
-                               [self.cookies, self.file_upload, self.chatbot]).then(**self.stop_args)
-        self.cancel_handles.append(self.click_handle)
+        click_handle = self.switchy_bt.click(**self.clear_agrs).then(route, [self.switchy_bt, *self.input_combo, gr.State(PORT)], self.output_combo)
+        click_handle.then(on_report_generated, [self.cookies, self.file_upload, self.chatbot],
+                               [self.cookies, self.file_upload, self.chatbot])
+        self.cancel_handles.append(click_handle)
+        click_handle.then(**self.stop_args)
         # 终止按钮的回调函数注册
         self.stopBtn.click(fn=lambda: (self.submitBtn.update(visible=True, interactive=True),
                                        self.stopBtn.update(visible=False, interactive=True)),
                            inputs=None, outputs=[self.submitBtn, self.stopBtn], cancels=self.cancel_handles)
 
-
         def on_llms_dropdown_changed(k):
             return {self.chatbot: gr.update(label="当前模型：" + k)}
-
         self.llms_dropdown.select(on_llms_dropdown_changed, [self.llms_dropdown], [self.chatbot])
 
 
@@ -415,8 +426,8 @@ class ChatBot(ChatBotFrame):
             self.signals_input_setting()
             self.signals_sm_btn()
             self.signals_prompt_func()
-            self.signals_public()
             self.signals_prompt_edit()
+            self.signals_public()
             adv_plugins = gr.State([i for i in crazy_fns])
             self.demo.load(fn=func_box.refresh_load_data,
                            inputs=[self.chatbot, self.history, self.pro_fp_state, adv_plugins],

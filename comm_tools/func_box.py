@@ -630,8 +630,7 @@ def clean_br_string(s):
     s = re.sub('<\s*br\s*/?>', '\n', s)  # 使用正则表达式同时匹配<br>、<br/>、<br />、< br>和< br/>
     return s
 
-
-def update_btn(self,
+def update_btn(self: gr.Button = gr.Button(value=''),
     value:  str = None,
     variant:  str = None,
     visible:  bool = None,
