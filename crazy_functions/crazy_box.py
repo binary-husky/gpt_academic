@@ -148,7 +148,9 @@ class ExcelHandle:
             # 增加起始行号
             start_row += 1
         # 保存 Excel 文件
+        time_stamp = time.strftime("%Y-%m-%d-%H", time.localtime())
         if filename == '': filename = time.strftime("%Y-%m-%d-%H", time.localtime()) + '_temp'
+        else: f"{time_stamp}_{filename}"
         test_case_path = f'{os.path.join(self.user_path, filename)}.xlsx'
         workbook.save(test_case_path)
         return test_case_path

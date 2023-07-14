@@ -83,7 +83,7 @@ def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs
         for i in gpt_response[k].splitlines():
             test_case.append([func_box.clean_br_string(i) for i in i.split('|')[1:]])
         file_path = crazy_box.ExcelHandle(ipaddr=llm_kwargs['ipaddr']).lpvoid_lpbuffe(test_case[2:], filename=file_name)
-        chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_download_blank(__href=file_path, file_name=file_path.split("/")[-1])}\n\n'
+        chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_download_blank(__href=file_path, dir_name=file_path.split("/")[-1])}\n\n'
     chatbot.append(['Done', chat_file_list])
     yield from update_ui(chatbot, history)
 
@@ -134,16 +134,16 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
 def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs):
     # 提交多线程任务
     if len(inputs_array) == 1:
-        yield from bridge_all.predict(inputs_array[0], llm_kwargs, plugin_kwargs, chatbot, history)
-        gpt_response_collection = [inputs_show_user_array[0], history[-1]]
         # 下面的方法有内存泄漏?的风险（加载完所有数据后，还在不知道轮询什么东西），暂时屏蔽
-        # gpt_say = yield from crazy_utils.request_gpt_model_in_new_thread_with_ui_alive(
-        #     inputs=inputs_array[0], inputs_show_user=inputs_array[0],
-        #     llm_kwargs=llm_kwargs, chatbot=chatbot, history=[],
-        #     sys_prompt="" , refresh_interval=0.1
-        # )
-        # gpt_response_collection = [inputs_show_user_array[0], gpt_say]
-        # history.extend(gpt_response_collection)
+        if inputs_array[0] > 200: inputs_show_user = inputs_array[0][:100]+"\n\n...\n\n"+inputs_array[0][-100:]
+        else: inputs_show_user = inputs_array[0]
+        gpt_say = yield from crazy_utils.request_gpt_model_in_new_thread_with_ui_alive(
+            inputs=inputs_array[0], inputs_show_user=inputs_show_user,
+            llm_kwargs=llm_kwargs, chatbot=chatbot, history=[],
+            sys_prompt="", refresh_interval=0.1
+        )
+        gpt_response_collection = [inputs_show_user_array[0], gpt_say]
+        history.extend(gpt_response_collection)
     else:
         gpt_response_collection = yield from crazy_utils.request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
             inputs_array=inputs_array,

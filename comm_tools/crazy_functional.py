@@ -54,7 +54,8 @@ def get_crazy_functions():
             "Parameters": {
                 "is_show": False,
                 "prompt": '文档转测试用例',
-                'img_ocr': False
+                'img_ocr': False,
+                "to_markdown": True
             }
         },
         "需求文档转测试用例(输入框输入需求文档)": {
