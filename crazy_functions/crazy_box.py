@@ -125,8 +125,9 @@ class Utils:
 
 class ExcelHandle:
 
-    def __init__(self, ipaddr):
-        self.template_excel = os.path.join(func_box.base_path, 'docs/template/【Temp】测试要点.xlsx')
+    def __init__(self, ipaddr, is_client=True):
+        if is_client: self.template_excel = os.path.join(func_box.base_path, 'docs/template/【Temp】测试要点.xlsx')
+        else: self.template_excel = os.path.join(func_box.base_path, 'docs/template/接口测试用例模板.xlsx')
         self.user_path = os.path.join(func_box.base_path, 'private_upload', ipaddr, 'test_case')
         os.makedirs(f'{self.user_path}', exist_ok=True)
 
@@ -135,8 +136,11 @@ class ExcelHandle:
         workbook = load_workbook(self.template_excel)
         # 选择要操作的工作表
         worksheet = workbook['测试要点']
-        decs_sheet = workbook['说明']
-        decs_sheet['C2'] = decs
+        try:
+            decs_sheet = workbook['说明']
+            decs_sheet['C2'] = decs
+        except:
+            print('文档没有说明的sheet')
         # 定义起始行号
         start_row = 4
         # 遍历数据列表
@@ -331,7 +335,7 @@ def ocr_batch_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pr
 
 
 if __name__ == '__main__':
-    # print(get_docs_content('https://kdocs.cn/l/coQeHUdxYOTo'))
-    ksw = {'advanced_arg': '{\n    "is_show": false,\n    "prompt": "文档转测试用例",\n    "img_ocr": true\n}',
-     'parameters_def': ''}
-    print(json_args_return(kwargs=ksw, keys=['prompt']))
+    print(get_docs_content('https://kdocs.cn/l/coQeHUdxYOTo'))
+    # ksw = {'advanced_arg': '{\n    "is_show": false,\n    "prompt": "文档转测试用例",\n    "img_ocr": true\n}',
+    #  'parameters_def': ''}
+    # print(json_args_return(kwargs=ksw, keys=['prompt']))

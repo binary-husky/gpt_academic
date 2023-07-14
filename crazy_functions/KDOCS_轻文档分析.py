@@ -10,6 +10,7 @@ from comm_tools.toolbox import update_ui
 from comm_tools.toolbox import CatchException
 from crazy_functions import crazy_utils
 from request_llm import bridge_all
+from request_llm.bridge_all import model_info
 from comm_tools import prompt_generator, func_box, ocr_tools
 import traceback
 
@@ -74,7 +75,7 @@ def long_name_processing(file_name):
     return file_name
 
 
-def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history):
+def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history, is_client=True):
     gpt_response = gpt_response_collection[1::2]
     chat_file_list = ''
     for k in range(len(gpt_response)):
@@ -82,7 +83,7 @@ def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs
         test_case = []
         for i in gpt_response[k].splitlines():
             test_case.append([func_box.clean_br_string(i) for i in i.split('|')[1:]])
-        file_path = crazy_box.ExcelHandle(ipaddr=llm_kwargs['ipaddr']).lpvoid_lpbuffe(test_case[2:], filename=file_name)
+        file_path = crazy_box.ExcelHandle(ipaddr=llm_kwargs['ipaddr'], is_client=is_client).lpvoid_lpbuffe(test_case[2:], filename=file_name)
         chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_download_blank(__href=file_path, dir_name=file_path.split("/")[-1])}\n\n'
     chatbot.append(['Done', chat_file_list])
     yield from update_ui(chatbot, history)
@@ -90,12 +91,12 @@ def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs
 
 def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
     model = llm_kwargs['llm_model']
-    max_length = llm_kwargs['max_length']/2  # 考虑到对话+回答会超过tokens,所以/2
+    max_token = model_info[llm_kwargs['llm_model']]['max_token']/2  # 考虑到对话+回答会超过tokens,所以/2
     get_token_num = bridge_all.model_info[model]['token_cnt']
-    if get_token_num(inputs) > max_length:
+    if get_token_num(inputs) > max_token:
         chatbot.append([None, f'{func_box.html_tag_color(inputs[:10])}...对话预计超出tokens限制, 拆分中...'])
         yield from update_ui(chatbot, history)
-        segments = crazy_utils.breakdown_txt_to_satisfy_token_limit(inputs, get_token_num, max_length)
+        segments = crazy_utils.breakdown_txt_to_satisfy_token_limit(inputs, get_token_num, max_token)
     else:
         segments = [inputs]
     return segments
@@ -135,7 +136,7 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
     # 提交多线程任务
     if len(inputs_array) == 1:
         # 下面的方法有内存泄漏?的风险（加载完所有数据后，还在不知道轮询什么东西），暂时屏蔽
-        if inputs_array[0] > 200: inputs_show_user = inputs_array[0][:100]+"\n\n...\n\n"+inputs_array[0][-100:]
+        if len(inputs_array[0]) > 200: inputs_show_user = inputs_array[0][:100]+"\n\n...\n\n"+inputs_array[0][-100:]
         else: inputs_show_user = inputs_array[0]
         gpt_say = yield from crazy_utils.request_gpt_model_in_new_thread_with_ui_alive(
             inputs=inputs_array[0], inputs_show_user=inputs_show_user,
@@ -165,6 +166,17 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
     return gpt_response_collection
 
 
+def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
+    for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
+        chatbot.append([None, f'{long_name_processing(you_say)} 🏃🏻‍正在努力将Markdown转换为流程图~'])
+        yield from update_ui(chatbot=chatbot, history=history)
+        md, html = crazy_box.Utils().markdown_to_flow_chart(data=inputs, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(you_say))
+        chatbot.append(("View: " + func_box.html_view_blank(md), f'{func_box.html_iframe_code(html_file=html)}'
+                                                               f'tips: 双击空白处可以放大～'
+                                                               f'\n\n--- \n\n Download: {func_box.html_download_blank(html)}' 
+                                                              '\n\n--- \n\n View: ' + func_box.html_view_blank(html)))
+        yield from update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
+
 def KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     file_limit = yield from Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
     if not file_limit:
@@ -180,23 +192,20 @@ def KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, s
 
 
 @CatchException
-def 需求转测试用例(file_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    if file_limit:
-        inputs_show_user_array = [str(file_limit).splitlines()[0]]
-        file_limit = [inputs_show_user_array, file_limit]
-        inputs_array, inputs_show_user_array = yield from input_output_processing(file_limit, llm_kwargs, plugin_kwargs,
-                                                                       chatbot, history)
-    else:
-        chatbot.append((None, f'输入框空空如也？\n\n'
-                            '请在输入框中输入你的需求文档，然后再点击需求转测试用例'))
-        yield from update_ui(chatbot, history)
+def KDocs_转接口测试用例(file_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    gpt_response_collection = yield from KDocs_转Markdown(file_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
+    if not gpt_response_collection:
+        yield from update_ui(chatbot=chatbot, history=history, msg='多线程一个都没有通过，暂停运行')
         return
+    inputs_array, inputs_show_user_array = yield from input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs,
+                                                                   chatbot, history)
     gpt_response_collection = yield from submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
-    write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history)
+    yield from write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history, is_client=False)
+    yield from update_ui(chatbot, history, '插件执行成功')
 
 
 @CatchException
-def KDocs_转测试用例(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def KDocs_转客户端测试用例(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     gpt_response_collection = yield from KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
     if not gpt_response_collection:
         yield from update_ui(chatbot=chatbot, history=history, msg='多线程一个都没有通过，暂停运行')
@@ -218,17 +227,6 @@ def KDocs_需求分析问答(link_limit, llm_kwargs, plugin_kwargs, chatbot, his
                                                                    chatbot, history)
     gpt_response_collection = yield from submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
     yield from update_ui(chatbot, history, '插件执行成功')
-
-def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
-    for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
-        chatbot.append([None, f'{long_name_processing(you_say)} 🏃🏻‍正在努力将Markdown转换为流程图~'])
-        yield from update_ui(chatbot=chatbot, history=history)
-        md, html = crazy_box.Utils().markdown_to_flow_chart(data=inputs, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(you_say))
-        chatbot.append(("View: " + func_box.html_view_blank(md), f'{func_box.html_iframe_code(html_file=html)}'
-                                                               f'tips: 双击空白处可以放大～'
-                                                               f'\n\n--- \n\n Download: {func_box.html_download_blank(html)}' 
-                                                              '\n\n--- \n\n View: ' + func_box.html_view_blank(html)))
-        yield from update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
 
 @CatchException
 def KDocs_文档转流程图(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):

@@ -116,7 +116,7 @@ class ChatBot(ChatBotFrame):
 
     def draw_examples(self):
         with gr.Column(elem_id='examples_col') as self.examples_column:
-            gr.Markdown('#  🤩 快速开始体验Ai功能')
+            gr.Markdown('#  🤩 快速开始使用Ai功能')
             with gr.Row():
                 hide_components = gr.Textbox(visible=False)
                 gr.Button.update = func_box.update_btn
@@ -363,7 +363,7 @@ class ChatBot(ChatBotFrame):
                                [self.cookies, self.file_upload, self.chatbot]).then(**self.stop_args)
         self.cancel_handles.append(self.click_handle)
         # 终止按钮的回调函数注册
-        self.stopBtn.click(fn=lambda: (gr.Button.update(visible=True), gr.Button.update(visible=False)),
+        self.stopBtn.click(fn=lambda: (self.submitBtn.update(visible=True), self.stopBtn.update(visible=False)),
                            inputs=None, outputs=[self.submitBtn, self.stopBtn], cancels=self.cancel_handles)
 
         def on_llms_dropdown_changed(k):

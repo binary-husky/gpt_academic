@@ -48,7 +48,7 @@ def get_crazy_functions():
         "Kdocs_多文件转测试用例(输入框输入文档链接)": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_轻文档分析.KDocs_转测试用例),
+            "Function": HotReload(KDOCS_轻文档分析.KDocs_转客户端测试用例),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
             "Parameters": {
@@ -58,16 +58,16 @@ def get_crazy_functions():
                 "to_markdown": True
             }
         },
-        "需求文档转测试用例(输入框输入需求文档)": {
+        "接口文档转测试用例(输入框输入需求文档)": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_轻文档分析.需求转测试用例),
+            "Function": HotReload(KDOCS_轻文档分析.KDocs_转接口测试用例),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
             "Parameters": {
                 "is_show": False,
-                "prompt": '文档转测试用例',
-                'img_ocr': False,
+                "prompt": '接口文档转测试用例',
+                'img_ocr': True,
                 'to_markdown': False,
             }
         },
