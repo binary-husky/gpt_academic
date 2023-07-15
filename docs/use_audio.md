@@ -6,7 +6,7 @@
 pip install --upgrade pyOpenSSL scipy git+https://github.com/aliyun/alibabacloud-nls-python-sdk.git
 ```
 
-如果因为中国特色网络问题导致上述命令无法执行：
+如果因为特色网络问题导致上述命令无法执行：
 1. git clone alibabacloud-nls-python-sdk这个项目（或者直接前往Github对应网址下载压缩包）.
 命令行输入： `git clone https://github.com/aliyun/alibabacloud-nls-python-sdk.git`
 1. 进入alibabacloud-nls-python-sdk目录命令行输入：`python setup.py install`
