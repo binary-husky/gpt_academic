@@ -392,7 +392,7 @@ def get_crazy_functions():
         })
         from crazy_functions.Latex输出PDF结果 import Latex翻译中文并重新编译PDF
         function_plugins.update({
-            "Arixv翻译（输入arxivID）[需Latex]": {
+            "Arixv论文精细翻译（输入arxivID）[需Latex]": {
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,
@@ -403,7 +403,7 @@ def get_crazy_functions():
             }
         })
         function_plugins.update({
-            "本地论文翻译（上传Latex压缩包）[需Latex]": {
+            "本地Latex论文精细翻译（上传Latex项目）[需Latex]": {
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,
