@@ -63,7 +63,7 @@ services:
 version: '3'
 services:
   gpt_academic_with_rwkv:
-    image: fuqingxu/gpt_academic:jittorllms
+    image: ghcr.io/binary-husky/gpt_academic_jittorllms:master
     environment:
       # 请查阅 `config.py` 以查看所有的配置信息
       API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx,fkxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  '
@@ -85,28 +85,13 @@ services:
     # 与宿主的网络融合
     network_mode: "host"
 
-    # 使用代理网络拉取最新代码
-    # command: >
-    #   bash -c "       truncate -s -1 /etc/proxychains.conf &&
-    #                   echo \"socks5 127.0.0.1 10880\" >> /etc/proxychains.conf &&
-    #                   echo '[gpt-academic] 正在从github拉取最新代码...' &&
-    #                   proxychains git pull &&
-    #                   echo '[jittorllms] 正在从github拉取最新代码...' &&
-    #                   proxychains git --git-dir=request_llm/jittorllms/.git --work-tree=request_llm/jittorllms pull --force &&
-    #                   python3 -u main.py"
-
     # 不使用代理网络拉取最新代码
     command: >
-      bash -c "       echo '[gpt-academic] 正在从github拉取最新代码...' &&
-                      git pull &&
-                      pip install -r requirements.txt &&
-                      echo '[jittorllms] 正在从github拉取最新代码...' &&
-                      git --git-dir=request_llm/jittorllms/.git --work-tree=request_llm/jittorllms pull --force &&
-                      python3 -u main.py"
+      python3 -u main.py
 
 
 ## ===================================================
-## 【方案四】 chatgpt + Latex
+## 【方案四】 ChatGPT + Latex
 ## ===================================================
 version: '3'
 services:
