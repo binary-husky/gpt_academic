@@ -146,7 +146,7 @@ python main.py
 
 1. 仅ChatGPT（推荐大多数人选择，等价于docker-compose方案1）
 [![basic](https://github.com/binary-husky/gpt_academic/actions/workflows/build-without-local-llms.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-without-local-llms.yml)
-[![basic](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-latex.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-latex.yml)
+[![basiclatex](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-latex.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-latex.yml)
 
 ``` sh
 git clone https://github.com/binary-husky/gpt_academic.git  # 下载项目
@@ -170,6 +170,8 @@ docker-compose up
 ```
 
 3. ChatGPT + LLAMA + 盘古 + RWKV（需要熟悉Docker）
+[![jittorllms](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-jittorllms.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-jittorllms.yml)
+
 ``` sh
 # 修改docker-compose.yml，保留方案3并删除其他方案。修改docker-compose.yml中方案3的配置，参考其中注释即可
 docker-compose up
