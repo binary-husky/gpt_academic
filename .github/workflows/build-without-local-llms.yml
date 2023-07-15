@@ -1,5 +1,5 @@
 # https://docs.github.com/en/actions/publishing-packages/publishing-docker-images#publishing-images-to-github-packages
-name: Create and publish a Docker image
+name: build-without-local-llms
 
 on:
   push:
