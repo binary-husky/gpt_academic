@@ -82,14 +82,6 @@
     margin: 1em 2em 1em 0.5em;
 }
 
-.app.svelte-1mya07g.svelte-1mya07g {
-    max-width: 95%;
-    position: relative;
-    padding: var(--size-4);
-    width: 95%;
-    height: 100%;
-}
-
 .codehilite .hll { background-color: #6e7681 }
 .codehilite .c { color: #8b949e; font-style: italic } /* Comment */
 .codehilite .err { color: #f85149 } /* Error */
