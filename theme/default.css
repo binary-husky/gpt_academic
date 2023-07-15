@@ -82,6 +82,16 @@
     margin: 1em 2em 1em 0.5em;
 }
 
+/* .mic-wrap.svelte-1thnwz {
+
+} */
+.block.svelte-mppz8v > .mic-wrap.svelte-1thnwz{
+    justify-content: center;
+    display: flex;
+    padding: 0;
+
+}
+
 .codehilite .hll { background-color: #6e7681 }
 .codehilite .c { color: #8b949e; font-style: italic } /* Comment */
 .codehilite .err { color: #f85149 } /* Error */
