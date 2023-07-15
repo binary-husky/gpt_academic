@@ -127,7 +127,7 @@ put your new bing cookies here
 """
 
 
-# 阿里云实时语音识别 配置难度较高 仅建议高手用户使用 参考 https://help.aliyun.com/document_detail/450255.html
+# 阿里云实时语音识别 配置难度较高 仅建议高手用户使用 参考 https://github.com/binary-husky/gpt_academic/blob/master/docs/use_audio.md
 ENABLE_AUDIO = False
 ALIYUN_TOKEN=""    # 例如 f37f30e0f9934c34a992f6f64f7eba4f
 ALIYUN_APPKEY=""   # 例如 RoPlZrM88DnAFkZK
