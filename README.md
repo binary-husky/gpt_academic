@@ -312,7 +312,7 @@ gpt_academic开发者QQ群-2：610599535
     - 官方Gradio目前有很多兼容性Bug，请务必使用`requirement.txt`安装Gradio
 
 ### III：主题
-
+可以通过修改`THEME`选项（config.py）变更主题
 1. `Chuanhu-Small-and-Beautiful` [网址](https://github.com/GaiZhenbiao/ChuanhuChatGPT/)
 
 
