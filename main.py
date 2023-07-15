@@ -8,18 +8,19 @@ def main():
     # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
     proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT, AVAIL_LLM_MODELS, AUTO_CLEAR_TXT = \
         get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'LAYOUT', 'AVAIL_LLM_MODELS', 'AUTO_CLEAR_TXT')
-
+    ENABLE_AUDIO, AUTO_CLEAR_TXT = get_conf('ENABLE_AUDIO', 'AUTO_CLEAR_TXT')
     # 如果WEB_PORT是-1, 则随机选取WEB端口
     PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
     if not AUTHENTICATION: AUTHENTICATION = None
 
     from check_proxy import get_current_version
+    from theme.theme import adjust_theme, advanced_css, theme_declaration
     initial_prompt = "Serve me as a writing and programming assistant."
-    title_html = f"<h1 align=\"center\">ChatGPT 学术优化 {get_current_version()}</h1>"
+    title_html = f"<h1 align=\"center\">GPT 学术优化 {get_current_version()}</h1>{theme_declaration}"
     description =  """代码开源和更新[地址🚀](https://github.com/binary-husky/chatgpt_academic)，感谢热情的[开发者们❤️](https://github.com/binary-husky/chatgpt_academic/graphs/contributors)"""
 
     # 问询记录, python 版本建议3.9+（越新越好）
-    import logging
+    import logging, uuid
     os.makedirs("gpt_log", exist_ok=True)
     try:logging.basicConfig(filename="gpt_log/chat_secrets.log", level=logging.INFO, encoding="utf-8")
     except:logging.basicConfig(filename="gpt_log/chat_secrets.log", level=logging.INFO)
@@ -37,7 +38,6 @@ def main():
     gr.Chatbot.postprocess = format_io
 
     # 做一些外观色彩上的调整
-    from theme import adjust_theme, advanced_css
     set_theme = adjust_theme()
 
     # 代理与自动更新
@@ -52,7 +52,7 @@ def main():
         CHATBOT_HEIGHT /= 2
 
     cancel_handles = []
-    with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
+    with gr.Blocks(title="GPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
         gr.HTML(title_html)
         cookies = gr.State(load_chat_cookies())
         with gr_L1():
@@ -70,6 +70,9 @@ def main():
                         resetBtn = gr.Button("重置", variant="secondary"); resetBtn.style(size="sm")
                         stopBtn = gr.Button("停止", variant="secondary"); stopBtn.style(size="sm")
                         clearBtn = gr.Button("清除", variant="secondary", visible=False); clearBtn.style(size="sm")
+                    if ENABLE_AUDIO: 
+                        with gr.Row():
+                            audio_mic = gr.Audio(source="microphone", type="numpy", streaming=True, show_label=False).style(container=False)
                     with gr.Row():
                         status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {proxy_info}", elem_id="state-panel")
                 with gr.Accordion("基础功能区", open=True, elem_id="basic-panel") as area_basic_fn:
@@ -80,7 +83,7 @@ def main():
                             functional[k]["Button"] = gr.Button(k, variant=variant)
                 with gr.Accordion("函数插件区", open=True, elem_id="plugin-panel") as area_crazy_fn:
                     with gr.Row():
-                        gr.Markdown("注意：以下“红颜色”标识的函数插件需从输入区读取路径作为参数.")
+                        gr.Markdown("插件可读取“输入区”文本/路径作为参数（上传文件自动修正路径）")
                     with gr.Row():
                         for k in crazy_fns:
                             if not crazy_fns[k].get("AsButton", True): continue
@@ -91,14 +94,14 @@ def main():
                         with gr.Accordion("更多函数插件", open=True):
                             dropdown_fn_list = [k for k in crazy_fns.keys() if not crazy_fns[k].get("AsButton", True)]
                             with gr.Row():
-                                dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="").style(container=False)
+                                dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="", show_label=False).style(container=False)
                             with gr.Row():
                                 plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False, 
                                                                  placeholder="这里是特殊函数插件的高级参数输入区").style(container=False)
                             with gr.Row():
                                 switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
                     with gr.Row():
-                        with gr.Accordion("点击展开“文件上传区”。上传本地文件可供红色函数插件调用。", open=False) as area_file_up:
+                        with gr.Accordion("点击展开“文件上传区”。上传本地文件/压缩包供函数插件调用。", open=False) as area_file_up:
                             file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)", file_count="multiple")
                 with gr.Accordion("更换模型 & SysPrompt & 交互界面布局", open=(LAYOUT == "TOP-DOWN"), elem_id="interact-panel"):
                     system_prompt = gr.Textbox(show_label=True, placeholder=f"System Prompt", label="System prompt", value=initial_prompt)
@@ -185,6 +188,18 @@ def main():
         # 终止按钮的回调函数注册
         stopBtn.click(fn=None, inputs=None, outputs=None, cancels=cancel_handles)
         stopBtn2.click(fn=None, inputs=None, outputs=None, cancels=cancel_handles)
+        if ENABLE_AUDIO: 
+            from crazy_functions.live_audio.audio_io import RealtimeAudioDistribution
+            rad = RealtimeAudioDistribution()
+            def deal_audio(audio, cookies):
+                rad.feed(cookies['uuid'].hex, audio)
+            audio_mic.stream(deal_audio, inputs=[audio_mic, cookies])
+
+        def init_cookie(cookies, chatbot):
+            # 为每一位访问的用户赋予一个独一无二的uuid编码
+            cookies.update({'uuid': uuid.uuid4()})
+            return cookies
+        demo.load(init_cookie, inputs=[cookies, chatbot], outputs=[cookies])
         demo.load(lambda: 0, inputs=None, outputs=None, _js='()=>{ChatBotHeight();}')
         
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
