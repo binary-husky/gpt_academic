@@ -23,7 +23,7 @@ class AliyunASR():
         pass
 
     def test_on_close(self, *args):
-        # print("on_close: args=>{}".format(args))
+        self.aliyun_service_ok = False
         pass
 
     def test_on_result_chg(self, message, *args):
@@ -50,7 +50,7 @@ class AliyunASR():
         rad.clean_up()
         temp_folder = tempfile.gettempdir()
         TOKEN, APPKEY = get_conf('ALIYUN_TOKEN', 'ALIYUN_APPKEY')
-
+        self.aliyun_service_ok = True
         URL="wss://nls-gateway.aliyuncs.com/ws/v1"
         sr = nls.NlsSpeechTranscriber(
                     url=URL,
@@ -86,4 +86,8 @@ class AliyunASR():
                 for i in slices: sr.send_audio(bytes(i))
             else:
                 time.sleep(0.1)
+
+            if not self.aliyun_service_ok:
+                self.stop = True
+                self.stop_msg = 'Aliyun音频服务异常，请检查ALIYUN_TOKEN和ALIYUN_APPKEY是否过期。'
         r = sr.stop()

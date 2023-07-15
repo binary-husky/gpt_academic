@@ -14,9 +14,11 @@ class WatchDog():
         self.bark_fn = bark_fn
         self.interval = interval
         self.msg = msg
+        self.kill_dog = False
     
     def watch(self):
         while True:
+            if self.kill_dog: break
             if time.time() - self.last_feed > self.timeout:
                 if len(self.msg) > 0: print(self.msg)
                 self.bark_fn()
@@ -87,6 +89,9 @@ class InterviewAssistant(AliyunASR):
 
     def __del__(self):
         self.stop = True
+        self.stop_msg = ""
+        self.commit_wd.kill_dog = True
+        self.plugin_wd.kill_dog = True
 
     def init(self, chatbot):
         # 初始化音频采集线程
@@ -119,7 +124,7 @@ class InterviewAssistant(AliyunASR):
         self.commit_wd = WatchDog(timeout=self.commit_after_pause_n_second, bark_fn=self.no_audio_for_a_while, interval=0.2)
         self.commit_wd.begin_watch()
 
-        while True:
+        while not self.stop:
             self.event_on_result_chg.wait(timeout=0.25)  # run once every 0.25 second
             chatbot = self.agt.update_chatbot(chatbot)   # 将子线程的gpt结果写入chatbot
             history = chatbot2history(chatbot)
@@ -158,6 +163,8 @@ class InterviewAssistant(AliyunASR):
                 chatbot.append(["[请讲话]", "[正在等您说完问题]"])
                 yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
+        if len(self.stop_msg) != 0:
+            raise RuntimeError(self.stop_msg)
 
 
 
