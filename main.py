@@ -52,7 +52,7 @@ def main():
         CHATBOT_HEIGHT /= 2
 
     cancel_handles = []
-    with gr.Blocks(title="ChatGPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
+    with gr.Blocks(title="GPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
         gr.HTML(title_html)
         cookies = gr.State(load_chat_cookies())
         with gr_L1():
