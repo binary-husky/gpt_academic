@@ -6,17 +6,23 @@
 pip install --upgrade pyOpenSSL scipy git+https://github.com/aliyun/alibabacloud-nls-python-sdk.git
 ```
 
-如果因为中国特色网络问题导致上述命令无法执行：
+如果因为特色网络问题导致上述命令无法执行：
 1. git clone alibabacloud-nls-python-sdk这个项目（或者直接前往Github对应网址下载压缩包）.
 命令行输入： `git clone https://github.com/aliyun/alibabacloud-nls-python-sdk.git`
 1. 进入alibabacloud-nls-python-sdk目录命令行输入：`python setup.py install`
 
 
 ## 2. 配置音频功能开关 和 阿里云APPKEY（config.py/config_private.py/环境变量）
+
+- 注册阿里云账号
+- 开通 智能语音交互 （有免费白嫖时长）
+- 获取token和appkey
+- 未来将逐步用其他更廉价的云服务取代阿里云
+
 ```
 ENABLE_AUDIO = True
-ALIYUN_TOKEN = "554a50fcd0bb476c8d07bb630e94d20c"    # 例如 f37f30e0f9934c34a992f6f64f7eba4f
-ALIYUN_APPKEY = "RoPlZrM88DnAFkZK"   # 例如 RoPlZrM88DnAFkZK
+ALIYUN_TOKEN = "554a50fcd0bb476c8d07bb630e94d20c"    # 此token已经失效
+ALIYUN_APPKEY = "RoPlZrM88DnAFkZK"   # 此appkey已经失效
 ```
 
 参考 https://help.aliyun.com/document_detail/450255.html
