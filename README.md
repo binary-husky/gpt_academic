@@ -25,7 +25,7 @@ To translate this project to arbitary language with GPT, read and run [`multi_la
 
 <div align="center">
 
-功能 | 描述
+功能（⭐= 近期新增功能） | 描述
 --- | ---
 一键润色 | 支持一键润色、一键查找论文语法错误
 一键中英互译 | 一键中英互译
@@ -49,7 +49,8 @@ Latex论文一键校对 | [函数插件] 仿Grammarly对Latex文章进行语法�
 多线程函数插件支持 | 支持多线调用chatgpt，一键处理[海量文本](https://www.bilibili.com/video/BV1FT411H7c5/)或程序
 启动暗色[主题](https://github.com/binary-husky/gpt_academic/issues/173) | 在浏览器url后面添加```/?__theme=dark```可以切换dark主题
 [多LLM模型](https://www.bilibili.com/video/BV1wT411p7yf)支持 | 同时被GPT3.5、GPT4、[清华ChatGLM2](https://github.com/THUDM/ChatGLM2-6B)、[复旦MOSS](https://github.com/OpenLMLab/MOSS)同时伺候的感觉一定会很不错吧？
-ChatGLM2微调模型 | 支持加载ChatGLM2微调模型，提供ChatGLM2微调插件
+⭐ChatGLM2微调模型 | 支持加载ChatGLM2微调模型，提供ChatGLM2微调辅助插件
+⭐实时语音对话输入 | 异步监听音频，完全脱手操作，自动断句，自动寻找回答时机
 更多LLM模型接入，支持[huggingface部署](https://huggingface.co/spaces/qingxu98/gpt-academic) | 加入Newbing接口(新必应)，引入清华[Jittorllms](https://github.com/Jittor/JittorLLMs)支持[LLaMA](https://github.com/facebookresearch/llama)和[盘古α](https://openi.org.cn/pangu/)
 更多新功能展示 (图像生成等) …… | 见本文档结尾处 ……
 
@@ -287,6 +288,7 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 
 ### II：版本:
 - version 3.5(Todo): 使用自然语言调用本项目的所有函数插件（高优先级）
+- version 3.46: 支持完全脱手操作的实时语音对话
 - version 3.45: 支持自定义ChatGLM2微调模型
 - version 3.44: 正式支持Azure，优化界面易用性
 - version 3.4: +arxiv论文翻译、latex论文批改功能
