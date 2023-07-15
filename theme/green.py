@@ -100,5 +100,7 @@ def adjust_theme():
     return set_theme
 
 
-with open("theme/green.css", "r", encoding="utf-8") as f:
+import os
+theme_dir = os.path.join(os.path.dirname(__file__), "..", "theme")
+with open(os.path.join(theme_dir, "green.css"), "r", encoding="utf-8") as f:
     advanced_css = f.read()
