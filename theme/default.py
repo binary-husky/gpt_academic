@@ -9,9 +9,8 @@ def adjust_theme():
         set_theme = gr.themes.Default(
             primary_hue=gr.themes.utils.colors.orange,
             neutral_hue=gr.themes.utils.colors.gray,
-            font=["sans-serif", "Microsoft YaHei", "ui-sans-serif", "system-ui",
-                  "sans-serif", gr.themes.utils.fonts.GoogleFont("Source Sans Pro")],
-            font_mono=["ui-monospace", "Consolas", "monospace", gr.themes.utils.fonts.GoogleFont("IBM Plex Mono")])
+            font=["sans-serif", "Microsoft YaHei", "ui-sans-serif", "system-ui"],
+            font_mono=["ui-monospace", "Consolas", "monospace"])
         set_theme.set(
             # Colors
             input_background_fill_dark="*neutral_800",
