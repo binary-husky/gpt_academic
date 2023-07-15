@@ -55,7 +55,7 @@ def get_crazy_functions():
                 "is_show": False,
                 "prompt": '文档转测试用例',
                 'img_ocr': False,
-                "to_markdown": True
+                "to_markdown": '文档转测试用例'
             }
         },
         "接口文档转测试用例(输入框输入需求文档)": {
@@ -68,7 +68,7 @@ def get_crazy_functions():
                 "is_show": False,
                 "prompt": '接口文档转测试用例',
                 'img_ocr': True,
-                'to_markdown': False,
+                'to_markdown': '文档转Markdown_分割',
             }
         },
         "KDocs需求分析问答": {
@@ -81,7 +81,7 @@ def get_crazy_functions():
                 "is_show": True,
                 "prompt": '需求分析对话',
                 'img_ocr': False,
-                'to_markdown': False,
+                'to_markdown': '文档转Markdown',
             }
         },
         "KDocs文档转流程图": {
@@ -91,7 +91,7 @@ def get_crazy_functions():
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
             "Parameters": {
-                'to_markdown': True,
+                'to_markdown': '文档转Markdown',
                 'img_ocr': True,
             }
         },

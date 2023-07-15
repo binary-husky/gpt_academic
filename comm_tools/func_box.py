@@ -467,7 +467,7 @@ def prompt_input(txt: str, prompt_str, name_str,  index, data: gr.Dataset, tabs_
             txt_temp = data_str + txt
         return txt_temp
     if tabs_index == 1 or txt == '':
-        new_txt = str_v_handle(prompt_str)
+        new_txt = str_v_handle(txt)
         return new_txt, new_txt, data_name
     else:
         new_txt = str_v_handle(txt)
@@ -630,20 +630,21 @@ def clean_br_string(s):
     s = re.sub('<\s*br\s*/?>', '\n', s)  # 使用正则表达式同时匹配<br>、<br/>、<br />、< br>和< br/>
     return s
 
-def update_btn(self: gr.Button = gr.Button(value=''),
-    value:  str = None,
-    variant:  str = None,
-    visible:  bool = None,
-    interactive: bool = None,
-    elem_id: str = None,
+def update_btn(self: gr.Button = None,
+    value:  str = '',
+    variant:  str = '',
+    visible:  bool = True,
+    interactive: bool = True,
+    elem_id: str = '',
     label: str = None
 ):
-    if not variant: variant = self.variant
-    if not visible: visible = self.visible
-    if not value: value = self.value
-    if not interactive: interactive = self.interactive
-    if not elem_id: elem_id = self.elem_id
-    if not elem_id: label = self.label
+    if self:
+        if not variant: variant = self.variant
+        if not visible: visible = self.visible
+        if not value: value = self.value
+        if not interactive: interactive = self.interactive
+        if not elem_id: elem_id = self.elem_id
+        if not elem_id: label = self.label
     return {
         "variant": variant,
         "visible": visible,
@@ -653,35 +654,6 @@ def update_btn(self: gr.Button = gr.Button(value=''),
         'label': label,
         "__type__": "update",
     }
-
-def update_txt(self,
-        value: str = None,
-        lines: int  = None,
-        max_lines: int  = None,
-        placeholder: str  = None,
-        label: str  = None,
-        show_label: bool  = None,
-        visible: bool  = None,
-        interactive: bool  = None,
-        type: str  = None,
-        elem_id: str = None
-    ):
-
-        return {
-            "lines": self.lines,
-            "max_lines": self.max_lines,
-            "placeholder": self.placeholder,
-            "label": self.label,
-            "show_label": self.show_label,
-            "visible": self.visible,
-            "value": self.value,
-            "type": self.type,
-            "interactive": self.interactive,
-            "elem_id": elem_id,
-            "__type__": "update",
-
-        }
-
 
 def get_html(filename):
     path = os.path.join(base_path, "docs/assets", "html", filename)

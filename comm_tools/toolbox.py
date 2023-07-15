@@ -60,6 +60,18 @@ def write_private(ipaddr, models, chatbot):
             chatbot[0] = [None,
                           f'正常对话模式, 你接来下的对话将会被记录并且可以被所有人检索，你可以到Settings中选择隐私模式 {transparent_address}']
 
+
+def end_predict(chatbot, history, llm_kwargs):
+    # 暂时无用
+    count_time = round(time.time() - llm_kwargs['start_time'], 3)
+    count_tokens = func_box.num_tokens_from_string(listing=history)
+    status_text = f"本次对话耗时: {func_box.html_tag_color(tag=f'{count_time}s')}" \
+                  f'\t 本次对话使用tokens: {func_box.html_tag_color(count_tokens)}' \
+
+    yield from update_ui(chatbot=chatbot, history=history, msg=status_text, start_end=1)  # 刷新界面
+
+
+
 def ArgsGeneralWrapper(f):
     """
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
@@ -96,18 +108,20 @@ def ArgsGeneralWrapper(f):
         write_private(ipaddr, models, chatbot_with_cookie)
         txt_passon = txt
         if encrypt in models: txt_passon = func_box.encryption_str(txt)
+        # 提交任务
         yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
+        # 将对话记录写入数据库
         threading.Thread(target=func_box.thread_write_chat, args=(chatbot_with_cookie,)).start()
     return decorated
 
 
 
-def update_ui(chatbot, history, msg='正常', *args):  # 刷新界面
+def update_ui(chatbot, history, msg='正常', start_end=0, *args):  # 刷新界面
     """
     刷新用户界面
     """
     assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时，可用clear将其清空，然后用for+append循环重新赋值。"
-    yield chatbot.get_cookies(), chatbot, history, msg
+    yield chatbot.get_cookies(), chatbot, history, msg, start_end
 
 def update_ui_lastest_msg(lastmsg, chatbot, history, delay=1):  # 刷新界面
     """

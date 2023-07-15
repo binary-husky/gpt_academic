@@ -78,13 +78,13 @@ def long_name_processing(file_name):
 def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history, is_client=True):
     gpt_response = gpt_response_collection[1::2]
     chat_file_list = ''
+    test_case = []
+    file_name = long_name_processing(inputs_show_user_array)
     for k in range(len(gpt_response)):
-        file_name = long_name_processing(inputs_show_user_array[k])
-        test_case = []
-        for i in gpt_response[k].splitlines():
+        for i in gpt_response[k].splitlines()[2:]:  # 过滤掉表头
             test_case.append([func_box.clean_br_string(i) for i in i.split('|')[1:]])
-        file_path = crazy_box.ExcelHandle(ipaddr=llm_kwargs['ipaddr'], is_client=is_client).lpvoid_lpbuffe(test_case[2:], filename=file_name)
-        chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_download_blank(__href=file_path, dir_name=file_path.split("/")[-1])}\n\n'
+    file_path = crazy_box.ExcelHandle(ipaddr=llm_kwargs['ipaddr'], is_client=is_client).lpvoid_lpbuffe(test_case, filename=file_name)
+    chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_download_blank(__href=file_path, dir_name=file_path.split("/")[-1])}\n\n'
     chatbot.append(['Done', chat_file_list])
     yield from update_ui(chatbot, history)
 
@@ -93,12 +93,16 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
     model = llm_kwargs['llm_model']
     max_token = model_info[llm_kwargs['llm_model']]['max_token']/2  # 考虑到对话+回答会超过tokens,所以/2
     get_token_num = bridge_all.model_info[model]['token_cnt']
-    if get_token_num(inputs) > max_token:
-        chatbot.append([None, f'{func_box.html_tag_color(inputs[:10])}...对话预计超出tokens限制, 拆分中...'])
-        yield from update_ui(chatbot, history)
-        segments = crazy_utils.breakdown_txt_to_satisfy_token_limit(inputs, get_token_num, max_token)
-    else:
-        segments = [inputs]
+    inputs = inputs.split('\n\n--- \n\n')
+    segments = []
+    for input_ in inputs:
+        if get_token_num(input_) > max_token:
+            chatbot.append([None, f'{func_box.html_tag_color(input_[:10])}...对话预计超出tokens限制, 拆分中...'])
+            yield from update_ui(chatbot, history)
+            segments.extend(crazy_utils.breakdown_txt_to_satisfy_token_limit(input_, get_token_num, max_token))
+        else:
+            segments.append(input_)
+    yield from update_ui(chatbot, history)
     return segments
 
 
@@ -185,7 +189,7 @@ def KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, s
     kwargs_to_mark, = crazy_box.json_args_return(plugin_kwargs, ['to_markdown'])
     if kwargs_to_mark:
         inputs_array, inputs_show_user_array = yield from input_output_processing(file_limit, llm_kwargs, plugin_kwargs,
-                                                                           chatbot, history, default_prompt='文档转Markdown')
+                                                                           chatbot, history, default_prompt=kwargs_to_mark)
         gpt_response_collection = yield from submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
     else: gpt_response_collection = file_limit
     return gpt_response_collection
