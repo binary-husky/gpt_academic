@@ -82,7 +82,8 @@ def adjust_theme():
         print('gradio版本较旧, 不能自定义字体和颜色')
     return set_theme
 
+
 import os
-theme_dir = os.path.join(os.path.dirname(__file__), '..', 'theme')
-with open(os.path.join(theme_dir, 'default.css'), 'r', encoding='utf-8') as f:
+theme_dir = os.path.join(os.path.dirname(__file__), "..", "theme")
+with open(os.path.join(theme_dir, "default.css"), "r", encoding="utf-8") as f:
     advanced_css = f.read()
