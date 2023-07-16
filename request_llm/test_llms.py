@@ -10,10 +10,11 @@ def validate_path():
     
 validate_path() # validate path so you can run from base directory
 if __name__ == "__main__":
-    from request_llm.bridge_newbingfree import predict_no_ui_long_connection
+    # from request_llm.bridge_newbingfree import predict_no_ui_long_connection
     # from request_llm.bridge_moss import predict_no_ui_long_connection
     # from request_llm.bridge_jittorllms_pangualpha import predict_no_ui_long_connection
     # from request_llm.bridge_jittorllms_llama import predict_no_ui_long_connection
+    from request_llm.bridge_claude import predict_no_ui_long_connection
 
     llm_kwargs = {
         'max_length': 512,
@@ -28,17 +29,6 @@ if __name__ == "__main__":
     print('final result:', result)
 
 
-    result = predict_no_ui_long_connection(inputs="what is a hero?", 
-                                        llm_kwargs=llm_kwargs,
-                                        history=["hello world"],
-                                        sys_prompt="")
-    print('final result:', result)
-
-    result = predict_no_ui_long_connection(inputs="如何理解传奇?", 
-                                        llm_kwargs=llm_kwargs,
-                                        history=[],
-                                        sys_prompt="")
-    print('final result:', result)
 
     # # print(result)
     # from multiprocessing import Process, Pipe
@@ -56,7 +46,6 @@ if __name__ == "__main__":
     #             os.chdir(root_dir_assume + '/request_llm/jittorllms')
     #             sys.path.append(root_dir_assume + '/request_llm/jittorllms')
     #         validate_path() # validate path so you can run from base directory
-
     #         jittorllms_model = None
     #         import types
     #         try:
@@ -70,7 +59,6 @@ if __name__ == "__main__":
     #         except:
     #             # self.child.send('[Local Message] Call jittorllms fail 不能正常加载jittorllms的参数。')
     #             raise RuntimeError("不能正常加载jittorllms的参数！")
-            
     # x = GetGLMHandle()
     # x.start()
 
