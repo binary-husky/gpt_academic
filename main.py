@@ -14,7 +14,7 @@ def main():
     if not AUTHENTICATION: AUTHENTICATION = None
 
     from check_proxy import get_current_version
-    from theme.theme import adjust_theme, advanced_css, theme_declaration
+    from themes.theme import adjust_theme, advanced_css, theme_declaration
     initial_prompt = "Serve me as a writing and programming assistant."
     title_html = f"<h1 align=\"center\">GPT 学术优化 {get_current_version()}</h1>{theme_declaration}"
     description =  """代码开源和更新[地址🚀](https://github.com/binary-husky/chatgpt_academic)，感谢热情的[开发者们❤️](https://github.com/binary-husky/chatgpt_academic/graphs/contributors)"""
