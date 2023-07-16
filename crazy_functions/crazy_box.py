@@ -335,7 +335,11 @@ def ocr_batch_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pr
 
 
 if __name__ == '__main__':
-    print(get_docs_content('https://kdocs.cn/l/coQeHUdxYOTo'))
-    # ksw = {'advanced_arg': '{\n    "is_show": false,\n    "prompt": "文档转测试用例",\n    "img_ocr": true\n}',
-    #  'parameters_def': ''}
-    # print(json_args_return(kwargs=ksw, keys=['prompt']))
+    import time
+    _, r, _, _ = get_docs_content('https://www.kdocs.cn/l/cj6CU9xFybun')
+    r = r.encode('utf-8')
+    name = r.splitlines()[0]
+    os.makedirs('./gpt_log/temp/', exist_ok=True)
+    temp_file = f'./gpt_log/temp/{name[:30]}_{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())}{type}'
+    with open(temp_file, 'wb+') as f:
+        f.write(r)

@@ -1,4 +1,5 @@
-from comm_tools.toolbox import update_ui, get_conf, trimmed_format_exc
+import os
+from comm_tools import toolbox
 import threading
 
 def input_clipping(inputs, history, max_token_limit):
@@ -64,7 +65,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
     from request_llm.bridge_all import predict_no_ui_long_connection
     # 用户反馈
     chatbot.append([inputs_show_user, ""])
-    yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
+    yield from toolbox.update_ui(chatbot=chatbot, history=[]) # 刷新界面
     executor = ThreadPoolExecutor(max_workers=16)
     mutable = ["", time.time(), ""]
     def _req_gpt(inputs, history, sys_prompt):
@@ -94,12 +95,12 @@ def request_gpt_model_in_new_thread_with_ui_alive(
                     continue # 返回重试
                 else:
                     # 【选择放弃】
-                    tb_str = '```\n' + trimmed_format_exc() + '```'
+                    tb_str = '```\n' + toolbox.trimmed_format_exc() + '```'
                     mutable[0] += f"[Local Message] 警告，在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                     return mutable[0] # 放弃
             except:
                 # 【第三种情况】：其他错误：重试几次
-                tb_str = '```\n' + trimmed_format_exc() + '```'
+                tb_str = '```\n' + toolbox.trimmed_format_exc() + '```'
                 print(tb_str)
                 mutable[0] += f"[Local Message] 警告，在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                 if retry_op > 0:
@@ -123,11 +124,11 @@ def request_gpt_model_in_new_thread_with_ui_alive(
         if future.done():
             break
         chatbot[-1] = [chatbot[-1][0], mutable[0]]
-        yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
+        yield from toolbox.update_ui(chatbot=chatbot, history=[]) # 刷新界面
 
     final_result = future.result()
     chatbot[-1] = [chatbot[-1][0], final_result]
-    yield from update_ui(chatbot=chatbot, history=[]) # 如果最后成功了，则删除报错信息
+    yield from toolbox.update_ui(chatbot=chatbot, history=[]) # 如果最后成功了，则删除报错信息
     return final_result
 
 
@@ -171,7 +172,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     assert len(inputs_array) == len(history_array)
     assert len(inputs_array) == len(sys_prompt_array)
     if max_workers == -1: # 读取配置文件
-        try: max_workers, = get_conf('DEFAULT_WORKER_NUM')
+        try: max_workers, = toolbox.get_conf('DEFAULT_WORKER_NUM')
         except: max_workers = 8
         if max_workers <= 0: max_workers = 3
     # 屏蔽掉 chatglm的多线程，可能会导致严重卡顿
@@ -182,7 +183,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     n_frag = len(inputs_array)
     # 用户反馈
     chatbot.append([None, ""])
-    yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
+    yield from toolbox.update_ui(chatbot=chatbot, history=[]) # 刷新界面
     # 跨线程传递
     mutable = [[f"", time.time(), "等待中"] for _ in range(n_frag)]
 
@@ -220,14 +221,14 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     continue # 返回重试
                 else:
                     # 【选择放弃】
-                    tb_str = '```\n' + trimmed_format_exc() + '```'
+                    tb_str = '```\n' + toolbox.trimmed_format_exc() + '```'
                     gpt_say += f"[Local Message] 警告，线程{index}在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                     if len(mutable[index][0]) > 0: gpt_say += "此线程失败前收到的回答：\n\n" + mutable[index][0]
                     mutable[index][2] = "输入过长已放弃"
                     return gpt_say # 放弃
             except:
                 # 【第三种情况】：其他错误
-                tb_str = '```\n' + trimmed_format_exc() + '```'
+                tb_str = '```\n' + toolbox.trimmed_format_exc() + '```'
                 print(tb_str)
                 gpt_say += f"[Local Message] 警告，线程{index}在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                 if len(mutable[index][0]) > 0: gpt_say += "此线程失败前收到的回答：\n\n" + mutable[index][0]
@@ -278,7 +279,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                             for thread_index, done, obs in zip(range(len(worker_done)), worker_done, observe_win)])
         # 在前端打印些好玩的东西
         chatbot[-1] = [chatbot[-1][0], f'多线程操作已经开始，完成情况: \n\n{stat_str}' + ''.join(['.']*(cnt % 10+1))]
-        yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
+        yield from toolbox.update_ui(chatbot=chatbot, history=[]) # 刷新界面
         if all(worker_done):
             executor.shutdown()
             break
@@ -294,7 +295,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         for inputs_show_user, f in zip(inputs_show_user_array, futures):
             gpt_res = f.result()
             chatbot.append([inputs_show_user, gpt_res])
-            yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
+            yield from toolbox.update_ui(chatbot=chatbot, history=[]) # 刷新界面
             time.sleep(0.3)
     return gpt_response_collection
 
@@ -579,18 +580,23 @@ def get_files_from_everything(txt, type): # type='.md'
     - project_folder: 字符串，表示文件所在的文件夹路径。如果是网络上的文件，就是临时文件夹的路径。
     该函数详细注释已添加，请确认是否满足您的需要。
     """
-    import glob, os
-
+    import glob, os, time
     success = True
     if txt.startswith('http'):
         # 网络的远程文件
         import requests
-        from comm_tools.toolbox import get_conf
-        proxies, = get_conf('proxies')
-        r = requests.get(txt, proxies=proxies)
-        with open('./gpt_log/temp'+type, 'wb+') as f: f.write(r.content)
-        project_folder = './gpt_log/'
-        file_manifest = ['./gpt_log/temp'+type]
+        from crazy_functions import crazy_box
+        proxies, = toolbox.get_conf('proxies')
+        if txt.find('kdocs') != -1:
+            _, r, _, _ = crazy_box.get_docs_content(txt)
+        else:
+            r = requests.get(txt, proxies=proxies).text
+        name = r.splitlines()[0]
+        os.makedirs('./gpt_log/temp/', exist_ok=True)
+        temp_file = f'./gpt_log/temp/{name[:30]}_{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())}{type}'
+        with open(temp_file, 'w+') as f: f.write(r)
+        project_folder = './gpt_log/temp/'
+        file_manifest = [temp_file]
     elif txt.endswith(type):
         # 直接给定文件
         file_manifest = [txt]
@@ -610,26 +616,20 @@ def get_files_from_everything(txt, type): # type='.md'
 
 
 
-
-def Singleton(cls):
-    _instance = {}
- 
-    def _singleton(*args, **kargs):
-        if cls not in _instance:
-            _instance[cls] = cls(*args, **kargs)
-        return _instance[cls]
- 
-    return _singleton
-
-
-@Singleton
+import os
+import shutil
+from zh_langchain.chains.local_doc_qa import LocalDocQA
+from zh_langchain.configs import model_config
 class knowledge_archive_interface():
-    def __init__(self) -> None:
-        self.threadLock = threading.Lock()
+    def __init__(self, vs_path) -> None:
         self.current_id = ""
         self.kai_path = None
-        self.qa_handle = None
+        import nltk
+        if model_config.NLTK_DATA_PATH not in nltk.data.path: nltk.data.path = [model_config.NLTK_DATA_PATH] + nltk.data.path
+        self.qa_handle = LocalDocQA()
+        self.qa_handle.init_cfg()
         self.text2vec_large_chinese = None
+        self.vs_root_path = vs_path
 
     def get_chinese_text2vec(self):
         if self.text2vec_large_chinese is None:
@@ -639,25 +639,28 @@ class knowledge_archive_interface():
             from langchain.embeddings.huggingface import HuggingFaceEmbeddings
             with ProxyNetworkActivate():    # 临时地激活代理网络
                 self.text2vec_large_chinese = HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
-
         return self.text2vec_large_chinese
 
 
     def feed_archive(self, file_manifest, id="default"):
-        self.threadLock.acquire()
         # import uuid
         self.current_id = id
-        from zh_langchain import construct_vector_store
-        self.qa_handle, self.kai_path = construct_vector_store(   
+        # from zh_langchain import construct_vector_store
+        # self.qa_handle, self.kai_path = construct_vector_store(
+        self.qa_handle, self.kai_path = self.construct_vector_store(
             vs_id=self.current_id, 
             files=file_manifest, 
             sentence_size=100,
-            history=[],
-            one_conent="",
-            one_content_segmentation="",
-            text2vec = self.get_chinese_text2vec(),
+            text2vec=self.get_chinese_text2vec(),
         )
-        self.threadLock.release()
+
+
+    def construct_vector_store(self, vs_id, files, sentence_size, text2vec):
+        for file in files:
+            assert os.path.exists(file), "输入文件不存在"
+        vs_path = os.path.join(self.vs_root_path, vs_id)
+        vs_path, loaded_files = self.qa_handle.init_knowledge_vector_store(files, vs_path, sentence_size, text2vec)
+        return self.qa_handle, vs_path
 
     def get_current_archive_id(self):
         return self.current_id
@@ -666,33 +669,22 @@ class knowledge_archive_interface():
         return self.qa_handle.get_loaded_file()
 
     def answer_with_archive_by_id(self, txt, id):
-        self.threadLock.acquire()
-        if not self.current_id == id:
-            self.current_id = id
-            from zh_langchain import construct_vector_store
-            self.qa_handle, self.kai_path = construct_vector_store(   
-                vs_id=self.current_id, 
-                files=[], 
-                sentence_size=100,
-                history=[],
-                one_conent="",
-                one_content_segmentation="",
-                text2vec = self.get_chinese_text2vec(),
-            )
+        self.kai_path = os.path.join(self.vs_root_path, id)
+        if not os.path.exists(self.kai_path):
+            return '', '', False
         VECTOR_SEARCH_SCORE_THRESHOLD = 0
         VECTOR_SEARCH_TOP_K = 4
         CHUNK_SIZE = 512
         resp, prompt = self.qa_handle.get_knowledge_based_conent_test(
-            query = txt,
-            vs_path = self.kai_path,
+            query=txt,
+            vs_path=self.kai_path,
             score_threshold=VECTOR_SEARCH_SCORE_THRESHOLD,
             vector_search_top_k=VECTOR_SEARCH_TOP_K, 
             chunk_conent=True,
             chunk_size=CHUNK_SIZE,
             text2vec=self.get_chinese_text2vec(),
         )
-        self.threadLock.release()
-        return resp, prompt
+        return resp, prompt, True
 
 def try_install_deps(deps):
     for dep in deps:

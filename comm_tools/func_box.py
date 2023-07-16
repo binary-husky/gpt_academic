@@ -548,6 +548,7 @@ def thread_write_chat(chatbot):
 base_path = os.path.dirname(os.path.dirname(__file__))
 html_covert_path = os.path.basename(base_path)
 prompt_path = os.path.join(base_path, 'users_data')
+knowledge_path = os.path.join(prompt_path, 'knowledge')
 users_path = os.path.join(base_path, 'private_upload')
 logs_path = os.path.join(base_path, 'gpt_log')
 
@@ -668,10 +669,13 @@ def git_log_list():
 
     return [i.split('|') for i in ll if 'branch' not in i][:5]
 
+
+def to_markdown_tabs(head: list, tabs: list):
+    pass
+
+
 import qrcode
 from PIL import Image
-
-
 def qr_code_generation(data, icon_path=None, file_name='qc_icon.png'):
     # 创建qrcode对象
     qr = qrcode.QRCode(version=2, error_correction=qrcode.constants.ERROR_CORRECT_Q, box_size=10, border=2,)

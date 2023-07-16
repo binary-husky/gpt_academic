@@ -88,7 +88,7 @@ class ChatBot(ChatBotFrame):
                 self.llms_dropdown = gr.Dropdown(choices=AVAIL_LLM_MODELS, value=LLM_MODEL,
                                                show_label=True, interactive=True, label='LLMs',
                                                elem_classes='sm_select', elem_id='change-font-size').style(container=False)
-                self.langchain_dropdown = gr.Dropdown(choices=[f'safasf{i}' for i in range(10)], value=None,
+                self.langchain_dropdown = gr.Dropdown(choices=['个人知识库'], value=None,
                                                show_label=True, interactive=True, label='知识库', multiselect=True,
                                                elem_classes='sm_select', elem_id='change-font-size').style(container=False)
                 self.switcher_drak = gr.HTML(func_box.get_html("appearance_switcher.html").format(), elem_classes="insert_block")
@@ -99,7 +99,6 @@ class ChatBot(ChatBotFrame):
                 self.input_copy = gr.State('')
                 self.submitBtn = gr.Button("", variant="primary", elem_classes='submit_btn').style(full_width=False)
                 self.stopBtn = gr.Button("", variant="secondary", visible=False, elem_classes='cancel_btn').style(full_width=False)
-                self.start_end = gr.State(0)
 
         with gr.Row():
             self.status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行\n {proxy_info}", elem_id='debug_mes')
@@ -114,7 +113,7 @@ class ChatBot(ChatBotFrame):
         ocr_handle = self.sm_ocr_result.click(**self.clear_agrs).then(
                                  fn=ArgsGeneralWrapper(crazy_functions.crazy_box.ocr_batch_plugin),
                                  inputs=[*self.input_combo, gr.State(PORT)],
-                                 outputs=[*self.output_combo]).then(**self.stop_args)
+                                 outputs=[*self.output_combo])
         self.cancel_handles.append(ocr_handle)
 
 
@@ -270,10 +269,30 @@ class ChatBot(ChatBotFrame):
                 self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
 
     def draw_langchain_base(self):
-        with gr.TabItem('构建知识库', id='sett_tab'):
-            self.langchain_upload = gr.Files(label="上传你需要构建的知识库文件", file_count="multiple", file_types=[])
+        with gr.TabItem('构建知识库', id='langchain_tab'):
+            with gr.Box():
+                self.langchain_upload = gr.Files(label="上传你需要构建的知识库文件", file_count="multiple", file_types=[])
+                self.langchain_links = gr.Textbox(show_label=False, placeholder='Kdocs/网络文件,多个链接使用换行间隔').style(container=False)
+                self.langchain_file_path = gr.State('')
+            with gr.Box():
+                with gr.Row():
+                    self.langchain_select = gr.Dropdown(choices=[None, '123123', '321123123'], value=r"个人知识库",
+                                                        interactive=True, label="已有知识库", elem_classes='sm_select').style(container=False)
+                with gr.Row():
+                    self.langchain_name = gr.Textbox(show_label=False,placeholder='新建知识库or重命名').style(container=False)
+
             with gr.Row():
-                pass
+                self.langchain_submit = gr.Button(value='构建/更新知识库', variant='primary').style(size='sm')
+            self.langchain_status = gr.Markdown(value='')
+
+    def signals_langchain_cn(self):
+        from comm_tools import Langchain_cn
+        self.langchain_upload.upload(fn=on_file_uploaded,
+                                     inputs=[self.langchain_upload, gr.State(''), self.langchain_file_path],
+                                     outputs=[self.langchain_status, self.langchain_file_path])
+        self.langchain_submit.click(fn=Langchain_cn.knowledge_base_writing,
+                                    inputs=[self.langchain_file_path, self.langchain_links, self.langchain_select, self.langchain_name],
+                                    outputs=[self.langchain_status, self.langchain_dropdown])
 
     def draw_setting_chat(self):
         switch_model = get_conf('switch_model')[0]
@@ -296,26 +315,21 @@ class ChatBot(ChatBotFrame):
 
     def signals_input_setting(self):
         # 注册input
-        self.input_combo = [self.cookies, self.max_length_sl, self.llms_dropdown,
+        self.input_combo = [self.cookies, self.max_length_sl, self.llms_dropdown, self.langchain_dropdown,
                             self.input_copy, self.top_p, self.temperature, self.ocr_identifying_trust, self.chatbot, self.history,
                             self.system_prompt, self.models_box, self.plugin_advanced_arg]
-        self.output_combo = [self.cookies, self.chatbot, self.history, self.status, self.start_end]
+        self.output_combo = [self.cookies, self.chatbot, self.history, self.status, self.stopBtn, self.submitBtn,]
         self.predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=self.input_combo,
                                  outputs=self.output_combo, show_progress=True)
         self.clear_agrs = dict(fn=self.__clear_input, inputs=[self.txt], outputs=[self.txt, self.input_copy,
                                                                                   self.stopBtn, self.submitBtn,
                                                                                   self.examples_column])
-        def lambda_btn_update():
-            return [self.stopBtn.update(visible=False), self.submitBtn.update(visible=True)]
 
-
-        self.stop_args = dict(fn=lambda_btn_update, inputs=None, outputs=[self.stopBtn, self.submitBtn])
         # 提交按钮、重置按钮
-        submit_handle = self.txt.submit(**self.clear_agrs).then(**self.predict_args).then(**self.stop_args)
-        click_handle = self.submitBtn.click(**self.clear_agrs).then(**self.predict_args).then(**self.stop_args)
+        submit_handle = self.txt.submit(**self.clear_agrs).then(**self.predict_args)
+        click_handle = self.submitBtn.click(**self.clear_agrs).then(**self.predict_args)
         self.cancel_handles.append(submit_handle)
         self.cancel_handles.append(click_handle)
-        # self.cpopyBtn.click(fn=func_box.copy_result, inputs=[self.history], outputs=[self.status])
         self.resetBtn.click(lambda: ([], [], "已重置"), None, [self.chatbot, self.history, self.status])
 
     def signals_public(self):
@@ -327,11 +341,11 @@ class ChatBot(ChatBotFrame):
             click_handle = crazy_fns[k]["Button"].click(**self.clear_agrs).then(
                               ArgsGeneralWrapper(crazy_fns[k]["Function"]),
                               [*self.input_combo, gr.State(PORT), gr.State(crazy_fns[k].get('Parameters', False))],
-                              self.output_combo).then(
-                              on_report_generated,
-                              [self.cookies, self.file_upload, self.chatbot],
-                              [self.cookies, self.file_upload, self.chatbot]).then(**self.stop_args)
+                              self.output_combo)
+            click_handle.then(on_report_generated, [self.cookies, self.file_upload, self.chatbot],
+                              [self.cookies, self.file_upload, self.chatbot])
             self.cancel_handles.append(click_handle)
+
 
         # 函数插件-下拉菜单与随变按钮的互动
         def on_dropdown_changed(k):
@@ -361,26 +375,26 @@ class ChatBot(ChatBotFrame):
             yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(*args, **kwargs)
 
         click_handle = self.switchy_bt.click(**self.clear_agrs).then(
-            route, [self.switchy_bt, *self.input_combo, gr.State(PORT)], self.output_combo).then(
-            on_report_generated,
-            [self.cookies, self.file_upload, self.chatbot],
-            [self.cookies, self.file_upload, self.chatbot]).then(**self.stop_args)
+            route, [self.switchy_bt, *self.input_combo, gr.State(PORT)], self.output_combo)
+        click_handle.then(on_report_generated,
+              [self.cookies, self.file_upload, self.chatbot],
+              [self.cookies, self.file_upload, self.chatbot])
         self.cancel_handles.append(click_handle)
         # 终止按钮的回调函数注册
         self.stopBtn.click(fn=lambda: (self.stopBtn.update(visible=False), self.submitBtn.update(visible=True)),
-            inputs=[], outputs=[self.stopBtn, self.submitBtn],).then(
-            fn=None, inputs=None, outputs=None, cancels=self.cancel_handles
-        )
+            inputs=[], outputs=[self.stopBtn, self.submitBtn], cancels=self.cancel_handles)
 
-        def on_llms_dropdown_changed(k):
-            return {self.chatbot: gr.update(label="当前模型：" + k)}
-        self.llms_dropdown.select(on_llms_dropdown_changed, [self.llms_dropdown], [self.chatbot])
-
+        def on_llms_dropdown_changed(k, m):
+            if m:
+                return {self.chatbot: gr.update(label="当前模型：" + k + "&" + '&'.join(m))}
+            else:
+                return {self.chatbot: gr.update(label="当前模型：" + k)}
+        self.llms_dropdown.select(on_llms_dropdown_changed, [self.llms_dropdown, self.langchain_dropdown], [self.chatbot])
+        self.langchain_dropdown.select(on_llms_dropdown_changed, [self.llms_dropdown, self.langchain_dropdown], [self.chatbot])
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay(self, is_open=False):
         import threading, webbrowser, time
-
         print(f"如果浏览器没有自动打开，请复制并转到以下URL：")
         print(f"\t（亮色主题）: http://localhost:{PORT}")
         print(f"\t（暗色主题）: {self.__url}/?__theme=dark")
@@ -405,6 +419,7 @@ class ChatBot(ChatBotFrame):
                     with gr.Tabs() as self.tabs_funcs:
                         self.draw_function_chat()
                         self.draw_public_chat()
+                        self.draw_langchain_base()
                         self.draw_setting_chat()
                 # 绘制列2
                 with gr.Column(scale=100):
@@ -421,6 +436,7 @@ class ChatBot(ChatBotFrame):
             self.signals_prompt_func()
             self.signals_prompt_edit()
             self.signals_public()
+            self.signals_langchain_cn()
             adv_plugins = gr.State([i for i in crazy_fns])
             self.demo.load(fn=func_box.refresh_load_data,
                            inputs=[self.chatbot, self.history, self.pro_fp_state, adv_plugins],
@@ -443,11 +459,12 @@ def check_proxy_free():
         import time
         time.sleep(5)
 
+PORT = LOCAL_PORT if WEB_PORT <= 0 else WEB_PORT
+chatbot_main = ChatBot()
 if __name__ == '__main__':
     # PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
-    PORT = LOCAL_PORT if WEB_PORT <= 0 else WEB_PORT
     check_proxy_free()
-    ChatBot().main()
+    chatbot_main.main()
     gr.close_all()
     check_proxy_free()
 

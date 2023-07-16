@@ -3,6 +3,7 @@ import importlib
 import inspect
 import gradio as gr
 from comm_tools import func_box
+from comm_tools import Langchain_cn
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
 import shutil
@@ -65,10 +66,10 @@ def end_predict(chatbot, history, llm_kwargs):
     # 暂时无用
     count_time = round(time.time() - llm_kwargs['start_time'], 3)
     count_tokens = func_box.num_tokens_from_string(listing=history)
-    status_text = f"本次对话耗时: {func_box.html_tag_color(tag=f'{count_time}s')}" \
-                  f'\t 本次对话使用tokens: {func_box.html_tag_color(count_tokens)}' \
+    status = f"<p>本次对话耗时: {func_box.html_tag_color(tag=f'{count_time}s')}" \
+                  f'\t 本次对话使用tokens: {func_box.html_tag_color(count_tokens)}</p>'
 
-    yield from update_ui(chatbot=chatbot, history=history, msg=status_text, start_end=1)  # 刷新界面
+    yield from update_ui(chatbot=chatbot, history=history, msg=status, end_code=1)  # 刷新界面
 
 
 
@@ -76,7 +77,7 @@ def ArgsGeneralWrapper(f):
     """
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
-    def decorated(cookies, max_length, llm_model, txt, top_p, temperature, ocr,
+    def decorated(cookies, max_length, llm_model, langchain, txt, top_p, temperature, ocr,
                   chatbot, history, system_prompt, models, plugin_advanced_arg, ipaddr: gr.Request, *args):
         """"""
         # 引入一个有cookie的chatbot
@@ -86,7 +87,6 @@ def ArgsGeneralWrapper(f):
             'top_p':top_p,
             'temperature':temperature,
         })
-
         llm_kwargs = {
             'api_key': cookies['api_key'],
             'llm_model': llm_model,
@@ -101,27 +101,38 @@ def ArgsGeneralWrapper(f):
             "advanced_arg": plugin_advanced_arg,
             "parameters_def": ''
         }
-        if len(args) > 1:
-            plugin_kwargs.update({'parameters_def': args[1]})
+
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
         write_private(ipaddr, models, chatbot_with_cookie)
         txt_passon = txt
         if encrypt in models: txt_passon = func_box.encryption_str(txt)
+        knowledge_base_passon = yield from Langchain_cn.knowledge_base_query(txt_passon, langchain, chatbot_with_cookie, history, llm_kwargs, ipaddr)
+        # 插件会传多参数，如果是插件，那么更新知识库 和 默认高级参数
+        if len(args) > 1:
+            llm_kwargs['knowledge'] = knowledge_base_passon
+            plugin_kwargs.update({'parameters_def': args[1]})
+        else:
+            txt_passon = knowledge_base_passon
         # 提交任务
         yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
         # 将对话记录写入数据库
+        yield from end_predict(chatbot_with_cookie, history, llm_kwargs)
         threading.Thread(target=func_box.thread_write_chat, args=(chatbot_with_cookie,)).start()
     return decorated
 
 
 
-def update_ui(chatbot, history, msg='正常', start_end=0, *args):  # 刷新界面
+def update_ui(chatbot, history, msg='正常', end_code=0, *args):  # 刷新界面
     """
     刷新用户界面
     """
     assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时，可用clear将其清空，然后用for+append循环重新赋值。"
-    yield chatbot.get_cookies(), chatbot, history, msg, start_end
+    event = [chatbot.get_cookies(), chatbot, history, msg]
+    if end_code:
+        yield event + [gr.Button.update(visible=False), gr.Button.update(visible=True, variant='primary')]
+    else:
+        yield event + [gr.Button.update(visible=True, variant='secondary'), gr.Button.update(visible=False)]
 
 def update_ui_lastest_msg(lastmsg, chatbot, history, delay=1):  # 刷新界面
     """
@@ -562,10 +573,15 @@ def on_file_uploaded(files, chatbot, txt, ipaddr: gr.Request):
     moved_files = [fp for fp in glob.glob(f'{time_tag_path}/**/*', recursive=True)]
     txt = f'{time_tag_path}'
     moved_files_str = '\t\n\n'.join(moved_files)
-    chatbot.append([None,
-                    f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
-                    f'\n\n调用路径参数已自动修正到: \n\n{txt}' +
-                    f'\n\n现在您点击任意“高亮”标识的函数插件时，以上文件将被作为输入参数'+err_msg])
+    if chatbot is str:
+        chatbot = f'[Local Message] 收到以下文件: \n\n{moved_files_str}' \
+                  f'\n\n调用路径参数已自动修正到: \n\n{txt}' \
+                  f'现在你可以开始构建属于自己的知识库啦～'
+    else:
+        chatbot.append([None,
+                        f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
+                        f'\n\n调用路径参数已自动修正到: \n\n{txt}' +
+                        f'\n\n现在您点击任意“高亮”标识的函数插件时，以上文件将被作为输入参数'+err_msg])
     return chatbot, txt
 
 

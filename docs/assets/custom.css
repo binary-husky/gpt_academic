@@ -121,6 +121,8 @@ mspace {
 }
 .sm_select .token.svelte-aqlk7e.svelte-aqlk7e.svelte-aqlk7e {
     padding: 1.5% !important;
+    max-height: 20px;
+
 }
 .sm_select .wrap-inner.svelte-aqlk7e.svelte-aqlk7e.svelte-aqlk7e {
     padding: 0 !important;

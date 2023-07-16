@@ -26,5 +26,4 @@ def 猜你想问(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
         history=history,
         sys_prompt=system_prompt
     )
-    chatbot.append([show_say, gpt_say])
     history.extend([show_say, gpt_say])
