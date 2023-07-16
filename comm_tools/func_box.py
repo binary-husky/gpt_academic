@@ -605,10 +605,12 @@ def refresh_load_data(chat, history, prompt, crazy_list, request: gr.Request):
     else:
         hied_elem = gr.update()
         show_elem = gr.update()
-
+    from comm_tools import Langchain_cn
+    know_list = Langchain_cn.obtain_a_list_of_knowledge_bases(request)
+    know_update = gr.Dropdown.update(choices=know_list)
     outputs = [gr.Dataset.update(samples=data, visible=True), prompt,
                chat, history, gr.Dataset.update(samples=[[i] for i in selected]), selected,
-               hied_elem, hied_elem]
+               hied_elem, hied_elem, know_update, know_update]
     return outputs
 
 
@@ -704,7 +706,7 @@ def qr_code_generation(data, icon_path=None, file_name='qc_icon.png'):
     return qr_path
 
 
-def created_at():
+def created_atime():
     import datetime
     return datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 

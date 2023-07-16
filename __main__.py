@@ -88,7 +88,7 @@ class ChatBot(ChatBotFrame):
                 self.llms_dropdown = gr.Dropdown(choices=AVAIL_LLM_MODELS, value=LLM_MODEL,
                                                show_label=True, interactive=True, label='LLMs',
                                                elem_classes='sm_select', elem_id='change-font-size').style(container=False)
-                self.langchain_dropdown = gr.Dropdown(choices=['个人知识库'], value=None,
+                self.langchain_dropdown = gr.Dropdown(choices=[], value=None,
                                                show_label=True, interactive=True, label='知识库', multiselect=True,
                                                elem_classes='sm_select', elem_id='change-font-size').style(container=False)
                 self.switcher_drak = gr.HTML(func_box.get_html("appearance_switcher.html").format(), elem_classes="insert_block")
@@ -269,14 +269,16 @@ class ChatBot(ChatBotFrame):
                 self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
 
     def draw_langchain_base(self):
+        spl, = get_conf('spl')
         with gr.TabItem('构建知识库', id='langchain_tab'):
             with gr.Box():
-                self.langchain_upload = gr.Files(label="上传你需要构建的知识库文件", file_count="multiple", file_types=[])
+                self.langchain_upload = gr.Files(label="上传你需要构建的知识库文件", file_count="multiple", file_types=spl)
                 self.langchain_links = gr.Textbox(show_label=False, placeholder='Kdocs/网络文件,多个链接使用换行间隔').style(container=False)
                 self.langchain_file_path = gr.State('')
+                self.langchain_know_name = gr.State()
             with gr.Box():
                 with gr.Row():
-                    self.langchain_select = gr.Dropdown(choices=[None, '123123', '321123123'], value=r"个人知识库",
+                    self.langchain_select = gr.Dropdown(choices=[], value=r"新建知识库",
                                                         interactive=True, label="已有知识库", elem_classes='sm_select').style(container=False)
                 with gr.Row():
                     self.langchain_name = gr.Textbox(show_label=False,placeholder='新建知识库or重命名').style(container=False)
@@ -286,13 +288,19 @@ class ChatBot(ChatBotFrame):
             self.langchain_status = gr.Markdown(value='')
 
     def signals_langchain_cn(self):
+        def update_drop(x, ipaddr: gr.Request):
+            return gr.Dropdown.update(value=x, choices=Langchain_cn.obtain_a_list_of_knowledge_bases(ipaddr))
         from comm_tools import Langchain_cn
         self.langchain_upload.upload(fn=on_file_uploaded,
                                      inputs=[self.langchain_upload, gr.State(''), self.langchain_file_path],
                                      outputs=[self.langchain_status, self.langchain_file_path])
         self.langchain_submit.click(fn=Langchain_cn.knowledge_base_writing,
                                     inputs=[self.langchain_file_path, self.langchain_links, self.langchain_select, self.langchain_name],
-                                    outputs=[self.langchain_status, self.langchain_dropdown])
+                                    outputs=[self.langchain_status, self.langchain_select, self.langchain_know_name]
+                                    ).then(
+                                    fn=update_drop,
+                                    inputs=[self.langchain_know_name],
+                                    outputs=[self.langchain_dropdown])
 
     def draw_setting_chat(self):
         switch_model = get_conf('switch_model')[0]
@@ -442,7 +450,7 @@ class ChatBot(ChatBotFrame):
                            inputs=[self.chatbot, self.history, self.pro_fp_state, adv_plugins],
                            outputs=[self.pro_func_prompt, self.pro_fp_state, self.chatbot,
                                     self.history, self.guidance_plugins, self.guidance_plugins_state,
-                                    self.cloum_1, self.examples_column])
+                                    self.cloum_1, self.examples_column, self.langchain_dropdown, self.langchain_select])
 
         # Start
         self.auto_opentab_delay()

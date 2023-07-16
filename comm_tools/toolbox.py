@@ -572,11 +572,12 @@ def on_file_uploaded(files, chatbot, txt, ipaddr: gr.Request):
                                    dest_dir=f'{time_tag_path}/{file_origin_name}.extract')
     moved_files = [fp for fp in glob.glob(f'{time_tag_path}/**/*', recursive=True)]
     txt = f'{time_tag_path}'
-    moved_files_str = '\t\n\n'.join(moved_files)
-    if chatbot is str:
+    moved_files_str = "| 文件 |\n| :---: |" + '\n'.join(f"| {f}| " for f in moved_files)
+    if type(chatbot) is str:
         chatbot = f'[Local Message] 收到以下文件: \n\n{moved_files_str}' \
                   f'\n\n调用路径参数已自动修正到: \n\n{txt}' \
-                  f'现在你可以开始构建属于自己的知识库啦～'
+                  f'\n\n现在你可以开始构建属于自己的知识库knowledge_base_writing啦～'
+        chatbot = markdown_convertion(chatbot)
     else:
         chatbot.append([None,
                         f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
