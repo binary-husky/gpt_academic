@@ -11,7 +11,7 @@ def get_crazy_functions():
     function_plugins['开发工程师'] = {
         "解析整个Python项目": {
             "Color": "primary",  # 按钮颜色
-            "AsButton": False,
+            "AsButton": True,
             "Function": HotReload(解析项目源代码.解析一个Python项目)
         },
         "批量生成函数注释": {
@@ -21,7 +21,7 @@ def get_crazy_functions():
         },
         "解析一个C项目的头文件": {
             "Color": "primary",  # 按钮颜色
-            "AsButton": False,
+            "AsButton": True,
             "Function": HotReload(解析项目源代码.解析一个C项目的头文件)
         },
         "解析整个C++项目（.cpp/.hpp/.c/.h）": {
@@ -41,7 +41,7 @@ def get_crazy_functions():
         },
         "解析一个Java项目": {
             "Color": "primary",  # 按钮颜色
-            "AsButton": False,
+            "AsButton": True,
             "Function": HotReload(解析项目源代码.解析一个Java项目)
         },
         "解析一个前端项目": {
@@ -93,13 +93,13 @@ def get_crazy_functions():
         "Markdown/Readme英译中": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "primary",
-            "AsButton": False,
+            "AsButton": True,
             "Function": HotReload(批量Markdown翻译.Markdown英译中)
         },
         "批量Markdown中译英": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "primary",
-            "AsButton": False,  # 加入下拉菜单中
+            "AsButton": True,  # 加入下拉菜单中
             "Function": HotReload(批量Markdown翻译.Markdown中译英)
         },
         "读Tex论文写摘要": {
@@ -114,7 +114,7 @@ def get_crazy_functions():
         },
         "批量翻译PDF文档（多线程）": {
             "Color": "primary",
-            "AsButton": False,  # 加入下拉菜单中
+            "AsButton": True,  # 加入下拉菜单中
             "Function": HotReload(批量翻译PDF文档_多线程.批量翻译PDF文档)
         },
         "[测试功能] 批量总结PDF文档": {
@@ -130,7 +130,7 @@ def get_crazy_functions():
         # },
         "谷歌学术检索助手（输入谷歌学术搜索页url）": {
             "Color": "primary",
-            "AsButton": False,  # 加入下拉菜单中
+            "AsButton": True,  # 加入下拉菜单中
             "Function": HotReload(谷歌检索小助手)
         },
         "理解PDF文档内容 （模仿ChatPDF）": {
@@ -224,7 +224,7 @@ def get_crazy_functions():
         "[插件demo] 历史上的今天": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Function": HotReload(高阶功能模板函数),
-            "AsButton": False,
+            "AsButton": True,
         },
 
         "保存当前的对话": {
@@ -255,7 +255,7 @@ def get_crazy_functions():
         },
         "连接网络回答问题（输入问题后点击该插件，需要访问谷歌）": {
             "Color": "primary",
-            "AsButton": False,  # 加入下拉菜单中
+            "AsButton": True,  # 加入下拉菜单中
             "Function": HotReload(连接网络回答问题)
         },
         "询问多个GPT模型（手动指定询问哪些模型）": {
@@ -267,7 +267,7 @@ def get_crazy_functions():
         },
         "图片生成（先切换模型到openai或api2d）": {
             "Color": "primary",
-            "AsButton": False,
+            "AsButton": True,
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": "在这里输入分辨率, 如256x256（默认）",  # 高级参数输入区的显示提示
             "Function": HotReload(图片生成)

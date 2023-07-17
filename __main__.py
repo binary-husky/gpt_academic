@@ -18,15 +18,17 @@ functional = get_core_functions()
 from comm_tools.crazy_functional import get_crazy_functions
 
 default_plugin,  = get_conf('default_plugin')
-crazy_fns = get_crazy_functions()
-crazy_classification = [i for i in crazy_fns]
-crazy_fns = crazy_fns[default_plugin]
-
+crazy_fns_role = get_crazy_functions()
+crazy_classification = [i for i in crazy_fns_role]
+crazy_fns = {}
+for role in crazy_fns_role:
+    for k in crazy_fns_role[role]:
+        crazy_fns[k] = crazy_fns_role[role][k]
 # 处理markdown文本格式的转变
 gr.Chatbot.postprocess = format_io
 
 # 做一些外观色彩上的调整
-from comm_tools.theme import adjust_theme, custom_css
+from comm_tools.theme import adjust_theme, custom_css, reload_javascript
 
 set_theme = adjust_theme()
 
@@ -75,6 +77,7 @@ class ChatBot(ChatBotFrame):
     def draw_title(self):
         # self.title = gr.HTML(self.title_html)
         self.cookies = gr.State({'api_key': API_KEY, 'llm_model': LLM_MODEL, 'local': self.__url})
+
     def draw_chatbot(self):
         self.chatbot = gr.Chatbot(elem_id='main_chatbot', label=f"当前模型：{LLM_MODEL}")
         self.chatbot.style()
@@ -249,26 +252,32 @@ class ChatBot(ChatBotFrame):
         with gr.TabItem('高级功能', id='plug_tab'):
             with gr.Accordion("上传本地文件可供高亮函数插件调用", open=False, visible=False) as self.area_file_up:
                 self.file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)",
-                                            file_count="multiple")
-                self.file_upload.style()
+                                            file_count="multiple").style()
             self.plugin_dropdown = gr.Dropdown(choices=crazy_classification, label='选择角色分类', value=[default_plugin],
                                                multiselect=True, interactive=True, elem_classes='normal_mut_select')
 
             with gr.Accordion("函数插件区", open=True) as self.area_crazy_fn:
                 with gr.Row():
-                    for k in crazy_fns:
-                        if not crazy_fns[k].get("AsButton", True): continue
-                        self.variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
-                        crazy_fns[k]["Button"] = gr.Button(k, variant=self.variant)
-                        crazy_fns[k]["Button"].style(size="sm")
+                    for role in crazy_fns_role:
+                        for k in crazy_fns_role[role]:
+                            if not crazy_fns_role[role][k].get("AsButton", True): continue
+                            if role != default_plugin:
+                                variant = crazy_fns_role[role][k]["Color"] if "Color" in crazy_fns_role[role][k] else "secondary"
+                                crazy_fns_role[role][k]['Button'] = gr.Button(k, variant=variant, visible=False).style(size="sm")
+                            else:
+                                variant = crazy_fns[k]["Color"] if "Color" in crazy_fns_role[role][k] else "secondary"
+                                crazy_fns_role[role][k]['Button'] = gr.Button(k, variant=variant, visible=True).style(size="sm")
+
             with gr.Accordion("更多函数插件/高级用法", open=True, ):
                 dropdown_fn_list = []
-                for k in crazy_fns.keys():
-                    if not crazy_fns[k].get("AsButton", True):
-                        dropdown_fn_list.append(k)
-                    elif crazy_fns[k].get('AdvancedArgs', False):
-                        dropdown_fn_list.append(k)
-                self.dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", interactive=True, show_label=False, label="").style(
+                for role in crazy_fns_role:
+                    if role == default_plugin:
+                        for k in crazy_fns_role[role]:
+                            if not crazy_fns_role[role][k].get("AsButton", True):
+                                dropdown_fn_list.append(k)
+                            elif crazy_fns_role[role][k].get('AdvancedArgs', False):
+                                dropdown_fn_list.append(k)
+                self.dropdown_fn = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", interactive=True, show_label=False, label="").style(
                     container=False)
                 self.plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False,
                                                  placeholder="这里是特殊函数插件的高级参数输入区").style(container=False)
@@ -276,18 +285,43 @@ class ChatBot(ChatBotFrame):
 
 
     def signals_plugin(self):
+        fn_btn_dict = {crazy_fns_role[role][k]['Button']: {role: k} for role in crazy_fns_role for k in crazy_fns_role[role] if crazy_fns_role[role][k].get('Button')}
+        def show_plugin_btn(plu_list):
+            new_btn_list = []
+            fns_list = []
+            if not plu_list:
+                return [*[fns.update(visible=False) for fns in fn_btn_dict], gr.Dropdown.update(choices=[])]
+            else:
+                for fns in fn_btn_dict:
+                    if list(fn_btn_dict[fns].keys())[0] in plu_list:
+                        new_btn_list.append(fns.update(visible=True))
+                    else:
+                        new_btn_list.append(fns.update(visible=False))
+                for role in crazy_fns_role:
+                    if role in plu_list:
+                        for k in crazy_fns_role[role]:
+                            if not crazy_fns_role[role][k].get("AsButton", True):
+                                fns_list.append(k)
+                            elif crazy_fns_role[role][k].get('AdvancedArgs', False):
+                                fns_list.append(k)
+                return [*new_btn_list, gr.Dropdown.update(choices=fns_list)]
+
         # 文件上传区，接收文件后与chatbot的互动
         self.file_upload.upload(on_file_uploaded, [self.file_upload, self.chatbot, self.txt], [self.chatbot, self.txt])
         # 函数插件-固定按钮区
-        for k in crazy_fns:
-            if not crazy_fns[k].get("AsButton", True): continue
-            click_handle = crazy_fns[k]["Button"].click(**self.clear_agrs).then(
-                              ArgsGeneralWrapper(crazy_fns[k]["Function"]),
-                              [*self.input_combo, gr.State(PORT), gr.State(crazy_fns[k].get('Parameters', False))],
-                              self.output_combo)
-            click_handle.then(on_report_generated, [self.cookies, self.file_upload, self.chatbot],
-                              [self.cookies, self.file_upload, self.chatbot])
-            self.cancel_handles.append(click_handle)
+        self.plugin_dropdown.select(fn=show_plugin_btn, inputs=[self.plugin_dropdown],
+                                    outputs=[*fn_btn_dict.keys(), self.dropdown_fn])
+        for i in crazy_fns_role:
+            role_fns = crazy_fns_role[i]
+            for k in role_fns:
+                if not role_fns[k].get("AsButton", True): continue
+                click_handle = role_fns[k]["Button"].click(**self.clear_agrs).then(
+                                  ArgsGeneralWrapper(role_fns[k]["Function"]),
+                                  [*self.input_combo, gr.State(PORT), gr.State(role_fns[k].get('Parameters', False))],
+                                  self.output_combo)
+                click_handle.then(on_report_generated, [self.cookies, self.file_upload, self.chatbot],
+                                  [self.cookies, self.file_upload, self.chatbot])
+                self.cancel_handles.append(click_handle)
 
         # 函数插件-下拉菜单与随变按钮的互动
         def on_dropdown_changed(k):
@@ -305,7 +339,7 @@ class ChatBot(ChatBotFrame):
                 ret.update({self.plugin_advanced_arg: gr.update(visible=False, label=f"插件[{k}]不需要高级参数。")})
             return ret
 
-        self.dropdown.select(on_dropdown_changed, [self.dropdown], [self.switchy_bt, self.plugin_advanced_arg])
+        self.dropdown_fn.select(on_dropdown_changed, [self.dropdown_fn], [self.switchy_bt, self.plugin_advanced_arg])
 
         # 随变按钮的回调函数注册
         def route(k, ipaddr: gr.Request, *args, **kwargs):
@@ -473,11 +507,13 @@ def check_proxy_free():
         import time
         time.sleep(5)
 
-PORT = LOCAL_PORT if WEB_PORT <= 0 else WEB_PORT
-chatbot_main = ChatBot()
+
 if __name__ == '__main__':
     # PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
+    PORT = LOCAL_PORT if WEB_PORT <= 0 else WEB_PORT
     check_proxy_free()
+    reload_javascript()
+    chatbot_main = ChatBot()
     chatbot_main.main()
     gr.close_all()
     check_proxy_free()

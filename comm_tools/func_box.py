@@ -643,11 +643,11 @@ def update_btn(self: gr.Button = None,
 ):
     if self:
         if not variant: variant = self.variant
-        if not visible: visible = self.visible
+        if visible is None: visible = self.visible
         if not value: value = self.value
-        if not interactive: interactive = self.interactive
+        if interactive is None: interactive = self.interactive
         if not elem_id: elem_id = self.elem_id
-        if not elem_id: label = self.label
+        if label is None: label = self.label
     return {
         "variant": variant,
         "visible": visible,
