@@ -555,11 +555,11 @@ logs_path = os.path.join(base_path, 'gpt_log')
 def reuse_chat(result, chatbot, history, say):
     """复用对话记录"""
     if result is None or result == []:
-        return chatbot, history, gr.update(), gr.update(), '', gr.Column.update()
+        return chatbot, history, gr.update(), gr.update(), gr.Column.update()
     else:
         chatbot += result
         history += [pattern_html(_) for i in result for _ in i]
-        return chatbot, history, say, gr.Tabs.update(selected='chatbot'), '', gr.Column.update(visible=False)
+        return chatbot, history, say, gr.Tabs.update(selected='chatbot'), gr.Column.update(visible=False)
 
 
 def num_tokens_from_string(listing: list, encoding_name: str = 'cl100k_base') -> int:
