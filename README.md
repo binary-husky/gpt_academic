@@ -5,7 +5,7 @@
 > `pip install -r requirements.txt`
 
 
-# <div align=center><img src="docs/logo.png" width="40" > GPT 学术优化 (GPT Academic)</div>
+# <div align=center><img src="docs/logo.png" width="40"> GPT 学术优化 (GPT Academic)</div>
 
 **如果喜欢这个项目，请给它一个Star；如果您发明了好用的快捷键或函数插件，欢迎发pull requests！**
 
