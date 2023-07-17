@@ -106,7 +106,7 @@ def adjust_theme():
                 externalScripts = f1.read()
             js += f'<script>{customJS}</script><script async>{externalScripts}</script>'
         # 添加一个萌萌的看板娘
-        if ADD_WAIFU:
+        if False:
             js += """
                 <script src="file=docs/waifu_plugin/jquery.min.js"></script>
                 <script src="file=docs/waifu_plugin/jquery-ui.min.js"></script>

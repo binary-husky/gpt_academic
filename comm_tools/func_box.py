@@ -672,8 +672,19 @@ def git_log_list():
     return [i.split('|') for i in ll if 'branch' not in i][:5]
 
 
-def to_markdown_tabs(head: list, tabs: list):
-    pass
+def to_markdown_tabs(head: list, tabs: list, alignment=':---:'):
+    """
+    Args:
+        head: 表头：[]
+        tabs:  表值：[[列1] ,[列2], [列3], [列4]]
+        alignment: :--- 左对齐， :---: 居中对齐， ---: 右对齐
+    Returns:
+        '| 表头 |\n| :---: |\n| 列1 |\n| 列2 |...'
+    """
+    tabs_list = "\n".join([f"| {i} |" for i in head])
+    tabs_list += "\n".join([f"| {alignment} |" for i in head])
+    tabs_list += '\n'.join([f"| {key} |" for line in tabs for key in line])
+    return tabs_list
 
 
 import qrcode

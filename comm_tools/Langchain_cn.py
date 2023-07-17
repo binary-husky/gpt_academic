@@ -31,8 +31,8 @@ def knowledge_base_writing(files, links: str, select, name, ipaddr: gr.Request):
         _, file_manifest_tmp, _ = crazy_utils.get_files_from_everything(net_file, type=f'.md')
         file_manifest += file_manifest_tmp
     if len(file_manifest) == 0:
-        types = "\t".join(spl)
-        yield (toolbox.markdown_convertion(f'没有找到任何可读取文件， 当前支持的格式包括: ```\n\n{types}\n\n```'),
+        types = "\t".join(f"`{s}`" for s in spl)
+        yield (toolbox.markdown_convertion(f'没有找到任何可读取文件， 当前支持解析的文件格式包括: \n\n{types}'),
                gr.Dropdown.update(), '')
         return
     # < -------------------预热文本向量化模组--------------- >
@@ -41,15 +41,14 @@ def knowledge_base_writing(files, links: str, select, name, ipaddr: gr.Request):
     with toolbox.ProxyNetworkActivate():    # 临时地激活代理网络
         HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
     # < -------------------构建知识库--------------- >
-    files_tabs = '| 文件 |\n| :---: |\n'
-    preprocessing_files = files_tabs + ''.join([f"| {f} |\n" for f in file_manifest])
+    preprocessing_files = func_box.to_markdown_tabs(head=['文件'], tabs=[file_manifest])
     yield (toolbox.markdown_convertion(f'正在准备将以下文件向量化，生成知识库文件：\n\n{preprocessing_files}'),
            gr.Dropdown.update(), '')
     with toolbox.ProxyNetworkActivate():    # 临时地激活代理网络
         kai = knowledge_archive_interface(vs_path=os.path.join(func_box.knowledge_path, ipaddr.client.host))
         kai.feed_archive(file_manifest=file_manifest, id=kai_id)
     kai_files = kai.get_loaded_file()
-    kai_files = files_tabs + ''.join([f"| {f} |\n" for f in kai_files])
+    kai_files = func_box.to_markdown_tabs(head=['文件'], tabs=[kai_files])
     yield (toolbox.markdown_convertion(f'构建完成, 当前知识库内有效的文件如下, 已自动帮您选中知识库，现在你可以畅快的开始提问啦～\n\n{kai_files}'),
            gr.Dropdown.update(value=kai_id, choices=obtain_a_list_of_knowledge_bases(ipaddr)), kai_id)
 
@@ -70,7 +69,7 @@ def knowledge_base_query(txt, kai_id, chatbot, history, llm_kwargs, ipaddr: gr.R
     if not txt: return txt
     # < -------------------检索Prompt--------------- >
     kai = knowledge_archive_interface(vs_path=os.path.join(func_box.knowledge_path, ipaddr.client.host))
-    new_txt = f'{txt}.'
+    new_txt = f'{txt}'
     for id in kai_id:
         # < -------------------查询向量数据库--------------- >
         chatbot.append([txt, f'正在将问题向量化，然后对{func_box.html_tag_color(id)}知识库进行匹配'])

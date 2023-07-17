@@ -101,6 +101,17 @@ mspace {
     min-width: min(20%,100%) !important;
     border-radius: 20px!important;
 }
+.normal_select .svelte-1gfkn6j {
+    float: left;
+    width: auto;
+    line-height: 220% !important;
+}
+.normal_mut_select .svelte-1gfkn6j {
+    float: left;
+    width: auto;
+    line-height: 260% !important;
+}
+
 .sm_select .svelte-1gfkn6j {
     float: left;
     width: auto;
@@ -138,6 +149,7 @@ mspace {
     position: relative;
     min-width: min(55px,100%) !important;
 }
+
 
 .submit_btn, .cancel_btn {
     flex-direction: column-reverse;
@@ -384,6 +396,7 @@ hr.append-display {
     border-top-width: 0;
     background-image: linear-gradient(to right, rgba(50,50,50, 0.1), rgba(150, 150, 150, 0.8), rgba(50,50,50, 0.1));
 }
+
 .source-a {
     font-size: 0.8em;
     max-width: 100%;

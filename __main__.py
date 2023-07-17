@@ -17,7 +17,10 @@ functional = get_core_functions()
 # 高级函数插件
 from comm_tools.crazy_functional import get_crazy_functions
 
+default_plugin,  = get_conf('default_plugin')
 crazy_fns = get_crazy_functions()
+crazy_classification = [i for i in crazy_fns]
+crazy_fns = crazy_fns[default_plugin]
 
 # 处理markdown文本格式的转变
 gr.Chatbot.postprocess = format_io
@@ -242,12 +245,15 @@ class ChatBot(ChatBotFrame):
         self.chat_tab.select(fn=lambda: 0, inputs=None, outputs=self.tabs_code)
         self.prompt_tab.select(fn=lambda: 1, inputs=None, outputs=self.tabs_code)
 
-    def draw_public_chat(self):
+    def draw_plugin_chat(self):
         with gr.TabItem('高级功能', id='plug_tab'):
-            with gr.Accordion("上传本地文件可供高亮函数插件调用", open=False) as self.area_file_up:
+            with gr.Accordion("上传本地文件可供高亮函数插件调用", open=False, visible=False) as self.area_file_up:
                 self.file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)",
                                             file_count="multiple")
                 self.file_upload.style()
+            self.plugin_dropdown = gr.Dropdown(choices=crazy_classification, label='选择角色分类', value=[default_plugin],
+                                               multiselect=True, interactive=True, elem_classes='normal_mut_select')
+
             with gr.Accordion("函数插件区", open=True) as self.area_crazy_fn:
                 with gr.Row():
                     for k in crazy_fns:
@@ -268,9 +274,69 @@ class ChatBot(ChatBotFrame):
                                                  placeholder="这里是特殊函数插件的高级参数输入区").style(container=False)
                 self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
 
+
+    def signals_plugin(self):
+        # 文件上传区，接收文件后与chatbot的互动
+        self.file_upload.upload(on_file_uploaded, [self.file_upload, self.chatbot, self.txt], [self.chatbot, self.txt])
+        # 函数插件-固定按钮区
+        for k in crazy_fns:
+            if not crazy_fns[k].get("AsButton", True): continue
+            click_handle = crazy_fns[k]["Button"].click(**self.clear_agrs).then(
+                              ArgsGeneralWrapper(crazy_fns[k]["Function"]),
+                              [*self.input_combo, gr.State(PORT), gr.State(crazy_fns[k].get('Parameters', False))],
+                              self.output_combo)
+            click_handle.then(on_report_generated, [self.cookies, self.file_upload, self.chatbot],
+                              [self.cookies, self.file_upload, self.chatbot])
+            self.cancel_handles.append(click_handle)
+
+        # 函数插件-下拉菜单与随变按钮的互动
+        def on_dropdown_changed(k):
+            # 按钮颜色随变
+            variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
+            ret = {self.switchy_bt: self.switchy_bt.update(value=k, variant=variant)}
+            # 参数取随变
+            fns_value = func_box.txt_converter_json(str(crazy_fns[k].get('Parameters', '')))
+            fns_lable = f"插件[{k}]的高级参数说明：\n" + crazy_fns[k].get("ArgsReminder", f"没有提供高级参数功能说明")
+            temp_dict = dict(visible=True, interactive=True, value=str(fns_value), label=fns_lable)
+            #  是否唤起高级插件参数区
+            if crazy_fns[k].get("AdvancedArgs", False):
+                ret.update({self.plugin_advanced_arg: gr.update(**temp_dict)})
+            else:
+                ret.update({self.plugin_advanced_arg: gr.update(visible=False, label=f"插件[{k}]不需要高级参数。")})
+            return ret
+
+        self.dropdown.select(on_dropdown_changed, [self.dropdown], [self.switchy_bt, self.plugin_advanced_arg])
+
+        # 随变按钮的回调函数注册
+        def route(k, ipaddr: gr.Request, *args, **kwargs):
+            if k in [r"打开插件列表", r"请先从插件列表中选择"]: return
+            append = list(args)
+            append[-2] = func_box.txt_converter_json(append[-2])
+            append.insert(-1, ipaddr)
+            args = tuple(append)
+            yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(*args, **kwargs)
+
+        click_handle = self.switchy_bt.click(**self.clear_agrs).then(
+            route, [self.switchy_bt, *self.input_combo, gr.State(PORT)], self.output_combo)
+        click_handle.then(on_report_generated,
+              [self.cookies, self.file_upload, self.chatbot],
+              [self.cookies, self.file_upload, self.chatbot])
+        self.cancel_handles.append(click_handle)
+        # 终止按钮的回调函数注册
+        self.stopBtn.click(fn=lambda: (self.stopBtn.update(visible=False), self.submitBtn.update(visible=True)),
+            inputs=[], outputs=[self.stopBtn, self.submitBtn], cancels=self.cancel_handles)
+
+        def on_llms_dropdown_changed(k, m):
+            if m:
+                return {self.chatbot: gr.update(label="当前模型：" + k + "&" + '&'.join(m))}
+            else:
+                return {self.chatbot: gr.update(label="当前模型：" + k)}
+        self.llms_dropdown.select(on_llms_dropdown_changed, [self.llms_dropdown, self.langchain_dropdown], [self.chatbot])
+        self.langchain_dropdown.select(on_llms_dropdown_changed, [self.llms_dropdown, self.langchain_dropdown], [self.chatbot])
+
     def draw_langchain_base(self):
         spl, = get_conf('spl')
-        with gr.TabItem('构建知识库', id='langchain_tab'):
+        with gr.TabItem('知识库构建', id='langchain_tab'):
             with gr.Box():
                 self.langchain_upload = gr.Files(label="上传你需要构建的知识库文件", file_count="multiple", file_types=spl)
                 self.langchain_links = gr.Textbox(show_label=False, placeholder='Kdocs/网络文件,多个链接使用换行间隔').style(container=False)
@@ -279,7 +345,7 @@ class ChatBot(ChatBotFrame):
             with gr.Box():
                 with gr.Row():
                     self.langchain_select = gr.Dropdown(choices=[], value=r"新建知识库",
-                                                        interactive=True, label="已有知识库", elem_classes='sm_select').style(container=False)
+                                                        interactive=True, label="选择知识库", elem_classes='normal_select').style(container=False)
                 with gr.Row():
                     self.langchain_name = gr.Textbox(show_label=False,placeholder='新建知识库or重命名').style(container=False)
 
@@ -289,7 +355,7 @@ class ChatBot(ChatBotFrame):
 
     def signals_langchain_cn(self):
         def update_drop(x, ipaddr: gr.Request):
-            return gr.Dropdown.update(value=x, choices=Langchain_cn.obtain_a_list_of_knowledge_bases(ipaddr))
+            return gr.Dropdown.update(value=[x], choices=Langchain_cn.obtain_a_list_of_knowledge_bases(ipaddr))
         from comm_tools import Langchain_cn
         self.langchain_upload.upload(fn=on_file_uploaded,
                                      inputs=[self.langchain_upload, gr.State(''), self.langchain_file_path],
@@ -340,66 +406,6 @@ class ChatBot(ChatBotFrame):
         self.cancel_handles.append(click_handle)
         self.resetBtn.click(lambda: ([], [], "已重置"), None, [self.chatbot, self.history, self.status])
 
-    def signals_public(self):
-        # 文件上传区，接收文件后与chatbot的互动
-        self.file_upload.upload(on_file_uploaded, [self.file_upload, self.chatbot, self.txt], [self.chatbot, self.txt])
-        # 函数插件-固定按钮区
-        for k in crazy_fns:
-            if not crazy_fns[k].get("AsButton", True): continue
-            click_handle = crazy_fns[k]["Button"].click(**self.clear_agrs).then(
-                              ArgsGeneralWrapper(crazy_fns[k]["Function"]),
-                              [*self.input_combo, gr.State(PORT), gr.State(crazy_fns[k].get('Parameters', False))],
-                              self.output_combo)
-            click_handle.then(on_report_generated, [self.cookies, self.file_upload, self.chatbot],
-                              [self.cookies, self.file_upload, self.chatbot])
-            self.cancel_handles.append(click_handle)
-
-
-        # 函数插件-下拉菜单与随变按钮的互动
-        def on_dropdown_changed(k):
-            # 按钮颜色随变
-            variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
-            ret = {self.switchy_bt: self.switchy_bt.update(value=k, variant=variant)}
-            # 参数取随变
-            fns_value = func_box.txt_converter_json(str(crazy_fns[k].get('Parameters', '')))
-            fns_lable = f"插件[{k}]的高级参数说明：\n" + crazy_fns[k].get("ArgsReminder", f"没有提供高级参数功能说明")
-            temp_dict = dict(visible=True, interactive=True, value=str(fns_value), label=fns_lable)
-            #  是否唤起高级插件参数区
-            if crazy_fns[k].get("AdvancedArgs", False):
-                ret.update({self.plugin_advanced_arg: gr.update(**temp_dict)})
-            else:
-                ret.update({self.plugin_advanced_arg: gr.update(visible=False, label=f"插件[{k}]不需要高级参数。")})
-            return ret
-
-        self.dropdown.select(on_dropdown_changed, [self.dropdown], [self.switchy_bt, self.plugin_advanced_arg])
-
-        # 随变按钮的回调函数注册
-        def route(k, ipaddr: gr.Request, *args, **kwargs):
-            if k in [r"打开插件列表", r"请先从插件列表中选择"]: return
-            append = list(args)
-            append[-2] = func_box.txt_converter_json(append[-2])
-            append.insert(-1, ipaddr)
-            args = tuple(append)
-            yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(*args, **kwargs)
-
-        click_handle = self.switchy_bt.click(**self.clear_agrs).then(
-            route, [self.switchy_bt, *self.input_combo, gr.State(PORT)], self.output_combo)
-        click_handle.then(on_report_generated,
-              [self.cookies, self.file_upload, self.chatbot],
-              [self.cookies, self.file_upload, self.chatbot])
-        self.cancel_handles.append(click_handle)
-        # 终止按钮的回调函数注册
-        self.stopBtn.click(fn=lambda: (self.stopBtn.update(visible=False), self.submitBtn.update(visible=True)),
-            inputs=[], outputs=[self.stopBtn, self.submitBtn], cancels=self.cancel_handles)
-
-        def on_llms_dropdown_changed(k, m):
-            if m:
-                return {self.chatbot: gr.update(label="当前模型：" + k + "&" + '&'.join(m))}
-            else:
-                return {self.chatbot: gr.update(label="当前模型：" + k)}
-        self.llms_dropdown.select(on_llms_dropdown_changed, [self.llms_dropdown, self.langchain_dropdown], [self.chatbot])
-        self.langchain_dropdown.select(on_llms_dropdown_changed, [self.llms_dropdown, self.langchain_dropdown], [self.chatbot])
-
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay(self, is_open=False):
         import threading, webbrowser, time
@@ -426,7 +432,7 @@ class ChatBot(ChatBotFrame):
                     gr.Markdown('# KSO Chat Bot 🦾')
                     with gr.Tabs() as self.tabs_funcs:
                         self.draw_function_chat()
-                        self.draw_public_chat()
+                        self.draw_plugin_chat()
                         self.draw_langchain_base()
                         self.draw_setting_chat()
                 # 绘制列2
@@ -443,7 +449,7 @@ class ChatBot(ChatBotFrame):
             self.signals_sm_btn()
             self.signals_prompt_func()
             self.signals_prompt_edit()
-            self.signals_public()
+            self.signals_plugin()
             self.signals_langchain_cn()
             adv_plugins = gr.State([i for i in crazy_fns])
             self.demo.load(fn=func_box.refresh_load_data,

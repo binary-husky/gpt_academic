@@ -25,3 +25,5 @@ rich
 Levenshtein
 paddleocr
 qrcode
+pypinyin
+zh_langchain
