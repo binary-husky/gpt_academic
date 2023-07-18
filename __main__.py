@@ -249,7 +249,7 @@ class ChatBot(ChatBotFrame):
         self.prompt_tab.select(fn=lambda: 1, inputs=None, outputs=self.tabs_code)
 
     def draw_plugin_chat(self):
-        with gr.TabItem('高级功能', id='plug_tab'):
+        with gr.TabItem('插件功能', id='plug_tab'):
             with gr.Accordion("上传本地文件可供高亮函数插件调用", open=False, visible=False) as self.area_file_up:
                 self.file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)",
                                             file_count="multiple").style()
@@ -268,7 +268,7 @@ class ChatBot(ChatBotFrame):
                                 variant = crazy_fns[k]["Color"] if "Color" in crazy_fns_role[role][k] else "secondary"
                                 crazy_fns_role[role][k]['Button'] = gr.Button(k, variant=variant, visible=True).style(size="sm")
 
-            with gr.Accordion("更多函数插件/高级用法", open=True, ):
+            with gr.Accordion("更多函数插件/自定义插件参数", open=True, ):
                 dropdown_fn_list = []
                 for role in crazy_fns_role:
                     if role == default_plugin:
@@ -404,7 +404,7 @@ class ChatBot(ChatBotFrame):
 
     def draw_setting_chat(self):
         switch_model = get_conf('switch_model')[0]
-        with gr.TabItem('对话设置', id='sett_tab'):
+        with gr.TabItem('Settings', id='sett_tab'):
             self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01, interactive=True,
                                    label="Top-p (nucleus sampling)", ).style(container=False)
             self.temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True,

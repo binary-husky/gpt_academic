@@ -54,7 +54,7 @@ def knowledge_base_writing(files, links: str, select, name, ipaddr: gr.Request):
     kai_files = kai.get_loaded_file()
     kai_files = func_box.to_markdown_tabs(head=['文件'], tabs=[kai_files])
     yield (toolbox.markdown_convertion(f'构建完成, 当前知识库内有效的文件如下, 已自动帮您选中知识库，现在你可以畅快的开始提问啦～\n\n{kai_files}'),
-           gr.Dropdown.update(value=kai_id, choices=obtain_a_list_of_knowledge_bases(ipaddr)), kai_id)
+           gr.Dropdown.update(value='新建知识库', choices=obtain_a_list_of_knowledge_bases(ipaddr)), kai_id)
 
 
 def knowledge_base_query(txt, kai_id, chatbot, history, llm_kwargs, ipaddr: gr.Request):
@@ -81,7 +81,7 @@ def knowledge_base_query(txt, kai_id, chatbot, history, llm_kwargs, ipaddr: gr.R
         resp, prompt, _ok = kai.answer_with_archive_by_id(txt, id)
         if resp:
             referenced_documents = "\n".join([f"{k}: " + doc.page_content for k, doc in enumerate(resp['source_documents'])])
-            new_txt += f'\n以下三个引号内的是知识库提供的参考文档"""\n{referenced_documents}\n"""'
+            new_txt += f'\n以下三个引号内的是知识库提供的参考文档：\n"""\n{referenced_documents}\n"""'
     return new_txt
 
 

@@ -63,6 +63,7 @@ def replace_special_chars(file_name):
     return re.sub(r'[^\u4e00-\u9fa5\d\w\s\.\_]', '_', file_name)
 
 def long_name_processing(file_name):
+    if type(file_name) is list: file_name = file_name[0]
     if len(file_name) > 50:
         if file_name.find('"""') != -1:
             temp = file_name.split('"""')[1].splitlines()
@@ -93,7 +94,7 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
     model = llm_kwargs['llm_model']
     max_token = model_info[llm_kwargs['llm_model']]['max_token']/2  # 考虑到对话+回答会超过tokens,所以/2
     get_token_num = bridge_all.model_info[model]['token_cnt']
-    inputs = inputs.split('\n\n--- \n\n')
+    inputs = inputs.split('\n---\n')
     segments = []
     for input_ in inputs:
         if get_token_num(input_) > max_token:
