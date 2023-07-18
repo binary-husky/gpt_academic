@@ -447,6 +447,15 @@ class _ChatHub:
         """
         Ask a question to the bot
         """
+        req_header = HEADERS
+        if self.cookies is not None:
+            ws_cookies = []
+            for cookie in self.cookies:
+                ws_cookies.append(f"{cookie['name']}={cookie['value']}")
+            req_header.update({
+                'Cookie': ';'.join(ws_cookies),
+            })
+            
         timeout = aiohttp.ClientTimeout(total=30)
         self.session = aiohttp.ClientSession(timeout=timeout)
 
@@ -455,7 +464,7 @@ class _ChatHub:
         # Check if websocket is closed
         self.wss = await self.session.ws_connect(
             wss_link,
-            headers=HEADERS,
+            headers=req_header,
             ssl=ssl_context,
             proxy=self.proxy,
             autoping=False,
