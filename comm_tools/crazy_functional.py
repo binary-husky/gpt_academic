@@ -295,12 +295,12 @@ def get_crazy_functions():
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.KDocs_转客户端测试用例),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
+            "ArgsReminder": "is_show 是否显示过程\nprompt生成测试用例的prompt\nimg_ocr是否使用ocr\nto_markdown增加阅读性使用的中间prompt",  # 高级参数输入区的显示提示
             "Parameters": {
                 "is_show": False,
                 "prompt": '文档转测试用例',
                 'img_ocr': False,
-                "to_markdown": '文档转测试用例'
+                "to_markdown": '文档转Markdown'
             }
         },
         "接口文档转测试用例(输入框输入需求文档)": {
@@ -308,7 +308,7 @@ def get_crazy_functions():
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.KDocs_转接口测试用例),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
+            "ArgsReminder": "is_show 是否显示过程\nprompt生成测试用例的提示词\nimg_ocr是否使用ocr\nto_markdown增加阅读性使用的中间prompt",  # 高级参数输入区的显示提示
             "Parameters": {
                 "is_show": False,
                 "prompt": '接口文档转测试用例',
@@ -321,7 +321,7 @@ def get_crazy_functions():
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.KDocs_需求分析问答),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
+            "ArgsReminder": "is_show：是否显示过程\nprompt:指定提示词\nimg_ocr：是否使用ocr\nto_markdown：增加阅读性使用的中间prompt",  # 高级参数输入区的显示提示
             "Parameters": {
                 "is_show": True,
                 "prompt": '需求分析对话',
@@ -334,7 +334,7 @@ def get_crazy_functions():
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.KDocs_文档转流程图),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "is_show 是否显示过程",  # 高级参数输入区的显示提示
+            "ArgsReminder": "prompt生成流程图的prompt\nimg_ocr是否使用ocr\n",  # 高级参数输入区的显示提示
             "Parameters": {
                 'to_markdown': '文档转Markdown',
                 'img_ocr': True,
