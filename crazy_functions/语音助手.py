@@ -1,5 +1,5 @@
-from toolbox import update_ui
-from toolbox import CatchException, get_conf, markdown_convertion
+from comm_tools.toolbox import update_ui
+from comm_tools.toolbox import CatchException, get_conf, markdown_convertion
 from crazy_functions.crazy_utils import input_clipping
 from request_llm.bridge_all import predict_no_ui_long_connection
 import threading, time

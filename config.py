@@ -108,8 +108,6 @@ MOBILE_SHOW = True
 THEME = "Default"
 
 
-
-
 # 设置用户名和密码（不需要修改）（相关功能不稳定，与gradio版本和网络都相关，如果本地使用不建议加这个）
 # [("username", "password"), ("username2", "password2"), ...]
 AUTHENTICATION = []
@@ -132,7 +130,7 @@ SLACK_CLAUDE_USER_TOKEN = ''
 AZURE_ENDPOINT = "https://你亲手写的api名称.openai.azure.com/"
 AZURE_API_KEY = "填入azure openai api的密钥"    # 建议直接在API_KEY处填写，该选项即将被弃用
 AZURE_ENGINE = "填入你亲手写的部署名"            # 读 docs\use_azure.md
-
+AZURE_API_VERSION = ''
 
 # 使用Newbing
 NEWBING_STYLE = "creative"  # ["creative", "balanced", "precise"]
