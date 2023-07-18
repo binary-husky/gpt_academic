@@ -15,7 +15,11 @@ def knowledge_base_writing(files, links: str, select, name, ipaddr: gr.Request):
         from crazy_functions.crazy_utils import try_install_deps
         try_install_deps(['zh_langchain==0.2.1'])
     # < --------------------读取参数--------------- >
-    if name: kai_id = ''
+    vector_path = os.path.join(func_box.knowledge_path, ipaddr.client.host)
+    if name and select != '新建知识库':
+        os.rename(os.path.join(vector_path, select), os.path.join(vector_path, name))
+        kai_id = name
+    elif name and select == '新建知识库': kai_id = name
     elif select and select != '新建知识库': kai_id = select
     else: kai_id = func_box.created_atime()
     yield '开始咯开始咯～', gr.Dropdown.update(), ''
@@ -45,7 +49,7 @@ def knowledge_base_writing(files, links: str, select, name, ipaddr: gr.Request):
     yield (toolbox.markdown_convertion(f'正在准备将以下文件向量化，生成知识库文件：\n\n{preprocessing_files}'),
            gr.Dropdown.update(), '')
     with toolbox.ProxyNetworkActivate():    # 临时地激活代理网络
-        kai = knowledge_archive_interface(vs_path=os.path.join(func_box.knowledge_path, ipaddr.client.host))
+        kai = knowledge_archive_interface(vs_path=vector_path)
         kai.feed_archive(file_manifest=file_manifest, id=kai_id)
     kai_files = kai.get_loaded_file()
     kai_files = func_box.to_markdown_tabs(head=['文件'], tabs=[kai_files])

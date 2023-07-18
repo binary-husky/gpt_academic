@@ -218,17 +218,28 @@ function toggleDarkMode(isEnabled) {
 function adjustDarkMode() {
     const darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
+    // 获取保存在localStorage中的状态，如果没有则使用系统偏好
+    const storedState = localStorage.getItem('darkModeEnabled');
+    const initialState = storedState === null ? darkModeQuery.matches : (storedState === "true");
+
     // 根据当前颜色模式设置初始状态
-    apSwitch.checked = darkModeQuery.matches;
-    toggleDarkMode(darkModeQuery.matches);
+    apSwitch.checked = initialState;
+    toggleDarkMode(initialState);
+
     // 监听颜色模式变化
     darkModeQuery.addEventListener("change", (e) => {
-        apSwitch.checked = e.matches;
-        toggleDarkMode(e.matches);
+        const newState = e.matches;
+        apSwitch.checked = newState;
+        toggleDarkMode(newState);
+        // 保存新状态到localStorage
+        localStorage.setItem('darkModeEnabled', newState);
     });
-    // apSwitch = document.querySelector('.apSwitch input[type="checkbox"]');
+
     apSwitch.addEventListener("change", (e) => {
-        toggleDarkMode(e.target.checked);
+        const newState = e.target.checked;
+        toggleDarkMode(newState);
+        // 保存新状态到localStorage
+        localStorage.setItem('darkModeEnabled', newState);
     });
 }
 

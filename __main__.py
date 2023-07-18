@@ -370,7 +370,7 @@ class ChatBot(ChatBotFrame):
 
     def draw_langchain_base(self):
         spl, = get_conf('spl')
-        with gr.TabItem('知识库构建', id='langchain_tab'):
+        with gr.TabItem('构建知识库', id='langchain_tab'):
             with gr.Box():
                 self.langchain_upload = gr.Files(label="上传你需要构建的知识库文件", file_count="multiple", file_types=spl)
                 self.langchain_links = gr.Textbox(show_label=False, placeholder='Kdocs/网络文件,多个链接使用换行间隔').style(container=False)
