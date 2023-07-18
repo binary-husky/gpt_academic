@@ -248,7 +248,6 @@ if "moss" in AVAIL_LLM_MODELS:
 if "stack-claude" in AVAIL_LLM_MODELS:
     from .bridge_stackclaude import predict_no_ui_long_connection as claude_noui
     from .bridge_stackclaude import predict as claude_ui
-    # claude
     model_info.update({
         "stack-claude": {
             "fn_with_ui": claude_ui,
@@ -263,7 +262,6 @@ if "newbing-free" in AVAIL_LLM_MODELS:
     try:
         from .bridge_newbingfree import predict_no_ui_long_connection as newbingfree_noui
         from .bridge_newbingfree import predict as newbingfree_ui
-        # claude
         model_info.update({
             "newbing-free": {
                 "fn_with_ui": newbingfree_ui,
@@ -280,7 +278,6 @@ if "newbing" in AVAIL_LLM_MODELS:   # same with newbing-free
     try:
         from .bridge_newbingfree import predict_no_ui_long_connection as newbingfree_noui
         from .bridge_newbingfree import predict as newbingfree_ui
-        # claude
         model_info.update({
             "newbing": {
                 "fn_with_ui": newbingfree_ui,
@@ -297,7 +294,6 @@ if "chatglmft" in AVAIL_LLM_MODELS:   # same with newbing-free
     try:
         from .bridge_chatglmft import predict_no_ui_long_connection as chatglmft_noui
         from .bridge_chatglmft import predict as chatglmft_ui
-        # claude
         model_info.update({
             "chatglmft": {
                 "fn_with_ui": chatglmft_ui,
@@ -310,7 +306,22 @@ if "chatglmft" in AVAIL_LLM_MODELS:   # same with newbing-free
         })
     except:
         print(trimmed_format_exc())
-
+if "internlm" in AVAIL_LLM_MODELS:
+    try:
+        from .bridge_internlm import predict_no_ui_long_connection as internlm_noui
+        from .bridge_internlm import predict as internlm_ui
+        model_info.update({
+            "internlm": {
+                "fn_with_ui": internlm_ui,
+                "fn_without_ui": internlm_noui,
+                "endpoint": None,
+                "max_token": 4096,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            }
+        })
+    except:
+        print(trimmed_format_exc())
 
 def LLM_CATCH_EXCEPTION(f):
     """
