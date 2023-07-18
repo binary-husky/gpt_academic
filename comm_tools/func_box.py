@@ -681,8 +681,8 @@ def to_markdown_tabs(head: list, tabs: list, alignment=':---:'):
     Returns:
         '| 表头 |\n| :---: |\n| 列1 |\n| 列2 |...'
     """
-    tabs_list = "\n".join([f"| {i} |" for i in head])
-    tabs_list += "\n".join([f"| {alignment} |" for i in head])
+    tabs_list = "\n".join([f"| {i} |" for i in head]) + '\n'
+    tabs_list += "\n".join([f"| {alignment} |" for i in head]) + '\n'
     tabs_list += '\n'.join([f"| {key} |" for line in tabs for key in line])
     return tabs_list
 
@@ -766,4 +766,4 @@ class JsonHandle:
 
 
 if __name__ == '__main__':
-    print(os.path.exists(users_path))
+    print(to_markdown_tabs(['文件'], ["12312321123231321"]))
