@@ -71,7 +71,7 @@ MAX_RETRY = 2
 # 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
 LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
 AVAIL_LLM_MODELS = ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "stack-claude"]
-# P.S. 其他可用的模型还包括 ["gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613", "newbing-free", "jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
+# P.S. 其他可用的模型还包括 ["gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613", "claude-1-100k", "claude-2", "jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
 
 
 # ChatGLM(2) Finetune Model Path （如果使用ChatGLM2微调模型，需要把"chatglmft"加入AVAIL_LLM_MODELS中）
@@ -88,6 +88,10 @@ CONCURRENT_COUNT = 100
 
 # 是否在提交时自动清空输入框
 AUTO_CLEAR_TXT = False
+
+
+# 色彩主体，可选 ["Default", "Chuanhu-Small-and-Beautiful"]
+THEME = "Default"
 
 
 # 加一个live2d装饰
@@ -123,3 +127,13 @@ NEWBING_STYLE = "creative"  # ["creative", "balanced", "precise"]
 NEWBING_COOKIES = """
 put your new bing cookies here
 """
+
+
+# 阿里云实时语音识别 配置难度较高 仅建议高手用户使用 参考 https://github.com/binary-husky/gpt_academic/blob/master/docs/use_audio.md
+ENABLE_AUDIO = False
+ALIYUN_TOKEN=""    # 例如 f37f30e0f9934c34a992f6f64f7eba4f
+ALIYUN_APPKEY=""   # 例如 RoPlZrM88DnAFkZK
+
+
+# Claude API KEY
+ANTHROPIC_API_KEY = ""

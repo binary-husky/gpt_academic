@@ -117,7 +117,7 @@ def auto_update(raise_error=False):
         with open('./version', 'r', encoding='utf8') as f:
             current_version = f.read()
             current_version = json.loads(current_version)['version']
-        if (remote_version - current_version) >= 0.01:
+        if (remote_version - current_version) >= 0.01-1e-5:
             from colorful import print亮黄
             print亮黄(
                 f'\n新版本可用。新版本:{remote_version}，当前版本:{current_version}。{new_feature}')
@@ -139,7 +139,7 @@ def auto_update(raise_error=False):
         else:
             return
     except:
-        msg = '自动更新程序：已禁用'
+        msg = '自动更新程序：已禁用。建议排查：代理网络配置。'
         if raise_error:
             from toolbox import trimmed_format_exc
             msg += trimmed_format_exc()

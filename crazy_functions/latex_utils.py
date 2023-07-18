@@ -147,7 +147,7 @@ def 寻找Latex主文件(file_manifest, mode):
     for texf in file_manifest:
         if os.path.basename(texf).startswith('merge'):
             continue
-        with open(texf, 'r', encoding='utf8') as f:
+        with open(texf, 'r', encoding='utf8', errors='ignore') as f:
             file_content = f.read()
         if r'\documentclass' in file_content:
             canidates.append(texf)
@@ -165,7 +165,7 @@ def 寻找Latex主文件(file_manifest, mode):
         expected_words = ['\input', '\ref', '\cite']
         for texf in canidates:
             canidates_score.append(0)
-            with open(texf, 'r', encoding='utf8') as f:
+            with open(texf, 'r', encoding='utf8', errors='ignore') as f:
                 file_content = f.read()
             for uw in unexpected_words:
                 if uw in file_content:

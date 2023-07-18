@@ -9,6 +9,7 @@ prompt_toolkit
 latex2mathml
 python-docx
 mdtex2html
+anthropic
 colorama
 Markdown
 pygments
