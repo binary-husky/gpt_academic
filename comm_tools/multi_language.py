@@ -33,7 +33,7 @@ import pickle
 import time
 
 CACHE_FOLDER = "gpt_log"
-blacklist = ['multi-language', 'gpt_log', '.git', 'private_upload', 'multi_language.py']
+blacklist = ['multi-language', 'gpt_log', '.git', 'private_upload', 'multi_language.py', 'build', '.github', '.vscode', '__pycache__', 'venv']
 
 # LANG = "TraditionalChinese"
 # TransPrompt = f"Replace each json value `#` with translated results in Traditional Chinese, e.g., \"原始文本\":\"翻譯後文字\". Keep Json format. Do not answer #."
@@ -301,6 +301,7 @@ def step_1_core_key_translate():
                 elif isinstance(node, ast.ImportFrom):
                     for n in node.names:
                         if contains_chinese(n.name): syntax.append(n.name)
+                        # if node.module is None: print(node.module)
                         for k in node.module.split('.'):
                             if contains_chinese(k): syntax.append(k)
             return syntax
@@ -310,6 +311,7 @@ def step_1_core_key_translate():
         for root, dirs, files in os.walk(directory_path):
             if any([b in root for b in blacklist]):
                 continue
+            print(files)
             for file in files:
                 if file.endswith('.py'):
                     file_path = os.path.join(root, file)
@@ -505,6 +507,6 @@ def step_2_core_key_translate():
                     with open(file_path_new, 'w', encoding='utf-8') as f:
                         f.write(content)
                     os.remove(file_path)
-
 step_1_core_key_translate()
 step_2_core_key_translate()
+print('Finished, checkout generated results at ./multi-language/')

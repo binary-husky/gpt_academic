@@ -70,26 +70,13 @@ def get_crazy_functions():
         },
     }
 
-    # < -------------------学术研究--------------- >
-    from crazy_functions.Latex全文润色 import Latex英文润色
-    from crazy_functions.读文章写摘要 import 读文章写摘要
+    # < -------------------文档处理--------------- >
     from crazy_functions.总结word文档 import 总结word文档
     from crazy_functions import 批量总结PDF文档
-    from crazy_functions.下载arxiv论文翻译摘要 import 下载arxiv论文并翻译摘要
     from crazy_functions import 批量翻译PDF文档_多线程
-    from crazy_functions import 谷歌检索小助手
     from crazy_functions import 理解PDF文档内容
-    from crazy_functions import Latex全文润色
-    from crazy_functions import Latex全文翻译
     from crazy_functions import 批量Markdown翻译
-    from crazy_functions import Latex输出PDF结果
-    function_plugins['学术研究'] = {
-        "英文Latex项目全文润色（输入路径或上传压缩包）": {
-            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
-            "Color": "primary",
-            "AsButton": False,  # 加入下拉菜单中
-            "Function": HotReload(Latex英文润色)
-        },
+    function_plugins['文档处理理解'] = {
         "Markdown/Readme英译中": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "primary",
@@ -101,11 +88,6 @@ def get_crazy_functions():
             "Color": "primary",
             "AsButton": True,  # 加入下拉菜单中
             "Function": HotReload(批量Markdown翻译.Markdown中译英)
-        },
-        "读Tex论文写摘要": {
-            "Color": "primary",  # 按钮颜色
-            "AsButton": False,  # 加入下拉菜单中
-            "Function": HotReload(读文章写摘要)
         },
         "批量总结Word文档": {
             "AsButton": False,
@@ -123,6 +105,41 @@ def get_crazy_functions():
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Function": HotReload(批量总结PDF文档)
         },
+        "理解PDF文档内容 （模仿ChatPDF）": {
+            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
+            "Color": "primary",
+            "AsButton": True,  # 加入下拉菜单中
+            "Function": HotReload(理解PDF文档内容.理解PDF文档内容标准文件输入)
+        },
+        "Markdown翻译（手动指定语言）": {
+            "Color": "primary",
+            "AsButton": False,
+            "AdvancedArgs": True,
+            "ArgsReminder": "请输入要翻译成哪种语言，默认为Chinese。",
+            "Function": HotReload(批量Markdown翻译.Markdown翻译指定语言)
+        },
+
+    }
+    # < -------------------学术研究--------------- >
+    from crazy_functions import Latex输出PDF结果
+    from crazy_functions.读文章写摘要 import 读文章写摘要
+    from crazy_functions.Latex全文润色 import Latex英文润色
+    from crazy_functions.下载arxiv论文翻译摘要 import 下载arxiv论文并翻译摘要
+    from crazy_functions import 谷歌检索小助手
+    from crazy_functions import Latex全文润色
+    from crazy_functions import Latex全文翻译
+    function_plugins['学术研究'] = {
+        "英文Latex项目全文润色（输入路径或上传压缩包）": {
+            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
+            "Color": "primary",
+            "AsButton": False,  # 加入下拉菜单中
+            "Function": HotReload(Latex英文润色)
+        },
+        "读Tex论文写摘要": {
+            "Color": "primary",  # 按钮颜色
+            "AsButton": False,  # 加入下拉菜单中
+            "Function": HotReload(读文章写摘要)
+        },
         # "[测试功能] 批量总结PDF文档pdfminer": {
         #     "Color": "primary",
         #     "AsButton": False,  # 加入下拉菜单中
@@ -133,13 +150,6 @@ def get_crazy_functions():
             "AsButton": True,  # 加入下拉菜单中
             "Function": HotReload(谷歌检索小助手)
         },
-        "理解PDF文档内容 （模仿ChatPDF）": {
-            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
-            "Color": "primary",
-            "AsButton": True,  # 加入下拉菜单中
-            "Function": HotReload(理解PDF文档内容.理解PDF文档内容标准文件输入)
-        },
-
         "英文Latex项目全文纠错（输入路径或上传压缩包）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "primary",
@@ -169,13 +179,6 @@ def get_crazy_functions():
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(下载arxiv论文并翻译摘要)
         },
-        "Markdown翻译（手动指定语言）": {
-            "Color": "primary",
-            "AsButton": False,
-            "AdvancedArgs": True,
-            "ArgsReminder": "请输入要翻译成哪种语言，默认为Chinese。",
-            "Function": HotReload(批量Markdown翻译.Markdown翻译指定语言)
-        },
         "Latex英文纠错+高亮修正位置 [需Latex]": {
             "Color": "primary",
             "AsButton": False,
@@ -188,7 +191,7 @@ def get_crazy_functions():
             "AsButton": False,
             "AdvancedArgs": True,
             "ArgsReminder":
-                "如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 " +
+                "如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不Latex英文纠错加PDF对比准确的问题。 " +
                 "例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: " + 'If the term "agent" is used in this section, it should be translated to "智能体". ',
             "Function": HotReload(Latex输出PDF结果.Latex翻译中文并重新编译PDF)
         },
@@ -205,7 +208,6 @@ def get_crazy_functions():
 
     # < -------------------试玩插件--------------- >
     from crazy_functions import 对话历史存档
-    from crazy_functions.辅助回答 import 猜你想问
     from crazy_functions.高级功能函数模板 import 高阶功能模板函数
     from crazy_functions import 询问多个大语言模型
     from crazy_functions.联网的ChatGPT_bing版 import 连接bing搜索回答问题
@@ -213,10 +215,9 @@ def get_crazy_functions():
     from crazy_functions.图片生成 import 图片生成
     from crazy_functions.总结音视频 import 总结音视频
     from crazy_functions.数学动画生成manim import 动画生成
-    function_plugins['试玩插件'] = {
-        "猜你想问": {
-            "Function": HotReload(猜你想问)
-        },
+    from crazy_functions.交互功能函数模板 import 交互功能模板函数
+    from crazy_functions.语音助手 import 语音助手
+    function_plugins['好玩的插件'] = {
         "询问多个GPT模型": {
             "Color": "primary",  # 按钮颜色
             "Function": HotReload(询问多个大语言模型.同时问询)
@@ -283,6 +284,16 @@ def get_crazy_functions():
             "Color": "primary",
             "AsButton": False,
             "Function": HotReload(动画生成)
+        },
+        "交互功能模板函数": {
+            "Color": "stop",
+            "AsButton": False,
+            "Function": HotReload(交互功能模板函数)
+        },
+        "实时音频采集": {
+            "Color": "stop",
+            "AsButton": True,
+            "Function": HotReload(语音助手)
         }
 
     }

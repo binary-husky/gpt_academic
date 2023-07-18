@@ -1,4 +1,4 @@
-from .bridge_newbing import preprocess_newbing_out, preprocess_newbing_out_simple
+from .bridge_newbingfree import preprocess_newbing_out, preprocess_newbing_out_simple
 from multiprocessing import Process, Pipe
 from comm_tools.toolbox import update_ui, trimmed_format_exc
 import threading

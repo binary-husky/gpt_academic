@@ -1,4 +1,3 @@
-# <<<<<<< HEAD
 ## Original ignores
 autogpt/keys.py
 autogpt/*json
@@ -164,3 +163,4 @@ request_llm/moss
 multi-language
 media
 __test.py
+flagged
