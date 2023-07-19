@@ -32,9 +32,11 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
             yield from update_ui(chatbot, history)  #增加中间过渡
             ovs_data, content, empty_picture_count, pic_dict = crazy_box.get_docs_content(url, image_processing=img_ocr)
             if img_ocr:
-                ocr_process = f'检测到轻文档中存在{func_box.html_tag_color(empty_picture_count)}张图片，为了产出结果不存在遗漏，正在逐一进行识别\n\n' \
-                              f'>> 红框为采用的文案,可信度低于 {func_box.html_tag_color(llm_kwargs["ocr"])} 将不采用, 可在Setting 中进行配置\n\n'
-                chatbot.append([None, ocr_process])
+                if pic_dict:  # 当有图片文件时，再去提醒
+                    ocr_process = f'检测到轻文档中存在{func_box.html_tag_color(empty_picture_count)}张图片，为了产出结果不存在遗漏，正在逐一进行识别\n\n' \
+                                  f'> 红框为采用的文案,可信度低于 {func_box.html_tag_color(llm_kwargs["ocr"])} 将不采用, 可在Setting 中进行配置\n\n'
+                    chatbot.append([None, ocr_process])
+                else: ocr_process = ''
                 for i in pic_dict:
                     yield from update_ui(chatbot, history, '正在调用OCR组件，图片多可能会比较慢')
                     img_content, img_result = ocr_tools.Paddle_ocr_select(ipaddr=llm_kwargs['ipaddr'], trust_value=llm_kwargs['ocr']).img_def_content(img_path=pic_dict[i])
@@ -82,8 +84,14 @@ def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs
     test_case = []
     file_name = long_name_processing(inputs_show_user_array)
     for k in range(len(gpt_response)):
-        for i in gpt_response[k].splitlines()[2:]:  # 过滤掉表头
-            test_case.append([func_box.clean_br_string(i) for i in i.split('|')[1:]])
+        gpt_response_split = gpt_response[k].splitlines()[2:]  # 过滤掉表头
+        for i in gpt_response_split:
+            if i.find('|') != -1:
+                test_case.append([func_box.clean_br_string(i) for i in i.split('|')[1:]])
+            elif i.find('｜') != -1:
+                test_case.append([func_box.clean_br_string(i) for i in i.split('｜')[1:]])
+            else:
+                test_case.append(i)
     file_path = crazy_box.ExcelHandle(ipaddr=llm_kwargs['ipaddr'], is_client=is_client).lpvoid_lpbuffe(test_case, filename=file_name)
     chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_download_blank(__href=file_path, dir_name=file_path.split("/")[-1])}\n\n'
     chatbot.append(['Done', chat_file_list])
@@ -92,7 +100,8 @@ def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs
 
 def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
     model = llm_kwargs['llm_model']
-    max_token = model_info[llm_kwargs['llm_model']]['max_token']/2  # 考虑到对话+回答会超过tokens,所以/2
+    all_tokens = model_info[llm_kwargs['llm_model']]['max_token']
+    max_token = all_tokens/2 - all_tokens/4  # 考虑到对话+回答会超过tokens,所以/2
     get_token_num = bridge_all.model_info[model]['token_cnt']
     inputs = inputs.split('\n---\n')
     segments = []
@@ -205,7 +214,8 @@ def KDocs_转接口测试用例(file_limit, llm_kwargs, plugin_kwargs, chatbot, 
     inputs_array, inputs_show_user_array = yield from input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs,
                                                                    chatbot, history)
     gpt_response_collection = yield from submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
-    yield from write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history, is_client=False)
+    template_file, = crazy_box.json_args_return(plugin_kwargs, ['template_file'])
+    yield from write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history, is_client=template_file)
     yield from update_ui(chatbot, history, '插件执行成功')
 
 

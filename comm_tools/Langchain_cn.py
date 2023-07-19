@@ -92,7 +92,27 @@ def obtain_a_list_of_knowledge_bases(ipaddr):
             for dir_name in dirs:
                 directory_list.append(dir_name)
         return directory_list
-    know_path = os.path.join(func_box.knowledge_path, ipaddr.client.host)
-    sys_path = os.path.join(func_box.knowledge_path, 'system')
-    return get_directory_list(know_path)+get_directory_list(sys_path)
+    user_path = os.path.join(func_box.knowledge_path, ipaddr.client.host)
+    return get_directory_list(user_path) + get_directory_list(func_box.knowledge_path_sys_path)
+
+def obtaining_knowledge_base_files(vs_id, chatbot, show,ipaddr: gr.Request):
+    from crazy_functions.crazy_utils import knowledge_archive_interface
+    if vs_id and '知识库展示' in show:
+        kai = knowledge_archive_interface(vs_path=os.path.join(func_box.knowledge_path, ipaddr.client.host))
+        if isinstance(chatbot, toolbox.ChatBotWithCookies):
+            pass
+        else:
+            chatbot = toolbox.ChatBotWithCookies(chatbot)
+            chatbot.write_list(chatbot)
+        chatbot.append([None, f'正在检查知识库内文件{"  ".join([func_box.html_tag_color(i)for i in vs_id])}'])
+        yield chatbot, gr.Column.update(visible=False), '🏃🏻‍ 正在努力轮询中....请稍等， tips：知识库可以多选，但不要贪杯哦～️'
+        kai_files = {}
+        for id in vs_id:
+            kai_files.update(kai.get_init_file(vs_id=id))
+        tabs = [[func_box.html_download_blank(file), kai_files[file]] for file in kai_files]
+        chatbot.append([None, f'检查完成，当前选择的知识库内可用文件如下：'
+                              f'\n\n {func_box.to_markdown_tabs(head=["文件", "文件类型"], tabs=tabs)}'])
+        yield chatbot, gr.Column.update(visible=False), '✅ 检查完成'
+    else:
+        yield chatbot, gr.update(), 'Done'
 

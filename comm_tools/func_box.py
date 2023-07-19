@@ -549,6 +549,7 @@ base_path = os.path.dirname(os.path.dirname(__file__))
 html_covert_path = os.path.basename(base_path)
 prompt_path = os.path.join(base_path, 'users_data')
 knowledge_path = os.path.join(prompt_path, 'knowledge')
+knowledge_path_sys_path = os.path.join(prompt_path, 'knowledge', 'system')
 users_path = os.path.join(base_path, 'private_upload')
 logs_path = os.path.join(base_path, 'gpt_log')
 
@@ -679,11 +680,15 @@ def to_markdown_tabs(head: list, tabs: list, alignment=':---:'):
         tabs:  表值：[[列1] ,[列2], [列3], [列4]]
         alignment: :--- 左对齐， :---: 居中对齐， ---: 右对齐
     Returns:
-        '| 表头 |\n| :---: |\n| 列1 |\n| 列2 |...'
+        '| 表头 |  表头2 |\n| :---: | :---: |\n| 列1 | 列2 |\n| 列3 | 列4 |'
     """
-    tabs_list = "\n".join([f"| {i} |" for i in head]) + '\n'
-    tabs_list += "\n".join([f"| {alignment} |" for i in head]) + '\n'
-    tabs_list += '\n'.join([f"| {key} |" for line in tabs for key in line])
+    tab_format = "| %s "
+    tabs_list = "".join([tab_format % i for i in head]) + '|\n'
+    tabs_list += "".join([tab_format % alignment for i in head]) + '|\n'
+
+    for tab in tabs:
+        tabs_list += "".join([tab_format % i for i in tab]) + '|\n'
+
     return tabs_list
 
 
@@ -766,4 +771,4 @@ class JsonHandle:
 
 
 if __name__ == '__main__':
-    print(to_markdown_tabs(['文件'], ["12312321123231321"]))
+    pass

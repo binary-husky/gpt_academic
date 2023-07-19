@@ -600,7 +600,7 @@ def on_file_uploaded(files, chatbot, txt, ipaddr: gr.Request):
     if type(chatbot) is str:
         chatbot = f'[Local Message] 收到以下文件: \n\n{moved_files_str}' \
                   f'\n\n调用路径参数已自动修正到: \n\n{txt}' \
-                  f'\n\n现在你可以开始构建属于自己的知识库knowledge_base_writing啦～'
+                  f'\n\n现在你可以开始构建属于自己的知识库啦～'
         chatbot = markdown_convertion(chatbot)
     else:
         chatbot.append([None,

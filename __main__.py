@@ -11,7 +11,7 @@ import logging
 
 # 一些普通功能模块
 from comm_tools.core_functional import get_core_functions
-
+from comm_tools import Langchain_cn
 functional = get_core_functions()
 
 # 高级函数插件
@@ -115,14 +115,23 @@ class ChatBot(ChatBotFrame):
         self.sm_code_block.click(fn=lambda x: x+'```\n\n```', inputs=[self.txt], outputs=[self.txt])
         self.sm_upload_history.click(get_user_upload, [self.chatbot], outputs=[self.chatbot]).then(
             fn=lambda: gr.Column.update(visible=False), inputs=None, outputs=self.examples_column)
-
         ocr_handle = self.sm_ocr_result.click(**self.clear_agrs).then(
                                  fn=ArgsGeneralWrapper(crazy_functions.crazy_box.ocr_batch_plugin),
                                  inputs=[*self.input_combo, gr.State(PORT)],
                                  outputs=[*self.output_combo])
         self.cancel_handles.append(ocr_handle)
-
-
+        def on_llms_dropdown_changed(k, m):
+            if m:
+                return {self.chatbot: gr.update(label="当前模型：" + k + "&" + '&'.join(m))}
+            else:
+                return {self.chatbot: gr.update(label="当前模型：" + k)}
+        self.llms_dropdown.select(on_llms_dropdown_changed, [self.llms_dropdown, self.langchain_dropdown], [self.chatbot])
+        self.langchain_dropdown.select(on_llms_dropdown_changed,
+                                       [self.llms_dropdown, self.langchain_dropdown],
+                                       [self.chatbot]
+                                       ).then(fn=Langchain_cn.obtaining_knowledge_base_files,
+                                       inputs=[self.langchain_dropdown, self.chatbot, self.models_box],
+                                       outputs=[self.chatbot, self.examples_column, self.status])
 
     def draw_examples(self):
         with gr.Column(elem_id='examples_col') as self.examples_column:
@@ -360,14 +369,6 @@ class ChatBot(ChatBotFrame):
         self.stopBtn.click(fn=lambda: (self.stopBtn.update(visible=False), self.submitBtn.update(visible=True)),
             inputs=[], outputs=[self.stopBtn, self.submitBtn], cancels=self.cancel_handles)
 
-        def on_llms_dropdown_changed(k, m):
-            if m:
-                return {self.chatbot: gr.update(label="当前模型：" + k + "&" + '&'.join(m))}
-            else:
-                return {self.chatbot: gr.update(label="当前模型：" + k)}
-        self.llms_dropdown.select(on_llms_dropdown_changed, [self.llms_dropdown, self.langchain_dropdown], [self.chatbot])
-        self.langchain_dropdown.select(on_llms_dropdown_changed, [self.llms_dropdown, self.langchain_dropdown], [self.chatbot])
-
     def draw_langchain_base(self):
         spl, = get_conf('spl')
         with gr.TabItem('构建知识库', id='langchain_tab'):
@@ -388,9 +389,8 @@ class ChatBot(ChatBotFrame):
             self.langchain_status = gr.Markdown(value='')
 
     def signals_langchain_cn(self):
-        def update_drop(x, ipaddr: gr.Request):
-            return gr.Dropdown.update(value=[x], choices=Langchain_cn.obtain_a_list_of_knowledge_bases(ipaddr))
-        from comm_tools import Langchain_cn
+        def update_drop(x, llms, ipaddr: gr.Request):
+            return gr.Dropdown.update(value=[x], choices=Langchain_cn.obtain_a_list_of_knowledge_bases(ipaddr)), gr.update(label="当前模型：" + llms + "&" + '&'.join([x]))
         self.langchain_upload.upload(fn=on_file_uploaded,
                                      inputs=[self.langchain_upload, gr.State(''), self.langchain_file_path],
                                      outputs=[self.langchain_status, self.langchain_file_path])
@@ -399,8 +399,9 @@ class ChatBot(ChatBotFrame):
                                     outputs=[self.langchain_status, self.langchain_select, self.langchain_know_name]
                                     ).then(
                                     fn=update_drop,
-                                    inputs=[self.langchain_know_name],
-                                    outputs=[self.langchain_dropdown])
+                                    inputs=[self.langchain_know_name, self.llms_dropdown],
+                                    outputs=[self.langchain_dropdown, self.chatbot])
+
 
     def draw_setting_chat(self):
         switch_model = get_conf('switch_model')[0]

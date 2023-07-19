@@ -126,8 +126,15 @@ class Utils:
 class ExcelHandle:
 
     def __init__(self, ipaddr, is_client=True):
-        if is_client: self.template_excel = os.path.join(func_box.base_path, 'docs/template/【Temp】测试要点.xlsx')
-        else: self.template_excel = os.path.join(func_box.base_path, 'docs/template/接口测试用例模板.xlsx')
+        if type(is_client) is bool and is_client:
+            self.template_excel = os.path.join(func_box.base_path, 'docs/template/【Temp】测试要点.xlsx')
+        elif not is_client:
+            self.template_excel = os.path.join(func_box.base_path, 'docs/template/接口测试用例模板.xlsx')
+        elif type(type) is str:
+            if os.path.exists(is_client):
+                self.template_excel = is_client
+            else:
+                self.template_excel = os.path.join(func_box.base_path, 'docs/template/【Temp】测试要点.xlsx')
         self.user_path = os.path.join(func_box.base_path, 'private_upload', ipaddr, 'test_case')
         os.makedirs(f'{self.user_path}', exist_ok=True)
 

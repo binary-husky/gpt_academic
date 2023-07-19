@@ -1,3 +1,4 @@
+import glob
 import os
 from comm_tools import toolbox
 import threading
@@ -626,6 +627,7 @@ def get_files_from_everything(txt, type): # type='.md'
 
 import os
 import shutil
+from comm_tools import func_box
 from zh_langchain.chains.local_doc_qa import LocalDocQA
 from zh_langchain.configs import model_config
 class knowledge_archive_interface():
@@ -662,7 +664,6 @@ class knowledge_archive_interface():
             text2vec=self.get_chinese_text2vec(),
         )
 
-
     def construct_vector_store(self, vs_id, files, sentence_size, text2vec):
         for file in files:
             assert os.path.exists(file), "输入文件不存在"
@@ -676,8 +677,32 @@ class knowledge_archive_interface():
     def get_loaded_file(self):
         return self.qa_handle.get_loaded_file()
 
-    def answer_with_archive_by_id(self, txt, id):
-        self.kai_path = os.path.join(self.vs_root_path, id)
+    def judge_to_obtain_user_data(self, vs_id):
+        user_vs_id = os.path.join(self.vs_root_path, vs_id)
+        if os.path.exists(user_vs_id):
+            return user_vs_id
+        else:
+            public_knowledge_base, = toolbox.get_conf('public_knowledge_base')
+            if public_knowledge_base:
+                for root, dirs, files in os.walk(func_box.knowledge_path):
+                    file_present = os.listdir(root)
+                    if vs_id in root and 'faiss' in file_present:
+                        return root
+            else:
+                return user_vs_id
+
+
+    def get_init_file(self, vs_id):
+        from langchain.vectorstores import FAISS
+        vs_path = self.judge_to_obtain_user_data(vs_id)
+        vector_store = FAISS.load_local(vs_path, self.get_chinese_text2vec())
+        ds = vector_store.docstore
+        file_dict = {ds._dict[k].metadata['source']: ds._dict[k].metadata['filetype'] for k in ds._dict}
+        return file_dict
+
+
+    def answer_with_archive_by_id(self, txt, vs_id):
+        vs_path = self.judge_to_obtain_user_data(vs_id)
         if not os.path.exists(self.kai_path):
             return '', '', False
         VECTOR_SEARCH_SCORE_THRESHOLD = 0
