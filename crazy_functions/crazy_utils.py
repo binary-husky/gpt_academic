@@ -658,23 +658,14 @@ class knowledge_archive_interface():
         return self.text2vec_large_chinese
 
 
-    def feed_archive(self, file_manifest, id="default"):
-        # import uuid
-        self.current_id = id
-        # from zh_langchain import construct_vector_store
-        # self.qa_handle, self.kai_path = construct_vector_store(
-        self.qa_handle, self.kai_path = self.construct_vector_store(
-            vs_id=self.current_id, 
-            files=file_manifest, 
-            sentence_size=100,
-            text2vec=self.get_chinese_text2vec(),
-        )
 
-    def construct_vector_store(self, vs_id, files, sentence_size, text2vec):
+    def construct_vector_store(self, vs_id, files):
         for file in files:
             assert os.path.exists(file), "输入文件不存在"
         vs_path = os.path.join(self.vs_root_path, vs_id)
-        vs_path, loaded_files = self.qa_handle.init_knowledge_vector_store(files, vs_path, sentence_size, text2vec)
+        vs_path, loaded_files = self.qa_handle.init_knowledge_vector_store(filepath=files, vs_path=vs_path,
+                                                                           sentence_size=100,
+                                                                           text2vec=self.get_chinese_text2vec(),)
         return self.qa_handle, vs_path
 
     def get_current_archive_id(self):

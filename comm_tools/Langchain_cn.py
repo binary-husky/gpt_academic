@@ -50,7 +50,7 @@ def knowledge_base_writing(files, links: str, select, name, ipaddr: gr.Request):
            gr.Dropdown.update(), '')
     with toolbox.ProxyNetworkActivate():    # 临时地激活代理网络
         kai = knowledge_archive_interface(vs_path=vector_path)
-        kai.feed_archive(file_manifest=file_manifest, id=kai_id)
+        kai.construct_vector_store(vs_id=kai_id, files=file_manifest)
     kai_files = kai.get_loaded_file()
     kai_files = func_box.to_markdown_tabs(head=['文件'], tabs=[kai_files])
     yield (toolbox.markdown_convertion(f'构建完成, 当前知识库内有效的文件如下, 已自动帮您选中知识库，现在你可以畅快的开始提问啦～\n\n{kai_files}'),
