@@ -138,6 +138,7 @@ def can_multi_process(llm):
     if llm.startswith('gpt-'): return True
     if llm.startswith('api2d-'): return True
     if llm.startswith('azure-'): return True
+    if llm.startswith('proxy-'): return True
     return False
 
 def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
