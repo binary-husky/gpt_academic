@@ -697,7 +697,7 @@ class knowledge_archive_interface():
         vs_path = self.judge_to_obtain_user_data(vs_id)
         vector_store = FAISS.load_local(vs_path, self.get_chinese_text2vec())
         ds = vector_store.docstore
-        file_dict = {ds._dict[k].metadata['source']: ds._dict[k].metadata['filetype'] for k in ds._dict}
+        file_dict = {ds._dict[k].metadata['source']: {vs_id :ds._dict[k].metadata['filetype']} for k in ds._dict}
         return file_dict
 
 
