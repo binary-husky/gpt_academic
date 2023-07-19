@@ -576,7 +576,7 @@ def read_and_clean_pdf_text(fp):
     return meta_txt, page_one_meta
 
 
-def get_files_from_everything(txt, type): # type='.md'
+def get_files_from_everything(txt, type, ipaddr='temp'): # type='.md'
     """
     这个函数是用来获取指定目录下所有指定类型（如.md）的文件，并且对于网络上的文件，也可以获取它。
     下面是对每个参数和返回值的说明：
@@ -595,9 +595,14 @@ def get_files_from_everything(txt, type): # type='.md'
         # 网络的远程文件
         import requests
         from crazy_functions import crazy_box
+        from comm_tools import ocr_tools
         proxies, = toolbox.get_conf('proxies')
         if txt.find('kdocs') != -1:
-            _, r, _, _ = crazy_box.get_docs_content(txt)
+            _, r, _, pic_dict = crazy_box.get_docs_content(txt)
+            for i in pic_dict:   # 增加OCR选项
+                img_content, img_result = ocr_tools.Paddle_ocr_select(ipaddr=ipaddr, trust_value=True
+                                                                      ).img_def_content(img_path=pic_dict[i])
+                r = str(r).replace(f"{i}", f"{func_box.html_local_img(img_result)}\n```{img_content}```")
         else:
             r = requests.get(txt, proxies=proxies).text
         name = r.splitlines()[0]

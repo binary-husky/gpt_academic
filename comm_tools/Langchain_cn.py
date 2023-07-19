@@ -29,10 +29,10 @@ def knowledge_base_writing(files, links: str, select, name, ipaddr: gr.Request):
     spl,  = toolbox.get_conf('spl')
     # 本地文件
     for sp in spl:
-        _, file_manifest_tmp, _ = crazy_utils.get_files_from_everything(files, type=f'.{sp}')
+        _, file_manifest_tmp, _ = crazy_utils.get_files_from_everything(files, type=f'.{sp}', ipaddr=ipaddr.client.host)
         file_manifest += file_manifest_tmp
     for net_file in network_files:
-        _, file_manifest_tmp, _ = crazy_utils.get_files_from_everything(net_file, type=f'.md')
+        _, file_manifest_tmp, _ = crazy_utils.get_files_from_everything(net_file, type=f'.md', ipaddr=ipaddr.client.host)
         file_manifest += file_manifest_tmp
     if len(file_manifest) == 0:
         types = "\t".join(f"`{s}`" for s in spl)
