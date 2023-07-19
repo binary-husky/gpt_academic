@@ -702,7 +702,7 @@ class knowledge_archive_interface():
 
 
     def answer_with_archive_by_id(self, txt, vs_id):
-        vs_path = self.judge_to_obtain_user_data(vs_id)
+        self.kai_path = self.judge_to_obtain_user_data(vs_id)
         if not os.path.exists(self.kai_path):
             return '', '', False
         VECTOR_SEARCH_SCORE_THRESHOLD = 0

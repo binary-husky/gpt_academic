@@ -109,7 +109,7 @@ def obtaining_knowledge_base_files(vs_id, chatbot, show,ipaddr: gr.Request):
         kai_files = {}
         for id in vs_id:
             kai_files.update(kai.get_init_file(vs_id=id))
-        tabs = [[_id, func_box.html_download_blank(file), kai_files[file][_id]] for file in kai_files for _id in kai_files[file]]
+        tabs = [[_id, func_box.html_view_blank(file), kai_files[file][_id]] for file in kai_files for _id in kai_files[file]]
         chatbot.append([None, f'检查完成，当前选择的知识库内可用文件如下：'
                               f'\n\n {func_box.to_markdown_tabs(head=["所属知识库", "文件", "文件类型"], tabs=tabs)}\n\n'
                               f'🤩 快来向我提问吧～'])
