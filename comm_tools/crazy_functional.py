@@ -213,7 +213,6 @@ def get_crazy_functions():
     from crazy_functions.联网的ChatGPT_bing版 import 连接bing搜索回答问题
     from crazy_functions.联网的ChatGPT import 连接网络回答问题
     from crazy_functions.图片生成 import 图片生成
-    from crazy_functions.总结音视频 import 总结音视频
     from crazy_functions.数学动画生成manim import 动画生成
     from crazy_functions.交互功能函数模板 import 交互功能模板函数
     from crazy_functions.语音助手 import 语音助手
@@ -293,6 +292,7 @@ def get_crazy_functions():
 
     # < -------------------金山文档专用--------------- >
     from crazy_functions import KDOCS_轻文档分析
+    from crazy_functions import 总结音视频
     function_plugins['金山文档专用'] = {
         "Kdocs_多文件转测试用例(输入框输入文档链接)": {
             "Color": "primary",
@@ -349,13 +349,15 @@ def get_crazy_functions():
                 'img_ocr': True,
             }
         },
-        "批量总结音视频（输入路径或上传文件）": {
+        "Kdocs批量总结音视频（输入文件路径或上传文件）": {
             "Color": "primary",
-            "AsButton": False,
+            "AsButton": True,
             "AdvancedArgs": True,
-            "ArgsReminder": "调用openai api 使用whisper-1模型, 目前支持的格式:mp4, m4a, wav, mpga, mpeg, mp3。此处可以输入解析提示，例如：解析为简体中文（默认）。",
-            "Function": HotReload(总结音视频),
-            "Parameters": "总结音视频，并列出代办事项"
+            "ArgsReminder": "",
+            "Function": HotReload(总结音视频.Kdocs音频提取总结),
+            "Parameters": {
+                "prompt": '总结摘要提取',
+            }
 
         },
     }

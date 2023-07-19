@@ -117,7 +117,6 @@ def ArgsGeneralWrapper(f):
             plugin_kwargs.update({'parameters_def': args[1]})
         else:
             txt_passon = knowledge_base_passon
-        threading.Thread(target=func_box.thread_write_chat, args=(chatbot_with_cookie,)).start()
         if cookies.get('lock_plugin', None) is None:
             # 正常状态
             yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
@@ -128,6 +127,7 @@ def ArgsGeneralWrapper(f):
             yield from f_hot_reload(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
         # 将对话记录写入数据库
         yield from end_predict(chatbot_with_cookie, history, llm_kwargs)
+        threading.Thread(target=func_box.thread_write_chat, args=(chatbot_with_cookie,)).start()
     return decorated
 
 
@@ -607,7 +607,7 @@ def on_file_uploaded(files, chatbot, txt, ipaddr: gr.Request):
                         f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
                         f'\n\n调用路径参数已自动修正到: \n\n{txt}' +
                         f'\n\n现在您点击任意“高亮”标识的函数插件时，以上文件将被作为输入参数'+err_msg])
-    return chatbot, txt
+    return chatbot, txt, ''
 
 
 def on_report_generated(cookies, files, chatbot):

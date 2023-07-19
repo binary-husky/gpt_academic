@@ -194,6 +194,7 @@ def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
 def KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     file_limit = yield from Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
     if not file_limit:
+        chatbot.append([None, f'{func_box.html_tag_color("无法获取需求文档内容，暂停运行!!!!")}'])
         yield from update_ui(chatbot=chatbot, history=history, msg='无法获取需求文档内容，暂停运行')
         return
     kwargs_to_mark, = crazy_box.json_args_return(plugin_kwargs, ['to_markdown'])
@@ -209,6 +210,7 @@ def KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, s
 def KDocs_转接口测试用例(file_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     gpt_response_collection = yield from KDocs_转Markdown(file_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
     if not gpt_response_collection:
+        chatbot.append([None,f'{func_box.html_tag_color("多线程一个都没有通过，暂停运行!!!!")}'])
         yield from update_ui(chatbot=chatbot, history=history, msg='多线程一个都没有通过，暂停运行')
         return
     inputs_array, inputs_show_user_array = yield from input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs,
@@ -223,6 +225,7 @@ def KDocs_转接口测试用例(file_limit, llm_kwargs, plugin_kwargs, chatbot, 
 def KDocs_转客户端测试用例(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     gpt_response_collection = yield from KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
     if not gpt_response_collection:
+        chatbot.append([None,f'{func_box.html_tag_color("多线程一个都没有通过，暂停运行!!!!")}'])
         yield from update_ui(chatbot=chatbot, history=history, msg='多线程一个都没有通过，暂停运行')
         return
     inputs_array, inputs_show_user_array = yield from input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs,
@@ -236,6 +239,7 @@ def KDocs_转客户端测试用例(link_limit, llm_kwargs, plugin_kwargs, chatbo
 def KDocs_需求分析问答(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     gpt_response_collection = yield from KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
     if not gpt_response_collection:
+        chatbot.append([None,f'{func_box.html_tag_color("多线程一个都没有通过，暂停运行!!!!")}'])
         yield from update_ui(chatbot=chatbot, history=history, msg='多线程一个都没有通过，暂停运行')
         return
     inputs_array, inputs_show_user_array = yield from input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs,
@@ -247,6 +251,7 @@ def KDocs_需求分析问答(link_limit, llm_kwargs, plugin_kwargs, chatbot, his
 def KDocs_文档转流程图(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     gpt_response_collection = yield from KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
     if not gpt_response_collection:
+        chatbot.append([None,f'{func_box.html_tag_color("多线程一个都没有通过，暂停运行!!!!")}'])
         yield from update_ui(chatbot=chatbot, history=history, msg='多线程一个都没有通过，暂停运行')
         return
     yield from transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history)

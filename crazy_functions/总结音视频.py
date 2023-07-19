@@ -1,5 +1,9 @@
 from comm_tools.toolbox import CatchException, report_execption, select_api_key, update_ui, write_results_to_file, get_conf
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, get_files_from_everything
+import glob, os
+from comm_tools import func_box
+from crazy_functions import KDOCS_轻文档分析
+
 
 def split_audio_file(filename, split_duration=1000):
     """
@@ -131,8 +135,6 @@ def AnalyAudio(parse_prompt, file_manifest, llm_kwargs, chatbot, history):
 
 @CatchException
 def 总结音视频(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, WEB_PORT):
-    import glob, os
-
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
@@ -180,3 +182,71 @@ def 总结音视频(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     parse_prompt = plugin_kwargs.get("advanced_arg", '将音频解析为简体中文')
     yield from AnalyAudio(parse_prompt, file_manifest, llm_kwargs, chatbot, history)
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
+
+
+def audio_extraction_text(file):
+    import speech_recognition as sr
+    # 打开音频文件
+    r = sr.Recognizer()
+    with sr.AudioFile(file) as source:
+        # 读取音频文件的内容
+        audio_content = r.record(source)
+        # 使用Google的文字转话服务将音频转换为文字
+        text = r.recognize_google(audio_content, language='zh-CN')
+    return text
+
+
+def audio_comparison_of_video_converters(files, chatbot, history):
+    from moviepy.editor import AudioFileClip
+    temp_chat = ''
+    chatbot.append([None, temp_chat])
+    temp_list = []
+    for file in files:
+        temp_chat += f'正在将{func_box.html_tag_color(file)}文件转换为可提取的音频文件.\n\n'
+        chatbot[-1] = [None, temp_chat]
+        yield from update_ui(chatbot=chatbot, history=history)
+        temp_path = os.path.join(os.path.dirname(file), f"{os.path.basename(file)}.wav")
+        videoclip = AudioFileClip(file)
+        videoclip.write_audiofile(temp_path)
+        temp_list.extend((temp_path, audio_extraction_text(temp_path)))
+    return temp_list
+
+
+@CatchException
+def Kdocs音频提取总结(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, WEB_PORT):
+    # 检测输入参数，如没有给定输入参数，直接退出
+    if os.path.exists(txt):
+        project_folder = txt
+    else:
+        if txt == "": txt = '空空如也的输入栏'
+        report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"找不到本地项目或无权访问: {txt}")
+        yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
+        return
+    # 搜索需要处理的文件清单
+    extensions = ['.mp4', '.m4a', '.wav', '.mpga', '.mpeg', '.mp3', '.avi', '.mkv', '.flac', '.aac']
+    if txt.endswith(tuple(extensions)):
+        file_manifest = [txt]
+    else:
+        file_manifest = []
+        for ed in extensions:
+            _, file_manifest_tmp, _ = get_files_from_everything(txt, ed)
+            file_manifest += file_manifest_tmp
+    # 如果没找到任何文件
+    if len(file_manifest) == 0:
+        report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"找不到任何音频或视频文件: {txt}")
+        yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
+        return
+    # 将音频转换为文字
+    txt_manifest = yield from audio_comparison_of_video_converters(file_manifest, chatbot, history)
+    inputs_array, inputs_show_user_array = yield from KDOCS_轻文档分析.input_output_processing(txt_manifest, llm_kwargs, plugin_kwargs, chatbot, history)
+    gpt_response_collection = yield from KDOCS_轻文档分析.submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
+    yield from update_ui(chatbot, history, '插件执行成功')
+
+if __name__ == '__main__':
+
+
+    # 创建一个音频识别对象w
+
+    video = '/Users/kilig/Desktop/output.wav'
+    new_wav = '/Users/kilig/Desktop/output.wav'
+
