@@ -91,7 +91,7 @@ def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs
             elif i.find('｜') != -1:
                 test_case.append([func_box.clean_br_string(i) for i in i.split('｜')[1:]])
             else:
-                test_case.append(i)
+                test_case.append([i])
     file_path = crazy_box.ExcelHandle(ipaddr=llm_kwargs['ipaddr'], is_client=is_client).lpvoid_lpbuffe(test_case, filename=file_name)
     chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_download_blank(__href=file_path, dir_name=file_path.split("/")[-1])}\n\n'
     chatbot.append(['Done', chat_file_list])

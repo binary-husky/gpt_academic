@@ -273,13 +273,6 @@ def get_crazy_functions():
             "ArgsReminder": "在这里输入分辨率, 如256x256（默认）",  # 高级参数输入区的显示提示
             "Function": HotReload(图片生成)
         },
-        "批量总结音视频（输入路径或上传压缩包）": {
-            "Color": "primary",
-            "AsButton": False,
-            "AdvancedArgs": True,
-            "ArgsReminder": "调用openai api 使用whisper-1模型, 目前支持的格式:mp4, m4a, wav, mpga, mpeg, mp3。此处可以输入解析提示，例如：解析为简体中文（默认）。",
-            "Function": HotReload(总结音视频)
-        },
         "数学动画生成（Manim）": {
             "Color": "primary",
             "AsButton": False,
@@ -355,6 +348,15 @@ def get_crazy_functions():
                 'to_markdown': '文档转Markdown',
                 'img_ocr': True,
             }
+        },
+        "批量总结音视频（输入路径或上传文件）": {
+            "Color": "primary",
+            "AsButton": False,
+            "AdvancedArgs": True,
+            "ArgsReminder": "调用openai api 使用whisper-1模型, 目前支持的格式:mp4, m4a, wav, mpga, mpeg, mp3。此处可以输入解析提示，例如：解析为简体中文（默认）。",
+            "Function": HotReload(总结音视频),
+            "Parameters": "总结音视频，并列出代办事项"
+
         },
     }
 

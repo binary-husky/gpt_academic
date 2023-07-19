@@ -607,7 +607,7 @@ def on_file_uploaded(files, chatbot, txt, ipaddr: gr.Request):
                         f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
                         f'\n\n调用路径参数已自动修正到: \n\n{txt}' +
                         f'\n\n现在您点击任意“高亮”标识的函数插件时，以上文件将被作为输入参数'+err_msg])
-    return chatbot, {'file': txt}
+    return chatbot, txt
 
 
 def on_report_generated(cookies, files, chatbot):

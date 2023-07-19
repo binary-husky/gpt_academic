@@ -262,10 +262,10 @@ class ChatBot(ChatBotFrame):
             with gr.Accordion("上传本地文件可供高亮函数插件调用", open=False, visible=False) as self.area_file_up:
                 self.file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)",
                                             file_count="multiple").style()
-            self.plugin_dropdown = gr.Dropdown(choices=crazy_classification, label='选择角色分类', value=[default_plugin],
+            self.plugin_dropdown = gr.Dropdown(choices=crazy_classification, label='选择插件分类', value=[default_plugin],
                                                multiselect=True, interactive=True, elem_classes='normal_mut_select')
 
-            with gr.Accordion("函数插件区", open=True) as self.area_crazy_fn:
+            with gr.Accordion("函数插件区/高亮插件需要输入框支持", open=True) as self.area_crazy_fn:
                 with gr.Row():
                     for role in crazy_fns_role:
                         for k in crazy_fns_role[role]:
@@ -382,7 +382,7 @@ class ChatBot(ChatBotFrame):
                     self.langchain_select = gr.Dropdown(choices=[], value=r"新建知识库",
                                                         interactive=True, label="选择知识库", elem_classes='normal_select').style(container=False)
                 with gr.Row():
-                    self.langchain_name = gr.Textbox(show_label=False,placeholder='新建知识库or重命名').style(container=False)
+                    self.langchain_name = gr.Textbox(show_label=False, placeholder='新建知识库or重命名').style(container=False)
 
             with gr.Row():
                 self.langchain_submit = gr.Button(value='构建/更新知识库', variant='primary').style(size='sm')

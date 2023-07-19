@@ -103,7 +103,7 @@ def AnalyAudio(parse_prompt, file_manifest, llm_kwargs, chatbot, history):
         # 已经对该文章的所有片段总结完毕，如果文章被切分了
         result = "".join(audio_history)
         if len(audio_history) > 1:
-            i_say = f"根据以上的对话，使用中文总结音频“{result}”的主要内容。"
+            i_say = f"根据以上的对话，总结音频“{result}”的主要内容。"
             i_say_show_user = f'第{index + 1}段音频的主要内容：'
             gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
                 inputs=i_say,
@@ -111,7 +111,7 @@ def AnalyAudio(parse_prompt, file_manifest, llm_kwargs, chatbot, history):
                 llm_kwargs=llm_kwargs,
                 chatbot=chatbot,
                 history=audio_history,
-                sys_prompt="总结文章。"
+                sys_prompt=""
             )
 
             history.extend([i_say, gpt_say])
@@ -162,7 +162,6 @@ def 总结音视频(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
 
     # 搜索需要处理的文件清单
     extensions = ['.mp4', '.m4a', '.wav', '.mpga', '.mpeg', '.mp3', '.avi', '.mkv', '.flac', '.aac']
-
     if txt.endswith(tuple(extensions)):
         file_manifest = [txt]
     else:
@@ -180,5 +179,4 @@ def 总结音视频(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     parse_prompt = plugin_kwargs.get("advanced_arg", '将音频解析为简体中文')
     yield from AnalyAudio(parse_prompt, file_manifest, llm_kwargs, chatbot, history)
-
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面

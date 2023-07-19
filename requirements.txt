@@ -30,3 +30,4 @@ qrcode
 pypinyin
 zh_langchain
 rich
+moviepy

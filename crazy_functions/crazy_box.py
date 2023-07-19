@@ -343,10 +343,4 @@ def ocr_batch_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pr
 
 if __name__ == '__main__':
     import time
-    _, r, _, _ = get_docs_content('https://www.kdocs.cn/l/cj6CU9xFybun')
-    r = r.encode('utf-8')
-    name = r.splitlines()[0]
-    os.makedirs('./gpt_log/temp/', exist_ok=True)
-    temp_file = f'./gpt_log/temp/{name[:30]}_{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())}{type}'
-    with open(temp_file, 'wb+') as f:
-        f.write(r)
+    print(Kdocs(url='https://plus.wps.cn/view/media/l/cp0J2ykX1HKe').get_file_info())
