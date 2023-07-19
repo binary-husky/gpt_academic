@@ -26,7 +26,6 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
         return
     file_limit = []
     img_ocr,  = crazy_box.json_args_return(plugin_kwargs, ['img_ocr'])
-    llm_kwargs['file_len'] = len(links)
     for url in links:
         try:
             chatbot.append([link_limit+"\n\n网页爬虫准备工作中～", None])
@@ -182,9 +181,6 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
 
 
 def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
-    file_len = llm_kwargs.get('file_len', 1)
-    if file_len == 1:
-        gpt_response_collection = ["".join(gpt_response_collection[i:i+2]) for i in range(0, len(gpt_response_collection), 2)]
     for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
         chatbot.append([None, f'{long_name_processing(you_say)} 🏃🏻‍正在努力将Markdown转换为流程图~'])
         yield from update_ui(chatbot=chatbot, history=history)
