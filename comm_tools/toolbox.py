@@ -47,7 +47,7 @@ class ChatBotWithCookies(list):
 
 
 def write_private(ipaddr, models, chatbot):
-    encrypt, private = get_conf('switch_model')[0]['key']
+    encrypt, private, _ = get_conf('switch_model')[0]['key']
     private_key = get_conf('private_key')
     transparent_address_private = f'<p style="display:none;">\n{private_key}\n{ipaddr.client.host}\n</p>'
     transparent_address = f'<p style="display:none;">\n{ipaddr.client.host}\n</p>'
@@ -80,12 +80,12 @@ def ArgsGeneralWrapper(f):
     """
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
-    def decorated(cookies, max_length, llm_model, langchain, txt, top_p, temperature, ocr,
+    def decorated(cookies, max_length, llm_model, langchain, know_obj,  txt, top_p, temperature, ocr,
                   chatbot, history, system_prompt, models, plugin_advanced_arg, ipaddr: gr.Request, *args):
         """"""
         # 引入一个有cookie的chatbot
         start_time = time.time()
-        encrypt, private = get_conf('switch_model')[0]['key']
+        encrypt, private, _ = get_conf('switch_model')[0]['key']
         cookies.update({
             'top_p':top_p,
             'temperature':temperature,
@@ -98,7 +98,8 @@ def ArgsGeneralWrapper(f):
             'temperature': temperature,
             'ipaddr': ipaddr.client.host,
             'start_time': start_time,
-            'ocr': ocr
+            'ocr': ocr,
+            'know_obj': know_obj
         }
         plugin_kwargs = {
             "advanced_arg": plugin_advanced_arg,
@@ -607,7 +608,7 @@ def on_file_uploaded(files, chatbot, txt, ipaddr: gr.Request):
                         f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
                         f'\n\n调用路径参数已自动修正到: \n\n{txt}' +
                         f'\n\n现在您点击任意“高亮”标识的函数插件时，以上文件将被作为输入参数'+err_msg])
-    return chatbot, txt
+    return chatbot, {'file': txt}
 
 
 def on_report_generated(cookies, files, chatbot):
