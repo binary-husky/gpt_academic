@@ -195,9 +195,10 @@ def test_Latex():
     # txt = r"https://arxiv.org/abs/2303.08774"
     # txt = r"https://arxiv.org/abs/2303.12712"
     # txt = r"C:\Users\fuqingxu\arxiv_cache\2303.12712\workfolder"
-    txt = r"2306.17157" # 这个paper有个input命令文件名大小写错误！
-    
-
+    # txt = r"2306.17157" # 这个paper有个input命令文件名大小写错误！
+    # txt = "https://arxiv.org/abs/2205.14135"
+    # txt = r"C:\Users\fuqingxu\arxiv_cache\2205.14135\workfolder"
+    txt = r"C:\Users\fuqingxu\arxiv_cache\2205.14135\workfolder"
     for cookies, cb, hist, msg in (Latex翻译中文并重新编译PDF)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
         cli_printer.print(cb)   #  print(cb)
 
@@ -240,7 +241,7 @@ if __name__ == "__main__":
     # test_数学动画生成manim()
     # test_Langchain知识库()
     # test_Langchain知识库读取()
-    # test_Latex()
-    test_chatglm_finetune()
+    test_Latex()
+    # test_chatglm_finetune()
     input("程序完成，回车退出。")
     print("退出。")
