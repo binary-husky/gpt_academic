@@ -110,7 +110,7 @@ class ChatBot(ChatBotFrame):
             self.status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行\n {proxy_info}", elem_id='debug_mes')
 
     def signals_sm_btn(self):
-        self.sm_upload.upload(on_file_uploaded, [self.sm_upload, self.chatbot, self.txt], [self.chatbot, self.txt, self.file_upload]).then(
+        self.sm_upload.upload(on_file_uploaded, [self.sm_upload, self.chatbot, self.txt], [self.chatbot, self.txt]).then(
             fn=lambda: [gr.Tabs.update(selected='plug_tab'), gr.Column.update(visible=False)], inputs=None, outputs=[self.tabs_funcs, self.examples_column])
         self.sm_code_block.click(fn=lambda x: x+'```\n\n```', inputs=[self.txt], outputs=[self.txt])
         self.sm_upload_history.click(get_user_upload, [self.chatbot], outputs=[self.chatbot]).then(
