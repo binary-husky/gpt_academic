@@ -3,6 +3,7 @@
 # @Time   : 2023/6/15
 # @Author : Spike
 # @Descr   :
+import os.path
 import time
 
 from crazy_functions import crazy_box
@@ -17,9 +18,10 @@ import traceback
 
 def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     links = crazy_box.Utils().split_startswith_txt(link_limit)
-    if not links:
+    files = [file for file in link_limit if os.path.exists(file)]
+    if not links and not files:
         chatbot.append((None, f'输入框空空如也？{link_limit}\n\n'
-                              '请在输入框中输入需要解析的轻文档链接，点击插件按钮，链接需要是可访问的，如以下格式，如果有多个文档则用换行或空格隔开'
+                              '请在输入框中输入需要解析的轻文档链接或Markdown文件目录地址，点击插件按钮，链接需要是可访问的，如以下格式，如果有多个文档则用换行或空格隔开'
                              f'\n\n【金山文档】 xxxx https://kdocs.cn/l/xxxxxxxxxx'
                              f'\n\n https://kdocs.cn/l/xxxxxxxxxx'))
         yield from update_ui(chatbot, history)
@@ -28,7 +30,7 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
     img_ocr,  = crazy_box.json_args_return(plugin_kwargs, ['img_ocr'])
     for url in links:
         try:
-            chatbot.append([link_limit+"\n\n网页爬虫准备工作中～", None])
+            chatbot.append([link_limit+"\n\n网页爬虫和文件处理准备工作中～", None])
             yield from update_ui(chatbot, history)  #增加中间过渡
             ovs_data, content, empty_picture_count, pic_dict = crazy_box.get_docs_content(url, image_processing=img_ocr)
             if img_ocr:
@@ -56,7 +58,15 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
             error_str = traceback.format_exc()
             chatbot.append([None, f'{func_box.html_a_blank(url)} \n\n请检查一下哦，这个链接我们访问不了，是否开启分享？是否设置密码？是否是轻文档？下面是什么错误？\n\n ```\n{str(error_str)}\n```'])
             yield from update_ui(chatbot, history)
-
+    extensions = ['.md', 'txt']
+    for _file in files:
+        for ed in extensions:
+            _, file_manifest_tmp, _ = crazy_utils.get_files_from_everything(_file, ed)
+            for _temp in file_manifest_tmp:
+                with open(_temp, mode='r') as f:
+                    cont_ = f.read()
+                    file_limit.extend([cont_.splitlines()[0], cont_])
+    yield from update_ui(chatbot, history)
     return file_limit
 
 import re
@@ -130,7 +140,7 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     inputs_show_user_array = []
     kwargs_prompt, = crazy_box.json_args_return(plugin_kwargs, ['prompt'])
     if default_prompt: kwargs_prompt = default_prompt
-    chatbot.append([f'接下来使用的Prompt是 {func_box.html_tag_color(kwargs_prompt)} ，你可以在Prompt编辑/检索中进行私人定制哦～', None])
+    chatbot.append([None, f'接下来使用的Prompt是 {func_box.html_tag_color(kwargs_prompt)} ，你可以在Prompt编辑/检索中进行私人定制哦～',])
     time.sleep(1)
     prompt = prompt_generator.SqliteHandle(table=f'prompt_{llm_kwargs["ipaddr"]}').find_prompt_result(kwargs_prompt)
     for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
@@ -149,8 +159,9 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
 def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs):
     # 提交多线程任务
     if len(inputs_array) == 1:
-        # 下面的方法有内存泄漏?的风险（加载完所有数据后，还在不知道轮询什么东西），暂时屏蔽
-        if len(inputs_array[0]) > 200: inputs_show_user = inputs_array[0][:100]+"\n\n...\n\n"+inputs_array[0][-100:]
+        # 折叠输出
+        if len(inputs_array[0]) > 200: inputs_show_user = \
+            inputs_array[0][:100]+f"\n\n{func_box.html_tag_color('......超过200个字符折叠......')}\n\n"+inputs_array[0][-100:]
         else: inputs_show_user = inputs_array[0]
         gpt_say = yield from crazy_utils.request_gpt_model_in_new_thread_with_ui_alive(
             inputs=inputs_array[0], inputs_show_user=inputs_show_user,
@@ -191,6 +202,13 @@ def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
                                                               '\n\n--- \n\n View: ' + func_box.html_view_blank(html)))
         yield from update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
 
+def result_written_to_markdwon(gpt_response_collection, llm_kwargs, chatbot, history):
+    for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
+        md = crazy_box.Utils().write_markdown(data=inputs, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(you_say))
+        chatbot.append((None, f'markdown已写入文件，下次可以直接提交markdown文件，就可以节省tomarkdown的时间啦 {func_box.html_view_blank(md)}'))
+        yield from update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
+
+
 def KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     file_limit = yield from Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
     if not file_limit:
@@ -203,6 +221,7 @@ def KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, s
                                                                            chatbot, history, default_prompt=kwargs_to_mark)
         gpt_response_collection = yield from submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
     else: gpt_response_collection = file_limit
+    yield from result_written_to_markdwon(gpt_response_collection, llm_kwargs, chatbot, history)
     return gpt_response_collection
 
 

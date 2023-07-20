@@ -94,13 +94,18 @@ class Utils:
         context_ = '\n'.join(context_)
         return text_values, context_, pic_dict, file_dict
 
-    def markdown_to_flow_chart(self, data, hosts, file_name):
-        user_path = os.path.join(func_box.users_path, hosts)
+    def write_markdown(self, data, hosts, file_name):
+        user_path = os.path.join(func_box.users_path, hosts, 'markdown')
         os.makedirs(user_path, exist_ok=True)
         md_file = os.path.join(user_path, f"{file_name}.md")
-        html_file = os.path.join(user_path, f"{file_name}.html")
         with open(file=md_file, mode='w') as f:
             f.write(data)
+        return md_file
+
+    def markdown_to_flow_chart(self, data, hosts, file_name):
+        user_path = os.path.join(func_box.users_path, hosts, 'mark_map')
+        md_file = self.write_markdown(data, hosts, file_name)
+        html_file = os.path.join(user_path, f"{file_name}.html")
         func_box.Shell(f'npx markmap-cli --no-open "{md_file}" -o "{html_file}"').read()
         return md_file, html_file
 

@@ -657,8 +657,6 @@ class knowledge_archive_interface():
                 self.text2vec_large_chinese = HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
         return self.text2vec_large_chinese
 
-
-
     def construct_vector_store(self, vs_id, files):
         for file in files:
             assert os.path.exists(file), "输入文件不存在"
@@ -666,7 +664,7 @@ class knowledge_archive_interface():
         vs_path, loaded_files = self.qa_handle.init_knowledge_vector_store(filepath=files, vs_path=vs_path,
                                                                            sentence_size=100,
                                                                            text2vec=self.get_chinese_text2vec(),)
-        return self.qa_handle, vs_path
+        return self, vs_path
 
     def get_current_archive_id(self):
         return self.current_id
@@ -692,10 +690,10 @@ class knowledge_archive_interface():
     def get_init_file(self, vs_id):
         from langchain.vectorstores import FAISS
         vs_path = self.judge_to_obtain_user_data(vs_id)
-        vector_store = FAISS.load_local(vs_path, self.get_chinese_text2vec())
-        ds = vector_store.docstore
+        self.qa_handle.vector_store = FAISS.load_local(vs_path, self.get_chinese_text2vec())
+        ds = self.qa_handle.vector_store.docstore
         file_dict = {ds._dict[k].metadata['source']: {vs_id :ds._dict[k].metadata['filetype']} for k in ds._dict}
-        return file_dict
+        return self, file_dict
 
 
     def answer_with_archive_by_id(self, txt, vs_id):

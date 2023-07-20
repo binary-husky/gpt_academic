@@ -80,7 +80,7 @@ def ArgsGeneralWrapper(f):
     """
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
-    def decorated(cookies, max_length, llm_model, langchain, txt, top_p, temperature, ocr,
+    def decorated(cookies, max_length, llm_model, langchain, know_obj, txt, top_p, temperature, ocr,
                   chatbot, history, system_prompt, models, plugin_advanced_arg, ipaddr: gr.Request, *args):
         """"""
         # 引入一个有cookie的chatbot
@@ -99,6 +99,7 @@ def ArgsGeneralWrapper(f):
             'ipaddr': ipaddr.client.host,
             'start_time': start_time,
             'ocr': ocr,
+            'know_obj': know_obj
         }
         plugin_kwargs = {
             "advanced_arg": plugin_advanced_arg,
@@ -110,7 +111,7 @@ def ArgsGeneralWrapper(f):
         write_private(ipaddr, models, chatbot_with_cookie)
         txt_passon = txt
         if encrypt in models: txt_passon = func_box.encryption_str(txt)
-        knowledge_base_passon = yield from Langchain_cn.knowledge_base_query(txt_passon, langchain, chatbot_with_cookie, history, llm_kwargs, ipaddr)
+        knowledge_base_passon = yield from Langchain_cn.knowledge_base_query(txt_passon, langchain, chatbot_with_cookie, history, llm_kwargs, args, ipaddr)
         # 插件会传多参数，如果是插件，那么更新知识库 和 默认高级参数
         if len(args) > 1:
             llm_kwargs['knowledge'] = knowledge_base_passon
