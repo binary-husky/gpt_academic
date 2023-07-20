@@ -10,7 +10,7 @@ import re
 import numpy as np
 
 pj = os.path.join
-buggy_line_surgery_n_lines = 10
+
 
 def split_subprocess(txt, project_folder, return_dict, opts):
     """
@@ -91,7 +91,7 @@ class LatexPaperSplit():
         self.msg_declare = "为了防止大语言模型的意外谬误产生扩散影响，禁止移除或修改此警告。}}\\\\" 
 
 
-    def merge_result(self, arr, mode, msg, buggy_lines=[]):
+    def merge_result(self, arr, mode, msg, buggy_lines=[], buggy_line_surgery_n_lines=10):
         """
         Merge the result after the GPT process completed
         """
@@ -307,11 +307,11 @@ def remove_buggy_lines(file_path, log_path, tex_name, tex_name_pure, n_fix, work
         print("reversing tex line that has errors", buggy_line)
 
         # 重组，逆转出错的段落
-        if buggy_line in fixed_line: raise RuntimeError
-        fixed_line.append(buggy_line)
+        if buggy_line not in fixed_line:
+            fixed_line.append(buggy_line)
 
         lps, file_result, mode, msg = objload(file=pj(work_folder_modified,'merge_result.pkl'))
-        final_tex = lps.merge_result(file_result, mode, msg, buggy_lines=fixed_line)
+        final_tex = lps.merge_result(file_result, mode, msg, buggy_lines=fixed_line, buggy_line_surgery_n_lines=5*n_fix)
 
         with open(pj(work_folder_modified, f"{tex_name_pure}_fix_{n_fix}.tex"), 'w', encoding='utf-8', errors='replace') as f:
             f.write(final_tex)
