@@ -22,8 +22,10 @@ def main():
     # 问询记录, python 版本建议3.9+（越新越好）
     import logging, uuid
     os.makedirs("gpt_log", exist_ok=True)
-    try:logging.basicConfig(filename="gpt_log/chat_secrets.log", level=logging.INFO, encoding="utf-8")
-    except:logging.basicConfig(filename="gpt_log/chat_secrets.log", level=logging.INFO)
+    try:logging.basicConfig(filename="gpt_log/chat_secrets.log", level=logging.INFO, encoding="utf-8", format="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+    except:logging.basicConfig(filename="gpt_log/chat_secrets.log", level=logging.INFO,  format="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+    # Disable logging output from the 'httpx' logger
+    logging.getLogger("httpx").setLevel(logging.WARNING)
     print("所有问询记录将自动保存在本地目录./gpt_log/chat_secrets.log, 请注意自我隐私保护哦！")
 
     # 一些普通功能模块
