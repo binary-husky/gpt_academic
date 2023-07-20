@@ -32,9 +32,9 @@ else:
 
 # ------------------------------------ 以下配置可以优化体验, 但大部分场合下并不需要修改 ------------------------------------
 
-# 重新URL重新定向，实现更换API_URL的作用（常规情况下，不要修改!! 高危设置！通过修改此设置，您将把您的API-KEY和对话隐私完全暴露给您设定的中间人！）
-# 格式 API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "在这里填写重定向的api.openai.com的URL"} 
-# 例如 API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions":"https://reverse-proxy-url/v1/chat/completions"}
+# 重新URL重新定向，实现更换API_URL的作用（高危设置! 常规情况下不要修改! 通过修改此设置，您将把您的API-KEY和对话隐私完全暴露给您设定的中间人！）
+# 格式: API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "在这里填写重定向的api.openai.com的URL"} 
+# 举例: API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "https://reverse-proxy-url/v1/chat/completions"}
 API_URL_REDIRECT = {}
 
 
