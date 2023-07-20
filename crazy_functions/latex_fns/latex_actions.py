@@ -390,14 +390,14 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
             if os.path.exists(pj(work_folder, '..', 'translation')):
                 shutil.copyfile(result_pdf, pj(work_folder, '..', 'translation', 'translate_zh.pdf'))
             promote_file_to_downloadzone(result_pdf, rename_file=None, chatbot=chatbot)  # promote file to web UI
-            # 将两个PDF拼接
-            if original_pdf_success: 
-                try:
-                    concat_pdf = pj(work_folder_modified, f'comparison.pdf')
-                    merge_pdfs(origin_pdf, result_pdf, concat_pdf)
-                    promote_file_to_downloadzone(concat_pdf, rename_file=None, chatbot=chatbot)  # promote file to web UI
-                except Exception as e:
-                    pass
+            # # 将两个PDF拼接
+            # if original_pdf_success: 
+            #     try:
+            #         concat_pdf = pj(work_folder_modified, f'comparison.pdf')
+            #         merge_pdfs(origin_pdf, result_pdf, concat_pdf)
+            #         promote_file_to_downloadzone(concat_pdf, rename_file=None, chatbot=chatbot)  # promote file to web UI
+            #     except Exception as e:
+            #         pass
             return True # 成功啦
         else:
             if n_fix>=max_try: break
@@ -427,29 +427,30 @@ def merge_pdfs(pdf1_path, pdf2_path, output_path):
         with open(pdf2_path, 'rb') as pdf2_file:
             pdf2_reader = PyPDF2.PdfReader(pdf2_file)
             # Create a new PDF file to store the merged pages
-            output_writer = PyPDF2.PdfFileWriter()
+            output_writer = PyPDF2.PdfWriter()
             # Determine the number of pages in each PDF file
-            num_pages = max(pdf1_reader.numPages, pdf2_reader.numPages)
+            num_pages = max(pdf1_reader.pages.__len__(), pdf2_reader.pages.__len__())
             # Merge the pages from the two PDF files
             for page_num in range(num_pages):
                 # Add the page from the first PDF file
-                if page_num < pdf1_reader.numPages:
-                    page1 = pdf1_reader.getPage(page_num)
+                if page_num < pdf1_reader.pages.__len__():
+                    page1 = pdf1_reader.pages[page_num]
                 else:
-                    page1 = PyPDF2.PageObject.createBlankPage(pdf1_reader)
+                    page1 = PyPDF2.PageObject.create_blank_page(pdf1_reader)
                 # Add the page from the second PDF file
-                if page_num < pdf2_reader.numPages:
-                    page2 = pdf2_reader.getPage(page_num)
+                if page_num < pdf2_reader.pages.__len__():
+                    page2 = pdf2_reader.pages[page_num]
                 else:
-                    page2 = PyPDF2.PageObject.createBlankPage(pdf1_reader)
+                    page2 = PyPDF2.PageObject.create_blank_page(pdf1_reader)
                 # Create a new empty page with double width
-                new_page = PyPDF2.PageObject.createBlankPage(
-                    width=2 * max(page1.mediaBox.getWidth(), page2.mediaBox.getWidth()),
-                    height=max(page1.mediaBox.getHeight(), page2.mediaBox.getHeight())
+                new_page = PyPDF2.PageObject.create_blank_page(
+                    width=2 * max(page1.mediabox.width, page2.mediabox.width),
+                    height=max(page1.mediabox.height, page2.mediabox.height)
                 )
-                new_page.mergeTranslatedPage(page1, 0, 0)
-                new_page.mergeTranslatedPage(page2, page1.mediaBox.getWidth(), 0)
-                output_writer.addPage(new_page)
+                page1.add_transformation(PyPDF2.Transformation().translate(0, 0)); new_page.merge_page(page1)
+                page2.add_transformation(PyPDF2.Transformation().translate(page1.mediabox.width, 0)); new_page.merge_page(page2)
+
+                output_writer.add_page(new_page)
             # Save the merged PDF file
             with open(output_path, 'wb') as output_file:
                 output_writer.write(output_file)
