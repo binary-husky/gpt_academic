@@ -18,4 +18,4 @@ openai
 numpy
 arxiv
 rich
-pypdf2
+pypdf2==2.12.1
