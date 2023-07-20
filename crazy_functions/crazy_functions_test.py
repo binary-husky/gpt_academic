@@ -200,6 +200,7 @@ def test_Latex():
     # txt = r"C:\Users\fuqingxu\arxiv_cache\2205.14135\workfolder"
     # txt = r"C:\Users\fuqingxu\arxiv_cache\2205.14135\workfolder"
     txt = r"2210.03629"
+    txt = r"2307.04964"
     for cookies, cb, hist, msg in (Latex翻译中文并重新编译PDF)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
         cli_printer.print(cb)   #  print(cb)
 
