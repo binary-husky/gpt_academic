@@ -18,3 +18,4 @@ openai
 numpy
 arxiv
 rich
+pypdf2
