@@ -519,7 +519,11 @@ class _ChatHub:
         resp_txt_no_link = ""
         while not final:
             msg = await self.wss.receive()
-            objects = msg.data.split(DELIMITER)
+            try:
+                objects = msg.data.split(DELIMITER)
+            except :
+                continue
+            
             for obj in objects:
                 if obj is None or not obj:
                     continue
