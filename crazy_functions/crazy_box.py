@@ -11,7 +11,6 @@ import sys
 job_path = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(job_path)
 from comm_tools import func_box, ocr_tools, toolbox
-from comm_tools.toolbox import get_conf
 from openpyxl import load_workbook
 import urllib.parse
 import gradio as gr
@@ -175,18 +174,45 @@ class ExcelHandle:
 class Kdocs:
 
     def __init__(self, url):
-        WPS_COOKIES, WPS_HEADERS, WPS_OTL_PARM, \
-        WPS_URL_OTL, WPS_SHAPES_PARM, WPS_URL_SHAPES = get_conf('WPS_COOKIES', 'WPS_HEADERS', 'WPS_OTL_PARM',
-                                                                'WPS_URL_OTL', 'WPS_SHAPES_PARM', 'WPS_URL_SHAPES')
+        WPS_COOKIES, = toolbox.get_conf('WPS_COOKIES',)
         self.url = url
         self.cookies = WPS_COOKIES
-        self.headers = WPS_HEADERS
-        self.parm_otl_data = WPS_OTL_PARM
-        self.parm_shapes_data = WPS_SHAPES_PARM
-        self.tol_url = WPS_URL_OTL
-        self.shapes_url = WPS_URL_SHAPES
+        self.headers = {
+            'accept-language': 'en-US,en;q=0.9,ja;q=0.8',
+            'content-type': 'text/plain;charset=UTF-8',
+            'x-csrf-rand': '',
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'}
+        self.ex_headers = {
+            'Host': 'www.kdocs.cn',
+            'accept': 'application/json, text/plain, */*',
+            'content-type': 'application/json',
+            'sec-ch-ua-platform': '"macOS"',
+            'origin': 'https://www.kdocs.cn',
+            'referer': 'https://www.kdocs.cn/l/cizMZqbz9FiZ?R=L1MvNA==',
+        }
+        self.parm_otl_data = {"connid": "",
+                              "args": {"password": "", "readonly": False, "modifyPassword": "", "sync": True,
+                                       "startVersion": 0, "endVersion": 0},
+                              "ex_args": {"queryInitArgs": {"enableCopyComments": False, "checkAuditRule": False}},
+                              "group": "", "front_ver": ""}
+        self.parm_shapes_data = {"objects": [], "expire": 86400000, "support_webp": True, "with_thumbnail": True,
+                                 "support_lossless": True}
+        self.parm_export_preload = {"ver": "56",
+                                     "csrfmiddlewaretoken": "PHMp62MZYXzzAPnH2drHay7NW2sHrw8c"}
+        self.tol_url = 'https://www.kdocs.cn/api/v3/office/file/%v/open/otl'
+        self.shapes_url = 'https://www.kdocs.cn/api/v3/office/file/%v/attachment/shapes'
+        self.kdocs_download_url = 'https://drive.kdocs.cn/api/v5/groups/%g/files/%f/download?isblocks=false&support_checksums=md5,sha1,sha224,sha256,sha384,sha512'
+        self.drive_download_url = 'https://drive.wps.cn/api/v3/groups/%g/files/%f/download?isblocks=false'
+        self.group_url = 'https://drive.wps.cn/api/v5/links/%v?review=true'
+        self.export_url = 'https://www.kdocs.cn/api/v3/office/file/%f/export/%t/result'
+        self.preload_url = 'https://www.kdocs.cn/api/v3/office/file/%f/export/%t/preload'
+        self.url_share_tag = self.split_link_tags()
+        self.file_info_parm = self.get_file_info_parm()
+        self.docs_old_type = ['docs', 'doc', 'pptx', 'ppt', 'xls', 'xlsx', 'pdf', 'csv', 'txt']
+        self.media_type = ['.mp4', '.m4a', '.wav', '.mpga', '.mpeg', '.mp3', '.avi', '.mkv', '.flac', '.aac']
+        self.smart_type = {'.otl': 'pdf', '.ksheet': 'xlsx'}
 
-    def get_file_info(self):
+    def get_file_info_html(self):
         """
         获取传递过来的文档HTML信息
         Returns:
@@ -194,6 +220,72 @@ class Kdocs:
         """
         response = requests.get(self.url, cookies=self.cookies, headers=self.headers)
         return response.text
+
+    def get_file_info_parm(self):
+        response = requests.get(self.group_url.replace("%v", self.url_share_tag),
+                                cookies=self.cookies,
+                                headers=self.headers, verify=False).json()
+        file_info = response['fileinfo']
+        return file_info
+
+    def document_aggregation_download(self, file_type=''):
+        link_name = self.file_info_parm['fname']
+        link = ''
+        for t in self.docs_old_type:
+            if t in link_name and file_type in link_name:
+                link = self.get_docs_old_link()
+        for t in self.media_type:
+            if t in link_name and file_type in link_name:
+                link = self.get_media_link()
+        for t in self.smart_type:
+            if (t in link_name and file_type in link_name) or (file_type in self.smart_type[t]):
+                link = self.get_kdocs_intelligence_link(type=self.smart_type[t])
+                link_name = link_name+f".{self.smart_type[t]}"
+        return link, link_name
+
+    def get_media_link(self):
+        response = requests.get(self.drive_download_url.replace("%g", str(self.file_info_parm['groupid'])
+                                                                ).replace('%f', str(self.file_info_parm['id'])),
+                                cookies=self.cookies,
+                                headers=self.headers, verify=False)
+        link = response.json()['fileinfo']['url']
+        return self.url_decode(link)
+
+    def get_docs_old_link(self):
+        response = requests.get(self.kdocs_download_url.replace("%g", str(self.file_info_parm['groupid'])
+                                                                ).replace('%f', str(self.file_info_parm['id'])),
+                                cookies=self.cookies,
+                                headers=self.headers, verify=False)
+        try:
+            link = response.json()['fileinfo']['url']
+        except:
+            link = response.json()['url']
+        return self.url_decode(link)
+
+    def get_kdocs_intelligence_link(self, type='xlsx'):
+        response_task = requests.post(
+            self.preload_url.replace('%f', str(self.file_info_parm['id'])).replace('%t', type),
+            cookies=self.cookies,
+            headers=self.ex_headers,
+            json=self.parm_export_preload, verify=False
+        )
+        self.parm_export_preload.update(response_task.json())
+        for i in range(20):
+            response_link = requests.post(
+                self.export_url.replace('%f', str(self.file_info_parm['id'])).replace('%t', type),
+                cookies=self.cookies,
+                headers=self.ex_headers,
+                json=self.parm_export_preload, verify=False
+            )
+            if response_link.json()['status'] == 'finished':
+                return response_link.json()['data']['url']
+        return None
+
+    def download_share_file(self):
+        response = requests.get(self.preload_url.replace("%g", str(self.file_info_parm['groupid'])
+                                                                ).replace('%f', str(self.file_info_parm['id'])),
+                                cookies=self.cookies,
+                                headers=self.headers, verify=False)
 
     def split_link_tags(self):
         url_parts = re.split('[/\?&#]+', self.url)
@@ -212,7 +304,7 @@ class Kdocs:
         """
         otl_url_str = self.split_link_tags()
         if otl_url_str is None: return
-        html_content = self.get_file_info()
+        html_content = self.get_file_info_html()
         self.bs4_file_info(html_content)  # 调用 bs4_file_info() 方法解析 html_content，获取文件信息# 更新类的parm_data 和 headers
         json_data = json.dumps(self.parm_otl_data)
         response = requests.post(
@@ -241,7 +333,6 @@ class Kdocs:
             except Exception as f:
                 pass
         return pic_dict
-
 
     @staticmethod
     def url_decode(url):
@@ -290,6 +381,46 @@ def get_docs_content(url, image_processing=False):
     pic_dict_convert = kdocs.get_file_pic_url(pic_dict)
     empty_picture_count = sum(1 for item in _all if 'picture' in item and not item['picture']['caption'])
     return _all, content, empty_picture_count, pic_dict_convert
+
+
+def get_kdocs_from_everything(txt, type='', ipaddr='temp'):
+    """
+    Args:
+        txt: kudos 文件分享码
+        type: type=='' 时，将支持所有文件类型
+        ipaddr:
+
+    Returns:
+    """
+    link_limit = Utils().split_startswith_txt(link_limit=txt)
+    file_manifest = []
+    success = False
+    project_folder = os.path.join(func_box.users_path, ipaddr, 'kdocs')
+    if link_limit:
+        for limit in link_limit:
+            name = 'temp.txt'
+            os.makedirs(project_folder, exist_ok=True)
+            if type == 'otl':
+                _, content, _, pic_dict = get_docs_content(limit)
+                for i in pic_dict:  # 增加OCR选项
+                    img_content, img_result = ocr_tools.Paddle_ocr_select(ipaddr=ipaddr, trust_value=True
+                                                                          ).img_def_content(img_path=pic_dict[i])
+                    content = str(content).replace(f"{i}", f"{func_box.html_local_img(img_result)}\n```{img_content}```")
+                    name = content.splitlines()[0] + '.md'
+                    content = content.encode('utf-8')
+            elif type or type == '':
+                link, name = Kdocs(limit).document_aggregation_download(file_type=type)
+                if link:
+                    content = requests.get(url=link, verify=False).content
+                else:
+                    return False, [], []
+            else:
+                return False, [], []
+            temp_file = os.path.join(project_folder, name)
+            with open(temp_file, 'wb') as f: f.write(content)
+            file_manifest.append(temp_file)
+            success = True
+    return success, file_manifest, project_folder
 
 
 def json_args_return(kwargs, keys: list) -> list: 
@@ -348,4 +479,4 @@ def ocr_batch_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pr
 
 if __name__ == '__main__':
     import time
-    print(Kdocs(url='https://plus.wps.cn/view/media/l/cp0J2ykX1HKe').get_file_info())
+    print(get_kdocs_from_everything('https://www.kdocs.cn/l/cizMZqbz9FiZ', type='xlsx'))

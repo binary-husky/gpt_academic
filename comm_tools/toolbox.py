@@ -80,7 +80,7 @@ def ArgsGeneralWrapper(f):
     """
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
-    def decorated(cookies, max_length, llm_model, langchain, know_obj, txt, top_p, temperature, ocr,
+    def decorated(cookies, max_length, llm_model, langchain, know_dict, txt, top_p, temperature, ocr,
                   chatbot, history, system_prompt, models, plugin_advanced_arg, ipaddr: gr.Request, *args):
         """"""
         # 引入一个有cookie的chatbot
@@ -99,7 +99,7 @@ def ArgsGeneralWrapper(f):
             'ipaddr': ipaddr.client.host,
             'start_time': start_time,
             'ocr': ocr,
-            'know_obj': know_obj
+            'know_dict': know_dict
         }
         plugin_kwargs = {
             "advanced_arg": plugin_advanced_arg,
@@ -596,14 +596,15 @@ def on_file_uploaded(files, chatbot, txt, ipaddr: gr.Request):
         err_msg += extract_archive(f'{time_tag_path}/{file_origin_name}',
                                    dest_dir=f'{time_tag_path}/{file_origin_name}.extract')
     moved_files = [fp for fp in glob.glob(f'{time_tag_path}/**/*', recursive=True)]
-    txt = f'{time_tag_path}'
     moved_files_str = func_box.to_markdown_tabs(head=['文件'], tabs=[moved_files])
     if type(chatbot) is str:
         chatbot = f'[Local Message] 收到以下文件: \n\n{moved_files_str}' \
-                  f'\n\n调用路径参数已自动修正到: \n\n{txt}' \
+                  f'\n\n调用路径参数已自动修正到: \n\n{time_tag_path}' \
                   f'\n\n现在你可以开始构建属于自己的知识库啦～'
         chatbot = markdown_convertion(chatbot)
+        txt.update({'file_path': time_tag_path})
     else:
+        txt = f'{time_tag_path}'
         chatbot.append([None,
                         f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
                         f'\n\n调用路径参数已自动修正到: \n\n{txt}' +

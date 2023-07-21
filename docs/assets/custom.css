@@ -583,6 +583,12 @@ ol:not(.options), ul:not(.options) {
 }
 .user .chuanhu-btn {
     left: -22px;
+    /*display: none;*/
+}
+.chuanhu-btn:hover {
+    /*background-color: rgba(167, 167, 167, 0.25) !important;*/
+    /*display: block !important;*/
+    color: unset !important;
 }
 .bot .chuanhu-btn {
     right: -22px;

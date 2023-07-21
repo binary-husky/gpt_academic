@@ -2,7 +2,8 @@ from comm_tools.toolbox import CatchException, report_execption, select_api_key,
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, get_files_from_everything
 import glob, os
 from comm_tools import func_box
-from crazy_functions import KDOCS_轻文档分析
+
+from crazy_functions import KDOCS_轻文档分析, crazy_box
 
 
 def split_audio_file(filename, split_duration=1000):
@@ -215,7 +216,7 @@ def audio_comparison_of_video_converters(files, chatbot, history):
 @CatchException
 def Kdocs音频提取总结(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, WEB_PORT):
     # 检测输入参数，如没有给定输入参数，直接退出
-    if os.path.exists(txt):
+    if os.path.exists(txt) or txt.find('http') != -1:
         project_folder = txt
     else:
         if txt == "": txt = '空空如也的输入栏'
@@ -229,8 +230,11 @@ def Kdocs音频提取总结(txt, llm_kwargs, plugin_kwargs, chatbot, history, sy
     else:
         file_manifest = []
         for ed in extensions:
-            _, file_manifest_tmp, _ = get_files_from_everything(txt, ed)
+            _, file_manifest_tmp, _ = get_files_from_everything(txt, ed, ipaddr=llm_kwargs['ipaddr'])
+            _, kdocs_manifest_tmp, _ = crazy_box.get_kdocs_from_everything(txt, ed, ipaddr=llm_kwargs['ipaddr'])
+            file_manifest += kdocs_manifest_tmp
             file_manifest += file_manifest_tmp
+
     # 如果没找到任何文件
     if len(file_manifest) == 0:
         report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"找不到任何音频或视频文件: {txt}")

@@ -349,7 +349,7 @@ def get_crazy_functions():
                 'img_ocr': True,
             }
         },
-        "Kdocs批量总结音视频（输入文件路径或上传文件）": {
+        "Kdocs批量总结音视频（输入云文件链接或上传文件）": {
             "Color": "primary",
             "AsButton": True,
             "AdvancedArgs": True,

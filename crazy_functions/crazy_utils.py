@@ -592,25 +592,16 @@ def get_files_from_everything(txt, type, ipaddr='temp'): # type='.md'
     """
     import glob, os, time
     success = True
-    if txt.startswith('http'):
+    if txt.startswith('http') and txt.find('kdocs') == -1 and txt.find('wps') == -1:
         # 网络的远程文件
         import requests
-        from crazy_functions import crazy_box
-        from comm_tools import ocr_tools
         proxies, = toolbox.get_conf('proxies')
-        if txt.find('kdocs') != -1:
-            _, r, _, pic_dict = crazy_box.get_docs_content(txt)
-            for i in pic_dict:   # 增加OCR选项
-                img_content, img_result = ocr_tools.Paddle_ocr_select(ipaddr=ipaddr, trust_value=True
-                                                                      ).img_def_content(img_path=pic_dict[i])
-                r = str(r).replace(f"{i}", f"{func_box.html_local_img(img_result)}\n```{img_content}```")
-        else:
-            r = requests.get(txt, proxies=proxies).text
+        r = requests.get(txt, proxies=proxies).content
         name = r.splitlines()[0]
-        os.makedirs('./gpt_log/temp/', exist_ok=True)
-        temp_file = f'./gpt_log/temp/{name[:30]}_{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())}{type}'
-        with open(temp_file, 'w+') as f: f.write(r)
-        project_folder = './gpt_log/temp/'
+        project_folder = os.path.join(func_box.users_path, ipaddr, 'Download')
+        os.makedirs(project_folder, exist_ok=True)
+        temp_file = f'{project_folder}/{name[:30]}_{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())}{type}'
+        with open(temp_file, 'wb') as f: f.write(r)
         file_manifest = [temp_file]
     elif txt.endswith(type):
         # 直接给定文件
@@ -626,10 +617,7 @@ def get_files_from_everything(txt, type, ipaddr='temp'): # type='.md'
         project_folder = None
         file_manifest = []
         success = False
-
     return success, file_manifest, project_folder
-
-
 
 import os
 import shutil
@@ -681,7 +669,7 @@ class knowledge_archive_interface():
             if public_knowledge_base:
                 for root, dirs, files in os.walk(func_box.knowledge_path):
                     file_present = os.listdir(root)
-                    if vs_id in root and 'faiss' in file_present:
+                    if vs_id in root and 'index.faiss' in file_present:
                         return root
             else:
                 return user_vs_id

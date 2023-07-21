@@ -99,7 +99,6 @@ class ChatBot(ChatBotFrame):
                                                elem_classes='sm_select', elem_id='change-font-size').style(container=False)
                 self.switcher_drak = gr.HTML(func_box.get_html("appearance_switcher.html").format(), elem_classes="insert_block")
 
-
             with gr.Row():
                 self.txt = gr.Textbox(show_label=False,  placeholder="Input question here.", elem_classes='chat_input').style(container=False)
                 self.input_copy = gr.State('')
@@ -130,11 +129,8 @@ class ChatBot(ChatBotFrame):
                                        [self.llms_dropdown, self.langchain_dropdown],
                                        [self.chatbot]
                                        ).then(fn=Langchain_cn.obtaining_knowledge_base_files,
-                                       inputs=[self.langchain_dropdown, self.chatbot, self.langchain_know_obj],
-                                       outputs=[self.chatbot, self.examples_column, self.status, self.langchain_know_obj])
-                                              # ).then(fn=ArgsGeneralWrapper(predict),   # 没有好的方案，暂时屏蔽
-                                              #        inputs=[*self.input_combo, gr.State(), gr.State(), gr.State('知识库辅助提问')],
-                                              #        outputs=[*self.output_combo])
+                                       inputs=[self.langchain_dropdown, self.chatbot, self.langchain_know_kwargs],
+                                       outputs=[self.chatbot, self.examples_column, self.status, self.langchain_know_kwargs])
 
     def draw_examples(self):
         with gr.Column(elem_id='examples_col') as self.examples_column:
@@ -378,10 +374,8 @@ class ChatBot(ChatBotFrame):
             with gr.Box():
                 self.langchain_upload = gr.Files(label="上传你需要构建的知识库文件", file_count="multiple", file_types=spl)
                 self.langchain_links = gr.Textbox(show_label=False, placeholder='Kdocs/网络文件,多个链接使用换行间隔').style(container=False)
-                self.langchain_file_path = gr.State()
-                self.langchain_know_name = gr.State()
-                self.langchain_know_obj = gr.State({})
-                #  path 是上传文件存储的地址，name是名称，obj是ql向量化后的对象
+                self.langchain_know_kwargs = gr.State({'file_path': '', 'know_name': '', 'know_obj': {}, 'file_list': []})
+                #  file_path 是上传文件存储的地址，know_name，know_obj是ql向量化后的对象
             with gr.Box():
                 with gr.Row():
                     self.langchain_select = gr.Dropdown(choices=[], value=r"新建知识库",
@@ -395,17 +389,18 @@ class ChatBot(ChatBotFrame):
 
     def signals_langchain_cn(self):
         def update_drop(x, llms, ipaddr: gr.Request):
+            x = x['know_name']
             if not x: return gr.update(), gr.update()
             return gr.Dropdown.update(value=[x], choices=Langchain_cn.obtain_a_list_of_knowledge_bases(ipaddr)), gr.update(label="当前模型：" + llms + "&" + '&'.join([x]))
         self.langchain_upload.upload(fn=on_file_uploaded,
-                                     inputs=[self.langchain_upload, gr.State(''), self.langchain_file_path],
-                                     outputs=[self.langchain_status, self.langchain_file_path])
+                                     inputs=[self.langchain_upload, gr.State(''), self.langchain_know_kwargs],
+                                     outputs=[self.langchain_status, self.langchain_know_kwargs])
         self.langchain_submit.click(fn=Langchain_cn.knowledge_base_writing,
-                                    inputs=[self.langchain_file_path, self.langchain_links, self.langchain_select, self.langchain_name, self.langchain_know_obj],
-                                    outputs=[self.langchain_status, self.langchain_select, self.langchain_know_name, self.langchain_know_obj]
+                                    inputs=[self.langchain_links, self.langchain_select, self.langchain_name, self.langchain_know_kwargs],
+                                    outputs=[self.langchain_status, self.langchain_select, self.langchain_know_kwargs]
                                     ).then(
                                     fn=update_drop,
-                                    inputs=[self.langchain_know_name, self.llms_dropdown],
+                                    inputs=[self.langchain_know_kwargs, self.llms_dropdown],
                                     outputs=[self.langchain_dropdown, self.chatbot])
 
 
@@ -430,7 +425,7 @@ class ChatBot(ChatBotFrame):
 
     def signals_input_setting(self):
         # 注册input
-        self.input_combo = [self.cookies, self.max_length_sl, self.llms_dropdown, self.langchain_dropdown, self.langchain_know_obj,
+        self.input_combo = [self.cookies, self.max_length_sl, self.llms_dropdown, self.langchain_dropdown, self.langchain_know_kwargs,
                             self.input_copy, self.top_p, self.temperature, self.ocr_identifying_trust, self.chatbot, self.history,
                             self.system_prompt, self.models_box, self.plugin_advanced_arg]
         self.output_combo = [self.cookies, self.chatbot, self.history, self.status, self.stopBtn, self.submitBtn,]
@@ -446,6 +441,7 @@ class ChatBot(ChatBotFrame):
         self.cancel_handles.append(submit_handle)
         self.cancel_handles.append(click_handle)
         self.resetBtn.click(lambda: ([], [], "已重置"), None, [self.chatbot, self.history, self.status])
+
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay(self, is_open=False):
@@ -518,10 +514,7 @@ def check_proxy_free():
 if __name__ == '__main__':
     # PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
     PORT = LOCAL_PORT if WEB_PORT <= 0 else WEB_PORT
-    check_proxy_free()
     reload_javascript()
     chatbot_main = ChatBot()
     chatbot_main.main()
     gr.close_all()
-    check_proxy_free()
-
