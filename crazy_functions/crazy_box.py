@@ -238,7 +238,7 @@ class Kdocs:
             if t in link_name and file_type in link_name:
                 link = self.get_media_link()
         for t in self.smart_type:
-            if (t in link_name and file_type in link_name) or (file_type in self.smart_type[t]):
+            if t in link_name and file_type in link_name:
                 link = self.get_kdocs_intelligence_link(type=self.smart_type[t])
                 link_name = link_name+f".{self.smart_type[t]}"
         return link, link_name
@@ -479,4 +479,4 @@ def ocr_batch_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pr
 
 if __name__ == '__main__':
     import time
-    print(get_kdocs_from_everything('https://www.kdocs.cn/l/cizMZqbz9FiZ', type='xlsx'))
+    print(get_kdocs_from_everything('https://kdocs.cn/l/cg1u79yDTk1k'))
