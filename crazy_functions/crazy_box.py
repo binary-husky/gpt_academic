@@ -479,4 +479,4 @@ def ocr_batch_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pr
 
 if __name__ == '__main__':
     import time
-    print(get_kdocs_from_everything('https://kdocs.cn/l/cg1u79yDTk1k'))
+    print(get_kdocs_from_everything('https://kdocs.cn/l/cgkva5MzXmey'))

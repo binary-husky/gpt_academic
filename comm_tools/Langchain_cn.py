@@ -24,7 +24,10 @@ def knowledge_base_writing(links: str, select, name, kai_handle, ipaddr: gr.Requ
     for sp in spl:
         _, file_manifest_tmp, _ = crazy_utils.get_files_from_everything(files, type=f'.{sp}')
         file_manifest += file_manifest_tmp
-        _, kdocs_manifest_tmp, _ = crazy_box.get_kdocs_from_everything(links, type=sp)
+        try:
+            _, kdocs_manifest_tmp, _ = crazy_box.get_kdocs_from_everything(links, type=sp)
+        except Exception as f:
+            return (f"提取文件错误啦, {f}", gr.Dropdown.update(), kai_handle)
         file_manifest += kdocs_manifest_tmp
     if len(file_manifest) == 0:
         types = "\t".join(f"`{s}`" for s in spl)
