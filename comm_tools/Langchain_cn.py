@@ -15,33 +15,38 @@ def knowledge_base_writing(links: str, select, name, kai_handle, ipaddr: gr.Requ
     elif name and select == '新建知识库': kai_id = name
     elif select and select != '新建知识库': kai_id = select
     else: kai_id = func_box.created_atime()
-    yield '开始咯开始咯～', gr.Dropdown.update(), kai_handle
+    yield '开始咯开始咯～', '', gr.Dropdown.update(), kai_handle
     files = kai_handle['file_path']
     # < --------------------读取文件--------------- >
     file_manifest = []
     spl,  = toolbox.get_conf('spl')
     # 本地文件
+    error = ''
     for sp in spl:
         _, file_manifest_tmp, _ = crazy_utils.get_files_from_everything(files, type=f'.{sp}')
         file_manifest += file_manifest_tmp
         try:
             _, kdocs_manifest_tmp, _ = crazy_box.get_kdocs_from_everything(links, type=sp)
-        except Exception as f:
-            return (f"提取文件错误啦, {f}", gr.Dropdown.update(), kai_handle)
+        except:
+            import traceback
+            error_str = traceback.format_exc()
+            error += f'提取出错文件错误啦\n\n```\n{error_str}\n```'
+            yield (f"", error, gr.Dropdown.update(), kai_handle)
+            kdocs_manifest_tmp = []
         file_manifest += kdocs_manifest_tmp
     if len(file_manifest) == 0:
         types = "\t".join(f"`{s}`" for s in spl)
-        yield (toolbox.markdown_convertion(f'没有找到任何可读取文件， 当前支持解析的文件格式包括: \n\n{types}'),
+        yield (f'没有找到任何可读取文件， 当前支持解析的文件格式包括: \n\n{types}', error,
                gr.Dropdown.update(),  kai_handle)
         return
     # < -------------------预热文本向量化模组--------------- >
-    yield ('正在加载向量化模型...', gr.Dropdown.update(), kai_handle)
+    yield ('正在加载向量化模型...', '', gr.Dropdown.update(), kai_handle)
     from langchain.embeddings.huggingface import HuggingFaceEmbeddings
     with toolbox.ProxyNetworkActivate():    # 临时地激活代理网络
         HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
     # < -------------------构建知识库--------------- >
     preprocessing_files = func_box.to_markdown_tabs(head=['文件'], tabs=[file_manifest])
-    yield (toolbox.markdown_convertion(f'正在准备将以下文件向量化，生成知识库文件：\n\n{preprocessing_files}'),
+    yield (f'正在准备将以下文件向量化，生成知识库文件：\n\n{preprocessing_files}', error,
            gr.Dropdown.update(), kai_handle)
     with toolbox.ProxyNetworkActivate():    # 临时地激活代理网络
         kai = knowledge_archive_interface(vs_path=vector_path)
@@ -51,7 +56,7 @@ def knowledge_base_writing(links: str, select, name, kai_handle, ipaddr: gr.Requ
     kai_files = func_box.to_markdown_tabs(head=['文件'], tabs=[kai_files])
     kai_handle['know_obj'].update({kai_id: qa_handle})
     kai_handle['know_name'] = kai_id
-    yield (toolbox.markdown_convertion(f'构建完成, 当前知识库内有效的文件如下, 已自动帮您选中知识库，现在你可以畅快的开始提问啦～\n\n{kai_files}'),
+    yield (f'构建完成, 当前知识库内有效的文件如下, 已自动帮您选中知识库，现在你可以畅快的开始提问啦～\n\n{kai_files}', error,
            gr.Dropdown.update(value='新建知识库', choices=obtain_a_list_of_knowledge_bases(ipaddr)),  kai_handle)
 
 

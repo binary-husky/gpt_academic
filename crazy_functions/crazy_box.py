@@ -411,15 +411,17 @@ def get_kdocs_from_everything(txt, type='', ipaddr='temp'):
             elif type or type == '':
                 link, name = Kdocs(limit).document_aggregation_download(file_type=type)
                 if link:
-                    content = requests.get(url=link, verify=False).content
+                    resp = requests.get(url=link, verify=False)
+                    content = resp.content
                 else:
                     return False, [], []
             else:
                 return False, [], []
-            temp_file = os.path.join(project_folder, name)
-            with open(temp_file, 'wb') as f: f.write(content)
-            file_manifest.append(temp_file)
-            success = True
+            if content:
+                temp_file = os.path.join(project_folder, name)
+                with open(temp_file, 'wb') as f: f.write(content)
+                file_manifest.append(temp_file)
+                success = True
     return success, file_manifest, project_folder
 
 
@@ -479,4 +481,4 @@ def ocr_batch_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pr
 
 if __name__ == '__main__':
     import time
-    print(get_kdocs_from_everything('https://kdocs.cn/l/cgkva5MzXmey'))
+    print(get_kdocs_from_everything('https://www.kdocs.cn/l/cgkva5MzXmey'))

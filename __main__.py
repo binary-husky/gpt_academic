@@ -386,6 +386,7 @@ class ChatBot(ChatBotFrame):
             with gr.Row():
                 self.langchain_submit = gr.Button(value='构建/更新知识库', variant='primary').style(size='sm')
             self.langchain_status = gr.Markdown(value='')
+            self.langchain_error = gr.Markdown(value='')
 
     def signals_langchain_cn(self):
         def update_drop(x, llms, ipaddr: gr.Request):
@@ -397,7 +398,7 @@ class ChatBot(ChatBotFrame):
                                      outputs=[self.langchain_status, self.langchain_know_kwargs])
         self.langchain_submit.click(fn=Langchain_cn.knowledge_base_writing,
                                     inputs=[self.langchain_links, self.langchain_select, self.langchain_name, self.langchain_know_kwargs],
-                                    outputs=[self.langchain_status, self.langchain_select, self.langchain_know_kwargs]
+                                    outputs=[self.langchain_status, self.langchain_error, self.langchain_select, self.langchain_know_kwargs]
                                     ).then(
                                     fn=update_drop,
                                     inputs=[self.langchain_know_kwargs, self.llms_dropdown],
