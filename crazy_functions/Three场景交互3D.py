@@ -164,3 +164,86 @@ def prompt(text):
     ```
 
 > User: """ + text
+
+"""
+Please construct a 3D environment where a girl is sitting under a tree in a garden.
+
+Requirements:
+1. List objects in this scene and make a markdown list.
+2. The list must contain creative details, give at least 20 objects
+"""
+
+
+"""
+Convert the result to json, 
+Requirements:
+1. Format: [
+    {
+        "name": "object-1",
+        "location": [position_x, position_y, position_z]
+    }
+]
+2. Generate relative position of objects
+"""
+
+
+
+"""
+> Requirements:
+    1. You can use box, octahedron, sphere, cylinder to build objects.
+    2. The ground is z=0.
+    3. You can only use 100 boxes.
+    4. Format of each box is json, e.g.
+    {
+        "name": "Box-1",
+        "geometry": "box", // choose from "box", "octahedron", "sphere", "cylinder"
+        "size": 1.0,
+        "color": "rgb(255,165,0)",
+        "location_x": 1.0,
+        "location_y": 0.0,
+        "location_z": 0.0
+    },
+    5. Only produce json as output. Use markdown code block to wrap the json output.
+
+> Example:
+    ```
+    [
+        {
+            "name": "Box-1",
+            "size": 1.0,
+            "geometry": "box",
+            "color": "rgb(255,11,10)",
+            "location_x": 1.0,
+            "location_y": 0.0,
+            "location_z": 0.0
+        },
+        {
+            "name": "Box-2",
+            "size": 1.0,
+            "geometry": "octahedron",
+            "color": "rgb(255,11,10)",
+            "location_x": -1.0,
+            "location_y": 0.0,
+            "location_z": 0.0
+        },
+        {
+            "name": "Box-3",
+            "size": 1.0,
+            "geometry": "sphere",
+            "color": "rgb(255,11,10)",
+            "location_x": 0.0,
+            "location_y": 1.0,
+            "location_z": 0.0
+        },
+        {
+            "name": "Box-4",
+            "size": 1.0,
+            "geometry": "cylinder",
+            "color": "rgb(255,11,10)",
+            "location_x": 0.0,
+            "location_y": -1.0,
+            "location_z": 0.0
+        }
+    ]
+    ```
+"""
