@@ -517,8 +517,8 @@ def get_kdocs_files(limit, project_folder, type, ipaddr):
         return []
     if content:
         tag_path = os.path.join(project_folder, tag)
-        temp_file = os.path.join(os.path.join(project_folder, tag,  name))
-        os.makedirs(tag_path)
+        temp_file = os.path.join(os.path.join(project_folder, tag, name))
+        os.makedirs(tag_path, exist_ok=True)
         with open(temp_file, 'wb') as f: f.write(content)
         return [temp_file]
 
@@ -647,11 +647,12 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     """
     inputs_array = []
     inputs_show_user_array = []
-    kwargs_prompt, = json_args_return(plugin_kwargs, ['prompt'])
+    kwargs_prompt, prompt_cls = json_args_return(plugin_kwargs, ['prompt', 'prompt_cls'])
     if default_prompt: kwargs_prompt = default_prompt
-    chatbot.append([None, f'接下来使用的Prompt是 {func_box.html_tag_color(kwargs_prompt)} ，你可以在Prompt编辑/检索中进行私人定制哦～',])
+    chatbot.append([None, f'接下来使用的Prompt是 {func_box.html_tag_color(kwargs_prompt)} ，'
+                          f'你可以保存一个同名的Prompt，或在{func_box.html_tag_color("自定义插件参数")}中指定另一个Prmopt哦～',])
     time.sleep(1)
-    prompt = prompt_generator.SqliteHandle(table=f'prompt_{llm_kwargs["ipaddr"]}').find_prompt_result(kwargs_prompt)
+    prompt = prompt_generator.SqliteHandle(table=f'prompt_{llm_kwargs["ipaddr"]}').find_prompt_result(kwargs_prompt, prompt_cls)
     for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
         content_limit = yield from split_content_limit(inputs, llm_kwargs, chatbot, history)
         for limit in content_limit:

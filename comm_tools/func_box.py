@@ -16,6 +16,7 @@ import re
 import tempfile
 import shutil
 import logging
+import requests
 import yaml
 import tiktoken
 logger = logging
@@ -288,12 +289,15 @@ def diff_list(txt='', percent=0.70, switch: list = None, lst: dict = None, sp=15
         lst = {}
         tabs = SqliteHandle().get_tables()
         if is_all in switch:
-            lst.update(SqliteHandle(f"ai_common_{hosts}").get_prompt_value(txt))
+            data, source = SqliteHandle(f"ai_common_{hosts}").get_prompt_value(txt)
+            lst.update(data)
         else:
             for tab in tabs:
                 if tab.startswith('ai_common'):
-                    lst.update(SqliteHandle(f"{tab}").get_prompt_value(txt))
-        lst.update(SqliteHandle(f"ai_private_{hosts}").get_prompt_value(txt))
+                    data, source = SqliteHandle(f"{tab}").get_prompt_value(txt)
+                    lst.update(data)
+        data, source = SqliteHandle(f"ai_private_{hosts}").get_prompt_value(txt)
+        lst.update(data)
     # diff 数据，根据precent系数归类数据
     str_ = time.time()
     def tf_factor_calcul(i):
@@ -361,6 +365,7 @@ def prompt_upload_refresh(file, prompt, pro_select, cls_name, ipaddr: gr.Request
     Returns:
         注册函数所需的元祖对象
     """
+    user_info = ipaddr.client.host
     if pro_select == '新建分类':
         if not cls_name:
             result = [[f'{html_tag_color("若选择新建分类，分类名不能为空", color="red")}', '']]
@@ -376,7 +381,7 @@ def prompt_upload_refresh(file, prompt, pro_select, cls_name, ipaddr: gr.Request
     else:
         upload_data = {}
     if upload_data != {}:
-        SqliteHandle(f'prompt_{tab_cls}').inset_prompt(upload_data, tab_cls)
+        status = SqliteHandle(f'prompt_{tab_cls}').inset_prompt(upload_data, user_info)
         ret_data = prompt_retrieval(is_all=tab_cls, hosts=tab_cls)
         return gr.Dataset.update(samples=ret_data, visible=True), prompt, tab_cls
     else:
@@ -399,13 +404,13 @@ def prompt_retrieval(is_all, hosts='', search=False):
     if all_ == is_all:
         for tab in SqliteHandle('ai_common').get_tables():
             if tab.startswith('prompt'):
-                data = SqliteHandle(tab).get_prompt_value(None)
+                data, source = SqliteHandle(tab).get_prompt_value(None)
                 if data: count_dict.update(data)
     elif personal == is_all:
-        data = SqliteHandle(f'prompt_{hosts}').get_prompt_value(None)
+        data, source = SqliteHandle(f'prompt_{hosts}').get_prompt_value(None)
         if data: count_dict.update(data)
     elif hosts and is_all != '新建分类':
-        data = SqliteHandle(f'prompt_{hosts}').get_prompt_value(None)
+        data, source = SqliteHandle(f'prompt_{hosts}').get_prompt_value(None)
         if data: count_dict.update(data)
     retrieval = []
     if count_dict != {}:
@@ -454,10 +459,11 @@ def prompt_save(txt, name, prompt: gr.Dataset, pro_select, cls_name, ipaddr: gr.
     Returns:
         返回注册函数所需的对象
     """
+    user_info = ipaddr.client.host
     if pro_select == '新建分类':
         if not cls_name:
             result = [[f'{html_tag_color("选择新建分类，分类名不能为空", color="red")}', '']]
-            prompt['samples'] = [[f'{html_tag_color("选择新建分类，分类名不能为空", color="red")}', '']]
+            prompt['samples'] = [[name, txt]]
             return txt, name, gr.update(), gr.Dataset.update(samples=result, visible=True), prompt, gr.Tabs.update()
         tab_cls = non_personal_tag(cls_name, ipaddr.client.host)
     else:
@@ -466,14 +472,21 @@ def prompt_save(txt, name, prompt: gr.Dataset, pro_select, cls_name, ipaddr: gr.
         all_, personal = toolbox.get_conf('preset_prompt')[0]['key']
         if pro_select == all_:
             cls_name = personal
-        yaml_obj = SqliteHandle(f'prompt_{tab_cls}')
-        yaml_obj.inset_prompt({name: txt}, tab_cls)
-        result = prompt_retrieval(is_all=pro_select, hosts=tab_cls)
-        prompt['samples'] = result
-        return "", "", cls_name, gr.Dataset.update(samples=result, visible=True), prompt, gr.Tabs.update(selected='chatbot')
+        sql_obj = SqliteHandle(f'prompt_{tab_cls}')
+        _, source = sql_obj.get_prompt_value(name)
+        status = sql_obj.inset_prompt({name: txt}, user_info)
+        if status:
+            result = [[f'{html_tag_color("!!!!已有其他人保存同名的prompt，请修改prompt名称后再保存", color="red")}', '']]
+            prompt['samples'] = [[name, txt]]
+            return txt, name, cls_name, gr.Dataset.update(samples=result, visible=True), prompt, gr.Tabs.update(selected='chatbot')
+        else:
+            result = prompt_retrieval(is_all=cls_name, hosts=tab_cls)
+            prompt['samples'] = result
+            return "", "", cls_name, gr.Dataset.update(samples=result, visible=True), prompt, gr.Tabs.update(
+                selected='chatbot')
     elif not txt or not name:
         result = [[f'{html_tag_color("编辑框 or 名称不能为空!!!!!", color="red")}', '']]
-        prompt['samples'] = [[f'{html_tag_color("编辑框 or 名称不能为空!!!!!", color="red")}', '']]
+        prompt['samples'] = [[name, txt]]
         return txt, name, cls_name, gr.Dataset.update(samples=result, visible=True), prompt, gr.Tabs.update(selected='chatbot')
 
 
@@ -554,6 +567,17 @@ def pattern_html(html):
     else:
         return ""
 
+from datetime import datetime, time
+def check_expected_time():
+    current_time = datetime.now().time()
+    morning_start = time(9, 0)
+    morning_end = time(12, 0)
+    afternoon_start = time(14, 0)
+    afternoon_end = time(18, 0)
+    if (morning_start <= current_time <= morning_end) or (afternoon_start <= current_time <= afternoon_end):
+        return False
+    else:
+        return True
 
 def get_directory_list(folder_path, user_info='temp'):
     directory_list = []
@@ -788,6 +812,24 @@ def created_atime():
     import datetime
     return datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
 
+
+def 通知机器人(error):
+    robot_hook, = toolbox.get_conf('robot_hook')
+    title = '## 警告警告\n'
+    results = "> <font color='red'>{}</font>".format('哈喽小主，chatbot 遇到意料之外的状况了呢，详情请查看以下报错信息')
+    notice = '<at user_id="-1">所有人</at>'
+    # 发送内容
+    markdown = {
+        "msgtype": "markdown",
+        "markdown": {
+            "text": f"{title}\n\n{results}\n\n{notice}\n\n{error}"
+        }
+    }
+    # 发送通知
+    quet = requests.post(url=robot_hook, json=markdown, verify=False)
+
+
+
 class YamlHandle:
 
     def __init__(self, file=os.path.join(prompt_path, 'ai_common.yaml')):
@@ -831,7 +873,5 @@ class JsonHandle:
         return data
 
 
-
-
 if __name__ == '__main__':
-    pass
+    通知机器人()

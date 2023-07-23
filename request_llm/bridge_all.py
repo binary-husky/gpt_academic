@@ -11,14 +11,9 @@
 import tiktoken
 from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor
-from comm_tools.toolbox import get_conf, trimmed_format_exc
-
+from comm_tools import toolbox
 from request_llm.bridge_chatgpt import predict_no_ui_long_connection as chatgpt_noui
 from request_llm.bridge_chatgpt import predict as chatgpt_ui
-from request_llm.bridge_azure_test import predict_no_ui_long_connection as azure_noui
-from request_llm.bridge_azure_test import predict as azure_ui
-from request_llm.bridge_newbingfree import predict_no_ui_long_connection as newbing_noui
-from request_llm.bridge_newbingfree import predict as newbing_ui
 from request_llm.bridge_chatglm import predict_no_ui_long_connection as chatglm_noui
 from request_llm.bridge_chatglm import predict as chatglm_ui
 
@@ -49,7 +44,7 @@ class LazyloadTiktoken(object):
         return encoder.decode(*args, **kwargs)
 
 # Endpoint 重定向
-API_URL_REDIRECT, AZURE_ENDPOINT, AZURE_ENGINE, PROXY_API_URL = get_conf("API_URL_REDIRECT", "AZURE_ENDPOINT", "AZURE_ENGINE", 'PROXY_API_URL')
+API_URL_REDIRECT, AZURE_ENDPOINT, AZURE_ENGINE, PROXY_API_URL = toolbox.get_conf("API_URL_REDIRECT", "AZURE_ENDPOINT", "AZURE_ENGINE", 'PROXY_API_URL')
 openai_endpoint = "https://api.openai.com/v1/chat/completions"
 api2d_endpoint = "https://openai.api2d.net/v1/chat/completions"
 newbing_endpoint = "wss://sydney.bing.com/sydney/ChatHub"
@@ -57,7 +52,7 @@ proxy_endpoint = PROXY_API_URL
 azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
 # 兼容旧版的配置
 try:
-    API_URL, = get_conf("API_URL")
+    API_URL, = toolbox.get_conf("API_URL")
     if API_URL != "https://api.openai.com/v1/chat/completions": 
         openai_endpoint = API_URL
         print("警告！API_URL配置选项将被弃用，请更换为API_URL_REDIRECT配置")
@@ -67,7 +62,6 @@ except:
 if openai_endpoint in API_URL_REDIRECT: openai_endpoint = API_URL_REDIRECT[openai_endpoint]
 if api2d_endpoint in API_URL_REDIRECT: api2d_endpoint = API_URL_REDIRECT[api2d_endpoint]
 if newbing_endpoint in API_URL_REDIRECT: newbing_endpoint = API_URL_REDIRECT[newbing_endpoint]
-
 
 
 # 获取tokenizer
@@ -182,7 +176,7 @@ model_info = {
 }
 
 
-AVAIL_LLM_MODELS, LLM_MODEL = get_conf("AVAIL_LLM_MODELS", "LLM_MODEL")
+AVAIL_LLM_MODELS, LLM_MODEL = toolbox.get_conf("AVAIL_LLM_MODELS", "LLM_MODEL")
 AVAIL_LLM_MODELS = AVAIL_LLM_MODELS + [LLM_MODEL]
 if "claude-1-100k" in AVAIL_LLM_MODELS or "claude-2" in AVAIL_LLM_MODELS:
     from .bridge_claude import predict_no_ui_long_connection as claude_noui
@@ -289,7 +283,7 @@ if "newbing-free" in AVAIL_LLM_MODELS:
             }
         })
     except:
-        print(trimmed_format_exc())
+        print(toolbox.trimmed_format_exc())
 if "newbing" in AVAIL_LLM_MODELS:   # same with newbing-free
     try:
         from .bridge_newbingfree import predict_no_ui_long_connection as newbingfree_noui
@@ -306,7 +300,7 @@ if "newbing" in AVAIL_LLM_MODELS:   # same with newbing-free
             }
         })
     except:
-        print(trimmed_format_exc())
+        print(toolbox.trimmed_format_exc())
 if "chatglmft" in AVAIL_LLM_MODELS:   # same with newbing-free
     try:
         from .bridge_chatglmft import predict_no_ui_long_connection as chatglmft_noui
@@ -323,7 +317,7 @@ if "chatglmft" in AVAIL_LLM_MODELS:   # same with newbing-free
             }
         })
     except:
-        print(trimmed_format_exc())
+        print(toolbox.trimmed_format_exc())
 
 
 def LLM_CATCH_EXCEPTION(f):
@@ -334,7 +328,7 @@ def LLM_CATCH_EXCEPTION(f):
         try:
             return f(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience)
         except Exception as e:
-            tb_str = '\n```\n' + trimmed_format_exc() + '\n```\n'
+            tb_str = '\n```\n' + toolbox.trimmed_format_exc() + '\n```\n'
             observe_window[0] = tb_str
             return tb_str
     return decorated
@@ -409,7 +403,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
             time.sleep(1)
 
         for i, future in enumerate(futures):  # wait and get
-            return_string_collect.append( f"【{str(models[i])} 说】: <font color=\"{colors[i]}\"> {future.result()} </font>" )
+            return_string_collect.append(f"【{str(models[i])} 说】: <font color=\"{colors[i]}\"> {future.result()} </font>" )
 
         window_mutex[-1] = False # stop mutex thread
         res = '<br/><br/>\n\n---\n\n'.join(return_string_collect)

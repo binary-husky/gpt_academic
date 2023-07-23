@@ -9,6 +9,7 @@ from crazy_functions import crazy_box
 import os
 
 
+@toolbox.CatchException
 def 批量分析流程图或图片(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     chatbot_with_cookie = toolbox.ChatBotWithCookies(chatbot)
     chatbot_with_cookie.write_list(chatbot)

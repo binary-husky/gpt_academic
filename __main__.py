@@ -383,7 +383,7 @@ class ChatBot(ChatBotFrame):
                     self.langchain_class_name = gr.Textbox(show_label=False, placeholder='*必填，构建知识库同时创建分类',
                                                            visible=False, interactive=True).style(container=False)
             with gr.Box():
-                with gr.Accordion(open=True, label='上传你需要构建的知识库文件'):
+                with gr.Accordion(open=False, label='上传你需要构建的知识库文件'):
                     self.langchain_upload = gr.Files(label="解析支持多类型文档，多文件建议使用zip上传", file_count="multiple", file_types=spl)
                 self.langchain_links = gr.Textbox(show_label=False, placeholder='Kdocs/网络文件,多个链接使用换行间隔').style(container=False)
                 self.langchain_know_kwargs = gr.State({'file_path': '', 'know_name': '', 'know_obj': {}, 'file_list': []})
@@ -397,14 +397,17 @@ class ChatBot(ChatBotFrame):
 
             with gr.Row():
                 self.langchain_submit = gr.Button(value='构建/更新知识库', variant='primary').style(size='sm')
+                self.langchain_stop = gr.Button(value='停止构建').style(size='sm')
             self.langchain_status = gr.Markdown(value='')
             self.langchain_error = gr.Markdown(value='')
 
     def signals_langchain_cn(self):
-        def update_drop(x, llms, ipaddr: gr.Request):
+        def update_drop(x, llms, cls_name, ipaddr: gr.Request):
+            _, available, _,  = Langchain_cn.obtain_classification_knowledge_base(cls_name, ipaddr)
             x = x['know_name']
-            if not x: return gr.update(), gr.update()
-            return gr.Dropdown.update(value=[x], choices=Langchain_cn.obtain_a_list_of_knowledge_bases(ipaddr)), gr.update(label="当前模型：" + llms + "&" + '&'.join([x]))
+            if not x:
+                return available, gr.update()
+            return available, gr.update(label="当前模型：" + llms + "&" + '&'.join([x]))
         self.langchain_classifi.select(fn=Langchain_cn.obtain_classification_knowledge_base,
                                        inputs=[self.langchain_classifi],
                                        outputs=[self.langchain_select, self.langchain_dropdown, self.langchain_status]
@@ -416,13 +419,15 @@ class ChatBot(ChatBotFrame):
         self.langchain_upload.clear(fn=lambda kw: (kw.update({'file_path': ''}), f'已清空本地文件调用路径参数'),
                                     inputs=[self.langchain_know_kwargs],
                                     outputs=[self.langchain_know_kwargs, self.langchain_status])
-        self.langchain_submit.click(fn=Langchain_cn.knowledge_base_writing,
-                                    inputs=[self.langchain_classifi, self.langchain_class_name, self.langchain_links, self.langchain_select, self.langchain_name, self.langchain_know_kwargs],
-                                    outputs=[self.langchain_status, self.langchain_error, self.langchain_classifi, self.langchain_select, self.langchain_know_kwargs]
-                                    ).then(
-                                    fn=update_drop,
-                                    inputs=[self.langchain_know_kwargs, self.llms_dropdown],
-                                    outputs=[self.langchain_dropdown, self.chatbot])
+
+        submit_id = self.langchain_submit.click(fn=Langchain_cn.knowledge_base_writing,
+                                                inputs=[self.langchain_classifi, self.langchain_class_name, self.langchain_links, self.langchain_select, self.langchain_name, self.langchain_know_kwargs],
+                                                outputs=[self.langchain_status, self.langchain_error, self.langchain_classifi, self.langchain_select, self.langchain_know_kwargs]
+                                                )
+        submit_id.then(fn=update_drop,
+                       inputs=[self.langchain_know_kwargs, self.llms_dropdown, self.langchain_classifi],
+                       outputs=[self.langchain_dropdown, self.chatbot])
+        self.langchain_stop.click(fn=None, inputs=None, outputs=None, cancels=[submit_id])
 
     def draw_setting_chat(self):
         switch_model = get_conf('switch_model')[0]

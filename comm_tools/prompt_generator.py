@@ -54,13 +54,15 @@ class SqliteHandle:
 
     def get_prompt_value(self, find=None):
         temp_all = {}
+        source = ''
         if find:
-            result = self.__cursor.execute(f"SELECT prompt, result FROM `{self.__table}` WHERE prompt LIKE '%{find}%'").fetchall()
+            result = self.__cursor.execute(f"SELECT prompt, result, source FROM `{self.__table}` WHERE prompt LIKE '%{find}%'").fetchall()
         else:
-            result = self.__cursor.execute(f"SELECT prompt, result FROM `{self.__table}`").fetchall()
+            result = self.__cursor.execute(f"SELECT prompt, result, source FROM `{self.__table}`").fetchall()
         for row in result:
             temp_all[row[0]] = row[1]
-        return temp_all
+            source = row[2]
+        return temp_all, source
 
     def query_table_columns(self):
         result = self.__cursor.execute(f"SELECT name, sql FROM sqlite_master WHERE type='table' AND name='{self.__table}';").fetchall()
@@ -71,10 +73,17 @@ class SqliteHandle:
         self.__connect.commit()
 
     def inset_prompt(self, prompt: dict, source=''):
+        error_status = ''
         for key in prompt:
-            self.__cursor.execute(f"REPLACE INTO `{self.__table}` (prompt, result, source)"
-                                  f"VALUES (?, ?, ?);", (str(key), str(prompt[key]), source))
+            _, user_info = self.get_prompt_value(key)
+            if user_info in source:
+                self.__cursor.execute(f"REPLACE INTO `{self.__table}` (prompt, result, source)"
+                                      f"VALUES (?, ?, ?);", (str(key), str(prompt[key]), source))
+            else:
+                error_status += f'【{key}】该分类下已有其他人保存重名的提示词，请更改提示词名称后再提交～'
+                print(f'{source} 保存名称为[key]的提示词失败，因为该分类下已有其他人保存重名的提示词')
         self.__connect.commit()
+        return error_status
 
     def delete_prompt(self, name):
         self.__cursor.execute(f"DELETE from `{self.__table}` where prompt LIKE '{name}'")
@@ -84,10 +93,10 @@ class SqliteHandle:
         self.__cursor.execute(f"DROP TABLE `{tab}`;")
         self.__connect.commit()
 
-    def find_prompt_result(self, name):
+    def find_prompt_result(self, name, tabs='prompt_127.0.0.1'):
         query = self.__cursor.execute(f"SELECT result FROM `{self.__table}` WHERE prompt LIKE '{name}'").fetchall()
         if query == []:
-            query = self.__cursor.execute(f"SELECT result FROM `prompt_127.0.0.1` WHERE prompt LIKE '{name}'").fetchall()
+            query = self.__cursor.execute(f"SELECT result FROM `{tabs}` WHERE prompt LIKE '{name}'").fetchall()
             return query[0][0]
         else:
             return query[0][0]

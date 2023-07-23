@@ -18,12 +18,10 @@ import traceback
 import requests
 import importlib
 from comm_tools import func_box
-
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
-from comm_tools.toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history, trimmed_format_exc
-proxies, API_KEY, TIMEOUT_SECONDS, MAX_RETRY, API_ORG = \
-    get_conf('proxies', 'API_KEY', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'API_ORG')
+from comm_tools import toolbox
+proxies, API_KEY, TIMEOUT_SECONDS, MAX_RETRY, API_ORG = toolbox.get_conf('proxies', 'API_KEY', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'API_ORG')
 
 
 timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check proxy settings in config.py.' + \
@@ -119,14 +117,14 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     chatbot 为WebUI中显示的对话列表，修改它，然后yeild出去，可以直接修改对话界面内容
     additional_fn代表点击的哪个按钮，按钮见functional.py
     """
-    if is_any_api_key(inputs):
+    if toolbox.is_any_api_key(inputs):
         chatbot._cookies['api_key'] = inputs
-        chatbot.append(("输入已识别为openai的api_key", what_keys(inputs)))
-        yield from update_ui(chatbot=chatbot, history=history, msg="api_key已导入") # 刷新界面
+        chatbot.append(("输入已识别为openai的api_key", toolbox.what_keys(inputs)))
+        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg="api_key已导入") # 刷新界面
         return
-    elif not is_any_api_key(chatbot._cookies['api_key']):
+    elif not toolbox.is_any_api_key(chatbot._cookies['api_key']):
         chatbot.append((inputs, "缺少api_key。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。"))
-        yield from update_ui(chatbot=chatbot, history=history, msg="缺少api_key") # 刷新界面
+        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg="缺少api_key") # 刷新界面
         return
 
     if additional_fn is not None:
@@ -140,12 +138,12 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     logging.info(f'[raw_input]_{llm_kwargs["ipaddr"]} {raw_input}')
     chatbot.append((inputs, ""))
     loading_msg = func_box.spinner_chatbot_loading(chatbot)
-    yield from update_ui(chatbot=loading_msg, history=history, msg="等待响应") # 刷新界面
+    yield from toolbox.update_ui(chatbot=loading_msg, history=history, msg="等待响应") # 刷新界面
     try:
         headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt, stream)
     except RuntimeError as e:
         chatbot[-1] = (inputs, f"您提供的api-key不满足要求，不包含任何可用于{llm_kwargs['llm_model']}的api-key。您可能选择了错误的模型或请求源。")
-        yield from update_ui(chatbot=chatbot, history=history, msg="api-key不满足要求") # 刷新界面
+        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg="api-key不满足要求") # 刷新界面
         return
     history.append(inputs); history.append("")
     retry = 0
@@ -160,7 +158,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             retry += 1
             chatbot[-1] = ((chatbot[-1][0], timeout_bot_msg))
             retry_msg = f"，正在重试 ({retry}/{MAX_RETRY}) ……" if MAX_RETRY > 0 else ""
-            yield from update_ui(chatbot=chatbot, history=history, msg="请求超时"+retry_msg) # 刷新界面
+            yield from toolbox.update_ui(chatbot=chatbot, history=history, msg="请求超时"+retry_msg) # 刷新界面
             if retry > MAX_RETRY: raise TimeoutError
 
     gpt_replying_buffer = ""
@@ -172,9 +170,9 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                 chunk = next(stream_response)
             except StopIteration:
                 # 非OpenAI官方接口的出现这样的报错，OpenAI和API2D不会走这里
-                from comm_tools.toolbox import regular_txt_to_markdown; tb_str = '```\n' + trimmed_format_exc() + '```'
+                from comm_tools.toolbox import regular_txt_to_markdown; tb_str = '```\n' + toolbox.trimmed_format_exc() + '```'
                 chatbot[-1] = (chatbot[-1][0], f"[Local Message] 远程返回错误: \n\n{tb_str} \n\n{regular_txt_to_markdown(chunk.decode())}")
-                yield from update_ui(chatbot=chatbot, history=history, msg="远程返回错误:" + chunk.decode()) # 刷新界面
+                yield from toolbox.update_ui(chatbot=chatbot, history=history, msg="远程返回错误:" + chunk.decode()) # 刷新界面
                 return
             
             # print(chunk.decode()[6:])
@@ -198,17 +196,17 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     history[-1] = gpt_replying_buffer
                     chatbot[-1] = (history[-2], history[-1])
                     status_text = f"finish_reason: {chunkjson['choices'][0]['finish_reason']}\t"
-                    yield from update_ui(chatbot=chatbot, history=history, msg=status_text) # 刷新界面
+                    yield from toolbox.update_ui(chatbot=chatbot, history=history, msg=status_text) # 刷新界面
                 except Exception as e:
                     traceback.print_exc()
-                    yield from update_ui(chatbot=chatbot, history=history, msg="Json解析不合常规") # 刷新界面
+                    yield from toolbox.update_ui(chatbot=chatbot, history=history, msg="Json解析不合常规") # 刷新界面
                     chunk = get_full_error(chunk, stream_response)
                     chunk_decoded = chunk.decode()
                     error_msg = chunk_decoded
                     openai_website = ' 请登录OpenAI查看详情 https://platform.openai.com/signup'
                     if "reduce the length" in error_msg:
                         if len(history) >= 2: history[-1] = ""; history[-2] = "" # 清除当前溢出的输入：history[-2] 是本次输入, history[-1] 是本次输出
-                        history = clip_history(inputs=inputs, history=history, tokenizer=model_info[llm_kwargs['llm_model']]['tokenizer'],
+                        history = toolbox.clip_history(inputs=inputs, history=history, tokenizer=model_info[llm_kwargs['llm_model']]['tokenizer'],
                                                max_token_limit=(model_info[llm_kwargs['llm_model']]['max_token'])) # history至少释放二分之一
                         chatbot[-1] = (chatbot[-1][0], "[Local Message] Reduce the length. 本次输入过长, 或历史数据过长. 历史缓存数据已部分释放, 您可以请再次尝试. (若再次失败则更可能是因为输入过长.)")
                         # history = []    # 清除历史
@@ -228,18 +226,18 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                         chatbot[-1] = (chatbot[-1][0], "[Local Message] Not enough point. API2D账户点数不足.")
                     else:
                         from comm_tools.toolbox import regular_txt_to_markdown
-                        tb_str = '```\n' + trimmed_format_exc() + '```'
+                        tb_str = '```\n' + toolbox.trimmed_format_exc() + '```'
                         chatbot[-1] = (chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str} \n\n{regular_txt_to_markdown(chunk_decoded)}")
-                    yield from update_ui(chatbot=chatbot, history=history, msg="Json异常" + error_msg) # 刷新界面
+                    yield from toolbox.update_ui(chatbot=chatbot, history=history, msg="Json异常" + error_msg) # 刷新界面
                     return
 
 def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     """
     整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
     """
-    if not is_any_api_key(llm_kwargs['api_key']):
+    if not toolbox.is_any_api_key(llm_kwargs['api_key']):
         raise AssertionError("你提供了错误的API_KEY。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。")
-    api_key = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
+    api_key = toolbox.select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
     headers = {
         "Content-Type": "application/json",
     }

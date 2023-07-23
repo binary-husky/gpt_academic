@@ -186,6 +186,7 @@ def CatchException(f):
             from comm_tools.check_proxy import check_proxy
             proxies, = get_conf('proxies')
             tb_str = '```\n' + trimmed_format_exc() + '```'
+            func_box.通知机器人(trimmed_format_exc()+f'\n\n错误来源：{top_p.get("ipaddr", None)}')
             if len(chatbot) == 0:
                 chatbot.clear()
                 chatbot.append(["插件调度异常", "异常原因"])

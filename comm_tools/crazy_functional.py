@@ -304,6 +304,7 @@ def get_crazy_functions():
                             "img_ocr: 是否使用ocr\nto_markdown: 增加阅读性使用的中间prompt",  # 高级参数输入区的显示提示
             "Parameters": {
                 "is_show": False,
+                "prompt_cls": '插件定制',
                 "prompt": '文档转测试用例',
                 'img_ocr': False,
                 "to_markdown": '文档转Markdown'
@@ -319,6 +320,7 @@ def get_crazy_functions():
                             "template_file: 可以指定上传的文档作为测试用例输出的模版",  # 高级参数输入区的显示提示
             "Parameters": {
                 "is_show": False,
+                "prompt_cls": '插件定制',
                 "prompt": '接口文档转测试用例',
                 'img_ocr': True,
                 'to_markdown': '文档转Markdown_分割',
@@ -334,6 +336,7 @@ def get_crazy_functions():
                             "img_ocr: 是否使用ocr\nto_markdown: 增加阅读性使用的中间prompt",  # 高级参数输入区的显示提示
             "Parameters": {
                 "is_show": True,
+                "prompt_cls": '插件定制',
                 "prompt": '需求分析对话',
                 'img_ocr': False,
                 'to_markdown': '文档转Markdown',
@@ -346,6 +349,7 @@ def get_crazy_functions():
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": "prompt生成流程图的prompt\nimg_ocr是否使用ocr\n",  # 高级参数输入区的显示提示
             "Parameters": {
+                "prompt_cls": '插件定制',
                 'to_markdown': '文档转Markdown',
                 'img_ocr': True,
             }
@@ -357,6 +361,7 @@ def get_crazy_functions():
             "ArgsReminder": "",
             "Function": HotReload(总结音视频.Kdocs音频提取总结),
             "Parameters": {
+                "prompt_cls": '插件定制',
                 "prompt": '总结摘要提取',
             }
         },
@@ -367,7 +372,6 @@ def get_crazy_functions():
             "ArgsReminder": "",
             "Function": HotReload(KDOCS_流程图_图片分析.批量分析流程图或图片),
             "Parameters": {
-                "prompt": '总结摘要提取',
             }
         }
     }

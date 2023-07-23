@@ -5,6 +5,7 @@ import gradio as gr
 from comm_tools import func_box
 from crazy_functions.crazy_utils import knowledge_archive_interface
 from crazy_functions import crazy_box
+from request_llm import bridge_all
 
 
 def classification_filtering_tag(cls_select, cls_name, ipaddr):
@@ -30,9 +31,15 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
     elif name and select == '新建知识库': kai_id = name
     elif select and select != '新建知识库': kai_id = select
     else: kai_id = func_box.created_atime()
+    # < --------------------限制上班时间段构建知识库--------------- >
+    reject_build_switch = toolbox.get_conf('reject_build_switch')
+    if reject_build_switch:
+        if not func_box.check_expected_time():
+            yield '上班时间段不允许启动构建知识库任务，若有紧急任务请联系管理员', '', gr.Dropdown.update(), gr.Dropdown.update(), kai_handle
+            return
+    # < --------------------读取文件正式开始--------------- >
     yield '开始咯开始咯～', '', gr.Dropdown.update(), gr.Dropdown.update(), kai_handle
     files = kai_handle['file_path']
-    # < --------------------读取文件--------------- >
     file_manifest = []
     spl,  = toolbox.get_conf('spl')
     # 本地文件
@@ -69,19 +76,20 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
     # < -------------------构建知识库--------------- >
     tab_show = [os.path.basename(i) for i in file_manifest]
     preprocessing_files = func_box.to_markdown_tabs(head=['文件'], tabs=[tab_show])
-    yield (f'正在准备将以下文件向量化，生成知识库文件：\n\n{preprocessing_files}', error, gr.Dropdown.update(),
+    yield (f'正在准备将以下文件向量化，生成知识库文件，若文件数据较多，可能需要等待几小时：\n\n{preprocessing_files}', error, gr.Dropdown.update(),
            gr.Dropdown.update(), kai_handle)
     with toolbox.ProxyNetworkActivate():    # 临时地激活代理网络
         kai = knowledge_archive_interface(vs_path=vector_path)
         qa_handle, vs_path = kai.construct_vector_store(vs_id=kai_id, files=file_manifest)
-    with open(os.path.join(vector_path, 'ipaddr.client.host'), mode='w') as f: pass
+    with open(os.path.join(vector_path, kai_id, ipaddr.client.host), mode='w') as f: pass
     kai_files = kai.get_init_file(kai_id)
-    kai_handle['file_list'] = [os.path.basename(file) for file in kai_files]
+    kai_handle['file_list'] = [os.path.basename(file) for file in kai_files if os.path.exists(file)]
     kai_files = func_box.to_markdown_tabs(head=['文件'], tabs=[tab_show])
     kai_handle['know_obj'].update({kai_id: qa_handle})
     kai_handle['know_name'] = kai_id
+    load_list, user_list = func_box.get_directory_list(vector_path, ipaddr.client.host)
     yield (f'构建完成, 当前知识库内有效的文件如下, 已自动帮您选中知识库，现在你可以畅快的开始提问啦～\n\n{kai_files}', error, gr.Dropdown.update(value=cls_select),
-           gr.Dropdown.update(value='新建知识库', choices=obtain_a_list_of_knowledge_bases(ipaddr)),  kai_handle)
+           gr.Dropdown.update(value='新建知识库', choices=load_list),  kai_handle)
 
 
 def knowledge_base_query(txt, kai_id, chatbot, history, llm_kwargs, args, ipaddr: gr.Request):
@@ -103,6 +111,7 @@ def knowledge_base_query(txt, kai_id, chatbot, history, llm_kwargs, args, ipaddr
             chatbot.append([None, f'啊哦，该知识库好像出问题了，请刷新页面重试'])
             yield from toolbox.update_ui(chatbot=chatbot, history=history)  # 刷新界面
     return new_txt
+
 
 def obtain_a_list_of_knowledge_bases(ipaddr):
     user_path, _ = func_box.get_directory_list(os.path.join(func_box.knowledge_path, ipaddr.client.host))
@@ -142,7 +151,7 @@ def obtaining_knowledge_base_files(cls_select, cls_name, vs_id, chatbot, kai_han
             kai_files.update(_dict)
             kai_handle['know_obj'].update({id: qa_handle})
         tabs = [[_id, func_box.html_view_blank(file), kai_files[file][_id]] for file in kai_files for _id in kai_files[file]]
-        kai_handle['file_list'] = [os.path.basename(file) for file in kai_files]
+        kai_handle['file_list'] = [os.path.basename(file) for file in kai_files if os.path.exists(file)]
         chatbot.append([None, f'检查完成，当前选择的知识库内可用文件如下：'
                               f'\n\n {func_box.to_markdown_tabs(head=["所属知识库", "文件", "文件类型"], tabs=tabs, column=True)}\n\n'
                               f'🤩 快来向我提问吧～'])
