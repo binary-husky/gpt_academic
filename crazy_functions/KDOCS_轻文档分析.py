@@ -5,14 +5,12 @@
 # @Descr   :
 import os.path
 import time
-
+from comm_tools import func_box, ocr_tools
 from crazy_functions import crazy_box
 from comm_tools.toolbox import update_ui
 from comm_tools.toolbox import CatchException
 from crazy_functions import crazy_utils
-from request_llm import bridge_all
-from request_llm.bridge_all import model_info
-from comm_tools import prompt_generator, func_box, ocr_tools
+
 import traceback
 
 
@@ -22,27 +20,32 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
     if not links and not files:
         chatbot.append((None, f'输入框空空如也？{link_limit}\n\n'
                               '请在输入框中输入需要解析的轻文档链接或Markdown文件目录地址，点击插件按钮，链接需要是可访问的，如以下格式，如果有多个文档则用换行或空格隔开'
-                             f'\n\n【金山文档】 xxxx https://kdocs.cn/l/xxxxxxxxxx'
-                             f'\n\n https://kdocs.cn/l/xxxxxxxxxx'))
+                              f'\n\n【金山文档】 xxxx https://kdocs.cn/l/xxxxxxxxxx'
+                              f'\n\n https://kdocs.cn/l/xxxxxxxxxx'))
         yield from update_ui(chatbot, history)
         return
     file_limit = []
-    img_ocr,  = crazy_box.json_args_return(plugin_kwargs, ['img_ocr'])
+    img_ocr, = crazy_box.json_args_return(plugin_kwargs, ['img_ocr'])
     for url in links:
         try:
-            chatbot.append([link_limit+"\n\n网页爬虫和文件处理准备工作中～", None])
-            yield from update_ui(chatbot, history)  #增加中间过渡
+            chatbot.append([link_limit + "\n\n网页爬虫和文件处理准备工作中～", None])
+            yield from update_ui(chatbot, history)  # 增加中间过渡
             ovs_data, content, empty_picture_count, pic_dict = crazy_box.get_docs_content(url, image_processing=img_ocr)
             if img_ocr:
                 if pic_dict:  # 当有图片文件时，再去提醒
                     ocr_process = f'检测到轻文档中存在{func_box.html_tag_color(empty_picture_count)}张图片，为了产出结果不存在遗漏，正在逐一进行识别\n\n' \
                                   f'> 红框为采用的文案,可信度低于 {func_box.html_tag_color(llm_kwargs["ocr"])} 将不采用, 可在Setting 中进行配置\n\n'
                     chatbot.append([None, ocr_process])
-                else: ocr_process = ''
+                else:
+                    ocr_process = ''
                 for i in pic_dict:
                     yield from update_ui(chatbot, history, '正在调用OCR组件，图片多可能会比较慢')
-                    img_content, img_result = ocr_tools.Paddle_ocr_select(ipaddr=llm_kwargs['ipaddr'], trust_value=llm_kwargs['ocr']).img_def_content(img_path=pic_dict[i])
-                    content = str(content).replace(f"{i}", f"{func_box.html_local_img(img_result)}\n```{img_content}```")
+                    img_content, img_result = ocr_tools.Paddle_ocr_select(ipaddr=llm_kwargs['ipaddr'],
+                                                                          trust_value=llm_kwargs[
+                                                                              'ocr']).img_def_content(
+                        img_path=pic_dict[i])
+                    content = str(content).replace(f"{i}",
+                                                   f"{func_box.html_local_img(img_result)}\n```{img_content}```")
                     ocr_process += f'{i} 识别完成，识别效果如下 {func_box.html_local_img(img_result)} \n\n'
                     chatbot[-1] = [None, ocr_process]
                     yield from update_ui(chatbot, history)
@@ -56,7 +59,8 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
             file_limit.extend([title, content])
         except Exception as e:
             error_str = traceback.format_exc()
-            chatbot.append([None, f'{func_box.html_a_blank(url)} \n\n请检查一下哦，这个链接我们访问不了，是否开启分享？是否设置密码？是否是轻文档？下面是什么错误？\n\n ```\n{str(error_str)}\n```'])
+            chatbot.append([None,
+                            f'{func_box.html_a_blank(url)} \n\n请检查一下哦，这个链接我们访问不了，是否开启分享？是否设置密码？是否是轻文档？下面是什么错误？\n\n ```\n{str(error_str)}\n```'])
             yield from update_ui(chatbot, history)
     extensions = ['.md', 'txt']
     for _file in files:
@@ -69,210 +73,95 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
     yield from update_ui(chatbot, history)
     return file_limit
 
-import re
-def replace_special_chars(file_name):
-    # 除了中文外，该正则表达式匹配任何一个不是数字、字母、下划线、.、空格的字符
-    return re.sub(r'[^\u4e00-\u9fa5\d\w\s\.\_]', '_', file_name)
-
-def long_name_processing(file_name):
-    if type(file_name) is list: file_name = file_name[0]
-    if len(file_name) > 50:
-        if file_name.find('"""') != -1:
-            temp = file_name.split('"""')[1].splitlines()
-            for i in temp:
-                if i:
-                    file_name = replace_special_chars(i)
-                    break
-        else:
-            file_name = file_name[:20]
-    return file_name
-
-
-def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history, is_client=True):
-    gpt_response = gpt_response_collection[1::2]
-    chat_file_list = ''
-    test_case = []
-    file_name = long_name_processing(inputs_show_user_array)
-    for k in range(len(gpt_response)):
-        gpt_response_split = gpt_response[k].splitlines()[2:]  # 过滤掉表头
-        for i in gpt_response_split:
-            if i.find('|') != -1:
-                test_case.append([func_box.clean_br_string(i) for i in i.split('|')[1:]])
-            elif i.find('｜') != -1:
-                test_case.append([func_box.clean_br_string(i) for i in i.split('｜')[1:]])
-            else:
-                test_case.append([i])
-    file_path = crazy_box.ExcelHandle(ipaddr=llm_kwargs['ipaddr'], is_client=is_client).lpvoid_lpbuffe(test_case, filename=file_name)
-    chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_download_blank(__href=file_path, dir_name=file_path.split("/")[-1])}\n\n'
-    chatbot.append(['Done', chat_file_list])
-    yield from update_ui(chatbot, history)
-
-
-def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
-    model = llm_kwargs['llm_model']
-    all_tokens = model_info[llm_kwargs['llm_model']]['max_token']
-    max_token = all_tokens/2 - all_tokens/4  # 考虑到对话+回答会超过tokens,所以/2
-    get_token_num = bridge_all.model_info[model]['token_cnt']
-    inputs = inputs.split('\n---\n')
-    segments = []
-    for input_ in inputs:
-        if get_token_num(input_) > max_token:
-            chatbot.append([None, f'{func_box.html_tag_color(input_[:10])}...对话预计超出tokens限制, 拆分中...'])
-            yield from update_ui(chatbot, history)
-            segments.extend(crazy_utils.breakdown_txt_to_satisfy_token_limit(input_, get_token_num, max_token))
-        else:
-            segments.append(input_)
-    yield from update_ui(chatbot, history)
-    return segments
-
-
-def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history, default_prompt: str = False, all_chat: bool = True):
-    """
-    Args:
-        gpt_response_collection:  多线程GPT的返回结果
-        plugin_kwargs: 对话使用的插件参数
-        llm_kwargs:  对话+用户信息
-        default_prompt: 默认Prompt, 如果为False，则不添加提示词
-    Returns: 下次使用？
-        inputs_array， inputs_show_user_array
-    """
-    inputs_array = []
-    inputs_show_user_array = []
-    kwargs_prompt, = crazy_box.json_args_return(plugin_kwargs, ['prompt'])
-    if default_prompt: kwargs_prompt = default_prompt
-    chatbot.append([None, f'接下来使用的Prompt是 {func_box.html_tag_color(kwargs_prompt)} ，你可以在Prompt编辑/检索中进行私人定制哦～',])
-    time.sleep(1)
-    prompt = prompt_generator.SqliteHandle(table=f'prompt_{llm_kwargs["ipaddr"]}').find_prompt_result(kwargs_prompt)
-    for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
-        content_limit = yield from split_content_limit(inputs, llm_kwargs, chatbot, history)
-        for limit in content_limit:
-            inputs_array.append(prompt.replace('{{{v}}}', limit))
-            inputs_show_user_array.append(you_say)
-    yield from update_ui(chatbot, history)
-    if all_chat:
-        inputs_show_user_array = inputs_array
-    else:
-        inputs_show_user_array = default_prompt + ': ' + gpt_response_collection[0::2]
-    return inputs_array, inputs_show_user_array
-
-
-def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs):
-    # 提交多线程任务
-    if len(inputs_array) == 1:
-        # 折叠输出
-        if len(inputs_array[0]) > 200: inputs_show_user = \
-            inputs_array[0][:100]+f"\n\n{func_box.html_tag_color('......超过200个字符折叠......')}\n\n"+inputs_array[0][-100:]
-        else: inputs_show_user = inputs_array[0]
-        gpt_say = yield from crazy_utils.request_gpt_model_in_new_thread_with_ui_alive(
-            inputs=inputs_array[0], inputs_show_user=inputs_show_user,
-            llm_kwargs=llm_kwargs, chatbot=chatbot, history=[],
-            sys_prompt="", refresh_interval=0.1
-        )
-        gpt_response_collection = [inputs_show_user_array[0], gpt_say]
-        history.extend(gpt_response_collection)
-    else:
-        gpt_response_collection = yield from crazy_utils.request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
-            inputs_array=inputs_array,
-            inputs_show_user_array=inputs_show_user_array,
-            llm_kwargs=llm_kwargs,
-            chatbot=chatbot,
-            history_array=[[""] for _ in range(len(inputs_array))],
-            sys_prompt_array=["" for _ in range(len(inputs_array))],
-            # max_workers=5,  # OpenAI所允许的最大并行过载
-            scroller_max_len=80
-        )
-        # 是否展示任务结果
-        kwargs_is_show,  = crazy_box.json_args_return(plugin_kwargs, ['is_show'])
-        if kwargs_is_show:
-            for results in list(zip(gpt_response_collection[0::2], gpt_response_collection[1::2])):
-                chatbot.append(results)
-                history.extend(results)
-                yield from update_ui(chatbot, history)
-    return gpt_response_collection
-
-
-def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
-    for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
-        chatbot.append([None, f'{long_name_processing(you_say)} 🏃🏻‍正在努力将Markdown转换为流程图~'])
-        yield from update_ui(chatbot=chatbot, history=history)
-        md, html = crazy_box.Utils().markdown_to_flow_chart(data=inputs, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(you_say))
-        chatbot.append(("View: " + func_box.html_view_blank(md), f'{func_box.html_iframe_code(html_file=html)}'
-                                                               f'tips: 双击空白处可以放大～'
-                                                               f'\n\n--- \n\n Download: {func_box.html_download_blank(html)}' 
-                                                              '\n\n--- \n\n View: ' + func_box.html_view_blank(html)))
-        yield from update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
-
-def result_written_to_markdwon(gpt_response_collection, llm_kwargs, chatbot, history):
-    for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
-        md = crazy_box.Utils().write_markdown(data=inputs, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(you_say))
-        chatbot.append((None, f'markdown已写入文件，下次可以直接提交markdown文件，就可以节省tomarkdown的时间啦 {func_box.html_view_blank(md)}'))
-        yield from update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
-
 
 def KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    file_limit = yield from Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
+    file_limit = yield from Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt,
+                                                 web_port)
     if not file_limit:
         chatbot.append([None, f'{func_box.html_tag_color("无法获取需求文档内容，暂停运行!!!!")}'])
         yield from update_ui(chatbot=chatbot, history=history, msg='无法获取需求文档内容，暂停运行')
         return
     kwargs_to_mark, = crazy_box.json_args_return(plugin_kwargs, ['to_markdown'])
     if kwargs_to_mark:
-        inputs_array, inputs_show_user_array = yield from input_output_processing(file_limit, llm_kwargs, plugin_kwargs,
-                                                                           chatbot, history, default_prompt=kwargs_to_mark)
-        gpt_response_collection = yield from submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
-    else: gpt_response_collection = file_limit
-    yield from result_written_to_markdwon(gpt_response_collection, llm_kwargs, chatbot, history)
+        split_content_limit = yield from crazy_box.input_output_processing(file_limit, llm_kwargs,
+                                                                                            plugin_kwargs,
+                                                                                            chatbot, history,
+                                                                                            default_prompt=kwargs_to_mark)
+        inputs_array, inputs_show_user_array = split_content_limit
+        gpt_response_collection = yield from crazy_box.submit_multithreaded_tasks(inputs_array, inputs_show_user_array,
+                                                                                  llm_kwargs, chatbot, history,
+                                                                                  plugin_kwargs)
+    else:
+        gpt_response_collection = file_limit
+    yield from crazy_box.result_written_to_markdwon(gpt_response_collection, llm_kwargs, chatbot, history)
     return gpt_response_collection
 
 
 @CatchException
 def KDocs_转接口测试用例(file_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    gpt_response_collection = yield from KDocs_转Markdown(file_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
+    gpt_response_collection = yield from KDocs_转Markdown(file_limit, llm_kwargs, plugin_kwargs, chatbot, history,
+                                                          system_prompt, web_port)
     if not gpt_response_collection:
-        chatbot.append([None,f'{func_box.html_tag_color("多线程一个都没有通过，暂停运行!!!!")}'])
+        chatbot.append([None, f'{func_box.html_tag_color("多线程一个都没有通过，暂停运行!!!!")}'])
         yield from update_ui(chatbot=chatbot, history=history, msg='多线程一个都没有通过，暂停运行')
         return
-    inputs_array, inputs_show_user_array = yield from input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs,
-                                                                   chatbot, history)
-    gpt_response_collection = yield from submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
+    split_content_limit = yield from crazy_box.input_output_processing(gpt_response_collection,
+                                                                                        llm_kwargs, plugin_kwargs,
+                                                                                        chatbot, history)
+    inputs_array, inputs_show_user_array = split_content_limit
+    gpt_response_collection = yield from crazy_box.submit_multithreaded_tasks(inputs_array, inputs_show_user_array,
+                                                                              llm_kwargs, chatbot, history,
+                                                                              plugin_kwargs)
     template_file, = crazy_box.json_args_return(plugin_kwargs, ['template_file'])
-    yield from write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history, is_client=template_file)
+    yield from crazy_box.write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history,
+                                          is_client=template_file)
     yield from update_ui(chatbot, history, '插件执行成功')
 
 
 @CatchException
 def KDocs_转客户端测试用例(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    gpt_response_collection = yield from KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
+    gpt_response_collection = yield from KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history,
+                                                          system_prompt, web_port)
     if not gpt_response_collection:
-        chatbot.append([None,f'{func_box.html_tag_color("多线程一个都没有通过，暂停运行!!!!")}'])
+        chatbot.append([None, f'{func_box.html_tag_color("多线程一个都没有通过，暂停运行!!!!")}'])
         yield from update_ui(chatbot=chatbot, history=history, msg='多线程一个都没有通过，暂停运行')
         return
-    inputs_array, inputs_show_user_array = yield from input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs,
-                                                                   chatbot, history)
-    gpt_response_collection = yield from submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
-    yield from write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history)
+    split_content_limit = yield from crazy_box.input_output_processing(gpt_response_collection,
+                                                                                        llm_kwargs, plugin_kwargs,
+                                                                                        chatbot, history)
+    inputs_array, inputs_show_user_array = split_content_limit
+    gpt_response_collection = yield from crazy_box.submit_multithreaded_tasks(inputs_array, inputs_show_user_array,
+                                                                              llm_kwargs, chatbot, history,
+                                                                              plugin_kwargs)
+    yield from crazy_box.write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history)
     yield from update_ui(chatbot, history, '插件执行成功')
 
 
 @CatchException
 def KDocs_需求分析问答(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    gpt_response_collection = yield from KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
+    gpt_response_collection = yield from KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history,
+                                                          system_prompt, web_port)
     if not gpt_response_collection:
-        chatbot.append([None,f'{func_box.html_tag_color("多线程一个都没有通过，暂停运行!!!!")}'])
+        chatbot.append([None, f'{func_box.html_tag_color("多线程一个都没有通过，暂停运行!!!!")}'])
         yield from update_ui(chatbot=chatbot, history=history, msg='多线程一个都没有通过，暂停运行')
         return
-    inputs_array, inputs_show_user_array = yield from input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs,
-                                                                   chatbot, history)
-    gpt_response_collection = yield from submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
+    split_content_limit = yield from crazy_box.input_output_processing(gpt_response_collection,
+                                                                                        llm_kwargs, plugin_kwargs,
+                                                                                        chatbot, history)
+    inputs_array, inputs_show_user_array = split_content_limit
+    gpt_response_collection = yield from crazy_box.submit_multithreaded_tasks(inputs_array, inputs_show_user_array,
+                                                                              llm_kwargs, chatbot, history,
+                                                                              plugin_kwargs)
     yield from update_ui(chatbot, history, '插件执行成功')
+
 
 @CatchException
 def KDocs_文档转流程图(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    gpt_response_collection = yield from KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
+    gpt_response_collection = yield from KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history,
+                                                          system_prompt, web_port)
     if not gpt_response_collection:
-        chatbot.append([None,f'{func_box.html_tag_color("多线程一个都没有通过，暂停运行!!!!")}'])
+        chatbot.append([None, f'{func_box.html_tag_color("多线程一个都没有通过，暂停运行!!!!")}'])
         yield from update_ui(chatbot=chatbot, history=history, msg='多线程一个都没有通过，暂停运行')
         return
-    yield from transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history)
+    yield from crazy_box.transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history)
     yield from update_ui(chatbot, history, '插件执行成功')
-

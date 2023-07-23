@@ -3,6 +3,7 @@
 # @Time   : 2023/4/19
 # @Author : Spike
 # @Descr   :
+import json
 import os.path
 import sqlite3
 import functools
@@ -42,7 +43,7 @@ class SqliteHandle:
         self.__connect.close()
 
     def create_tab(self):
-        self.__cursor.execute(f"CREATE TABLE `{self.__table}` ('prompt' TEXT UNIQUE, 'result' TEXT)")
+        self.__cursor.execute(f"CREATE TABLE `{self.__table}` ('prompt' TEXT UNIQUE, 'result' TEXT, 'source' TEXT)")
 
     def get_tables(self):
         all_tab = []
@@ -61,9 +62,18 @@ class SqliteHandle:
             temp_all[row[0]] = row[1]
         return temp_all
 
-    def inset_prompt(self, prompt: dict):
+    def query_table_columns(self):
+        result = self.__cursor.execute(f"SELECT name, sql FROM sqlite_master WHERE type='table' AND name='{self.__table}';").fetchall()
+        return result
+
+    def add_colum_type(self, colum, type='TEXT'):
+        self.__cursor.execute(f"ALTER TABLE `{self.__table}` ADD COLUMN {colum} {type};")
+        self.__connect.commit()
+
+    def inset_prompt(self, prompt: dict, source=''):
         for key in prompt:
-            self.__cursor.execute(f"REPLACE INTO `{self.__table}` (prompt, result) VALUES (?, ?);", (str(key), str(prompt[key])))
+            self.__cursor.execute(f"REPLACE INTO `{self.__table}` (prompt, result, source)"
+                                  f"VALUES (?, ?, ?);", (str(key), str(prompt[key]), source))
         self.__connect.commit()
 
     def delete_prompt(self, name):
@@ -90,13 +100,36 @@ def cp_db_data(incloud_tab='prompt'):
             old_data = sqlite_handle(table=i, database='ai_prompt_cp.db').get_prompt_value()
             sqlite_handle(table=i).inset_prompt(old_data)
 
-def inset_127_prompt():
-    sql_handle = sqlite_handle(table='prompt_127.0.0.1')
-    prompt_json = os.path.join(sql_handle.prompt_path, 'prompts-PlexPt.json')
-    data_list = func_box.JsonHandle(prompt_json).load()
+def batch_inset_prompt(json_path, tables):
+    sql_handle = sqlite_handle(table=tables)
+    data_list = func_box.JsonHandle(json_path).load()
     for i in data_list:
-        sql_handle.inset_prompt(prompt={i['act']: i['prompt']})
+        source = os.path.basename(json_path).split('.')[0]
+        sql_handle.inset_prompt(prompt={i['act']: i['prompt']}, source=source)
+
+def batch_add_source():
+    sql_ll = sqlite_handle(database='ai_prompt.db')
+    tabs = sql_ll.get_tables()
+    for t in tabs:
+        sqlite_handle(table=t).add_colum_type('source')
+
+def batch_export_prompt(incloud_tab='prompt'):
+    sql_ll = sqlite_handle(database='ai_prompt.db')
+    tabs = sql_ll.get_tables()
+    for i in tabs:
+        if str(i).startswith(incloud_tab):
+            source = i.split('_')[-1]
+            result = sqlite_handle(i).get_prompt_value()
+            file_dict = []
+            for k in result:
+                file_dict.append({'act': k, 'prompt': result[k]})
+            if file_dict:
+                file_path = os.path.join(func_box.prompt_path, 'export_prompt')
+                os.makedirs(file_path, exist_ok=True)
+                with open(os.path.join(file_path, f"{source}.json"), mode='w', encoding='utf-8') as f:
+                    f.write(json.dumps(file_dict, ensure_ascii=False))
+                    print(f'{source}已导出', os.path.join(file_path, f"{source}.json"))
 
 sqlite_handle = SqliteHandle
 if __name__ == '__main__':
-    cp_db_data()
+    sqlite_handle().delete_tabls('prompt_新建分类_sys')

@@ -587,7 +587,11 @@ def on_file_uploaded(files, chatbot, txt, ipaddr: gr.Request):
         return chatbot, txt
     private_upload = './private_upload'
     #     shutil.rmtree('./private_upload/')  不需要删除文件
-    time_tag_path = os.path.join(private_upload, ipaddr.client.host, time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()))
+    if type(ipaddr) is str:
+        ipaddr = ipaddr
+    else:
+        ipaddr = ipaddr.client.host
+    time_tag_path = os.path.join(private_upload, ipaddr, func_box.created_atime())
     os.makedirs(f'{time_tag_path}', exist_ok=True)
     err_msg = ''
     for file in files:

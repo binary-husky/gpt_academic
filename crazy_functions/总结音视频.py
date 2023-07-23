@@ -219,8 +219,7 @@ def Kdocs音频提取总结(txt, llm_kwargs, plugin_kwargs, chatbot, history, sy
     if os.path.exists(txt) or txt.find('http') != -1:
         project_folder = txt
     else:
-        if txt == "": txt = '空空如也的输入栏'
-        report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"找不到本地项目或无权访问: {txt}")
+        report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"{crazy_box.previously_on_plugins}")
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
         return
     # 搜索需要处理的文件清单
@@ -237,18 +236,16 @@ def Kdocs音频提取总结(txt, llm_kwargs, plugin_kwargs, chatbot, history, sy
 
     # 如果没找到任何文件
     if len(file_manifest) == 0:
-        report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"找不到任何音频或视频文件: {txt}")
+        report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"{crazy_box.previously_on_plugins}")
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
         return
     # 将音频转换为文字
     txt_manifest = yield from audio_comparison_of_video_converters(file_manifest, chatbot, history)
-    inputs_array, inputs_show_user_array = yield from KDOCS_轻文档分析.input_output_processing(txt_manifest, llm_kwargs, plugin_kwargs, chatbot, history)
-    gpt_response_collection = yield from KDOCS_轻文档分析.submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
+    inputs_array, inputs_show_user_array = yield from crazy_box.input_output_processing(txt_manifest, llm_kwargs, plugin_kwargs, chatbot, history)
+    gpt_response_collection = yield from crazy_box.submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
     yield from update_ui(chatbot, history, '插件执行成功')
 
 if __name__ == '__main__':
-
-
     # 创建一个音频识别对象w
 
     video = '/Users/kilig/Desktop/output.wav'

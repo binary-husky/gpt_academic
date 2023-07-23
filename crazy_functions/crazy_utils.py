@@ -634,6 +634,7 @@ class knowledge_archive_interface():
         self.qa_handle.init_cfg()
         self.text2vec_large_chinese = None
         self.vs_root_path = vs_path
+        self.ds_docstore = ''
 
     def get_chinese_text2vec(self):
         if self.text2vec_large_chinese is None:
@@ -677,15 +678,15 @@ class knowledge_archive_interface():
 
     def get_init_file(self, vs_id):
         from langchain.vectorstores import FAISS
-        vs_path = self.judge_to_obtain_user_data(vs_id)
+        vs_path = os.path.join(self.vs_root_path, vs_id)
         self.qa_handle.vector_store = FAISS.load_local(vs_path, self.get_chinese_text2vec())
         ds = self.qa_handle.vector_store.docstore
+        self.ds_docstore = ds
         file_dict = {ds._dict[k].metadata['source']: {vs_id :ds._dict[k].metadata['filetype']} for k in ds._dict}
         return self, file_dict
 
-
     def answer_with_archive_by_id(self, txt, vs_id):
-        self.kai_path = self.judge_to_obtain_user_data(vs_id)
+        self.kai_path = os.path.join(self.vs_root_path, vs_id)
         if not os.path.exists(self.kai_path):
             return '', '', False
         VECTOR_SEARCH_SCORE_THRESHOLD = 0

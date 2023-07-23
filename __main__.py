@@ -90,11 +90,10 @@ class ChatBot(ChatBotFrame):
                 self.sm_code_block = gr.Button(value='💻', elem_classes='sm_btn').style(size='sm', full_width=False)
                 self.resetBtn = gr.Button("🗑", variant="primary", elem_classes='sm_btn').style(size='sm', full_width=False)
                 self.sm_upload_history = gr.Button("🔭", variant="primary", elem_classes='sm_btn').style(size='sm', full_width=False)
-                self.sm_ocr_result = gr.Button("📸", variant="primary", elem_classes='sm_btn').style(size='sm', full_width=False)
                 self.llms_dropdown = gr.Dropdown(choices=AVAIL_LLM_MODELS, value=LLM_MODEL,
                                                show_label=True, interactive=True, label='LLMs',
                                                elem_classes='sm_select', elem_id='change-font-size').style(container=False)
-                self.langchain_dropdown = gr.Dropdown(choices=[], value=None,
+                self.langchain_dropdown = gr.Dropdown(choices=[], value=[],
                                                show_label=True, interactive=True, label='知识库', multiselect=True,
                                                elem_classes='sm_select', elem_id='change-font-size').style(container=False)
                 self.switcher_drak = gr.HTML(func_box.get_html("appearance_switcher.html").format(), elem_classes="insert_block")
@@ -114,11 +113,6 @@ class ChatBot(ChatBotFrame):
         self.sm_code_block.click(fn=lambda x: x+'```\n\n```', inputs=[self.txt], outputs=[self.txt])
         self.sm_upload_history.click(get_user_upload, [self.chatbot], outputs=[self.chatbot]).then(
             fn=lambda: gr.Column.update(visible=False), inputs=None, outputs=self.examples_column)
-        ocr_handle = self.sm_ocr_result.click(**self.clear_agrs).then(
-                                 fn=ArgsGeneralWrapper(crazy_functions.crazy_box.ocr_batch_plugin),
-                                 inputs=[*self.input_combo, gr.State(PORT)],
-                                 outputs=[*self.output_combo])
-        self.cancel_handles.append(ocr_handle)
         def on_llms_dropdown_changed(k, m):
             if m:
                 return {self.chatbot: gr.update(label="当前模型：" + k + "&" + '&'.join(m))}
@@ -129,7 +123,7 @@ class ChatBot(ChatBotFrame):
                                        [self.llms_dropdown, self.langchain_dropdown],
                                        [self.chatbot]
                                        ).then(fn=Langchain_cn.obtaining_knowledge_base_files,
-                                       inputs=[self.langchain_dropdown, self.chatbot, self.langchain_know_kwargs],
+                                       inputs=[self.langchain_classifi, self.langchain_class_name, self.langchain_dropdown, self.chatbot, self.langchain_know_kwargs],
                                        outputs=[self.chatbot, self.examples_column, self.status, self.langchain_know_kwargs])
 
     def draw_examples(self):
@@ -185,6 +179,57 @@ class ChatBot(ChatBotFrame):
         with gr.Row():
             self.pro_results = gr.Chatbot(label='提示词和对话记录', elem_id='prompt_result').style()
 
+    def draw_function_chat(self):
+        preset_prompt, devs_document = get_conf('preset_prompt', 'devs_document')
+        with gr.TabItem('基础功能', id='func_tab'):
+            with gr.Box():
+                with gr.Row():
+                    self.pro_private_check = gr.Dropdown(choices=[], value=preset_prompt['value'],
+                                                         label='选择提示词分类', elem_classes='normal_select').style(container=False)
+                with gr.Row():
+                    self.pro_class_name = gr.Textbox(show_label=False, placeholder='*必填，保存Prompt同时创建分类',
+                                                     visible=False).style(container=False)
+            with gr.Accordion("提示词编辑保存", open=False) as self.prompt_edit_area:
+                Tips = "用 BORF 分析法设计chat GPT `提示词`:\n" \
+                       "1、阐述背景 B(Background): 说明背景，为chatGPT提供充足的信息\n" \
+                       "2、定义目标 O(Objectives):“我们希望实现什么”\n" \
+                       "3、定义关键结果 R(key Result):“我要什么具体效果”\n" \
+                       "4、试验并调整，改进 E(Evolve):三种改进方法自由组合\n" \
+                       "\t 改进输入：从答案的不足之处着手改进背景B,目标O与关键结果R\n" \
+                       "\t 改进答案：在后续对话中指正chatGPT答案缺点\n" \
+                       "\t 重新生成：尝试在`提示词`不变的情况下多次生成结果，优中选优\n" \
+                       "\t 熟练使用占位符{{{v}}}:  当`提示词`存在占位符，则优先将{{{v}}}替换为预期文本"
+                self.pro_edit_txt = gr.Textbox(show_label=False, info='提示词编辑区', lines=9,
+                                               placeholder=Tips).style(container=False)
+                with gr.Row():
+                    self.pro_name_txt = gr.Textbox(show_label=False, placeholder='提示词名称').style(container=False)
+                    self.pro_new_btn = gr.Button("保存提示词", variant="primary").style(size='sm', full_width=True)
+            with gr.Accordion("上传提示词", open=False) as self.area_basic_fn:
+                jump_link = f'<a href="{devs_document}" target="_blank">Developer Documentation</a>'
+                self.pro_devs_link = gr.HTML(jump_link)
+                self.pro_upload_btn = gr.File(file_count='single', file_types=['.yaml', '.json'],
+                                              label=f'上传你的提示词文件, 编写格式请遵循上述开发者文档', )
+            self.pro_func_prompt = gr.Dataset(components=[gr.HTML()], label="提示词列表", visible=False,
+                                              samples=[['...', ""] for i in range(20)], type='index',
+                                              samples_per_page=10,)
+            self.pro_fp_state = gr.State({'samples': None})
+
+    def signals_prompt_func(self):
+        self.pro_private_check.select(fn=func_box.prompt_reduce,
+                                      inputs=[self.pro_private_check, self.pro_fp_state, self.pro_private_check],
+                                      outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check]
+                                      ).then(fn=func_box.new_button_display, inputs=[self.pro_private_check],
+                                             outputs=[self.pro_class_name])
+        self.tabs_code = gr.State(0)
+        self.pro_func_prompt.select(fn=func_box.prompt_input,
+                                    inputs=[self.txt, self.pro_edit_txt, self.pro_name_txt, self.pro_func_prompt, self.pro_fp_state, self.tabs_code],
+                                    outputs=[self.txt, self.pro_edit_txt, self.pro_name_txt])
+        self.pro_upload_btn.upload(fn=func_box.prompt_upload_refresh,
+                                   inputs=[self.pro_upload_btn, self.pro_prompt_state, self.pro_private_check, self.pro_class_name],
+                                   outputs=[self.pro_func_prompt, self.pro_prompt_state, self.pro_private_check])
+        self.chat_tab.select(fn=lambda: 0, inputs=None, outputs=self.tabs_code)
+        self.prompt_tab.select(fn=lambda: 1, inputs=None, outputs=self.tabs_code)
+
     def signals_prompt_edit(self):
         self.pro_clear_btn.click(fn=lambda: [], inputs=None, outputs=self.pro_results)
         self.prompt_tab.select(fn=func_box.draw_results,
@@ -203,7 +248,7 @@ class ChatBot(ChatBotFrame):
                                    inputs=[self.pro_prompt_list, self.pro_prompt_state, self.pro_results, self.pro_edit_txt, self.pro_name_txt],
                                    outputs=[self.pro_results, self.pro_edit_txt, self.pro_name_txt, self.tabs_funcs, self.prompt_edit_area])
         self.pro_new_btn.click(fn=func_box.prompt_save,
-                               inputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_fp_state],
+                               inputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_fp_state, self.pro_private_check, self.pro_class_name],
                                outputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_private_check,
                                         self.pro_func_prompt, self.pro_fp_state, self.tabs_chatbot])
         self.pro_reuse_btn.click(
@@ -212,57 +257,14 @@ class ChatBot(ChatBotFrame):
             outputs=[self.chatbot, self.history, self.txt, self.tabs_chatbot, self.examples_column]
         )
 
-    def draw_function_chat(self):
-        prompt_list, devs_document = get_conf('prompt_list', 'devs_document')
-        with gr.TabItem('基础功能', id='func_tab'):
-            with gr.Accordion("`提示词`编辑保存", open=False) as self.prompt_edit_area:
-                Tips = "用 BORF 分析法设计chat GPT `提示词`:\n" \
-                       "1、阐述背景 B(Background): 说明背景，为chatGPT提供充足的信息\n" \
-                       "2、定义目标 O(Objectives):“我们希望实现什么”\n" \
-                       "3、定义关键结果 R(key Result):“我要什么具体效果”\n" \
-                       "4、试验并调整，改进 E(Evolve):三种改进方法自由组合\n" \
-                       "\t 改进输入：从答案的不足之处着手改进背景B,目标O与关键结果R\n" \
-                       "\t 改进答案：在后续对话中指正chatGPT答案缺点\n" \
-                       "\t 重新生成：尝试在`提示词`不变的情况下多次生成结果，优中选优\n" \
-                       "\t 熟练使用占位符{{{v}}}:  当`提示词`存在占位符，则优先将{{{v}}}替换为预期文本"
-                self.pro_edit_txt = gr.Textbox(show_label=False, info='提示词编辑区', lines=9,
-                                               placeholder=Tips).style(container=False)
-                with gr.Row():
-                    self.pro_name_txt = gr.Textbox(show_label=False, placeholder='提示词名称').style(container=False)
-                    self.pro_new_btn = gr.Button("保存提示词", variant="primary").style(size='sm', full_width=True)
-            with gr.Accordion("`提示词`上传", open=False) as self.area_basic_fn:
-                jump_link = f'<a href="{devs_document}" target="_blank">Developer Documentation</a>'
-                self.pro_devs_link = gr.HTML(jump_link)
-                self.pro_upload_btn = gr.File(file_count='single', file_types=['.yaml', '.json'],
-                                              label=f'上传你的`提示词`文件, 编写格式请遵循上述开发者文档', )
-            self.pro_private_check = gr.Dropdown(choices=prompt_list['key'], value=prompt_list['value'], multiselect=True,
-                                                 label='`提示词`选择', ).style()
-            self.pro_func_prompt = gr.Dataset(components=[gr.HTML()], label="提示词列表", visible=False,
-                                              samples=[['...', ""] for i in range(20)], type='index',
-                                              samples_per_page=10)
-            self.pro_fp_state = gr.State({'samples': None})
-
-    def signals_prompt_func(self):
-        self.pro_private_check.select(fn=func_box.prompt_reduce,
-                                      inputs=[self.pro_private_check, self.pro_fp_state],
-                                      outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check])
-        self.tabs_code = gr.State(0)
-        self.pro_func_prompt.select(fn=func_box.prompt_input,
-                                    inputs=[self.txt, self.pro_edit_txt, self.pro_name_txt, self.pro_func_prompt, self.pro_fp_state, self.tabs_code],
-                                    outputs=[self.txt, self.pro_edit_txt, self.pro_name_txt])
-        self.pro_upload_btn.upload(fn=func_box.prompt_upload_refresh,
-                                   inputs=[self.pro_upload_btn, self.pro_prompt_state],
-                                   outputs=[self.pro_func_prompt, self.pro_prompt_state, self.pro_private_check])
-        self.chat_tab.select(fn=lambda: 0, inputs=None, outputs=self.tabs_code)
-        self.prompt_tab.select(fn=lambda: 1, inputs=None, outputs=self.tabs_code)
-
     def draw_plugin_chat(self):
         with gr.TabItem('插件功能', id='plug_tab'):
             with gr.Accordion("上传本地文件可供高亮函数插件调用", open=False, visible=False) as self.area_file_up:
                 self.file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)",
                                             file_count="multiple").style()
             self.plugin_dropdown = gr.Dropdown(choices=crazy_classification, label='选择插件分类', value=[default_plugin],
-                                               multiselect=True, interactive=True, elem_classes='normal_mut_select')
+                                               multiselect=True, interactive=True, elem_classes='normal_mut_select'
+                                               ).style(container=False)
 
             with gr.Accordion("函数插件区/高亮插件需要输入框支持", open=True) as self.area_crazy_fn:
                 with gr.Row():
@@ -331,6 +333,7 @@ class ChatBot(ChatBotFrame):
                                   [self.cookies, self.file_upload, self.chatbot])
                 self.cancel_handles.append(click_handle)
 
+
         # 函数插件-下拉菜单与随变按钮的互动
         def on_dropdown_changed(k):
             # 按钮颜色随变
@@ -369,17 +372,26 @@ class ChatBot(ChatBotFrame):
             inputs=[], outputs=[self.stopBtn, self.submitBtn], cancels=self.cancel_handles)
 
     def draw_langchain_base(self):
+
         spl, = get_conf('spl')
         with gr.TabItem('构建知识库', id='langchain_tab'):
             with gr.Box():
-                self.langchain_upload = gr.Files(label="上传你需要构建的知识库文件", file_count="multiple", file_types=spl)
+                with gr.Row():
+                    self.langchain_classifi= gr.Dropdown(choices=[], value="公共知识库", interactive=True, label="选择知识库分类",
+                                                        elem_classes='normal_select').style(container=False)
+                with gr.Row():
+                    self.langchain_class_name = gr.Textbox(show_label=False, placeholder='*必填，构建知识库同时创建分类',
+                                                           visible=False, interactive=True).style(container=False)
+            with gr.Box():
+                with gr.Accordion(open=True, label='上传你需要构建的知识库文件'):
+                    self.langchain_upload = gr.Files(label="解析支持多类型文档，多文件建议使用zip上传", file_count="multiple", file_types=spl)
                 self.langchain_links = gr.Textbox(show_label=False, placeholder='Kdocs/网络文件,多个链接使用换行间隔').style(container=False)
                 self.langchain_know_kwargs = gr.State({'file_path': '', 'know_name': '', 'know_obj': {}, 'file_list': []})
                 #  file_path 是上传文件存储的地址，know_name，know_obj是ql向量化后的对象
             with gr.Box():
                 with gr.Row():
                     self.langchain_select = gr.Dropdown(choices=[], value=r"新建知识库",
-                                                        interactive=True, label="选择知识库", elem_classes='normal_select').style(container=False)
+                                                        interactive=True, label="新建or增量重构", elem_classes='normal_select').style(container=False)
                 with gr.Row():
                     self.langchain_name = gr.Textbox(show_label=False, placeholder='新建知识库or重命名').style(container=False)
 
@@ -393,17 +405,24 @@ class ChatBot(ChatBotFrame):
             x = x['know_name']
             if not x: return gr.update(), gr.update()
             return gr.Dropdown.update(value=[x], choices=Langchain_cn.obtain_a_list_of_knowledge_bases(ipaddr)), gr.update(label="当前模型：" + llms + "&" + '&'.join([x]))
+        self.langchain_classifi.select(fn=Langchain_cn.obtain_classification_knowledge_base,
+                                       inputs=[self.langchain_classifi],
+                                       outputs=[self.langchain_select, self.langchain_dropdown, self.langchain_status]
+                                       ).then(fn=func_box.new_button_display,
+                                              inputs=[self.langchain_classifi], outputs=[self.langchain_class_name])
         self.langchain_upload.upload(fn=on_file_uploaded,
                                      inputs=[self.langchain_upload, gr.State(''), self.langchain_know_kwargs],
                                      outputs=[self.langchain_status, self.langchain_know_kwargs])
+        self.langchain_upload.clear(fn=lambda kw: (kw.update({'file_path': ''}), f'已清空本地文件调用路径参数'),
+                                    inputs=[self.langchain_know_kwargs],
+                                    outputs=[self.langchain_know_kwargs, self.langchain_status])
         self.langchain_submit.click(fn=Langchain_cn.knowledge_base_writing,
-                                    inputs=[self.langchain_links, self.langchain_select, self.langchain_name, self.langchain_know_kwargs],
-                                    outputs=[self.langchain_status, self.langchain_error, self.langchain_select, self.langchain_know_kwargs]
+                                    inputs=[self.langchain_classifi, self.langchain_class_name, self.langchain_links, self.langchain_select, self.langchain_name, self.langchain_know_kwargs],
+                                    outputs=[self.langchain_status, self.langchain_error, self.langchain_classifi, self.langchain_select, self.langchain_know_kwargs]
                                     ).then(
                                     fn=update_drop,
                                     inputs=[self.langchain_know_kwargs, self.llms_dropdown],
                                     outputs=[self.langchain_dropdown, self.chatbot])
-
 
     def draw_setting_chat(self):
         switch_model = get_conf('switch_model')[0]
@@ -413,9 +432,9 @@ class ChatBot(ChatBotFrame):
             self.temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True,
                                          label="Temperature", ).style(container=False)
             self.max_length_sl = gr.Slider(minimum=256, maximum=4096, value=4096, step=1, interactive=True,
-                                           label="MaxLength", ).style(container=False)
+                                           label="MaxLength", visible=False).style(container=False)
             self.pro_tf_slider = gr.Slider(minimum=0.01, maximum=1.0, value=0.70, step=0.01, interactive=True,
-                                           label="Term Frequency系数").style(container=False)
+                                           label="搜索匹配系数").style(container=False)
             self.ocr_identifying_trust = gr.Slider(minimum=0.01, maximum=1.0, value=0.60, step=0.01, interactive=True,
                                            label="OCR 识别信任度").style(container=False)
 
@@ -491,10 +510,11 @@ class ChatBot(ChatBotFrame):
             self.signals_langchain_cn()
             adv_plugins = gr.State([i for i in crazy_fns])
             self.demo.load(fn=func_box.refresh_load_data,
-                           inputs=[self.chatbot, self.history, self.pro_fp_state, adv_plugins],
-                           outputs=[self.pro_func_prompt, self.pro_fp_state, self.chatbot,
-                                    self.history, self.guidance_plugins, self.guidance_plugins_state,
-                                    self.cloum_1, self.examples_column, self.langchain_dropdown, self.langchain_select])
+                           inputs=[self.pro_fp_state, adv_plugins],
+                           outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check,
+                                    self.guidance_plugins, self.guidance_plugins_state,
+                                    self.cloum_1, self.examples_column,
+                                    self.langchain_classifi, self.langchain_select, self.langchain_dropdown]) #
 
         # Start
         self.auto_opentab_delay()

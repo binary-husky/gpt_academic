@@ -293,8 +293,9 @@ def get_crazy_functions():
     # < -------------------金山文档专用--------------- >
     from crazy_functions import KDOCS_轻文档分析
     from crazy_functions import 总结音视频
+    from crazy_functions import KDOCS_流程图_图片分析
     function_plugins['金山文档专用'] = {
-        "Kdocs_多文件转测试用例(输入框输入文档链接)": {
+        "多文件转测试用例": {
             "Color": "primary",
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.KDocs_转客户端测试用例),
@@ -308,7 +309,7 @@ def get_crazy_functions():
                 "to_markdown": '文档转Markdown'
             }
         },
-        "接口文档转测试用例(输入框输入需求文档)": {
+        "接口文档转测试用例": {
             "Color": "primary",
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.KDocs_转接口测试用例),
@@ -324,7 +325,7 @@ def get_crazy_functions():
                 'template_file': False
             }
         },
-        "KDocs需求分析问答": {
+        "需求分析问答": {
             "Color": "primary",
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.KDocs_需求分析问答),
@@ -338,7 +339,7 @@ def get_crazy_functions():
                 'to_markdown': '文档转Markdown',
             }
         },
-        "KDocs文档转流程图": {
+        "文档转流程图": {
             "Color": "primary",
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.KDocs_文档转流程图),
@@ -349,7 +350,7 @@ def get_crazy_functions():
                 'img_ocr': True,
             }
         },
-        "Kdocs批量总结音视频（输入云文件链接或上传文件）": {
+        "批量总结音视频": {
             "Color": "primary",
             "AsButton": True,
             "AdvancedArgs": True,
@@ -358,8 +359,17 @@ def get_crazy_functions():
             "Parameters": {
                 "prompt": '总结摘要提取',
             }
-
         },
+        "批量理解流程图、图片": {
+            "Color": "primary",
+            "AsButton": True,
+            "AdvancedArgs": True,
+            "ArgsReminder": "",
+            "Function": HotReload(KDOCS_流程图_图片分析.批量分析流程图或图片),
+            "Parameters": {
+                "prompt": '总结摘要提取',
+            }
+        }
     }
 
     # try:

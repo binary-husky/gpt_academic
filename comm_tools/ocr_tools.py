@@ -7,8 +7,6 @@ import os.path
 import requests
 from comm_tools import func_box
 from paddleocr import PaddleOCR, draw_ocr, PPStructure, save_structure_res
-from paddleocr.ppstructure.recovery.recovery_to_doc import sorted_layout_boxes, convert_info_docx
-
 # Paddleocr目前支持的多语言语种可以通过修改lang参数进行切换
 # 例如`ch`, `en`, `fr`, `german`, `korean`, `japan`
 
@@ -49,26 +47,6 @@ class Paddle_ocr_select():
             txts_select = []
         return '\n'.join(txts_select), save_file
 
-    def img_tabs_content(self):
-        import os
-        import cv2
-        from paddleocr import PPStructure, draw_structure_result, save_structure_res
-        table_engine = PPStructure(show_log=True, image_orientation=True)
-        save_folder = './private_upload'
-        img_path = './gpt_log/img.png'
-        img = cv2.imread(img_path)
-        result = table_engine(img)
-        save_structure_res(result, save_folder, os.path.basename(img_path).split('.')[0])
-        for line in result:
-            line.pop('img')
-            print(line)
-        from PIL import Image # PaddleOCR下提供字体包
-        image = Image.open(img_path).convert('RGB')
-        im_show = draw_structure_result(image, result, font_path=self.font_path)
-        im_show = Image.fromarray(im_show)
-        im_show.save('result.jpg')
-
 
 if __name__ == '__main__':
-    file = '../gpt_log/img.png'
-    Paddle_ocr_select().img_tabs_content()
+    pass

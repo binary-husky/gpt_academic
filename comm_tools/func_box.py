@@ -282,8 +282,8 @@ def diff_list(txt='', percent=0.70, switch: list = None, lst: dict = None, sp=15
     Returns:
         返回一个列表
     """
+    is_all = toolbox.get_conf('preset_prompt')[0]['value']
     count_dict = {}
-    is_all = toolbox.get_conf('prompt_list')[0]['key'][1]
     if not lst:
         lst = {}
         tabs = SqliteHandle().get_tables()
@@ -351,7 +351,7 @@ def diff_list(txt='', percent=0.70, switch: list = None, lst: dict = None, sp=15
     return dateset_list
 
 
-def prompt_upload_refresh(file, prompt, ipaddr: gr.Request):
+def prompt_upload_refresh(file, prompt, pro_select, cls_name, ipaddr: gr.Request):
     """
     上传文件，将文件转换为字典，然后存储到数据库，并刷新Prompt区域
     Args:
@@ -361,7 +361,14 @@ def prompt_upload_refresh(file, prompt, ipaddr: gr.Request):
     Returns:
         注册函数所需的元祖对象
     """
-    hosts = ipaddr.client.host
+    if pro_select == '新建分类':
+        if not cls_name:
+            result = [[f'{html_tag_color("若选择新建分类，分类名不能为空", color="red")}', '']]
+            prompt['samples'] = [[f'{html_tag_color("选择新建分类，分类名不能为空", color="red")}', '']]
+            return gr.update(), gr.Dataset.update(samples=result, visible=True), prompt, pro_select
+        tab_cls = non_personal_tag(cls_name, ipaddr.client.host)
+    else:
+        tab_cls = non_personal_tag(pro_select, ipaddr.client.host)
     if file.name.endswith('json'):
         upload_data = check_json_format(file.name)
     elif file.name.endswith('yaml'):
@@ -369,11 +376,11 @@ def prompt_upload_refresh(file, prompt, ipaddr: gr.Request):
     else:
         upload_data = {}
     if upload_data != {}:
-        SqliteHandle(f'prompt_{hosts}').inset_prompt(upload_data)
-        ret_data = prompt_retrieval(is_all=['个人'], hosts=hosts)
-        return gr.Dataset.update(samples=ret_data, visible=True), prompt, ['个人']
+        SqliteHandle(f'prompt_{tab_cls}').inset_prompt(upload_data, tab_cls)
+        ret_data = prompt_retrieval(is_all=tab_cls, hosts=tab_cls)
+        return gr.Dataset.update(samples=ret_data, visible=True), prompt, tab_cls
     else:
-        prompt['samples'] = [[f'{html_tag_color("数据解析失败，请检查文件是否符合规范", color="red")}', '']]
+        prompt['samples'] = [[f'{html_tag_color("数据解析失败，请检查文件是否符合规范", color="red")}', tab_cls]]
         return prompt['samples'], prompt, []
 
 
@@ -387,13 +394,17 @@ def prompt_retrieval(is_all, hosts='', search=False):
     Returns:
         返回一个列表
     """
+    all_, personal = toolbox.get_conf('preset_prompt')[0]['key']
     count_dict = {}
-    if '所有人' in is_all:
+    if all_ == is_all:
         for tab in SqliteHandle('ai_common').get_tables():
             if tab.startswith('prompt'):
                 data = SqliteHandle(tab).get_prompt_value(None)
                 if data: count_dict.update(data)
-    elif '个人' in is_all:
+    elif personal == is_all:
+        data = SqliteHandle(f'prompt_{hosts}').get_prompt_value(None)
+        if data: count_dict.update(data)
+    elif hosts and is_all != '新建分类':
         data = SqliteHandle(f'prompt_{hosts}').get_prompt_value(None)
         if data: count_dict.update(data)
     retrieval = []
@@ -408,7 +419,7 @@ def prompt_retrieval(is_all, hosts='', search=False):
         return retrieval
 
 
-def prompt_reduce(is_all, prompt: gr.Dataset, ipaddr: gr.Request):  # is_all, ipaddr: gr.Request
+def prompt_reduce(is_all, prompt: gr.Dataset, pro_cls, ipaddr: gr.Request):  # is_all, ipaddr: gr.Request
     """
     上传文件，将文件转换为字典，然后存储到数据库，并刷新Prompt区域
     Args:
@@ -418,12 +429,21 @@ def prompt_reduce(is_all, prompt: gr.Dataset, ipaddr: gr.Request):  # is_all, ip
     Returns:
         返回注册函数所需的对象
     """
-    data = prompt_retrieval(is_all=is_all, hosts=ipaddr.client.host)
+    tab_cls = non_personal_tag(pro_cls, ipaddr.client.host)
+    data = prompt_retrieval(is_all=is_all, hosts=tab_cls)
     prompt['samples'] = data
     return gr.Dataset.update(samples=data, visible=True), prompt, is_all
 
 
-def prompt_save(txt, name, prompt: gr.Dataset, ipaddr: gr.Request):
+def non_personal_tag(select, ipaddr):
+    all_, personal = toolbox.get_conf('preset_prompt')[0]['key']
+    if select and personal != select and all_ != select:
+        tab_cls = select+'_sys'
+    else:
+        tab_cls = ipaddr
+    return tab_cls
+
+def prompt_save(txt, name, prompt: gr.Dataset, pro_select, cls_name, ipaddr: gr.Request):
     """
     编辑和保存Prompt
     Args:
@@ -434,16 +454,27 @@ def prompt_save(txt, name, prompt: gr.Dataset, ipaddr: gr.Request):
     Returns:
         返回注册函数所需的对象
     """
+    if pro_select == '新建分类':
+        if not cls_name:
+            result = [[f'{html_tag_color("选择新建分类，分类名不能为空", color="red")}', '']]
+            prompt['samples'] = [[f'{html_tag_color("选择新建分类，分类名不能为空", color="red")}', '']]
+            return txt, name, gr.update(), gr.Dataset.update(samples=result, visible=True), prompt, gr.Tabs.update()
+        tab_cls = non_personal_tag(cls_name, ipaddr.client.host)
+    else:
+        tab_cls = non_personal_tag(pro_select, ipaddr.client.host)
     if txt and name:
-        yaml_obj = SqliteHandle(f'prompt_{ipaddr.client.host}')
-        yaml_obj.inset_prompt({name: txt})
-        result = prompt_retrieval(is_all=['个人'], hosts=ipaddr.client.host)
+        all_, personal = toolbox.get_conf('preset_prompt')[0]['key']
+        if pro_select == all_:
+            cls_name = personal
+        yaml_obj = SqliteHandle(f'prompt_{tab_cls}')
+        yaml_obj.inset_prompt({name: txt}, tab_cls)
+        result = prompt_retrieval(is_all=pro_select, hosts=tab_cls)
         prompt['samples'] = result
-        return "", "", ['个人'], gr.Dataset.update(samples=result, visible=True), prompt, gr.Tabs.update(selected='chatbot')
+        return "", "", cls_name, gr.Dataset.update(samples=result, visible=True), prompt, gr.Tabs.update(selected='chatbot')
     elif not txt or not name:
         result = [[f'{html_tag_color("编辑框 or 名称不能为空!!!!!", color="red")}', '']]
         prompt['samples'] = [[f'{html_tag_color("编辑框 or 名称不能为空!!!!!", color="red")}', '']]
-        return txt, name, [], gr.Dataset.update(samples=result, visible=True), prompt, gr.Tabs.update(selected='chatbot')
+        return txt, name, cls_name, gr.Dataset.update(samples=result, visible=True), prompt, gr.Tabs.update(selected='chatbot')
 
 
 def prompt_input(txt: str, prompt_str, name_str,  index, data: gr.Dataset, tabs_index):
@@ -459,7 +490,6 @@ def prompt_input(txt: str, prompt_str, name_str,  index, data: gr.Dataset, tabs_
     data_str = str(data['samples'][index][1])
     data_name = str(data['samples'][index][0])
     rp_str = '{{{v}}}'
-
     def str_v_handle(__str):
         if data_str.find(rp_str) != -1 and __str:
             txt_temp = data_str.replace(rp_str, __str)
@@ -525,6 +555,17 @@ def pattern_html(html):
         return ""
 
 
+def get_directory_list(folder_path, user_info='temp'):
+    directory_list = []
+    users_list = []
+    for root, dirs, files in os.walk(folder_path):
+        for dir_name in dirs:
+            directory_list.append(dir_name)
+        if user_info in files and 'index.faiss' in files:
+            users_list.append(os.path.basename(root))
+    return directory_list, users_list
+
+
 def thread_write_chat(chatbot):
     """
     对话记录写入数据库
@@ -540,18 +581,25 @@ def thread_write_chat(chatbot):
             else: v = pattern_html(v)
             gpt_result.append(v)
     if private_key in chat_title:
-        SqliteHandle(f'ai_private_{chat_title[-2]}').inset_prompt({i_say: gpt_result})
+        SqliteHandle(f'ai_private_{chat_title[-2]}').inset_prompt({i_say: gpt_result}, chat_title[-2])
     else:
-        SqliteHandle(f'ai_common_{chat_title[-2]}').inset_prompt({i_say: gpt_result})
+        SqliteHandle(f'ai_common_{chat_title[-2]}').inset_prompt({i_say: gpt_result}, chat_title[-2])
 
 
 base_path = os.path.dirname(os.path.dirname(__file__))
-html_covert_path = os.path.basename(base_path)
 prompt_path = os.path.join(base_path, 'users_data')
 knowledge_path = os.path.join(prompt_path, 'knowledge')
 knowledge_path_sys_path = os.path.join(prompt_path, 'knowledge', 'system')
 users_path = os.path.join(base_path, 'private_upload')
 logs_path = os.path.join(base_path, 'gpt_log')
+
+
+def new_button_display(select):
+    if '新建分类' == select:
+        return gr.Textbox.update(visible=True)
+    else:
+        return gr.Textbox.update(visible=False)
+
 
 def reuse_chat(result, chatbot, history, say):
     """复用对话记录"""
@@ -583,35 +631,42 @@ def spinner_chatbot_loading(chatbot):
     loading_msg[-1] = tuple(temp_list)
     return loading_msg
 
+def filter_database_tables():
+    tables = SqliteHandle().get_tables()
+    preset = toolbox.get_conf('preset_prompt')[0]['key']
+    split_tab = []
+    for t in tables:
+        if str(t).startswith('prompt_') and str(t).endswith('_sys'):
+            split_tab.append("_".join(str(t).split('_')[1:-1]))
+    split_tab_new = ['新建分类'] + preset + split_tab
+    return split_tab_new
 
-def refresh_load_data(chat, history, prompt, crazy_list, request: gr.Request):
+def refresh_load_data(prompt, crazy_list, request: gr.Request):
     """
     Args:
-        chat: 聊天组件
-        history: 对话记录
         prompt: prompt dataset组件
-
     Returns:
-        预期是每次刷新页面，加载最新
+        预期是每次刷新页面，加载最新数据
     """
-    is_all = toolbox.get_conf('prompt_list')[0]['key'][0]
-    data = prompt_retrieval(is_all=[is_all])
+    is_all = toolbox.get_conf('preset_prompt')[0]['value']
+    data = prompt_retrieval(is_all=is_all)
     prompt['samples'] = data
     selected = random.sample(crazy_list, 4)
     user_agent = request.kwargs['headers']['user-agent'].lower()
     if user_agent.find('android') != -1 or user_agent.find('iphone') != -1:
         hied_elem = gr.update(visible=False)
-        MOBILE_SHOW, = toolbox.get_conf('MOBILE_SHOW')
-        show_elem = gr.update(visible=MOBILE_SHOW)
     else:
         hied_elem = gr.update()
-        show_elem = gr.update()
-    from comm_tools import Langchain_cn
-    know_list = Langchain_cn.obtain_a_list_of_knowledge_bases(request)
-    know_update = gr.Dropdown.update(choices=know_list)
-    outputs = [gr.Dataset.update(samples=data, visible=True), prompt,
-               chat, history, gr.Dataset.update(samples=[[i] for i in selected]), selected,
-               hied_elem, hied_elem, know_update, know_update]
+    know_list = ['新建分类'] + os.listdir(knowledge_path)
+    load_list, user_list = get_directory_list(os.path.join(knowledge_path, '公共知识库'), request.client.host)
+    know_cls = gr.Dropdown.update(choices=know_list, label='公共知识库')
+    know_load = gr.Dropdown.update(choices=load_list, label='公共知识库')
+    know_user = gr.Dropdown.update(choices=user_list)
+    select_list = filter_database_tables()
+    outputs = [gr.Dataset.update(samples=data, visible=True), prompt, gr.Dropdown.update(choices=select_list),
+               gr.Dataset.update(samples=[[i] for i in selected]), selected,
+               hied_elem, hied_elem,
+               know_cls, know_user, know_load]
     return outputs
 
 
@@ -673,24 +728,31 @@ def git_log_list():
     return [i.split('|') for i in ll if 'branch' not in i][:5]
 
 
-def to_markdown_tabs(head: list, tabs: list, alignment=':---:'):
+def to_markdown_tabs(head: list, tabs: list, alignment=':---:', column=False):
     """
     Args:
         head: 表头：[]
-        tabs:  表值：[[列1] ,[列2], [列3], [列4]]
+        tabs: 表值：[[列1], [列2], [列3], [列4]]
         alignment: :--- 左对齐， :---: 居中对齐， ---: 右对齐
+        column: True to keep data in columns, False to keep data in rows (default).
     Returns:
-        '| 表头 |  表头2 |\n| :---: | :---: |\n| 列1 | 列2 |\n| 列3 | 列4 |'
+        A string representation of the markdown table.
     """
+    if column:
+        transposed_tabs = list(map(list, zip(*tabs)))
+    else:
+        transposed_tabs = tabs
+    # Find the maximum length among the columns
+    max_len = max(len(column) for column in transposed_tabs)
+
     tab_format = "| %s "
     tabs_list = "".join([tab_format % i for i in head]) + '|\n'
     tabs_list += "".join([tab_format % alignment for i in head]) + '|\n'
 
-    for tab in tabs:
-        tabs_list += "".join([tab_format % i for i in tab]) + '|\n'
-
+    for i in range(max_len):
+        row_data = [tab[i] if i < len(tab) else '' for tab in transposed_tabs]
+        tabs_list += "".join([tab_format % i for i in row_data]) + '|\n'
     return tabs_list
-
 
 import qrcode
 from PIL import Image
@@ -767,6 +829,7 @@ class JsonHandle:
         with open(self.file, 'r') as f:
             data = json.load(f)
         return data
+
 
 
 
