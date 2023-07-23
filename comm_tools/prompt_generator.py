@@ -56,7 +56,7 @@ class SqliteHandle:
         temp_all = {}
         source = ''
         if find:
-            result = self.__cursor.execute(f"SELECT prompt, result, source FROM `{self.__table}` WHERE prompt LIKE '%{find}%'").fetchall()
+            result = self.__cursor.execute("SELECT prompt, result, source FROM ? WHERE prompt LIKE ?", (self.__table, f"%{find}%")).fetchall()
         else:
             result = self.__cursor.execute(f"SELECT prompt, result, source FROM `{self.__table}`").fetchall()
         for row in result:
@@ -101,26 +101,32 @@ class SqliteHandle:
         else:
             return query[0][0]
 
-def cp_db_data(incloud_tab='prompt'):
+
+def cp_db_data(incloud_tab='prompt_'):
     sql_ll = sqlite_handle(database='ai_prompt_cp.db')
     tabs = sql_ll.get_tables()
     for i in tabs:
         if str(i).startswith(incloud_tab):
-            old_data = sqlite_handle(table=i, database='ai_prompt_cp.db').get_prompt_value()
-            sqlite_handle(table=i).inset_prompt(old_data)
+            old_data, _ = sqlite_handle(table=i, database='ai_prompt_cp.db').get_prompt_value()
+            source = str(i).replace(incloud_tab, '')
+            sqlite_handle(table=i).inset_prompt(old_data, source)
+
 
 def batch_inset_prompt(json_path, tables):
     sql_handle = sqlite_handle(table=tables)
-    data_list = func_box.JsonHandle(json_path).load()
-    for i in data_list:
-        source = os.path.basename(json_path).split('.')[0]
-        sql_handle.inset_prompt(prompt={i['act']: i['prompt']}, source=source)
+    for json_ in os.listdir(json_path):
+        data_list = func_box.JsonHandle(json_).load()
+        for i in data_list:
+            source = os.path.basename(json_path).split('.')[0]
+            sql_handle.inset_prompt(prompt={i['act']: i['prompt']}, source=source)
+
 
 def batch_add_source():
     sql_ll = sqlite_handle(database='ai_prompt.db')
     tabs = sql_ll.get_tables()
     for t in tabs:
         sqlite_handle(table=t).add_colum_type('source')
+
 
 def batch_export_prompt(incloud_tab='prompt'):
     sql_ll = sqlite_handle(database='ai_prompt.db')
@@ -138,6 +144,7 @@ def batch_export_prompt(incloud_tab='prompt'):
                 with open(os.path.join(file_path, f"{source}.json"), mode='w', encoding='utf-8') as f:
                     f.write(json.dumps(file_dict, ensure_ascii=False))
                     print(f'{source}已导出', os.path.join(file_path, f"{source}.json"))
+
 
 sqlite_handle = SqliteHandle
 if __name__ == '__main__':

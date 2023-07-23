@@ -32,7 +32,7 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
     elif select and select != '新建知识库': kai_id = select
     else: kai_id = func_box.created_atime()
     # < --------------------限制上班时间段构建知识库--------------- >
-    reject_build_switch = toolbox.get_conf('reject_build_switch')
+    reject_build_switch, = toolbox.get_conf('reject_build_switch')
     if reject_build_switch:
         if not func_box.check_expected_time():
             yield '上班时间段不允许启动构建知识库任务，若有紧急任务请联系管理员', '', gr.Dropdown.update(), gr.Dropdown.update(), kai_handle
@@ -76,7 +76,8 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
     # < -------------------构建知识库--------------- >
     tab_show = [os.path.basename(i) for i in file_manifest]
     preprocessing_files = func_box.to_markdown_tabs(head=['文件'], tabs=[tab_show])
-    yield (f'正在准备将以下文件向量化，生成知识库文件，若文件数据较多，可能需要等待几小时：\n\n{preprocessing_files}', error, gr.Dropdown.update(),
+    yield (f'正在准备将以下文件向量化，生成知识库文件，若文件数据较多，可能需要等待几小时：\n\n{preprocessing_files}',
+           error, gr.Dropdown.update(),
            gr.Dropdown.update(), kai_handle)
     with toolbox.ProxyNetworkActivate():    # 临时地激活代理网络
         kai = knowledge_archive_interface(vs_path=vector_path)
@@ -88,7 +89,8 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
     kai_handle['know_obj'].update({kai_id: qa_handle})
     kai_handle['know_name'] = kai_id
     load_list, user_list = func_box.get_directory_list(vector_path, ipaddr.client.host)
-    yield (f'构建完成, 当前知识库内有效的文件如下, 已自动帮您选中知识库，现在你可以畅快的开始提问啦～\n\n{kai_files}', error, gr.Dropdown.update(value=cls_select),
+    yield (f'构建完成, 当前知识库内有效的文件如下, 已自动帮您选中知识库，现在你可以畅快的开始提问啦～\n\n{kai_files}',
+           error, gr.Dropdown.update(value=cls_select),
            gr.Dropdown.update(value='新建知识库', choices=load_list),  kai_handle)
 
 

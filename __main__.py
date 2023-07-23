@@ -377,7 +377,7 @@ class ChatBot(ChatBotFrame):
         with gr.TabItem('构建知识库', id='langchain_tab'):
             with gr.Box():
                 with gr.Row():
-                    self.langchain_classifi= gr.Dropdown(choices=[], value="公共知识库", interactive=True, label="选择知识库分类",
+                    self.langchain_classifi = gr.Dropdown(choices=[], value="公共知识库", interactive=True, label="选择知识库分类",
                                                         elem_classes='normal_select').style(container=False)
                 with gr.Row():
                     self.langchain_class_name = gr.Textbox(show_label=False, placeholder='*必填，构建知识库同时创建分类',

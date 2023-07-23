@@ -683,7 +683,7 @@ def refresh_load_data(prompt, crazy_list, request: gr.Request):
         hied_elem = gr.update()
     know_list = ['新建分类'] + os.listdir(knowledge_path)
     load_list, user_list = get_directory_list(os.path.join(knowledge_path, '公共知识库'), request.client.host)
-    know_cls = gr.Dropdown.update(choices=know_list, label='公共知识库')
+    know_cls = gr.Dropdown.update(choices=know_list, value='公共知识库')
     know_load = gr.Dropdown.update(choices=load_list, label='公共知识库')
     know_user = gr.Dropdown.update(choices=user_list)
     select_list = filter_database_tables()
