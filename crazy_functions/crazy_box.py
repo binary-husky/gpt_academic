@@ -225,7 +225,7 @@ class Kdocs:
         self.docs_old_type = ['.docs', '.doc', '.pptx', '.ppt', '.xls', '.xlsx', '.pdf', '.csv', '.txt', '.pom', '.pof']
         self.to_img_type = {'.pom': '.png', '.pof': '.png'}
         self.media_type = ['.mp4', '.m4a', '.wav', '.mpga', '.mpeg', '.mp3', '.avi', '.mkv', '.flac', '.aac']
-        self.smart_type = {'.otl': 'pdf', '.ksheet': 'xlsx'}
+        self.smart_type = {'.otl': '.pdf', '.ksheet': '.xlsx'}
 
     def get_file_info_html(self):
         """
