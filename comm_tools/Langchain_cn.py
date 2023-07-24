@@ -131,7 +131,7 @@ def obtain_classification_knowledge_base(cls_name, ipaddr: gr.Request):
 
 def obtaining_knowledge_base_files(cls_select, cls_name, vs_id, chatbot, kai_handle, ipaddr: gr.Request):
     if vs_id:
-        cls_select = classification_filtering_tag(cls_select, cls_name, vs_id)
+        cls_select = classification_filtering_tag(cls_select, cls_name, ipaddr.client.host)
         vs_path = os.path.join(func_box.knowledge_path, cls_select)
         if isinstance(chatbot, toolbox.ChatBotWithCookies):
             pass
