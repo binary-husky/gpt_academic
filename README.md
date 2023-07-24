@@ -93,7 +93,7 @@ Latex论文一键校对 | [函数插件] 仿Grammarly对Latex文章进行语法�
 
 1. 下载项目
 ```sh
-git clone https://github.com/binary-husky/gpt_academic.git
+git clone --depth=1 https://github.com/binary-husky/gpt_academic.git
 cd gpt_academic
 ```
 
@@ -126,7 +126,7 @@ python -m pip install -r request_llm/requirements_chatglm.txt
 
 # 【可选步骤II】支持复旦MOSS
 python -m pip install -r request_llm/requirements_moss.txt
-git clone https://github.com/OpenLMLab/MOSS.git request_llm/moss  # 注意执行此行代码时，必须处于项目根路径
+git clone --depth=1 https://github.com/OpenLMLab/MOSS.git request_llm/moss  # 注意执行此行代码时，必须处于项目根路径
 
 # 【可选步骤III】确保config.py配置文件的AVAIL_LLM_MODELS包含了期望的模型，目前支持的全部模型如下(jittorllms系列目前仅支持docker方案)：
 AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "newbing", "moss"] # + ["jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
@@ -149,7 +149,7 @@ python main.py
 [![basiclatex](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-latex.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-latex.yml)
 
 ``` sh
-git clone https://github.com/binary-husky/gpt_academic.git  # 下载项目
+git clone --depth=1 https://github.com/binary-husky/gpt_academic.git  # 下载项目
 cd gpt_academic                                 # 进入路径
 nano config.py                                      # 用任意文本编辑器编辑config.py, 配置 “Proxy”， “API_KEY” 以及 “WEB_PORT” (例如50923) 等
 docker build -t gpt-academic .                      # 安装
