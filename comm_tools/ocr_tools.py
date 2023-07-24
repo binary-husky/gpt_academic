@@ -24,27 +24,30 @@ class Paddle_ocr_select():
         save_path = os.path.join(func_box.users_path, self.ipaddr, 'ocr_temp')
         save_file = os.path.join(save_path, f'{func_box.created_atime()}.jpeg')
         os.makedirs(save_path, exist_ok=True)
+        result = result[0]
         if show_result:
             # 显示结果
             from PIL import Image
-            result = result[0]
-            if img_path.startswith('http'):
-                response = requests.get(img_path)
-                with open(save_file, 'wb') as f:
-                    f.write(response.content)
-                image = Image.open(save_file).convert('RGB')
-            else:
-                image = Image.open(img_path).convert('RGB')
             boxes = [line[0] for line in result if line[1][1] > self.trust_value]
             txts = [line[1][0] for line in result]
             txts_select = [line[1][0] for line in result if line[1][1] > self.trust_value]
             scores = [line[1][1] for line in result]
-            im_show = draw_ocr(image, boxes, txts, scores, font_path=self.font_path)
-            im_show = Image.fromarray(im_show)
-            im_show.save(save_file)
+            try:
+                if img_path.startswith('http'):
+                    response = requests.get(img_path)
+                    with open(save_file, 'wb') as f:
+                        f.write(response.content)
+                    image = Image.open(save_file).convert('RGB')
+                else:
+                    image = Image.open(img_path).convert('RGB')
+                im_show = draw_ocr(image, boxes, txts, scores, font_path=self.font_path)
+                im_show = Image.fromarray(im_show)
+                im_show.save(save_file)
+            except Exception:
+                print('绘制选择文字出错')
         else:
-            save_file=''
-            txts_select = []
+            save_file= ''
+            txts_select = result
         return '\n'.join(txts_select), save_file
 
 

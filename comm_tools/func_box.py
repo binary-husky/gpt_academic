@@ -875,4 +875,4 @@ class JsonHandle:
 
 
 if __name__ == '__main__':
-    通知机器人()
+    print('safafafa')

@@ -3,9 +3,6 @@ import importlib
 import inspect
 import gradio as gr
 from comm_tools import func_box
-from comm_tools import Langchain_cn
-import re
-import os
 import gradio
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
@@ -84,6 +81,7 @@ def ArgsGeneralWrapper(f):
                   chatbot, history, system_prompt, models, plugin_advanced_arg, ipaddr: gr.Request, *args):
         """"""
         # 引入一个有cookie的chatbot
+        from comm_tools import Langchain_cn
         start_time = time.time()
         encrypt, private, _ = get_conf('switch_model')[0]['key']
         cookies.update({

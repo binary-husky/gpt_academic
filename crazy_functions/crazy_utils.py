@@ -1,6 +1,7 @@
 import glob
 import os
 from comm_tools import toolbox
+from comm_tools import func_box
 import threading
 
 def input_clipping(inputs, history, max_token_limit):
@@ -621,7 +622,6 @@ def get_files_from_everything(txt, type, ipaddr='temp'): # type='.md'
 
 import os
 import shutil
-from comm_tools import func_box
 from zh_langchain.chains.local_doc_qa import LocalDocQA
 from zh_langchain.configs import model_config
 class knowledge_archive_interface():

@@ -3,7 +3,6 @@ from comm_tools import toolbox
 from crazy_functions import crazy_utils
 import gradio as gr
 from comm_tools import func_box
-from crazy_functions.crazy_utils import knowledge_archive_interface
 from crazy_functions import crazy_box
 
 
@@ -79,7 +78,7 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
            error, gr.Dropdown.update(),
            gr.Dropdown.update(), kai_handle)
     with toolbox.ProxyNetworkActivate():    # 临时地激活代理网络
-        kai = knowledge_archive_interface(vs_path=vector_path)
+        kai = crazy_utils.knowledge_archive_interface(vs_path=vector_path)
         qa_handle, vs_path = kai.construct_vector_store(vs_id=kai_id, files=file_manifest)
     with open(os.path.join(vector_path, kai_id, ipaddr.client.host), mode='w') as f: pass
     _, kai_files = kai.get_init_file(kai_id)
@@ -131,7 +130,6 @@ def obtain_classification_knowledge_base(cls_name, ipaddr: gr.Request):
 
 
 def obtaining_knowledge_base_files(cls_select, cls_name, vs_id, chatbot, kai_handle, ipaddr: gr.Request):
-    from crazy_functions.crazy_utils import knowledge_archive_interface
     if vs_id:
         cls_select = classification_filtering_tag(cls_select, cls_name, vs_id)
         vs_path = os.path.join(func_box.knowledge_path, cls_select)
@@ -147,7 +145,7 @@ def obtaining_knowledge_base_files(cls_select, cls_name, vs_id, chatbot, kai_han
             if kai_handle['know_obj'].get(id, None):
                 kai = kai_handle['know_obj'][id]
             else:
-                kai = knowledge_archive_interface(vs_path=vs_path)
+                kai = crazy_utils.knowledge_archive_interface(vs_path=vs_path)
             qa_handle, _dict = kai.get_init_file(vs_id=id)
             kai_files.update(_dict)
             kai_handle['know_obj'].update({id: qa_handle})
