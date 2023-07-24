@@ -107,9 +107,10 @@ class SqliteHandle:
         self.__connect.commit()
 
     def find_prompt_result(self, name, tabs='prompt_127.0.0.1'):
+
         query = self.__cursor.execute(f"SELECT result FROM `{self.__table}` WHERE prompt LIKE '{name}'").fetchall()
         if query == []:
-            query = self.__cursor.execute(f"SELECT result FROM `{tabs}` WHERE prompt LIKE '{name}'").fetchall()
+            query = self.__cursor.execute(f"SELECT result FROM `prompt_{tabs}_sys` WHERE prompt LIKE '{name}'").fetchall()
             return query[0][0]
         else:
             return query[0][0]
