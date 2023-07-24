@@ -7,7 +7,6 @@ import json
 import os.path
 import sqlite3
 import functools
-from comm_tools import func_box
 # 连接到数据库
 
 
@@ -56,7 +55,8 @@ class SqliteHandle:
         temp_all = {}
         source = ''
         if find:
-            result = self.__cursor.execute("SELECT prompt, result, source FROM ? WHERE prompt LIKE ?", (self.__table, f"%{find}%")).fetchall()
+            result = self.__cursor.execute(f"SELECT prompt, result, source FROM {self.__table} WHERE prompt LIKE ?",
+                                           (f"%{find}%",)).fetchall()
         else:
             result = self.__cursor.execute(f"SELECT prompt, result, source FROM `{self.__table}`").fetchall()
         for row in result:
@@ -64,13 +64,26 @@ class SqliteHandle:
             source = row[2]
         return temp_all, source
 
+    def get_prompt_value_temp(self):
+        temp_all = {}
+        ss = self.__table
+        result = self.__cursor.execute(f"SELECT prompt, result FROM `{self.__table}`").fetchall()
+        for row in result:
+            temp_all[row[0]] = row[1]
+        return temp_all
+
     def query_table_columns(self):
         result = self.__cursor.execute(f"SELECT name, sql FROM sqlite_master WHERE type='table' AND name='{self.__table}';").fetchall()
         return result
 
-    def add_colum_type(self, colum, type='TEXT'):
-        self.__cursor.execute(f"ALTER TABLE `{self.__table}` ADD COLUMN {colum} {type};")
-        self.__connect.commit()
+    def add_column_type(self, column, column_type='TEXT'):
+        # 检查要添加的列是否已存在
+        existing_columns = self.__cursor.execute(f"PRAGMA table_info(`{self.__table}`)").fetchall()
+        existing_column_names = [column[1] for column in existing_columns]
+        if column not in existing_column_names:
+            # 执行添加列的操作
+            self.__cursor.execute(f"ALTER TABLE `{self.__table}` ADD COLUMN {column} {column_type};")
+            self.__connect.commit()
 
     def inset_prompt(self, prompt: dict, source=''):
         error_status = ''
@@ -107,45 +120,44 @@ def cp_db_data(incloud_tab='prompt_'):
     tabs = sql_ll.get_tables()
     for i in tabs:
         if str(i).startswith(incloud_tab):
-            old_data, _ = sqlite_handle(table=i, database='ai_prompt_cp.db').get_prompt_value()
+            old_data = sqlite_handle(table=i, database='ai_prompt_cp.db').get_prompt_value_temp()
             source = str(i).replace(incloud_tab, '')
             sqlite_handle(table=i).inset_prompt(old_data, source)
 
 
-def batch_inset_prompt(json_path, tables):
-    sql_handle = sqlite_handle(table=tables)
+def batch_inset_prompt(json_path):
     for json_ in os.listdir(json_path):
-        data_list = func_box.JsonHandle(json_).load()
+        with open(os.path.join(json_path, json_), 'r') as f:
+            data_list = json.load(f)
         for i in data_list:
-            source = os.path.basename(json_path).split('.')[0]
-            sql_handle.inset_prompt(prompt={i['act']: i['prompt']}, source=source)
+            source = os.path.basename(os.path.join(json_path, json_)).split('.')[0]
+            sqlite_handle(table=f"prompt_{source}_sys", database='ai_prompt_cp.db').inset_prompt(prompt={i['act']: i['prompt']}, source=source)
 
 
 def batch_add_source():
-    sql_ll = sqlite_handle(database='ai_prompt.db')
+    sql_ll = sqlite_handle(database='ai_prompt_cp.db')
     tabs = sql_ll.get_tables()
     for t in tabs:
-        sqlite_handle(table=t).add_colum_type('source')
+        sqlite_handle(table=t, database='ai_prompt_cp.db').add_column_type('source')
 
 
-def batch_export_prompt(incloud_tab='prompt'):
-    sql_ll = sqlite_handle(database='ai_prompt.db')
+def batch_export_prompt(incloud_tab='prompt_'):
+    sql_ll = sqlite_handle(database='ai_prompt_cp.db')
     tabs = sql_ll.get_tables()
     for i in tabs:
         if str(i).startswith(incloud_tab):
             source = i.split('_')[-1]
-            result = sqlite_handle(i).get_prompt_value()
+            result = sqlite_handle(table=i, database='ai_prompt_cp.db').get_prompt_value_temp()
             file_dict = []
             for k in result:
                 file_dict.append({'act': k, 'prompt': result[k]})
             if file_dict:
-                file_path = os.path.join(func_box.prompt_path, 'export_prompt')
+                file_path = os.path.join('/Users/kilig/Job/Python-project/kso_gpt/users_data/export_prompt')
                 os.makedirs(file_path, exist_ok=True)
                 with open(os.path.join(file_path, f"{source}.json"), mode='w', encoding='utf-8') as f:
                     f.write(json.dumps(file_dict, ensure_ascii=False))
                     print(f'{source}已导出', os.path.join(file_path, f"{source}.json"))
 
-
 sqlite_handle = SqliteHandle
 if __name__ == '__main__':
-    sqlite_handle().delete_tabls('prompt_新建分类_sys')
+    batch_inset_prompt('/Users/kilig/Job/Python-project/kso_gpt/users_data/export_prompt')

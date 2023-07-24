@@ -27,9 +27,10 @@ import pyperclip
 import random
 import gradio as gr
 from comm_tools import toolbox
-from comm_tools.prompt_generator import SqliteHandle
+from comm_tools import prompt_generator
 from bs4 import BeautifulSoup
 import copy
+SqliteHandle = prompt_generator.SqliteHandle
 
 """contextlib 是 Python 标准库中的一个模块，提供了一些工具函数和装饰器，用于支持编写上下文管理器和处理上下文的常见任务，例如资源管理、异常处理等。
 官网：https://docs.python.org/3/library/contextlib.html"""
