@@ -121,7 +121,7 @@ def obtain_a_list_of_knowledge_bases(ipaddr):
 
 def obtain_classification_knowledge_base(cls_name, ipaddr: gr.Request):
     if cls_name == '个人知识库':
-        load_path = os.path.join(func_box.knowledge_path, ipaddr.client.host)
+        load_path = os.path.join(func_box.knowledge_path, '个人知识库', ipaddr.client.host)
     else:
         load_path = os.path.join(func_box.knowledge_path, cls_name)
     load_list, user_list = func_box.get_directory_list(load_path, ipaddr.client.host)
