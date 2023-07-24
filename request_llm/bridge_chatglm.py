@@ -37,15 +37,23 @@ class GetGLMHandle(Process):
         # 子进程执行
         # 第一次运行，加载参数
         retry = 0
+        LOCAL_MODEL_QUANT, device = get_conf('LOCAL_MODEL_QUANT', 'LOCAL_MODEL_DEVICE')
+
+        if LOCAL_MODEL_QUANT == "INT4":         # INT4
+            _model_name_ = "THUDM/chatglm2-6b-int4"
+        elif LOCAL_MODEL_QUANT == "INT8":       # INT8
+            _model_name_ = "THUDM/chatglm2-6b-int8"
+        else:
+            _model_name_ = "THUDM/chatglm2-6b"  # FP16
+
         while True:
             try:
                 if self.chatglm_model is None:
-                    self.chatglm_tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm2-6b", trust_remote_code=True)
-                    device, = get_conf('LOCAL_MODEL_DEVICE')
+                    self.chatglm_tokenizer = AutoTokenizer.from_pretrained(_model_name_, trust_remote_code=True)
                     if device=='cpu':
-                        self.chatglm_model = AutoModel.from_pretrained("THUDM/chatglm2-6b", trust_remote_code=True).float()
+                        self.chatglm_model = AutoModel.from_pretrained(_model_name_, trust_remote_code=True).float()
                     else:
-                        self.chatglm_model = AutoModel.from_pretrained("THUDM/chatglm2-6b", trust_remote_code=True).half().cuda()
+                        self.chatglm_model = AutoModel.from_pretrained(_model_name_, trust_remote_code=True).half().cuda()
                     self.chatglm_model = self.chatglm_model.eval()
                     break
                 else:
