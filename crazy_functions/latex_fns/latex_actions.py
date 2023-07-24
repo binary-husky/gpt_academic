@@ -22,7 +22,8 @@ def split_subprocess(txt, project_folder, return_dict, opts):
     mask = np.zeros(len(txt), dtype=np.uint8) + TRANSFORM
 
     # 吸收title与作者以上的部分
-    text, mask = set_forbidden_text(text, mask, r"(.*?)\\maketitle", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"^(.*?)\\maketitle", re.DOTALL)
+    text, mask = set_forbidden_text(text, mask, r"^(.*?)\\begin{document}", re.DOTALL)
     # 吸收iffalse注释
     text, mask = set_forbidden_text(text, mask, r"\\iffalse(.*?)\\fi", re.DOTALL)
     # 吸收在42行以内的begin-end组合
