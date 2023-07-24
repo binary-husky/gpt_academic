@@ -225,7 +225,7 @@ class Kdocs:
         self.docs_old_type = ['.docs', '.doc', '.pptx', '.ppt', '.xls', '.xlsx', '.pdf', '.csv', '.txt', '.pom', '.pof']
         self.to_img_type = {'.pom': '.png', '.pof': '.png'}
         self.media_type = ['.mp4', '.m4a', '.wav', '.mpga', '.mpeg', '.mp3', '.avi', '.mkv', '.flac', '.aac']
-        self.smart_type = {'.otl': '.pdf', '.ksheet': '.xlsx'}
+        self.smart_type = {'.otl': 'pdf', '.ksheet': 'xlsx'}
 
     def get_file_info_html(self):
         """
@@ -299,7 +299,7 @@ class Kdocs:
         for t in self.smart_type:
             if t in link_name and file_type in link_name:
                 link = self.get_kdocs_intelligence_link(type=self.smart_type[t])
-                link_name = link_name+f"{self.smart_type[t]}"
+                link_name = link_name+f".{self.smart_type[t]}"
         return link, link_name
 
     def get_media_link(self):
