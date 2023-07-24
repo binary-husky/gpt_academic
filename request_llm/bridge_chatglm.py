@@ -41,8 +41,9 @@ class GetGLMHandle(Process):
 
         if LOCAL_MODEL_QUANT == "INT4":         # INT4
             _model_name_ = "THUDM/chatglm2-6b-int4"
-        elif LOCAL_MODEL_QUANT == "INT8":       # INT8
-            _model_name_ = "THUDM/chatglm2-6b-int8"
+        # INT8 need quantize(8).cuda() instead
+        # elif LOCAL_MODEL_QUANT == "INT8":       # INT8
+        #     _model_name_ = "THUDM/chatglm2-6b-int8"
         else:
             _model_name_ = "THUDM/chatglm2-6b"  # FP16
 
@@ -53,7 +54,10 @@ class GetGLMHandle(Process):
                     if device=='cpu':
                         self.chatglm_model = AutoModel.from_pretrained(_model_name_, trust_remote_code=True).float()
                     else:
-                        self.chatglm_model = AutoModel.from_pretrained(_model_name_, trust_remote_code=True).half().cuda()
+                        if LOCAL_MODEL_QUANT == "INT8":
+                            self.chatglm_model = AutoModel.from_pretrained(_model_name_, trust_remote_code=True).quantize(8).cuda()
+                        else:
+                            self.chatglm_model = AutoModel.from_pretrained(_model_name_, trust_remote_code=True).half().cuda()
                     self.chatglm_model = self.chatglm_model.eval()
                     break
                 else:
