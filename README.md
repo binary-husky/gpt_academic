@@ -93,7 +93,7 @@ Latex论文一键校对 | [函数插件] 仿Grammarly对Latex文章进行语法�
 
 1. 下载项目
 ```sh
-git clone https://github.com/binary-husky/gpt_academic.git
+git clone --depth=1 https://github.com/binary-husky/gpt_academic.git
 cd gpt_academic
 ```
 
