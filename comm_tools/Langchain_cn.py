@@ -5,7 +5,6 @@ import gradio as gr
 from comm_tools import func_box
 from crazy_functions.crazy_utils import knowledge_archive_interface
 from crazy_functions import crazy_box
-from request_llm import bridge_all
 
 
 def classification_filtering_tag(cls_select, cls_name, ipaddr):
@@ -83,7 +82,7 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
         kai = knowledge_archive_interface(vs_path=vector_path)
         qa_handle, vs_path = kai.construct_vector_store(vs_id=kai_id, files=file_manifest)
     with open(os.path.join(vector_path, kai_id, ipaddr.client.host), mode='w') as f: pass
-    kai_files = kai.get_init_file(kai_id)
+    _, kai_files = kai.get_init_file(kai_id)
     kai_handle['file_list'] = [os.path.basename(file) for file in kai_files if os.path.exists(file)]
     kai_files = func_box.to_markdown_tabs(head=['文件'], tabs=[tab_show])
     kai_handle['know_obj'].update({kai_id: qa_handle})

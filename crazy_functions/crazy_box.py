@@ -7,16 +7,11 @@ import re, os
 import json, time
 from bs4 import BeautifulSoup
 import requests
-import sys
-job_path = os.path.dirname(os.path.dirname(__file__))
-sys.path.append(job_path)
 from comm_tools import func_box, ocr_tools, toolbox, prompt_generator
 from openpyxl import load_workbook
 from crazy_functions import crazy_utils
 import urllib.parse
-import gradio as gr
 from request_llm import bridge_all
-from request_llm.bridge_all import model_info
 
 
 class Utils:
@@ -619,7 +614,7 @@ def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs
 
 def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
     model = llm_kwargs['llm_model']
-    all_tokens = model_info[llm_kwargs['llm_model']]['max_token']
+    all_tokens = bridge_all.model_info[llm_kwargs['llm_model']]['max_token']
     max_token = all_tokens/2 - all_tokens/4  # 考虑到对话+回答会超过tokens,所以/2
     get_token_num = bridge_all.model_info[model]['token_cnt']
     inputs = inputs.split('\n---\n')
@@ -705,6 +700,7 @@ def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
     for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
         chatbot.append([None, f'{long_name_processing(you_say)} 🏃🏻‍正在努力将Markdown转换为流程图~'])
         yield from toolbox.update_ui(chatbot=chatbot, history=history)
+        inputs = str(inputs).lstrip('```').rstrip('```')  # 去除头部和尾部的代码块, 避免流程图堆在一块
         md, html = Utils().markdown_to_flow_chart(data=inputs, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(you_say))
         chatbot.append(("View: " + func_box.html_view_blank(md), f'{func_box.html_iframe_code(html_file=html)}'
                                                                f'tips: 双击空白处可以放大～'

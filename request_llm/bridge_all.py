@@ -12,12 +12,12 @@ import tiktoken
 from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor
 from comm_tools import toolbox
-from request_llm.bridge_chatgpt import predict_no_ui_long_connection as chatgpt_noui
-from request_llm.bridge_chatgpt import predict as chatgpt_ui
-from request_llm.bridge_chatglm import predict_no_ui_long_connection as chatglm_noui
-from request_llm.bridge_chatglm import predict as chatglm_ui
-
-
+from request_llm import bridge_chatgpt
+from request_llm import bridge_chatglm
+chatgpt_noui = bridge_chatgpt.predict_no_ui_long_connection
+chatgpt_ui = bridge_chatgpt.predict
+chatglm_noui = bridge_chatglm.predict_no_ui_long_connection
+chatglm_ui = bridge_chatglm.predict
 # from .bridge_tgui import predict_no_ui_long_connection as tgui_noui
 # from .bridge_tgui import predict as tgui_ui
 

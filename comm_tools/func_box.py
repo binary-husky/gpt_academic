@@ -590,7 +590,7 @@ def get_directory_list(folder_path, user_info='temp'):
     return directory_list, users_list
 
 
-def thread_write_chat(chatbot):
+def thread_write_chat(chatbot, ipaddr):
     """
     对话记录写入数据库
     """
@@ -605,9 +605,9 @@ def thread_write_chat(chatbot):
             else: v = pattern_html(v)
             gpt_result.append(v)
     if private_key in chat_title:
-        SqliteHandle(f'ai_private_{chat_title[-2]}').inset_prompt({i_say: gpt_result}, chat_title[-2])
+        SqliteHandle(f'ai_private_{ipaddr}').inset_prompt({i_say: gpt_result}, '')
     else:
-        SqliteHandle(f'ai_common_{chat_title[-2]}').inset_prompt({i_say: gpt_result}, chat_title[-2])
+        SqliteHandle(f'ai_common_{ipaddr}').inset_prompt({i_say: gpt_result}, '')
 
 
 base_path = os.path.dirname(os.path.dirname(__file__))

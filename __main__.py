@@ -427,7 +427,7 @@ class ChatBot(ChatBotFrame):
         submit_id.then(fn=update_drop,
                        inputs=[self.langchain_know_kwargs, self.llms_dropdown, self.langchain_classifi],
                        outputs=[self.langchain_dropdown, self.chatbot])
-        self.langchain_stop.click(fn=None, inputs=None, outputs=None, cancels=[submit_id])
+        self.langchain_stop.click(fn=lambda: '已暂停构建任务', inputs=None, outputs=[self.langchain_status], cancels=[submit_id])
 
     def draw_setting_chat(self):
         switch_model = get_conf('switch_model')[0]
