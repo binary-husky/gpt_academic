@@ -55,7 +55,7 @@ class SqliteHandle:
         temp_all = {}
         source = ''
         if find:
-            result = self.__cursor.execute(f"SELECT prompt, result, source FROM {self.__table} WHERE prompt LIKE ?",
+            result = self.__cursor.execute(f"SELECT prompt, result, source FROM `{self.__table}` WHERE prompt LIKE ?",
                                            (f"%{find}%",)).fetchall()
         else:
             result = self.__cursor.execute(f"SELECT prompt, result, source FROM `{self.__table}`").fetchall()
