@@ -568,13 +568,13 @@ def pattern_html(html):
     else:
         return ""
 
-from datetime import datetime, time
+import datetime
 def check_expected_time():
-    current_time = datetime.now().time()
-    morning_start = time(9, 0)
-    morning_end = time(12, 0)
-    afternoon_start = time(14, 0)
-    afternoon_end = time(18, 0)
+    current_time = datetime.datetime.now().time()
+    morning_start = datetime.time(9, 0)
+    morning_end = datetime.time(12, 0)
+    afternoon_start = datetime.time(14, 0)
+    afternoon_end = datetime.time(18, 0)
     if (morning_start <= current_time <= morning_end) or (afternoon_start <= current_time <= afternoon_end):
         return False
     else:
