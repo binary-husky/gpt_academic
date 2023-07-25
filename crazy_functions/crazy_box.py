@@ -100,6 +100,7 @@ class Utils:
 
     def markdown_to_flow_chart(self, data, hosts, file_name):
         user_path = os.path.join(func_box.users_path, hosts, 'mark_map')
+        os.makedirs(user_path, exist_ok=True)
         md_file = self.write_markdown(data, hosts, file_name)
         html_file = os.path.join(user_path, f"{file_name}.html")
         func_box.Shell(f'npx markmap-cli --no-open "{md_file}" -o "{html_file}"').read()
