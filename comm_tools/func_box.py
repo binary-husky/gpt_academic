@@ -628,7 +628,7 @@ def login_authentication(user, password):
     json_data = {
         'accounttype': 'koa',
         'username': user,
-        'password': '7507c1103ba267ce769a',
+        'password': '',
     }
 
 def new_button_display(select):
