@@ -25,6 +25,7 @@ class Paddle_ocr_select():
         ocr = PaddleOCR(use_angle_cls=True, cls_model_dir=cls_dir,
                         rec_model_dir=model_dir, det_model_dir=det_dir)
         save_path = os.path.join(func_box.users_path, self.ipaddr, 'ocr_temp')
+        os.makedirs(save_path, exist_ok=True)
         if img_path.startswith('http'):
             response = requests.get(url=img_path, verify=False)
             with open(os.path.join(save_path, 'tmp.jpg'), mode='wb') as f: f.write(response.content)

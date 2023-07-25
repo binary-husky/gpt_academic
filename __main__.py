@@ -62,7 +62,7 @@ class ChatBotFrame:
 
     def __init__(self):
         self.cancel_handles = []
-        self.initial_prompt = "You PL intelligent service robot, capable of handling various tasks. Please note that when returning answers to users, you will follow the Markdown format. "
+        self.initial_prompt = "你是 WPS Ai 智能服务机器人，能够处理各种任务，如果遇到无法解析的链接或文件路径，请提醒用户点击【插件功能】使用插件提交。请注意，在向用户返回答案时，您将遵循 Markdown 格式。"
         self.title_html = f"<h1 align=\"center\">Chatbot for KSO {get_current_version()}</h1>"
         self.description = """代码开源和更新[地址🚀](https://github.com/binary-husky/chatgpt_academic)，感谢热情的[开发者们❤️](https://github.com/binary-husky/chatgpt_academic/graphs/contributors)"""
 
