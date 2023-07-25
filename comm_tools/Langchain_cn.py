@@ -97,7 +97,8 @@ def knowledge_base_query(txt, kai_id, chatbot, history, llm_kwargs, args, ipaddr
     if not txt: return txt
     # < -------------------检索Prompt--------------- >
     new_txt = f'{txt}'
-    chatbot.append([txt, f'正在将问题向量化，然后对{func_box.html_tag_color(str(kai_id))}知识库进行匹配'])
+    if kai_id:
+        chatbot.append([txt, f'正在将问题向量化，然后对{func_box.html_tag_color(str(kai_id))}知识库进行匹配'])
     for id in kai_id:   #
         if llm_kwargs['know_dict']['know_obj'].get(id, False):
             kai = llm_kwargs['know_dict']['know_obj'][id]
