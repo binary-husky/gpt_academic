@@ -710,10 +710,12 @@ def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
 
 
 def result_written_to_markdwon(gpt_response_collection, llm_kwargs, chatbot, history):
+    inputs_all = ''
     for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
-        md = Utils().write_markdown(data=inputs, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(you_say))
-        chatbot.append((None, f'markdown已写入文件，下次可以直接提交markdown文件，就可以节省tomarkdown的时间啦 {func_box.html_view_blank(md)}'))
-        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
+        inputs_all += inputs
+    md = Utils().write_markdown(data=inputs_all, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(gpt_response_collection[0]))
+    chatbot.append((None, f'markdown已写入文件，下次可以直接提交markdown文件，就可以节省tomarkdown的时间啦 {func_box.html_view_blank(md)}'))
+    yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
 
 
 previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传，多个文件请上传压缩包，'\

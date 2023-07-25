@@ -19,9 +19,16 @@ class Paddle_ocr_select():
         self.trust_value = trust_value
 
     def img_def_content(self, img_path, show_result: bool=True):
-        ocr = PaddleOCR(use_angle_cls=True)  # need to run only once to download and load model into memory
-        result = ocr.ocr(img_path, cls=True)
+        model_dir = os.path.join(func_box.base_path, 'docs', 'OCR', 'ch_PP-OCRv3_rec_infer')
+        det_dir = os.path.join(func_box.base_path, 'docs', 'OCR', 'ch_PP-OCRv3_det_infer')
+        cls_dir = os.path.join(func_box.base_path, 'docs', 'OCR', 'ch_ppocr_mobile_v2.0_cls_infer')
+        ocr = PaddleOCR(use_angle_cls=True, cls_model_dir=cls_dir,
+                        rec_model_dir=model_dir, det_model_dir=det_dir)
         save_path = os.path.join(func_box.users_path, self.ipaddr, 'ocr_temp')
+        if img_path.startswith('http'):
+            response = requests.get(url=img_path, verify=False)
+            with open(os.path.join(save_path, 'tmp.jpg'), mode='wb') as f: f.write(response.content)
+        result = ocr.ocr(img_path, cls=True)
         save_file = os.path.join(save_path, f'{func_box.created_atime()}.jpeg')
         os.makedirs(save_path, exist_ok=True)
         result = result[0]
@@ -52,4 +59,6 @@ class Paddle_ocr_select():
 
 
 if __name__ == '__main__':
-    pass
+    Paddle_ocr_select(
+        ipaddr='123', trust_value=0.9).img_def_content(
+        img_path='/Users/kilig/Job/Python-project/kso_gpt/private_upload/192.168.0.102/kdocs/711 AI活动流程图.pom.png', show_result=True)

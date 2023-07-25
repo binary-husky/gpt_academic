@@ -295,7 +295,7 @@ def get_crazy_functions():
     from crazy_functions import 总结音视频
     from crazy_functions import KDOCS_流程图_图片分析
     function_plugins['金山文档专用'] = {
-        "需求文档转客户端测试用例": {
+        "轻文档转客户端测试用例": {
             "Color": "primary",
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.KDocs_转客户端测试用例),
@@ -306,11 +306,11 @@ def get_crazy_functions():
                 "is_show": False,
                 "prompt_cls": '插件定制',
                 "prompt": '文档转测试用例',
-                'img_ocr': False,
+                'img_ocr': True,
                 "to_markdown": '文档转Markdown'
             }
         },
-        "接口文档转接口测试用例": {
+        "轻文档转接口测试用例": {
             "Color": "primary",
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.KDocs_转接口测试用例),
@@ -327,7 +327,7 @@ def get_crazy_functions():
                 'template_file': False
             }
         },
-        "需求分析问答": {
+        "轻文档需求分析问答": {
             "Color": "primary",
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.KDocs_需求分析问答),
@@ -342,7 +342,7 @@ def get_crazy_functions():
                 'to_markdown': '文档转Markdown',
             }
         },
-        "文档转流程图": {
+        "轻文档转流程图": {
             "Color": "primary",
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.KDocs_文档转流程图),

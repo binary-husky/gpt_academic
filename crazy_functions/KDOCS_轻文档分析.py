@@ -8,13 +8,13 @@ import time
 from comm_tools import func_box, ocr_tools
 from crazy_functions import crazy_box
 from comm_tools.toolbox import update_ui, CatchException
-from crazy_functions import crazy_utils
+from crazy_functions.crazy_utils import get_files_from_everything, read_and_clean_pdf_text
 import traceback
 
 
 def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     links = crazy_box.Utils().split_startswith_txt(link_limit)
-    files = [file for file in link_limit if os.path.exists(file)]
+    files = [file for file in link_limit.splitlines() if os.path.exists(file)]
     if not links and not files:
         chatbot.append((None, f'输入框空空如也？{link_limit}\n\n'
                               '请在输入框中输入需要解析的轻文档链接或Markdown文件目录地址，点击插件按钮，链接需要是可访问的，如以下格式，如果有多个文档则用换行或空格隔开'
@@ -23,6 +23,7 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
         yield from update_ui(chatbot, history)
         return
     file_limit = []
+    # 爬虫读取
     img_ocr, = crazy_box.json_args_return(plugin_kwargs, ['img_ocr'])
     for url in links:
         try:
@@ -50,7 +51,8 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
             else:
                 if empty_picture_count >= 5:
                     chatbot.append([None, f'\n\n 需求文档中没有{func_box.html_tag_color("描述")}的图片数量' \
-                                          f'有{func_box.html_tag_color(empty_picture_count)}张，生成的测试用例可能存在遗漏点，可以参考以下方法对图片进行描述补充，x\n\n' \
+                                          f'有{func_box.html_tag_color(empty_picture_count)}张，生成的测试用例可能存在遗漏点，'
+                                          f'可以参考以下方法对图片进行描述补充，或在自定义插件参数中开始OCR功能\n\n' \
                                           f'{func_box.html_local_img("docs/imgs/pic_desc.png")}'])
                 yield from update_ui(chatbot, history)
             title = content.splitlines()[0]
@@ -60,6 +62,21 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
             chatbot.append([None,
                             f'{func_box.html_a_blank(url)} \n\n请检查一下哦，这个链接我们访问不了，是否开启分享？是否设置密码？是否是轻文档？下面是什么错误？\n\n ```\n\n{str(error_str)}\n```'])
             yield from update_ui(chatbot, history)
+    # 文件读取
+    for t in ['md', 'txt', 'pdf']:
+        for f in files:
+            file_routing = get_files_from_everything(f, t)
+            for file_path in file_routing:
+                if file_path.endswith('pdf'):
+                    file_content, _ = read_and_clean_pdf_text(file_path)
+                    title = file_content[0].splitlines()[0][:20]
+                    content = "".join(file_content)
+                    file_limit.extend([title, content])
+                else:
+                    with open(file_path, mode='r') as f:
+                        file_content = f.read()
+                        title = file_content.splitlines()[0][:20]
+                        file_limit.extend([title, file_content])
     yield from update_ui(chatbot, history)
     return file_limit
 
