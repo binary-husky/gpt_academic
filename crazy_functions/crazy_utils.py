@@ -661,21 +661,6 @@ class knowledge_archive_interface():
     def get_loaded_file(self):
         return self.qa_handle.get_loaded_file()
 
-    def judge_to_obtain_user_data(self, vs_id):
-        user_vs_id = os.path.join(self.vs_root_path, vs_id)
-        if os.path.exists(user_vs_id):
-            return user_vs_id
-        else:
-            public_knowledge_base, = toolbox.get_conf('public_knowledge_base')
-            if public_knowledge_base:
-                for root, dirs, files in os.walk(func_box.knowledge_path):
-                    file_present = os.listdir(root)
-                    if vs_id in root and 'index.faiss' in file_present:
-                        return root
-            else:
-                return user_vs_id
-
-
     def get_init_file(self, vs_id):
         from langchain.vectorstores import FAISS
         vs_path = os.path.join(self.vs_root_path, vs_id)

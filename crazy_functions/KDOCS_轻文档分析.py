@@ -65,7 +65,8 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
     # 文件读取
     for t in ['md', 'txt', 'pdf']:
         for f in files:
-            file_routing = get_files_from_everything(f, t)
+            chatbot.append([link_limit + "本地文件正在处理\n\n", None])
+            _, file_routing, _ = get_files_from_everything(f, t)
             for file_path in file_routing:
                 if file_path.endswith('pdf'):
                     file_content, _ = read_and_clean_pdf_text(file_path)
@@ -97,10 +98,11 @@ def KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, s
         inputs_array, inputs_show_user_array = split_content_limit
         gpt_response_collection = yield from crazy_box.submit_multithreaded_tasks(inputs_array, inputs_show_user_array,
                                                                                   llm_kwargs, chatbot, history,
-                                                                                  plugin_kwargs)
+                                                                                plugin_kwargs)
+        yield from crazy_box.result_written_to_markdwon(gpt_response_collection, llm_kwargs, chatbot, history)
     else:
         gpt_response_collection = file_limit
-    yield from crazy_box.result_written_to_markdwon(gpt_response_collection, llm_kwargs, chatbot, history)
+
     return gpt_response_collection
 
 

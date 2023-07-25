@@ -156,7 +156,11 @@ class ExcelHandle:
             # 写入每一行的数据到指定的单元格范围
             for col_num, value in enumerate(row_data, start=1):
                 cell = worksheet.cell(row=start_row, column=col_num)
-                cell.value = value
+                try:
+                    cell.value = value
+                except Exception:
+                    print(row_data, value)
+                    func_box.通知机器人(error=f'写入excel错误啦\n\n```\n\n{row_data}\n\n{value}\n\n```\n\n')
             # 增加起始行号
             start_row += 1
         # 保存 Excel 文件
@@ -644,8 +648,8 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     inputs_show_user_array = []
     kwargs_prompt, prompt_cls = json_args_return(plugin_kwargs, ['prompt', 'prompt_cls'])
     if default_prompt: kwargs_prompt = default_prompt
-    chatbot.append([None, f'接下来使用的Prompt是 {func_box.html_tag_color(kwargs_prompt)} ，'
-                          f'你可以保存一个同名的Prompt，或在{func_box.html_tag_color("自定义插件参数")}中指定另一个Prmopt哦～',])
+    chatbot.append([f'接下来使用的Prompt是 {func_box.html_tag_color(kwargs_prompt)} ，'
+                     f'你可以保存一个同名的Prompt，或在{func_box.html_tag_color("自定义插件参数")}中指定另一个Prmopt哦～', None])
     time.sleep(1)
     prompt = prompt_generator.SqliteHandle(table=f'prompt_{llm_kwargs["ipaddr"]}').find_prompt_result(kwargs_prompt, prompt_cls)
     for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):

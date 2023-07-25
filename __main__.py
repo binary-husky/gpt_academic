@@ -519,12 +519,16 @@ class ChatBot(ChatBotFrame):
                            outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check,
                                     self.guidance_plugins, self.guidance_plugins_state,
                                     self.cloum_1, self.examples_column,
-                                    self.langchain_classifi, self.langchain_select, self.langchain_dropdown]) #
+                                    self.langchain_classifi, self.langchain_select, self.langchain_dropdown])
+            self.demo.get_expected_parent()
 
         # Start
         self.auto_opentab_delay()
-        self.demo.queue(concurrency_count=CONCURRENT_COUNT,).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION,
-        blocked_paths=["config.py", "config_private.py", "docker-compose.yml", "Dockerfile"], show_api=False)
+        login_html = ''
+        self.demo.queue(concurrency_count=CONCURRENT_COUNT,
+                        ).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, auth_message=login_html,
+                                 blocked_paths=["config.py", "config_private.py", "docker-compose.yml", "Dockerfile"],
+                                 show_api=False)
 
 
 def check_proxy_free():
