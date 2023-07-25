@@ -44,8 +44,8 @@ class ChatBotWithCookies(list):
 
 
 def write_private(ipaddr, models, chatbot):
-    encrypt, private, _ = get_conf('switch_model')[0]['key']
-    private_key = get_conf('private_key')
+    encrypt, private = get_conf('switch_model')[0]['key']
+    private_key, = get_conf('private_key')
     transparent_address_private = f'<p style="display:none;">\n{private_key}\n{ipaddr.client.host}\n</p>'
     transparent_address = f'<p style="display:none;">\n{ipaddr.client.host}\n</p>'
     if private in models:
@@ -83,7 +83,7 @@ def ArgsGeneralWrapper(f):
         # 引入一个有cookie的chatbot
         from comm_tools import Langchain_cn
         start_time = time.time()
-        encrypt, private, _ = get_conf('switch_model')[0]['key']
+        encrypt, private = get_conf('switch_model')[0]['key']
         cookies.update({
             'top_p':top_p,
             'temperature':temperature,

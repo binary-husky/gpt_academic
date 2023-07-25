@@ -158,7 +158,7 @@ class ExcelHandle:
             for col_num, value in enumerate(row_data, start=1):
                 cell = worksheet.cell(row=start_row, column=col_num)
                 try:
-                    cell.value = value
+                    cell.value = str(value).strip()
                 except Exception:
                     print(row_data, value)
                     func_box.通知机器人(error=f'写入excel错误啦\n\n```\n\n{row_data}\n\n{value}\n\n```\n\n')
@@ -610,7 +610,7 @@ def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs
             elif i.find('｜') != -1:
                 test_case.append([func_box.clean_br_string(i) for i in i.split('｜')[1:]])
             else:
-                test_case.append([i])
+                func_box.通知机器人(f'脏数据过滤，这个不符合写入测试用例的条件 \n\n```\n\n{i}\n\n```')
     file_path = ExcelHandle(ipaddr=llm_kwargs['ipaddr'], is_client=is_client).lpvoid_lpbuffe(test_case, filename=file_name)
     chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_download_blank(__href=file_path, dir_name=file_path.split("/")[-1])}\n\n'
     chatbot.append(['Done', chat_file_list])

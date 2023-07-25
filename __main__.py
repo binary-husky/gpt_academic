@@ -525,10 +525,10 @@ class ChatBot(ChatBotFrame):
         # Start
         self.auto_opentab_delay()
         login_html = ''
-        self.demo.queue(concurrency_count=CONCURRENT_COUNT,
-                        ).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, auth_message=login_html,
+        self.demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, auth_message=login_html,
                                  blocked_paths=["config.py", "config_private.py", "docker-compose.yml", "Dockerfile"],
                                  show_api=False, favicon_path='./docs/wps_logo.png')
+
 
 def check_proxy_free():
     proxy_state = func_box.Shell(f'lsof -i :{PORT}').read()[1].splitlines()

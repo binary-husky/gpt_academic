@@ -619,6 +619,18 @@ users_path = os.path.join(base_path, 'private_upload')
 logs_path = os.path.join(base_path, 'gpt_log')
 
 
+def login_authentication(user, password):
+    headers = {
+        'Host': 'ovsmgr-api.4wps.net', 'sec-ch-ua-platform': '"macOS"',
+        'Origin': 'https://console.4wps.net', 'Referer': 'https://console.4wps.net/',
+    }
+
+    json_data = {
+        'accounttype': 'koa',
+        'username': user,
+        'password': '7507c1103ba267ce769a',
+    }
+
 def new_button_display(select):
     if '新建分类' == select:
         return gr.Textbox.update(visible=True)

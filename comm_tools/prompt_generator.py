@@ -89,6 +89,7 @@ class SqliteHandle:
         error_status = ''
         for key in prompt:
             _, user_info = self.get_prompt_value(key)
+            if not user_info: user_info = ''  # 增加保障
             if user_info in source:
                 self.__cursor.execute(f"REPLACE INTO `{self.__table}` (prompt, result, source)"
                                       f"VALUES (?, ?, ?);", (str(key), str(prompt[key]), source))
@@ -102,8 +103,12 @@ class SqliteHandle:
         self.__cursor.execute(f"DELETE from `{self.__table}` where prompt LIKE '{name}'")
         self.__connect.commit()
 
-    def delete_tabls(self, tab):
+    def delete_tables(self, tab):
         self.__cursor.execute(f"DROP TABLE `{tab}`;")
+        self.__connect.commit()
+
+    def rename_tables(self, old, new):
+        self.__cursor.execute(f"ALTER TABLE `{old}` RENAME TO `{new}`;")
         self.__connect.commit()
 
     def find_prompt_result(self, name, tabs='prompt_127.0.0.1'):
@@ -159,6 +164,19 @@ def batch_export_prompt(incloud_tab='prompt_'):
                     f.write(json.dumps(file_dict, ensure_ascii=False))
                     print(f'{source}已导出', os.path.join(file_path, f"{source}.json"))
 
+def batch_migration_data_table():
+    sql_ll = sqlite_handle(database='ai_prompt.db')
+    tabs = sql_ll.get_tables()
+    for t in tabs:
+        if str(t).startswith('ai_private_'):
+            sql_ll.delete_tables(t)
+    for t in tabs:
+        if str(t).startswith('ai_common_'):
+            new = str(t).split('_')[-1]
+            sql_ll.rename_tables(t, new=f'ai_private_{new}')
+
+
+
 sqlite_handle = SqliteHandle
 if __name__ == '__main__':
-    batch_inset_prompt('/Users/kilig/Job/Python-project/kso_gpt/users_data/export_prompt')
+    batch_migration_data_table()
