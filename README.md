@@ -177,8 +177,12 @@ docker-compose up
 docker-compose up
 ```
 
+### 安装方法III：使用 Sealos
 
-### 安装方法III：其他部署姿势
+[![](https://raw.githubusercontent.com/labring-actions/templates/main/Deploy-on-Sealos.svg)](https://cloud.sealos.io/?openapp=system-fastdeploy%3FtemplateName%3Dgpt-academic)
+
+
+### 安装方法IV：其他部署姿势
 1. 一键运行脚本。
 完全不熟悉python环境的Windows用户可以下载[Release](https://github.com/binary-husky/gpt_academic/releases)中发布的一键运行脚本安装无本地模型的版本。
 脚本的贡献来源是[oobabooga](https://github.com/oobabooga/one-click-installers)。
