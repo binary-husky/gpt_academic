@@ -97,26 +97,24 @@ def knowledge_base_query(txt, kai_id, chatbot, history, llm_kwargs, args, ipaddr
     if not txt: return txt
     # < -------------------检索Prompt--------------- >
     new_txt = f'{txt}'
+    chatbot.append([txt, f'正在将问题向量化，然后对{func_box.html_tag_color(str(kai_id))}知识库进行匹配'])
     for id in kai_id:   #
         if llm_kwargs['know_dict']['know_obj'].get(id, False):
             kai = llm_kwargs['know_dict']['know_obj'][id]
-            # < -------------------查询向量数据库--------------- >
-            chatbot.append([txt, f'正在将问题向量化，然后对{func_box.html_tag_color(id)}知识库进行匹配'])
-            yield from toolbox.update_ui(chatbot=chatbot, history=history)  # 刷新界面
-            resp, prompt, _ok = kai.answer_with_archive_by_id(txt, id)
-            if resp:
-                referenced_documents = "\n".join([f"{k}: " + doc.page_content for k, doc in enumerate(resp['source_documents'])])
-                new_txt += f'\n以下三个引号内的是知识库提供的参考文档：\n"""\n{referenced_documents}\n"""'
         else:
-            chatbot.append([None, f'啊哦，该知识库好像出问题了，请刷新页面重试'])
-            yield from toolbox.update_ui(chatbot=chatbot, history=history)  # 刷新界面
+            know_cls = llm_kwargs['know_cls']
+            know_cls = classification_filtering_tag(know_cls, know_cls, ipaddr.client.host)
+            vs_path = os.path.join(func_box.knowledge_path, know_cls)
+            kai = crazy_utils.knowledge_archive_interface(vs_path=vs_path)
+            llm_kwargs['know_dict']['know_obj'][id] = kai
+        # < -------------------查询向量数据库--------------- >
+        yield from toolbox.update_ui(chatbot=chatbot, history=history)  # 刷新界面
+        resp, prompt, _ok = kai.answer_with_archive_by_id(txt, id)
+        if resp:
+            referenced_documents = "\n".join(
+                [f"{k}: " + doc.page_content for k, doc in enumerate(resp['source_documents'])])
+            new_txt += f'\n以下三个引号内的是{id}提供的参考文档：\n"""\n{referenced_documents}\n"""'
     return new_txt
-
-
-def obtain_a_list_of_knowledge_bases(ipaddr):
-    user_path, _ = func_box.get_directory_list(os.path.join(func_box.knowledge_path, ipaddr.client.host))
-    return user_path
-
 
 def obtain_classification_knowledge_base(cls_name, ipaddr: gr.Request):
     if cls_name == '个人知识库':
@@ -139,7 +137,7 @@ def obtaining_knowledge_base_files(cls_select, cls_name, vs_id, chatbot, kai_han
             chatbot = toolbox.ChatBotWithCookies(chatbot)
             chatbot.write_list(chatbot)
         chatbot.append([None, f'正在检查知识库内文件{"  ".join([func_box.html_tag_color(i)for i in vs_id])}'])
-        yield chatbot, gr.Column.update(visible=False), '🏃🏻‍ 正在努力轮询中....请稍等， tips：知识库可以多选，但不要贪杯哦～️', kai_handle
+        yield chatbot, gr.Column.update(visible=False), '🏃🏻‍ 正在努力轮询中....请稍等， tips：知识库可以多选，但只会预加载第一个选中的知识库～️', kai_handle
         kai_files = {}
         for id in vs_id:
             if kai_handle['know_obj'].get(id, None):

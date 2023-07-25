@@ -121,10 +121,10 @@ class ChatBot(ChatBotFrame):
         self.llms_dropdown.select(on_llms_dropdown_changed, [self.llms_dropdown, self.langchain_dropdown], [self.chatbot])
         self.langchain_dropdown.select(on_llms_dropdown_changed,
                                        [self.llms_dropdown, self.langchain_dropdown],
-                                       [self.chatbot]
-                                       ).then(fn=Langchain_cn.obtaining_knowledge_base_files,
+                                       [self.chatbot]).success(fn=Langchain_cn.obtaining_knowledge_base_files,
                                        inputs=[self.langchain_classifi, self.langchain_class_name, self.langchain_dropdown, self.chatbot, self.langchain_know_kwargs],
-                                       outputs=[self.chatbot, self.examples_column, self.status, self.langchain_know_kwargs])
+                                       outputs=[self.chatbot, self.examples_column, self.status, self.langchain_know_kwargs]
+                                       )
 
     def draw_examples(self):
         with gr.Column(elem_id='examples_col') as self.examples_column:
@@ -450,7 +450,7 @@ class ChatBot(ChatBotFrame):
 
     def signals_input_setting(self):
         # 注册input
-        self.input_combo = [self.cookies, self.max_length_sl, self.llms_dropdown, self.langchain_dropdown, self.langchain_know_kwargs,
+        self.input_combo = [self.cookies, self.max_length_sl, self.llms_dropdown, self.langchain_dropdown, self.langchain_know_kwargs, self.langchain_classifi,
                             self.input_copy, self.top_p, self.temperature, self.ocr_identifying_trust, self.chatbot, self.history,
                             self.system_prompt, self.models_box, self.plugin_advanced_arg]
         self.output_combo = [self.cookies, self.chatbot, self.history, self.status, self.stopBtn, self.submitBtn,]

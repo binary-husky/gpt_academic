@@ -723,5 +723,3 @@ previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传�
 
 if __name__ == '__main__':
     import time
-    print(get_kdocs_dir('https://www.kdocs.cn/ent/41000207/1349351159/130730080903',
-                        project_folder=os.path.join(func_box.logs_path)))

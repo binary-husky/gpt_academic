@@ -77,7 +77,7 @@ def ArgsGeneralWrapper(f):
     """
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
-    def decorated(cookies, max_length, llm_model, langchain, know_dict, txt, top_p, temperature, ocr,
+    def decorated(cookies, max_length, llm_model, langchain, know_dict, know_cls, txt, top_p, temperature, ocr,
                   chatbot, history, system_prompt, models, plugin_advanced_arg, ipaddr: gr.Request, *args):
         """"""
         # 引入一个有cookie的chatbot
@@ -97,7 +97,8 @@ def ArgsGeneralWrapper(f):
             'ipaddr': ipaddr.client.host,
             'start_time': start_time,
             'ocr': ocr,
-            'know_dict': know_dict
+            'know_dict': know_dict,
+            'know_cls': know_cls
         }
         plugin_kwargs = {
             "advanced_arg": plugin_advanced_arg,
@@ -184,7 +185,7 @@ def CatchException(f):
             from comm_tools.check_proxy import check_proxy
             proxies, = get_conf('proxies')
             tb_str = '```\n' + trimmed_format_exc() + '```'
-            func_box.通知机器人(trimmed_format_exc()+f'\n\n错误来源：{top_p.get("ipaddr", None)}')
+            func_box.通知机器人(f'f请求参数：```\n{txt}\n{temperature}\n```\n\n错误信息{tb_str}\n\n错误来源：{top_p.get("ipaddr", None)}')
             if len(chatbot) == 0:
                 chatbot.clear()
                 chatbot.append(["插件调度异常", "异常原因"])
