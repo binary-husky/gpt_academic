@@ -197,10 +197,10 @@ docker-compose up
 
 6. 使用Sealos[一键部署](https://github.com/binary-husky/gpt_academic/issues/993)。
 
-6. 使用WSL2（Windows Subsystem for Linux 子系统）。
+7. 使用WSL2（Windows Subsystem for Linux 子系统）。
 请访问[部署wiki-2](https://github.com/binary-husky/gpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2)
 
-7. 如何在二级网址（如`http://localhost/subpath`）下运行。
+8. 如何在二级网址（如`http://localhost/subpath`）下运行。
 请访问[FastAPI运行说明](docs/WithFastapi.md)
 
 
