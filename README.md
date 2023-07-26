@@ -177,12 +177,8 @@ docker-compose up
 docker-compose up
 ```
 
-### 安装方法III：使用 Sealos
 
-[![](https://raw.githubusercontent.com/labring-actions/templates/main/Deploy-on-Sealos.svg)](https://cloud.sealos.io/?openapp=system-fastdeploy%3FtemplateName%3Dgpt-academic)
-
-
-### 安装方法IV：其他部署姿势
+### 安装方法III：其他部署姿势
 1. 一键运行脚本。
 完全不熟悉python环境的Windows用户可以下载[Release](https://github.com/binary-husky/gpt_academic/releases)中发布的一键运行脚本安装无本地模型的版本。
 脚本的贡献来源是[oobabooga](https://github.com/oobabooga/one-click-installers)。
@@ -198,6 +194,8 @@ docker-compose up
 
 5. 远程云服务器部署（需要云服务器知识与经验）。
 请访问[部署wiki-1](https://github.com/binary-husky/gpt_academic/wiki/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BF%9C%E7%A8%8B%E9%83%A8%E7%BD%B2%E6%8C%87%E5%8D%97)
+
+6. 使用Sealos[一键部署](https://github.com/binary-husky/gpt_academic/issues/993)。
 
 6. 使用WSL2（Windows Subsystem for Linux 子系统）。
 请访问[部署wiki-2](https://github.com/binary-husky/gpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2)
