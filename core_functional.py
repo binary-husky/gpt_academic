@@ -1,7 +1,7 @@
 # 'primary' 颜色对应 theme.py 中的 primary_hue
 # 'secondary' 颜色对应 theme.py 中的 neutral_hue
 # 'stop' 颜色对应 theme.py 中的 color_er
-# 默认按钮颜色是 secondary
+import importlib
 from toolbox import clear_line_break
 
 
@@ -14,7 +14,12 @@ def get_core_functions():
                         r"Furthermore, list all modification and explain the reasons to do so in markdown table." + "\n\n",
             # 后语
             "Suffix":   r"",
-            "Color":    r"secondary",    # 按钮颜色
+            # 按钮颜色 (默认 secondary)
+            "Color":    r"secondary",
+            # 按钮是否可见 (默认 True，即可见)
+            "Visible": True,
+            # 是否在触发时清除历史 (默认 False，即不处理之前的对话历史)
+            "AutoClearHistory": True
         },
         "中文学术润色": {
             "Prefix":   r"作为一名中文学术论文写作改进助理，你的任务是改进所提供文本的拼写、语法、清晰、简洁和整体可读性，" +
@@ -76,3 +81,13 @@ def get_core_functions():
             "Suffix":   r"",
         }
     }
+
+
+def handle_core_functionality(additional_fn, inputs, history):
+    import core_functional
+    importlib.reload(core_functional)    # 热更新prompt
+    core_functional = core_functional.get_core_functions()
+    if "PreProcess" in core_functional[additional_fn]: inputs = core_functional[additional_fn]["PreProcess"](inputs)  # 获取预处理函数（如果有的话）
+    inputs = core_functional[additional_fn]["Prefix"] + inputs + core_functional[additional_fn]["Suffix"]
+    history = [] if core_functional[additional_fn].get("AutoClearHistory", False) else history
+    return inputs, history
