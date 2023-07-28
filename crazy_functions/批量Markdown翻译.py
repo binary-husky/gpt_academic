@@ -1,5 +1,7 @@
-from toolbox import update_ui, trimmed_format_exc, gen_time_str
-from toolbox import CatchException, report_execption, write_results_to_file
+import glob, time, os, re
+from toolbox import update_ui, trimmed_format_exc, gen_time_str, disable_auto_promotion
+from toolbox import CatchException, report_execption, write_history_to_file
+from toolbox import promote_file_to_downloadzone, get_log_folder
 fast_debug = False
 
 class PaperFileGroup():
@@ -42,13 +44,13 @@ class PaperFileGroup():
     def write_result(self, language):
         manifest = []
         for path, res in zip(self.file_paths, self.file_result):
-            with open(path + f'.{gen_time_str()}.{language}.md', 'w', encoding='utf8') as f:
-                manifest.append(path + f'.{gen_time_str()}.{language}.md')
+            dst_file = os.path.join(get_log_folder(), f'{gen_time_str()}.md')
+            with open(dst_file, 'w', encoding='utf8') as f:
+                manifest.append(dst_file)
                 f.write(res)
         return manifest
 
 def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, language='en'):
-    import time, os, re
     from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 
     #  <-------- 读取Markdown文件，删除其中的所有注释 ----------> 
@@ -102,15 +104,15 @@ def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
         print(trimmed_format_exc())
 
     #  <-------- 整理结果，退出 ----------> 
-    create_report_file_name = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + f"-chatgpt.polish.md"
-    res = write_results_to_file(gpt_response_collection, file_name=create_report_file_name)
+    create_report_file_name = gen_time_str() + f"-chatgpt.md"
+    res = write_history_to_file(gpt_response_collection, file_basename=create_report_file_name)
+    promote_file_to_downloadzone(res, chatbot=chatbot)
     history = gpt_response_collection
     chatbot.append((f"{fp}完成了吗？", res))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
 
 def get_files_from_everything(txt, preference=''):
-    import glob, os
     success = True
     if txt.startswith('http'):
         import requests
@@ -129,9 +131,9 @@ def get_files_from_everything(txt, preference=''):
                 txt = txt.replace("/blob/", "/")
 
         r = requests.get(txt, proxies=proxies)
-        download_local = f'./gpt_log/temp_{gen_time_str()}.md'
+        download_local = f'{get_log_folder(plugin_name="批量Markdown翻译")}/raw-readme-{gen_time_str()}.md'
+        project_folder = f'{get_log_folder(plugin_name="批量Markdown翻译")}'
         with open(download_local, 'wb+') as f: f.write(r.content)
-        project_folder = './gpt_log/'
         file_manifest = [download_local]
     elif txt.endswith('.md'):
         # 直接给定文件
@@ -154,11 +156,11 @@ def Markdown英译中(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
         "函数插件功能？",
         "对整个Markdown项目进行翻译。函数插件贡献者: Binary-Husky"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+    disable_auto_promotion(chatbot)
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
         import tiktoken
-        import glob, os
     except:
         report_execption(chatbot, history,
                          a=f"解析项目: {txt}",
@@ -194,11 +196,11 @@ def Markdown中译英(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
         "函数插件功能？",
         "对整个Markdown项目进行翻译。函数插件贡献者: Binary-Husky"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+    disable_auto_promotion(chatbot)
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
         import tiktoken
-        import glob, os
     except:
         report_execption(chatbot, history,
                          a=f"解析项目: {txt}",
@@ -227,11 +229,11 @@ def Markdown翻译指定语言(txt, llm_kwargs, plugin_kwargs, chatbot, history,
         "函数插件功能？",
         "对整个Markdown项目进行翻译。函数插件贡献者: Binary-Husky"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+    disable_auto_promotion(chatbot)
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
         import tiktoken
-        import glob, os
     except:
         report_execption(chatbot, history,
                          a=f"解析项目: {txt}",
