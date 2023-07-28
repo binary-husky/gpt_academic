@@ -19,7 +19,7 @@ def get_core_functions():
             # 按钮是否可见 (默认 True，即可见)
             "Visible": True,
             # 是否在触发时清除历史 (默认 False，即不处理之前的对话历史)
-            "AutoClearHistory": True
+            "AutoClearHistory": False
         },
         "中文学术润色": {
             "Prefix":   r"作为一名中文学术论文写作改进助理，你的任务是改进所提供文本的拼写、语法、清晰、简洁和整体可读性，" +
@@ -83,11 +83,12 @@ def get_core_functions():
     }
 
 
-def handle_core_functionality(additional_fn, inputs, history):
+def handle_core_functionality(additional_fn, inputs, history, chatbot):
     import core_functional
     importlib.reload(core_functional)    # 热更新prompt
     core_functional = core_functional.get_core_functions()
     if "PreProcess" in core_functional[additional_fn]: inputs = core_functional[additional_fn]["PreProcess"](inputs)  # 获取预处理函数（如果有的话）
     inputs = core_functional[additional_fn]["Prefix"] + inputs + core_functional[additional_fn]["Suffix"]
-    history = [] if core_functional[additional_fn].get("AutoClearHistory", False) else history
+    if core_functional[additional_fn].get("AutoClearHistory", False):
+        history = []
     return inputs, history
