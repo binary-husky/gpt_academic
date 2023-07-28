@@ -109,21 +109,30 @@ def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
 
-def get_files_from_everything(txt):
+def get_files_from_everything(txt, preference=''):
     import glob, os
-
     success = True
     if txt.startswith('http'):
-        # 网络的远程文件
-        txt = txt.replace("https://github.com/", "https://raw.githubusercontent.com/")
-        txt = txt.replace("/blob/", "/")
         import requests
         from toolbox import get_conf
         proxies, = get_conf('proxies')
+        # 网络的远程文件
+        if preference == 'Github':
+            print('正在从github下载资源 ...')
+            if not txt.endswith('.md'):
+                # Make a request to the GitHub API to retrieve the repository information
+                url = txt.replace("https://github.com/", "https://api.github.com/repos/") + '/readme'
+                response = requests.get(url, proxies=proxies)
+                txt = response.json()['download_url']
+            else:
+                txt = txt.replace("https://github.com/", "https://raw.githubusercontent.com/")
+                txt = txt.replace("/blob/", "/")
+
         r = requests.get(txt, proxies=proxies)
-        with open('./gpt_log/temp.md', 'wb+') as f: f.write(r.content)
+        download_local = f'./gpt_log/temp_{gen_time_str()}.md'
+        with open(download_local, 'wb+') as f: f.write(r.content)
         project_folder = './gpt_log/'
-        file_manifest = ['./gpt_log/temp.md']
+        file_manifest = [download_local]
     elif txt.endswith('.md'):
         # 直接给定文件
         file_manifest = [txt]
@@ -158,7 +167,7 @@ def Markdown英译中(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
         return
     history = []    # 清空历史，以免输入溢出
 
-    success, file_manifest, project_folder = get_files_from_everything(txt)
+    success, file_manifest, project_folder = get_files_from_everything(txt, preference="Github")
 
     if not success:
         # 什么都没有
