@@ -116,7 +116,7 @@ python -m pip install -r requirements.txt # 这个步骤和pip安装一样的步
 ```
 
 
-<details><summary>如果需要支持清华ChatGLM2/复旦MOSS作为后端，请点击展开此处</summary>
+<details><summary>如果需要支持清华ChatGLM2/复旦MOSS/RWKV作为后端，请点击展开此处</summary>
 <p>
 
 【可选步骤】如果需要支持清华ChatGLM2/复旦MOSS作为后端，需要额外安装更多依赖（前提条件：熟悉Python + 用过Pytorch + 电脑配置够强）：
