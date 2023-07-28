@@ -82,9 +82,13 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
     return file_limit
 
 
-def KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    file_limit = yield from Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt,
-                                                 web_port)
+
+def KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port, to_kdocs=True):
+    if to_kdocs:
+        file_limit = yield from Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt,
+                                                     web_port)
+    else:
+        file_limit = link_limit
     if not file_limit:
         chatbot.append([None, f'{func_box.html_tag_color("无法获取需求文档内容，暂停运行!!!!")}'])
         yield from update_ui(chatbot=chatbot, history=history, msg='无法获取需求文档内容，暂停运行')
@@ -102,7 +106,6 @@ def KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, s
         yield from crazy_box.result_written_to_markdwon(gpt_response_collection, llm_kwargs, chatbot, history)
     else:
         gpt_response_collection = file_limit
-
     return gpt_response_collection
 
 

@@ -163,7 +163,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     gpt_replying_buffer = ""
     is_head_of_the_stream = True
     if stream:
-        stream_response =  response.iter_lines()
+        stream_response = response.iter_lines()
         while True:
             try:
                 chunk = next(stream_response)

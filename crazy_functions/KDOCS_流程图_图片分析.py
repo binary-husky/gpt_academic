@@ -4,9 +4,28 @@
 # @Author : Spike
 # @Descr   :
 from comm_tools import toolbox
-from comm_tools import func_box
+from comm_tools import func_box, ocr_tools
 from crazy_functions import crazy_box
 import os
+
+
+def ocr_batch_processing(file_manifest, chatbot, history, llm_kwargs):
+    ocr_process = f'> 红框为采用的文案,可信度低于 {func_box.html_tag_color(llm_kwargs["ocr"])} 将不采用, 可在Setting 中进行配置\n\n'
+    i_say = f'{"  ".join([func_box.html_view_blank(i) for i in file_manifest if os.path.exists(i)])}\n\nORC开始工作'
+    chatbot.append([i_say, ocr_process])
+    for pic_path in file_manifest:
+        yield from toolbox.update_ui(chatbot, history, '正在调用OCR组件，图片多可能会比较慢')
+        img_content, img_result = ocr_tools.Paddle_ocr_select(ipaddr=llm_kwargs['ipaddr'],
+                                                              trust_value=llm_kwargs['ocr']
+                                                              ).img_def_content(img_path=pic_path)
+        ocr_process += f'{pic_path} 识别完成，识别效果如下 {func_box.html_local_img(img_result)} \n\n' \
+                       f'```\n{img_content}\n```\n\n---\n\n'
+        chatbot[-1] = [i_say, ocr_process]
+        yield from toolbox.update_ui(chatbot, history)
+    ocr_process += f'\n\n---\n\n解析成功，现在我已理解上述内容，有什么不懂得地方你可以问我～'
+    chatbot[-1] = [i_say, ocr_process]
+    history.extend([i_say, ocr_process])
+    yield from toolbox.update_ui(chatbot, history)
 
 
 @toolbox.CatchException

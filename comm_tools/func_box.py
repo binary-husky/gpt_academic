@@ -179,7 +179,7 @@ def encryption_str(txt: str):
     """(关键字)(加密间隔)匹配机制（关键字间隔）"""
     txt = str(txt)
     pattern = re.compile(rf"(Authorization|WPS-Sid|Cookie)(:|\s+)\s*(\S+)[\s\S]*?(?=\n|$|\s)", re.IGNORECASE)
-    result = pattern.sub(lambda x: x.group(1) + ": XXXXXXXX", txt)
+    result = pattern.sub(lambda x: x.group(1) + ": XXXX加密封条XXXX", txt)
     return result
 
 
