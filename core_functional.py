@@ -19,7 +19,7 @@ def get_core_functions():
             # 按钮是否可见 (默认 True，即可见)
             "Visible": True,
             # 是否在触发时清除历史 (默认 False，即不处理之前的对话历史)
-            "AutoClearHistory": True
+            "AutoClearHistory": False
         },
         "中文学术润色": {
             "Prefix":   r"作为一名中文学术论文写作改进助理，你的任务是改进所提供文本的拼写、语法、清晰、简洁和整体可读性，" +
@@ -91,5 +91,4 @@ def handle_core_functionality(additional_fn, inputs, history, chatbot):
     inputs = core_functional[additional_fn]["Prefix"] + inputs + core_functional[additional_fn]["Suffix"]
     if core_functional[additional_fn].get("AutoClearHistory", False):
         history = []
-        chatbot.append((f'[{additional_fn}] 是否已清空历史消息？', "[Local Message] 已清空所有历史消息。"))
     return inputs, history
