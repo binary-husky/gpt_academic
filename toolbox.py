@@ -196,11 +196,10 @@ def write_results_to_file(history, file_name=None):
     import time
     if file_name is None:
         # file_name = time.strftime("chatGPT分析报告%Y-%m-%d-%H-%M-%S", time.localtime()) + '.md'
-        file_name = 'chatGPT分析报告' + \
-            time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + '.md'
+        file_name = 'GPT-Report-' + gen_time_str() + '.md'
     os.makedirs('./gpt_log/', exist_ok=True)
     with open(f'./gpt_log/{file_name}', 'w', encoding='utf8') as f:
-        f.write('# chatGPT 分析报告\n')
+        f.write('# GPT-Academic Report\n')
         for i, content in enumerate(history):
             try:    
                 if type(content) != str: content = str(content)
@@ -216,6 +215,37 @@ def write_results_to_file(history, file_name=None):
             f.write('\n\n')
     res = '以上材料已经被写入:\t' + os.path.abspath(f'./gpt_log/{file_name}')
     print(res)
+    return res
+
+
+def write_history_to_file(history, file_basename=None, file_fullname=None):
+    """
+    将对话记录history以Markdown格式写入文件中。如果没有指定文件名，则使用当前时间生成文件名。
+    """
+    import os
+    import time
+    if file_fullname is None:
+        if file_basename is not None:
+            file_fullname = os.path.join(get_log_folder(), file_basename)
+        else:
+            file_fullname = os.path.join(get_log_folder(), f'GPT-Academic-{gen_time_str()}.md')
+    os.makedirs(os.path.dirname(file_fullname), exist_ok=True)
+    with open(file_fullname, 'w', encoding='utf8') as f:
+        f.write('# GPT-Academic Report\n')
+        for i, content in enumerate(history):
+            try:    
+                if type(content) != str: content = str(content)
+            except:
+                continue
+            if i % 2 == 0:
+                f.write('## ')
+            try:
+                f.write(content)
+            except:
+                # remove everything that cannot be handled by utf8
+                f.write(content.encode('utf-8', 'ignore').decode())
+            f.write('\n\n')
+    res = os.path.abspath(file_fullname)
     return res
 
 
@@ -477,6 +507,10 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
         else: current = []
         chatbot._cookies.update({'file_to_promote': [new_path] + current})
 
+def disable_auto_promotion(chatbot):
+    chatbot._cookies.update({'file_to_promote': []})
+    return
+
 def on_file_uploaded(files, chatbot, txt, txt2, checkboxes):
     """
     当文件被上传时的回调函数
@@ -492,7 +526,7 @@ def on_file_uploaded(files, chatbot, txt, txt2, checkboxes):
         shutil.rmtree('./private_upload/')
     except:
         pass
-    time_tag = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+    time_tag = gen_time_str()
     os.makedirs(f'private_upload/{time_tag}', exist_ok=True)
     err_msg = ''
     for file in files:
@@ -849,14 +883,18 @@ def zip_folder(source_folder, dest_folder, zip_name):
     print(f"Zip file created at {zip_file}")
 
 def zip_result(folder):
-    import time
-    t = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+    t = gen_time_str()
     zip_folder(folder, './gpt_log/', f'{t}-result.zip')
     return pj('./gpt_log/', f'{t}-result.zip')
 
 def gen_time_str():
     import time
     return time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+
+def get_log_folder(user='default', plugin_name='shared'):
+    _dir = os.path.join(os.path.dirname(__file__), 'gpt_log', user, plugin_name)
+    if not os.path.exists(_dir): os.makedirs(_dir)
+    return _dir
 
 class ProxyNetworkActivate():
     """
