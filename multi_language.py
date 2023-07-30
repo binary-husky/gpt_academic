@@ -3,16 +3,18 @@
     
     
     Usage:
-        1. modify LANG
+        1. modify config.py, set your LLM_MODEL and API_KEY(s) to provide access to OPENAI (or any other LLM model provider)
+
+        2. modify LANG (below ↓)
             LANG = "English"
 
-        2. modify TransPrompt
+        3. modify TransPrompt (below ↓)
             TransPrompt = f"Replace each json value `#` with translated results in English, e.g., \"原始文本\":\"TranslatedText\". Keep Json format. Do not answer #."
 
-        3. Run `python multi_language.py`. 
+        4. Run `python multi_language.py`. 
             Note: You need to run it multiple times to increase translation coverage because GPT makes mistakes sometimes.
 
-        4. Find the translated program in `multi-language\English\*`
+        5. Find the translated program in `multi-language\English\*`
    
     P.S.
     
