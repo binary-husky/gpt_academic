@@ -8,11 +8,11 @@ from toolbox import clear_line_break
 def get_core_functions():
     return {
         "英语学术润色": {
-            # 前言
+            # 前缀，会被加在你的输入之前。例如，用来描述你的要求，例如翻译、解释代码、润色等等
             "Prefix":   r"Below is a paragraph from an academic paper. Polish the writing to meet the academic style, " +
                         r"improve the spelling, grammar, clarity, concision and overall readability. When necessary, rewrite the whole sentence. " +
                         r"Furthermore, list all modification and explain the reasons to do so in markdown table." + "\n\n",
-            # 后语
+            # 后缀，会被加在你的输入之后。例如，配合前缀可以把你的输入内容用引号圈起来
             "Suffix":   r"",
             # 按钮颜色 (默认 secondary)
             "Color":    r"secondary",
