@@ -37,9 +37,9 @@ def 批量分析流程图或图片(txt, llm_kwargs, plugin_kwargs, chatbot, hist
     if txt:
         if os.path.exists(txt):
             file_manifest = file_handle.global_search_for_files(txt, matching=file_handle.picture_format)
-            yield from crazy_box.ocr_batch_processing(file_manifest, chatbot, history, llm_kwargs=llm_kwargs)
+            yield from ocr_batch_processing(file_manifest, chatbot, history, llm_kwargs=llm_kwargs)
         elif kdocs_manifest_tmp != []:
-            yield from crazy_box.ocr_batch_processing(kdocs_manifest_tmp, chatbot, history, llm_kwargs=llm_kwargs)
+            yield from ocr_batch_processing(kdocs_manifest_tmp, chatbot, history, llm_kwargs=llm_kwargs)
         else:
             chatbot.append([crazy_box.previously_on_plugins, None])
             yield from toolbox.update_ui(chatbot, history)

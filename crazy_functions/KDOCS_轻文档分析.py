@@ -7,7 +7,7 @@ import os.path
 import time
 from comm_tools import func_box, ocr_tools
 from crazy_functions import crazy_box
-from comm_tools.toolbox import update_ui, CatchException
+from comm_tools.toolbox import update_ui, CatchException, trimmed_format_exc
 from crazy_functions.crazy_utils import get_files_from_everything, read_and_clean_pdf_text
 import traceback
 
@@ -29,7 +29,7 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
         try:
             chatbot.append([link_limit + "\n\n网页爬虫和文件处理准备工作中～", None])
             yield from update_ui(chatbot, history)  # 增加中间过渡
-            ovs_data, content, empty_picture_count, pic_dict = crazy_box.get_docs_content(url, image_processing=img_ocr)
+            ovs_data, content, empty_picture_count, pic_dict, kdocs_dict = crazy_box.get_docs_content(url, image_processing=img_ocr)
             if img_ocr:
                 if pic_dict:  # 当有图片文件时，再去提醒
                     ocr_process = f'检测到轻文档中存在{func_box.html_tag_color(empty_picture_count)}张图片，为了产出结果不存在遗漏，正在逐一进行识别\n\n' \
@@ -58,9 +58,10 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
             title = content.splitlines()[0]
             file_limit.extend([title, content])
         except Exception as e:
-            error_str = traceback.format_exc()
+            error_str = trimmed_format_exc()
             chatbot.append([None,
                             f'{func_box.html_a_blank(url)} \n\n请检查一下哦，这个链接我们访问不了，是否开启分享？是否设置密码？是否是轻文档？下面是什么错误？\n\n ```\n\n{str(error_str)}\n```'])
+            func_box.通知机器人(f"{link_limit}\n\n```\n{error_str}\n```\n\n```\n{llm_kwargs}\n```")
             yield from update_ui(chatbot, history)
     # 文件读取
     for t in ['md', 'txt', 'pdf']:

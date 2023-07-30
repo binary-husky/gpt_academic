@@ -3,15 +3,16 @@
 # @Time   : 2023/6/14
 # @Author : Spike
 # @Descr   :
-import re, os
-import json, time
-from bs4 import BeautifulSoup
+import os
+import json
 import requests
+import re
+import time
 from comm_tools import func_box, ocr_tools, toolbox, prompt_generator
 from openpyxl import load_workbook
 from crazy_functions import crazy_utils
-import urllib.parse
 from request_llm import bridge_all
+from crazy_functions import crzay_kingsoft
 
 
 class Utils:
@@ -68,6 +69,12 @@ class Utils:
         return text_values
 
     def statistical_results(self, text_values, img_proce=False):
+        """
+        Args: 提取爬虫内嵌图片、文件等等信息
+            text_values: dict
+            img_proce: 图片标识
+        Returns: （元数据， 组合数据， 图片dict， 文件dict）
+        """
         context_ = []
         pic_dict = {}
         file_dict = {}
@@ -84,6 +91,7 @@ class Utils:
                         pic_dict[value['sourceKey']] = value['imgID']
                 elif key in self.find_document_tags:
                     mark = f'{value["wpsDocumentName"]}: {value["wpsDocumentLink"]}'
+                    file_dict.update({value["wpsDocumentName"]: value["wpsDocumentLink"]})
                     context_.append(mark)
                 else:
                     context_.append(value)
@@ -91,6 +99,13 @@ class Utils:
         return text_values, context_, pic_dict, file_dict
 
     def write_markdown(self, data, hosts, file_name):
+        """
+        Args: 将data写入md文件
+            data: 数据
+            hosts: 用户标识
+            file_name: 另取文件名
+        Returns: 写入的文件地址
+        """
         user_path = os.path.join(func_box.users_path, hosts, 'markdown')
         os.makedirs(user_path, exist_ok=True)
         md_file = os.path.join(user_path, f"{file_name}.md")
@@ -99,6 +114,13 @@ class Utils:
         return md_file
 
     def markdown_to_flow_chart(self, data, hosts, file_name):
+        """
+        Args: 调用markmap-cli
+            data: 要写入md的数据
+            hosts: 用户标识
+            file_name: 要写入的文件名
+        Returns: [md, 流程图] 文件
+        """
         user_path = os.path.join(func_box.users_path, hosts, 'mark_map')
         os.makedirs(user_path, exist_ok=True)
         md_file = self.write_markdown(data, hosts, file_name)
@@ -173,282 +195,30 @@ class ExcelHandle:
         return test_case_path
 
 
-class Kdocs:
-
-    def __init__(self, url):
-        WPS_COOKIES, = toolbox.get_conf('WPS_COOKIES',)
-        self.url = url
-        self.cookies = WPS_COOKIES
-        self.headers = {
-            'accept-language': 'en-US,en;q=0.9,ja;q=0.8',
-            'content-type': 'text/plain;charset=UTF-8',
-            'x-csrf-rand': '',
-            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'}
-        self.ex_headers = {
-            'Host': 'www.kdocs.cn',
-            'accept': 'application/json, text/plain, */*',
-            'content-type': 'application/json',
-            'sec-ch-ua-platform': '"macOS"',
-            'origin': 'https://www.kdocs.cn',
-        }
-        self.dzip_header = {
-            'Host': 'kdzip-download.kdocs.cn',
-            'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.82',
-            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-
-            }
-        self.parm_otl_data = {"connid": "",
-                              "args": {"password": "", "readonly": False, "modifyPassword": "", "sync": True,
-                                       "startVersion": 0, "endVersion": 0},
-                              "ex_args": {"queryInitArgs": {"enableCopyComments": False, "checkAuditRule": False}},
-                              "group": "", "front_ver": ""}
-        self.parm_shapes_data = {"objects": [], "expire": 86400000, "support_webp": True, "with_thumbnail": True,
-                                 "support_lossless": True}
-        self.parm_export_preload = {"ver": "56"}
-        self.parm_bulk_download = {'file_ids': []}
-        self.params_task = {'task_id': ''}
-        self.params_continue = {"task_id": "", "download_as": [
-                            {"suffix": ".otl", "as": ".pdf"},
-                            {"suffix": ".ksheet", "as": ".xlsx"},
-                            {"suffix": ".pof", "as": ".png"},
-                            {"suffix": ".pom", "as": ".png"}]}
-        self.tol_url = 'https://www.kdocs.cn/api/v3/office/file/%v/open/otl'
-        self.shapes_url = 'https://www.kdocs.cn/api/v3/office/file/%v/attachment/shapes'
-        self.kdocs_download_url = 'https://drive.kdocs.cn/api/v5/groups/%g/files/%f/download?isblocks=false&support_checksums=md5,sha1,sha224,sha256,sha384,sha512'
-        self.drive_download_url = 'https://drive.wps.cn/api/v3/groups/%g/files/%f/download?isblocks=false'
-        self.group_url = 'https://drive.wps.cn/api/v5/links/%v?review=true'
-        self.export_url = 'https://www.kdocs.cn/api/v3/office/file/%f/export/%t/result'
-        self.preload_url = 'https://www.kdocs.cn/api/v3/office/file/%f/export/%t/preload'
-        self.bulk_download_url = 'https://www.kdocs.cn/kfc/batch/v2/files/download'
-        self.bulk_continue_url = 'https://www.kdocs.cn/kfc/batch/v2/files/download/continue'
-        self.task_result_url = 'https://www.kdocs.cn/kfc/batch/v2/files/download/progress'
-        self.url_share_tag = ''
-        self.url_dirs_tag = ''
-        self.split_link_tags()
-        if self.url_share_tag:
-            self.file_info_parm = self.get_file_info_parm()
-        self.docs_old_type = ['.docs', '.doc', '.pptx', '.ppt', '.xls', '.xlsx', '.pdf', '.csv', '.txt', '.pom', '.pof']
-        self.to_img_type = {'.pom': '.png', '.pof': '.png'}
-        self.media_type = ['.mp4', '.m4a', '.wav', '.mpga', '.mpeg', '.mp3', '.avi', '.mkv', '.flac', '.aac']
-        self.smart_type = {'.otl': 'pdf', '.ksheet': 'xlsx'}
-
-    def get_file_info_html(self):
-        """
-        获取传递过来的文档HTML信息
-        Returns:
-            HTML信息
-        """
-        response = requests.get(self.url, cookies=self.cookies, headers=self.headers)
-        return response.text
-
-    def get_file_info_parm(self):
-        response = requests.get(self.group_url.replace("%v", self.url_share_tag),
-                                cookies=self.cookies,
-                                headers=self.headers, verify=False).json()
-        try:
-            file_info = response['fileinfo']
-        except KeyError:
-            file_info = {}
-        return file_info
-
-    def submit_batch_download_tasks(self):
-        self.parm_bulk_download.update({'file_ids': [self.url_dirs_tag]})
-        dw_response = requests.post(self.bulk_download_url, cookies=self.cookies, headers=self.ex_headers,
-                                 json=self.parm_bulk_download, verify=False).json()
-        if dw_response.get('data', False):
-            task_id = dw_response['data']['task_id']
-            task_info = dw_response['data']['online_file'], dw_response['data']['online_fnum']
-        else:
-            print(dw_response['result'])
-            task_id = None
-            task_info = None
-        if task_id:
-            self.params_continue.update({'task_id': task_id})
-            requests.post(self.bulk_continue_url, cookies=self.cookies, headers=self.ex_headers,
-                          json=self.params_continue, verify=False).json()
-        return task_id, task_info
-
-    def polling_batch_download_tasks(self, task_id):
-        self.params_task.update({'task_id': task_id})
-        link = ''
-        faillist = ''
-        if task_id:
-            for i in range(600):
-                response = requests.get(url=self.task_result_url,
-                                        params=self.params_task,
-                                        cookies=self.cookies,
-                                        headers=self.ex_headers, verify=False).json()
-                if response['data'].get('url', False):
-                    link = response['data'].get('url', '')
-                    faillist = str(response['data'].get('faillist', ''))
-                    break
-                time.sleep(3)
-        return link, faillist
-
-    def wps_file_download(self, url):
-        response = requests.get(url=url, cookies=self.cookies, headers=self.dzip_header, verify=False)
-        return response
-
-    def document_aggregation_download(self, file_type=''):
-        link_name = self.file_info_parm['fname']
-        for t in self.to_img_type:
-            if t in link_name:
-                link_name = link_name+self.to_img_type[t]
-        link = ''
-        for t in self.docs_old_type:
-            if t in link_name and file_type in link_name:
-                link = self.get_docs_old_link()
-        for t in self.media_type:
-            if t in link_name and file_type in link_name:
-                link = self.get_media_link()
-        for t in self.smart_type:
-            if t in link_name and file_type in link_name:
-                link = self.get_kdocs_intelligence_link(type=self.smart_type[t])
-                link_name = link_name+f".{self.smart_type[t]}"
-        return link, link_name
-
-    def get_media_link(self):
-        response = requests.get(self.drive_download_url.replace("%g", str(self.file_info_parm['groupid'])
-                                                                ).replace('%f', str(self.file_info_parm['id'])),
-                                cookies=self.cookies,
-                                headers=self.headers, verify=False)
-        link = response.json()['fileinfo']['url']
-        return self.url_decode(link)
-
-    def get_docs_old_link(self):
-        response = requests.get(self.kdocs_download_url.replace("%g", str(self.file_info_parm['groupid'])
-                                                                ).replace('%f', str(self.file_info_parm['id'])),
-                                cookies=self.cookies,
-                                headers=self.headers, verify=False)
-        try:
-            link = response.json()['fileinfo']['url']
-        except:
-            link = response.json()['url']
-        return self.url_decode(link)
-
-    def get_kdocs_intelligence_link(self, type='xlsx'):
-        response_task = requests.post(
-            self.preload_url.replace('%f', str(self.file_info_parm['id'])).replace('%t', type),
-            cookies=self.cookies,
-            headers=self.ex_headers,
-            json=self.parm_export_preload, verify=False
-        )
-        self.parm_export_preload.update(response_task.json())
-        for i in range(20):
-            response_link = requests.post(
-                self.export_url.replace('%f', str(self.file_info_parm['id'])).replace('%t', type),
-                cookies=self.cookies,
-                headers=self.ex_headers,
-                json=self.parm_export_preload, verify=False
-            )
-            if response_link.json()['status'] == 'finished':
-                return response_link.json()['data']['url']
-        return None
-
-    def split_link_tags(self):
-        url_parts = re.split('[/\?&#]+', self.url)
-        try:
-            try:
-                l_index = url_parts.index('l')
-                otl_url_str = url_parts[l_index + 1]
-                self.url_share_tag = otl_url_str
-            except ValueError:
-                l_index = url_parts.index('ent')
-                otl_url_str = url_parts[-1]
-                self.url_dirs_tag = otl_url_str
-        except ValueError:
-            print('既不是在线文档，也不是文档目录')
-            return ''
-
-    def get_file_content(self):
-        """
-        爬虫解析文档内容
-        Returns:
-            文档内容
-        """
-        otl_url_str = self.url_share_tag
-        if otl_url_str is None: return
-        html_content = self.get_file_info_html()
-        self.bs4_file_info(html_content)  # 调用 bs4_file_info() 方法解析 html_content，获取文件信息# 更新类的parm_data 和 headers
-        json_data = json.dumps(self.parm_otl_data)
-        response = requests.post(
-            str(self.tol_url).replace('%v', otl_url_str),
-            cookies=self.cookies,
-            headers=self.headers,
-            data=json_data,)
-        return response.json(), response.text
-
-    def get_file_pic_url(self, pic_dict: dict):
-        otl_url_str = self.url_share_tag
-        if otl_url_str is None: return
-        for pic in pic_dict:
-            pic_parm = {'attachment_id': pic, "imgId": pic_dict[pic], "max_edge": 1180, "source": ""}
-            self.parm_shapes_data['objects'].append(pic_parm)
-        json_data = json.dumps(self.parm_shapes_data)
-        response = requests.post(
-            str(self.shapes_url).replace('%v', otl_url_str),
-            cookies=self.cookies,
-            headers=self.headers,
-            data=json_data,)
-        url_data = response.json()['data']
-        for pic in url_data:
-            try:
-                pic_dict[pic] = self.url_decode(url_data[pic]['url'])
-            except Exception as f:
-                pass
-        return pic_dict
-
-    @staticmethod
-    def url_decode(url):
-        decoded_url = urllib.parse.unquote(url)
-        return decoded_url
-
-
-    def bs4_file_info(self, html_str):
-        """
-        bs4爬虫文档信息，没有这个可不行🤨
-        Args:
-            html_str: HTML信息
-        Returns:
-            {'connid': 文档id, 'group': 文档的群组, 'front_ver': 文档版本}
-        """
-        html = BeautifulSoup(html_str, "html.parser")
-        # Find all script tags in the HTML
-        script_tags = html.find_all("script")
-        json_string = None
-        # Iterate through script tags to find the one containing required data
-        for tag in script_tags:
-            if tag.string and "window.__WPSENV__" in tag.string:
-                json_string = re.search(r"window\.__WPSENV__=(.*);", tag.string).group(1)
-                break
-        if json_string:
-            # Load the JSON data from the found string
-            json_data = json.loads(json_string)
-            file_connid = json_data['conn_id']
-            file_group = json_data['user_group']
-            file_front_ver = json_data['file_version']
-            file_id = json_data['root_file_id']
-            group_id = json_data['file_info']['file']['group_id']
-            self.headers['x-csrf-rand'] = json_data['csrf_token']
-            self.parm_otl_data.update({'connid': file_connid, 'group': file_group, 'front_ver': file_front_ver,
-                                       'file_id': file_id, 'group_id':group_id})
-            return True
-        else:
-            return None
-
-
 def get_docs_content(url, image_processing=False):
-    kdocs = Kdocs(url)
+    """
+    Args: 爬虫程序，通过拿到分享链接提取文档内信息
+        url: 文档url
+        image_processing: 是否开始OCR
+    Returns:
+    """
+    kdocs = crzay_kingsoft.Kdocs(url)
     utils = Utils()
     json_data, json_dict = kdocs.get_file_content()
     text_values = utils.find_all_text_keys(json_data, filter_type='')
     _all, content, pic_dict, file_dict = utils.statistical_results(text_values, img_proce=image_processing)
     pic_dict_convert = kdocs.get_file_pic_url(pic_dict)
     empty_picture_count = sum(1 for item in _all if 'picture' in item and not item['picture']['caption'])
-    return _all, content, empty_picture_count, pic_dict_convert
+    return _all, content, empty_picture_count, pic_dict_convert, file_dict
 
 
 def batch_recognition_images_to_md(img_list, ipaddr):
+    """
+    Args: 将图片批量识别然后写入md文件
+        img_list: 图片地址list
+        ipaddr: 用户所属标识
+    Returns: [文件list]
+    """
     temp_list = []
     for img in img_list:
         if os.path.exists(img):
@@ -472,7 +242,7 @@ def get_kdocs_dir(limit, project_folder, type, ipaddr):
         ipaddr:  文件所属标识
     Returns: [文件列表], 目录内文件信息, 失败信息
     """
-    kdocs = Kdocs(limit)
+    kdocs = crzay_kingsoft.Kdocs(limit)
     task_id, task_info = kdocs.submit_batch_download_tasks()
     link, task_faillist = kdocs.polling_batch_download_tasks(task_id)
     resp = kdocs.wps_file_download(link)
@@ -494,8 +264,16 @@ def get_kdocs_dir(limit, project_folder, type, ipaddr):
 
 
 def get_kdocs_files(limit, project_folder, type, ipaddr):
+    """
+    Args:
+        limit: 金山文档分享文件地址
+        project_folder: 存储地址
+        type: 指定的文件类型
+        ipaddr: 用户信息
+    Returns: [提取的文件list]
+    """
     if type == 'otl':
-        _, content, _, pic_dict = get_docs_content(limit)
+        _, content, _, pic_dict, _ = get_docs_content(limit)
         name = 'temp.md'
         tag = content.splitlines()[0][:20]
         for i in pic_dict:  # 增加OCR选项
@@ -505,7 +283,7 @@ def get_kdocs_files(limit, project_folder, type, ipaddr):
             name = tag + '.md'
             content = content.encode('utf-8')
     elif type or type == '':
-        kdocs = Kdocs(limit)
+        kdocs = crzay_kingsoft.Kdocs(limit)
         link, name = kdocs.document_aggregation_download(file_type=type)
         tag = kdocs.url_share_tag
         if link:
@@ -528,7 +306,7 @@ def get_kdocs_from_everything(txt, type='', ipaddr='temp'):
     Args:
         txt: kudos 文件分享码
         type: type=='' 时，将支持所有文件类型
-        ipaddr:
+        ipaddr: 用户信息
     Returns:
     """
     link_limit = Utils().split_startswith_txt(link_limit=txt)
@@ -547,6 +325,12 @@ def get_kdocs_from_everything(txt, type='', ipaddr='temp'):
     return success, file_manifest, project_folder
 
 def json_args_return(kwargs, keys: list) -> list:
+    """
+    Args: 提取插件的调优参数，如果有，则返回取到的值，如果无，则返回False
+        kwargs: 一般是plugin_kwargs
+        keys: 需要取得key
+    Returns: 有key返value，无key返False
+    """
     temp = [False for i in range(len(keys))]
     for i in range(len(keys)):
         try:
@@ -558,12 +342,20 @@ def json_args_return(kwargs, keys: list) -> list:
                 temp[i] = False
     return temp
 
-import re
 def replace_special_chars(file_name):
-    # 除了中文外，该正则表达式匹配任何一个不是数字、字母、下划线、.、空格的字符
-    return re.sub(r'[^\u4e00-\u9fa5\d\w\s\.\_]', '_', file_name)
+    # 除了中文外，该正则表达式匹配任何一个不是数字、字母、下划线、.、空格的字符，避免文件名有问题
+    new_name = re.sub(r'[^\u4e00-\u9fa5\d\w\s\.\_]', '', file_name)
+    if not new_name:
+        new_name = func_box.created_atime()
+    return new_name
+
 
 def long_name_processing(file_name):
+    """
+    Args:
+        file_name: 文件名取材，如果是list，则取下标0，转换为str， 如果是str则取最多20个字符
+    Returns: 返回处理过的文件名
+    """
     if type(file_name) is list: file_name = file_name[0]
     if len(file_name) > 50:
         if file_name.find('"""') != -1:
@@ -578,6 +370,16 @@ def long_name_processing(file_name):
 
 
 def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history, is_client=True):
+    """
+    Args:
+        gpt_response_collection: [输出， 输出]
+        inputs_show_user_array: [输出]
+        llm_kwargs: 调优参数
+        chatbot: 对话组件
+        history: 对话历史
+        is_client: 是否客户端测试用例
+    Returns: None
+    """
     gpt_response = gpt_response_collection[1::2]
     chat_file_list = ''
     test_case = []
@@ -598,6 +400,14 @@ def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs
 
 
 def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
+    """
+    Args:
+        inputs: 需要提取拆分的提问信息
+        llm_kwargs: 调优参数
+        chatbot: 对话组件
+        history: 历史记录
+    Returns: [拆分1， 拆分2]
+    """
     model = llm_kwargs['llm_model']
     all_tokens = bridge_all.model_info[llm_kwargs['llm_model']]['max_token']
     max_token = all_tokens/2 - all_tokens/4  # 考虑到对话+回答会超过tokens,所以/2
@@ -620,7 +430,9 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     Args:
         gpt_response_collection:  多线程GPT的返回结果
         plugin_kwargs: 对话使用的插件参数
-        llm_kwargs:  对话+用户信息
+        chatbot: 对话组件
+        history: 历史对话
+        llm_kwargs:  调优参数
         default_prompt: 默认Prompt, 如果为False，则不添加提示词
     Returns: 下次使用？
         inputs_array， inputs_show_user_array
@@ -647,7 +459,16 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
 
 
 def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs):
-    # 提交多线程任务
+    """
+    Args: 提交多线程任务
+        inputs_array: 需要提交给gpt的任务列表
+        inputs_show_user_array: 显示在user页面上信息
+        llm_kwargs: 调优参数
+        chatbot: 对话组件
+        history: 历史对话
+        plugin_kwargs: 插件调优参数
+    Returns:  将对话结果返回[输入, 输出]
+    """
     if len(inputs_array) == 1:
         # 折叠输出
         if len(inputs_array[0]) > 200: inputs_show_user = \
@@ -682,6 +503,15 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
 
 
 def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
+    """
+    Args: 将输出结果写入md，并转换为流程图
+        gpt_response_collection: [输入、输出]
+        llm_kwargs: 调优参数
+        chatbot: 对话组件
+        history: 历史对话
+    Returns:
+        None
+    """
     for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
         chatbot.append([None, f'{long_name_processing(you_say)} 🏃🏻‍正在努力将Markdown转换为流程图~'])
         yield from toolbox.update_ui(chatbot=chatbot, history=history)
@@ -695,6 +525,15 @@ def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
 
 
 def result_written_to_markdwon(gpt_response_collection, llm_kwargs, chatbot, history):
+    """
+    Args: 将输出结果写入md
+        gpt_response_collection: [输入、输出]
+        llm_kwargs: 调优参数
+        chatbot: 对话组件
+        history: 历史对话
+    Returns:
+        None
+    """
     inputs_all = ''
     for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
         inputs_all += inputs
@@ -709,4 +548,4 @@ previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传�
 
 
 if __name__ == '__main__':
-    import time
+    print(get_docs_content('https://www.kdocs.cn/l/cnYprFmFqghk'))

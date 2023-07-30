@@ -163,8 +163,13 @@ def html_download_blank(__href, dir_name=''):
     a = f'<a href="{__href}" target="_blank" download="{dir_name}" class="svelte-xrr240">{dir_name}</a>'
     return a
 
-def html_local_img(__file, layout='left'):
-    a = f'<div align="{layout}"><img src="file={__file}"></div>'
+def html_local_img(__file, layout='left', max_width=None, max_height=None):
+    style = ''
+    if max_width is not None:
+        style += f"max-width: {max_width};"
+    if max_height is not None:
+        style += f"max-height: {max_height};"
+    a = f'<div align="{layout}"><img src="file={__file}" style="{style}"></div>'
     return a
 
 def ipaddr():
@@ -553,10 +558,12 @@ def show_prompt_result(index, data: gr.Dataset, chatbot, pro_edit, pro_name):
                 chatbot.append([list_copy[i]])
             else:
                 chatbot.append([list_copy[i], list_copy[i + 1]])
+            yield chatbot, pro_edit, pro_name, gr.Tabs.update(), gr.Accordion.update()
     elif click[2] is None:
         pro_edit = click[1]
         pro_name = click[3]
-    return chatbot, pro_edit, pro_name, gr.Tabs.update(selected='func_tab'), gr.Accordion.update(open=True)
+        chatbot.append([click[3], click[1]])
+    yield chatbot, pro_edit, pro_name, gr.Tabs.update(selected='func_tab'), gr.Accordion.update(open=True)
 
 
 
@@ -689,11 +696,6 @@ def refresh_load_data(prompt, crazy_list, request: gr.Request):
     data = prompt_retrieval(is_all=is_all)
     prompt['samples'] = data
     selected = random.sample(crazy_list, 4)
-    user_agent = request.kwargs['headers']['user-agent'].lower()
-    if user_agent.find('android') != -1 or user_agent.find('iphone') != -1:
-        hied_elem = gr.update(visible=False)
-    else:
-        hied_elem = gr.update()
     know_list = ['新建分类'] + os.listdir(knowledge_path)
     load_list, user_list = get_directory_list(os.path.join(knowledge_path, '公共知识库'), request.client.host)
     know_cls = gr.Dropdown.update(choices=know_list, value='公共知识库')
@@ -702,10 +704,8 @@ def refresh_load_data(prompt, crazy_list, request: gr.Request):
     select_list = filter_database_tables()
     outputs = [gr.Dataset.update(samples=data, visible=True), prompt, gr.Dropdown.update(choices=select_list),
                gr.Dataset.update(samples=[[i] for i in selected]), selected,
-               hied_elem, hied_elem,
                know_cls, know_user, know_load]
     return outputs
-
 
 
 def txt_converter_json(input_string):
@@ -791,8 +791,8 @@ def to_markdown_tabs(head: list, tabs: list, alignment=':---:', column=False):
         tabs_list += "".join([tab_format % i for i in row_data]) + '|\n'
     return tabs_list
 
+from PIL import Image, ImageOps
 import qrcode
-from PIL import Image
 def qr_code_generation(data, icon_path=None, file_name='qc_icon.png'):
     # 创建qrcode对象
     qr = qrcode.QRCode(version=2, error_correction=qrcode.constants.ERROR_CORRECT_Q, box_size=10, border=2,)
@@ -805,19 +805,21 @@ def qr_code_generation(data, icon_path=None, file_name='qc_icon.png'):
     img_w, img_h = img.size
     # 打开logo
     if not icon_path:
-        icon_path = os.path.join(base_path, '/docs/assets/PLAI.jpeg')
+        icon_path = os.path.join(base_path, 'docs/wps_logo.png')
     logo = Image.open(icon_path)
     # logo大小为二维码的四分之一
     logo_w = img_w // 4
     logo_h = img_w // 4
     # 修改logo图片大小
     logo = logo.resize((logo_w, logo_h), Image.LANCZOS)  # or Image.Resampling.LANCZOS
+    # 填充logo背景色透明
+    ImageOps.pad(logo, (logo_w, logo_h), method=Image.LANCZOS)
     # 把logo放置在二维码中间
     w = (img_w - logo_w) // 2
     h = (img_h - logo_h) // 2
     img.paste(logo, (w, h))
-    qr_path = os.path.join(logs_path, 'file_name')
-    img.save()
+    qr_path = os.path.join(logs_path, file_name)
+    img.save(qr_path)
     return qr_path
 
 

@@ -50,9 +50,9 @@ def write_private(ipaddr, models, chatbot):
     transparent_address = f'<p style="display:none;">\n{ipaddr.client.host}\n</p>'
     if private in models:
         if chatbot == []:
-            chatbot.append([None, f'隐私模式, 你的对话记录无法被他人检索 {transparent_address_private}'])
+            chatbot.append([None, f'隐私模式, 你的对话记录不会被他人检索 {transparent_address_private}'])
         else:
-            chatbot[0] = [None, f'隐私模式, 你的对话记录无法被他人检索 {transparent_address_private}']
+            chatbot[0] = [None, f'隐私模式, 你的对话记录不会被他人检索 {transparent_address_private}']
     else:
         if chatbot == []:
             chatbot.append([None,

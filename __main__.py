@@ -86,13 +86,16 @@ class ChatBot(ChatBotFrame):
         with gr.Box(elem_id='chat_box'):
             self.state_users = gr.HTML(value='', visible=False, elem_id='state_users')
             with gr.Row():
-                self.sm_upload = gr.UploadButton(label='🔗', file_count='multiple', elem_classes='sm_btn').style(size='sm', full_width=False)
-                self.sm_code_block = gr.Button(value='💻', elem_classes='sm_btn').style(size='sm', full_width=False)
-                self.resetBtn = gr.Button("🗑", variant="primary", elem_classes='sm_btn').style(size='sm', full_width=False)
-                self.sm_upload_history = gr.Button("🔭", variant="primary", elem_classes='sm_btn').style(size='sm', full_width=False)
+                self.sm_upload = gr.UploadButton(label='🔗 上传', file_count='multiple', elem_classes='sm_btn').style(size='sm', full_width=False)
+                self.sm_code_block = gr.Button(value='< > 代码块', elem_classes='sm_btn').style(size='sm', full_width=False)
+                self.resetBtn = gr.Button("🗑 新对话", variant="primary", elem_classes='sm_btn').style(size='sm', full_width=False)
+                self.sm_upload_history = gr.Button("🥷 上传历史", variant="primary", elem_classes='sm_btn').style(size='sm', full_width=False)
                 self.llms_dropdown = gr.Dropdown(choices=AVAIL_LLM_MODELS, value=LLM_MODEL,
                                                show_label=True, interactive=True, label='LLMs',
                                                elem_classes='sm_select', elem_id='change-font-size').style(container=False)
+                self.langchain_sm_classifi = gr.Dropdown(choices=[], value="公共知识库", interactive=True,
+                                                      label="选择知识库分类", visible=False,
+                                                      elem_classes='sm_select', elem_id='change-font-size').style(container=False)
                 self.langchain_dropdown = gr.Dropdown(choices=[], value=[],
                                                show_label=True, interactive=True, label='知识库', multiselect=True,
                                                elem_classes='sm_select', elem_id='change-font-size').style(container=False)
@@ -125,6 +128,11 @@ class ChatBot(ChatBotFrame):
                                        inputs=[self.langchain_classifi, self.langchain_class_name, self.langchain_dropdown, self.chatbot, self.langchain_know_kwargs],
                                        outputs=[self.chatbot, self.examples_column, self.status, self.langchain_know_kwargs]
                                        )
+        self.langchain_sm_classifi.select(fn=Langchain_cn.obtain_classification_knowledge_base,
+                                       inputs=[self.langchain_sm_classifi],
+                                       outputs=[self.langchain_select, self.langchain_dropdown, self.langchain_status]
+                                       ).then(fn=func_box.new_button_display,
+                                              inputs=[self.langchain_sm_classifi], outputs=[self.langchain_class_name])
 
     def draw_examples(self):
         with gr.Column(elem_id='examples_col') as self.examples_column:
@@ -139,7 +147,12 @@ class ChatBot(ChatBotFrame):
                 self.guidance_example = gr.Examples(examples=self.example, inputs=self.example_inputs, label='基础对话')
                 self.guidance_plugins = gr.Dataset(components=[gr.HTML(visible=False)], samples=[['...'] for i in range(4)], label='高级功能', type='index')
                 self.guidance_plugins_state = gr.State()
-                self.guidance_news = gr.Examples(examples=func_box.git_log_list(), inputs=[hide_components, hide_components], label='News')
+                # self.guidance_news = gr.Examples(examples=func_box.git_log_list(), inputs=[hide_components, hide_components], label='News')
+                title = func_box.get_html('what_news.html').replace('{%v}', 'What`News\n\n')
+                qr_path = func_box.qr_code_generation(data='http://192.168.0.100:7891/?__theme=dark')
+                content = func_box.get_html('what_news.md').replace('{qrcode}', func_box.html_local_img(qr_path, max_width='150px'))
+                content = content.replace('{log}', "".join(func_box.git_log_list()[0]))
+                self.guidance_what_new = gr.Markdown(title+content)
 
                 def plug_update(index, date_set):
                     variant = crazy_fns[date_set[index]]["Color"] if "Color" in crazy_fns[date_set[index]] else "secondary"
@@ -166,8 +179,8 @@ class ChatBot(ChatBotFrame):
 
     def draw_prompt(self):
         with gr.Row():
-            self.pro_search_txt = gr.Textbox(show_label=False, placeholder="Enter the prompt you want.").style(
-                container=False)
+            self.pro_search_txt = gr.Textbox(show_label=False,
+                                             placeholder="输入你想要搜索的对话记录或提示词").style(container=False)
             self.pro_entry_btn = gr.Button("搜索", variant="primary", elem_classes='short_btn ').style(full_width=False, size="sm")
             self.pro_reuse_btn = gr.Button("复用上下文", variant="secondary", elem_classes='short_btn ').style(full_width=False, size="sm")
             self.pro_clear_btn = gr.Button("重置对话记录", variant="stop", elem_classes='short_btn ').style(full_width=False, size="sm")
@@ -177,7 +190,7 @@ class ChatBot(ChatBotFrame):
                                               samples=[[". . ."] for i in range(20)], type='index')
             self.pro_prompt_state = gr.State({'samples': None})
         with gr.Row():
-            self.pro_results = gr.Chatbot(label='提示词和对话记录', elem_id='prompt_result').style()
+            self.pro_results = gr.Chatbot(label='提示词和对话记录', elem_id='main_chatbot').style()
 
     def draw_function_chat(self):
         preset_prompt, devs_document = get_conf('preset_prompt', 'devs_document')
@@ -435,7 +448,7 @@ class ChatBot(ChatBotFrame):
             self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01, interactive=True,
                                    label="Top-p (nucleus sampling)", ).style(container=False)
             self.temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True,
-                                         label="Temperature", ).style(container=False)
+                                         label="Temperature",).style(container=False)
             self.max_length_sl = gr.Slider(minimum=256, maximum=4096, value=4096, step=1, interactive=True,
                                            label="MaxLength", visible=False).style(container=False)
             self.pro_tf_slider = gr.Slider(minimum=0.01, maximum=1.0, value=0.70, step=0.01, interactive=True,
@@ -484,7 +497,7 @@ class ChatBot(ChatBotFrame):
         # threading.Thread(target=warm_up_modules, name="warm-up", daemon=True).start()
 
     def main(self):
-        with gr.Blocks(title="Chatbot for KSO ", theme=set_theme, analytics_enabled=False, css=custom_css) as self.demo:
+        with (gr.Blocks(title="Chatbot for KSO ", theme=set_theme, analytics_enabled=False, css=custom_css) as self.demo):
             # 绘制页面title
             self.draw_title()
             # 绘制一个ROW，row会让底下的元素自动排成一行
@@ -518,15 +531,35 @@ class ChatBot(ChatBotFrame):
                            inputs=[self.pro_fp_state, adv_plugins],
                            outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check,
                                     self.guidance_plugins, self.guidance_plugins_state,
-                                    self.cloum_1, self.examples_column,
                                     self.langchain_classifi, self.langchain_select, self.langchain_dropdown])
+
+            # 为适配手机端
+            def mobile_access(request: gr.Request):
+                user_agent = request.kwargs['headers']['user-agent'].lower()
+                if user_agent.find('android') != -1 or user_agent.find('iphone') != -1:
+                    know_list = os.listdir(func_box.knowledge_path)
+                    outputs = [gr.update(visible=False), gr.update(visible=False),
+                               self.sm_upload.update(visible=False), self.sm_code_block.update(visible=False),
+                               self.sm_upload_history.update(visible=False), gr.update(visible=False), gr.update(visible=False),
+                               gr.update(visible=False), gr.update(visible=True, choices=know_list)]
+                else:
+                    outputs = [gr.update(), gr.update(),
+                               self.sm_upload.update(), self.sm_code_block.update(),
+                               self.resetBtn.update(), self.sm_upload_history.update(), self.switcher_drak.update(),
+                               gr.update(), gr.update(visible=False)]
+                return outputs
+            self.demo.load(mobile_access,
+                           inputs=None,
+                           outputs=[self.cloum_1, self.examples_column,
+                                    self.sm_upload, self.sm_code_block, self.resetBtn, self.sm_upload_history, self.switcher_drak,
+                                    self.llms_dropdown, self.langchain_sm_classifi])
             self.demo.get_expected_parent()
 
         # Start
         self.auto_opentab_delay()
         login_html = ''
         self.demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, auth_message=login_html,
-                                 blocked_paths=["config.py", "config_private.py", "docker-compose.yml", "Dockerfile"],
+                                 allowed_paths=['private_upload'],
                                  show_api=False, favicon_path='./docs/wps_logo.png')
 
 
