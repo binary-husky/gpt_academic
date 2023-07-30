@@ -97,7 +97,7 @@ class InterviewAssistant(AliyunASR):
         # 初始化音频采集线程
         self.captured_audio = np.array([])
         self.keep_latest_n_second = 10
-        self.commit_after_pause_n_second = 1.5
+        self.commit_after_pause_n_second = 2.0
         self.ready_audio_flagment = None
         self.stop = False
         self.plugin_wd = WatchDog(timeout=5, bark_fn=self.__del__, msg="程序终止")
