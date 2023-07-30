@@ -292,6 +292,10 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 <img src="https://github.com/binary-husky/gpt_academic/assets/96192199/476f66d9-7716-4537-b5c1-735372c25adb" height="200">
 </div>
 
+11. 语言、主题切换
+<div align="center">
+<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/b6799499-b6fb-4f0c-9c8e-1b441872f4e8" width="500" >
+</div>
 
 
 ### II：版本:
