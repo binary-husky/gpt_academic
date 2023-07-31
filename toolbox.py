@@ -940,3 +940,101 @@ def Singleton(cls):
         return _instance[cls]
  
     return _singleton
+
+"""
+========================================================================
+第四部分
+接驳虚空终端:
+    - set_conf:                     在运行过程中动态地修改配置
+    - set_multi_conf:               在运行过程中动态地修改多个配置
+    - get_plugin_handle:            获取插件的句柄
+    - get_plugin_default_kwargs:    获取插件的默认参数
+    - get_chat_handle:              获取简单聊天的句柄
+    - get_chat_default_kwargs:      获取简单聊天的默认参数
+========================================================================
+"""
+
+def set_conf(key, value):
+    from toolbox import read_single_conf_with_lru_cache, get_conf
+    read_single_conf_with_lru_cache.cache_clear()
+    get_conf.cache_clear()
+    os.environ[key] = str(value)
+    altered, = get_conf(key)
+    return altered
+
+def set_multi_conf(dic):
+    for k, v in dic.items(): set_conf(k, v)
+    return
+
+def get_plugin_handle(plugin_name):
+    """
+    e.g. plugin_name = 'crazy_functions.批量Markdown翻译->Markdown翻译指定语言'
+    """
+    import importlib
+    assert '->' in plugin_name, \
+        "Example of plugin_name: crazy_functions.批量Markdown翻译->Markdown翻译指定语言"
+    module, fn_name = plugin_name.split('->')
+    f_hot_reload = getattr(importlib.import_module(module, fn_name), fn_name)
+    return f_hot_reload
+
+def get_chat_handle():
+    """
+    """
+    from request_llm.bridge_all import predict_no_ui_long_connection
+    return predict_no_ui_long_connection
+
+def get_plugin_default_kwargs():
+    """
+    """
+    from toolbox import get_conf, ChatBotWithCookies
+
+    WEB_PORT, LLM_MODEL, API_KEY = \
+        get_conf('WEB_PORT', 'LLM_MODEL', 'API_KEY')
+
+    llm_kwargs = {
+        'api_key': API_KEY,
+        'llm_model': LLM_MODEL,
+        'top_p':1.0, 
+        'max_length': None,
+        'temperature':1.0,
+    }
+    chatbot = ChatBotWithCookies(llm_kwargs)
+
+    # txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port
+    default_plugin_kwargs = {
+        "main_inputs": "./README.md",
+        "llm_kwargs": llm_kwargs,
+        "plugin_kwargs": {},
+        "chatbot_with_cookie": chatbot,
+        "history": [],
+        "system_prompt": "You are a good AI.", 
+        "web_port": WEB_PORT
+    }
+    return default_plugin_kwargs
+
+def get_chat_default_kwargs():
+    """
+    """
+    from toolbox import get_conf
+
+    LLM_MODEL, API_KEY = get_conf('LLM_MODEL', 'API_KEY')
+
+    llm_kwargs = {
+        'api_key': API_KEY,
+        'llm_model': LLM_MODEL,
+        'top_p':1.0, 
+        'max_length': None,
+        'temperature':1.0,
+    }
+
+    default_chat_kwargs = {
+        "inputs": "Hello there, are you ready?",
+        "llm_kwargs": llm_kwargs,
+        "history": [],
+        "sys_prompt": "You are AI assistant",
+        "observe_window": None,
+        "console_slience": False,
+    }
+
+    return default_chat_kwargs
+
