@@ -117,20 +117,20 @@ def CatchException(f):
     """
 
     @wraps(f)
-    def decorated(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT=-1):
+    def decorated(main_input, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, *args, **kwargs):
         try:
-            yield from f(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT)
+            yield from f(main_input, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, *args, **kwargs)
         except Exception as e:
             from check_proxy import check_proxy
             from toolbox import get_conf
             proxies, = get_conf('proxies')
             tb_str = '```\n' + trimmed_format_exc() + '```'
-            if len(chatbot) == 0:
-                chatbot.clear()
-                chatbot.append(["插件调度异常", "异常原因"])
-            chatbot[-1] = (chatbot[-1][0],
+            if len(chatbot_with_cookie) == 0:
+                chatbot_with_cookie.clear()
+                chatbot_with_cookie.append(["插件调度异常", "异常原因"])
+            chatbot_with_cookie[-1] = (chatbot_with_cookie[-1][0],
                            f"[Local Message] 实验性函数调用出错: \n\n{tb_str} \n\n当前代理可用性: \n\n{check_proxy(proxies)}")
-            yield from update_ui(chatbot=chatbot, history=history, msg=f'异常 {e}') # 刷新界面
+            yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=f'异常 {e}') # 刷新界面
     return decorated
 
 
@@ -1002,7 +1002,7 @@ def get_plugin_default_kwargs():
 
     # txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port
     default_plugin_kwargs = {
-        "main_inputs": "./README.md",
+        "main_input": "./README.md",
         "llm_kwargs": llm_kwargs,
         "plugin_kwargs": {},
         "chatbot_with_cookie": chatbot,
