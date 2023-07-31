@@ -19,6 +19,8 @@ from .bridge_chatgpt import predict as chatgpt_ui
 from .bridge_chatglm import predict_no_ui_long_connection as chatglm_noui
 from .bridge_chatglm import predict as chatglm_ui
 
+from .bridge_chatglm_onnx import predict_no_ui_long_connection as chatglm_onnx_noui
+from .bridge_chatglm_onnx import predict as chatglm_onnx_ui
 # from .bridge_tgui import predict_no_ui_long_connection as tgui_noui
 # from .bridge_tgui import predict as tgui_ui
 
@@ -164,7 +166,14 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
-
+    "chatglm_onnx": {
+        "fn_with_ui": chatglm_onnx_ui,
+        "fn_without_ui": chatglm_onnx_noui,
+        "endpoint": None,
+        "max_token": 1024,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
 }
 
 
