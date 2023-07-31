@@ -113,6 +113,7 @@ def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
 
 
 def get_files_from_everything(txt, preference=''):
+    if txt == "": return False, None, None
     success = True
     if txt.startswith('http'):
         import requests
