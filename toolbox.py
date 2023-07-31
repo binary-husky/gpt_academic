@@ -496,7 +496,7 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
     # 将文件复制一份到下载区
     import shutil
     if rename_file is None: rename_file = f'{gen_time_str()}-{os.path.basename(file)}'
-    new_path = os.path.join(f'./gpt_log/', rename_file)
+    new_path = os.path.join(get_log_folder(), rename_file)
     # 如果已经存在，先删除
     if os.path.exists(new_path) and not os.path.samefile(new_path, file): os.remove(new_path)
     # 把文件复制过去
