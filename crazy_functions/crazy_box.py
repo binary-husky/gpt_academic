@@ -151,27 +151,30 @@ class ExcelHandle:
 
     def __init__(self, ipaddr, is_client=True):
         if type(is_client) is bool and is_client:
-            self.template_excel = os.path.join(func_box.base_path, 'docs/template/【Temp】测试要点.xlsx')
+            self.template_excel = os.path.join(func_box.base_path, 'docs/template/客户端测试用例模版.xlsx')
         elif not is_client:
             self.template_excel = os.path.join(func_box.base_path, 'docs/template/接口测试用例模板.xlsx')
         elif type(type) is str:
             if os.path.exists(is_client):
                 self.template_excel = is_client
             else:
-                self.template_excel = os.path.join(func_box.base_path, 'docs/template/【Temp】测试要点.xlsx')
+                self.template_excel = os.path.join(func_box.base_path, 'docs/template/客户端测试用例模版.xlsx')
         self.user_path = os.path.join(func_box.base_path, 'private_upload', ipaddr, 'test_case')
         os.makedirs(f'{self.user_path}', exist_ok=True)
 
     def lpvoid_lpbuffe(self, data_list: list, filename='', decs=''):
         # 加载现有的 Excel 文件
         workbook = load_workbook(self.template_excel)
-        # 选择要操作的工作表
-        worksheet = workbook['测试要点']
-        try:
+        # 选择要操作的工作表, 默认是测试要点
+        if '测试要点' in workbook.sheetnames:
+            worksheet = workbook['测试要点']
+        else:
+            worksheet = workbook.create_sheet('测试要点')
+        if '说明' in workbook.sheetnames:
             decs_sheet = workbook['说明']
-            decs_sheet['C2'] = decs
-        except:
-            print('文档没有说明的sheet')
+        else:
+            decs_sheet = workbook.create_sheet('说明')
+        decs_sheet['C2'] = decs
         # 定义起始行号
         start_row = 4
         # 遍历数据列表
@@ -392,7 +395,7 @@ def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs
             elif i.find('｜') != -1:
                 test_case.append([func_box.clean_br_string(i) for i in i.split('｜')[1:]])
             else:
-                func_box.通知机器人(f'脏数据过滤，这个不符合写入测试用例的条件 \n\n```\n\n{i}\n\n```')
+                func_box.通知机器人(f'脏数据过滤，这个不符合写入测试用例的条件 \n\n```\n\n{i}\n\n```\n\n```\n{gpt_response_split}\n```')
     file_path = ExcelHandle(ipaddr=llm_kwargs['ipaddr'], is_client=is_client).lpvoid_lpbuffe(test_case, filename=file_name)
     chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_download_blank(__href=file_path, dir_name=file_path.split("/")[-1])}\n\n'
     chatbot.append(['Done', chat_file_list])

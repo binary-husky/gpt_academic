@@ -247,7 +247,44 @@ def Kdocs音频提取总结(txt, llm_kwargs, plugin_kwargs, chatbot, history, sy
 
 if __name__ == '__main__':
     # 创建一个音频识别对象w
+    import speech_recognition as sr
+    from pydub import AudioSegment
 
-    video = '/Users/kilig/Desktop/output.wav'
-    new_wav = '/Users/kilig/Desktop/output.wav'
 
+    def extract_audio(file_path):
+        audio = AudioSegment.from_file(file_path)
+        return audio
+
+
+    def recognize_speech(audio):
+        r = sr.Recognizer()
+        audio_data = sr.AudioData(audio.raw_data,
+                                  sample_rate=audio.frame_rate,
+                                  sample_width=audio.sample_width)
+
+        # 文字识别
+        text = r.recognize_google(audio_data, language='en')
+
+        # 返回文字和时间段
+        time_markers = []
+        for i, segment in enumerate(audio[::10000]):  # 根据需要调整分割时间间隔
+            start_time = i * 10
+            end_time = (i + 1) * 10
+            time_markers.append({
+                'text': text,
+                'start_time': start_time,
+                'end_time': end_time
+            })
+
+        return time_markers
+
+
+    file_path = '/Users/kilig/Desktop/土木三班陈同学-离人.mp3'  # 替换成你的音视频文件路径
+    audio = extract_audio(file_path)
+    time_markers = recognize_speech(audio)
+
+    for marker in time_markers:
+        print(f"Text: {marker['text']}")
+        print(f"Start Time: {marker['start_time']}s")
+        print(f"End Time: {marker['end_time']}s")
+        print('---')
