@@ -32,3 +32,4 @@ zh_langchain
 rich
 moviepy
 SpeechRecognition
+pyDes
