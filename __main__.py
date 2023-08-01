@@ -102,7 +102,7 @@ class ChatBot(ChatBotFrame):
                 self.switcher_drak = gr.HTML(func_box.get_html("appearance_switcher.html").format(), elem_classes="insert_block")
 
             with gr.Row():
-                self.txt = gr.Textbox(show_label=False,  placeholder="Input question here.", elem_classes='chat_input').style(container=False)
+                self.txt = gr.Textbox(show_label=False,  placeholder="Input question here.", elem_classes='chat_input no_padding_input' ).style()
                 self.input_copy = gr.State('')
                 self.submitBtn = gr.Button("", variant="primary", elem_classes='submit_btn').style(full_width=False)
                 self.stopBtn = gr.Button("", variant="secondary", visible=False, elem_classes='cancel_btn').style(full_width=False)
@@ -149,8 +149,9 @@ class ChatBot(ChatBotFrame):
                 self.guidance_plugins_state = gr.State()
                 # self.guidance_news = gr.Examples(examples=func_box.git_log_list(), inputs=[hide_components, hide_components], label='News')
                 title = func_box.get_html('what_news.html').replace('{%v}', 'What`News\n\n')
-                qr_path = func_box.qr_code_generation(data='http://192.168.0.100:7891/?__theme=dark')
+                qr_path = func_box.qr_code_generation(data='https://kso-chatbot-cc.4wps.net/')
                 content = func_box.get_html('what_news.md').replace('{qrcode}', func_box.html_local_img(qr_path, max_width='150px'))
+                content = content.replace('{my}', 'https://www.kdocs.cn/l/cajcYsWVVKZJ?from=koa')
                 content = content.replace('{log}', "".join(func_box.git_log_list()[0]))
                 self.guidance_what_new = gr.Markdown(title+content)
 
@@ -179,7 +180,7 @@ class ChatBot(ChatBotFrame):
 
     def draw_prompt(self):
         with gr.Row():
-            self.pro_search_txt = gr.Textbox(show_label=False,
+            self.pro_search_txt = gr.Textbox(show_label=False, elem_classes='search_txt',
                                              placeholder="输入你想要搜索的对话记录或提示词").style(container=False)
             self.pro_entry_btn = gr.Button("搜索", variant="primary", elem_classes='short_btn ').style(full_width=False, size="sm")
             self.pro_reuse_btn = gr.Button("复用上下文", variant="secondary", elem_classes='short_btn ').style(full_width=False, size="sm")
@@ -212,8 +213,8 @@ class ChatBot(ChatBotFrame):
                        "\t 改进答案：在后续对话中指正chatGPT答案缺点\n" \
                        "\t 重新生成：尝试在`提示词`不变的情况下多次生成结果，优中选优\n" \
                        "\t 熟练使用占位符{{{v}}}:  当`提示词`存在占位符，则优先将{{{v}}}替换为预期文本"
-                self.pro_edit_txt = gr.Textbox(show_label=False, info='提示词编辑区', lines=9,
-                                               placeholder=Tips).style(container=False)
+                self.pro_edit_txt = gr.Textbox(show_label=False, info='提示词编辑区', lines=9, elem_classes='no_padding_input',
+                                               placeholder=Tips).style()
                 with gr.Row():
                     self.pro_name_txt = gr.Textbox(show_label=False, placeholder='提示词名称').style(container=False)
                     self.pro_new_btn = gr.Button("保存提示词", variant="primary").style(size='sm', full_width=True)
@@ -302,8 +303,8 @@ class ChatBot(ChatBotFrame):
                                 dropdown_fn_list.append(k)
                 self.dropdown_fn = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", interactive=True, show_label=False, label="").style(
                     container=False)
-                self.plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False,
-                                                 placeholder="这里是特殊函数插件的高级参数输入区").style(container=False)
+                self.plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False, elem_classes='no_padding_input',
+                                                 placeholder="这里是特殊函数插件的高级参数输入区").style()
                 self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
 
 
@@ -393,12 +394,13 @@ class ChatBot(ChatBotFrame):
                     self.langchain_classifi = gr.Dropdown(choices=[], value="公共知识库", interactive=True, label="选择知识库分类",
                                                         elem_classes='normal_select').style(container=False)
                 with gr.Row():
-                    self.langchain_class_name = gr.Textbox(show_label=False, placeholder='*必填，构建知识库同时创建分类',
-                                                           visible=False, interactive=True).style(container=False)
+                    self.langchain_class_name = gr.Textbox(show_label=False, placeholder='*必填，构建知识库同时创建分类', elem_classes='no_padding_input',
+                                                           visible=False, interactive=True).style()
             with gr.Box():
                 with gr.Accordion(open=False, label='上传你需要构建的知识库文件'):
                     self.langchain_upload = gr.Files(label="解析支持多类型文档，多文件建议使用zip上传", file_count="multiple", file_types=spl)
-                self.langchain_links = gr.Textbox(show_label=False, placeholder='Kdocs/网络文件,多个链接使用换行间隔').style(container=False)
+                self.langchain_links = gr.Textbox(show_label=False, placeholder='Kdocs/网络文件,多个链接使用换行间隔',
+                                                  elem_classes='no_padding_input').style()
                 self.langchain_know_kwargs = gr.State({'file_path': '', 'know_name': '', 'know_obj': {}, 'file_list': []})
                 #  file_path 是上传文件存储的地址，know_name，know_obj是ql向量化后的对象
             with gr.Box():
@@ -445,16 +447,17 @@ class ChatBot(ChatBotFrame):
     def draw_setting_chat(self):
         switch_model = get_conf('switch_model')[0]
         with gr.TabItem('Settings', id='sett_tab'):
-            self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01, interactive=True,
-                                   label="Top-p (nucleus sampling)", ).style(container=False)
-            self.temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True,
-                                         label="Temperature",).style(container=False)
-            self.max_length_sl = gr.Slider(minimum=256, maximum=4096, value=4096, step=1, interactive=True,
-                                           label="MaxLength", visible=False).style(container=False)
-            self.pro_tf_slider = gr.Slider(minimum=0.01, maximum=1.0, value=0.70, step=0.01, interactive=True,
-                                           label="搜索匹配系数").style(container=False)
-            self.ocr_identifying_trust = gr.Slider(minimum=0.01, maximum=1.0, value=0.60, step=0.01, interactive=True,
-                                           label="OCR 识别信任度").style(container=False)
+            with gr.Box():
+                self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01, interactive=True,
+                                       label="Top-p (nucleus sampling)", ).style(container=False)
+                self.temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True,
+                                             label="Temperature",).style(container=False)
+                self.max_length_sl = gr.Slider(minimum=256, maximum=4096, value=4096, step=1, interactive=True,
+                                               label="MaxLength", visible=False).style(container=False)
+                self.pro_tf_slider = gr.Slider(minimum=0.01, maximum=1.0, value=0.70, step=0.01, interactive=True,
+                                               label="搜索匹配系数").style(container=False)
+                self.ocr_identifying_trust = gr.Slider(minimum=0.01, maximum=1.0, value=0.60, step=0.01, interactive=True,
+                                               label="OCR 识别信任度").style(container=False)
 
             self.models_box = gr.CheckboxGroup(choices=switch_model['key'], value=switch_model['value'], label="对话模式")
             self.system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt",
@@ -560,7 +563,7 @@ class ChatBot(ChatBotFrame):
         login_html = ''
         self.demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, auth_message=login_html,
                                  allowed_paths=['private_upload'],
-                                 show_api=False, favicon_path='./docs/wps_logo.png')
+                                favicon_path='./docs/wps_logo.png')
 
 
 def check_proxy_free():

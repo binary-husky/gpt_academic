@@ -67,13 +67,11 @@ mspace {
     left: 0;
     width: 100%;
     margin-bottom: 25px !important;
-    border: 1px solid var(--border-color-primary);
+    border: 1px solid var(--border-color-primary) !important;
 }
+
 .toast-body {
     z-index: 5 !important;
-}
-.chat_input {
-
 }
 #sm_row {
     display: flex;
@@ -83,7 +81,7 @@ mspace {
 }
 .sm_btn {
     position: relative;
-    /*bottom: 5px;*/
+    bottom: 5px;
     height: 10%;
     border-radius: 20px!important;
     min-width: min(10%,100%) !important;
@@ -97,9 +95,13 @@ mspace {
 .sm_select {
     position: relative !important;
     z-index: 5 !important;
-    /*bottom: 5px;*/
+    bottom: 5px;
     min-width: min(20%,100%) !important;
-    border-radius: 20px!important;
+    /*border-radius: 20px!important;*/
+}
+
+.sm_select .style {
+    max-height: 28px;
 }
 .normal_select .svelte-1gfkn6j {
     float: left;
@@ -112,16 +114,20 @@ mspace {
     line-height: 260% !important;
 }
 
+span.svelte-1gfkn6j:not(.has-info) {
+    margin-bottom: unset;
+}
+
 .sm_select .svelte-1gfkn6j {
     float: left;
     width: auto;
 }
-.sm_select .wrap .svelte-aqlk7e {
+.sm_select .wrap .svelte-c0u3f0 {
     border-radius: var(--block-title-radius);;
     width: auto;
     background-color: #f6f6f6 !important;
 }
-.dark .sm_select .wrap .svelte-aqlk7e {
+.dark .sm_select .wrap .svelte-c0u3f0 {
     background-color: #515151 !important;
 }
 .sm_checkbox {
@@ -130,16 +136,18 @@ mspace {
     bottom: 5px;
     padding: 0 !important;
 }
-.sm_select .token.svelte-aqlk7e.svelte-aqlk7e.svelte-aqlk7e {
+
+.sm_select .token.svelte-c0u3f0.svelte-c0u3f0.svelte-c0u3f0 {
     padding: 1.5% !important;
-    max-height: 20px;
+    max-height: 20px !important;
 
 }
-.sm_select .wrap-inner.svelte-aqlk7e.svelte-aqlk7e.svelte-aqlk7e {
+.sm_select .wrap-inner.svelte-c0u3f0.svelte-c0u3f0.svelte-c0u3f0 {
     padding: 0 !important;
     flex-wrap: unset !important;
     overflow: hidden !important;
 }
+
 .sm_select .block.svelte-mppz8v {
     width: 10% !important;
 }
@@ -148,6 +156,7 @@ mspace {
 .insert_block {
     position: relative;
     min-width: min(55px,100%) !important;
+    bottom: 2.5px;;
 }
 
 
@@ -161,10 +170,10 @@ mspace {
     min-width: min(50px,100%) !important;
 }
 
-textarea {
-    resize: none;
-    height: 100%; /* 填充父元素的高度 */
-}
+/*textarea {*/
+/*    resize: none;*/
+/*    height: 100%; !* 填充父元素的高度 *!*/
+/*}*/
 #main_chatbot {
     height: 75vh !important;
     max-height: 75vh !important;
@@ -233,13 +242,23 @@ footer {
     transition: opacity 0.3s ease-in-out;
 }
 /*输入框*/
-.chat_input textarea.svelte-1pie7s6 {
-    width: 96% !important;
+.no_padding_input {
+    padding: unset !important;
 }
-textarea.svelte-1pie7s6 {
+
+.dark .chat_input.svelte-90oupt{
+    background: #515151 !important;
+}
+.chat_input.svelte-90oupt{
     background: #e7e6e6 !important;
 }
-.dark textarea.svelte-1pie7s6 {
+.chat_input textarea.svelte-1kcgrqr {
+    width: 96% !important;
+}
+textarea.svelte-1kcgrqr {
+    background: #e7e6e6 !important;
+}
+.dark textarea.svelte-1kcgrqr {
     background: var(--input-background-fill) !important;
 }
 
@@ -248,8 +267,16 @@ textarea.svelte-1pie7s6 {
     border: var(--input-border-width) solid var(--input-border-color) !important;
 }
 .dark input[type="range"] {
-    background: #393939 !important;
+    background: #02af57 !important;
 }
+/* 搜索prompt*/
+.search_txt {
+    min-width: min(60%, 100%) !important;
+}
+.search_txt .svelte-1kcgrq {
+    min-width: min(60%, 100%) !important;
+}
+
 #user_info .wrap {
     opacity: 0;
 }
@@ -288,13 +315,16 @@ textarea.svelte-1pie7s6 {
     transition: height 0.3s ease;
 }
 
+
 .wrap.svelte-18telvq.svelte-18telvq {
     padding: var(--block-padding) !important;
     height: 100% !important;
     max-height: 95% !important;
     overflow-y: auto !important;
 }
-.app.svelte-1mya07g.svelte-1mya07g {
+
+/* 整体页面*/
+.app.svelte-1kyws56.svelte-1kyws56 {
     max-width: 100%;
     position: relative;
     /* margin: auto; */
@@ -303,29 +333,29 @@ textarea.svelte-1pie7s6 {
     height: 100%;
 }
 
-.gradio-container-3-32-2 h1 {
+.gradio-container-3-39-0 h1 {
     font-weight: 700 !important;
     font-size: 28px !important;
 }
 
 
-.gradio-container-3-32-2 h2 {
+.gradio-container-3-39-0 h2 {
     font-weight: 600 !important;
     font-size: 24px !important;
 }
-.gradio-container-3-32-2 h3 {
+.gradio-container-3-39-0 h3 {
     font-weight: 500 !important;
     font-size: 20px !important;
 }
-.gradio-container-3-32-2 h4 {
+.gradio-container-3-39-0 h4 {
     font-weight: 400 !important;
     font-size: 16px !important;
 }
-.gradio-container-3-32-2 h5 {
+.gradio-container-3-39-0 h5 {
     font-weight: 300 !important;
     font-size: 14px !important;
 }
-.gradio-container-3-32-2 h6 {
+.gradio-container-3-39-0 h6 {
     font-weight: 200 !important;
     font-size: 12px !important;
 }
