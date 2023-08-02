@@ -561,10 +561,14 @@ class ChatBot(ChatBotFrame):
         # Start
         self.auto_opentab_delay()
         login_html = ''
-        self.demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
-            server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, auth_message=login_html,
-            allowed_paths=['private_upload'], ssl_verify=False, share=True,
-            favicon_path='./docs/wps_logo.png')
+        self.demo.queue(concurrency_count=CONCURRENT_COUNT)
+        self.demo.allowed_paths = ['private_upload']
+        self.demo.ssl_verify = False
+        self.demo.favicon_path = './docs/wps_logo.png'
+        # self.demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
+        #     server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, auth_message=login_html,
+        #     allowed_paths=['private_upload'], ssl_verify=False, share=True,
+        #     favicon_path='./docs/wps_logo.png')
 
 
 def check_proxy_free():
@@ -577,10 +581,14 @@ def check_proxy_free():
         time.sleep(5)
 
 
+from comm_tools import authentication
+app = authentication.app
+PORT = LOCAL_PORT if WEB_PORT <= 0 else WEB_PORT
+reload_javascript()
+chatbot_main = ChatBot()
+chatbot_main.main()
+gradio_app = gr.mount_gradio_app(app, chatbot_main.demo, '/gradio')
+
 if __name__ == '__main__':
-    # PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
-    PORT = LOCAL_PORT if WEB_PORT <= 0 else WEB_PORT
-    reload_javascript()
-    chatbot_main = ChatBot()
-    chatbot_main.main()
-    gr.close_all()
+    import uvicorn
+    uvicorn.run("__main__:app", host="0.0.0.0", port=PORT)
