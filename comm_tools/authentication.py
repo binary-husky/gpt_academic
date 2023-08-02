@@ -9,7 +9,7 @@ import requests
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
-
+from comm_tools import func_box
 
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="!secret")
@@ -27,7 +27,12 @@ def check_cookie(cookie):
         return False
 
 
-@app.middleware("http")
+@app.get("/favicon.ico")  # 设置icon
+async def get_favicon():
+   return {"file": '/docs/wps_logo.png'}
+
+
+@app.middleware("https")
 async def check_authentication(request: Request, call_next):
     if request.url.path == '/gradio/api/predict' or request.url.path == '/gradio/reset':
         return await call_next(request)
@@ -41,6 +46,7 @@ async def check_authentication(request: Request, call_next):
 
 @app.get('/')
 async def homepage(request: Request):
+    request.cookies.update({'ovsmgr_sid': '2YcENNnixrFIrFK9LfnX6QnL1aOWQwsaKhqal_7toU1voKL7'})
     cookie = request.cookies.get('ovsmgr_sid', '')
     user = check_cookie(cookie)
     if user:
@@ -49,17 +55,6 @@ async def homepage(request: Request):
         new_website_url = "https://console.4wps.net/#/login"  # 新网站的URL
         return RedirectResponse(new_website_url)
 
-
-# @app.get('/gradio')
-# async def homepage(request: Request):
-#     # request.cookies.update({'ovsmgr_sid': '-VT2ccoo_Fs-wopSz-YTicgM8YcEcGyzO4HLgA_DFWVoD4n1'})
-#     cookie = request.cookies.get('ovsmgr_sid', '')
-#     user = check_cookie(cookie)
-#     if user:
-#         return RedirectResponse()
-#     else:
-#         new_website_url = "https://console.4wps.net/#/login"  # 新网站的URL
-#         return RedirectResponse(new_website_url)
 
 
 if __name__ == '__main__':
