@@ -41,7 +41,7 @@ async def homepage(request: Request):
     cookie = request.cookies.get('ovsmgr_sid', '')
     user = check_cookie(cookie)
     if user:
-        return 'https://kso-chatbot-cc.4wps.net/gradio'
+        return request.url
     else:
         new_website_url = "https://console.4wps.net/#/login"  # 新网站的URL
         return RedirectResponse(new_website_url)
