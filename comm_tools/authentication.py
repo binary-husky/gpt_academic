@@ -13,6 +13,7 @@ from comm_tools import func_box
 
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="!secret")
+cancel_verification = False
 
 
 def check_cookie(cookie):
@@ -24,7 +25,7 @@ def check_cookie(cookie):
     try:
         user = resp.get('data').get('account')
     except:
-        user = ''
+        user = cancel_verification
     if not user:
         return user
     else:
@@ -58,7 +59,6 @@ async def homepage(request: Request):
     else:
         new_website_url = "https://console.4wps.net/#/login"  # 新网站的URL
         return RedirectResponse(new_website_url)
-
 
 
 if __name__ == '__main__':
