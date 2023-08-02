@@ -62,4 +62,4 @@ async def homepage(request: Request):
 
 
 if __name__ == '__main__':
-    check_cookie('2YcENNnixrFIrFK9LfnX6QnL1aOWQwsaKhqal_7toU1voKL7')
+    pass

@@ -68,7 +68,7 @@ def end_predict(chatbot, history, llm_kwargs, ipaddr):
     count_tokens = func_box.num_tokens_from_string(listing=history)
     status = f"<p>本次对话耗时: {func_box.html_tag_color(tag=f'{count_time}s')}" \
                 f'\t 本次对话使用tokens: {func_box.html_tag_color(count_tokens)}</p>'\
-                f'\t 你的身份是: {ipaddr.request.cookies.get("ovsmgr_sid")}'
+                f'\t 你的身份是: {ipaddr.cookies.get("ovsmgr_sid")}'
 
     yield from update_ui(chatbot=chatbot, history=history, msg=status, end_code=1)  # 刷新界面
 
