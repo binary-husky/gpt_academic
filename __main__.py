@@ -591,4 +591,4 @@ gradio_app = gr.mount_gradio_app(app, chatbot_main.demo, '/gradio')
 
 if __name__ == '__main__':
     import uvicorn
-    uvicorn.run("__main__:app", host="0.0.0.0", port=PORT)
+    uvicorn.run("__main__:app", host="0.0.0.0", port=PORT, reload=False)
