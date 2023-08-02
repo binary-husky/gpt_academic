@@ -28,17 +28,23 @@ class Feishu:
         self.file_mapping = {
             'docx': 'docx',
             'sheet': 'xlsx',
-            'file': False
+            'file': False,
+            'wiki': 'docx',
             # 'bitable': 'xlsx' 这较难支持，。。。
+        }
+        self.type_need_mapping = {
+            'wiki': 'docx',
         }
 
     def __submit_download_task(self):
         """提交下载任务"""
+        share_tag = self.share_tag if self.share_file_type != 'wiki' else self.query_wiki_docs_id()
+        share_file_type = self.type_need_mapping.get(self.share_file_type) if self.type_need_mapping.get(self.share_file_type) else self.share_file_type
         json_data = {
-            'token': self.share_tag,
-            'type': self.share_file_type,
+            'token': share_tag,
+            'type': share_file_type,
             'file_extension': self.file_mapping[self.share_file_type],
-            'event_source': '1',
+            'event_source': '1' if self.share_file_type == 'wiki' else '6',
             'need_comment': True,
         }
         response = requests.post(
@@ -46,7 +52,21 @@ class Feishu:
             headers=self.header_cookies,
             json=json_data, verify=False
         ).json()
+        if not response.get('data'):
+            raise ValueError(json.dumps(response))
         return response['data']['ticket'], response['data']['job_timeout']
+
+    def query_wiki_docs_id(self):
+        """查询wiki文档"""
+        params = {
+            'wiki_token': self.share_tag,
+        }
+        response = requests.get(
+            f'{self.base_host}/space/api/wiki/v2/tree/get_info',
+            params=params, verify=False,
+            headers=self.header_cookies)
+
+        return response.json()['data']['tree']['nodes'][self.share_tag]['obj_token']
 
     def query_download_task(self):
         """查询下载任务状态"""
@@ -99,7 +119,7 @@ def get_feishu_file(link, project_folder, header=None):
         return {}
 
 
-def get_feishu_from_limit(link_limit,  project_folder, header=None):
+def get_feishu_from_limit(link_limit, project_folder, header=None):
     """
     Args:
         link_limit: kudos 文件分享码

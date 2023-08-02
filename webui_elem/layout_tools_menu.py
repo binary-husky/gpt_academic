@@ -151,15 +151,15 @@ class RightElem:
                                                               label=i18n('返回数据类型'),
                                                               value=default_params['response_format'],
                                                               interactive=True, container=False, show_label=True)
+                    self.max_generation_slider = gr.Slider(minimum=1, maximum=1024*32, show_label=True,
+                                                           value=default_params['max_generation'],
+                                                           step=1, interactive=True, label="max generations",
+                                                           container=False)
                     func_box.md_division_line()
                     self.max_context_length_slider = gr.Slider(minimum=1, maximum=32768, show_label=True,
                                                                value=default_params['max_context'],
                                                                step=1, interactive=True, label="max context",
                                                                container=False)
-                    self.max_generation_slider = gr.Slider(minimum=1, maximum=32768, show_label=True,
-                                                           value=default_params['max_generation'],
-                                                           step=1, interactive=True, label="max generations",
-                                                           container=False)
                     self.logit_bias_txt = gr.Textbox(show_label=True, placeholder=f"word:likelihood",
                                                      label="logit bias", value=default_params['logit_bias'], lines=1,
                                                      container=False)

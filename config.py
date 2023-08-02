@@ -78,7 +78,7 @@ LLM_DEFAULT_PARAMETER = {
     'top_p': 1.0, 'temperature': 1.0, 'n_choices': 1, 'stop': '',
     'presence_penalty': 2.0, 'frequency_penalty': 0, 'user_identifier': "",
     "response_format": 'text',
-    'max_context': 2000, 'max_generation': 1000, 'logit_bias': "",
+    'max_context': 2000, 'max_generation': 4096, 'logit_bias': "",
     'system_prompt': '',
 }
 # 支持的response_format类型

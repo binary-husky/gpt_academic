@@ -155,7 +155,7 @@ def ArgsGeneralWrapper(func):
                                                              chatbot_with_cookie, history, args, func)
         # 根据args判断需要对提交和历史对话做什么处理
         txt_proc, history, func_redirect = yield from plugins_selection(txt_proc, history, plugin_kwargs,
-                                                    args, cookies, chatbot_with_cookie, llm_kwargs, func)
+                                                    args, cookies, chatbot_with_cookie, llm_kwargs, func_redirect)
         # 根据cookie 或 对话配置决定到底走哪一步
         yield from func_decision_tree(func_redirect, cookies, single_mode, agent_mode,
                                       txt_proc, llm_kwargs, plugin_kwargs, chatbot_with_cookie,
@@ -190,8 +190,9 @@ def model_selection(txt, models, llm_kwargs, plugin_kwargs, cookies, chatbot_wit
                 input_embedding_content = yield from user_input_embedding_content(txt_proc, chatbot_with_cookie,
                                                                                   history, llm_kwargs, plugin_kwargs,
                                                                                   valid_types)
-                txt_proc = "\n\n---\n\n".join([v for i, v in enumerate(input_embedding_content) if i % 2 == 1])
-                if txt_proc:
+                txt_proc_embedding = "\n\n---\n\n".join([v for i, v in enumerate(input_embedding_content) if i % 2 == 1])
+                if txt_proc_embedding:
+                    txt_proc = txt_proc_embedding
                     func = submit_no_use_ui_task
             else:
                 yield from update_ui(chatbot_with_cookie, history, msg='Switching to normal dialog...')

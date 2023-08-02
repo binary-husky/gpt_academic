@@ -127,6 +127,7 @@ class GPTChatInit:
             # "logit_bias": llm_kwargs['logit_bias'],
             "user": llm_kwargs.get('user_identifier', ''),
             "stream": stream,
+            "max_tokens": llm_kwargs.get('max_generation', 4096)
         }
         if '1106' in self.llm_model:
             payload.update({"response_format": {"type": llm_kwargs.get('response_format', "text")}})
@@ -172,7 +173,7 @@ class GPTChatInit:
             return self.generate_messages(inputs, llm_kwargs, history, system_prompt, stream)
         for chuck in response.iter_lines():
             chunk_decoded, check_json, content = self._analysis_content(chuck)
-            chunk_content += chunk_decoded
+            chunk_content += chunk_decoded + '\n'
             if content:
                 gpt_bro_result += content
                 yield content, gpt_bro_result, ''

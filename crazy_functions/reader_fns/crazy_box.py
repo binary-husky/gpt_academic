@@ -794,9 +794,7 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='Reader loading...')
         fp_mapping, download_status = input_retrieval_file(user_input, llm_kwargs, valid_types)
         download_status.update(fp_mapping)
-        if not fp_mapping:
-            chatbot[-1][1] = ''
-        else:
+        if fp_mapping:
             chatbot[-1][1] = download_format(title='链接解析完成', content=download_status, status='Done')
         content_mapping = yield from file_extraction_intype(fp_mapping, chatbot, history, llm_kwargs, plugin_kwargs)
         for content_fp in content_mapping:  # 一个文件一个对话
@@ -826,7 +824,7 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
                     chatbot[-1][1] = status
                 chatbot[-1][1] += status
                 yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='没有探测到数据')
-                return None
+                return []
         kb_upload, = json_args_return(plugin_kwargs, ['自动录入知识库'])
         files_list = [i for i in content_mapping if os.path.exists(i)]
         if kb_upload and files_list:
