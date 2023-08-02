@@ -711,7 +711,7 @@ thead th {
     display: inline;
     white-space: break-spaces;
     border-radius: 6px;
-    margin: 0 2px 0 2px;
+    /*margin: 0 2px 0 2px;*/
     padding: .2em .4em .1em .4em;
     background-color: rgba(175,184,193,0.2);
 }
@@ -721,13 +721,19 @@ thead th {
     overflow: auto;
     white-space: pre;
     background-color: hsla(0, 0%, 7%, 70%)!important;
-    border-radius: 10px;
-    padding: 1.2em 1em 0em .5em;
-    margin: 0.6em 2em 1em 0.2em;
+    /*border-radius: 10px;*/
+    /*padding: 1.2em 1em 0em .5em;*/
+    /*margin: 0.6em 2em 1em 0.2em;*/
     color: #FFF;
     box-shadow: 6px 6px 16px hsla(0, 0%, 0%, 0.2);
 }
-.dark .message pre code {
+/*.dark .message pre code {*/
+/*    background-color: hsla(0, 0%, 20%, 300%)!important;*/
+/*}*/
+.dark .message-wrap.svelte-lpz3rh pre {
+    background-color: hsla(0, 0%, 20%, 300%)!important;
+}
+.message-wrap.svelte-lpz3rh pre {
     background-color: hsla(0, 0%, 20%, 300%)!important;
 }
 .message pre {

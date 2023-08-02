@@ -561,9 +561,10 @@ class ChatBot(ChatBotFrame):
         # Start
         self.auto_opentab_delay()
         login_html = ''
-        self.demo.queue(concurrency_count=CONCURRENT_COUNT).launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, auth_message=login_html,
-                                 allowed_paths=['private_upload'],
-                                favicon_path='./docs/wps_logo.png')
+        self.demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
+            server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, auth_message=login_html,
+            allowed_paths=['private_upload'], ssl_verify=False, share=True,
+            favicon_path='./docs/wps_logo.png')
 
 
 def check_proxy_free():
