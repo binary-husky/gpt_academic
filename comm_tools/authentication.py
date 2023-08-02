@@ -40,19 +40,17 @@ async def get_favicon():
 async def check_authentication(request: Request, call_next):
     if request.url.path == '/gradio/api/predict' or request.url.path == '/gradio/reset':
         return await call_next(request)
-    request.cookies.update({'ovsmgr_sid': '2YcENNnixrFIrFK9LfnX6QnL1aOWQwsaKhqal_7toU1voKL7'})
     cookie = request.cookies.get('ovsmgr_sid', '')
     user = check_cookie(cookie)
     if not user:
         new_website_url = "https://console.4wps.net/#/login"  # 新网站的URL
         return RedirectResponse(new_website_url)
-    request.client.host = user
+    # request.client.host = ''
     return await call_next(request)
 
 
 @app.get('/')
 async def homepage(request: Request):
-    request.cookies.update({'ovsmgr_sid': '2YcENNnixrFIrFK9LfnX6QnL1aOWQwsaKhqal_7toU1voKL7'})
     cookie = request.cookies.get('ovsmgr_sid', '')
     user = check_cookie(cookie)
     if user:

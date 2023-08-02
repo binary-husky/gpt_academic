@@ -62,15 +62,15 @@ def write_private(ipaddr, models, chatbot):
                           f'正常对话模式, 你接来下的对话将会被记录并且可以被所有人检索，你可以到Settings中选择隐私模式 {transparent_address}']
 
 
-def end_predict(chatbot, history, llm_kwargs):
+def end_predict(chatbot, history, llm_kwargs, ipaddr):
     # 暂时无用
     count_time = round(time.time() - llm_kwargs['start_time'], 3)
     count_tokens = func_box.num_tokens_from_string(listing=history)
     status = f"<p>本次对话耗时: {func_box.html_tag_color(tag=f'{count_time}s')}" \
-                  f'\t 本次对话使用tokens: {func_box.html_tag_color(count_tokens)}</p>'
+                f'\t 本次对话使用tokens: {func_box.html_tag_color(count_tokens)}</p>'\
+                f'\t 你的身份是: {ipaddr.request.cookies.get("ovsmgr_sid")}'
 
     yield from update_ui(chatbot=chatbot, history=history, msg=status, end_code=1)  # 刷新界面
-
 
 
 def ArgsGeneralWrapper(f):
@@ -104,7 +104,6 @@ def ArgsGeneralWrapper(f):
             "advanced_arg": plugin_advanced_arg,
             "parameters_def": ''
         }
-
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
         write_private(ipaddr, models, chatbot_with_cookie)
@@ -126,7 +125,7 @@ def ArgsGeneralWrapper(f):
             f_hot_reload = getattr(importlib.import_module(module, fn_name), fn_name)
             yield from f_hot_reload(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
         # 将对话记录写入数据库
-        yield from end_predict(chatbot_with_cookie, history, llm_kwargs)
+        yield from end_predict(chatbot_with_cookie, history, llm_kwargs, ipaddr)
         threading.Thread(target=func_box.thread_write_chat, args=(chatbot_with_cookie, ipaddr.client.host)).start()
     return decorated
 
