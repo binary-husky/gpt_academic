@@ -345,6 +345,8 @@ def markdown_convertion(txt):
     suf = '</div>'
     raw_pre = '<div class="raw-message hideM">'
     raw_suf = '</div>'
+    txt = txt.replace('</code><p><code>', '</code><code>'   # 解决代码块断层的问题
+                      ).replace('</code></p></pre>', '</code></pre>').replace('</code><p></code>', '</code></code>')
     if txt.startswith(pre) and txt.endswith(suf):
         # print('警告，输入了已经经过转化的字符串，二次转化可能出问题')
         return txt  # 已经被转化过，不需要再次转化

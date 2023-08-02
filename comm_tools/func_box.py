@@ -138,7 +138,7 @@ def html_a_blank(__href, name=''):
 
 def html_view_blank(__href, file_name=''):
     if os.path.exists(__href):
-        __href = f'/file={__href}'
+        __href = f'/gradio/file={__href}'
     if not file_name:
         file_name = __href.split('/')[-1]
     a = f'<a href="{__href}" target="_blank" class="svelte-xrr240">{file_name}</a>'
@@ -146,7 +146,7 @@ def html_view_blank(__href, file_name=''):
 
 def html_local_file(html_file):
     proxy, = toolbox.get_conf('LOCAL_PORT')
-    html_file = f'http://{ipaddr()}:{proxy}/file={html_file}'
+    html_file = f'http://{ipaddr()}:{proxy}/gradio/file={html_file}'
     return html_file
 
 def html_iframe_code(html_file):
@@ -157,7 +157,7 @@ def html_iframe_code(html_file):
 
 def html_download_blank(__href, dir_name=''):
     if os.path.exists(__href):
-        __href = f'/file={__href}'
+        __href = f'/gradio/{__href}'
     if not dir_name:
         dir_name = str(__href).split('/')[-1]
     a = f'<a href="{__href}" target="_blank" download="{dir_name}" class="svelte-xrr240">{dir_name}</a>'

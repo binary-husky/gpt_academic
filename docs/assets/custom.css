@@ -720,7 +720,7 @@ thead th {
     display: block;
     overflow: auto;
     white-space: pre;
-    background-color: hsla(0, 0%, 7%, 70%)!important;
+    background-color: hsla(0, 0%, 20%, 300%)!important;
     /*border-radius: 10px;*/
     /*padding: 1.2em 1em 0em .5em;*/
     /*margin: 0.6em 2em 1em 0.2em;*/

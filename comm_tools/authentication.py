@@ -20,11 +20,15 @@ def check_cookie(cookie):
         'Cookie': f"ovsmgr_sid={cookie}",
         "Origin": 'https://kso-chatbot-cc.4wps.net/'
     }
-    resp = requests.get(url='https://ovsmgr-api.4wps.net/checkv2', headers=header)
-    if resp.json().get('code') != 'error':
-        return True
+    resp = requests.get(url='https://ovsmgr-api.4wps.net/checkv2', headers=header).json()
+    try:
+        user = resp.get('data').get('account')
+    except:
+        user = ''
+    if not user:
+        return user
     else:
-        return False
+        return user
 
 
 @app.get("/favicon.ico")  # 设置icon
@@ -36,11 +40,13 @@ async def get_favicon():
 async def check_authentication(request: Request, call_next):
     if request.url.path == '/gradio/api/predict' or request.url.path == '/gradio/reset':
         return await call_next(request)
+    request.cookies.update({'ovsmgr_sid': '2YcENNnixrFIrFK9LfnX6QnL1aOWQwsaKhqal_7toU1voKL7'})
     cookie = request.cookies.get('ovsmgr_sid', '')
     user = check_cookie(cookie)
     if not user:
         new_website_url = "https://console.4wps.net/#/login"  # 新网站的URL
         return RedirectResponse(new_website_url)
+    request.client.host = user
     return await call_next(request)
 
 
@@ -58,4 +64,4 @@ async def homepage(request: Request):
 
 
 if __name__ == '__main__':
-    check_cookie('')
+    check_cookie('2YcENNnixrFIrFK9LfnX6QnL1aOWQwsaKhqal_7toU1voKL7')
