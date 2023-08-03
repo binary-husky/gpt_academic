@@ -24,8 +24,9 @@ crazy_fns = {}
 for role in crazy_fns_role:
     for k in crazy_fns_role[role]:
         crazy_fns[k] = crazy_fns_role[role][k]
-# 处理markdown文本格式的转变
-gr.Chatbot.postprocess = format_io
+
+# 处理markdown文本格式的转变 暂时屏蔽这个高亮代码
+# gr.Chatbot.postprocess = format_io
 
 # 做一些外观色彩上的调整
 from comm_tools.theme import adjust_theme, custom_css, reload_javascript

@@ -9,11 +9,11 @@ import requests
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
-from comm_tools import func_box
+from comm_tools import toolbox
 
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="!secret")
-cancel_verification = False
+cancel_verification = toolbox.get_conf('cancel_verification')
 
 
 def check_cookie(cookie):
@@ -46,7 +46,6 @@ async def check_authentication(request: Request, call_next):
     if not user:
         new_website_url = "https://console.4wps.net/#/login"  # 新网站的URL
         return RedirectResponse(new_website_url)
-    # request.client.host = ''
     return await call_next(request)
 
 

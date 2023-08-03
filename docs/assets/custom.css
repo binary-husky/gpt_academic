@@ -720,16 +720,13 @@ thead th {
     display: block;
     overflow: auto;
     white-space: pre;
-    background-color: hsla(0, 0%, 20%, 300%)!important;
-    /*border-radius: 10px;*/
-    /*padding: 1.2em 1em 0em .5em;*/
-    /*margin: 0.6em 2em 1em 0.2em;*/
+    background-color: hsl(0deg 0% 20%)!important;
+    border-radius: 10px;
+    padding: 1.2em 1em 0em .5em;
+    margin: 0.6em 2em 1em 0.2em;
     color: #FFF;
-    box-shadow: 6px 6px 16px hsla(0, 0%, 0%, 0.2);
+    /*box-shadow: 6px 6px 16px hsla(0, 0%, 0%, 0.2);*/
 }
-/*.dark .message pre code {*/
-/*    background-color: hsla(0, 0%, 20%, 300%)!important;*/
-/*}*/
 .dark .message-wrap.svelte-lpz3rh pre {
     background-color: hsla(0, 0%, 20%, 300%)!important;
 }
