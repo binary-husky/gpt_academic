@@ -727,6 +727,10 @@ thead th {
     color: #FFF;
     /*box-shadow: 6px 6px 16px hsla(0, 0%, 0%, 0.2);*/
 }
+.gradio-container-3-39-0 code[class*=language-], .gradio-container-3-39-0 pre[class*=language-] {
+    text-shadow: unset;
+    color: #abb2bf;
+}
 .dark .message-wrap.svelte-lpz3rh pre {
     background-color: hsla(0, 0%, 20%, 300%)!important;
 }
