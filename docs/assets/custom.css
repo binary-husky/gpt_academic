@@ -121,6 +121,7 @@ span.svelte-1gfkn6j:not(.has-info) {
 .sm_select .svelte-1gfkn6j {
     float: left;
     width: auto;
+    line-height: 151% !important;
 }
 .sm_select .wrap .svelte-c0u3f0 {
     border-radius: var(--block-title-radius);;

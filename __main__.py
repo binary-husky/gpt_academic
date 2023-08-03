@@ -150,7 +150,7 @@ class ChatBot(ChatBotFrame):
                 self.guidance_plugins_state = gr.State()
                 # self.guidance_news = gr.Examples(examples=func_box.git_log_list(), inputs=[hide_components, hide_components], label='News')
                 title = func_box.get_html('what_news.html').replace('{%v}', 'What`News\n\n')
-                qr_path = func_box.qr_code_generation(data='https://kso-chatbot-cc.4wps.net/')
+                qr_path = func_box.qr_code_generation(data='https://kso-chatbot-cc.4wps.net/gradio/')
                 content = func_box.get_html('what_news.md').replace('{qrcode}', func_box.html_local_img(qr_path, max_width='150px'))
                 content = content.replace('{my}', 'https://www.kdocs.cn/l/cajcYsWVVKZJ?from=koa')
                 content = content.replace('{log}', "".join(func_box.git_log_list()[0]))
@@ -562,7 +562,10 @@ class ChatBot(ChatBotFrame):
         # Start
         self.auto_opentab_delay()
         self.demo.queue(concurrency_count=CONCURRENT_COUNT)
-        self.demo.blocked_paths = ['private_upload']
+        self.demo.blocked_paths = [f"./config.py", "./config_private.py", "config.py", "config_private.py",
+                                   'comm_tools', '__main__.py', "crazy_functions", "users_data"]
+        self.demo.favicon_path = './docs/wps_logo.png'
+        self.demo.root_path = '/gradio'
         login_html = ''
         # self.demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
         #     server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, auth_message=login_html,
