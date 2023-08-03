@@ -4,7 +4,7 @@ import time
 import crazy_functions.crazy_box
 from request_llm.bridge_all import predict
 from comm_tools.toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_user_upload, \
-    get_conf, ArgsGeneralWrapper
+    get_conf, ArgsGeneralWrapper, postprocess
 
 # 问询记录, python 版本建议3.9+（越新越好）
 import logging
@@ -27,6 +27,7 @@ for role in crazy_fns_role:
 
 # 处理markdown文本格式的转变 暂时屏蔽这个高亮代码
 # gr.Chatbot.postprocess = format_io
+gr.Chatbot.postprocess = postprocess
 
 # 做一些外观色彩上的调整
 from comm_tools.theme import adjust_theme, custom_css, reload_javascript
@@ -566,6 +567,7 @@ class ChatBot(ChatBotFrame):
                                    'comm_tools', '__main__.py', "crazy_functions", "users_data"]
         self.demo.favicon_path = './docs/wps_logo.png'
         self.demo.root_path = '/gradio'
+        self.demo.inline = True
         login_html = ''
         # self.demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
         #     server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, auth_message=login_html,

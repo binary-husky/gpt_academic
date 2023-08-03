@@ -203,7 +203,7 @@ def audio_comparison_of_video_converters(files, chatbot, history):
     chatbot.append([None, temp_chat])
     temp_list = []
     for file in files:
-        temp_chat += f'正在将{func_box.html_tag_color(file)}文件转换为可提取的音频文件.\n\n'
+        temp_chat += f'正在将{func_box.html_view_blank(file)}文件转换为可提取的音频文件.\n\n'
         chatbot[-1] = [None, temp_chat]
         yield from update_ui(chatbot=chatbot, history=history)
         temp_path = os.path.join(os.path.dirname(file), f"{os.path.basename(file)}.wav")

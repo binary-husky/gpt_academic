@@ -516,15 +516,14 @@ def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
         None
     """
     inputs_count = ''
+    chatbot.append([None, f'🏃🏻‍正在努力将Markdown转换为流程图~'])
     for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
-        chatbot.append([None, f'{long_name_processing(you_say)} 🏃🏻‍正在努力将Markdown转换为流程图~'])
         yield from toolbox.update_ui(chatbot=chatbot, history=history)
-        inputs_count += str(inputs).lstrip('```').rstrip('```')  # 去除头部和尾部的代码块, 避免流程图堆在一块
+        inputs_count += str(inputs).replace('```', '') # 去除头部和尾部的代码块, 避免流程图堆在一块
 
     md, html = Utils().markdown_to_flow_chart(data=inputs_count, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(you_say))
     chatbot.append(("View: " + func_box.html_view_blank(md), f'tips: 双击空白处可以放大～\n\n'
                                                            f'{func_box.html_iframe_code(html_file=html)}'
-                                                           f'\n\n--- \n\n Download: {func_box.html_download_blank(html)}' 
                                                           '\n\n--- \n\n View: ' + func_box.html_view_blank(html)))
     yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
 

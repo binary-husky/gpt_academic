@@ -182,8 +182,8 @@ def ipaddr():
 def encryption_str(txt: str):
     """(关键字)(加密间隔)匹配机制（关键字间隔）"""
     txt = str(txt)
-    pattern = re.compile(rf"(Authorization|WPS-Sid|Cookie)(:|\s+)\s*(\S+)[\s\S]*?(?=\n|$|\s)", re.IGNORECASE)
-    result = pattern.sub(lambda x: x.group(1) + ": XXXX加密封条XXXX", txt)
+    pattern = re.compile(r"(Authorization|WPS-Sid|Cookie)(:|\s+)\s*([\w-]+?)(,|$|\s)", re.IGNORECASE)
+    result = pattern.sub(lambda x: x.group(1) + "XXXX加密封条XXXX" + x.group(4), txt)
     return result
 
 
@@ -888,4 +888,4 @@ class JsonHandle:
 
 
 if __name__ == '__main__':
-    print('safafafa')
+    print(encryption_str('Cookie 12321412421412412-12412421,124214124214'))
