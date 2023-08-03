@@ -13,7 +13,7 @@ from comm_tools import toolbox
 
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="!secret")
-cancel_verification = toolbox.get_conf('cancel_verification')
+cancel_verification, = toolbox.get_conf('cancel_verification')
 
 
 def check_cookie(cookie):
