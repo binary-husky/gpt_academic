@@ -124,7 +124,7 @@ def ArgsGeneralWrapper(f):
             f_hot_reload = getattr(importlib.import_module(module, fn_name), fn_name)
             yield from f_hot_reload(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
         # 将对话记录写入数据库
-        yield from end_predict(chatbot_with_cookie, history, llm_kwargs, ipaddr)
+        yield from end_predict(chatbot_with_cookie, history, llm_kwargs)
         threading.Thread(target=func_box.thread_write_chat, args=(chatbot_with_cookie, ipaddr.client.host)).start()
     return decorated
 
