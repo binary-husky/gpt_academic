@@ -34,7 +34,7 @@ def check_cookie(cookie):
 
 @app.get("/favicon.ico")  # 设置icon
 async def get_favicon():
-   return {"file": '/docs/wps_logo.png'}
+   return RedirectResponse(url='/gradio/file=./docs/wps_logo.png')
 
 
 @app.middleware("https")
