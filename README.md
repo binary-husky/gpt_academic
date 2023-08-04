@@ -52,8 +52,8 @@ Latex论文一键校对 | [函数插件] 仿Grammarly对Latex文章进行语法�
 [多LLM模型](https://www.bilibili.com/video/BV1wT411p7yf)支持 | 同时被GPT3.5、GPT4、[清华ChatGLM2](https://github.com/THUDM/ChatGLM2-6B)、[复旦MOSS](https://github.com/OpenLMLab/MOSS)同时伺候的感觉一定会很不错吧？
 ⭐ChatGLM2微调模型 | 支持加载ChatGLM2微调模型，提供ChatGLM2微调辅助插件
 更多LLM模型接入，支持[huggingface部署](https://huggingface.co/spaces/qingxu98/gpt-academic) | 加入Newbing接口(新必应)，引入清华[Jittorllms](https://github.com/Jittor/JittorLLMs)支持[LLaMA](https://github.com/facebookresearch/llama)和[盘古α](https://openi.org.cn/pangu/)
+⭐[虚空终端](https://github.com/binary-husky/void-terminal)pip包 | 脱离GUI，在Python中直接调用本项目的函数插件（开发中）
 更多新功能展示 (图像生成等) …… | 见本文档结尾处 ……
-
 </div>
 
 
@@ -292,6 +292,10 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 <img src="https://github.com/binary-husky/gpt_academic/assets/96192199/476f66d9-7716-4537-b5c1-735372c25adb" height="200">
 </div>
 
+11. 语言、主题切换
+<div align="center">
+<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/b6799499-b6fb-4f0c-9c8e-1b441872f4e8" width="500" >
+</div>
 
 
 ### II：版本:
