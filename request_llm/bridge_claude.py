@@ -117,7 +117,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     
     if additional_fn is not None:
         from core_functional import handle_core_functionality
-        inputs, history = handle_core_functionality(additional_fn, inputs, history)
+        inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
     raw_input = inputs
     logging.info(f'[raw_input] {raw_input}')
