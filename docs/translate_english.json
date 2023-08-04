@@ -2146,5 +2146,20 @@
     "的参数！": "parameters!",
     "例如翻译、解释代码、润色等等": "such as translation, code interpretation, polishing, etc.",
     "响应异常": "Response exception",
-    "响应中": "Responding"
+    "响应中": "Responding",
+    "请尝试英文Prompt": "Try English Prompt",
+    "在运行过程中动态地修改多个配置": "Dynamically modify multiple configurations during runtime",
+    "无法调用相关功能": "Unable to invoke related functions",
+    "接驳虚空终端": "Connect to Void Terminal",
+    "虚空终端插件的功能": "Functionality of Void Terminal plugin",
+    "执行任意插件的命令": "Execute commands of any plugin",
+    "修改调用函数": "Modify calling function",
+    "获取简单聊天的默认参数": "Get default parameters for simple chat",
+    "根据自然语言的描述": "Based on natural language description",
+    "获取插件的句柄": "Get handle of plugin",
+    "第四部分": "Part Four",
+    "在运行过程中动态地修改配置": "Dynamically modify configurations during runtime",
+    "请先把模型切换至gpt-*或者api2d-*": "Please switch the model to gpt-* or api2d-* first",
+    "获取简单聊天的句柄": "Get handle of simple chat",
+    "获取插件的默认参数": "Get default parameters of plugin"
 }
