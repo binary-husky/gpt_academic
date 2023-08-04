@@ -295,6 +295,9 @@ function addChuanhuButton(botElement) {
     var mdMessage = null;
     rawMessage = botElement.querySelector('.raw-message');
     mdMessage = botElement.querySelector('.md-message');
+    console.log('botElement：', botElement)
+    console.log('rawMessage：', rawMessage)
+    console.log('mdMessage：', mdMessage)
     if (!rawMessage) {
         var buttons = botElement.querySelectorAll('button.chuanhu-btn');
         for (var i = 0; i < buttons.length; i++) {
@@ -396,7 +399,8 @@ var mObserver = new MutationObserver(function(mutationsList) {
           node.classList.contains('message') &&
           (node.getAttribute('data-testid') === 'bot' || node.getAttribute('data-testid') === 'user')
         ) {
-          document.querySelectorAll('#main_chatbot > .wrap > .message-wrap .message.bot, #main_chatbot > .wrap > .message-wrap .message.user')
+            console.log('kkk--1')
+            document.querySelectorAll('#main_chatbot > .wrapper > .wrap > .message-wrap .message.bot, #main_chatbot > .wrap > .message-wrap .message.user')
             .forEach(addChuanhuButton);
         }
         if (node.tagName === 'INPUT' && node.getAttribute('type') === 'range') {
@@ -409,7 +413,8 @@ var mObserver = new MutationObserver(function(mutationsList) {
           node.classList.contains('message') &&
           (node.getAttribute('data-testid') === 'bot' || node.getAttribute('data-testid') === 'user')
         ) {
-          document.querySelectorAll('#main_chatbot > .wrap > .message-wrap .message.bot, #main_chatbot > .wrap > .message-wrap .message.user')
+            console.log('kkk--2')
+            document.querySelectorAll('#main_chatbot > .wrapper > .wrap > .message-wrap .message.bot, #main_chatbot > .wrap > .message-wrap .message.user')
             .forEach(addChuanhuButton);
         }
       }
@@ -424,8 +429,9 @@ var mObserver = new MutationObserver(function(mutationsList) {
         clearTimeout(timeoutId);
         timeoutId = setTimeout(() => {
           isThrottled = false;
+          console.log('kkk--3')
           document.querySelectorAll(
-              '#main_chatbot > .wrap > .message-wrap .message.bot, #main_chatbot > .wrap > .message-wrap .message.user'
+              '#main_chatbot > .wrapper > .wrap > .message-wrap .message.bot, #main_chatbot > .wrap > .message-wrap .message.user'
             )
             .forEach(addChuanhuButton);
         }, 500);
