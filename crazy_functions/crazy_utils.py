@@ -286,7 +286,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         # 在前端打印些好玩的东西
         stat_str = ''.join([f'`{inputs_show_user_array[thread_index][0:5]}...{inputs_show_user_array[thread_index][-5:]}`\t'
                             f'`{mutable[thread_index][2]}`: {obs}\n\n'
-                            if not done else f'`{mutable[thread_index][2]}`\n\n' 
+                            if not done else f'`{mutable[thread_index][2]}`\n\n'
                             for thread_index, done, obs in zip(range(len(worker_done)), worker_done, observe_win)])
         # 在前端打印些好玩的东西
         chatbot[-1] = [chatbot[-1][0], f'多线程操作已经开始，完成情况: \n\n{stat_str}' + ''.join(['.']*(cnt % 10+1))]

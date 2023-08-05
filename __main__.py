@@ -27,7 +27,7 @@ for role in crazy_fns_role:
 
 # 处理markdown文本格式的转变 暂时屏蔽这个高亮代码
 # gr.Chatbot.postprocess = format_io
-gr.Chatbot.postprocess = postprocess
+# gr.Chatbot.postprocess = postprocess
 
 # 做一些外观色彩上的调整
 from comm_tools.theme import adjust_theme, custom_css, reload_javascript
@@ -565,8 +565,6 @@ class ChatBot(ChatBotFrame):
         self.demo.queue(concurrency_count=CONCURRENT_COUNT)
         self.demo.blocked_paths = [f"./config.py", "./config_private.py", "config.py", "config_private.py",
                                    'comm_tools', '__main__.py', "crazy_functions", "users_data"]
-        self.demo.favicon_path = './docs/wps_logo.png'
-        self.demo.root_path = '/gradio'
         self.demo.inline = True
         login_html = ''
         # self.demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
@@ -585,8 +583,8 @@ def check_proxy_free():
         time.sleep(5)
 
 
-from comm_tools import authentication
-app = authentication.app
+from comm_tools import base_api
+app = base_api.app
 PORT = LOCAL_PORT if WEB_PORT <= 0 else WEB_PORT
 reload_javascript()
 chatbot_main = ChatBot()

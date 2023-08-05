@@ -149,18 +149,17 @@ class Utils:
 
 class ExcelHandle:
 
-    def __init__(self, ipaddr, is_client=True):
-        if type(is_client) is bool and is_client:
-            self.template_excel = os.path.join(func_box.base_path, 'docs/template/客户端测试用例模版.xlsx')
-        elif not is_client:
-            self.template_excel = os.path.join(func_box.base_path, 'docs/template/接口测试用例模板.xlsx')
-        elif type(type) is str:
-            if os.path.exists(is_client):
-                self.template_excel = is_client
-            else:
-                self.template_excel = os.path.join(func_box.base_path, 'docs/template/客户端测试用例模版.xlsx')
+    def __init__(self, ipaddr, temp_file=''):
         self.user_path = os.path.join(func_box.base_path, 'private_upload', ipaddr, 'test_case')
         os.makedirs(f'{self.user_path}', exist_ok=True)
+        if os.path.exists(temp_file):
+            self.template_excel = temp_file
+        elif temp_file.startswith('http'):
+            self.template_excel = get_kdocs_files(temp_file, project_folder=self.user_path, type='xlsx', ipaddr=ipaddr)[0]
+        else:
+            self.template_excel = os.path.join(func_box.base_path, 'docs/template/客户端测试用例模版.xlsx')
+        if not self.template_excel:
+            self.template_excel = os.path.join(func_box.base_path, 'docs/template/客户端测试用例模版.xlsx')
 
     def lpvoid_lpbuffe(self, data_list: list, filename='', decs=''):
         # 加载现有的 Excel 文件
@@ -371,8 +370,14 @@ def long_name_processing(file_name):
             file_name = file_name[:20]
     return file_name
 
+def table_header_subscript(content: list):
+    for index, item in enumerate(content):
+        if '---' in item:
+            return index
+    return 0  # 兜底
 
-def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history, is_client=True):
+
+def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history, temp_file):
     """
     Args:
         gpt_response_collection: [输出， 输出]
@@ -380,7 +385,7 @@ def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs
         llm_kwargs: 调优参数
         chatbot: 对话组件
         history: 对话历史
-        is_client: 是否客户端测试用例
+        temp_file: 指定写入模版
     Returns: None
     """
     gpt_response = gpt_response_collection[1::2]
@@ -388,7 +393,9 @@ def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs
     test_case = []
     file_name = long_name_processing(inputs_show_user_array)
     for k in range(len(gpt_response)):
-        gpt_response_split = gpt_response[k].splitlines()[2:]  # 过滤掉表头
+        test_case_content = gpt_response[k].splitlines()
+        index = table_header_subscript(test_case_content)
+        gpt_response_split = test_case_content[index+1:]  # 过滤掉表头
         for i in gpt_response_split:
             if i.find('|') != -1:
                 test_case.append([func_box.clean_br_string(i) for i in i.split('|')[1:]])
@@ -396,7 +403,7 @@ def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs
                 test_case.append([func_box.clean_br_string(i) for i in i.split('｜')[1:]])
             else:
                 func_box.通知机器人(f'脏数据过滤，这个不符合写入测试用例的条件 \n\n```\n\n{i}\n\n```\n\n```\n{gpt_response_split}\n```')
-    file_path = ExcelHandle(ipaddr=llm_kwargs['ipaddr'], is_client=is_client).lpvoid_lpbuffe(test_case, filename=file_name)
+    file_path = ExcelHandle(ipaddr=llm_kwargs['ipaddr'], temp_file=temp_file).lpvoid_lpbuffe(test_case, filename=file_name)
     chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_download_blank(__href=file_path, dir_name=file_path.split("/")[-1])}\n\n'
     chatbot.append(['Done', chat_file_list])
     yield from toolbox.update_ui(chatbot, history)

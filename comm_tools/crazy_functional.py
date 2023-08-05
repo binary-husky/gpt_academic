@@ -307,7 +307,9 @@ def get_crazy_functions():
                 "prompt_cls": '插件定制',
                 "prompt": '文档转测试用例',
                 'img_ocr': True,
-                "to_markdown": '文档转Markdown'
+                "to_markdown": '文档转Markdown',
+                'template_file': 'https://www.kdocs.cn/l/civeYz1Wg2OK'
+
             }
         },
         "轻文档转接口测试用例": {
@@ -324,7 +326,7 @@ def get_crazy_functions():
                 "prompt": '接口文档转测试用例',
                 'img_ocr': True,
                 'to_markdown': '文档转Markdown_分割',
-                'template_file': False
+                'template_file': 'https://www.kdocs.cn/l/ckuTJWR6vBtJ'
             }
         },
         "轻文档需求分析问答": {
