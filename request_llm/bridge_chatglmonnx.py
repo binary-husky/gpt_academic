@@ -1,5 +1,5 @@
 model_name = "ChatGLM-ONNX"
-cmd_to_install = "`pip install request_llm/requirements_chatglm.txt`"
+cmd_to_install = "`pip install request_llm/requirements_chatglm_onnx.txt`"
 
 
 from transformers import AutoModel, AutoTokenizer
