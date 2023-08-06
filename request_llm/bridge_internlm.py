@@ -1,5 +1,5 @@
 model_name = "InternLM"
-cmd_to_install = "`pip install request_llm/requirements_chatglm.txt`"
+cmd_to_install = "`pip install -r request_llm/requirements_chatglm.txt`"
 
 from transformers import AutoModel, AutoTokenizer
 import time
