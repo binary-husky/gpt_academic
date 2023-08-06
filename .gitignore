@@ -151,3 +151,4 @@ multi-language
 request_llm/moss
 media
 flagged
+request_llm/ChatGLM-6b-onnx-u8s8

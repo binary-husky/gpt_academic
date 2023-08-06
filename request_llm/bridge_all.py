@@ -19,11 +19,6 @@ from .bridge_chatgpt import predict as chatgpt_ui
 from .bridge_chatglm import predict_no_ui_long_connection as chatglm_noui
 from .bridge_chatglm import predict as chatglm_ui
 
-from .bridge_chatglm_onnx import predict_no_ui_long_connection as chatglm_onnx_noui
-from .bridge_chatglm_onnx import predict as chatglm_onnx_ui
-# from .bridge_tgui import predict_no_ui_long_connection as tgui_noui
-# from .bridge_tgui import predict as tgui_ui
-
 colors = ['#FF00FF', '#00FFFF', '#FF0000', '#990099', '#009999', '#990044']
 
 class LazyloadTiktoken(object):
@@ -166,14 +161,7 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
-    "chatglm_onnx": {
-        "fn_with_ui": chatglm_onnx_ui,
-        "fn_without_ui": chatglm_onnx_noui,
-        "endpoint": None,
-        "max_token": 1024,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
+
 }
 
 
@@ -323,6 +311,22 @@ if "internlm" in AVAIL_LLM_MODELS:
             "internlm": {
                 "fn_with_ui": internlm_ui,
                 "fn_without_ui": internlm_noui,
+                "endpoint": None,
+                "max_token": 4096,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            }
+        })
+    except:
+        print(trimmed_format_exc())
+if "chatglm_onnx" in AVAIL_LLM_MODELS:
+    try:
+        from .bridge_chatglmonnx import predict_no_ui_long_connection as chatglm_onnx_noui
+        from .bridge_chatglmonnx import predict as chatglm_onnx_ui
+        model_info.update({
+            "chatglm_onnx": {
+                "fn_with_ui": chatglm_onnx_ui,
+                "fn_without_ui": chatglm_onnx_noui,
                 "endpoint": None,
                 "max_token": 4096,
                 "tokenizer": tokenizer_gpt35,
