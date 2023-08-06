@@ -124,6 +124,7 @@ def get_local_llm_predict_fns(LLMSingletonClass, model_name):
         """
         _llm_handle = LLMSingletonClass()
         if len(observe_window) >= 1: observe_window[0] = load_message + "\n\n" + _llm_handle.info
+        if not _llm_handle.running: raise RuntimeError(_llm_handle.info)
 
         # chatglm 没有 sys_prompt 接口，因此把prompt加入 history
         history_feedin = []
@@ -152,6 +153,7 @@ def get_local_llm_predict_fns(LLMSingletonClass, model_name):
         _llm_handle = LLMSingletonClass()
         chatbot[-1] = (inputs, load_message + "\n\n" + _llm_handle.info)
         yield from update_ui(chatbot=chatbot, history=[])
+        if not _llm_handle.running: raise RuntimeError(_llm_handle.info)
 
         if additional_fn is not None:
             from core_functional import handle_core_functionality
