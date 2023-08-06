@@ -58,8 +58,8 @@ class GetONNXGLMHandle(LocalLLMHandle):
     def try_to_import_special_deps(self, **kwargs):
         # import something that will raise error if the user does not install requirement_*.txt
         # 🏃‍♂️🏃‍♂️🏃‍♂️ 主进程执行
-        # from modelscope import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
-        pass
+        import importlib
+        importlib.import_module('modelscope')
 
 
 # ------------------------------------------------------------------------------------------------------------------------
