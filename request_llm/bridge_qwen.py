@@ -32,15 +32,13 @@ class GetONNXGLMHandle(LocalLLMHandle):
 
         model_id = 'qwen/Qwen-7B-Chat'
         revision = 'v1.0.1'
-        tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision, trust_remote_code=True)
+        self._tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision, trust_remote_code=True)
         # use fp16
-        model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto", revision=revision, 
-                                                    trust_remote_code=True, fp16=True).eval()
-        model.generation_config = GenerationConfig.from_pretrained(model_id,
-                                                                trust_remote_code=True)  # 可指定不同的生成长度、top_p等相关超参
+        model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto", revision=revision, trust_remote_code=True, fp16=True).eval()
+        model.generation_config = GenerationConfig.from_pretrained(model_id, trust_remote_code=True)  # 可指定不同的生成长度、top_p等相关超参
         self._model = model
 
-        return self._model, None
+        return self._model, self._tokenizer
 
     def llm_stream_generator(self, **kwargs):
         # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行
@@ -54,8 +52,7 @@ class GetONNXGLMHandle(LocalLLMHandle):
 
         query, max_length, top_p, temperature, history = adaptor(kwargs)
 
-        prompt = chat_template(history, query)
-        for response in model.chat(tokenizer, query, history=history, stream=True):
+        for response in self._model.chat(self._tokenizer, query, history=history, stream=True):
             yield response
         
     def try_to_import_special_deps(self, **kwargs):

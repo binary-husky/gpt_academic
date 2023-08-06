@@ -335,6 +335,22 @@ if "chatglm_onnx" in AVAIL_LLM_MODELS:
         })
     except:
         print(trimmed_format_exc())
+if "qwen" in AVAIL_LLM_MODELS:
+    try:
+        from .bridge_qwen import predict_no_ui_long_connection as qwen_noui
+        from .bridge_qwen import predict as qwen_ui
+        model_info.update({
+            "qwen": {
+                "fn_with_ui": qwen_ui,
+                "fn_without_ui": qwen_noui,
+                "endpoint": None,
+                "max_token": 4096,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            }
+        })
+    except:
+        print(trimmed_format_exc())
 
 def LLM_CATCH_EXCEPTION(f):
     """
