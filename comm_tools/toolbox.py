@@ -97,7 +97,8 @@ def ArgsGeneralWrapper(f):
             'start_time': start_time,
             'ocr': ocr,
             'know_dict': know_dict,
-            'know_cls': know_cls
+            'know_cls': know_cls,
+            'know_id': langchain
         }
         plugin_kwargs = {
             "advanced_arg": plugin_advanced_arg,
@@ -108,13 +109,11 @@ def ArgsGeneralWrapper(f):
         write_private(ipaddr, models, chatbot_with_cookie)
         txt_passon = txt
         if encrypt in models: txt_passon = func_box.encryption_str(txt)
-        knowledge_base_passon = yield from Langchain_cn.knowledge_base_query(txt_passon, langchain, chatbot_with_cookie, history, llm_kwargs, args, ipaddr)
         # 插件会传多参数，如果是插件，那么更新知识库 和 默认高级参数
         if len(args) > 1:
-            llm_kwargs['knowledge'] = knowledge_base_passon
             plugin_kwargs.update({'parameters_def': args[1]})
         else:
-            txt_passon = knowledge_base_passon
+            txt_passon = yield from Langchain_cn.knowledge_base_query(txt_passon, langchain, chatbot_with_cookie, history, llm_kwargs)
         if cookies.get('lock_plugin', None) is None:
             # 正常状态
             yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)

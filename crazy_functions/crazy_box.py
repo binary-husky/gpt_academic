@@ -8,7 +8,7 @@ import json
 import requests
 import re
 import time
-from comm_tools import func_box, ocr_tools, toolbox, prompt_generator
+from comm_tools import func_box, ocr_tools, toolbox, prompt_generator, Langchain_cn
 from openpyxl import load_workbook
 from crazy_functions import crazy_utils
 from request_llm import bridge_all
@@ -458,7 +458,8 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
         content_limit = yield from split_content_limit(inputs, llm_kwargs, chatbot, history)
         for limit in content_limit:
-            inputs_array.append(prompt.replace('{{{v}}}', limit))
+            kai_limit = yield from Langchain_cn.knowledge_base_query(limit, llm_kwargs['know_id'], chatbot, history, llm_kwargs)
+            inputs_array.append(prompt.replace('{{{v}}}', kai_limit))
             inputs_show_user_array.append(you_say)
     yield from toolbox.update_ui(chatbot, history)
     if all_chat:

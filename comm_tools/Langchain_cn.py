@@ -92,7 +92,7 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
            gr.Dropdown.update(value='新建知识库', choices=load_list),  kai_handle)
 
 
-def knowledge_base_query(txt, kai_id, chatbot, history, llm_kwargs, args, ipaddr: gr.Request):
+def knowledge_base_query(txt, kai_id, chatbot, history, llm_kwargs):
     # < -------------------为空时，不去查询向量数据库--------------- >
     if not txt: return txt
     # < -------------------检索Prompt--------------- >
@@ -104,7 +104,7 @@ def knowledge_base_query(txt, kai_id, chatbot, history, llm_kwargs, args, ipaddr
             kai = llm_kwargs['know_dict']['know_obj'][id]
         else:
             know_cls = llm_kwargs['know_cls']
-            know_cls = classification_filtering_tag(know_cls, know_cls, ipaddr.client.host)
+            know_cls = classification_filtering_tag(know_cls, know_cls, llm_kwargs['ipaddr'])
             vs_path = os.path.join(func_box.knowledge_path, know_cls)
             kai = crazy_utils.knowledge_archive_interface(vs_path=vs_path)
             llm_kwargs['know_dict']['know_obj'][id] = kai
