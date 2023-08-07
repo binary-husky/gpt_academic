@@ -1,23 +1,25 @@
+model_name = "InternLM"
+cmd_to_install = "`pip install -r request_llm/requirements_chatglm.txt`"
 
 from transformers import AutoModel, AutoTokenizer
 import time
 import threading
 import importlib
-from toolbox import update_ui, get_conf, Singleton
+from toolbox import update_ui, get_conf
 from multiprocessing import Process, Pipe
+from .local_llm_class import LocalLLMHandle, get_local_llm_predict_fns, SingletonLocalLLM
 
-model_name = "InternLM"
-cmd_to_install = "`pip install ???`"
-load_message = f"{model_name}尚未加载，加载需要一段时间。注意，取决于`config.py`的配置，{model_name}消耗大量的内存（CPU）或显存（GPU），也许会导致低配计算机卡死 ……"
+
+# ------------------------------------------------------------------------------------------------------------------------
+# 🔌💻 Local Model Utils
+# ------------------------------------------------------------------------------------------------------------------------
 def try_to_import_special_deps():
     import sentencepiece
 
-user_prompt = "<|User|>:{user}<eoh>\n"
-robot_prompt = "<|Bot|>:{robot}<eoa>\n"
-cur_query_prompt = "<|User|>:{user}<eoh>\n<|Bot|>:"
-
-
 def combine_history(prompt, hist):
+    user_prompt = "<|User|>:{user}<eoh>\n"
+    robot_prompt = "<|Bot|>:{robot}<eoa>\n"
+    cur_query_prompt = "<|User|>:{user}<eoh>\n<|Bot|>:"
     messages = hist
     total_prompt = ""
     for message in messages:
@@ -29,24 +31,22 @@ def combine_history(prompt, hist):
     total_prompt = total_prompt + cur_query_prompt.replace("{user}", prompt)
     return total_prompt
 
+# ------------------------------------------------------------------------------------------------------------------------
+# 🔌💻 Local Model
+# ------------------------------------------------------------------------------------------------------------------------
+@SingletonLocalLLM
+class GetInternlmHandle(LocalLLMHandle):
 
-@Singleton
-class GetInternlmHandle(Process):
-    def __init__(self):
-        # ⭐主进程执行
-        super().__init__(daemon=True)
-        self.parent, self.child = Pipe()
-        self._model = None
-        self._tokenizer = None
-        self.info = ""
-        self.success = True
-        self.check_dependency()
-        self.start()
-        self.threadLock = threading.Lock()
+    def load_model_info(self):
+        # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行
+        self.model_name = model_name
+        self.cmd_to_install = cmd_to_install
 
-    def ready(self):
-        # ⭐主进程执行
-        return self._model is not None
+    def try_to_import_special_deps(self, **kwargs):
+        """
+        import something that will raise error if the user does not install requirement_*.txt
+        """
+        import sentencepiece
 
     def load_model_and_tokenizer(self):
         # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行
@@ -195,118 +195,8 @@ class GetInternlmHandle(Process):
             if unfinished_sequences.max() == 0 or stopping_criteria(input_ids, scores):
                 return
 
-
-
-    def check_dependency(self):
-        # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行
-        try:
-            try_to_import_special_deps()
-            self.info = "依赖检测通过"
-            self.success = True
-        except:
-            self.info = f"缺少{model_name}的依赖，如果要使用{model_name}，除了基础的pip依赖以外，您还需要运行{cmd_to_install}安装{model_name}的依赖。"
-            self.success = False
-
-    def run(self):
-        # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行
-        # 第一次运行，加载参数
-        try:
-            self._model, self._tokenizer = self.load_model_and_tokenizer()
-        except:
-            from toolbox import trimmed_format_exc
-            self.child.send(f'[Local Message] 不能正常加载{model_name}的参数.' + '\n```\n' + trimmed_format_exc() + '\n```\n')
-            raise RuntimeError(f"不能正常加载{model_name}的参数！")
-
-        while True:
-            # 进入任务等待状态
-            kwargs = self.child.recv()
-            # 收到消息，开始请求
-            try:
-                for response_full in self.llm_stream_generator(**kwargs):
-                    self.child.send(response_full)
-            except:
-                from toolbox import trimmed_format_exc
-                self.child.send(f'[Local Message] 调用{model_name}失败.' + '\n```\n' + trimmed_format_exc() + '\n```\n')
-            # 请求处理结束，开始下一个循环
-            self.child.send('[Finish]')
-
-    def stream_chat(self, **kwargs):
-        # ⭐主进程执行
-        self.threadLock.acquire()
-        self.parent.send(kwargs)
-        while True:
-            res = self.parent.recv()
-            if res != '[Finish]':
-                yield res
-            else:
-                break
-        self.threadLock.release()
-    
     
 # ------------------------------------------------------------------------------------------------------------------------
-# 🔌💻 GPT-Academic
+# 🔌💻 GPT-Academic Interface
 # ------------------------------------------------------------------------------------------------------------------------
-def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=[], console_slience=False):
-    """
-        ⭐多线程方法
-        函数的说明请见 request_llm/bridge_all.py
-    """
-    _llm_handle = GetInternlmHandle()
-    if len(observe_window) >= 1: observe_window[0] = load_message + "\n\n" + _llm_handle.info
-    if not _llm_handle.success: 
-        error = _llm_handle.info
-        _llm_handle = None
-        raise RuntimeError(error)
-
-    # chatglm 没有 sys_prompt 接口，因此把prompt加入 history
-    history_feedin = []
-    history_feedin.append(["What can I do?", sys_prompt])
-    for i in range(len(history)//2):
-        history_feedin.append([history[2*i], history[2*i+1]] )
-
-    watch_dog_patience = 5 # 看门狗 (watchdog) 的耐心, 设置5秒即可
-    response = ""
-    for response in _llm_handle.stream_chat(query=inputs, history=history_feedin, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
-        if len(observe_window) >= 1:  observe_window[0] = response
-        if len(observe_window) >= 2:  
-            if (time.time()-observe_window[1]) > watch_dog_patience:
-                raise RuntimeError("程序终止。")
-    return response
-
-
-
-def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream = True, additional_fn=None):
-    """
-        ⭐单线程方法
-        函数的说明请见 request_llm/bridge_all.py
-    """
-    chatbot.append((inputs, ""))
-
-    _llm_handle = GetInternlmHandle()
-    chatbot[-1] = (inputs, load_message + "\n\n" + _llm_handle.info)
-    yield from update_ui(chatbot=chatbot, history=[])
-    if not _llm_handle.success: 
-        _llm_handle = None
-        return
-
-    if additional_fn is not None:
-        from core_functional import handle_core_functionality
-        inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
-
-    # 处理历史信息
-    history_feedin = []
-    history_feedin.append(["What can I do?", system_prompt] )
-    for i in range(len(history)//2):
-        history_feedin.append([history[2*i], history[2*i+1]] )
-
-    # 开始接收chatglm的回复
-    response = f"[Local Message]: 等待{model_name}响应中 ..."
-    for response in _llm_handle.stream_chat(query=inputs, history=history_feedin, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
-        chatbot[-1] = (inputs, response)
-        yield from update_ui(chatbot=chatbot, history=history)
-
-    # 总结输出
-    if response == f"[Local Message]: 等待{model_name}响应中 ...":
-        response = f"[Local Message]: {model_name}响应异常 ..."
-    history.extend([inputs, response])
-    yield from update_ui(chatbot=chatbot, history=history)
+predict_no_ui_long_connection, predict = get_local_llm_predict_fns(GetInternlmHandle, model_name)
