@@ -555,7 +555,7 @@ def result_written_to_markdwon(gpt_response_collection, llm_kwargs, chatbot, his
 
 
 previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传，多个文件请上传压缩包，'\
-                  f'如果是网络文件或金山文档链接，{func_box.html_tag_color("请粘贴到输入框, 然后再次点击该插件")}'\
+                  f'{func_box.html_tag_color("如果是网络文件或金山文档链接，请粘贴到输入框")}, 然后再次点击该插件'\
                   f'多个文件{func_box.html_tag_color("请使用换行或空格区分")}'
 
 

@@ -58,6 +58,9 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
         yield (f"", error, gr.Dropdown.update(), gr.Dropdown.update(), kai_handle)
         kdocs_manifest_tmp = []
     file_manifest += kdocs_manifest_tmp
+    # < --------------------缺陷文件拆分--------------- >
+    file_manifest = func_box.handling_defect_files(file_manifest)
+    # < --------------------正式准备启动！--------------- >
     if len(file_manifest) == 0:
         types = "\t".join(f"`{s}`" for s in spl)
         link_type = f'\n\n目录: https://www.kdocs.cn/{func_box.html_tag_color("ent")}/41000207/{func_box.html_tag_color("130730080903")}\n\n' \

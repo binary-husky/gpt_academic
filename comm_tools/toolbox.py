@@ -106,7 +106,6 @@ def ArgsGeneralWrapper(f):
         }
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
-        write_private(ipaddr, models, chatbot_with_cookie)
         txt_passon = txt
         if encrypt in models: txt_passon = func_box.encryption_str(txt)
         # 插件会传多参数，如果是插件，那么更新知识库 和 默认高级参数
@@ -124,7 +123,7 @@ def ArgsGeneralWrapper(f):
             yield from f_hot_reload(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
         # 将对话记录写入数据库
         yield from end_predict(chatbot_with_cookie, history, llm_kwargs)
-        threading.Thread(target=func_box.thread_write_chat, args=(chatbot_with_cookie, ipaddr.client.host)).start()
+        threading.Thread(target=func_box.thread_write_chat, args=(chatbot_with_cookie, ipaddr.client.host, models)).start()
     return decorated
 
 

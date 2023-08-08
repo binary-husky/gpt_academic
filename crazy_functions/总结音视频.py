@@ -219,7 +219,7 @@ def Kdocs音频提取总结(txt, llm_kwargs, plugin_kwargs, chatbot, history, sy
     if os.path.exists(txt) or txt.find('http') != -1:
         project_folder = txt
     else:
-        report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"{crazy_box.previously_on_plugins}")
+        report_execption(chatbot, history, a=None, b=f"{crazy_box.previously_on_plugins}")
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
         return
     # 搜索需要处理的文件清单

@@ -19,6 +19,7 @@ import logging
 import requests
 import yaml
 import tiktoken
+import pandas as pd
 logger = logging
 from sklearn.feature_extraction.text import CountVectorizer
 import numpy as np
@@ -597,21 +598,19 @@ def get_directory_list(folder_path, user_info='temp'):
     return directory_list, users_list
 
 
-def thread_write_chat(chatbot, ipaddr):
+def thread_write_chat(chatbot, ipaddr, models):
     """
     对话记录写入数据库
     """
     chatbot = copy.copy(chatbot)
-    private_key = toolbox.get_conf('private_key')[0]
-    chat_title = chatbot[0][1].split()
-    i_say = pattern_html(chatbot[-1][0])
+    # i_say = pattern_html(chatbot[-1][0])
+    i_say = chatbot[-1][0]
+    encrypt, private = toolbox.get_conf('switch_model')[0]['key']
     gpt_result = []
-    for i in chatbot[1:]:
+    for i in chatbot:
         for v in i:
-            if v is None: pass
-            else: v = pattern_html(v)
             gpt_result.append(v)
-    if private_key in chat_title:
+    if private in models:
         SqliteHandle(f'ai_private_{ipaddr}').inset_prompt({i_say: gpt_result}, '')
     else:
         SqliteHandle(f'ai_common_{ipaddr}').inset_prompt({i_say: gpt_result}, '')
@@ -624,18 +623,61 @@ knowledge_path_sys_path = os.path.join(prompt_path, 'knowledge', 'system')
 users_path = os.path.join(base_path, 'private_upload')
 logs_path = os.path.join(base_path, 'gpt_log')
 
+import os
+import csv
+import datetime
 
-def login_authentication(user, password):
-    headers = {
-        'Host': 'ovsmgr-api.4wps.net', 'sec-ch-ua-platform': '"macOS"',
-        'Origin': 'https://console.4wps.net', 'Referer': 'https://console.4wps.net/',
-    }
 
-    json_data = {
-        'accounttype': 'koa',
-        'username': user,
-        'password': '',
-    }
+def split_csv_by_quarter(file_path, date_format='%Y/%m/%d %H:%M:%S'):
+    # 获取文件名和扩展名
+    file_name, file_ext = os.path.splitext(file_path)
+    result_files = {}
+
+    with open(file_path, 'r') as csv_file:
+        reader = csv.reader(csv_file)
+        headers = next(reader)  # 读取表头
+        first_row = next(reader)  # 读取第一行数据
+        first_cell = first_row[0]  # 第一列的值
+        try:
+            datetime.datetime.strptime(first_cell, date_format)  # 判断第一列是否为时间格式
+            is_datetime = True
+        except ValueError:
+            is_datetime = False
+
+        if is_datetime:
+            # 拆分文件并写入新的CSV文件
+            quarter_start = datetime.datetime.strptime(first_cell, date_format).date()
+            for row in reader:
+                cell_value = row[0]
+                if not cell_value:
+                    continue
+                cell_date = datetime.datetime.strptime(cell_value, date_format).date()
+                quarter_data = [row]
+                quarter_start = quarter_start.replace(year=cell_date.year).replace(month=cell_date.month)
+                quarter = quarter_start.month // 3 + 1
+                if quarter > 4: quarter = 4
+                quarter_file_path = f"{file_name}_{quarter_start.year}_Q{quarter}{file_ext}"
+                writer = csv.writer(open(quarter_file_path, 'a', newline=''))
+                writer.writerows(quarter_data)  # 写入季度数据
+                result_files[quarter_file_path] = ''
+
+            # 在写入完所有数据后再写入表头
+            for quarter_file_path in result_files:
+                with open(quarter_file_path, 'r+') as quarter_file:
+                    content = quarter_file.read()
+                    quarter_file.seek(0, 0)  # 将文件指针移回文件开头
+                    quarter_file.write(','.join(headers) + '\n')  # 写入表头
+                    quarter_file.write(content)  # 写入之前的内容
+        else:
+            result_files[file_path] = ''
+    result_files = [i for i in result_files]
+    return result_files
+
+
+def handling_defect_files(file_manifest: list):
+    bugs_list = [mani for mani in file_manifest if '缺陷' in mani]  # 筛选出带有缺陷字样的文件list
+    file_manifest = [x for x in file_manifest if x not in bugs_list]  # 过滤掉筛选出来的文件
+
 
 def new_button_display(select):
     if '新建分类' == select:
@@ -888,4 +930,4 @@ class JsonHandle:
 
 
 if __name__ == '__main__':
-    print(encryption_str('Cookie 12321412421412412-12412421,124214124214'))
+    print(split_csv_by_quarter('/Users/kilig/Desktop/testbug/中台+-+PC+Office-缺陷池-MAC海外版-全部缺陷.csv'))

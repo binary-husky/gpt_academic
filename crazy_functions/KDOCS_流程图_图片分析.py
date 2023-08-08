@@ -18,7 +18,7 @@ def ocr_batch_processing(file_manifest, chatbot, history, llm_kwargs):
         img_content, img_result = ocr_tools.Paddle_ocr_select(ipaddr=llm_kwargs['ipaddr'],
                                                               trust_value=llm_kwargs['ocr']
                                                               ).img_def_content(img_path=pic_path)
-        ocr_process += f'{pic_path.split("/")[-2:]} 识别完成，识别效果如下 {func_box.html_local_img(img_result)} \n\n' \
+        ocr_process += f'{"/".join(pic_path.split("/")[-2:])} 识别完成，识别效果如下 {func_box.html_local_img(img_result)} \n\n' \
                        f'```\n{img_content}\n```\n\n---\n\n'
         chatbot[-1] = [i_say, ocr_process]
         yield from toolbox.update_ui(chatbot, history)
@@ -41,7 +41,7 @@ def 批量分析流程图或图片(txt, llm_kwargs, plugin_kwargs, chatbot, hist
         elif kdocs_manifest_tmp != []:
             yield from ocr_batch_processing(kdocs_manifest_tmp, chatbot, history, llm_kwargs=llm_kwargs)
         else:
-            chatbot.append([crazy_box.previously_on_plugins, None])
+            chatbot.append([None, crazy_box.previously_on_plugins])
             yield from toolbox.update_ui(chatbot, history)
     else:
         chatbot.append([f'空空如也的输入框，{crazy_box.previously_on_plugins}', None])

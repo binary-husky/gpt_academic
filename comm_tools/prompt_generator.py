@@ -94,7 +94,7 @@ class SqliteHandle:
                 self.__cursor.execute(f"REPLACE INTO `{self.__table}` (prompt, result, source)"
                                       f"VALUES (?, ?, ?);", (str(key), str(prompt[key]), source))
             else:
-                error_status += f'【{key}】该分类下已有其他人保存重名的提示词，请更改提示词名称后再提交～'
+                error_status += f'【{key}】权限不足，该分类下已有其他人保存重名的提示词，请更改提示词名称后再提交～'
                 print(f'{source} 保存名称为[key]的提示词失败，因为该分类下已有其他人保存重名的提示词')
         self.__connect.commit()
         return error_status
@@ -112,13 +112,17 @@ class SqliteHandle:
         self.__connect.commit()
 
     def find_prompt_result(self, name, tabs='prompt_127.0.0.1'):
-
         query = self.__cursor.execute(f"SELECT result FROM `{self.__table}` WHERE prompt LIKE '{name}'").fetchall()
         if query == []:
             query = self.__cursor.execute(f"SELECT result FROM `prompt_{tabs}_sys` WHERE prompt LIKE '{name}'").fetchall()
             return query[0][0]
         else:
             return query[0][0]
+
+    def update_value(self, new_source):
+        query = f"UPDATE {self.__table} SET source=source || ' ' || ?"
+        self.__cursor.execute(query, (new_source,))
+        self.__connect.commit()
 
 
 def cp_db_data(incloud_tab='prompt_'):
@@ -164,6 +168,7 @@ def batch_export_prompt(incloud_tab='prompt_'):
                     f.write(json.dumps(file_dict, ensure_ascii=False))
                     print(f'{source}已导出', os.path.join(file_path, f"{source}.json"))
 
+
 def batch_migration_data_table():
     sql_ll = sqlite_handle(database='ai_prompt.db')
     tabs = sql_ll.get_tables()
@@ -179,4 +184,4 @@ def batch_migration_data_table():
 
 sqlite_handle = SqliteHandle
 if __name__ == '__main__':
-    batch_migration_data_table()
+    sqlite_handle(table='pro_插件定制_')
