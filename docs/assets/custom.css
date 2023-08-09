@@ -66,7 +66,7 @@ mspace {
     bottom: 0;
     left: 0;
     width: 100%;
-    margin-bottom: 25px !important;
+    margin-bottom: 1% !important;
     border: 1px solid var(--border-color-primary) !important;
 }
 
@@ -176,8 +176,8 @@ span.svelte-1gfkn6j:not(.has-info) {
 /*    height: 100%; !* 填充父元素的高度 *!*/
 /*}*/
 #main_chatbot {
-    height: 75vh !important;
-    max-height: 75vh !important;
+    height: 79vh !important;
+    max-height: 79vh !important;
     /* overflow: auto !important; */
     z-index: 2;
     transform: translateZ(0) !important;

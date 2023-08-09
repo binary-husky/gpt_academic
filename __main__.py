@@ -27,7 +27,7 @@ for role in crazy_fns_role:
 
 # 处理markdown文本格式的转变 暂时屏蔽这个高亮代码
 # gr.Chatbot.postprocess = format_io
-# gr.Chatbot.postprocess = postprocess
+
 
 # 做一些外观色彩上的调整
 from comm_tools.theme import adjust_theme, custom_css, reload_javascript
@@ -84,7 +84,7 @@ class ChatBot(ChatBotFrame):
         self.chatbot = gr.Chatbot(elem_id='main_chatbot', label=f"当前模型：{LLM_MODEL}")
         self.chatbot.style()
         self.history = gr.State([])
-        temp_draw = [gr.HTML() for i in range(7)]
+        temp_draw = [gr.HTML() for i in range(6)]
         with gr.Box(elem_id='chat_box'):
             self.state_users = gr.HTML(value='', visible=False, elem_id='state_users')
             with gr.Row():

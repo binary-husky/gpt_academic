@@ -108,25 +108,23 @@ with open(os.path.join(func_box.base_path, 'docs/assets/custom.css'), "r", encod
     customCSS = f.read()
 custom_css = customCSS
 
-js = ''
-if ADD_CHUANHU:
-    with open(os.path.join(func_box.base_path, "docs/assets/custom.js"), "r", encoding="utf-8") as f, \
-            open(os.path.join(func_box.base_path, "docs/assets/external-scripts.js"), "r", encoding="utf-8") as f1:
-        customJS = f.read()
-        externalScripts = f1.read()
-    js += f'<script>{customJS}</script><script async>{externalScripts}</script>'
-# 添加一个萌萌的看板娘
-if ADD_WAIFU:
-    js += """
-        <script src="file=docs/waifu_plugin/jquery.min.js"></script>
-        <script src="file=docs/waifu_plugin/jquery-ui.min.js"></script>
-        <script src="file=docs/waifu_plugin/autoload.js"></script>
-    """
-
 
 def reload_javascript():
     print("Reloading javascript...")
-    js = f'<script>{customJS}</script><script async>{externalScripts}</script>'
+    js = ''
+    if ADD_CHUANHU:
+        with open(os.path.join(func_box.base_path, "docs/assets/custom.js"), "r", encoding="utf-8") as f, \
+                open(os.path.join(func_box.base_path, "docs/assets/external-scripts.js"), "r", encoding="utf-8") as f1:
+            customJS = f.read()
+            externalScripts = f1.read()
+        js += f'<script>{customJS}</script><script async>{externalScripts}</script>'
+    # 添加一个萌萌的看板娘
+    if ADD_WAIFU:
+        js += """
+            <script src="file=docs/waifu_plugin/jquery.min.js"></script>
+            <script src="file=docs/waifu_plugin/jquery-ui.min.js"></script>
+            <script src="file=docs/waifu_plugin/autoload.js"></script>
+        """
     js += '<script async src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>'
     def template_response(*args, **kwargs):
         res = GradioTemplateResponseOriginal(*args, **kwargs)
