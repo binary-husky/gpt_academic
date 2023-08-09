@@ -131,23 +131,27 @@ def html_tag_color(tag, color=None, font='black'):
     tag = f'<span style="background-color: {color}; font-weight: bold; color: {font}">&nbsp;{tag}&ensp;</span>'
     return tag
 
+
 def html_a_blank(__href, name=''):
     if not name:
         name = __href
     a = f'<a href="{__href}" target="_blank" class="svelte-xrr240">{name}</a>'
     return a
 
-def html_view_blank(__href, file_name=''):
-    if os.path.exists(__href):
-        __href = f'/gradio/file={__href}'
+
+def html_local_file(file):
+    if os.path.exists(file):
+        file = f'/gradio/file={file.replace(base_path, ".")}'
+    return file
+
+
+def html_view_blank(__href: str, file_name=''):
+    __href = html_local_file(__href)
     if not file_name:
         file_name = __href.split('/')[-1]
     a = f'<a href="{__href}" target="_blank" class="svelte-xrr240">{file_name}</a>'
     return a
 
-def html_local_file(html_file):
-    html_file = f'/gradio/file={html_file}'
-    return html_file
 
 def html_iframe_code(html_file):
     html_file = html_local_file(html_file)
@@ -935,4 +939,5 @@ class JsonHandle:
 
 
 if __name__ == '__main__':
-    print(split_csv_by_quarter('/Users/kilig/Desktop/testbug/中台+-+PC+Office-缺陷池-MAC海外版-全部缺陷.csv'))
+    # print(split_csv_by_quarter('/Users/kilig/Desktop/testbug/中台+-+PC+Office-缺陷池-MAC海外版-全部缺陷.csv'))
+    print(html_local_file('/Users/kilig/Job/Python-project/kso_gpt/config.py'))

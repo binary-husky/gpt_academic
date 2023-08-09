@@ -404,7 +404,7 @@ def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs
             else:
                 func_box.通知机器人(f'脏数据过滤，这个不符合写入测试用例的条件 \n\n```\n\n{i}\n\n```\n\n```\n{gpt_response_split}\n```')
     file_path = ExcelHandle(ipaddr=llm_kwargs['ipaddr'], temp_file=temp_file).lpvoid_lpbuffe(test_case, filename=file_name)
-    chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_download_blank(__href=file_path, dir_name=file_path.split("/")[-1])}\n\n'
+    chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, file_name=file_path.split("/")[-1])}\n\n'
     chatbot.append(['Done', chat_file_list])
     yield from toolbox.update_ui(chatbot, history)
 
@@ -530,9 +530,8 @@ def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
         inputs_count += str(inputs).replace('```', '') # 去除头部和尾部的代码块, 避免流程图堆在一块
 
     md, html = Utils().markdown_to_flow_chart(data=inputs_count, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(you_say))
-    chatbot.append(("View: " + func_box.html_view_blank(md), f'tips: 双击空白处可以放大～\n\n'
-                                                           f'{func_box.html_iframe_code(html_file=html)}'
-                                                          '\n\n--- \n\n View: ' + func_box.html_view_blank(html)))
+    chatbot.append(("View: " + func_box.html_view_blank(md), '\n\n--- \n\n View: ' + func_box.html_view_blank(html)))
+    # f'tips: 双击空白处可以放大～\n\n' f'{func_box.html_iframe_code(html_file=html)}'  无用，不允许内嵌网页了
     yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
 
 
