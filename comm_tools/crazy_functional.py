@@ -300,16 +300,14 @@ def get_crazy_functions():
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.KDocs_转客户端测试用例),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "is_show: 是否显示过程\nprompt: 生成测试用例的prompt\n"
-                            "img_ocr: 是否使用ocr\nto_markdown: 增加阅读性使用的中间prompt",  # 高级参数输入区的显示提示
+            "ArgsReminder": "高级参数详细说明请查看项目自述文档",  # 高级参数输入区的显示提示
             "Parameters": {
-                "is_show": False,
-                "prompt_cls": '插件定制',
-                "prompt": '文档转测试用例',
-                'img_ocr': True,
-                "to_markdown": '文档转Markdown',
-                'template_file': 'https://www.kdocs.cn/l/civeYz1Wg2OK'
-
+                '开启OCR': True,
+                "提示词分类": '插件定制',
+                "格式化文档提示词": '文档转Markdown',
+                "预期产出提示词": '文档转测试用例',
+                '写入指定模版': 'https://www.kdocs.cn/l/civeYz1Wg2OK',
+                "显示过程": False,
             }
         },
         "轻文档转接口测试用例": {
@@ -317,16 +315,14 @@ def get_crazy_functions():
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.KDocs_转接口测试用例),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "is_show: 是否显示过程\n prompt: 生成测试用例的提示词\n"
-                            "img_ocr: 是否使用ocr\n to_markdown: 增加阅读性使用的中间prompt\n"
-                            "template_file: 可以指定上传的文档作为测试用例输出的模版",  # 高级参数输入区的显示提示
+            "ArgsReminder": "高级参数详细说明请查看项目自述文档",  # 高级参数输入区的显示提示
             "Parameters": {
-                "is_show": False,
-                "prompt_cls": '插件定制',
-                "prompt": '接口文档转测试用例',
-                'img_ocr': True,
-                'to_markdown': '文档转Markdown_分割',
-                'template_file': 'https://www.kdocs.cn/l/ckuTJWR6vBtJ'
+                '开启OCR': True,
+                "提示词分类": '插件定制',
+                '格式化文档提示词': '文档转Markdown_分割',
+                "预期产出提示词": '接口文档转测试用例',
+                '写入指定模版': 'https://www.kdocs.cn/l/ckuTJWR6vBtJ',
+                "显示过程": False,
             }
         },
         "轻文档需求分析问答": {
@@ -334,14 +330,13 @@ def get_crazy_functions():
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.KDocs_需求分析问答),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "is_show: 是否显示过程\nprompt: 指定提示词\n"
-                            "img_ocr: 是否使用ocr\nto_markdown: 增加阅读性使用的中间prompt",  # 高级参数输入区的显示提示
+            "ArgsReminder": "高级参数详细说明请查看项目自述文档",  # 高级参数输入区的显示提示
             "Parameters": {
-                "is_show": True,
-                "prompt_cls": '插件定制',
-                "prompt": '需求分析对话',
-                'img_ocr': False,
-                'to_markdown': '文档转Markdown',
+                '开启OCR': False,
+                "提示词分类": '插件定制',
+                '格式化文档提示词': '文档转Markdown',
+                "预期产出提示词": '需求分析对话',
+                "显示过程": True,
             }
         },
         "轻文档转流程图": {
@@ -349,22 +344,22 @@ def get_crazy_functions():
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.KDocs_文档转流程图),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "prompt生成流程图的prompt\nimg_ocr是否使用ocr\n",  # 高级参数输入区的显示提示
+            "ArgsReminder": "高级参数详细说明请查看项目自述文档",  # 高级参数输入区的显示提示
             "Parameters": {
-                "prompt_cls": '插件定制',
-                'to_markdown': '文档转Markdown',
-                'img_ocr': True,
+                '开启OCR': True,
+                "提示词分类": '插件定制',
+                '预期产出提示词': '文档转Markdown',
             }
         },
         "批量总结音视频": {
             "Color": "primary",
             "AsButton": True,
             "AdvancedArgs": True,
-            "ArgsReminder": "",
             "Function": HotReload(总结音视频.Kdocs音频提取总结),
+            "ArgsReminder": "高级参数详细说明请查看项目自述文档",  # 高级参数输入区的显示提示
             "Parameters": {
-                "prompt_cls": '插件定制',
-                "prompt": '总结摘要提取',
+                "提示词分类": '插件定制',
+                "预期产出提示词": '总结摘要提取',
             }
         },
         "批量理解流程图、图片": {

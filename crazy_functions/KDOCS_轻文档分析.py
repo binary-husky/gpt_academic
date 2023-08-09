@@ -24,7 +24,7 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
         return
     file_limit = []
     # 爬虫读取
-    img_ocr, = crazy_box.json_args_return(plugin_kwargs, ['img_ocr'])
+    img_ocr, = crazy_box.json_args_return(plugin_kwargs, ['开启OCR'])
     for url in links:
         try:
             chatbot.append([link_limit + "\n\n网页爬虫和文件处理准备工作中～", None])
@@ -94,7 +94,7 @@ def KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, s
         chatbot.append([None, f'{func_box.html_tag_color("无法获取需求文档内容，暂停运行!!!!")}'])
         yield from update_ui(chatbot=chatbot, history=history, msg='无法获取需求文档内容，暂停运行')
         return
-    kwargs_to_mark, = crazy_box.json_args_return(plugin_kwargs, ['to_markdown'])
+    kwargs_to_mark, = crazy_box.json_args_return(plugin_kwargs, ['格式化文档提示词'])
     if kwargs_to_mark:
         split_content_limit = yield from crazy_box.input_output_processing(file_limit, llm_kwargs,
                                                                                             plugin_kwargs,
@@ -125,7 +125,7 @@ def KDocs_转接口测试用例(file_limit, llm_kwargs, plugin_kwargs, chatbot, 
     gpt_response_collection = yield from crazy_box.submit_multithreaded_tasks(inputs_array, inputs_show_user_array,
                                                                               llm_kwargs, chatbot, history,
                                                                               plugin_kwargs)
-    template_file, = crazy_box.json_args_return(plugin_kwargs, ['template_file'])
+    template_file, = crazy_box.json_args_return(plugin_kwargs, ['写入指定模版'])
     yield from crazy_box.write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history,
                                           temp_file=template_file)
     yield from update_ui(chatbot, history, '插件执行成功')
@@ -147,7 +147,7 @@ def KDocs_转客户端测试用例(link_limit, llm_kwargs, plugin_kwargs, chatbo
                                                                               llm_kwargs, chatbot, history,
                                                                               plugin_kwargs)
 
-    template_file, = crazy_box.json_args_return(plugin_kwargs, ['template_file'])
+    template_file, = crazy_box.json_args_return(plugin_kwargs, ['写入指定模版'])
     yield from crazy_box.write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history,
                                           temp_file=template_file)
     yield from update_ui(chatbot, history, '插件执行成功')

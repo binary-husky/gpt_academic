@@ -482,6 +482,8 @@ def prompt_save(txt, name, prompt: gr.Dataset, pro_select, cls_name, ipaddr: gr.
         all_, personal = toolbox.get_conf('preset_prompt')[0]['key']
         if pro_select == all_:
             cls_name = personal
+        elif pro_select != '新建分类':
+            cls_name = pro_select
         sql_obj = SqliteHandle(f'prompt_{tab_cls}')
         _, source = sql_obj.get_prompt_value(name)
         status = sql_obj.inset_prompt({name: txt}, user_info)

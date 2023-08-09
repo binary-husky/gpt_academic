@@ -91,7 +91,7 @@ class ChatBot(ChatBotFrame):
                 self.sm_upload = gr.UploadButton(label='🔗 上传', file_count='multiple', elem_classes='sm_btn').style(size='sm', full_width=False)
                 self.sm_code_block = gr.Button(value='< > 代码块', elem_classes='sm_btn').style(size='sm', full_width=False)
                 self.resetBtn = gr.Button("🗑 新对话", variant="primary", elem_classes='sm_btn').style(size='sm', full_width=False)
-                self.sm_upload_history = gr.Button("🥷 上传历史", variant="primary", elem_classes='sm_btn').style(size='sm', full_width=False)
+                self.sm_upload_history = gr.Button("🥷 我的文件", variant="primary", elem_classes='sm_btn').style(size='sm', full_width=False)
                 self.llms_dropdown = gr.Dropdown(choices=AVAIL_LLM_MODELS, value=LLM_MODEL,
                                                show_label=True, interactive=True, label='LLMs',
                                                elem_classes='sm_select', elem_id='change-font-size').style(container=False)
@@ -221,6 +221,7 @@ class ChatBot(ChatBotFrame):
                 with gr.Row():
                     self.pro_name_txt = gr.Textbox(show_label=False, placeholder='提示词名称').style(container=False)
                     self.pro_new_btn = gr.Button("保存提示词", variant="primary").style(size='sm', full_width=True)
+                    # self.pro_del_btn = gr.Button("删除提示词", ).style(size='sm', full_width=True)
             with gr.Accordion("上传提示词", open=False) as self.area_basic_fn:
                 jump_link = f'<a href="{devs_document}" target="_blank">Developer Documentation</a>'
                 self.pro_devs_link = gr.HTML(jump_link)

@@ -90,9 +90,9 @@ class SqliteHandle:
         for key in prompt:
             _, user_info = self.get_prompt_value(key)
             if not user_info: user_info = ''  # 增加保障
-            if user_info in source:
+            if source in user_info or not user_info:
                 self.__cursor.execute(f"REPLACE INTO `{self.__table}` (prompt, result, source)"
-                                      f"VALUES (?, ?, ?);", (str(key), str(prompt[key]), source))
+                                      f"VALUES (?, ?, ?);", (str(key), str(prompt[key]), user_info))
             else:
                 error_status += f'【{key}】权限不足，该分类下已有其他人保存重名的提示词，请更改提示词名称后再提交～'
                 print(f'{source} 保存名称为[key]的提示词失败，因为该分类下已有其他人保存重名的提示词')
@@ -180,6 +180,7 @@ def batch_migration_data_table():
             new = str(t).split('_')[-1]
             sql_ll.rename_tables(t, new=f'ai_private_{new}')
 
+
 def batch_delete_data_table():
     sql_ll = sqlite_handle(database='ai_prompt_2.db')
     tabs = sql_ll.get_tables()
@@ -187,8 +188,23 @@ def batch_delete_data_table():
         if not str(t).endswith('sys'):
             sql_ll.delete_tables(t)
 
+def main():
+    import argparse
+    parser = argparse.ArgumentParser(description='数据库命令行操作')
+    parser.add_argument('--database', metavar='text', help='指定数据库，默认ai_prompt.db')
+    parser.add_argument('--tab', metavar='text', help='指定数据表, 默认prompt_插件定制_sys')
+    parser.add_argument('--source', metavar='text', help='**增加source')
+    args = parser.parse_args()
 
+    if args.source:
+        if not args.tab:
+            args.tab = 'prompt_插件定制_sys'
+        if not args.database:
+            args.database = 'ai_prompt.db'
+        SqliteHandle(table=args.tab, database=args.database).update_value(new_source=args.source)
+    else:
+        print('带**的必填呀撒比')
 
 sqlite_handle = SqliteHandle
 if __name__ == '__main__':
-    batch_delete_data_table()
+    main()

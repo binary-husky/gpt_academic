@@ -370,6 +370,7 @@ def long_name_processing(file_name):
             file_name = file_name[:20]
     return file_name
 
+
 def table_header_subscript(content: list):
     for index, item in enumerate(content):
         if '---' in item:
@@ -449,7 +450,7 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     """
     inputs_array = []
     inputs_show_user_array = []
-    kwargs_prompt, prompt_cls = json_args_return(plugin_kwargs, ['prompt', 'prompt_cls'])
+    kwargs_prompt, prompt_cls = json_args_return(plugin_kwargs, ['提示词分类', '预期产出提示词'])
     if default_prompt: kwargs_prompt = default_prompt
     chatbot.append([f'接下来使用的Prompt是 {func_box.html_tag_color(kwargs_prompt)} ，'
                      f'你可以保存一个同名的Prompt，或在{func_box.html_tag_color("自定义插件参数")}中指定另一个Prmopt哦～', None])
@@ -504,7 +505,7 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
             scroller_max_len=80
         )
         # 是否展示任务结果
-        kwargs_is_show,  = json_args_return(plugin_kwargs, ['is_show'])
+        kwargs_is_show,  = json_args_return(plugin_kwargs, ['显示过程'])
         if kwargs_is_show:
             for results in list(zip(gpt_response_collection[0::2], gpt_response_collection[1::2])):
                 chatbot.append(results)
