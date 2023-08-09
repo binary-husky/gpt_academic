@@ -450,7 +450,7 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     """
     inputs_array = []
     inputs_show_user_array = []
-    kwargs_prompt, prompt_cls = json_args_return(plugin_kwargs, ['提示词分类', '预期产出提示词'])
+    kwargs_prompt, prompt_cls = json_args_return(plugin_kwargs, ['预期产出提示词', '提示词分类'])
     if default_prompt: kwargs_prompt = default_prompt
     chatbot.append([f'接下来使用的Prompt是 {func_box.html_tag_color(kwargs_prompt)} ，'
                      f'你可以保存一个同名的Prompt，或在{func_box.html_tag_color("自定义插件参数")}中指定另一个Prmopt哦～', None])
