@@ -628,7 +628,7 @@ import csv
 import datetime
 
 
-def split_csv_by_quarter(file_path, date_format='%Y/%m/%d %H:%M:%S'):
+def split_csv_by_quarter(file_path, date_format='%Y-%m-%d %H:%M:%S'):
     # 获取文件名和扩展名
     file_name, file_ext = os.path.splitext(file_path)
     result_files = {}
@@ -677,6 +677,11 @@ def split_csv_by_quarter(file_path, date_format='%Y/%m/%d %H:%M:%S'):
 def handling_defect_files(file_manifest: list):
     bugs_list = [mani for mani in file_manifest if '缺陷' in mani]  # 筛选出带有缺陷字样的文件list
     file_manifest = [x for x in file_manifest if x not in bugs_list]  # 过滤掉筛选出来的文件
+    temp_file = []
+    for i in bugs_list:
+        temp_file.extend(split_csv_by_quarter(i))
+    file_manifest.extend(temp_file)
+    return file_manifest
 
 
 def new_button_display(select):

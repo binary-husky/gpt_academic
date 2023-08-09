@@ -180,8 +180,15 @@ def batch_migration_data_table():
             new = str(t).split('_')[-1]
             sql_ll.rename_tables(t, new=f'ai_private_{new}')
 
+def batch_delete_data_table():
+    sql_ll = sqlite_handle(database='ai_prompt_2.db')
+    tabs = sql_ll.get_tables()
+    for t in tabs:
+        if not str(t).endswith('sys'):
+            sql_ll.delete_tables(t)
+
 
 
 sqlite_handle = SqliteHandle
 if __name__ == '__main__':
-    sqlite_handle(table='pro_插件定制_')
+    batch_delete_data_table()
