@@ -941,5 +941,5 @@ class JsonHandle:
 
 
 if __name__ == '__main__':
-    # print(split_csv_by_quarter('/Users/kilig/Desktop/testbug/中台+-+PC+Office-缺陷池-MAC海外版-全部缺陷.csv'))
+    print(split_csv_by_quarter('/Users/kilig/Desktop/testbug/中台+-+PC+Office-缺陷池-MAC海外版-全部缺陷.csv'))
     print(html_local_file('/Users/kilig/Job/Python-project/kso_gpt/config.py'))

@@ -7,7 +7,7 @@ import os.path
 import time
 from comm_tools import func_box, ocr_tools
 from crazy_functions import crazy_box
-from comm_tools.toolbox import update_ui, CatchException, trimmed_format_exc
+from comm_tools.toolbox import update_ui, CatchException, trimmed_format_exc, get_conf
 from crazy_functions.crazy_utils import get_files_from_everything, read_and_clean_pdf_text
 import traceback
 
@@ -15,11 +15,15 @@ import traceback
 def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     links = crazy_box.Utils().split_startswith_txt(link_limit)
     files = [file for file in link_limit.splitlines() if os.path.exists(file)]
+    file_types = ['md', 'txt', 'pdf', 'xmind', 'ap轻文档']
     if not links and not files:
+        devs_document, = get_conf('devs_document')
         chatbot.append((None, f'输入框空空如也？{link_limit}\n\n'
-                              '请在输入框中输入需要解析的轻文档链接或Markdown文件目录地址，点击插件按钮，链接需要是可访问的，如以下格式，如果有多个文档则用换行或空格隔开'
+                              f'请在输入框中输入需要解析的文档链接或本地文件地址，文档支持类型{func_box.html_tag_color(file_types)}'
+                              f'链接需要是可访问的，格式如下，如果有多个文档则用换行或空格隔开，输入后再点击对应的插件'
                               f'\n\n【金山文档】 xxxx https://kdocs.cn/l/xxxxxxxxxx'
-                              f'\n\n https://kdocs.cn/l/xxxxxxxxxx'))
+                              f'\n\n https://kdocs.cn/l/xxxxxxxxxx'
+                              f'\n\n`还是不懂？那就来👺` {devs_document}'))
         yield from update_ui(chatbot, history)
         return
     file_limit = []
@@ -29,34 +33,41 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
         try:
             chatbot.append([link_limit + "\n\n网页爬虫和文件处理准备工作中～", None])
             yield from update_ui(chatbot, history)  # 增加中间过渡
-            ovs_data, content, empty_picture_count, pic_dict, kdocs_dict = crazy_box.get_docs_content(url, image_processing=img_ocr)
-            if img_ocr:
-                if pic_dict:  # 当有图片文件时，再去提醒
-                    ocr_process = f'检测到轻文档中存在{func_box.html_tag_color(empty_picture_count)}张图片，为了产出结果不存在遗漏，正在逐一进行识别\n\n' \
-                                  f'> 红框为采用的文案,可信度低于 {func_box.html_tag_color(llm_kwargs["ocr"])} 将不采用, 可在Setting 中进行配置\n\n'
-                    chatbot.append([None, ocr_process])
+            if crazy_box.if_kdocs_url_isap(url):
+                ovs_data, content, empty_picture_count, pic_dict, kdocs_dict = crazy_box.get_docs_content(url, image_processing=img_ocr)
+                if img_ocr:
+                    if pic_dict:  # 当有图片文件时，再去提醒
+                        ocr_process = f'检测到轻文档中存在{func_box.html_tag_color(empty_picture_count)}张图片，为了产出结果不存在遗漏，正在逐一进行识别\n\n' \
+                                      f'> 红框为采用的文案,可信度低于 {func_box.html_tag_color(llm_kwargs["ocr"])} 将不采用, 可在Setting 中进行配置\n\n'
+                        chatbot.append([None, ocr_process])
+                    else:
+                        ocr_process = ''
+                    for i in pic_dict:
+                        yield from update_ui(chatbot, history, '正在调用OCR组件，图片多可能会比较慢')
+                        img_content, img_result = ocr_tools.Paddle_ocr_select(ipaddr=llm_kwargs['ipaddr'],
+                                                                              trust_value=llm_kwargs[
+                                                                                  'ocr']).img_def_content(
+                            img_path=pic_dict[i])
+                        content = str(content).replace(f"{i}",
+                                                       f"{func_box.html_local_img(img_result)}\n```{img_content}```")
+                        ocr_process += f'{i} 识别完成，识别效果如下 {func_box.html_local_img(img_result)} \n\n'
+                        chatbot[-1] = [None, ocr_process]
+                        yield from update_ui(chatbot, history)
                 else:
-                    ocr_process = ''
-                for i in pic_dict:
-                    yield from update_ui(chatbot, history, '正在调用OCR组件，图片多可能会比较慢')
-                    img_content, img_result = ocr_tools.Paddle_ocr_select(ipaddr=llm_kwargs['ipaddr'],
-                                                                          trust_value=llm_kwargs[
-                                                                              'ocr']).img_def_content(
-                        img_path=pic_dict[i])
-                    content = str(content).replace(f"{i}",
-                                                   f"{func_box.html_local_img(img_result)}\n```{img_content}```")
-                    ocr_process += f'{i} 识别完成，识别效果如下 {func_box.html_local_img(img_result)} \n\n'
-                    chatbot[-1] = [None, ocr_process]
+                    if empty_picture_count >= 5:
+                        chatbot.append([None, f'\n\n 需求文档中没有{func_box.html_tag_color("描述")}的图片数量' \
+                                              f'有{func_box.html_tag_color(empty_picture_count)}张，生成的测试用例可能存在遗漏点，'
+                                              f'可以参考以下方法对图片进行描述补充，或在自定义插件参数中开始OCR功能\n\n' \
+                                              f'{func_box.html_local_img("docs/imgs/pic_desc.png")}'])
                     yield from update_ui(chatbot, history)
+                title = content.splitlines()[0]
+                file_limit.extend([title, content])
             else:
-                if empty_picture_count >= 5:
-                    chatbot.append([None, f'\n\n 需求文档中没有{func_box.html_tag_color("描述")}的图片数量' \
-                                          f'有{func_box.html_tag_color(empty_picture_count)}张，生成的测试用例可能存在遗漏点，'
-                                          f'可以参考以下方法对图片进行描述补充，或在自定义插件参数中开始OCR功能\n\n' \
-                                          f'{func_box.html_local_img("docs/imgs/pic_desc.png")}'])
-                yield from update_ui(chatbot, history)
-            title = content.splitlines()[0]
-            file_limit.extend([title, content])
+                for t in file_types:
+                    success, file_manifest, _ = crazy_box.get_kdocs_from_everything(txt=url, type=t, ipaddr=llm_kwargs['ipaddr'])
+                    files.extend(file_manifest)
+                    if success:
+                        chatbot.append([None, success])
         except Exception as e:
             error_str = trimmed_format_exc()
             chatbot.append([None,
@@ -64,21 +75,10 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
             func_box.通知机器人(f"{link_limit}\n\n```\n{error_str}\n```\n\n```\n{llm_kwargs}\n```")
             yield from update_ui(chatbot, history)
     # 文件读取
-    for t in ['md', 'txt', 'pdf']:
+    for t in file_types:
         for f in files:
-            chatbot.append([link_limit + "本地文件正在处理\n\n", None])
-            _, file_routing, _ = get_files_from_everything(f, t)
-            for file_path in file_routing:
-                if file_path.endswith('pdf'):
-                    file_content, _ = read_and_clean_pdf_text(file_path)
-                    title = file_content[0].splitlines()[0][:20]
-                    content = "".join(file_content)
-                    file_limit.extend([title, content])
-                else:
-                    with open(file_path, mode='r') as f:
-                        file_content = f.read()
-                        title = file_content.splitlines()[0][:20]
-                        file_limit.extend([title, file_content])
+            _, file_routing, _ = get_files_from_everything(f, t, )
+            yield from crazy_box.file_extraction_intype(file_routing, file_limit, chatbot, history)
     yield from update_ui(chatbot, history)
     return file_limit
 
@@ -181,3 +181,13 @@ def KDocs_文档转流程图(link_limit, llm_kwargs, plugin_kwargs, chatbot, his
         return
     yield from crazy_box.transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history)
     yield from update_ui(chatbot, history, '插件执行成功')
+
+
+@CatchException
+def KDocs_文档提取测试点(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    gpt_response_collection = yield from KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history,
+                                                          system_prompt, web_port)
+    if not gpt_response_collection:
+        chatbot.append([None, f'{func_box.html_tag_color("多线程一个都没有通过，暂停运行!!!!")}'])
+        yield from update_ui(chatbot=chatbot, history=history, msg='多线程一个都没有通过，暂停运行')
+        return

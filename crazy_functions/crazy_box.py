@@ -8,6 +8,9 @@ import json
 import requests
 import re
 import time
+import xmindparser
+from typing import Dict
+import typing as typing
 from comm_tools import func_box, ocr_tools, toolbox, prompt_generator, Langchain_cn
 from openpyxl import load_workbook
 from crazy_functions import crazy_utils
@@ -197,6 +200,65 @@ class ExcelHandle:
         return test_case_path
 
 
+class XmindHandle():
+
+    def __int__(self):
+        pass
+
+    def _WalkTopic(self, dictXmind: Dict, resultDict: Dict):
+        strTitle: typing.AnyStr = dictXmind['title']
+        if 'topics' in dictXmind:
+            pass
+            # print(dictXmind['topics'])
+            listTopics: typing.List = dictXmind['topics']
+
+            if (listTopics.__len__() > 0):
+                resultDict[strTitle] = {}
+                for topic in listTopics:
+                    self._WalkTopic(topic, resultDict[strTitle])
+        else:
+            resultDict[strTitle] = strTitle
+
+    def _Print2MDList(self, dictOri: typing.Dict) -> typing.AnyStr:
+        levelOri = 0
+        listStr = []
+
+        def Print2MDListInternal(dictContent: typing.Dict, level):
+            if type(dictContent).__name__ != 'dict':
+                return
+            level = level + 1
+            for topic, topicDict in dictContent.items():
+                listStr.append('  ' * (level - 1))
+                listStr.append('- ')
+                listStr.append(topic)
+                listStr.append('\n')
+                Print2MDListInternal(topicDict, level)
+        Print2MDListInternal(dictOri, levelOri)
+        return ''.join(listStr)
+
+    def xmind_2_md(self, pathSource):
+        dictSheet = xmindparser.xmind_to_dict(pathSource)
+        dictResult: Dict = {}
+        xm_content = ''
+        md_path = []
+        for canvas in dictSheet:
+            self._WalkTopic(canvas['topic'], dictResult)
+            strResult = self._Print2MDList(dictResult)
+            xm_content += strResult
+            pathOutput = os.path.splitext(pathSource)[0] + f'_{canvas["title"]}.md'
+            with open(pathOutput, 'w', encoding='utf-8') as f:
+                f.write(strResult)
+                md_path.append(pathOutput)
+        return xm_content, md_path
+
+def if_kdocs_url_isap(url):
+    kdocs = crzay_kingsoft.Kdocs(url)
+    if 'otl' in kdocs.file_info_parm['fname']:
+        return True
+    return False
+
+
+
 def get_docs_content(url, image_processing=False):
     """
     Args: 爬虫程序，通过拿到分享链接提取文档内信息
@@ -325,6 +387,36 @@ def get_kdocs_from_everything(txt, type='', ipaddr='temp'):
             else:
                 file_manifest += get_kdocs_files(limit, project_folder, type, ipaddr)
     return success, file_manifest, project_folder
+
+
+def file_extraction_intype(file_routing, file_limit, chatbot, history):
+    """
+    Args:
+        file_routing: 文件路径
+        file_limit:  存储解析后的文档list
+        chatbot: 对话组件
+    Returns: None
+    """
+    for file_path in file_routing:
+        if file_path.endswith('pdf'):
+            chatbot.append([func_box.html_view_blank(file_path) + "\t本地文件pdf正在处理\n\n", None])
+            file_content, _ = crazy_utils.read_and_clean_pdf_text(file_path)
+            title = long_name_processing(file_content)
+            content = "".join(file_content)
+            file_limit.extend([title, content])
+        elif file_path.endswith('xmind'):
+            file_content, _path = XmindHandle().xmind_2_md(pathSource=file_path)
+            chatbot.append([func_box.html_view_blank(file_path) + "\t本地文件xmind正在处理\n\n", None])
+            title = long_name_processing(file_content)
+            file_limit.extend([title, file_content])
+        else:
+            chatbot.append([func_box.html_view_blank(file_path) + "\t本地文件正在处理\n\n", None])
+            with open(file_path, mode='r') as f:
+                file_content = f.read()
+                title = file_content.splitlines()[0][:20]
+                file_limit.extend([title, file_content])
+        yield from toolbox.update_ui(chatbot, history)
+
 
 def json_args_return(kwargs, keys: list) -> list:
     """
@@ -554,10 +646,11 @@ def result_written_to_markdwon(gpt_response_collection, llm_kwargs, chatbot, his
     yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
 
 
+
 previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传，多个文件请上传压缩包，'\
                   f'{func_box.html_tag_color("如果是网络文件或金山文档链接，请粘贴到输入框")}, 然后再次点击该插件'\
                   f'多个文件{func_box.html_tag_color("请使用换行或空格区分")}'
 
 
 if __name__ == '__main__':
-    print(get_docs_content('https://www.kdocs.cn/l/cnYprFmFqghk'))
+    print(if_kdocs_url_isap('https://www.kdocs.cn/l/cusuZF0LcQuI?from=koa'))

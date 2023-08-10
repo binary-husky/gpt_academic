@@ -154,7 +154,8 @@ class ChatBot(ChatBotFrame):
                 routing_address, = get_conf('routing_address')
                 qr_path = func_box.qr_code_generation(data=routing_address)
                 content = func_box.get_html('what_news.md').replace('{qrcode}', func_box.html_local_img(qr_path, max_width='150px'))
-                content = content.replace('{my}', 'https://www.kdocs.cn/l/cajcYsWVVKZJ?from=koa')
+                devs_document, = get_conf('devs_document')
+                content = content.replace('{my}', devs_document)
                 content = content.replace('{log}', "".join(func_box.git_log_list()[0]))
                 self.guidance_what_new = gr.Markdown(title+content)
 
@@ -240,7 +241,8 @@ class ChatBot(ChatBotFrame):
                                              outputs=[self.pro_class_name])
         self.tabs_code = gr.State(0)
         self.pro_func_prompt.select(fn=func_box.prompt_input,
-                                    inputs=[self.txt, self.pro_edit_txt, self.pro_name_txt, self.pro_func_prompt, self.pro_fp_state, self.tabs_code],
+                                    inputs=[self.txt, self.pro_edit_txt, self.pro_name_txt, self.pro_func_prompt,
+                                            self.pro_fp_state, self.tabs_code],
                                     outputs=[self.txt, self.pro_edit_txt, self.pro_name_txt])
         self.pro_upload_btn.upload(fn=func_box.prompt_upload_refresh,
                                    inputs=[self.pro_upload_btn, self.pro_prompt_state, self.pro_private_check, self.pro_class_name],
@@ -589,10 +591,12 @@ from comm_tools import base_api
 app = base_api.app
 PORT = LOCAL_PORT if WEB_PORT <= 0 else WEB_PORT
 reload_javascript()
+check_proxy_free()
 chatbot_main = ChatBot()
 chatbot_main.main()
 gradio_app = gr.mount_gradio_app(app, chatbot_main.demo, '/gradio')
 
 if __name__ == '__main__':
     import uvicorn
-    uvicorn.run("__main__:app", host="0.0.0.0", port=PORT, reload=False)
+    app_reload, = get_conf('app_reload')
+    uvicorn. run("__main__:app", host="0.0.0.0", port=PORT, reload=app_reload)

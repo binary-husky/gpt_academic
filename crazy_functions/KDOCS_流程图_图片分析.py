@@ -23,9 +23,8 @@ def ocr_batch_processing(file_manifest, chatbot, history, llm_kwargs):
         chatbot[-1] = [i_say, ocr_process]
         yield from toolbox.update_ui(chatbot, history)
     ocr_process += f'\n\n---\n\n解析成功，现在我已理解上述内容，有什么不懂得地方你可以问我～'
-    chatbot[-1] = [i_say, ocr_process]
-    history.extend([i_say, ocr_process])
     yield from toolbox.update_ui(chatbot, history)
+    return i_say, ocr_process
 
 
 @toolbox.CatchException
@@ -39,7 +38,20 @@ def 批量分析流程图或图片(txt, llm_kwargs, plugin_kwargs, chatbot, hist
             file_manifest = file_handle.global_search_for_files(txt, matching=file_handle.picture_format)
             yield from ocr_batch_processing(file_manifest, chatbot, history, llm_kwargs=llm_kwargs)
         elif kdocs_manifest_tmp != []:
-            yield from ocr_batch_processing(kdocs_manifest_tmp, chatbot, history, llm_kwargs=llm_kwargs)
+            for manif in kdocs_manifest_tmp:
+                if str(manif).endswith('xmind'):
+                    i_say,  process = [func_box.html_view_blank(manif) + "\n\n开始解析", None]
+                    chatbot.append([i_say, process])
+                    yield from toolbox.update_ui(chatbot, history)
+                    content, _ = crazy_box.XmindHandle().xmind_2_md(manif)
+                    i_say,  process = [func_box.html_view_blank(manif) + "\n\n开始解析",
+                                      f'```{content}```\n\n---\n\nxmind解析成功，现在我已理解上述内容，有什么不懂得地方你可以问我～']
+                    chatbot[-1] = [i_say, process]
+                    yield from toolbox.update_ui(chatbot, history)
+                else:
+                    i_say, process = yield from ocr_batch_processing([manif], chatbot, history, llm_kwargs=llm_kwargs)
+                chatbot[-1] = [i_say, process]
+                history.extend([i_say, process])
         else:
             chatbot.append([None, crazy_box.previously_on_plugins])
             yield from toolbox.update_ui(chatbot, history)

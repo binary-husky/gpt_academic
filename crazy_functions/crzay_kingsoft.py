@@ -67,7 +67,7 @@ class Kdocs:
         self.split_link_tags()
         if self.url_share_tag:
             self.file_info_parm = self.get_file_info_parm()
-        self.docs_old_type = ['.docs', '.doc', '.pptx', '.ppt', '.xls', '.xlsx', '.pdf', '.csv', '.txt', '.pom', '.pof']
+        self.docs_old_type = ['.docs', '.doc', '.pptx', '.ppt', '.xls', '.xlsx', '.pdf', '.csv', '.txt', '.pom', '.pof', '.xmind']
         self.to_img_type = {'.pom': '.png', '.pof': '.png'}
         self.media_type = ['.mp4', '.m4a', '.wav', '.mpga', '.mpeg', '.mp3', '.avi', '.mkv', '.flac', '.aac']
         self.smart_type = {'.otl': 'pdf', '.ksheet': 'xlsx'}
