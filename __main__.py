@@ -454,12 +454,21 @@ class ChatBot(ChatBotFrame):
         switch_model = get_conf('switch_model')[0]
         with gr.TabItem('Settings', id='sett_tab'):
             with gr.Box():
+                gr.Markdown(func_box.get_html('what_news.html').replace('{%v}', 'LLMs调优参数'))
                 self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01, interactive=True,
                                        label="Top-p (nucleus sampling)", ).style(container=False)
                 self.temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True,
                                              label="Temperature",).style(container=False)
                 self.max_length_sl = gr.Slider(minimum=256, maximum=4096, value=4096, step=1, interactive=True,
                                                label="MaxLength", visible=False).style(container=False)
+                gr.Markdown(func_box.get_html('what_news.html').replace('{%v}', 'Langchain调优参数'))
+                self.vector_search_score = gr.Slider(minimum=0, maximum=1100, value=500, step=1, interactive=True,
+                                       label="知识库检索相关度", ).style(container=False)
+                self.vector_search_top_k = gr.Slider(minimum=1, maximum=10, value=4, step=1, interactive=True,
+                                             label="知识库引用文档数量",).style(container=False)
+                self.vector_chunk_size = gr.Slider(minimum=100, maximum=1000, value=521, step=1, interactive=True,
+                                       label="知识库引用Token", ).style(container=False)
+                gr.Markdown(func_box.get_html('what_news.html').replace('{%v}', '工具调试参数'))
                 self.pro_tf_slider = gr.Slider(minimum=0.01, maximum=1.0, value=0.70, step=0.01, interactive=True,
                                                label="搜索匹配系数").style(container=False)
                 self.ocr_identifying_trust = gr.Slider(minimum=0.01, maximum=1.0, value=0.60, step=0.01, interactive=True,
@@ -472,9 +481,11 @@ class ChatBot(ChatBotFrame):
 
     def signals_input_setting(self):
         # 注册input
-        self.input_combo = [self.cookies, self.max_length_sl, self.llms_dropdown, self.langchain_dropdown, self.langchain_know_kwargs, self.langchain_classifi,
-                            self.input_copy, self.top_p, self.temperature, self.ocr_identifying_trust, self.chatbot, self.history,
-                            self.system_prompt, self.models_box, self.plugin_advanced_arg]
+        self.input_combo = [self.cookies, self.max_length_sl, self.llms_dropdown,
+                            self.langchain_dropdown, self.langchain_know_kwargs, self.langchain_classifi,
+                            self.vector_search_score, self.vector_search_top_k, self.vector_chunk_size,
+                            self.input_copy, self.top_p, self.temperature, self.ocr_identifying_trust, self.chatbot,
+                            self.history, self.system_prompt, self.models_box, self.plugin_advanced_arg]
         self.output_combo = [self.cookies, self.chatbot, self.history, self.status, self.stopBtn, self.submitBtn,]
         self.predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=self.input_combo,
                                  outputs=self.output_combo, show_progress=True)

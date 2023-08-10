@@ -189,6 +189,13 @@ span.svelte-1gfkn6j:not(.has-info) {
 #colum_chat {
 }
 
+.label.svelte-13hsdno.svelte-13hsdno.svelte-13hsdno {
+    color: #515151 !important;
+}
+.dark .label.svelte-13hsdno.svelte-13hsdno.svelte-13hsdno {
+    color: #ebebeb !important;
+}
+
 #prompt_result{
     height: 60vh !important;
     max-height: 60vh !important;

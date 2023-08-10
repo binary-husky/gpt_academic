@@ -113,7 +113,11 @@ def knowledge_base_query(txt, kai_id, chatbot, history, llm_kwargs):
             llm_kwargs['know_dict']['know_obj'][id] = kai
         # < -------------------查询向量数据库--------------- >
         yield from toolbox.update_ui(chatbot=chatbot, history=history)  # 刷新界面
-        resp, prompt, _ok = kai.answer_with_archive_by_id(txt, id)
+        vector_config = llm_kwargs['vector']
+        resp, prompt, _ok = kai.answer_with_archive_by_id(txt, id,
+                                                          VECTOR_SEARCH_SCORE_THRESHOLD=vector_config['score'],
+                                                          VECTOR_SEARCH_TOP_K=vector_config['top-k'],
+                                                          CHUNK_SIZE=vector_config['size'])
         if resp:
             referenced_documents = "\n".join(
                 [f"{k}: " + doc.page_content for k, doc in enumerate(resp['source_documents'])])

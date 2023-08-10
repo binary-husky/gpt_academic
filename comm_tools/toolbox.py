@@ -76,7 +76,10 @@ def ArgsGeneralWrapper(f):
     """
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
-    def decorated(cookies, max_length, llm_model, langchain, know_dict, know_cls, txt, top_p, temperature, ocr,
+    def decorated(cookies, max_length, llm_model,
+                  langchain, know_dict, know_cls,
+                  vector_score, vector_top_k, vector_size,
+                  txt, top_p, temperature, ocr_trust,
                   chatbot, history, system_prompt, models, plugin_advanced_arg, ipaddr: gr.Request, *args):
         """"""
         # 引入一个有cookie的chatbot
@@ -95,10 +98,15 @@ def ArgsGeneralWrapper(f):
             'temperature': temperature,
             'ipaddr': ipaddr.client.host,
             'start_time': start_time,
-            'ocr': ocr,
+            'ocr': ocr_trust,
             'know_dict': know_dict,
             'know_cls': know_cls,
-            'know_id': langchain
+            'know_id': langchain,
+            'vector': {
+                'score': vector_score,
+                'top-k': vector_top_k,
+                'size': vector_size
+            }
         }
         plugin_kwargs = {
             "advanced_arg": plugin_advanced_arg,

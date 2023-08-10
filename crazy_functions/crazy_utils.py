@@ -666,13 +666,10 @@ class knowledge_archive_interface():
         file_dict = {ds._dict[k].metadata['source']: {vs_id :ds._dict[k].metadata['filetype']} for k in ds._dict}
         return self, file_dict
 
-    def answer_with_archive_by_id(self, txt, vs_id):
+    def answer_with_archive_by_id(self, txt, vs_id, VECTOR_SEARCH_SCORE_THRESHOLD=0, VECTOR_SEARCH_TOP_K=4, CHUNK_SIZE=521):
         self.kai_path = os.path.join(self.vs_root_path, vs_id)
         if not os.path.exists(self.kai_path):
             return '', '', False
-        VECTOR_SEARCH_SCORE_THRESHOLD = 0
-        VECTOR_SEARCH_TOP_K = 4
-        CHUNK_SIZE = 512
         resp, prompt = self.qa_handle.get_knowledge_based_conent_test(
             query=txt,
             vs_path=self.kai_path,

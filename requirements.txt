@@ -34,3 +34,4 @@ moviepy
 SpeechRecognition
 pyDes
 PaddlePaddle
+xmindparser
