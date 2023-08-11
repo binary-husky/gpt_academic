@@ -35,3 +35,4 @@ SpeechRecognition
 pyDes
 PaddlePaddle
 xmindparser
+xmind

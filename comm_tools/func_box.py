@@ -523,10 +523,10 @@ def prompt_input(txt: str, prompt_str, name_str,  index, data: gr.Dataset, tabs_
         return txt_temp
     if tabs_index == 1 or txt == '':
         new_txt = str_v_handle(txt)
-        return new_txt, new_txt, data_name
+        return new_txt, data_str, data_name
     else:
         new_txt = str_v_handle(txt)
-        return new_txt, new_txt, name_str
+        return new_txt, data_str, name_str
 
 
 def copy_result(history):
@@ -941,5 +941,5 @@ class JsonHandle:
 
 
 if __name__ == '__main__':
-    print(split_csv_by_quarter('/Users/kilig/Desktop/testbug/中台+-+PC+Office-缺陷池-MAC海外版-全部缺陷.csv'))
-    print(html_local_file('/Users/kilig/Job/Python-project/kso_gpt/config.py'))
+    print(split_csv_by_quarter('/Users/kilig/Desktop/testbug/国际客户端项目-缺陷池-Win端-全部缺陷.csv'))
+    # print(html_local_file('/Users/kilig/Job/Python-project/kso_gpt/config.py'))

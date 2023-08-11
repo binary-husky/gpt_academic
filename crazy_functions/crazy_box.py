@@ -237,7 +237,14 @@ class XmindHandle():
         return ''.join(listStr)
 
     def xmind_2_md(self, pathSource):
-        dictSheet = xmindparser.xmind_to_dict(pathSource)
+        try:
+            dictSheet = xmindparser.xmind_to_dict(pathSource)
+
+        except:
+            import xmind
+            workbook = xmind.load(pathSource)
+            sheet = workbook.getPrimarySheet()
+            dictSheet = [sheet.getData()]
         dictResult: Dict = {}
         xm_content = ''
         md_path = []
@@ -653,4 +660,4 @@ previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传�
 
 
 if __name__ == '__main__':
-    print(if_kdocs_url_isap('https://www.kdocs.cn/l/cusuZF0LcQuI?from=koa'))
+    print(XmindHandle().xmind_2_md('/Users/kilig/Desktop/material/web端测试用例111.xmind'))
