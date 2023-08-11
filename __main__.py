@@ -349,8 +349,8 @@ class ChatBot(ChatBotFrame):
                                   ArgsGeneralWrapper(role_fns[k]["Function"]),
                                   [*self.input_combo, gr.State(PORT), gr.State(role_fns[k].get('Parameters', False))],
                                   self.output_combo)
-                click_handle.then(on_report_generated, [self.cookies, self.file_upload, self.chatbot],
-                                  [self.cookies, self.file_upload, self.chatbot])
+                # click_handle.then(on_report_generated, [self.cookies, self.file_upload, self.chatbot],
+                #                   [self.cookies, self.file_upload, self.chatbot])
                 self.cancel_handles.append(click_handle)
 
 
@@ -383,9 +383,9 @@ class ChatBot(ChatBotFrame):
 
         click_handle = self.switchy_bt.click(**self.clear_agrs).then(
             route, [self.switchy_bt, *self.input_combo, gr.State(PORT)], self.output_combo)
-        click_handle.then(on_report_generated,
-              [self.cookies, self.file_upload, self.chatbot],
-              [self.cookies, self.file_upload, self.chatbot])
+        # click_handle.then(on_report_generated,
+        #       [self.cookies, self.file_upload, self.chatbot],
+        #       [self.cookies, self.file_upload, self.chatbot])
         self.cancel_handles.append(click_handle)
         # 终止按钮的回调函数注册
         self.stopBtn.click(fn=lambda: (self.stopBtn.update(visible=False), self.submitBtn.update(visible=True)),
