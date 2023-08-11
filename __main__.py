@@ -453,26 +453,32 @@ class ChatBot(ChatBotFrame):
     def draw_setting_chat(self):
         switch_model = get_conf('switch_model')[0]
         with gr.TabItem('Settings', id='sett_tab'):
-            with gr.Box():
-                gr.Markdown(func_box.get_html('what_news.html').replace('{%v}', 'LLMs调优参数'))
-                self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01, interactive=True,
-                                       label="Top-p (nucleus sampling)", ).style(container=False)
-                self.temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True,
-                                             label="Temperature",).style(container=False)
-                self.max_length_sl = gr.Slider(minimum=256, maximum=4096, value=4096, step=1, interactive=True,
-                                               label="MaxLength", visible=False).style(container=False)
-                gr.Markdown(func_box.get_html('what_news.html').replace('{%v}', 'Langchain调优参数'))
-                self.vector_search_score = gr.Slider(minimum=0, maximum=1100, value=500, step=1, interactive=True,
-                                       label="知识库检索相关度", ).style(container=False)
-                self.vector_search_top_k = gr.Slider(minimum=1, maximum=10, value=4, step=1, interactive=True,
-                                             label="知识库引用文档数量",).style(container=False)
-                self.vector_chunk_size = gr.Slider(minimum=100, maximum=1000, value=521, step=1, interactive=True,
-                                       label="知识库引用Token", ).style(container=False)
-                gr.Markdown(func_box.get_html('what_news.html').replace('{%v}', '工具调试参数'))
-                self.pro_tf_slider = gr.Slider(minimum=0.01, maximum=1.0, value=0.70, step=0.01, interactive=True,
-                                               label="搜索匹配系数").style(container=False)
-                self.ocr_identifying_trust = gr.Slider(minimum=0.01, maximum=1.0, value=0.60, step=0.01, interactive=True,
-                                               label="OCR 识别信任度").style(container=False)
+            with gr.Accordion(label='参数配置'):
+                with gr.Box():
+                    gr.Markdown(func_box.get_html('what_news.html').replace('{%v}', 'LLMs调优参数'))
+                    self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01, interactive=True,
+                                           label="Top-p (nucleus sampling)", ).style(container=False)
+                    self.temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True,
+                                                 label="Temperature",).style(container=False)
+                    self.max_length_sl = gr.Slider(minimum=256, maximum=4096, value=4096, step=1, interactive=True,
+                                                   label="MaxLength", visible=False).style(container=False)
+                    worker_num, =  get_conf('DEFAULT_WORKER_NUM')
+                    self.default_worker_num = gr.Slider(minimum=1, maximum=30, value=worker_num, step=1, interactive=True,
+                                                   label="多线程最大并行数").style(container=False)
+
+                    gr.Markdown(func_box.get_html('what_news.html').replace('{%v}', 'Langchain调优参数'))
+                    self.vector_search_score = gr.Slider(minimum=0, maximum=1100, value=500, step=1, interactive=True,
+                                           label="知识库检索相关度", ).style(container=False)
+                    self.vector_search_top_k = gr.Slider(minimum=1, maximum=10, value=4, step=1, interactive=True,
+                                                 label="知识库引用文档数量",).style(container=False)
+                    self.vector_chunk_size = gr.Slider(minimum=100, maximum=1000, value=521, step=1, interactive=True,
+                                           label="知识库引用Token", ).style(container=False)
+
+                    gr.Markdown(func_box.get_html('what_news.html').replace('{%v}', '工具调试参数'))
+                    self.pro_tf_slider = gr.Slider(minimum=0.01, maximum=1.0, value=0.70, step=0.01, interactive=True,
+                                                   label="搜索匹配系数").style(container=False)
+                    self.ocr_identifying_trust = gr.Slider(minimum=0.01, maximum=1.0, value=0.60, step=0.01, interactive=True,
+                                                   label="OCR 识别信任度").style(container=False)
 
             self.models_box = gr.CheckboxGroup(choices=switch_model['key'], value=switch_model['value'], label="对话模式")
             self.system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt",
@@ -481,7 +487,7 @@ class ChatBot(ChatBotFrame):
 
     def signals_input_setting(self):
         # 注册input
-        self.input_combo = [self.cookies, self.max_length_sl, self.llms_dropdown,
+        self.input_combo = [self.cookies, self.max_length_sl, self.default_worker_num, self.llms_dropdown,
                             self.langchain_dropdown, self.langchain_know_kwargs, self.langchain_classifi,
                             self.vector_search_score, self.vector_search_top_k, self.vector_chunk_size,
                             self.input_copy, self.top_p, self.temperature, self.ocr_identifying_trust, self.chatbot,

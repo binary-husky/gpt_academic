@@ -275,6 +275,7 @@ textarea.svelte-1kcgrqr {
     border: var(--input-border-width) solid var(--input-border-color) !important;
 }
 .dark input[type="range"] {
+    -webkit-appearance: button;
     background: #02af57 !important;
 }
 /* 搜索prompt*/

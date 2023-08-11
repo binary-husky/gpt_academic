@@ -76,7 +76,7 @@ def ArgsGeneralWrapper(f):
     """
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
-    def decorated(cookies, max_length, llm_model,
+    def decorated(cookies, max_length, worker_num, llm_model,
                   langchain, know_dict, know_cls,
                   vector_score, vector_top_k, vector_size,
                   txt, top_p, temperature, ocr_trust,
@@ -96,6 +96,7 @@ def ArgsGeneralWrapper(f):
             'top_p':top_p,
             'max_length': max_length,
             'temperature': temperature,
+            'worker_num': worker_num,
             'ipaddr': ipaddr.client.host,
             'start_time': start_time,
             'ocr': ocr_trust,
