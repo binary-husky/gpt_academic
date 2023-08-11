@@ -258,12 +258,13 @@ class XmindHandle():
                 md_path.append(pathOutput)
         return xm_content, md_path
 
+
+# <---------------------------------------乱七八糟的方法，有点用，很好用----------------------------------------->
 def if_kdocs_url_isap(url):
     kdocs = crzay_kingsoft.Kdocs(url)
     if 'otl' in kdocs.file_info_parm['fname']:
         return True
     return False
-
 
 
 def get_docs_content(url, image_processing=False):
@@ -281,27 +282,6 @@ def get_docs_content(url, image_processing=False):
     pic_dict_convert = kdocs.get_file_pic_url(pic_dict)
     empty_picture_count = sum(1 for item in _all if 'picture' in item and not item['picture']['caption'])
     return _all, content, empty_picture_count, pic_dict_convert, file_dict
-
-
-def batch_recognition_images_to_md(img_list, ipaddr):
-    """
-    Args: 将图片批量识别然后写入md文件
-        img_list: 图片地址list
-        ipaddr: 用户所属标识
-    Returns: [文件list]
-    """
-    temp_list = []
-    for img in img_list:
-        if os.path.exists(img):
-            img_content, img_result = ocr_tools.Paddle_ocr_select(ipaddr=ipaddr, trust_value=True
-                                                                  ).img_def_content(img_path=img)
-            temp_file = os.path.join(func_box.users_path, ipaddr, 'ocr_to_md', img_content.splitlines()[0][:20]+'.md')
-            with open(temp_file, mode='w') as f:
-                f.write(f"{func_box.html_view_blank(temp_file)}\n\n"+img_content)
-            temp_list.append(temp_list)
-        else:
-            print(img, '文件路径不存在')
-    return temp_list
 
 
 def get_kdocs_dir(limit, project_folder, type, ipaddr):
@@ -420,7 +400,7 @@ def file_extraction_intype(file_routing, file_limit, chatbot, history):
             chatbot.append([f'`{file_path}`' + f"\t...准备读取本地文件{os.path.splitext(file_path)[1]}\n\n", None])
             with open(file_path, mode='r') as f:
                 file_content = f.read()
-                title = file_content.splitlines()[0][:20]
+                title = long_name_processing(file_content)
                 file_limit.extend([title, file_content])
         yield from toolbox.update_ui(chatbot, history)
 
@@ -443,6 +423,7 @@ def json_args_return(kwargs, keys: list) -> list:
                 temp[i] = False
     return temp
 
+
 def replace_special_chars(file_name):
     # 除了中文外，该正则表达式匹配任何一个不是数字、字母、下划线、.、空格的字符，避免文件名有问题
     new_name = re.sub(r'[^\u4e00-\u9fa5\d\w\s\.\_]', '', file_name)
@@ -457,7 +438,8 @@ def long_name_processing(file_name):
         file_name: 文件名取材，如果是list，则取下标0，转换为str， 如果是str则取最多20个字符
     Returns: 返回处理过的文件名
     """
-    if type(file_name) is list: file_name = file_name[0]
+    if type(file_name) is list:
+        file_name = file_name[0]
     if len(file_name) > 50:
         if file_name.find('"""') != -1:
             temp = file_name.split('"""')[1].splitlines()
@@ -466,7 +448,11 @@ def long_name_processing(file_name):
                     file_name = replace_special_chars(i)
                     break
         else:
-            file_name = file_name[:20]
+            temp = file_name.splitlines()
+            for i in temp:
+                if i:
+                    file_name = replace_special_chars(i)
+                    break
     return file_name
 
 
@@ -477,39 +463,7 @@ def table_header_subscript(content: list):
     return 0  # 兜底
 
 
-def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, plugin_kwargs, chatbot, history):
-    """
-    Args:
-        gpt_response_collection: [输出， 输出]
-        inputs_show_user_array: [输出]
-        llm_kwargs: 调优参数
-        plugin_kwargs: 插件调优参数
-        chatbot: 对话组件
-        history: 对话历史
-    Returns: None
-    """
-    template_file, = json_args_return(plugin_kwargs, ['写入指定模版'])
-    gpt_response = gpt_response_collection[1::2]
-    chat_file_list = ''
-    test_case = []
-    file_name = long_name_processing(inputs_show_user_array)
-    for k in range(len(gpt_response)):
-        test_case_content = gpt_response[k].splitlines()
-        index = table_header_subscript(test_case_content)
-        gpt_response_split = test_case_content[index+1:]  # 过滤掉表头
-        for i in gpt_response_split:
-            if i.find('|') != -1:
-                test_case.append([func_box.clean_br_string(i) for i in i.split('|')[1:]])
-            elif i.find('｜') != -1:
-                test_case.append([func_box.clean_br_string(i) for i in i.split('｜')[1:]])
-            else:
-                func_box.通知机器人(f'脏数据过滤，这个不符合写入测试用例的条件 \n\n```\n\n{i}\n\n```\n\n```\n{gpt_response_split}\n```')
-    file_path = ExcelHandle(ipaddr=llm_kwargs['ipaddr'], temp_file=template_file).lpvoid_lpbuffe(test_case, filename=file_name)
-    chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, file_name=file_path.split("/")[-1])}\n\n'
-    chatbot.append(['Done', chat_file_list])
-    yield from toolbox.update_ui(chatbot, history)
-
-
+# <---------------------------------------插件用了都说好方法----------------------------------------->
 def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
     """
     Args:
@@ -536,7 +490,7 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
     return segments
 
 
-def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history, default_prompt: str = False, all_chat: bool = True):
+def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history, default_prompt: str = False):
     """
     Args:
         gpt_response_collection:  多线程GPT的返回结果
@@ -567,10 +521,6 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
             inputs_array.append(prompt.replace('{{{v}}}', kai_limit))
             inputs_show_user_array.append(you_say)
     yield from toolbox.update_ui(chatbot, history)
-    if all_chat:
-        inputs_show_user_array = inputs_array
-    else:
-        inputs_show_user_array = default_prompt + ': ' + gpt_response_collection[0::2]
     return inputs_array, inputs_show_user_array
 
 
@@ -587,9 +537,10 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
     """
     if len(inputs_array) == 1:
         # 折叠输出
-        if len(inputs_array[0]) > 200: inputs_show_user = \
-            inputs_array[0][:100]+f"\n\n{func_box.html_tag_color('......超过200个字符折叠......')}\n\n"+inputs_array[0][-100:]
-        else: inputs_show_user = inputs_array[0]
+        if len(inputs_array[0]) > 200:
+            inputs_show_user = inputs_array[0][:100]+f"\n\n{func_box.html_tag_color('......超过200个字符折叠......')}\n\n"+inputs_array[0][-100:]
+        else:
+            inputs_show_user = inputs_array[0]
         gpt_say = yield from crazy_utils.request_gpt_model_in_new_thread_with_ui_alive(
             inputs=inputs_array[0], inputs_show_user=inputs_show_user,
             llm_kwargs=llm_kwargs, chatbot=chatbot, history=[],
@@ -618,6 +569,77 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
     return gpt_response_collection
 
 
+# <---------------------------------------写入文件方法----------------------------------------->
+def file_classification_to_dict(gpt_response_collection):
+    """
+    接收gpt多线程的返回数据，将输入相同的作为key, gpt返回以列表形式添加到对应的key中，主要是为了区分不用文件的输入
+    Args:
+        gpt_response_collection: 多线程GPT的返回耶
+    Returns: {'文件': [结果1， 结果2...], '文件2': [结果1， 结果2...]}
+    """
+    file_classification = {}
+    for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
+        file_classification[you_say] = []
+    for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
+        file_classification[you_say].append(inputs)
+    return file_classification
+
+
+def batch_recognition_images_to_md(img_list, ipaddr):
+    """
+    Args: 将图片批量识别然后写入md文件
+        img_list: 图片地址list
+        ipaddr: 用户所属标识
+    Returns: [文件list]
+    """
+    temp_list = []
+    for img in img_list:
+        if os.path.exists(img):
+            img_content, img_result = ocr_tools.Paddle_ocr_select(ipaddr=ipaddr, trust_value=True
+                                                                  ).img_def_content(img_path=img)
+            temp_file = os.path.join(func_box.users_path, ipaddr, 'ocr_to_md', img_content.splitlines()[0][:20]+'.md')
+            with open(temp_file, mode='w') as f:
+                f.write(f"{func_box.html_view_blank(temp_file)}\n\n"+img_content)
+            temp_list.append(temp_list)
+        else:
+            print(img, '文件路径不存在')
+    return temp_list
+
+
+def write_test_cases(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history):
+    """
+    Args:
+        gpt_response_collection: [输入文件标题， 输出]
+        llm_kwargs: 调优参数
+        plugin_kwargs: 插件调优参数
+        chatbot: 对话组件
+        history: 对话历史
+    Returns: None
+    """
+    template_file, = json_args_return(plugin_kwargs, ['写入指定模版'])
+    file_classification = file_classification_to_dict(gpt_response_collection)
+    chat_file_list = ''
+    chatbot.append(['Done', chat_file_list])
+    for file_name in file_classification:
+        test_case = []
+        for value in file_classification[file_name]:
+            test_case_content = value.splitlines()
+            index = table_header_subscript(test_case_content)
+            gpt_response_split = test_case_content[index+1:]  # 过滤掉表头
+            for i in gpt_response_split:
+                if i.find('|') != -1:
+                    test_case.append([func_box.clean_br_string(i) for i in i.split('|')[1:]])
+                elif i.find('｜') != -1:
+                    test_case.append([func_box.clean_br_string(i) for i in i.split('｜')[1:]])
+                else:
+                    func_box.通知机器人(f'脏数据过滤，这个不符合写入测试用例的条件 \n\n```\n\n{i}\n\n```\n\n```\n{gpt_response_split}\n```')
+        file_path = ExcelHandle(ipaddr=llm_kwargs['ipaddr'], temp_file=template_file).lpvoid_lpbuffe(test_case, filename=long_name_processing(file_name))
+        chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path)}\n\n'
+        chatbot[-1] = (['Done', chat_file_list])
+        yield from toolbox.update_ui(chatbot, history)
+    return
+
+
 def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
     """
     Args: 将输出结果写入md，并转换为流程图
@@ -628,14 +650,15 @@ def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
     Returns:
         None
     """
-    inputs_count = ''
     chatbot.append([None, f'🏃🏻‍正在努力将Markdown转换为流程图~'])
-    for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
-        yield from toolbox.update_ui(chatbot=chatbot, history=history)
-        inputs_count += str(inputs).replace('```', '') # 去除头部和尾部的代码块, 避免流程图堆在一块
-
-    md, html = Utils().markdown_to_flow_chart(data=inputs_count, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(you_say))
-    chatbot.append(("View: " + func_box.html_view_blank(md), '\n\n--- \n\n View: ' + func_box.html_view_blank(html)))
+    file_classification = file_classification_to_dict(gpt_response_collection)
+    for file_name in file_classification:
+        inputs_count = ''
+        for value in file_classification[file_name]:
+            inputs_count += str(value).replace('```', '') # 去除头部和尾部的代码块, 避免流程图堆在一块
+        md, html = Utils().markdown_to_flow_chart(data=inputs_count, hosts=llm_kwargs['ipaddr'],
+                                                  file_name=long_name_processing(file_name))
+        chatbot.append((None, "View: " + func_box.html_view_blank(md)+'\n\n--- \n\n View: ' + func_box.html_view_blank(html)))
     # f'tips: 双击空白处可以放大～\n\n' f'{func_box.html_iframe_code(html_file=html)}'  无用，不允许内嵌网页了
     yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
 
@@ -650,19 +673,23 @@ def result_written_to_markdwon(gpt_response_collection, llm_kwargs, chatbot, his
     Returns:
         None
     """
-    inputs_all = ''
-    for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
-        inputs_all += inputs
-    md = Utils().write_markdown(data=inputs_all, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(gpt_response_collection[0]))
-    chatbot.append((None, f'markdown已写入文件，下次可以直接提交markdown文件，就可以节省tomarkdown的时间啦 {func_box.html_view_blank(md)}'))
-    yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
+    file_classification = file_classification_to_dict(gpt_response_collection)
+    for file_name in file_classification:
+        inputs_all = ''
+        for value in file_classification[file_name]:
+            inputs_all += value
+        md = Utils().write_markdown(data=inputs_all, hosts=llm_kwargs['ipaddr'],
+                                    file_name=long_name_processing(file_name))
+        chatbot.append((None, f'markdown已写入文件，下次可以直接提交markdown文件，就可以节省tomarkdown的时间啦 {func_box.html_view_blank(md)}'))
+        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
 
 
-
+# <---------------------------------------一些Tips----------------------------------------->
 previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传，多个文件请上传压缩包，'\
                   f'{func_box.html_tag_color("如果是网络文件或金山文档链接，请粘贴到输入框")}, 然后再次点击该插件'\
                   f'多个文件{func_box.html_tag_color("请使用换行或空格区分")}'
 
 
 if __name__ == '__main__':
-    print(XmindHandle().xmind_2_md('/Users/kilig/Desktop/material/web端测试用例111.xmind'))
+    print(long_name_processing('12312345556'))
+    print(file_classification_to_dict(['312321', '3123213123', '312321', '1231231213233', '312123123', '321321123']))

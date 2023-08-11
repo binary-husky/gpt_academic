@@ -180,7 +180,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     assert len(inputs_array) == len(history_array)
     assert len(inputs_array) == len(sys_prompt_array)
     if max_workers == -1: # 读取配置文件
-        try: max_workers = llm_kwargs.get('max_workers', 3)
+        try: max_workers = llm_kwargs.get('worker_num', 3)
         except: max_workers = 8
         if max_workers <= 0: max_workers = 3
     # 屏蔽掉 chatglm的多线程，可能会导致严重卡顿
@@ -282,7 +282,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                                                                 '.....').replace('$', '.')+"`... ]"
             observe_win.append(print_something_really_funny)
         # 在前端打印些好玩的东西
-        stat_str = ''.join([f'`{inputs_show_user_array[thread_index][0:5]}...{inputs_show_user_array[thread_index][-5:]}`\t'
+        stat_str = ''.join([f'`{inputs_show_user_array[thread_index][0:5]}...{inputs_show_user_array[thread_index][-5:]}_{thread_index}`\t'
                             f'`{mutable[thread_index][2]}`: {obs}\n\n'
                             if not done else f'`{mutable[thread_index][2]}`\n\n'
                             for thread_index, done, obs in zip(range(len(worker_done)), worker_done, observe_win)])
@@ -668,7 +668,13 @@ class knowledge_archive_interface():
         file_dict = {ds._dict[k].metadata['source']: {vs_id :ds._dict[k].metadata['filetype']} for k in ds._dict}
         return self, file_dict
 
-    def answer_with_archive_by_id(self, txt, vs_id, VECTOR_SEARCH_SCORE_THRESHOLD=0, VECTOR_SEARCH_TOP_K=4, CHUNK_SIZE=521):
+    def answer_with_archive_by_id(self, txt, vs_id, llm_kwargs=None, VECTOR_SEARCH_SCORE_THRESHOLD=0,
+                                  VECTOR_SEARCH_TOP_K=4, CHUNK_SIZE=521):
+        if llm_kwargs:
+            vector_config = llm_kwargs.get('vector')
+            VECTOR_SEARCH_SCORE_THRESHOLD = vector_config['score'],
+            VECTOR_SEARCH_TOP_K = vector_config['top-k'],
+            CHUNK_SIZE = vector_config['size']
         self.kai_path = os.path.join(self.vs_root_path, vs_id)
         if not os.path.exists(self.kai_path):
             return '', '', False
@@ -682,6 +688,7 @@ class knowledge_archive_interface():
             text2vec=self.get_chinese_text2vec(),
         )
         return resp, prompt, True
+
 
 def try_install_deps(deps):
     for dep in deps:
