@@ -212,7 +212,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     sys_prompt=sys_prompt, observe_window=mutable[index], console_slience=True
                 )
                 mutable[index][2] = "已成功"
-                if 'raise ConnectionAbortedError' in gpt_say:
+                if 'raise ConnectionAbortedError jsokf' in gpt_say:  # 超出Tokens限制错误标记位
                     mutable[index][2] = "!!超出Tokens限制，捕获了已生成的回答，但回答结尾会损失部分数据!!"
                 return gpt_say
             except ConnectionAbortedError as token_exceeded_error:
