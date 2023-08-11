@@ -212,6 +212,8 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     sys_prompt=sys_prompt, observe_window=mutable[index], console_slience=True
                 )
                 mutable[index][2] = "已成功"
+                if 'raise ConnectionAbortedError' in gpt_say:
+                    mutable[index][2] = "!!超出Tokens限制，捕获了已生成的回答，但回答结尾会损失部分数据!!"
                 return gpt_say
             except ConnectionAbortedError as token_exceeded_error:
                 # 【第二种情况】：Token溢出，
@@ -276,8 +278,8 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         # 在前端打印些好玩的东西
         for thread_index, _ in enumerate(worker_done):
             print_something_really_funny = "[ ...`"+mutable[thread_index][0][-scroller_max_len:].\
-                replace('\n', '').replace('```', '...').replace(
-                    ' ', '.').replace('<br/>', '.....').replace('$', '.')+"`... ]"
+                replace('\n', '').replace('```', '...').replace('<br/>',
+                                                                '.....').replace('$', '.')+"`... ]"
             observe_win.append(print_something_really_funny)
         # 在前端打印些好玩的东西
         stat_str = ''.join([f'`{inputs_show_user_array[thread_index][0:5]}...{inputs_show_user_array[thread_index][-5:]}`\t'

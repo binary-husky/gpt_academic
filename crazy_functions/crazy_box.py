@@ -153,7 +153,7 @@ class Utils:
 class ExcelHandle:
 
     def __init__(self, ipaddr, temp_file=''):
-        self.user_path = os.path.join(func_box.base_path, 'private_upload', ipaddr, 'test_case')
+        self.user_path = os.path.join(func_box.base_path, 'private_upload', ipaddr, 'test_case', func_box.created_atime())
         os.makedirs(f'{self.user_path}', exist_ok=True)
         if os.path.exists(temp_file):
             self.template_excel = temp_file
@@ -406,18 +406,18 @@ def file_extraction_intype(file_routing, file_limit, chatbot, history):
     """
     for file_path in file_routing:
         if file_path.endswith('pdf'):
-            chatbot.append([func_box.html_view_blank(file_path) + "\t本地文件pdf正在处理\n\n", None])
+            chatbot.append([file_path + "\t本地文件pdf正在处理\n\n", None])
             file_content, _ = crazy_utils.read_and_clean_pdf_text(file_path)
             title = long_name_processing(file_content)
             content = "".join(file_content)
             file_limit.extend([title, content])
         elif file_path.endswith('xmind'):
             file_content, _path = XmindHandle().xmind_2_md(pathSource=file_path)
-            chatbot.append([func_box.html_view_blank(file_path) + "\t本地文件xmind正在处理\n\n", None])
+            chatbot.append([file_path + "\t本地文件xmind正在处理\n\n", None])
             title = long_name_processing(file_content)
             file_limit.extend([title, file_content])
         else:
-            chatbot.append([func_box.html_view_blank(file_path) + "\t本地文件正在处理\n\n", None])
+            chatbot.append([file_path + "\t本地文件正在处理\n\n", None])
             with open(file_path, mode='r') as f:
                 file_content = f.read()
                 title = file_content.splitlines()[0][:20]
