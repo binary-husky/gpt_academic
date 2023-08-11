@@ -111,13 +111,9 @@ class SqliteHandle:
         self.__cursor.execute(f"ALTER TABLE `{old}` RENAME TO `{new}`;")
         self.__connect.commit()
 
-    def find_prompt_result(self, name, tabs='prompt_127.0.0.1'):
+    def find_prompt_result(self, name):
         query = self.__cursor.execute(f"SELECT result FROM `{self.__table}` WHERE prompt LIKE '{name}'").fetchall()
-        if query == []:
-            query = self.__cursor.execute(f"SELECT result FROM `prompt_{tabs}_sys` WHERE prompt LIKE '{name}'").fetchall()
-            return query[0][0]
-        else:
-            return query[0][0]
+        return query[0][0]
 
     def update_value(self, new_source):
         query = f"UPDATE {self.__table} SET source=source || ' ' || ?"

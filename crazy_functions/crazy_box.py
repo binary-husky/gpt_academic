@@ -477,17 +477,18 @@ def table_header_subscript(content: list):
     return 0  # 兜底
 
 
-def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history, temp_file):
+def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, plugin_kwargs, chatbot, history):
     """
     Args:
         gpt_response_collection: [输出， 输出]
         inputs_show_user_array: [输出]
         llm_kwargs: 调优参数
+        plugin_kwargs: 插件调优参数
         chatbot: 对话组件
         history: 对话历史
-        temp_file: 指定写入模版
     Returns: None
     """
+    template_file, = json_args_return(plugin_kwargs, ['写入指定模版'])
     gpt_response = gpt_response_collection[1::2]
     chat_file_list = ''
     test_case = []
@@ -503,7 +504,7 @@ def write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs
                 test_case.append([func_box.clean_br_string(i) for i in i.split('｜')[1:]])
             else:
                 func_box.通知机器人(f'脏数据过滤，这个不符合写入测试用例的条件 \n\n```\n\n{i}\n\n```\n\n```\n{gpt_response_split}\n```')
-    file_path = ExcelHandle(ipaddr=llm_kwargs['ipaddr'], temp_file=temp_file).lpvoid_lpbuffe(test_case, filename=file_name)
+    file_path = ExcelHandle(ipaddr=llm_kwargs['ipaddr'], temp_file=template_file).lpvoid_lpbuffe(test_case, filename=file_name)
     chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, file_name=file_path.split("/")[-1])}\n\n'
     chatbot.append(['Done', chat_file_list])
     yield from toolbox.update_ui(chatbot, history)
@@ -550,11 +551,15 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     inputs_array = []
     inputs_show_user_array = []
     kwargs_prompt, prompt_cls = json_args_return(plugin_kwargs, ['预期产出提示词', '提示词分类'])
+    if not prompt_cls or prompt_cls == '个人':  # 当提示词分类获取不到或个人时，使用个人prompt
+        prompt_cls_tab = f'prompt_{llm_kwargs["ipaddr"]}'
+    else:
+        prompt_cls_tab = f'prompt_{prompt_cls}_sys'
     if default_prompt: kwargs_prompt = default_prompt
-    chatbot.append([f'接下来使用的Prompt是 {func_box.html_tag_color(kwargs_prompt)} ，'
-                     f'你可以保存一个同名的Prompt，或在{func_box.html_tag_color("自定义插件参数")}中指定另一个Prmopt哦～', None])
+    chatbot.append([f'接下来使用的Prompt是{func_box.html_tag_color(prompt_cls)}分类下的：{func_box.html_tag_color(kwargs_prompt)}'
+                    f', 你可以在{func_box.html_tag_color("自定义插件参数")}中指定另一个Prompt哦～', None])
     time.sleep(1)
-    prompt = prompt_generator.SqliteHandle(table=f'prompt_{llm_kwargs["ipaddr"]}').find_prompt_result(kwargs_prompt, prompt_cls)
+    prompt = prompt_generator.SqliteHandle(table=prompt_cls_tab).find_prompt_result(kwargs_prompt)
     for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
         content_limit = yield from split_content_limit(inputs, llm_kwargs, chatbot, history)
         for limit in content_limit:

@@ -125,9 +125,9 @@ def KDocs_转接口测试用例(file_limit, llm_kwargs, plugin_kwargs, chatbot, 
     gpt_response_collection = yield from crazy_box.submit_multithreaded_tasks(inputs_array, inputs_show_user_array,
                                                                               llm_kwargs, chatbot, history,
                                                                               plugin_kwargs)
-    template_file, = crazy_box.json_args_return(plugin_kwargs, ['写入指定模版'])
-    yield from crazy_box.write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history,
-                                          temp_file=template_file)
+
+    yield from crazy_box.write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, plugin_kwargs,
+                                          chatbot, history)
     yield from update_ui(chatbot, history, '插件执行成功')
 
 
@@ -147,9 +147,8 @@ def KDocs_转客户端测试用例(link_limit, llm_kwargs, plugin_kwargs, chatbo
                                                                               llm_kwargs, chatbot, history,
                                                                               plugin_kwargs)
 
-    template_file, = crazy_box.json_args_return(plugin_kwargs, ['写入指定模版'])
-    yield from crazy_box.write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, chatbot, history,
-                                          temp_file=template_file)
+    yield from crazy_box.write_test_cases(gpt_response_collection, inputs_show_user_array, llm_kwargs, plugin_kwargs,
+                                          chatbot, history)
     yield from update_ui(chatbot, history, '插件执行成功')
 
 
