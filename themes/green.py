@@ -56,7 +56,7 @@ def adjust_theme():
             button_primary_background_fill_hover="*primary_400",
             button_primary_border_color="*primary_500",
             button_primary_border_color_dark="*primary_600",
-            button_primary_text_color="wihte",
+            button_primary_text_color="white",
             button_primary_text_color_dark="white",
             button_secondary_background_fill="*neutral_100",
             button_secondary_background_fill_hover="*neutral_50",
