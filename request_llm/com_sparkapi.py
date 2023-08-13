@@ -1,4 +1,4 @@
-import _thread as thread
+from toolbox import get_conf
 import base64
 import datetime
 import hashlib
@@ -10,8 +10,8 @@ from datetime import datetime
 from time import mktime
 from urllib.parse import urlencode
 from wsgiref.handlers import format_date_time
-
 import websocket
+import threading, time
 
 timeout_bot_msg = '[Local Message] Request timeout. Network error.'
 
@@ -37,13 +37,9 @@ class Ws_Param(object):
         signature_origin += "GET " + self.path + " HTTP/1.1"
 
         # 进行hmac-sha256进行加密
-        signature_sha = hmac.new(self.APISecret.encode('utf-8'), signature_origin.encode('utf-8'),
-                                 digestmod=hashlib.sha256).digest()
-
+        signature_sha = hmac.new(self.APISecret.encode('utf-8'), signature_origin.encode('utf-8'), digestmod=hashlib.sha256).digest()
         signature_sha_base64 = base64.b64encode(signature_sha).decode(encoding='utf-8')
-
         authorization_origin = f'api_key="{self.APIKey}", algorithm="hmac-sha256", headers="host date request-line", signature="{signature_sha_base64}"'
-
         authorization = base64.b64encode(authorization_origin.encode('utf-8')).decode(encoding='utf-8')
 
         # 将请求的鉴权参数组合为字典
@@ -58,18 +54,84 @@ class Ws_Param(object):
         return url
 
 
-# 收到websocket错误的处理
-def on_error(ws, error):
-    print("### error:", error)
+
+class SparkRequestInstance():
+    def __init__(self):
+        XFYUN_APPID, XFYUN_API_SECRET, XFYUN_API_KEY = get_conf('XFYUN_APPID', 'XFYUN_API_SECRET', 'XFYUN_API_KEY')
+
+        self.appid = XFYUN_APPID
+        self.api_secret = XFYUN_API_SECRET
+        self.api_key = XFYUN_API_KEY
+        self.gpt_url = "ws://spark-api.xf-yun.com/v1.1/chat"
+        self.time_to_yield_event = threading.Event()
+        self.time_to_exit_event = threading.Event()
+
+        self.result_buf = ""
+
+    def generate(self, inputs, llm_kwargs, history, system_prompt):
+        llm_kwargs = llm_kwargs
+        history = history
+        system_prompt = system_prompt
+        import _thread as thread
+        thread.start_new_thread(self.create_blocking_request, (inputs, llm_kwargs, history, system_prompt))
+        while True:
+            self.time_to_yield_event.wait(timeout=1)
+            if self.time_to_yield_event.is_set():
+                yield self.result_buf
+            if self.time_to_exit_event.is_set():
+                return self.result_buf
 
 
-# 收到websocket关闭的处理
-def on_close(ws):
-    print("### closed ###")
+    def create_blocking_request(self, inputs, llm_kwargs, history, system_prompt):
+        wsParam = Ws_Param(self.appid, self.api_key, self.api_secret, self.gpt_url)
+        websocket.enableTrace(False)
+        wsUrl = wsParam.create_url()
 
+        # 收到websocket连接建立的处理
+        def on_open(ws):
+            import _thread as thread
+            thread.start_new_thread(run, (ws,))
 
+        def run(ws, *args):
+            data = json.dumps(gen_params(ws.appid, *ws.all_args))
+            ws.send(data)
 
-def generate_message_payload(inputs, llm_kwargs, history, system_prompt, stream):
+        # 收到websocket消息的处理
+        def on_message(ws, message):
+            data = json.loads(message)
+            code = data['header']['code']
+            if code != 0:
+                print(f'请求错误: {code}, {data}')
+                ws.close()
+                self.time_to_exit_event.set()
+            else:
+                choices = data["payload"]["choices"]
+                status = choices["status"]
+                content = choices["text"][0]["content"]
+                ws.content += content
+                self.result_buf += content
+                if status == 2:
+                    ws.close()
+                    self.time_to_exit_event.set()
+            self.time_to_yield_event.set()
+
+        # 收到websocket错误的处理
+        def on_error(ws, error):
+            print("error:", error)
+            self.time_to_exit_event.set()
+
+        # 收到websocket关闭的处理
+        def on_close(ws):
+            self.time_to_exit_event.set()
+
+        # websocket
+        ws = websocket.WebSocketApp(wsUrl, on_message=on_message, on_error=on_error, on_close=on_close, on_open=on_open)
+        ws.appid = self.appid
+        ws.content = ""
+        ws.all_args = (inputs, llm_kwargs, history, system_prompt)
+        ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE})
+
+def generate_message_payload(inputs, llm_kwargs, history, system_prompt):
     conversation_cnt = len(history) // 2
     messages = [{"role": "system", "content": system_prompt}]
     if conversation_cnt:
@@ -94,7 +156,7 @@ def generate_message_payload(inputs, llm_kwargs, history, system_prompt, stream)
     return messages
 
 
-def gen_params(appid, inputs, llm_kwargs, history, system_prompt, stream):
+def gen_params(appid, inputs, llm_kwargs, history, system_prompt):
     """
     通过appid和用户的提问来生成请参数
     """
@@ -106,75 +168,17 @@ def gen_params(appid, inputs, llm_kwargs, history, system_prompt, stream):
         "parameter": {
             "chat": {
                 "domain": "general",
+                "temperature": llm_kwargs["temperature"],
                 "random_threshold": 0.5,
-                "max_tokens": 2048,
+                "max_tokens": 4096,
                 "auditing": "default"
             }
         },
         "payload": {
             "message": {
-                "text": generate_message_payload(inputs, llm_kwargs, history, system_prompt, stream)
+                "text": generate_message_payload(inputs, llm_kwargs, history, system_prompt)
             }
         }
     }
     return data
 
-# 收到websocket消息的处理
-def on_message(ws, message):
-    print(message)
-    data = json.loads(message)
-    code = data['header']['code']
-    if code != 0:
-        print(f'请求错误: {code}, {data}')
-        ws.close()
-    else:
-        choices = data["payload"]["choices"]
-        status = choices["status"]
-        content = choices["text"][0]["content"]
-        ws.content += content
-        print(content, end='')
-        if status == 2:
-            ws.close()
-
-def commit_request(appid, api_key, api_secret, gpt_url, question):
-    inputs = question
-    llm_kwargs = {}
-    history = []
-    system_prompt = ""
-    stream = True
-
-    wsParam = Ws_Param(appid, api_key, api_secret, gpt_url)
-    websocket.enableTrace(False)
-    wsUrl = wsParam.create_url()
-
-    # 收到websocket连接建立的处理
-    def on_open(ws):
-        thread.start_new_thread(run, (ws,))
-
-    def run(ws, *args):
-        data = json.dumps(gen_params(ws.appid, *ws.all_args))
-        ws.send(data)
-
-    ws = websocket.WebSocketApp(wsUrl, on_message=on_message, on_error=on_error, on_close=on_close, on_open=on_open)
-    ws.appid = appid
-    ws.content = ""
-    
-    ws.all_args = (inputs, llm_kwargs, history, system_prompt, stream)
-    ws.run_forever(sslopt={"cert_reqs": ssl.CERT_NONE})
-
-    return ws.content
-
-
-
-"""
-    1、配置好python、pip的环境变量
-    2、执行 pip install websocket 与 pip3 install websocket-client
-    3、去控制台https://console.xfyun.cn/services/cbm获取appid等信息填写即可
-"""
-if __name__ == "__main__":
-    # 测试时候在此处正确填写相关信息即可运行
-    commit_request(appid="929e7d53",
-         api_secret="NmFjNGE1ZDNhZWE2MzBkYzg5ZjNkZDcx",
-         api_key="896f9c5cf1b2b8669f523507f96e6c99",
-         gpt_url="ws://spark-api.xf-yun.com/v1.1/chat",
-         question="你是谁？你能做什么")

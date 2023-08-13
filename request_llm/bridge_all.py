@@ -68,6 +68,10 @@ get_token_num_gpt35 = lambda txt: len(tokenizer_gpt35.encode(txt, disallowed_spe
 get_token_num_gpt4 = lambda txt: len(tokenizer_gpt4.encode(txt, disallowed_special=()))
 
 
+# 开始初始化模型
+AVAIL_LLM_MODELS, LLM_MODEL = get_conf("AVAIL_LLM_MODELS", "LLM_MODEL")
+AVAIL_LLM_MODELS = AVAIL_LLM_MODELS + [LLM_MODEL]
+# -=-=-=-=-=-=- 以下这部分是最早加入的最稳定的模型 -=-=-=-=-=-=-
 model_info = {
     # openai
     "gpt-3.5-turbo": {
@@ -164,9 +168,7 @@ model_info = {
 
 }
 
-
-AVAIL_LLM_MODELS, LLM_MODEL = get_conf("AVAIL_LLM_MODELS", "LLM_MODEL")
-AVAIL_LLM_MODELS = AVAIL_LLM_MODELS + [LLM_MODEL]
+# -=-=-=-=-=-=- 以下部分是新加入的模型，可能附带额外依赖 -=-=-=-=-=-=-
 if "claude-1-100k" in AVAIL_LLM_MODELS or "claude-2" in AVAIL_LLM_MODELS:
     from .bridge_claude import predict_no_ui_long_connection as claude_noui
     from .bridge_claude import predict as claude_ui
@@ -367,6 +369,24 @@ if "chatgpt_website" in AVAIL_LLM_MODELS:   # 接入一些逆向工程https://gi
         })
     except:
         print(trimmed_format_exc())
+if "spark" in AVAIL_LLM_MODELS:   # 接入一些逆向工程https://github.com/acheong08/ChatGPT-to-API/
+    try:
+        from .bridge_spark import predict_no_ui_long_connection as spark_noui
+        from .bridge_spark import predict as spark_ui
+        model_info.update({
+            "spark": {
+                "fn_with_ui": spark_ui,
+                "fn_without_ui": spark_noui,
+                "endpoint": None,
+                "max_token": 4096,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            }
+        })
+    except:
+        print(trimmed_format_exc())
+
+
 
 def LLM_CATCH_EXCEPTION(f):
     """
