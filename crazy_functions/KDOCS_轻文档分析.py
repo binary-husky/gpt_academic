@@ -12,10 +12,9 @@ from crazy_functions.crazy_utils import get_files_from_everything, read_and_clea
 import traceback
 
 
-def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, file_types):
     links = crazy_box.Utils().split_startswith_txt(link_limit)
     files = [file for file in link_limit.splitlines() if os.path.exists(file)]
-    file_types = ['md', 'txt', 'pdf', 'xmind', 'ap轻文档']
     if not links and not files:
         devs_document, = get_conf('devs_document')
         chatbot.append((None, f'输入框空空如也？{link_limit}\n\n'
@@ -78,22 +77,23 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
     for t in file_types:
         for f in files:
             _, file_routing, _ = get_files_from_everything(f, t, )
-            yield from crazy_box.file_extraction_intype(file_routing, file_limit, chatbot, history)
+            yield from crazy_box.file_extraction_intype(file_routing, file_limit, chatbot, history, plugin_kwargs)
     yield from update_ui(chatbot, history)
-    return file_limit
-
-
-
-def KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port, to_kdocs=True):
-    if to_kdocs:
-        file_limit = yield from Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt,
-                                                     web_port)
-    else:
-        file_limit = link_limit
     if not file_limit:
         chatbot.append([None, f'{func_box.html_tag_color("无法获取需求文档内容，暂停运行!!!!")}'])
         yield from update_ui(chatbot=chatbot, history=history, msg='无法获取需求文档内容，暂停运行')
         return
+    else:
+        return file_limit
+
+
+
+def KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port, to_kdocs=True):
+    file_types = ['md', 'txt', 'pdf', 'xmind', 'ap轻文档']
+    if to_kdocs:
+        file_limit = yield from Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, file_types)
+    else:
+        file_limit = link_limit
     kwargs_to_mark, = crazy_box.json_args_return(plugin_kwargs, ['格式化文档提示词'])
     if kwargs_to_mark:
         split_content_limit = yield from crazy_box.input_output_processing(file_limit, llm_kwargs,
@@ -158,9 +158,8 @@ def KDocs_需求分析问答(link_limit, llm_kwargs, plugin_kwargs, chatbot, his
         chatbot.append([None, f'{func_box.html_tag_color("多线程一个都没有通过，暂停运行!!!!")}'])
         yield from update_ui(chatbot=chatbot, history=history, msg='多线程一个都没有通过，暂停运行')
         return
-    split_content_limit = yield from crazy_box.input_output_processing(gpt_response_collection,
-                                                                                        llm_kwargs, plugin_kwargs,
-                                                                                        chatbot, history)
+    split_content_limit = yield from crazy_box.input_output_processing(gpt_response_collection, llm_kwargs,
+                                                                       plugin_kwargs, chatbot, history)
     inputs_array, inputs_show_user_array = split_content_limit
     gpt_response_collection = yield from crazy_box.submit_multithreaded_tasks(inputs_array, inputs_show_user_array,
                                                                               llm_kwargs, chatbot, history,
@@ -188,3 +187,19 @@ def KDocs_文档提取测试点(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
         chatbot.append([None, f'{func_box.html_tag_color("多线程一个都没有通过，暂停运行!!!!")}'])
         yield from update_ui(chatbot=chatbot, history=history, msg='多线程一个都没有通过，暂停运行')
         return
+
+
+@CatchException
+def KDocs_测试用例检查优化(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    file_types = ['xlsx', 'xmind']
+    file_limit = yield from Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, file_types)
+
+    split_content_limit = yield from crazy_box.input_output_processing(file_limit, llm_kwargs, plugin_kwargs,
+                                                                       chatbot, history)
+
+    inputs_array, inputs_show_user_array = split_content_limit
+    gpt_response_collection = yield from crazy_box.submit_multithreaded_tasks(inputs_array, inputs_show_user_array,
+                                                                              llm_kwargs, chatbot, history, plugin_kwargs)
+
+    yield from crazy_box.supplementary_test_case(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history)
+    yield from update_ui(chatbot, history, '插件执行成功')

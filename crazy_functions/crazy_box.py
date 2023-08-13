@@ -13,6 +13,7 @@ from typing import Dict
 import typing as typing
 from comm_tools import func_box, ocr_tools, toolbox, prompt_generator, Langchain_cn
 from openpyxl import load_workbook
+from openpyxl.styles import PatternFill
 from crazy_functions import crazy_utils
 from request_llm import bridge_all
 from crazy_functions import crzay_kingsoft
@@ -116,6 +117,22 @@ class Utils:
             f.write(data)
         return md_file
 
+    def md_2_html(self, data, hosts, file_name):
+        """
+        Args: 将data写入md文件
+            data: 数据
+            hosts: 用户标识
+            file_name: 另取文件名
+        Returns: 写入的文件地址
+        """
+        data = toolbox.markdown_convertion(data)
+        user_path = os.path.join(func_box.users_path, hosts, 'view_html')
+        os.makedirs(user_path, exist_ok=True)
+        md_file = os.path.join(user_path, f"{file_name}.html")
+        with open(file=md_file, mode='w') as f:
+            f.write(data)
+        return md_file
+
     def markdown_to_flow_chart(self, data, hosts, file_name):
         """
         Args: 调用markmap-cli
@@ -152,9 +169,11 @@ class Utils:
 
 class ExcelHandle:
 
-    def __init__(self, ipaddr, temp_file=''):
+    def __init__(self, ipaddr='temp', temp_file=''):
         self.user_path = os.path.join(func_box.base_path, 'private_upload', ipaddr, 'test_case', func_box.created_atime())
         os.makedirs(f'{self.user_path}', exist_ok=True)
+        if not temp_file:
+            self.template_excel = os.path.join(func_box.base_path, 'docs/template/客户端测试用例模版.xlsx')
         if os.path.exists(temp_file):
             self.template_excel = temp_file
         elif temp_file.startswith('http'):
@@ -164,21 +183,18 @@ class ExcelHandle:
         if not self.template_excel:
             self.template_excel = os.path.join(func_box.base_path, 'docs/template/客户端测试用例模版.xlsx')
 
-    def lpvoid_lpbuffe(self, data_list: list, filename='', decs=''):
+    def lpvoid_lpbuffe(self, data_list: list, filename='', decs='', sheet='测试要点'):
         # 加载现有的 Excel 文件
         workbook = load_workbook(self.template_excel)
         # 选择要操作的工作表, 默认是测试要点
-        if '测试要点' in workbook.sheetnames:
-            worksheet = workbook['测试要点']
+        if sheet in workbook.sheetnames:
+            worksheet = workbook[sheet]
         else:
-            worksheet = workbook.create_sheet('测试要点')
-        if '说明' in workbook.sheetnames:
-            decs_sheet = workbook['说明']
-        else:
-            decs_sheet = workbook.create_sheet('说明')
-        decs_sheet['C2'] = decs
+            worksheet = workbook.create_sheet(sheet)
         # 定义起始行号
-        start_row = 4
+        start_row = find_index_inlist(self.read_as_dict()['测试要点'], ['操作步骤', '前置条件', '预期结果']) + 2
+        # 创建一个黄色的填充样式
+        fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
         # 遍历数据列表
         for row_data in data_list:
             # 写入每一行的数据到指定的单元格范围
@@ -186,9 +202,13 @@ class ExcelHandle:
                 cell = worksheet.cell(row=start_row, column=col_num)
                 try:
                     cell.value = str(value).strip()
+                    # 判断 value 是否为 '插件补充的用例'
+                    if '插件补充的用例' == str(value):
+                        cell.fill = fill  # 设置单元格的填充样式为黄色
                 except Exception:
                     print(row_data, value)
-                    func_box.通知机器人(error=f'写入excel错误啦\n\n```\n\n{row_data}\n\n{value}\n\n```\n\n')
+                    func_box.通知机器人(error=f'写入excel错误啦\n\n```\n\n{row_data}\n\n{value}\n\n```'
+                                              f'\n\n```\n\n{toolbox.trimmed_format_exc()}```\n\n')
             # 增加起始行号
             start_row += 1
         # 保存 Excel 文件
@@ -199,6 +219,20 @@ class ExcelHandle:
         workbook.save(test_case_path)
         return test_case_path
 
+    def read_as_dict(self):
+        workbook = load_workbook(self.template_excel)
+        data_dict = {}
+        # 遍历每个工作表
+        for sheet_name in workbook.sheetnames:
+            sheet = workbook[sheet_name]
+            sheet_data = []
+            # 遍历每一行
+            for row in sheet.iter_rows(values_only=True):
+                row = tuple(x for x in row if x is not None and x != row[-1])
+                sheet_data.append(row)
+            # 将工作表名作为字典的键，行数据作为值
+            data_dict[sheet_name] = sheet_data
+        return data_dict
 
 class XmindHandle():
 
@@ -265,6 +299,22 @@ def if_kdocs_url_isap(url):
     if 'otl' in kdocs.file_info_parm['fname']:
         return True
     return False
+
+
+def find_index_inlist(data_list: list, search_terms: list) -> int:
+    """ 在data_list找到符合search_terms字符串，找到后直接返回下标
+    Args:
+        data_list: list数据，最多往里面找两层
+        search_terms: list数据，符合一个就返回数据
+    Returns: 对应的下标
+    """
+    for i, sublist in enumerate(data_list):
+        if any(term in str(sublist) for term in search_terms):
+            return i
+        for j, item in enumerate(sublist):
+            if any(term in str(item) for term in search_terms):
+                return i
+    return 0  # 如果没有找到匹配的元素，则返回初始坐标
 
 
 def get_docs_content(url, image_processing=False):
@@ -376,7 +426,7 @@ def get_kdocs_from_everything(txt, type='', ipaddr='temp'):
     return success, file_manifest, project_folder
 
 
-def file_extraction_intype(file_routing, file_limit, chatbot, history):
+def file_extraction_intype(file_routing, file_limit, chatbot, history, plugin_kwargs):
     """
     Args:
         file_routing: 文件路径
@@ -385,19 +435,24 @@ def file_extraction_intype(file_routing, file_limit, chatbot, history):
     Returns: None
     """
     for file_path in file_routing:
+        chatbot.append([None, f'`{file_path.replace(func_box.base_path, ".")}`' +
+                        f"\t...正在解析本地文件\n\n"])
         if file_path.endswith('pdf'):
-            chatbot.append([f'`{file_path}`' + f"\t...准备读取本地文件{os.path.splitext(file_path)[1]}\n\n", None])
             file_content, _ = crazy_utils.read_and_clean_pdf_text(file_path)
             title = long_name_processing(file_content)
             content = "".join(file_content)
             file_limit.extend([title, content])
         elif file_path.endswith('xmind'):
             file_content, _path = XmindHandle().xmind_2_md(pathSource=file_path)
-            chatbot.append([f'`{file_path}`' + f"\t...准备读取本地文件{os.path.splitext(file_path)[1]}\n\n", None])
             title = long_name_processing(file_content)
             file_limit.extend([title, file_content])
+        elif file_path.endswith('xlsx') or file_path.endswith('xls'):
+            sheet, = json_args_return(plugin_kwargs, keys=['读取指定Sheet'], default='测试要点')
+            file_content = ExcelHandle(temp_file=file_path).read_as_dict()[sheet]
+            plugin_kwargs['写入指定模版'] = file_path
+            title = long_name_processing(os.path.basename(file_path))
+            file_limit.extend([title, file_content])
         else:
-            chatbot.append([f'`{file_path}`' + f"\t...准备读取本地文件{os.path.splitext(file_path)[1]}\n\n", None])
             with open(file_path, mode='r') as f:
                 file_content = f.read()
                 title = long_name_processing(file_content)
@@ -405,22 +460,26 @@ def file_extraction_intype(file_routing, file_limit, chatbot, history):
         yield from toolbox.update_ui(chatbot, history)
 
 
-def json_args_return(kwargs, keys: list) -> list:
+def json_args_return(kwargs, keys: list, default=None) -> list:
     """
     Args: 提取插件的调优参数，如果有，则返回取到的值，如果无，则返回False
         kwargs: 一般是plugin_kwargs
         keys: 需要取得key
+        default: 找不到时总得返回什么东西
     Returns: 有key返value，无key返False
     """
-    temp = [False for i in range(len(keys))]
+    temp = [default for i in range(len(keys))]
     for i in range(len(keys)):
         try:
-            temp[i] = json.loads(kwargs['advanced_arg'])[keys[i]]
-        except Exception as f:
+            temp[i] = kwargs[keys[i]]
+        except Exception:
             try:
-                temp[i] = kwargs['parameters_def'][keys[i]]
+                temp[i] = json.loads(kwargs['advanced_arg'])[keys[i]]
             except Exception as f:
-                temp[i] = False
+                try:
+                    temp[i] = kwargs['parameters_def'][keys[i]]
+                except Exception as f:
+                    temp[i] = default
     return temp
 
 
@@ -456,14 +515,23 @@ def long_name_processing(file_name):
     return file_name
 
 
-def table_header_subscript(content: list):
-    for index, item in enumerate(content):
-        if '---' in item:
-            return index
-    return 0  # 兜底
-
-
 # <---------------------------------------插件用了都说好方法----------------------------------------->
+def split_list_token_limit(data, get_num, max_num=500):
+    header_index = find_index_inlist(data_list=data, search_terms=['操作步骤', '预期结果'])
+    header_data = data[header_index]
+    max_num -= len(str(header_data))
+    temp_list = []
+    split_data = []
+    for index in data[header_index+1:]:
+        if get_num(str(temp_list)) > max_num:
+            temp_list.insert(0, header_data)
+            split_data.append(json.dumps(temp_list, ensure_ascii=False))
+            temp_list = []
+        else:
+            temp_list.append(index)
+    return split_data
+
+
 def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
     """
     Args:
@@ -477,23 +545,31 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
     all_tokens = bridge_all.model_info[llm_kwargs['llm_model']]['max_token']
     max_token = all_tokens/2 - all_tokens/4  # 考虑到对话+回答会超过tokens,所以/2
     get_token_num = bridge_all.model_info[model]['token_cnt']
-    inputs = inputs.split('\n---\n')
     segments = []
-    for input_ in inputs:
-        if get_token_num(input_) > max_token:
-            chatbot.append([None, f'{func_box.html_tag_color(input_[:10])}...对话预计超出tokens限制, 拆分中...'])
-            yield from toolbox.update_ui(chatbot, history)
-            segments.extend(crazy_utils.breakdown_txt_to_satisfy_token_limit(input_, get_token_num, max_token))
+    if type(inputs) is list:
+        if get_token_num(str(inputs)) > max_token:
+            chatbot.append([None, f'...对话数据预计会超出{all_tokens}tokens限制, 拆分中...'])
+            segments.extend(split_list_token_limit(data=inputs, get_num=get_token_num, max_num=max_token))
         else:
-            segments.append(input_)
+            segments.extend(inputs)
+    else:
+        inputs = inputs.split('\n---\n')
+        for input_ in inputs:
+            if get_token_num(input_) > max_token:
+                chatbot.append([None, f'{func_box.html_tag_color(input_[:10])}...对话数据预计会超出{all_tokens}tokens限制, 拆分中...'])
+                yield from toolbox.update_ui(chatbot, history)
+                segments.extend(crazy_utils.breakdown_txt_to_satisfy_token_limit(input_, get_token_num, max_token))
+            else:
+                segments.append(input_)
     yield from toolbox.update_ui(chatbot, history)
     return segments
+
 
 
 def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history, default_prompt: str = False):
     """
     Args:
-        gpt_response_collection:  多线程GPT的返回结果
+        gpt_response_collection:  多线程GPT的返回结果or文件读取处理后的结果
         plugin_kwargs: 对话使用的插件参数
         chatbot: 对话组件
         history: 历史对话
@@ -516,6 +592,10 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     prompt = prompt_generator.SqliteHandle(table=prompt_cls_tab).find_prompt_result(kwargs_prompt)
     for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
         content_limit = yield from split_content_limit(inputs, llm_kwargs, chatbot, history)
+        try:
+            plugin_kwargs['原测试用例数据'] = [json.loads(limit)[1:] for limit in content_limit]
+        except:
+            pass
         for limit in content_limit:
             kai_limit = yield from Langchain_cn.knowledge_base_query(limit, llm_kwargs['know_id'], chatbot, history, llm_kwargs)
             inputs_array.append(prompt.replace('{{{v}}}', kai_limit))
@@ -624,7 +704,7 @@ def write_test_cases(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot
         test_case = []
         for value in file_classification[file_name]:
             test_case_content = value.splitlines()
-            index = table_header_subscript(test_case_content)
+            index = find_index_inlist(test_case_content, ['---'])
             gpt_response_split = test_case_content[index+1:]  # 过滤掉表头
             for i in gpt_response_split:
                 if i.find('|') != -1:
@@ -635,6 +715,47 @@ def write_test_cases(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot
                     func_box.通知机器人(f'脏数据过滤，这个不符合写入测试用例的条件 \n\n```\n\n{i}\n\n```\n\n```\n{gpt_response_split}\n```')
         file_path = ExcelHandle(ipaddr=llm_kwargs['ipaddr'], temp_file=template_file).lpvoid_lpbuffe(test_case, filename=long_name_processing(file_name))
         chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path)}\n\n'
+        chatbot[-1] = (['Done', chat_file_list])
+        yield from toolbox.update_ui(chatbot, history)
+    return
+
+
+def parsing_json_in_text(txt_data: list, old_case):
+    response = []
+    desc = '\n\n---\n\n'.join(txt_data)
+    for index in range(len(txt_data)):
+        supplementary_data = []
+        pattern = r'\[[^\[\]]*\]'
+        result = re.findall(pattern, txt_data[index])
+        for sp in result:
+            __list = []
+            try:
+                # 尝试补充一些错误的JSON数据
+                sp = sp.replace('][', '],[').replace(']\n[', '],[')
+                __list = json.loads(sp)
+                supplementary_data.append(__list)
+            except:
+                pass
+        if len(txt_data) != len(old_case): index = -1  # 兼容一下哈
+        for new_case in supplementary_data:
+            if new_case not in old_case[index]:
+                old_case[index].append(new_case+['插件补充的用例'])
+        response.extend(old_case[index])
+    return response, desc
+
+
+def supplementary_test_case(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history):
+    template_file, = json_args_return(plugin_kwargs, ['写入指定模版'])
+    file_classification = file_classification_to_dict(gpt_response_collection)
+    chat_file_list = ''
+    chatbot.append(['Done', chat_file_list])
+    for file_name in file_classification:
+        old_case = plugin_kwargs['原测试用例数据']
+        test_case, desc = parsing_json_in_text(file_classification[file_name], old_case)
+        file_path = ExcelHandle(ipaddr=llm_kwargs['ipaddr'], temp_file=template_file).lpvoid_lpbuffe(test_case,filename=long_name_processing(file_name))
+        md = Utils().write_markdown(data=desc, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(file_name))
+        chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path)}\n\n' \
+                          f'---\n\n{file_name}补充思路如下：\t{func_box.html_view_blank(__href=md)}\n\n'
         chatbot[-1] = (['Done', chat_file_list])
         yield from toolbox.update_ui(chatbot, history)
     return
@@ -655,7 +776,7 @@ def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
     for file_name in file_classification:
         inputs_count = ''
         for value in file_classification[file_name]:
-            inputs_count += str(value).replace('```', '') # 去除头部和尾部的代码块, 避免流程图堆在一块
+            inputs_count += str(value).replace('```', '')  # 去除头部和尾部的代码块, 避免流程图堆在一块
         md, html = Utils().markdown_to_flow_chart(data=inputs_count, hosts=llm_kwargs['ipaddr'],
                                                   file_name=long_name_processing(file_name))
         chatbot.append((None, "View: " + func_box.html_view_blank(md)+'\n\n--- \n\n View: ' + func_box.html_view_blank(html)))
@@ -691,5 +812,7 @@ previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传�
 
 
 if __name__ == '__main__':
-    print(long_name_processing('12312345556'))
-    print(file_classification_to_dict(['312321', '3123213123', '312321', '1231231213233', '312123123', '321321123']))
+    # old_data = ExcelHandle(temp_file='/Users/kilig/Desktop/支付路径优化-自测用例.xlsx').read_as_dict()['测试要点']
+    with open('/Users/kilig/Job/Python-project/kso_gpt/private_upload/192.168.0.102/markdown/支付路径优化-自测用例2.xlsx.md', mode='r') as f:
+        data = f.read()
+        Utils().md_2_html(data.replace('\n', '\n\n'), 'temp', 'test')

@@ -394,6 +394,20 @@ def get_crazy_functions():
             "AsButton": True,
             "Function": HotReload(KDOCS_流程图_图片分析.批量分析流程图或图片),
         },
+        "测试用例检查优化": {
+            "Color": "primary",
+            "AsButton": True,
+            "Function": HotReload(KDOCS_轻文档分析.KDocs_测试用例检查优化),
+            "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+            "ArgsReminder": "高级参数详细说明请查看项目自述文档",  # 高级参数输入区的显示提示
+            "Parameters": {
+                '开启OCR': True,
+                '读取指定Sheet': '测试要点',
+                "提示词分类": '插件定制',
+                "预期产出提示词": '补充测试用例场景',
+                "显示过程": False,
+            }
+        },
     }
 
     # try:

@@ -167,6 +167,7 @@ def html_download_blank(__href, dir_name=''):
     a = f'<a href="{__href}" target="_blank" download="{dir_name}" class="svelte-xrr240">{dir_name}</a>'
     return a
 
+
 def html_local_img(__file, layout='left', max_width=None, max_height=None):
     style = ''
     if max_width is not None:

@@ -102,7 +102,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     if json_data['finish_reason'] == 'content_filter':
         raise RuntimeError("由于提问含不合规内容被Azure过滤。")
     if json_data['finish_reason'] == 'length':
-        return "raise ConnectionAbortedError jsokf\n\n{result}\n\n"
+        return f"raise ConnectionAbortedError jsokf\n\n{result}\n\n"
     return result
 
 
@@ -212,7 +212,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     elif "does not exist" in error_msg:
                         chatbot[-1] = (chatbot[-1][0], f"[Local Message] Model {llm_kwargs['llm_model']} does not exist. 模型不存在, 或者您没有获得体验资格.")
                     elif "Incorrect API key" in error_msg:
-                        chatbot[-1] = (chatbot[-1][0], "[Local Message] Incorrect API key. OpenAI以提供了不正确的API_KEY为由, 拒绝服务. " + openai_website)
+                        chatbot[-1] = (chatbot[-1][0], "[Local Message] Incorrect API key. OpenAI以提供了不正确的API_KEY:为由, 拒绝服务. " + openai_website)
                     elif "exceeded your current quota" in error_msg:
                         chatbot[-1] = (chatbot[-1][0], "[Local Message] You exceeded your current quota. OpenAI以账户额度不足为由, 拒绝服务." + openai_website)
                     elif "account is not active" in error_msg:
