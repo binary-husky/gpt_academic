@@ -735,8 +735,10 @@ def parsing_json_in_text(txt_data: list, old_case):
         content_data = txt_data[index]
         if 'raise ConnectionAbortedError jsokf' in content_data:
             # 尝试修复超出Token限制导致的Json数据结构错误
-            temp_str = content_data.splitlines()
-            content_data = "\n".join([item for item in temp_str if item != ''][-1]) + ']'
+            content_data = "\n".join([item for item in str(content_data).splitlines() if item != ''][:-1])
+            if re.search(r'[^\w\s\]]', content_data[-1]):  # 判断是不是有,号之类的特殊字符
+                content_data = content_data[:-1]  # 有则排除
+            content_data += ']'
         pattern = r'\[[^\[\]]*\]'
         result = re.findall(pattern, content_data)
         for sp in result:
@@ -824,4 +826,6 @@ previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传�
 
 
 if __name__ == '__main__':
-    old_data = ExcelHandle(temp_file='/Users/kilig/Desktop/支付路径优化-自测用例.xlsx').read_as_dict()['测试要点']
+    # old_data = ExcelHandle(temp_file='/Users/kilig/Desktop/支付路径优化-自测用例.xlsx').read_as_dict()['测试要点']
+    with open(file='/Users/kilig/Job/Python-project/kso_gpt/private_upload/192.168.0.102/markdown/支付路径优化-自测用例2.xlsx.md', mode='r') as f:
+        parsing_json_in_text([f.read()], old_case=[['3213']])
