@@ -448,10 +448,17 @@ def file_extraction_intype(file_routing, file_limit, chatbot, history, plugin_kw
             file_limit.extend([title, file_content])
         elif file_path.endswith('xlsx') or file_path.endswith('xls'):
             sheet, = json_args_return(plugin_kwargs, keys=['读取指定Sheet'], default='测试要点')
-            file_content = ExcelHandle(temp_file=file_path).read_as_dict()[sheet]
+            file_content = ExcelHandle(temp_file=file_path).read_as_dict().get(sheet)
             plugin_kwargs['写入指定模版'] = file_path
             title = long_name_processing(os.path.basename(file_path))
-            file_limit.extend([title, file_content])
+            if file_content:
+                file_limit.extend([title, file_content])
+            else:
+                chatbot.append([None,
+                                f'无法在{os.path.basename(file_path)}找到{func_box.html_tag_color(sheet)}工作表, '
+                                f'请检查用例文件是存在该工作表。'f'若你的用例工作表是其他名称，'
+                                f'请在自定义插件配置中更改{func_box.html_tag_color("读取指定Sheet")}。'])
+                yield from toolbox.update_ui(chatbot, history)
         else:
             with open(file_path, mode='r') as f:
                 file_content = f.read()

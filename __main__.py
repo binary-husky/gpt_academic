@@ -311,7 +311,7 @@ class ChatBot(ChatBotFrame):
                     container=False)
                 self.plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False, elem_classes='no_padding_input',
                                                  placeholder="这里是特殊函数插件的高级参数输入区").style()
-                self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
+                self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary", visible=False)
 
 
     def signals_plugin(self):
@@ -358,19 +358,19 @@ class ChatBot(ChatBotFrame):
         def on_dropdown_changed(k):
             # 按钮颜色随变
             variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
-            ret = {self.switchy_bt: self.switchy_bt.update(value=k, variant=variant)}
+            ret = {self.switchy_bt: self.switchy_bt.update(value=k, variant=variant, visible=True),
+                   self.area_crazy_fn: gr.update()}
             # 参数取随变
             fns_value = func_box.txt_converter_json(str(crazy_fns[k].get('Parameters', '')))
             fns_lable = f"插件[{k}]的高级参数说明：\n" + crazy_fns[k].get("ArgsReminder", f"没有提供高级参数功能说明")
             temp_dict = dict(visible=True, interactive=True, value=str(fns_value), label=fns_lable)
             #  是否唤起高级插件参数区
             if crazy_fns[k].get("AdvancedArgs", False):
-                ret.update({self.plugin_advanced_arg: gr.update(**temp_dict)})
+                ret.update({self.plugin_advanced_arg: gr.update(**temp_dict), self.area_crazy_fn: gr.update(open=False)})
             else:
                 ret.update({self.plugin_advanced_arg: gr.update(visible=False, label=f"插件[{k}]不需要高级参数。")})
             return ret
-
-        self.dropdown_fn.select(on_dropdown_changed, [self.dropdown_fn], [self.switchy_bt, self.plugin_advanced_arg])
+        self.dropdown_fn.select(on_dropdown_changed, [self.dropdown_fn], [self.switchy_bt, self.plugin_advanced_arg, self.area_crazy_fn])
 
         # 随变按钮的回调函数注册
         def route(k, ipaddr: gr.Request, *args, **kwargs):

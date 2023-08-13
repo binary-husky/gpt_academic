@@ -79,12 +79,7 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
             _, file_routing, _ = get_files_from_everything(f, t, )
             yield from crazy_box.file_extraction_intype(file_routing, file_limit, chatbot, history, plugin_kwargs)
     yield from update_ui(chatbot, history)
-    if not file_limit:
-        chatbot.append([None, f'{func_box.html_tag_color("无法获取需求文档内容，暂停运行!!!!")}'])
-        yield from update_ui(chatbot=chatbot, history=history, msg='无法获取需求文档内容，暂停运行')
-        return
-    else:
-        return file_limit
+    return file_limit
 
 
 
@@ -94,6 +89,10 @@ def KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, s
         file_limit = yield from Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, file_types)
     else:
         file_limit = link_limit
+    if not file_limit:
+        chatbot.append([None, f'{func_box.html_tag_color("无法获取需求文档内容，暂停运行!!!!")}'])
+        yield from update_ui(chatbot=chatbot, history=history, msg='无法获取需求文档内容，暂停运行')
+        return
     kwargs_to_mark, = crazy_box.json_args_return(plugin_kwargs, ['格式化文档提示词'])
     if kwargs_to_mark:
         split_content_limit = yield from crazy_box.input_output_processing(file_limit, llm_kwargs,
@@ -193,7 +192,10 @@ def KDocs_文档提取测试点(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
 def KDocs_测试用例检查优化(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     file_types = ['xlsx', 'xmind']
     file_limit = yield from Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, file_types)
-
+    if not file_limit:
+        chatbot.append([None, f'{func_box.html_tag_color("无法获取需求文档内容，暂停运行!!!!")}'])
+        yield from update_ui(chatbot=chatbot, history=history, msg='无法获取需求文档内容，暂停运行')
+        return
     split_content_limit = yield from crazy_box.input_output_processing(file_limit, llm_kwargs, plugin_kwargs,
                                                                        chatbot, history)
 
