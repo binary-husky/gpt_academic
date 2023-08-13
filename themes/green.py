@@ -63,7 +63,7 @@ def adjust_theme():
             button_secondary_background_fill_dark="*neutral_900",
             button_secondary_text_color="*neutral_800",
             button_secondary_text_color_dark="white",
-            background_fill_primary="#F7F7F7",
+            background_fill_primary="*neutral_50",
             background_fill_primary_dark="#1F1F1F",
             block_title_text_color="*primary_500",
             block_title_background_fill_dark="*primary_900",
