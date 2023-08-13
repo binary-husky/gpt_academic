@@ -186,15 +186,16 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                 try:
                     chunk_decoded = chunk.decode()
                     # 前者是API2D的结束条件，后者是OPENAI的结束条件
-                    if ('data: [DONE]' in chunk_decoded) or (len(json.loads(chunk_decoded[6:])['choices'][0]["delta"]) == 0):
+                    if 'data: [DONE]' in chunk_decoded:
                         # 判定为数据流的结束，gpt_replying_buffer也写完了
                         logging.info(f'[response] {gpt_replying_buffer}')
                         break
                     # 处理数据流的主体
                     chunkjson = json.loads(chunk_decoded[6:])
                     status_text = f"finish_reason: {chunkjson['choices'][0]['finish_reason']}"
-                    # 如果这里抛出异常，一般是文本过长，详情见get_full_error的输出
-                    gpt_replying_buffer = gpt_replying_buffer + json.loads(chunk_decoded[6:])['choices'][0]["delta"]["content"]
+                    delta = chunkjson['choices'][0]["delta"]
+                    if "content" in delta:
+                        gpt_replying_buffer = gpt_replying_buffer + delta["content"]
                     history[-1] = gpt_replying_buffer
                     chatbot[-1] = (history[-2], history[-1])
                     yield from update_ui(chatbot=chatbot, history=history, msg=status_text) # 刷新界面
