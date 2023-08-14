@@ -192,7 +192,7 @@ class ExcelHandle:
         else:
             worksheet = workbook.create_sheet(sheet)
         # 定义起始行号
-        start_row = find_index_inlist(self.read_as_dict()['测试要点'], ['操作步骤', '前置条件', '预期结果']) + 2
+        start_row = find_index_inlist(self.read_as_dict()[sheet], ['操作步骤', '前置条件', '预期结果']) + 2
         # 创建一个黄色的填充样式
         fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
         # 遍历数据列表
@@ -524,7 +524,7 @@ def long_name_processing(file_name):
 
 # <---------------------------------------插件用了都说好方法----------------------------------------->
 def split_list_token_limit(data, get_num, max_num=500):
-    header_index = find_index_inlist(data_list=data, search_terms=['操作步骤', '预期结果'])
+    header_index = find_index_inlist(data_list=data, search_terms=['操作步骤', '前置条件', '预期结果'])
     header_data = data[header_index]
     max_num -= len(str(header_data))
     temp_list = []
