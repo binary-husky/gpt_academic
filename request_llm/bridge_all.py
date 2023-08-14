@@ -369,7 +369,7 @@ if "chatgpt_website" in AVAIL_LLM_MODELS:   # 接入一些逆向工程https://gi
         })
     except:
         print(trimmed_format_exc())
-if "spark" in AVAIL_LLM_MODELS:   # 接入一些逆向工程https://github.com/acheong08/ChatGPT-to-API/
+if "spark" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
     try:
         from .bridge_spark import predict_no_ui_long_connection as spark_noui
         from .bridge_spark import predict as spark_ui
@@ -427,7 +427,8 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
         method = model_info[model]["fn_without_ui"]
         return method(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience)
     else:
-        # 如果同时询问多个大语言模型：
+
+        # 如果同时询问多个大语言模型，这个稍微啰嗦一点，但思路相同，您不必读这个else分支
         executor = ThreadPoolExecutor(max_workers=4)
         models = model.split('&')
         n_model = len(models)
