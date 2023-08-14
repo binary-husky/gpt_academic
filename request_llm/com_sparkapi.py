@@ -121,7 +121,7 @@ class SparkRequestInstance():
             self.time_to_exit_event.set()
 
         # 收到websocket关闭的处理
-        def on_close(ws):
+        def on_close(ws, *args):
             self.time_to_exit_event.set()
 
         # websocket
