@@ -584,8 +584,9 @@ class ChatBot(ChatBotFrame):
         # Start
         self.auto_opentab_delay()
         self.demo.queue(concurrency_count=CONCURRENT_COUNT)
-        self.demo.blocked_paths = [f"./config.py", "./config_private.py", "config.py", "config_private.py",
-                                   'comm_tools', '__main__.py', "crazy_functions", "users_data"]
+        # 过滤掉不允许用户访问的路径
+        self.demo.blocked_paths = func_box.get_files_and_dirs(path=func_box.base_path,
+                                                              filter_allow=['private_upload', 'gpt_log', 'docs'])
         self.demo.inline = True
         login_html = ''
         # self.demo.queue(concurrency_count=CONCURRENT_COUNT).launch(

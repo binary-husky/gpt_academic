@@ -897,6 +897,18 @@ def 通知机器人(error):
     quet = requests.post(url=robot_hook, json=markdown, verify=False)
 
 
+def get_files_and_dirs(path, filter_allow):
+    result = []
+    for item in os.listdir(path):
+        item_path = os.path.join(path, item)
+        if os.path.isfile(item_path):
+            result.append('./{}'.format(item))
+            result.append(item)
+        elif os.path.isdir(item_path):
+            if item not in filter_allow:
+                result.append(item)
+    return result
+
 
 class YamlHandle:
 
