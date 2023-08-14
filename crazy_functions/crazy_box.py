@@ -519,6 +519,8 @@ def long_name_processing(file_name):
                 if i:
                     file_name = replace_special_chars(i)
                     break
+    if file_name.find('.') != -1:
+        file_name = "".join(file_name.split('.')[:-1])
     return file_name
 
 
@@ -827,5 +829,6 @@ previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传�
 
 if __name__ == '__main__':
     # old_data = ExcelHandle(temp_file='/Users/kilig/Desktop/支付路径优化-自测用例.xlsx').read_as_dict()['测试要点']
-    with open(file='/Users/kilig/Job/Python-project/kso_gpt/private_upload/192.168.0.102/markdown/支付路径优化-自测用例2.xlsx.md', mode='r') as f:
-        parsing_json_in_text([f.read()], old_case=[['3213']])
+    # with open(file='/Users/kilig/Job/Python-project/kso_gpt/private_upload/192.168.0.102/markdown/支付路径优化-自测用例2.xlsx.md', mode='r') as f:
+    #     parsing_json_in_text([f.read()], old_case=[['3213']])
+    print(long_name_processing('支付路径优化-自测用例2.xlsx'))
