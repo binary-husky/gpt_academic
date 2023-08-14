@@ -18,6 +18,5 @@ openai
 numpy
 arxiv
 rich
-websocket
 websocket-client
 pypdf2==2.12.1
