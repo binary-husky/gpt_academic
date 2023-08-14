@@ -59,7 +59,7 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
                                               f'可以参考以下方法对图片进行描述补充，或在自定义插件参数中开始OCR功能\n\n' \
                                               f'{func_box.html_local_img("docs/imgs/pic_desc.png")}'])
                     yield from update_ui(chatbot, history)
-                title = content.splitlines()[0]
+                title = crazy_box.long_name_processing(content)
                 file_limit.extend([title, content])
             else:
                 for t in file_types:
