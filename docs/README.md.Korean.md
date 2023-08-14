@@ -13,7 +13,7 @@ GPT를 이용하여 프로젝트를 임의의 언어로 번역하려면 [`multi_
 >
 > 1. 파일을 읽기 위해 **빨간색**으로 표시된 기능 플러그인 (버튼) 만 지원됩니다. 일부 플러그인은 플러그인 영역의 **드롭다운 메뉴**에 있습니다. 또한 새로운 플러그인은 **가장 높은 우선순위**로 환영하며 처리합니다!
 >
-> 2. 이 프로젝트의 각 파일의 기능을 [`self_analysis.md`](https://github.com/binary-husky/chatgpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A)에서 자세히 설명합니다. 버전이 업데이트 됨에 따라 관련된 기능 플러그인을 클릭하고 GPT를 호출하여 프로젝트의 자체 분석 보고서를 다시 생성할 수도 있습니다. 자주 묻는 질문은 [`위키`](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98)에서 볼 수 있습니다. [설치 방법](#installation).
+> 2. 이 프로젝트의 각 파일의 기능을 [`self_analysis.md`](https://github.com/binary-husky/gpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A)에서 자세히 설명합니다. 버전이 업데이트 됨에 따라 관련된 기능 플러그인을 클릭하고 GPT를 호출하여 프로젝트의 자체 분석 보고서를 다시 생성할 수도 있습니다. 자주 묻는 질문은 [`위키`](https://github.com/binary-husky/gpt_academic/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98)에서 볼 수 있습니다. [설치 방법](#installation).
 > 
 > 3. 이 프로젝트는 국내 언어 모델 chatglm과 RWKV, 판고 등의 시도와 호환 가능합니다. 여러 개의 api-key를 지원하며 설정 파일에 "API_KEY="openai-key1,openai-key2,api2d-key3""와 같이 작성할 수 있습니다. `API_KEY`를 임시로 변경해야하는 경우 입력 영역에 임시 `API_KEY`를 입력 한 후 엔터 키를 누르면 즉시 적용됩니다. 
 
@@ -25,13 +25,13 @@ GPT를 이용하여 프로젝트를 임의의 언어로 번역하려면 [`multi_
 한-영 키워드 | 한-영 키워드 지원
 코드 설명 | 코드 표시, 코드 설명, 코드 생성, 코드에 주석 추가
 [사용자 정의 바로 가기 키](https://www.bilibili.com/video/BV14s4y1E7jN) | 사용자 정의 바로 가기 키 지원
-모듈식 설계 | 강력한[함수 플러그인](https://github.com/binary-husky/chatgpt_academic/tree/master/crazy_functions) 지원, 플러그인이 [램 업데이트](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)를 지원합니다.
+모듈식 설계 | 강력한[함수 플러그인](https://github.com/binary-husky/gpt_academic/tree/master/crazy_functions) 지원, 플러그인이 [램 업데이트](https://github.com/binary-husky/gpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)를 지원합니다.
 [자체 프로그램 분석](https://www.bilibili.com/video/BV1cj411A7VW) | [함수 플러그인] [원 키 우드] 프로젝트 소스 코드의 내용을 이해하는 기능을 제공
 [프로그램 분석](https://www.bilibili.com/video/BV1cj411A7VW) | [함수 플러그인] 프로젝트 트리를 분석할 수 있습니다 (Python/C/C++/Java/Lua/...)
 논문 읽기, 번역 | [함수 플러그인] LaTex/PDF 논문의 전문을 읽고 요약을 생성합니다.
 LaTeX 텍스트[번역](https://www.bilibili.com/video/BV1nk4y1Y7Js/), [원 키워드](https://www.bilibili.com/video/BV1FT411H7c5/) | [함수 플러그인] LaTeX 논문의 번역 또는 개량을 위해 일련의 모드를 번역할 수 있습니다.
 대량의 주석 생성 | [함수 플러그인] 함수 코멘트를 대량으로 생성할 수 있습니다.
-Markdown 한-영 번역 | [함수 플러그인] 위의 5 종 언어의 [README](https://github.com/binary-husky/chatgpt_academic/blob/master/docs/README_EN.md)를 볼 수 있습니다.
+Markdown 한-영 번역 | [함수 플러그인] 위의 5 종 언어의 [README](https://github.com/binary-husky/gpt_academic/blob/master/docs/README_EN.md)를 볼 수 있습니다.
 chat 분석 보고서 생성 | [함수 플러그인] 수행 후 요약 보고서를 자동으로 생성합니다.
 [PDF 논문 번역](https://www.bilibili.com/video/BV1KT411x7Wn) | [함수 플러그인] PDF 논문이 제목 및 요약을 추출한 후 번역됩니다. (멀티 스레드)
 [Arxiv 도우미](https://www.bilibili.com/video/BV1LM4y1279X) | [함수 플러그인] Arxiv 논문 URL을 입력하면 요약을 번역하고 PDF를 다운로드 할 수 있습니다.
@@ -73,8 +73,8 @@ LLM 모델 추가 및[huggingface 배치](https://huggingface.co/spaces/qingxu98
 
 1. 프로젝트 다운로드
 ```sh
-git clone https://github.com/binary-husky/chatgpt_academic.git
-cd chatgpt_academic
+git clone https://github.com/binary-husky/gpt_academic.git
+cd gpt_academic
 ```
 
 2. API_KEY 구성
@@ -134,8 +134,8 @@ python main.py
 1. ChatGPT 만 (대부분의 사람들이 선택하는 것을 권장합니다.)
 
 ``` sh
-git clone https://github.com/binary-husky/chatgpt_academic.git  # 다운로드
-cd chatgpt_academic                                 # 경로 이동
+git clone https://github.com/binary-husky/gpt_academic.git  # 다운로드
+cd gpt_academic                                 # 경로 이동
 nano config.py                                      # 아무 텍스트 에디터로 config.py를 열고 "Proxy","API_KEY","WEB_PORT" (예 : 50923) 등을 구성합니다.
 docker build -t gpt-academic .                      # 설치
 
@@ -165,10 +165,10 @@ docker-compose up
 API_URL_REDIRECT를 `config.py`에 따라 구성하면됩니다.
 
 2. 원격 클라우드 서버 배치 (클라우드 서버 지식과 경험이 필요합니다.)
-[배치위키-1](https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BF%9C%E7%A8%8B%E9%83%A8%E7%BD%B2%E6%8C%87%E5%8D%97)에 방문하십시오.
+[배치위키-1](https://github.com/binary-husky/gpt_academic/wiki/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BF%9C%E7%A8%8B%E9%83%A8%E7%BD%B2%E6%8C%87%E5%8D%97)에 방문하십시오.
 
 3. WSL2 사용 (Windows Subsystem for Linux 하위 시스템)
-[배치 위키-2](https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2)에 방문하십시오.
+[배치 위키-2](https://github.com/binary-husky/gpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2)에 방문하십시오.
 
 4. 2 차 URL (예 : `http : //localhost/subpath`)에서 실행하는 방법
 [FastAPI 실행 설명서] (docs / WithFastapi.md)를 참조하십시오.
@@ -197,7 +197,7 @@ docker-compose.yml을 읽은 후 지시 사항에 따라 작업하십시오.
 
 2. 사용자 지정 함수 플러그인
 강력한 함수 플러그인을 작성하여 원하는 작업을 수행하십시오.
-이 프로젝트의 플러그인 작성 및 디버깅 난이도는 매우 낮으며, 일부 파이썬 기본 지식만 있으면 제공된 템플릿을 모방하여 플러그인 기능을 구현할 수 있습니다. 자세한 내용은 [함수 플러그인 가이드]를 참조하십시오. (https://github.com/binary -husky/chatgpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E 4%BB%B6%E6%8C%87%E5%8D%97).
+이 프로젝트의 플러그인 작성 및 디버깅 난이도는 매우 낮으며, 일부 파이썬 기본 지식만 있으면 제공된 템플릿을 모방하여 플러그인 기능을 구현할 수 있습니다. 자세한 내용은 [함수 플러그인 가이드]를 참조하십시오. (https://github.com/binary -husky/gpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E 4%BB%B6%E6%8C%87%E5%8D%97).
 ---
 # 최신 업데이트
 ## 새로운 기능 동향1. 대화 저장 기능. 

@@ -14,7 +14,7 @@ To translate this project to arbitary language with GPT, read and run [`multi_la
 > Note:
 > 
 > 1. Please note that only the function plugins (buttons) marked in **red** support reading files. Some plugins are in the **drop-down menu** in the plugin area. We welcome and process any new plugins with the **highest priority**!
-> 2. The function of each file in this project is detailed in the self-translation analysis [`self_analysis.md`](https://github.com/binary-husky/chatgpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A). With version iteration, you can also click on related function plugins at any time to call GPT to regenerate the project's self-analysis report. Common questions are summarized in the [`wiki`](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98). [Installation method](#installation).
+> 2. The function of each file in this project is detailed in the self-translation analysis [`self_analysis.md`](https://github.com/binary-husky/gpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A). With version iteration, you can also click on related function plugins at any time to call GPT to regenerate the project's self-analysis report. Common questions are summarized in the [`wiki`](https://github.com/binary-husky/gpt_academic/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98). [Installation method](#installation).
 > 3. This project is compatible with and encourages trying domestic large language models such as chatglm, RWKV, Pangu, etc. Multiple API keys are supported and can be filled in the configuration file like `API_KEY="openai-key1,openai-key2,api2d-key3"`. When temporarily changing `API_KEY`, enter the temporary `API_KEY` in the input area and press enter to submit, which will take effect. 
 
 <div align="center">
@@ -25,13 +25,13 @@ One-click polishing | Supports one-click polishing and one-click searching for g
 One-click Chinese-English translation | One-click Chinese-English translation.
 One-click code interpretation | Displays, explains, generates, and adds comments to code.
 [Custom shortcut keys](https://www.bilibili.com/video/BV14s4y1E7jN) | Supports custom shortcut keys.
-Modular design | Supports custom powerful [function plug-ins](https://github.com/binary-husky/chatgpt_academic/tree/master/crazy_functions), plug-ins support [hot update](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97).
-[Self-program profiling](https://www.bilibili.com/video/BV1cj411A7VW) | [Function plug-in] [One-click understanding](https://github.com/binary-husky/chatgpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A) of the source code of this project
+Modular design | Supports custom powerful [function plug-ins](https://github.com/binary-husky/gpt_academic/tree/master/crazy_functions), plug-ins support [hot update](https://github.com/binary-husky/gpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97).
+[Self-program profiling](https://www.bilibili.com/video/BV1cj411A7VW) | [Function plug-in] [One-click understanding](https://github.com/binary-husky/gpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A) of the source code of this project
 [Program profiling](https://www.bilibili.com/video/BV1cj411A7VW) | [Function plug-in] One-click profiling of other project trees in Python/C/C++/Java/Lua/...
 Reading papers, [translating](https://www.bilibili.com/video/BV1KT411x7Wn) papers | [Function Plug-in] One-click interpretation of latex/pdf full-text papers and generation of abstracts.
 Latex full-text [translation](https://www.bilibili.com/video/BV1nk4y1Y7Js/), [polishing](https://www.bilibili.com/video/BV1FT411H7c5/) | [Function plug-in] One-click translation or polishing of latex papers.
 Batch annotation generation | [Function plug-in] One-click batch generation of function annotations.
-Markdown [Chinese-English translation](https://www.bilibili.com/video/BV1yo4y157jV/) | [Function plug-in] Have you seen the [README](https://github.com/binary-husky/chatgpt_academic/blob/master/docs/README_EN.md) in the five languages above?
+Markdown [Chinese-English translation](https://www.bilibili.com/video/BV1yo4y157jV/) | [Function plug-in] Have you seen the [README](https://github.com/binary-husky/gpt_academic/blob/master/docs/README_EN.md) in the five languages above?
 Chat analysis report generation | [Function plug-in] Automatically generate summary reports after running.
 [PDF full-text translation function](https://www.bilibili.com/video/BV1KT411x7Wn) | [Function plug-in] PDF paper extract title & summary + translate full text (multi-threaded)
 [Arxiv Assistant](https://www.bilibili.com/video/BV1LM4y1279X) | [Function plug-in] Enter the arxiv article url and you can translate abstracts and download PDFs with one click.
@@ -39,7 +39,7 @@ Chat analysis report generation | [Function plug-in] Automatically generate summ
 Internet information aggregation+GPT | [Function plug-in] One-click [let GPT get information from the Internet first](https://www.bilibili.com/video/BV1om4y127ck), then answer questions, and let the information never be outdated.
 Formula/image/table display | Can display formulas in both [tex form and render form](https://user-images.githubusercontent.com/96192199/230598842-1d7fcddd-815d-40ee-af60-baf488a199df.png), support formulas and code highlighting.
 Multi-threaded function plug-in support | Supports multi-threaded calling of chatgpt, and can process [massive text](https://www.bilibili.com/video/BV1FT411H7c5/) or programs with one click.
-Start Dark Gradio [theme](https://github.com/binary-husky/chatgpt_academic/issues/173) | Add ```/?__theme=dark``` after the browser URL to switch to the dark theme.
+Start Dark Gradio [theme](https://github.com/binary-husky/gpt_academic/issues/173) | Add ```/?__theme=dark``` after the browser URL to switch to the dark theme.
 [Multiple LLM models](https://www.bilibili.com/video/BV1wT411p7yf) support, [API2D](https://api2d.com/) interface support | The feeling of being served by GPT3.5, GPT4, [Tsinghua ChatGLM](https://github.com/THUDM/ChatGLM-6B), and [Fudan MOSS](https://github.com/OpenLMLab/MOSS) at the same time must be great, right?
 More LLM model access, support [huggingface deployment](https://huggingface.co/spaces/qingxu98/gpt-academic) | Add Newbing interface (New Bing), introduce Tsinghua [Jittorllms](https://github.com/Jittor/JittorLLMs) to support [LLaMA](https://github.com/facebookresearch/llama), [RWKV](https://github.com/BlinkDL/ChatRWKV) and [Panguα](https://openi.org.cn/pangu/)
 More new feature displays (image generation, etc.)…… | See the end of this document for more... 
@@ -79,8 +79,8 @@ More new feature displays (image generation, etc.)…… | See the end of this d
 
 1. Download the project
 ```sh
-git clone https://github.com/binary-husky/chatgpt_academic.git
-cd chatgpt_academic
+git clone https://github.com/binary-husky/gpt_academic.git
+cd gpt_academic
 ```
 
 2. Configure the API_KEY
@@ -136,8 +136,8 @@ python main.py
 1. ChatGPT Only (Recommended for Most People)
 
 ``` sh
-git clone https://github.com/binary-husky/chatgpt_academic.git  # Download project
-cd chatgpt_academic                                 # Enter path
+git clone https://github.com/binary-husky/gpt_academic.git  # Download project
+cd gpt_academic                                 # Enter path
 nano config.py                                      # Edit config.py with any text editor, configure "Proxy", "API_KEY" and "WEB_PORT" (e.g. 50923), etc.
 docker build -t gpt-academic .                      # Install
 
@@ -167,10 +167,10 @@ docker-compose up
 Configure API_URL_REDIRECT according to the instructions in 'config.py'.
 
 2. Deploy to a Remote Server (Requires Knowledge and Experience with Cloud Servers)
-Please visit [Deployment Wiki-1](https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BF%9C%E7%A8%8B%E9%83%A8%E7%BD%B2%E6%8C%87%E5%8D%97)
+Please visit [Deployment Wiki-1](https://github.com/binary-husky/gpt_academic/wiki/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BF%9C%E7%A8%8B%E9%83%A8%E7%BD%B2%E6%8C%87%E5%8D%97)
 
 3. Using WSL2 (Windows Subsystem for Linux)
-Please visit [Deployment Wiki-2](https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2)
+Please visit [Deployment Wiki-2](https://github.com/binary-husky/gpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2)
 
 4. How to Run Under a Subdomain (e.g. `http://localhost/subpath`)
 Please visit [FastAPI Running Instructions](docs/WithFastapi.md)
@@ -202,7 +202,7 @@ For example,
 
 Write powerful function plugins to perform any task you can think of, even those you cannot think of.
 The difficulty of plugin writing and debugging in this project is very low. As long as you have a certain knowledge of Python, you can implement your own plug-in functions based on the template we provide.
-For details, please refer to the [Function Plugin Guide](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97).
+For details, please refer to the [Function Plugin Guide](https://github.com/binary-husky/gpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97).
 
 ---
 # Latest Update

@@ -14,7 +14,7 @@ RUN python3 -m pip install torch --extra-index-url https://download.pytorch.org/
 # 下载分支
 WORKDIR /gpt
 RUN git clone --depth=1 https://github.com/binary-husky/gpt_academic.git
-WORKDIR /gpt/chatgpt_academic
+WORKDIR /gpt/gpt_academic
 RUN git clone https://github.com/OpenLMLab/MOSS.git request_llm/moss
 RUN python3 -m pip install -r requirements.txt
 RUN python3 -m pip install -r request_llm/requirements_moss.txt
