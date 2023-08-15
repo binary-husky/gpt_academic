@@ -672,8 +672,8 @@ class knowledge_archive_interface():
                                   VECTOR_SEARCH_TOP_K=4, CHUNK_SIZE=521):
         if llm_kwargs:
             vector_config = llm_kwargs.get('vector')
-            VECTOR_SEARCH_SCORE_THRESHOLD = vector_config['score'],
-            VECTOR_SEARCH_TOP_K = vector_config['top-k'],
+            VECTOR_SEARCH_SCORE_THRESHOLD = vector_config['score']
+            VECTOR_SEARCH_TOP_K = vector_config['top-k']
             CHUNK_SIZE = vector_config['size']
         self.kai_path = os.path.join(self.vs_root_path, vs_id)
         if not os.path.exists(self.kai_path):

@@ -606,7 +606,7 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
         except:
             pass
         for limit in content_limit:
-            kai_limit = yield from Langchain_cn.knowledge_base_query(limit, llm_kwargs['know_id'], chatbot, history, llm_kwargs)
+            kai_limit = yield from Langchain_cn.knowledge_base_query(limit, chatbot, history, llm_kwargs, plugin_kwargs)
             inputs_array.append(prompt.replace('{{{v}}}', kai_limit))
             inputs_show_user_array.append(you_say)
     yield from toolbox.update_ui(chatbot, history)

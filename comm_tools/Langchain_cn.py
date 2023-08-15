@@ -2,7 +2,7 @@ import os.path
 from comm_tools import toolbox
 from crazy_functions import crazy_utils
 import gradio as gr
-from comm_tools import func_box
+from comm_tools import func_box, prompt_generator
 from crazy_functions import crazy_box
 
 
@@ -95,13 +95,18 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
            gr.Dropdown.update(value='新建知识库', choices=load_list),  kai_handle)
 
 
-def knowledge_base_query(txt, kai_id, chatbot, history, llm_kwargs):
+def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
     # < -------------------为空时，不去查询向量数据库--------------- >
     if not txt: return txt
     # < -------------------检索Prompt--------------- >
     new_txt = f'{txt}'
+    know_kwargs, = crazy_box.json_args_return(plugin_kwargs, ['关联知识库'])
+    if know_kwargs:  # 当插件有配置关联知识库，优先使用插件配置
+        llm_kwargs['know_id'] = know_kwargs['查询列表']
+        llm_kwargs['know_cls'] = know_kwargs['查询分类']
+    kai_id = llm_kwargs['know_id']
     if kai_id:
-        chatbot.append([txt, f'正在将问题向量化，然后对{func_box.html_tag_color(str(kai_id))}知识库进行匹配'])
+        chatbot.append([txt, f'正在将问题向量化，然后对{func_box.html_tag_color(str(kai_id))}知识库进行匹配...'])
     for id in kai_id:   #
         if llm_kwargs['know_dict']['know_obj'].get(id, False):
             kai = llm_kwargs['know_dict']['know_obj'][id]
@@ -117,8 +122,28 @@ def knowledge_base_query(txt, kai_id, chatbot, history, llm_kwargs):
         if resp:
             referenced_documents = "\n".join(
                 [f"{k}: " + doc.page_content for k, doc in enumerate(resp['source_documents'])])
-            new_txt += f'\n以下三个引号内的是{id}提供的参考文档：\n"""\n{referenced_documents}\n"""'
+            prompt_cls = '知识库提示词'
+            if not referenced_documents:
+                chatbot.append([None, f"{func_box.html_tag_color(id)}知识库中没有与问题匹配的文本，所以不会提供任何参考文本，你可以在Settings-更改`知识库检索相关度`中进行调优"])
+            else:
+                if know_kwargs:
+                    prompt_name = know_kwargs.get()
+                    chatbot.append([None, f'{func_box.html_tag_color(id)}知识库使用的Prompt是`{prompt_cls}`分类下的'
+                                          f'{func_box.html_tag_color(prompt_name)}, 插件自定义参数允许指定其他Prompt哦～'])
+                else:
+                    prompt_name = '引用知识库回答'
+                    tips = [None, f'{func_box.html_tag_color(id)}知识库问答使用的Prompt是`{prompt_cls}`分类下的'
+                                   f'{func_box.html_tag_color(prompt_name)}, 你可以保存一个同名的Prompt到个人分类下，知识库问答会优先使用个人分类下的提示词']
+                    if tips not in chatbot:
+                        chatbot.append(tips)
+                prompt_con = prompt_generator.SqliteHandle(table=f'prompt_{prompt_cls}_sys').find_prompt_result(
+                    prompt_name, individual_priority=llm_kwargs['ipaddr'])
+                prompt_content = func_box.replace_expected_text(prompt=prompt_con, content=referenced_documents,
+                                                                expect='{{{v}}}')
+                new_txt = func_box.replace_expected_text(prompt=prompt_content, content=new_txt, expect='{{{q}}}')
+            yield from toolbox.update_ui(chatbot=chatbot, history=history)  # 刷新界面
     return new_txt
+
 
 def obtain_classification_knowledge_base(cls_name, ipaddr: gr.Request):
     if cls_name == '个人知识库':
@@ -141,7 +166,7 @@ def obtaining_knowledge_base_files(cls_select, cls_name, vs_id, chatbot, kai_han
             chatbot = toolbox.ChatBotWithCookies(chatbot)
             chatbot.write_list(chatbot)
         chatbot.append([None, f'正在检查知识库内文件{"  ".join([func_box.html_tag_color(i)for i in vs_id])}'])
-        yield chatbot, gr.Column.update(visible=False), '🏃🏻‍ 正在努力轮询中....请稍等， tips：知识库可以多选，但只会预加载第一个选中的知识库～️', kai_handle
+        yield chatbot, gr.Column.update(visible=False), '🏃🏻‍ 正在努力轮询中....请稍等， tips：知识库可以多选，但不要贪杯哦～️', kai_handle
         kai_files = {}
         for id in vs_id:
             if kai_handle['know_obj'].get(id, None):

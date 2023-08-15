@@ -337,6 +337,23 @@ def get_crazy_functions():
                 "显示过程": False,
             }
         },
+        "文档转客户端测试用例(关联知识库)": {
+            "Color": "primary",
+            "AsButton": True,
+            "Function": HotReload(KDOCS_轻文档分析.KDocs_转客户端测试用例),
+            "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+            "ArgsReminder": "高级参数详细说明请查看项目自述文档",  # 高级参数输入区的显示提示
+            "Parameters": {
+                '开启OCR': True,
+                "提示词分类": '插件定制',
+                "格式化文档提示词": '提取文档测试点',
+                "预期产出提示词": '文档转测试用例',
+                "关联知识库": {"知识库提示词": "缺陷反推测试用例", "查询分类": "历史缺陷列表",
+                               "查询列表": ["国际客户端项目-缺陷池-Win端"]},
+                '写入指定模版': 'https://www.kdocs.cn/l/civeYz1Wg2OK',
+                "显示过程": False,
+            }
+        },
         "文档转接口测试用例": {
             "Color": "primary",
             "AsButton": True,
@@ -349,6 +366,20 @@ def get_crazy_functions():
                 '格式化文档提示词': '文档转Markdown_分割',
                 "预期产出提示词": '接口文档转测试用例',
                 '写入指定模版': 'https://www.kdocs.cn/l/ckuTJWR6vBtJ',
+                "显示过程": False,
+            }
+        },
+        "测试用例检查优化": {
+            "Color": "primary",
+            "AsButton": True,
+            "Function": HotReload(KDOCS_轻文档分析.KDocs_测试用例检查优化),
+            "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+            "ArgsReminder": "高级参数详细说明请查看项目自述文档",  # 高级参数输入区的显示提示
+            "Parameters": {
+                '开启OCR': True,
+                '读取指定Sheet': '测试要点',
+                "提示词分类": '插件定制',
+                "预期产出提示词": '补充测试用例场景',
                 "显示过程": False,
             }
         },
@@ -393,20 +424,6 @@ def get_crazy_functions():
             "Color": "primary",
             "AsButton": True,
             "Function": HotReload(KDOCS_流程图_图片分析.批量分析流程图或图片),
-        },
-        "测试用例检查优化": {
-            "Color": "primary",
-            "AsButton": True,
-            "Function": HotReload(KDOCS_轻文档分析.KDocs_测试用例检查优化),
-            "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "高级参数详细说明请查看项目自述文档",  # 高级参数输入区的显示提示
-            "Parameters": {
-                '开启OCR': True,
-                '读取指定Sheet': '测试要点',
-                "提示词分类": '插件定制',
-                "预期产出提示词": '补充测试用例场景',
-                "显示过程": False,
-            }
         },
     }
 

@@ -910,6 +910,22 @@ def get_files_and_dirs(path, filter_allow):
     return result
 
 
+def replace_expected_text(prompt: str, content: str, expect='{{{v}}}'):
+    """ 查找prompt中expect相关占位符，并将content替换到prompt中
+    Args:
+        prompt: 提示词
+        content:  正文
+        expect: 预期替换的文本
+    Returns:
+    """
+    if content:
+        if prompt.find(expect) != -1:
+            content = prompt.replace(expect, content)
+        else:
+            content = content + prompt
+    return content
+
+
 class YamlHandle:
 
     def __init__(self, file=os.path.join(prompt_path, 'ai_common.yaml')):

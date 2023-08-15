@@ -121,7 +121,7 @@ def ArgsGeneralWrapper(f):
         if len(args) > 1:
             plugin_kwargs.update({'parameters_def': args[1]})
         else:
-            txt_passon = yield from Langchain_cn.knowledge_base_query(txt_passon, langchain, chatbot_with_cookie, history, llm_kwargs)
+            txt_passon = yield from Langchain_cn.knowledge_base_query(txt_passon, chatbot_with_cookie, history, llm_kwargs, plugin_kwargs)
         if cookies.get('lock_plugin', None) is None:
             # 正常状态
             yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
