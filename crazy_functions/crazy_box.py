@@ -13,6 +13,8 @@ from typing import Dict
 import typing as typing
 from comm_tools import func_box, ocr_tools, toolbox, prompt_generator, Langchain_cn
 from openpyxl import load_workbook
+from openpyxl.utils import get_column_letter
+from openpyxl.styles import Border, Side
 from openpyxl.styles import PatternFill
 from crazy_functions import crazy_utils
 from request_llm import bridge_all
@@ -169,7 +171,7 @@ class Utils:
 
 class ExcelHandle:
 
-    def __init__(self, ipaddr='temp', temp_file=''):
+    def __init__(self, ipaddr='temp', temp_file='', sheet='测试要点'):
         self.user_path = os.path.join(func_box.base_path, 'private_upload', ipaddr, 'test_case', func_box.created_atime())
         os.makedirs(f'{self.user_path}', exist_ok=True)
         if not temp_file:
@@ -182,17 +184,17 @@ class ExcelHandle:
             self.template_excel = os.path.join(func_box.base_path, 'docs/template/客户端测试用例模版.xlsx')
         if not self.template_excel:
             self.template_excel = os.path.join(func_box.base_path, 'docs/template/客户端测试用例模版.xlsx')
+        self.workbook = load_workbook(self.template_excel)
+        self.sheet = sheet
 
-    def lpvoid_lpbuffe(self, data_list: list, filename='', decs='', sheet='测试要点'):
-        # 加载现有的 Excel 文件
-        workbook = load_workbook(self.template_excel)
-        # 选择要操作的工作表, 默认是测试要点
-        if sheet in workbook.sheetnames:
-            worksheet = workbook[sheet]
+    def lpvoid_lpbuffe(self, data_list: list, filename=''):
+        # 加载现有的 Excel 文件        # 选择要操作的工作表, 默认是测试要点
+        if self.sheet in self.workbook.sheetnames:
+            worksheet = self.workbook[self.sheet]
         else:
-            worksheet = workbook.create_sheet(sheet)
+            worksheet = self.workbook.create_sheet(self.sheet)
         # 定义起始行号
-        start_row = find_index_inlist(self.read_as_dict()[sheet], ['操作步骤', '前置条件', '预期结果']) + 2
+        start_row = find_index_inlist(self.read_as_dict()[self.sheet], ['操作步骤', '前置条件', '预期结果']) + 2
         # 创建一个黄色的填充样式
         fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
         # 遍历数据列表
@@ -211,20 +213,20 @@ class ExcelHandle:
                                               f'\n\n```\n\n{toolbox.trimmed_format_exc()}```\n\n')
             # 增加起始行号
             start_row += 1
+        self.merge_same_cells()   # 还原被拆分的合并单元格
         # 保存 Excel 文件
         time_stamp = time.strftime("%Y-%m-%d-%H", time.localtime())
         if filename == '': filename = time.strftime("%Y-%m-%d-%H", time.localtime()) + '_temp'
         else: f"{time_stamp}_{filename}"
         test_case_path = f'{os.path.join(self.user_path, filename)}.xlsx'
-        workbook.save(test_case_path)
+        self.workbook.save(test_case_path)
         return test_case_path
 
     def read_as_dict(self):
-        workbook = load_workbook(self.template_excel)
         data_dict = {}
         # 遍历每个工作表
-        for sheet_name in workbook.sheetnames:
-            sheet = workbook[sheet_name]
+        for sheet_name in self.workbook.sheetnames:
+            sheet = self.workbook[sheet_name]
             sheet_data = []
             # 遍历每一行
             for row in sheet.iter_rows(values_only=True):
@@ -233,6 +235,58 @@ class ExcelHandle:
             # 将工作表名作为字典的键，行数据作为值
             data_dict[sheet_name] = sheet_data
         return data_dict
+
+    def split_merged_cells(self):
+        # 加载Excel文件
+        ws = self.workbook[self.sheet]
+        # 获取合并单元格的范围
+        merged_ranges = list(ws.merged_cells.ranges)
+        for merged_range in merged_ranges:
+            # 获取合并单元格的起始行、起始列、结束行、结束列
+            start_row = merged_range.min_row
+            start_col = merged_range.min_col
+            end_row = merged_range.max_row
+            end_col = merged_range.max_col
+            # 获取合并单元格的值
+            value = ws.cell(start_row, start_col).value
+            # 拆分合并单元格
+            ws.unmerge_cells(str(merged_range))
+            # 在每个拆分后的单元格中填入值
+            for row in range(start_row, end_row + 1):
+                for col in range(start_col, end_col + 1):
+                    cell = ws.cell(row, col)
+                    cell.value = value
+        # 保存结果
+        self.workbook.save(self.template_excel)
+
+    def merge_same_cells(self):
+        # 加载xlsx文件
+        ws = self.workbook[self.sheet]
+        # 定义边框样式
+        border_style = Side(style='thin', color="000000")
+        border = Border(left=border_style, right=border_style, top=border_style, bottom=border_style)
+        # 遍历每个单元格（列优先遍历）
+        for col_index in range(1, ws.max_column + 1):
+            col_letter = get_column_letter(col_index)
+            row_start = None
+            row_end = None
+            for row_index in range(1, ws.max_row + 1):
+                current_cell = ws[f"{col_letter}{row_index}"]
+                next_cell = ws[f"{col_letter}{row_index + 1}"]
+                # 当前单元格与下个单元格内容相同时，都不为空，并记录合并范围row_start
+                if row_start is None and current_cell.value == next_cell.value and current_cell.value is not None:
+                    row_start = row_index
+                # 当前单元格与下个单元格内容不同时或任何一个为空时，记录合并范围row_end，并执行合并
+                elif row_start is not None and (
+                        current_cell.value != next_cell.value or current_cell.value is None or next_cell.value is None):
+                    row_end = row_index
+                    ws.merge_cells(f"{col_letter}{row_start}:{col_letter}{row_end}")
+                    row_start = None
+                # 设置边框样式
+                current_cell.border = border
+                next_cell.border = border
+        self.workbook.save(self.template_excel)
+
 
 class XmindHandle():
 
@@ -448,16 +502,25 @@ def file_extraction_intype(file_routing, file_limit, chatbot, history, plugin_kw
             file_limit.extend([title, file_content])
         elif file_path.endswith('xlsx') or file_path.endswith('xls'):
             sheet, = json_args_return(plugin_kwargs, keys=['读取指定Sheet'], default='测试要点')
-            file_content = ExcelHandle(temp_file=file_path).read_as_dict().get(sheet)
+            # 创建文件对象
+            ex_handle = ExcelHandle(temp_file=file_path)
+            # 将工作表中的合并单元格拆分
+            ex_handle.split_merged_cells()
+            xlsx_dict = ex_handle.read_as_dict()
+            file_content = xlsx_dict.get(sheet)
+            active_sheet = ex_handle.workbook.active.title
+            active_content = xlsx_dict.get(active_sheet)
             plugin_kwargs['写入指定模版'] = file_path
             title = long_name_processing(os.path.basename(file_path))
             if file_content:
                 file_limit.extend([title, file_content])
             else:
+                file_limit.extend([title, active_content])
                 chatbot.append([None,
-                                f'无法在{os.path.basename(file_path)}找到{func_box.html_tag_color(sheet)}工作表, '
-                                f'请检查用例文件是存在该工作表。'f'若你的用例工作表是其他名称，'
-                                f'请在自定义插件配置中更改{func_box.html_tag_color("读取指定Sheet")}。'])
+                                f'无法在`{os.path.basename(file_path)}`找到`{sheet}工作表`'
+                                f'将读取上次预览的活动工作表`{active_sheet}`.'
+                                f'若你的用例工作表是其他名称, 请及时暂停插件运行，并在自定义插件配置中更改'
+                                f'{func_box.html_tag_color("读取指定Sheet")}。'])
                 yield from toolbox.update_ui(chatbot, history)
         else:
             with open(file_path, mode='r') as f:
@@ -599,8 +662,9 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
         except:
             pass
         for limit in content_limit:
-            kai_limit = yield from Langchain_cn.knowledge_base_query(limit, chatbot, history, llm_kwargs, plugin_kwargs)
-            inputs_array.append(prompt.replace('{{{v}}}', kai_limit))
+            if not default_prompt:
+                limit = yield from Langchain_cn.knowledge_base_query(limit, chatbot, history, llm_kwargs, plugin_kwargs)
+            inputs_array.append(func_box.replace_expected_text(prompt, content=limit, expect='{{{v}}}'))
             inputs_show_user_array.append(you_say)
     yield from toolbox.update_ui(chatbot, history)
     return inputs_array, inputs_show_user_array
@@ -698,7 +762,7 @@ def write_test_cases(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot
         history: 对话历史
     Returns: None
     """
-    template_file, = json_args_return(plugin_kwargs, ['写入指定模版'])
+    template_file, sheet = json_args_return(plugin_kwargs, ['写入指定模版', '写入指定Sheet'])
     file_classification = file_classification_to_dict(gpt_response_collection)
     chat_file_list = ''
     chatbot.append(['Done', chat_file_list])
@@ -715,7 +779,9 @@ def write_test_cases(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot
                     test_case.append([func_box.clean_br_string(i) for i in i.split('｜')[1:]])
                 else:
                     func_box.通知机器人(f'脏数据过滤，这个不符合写入测试用例的条件 \n\n```\n\n{i}\n\n```\n\n```\n{gpt_response_split}\n```')
-        file_path = ExcelHandle(ipaddr=llm_kwargs['ipaddr'], temp_file=template_file).lpvoid_lpbuffe(test_case, filename=long_name_processing(file_name))
+        xlsx_heandle = ExcelHandle(ipaddr=llm_kwargs['ipaddr'], temp_file=template_file, sheet=sheet)
+        xlsx_heandle.split_merged_cells()  # 先把合并的单元格拆分，避免写入失败
+        file_path = xlsx_heandle.lpvoid_lpbuffe(test_case, filename=long_name_processing(file_name))
         chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, to_tabs=True)}\n\n'
         chatbot[-1] = (['Done', chat_file_list])
         yield from toolbox.update_ui(chatbot, history)
@@ -762,8 +828,8 @@ def supplementary_test_case(gpt_response_collection, llm_kwargs, plugin_kwargs, 
         old_case = plugin_kwargs['原测试用例数据']
         test_case, desc = parsing_json_in_text(file_classification[file_name], old_case)
         file_path = ExcelHandle(ipaddr=llm_kwargs['ipaddr'],
-                                temp_file=template_file).lpvoid_lpbuffe(
-            test_case, filename=long_name_processing(file_name), sheet=sheet)
+                                temp_file=template_file, sheet=sheet).lpvoid_lpbuffe(
+            test_case, filename=long_name_processing(file_name))
         md = Utils().write_markdown(data=desc, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(file_name))
         chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, to_tabs=True)}\n\n' \
                           f'---\n\n{file_name}补充思路如下：\t{func_box.html_view_blank(__href=md, to_tabs=True)}\n\n'
@@ -823,6 +889,4 @@ previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传�
 
 
 if __name__ == '__main__':
-    # old_data = ExcelHandle(temp_file='/Users/kilig/Desktop/支付路径优化-自测用例.xlsx').read_as_dict()['测试要点']
-    with open(file='/Users/kilig/Job/Python-project/kso_gpt/private_upload/192.168.0.102/markdown/支付路径优化-自测用例2.xlsx.md', mode='r') as f:
-        parsing_json_in_text([f.read()], old_case=[['3213']])
+    old_data = ExcelHandle(temp_file='/Users/kilig/Desktop/工作簿.xlsx').merge_same_cells()

@@ -30,9 +30,10 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
     img_ocr, = crazy_box.json_args_return(plugin_kwargs, ['开启OCR'])
     for url in links:
         try:
-            chatbot.append([link_limit + "\n\n网页爬虫和文件处理准备工作中～", None])
+            gpt_say = "网页爬虫和文件处理准备工作中...."
+            chatbot.append([link_limit, gpt_say])
             yield from update_ui(chatbot, history)  # 增加中间过渡
-            if crazy_box.if_kdocs_url_isap(url):
+            if crazy_box.if_kdocs_url_isap(url) and 'ap轻文档' in file_types:
                 ovs_data, content, empty_picture_count, pic_dict, kdocs_dict = crazy_box.get_docs_content(url, image_processing=img_ocr)
                 if img_ocr:
                     if pic_dict:  # 当有图片文件时，再去提醒
@@ -63,6 +64,9 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
                 title = crazy_box.long_name_processing(content)
                 file_limit.extend([title, content])
             else:
+                gpt_say += f'正在解析文档链接，如果文件类型符合`{file_types}`,将下载并解析...'
+                chatbot[-1] = [link_limit, gpt_say]
+                yield from update_ui(chatbot, history)
                 for t in file_types:
                     success, file_manifest, _ = crazy_box.get_kdocs_from_everything(txt=url, type=t, ipaddr=llm_kwargs['ipaddr'])
                     files.extend(file_manifest)
@@ -77,11 +81,10 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
     # 文件读取
     for t in file_types:
         for f in files:
-            _, file_routing, _ = get_files_from_everything(f, t, )
+            _, file_routing, _ = get_files_from_everything(f, t, ipaddr=llm_kwargs['ipaddr'])
             yield from crazy_box.file_extraction_intype(file_routing, file_limit, chatbot, history, plugin_kwargs)
     yield from update_ui(chatbot, history)
     return file_limit
-
 
 
 def KDocs_转Markdown(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port, to_kdocs=True):
