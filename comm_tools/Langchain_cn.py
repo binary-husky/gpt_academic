@@ -106,8 +106,9 @@ def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
         llm_kwargs['know_id'] = know_kwargs['查询列表']
         txt = None
     kai_id = llm_kwargs['know_id']
+    gpt_say = f'正在将问题向量化，然后对`{str(kai_id)}`知识库进行匹配...'
     if kai_id:
-        chatbot.append([txt, f'正在将问题向量化，然后对`{str(kai_id)}`知识库进行匹配...'])
+        chatbot.append([txt, gpt_say])
     for id in kai_id:   #
         if llm_kwargs['know_dict']['know_obj'].get(id, False):
             kai = llm_kwargs['know_dict']['know_obj'][id]
@@ -124,18 +125,22 @@ def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
             referenced_documents = "\n".join([f"{k}: " + doc.page_content for k, doc in enumerate(resp['source_documents'])])
             prompt_cls = '知识库提示词'
             if not referenced_documents:
-                chatbot.append([None, f"`{id}`知识库中没有与问题匹配的文本，所以不会提供任何参考文本，你可以在Settings-更改`知识库检索相关度`中进行调优"])
+                gpt_say += f"`{id}`知识库中没有与问题匹配的文本，所以不会提供任何参考文本，你可以在Settings-更改`知识库检索相关度`中进行调优。\n"
+                chatbot[-1] = [txt, gpt_say]
             else:
                 if know_kwargs:
                     prompt_name = know_kwargs.get(prompt_cls)
-                    chatbot.append([None, f'`{id}`知识库使用的Prompt是`{prompt_cls}`分类下的'
-                                          f'`{prompt_name}`, 插件自定义参数允许指定其他Prompt哦～'])
+                    tips = f'`{id}`知识库使用的Prompt是`{prompt_cls}`分类下的`{prompt_name}`, 插件自定义参数允许指定其他Prompt哦～'
+                    if tips not in str(chatbot):
+                        gpt_say += tips
+                    chatbot[-1] = [txt, gpt_say]
                 else:
                     prompt_name = '引用知识库回答'
-                    tips = [None, f'`{id}`知识库问答使用的Prompt是`{prompt_cls}`分类下的'
-                                  f'`{prompt_name}`, 你可以保存一个同名的Prompt到个人分类下，知识库问答会优先使用个人分类下的提示词']
-                    if tips not in chatbot:
-                        chatbot.append(tips)
+                    tips = f'`{id}`知识库问答使用的Prompt是`{prompt_cls}`分类下的' \
+                           f'`{prompt_name}`, 你可以保存一个同名的Prompt到个人分类下，知识库问答会优先使用个人分类下的提示词'
+                    if tips not in str(chatbot):
+                        gpt_say += tips
+                    chatbot[-1] = [txt, gpt_say]
                 prompt_con = prompt_generator.SqliteHandle(table=f'prompt_{prompt_cls}_sys').find_prompt_result(
                     prompt_name, individual_priority=llm_kwargs['ipaddr'])
                 prompt_content = func_box.replace_expected_text(prompt=prompt_con, content=referenced_documents,

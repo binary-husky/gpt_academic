@@ -7,6 +7,7 @@ import os.path
 import requests
 from comm_tools import func_box
 from paddleocr import PaddleOCR, draw_ocr, PPStructure, save_structure_res
+import concurrent.futures
 # Paddleocr目前支持的多语言语种可以通过修改lang参数进行切换
 # 例如`ch`, `en`, `fr`, `german`, `korean`, `japan`
 
@@ -28,7 +29,8 @@ class Paddle_ocr_select():
         os.makedirs(save_path, exist_ok=True)
         if img_path.startswith('http'):
             response = requests.get(url=img_path, verify=False)
-            with open(os.path.join(save_path, 'tmp.jpg'), mode='wb') as f: f.write(response.content)
+            img_path = os.path.join(save_path, f'{func_box.created_atime()}.jpeg')
+            with open(img_path, mode='wb') as f: f.write(response.content)
         result = ocr.ocr(img_path, cls=True)
         save_file = os.path.join(save_path, f'{func_box.created_atime()}.jpeg')
         os.makedirs(save_path, exist_ok=True)
@@ -53,17 +55,29 @@ class Paddle_ocr_select():
                 im_show.save(save_file)
             except Exception:
                 print('绘制选择文字出错')
+                save_file = img_path
         else:
             save_file= ''
             txts_select = result
         return '\n'.join(txts_select), save_file
 
 
-
-
+def submit_threads_ocr(dictionary, func, max_threads=10):
+    threads = {}
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=max_threads)
+    # 提交任务，并将线程对象作为键，字典的键作为值存储
+    for key in dictionary:
+        threads[key] = executor.submit(func, dictionary[key])
+    # 返回线程字典
+    return threads
 
 
 if __name__ == '__main__':
-    Paddle_ocr_select(
-        ipaddr='123', trust_value=0.9).img_def_content(
-        img_path='/Users/kilig/Job/Python-project/kso_gpt/private_upload/192.168.0.102/kdocs/711 AI活动流程图.pom.png', show_result=True)
+    # 测试
+    my_dict = {'key1': '/Users/kilig/Job/Python-project/kso_gpt/private_upload/img.png',
+               'key2': '/Users/kilig/Job/Python-project/kso_gpt/private_upload/img.png'}
+    thread_dict = submit_threads_ocr(my_dict, Paddle_ocr_select().img_def_content,2)
+    for t in thread_dict:
+        print('1232312')
+        print(thread_dict[t].result())
+

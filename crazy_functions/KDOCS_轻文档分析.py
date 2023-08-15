@@ -41,17 +41,18 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
                         chatbot.append([None, ocr_process])
                     else:
                         ocr_process = ''
-                    for i in pic_dict:
+                    if pic_dict:
                         yield from update_ui(chatbot, history, '正在调用OCR组件，已启用多线程解析，请稍等')
-                        img_content, img_result = ocr_tools.Paddle_ocr_select(ipaddr=llm_kwargs['ipaddr'],
-                                                                              trust_value=llm_kwargs[
-                                                                                  'ocr']).img_def_content(
-                            img_path=pic_dict[i])
-                        content = str(content).replace(f"{i}",
-                                                       f"{func_box.html_local_img(img_result)}\n```{img_content}```")
-                        ocr_process += f'{i} 识别完成，识别效果如下 {func_box.html_local_img(img_result)} \n\n'
-                        chatbot[-1] = [None, ocr_process]
-                        yield from update_ui(chatbot, history)
+                        ocr_func = ocr_tools.Paddle_ocr_select(ipaddr=llm_kwargs['ipaddr'],trust_value=llm_kwargs['ocr']).img_def_content
+                        thread_submission = ocr_tools.submit_threads_ocr(pic_dict, func=ocr_func, max_threads=llm_kwargs.get('worker_num', 5))
+                        for t in thread_submission:
+                            img_result = thread_submission[t].result()[1]
+                            img_content = thread_submission[t].result()[0]
+                            content = str(content).replace(f"{t}",
+                                                           f"{func_box.html_local_img(img_result)}\n```{img_content}```")
+                            ocr_process += f'{t} 识别完成，识别效果如下 {func_box.html_local_img(img_result)} \n\n'
+                            chatbot[-1] = [None, ocr_process]
+                            yield from update_ui(chatbot, history)
                 else:
                     if empty_picture_count >= 5:
                         chatbot.append([None, f'\n\n 需求文档中没有{func_box.html_tag_color("描述")}的图片数量' \

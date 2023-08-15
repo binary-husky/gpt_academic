@@ -267,6 +267,8 @@ def json_convert_dict(file):
     return new_dict
 
 
+
+
 def draw_results(txt, prompt: dict, percent, switch, ipaddr: gr.Request):
     """
     绘制搜索结果
@@ -732,6 +734,7 @@ def spinner_chatbot_loading(chatbot):
     loading_msg[-1] = tuple(temp_list)
     return loading_msg
 
+
 def filter_database_tables():
     tables = SqliteHandle().get_tables()
     preset = toolbox.get_conf('preset_prompt')[0]['key']
@@ -741,6 +744,7 @@ def filter_database_tables():
             split_tab.append("_".join(str(t).split('_')[1:-1]))
     split_tab_new = ['新建分类'] + preset + split_tab
     return split_tab_new
+
 
 def refresh_load_data(prompt, crazy_list, request: gr.Request):
     """

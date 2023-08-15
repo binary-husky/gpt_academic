@@ -492,7 +492,7 @@ def json_args_return(kwargs, keys: list, default=None) -> list:
 
 def replace_special_chars(file_name):
     # 除了中文外，该正则表达式匹配任何一个不是数字、字母、下划线、.、空格的字符，避免文件名有问题
-    new_name = re.sub(r'[^\u4e00-\u9fa5\d\w\s\.\_]', '', file_name)
+    new_name = re.sub(r'[^\u4e00-\u9fa5\d\w\s\.\_]', '', file_name).rstrip().replace(' ', '_')
     if not new_name:
         new_name = func_box.created_atime()
     return new_name
@@ -506,19 +506,12 @@ def long_name_processing(file_name):
     """
     if type(file_name) is list:
         file_name = file_name[0]
-    if len(file_name) > 50:
-        if file_name.find('"""') != -1:
-            temp = file_name.split('"""')[1].splitlines()
-            for i in temp:
-                if i:
-                    file_name = replace_special_chars(i)
-                    break
-        else:
-            temp = file_name.splitlines()
-            for i in temp:
-                if i:
-                    file_name = replace_special_chars(i)
-                    break
+    if len(file_name) > 20:
+        temp = file_name.splitlines()
+        for i in temp:
+            if i:
+                file_name = replace_special_chars(i)
+                break
     if file_name.find('.') != -1:
         file_name = "".join(file_name.split('.')[:-1])
     return file_name
@@ -831,6 +824,5 @@ previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传�
 
 if __name__ == '__main__':
     # old_data = ExcelHandle(temp_file='/Users/kilig/Desktop/支付路径优化-自测用例.xlsx').read_as_dict()['测试要点']
-    # with open(file='/Users/kilig/Job/Python-project/kso_gpt/private_upload/192.168.0.102/markdown/支付路径优化-自测用例2.xlsx.md', mode='r') as f:
-    #     parsing_json_in_text([f.read()], old_case=[['3213']])
-    print(long_name_processing('支付路径优化-自测用例2.xlsx'))
+    with open(file='/Users/kilig/Job/Python-project/kso_gpt/private_upload/192.168.0.102/markdown/支付路径优化-自测用例2.xlsx.md', mode='r') as f:
+        parsing_json_in_text([f.read()], old_case=[['3213']])
