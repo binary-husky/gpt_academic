@@ -136,6 +136,7 @@ class ChatBot(ChatBotFrame):
                                        ).then(fn=func_box.new_button_display,
                                               inputs=[self.langchain_sm_classifi], outputs=[self.langchain_class_name])
 
+
     def draw_examples(self):
         with gr.Column(elem_id='examples_col') as self.examples_column:
             gr.Markdown('#  🤩 快速开始使用Ai功能')

@@ -43,13 +43,7 @@ class Paddle_ocr_select():
             txts_select = [line[1][0] for line in result if line[1][1] > self.trust_value]
             scores = [line[1][1] for line in result]
             try:
-                if img_path.startswith('http'):
-                    response = requests.get(img_path)
-                    with open(save_file, 'wb') as f:
-                        f.write(response.content)
-                    image = Image.open(save_file).convert('RGB')
-                else:
-                    image = Image.open(img_path).convert('RGB')
+                image = Image.open(save_file).convert('RGB')
                 im_show = draw_ocr(image, boxes, txts, scores, font_path=self.font_path)
                 im_show = Image.fromarray(im_show)
                 im_show.save(save_file)

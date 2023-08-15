@@ -148,7 +148,9 @@ span.svelte-1gfkn6j:not(.has-info) {
     flex-wrap: unset !important;
     overflow: hidden !important;
 }
-
+#colum_1 {
+    z-index: 2;
+}
 .sm_select .block.svelte-mppz8v {
     width: 10% !important;
 }

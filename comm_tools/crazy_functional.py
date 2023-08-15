@@ -317,9 +317,9 @@ def get_crazy_functions():
             "Parameters": {
                 '开启OCR': True,
                 "提示词分类": '插件定制',
-                '写入指定Sheet': '测试要点',
                 "预期产出提示词": '文档转测试用例',
                 '写入指定模版': 'https://www.kdocs.cn/l/civeYz1Wg2OK',
+                '写入指定Sheet': '测试要点',
                 "显示过程": False,
             }
         },
@@ -332,10 +332,10 @@ def get_crazy_functions():
             "Parameters": {
                 '开启OCR': True,
                 "提示词分类": '插件定制',
-                '写入指定Sheet': '测试要点',
                 "格式化文档提示词": '提取文档测试点',
                 "预期产出提示词": '文档转测试用例',
                 '写入指定模版': 'https://www.kdocs.cn/l/civeYz1Wg2OK',
+                '写入指定Sheet': '测试要点',
                 "显示过程": False,
             }
         },
@@ -348,12 +348,12 @@ def get_crazy_functions():
             "Parameters": {
                 '开启OCR': True,
                 "提示词分类": '插件定制',
-                '写入指定Sheet': '测试要点',
                 "格式化文档提示词": '提取文档测试点',
                 "预期产出提示词": '文档转测试用例',
                 "关联知识库": {"知识库提示词": "缺陷反推测试用例", "查询分类": "历史缺陷列表",
-                               "查询列表": ["国际客户端项目-缺陷池-Win端"]},
+                               "查询列表": ["国际客户端项目-缺陷池"]},
                 '写入指定模版': 'https://www.kdocs.cn/l/civeYz1Wg2OK',
+                '写入指定Sheet': '测试要点',
                 "显示过程": False,
             }
         },
@@ -366,10 +366,10 @@ def get_crazy_functions():
             "Parameters": {
                 '开启OCR': True,
                 "提示词分类": '插件定制',
-                '写入指定Sheet': '测试要点',
                 '格式化文档提示词': '文档转Markdown_分割',
                 "预期产出提示词": '接口文档转测试用例',
                 '写入指定模版': 'https://www.kdocs.cn/l/ckuTJWR6vBtJ',
+                '写入指定Sheet': '测试要点',
                 "显示过程": False,
             }
         },

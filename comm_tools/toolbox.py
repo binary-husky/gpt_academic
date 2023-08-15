@@ -122,6 +122,7 @@ def ArgsGeneralWrapper(f):
             plugin_kwargs['advanced_arg'] = ''
             plugin_kwargs.update({'parameters_def': args[1]})
         elif len(args) == 0:
+            plugin_kwargs['advanced_arg'] = ''
             txt_passon = yield from Langchain_cn.knowledge_base_query(txt_passon, chatbot_with_cookie, history, llm_kwargs, plugin_kwargs)
         if cookies.get('lock_plugin', None) is None:
             # 正常状态
