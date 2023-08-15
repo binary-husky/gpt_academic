@@ -651,7 +651,7 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
         # 是否展示任务结果
         kwargs_is_show,  = json_args_return(plugin_kwargs, ['显示过程'])
         if kwargs_is_show:
-            for results in list(zip(gpt_response_collection[0::2], gpt_response_collection[1::2])):
+            for results in list(zip(inputs_array, gpt_response_collection[1::2])):
                 chatbot.append(results)
                 history.extend(results)
                 yield from toolbox.update_ui(chatbot, history)
@@ -723,7 +723,7 @@ def write_test_cases(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot
                 else:
                     func_box.通知机器人(f'脏数据过滤，这个不符合写入测试用例的条件 \n\n```\n\n{i}\n\n```\n\n```\n{gpt_response_split}\n```')
         file_path = ExcelHandle(ipaddr=llm_kwargs['ipaddr'], temp_file=template_file).lpvoid_lpbuffe(test_case, filename=long_name_processing(file_name))
-        chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path)}\n\n'
+        chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, to_tabs=True)}\n\n'
         chatbot[-1] = (['Done', chat_file_list])
         yield from toolbox.update_ui(chatbot, history)
     return
@@ -761,17 +761,19 @@ def parsing_json_in_text(txt_data: list, old_case):
 
 
 def supplementary_test_case(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history):
-    template_file, = json_args_return(plugin_kwargs, ['写入指定模版'])
+    template_file, sheet = json_args_return(plugin_kwargs, ['写入指定模版', '读取指定Sheet'])
     file_classification = file_classification_to_dict(gpt_response_collection)
     chat_file_list = ''
     chatbot.append(['Done', chat_file_list])
     for file_name in file_classification:
         old_case = plugin_kwargs['原测试用例数据']
         test_case, desc = parsing_json_in_text(file_classification[file_name], old_case)
-        file_path = ExcelHandle(ipaddr=llm_kwargs['ipaddr'], temp_file=template_file).lpvoid_lpbuffe(test_case,filename=long_name_processing(file_name))
+        file_path = ExcelHandle(ipaddr=llm_kwargs['ipaddr'],
+                                temp_file=template_file).lpvoid_lpbuffe(
+            test_case, filename=long_name_processing(file_name), sheet=sheet)
         md = Utils().write_markdown(data=desc, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(file_name))
-        chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path)}\n\n' \
-                          f'---\n\n{file_name}补充思路如下：\t{func_box.html_view_blank(__href=md)}\n\n'
+        chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, to_tabs=True)}\n\n' \
+                          f'---\n\n{file_name}补充思路如下：\t{func_box.html_view_blank(__href=md, to_tabs=True)}\n\n'
         chatbot[-1] = (['Done', chat_file_list])
         yield from toolbox.update_ui(chatbot, history)
     return
@@ -795,7 +797,7 @@ def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
             inputs_count += str(value).replace('```', '')  # 去除头部和尾部的代码块, 避免流程图堆在一块
         md, html = Utils().markdown_to_flow_chart(data=inputs_count, hosts=llm_kwargs['ipaddr'],
                                                   file_name=long_name_processing(file_name))
-        chatbot.append((None, "View: " + func_box.html_view_blank(md)+'\n\n--- \n\n View: ' + func_box.html_view_blank(html)))
+        chatbot.append((None, "View: " + func_box.html_view_blank(md, to_tabs=True)+'\n\n--- \n\n View: ' + func_box.html_view_blank(html)))
     # f'tips: 双击空白处可以放大～\n\n' f'{func_box.html_iframe_code(html_file=html)}'  无用，不允许内嵌网页了
     yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
 
@@ -817,7 +819,7 @@ def result_written_to_markdwon(gpt_response_collection, llm_kwargs, chatbot, his
             inputs_all += value
         md = Utils().write_markdown(data=inputs_all, hosts=llm_kwargs['ipaddr'],
                                     file_name=long_name_processing(file_name))
-        chatbot.append((None, f'markdown已写入文件，下次可以直接提交markdown文件，就可以节省tomarkdown的时间啦 {func_box.html_view_blank(md)}'))
+        chatbot.append((None, f'markdown已写入文件，下次使用插件可以直接提交markdown文件啦 {func_box.html_view_blank(md, to_tabs=True)}'))
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
 
 

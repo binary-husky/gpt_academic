@@ -59,6 +59,10 @@ class Paddle_ocr_select():
         return '\n'.join(txts_select), save_file
 
 
+
+
+
+
 if __name__ == '__main__':
     Paddle_ocr_select(
         ipaddr='123', trust_value=0.9).img_def_content(

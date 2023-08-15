@@ -119,8 +119,9 @@ def ArgsGeneralWrapper(f):
         if encrypt in models: txt_passon = func_box.encryption_str(txt)
         # 插件会传多参数，如果是插件，那么更新知识库 和 默认高级参数
         if len(args) > 1:
+            plugin_kwargs['advanced_arg'] = ''
             plugin_kwargs.update({'parameters_def': args[1]})
-        else:
+        elif len(args) == 0:
             txt_passon = yield from Langchain_cn.knowledge_base_query(txt_passon, chatbot_with_cookie, history, llm_kwargs, plugin_kwargs)
         if cookies.get('lock_plugin', None) is None:
             # 正常状态

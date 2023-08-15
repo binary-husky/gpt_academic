@@ -145,11 +145,14 @@ def html_local_file(file):
     return file
 
 
-def html_view_blank(__href: str, file_name=''):
+def html_view_blank(__href: str, file_name='', to_tabs=False):
+    __file = __href.replace(base_path, ".")
     __href = html_local_file(__href)
     if not file_name:
         file_name = __href.split('/')[-1]
     a = f'<a href="{__href}" target="_blank" class="svelte-xrr240">{file_name}</a>'
+    if to_tabs:
+        a = "\n\n"+to_markdown_tabs(head=['下载地址', '插件复用地址'], tabs=[[a], [__file]])+"\n\n"
     return a
 
 
@@ -486,16 +489,17 @@ def prompt_save(txt, name, prompt: gr.Dataset, pro_select, cls_name, ipaddr: gr.
         elif pro_select != '新建分类':
             cls_name = pro_select
         sql_obj = SqliteHandle(f'prompt_{tab_cls}')
+        cls_update = gr.Dropdown.update(value=cls_name, choices=filter_database_tables())
         _, source = sql_obj.get_prompt_value(name)
         status = sql_obj.inset_prompt({name: txt}, user_info)
         if status:
             result = [[f'{html_tag_color("!!!!已有其他人保存同名的prompt，请修改prompt名称后再保存", color="red")}', '']]
             prompt['samples'] = [[name, txt]]
-            return txt, name, cls_name, gr.Dataset.update(samples=result, visible=True), prompt, gr.Tabs.update(selected='chatbot')
+            return txt, name, cls_update, gr.Dataset.update(samples=result, visible=True), prompt, gr.Tabs.update(selected='chatbot')
         else:
             result = prompt_retrieval(is_all=cls_name, hosts=tab_cls)
             prompt['samples'] = result
-            return "", "", cls_name, gr.Dataset.update(samples=result, visible=True), prompt, gr.Tabs.update(
+            return "", "", cls_update, gr.Dataset.update(samples=result, visible=True), prompt, gr.Tabs.update(
                 selected='chatbot')
     elif not txt or not name:
         result = [[f'{html_tag_color("编辑框 or 名称不能为空!!!!!", color="red")}', '']]
@@ -970,5 +974,5 @@ class JsonHandle:
 
 
 if __name__ == '__main__':
-    print(split_csv_by_quarter('/Users/kilig/Desktop/testbug/国际客户端项目-缺陷池-Win端-全部缺陷.csv'))
-    # print(html_local_file('/Users/kilig/Job/Python-project/kso_gpt/config.py'))
+    # print(split_csv_by_quarter('/Users/kilig/Desktop/testbug/国际客户端项目-缺陷池-Win端-全部缺陷.csv'))
+    print(html_view_blank('/Users/kilig/Job/Python-project/kso_gpt/config.py', to_tabs=True))

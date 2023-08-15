@@ -42,7 +42,7 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
                     else:
                         ocr_process = ''
                     for i in pic_dict:
-                        yield from update_ui(chatbot, history, '正在调用OCR组件，图片多可能会比较慢')
+                        yield from update_ui(chatbot, history, '正在调用OCR组件，已启用多线程解析，请稍等')
                         img_content, img_result = ocr_tools.Paddle_ocr_select(ipaddr=llm_kwargs['ipaddr'],
                                                                               trust_value=llm_kwargs[
                                                                                   'ocr']).img_def_content(
