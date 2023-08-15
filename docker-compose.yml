@@ -56,6 +56,8 @@ services:
     network_mode: "host"
     command: >
       bash -c "python3 -u main.py"
+    volumes:
+      - ./cache:/root/.cache/
 
 ### ===================================================
 ### 【方案三】 如果需要运行ChatGPT + LLAMA + 盘古 + RWKV本地模型
@@ -88,7 +90,8 @@ services:
     # 不使用代理网络拉取最新代码
     command: >
       python3 -u main.py
-
+    volumes:
+      - ./cache:/root/.cache/
 
 ## ===================================================
 ## 【方案四】 ChatGPT + Latex
