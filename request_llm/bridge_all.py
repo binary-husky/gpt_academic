@@ -361,7 +361,7 @@ if "chatgpt_website" in AVAIL_LLM_MODELS:   # 接入一些逆向工程https://gi
             "chatgpt_website": {
                 "fn_with_ui": chatgpt_website_ui,
                 "fn_without_ui": chatgpt_website_noui,
-                "endpoint": None,
+                "endpoint": openai_endpoint,
                 "max_token": 4096,
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
