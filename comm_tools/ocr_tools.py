@@ -35,6 +35,7 @@ class Paddle_ocr_select():
         save_file = os.path.join(save_path, f'{func_box.created_atime()}.jpeg')
         os.makedirs(save_path, exist_ok=True)
         result = result[0]
+        draw_error = False
         if show_result:
             # 显示结果
             from PIL import Image
@@ -50,10 +51,11 @@ class Paddle_ocr_select():
             except Exception:
                 print('绘制选择文字出错')
                 save_file = img_path
+                draw_error = True
         else:
             save_file= ''
             txts_select = result
-        return '\n'.join(txts_select), save_file
+        return '\n'.join(txts_select), save_file, draw_error
 
 
 def submit_threads_ocr(dictionary, func, max_threads=10):

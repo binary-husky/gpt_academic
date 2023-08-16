@@ -188,6 +188,12 @@ class ExcelHandle:
             self.template_excel = os.path.join(func_box.base_path, 'docs/template/客户端测试用例模版.xlsx')
         self.workbook = load_workbook(self.template_excel)
         self.sheet = sheet
+        self.yellow_fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
+        self.green_fill = PatternFill(start_color="1abc9c", end_color="1abc9c", fill_type="solid")
+        self.red_fill = PatternFill(start_color="ff7f50", end_color="ff7f50", fill_type="solid")
+        if not sheet: self.sheet = '测试要点'
+
+
 
     def lpvoid_lpbuffe(self, data_list: list, filename=''):
         # 加载现有的 Excel 文件        # 选择要操作的工作表, 默认是测试要点
@@ -198,7 +204,6 @@ class ExcelHandle:
         # 定义起始行号
         start_row = find_index_inlist(self.read_as_dict()[self.sheet], ['操作步骤', '前置条件', '预期结果']) + 2
         # 创建一个黄色的填充样式
-        fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
         # 遍历数据列表
         for row_data in data_list:
             # 写入每一行的数据到指定的单元格范围
@@ -207,8 +212,8 @@ class ExcelHandle:
                 try:
                     cell.value = str(value).strip()
                     # 判断 value 是否为 '插件补充的用例'
-                    if '插件补充的用例' == str(value):
-                        cell.fill = fill  # 设置单元格的填充样式为黄色
+                    if '插件补充的用例' in str(value):
+                        cell.fill = self.yellow_fill
                 except Exception:
                     print(row_data, value)
                     func_box.通知机器人(error=f'写入excel错误啦\n\n```\n\n{row_data}\n\n{value}\n\n```'
@@ -453,7 +458,7 @@ def get_kdocs_files(limit, project_folder, type, ipaddr):
         name = 'temp.md'
         tag = content.splitlines()[0][:20]
         for i in pic_dict:  # 增加OCR选项
-            img_content, img_result = ocr_tools.Paddle_ocr_select(ipaddr=ipaddr, trust_value=True
+            img_content, img_result, _ = ocr_tools.Paddle_ocr_select(ipaddr=ipaddr, trust_value=True
                                                                   ).img_def_content(img_path=pic_dict[i])
             content = str(content).replace(f"{i}", f"{func_box.html_local_img(img_result)}\n```{img_content}```")
             name = tag + '.md'
@@ -501,7 +506,7 @@ def get_kdocs_from_everything(txt, type='', ipaddr='temp'):
     return success, file_manifest, project_folder
 
 
-def file_extraction_intype(file_routing, file_limit, chatbot, history, plugin_kwargs):
+def file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_kwargs, plugin_kwargs):
     """
     Args:
         file_routing: 文件路径
@@ -509,9 +514,17 @@ def file_extraction_intype(file_routing, file_limit, chatbot, history, plugin_kw
         chatbot: 对话组件
     Returns: None
     """
+    # 文件读取
+    file_routing = []
+    if type(file_types) is dict: files = [files[f] for f in files]
+    for t in file_types:
+        for f in files:
+            _, routing, _ = crazy_utils.get_files_from_everything(f, t, ipaddr=llm_kwargs['ipaddr'])
+            file_routing.extend(routing)
     for file_path in file_routing:
         chatbot.append([None, f'`{file_path.replace(func_box.base_path, ".")}`' +
                         f"\t...正在解析本地文件\n\n"])
+        yield from toolbox.update_ui(chatbot, history)
         if file_path.endswith('pdf'):
             file_content, _ = crazy_utils.read_and_clean_pdf_text(file_path)
             title = long_name_processing(file_content)
@@ -634,7 +647,7 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
     segments = []
     if type(inputs) is list:
         if get_token_num(str(inputs)) > max_token:
-            chatbot.append([None, f'...对话数据预计会超出{all_tokens}tokens限制, 拆分中...'])
+            chatbot.append(['请检查数据，并进行提交处理', f'...对话数据预计会超出{all_tokens}tokens限制, 拆分中...'])
             segments.extend(split_list_token_limit(data=inputs, get_num=get_token_num, max_num=max_token))
         else:
             segments.extend(inputs)
@@ -652,7 +665,7 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
 
 
 
-def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history, default_prompt: str = False, knowledge_base: bool = False):
+def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history, default_prompt: str = False, knowledge_base: bool = False, task_tag=''):
     """
     Args:
         gpt_response_collection:  多线程GPT的返回结果or文件读取处理后的结果
@@ -673,8 +686,8 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     else:
         prompt_cls_tab = f'prompt_{prompt_cls}_sys'
     if default_prompt: kwargs_prompt = default_prompt
-    chatbot.append([f'接下来使用的Prompt是{func_box.html_tag_color(prompt_cls)}分类下的：{func_box.html_tag_color(kwargs_prompt)}'
-                    f', 你可以在{func_box.html_tag_color("自定义插件参数")}中指定另一个Prompt哦～', None])
+    chatbot.append([None, f'接下来使用的Prompt是{func_box.html_tag_color(prompt_cls)}分类下的：{func_box.html_tag_color(kwargs_prompt)}'
+                    f', 你可以在{func_box.html_tag_color("自定义插件参数")}中指定另一个Prompt哦～'])
     time.sleep(1)
     prompt = prompt_generator.SqliteHandle(table=prompt_cls_tab).find_prompt_result(kwargs_prompt)
     for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
@@ -687,7 +700,7 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
             if knowledge_base:
                 limit = yield from Langchain_cn.knowledge_base_query(limit, chatbot, history, llm_kwargs, plugin_kwargs)
             inputs_array.append(func_box.replace_expected_text(prompt, content=limit, expect='{{{v}}}'))
-            inputs_show_user_array.append(you_say)
+            inputs_show_user_array.append(you_say+task_tag)
     yield from toolbox.update_ui(chatbot, history)
     return inputs_array, inputs_show_user_array
 
@@ -737,6 +750,19 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
     return gpt_response_collection
 
 
+def func_拆分与提问(file_limit, llm_kwargs, plugin_kwargs, chatbot, history, args_keys: list, task_tag: str = ''):
+    if args_keys[1]:
+        plugin_kwargs['关联知识库'] = args_keys[1]
+    split_content_limit = yield from input_output_processing(file_limit, llm_kwargs, plugin_kwargs,
+                                                             chatbot, history, default_prompt=args_keys[0],
+                                                             knowledge_base=args_keys[1], task_tag=task_tag)
+    inputs_array, inputs_show_user_array = split_content_limit
+    gpt_response_collection = yield from submit_multithreaded_tasks(inputs_array, inputs_show_user_array,
+                                                                              llm_kwargs, chatbot, history,
+                                                                              plugin_kwargs)
+    return gpt_response_collection
+
+
 # <---------------------------------------写入文件方法----------------------------------------->
 def file_classification_to_dict(gpt_response_collection):
     """
@@ -753,7 +779,7 @@ def file_classification_to_dict(gpt_response_collection):
     return file_classification
 
 
-def batch_recognition_images_to_md(img_list, ipaddr):
+def batch_recognition_images_to_md(img_list, ipaddr, desc='插件补充的用例'):
     """
     Args: 将图片批量识别然后写入md文件
         img_list: 图片地址list
@@ -763,7 +789,7 @@ def batch_recognition_images_to_md(img_list, ipaddr):
     temp_list = []
     for img in img_list:
         if os.path.exists(img):
-            img_content, img_result = ocr_tools.Paddle_ocr_select(ipaddr=ipaddr, trust_value=True
+            img_content, img_result, _ = ocr_tools.Paddle_ocr_select(ipaddr=ipaddr, trust_value=True
                                                                   ).img_def_content(img_path=img)
             temp_file = os.path.join(func_box.users_path, ipaddr, 'ocr_to_md', img_content.splitlines()[0][:20]+'.md')
             with open(temp_file, mode='w') as f:
@@ -772,44 +798,6 @@ def batch_recognition_images_to_md(img_list, ipaddr):
         else:
             print(img, '文件路径不存在')
     return temp_list
-
-
-def write_test_cases(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history):
-    """
-    Args:
-        gpt_response_collection: [输入文件标题， 输出]
-        llm_kwargs: 调优参数
-        plugin_kwargs: 插件调优参数
-        chatbot: 对话组件
-        history: 对话历史
-    Returns: None
-    """
-    template_file, sheet = json_args_return(plugin_kwargs, ['写入指定模版', '写入指定Sheet'])
-    file_classification = file_classification_to_dict(gpt_response_collection)
-    chat_file_list = ''
-    you_say = '准备将测试用例写入...'
-    chatbot.append([you_say, chat_file_list])
-    for file_name in file_classification:
-        test_case = []
-        for value in file_classification[file_name]:
-            test_case_content = value.splitlines()
-            index = find_index_inlist(test_case_content, ['---'])
-            gpt_response_split = test_case_content[index+1:]  # 过滤掉表头
-            for i in gpt_response_split:
-                if i.find('|') != -1:
-                    test_case.append([func_box.clean_br_string(i) for i in i.split('|')[1:]])
-                elif i.find('｜') != -1:
-                    test_case.append([func_box.clean_br_string(i) for i in i.split('｜')[1:]])
-                else:
-                    func_box.通知机器人(f'脏数据过滤，这个不符合写入测试用例的条件 \n\n```\n\n{i}\n\n```\n\n```\n{gpt_response_split}\n```')
-        xlsx_heandle = ExcelHandle(ipaddr=llm_kwargs['ipaddr'], temp_file=template_file, sheet=sheet)
-        xlsx_heandle.split_merged_cells()  # 先把合并的单元格拆分，避免写入失败
-        file_path = xlsx_heandle.lpvoid_lpbuffe(test_case, filename=long_name_processing(file_name))
-        chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, to_tabs=True)}\n\n'
-        you_say += 'Done'
-        chatbot[-1] = ([you_say, chat_file_list])
-        yield from toolbox.update_ui(chatbot, history)
-    return
 
 
 def parsing_json_in_text(txt_data: list, old_case):
@@ -838,16 +826,60 @@ def parsing_json_in_text(txt_data: list, old_case):
         if len(txt_data) != len(old_case): index = -1  # 兼容一下哈
         for new_case in supplementary_data:
             if new_case not in old_case[index]:
-                old_case[index].append(new_case+['插件补充的用例'])
+                old_case[index].append(new_case+[desc])
         response.extend(old_case[index])
     return response, desc
 
 
+def write_test_cases(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history):
+    """
+    Args:
+        gpt_response_collection: [输入文件标题， 输出]
+        llm_kwargs: 调优参数
+        plugin_kwargs: 插件调优参数
+        chatbot: 对话组件
+        history: 对话历史
+        file_key: 存入历史文件
+    Returns: None
+    """
+    template_file, sheet = json_args_return(plugin_kwargs, ['写入指定模版', '写入指定Sheet'])
+    file_classification = file_classification_to_dict(gpt_response_collection)
+    chat_file_list = '...'
+    you_say = '准备将测试用例写入Excel中...'
+    chatbot.append([you_say, chat_file_list])
+    yield from toolbox.update_ui(chatbot, history)
+    files_limit = []
+    for file_name in file_classification:
+        test_case = []
+        for value in file_classification[file_name]:
+            test_case_content = value.splitlines()
+            index = find_index_inlist(test_case_content, ['---'])
+            gpt_response_split = test_case_content[index+1:]  # 过滤掉表头
+            for i in gpt_response_split:
+                if i.find('|') != -1:
+                    test_case.append([func_box.clean_br_string(i) for i in i.split('|')[1:]])
+                elif i.find('｜') != -1:
+                    test_case.append([func_box.clean_br_string(i) for i in i.split('｜')[1:]])
+                else:
+                    func_box.通知机器人(f'脏数据过滤，这个不符合写入测试用例的条件 \n\n```\n\n{i}\n\n```\n\n```\n{gpt_response_split}\n```')
+        xlsx_heandle = ExcelHandle(ipaddr=llm_kwargs['ipaddr'], temp_file=template_file, sheet=sheet)
+        xlsx_heandle.split_merged_cells()  # 先把合并的单元格拆分，避免写入失败
+        file_path = xlsx_heandle.lpvoid_lpbuffe(test_case, filename=long_name_processing(file_name))
+        chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, to_tabs=True)}\n\n'
+        chatbot[-1] = ([you_say, chat_file_list])
+        yield from toolbox.update_ui(chatbot, history)
+        files_limit.append(file_path)
+    return files_limit
+
+
 def supplementary_test_case(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history):
     template_file, sheet = json_args_return(plugin_kwargs, ['写入指定模版', '读取指定Sheet'])
+    if not sheet:
+        sheet, = json_args_return(plugin_kwargs, ['写入指定Sheet'])
     file_classification = file_classification_to_dict(gpt_response_collection)
     chat_file_list = ''
     chatbot.append(['Done', chat_file_list])
+    files_limit = []
     for file_name in file_classification:
         old_case = plugin_kwargs['原测试用例数据']
         test_case, desc = parsing_json_in_text(file_classification[file_name], old_case)
@@ -859,10 +891,11 @@ def supplementary_test_case(gpt_response_collection, llm_kwargs, plugin_kwargs, 
                           f'---\n\n{file_name}补充思路如下：\t{func_box.html_view_blank(__href=md, to_tabs=True)}\n\n'
         chatbot[-1] = (['Done', chat_file_list])
         yield from toolbox.update_ui(chatbot, history)
-    return
+        files_limit.append(file_path)
+    return files_limit
 
 
-def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
+def transfer_flow_chart(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history):
     """
     Args: 将输出结果写入md，并转换为流程图
         gpt_response_collection: [输入、输出]
@@ -874,6 +907,7 @@ def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
     """
     chatbot.append([None, f'🏃🏻‍正在努力将Markdown转换为流程图~'])
     file_classification = file_classification_to_dict(gpt_response_collection)
+    file_limit = []
     for file_name in file_classification:
         inputs_count = ''
         for value in file_classification[file_name]:
@@ -881,11 +915,13 @@ def transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history):
         md, html = Utils().markdown_to_flow_chart(data=inputs_count, hosts=llm_kwargs['ipaddr'],
                                                   file_name=long_name_processing(file_name))
         chatbot.append((None, "View: " + func_box.html_view_blank(md, to_tabs=True)+'\n\n--- \n\n View: ' + func_box.html_view_blank(html)))
+        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
+        file_limit.append(md)
     # f'tips: 双击空白处可以放大～\n\n' f'{func_box.html_iframe_code(html_file=html)}'  无用，不允许内嵌网页了
-    yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
+    return file_limit
 
 
-def result_written_to_markdwon(gpt_response_collection, llm_kwargs, chatbot, history):
+def result_written_to_markdwon(gpt_response_collection, llm_kwargs, plugin_kwargs,  chatbot, history, stage=False):
     """
     Args: 将输出结果写入md
         gpt_response_collection: [输入、输出]
@@ -896,16 +932,18 @@ def result_written_to_markdwon(gpt_response_collection, llm_kwargs, chatbot, his
         None
     """
     file_classification = file_classification_to_dict(gpt_response_collection)
+    file_limit = []
     for file_name in file_classification:
         inputs_all = ''
         for value in file_classification[file_name]:
             inputs_all += value
         md = Utils().write_markdown(data=inputs_all, hosts=llm_kwargs['ipaddr'],
                                     file_name=long_name_processing(file_name))
-        chatbot.append((None, f'markdown已写入文件，下次使用插件可以直接提交markdown文件啦 {func_box.html_view_blank(md, to_tabs=True)}'))
+        chat_file_list = f'markdown已写入文件，下次使用插件可以直接提交markdown文件啦 {func_box.html_view_blank(md, to_tabs=True)}'
+        chatbot.append((None, chat_file_list))
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
-
-
+        file_limit.append(md)
+    return file_limit
 # <---------------------------------------一些Tips----------------------------------------->
 previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传，多个文件请上传压缩包，'\
                   f'{func_box.html_tag_color("如果是网络文件或金山文档链接，请粘贴到输入框")}, 然后再次点击该插件'\

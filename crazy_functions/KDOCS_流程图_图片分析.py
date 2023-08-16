@@ -28,7 +28,7 @@ def ocr_batch_processing(file_manifest, chatbot, history, llm_kwargs):
             i_say = f'{" ".join([func_box.html_view_blank(i, to_tabs=True)for i in file_manifest if os.path.exists(i)])}\n\nORC开始工作'
             chatbot.append([i_say, process])
             yield from toolbox.update_ui(chatbot, history, '正在调用OCR组件，图片多可能会比较慢')
-            img_content, img_result = ocr_tools.Paddle_ocr_select(ipaddr=llm_kwargs['ipaddr'],
+            img_content, img_result, _ = ocr_tools.Paddle_ocr_select(ipaddr=llm_kwargs['ipaddr'],
                                                                   trust_value=llm_kwargs['ocr']
                                                                   ).img_def_content(img_path=pic_path, show_result=True)
             process += f'{"/".join(pic_path.split("/")[-2:])} 识别完成，识别效果如下 {func_box.html_local_img(img_result)} \n\n' \

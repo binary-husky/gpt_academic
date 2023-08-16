@@ -100,7 +100,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
                         raise RuntimeError("用户取消了程序。")
         else: raise RuntimeError("意外Json结构："+delta)
     if json_data['finish_reason'] == 'content_filter':
-        raise RuntimeError("由于提问含不合规内容被Azure过滤。")
+        return f"raise ConnectionAbortedError jsokf 由于提问含不合规内容被Azure过滤。\n\n{result}\n\n"
     if json_data['finish_reason'] == 'length':
         return f"raise ConnectionAbortedError jsokf\n\n{result}\n\n"
     return result
@@ -198,6 +198,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     yield from toolbox.update_ui(chatbot=chatbot, history=history, msg=status_text) # 刷新界面
                 except Exception as e:
                     traceback.print_exc()
+                    history = []  # 发生错误后，清空对话记录
                     yield from toolbox.update_ui(chatbot=chatbot, history=history, msg="Json解析不合常规") # 刷新界面
                     chunk = get_full_error(chunk, stream_response)
                     chunk_decoded = chunk.decode()

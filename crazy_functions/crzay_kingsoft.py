@@ -45,7 +45,7 @@ class Kdocs:
         self.parm_shapes_data = {"objects": [], "expire": 86400000, "support_webp": True, "with_thumbnail": True,
                                  "support_lossless": True}
         self.parm_export_preload = {"ver": "56"}
-        self.parm_bulk_download = {'file_ids': []}
+        self.parm_bulk_download = {'file_ids': [], 'csrfmiddlewaretoken': self.cookies['csrf']}
         self.params_task = {'task_id': ''}
         self.params_continue = {"task_id": "", "download_as": [
                             {"suffix": ".otl", "as": ".pdf"},
@@ -99,7 +99,7 @@ class Kdocs:
                                  json=self.parm_bulk_download, verify=False).json()
         if dw_response.get('data', False):
             task_id = dw_response['data']['task_id']
-            task_info = dw_response['data']['online_file'], dw_response['data']['online_fnum']
+            task_info = dw_response['data'].get('online_file'), dw_response['data'].get('online_fnum')
         else:
             print(dw_response['result'])
             task_id = None

@@ -610,7 +610,6 @@ from comm_tools import base_api
 app = base_api.app
 PORT = LOCAL_PORT if WEB_PORT <= 0 else WEB_PORT
 reload_javascript()
-check_proxy_free()
 chatbot_main = ChatBot()
 chatbot_main.main()
 gradio_app = gr.mount_gradio_app(app, chatbot_main.demo, '/gradio')
