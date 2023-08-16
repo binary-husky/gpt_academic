@@ -1,5 +1,5 @@
 from toolbox import CatchException, report_execption, write_results_to_file
-from toolbox import update_ui
+from toolbox import update_ui, promote_file_to_downloadzone
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 from .crazy_utils import read_and_clean_pdf_text
@@ -147,23 +147,14 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
             print('writing html result failed:', trimmed_format_exc())
 
     # 准备文件的下载
-    import shutil
     for pdf_path in generated_conclusion_files:
         # 重命名文件
-        rename_file = f'./gpt_log/翻译-{os.path.basename(pdf_path)}'
-        if os.path.exists(rename_file):
-            os.remove(rename_file)
-        shutil.copyfile(pdf_path, rename_file)
-        if os.path.exists(pdf_path):
-            os.remove(pdf_path)
+        rename_file = f'翻译-{os.path.basename(pdf_path)}'
+        promote_file_to_downloadzone(pdf_path, rename_file=rename_file, chatbot=chatbot)
     for html_path in generated_html_files:
         # 重命名文件
-        rename_file = f'./gpt_log/翻译-{os.path.basename(html_path)}'
-        if os.path.exists(rename_file):
-            os.remove(rename_file)
-        shutil.copyfile(html_path, rename_file)
-        if os.path.exists(html_path):
-            os.remove(html_path)
+        rename_file = f'翻译-{os.path.basename(html_path)}'
+        promote_file_to_downloadzone(html_path, rename_file=rename_file, chatbot=chatbot)
     chatbot.append(("给出输出文件清单", str(generated_conclusion_files + generated_html_files)))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 

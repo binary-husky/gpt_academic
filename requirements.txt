@@ -1,3 +1,5 @@
+./docs/gradio-3.32.2-py3-none-any.whl
+pydantic==1.10.11
 tiktoken>=0.3.3
 requests[socks]
 transformers
@@ -7,6 +9,7 @@ prompt_toolkit
 latex2mathml
 python-docx
 mdtex2html
+anthropic
 colorama
 Markdown
 pygments
@@ -15,3 +18,5 @@ openai
 numpy
 arxiv
 rich
+websocket-client
+pypdf2==2.12.1

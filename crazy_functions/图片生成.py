@@ -27,8 +27,10 @@ def gen_image(llm_kwargs, prompt, resolution="256x256"):
     }
     response = requests.post(url, headers=headers, json=data, proxies=proxies)
     print(response.content)
-    image_url = json.loads(response.content.decode('utf8'))['data'][0]['url']
-
+    try:
+        image_url = json.loads(response.content.decode('utf8'))['data'][0]['url']
+    except:
+        raise RuntimeError(response.content.decode())
     # 文件保存到本地
     r = requests.get(image_url, proxies=proxies)
     file_path = 'gpt_log/image_gen/'
@@ -53,7 +55,7 @@ def 图片生成(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     web_port        当前软件运行的端口号
     """
     history = []    # 清空历史，以免输入溢出
-    chatbot.append(("这是什么功能？", "[Local Message] 生成图像, 请先把模型切换至gpt-xxxx或者api2d-xxxx。如果中文效果不理想, 尝试Prompt。正在处理中 ....."))
+    chatbot.append(("这是什么功能？", "[Local Message] 生成图像, 请先把模型切换至gpt-*或者api2d-*。如果中文效果不理想, 请尝试英文Prompt。正在处理中 ....."))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     resolution = plugin_kwargs.get("advanced_arg", '256x256')
