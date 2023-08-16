@@ -141,9 +141,10 @@ def KDocs_转客户端测试用例(link_limit, llm_kwargs, plugin_kwargs, chatbo
         chatbot.append([None, f'{func_box.html_tag_color("多线程一个都没有通过，暂停运行!!!!")}'])
         yield from update_ui(chatbot=chatbot, history=history, msg='多线程一个都没有通过，暂停运行')
         return
+    know_kwargs, = crazy_box.json_args_return(plugin_kwargs, ['关联知识库'])
     split_content_limit = yield from crazy_box.input_output_processing(gpt_response_collection,
                                                                                         llm_kwargs, plugin_kwargs,
-                                                                                        chatbot, history)
+                                                                                        chatbot, history, knowledge_base=know_kwargs)
     inputs_array, inputs_show_user_array = split_content_limit
     gpt_response_collection = yield from crazy_box.submit_multithreaded_tasks(inputs_array, inputs_show_user_array,
                                                                               llm_kwargs, chatbot, history,
@@ -201,7 +202,7 @@ def KDocs_测试用例检查优化(link_limit, llm_kwargs, plugin_kwargs, chatbo
         yield from update_ui(chatbot=chatbot, history=history, msg='无法获取需求文档内容，暂停运行')
         return
     split_content_limit = yield from crazy_box.input_output_processing(file_limit, llm_kwargs, plugin_kwargs,
-                                                                       chatbot, history)
+                                                                       chatbot, history, knowledge_base=True)
 
     inputs_array, inputs_show_user_array = split_content_limit
     gpt_response_collection = yield from crazy_box.submit_multithreaded_tasks(inputs_array, inputs_show_user_array,

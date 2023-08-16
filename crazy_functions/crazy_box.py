@@ -261,17 +261,18 @@ class ExcelHandle:
         # 保存结果
         self.workbook.save(self.template_excel)
 
-    def merge_same_cells(self):
+    def merge_same_cells(self, truncation=10):
         # 加载xlsx文件
         ws = self.workbook[self.sheet]
         # 定义边框样式
         border_style = Side(style='thin', color="000000")
         border = Border(left=border_style, right=border_style, top=border_style, bottom=border_style)
         # 遍历每个单元格（列优先遍历）
+        column_counter = {'row': 0, 'col': 0}
         for col_index in range(1, ws.max_column + 1):
             col_letter = get_column_letter(col_index)
             row_start = None
-            row_end = None
+            last_column_empty = True
             for row_index in range(1, ws.max_row + 1):
                 current_cell = ws[f"{col_letter}{row_index}"]
                 next_cell = ws[f"{col_letter}{row_index + 1}"]
@@ -287,6 +288,24 @@ class ExcelHandle:
                 # 设置边框样式
                 current_cell.border = border
                 next_cell.border = border
+                # 当列超过10行为空，跳出循环
+                if not current_cell.value:
+                    column_counter['row'] += 1
+                    if column_counter['row'] > truncation:
+                        column_counter['row'] = 0
+                        break
+                # 检查当前列是否为空
+            if all(cell.value is None for cell in ws[col_letter]):
+                if last_column_empty:  # 如果上一列也为空，增加计数器
+                    column_counter['col'] += 1
+                    if column_counter['col'] > truncation:  # 如果空列超过所设定的上限，跳出循环
+                        break
+                else:  # 如果上一列非空，重置计数器
+                    column_counter['col'] = 1
+                    last_column_empty = True
+            else:  # 如果当前列非空，重置计数器和 last_column_empty 标记
+                last_column_empty = False
+                column_counter['col'] = 0
         self.workbook.save(self.template_excel)
 
 
@@ -633,7 +652,7 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
 
 
 
-def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history, default_prompt: str = False):
+def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history, default_prompt: str = False, knowledge_base: bool = False):
     """
     Args:
         gpt_response_collection:  多线程GPT的返回结果or文件读取处理后的结果
@@ -642,6 +661,7 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
         history: 历史对话
         llm_kwargs:  调优参数
         default_prompt: 默认Prompt, 如果为False，则不添加提示词
+        knowledge_base: 是否启用知识库
     Returns: 下次使用？
         inputs_array， inputs_show_user_array
     """
@@ -664,7 +684,7 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
         except:
             pass
         for limit in content_limit:
-            if not default_prompt:
+            if knowledge_base:
                 limit = yield from Langchain_cn.knowledge_base_query(limit, chatbot, history, llm_kwargs, plugin_kwargs)
             inputs_array.append(func_box.replace_expected_text(prompt, content=limit, expect='{{{v}}}'))
             inputs_show_user_array.append(you_say)
@@ -767,7 +787,8 @@ def write_test_cases(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot
     template_file, sheet = json_args_return(plugin_kwargs, ['写入指定模版', '写入指定Sheet'])
     file_classification = file_classification_to_dict(gpt_response_collection)
     chat_file_list = ''
-    chatbot.append(['Done', chat_file_list])
+    you_say = '准备将测试用例写入...'
+    chatbot.append([you_say, chat_file_list])
     for file_name in file_classification:
         test_case = []
         for value in file_classification[file_name]:
@@ -785,7 +806,8 @@ def write_test_cases(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot
         xlsx_heandle.split_merged_cells()  # 先把合并的单元格拆分，避免写入失败
         file_path = xlsx_heandle.lpvoid_lpbuffe(test_case, filename=long_name_processing(file_name))
         chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, to_tabs=True)}\n\n'
-        chatbot[-1] = (['Done', chat_file_list])
+        you_say += 'Done'
+        chatbot[-1] = ([you_say, chat_file_list])
         yield from toolbox.update_ui(chatbot, history)
     return
 
@@ -891,4 +913,4 @@ previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传�
 
 
 if __name__ == '__main__':
-    old_data = ExcelHandle(temp_file='/Users/kilig/Desktop/工作簿.xlsx').merge_same_cells()
+    old_data = ExcelHandle(temp_file='/Users/kilig/Job/Python-project/kso_gpt/private_upload/10.13.236.56/test_case/20230815_154152/Mac 支付页改版.xlsx').merge_same_cells()
