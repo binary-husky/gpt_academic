@@ -647,7 +647,7 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
     segments = []
     if type(inputs) is list:
         if get_token_num(str(inputs)) > max_token:
-            chatbot.append(['请检查数据，并进行提交处理', f'...对话数据预计会超出{all_tokens}tokens限制, 拆分中...'])
+            chatbot.append(['请检查数据，并进行提交处理', f'{func_box.html_tag_color(inputs[0][:10])}...对话数据预计会超出{all_tokens}tokens限制, 拆分中...'])
             segments.extend(split_list_token_limit(data=inputs, get_num=get_token_num, max_num=max_token))
         else:
             segments.extend(inputs)
@@ -655,7 +655,7 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
         inputs = inputs.split('\n---\n')
         for input_ in inputs:
             if get_token_num(input_) > max_token:
-                chatbot.append([None, f'{func_box.html_tag_color(input_[:10])}...对话数据预计会超出{all_tokens}tokens限制, 拆分中...'])
+                chatbot.append(['请检查数据，并进行提交处理', f'{func_box.html_tag_color(input_[:10])}...对话数据预计会超出{all_tokens}tokens限制, 拆分中...'])
                 yield from toolbox.update_ui(chatbot, history)
                 segments.extend(crazy_utils.breakdown_txt_to_satisfy_token_limit(input_, get_token_num, max_token))
             else:
@@ -698,7 +698,11 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
             pass
         for limit in content_limit:
             if knowledge_base:
-                limit = yield from Langchain_cn.knowledge_base_query(limit, chatbot, history, llm_kwargs, plugin_kwargs)
+                try:
+                    limit = yield from Langchain_cn.knowledge_base_query(limit, chatbot, history, llm_kwargs, plugin_kwargs)
+                except Exception:
+                    chatbot.append([None, '读取知识库失败，本次对话不会提供任何参考文本'])
+                    yield from toolbox.update_ui(chatbot, history)
             inputs_array.append(func_box.replace_expected_text(prompt, content=limit, expect='{{{v}}}'))
             inputs_show_user_array.append(you_say+task_tag)
     yield from toolbox.update_ui(chatbot, history)
@@ -779,7 +783,7 @@ def file_classification_to_dict(gpt_response_collection):
     return file_classification
 
 
-def batch_recognition_images_to_md(img_list, ipaddr, desc='插件补充的用例'):
+def batch_recognition_images_to_md(img_list, ipaddr):
     """
     Args: 将图片批量识别然后写入md文件
         img_list: 图片地址list
@@ -800,7 +804,7 @@ def batch_recognition_images_to_md(img_list, ipaddr, desc='插件补充的用例
     return temp_list
 
 
-def parsing_json_in_text(txt_data: list, old_case):
+def parsing_json_in_text(txt_data: list, old_case, tags='插件补充的用例'):
     response = []
     desc = '\n\n---\n\n'.join(txt_data)
     for index in range(len(txt_data)):
@@ -826,7 +830,7 @@ def parsing_json_in_text(txt_data: list, old_case):
         if len(txt_data) != len(old_case): index = -1  # 兼容一下哈
         for new_case in supplementary_data:
             if new_case not in old_case[index]:
-                old_case[index].append(new_case+[desc])
+                old_case[index].append(new_case+[tags])
         response.extend(old_case[index])
     return response, desc
 
@@ -877,8 +881,10 @@ def supplementary_test_case(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     if not sheet:
         sheet, = json_args_return(plugin_kwargs, ['写入指定Sheet'])
     file_classification = file_classification_to_dict(gpt_response_collection)
-    chat_file_list = ''
-    chatbot.append(['Done', chat_file_list])
+    chat_file_list = '...'
+    you_say = '准备将测试用例写入Excel中...'
+    chatbot.append([you_say, chat_file_list])
+    yield from toolbox.update_ui(chatbot, history)
     files_limit = []
     for file_name in file_classification:
         old_case = plugin_kwargs['原测试用例数据']
@@ -889,7 +895,8 @@ def supplementary_test_case(gpt_response_collection, llm_kwargs, plugin_kwargs, 
         md = Utils().write_markdown(data=desc, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(file_name))
         chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, to_tabs=True)}\n\n' \
                           f'---\n\n{file_name}补充思路如下：\t{func_box.html_view_blank(__href=md, to_tabs=True)}\n\n'
-        chatbot[-1] = (['Done', chat_file_list])
+        you_say += 'Done'
+        chatbot[-1] = ([you_say, chat_file_list])
         yield from toolbox.update_ui(chatbot, history)
         files_limit.append(file_path)
     return files_limit

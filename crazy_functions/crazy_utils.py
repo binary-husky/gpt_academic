@@ -644,6 +644,7 @@ class knowledge_archive_interface():
                 self.text2vec_large_chinese = HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
         return self.text2vec_large_chinese
 
+
     def filter_quarterly_files(self, files):
         database_files = list(self.get_loaded_file())
 

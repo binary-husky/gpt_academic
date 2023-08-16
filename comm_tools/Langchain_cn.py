@@ -18,7 +18,7 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
     # < --------------------读取参数--------------- >
     cls_select = classification_filtering_tag(cls_select, cls_name, ipaddr.client.host)
     if not cls_select:
-        yield '新建分类名称请不要为空', '', gr.Dropdown.update(), gr.Dropdown.update(), kai_handle
+        yield '新建分类名称请不要为空', '', gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(), kai_handle
         return
     vector_path = os.path.join(func_box.knowledge_path, cls_select)
     if name and select != '新建知识库':
@@ -33,10 +33,10 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
     reject_build_switch, = toolbox.get_conf('reject_build_switch')
     if reject_build_switch:
         if not func_box.check_expected_time():
-            yield '上班时间段不允许启动构建知识库任务，若有紧急任务请联系管理员', '', gr.Dropdown.update(), gr.Dropdown.update(), kai_handle
+            yield '上班时间段不允许启动构建知识库任务，若有紧急任务请联系管理员', '', gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(),kai_handle
             return
     # < --------------------读取文件正式开始--------------- >
-    yield '开始咯开始咯～', '', gr.Dropdown.update(), gr.Dropdown.update(), kai_handle
+    yield '开始咯开始咯～', '', gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(), kai_handle
     files = kai_handle['file_path']
     file_manifest = []
     spl,  = toolbox.get_conf('spl')
@@ -50,12 +50,12 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
         task_info, kdocs_manifest_tmp, _ = crazy_box.get_kdocs_from_everything(links, type='', ipaddr=ipaddr.client.host)
         if kdocs_manifest_tmp:
             error += task_info
-            yield (f"", error, gr.Dropdown.update(), gr.Dropdown.update(), kai_handle)
+            yield (f"", error, gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(), kai_handle)
     except:
         import traceback
         error_str = traceback.format_exc()
         error += f'提取出错文件错误啦\n\n```\n{error_str}\n```'
-        yield (f"", error, gr.Dropdown.update(), gr.Dropdown.update(), kai_handle)
+        yield (f"", error, gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(), kai_handle)
         kdocs_manifest_tmp = []
     file_manifest += kdocs_manifest_tmp
     # < --------------------缺陷文件拆分--------------- >
@@ -70,7 +70,7 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
                gr.Dropdown.update(),  kai_handle)
         return
     # < -------------------预热文本向量化模组--------------- >
-    yield ('正在加载向量化模型...', '', gr.Dropdown.update(), gr.Dropdown.update(), kai_handle)
+    yield ('正在加载向量化模型...', '', gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(), kai_handle)
     from langchain.embeddings.huggingface import HuggingFaceEmbeddings
     with toolbox.ProxyNetworkActivate():    # 临时地激活代理网络
         HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
@@ -78,8 +78,8 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
     tab_show = [os.path.basename(i) for i in file_manifest]
     preprocessing_files = func_box.to_markdown_tabs(head=['文件'], tabs=[tab_show])
     yield (f'正在准备将以下文件向量化，生成知识库文件，若文件数据较多，可能需要等待几小时：\n\n{preprocessing_files}',
-           error, gr.Dropdown.update(),
-           gr.Dropdown.update(), kai_handle)
+           error, gr.Dropdown.update(), gr.Dropdown.update(),
+           gr.update(), kai_handle)
     with toolbox.ProxyNetworkActivate():    # 临时地激活代理网络
         kai = crazy_utils.knowledge_archive_interface(vs_path=vector_path)
         qa_handle, vs_path = kai.construct_vector_store(vs_id=kai_id, files=file_manifest)
@@ -91,8 +91,9 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
     kai_handle['know_name'] = kai_id
     load_list, user_list = func_box.get_directory_list(vector_path, ipaddr.client.host)
     yield (f'构建完成, 当前知识库内有效的文件如下, 已自动帮您选中知识库，现在你可以畅快的开始提问啦～\n\n{kai_files}',
-           error, gr.Dropdown.update(value=cls_select),
-           gr.Dropdown.update(value='新建知识库', choices=load_list),  kai_handle)
+           error, gr.Dropdown.update(value=cls_select, choices=load_list),
+           gr.Dropdown.update(value='新建知识库', choices=load_list),
+           gr.Dropdown.update(value=kai_id, choices=load_list), kai_handle)
 
 
 def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
@@ -108,7 +109,8 @@ def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
     kai_id = llm_kwargs['know_id']
     gpt_say = f'正在将问题向量化，然后对`{str(kai_id)}`知识库进行匹配...'
     if kai_id:
-        chatbot.append([txt, gpt_say])
+        if gpt_say not in str(chatbot):
+            chatbot.append([txt, gpt_say])
     for id in kai_id:   #
         if llm_kwargs['know_dict']['know_obj'].get(id, False):
             kai = llm_kwargs['know_dict']['know_obj'][id]

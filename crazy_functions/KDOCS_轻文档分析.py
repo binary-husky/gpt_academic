@@ -159,20 +159,24 @@ def Kdocs_多阶段生成回答(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
         func = multi_stage_config[stage].get('调用方法', False)
         knowledge_base = multi_stage_config[stage].get('关联知识库', False)
         file_count[stage] = []
-        chatbot.append([f'开始执行{stage}动作，使用`{prompt}`提问后，调用`{func}保存回答`', None])
+        chatbot.append([f'开始执行`{stage}`动作，使用`{prompt}`提问后，调用`{func}保存回答`', None])
         yield from update_ui(chatbot=chatbot, history=history)
         if prompt:
             file_limit = yield from crazy_box.func_拆分与提问(file_limit, llm_kwargs, plugin_kwargs, chatbot, history,
                                                             args_keys=[prompt, knowledge_base], task_tag=stage)
         else:
-            yield from update_ui(chatbot=chatbot+[[None, '你没有指定提示词，跳过提问']], history=history)
+            chatbot.append([None, '你没有指定提示词，跳过提问'])
+            yield from update_ui(chatbot=chatbot, history=history)
         if func:
             plugin_kwargs[stage] = yield from func_kwargs[func](file_limit, llm_kwargs, plugin_kwargs,  chatbot, history)
         else:
-            yield from update_ui(chatbot=chatbot+[[None, '你没有指定调用方法，跳过生成结果']], history=history)
-        file_limit = []
-        yield from update_ui(chatbot=chatbot + [[None, '']], history=history)
-        yield from crazy_box.file_extraction_intype(plugin_kwargs[stage], [''], file_limit, chatbot, history, llm_kwargs, plugin_kwargs)
+            chatbot.append([None, '你没有指定调用方法，跳过生成结果'])
+            yield from update_ui(chatbot=chatbot, history=history)
+        if stage != [i for i in multi_stage_config][-1]:
+            file_limit = []
+            chatbot.append(['开始准备下一阶段的数据', None])
+            yield from update_ui(chatbot=chatbot, history=history)
+            yield from crazy_box.file_extraction_intype(plugin_kwargs[stage], [''], file_limit, chatbot, history, llm_kwargs, plugin_kwargs)
 
 
 @CatchException

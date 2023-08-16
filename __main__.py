@@ -444,7 +444,7 @@ class ChatBot(ChatBotFrame):
 
         submit_id = self.langchain_submit.click(fn=Langchain_cn.knowledge_base_writing,
                                                 inputs=[self.langchain_classifi, self.langchain_class_name, self.langchain_links, self.langchain_select, self.langchain_name, self.langchain_know_kwargs],
-                                                outputs=[self.langchain_status, self.langchain_error, self.langchain_classifi, self.langchain_select, self.langchain_know_kwargs]
+                                                outputs=[self.langchain_status, self.langchain_error, self.langchain_classifi, self.langchain_select, self.langchain_dropdown, self.langchain_know_kwargs]
                                                 )
         submit_id.then(fn=update_drop,
                        inputs=[self.langchain_know_kwargs, self.llms_dropdown, self.langchain_classifi],

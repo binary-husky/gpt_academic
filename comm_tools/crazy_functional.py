@@ -294,13 +294,14 @@ def get_crazy_functions():
     from crazy_functions import KDOCS_轻文档分析
     from crazy_functions import 总结音视频
     from crazy_functions import KDOCS_流程图_图片分析
+    desc = '高级参数详细说明请查看项目自述文档, 若有更改，提交前请使用Json检查器检查是否符合要求'
     function_plugins['金山文档专用'] = {
         "文档提取测试点": {
             "Color": "primary",
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.KDocs_文档提取测试点),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "高级参数详细说明请查看项目自述文档",  # 高级参数输入区的显示提示
+            "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
                 '开启OCR': True,
                 "提示词分类": '插件定制',
@@ -313,7 +314,7 @@ def get_crazy_functions():
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.KDocs_转客户端测试用例),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "高级参数详细说明请查看项目自述文档",  # 高级参数输入区的显示提示
+            "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
                 '开启OCR': True,
                 "提示词分类": '插件定制',
@@ -328,7 +329,7 @@ def get_crazy_functions():
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.KDocs_转客户端测试用例),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "高级参数详细说明请查看项目自述文档",  # 高级参数输入区的显示提示
+            "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
                 '开启OCR': True,
                 "提示词分类": '插件定制',
@@ -344,14 +345,21 @@ def get_crazy_functions():
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.Kdocs_多阶段生成回答),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "高级参数详细说明请查看项目自述文档",  # 高级参数输入区的显示提示
+            "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
                 "开启OCR": True,
                 "提示词分类": "插件定制",
                 "阶段性产出": {
                     "一阶段": {
                         "提示词": "提取文档测试点",
-                        "调用方法": "格式化文档"
+                        "调用方法": "格式化文档",
+                        "关联知识库": {
+                            "知识库提示词": "用例反推测试点",
+                            "查询分类": "历史版本测试用例",
+                            "查询列表": [
+                                "Apple端测试用例"
+                            ]
+                        }
                     },
                     "二阶段": {
                         "提示词": "文档转测试用例",
@@ -383,7 +391,7 @@ def get_crazy_functions():
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.KDocs_转接口测试用例),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "高级参数详细说明请查看项目自述文档",  # 高级参数输入区的显示提示
+            "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
                 '开启OCR': True,
                 "提示词分类": '插件定制',
@@ -399,7 +407,7 @@ def get_crazy_functions():
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.KDocs_测试用例检查优化),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "高级参数详细说明请查看项目自述文档",  # 高级参数输入区的显示提示
+            "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
                 '开启OCR': True,
                 '读取指定Sheet': '测试要点',
@@ -413,7 +421,7 @@ def get_crazy_functions():
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.KDocs_需求分析问答),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "高级参数详细说明请查看项目自述文档",  # 高级参数输入区的显示提示
+            "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
                 '开启OCR': False,
                 "提示词分类": '插件定制',
@@ -427,7 +435,7 @@ def get_crazy_functions():
             "AsButton": True,
             "Function": HotReload(KDOCS_轻文档分析.KDocs_文档转流程图),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "高级参数详细说明请查看项目自述文档",  # 高级参数输入区的显示提示
+            "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
                 '开启OCR': True,
                 "提示词分类": '插件定制',
@@ -439,7 +447,7 @@ def get_crazy_functions():
             "AsButton": True,
             "AdvancedArgs": True,
             "Function": HotReload(总结音视频.Kdocs音频提取总结),
-            "ArgsReminder": "高级参数详细说明请查看项目自述文档",  # 高级参数输入区的显示提示
+            "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
                 "提示词分类": '插件定制',
                 "预期产出提示词": '总结摘要提取',
