@@ -148,7 +148,7 @@ python main.py
 
 ### 安装方法II：使用Docker
 
-1. 仅ChatGPT（推荐大多数人选择，等价于docker-compose方案1）
+1. 仅ChatGPT（推荐大多数人选择，等价于docker-compose `nolocal` 方案）
 [![basic](https://github.com/binary-husky/gpt_academic/actions/workflows/build-without-local-llms.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-without-local-llms.yml)
 [![basiclatex](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-latex.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-latex.yml)
 [![basicaudio](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-audio-assistant.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-audio-assistant.yml)
@@ -170,16 +170,14 @@ P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以
 [![chatglm](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-chatglm.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-chatglm.yml)
 
 ``` sh
-# 修改docker-compose.yml，保留方案2并删除其他方案。修改docker-compose.yml中方案2的配置，参考其中注释即可
-docker-compose up
+docker-compose --profile chatglm up
 ```
 
 3. ChatGPT + LLAMA + 盘古 + RWKV（需要熟悉Docker）
 [![jittorllms](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-jittorllms.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-jittorllms.yml)
 
 ``` sh
-# 修改docker-compose.yml，保留方案3并删除其他方案。修改docker-compose.yml中方案3的配置，参考其中注释即可
-docker-compose up
+docker-compose --profile rwkv up
 ```
 
 
