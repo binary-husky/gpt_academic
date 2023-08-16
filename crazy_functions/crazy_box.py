@@ -160,6 +160,8 @@ class Utils:
 
     def global_search_for_files(self, file_path, matching: list):
         file_list = []
+        if os.path.isfile(file_path):
+            file_list.append(file_path)
         for root, dirs, files in os.walk(file_path):
             for file in files:
                 for math in matching:

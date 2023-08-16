@@ -12,7 +12,7 @@ import os
 def ocr_batch_processing(file_manifest, chatbot, history, llm_kwargs):
     process = ''
     if not file_manifest:
-        chatbot.append([None, '阿欧，没有找到符合要求的文件呢'])
+        chatbot.append([[f.replace(func_box.base_path, '.') for f in file_manifest], '阿欧，没有找到符合要求的文件呢'])
     for pic_path in file_manifest:
         if pic_path.endswith('xmind'):
             i_say, process = [func_box.html_view_blank(pic_path) + "\n\n开始解析", None]
@@ -30,7 +30,7 @@ def ocr_batch_processing(file_manifest, chatbot, history, llm_kwargs):
             yield from toolbox.update_ui(chatbot, history, '正在调用OCR组件，图片多可能会比较慢')
             img_content, img_result = ocr_tools.Paddle_ocr_select(ipaddr=llm_kwargs['ipaddr'],
                                                                   trust_value=llm_kwargs['ocr']
-                                                                  ).img_def_content(img_path=pic_path)
+                                                                  ).img_def_content(img_path=pic_path, show_result=True)
             process += f'{"/".join(pic_path.split("/")[-2:])} 识别完成，识别效果如下 {func_box.html_local_img(img_result)} \n\n' \
                            f'```\n{img_content}\n```\n\n---\n\n'
             chatbot[-1] = [i_say, process]

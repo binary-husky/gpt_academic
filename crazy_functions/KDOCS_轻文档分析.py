@@ -51,7 +51,7 @@ def Kdocs_轻文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
                             img_content = thread_submission[t].result()[0]
                             content = str(content).replace(f"{t}",
                                                            f"{func_box.html_local_img(img_result)}\n```{img_content}```")
-                            ocr_process += f'{t} 识别完成，识别效果如下 {func_box.html_local_img(img_result)} tips: 图片右侧无文案仅代表图片太大失绘制败，不影响实际OCR结果\n\n'
+                            ocr_process += f'{t} 识别完成，识别效果如下, tips: 图片右侧无文案仅代表图片太大失绘制败，不影响实际OCR结果 {func_box.html_local_img(img_result)}\n\n'
                             chatbot[-1] = [None, ocr_process]
                             yield from update_ui(chatbot, history)
                 else:
