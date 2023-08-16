@@ -22,10 +22,12 @@ def silence_stdout(func):
     def wrapper(*args, **kwargs):
         _original_stdout = sys.stdout
         sys.stdout = open(os.devnull, 'w')
+        sys.stdout.reconfigure(encoding='utf-8')
         for q in func(*args, **kwargs):
             sys.stdout = _original_stdout
             yield q
             sys.stdout = open(os.devnull, 'w')
+            sys.stdout.reconfigure(encoding='utf-8')
         sys.stdout.close()
         sys.stdout = _original_stdout
     return wrapper
@@ -35,6 +37,7 @@ def silence_stdout_fn(func):
     def wrapper(*args, **kwargs):
         _original_stdout = sys.stdout
         sys.stdout = open(os.devnull, 'w')
+        sys.stdout.reconfigure(encoding='utf-8')
         result = func(*args, **kwargs)
         sys.stdout.close()
         sys.stdout = _original_stdout
