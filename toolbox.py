@@ -4,6 +4,7 @@ import time
 import inspect
 import re
 import os
+import gradio
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
 pj = os.path.join
@@ -40,7 +41,7 @@ def ArgsGeneralWrapper(f):
     """
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
-    def decorated(cookies, max_length, llm_model, txt, txt2, top_p, temperature, chatbot, history, system_prompt, plugin_advanced_arg, *args):
+    def decorated(request: gradio.Request, cookies, max_length, llm_model, txt, txt2, top_p, temperature, chatbot, history, system_prompt, plugin_advanced_arg, *args):
         txt_passon = txt
         if txt == "" and txt2 != "": txt_passon = txt2
         # 引入一个有cookie的chatbot
@@ -54,13 +55,21 @@ def ArgsGeneralWrapper(f):
             'top_p':top_p,
             'max_length': max_length,
             'temperature':temperature,
+            'client_ip': request.client.host,
         }
         plugin_kwargs = {
             "advanced_arg": plugin_advanced_arg,
         }
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
-        yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
+        if cookies.get('lock_plugin', None) is None:
+            # 正常状态
+            yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
+        else:
+            # 处理个别特殊插件的锁定状态
+            module, fn_name = cookies['lock_plugin'].split('->')
+            f_hot_reload = getattr(importlib.import_module(module, fn_name), fn_name)
+            yield from f_hot_reload(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
     return decorated
 
 
@@ -68,8 +77,21 @@ def update_ui(chatbot, history, msg='正常', **kwargs):  # 刷新界面
     """
     刷新用户界面
     """
-    assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时，可用clear将其清空，然后用for+append循环重新赋值。"
-    yield chatbot.get_cookies(), chatbot, history, msg
+    assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时, 可用clear将其清空, 然后用for+append循环重新赋值。"
+    cookies = chatbot.get_cookies()
+
+    # 解决插件锁定时的界面显示问题
+    if cookies.get('lock_plugin', None):
+        label = cookies.get('llm_model', "") + " | " + "正在锁定插件" + cookies.get('lock_plugin', None)
+        chatbot_gr = gradio.update(value=chatbot, label=label)
+        if cookies.get('label', "") != label: cookies['label'] = label   # 记住当前的label
+    elif cookies.get('label', None):
+        chatbot_gr = gradio.update(value=chatbot, label=cookies.get('llm_model', ""))
+        cookies['label'] = None    # 清空label
+    else:
+        chatbot_gr = chatbot
+
+    yield cookies, chatbot_gr, history, msg
 
 def update_ui_lastest_msg(lastmsg, chatbot, history, delay=1):  # 刷新界面
     """
@@ -95,20 +117,20 @@ def CatchException(f):
     """
 
     @wraps(f)
-    def decorated(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT=-1):
+    def decorated(main_input, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, *args, **kwargs):
         try:
-            yield from f(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT)
+            yield from f(main_input, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, *args, **kwargs)
         except Exception as e:
             from check_proxy import check_proxy
             from toolbox import get_conf
             proxies, = get_conf('proxies')
             tb_str = '```\n' + trimmed_format_exc() + '```'
-            if len(chatbot) == 0:
-                chatbot.clear()
-                chatbot.append(["插件调度异常", "异常原因"])
-            chatbot[-1] = (chatbot[-1][0],
+            if len(chatbot_with_cookie) == 0:
+                chatbot_with_cookie.clear()
+                chatbot_with_cookie.append(["插件调度异常", "异常原因"])
+            chatbot_with_cookie[-1] = (chatbot_with_cookie[-1][0],
                            f"[Local Message] 实验性函数调用出错: \n\n{tb_str} \n\n当前代理可用性: \n\n{check_proxy(proxies)}")
-            yield from update_ui(chatbot=chatbot, history=history, msg=f'异常 {e}') # 刷新界面
+            yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=f'异常 {e}') # 刷新界面
     return decorated
 
 
@@ -174,11 +196,10 @@ def write_results_to_file(history, file_name=None):
     import time
     if file_name is None:
         # file_name = time.strftime("chatGPT分析报告%Y-%m-%d-%H-%M-%S", time.localtime()) + '.md'
-        file_name = 'chatGPT分析报告' + \
-            time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + '.md'
+        file_name = 'GPT-Report-' + gen_time_str() + '.md'
     os.makedirs('./gpt_log/', exist_ok=True)
     with open(f'./gpt_log/{file_name}', 'w', encoding='utf8') as f:
-        f.write('# chatGPT 分析报告\n')
+        f.write('# GPT-Academic Report\n')
         for i, content in enumerate(history):
             try:    
                 if type(content) != str: content = str(content)
@@ -192,8 +213,39 @@ def write_results_to_file(history, file_name=None):
                 # remove everything that cannot be handled by utf8
                 f.write(content.encode('utf-8', 'ignore').decode())
             f.write('\n\n')
-    res = '以上材料已经被写入' + os.path.abspath(f'./gpt_log/{file_name}')
+    res = '以上材料已经被写入:\t' + os.path.abspath(f'./gpt_log/{file_name}')
     print(res)
+    return res
+
+
+def write_history_to_file(history, file_basename=None, file_fullname=None):
+    """
+    将对话记录history以Markdown格式写入文件中。如果没有指定文件名，则使用当前时间生成文件名。
+    """
+    import os
+    import time
+    if file_fullname is None:
+        if file_basename is not None:
+            file_fullname = os.path.join(get_log_folder(), file_basename)
+        else:
+            file_fullname = os.path.join(get_log_folder(), f'GPT-Academic-{gen_time_str()}.md')
+    os.makedirs(os.path.dirname(file_fullname), exist_ok=True)
+    with open(file_fullname, 'w', encoding='utf8') as f:
+        f.write('# GPT-Academic Report\n')
+        for i, content in enumerate(history):
+            try:    
+                if type(content) != str: content = str(content)
+            except:
+                continue
+            if i % 2 == 0:
+                f.write('## ')
+            try:
+                f.write(content)
+            except:
+                # remove everything that cannot be handled by utf8
+                f.write(content.encode('utf-8', 'ignore').decode())
+            f.write('\n\n')
+    res = os.path.abspath(file_fullname)
     return res
 
 
@@ -444,13 +496,20 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
     # 将文件复制一份到下载区
     import shutil
     if rename_file is None: rename_file = f'{gen_time_str()}-{os.path.basename(file)}'
-    new_path = os.path.join(f'./gpt_log/', rename_file)
+    new_path = os.path.join(get_log_folder(), rename_file)
+    # 如果已经存在，先删除
     if os.path.exists(new_path) and not os.path.samefile(new_path, file): os.remove(new_path)
+    # 把文件复制过去
     if not os.path.exists(new_path): shutil.copyfile(file, new_path)
+    # 将文件添加到chatbot cookie中，避免多用户干扰
     if chatbot:
         if 'file_to_promote' in chatbot._cookies: current = chatbot._cookies['file_to_promote']
         else: current = []
         chatbot._cookies.update({'file_to_promote': [new_path] + current})
+
+def disable_auto_promotion(chatbot):
+    chatbot._cookies.update({'file_to_promote': []})
+    return
 
 def on_file_uploaded(files, chatbot, txt, txt2, checkboxes):
     """
@@ -467,7 +526,7 @@ def on_file_uploaded(files, chatbot, txt, txt2, checkboxes):
         shutil.rmtree('./private_upload/')
     except:
         pass
-    time_tag = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+    time_tag = gen_time_str()
     os.makedirs(f'private_upload/{time_tag}', exist_ok=True)
     err_msg = ''
     for file in files:
@@ -505,16 +564,28 @@ def on_report_generated(cookies, files, chatbot):
     chatbot.append(['报告如何远程获取？', f'报告已经添加到右侧“文件上传区”（可能处于折叠状态），请查收。{file_links}'])
     return cookies, report_files, chatbot
 
+def load_chat_cookies():
+    API_KEY, LLM_MODEL, AZURE_API_KEY = get_conf('API_KEY', 'LLM_MODEL', 'AZURE_API_KEY')
+    if is_any_api_key(AZURE_API_KEY):
+        if is_any_api_key(API_KEY): API_KEY = API_KEY + ',' + AZURE_API_KEY
+        else: API_KEY = AZURE_API_KEY
+    return {'api_key': API_KEY, 'llm_model': LLM_MODEL}
+
 def is_openai_api_key(key):
-    API_MATCH_ORIGINAL = re.match(r"sk-[a-zA-Z0-9]{48}$", key)
+    CUSTOM_API_KEY_PATTERN, = get_conf('CUSTOM_API_KEY_PATTERN')
+    if len(CUSTOM_API_KEY_PATTERN) != 0:
+        API_MATCH_ORIGINAL = re.match(CUSTOM_API_KEY_PATTERN, key)
+    else:
+        API_MATCH_ORIGINAL = re.match(r"sk-[a-zA-Z0-9]{48}$", key)
+    return bool(API_MATCH_ORIGINAL)
+
+def is_azure_api_key(key):
     API_MATCH_AZURE = re.match(r"[a-zA-Z0-9]{32}$", key)
-    return bool(API_MATCH_ORIGINAL) or bool(API_MATCH_AZURE)
+    return bool(API_MATCH_AZURE)
 
 def is_api2d_key(key):
-    if key.startswith('fk') and len(key) == 41:
-        return True
-    else:
-        return False
+    API_MATCH_API2D = re.match(r"fk[a-zA-Z0-9]{6}-[a-zA-Z0-9]{32}$", key)
+    return bool(API_MATCH_API2D)
 
 def is_any_api_key(key):
     if ',' in key:
@@ -523,10 +594,10 @@ def is_any_api_key(key):
             if is_any_api_key(k): return True
         return False
     else:
-        return is_openai_api_key(key) or is_api2d_key(key)
+        return is_openai_api_key(key) or is_api2d_key(key) or is_azure_api_key(key)
 
 def what_keys(keys):
-    avail_key_list = {'OpenAI Key':0, "API2D Key":0}
+    avail_key_list = {'OpenAI Key':0, "Azure Key":0, "API2D Key":0}
     key_list = keys.split(',')
 
     for k in key_list:
@@ -537,7 +608,11 @@ def what_keys(keys):
         if is_api2d_key(k): 
             avail_key_list['API2D Key'] += 1
 
-    return f"检测到： OpenAI Key {avail_key_list['OpenAI Key']} 个，API2D Key {avail_key_list['API2D Key']} 个"
+    for k in key_list:
+        if is_azure_api_key(k): 
+            avail_key_list['Azure Key'] += 1
+
+    return f"检测到： OpenAI Key {avail_key_list['OpenAI Key']} 个, Azure Key {avail_key_list['Azure Key']} 个, API2D Key {avail_key_list['API2D Key']} 个"
 
 def select_api_key(keys, llm_model):
     import random
@@ -552,8 +627,12 @@ def select_api_key(keys, llm_model):
         for k in key_list:
             if is_api2d_key(k): avail_key_list.append(k)
 
+    if llm_model.startswith('azure-'):
+        for k in key_list:
+            if is_azure_api_key(k): avail_key_list.append(k)
+
     if len(avail_key_list) == 0:
-        raise RuntimeError(f"您提供的api-key不满足要求，不包含任何可用于{llm_model}的api-key。您可能选择了错误的模型或请求源。")
+        raise RuntimeError(f"您提供的api-key不满足要求，不包含任何可用于{llm_model}的api-key。您可能选择了错误的模型或请求源（右下角更换模型菜单中可切换openai,azure,claude,api2d等请求源）。")
 
     api_key = random.choice(avail_key_list) # 随机负载均衡
     return api_key
@@ -629,13 +708,14 @@ def read_single_conf_with_lru_cache(arg):
 
     # 在读取API_KEY时，检查一下是不是忘了改config
     if arg == 'API_KEY':
-        print亮蓝(f"[API_KEY] 本项目现已支持OpenAI和API2D的api-key。也支持同时填写多个api-key，如API_KEY=\"openai-key1,openai-key2,api2d-key3\"")
+        print亮蓝(f"[API_KEY] 本项目现已支持OpenAI和Azure的api-key。也支持同时填写多个api-key，如API_KEY=\"openai-key1,openai-key2,azure-key3\"")
         print亮蓝(f"[API_KEY] 您既可以在config.py中修改api-key(s)，也可以在问题输入区输入临时的api-key(s)，然后回车键提交后即可生效。")
         if is_any_api_key(r):
             print亮绿(f"[API_KEY] 您的 API_KEY 是: {r[:15]}*** API_KEY 导入成功")
         else:
-            print亮红( "[API_KEY] 正确的 API_KEY 是'sk'开头的51位密钥（OpenAI），或者 'fk'开头的41位密钥，请在config文件中修改API密钥之后再运行。")
+            print亮红( "[API_KEY] 您的 API_KEY 不满足任何一种已知的密钥格式，请在config文件中修改API密钥之后再运行。")
     if arg == 'proxies':
+        if not read_single_conf_with_lru_cache('USE_PROXY'): r = None   # 检查USE_PROXY，防止proxies单独起作用
         if r is None:
             print亮红('[PROXY] 网络代理状态：未配置。无代理状态下很可能无法访问OpenAI家族的模型。建议：检查USE_PROXY选项是否修改。')
         else:
@@ -644,6 +724,7 @@ def read_single_conf_with_lru_cache(arg):
     return r
 
 
+@lru_cache(maxsize=128)
 def get_conf(*args):
     # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
     res = []
@@ -802,14 +883,18 @@ def zip_folder(source_folder, dest_folder, zip_name):
     print(f"Zip file created at {zip_file}")
 
 def zip_result(folder):
-    import time
-    t = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+    t = gen_time_str()
     zip_folder(folder, './gpt_log/', f'{t}-result.zip')
     return pj('./gpt_log/', f'{t}-result.zip')
 
 def gen_time_str():
     import time
     return time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+
+def get_log_folder(user='default', plugin_name='shared'):
+    _dir = os.path.join(os.path.dirname(__file__), 'gpt_log', user, plugin_name)
+    if not os.path.exists(_dir): os.makedirs(_dir)
+    return _dir
 
 class ProxyNetworkActivate():
     """
@@ -843,3 +928,113 @@ def objload(file='objdump.tmp'):
     with open(file, 'rb') as f:
         return pickle.load(f)
     
+def Singleton(cls):
+    """
+    一个单实例装饰器
+    """
+    _instance = {}
+ 
+    def _singleton(*args, **kargs):
+        if cls not in _instance:
+            _instance[cls] = cls(*args, **kargs)
+        return _instance[cls]
+ 
+    return _singleton
+
+"""
+========================================================================
+第四部分
+接驳虚空终端:
+    - set_conf:                     在运行过程中动态地修改配置
+    - set_multi_conf:               在运行过程中动态地修改多个配置
+    - get_plugin_handle:            获取插件的句柄
+    - get_plugin_default_kwargs:    获取插件的默认参数
+    - get_chat_handle:              获取简单聊天的句柄
+    - get_chat_default_kwargs:      获取简单聊天的默认参数
+========================================================================
+"""
+
+def set_conf(key, value):
+    from toolbox import read_single_conf_with_lru_cache, get_conf
+    read_single_conf_with_lru_cache.cache_clear()
+    get_conf.cache_clear()
+    os.environ[key] = str(value)
+    altered, = get_conf(key)
+    return altered
+
+def set_multi_conf(dic):
+    for k, v in dic.items(): set_conf(k, v)
+    return
+
+def get_plugin_handle(plugin_name):
+    """
+    e.g. plugin_name = 'crazy_functions.批量Markdown翻译->Markdown翻译指定语言'
+    """
+    import importlib
+    assert '->' in plugin_name, \
+        "Example of plugin_name: crazy_functions.批量Markdown翻译->Markdown翻译指定语言"
+    module, fn_name = plugin_name.split('->')
+    f_hot_reload = getattr(importlib.import_module(module, fn_name), fn_name)
+    return f_hot_reload
+
+def get_chat_handle():
+    """
+    """
+    from request_llm.bridge_all import predict_no_ui_long_connection
+    return predict_no_ui_long_connection
+
+def get_plugin_default_kwargs():
+    """
+    """
+    from toolbox import get_conf, ChatBotWithCookies
+
+    WEB_PORT, LLM_MODEL, API_KEY = \
+        get_conf('WEB_PORT', 'LLM_MODEL', 'API_KEY')
+
+    llm_kwargs = {
+        'api_key': API_KEY,
+        'llm_model': LLM_MODEL,
+        'top_p':1.0, 
+        'max_length': None,
+        'temperature':1.0,
+    }
+    chatbot = ChatBotWithCookies(llm_kwargs)
+
+    # txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port
+    default_plugin_kwargs = {
+        "main_input": "./README.md",
+        "llm_kwargs": llm_kwargs,
+        "plugin_kwargs": {},
+        "chatbot_with_cookie": chatbot,
+        "history": [],
+        "system_prompt": "You are a good AI.", 
+        "web_port": WEB_PORT
+    }
+    return default_plugin_kwargs
+
+def get_chat_default_kwargs():
+    """
+    """
+    from toolbox import get_conf
+
+    LLM_MODEL, API_KEY = get_conf('LLM_MODEL', 'API_KEY')
+
+    llm_kwargs = {
+        'api_key': API_KEY,
+        'llm_model': LLM_MODEL,
+        'top_p':1.0, 
+        'max_length': None,
+        'temperature':1.0,
+    }
+
+    default_chat_kwargs = {
+        "inputs": "Hello there, are you ready?",
+        "llm_kwargs": llm_kwargs,
+        "history": [],
+        "sys_prompt": "You are AI assistant",
+        "observe_window": None,
+        "console_slience": False,
+    }
+
+    return default_chat_kwargs
+

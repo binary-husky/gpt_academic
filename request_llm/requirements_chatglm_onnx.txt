@@ -1,0 +1,11 @@
+protobuf
+transformers>=4.27.1
+cpm_kernels
+torch>=1.10
+mdtex2html
+sentencepiece
+numpy
+onnxruntime
+sentencepiece
+streamlit
+streamlit-chat

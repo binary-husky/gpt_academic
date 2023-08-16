@@ -6,7 +6,7 @@
 version: '3'
 services:
   gpt_academic_nolocalllms:
-    image: ghcr.io/binary-husky/gpt_academic_nolocal:master
+    image: ghcr.io/binary-husky/gpt_academic_nolocal:master # (Auto Built by Dockerfile: docs/GithubAction+NoLocal)
     environment:
       # 请查阅 `config.py` 以查看所有的配置信息
       API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                                            '
@@ -33,7 +33,7 @@ services:
 version: '3'
 services:
   gpt_academic_with_chatglm:
-    image: ghcr.io/binary-husky/gpt_academic_chatglm_moss:master
+    image: ghcr.io/binary-husky/gpt_academic_chatglm_moss:master  # (Auto Built by Dockerfile: docs/Dockerfile+ChatGLM)
     environment:
       # 请查阅 `config.py` 以查看所有的配置信息
       API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx,fkxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  '
@@ -63,7 +63,7 @@ services:
 version: '3'
 services:
   gpt_academic_with_rwkv:
-    image: fuqingxu/gpt_academic:jittorllms    # [option 2] 如果需要运行ChatGLM本地模型
+    image: ghcr.io/binary-husky/gpt_academic_jittorllms:master
     environment:
       # 请查阅 `config.py` 以查看所有的配置信息
       API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx,fkxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  '
@@ -85,33 +85,18 @@ services:
     # 与宿主的网络融合
     network_mode: "host"
 
-    # 使用代理网络拉取最新代码
-    # command: >
-    #   bash -c "       truncate -s -1 /etc/proxychains.conf &&
-    #                   echo \"socks5 127.0.0.1 10880\" >> /etc/proxychains.conf &&
-    #                   echo '[gpt-academic] 正在从github拉取最新代码...' &&
-    #                   proxychains git pull &&
-    #                   echo '[jittorllms] 正在从github拉取最新代码...' &&
-    #                   proxychains git --git-dir=request_llm/jittorllms/.git --work-tree=request_llm/jittorllms pull --force &&
-    #                   python3 -u main.py"
-
     # 不使用代理网络拉取最新代码
     command: >
-      bash -c "       echo '[gpt-academic] 正在从github拉取最新代码...' &&
-                      git pull &&
-                      pip install -r requirements.txt &&
-                      echo '[jittorllms] 正在从github拉取最新代码...' &&
-                      git --git-dir=request_llm/jittorllms/.git --work-tree=request_llm/jittorllms pull --force &&
-                      python3 -u main.py"
+      python3 -u main.py
 
 
 ## ===================================================
-## 【方案四】 chatgpt + Latex
+## 【方案四】 ChatGPT + Latex
 ## ===================================================
 version: '3'
 services:
   gpt_academic_with_latex:
-    image: ghcr.io/binary-husky/gpt_academic_with_latex:master
+    image: ghcr.io/binary-husky/gpt_academic_with_latex:master  # (Auto Built by Dockerfile: docs/GithubAction+NoLocal+Latex)
     environment:
       # 请查阅 `config.py` 以查看所有的配置信息
       API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                              '
@@ -122,6 +107,39 @@ services:
       LOCAL_MODEL_DEVICE:       '    cuda                                                                             '
       DEFAULT_WORKER_NUM:       '    10                                                                               '
       WEB_PORT:                 '    12303                                                                            '
+
+    # 与宿主的网络融合
+    network_mode: "host"
+
+    # 不使用代理网络拉取最新代码
+    command: >
+      bash -c "python3 -u main.py"
+
+
+## ===================================================
+## 【方案五】 ChatGPT + 语音助手 （请先阅读 docs/use_audio.md）
+## ===================================================
+version: '3'
+services:
+  gpt_academic_with_audio:
+    image: ghcr.io/binary-husky/gpt_academic_audio_assistant:master
+    environment:
+      # 请查阅 `config.py` 以查看所有的配置信息
+      API_KEY:                  '    fk195831-IdP0Pb3W6DCMUIbQwVX6MsSiyxwqybyS                        '
+      USE_PROXY:                '    False                                                            '
+      proxies:                  '    None                                                             '
+      LLM_MODEL:                '    gpt-3.5-turbo                                                    '
+      AVAIL_LLM_MODELS:         '    ["gpt-3.5-turbo", "gpt-4"]                                       '
+      ENABLE_AUDIO:             '    True                                                             '
+      LOCAL_MODEL_DEVICE:       '    cuda                                                             '
+      DEFAULT_WORKER_NUM:       '    20                                                               '
+      WEB_PORT:                 '    12343                                                            '
+      ADD_WAIFU:                '    True                                                             '
+      THEME:                    '    Chuanhu-Small-and-Beautiful                                      '
+      ALIYUN_APPKEY:            '    RoP1ZrM84DnAFkZK                                                 '
+      ALIYUN_TOKEN:             '    f37f30e0f9934c34a992f6f64f7eba4f                                 '
+      # (无需填写) ALIYUN_ACCESSKEY:         '    LTAI5q6BrFUzoRXVGUWnekh1                                         '
+      # (无需填写) ALIYUN_SECRET:            '    eHmI20AVWIaQZ0CiTD2bGQVsaP9i68                                   '
 
     # 与宿主的网络融合
     network_mode: "host"

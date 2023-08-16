@@ -90,62 +90,29 @@
 
 到现在为止，申请操作就完成了，需要记下来的有下面几个东西：
 
-● 密钥（1或2都可以）
+● 密钥（对应AZURE_API_KEY，1或2都可以）
 
-● 终结点
+● 终结点 （对应AZURE_ENDPOINT）
 
-● 部署名（不是模型名）
+● 部署名（对应AZURE_ENGINE，不是模型名）
+
 
 # 修改 config.py
 
 ```
-AZURE_ENDPOINT = "填入终结点"
+LLM_MODEL = "azure-gpt-3.5"  # 指定启动时的默认模型，当然事后从下拉菜单选也ok
+
+AZURE_ENDPOINT = "填入终结点" # 见上述图片
 AZURE_API_KEY = "填入azure openai api的密钥"
 AZURE_API_VERSION = "2023-05-15"  # 默认使用 2023-05-15 版本，无需修改
-AZURE_ENGINE = "填入部署名"
-
-```
-# API的使用
-
-接下来就是具体怎么使用API了，还是可以参考官方文档：[快速入门 - 开始通过 Azure OpenAI 服务使用 ChatGPT 和 GPT-4 - Azure OpenAI Service | Microsoft Learn](https://learn.microsoft.com/zh-cn/azure/cognitive-services/openai/chatgpt-quickstart?pivots=programming-language-python)
-
-和openai自己的api调用有点类似，都需要安装openai库，不同的是调用方式
-
-```
-import openai
-openai.api_type = "azure" #固定格式，无需修改
-openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT") #这里填入“终结点”
-openai.api_version = "2023-05-15" #固定格式，无需修改
-openai.api_key = os.getenv("AZURE_OPENAI_KEY") #这里填入“密钥1”或“密钥2”
-
-response = openai.ChatCompletion.create(
-    engine="gpt-35-turbo", #这里填入的不是模型名，是部署名
-    messages=[
-        {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Does Azure OpenAI support customer managed keys?"},
-        {"role": "assistant", "content": "Yes, customer managed keys are supported by Azure OpenAI."},
-        {"role": "user", "content": "Do other Azure Cognitive Services support this too?"}
-    ]
-)
-
-print(response)
-print(response['choices'][0]['message']['content'])
+AZURE_ENGINE = "填入部署名" # 见上述图片
 
 ```
 
-需要注意的是：
-
-1.  engine那里填入的是部署名，不是模型名
-
-2.  通过openai库获得的这个 response 和通过 request 库访问 url 获得的 response 不同，不需要 decode，已经是解析好的 json 了，直接根据键值读取即可。
-
-更细节的使用方法，详见官方API文档。
 
 # 关于费用
 
-Azure OpenAI API 还是需要一些费用的（免费订阅只有1个月有效期），费用如下：
-
-![image.png](https://note.youdao.com/yws/res/18095/WEBRESOURCEeba0ab6d3127b79e143ef2d5627c0e44)
+Azure OpenAI API 还是需要一些费用的（免费订阅只有1个月有效期）
 
 具体可以可以看这个网址 ：[Azure OpenAI 服务 - 定价| Microsoft Azure](https://azure.microsoft.com/zh-cn/pricing/details/cognitive-services/openai-service/?cdn=disable)
 
