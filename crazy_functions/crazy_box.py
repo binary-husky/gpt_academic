@@ -192,6 +192,9 @@ class ExcelHandle:
         self.yellow_fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
         self.green_fill = PatternFill(start_color="1abc9c", end_color="1abc9c", fill_type="solid")
         self.red_fill = PatternFill(start_color="ff7f50", end_color="ff7f50", fill_type="solid")
+        # 定义边框样式
+        border_style = Side(style='thin', color="000000")
+        self.border = Border(left=border_style, right=border_style, top=border_style, bottom=border_style)
         if not sheet: self.sheet = '测试要点'
 
     def lpvoid_lpbuffe(self, data_list: list, filename=''):
@@ -210,6 +213,7 @@ class ExcelHandle:
                 cell = worksheet.cell(row=start_row, column=col_num)
                 try:
                     cell.value = str(value).strip()
+                    cell.border = self.border
                     # 判断 value 是否为 '插件补充的用例'
                     if '插件补充的用例' in str(value):
                         cell.fill = self.yellow_fill
@@ -273,9 +277,6 @@ class ExcelHandle:
     def merge_same_cells(self, truncation=10):
         # 加载xlsx文件
         ws = self.workbook[self.sheet]
-        # 定义边框样式
-        border_style = Side(style='thin', color="000000")
-        border = Border(left=border_style, right=border_style, top=border_style, bottom=border_style)
         # 遍历每个单元格（列优先遍历）
         column_counter = {'row': 0, 'col': 0}
         for col_index in range(1, ws.max_column + 1):
@@ -295,8 +296,8 @@ class ExcelHandle:
                     ws.merge_cells(f"{col_letter}{row_start}:{col_letter}{row_end}")
                     row_start = None
                 # # 设置边框样式
-                # current_cell.border = border
-                # next_cell.border = border
+                current_cell.border = self.border
+                next_cell.border = self.border
                 # 当列超过10行为空，跳出循环
                 if not current_cell.value:
                     column_counter['row'] += 1
@@ -370,7 +371,7 @@ class XmindHandle():
             self._WalkTopic(canvas['topic'], dictResult)
             strResult = self._Print2MDList(dictResult)
             xm_content += strResult
-            pathOutput = os.path.splitext(pathSource)[0] + f'_{canvas["title"]}.md'
+            pathOutput = os.path.basename() + f'_{canvas["title"]}.md'
             with open(pathOutput, 'w', encoding='utf-8') as f:
                 f.write(strResult)
                 md_path.append(pathOutput)
@@ -526,7 +527,7 @@ def file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_
             _, routing, _ = crazy_utils.get_files_from_everything(f, t, ipaddr=llm_kwargs['ipaddr'])
             file_routing.extend(routing)
     for file_path in file_routing:
-        chatbot.append([None, f'`{file_path.replace(func_box.base_path, ".")}`' +
+        chatbot.append(['检查文件是否符合格式要求，并解析文件', f'`{file_path.replace(func_box.base_path, ".")}`' +
                         f"\t...正在解析本地文件\n\n"])
         yield from toolbox.update_ui(chatbot, history)
         title = long_name_processing(os.path.basename(file_path))
@@ -821,17 +822,18 @@ def parsing_json_in_text(txt_data: list, old_case, filter_list: list = 'None----
             if re.search(r'[^\w\s\]]', content_data[-1]):  # 判断是不是有,号之类的特殊字符
                 content_data = content_data[:-1]  # 有则排除
             content_data += ']'
+        # 尝试补充一些错误的JSON数据
+        fix_data = content_data.replace('][', '],[').replace(']\n[', '],[')
+        fix_data = fix_data.replace('\n...\n', '').replace('\n\n...\n\n', '')
         pattern = r'\[[^\[\]]*\]'
-        result = re.findall(pattern, content_data)
+        result = re.findall(pattern, fix_data)
         for sp in result:
             __list = []
             try:
-                # 尝试补充一些错误的JSON数据
-                sp = sp.replace('][', '],[').replace(']\n[', '],[')
                 __list = json.loads(sp)
                 supplementary_data.append(__list)
             except:
-                pass
+                func_box.通知机器人(f'{sp} 测试用例转dict失败了来看看')
         if len(txt_data) != len(old_case): index = -1  # 兼容一下哈
         # 过滤掉产出带的表头数据
         filter_supplementary_data = [data for data in supplementary_data
@@ -873,7 +875,7 @@ def write_test_cases(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot
                 elif i.find('｜') != -1:
                     test_case.append([func_box.clean_br_string(i) for i in i.split('｜')[1:]])
                 else:
-                    func_box.通知机器人(f'脏数据过滤，这个不符合写入测试用例的条件 \n\n```\n\n{i}\n\n```\n\n```\n{gpt_response_split}\n```')
+                    func_box.通知机器人(f'脏数据过滤，这个不符合写入测试用例的条件 \n\n预期写入数据`{i}`\n\n```\n{gpt_response_split}\n```')
         xlsx_heandle = ExcelHandle(ipaddr=llm_kwargs['ipaddr'], temp_file=template_file, sheet=sheet)
         xlsx_heandle.split_merged_cells()  # 先把合并的单元格拆分，避免写入失败
         file_path = xlsx_heandle.lpvoid_lpbuffe(test_case, filename=long_name_processing(file_name))
@@ -975,4 +977,4 @@ previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传�
 if __name__ == '__main__':
     with open('/Users/kilig/Desktop/过滤.md') as f:
         daat = f.read()
-    parsing_json_in_text(txt_data=[daat], old_case=[[]])
+    print(parsing_json_in_text(txt_data=[daat], old_case=[[]], filter_list=["功能分类", "功能点", "验证点", "前置条件", "操作步骤", "预期结果", "优先级", "验证截图", "开发自测结果", "开发备注", "测试结果", "测试备注"]))

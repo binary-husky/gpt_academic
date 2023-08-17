@@ -128,7 +128,6 @@ def KDocs_转接口测试用例(file_limit, llm_kwargs, plugin_kwargs, chatbot, 
 
 @CatchException
 def KDocs_转客户端测试用例(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    file_history = {i: {} for i in range(3)}
     gpt_response_collection = yield from func_格式化文档(link_limit, llm_kwargs, plugin_kwargs, chatbot, history,
                                                           system_prompt, web_port)
     if not gpt_response_collection:
@@ -136,6 +135,8 @@ def KDocs_转客户端测试用例(link_limit, llm_kwargs, plugin_kwargs, chatbo
     # < --------------------------- 第一阶段执行 -------------------------------->
     gpt_response = yield from crazy_box.func_拆分与提问(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot,
                                                         history, args_keys=[False, False])
+    if not gpt_response:
+        return
     yield from crazy_box.write_test_cases(gpt_response, llm_kwargs, plugin_kwargs,
                                           chatbot, history)
     yield from update_ui(chatbot, history, '插件执行成功')
@@ -181,6 +182,9 @@ def Kdocs_多阶段生成回答(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
             yield from update_ui(chatbot=chatbot, history=history)
             yield from crazy_box.file_extraction_intype(plugin_kwargs[stage], [''], file_limit, chatbot, history, llm_kwargs, plugin_kwargs)
 
+    if not multi_stage_config:
+        chatbot.append([None, '!!!!! 自定义参数中的Json存在问题，请仔细检查配置是否符合JSON编码格式'])
+        yield from update_ui(chatbot=chatbot, history=history)
 
 @CatchException
 def KDocs_需求分析问答(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):

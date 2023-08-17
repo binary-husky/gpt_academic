@@ -107,7 +107,7 @@ def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
         llm_kwargs['know_id'] = know_kwargs['查询列表']
         txt = None
     kai_id = llm_kwargs['know_id']
-    gpt_say = f'正在将问题向量化，然后对`{str(kai_id)}`知识库进行匹配...'
+    gpt_say = f'正在将`{txt[:10]}`向量化，然后对`{str(kai_id)}`知识库进行匹配...'
     if kai_id:
         if gpt_say not in str(chatbot):
             chatbot.append([txt, gpt_say])
