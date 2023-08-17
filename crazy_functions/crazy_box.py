@@ -809,7 +809,7 @@ def batch_recognition_images_to_md(img_list, ipaddr):
     return temp_list
 
 
-def parsing_json_in_text(txt_data: list, old_case, filter_list: list = False, tags='插件补充的用例'):
+def parsing_json_in_text(txt_data: list, old_case, filter_list: list = 'None----', tags='插件补充的用例'):
     response = []
     desc = '\n\n---\n\n'.join(txt_data)
     for index in range(len(txt_data)):
@@ -973,4 +973,6 @@ previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传�
 
 
 if __name__ == '__main__':
-    old_data = ExcelHandle(temp_file='/Users/kilig/Job/Python-project/kso_gpt/private_upload/10.13.236.56/test_case/20230815_154152/Mac 支付页改版.xlsx').merge_same_cells()
+    with open('/Users/kilig/Desktop/过滤.md') as f:
+        daat = f.read()
+    parsing_json_in_text(txt_data=[daat], old_case=[[]])
