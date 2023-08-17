@@ -88,8 +88,8 @@ class Utils:
             for key, value in i.items():
                 if key in self.find_picture_tags:
                     if img_proce:
-                        mark = f'{key}OCR结果: """{value["sourceKey"]}"""\n'
-                        if value["caption"]: mark += f'{key}描述: {value["caption"]}\n'
+                        mark = f'{key}图片内容: """{value["sourceKey"]}"""\n'
+                        if value["caption"]: mark += f'{key}图片描述: {value["caption"]}\n'
                         context_.append(mark)
                         pic_dict[value['sourceKey']] = value['imgID']
                     else:
@@ -525,14 +525,13 @@ def file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_
         chatbot.append([None, f'`{file_path.replace(func_box.base_path, ".")}`' +
                         f"\t...正在解析本地文件\n\n"])
         yield from toolbox.update_ui(chatbot, history)
+        title = long_name_processing(os.path.basename(file_path))
         if file_path.endswith('pdf'):
             file_content, _ = crazy_utils.read_and_clean_pdf_text(file_path)
-            title = long_name_processing(file_content)
             content = "".join(file_content)
             file_limit.extend([title, content])
         elif file_path.endswith('xmind'):
             file_content, _path = XmindHandle().xmind_2_md(pathSource=file_path)
-            title = long_name_processing(file_content)
             file_limit.extend([title, file_content])
         elif file_path.endswith('xlsx') or file_path.endswith('xls'):
             sheet, = json_args_return(plugin_kwargs, keys=['读取指定Sheet'], default='测试要点')
@@ -545,7 +544,7 @@ def file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_
             active_sheet = ex_handle.workbook.active.title
             active_content = xlsx_dict.get(active_sheet)
             plugin_kwargs['写入指定模版'] = file_path
-            title = long_name_processing(os.path.basename(file_path))
+            plugin_kwargs['写入指定Sheet'] = active_sheet
             if file_content:
                 file_limit.extend([title, file_content])
             else:
@@ -559,7 +558,6 @@ def file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_
         else:
             with open(file_path, mode='r') as f:
                 file_content = f.read()
-                title = long_name_processing(file_content)
                 file_limit.extend([title, file_content])
         yield from toolbox.update_ui(chatbot, history)
 
@@ -951,6 +949,7 @@ def result_written_to_markdwon(gpt_response_collection, llm_kwargs, plugin_kwarg
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
         file_limit.append(md)
     return file_limit
+
 # <---------------------------------------一些Tips----------------------------------------->
 previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传，多个文件请上传压缩包，'\
                   f'{func_box.html_tag_color("如果是网络文件或金山文档链接，请粘贴到输入框")}, 然后再次点击该插件'\

@@ -521,6 +521,9 @@ def prompt_input(txt: str, prompt_str, name_str,  index, data: gr.Dataset, tabs_
     """
     data_str = str(data['samples'][index][1])
     data_name = str(data['samples'][index][0])
+    if prompt_str != '':
+        data_str = prompt_str
+        data_name = name_str
     rp_str = '{{{v}}}'
     def str_v_handle(__str):
         if data_str.find(rp_str) != -1 and __str:

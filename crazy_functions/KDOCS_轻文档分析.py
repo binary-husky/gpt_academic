@@ -167,13 +167,15 @@ def Kdocs_多阶段生成回答(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
         else:
             chatbot.append([None, '你没有指定提示词，跳过提问'])
             yield from update_ui(chatbot=chatbot, history=history)
-        if func:
+        if func and func_kwargs.get(func, False):
             plugin_kwargs[stage] = yield from func_kwargs[func](file_limit, llm_kwargs, plugin_kwargs,  chatbot, history)
+            file_limit = []
         else:
-            chatbot.append([None, '你没有指定调用方法，跳过生成结果'])
+            chatbot.append([None, '你没有指定调用方法 or 方法错误，跳过生成结果，直接将上次的结果提交给下阶段'])
+            content_limit = crazy_box.file_classification_to_dict(file_limit)
+            file_limit = [[limit, "".join(content_limit[limit])] for limit in content_limit]
             yield from update_ui(chatbot=chatbot, history=history)
         if stage != [i for i in multi_stage_config][-1]:
-            file_limit = []
             chatbot.append(['开始准备下一阶段的数据', None])
             yield from update_ui(chatbot=chatbot, history=history)
             yield from crazy_box.file_extraction_intype(plugin_kwargs[stage], [''], file_limit, chatbot, history, llm_kwargs, plugin_kwargs)
