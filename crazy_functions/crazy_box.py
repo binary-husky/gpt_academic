@@ -16,6 +16,7 @@ from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Border, Side
 from openpyxl.styles import PatternFill
+from openpyxl.drawing.image import Image
 from crazy_functions import crazy_utils
 from request_llm import bridge_all
 from crazy_functions import crzay_kingsoft
@@ -193,8 +194,6 @@ class ExcelHandle:
         self.red_fill = PatternFill(start_color="ff7f50", end_color="ff7f50", fill_type="solid")
         if not sheet: self.sheet = '测试要点'
 
-
-
     def lpvoid_lpbuffe(self, data_list: list, filename=''):
         # 加载现有的 Excel 文件        # 选择要操作的工作表, 默认是测试要点
         if self.sheet in self.workbook.sheetnames:
@@ -226,7 +225,11 @@ class ExcelHandle:
         if filename == '': filename = time.strftime("%Y-%m-%d-%H", time.localtime()) + '_temp'
         else: f"{time_stamp}_{filename}"
         test_case_path = f'{os.path.join(self.user_path, filename)}.xlsx'
-        self.workbook.save(test_case_path)
+        # 遇到遇到文件无法保存时，再拆开图片
+        try:
+            self.workbook.save(test_case_path)
+        except Exception as f:
+            test_case_path = self.template_excel
         return test_case_path
 
     def read_as_dict(self):
@@ -536,25 +539,27 @@ def file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_
         elif file_path.endswith('xlsx') or file_path.endswith('xls'):
             sheet, = json_args_return(plugin_kwargs, keys=['读取指定Sheet'], default='测试要点')
             # 创建文件对象
-            ex_handle = ExcelHandle(temp_file=file_path)
-            # 将工作表中的合并单元格拆分
-            ex_handle.split_merged_cells()
-            xlsx_dict = ex_handle.read_as_dict()
-            file_content = xlsx_dict.get(sheet)
-            active_sheet = ex_handle.workbook.active.title
-            active_content = xlsx_dict.get(active_sheet)
-            plugin_kwargs['写入指定模版'] = file_path
-            plugin_kwargs['写入指定Sheet'] = active_sheet
-            if file_content:
+            ex_handle = ExcelHandle(temp_file=file_path, sheet=sheet)
+            if sheet in ex_handle.workbook.sheetnames:
+                ex_handle.split_merged_cells()
+                xlsx_dict = ex_handle.read_as_dict()
+                file_content = xlsx_dict.get(sheet)
                 file_limit.extend([title, file_content])
             else:
+                active_sheet = ex_handle.workbook.active.title
+                ex_handle.sheet = active_sheet
+                ex_handle.split_merged_cells()
+                xlsx_dict = ex_handle.read_as_dict()
+                active_content = xlsx_dict.get(active_sheet)
                 file_limit.extend([title, active_content])
                 chatbot.append([None,
-                                f'无法在`{os.path.basename(file_path)}`找到`{sheet}工作表`'
-                                f'将读取上次预览的活动工作表`{active_sheet}`.'
+                                f'无法在`{os.path.basename(file_path)}`找到`{sheet}`工作表'
+                                f'将读取上次预览的活动工作表`{active_sheet}`，'
                                 f'若你的用例工作表是其他名称, 请及时暂停插件运行，并在自定义插件配置中更改'
                                 f'{func_box.html_tag_color("读取指定Sheet")}。'])
-                yield from toolbox.update_ui(chatbot, history)
+            plugin_kwargs['写入指定模版'] = file_path
+            plugin_kwargs['写入指定Sheet'] = ex_handle.sheet
+            yield from toolbox.update_ui(chatbot, history)
         else:
             with open(file_path, mode='r') as f:
                 file_content = f.read()
@@ -684,7 +689,7 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     else:
         prompt_cls_tab = f'prompt_{prompt_cls}_sys'
     if default_prompt: kwargs_prompt = default_prompt
-    chatbot.append([None, f'接下来使用的Prompt是{func_box.html_tag_color(prompt_cls)}分类下的：{func_box.html_tag_color(kwargs_prompt)}'
+    chatbot.append([None, f'接下来使用的Prompt是`{prompt_cls}`分类下的：`{kwargs_prompt}`'
                     f', 你可以在{func_box.html_tag_color("自定义插件参数")}中指定另一个Prompt哦～'])
     time.sleep(1)
     prompt = prompt_generator.SqliteHandle(table=prompt_cls_tab).find_prompt_result(kwargs_prompt)
@@ -692,14 +697,15 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
         content_limit = yield from split_content_limit(inputs, llm_kwargs, chatbot, history)
         try:
             plugin_kwargs['原测试用例数据'] = [json.loads(limit)[1:] for limit in content_limit]
-        except:
-            pass
+            plugin_kwargs['原测试用例表头'] = json.loads(content_limit[0])[0]
+        except Exception as f:
+            print(f'读取原测试用例报错 {f}')
         for limit in content_limit:
             if knowledge_base:
                 try:
                     limit = yield from Langchain_cn.knowledge_base_query(limit, chatbot, history, llm_kwargs, plugin_kwargs)
-                except Exception:
-                    chatbot.append([None, '读取知识库失败，本次对话不会提供任何参考文本'])
+                except Exception as f:
+                    chatbot.append([None, f'`{f}`读取知识库失败，本次对话不会提供任何参考文本'])
                     yield from toolbox.update_ui(chatbot, history)
             inputs_array.append(func_box.replace_expected_text(prompt, content=limit, expect='{{{v}}}'))
             inputs_show_user_array.append(you_say+task_tag)
@@ -802,7 +808,7 @@ def batch_recognition_images_to_md(img_list, ipaddr):
     return temp_list
 
 
-def parsing_json_in_text(txt_data: list, old_case, tags='插件补充的用例'):
+def parsing_json_in_text(txt_data: list, old_case, filter_list: list = False, tags='插件补充的用例'):
     response = []
     desc = '\n\n---\n\n'.join(txt_data)
     for index in range(len(txt_data)):
@@ -826,7 +832,9 @@ def parsing_json_in_text(txt_data: list, old_case, tags='插件补充的用例')
             except:
                 pass
         if len(txt_data) != len(old_case): index = -1  # 兼容一下哈
-        for new_case in supplementary_data:
+        # 过滤掉产出带的表头数据
+        filter_supplementary_data = [data for data in supplementary_data if filter_list != data]
+        for new_case in filter_supplementary_data:
             if new_case not in old_case[index]:
                 old_case[index].append(new_case+[tags])
         response.extend(old_case[index])
@@ -846,7 +854,7 @@ def write_test_cases(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot
     """
     template_file, sheet = json_args_return(plugin_kwargs, ['写入指定模版', '写入指定Sheet'])
     file_classification = file_classification_to_dict(gpt_response_collection)
-    chat_file_list = '...'
+    chat_file_list = ''
     you_say = '准备将测试用例写入Excel中...'
     chatbot.append([you_say, chat_file_list])
     yield from toolbox.update_ui(chatbot, history)
@@ -879,22 +887,22 @@ def supplementary_test_case(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     if not sheet:
         sheet, = json_args_return(plugin_kwargs, ['写入指定Sheet'])
     file_classification = file_classification_to_dict(gpt_response_collection)
-    chat_file_list = '...'
+    chat_file_list = ''
     you_say = '准备将测试用例写入Excel中...'
     chatbot.append([you_say, chat_file_list])
     yield from toolbox.update_ui(chatbot, history)
     files_limit = []
     for file_name in file_classification:
         old_case = plugin_kwargs['原测试用例数据']
-        test_case, desc = parsing_json_in_text(file_classification[file_name], old_case)
+        header = plugin_kwargs.get('原测试用例表头', False)
+        test_case, desc = parsing_json_in_text(file_classification[file_name], old_case, filter_list=header)
         file_path = ExcelHandle(ipaddr=llm_kwargs['ipaddr'],
                                 temp_file=template_file, sheet=sheet).lpvoid_lpbuffe(
             test_case, filename=long_name_processing(file_name))
         md = Utils().write_markdown(data=desc, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(file_name))
         chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, to_tabs=True)}\n\n' \
                           f'---\n\n{file_name}补充思路如下：\t{func_box.html_view_blank(__href=md, to_tabs=True)}\n\n'
-        you_say += 'Done'
-        chatbot[-1] = ([you_say, chat_file_list])
+        chatbot[-1] = ([you_say+'Done', chat_file_list])
         yield from toolbox.update_ui(chatbot, history)
         files_limit.append(file_path)
     return files_limit
@@ -910,16 +918,19 @@ def transfer_flow_chart(gpt_response_collection, llm_kwargs, plugin_kwargs, chat
     Returns:
         None
     """
-    chatbot.append([None, f'🏃🏻‍正在努力将Markdown转换为流程图~'])
     file_classification = file_classification_to_dict(gpt_response_collection)
     file_limit = []
+    chat_file_list = ''
+    you_say = '请将Markdown结果转换为流程图~'
+    chatbot.append([you_say, chat_file_list])
     for file_name in file_classification:
         inputs_count = ''
         for value in file_classification[file_name]:
             inputs_count += str(value).replace('```', '')  # 去除头部和尾部的代码块, 避免流程图堆在一块
         md, html = Utils().markdown_to_flow_chart(data=inputs_count, hosts=llm_kwargs['ipaddr'],
                                                   file_name=long_name_processing(file_name))
-        chatbot.append((None, "View: " + func_box.html_view_blank(md, to_tabs=True)+'\n\n--- \n\n View: ' + func_box.html_view_blank(html)))
+        chat_file_list += "View: " + func_box.html_view_blank(md, to_tabs=True) + '\n\n--- \n\n View: ' + func_box.html_view_blank(html)
+        chatbot.append((you_say, ))
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
         file_limit.append(md)
     # f'tips: 双击空白处可以放大～\n\n' f'{func_box.html_iframe_code(html_file=html)}'  无用，不允许内嵌网页了
@@ -938,6 +949,9 @@ def result_written_to_markdwon(gpt_response_collection, llm_kwargs, plugin_kwarg
     """
     file_classification = file_classification_to_dict(gpt_response_collection)
     file_limit = []
+    chat_file_list = ''
+    you_say = '请将Markdown结果写入文件中...'
+    chatbot.append([you_say, chat_file_list])
     for file_name in file_classification:
         inputs_all = ''
         for value in file_classification[file_name]:
@@ -945,7 +959,7 @@ def result_written_to_markdwon(gpt_response_collection, llm_kwargs, plugin_kwarg
         md = Utils().write_markdown(data=inputs_all, hosts=llm_kwargs['ipaddr'],
                                     file_name=long_name_processing(file_name))
         chat_file_list = f'markdown已写入文件，下次使用插件可以直接提交markdown文件啦 {func_box.html_view_blank(md, to_tabs=True)}'
-        chatbot.append((None, chat_file_list))
+        chatbot.append((you_say+'Done', chat_file_list))
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
         file_limit.append(md)
     return file_limit

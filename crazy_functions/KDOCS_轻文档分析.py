@@ -214,7 +214,7 @@ def KDocs_文档提取测试点(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
 
 @CatchException
 def KDocs_测试用例检查优化(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    file_types = ['xlsx', 'xmind']
+    file_types = ['xlsx']
     file_limit = yield from func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, file_types)
     if not link_limit:
         return
