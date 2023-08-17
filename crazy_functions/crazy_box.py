@@ -90,7 +90,7 @@ class Utils:
                 if key in self.find_picture_tags:
                     if img_proce:
                         mark = f'{key}图片内容: """{value["sourceKey"]}"""\n'
-                        if value["caption"]: mark += f'{key}图片描述: {value["caption"]}\n'
+                        if value["caption"]: mark += f'\n```\n{key}:\n\n {value["caption"]}\n```\n'
                         context_.append(mark)
                         pic_dict[value['sourceKey']] = value['imgID']
                     else:

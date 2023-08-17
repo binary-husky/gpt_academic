@@ -35,7 +35,8 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
                 ovs_data, content, empty_picture_count, pic_dict, kdocs_dict = crazy_box.get_docs_content(url, image_processing=img_ocr)
                 if img_ocr:
                     if pic_dict:  # 当有图片文件时，再去提醒
-                        ocr_process = f'检测到轻文档中存在{func_box.html_tag_color(empty_picture_count)}张图片，为了产出结果不存在遗漏，正在逐一进行识别\n\n' \
+                        title = crazy_box.long_name_processing(content)
+                        ocr_process = f'检测到{title}文档中存在{func_box.html_tag_color(empty_picture_count)}张图片，为了产出结果不存在遗漏，正在逐一进行识别\n\n' \
                                       f'> 红框为采用的文案,可信度低于 {func_box.html_tag_color(llm_kwargs["ocr"])} 将不采用, 可在Setting 中进行配置\n\n'
                         chatbot.append([None, ocr_process])
                     else:
@@ -136,7 +137,7 @@ def KDocs_转客户端测试用例(link_limit, llm_kwargs, plugin_kwargs, chatbo
     gpt_response = yield from crazy_box.func_拆分与提问(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot,
                                                         history, args_keys=[False, False])
     yield from crazy_box.write_test_cases(gpt_response, llm_kwargs, plugin_kwargs,
-                                          chatbot, history, file_history[1])
+                                          chatbot, history)
     yield from update_ui(chatbot, history, '插件执行成功')
 
 
@@ -163,7 +164,7 @@ def Kdocs_多阶段生成回答(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
         yield from update_ui(chatbot=chatbot, history=history)
         if prompt:
             file_limit = yield from crazy_box.func_拆分与提问(file_limit, llm_kwargs, plugin_kwargs, chatbot, history,
-                                                            args_keys=[prompt, knowledge_base], task_tag=stage)
+                                                            args_keys=[prompt, knowledge_base], task_tag="_"+stage)
         else:
             chatbot.append([None, '你没有指定提示词，跳过提问'])
             yield from update_ui(chatbot=chatbot, history=history)
@@ -198,7 +199,7 @@ def KDocs_文档转流程图(link_limit, llm_kwargs, plugin_kwargs, chatbot, his
                                                           system_prompt, web_port)
     if not gpt_response_collection:
         return
-    yield from crazy_box.transfer_flow_chart(gpt_response_collection, llm_kwargs, chatbot, history)
+    yield from crazy_box.transfer_flow_chart(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history)
     yield from update_ui(chatbot, history, '插件执行成功')
 
 
