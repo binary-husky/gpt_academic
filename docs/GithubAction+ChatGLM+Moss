@@ -18,6 +18,7 @@ WORKDIR /gpt/gpt_academic
 RUN git clone https://github.com/OpenLMLab/MOSS.git request_llm/moss
 RUN python3 -m pip install -r requirements.txt
 RUN python3 -m pip install -r request_llm/requirements_moss.txt
+RUN python3 -m pip install -r request_llm/requirements_qwen.txt
 RUN python3 -m pip install -r request_llm/requirements_chatglm.txt
 RUN python3 -m pip install -r request_llm/requirements_newbing.txt
 
