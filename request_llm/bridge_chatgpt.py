@@ -192,7 +192,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                         break
                     # 处理数据流的主体
                     chunkjson = json.loads(chunk_decoded[6:])
-                    status_text = f"finish_reason: {chunkjson['choices'][0]['finish_reason']}"
+                    status_text = f"finish_reason: {chunkjson['choices'][0].get('finish_reason', 'null')}"
                     # 如果这里抛出异常，一般是文本过长，详情见get_full_error的输出
                     gpt_replying_buffer = gpt_replying_buffer + json.loads(chunk_decoded[6:])['choices'][0]["delta"]["content"]
                     history[-1] = gpt_replying_buffer

@@ -16,6 +16,7 @@ services:
       AVAIL_LLM_MODELS:         '    ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "newbing"]                    '
       WEB_PORT:                 '    22303                                                                                          '
       ADD_WAIFU:                '    True                                                                                           '
+      # THEME:                    '    Chuanhu-Small-and-Beautiful                                                                    '
       # DEFAULT_WORKER_NUM:       '    10                                                                                             '
       # AUTHENTICATION:           '    [("username", "passwd"), ("username2", "passwd2")]                                             '
 
@@ -28,7 +29,7 @@ services:
 
 
 ### ===================================================
-### 【方案二】 如果需要运行ChatGLM本地模型
+### 【方案二】 如果需要运行ChatGLM + Qwen + MOSS等本地模型
 ### ===================================================
 version: '3'
 services:
@@ -36,11 +37,11 @@ services:
     image: ghcr.io/binary-husky/gpt_academic_chatglm_moss:master  # (Auto Built by Dockerfile: docs/Dockerfile+ChatGLM)
     environment:
       # 请查阅 `config.py` 以查看所有的配置信息
-      API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx,fkxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  '
+      API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                                            '
       USE_PROXY:                '    True                                                                                           '
       proxies:                  '    { "http": "socks5h://localhost:10880", "https": "socks5h://localhost:10880", }                 '
       LLM_MODEL:                '    gpt-3.5-turbo                                                                                  '
-      AVAIL_LLM_MODELS:         '    ["chatglm", "moss", "gpt-3.5-turbo", "gpt-4", "newbing"]                                       '
+      AVAIL_LLM_MODELS:         '    ["chatglm", "qwen", "moss", "gpt-3.5-turbo", "gpt-4", "newbing"]                               '
       LOCAL_MODEL_DEVICE:       '    cuda                                                                                           '
       DEFAULT_WORKER_NUM:       '    10                                                                                             '
       WEB_PORT:                 '    12303                                                                                          '
@@ -58,6 +59,10 @@ services:
       bash -c "python3 -u main.py"
     volumes:
       - ./cache:/root/.cache/
+
+    # P.S. 通过对 command 进行微调，可以便捷地安装额外的依赖
+    # command: >
+    #   bash -c "pip install -r request_llm/requirements_qwen.txt && python3 -u main.py"
 
 ### ===================================================
 ### 【方案三】 如果需要运行ChatGPT + LLAMA + 盘古 + RWKV本地模型
