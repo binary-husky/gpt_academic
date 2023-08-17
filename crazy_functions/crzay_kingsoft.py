@@ -147,6 +147,8 @@ class Kdocs:
             if t in link_name and file_type in link_name:
                 link = self.get_media_link()
         for t in self.smart_type:
+            if file_type == self.smart_type[t]:
+                file_type = t
             if t in link_name and file_type in link_name:
                 link = self.get_kdocs_intelligence_link(type=self.smart_type[t])
                 link_name = link_name+f".{self.smart_type[t]}"

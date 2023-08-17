@@ -89,8 +89,8 @@ class Utils:
             for key, value in i.items():
                 if key in self.find_picture_tags:
                     if img_proce:
-                        mark = f'{key}图片内容: """{value["sourceKey"]}"""\n'
-                        if value["caption"]: mark += f'\n```\n{key}:\n\n {value["caption"]}\n```\n'
+                        mark = f'{key}链接内容: """\n{value["sourceKey"]}\n"""\n'
+                        if value["caption"]: mark += f'\n{key}:{value["caption"]}\n\n'
                         context_.append(mark)
                         pic_dict[value['sourceKey']] = value['imgID']
                     else:
@@ -240,7 +240,8 @@ class ExcelHandle:
             sheet_data = []
             # 遍历每一行
             for row in sheet.iter_rows(values_only=True):
-                row = tuple(x for x in row if x is not None and x != row[-1])
+                # 过滤掉空行
+                # row = tuple(x for x in row if x is not None and x != row[-1])
                 sheet_data.append(row)
             # 将工作表名作为字典的键，行数据作为值
             data_dict[sheet_name] = sheet_data
@@ -293,9 +294,9 @@ class ExcelHandle:
                     row_end = row_index
                     ws.merge_cells(f"{col_letter}{row_start}:{col_letter}{row_end}")
                     row_start = None
-                # 设置边框样式
-                current_cell.border = border
-                next_cell.border = border
+                # # 设置边框样式
+                # current_cell.border = border
+                # next_cell.border = border
                 # 当列超过10行为空，跳出循环
                 if not current_cell.value:
                     column_counter['row'] += 1
@@ -833,7 +834,8 @@ def parsing_json_in_text(txt_data: list, old_case, filter_list: list = False, ta
                 pass
         if len(txt_data) != len(old_case): index = -1  # 兼容一下哈
         # 过滤掉产出带的表头数据
-        filter_supplementary_data = [data for data in supplementary_data if filter_list != data]
+        filter_supplementary_data = [data for data in supplementary_data
+                                     if filter_list[:5] != data[:5] or filter_list[-5:] != data[-5:]]
         for new_case in filter_supplementary_data:
             if new_case not in old_case[index]:
                 old_case[index].append(new_case+[tags])
@@ -883,9 +885,9 @@ def write_test_cases(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot
 
 
 def supplementary_test_case(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history):
-    template_file, sheet = json_args_return(plugin_kwargs, ['写入指定模版', '读取指定Sheet'])
+    template_file, sheet = json_args_return(plugin_kwargs, ['写入指定模版', '写入指定Sheet'])
     if not sheet:
-        sheet, = json_args_return(plugin_kwargs, ['写入指定Sheet'])
+        sheet, = json_args_return(plugin_kwargs, ['读取指定Sheet'])
     file_classification = file_classification_to_dict(gpt_response_collection)
     chat_file_list = ''
     you_say = '准备将测试用例写入Excel中...'
