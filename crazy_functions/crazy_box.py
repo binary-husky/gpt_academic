@@ -963,7 +963,7 @@ def result_written_to_markdwon(gpt_response_collection, llm_kwargs, plugin_kwarg
         md = Utils().write_markdown(data=inputs_all, hosts=llm_kwargs['ipaddr'],
                                     file_name=long_name_processing(file_name))
         chat_file_list = f'markdown已写入文件，下次使用插件可以直接提交markdown文件啦 {func_box.html_view_blank(md, to_tabs=True)}'
-        chatbot.append((you_say+'Done', chat_file_list))
+        chatbot[-1] = [you_say+'Done', chat_file_list]
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
         file_limit.append(md)
     return file_limit
