@@ -472,37 +472,6 @@ def format_io(self, y):
     return y
 
 
-def postprocess(self, y):
-    """
-    Parameters:
-        y: List of lists representing the message and response pairs. Each message and response should be a string, which may be in Markdown format.  It can also be a tuple whose first element is a string or pathlib.Path filepath or URL to an image/video/audio, and second (optional) element is the alt text, in which case the media file is displayed. It can also be None, in which case that message is not displayed.
-    Returns:
-        List of lists representing the message and response. Each message and response will be a string of HTML, or a dictionary with media information. Or None if the message is not to be displayed.
-    """
-    if y is None:
-        return []
-    processed_messages = []
-    pre = '<div class="md-message">'
-    suf = '</div>'
-    raw_pre = '<div class="raw-message hideM">'
-    raw_suf = '</div>'
-    for message_pair in y:
-        assert isinstance(
-            message_pair, (tuple, list)
-        ), f"Expected a list of lists or list of tuples. Received: {message_pair}"
-        assert (
-            len(message_pair) == 2
-        ), f"Expected a list of lists of length 2 or list of tuples of length 2. Received: {message_pair}"
-        i_say, you_say = message_pair
-        if message_pair[0]:
-            i_say = pre+self._postprocess_chat_messages(message_pair[0])+suf+raw_pre+str(message_pair[0])+raw_suf
-        if message_pair[1]:
-            you_say = pre+self._postprocess_chat_messages(message_pair[1]) + suf + raw_pre + str(message_pair[1]) + raw_suf
-        processed_messages.append([i_say, you_say])
-
-    return processed_messages
-
-
 def find_free_port():
     """
     返回当前系统中可用的未使用端口。

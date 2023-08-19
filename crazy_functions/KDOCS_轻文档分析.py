@@ -16,7 +16,7 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
     if not links and not files:
         devs_document, = get_conf('devs_document')
         chatbot.append((None, f'输入框空空如也？{link_limit}\n\n'
-                              f'请在输入框中输入需要解析的文档链接或本地文件地址，文档支持类型{func_box.html_tag_color(file_types)}'
+                              f'请在输入框中输入需要解析的文档链接或本地文件地址，然后再点击对应的插件，文档支持类型{func_box.html_tag_color(file_types)}'
                               f'链接需要是可访问的，格式如下，如果有多个文档则用换行或空格隔开，输入后再点击对应的插件'
                               f'\n\n【金山文档】 xxxx https://kdocs.cn/l/xxxxxxxxxx'
                               f'\n\n https://kdocs.cn/l/xxxxxxxxxx'

@@ -4,8 +4,9 @@ import time
 import crazy_functions.crazy_box
 from request_llm.bridge_all import predict
 from comm_tools.toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_user_upload, \
-    get_conf, ArgsGeneralWrapper, postprocess
+    get_conf, ArgsGeneralWrapper
 
+from comm_tools.overwrites import postprocess_chat_messages, postprocess
 # 问询记录, python 版本建议3.9+（越新越好）
 import logging
 
@@ -27,7 +28,8 @@ for role in crazy_fns_role:
 
 # 处理markdown文本格式的转变 暂时屏蔽这个高亮代码
 # gr.Chatbot.postprocess = format_io
-
+gr.Chatbot._postprocess_chat_messages = postprocess_chat_messages
+gr.Chatbot.postprocess = postprocess
 
 # 做一些外观色彩上的调整
 from comm_tools.theme import adjust_theme, custom_css, reload_javascript
