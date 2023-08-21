@@ -150,3 +150,7 @@ ANTHROPIC_API_KEY = ""
 
 # 自定义API KEY格式
 CUSTOM_API_KEY_PATTERN = ""
+
+
+# HUGGINGFACE的TOKEN 下载LLAMA时起作用 https://huggingface.co/docs/hub/security-tokens
+HUGGINGFACE_ACCESS_TOKEN = "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"
