@@ -37,7 +37,7 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
                     if pic_dict:  # 当有图片文件时，再去提醒
                         title = crazy_box.long_name_processing(content)
                         ocr_process = f'检测到{title}文档中存在{func_box.html_tag_color(empty_picture_count)}张图片，为了产出结果不存在遗漏，正在逐一进行识别\n\n' \
-                                      f'> 红框为采用的文案,可信度低于 {func_box.html_tag_color(llm_kwargs["ocr"])} 将不采用, 可在Setting 中进行配置\n\n'
+                                      f'> 红框为采用的文案,可信指数低于 {func_box.html_tag_color(llm_kwargs["ocr"])} 将不采用, 可在Setting 中进行配置\n\n'
                         chatbot.append([None, ocr_process])
                     else:
                         ocr_process = ''

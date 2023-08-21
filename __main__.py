@@ -481,7 +481,7 @@ class ChatBot(ChatBotFrame):
                     self.pro_tf_slider = gr.Slider(minimum=0.01, maximum=1.0, value=0.70, step=0.01, interactive=True,
                                                    label="搜索匹配系数").style(container=False)
                     self.ocr_identifying_trust = gr.Slider(minimum=0.01, maximum=1.0, value=0.60, step=0.01, interactive=True,
-                                                   label="OCR 识别信任度").style(container=False)
+                                                   label="OCR 识别信任指数").style(container=False)
 
             self.models_box = gr.CheckboxGroup(choices=switch_model['key'], value=switch_model['value'], label="对话模式")
             self.system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt",
