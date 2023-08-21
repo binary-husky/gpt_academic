@@ -521,22 +521,19 @@ def prompt_input(txt: str, prompt_str, name_str,  index, data: gr.Dataset, tabs_
     """
     data_str = str(data['samples'][index][1])
     data_name = str(data['samples'][index][0])
-    if prompt_str != '':
-        data_str = prompt_str
-        data_name = name_str
     rp_str = '{{{v}}}'
     def str_v_handle(__str):
-        if data_str.find(rp_str) != -1 and __str:
-            txt_temp = data_str.replace(rp_str, __str)
+        temp_ = data_str
+        if temp_.find(rp_str) != -1 and __str:
+            txt_temp = temp_.replace(rp_str, __str)
         else:
-            txt_temp = data_str + txt
+            txt_temp = temp_ + txt
         return txt_temp
-    if tabs_index == 1 or txt == '':
-        new_txt = str_v_handle(txt)
-        return new_txt, data_str, data_name
-    else:
-        new_txt = str_v_handle(txt)
-        return new_txt, data_str, name_str
+    new_txt = str_v_handle(txt)
+    if prompt_str != '' or name_str != '':
+        data_str, data_name = prompt_str, name_str
+    return new_txt, data_str, data_name
+
 
 
 def copy_result(history):
