@@ -216,7 +216,7 @@ span.svelte-1gfkn6j:not(.has-info) {
     margin: 32px 0 4px 0;
 }
 .toggle-button-hide {
-    display: none;
+    opacity: 0;
 }
 /* gradio的页脚信息 */
 footer {

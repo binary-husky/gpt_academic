@@ -14,7 +14,7 @@ def escape_markdown(text):
     Escape Markdown special characters to HTML-safe equivalents.
     """
     escape_chars = {
-        # ' ': '&nbsp;',
+        ' ': '&nbsp;',
         '_': '&#95;',
         '*': '&#42;',
         '[': '&#91;',
@@ -54,7 +54,7 @@ def convert_bot_before_marked(chat_message):
         hr_pattern = r'\n\n<hr class="append-display no-in-raw" />(.*?)'
         hr_match = re.search(hr_pattern, chat_message, re.DOTALL)
         clip_hr = chat_message[:hr_match.start()] if hr_match else chat_message
-        raw = f'<div class="raw-message hideM">{escape_markdown(clip_hr)}</div>'
+        raw = f'<div class="raw-message hideM"></p>{escape_markdown(clip_hr)}</p></div>'
         for non_code, code in zip(non_code_parts, code_blocks + [""]):
             if non_code.strip():
                 result.append(non_code)

@@ -215,6 +215,4 @@ window.addEventListener("DOMContentLoaded", function () {
     historyLoaded = false;
 });
 mObserver.observe(document.documentElement, { attributes: true, childList: true, subtree: true });
-window.addEventListener('resize', setChatbotHeight);
-window.addEventListener('scroll', function(){setChatbotHeight(); setUpdateWindowHeight();});
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", adjustDarkMode);
