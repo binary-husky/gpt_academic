@@ -245,7 +245,7 @@ class ExcelHandle:
             # 遍历每一行
             for row in sheet.iter_rows(values_only=True):
                 # 过滤掉空行
-                # row = tuple(x for x in row if x is not None and x != row[-1])
+                row = tuple(x for x in row if x is not None and x != row[-1])
                 sheet_data.append(row)
             # 将工作表名作为字典的键，行数据作为值
             data_dict[sheet_name] = sheet_data
@@ -699,8 +699,10 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
         content_limit = yield from split_content_limit(inputs, llm_kwargs, chatbot, history)
         try:
-            plugin_kwargs['原测试用例数据'] = [json.loads(limit)[1:] for limit in content_limit]
-            plugin_kwargs['原测试用例表头'] = json.loads(content_limit[0])[0]
+
+            plugin_kwargs[you_say] = {}
+            plugin_kwargs[you_say]['原测试用例数据'] = [json.loads(limit)[1:] for limit in content_limit]
+            plugin_kwargs[you_say]['原测试用例表头'] = json.loads(content_limit[0])[0]
         except Exception as f:
             print(f'读取原测试用例报错 {f}')
         for limit in content_limit:
@@ -814,7 +816,7 @@ def batch_recognition_images_to_md(img_list, ipaddr):
 def parsing_json_in_text(txt_data: list, old_case, filter_list: list = 'None----', tags='插件补充的用例'):
     response = []
     desc = '\n\n---\n\n'.join(txt_data)
-    for index in range(len(txt_data)):
+    for index in range(len(old_case)):
         supplementary_data = []
         content_data = txt_data[index]
         if 'raise ConnectionAbortedError jsokf' in content_data:
@@ -898,8 +900,8 @@ def supplementary_test_case(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     yield from toolbox.update_ui(chatbot, history)
     files_limit = []
     for file_name in file_classification:
-        old_case = plugin_kwargs['原测试用例数据']
-        header = plugin_kwargs.get('原测试用例表头', False)
+        old_case = plugin_kwargs[file_name]['原测试用例数据']
+        header = plugin_kwargs[file_name].get('原测试用例表头', False)
         test_case, desc = parsing_json_in_text(file_classification[file_name], old_case, filter_list=header)
         file_path = ExcelHandle(ipaddr=llm_kwargs['ipaddr'],
                                 temp_file=template_file, sheet=sheet).lpvoid_lpbuffe(
