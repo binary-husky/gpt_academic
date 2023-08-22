@@ -85,9 +85,6 @@ def convert_bot_before_marked(chat_message):
         return raw + md
 
 
-def convert_bot_before_marked_old(chat_message):
-    pass
-
 def postprocess(self, y):
     """
     Parameters:

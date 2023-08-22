@@ -20,6 +20,12 @@ function gradioLoaded(mutations) {
             }
             initialize();
         }
+        chatbot = document.querySelector('#main_chatbot');
+        chatbotWrap = document.querySelector('#main_chatbot > .wrapper > .wrap');
+
+        if (gradioContainer && apSwitch) {  // gradioCainter 加载出来了没?
+                adjustDarkMode();
+        }
     }
 }
 
@@ -47,26 +53,41 @@ function initialize() {
     }
 }
 
-function adjustDarkMode() {
-    function toggleDarkMode(isEnabled) {
-        if (isEnabled) {
-            document.body.classList.add("dark");
-            document.body.style.setProperty("background-color", "var(--neutral-950)", "important");
-        } else {
-            document.body.classList.remove("dark");
-            document.body.style.backgroundColor = "";
-        }
+var username = null;
+function toggleDarkMode(isEnabled) {
+    if (isEnabled) {
+        document.body.classList.add("dark");
+        document.body.style.setProperty("background-color", "var(--neutral-950)", "important");
+    } else {
+        document.body.classList.remove("dark");
+        document.body.style.backgroundColor = "";
     }
-
+}
+function adjustDarkMode() {
     const darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    apSwitch.checked = darkModeQuery.matches;
-    toggleDarkMode(darkModeQuery.matches);
+
+    // 获取保存在localStorage中的状态，如果没有则使用系统偏好
+    const storedState = localStorage.getItem('darkModeEnabled');
+    const initialState = storedState === null ? darkModeQuery.matches : (storedState === "true");
+
+    // 根据当前颜色模式设置初始状态
+    apSwitch.checked = initialState;
+    toggleDarkMode(initialState);
+
+    // 监听颜色模式变化
     darkModeQuery.addEventListener("change", (e) => {
-        apSwitch.checked = e.matches;
-        toggleDarkMode(e.matches);
+        const newState = e.matches;
+        apSwitch.checked = newState;
+        toggleDarkMode(newState);
+        // 保存新状态到localStorage
+        localStorage.setItem('darkModeEnabled', newState);
     });
+
     apSwitch.addEventListener("change", (e) => {
-        toggleDarkMode(e.target.checked);
+        const newState = e.target.checked;
+        toggleDarkMode(newState);
+        // 保存新状态到localStorage
+        localStorage.setItem('darkModeEnabled', newState);
     });
 }
 // button svg code

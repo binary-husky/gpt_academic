@@ -8,7 +8,7 @@ def get_crazy_functions():
     from crazy_functions import 生成函数注释
     from crazy_functions import 解析项目源代码
     from crazy_functions.解析JupyterNotebook import 解析ipynb文件
-    function_plugins['开发工程师'] = {
+    function_plugins['代码分析'] = {
         "解析整个Python项目": {
             "Color": "primary",  # 按钮颜色
             "AsButton": True,
