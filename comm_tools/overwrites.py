@@ -14,7 +14,7 @@ def escape_markdown(text):
     Escape Markdown special characters to HTML-safe equivalents.
     """
     escape_chars = {
-        ' ': '&nbsp;',
+        # ' ': '&nbsp;',
         '_': '&#95;',
         '*': '&#42;',
         '[': '&#91;',
@@ -34,9 +34,31 @@ def escape_markdown(text):
         '|': '&#124;',
         '$': '&#36;',
         ':': '&#58;',
+        '\n': '<br>',
     }
     text = text.replace('    ', '&nbsp;&nbsp;&nbsp;&nbsp;')
     return ''.join(escape_chars.get(c, c) for c in text)
+
+
+def clip_rawtext(chat_message, need_escape=True):
+    # first, clip hr line
+    hr_pattern = r'\n\n<hr class="append-display no-in-raw" />(.*?)'
+    hr_match = re.search(hr_pattern, chat_message, re.DOTALL)
+    message_clipped = chat_message[:hr_match.start()] if hr_match else chat_message
+    # second, avoid agent-prefix being escaped
+    agent_prefix_pattern = r'<!-- S O PREFIX --><p class="agent-prefix">(.*?)<\/p><!-- E O PREFIX -->'
+    agent_matches = re.findall(agent_prefix_pattern, message_clipped)
+    final_message = ""
+    if agent_matches:
+        agent_parts = re.split(agent_prefix_pattern, message_clipped)
+        for i, part in enumerate(agent_parts):
+            if i % 2 == 0:
+                final_message += escape_markdown(part) if need_escape else part
+            else:
+                final_message += f'<!-- S O PREFIX --><p class="agent-prefix">{part}</p><!-- E O PREFIX -->'
+    else:
+        final_message = escape_markdown(message_clipped) if need_escape else message_clipped
+    return final_message
 
 
 def convert_bot_before_marked(chat_message):
@@ -46,15 +68,12 @@ def convert_bot_before_marked(chat_message):
     if '<div class="md-message">' in chat_message:
         return chat_message
     else:
+        raw = f'<div class="raw-message hideM"><pre>{clip_rawtext(chat_message)}</pre></div>'
+        # really_raw = f'{START_OF_OUTPUT_MARK}<div class="really-raw hideM">{clip_rawtext(chat_message, need_escape=False)}\n</div>{END_OF_OUTPUT_MARK}'
         code_block_pattern = re.compile(r"```(.*?)(?:```|$)", re.DOTALL)
         code_blocks = code_block_pattern.findall(chat_message)
         non_code_parts = code_block_pattern.split(chat_message)[::2]
         result = []
-
-        hr_pattern = r'\n\n<hr class="append-display no-in-raw" />(.*?)'
-        hr_match = re.search(hr_pattern, chat_message, re.DOTALL)
-        clip_hr = chat_message[:hr_match.start()] if hr_match else chat_message
-        raw = f'<div class="raw-message hideM">{escape_markdown(clip_hr)}</div>'
         for non_code, code in zip(non_code_parts, code_blocks + [""]):
             if non_code.strip():
                 result.append(non_code)
@@ -65,6 +84,9 @@ def convert_bot_before_marked(chat_message):
         md = f'<div class="md-message">\n\n{result}\n</div>'
         return raw + md
 
+
+def convert_bot_before_marked_old(chat_message):
+    pass
 
 def postprocess(self, y):
     """
