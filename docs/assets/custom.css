@@ -548,10 +548,10 @@ ol:not(.options), ul:not(.options) {
 /* update on 2023.4.8: 高度的细致调整已写入JavaScript */
 @media screen and (min-width: 500px) {
     #main_chatbot {
-        height: calc(100vh - 200px);
+        height: calc(100vh - 100px);
     }
     #main_chatbot .wrap {
-        max-height: calc(100vh - 200px - var(--line-sm)*1rem - 2*var(--block-label-margin) );
+        max-height: calc(100vh - 100px - var(--line-sm)*1rem - 2*var(--block-label-margin) );
     }
 }
 /* 屏幕宽度小于500px的设备 */
@@ -560,7 +560,7 @@ ol:not(.options), ul:not(.options) {
         height: calc(100vh - 140px);
     }
     #main_chatbot .wrap {
-        max-height: calc(100vh - 140px - var(--line-sm)*1rem - 2*var(--block-label-margin) );
+        max-height: calc(100vh - 70px - var(--line-sm)*1rem - 2*var(--block-label-margin) );
     }
     [data-testid = "bot"] {
         max-width: 95% !important;

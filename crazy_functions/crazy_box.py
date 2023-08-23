@@ -236,17 +236,26 @@ class ExcelHandle:
             test_case_path = self.template_excel
         return test_case_path
 
-    def read_as_dict(self):
+    def read_as_dict(self, only_sheet=True):
         data_dict = {}
         # 遍历每个工作表
-        for sheet_name in self.workbook.sheetnames:
+        if only_sheet:
+            sheet_list = [self.sheet]
+        else:
+            sheet_list = self.workbook.sheetnames
+        for sheet_name in sheet_list:
             sheet = self.workbook[sheet_name]
             sheet_data = []
             # 遍历每一行
+            sheet_temp_count = 0
             for row in sheet.iter_rows(values_only=True):
-                # 过滤掉空行
+                # 过滤尾部的空行
                 row = tuple(x for x in row if x is not None and x != row[-1])
-                sheet_data.append(row)
+                if row:
+                    sheet_data.append(row)
+                else:
+                    sheet_temp_count += 1
+                if sheet_temp_count >=20: break
             # 将工作表名作为字典的键，行数据作为值
             data_dict[sheet_name] = sheet_data
         return data_dict
@@ -656,7 +665,7 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
             chatbot.append(['请检查数据，并进行提交处理', f'{func_box.html_tag_color(inputs[0][:10])}...对话数据预计会超出{all_tokens}tokens限制, 拆分中...'])
             segments.extend(split_list_token_limit(data=inputs, get_num=get_token_num, max_num=max_token))
         else:
-            segments.extend(inputs)
+            segments.append(json.dumps(inputs, ensure_ascii=False))
     else:
         inputs = inputs.split('\n---\n')
         for input_ in inputs:
@@ -699,7 +708,7 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
         content_limit = yield from split_content_limit(inputs, llm_kwargs, chatbot, history)
         try:
-
+            plugin_kwargs['上阶段文件'] = you_say
             plugin_kwargs[you_say] = {}
             plugin_kwargs[you_say]['原测试用例数据'] = [json.loads(limit)[1:] for limit in content_limit]
             plugin_kwargs[you_say]['原测试用例表头'] = json.loads(content_limit[0])[0]
@@ -837,7 +846,7 @@ def parsing_json_in_text(txt_data: list, old_case, filter_list: list = 'None----
                 supplementary_data.append(__list)
             except:
                 func_box.通知机器人(f'{sp} 测试用例转dict失败了来看看')
-        if len(txt_data) != len(old_case): index = -1  # 兼容一下哈
+        if len(txt_data) != len(old_case): index = -1   # 兼容一下哈
         # 过滤掉产出带的表头数据
         filter_supplementary_data = [data for data in supplementary_data
                                      if filter_list[:5] != data[:5] or filter_list[-5:] != data[-5:]]
@@ -900,8 +909,9 @@ def supplementary_test_case(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     yield from toolbox.update_ui(chatbot, history)
     files_limit = []
     for file_name in file_classification:
-        old_case = plugin_kwargs[file_name]['原测试用例数据']
-        header = plugin_kwargs[file_name].get('原测试用例表头', False)
+        old_file = plugin_kwargs['上阶段文件']
+        old_case = plugin_kwargs[old_file]['原测试用例数据']
+        header = plugin_kwargs[old_file]['原测试用例表头']
         test_case, desc = parsing_json_in_text(file_classification[file_name], old_case, filter_list=header)
         file_path = ExcelHandle(ipaddr=llm_kwargs['ipaddr'],
                                 temp_file=template_file, sheet=sheet).lpvoid_lpbuffe(
@@ -978,6 +988,7 @@ previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传�
 
 
 if __name__ == '__main__':
-    with open('/Users/kilig/Desktop/过滤.md') as f:
-        daat = f.read()
-    print(parsing_json_in_text(txt_data=[daat], old_case=[[]], filter_list=["功能分类", "功能点", "验证点", "前置条件", "操作步骤", "预期结果", "优先级", "验证截图", "开发自测结果", "开发备注", "测试结果", "测试备注"]))
+    ex_handle = ExcelHandle(temp_file='../private_upload/10.13.236.56/test_case/20230823_132829/Mac_支付页改版_一阶段_二阶段.xlsx', sheet='测试要点')
+    ex_handle.split_merged_cells()
+    dicss = ex_handle.read_as_dict()
+    print(dicss)

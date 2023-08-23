@@ -132,7 +132,7 @@ def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
             else:
                 if know_kwargs:
                     prompt_name = know_kwargs.get(prompt_cls)
-                    tips = f'`{id}`知识库使用的Prompt是`{prompt_cls}`分类下的`{prompt_name}`, 插件自定义参数允许指定其他Prompt哦～'
+                    tips = f'匹配中了`{id}`知识库，使用的Prompt是`{prompt_cls}`分类下的`{prompt_name}`, 插件自定义参数允许指定其他Prompt哦～'
                     if tips not in str(chatbot):
                         gpt_say += tips
                     chatbot[-1] = [txt, gpt_say]
