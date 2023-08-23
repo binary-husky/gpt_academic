@@ -272,7 +272,7 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     messages.append(what_i_ask_now)
 
     payload = {
-        "model": llm_kwargs['llm_model'].strip('api2d-'),
+        "model": llm_kwargs['llm_model'].strip('api2d-').strip('proxy-'),
         "messages": messages, 
         "temperature": llm_kwargs['temperature'],  # 1.0,
         "top_p": llm_kwargs['top_p'],  # 1.0,
