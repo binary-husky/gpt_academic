@@ -110,7 +110,7 @@ def generate_from_baidu_qianfan(inputs, llm_kwargs, history, system_prompt):
             yield buffer
         except:
             if ('error_code' in dec) and ("max length" in dec['error_msg']):
-                raise ConnectionAbortedError(dec['error_msg'])
+                raise ConnectionAbortedError(dec['error_msg'])  # 上下文太长导致 token 溢出
             elif ('error_code' in dec):
                 raise RuntimeError(dec['error_msg'])
 
