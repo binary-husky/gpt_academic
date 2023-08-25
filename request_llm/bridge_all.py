@@ -175,7 +175,7 @@ model_info = {
         "fn_with_ui": qianfan_ui,
         "fn_without_ui": qianfan_noui,
         "endpoint": None,
-        "max_token": 4096,
+        "max_token": 2000,
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },

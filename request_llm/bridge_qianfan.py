@@ -1,9 +1,9 @@
 
 import time, requests, json
-from toolbox import update_ui, get_conf
 from multiprocessing import Process, Pipe
 from functools import wraps
 from datetime import datetime, timedelta
+from toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history, trimmed_format_exc, get_conf
 
 model_name = '千帆大模型平台'
 timeout_bot_msg = '[Local Message] Request timeout. Network error.'
@@ -101,6 +101,7 @@ def generate_from_baidu_qianfan(inputs, llm_kwargs, history, system_prompt):
     response = requests.request("POST", url, headers=headers, data=payload, stream=True)
     buffer = ""
     for line in response.iter_lines():
+        if len(line) == 0: continue
         try:
             dec = line.decode().lstrip('data:')
             dec = json.loads(dec)
@@ -108,7 +109,10 @@ def generate_from_baidu_qianfan(inputs, llm_kwargs, history, system_prompt):
             buffer += incoming
             yield buffer
         except:
-            if 'error_code' in dec: raise RuntimeError(dec['error_msg'])
+            if ('error_code' in dec) and ("max length" in dec['error_msg']):
+                raise ConnectionAbortedError(dec['error_msg'])
+            elif ('error_code' in dec):
+                raise RuntimeError(dec['error_msg'])
 
 
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=[], console_slience=False):
@@ -137,11 +141,21 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         from core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
-    # 开始接收回复    
-    for response in generate_from_baidu_qianfan(inputs, llm_kwargs, history, system_prompt):
-        chatbot[-1] = (inputs, response)
-        yield from update_ui(chatbot=chatbot, history=history)
-
+    yield from update_ui(chatbot=chatbot, history=history)
+    # 开始接收回复
+    try:
+        for response in generate_from_baidu_qianfan(inputs, llm_kwargs, history, system_prompt):
+            chatbot[-1] = (inputs, response)
+            yield from update_ui(chatbot=chatbot, history=history)
+    except ConnectionAbortedError as e:
+        from .bridge_all import model_info
+        if len(history) >= 2: history[-1] = ""; history[-2] = "" # 清除当前溢出的输入：history[-2] 是本次输入, history[-1] 是本次输出
+        history = clip_history(inputs=inputs, history=history, tokenizer=model_info[llm_kwargs['llm_model']]['tokenizer'], 
+                    max_token_limit=(model_info[llm_kwargs['llm_model']]['max_token'])) # history至少释放二分之一
+        chatbot[-1] = (chatbot[-1][0], "[Local Message] Reduce the length. 本次输入过长, 或历史数据过长. 历史缓存数据已部分释放, 您可以请再次尝试. (若再次失败则更可能是因为输入过长.)")
+        yield from update_ui(chatbot=chatbot, history=history, msg="异常") # 刷新界面
+        return
+    
     # 总结输出
     response = f"[Local Message]: {model_name}响应异常 ..."
     if response == f"[Local Message]: 等待{model_name}响应中 ...":
