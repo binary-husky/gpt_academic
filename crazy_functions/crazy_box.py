@@ -16,7 +16,8 @@ from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Border, Side
 from openpyxl.styles import PatternFill
-from openpyxl.drawing.image import Image
+from openpyxl.styles import Alignment
+from openpyxl.styles import Font
 from crazy_functions import crazy_utils
 from request_llm import bridge_all
 from crazy_functions import crzay_kingsoft
@@ -89,7 +90,7 @@ class Utils:
             for key, value in i.items():
                 if key in self.find_picture_tags:
                     if img_proce:
-                        mark = f'{key}链接内容: """\n{value["sourceKey"]}\n"""\n'
+                        mark = f'{key}"""\n{value["sourceKey"]}\n"""\n'
                         if value["caption"]: mark += f'\n{key}:{value["caption"]}\n\n'
                         context_.append(mark)
                         pic_dict[value['sourceKey']] = value['imgID']
@@ -214,9 +215,12 @@ class ExcelHandle:
                 try:
                     cell.value = str(value).strip()
                     cell.border = self.border
+                    cell.alignment = Alignment(wrapText=True)
                     # 判断 value 是否为 '插件补充的用例'
                     if '插件补充的用例' in str(value):
                         cell.fill = self.yellow_fill
+                    font = Font(name='苹方-简', size=11)
+                    cell.font = font
                 except Exception:
                     print(row_data, value)
                     func_box.通知机器人(error=f'写入excel错误啦\n\n```\n\n{row_data}\n\n{value}\n\n```'
@@ -954,7 +958,7 @@ def transfer_flow_chart(gpt_response_collection, llm_kwargs, plugin_kwargs, chat
     return file_limit
 
 
-def result_written_to_markdwon(gpt_response_collection, llm_kwargs, plugin_kwargs,  chatbot, history, stage=False):
+def result_written_to_markdwon(gpt_response_collection, llm_kwargs, plugin_kwargs,  chatbot, history, stage=''):
     """
     Args: 将输出结果写入md
         gpt_response_collection: [输入、输出]
@@ -974,7 +978,7 @@ def result_written_to_markdwon(gpt_response_collection, llm_kwargs, plugin_kwarg
         for value in file_classification[file_name]:
             inputs_all += value
         md = Utils().write_markdown(data=inputs_all, hosts=llm_kwargs['ipaddr'],
-                                    file_name=long_name_processing(file_name))
+                                    file_name=long_name_processing(file_name)+stage)
         chat_file_list = f'markdown已写入文件，下次使用插件可以直接提交markdown文件啦 {func_box.html_view_blank(md, to_tabs=True)}'
         chatbot[-1] = [you_say+'Done', chat_file_list]
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')

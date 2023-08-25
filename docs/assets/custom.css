@@ -66,7 +66,7 @@ mspace {
     bottom: 0;
     left: 0;
     width: 100%;
-    margin-bottom: 1% !important;
+    margin-bottom: 15px !important;
     border: 1px solid var(--border-color-primary) !important;
 }
 
@@ -81,7 +81,7 @@ mspace {
 }
 .sm_btn {
     position: relative;
-    bottom: 5px;
+    bottom: 3px;
     height: 10%;
     border-radius: 20px!important;
     min-width: min(10%,100%) !important;
@@ -103,6 +103,7 @@ mspace {
 .sm_select .style {
     max-height: 28px;
 }
+/*更新注意这里， 这是左侧边栏选择 */
 .normal_select .svelte-1gfkn6j {
     float: left;
     width: auto;
@@ -118,17 +119,18 @@ span.svelte-1gfkn6j:not(.has-info) {
     margin-bottom: unset;
 }
 
+/*更新注意这里*/
 .sm_select .svelte-1gfkn6j {
     float: left;
     width: auto;
     line-height: 151% !important;
 }
-.sm_select .wrap .svelte-c0u3f0 {
+.sm_select .wrap [class*="svelte-"] {
     border-radius: var(--block-title-radius);;
     width: auto;
     background-color: #f6f6f6 !important;
 }
-.dark .sm_select .wrap .svelte-c0u3f0 {
+.dark .sm_select .wrap [class*="svelte-"] {
     background-color: #515151 !important;
 }
 .sm_checkbox {
@@ -138,12 +140,12 @@ span.svelte-1gfkn6j:not(.has-info) {
     padding: 0 !important;
 }
 
-.sm_select .token.svelte-c0u3f0.svelte-c0u3f0.svelte-c0u3f0 {
+.sm_select .token[class*="svelte-"] {
     padding: 1.5% !important;
     max-height: 20px !important;
 
 }
-.sm_select .wrap-inner.svelte-c0u3f0.svelte-c0u3f0.svelte-c0u3f0 {
+.sm_select .wrap-inner[class*="svelte-"] {
     padding: 0 !important;
     flex-wrap: unset !important;
     overflow: hidden !important;
@@ -190,7 +192,7 @@ span.svelte-1gfkn6j:not(.has-info) {
 }
 #colum_chat {
 }
-
+/*更新注意这里*/
 .label.svelte-13hsdno.svelte-13hsdno.svelte-13hsdno {
     color: #515151 !important;
 }
@@ -253,7 +255,7 @@ footer {
     opacity: 1;
     transition: opacity 0.3s ease-in-out;
 }
-/*输入框*/
+/*输入框 更新注意这里*/
 .no_padding_input {
     padding: unset !important;
 }

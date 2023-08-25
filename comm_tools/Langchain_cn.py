@@ -1,9 +1,12 @@
 import os.path
+import threading
+
 from comm_tools import toolbox
 from crazy_functions import crazy_utils
 import gradio as gr
 from comm_tools import func_box, prompt_generator
 from crazy_functions import crazy_box
+from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 
 
 def classification_filtering_tag(cls_select, cls_name, ipaddr):
@@ -71,7 +74,6 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
         return
     # < -------------------预热文本向量化模组--------------- >
     yield ('正在加载向量化模型...', '', gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(), kai_handle)
-    from langchain.embeddings.huggingface import HuggingFaceEmbeddings
     with toolbox.ProxyNetworkActivate():    # 临时地激活代理网络
         HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
     # < -------------------构建知识库--------------- >
@@ -111,7 +113,7 @@ def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
     if kai_id:
         if gpt_say not in str(chatbot):
             chatbot.append([txt, gpt_say])
-    for id in kai_id:   #
+    for id in kai_id:#
         if llm_kwargs['know_dict']['know_obj'].get(id, False):
             kai = llm_kwargs['know_dict']['know_obj'][id]
         else:
@@ -192,4 +194,16 @@ def obtaining_knowledge_base_files(cls_select, cls_name, vs_id, chatbot, kai_han
     else:
         yield chatbot, gr.update(), 'Done', kai_handle
 
+
+def single_step_thread_building_knowledge(cls_name, know_id, file_manifest, llm_kwargs):
+    vector_path = os.path.join(func_box.knowledge_path, cls_name)
+    os.makedirs(vector_path, exist_ok=True)
+    def thread_task():
+        with toolbox.ProxyNetworkActivate():    # 临时地激活代理网络
+            HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
+        with toolbox.ProxyNetworkActivate():    # 临时地激活代理网络
+            kai = crazy_utils.knowledge_archive_interface(vs_path=vector_path)
+            qa_handle, vs_path = kai.construct_vector_store(vs_id=know_id, files=file_manifest)
+            llm_kwargs['know_dict']['know_obj'][know_id] = qa_handle
+    threading.Thread(target=thread_task, ).start()
 

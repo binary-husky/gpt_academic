@@ -5,9 +5,10 @@
 # @Descr   :
 import os.path
 import time
-from comm_tools import func_box, ocr_tools
+from comm_tools import func_box, ocr_tools, Langchain_cn
 from crazy_functions import crazy_box
 from comm_tools.toolbox import update_ui, CatchException, trimmed_format_exc, get_conf
+
 
 
 def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, file_types):
@@ -51,7 +52,7 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
                                 content = str(content).replace(f"{t}",
                                                                f"{func_box.html_local_img(img_result)}\n```{img_content}```")
                                 if error:
-                                    ocr_process += '`tips: 图片右侧说明仅代表图片太大失绘制失败，不影响实际OCR结果`'
+                                    ocr_process += '`tips: 图片右侧无说明仅代表图片太大失绘制失败，不影响实际OCR结果`'
                                 ocr_process += f'{t} 识别完成，识别效果如下{func_box.html_local_img(img_result)}\n\n'
                                 chatbot[-1] = [None, ocr_process]
                                 yield from update_ui(chatbot, history)
@@ -68,7 +69,9 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
                                               f'{func_box.html_local_img("docs/imgs/pic_desc.png")}'])
                     yield from update_ui(chatbot, history)
                 title = crazy_box.long_name_processing(content)
-                file_limit.extend([title, content])
+                temp_list = [title, content]
+                temp_file = yield from crazy_box.result_written_to_markdwon(temp_list, llm_kwargs, plugin_kwargs, chatbot, history)
+                files.extend(temp_file)
             else:
                 gpt_say += f'正在解析文档链接，如果文件类型符合`{file_types}`,将下载并解析...'
                 chatbot[-1] = [link_limit, gpt_say]
@@ -87,6 +90,16 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
     # 提交文件给file_extraction_intype读取
     yield from crazy_box.file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_kwargs, plugin_kwargs)
     yield from update_ui(chatbot, history)
+    know_dict, = crazy_box.json_args_return(plugin_kwargs, keys=['自动录入知识库'], default={})
+    if files and know_dict:
+        cls_name, = list(know_dict.keys())
+        know_id, = list(know_dict.values())
+        you_say = f'请将`{str(files).replace(func_box.base_path, "")}`文件录入`cls_name`分类下的`{cls_name}`'
+        chatbot.append([you_say, None])
+        yield from update_ui(chatbot, history)
+        Langchain_cn.single_step_thread_building_knowledge(cls_name=cls_name, know_id=know_id, file_manifest=files, llm_kwargs=llm_kwargs)
+        chatbot[-1] = [you_say, 'Done, 已提交线程任务']
+        yield from update_ui(chatbot, history)
     if not file_limit:
         chatbot.append([None, f'{func_box.html_tag_color("无法获取需求文档内容，暂停运行!!!!")}'])
         yield from update_ui(chatbot=chatbot, history=history, msg='无法获取需求文档内容，暂停运行')
