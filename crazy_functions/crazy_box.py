@@ -384,8 +384,9 @@ class XmindHandle():
             self._WalkTopic(canvas['topic'], dictResult)
             strResult = self._Print2MDList(dictResult)
             xm_content += strResult
-            pathOutput = os.path.join(os.path.dirname(os.path.dirname(pathSource)), 'markdown',
-                                      f'{os.path.basename(pathSource)}_{canvas["title"]}.md')
+            temp_path = os.path.join(os.path.dirname(os.path.dirname(pathSource)), 'markdown')
+            os.makedirs(temp_path, exist_ok=True)
+            pathOutput = os.path.join(temp_path, f'{os.path.basename(pathSource)}_{canvas["title"]}.md')
             with open(pathOutput, 'w', encoding='utf-8') as f:
                 f.write(strResult)
                 md_path.append(pathOutput)
