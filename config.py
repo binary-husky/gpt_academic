@@ -11,7 +11,7 @@
 API_KEY = "此处填API密钥"    # 可同时填写多个API-KEY，用英文逗号分割，例如API_KEY = "sk-openaikey1,sk-openaikey2,fkxxxx-api2dkey3,azure-apikey4"
 
 
-# [step 2]>> 改为True应用代理，如果直接在海外服务器部署，此处不修改
+# [step 2]>> 改为True应用代理，如果直接在海外服务器部署，此处不修改；如果使用本地或无地域限制的大模型时，此处也不需要修改
 USE_PROXY = False
 if USE_PROXY:
     """
@@ -71,10 +71,16 @@ MAX_RETRY = 2
 # 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
 LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
 AVAIL_LLM_MODELS = ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "stack-claude"]
-# P.S. 其他可用的模型还包括 ["llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613", "spark", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
+# P.S. 其他可用的模型还包括 ["qianfan", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613", "spark", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
 
 
-# ChatGLM(2) Finetune Model Path （如果使用ChatGLM2微调模型，需要把"chatglmft"加入AVAIL_LLM_MODELS中）
+# 百度千帆（LLM_MODEL="qianfan"）
+BAIDU_CLOUD_API_KEY = ''
+BAIDU_CLOUD_SECRET_KEY = ''
+BAIDU_CLOUD_QIANFAN_MODEL = 'ERNIE-Bot'    # 可选 "ERNIE-Bot"(文心一言), "ERNIE-Bot-turbo", "BLOOMZ-7B", "Llama-2-70B-Chat", "Llama-2-13B-Chat", "Llama-2-7B-Chat"
+
+
+# 如果使用ChatGLM2微调模型，请把 LLM_MODEL="chatglmft"，并在此处指定模型路径
 ChatGLM_PTUNING_CHECKPOINT = "" # 例如"/home/hmp/ChatGLM2-6B/ptuning/output/6b-pt-128-1e-2/checkpoint-100"
 
 
@@ -152,5 +158,56 @@ ANTHROPIC_API_KEY = ""
 CUSTOM_API_KEY_PATTERN = ""
 
 
-# HUGGINGFACE的TOKEN 下载LLAMA时起作用 https://huggingface.co/docs/hub/security-tokens
+# HUGGINGFACE的TOKEN，下载LLAMA时起作用 https://huggingface.co/docs/hub/security-tokens
 HUGGINGFACE_ACCESS_TOKEN = "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"
+
+
+
+"""
+在线大模型配置关联关系示意图
+│
+├── "gpt-3.5-turbo" 等openai模型
+│   ├── API_KEY
+│   ├── CUSTOM_API_KEY_PATTERN（不常用）
+│   ├── API_ORG（不常用）
+│   └── API_URL_REDIRECT（不常用）
+│
+├── "azure-gpt-3.5" 等azure模型
+│   ├── API_KEY
+│   ├── AZURE_ENDPOINT
+│   ├── AZURE_API_KEY
+│   ├── AZURE_ENGINE
+│   └── API_URL_REDIRECT
+│
+├── "spark" 星火认知大模型
+│   ├── XFYUN_APPID
+│   ├── XFYUN_API_SECRET
+│   └── XFYUN_API_KEY
+│
+├── "claude-1-100k" 等claude模型
+│   └── ANTHROPIC_API_KEY
+│
+├── "stack-claude"
+│   ├── SLACK_CLAUDE_BOT_ID
+│   └── SLACK_CLAUDE_USER_TOKEN
+│
+├── "qianfan" 百度千帆大模型库
+│   ├── BAIDU_CLOUD_QIANFAN_MODEL
+│   ├── BAIDU_CLOUD_API_KEY
+│   └── BAIDU_CLOUD_SECRET_KEY
+│
+├── "newbing" Newbing接口不再稳定，不推荐使用
+    ├── NEWBING_STYLE
+    └── NEWBING_COOKIES
+
+
+
+插件在线服务配置依赖关系示意图
+│
+├── 语音功能
+    ├── ENABLE_AUDIO
+    ├── ALIYUN_TOKEN
+    ├── ALIYUN_APPKEY
+    ├── ALIYUN_ACCESSKEY
+    └── ALIYUN_SECRET
+"""

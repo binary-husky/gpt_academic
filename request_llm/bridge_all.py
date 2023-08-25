@@ -19,6 +19,12 @@ from .bridge_chatgpt import predict as chatgpt_ui
 from .bridge_chatglm import predict_no_ui_long_connection as chatglm_noui
 from .bridge_chatglm import predict as chatglm_ui
 
+from .bridge_chatglm import predict_no_ui_long_connection as chatglm_noui
+from .bridge_chatglm import predict as chatglm_ui
+
+from .bridge_qianfan import predict_no_ui_long_connection as qianfan_noui
+from .bridge_qianfan import predict as qianfan_ui
+
 colors = ['#FF00FF', '#00FFFF', '#FF0000', '#990099', '#009999', '#990044']
 
 class LazyloadTiktoken(object):
@@ -165,7 +171,14 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
-
+    "qianfan": {
+        "fn_with_ui": qianfan_ui,
+        "fn_without_ui": qianfan_noui,
+        "endpoint": None,
+        "max_token": 4096,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
 }
 
 # -=-=-=-=-=-=- 以下部分是新加入的模型，可能附带额外依赖 -=-=-=-=-=-=-
@@ -385,7 +398,7 @@ if "spark" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
         })
     except:
         print(trimmed_format_exc())
-if "llama2" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
+if "llama2" in AVAIL_LLM_MODELS:   # llama2
     try:
         from .bridge_llama2 import predict_no_ui_long_connection as llama2_noui
         from .bridge_llama2 import predict as llama2_ui
