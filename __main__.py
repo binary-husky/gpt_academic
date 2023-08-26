@@ -83,8 +83,8 @@ class ChatBot(ChatBotFrame):
         self.cookies = gr.State({'api_key': API_KEY, 'llm_model': LLM_MODEL, 'local': self.__url})
 
     def draw_chatbot(self):
-        self.chatbot = gr.Chatbot(elem_id='main_chatbot', label=f"当前模型：{LLM_MODEL}")
-        self.chatbot.style()
+        self.chatbot = gr.Chatbot(elem_id='main_chatbot', label=f"当前模型：{LLM_MODEL}",
+                                  avatar_images=(os.path.join('./docs/user.png'), os.path.join('./docs/wps_logo.png')))
         self.history = gr.State([])
         temp_draw = [gr.HTML() for i in range(6)]
         with gr.Box(elem_id='chat_box'):
@@ -129,7 +129,7 @@ class ChatBot(ChatBotFrame):
         self.langchain_dropdown.select(on_llms_dropdown_changed,
                                        [self.llms_dropdown, self.langchain_dropdown],
                                        [self.chatbot]).success(fn=Langchain_cn.obtaining_knowledge_base_files,
-                                       inputs=[self.langchain_classifi, self.langchain_class_name, self.langchain_dropdown, self.chatbot, self.langchain_know_kwargs],
+                                       inputs=[self.langchain_classifi, self.langchain_class_name, self.langchain_dropdown, self.chatbot, self.langchain_know_kwargs, self.models_box],
                                        outputs=[self.chatbot, self.examples_column, self.status, self.langchain_know_kwargs]
                                        )
         self.langchain_sm_classifi.select(fn=Langchain_cn.obtain_classification_knowledge_base,
@@ -456,9 +456,9 @@ class ChatBot(ChatBotFrame):
     def draw_setting_chat(self):
         switch_model = get_conf('switch_model')[0]
         with gr.TabItem('Settings', id='sett_tab'):
-            with gr.Accordion(label='参数配置'):
-                with gr.Box():
-                    gr.Markdown(func_box.get_html('what_news.html').replace('{%v}', 'LLMs调优参数'))
+            with gr.Box():
+                # gr.Markdown(func_box.get_html('what_news.html').replace('{%v}', 'LLMs调优参数'))
+                with gr.Accordion(label='LLMs调优参数', open=False):
                     self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01, interactive=True,
                                            label="Top-p (nucleus sampling)", ).style(container=False)
                     self.temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True,
@@ -468,16 +468,14 @@ class ChatBot(ChatBotFrame):
                     worker_num, =  get_conf('DEFAULT_WORKER_NUM')
                     self.default_worker_num = gr.Slider(minimum=1, maximum=30, value=worker_num, step=1, interactive=True,
                                                    label="多线程最大并行数").style(container=False)
-
-                    gr.Markdown(func_box.get_html('what_news.html').replace('{%v}', 'Langchain调优参数'))
+                with gr.Accordion(label='Langchain调优参数'):
                     self.vector_search_score = gr.Slider(minimum=0, maximum=1100, value=500, step=1, interactive=True,
                                            label="知识库检索相关度", ).style(container=False)
                     self.vector_search_top_k = gr.Slider(minimum=1, maximum=10, value=4, step=1, interactive=True,
                                                  label="知识库引用文档数量",).style(container=False)
                     self.vector_chunk_size = gr.Slider(minimum=100, maximum=1000, value=521, step=1, interactive=True,
                                            label="知识库引用Token", ).style(container=False)
-
-                    gr.Markdown(func_box.get_html('what_news.html').replace('{%v}', '工具调试参数'))
+                with gr.Accordion(label='工具调试参数', open=False):
                     self.pro_tf_slider = gr.Slider(minimum=0.01, maximum=1.0, value=0.70, step=0.01, interactive=True,
                                                    label="搜索匹配系数").style(container=False)
                     self.ocr_identifying_trust = gr.Slider(minimum=0.01, maximum=1.0, value=0.60, step=0.01, interactive=True,

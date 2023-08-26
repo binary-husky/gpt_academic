@@ -16,7 +16,7 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
     files = [file for file in link_limit.splitlines() if os.path.exists(file)]
     if not links and not files:
         devs_document, = get_conf('devs_document')
-        chatbot.append((None, f'输入框空空如也？{link_limit}\n\n'
+        chatbot.append((link_limit, f'输入框空空如也？{link_limit}\n\n'
                               f'请在输入框中输入需要解析的文档链接或本地文件地址，然后再点击对应的插件，文档支持类型{func_box.html_tag_color(file_types)}'
                               f'链接需要是可访问的，格式如下，如果有多个文档则用换行或空格隔开，输入后再点击对应的插件'
                               f'\n\n【金山文档】 xxxx https://kdocs.cn/l/xxxxxxxxxx'
@@ -63,7 +63,7 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
 
                 else:
                     if empty_picture_count >= 5:
-                        chatbot.append([None, f'\n\n 需求文档中没有{func_box.html_tag_color("描述")}的图片数量' \
+                        chatbot.append(['请检查文档内容', f'\n\n 需求文档中没有{func_box.html_tag_color("描述")}的图片数量' \
                                               f'有{func_box.html_tag_color(empty_picture_count)}张，生成的测试用例可能存在遗漏点，'
                                               f'可以参考以下方法对图片进行描述补充，或在自定义插件参数中开始OCR功能\n\n' \
                                               f'{func_box.html_local_img("docs/imgs/pic_desc.png")}'])
@@ -80,10 +80,10 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
                     success, file_manifest, _ = crazy_box.get_kdocs_from_everything(txt=url, type=t, ipaddr=llm_kwargs['ipaddr'])
                     files.extend(file_manifest)
                     if success:
-                        chatbot.append([None, success])
+                        chatbot.append(['进度如何？', success])
         except Exception as e:
             error_str = trimmed_format_exc()
-            chatbot.append([None,
+            chatbot.append(['请检查链接是否有效',
                             f'{func_box.html_a_blank(url)} \n\n请检查一下哦，这个链接我们访问不了，是否开启分享？是否设置密码？是否是轻文档？下面是什么错误？\n\n ```\n\n{str(error_str)}\n```'])
             func_box.通知机器人(f"{link_limit}\n\n```\n{error_str}\n```\n\n```\n{llm_kwargs}\n```")
             yield from update_ui(chatbot, history)
@@ -91,6 +91,10 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
     yield from crazy_box.file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_kwargs, plugin_kwargs)
     yield from update_ui(chatbot, history)
     know_dict, = crazy_box.json_args_return(plugin_kwargs, keys=['自动录入知识库'], default={})
+    if not file_limit:
+        chatbot.append(['为什么不往下执行？', f'{func_box.html_tag_color("无法获取需求文档内容，暂停运行!!!!")}'])
+        yield from update_ui(chatbot=chatbot, history=history, msg='无法获取需求文档内容，暂停运行')
+        return
     if files and know_dict:
         cls_name, = list(know_dict.keys())
         know_id, = list(know_dict.values())
@@ -100,9 +104,6 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
         Langchain_cn.single_step_thread_building_knowledge(cls_name=cls_name, know_id=know_id, file_manifest=files, llm_kwargs=llm_kwargs)
         chatbot[-1] = [you_say, 'Done, 已提交线程任务']
         yield from update_ui(chatbot, history)
-    if not file_limit:
-        chatbot.append([None, f'{func_box.html_tag_color("无法获取需求文档内容，暂停运行!!!!")}'])
-        yield from update_ui(chatbot=chatbot, history=history, msg='无法获取需求文档内容，暂停运行')
     return file_limit
 
 
@@ -122,7 +123,7 @@ def func_格式化文档(link_limit, llm_kwargs, plugin_kwargs, chatbot, history
     else:
         gpt_response = file_limit
     if not gpt_response:
-        chatbot.append([None, f'{func_box.html_tag_color("多线程一个都没有通过，暂停运行!!!!")}'])
+        chatbot.append(['为什么不继续执行？', f'{func_box.html_tag_color("多线程一个都没有通过，暂停运行!!!!")}'])
         yield from update_ui(chatbot=chatbot, history=history, msg='多线程一个都没有通过，暂停运行')
     return gpt_response
 
@@ -167,6 +168,8 @@ func_kwargs = {
 def Kdocs_多阶段生成回答(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     file_types = ['md', 'txt', 'pdf', 'xmind', 'ap轻文档']
     file_limit = yield from func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, file_types)
+    if not file_limit:
+        return
     multi_stage_config, = crazy_box.json_args_return(plugin_kwargs, keys=['阶段性产出'], default={})
     file_count = {}
     for stage in multi_stage_config:
@@ -180,23 +183,23 @@ def Kdocs_多阶段生成回答(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
             file_limit = yield from crazy_box.func_拆分与提问(file_limit, llm_kwargs, plugin_kwargs, chatbot, history,
                                                             args_keys=[prompt, knowledge_base], task_tag="_"+stage)
         else:
-            chatbot.append([None, '你没有指定提示词，跳过提问'])
+            chatbot.append(['为什么跳过？', '你没有指定提示词，跳过提问'])
             yield from update_ui(chatbot=chatbot, history=history)
         if func and func_kwargs.get(func, False):
             plugin_kwargs[stage] = yield from func_kwargs[func](file_limit, llm_kwargs, plugin_kwargs,  chatbot, history)
             file_limit = []
         else:
-            chatbot.append([None, '你没有指定调用方法 or 方法错误，跳过生成结果，直接将上次的结果提交给下阶段'])
+            chatbot.append(['为什么跳过？', '你没有指定调用方法 or 方法错误，跳过生成结果，直接将上次的结果提交给下阶段'])
             content_limit = crazy_box.file_classification_to_dict(file_limit)
             file_limit = [[limit, "".join(content_limit[limit])] for limit in content_limit]
             yield from update_ui(chatbot=chatbot, history=history)
         if stage != [i for i in multi_stage_config][-1]:
-            chatbot.append(['开始准备下一阶段的数据', None])
+            chatbot.append(['开始准备下一阶段的数据', '下阶段准备执行中...'])
             yield from update_ui(chatbot=chatbot, history=history)
             yield from crazy_box.file_extraction_intype(plugin_kwargs[stage], [''], file_limit, chatbot, history, llm_kwargs, plugin_kwargs)
 
     if not multi_stage_config:
-        chatbot.append([None, '!!!!! 自定义参数中的Json存在问题，请仔细检查配置是否符合JSON编码格式'])
+        chatbot.append(['发生了什么事情？', '!!!!! 自定义参数中的Json存在问题，请仔细检查配置是否符合JSON编码格式'])
         yield from update_ui(chatbot=chatbot, history=history)
 
 @CatchException
@@ -225,7 +228,7 @@ def KDocs_文档提取测试点(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
     gpt_response_collection = yield from func_格式化文档(link_limit, llm_kwargs, plugin_kwargs, chatbot, history,
                                                           system_prompt, web_port)
     if not gpt_response_collection:
-        chatbot.append([None, f'{func_box.html_tag_color("多线程一个都没有通过，暂停运行!!!!")}'])
+        chatbot.append(['为什么暂停？', f'{func_box.html_tag_color("多线程一个都没有通过，暂停运行!!!!")}'])
         yield from update_ui(chatbot=chatbot, history=history, msg='多线程一个都没有通过，暂停运行')
         return
 

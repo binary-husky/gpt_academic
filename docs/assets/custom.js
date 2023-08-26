@@ -24,7 +24,7 @@ function gradioLoaded(mutations) {
         chatbotWrap = document.querySelector('#main_chatbot > .wrapper > .wrap');
 
         if (gradioContainer && apSwitch) {  // gradioCainter 加载出来了没?
-                adjustDarkMode();
+            adjustDarkMode();
         }
     }
 }
@@ -46,7 +46,6 @@ function initialize() {
             return;
         }
     }
-
     if (initialized) {
         adjustDarkMode();
         chatbotObserver.observe(chatbotIndicator, {attributes: true});
@@ -233,3 +232,16 @@ window.addEventListener("DOMContentLoaded", function () {
     isInIframe = (window.self !== window.top);
 });
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", adjustDarkMode);
+// 获取所有的 message-row 元素
+const messageRows = document.querySelectorAll('.message-row');
+if (messageRows.length > 0) {
+    // 遍历每个 message-row 元素
+    messageRows.forEach(row => {
+        // 检查是否有隐藏属性
+        const userMessage = row.querySelector('.message');
+        if (userMessage.classList.contains('hide')) {
+            // 如果有隐藏属性，则添加 display: none 样式
+            messageRows.style.display = 'none';
+        }
+    });
+}

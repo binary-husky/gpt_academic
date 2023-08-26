@@ -200,11 +200,11 @@ def audio_extraction_text(file):
 def audio_comparison_of_video_converters(files, chatbot, history):
     from moviepy.editor import AudioFileClip
     temp_chat = ''
-    chatbot.append([None, temp_chat])
+    chatbot.append(['可以开始了么', temp_chat])
     temp_list = []
     for file in files:
         temp_chat += f'正在将{func_box.html_view_blank(file)}文件转换为可提取的音频文件.\n\n'
-        chatbot[-1] = [None, temp_chat]
+        chatbot[-1] = ['可以开始了么', temp_chat]
         yield from update_ui(chatbot=chatbot, history=history)
         temp_path = os.path.join(os.path.dirname(file), f"{os.path.basename(file)}.wav")
         videoclip = AudioFileClip(file)

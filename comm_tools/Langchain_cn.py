@@ -165,16 +165,13 @@ def obtain_classification_knowledge_base(cls_name, ipaddr: gr.Request):
     return gr.Dropdown.update(choices=user_list), gr.Dropdown.update(choices=load_list, label=f'{cls_name}'), status
 
 
-def obtaining_knowledge_base_files(cls_select, cls_name, vs_id, chatbot, kai_handle, ipaddr: gr.Request):
-    if vs_id:
+def obtaining_knowledge_base_files(cls_select, cls_name, vs_id, chatbot, kai_handle, model, ipaddr: gr.Request):
+    _, _, preload_knowledge = toolbox.get_conf('switch_model')[0]['key']
+    if vs_id and preload_knowledge in model:
         cls_select = classification_filtering_tag(cls_select, cls_name, ipaddr.client.host)
         vs_path = os.path.join(func_box.knowledge_path, cls_select)
-        if isinstance(chatbot, toolbox.ChatBotWithCookies):
-            pass
-        else:
-            chatbot = toolbox.ChatBotWithCookies(chatbot)
-            chatbot.write_list(chatbot)
-        chatbot.append([None, f'正在检查知识库内文件{"  ".join([func_box.html_tag_color(i)for i in vs_id])}'])
+        you_say = f'请检查知识库内文件{"  ".join([func_box.html_tag_color(i)for i in vs_id])}'
+        chatbot.append([you_say, None])
         yield chatbot, gr.Column.update(visible=False), '🏃🏻‍ 正在努力轮询中....请稍等， tips：知识库可以多选，但不要贪杯哦～️', kai_handle
         kai_files = {}
         for id in vs_id:
@@ -187,9 +184,9 @@ def obtaining_knowledge_base_files(cls_select, cls_name, vs_id, chatbot, kai_han
             kai_handle['know_obj'].update({id: qa_handle})
         tabs = [[_id, func_box.html_view_blank(file), kai_files[file][_id]] for file in kai_files for _id in kai_files[file]]
         kai_handle['file_list'] = [os.path.basename(file) for file in kai_files if os.path.exists(file)]
-        chatbot.append([None, f'检查完成，当前选择的知识库内可用文件如下：'
+        chatbot[-1] = [you_say, f'检查完成，当前选择的知识库内可用文件如下：'
                               f'\n\n {func_box.to_markdown_tabs(head=["所属知识库", "文件", "文件类型"], tabs=tabs, column=True)}\n\n'
-                              f'🤩 快来向我提问吧～'])
+                              f'🤩 快来向我提问吧～']
         yield chatbot, gr.Column.update(visible=False), '✅ 检查完成', kai_handle
     else:
         yield chatbot, gr.update(), 'Done', kai_handle

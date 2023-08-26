@@ -618,7 +618,7 @@ def thread_write_chat(chatbot, ipaddr, models):
     chatbot = copy.copy(chatbot)
     # i_say = pattern_html(chatbot[-1][0])
     i_say = chatbot[-1][0]
-    encrypt, private = toolbox.get_conf('switch_model')[0]['key']
+    encrypt, private, _ = toolbox.get_conf('switch_model')[0]['key']
     gpt_result = []
     for i in chatbot:
         for v in i:

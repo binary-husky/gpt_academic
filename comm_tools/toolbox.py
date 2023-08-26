@@ -44,23 +44,10 @@ class ChatBotWithCookies(list):
 
 
 def write_private(ipaddr, models, chatbot):
-    encrypt, private = get_conf('switch_model')[0]['key']
+    encrypt, private, _ = get_conf('switch_model')[0]['key']
     private_key, = get_conf('private_key')
     transparent_address_private = f'<p style="display:none;">\n{private_key}\n{ipaddr.client.host}\n</p>'
     transparent_address = f'<p style="display:none;">\n{ipaddr.client.host}\n</p>'
-    if private in models:
-        if chatbot == []:
-            chatbot.append([None, f'隐私模式, 你的对话记录不会被他人检索 {transparent_address_private}'])
-        else:
-            chatbot[0] = [None, f'隐私模式, 你的对话记录不会被他人检索 {transparent_address_private}']
-    else:
-        if chatbot == []:
-            chatbot.append([None,
-                            f'正常对话模式, 你接来下的对话将会被记录并且可以被所有人检索，你可以到Settings中选择隐私模式 {transparent_address}'])
-        else:
-            chatbot[0] = [None,
-                          f'正常对话模式, 你接来下的对话将会被记录并且可以被所有人检索，你可以到Settings中选择隐私模式 {transparent_address}']
-
 
 def end_predict(chatbot, history, llm_kwargs):
     # 暂时无用
@@ -85,7 +72,7 @@ def ArgsGeneralWrapper(f):
         # 引入一个有cookie的chatbot
         from comm_tools import Langchain_cn
         start_time = time.time()
-        encrypt, private = get_conf('switch_model')[0]['key']
+        encrypt, private, _ = get_conf('switch_model')[0]['key']
         cookies.update({
             'top_p':top_p,
             'temperature':temperature,
@@ -618,7 +605,7 @@ def on_file_uploaded(files, chatbot, txt, ipaddr: gr.Request):
         txt.update({'file_path': time_tag_path})
     else:
         txt = f'{time_tag_path}'
-        chatbot.append([None,
+        chatbot.append(['上传文件修正',
                         f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
                         f'\n\n调用路径参数已自动修正到: \n\n{txt}' +
                         f'\n\n现在您点击任意“高亮”标识的函数插件时，以上文件将被作为输入参数'+err_msg])

@@ -54,8 +54,8 @@ def 批量分析流程图或图片(txt, llm_kwargs, plugin_kwargs, chatbot, hist
         elif kdocs_manifest_tmp != []:
             yield from ocr_batch_processing(kdocs_manifest_tmp, chatbot, history, llm_kwargs=llm_kwargs)
         else:
-            chatbot.append([None, crazy_box.previously_on_plugins])
+            chatbot.append([txt, crazy_box.previously_on_plugins])
             yield from toolbox.update_ui(chatbot, history)
     else:
-        chatbot.append([f'空空如也的输入框，{crazy_box.previously_on_plugins}', None])
+        chatbot.append([txt, f'空空如也的输入框，{crazy_box.previously_on_plugins}'])
         yield from toolbox.update_ui(chatbot, history)

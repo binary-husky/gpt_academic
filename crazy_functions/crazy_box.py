@@ -569,7 +569,7 @@ def file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_
                 xlsx_dict = ex_handle.read_as_dict()
                 active_content = xlsx_dict.get(active_sheet)
                 file_limit.extend([title, active_content])
-                chatbot.append([None,
+                chatbot.append(['可以开始了么？',
                                 f'无法在`{os.path.basename(file_path)}`找到`{sheet}`工作表'
                                 f'将读取上次预览的活动工作表`{active_sheet}`，'
                                 f'若你的用例工作表是其他名称, 请及时暂停插件运行，并在自定义插件配置中更改'
@@ -706,7 +706,7 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     else:
         prompt_cls_tab = f'prompt_{prompt_cls}_sys'
     if default_prompt: kwargs_prompt = default_prompt
-    chatbot.append([None, f'接下来使用的Prompt是`{prompt_cls}`分类下的：`{kwargs_prompt}`'
+    chatbot.append(['请将提示词套入提取的信息中', f'接下来使用的Prompt是`{prompt_cls}`分类下的：`{kwargs_prompt}`'
                     f', 你可以在{func_box.html_tag_color("自定义插件参数")}中指定另一个Prompt哦～'])
     time.sleep(1)
     prompt = prompt_generator.SqliteHandle(table=prompt_cls_tab).find_prompt_result(kwargs_prompt)
@@ -724,7 +724,7 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
                 try:
                     limit = yield from Langchain_cn.knowledge_base_query(limit, chatbot, history, llm_kwargs, plugin_kwargs)
                 except Exception as f:
-                    chatbot.append([None, f'`{f}`读取知识库失败，本次对话不会提供任何参考文本'])
+                    chatbot.append(["出事了？", f'`{f}`读取知识库失败，本次对话不会提供任何参考文本'])
                     yield from toolbox.update_ui(chatbot, history)
             inputs_array.append(func_box.replace_expected_text(prompt, content=limit, expect='{{{v}}}'))
             inputs_show_user_array.append(you_say+task_tag)
