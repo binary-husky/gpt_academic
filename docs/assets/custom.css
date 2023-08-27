@@ -257,26 +257,24 @@ footer {
 }
 /*输入框 更新注意这里*/
 .no_padding_input {
+    max-width: 95% !important;
     padding: unset !important;
 }
 
-.dark .chat_input.svelte-90oupt{
+.dark .chat_input[class*='svelte-'] {
     background: #515151 !important;
 }
-.chat_input.svelte-90oupt{
+.chat_input[class*='svelte-']{
     background: #e7e6e6 !important;
 }
-.chat_input textarea.svelte-1kcgrqr {
-    width: 96% !important;
-}
-textarea.svelte-1kcgrqr {
+textarea[class*='svelte-'] {
     background: #e7e6e6 !important;
 }
-.dark textarea.svelte-1kcgrqr {
+.dark textarea[class*='svelte-'] {
     background: var(--input-background-fill) !important;
 }
 
-.dark input[type=number].svelte-1cl284s {
+.dark input[type=number][class*='svelte-'] {
     background: #393939 !important;
     border: var(--input-border-width) solid var(--input-border-color) !important;
 }
@@ -304,7 +302,7 @@ textarea.svelte-1kcgrqr {
     transition: opacity 1s ease-in-out;
 }
 [class *= "message"] {
-    gap: 3px !important;
+    gap: 7px !important;
     border-radius: var(--radius-xl) !important
 }
 /* debug_mes */
@@ -757,7 +755,7 @@ thead th {
 .message :not(pre) code {
     display: inline;
     white-space: break-spaces;
-    border-radius: 6px;
+    border-radius: 6px !important;
     /*margin: 0 2px 0 2px;*/
     padding: .2em .4em .1em .4em;
     background-color: rgba(175,184,193,0.2);

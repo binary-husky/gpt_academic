@@ -1,4 +1,5 @@
 from comm_tools.toolbox import HotReload  # HotReload 的意思是热更新，修改函数插件后，不需要重启程序，代码直接生效
+from langchain import agents
 
 
 def get_crazy_functions():
@@ -355,11 +356,7 @@ def get_crazy_functions():
                         "提示词": "提取文档测试点",
                         "调用方法": "格式化文档",
                         "关联知识库": {
-                            "知识库提示词": "用例反推测试点",
-                            "查询分类": "历史版本测试用例",
-                            "查询列表": [
-                                "Apple端测试用例"
-                            ]
+                            '历史版本测试用例': {"查询列表": ["Apple端测试用例"], "知识库提示词": "用例反推测试点"},
                         }
                     },
                     "二阶段": {
@@ -370,11 +367,7 @@ def get_crazy_functions():
                         "提示词": "三方评审补充用例场景",
                         "调用方法": "补充测试用例",
                         "关联知识库": {
-                            "知识库提示词": "缺陷反推测试用例",
-                            "查询分类": "业务知识库",
-                            "查询列表": [
-                                "需求文稿"
-                            ]
+                            '业务知识库': {"查询列表": ["需求文稿"], "知识库提示词": "缺陷反推测试用例"},
                         }
                     }
                 },
@@ -472,3 +465,12 @@ def get_crazy_functions():
     #     print('Load function plugin failed')
 
     return function_plugins
+
+def crazy_func_to_tool():
+
+    crazy_kwargs = get_crazy_functions()
+    crazy_tools = []
+    for crazy in crazy_kwargs:
+        for func in crazy_kwargs[crazy]:
+            crazy_tools.append(agents.Tool(name=crazy, func=crazy_kwargs[crazy][func]['Function'], description=func))
+    return crazy_tools
