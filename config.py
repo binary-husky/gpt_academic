@@ -70,8 +70,10 @@ MAX_RETRY = 2
 
 # 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
 LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
-AVAIL_LLM_MODELS = ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "stack-claude"]
-# P.S. 其他可用的模型还包括 ["qianfan", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613", "spark", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
+AVAIL_LLM_MODELS = ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5", "api2d-gpt-3.5-turbo", 
+                    "gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "stack-claude"]
+# P.S. 其他可用的模型还包括 ["qianfan", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613", 
+# "spark", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"]
 
 
 # 百度千帆（LLM_MODEL="qianfan"）
@@ -162,6 +164,14 @@ CUSTOM_API_KEY_PATTERN = ""
 HUGGINGFACE_ACCESS_TOKEN = "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"
 
 
+# GROBID服务器地址（填写多个可以均衡负载），用于高质量地读取PDF文档
+# 获取方法：复制以下空间https://huggingface.co/spaces/qingxu98/grobid，设为public，然后GROBID_URL = "https://(你的hf用户名如qingxu98)-(你的填写的空间名如grobid).hf.space"
+GROBID_URLS = [
+    "https://qingxu98-grobid.hf.space","https://qingxu98-grobid2.hf.space","https://qingxu98-grobid3.hf.space",
+    "https://shaocongma-grobid.hf.space","https://FBR123-grobid.hf.space",
+]
+
+
 
 """
 在线大模型配置关联关系示意图
@@ -205,9 +215,13 @@ HUGGINGFACE_ACCESS_TOKEN = "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"
 插件在线服务配置依赖关系示意图
 │
 ├── 语音功能
-    ├── ENABLE_AUDIO
-    ├── ALIYUN_TOKEN
-    ├── ALIYUN_APPKEY
-    ├── ALIYUN_ACCESSKEY
-    └── ALIYUN_SECRET
+│   ├── ENABLE_AUDIO
+│   ├── ALIYUN_TOKEN
+│   ├── ALIYUN_APPKEY
+│   ├── ALIYUN_ACCESSKEY
+│   └── ALIYUN_SECRET
+│
+├── PDF文档精准解析
+│   └── GROBID_URLS
+
 """
