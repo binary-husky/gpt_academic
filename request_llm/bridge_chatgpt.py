@@ -137,6 +137,12 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     chatbot.append((inputs, ""))
     yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
 
+    # check mis-behavior
+    if raw_input.startswith('private_upload/') and len(raw_input) == 34:
+        chatbot[-1] = (inputs, f"[Local Message] 检测到操作错误！当您上传文档之后，需要点击“函数插件区”按钮进行处理，而不是点击“提交”按钮。")
+        yield from update_ui(chatbot=chatbot, history=history, msg="正常") # 刷新界面
+        time.sleep(2)
+
     try:
         headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt, stream)
     except RuntimeError as e:
