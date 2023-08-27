@@ -177,14 +177,13 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                 yield from update_ui(chatbot=chatbot, history=history, msg="非Openai官方接口返回了错误:" + chunk.decode()) # 刷新界面
                 return
             
-            # print(chunk.decode()[6:])
-            if is_head_of_the_stream and (r'"object":"error"' not in chunk.decode()):
+            chunk_decoded = chunk.decode()
+            if is_head_of_the_stream and (r'"object":"error"' not in chunk_decoded) and (r"choices" not in chunk_decoded):
                 # 数据流的第一帧不携带content
                 is_head_of_the_stream = False; continue
             
             if chunk:
                 try:
-                    chunk_decoded = chunk.decode()
                     # 前者是API2D的结束条件，后者是OPENAI的结束条件
                     if ('data: [DONE]' in chunk_decoded) or (len(json.loads(chunk_decoded[6:])['choices'][0]["delta"]) == 0):
                         # 判定为数据流的结束，gpt_replying_buffer也写完了
@@ -192,7 +191,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                         break
                     # 处理数据流的主体
                     chunkjson = json.loads(chunk_decoded[6:])
-                    status_text = f"finish_reason: {chunkjson['choices'][0]['finish_reason']}"
+                    status_text = f"finish_reason: {chunkjson['choices'][0].get('finish_reason', 'null')}"
                     # 如果这里抛出异常，一般是文本过长，详情见get_full_error的输出
                     gpt_replying_buffer = gpt_replying_buffer + json.loads(chunk_decoded[6:])['choices'][0]["delta"]["content"]
                     history[-1] = gpt_replying_buffer
@@ -216,7 +215,6 @@ def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
         history = clip_history(inputs=inputs, history=history, tokenizer=model_info[llm_kwargs['llm_model']]['tokenizer'], 
                                                max_token_limit=(model_info[llm_kwargs['llm_model']]['max_token'])) # history至少释放二分之一
         chatbot[-1] = (chatbot[-1][0], "[Local Message] Reduce the length. 本次输入过长, 或历史数据过长. 历史缓存数据已部分释放, 您可以请再次尝试. (若再次失败则更可能是因为输入过长.)")
-                        # history = []    # 清除历史
     elif "does not exist" in error_msg:
         chatbot[-1] = (chatbot[-1][0], f"[Local Message] Model {llm_kwargs['llm_model']} does not exist. 模型不存在, 或者您没有获得体验资格.")
     elif "Incorrect API key" in error_msg:

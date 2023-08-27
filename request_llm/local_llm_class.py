@@ -128,7 +128,7 @@ def get_local_llm_predict_fns(LLMSingletonClass, model_name):
 
         # chatglm 没有 sys_prompt 接口，因此把prompt加入 history
         history_feedin = []
-        history_feedin.append(["What can I do?", sys_prompt])
+        history_feedin.append([sys_prompt, "Certainly!"])
         for i in range(len(history)//2):
             history_feedin.append([history[2*i], history[2*i+1]] )
 
@@ -161,7 +161,7 @@ def get_local_llm_predict_fns(LLMSingletonClass, model_name):
 
         # 处理历史信息
         history_feedin = []
-        history_feedin.append(["What can I do?", system_prompt] )
+        history_feedin.append([system_prompt, "Certainly!"])
         for i in range(len(history)//2):
             history_feedin.append([history[2*i], history[2*i+1]] )
 

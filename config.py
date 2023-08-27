@@ -11,7 +11,11 @@
 API_KEY = "此处填API密钥"    # 可同时填写多个API-KEY，用英文逗号分割，例如API_KEY = "sk-openaikey1,sk-openaikey2,fkxxxx-api2dkey3,azure-apikey4"
 
 
-# [step 2]>> 改为True应用代理，如果直接在海外服务器部署，此处不修改
+# [step 1]>> API_KEY = "sk-123456789xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx123456789"。极少数情况下，还需要填写组织（格式如org-123456789abcdefghijklmno的），请向下翻，找 API_ORG 设置项
+API_KEY = "此处填API密钥"    # 可同时填写多个API-KEY，用英文逗号分割，例如API_KEY = "sk-openaikey1,sk-openaikey2,fkxxxx-api2dkey3,azure-apikey4"
+
+
+# [step 2]>> 改为True应用代理，如果直接在海外服务器部署，此处不修改；如果使用本地或无地域限制的大模型时，此处也不需要修改
 USE_PROXY = False
 if USE_PROXY:
     """
@@ -69,7 +73,7 @@ MAX_RETRY = 2
 
 # OpenAI模型选择是（gpt4现在只对申请成功的人开放）
 LLM_MODEL = "gpt-3.5-turbo" # 可选 "chatglm"
-AVAIL_LLM_MODELS = ["newbing-free", "gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "api2d-gpt-3.5-turbo"]
+AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "api2d-gpt-3.5-turbo", "spark", "azure-gpt-3.5"]
 
 # ChatGLM(2) Finetune Model Path （如果使用ChatGLM2微调模型，需要把"chatglmft"加入AVAIL_LLM_MODELS中）
 ChatGLM_PTUNING_CHECKPOINT = "" # 例如"/home/hmp/ChatGLM2-6B/ptuning/output/6b-pt-128-1e-2/checkpoint-100"
@@ -147,3 +151,70 @@ ANTHROPIC_API_KEY = ""
 
 # 自定义API KEY格式
 CUSTOM_API_KEY_PATTERN = ""
+
+
+# HUGGINGFACE的TOKEN，下载LLAMA时起作用 https://huggingface.co/docs/hub/security-tokens
+HUGGINGFACE_ACCESS_TOKEN = "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"
+
+
+# GROBID服务器地址（填写多个可以均衡负载），用于高质量地读取PDF文档
+# 获取方法：复制以下空间https://huggingface.co/spaces/qingxu98/grobid，设为public，然后GROBID_URL = "https://(你的hf用户名如qingxu98)-(你的填写的空间名如grobid).hf.space"
+GROBID_URLS = [
+    "https://qingxu98-grobid.hf.space","https://qingxu98-grobid2.hf.space","https://qingxu98-grobid3.hf.space",
+    "https://shaocongma-grobid.hf.space","https://FBR123-grobid.hf.space",
+]
+
+
+
+"""
+在线大模型配置关联关系示意图
+│
+├── "gpt-3.5-turbo" 等openai模型
+│   ├── API_KEY
+│   ├── CUSTOM_API_KEY_PATTERN（不常用）
+│   ├── API_ORG（不常用）
+│   └── API_URL_REDIRECT（不常用）
+│
+├── "azure-gpt-3.5" 等azure模型
+│   ├── API_KEY
+│   ├── AZURE_ENDPOINT
+│   ├── AZURE_API_KEY
+│   ├── AZURE_ENGINE
+│   └── API_URL_REDIRECT
+│
+├── "spark" 星火认知大模型
+│   ├── XFYUN_APPID
+│   ├── XFYUN_API_SECRET
+│   └── XFYUN_API_KEY
+│
+├── "claude-1-100k" 等claude模型
+│   └── ANTHROPIC_API_KEY
+│
+├── "stack-claude"
+│   ├── SLACK_CLAUDE_BOT_ID
+│   └── SLACK_CLAUDE_USER_TOKEN
+│
+├── "qianfan" 百度千帆大模型库
+│   ├── BAIDU_CLOUD_QIANFAN_MODEL
+│   ├── BAIDU_CLOUD_API_KEY
+│   └── BAIDU_CLOUD_SECRET_KEY
+│
+├── "newbing" Newbing接口不再稳定，不推荐使用
+    ├── NEWBING_STYLE
+    └── NEWBING_COOKIES
+
+
+
+插件在线服务配置依赖关系示意图
+│
+├── 语音功能
+│   ├── ENABLE_AUDIO
+│   ├── ALIYUN_TOKEN
+│   ├── ALIYUN_APPKEY
+│   ├── ALIYUN_ACCESSKEY
+│   └── ALIYUN_SECRET
+│
+├── PDF文档精准解析
+│   └── GROBID_URLS
+
+"""

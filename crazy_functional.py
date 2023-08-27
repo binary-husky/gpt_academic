@@ -24,6 +24,7 @@ def get_crazy_functions():
     from crazy_functions.对话历史存档 import 对话历史存档
     from crazy_functions.对话历史存档 import 载入对话历史存档
     from crazy_functions.对话历史存档 import 删除所有本地对话历史记录
+    from crazy_functions.辅助功能 import 清除缓存
     
     from crazy_functions.批量Markdown翻译 import Markdown英译中
     function_plugins = {
@@ -40,7 +41,12 @@ def get_crazy_functions():
             "AsButton":False,
             "Function": HotReload(删除所有本地对话历史记录)
         },
-        "[测试功能] 解析Jupyter Notebook文件": {
+        "清除所有缓存文件（请谨慎操作）": {
+            "Color": "stop",
+            "AsButton": False,  # 加入下拉菜单中
+            "Function": HotReload(清除缓存)
+        },
+        "解析Jupyter Notebook文件": {
             "Color": "stop",
             "AsButton":False,
             "Function": HotReload(解析ipynb文件),
@@ -328,7 +334,7 @@ def get_crazy_functions():
     try:
         from crazy_functions.Langchain知识库 import 知识库问答
         function_plugins.update({
-            "[功能尚不稳定] 构建知识库（请先上传文件素材）": {
+            "构建知识库（请先上传文件素材）": {
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,
@@ -342,7 +348,7 @@ def get_crazy_functions():
     try:
         from crazy_functions.Langchain知识库 import 读取知识库作答
         function_plugins.update({
-            "[功能尚不稳定] 知识库问答": {
+            "知识库问答": {
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,
@@ -352,6 +358,32 @@ def get_crazy_functions():
         })
     except:
         print('Load function plugin failed')
+        
+    try:
+        from crazy_functions.交互功能函数模板 import 交互功能模板函数
+        function_plugins.update({
+            "交互功能模板函数": {
+                "Color": "stop",
+                "AsButton": False,
+                "Function": HotReload(交互功能模板函数)
+            }
+        })
+    except:
+        print('Load function plugin failed')
+
+    # try:
+    #     from crazy_functions.chatglm微调工具 import 微调数据集生成
+    #     function_plugins.update({
+    #         "黑盒模型学习: 微调数据集生成 (先上传数据集)": {
+    #             "Color": "stop",
+    #             "AsButton": False,
+    #             "AdvancedArgs": True,
+    #             "ArgsReminder": "针对数据集输入（如 绿帽子*深蓝色衬衫*黑色运动裤）给出指令，例如您可以将以下命令复制到下方: --llm_to_learn=azure-gpt-3.5 --prompt_prefix='根据下面的服装类型提示，想象一个穿着者，对这个人外貌、身处的环境、内心世界、过去经历进行描写。要求：100字以内，用第二人称。' --system_prompt=''",
+    #             "Function": HotReload(微调数据集生成)
+    #         }
+    #     })
+    # except:
+    #     print('Load function plugin failed')
 
     try:
         from crazy_functions.Latex输出PDF结果 import Latex英文纠错加PDF对比
@@ -366,7 +398,7 @@ def get_crazy_functions():
         })
         from crazy_functions.Latex输出PDF结果 import Latex翻译中文并重新编译PDF
         function_plugins.update({
-            "Arixv翻译（输入arxivID）[需Latex]": {
+            "Arixv论文精细翻译（输入arxivID）[需Latex]": {
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,
@@ -377,7 +409,7 @@ def get_crazy_functions():
             }
         })
         function_plugins.update({
-            "本地论文翻译（上传Latex压缩包）[需Latex]": {
+            "本地Latex论文精细翻译（上传Latex项目）[需Latex]": {
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,
