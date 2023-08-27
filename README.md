@@ -39,7 +39,7 @@ To translate this project to arbitary language with GPT, read and run [`multi_la
 
 功能（⭐= 近期新增功能） | 描述
 --- | ---
-⭐[接入新模型](https://github.com/binary-husky/gpt_academic/wiki/%E5%A6%82%E4%BD%95%E5%88%87%E6%8D%A2%E6%A8%A1%E5%9E%8B)！ | ⭐阿里达摩院[通义千问](https://modelscope.cn/models/qwen/Qwen-7B-Chat/summary)，上海AI-Lab[书生](https://github.com/InternLM/InternLM)，讯飞[星火](https://xinghuo.xfyun.cn/)
+⭐[接入新模型](https://github.com/binary-husky/gpt_academic/wiki/%E5%A6%82%E4%BD%95%E5%88%87%E6%8D%A2%E6%A8%A1%E5%9E%8B)！ | 百度[千帆](https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Nlks5zkzu)与文心一言, [通义千问](https://modelscope.cn/models/qwen/Qwen-7B-Chat/summary)，上海AI-Lab[书生](https://github.com/InternLM/InternLM)，讯飞[星火](https://xinghuo.xfyun.cn/)，[LLaMa2](https://huggingface.co/meta-llama/Llama-2-7b-chat-hf)
 一键润色 | 支持一键润色、一键查找论文语法错误
 一键中英互译 | 一键中英互译
 一键代码解释 | 显示代码、解释代码、生成代码、给代码加注释
@@ -178,7 +178,7 @@ docker run --rm -it -e WEB_PORT=50923 -p 50923:50923 gpt-academic
 ```
 P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以直接使用docker-compose获取Latex功能（修改docker-compose.yml，保留方案4并删除其他方案）。
 
-2. ChatGPT + ChatGLM2 + MOSS（需要熟悉Docker）
+2. ChatGPT + ChatGLM2 + MOSS + LLAMA2 + 通义千问（需要熟悉[Nvidia Docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#installing-on-ubuntu-and-debian)运行时）
 [![chatglm](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-chatglm.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-chatglm.yml)
 
 ``` sh
@@ -186,7 +186,7 @@ P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以
 docker-compose up
 ```
 
-3. ChatGPT + LLAMA + 盘古 + RWKV（需要熟悉Docker）
+3. ChatGPT + LLAMA + 盘古 + RWKV（需要熟悉[Nvidia Docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#installing-on-ubuntu-and-debian)运行时）
 [![jittorllms](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-jittorllms.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-jittorllms.yml)
 
 ``` sh
@@ -313,6 +313,8 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 
 ### II：版本:
 - version 3.5(Todo): 使用自然语言调用本项目的所有函数插件（高优先级）
+- version 3.49: 支持百度千帆平台和文心一言
+- version 3.48: 支持阿里达摩院通义千问，上海AI-Lab书生，讯飞星火
 - version 3.46: 支持完全脱手操作的实时语音对话
 - version 3.45: 支持自定义ChatGLM2微调模型
 - version 3.44: 正式支持Azure，优化界面易用性
