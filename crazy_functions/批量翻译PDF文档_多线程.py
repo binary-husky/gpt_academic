@@ -113,7 +113,7 @@ def 解析PDF_基于GROBID(file_manifest, project_folder, llm_kwargs, plugin_kwa
             section_frags = break_down(section['text'])
             for i, fragment in enumerate(section_frags):
                 heading = section['heading']
-                if len(section_frags) > 1: heading += f'Part-{i+1}'
+                if len(section_frags) > 1: heading += f' Part-{i+1}'
                 inputs_array.append(
                     f"你需要翻译{heading}章节，内容如下: \n\n{fragment}"
                 )
