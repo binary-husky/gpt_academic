@@ -109,7 +109,7 @@ def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
         know_cls_kw = {}
         for _kw in associated_knowledge_base:
             know_cls_kw[_kw] = associated_knowledge_base[_kw]['查询列表']
-    gpt_say = f'正在将`{new_txt[:10]}`向量化，然后对`{str(know_cls_kw)}`知识库进行匹配.\n\n'
+    gpt_say = f'正在将问题向量化，然后对`{str(know_cls_kw)}`知识库进行匹配.\n\n'
     if list(know_cls_kw.values())[-1]:
         if gpt_say not in str(chatbot):
             chatbot.append([f'请检查知识库库中是否能提供与`{new_txt[:10]}``关联信息', gpt_say])

@@ -855,7 +855,7 @@ def parsing_json_in_text(txt_data: list, old_case, filter_list: list = 'None----
         filter_supplementary_data = [data for data in supplementary_data
                                      if filter_list[:5] != data[:5] or filter_list[-5:] != data[-5:]]
         for new_case in filter_supplementary_data:
-            if new_case not in old_case[index]:
+            if new_case not in old_case[index] and new_case+[tags] not in old_case[index]:
                 old_case[index].append(new_case+[tags])
         response.extend(old_case[index])
     return response, desc
@@ -992,7 +992,9 @@ previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传�
 
 
 if __name__ == '__main__':
-    ex_handle = ExcelHandle(temp_file='../private_upload/10.13.236.56/test_case/20230823_132829/Mac_支付页改版_一阶段_二阶段.xlsx', sheet='测试要点')
-    ex_handle.split_merged_cells()
-    dicss = ex_handle.read_as_dict()
-    print(dicss)
+    old_case = ExcelHandle(temp_file='/Users/kilig/Desktop/MAC新会员引导_二阶段_三阶段.xlsx').read_as_dict()['测试要点']
+    with open('/Users/kilig/Desktop/test.md', mode='r') as f:
+        content = f.read()
+    test_case, desc = parsing_json_in_text([content], [old_case], filter_list=['123'])
+    print()
+
