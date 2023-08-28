@@ -256,7 +256,7 @@ footer {
     transition: opacity 0.3s ease-in-out;
 }
 /*输入框 更新注意这里*/
-.no_padding_input {
+.chat_input {
     max-width: 95% !important;
     padding: unset !important;
 }

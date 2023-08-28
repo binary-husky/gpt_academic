@@ -102,8 +102,8 @@ def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
     # < -------------------为空时，不去查询向量数据库--------------- >
     if not txt: return txt
     know_cls_kw = {llm_kwargs['know_cls']: llm_kwargs['know_id']}
-    # < -------------------检查应该走哪套流程-------------- >
     new_txt = f'{txt}'
+    # < -------------------检查应该走哪套流程-------------- >
     associated_knowledge_base, = crazy_box.json_args_return(plugin_kwargs, ['关联知识库'])
     if associated_knowledge_base:
         know_cls_kw = {}

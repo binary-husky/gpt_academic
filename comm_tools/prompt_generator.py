@@ -89,7 +89,8 @@ class SqliteHandle:
         error_status = ''
         for key in prompt:
             _, user_info = self.get_prompt_value(key)
-            if not user_info: user_info = ''  # 增加保障
+            if not user_info:
+                user_info = source  # 增加保障
             if source in user_info or not user_info:
                 self.__cursor.execute(f"REPLACE INTO `{self.__table}` (prompt, result, source)"
                                       f"VALUES (?, ?, ?);", (str(key), str(prompt[key]), user_info))

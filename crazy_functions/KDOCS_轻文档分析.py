@@ -35,16 +35,17 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
             if crazy_box.if_kdocs_url_isap(url) and 'ap轻文档' in file_types:
                 ovs_data, content, empty_picture_count, pic_dict, kdocs_dict = crazy_box.get_docs_content(url, image_processing=img_ocr)
                 if img_ocr:
+                    you_say = '请检查数据，并进行处理'
                     if pic_dict:  # 当有图片文件时，再去提醒
                         title = crazy_box.long_name_processing(content)
                         ocr_process = f'检测到`{title}`文档中存在{func_box.html_tag_color(empty_picture_count)}张图片，为了产出结果不存在遗漏，正在逐一进行识别\n\n' \
                                       f'> 红框为采用的文案,可信指数低于 {func_box.html_tag_color(llm_kwargs["ocr"])} 将不采用, 可在Setting 中进行配置\n\n'
-                        chatbot.append(['请检查数据，并进行处理', ocr_process])
+                        chatbot.append([you_say, ocr_process])
                     else:
                         ocr_process = ''
                     if pic_dict:
                         yield from update_ui(chatbot, history, '正在调用OCR组件，已启用多线程解析，请稍等')
-                        ocr_func = ocr_tools.Paddle_ocr_select(ipaddr=llm_kwargs['ipaddr'],trust_value=llm_kwargs['ocr']).img_def_content
+                        ocr_func = ocr_tools.Paddle_ocr_select(ipaddr=llm_kwargs['ipaddr'], trust_value=llm_kwargs['ocr']).identify_cache
                         thread_submission = ocr_tools.submit_threads_ocr(pic_dict, func=ocr_func, max_threads=llm_kwargs.get('worker_num', 5))
                         for t in thread_submission:
                             try:
@@ -52,13 +53,13 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
                                 content = str(content).replace(f"{t}",
                                                                f"{func_box.html_local_img(img_result)}\n```{img_content}```")
                                 if error:
-                                    ocr_process += '`tips: 图片右侧无说明仅代表图片太大失绘制失败，不影响实际OCR结果`'
+                                    ocr_process += f'`tips: {error}`'
                                 ocr_process += f'{t} 识别完成，识别效果如下{func_box.html_local_img(img_result)}\n\n'
-                                chatbot[-1] = [None, ocr_process]
+                                chatbot[-1] = [you_say, ocr_process]
                                 yield from update_ui(chatbot, history)
                             except Exception:
                                 ocr_process += f'{t} 识别失败，过滤这个图片\n\n'
-                                chatbot[-1] = [None, ocr_process]
+                                chatbot[-1] = [you_say, ocr_process]
                                 yield from update_ui(chatbot, history)
 
                 else:
