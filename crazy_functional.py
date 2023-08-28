@@ -143,7 +143,7 @@ def get_crazy_functions():
     from crazy_functions.批量Markdown翻译 import Markdown中译英
 
     function_plugins.update({
-        "批量翻译PDF文档（多线程）": {
+        "精准翻译PDF论文": {
             "Color": "stop",
             "AsButton": True,  # 加入下拉菜单中
             "Function": HotReload(批量翻译PDF文档)
@@ -152,7 +152,7 @@ def get_crazy_functions():
             "Color": "stop",    # 按钮颜色
             "Function": HotReload(同时问询)
         },
-        "[测试功能] 批量总结PDF文档": {
+        "批量总结PDF文档": {
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
