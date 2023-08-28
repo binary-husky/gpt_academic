@@ -724,8 +724,7 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
                 try:
                     limit = yield from Langchain_cn.knowledge_base_query(limit, chatbot, history, llm_kwargs, plugin_kwargs)
                 except Exception as f:
-                    chatbot.append(["出事了？", f'`{f}`读取知识库失败，本次对话不会提供任何参考文本'])
-                    yield from toolbox.update_ui(chatbot, history)
+                    func_box.通知机器人(f'读取知识库失败，请检查{f}')
             inputs_array.append(func_box.replace_expected_text(prompt, content=limit, expect='{{{v}}}'))
             inputs_show_user_array.append(you_say+task_tag)
     yield from toolbox.update_ui(chatbot, history)
