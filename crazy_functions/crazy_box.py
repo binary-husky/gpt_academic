@@ -667,7 +667,7 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
     segments = []
     if type(inputs) is list:
         if get_token_num(str(inputs)) > max_token:
-            chatbot.append(['请检查数据，并进行提交处理', f'{func_box.html_tag_color(inputs[0][:10])}...对话数据预计会超出{all_tokens}tokens限制, 拆分中...'])
+            chatbot.append([None, f'{func_box.html_tag_color(inputs[0][:10])}...对话数据预计会超出{all_tokens}tokens限制, 拆分中...'])
             segments.extend(split_list_token_limit(data=inputs, get_num=get_token_num, max_num=max_token))
         else:
             segments.append(json.dumps(inputs, ensure_ascii=False))
@@ -675,7 +675,7 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
         inputs = inputs.split('\n---\n')
         for input_ in inputs:
             if get_token_num(input_) > max_token:
-                chatbot.append(['请检查数据，并进行提交处理', f'{func_box.html_tag_color(input_[:10])}...对话数据预计会超出{all_tokens}tokens限制, 拆分中...'])
+                chatbot.append([None, f'{func_box.html_tag_color(input_[:10])}...对话数据预计会超出{all_tokens}tokens限制, 拆分中...'])
                 yield from toolbox.update_ui(chatbot, history)
                 segments.extend(crazy_utils.breakdown_txt_to_satisfy_token_limit(input_, get_token_num, max_token))
             else:
@@ -706,7 +706,7 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     else:
         prompt_cls_tab = f'prompt_{prompt_cls}_sys'
     if default_prompt: kwargs_prompt = default_prompt
-    chatbot.append(['请将提示词套入提取的信息中', f'接下来使用的Prompt是`{prompt_cls}`分类下的：`{kwargs_prompt}`'
+    chatbot.append([None, f'接下来使用的Prompt是`{prompt_cls}`分类下的：`{kwargs_prompt}`'
                     f', 你可以在{func_box.html_tag_color("自定义插件参数")}中指定另一个Prompt哦～'])
     time.sleep(1)
     prompt = prompt_generator.SqliteHandle(table=prompt_cls_tab).find_prompt_result(kwargs_prompt)
@@ -923,7 +923,7 @@ def supplementary_test_case(gpt_response_collection, llm_kwargs, plugin_kwargs, 
         md = Utils().write_markdown(data=desc, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(file_name))
         chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, to_tabs=True)}\n\n' \
                           f'---\n\n{file_name}补充思路如下：\t{func_box.html_view_blank(__href=md, to_tabs=True)}\n\n'
-        chatbot[-1] = ([you_say+'Done', chat_file_list])
+        chatbot[-1] = ([you_say, chat_file_list])
         yield from toolbox.update_ui(chatbot, history)
         files_limit.append(file_path)
     return files_limit
@@ -980,7 +980,7 @@ def result_written_to_markdwon(gpt_response_collection, llm_kwargs, plugin_kwarg
         md = Utils().write_markdown(data=inputs_all, hosts=llm_kwargs['ipaddr'],
                                     file_name=long_name_processing(file_name)+stage)
         chat_file_list = f'markdown已写入文件，下次使用插件可以直接提交markdown文件啦 {func_box.html_view_blank(md, to_tabs=True)}'
-        chatbot[-1] = [you_say+'Done', chat_file_list]
+        chatbot[-1] = [you_say, chat_file_list]
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
         file_limit.append(md)
     return file_limit

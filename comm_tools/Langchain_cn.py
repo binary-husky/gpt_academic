@@ -109,10 +109,11 @@ def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
         know_cls_kw = {}
         for _kw in associated_knowledge_base:
             know_cls_kw[_kw] = associated_knowledge_base[_kw]['查询列表']
+        txt = None
     gpt_say = f'正在将问题向量化，然后对`{str(know_cls_kw)}`知识库进行匹配.\n\n'
     if list(know_cls_kw.values())[-1]:
         if gpt_say not in str(chatbot):
-            chatbot.append([f'请检查知识库库中是否能提供与`{new_txt[:10]}``关联信息', gpt_say])
+            chatbot.append([txt, gpt_say])
             yield from toolbox.update_ui(chatbot=chatbot, history=history)  # 刷新界面
     for know_cls in know_cls_kw:
         for id in know_cls_kw[know_cls]:
@@ -127,6 +128,7 @@ def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
             prompt_cls = '知识库提示词'
             resp, prompt, _ok = kai.answer_with_archive_by_id(new_txt, id, llm_kwargs)
             referenced_documents = "\n".join([f"{k}: " + doc.page_content for k, doc in enumerate(resp['source_documents'])])
+            source_documents = "\n".join({func_box.html_view_blank(doc.metadata.get('source', '')): '' for k, doc in enumerate(resp['source_documents'])})
             if not referenced_documents:
                 gpt_say += f"`{id}`知识库中没有与问题匹配的文本，所以不会提供任何参考文本，你可以在Settings-更改`知识库检索相关度`中进行调优。\n"
                 chatbot[-1] = [txt, gpt_say]
@@ -136,14 +138,14 @@ def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
                     tips = f'匹配中了`{id}`知识库，使用的Prompt是`{prompt_cls}`分类下的`{prompt_name}`, 插件自定义参数允许指定其他Prompt哦～'
                     if tips not in str(chatbot):
                         gpt_say += tips
-                    chatbot[-1] = [txt, gpt_say]
                 else:
                     prompt_name = '引用知识库回答'
                     tips = f'`{id}`知识库问答使用的Prompt是`{prompt_cls}`分类下的' \
-                           f'`{prompt_name}`, 你可以保存一个同名的Prompt到个人分类下，知识库问答会优先使用个人分类下的提示词'
+                           f'`{prompt_name}`, 你可以保存一个同名的Prompt到个人分类下，知识库问答会优先使用个人分类下的提示词。'
                     if tips not in str(chatbot):
                         gpt_say += tips
-                    chatbot[-1] = [txt, gpt_say]
+                gpt_say += f"\n\n引用文档:\n\n> {source_documents}"
+                chatbot[-1] = [txt, gpt_say]
                 prompt_con = prompt_generator.SqliteHandle(table=f'prompt_{prompt_cls}_sys').find_prompt_result(
                     prompt_name, individual_priority=llm_kwargs['ipaddr'])
                 prompt_content = func_box.replace_expected_text(prompt=prompt_con, content=referenced_documents,

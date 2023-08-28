@@ -195,8 +195,6 @@ def Kdocs_多阶段生成回答(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
             file_limit = [[limit, "".join(content_limit[limit])] for limit in content_limit]
             yield from update_ui(chatbot=chatbot, history=history)
         if stage != [i for i in multi_stage_config][-1]:
-            chatbot.append(['开始准备下一阶段的数据', '下阶段准备执行中...'])
-            yield from update_ui(chatbot=chatbot, history=history)
             yield from crazy_box.file_extraction_intype(plugin_kwargs[stage], [''], file_limit, chatbot, history, llm_kwargs, plugin_kwargs)
 
     if not multi_stage_config:

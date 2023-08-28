@@ -210,7 +210,16 @@ function chatbotContentChanged(attempt = 1) {
     for (var i = 0; i < attempt; i++) {
         setTimeout(() => {
             gradioApp().querySelectorAll('#main_chatbot .message-wrap .message.bot, #main_chatbot .message-wrap .message.user').forEach(addChuanhuButton);
-        }, i === 0 ? 0 : 500);
+          // 添加以下代码
+          const messageElems = gradioApp().querySelectorAll('#main_chatbot .message-wrap .message');
+          messageElems.forEach(messageElem => {
+            if (messageElem.classList.contains('hide')) {
+              messageElem.parentNode.classList.add('hide-important');
+            } else {
+              messageElem.parentNode.classList.remove('hide-important');
+            }
+          });
+            }, i === 0 ? 0 : 500);
     }
     // 理论上是不需要多次尝试执行的，可惜gradio的bug导致message可能没有渲染完毕，所以尝试500ms后再次执行
 }
@@ -232,16 +241,3 @@ window.addEventListener("DOMContentLoaded", function () {
     isInIframe = (window.self !== window.top);
 });
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", adjustDarkMode);
-// 获取所有的 message-row 元素
-const messageRows = document.querySelectorAll('.message-row');
-if (messageRows.length > 0) {
-    // 遍历每个 message-row 元素
-    messageRows.forEach(row => {
-        // 检查是否有隐藏属性
-        const userMessage = row.querySelector('.message');
-        if (userMessage.classList.contains('hide')) {
-            // 如果有隐藏属性，则添加 display: none 样式
-            messageRows.style.display = 'none';
-        }
-    });
-}
