@@ -8,23 +8,16 @@ from crazy_functions.crazy_utils import input_clipping
 from crazy_functions.json_fns.pydantic_io import GptJsonIO
 from crazy_functions.vt_fns.vt_modify_config import modify_configuration_hot
 from crazy_functions.vt_fns.vt_modify_config import modify_configuration_reboot
+from crazy_functions.vt_fns.vt_call_plugin import execute_plugin
 from enum import Enum
 import copy, json, pickle, os, sys
 
-class IntentionEnum(str, Enum):
-    ModifyConfiguration = 'ModifyConfiguration'
-    ExecutePlugin = 'ExecutePlugin'
-    Chat = 'Chat'
 
 class UserIntention(BaseModel):
     user_prompt: str = Field(description="the content of user input", default="")
-    intention_type: IntentionEnum = Field(description="the type of user intention", default=IntentionEnum.Chat)
+    intention_type: str = Field(description="the type of user intention, choose from ['ModifyConfiguration', 'ExecutePlugin', 'Chat']", default="Chat")
     user_provide_file: bool = Field(description="whether the user provides a path to a file", default=False)
     user_provide_url: bool = Field(description="whether the user provides a url", default=False)
-
-def execute_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention):
-    # 没写完
-    pass
 
 def chat(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention):
     gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
@@ -36,6 +29,21 @@ def chat(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_i
     history.extend([txt, gpt_say])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
     pass
+
+def analyze_with_rule(txt):
+    user_intention = UserIntention()
+    user_intention.user_prompt = txt
+    is_certain = False
+
+    if '调用插件' in txt:
+        is_certain = True
+        user_intention.intention_type = 'ExecutePlugin'
+
+    if '修改配置' in txt:
+        is_certain = True
+        user_intention.intention_type = 'ModifyConfiguration'
+
+    return is_certain, user_intention
 
 @CatchException
 def 自动终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
@@ -63,23 +71,27 @@ def 自动终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
         chatbot._cookies['vt_state'] = pickle.dumps(state)
 
     # ⭐ ⭐ ⭐ 分析用户意图
-    yield from update_ui_lastest_msg(lastmsg=f"正在执行任务: {txt}\n\n分析用户意图中", chatbot=chatbot, history=history, delay=0)
-    gpt_json_io = GptJsonIO(UserIntention)
-    inputs = "Analyze the intention of the user according to following user input: \n\n" + txt + '\n\n' + gpt_json_io.format_instructions
-    run_gpt_fn = lambda inputs, sys_prompt: predict_no_ui_long_connection(
-        inputs=inputs, llm_kwargs=llm_kwargs, history=[], sys_prompt=sys_prompt, observe_window=[])
-    user_intention = gpt_json_io.generate_output_auto_repair(run_gpt_fn(inputs, ""), run_gpt_fn)
+    is_certain, user_intention = analyze_with_rule(txt)
+    if not is_certain:
+        yield from update_ui_lastest_msg(lastmsg=f"正在执行任务: {txt}\n\n分析用户意图中", chatbot=chatbot, history=history, delay=0)
+        gpt_json_io = GptJsonIO(UserIntention)
+        inputs = "Analyze the intention of the user according to following user input: \n\n" + txt + '\n\n' + gpt_json_io.format_instructions
+        run_gpt_fn = lambda inputs, sys_prompt: predict_no_ui_long_connection(
+            inputs=inputs, llm_kwargs=llm_kwargs, history=[], sys_prompt=sys_prompt, observe_window=[])
+        user_intention = gpt_json_io.generate_output_auto_repair(run_gpt_fn(inputs, ""), run_gpt_fn)
+    else:
+        pass
 
     # 用户意图: 修改本项目的配置
-    if user_intention.intention_type == IntentionEnum.ModifyConfiguration:
+    if user_intention.intention_type == 'ModifyConfiguration':
         yield from modify_configuration_reboot(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention)
 
     # 用户意图: 调度插件
-    if user_intention.intention_type == IntentionEnum.ExecutePlugin:
+    if user_intention.intention_type == 'ExecutePlugin':
         yield from execute_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention)
 
     # 用户意图: 聊天
-    if user_intention.intention_type == IntentionEnum.Chat:
+    if user_intention.intention_type == 'Chat':
         yield from chat(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention)
 
     # update_vt_state()
