@@ -94,8 +94,6 @@ def 自动终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     if user_intention.intention_type == 'Chat':
         yield from chat(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention)
 
-    # update_vt_state()
-
     return
 
 
