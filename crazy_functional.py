@@ -282,6 +282,7 @@ def get_crazy_functions():
                 "AsButton": False,
                 "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
                 "ArgsReminder": "在这里输入分辨率, 如256x256（默认）",  # 高级参数输入区的显示提示
+                "Info": "图片生成 | 输入参数字符串，提供图像的内容",
                 "Function": HotReload(图片生成)
             },
         })
@@ -296,6 +297,7 @@ def get_crazy_functions():
                 "AsButton": False,
                 "AdvancedArgs": True,
                 "ArgsReminder": "调用openai api 使用whisper-1模型, 目前支持的格式:mp4, m4a, wav, mpga, mpeg, mp3。此处可以输入解析提示，例如：解析为简体中文（默认）。",
+                "Info": "批量总结音频或视频 | 输入参数为路径",
                 "Function": HotReload(总结音视频)
             }
         })

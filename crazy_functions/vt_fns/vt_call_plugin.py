@@ -27,7 +27,7 @@ def execute_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prom
     gpt_json_io = GptJsonIO(Plugin)
     gpt_json_io.format_instructions += plugin_arr_enum_prompt
     inputs = "Choose the correct plugin and extract plugin_arg, the user requirement is: \n\n" + \
-             ">>" + txt + '\n\n' + \
+             ">> " + txt.rstrip('\n').replace('\n','\n>> ') + '\n\n' + \
              gpt_json_io.format_instructions 
     run_gpt_fn = lambda inputs, sys_prompt: predict_no_ui_long_connection(
         inputs=inputs, llm_kwargs=llm_kwargs, history=[], sys_prompt=sys_prompt, observe_window=[])
@@ -38,7 +38,7 @@ def execute_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prom
         plugin = plugin_arr_dict[plugin_sel.plugin_selection]
         fn = plugin['Function']
         fn_name = fn.__name__
-        msg = f'正在调用插件: {fn_name}\n\n插件说明：{plugin["Info"]}'
+        msg = f'正在调用插件: {fn_name}\n\n插件说明：{plugin["Info"]}\n\n插件参数：{plugin_sel.plugin_arg}'
         yield from update_ui_lastest_msg(lastmsg=msg, chatbot=chatbot, history=history, delay=2)
         yield from fn(plugin_sel.plugin_arg, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, -1)
         return
