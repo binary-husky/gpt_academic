@@ -2,7 +2,7 @@ from comm_tools.toolbox import CatchException, report_execption, select_api_key,
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, get_files_from_everything
 import glob, os
 from comm_tools import func_box
-
+from moviepy.editor import AudioFileClip
 from crazy_functions import KDOCS_轻文档分析, crazy_box
 
 
@@ -198,7 +198,6 @@ def audio_extraction_text(file):
 
 
 def audio_comparison_of_video_converters(files, chatbot, history):
-    from moviepy.editor import AudioFileClip
     temp_chat = ''
     chatbot.append(['可以开始了么', temp_chat])
     temp_list = []
@@ -233,7 +232,6 @@ def Kdocs音频提取总结(txt, llm_kwargs, plugin_kwargs, chatbot, history, sy
             _, kdocs_manifest_tmp, _ = crazy_box.get_kdocs_from_everything(txt, ed, ipaddr=llm_kwargs['ipaddr'])
             file_manifest += kdocs_manifest_tmp
             file_manifest += file_manifest_tmp
-
     # 如果没找到任何文件
     if len(file_manifest) == 0:
         report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"{crazy_box.previously_on_plugins}")
@@ -246,45 +244,10 @@ def Kdocs音频提取总结(txt, llm_kwargs, plugin_kwargs, chatbot, history, sy
     yield from update_ui(chatbot, history, '插件执行成功')
 
 if __name__ == '__main__':
-    # 创建一个音频识别对象w
-    import speech_recognition as sr
-    from pydub import AudioSegment
-
-
-    def extract_audio(file_path):
-        audio = AudioSegment.from_file(file_path)
-        return audio
-
-
-    def recognize_speech(audio):
-        r = sr.Recognizer()
-        audio_data = sr.AudioData(audio.raw_data,
-                                  sample_rate=audio.frame_rate,
-                                  sample_width=audio.sample_width)
-
-        # 文字识别
-        text = r.recognize_google(audio_data, language='en')
-
-        # 返回文字和时间段
-        time_markers = []
-        for i, segment in enumerate(audio[::10000]):  # 根据需要调整分割时间间隔
-            start_time = i * 10
-            end_time = (i + 1) * 10
-            time_markers.append({
-                'text': text,
-                'start_time': start_time,
-                'end_time': end_time
-            })
-
-        return time_markers
-
-
-    file_path = '/Users/kilig/Desktop/土木三班陈同学-离人.mp3'  # 替换成你的音视频文件路径
-    audio = extract_audio(file_path)
-    time_markers = recognize_speech(audio)
-
-    for marker in time_markers:
-        print(f"Text: {marker['text']}")
-        print(f"Start Time: {marker['start_time']}s")
-        print(f"End Time: {marker['end_time']}s")
-        print('---')
+    file = "/Users/kilig/Desktop/resource/142856_151312_知识库ai问答-实现原理讲解.mp4"
+    temp_list = []
+    temp_path = os.path.join(os.path.dirname(file), f"{os.path.basename(file)}.wav")
+    videoclip = AudioFileClip(file)
+    videoclip.write_audiofile(temp_path)
+    temp_list.extend((temp_path, audio_extraction_text(temp_path)))
+    print(videoclip)
