@@ -25,7 +25,7 @@ def get_crazy_functions():
     from crazy_functions.对话历史存档 import 载入对话历史存档
     from crazy_functions.对话历史存档 import 删除所有本地对话历史记录
     from crazy_functions.辅助功能 import 清除缓存
-    
+
     from crazy_functions.批量Markdown翻译 import Markdown英译中
     function_plugins = {
         "解析整个Python项目": {
@@ -34,11 +34,11 @@ def get_crazy_functions():
         },
         "载入对话历史存档（先上传存档或输入路径）": {
             "Color": "stop",
-            "AsButton":False,
+            "AsButton": False,
             "Function": HotReload(载入对话历史存档)
         },
         "删除所有本地对话历史记录（请谨慎操作）": {
-            "AsButton":False,
+            "AsButton": False,
             "Function": HotReload(删除所有本地对话历史记录)
         },
         "清除所有缓存文件（请谨慎操作）": {
@@ -48,10 +48,10 @@ def get_crazy_functions():
         },
         "解析Jupyter Notebook文件": {
             "Color": "stop",
-            "AsButton":False,
+            "AsButton": False,
             "Function": HotReload(解析ipynb文件),
-            "AdvancedArgs": True, # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "若输入0，则不解析notebook中的Markdown块", # 高级参数输入区的显示提示
+            "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+            "ArgsReminder": "若输入0，则不解析notebook中的Markdown块",  # 高级参数输入区的显示提示
         },
         "批量总结Word文档": {
             "Color": "stop",
@@ -255,8 +255,8 @@ def get_crazy_functions():
             "解析项目源代码（手动指定和筛选源代码文件类型）": {
                 "Color": "stop",
                 "AsButton": False,
-                "AdvancedArgs": True, # 调用时，唤起高级参数输入区（默认False）
-                "ArgsReminder": "输入时用逗号隔开, *代表通配符, 加了^代表不匹配; 不输入代表全部匹配。例如: \"*.c, ^*.cpp, config.toml, ^*.toml\"", # 高级参数输入区的显示提示
+                "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+                "ArgsReminder": "输入时用逗号隔开, *代表通配符, 加了^代表不匹配; 不输入代表全部匹配。例如: \"*.c, ^*.cpp, config.toml, ^*.toml\"",  # 高级参数输入区的显示提示
                 "Function": HotReload(解析任意code项目)
             },
         })
@@ -269,8 +269,8 @@ def get_crazy_functions():
             "询问多个GPT模型（手动指定询问哪些模型）": {
                 "Color": "stop",
                 "AsButton": False,
-                "AdvancedArgs": True, # 调用时，唤起高级参数输入区（默认False）
-                "ArgsReminder": "支持任意数量的llm接口，用&符号分隔。例如chatglm&gpt-3.5-turbo&api2d-gpt-4", # 高级参数输入区的显示提示
+                "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+                "ArgsReminder": "支持任意数量的llm接口，用&符号分隔。例如chatglm&gpt-3.5-turbo&api2d-gpt-4",  # 高级参数输入区的显示提示
                 "Function": HotReload(同时问询_指定模型)
             },
         })
@@ -283,8 +283,8 @@ def get_crazy_functions():
             "图片生成（先切换模型到openai或api2d）": {
                 "Color": "stop",
                 "AsButton": False,
-                "AdvancedArgs": True, # 调用时，唤起高级参数输入区（默认False）
-                "ArgsReminder": "在这里输入分辨率, 如256x256（默认）", # 高级参数输入区的显示提示
+                "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+                "ArgsReminder": "在这里输入分辨率, 如256x256（默认）",  # 高级参数输入区的显示提示
                 "Function": HotReload(图片生成)
             },
         })
@@ -358,7 +358,7 @@ def get_crazy_functions():
         })
     except:
         print('Load function plugin failed')
-        
+
     try:
         from crazy_functions.交互功能函数模板 import 交互功能模板函数
         function_plugins.update({
@@ -402,9 +402,10 @@ def get_crazy_functions():
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,
-                "ArgsReminder": 
-                    "如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "+ 
-                    "例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: " + 'If the term "agent" is used in this section, it should be translated to "智能体". ',
+                "ArgsReminder":
+                    "如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 " +
+                    "例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: " +
+                    'If the term "agent" is used in this section, it should be translated to "智能体". ',
                 "Function": HotReload(Latex翻译中文并重新编译PDF)
             }
         })
@@ -413,15 +414,15 @@ def get_crazy_functions():
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,
-                "ArgsReminder": 
-                    "如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "+ 
-                    "例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: " + 'If the term "agent" is used in this section, it should be translated to "智能体". ',
+                "ArgsReminder":
+                    "如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 " +
+                    "例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: " +
+                    'If the term "agent" is used in this section, it should be translated to "智能体". ',
                 "Function": HotReload(Latex翻译中文并重新编译PDF)
             }
         })
     except:
         print('Load function plugin failed')
-
 
     try:
         from toolbox import get_conf
@@ -437,19 +438,17 @@ def get_crazy_functions():
             })
     except:
         print('Load function plugin failed')
-        
-    # try:
-    #     from crazy_functions.虚空终端 import 终端
-    #     function_plugins.update({
-    #         "超级终端": {
-    #             "Color": "stop",
-    #             "AsButton": False,
-    #             # "AdvancedArgs": True,
-    #             # "ArgsReminder": "",
-    #             "Function": HotReload(终端)
-    #         }
-    #     })
-    # except:
-    #     print('Load function plugin failed')
+
+    try:
+        from crazy_functions.虚空终端 import 自动终端
+        function_plugins.update({
+            "自动终端": {
+                "Color": "stop",
+                "AsButton": False,
+                "Function": HotReload(自动终端)
+            }
+        })
+    except:
+        print('Load function plugin failed')
 
     return function_plugins
