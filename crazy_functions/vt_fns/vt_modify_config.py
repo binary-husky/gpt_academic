@@ -1,17 +1,24 @@
 from pydantic import BaseModel, Field
 from typing import List
-from toolbox import update_ui_lastest_msg
+from toolbox import update_ui_lastest_msg, get_conf
 from request_llm.bridge_all import predict_no_ui_long_connection
 from crazy_functions.json_fns.pydantic_io import GptJsonIO
 import copy, json, pickle, os, sys
 
 
 def modify_configuration_hot(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention):
-    import config
+    ALLOW_RESET_CONFIG, = get_conf('ALLOW_RESET_CONFIG')
+    if not ALLOW_RESET_CONFIG:
+        yield from update_ui_lastest_msg(
+            lastmsg=f"当前配置不允许被修改！如需激活本功能，请在config.py中设置ALLOW_RESET_CONFIG=True后重启软件。", 
+            chatbot=chatbot, history=history, delay=2
+        )
+        return
 
     # ⭐ ⭐ ⭐ 读取可配置项目条目
-    from enum import Enum
     names = {}
+    from enum import Enum
+    import config
     for k, v in config.__dict__.items():
         if k.startswith('__'): continue
         names.update({k:k})
@@ -59,6 +66,14 @@ def modify_configuration_hot(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         )
 
 def modify_configuration_reboot(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention):
+    ALLOW_RESET_CONFIG, = get_conf('ALLOW_RESET_CONFIG')
+    if not ALLOW_RESET_CONFIG:
+        yield from update_ui_lastest_msg(
+            lastmsg=f"当前配置不允许被修改！如需激活本功能，请在config.py中设置ALLOW_RESET_CONFIG=True后重启软件。", 
+            chatbot=chatbot, history=history, delay=2
+        )
+        return
+
     yield from modify_configuration_hot(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention)
     yield from update_ui_lastest_msg(
         lastmsg=f"正在执行任务: {txt}\n\n配置修改完成，五秒后即将重启！若出现报错请无视即可。", chatbot=chatbot, history=history, delay=5
