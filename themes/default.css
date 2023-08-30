@@ -16,6 +16,11 @@
 .markdown-body thead th {
     padding: .5em .2em;
 }
+.normal_mut_select .svelte-1gfkn6j {
+    float: left;
+    width: auto;
+    line-height: 260% !important;
+}
 
 .markdown-body ol, .markdown-body ul {
     padding-inline-start: 2em !important;

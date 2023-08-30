@@ -67,6 +67,8 @@ WEB_PORT = -1
 # 如果OpenAI不响应（网络卡顿、代理失败、KEY失效），重试的次数限制
 MAX_RETRY = 2
 
+# 插件分类默认选项
+default_plugin = ['学术优化', '多功能插件', '代码解析']
 
 # 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
 LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
@@ -100,7 +102,7 @@ AUTO_CLEAR_TXT = False
 
 
 # 色彩主体，可选 ["Default", "Chuanhu-Small-and-Beautiful"]
-THEME = "Default"
+THEME = "Chuanhu-Small-and-Beautiful"
 
 
 # 加一个live2d装饰

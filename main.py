@@ -2,7 +2,7 @@ import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 
 def main():
     import gradio as gr
-    if gr.__version__ not in ['3.28.3','3.32.2']: assert False, "需要特殊依赖，请务必用 pip install -r requirements.txt 指令安装依赖，详情信息见requirements.txt"
+    # if gr.__version__ not in ['3.28.3','3.32.2']: assert False, "需要特殊依赖，请务必用 pip install -r requirements.txt 指令安装依赖，详情信息见requirements.txt"
     from request_llm.bridge_all import predict
     from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, load_chat_cookies, DummyWith
     # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
@@ -34,7 +34,13 @@ def main():
 
     # 高级函数插件
     from crazy_functional import get_crazy_functions
-    crazy_fns = get_crazy_functions()
+    default_plugin, = get_conf('default_plugin')
+    crazy_fns_role = get_crazy_functions()
+    crazy_classification = [i for i in crazy_fns_role]
+    crazy_fns = {}
+    for role in crazy_fns_role:
+        for k in crazy_fns_role[role]:
+            crazy_fns[k] = crazy_fns_role[role][k]
 
     # 处理markdown文本格式的转变
     gr.Chatbot.postprocess = format_io
@@ -86,15 +92,35 @@ def main():
                 with gr.Accordion("函数插件区", open=True, elem_id="plugin-panel") as area_crazy_fn:
                     with gr.Row():
                         gr.Markdown("插件可读取“输入区”文本/路径作为参数（上传文件自动修正路径）")
+                    plugin_dropdown = gr.Dropdown(choices=crazy_classification, label='选择插件分类',
+                                                       value=default_plugin,
+                                                       multiselect=True, interactive=True,
+                                                       elem_classes='normal_mut_select'
+                                                       ).style(container=False)
                     with gr.Row():
-                        for k in crazy_fns:
-                            if not crazy_fns[k].get("AsButton", True): continue
-                            variant = crazy_fns[k]["Color"] if "Color" in crazy_fns[k] else "secondary"
-                            crazy_fns[k]["Button"] = gr.Button(k, variant=variant)
-                            crazy_fns[k]["Button"].style(size="sm")
+                        for role in crazy_fns_role:
+                            for k in crazy_fns_role[role]:
+                                if not crazy_fns_role[role][k].get("AsButton", True): continue
+                                if role not in default_plugin:
+                                    variant = crazy_fns_role[role][k]["Color"] if "Color" in crazy_fns_role[role][
+                                        k] else "secondary"
+                                    crazy_fns_role[role][k]['Button'] = gr.Button(k, variant=variant,
+                                                                                  visible=False).style(size="sm")
+                                else:
+                                    variant = crazy_fns[k]["Color"] if "Color" in crazy_fns_role[role][
+                                        k] else "secondary"
+                                    crazy_fns_role[role][k]['Button'] = gr.Button(k, variant=variant,
+                                                                                  visible=True).style(size="sm")
                     with gr.Row():
                         with gr.Accordion("更多函数插件", open=True):
-                            dropdown_fn_list = [k for k in crazy_fns.keys() if not crazy_fns[k].get("AsButton", True)]
+                            dropdown_fn_list = []
+                            for role in crazy_fns_role:
+                                if role in default_plugin:
+                                    for k in crazy_fns_role[role]:
+                                        if not crazy_fns_role[role][k].get("AsButton", True):
+                                            dropdown_fn_list.append(k)
+                                        elif crazy_fns_role[role][k].get('AdvancedArgs', False):
+                                            dropdown_fn_list.append(k)
                             with gr.Row():
                                 dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="", show_label=False).style(container=False)
                             with gr.Row():
@@ -190,6 +216,28 @@ def main():
         # 终止按钮的回调函数注册
         stopBtn.click(fn=None, inputs=None, outputs=None, cancels=cancel_handles)
         stopBtn2.click(fn=None, inputs=None, outputs=None, cancels=cancel_handles)
+        fn_btn_dict = {crazy_fns_role[role][k]['Button']: {role: k} for role in crazy_fns_role for k in crazy_fns_role[role] if crazy_fns_role[role][k].get('Button')}
+        def show_plugin_btn(plu_list):
+            new_btn_list = []
+            fns_list = []
+            if not plu_list:
+                return [*[fns.update(visible=False) for fns in fn_btn_dict], gr.Dropdown.update(choices=[])]
+            else:
+                for fns in fn_btn_dict:
+                    if list(fn_btn_dict[fns].keys())[0] in plu_list:
+                        new_btn_list.append(fns.update(visible=True))
+                    else:
+                        new_btn_list.append(fns.update(visible=False))
+                for role in crazy_fns_role:
+                    if role in plu_list:
+                        for k in crazy_fns_role[role]:
+                            if not crazy_fns_role[role][k].get("AsButton", True):
+                                fns_list.append(k)
+                            elif crazy_fns_role[role][k].get('AdvancedArgs', False):
+                                fns_list.append(k)
+                return [*new_btn_list, gr.Dropdown.update(choices=fns_list)]
+        plugin_dropdown.select(fn=show_plugin_btn, inputs=[plugin_dropdown],
+                                    outputs=[*fn_btn_dict.keys(), dropdown])
         if ENABLE_AUDIO: 
             from crazy_functions.live_audio.audio_io import RealtimeAudioDistribution
             rad = RealtimeAudioDistribution()
