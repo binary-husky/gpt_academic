@@ -34,7 +34,7 @@ def main():
 
     # 高级函数插件
     from crazy_functional import get_crazy_functions
-    default_plugin, = get_conf('default_plugin')
+    DEFAULT_FN_GROUPS, = get_conf('DEFAULT_FN_GROUPS')
     crazy_fns_role = get_crazy_functions()
     crazy_classification = [i for i in crazy_fns_role]
     crazy_fns = {}
@@ -93,7 +93,7 @@ def main():
                     with gr.Row():
                         gr.Markdown("插件可读取“输入区”文本/路径作为参数（上传文件自动修正路径）")
                     plugin_dropdown = gr.Dropdown(choices=crazy_classification, label='选择插件分类',
-                                                       value=default_plugin,
+                                                       value=DEFAULT_FN_GROUPS,
                                                        multiselect=True, interactive=True,
                                                        elem_classes='normal_mut_select'
                                                        ).style(container=False)
@@ -101,7 +101,7 @@ def main():
                         for role in crazy_fns_role:
                             for k in crazy_fns_role[role]:
                                 if not crazy_fns_role[role][k].get("AsButton", True): continue
-                                if role not in default_plugin:
+                                if role not in DEFAULT_FN_GROUPS:
                                     variant = crazy_fns_role[role][k]["Color"] if "Color" in crazy_fns_role[role][
                                         k] else "secondary"
                                     crazy_fns_role[role][k]['Button'] = gr.Button(k, variant=variant,
@@ -115,7 +115,7 @@ def main():
                         with gr.Accordion("更多函数插件", open=True):
                             dropdown_fn_list = []
                             for role in crazy_fns_role:
-                                if role in default_plugin:
+                                if role in DEFAULT_FN_GROUPS:
                                     for k in crazy_fns_role[role]:
                                         if not crazy_fns_role[role][k].get("AsButton", True):
                                             dropdown_fn_list.append(k)

@@ -1001,7 +1001,7 @@ def get_plugin_default_kwargs():
     chatbot = ChatBotWithCookies(llm_kwargs)
 
     # txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port
-    default_plugin_kwargs = {
+    DEFAULT_FN_GROUPS_kwargs = {
         "main_input": "./README.md",
         "llm_kwargs": llm_kwargs,
         "plugin_kwargs": {},
@@ -1010,7 +1010,7 @@ def get_plugin_default_kwargs():
         "system_prompt": "You are a good AI.", 
         "web_port": WEB_PORT
     }
-    return default_plugin_kwargs
+    return DEFAULT_FN_GROUPS_kwargs
 
 def get_chat_default_kwargs():
     """
