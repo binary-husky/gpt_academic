@@ -636,6 +636,8 @@ def on_file_uploaded(files, chatbot, txt, ipaddr: gr.Request):
                   f'\n\n调用路径参数已自动修正到: \n\n{time_tag_path}' \
                   f'\n\n现在你可以开始构建属于自己的知识库啦～'
         chatbot = markdown_convertion(chatbot)
+        if not txt:
+            txt = {'file_path': '', 'know_name': '', 'know_obj': {}, 'file_list': []}
         txt.update({'file_path': time_tag_path})
     else:
         txt = f'{time_tag_path}'

@@ -438,7 +438,11 @@ class ChatBot(ChatBotFrame):
         self.langchain_upload.upload(fn=on_file_uploaded,
                                      inputs=[self.langchain_upload, gr.State(''), self.langchain_know_kwargs],
                                      outputs=[self.langchain_status, self.langchain_know_kwargs])
-        self.langchain_upload.clear(fn=lambda kw: (kw.update({'file_path': ''}), f'已清空本地文件调用路径参数'),
+
+        def clear_file(kw):
+            kw.update({'file_path': ''})
+            return kw, f'已清空本地文件调用路径参数'
+        self.langchain_upload.clear(fn=clear_file,
                                     inputs=[self.langchain_know_kwargs],
                                     outputs=[self.langchain_know_kwargs, self.langchain_status])
 
