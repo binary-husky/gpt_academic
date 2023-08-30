@@ -777,6 +777,10 @@ thead th {
     color: #FFF;
     /*box-shadow: 6px 6px 16px hsla(0, 0%, 0%, 0.2);*/
 }
+div[class*='svelte-'] .block {
+    padding: 0;
+}
+
 [class*="gradio-container-"] .md :not(pre)>code {
     border: unset;
     color: #FFF;

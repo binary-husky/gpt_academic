@@ -634,7 +634,7 @@ prompt_path = os.path.join(base_path, 'users_data')
 knowledge_path = os.path.join(prompt_path, 'knowledge')
 users_path = os.path.join(base_path, 'private_upload')
 logs_path = os.path.join(base_path, 'gpt_log')
-os.makedirs(knowledge_path, exist_ok=False)
+os.makedirs(knowledge_path, exist_ok=True)
 import os
 import csv
 import datetime

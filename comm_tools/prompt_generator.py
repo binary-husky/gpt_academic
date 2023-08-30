@@ -7,6 +7,9 @@ import json
 import os.path
 import sqlite3
 import functools
+import time
+
+
 # 连接到数据库
 
 
@@ -22,10 +25,15 @@ def connect_db_close(cls_method):
 
 
 class SqliteHandle:
-    def __init__(self, table='ai_common', database='ai_prompt.db'):
+    def __init__(self, table='user_info', database='ai_private.db', auto=True):
         self.base_path = os.path.dirname(os.path.dirname(__file__))
         self.prompt_path = os.path.join(self.base_path, 'users_data')
         self.__database = database
+        if auto:  # 自动查库
+            if table.startswith('ai_private_') or table.startswith('ai_common_') or table.startswith('ocr'):
+                self.__database = 'ai_private.db'
+            elif table.startswith('prompt_'):
+                self.__database = 'ai_prompt.db'
         self.__connect = sqlite3.connect(os.path.join(self.prompt_path, self.__database))
         self.__cursor = self.__connect.cursor()
         self.__table = table
@@ -106,6 +114,7 @@ class SqliteHandle:
 
     def delete_tables(self, tab):
         self.__cursor.execute(f"DROP TABLE `{tab}`;")
+        self.__cursor.execute('VACUUM;')
         self.__connect.commit()
 
     def rename_tables(self, old, new):
@@ -175,6 +184,25 @@ def batch_export_prompt(incloud_tab='prompt_'):
                     print(f'{source}已导出', os.path.join(file_path, f"{source}.json"))
 
 
+def database_separation():
+    import shutil
+    base_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'users_data')
+    base_db = os.path.join(base_path, 'ai_prompt.db')
+    shutil.copy(base_db, os.path.join(base_path, 'ai_prompt_cp.db'))
+    shutil.copy(base_db, os.path.join(base_path, 'ai_private.db'))
+    prompt = sqlite_handle(database='ai_prompt.db')
+    common = sqlite_handle(database='ai_private.db')
+    time.sleep(3)
+    prompt_tables = prompt.get_tables()
+    common_tables = common.get_tables()
+    for tab in prompt_tables:
+        if tab.startswith('ai_private_') or tab.startswith('ai_common_') or tab.startswith('ocr'):
+            prompt.delete_tables(tab)
+    for tab in common_tables:
+        if tab.startswith('prompt_'):
+            common.delete_tables(tab)
+
+
 def batch_migration_data_table():
     sql_ll = sqlite_handle(database='ai_prompt.db')
     tabs = sql_ll.get_tables()
@@ -187,29 +215,34 @@ def batch_migration_data_table():
             sql_ll.rename_tables(t, new=f'ai_private_{new}')
 
 
-def batch_delete_data_table():
-    sql_ll = sqlite_handle(database='ai_prompt_2.db')
+def batch_delete_data_table(database, start):
+    sql_ll = sqlite_handle(database=database)
     tabs = sql_ll.get_tables()
     for t in tabs:
-        if not str(t).endswith('sys'):
+        if str(t).startswith(start):
             sql_ll.delete_tables(t)
+
 
 def main():
     import argparse
     parser = argparse.ArgumentParser(description='数据库命令行操作')
     parser.add_argument('--database', metavar='text', help='指定数据库，默认ai_prompt.db')
     parser.add_argument('--tab', metavar='text', help='指定数据表, 默认prompt_插件定制_sys')
+    parser.add_argument('--tab_start', metavar='text', help='指定数据表, 默认prompt_插件定制_sys')
     parser.add_argument('--source', metavar='text', help='**增加source')
+    parser.add_argument('--split', metavar='text', help='**分离数据库, 随便给一个')
     args = parser.parse_args()
-
     if args.source:
         if not args.tab:
             args.tab = 'prompt_插件定制_sys'
         if not args.database:
             args.database = 'ai_prompt.db'
         SqliteHandle(table=args.tab, database=args.database).update_value(new_source=args.source)
+
+    elif args.split:
+        database_separation()
     else:
-        print('带**的必填呀撒比')
+        print('必须选一个带**')
 
 sqlite_handle = SqliteHandle
 if __name__ == '__main__':
