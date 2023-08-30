@@ -8,11 +8,11 @@
 """
 
 # [step 1]>> API_KEY = "sk-123456789xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx123456789"。极少数情况下，还需要填写组织（格式如org-123456789abcdefghijklmno的），请向下翻，找 API_ORG 设置项
-API_KEY = "此处填API密钥"    # 可同时填写多个API-KEY，用英文逗号分割，例如API_KEY = "sk-openaikey1,sk-openaikey2,fkxxxx-api2dkey3,azure-apikey4"
+API_KEY = "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"    # 可同时填写多个API-KEY，用英文逗号分割，例如API_KEY = "sk-openaikey1,sk-openaikey2,fkxxxx-api2dkey3,azure-apikey4"
 
 
 # [step 2]>> 改为True应用代理，如果直接在海外服务器部署，此处不修改；如果使用本地或无地域限制的大模型时，此处也不需要修改
-USE_PROXY = False
+USE_PROXY = True
 if USE_PROXY:
     """
     填写格式是 [协议]://  [地址] :[端口]，填写之前不要忘记把USE_PROXY改成True，如果直接在海外服务器部署，此处不修改
@@ -24,8 +24,8 @@ if USE_PROXY:
     # 代理网络的地址，打开你的*学*网软件查看代理的协议(socks5h / http)、地址(localhost)和端口(11284)
     proxies = {
         #          [协议]://  [地址]  :[端口]
-        "http":  "socks5h://localhost:11284",  # 再例如  "http":  "http://127.0.0.1:7890",
-        "https": "socks5h://localhost:11284",  # 再例如  "https": "http://127.0.0.1:7890",
+        "http":  "http://127.0.0.1:7890",  # 再例如  "http":  "http://127.0.0.1:7890",
+        "https": "http://127.0.0.1:7890",  # 再例如  "https": "http://127.0.0.1:7890",
     }
 else:
     proxies = None
