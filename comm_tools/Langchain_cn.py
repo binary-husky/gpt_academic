@@ -196,7 +196,8 @@ def obtaining_knowledge_base_files(cls_select, cls_name, vs_id, chatbot, kai_han
 
 
 def single_step_thread_building_knowledge(cls_name, know_id, file_manifest, llm_kwargs):
-    vector_path = os.path.join(func_box.knowledge_path, cls_name)
+    cls_select = classification_filtering_tag(cls_name, cls_name, llm_kwargs['ipaddr'])
+    vector_path = os.path.join(func_box.knowledge_path, cls_select)
     os.makedirs(vector_path, exist_ok=True)
     def thread_task():
         kai = crazy_utils.knowledge_archive_interface(vs_path=vector_path)

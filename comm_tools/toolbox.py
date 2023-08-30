@@ -598,7 +598,7 @@ def get_user_upload(chatbot, txt, ipaddr: gr.Request):
             file_link = "<br>".join([f'{func_box.html_view_blank(f"{root}/{i}")}' for i in file])
             history += f'| {count_num} | {root} | {file_link} |\n'
             count_num += 1
-    chatbot.append([f'Load Submission History like `{txt}`....',
+    chatbot.append([ None, # 'Load Submission History like `{txt}`....',
                     f'{history}\n\n'
                     f'[Local Message] 请自行复制以上目录 or 目录+文件, 填入输入框以供函数区高亮按钮使用\n\n'
                     f'{func_box.html_tag_color("提交前记得请检查头尾空格哦～")}\n\n'])

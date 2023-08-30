@@ -188,6 +188,9 @@ span.svelte-1gfkn6j:not(.has-info) {
     backface-visibility: hidden !important;
     will-change: transform !important;
 }
+.hide-important {
+    display: none !important;
+}
 #colum_func {
 }
 #colum_chat {
@@ -595,7 +598,7 @@ ol:not(.options), ul:not(.options) {
 }
 .message-row {
     flex-direction: row !important;
-    display: flex !important;
+    display: flex;
     gap: 0px !important;
     width: 100%;
 }
@@ -759,7 +762,9 @@ thead th {
     /*margin: 0 2px 0 2px;*/
     padding: .2em .4em .1em .4em;
     background-color: rgba(175,184,193,0.2);
+    color: #e5e7eb;
 }
+
 /* 代码块 */
 .message pre code {
     display: block;
