@@ -22,7 +22,6 @@ function gradioLoaded(mutations) {
         }
         chatbot = document.querySelector('#main_chatbot');
         chatbotWrap = document.querySelector('#main_chatbot > .wrapper > .wrap');
-
         if (gradioContainer && apSwitch) {  // gradioCainter 加载出来了没?
             adjustDarkMode();
         }
@@ -210,15 +209,6 @@ function chatbotContentChanged(attempt = 1) {
     for (var i = 0; i < attempt; i++) {
         setTimeout(() => {
             gradioApp().querySelectorAll('#main_chatbot .message-wrap .message.bot, #main_chatbot .message-wrap .message.user').forEach(addChuanhuButton);
-          // 添加以下代码
-          const messageElems = gradioApp().querySelectorAll('#main_chatbot .message-wrap .message');
-          messageElems.forEach(messageElem => {
-            if (messageElem.classList.contains('hide')) {
-              messageElem.parentNode.classList.add('hide-important');
-            } else {
-              messageElem.parentNode.classList.remove('hide-important');
-            }
-          });
             }, i === 0 ? 0 : 500);
     }
     // 理论上是不需要多次尝试执行的，可惜gradio的bug导致message可能没有渲染完毕，所以尝试500ms后再次执行
@@ -239,5 +229,14 @@ window.addEventListener("DOMContentLoaded", function () {
     const ga = document.getElementsByTagName("gradio-app");
     observer.observe(ga[0], { childList: true, subtree: true });
     isInIframe = (window.self !== window.top);
+        // 添加以下代码
+    const messageElems = gradioApp().querySelectorAll('#main_chatbot .message-wrap .message');
+    messageElems.forEach(messageElem => {
+        if (messageElem.classList.contains('hide')) {
+            messageElem.parentNode.classList.add('hide-important');
+        } else {
+            messageElem.parentNode.classList.remove('hide-important');
+        }
+    });
 });
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", adjustDarkMode);

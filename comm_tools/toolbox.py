@@ -174,7 +174,7 @@ def CatchException(f):
     @wraps(f)
     def decorated(main_input, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, *args, **kwargs):
         try:
-            yield from f(main_input, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, *args, **kwargs)
+            yield from f(main_input, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, args, kwargs)
         except Exception as e:
             from comm_tools.check_proxy import check_proxy
             proxies, = get_conf('proxies')
