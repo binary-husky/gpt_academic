@@ -89,14 +89,16 @@ def main():
                             if ("Visible" in functional[k]) and (not functional[k]["Visible"]): continue
                             variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
                             functional[k]["Button"] = gr.Button(k, variant=variant)
+                            functional[k]["Button"].style(size="sm")
                 with gr.Accordion("函数插件区", open=True, elem_id="plugin-panel") as area_crazy_fn:
                     with gr.Row():
                         gr.Markdown("插件可读取“输入区”文本/路径作为参数（上传文件自动修正路径）")
-                    plugin_dropdown = gr.Dropdown(choices=crazy_classification, label='选择插件分类',
-                                                       value=DEFAULT_FN_GROUPS,
-                                                       multiselect=True, interactive=True,
-                                                       elem_classes='normal_mut_select'
-                                                       ).style(container=False)
+                    with gr.Row(elem_id="input-plugin-group"):
+                        plugin_dropdown = gr.Dropdown(choices=crazy_classification, label='',
+                                                        value=DEFAULT_FN_GROUPS,
+                                                        multiselect=True, interactive=True,
+                                                        elem_classes='normal_mut_select',
+                                                        ).style(container=False)
                     with gr.Row():
                         for role in crazy_fns_role:
                             for k in crazy_fns_role[role]:
@@ -138,7 +140,6 @@ def main():
                     max_length_sl = gr.Slider(minimum=256, maximum=8192, value=4096, step=1, interactive=True, label="Local LLM MaxLength",)
                     checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区", "底部输入区", "输入清除键", "插件参数区"], value=["基础功能区", "函数插件区"], label="显示/隐藏功能区")
                     md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(container=False)
-
                     gr.Markdown(description)
                 with gr.Accordion("备选输入区", open=True, visible=False, elem_id="input-panel2") as area_input_secondary:
                     with gr.Row():

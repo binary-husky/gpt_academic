@@ -39,7 +39,10 @@ function get_elements() {
     const panel4 = document.querySelector('#interact-panel');
     const panel5 = document.querySelector('#input-panel2');
     const panel_active = document.querySelector('#state-panel');
-    var panel_height_target = (20-panel_active.offsetHeight) + panel1.offsetHeight + panel2.offsetHeight + panel3.offsetHeight + panel4.offsetHeight + panel5.offsetHeight + 21;
+    // 25.3 是chatbot的label高度, 16 是右侧的gap
+    var panel_height_target = panel1.offsetHeight + panel2.offsetHeight + panel3.offsetHeight + panel4.offsetHeight + panel5.offsetHeight - 25.5 + 16*3;
+    // 禁止动态的state-panel高度影响
+    panel_height_target = panel_height_target + (21-panel_active.offsetHeight)
     var panel_height_target = parseInt(panel_height_target);
     var chatbot_height = chatbot.style.height;
     var chatbot_height = parseInt(chatbot_height);
