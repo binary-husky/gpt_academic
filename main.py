@@ -220,19 +220,15 @@ def main():
         threading.Thread(target=warm_up_modules, name="warm-up", daemon=True).start()
 
     auto_opentab_delay()
+    demo = demo.queue(concurrency_count=CONCURRENT_COUNT)
+    CUSTOM_PATH, = get_conf('CUSTOM_PATH')
     demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
-        server_name="0.0.0.0", server_port=PORT,
+        server_name="0.0.0.0" if CUSTOM_PATH == "/" else "127.0.0.1", # 在使用二级路径反代时仅侦听本地地址
+        server_port=PORT,
         favicon_path="docs/logo.png", auth=AUTHENTICATION,
-        blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile"])
-
-    # 如果需要在二级路径下运行
-    # CUSTOM_PATH, = get_conf('CUSTOM_PATH')
-    # if CUSTOM_PATH != "/": 
-    #     from toolbox import run_gradio_in_subpath
-    #     run_gradio_in_subpath(demo, auth=AUTHENTICATION, port=PORT, custom_path=CUSTOM_PATH)
-    # else: 
-    #     demo.launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, favicon_path="docs/logo.png",
-    #                 blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile"])
+        blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile"],
+        root_path=CUSTOM_PATH # 确保二级路径反代时，静态资源能够被正确指向
+    )
 
 if __name__ == "__main__":
     main()
