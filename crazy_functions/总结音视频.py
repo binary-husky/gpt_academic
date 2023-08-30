@@ -3,7 +3,7 @@ from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_
 import glob, os
 from comm_tools import func_box
 from moviepy.editor import AudioFileClip
-from crazy_functions import KDOCS_轻文档分析, crazy_box
+from crazy_functions.kingsoft_fns import crazy_box
 
 
 def split_audio_file(filename, split_duration=1000):

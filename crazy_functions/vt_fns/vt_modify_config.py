@@ -33,7 +33,7 @@ def modify_configuration_hot(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     yield from update_ui_lastest_msg(lastmsg=f"正在执行任务: {txt}\n\n读取新配置中", chatbot=chatbot, history=history, delay=0)
     gpt_json_io = GptJsonIO(ModifyConfigurationIntention)
     inputs = "Analyze how to change configuration according to following user input, answer me with json: \n\n" + \
-             ">>" + txt + '\n\n' + \
+             ">> " + txt.rstrip('\n').replace('\n','\n>> ') + '\n\n' + \
              gpt_json_io.format_instructions
     
     run_gpt_fn = lambda inputs, sys_prompt: predict_no_ui_long_connection(

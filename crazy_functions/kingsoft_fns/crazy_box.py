@@ -20,7 +20,7 @@ from openpyxl.styles import Alignment
 from openpyxl.styles import Font
 from crazy_functions import crazy_utils
 from request_llm import bridge_all
-from crazy_functions import crzay_kingsoft
+from crazy_functions.kingsoft_fns import crzay_kingsoft
 
 
 class Utils:

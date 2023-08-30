@@ -5,7 +5,7 @@
 # @Descr   :
 from comm_tools import toolbox
 from comm_tools import func_box, ocr_tools
-from crazy_functions import crazy_box
+from crazy_functions.kingsoft_fns import crazy_box
 import os
 
 

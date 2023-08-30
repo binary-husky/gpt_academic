@@ -4,9 +4,8 @@
 # @Author : Spike
 # @Descr   :
 import os.path
-import time
 from comm_tools import func_box, ocr_tools, Langchain_cn
-from crazy_functions import crazy_box
+from crazy_functions.kingsoft_fns import crazy_box
 from comm_tools.toolbox import update_ui, CatchException, trimmed_format_exc, get_conf
 
 
@@ -119,7 +118,7 @@ def func_格式化文档(link_limit, llm_kwargs, plugin_kwargs, chatbot, history
     kwargs_to_mark, = crazy_box.json_args_return(plugin_kwargs, ['格式化文档提示词'])
     if kwargs_to_mark:
         gpt_response = yield from crazy_box.func_拆分与提问(file_limit, llm_kwargs, plugin_kwargs, chatbot, history,
-                                                  args_keys=[kwargs_to_mark, False])
+                                                            args_keys=[kwargs_to_mark, False])
         yield from crazy_box.result_written_to_markdwon(gpt_response, llm_kwargs, plugin_kwargs, chatbot, history)
     else:
         gpt_response = file_limit
@@ -182,7 +181,7 @@ def Kdocs_多阶段生成回答(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
         yield from update_ui(chatbot=chatbot, history=history)
         if prompt:
             file_limit = yield from crazy_box.func_拆分与提问(file_limit, llm_kwargs, plugin_kwargs, chatbot, history,
-                                                            args_keys=[prompt, knowledge_base], task_tag="_"+stage)
+                                                              args_keys=[prompt, knowledge_base], task_tag="_"+stage)
         else:
             chatbot.append(['为什么跳过？', '你没有指定提示词，跳过提问'])
             yield from update_ui(chatbot=chatbot, history=history)
@@ -208,7 +207,7 @@ def KDocs_需求分析问答(link_limit, llm_kwargs, plugin_kwargs, chatbot, his
     if not gpt_response_collection:
         return
     gpt_response = yield from crazy_box.func_拆分与提问(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot,
-                                                      history, args_keys=[False, False],)
+                                                        history, args_keys=[False, False], )
     yield from update_ui(chatbot, history, '插件执行成功')
 
 
@@ -239,7 +238,7 @@ def KDocs_测试用例检查优化(link_limit, llm_kwargs, plugin_kwargs, chatbo
     if not link_limit:
         return
     gpt_response_collection = yield from crazy_box.func_拆分与提问(file_limit, llm_kwargs, plugin_kwargs, chatbot,
-                                                      history, args_keys=[False, False],)
+                                                                   history, args_keys=[False, False], )
     yield from crazy_box.supplementary_test_case(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history)
     yield from update_ui(chatbot, history, '插件执行成功')
 
