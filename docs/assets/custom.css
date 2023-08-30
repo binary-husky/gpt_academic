@@ -777,7 +777,8 @@ thead th {
     color: #FFF;
     /*box-shadow: 6px 6px 16px hsla(0, 0%, 0%, 0.2);*/
 }
-div[class*='svelte-'] .block {
+/* 这里是输入框*/
+div.svelte-sfqy0y .block {
     padding: 0;
 }
 
