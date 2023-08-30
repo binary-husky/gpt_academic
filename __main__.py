@@ -607,17 +607,9 @@ class ChatBot(ChatBotFrame):
         #     favicon_path='./docs/wps_logo.png')
 
 
-def check_proxy_free():
-    proxy_state = func_box.Shell(f'lsof -i :{PORT}').read()[1].splitlines()
-    if proxy_state != ["", ""]:
-        print('Kill Old Server')
-        for i in proxy_state[1:]:
-            func_box.Shell(f'kill -9 {i.split()[1]}').read()
-        import time
-        time.sleep(5)
 
 
-check_proxy_free()
+
 from comm_tools import base_api
 app = base_api.app
 PORT = LOCAL_PORT if WEB_PORT <= 0 else WEB_PORT
