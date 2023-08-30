@@ -418,7 +418,7 @@ def prompt_retrieval(is_all, hosts='', search=False):
     all_, personal = toolbox.get_conf('preset_prompt')[0]['key']
     count_dict = {}
     if all_ == is_all:
-        for tab in SqliteHandle('ai_common').get_tables():
+        for tab in SqliteHandle('prompt_').get_tables():
             if tab.startswith('prompt'):
                 data, source = SqliteHandle(tab).get_prompt_value(None)
                 if data: count_dict.update(data)

@@ -25,7 +25,7 @@ def connect_db_close(cls_method):
 
 
 class SqliteHandle:
-    def __init__(self, table='user_info', database='ai_private.db', auto=True):
+    def __init__(self, table='ai_common', database='ai_private.db', auto=True):
         self.base_path = os.path.dirname(os.path.dirname(__file__))
         self.prompt_path = os.path.join(self.base_path, 'users_data')
         self.__database = database
@@ -190,8 +190,8 @@ def database_separation():
     base_db = os.path.join(base_path, 'ai_prompt.db')
     shutil.copy(base_db, os.path.join(base_path, 'ai_prompt_cp.db'))
     shutil.copy(base_db, os.path.join(base_path, 'ai_private.db'))
-    prompt = sqlite_handle(database='ai_prompt.db')
-    common = sqlite_handle(database='ai_private.db')
+    prompt = sqlite_handle(database='ai_prompt.db', auto=False)
+    common = sqlite_handle(database='ai_private.db', auto=False)
     time.sleep(3)
     prompt_tables = prompt.get_tables()
     common_tables = common.get_tables()
