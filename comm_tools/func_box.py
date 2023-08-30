@@ -632,10 +632,9 @@ def thread_write_chat(chatbot, ipaddr, models):
 base_path = os.path.dirname(os.path.dirname(__file__))
 prompt_path = os.path.join(base_path, 'users_data')
 knowledge_path = os.path.join(prompt_path, 'knowledge')
-knowledge_path_sys_path = os.path.join(prompt_path, 'knowledge', 'system')
 users_path = os.path.join(base_path, 'private_upload')
 logs_path = os.path.join(base_path, 'gpt_log')
-
+os.makedirs(knowledge_path, exist_ok=False)
 import os
 import csv
 import datetime

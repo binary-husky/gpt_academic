@@ -31,7 +31,10 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
         yield '更名成功～', '', gr.Dropdown.update(), gr.Dropdown.update(choices=load_file, value=kai_id), gr.Dropdown.update(), kai_handle
     elif name and select == '新建知识库': kai_id = name
     elif select and select != '新建知识库': kai_id = select
-    else: kai_id = func_box.created_atime()
+    else:
+        yield '！！！新建知识库时，知识库名称不能为空！！！', '', gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(), kai_handle
+        return
+        # kai_id = func_box.created_atime()
     # < --------------------限制上班时间段构建知识库--------------- >
     reject_build_switch, = toolbox.get_conf('reject_build_switch')
     if reject_build_switch:

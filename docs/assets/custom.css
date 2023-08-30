@@ -777,6 +777,12 @@ thead th {
     color: #FFF;
     /*box-shadow: 6px 6px 16px hsla(0, 0%, 0%, 0.2);*/
 }
+[class*="gradio-container-"] .md :not(pre)>code {
+    border: unset;
+    color: #FFF;
+    border-radius: 5px;
+}
+
 [class*="gradio-container-"] code[class*=language-], [class*="gradio-container-"] pre[class*=language-] {
     text-shadow: unset;
     color: #abb2bf;

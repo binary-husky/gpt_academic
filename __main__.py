@@ -204,7 +204,8 @@ class ChatBot(ChatBotFrame):
             with gr.Box():
                 with gr.Row():
                     self.pro_private_check = gr.Dropdown(choices=[], value=preset_prompt['value'],
-                                                         label='选择提示词分类', elem_classes='normal_select').style(container=False)
+                                                         label='选择提示词分类', elem_classes='normal_select'
+                                                         ).style(container=False)
                 with gr.Row():
                     self.pro_class_name = gr.Textbox(show_label=False, placeholder='*必填，保存Prompt同时创建分类',
                                                      visible=False).style(container=False)
@@ -393,7 +394,6 @@ class ChatBot(ChatBotFrame):
             inputs=[], outputs=[self.stopBtn, self.submitBtn], cancels=self.cancel_handles)
 
     def draw_langchain_base(self):
-
         spl, = get_conf('spl')
         with gr.TabItem('构建知识库', id='langchain_tab'):
             with gr.Box():
@@ -406,16 +406,16 @@ class ChatBot(ChatBotFrame):
             with gr.Box():
                 with gr.Accordion(open=False, label='上传你需要构建的知识库文件'):
                     self.langchain_upload = gr.Files(label="解析支持多类型文档，多文件建议使用zip上传", file_count="multiple", file_types=spl)
-                self.langchain_links = gr.Textbox(show_label=False, placeholder='Kdocs/网络文件,多个链接使用换行间隔',
+                self.langchain_links = gr.Textbox(show_label=False, placeholder='金山文档分享链接/网络文件,多个链接使用换行间隔',
                                                   elem_classes='no_padding_input').style()
                 self.langchain_know_kwargs = gr.State({'file_path': '', 'know_name': '', 'know_obj': {}, 'file_list': []})
                 #  file_path 是上传文件存储的地址，know_name，know_obj是ql向量化后的对象
             with gr.Box():
                 with gr.Row():
-                    self.langchain_select = gr.Dropdown(choices=[], value=r"新建知识库",
+                    self.langchain_select = gr.Dropdown(choices=[], value=r"新建知识库", allow_custom_value=True,
                                                         interactive=True, label="新建or增量重构", elem_classes='normal_select').style(container=False)
                 with gr.Row():
-                    self.langchain_name = gr.Textbox(show_label=False, placeholder='新建知识库or重命名').style(container=False)
+                    self.langchain_name = gr.Textbox(show_label=False, placeholder='知识库名称or重命名').style(container=False)
 
             with gr.Row():
                 self.langchain_submit = gr.Button(value='构建/更新知识库', variant='primary').style(size='sm')
@@ -488,6 +488,14 @@ class ChatBot(ChatBotFrame):
                                             label="System prompt", value=self.initial_prompt)
             # temp = gr.Markdown(self.description)
 
+    def darw_private_operation(self):
+        with gr.TabItem('个人中心', id='private'):
+            with gr.Row():
+                gr.Markdown('####  粉身碎骨浑不怕 要留清白在人间\n\n'
+                            '这里是删除个人文件信息的地方，`注意！！这里的所有操作不可逆，请谨慎操作！！！！`')
+            with gr.Row():
+                gr.Markdown('待完善')
+
     def signals_input_setting(self):
         # 注册input
         self.input_combo = [self.cookies, self.max_length_sl, self.default_worker_num, self.llms_dropdown,
@@ -539,6 +547,7 @@ class ChatBot(ChatBotFrame):
                         self.draw_plugin_chat()
                         self.draw_langchain_base()
                         self.draw_setting_chat()
+                        self.darw_private_operation()
                 # 绘制列2
                 with gr.Column(scale=100):
                     with gr.Tabs() as self.tabs_chatbot:
