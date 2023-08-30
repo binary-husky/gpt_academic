@@ -1,126 +1,18 @@
 from comm_tools.toolbox import HotReload  # HotReload 的意思是热更新，修改函数插件后，不需要重启程序，代码直接生效
 from langchain import agents
 
+# < -------------------初始化插件模块--------------- >
+function_plugins = {}
 
 def get_crazy_functions():
-    # < -------------------初始化插件模块--------------- >
-    function_plugins = {}
-    # < -------------------开发--------------- >
-    from crazy_functions import 生成函数注释
-    from crazy_functions import 解析项目源代码
-    from crazy_functions.解析JupyterNotebook import 解析ipynb文件
-    function_plugins['代码分析'] = {
-        "解析整个Python项目": {
-            "Color": "primary",  # 按钮颜色
-            "AsButton": True,
-            "Function": HotReload(解析项目源代码.解析一个Python项目)
-        },
-        "批量生成函数注释": {
-            "Color": "primary",  # 按钮颜色
-            "AsButton": False,
-            "Function": HotReload(生成函数注释.批量生成函数注释)
-        },
-        "解析一个C项目的头文件": {
-            "Color": "primary",  # 按钮颜色
-            "AsButton": True,
-            "Function": HotReload(解析项目源代码.解析一个C项目的头文件)
-        },
-        "解析整个C++项目（.cpp/.hpp/.c/.h）": {
-            "Color": "primary",  # 按钮颜色
-            "AsButton": False,  # 加入下拉菜单中
-            "Function": HotReload(解析项目源代码.解析一个C项目)
-        },
-        "解析一个Golang项目": {
-            "Color": "primary",  # 按钮颜色
-            "AsButton": False,
-            "Function": HotReload(解析项目源代码.解析一个Golang项目)
-        },
-        "解析一个Rust项目": {
-            "Color": "primary",  # 按钮颜色
-            "AsButton": False,
-            "Function": HotReload(解析项目源代码.解析一个Rust项目)
-        },
-        "解析一个Java项目": {
-            "Color": "primary",  # 按钮颜色
-            "AsButton": True,
-            "Function": HotReload(解析项目源代码.解析一个Java项目)
-        },
-        "解析一个前端项目": {
-            "Color": "primary",  # 按钮颜色
-            "AsButton": False,
-            "Function": HotReload(解析项目源代码.解析一个前端项目)
-        },
-        "解析一个CSharp项目": {
-            "Color": "primary",  # 按钮颜色
-            "AsButton": False,
-            "Function": HotReload(解析项目源代码.解析一个CSharp项目)
-        },
-        "解析项目源代码（手动指定和筛选源代码文件类型）": {
-                "Color": "primary",
-                "AsButton": False,
-                "AdvancedArgs": True, # 调用时，唤起高级参数输入区（默认False）
-                "ArgsReminder": "输入时用逗号隔开, *代表通配符, 加了^代表不匹配; 不输入代表全部匹配。例如: \"*.c, ^*.cpp, config.toml, ^*.toml\"", # 高级参数输入区的显示提示
-                "Function": HotReload(解析项目源代码.解析任意code项目)
-        },
-        "[测试功能] 解析Jupyter Notebook文件": {
-            "Color": "primary",
-            "AsButton": False,
-            "Function": HotReload(解析ipynb文件),
-            "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "若输入0，则不解析notebook中的Markdown块",  # 高级参数输入区的显示提示
-        },
-    }
+    get_functions_学术优化()
+    get_functions_文档读取()
+    get_functions_代码解析()
+    get_functions_多功能插件()
+    get_functions_金山专用()
+    return function_plugins
 
-    # < -------------------文档处理--------------- >
-    from crazy_functions.总结word文档 import 总结word文档
-    from crazy_functions import 批量总结PDF文档
-    from crazy_functions import 批量翻译PDF文档_多线程
-    from crazy_functions import 理解PDF文档内容
-    from crazy_functions import 批量Markdown翻译
-    function_plugins['文档处理理解'] = {
-        "Markdown/Readme英译中": {
-            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
-            "Color": "primary",
-            "AsButton": True,
-            "Function": HotReload(批量Markdown翻译.Markdown英译中)
-        },
-        "批量Markdown中译英": {
-            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
-            "Color": "primary",
-            "AsButton": True,  # 加入下拉菜单中
-            "Function": HotReload(批量Markdown翻译.Markdown中译英)
-        },
-        "批量总结Word文档": {
-            "AsButton": False,
-            "Color": "primary",
-            "Function": HotReload(总结word文档)
-        },
-        "批量翻译PDF文档（多线程）": {
-            "Color": "primary",
-            "AsButton": True,  # 加入下拉菜单中
-            "Function": HotReload(批量翻译PDF文档_多线程.批量翻译PDF文档)
-        },
-        "[测试功能] 批量总结PDF文档": {
-            "Color": "primary",
-            "AsButton": False,  # 加入下拉菜单中
-            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
-            "Function": HotReload(批量总结PDF文档)
-        },
-        "理解PDF文档内容 （模仿ChatPDF）": {
-            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
-            "Color": "primary",
-            "AsButton": True,  # 加入下拉菜单中
-            "Function": HotReload(理解PDF文档内容.理解PDF文档内容标准文件输入)
-        },
-        "Markdown翻译（手动指定语言）": {
-            "Color": "primary",
-            "AsButton": False,
-            "AdvancedArgs": True,
-            "ArgsReminder": "请输入要翻译成哪种语言，默认为Chinese。",
-            "Function": HotReload(批量Markdown翻译.Markdown翻译指定语言)
-        },
-
-    }
+def get_functions_学术优化():
     # < -------------------学术研究--------------- >
     from crazy_functions import Latex输出PDF结果
     from crazy_functions.读文章写摘要 import 读文章写摘要
@@ -207,6 +99,128 @@ def get_crazy_functions():
         }
     }
 
+def get_functions_文档读取():
+    # < -------------------文档处理--------------- >
+    from crazy_functions.总结word文档 import 总结word文档
+    from crazy_functions import 批量总结PDF文档
+    from crazy_functions import 批量翻译PDF文档_多线程
+    from crazy_functions import 理解PDF文档内容
+    from crazy_functions import 批量Markdown翻译
+    function_plugins['文档处理理解'] = {
+        "Markdown/Readme英译中": {
+            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
+            "Color": "primary",
+            "AsButton": True,
+            "Function": HotReload(批量Markdown翻译.Markdown英译中)
+        },
+        "批量Markdown中译英": {
+            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
+            "Color": "primary",
+            "AsButton": True,  # 加入下拉菜单中
+            "Function": HotReload(批量Markdown翻译.Markdown中译英)
+        },
+        "批量总结Word文档": {
+            "AsButton": False,
+            "Color": "primary",
+            "Function": HotReload(总结word文档)
+        },
+        "批量翻译PDF文档（多线程）": {
+            "Color": "primary",
+            "AsButton": True,  # 加入下拉菜单中
+            "Function": HotReload(批量翻译PDF文档_多线程.批量翻译PDF文档)
+        },
+        "[测试功能] 批量总结PDF文档": {
+            "Color": "primary",
+            "AsButton": False,  # 加入下拉菜单中
+            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
+            "Function": HotReload(批量总结PDF文档)
+        },
+        "理解PDF文档内容 （模仿ChatPDF）": {
+            # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
+            "Color": "primary",
+            "AsButton": True,  # 加入下拉菜单中
+            "Function": HotReload(理解PDF文档内容.理解PDF文档内容标准文件输入)
+        },
+        "Markdown翻译（手动指定语言）": {
+            "Color": "primary",
+            "AsButton": False,
+            "AdvancedArgs": True,
+            "ArgsReminder": "请输入要翻译成哪种语言，默认为Chinese。",
+            "Function": HotReload(批量Markdown翻译.Markdown翻译指定语言)
+        },
+
+    }
+
+def get_functions_代码解析():
+    # < -------------------开发--------------- >
+    from crazy_functions import 生成函数注释
+    from crazy_functions import 解析项目源代码
+    from crazy_functions.解析JupyterNotebook import 解析ipynb文件
+    function_plugins['代码分析'] = {
+        "解析整个Python项目": {
+            "Color": "primary",  # 按钮颜色
+            "AsButton": True,
+            "Info": "解析一个Python项目的所有源文件(.py) | 输入参数为路径",
+            "Function": HotReload(解析项目源代码.解析一个Python项目)
+        },
+        "批量生成函数注释": {
+            "Color": "primary",  # 按钮颜色
+            "AsButton": False,
+            "Function": HotReload(生成函数注释.批量生成函数注释)
+        },
+        "解析一个C项目的头文件": {
+            "Color": "primary",  # 按钮颜色
+            "AsButton": True,
+            "Function": HotReload(解析项目源代码.解析一个C项目的头文件)
+        },
+        "解析整个C++项目（.cpp/.hpp/.c/.h）": {
+            "Color": "primary",  # 按钮颜色
+            "AsButton": False,  # 加入下拉菜单中
+            "Function": HotReload(解析项目源代码.解析一个C项目)
+        },
+        "解析一个Golang项目": {
+            "Color": "primary",  # 按钮颜色
+            "AsButton": False,
+            "Function": HotReload(解析项目源代码.解析一个Golang项目)
+        },
+        "解析一个Rust项目": {
+            "Color": "primary",  # 按钮颜色
+            "AsButton": False,
+            "Function": HotReload(解析项目源代码.解析一个Rust项目)
+        },
+        "解析一个Java项目": {
+            "Color": "primary",  # 按钮颜色
+            "AsButton": True,
+            "Function": HotReload(解析项目源代码.解析一个Java项目)
+        },
+        "解析一个前端项目": {
+            "Color": "primary",  # 按钮颜色
+            "AsButton": False,
+            "Function": HotReload(解析项目源代码.解析一个前端项目)
+        },
+        "解析一个CSharp项目": {
+            "Color": "primary",  # 按钮颜色
+            "AsButton": False,
+            "Function": HotReload(解析项目源代码.解析一个CSharp项目)
+        },
+        "解析项目源代码（手动指定和筛选源代码文件类型）": {
+            "Color": "primary",
+            "AsButton": False,
+            "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+            "ArgsReminder": "输入时用逗号隔开, *代表通配符, 加了^代表不匹配; 不输入代表全部匹配。例如: \"*.c, ^*.cpp, config.toml, ^*.toml\"",
+            # 高级参数输入区的显示提示
+            "Function": HotReload(解析项目源代码.解析任意code项目)
+        },
+        "[测试功能] 解析Jupyter Notebook文件": {
+            "Color": "primary",
+            "AsButton": False,
+            "Function": HotReload(解析ipynb文件),
+            "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+            "ArgsReminder": "若输入0，则不解析notebook中的Markdown块",  # 高级参数输入区的显示提示
+        },
+    }
+
+def get_functions_多功能插件():
     # < -------------------试玩插件--------------- >
     from crazy_functions import 对话历史存档
     from crazy_functions.高级功能函数模板 import 高阶功能模板函数
@@ -217,6 +231,7 @@ def get_crazy_functions():
     from crazy_functions.数学动画生成manim import 动画生成
     from crazy_functions.交互功能函数模板 import 交互功能模板函数
     from crazy_functions.语音助手 import 语音助手
+    from crazy_functions.虚空终端 import 自动终端
     function_plugins['好玩的插件'] = {
         "询问多个GPT模型": {
             "Color": "primary",  # 按钮颜色
@@ -279,18 +294,24 @@ def get_crazy_functions():
             "Function": HotReload(动画生成)
         },
         "交互功能模板函数": {
-            "Color": "stop",
+            "Color": "primary",
             "AsButton": False,
             "Function": HotReload(交互功能模板函数)
         },
         "实时音频采集": {
-            "Color": "stop",
+            "Color": "primary",
             "AsButton": True,
             "Function": HotReload(语音助手)
+        },
+        "自动终端": {
+            "Color": "primary",
+            "AsButton": False,
+            "Function": HotReload(自动终端)
         }
 
     }
 
+def get_functions_金山专用():
     # < -------------------金山文档专用--------------- >
     from crazy_functions import KDOCS_轻文档分析
     from crazy_functions import 总结音视频
@@ -449,22 +470,8 @@ def get_crazy_functions():
             "Function": HotReload(KDOCS_流程图_图片分析.批量分析流程图或图片),
         },
     }
-
-    # try:
-    #     from crazy_functions.虚空终端 import 终端
-    #     function_plugins.update({
-    #         "超级终端": {
-    #             "Color": "primary",
-    #             "AsButton": False,
-    #             # "AdvancedArgs": True,
-    #             # "ArgsReminder": "",
-    #             "Function": HotReload(终端)
-    #         }
-    #     })
-    # except:
-    #     print('Load function plugin failed')
-
     return function_plugins
+
 
 def crazy_func_to_tool():
 

@@ -283,7 +283,7 @@ class ChatBot(ChatBotFrame):
             with gr.Accordion("上传本地文件可供高亮函数插件调用", open=False, visible=False) as self.area_file_up:
                 self.file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)",
                                             file_count="multiple").style()
-            self.plugin_dropdown = gr.Dropdown(choices=crazy_classification, label='选择插件分类', value=[default_plugin],
+            self.plugin_dropdown = gr.Dropdown(choices=crazy_classification, label='选择插件分类', value=default_plugin,
                                                multiselect=True, interactive=True, elem_classes='normal_mut_select'
                                                ).style(container=False)
 
@@ -292,7 +292,7 @@ class ChatBot(ChatBotFrame):
                     for role in crazy_fns_role:
                         for k in crazy_fns_role[role]:
                             if not crazy_fns_role[role][k].get("AsButton", True): continue
-                            if role != default_plugin:
+                            if role not in default_plugin:
                                 variant = crazy_fns_role[role][k]["Color"] if "Color" in crazy_fns_role[role][k] else "secondary"
                                 crazy_fns_role[role][k]['Button'] = gr.Button(k, variant=variant, visible=False).style(size="sm")
                             else:
@@ -302,7 +302,7 @@ class ChatBot(ChatBotFrame):
             with gr.Accordion("更多函数插件/自定义插件参数", open=True, ):
                 dropdown_fn_list = []
                 for role in crazy_fns_role:
-                    if role == default_plugin:
+                    if role in default_plugin:
                         for k in crazy_fns_role[role]:
                             if not crazy_fns_role[role][k].get("AsButton", True):
                                 dropdown_fn_list.append(k)

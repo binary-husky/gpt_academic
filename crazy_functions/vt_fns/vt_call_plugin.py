@@ -1,13 +1,13 @@
 from pydantic import BaseModel, Field
 from typing import List
-from toolbox import update_ui_lastest_msg, get_conf
+from comm_tools.toolbox import update_ui_lastest_msg, get_conf
 from request_llm.bridge_all import predict_no_ui_long_connection
 from crazy_functions.json_fns.pydantic_io import GptJsonIO
 import copy, json, pickle, os, sys
 
 
 def read_avail_plugin_enum():
-    from crazy_functional import get_crazy_functions
+    from comm_tools.crazy_functional import get_crazy_functions
     plugin_arr = get_crazy_functions()
     # remove plugins with out explaination
     plugin_arr = {k:v for k, v in plugin_arr.items() if 'Info' in v}

@@ -28,7 +28,7 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
         kai_id = name
         os.rename(os.path.join(vector_path, select), os.path.join(vector_path, name))
         _, load_file = func_box.get_directory_list(vector_path, ipaddr.client.host)
-        yield '更名成功～', '', gr.Dropdown.update(), gr.Dropdown.update(choices=load_file, value=kai_id), kai_handle
+        yield '更名成功～', '', gr.Dropdown.update(), gr.Dropdown.update(choices=load_file, value=kai_id), gr.Dropdown.update(), kai_handle
     elif name and select == '新建知识库': kai_id = name
     elif select and select != '新建知识库': kai_id = select
     else: kai_id = func_box.created_atime()
@@ -138,16 +138,18 @@ def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
                     tips = f'匹配中了`{id}`知识库，使用的Prompt是`{prompt_cls}`分类下的`{prompt_name}`, 插件自定义参数允许指定其他Prompt哦～'
                     if tips not in str(chatbot):
                         gpt_say += tips
+                    prompt_con = prompt_generator.SqliteHandle(table=f'prompt_{prompt_cls}_sys').find_prompt_result(
+                        prompt_name)
                 else:
                     prompt_name = '引用知识库回答'
                     tips = f'`{id}`知识库问答使用的Prompt是`{prompt_cls}`分类下的' \
                            f'`{prompt_name}`, 你可以保存一个同名的Prompt到个人分类下，知识库问答会优先使用个人分类下的提示词。'
                     if tips not in str(chatbot):
                         gpt_say += tips
+                    prompt_con = prompt_generator.SqliteHandle(table=f'prompt_{prompt_cls}_sys').find_prompt_result(
+                        prompt_name, individual_priority=llm_kwargs['ipaddr'])
                 gpt_say += f"\n\n引用文档:\n\n> {source_documents}"
                 chatbot[-1] = [txt, gpt_say]
-                prompt_con = prompt_generator.SqliteHandle(table=f'prompt_{prompt_cls}_sys').find_prompt_result(
-                    prompt_name, individual_priority=llm_kwargs['ipaddr'])
                 prompt_content = func_box.replace_expected_text(prompt=prompt_con, content=referenced_documents,
                                                                 expect='{{{v}}}')
                 new_txt = func_box.replace_expected_text(prompt=prompt_content, content=new_txt, expect='{{{q}}}')
