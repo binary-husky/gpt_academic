@@ -470,11 +470,11 @@ class ChatBot(ChatBotFrame):
                                                    label="多线程最大并行数").style(container=False)
                 with gr.Accordion(label='Langchain调优参数'):
                     self.vector_search_score = gr.Slider(minimum=0, maximum=1100, value=500, step=1, interactive=True,
-                                           label="知识库检索相关度", ).style(container=False)
+                                           label="SCORE-THRESHOLD", ).style(container=False)
                     self.vector_search_top_k = gr.Slider(minimum=1, maximum=10, value=4, step=1, interactive=True,
-                                                 label="知识库引用文档数量",).style(container=False)
+                                                 label="TOP-K",).style(container=False)
                     self.vector_chunk_size = gr.Slider(minimum=100, maximum=1000, value=521, step=1, interactive=True,
-                                           label="知识库引用Token", ).style(container=False)
+                                           label="CHUNK-SIZE", ).style(container=False)
                 with gr.Accordion(label='工具调试参数', open=False):
                     self.pro_tf_slider = gr.Slider(minimum=0.01, maximum=1.0, value=0.70, step=0.01, interactive=True,
                                                    label="搜索匹配系数").style(container=False)

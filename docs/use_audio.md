@@ -28,6 +28,16 @@ ALIYUN_APPKEY = "RoPlZrM88DnAFkZK"   # 此appkey已经失效
 参考 https://help.aliyun.com/document_detail/450255.html
 先有阿里云开发者账号，登录之后，需要开通 智能语音交互 的功能，可以免费获得一个token，然后在 全部项目 中，创建一个项目，可以获得一个appkey.
 
+- 进阶功能
+进一步填写ALIYUN_ACCESSKEY和ALIYUN_SECRET实现自动获取ALIYUN_TOKEN
+```
+ALIYUN_APPKEY = "RoP1ZrM84DnAFkZK"
+ALIYUN_TOKEN = ""
+ALIYUN_ACCESSKEY = "LTAI5q6BrFUzoRXVGUWnekh1"
+ALIYUN_SECRET = "eHmI20AVWIaQZ0CiTD2bGQVsaP9i68"
+```
+
+
 ## 3.启动
 
 启动gpt-academic `python main.py`
@@ -48,7 +58,7 @@ III `[把特殊软件（如腾讯会议）的外放声音用VoiceMeeter截留]` 
 
 VI 两种音频监听模式切换时，需要刷新页面才有效。
 
+VII 非localhost运行+非https情况下无法打开录音功能的坑：https://blog.csdn.net/weixin_39461487/article/details/109594434
+
 ## 5.点击函数插件区“实时音频采集” 或者其他音频交互功能
-
-
 

@@ -1,56 +1,33 @@
 from comm_tools.toolbox import CatchException, update_ui
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from pydantic import BaseModel, Field
+from typing import List
+from comm_tools.toolbox import CatchException, update_ui, gen_time_str
+from comm_tools.toolbox import update_ui_lastest_msg
+from request_llm.bridge_all import predict_no_ui_long_connection
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from crazy_functions.crazy_utils import input_clipping
+from crazy_functions.json_fns.pydantic_io import GptJsonIO
+from crazy_functions.vt_fns.vt_modify_config import modify_configuration_hot
+from crazy_functions.vt_fns.vt_modify_config import modify_configuration_reboot
+from enum import Enum
+import copy, json, pickle, os, sys
 
-prompt = """
-I have to achieve some functionalities by calling one of the functions below.
-Your job is to find the correct funtion to use to satisfy my requirement,
-and then write python code to call this function with correct parameters.
+class IntentionEnum(str, Enum):
+    ModifyConfiguration = 'ModifyConfiguration'
+    ExecutePlugin = 'ExecutePlugin'
+    Chat = 'Chat'
 
-These are functions you are allowed to choose from:
-1. 
-    功能描述: 总结音视频内容
-    调用函数: ConcludeAudioContent(txt, llm_kwargs)
-    参数说明: 
-            txt: 音频文件的路径
-            llm_kwargs: 模型参数, 永远给定None
-2. 
-    功能描述: 将每次对话记录写入Markdown格式的文件中
-    调用函数: WriteMarkdown()
-3.
-    功能描述: 将指定目录下的PDF文件从英文翻译成中文
-    调用函数: BatchTranslatePDFDocuments_MultiThreaded(txt, llm_kwargs)
-    参数说明: 
-            txt: PDF文件所在的路径
-            llm_kwargs: 模型参数, 永远给定None
-4.
-    功能描述: 根据文本使用GPT模型生成相应的图像
-    调用函数: ImageGeneration(txt, llm_kwargs)
-    参数说明: 
-            txt: 图像生成所用到的提示文本
-            llm_kwargs: 模型参数, 永远给定None
-5.
-    功能描述: 对输入的word文档进行摘要生成 
-    调用函数: SummarizingWordDocuments(input_path, output_path)
-    参数说明: 
-            input_path: 待处理的word文档路径
-            output_path: 摘要生成后的文档路径
+class UserIntention(BaseModel):
+    user_prompt: str = Field(description="the content of user input", default="")
+    intention_type: IntentionEnum = Field(description="the type of user intention", default=IntentionEnum.Chat)
+    user_provide_file: bool = Field(description="whether the user provides a path to a file", default=False)
+    user_provide_url: bool = Field(description="whether the user provides a url", default=False)
 
+def execute_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention):
+    # 没写完
+    pass
 
-You should always anwser with following format:
-----------------
-Code:
-```
-class AutoAcademic(object):
-    def __init__(self):
-        self.selected_function = "FILL_CORRECT_FUNCTION_HERE"      # e.g., "GenerateImage"
-        self.txt = "FILL_MAIN_PARAMETER_HERE"      # e.g., "荷叶上的蜻蜓"
-        self.llm_kwargs = None
-```
-Explanation:
-只有GenerateImage和生成图像相关, 因此选择GenerateImage函数。
-----------------
-
-Now, this is my requirement: 
 
 """
 def get_fn_lib():
@@ -92,38 +69,84 @@ def get_code_block(reply):
     if len(matches) != 1: 
         raise RuntimeError("GPT is not generating proper code.")
     return matches[0].strip('python') #  code block
+=======
+def chat(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention):
+    gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
+        inputs=txt, inputs_show_user=txt,
+        llm_kwargs=llm_kwargs, chatbot=chatbot, history=[], 
+        sys_prompt=system_prompt
+    )
+    chatbot[-1] = [txt, gpt_say]
+    history.extend([txt, gpt_say])
+    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+    pass
+>>>>>>> master
 
 @CatchException
-def 终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    """
-    txt             输入栏用户输入的文本, 例如需要翻译的一段话, 再例如一个包含了待处理文件的路径
+def 自动终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数, 如温度和top_p等, 一般原样传递下去就行
-    plugin_kwargs   插件模型的参数, 暂时没有用武之地
-    chatbot         聊天显示框的句柄, 用于显示给用户
-    history         聊天历史, 前情提要
+    plugin_kwargs   插件模型的参数, 如温度和top_p等, 一般原样传递下去就行
+    chatbot         聊天显示框的句柄，用于显示给用户
+    history         聊天历史，前情提要
     system_prompt   给gpt的静默提醒
     web_port        当前软件运行的端口号
-    """
-    # 清空历史, 以免输入溢出
-    history = []    
-
-    # 基本信息：功能、贡献者
-    chatbot.append(["函数插件功能？", "根据自然语言执行插件命令, 作者: binary-husky, 插件初始化中 ..."])
+    history = []    # 清空历史，以免输入溢出
+    chatbot.append(("自动终端状态: ", f"正在执行任务: {txt}"))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
-    # # 尝试导入依赖, 如果缺少依赖, 则给出安装建议
-    # dep_ok = yield from inspect_dependency(chatbot=chatbot, history=history) # 刷新界面
-    # if not dep_ok: return
-    
-    # 输入
-    i_say = prompt + txt
-    # 开始
-    gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
-        inputs=i_say, inputs_show_user=txt, 
-        llm_kwargs=llm_kwargs, chatbot=chatbot, history=[], 
-        sys_prompt=""
-    )
+    # 初始化插件状态
+    state = chatbot._cookies.get('plugin_state', None)
+    if state is not None:   state = pickle.loads(state)
+    else:                   state = {}
 
-    # 将代码转为动画
-    code = get_code_block(gpt_say)
-    yield from eval_code(code, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
+    def update_vt_state():
+        # 赋予插件锁定 锁定插件回调路径，当下一次用户提交时，会直接转到该函数
+        chatbot._cookies['lock_plugin'] = 'crazy_functions.虚空终端->自动终端'
+        chatbot._cookies['vt_state'] = pickle.dumps(state)
+
+    # ⭐ ⭐ ⭐ 分析用户意图
+    yield from update_ui_lastest_msg(lastmsg=f"正在执行任务: {txt}\n\n分析用户意图中", chatbot=chatbot, history=history, delay=0)
+    gpt_json_io = GptJsonIO(UserIntention)
+    inputs = "Analyze the intention of the user according to following user input: \n\n" + txt + '\n\n' + gpt_json_io.format_instructions
+    run_gpt_fn = lambda inputs, sys_prompt: predict_no_ui_long_connection(
+        inputs=inputs, llm_kwargs=llm_kwargs, history=[], sys_prompt=sys_prompt, observe_window=[])
+    user_intention = gpt_json_io.generate_output_auto_repair(run_gpt_fn(inputs, ""), run_gpt_fn)
+
+    # 用户意图: 修改本项目的配置
+    if user_intention.intention_type == IntentionEnum.ModifyConfiguration:
+        yield from modify_configuration_reboot(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention)
+
+    # 用户意图: 调度插件
+    if user_intention.intention_type == IntentionEnum.ExecutePlugin:
+        yield from execute_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention)
+
+    # 用户意图: 聊天
+    if user_intention.intention_type == IntentionEnum.Chat:
+        yield from chat(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention)
+
+    # update_vt_state()
+
+    return
+
+
+
+
+
+    # # if state == 'wait_user_keyword':
+    # #     chatbot._cookies['lock_plugin'] = None          # 解除插件锁定，避免遗忘导致死锁
+    # #     chatbot._cookies['plugin_state_0001'] = None    # 解除插件状态，避免遗忘导致死锁
+
+    # #     # 解除插件锁定
+    # #     chatbot.append((f"获取关键词：{txt}", ""))
+    # #     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+    # #     inputs=inputs_show_user=f"Extract all image urls in this html page, pick the first 5 images and show them with markdown format: \n\n {page_return}"
+    # #     gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
+    # #         inputs=inputs, inputs_show_user=inputs_show_user,
+    # #         llm_kwargs=llm_kwargs, chatbot=chatbot, history=[], 
+    # #         sys_prompt="When you want to show an image, use markdown format. e.g. ![image_description](image_url). If there are no image url provided, answer 'no image url provided'"
+    # #     )
+    # #     chatbot[-1] = [chatbot[-1][0], gpt_say]
+    # yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+    # return
+"""

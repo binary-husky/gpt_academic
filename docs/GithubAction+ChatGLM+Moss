@@ -13,11 +13,12 @@ RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.8
 RUN python3 -m pip install torch --extra-index-url https://download.pytorch.org/whl/cu113
 # 下载分支
 WORKDIR /gpt
-RUN git clone https://github.com/binary-husky/chatgpt_academic.git
-WORKDIR /gpt/chatgpt_academic
+RUN git clone --depth=1 https://github.com/binary-husky/gpt_academic.git
+WORKDIR /gpt/gpt_academic
 RUN git clone https://github.com/OpenLMLab/MOSS.git request_llm/moss
 RUN python3 -m pip install -r requirements.txt
 RUN python3 -m pip install -r request_llm/requirements_moss.txt
+RUN python3 -m pip install -r request_llm/requirements_qwen.txt
 RUN python3 -m pip install -r request_llm/requirements_chatglm.txt
 RUN python3 -m pip install -r request_llm/requirements_newbing.txt
 

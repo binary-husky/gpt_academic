@@ -3,16 +3,18 @@
     
     
     Usage:
-        1. modify LANG
+        1. modify config.py, set your LLM_MODEL and API_KEY(s) to provide access to OPENAI (or any other LLM model provider)
+
+        2. modify LANG (below ↓)
             LANG = "English"
 
-        2. modify TransPrompt
+        3. modify TransPrompt (below ↓)
             TransPrompt = f"Replace each json value `#` with translated results in English, e.g., \"原始文本\":\"TranslatedText\". Keep Json format. Do not answer #."
 
-        3. Run `python multi_language.py`. 
+        4. Run `python multi_language.py`. 
             Note: You need to run it multiple times to increase translation coverage because GPT makes mistakes sometimes.
 
-        4. Find the translated program in `multi-language\English\*`
+        5. Find the translated program in `multi-language\English\*`
    
     P.S.
     
@@ -286,6 +288,7 @@ def trans_json(word_to_translate, language, special=False):
 
 
 def step_1_core_key_translate():
+    LANG_STD = 'std'
     def extract_chinese_characters(file_path):
         syntax = []
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -325,15 +328,15 @@ def step_1_core_key_translate():
     for d in chinese_core_keys:
         if d not in chinese_core_keys_norepeat: chinese_core_keys_norepeat.append(d)
     need_translate = []
-    cached_translation = read_map_from_json(language=LANG)
+    cached_translation = read_map_from_json(language=LANG_STD)
     cached_translation_keys = list(cached_translation.keys())
     for d in chinese_core_keys_norepeat:
         if d not in cached_translation_keys: 
             need_translate.append(d)
 
-    need_translate_mapping = trans(need_translate, language=LANG, special=True)
-    map_to_json(need_translate_mapping, language=LANG)
-    cached_translation = read_map_from_json(language=LANG)
+    need_translate_mapping = trans(need_translate, language=LANG_STD, special=True)
+    map_to_json(need_translate_mapping, language=LANG_STD)
+    cached_translation = read_map_from_json(language=LANG_STD)
     cached_translation = dict(sorted(cached_translation.items(), key=lambda x: -len(x[0])))
 
     chinese_core_keys_norepeat_mapping = {}

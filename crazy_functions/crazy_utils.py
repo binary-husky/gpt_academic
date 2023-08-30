@@ -655,7 +655,7 @@ class knowledge_archive_interface():
         vs_path = os.path.join(self.vs_root_path, vs_id)
         vs_path, loaded_files = self.qa_handle.init_knowledge_vector_store(filepath=files, vs_path=vs_path,
                                                                            sentence_size=100,
-                                                                           text2vec=self.get_chinese_text2vec(),)
+                                                                           text2vec=self.get_chinese_text2vec())
         return self, vs_path
 
     def get_current_archive_id(self):

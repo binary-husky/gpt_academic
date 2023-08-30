@@ -115,7 +115,10 @@ class SqliteHandle:
     def find_prompt_result(self, name, individual_priority=False):
         query = []
         if individual_priority:
-            query = self.__cursor.execute(f"SELECT result FROM `prompt_{individual_priority}` WHERE prompt LIKE '{name}'").fetchall()
+            try:
+                query = self.__cursor.execute(f"SELECT result FROM `prompt_{individual_priority}` WHERE prompt LIKE '{name}'").fetchall()
+            except:
+                pass
         if not query:
             query = self.__cursor.execute(f"SELECT result FROM `{self.__table}` WHERE prompt LIKE '{name}'").fetchall()
             return query[0][0]

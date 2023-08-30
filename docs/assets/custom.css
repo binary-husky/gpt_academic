@@ -255,17 +255,12 @@ footer {
     opacity: 1;
     transition: opacity 0.3s ease-in-out;
 }
-.hide-important {
-  display: none !important;
-}
-.no_padding_input {
-    padding: 5px !important;
-}
 /*输入框 更新注意这里*/
 .chat_input {
     max-width: 95% !important;
     padding: unset !important;
 }
+
 .dark .chat_input[class*='svelte-'] {
     background: #515151 !important;
 }
@@ -600,7 +595,7 @@ ol:not(.options), ul:not(.options) {
 }
 .message-row {
     flex-direction: row !important;
-    display: flex;
+    display: flex !important;
     gap: 0px !important;
     width: 100%;
 }

@@ -19,7 +19,7 @@ class AliyunASR():
         pass
 
     def test_on_error(self, message, *args):
-        # print("on_error args=>{}".format(args))
+        print("on_error args=>{}".format(args))
         pass
 
     def test_on_close(self, *args):
@@ -50,6 +50,8 @@ class AliyunASR():
         rad.clean_up()
         temp_folder = tempfile.gettempdir()
         TOKEN, APPKEY = get_conf('ALIYUN_TOKEN', 'ALIYUN_APPKEY')
+        if len(TOKEN) == 0:
+            TOKEN = self.get_token()
         self.aliyun_service_ok = True
         URL="wss://nls-gateway.aliyuncs.com/ws/v1"
         sr = nls.NlsSpeechTranscriber(
@@ -91,3 +93,38 @@ class AliyunASR():
                 self.stop = True
                 self.stop_msg = 'Aliyun音频服务异常，请检查ALIYUN_TOKEN和ALIYUN_APPKEY是否过期。'
         r = sr.stop()
+
+    def get_token(self):
+        from toolbox import get_conf
+        import json
+        from aliyunsdkcore.request import CommonRequest
+        from aliyunsdkcore.client import AcsClient
+        AccessKey_ID, AccessKey_secret = get_conf('ALIYUN_ACCESSKEY', 'ALIYUN_SECRET')
+
+        # 创建AcsClient实例
+        client = AcsClient(
+            AccessKey_ID,
+            AccessKey_secret,
+            "cn-shanghai"
+        )
+
+        # 创建request，并设置参数。
+        request = CommonRequest()
+        request.set_method('POST')
+        request.set_domain('nls-meta.cn-shanghai.aliyuncs.com')
+        request.set_version('2019-02-28')
+        request.set_action_name('CreateToken')
+
+        try:
+            response = client.do_action_with_exception(request)
+            print(response)
+            jss = json.loads(response)
+            if 'Token' in jss and 'Id' in jss['Token']:
+                token = jss['Token']['Id']
+                expireTime = jss['Token']['ExpireTime']
+                print("token = " + token)
+                print("expireTime = " + str(expireTime))
+        except Exception as e:
+            print(e)
+
+        return token

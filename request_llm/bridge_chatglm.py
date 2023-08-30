@@ -37,15 +37,23 @@ class GetGLMHandle(Process):
         # 子进程执行
         # 第一次运行，加载参数
         retry = 0
+        LOCAL_MODEL_QUANT, device = get_conf('LOCAL_MODEL_QUANT', 'LOCAL_MODEL_DEVICE')
+
+        if LOCAL_MODEL_QUANT == "INT4":         # INT4
+            _model_name_ = "THUDM/chatglm2-6b-int4"
+        elif LOCAL_MODEL_QUANT == "INT8":       # INT8
+            _model_name_ = "THUDM/chatglm2-6b-int8"
+        else:
+            _model_name_ = "THUDM/chatglm2-6b"  # FP16
+
         while True:
             try:
                 if self.chatglm_model is None:
-                    self.chatglm_tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm2-6b", trust_remote_code=True)
-                    device, = get_conf('LOCAL_MODEL_DEVICE')
+                    self.chatglm_tokenizer = AutoTokenizer.from_pretrained(_model_name_, trust_remote_code=True)
                     if device=='cpu':
-                        self.chatglm_model = AutoModel.from_pretrained("THUDM/chatglm2-6b", trust_remote_code=True).float()
+                        self.chatglm_model = AutoModel.from_pretrained(_model_name_, trust_remote_code=True).float()
                     else:
-                        self.chatglm_model = AutoModel.from_pretrained("THUDM/chatglm2-6b", trust_remote_code=True).half().cuda()
+                        self.chatglm_model = AutoModel.from_pretrained(_model_name_, trust_remote_code=True).half().cuda()
                     self.chatglm_model = self.chatglm_model.eval()
                     break
                 else:
@@ -136,11 +144,8 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             return
 
     if additional_fn is not None:
-        from comm_tools import core_functional
-        importlib.reload(core_functional)    # 热更新prompt
-        core_functional = core_functional.get_core_functions()
-        if "PreProcess" in core_functional[additional_fn]: inputs = core_functional[additional_fn]["PreProcess"](inputs)  # 获取预处理函数（如果有的话）
-        inputs = core_functional[additional_fn]["Prefix"] + inputs + core_functional[additional_fn]["Suffix"]
+        from comm_tools.core_functional import handle_core_functionality
+        inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
     # 处理历史信息
     history_feedin = []
