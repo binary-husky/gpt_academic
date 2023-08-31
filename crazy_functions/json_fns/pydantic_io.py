@@ -37,10 +37,18 @@ Here is the output schema:
 {schema}
 ```"""
 
+
+PYDANTIC_FORMAT_INSTRUCTIONS_SIMPLE = """The output should be formatted as a JSON instance that conforms to the JSON schema below.
+```
+{schema}
+```"""
+
+
 class GptJsonIO():
 
-    def __init__(self, schema):
+    def __init__(self, schema, example_instruction=True):
         self.pydantic_object = schema
+        self.example_instruction = example_instruction
         self.format_instructions = self.generate_format_instructions()
 
     def generate_format_instructions(self):
@@ -53,9 +61,11 @@ class GptJsonIO():
         if "type" in reduced_schema:
             del reduced_schema["type"]
         # Ensure json in context is well-formed with double quotes.
-        schema_str = json.dumps(reduced_schema)
-
-        return PYDANTIC_FORMAT_INSTRUCTIONS.format(schema=schema_str)
+        if self.example_instruction:
+            schema_str = json.dumps(reduced_schema)
+            return PYDANTIC_FORMAT_INSTRUCTIONS.format(schema=schema_str)
+        else:
+            return PYDANTIC_FORMAT_INSTRUCTIONS_SIMPLE.format(schema=schema_str)
 
     def generate_output(self, text):
         # Greedy search for 1st json candidate.

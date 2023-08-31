@@ -46,7 +46,7 @@ def analyze_with_rule(txt):
     return is_certain, user_intention
 
 @CatchException
-def 自动终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     """
     txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数, 如温度和top_p等, 一般原样传递下去就行
@@ -57,7 +57,7 @@ def 自动终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     web_port        当前软件运行的端口号
     """
     history = []    # 清空历史，以免输入溢出
-    chatbot.append(("自动终端状态: ", f"正在执行任务: {txt}"))
+    chatbot.append(("虚空终端状态: ", f"正在执行任务: {txt}"))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # 初始化插件状态
@@ -67,21 +67,29 @@ def 自动终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
 
     def update_vt_state():
         # 赋予插件锁定 锁定插件回调路径，当下一次用户提交时，会直接转到该函数
-        chatbot._cookies['lock_plugin'] = 'crazy_functions.虚空终端->自动终端'
+        chatbot._cookies['lock_plugin'] = 'crazy_functions.虚空终端->虚空终端'
         chatbot._cookies['vt_state'] = pickle.dumps(state)
 
     # ⭐ ⭐ ⭐ 分析用户意图
     is_certain, user_intention = analyze_with_rule(txt)
     if not is_certain:
-        yield from update_ui_lastest_msg(lastmsg=f"正在执行任务: {txt}\n\n分析用户意图中", chatbot=chatbot, history=history, delay=0)
+        yield from update_ui_lastest_msg(
+            lastmsg=f"正在执行任务: {txt}\n\n分析用户意图中", chatbot=chatbot, history=history, delay=0)
         gpt_json_io = GptJsonIO(UserIntention)
         inputs = "Analyze the intention of the user according to following user input: \n\n" + txt + '\n\n' + gpt_json_io.format_instructions
         run_gpt_fn = lambda inputs, sys_prompt: predict_no_ui_long_connection(
             inputs=inputs, llm_kwargs=llm_kwargs, history=[], sys_prompt=sys_prompt, observe_window=[])
-        user_intention = gpt_json_io.generate_output_auto_repair(run_gpt_fn(inputs, ""), run_gpt_fn)
+        try:
+            user_intention = gpt_json_io.generate_output_auto_repair(run_gpt_fn(inputs, ""), run_gpt_fn)
+        except:
+            yield from update_ui_lastest_msg(
+                lastmsg=f"正在执行任务: {txt}\n\n用户意图理解: 失败 当前语言模型不能理解您的意图", chatbot=chatbot, history=history, delay=0)
+            return
     else:
         pass
 
+    yield from update_ui_lastest_msg(
+        lastmsg=f"正在执行任务: {txt}\n\n用户意图理解: intention_type={user_intention.intention_type}", chatbot=chatbot, history=history, delay=0)
     # 用户意图: 修改本项目的配置
     if user_intention.intention_type == 'ModifyConfiguration':
         yield from modify_configuration_reboot(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention)
@@ -97,22 +105,3 @@ def 自动终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     return
 
 
-
-
-
-    # # if state == 'wait_user_keyword':
-    # #     chatbot._cookies['lock_plugin'] = None          # 解除插件锁定，避免遗忘导致死锁
-    # #     chatbot._cookies['plugin_state_0001'] = None    # 解除插件状态，避免遗忘导致死锁
-
-    # #     # 解除插件锁定
-    # #     chatbot.append((f"获取关键词：{txt}", ""))
-    # #     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-    # #     inputs=inputs_show_user=f"Extract all image urls in this html page, pick the first 5 images and show them with markdown format: \n\n {page_return}"
-    # #     gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
-    # #         inputs=inputs, inputs_show_user=inputs_show_user,
-    # #         llm_kwargs=llm_kwargs, chatbot=chatbot, history=[], 
-    # #         sys_prompt="When you want to show an image, use markdown format. e.g. ![image_description](image_url). If there are no image url provided, answer 'no image url provided'"
-    # #     )
-    # #     chatbot[-1] = [chatbot[-1][0], gpt_say]
-    # yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-    # return

@@ -140,6 +140,7 @@ def get_crazy_functions():
             "Group": "学术",
             "Color": "stop",
             "AsButton": True,
+            "Info": "读取Tex论文并写摘要 | 输入参数为路径",
             "Function": HotReload(读文章写摘要)
         },
         "翻译README或MD": {
@@ -153,12 +154,14 @@ def get_crazy_functions():
             "Group": "编程",
             "Color": "stop",
             "AsButton": False,
+            "Info": "将Markdown或README翻译为中文 | 输入参数为路径或URL",
             "Function": HotReload(Markdown英译中)
         },
         "批量生成函数注释": {
             "Group": "编程",
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
+            "Info": "批量生成函数的注释 | 输入参数为路径",
             "Function": HotReload(批量生成函数注释)
         },
         "保存当前的对话": {
@@ -170,17 +173,20 @@ def get_crazy_functions():
         "[多线程Demo]解析此项目本身（源码自译解）": {
             "Group": "对话|编程",
             "AsButton": False,  # 加入下拉菜单中
+            "Info": "多线程解析并翻译此项目的源码 | 不需要输入参数",
             "Function": HotReload(解析项目本身)
         },
         "[插件demo]历史上的今天": {
             "Group": "对话",
             "AsButton": True,
+            "Info": "查看历史上的今天事件 | 不需要输入参数",
             "Function": HotReload(高阶功能模板函数)
         },
         "精准翻译PDF论文": {
             "Group": "学术",
             "Color": "stop",
-            "AsButton": True,  # 加入下拉菜单中
+            "AsButton": True,  
+            "Info": "精准翻译PDF论文为中文 | 输入参数为路径",
             "Function": HotReload(批量翻译PDF文档)
         },
         "询问多个GPT模型": {
@@ -193,54 +199,63 @@ def get_crazy_functions():
             "Group": "学术",
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
+            "Info": "批量总结PDF文档的内容 | 输入参数为路径",
             "Function": HotReload(批量总结PDF文档)
         },
         "谷歌学术检索助手（输入谷歌学术搜索页url）": {
             "Group": "学术",
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
+            "Info": "使用谷歌学术检索助手搜索指定URL的结果 | 输入参数为谷歌学术搜索页的URL",
             "Function": HotReload(谷歌检索小助手)
         },
         "理解PDF文档内容 （模仿ChatPDF）": {
             "Group": "学术",
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
+            "Info": "理解PDF文档的内容并进行回答 | 输入参数为路径",
             "Function": HotReload(理解PDF文档内容标准文件输入)
         },
         "英文Latex项目全文润色（输入路径或上传压缩包）": {
             "Group": "学术",
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
+            "Info": "对英文Latex项目全文进行润色处理 | 输入参数为路径或上传压缩包",
             "Function": HotReload(Latex英文润色)
         },
         "英文Latex项目全文纠错（输入路径或上传压缩包）": {
             "Group": "学术",
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
+            "Info": "对英文Latex项目全文进行纠错处理 | 输入参数为路径或上传压缩包",
             "Function": HotReload(Latex英文纠错)
         },
         "中文Latex项目全文润色（输入路径或上传压缩包）": {
             "Group": "学术",
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
+            "Info": "对中文Latex项目全文进行润色处理 | 输入参数为路径或上传压缩包",
             "Function": HotReload(Latex中文润色)
         },
         "Latex项目全文中译英（输入路径或上传压缩包）": {
             "Group": "学术",
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
+            "Info": "对Latex项目全文进行中译英处理 | 输入参数为路径或上传压缩包",
             "Function": HotReload(Latex中译英)
         },
         "Latex项目全文英译中（输入路径或上传压缩包）": {
             "Group": "学术",
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
+            "Info": "对Latex项目全文进行英译中处理 | 输入参数为路径或上传压缩包",
             "Function": HotReload(Latex英译中)
         },
         "批量Markdown中译英（输入路径或上传压缩包）": {
             "Group": "编程",
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
+            "Info": "批量将Markdown文件中文翻译为英文 | 输入参数为路径或上传压缩包",
             "Function": HotReload(Markdown中译英)
         },
     }
@@ -253,6 +268,7 @@ def get_crazy_functions():
                 "Group": "学术",
                 "Color": "stop",
                 "AsButton": False,  # 加入下拉菜单中
+                "Info": "下载arxiv论文并翻译摘要 | 输入参数为arxiv编号如1812.10695",
                 "Function": HotReload(下载arxiv论文并翻译摘要)
             }
         })
@@ -266,6 +282,7 @@ def get_crazy_functions():
                 "Group": "对话",
                 "Color": "stop",
                 "AsButton": False,  # 加入下拉菜单中
+                # "Info": "连接网络回答问题（需要访问谷歌）| 输入参数是一个问题",
                 "Function": HotReload(连接网络回答问题)
             }
         })
@@ -275,6 +292,7 @@ def get_crazy_functions():
                 "Group": "对话",
                 "Color": "stop",
                 "AsButton": False,  # 加入下拉菜单中
+                "Info": "连接网络回答问题（需要访问中文Bing）| 输入参数是一个问题",
                 "Function": HotReload(连接bing搜索回答问题)
             }
         })
@@ -350,6 +368,7 @@ def get_crazy_functions():
                 "Group": "对话",
                 "Color": "stop",
                 "AsButton": False,
+                "Info": "按照自然语言描述生成一个动画 | 输入参数是一段话",
                 "Function": HotReload(动画生成)
             }
         })
@@ -437,6 +456,7 @@ def get_crazy_functions():
                     "如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 " +
                     "例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: " +
                     'If the term "agent" is used in this section, it should be translated to "智能体". ',
+                "Info": "Arixv论文精细翻译 | 输入参数arxiv论文的ID，比如1812.10695",
                 "Function": HotReload(Latex翻译中文并重新编译PDF)
             }
         })
@@ -450,6 +470,7 @@ def get_crazy_functions():
                     "如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 " +
                     "例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: " +
                     'If the term "agent" is used in this section, it should be translated to "智能体". ',
+                "Info": "本地Latex论文精细翻译 | 输入参数是路径",
                 "Function": HotReload(Latex翻译中文并重新编译PDF)
             }
         })
@@ -466,6 +487,7 @@ def get_crazy_functions():
                     "Group": "对话",
                     "Color": "stop",
                     "AsButton": True,
+                    "Info": "开始语言对话 | 没有输入参数",
                     "Function": HotReload(语音助手)
                 }
             })
@@ -473,13 +495,13 @@ def get_crazy_functions():
         print('Load function plugin failed')
 
     try:
-        from crazy_functions.虚空终端 import 自动终端
+        from crazy_functions.虚空终端 import 虚空终端
         function_plugins.update({
-            "自动终端": {
+            "虚空终端": {
                 "Group": "对话",
                 "Color": "stop",
                 "AsButton": False,
-                "Function": HotReload(自动终端)
+                "Function": HotReload(虚空终端)
             }
         })
     except:
