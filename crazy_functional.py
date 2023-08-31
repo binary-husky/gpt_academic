@@ -168,7 +168,7 @@ def get_crazy_functions():
             "Function": HotReload(对话历史存档)
         },
         "[多线程Demo]解析此项目本身（源码自译解）": {
-            "Group": "对话",
+            "Group": "对话|编程",
             "AsButton": False,  # 加入下拉菜单中
             "Function": HotReload(解析项目本身)
         },
@@ -499,13 +499,23 @@ def get_crazy_functions():
     # except:
     #     print('Load function plugin failed')
 
-    regroupped_functions = {}
+
+
+    """
+    设置默认值:
+    - 默认 Group = 对话
+    - 默认 AsButton = True
+    - 默认 AdvancedArgs = False
+    - 默认 Color = secondary
+    """
     for name, function_meta in function_plugins.items():
-        if "Group" in function_meta:
-            groups = function_meta["Group"].split('|')
-        else:
-            groups = ['对话']
-        for gruop in groups:
-            regroupped_functions[gruop] = regroupped_functions.get(gruop, {})
-            regroupped_functions[gruop].update({name: function_meta})
-    return regroupped_functions
+        if "Group" not in function_meta:
+            function_plugins[name]["Group"] = '对话'
+        if "AsButton" not in function_meta:
+            function_plugins[name]["AsButton"] = True
+        if "AdvancedArgs" not in function_meta:
+            function_plugins[name]["AdvancedArgs"] = False
+        if "Color" not in function_meta:
+            function_plugins[name]["Color"] = 'secondary'
+
+    return function_plugins
