@@ -145,6 +145,8 @@ def get_files_from_everything(txt, preference=''):
         project_folder = txt
         file_manifest = [f for f in glob.glob(f'{project_folder}/**/*.md', recursive=True)]
     else:
+        project_folder = None
+        file_manifest = []
         success = False
 
     return success, file_manifest, project_folder
