@@ -30,6 +30,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         函数的说明请见 request_llm/bridge_all.py
     """
     chatbot.append((inputs, ""))
+    yield from update_ui(chatbot=chatbot, history=history)
 
     if additional_fn is not None:
         from core_functional import handle_core_functionality
