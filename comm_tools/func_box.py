@@ -19,7 +19,6 @@ import logging
 import requests
 import yaml
 import tiktoken
-import pandas as pd
 logger = logging
 from sklearn.feature_extraction.text import CountVectorizer
 import numpy as np
@@ -265,8 +264,6 @@ def json_convert_dict(file):
             if f.startswith('prompt') and f.endswith('json'):
                 new_dict.update(check_json_format(f))
     return new_dict
-
-
 
 
 def draw_results(txt, prompt: dict, percent, switch, ipaddr: gr.Request):

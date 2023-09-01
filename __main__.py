@@ -617,7 +617,6 @@ reload_javascript()
 chatbot_main = ChatBot()
 chatbot_main.main()
 gradio_app = gr.mount_gradio_app(app, chatbot_main.demo, '/gradio')
-
 if __name__ == '__main__':
     import uvicorn
     app_reload, = get_conf('app_reload')
