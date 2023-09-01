@@ -99,7 +99,7 @@ CONCURRENT_COUNT = 100
 AUTO_CLEAR_TXT = False
 
 
-# 色彩主体，可选 ["Default", "Chuanhu-Small-and-Beautiful"]
+# 色彩主体，可选 ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast"]
 THEME = "Default"
 
 
