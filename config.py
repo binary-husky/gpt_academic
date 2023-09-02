@@ -228,7 +228,7 @@ ALLOW_RESET_CONFIG = False
 ├── THEME 色彩主题
 ├── AUTO_CLEAR_TXT 是否在提交时自动清空输入框
 ├── ADD_WAIFU 加一个live2d装饰
-
+├── ALLOW_RESET_CONFIG 是否允许通过自然语言描述修改本页的配置，该功能具有一定的危险性
 
 
 插件在线服务配置依赖关系示意图

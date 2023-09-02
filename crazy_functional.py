@@ -268,7 +268,7 @@ def get_crazy_functions():
                 "Group": "学术",
                 "Color": "stop",
                 "AsButton": False,  # 加入下拉菜单中
-                "Info": "下载arxiv论文并翻译摘要 | 输入参数为arxiv编号如1812.10695",
+                # "Info": "下载arxiv论文并翻译摘要 | 输入参数为arxiv编号如1812.10695",
                 "Function": HotReload(下载arxiv论文并翻译摘要)
             }
         })

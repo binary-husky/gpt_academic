@@ -50,7 +50,7 @@ def analyze_intention_with_simple_rules(txt):
         is_certain = True
         user_intention.intention_type = 'Chat'
 
-    if '调用插件' in txt:
+    if '用插件' in txt:
         is_certain = True
         user_intention.intention_type = 'ExecutePlugin'
 
@@ -71,15 +71,22 @@ explain_msg = """
 
 请用**自然语言**描述您需要做什么。
 
-1. 如果涉及文件处理, 请务必描述文件所在路径（把文件拖拽到文件上传区亦可）。
+1. 您可以打开插件下拉菜单以了解本项目的各种能力，然后用自然语言描述您的需要，例如：
+    - 「请调用插件，为我翻译PDF论文，论文我刚刚放到上传区了。」
+    - 「请调用插件翻译PDF论文，地址为https://www.nature.com/articles/s41586-019-1724-z.pdf」
+    - 「生成一张图片，图中鲜花怒放，绿草如茵，用插件实现。」
+    - 「用插件翻译README，Github网址是https://github.com/facebookresearch/co-tracker」
+    - 「给爷翻译Arxiv论文，arxiv论文的ID是1812.10695，记得用插件，不要自己瞎搞！」
+    - 「我不喜欢当前的界面颜色，修改配置，把主题THEME更换为THEME="High-Contrast"。」
+    - 「请问Transformer网络的结构是怎样的？」
 
-2. 您可以打开插件下拉菜单以了解本项目的各种能力。
+2. 如果您使用「调用插件xxx」、「修改配置xxx」、「请问」等关键词，您的意图可以被识别的更准确。
 
-3. 如果您使用“调用插件xxx”、“修改配置xxx”、“请问”等关键词，您的意图可以被识别的更准确。
+3. 使用GPT4等强模型时，您的意图可以被识别的更准确。
 
-4. 使用GPT4等强模型时，您的意图可以被识别的更准确。
+4. 现在，如果需要处理文件，请您上传文件（将文件拖动到文件上传区），或者描述文件所在的路径。
 
-5. 现在，请您给出指令（或先上传文件，再给指令）。
+5. 如果不需要上传文件，现在您只需要再次重复一次您的指令即可。
 """
 
 
@@ -89,10 +96,14 @@ explain_msg = """
 def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     # 获取当前虚空终端状态
     state = VoidTerminalState.get_state(chatbot)
+    appendix_msg = ""
 
     # 用简单的关键词检测用户意图
     is_certain, _ = analyze_intention_with_simple_rules(txt)
-
+    if txt.startswith('private_upload/') and len(txt) == 34:
+        state.set_state(chatbot=chatbot, key='has_provided_explaination', value=False)
+        appendix_msg = "\n\n**很好，您已经上传了文件**，现在请您描述您的需求。"
+        
     if is_certain or (state.has_provided_explaination):
         # 如果意图明确，跳过提示环节
         state.set_state(chatbot=chatbot, key='has_provided_explaination', value=True)
@@ -104,7 +115,7 @@ def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
         # 如果意图模糊，提示
         state.set_state(chatbot=chatbot, key='has_provided_explaination', value=True)
         state.lock_plugin(chatbot=chatbot)
-        chatbot.append(("虚空终端状态:", explain_msg))
+        chatbot.append(("虚空终端状态:", explain_msg+appendix_msg))
         yield from update_ui(chatbot=chatbot, history=history)
         return
 

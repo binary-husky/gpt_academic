@@ -37,6 +37,15 @@ def get_recent_file_prompt_support(chatbot):
     prompt += f"Only use it when necessary, otherwise, you can ignore this file." 
     return prompt
 
+def get_inputs_show_user(inputs, plugin_arr_enum_prompt):
+    # remove plugin_arr_enum_prompt from inputs string
+    inputs_show_user = inputs.replace(plugin_arr_enum_prompt, "")
+    inputs_show_user += plugin_arr_enum_prompt[:200] + '...'
+    inputs_show_user += '\n...\n'
+    inputs_show_user += '...\n'
+    inputs_show_user += '...}'
+    return inputs_show_user
+
 def execute_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention):
     plugin_arr_enum_prompt, plugin_arr_dict = read_avail_plugin_enum()
     class Plugin(BaseModel):
@@ -59,14 +68,14 @@ def execute_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prom
         plugin_sel = gpt_json_io.generate_output_auto_repair(gpt_reply, run_gpt_fn)
     except:
         msg = "抱歉,当前的大语言模型无法理解您的需求。"
-        msg += "请求的Prompt为：\n" + wrap_code(inputs)
+        msg += "请求的Prompt为：\n" + wrap_code(get_inputs_show_user(inputs, plugin_arr_enum_prompt))
         msg += "语言模型回复为：\n" + wrap_code(gpt_reply)
         msg += "但您可以尝试再试一次\n"
         yield from update_ui_lastest_msg(lastmsg=msg, chatbot=chatbot, history=history, delay=2)
         return
     if plugin_sel.plugin_selection not in plugin_arr_dict:
         msg = "抱歉, 找不到合适插件执行该任务, 当前的大语言模型可能无法理解您的需求。"
-        msg += "请求的Prompt为：\n" + wrap_code(inputs)
+        msg += "请求的Prompt为：\n" + wrap_code(get_inputs_show_user(inputs, plugin_arr_enum_prompt))
         msg += "语言模型回复为：\n" + wrap_code(gpt_reply)
         msg += "但您可以尝试再试一次\n"
         yield from update_ui_lastest_msg(lastmsg=msg, chatbot=chatbot, history=history, delay=2)
