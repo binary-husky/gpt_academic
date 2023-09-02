@@ -887,6 +887,7 @@ def created_atime():
 
 def 通知机器人(error):
     robot_hook, = toolbox.get_conf('robot_hook')
+    if not robot_hook: return
     title = '## 警告警告\n'
     results = "> <font color='red'>{}</font>".format('哈喽小主，chatbot 遇到意料之外的状况了呢，详情请查看以下报错信息')
     notice = '<at user_id="-1">所有人</at>'

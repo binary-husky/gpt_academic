@@ -64,8 +64,7 @@ class ChatBotFrame:
 
     def __init__(self):
         self.cancel_handles = []
-        self.initial_prompt = "你是 WPS Ai 智能服务机器人，能够处理各种任务，如果遇到无法解析的链接或文件路径，请提醒用户点击【插件功能】使用插件提交。请注意，在向用户返回答案时，您将遵循 Markdown 格式。"
-        self.title_html = f"<h1 align=\"center\">Chatbot for KSO {get_current_version()}</h1>"
+        self.initial_prompt = ""
         self.description = """代码开源和更新[地址🚀](https://github.com/binary-husky/chatgpt_academic)，感谢热情的[开发者们❤️](https://github.com/binary-husky/chatgpt_academic/graphs/contributors)"""
 
 
@@ -77,12 +76,12 @@ class ChatBot(ChatBotFrame):
         # self.__gr_url = gr.State(self.__url)
 
     def draw_title(self):
-        # self.title = gr.HTML(self.title_html)
         self.cookies = gr.State({'api_key': API_KEY, 'llm_model': LLM_MODEL, 'local': self.__url})
 
     def draw_chatbot(self):
+        avatar_images, = get_conf('avatar_images')
         self.chatbot = gr.Chatbot(elem_id='main_chatbot', label=f"当前模型：{LLM_MODEL}",
-                                  avatar_images=(os.path.join('./docs/user.png'), os.path.join('./docs/wps_logo.png')))
+                                  avatar_images=avatar_images)
         self.history = gr.State([])
         temp_draw = [gr.HTML() for i in range(6)]
         with gr.Box(elem_id='chat_box'):
@@ -534,14 +533,15 @@ class ChatBot(ChatBotFrame):
         # threading.Thread(target=warm_up_modules, name="warm-up", daemon=True).start()
 
     def main(self):
-        with (gr.Blocks(title="Chatbot for KSO ", theme=set_theme, analytics_enabled=False, css=custom_css) as self.demo):
+        app_name, = get_conf('APPNAME')
+        with (gr.Blocks(title=app_name, theme=set_theme, analytics_enabled=False, css=custom_css) as self.demo):
             # 绘制页面title
             self.draw_title()
             # 绘制一个ROW，row会让底下的元素自动排成一行
             with gr.Row().style(justify='between'):
                 # 绘制列1
                 with gr.Column(scale=40, elem_id='colum_1') as self.cloum_1:
-                    gr.Markdown('# KSO Chat Bot 🦾')
+                    gr.Markdown(f'# {app_name} 🦾')
                     with gr.Tabs() as self.tabs_funcs:
                         self.draw_function_chat()
                         self.draw_plugin_chat()
