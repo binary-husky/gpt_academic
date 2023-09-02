@@ -3,7 +3,7 @@ from typing import List
 from toolbox import update_ui_lastest_msg, get_conf
 from request_llm.bridge_all import predict_no_ui_long_connection
 from crazy_functions.json_fns.pydantic_io import GptJsonIO
-import copy, json, pickle, os, sys
+import copy, json, pickle, os, sys, time
 
 
 def read_avail_plugin_enum():
@@ -19,6 +19,23 @@ def read_avail_plugin_enum():
 
 def wrap_code(txt):
     return f"\n```\n{txt}\n```\n"
+
+def have_any_recent_upload_files(chatbot):
+    _5min = 5 * 60
+    if not chatbot: return False    # chatbot is None
+    most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
+    if not most_recent_uploaded: return False   # most_recent_uploaded is None
+    if time.time() - most_recent_uploaded["time"] < _5min: return True # most_recent_uploaded is new
+    else: return False  # most_recent_uploaded is too old
+
+def get_recent_file_prompt_support(chatbot):
+    most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
+    path = most_recent_uploaded['path']
+    prompt =   "\nAdditional Information:\n"
+    prompt =   "In case that this plugin requires a path or a file as argument," 
+    prompt += f"it is important for you to know that the user has recently uploaded a file, located at: `{path}`" 
+    prompt += f"Only use it when necessary, otherwise, you can ignore this file." 
+    return prompt
 
 def execute_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention):
     plugin_arr_enum_prompt, plugin_arr_dict = read_avail_plugin_enum()
@@ -56,6 +73,11 @@ def execute_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prom
         return
     
     # ⭐ ⭐ ⭐ 确认插件参数
+    if not have_any_recent_upload_files(chatbot):
+        appendix_info = ""
+    else:
+        appendix_info = get_recent_file_prompt_support(chatbot)
+
     plugin = plugin_arr_dict[plugin_sel.plugin_selection]
     yield from update_ui_lastest_msg(lastmsg=f"正在执行任务: {txt}\n\n提取插件参数...", chatbot=chatbot, history=history, delay=0)
     class PluginExplicit(BaseModel):
@@ -65,7 +87,7 @@ def execute_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prom
     gpt_json_io.format_instructions += "The information about this plugin is:" + plugin["Info"]
     inputs = f"A plugin named {plugin_sel.plugin_selection} is selected, " + \
              "you should extract plugin_arg from the user requirement, the user requirement is: \n\n" + \
-             ">> " + txt.rstrip('\n').replace('\n','\n>> ') + '\n\n' + \
+             ">> " + (txt + appendix_info).rstrip('\n').replace('\n','\n>> ') + '\n\n' + \
              gpt_json_io.format_instructions 
     run_gpt_fn = lambda inputs, sys_prompt: predict_no_ui_long_connection(
         inputs=inputs, llm_kwargs=llm_kwargs, history=[], sys_prompt=sys_prompt, observe_window=[])

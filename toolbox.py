@@ -24,6 +24,19 @@ pj = os.path.join
 
 class ChatBotWithCookies(list):
     def __init__(self, cookie):
+        """
+        cookies = {
+            'top_p': top_p,
+            'temperature': temperature,
+            'lock_plugin': bool,
+            "files_to_promote": ["file1", "file2"],
+            "most_recent_uploaded": {
+                "path": "uploaded_path",
+                "time": time.time(),
+                "time_str": "timestr",
+            }
+        }
+        """
         self._cookies = cookie
 
     def write_list(self, list):
@@ -503,15 +516,15 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
     if not os.path.exists(new_path): shutil.copyfile(file, new_path)
     # 将文件添加到chatbot cookie中，避免多用户干扰
     if chatbot:
-        if 'file_to_promote' in chatbot._cookies: current = chatbot._cookies['file_to_promote']
+        if 'files_to_promote' in chatbot._cookies: current = chatbot._cookies['files_to_promote']
         else: current = []
-        chatbot._cookies.update({'file_to_promote': [new_path] + current})
+        chatbot._cookies.update({'files_to_promote': [new_path] + current})
 
 def disable_auto_promotion(chatbot):
-    chatbot._cookies.update({'file_to_promote': []})
+    chatbot._cookies.update({'files_to_promote': []})
     return
 
-def on_file_uploaded(files, chatbot, txt, txt2, checkboxes):
+def on_file_uploaded(files, chatbot, txt, txt2, checkboxes, cookies):
     """
     当文件被上传时的回调函数
     """
@@ -546,14 +559,20 @@ def on_file_uploaded(files, chatbot, txt, txt2, checkboxes):
                     f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
                     f'\n\n调用路径参数已自动修正到: \n\n{txt}' +
                     f'\n\n现在您点击任意“红颜色”标识的函数插件时，以上文件将被作为输入参数'+err_msg])
-    return chatbot, txt, txt2
+    cookies.update({
+        'most_recent_uploaded': {
+            'path': f'private_upload/{time_tag}',
+            'time': time.time(),
+            'time_str': time_tag
+    }})
+    return chatbot, txt, txt2, cookies
 
 
 def on_report_generated(cookies, files, chatbot):
     from toolbox import find_recent_files
-    if 'file_to_promote' in cookies:
-        report_files = cookies['file_to_promote']
-        cookies.pop('file_to_promote')
+    if 'files_to_promote' in cookies:
+        report_files = cookies['files_to_promote']
+        cookies.pop('files_to_promote')
     else:
         report_files = find_recent_files('gpt_log')
     if len(report_files) == 0:

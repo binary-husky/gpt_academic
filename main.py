@@ -113,7 +113,7 @@ def main():
                                 plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False, 
                                                                  placeholder="这里是特殊函数插件的高级参数输入区").style(container=False)
                             with gr.Row():
-                                switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary")
+                                switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary").style(size="sm")
                     with gr.Row():
                         with gr.Accordion("点击展开“文件上传区”。上传本地文件/压缩包供函数插件调用。", open=False) as area_file_up:
                             file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)", file_count="multiple")
@@ -172,7 +172,7 @@ def main():
             click_handle = functional[k]["Button"].click(fn=ArgsGeneralWrapper(predict), inputs=[*input_combo, gr.State(True), gr.State(k)], outputs=output_combo)
             cancel_handles.append(click_handle)
         # 文件上传区，接收文件后与chatbot的互动
-        file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt, txt2, checkboxes], [chatbot, txt, txt2])
+        file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt, txt2, checkboxes, cookies], [chatbot, txt, txt2, cookies])
         # 函数插件-固定按钮区
         for k in plugins:
             if not plugins[k].get("AsButton", True): continue
