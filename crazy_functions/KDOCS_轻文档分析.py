@@ -5,7 +5,7 @@
 # @Descr   :
 import os.path
 from comm_tools import func_box, ocr_tools, Langchain_cn
-from crazy_functions.kingsoft_fns import crazy_box
+from crazy_functions.kingsoft_fns import crazy_box, crzay_kingsoft
 from comm_tools.toolbox import update_ui, CatchException, trimmed_format_exc, get_conf
 
 
@@ -31,8 +31,8 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
             gpt_say = "网页爬虫和文件处理准备工作中...."
             chatbot.append([link_limit, gpt_say])
             yield from update_ui(chatbot, history)  # 增加中间过渡
-            if crazy_box.if_kdocs_url_isap(url) and 'ap轻文档' in file_types:
-                ovs_data, content, empty_picture_count, pic_dict, kdocs_dict = crazy_box.get_docs_content(url, image_processing=img_ocr)
+            if crzay_kingsoft.if_kdocs_url_isap(url) and 'ap轻文档' in file_types:
+                ovs_data, content, empty_picture_count, pic_dict, kdocs_dict = crzay_kingsoft.get_docs_content(url, image_processing=img_ocr)
                 if img_ocr:
                     you_say = '请检查数据，并进行处理'
                     if pic_dict:  # 当有图片文件时，再去提醒
@@ -77,7 +77,7 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
                 chatbot[-1] = [link_limit, gpt_say]
                 yield from update_ui(chatbot, history)
                 for t in file_types:
-                    success, file_manifest, _ = crazy_box.get_kdocs_from_everything(txt=url, type=t, ipaddr=llm_kwargs['ipaddr'])
+                    success, file_manifest, _ = crzay_kingsoft.get_kdocs_from_everything(txt=url, type=t, ipaddr=llm_kwargs['ipaddr'])
                     files.extend(file_manifest)
                     if success:
                         chatbot.append(['进度如何？', success])

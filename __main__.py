@@ -36,9 +36,7 @@ set_theme = adjust_theme()
 
 # 代理与自动更新
 from comm_tools.check_proxy import check_proxy, auto_update
-
-from comm_tools import func_box
-
+from comm_tools import func_box, func_signals
 from comm_tools.check_proxy import get_current_version
 
 os.makedirs("gpt_log", exist_ok=True)
@@ -235,17 +233,17 @@ class ChatBot(ChatBotFrame):
             self.pro_fp_state = gr.State({'samples': None})
 
     def signals_prompt_func(self):
-        self.pro_private_check.select(fn=func_box.prompt_reduce,
+        self.pro_private_check.select(fn=func_signals.prompt_reduce,
                                       inputs=[self.pro_private_check, self.pro_fp_state, self.pro_private_check],
                                       outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check]
                                       ).then(fn=func_box.new_button_display, inputs=[self.pro_private_check],
                                              outputs=[self.pro_class_name])
         self.tabs_code = gr.State(0)
-        self.pro_func_prompt.select(fn=func_box.prompt_input,
+        self.pro_func_prompt.select(fn=func_signals.prompt_input,
                                     inputs=[self.txt, self.pro_edit_txt, self.pro_name_txt, self.pro_func_prompt,
                                             self.pro_fp_state, self.tabs_code],
                                     outputs=[self.txt, self.pro_edit_txt, self.pro_name_txt])
-        self.pro_upload_btn.upload(fn=func_box.prompt_upload_refresh,
+        self.pro_upload_btn.upload(fn=func_signals.prompt_upload_refresh,
                                    inputs=[self.pro_upload_btn, self.pro_prompt_state, self.pro_private_check, self.pro_class_name],
                                    outputs=[self.pro_func_prompt, self.pro_prompt_state, self.pro_private_check])
         self.chat_tab.select(fn=lambda: 0, inputs=None, outputs=self.tabs_code)
@@ -253,27 +251,27 @@ class ChatBot(ChatBotFrame):
 
     def signals_prompt_edit(self):
         self.pro_clear_btn.click(fn=lambda: [], inputs=None, outputs=self.pro_results)
-        self.prompt_tab.select(fn=func_box.draw_results,
+        self.prompt_tab.select(fn=func_signals.draw_results,
                                inputs=[self.pro_search_txt, self.pro_prompt_state, self.pro_tf_slider,
                                        self.pro_private_check],
                                outputs=[self.pro_prompt_list, self.pro_prompt_state])
-        self.pro_search_txt.submit(fn=func_box.draw_results,
+        self.pro_search_txt.submit(fn=func_signals.draw_results,
                                    inputs=[self.pro_search_txt, self.pro_prompt_state, self.pro_tf_slider,
                                          self.pro_private_check],
                                    outputs=[self.pro_prompt_list, self.pro_prompt_state])
-        self.pro_entry_btn.click(fn=func_box.draw_results,
+        self.pro_entry_btn.click(fn=func_signals.draw_results,
                                  inputs=[self.pro_search_txt, self.pro_prompt_state, self.pro_tf_slider,
                                          self.pro_private_check],
                                  outputs=[self.pro_prompt_list, self.pro_prompt_state])
-        self.pro_prompt_list.click(fn=func_box.show_prompt_result,
+        self.pro_prompt_list.click(fn=func_signals.show_prompt_result,
                                    inputs=[self.pro_prompt_list, self.pro_prompt_state, self.pro_results, self.pro_edit_txt, self.pro_name_txt],
                                    outputs=[self.pro_results, self.pro_edit_txt, self.pro_name_txt, self.tabs_funcs, self.prompt_edit_area])
-        self.pro_new_btn.click(fn=func_box.prompt_save,
+        self.pro_new_btn.click(fn=func_signals.prompt_save,
                                inputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_fp_state, self.pro_private_check, self.pro_class_name],
                                outputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_private_check,
                                         self.pro_func_prompt, self.pro_fp_state, self.tabs_chatbot])
         self.pro_reuse_btn.click(
-            fn=func_box.reuse_chat,
+            fn=func_signals.reuse_chat,
             inputs=[self.pro_results, self.chatbot, self.history, self.txt],
             outputs=[self.chatbot, self.history, self.txt, self.tabs_chatbot, self.examples_column]
         )
@@ -565,7 +563,7 @@ class ChatBot(ChatBotFrame):
             self.signals_plugin()
             self.signals_langchain_cn()
             adv_plugins = gr.State([i for i in crazy_fns])
-            self.demo.load(fn=func_box.refresh_load_data,
+            self.demo.load(fn=func_signals.refresh_load_data,
                            inputs=[self.pro_fp_state, adv_plugins],
                            outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check,
                                     self.guidance_plugins, self.guidance_plugins_state,

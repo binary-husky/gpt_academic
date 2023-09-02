@@ -3,7 +3,7 @@ from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_
 import glob, os
 from comm_tools import func_box
 from moviepy.editor import AudioFileClip
-from crazy_functions.kingsoft_fns import crazy_box
+from crazy_functions.kingsoft_fns import crazy_box, crzay_kingsoft
 
 
 def split_audio_file(filename, split_duration=1000):
@@ -229,7 +229,7 @@ def Kdocs音频提取总结(txt, llm_kwargs, plugin_kwargs, chatbot, history, sy
         file_manifest = []
         for ed in extensions:
             _, file_manifest_tmp, _ = get_files_from_everything(txt, ed, ipaddr=llm_kwargs['ipaddr'])
-            _, kdocs_manifest_tmp, _ = crazy_box.get_kdocs_from_everything(txt, ed, ipaddr=llm_kwargs['ipaddr'])
+            _, kdocs_manifest_tmp, _ = crzay_kingsoft.get_kdocs_from_everything(txt, ed, ipaddr=llm_kwargs['ipaddr'])
             file_manifest += kdocs_manifest_tmp
             file_manifest += file_manifest_tmp
     # 如果没找到任何文件

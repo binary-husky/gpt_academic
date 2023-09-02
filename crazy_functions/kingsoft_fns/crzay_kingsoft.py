@@ -11,7 +11,10 @@ import requests
 import urllib.parse
 
 from bs4 import BeautifulSoup
-from comm_tools import toolbox
+from comm_tools import toolbox, func_box
+from crazy_functions.kingsoft_fns import crazy_box
+from crazy_functions import crazy_utils
+from comm_tools import ocr_tools
 
 class Kdocs:
 
@@ -286,3 +289,119 @@ class Kdocs:
             return True
         else:
             return None
+
+
+def if_kdocs_url_isap(url):
+    kdocs = Kdocs(url)
+    if 'otl' in kdocs.file_info_parm['fname']:
+        return True
+    return False
+
+
+def get_docs_content(url, image_processing=False):
+    """
+    Args: 爬虫程序，通过拿到分享链接提取文档内信息
+        url: 文档url
+        image_processing: 是否开始OCR
+    Returns:
+    """
+    kdocs = Kdocs(url)
+    utils = crazy_box.Utils()
+    json_data, json_dict = kdocs.get_file_content()
+    text_values = utils.find_all_text_keys(json_data, filter_type='')
+    _all, content, pic_dict, file_dict = utils.statistical_results(text_values, img_proce=image_processing)
+    pic_dict_convert = kdocs.get_file_pic_url(pic_dict)
+    empty_picture_count = sum(1 for item in _all if 'picture' in item and not item['picture']['caption'])
+    return _all, content, empty_picture_count, pic_dict_convert, file_dict
+
+
+def get_kdocs_dir(limit, project_folder, type, ipaddr):
+    """
+    Args:
+        limit: 文档目录路径
+        project_folder: 写入的文件
+        type: 文件类型, 不过这里没用到
+        ipaddr:  文件所属标识
+    Returns: [文件列表], 目录内文件信息, 失败信息
+    """
+    kdocs = Kdocs(limit)
+    task_id, task_info = kdocs.submit_batch_download_tasks()
+    link, task_faillist = kdocs.polling_batch_download_tasks(task_id)
+    resp = kdocs.wps_file_download(link)
+    content = resp.content
+    temp_file = os.path.join(project_folder, kdocs.url_dirs_tag + '.zip')
+    with open(temp_file, 'wb') as f: f.write(content)
+    decompress_directory = os.path.join(project_folder, 'extract', kdocs.url_dirs_tag)
+    toolbox.extract_archive(temp_file, decompress_directory)
+    file_list = []
+    img_list = []
+    for f_t in kdocs.docs_old_type:
+        _, file_, _ = crazy_utils.get_files_from_everything(decompress_directory, type=f_t, ipaddr=ipaddr)
+        file_list += file_
+    for i_t in crazy_box.Utils().picture_format:
+        _, file_, _ = crazy_utils.get_files_from_everything(decompress_directory, type=i_t, ipaddr=ipaddr)
+        file_list += file_
+    file_list += crazy_box.batch_recognition_images_to_md(img_list, ipaddr)
+    return file_list, task_info, task_faillist
+
+
+def get_kdocs_files(limit, project_folder, type, ipaddr):
+    """
+    Args:
+        limit: 金山文档分享文件地址
+        project_folder: 存储地址
+        type: 指定的文件类型
+        ipaddr: 用户信息
+    Returns: [提取的文件list]
+    """
+    if type == 'otl':
+        _, content, _, pic_dict, _ = get_docs_content(limit)
+        name = 'temp.md'
+        tag = content.splitlines()[0][:20]
+        for i in pic_dict:  # 增加OCR选项
+            img_content, img_result, _ = ocr_tools.Paddle_ocr_select(ipaddr=ipaddr, trust_value=True
+                                                                  ).img_def_content(img_path=pic_dict[i], img_tag=i)
+            content = str(content).replace(f"{i}", f"{func_box.html_local_img(img_result)}\n```{img_content}```")
+            name = tag + '.md'
+            content = content.encode('utf-8')
+    elif type or type == '':
+        kdocs = Kdocs(limit)
+        link, name = kdocs.document_aggregation_download(file_type=type)
+        tag = kdocs.url_share_tag
+        if link:
+            resp = requests.get(url=link, verify=False)
+            content = resp.content
+        else:
+            return []
+    else:
+        return []
+    if content:
+        tag_path = os.path.join(project_folder, tag)
+        temp_file = os.path.join(os.path.join(project_folder, tag, name))
+        os.makedirs(tag_path, exist_ok=True)
+        with open(temp_file, 'wb') as f: f.write(content)
+        return [temp_file]
+
+
+def get_kdocs_from_everything(txt, type='', ipaddr='temp'):
+    """
+    Args:
+        txt: kudos 文件分享码
+        type: type=='' 时，将支持所有文件类型
+        ipaddr: 用户信息
+    Returns:
+    """
+    link_limit = crazy_box.Utils().split_startswith_txt(link_limit=txt)
+    file_manifest = []
+    success = ''
+    project_folder = os.path.join(func_box.users_path, ipaddr, 'kdocs')
+    os.makedirs(project_folder, exist_ok=True)
+    if link_limit:
+        for limit in link_limit:
+            if '/ent/' in limit:
+                file_list, info, fail = get_kdocs_dir(limit, project_folder, type, ipaddr)
+                file_manifest += file_list
+                success += f"{limit}文件信息如下：{info}\n\n 下载任务状况：{fail}\n\n"
+            else:
+                file_manifest += get_kdocs_files(limit, project_folder, type, ipaddr)
+    return success, file_manifest, project_folder
