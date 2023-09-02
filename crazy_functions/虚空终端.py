@@ -6,6 +6,7 @@ from request_llm.bridge_all import predict_no_ui_long_connection
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from crazy_functions.crazy_utils import input_clipping
 from crazy_functions.json_fns.pydantic_io import GptJsonIO
+from crazy_functions.vt_fns.vt_state import VoidTerminalState
 from crazy_functions.vt_fns.vt_modify_config import modify_configuration_hot
 from crazy_functions.vt_fns.vt_modify_config import modify_configuration_reboot
 from crazy_functions.vt_fns.vt_call_plugin import execute_plugin
@@ -13,11 +14,13 @@ from enum import Enum
 import copy, json, pickle, os, sys
 
 
+
 class UserIntention(BaseModel):
     user_prompt: str = Field(description="the content of user input", default="")
-    intention_type: str = Field(description="the type of user intention, choose from ['ModifyConfiguration', 'ExecutePlugin', 'Chat']", default="Chat")
+    intention_type: str = Field(description="the type of user intention, choose from ['ModifyConfiguration', 'ExecutePlugin', 'Chat']", default="ExecutePlugin")
     user_provide_file: bool = Field(description="whether the user provides a path to a file", default=False)
     user_provide_url: bool = Field(description="whether the user provides a url", default=False)
+
 
 def chat(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention):
     gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
@@ -30,10 +33,22 @@ def chat(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_i
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
     pass
 
-def analyze_with_rule(txt):
+
+explain_intention_to_user = {
+    'Chat': "聊天对话",
+    'ExecutePlugin': "调用插件",
+    'ModifyConfiguration': "修改配置",
+}
+
+
+def analyze_intention_with_simple_rules(txt):
     user_intention = UserIntention()
     user_intention.user_prompt = txt
     is_certain = False
+
+    if '请问' in txt:
+        is_certain = True
+        user_intention.intention_type = 'Chat'
 
     if '调用插件' in txt:
         is_certain = True
@@ -45,33 +60,63 @@ def analyze_with_rule(txt):
 
     return is_certain, user_intention
 
+
+
+
+    
+
+
+explain_msg = """
+## 虚空终端插件说明:
+
+请用**自然语言**描述您需要做什么。
+
+1. 如果涉及文件处理, 请务必描述文件所在路径（把文件拖拽到文件上传区亦可）。
+
+2. 您可以打开插件下拉菜单以了解本项目的各种能力。
+
+3. 如果您使用“调用插件xxx”、“修改配置xxx”、“请问”等关键词，您的意图可以被识别的更准确。
+
+4. 使用GPT4等强模型时，您的意图可以被识别的更准确。
+
+5. 现在，请您给出指令（或先上传文件，再给指令）。
+"""
+
+
+ 
+
 @CatchException
 def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    """
-    txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
-    llm_kwargs      gpt模型参数, 如温度和top_p等, 一般原样传递下去就行
-    plugin_kwargs   插件模型的参数, 如温度和top_p等, 一般原样传递下去就行
-    chatbot         聊天显示框的句柄，用于显示给用户
-    history         聊天历史，前情提要
-    system_prompt   给gpt的静默提醒
-    web_port        当前软件运行的端口号
-    """
-    history = []    # 清空历史，以免输入溢出
+    # 获取当前虚空终端状态
+    state = VoidTerminalState.get_state(chatbot)
+
+    # 用简单的关键词检测用户意图
+    is_certain, _ = analyze_intention_with_simple_rules(txt)
+
+    if is_certain or (state.has_provided_explaination):
+        # 如果意图明确，跳过提示环节
+        state.set_state(chatbot=chatbot, key='has_provided_explaination', value=True)
+        state.unlock_plugin(chatbot=chatbot)
+        yield from update_ui(chatbot=chatbot, history=history)
+        yield from 虚空终端主路由(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
+        return
+    else:
+        # 如果意图模糊，提示
+        state.set_state(chatbot=chatbot, key='has_provided_explaination', value=True)
+        state.lock_plugin(chatbot=chatbot)
+        chatbot.append(("虚空终端状态:", explain_msg))
+        yield from update_ui(chatbot=chatbot, history=history)
+        return
+
+
+
+def 虚空终端主路由(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    history = []
     chatbot.append(("虚空终端状态: ", f"正在执行任务: {txt}"))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
-    # 初始化插件状态
-    state = chatbot._cookies.get('plugin_state', None)
-    if state is not None:   state = pickle.loads(state)
-    else:                   state = {}
-
-    def update_vt_state():
-        # 赋予插件锁定 锁定插件回调路径，当下一次用户提交时，会直接转到该函数
-        chatbot._cookies['lock_plugin'] = 'crazy_functions.虚空终端->虚空终端'
-        chatbot._cookies['vt_state'] = pickle.dumps(state)
-
     # ⭐ ⭐ ⭐ 分析用户意图
-    is_certain, user_intention = analyze_with_rule(txt)
+    is_certain, user_intention = analyze_intention_with_simple_rules(txt)
     if not is_certain:
         yield from update_ui_lastest_msg(
             lastmsg=f"正在执行任务: {txt}\n\n分析用户意图中", chatbot=chatbot, history=history, delay=0)
@@ -89,7 +134,9 @@ def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
         pass
 
     yield from update_ui_lastest_msg(
-        lastmsg=f"正在执行任务: {txt}\n\n用户意图理解: intention_type={user_intention.intention_type}", chatbot=chatbot, history=history, delay=0)
+        lastmsg=f"正在执行任务: {txt}\n\n用户意图理解: 意图={explain_intention_to_user[user_intention.intention_type]}", 
+        chatbot=chatbot, history=history, delay=0)
+
     # 用户意图: 修改本项目的配置
     if user_intention.intention_type == 'ModifyConfiguration':
         yield from modify_configuration_reboot(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention)

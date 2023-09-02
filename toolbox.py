@@ -82,7 +82,7 @@ def ArgsGeneralWrapper(f):
             # 处理个别特殊插件的锁定状态
             module, fn_name = cookies['lock_plugin'].split('->')
             f_hot_reload = getattr(importlib.import_module(module, fn_name), fn_name)
-            yield from f_hot_reload(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
+            yield from f_hot_reload(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, request)
     return decorated
 
 
