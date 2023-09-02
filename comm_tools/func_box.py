@@ -528,7 +528,7 @@ def qr_code_generation(data, icon_path=None, file_name='qc_icon.png'):
     img_w, img_h = img.size
     # 打开logo
     if not icon_path:
-        icon_path = os.path.join(base_path, 'docs/wps_logo.png')
+        icon_path, = toolbox.get_conf('qc_icon_path')
     logo = Image.open(icon_path)
     # logo大小为二维码的四分之一
     logo_w = img_w // 4

@@ -95,16 +95,8 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         additional_fn代表点击的哪个按钮，按钮见functional.py
     """
     if additional_fn is not None:
-<<<<<<< HEAD
-        from comm_tools import core_functional
-        importlib.reload(core_functional)    # 热更新prompt
-        core_functional = core_functional.get_core_functions()
-        if "PreProcess" in core_functional[additional_fn]: inputs = core_functional[additional_fn]["PreProcess"](inputs)  # 获取预处理函数（如果有的话）
-        inputs = core_functional[additional_fn]["Prefix"] + inputs + core_functional[additional_fn]["Suffix"]
-=======
-        from core_functional import handle_core_functionality
+        from comm_tools.core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
->>>>>>> master
 
     raw_input = "What I would like to say is the following: " + inputs
     history.extend([inputs, ""])

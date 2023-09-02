@@ -607,7 +607,6 @@ class ChatBot(ChatBotFrame):
 
 
 
-
 from comm_tools import base_api
 app = base_api.app
 PORT = LOCAL_PORT if WEB_PORT <= 0 else WEB_PORT
