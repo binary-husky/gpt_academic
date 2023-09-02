@@ -5,24 +5,54 @@
 # @Descr   :
 import re
 import json
+import time
+
+import requests
 
 from comm_tools import func_box
+from comm_tools import toolbox
 
 
 class QQDocs:
 
-    def __init__(self):
+    def __init__(self, link):
+        self._hosts = 'docs.qq.com'
+        self.link = link
+        self.link_id = self.split_link_id()
+        self.file_info_dict = {
+            'tag': '',
+            'name': '',
+            'type': ''
+        }
+        self.cookies, = toolbox.get_conf('QQ_COOKIES')
         self.file_info_header = {
-            'Host': 'docs.qq.com',
-            # 'Cookie': 'RK=uGvhhCQ0zj; ptcz=99c50f94a55160ab18fc6eb8f096b3f8ba5ff39929bd1050b651976e22690272; pac_uid=0_53b2f679b8958; iip=0; pgv_pvid=3226633567; eas_sid=S1Y6E7m5q5G980D7p3Y0V6r1i9; _hjSessionUser_2765497=eyJpZCI6ImE2ZmVkYzQ3LWUxYTItNTNkZC05MjQyLTdjMGE0NTFkNGVjMyIsImNyZWF0ZWQiOjE2NzY5NzM5MjIxNDksImV4aXN0aW5nIjpmYWxzZX0=; _ga=GA1.2.672540206.1676973925; fingerprint=25068f269dc748cfa1f72b18c9bb567485; traceid=5c93285746; TOK=5c932857469d443e; hashkey=5c932857; pgv_info=ssid=s1566934721485879; low_login_enable=1; uin=o2411123479; skey=@RLRg3Do1o; luin=o2411123479; lskey=00010000028f61e566ebc077aaf94f4d0d3710de98d0c5aa880aef892ca4b6f9fb91e1d00a68532db2764d7c; p_uin=o2411123479; pt4_token=lz-mBvVtcG*phwWovBO2jlUnS*sDLRURsHwxK9pjL8A_; p_skey=AvdKkMELItneZVvg5zevEmFZYlTK9f1x08ha*sR69-w_; p_luin=o2411123479; p_lskey=000400009940d03062ae753a92f6c2a73f81f94bca33f37c6706df4546a5aa32d7d81e61dd0fcdaa2207fca4; uid=144115211492590730; utype=qq; vfwebqq=addce68ddab2c5a4e3220b3eaef97ef878695bfe5bf61074af22048b997fd3f31f7885037d12d55e; DOC_QQ_APPID=101458937; DOC_QQ_OPENID=7F1531B5C41FFEB3ED1AC333D7FC65DC; env_id=gray-pct50; gray_user=true; DOC_SID=6709e087993a4c13a8f4fb4959847db0e6ec453fe1924b549847b98a9e814ce5; SID=6709e087993a4c13a8f4fb4959847db0e6ec453fe1924b549847b98a9e814ce5; uid_key=EOP1mMQHGixKNE9lMWNNYmtpejZHZEVZNUNrSzE4WHpXcWVCdjYyYTFHTG9rK2l5ZFVzPSJISVFQZGMRpDexb8grhGKnpwXwY4nhwrKrS%2FjKVVKPaBjNBpA%2Fst%2BPOBtPPPCvpU7xEdHxZNhXKvAGgvuahRO05oQi4C8Mzl0%2BKPTH36gG; optimal_cdn_domain=docs2.gtimg.com; loginTime=1693665288205; tgw_l7_route=cc6311fb2d0a9056eacc27e331f5e16a',
+            'Host': self._hosts,
             'sec-ch-ua': '"Chromium";v="116", "Not)A;Brand";v="24", "Microsoft Edge";v="116"',
             'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.62',
             'referer': 'https://docs.qq.com/',
             'accept-language': 'en-US,en;q=0.9,ja;q=0.8',
         }
-        self.file_info_params = {
+        self.file_info_url = 'https://docs.qq.com/dop-api/opendoc'
+        self.blind_task_url = 'https://docs.qq.com/v1/export/export_office'
+        self.obtain_d_link_url = 'https://docs.qq.com/v1/export/query_progress'
+        self.get_file_info()
+
+    def split_link_id(self):
+        # 提取tag，给后续请求使用
+        url_parts = re.split('[/\?&#]+', self.link)
+        try:
+            l_index = url_parts.index(self._hosts)
+            url_id = url_parts[l_index + 2]
+            self.link_id = url_id
+            return url_id
+        except ValueError:
+            print('既不是在线文档，也不是文档目录')
+            return ''
+
+    def get_file_info(self):
+        file_info_params = {
             'noEscape': '1',
-            'id': 'DS0VIVXZ4TGZIdERw',
+            'id': self.link_id,
             'normal': '1',
             'outformat': '1',
             'startrow': '0',
@@ -31,33 +61,55 @@ class QQDocs:
             'nowb': '0',
             'callback': 'clientVarsCallback',
         }
-        self.file_info_url = 'https://docs.qq.com/dop-api/opendoc'
-        self.re_pattern = re.compile(rf'{re.escape(self.file_info_params["callback"])}\((.*?)\)')
-        self.file_info_dict = {
-            'file_tag': '',
-            'file_name': '',
-            'file_type': ''
-        }
-
-
-    def get_file_info(self):
-        response = requests.get(self.file_info_url, params=self.file_info_params,
+        re_pattern = re.compile(rf'{re.escape(file_info_params["callback"])}\((.*?)\)')
+        response = requests.get(self.file_info_url, params=file_info_params,
                                 headers=self.file_info_header,
                                 verify=False)
-        json_resp = self.re_pattern.findall(response.text)
+        json_resp = re_pattern.findall(response.text)
         if json_resp:
-            print(json_resp[0])
+            dict_info = json.loads(json_resp[0])
+            info_vars = dict_info['clientVars']
+            self.file_info_dict['tag'] = info_vars.get('padId', '')
+            self.file_info_dict['name'] = info_vars.get('padTitle', '')
+            self.file_info_dict['type'] = info_vars.get('padType', '')
+
+    def submit_the_blind_task(self):
+        blind_task_params = {
+            'exportType': '0',
+            'switches': '{"embedFonts":false}',
+            'exportSource': 'client',
+            'docId': self.file_info_dict['tag'],
+        }
+        response = requests.post(self.blind_task_url, headers=self.file_info_header,
+                                 cookies=self.cookies, data=blind_task_params, verify=False)
+        json_resp = response.json()
+        return json_resp['operationId']
+
+    def obtain_file_download_link(self):
+        d_link_params = {
+            'operationId': self.submit_the_blind_task()
+        }
+        for i in range(600):
+            response = requests.get(self.obtain_d_link_url, params=d_link_params, cookies=self.cookies,
+                                    headers=self.file_info_header, verify=False)
+            json_resp = response.json()
+            if int(json_resp.get('ret', '1')) > 100:
+                raise TypeError(f'该类型文档不支持导出\n {json_resp}')
+            file_url = json_resp.get('file_url', '')
+            if file_url:
+                return file_url
+            else:
+                print(f'下载任务进度： {json_resp.get("progress")}')
+                time.sleep(1)
 
 
 
 
+if __name__ == '__main__':
+    qqdocs = QQDocs('')
+    print(qqdocs.obtain_file_download_link())
 
-import requests
 
-qqdocs = QQDocs()
-
-
-qqdocs.get_file_info()
 
 
 
