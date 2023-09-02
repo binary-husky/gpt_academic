@@ -500,7 +500,7 @@ def get_crazy_functions():
             "虚空终端": {
                 "Group": "对话",
                 "Color": "stop",
-                "AsButton": False,
+                "AsButton": True,
                 "Function": HotReload(虚空终端)
             }
         })
