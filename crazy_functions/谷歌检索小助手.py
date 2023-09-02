@@ -57,9 +57,9 @@ def get_meta_information(url, chatbot, history):
         except:
             citation = 'cited by 0'
         abstract = result.select_one(".gs_rs").text.strip()  # 摘要在 .gs_rs 中的文本，需要清除首尾空格
-        other_versions = next((tag['href'] for tag in result.select_one('.gs_flb').select('.gs_nph') if 'cluster' in tag['href']), None)  # 获取所有版本的链接
-        search = search_all_version('http://' + urlparse(url).netloc + other_versions)
         try:
+            other_versions = next((tag['href'] for tag in result.select_one('.gs_flb').select('.gs_nph') if 'cluster' in tag['href']), None)  # 获取所有版本的链接
+            search = search_all_version('http://' + urlparse(url).netloc + other_versions)
             if search:
                 paper = next(search.results())
                 abstract = paper.summary.replace('\n', ' ')
