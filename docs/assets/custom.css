@@ -784,7 +784,7 @@ div.svelte-sfqy0y .block {
 
 [class*="gradio-container-"] .md :not(pre)>code {
     border: unset;
-    color: #FFF;
+    color: #ff6e67;
     border-radius: 5px;
 }
 
@@ -797,7 +797,7 @@ div.svelte-sfqy0y .block {
     background-color: #333333 !important;
 }
 .copy_code_button {
-    color: #f2f2f2;
+    color: #f2f2f2 !important;
 }
 .dark .message-wrap.svelte-lpz3rh pre {
     background-color: hsla(0, 0%, 20%, 300%)!important;
