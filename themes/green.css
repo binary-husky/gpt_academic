@@ -24,7 +24,11 @@ mspace {
     border-color: yellow;
   }
 }
-
+.normal_mut_select .svelte-1gfkn6j {
+    float: left;
+    width: auto;
+    line-height: 260% !important;
+}
 #highlight_update {
   animation-name: highlight;
   animation-duration: 0.75s;
