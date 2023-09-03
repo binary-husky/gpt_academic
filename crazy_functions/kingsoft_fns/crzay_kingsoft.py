@@ -405,3 +405,49 @@ def get_kdocs_from_everything(txt, type='', ipaddr='temp'):
             else:
                 file_manifest += get_kdocs_files(limit, project_folder, type, ipaddr)
     return success, file_manifest, project_folder
+
+
+def smart_document_extraction(url, llm_kwargs, plugin_kwargs, chatbot, history, files):
+    img_ocr, = crazy_box.json_args_return(plugin_kwargs, ['开启OCR'])
+    ovs_data, content, empty_picture_count, pic_dict, kdocs_dict = get_docs_content(url, image_processing=img_ocr)
+    if img_ocr:
+        you_say = '请检查数据，并进行处理'
+        if pic_dict:  # 当有图片文件时，再去提醒
+            title = crazy_box.long_name_processing(content)
+            ocr_process = f'检测到`{title}`文档中存在{func_box.html_tag_color(empty_picture_count)}张图片，为了产出结果不存在遗漏，正在逐一进行识别\n\n' \
+                          f'> 红框为采用的文案,可信指数低于 {func_box.html_tag_color(llm_kwargs["ocr"])} 将不采用, 可在Setting 中进行配置\n\n'
+            chatbot.append([you_say, ocr_process])
+        else:
+            ocr_process = ''
+        if pic_dict:
+            yield from toolbox.update_ui(chatbot, history, '正在调用OCR组件，已启用多线程解析，请稍等')
+            ocr_func = ocr_tools.Paddle_ocr_select(ipaddr=llm_kwargs['ipaddr'],
+                                                   trust_value=llm_kwargs['ocr']).identify_cache
+            thread_submission = ocr_tools.submit_threads_ocr(pic_dict, func=ocr_func,
+                                                             max_threads=llm_kwargs.get('worker_num', 5))
+            for t in thread_submission:
+                try:
+                    img_content, img_result, error = thread_submission[t].result()
+                    content = str(content).replace(f"{t}",
+                                                   f"{func_box.html_local_img(img_result)}\n```{img_content}```")
+                    if error:
+                        ocr_process += f'`tips: {error}`'
+                    ocr_process += f'{t} 识别完成，识别效果如下{func_box.html_local_img(img_result)}\n\n'
+                    chatbot[-1] = [you_say, ocr_process]
+                    yield from toolbox.update_ui(chatbot, history)
+                except Exception:
+                    ocr_process += f'{t} 识别失败，过滤这个图片\n\n'
+                    chatbot[-1] = [you_say, ocr_process]
+                    yield from toolbox.update_ui(chatbot, history)
+
+    else:
+        if empty_picture_count >= 5:
+            chatbot.append(['请检查文档内容', f'\n\n 需求文档中没有{func_box.html_tag_color("描述")}的图片数量' \
+                                              f'有{func_box.html_tag_color(empty_picture_count)}张，生成的测试用例可能存在遗漏点，'
+                                              f'可以参考以下方法对图片进行描述补充，或在自定义插件参数中开始OCR功能\n\n' \
+                                              f'{func_box.html_local_img("docs/imgs/pic_desc.png")}'])
+        yield from toolbox.update_ui(chatbot, history)
+    title = crazy_box.long_name_processing(content)
+    temp_list = [title, content]
+    temp_file = yield from crazy_box.result_written_to_markdwon(temp_list, llm_kwargs, plugin_kwargs, chatbot, history)
+    files.extend(temp_file)

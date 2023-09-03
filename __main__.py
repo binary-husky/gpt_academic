@@ -403,7 +403,7 @@ class ChatBot(ChatBotFrame):
             with gr.Box():
                 with gr.Accordion(open=False, label='上传你需要构建的知识库文件'):
                     self.langchain_upload = gr.Files(label="解析支持多类型文档，多文件建议使用zip上传", file_count="multiple", file_types=spl)
-                self.langchain_links = gr.Textbox(show_label=False, placeholder='金山文档分享链接/网络文件,多个链接使用换行间隔',
+                self.langchain_links = gr.Textbox(show_label=False, placeholder='分享链接/网络文件,多个链接使用换行间隔',
                                                   elem_classes='no_padding_input').style()
                 self.langchain_know_kwargs = gr.State({'file_path': '', 'know_name': '', 'know_obj': {}, 'file_list': []})
                 #  file_path 是上传文件存储的地址，know_name，know_obj是ql向量化后的对象
