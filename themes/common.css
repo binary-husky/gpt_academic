@@ -13,3 +13,9 @@
 #input-plugin-group .svelte-1gfkn6j {
     visibility: hidden;
 }
+
+
+/* height of the upload box */
+.wrap.svelte-xwlu1w {
+    min-height: var(--size-32);
+}

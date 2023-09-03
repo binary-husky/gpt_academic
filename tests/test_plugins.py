@@ -9,9 +9,9 @@ validate_path() # 返回项目根路径
 from tests.test_utils import plugin_test
 
 if __name__ == "__main__":
-    # plugin_test(plugin='crazy_functions.虚空终端->自动终端', main_input='修改api-key为sk-jhoejriotherjep')
+    # plugin_test(plugin='crazy_functions.虚空终端->虚空终端', main_input='修改api-key为sk-jhoejriotherjep')
 
-    plugin_test(plugin='crazy_functions.虚空终端->自动终端', main_input='调用插件，对C:/Users/fuqingxu/Desktop/旧文件/gpt/chatgpt_academic/crazy_functions/latex_fns中的python文件进行解析')
+    plugin_test(plugin='crazy_functions.虚空终端->虚空终端', main_input='调用插件，对C:/Users/fuqingxu/Desktop/旧文件/gpt/chatgpt_academic/crazy_functions/latex_fns中的python文件进行解析')
 
     # plugin_test(plugin='crazy_functions.命令行助手->命令行助手', main_input='查看当前的docker容器列表')
 
