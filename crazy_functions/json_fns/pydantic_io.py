@@ -43,6 +43,7 @@ PYDANTIC_FORMAT_INSTRUCTIONS_SIMPLE = """The output should be formatted as a JSO
 {schema}
 ```"""
 
+class JsonStringError(Exception): ...
 
 class GptJsonIO():
 
@@ -105,6 +106,6 @@ class GptJsonIO():
             except Exception as e:
                 # 没辙了，放弃治疗
                 logging.info('Repaire json fail.')
-                raise RuntimeError('Cannot repair json.', str(e))
+                raise JsonStringError('Cannot repair json.', str(e))
         return result
 

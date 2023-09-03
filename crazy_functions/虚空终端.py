@@ -23,9 +23,7 @@ Please describe in natural language what you want to do.
 explain_msg = """
 ## 虚空终端插件说明:
 
-请用**自然语言**描述您需要做什么。
-
-1. 您可以打开插件下拉菜单以了解本项目的各种能力，然后用自然语言描述您的需要，例如：
+1. 请用**自然语言**描述您需要做什么。例如：
     - 「请调用插件，为我翻译PDF论文，论文我刚刚放到上传区了。」
     - 「请调用插件翻译PDF论文，地址为https://www.nature.com/articles/s41586-019-1724-z.pdf」
     - 「生成一张图片，图中鲜花怒放，绿草如茵，用插件实现。」
@@ -34,13 +32,15 @@ explain_msg = """
     - 「我不喜欢当前的界面颜色，修改配置，把主题THEME更换为THEME="High-Contrast"。」
     - 「请问Transformer网络的结构是怎样的？」
 
-2. 如果您使用「调用插件xxx」、「修改配置xxx」、「请问」等关键词，您的意图可以被识别的更准确。
+2. 您可以打开插件下拉菜单以了解本项目的各种能力。    
 
-3. 建议使用 GPT3.5 或更强的模型，弱模型可能无法理解您的想法。该插件诞生时间不长，欢迎您前往Github反馈问题。
+3. 如果您使用「调用插件xxx」、「修改配置xxx」、「请问」等关键词，您的意图可以被识别的更准确。
 
-4. 现在，如果需要处理文件，请您上传文件（将文件拖动到文件上传区），或者描述文件所在的路径。
+4. 建议使用 GPT3.5 或更强的模型，弱模型可能无法理解您的想法。该插件诞生时间不长，欢迎您前往Github反馈问题。
 
-5. 如果不需要上传文件，现在您只需要再次重复一次您的指令即可。
+5. 现在，如果需要处理文件，请您上传文件（将文件拖动到文件上传区），或者描述文件所在的路径。
+
+6. 如果不需要上传文件，现在您只需要再次重复一次您的指令即可。
 """
 
 from pydantic import BaseModel, Field
@@ -50,7 +50,7 @@ from toolbox import update_ui_lastest_msg, disable_auto_promotion
 from request_llm.bridge_all import predict_no_ui_long_connection
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from crazy_functions.crazy_utils import input_clipping
-from crazy_functions.json_fns.pydantic_io import GptJsonIO
+from crazy_functions.json_fns.pydantic_io import GptJsonIO, JsonStringError
 from crazy_functions.vt_fns.vt_state import VoidTerminalState
 from crazy_functions.vt_fns.vt_modify_config import modify_configuration_hot
 from crazy_functions.vt_fns.vt_modify_config import modify_configuration_reboot
@@ -148,10 +148,11 @@ def 虚空终端主路由(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
             ">> " + (txt+rf_req).rstrip('\n').replace('\n','\n>> ') + '\n\n' + gpt_json_io.format_instructions
         run_gpt_fn = lambda inputs, sys_prompt: predict_no_ui_long_connection(
             inputs=inputs, llm_kwargs=llm_kwargs, history=[], sys_prompt=sys_prompt, observe_window=[])
+        analyze_res = run_gpt_fn(inputs, "")
         try:
-            user_intention = gpt_json_io.generate_output_auto_repair(run_gpt_fn(inputs, ""), run_gpt_fn)
+            user_intention = gpt_json_io.generate_output_auto_repair(analyze_res, run_gpt_fn)
             lastmsg=f"正在执行任务: {txt}\n\n用户意图理解: 意图={explain_intention_to_user[user_intention.intention_type]}", 
-        except:
+        except JsonStringError as e:
             yield from update_ui_lastest_msg(
                 lastmsg=f"正在执行任务: {txt}\n\n用户意图理解: 失败 当前语言模型（{llm_kwargs['llm_model']}）不能理解您的意图", chatbot=chatbot, history=history, delay=0)
             return

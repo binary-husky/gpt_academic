@@ -60,6 +60,8 @@ def ArgsGeneralWrapper(f):
         # 引入一个有cookie的chatbot
         cookies.update({
             'top_p':top_p,
+            'api_key': cookies['api_key'],
+            'llm_model': llm_model,
             'temperature':temperature,
         })
         llm_kwargs = {

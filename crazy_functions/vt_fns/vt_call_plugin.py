@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from typing import List
 from toolbox import update_ui_lastest_msg, disable_auto_promotion
 from request_llm.bridge_all import predict_no_ui_long_connection
-from crazy_functions.json_fns.pydantic_io import GptJsonIO
+from crazy_functions.json_fns.pydantic_io import GptJsonIO, JsonStringError
 import copy, json, pickle, os, sys, time
 
 
@@ -69,7 +69,7 @@ def execute_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prom
     try:
         gpt_reply = run_gpt_fn(inputs, "")
         plugin_sel = gpt_json_io.generate_output_auto_repair(gpt_reply, run_gpt_fn)
-    except:
+    except JsonStringError:
         msg = f"抱歉, {llm_kwargs['llm_model']}无法理解您的需求。"
         msg += "请求的Prompt为：\n" + wrap_code(get_inputs_show_user(inputs, plugin_arr_enum_prompt))
         msg += "语言模型回复为：\n" + wrap_code(gpt_reply)
