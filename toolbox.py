@@ -492,7 +492,8 @@ def find_recent_files(directory):
     current_time = time.time()
     one_minute_ago = current_time - 60
     recent_files = []
-
+    if not os.path.exists(directory): 
+        os.makedirs(directory, exist_ok=True)
     for filename in os.listdir(directory):
         file_path = os.path.join(directory, filename)
         if file_path.endswith('.log'):

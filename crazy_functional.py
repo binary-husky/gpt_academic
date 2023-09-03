@@ -34,9 +34,16 @@ def get_crazy_functions():
     from crazy_functions.Latex全文翻译 import Latex中译英
     from crazy_functions.Latex全文翻译 import Latex英译中
     from crazy_functions.批量Markdown翻译 import Markdown中译英
+    from crazy_functions.虚空终端 import 虚空终端
 
 
     function_plugins = {
+        "虚空终端": {
+            "Group": "对话|编程|学术",
+            "Color": "stop",
+            "AsButton": True,
+            "Function": HotReload(虚空终端)
+        },
         "解析整个Python项目": {
             "Group": "编程",
             "Color": "stop",
@@ -139,7 +146,7 @@ def get_crazy_functions():
         "读Tex论文写摘要": {
             "Group": "学术",
             "Color": "stop",
-            "AsButton": True,
+            "AsButton": False,
             "Info": "读取Tex论文并写摘要 | 输入参数为路径",
             "Function": HotReload(读文章写摘要)
         },
@@ -494,18 +501,6 @@ def get_crazy_functions():
     except:
         print('Load function plugin failed')
 
-    try:
-        from crazy_functions.虚空终端 import 虚空终端
-        function_plugins.update({
-            "虚空终端": {
-                "Group": "对话",
-                "Color": "stop",
-                "AsButton": True,
-                "Function": HotReload(虚空终端)
-            }
-        })
-    except:
-        print('Load function plugin failed')
 
     # try:
     #     from crazy_functions.chatglm微调工具 import 微调数据集生成

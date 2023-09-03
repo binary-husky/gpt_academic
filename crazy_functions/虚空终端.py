@@ -1,3 +1,48 @@
+"""
+Explanation of the Void Terminal Plugin:
+
+Please describe in natural language what you want to do.
+
+1. You can open the plugin's dropdown menu to explore various capabilities of this project, and then describe your needs in natural language, for example:
+- "Please call the plugin to translate a PDF paper for me. I just uploaded the paper to the upload area."
+- "Please use the plugin to translate a PDF paper, with the address being https://www.nature.com/articles/s41586-019-1724-z.pdf."
+- "Generate an image with blooming flowers and lush green grass using the plugin."
+- "Translate the README using the plugin. The GitHub URL is https://github.com/facebookresearch/co-tracker."
+- "Translate an Arxiv paper for me. The Arxiv ID is 1812.10695. Remember to use the plugin and don't do it manually!"
+- "I don't like the current interface color. Modify the configuration and change the theme to THEME="High-Contrast"."
+- "Could you please explain the structure of the Transformer network?"
+
+2. If you use keywords like "call the plugin xxx", "modify the configuration xxx", "please", etc., your intention can be recognized more accurately.
+
+3. Your intention can be recognized more accurately when using powerful models like GPT4. This plugin is relatively new, so please feel free to provide feedback on GitHub.
+
+4. Now, if you need to process a file, please upload the file (drag the file to the file upload area) or describe the path to the file.
+
+5. If you don't need to upload a file, you can simply repeat your command again.
+"""
+explain_msg = """
+## 虚空终端插件说明:
+
+请用**自然语言**描述您需要做什么。
+
+1. 您可以打开插件下拉菜单以了解本项目的各种能力，然后用自然语言描述您的需要，例如：
+    - 「请调用插件，为我翻译PDF论文，论文我刚刚放到上传区了。」
+    - 「请调用插件翻译PDF论文，地址为https://www.nature.com/articles/s41586-019-1724-z.pdf」
+    - 「生成一张图片，图中鲜花怒放，绿草如茵，用插件实现。」
+    - 「用插件翻译README，Github网址是https://github.com/facebookresearch/co-tracker」
+    - 「给爷翻译Arxiv论文，arxiv论文的ID是1812.10695，记得用插件，不要自己瞎搞！」
+    - 「我不喜欢当前的界面颜色，修改配置，把主题THEME更换为THEME="High-Contrast"。」
+    - 「请问Transformer网络的结构是怎样的？」
+
+2. 如果您使用「调用插件xxx」、「修改配置xxx」、「请问」等关键词，您的意图可以被识别的更准确。
+
+3. 使用GPT4等强力模型时，您的意图可以被识别的更准确。该插件诞生时间不长，欢迎您前往Github反馈问题。
+
+4. 现在，如果需要处理文件，请您上传文件（将文件拖动到文件上传区），或者描述文件所在的路径。
+
+5. 如果不需要上传文件，现在您只需要再次重复一次您的指令即可。
+"""
+
 from pydantic import BaseModel, Field
 from typing import List
 from toolbox import CatchException, update_ui, gen_time_str
@@ -10,10 +55,6 @@ from crazy_functions.vt_fns.vt_state import VoidTerminalState
 from crazy_functions.vt_fns.vt_modify_config import modify_configuration_hot
 from crazy_functions.vt_fns.vt_modify_config import modify_configuration_reboot
 from crazy_functions.vt_fns.vt_call_plugin import execute_plugin
-from enum import Enum
-import copy, json, pickle, os, sys
-
-
 
 class UserIntention(BaseModel):
     user_prompt: str = Field(description="the content of user input", default="")
@@ -60,37 +101,6 @@ def analyze_intention_with_simple_rules(txt):
 
     return is_certain, user_intention
 
-
-
-
-    
-
-
-explain_msg = """
-## 虚空终端插件说明:
-
-请用**自然语言**描述您需要做什么。
-
-1. 您可以打开插件下拉菜单以了解本项目的各种能力，然后用自然语言描述您的需要，例如：
-    - 「请调用插件，为我翻译PDF论文，论文我刚刚放到上传区了。」
-    - 「请调用插件翻译PDF论文，地址为https://www.nature.com/articles/s41586-019-1724-z.pdf」
-    - 「生成一张图片，图中鲜花怒放，绿草如茵，用插件实现。」
-    - 「用插件翻译README，Github网址是https://github.com/facebookresearch/co-tracker」
-    - 「给爷翻译Arxiv论文，arxiv论文的ID是1812.10695，记得用插件，不要自己瞎搞！」
-    - 「我不喜欢当前的界面颜色，修改配置，把主题THEME更换为THEME="High-Contrast"。」
-    - 「请问Transformer网络的结构是怎样的？」
-
-2. 如果您使用「调用插件xxx」、「修改配置xxx」、「请问」等关键词，您的意图可以被识别的更准确。
-
-3. 使用GPT4等强模型时，您的意图可以被识别的更准确。
-
-4. 现在，如果需要处理文件，请您上传文件（将文件拖动到文件上传区），或者描述文件所在的路径。
-
-5. 如果不需要上传文件，现在您只需要再次重复一次您的指令即可。
-"""
-
-
- 
 
 @CatchException
 def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
@@ -161,5 +171,4 @@ def 虚空终端主路由(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
         yield from chat(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention)
 
     return
-
 
