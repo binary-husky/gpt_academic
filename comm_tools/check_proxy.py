@@ -34,7 +34,7 @@ def backup_and_download(current_version, remote_version):
     """
     一键更新协议：备份和下载
     """
-    from toolbox import get_conf
+    from comm_tools.toolbox import get_conf
     import shutil
     import os
     import requests
@@ -109,7 +109,7 @@ def auto_update(raise_error=False):
     一键更新协议：查询版本和用户意见
     """
     try:
-        from toolbox import get_conf
+        from comm_tools.toolbox import get_conf
         import requests
         import time
         import json
@@ -138,7 +138,7 @@ def auto_update(raise_error=False):
                 except:
                     msg = '更新失败。'
                     if raise_error:
-                        from toolbox import trimmed_format_exc
+                        from comm_tools.toolbox import trimmed_format_exc
                         msg += trimmed_format_exc()
                     print(msg)
             else:
@@ -149,7 +149,7 @@ def auto_update(raise_error=False):
     except:
         msg = '自动更新程序：已禁用。建议排查：代理网络配置。'
         if raise_error:
-            from toolbox import trimmed_format_exc
+            from comm_tools.toolbox import trimmed_format_exc
             msg += trimmed_format_exc()
         print(msg)
 
@@ -164,6 +164,6 @@ def warm_up_modules():
 if __name__ == '__main__':
     import os
     os.environ['no_proxy'] = '*'  # 避免代理网络产生意外污染
-    from toolbox import get_conf
+    from comm_tools.toolbox import get_conf
     proxies, = get_conf('proxies')
     check_proxy(proxies)

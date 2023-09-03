@@ -2,7 +2,7 @@
 import time
 import threading
 import importlib
-from toolbox import update_ui, get_conf
+from comm_tools.toolbox import update_ui, get_conf
 from multiprocessing import Process, Pipe
 
 model_name = '星火认知大模型'
@@ -32,7 +32,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     chatbot.append((inputs, ""))
 
     if additional_fn is not None:
-        from core_functional import handle_core_functionality
+        from comm_tools.core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
     # 开始接收回复    

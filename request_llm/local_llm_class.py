@@ -2,7 +2,7 @@ from transformers import AutoModel, AutoTokenizer
 import time
 import threading
 import importlib
-from toolbox import update_ui, get_conf, Singleton
+from comm_tools.toolbox import update_ui, get_conf, Singleton
 from multiprocessing import Process, Pipe
 
 def SingletonLocalLLM(cls):
@@ -77,7 +77,7 @@ class LocalLLMHandle(Process):
             self._model, self._tokenizer = self.load_model_and_tokenizer()
         except:
             self.running = False
-            from toolbox import trimmed_format_exc
+            from comm_tools.toolbox import trimmed_format_exc
             self.child.send(f'[Local Message] 不能正常加载{self.model_name}的参数.' + '\n```\n' + trimmed_format_exc() + '\n```\n')
             self.child.send('[FinishBad]')
             raise RuntimeError(f"不能正常加载{self.model_name}的参数！")
@@ -92,7 +92,7 @@ class LocalLLMHandle(Process):
                 self.child.send('[Finish]')
                 # 请求处理结束，开始下一个循环
             except:
-                from toolbox import trimmed_format_exc
+                from comm_tools.toolbox import trimmed_format_exc
                 self.child.send(f'[Local Message] 调用{self.model_name}失败.' + '\n```\n' + trimmed_format_exc() + '\n```\n')
                 self.child.send('[Finish]')
 
@@ -156,7 +156,7 @@ def get_local_llm_predict_fns(LLMSingletonClass, model_name):
         if not _llm_handle.running: raise RuntimeError(_llm_handle.info)
 
         if additional_fn is not None:
-            from core_functional import handle_core_functionality
+            from comm_tools.core_functional import handle_core_functionality
             inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
         # 处理历史信息

@@ -137,7 +137,7 @@ class Kdocs:
         return response
 
     def document_aggregation_download(self, file_type=''):
-        #
+
         link_name = self.file_info_parm['fname']
         for t in self.to_img_type:
             if t in link_name:

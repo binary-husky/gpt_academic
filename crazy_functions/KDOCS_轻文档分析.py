@@ -51,8 +51,8 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
             yield from update_ui(chatbot, history)
     # 腾讯文档
     for url in qq_link:
-        for t in file_types:
-            success, file_manifest, _ = crzay_qqdocs.get_qqdocs_from_everything(txt=url, type=t, ipaddr=llm_kwargs['ipaddr'])
+        success, file_manifest, _ = crzay_qqdocs.get_qqdocs_from_everything(txt=url, type=file_types, ipaddr=llm_kwargs['ipaddr'])
+        files.extend(file_manifest)
     # 提交文件给file_extraction_intype读取
     yield from crazy_box.file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_kwargs, plugin_kwargs)
     yield from update_ui(chatbot, history)
@@ -74,7 +74,7 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
 
 
 def func_格式化文档(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port, to_kdocs=True):
-    file_types = ['md', 'txt', 'pdf', 'xmind', '智能文档']
+    file_types = ['md', 'txt', 'pdf', 'xmind', '智能文档', 'pptx']
     if to_kdocs:
         file_limit = yield from func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, file_types)
     else:

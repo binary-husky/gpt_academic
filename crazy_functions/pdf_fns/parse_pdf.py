@@ -4,7 +4,7 @@ from functools import lru_cache
 class GROBID_OFFLINE_EXCEPTION(Exception): pass
 
 def get_avail_grobid_url():
-    from toolbox import get_conf
+    from comm_tools.toolbox import get_conf
     GROBID_URLS, = get_conf('GROBID_URLS')
     if len(GROBID_URLS) == 0: return None
     try:

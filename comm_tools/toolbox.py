@@ -1075,7 +1075,7 @@ def Singleton(cls):
 """
 
 def set_conf(key, value):
-    from toolbox import read_single_conf_with_lru_cache, get_conf
+    from comm_tools.toolbox import read_single_conf_with_lru_cache, get_conf
     read_single_conf_with_lru_cache.cache_clear()
     get_conf.cache_clear()
     os.environ[key] = str(value)
@@ -1106,7 +1106,7 @@ def get_chat_handle():
 def get_plugin_default_kwargs():
     """
     """
-    from toolbox import get_conf, ChatBotWithCookies
+    from comm_tools.toolbox import get_conf, ChatBotWithCookies
 
     WEB_PORT, LLM_MODEL, API_KEY = \
         get_conf('WEB_PORT', 'LLM_MODEL', 'API_KEY')
@@ -1135,7 +1135,7 @@ def get_plugin_default_kwargs():
 def get_chat_default_kwargs():
     """
     """
-    from toolbox import get_conf
+    from comm_tools.toolbox import get_conf
 
     LLM_MODEL, API_KEY = get_conf('LLM_MODEL', 'API_KEY')
 

@@ -98,27 +98,28 @@ class QQDocs:
                 print(f'下载任务进度： {json_resp.get("progress")}')
 
 
-def get_qqdocs_files(limit, project_folder, type, ipaddr):
+def get_qqdocs_files(limit, project_folder, file_types, ipaddr):
     """
     Args:
         limit: 腾讯文档分享文件地址
         project_folder: 存储地址
-        type: 指定的文件类型
+        file_types: 指定的文件类型
         ipaddr: 用户信息
     Returns: [提取的文件list]
     """
     qqdocs = QQDocs(limit)
     d_link, f_name = qqdocs.obtain_file_download_link()
-    if type in f_name:
-        resp = requests.get(url=d_link, verify=False)
-        file_path = os.path.join(project_folder, f_name)
-        with open(file_path, mode='wb') as f:
-            f.write(resp.content)
-        return [file_path]
+    for _type in file_types:
+        if _type in f_name:
+            resp = requests.get(url=d_link, verify=False)
+            file_path = os.path.join(project_folder, f_name)
+            with open(file_path, mode='wb') as f:
+                f.write(resp.content)
+            return [file_path]
     return []
 
 
-def get_qqdocs_from_everything(txt, type='', ipaddr='temp'):
+def get_qqdocs_from_everything(txt, type: list=[''], ipaddr='temp'):
     """
     Args:
         txt: kudos 文件分享码

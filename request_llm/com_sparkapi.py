@@ -1,4 +1,4 @@
-from toolbox import get_conf
+from comm_tools.toolbox import get_conf
 import base64
 import datetime
 import hashlib

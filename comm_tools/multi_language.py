@@ -177,7 +177,7 @@ cached_translation = read_map_from_json(language=LANG)
 def trans(word_to_translate, language, special=False):
     if len(word_to_translate) == 0: return {}
     from crazy_functions.crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
-    from toolbox import get_conf, ChatBotWithCookies
+    from comm_tools.toolbox import get_conf, ChatBotWithCookies
     proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT, API_KEY = \
         get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'LAYOUT', 'API_KEY')
     llm_kwargs = {
@@ -240,7 +240,7 @@ def trans(word_to_translate, language, special=False):
 def trans_json(word_to_translate, language, special=False):
     if len(word_to_translate) == 0: return {}
     from crazy_functions.crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
-    from toolbox import get_conf, ChatBotWithCookies
+    from comm_tools.toolbox import get_conf, ChatBotWithCookies
     proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT, API_KEY = \
         get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'LAYOUT', 'API_KEY')
     llm_kwargs = {
@@ -349,7 +349,7 @@ def step_1_core_key_translate():
     # ===============================================
     def copy_source_code():
 
-        from toolbox import get_conf
+        from comm_tools.toolbox import get_conf
         import shutil
         import os
         try: shutil.rmtree(f'./multi-language/{LANG}/')

@@ -152,7 +152,7 @@ class Utils:
         func_box.Shell(f'npx markmap-cli --no-open "{md_file}" -o "{html_file}"').read()
         return md_file, html_file
 
-    def split_startswith_txt(self, link_limit, start='http', domain_name: list = []):
+    def split_startswith_txt(self, link_limit, start='http', domain_name: list = ['']):
         link = str(link_limit).split()
         links = []
         for i in link:

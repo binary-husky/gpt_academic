@@ -54,7 +54,7 @@ def modify_configuration_hot(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         )
 
         # ⭐ ⭐ ⭐ 立即应用配置
-        from toolbox import set_conf
+        from comm_tools.toolbox import set_conf
         set_conf(explicit_conf, user_intention.new_option_value)
 
         yield from update_ui_lastest_msg(
