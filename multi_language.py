@@ -478,6 +478,8 @@ def step_2_core_key_translate():
     up = trans_json(need_translate, language=LANG, special=False)
     map_to_json(up, language=LANG)
     cached_translation = read_map_from_json(language=LANG)
+    LANG_STD = 'std'
+    cached_translation.update(read_map_from_json(language=LANG_STD))
     cached_translation = dict(sorted(cached_translation.items(), key=lambda x: -len(x[0])))
 
     # ===============================================
