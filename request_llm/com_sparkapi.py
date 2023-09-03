@@ -63,6 +63,8 @@ class SparkRequestInstance():
         self.api_secret = XFYUN_API_SECRET
         self.api_key = XFYUN_API_KEY
         self.gpt_url = "ws://spark-api.xf-yun.com/v1.1/chat"
+        self.gpt_url_v2 = "ws://spark-api.xf-yun.com/v2.1/chat"
+
         self.time_to_yield_event = threading.Event()
         self.time_to_exit_event = threading.Event()
 
@@ -83,7 +85,12 @@ class SparkRequestInstance():
 
 
     def create_blocking_request(self, inputs, llm_kwargs, history, system_prompt):
-        wsParam = Ws_Param(self.appid, self.api_key, self.api_secret, self.gpt_url)
+        if llm_kwargs['llm_model'] == 'sparkv2':
+            gpt_url = self.gpt_url_v2
+        else:
+            gpt_url = self.gpt_url
+
+        wsParam = Ws_Param(self.appid, self.api_key, self.api_secret, gpt_url)
         websocket.enableTrace(False)
         wsUrl = wsParam.create_url()
 
@@ -167,7 +174,7 @@ def gen_params(appid, inputs, llm_kwargs, history, system_prompt):
         },
         "parameter": {
             "chat": {
-                "domain": "general",
+                "domain": "generalv2" if llm_kwargs['llm_model'] == 'sparkv2' else "general",
                 "temperature": llm_kwargs["temperature"],
                 "random_threshold": 0.5,
                 "max_tokens": 4096,
