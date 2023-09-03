@@ -180,7 +180,7 @@ class ChatBot(ChatBotFrame):
     def __clear_input(self, inputs):
         return '', inputs, self.stopBtn.update(visible=True), self.submitBtn.update(visible=False), self.examples_column.update(visible=False)
 
-    def draw_prompt(self):
+    def draw_history_prompt(self):
         with gr.Row():
             self.pro_search_txt = gr.Textbox(show_label=False, elem_classes='search_txt',
                                              placeholder="输入你想要搜索的对话记录或提示词").style(container=False)
@@ -220,8 +220,9 @@ class ChatBot(ChatBotFrame):
                                                placeholder=Tips).style()
                 with gr.Row():
                     self.pro_name_txt = gr.Textbox(show_label=False, placeholder='提示词名称').style(container=False)
+                with gr.Row():
+                    self.pro_del_btn = gr.Button("删除提示词", ).style(size='sm', full_width=True)
                     self.pro_new_btn = gr.Button("保存提示词", variant="primary").style(size='sm', full_width=True)
-                    # self.pro_del_btn = gr.Button("删除提示词", ).style(size='sm', full_width=True)
             with gr.Accordion("上传提示词", open=False) as self.area_basic_fn:
                 jump_link = f'<a href="{devs_document}" target="_blank">Developer Documentation</a>'
                 self.pro_devs_link = gr.HTML(jump_link)
@@ -234,7 +235,7 @@ class ChatBot(ChatBotFrame):
 
     def signals_prompt_func(self):
         self.pro_private_check.select(fn=func_signals.prompt_reduce,
-                                      inputs=[self.pro_private_check, self.pro_fp_state, self.pro_private_check],
+                                      inputs=[self.pro_private_check, self.pro_fp_state],
                                       outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check]
                                       ).then(fn=func_box.new_button_display, inputs=[self.pro_private_check],
                                              outputs=[self.pro_class_name])
@@ -266,6 +267,9 @@ class ChatBot(ChatBotFrame):
         self.pro_prompt_list.click(fn=func_signals.show_prompt_result,
                                    inputs=[self.pro_prompt_list, self.pro_prompt_state, self.pro_results, self.pro_edit_txt, self.pro_name_txt],
                                    outputs=[self.pro_results, self.pro_edit_txt, self.pro_name_txt, self.tabs_funcs, self.prompt_edit_area])
+        self.pro_del_btn.click(func_signals.prompt_delete,
+                               inputs=[self.pro_name_txt, self.pro_fp_state, self.pro_private_check],
+                               outputs=[self.pro_func_prompt, self.pro_fp_state])
         self.pro_new_btn.click(fn=func_signals.prompt_save,
                                inputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_fp_state, self.pro_private_check, self.pro_class_name],
                                outputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_private_check,
@@ -352,7 +356,6 @@ class ChatBot(ChatBotFrame):
                 #                   [self.cookies, self.file_upload, self.chatbot])
                 self.cancel_handles.append(click_handle)
 
-
         # 函数插件-下拉菜单与随变按钮的互动
         def on_dropdown_changed(k):
             # 按钮颜色随变
@@ -409,7 +412,7 @@ class ChatBot(ChatBotFrame):
                 #  file_path 是上传文件存储的地址，know_name，know_obj是ql向量化后的对象
             with gr.Box():
                 with gr.Row():
-                    self.langchain_select = gr.Dropdown(choices=[], value=r"新建知识库", allow_custom_value=True,
+                    self.langchain_select = gr.Dropdown(choices=[], value=r"新建知识库",
                                                         interactive=True, label="新建or增量重构", elem_classes='normal_select').style(container=False)
                 with gr.Row():
                     self.langchain_name = gr.Textbox(show_label=False, placeholder='知识库名称or重命名').style(container=False)
@@ -532,7 +535,7 @@ class ChatBot(ChatBotFrame):
 
     def main(self):
         app_name, = get_conf('APPNAME')
-        with (gr.Blocks(title=app_name, theme=set_theme, analytics_enabled=False, css=custom_css) as self.demo):
+        with gr.Blocks(title=app_name, theme=set_theme, analytics_enabled=False, css=custom_css) as self.demo:
             # 绘制页面title
             self.draw_title()
             # 绘制一个ROW，row会让底下的元素自动排成一行
@@ -553,7 +556,7 @@ class ChatBot(ChatBotFrame):
                             self.draw_chatbot()
                             self.draw_examples()
                         with gr.TabItem('提示词、对话记录搜索') as self.prompt_tab:
-                            self.draw_prompt()
+                            self.draw_history_prompt()
 
             # 函数注册，需要在Blocks下进行
             self.signals_input_setting()
@@ -598,6 +601,7 @@ class ChatBot(ChatBotFrame):
         self.demo.blocked_paths = func_box.get_files_and_dirs(path=func_box.base_path,
                                                               filter_allow=['private_upload', 'gpt_log', 'docs'])
         self.demo.inline = True
+        self.demo.show_error = True
         login_html = ''
         # self.demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
         #     server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, auth_message=login_html,

@@ -307,14 +307,18 @@ def check_expected_time():
 
 
 def get_directory_list(folder_path, user_info='temp'):
-    directory_list = []
-    users_list = []
+    allow_list = []
+    build_list = []
+    know_user_build, know_user_allow = toolbox.get_conf('know_user_build', 'know_user_allow')
     for root, dirs, files in os.walk(folder_path):
         for dir_name in dirs:
-            directory_list.append(dir_name)
-        if user_info in files and 'index.faiss' in files:
-            users_list.append(os.path.basename(root))
-    return directory_list, users_list
+            if know_user_allow:
+                allow_list.append(dir_name)
+        if know_user_build and 'index.faiss' in files:
+            build_list.append(os.path.basename(root))
+        elif user_info in files and 'index.faiss' in files:
+            build_list.append(os.path.basename(root))
+    return allow_list, build_list
 
 
 base_path = os.path.dirname(os.path.dirname(__file__))

@@ -21,8 +21,7 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
     # < --------------------读取参数--------------- >
     cls_select = classification_filtering_tag(cls_select, cls_name, ipaddr.client.host)
     if not cls_select:
-        yield '新建分类名称请不要为空', '', gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(), kai_handle
-        return
+        raise gr.Error('新建分类名称请不要为空')
     vector_path = os.path.join(func_box.knowledge_path, cls_select)
     if name and select != '新建知识库':
         kai_id = name
@@ -32,15 +31,14 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
     elif name and select == '新建知识库': kai_id = name
     elif select and select != '新建知识库': kai_id = select
     else:
-        yield '！！！新建知识库时，知识库名称不能为空！！！', '', gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(), kai_handle
-        return
-        # kai_id = func_box.created_atime()
+        kai_id = func_box.created_atime()
+        waring = '新建知识库时，知识库名称建议不要为空，本次知识库名称取用服务器时间`kai_id`为知识库名称！！！'
+        yield '', waring, gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(), kai_handle
     # < --------------------限制上班时间段构建知识库--------------- >
     reject_build_switch, = toolbox.get_conf('reject_build_switch')
     if reject_build_switch:
         if not func_box.check_expected_time():
-            yield '上班时间段不允许启动构建知识库任务，若有紧急任务请联系管理员', '', gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(),kai_handle
-            return
+            raise gr.Error('上班时间段不允许启动构建知识库任务，若有紧急任务请联系管理员')
     # < --------------------读取文件正式开始--------------- >
     yield '开始咯开始咯～', '', gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(), kai_handle
     files = kai_handle['file_path']
@@ -166,7 +164,10 @@ def obtain_classification_knowledge_base(cls_name, ipaddr: gr.Request):
     else:
         load_path = os.path.join(func_box.knowledge_path, cls_name)
     load_list, user_list = func_box.get_directory_list(load_path, ipaddr.client.host)
-    status = f"你只能重构自己上传的知识库哦 😎" \
+    know_user_build = toolbox.get_conf('know_user_build')
+    if know_user_build: mesg = '构建重构没有任何限制，你可以更改config中的`know_user_build`，限制只能重构构建个人的知识库'
+    else: mesg = '你只能重构自己上传的知识库哦😎'
+    status = f"{mesg}" \
              f"\n\n{func_box.to_markdown_tabs(head=['可编辑知识库', '可用知识库'], tabs=[user_list, load_list], column=False)}\n\n"
     return gr.Dropdown.update(choices=user_list), gr.Dropdown.update(choices=load_list, label=f'{cls_name}'), status
 
@@ -191,8 +192,8 @@ def obtaining_knowledge_base_files(cls_select, cls_name, vs_id, chatbot, kai_han
         tabs = [[_id, func_box.html_view_blank(file), kai_files[file][_id]] for file in kai_files for _id in kai_files[file]]
         kai_handle['file_list'] = [os.path.basename(file) for file in kai_files if os.path.exists(file)]
         chatbot[-1] = [you_say, f'检查完成，当前选择的知识库内可用文件如下：'
-                              f'\n\n {func_box.to_markdown_tabs(head=["所属知识库", "文件", "文件类型"], tabs=tabs, column=True)}\n\n'
-                              f'🤩 快来向我提问吧～']
+                                f'\n\n {func_box.to_markdown_tabs(head=["所属知识库", "文件", "文件类型"], tabs=tabs, column=True)}\n\n'
+                                f'🤩 快来向我提问吧～']
         yield chatbot, gr.Column.update(visible=False), '✅ 检查完成', kai_handle
     else:
         yield chatbot, gr.update(), 'Done', kai_handle

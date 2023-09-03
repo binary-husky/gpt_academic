@@ -75,6 +75,22 @@ def prompt_retrieval(is_all, hosts='', search=False):
         return retrieval
 
 
+def prompt_reduce(is_all, prompt: gr.Dataset, ipaddr: gr.Request):  # is_all, ipaddr: gr.Request
+    """
+    刷新提示词
+    Args:
+        is_all： prompt类型
+        prompt： dataset原始对象
+        ipaddr：请求用户信息
+    Returns:
+        返回注册函数所需的对象
+    """
+    tab_cls = func_box.non_personal_tag(is_all, ipaddr.client.host)
+    data = prompt_retrieval(is_all=is_all, hosts=tab_cls)
+    prompt['samples'] = data
+    return gr.Dataset.update(samples=data, visible=True), prompt, is_all
+
+
 def prompt_upload_refresh(file, prompt, pro_select, cls_name, ipaddr: gr.Request):
     """
     上传文件，将文件转换为字典，然后存储到数据库，并刷新Prompt区域
@@ -110,6 +126,25 @@ def prompt_upload_refresh(file, prompt, pro_select, cls_name, ipaddr: gr.Request
         return prompt['samples'], prompt, []
 
 
+def prompt_delete(pro_name, prompt_dict, select_check, ipaddr: gr.Request):
+    if not pro_name:
+        raise gr.Error('删除的提示词名称不能为空')
+    find_prompt = [i for i in prompt_dict['samples'] if i[0] == pro_name]
+    if not any(find_prompt):
+        raise gr.Error('无法找到提示词')
+    tab_cls = func_box.non_personal_tag(select_check, ipaddr.client.host)
+    sqlite_handle = SqliteHandle(table=f'prompt_{tab_cls}')
+    _, source = sqlite_handle.get_prompt_value(find=pro_name)
+    if not _: raise gr.Error('无法找到提示词，或请不要在所有人分类下删除提示词')
+    if source in ipaddr.client.host:
+        sqlite_handle.delete_prompt(pro_name)
+    else:
+        raise gr.Error('无法删除不属于你创建的提示词，如有紧急需求，请联系管理员')
+    data = prompt_retrieval(is_all=select_check, hosts=tab_cls)
+    prompt_dict['samples'] = data
+    return gr.Dataset.update(samples=data, visible=True), prompt_dict
+
+
 def prompt_save(txt, name, prompt: gr.Dataset, pro_select, cls_name, ipaddr: gr.Request):
     """
     编辑和保存Prompt
@@ -124,9 +159,7 @@ def prompt_save(txt, name, prompt: gr.Dataset, pro_select, cls_name, ipaddr: gr.
     user_info = ipaddr.client.host
     if pro_select == '新建分类':
         if not cls_name:
-            result = [[f'{func_box.html_tag_color("选择新建分类，分类名不能为空", color="red")}', '']]
-            prompt['samples'] = [[name, txt]]
-            return txt, name, gr.update(), gr.Dataset.update(samples=result, visible=True), prompt, gr.Tabs.update()
+            raise gr.Error('选择新建分类，分类名不能为空')
         tab_cls = func_box.non_personal_tag(cls_name, ipaddr.client.host)
     else:
         tab_cls = func_box.non_personal_tag(pro_select, ipaddr.client.host)
@@ -141,34 +174,14 @@ def prompt_save(txt, name, prompt: gr.Dataset, pro_select, cls_name, ipaddr: gr.
         _, source = sql_obj.get_prompt_value(name)
         status = sql_obj.inset_prompt({name: txt}, user_info)
         if status:
-            result = [[f'{func_box.html_tag_color("!!!!已有其他人保存同名的prompt，请修改prompt名称后再保存", color="red")}', '']]
-            prompt['samples'] = [[name, txt]]
-            return txt, name, cls_update, gr.Dataset.update(samples=result, visible=True), prompt, gr.Tabs.update(selected='chatbot')
+            raise gr.Error('!!!!已有其他人保存同名的prompt，请修改prompt名称后再保存')
         else:
             result = prompt_retrieval(is_all=cls_name, hosts=tab_cls)
             prompt['samples'] = result
             return "", "", cls_update, gr.Dataset.update(samples=result, visible=True), prompt, gr.Tabs.update(
                 selected='chatbot')
     elif not txt or not name:
-        result = [[f'{func_box.html_tag_color("编辑框 or 名称不能为空!!!!!", color="red")}', '']]
-        prompt['samples'] = [[name, txt]]
-        return txt, name, cls_name, gr.Dataset.update(samples=result, visible=True), prompt, gr.Tabs.update(selected='chatbot')
-
-
-def prompt_reduce(is_all, prompt: gr.Dataset, pro_cls, ipaddr: gr.Request):  # is_all, ipaddr: gr.Request
-    """
-    刷新提示词
-    Args:
-        is_all： prompt类型
-        prompt： dataset原始对象
-        ipaddr：请求用户信息
-    Returns:
-        返回注册函数所需的对象
-    """
-    tab_cls = func_box.non_personal_tag(pro_cls, ipaddr.client.host)
-    data = prompt_retrieval(is_all=is_all, hosts=tab_cls)
-    prompt['samples'] = data
-    return gr.Dataset.update(samples=data, visible=True), prompt, is_all
+        raise gr.Error('!!!!编辑框 or 名称不能为空!!!!')
 
 
 def prompt_input(txt: str, prompt_str, name_str,  index, data: gr.Dataset, tabs_index):
@@ -195,6 +208,32 @@ def prompt_input(txt: str, prompt_str, name_str,  index, data: gr.Dataset, tabs_
     if prompt_str != '' or name_str != '':
         data_str, data_name = prompt_str, name_str
     return new_txt, data_str, data_name
+
+
+def show_prompt_result(index, data: gr.Dataset, chatbot, pro_edit, pro_name):
+    """
+    查看Prompt的对话记录结果
+    Args:
+        index： 点击的Dataset下标
+        data： dataset原始对象
+        chatbot：聊天机器人
+    Returns:
+        返回注册函数所需的对象
+    """
+    click = data['samples'][index]
+    if func_box.str_is_list(click[2]):
+        list_copy = eval(click[2])
+        for i in range(0, len(list_copy), 2):
+            if i + 1 >= len(list_copy):  # 如果下标越界了，单独处理最后一个元素
+                chatbot.append([list_copy[i]])
+            else:
+                chatbot.append([list_copy[i], list_copy[i + 1]])
+            yield chatbot, pro_edit, pro_name, gr.Tabs.update(), gr.Accordion.update()
+    elif click[2] is None:
+        pro_edit = click[1]
+        pro_name = click[3]
+        chatbot.append([click[3], click[1]])
+    yield chatbot, pro_edit, pro_name, gr.Tabs.update(selected='func_tab'), gr.Accordion.update(open=True)
 
 
 # TODO < -------------------------------- 搜索函数注册区 -------------------------------->
@@ -311,31 +350,6 @@ def draw_results(txt, prompt: dict, percent, switch, ipaddr: gr.Request):
     prompt['samples'] = data
     return gr.Dataset.update(samples=data, visible=True), prompt
 
-
-def show_prompt_result(index, data: gr.Dataset, chatbot, pro_edit, pro_name):
-    """
-    查看Prompt的对话记录结果
-    Args:
-        index： 点击的Dataset下标
-        data： dataset原始对象
-        chatbot：聊天机器人
-    Returns:
-        返回注册函数所需的对象
-    """
-    click = data['samples'][index]
-    if func_box.str_is_list(click[2]):
-        list_copy = eval(click[2])
-        for i in range(0, len(list_copy), 2):
-            if i + 1 >= len(list_copy):  # 如果下标越界了，单独处理最后一个元素
-                chatbot.append([list_copy[i]])
-            else:
-                chatbot.append([list_copy[i], list_copy[i + 1]])
-            yield chatbot, pro_edit, pro_name, gr.Tabs.update(), gr.Accordion.update()
-    elif click[2] is None:
-        pro_edit = click[1]
-        pro_name = click[3]
-        chatbot.append([click[3], click[1]])
-    yield chatbot, pro_edit, pro_name, gr.Tabs.update(selected='func_tab'), gr.Accordion.update(open=True)
 
 
 # TODO < -------------------------------- 页面刷新函数注册区 -------------------------------->

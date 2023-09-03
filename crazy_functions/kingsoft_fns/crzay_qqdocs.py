@@ -6,11 +6,12 @@
 import re
 import json
 import time
-
+import os
 import requests
 
 from comm_tools import func_box
 from comm_tools import toolbox
+from crazy_functions.kingsoft_fns import crazy_box
 
 
 class QQDocs:
@@ -19,11 +20,7 @@ class QQDocs:
         self._hosts = 'docs.qq.com'
         self.link = link
         self.link_id = self.split_link_id()
-        self.file_info_dict = {
-            'tag': '',
-            'name': '',
-            'type': ''
-        }
+        self.file_info_dict = {'tag': '',}
         self.cookies, = toolbox.get_conf('QQ_COOKIES')
         self.file_info_header = {
             'Host': self._hosts,
@@ -70,8 +67,6 @@ class QQDocs:
             dict_info = json.loads(json_resp[0])
             info_vars = dict_info['clientVars']
             self.file_info_dict['tag'] = info_vars.get('padId', '')
-            self.file_info_dict['name'] = info_vars.get('padTitle', '')
-            self.file_info_dict['type'] = info_vars.get('padType', '')
 
     def submit_the_blind_task(self):
         blind_task_params = {
@@ -97,16 +92,18 @@ class QQDocs:
                 raise TypeError(f'该类型文档不支持导出\n {json_resp}')
             file_url = json_resp.get('file_url', '')
             if file_url:
-                return file_url
+                file_name = json_resp.get('file_name')
+                return file_url, file_name
             else:
                 print(f'下载任务进度： {json_resp.get("progress")}')
-                time.sleep(1)
 
 
+def get_qqdocs_files():
+    pass
 
 
 if __name__ == '__main__':
-    qqdocs = QQDocs('')
+    qqdocs = QQDocs('https://docs.qq.com/slide/DS2FGRVdxdE1LTURI')
     print(qqdocs.obtain_file_download_link())
 
 
