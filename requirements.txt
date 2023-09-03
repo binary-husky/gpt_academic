@@ -15,4 +15,11 @@ pymupdf
 openai
 numpy
 arxiv
+pymupdf
+pyperclip
+scikit-learn
+psutil
+distro
+python-dotenv
 rich
+Levenshtein

@@ -103,3 +103,30 @@ services:
                       echo '[jittorllms] 正在从github拉取最新代码...' &&
                       git --git-dir=request_llm/jittorllms/.git --work-tree=request_llm/jittorllms pull --force &&
                       python3 -u main.py"
+
+
+## ===================================================
+## 【方案四】 chatgpt + Latex
+## ===================================================
+version: '3'
+services:
+  gpt_academic_with_latex:
+    image: ghcr.io/binary-husky/gpt_academic_with_latex:master
+    environment:
+      # 请查阅 `config.py` 以查看所有的配置信息
+      API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                              '
+      USE_PROXY:                '    True                                                                             '
+      proxies:                  '    { "http": "socks5h://localhost:10880", "https": "socks5h://localhost:10880", }   '
+      LLM_MODEL:                '    gpt-3.5-turbo                                                                    '
+      AVAIL_LLM_MODELS:         '    ["gpt-3.5-turbo", "gpt-4"]                                                       '
+      LOCAL_MODEL_DEVICE:       '    cuda                                                                             '
+      DEFAULT_WORKER_NUM:       '    10                                                                               '
+      WEB_PORT:                 '    12303                                                                            '
+
+    # 与宿主的网络融合
+    network_mode: "host"
+
+    # 不使用代理网络拉取最新代码
+    command: >
+      bash -c "python3 -u main.py"
+

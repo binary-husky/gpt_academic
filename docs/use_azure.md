@@ -96,6 +96,15 @@
 
 ● 部署名（不是模型名）
 
+# 修改 config.py
+
+```
+AZURE_ENDPOINT = "填入终结点"
+AZURE_API_KEY = "填入azure openai api的密钥"
+AZURE_API_VERSION = "2023-05-15"  # 默认使用 2023-05-15 版本，无需修改
+AZURE_ENGINE = "填入部署名"
+
+```
 # API的使用
 
 接下来就是具体怎么使用API了，还是可以参考官方文档：[快速入门 - 开始通过 Azure OpenAI 服务使用 ChatGPT 和 GPT-4 - Azure OpenAI Service | Microsoft Learn](https://learn.microsoft.com/zh-cn/azure/cognitive-services/openai/chatgpt-quickstart?pivots=programming-language-python)
