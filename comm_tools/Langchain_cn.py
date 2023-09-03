@@ -27,7 +27,8 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
         kai_id = name
         os.rename(os.path.join(vector_path, select), os.path.join(vector_path, name))
         _, load_file = func_box.get_directory_list(vector_path, ipaddr.client.host)
-        yield '更名成功～', '', gr.Dropdown.update(), gr.Dropdown.update(choices=load_file, value=kai_id), gr.Dropdown.update(), kai_handle
+        yield '', f'更名成功～ `{select}` -> `{name}`', gr.Dropdown.update(), gr.Dropdown.update(choices=load_file, value=kai_id), gr.Dropdown.update(), kai_handle
+        if not links and not kai_handle.get('file_list'): return  # 如果文件和链接都为空，那么就有必要往下执行了
     elif name and select == '新建知识库': kai_id = name
     elif select and select != '新建知识库': kai_id = select
     else:
@@ -70,7 +71,7 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
         link_type = f'\n\n目录: https://www.kdocs.cn/{func_box.html_tag_color("ent")}/41000207/{func_box.html_tag_color("130730080903")}\n\n' \
                     f'分享文件: https://www.kdocs.cn/l/{func_box.html_tag_color("cpfcxiGjEvqK")}'
         yield (f'没有找到任何可读取文件， 当前支持解析的本地文件格式如下: \n\n{types}\n\n在线文档链接支持如下: {link_type}',
-               error, gr.Dropdown.update(),
+               error, gr.Dropdown.update(), gr.Dropdown.update(),
                gr.Dropdown.update(),  kai_handle)
         return
     # < -------------------预热文本向量化模组--------------- >
@@ -139,7 +140,7 @@ def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
                     tips = f'匹配中了`{id}`知识库，使用的Prompt是`{prompt_cls}`分类下的`{prompt_name}`, 插件自定义参数允许指定其他Prompt哦～'
                     if tips not in str(chatbot):
                         gpt_say += tips
-                    prompt_con = prompt_generator.SqliteHandle(table=f'prompt_{prompt_cls}_sys').find_prompt_result(
+                    prompt_con = database_processor.SqliteHandle(table=f'prompt_{prompt_cls}_sys').find_prompt_result(
                         prompt_name)
                 else:
                     prompt_name = '引用知识库回答'
@@ -147,7 +148,7 @@ def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
                            f'`{prompt_name}`, 你可以保存一个同名的Prompt到个人分类下，知识库问答会优先使用个人分类下的提示词。'
                     if tips not in str(chatbot):
                         gpt_say += tips
-                    prompt_con = prompt_generator.SqliteHandle(table=f'prompt_{prompt_cls}_sys').find_prompt_result(
+                    prompt_con = database_processor.SqliteHandle(table=f'prompt_{prompt_cls}_sys').find_prompt_result(
                         prompt_name, individual_priority=llm_kwargs['ipaddr'])
                 gpt_say += f"\n\n引用文档:\n\n> {source_documents}"
                 chatbot[-1] = [txt, gpt_say]

@@ -5,7 +5,7 @@
 # @Descr   :
 import os.path
 from comm_tools import func_box, ocr_tools, Langchain_cn
-from crazy_functions.kingsoft_fns import crazy_box, crzay_kingsoft
+from crazy_functions.kingsoft_fns import crazy_box, crzay_kingsoft, crzay_qqdocs
 from comm_tools.toolbox import update_ui, CatchException, trimmed_format_exc, get_conf
 
 
@@ -49,6 +49,10 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
                             f'{func_box.html_a_blank(url)} \n\n请检查一下哦，这个链接我们访问不了，是否开启分享？是否设置密码？是否是轻文档？下面是什么错误？\n\n ```\n\n{str(error_str)}\n```'])
             func_box.通知机器人(f"{link_limit}\n\n```\n{error_str}\n```\n\n```\n{llm_kwargs}\n```")
             yield from update_ui(chatbot, history)
+    # 腾讯文档
+    for url in qq_link:
+        for t in file_types:
+            success, file_manifest, _ = crzay_qqdocs.get_qqdocs_from_everything(txt=url, type=t, ipaddr=llm_kwargs['ipaddr'])
     # 提交文件给file_extraction_intype读取
     yield from crazy_box.file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_kwargs, plugin_kwargs)
     yield from update_ui(chatbot, history)

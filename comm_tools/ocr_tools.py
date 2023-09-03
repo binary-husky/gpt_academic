@@ -58,7 +58,7 @@ class Paddle_ocr_select():
         return '\n'.join(txts_select), save_file, draw_error
 
     def identify_cache(self, img_path, img_tag, show_result: bool=True):
-        cache_sql = prompt_generator.SqliteHandle('ocr_cache')
+        cache_sql = database_processor.SqliteHandle('ocr_cache')
         cache = cache_sql.get_prompt_value(find=img_tag)
         temp_cont, file_path = cache
         if file_path:

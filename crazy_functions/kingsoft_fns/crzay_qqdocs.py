@@ -98,13 +98,48 @@ class QQDocs:
                 print(f'下载任务进度： {json_resp.get("progress")}')
 
 
-def get_qqdocs_files():
-    pass
+def get_qqdocs_files(limit, project_folder, type, ipaddr):
+    """
+    Args:
+        limit: 腾讯文档分享文件地址
+        project_folder: 存储地址
+        type: 指定的文件类型
+        ipaddr: 用户信息
+    Returns: [提取的文件list]
+    """
+    qqdocs = QQDocs(limit)
+    d_link, f_name = qqdocs.obtain_file_download_link()
+    if type in f_name:
+        resp = requests.get(url=d_link, verify=False)
+        file_path = os.path.join(project_folder, f_name)
+        with open(file_path, mode='wb') as f:
+            f.write(resp.content)
+        return [file_path]
+    return []
+
+
+def get_qqdocs_from_everything(txt, type='', ipaddr='temp'):
+    """
+    Args:
+        txt: kudos 文件分享码
+        type: type=='' 时，将支持所有文件类型
+        ipaddr: 用户信息
+    Returns:
+    """
+    link_limit = crazy_box.Utils().split_startswith_txt(link_limit=txt)
+    file_manifest = []
+    success = ''
+    project_folder = os.path.join(func_box.users_path, ipaddr, 'qqdocs')
+    os.makedirs(project_folder, exist_ok=True)
+    for limit in link_limit:
+        file_manifest += get_qqdocs_files(limit, project_folder, type, ipaddr)
+    return success, file_manifest, project_folder
+
 
 
 if __name__ == '__main__':
-    qqdocs = QQDocs('https://docs.qq.com/slide/DS2FGRVdxdE1LTURI')
-    print(qqdocs.obtain_file_download_link())
+    pass
+
 
 
 
