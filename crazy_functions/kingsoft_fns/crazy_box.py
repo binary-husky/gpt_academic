@@ -11,7 +11,7 @@ import time
 import xmindparser
 from typing import Dict
 import typing as typing
-from comm_tools import func_box, ocr_tools, toolbox, prompt_generator, Langchain_cn
+from comm_tools import func_box, ocr_tools, toolbox, database_processor, Langchain_cn
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Border, Side

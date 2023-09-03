@@ -8,7 +8,7 @@ import requests
 from comm_tools import func_box
 from paddleocr import PaddleOCR, draw_ocr, PPStructure, save_structure_res
 import concurrent.futures
-from comm_tools import prompt_generator
+from comm_tools import database_processor
 # Paddleocr目前支持的多语言语种可以通过修改lang参数进行切换
 # 例如`ch`, `en`, `fr`, `german`, `korean`, `japan`
 

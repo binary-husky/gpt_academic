@@ -12,7 +12,7 @@ import Levenshtein
 from concurrent.futures import ThreadPoolExecutor
 
 from comm_tools import toolbox
-from comm_tools.prompt_generator import SqliteHandle
+from comm_tools.database_processor import SqliteHandle
 from comm_tools import func_box
 
 

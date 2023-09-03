@@ -4,7 +4,7 @@ import threading
 from comm_tools import toolbox
 from crazy_functions import crazy_utils
 import gradio as gr
-from comm_tools import func_box, prompt_generator
+from comm_tools import func_box, database_processor
 from crazy_functions.kingsoft_fns import crazy_box, crzay_kingsoft
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 
