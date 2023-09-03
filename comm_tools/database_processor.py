@@ -8,10 +8,12 @@ import os.path
 import sqlite3
 import functools
 import time
-
-
+import psutil
 # 连接到数据库
 
+base_path = os.path.dirname(os.path.dirname(__file__))
+users_data = os.path.join(base_path, 'users_data')
+export_path = os.path.join(users_data, 'export_prompt')
 
 
 def connect_db_close(cls_method):
@@ -24,10 +26,17 @@ def connect_db_close(cls_method):
     return wrapper
 
 
+def ipaddr():
+    # 获取本地ipx
+    ip = psutil.net_if_addrs()
+    for i in ip:
+        if ip[i][0][3]:
+            return ip[i][0][1]
+
+
 class SqliteHandle:
     def __init__(self, table='ai_common', database='ai_private.db', auto=True):
-        self.base_path = os.path.dirname(os.path.dirname(__file__))
-        self.prompt_path = os.path.join(self.base_path, 'users_data')
+        self.prompt_path = users_data
         self.__database = database
         if auto:  # 自动查库
             if table.startswith('ai_private_') or table.startswith('ai_common_') or table.startswith('ocr'):
@@ -150,46 +159,46 @@ def cp_db_data(incloud_tab='prompt_'):
             sqlite_handle(table=i).inset_prompt(old_data, source)
 
 
-def batch_inset_prompt(json_path):
+def batch_inset_prompt(json_path=None):
+    if json_path: json_path = export_path
     for json_ in os.listdir(json_path):
         with open(os.path.join(json_path, json_), 'r') as f:
             data_list = json.load(f)
         for i in data_list:
             source = os.path.basename(os.path.join(json_path, json_)).split('.')[0]
-            sqlite_handle(table=f"prompt_{source}_sys", database='ai_prompt_cp.db').inset_prompt(prompt={i['act']: i['prompt']}, source=source)
+            source_addr = ipaddr()
+            sqlite_handle(table=f"prompt_{source}_sys", database='ai_prompt_cp.db').inset_prompt(prompt={i['act']: i['prompt']}, source=source_addr)
 
 
 def batch_add_source():
-    sql_ll = sqlite_handle(database='ai_prompt_cp.db')
+    sql_ll = sqlite_handle(database='ai_prompt.db')
     tabs = sql_ll.get_tables()
     for t in tabs:
-        sqlite_handle(table=t, database='ai_prompt_cp.db').add_column_type('source')
+        sqlite_handle(table=t, database='ai_prompt.db').add_column_type('source')
 
 
 def batch_export_prompt(incloud_tab='prompt_'):
-    sql_ll = sqlite_handle(database='ai_prompt_cp.db')
+    sql_ll = sqlite_handle(database='ai_prompt.db')
     tabs = sql_ll.get_tables()
     for i in tabs:
-        if str(i).startswith(incloud_tab):
-            source = i.split('_')[-1]
-            result = sqlite_handle(table=i, database='ai_prompt_cp.db').get_prompt_value_temp()
+        if str(i).startswith(incloud_tab) and str(i).endswith('sys'):
+            source = i.split('_')[1]
+            result = sqlite_handle(table=i, database='ai_prompt.db').get_prompt_value_temp()
             file_dict = []
             for k in result:
                 file_dict.append({'act': k, 'prompt': result[k]})
             if file_dict:
-                file_path = os.path.join('/Users/kilig/Job/Python-project/kso_gpt/users_data/export_prompt')
-                os.makedirs(file_path, exist_ok=True)
-                with open(os.path.join(file_path, f"{source}.json"), mode='w', encoding='utf-8') as f:
+                os.makedirs(export_path, exist_ok=True)
+                with open(os.path.join(export_path, f"{source}.json"), mode='w', encoding='utf-8') as f:
                     f.write(json.dumps(file_dict, ensure_ascii=False))
-                    print(f'{source}已导出', os.path.join(file_path, f"{source}.json"))
+                    print(f'{source}已导出', os.path.join(export_path, f"{source}.json"))
 
 
 def database_separation():
     import shutil
-    base_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'users_data')
-    base_db = os.path.join(base_path, 'ai_prompt.db')
-    shutil.copy(base_db, os.path.join(base_path, 'ai_prompt_cp.db'))
-    shutil.copy(base_db, os.path.join(base_path, 'ai_private.db'))
+    base_db = os.path.join(users_data, 'ai_prompt.db')
+    shutil.copy(base_db, os.path.join(users_data, 'ai_prompt_cp.db'))
+    shutil.copy(base_db, os.path.join(users_data, 'ai_private.db'))
     prompt = sqlite_handle(database='ai_prompt.db', auto=False)
     common = sqlite_handle(database='ai_private.db', auto=False)
     time.sleep(3)
@@ -231,6 +240,10 @@ def main():
     parser.add_argument('--tab_start', metavar='text', help='指定数据表, 默认prompt_插件定制_sys')
     parser.add_argument('--source', metavar='text', help='**增加source')
     parser.add_argument('--split', metavar='text', help='**分离数据库, 随便给一个')
+    parser.add_argument('command', metavar='command',
+                        choices=['batch_export', 'batch_import'], help='执行的操作命令 \n\n'
+                                                                       'batch_export: 批量导出提示词 \n\n'
+                                                                       'batch_import: 批量导入提示词')
     args = parser.parse_args()
     if args.source:
         if not args.tab:
@@ -238,7 +251,10 @@ def main():
         if not args.database:
             args.database = 'ai_prompt.db'
         SqliteHandle(table=args.tab, database=args.database).update_value(new_source=args.source)
-
+    elif args.command == 'batch_export':  # 根据命令参数执行对应的操作
+        batch_export_prompt()
+    elif args.command == 'batch_import':
+        batch_inset_prompt()
     elif args.split:
         database_separation()
     else:
