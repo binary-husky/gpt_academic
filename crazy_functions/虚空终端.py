@@ -36,7 +36,7 @@ explain_msg = """
 
 2. 如果您使用「调用插件xxx」、「修改配置xxx」、「请问」等关键词，您的意图可以被识别的更准确。
 
-3. 使用GPT4等强力模型时，您的意图可以被识别的更准确。该插件诞生时间不长，欢迎您前往Github反馈问题。
+3. 建议使用 GPT3.5 或更强的模型，弱模型可能无法理解您的想法。该插件诞生时间不长，欢迎您前往Github反馈问题。
 
 4. 现在，如果需要处理文件，请您上传文件（将文件拖动到文件上传区），或者描述文件所在的路径。
 
@@ -46,7 +46,7 @@ explain_msg = """
 from pydantic import BaseModel, Field
 from typing import List
 from toolbox import CatchException, update_ui, gen_time_str
-from toolbox import update_ui_lastest_msg
+from toolbox import update_ui_lastest_msg, disable_auto_promotion
 from request_llm.bridge_all import predict_no_ui_long_connection
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from crazy_functions.crazy_utils import input_clipping
@@ -104,6 +104,7 @@ def analyze_intention_with_simple_rules(txt):
 
 @CatchException
 def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    disable_auto_promotion(chatbot=chatbot)
     # 获取当前虚空终端状态
     state = VoidTerminalState.get_state(chatbot)
     appendix_msg = ""
@@ -142,14 +143,17 @@ def 虚空终端主路由(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
         yield from update_ui_lastest_msg(
             lastmsg=f"正在执行任务: {txt}\n\n分析用户意图中", chatbot=chatbot, history=history, delay=0)
         gpt_json_io = GptJsonIO(UserIntention)
-        inputs = "Analyze the intention of the user according to following user input: \n\n" + txt + '\n\n' + gpt_json_io.format_instructions
+        rf_req = "\nchoose from ['ModifyConfiguration', 'ExecutePlugin', 'Chat']"
+        inputs = "Analyze the intention of the user according to following user input: \n\n" + \
+            ">> " + (txt+rf_req).rstrip('\n').replace('\n','\n>> ') + '\n\n' + gpt_json_io.format_instructions
         run_gpt_fn = lambda inputs, sys_prompt: predict_no_ui_long_connection(
             inputs=inputs, llm_kwargs=llm_kwargs, history=[], sys_prompt=sys_prompt, observe_window=[])
         try:
             user_intention = gpt_json_io.generate_output_auto_repair(run_gpt_fn(inputs, ""), run_gpt_fn)
+            lastmsg=f"正在执行任务: {txt}\n\n用户意图理解: 意图={explain_intention_to_user[user_intention.intention_type]}", 
         except:
             yield from update_ui_lastest_msg(
-                lastmsg=f"正在执行任务: {txt}\n\n用户意图理解: 失败 当前语言模型不能理解您的意图", chatbot=chatbot, history=history, delay=0)
+                lastmsg=f"正在执行任务: {txt}\n\n用户意图理解: 失败 当前语言模型（{llm_kwargs['llm_model']}）不能理解您的意图", chatbot=chatbot, history=history, delay=0)
             return
     else:
         pass
