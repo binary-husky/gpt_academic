@@ -298,6 +298,11 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 <img src="https://github.com/binary-husky/gpt_academic/assets/96192199/b6799499-b6fb-4f0c-9c8e-1b441872f4e8" width="500" >
 </div>
 
+12. 虚空终端
+<div align="center">
+<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/66f1b044-e9ff-4eed-9126-5d4f3668f1ed" width="500" >
+</div>
+
 
 ### II：版本:
 - version 3.60（todo）: 优化虚空终端，引入code interpreter和更多插件
