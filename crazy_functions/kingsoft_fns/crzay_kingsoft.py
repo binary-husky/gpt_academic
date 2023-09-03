@@ -383,7 +383,7 @@ def get_kdocs_files(limit, project_folder, type, ipaddr):
         return [temp_file]
 
 
-def get_kdocs_from_everything(txt, type='', ipaddr='temp'):
+def get_kdocs_from_everything(txt, type=[''], ipaddr='temp'):
     """
     Args:
         txt: kudos 文件分享码

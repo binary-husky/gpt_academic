@@ -434,6 +434,8 @@ def file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_
             file_content, _ = crazy_utils.read_and_clean_pdf_text(file_path)
             content = "".join(file_content)
             file_limit.extend([title, content])
+        elif file_path.endswith('docx') or file_path.endswith('doc'):
+            pass
         elif file_path.endswith('xmind'):
             file_content, _path = XmindHandle().xmind_2_md(pathSource=file_path)
             file_limit.extend([title, file_content])

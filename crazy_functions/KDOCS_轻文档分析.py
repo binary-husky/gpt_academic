@@ -74,7 +74,7 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
 
 
 def func_格式化文档(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port, to_kdocs=True):
-    file_types = ['md', 'txt', 'pdf', 'xmind', '智能文档', 'pptx']
+    file_types = ['md', 'txt', 'pdf', 'xmind', '智能文档']
     if to_kdocs:
         file_limit = yield from func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, file_types)
     else:
@@ -163,7 +163,7 @@ def Kdocs_多阶段生成回答(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
             yield from crazy_box.file_extraction_intype(plugin_kwargs[stage], [''], file_limit, chatbot, history, llm_kwargs, plugin_kwargs)
 
     if not multi_stage_config:
-        chatbot.append(['发生了什么事情？', '!!!!! 自定义参数中的Json存在问题，请仔细检查配置是否符合JSON编码格式'])
+        chatbot.append(['发生了什么事情？', f'!!!!! 自定义参数中的Json存在问题，请仔细检查以下配置是否符合JSON编码格式\n\n```\n{plugin_kwargs["advanced_arg"]}```'])
         yield from update_ui(chatbot=chatbot, history=history)
 
 @CatchException
