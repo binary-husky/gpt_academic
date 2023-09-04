@@ -52,6 +52,7 @@ def prompt_retrieval(is_all, hosts='', search=False):
     """
     all_, personal = toolbox.get_conf('preset_prompt')[0]['key']
     count_dict = {}
+    hosts = func_box.non_personal_tag(is_all, hosts)
     if all_ == is_all:
         for tab in SqliteHandle('prompt_').get_tables():
             if tab.startswith('prompt'):
@@ -267,7 +268,6 @@ def diff_list(txt='', percent=0.70, switch: list = None, lst: dict = None, sp=15
         lst.update(data)
     # diff 数据，根据precent系数归类数据
     str_ = time.time()
-
     def tf_factor_calcul(i):
         found = False
         dict_copy = count_dict.copy()

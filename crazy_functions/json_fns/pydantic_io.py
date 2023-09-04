@@ -89,7 +89,7 @@ class GptJsonIO():
         except Exception as e:
             try:
                 logging.info(f'Repairing json：{response}')
-                repair_prompt = self.generate_repair_prompt(broken_json = response, error=repr(e))
+                repair_prompt = self.generate_repair_prompt(broken_json=response, error=repr(e))
                 result = self.generate_output(gpt_gen_fn(repair_prompt, self.format_instructions))
                 logging.info('Repaire json success.')
             except Exception as e:
