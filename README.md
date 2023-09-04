@@ -250,10 +250,13 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 <img src="https://github.com/binary-husky/gpt_academic/assets/96192199/9fdcc391-f823-464f-9322-f8719677043b" height="250" >
 </div>
 
-3. 生成报告。大部分插件都会在执行结束后，生成工作报告
+3. 虚空终端（从自然语言输入中，理解用户意图+自动调用其他插件）
+
+- 步骤一：输入 “ 请调用插件翻译PDF论文，地址为https://www.nature.com/articles/s41586-019-1724-z.pdf ”
+- 步骤二：点击“虚空终端”
+
 <div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/227503770-fe29ce2c-53fd-47b0-b0ff-93805f0c2ff4.png" height="250" >
-<img src="https://user-images.githubusercontent.com/96192199/227504617-7a497bb3-0a2a-4b50-9a8a-95ae60ea7afd.png" height="250" >
+<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/66f1b044-e9ff-4eed-9126-5d4f3668f1ed" width="500" >
 </div>
 
 4. 模块化功能设计，简单的接口却能支持强大的功能
@@ -299,15 +302,6 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 <img src="https://github.com/binary-husky/gpt_academic/assets/96192199/b6799499-b6fb-4f0c-9c8e-1b441872f4e8" width="500" >
 </div>
 
-12. 虚空终端
-
-步骤一：“请调用插件翻译PDF论文，地址为https://www.nature.com/articles/s41586-019-1724-z.pdf”
-
-步骤二：点击“虚空终端”
-
-<div align="center">
-<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/66f1b044-e9ff-4eed-9126-5d4f3668f1ed" width="500" >
-</div>
 
 
 ### II：版本:
