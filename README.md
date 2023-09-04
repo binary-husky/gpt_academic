@@ -300,6 +300,11 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 </div>
 
 12. 虚空终端
+
+步骤一：“请调用插件翻译PDF论文，地址为https://www.nature.com/articles/s41586-019-1724-z.pdf”
+
+步骤二：点击“虚空终端”
+
 <div align="center">
 <img src="https://github.com/binary-husky/gpt_academic/assets/96192199/66f1b044-e9ff-4eed-9126-5d4f3668f1ed" width="500" >
 </div>
