@@ -29,7 +29,7 @@ def spinner_chatbot_loading(chatbot):
 
 
 def filter_database_tables():
-    tables = SqliteHandle().get_tables()
+    tables = SqliteHandle(database='ai_prompt.db').get_tables()
     preset = toolbox.get_conf('preset_prompt')[0]['key']
     split_tab = []
     for t in tables:
