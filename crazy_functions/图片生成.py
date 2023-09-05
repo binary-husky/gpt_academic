@@ -34,10 +34,8 @@ def gen_image(llm_kwargs, prompt, resolution="256x256"):
     file_path = 'gpt_log/image_gen/'
     os.makedirs(file_path, exist_ok=True)
     file_name = 'Image' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + '.png'
-    with open(file_path + file_name, 'wb+') as f:
-        f.write(r.content)
-    return image_url, file_path + file_name
-
+    with open(file_path+file_name, 'wb+') as f: f.write(r.content)
+    return image_url, file_path+file_name
 
 
 

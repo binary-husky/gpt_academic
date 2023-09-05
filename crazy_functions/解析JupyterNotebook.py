@@ -145,7 +145,6 @@ def 解析ipynb文件(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
         return
     yield from ipynb解释(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, )
 
-
 if __name__ == '__main__':
     import json
     filename = ''

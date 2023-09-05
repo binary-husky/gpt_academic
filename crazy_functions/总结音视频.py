@@ -108,7 +108,7 @@ def AnalyAudio(parse_prompt, file_manifest, llm_kwargs, chatbot, history):
         # 已经对该文章的所有片段总结完毕，如果文章被切分了
         result = "".join(audio_history)
         if len(audio_history) > 1:
-            i_say = f"根据以上的对话，总结音频“{result}”的主要内容。"
+            i_say = f"根据以上的对话，使用中文总结音频“{result}”的主要内容。"
             i_say_show_user = f'第{index + 1}段音频的主要内容：'
             gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
                 inputs=i_say,
@@ -116,7 +116,7 @@ def AnalyAudio(parse_prompt, file_manifest, llm_kwargs, chatbot, history):
                 llm_kwargs=llm_kwargs,
                 chatbot=chatbot,
                 history=audio_history,
-                sys_prompt=""
+                sys_prompt="总结文章。"
             )
 
             history.extend([i_say, gpt_say])
@@ -136,6 +136,7 @@ def AnalyAudio(parse_prompt, file_manifest, llm_kwargs, chatbot, history):
 
 @CatchException
 def 总结音视频(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, WEB_PORT):
+    import glob, os
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
@@ -242,12 +243,3 @@ def Kdocs音频提取总结(txt, llm_kwargs, plugin_kwargs, chatbot, history, sy
     inputs_array, inputs_show_user_array = yield from crazy_box.input_output_processing(txt_manifest, llm_kwargs, plugin_kwargs, chatbot, history)
     gpt_response_collection = yield from crazy_box.submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs)
     yield from update_ui(chatbot, history, '插件执行成功')
-
-if __name__ == '__main__':
-    file = "/Users/kilig/Desktop/resource/142856_151312_知识库ai问答-实现原理讲解.mp4"
-    temp_list = []
-    temp_path = os.path.join(os.path.dirname(file), f"{os.path.basename(file)}.wav")
-    videoclip = AudioFileClip(file)
-    videoclip.write_audiofile(temp_path)
-    temp_list.extend((temp_path, audio_extraction_text(temp_path)))
-    print(videoclip)

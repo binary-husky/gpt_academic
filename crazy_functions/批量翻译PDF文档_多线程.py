@@ -1,3 +1,4 @@
+
 from comm_tools.toolbox import CatchException, report_execption, write_results_to_file
 from comm_tools.toolbox import update_ui, promote_file_to_downloadzone, update_ui_lastest_msg, disable_auto_promotion
 from comm_tools.toolbox import write_history_to_file, get_log_folder
@@ -5,9 +6,10 @@ from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 from .crazy_utils import read_and_clean_pdf_text
 from .pdf_fns.parse_pdf import parse_pdf, get_avail_grobid_url
+from comm_tools.colorful import *
+import glob
 import os
 import math
-
 
 @CatchException
 def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
@@ -57,6 +59,7 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
 
 def 解析PDF_基于GROBID(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, grobid_url):
     import copy
+    import tiktoken
     TOKEN_LIMIT_PER_FRAGMENT = 1280
     generated_conclusion_files = []
     generated_html_files = []

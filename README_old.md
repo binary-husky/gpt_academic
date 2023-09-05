@@ -1,3 +1,4 @@
+=======
 > **Note**
 >
 > 2023.7.8: Gradio, Pydantic依赖调整，已修改 `requirements.txt`。请及时**更新代码**，安装依赖时，请严格选择`requirements.txt`中**指定的版本**
@@ -10,13 +11,13 @@
 **如果喜欢这个项目，请给它一个Star；如果您发明了好用的快捷键或函数插件，欢迎发pull requests！**
 
 If you like this project, please give it a Star. If you've come up with more useful academic shortcuts or functional plugins, feel free to open an issue or pull request. We also have a README in [English|](docs/README_EN.md)[日本語|](docs/README_JP.md)[한국어|](https://github.com/mldljyh/ko_gpt_academic)[Русский|](docs/README_RS.md)[Français](docs/README_FR.md) translated by this project itself.
-To translate this project to arbitary language with GPT, read and run [`multi_language.py`](comm_tools/multi_language.py) (experimental).
+To translate this project to arbitary language with GPT, read and run [`multi_language.py`](multi_language.py) (experimental).
 
 > **Note**
 >
-> 1.请注意只有 **高亮(如红色)** 标识的函数插件（按钮）才支持读取文件，部分插件位于插件区的**下拉菜单**中。另外我们以**最高优先级**欢迎和处理任何新插件的PR。
+> 1.请注意只有 **高亮** 标识的函数插件（按钮）才支持读取文件，部分插件位于插件区的**下拉菜单**中。另外我们以**最高优先级**欢迎和处理任何新插件的PR。
 >
-> 2.本项目中每个文件的功能都在[自译解报告`self_analysis.md`](https://github.com/binary-husky/gpt_academic/wiki/GPT‐Academic项目自译解报告)详细说明。随着版本的迭代，您也可以随时自行点击相关函数插件，调用GPT重新生成项目的自我解析报告。常见问题汇总在[`wiki`](https://github.com/binary-husky/gpt_academic/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98)当中。[安装方法](#installation)。
+> 2.本项目中每个文件的功能都在[自译解报告`self_analysis.md`](https://github.com/binary-husky/gpt_academic/wiki/GPT‐Academic项目自译解报告)详细说明。随着版本的迭代，您也可以随时自行点击相关函数插件，调用GPT重新生成项目的自我解析报告。常见问题[`wiki`](https://github.com/binary-husky/gpt_academic/wiki)。[安装方法](#installation) | [配置说明](https://github.com/binary-husky/gpt_academic/wiki/%E9%A1%B9%E7%9B%AE%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E)。
 > 
 > 3.本项目兼容并鼓励尝试国产大语言模型ChatGLM和Moss等等。支持多个api-key共存，可在配置文件中填写如`API_KEY="openai-key1,openai-key2,azure-key3,api2d-key4"`。需要临时更换`API_KEY`时，在输入区输入临时的`API_KEY`然后回车键提交后即可生效。
 
@@ -53,7 +54,8 @@ Latex论文一键校对 | [函数插件] 仿Grammarly对Latex文章进行语法�
 [多LLM模型](https://www.bilibili.com/video/BV1wT411p7yf)支持 | 同时被GPT3.5、GPT4、[清华ChatGLM2](https://github.com/THUDM/ChatGLM2-6B)、[复旦MOSS](https://github.com/OpenLMLab/MOSS)同时伺候的感觉一定会很不错吧？
 ⭐ChatGLM2微调模型 | 支持加载ChatGLM2微调模型，提供ChatGLM2微调辅助插件
 更多LLM模型接入，支持[huggingface部署](https://huggingface.co/spaces/qingxu98/gpt-academic) | 加入Newbing接口(新必应)，引入清华[Jittorllms](https://github.com/Jittor/JittorLLMs)支持[LLaMA](https://github.com/facebookresearch/llama)和[盘古α](https://openi.org.cn/pangu/)
-⭐[虚空终端](https://github.com/binary-husky/void-terminal)pip包 | 脱离GUI，在Python中直接调用本项目的函数插件（开发中）
+⭐[void-terminal](https://github.com/binary-husky/void-terminal) pip包 | 脱离GUI，在Python中直接调用本项目的所有函数插件（开发中）
+⭐虚空终端插件 | 用自然语言，直接调度本项目其他插件
 更多新功能展示 (图像生成等) …… | 见本文档结尾处 ……
 </div>
 
@@ -249,10 +251,13 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 <img src="https://github.com/binary-husky/gpt_academic/assets/96192199/9fdcc391-f823-464f-9322-f8719677043b" height="250" >
 </div>
 
-3. 生成报告。大部分插件都会在执行结束后，生成工作报告
+3. 虚空终端（从自然语言输入中，理解用户意图+自动调用其他插件）
+
+- 步骤一：输入 “ 请调用插件翻译PDF论文，地址为https://www.nature.com/articles/s41586-019-1724-z.pdf ”
+- 步骤二：点击“虚空终端”
+
 <div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/227503770-fe29ce2c-53fd-47b0-b0ff-93805f0c2ff4.png" height="250" >
-<img src="https://user-images.githubusercontent.com/96192199/227504617-7a497bb3-0a2a-4b50-9a8a-95ae60ea7afd.png" height="250" >
+<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/66f1b044-e9ff-4eed-9126-5d4f3668f1ed" width="500" >
 </div>
 
 4. 模块化功能设计，简单的接口却能支持强大的功能
@@ -299,8 +304,10 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 </div>
 
 
+
 ### II：版本:
-- version 3.5(Todo): 使用自然语言调用本项目的所有函数插件（高优先级）
+- version 3.60（todo）: 优化虚空终端，引入code interpreter和更多插件
+- version 3.50: 使用自然语言调用本项目的所有函数插件（虚空终端），支持插件分类，改进UI，设计新主题
 - version 3.49: 支持百度千帆平台和文心一言
 - version 3.48: 支持阿里达摩院通义千问，上海AI-Lab书生，讯飞星火
 - version 3.46: 支持完全脱手操作的实时语音对话

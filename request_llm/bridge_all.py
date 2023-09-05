@@ -21,8 +21,9 @@ chatglm_ui = bridge_chatglm.predict
 # from .bridge_tgui import predict_no_ui_long_connection as tgui_noui
 # from .bridge_tgui import predict as tgui_ui
 from comm_tools.toolbox import get_conf, trimmed_format_exc
-from request_llm.bridge_qianfan import predict_no_ui_long_connection as qianfan_noui
-from request_llm.bridge_qianfan import predict as qianfan_ui
+from .bridge_qianfan import predict_no_ui_long_connection as qianfan_noui
+from .bridge_qianfan import predict as qianfan_ui
+
 
 colors = ['#FF00FF', '#00FFFF', '#FF0000', '#990099', '#009999', '#990044']
 
@@ -86,6 +87,14 @@ model_info = {
         "fn_without_ui": chatgpt_noui,
         "endpoint": openai_endpoint,
         "max_token": 4096,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+    "gpt-3.5-turbo-16k": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": openai_endpoint,
+        "max_token": 1024*16,
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
@@ -198,9 +207,6 @@ model_info = {
     },
 }
 
-AVAIL_LLM_MODELS, LLM_MODEL = toolbox.get_conf("AVAIL_LLM_MODELS", "LLM_MODEL")
-AVAIL_LLM_MODELS = AVAIL_LLM_MODELS + [LLM_MODEL]
-
 # -=-=-=-=-=-=- 以下部分是新加入的模型，可能附带额外依赖 -=-=-=-=-=-=-
 if "claude-1-100k" in AVAIL_LLM_MODELS or "claude-2" in AVAIL_LLM_MODELS:
     from .bridge_claude import predict_no_ui_long_connection as claude_noui
@@ -265,8 +271,8 @@ if "jittorllms_pangualpha" in AVAIL_LLM_MODELS:
         },
     })
 if "moss" in AVAIL_LLM_MODELS:
-    from request_llm.bridge_moss import predict_no_ui_long_connection as moss_noui
-    from request_llm.bridge_moss import predict as moss_ui
+    from .bridge_moss import predict_no_ui_long_connection as moss_noui
+    from .bridge_moss import predict as moss_ui
     model_info.update({
         "moss": {
             "fn_with_ui": moss_ui,
@@ -418,6 +424,22 @@ if "spark" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
         })
     except:
         print(trimmed_format_exc())
+if "sparkv2" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
+    try:
+        from .bridge_spark import predict_no_ui_long_connection as spark_noui
+        from .bridge_spark import predict as spark_ui
+        model_info.update({
+            "sparkv2": {
+                "fn_with_ui": spark_ui,
+                "fn_without_ui": spark_noui,
+                "endpoint": None,
+                "max_token": 4096,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            }
+        })
+    except:
+        print(trimmed_format_exc())
 if "llama2" in AVAIL_LLM_MODELS:   # llama2
     try:
         from .bridge_llama2 import predict_no_ui_long_connection as llama2_noui
@@ -434,6 +456,7 @@ if "llama2" in AVAIL_LLM_MODELS:   # llama2
         })
     except:
         print(trimmed_format_exc())
+
 
 def LLM_CATCH_EXCEPTION(f):
     """
@@ -472,6 +495,9 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
         # 如果只询问1个大语言模型：
         method = model_info[model]["fn_without_ui"]
         return LLM_CATCH_EXCEPTION(method)(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience)
+        # # 如果只询问1个大语言模型：
+        # method = model_info[model]["fn_without_ui"]
+        # return method(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience)
     else:
 
         # 如果同时询问多个大语言模型，这个稍微啰嗦一点，但思路相同，您不必读这个else分支
@@ -519,8 +545,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
             time.sleep(1)
 
         for i, future in enumerate(futures):  # wait and get
-            return_string_collect.append(f"【{str(models[i])} 说】: <font color=\"{colors[i]}\"> {future.result()} </font>" )
-
+            return_string_collect.append( f"【{str(models[i])} 说】: <font color=\"{colors[i]}\"> {future.result()} </font>" )
         window_mutex[-1] = False # stop mutex thread
         res = '<br/><br/>\n\n---\n\n'.join(return_string_collect)
         return res

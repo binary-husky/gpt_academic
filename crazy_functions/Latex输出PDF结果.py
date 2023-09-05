@@ -6,7 +6,7 @@ pj = os.path.join
 ARXIV_CACHE_DIR = os.path.expanduser(f"~/arxiv_cache/")
 
 # =================================== 工具函数 ===============================================
-专业词汇声明  = 'If the term "agent" is used in this section, it should be translated to "智能体". '
+# 专业词汇声明  = 'If the term "agent" is used in this section, it should be translated to "智能体". '
 def switch_prompt(pfg, mode, more_requirement):
     """
     Generate prompts and system prompts based on the mode for proofreading or translating.
@@ -291,7 +291,7 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
         yield from update_ui(chatbot=chatbot, history=history); time.sleep(1) # 刷新界面
         promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
     else:
-        chatbot.append((f"失败了", '虽然PDF生成失败了, 但请查收结果（压缩包）, 内含已经翻译的Tex文档, 也是可读的, 您可以到Github Issue区, 用该压缩包+对话历史存档进行反馈 ...'))
+        chatbot.append((f"失败了", '虽然PDF生成失败了, 但请查收结果（压缩包）, 内含已经翻译的Tex文档, 您可以到Github Issue区, 用该压缩包进行反馈。如系统是Linux，请检查系统字体（见Github wiki） ...'))
         yield from update_ui(chatbot=chatbot, history=history); time.sleep(1) # 刷新界面
         promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
 

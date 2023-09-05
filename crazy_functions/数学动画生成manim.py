@@ -13,8 +13,7 @@ def inspect_dependency(chatbot, history):
         return False
 
 def eval_manim(code):
-    import subprocess, sys, shutil
-
+    import subprocess, sys, os, shutil
     with open('gpt_log/MyAnimation.py', 'w', encoding='utf8') as f:
         f.write(code)
 

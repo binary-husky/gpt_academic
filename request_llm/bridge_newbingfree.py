@@ -13,6 +13,7 @@ load_message = "等待NewBing响应。"
 ========================================================================
 """
 import time
+import json
 import re
 import logging
 import asyncio

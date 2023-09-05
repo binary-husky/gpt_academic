@@ -7,13 +7,15 @@ sample = """
 """
 import re
 
+
 def preprocess_newbing_out(s):
-    pattern = r'\^(\d+)\^' # 匹配^数字^
-    pattern2 = r'\[(\d+)\]' # 匹配^数字^
-    sub = lambda m: '\['+m.group(1)+'\]' # 将匹配到的数字作为替换值
-    result = re.sub(pattern, sub, s) # 替换操作
+    pattern = r'\^(\d+)\^'  # 匹配^数字^
+    pattern2 = r'\[(\d+)\]'  # 匹配^数字^
+    sub = lambda m: '\[' + m.group(1) + '\]'  # 将匹配到的数字作为替换值
+    result = re.sub(pattern, sub, s)  # 替换操作
     if '[1]' in result:
-        result += '<br/><hr style="border-top: dotted 1px #44ac5c;"><br/><small>' + "<br/>".join([re.sub(pattern2, sub, r) for r in result.split('\n') if r.startswith('[')]) + '</small>'
+        result += '<br/><hr style="border-top: dotted 1px #44ac5c;"><br/><small>' + "<br/>".join(
+            [re.sub(pattern2, sub, r) for r in result.split('\n') if r.startswith('[')]) + '</small>'
     return result
 
 
@@ -38,23 +40,26 @@ def close_up_code_segment_during_stream(gpt_reply):
     n_mark = len(segments) - 1
     if n_mark % 2 == 1:
         # print('输出代码片段中！')
-        return gpt_reply+'\n```'
+        return gpt_reply + '\n```'
     else:
         return gpt_reply
-    
+
+
 import markdown
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
+
+
 def markdown_convertion(txt):
     """
     将Markdown格式的文本转换为HTML格式。如果包含数学公式，则先将公式转换为HTML格式。
     """
-    pre = '<div class="md-message">'
+    pre = '<div class="markdown-body">'
     suf = '</div>'
     if txt.startswith(pre) and txt.endswith(suf):
         # print('警告，输入了已经经过转化的字符串，二次转化可能出问题')
-        return txt # 已经被转化过，不需要再次转化
-    
+        return txt  # 已经被转化过，不需要再次转化
+
     markdown_extension_configs = {
         'mdx_math': {
             'enable_dollar_delimiter': True,
@@ -94,15 +99,16 @@ def markdown_convertion(txt):
         """
         解决一个mdx_math的bug（单$包裹begin命令时多余<script>）
         """
-        content = content.replace('<script type="math/tex">\n<script type="math/tex; mode=display">', '<script type="math/tex; mode=display">')
+        content = content.replace('<script type="math/tex">\n<script type="math/tex; mode=display">',
+                                  '<script type="math/tex; mode=display">')
         content = content.replace('</script>\n</script>', '</script>')
         return content
-
 
     if ('$' in txt) and ('```' not in txt):  # 有$标识的公式符号，且没有代码段```的标识
         # convert everything to html format
         split = markdown.markdown(text='---')
-        convert_stage_1 = markdown.markdown(text=txt, extensions=['mdx_math', 'fenced_code', 'tables', 'sane_lists'], extension_configs=markdown_extension_configs)
+        convert_stage_1 = markdown.markdown(text=txt, extensions=['mdx_math', 'fenced_code', 'tables', 'sane_lists'],
+                                            extension_configs=markdown_extension_configs)
         convert_stage_1 = markdown_bug_hunt(convert_stage_1)
         # re.DOTALL: Make the '.' special character match any character at all, including a newline; without this flag, '.' will match anything except a newline. Corresponds to the inline flag (?s).
         # 1. convert to easy-to-copy tex (do not render math)

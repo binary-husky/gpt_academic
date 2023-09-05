@@ -1,9 +1,9 @@
 #【请修改完参数后，删除此行】请在以下方案中选择一种，然后删除其他的方案，最后docker-compose up运行 | Please choose from one of these options below, delete other options as well as This Line
 
 ## ===================================================
-## 【方案一】 如果不需要运行本地模型（仅chatgpt,newbing类远程服务）
+## 【方案一】 如果不需要运行本地模型（仅 chatgpt, azure, 星火, 千帆, claude 等在线大模型服务）
 ## ===================================================
-version: '1'
+version: '3'
 services:
   gpt_academic_nolocalllms:
     image: ghcr.io/binary-husky/gpt_academic_nolocal:master # (Auto Built by Dockerfile: docs/GithubAction+NoLocal)
@@ -13,7 +13,7 @@ services:
       USE_PROXY:                '    True                                                                                           '
       proxies:                  '    { "http": "socks5h://localhost:10880", "https": "socks5h://localhost:10880", }                 '
       LLM_MODEL:                '    gpt-3.5-turbo                                                                                  '
-      AVAIL_LLM_MODELS:         '    ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "newbing"]                    '
+      AVAIL_LLM_MODELS:         '    ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "sparkv2", "qianfan"]         '
       WEB_PORT:                 '    22303                                                                                          '
       ADD_WAIFU:                '    True                                                                                           '
       # THEME:                    '    Chuanhu-Small-and-Beautiful                                                                    '
@@ -31,7 +31,7 @@ services:
 ### ===================================================
 ### 【方案二】 如果需要运行ChatGLM + Qwen + MOSS等本地模型
 ### ===================================================
-version: '2'
+version: '3'
 services:
   gpt_academic_with_chatglm:
     image: ghcr.io/binary-husky/gpt_academic_chatglm_moss:master  # (Auto Built by Dockerfile: docs/Dockerfile+ChatGLM)
@@ -52,7 +52,7 @@ services:
     runtime: nvidia
     devices:
       - /dev/nvidia0:/dev/nvidia0
-      
+
     # 与宿主的网络融合
     network_mode: "host"
     command: >
@@ -86,7 +86,7 @@ services:
     runtime: nvidia
     devices:
       - /dev/nvidia0:/dev/nvidia0
-      
+
     # 与宿主的网络融合
     network_mode: "host"
 
@@ -98,7 +98,7 @@ services:
 ## ===================================================
 ## 【方案四】 ChatGPT + Latex
 ## ===================================================
-version: '4'
+version: '3'
 services:
   gpt_academic_with_latex:
     image: ghcr.io/binary-husky/gpt_academic_with_latex:master  # (Auto Built by Dockerfile: docs/GithubAction+NoLocal+Latex)
@@ -119,6 +119,7 @@ services:
     # 不使用代理网络拉取最新代码
     command: >
       bash -c "python3 -u main.py"
+
 
 ## ===================================================
 ## 【方案五】 ChatGPT + 语音助手 （请先阅读 docs/use_audio.md）
@@ -151,3 +152,4 @@ services:
     # 不使用代理网络拉取最新代码
     command: >
       bash -c "python3 -u main.py"
+

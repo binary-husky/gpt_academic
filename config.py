@@ -50,8 +50,11 @@ API_URL_REDIRECT = {}
 # 一言以蔽之：免费（5刀）用户填3，OpenAI绑了信用卡的用户可以填 16 或者更高。提高限制请查询：https://platform.openai.com/docs/guides/rate-limits/overview
 DEFAULT_WORKER_NUM = 3
 
+# 色彩主题，可选 ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast"]
+THEME = "Default"
 
-# 对话窗的高度
+
+# 对话窗的高度 （仅在LAYOUT="TOP-DOWN"时生效）
 CHATBOT_HEIGHT = 1115
 
 
@@ -74,7 +77,6 @@ WEB_PORT = -1
 
 # 如果OpenAI不响应（网络卡顿、代理失败、KEY失效），重试的次数限制
 MAX_RETRY = 2
-
 
 # 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
 LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
@@ -102,6 +104,34 @@ LOCAL_MODEL_QUANT = "FP16" # 默认 "FP16" "INT4" 启用量化INT4版本 "INT8" 
 API_URL = "https://api.openai.com/v1/chat/completions"
 PROXY_API_URL = '' # 你的网关应用
 
+
+# 插件分类默认选项
+DEFAULT_FN_GROUPS = ['对话', '编程', '学术']
+
+
+# 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
+LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
+AVAIL_LLM_MODELS = ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5", "api2d-gpt-3.5-turbo", 
+                    "gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "stack-claude"]
+# P.S. 其他可用的模型还包括 ["qianfan", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613", 
+# "spark", "sparkv2", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"]
+
+
+# 百度千帆（LLM_MODEL="qianfan"）
+BAIDU_CLOUD_API_KEY = ''
+BAIDU_CLOUD_SECRET_KEY = ''
+BAIDU_CLOUD_QIANFAN_MODEL = 'ERNIE-Bot'    # 可选 "ERNIE-Bot"(文心一言), "ERNIE-Bot-turbo", "BLOOMZ-7B", "Llama-2-70B-Chat", "Llama-2-13B-Chat", "Llama-2-7B-Chat"
+
+
+# 如果使用ChatGLM2微调模型，请把 LLM_MODEL="chatglmft"，并在此处指定模型路径
+CHATGLM_PTUNING_CHECKPOINT = "" # 例如"/home/hmp/ChatGLM2-6B/ptuning/output/6b-pt-128-1e-2/checkpoint-100"
+
+
+# 本地LLM模型如ChatGLM的执行方式 CPU/GPU
+LOCAL_MODEL_DEVICE = "cpu" # 可选 "cuda"
+LOCAL_MODEL_QUANT = "FP16" # 默认 "FP16" "INT4" 启用量化INT4版本 "INT8" 启用量化INT8版本
+
+
 # 设置gradio的并行线程数（不需要修改）
 CONCURRENT_COUNT = 100
 
@@ -116,7 +146,6 @@ ADD_CHUANHU = True
 # 手机是否展示高级插件
 MOBILE_SHOW = True
 # 色彩主体，可选 ["Default", "Chuanhu-Small-and-Beautiful"]
-THEME = "Default"
 
 
 # 设置用户名和密码（不需要修改）（相关功能不稳定，与gradio版本和网络都相关，如果本地使用不建议加这个）
@@ -204,7 +233,11 @@ ALLOW_RESET_CONFIG = False
 │   ├── AZURE_ENGINE
 │   └── API_URL_REDIRECT
 │
+<<<<<<< HEAD
 ├── "spark" 星火认知大模型
+=======
+├── "spark" 星火认知大模型 spark & sparkv2
+>>>>>>> master
 │   ├── XFYUN_APPID
 │   ├── XFYUN_API_SECRET
 │   └── XFYUN_API_KEY
@@ -225,6 +258,21 @@ ALLOW_RESET_CONFIG = False
     ├── NEWBING_STYLE
     └── NEWBING_COOKIES
 
+<<<<<<< HEAD
+=======
+    
+用户图形界面布局依赖关系示意图
+│
+├── CHATBOT_HEIGHT 对话窗的高度
+├── CODE_HIGHLIGHT 代码高亮
+├── LAYOUT 窗口布局
+├── DARK_MODE 暗色模式 / 亮色模式
+├── DEFAULT_FN_GROUPS 插件分类默认选项
+├── THEME 色彩主题
+├── AUTO_CLEAR_TXT 是否在提交时自动清空输入框
+├── ADD_WAIFU 加一个live2d装饰
+├── ALLOW_RESET_CONFIG 是否允许通过自然语言描述修改本页的配置，该功能具有一定的危险性
+>>>>>>> master
 
 
 插件在线服务配置依赖关系示意图

@@ -20,7 +20,8 @@ import importlib
 from comm_tools import toolbox
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
-proxies, API_KEY, TIMEOUT_SECONDS, MAX_RETRY, API_ORG = toolbox.get_conf('proxies', 'API_KEY', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'API_ORG')
+proxies, API_KEY, TIMEOUT_SECONDS, MAX_RETRY, API_ORG = (
+    toolbox.get_conf('proxies', 'API_KEY', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'API_ORG'))
 
 timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check proxy settings in config.py.' + \
                   '网络错误，检查代理服务器是否可用，以及代理设置的格式是否正确，格式须是[协议]://[地址]:[端口]，缺一不可。'
@@ -136,6 +137,24 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
 
     # check mis-behavior
     if raw_input.startswith('private_upload/') and len(raw_input) == 34:
+        chatbot[-1] = (
+        inputs, f"[Local Message] 检测到操作错误！当您上传文档之后，需要点击“函数插件区”按钮进行处理，而不是点击“提交”按钮。")
+        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg="正常")  # 刷新界面
+        time.sleep(2)
+
+    try:
+        headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt, stream)
+    except RuntimeError as e:
+        chatbot[-1] = (inputs,
+                       f"您提供的api-key不满足要求，不包含任何可用于{llm_kwargs['llm_model']}的api-key。您可能选择了错误的模型或请求源。")
+        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg="api-key不满足要求")  # 刷新界面
+        return
+
+    history.append(inputs);
+    history.append("")
+
+    # check mis-behavior
+    if raw_input.startswith('private_upload/') and len(raw_input) == 34:
         chatbot[-1] = (inputs, f"[Local Message] 检测到操作错误！当您上传文档之后，需要点击“函数插件区”按钮进行处理，而不是点击“提交”按钮。")
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg="正常") # 刷新界面
         time.sleep(2)
@@ -230,7 +249,6 @@ def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
     else:
         tb_str = '```\n' + toolbox.trimmed_format_exc() + '```'
         chatbot[-1] = (chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str} \n\n{toolbox.regular_txt_to_markdown(chunk_decoded)}")
-    return chatbot, history
 
 def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     """

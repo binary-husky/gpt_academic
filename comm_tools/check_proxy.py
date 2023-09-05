@@ -77,9 +77,9 @@ def patch_and_restart(path):
     if not os.path.exists('../config_private.py'):
         print亮黄('由于您没有设置config_private.py私密配置，现将您的现有配置移动至config_private.py以防止配置丢失，',
               '另外您可以随时在history子文件夹下找回旧版的程序。')
-        shutil.copyfile('../config.py', 'config_private.py')
+        shutil.copyfile('config.py', 'config_private.py')
     path_new_version = glob.glob(path + '/*-master')[0]
-    dir_util.copy_tree(path_new_version, '../')
+    dir_util.copy_tree(path_new_version, './')
     print亮绿('代码已经更新，即将更新pip包依赖……')
     for i in reversed(range(5)): time.sleep(1); print(i)
     try: 

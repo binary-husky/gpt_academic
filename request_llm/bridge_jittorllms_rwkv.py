@@ -1,3 +1,4 @@
+from transformers import AutoModel, AutoTokenizer
 import time
 import threading
 import importlib

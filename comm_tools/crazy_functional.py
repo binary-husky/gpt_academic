@@ -231,7 +231,7 @@ def get_functions_多功能插件():
     from crazy_functions.数学动画生成manim import 动画生成
     from crazy_functions.交互功能函数模板 import 交互功能模板函数
     from crazy_functions.语音助手 import 语音助手
-    from crazy_functions.虚空终端 import 自动终端
+    from crazy_functions.虚空终端 import 虚空终端
     function_plugins['好玩的插件'] = {
         "询问多个GPT模型": {
             "Color": "primary",  # 按钮颜色
@@ -306,7 +306,7 @@ def get_functions_多功能插件():
         "自动终端": {
             "Color": "primary",
             "AsButton": False,
-            "Function": HotReload(自动终端)
+            "Function": HotReload(虚空终端)
         }
 
     }

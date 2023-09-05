@@ -1,7 +1,8 @@
+from transformers import AutoModel, AutoTokenizer
 import time
 import threading
 import importlib
-from comm_tools.toolbox import update_ui
+from comm_tools.toolbox import update_ui, get_conf
 from multiprocessing import Process, Pipe
 
 load_message = "MOSS尚未加载，加载需要一段时间。注意，取决于`config.py`的配置，MOSS消耗大量的内存（CPU）或显存（GPU），也许会导致低配计算机卡死 ……"
@@ -41,6 +42,7 @@ class GetGLMHandle(Process):
         # 这段代码来源 https://github.com/OpenLMLab/MOSS/blob/main/moss_cli_demo.py
         import argparse
         import os
+        import platform
         import warnings
 
         import torch

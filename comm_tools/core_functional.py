@@ -64,6 +64,7 @@ def get_core_functions():
         "英译中": {
             "Prefix":   r"翻译成地道的中文：" + "\n\n",
             "Suffix":   r"",
+            "Visible": False,
         },
         "找图片": {
             "Prefix":   r"我需要你找一张网络图片。使用Unsplash API(https://source.unsplash.com/960x640/?<英语关键词>)获取图片URL，" +
@@ -79,6 +80,7 @@ def get_core_functions():
             "Prefix":   r"Here are some bibliography items, please transform them into bibtex style." +
                         r"Note that, reference styles maybe more than one kind, you should transform each item correctly." +
                         r"Items need to be transformed:",
+            "Visible": False,
             "Suffix":   r"",
         }
     }

@@ -30,10 +30,10 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         函数的说明请见 request_llm/bridge_all.py
     """
     chatbot.append((inputs, ""))
-
     if additional_fn is not None:
         from comm_tools.core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
+        yield from update_ui(chatbot=chatbot, history=history)
 
     # 开始接收回复    
     from .com_sparkapi import SparkRequestInstance

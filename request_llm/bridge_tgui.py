@@ -140,8 +140,6 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
 
-
-
 def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience=False):
     raw_input = "What I would like to say is the following: " + inputs
     prompt = raw_input

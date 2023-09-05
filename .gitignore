@@ -1,28 +1,3 @@
-## Original ignores
-autogpt/keys.py
-autogpt/*json
-autogpt/node_modules/
-autogpt/__pycache__/keys.cpython-310.pyc
-autogpt/auto_gpt_workspace
-package-lock.json
-*.pyc
-auto_gpt_workspace/*
-*.mpeg
-.env
-azure.yaml
-ai_settings.yaml
-last_run_ai_settings.yaml
-.vscode
-.idea/*
-auto-gpt.json
-log.txt
-log-ingestion.txt
-logs
-*.log
-*.mp3
-mem.sqlite3
-venvAutoGPT
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -34,7 +9,6 @@ __pycache__/
 build/
 develop-eggs/
 dist/
-plugins/
 downloads/
 eggs/
 .eggs/
@@ -50,6 +24,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
@@ -58,6 +33,7 @@ MANIFEST
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
+
 # Unit test / coverage reports
 htmlcov/
 .tox/
@@ -71,78 +47,91 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
+
 # Translations
 *.mo
 *.pot
+github
+.github
+TEMP
+TRASH
+
 # Django stuff:
+*.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+
 # Flask stuff:
 instance/
 .webassets-cache
+
 # Scrapy stuff:
 .scrapy
+
 # Sphinx documentation
 docs/_build/
-site/
+
 # PyBuilder
 target/
+
 # Jupyter Notebook
 .ipynb_checkpoints
+
 # IPython
 profile_default/
 ipython_config.py
+
 # pyenv
 .python-version
+
 # pipenv
 #   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
 #   However, in case of collaboration, if having platform-specific dependencies or dependencies
 #   having no cross-platform support, pipenv may install dependencies that don't work, or not
 #   install all needed dependencies.
 #Pipfile.lock
+
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow
 __pypackages__/
+
 # Celery stuff
 celerybeat-schedule
 celerybeat.pid
+
 # SageMath parsed files
 *.sage.py
+
 # Environments
-.direnv/
+.env
 .venv
 env/
-venv*/
+venv/
 ENV/
 env.bak/
+venv.bak/
+
 # Spyder project settings
 .spyderproject
 .spyproject
+
 # Rope project settings
 .ropeproject
+
 # mkdocs documentation
 /site
+
 # mypy
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
 # Pyre type checker
 .pyre/
-llama-*
-vicuna-*
-# mac
-.DS_Store
-openai/
-# news
-CURRENT_BULLETIN.md
-.tree*
-github
-.github
-TEMP
-TRASH
-venv/
-venv.bak/
+
+.vscode
 .idea
+
 history
 ssr_conf
 config_private.py
@@ -153,18 +142,7 @@ other_llms
 cradle*
 debug*
 private*
-crazy_functions/test_project/pdf_and_word
-crazy_fun
-ctions/test_samples
-crazy_functions/test_samples
-request_llm/jittorllms
 users_data/*
-request_llm/moss
-multi-language
-media
-__test.py
-flagged
-tmp.jpg
 crazy_functions/test_project/pdf_and_word
 crazy_functions/test_samples
 request_llm/jittorllms
@@ -173,5 +151,5 @@ request_llm/moss
 media
 flagged
 request_llm/ChatGLM-6b-onnx-u8s8
-
-
+.DS_Store
+/*.DS_Store
