@@ -501,6 +501,18 @@ def get_crazy_functions():
     except:
         print('Load function plugin failed')
 
+    try:
+        from crazy_functions.批量翻译PDF文档_NOUGAT import 批量翻译PDF文档
+        function_plugins.update({
+            "精准翻译PDF文档（NOUGAT）": {
+                "Group": "学术",
+                "Color": "stop",
+                "AsButton": False,
+                "Function": HotReload(批量翻译PDF文档)
+            }
+        })
+    except:
+        print('Load function plugin failed')
 
     # try:
     #     from crazy_functions.chatglm微调工具 import 微调数据集生成
