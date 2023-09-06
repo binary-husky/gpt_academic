@@ -13,13 +13,21 @@ def get_meta_information(url, chatbot, history):
     from bs4 import BeautifulSoup
     from toolbox import get_conf
     from urllib.parse import urlparse
+    session = requests.session()
+
     proxies, = get_conf('proxies')
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
+        'Accept-Encoding': 'gzip, deflate, br', 
+        'Accept-Language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7',
+        'Cache-Control':'max-age=0',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 
+        'Connection': 'keep-alive'
     }
-    # 发送 GET 请求
-    response = requests.get(url, proxies=proxies, headers=headers)
+    session.proxies.update(proxies)
+    session.headers.update(headers)
 
+    response = session.get(url)
     # 解析网页内容
     soup = BeautifulSoup(response.text, "html.parser")
 
@@ -28,8 +36,9 @@ def get_meta_information(url, chatbot, history):
 
     if ENABLE_ALL_VERSION_SEARCH:
         def search_all_version(url):
-            response = requests.get(url, proxies=proxies, headers=headers)
+            response = session.get(url)
             soup = BeautifulSoup(response.text, "html.parser")
+
             for result in soup.select(".gs_ri"):
                 try:
                     url = result.select_one(".gs_rt").a['href']
@@ -39,14 +48,15 @@ def get_meta_information(url, chatbot, history):
                 if not arxiv_id:
                     continue
                 search = arxiv.Search(
-                    id_list = [arxiv_id],
-                    max_results = 1,
-                    sort_by = arxiv.SortCriterion.Relevance,
+                    id_list=[arxiv_id],
+                    max_results=1,
+                    sort_by=arxiv.SortCriterion.Relevance,
                 )
                 paper = next(search.results())
                 return paper
+
             return None
-        
+
         def extract_arxiv_id(url):
             # 返回给定的url解析出的arxiv_id，如url未成功匹配返回None
             pattern = r'arxiv.org/abs/([^/]+)'
@@ -55,7 +65,7 @@ def get_meta_information(url, chatbot, history):
                 return match.group(1)
             else:
                 return None
-        
+
     profile = []
     # 获取所有文章的标题和作者
     for result in soup.select(".gs_ri"):
@@ -87,15 +97,17 @@ def get_meta_information(url, chatbot, history):
         except:
             abstract = abstract
             is_paper_in_arxiv = False
+
         logging.info('[title]:' + title)
         logging.info('[author]:' + author)
         logging.info('[citation]:' + citation)
+
         profile.append({
-            'title':title,
-            'author':author,
-            'citation':citation,
-            'abstract':abstract,
-            'is_paper_in_arxiv':is_paper_in_arxiv,
+            'title': title,
+            'author': author,
+            'citation': citation,
+            'abstract': abstract,
+            'is_paper_in_arxiv': is_paper_in_arxiv,
         })
 
         chatbot[-1] = [chatbot[-1][0], title + f'\n\n是否在arxiv中（不在arxiv中无法获取完整摘要）:{is_paper_in_arxiv}\n\n' + abstract]
