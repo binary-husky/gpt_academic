@@ -39,6 +39,6 @@ jobs:
         with:
           context: .
           push: true
-          file: docs/GithubAction+NoLocal+AllCapacity
+          file: docs/GithubAction+AllCapacity
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
