@@ -2,10 +2,16 @@
 import time
 import threading
 import importlib
-from toolbox import update_ui, get_conf
+from toolbox import update_ui, get_conf, update_ui_lastest_msg
 from multiprocessing import Process, Pipe
 
 model_name = '星火认知大模型'
+
+def validate_key():
+    XFYUN_APPID,  = get_conf('XFYUN_APPID', )
+    if XFYUN_APPID == '00000000' or XFYUN_APPID == '': 
+        return False
+    return True
 
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=[], console_slience=False):
     """
@@ -14,6 +20,9 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     """
     watch_dog_patience = 5
     response = ""
+
+    if validate_key() is False:
+        raise RuntimeError('请配置讯飞星火大模型的XFYUN_APPID, XFYUN_API_KEY, XFYUN_API_SECRET')
 
     from .com_sparkapi import SparkRequestInstance
     sri = SparkRequestInstance()
@@ -31,6 +40,10 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     """
     chatbot.append((inputs, ""))
     yield from update_ui(chatbot=chatbot, history=history)
+
+    if validate_key() is False:
+        yield from update_ui_lastest_msg(lastmsg="[Local Message]: 请配置讯飞星火大模型的XFYUN_APPID, XFYUN_API_KEY, XFYUN_API_SECRET", chatbot=chatbot, history=history, delay=0)
+        return
 
     if additional_fn is not None:
         from core_functional import handle_core_functionality
