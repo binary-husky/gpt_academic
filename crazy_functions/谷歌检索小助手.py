@@ -5,9 +5,10 @@ from toolbox import update_ui
 def get_meta_information(url, chatbot, history):
     import requests
     import arxiv
-    import difflib
     from bs4 import BeautifulSoup
     from toolbox import get_conf
+    from urllib.parse import urlparse
+    import re
     proxies, = get_conf('proxies')
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
@@ -18,9 +19,34 @@ def get_meta_information(url, chatbot, history):
     # 解析网页内容
     soup = BeautifulSoup(response.text, "html.parser")
 
-    def string_similar(s1, s2):
-        return difflib.SequenceMatcher(None, s1, s2).quick_ratio()
-
+    def search_all_version(url):
+        response = requests.get(url, proxies=proxies, headers=headers)
+        soup = BeautifulSoup(response.text, "html.parser")
+        for result in soup.select(".gs_ri"):
+            try:
+                url = result.select_one(".gs_rt").a['href']
+            except:
+                continue
+            arxiv_id = extract_arxiv_id(url)
+            if not arxiv_id:
+                continue
+            search = arxiv.Search(
+                id_list = [arxiv_id],
+                max_results = 1,
+                sort_by = arxiv.SortCriterion.Relevance,
+            )
+            return search
+        return None
+    
+    def extract_arxiv_id(url):
+        # 返回给定的url解析出的arxiv_id，如url未成功匹配返回None
+        pattern = r'arxiv.org/abs/([^/]+)'
+        match = re.search(pattern, url)
+        if match:
+            return match.group(1)
+        else:
+            return None
+        
     profile = []
     # 获取所有文章的标题和作者
     for result in soup.select(".gs_ri"):
@@ -31,17 +57,14 @@ def get_meta_information(url, chatbot, history):
         except:
             citation = 'cited by 0'
         abstract = result.select_one(".gs_rs").text.strip()  # 摘要在 .gs_rs 中的文本，需要清除首尾空格
-        search = arxiv.Search(
-            query = title,
-            max_results = 1,
-            sort_by = arxiv.SortCriterion.Relevance,
-        )
         try:
-            paper = next(search.results())
-            if string_similar(title, paper.title) > 0.90: # same paper
+            other_versions = next((tag['href'] for tag in result.select_one('.gs_flb').select('.gs_nph') if 'cluster' in tag['href']), None)  # 获取所有版本的链接
+            search = search_all_version('http://' + urlparse(url).netloc + other_versions)
+            if search:
+                paper = next(search.results())
                 abstract = paper.summary.replace('\n', ' ')
                 is_paper_in_arxiv = True
-            else:   # different paper
+            else:   # not found
                 abstract = abstract
                 is_paper_in_arxiv = False
             paper = next(search.results())
