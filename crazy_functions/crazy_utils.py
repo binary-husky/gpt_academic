@@ -591,11 +591,13 @@ def get_files_from_everything(txt, type): # type='.md'
         # 网络的远程文件
         import requests
         from toolbox import get_conf
+        from toolbox import get_log_folder, gen_time_str
         proxies, = get_conf('proxies')
         r = requests.get(txt, proxies=proxies)
-        with open('./gpt_log/temp'+type, 'wb+') as f: f.write(r.content)
-        project_folder = './gpt_log/'
-        file_manifest = ['./gpt_log/temp'+type]
+        path = os.path.join(get_log_folder(plugin_name='web_download'), gen_time_str()+type)
+        with open(path, 'wb+') as f: f.write(r.content)
+        project_folder = get_log_folder(plugin_name='web_download')
+        file_manifest = [path]
     elif txt.endswith(type):
         # 直接给定文件
         file_manifest = [txt]

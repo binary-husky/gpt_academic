@@ -514,6 +514,20 @@ def get_crazy_functions():
     except:
         print('Load function plugin failed')
 
+
+    # try:
+    #     from crazy_functions.CodeInterpreter import 虚空终端CodeInterpreter
+    #     function_plugins.update({
+    #         "CodeInterpreter（开发中，仅供测试）": {
+    #             "Group": "编程|对话",
+    #             "Color": "stop",
+    #             "AsButton": False,
+    #             "Function": HotReload(虚空终端CodeInterpreter)
+    #         }
+    #     })
+    # except:
+    #     print('Load function plugin failed')
+
     # try:
     #     from crazy_functions.chatglm微调工具 import 微调数据集生成
     #     function_plugins.update({

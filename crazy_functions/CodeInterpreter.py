@@ -5,6 +5,7 @@ from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import input_clipping, try_install_deps
 from multiprocessing import Process, Pipe
 import os
+import time
 
 templete = """
 ```python
@@ -121,6 +122,19 @@ def for_immediate_show_off_when_possible(file_type, fp, chatbot):
 def subprocess_worker(instance, file_path, return_dict):
     return_dict['result'] = instance.run(file_path)
 
+def have_any_recent_upload_files(chatbot):
+    _5min = 5 * 60
+    if not chatbot: return False    # chatbot is None
+    most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
+    if not most_recent_uploaded: return False   # most_recent_uploaded is None
+    if time.time() - most_recent_uploaded["time"] < _5min: return True # most_recent_uploaded is new
+    else: return False  # most_recent_uploaded is too old
+
+def get_recent_file_prompt_support(chatbot):
+    most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
+    path = most_recent_uploaded['path']
+    return path
+
 @CatchException
 def 虚空终端CodeInterpreter(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     """
@@ -132,6 +146,8 @@ def 虚空终端CodeInterpreter(txt, llm_kwargs, plugin_kwargs, chatbot, history
     system_prompt   给gpt的静默提醒
     web_port        当前软件运行的端口号
     """
+    raise NotImplementedError
+
     # 清空历史，以免输入溢出
     history = []; clear_file_downloadzone(chatbot)
 
@@ -142,10 +158,12 @@ def 虚空终端CodeInterpreter(txt, llm_kwargs, plugin_kwargs, chatbot, history
     ])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
-    # 尝试导入依赖, 如果缺少依赖, 则给出安装建议
-    dep_ok = yield from inspect_dependency(chatbot=chatbot, history=history) # 刷新界面
-    if not dep_ok: return
-    
+    if have_any_recent_upload_files(chatbot):
+        file_path = get_recent_file_prompt_support(chatbot)
+    else:
+        chatbot.append(["文件检索", "没有发现任何近期上传的文件。"])
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+
     # 读取文件
     if ("recently_uploaded_files" in plugin_kwargs) and (plugin_kwargs["recently_uploaded_files"] == ""): plugin_kwargs.pop("recently_uploaded_files")
     recently_uploaded_files = plugin_kwargs.get("recently_uploaded_files", None)
