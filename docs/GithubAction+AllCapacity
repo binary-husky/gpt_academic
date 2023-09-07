@@ -1,17 +1,10 @@
+# docker build -t gpt-academic-all-capacity -f docs/GithubAction+AllCapacity  --network=host --build-arg http_proxy=http://localhost:10881 --build-arg https_proxy=http://localhost:10881 .
 
 # 从NVIDIA源，从而支持显卡（检查宿主的nvidia-smi中的cuda版本必须>=11.3）
-FROM fuqingxu/python311_texlive_ctex:latest as texdocker
-FROM nvidia/cuda:11.3.1-runtime-ubuntu20.04
-COPY --from=texdocker /usr/local/texlive/ /usr/local/texlive/
-
-RUN apt-get update
-RUN apt-get install -y curl proxychains curl gcc
-RUN apt-get install -y git python python3 python-dev python3-dev --fix-missing
-
-ENV PATH="${PATH}:/usr/local/texlive/2023/bin/x86_64-linux:/usr/local/texlive/2024/bin/x86_64-linux:/usr/local/texlive/2025/bin/x86_64-linux:/usr/local/texlive/2026/bin/x86_64-linux"
-
+FROM fuqingxu/11.3.1-runtime-ubuntu20.04-with-texlive:latest
 
 # use python3 as the system default python
+WORKDIR /gpt
 RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.8
 # 下载pytorch
 RUN python3 -m pip install torch --extra-index-url https://download.pytorch.org/whl/cu113
