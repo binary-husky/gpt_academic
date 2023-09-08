@@ -24,10 +24,11 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     try:
         import fitz
         import tiktoken
+        import scipdf
     except:
         report_execption(chatbot, history,
                          a=f"解析项目: {txt}",
-                         b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pymupdf tiktoken```。")
+                         b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pymupdf tiktoken scipdf_parser```。")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
 
@@ -58,7 +59,6 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
 
 def 解析PDF_基于GROBID(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, grobid_url):
     import copy
-    import tiktoken
     TOKEN_LIMIT_PER_FRAGMENT = 1280
     generated_conclusion_files = []
     generated_html_files = []
