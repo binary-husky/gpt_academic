@@ -24,10 +24,11 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     try:
         import fitz
         import tiktoken
+        import scipdf
     except:
         report_execption(chatbot, history,
                          a=f"解析项目: {txt}",
-                         b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pymupdf tiktoken```。")
+                         b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pymupdf tiktoken scipdf_parser```。")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
 
@@ -58,7 +59,6 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
 
 def 解析PDF_基于GROBID(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, grobid_url):
     import copy
-    import tiktoken
     TOKEN_LIMIT_PER_FRAGMENT = 1280
     generated_conclusion_files = []
     generated_html_files = []
@@ -66,7 +66,7 @@ def 解析PDF_基于GROBID(file_manifest, project_folder, llm_kwargs, plugin_kwa
     for index, fp in enumerate(file_manifest):
         chatbot.append(["当前进度：", f"正在连接GROBID服务，请稍候: {grobid_url}\n如果等待时间过长，请修改config中的GROBID_URL，可修改成本地GROBID服务。"]); yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         article_dict = parse_pdf(fp, grobid_url)
-        print(article_dict)
+        if article_dict is None: raise RuntimeError("解析PDF失败，请检查PDF是否损坏。")
         prompt = "以下是一篇学术论文的基本信息:\n"
         # title
         title = article_dict.get('title', '无法获取 title'); prompt += f'title:{title}\n\n'

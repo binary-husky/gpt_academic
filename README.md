@@ -54,7 +54,7 @@ Latex论文一键校对 | [函数插件] 仿Grammarly对Latex文章进行语法�
 ⭐ChatGLM2微调模型 | 支持加载ChatGLM2微调模型，提供ChatGLM2微调辅助插件
 更多LLM模型接入，支持[huggingface部署](https://huggingface.co/spaces/qingxu98/gpt-academic) | 加入Newbing接口(新必应)，引入清华[Jittorllms](https://github.com/Jittor/JittorLLMs)支持[LLaMA](https://github.com/facebookresearch/llama)和[盘古α](https://openi.org.cn/pangu/)
 ⭐[void-terminal](https://github.com/binary-husky/void-terminal) pip包 | 脱离GUI，在Python中直接调用本项目的所有函数插件（开发中）
-⭐虚空终端插件 | 用自然语言，直接调度本项目其他插件
+⭐虚空终端插件 | [函数插件] 用自然语言，直接调度本项目其他插件
 更多新功能展示 (图像生成等) …… | 见本文档结尾处 ……
 </div>
 
@@ -149,10 +149,13 @@ python main.py
 
 ### 安装方法II：使用Docker
 
+[![fullcapacity](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-all-capacity.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-audio-assistant.yml)
+
 1. 仅ChatGPT（推荐大多数人选择，等价于docker-compose方案1）
 [![basic](https://github.com/binary-husky/gpt_academic/actions/workflows/build-without-local-llms.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-without-local-llms.yml)
 [![basiclatex](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-latex.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-latex.yml)
 [![basicaudio](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-audio-assistant.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-audio-assistant.yml)
+
 
 ``` sh
 git clone --depth=1 https://github.com/binary-husky/gpt_academic.git  # 下载项目
@@ -252,7 +255,7 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 
 3. 虚空终端（从自然语言输入中，理解用户意图+自动调用其他插件）
 
-- 步骤一：输入 “ 请调用插件翻译PDF论文，地址为https://www.nature.com/articles/s41586-019-1724-z.pdf ”
+- 步骤一：输入 “ 请调用插件翻译PDF论文，地址为https://storage.googleapis.com/deepmind-media/alphago/AlphaGoNaturePaper.pdf ”
 - 步骤二：点击“虚空终端”
 
 <div align="center">

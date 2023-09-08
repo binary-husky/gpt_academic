@@ -109,7 +109,7 @@ def arxiv_download(chatbot, history, txt):
 
     url_ = txt   # https://arxiv.org/abs/1707.06690
     if not txt.startswith('https://arxiv.org/abs/'): 
-        msg = f"解析arxiv网址失败, 期望格式例如: https://arxiv.org/abs/1707.06690。实际得到格式: {url_}"
+        msg = f"解析arxiv网址失败, 期望格式例如: https://arxiv.org/abs/1707.06690。实际得到格式: {url_}。"
         yield from update_ui_lastest_msg(msg, chatbot=chatbot, history=history) # 刷新界面
         return msg, None
     # <-------------- set format ------------->
@@ -255,7 +255,7 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
         project_folder = txt
     else:
         if txt == "": txt = '空空如也的输入栏'
-        report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
+        report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无法处理: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
     

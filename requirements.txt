@@ -20,4 +20,4 @@ arxiv
 rich
 pypdf2==2.12.1
 websocket-client
-scipdf_parser==0.3
+scipdf_parser>=0.3
