@@ -593,7 +593,10 @@ def get_files_from_everything(txt, type): # type='.md'
         from toolbox import get_conf
         from toolbox import get_log_folder, gen_time_str
         proxies, = get_conf('proxies')
-        r = requests.get(txt, proxies=proxies)
+        try:
+            r = requests.get(txt, proxies=proxies)
+        except:
+            raise ConnectionRefusedError(f"无法下载资源{txt}，请检查。")
         path = os.path.join(get_log_folder(plugin_name='web_download'), gen_time_str()+type)
         with open(path, 'wb+') as f: f.write(r.content)
         project_folder = get_log_folder(plugin_name='web_download')
