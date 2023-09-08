@@ -56,14 +56,14 @@ def adjust_theme():
             button_primary_background_fill_hover="*primary_400",
             button_primary_border_color="*primary_500",
             button_primary_border_color_dark="*primary_600",
-            button_primary_text_color="wihte",
+            button_primary_text_color="white",
             button_primary_text_color_dark="white",
             button_secondary_background_fill="*neutral_100",
             button_secondary_background_fill_hover="*neutral_50",
             button_secondary_background_fill_dark="*neutral_900",
             button_secondary_text_color="*neutral_800",
             button_secondary_text_color_dark="white",
-            background_fill_primary="#F7F7F7",
+            background_fill_primary="*neutral_50",
             background_fill_primary_dark="#1F1F1F",
             block_title_text_color="*primary_500",
             block_title_background_fill_dark="*primary_900",
@@ -87,6 +87,10 @@ def adjust_theme():
                 <script src="file=docs/waifu_plugin/jquery-ui.min.js"></script>
                 <script src="file=docs/waifu_plugin/autoload.js"></script>
             """
+        
+        with open('themes/green.js', 'r', encoding='utf8') as f:
+            js += f"<script>{f.read()}</script>"
+        
         gradio_original_template_fn = gr.routes.templates.TemplateResponse
         def gradio_new_template_fn(*args, **kwargs):
             res = gradio_original_template_fn(*args, **kwargs)
@@ -102,3 +106,5 @@ def adjust_theme():
 
 with open("themes/green.css", "r", encoding="utf-8") as f:
     advanced_css = f.read()
+with open("themes/common.css", "r", encoding="utf-8") as f:
+    advanced_css += f.read()

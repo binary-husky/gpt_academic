@@ -80,9 +80,9 @@ class InterviewAssistant(AliyunASR):
     def __init__(self):
         self.capture_interval = 0.5 # second
         self.stop = False
-        self.parsed_text = ""
-        self.parsed_sentence = ""
-        self.buffered_sentence = ""
+        self.parsed_text = ""   # 下个句子中已经说完的部分, 由 test_on_result_chg() 写入
+        self.parsed_sentence = ""   # 某段话的整个句子,由 test_on_sentence_end() 写入
+        self.buffered_sentence = ""    #
         self.event_on_result_chg = threading.Event()
         self.event_on_entence_end = threading.Event()
         self.event_on_commit_question = threading.Event()
@@ -97,7 +97,7 @@ class InterviewAssistant(AliyunASR):
         # 初始化音频采集线程
         self.captured_audio = np.array([])
         self.keep_latest_n_second = 10
-        self.commit_after_pause_n_second = 1.5
+        self.commit_after_pause_n_second = 2.0
         self.ready_audio_flagment = None
         self.stop = False
         self.plugin_wd = WatchDog(timeout=5, bark_fn=self.__del__, msg="程序终止")
@@ -132,7 +132,7 @@ class InterviewAssistant(AliyunASR):
             self.plugin_wd.feed()
 
             if self.event_on_result_chg.is_set(): 
-                # update audio decode result
+                # called when some words have finished
                 self.event_on_result_chg.clear()
                 chatbot[-1] = list(chatbot[-1])
                 chatbot[-1][0] = self.buffered_sentence + self.parsed_text
@@ -144,7 +144,11 @@ class InterviewAssistant(AliyunASR):
                 # called when a sentence has ended
                 self.event_on_entence_end.clear()
                 self.parsed_text = self.parsed_sentence
-                self.buffered_sentence += self.parsed_sentence
+                self.buffered_sentence += self.parsed_text
+                chatbot[-1] = list(chatbot[-1])
+                chatbot[-1][0] = self.buffered_sentence
+                history = chatbot2history(chatbot)
+                yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
             if self.event_on_commit_question.is_set():
                 # called when a question should be commited
@@ -179,12 +183,12 @@ def 语音助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
         import nls
         from scipy import io
     except:
-        chatbot.append(["导入依赖失败", "使用该模块需要额外依赖, 安装方法:```pip install --upgrade pyOpenSSL scipy git+https://github.com/aliyun/alibabacloud-nls-python-sdk.git```"])
+        chatbot.append(["导入依赖失败", "使用该模块需要额外依赖, 安装方法:```pip install --upgrade aliyun-python-sdk-core==2.13.3 pyOpenSSL scipy git+https://github.com/aliyun/alibabacloud-nls-python-sdk.git```"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
 
-    TOKEN, APPKEY = get_conf('ALIYUN_TOKEN', 'ALIYUN_APPKEY')
-    if TOKEN == "" or APPKEY == "":
+    APPKEY = get_conf('ALIYUN_APPKEY')
+    if APPKEY == "":
         chatbot.append(["导入依赖失败", "没有阿里云语音识别APPKEY和TOKEN, 详情见https://help.aliyun.com/document_detail/450255.html"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return

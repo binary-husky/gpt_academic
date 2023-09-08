@@ -24,7 +24,11 @@ mspace {
     border-color: yellow;
   }
 }
-
+.normal_mut_select .svelte-1gfkn6j {
+    float: left;
+    width: auto;
+    line-height: 260% !important;
+}
 #highlight_update {
   animation-name: highlight;
   animation-duration: 0.75s;
@@ -103,6 +107,10 @@ mspace {
     width: 10% !important;
 }
 
+button.sm {
+    padding: 6px 8px !important;
+}
+
 /* usage_display */
 .insert_block {
     position: relative;
@@ -124,15 +132,15 @@ textarea {
     resize: none;
     height: 100%; /* 填充父元素的高度 */
 }
-#main_chatbot {
+/* #main_chatbot {
     height: 75vh !important;
     max-height: 75vh !important;
-    /* overflow: auto !important; */
+    overflow: auto !important;
     z-index: 2;
     transform: translateZ(0) !important;
     backface-visibility: hidden !important;
     will-change: transform !important;
-}
+} */
 #prompt_result{
     height: 60vh !important;
     max-height: 60vh !important;
@@ -201,9 +209,9 @@ textarea.svelte-1pie7s6 {
     background: #393939 !important;
     border: var(--input-border-width) solid var(--input-border-color) !important;
 }
-.dark input[type="range"] {
+/* .dark input[type="range"] {
     background: #393939 !important;
-}
+} */
 #user_info .wrap {
     opacity: 0;
 }
@@ -238,7 +246,7 @@ textarea.svelte-1pie7s6 {
 #debug_mes {
     transition: all 0.6s;
 }
-#main_chatbot {
+#gpt-chatbot {
     transition: height 0.3s ease;
 }
 
@@ -415,7 +423,7 @@ input[type="range"]::-webkit-slider-thumb {
 input[type="range"]::-webkit-slider-thumb:hover {
     background: var(--neutral-50);
 }
-input[type=range]::-webkit-slider-runnable-track {
+input[type="range"]::-webkit-slider-runnable-track {
     -webkit-appearance: none;
     box-shadow: none;
     border: none;
@@ -440,28 +448,37 @@ ol:not(.options), ul:not(.options) {
 }
 
 /* 亮色（默认） */
-#main_chatbot {
+#gpt-chatbot {
     background-color: var(--chatbot-background-color-light) !important;
     color: var(--chatbot-color-light) !important;
+    box-shadow: 0 0 12px 4px rgba(0, 0, 0, 0.06);
 }
 /* 暗色 */
-.dark #main_chatbot {
+.dark #gpt-chatbot {
     background-color: var(--block-background-fill) !important;
     color: var(--chatbot-color-dark) !important;
+    box-shadow: 0 0 12px 4px rgba(0, 0, 0, 0.2);
+}
+
+#gpt-panel > div {
+    box-shadow: 0 0 12px 4px rgba(0, 0, 0, 0.06);
+}
+.dark #gpt-panel > div {
+    box-shadow: 0 0 12px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* 屏幕宽度大于等于500px的设备 */
 /* update on 2023.4.8: 高度的细致调整已写入JavaScript */
-@media screen and (min-width: 500px) {
+/* @media screen and (min-width: 500px) {
     #main_chatbot {
         height: calc(100vh - 200px);
     }
     #main_chatbot .wrap {
         max-height: calc(100vh - 200px - var(--line-sm)*1rem - 2*var(--block-label-margin) );
     }
-}
+} */
 /* 屏幕宽度小于500px的设备 */
-@media screen and (max-width: 499px) {
+/* @media screen and (max-width: 499px) {
     #main_chatbot {
         height: calc(100vh - 140px);
     }
@@ -474,8 +491,8 @@ ol:not(.options), ul:not(.options) {
     #app_title h1{
         letter-spacing: -1px; font-size: 22px;
     }
-}
-#main_chatbot .wrap {
+} */
+#gpt-chatbot .wrap {
     overflow-x: hidden
 }
 /* 对话气泡 */
@@ -491,11 +508,19 @@ ol:not(.options), ul:not(.options) {
 [data-testid = "bot"] {
     max-width: 85%;
     border-bottom-left-radius: 0 !important;
+    background-color: var(--message-bot-background-color-light) !important;
 }
 [data-testid = "user"] {
     max-width: 85%;
     width: auto !important;
     border-bottom-right-radius: 0 !important;
+    background-color: var(--message-user-background-color-light) !important;
+}
+.dark [data-testid = "bot"] {
+    background-color: var(--message-bot-background-color-dark) !important;
+}
+.dark [data-testid = "user"] {
+    background-color: var(--message-user-background-color-dark) !important;
 }
 
 .message p {

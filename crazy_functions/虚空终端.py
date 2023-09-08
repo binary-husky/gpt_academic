@@ -1,131 +1,179 @@
-from toolbox import CatchException, update_ui, gen_time_str
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-from .crazy_utils import input_clipping
-
-
-prompt = """
-I have to achieve some functionalities by calling one of the functions below.
-Your job is to find the correct funtion to use to satisfy my requirement,
-and then write python code to call this function with correct parameters.
-
-These are functions you are allowed to choose from:
-1. 
-    功能描述: 总结音视频内容
-    调用函数: ConcludeAudioContent(txt, llm_kwargs)
-    参数说明: 
-            txt: 音频文件的路径
-            llm_kwargs: 模型参数, 永远给定None
-2. 
-    功能描述: 将每次对话记录写入Markdown格式的文件中
-    调用函数: WriteMarkdown()
-3.
-    功能描述: 将指定目录下的PDF文件从英文翻译成中文
-    调用函数: BatchTranslatePDFDocuments_MultiThreaded(txt, llm_kwargs)
-    参数说明: 
-            txt: PDF文件所在的路径
-            llm_kwargs: 模型参数, 永远给定None
-4.
-    功能描述: 根据文本使用GPT模型生成相应的图像
-    调用函数: ImageGeneration(txt, llm_kwargs)
-    参数说明: 
-            txt: 图像生成所用到的提示文本
-            llm_kwargs: 模型参数, 永远给定None
-5.
-    功能描述: 对输入的word文档进行摘要生成 
-    调用函数: SummarizingWordDocuments(input_path, output_path)
-    参数说明: 
-            input_path: 待处理的word文档路径
-            output_path: 摘要生成后的文档路径
-
-
-You should always anwser with following format:
-----------------
-Code:
-```
-class AutoAcademic(object):
-    def __init__(self):
-        self.selected_function = "FILL_CORRECT_FUNCTION_HERE"      # e.g., "GenerateImage"
-        self.txt = "FILL_MAIN_PARAMETER_HERE"      # e.g., "荷叶上的蜻蜓"
-        self.llm_kwargs = None
-```
-Explanation:
-只有GenerateImage和生成图像相关, 因此选择GenerateImage函数。
-----------------
-
-Now, this is my requirement: 
-
 """
-def get_fn_lib():
-    return {
-        "BatchTranslatePDFDocuments_MultiThreaded": ("crazy_functions.批量翻译PDF文档_多线程",  "批量翻译PDF文档"),
-        "SummarizingWordDocuments": ("crazy_functions.总结word文档",  "总结word文档"),
-        "ImageGeneration": ("crazy_functions.图片生成",  "图片生成"),
-        "TranslateMarkdownFromEnglishToChinese": ("crazy_functions.批量Markdown翻译",  "Markdown中译英"),
-        "SummaryAudioVideo": ("crazy_functions.总结音视频",  "总结音视频"),
-    }
+Explanation of the Void Terminal Plugin:
 
-def inspect_dependency(chatbot, history):
-    return True
+Please describe in natural language what you want to do.
 
-def eval_code(code, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    import subprocess, sys, os, shutil, importlib
+1. You can open the plugin's dropdown menu to explore various capabilities of this project, and then describe your needs in natural language, for example:
+- "Please call the plugin to translate a PDF paper for me. I just uploaded the paper to the upload area."
+- "Please use the plugin to translate a PDF paper, with the address being https://www.nature.com/articles/s41586-019-1724-z.pdf."
+- "Generate an image with blooming flowers and lush green grass using the plugin."
+- "Translate the README using the plugin. The GitHub URL is https://github.com/facebookresearch/co-tracker."
+- "Translate an Arxiv paper for me. The Arxiv ID is 1812.10695. Remember to use the plugin and don't do it manually!"
+- "I don't like the current interface color. Modify the configuration and change the theme to THEME="High-Contrast"."
+- "Could you please explain the structure of the Transformer network?"
 
-    with open('gpt_log/void_terminal_runtime.py', 'w', encoding='utf8') as f:
-        f.write(code)
+2. If you use keywords like "call the plugin xxx", "modify the configuration xxx", "please", etc., your intention can be recognized more accurately.
 
-    try:
-        AutoAcademic = getattr(importlib.import_module('gpt_log.void_terminal_runtime', 'AutoAcademic'), 'AutoAcademic')
-        # importlib.reload(AutoAcademic)
-        auto_dict = AutoAcademic()
-        selected_function = auto_dict.selected_function
-        txt = auto_dict.txt
-        fp, fn = get_fn_lib()[selected_function]
-        fn_plugin = getattr(importlib.import_module(fp, fn), fn)
-        yield from fn_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
-    except:
-        from toolbox import trimmed_format_exc
-        chatbot.append(["执行错误", f"\n```\n{trimmed_format_exc()}\n```\n"])
-        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+3. Your intention can be recognized more accurately when using powerful models like GPT4. This plugin is relatively new, so please feel free to provide feedback on GitHub.
 
-def get_code_block(reply):
-    import re
-    pattern = r"```([\s\S]*?)```" # regex pattern to match code blocks
-    matches = re.findall(pattern, reply) # find all code blocks in text
-    if len(matches) != 1: 
-        raise RuntimeError("GPT is not generating proper code.")
-    return matches[0].strip('python') #  code block
+4. Now, if you need to process a file, please upload the file (drag the file to the file upload area) or describe the path to the file.
+
+5. If you don't need to upload a file, you can simply repeat your command again.
+"""
+explain_msg = """
+## 虚空终端插件说明:
+
+1. 请用**自然语言**描述您需要做什么。例如：
+    - 「请调用插件，为我翻译PDF论文，论文我刚刚放到上传区了」
+    - 「请调用插件翻译PDF论文，地址为https://aaa/bbb/ccc.pdf」
+    - 「把Arxiv论文翻译成中文PDF，arxiv论文的ID是1812.10695，记得用插件！」
+    - 「生成一张图片，图中鲜花怒放，绿草如茵，用插件实现」
+    - 「用插件翻译README，Github网址是https://github.com/facebookresearch/co-tracker」
+    - 「我不喜欢当前的界面颜色，修改配置，把主题THEME更换为THEME="High-Contrast"」
+    - 「请问Transformer网络的结构是怎样的？」
+
+2. 您可以打开插件下拉菜单以了解本项目的各种能力。    
+
+3. 如果您使用「调用插件xxx」、「修改配置xxx」、「请问」等关键词，您的意图可以被识别的更准确。
+
+4. 建议使用 GPT3.5 或更强的模型，弱模型可能无法理解您的想法。该插件诞生时间不长，欢迎您前往Github反馈问题。
+
+5. 现在，如果需要处理文件，请您上传文件（将文件拖动到文件上传区），或者描述文件所在的路径。
+
+6. 如果不需要上传文件，现在您只需要再次重复一次您的指令即可。
+"""
+
+from pydantic import BaseModel, Field
+from typing import List
+from toolbox import CatchException, update_ui, gen_time_str
+from toolbox import update_ui_lastest_msg, disable_auto_promotion
+from request_llm.bridge_all import predict_no_ui_long_connection
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from crazy_functions.crazy_utils import input_clipping
+from crazy_functions.json_fns.pydantic_io import GptJsonIO, JsonStringError
+from crazy_functions.vt_fns.vt_state import VoidTerminalState
+from crazy_functions.vt_fns.vt_modify_config import modify_configuration_hot
+from crazy_functions.vt_fns.vt_modify_config import modify_configuration_reboot
+from crazy_functions.vt_fns.vt_call_plugin import execute_plugin
+
+class UserIntention(BaseModel):
+    user_prompt: str = Field(description="the content of user input", default="")
+    intention_type: str = Field(description="the type of user intention, choose from ['ModifyConfiguration', 'ExecutePlugin', 'Chat']", default="ExecutePlugin")
+    user_provide_file: bool = Field(description="whether the user provides a path to a file", default=False)
+    user_provide_url: bool = Field(description="whether the user provides a url", default=False)
+
+
+def chat(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention):
+    gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
+        inputs=txt, inputs_show_user=txt,
+        llm_kwargs=llm_kwargs, chatbot=chatbot, history=[], 
+        sys_prompt=system_prompt
+    )
+    chatbot[-1] = [txt, gpt_say]
+    history.extend([txt, gpt_say])
+    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+    pass
+
+
+explain_intention_to_user = {
+    'Chat': "聊天对话",
+    'ExecutePlugin': "调用插件",
+    'ModifyConfiguration': "修改配置",
+}
+
+
+def analyze_intention_with_simple_rules(txt):
+    user_intention = UserIntention()
+    user_intention.user_prompt = txt
+    is_certain = False
+
+    if '请问' in txt:
+        is_certain = True
+        user_intention.intention_type = 'Chat'
+
+    if '用插件' in txt:
+        is_certain = True
+        user_intention.intention_type = 'ExecutePlugin'
+
+    if '修改配置' in txt:
+        is_certain = True
+        user_intention.intention_type = 'ModifyConfiguration'
+
+    return is_certain, user_intention
+
 
 @CatchException
-def 终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    """
-    txt             输入栏用户输入的文本, 例如需要翻译的一段话, 再例如一个包含了待处理文件的路径
-    llm_kwargs      gpt模型参数, 如温度和top_p等, 一般原样传递下去就行
-    plugin_kwargs   插件模型的参数, 暂时没有用武之地
-    chatbot         聊天显示框的句柄, 用于显示给用户
-    history         聊天历史, 前情提要
-    system_prompt   给gpt的静默提醒
-    web_port        当前软件运行的端口号
-    """
-    # 清空历史, 以免输入溢出
-    history = []    
+def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    disable_auto_promotion(chatbot=chatbot)
+    # 获取当前虚空终端状态
+    state = VoidTerminalState.get_state(chatbot)
+    appendix_msg = ""
 
-    # 基本信息：功能、贡献者
-    chatbot.append(["函数插件功能？", "根据自然语言执行插件命令, 作者: binary-husky, 插件初始化中 ..."])
+    # 用简单的关键词检测用户意图
+    is_certain, _ = analyze_intention_with_simple_rules(txt)
+    if txt.startswith('private_upload/') and len(txt) == 34:
+        state.set_state(chatbot=chatbot, key='has_provided_explaination', value=False)
+        appendix_msg = "\n\n**很好，您已经上传了文件**，现在请您描述您的需求。"
+        
+    if is_certain or (state.has_provided_explaination):
+        # 如果意图明确，跳过提示环节
+        state.set_state(chatbot=chatbot, key='has_provided_explaination', value=True)
+        state.unlock_plugin(chatbot=chatbot)
+        yield from update_ui(chatbot=chatbot, history=history)
+        yield from 虚空终端主路由(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
+        return
+    else:
+        # 如果意图模糊，提示
+        state.set_state(chatbot=chatbot, key='has_provided_explaination', value=True)
+        state.lock_plugin(chatbot=chatbot)
+        chatbot.append(("虚空终端状态:", explain_msg+appendix_msg))
+        yield from update_ui(chatbot=chatbot, history=history)
+        return
+
+
+
+def 虚空终端主路由(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    history = []
+    chatbot.append(("虚空终端状态: ", f"正在执行任务: {txt}"))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
-    # # 尝试导入依赖, 如果缺少依赖, 则给出安装建议
-    # dep_ok = yield from inspect_dependency(chatbot=chatbot, history=history) # 刷新界面
-    # if not dep_ok: return
-    
-    # 输入
-    i_say = prompt + txt
-    # 开始
-    gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
-        inputs=i_say, inputs_show_user=txt, 
-        llm_kwargs=llm_kwargs, chatbot=chatbot, history=[], 
-        sys_prompt=""
-    )
+    # ⭐ ⭐ ⭐ 分析用户意图
+    is_certain, user_intention = analyze_intention_with_simple_rules(txt)
+    if not is_certain:
+        yield from update_ui_lastest_msg(
+            lastmsg=f"正在执行任务: {txt}\n\n分析用户意图中", chatbot=chatbot, history=history, delay=0)
+        gpt_json_io = GptJsonIO(UserIntention)
+        rf_req = "\nchoose from ['ModifyConfiguration', 'ExecutePlugin', 'Chat']"
+        inputs = "Analyze the intention of the user according to following user input: \n\n" + \
+            ">> " + (txt+rf_req).rstrip('\n').replace('\n','\n>> ') + '\n\n' + gpt_json_io.format_instructions
+        run_gpt_fn = lambda inputs, sys_prompt: predict_no_ui_long_connection(
+            inputs=inputs, llm_kwargs=llm_kwargs, history=[], sys_prompt=sys_prompt, observe_window=[])
+        analyze_res = run_gpt_fn(inputs, "")
+        try:
+            user_intention = gpt_json_io.generate_output_auto_repair(analyze_res, run_gpt_fn)
+            lastmsg=f"正在执行任务: {txt}\n\n用户意图理解: 意图={explain_intention_to_user[user_intention.intention_type]}", 
+        except JsonStringError as e:
+            yield from update_ui_lastest_msg(
+                lastmsg=f"正在执行任务: {txt}\n\n用户意图理解: 失败 当前语言模型（{llm_kwargs['llm_model']}）不能理解您的意图", chatbot=chatbot, history=history, delay=0)
+            return
+    else:
+        pass
 
-    # 将代码转为动画
-    code = get_code_block(gpt_say)
-    yield from eval_code(code, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
+    yield from update_ui_lastest_msg(
+        lastmsg=f"正在执行任务: {txt}\n\n用户意图理解: 意图={explain_intention_to_user[user_intention.intention_type]}", 
+        chatbot=chatbot, history=history, delay=0)
+
+    # 用户意图: 修改本项目的配置
+    if user_intention.intention_type == 'ModifyConfiguration':
+        yield from modify_configuration_reboot(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention)
+
+    # 用户意图: 调度插件
+    if user_intention.intention_type == 'ExecutePlugin':
+        yield from execute_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention)
+
+    # 用户意图: 聊天
+    if user_intention.intention_type == 'Chat':
+        yield from chat(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention)
+
+    return
+

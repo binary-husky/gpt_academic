@@ -1,3 +1,46 @@
+.dark {
+    --background-fill-primary: #050810;
+    --body-background-fill: var(--background-fill-primary);
+}
+/* 插件下拉菜单 */
+#plugin-panel .wrap.svelte-aqlk7e.svelte-aqlk7e.svelte-aqlk7e {
+    box-shadow: var(--input-shadow);
+    border: var(--input-border-width) dashed var(--border-color-primary);
+    border-radius: 4px;
+}
+
+#plugin-panel .dropdown-arrow.svelte-p5edak {
+    width: 50px;
+}
+#plugin-panel input.svelte-aqlk7e.svelte-aqlk7e.svelte-aqlk7e {
+    padding-left: 5px;
+}
+
+/* 小按钮 */
+.sm.svelte-1ipelgc {
+    font-family: "Microsoft YaHei UI", "Helvetica", "Microsoft YaHei", "ui-sans-serif", "sans-serif", "system-ui";
+    --button-small-text-weight: 600;
+    --button-small-text-size:   16px;
+    border-bottom-right-radius: 6px;
+    border-bottom-left-radius:  6px;
+    border-top-right-radius:    6px;
+    border-top-left-radius:     6px;
+}
+
+#plugin-panel .sm.svelte-1ipelgc {
+    font-family: "Microsoft YaHei UI", "Helvetica", "Microsoft YaHei", "ui-sans-serif", "sans-serif", "system-ui";
+    --button-small-text-weight: 400;
+    --button-small-text-size:   14px;
+    border-bottom-right-radius: 6px;
+    border-bottom-left-radius:  6px;
+    border-top-right-radius:    6px;
+    border-top-left-radius:     6px;
+}
+
+.wrap-inner.svelte-aqlk7e.svelte-aqlk7e.svelte-aqlk7e {
+    padding: 0%;
+}
+
 .markdown-body table {
     margin: 1em 0;
     border-collapse: collapse;
@@ -15,6 +58,12 @@
 
 .markdown-body thead th {
     padding: .5em .2em;
+}
+
+.normal_mut_select .svelte-1gfkn6j {
+    float: left;
+    width: auto;
+    line-height: 260% !important;
 }
 
 .markdown-body ol, .markdown-body ul {

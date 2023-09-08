@@ -24,6 +24,19 @@ pj = os.path.join
 
 class ChatBotWithCookies(list):
     def __init__(self, cookie):
+        """
+        cookies = {
+            'top_p': top_p,
+            'temperature': temperature,
+            'lock_plugin': bool,
+            "files_to_promote": ["file1", "file2"],
+            "most_recent_uploaded": {
+                "path": "uploaded_path",
+                "time": time.time(),
+                "time_str": "timestr",
+            }
+        }
+        """
         self._cookies = cookie
 
     def write_list(self, list):
@@ -47,6 +60,8 @@ def ArgsGeneralWrapper(f):
         # 引入一个有cookie的chatbot
         cookies.update({
             'top_p':top_p,
+            'api_key': cookies['api_key'],
+            'llm_model': llm_model,
             'temperature':temperature,
         })
         llm_kwargs = {
@@ -69,7 +84,7 @@ def ArgsGeneralWrapper(f):
             # 处理个别特殊插件的锁定状态
             module, fn_name = cookies['lock_plugin'].split('->')
             f_hot_reload = getattr(importlib.import_module(module, fn_name), fn_name)
-            yield from f_hot_reload(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
+            yield from f_hot_reload(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, request)
     return decorated
 
 
@@ -117,20 +132,20 @@ def CatchException(f):
     """
 
     @wraps(f)
-    def decorated(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT=-1):
+    def decorated(main_input, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, *args, **kwargs):
         try:
-            yield from f(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT)
+            yield from f(main_input, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, *args, **kwargs)
         except Exception as e:
             from check_proxy import check_proxy
             from toolbox import get_conf
             proxies, = get_conf('proxies')
             tb_str = '```\n' + trimmed_format_exc() + '```'
-            if len(chatbot) == 0:
-                chatbot.clear()
-                chatbot.append(["插件调度异常", "异常原因"])
-            chatbot[-1] = (chatbot[-1][0],
+            if len(chatbot_with_cookie) == 0:
+                chatbot_with_cookie.clear()
+                chatbot_with_cookie.append(["插件调度异常", "异常原因"])
+            chatbot_with_cookie[-1] = (chatbot_with_cookie[-1][0],
                            f"[Local Message] 实验性函数调用出错: \n\n{tb_str} \n\n当前代理可用性: \n\n{check_proxy(proxies)}")
-            yield from update_ui(chatbot=chatbot, history=history, msg=f'异常 {e}') # 刷新界面
+            yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=f'异常 {e}') # 刷新界面
     return decorated
 
 
@@ -196,11 +211,10 @@ def write_results_to_file(history, file_name=None):
     import time
     if file_name is None:
         # file_name = time.strftime("chatGPT分析报告%Y-%m-%d-%H-%M-%S", time.localtime()) + '.md'
-        file_name = 'chatGPT分析报告' + \
-            time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + '.md'
+        file_name = 'GPT-Report-' + gen_time_str() + '.md'
     os.makedirs('./gpt_log/', exist_ok=True)
     with open(f'./gpt_log/{file_name}', 'w', encoding='utf8') as f:
-        f.write('# chatGPT 分析报告\n')
+        f.write('# GPT-Academic Report\n')
         for i, content in enumerate(history):
             try:    
                 if type(content) != str: content = str(content)
@@ -216,6 +230,37 @@ def write_results_to_file(history, file_name=None):
             f.write('\n\n')
     res = '以上材料已经被写入:\t' + os.path.abspath(f'./gpt_log/{file_name}')
     print(res)
+    return res
+
+
+def write_history_to_file(history, file_basename=None, file_fullname=None):
+    """
+    将对话记录history以Markdown格式写入文件中。如果没有指定文件名，则使用当前时间生成文件名。
+    """
+    import os
+    import time
+    if file_fullname is None:
+        if file_basename is not None:
+            file_fullname = os.path.join(get_log_folder(), file_basename)
+        else:
+            file_fullname = os.path.join(get_log_folder(), f'GPT-Academic-{gen_time_str()}.md')
+    os.makedirs(os.path.dirname(file_fullname), exist_ok=True)
+    with open(file_fullname, 'w', encoding='utf8') as f:
+        f.write('# GPT-Academic Report\n')
+        for i, content in enumerate(history):
+            try:    
+                if type(content) != str: content = str(content)
+            except:
+                continue
+            if i % 2 == 0:
+                f.write('## ')
+            try:
+                f.write(content)
+            except:
+                # remove everything that cannot be handled by utf8
+                f.write(content.encode('utf-8', 'ignore').decode())
+            f.write('\n\n')
+    res = os.path.abspath(file_fullname)
     return res
 
 
@@ -449,7 +494,8 @@ def find_recent_files(directory):
     current_time = time.time()
     one_minute_ago = current_time - 60
     recent_files = []
-
+    if not os.path.exists(directory): 
+        os.makedirs(directory, exist_ok=True)
     for filename in os.listdir(directory):
         file_path = os.path.join(directory, filename)
         if file_path.endswith('.log'):
@@ -466,18 +512,22 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
     # 将文件复制一份到下载区
     import shutil
     if rename_file is None: rename_file = f'{gen_time_str()}-{os.path.basename(file)}'
-    new_path = os.path.join(f'./gpt_log/', rename_file)
+    new_path = os.path.join(get_log_folder(), rename_file)
     # 如果已经存在，先删除
     if os.path.exists(new_path) and not os.path.samefile(new_path, file): os.remove(new_path)
     # 把文件复制过去
     if not os.path.exists(new_path): shutil.copyfile(file, new_path)
     # 将文件添加到chatbot cookie中，避免多用户干扰
     if chatbot:
-        if 'file_to_promote' in chatbot._cookies: current = chatbot._cookies['file_to_promote']
+        if 'files_to_promote' in chatbot._cookies: current = chatbot._cookies['files_to_promote']
         else: current = []
-        chatbot._cookies.update({'file_to_promote': [new_path] + current})
+        chatbot._cookies.update({'files_to_promote': [new_path] + current})
 
-def on_file_uploaded(files, chatbot, txt, txt2, checkboxes):
+def disable_auto_promotion(chatbot):
+    chatbot._cookies.update({'files_to_promote': []})
+    return
+
+def on_file_uploaded(files, chatbot, txt, txt2, checkboxes, cookies):
     """
     当文件被上传时的回调函数
     """
@@ -492,7 +542,7 @@ def on_file_uploaded(files, chatbot, txt, txt2, checkboxes):
         shutil.rmtree('./private_upload/')
     except:
         pass
-    time_tag = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+    time_tag = gen_time_str()
     os.makedirs(f'private_upload/{time_tag}', exist_ok=True)
     err_msg = ''
     for file in files:
@@ -512,14 +562,20 @@ def on_file_uploaded(files, chatbot, txt, txt2, checkboxes):
                     f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
                     f'\n\n调用路径参数已自动修正到: \n\n{txt}' +
                     f'\n\n现在您点击任意“红颜色”标识的函数插件时，以上文件将被作为输入参数'+err_msg])
-    return chatbot, txt, txt2
+    cookies.update({
+        'most_recent_uploaded': {
+            'path': f'private_upload/{time_tag}',
+            'time': time.time(),
+            'time_str': time_tag
+    }})
+    return chatbot, txt, txt2, cookies
 
 
 def on_report_generated(cookies, files, chatbot):
     from toolbox import find_recent_files
-    if 'file_to_promote' in cookies:
-        report_files = cookies['file_to_promote']
-        cookies.pop('file_to_promote')
+    if 'files_to_promote' in cookies:
+        report_files = cookies['files_to_promote']
+        cookies.pop('files_to_promote')
     else:
         report_files = find_recent_files('gpt_log')
     if len(report_files) == 0:
@@ -849,14 +905,18 @@ def zip_folder(source_folder, dest_folder, zip_name):
     print(f"Zip file created at {zip_file}")
 
 def zip_result(folder):
-    import time
-    t = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+    t = gen_time_str()
     zip_folder(folder, './gpt_log/', f'{t}-result.zip')
     return pj('./gpt_log/', f'{t}-result.zip')
 
 def gen_time_str():
     import time
     return time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+
+def get_log_folder(user='default', plugin_name='shared'):
+    _dir = os.path.join(os.path.dirname(__file__), 'gpt_log', user, plugin_name)
+    if not os.path.exists(_dir): os.makedirs(_dir)
+    return _dir
 
 class ProxyNetworkActivate():
     """
@@ -902,3 +962,101 @@ def Singleton(cls):
         return _instance[cls]
  
     return _singleton
+
+"""
+========================================================================
+第四部分
+接驳虚空终端:
+    - set_conf:                     在运行过程中动态地修改配置
+    - set_multi_conf:               在运行过程中动态地修改多个配置
+    - get_plugin_handle:            获取插件的句柄
+    - get_plugin_default_kwargs:    获取插件的默认参数
+    - get_chat_handle:              获取简单聊天的句柄
+    - get_chat_default_kwargs:      获取简单聊天的默认参数
+========================================================================
+"""
+
+def set_conf(key, value):
+    from toolbox import read_single_conf_with_lru_cache, get_conf
+    read_single_conf_with_lru_cache.cache_clear()
+    get_conf.cache_clear()
+    os.environ[key] = str(value)
+    altered, = get_conf(key)
+    return altered
+
+def set_multi_conf(dic):
+    for k, v in dic.items(): set_conf(k, v)
+    return
+
+def get_plugin_handle(plugin_name):
+    """
+    e.g. plugin_name = 'crazy_functions.批量Markdown翻译->Markdown翻译指定语言'
+    """
+    import importlib
+    assert '->' in plugin_name, \
+        "Example of plugin_name: crazy_functions.批量Markdown翻译->Markdown翻译指定语言"
+    module, fn_name = plugin_name.split('->')
+    f_hot_reload = getattr(importlib.import_module(module, fn_name), fn_name)
+    return f_hot_reload
+
+def get_chat_handle():
+    """
+    """
+    from request_llm.bridge_all import predict_no_ui_long_connection
+    return predict_no_ui_long_connection
+
+def get_plugin_default_kwargs():
+    """
+    """
+    from toolbox import get_conf, ChatBotWithCookies
+
+    WEB_PORT, LLM_MODEL, API_KEY = \
+        get_conf('WEB_PORT', 'LLM_MODEL', 'API_KEY')
+
+    llm_kwargs = {
+        'api_key': API_KEY,
+        'llm_model': LLM_MODEL,
+        'top_p':1.0, 
+        'max_length': None,
+        'temperature':1.0,
+    }
+    chatbot = ChatBotWithCookies(llm_kwargs)
+
+    # txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port
+    DEFAULT_FN_GROUPS_kwargs = {
+        "main_input": "./README.md",
+        "llm_kwargs": llm_kwargs,
+        "plugin_kwargs": {},
+        "chatbot_with_cookie": chatbot,
+        "history": [],
+        "system_prompt": "You are a good AI.", 
+        "web_port": WEB_PORT
+    }
+    return DEFAULT_FN_GROUPS_kwargs
+
+def get_chat_default_kwargs():
+    """
+    """
+    from toolbox import get_conf
+
+    LLM_MODEL, API_KEY = get_conf('LLM_MODEL', 'API_KEY')
+
+    llm_kwargs = {
+        'api_key': API_KEY,
+        'llm_model': LLM_MODEL,
+        'top_p':1.0, 
+        'max_length': None,
+        'temperature':1.0,
+    }
+
+    default_chat_kwargs = {
+        "inputs": "Hello there, are you ready?",
+        "llm_kwargs": llm_kwargs,
+        "history": [],
+        "sys_prompt": "You are AI assistant",
+        "observe_window": None,
+        "console_slience": False,
+    }
+
+    return default_chat_kwargs
+

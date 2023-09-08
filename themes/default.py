@@ -9,7 +9,7 @@ def adjust_theme():
         set_theme = gr.themes.Default(
             primary_hue=gr.themes.utils.colors.orange,
             neutral_hue=gr.themes.utils.colors.gray,
-            font=["sans-serif", "Microsoft YaHei", "ui-sans-serif", "system-ui"],
+            font=["Helvetica", "Microsoft YaHei", "ui-sans-serif", "sans-serif", "system-ui"],
             font_mono=["ui-monospace", "Consolas", "monospace"])
         set_theme.set(
             # Colors
@@ -84,3 +84,5 @@ def adjust_theme():
 
 with open("themes/default.css", "r", encoding="utf-8") as f:
     advanced_css = f.read()
+with open("themes/common.css", "r", encoding="utf-8") as f:
+    advanced_css += f.read()

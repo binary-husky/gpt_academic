@@ -16,7 +16,7 @@ Pour traduire ce projet dans une langue arbitraire avec GPT, lisez et exécutez 
 >
 > 1. Veuillez noter que seuls les plugins de fonctions (boutons) **en rouge** prennent en charge la lecture de fichiers. Certains plugins se trouvent dans le **menu déroulant** de la zone de plugins. De plus, nous accueillons et traitons les nouvelles pull requests pour les plugins avec **la plus haute priorité**!
 >
-> 2. Les fonctions de chaque fichier de ce projet sont expliquées en détail dans l'auto-analyse [`self_analysis.md`](https://github.com/binary-husky/chatgpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A). Avec l'itération des versions, vous pouvez également cliquer sur les plugins de fonctions pertinents et appeler GPT pour régénérer le rapport d'auto-analyse du projet à tout moment. Les FAQ sont résumées dans [le wiki](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98). [Méthode d'installation](#installation).
+> 2. Les fonctions de chaque fichier de ce projet sont expliquées en détail dans l'auto-analyse [`self_analysis.md`](https://github.com/binary-husky/gpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A). Avec l'itération des versions, vous pouvez également cliquer sur les plugins de fonctions pertinents et appeler GPT pour régénérer le rapport d'auto-analyse du projet à tout moment. Les FAQ sont résumées dans [le wiki](https://github.com/binary-husky/gpt_academic/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98). [Méthode d'installation](#installation).
 >
 > 3. Ce projet est compatible avec et encourage l'utilisation de grands modèles de langage nationaux tels que chatglm, RWKV, Pangu, etc. La coexistence de plusieurs clés API est prise en charge et peut être remplie dans le fichier de configuration, tel que `API_KEY="openai-key1,openai-key2,api2d-key3"`. Lorsque vous souhaitez remplacer temporairement `API_KEY`, saisissez temporairement `API_KEY` dans la zone de saisie, puis appuyez sur Entrée pour soumettre et activer. 
 
@@ -28,13 +28,13 @@ Révision en un clic | prend en charge la révision en un clic et la recherche d
 Traduction chinois-anglais en un clic | Traduction chinois-anglais en un clic
 Explication de code en un clic | Affichage, explication, génération et ajout de commentaires de code
 [Raccourcis personnalisés](https://www.bilibili.com/video/BV14s4y1E7jN) | prend en charge les raccourcis personnalisés
-Conception modulaire | prend en charge de puissants plugins de fonction personnalisée, les plugins prennent en charge la [mise à jour à chaud](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)  
-[Autoscanner](https://www.bilibili.com/video/BV1cj411A7VW) | [Plug-in de fonction] [Compréhension instantanée](https://github.com/binary-husky/chatgpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A) du code source de ce projet
+Conception modulaire | prend en charge de puissants plugins de fonction personnalisée, les plugins prennent en charge la [mise à jour à chaud](https://github.com/binary-husky/gpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)  
+[Autoscanner](https://www.bilibili.com/video/BV1cj411A7VW) | [Plug-in de fonction] [Compréhension instantanée](https://github.com/binary-husky/gpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A) du code source de ce projet
 [Analyse de programme](https://www.bilibili.com/video/BV1cj411A7VW) | [Plug-in de fonction] Analyse en un clic de la structure d'autres projets Python / C / C ++ / Java / Lua / ...
 Lecture d'articles, [traduction](https://www.bilibili.com/video/BV1KT411x7Wn) d'articles | [Plug-in de fonction] Compréhension instantanée de l'article latex / pdf complet et génération de résumés
 [Traduction](https://www.bilibili.com/video/BV1nk4y1Y7Js/) et [révision](https://www.bilibili.com/video/BV1FT411H7c5/) complets en latex | [Plug-in de fonction] traduction ou révision en un clic d'articles en latex
 Génération de commentaires en masse | [Plug-in de fonction] Génération en un clic de commentaires de fonction en masse
-Traduction [chinois-anglais](https://www.bilibili.com/video/BV1yo4y157jV/) en Markdown | [Plug-in de fonction] avez-vous vu la [README](https://github.com/binary-husky/chatgpt_academic/blob/master/docs/README_EN.md) pour les 5 langues ci-dessus?
+Traduction [chinois-anglais](https://www.bilibili.com/video/BV1yo4y157jV/) en Markdown | [Plug-in de fonction] avez-vous vu la [README](https://github.com/binary-husky/gpt_academic/blob/master/docs/README_EN.md) pour les 5 langues ci-dessus?
 Génération de rapports d'analyse de chat | [Plug-in de fonction] Génère automatiquement un rapport de résumé après l'exécution
 [Traduction intégrale en pdf](https://www.bilibili.com/video/BV1KT411x7Wn) | [Plug-in de fonction] Extraction de titre et de résumé de l'article pdf + traduction intégrale (multi-thread)
 [Aide à arxiv](https://www.bilibili.com/video/BV1LM4y1279X) | [Plug-in de fonction] Entrer l'url de l'article arxiv pour traduire et télécharger le résumé en un clic
@@ -84,8 +84,8 @@ Plus de nouvelles fonctionnalités (génération d'images, etc.) ... | Voir la f
 
 1. Télécharger le projet
 ```sh
-git clone https://github.com/binary-husky/chatgpt_academic.git
-cd chatgpt_academic
+git clone https://github.com/binary-husky/gpt_academic.git
+cd gpt_academic
 ```
 
 2. Configuration de la clé API
@@ -141,8 +141,8 @@ python main.py
 1. ChatGPT uniquement (recommandé pour la plupart des gens)
 
 ``` sh
-git clone https://github.com/binary-husky/chatgpt_academic.git  # Télécharger le projet
-cd chatgpt_academic                                 # Accéder au chemin
+git clone https://github.com/binary-husky/gpt_academic.git  # Télécharger le projet
+cd gpt_academic                                 # Accéder au chemin
 nano config.py                                      # Editez config.py avec n'importe quel éditeur de texte en configurant "Proxy", "API_KEY" et "WEB_PORT" (p. ex. 50923)
 docker build -t gpt-academic .                      # Installer
 
@@ -172,10 +172,10 @@ docker-compose up
 Configurez simplement API_URL_REDIRECT selon les instructions de config.py.
 
 2. Déploiement distant sur un serveur cloud (connaissance et expérience des serveurs cloud requises)
-Veuillez consulter [Wiki de déploiement-1] (https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BF%9C%E7%A8%8B%E9%83%A8%E7%BD%B2%E6%8C%87%E5%8D%97).
+Veuillez consulter [Wiki de déploiement-1] (https://github.com/binary-husky/gpt_academic/wiki/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BF%9C%E7%A8%8B%E9%83%A8%E7%BD%B2%E6%8C%87%E5%8D%97).
 
 3. Utilisation de WSL2 (sous-système Windows pour Linux)
-Veuillez consulter [Wiki de déploiement-2] (https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2).
+Veuillez consulter [Wiki de déploiement-2] (https://github.com/binary-husky/gpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2).
 
 4. Comment exécuter sous un sous-répertoire (tel que `http://localhost/subpath`)
 Veuillez consulter les [instructions d'exécution de FastAPI] (docs/WithFastapi.md).
@@ -206,7 +206,7 @@ Par exemple
 
 Écrivez des plugins de fonctions puissants pour effectuer toutes les tâches que vous souhaitez ou que vous ne pouvez pas imaginer.
 Les plugins de ce projet ont une difficulté de programmation et de débogage très faible. Si vous avez des connaissances de base en Python, vous pouvez simuler la fonctionnalité de votre propre plugin en suivant le modèle que nous avons fourni.
-Veuillez consulter le [Guide du plugin de fonction] (https://github.com/binary-husky/chatgpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97) pour plus de détails.
+Veuillez consulter le [Guide du plugin de fonction] (https://github.com/binary-husky/gpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97) pour plus de détails.
 
 ---
 # Latest Update

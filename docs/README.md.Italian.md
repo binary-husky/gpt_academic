@@ -13,7 +13,7 @@ Per tradurre questo progetto in qualsiasi lingua con GPT, leggere e eseguire [`m
 >
 > 1. Si prega di notare che solo i plugin (pulsanti) contrassegnati in **rosso** supportano la lettura di file, alcuni plugin sono posizionati nel **menu a discesa** nella zona dei plugin. Accettiamo e gestiamo PR per qualsiasi nuovo plugin con **massima priorità**!
 >
-> 2. Le funzionalità di ogni file di questo progetto sono descritte dettagliatamente nella propria analisi di autotraduzione [`self_analysis.md`](https://github.com/binary-husky/chatgpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A). Con l'iterazione delle versioni, è possibile fare clic sui plugin funzionali correlati in qualsiasi momento per richiamare GPT e generare nuovamente il rapporto di analisi automatica del progetto. Le domande frequenti sono riassunte nella [`wiki`](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98). [Metodo di installazione] (#installazione).
+> 2. Le funzionalità di ogni file di questo progetto sono descritte dettagliatamente nella propria analisi di autotraduzione [`self_analysis.md`](https://github.com/binary-husky/gpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A). Con l'iterazione delle versioni, è possibile fare clic sui plugin funzionali correlati in qualsiasi momento per richiamare GPT e generare nuovamente il rapporto di analisi automatica del progetto. Le domande frequenti sono riassunte nella [`wiki`](https://github.com/binary-husky/gpt_academic/wiki/%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98). [Metodo di installazione] (#installazione).
 >
 > 3. Questo progetto è compatibile e incoraggia l'utilizzo di grandi modelli di linguaggio di produzione nazionale come chatglm, RWKV, Pangu ecc. Supporta la coesistenza di più api-key e può essere compilato nel file di configurazione come `API_KEY="openai-key1,openai-key2,api2d-key3"`. Per sostituire temporaneamente `API_KEY`, inserire `API_KEY` temporaneo nell'area di input e premere Invio per renderlo effettivo. 
 
@@ -25,13 +25,13 @@ Correzione immediata | Supporta correzione immediata e ricerca degli errori di g
 Traduzione cinese-inglese immediata | Traduzione cinese-inglese immediata con un solo clic
 Spiegazione del codice immediata | Visualizzazione del codice, spiegazione del codice, generazione del codice, annotazione del codice con un solo clic
 [Scorciatoie personalizzate](https://www.bilibili.com/video/BV14s4y1E7jN) | Supporta scorciatoie personalizzate
-Design modularizzato | Supporta potenti [plugin di funzioni](https://github.com/binary-husky/chatgpt_academic/tree/master/crazy_functions) personalizzati, i plugin supportano l'[aggiornamento in tempo reale](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)
-[Auto-profiling del programma](https://www.bilibili.com/video/BV1cj411A7VW) | [Plugin di funzioni] [Comprensione immediata](https://github.com/binary-husky/chatgpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A) del codice sorgente di questo progetto
+Design modularizzato | Supporta potenti [plugin di funzioni](https://github.com/binary-husky/gpt_academic/tree/master/crazy_functions) personalizzati, i plugin supportano l'[aggiornamento in tempo reale](https://github.com/binary-husky/gpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)
+[Auto-profiling del programma](https://www.bilibili.com/video/BV1cj411A7VW) | [Plugin di funzioni] [Comprensione immediata](https://github.com/binary-husky/gpt_academic/wiki/chatgpt-academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E6%8A%A5%E5%91%8A) del codice sorgente di questo progetto
 [Analisi del programma](https://www.bilibili.com/video/BV1cj411A7VW) | [Plugin di funzioni] Un clic può analizzare l'albero di altri progetti Python/C/C++/Java/Lua/...
 Lettura del documento, [traduzione](https://www.bilibili.com/video/BV1KT411x7Wn) del documento | [Plugin di funzioni] La lettura immediata dell'intero documento latex/pdf di un documento e la generazione di un riassunto
 Traduzione completa di un documento Latex, [correzione immediata](https://www.bilibili.com/video/BV1FT411H7c5/) | [Plugin di funzioni] Una traduzione o correzione immediata di un documento Latex
 Generazione di annotazioni in batch | [Plugin di funzioni] Generazione automatica delle annotazioni di funzione con un solo clic
-[Traduzione cinese-inglese di Markdown](https://www.bilibili.com/video/BV1yo4y157jV/) | [Plugin di funzioni] Hai letto il [README](https://github.com/binary-husky/chatgpt_academic/blob/master/docs/README_EN.md) delle cinque lingue sopra?
+[Traduzione cinese-inglese di Markdown](https://www.bilibili.com/video/BV1yo4y157jV/) | [Plugin di funzioni] Hai letto il [README](https://github.com/binary-husky/gpt_academic/blob/master/docs/README_EN.md) delle cinque lingue sopra?
 Generazione di report di analisi di chat | [Plugin di funzioni] Generazione automatica di un rapporto di sintesi dopo l'esecuzione
 [Funzione di traduzione di tutto il documento PDF](https://www.bilibili.com/video/BV1KT411x7Wn) | [Plugin di funzioni] Estrarre il titolo e il sommario dell'articolo PDF + tradurre l'intero testo (multithreading)
 [Assistente di Arxiv](https://www.bilibili.com/video/BV1LM4y1279X) | [Plugin di funzioni] Inserire l'URL dell'articolo di Arxiv e tradurre il sommario con un clic + scaricare il PDF
@@ -39,7 +39,7 @@ Generazione di report di analisi di chat | [Plugin di funzioni] Generazione auto
 Aggregazione delle informazioni su Internet + GPT | [Plugin di funzioni] Fai in modo che GPT rilevi le informazioni su Internet prima di rispondere alle domande, senza mai diventare obsolete
 Visualizzazione di formule/img/tabelle | È possibile visualizzare un'equazione in forma [tex e render](https://user-images.githubusercontent.com/96192199/230598842-1d7fcddd-815d-40ee-af60-baf488a199df.png) contemporaneamente, supporta equazioni e evidenziazione del codice
 Supporto per plugin di funzioni multithreading | Supporto per chiamata multithreaded di chatgpt, elaborazione con un clic di grandi quantità di testo o di un programma
-Avvia il tema di gradio [scuro](https://github.com/binary-husky/chatgpt_academic/issues/173) | Aggiungere ```/?__theme=dark``` dopo l'URL del browser per passare a un tema scuro
+Avvia il tema di gradio [scuro](https://github.com/binary-husky/gpt_academic/issues/173) | Aggiungere ```/?__theme=dark``` dopo l'URL del browser per passare a un tema scuro
 Supporto per maggiori modelli LLM, supporto API2D | Sentirsi serviti simultaneamente da GPT3.5, GPT4, [Tsinghua ChatGLM](https://github.com/THUDM/ChatGLM-6B), [Fudan MOSS](https://github.com/OpenLMLab/MOSS) deve essere una grande sensazione, giusto?
 Ulteriori modelli LLM supportat,i supporto per l'implementazione di Huggingface | Aggiunta di un'interfaccia Newbing (Nuovo Bing), introdotta la compatibilità con Tsinghua [Jittorllms](https://github.com/Jittor/JittorLLMs), [LLaMA](https://github.com/facebookresearch/llama), [RWKV](https://github.com/BlinkDL/ChatRWKV) e [PanGu-α](https://openi.org.cn/pangu/)
 Ulteriori dimostrazioni di nuove funzionalità (generazione di immagini, ecc.)... | Vedere la fine di questo documento...
@@ -82,8 +82,8 @@ Ulteriori dimostrazioni di nuove funzionalità (generazione di immagini, ecc.)..
 
 1. Scarica il progetto
 ```sh
-git clone https://github.com/binary-husky/chatgpt_academic.git
-cd chatgpt_academic
+git clone https://github.com/binary-husky/gpt_academic.git
+cd gpt_academic
 ```
 
 2. Configura API_KEY
@@ -139,8 +139,8 @@ python main.py
 1. Solo ChatGPT (consigliato per la maggior parte delle persone)
 
 ``` sh
-git clone https://github.com/binary-husky/chatgpt_academic.git  # scarica il progetto
-cd chatgpt_academic                                 # entra nel percorso
+git clone https://github.com/binary-husky/gpt_academic.git  # scarica il progetto
+cd gpt_academic                                 # entra nel percorso
 nano config.py                                      # con un qualsiasi editor di testo, modifica config.py configurando "Proxy", "API_KEY" e "WEB_PORT" (ad esempio 50923)
 docker build -t gpt-academic .                      # installa
 
@@ -171,10 +171,10 @@ docker-compose up
 Configura API_URL_REDIRECT seguendo le istruzioni nel file `config.py`.
 
 2. Distribuzione su un server cloud remoto (richiede conoscenze ed esperienza di server cloud)
-Si prega di visitare [wiki di distribuzione-1] (https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BF%9C%E7%A8%8B%E9%83%A8%E7%BD%B2%E6%8C%87%E5%8D%97)
+Si prega di visitare [wiki di distribuzione-1] (https://github.com/binary-husky/gpt_academic/wiki/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BF%9C%E7%A8%8B%E9%83%A8%E7%BD%B2%E6%8C%87%E5%8D%97)
 
 3. Utilizzo di WSL2 (Windows Subsystem for Linux)
-Si prega di visitare [wiki di distribuzione-2] (https://github.com/binary-husky/chatgpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2)
+Si prega di visitare [wiki di distribuzione-2] (https://github.com/binary-husky/gpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2)
 
 4. Come far funzionare ChatGPT all'interno di un sottodominio (ad es. `http://localhost/subpath`)
 Si prega di visitare [Istruzioni per l'esecuzione con FastAPI] (docs/WithFastapi.md)
@@ -206,7 +206,7 @@ ad esempio
 2. Plugin di funzione personalizzati
 
 Scrivi plugin di funzione personalizzati e esegui tutte le attività che desideri o non hai mai pensato di fare.
-La difficoltà di scrittura e debug dei plugin del nostro progetto è molto bassa. Se si dispone di una certa conoscenza di base di Python, è possibile realizzare la propria funzione del plugin seguendo il nostro modello. Per maggiori dettagli, consultare la [guida al plugin per funzioni](https://github.com/binary-husky/chatgpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97).
+La difficoltà di scrittura e debug dei plugin del nostro progetto è molto bassa. Se si dispone di una certa conoscenza di base di Python, è possibile realizzare la propria funzione del plugin seguendo il nostro modello. Per maggiori dettagli, consultare la [guida al plugin per funzioni](https://github.com/binary-husky/gpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97).
 
 ---
 # Ultimo aggiornamento
