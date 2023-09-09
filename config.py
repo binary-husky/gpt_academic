@@ -48,7 +48,7 @@ DEFAULT_WORKER_NUM = 3
 
 
 # 色彩主题，可选 ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast"]
-THEME = "Default"
+THEME = "Chuanhu-Small-and-Beautiful"
 
 
 # 对话窗的高度 （仅在LAYOUT="TOP-DOWN"时生效）
