@@ -1,5 +1,5 @@
 ---
-title: ChatImprovement
+title: GPT-Academic
 emoji: 😻
 colorFrom: blue
 colorTo: blue
