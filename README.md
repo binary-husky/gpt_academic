@@ -255,7 +255,7 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 
 3. 虚空终端（从自然语言输入中，理解用户意图+自动调用其他插件）
 
-- 步骤一：输入 “ 请调用插件翻译PDF论文，地址为https://storage.googleapis.com/deepmind-media/alphago/AlphaGoNaturePaper.pdf ”
+- 步骤一：输入 “ 请调用插件翻译PDF论文，地址为https://openreview.net/pdf?id=rJl0r3R9KX ”
 - 步骤二：点击“虚空终端”
 
 <div align="center">
