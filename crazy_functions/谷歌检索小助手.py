@@ -3,8 +3,10 @@ from toolbox import CatchException, report_execption, promote_file_to_downloadzo
 from toolbox import update_ui, update_ui_lastest_msg, disable_auto_promotion, write_history_to_file
 import logging
 import requests
+import time
+import random
 
-ENABLE_ALL_VERSION_SEARCH = False
+ENABLE_ALL_VERSION_SEARCH = True
 
 def get_meta_information(url, chatbot, history):
     import arxiv
@@ -36,6 +38,7 @@ def get_meta_information(url, chatbot, history):
 
     if ENABLE_ALL_VERSION_SEARCH:
         def search_all_version(url):
+            time.sleep(random.randint(1,5)) # 睡一会防止触发google反爬虫
             response = session.get(url)
             soup = BeautifulSoup(response.text, "html.parser")
 
@@ -52,7 +55,8 @@ def get_meta_information(url, chatbot, history):
                     max_results=1,
                     sort_by=arxiv.SortCriterion.Relevance,
                 )
-                paper = next(search.results())
+                try: paper = next(search.results())
+                except: paper = None
                 return paper
 
             return None
@@ -76,25 +80,32 @@ def get_meta_information(url, chatbot, history):
         except:
             citation = 'cited by 0'
         abstract = result.select_one(".gs_rs").text.strip()  # 摘要在 .gs_rs 中的文本，需要清除首尾空格
-        if ENABLE_ALL_VERSION_SEARCH:
-            other_versions = next((tag['href'] for tag in result.select_one('.gs_flb').select('.gs_nph') if 'cluster' in tag['href']), None)  # 获取所有版本的链接
-            paper = search_all_version('http://' + urlparse(url).netloc + other_versions)
+
+        # 首先在arxiv上搜索，获取文章摘要
+        search = arxiv.Search(
+            query = title,
+            max_results = 1,
+            sort_by = arxiv.SortCriterion.Relevance,
+        )
+        try: paper = next(search.results())
+        except: paper = None
+        
+        is_match = paper is not None and string_similar(title, paper.title) > 0.90
+
+        # 如果在Arxiv上匹配失败，检索文章的历史版本的题目
+        if not is_match and ENABLE_ALL_VERSION_SEARCH:
+            other_versions_page_url = [tag['href'] for tag in result.select_one('.gs_flb').select('.gs_nph') if 'cluster' in tag['href']]
+            if len(other_versions_page_url) > 0:
+                other_versions_page_url = other_versions_page_url[0]
+                paper = search_all_version('http://' + urlparse(url).netloc + other_versions_page_url)
+                is_match = paper is not None and string_similar(title, paper.title) > 0.90
+
+        if is_match:
+            # same paper
+            abstract = paper.summary.replace('\n', ' ')
+            is_paper_in_arxiv = True
         else:
-            search = arxiv.Search(
-                query = title,
-                max_results = 1,
-                sort_by = arxiv.SortCriterion.Relevance,
-            )
-            paper = next(search.results())
-        try:
-            if paper and string_similar(title, paper.title) > 0.90: # same paper
-                abstract = paper.summary.replace('\n', ' ')
-                is_paper_in_arxiv = True
-            else:   # different paper
-                abstract = abstract
-                is_paper_in_arxiv = False
-            paper = next(search.results())
-        except:
+            # different paper
             abstract = abstract
             is_paper_in_arxiv = False
 
