@@ -281,8 +281,7 @@ def report_execption(chatbot, history, a, b):
     向chatbot中添加错误信息
     """
     chatbot.append((a, b))
-    history.append(a)
-    history.append(b)
+    history.extend([a, b])
 
 
 def text_divide_paragraph(text):
@@ -304,6 +303,7 @@ def text_divide_paragraph(text):
             lines[i] = lines[i].replace(" ", "&nbsp;")
         text = "</br>".join(lines)
         return pre + text + suf
+
 
 @lru_cache(maxsize=128) # 使用 lru缓存 加快转换速度
 def markdown_convertion(txt):
@@ -359,19 +359,41 @@ def markdown_convertion(txt):
         content = content.replace('</script>\n</script>', '</script>')
         return content
 
-    def no_code(txt):
-        if '```' not in txt: 
-            return True
-        else:
-            if '```reference' in txt: return True    # newbing
-            else: return False
+    def is_equation(txt):
+        """
+        判定是否为公式 | 测试1 写出洛伦兹定律，使用tex格式公式 测试2 给出柯西不等式，使用latex格式 测试3 写出麦克斯韦方程组
+        """
+        if '```' in txt and '```reference' not in txt: return False
+        if '$' not in txt and '\\[' not in txt: return False
+        mathpatterns = {
+            r'(?<!\\|\$)(\$)([^\$]+)(\$)': {'allow_multi_lines': False},                            #  $...$
+            r'(?<!\\)(\$\$)([^\$]+)(\$\$)': {'allow_multi_lines': True},                            # $$...$$
+            r'(?<!\\)(\\\[)(.+?)(\\\])': {'allow_multi_lines': False},                              # \[...\]
+            # r'(?<!\\)(\\\()(.+?)(\\\))': {'allow_multi_lines': False},                            # \(...\)
+            # r'(?<!\\)(\\begin{([a-z]+?\*?)})(.+?)(\\end{\2})': {'allow_multi_lines': True},       # \begin...\end
+            # r'(?<!\\)(\$`)([^`]+)(`\$)': {'allow_multi_lines': False},                            # $`...`$
+        }
+        matches = []
+        for pattern, property in mathpatterns.items():
+            flags = re.ASCII|re.DOTALL if property['allow_multi_lines'] else re.ASCII
+            matches.extend(re.findall(pattern, txt, flags))
+        if len(matches) == 0: return False
+        contain_any_eq = False
+        illegal_pattern = re.compile(r'[^\x00-\x7F]|echo')
+        for match in matches:
+            if len(match) != 3: return False
+            eq_canidate = match[1]
+            if illegal_pattern.search(eq_canidate): 
+                return False
+            else: 
+                contain_any_eq = True
+        return contain_any_eq
 
-    if ('$' in txt) and no_code(txt):  # 有$标识的公式符号，且没有代码段```的标识
+    if is_equation(txt):  # 有$标识的公式符号，且没有代码段```的标识
         # convert everything to html format
         split = markdown.markdown(text='---')
-        convert_stage_1 = markdown.markdown(text=txt, extensions=['mdx_math', 'fenced_code', 'tables', 'sane_lists'], extension_configs=markdown_extension_configs)
+        convert_stage_1 = markdown.markdown(text=txt, extensions=['sane_lists', 'tables', 'mdx_math', 'fenced_code'], extension_configs=markdown_extension_configs)
         convert_stage_1 = markdown_bug_hunt(convert_stage_1)
-        # re.DOTALL: Make the '.' special character match any character at all, including a newline; without this flag, '.' will match anything except a newline. Corresponds to the inline flag (?s).
         # 1. convert to easy-to-copy tex (do not render math)
         convert_stage_2_1, n = re.subn(find_equation_pattern, replace_math_no_render, convert_stage_1, flags=re.DOTALL)
         # 2. convert to rendered equation
@@ -379,7 +401,7 @@ def markdown_convertion(txt):
         # cat them together
         return pre + convert_stage_2_1 + f'{split}' + convert_stage_2_2 + suf
     else:
-        return pre + markdown.markdown(txt, extensions=['fenced_code', 'codehilite', 'tables', 'sane_lists']) + suf
+        return pre + markdown.markdown(txt, extensions=['sane_lists', 'tables', 'fenced_code', 'codehilite']) + suf
 
 
 def close_up_code_segment_during_stream(gpt_reply):
@@ -561,7 +583,7 @@ def on_file_uploaded(files, chatbot, txt, txt2, checkboxes, cookies):
     chatbot.append(['我上传了文件，请查收',
                     f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
                     f'\n\n调用路径参数已自动修正到: \n\n{txt}' +
-                    f'\n\n现在您点击任意“红颜色”标识的函数插件时，以上文件将被作为输入参数'+err_msg])
+                    f'\n\n现在您点击任意函数插件时，以上文件将被作为输入参数'+err_msg])
     cookies.update({
         'most_recent_uploaded': {
             'path': f'private_upload/{time_tag}',
