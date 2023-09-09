@@ -43,7 +43,11 @@ API_URL_REDIRECT = {}
 DEFAULT_WORKER_NUM = 3
 
 
-# 对话窗的高度
+# 色彩主题，可选 ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast"]
+THEME = "Default"
+
+
+# 对话窗的高度 （仅在LAYOUT="TOP-DOWN"时生效）
 CHATBOT_HEIGHT = 1115
 
 
@@ -68,6 +72,10 @@ WEB_PORT = -1
 MAX_RETRY = 2
 
 
+# 插件分类默认选项
+DEFAULT_FN_GROUPS = ['对话', '编程', '学术']
+
+
 # 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
 LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
 AVAIL_LLM_MODELS = ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5", "api2d-gpt-3.5-turbo", 
@@ -83,7 +91,7 @@ BAIDU_CLOUD_QIANFAN_MODEL = 'ERNIE-Bot'    # 可选 "ERNIE-Bot"(文心一言), "
 
 
 # 如果使用ChatGLM2微调模型，请把 LLM_MODEL="chatglmft"，并在此处指定模型路径
-ChatGLM_PTUNING_CHECKPOINT = "" # 例如"/home/hmp/ChatGLM2-6B/ptuning/output/6b-pt-128-1e-2/checkpoint-100"
+CHATGLM_PTUNING_CHECKPOINT = "" # 例如"/home/hmp/ChatGLM2-6B/ptuning/output/6b-pt-128-1e-2/checkpoint-100"
 
 
 # 本地LLM模型如ChatGLM的执行方式 CPU/GPU
@@ -97,10 +105,6 @@ CONCURRENT_COUNT = 100
 
 # 是否在提交时自动清空输入框
 AUTO_CLEAR_TXT = False
-
-
-# 色彩主体，可选 ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast"]
-THEME = "Default"
 
 
 # 加一个live2d装饰
@@ -213,6 +217,18 @@ ALLOW_RESET_CONFIG = False
     ├── NEWBING_STYLE
     └── NEWBING_COOKIES
 
+    
+用户图形界面布局依赖关系示意图
+│
+├── CHATBOT_HEIGHT 对话窗的高度
+├── CODE_HIGHLIGHT 代码高亮
+├── LAYOUT 窗口布局
+├── DARK_MODE 暗色模式 / 亮色模式
+├── DEFAULT_FN_GROUPS 插件分类默认选项
+├── THEME 色彩主题
+├── AUTO_CLEAR_TXT 是否在提交时自动清空输入框
+├── ADD_WAIFU 加一个live2d装饰
+├── ALLOW_RESET_CONFIG 是否允许通过自然语言描述修改本页的配置，该功能具有一定的危险性
 
 
 插件在线服务配置依赖关系示意图

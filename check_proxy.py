@@ -5,7 +5,7 @@ def check_proxy(proxies):
     try:
         response = requests.get("https://ipapi.co/json/", proxies=proxies, timeout=4)
         data = response.json()
-        print(f'查询代理的地理位置，返回的结果是{data}')
+        # print(f'查询代理的地理位置，返回的结果是{data}')
         if 'country_name' in data:
             country = data['country_name']
             result = f"代理配置 {proxies_https}, 代理所在地：{country}"
