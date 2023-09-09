@@ -1,7 +1,7 @@
 # docker build -t gpt-academic-all-capacity -f docs/GithubAction+AllCapacity  --network=host --build-arg http_proxy=http://localhost:10881 --build-arg https_proxy=http://localhost:10881 .
 
 # 从NVIDIA源，从而支持显卡（检查宿主的nvidia-smi中的cuda版本必须>=11.3）
-FROM fuqingxu/11.3.1-runtime-ubuntu20.04-with-texlive-cache:latest
+FROM fuqingxu/11.3.1-runtime-ubuntu20.04-with-texlive:latest
 
 # use python3 as the system default python
 WORKDIR /gpt

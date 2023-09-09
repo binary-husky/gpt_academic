@@ -1,4 +1,4 @@
-from toolbox import update_ui, promote_file_to_downloadzone
+from toolbox import update_ui, promote_file_to_downloadzone, disable_auto_promotion
 from toolbox import CatchException, report_execption, write_history_to_file
 from .crazy_utils import input_clipping
 
@@ -6,7 +6,8 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
     import os, copy
     from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
     from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-    msg = '正常'
+    disable_auto_promotion(chatbot=chatbot)
+
     summary_batch_isolation = True
     inputs_array = []
     inputs_show_user_array = []
