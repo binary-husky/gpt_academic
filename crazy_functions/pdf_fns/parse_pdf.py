@@ -20,6 +20,11 @@ def get_avail_grobid_url():
 def parse_pdf(pdf_path, grobid_url):
     import scipdf   # pip install scipdf_parser
     if grobid_url.endswith('/'): grobid_url = grobid_url.rstrip('/')
-    article_dict = scipdf.parse_pdf_to_dict(pdf_path, grobid_url=grobid_url)
+    try:
+        article_dict = scipdf.parse_pdf_to_dict(pdf_path, grobid_url=grobid_url)
+    except GROBID_OFFLINE_EXCEPTION:
+        raise GROBID_OFFLINE_EXCEPTION("GROBID服务不可用，请修改config中的GROBID_URL，可修改成本地GROBID服务。")
+    except:
+        raise RuntimeError("解析PDF失败，请检查PDF是否损坏。")
     return article_dict
 

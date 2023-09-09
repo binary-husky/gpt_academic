@@ -75,7 +75,11 @@ def 连接bing搜索回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, histor
     proxies, = get_conf('proxies')
     urls = bing_search(txt, proxies)
     history = []
-
+    if len(urls) == 0:
+        chatbot.append((f"结论：{txt}",
+                        "[Local Message] 受到bing限制，无法从bing获取信息！"))
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
+        return
     # ------------- < 第2步：依次访问网页 > -------------
     max_search_result = 8   # 最多收纳多少个网页的结果
     for index, url in enumerate(urls[:max_search_result]):

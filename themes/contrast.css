@@ -1,7 +1,182 @@
-.dark {
-    --background-fill-primary: #050810;
-    --body-background-fill: var(--background-fill-primary);
+:root {
+    --body-text-color: #FFFFFF;
+    --link-text-color: #FFFFFF;
+    --link-text-color-active: #FFFFFF;
+    --link-text-color-hover: #FFFFFF;
+    --link-text-color-visited: #FFFFFF;
+    --body-text-color-subdued: #FFFFFF;
+    --block-info-text-color: #FFFFFF;
+    --block-label-text-color: #FFFFFF;
+    --block-title-text-color: #FFFFFF;
+    --checkbox-label-text-color: #FFFFFF;
+    --checkbox-label-text-color-selected: #FFFFFF;
+    --error-text-color: #FFFFFF;
+    --button-cancel-text-color: #FFFFFF;
+    --button-cancel-text-color-hover: #FFFFFF;
+    --button-primary-text-color: #FFFFFF;
+    --button-primary-text-color-hover: #FFFFFF;
+    --button-secondary-text-color: #FFFFFF;
+    --button-secondary-text-color-hover: #FFFFFF;
+    
+
+    --border-bottom-right-radius: 0px;
+    --border-bottom-left-radius:  0px;
+    --border-top-right-radius:    0px;
+    --border-top-left-radius:     0px;
+    --block-radius:     0px;
+    --button-large-radius: 0px;
+    --button-small-radius: 0px;
+    --block-background-fill: #000000;
+
+    --border-color-accent: #3cff00;
+    --border-color-primary: #3cff00;
+    --block-border-color: #3cff00;
+    --block-label-border-color: #3cff00;
+    --block-title-border-color: #3cff00;
+    --panel-border-color: #3cff00;
+    --checkbox-border-color: #3cff00;
+    --checkbox-border-color-focus: #3cff00;
+    --checkbox-border-color-hover: #3cff00;
+    --checkbox-border-color-selected: #3cff00;
+    --checkbox-label-border-color: #3cff00;
+    --checkbox-label-border-color-hover: #3cff00;
+    --error-border-color: #3cff00;
+    --input-border-color: #3cff00;
+    --input-border-color-focus: #3cff00;
+    --input-border-color-hover: #3cff00;
+    --table-border-color: #3cff00;
+    --button-cancel-border-color: #3cff00;
+    --button-cancel-border-color-hover: #3cff00;
+    --button-primary-border-color: #3cff00;
+    --button-primary-border-color-hover: #3cff00;
+    --button-secondary-border-color: #3cff00;
+    --button-secondary-border-color-hover: #3cff00;
+    
+    
+    --body-background-fill: #000000;
+    --background-fill-primary: #000000;
+    --background-fill-secondary: #000000;
+    --block-background-fill: #000000;
+    --block-label-background-fill: #000000;
+    --block-title-background-fill: #000000;
+    --panel-background-fill: #000000;
+    --chatbot-code-background-color: #000000;
+    --checkbox-background-color: #000000;
+    --checkbox-background-color-focus: #000000;
+    --checkbox-background-color-hover: #000000;
+    --checkbox-background-color-selected: #000000;
+    --checkbox-label-background-fill: #000000;
+    --checkbox-label-background-fill-hover: #000000;
+    --checkbox-label-background-fill-selected: #000000;
+    --error-background-fill: #000000;
+    --input-background-fill: #000000;
+    --input-background-fill-focus: #000000;
+    --input-background-fill-hover: #000000;
+    --stat-background-fill: #000000;
+    --table-even-background-fill: #000000;
+    --table-odd-background-fill: #000000;
+    --button-cancel-background-fill: #000000;
+    --button-cancel-background-fill-hover: #000000;
+    --button-primary-background-fill: #000000;
+    --button-primary-background-fill-hover: #000000;
+    --button-secondary-background-fill: #000000;
+    --button-secondary-background-fill-hover: #000000;
+    --color-accent-soft: #000000;
 }
+
+.dark {
+    --body-text-color: #FFFFFF;
+    --link-text-color: #FFFFFF;
+    --link-text-color-active: #FFFFFF;
+    --link-text-color-hover: #FFFFFF;
+    --link-text-color-visited: #FFFFFF;
+    --body-text-color-subdued: #FFFFFF;
+    --block-info-text-color: #FFFFFF;
+    --block-label-text-color: #FFFFFF;
+    --block-title-text-color: #FFFFFF;
+    --checkbox-label-text-color: #FFFFFF;
+    --checkbox-label-text-color-selected: #FFFFFF;
+    --error-text-color: #FFFFFF;
+    --button-cancel-text-color: #FFFFFF;
+    --button-cancel-text-color-hover: #FFFFFF;
+    --button-primary-text-color: #FFFFFF;
+    --button-primary-text-color-hover: #FFFFFF;
+    --button-secondary-text-color: #FFFFFF;
+    --button-secondary-text-color-hover: #FFFFFF;
+    
+
+
+    --border-bottom-right-radius: 0px;
+    --border-bottom-left-radius:  0px;
+    --border-top-right-radius:    0px;
+    --border-top-left-radius:     0px;
+    --block-radius:     0px;
+    --button-large-radius: 0px;
+    --button-small-radius: 0px;
+    --block-background-fill: #000000;
+
+    --border-color-accent: #3cff00;
+    --border-color-primary: #3cff00;
+    --block-border-color: #3cff00;
+    --block-label-border-color: #3cff00;
+    --block-title-border-color: #3cff00;
+    --panel-border-color: #3cff00;
+    --checkbox-border-color: #3cff00;
+    --checkbox-border-color-focus: #3cff00;
+    --checkbox-border-color-hover: #3cff00;
+    --checkbox-border-color-selected: #3cff00;
+    --checkbox-label-border-color: #3cff00;
+    --checkbox-label-border-color-hover: #3cff00;
+    --error-border-color: #3cff00;
+    --input-border-color: #3cff00;
+    --input-border-color-focus: #3cff00;
+    --input-border-color-hover: #3cff00;
+    --table-border-color: #3cff00;
+    --button-cancel-border-color: #3cff00;
+    --button-cancel-border-color-hover: #3cff00;
+    --button-primary-border-color: #3cff00;
+    --button-primary-border-color-hover: #3cff00;
+    --button-secondary-border-color: #3cff00;
+    --button-secondary-border-color-hover: #3cff00;
+    
+    
+    --body-background-fill: #000000;
+    --background-fill-primary: #000000;
+    --background-fill-secondary: #000000;
+    --block-background-fill: #000000;
+    --block-label-background-fill: #000000;
+    --block-title-background-fill: #000000;
+    --panel-background-fill: #000000;
+    --chatbot-code-background-color: #000000;
+    --checkbox-background-color: #000000;
+    --checkbox-background-color-focus: #000000;
+    --checkbox-background-color-hover: #000000;
+    --checkbox-background-color-selected: #000000;
+    --checkbox-label-background-fill: #000000;
+    --checkbox-label-background-fill-hover: #000000;
+    --checkbox-label-background-fill-selected: #000000;
+    --error-background-fill: #000000;
+    --input-background-fill: #000000;
+    --input-background-fill-focus: #000000;
+    --input-background-fill-hover: #000000;
+    --stat-background-fill: #000000;
+    --table-even-background-fill: #000000;
+    --table-odd-background-fill: #000000;
+    --button-cancel-background-fill: #000000;
+    --button-cancel-background-fill-hover: #000000;
+    --button-primary-background-fill: #000000;
+    --button-primary-background-fill-hover: #000000;
+    --button-secondary-background-fill: #000000;
+    --button-secondary-background-fill-hover: #000000;
+    --color-accent-soft: #000000;
+}
+
+
+
+.block.svelte-mppz8v {
+    border-color: #3cff00;
+}
+
 /* 插件下拉菜单 */
 #plugin-panel .wrap.svelte-aqlk7e.svelte-aqlk7e.svelte-aqlk7e {
     box-shadow: var(--input-shadow);
@@ -15,26 +190,32 @@
 #plugin-panel input.svelte-aqlk7e.svelte-aqlk7e.svelte-aqlk7e {
     padding-left: 5px;
 }
+.root{
+    border-bottom-right-radius: 0px;
+    border-bottom-left-radius:  0px;
+    border-top-right-radius:    0px;
+    border-top-left-radius:     0px;
+}
 
 /* 小按钮 */
 .sm.svelte-1ipelgc {
     font-family: "Microsoft YaHei UI", "Helvetica", "Microsoft YaHei", "ui-sans-serif", "sans-serif", "system-ui";
     --button-small-text-weight: 600;
     --button-small-text-size:   16px;
-    border-bottom-right-radius: 6px;
-    border-bottom-left-radius:  6px;
-    border-top-right-radius:    6px;
-    border-top-left-radius:     6px;
+    border-bottom-right-radius: 0px;
+    border-bottom-left-radius:  0px;
+    border-top-right-radius:    0px;
+    border-top-left-radius:     0px;
 }
 
 #plugin-panel .sm.svelte-1ipelgc {
     font-family: "Microsoft YaHei UI", "Helvetica", "Microsoft YaHei", "ui-sans-serif", "sans-serif", "system-ui";
     --button-small-text-weight: 400;
     --button-small-text-size:   14px;
-    border-bottom-right-radius: 6px;
-    border-bottom-left-radius:  6px;
-    border-top-right-radius:    6px;
-    border-top-left-radius:     6px;
+    border-bottom-right-radius: 0px;
+    border-bottom-left-radius:  0px;
+    border-top-right-radius:    0px;
+    border-top-left-radius:     0px;
 }
 
 .wrap-inner.svelte-aqlk7e.svelte-aqlk7e.svelte-aqlk7e {
@@ -53,7 +234,7 @@
 }
 
 .markdown-body thead {
-    background-color: rgba(175,184,193,0.2);
+    background-color: rgb(0, 0, 0);
 }
 
 .markdown-body thead th {
@@ -97,7 +278,7 @@
     border-radius: 6px;
     margin: 0 2px 0 2px;
     padding: .2em .4em .1em .4em;
-    background-color: rgba(13, 17, 23, 0.95);
+    background-color: rgba(0, 0, 0, 0.95);
     color: #c9d1d9;
 }
 
@@ -107,7 +288,7 @@
     border-radius: 6px;
     margin: 0 2px 0 2px;
     padding: .2em .4em .1em .4em;
-    background-color: rgba(175,184,193,0.2);
+    background-color: rgba(0,0,0,0.2);
 }
 
 /* code block css */
@@ -115,7 +296,7 @@
     display: block;
     overflow: auto;
     white-space: pre;
-    background-color: rgba(13, 17, 23, 0.95);
+    background-color: rgba(0, 0, 0, 0.95);
     border-radius: 10px;
     padding: 1em;
     margin: 1em 2em 1em 0.5em;
@@ -125,7 +306,7 @@
     display: block;
     overflow: auto;
     white-space: pre;
-    background-color: rgba(175,184,193,0.2);
+    background-color: rgba(0,0,0,0.2);
     border-radius: 10px;
     padding: 1em;
     margin: 1em 2em 1em 0.5em;
