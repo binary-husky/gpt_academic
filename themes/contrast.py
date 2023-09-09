@@ -82,7 +82,7 @@ def adjust_theme():
         print('gradio版本较旧, 不能自定义字体和颜色')
     return set_theme
 
-with open("themes/default.css", "r", encoding="utf-8") as f:
+with open("themes/contrast.css", "r", encoding="utf-8") as f:
     advanced_css = f.read()
 with open("themes/common.css", "r", encoding="utf-8") as f:
     advanced_css += f.read()

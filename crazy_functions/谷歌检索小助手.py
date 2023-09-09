@@ -1,25 +1,74 @@
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-from toolbox import CatchException, report_execption, write_results_to_file
-from toolbox import update_ui
+from toolbox import CatchException, report_execption, promote_file_to_downloadzone
+from toolbox import update_ui, update_ui_lastest_msg, disable_auto_promotion, write_history_to_file
+import logging
+import requests
+import time
+import random
+
+ENABLE_ALL_VERSION_SEARCH = True
 
 def get_meta_information(url, chatbot, history):
-    import requests
     import arxiv
     import difflib
+    import re
     from bs4 import BeautifulSoup
     from toolbox import get_conf
+    from urllib.parse import urlparse
+    session = requests.session()
+
     proxies, = get_conf('proxies')
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
+        'Accept-Encoding': 'gzip, deflate, br', 
+        'Accept-Language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7',
+        'Cache-Control':'max-age=0',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 
+        'Connection': 'keep-alive'
     }
-    # 发送 GET 请求
-    response = requests.get(url, proxies=proxies, headers=headers)
+    session.proxies.update(proxies)
+    session.headers.update(headers)
 
+    response = session.get(url)
     # 解析网页内容
     soup = BeautifulSoup(response.text, "html.parser")
 
     def string_similar(s1, s2):
         return difflib.SequenceMatcher(None, s1, s2).quick_ratio()
+
+    if ENABLE_ALL_VERSION_SEARCH:
+        def search_all_version(url):
+            time.sleep(random.randint(1,5)) # 睡一会防止触发google反爬虫
+            response = session.get(url)
+            soup = BeautifulSoup(response.text, "html.parser")
+
+            for result in soup.select(".gs_ri"):
+                try:
+                    url = result.select_one(".gs_rt").a['href']
+                except:
+                    continue
+                arxiv_id = extract_arxiv_id(url)
+                if not arxiv_id:
+                    continue
+                search = arxiv.Search(
+                    id_list=[arxiv_id],
+                    max_results=1,
+                    sort_by=arxiv.SortCriterion.Relevance,
+                )
+                try: paper = next(search.results())
+                except: paper = None
+                return paper
+
+            return None
+
+        def extract_arxiv_id(url):
+            # 返回给定的url解析出的arxiv_id，如url未成功匹配返回None
+            pattern = r'arxiv.org/abs/([^/]+)'
+            match = re.search(pattern, url)
+            if match:
+                return match.group(1)
+            else:
+                return None
 
     profile = []
     # 获取所有文章的标题和作者
@@ -31,32 +80,45 @@ def get_meta_information(url, chatbot, history):
         except:
             citation = 'cited by 0'
         abstract = result.select_one(".gs_rs").text.strip()  # 摘要在 .gs_rs 中的文本，需要清除首尾空格
+
+        # 首先在arxiv上搜索，获取文章摘要
         search = arxiv.Search(
             query = title,
             max_results = 1,
             sort_by = arxiv.SortCriterion.Relevance,
         )
-        try:
-            paper = next(search.results())
-            if string_similar(title, paper.title) > 0.90: # same paper
-                abstract = paper.summary.replace('\n', ' ')
-                is_paper_in_arxiv = True
-            else:   # different paper
-                abstract = abstract
-                is_paper_in_arxiv = False
-            paper = next(search.results())
-        except:
+        try: paper = next(search.results())
+        except: paper = None
+        
+        is_match = paper is not None and string_similar(title, paper.title) > 0.90
+
+        # 如果在Arxiv上匹配失败，检索文章的历史版本的题目
+        if not is_match and ENABLE_ALL_VERSION_SEARCH:
+            other_versions_page_url = [tag['href'] for tag in result.select_one('.gs_flb').select('.gs_nph') if 'cluster' in tag['href']]
+            if len(other_versions_page_url) > 0:
+                other_versions_page_url = other_versions_page_url[0]
+                paper = search_all_version('http://' + urlparse(url).netloc + other_versions_page_url)
+                is_match = paper is not None and string_similar(title, paper.title) > 0.90
+
+        if is_match:
+            # same paper
+            abstract = paper.summary.replace('\n', ' ')
+            is_paper_in_arxiv = True
+        else:
+            # different paper
             abstract = abstract
             is_paper_in_arxiv = False
-        print(title)
-        print(author)
-        print(citation)
+
+        logging.info('[title]:' + title)
+        logging.info('[author]:' + author)
+        logging.info('[citation]:' + citation)
+
         profile.append({
-            'title':title,
-            'author':author,
-            'citation':citation,
-            'abstract':abstract,
-            'is_paper_in_arxiv':is_paper_in_arxiv,
+            'title': title,
+            'author': author,
+            'citation': citation,
+            'abstract': abstract,
+            'is_paper_in_arxiv': is_paper_in_arxiv,
         })
 
         chatbot[-1] = [chatbot[-1][0], title + f'\n\n是否在arxiv中（不在arxiv中无法获取完整摘要）:{is_paper_in_arxiv}\n\n' + abstract]
@@ -65,6 +127,7 @@ def get_meta_information(url, chatbot, history):
 
 @CatchException
 def 谷歌检索小助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    disable_auto_promotion(chatbot=chatbot)
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
@@ -86,6 +149,9 @@ def 谷歌检索小助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     # 清空历史，以免输入溢出
     history = []
     meta_paper_info_list = yield from get_meta_information(txt, chatbot, history)
+    if len(meta_paper_info_list) == 0:
+        yield from update_ui_lastest_msg(lastmsg='获取文献失败，可能触发了google反爬虫机制。',chatbot=chatbot, history=history, delay=0)
+        return
     batchsize = 5
     for batch in range(math.ceil(len(meta_paper_info_list)/batchsize)):
         if len(meta_paper_info_list[:batchsize]) > 0:
@@ -107,6 +173,7 @@ def 谷歌检索小助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
         "已经全部完成，您可以试试让AI写一个Related Works，例如您可以继续输入Write a \"Related Works\" section about \"你搜索的研究领域\" for me."])
     msg = '正常'
     yield from update_ui(chatbot=chatbot, history=history, msg=msg) # 刷新界面
-    res = write_results_to_file(history)
-    chatbot.append(("完成了吗？", res)); 
+    path = write_history_to_file(history)
+    promote_file_to_downloadzone(path, chatbot=chatbot)
+    chatbot.append(("完成了吗？", path)); 
     yield from update_ui(chatbot=chatbot, history=history, msg=msg) # 刷新界面

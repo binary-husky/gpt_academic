@@ -9,6 +9,11 @@ validate_path() # 返回项目根路径
 from tests.test_utils import plugin_test
 
 if __name__ == "__main__":
+    # plugin_test(plugin='crazy_functions.虚空终端->虚空终端', main_input='修改api-key为sk-jhoejriotherjep')
+    plugin_test(plugin='crazy_functions.批量翻译PDF文档_NOUGAT->批量翻译PDF文档', main_input='crazy_functions/test_project/pdf_and_word/aaai.pdf')
+
+    # plugin_test(plugin='crazy_functions.虚空终端->虚空终端', main_input='调用插件，对C:/Users/fuqingxu/Desktop/旧文件/gpt/chatgpt_academic/crazy_functions/latex_fns中的python文件进行解析')
+
     # plugin_test(plugin='crazy_functions.命令行助手->命令行助手', main_input='查看当前的docker容器列表')
 
     # plugin_test(plugin='crazy_functions.解析项目源代码->解析一个Python项目', main_input="crazy_functions/test_project/python/dqn")
@@ -19,7 +24,7 @@ if __name__ == "__main__":
 
     # plugin_test(plugin='crazy_functions.批量Markdown翻译->Markdown中译英', main_input="README.md")
 
-    plugin_test(plugin='crazy_functions.批量翻译PDF文档_多线程->批量翻译PDF文档', main_input='crazy_functions/test_project/pdf_and_word/aaai.pdf')
+    # plugin_test(plugin='crazy_functions.批量翻译PDF文档_多线程->批量翻译PDF文档', main_input='crazy_functions/test_project/pdf_and_word/aaai.pdf')
 
     # plugin_test(plugin='crazy_functions.谷歌检索小助手->谷歌检索小助手', main_input="https://scholar.google.com/scholar?hl=en&as_sdt=0%2C5&q=auto+reinforcement+learning&btnG=")
     

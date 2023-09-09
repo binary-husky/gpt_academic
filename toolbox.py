@@ -24,6 +24,19 @@ pj = os.path.join
 
 class ChatBotWithCookies(list):
     def __init__(self, cookie):
+        """
+        cookies = {
+            'top_p': top_p,
+            'temperature': temperature,
+            'lock_plugin': bool,
+            "files_to_promote": ["file1", "file2"],
+            "most_recent_uploaded": {
+                "path": "uploaded_path",
+                "time": time.time(),
+                "time_str": "timestr",
+            }
+        }
+        """
         self._cookies = cookie
 
     def write_list(self, list):
@@ -47,6 +60,8 @@ def ArgsGeneralWrapper(f):
         # 引入一个有cookie的chatbot
         cookies.update({
             'top_p':top_p,
+            'api_key': cookies['api_key'],
+            'llm_model': llm_model,
             'temperature':temperature,
         })
         llm_kwargs = {
@@ -69,7 +84,7 @@ def ArgsGeneralWrapper(f):
             # 处理个别特殊插件的锁定状态
             module, fn_name = cookies['lock_plugin'].split('->')
             f_hot_reload = getattr(importlib.import_module(module, fn_name), fn_name)
-            yield from f_hot_reload(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
+            yield from f_hot_reload(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, request)
     return decorated
 
 
@@ -266,8 +281,7 @@ def report_execption(chatbot, history, a, b):
     向chatbot中添加错误信息
     """
     chatbot.append((a, b))
-    history.append(a)
-    history.append(b)
+    history.extend([a, b])
 
 
 def text_divide_paragraph(text):
@@ -289,6 +303,7 @@ def text_divide_paragraph(text):
             lines[i] = lines[i].replace(" ", "&nbsp;")
         text = "</br>".join(lines)
         return pre + text + suf
+
 
 @lru_cache(maxsize=128) # 使用 lru缓存 加快转换速度
 def markdown_convertion(txt):
@@ -344,19 +359,41 @@ def markdown_convertion(txt):
         content = content.replace('</script>\n</script>', '</script>')
         return content
 
-    def no_code(txt):
-        if '```' not in txt: 
-            return True
-        else:
-            if '```reference' in txt: return True    # newbing
-            else: return False
+    def is_equation(txt):
+        """
+        判定是否为公式 | 测试1 写出洛伦兹定律，使用tex格式公式 测试2 给出柯西不等式，使用latex格式 测试3 写出麦克斯韦方程组
+        """
+        if '```' in txt and '```reference' not in txt: return False
+        if '$' not in txt and '\\[' not in txt: return False
+        mathpatterns = {
+            r'(?<!\\|\$)(\$)([^\$]+)(\$)': {'allow_multi_lines': False},                            #  $...$
+            r'(?<!\\)(\$\$)([^\$]+)(\$\$)': {'allow_multi_lines': True},                            # $$...$$
+            r'(?<!\\)(\\\[)(.+?)(\\\])': {'allow_multi_lines': False},                              # \[...\]
+            # r'(?<!\\)(\\\()(.+?)(\\\))': {'allow_multi_lines': False},                            # \(...\)
+            # r'(?<!\\)(\\begin{([a-z]+?\*?)})(.+?)(\\end{\2})': {'allow_multi_lines': True},       # \begin...\end
+            # r'(?<!\\)(\$`)([^`]+)(`\$)': {'allow_multi_lines': False},                            # $`...`$
+        }
+        matches = []
+        for pattern, property in mathpatterns.items():
+            flags = re.ASCII|re.DOTALL if property['allow_multi_lines'] else re.ASCII
+            matches.extend(re.findall(pattern, txt, flags))
+        if len(matches) == 0: return False
+        contain_any_eq = False
+        illegal_pattern = re.compile(r'[^\x00-\x7F]|echo')
+        for match in matches:
+            if len(match) != 3: return False
+            eq_canidate = match[1]
+            if illegal_pattern.search(eq_canidate): 
+                return False
+            else: 
+                contain_any_eq = True
+        return contain_any_eq
 
-    if ('$' in txt) and no_code(txt):  # 有$标识的公式符号，且没有代码段```的标识
+    if is_equation(txt):  # 有$标识的公式符号，且没有代码段```的标识
         # convert everything to html format
         split = markdown.markdown(text='---')
-        convert_stage_1 = markdown.markdown(text=txt, extensions=['mdx_math', 'fenced_code', 'tables', 'sane_lists'], extension_configs=markdown_extension_configs)
+        convert_stage_1 = markdown.markdown(text=txt, extensions=['sane_lists', 'tables', 'mdx_math', 'fenced_code'], extension_configs=markdown_extension_configs)
         convert_stage_1 = markdown_bug_hunt(convert_stage_1)
-        # re.DOTALL: Make the '.' special character match any character at all, including a newline; without this flag, '.' will match anything except a newline. Corresponds to the inline flag (?s).
         # 1. convert to easy-to-copy tex (do not render math)
         convert_stage_2_1, n = re.subn(find_equation_pattern, replace_math_no_render, convert_stage_1, flags=re.DOTALL)
         # 2. convert to rendered equation
@@ -364,7 +401,7 @@ def markdown_convertion(txt):
         # cat them together
         return pre + convert_stage_2_1 + f'{split}' + convert_stage_2_2 + suf
     else:
-        return pre + markdown.markdown(txt, extensions=['fenced_code', 'codehilite', 'tables', 'sane_lists']) + suf
+        return pre + markdown.markdown(txt, extensions=['sane_lists', 'tables', 'fenced_code', 'codehilite']) + suf
 
 
 def close_up_code_segment_during_stream(gpt_reply):
@@ -479,7 +516,8 @@ def find_recent_files(directory):
     current_time = time.time()
     one_minute_ago = current_time - 60
     recent_files = []
-
+    if not os.path.exists(directory): 
+        os.makedirs(directory, exist_ok=True)
     for filename in os.listdir(directory):
         file_path = os.path.join(directory, filename)
         if file_path.endswith('.log'):
@@ -503,15 +541,15 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
     if not os.path.exists(new_path): shutil.copyfile(file, new_path)
     # 将文件添加到chatbot cookie中，避免多用户干扰
     if chatbot:
-        if 'file_to_promote' in chatbot._cookies: current = chatbot._cookies['file_to_promote']
+        if 'files_to_promote' in chatbot._cookies: current = chatbot._cookies['files_to_promote']
         else: current = []
-        chatbot._cookies.update({'file_to_promote': [new_path] + current})
+        chatbot._cookies.update({'files_to_promote': [new_path] + current})
 
 def disable_auto_promotion(chatbot):
-    chatbot._cookies.update({'file_to_promote': []})
+    chatbot._cookies.update({'files_to_promote': []})
     return
 
-def on_file_uploaded(files, chatbot, txt, txt2, checkboxes):
+def on_file_uploaded(files, chatbot, txt, txt2, checkboxes, cookies):
     """
     当文件被上传时的回调函数
     """
@@ -545,15 +583,21 @@ def on_file_uploaded(files, chatbot, txt, txt2, checkboxes):
     chatbot.append(['我上传了文件，请查收',
                     f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
                     f'\n\n调用路径参数已自动修正到: \n\n{txt}' +
-                    f'\n\n现在您点击任意“红颜色”标识的函数插件时，以上文件将被作为输入参数'+err_msg])
-    return chatbot, txt, txt2
+                    f'\n\n现在您点击任意函数插件时，以上文件将被作为输入参数'+err_msg])
+    cookies.update({
+        'most_recent_uploaded': {
+            'path': f'private_upload/{time_tag}',
+            'time': time.time(),
+            'time_str': time_tag
+    }})
+    return chatbot, txt, txt2, cookies
 
 
 def on_report_generated(cookies, files, chatbot):
     from toolbox import find_recent_files
-    if 'file_to_promote' in cookies:
-        report_files = cookies['file_to_promote']
-        cookies.pop('file_to_promote')
+    if 'files_to_promote' in cookies:
+        report_files = cookies['files_to_promote']
+        cookies.pop('files_to_promote')
     else:
         report_files = find_recent_files('gpt_log')
     if len(report_files) == 0:
@@ -1001,7 +1045,7 @@ def get_plugin_default_kwargs():
     chatbot = ChatBotWithCookies(llm_kwargs)
 
     # txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port
-    default_plugin_kwargs = {
+    DEFAULT_FN_GROUPS_kwargs = {
         "main_input": "./README.md",
         "llm_kwargs": llm_kwargs,
         "plugin_kwargs": {},
@@ -1010,7 +1054,7 @@ def get_plugin_default_kwargs():
         "system_prompt": "You are a good AI.", 
         "web_port": WEB_PORT
     }
-    return default_plugin_kwargs
+    return DEFAULT_FN_GROUPS_kwargs
 
 def get_chat_default_kwargs():
     """
