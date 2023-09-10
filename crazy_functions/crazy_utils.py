@@ -469,14 +469,16 @@ def read_and_clean_pdf_text(fp):
                     '- ', '') for t in text_areas['blocks'] if 'lines' in t]
                 
         ############################## <第 2 步，获取正文主字体> ##################################
-        fsize_statiscs = {}
-        for span in meta_span:
-            if span[1] not in fsize_statiscs: fsize_statiscs[span[1]] = 0
-            fsize_statiscs[span[1]] += span[2]
-        main_fsize = max(fsize_statiscs, key=fsize_statiscs.get)
-        if REMOVE_FOOT_NOTE:
-            give_up_fize_threshold = main_fsize * REMOVE_FOOT_FFSIZE_PERCENT
-
+        try:
+            fsize_statiscs = {}
+            for span in meta_span:
+                if span[1] not in fsize_statiscs: fsize_statiscs[span[1]] = 0
+                fsize_statiscs[span[1]] += span[2]
+            main_fsize = max(fsize_statiscs, key=fsize_statiscs.get)
+            if REMOVE_FOOT_NOTE:
+                give_up_fize_threshold = main_fsize * REMOVE_FOOT_FFSIZE_PERCENT
+        except:
+            raise RuntimeError(f'抱歉, 我们暂时无法解析此PDF文档: {fp}。')
         ############################## <第 3 步，切分和重新整合> ##################################
         mega_sec = []
         sec = []
