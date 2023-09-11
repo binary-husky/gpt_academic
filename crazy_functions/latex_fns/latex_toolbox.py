@@ -423,7 +423,7 @@ def compile_latex_with_timeout(command, cwd, timeout=60):
 
 def merge_pdfs(pdf1_path, pdf2_path, output_path):
     import PyPDF2
-    Percent = 0.8
+    Percent = 0.95
     # Open the first PDF file
     with open(pdf1_path, 'rb') as pdf1_file:
         pdf1_reader = PyPDF2.PdfFileReader(pdf1_file)
