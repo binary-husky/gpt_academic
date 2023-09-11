@@ -179,8 +179,13 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                 # 非OpenAI官方接口的出现这样的报错，OpenAI和API2D不会走这里
                 chunk_decoded = chunk.decode()
                 error_msg = chunk_decoded
+                # 首先排除一个one-api没有done数据包的第三方Bug情形
+                if len(gpt_replying_buffer.strip()) > 0 and len(error_msg) == 0: 
+                    yield from update_ui(chatbot=chatbot, history=history, msg="检测到有缺陷的非OpenAI官方接口，建议选择更稳定的接口。")
+                    break
+                # 其他情况，直接返回报错
                 chatbot, history = handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
-                yield from update_ui(chatbot=chatbot, history=history, msg="非Openai官方接口返回了错误:" + chunk.decode()) # 刷新界面
+                yield from update_ui(chatbot=chatbot, history=history, msg="非OpenAI官方接口返回了错误:" + chunk.decode()) # 刷新界面
                 return
             
             chunk_decoded = chunk.decode()
