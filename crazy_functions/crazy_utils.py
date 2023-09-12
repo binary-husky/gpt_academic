@@ -706,11 +706,14 @@ class knowledge_archive_interface():
         self.threadLock.release()
         return resp, prompt
 
-def try_install_deps(deps):
+def try_install_deps(deps, reload_m=[]):
+    import subprocess, sys, importlib
     for dep in deps:
-        import subprocess, sys
         subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--user', dep])
-
+    import site
+    importlib.reload(site)
+    for m in reload_m:
+        importlib.reload(__import__(m))
 
 class construct_html():
     def __init__(self) -> None:

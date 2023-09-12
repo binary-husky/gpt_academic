@@ -415,7 +415,7 @@ def get_crazy_functions():
     try:
         from crazy_functions.Langchain知识库 import 读取知识库作答
         function_plugins.update({
-            "知识库问答": {
+            "知识库问答（请构建知识库）": {
                 "Group": "对话",
                 "Color": "stop",
                 "AsButton": False,
