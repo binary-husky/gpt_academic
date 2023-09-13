@@ -30,7 +30,7 @@ def write_chat_to_file(chatbot, history=None, file_name=None):
             f.write("\n>>>" + h)
         f.write('</code>')
     promote_file_to_downloadzone(fp, rename_file=file_name, chatbot=chatbot)
-    return '对话历史写入：' + os.path.abspath(fp)
+    return '对话历史写入：' + fp
 
 def gen_file_preview(file_name):
     try:
