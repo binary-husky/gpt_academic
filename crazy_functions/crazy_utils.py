@@ -1,5 +1,6 @@
-from toolbox import update_ui, get_conf, trimmed_format_exc
+from toolbox import update_ui, get_conf, trimmed_format_exc, get_log_folder
 import threading
+import os
 
 def input_clipping(inputs, history, max_token_limit):
     import numpy as np
@@ -705,6 +706,40 @@ class knowledge_archive_interface():
         )
         self.threadLock.release()
         return resp, prompt
+    
+@Singleton
+class nougat_interface():
+    def __init__(self):
+        self.threadLock = threading.Lock()
+
+    def nougat_with_timeout(self, command, cwd, timeout=3600):
+        import subprocess
+        process = subprocess.Popen(command, shell=True, cwd=cwd)
+        try:
+            stdout, stderr = process.communicate(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            stdout, stderr = process.communicate()
+            print("Process timed out!")
+            return False
+        return True
+
+
+    def NOUGAT_parse_pdf(self, fp):
+        self.threadLock.acquire()
+        import glob, threading, os
+        from toolbox import get_log_folder, gen_time_str
+        dst = os.path.join(get_log_folder(plugin_name='nougat'), gen_time_str())
+        os.makedirs(dst)
+        self.nougat_with_timeout(f'nougat --out "{os.path.abspath(dst)}" "{os.path.abspath(fp)}"', os.getcwd())
+        res = glob.glob(os.path.join(dst,'*.mmd'))
+        if len(res) == 0:
+            raise RuntimeError("Nougat解析论文失败。")
+        self.threadLock.release()
+        return res[0]
+
+
+
 
 def try_install_deps(deps, reload_m=[]):
     import subprocess, sys, importlib
@@ -715,42 +750,43 @@ def try_install_deps(deps, reload_m=[]):
     for m in reload_m:
         importlib.reload(__import__(m))
 
-class construct_html():
-    def __init__(self) -> None:
-        self.css = """
+
+HTML_CSS = """
 .row {
   display: flex;
   flex-wrap: wrap;
 }
-
 .column {
   flex: 1;
   padding: 10px;
 }
-
 .table-header {
   font-weight: bold;
   border-bottom: 1px solid black;
 }
-
 .table-row {
   border-bottom: 1px solid lightgray;
 }
-
 .table-cell {
   padding: 5px;
 }
-        """
-        self.html_string = f'<!DOCTYPE html><head><meta charset="utf-8"><title>翻译结果</title><style>{self.css}</style></head>'
+"""
 
-
-    def add_row(self, a, b):
-        tmp = """
+TABLE_CSS = """
 <div class="row table-row">
     <div class="column table-cell">REPLACE_A</div>
     <div class="column table-cell">REPLACE_B</div>
 </div>
-        """
+"""
+
+class construct_html():
+    def __init__(self) -> None:
+        self.css = HTML_CSS
+        self.html_string = f'<!DOCTYPE html><head><meta charset="utf-8"><title>翻译结果</title><style>{self.css}</style></head>'
+
+
+    def add_row(self, a, b):
+        tmp = TABLE_CSS
         from toolbox import markdown_convertion
         tmp = tmp.replace('REPLACE_A', markdown_convertion(a))
         tmp = tmp.replace('REPLACE_B', markdown_convertion(b))
@@ -758,6 +794,6 @@ class construct_html():
 
 
     def save_file(self, file_name):
-        with open(f'./gpt_log/{file_name}', 'w', encoding='utf8') as f:
+        with open(os.path.join(get_log_folder(), file_name), 'w', encoding='utf8') as f:
             f.write(self.html_string.encode('utf-8', 'ignore').decode())
-
+        return os.path.join(get_log_folder(), file_name)
