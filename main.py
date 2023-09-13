@@ -184,7 +184,7 @@ def main():
         # 函数插件-固定按钮区
         for k in plugins:
             if not plugins[k].get("AsButton", True): continue
-            click_handle = plugins[k]["Button"].click(ArgsGeneralWrapper(plugins[k]["Function"]), [*input_combo, gr.State(PORT)], output_combo)
+            click_handle = plugins[k]["Button"].click(ArgsGeneralWrapper(plugins[k]["Function"]), [*input_combo], output_combo)
             click_handle.then(on_report_generated, [cookies, file_upload, chatbot], [cookies, file_upload, chatbot])
             cancel_handles.append(click_handle)
         # 函数插件-下拉菜单与随变按钮的互动
@@ -204,7 +204,7 @@ def main():
         def route(request: gr.Request, k, *args, **kwargs):
             if k in [r"打开插件列表", r"请先从插件列表中选择"]: return
             yield from ArgsGeneralWrapper(plugins[k]["Function"])(request, *args, **kwargs)
-        click_handle = switchy_bt.click(route,[switchy_bt, *input_combo, gr.State(PORT)], output_combo)
+        click_handle = switchy_bt.click(route,[switchy_bt, *input_combo], output_combo)
         click_handle.then(on_report_generated, [cookies, file_upload, chatbot], [cookies, file_upload, chatbot])
         cancel_handles.append(click_handle)
         # 终止按钮的回调函数注册

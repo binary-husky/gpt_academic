@@ -79,14 +79,23 @@ def ArgsGeneralWrapper(f):
         }
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
+        
         if cookies.get('lock_plugin', None) is None:
             # 正常状态
-            yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
+            if len(args) == 0:  # 插件通道
+                yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, request)
+            else:               # 对话通道
+                yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
         else:
-            # 处理个别特殊插件的锁定状态
+            # 处理少数情况下的特殊插件的锁定状态
             module, fn_name = cookies['lock_plugin'].split('->')
             f_hot_reload = getattr(importlib.import_module(module, fn_name), fn_name)
             yield from f_hot_reload(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, request)
+            # 判断一下用户是否错误地通过对话通道进入，如果是，则进行提醒
+            final_cookies = chatbot_with_cookie.get_cookies()
+            if len(args) == 0 and 'files_to_promote' in final_cookies and len(final_cookies['files_to_promote']) > 0: 
+                chatbot_with_cookie.append(["检测到**滞留的缓存文档**，请及时处理。", "请及时点击“**保存当前对话**”获取所有滞留文档。"])
+                yield from update_ui(chatbot_with_cookie, final_cookies['history'], msg="检测到被滞留的缓存文档")
     return decorated
 
 
@@ -96,7 +105,8 @@ def update_ui(chatbot, history, msg='正常', **kwargs):  # 刷新界面
     """
     assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时, 可用clear将其清空, 然后用for+append循环重新赋值。"
     cookies = chatbot.get_cookies()
-
+    # 备份一份History作为记录
+    cookies.update({'history': history})
     # 解决插件锁定时的界面显示问题
     if cookies.get('lock_plugin', None):
         label = cookies.get('llm_model', "") + " | " + "正在锁定插件" + cookies.get('lock_plugin', None)
