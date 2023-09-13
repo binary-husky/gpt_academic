@@ -1,4 +1,4 @@
-from toolbox import CatchException, update_ui, get_conf, select_api_key
+from toolbox import CatchException, update_ui, get_conf, select_api_key, get_log_folder
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 import datetime
 
@@ -33,7 +33,7 @@ def gen_image(llm_kwargs, prompt, resolution="256x256"):
         raise RuntimeError(response.content.decode())
     # 文件保存到本地
     r = requests.get(image_url, proxies=proxies)
-    file_path = 'gpt_log/image_gen/'
+    file_path = f'{get_log_folder()}/image_gen/'
     os.makedirs(file_path, exist_ok=True)
     file_name = 'Image' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + '.png'
     with open(file_path+file_name, 'wb+') as f: f.write(r.content)

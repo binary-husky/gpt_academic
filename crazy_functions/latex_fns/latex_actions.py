@@ -1,4 +1,4 @@
-from toolbox import update_ui, update_ui_lastest_msg    # 刷新Gradio前端界面
+from toolbox import update_ui, update_ui_lastest_msg, get_log_folder
 from toolbox import zip_folder, objdump, objload, promote_file_to_downloadzone
 from .latex_toolbox import PRESERVE, TRANSFORM
 from .latex_toolbox import set_forbidden_text, set_forbidden_text_begin_end, set_forbidden_text_careful_brace
@@ -439,9 +439,9 @@ def write_html(sp_file_contents, sp_file_result, chatbot, project_folder):
                 trans = k
                 ch.add_row(a=orig, b=trans)
         create_report_file_name = f"{gen_time_str()}.trans.html"
-        ch.save_file(create_report_file_name)
-        shutil.copyfile(pj('./gpt_log/', create_report_file_name), pj(project_folder, create_report_file_name))
-        promote_file_to_downloadzone(file=f'./gpt_log/{create_report_file_name}', chatbot=chatbot)
+        res = ch.save_file(create_report_file_name)
+        shutil.copyfile(res, pj(project_folder, create_report_file_name))
+        promote_file_to_downloadzone(file=res, chatbot=chatbot)
     except:
         from toolbox import trimmed_format_exc
         print('writing html result failed:', trimmed_format_exc())

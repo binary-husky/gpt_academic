@@ -1,5 +1,5 @@
-from toolbox import update_ui
-from toolbox import CatchException, report_execption, write_results_to_file
+from toolbox import update_ui, promote_file_to_downloadzone
+from toolbox import CatchException, report_execption, write_history_to_file
 fast_debug = False
 
 class PaperFileGroup():
@@ -95,7 +95,8 @@ def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
 
     #  <-------- 整理结果，退出 ----------> 
     create_report_file_name = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + f"-chatgpt.polish.md"
-    res = write_results_to_file(gpt_response_collection, file_name=create_report_file_name)
+    res = write_history_to_file(gpt_response_collection, create_report_file_name)
+    promote_file_to_downloadzone(res, chatbot=chatbot)
     history = gpt_response_collection
     chatbot.append((f"{fp}完成了吗？", res))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面

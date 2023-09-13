@@ -109,9 +109,9 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
 def 解析项目本身(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     history = []    # 清空历史，以免输入溢出
     import glob
-    file_manifest = [f for f in glob.glob('./*.py') if ('test_project' not in f) and ('gpt_log' not in f)] + \
-                    [f for f in glob.glob('./crazy_functions/*.py') if ('test_project' not in f) and ('gpt_log' not in f)]+ \
-                    [f for f in glob.glob('./request_llm/*.py') if ('test_project' not in f) and ('gpt_log' not in f)]
+    file_manifest = [f for f in glob.glob('./*.py')] + \
+                    [f for f in glob.glob('./crazy_functions/**/*.py')]+ \
+                    [f for f in glob.glob('./request_llm/**/*.py')]
     project_folder = './'
     if len(file_manifest) == 0:
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何python文件: {txt}")

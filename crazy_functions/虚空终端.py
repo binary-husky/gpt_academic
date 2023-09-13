@@ -46,7 +46,7 @@ explain_msg = """
 
 from pydantic import BaseModel, Field
 from typing import List
-from toolbox import CatchException, update_ui, gen_time_str
+from toolbox import CatchException, update_ui, is_the_upload_folder
 from toolbox import update_ui_lastest_msg, disable_auto_promotion
 from request_llm.bridge_all import predict_no_ui_long_connection
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
@@ -112,7 +112,7 @@ def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
 
     # 用简单的关键词检测用户意图
     is_certain, _ = analyze_intention_with_simple_rules(txt)
-    if txt.startswith('private_upload/') and len(txt) == 34:
+    if is_the_upload_folder(txt):
         state.set_state(chatbot=chatbot, key='has_provided_explaination', value=False)
         appendix_msg = "\n\n**很好，您已经上传了文件**，现在请您描述您的需求。"
         

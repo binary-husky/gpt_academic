@@ -1,5 +1,5 @@
-from toolbox import update_ui, trimmed_format_exc
-from toolbox import CatchException, report_execption, write_results_to_file, zip_folder
+from toolbox import update_ui, trimmed_format_exc, promote_file_to_downloadzone, get_log_folder
+from toolbox import CatchException, report_execption, write_history_to_file, zip_folder
 
 
 class PaperFileGroup():
@@ -51,7 +51,7 @@ class PaperFileGroup():
         import os, time
         folder = os.path.dirname(self.file_paths[0])
         t = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
-        zip_folder(folder, './gpt_log/', f'{t}-polished.zip')
+        zip_folder(folder, get_log_folder(), f'{t}-polished.zip')
 
 
 def 多文件润色(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, language='en', mode='polish'):
@@ -126,7 +126,9 @@ def 多文件润色(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
 
     #  <-------- 整理结果，退出 ----------> 
     create_report_file_name = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + f"-chatgpt.polish.md"
-    res = write_results_to_file(gpt_response_collection, file_name=create_report_file_name)
+    res = write_history_to_file(gpt_response_collection, file_basename=create_report_file_name)
+    promote_file_to_downloadzone(res, chatbot=chatbot)
+
     history = gpt_response_collection
     chatbot.append((f"{fp}完成了吗？", res))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面

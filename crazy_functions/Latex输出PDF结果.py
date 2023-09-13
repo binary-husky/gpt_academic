@@ -1,4 +1,4 @@
-from toolbox import update_ui, trimmed_format_exc, get_conf, objdump, objload, promote_file_to_downloadzone
+from toolbox import update_ui, trimmed_format_exc, get_conf, get_log_folder, promote_file_to_downloadzone
 from toolbox import CatchException, report_execption, update_ui_lastest_msg, zip_result, gen_time_str
 from functools import partial
 import glob, os, requests, time
@@ -65,7 +65,7 @@ def move_project(project_folder, arxiv_id=None):
     if arxiv_id is not None:
         new_workfolder = pj(ARXIV_CACHE_DIR, arxiv_id, 'workfolder')
     else:
-        new_workfolder = f'gpt_log/{gen_time_str()}'
+        new_workfolder = f'{get_log_folder()}/{gen_time_str()}'
     try:
         shutil.rmtree(new_workfolder)
     except:

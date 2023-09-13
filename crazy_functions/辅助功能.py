@@ -2,8 +2,8 @@
 # @Time   : 2023/4/19
 # @Author : Spike
 # @Descr   :
-from toolbox import update_ui
-from toolbox import CatchException, report_execption, write_results_to_file, get_log_folder
+from toolbox import update_ui, get_conf
+from toolbox import CatchException
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 
 
@@ -30,14 +30,13 @@ def 猜你想问(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
 
 @CatchException
 def 清除缓存(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    chatbot.append(['清除本地缓存数据', '执行中. 删除 gpt_log & private_upload'])
+    chatbot.append(['清除本地缓存数据', '执行中. 删除数据'])
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
     import shutil, os
-    gpt_log_dir = os.path.join(os.path.dirname(__file__), '..', 'gpt_log')
-    private_upload_dir = os.path.join(os.path.dirname(__file__), '..', 'private_upload')
-    shutil.rmtree(gpt_log_dir, ignore_errors=True)
-    shutil.rmtree(private_upload_dir, ignore_errors=True)
+    PATH_PRIVATE_UPLOAD, PATH_LOGGING = get_conf('PATH_PRIVATE_UPLOAD', 'PATH_LOGGING')
+    shutil.rmtree(PATH_LOGGING, ignore_errors=True)
+    shutil.rmtree(PATH_PRIVATE_UPLOAD, ignore_errors=True)
 
     chatbot.append(['清除本地缓存数据', '执行完成'])
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
