@@ -23,7 +23,7 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
             file_content = f.read()
         prefix = "接下来请你逐文件分析下面的工程" if index==0 else ""
         i_say = prefix + f'请对下面的程序文件做一个概述文件名是{os.path.relpath(fp, project_folder)}，文件代码是 ```{file_content}```'
-        i_say_show_user = prefix + f'[{index}/{len(file_manifest)}] 请对下面的程序文件做一个概述: {os.path.abspath(fp)}'
+        i_say_show_user = prefix + f'[{index}/{len(file_manifest)}] 请对下面的程序文件做一个概述: {fp}'
         # 装载请求内容
         inputs_array.append(i_say)
         inputs_show_user_array.append(i_say_show_user)
@@ -110,8 +110,7 @@ def 解析项目本身(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
     history = []    # 清空历史，以免输入溢出
     import glob
     file_manifest = [f for f in glob.glob('./*.py')] + \
-                    [f for f in glob.glob('./crazy_functions/**/*.py')]+ \
-                    [f for f in glob.glob('./request_llm/**/*.py')]
+                    [f for f in glob.glob('./*/*.py')]
     project_folder = './'
     if len(file_manifest) == 0:
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何python文件: {txt}")
