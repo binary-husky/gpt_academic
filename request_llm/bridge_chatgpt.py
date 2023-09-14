@@ -128,6 +128,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         yield from update_ui(chatbot=chatbot, history=history, msg="缺少api_key") # 刷新界面
         return
 
+    user_input = inputs
     if additional_fn is not None:
         from core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
@@ -138,8 +139,8 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
 
     # check mis-behavior
-    if is_the_upload_folder(raw_input):
-        chatbot[-1] = (inputs, f"[Local Message] 检测到操作错误！当您上传文档之后，需要点击“函数插件区”按钮进行处理，而不是点击“提交”按钮。")
+    if is_the_upload_folder(user_input):
+        chatbot[-1] = (inputs, f"[Local Message] 检测到操作错误！当您上传文档之后，需点击“**函数插件区**”按钮进行处理，请勿点击“提交”按钮或者“基础功能区”按钮。")
         yield from update_ui(chatbot=chatbot, history=history, msg="正常") # 刷新界面
         time.sleep(2)
 
