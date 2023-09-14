@@ -256,6 +256,7 @@ def find_main_tex_file(file_manifest, mode):
             canidates_score.append(0)
             with open(texf, 'r', encoding='utf8', errors='ignore') as f:
                 file_content = f.read()
+                file_content = rm_comments(file_content)
             for uw in unexpected_words:
                 if uw in file_content:
                     canidates_score[-1] -= 1
