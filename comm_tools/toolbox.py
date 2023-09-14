@@ -823,7 +823,8 @@ def read_env_variable(arg, default_value):
         set GPT_ACADEMIC_AVAIL_LLM_MODELS=["gpt-3.5-turbo", "chatglm"]
         set GPT_ACADEMIC_AUTHENTICATION=[("username", "password"), ("username2", "password2")]
     """
-    from colorful import print亮红, print亮绿
+    from comm_tools.colorful import print亮红, print亮绿
+    sys.path.append(func_box.base_path)
     arg_with_prefix = "GPT_ACADEMIC_" + arg
     if arg_with_prefix in os.environ:
         env_arg = os.environ[arg_with_prefix]
@@ -868,6 +869,8 @@ def read_env_variable(arg, default_value):
 @lru_cache(maxsize=128)
 def read_single_conf_with_lru_cache(arg):
     from comm_tools.colorful import print亮红, print亮绿, print亮蓝
+    # 将上一层目录添加到Python的搜索路径中
+    sys.path.append(func_box.base_path)
     try:
         # 优先级1. 获取环境变量作为配置
         default_ref = getattr(importlib.import_module('config'), arg)  # 读取默认值作为数据类型转换的参考
@@ -875,12 +878,6 @@ def read_single_conf_with_lru_cache(arg):
     except:
         try:
             # 优先级2. 获取config_private中的配置
-            # 获取当前文件所在目录的路径
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            # 获取上一层目录的路径
-            parent_dir = os.path.dirname(current_dir)
-            # 将上一层目录添加到Python的搜索路径中
-            sys.path.append(parent_dir)
             r = getattr(importlib.import_module('config_private'), arg)
         except:
             # 优先级3. 获取config中的配置

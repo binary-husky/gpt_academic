@@ -1,4 +1,4 @@
-from toolbox import HotReload  # HotReload 的意思是热更新，修改函数插件后，不需要重启程序，代码直接生效
+from comm_tools.toolbox import HotReload  # HotReload 的意思是热更新，修改函数插件后，不需要重启程序，代码直接生效
 
 
 def get_crazy_functions():
@@ -485,7 +485,7 @@ def get_crazy_functions():
         print('Load function plugin failed')
 
     try:
-        from toolbox import get_conf
+        from comm_tools.toolbox import get_conf
         ENABLE_AUDIO, = get_conf('ENABLE_AUDIO')
         if ENABLE_AUDIO:
             from crazy_functions.语音助手 import 语音助手

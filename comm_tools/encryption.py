@@ -10,13 +10,9 @@ import os, sys
 from pyDes import des, CBC, PAD_PKCS5
 jobpath = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(jobpath)  # 外部运行，将项目目录添加成临时环境变量
-from comm_tools import toolbox
-
 """
     DES加密、解密
 """
-encrypt_key = toolbox.get_conf('private_key')[0][:4]
-
 
 def encrypt_text(info):
     """
@@ -24,6 +20,7 @@ def encrypt_text(info):
     :param : 原始字符串
     :return: 加密后字符串，16进制
     """
+    encrypt_key = os.environ['private_key'][:4]
     key = "ZDNC{}".format(encrypt_key)
     secret_key = key  # 密码
     iv = secret_key  # 偏移
@@ -53,12 +50,13 @@ def decrypt_text(info):
     :param : 加密后的字符串，16进制
     :return:  解密后的字符串
     """
+    encrypt_key = os.environ['private_key'][:4]
     key = "ZDNC{}".format(encrypt_key)
     secret_key = key
     iv = secret_key
     des_obj = des(secret_key, CBC, iv, pad=None, padmode=PAD_PKCS5)
     decrypt_str = des_obj.decrypt(binascii.a2b_hex(info.encode("utf-8")), padmode=PAD_PKCS5)
-    return bytes.decode(decrypt_str)# bytes.decode() 将bit转为str
+    return bytes.decode(decrypt_str) # bytes.decode() 将bit转为str
 
 
 def main():

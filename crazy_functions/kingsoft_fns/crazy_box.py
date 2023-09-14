@@ -32,6 +32,7 @@ class Utils:
         self.find_document_tags = ['WPSDocument']
         self.find_picture_tags = ['picture', 'processon']
         self.picture_format = ['.jpeg', '.jpg', '.png', '.gif', '.bmp', '.tiff']
+        self.comments = []
 
     def find_all_text_keys(self, dictionary, parent_type=None, text_values=None, filter_type=''):
         """
@@ -52,6 +53,11 @@ class Utils:
         # 获取当前层级的 type 值
         current_type = dictionary.get(self.find_keys_type, parent_type)
         # 如果字典中包含 'text' 或 'caption' 键，将对应的值添加到 text_values 列表中
+        if 'comments' in dictionary:
+            temp = dictionary.get('comments', [])
+            for t in temp:
+                if type(t) is dict:
+                    self.comments.append(t.get('key'))
         if 'text' in dictionary:
             content_value = dictionary.get('text', None)
             text_values.append({current_type: content_value})
@@ -630,10 +636,10 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
     """
     if len(inputs_array) == 1:
         # 折叠输出
-        if len(inputs_array[0]) > 200:
-            inputs_show_user = inputs_array[0][:100]+f"\n\n{func_box.html_tag_color('......超过200个字符折叠......')}\n\n"+inputs_array[0][-100:]
-        else:
-            inputs_show_user = inputs_array[0]
+        # if len(inputs_array[0]) > 200:
+        #     inputs_show_user = inputs_array[0][:100]+f"\n\n{func_box.html_tag_color('......超过200个字符折叠......')}\n\n"+inputs_array[0][-100:]
+        # else:
+        inputs_show_user = inputs_array[0]
         gpt_say = yield from crazy_utils.request_gpt_model_in_new_thread_with_ui_alive(
             inputs=inputs_array[0], inputs_show_user=inputs_show_user,
             llm_kwargs=llm_kwargs, chatbot=chatbot, history=[],
@@ -744,6 +750,12 @@ def parsing_json_in_text(txt_data: list, old_case, filter_list: list = 'None----
             if new_case not in old_case[index] and new_case+[tags] not in old_case[index]:
                 old_case[index].append(new_case+[tags])
         response.extend(old_case[index])
+    # 按照名称排列重组
+    d = {}
+    for i, v in enumerate(response):
+        if v[0] not in d:
+            d[v[0]] = i
+    response.sort(key=lambda x: d[x[0]])
     return response, desc
 
 

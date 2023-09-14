@@ -1,6 +1,6 @@
 from collections.abc import Callable, Iterable, Mapping
 from typing import Any
-from toolbox import CatchException, update_ui, gen_time_str, trimmed_format_exc, promote_file_to_downloadzone, clear_file_downloadzone
+from comm_tools.toolbox import CatchException, update_ui, gen_time_str, trimmed_format_exc, promote_file_to_downloadzone, clear_file_downloadzone
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import input_clipping, try_install_deps
 from multiprocessing import Process, Pipe

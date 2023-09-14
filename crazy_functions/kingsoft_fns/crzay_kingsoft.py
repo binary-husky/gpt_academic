@@ -45,16 +45,7 @@ class Kdocs:
                                        "startVersion": 0, "endVersion": 0},
                               "ex_args": {"queryInitArgs": {"enableCopyComments": False, "checkAuditRule": False}},
                               "group": "", "front_ver": ""}
-        self.parm_shapes_data = {"objects": [], "expire": 86400000, "support_webp": True, "with_thumbnail": True,
-                                 "support_lossless": True}
-        self.parm_export_preload = {"ver": "56"}
-        self.parm_bulk_download = {'file_ids': [], 'csrfmiddlewaretoken': self.cookies['csrf']}
-        self.params_task = {'task_id': ''}
-        self.params_continue = {"task_id": "", "download_as": [
-                            {"suffix": ".otl", "as": ".pdf"},
-                            {"suffix": ".ksheet", "as": ".xlsx"},
-                            {"suffix": ".pof", "as": ".png"},
-                            {"suffix": ".pom", "as": ".png"}]}
+
         self.tol_url = 'https://www.kdocs.cn/api/v3/office/file/%v/open/otl'
         self.shapes_url = 'https://www.kdocs.cn/api/v3/office/file/%v/attachment/shapes'
         self.kdocs_download_url = 'https://drive.kdocs.cn/api/v5/groups/%g/files/%f/download?isblocks=false&support_checksums=md5,sha1,sha224,sha256,sha384,sha512'
@@ -65,6 +56,7 @@ class Kdocs:
         self.bulk_download_url = 'https://www.kdocs.cn/kfc/batch/v2/files/download'
         self.bulk_continue_url = 'https://www.kdocs.cn/kfc/batch/v2/files/download/continue'
         self.task_result_url = 'https://www.kdocs.cn/kfc/batch/v2/files/download/progress'
+        self.file_comments_ulr  = 'https://www.kdocs.cn/api/v3/office/outline/file/%f/comment'
         self.url_share_tag = ''
         self.url_dirs_tag = ''
         self.split_link_tags()
@@ -97,9 +89,15 @@ class Kdocs:
 
     def submit_batch_download_tasks(self):
         # 提交目录转换任务
-        self.parm_bulk_download.update({'file_ids': [self.url_dirs_tag]})
+        params_continue = {"task_id": "", "download_as": [
+                            {"suffix": ".otl", "as": ".pdf"},
+                            {"suffix": ".ksheet", "as": ".xlsx"},
+                            {"suffix": ".pof", "as": ".png"},
+                            {"suffix": ".pom", "as": ".png"}]}
+        parm_bulk_download = {'file_ids': [], 'csrfmiddlewaretoken': self.cookies['csrf']}
+        parm_bulk_download.update({'file_ids': [self.url_dirs_tag]})
         dw_response = requests.post(self.bulk_download_url, cookies=self.cookies, headers=self.ex_headers,
-                                 json=self.parm_bulk_download, verify=False).json()
+                                 json=parm_bulk_download, verify=False).json()
         if dw_response.get('data', False):
             task_id = dw_response['data']['task_id']
             task_info = dw_response['data'].get('online_file'), dw_response['data'].get('online_fnum')
@@ -108,20 +106,20 @@ class Kdocs:
             task_id = None
             task_info = None
         if task_id:
-            self.params_continue.update({'task_id': task_id})
+            params_continue.update({'task_id': task_id})
             requests.post(self.bulk_continue_url, cookies=self.cookies, headers=self.ex_headers,
-                          json=self.params_continue, verify=False).json()
+                          json=params_continue, verify=False).json()
         return task_id, task_info
 
     def polling_batch_download_tasks(self, task_id):
         # 轮询任务状态，提取下载链接
-        self.params_task.update({'task_id': task_id})
+        params_task = {'task_id': task_id}
         link = ''
         faillist = ''
         if task_id:
             for i in range(600):
                 response = requests.get(url=self.task_result_url,
-                                        params=self.params_task,
+                                        params=params_task,
                                         cookies=self.cookies,
                                         headers=self.ex_headers, verify=False).json()
                 if response['data'].get('url', False):
@@ -178,8 +176,27 @@ class Kdocs:
             link = response.json()['url']
         return self.url_decode(link)
 
+    def get_comments_desc(self, tag: list):
+        comm_url = self.file_comments_ulr.replace('%f', self.url_share_tag)
+        if tag:
+            comm_url += f'?pageno=0&size=100&sids={",".join(tag)}'
+        response = requests.get(comm_url, headers=self.headers,
+                                cookies=self.cookies, verify=False)
+        selections = response.json()['selections']
+        comments_desc = {}
+        for desc in selections:
+            comments_desc[desc['selection_text']] = ''
+            for i in desc['comments']:
+                user_ = ''
+                if i.get('user_info'):
+                    user_ = i['user_info']['name'] + ':'
+                reverse_order = f"\n> {user_} {i['comment']['content']['text']}" + comments_desc[desc['selection_text']]
+                comments_desc[desc['selection_text']] = reverse_order
+        return comments_desc
+
     def get_kdocs_intelligence_link(self, type='xlsx'):
         # 智能文档下载
+        self.parm_export_preload = {"ver": "56"}
         response_task = requests.post(
             self.preload_url.replace('%f', str(self.file_info_parm['id'])).replace('%t', type),
             cookies=self.cookies,
@@ -233,12 +250,14 @@ class Kdocs:
         return response.json(), response.text
 
     def get_file_pic_url(self, pic_dict: dict):
+        parm_shapes_data = {"objects": [], "expire": 86400000, "support_webp": True, "with_thumbnail": True,
+                                 "support_lossless": True}
         otl_url_str = self.url_share_tag
         if otl_url_str is None: return
         for pic in pic_dict:
             pic_parm = {'attachment_id': pic, "imgId": pic_dict[pic], "max_edge": 1180, "source": ""}
-            self.parm_shapes_data['objects'].append(pic_parm)
-        json_data = json.dumps(self.parm_shapes_data)
+            parm_shapes_data['objects'].append(pic_parm)
+        json_data = json.dumps(parm_shapes_data)
         response = requests.post(
             str(self.shapes_url).replace('%v', otl_url_str),
             cookies=self.cookies,
@@ -309,9 +328,16 @@ def get_docs_content(url, image_processing=False):
     utils = crazy_box.Utils()
     json_data, json_dict = kdocs.get_file_content()
     text_values = utils.find_all_text_keys(json_data, filter_type='')
+
     _all, content, pic_dict, file_dict = utils.statistical_results(text_values, img_proce=image_processing)
     pic_dict_convert = kdocs.get_file_pic_url(pic_dict)
     empty_picture_count = sum(1 for item in _all if 'picture' in item and not item['picture']['caption'])
+    # 提取补充说明
+    desc_tag = utils.comments
+    comments_desc = kdocs.get_comments_desc(tag=desc_tag)
+    for key in comments_desc:
+        index = content.find(key)+len(key)
+        content = content[:index] + f"\n 补充说明: {comments_desc[key]}" + content[index:]
     return _all, content, empty_picture_count, pic_dict_convert, file_dict
 
 
@@ -451,3 +477,8 @@ def smart_document_extraction(url, llm_kwargs, plugin_kwargs, chatbot, history, 
     temp_list = [title, content]
     temp_file = yield from crazy_box.result_written_to_markdwon(temp_list, llm_kwargs, plugin_kwargs, chatbot, history)
     files.extend(temp_file)
+
+
+
+if __name__ == '__main__':
+    pass

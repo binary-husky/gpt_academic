@@ -1,11 +1,11 @@
-from toolbox import CatchException, report_execption, gen_time_str
-from toolbox import update_ui, promote_file_to_downloadzone, update_ui_lastest_msg, disable_auto_promotion
-from toolbox import write_history_to_file, get_log_folder
+from comm_tools.toolbox import CatchException, report_execption, gen_time_str
+from comm_tools.toolbox import update_ui, promote_file_to_downloadzone, update_ui_lastest_msg, disable_auto_promotion
+from comm_tools.toolbox import write_history_to_file, get_log_folder
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 from .crazy_utils import read_and_clean_pdf_text
 from .pdf_fns.parse_pdf import parse_pdf, get_avail_grobid_url
-from colorful import *
+from comm_tools.colorful import *
 import os
 import math
 import logging
