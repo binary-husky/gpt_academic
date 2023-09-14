@@ -262,6 +262,7 @@ footer {
 .chat_input {
     max-width: 95% !important;
     padding: unset !important;
+    max-height: 233px;
 }
 
 .dark .chat_input[class*='svelte-'] {

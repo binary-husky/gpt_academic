@@ -2,6 +2,7 @@ import os.path
 from comm_tools import func_box
 import gradio as gr
 from comm_tools.toolbox import get_conf
+from collections import namedtuple
 CODE_HIGHLIGHT, ADD_WAIFU, ADD_CHUANHU = get_conf('CODE_HIGHLIGHT', 'ADD_WAIFU', 'ADD_CHUANHU')
 # gradio可用颜色列表
 # gr.themes.utils.colors.slate (石板色)
@@ -109,6 +110,52 @@ with open(os.path.join(func_box.base_path, 'docs/assets/custom.css'), "r", encod
 custom_css = customCSS
 
 
+def get_html(filename):
+    path = os.path.join(func_box.base_path, "docs/assets", "html", filename)
+    if os.path.exists(path):
+        with open(path, encoding="utf8") as file:
+            return file.read()
+    return ""
+
+
+def webpath(fn):
+    if fn.startswith(func_box.base_path):
+        web_path = os.path.relpath(fn, func_box.base_path).replace('\\', '/')
+    else:
+        web_path = os.path.abspath(fn)
+    return f'file={web_path}?{os.path.getmtime(fn)}'
+
+
+ScriptFile = namedtuple("ScriptFile", ["basedir", "filename", "path"])
+
+
+def javascript_html():
+    head = ""
+    for script in list_scripts("javascript", ".js"):
+        head += f'<script type="text/javascript" src="{webpath(script.path)}"></script>\n'
+    for script in list_scripts("javascript", ".mjs"):
+        head += f'<script type="module" src="{webpath(script.path)}"></script>\n'
+    return head
+
+
+def css_html():
+    head = ""
+    for cssfile in list_scripts("stylesheet", ".css"):
+        head += f'<link rel="stylesheet" property="stylesheet" href="{webpath(cssfile.path)}">'
+    return head
+
+
+def list_scripts(scriptdirname, extension):
+    scripts_list = []
+    scripts_dir = os.path.join(func_box.base_path, "docs/assets", scriptdirname)
+    if os.path.exists(scripts_dir):
+        for filename in sorted(os.listdir(scripts_dir)):
+            scripts_list.append(ScriptFile(func_box.base_path, filename, os.path.join(scripts_dir, filename)))
+    scripts_list = [x for x in scripts_list if
+                    os.path.splitext(x.path)[1].lower() == extension and os.path.isfile(x.path)]
+    return scripts_list
+
+
 def reload_javascript():
     print("Reloading javascript...")
     js = ''
@@ -125,10 +172,15 @@ def reload_javascript():
             <script src="file=docs/waifu_plugin/jquery-ui.min.js"></script>
             <script src="file=docs/waifu_plugin/autoload.js"></script>
         """
+    css = css_html()
+    js += javascript_html()
     js += '<script async src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>'
+    js += '<script async type="module" src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>'
+    js += '<script async type="module" src="http://spin.js.org/spin.umd.js"></script><link type="text/css" href="https://spin.js.org/spin.css" rel="stylesheet" />'
     def template_response(*args, **kwargs):
         res = GradioTemplateResponseOriginal(*args, **kwargs)
         res.body = res.body.replace(b'</html>', f'{js}</html>'.encode("utf8"))
+        res.body = res.body.replace(b'</body>', f'{css}</body>'.encode("utf8"))
         res.init_headers()
         return res
     gr.routes.templates.TemplateResponse = template_response

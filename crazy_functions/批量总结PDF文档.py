@@ -1,5 +1,5 @@
-from toolbox import update_ui, promote_file_to_downloadzone, gen_time_str
-from toolbox import CatchException, report_execption, write_results_to_file
+from comm_tools.toolbox import update_ui, promote_file_to_downloadzone, gen_time_str
+from comm_tools.toolbox import CatchException, report_execption, write_results_to_file
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import read_and_clean_pdf_text
 from .crazy_utils import input_clipping

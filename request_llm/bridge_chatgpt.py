@@ -189,16 +189,15 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                 chunk = next(stream_response)
             except StopIteration:
                 # 非OpenAI官方接口的出现这样的报错，OpenAI和API2D不会走这里
-                chunk_decoded = chunk.decode()
-                error_msg = chunk_decoded
-                chatbot, history = handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
-                yield from toolbox.update_ui(chatbot=chatbot, history=history, msg="非Openai官方接口返回了错误:" + chunk.decode()) # 刷新界面
+                from comm_tools.toolbox import regular_txt_to_markdown;
+                tb_str = '```\n' + toolbox.trimmed_format_exc() + '```'
+                chatbot[-1] = (chatbot[-1][0], f"[Local Message] 远程返回错误: \n\n{tb_str} ")
+                yield from toolbox.update_ui(chatbot=chatbot, history=history, msg="远程返回错误:") # 刷新界面
                 return
             chunk_decoded = chunk.decode()
             if is_head_of_the_stream and (r'"object":"error"' not in chunk_decoded) and (r"content" not in chunk_decoded):
                 # 数据流的第一帧不携带content
                 is_head_of_the_stream = False; continue
-
             if chunk:
                 try:
                     # 前者是API2D的结束条件，后者是OPENAI的结束条件

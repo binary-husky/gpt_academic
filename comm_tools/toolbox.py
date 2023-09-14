@@ -12,6 +12,7 @@ import time
 import glob
 import sys
 import threading
+
 ############################### 插件输入输出接驳区 #######################################
 pj = os.path.join
 
@@ -27,6 +28,7 @@ pj = os.path.join
     - trimmed_format_exc:   打印traceback，为了安全而隐藏绝对地址
 ========================================================================
 """
+
 
 class ChatBotWithCookies(list):
     def __init__(self, cookie):
@@ -49,13 +51,13 @@ def write_private(ipaddr, models, chatbot):
     transparent_address_private = f'<p style="display:none;">\n{private_key}\n{ipaddr.client.host}\n</p>'
     transparent_address = f'<p style="display:none;">\n{ipaddr.client.host}\n</p>'
 
+
 def end_predict(chatbot, history, llm_kwargs):
     # 暂时无用
     count_time = round(time.time() - llm_kwargs['start_time'], 3)
     count_tokens = func_box.num_tokens_from_string(listing=history)
     status = f"<p>本次对话耗时: {func_box.html_tag_color(tag=f'{count_time}s')}" \
-                f'\t 本次对话使用tokens: {func_box.html_tag_color(count_tokens)}</p>'\
-
+             f'\t 本次对话使用tokens: {func_box.html_tag_color(count_tokens)}</p>'
     yield from update_ui(chatbot=chatbot, history=history, msg=status, end_code=1)  # 刷新界面
 
 
@@ -63,6 +65,7 @@ def ArgsGeneralWrapper(f):
     """
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
+
     def decorated(cookies, max_length, worker_num, llm_model,
                   langchain, know_dict, know_cls,
                   vector_score, vector_top_k, vector_size,
@@ -74,13 +77,13 @@ def ArgsGeneralWrapper(f):
         start_time = time.time()
         encrypt, private, _ = get_conf('switch_model')[0]['key']
         cookies.update({
-            'top_p':top_p,
-            'temperature':temperature,
+            'top_p': top_p,
+            'temperature': temperature,
         })
         llm_kwargs = {
             'api_key': cookies['api_key'],
             'llm_model': llm_model,
-            'top_p':top_p,
+            'top_p': top_p,
             'max_length': max_length,
             'temperature': temperature,
             'worker_num': worker_num,
@@ -104,13 +107,16 @@ def ArgsGeneralWrapper(f):
         chatbot_with_cookie.write_list(chatbot)
         txt_passon = txt
         if encrypt in models: txt_passon = func_box.encryption_str(txt)
+        if cookies.get(''):
+            cookies['']
         # 插件会传多参数，如果是插件，那么更新知识库 和 默认高级参数
         if len(args) > 1:
             plugin_kwargs['advanced_arg'] = ''
             plugin_kwargs.update({'parameters_def': args[1]})
         elif len(args) == 0:
             plugin_kwargs['advanced_arg'] = ''
-            txt_passon = yield from Langchain_cn.knowledge_base_query(txt_passon, chatbot_with_cookie, history, llm_kwargs, plugin_kwargs)
+            txt_passon = yield from Langchain_cn.knowledge_base_query(txt_passon, chatbot_with_cookie, history,
+                                                                      llm_kwargs, plugin_kwargs)
         if cookies.get('lock_plugin', None) is None:
             # 正常状态
             yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
@@ -118,12 +124,14 @@ def ArgsGeneralWrapper(f):
             # 处理个别特殊插件的锁定状态
             module, fn_name = cookies['lock_plugin'].split('->')
             f_hot_reload = getattr(importlib.import_module(module, fn_name), fn_name)
-            yield from f_hot_reload(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
+            yield from f_hot_reload(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt,
+                                    *args)
         # 将对话记录写入数据库
         yield from end_predict(chatbot_with_cookie, history, llm_kwargs)
-        threading.Thread(target=func_box.thread_write_chat, args=(chatbot_with_cookie, ipaddr.client.host, models)).start()
-    return decorated
+        threading.Thread(target=func_box.thread_write_chat,
+                         args=(chatbot_with_cookie, ipaddr.client.host, models)).start()
 
+    return decorated
 
 
 def update_ui(chatbot, history, msg='正常', end_code=0, *args):  # 刷新界面
@@ -136,10 +144,10 @@ def update_ui(chatbot, history, msg='正常', end_code=0, *args):  # 刷新界�
     if cookies.get('lock_plugin', None):
         label = cookies.get('llm_model', "") + " | " + "正在锁定插件" + cookies.get('lock_plugin', None)
         chatbot_gr = gradio.update(value=chatbot, label=label)
-        if cookies.get('label', "") != label: cookies['label'] = label   # 记住当前的label
+        if cookies.get('label', "") != label: cookies['label'] = label  # 记住当前的label
     elif cookies.get('label', None):
         chatbot_gr = gradio.update(value=chatbot, label=cookies.get('llm_model', ""))
-        cookies['label'] = None    # 清空label
+        cookies['label'] = None  # 清空label
     else:
         chatbot_gr = chatbot
     event = [cookies, chatbot_gr, history, msg]
@@ -147,6 +155,7 @@ def update_ui(chatbot, history, msg='正常', end_code=0, *args):  # 刷新界�
         yield event + [gr.Button.update(visible=False), gr.Button.update(visible=True, variant='primary')]
     else:
         yield event + [gr.Button.update(visible=True, variant='secondary'), gr.Button.update(visible=False)]
+
 
 def update_ui_lastest_msg(lastmsg, chatbot, history, delay=1):  # 刷新界面
     """
@@ -163,8 +172,9 @@ def trimmed_format_exc():
     import os, traceback
     str = traceback.format_exc()
     current_path = os.getcwd()
-    replace_path = ".."
+    replace_path = "../.."
     return str.replace(current_path, replace_path)
+
 
 def CatchException(f):
     """
@@ -179,13 +189,15 @@ def CatchException(f):
             from comm_tools.check_proxy import check_proxy
             proxies, = get_conf('proxies')
             tb_str = '```\n' + trimmed_format_exc() + '```'
-            func_box.通知机器人(f'f请求参数：```\n{main_input}\n{plugin_kwargs}\n```\n\n错误信息{tb_str}\n\n错误来源：{llm_kwargs.get("ipaddr", None)}')
+            func_box.通知机器人(
+                f'f请求参数：```\n{main_input}\n{plugin_kwargs}\n```\n\n错误信息{tb_str}\n\n错误来源：{llm_kwargs.get("ipaddr", None)}')
             if len(chatbot_with_cookie) == 0:
                 chatbot_with_cookie.clear()
                 chatbot_with_cookie.append(["插件调度异常", "异常原因"])
             chatbot_with_cookie[-1] = (chatbot_with_cookie[-1][0],
-                           f"[Local Message] 实验性函数调用出错: \n\n{tb_str} \n\n当前代理可用性: \n\n{check_proxy(proxies)}")
-            yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=f'异常 {e}') # 刷新界面
+                                       f"[Local Message] 实验性函数调用出错: \n\n{tb_str} \n\n当前代理可用性: \n\n{check_proxy(proxies)}")
+            yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=f'异常 {e}')  # 刷新界面
+
     return decorated
 
 
@@ -199,6 +211,7 @@ def HotReload(f):
     最后，使用yield from语句返回重新加载过的函数，并在被装饰的函数上执行。
     最终，装饰器函数返回内部函数。这个内部函数可以将函数的原始定义更新为最新版本，并执行函数的新版本。
     """
+
     @wraps(f)
     def decorated(*args, **kwargs):
         fn_name = f.__name__
@@ -208,7 +221,9 @@ def HotReload(f):
         except TypeError:
             args = tuple(args[element] for element in range(len(args)) if element != 6)
             yield from f_hot_reload(*args, **kwargs)
+
     return decorated
+
 
 ####################################### 其他小工具 #####################################
 
@@ -230,6 +245,7 @@ def HotReload(f):
 ========================================================================
 """
 
+
 def get_reduce_token_percent(text):
     """
         * 此函数未来将被弃用
@@ -241,9 +257,9 @@ def get_reduce_token_percent(text):
         EXCEED_ALLO = 500  # 稍微留一点余地，否则在回复时会因余量太少出问题
         max_limit = float(match[0]) - EXCEED_ALLO
         current_tokens = float(match[1])
-        ratio = max_limit/current_tokens
+        ratio = max_limit / current_tokens
         assert ratio > 0 and ratio < 1
-        return ratio, str(int(current_tokens-max_limit))
+        return ratio, str(int(current_tokens - max_limit))
     except:
         return 0.5, '不详'
 
@@ -257,12 +273,12 @@ def write_results_to_file(history, file_name=None):
     if file_name is None:
         # file_name = time.strftime("chatGPT分析报告%Y-%m-%d-%H-%M-%S", time.localtime()) + '.md'
         file_name = 'chatGPT分析报告' + \
-            time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + '.md'
-    os.makedirs('../gpt_log/', exist_ok=True)
+                    time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + '.md'
+    os.makedirs('../../gpt_log/', exist_ok=True)
     with open(f'./gpt_log/{file_name}', 'w', encoding='utf8') as f:
         f.write('# GPT-Academic Report\n')
         for i, content in enumerate(history):
-            try:    
+            try:
                 if type(content) != str: content = str(content)
             except:
                 continue
@@ -294,7 +310,7 @@ def write_history_to_file(history, file_basename=None, file_fullname=None):
     with open(file_fullname, 'w', encoding='utf8') as f:
         f.write('# GPT-Academic Report\n')
         for i, content in enumerate(history):
-            try:    
+            try:
                 if type(content) != str: content = str(content)
             except:
                 continue
@@ -320,8 +336,6 @@ def regular_txt_to_markdown(text):
     return text
 
 
-
-
 def report_execption(chatbot, history, a, b):
     """
     向chatbot中添加错误信息
@@ -332,6 +346,8 @@ def report_execption(chatbot, history, a, b):
 
 
 import re
+
+
 def text_divide_paragraph(input_str):
     if input_str:
         code_blocks = re.findall(r'```[\s\S]*?```', input_str)
@@ -370,7 +386,7 @@ def markdown_convertion(txt):
     suf = '</div>'
     raw_pre = '<div class="raw-message hideM">'
     raw_suf = '</div>'
-    txt = txt.replace('</code><p><code>', '</code><code>'   # 解决代码块断层的问题
+    txt = txt.replace('</code><p><code>', '</code><code>'  # 解决代码块断层的问题
                       ).replace('</code></p></pre>', '</code></pre>').replace('</code><p></code>', '</code></code>')
     if txt.startswith(pre) and txt.endswith(suf):
         # print('警告，输入了已经经过转化的字符串，二次转化可能出问题')
@@ -428,17 +444,19 @@ def markdown_convertion(txt):
         # convert everything to html format
         split = markdown.markdown(text='---')
         txt = re.sub(r'\$\$((?:.|\n)*?)\$\$', lambda match: '$$' + re.sub(r'\n+', '</br>', match.group(1)) + '$$', txt)
-        convert_stage_1 = markdown.markdown(text=txt, extensions=['mdx_math', 'fenced_code', 'tables', 'sane_lists'], extension_configs=markdown_extension_configs)
+        convert_stage_1 = markdown.markdown(text=txt, extensions=['mdx_math', 'fenced_code', 'tables', 'sane_lists'],
+                                            extension_configs=markdown_extension_configs)
         convert_stage_1 = markdown_bug_hunt(convert_stage_1)
         # re.DOTALL: Make the '.' special character match any character at all, including a newline; without this flag, '.' will match anything except a newline. Corresponds to the inline flag (?s).
         # 1. convert to easy-to-copy tex (do not render math)
         convert_stage_2_1, n = re.subn(find_equation_pattern, replace_math_no_render, convert_stage_1, flags=re.DOTALL)
         # 2. convert to rendered equation
         convert_stage_1_resp = convert_stage_1.replace('</br>', '')
-        convert_stage_2_2, n = re.subn(find_equation_pattern, replace_math_render, convert_stage_1_resp, flags=re.DOTALL)
+        convert_stage_2_2, n = re.subn(find_equation_pattern, replace_math_render, convert_stage_1_resp,
+                                       flags=re.DOTALL)
         # cat them together
         context = pre + convert_stage_2_1 + f'{split}' + convert_stage_2_2 + suf
-        return raw_hide + context   # 破坏html 结构，并显示源码
+        return raw_hide + context  # 破坏html 结构，并显示源码
     else:
         context = pre + markdown.markdown(txt, extensions=['fenced_code', 'codehilite', 'tables', 'sane_lists']) + suf
         return raw_hide + context  # 破坏html 结构，并显示源码
@@ -465,7 +483,7 @@ def close_up_code_segment_during_stream(gpt_reply):
     n_mark = len(segments) - 1
     if n_mark % 2 == 1:
         # print('输出代码片段中！')
-        return gpt_reply+'\n```'
+        return gpt_reply + '\n```'
     else:
         return gpt_reply
 
@@ -570,6 +588,7 @@ def find_recent_files(directory):
 
     return recent_files
 
+
 def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
     # 将文件复制一份到下载区
     import shutil
@@ -581,9 +600,12 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
     if not os.path.exists(new_path): shutil.copyfile(file, new_path)
     # 将文件添加到chatbot cookie中，避免多用户干扰
     if chatbot:
-        if 'file_to_promote' in chatbot._cookies: current = chatbot._cookies['file_to_promote']
-        else: current = []
+        if 'file_to_promote' in chatbot._cookies:
+            current = chatbot._cookies['file_to_promote']
+        else:
+            current = []
         chatbot._cookies.update({'file_to_promote': [new_path] + current})
+
 
 def get_user_upload(chatbot, txt, ipaddr: gr.Request):
     """
@@ -598,7 +620,7 @@ def get_user_upload(chatbot, txt, ipaddr: gr.Request):
             file_link = "<br>".join([f'{func_box.html_view_blank(f"{root}/{i}")}' for i in file])
             history += f'| {count_num} | {root} | {file_link} |\n'
             count_num += 1
-    chatbot.append([ None, # 'Load Submission History like `{txt}`....',
+    chatbot.append([None,  # 'Load Submission History like `{txt}`....',
                     f'{history}\n\n'
                     f'[Local Message] 请自行复制以上目录 or 目录+文件, 填入输入框以供函数区高亮按钮使用\n\n'
                     f'{func_box.html_tag_color("提交前记得请检查头尾空格哦～")}\n\n'])
@@ -608,6 +630,7 @@ def get_user_upload(chatbot, txt, ipaddr: gr.Request):
 def disable_auto_promotion(chatbot):
     chatbot._cookies.update({'file_to_promote': []})
     return
+
 
 def on_file_uploaded(files, chatbot, txt, ipaddr: gr.Request):
     """
@@ -644,7 +667,7 @@ def on_file_uploaded(files, chatbot, txt, ipaddr: gr.Request):
         chatbot.append(['上传文件修正',
                         f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
                         f'\n\n调用路径参数已自动修正到: \n\n{txt}' +
-                        f'\n\n现在您点击任意“高亮”标识的函数插件时，以上文件将被作为输入参数'+err_msg])
+                        f'\n\n现在您点击任意“高亮”标识的函数插件时，以上文件将被作为输入参数' + err_msg])
     return chatbot, txt
 
 
@@ -662,12 +685,16 @@ def on_report_generated(cookies, files, chatbot):
     chatbot.append(['报告如何远程获取？', f'报告已经添加到右侧“文件上传区”（可能处于折叠状态），请查收。{file_links}'])
     return cookies, report_files, chatbot
 
+
 def load_chat_cookies():
     API_KEY, LLM_MODEL, AZURE_API_KEY = get_conf('API_KEY', 'LLM_MODEL', 'AZURE_API_KEY')
     if is_any_api_key(AZURE_API_KEY):
-        if is_any_api_key(API_KEY): API_KEY = API_KEY + ',' + AZURE_API_KEY
-        else: API_KEY = AZURE_API_KEY
+        if is_any_api_key(API_KEY):
+            API_KEY = API_KEY + ',' + AZURE_API_KEY
+        else:
+            API_KEY = AZURE_API_KEY
     return {'api_key': API_KEY, 'llm_model': LLM_MODEL}
+
 
 def is_openai_api_key(key):
     CUSTOM_API_KEY_PATTERN, = get_conf('CUSTOM_API_KEY_PATTERN')
@@ -677,13 +704,16 @@ def is_openai_api_key(key):
         API_MATCH_ORIGINAL = re.match(r"sk-[a-zA-Z0-9]{48}$", key)
     return bool(API_MATCH_ORIGINAL)
 
+
 def is_azure_api_key(key):
     API_MATCH_AZURE = re.match(r"[a-zA-Z0-9]{32}$", key)
     return bool(API_MATCH_AZURE)
 
+
 def is_api2d_key(key):
     API_MATCH_API2D = re.match(r"fk[a-zA-Z0-9]{6}-[a-zA-Z0-9]{32}$", key)
     return bool(API_MATCH_API2D)
+
 
 def is_proxy_key(key):
     if key.startswith('proxy-') and len(key) == 38:
@@ -701,16 +731,17 @@ def is_any_api_key(key):
     else:
         return is_openai_api_key(key) or is_api2d_key(key) or is_proxy_key(key) or is_azure_api_key(key)
 
+
 def what_keys(keys):
-    avail_key_list = {'OpenAI Key':0, "Azure Key":0, "API2D Key":0}
+    avail_key_list = {'OpenAI Key': 0, "Azure Key": 0, "API2D Key": 0}
     key_list = keys.split(',')
 
     for k in key_list:
-        if is_openai_api_key(k): 
+        if is_openai_api_key(k):
             avail_key_list['OpenAI Key'] += 1
 
     for k in key_list:
-        if is_api2d_key(k): 
+        if is_api2d_key(k):
             avail_key_list['API2D Key'] += 1
 
     for k in key_list:
@@ -747,10 +778,12 @@ def select_api_key(keys, llm_model):
             if is_azure_api_key(k): avail_key_list.append(k)
 
     if len(avail_key_list) == 0:
-        raise RuntimeError(f"您提供的api-key不满足要求，不包含任何可用于{llm_model}的api-key。您可能选择了错误的模型或请求源（右下角更换模型菜单中可切换openai,azure,claude,api2d等请求源）。")
+        raise RuntimeError(
+            f"您提供的api-key不满足要求，不包含任何可用于{llm_model}的api-key。您可能选择了错误的模型或请求源（右下角更换模型菜单中可切换openai,azure,claude,api2d等请求源）。")
 
-    api_key = random.choice(avail_key_list) # 随机负载均衡
+    api_key = random.choice(avail_key_list)  # 随机负载均衡
     return api_key
+
 
 def read_env_variable(arg, default_value):
     """
@@ -769,10 +802,10 @@ def read_env_variable(arg, default_value):
         set GPT_ACADEMIC_AUTHENTICATION=[("username", "password"), ("username2", "password2")]
     """
     from colorful import print亮红, print亮绿
-    arg_with_prefix = "GPT_ACADEMIC_" + arg 
-    if arg_with_prefix in os.environ: 
+    arg_with_prefix = "GPT_ACADEMIC_" + arg
+    if arg_with_prefix in os.environ:
         env_arg = os.environ[arg_with_prefix]
-    elif arg in os.environ: 
+    elif arg in os.environ:
         env_arg = os.environ[arg]
     else:
         raise KeyError
@@ -780,9 +813,12 @@ def read_env_variable(arg, default_value):
     try:
         if isinstance(default_value, bool):
             env_arg = env_arg.strip()
-            if env_arg == 'True': r = True
-            elif env_arg == 'False': r = False
-            else: print('enter True or False, but have:', env_arg); r = default_value
+            if env_arg == 'True':
+                r = True
+            elif env_arg == 'False':
+                r = False
+            else:
+                print('enter True or False, but have:', env_arg); r = default_value
         elif isinstance(default_value, int):
             r = int(env_arg)
         elif isinstance(default_value, float):
@@ -806,13 +842,14 @@ def read_env_variable(arg, default_value):
     print亮绿(f"[ENV_VAR] 成功读取环境变量{arg}")
     return r
 
+
 @lru_cache(maxsize=128)
 def read_single_conf_with_lru_cache(arg):
     from comm_tools.colorful import print亮红, print亮绿, print亮蓝
     try:
         # 优先级1. 获取环境变量作为配置
-        default_ref = getattr(importlib.import_module('config'), arg)   # 读取默认值作为数据类型转换的参考
-        r = read_env_variable(arg, default_ref) 
+        default_ref = getattr(importlib.import_module('config'), arg)  # 读取默认值作为数据类型转换的参考
+        r = read_env_variable(arg, default_ref)
     except:
         try:
             # 优先级2. 获取config_private中的配置
@@ -829,16 +866,19 @@ def read_single_conf_with_lru_cache(arg):
 
     # 在读取API_KEY时，检查一下是不是忘了改config
     if arg == 'API_KEY':
-        print亮蓝(f"[API_KEY] 本项目现已支持OpenAI和Azure的api-key。也支持同时填写多个api-key，如API_KEY=\"openai-key1,openai-key2,azure-key3\"")
-        print亮蓝(f"[API_KEY] 您既可以在config.py中修改api-key(s)，也可以在问题输入区输入临时的api-key(s)，然后回车键提交后即可生效。")
+        print亮蓝(
+            f"[API_KEY] 本项目现已支持OpenAI和Azure的api-key。也支持同时填写多个api-key，如API_KEY=\"openai-key1,openai-key2,azure-key3\"")
+        print亮蓝(
+            f"[API_KEY] 您既可以在config.py中修改api-key(s)，也可以在问题输入区输入临时的api-key(s)，然后回车键提交后即可生效。")
         if is_any_api_key(r):
             print亮绿(f"[API_KEY] 您的 API_KEY 是: {r[:15]}*** API_KEY 导入成功")
         else:
-            print亮红( "[API_KEY] 您的 API_KEY 不满足任何一种已知的密钥格式，请在config文件中修改API密钥之后再运行。")
+            print亮红("[API_KEY] 您的 API_KEY 不满足任何一种已知的密钥格式，请在config文件中修改API密钥之后再运行。")
     if arg == 'proxies':
-        if not read_single_conf_with_lru_cache('USE_PROXY'): r = None   # 检查USE_PROXY，防止proxies单独起作用
+        if not read_single_conf_with_lru_cache('USE_PROXY'): r = None  # 检查USE_PROXY，防止proxies单独起作用
         if r is None:
-            print亮红('[PROXY] 网络代理状态：未配置。无代理状态下很可能无法访问OpenAI家族的模型。建议：检查USE_PROXY选项是否修改。')
+            print亮红(
+                '[PROXY] 网络代理状态：未配置。无代理状态下很可能无法访问OpenAI家族的模型。建议：检查USE_PROXY选项是否修改。')
         else:
             print亮绿('[PROXY] 网络代理状态：已配置。配置信息如下：', r)
             assert isinstance(r, dict), 'proxies格式错误，请注意proxies选项的格式，不要遗漏括号。'
@@ -872,6 +912,7 @@ class DummyWith():
     在上下文执行开始的情况下，__enter__()方法会在代码块被执行前被调用，
     而在上下文执行结束时，__exit__()方法则会被调用。
     """
+
     def __enter__(self):
         return self
 
@@ -883,7 +924,8 @@ def run_gradio_in_subpath(demo, auth, port, custom_path):
     """
     把gradio的运行地址更改到指定的二次路径上
     """
-    def is_path_legal(path: str)->bool:
+
+    def is_path_legal(path: str) -> bool:
         '''
         check path for sub url
         path: path to check
@@ -908,10 +950,10 @@ def run_gradio_in_subpath(demo, auth, port, custom_path):
     app = FastAPI()
     if custom_path != "/":
         @app.get("/")
-        def read_main(): 
+        def read_main():
             return {"message": f"Gradio is running at: {custom_path}"}
     app = gr.mount_gradio_app(app, demo, path=custom_path)
-    uvicorn.run(app, host="0.0.0.0", port=port) # , auth=auth
+    uvicorn.run(app, host="0.0.0.0", port=port)  # , auth=auth
 
 
 def clip_history(inputs, history, tokenizer, max_token_limit):
@@ -919,13 +961,14 @@ def clip_history(inputs, history, tokenizer, max_token_limit):
     reduce the length of history by clipping.
     this function search for the longest entries to clip, little by little,
     until the number of token of history is reduced under threshold.
-    通过裁剪来缩短历史记录的长度。 
+    通过裁剪来缩短历史记录的长度。
     此函数逐渐地搜索最长的条目进行剪辑，
     直到历史记录的标记数量降低到阈值以下。
     """
     import numpy as np
     def get_token_num(txt):
         return len(tokenizer.encode(txt, disallowed_special=()))
+
     input_token_num = get_token_num(inputs)
     if input_token_num < max_token_limit * 3 / 4:
         # 当输入部分的token占比小于限制的3/4时，裁剪时
@@ -953,13 +996,14 @@ def clip_history(inputs, history, tokenizer, max_token_limit):
     while n_token > max_token_limit:
         where = np.argmax(everything_token)
         encoded = tokenizer.encode(everything[where], disallowed_special=())
-        clipped_encoded = encoded[:len(encoded)-delta]
-        everything[where] = tokenizer.decode(clipped_encoded)[:-1]    # -1 to remove the may-be illegal char
+        clipped_encoded = encoded[:len(encoded) - delta]
+        everything[where] = tokenizer.decode(clipped_encoded)[:-1]  # -1 to remove the may-be illegal char
         everything_token[where] = get_token_num(everything[where])
         n_token = get_token_num('\n'.join(everything))
 
     history = everything[1:]
     return history
+
 
 """
 ========================================================================
@@ -971,6 +1015,7 @@ def clip_history(inputs, history, tokenizer, max_token_limit):
     - objdump/objload: 快捷的调试函数
 ========================================================================
 """
+
 
 def zip_folder(source_folder, dest_folder, zip_name):
     import zipfile
@@ -1003,24 +1048,29 @@ def zip_folder(source_folder, dest_folder, zip_name):
 
     print(f"Zip file created at {zip_file}")
 
+
 def zip_result(folder):
     t = gen_time_str()
     zip_folder(folder, './gpt_log/', f'{t}-result.zip')
-    return pj('../gpt_log/', f'{t}-result.zip')
+    return pj('../../gpt_log/', f'{t}-result.zip')
+
 
 def gen_time_str():
     import time
     return time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
 
+
 def get_log_folder(user='default', plugin_name='shared'):
-    _dir = os.path.join(os.path.dirname(__file__), 'gpt_log', user, plugin_name)
+    _dir = os.path.join(os.path.dirname(__file__), '../gpt_log', user, plugin_name)
     if not os.path.exists(_dir): os.makedirs(_dir)
     return _dir
+
 
 class ProxyNetworkActivate():
     """
     这段代码定义了一个名为TempProxy的空上下文管理器, 用于给一小段代码上代理
     """
+
     def __enter__(self):
         proxies, = get_conf('proxies')
         if 'no_proxy' in os.environ: os.environ.pop('no_proxy')
@@ -1035,31 +1085,35 @@ class ProxyNetworkActivate():
         if 'HTTPS_PROXY' in os.environ: os.environ.pop('HTTPS_PROXY')
         return
 
+
 def objdump(obj, file='objdump.tmp'):
     import pickle
     with open(file, 'wb+') as f:
         pickle.dump(obj, f)
     return
 
+
 def objload(file='objdump.tmp'):
     import pickle, os
-    if not os.path.exists(file): 
+    if not os.path.exists(file):
         return
     with open(file, 'rb') as f:
         return pickle.load(f)
-    
+
+
 def Singleton(cls):
     """
     一个单实例装饰器
     """
     _instance = {}
- 
+
     def _singleton(*args, **kargs):
         if cls not in _instance:
             _instance[cls] = cls(*args, **kargs)
         return _instance[cls]
- 
+
     return _singleton
+
 
 """
 ========================================================================
@@ -1074,6 +1128,7 @@ def Singleton(cls):
 ========================================================================
 """
 
+
 def set_conf(key, value):
     from comm_tools.toolbox import read_single_conf_with_lru_cache, get_conf
     read_single_conf_with_lru_cache.cache_clear()
@@ -1082,9 +1137,11 @@ def set_conf(key, value):
     altered, = get_conf(key)
     return altered
 
+
 def set_multi_conf(dic):
     for k, v in dic.items(): set_conf(k, v)
     return
+
 
 def get_plugin_handle(plugin_name):
     """
@@ -1097,11 +1154,13 @@ def get_plugin_handle(plugin_name):
     f_hot_reload = getattr(importlib.import_module(module, fn_name), fn_name)
     return f_hot_reload
 
+
 def get_chat_handle():
     """
     """
     from request_llm.bridge_all import predict_no_ui_long_connection
     return predict_no_ui_long_connection
+
 
 def get_plugin_default_kwargs():
     """
@@ -1114,9 +1173,9 @@ def get_plugin_default_kwargs():
     llm_kwargs = {
         'api_key': API_KEY,
         'llm_model': LLM_MODEL,
-        'top_p':1.0, 
+        'top_p': 1.0,
         'max_length': None,
-        'temperature':1.0,
+        'temperature': 1.0,
     }
     chatbot = ChatBotWithCookies(llm_kwargs)
 
@@ -1127,24 +1186,24 @@ def get_plugin_default_kwargs():
         "plugin_kwargs": {},
         "chatbot_with_cookie": chatbot,
         "history": [],
-        "system_prompt": "You are a good AI.", 
+        "system_prompt": "You are a good AI.",
         "web_port": WEB_PORT
     }
     return default_plugin_kwargs
 
+
 def get_chat_default_kwargs():
     """
     """
-    from comm_tools.toolbox import get_conf
 
     LLM_MODEL, API_KEY = get_conf('LLM_MODEL', 'API_KEY')
 
     llm_kwargs = {
         'api_key': API_KEY,
         'llm_model': LLM_MODEL,
-        'top_p':1.0, 
+        'top_p': 1.0,
         'max_length': None,
-        'temperature':1.0,
+        'temperature': 1.0,
     }
 
     default_chat_kwargs = {

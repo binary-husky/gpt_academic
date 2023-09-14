@@ -98,7 +98,7 @@ class ChatBot(ChatBotFrame):
                 self.langchain_dropdown = gr.Dropdown(choices=[], value=[],
                                                show_label=True, interactive=True, label='知识库', multiselect=True,
                                                elem_classes='sm_select', elem_id='change-font-size').style(container=False)
-                self.switcher_drak = gr.HTML(func_box.get_html("appearance_switcher.html").format(), elem_classes="insert_block")
+                self.switcher_drak = gr.HTML(func_box.get_html("switcher_dr_li.html").format(), elem_classes="insert_block")
 
             with gr.Row():
                 self.txt = gr.Textbox(show_label=False,  placeholder="Input question here.", elem_classes='chat_input no_padding_input' ).style()

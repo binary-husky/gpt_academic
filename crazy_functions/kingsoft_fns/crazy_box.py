@@ -837,7 +837,7 @@ def transfer_flow_chart(gpt_response_collection, llm_kwargs, plugin_kwargs, chat
         md, html = Utils().markdown_to_flow_chart(data=inputs_count, hosts=llm_kwargs['ipaddr'],
                                                   file_name=long_name_processing(file_name))
         chat_file_list += "View: " + func_box.html_view_blank(md, to_tabs=True) + '\n\n--- \n\n View: ' + func_box.html_view_blank(html)
-        chatbot.append((you_say, ))
+        chatbot.append((you_say, chat_file_list))
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
         file_limit.append(md)
     # f'tips: 双击空白处可以放大～\n\n' f'{func_box.html_iframe_code(html_file=html)}'  无用，不允许内嵌网页了

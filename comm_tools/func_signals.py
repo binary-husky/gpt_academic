@@ -10,10 +10,46 @@ import time
 import Levenshtein
 
 from concurrent.futures import ThreadPoolExecutor
-
 from comm_tools import toolbox
 from comm_tools.database_processor import SqliteHandle
 from comm_tools import func_box
+
+# 处理latex options
+user_latex_option, = toolbox.get_conf('latex_option')
+if user_latex_option == "default":
+    latex_delimiters_set = [
+        {"left": "$$", "right": "$$", "display": True},
+        {"left": "$", "right": "$", "display": False},
+        {"left": "\\(", "right": "\\)", "display": False},
+        {"left": "\\[", "right": "\\]", "display": True},
+    ]
+elif user_latex_option == "strict":
+    latex_delimiters_set = [
+        {"left": "$$", "right": "$$", "display": True},
+        {"left": "\\(", "right": "\\)", "display": False},
+        {"left": "\\[", "right": "\\]", "display": True},
+    ]
+elif user_latex_option == "all":
+    latex_delimiters_set = [
+        {"left": "$$", "right": "$$", "display": True},
+        {"left": "$", "right": "$", "display": False},
+        {"left": "\\(", "right": "\\)", "display": False},
+        {"left": "\\[", "right": "\\]", "display": True},
+        {"left": "\\begin{equation}", "right": "\\end{equation}", "display": True},
+        {"left": "\\begin{align}", "right": "\\end{align}", "display": True},
+        {"left": "\\begin{alignat}", "right": "\\end{alignat}", "display": True},
+        {"left": "\\begin{gather}", "right": "\\end{gather}", "display": True},
+        {"left": "\\begin{CD}", "right": "\\end{CD}", "display": True},
+    ]
+elif user_latex_option == "disabled":
+    latex_delimiters_set = []
+else:
+    latex_delimiters_set = [
+        {"left": "$$", "right": "$$", "display": True},
+        {"left": "$", "right": "$", "display": False},
+        {"left": "\\(", "right": "\\)", "display": False},
+        {"left": "\\[", "right": "\\]", "display": True},
+    ]
 
 
 def spinner_chatbot_loading(chatbot):

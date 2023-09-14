@@ -459,11 +459,13 @@ def update_btn(self: gr.Button = None,
 
 
 def get_html(filename):
-    path = os.path.join(base_path, "docs/assets", "html", filename)
+    path = os.path.join(base_path, "docs/assets/html", filename)
     if os.path.exists(path):
         with open(path, encoding="utf8") as file:
             return file.read()
     return ""
+
+
 
 def thread_write_chat(chatbot, ipaddr, models):
     """
