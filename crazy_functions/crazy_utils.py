@@ -731,9 +731,10 @@ class nougat_interface():
         from toolbox import get_log_folder, gen_time_str
         dst = os.path.join(get_log_folder(plugin_name='nougat'), gen_time_str())
         os.makedirs(dst)
-        self.nougat_with_timeout(f'nougat --out "{os.path.abspath(dst)}" "{os.path.abspath(fp)}"', os.getcwd())
+        self.nougat_with_timeout(f'nougat --out "{os.path.abspath(dst)}" "{os.path.abspath(fp)}"', os.getcwd(), timeout=300)
         res = glob.glob(os.path.join(dst,'*.mmd'))
         if len(res) == 0:
+            self.threadLock.release()
             raise RuntimeError("Nougat解析论文失败。")
         self.threadLock.release()
         return res[0]
