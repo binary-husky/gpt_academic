@@ -159,7 +159,7 @@ def main():
         # 整理反复出现的控件句柄组合
         input_combo = [cookies, max_length_sl, md_dropdown, txt, txt2, top_p, temperature, chatbot, history, system_prompt, plugin_advanced_arg]
         output_combo = [cookies, chatbot, history, status]
-        predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=input_combo, outputs=output_combo)
+        predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=[*input_combo, gr.State(True)], outputs=output_combo)
         # 提交按钮、重置按钮
         cancel_handles.append(txt.submit(**predict_args))
         cancel_handles.append(txt2.submit(**predict_args))
