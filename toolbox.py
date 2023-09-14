@@ -84,7 +84,7 @@ def ArgsGeneralWrapper(f):
             # 正常状态
             if len(args) == 0:  # 插件通道
                 yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, request)
-            else:               # 对话通道
+            else:               # 对话通道，或者基础功能通道
                 yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
         else:
             # 处理少数情况下的特殊插件的锁定状态
@@ -93,7 +93,8 @@ def ArgsGeneralWrapper(f):
             yield from f_hot_reload(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, request)
             # 判断一下用户是否错误地通过对话通道进入，如果是，则进行提醒
             final_cookies = chatbot_with_cookie.get_cookies()
-            if len(args) == 0 and 'files_to_promote' in final_cookies and len(final_cookies['files_to_promote']) > 0: 
+            # len(args) != 0 代表“提交”键对话通道，或者基础功能通道
+            if len(args) != 0 and 'files_to_promote' in final_cookies and len(final_cookies['files_to_promote']) > 0:
                 chatbot_with_cookie.append(["检测到**滞留的缓存文档**，请及时处理。", "请及时点击“**保存当前对话**”获取所有滞留文档。"])
                 yield from update_ui(chatbot_with_cookie, final_cookies['history'], msg="检测到被滞留的缓存文档")
     return decorated
