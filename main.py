@@ -8,7 +8,7 @@ def main():
     if gr.__version__ not in ['3.28.3',
                               '3.32.2']: assert False, "需要特殊依赖，请务必用 pip install -r requirements.txt 指令安装依赖，详情信息见requirements.txt"
     from request_llm.bridge_all import predict
-    from comm_tools.toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, \
+    from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, \
         load_chat_cookies, DummyWith
     # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
     proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION = get_conf('proxies', 'WEB_PORT', 'LLM_MODEL',
@@ -157,6 +157,15 @@ def main():
                         value=["基础功能区", "函数插件区"], label="显示/隐藏功能区")
                     md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(
                         container=False)
+                    dark_mode_btn = gr.Button("Toggle Dark Mode ☀", variant="secondary").style(size="sm")
+                    dark_mode_btn.click(None, None, None, _js="""() => {
+                            if (document.querySelectorAll('.dark').length) {
+                                document.querySelectorAll('.dark').forEach(el => el.classList.remove('dark'));
+                            } else {
+                                document.querySelector('body').classList.add('dark');
+                            }
+                        }""",
+                                        )
                     gr.Markdown(description)
                 with gr.Accordion("备选输入区", open=True, visible=False,
                                   elem_id="input-panel2") as area_input_secondary:
@@ -321,9 +330,9 @@ def main():
     # 如果需要在二级路径下运行
     # CUSTOM_PATH, = get_conf('CUSTOM_PATH')
     # if CUSTOM_PATH != "/":
-    #     from comm_tools.toolbox import run_gradio_in_subpath
+    #     from toolbox import run_gradio_in_subpath
     #     run_gradio_in_subpath(demo, auth=AUTHENTICATION, port=PORT, custom_path=CUSTOM_PATH)
-    # else: 
+    # else:
     #     demo.launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, favicon_path="docs/logo.png",
     #                 blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile"])
 

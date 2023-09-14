@@ -3,6 +3,7 @@ import os
 from comm_tools import toolbox
 from comm_tools import func_box
 import threading
+import os
 
 def input_clipping(inputs, history, max_token_limit):
     import numpy as np
@@ -474,14 +475,16 @@ def read_and_clean_pdf_text(fp):
                     '- ', '') for t in text_areas['blocks'] if 'lines' in t]
                 
         ############################## <第 2 步，获取正文主字体> ##################################
-        fsize_statiscs = {}
-        for span in meta_span:
-            if span[1] not in fsize_statiscs: fsize_statiscs[span[1]] = 0
-            fsize_statiscs[span[1]] += span[2]
-        main_fsize = max(fsize_statiscs, key=fsize_statiscs.get)
-        if REMOVE_FOOT_NOTE:
-            give_up_fize_threshold = main_fsize * REMOVE_FOOT_FFSIZE_PERCENT
-
+        try:
+            fsize_statiscs = {}
+            for span in meta_span:
+                if span[1] not in fsize_statiscs: fsize_statiscs[span[1]] = 0
+                fsize_statiscs[span[1]] += span[2]
+            main_fsize = max(fsize_statiscs, key=fsize_statiscs.get)
+            if REMOVE_FOOT_NOTE:
+                give_up_fize_threshold = main_fsize * REMOVE_FOOT_FFSIZE_PERCENT
+        except:
+            raise RuntimeError(f'抱歉, 我们暂时无法解析此PDF文档: {fp}。')
         ############################## <第 3 步，切分和重新整合> ##################################
         mega_sec = []
         sec = []
@@ -695,55 +698,101 @@ class knowledge_archive_interface():
         return resp, prompt, True
 
 
-def try_install_deps(deps):
+def Singleton(cls):
+    _instance = {}
+
+    def _singleton(*args, **kargs):
+        if cls not in _instance:
+            _instance[cls] = cls(*args, **kargs)
+        return _instance[cls]
+
+    return _singleton
+
+@Singleton
+class nougat_interface():
+    def __init__(self):
+        self.threadLock = threading.Lock()
+
+    def nougat_with_timeout(self, command, cwd, timeout=3600):
+        import subprocess
+        process = subprocess.Popen(command, shell=True, cwd=cwd)
+        try:
+            stdout, stderr = process.communicate(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            stdout, stderr = process.communicate()
+            print("Process timed out!")
+            return False
+        return True
+
+
+    def NOUGAT_parse_pdf(self, fp):
+        self.threadLock.acquire()
+        import glob, threading, os
+        dst = os.path.join(toolbox.get_log_folder(plugin_name='nougat'), toolbox.gen_time_str())
+        os.makedirs(dst)
+        self.nougat_with_timeout(f'nougat --out "{os.path.abspath(dst)}" "{os.path.abspath(fp)}"', os.getcwd())
+        res = glob.glob(os.path.join(dst,'*.mmd'))
+        if len(res) == 0:
+            raise RuntimeError("Nougat解析论文失败。")
+        self.threadLock.release()
+        return res[0]
+
+
+
+def try_install_deps(deps, reload_m=[]):
+    import subprocess, sys, importlib
     for dep in deps:
-        import subprocess, sys
         subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--user', dep])
+    import site
+    importlib.reload(site)
+    for m in reload_m:
+        importlib.reload(__import__(m))
 
 
-class construct_html():
-    def __init__(self) -> None:
-        self.css = """
+HTML_CSS = """
 .row {
   display: flex;
   flex-wrap: wrap;
 }
-
 .column {
   flex: 1;
   padding: 10px;
 }
-
 .table-header {
   font-weight: bold;
   border-bottom: 1px solid black;
 }
-
 .table-row {
   border-bottom: 1px solid lightgray;
 }
-
 .table-cell {
   padding: 5px;
 }
-        """
-        self.html_string = f'<!DOCTYPE html><head><meta charset="utf-8"><title>翻译结果</title><style>{self.css}</style></head>'
+"""
 
-
-    def add_row(self, a, b):
-        tmp = """
+TABLE_CSS = """
 <div class="row table-row">
     <div class="column table-cell">REPLACE_A</div>
     <div class="column table-cell">REPLACE_B</div>
 </div>
-        """
-        from comm_tools.toolbox import markdown_convertion
-        tmp = tmp.replace('REPLACE_A', markdown_convertion(a))
-        tmp = tmp.replace('REPLACE_B', markdown_convertion(b))
+"""
+
+class construct_html():
+    def __init__(self) -> None:
+        self.css = HTML_CSS
+        self.html_string = f'<!DOCTYPE html><head><meta charset="utf-8"><title>翻译结果</title><style>{self.css}</style></head>'
+
+
+    def add_row(self, a, b):
+        tmp = TABLE_CSS
+        tmp = tmp.replace('REPLACE_A', toolbox.markdown_convertion(a))
+        tmp = tmp.replace('REPLACE_B', toolbox.markdown_convertion(b))
         self.html_string += tmp
 
 
     def save_file(self, file_name):
-        with open(f'./gpt_log/{file_name}', 'w', encoding='utf8') as f:
+        with open(os.path.join(toolbox.get_log_folder(), file_name), 'w', encoding='utf8') as f:
             f.write(self.html_string.encode('utf-8', 'ignore').decode())
+        return os.path.join(toolbox.get_log_folder(), file_name)
 

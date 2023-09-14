@@ -58,7 +58,7 @@ class Ws_Param(object):
 class SparkRequestInstance():
     def __init__(self):
         XFYUN_APPID, XFYUN_API_SECRET, XFYUN_API_KEY = get_conf('XFYUN_APPID', 'XFYUN_API_SECRET', 'XFYUN_API_KEY')
-
+        if XFYUN_APPID == '00000000' or XFYUN_APPID == '': raise RuntimeError('请配置讯飞星火大模型的XFYUN_APPID, XFYUN_API_KEY, XFYUN_API_SECRET')
         self.appid = XFYUN_APPID
         self.api_secret = XFYUN_API_SECRET
         self.api_key = XFYUN_API_KEY

@@ -24,12 +24,13 @@ explain_msg = """
 ## 虚空终端插件说明:
 
 1. 请用**自然语言**描述您需要做什么。例如：
-    - 「请调用插件，为我翻译PDF论文，论文我刚刚放到上传区了。」
-    - 「请调用插件翻译PDF论文，地址为https://www.nature.com/articles/s41586-019-1724-z.pdf」
-    - 「生成一张图片，图中鲜花怒放，绿草如茵，用插件实现。」
+    - 「请调用插件，为我翻译PDF论文，论文我刚刚放到上传区了」
+    - 「请调用插件翻译PDF论文，地址为https://openreview.net/pdf?id=rJl0r3R9KX」
+    - 「把Arxiv论文翻译成中文PDF，arxiv论文的ID是1812.10695，记得用插件！」
+    - 「生成一张图片，图中鲜花怒放，绿草如茵，用插件实现」
     - 「用插件翻译README，Github网址是https://github.com/facebookresearch/co-tracker」
-    - 「给爷翻译Arxiv论文，arxiv论文的ID是1812.10695，记得用插件，不要自己瞎搞！」
-    - 「我不喜欢当前的界面颜色，修改配置，把主题THEME更换为THEME="High-Contrast"。」
+    - 「我不喜欢当前的界面颜色，修改配置，把主题THEME更换为THEME="High-Contrast"」
+    - 「请调用插件，解析python源代码项目，代码我刚刚打包拖到上传区了」
     - 「请问Transformer网络的结构是怎样的？」
 
 2. 您可以打开插件下拉菜单以了解本项目的各种能力。    

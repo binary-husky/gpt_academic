@@ -110,7 +110,8 @@ class ChatBot(ChatBotFrame):
             self.status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行\n {proxy_info}", elem_id='debug_mes')
 
     def signals_sm_btn(self):
-        self.sm_upload.upload(on_file_uploaded, [self.sm_upload, self.chatbot, self.txt], [self.chatbot, self.txt]).then(
+        self.sm_upload.upload(on_file_uploaded, [self.sm_upload, self.chatbot, self.txt, self.cookies],
+                              [self.chatbot, self.txt]).then(
             fn=lambda: [gr.Tabs.update(selected='plug_tab'), gr.Column.update(visible=False)], inputs=None, outputs=[self.tabs_funcs, self.examples_column])
         self.sm_code_block.click(fn=lambda x: x+'```\n\n```', inputs=[self.txt], outputs=[self.txt])
         self.sm_upload_history.click(get_user_upload, [self.chatbot, self.txt], outputs=[self.chatbot]).then(
@@ -340,7 +341,7 @@ class ChatBot(ChatBotFrame):
                 return [*new_btn_list, gr.Dropdown.update(choices=fns_list)]
 
         # 文件上传区，接收文件后与chatbot的互动
-        self.file_upload.upload(on_file_uploaded, [self.file_upload, self.chatbot, self.txt], [self.chatbot, self.txt])
+        self.file_upload.upload(on_file_uploaded, [self.file_upload, self.chatbot, self.txt, self.cookies], [self.chatbot, self.txt])
         # 函数插件-固定按钮区
         self.plugin_dropdown.select(fn=show_plugin_btn, inputs=[self.plugin_dropdown],
                                     outputs=[*fn_btn_dict.keys(), self.dropdown_fn])
@@ -436,7 +437,7 @@ class ChatBot(ChatBotFrame):
                                        ).then(fn=func_box.new_button_display,
                                               inputs=[self.langchain_classifi], outputs=[self.langchain_class_name])
         self.langchain_upload.upload(fn=on_file_uploaded,
-                                     inputs=[self.langchain_upload, gr.State(''), self.langchain_know_kwargs],
+                                     inputs=[self.langchain_upload, gr.State(''), self.langchain_know_kwargs, self.cookies],
                                      outputs=[self.langchain_status, self.langchain_know_kwargs])
 
         def clear_file(kw):

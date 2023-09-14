@@ -10,16 +10,6 @@
 # [step 1]>> API_KEY = "sk-123456789xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx123456789"。极少数情况下，还需要填写组织（格式如org-123456789abcdefghijklmno的），请向下翻，找 API_ORG 设置项
 API_KEY = "此处填API密钥"    # 可同时填写多个API-KEY，用英文逗号分割，例如API_KEY = "sk-openaikey1,sk-openaikey2,fkxxxx-api2dkey3,azure-apikey4"
 
-preset_prompt = {'key': ['所有', '个人'], 'value': '所有'}
-switch_model = {'key': ['input加密', '隐私模式'], 'value': ['input加密']}
-
-private_key = 'uhA51pHtjisfjij'
-
-# 知识库支持解析的文件类型
-spl = ["txt", "doc", "docx", "email", "epub", "html", "json", "md", "msg", "pdf", "ppt", "pptx", "rtf", 'csv']
-from comm_tools import func_box
-import os
-devs_document = "/file="+os.path.join(func_box.base_path, 'README.md')
 
 # [step 2]>> 改为True应用代理，如果直接在海外服务器部署，此处不修改；如果使用本地或无地域限制的大模型时，此处也不需要修改
 USE_PROXY = False
@@ -41,16 +31,20 @@ else:
     proxies = None
 
 # ------------------------------------ 以下配置可以优化体验, 但大部分场合下并不需要修改 ------------------------------------
+
 # 重新URL重新定向，实现更换API_URL的作用（高危设置! 常规情况下不要修改! 通过修改此设置，您将把您的API-KEY和对话隐私完全暴露给您设定的中间人！）
-# 格式: API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "在这里填写重定向的api.openai.com的URL"} 
+# 格式: API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "在这里填写重定向的api.openai.com的URL"}
 # 举例: API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "https://reverse-proxy-url/v1/chat/completions"}
 API_URL_REDIRECT = {}
+
 
 # 多线程函数插件中，默认允许多少路线程同时访问OpenAI。Free trial users的限制是每分钟3次，Pay-as-you-go users的限制是每分钟3500次
 # 一言以蔽之：免费（5刀）用户填3，OpenAI绑了信用卡的用户可以填 16 或者更高。提高限制请查询：https://platform.openai.com/docs/guides/rate-limits/overview
 DEFAULT_WORKER_NUM = 3
 
-# 色彩主题，可选 ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast"]
+
+# 色彩主题, 可选 ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast"]
+# 更多主题, 请查阅Gradio主题商店: https://huggingface.co/spaces/gradio/theme-gallery 可选 ["Gstaff/Xkcd", "NoCrypt/Miku", ...]
 THEME = "Default"
 
 
@@ -78,32 +72,6 @@ WEB_PORT = -1
 # 如果OpenAI不响应（网络卡顿、代理失败、KEY失效），重试的次数限制
 MAX_RETRY = 2
 
-# 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
-LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
-AVAIL_LLM_MODELS = ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5", "api2d-gpt-3.5-turbo", 
-                    "gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "stack-claude"]
-# P.S. 其他可用的模型还包括 ["qianfan", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613", 
-# "spark", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"]
-
-
-# 百度千帆（LLM_MODEL="qianfan"）
-BAIDU_CLOUD_API_KEY = ''
-BAIDU_CLOUD_SECRET_KEY = ''
-BAIDU_CLOUD_QIANFAN_MODEL = 'ERNIE-Bot'    # 可选 "ERNIE-Bot"(文心一言), "ERNIE-Bot-turbo", "BLOOMZ-7B", "Llama-2-70B-Chat", "Llama-2-13B-Chat", "Llama-2-7B-Chat"
-
-
-# 如果使用ChatGLM2微调模型，请把 LLM_MODEL="chatglmft"，并在此处指定模型路径
-ChatGLM_PTUNING_CHECKPOINT = "" # 例如"/home/hmp/ChatGLM2-6B/ptuning/output/6b-pt-128-1e-2/checkpoint-100"
-
-
-# 本地LLM模型如ChatGLM的执行方式 CPU/GPU
-LOCAL_MODEL_DEVICE = "cpu" # 可选 "cuda"
-LOCAL_MODEL_QUANT = "FP16" # 默认 "FP16" "INT4" 启用量化INT4版本 "INT8" 启用量化INT8版本
-
-# OpenAI的API_URL
-API_URL = "https://api.openai.com/v1/chat/completions"
-PROXY_API_URL = '' # 你的网关应用
-
 
 # 插件分类默认选项
 DEFAULT_FN_GROUPS = ['对话', '编程', '学术']
@@ -111,9 +79,9 @@ DEFAULT_FN_GROUPS = ['对话', '编程', '学术']
 
 # 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
 LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
-AVAIL_LLM_MODELS = ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5", "api2d-gpt-3.5-turbo", 
+AVAIL_LLM_MODELS = ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5", "api2d-gpt-3.5-turbo",
                     "gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "stack-claude"]
-# P.S. 其他可用的模型还包括 ["qianfan", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613", 
+# P.S. 其他可用的模型还包括 ["qianfan", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613",
 # "spark", "sparkv2", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"]
 
 
@@ -139,13 +107,9 @@ CONCURRENT_COUNT = 100
 # 是否在提交时自动清空输入框
 AUTO_CLEAR_TXT = False
 
-# 加一个看板娘装饰
-ADD_WAIFU = True
-# 川虎 js
-ADD_CHUANHU = True
-# 手机是否展示高级插件
-MOBILE_SHOW = True
-# 色彩主体，可选 ["Default", "Chuanhu-Small-and-Beautiful"]
+
+# 加一个live2d装饰
+ADD_WAIFU = False
 
 
 # 设置用户名和密码（不需要修改）（相关功能不稳定，与gradio版本和网络都相关，如果本地使用不建议加这个）
@@ -162,7 +126,7 @@ API_ORG = ""
 
 
 # 如果需要使用Slack Claude，使用教程详情见 request_llm/README.md
-SLACK_CLAUDE_BOT_ID = ''   
+SLACK_CLAUDE_BOT_ID = ''
 SLACK_CLAUDE_USER_TOKEN = ''
 
 
@@ -170,7 +134,7 @@ SLACK_CLAUDE_USER_TOKEN = ''
 AZURE_ENDPOINT = "https://你亲手写的api名称.openai.azure.com/"
 AZURE_API_KEY = "填入azure openai api的密钥"    # 建议直接在API_KEY处填写，该选项即将被弃用
 AZURE_ENGINE = "填入你亲手写的部署名"            # 读 docs\use_azure.md
-AZURE_API_VERSION = ''
+
 
 # 使用Newbing
 NEWBING_STYLE = "creative"  # ["creative", "balanced", "precise"]
@@ -209,7 +173,7 @@ HUGGINGFACE_ACCESS_TOKEN = "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"
 # 获取方法：复制以下空间https://huggingface.co/spaces/qingxu98/grobid，设为public，然后GROBID_URL = "https://(你的hf用户名如qingxu98)-(你的填写的空间名如grobid).hf.space"
 GROBID_URLS = [
     "https://qingxu98-grobid.hf.space","https://qingxu98-grobid2.hf.space","https://qingxu98-grobid3.hf.space",
-    "https://shaocongma-grobid.hf.space","https://FBR123-grobid.hf.space", "https://yeku-grobid.hf.space", 
+    "https://shaocongma-grobid.hf.space","https://FBR123-grobid.hf.space", "https://yeku-grobid.hf.space",
 ]
 
 
@@ -233,11 +197,7 @@ ALLOW_RESET_CONFIG = False
 │   ├── AZURE_ENGINE
 │   └── API_URL_REDIRECT
 │
-<<<<<<< HEAD
-├── "spark" 星火认知大模型
-=======
 ├── "spark" 星火认知大模型 spark & sparkv2
->>>>>>> master
 │   ├── XFYUN_APPID
 │   ├── XFYUN_API_SECRET
 │   └── XFYUN_API_KEY
@@ -258,8 +218,6 @@ ALLOW_RESET_CONFIG = False
     ├── NEWBING_STYLE
     └── NEWBING_COOKIES
 
-<<<<<<< HEAD
-=======
     
 用户图形界面布局依赖关系示意图
 │
@@ -272,7 +230,6 @@ ALLOW_RESET_CONFIG = False
 ├── AUTO_CLEAR_TXT 是否在提交时自动清空输入框
 ├── ADD_WAIFU 加一个live2d装饰
 ├── ALLOW_RESET_CONFIG 是否允许通过自然语言描述修改本页的配置，该功能具有一定的危险性
->>>>>>> master
 
 
 插件在线服务配置依赖关系示意图

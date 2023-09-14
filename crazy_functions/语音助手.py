@@ -80,9 +80,9 @@ class InterviewAssistant(AliyunASR):
     def __init__(self):
         self.capture_interval = 0.5 # second
         self.stop = False
-        self.parsed_text = ""
-        self.parsed_sentence = ""
-        self.buffered_sentence = ""
+        self.parsed_text = ""   # 下个句子中已经说完的部分, 由 test_on_result_chg() 写入
+        self.parsed_sentence = ""   # 某段话的整个句子,由 test_on_sentence_end() 写入
+        self.buffered_sentence = ""    #
         self.event_on_result_chg = threading.Event()
         self.event_on_entence_end = threading.Event()
         self.event_on_commit_question = threading.Event()
@@ -132,7 +132,7 @@ class InterviewAssistant(AliyunASR):
             self.plugin_wd.feed()
 
             if self.event_on_result_chg.is_set(): 
-                # update audio decode result
+                # called when some words have finished
                 self.event_on_result_chg.clear()
                 chatbot[-1] = list(chatbot[-1])
                 chatbot[-1][0] = self.buffered_sentence + self.parsed_text
@@ -144,7 +144,11 @@ class InterviewAssistant(AliyunASR):
                 # called when a sentence has ended
                 self.event_on_entence_end.clear()
                 self.parsed_text = self.parsed_sentence
-                self.buffered_sentence += self.parsed_sentence
+                self.buffered_sentence += self.parsed_text
+                chatbot[-1] = list(chatbot[-1])
+                chatbot[-1][0] = self.buffered_sentence
+                history = chatbot2history(chatbot)
+                yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
             if self.event_on_commit_question.is_set():
                 # called when a question should be commited

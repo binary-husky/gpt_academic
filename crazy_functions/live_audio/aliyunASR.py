@@ -1,4 +1,4 @@
-import time, threading, json
+import time, logging, json
 
 
 class AliyunASR():
@@ -12,14 +12,14 @@ class AliyunASR():
         message = json.loads(message)
         self.parsed_sentence = message['payload']['result']
         self.event_on_entence_end.set()
-        print(self.parsed_sentence)
+        # print(self.parsed_sentence)
 
     def test_on_start(self, message, *args):
         # print("test_on_start:{}".format(message))
         pass
 
     def test_on_error(self, message, *args):
-        print("on_error args=>{}".format(args))
+        logging.error("on_error args=>{}".format(args))
         pass
 
     def test_on_close(self, *args):
@@ -35,7 +35,6 @@ class AliyunASR():
     def test_on_completed(self, message, *args):
         # print("on_completed:args=>{} message=>{}".format(args, message))
         pass
-
 
     def audio_convertion_thread(self, uuid):
         # 在一个异步线程中采集音频
