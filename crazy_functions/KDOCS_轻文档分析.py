@@ -124,6 +124,7 @@ def KDocs_转客户端测试用例(link_limit, llm_kwargs, plugin_kwargs, chatbo
 
 
 func_kwargs = {
+    'Markdown转换为流程图': crazy_box.transfer_flow_chart,
     '结果写入Markdown': crazy_box.result_written_to_markdwon,
     '写入测试用例': crazy_box.write_test_cases,
     '补充测试用例': crazy_box.supplementary_test_case

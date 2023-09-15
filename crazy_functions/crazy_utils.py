@@ -261,7 +261,6 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     wait = 5
                     time.sleep(5)
                     return gpt_say # 放弃
-
     # 异步任务开始
     futures = [executor.submit(_req_gpt, index, inputs, history, sys_prompt) for index, inputs, history, sys_prompt in zip(
         range(len(inputs_array)), inputs_array, history_array, sys_prompt_array)]

@@ -371,6 +371,7 @@ def get_functions_金山专用():
             "Parameters": {
                 "开启OCR": True,
                 "提示词分类": "插件定制",
+                "多模型并行": "proxy-gpt-35-turbo-16k&proxy-gpt-4",
                 "自动录入知识库": {'个人知识库': '需求文稿'},
                 "阶段性产出": {
                     "编写测试用例": {

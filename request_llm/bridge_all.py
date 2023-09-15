@@ -487,7 +487,6 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
         用于负责跨越线程传递已经输出的部分，大部分时候仅仅为了fancy的视觉效果，留空即可。observe_window[0]：观测窗。observe_window[1]：看门狗
     """
     import threading, time, copy
-
     model = llm_kwargs['llm_model']
     n_model = 1
     if '&' not in model:
@@ -499,7 +498,6 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
         # method = model_info[model]["fn_without_ui"]
         # return method(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience)
     else:
-
         # 如果同时询问多个大语言模型，这个稍微啰嗦一点，但思路相同，您不必读这个else分支
         executor = ThreadPoolExecutor(max_workers=4)
         models = model.split('&')
@@ -545,7 +543,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
             time.sleep(1)
 
         for i, future in enumerate(futures):  # wait and get
-            return_string_collect.append( f"【{str(models[i])} 说】: <font color=\"{colors[i]}\"> {future.result()} </font>" )
+            return_string_collect.append(f"【{str(models[i])} 说】: <font color=\"{colors[i]}\"> {future.result()} </font>" )
         window_mutex[-1] = False # stop mutex thread
         res = '<br/><br/>\n\n---\n\n'.join(return_string_collect)
         return res

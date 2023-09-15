@@ -634,6 +634,8 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
         plugin_kwargs: 插件调优参数
     Returns:  将对话结果返回[输入, 输出]
     """
+    multi_model_parallelism, =  json_args_return(plugin_kwargs, ['多模型并行'], llm_kwargs['llm_model'])
+    llm_kwargs['llm_model'] = multi_model_parallelism
     if len(inputs_array) == 1:
         # 折叠输出
         # if len(inputs_array[0]) > 200:
@@ -656,7 +658,7 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
             history_array=[[""] for _ in range(len(inputs_array))],
             sys_prompt_array=["" for _ in range(len(inputs_array))],
             # max_workers=5,  # OpenAI所允许的最大并行过载
-            scroller_max_len=80
+            scroller_max_len=80,
         )
         # 是否展示任务结果
         kwargs_is_show,  = json_args_return(plugin_kwargs, ['显示过程'])
@@ -718,6 +720,15 @@ def batch_recognition_images_to_md(img_list, ipaddr):
     return temp_list
 
 
+def name_sorting(response, index=0):
+    d = {}
+    for i, v in enumerate(response):
+        if v[index] not in d:
+            d[v[index]] = i
+    response.sort(key=lambda x: d[x[index]])
+    return response
+
+
 def parsing_json_in_text(txt_data: list, old_case, filter_list: list = 'None----', tags='插件补充的用例'):
     response = []
     desc = '\n\n---\n\n'.join(txt_data)
@@ -751,11 +762,7 @@ def parsing_json_in_text(txt_data: list, old_case, filter_list: list = 'None----
                 old_case[index].append(new_case+[tags])
         response.extend(old_case[index])
     # 按照名称排列重组
-    d = {}
-    for i, v in enumerate(response):
-        if v[0] not in d:
-            d[v[0]] = i
-    response.sort(key=lambda x: d[x[0]])
+    response = name_sorting(response, 0)
     return response, desc
 
 
@@ -790,9 +797,10 @@ def write_test_cases(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot
                     test_case.append([func_box.clean_br_string(i) for i in i.split('｜')[1:]])
                 else:
                     func_box.通知机器人(f'脏数据过滤，这个不符合写入测试用例的条件 \n\n预期写入数据`{i}`\n\n```\n{gpt_response_split}\n```')
+        sort_test_case = name_sorting(list(set(test_case)), 0)  # 去重加排序
         xlsx_heandle = ExcelHandle(ipaddr=llm_kwargs['ipaddr'], temp_file=template_file, sheet=sheet)
         xlsx_heandle.split_merged_cells()  # 先把合并的单元格拆分，避免写入失败
-        file_path = xlsx_heandle.lpvoid_lpbuffe(test_case, filename=long_name_processing(file_name))
+        file_path = xlsx_heandle.lpvoid_lpbuffe(sort_test_case, filename=long_name_processing(file_name))
         chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, to_tabs=True)}\n\n'
         chatbot[-1] = ([you_say, chat_file_list])
         yield from toolbox.update_ui(chatbot, history)
@@ -890,9 +898,9 @@ previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传�
 
 
 if __name__ == '__main__':
-    old_case = ExcelHandle(temp_file='/Users/kilig/Desktop/MAC新会员引导_二阶段_三阶段.xlsx').read_as_dict()['测试要点']
-    with open('/Users/kilig/Desktop/test.md', mode='r') as f:
-        content = f.read()
-    test_case, desc = parsing_json_in_text([content], [old_case], filter_list=['123'])
-    print()
+    test = [1 ,2, 3 , 4, [12], 33, 1]
+    print(name_sorting(list(set(test))))
+    # with open('/Users/kilig/Desktop/test.md', mode='r') as f:
+    #     content = f.read()
+
 
