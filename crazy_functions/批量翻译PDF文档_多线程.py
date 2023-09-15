@@ -1,7 +1,7 @@
-
-from comm_tools.toolbox import CatchException, report_execption, write_results_to_file
+from comm_tools.toolbox import CatchException, report_execption, get_log_folder
 from comm_tools.toolbox import update_ui, promote_file_to_downloadzone, update_ui_lastest_msg, disable_auto_promotion
-from comm_tools.toolbox import write_history_to_file, get_log_folder
+from comm_tools.toolbox import write_history_to_file, promote_file_to_downloadzone
+
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 from .crazy_utils import read_and_clean_pdf_text
@@ -240,10 +240,11 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
         final = ["一、论文概况\n\n---\n\n", paper_meta_info.replace('# ', '### ') + '\n\n---\n\n', "二、论文翻译", ""]
         final.extend(gpt_response_collection_md)
         create_report_file_name = f"{os.path.basename(fp)}.trans.md"
-        res = write_results_to_file(final, file_name=create_report_file_name)
+        res = write_history_to_file(final, create_report_file_name)
+        promote_file_to_downloadzone(res, chatbot=chatbot)
 
         # 更新UI
-        generated_conclusion_files.append(f'./gpt_log/{create_report_file_name}')
+        generated_conclusion_files.append(f'{get_log_folder()}/{create_report_file_name}')
         chatbot.append((f"{fp}完成了吗？", res))
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 

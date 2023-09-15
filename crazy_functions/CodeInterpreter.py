@@ -1,6 +1,7 @@
 from collections.abc import Callable, Iterable, Mapping
 from typing import Any
-from comm_tools.toolbox import CatchException, update_ui, gen_time_str, trimmed_format_exc, promote_file_to_downloadzone, clear_file_downloadzone
+from comm_tools.toolbox import CatchException, update_ui, gen_time_str, trimmed_format_exc
+from comm_tools.toolbox import promote_file_to_downloadzone, get_log_folder
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import input_clipping, try_install_deps
 from multiprocessing import Process, Pipe
@@ -92,7 +93,7 @@ def gpt_interact_multi_step(txt, file_type, llm_kwargs, chatbot, history):
 
 def make_module(code):
     module_file = 'gpt_fn_' + gen_time_str().replace('-','_')
-    with open(f'gpt_log/{module_file}.py', 'w', encoding='utf8') as f:
+    with open(f'{get_log_folder()}/{module_file}.py', 'w', encoding='utf8') as f:
         f.write(code)
 
     def get_class_name(class_string):
@@ -102,7 +103,7 @@ def make_module(code):
         return class_name
 
     class_name = get_class_name(code)
-    return f"gpt_log.{module_file}->{class_name}"
+    return f"{get_log_folder().replace('/', '.')}.{module_file}->{class_name}"
 
 def init_module_instance(module):
     import importlib
@@ -171,7 +172,7 @@ def 虚空终端CodeInterpreter(txt, llm_kwargs, plugin_kwargs, chatbot, history
     file_type = file_path.split('.')[-1]
 
     # 粗心检查
-    if 'private_upload' in txt:
+    if is_the_upload_folder(txt):
         chatbot.append([
             "...",
             f"请在输入框内填写需求，然后再次点击该插件（文件路径 {file_path} 已经被记忆）"

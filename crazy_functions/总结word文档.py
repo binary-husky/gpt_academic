@@ -1,5 +1,7 @@
 from comm_tools.toolbox import update_ui
-from comm_tools.toolbox import CatchException, report_execption, write_results_to_file
+from comm_tools.toolbox import CatchException, report_execption
+from comm_tools.toolbox import write_history_to_file, promote_file_to_downloadzone
+
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 fast_debug = False
 
@@ -71,11 +73,13 @@ def 解析docx(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot
             history.extend([i_say,gpt_say])
             this_paper_history.extend([i_say,gpt_say])
 
-        res = write_results_to_file(history)
+        res = write_history_to_file(history)
+        promote_file_to_downloadzone(res, chatbot=chatbot)
         chatbot.append(("完成了吗？", res))
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
-    res = write_results_to_file(history)
+    res = write_history_to_file(history)
+    promote_file_to_downloadzone(res, chatbot=chatbot)
     chatbot.append(("所有文件都总结完成了吗？", res))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 

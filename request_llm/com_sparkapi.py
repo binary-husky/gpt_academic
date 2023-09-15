@@ -107,6 +107,7 @@ class SparkRequestInstance():
             code = data['header']['code']
             if code != 0:
                 print(f'请求错误: {code}, {data}')
+                self.result_buf += str(data)
                 ws.close()
                 self.time_to_exit_event.set()
             else:

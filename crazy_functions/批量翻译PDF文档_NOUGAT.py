@@ -100,7 +100,7 @@ def 解析PDF_基于NOUGAT(file_manifest, project_folder, llm_kwargs, plugin_kwa
     nougat_handle = nougat_interface()
     for index, fp in enumerate(file_manifest):
         chatbot.append(["当前进度：", f"正在解析论文，请稍候。（第一次运行时，需要花费较长时间下载NOUGAT参数）"]); yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-        fpp = nougat_handle.NOUGAT_parse_pdf(fp)
+        fpp = yield from nougat_handle.NOUGAT_parse_pdf(fp, chatbot, history)
 
         with open(fpp, 'r', encoding='utf8') as f:
             article_content = f.readlines()

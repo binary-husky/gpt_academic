@@ -4,6 +4,7 @@ from comm_tools import toolbox
 from comm_tools import func_box
 import threading
 import os
+import logging
 
 def input_clipping(inputs, history, max_token_limit):
     import numpy as np
@@ -714,6 +715,7 @@ class nougat_interface():
 
     def nougat_with_timeout(self, command, cwd, timeout=3600):
         import subprocess
+        logging.info(f'正在执行命令 {command}')
         process = subprocess.Popen(command, shell=True, cwd=cwd)
         try:
             stdout, stderr = process.communicate(timeout=timeout)
@@ -725,14 +727,22 @@ class nougat_interface():
         return True
 
 
-    def NOUGAT_parse_pdf(self, fp):
+    def NOUGAT_parse_pdf(self, fp, chatbot, history):
+        from toolbox import update_ui_lastest_msg
+
+        yield from update_ui_lastest_msg("正在解析论文, 请稍候。进度：正在排队, 等待线程锁...", 
+                                         chatbot=chatbot, history=history, delay=0)
         self.threadLock.acquire()
         import glob, threading, os
         dst = os.path.join(toolbox.get_log_folder(plugin_name='nougat'), toolbox.gen_time_str())
         os.makedirs(dst)
-        self.nougat_with_timeout(f'nougat --out "{os.path.abspath(dst)}" "{os.path.abspath(fp)}"', os.getcwd())
+
+        yield from update_ui_lastest_msg("正在解析论文, 请稍候。进度：正在加载NOUGAT... （提示：首次运行需要花费较长时间下载NOUGAT参数）", 
+                                         chatbot=chatbot, history=history, delay=0)
+        self.nougat_with_timeout(f'nougat --out "{os.path.abspath(dst)}" "{os.path.abspath(fp)}"', os.getcwd(), timeout=3600)
         res = glob.glob(os.path.join(dst,'*.mmd'))
         if len(res) == 0:
+            self.threadLock.release()
             raise RuntimeError("Nougat解析论文失败。")
         self.threadLock.release()
         return res[0]

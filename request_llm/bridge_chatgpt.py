@@ -21,8 +21,8 @@ import importlib
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
-from comm_tools.toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history, trimmed_format_exc, regular_txt_to_markdown
-
+from comm_tools.toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history, trimmed_format_exc, \
+    is_the_upload_folder
 
 proxies, TIMEOUT_SECONDS, MAX_RETRY, API_ORG = \
     get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'API_ORG')
@@ -136,6 +136,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         yield from update_ui(chatbot=chatbot, history=history, msg="缺少api_key")  # 刷新界面
         return
 
+    user_input = inputs
     if additional_fn is not None:
         from comm_tools.core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
@@ -146,9 +147,9 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     yield from update_ui(chatbot=chatbot, history=history, msg="等待响应")  # 刷新界面
 
     # check mis-behavior
-    if raw_input.startswith('private_upload/') and len(raw_input) == 34:
+    if is_the_upload_folder(user_input):
         chatbot[-1] = (inputs,
-                       f"[Local Message] 检测到操作错误！当您上传文档之后，需要点击“函数插件区”按钮进行处理，而不是点击“提交”按钮。")
+                       f"[Local Message] 检测到操作错误！当您上传文档之后，需点击“**函数插件区**”按钮进行处理，请勿点击“提交”按钮或者“基础功能区”按钮。")
         yield from update_ui(chatbot=chatbot, history=history, msg="正常")  # 刷新界面
         time.sleep(2)
 
@@ -221,8 +222,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     chunkjson = json.loads(chunk_decoded[6:])
                     status_text = f"finish_reason: {chunkjson['choices'][0].get('finish_reason', 'null')}"
                     # 如果这里抛出异常，一般是文本过长，详情见get_full_error的输出
-                    gpt_replying_buffer = gpt_replying_buffer + json.loads(chunk_decoded[6:])['choices'][0]["delta"][
-                        "content"]
+                    gpt_replying_buffer = gpt_replying_buffer + chunkjson['choices'][0]["delta"]["content"]
                     history[-1] = gpt_replying_buffer
                     chatbot[-1] = (history[-2], history[-1])
                     yield from update_ui(chatbot=chatbot, history=history, msg=status_text)  # 刷新界面
@@ -267,6 +267,7 @@ def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
     elif "Not enough point" in error_msg:
         chatbot[-1] = (chatbot[-1][0], "[Local Message] Not enough point. API2D账户点数不足.")
     else:
+        from comm_tools.toolbox import regular_txt_to_markdown
         tb_str = '```\n' + trimmed_format_exc() + '```'
         chatbot[-1] = (
         chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str} \n\n{regular_txt_to_markdown(chunk_decoded)}")
@@ -285,12 +286,12 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
 
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {api_key}",
-        'api-key': api_key
+        "Authorization": f"Bearer {api_key}"
     }
     if API_ORG.startswith('org-'): headers.update({"OpenAI-Organization": API_ORG})
-    if llm_kwargs['llm_model'].startswith('azure-') and llm_kwargs['llm_model'].startswith('proxy-'):
+    if llm_kwargs['llm_model'].startswith('azure-') or llm_kwargs['llm_model'].startswith('proxy-'):
         headers.update({"api-key": api_key})
+
     conversation_cnt = len(history) // 2
 
     messages = [{"role": "system", "content": system_prompt}]
@@ -316,7 +317,7 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     messages.append(what_i_ask_now)
 
     payload = {
-        "model": llm_kwargs['llm_model'].strip('api2d-'),
+        "model": str(llm_kwargs['llm_model']).replace('api2d-', '').replace('proxy-', ''),
         "messages": messages,
         "temperature": llm_kwargs['temperature'],  # 1.0,
         "top_p": llm_kwargs['top_p'],  # 1.0,
@@ -326,7 +327,7 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         "frequency_penalty": 0,
     }
     try:
-        print(f" {llm_kwargs['llm_model']} : {conversation_cnt} : {inputs[:100]} ..........")
+        print("\033[1;35m", f"{llm_kwargs['llm_model']}_{llm_kwargs['ipaddr']} :", "\033[0m", f"{conversation_cnt} : {inputs[:100]} ..........")
     except:
         print('输入中可能存在乱码。')
     return headers, payload

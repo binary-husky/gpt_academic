@@ -1,5 +1,7 @@
 from comm_tools.toolbox import update_ui
-from comm_tools.toolbox import CatchException, report_execption, write_results_to_file
+from comm_tools.toolbox import CatchException, report_execption
+from comm_tools.toolbox import write_history_to_file, promote_file_to_downloadzone
+
 fast_debug = True
 
 
@@ -110,7 +112,8 @@ def ipynb解释(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbo
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
     #  <-------- 写入文件，退出 ---------->
-    res = write_results_to_file(history)
+    res = write_history_to_file(history)
+    promote_file_to_downloadzone(res, chatbot=chatbot)
     chatbot.append(("完成了吗？", res))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 

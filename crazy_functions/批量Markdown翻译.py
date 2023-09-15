@@ -1,7 +1,7 @@
-import glob, time, os, re
+import glob, time, os, re, logging
 from comm_tools.toolbox import update_ui, trimmed_format_exc, gen_time_str, disable_auto_promotion
-from comm_tools.toolbox import CatchException, report_execption, write_history_to_file
-from comm_tools.toolbox import promote_file_to_downloadzone, get_log_folder
+from comm_tools.toolbox import CatchException, report_execption, get_log_folder
+from comm_tools.toolbox import write_history_to_file, promote_file_to_downloadzone
 fast_debug = False
 
 class PaperFileGroup():
@@ -34,7 +34,7 @@ class PaperFileGroup():
                     self.sp_file_contents.append(segment)
                     self.sp_file_index.append(index)
                     self.sp_file_tag.append(self.file_paths[index] + f".part-{j}.md")
-        print('Segmentation: done')
+        logging.info('Segmentation: done')
 
     def merge_result(self):
         self.file_result = ["" for _ in range(len(self.file_paths))]
@@ -101,7 +101,7 @@ def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
         pfg.merge_result()
         pfg.write_result(language)
     except:
-        print(trimmed_format_exc())
+        logging.error(trimmed_format_exc())
 
     #  <-------- 整理结果，退出 ----------> 
     create_report_file_name = gen_time_str() + f"-chatgpt.md"
@@ -121,7 +121,7 @@ def get_files_from_everything(txt, preference=''):
         proxies, = get_conf('proxies')
         # 网络的远程文件
         if preference == 'Github':
-            print('正在从github下载资源 ...')
+            logging.info('正在从github下载资源 ...')
             if not txt.endswith('.md'):
                 # Make a request to the GitHub API to retrieve the repository information
                 url = txt.replace("https://github.com/", "https://api.github.com/repos/") + '/readme'
