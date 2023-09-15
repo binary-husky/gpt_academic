@@ -768,7 +768,9 @@ def parsing_json_in_text(txt_data: list, old_case, filter_list: list = 'None----
         # 过滤掉产出带的表头数据
         filter_supplementary_data = [data for data in supplementary_data
                                      if filter_list[:5] != data[:5] or filter_list[-5:] != data[-5:]]
-        for new_case in filter_supplementary_data:
+        max_length = max(len(lst) for lst in filter_supplementary_data)
+        supplement_temp_data = [lst + [''] * (max_length - len(lst)) for lst in filter_supplementary_data]
+        for new_case in supplement_temp_data:
             if new_case not in old_case[index] and new_case+[tags] not in old_case[index]:
                 old_case[index].append(new_case+[tags])
         response.extend(old_case[index])
