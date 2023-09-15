@@ -13,7 +13,6 @@ def get_crazy_functions():
     from crazy_functions.解析项目源代码 import 解析一个Java项目
     from crazy_functions.解析项目源代码 import 解析一个前端项目
     from crazy_functions.高级功能函数模板 import 高阶功能模板函数
-    from crazy_functions.代码重写为全英文_多线程 import 全项目切换英文
     from crazy_functions.Latex全文润色 import Latex英文润色
     from crazy_functions.询问多个大语言模型 import 同时问询
     from crazy_functions.解析项目源代码 import 解析一个Lua项目
@@ -400,12 +399,12 @@ def get_crazy_functions():
     try:
         from crazy_functions.Langchain知识库 import 知识库问答
         function_plugins.update({
-            "构建知识库（请先上传文件素材）": {
+            "构建知识库（先上传文件素材,再运行此插件）": {
                 "Group": "对话",
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,
-                "ArgsReminder": "待注入的知识库名称id, 默认为default",
+                "ArgsReminder": "此处待注入的知识库名称id, 默认为default。文件进入知识库后可长期保存。可以通过再次调用本插件的方式，向知识库追加更多文档。",
                 "Function": HotReload(知识库问答)
             }
         })
@@ -415,12 +414,12 @@ def get_crazy_functions():
     try:
         from crazy_functions.Langchain知识库 import 读取知识库作答
         function_plugins.update({
-            "知识库问答": {
+            "知识库问答（构建知识库后,再运行此插件）": {
                 "Group": "对话",
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,
-                "ArgsReminder": "待提取的知识库名称id, 默认为default, 您需要首先调用构建知识库",
+                "ArgsReminder": "待提取的知识库名称id, 默认为default, 您需要构建知识库后再运行此插件。",
                 "Function": HotReload(读取知识库作答)
             }
         })

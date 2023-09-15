@@ -1,5 +1,6 @@
-from toolbox import CatchException, report_execption, select_api_key, update_ui, write_results_to_file, get_conf
+from toolbox import CatchException, report_execption, select_api_key, update_ui, get_conf
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from toolbox import write_history_to_file, promote_file_to_downloadzone, get_log_folder
 
 def split_audio_file(filename, split_duration=1000):
     """
@@ -15,7 +16,7 @@ def split_audio_file(filename, split_duration=1000):
     """
     from moviepy.editor import AudioFileClip
     import os
-    os.makedirs('gpt_log/mp3/cut/', exist_ok=True)  # 创建存储切割音频的文件夹
+    os.makedirs(f"{get_log_folder(plugin_name='audio')}/mp3/cut/", exist_ok=True)  # 创建存储切割音频的文件夹
 
     # 读取音频文件
     audio = AudioFileClip(filename)
@@ -31,8 +32,8 @@ def split_audio_file(filename, split_duration=1000):
         start_time = split_points[i]
         end_time = split_points[i + 1]
         split_audio = audio.subclip(start_time, end_time)
-        split_audio.write_audiofile(f"gpt_log/mp3/cut/{filename[0]}_{i}.mp3")
-        filelist.append(f"gpt_log/mp3/cut/{filename[0]}_{i}.mp3")
+        split_audio.write_audiofile(f"{get_log_folder(plugin_name='audio')}/mp3/cut/{filename[0]}_{i}.mp3")
+        filelist.append(f"{get_log_folder(plugin_name='audio')}/mp3/cut/{filename[0]}_{i}.mp3")
 
     audio.close()
     return filelist
@@ -52,7 +53,7 @@ def AnalyAudio(parse_prompt, file_manifest, llm_kwargs, chatbot, history):
         'Authorization': f"Bearer {api_key}"
     }
 
-    os.makedirs('gpt_log/mp3/', exist_ok=True)
+    os.makedirs(f"{get_log_folder(plugin_name='audio')}/mp3/", exist_ok=True)
     for index, fp in enumerate(file_manifest):
         audio_history = []
         # 提取文件扩展名
@@ -60,8 +61,8 @@ def AnalyAudio(parse_prompt, file_manifest, llm_kwargs, chatbot, history):
         # 提取视频中的音频
         if ext not in [".mp3", ".wav", ".m4a", ".mpga"]:
             audio_clip = AudioFileClip(fp)
-            audio_clip.write_audiofile(f'gpt_log/mp3/output{index}.mp3')
-            fp = f'gpt_log/mp3/output{index}.mp3'
+            audio_clip.write_audiofile(f"{get_log_folder(plugin_name='audio')}/mp3/output{index}.mp3")
+            fp = f"{get_log_folder(plugin_name='audio')}/mp3/output{index}.mp3"
         # 调用whisper模型音频转文字
         voice = split_audio_file(fp)
         for j, i in enumerate(voice):
@@ -113,18 +114,19 @@ def AnalyAudio(parse_prompt, file_manifest, llm_kwargs, chatbot, history):
                 history=audio_history,
                 sys_prompt="总结文章。"
             )
-
             history.extend([i_say, gpt_say])
             audio_history.extend([i_say, gpt_say])
 
-        res = write_results_to_file(history)
+        res = write_history_to_file(history)
+        promote_file_to_downloadzone(res, chatbot=chatbot)
         chatbot.append((f"第{index + 1}段音频完成了吗？", res))
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
     # 删除中间文件夹
     import shutil
-    shutil.rmtree('gpt_log/mp3')
-    res = write_results_to_file(history)
+    shutil.rmtree(f"{get_log_folder(plugin_name='audio')}/mp3")
+    res = write_history_to_file(history)
+    promote_file_to_downloadzone(res, chatbot=chatbot)
     chatbot.append(("所有音频都总结完成了吗？", res))
     yield from update_ui(chatbot=chatbot, history=history)
 

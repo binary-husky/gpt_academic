@@ -1,6 +1,6 @@
-from toolbox import CatchException, report_execption, write_results_to_file
+from toolbox import CatchException, report_execption, get_log_folder
 from toolbox import update_ui, promote_file_to_downloadzone, update_ui_lastest_msg, disable_auto_promotion
-from toolbox import write_history_to_file, get_log_folder
+from toolbox import write_history_to_file, promote_file_to_downloadzone
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 from .crazy_utils import read_and_clean_pdf_text
@@ -63,6 +63,7 @@ def 解析PDF_基于GROBID(file_manifest, project_folder, llm_kwargs, plugin_kwa
     generated_conclusion_files = []
     generated_html_files = []
     DST_LANG = "中文"
+    from crazy_functions.crazy_utils import construct_html
     for index, fp in enumerate(file_manifest):
         chatbot.append(["当前进度：", f"正在连接GROBID服务，请稍候: {grobid_url}\n如果等待时间过长，请修改config中的GROBID_URL，可修改成本地GROBID服务。"]); yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         article_dict = parse_pdf(fp, grobid_url)
@@ -166,6 +167,7 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
     TOKEN_LIMIT_PER_FRAGMENT = 1280
     generated_conclusion_files = []
     generated_html_files = []
+    from crazy_functions.crazy_utils import construct_html
     for index, fp in enumerate(file_manifest):
         # 读取PDF文件
         file_content, page_one = read_and_clean_pdf_text(fp)
@@ -216,10 +218,11 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
         final = ["一、论文概况\n\n---\n\n", paper_meta_info.replace('# ', '### ') + '\n\n---\n\n', "二、论文翻译", ""]
         final.extend(gpt_response_collection_md)
         create_report_file_name = f"{os.path.basename(fp)}.trans.md"
-        res = write_results_to_file(final, file_name=create_report_file_name)
+        res = write_history_to_file(final, create_report_file_name)
+        promote_file_to_downloadzone(res, chatbot=chatbot)
 
         # 更新UI
-        generated_conclusion_files.append(f'./gpt_log/{create_report_file_name}')
+        generated_conclusion_files.append(f'{get_log_folder()}/{create_report_file_name}')
         chatbot.append((f"{fp}完成了吗？", res))
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
@@ -261,49 +264,3 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
 
-class construct_html():
-    def __init__(self) -> None:
-        self.css = """
-.row {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.column {
-  flex: 1;
-  padding: 10px;
-}
-
-.table-header {
-  font-weight: bold;
-  border-bottom: 1px solid black;
-}
-
-.table-row {
-  border-bottom: 1px solid lightgray;
-}
-
-.table-cell {
-  padding: 5px;
-}
-        """
-        self.html_string = f'<!DOCTYPE html><head><meta charset="utf-8"><title>翻译结果</title><style>{self.css}</style></head>'
-
-
-    def add_row(self, a, b):
-        tmp = """
-<div class="row table-row">
-    <div class="column table-cell">REPLACE_A</div>
-    <div class="column table-cell">REPLACE_B</div>
-</div>
-        """
-        from toolbox import markdown_convertion
-        tmp = tmp.replace('REPLACE_A', markdown_convertion(a))
-        tmp = tmp.replace('REPLACE_B', markdown_convertion(b))
-        self.html_string += tmp
-
-
-    def save_file(self, file_name):
-        with open(os.path.join(get_log_folder(), file_name), 'w', encoding='utf8') as f:
-            f.write(self.html_string.encode('utf-8', 'ignore').decode())
-        return os.path.join(get_log_folder(), file_name)

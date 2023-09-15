@@ -1,4 +1,4 @@
-from toolbox import CatchException, update_ui, ProxyNetworkActivate
+from toolbox import CatchException, update_ui, ProxyNetworkActivate, update_ui_lastest_msg
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, get_files_from_everything
 
 
@@ -15,7 +15,12 @@ def 知识库问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     web_port        当前软件运行的端口号
     """
     history = []    # 清空历史，以免输入溢出
-    chatbot.append(("这是什么功能？", "[Local Message] 从一批文件(txt, md, tex)中读取数据构建知识库, 然后进行问答。"))
+
+    # < --------------------读取参数--------------- >
+    if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
+    kai_id = plugin_kwargs.get("advanced_arg", 'default')
+
+    chatbot.append((f"向`{kai_id}`知识库中添加文件。", "[Local Message] 从一批文件(txt, md, tex)中读取数据构建知识库, 然后进行问答。"))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # resolve deps
@@ -24,17 +29,12 @@ def 知识库问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
         from langchain.embeddings.huggingface import HuggingFaceEmbeddings
         from .crazy_utils import knowledge_archive_interface
     except Exception as e:
-        chatbot.append(
-            ["依赖不足", 
-             "导入依赖失败。正在尝试自动安装，请查看终端的输出或耐心等待..."]
-        )
+        chatbot.append(["依赖不足", "导入依赖失败。正在尝试自动安装，请查看终端的输出或耐心等待..."])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         from .crazy_utils import try_install_deps
-        try_install_deps(['zh_langchain==0.2.1', 'pypinyin'])
-    
-    # < --------------------读取参数--------------- >
-    if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
-    kai_id = plugin_kwargs.get("advanced_arg", 'default')
+        try_install_deps(['zh_langchain==0.2.1', 'pypinyin'], reload_m=['pypinyin', 'zh_langchain'])
+        yield from update_ui_lastest_msg("安装完成，您可以再次重试。", chatbot, history)
+        return
 
     # < --------------------读取文件--------------- >
     file_manifest = []
@@ -84,19 +84,18 @@ def 读取知识库作答(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
         chatbot.append(["依赖不足", "导入依赖失败。正在尝试自动安装，请查看终端的输出或耐心等待..."])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         from .crazy_utils import try_install_deps
-        try_install_deps(['zh_langchain==0.2.1'])
+        try_install_deps(['zh_langchain==0.2.1', 'pypinyin'], reload_m=['pypinyin', 'zh_langchain'])
+        yield from update_ui_lastest_msg("安装完成，您可以再次重试。", chatbot, history)
+        return
 
     # < -------------------  --------------- >
     kai = knowledge_archive_interface()
 
-    if 'langchain_plugin_embedding' in chatbot._cookies:
-        resp, prompt = kai.answer_with_archive_by_id(txt, chatbot._cookies['langchain_plugin_embedding'])
-    else:
-        if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
-        kai_id = plugin_kwargs.get("advanced_arg", 'default')
-        resp, prompt = kai.answer_with_archive_by_id(txt, kai_id)
+    if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
+    kai_id = plugin_kwargs.get("advanced_arg", 'default')
+    resp, prompt = kai.answer_with_archive_by_id(txt, kai_id)
 
-    chatbot.append((txt, '[Local Message] ' + prompt))
+    chatbot.append((txt, f'[知识库 {kai_id}] ' + prompt))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
     gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
         inputs=prompt, inputs_show_user=txt, 

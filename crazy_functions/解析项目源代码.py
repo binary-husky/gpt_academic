@@ -1,12 +1,13 @@
-from toolbox import update_ui
-from toolbox import CatchException, report_execption, write_results_to_file
+from toolbox import update_ui, promote_file_to_downloadzone, disable_auto_promotion
+from toolbox import CatchException, report_execption, write_history_to_file
 from .crazy_utils import input_clipping
 
 def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
     import os, copy
     from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
     from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-    msg = '正常'
+    disable_auto_promotion(chatbot=chatbot)
+
     summary_batch_isolation = True
     inputs_array = []
     inputs_show_user_array = []
@@ -22,7 +23,7 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
             file_content = f.read()
         prefix = "接下来请你逐文件分析下面的工程" if index==0 else ""
         i_say = prefix + f'请对下面的程序文件做一个概述文件名是{os.path.relpath(fp, project_folder)}，文件代码是 ```{file_content}```'
-        i_say_show_user = prefix + f'[{index}/{len(file_manifest)}] 请对下面的程序文件做一个概述: {os.path.abspath(fp)}'
+        i_say_show_user = prefix + f'[{index}/{len(file_manifest)}] 请对下面的程序文件做一个概述: {fp}'
         # 装载请求内容
         inputs_array.append(i_say)
         inputs_show_user_array.append(i_say_show_user)
@@ -43,7 +44,8 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
     # 全部文件解析完成，结果写入文件，准备对工程源代码进行汇总分析
     report_part_1 = copy.deepcopy(gpt_response_collection)
     history_to_return = report_part_1
-    res = write_results_to_file(report_part_1)
+    res = write_history_to_file(report_part_1)
+    promote_file_to_downloadzone(res, chatbot=chatbot)
     chatbot.append(("完成？", "逐个文件分析已完成。" + res + "\n\n正在开始汇总。"))
     yield from update_ui(chatbot=chatbot, history=history_to_return) # 刷新界面
 
@@ -97,7 +99,8 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
 
     ############################## <END> ##################################
     history_to_return.extend(report_part_2)
-    res = write_results_to_file(history_to_return)
+    res = write_history_to_file(history_to_return)
+    promote_file_to_downloadzone(res, chatbot=chatbot)
     chatbot.append(("完成了吗？", res))
     yield from update_ui(chatbot=chatbot, history=history_to_return) # 刷新界面
 
@@ -106,9 +109,8 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
 def 解析项目本身(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     history = []    # 清空历史，以免输入溢出
     import glob
-    file_manifest = [f for f in glob.glob('./*.py') if ('test_project' not in f) and ('gpt_log' not in f)] + \
-                    [f for f in glob.glob('./crazy_functions/*.py') if ('test_project' not in f) and ('gpt_log' not in f)]+ \
-                    [f for f in glob.glob('./request_llm/*.py') if ('test_project' not in f) and ('gpt_log' not in f)]
+    file_manifest = [f for f in glob.glob('./*.py')] + \
+                    [f for f in glob.glob('./*/*.py')]
     project_folder = './'
     if len(file_manifest) == 0:
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何python文件: {txt}")

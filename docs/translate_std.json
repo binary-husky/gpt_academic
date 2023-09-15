@@ -88,5 +88,7 @@
     "辅助功能": "Accessibility",
     "虚空终端": "VoidTerminal",
     "解析PDF_基于GROBID": "ParsePDF_BasedOnGROBID",
-    "虚空终端主路由": "VoidTerminalMainRoute"
+    "虚空终端主路由": "VoidTerminalMainRoute",
+    "批量翻译PDF文档_NOUGAT": "BatchTranslatePDFDocuments_NOUGAT",
+    "解析PDF_基于NOUGAT": "ParsePDF_NOUGAT"
 }

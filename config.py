@@ -47,8 +47,9 @@ API_URL_REDIRECT = {}
 DEFAULT_WORKER_NUM = 3
 
 
-# 色彩主题，可选 ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast"]
-THEME = "Chuanhu-Small-and-Beautiful"
+# 色彩主题, 可选 ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast"]
+# 更多主题, 请查阅Gradio主题商店: https://huggingface.co/spaces/gradio/theme-gallery 可选 ["Gstaff/Xkcd", "NoCrypt/Miku", ...]
+THEME = "Default"
 
 
 # 对话窗的高度 （仅在LAYOUT="TOP-DOWN"时生效）
@@ -185,7 +186,10 @@ GROBID_URLS = [
 
 # 是否允许通过自然语言描述修改本页的配置，该功能具有一定的危险性，默认关闭
 ALLOW_RESET_CONFIG = False
-
+# 临时的上传文件夹位置，请勿修改
+PATH_PRIVATE_UPLOAD = "private_upload"
+# 日志文件夹的位置，请勿修改
+PATH_LOGGING = "gpt_log"
 
 """
 在线大模型配置关联关系示意图

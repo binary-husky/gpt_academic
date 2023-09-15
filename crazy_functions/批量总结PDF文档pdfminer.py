@@ -1,6 +1,7 @@
 from toolbox import update_ui
-from toolbox import CatchException, report_execption, write_results_to_file
+from toolbox import CatchException, report_execption
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from toolbox import write_history_to_file, promote_file_to_downloadzone
 
 fast_debug = False
 
@@ -115,7 +116,8 @@ def 解析Paper(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbo
         chatbot[-1] = (i_say, gpt_say)
         history.append(i_say); history.append(gpt_say)
         yield from update_ui(chatbot=chatbot, history=history, msg=msg) # 刷新界面
-        res = write_results_to_file(history)
+        res = write_history_to_file(history)
+        promote_file_to_downloadzone(res, chatbot=chatbot)
         chatbot.append(("完成了吗？", res))
         yield from update_ui(chatbot=chatbot, history=history, msg=msg) # 刷新界面
 
