@@ -291,7 +291,11 @@ def find_tex_file_ignore_case(fp):
     import glob
     for f in glob.glob(dir_name+'/*.tex'):
         base_name_s = os.path.basename(fp)
-        if base_name_s.lower() == base_name.lower(): return f
+        base_name_f = os.path.basename(f)
+        if base_name_s.lower() == base_name_f.lower(): return f
+        # 试着加上.tex后缀试试
+        if not base_name_s.endswith('.tex'): base_name_s+='.tex'
+        if base_name_s.lower() == base_name_f.lower(): return f
     return None
 
 def merge_tex_files_(project_foler, main_file, mode):
@@ -302,9 +306,9 @@ def merge_tex_files_(project_foler, main_file, mode):
     for s in reversed([q for q in re.finditer(r"\\input\{(.*?)\}", main_file, re.M)]):
         f = s.group(1)
         fp = os.path.join(project_foler, f)
-        fp = find_tex_file_ignore_case(fp)
-        if fp:
-            with open(fp, 'r', encoding='utf-8', errors='replace') as fx: c = fx.read()
+        fp_ = find_tex_file_ignore_case(fp)
+        if fp_:
+            with open(fp_, 'r', encoding='utf-8', errors='replace') as fx: c = fx.read()
         else:
             raise RuntimeError(f'找不到{fp}，Tex源文件缺失！')
         c = merge_tex_files_(project_foler, c, mode)
