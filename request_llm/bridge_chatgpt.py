@@ -72,6 +72,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
 
     stream_response =  response.iter_lines()
     result = ''
+    json_data = None
     while True:
         try: chunk = next(stream_response).decode()
         except StopIteration: 
@@ -90,20 +91,21 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
         delta = json_data["delta"]
         if len(delta) == 0: break
         if "role" in delta: continue
-        if "content" in delta: 
+        if "content" in delta:
             result += delta["content"]
             if not console_slience: print(delta["content"], end='')
             if observe_window is not None: 
                 # 观测窗，把已经获取的数据显示出去
-                if len(observe_window) >= 1: observe_window[0] += delta["content"]
+                if len(observe_window) >= 1:
+                    observe_window[0] += delta["content"]
                 # 看门狗，如果超过期限没有喂狗，则终止
-                if len(observe_window) >= 2:  
+                if len(observe_window) >= 2:
                     if (time.time()-observe_window[1]) > watch_dog_patience:
                         raise RuntimeError("用户取消了程序。")
         else: raise RuntimeError("意外Json结构："+delta)
-    if json_data['finish_reason'] == 'content_filter':
+    if json_data and json_data['finish_reason'] == 'content_filter':
         raise RuntimeError("由于提问含不合规内容被Azure过滤。")
-    if json_data['finish_reason'] == 'length':
+    if json_data and json_data['finish_reason'] == 'length':
         raise ConnectionAbortedError("正常结束，但显示Token不足，导致输出不完整，请削减单次输入的文本量。")
     return result
 
