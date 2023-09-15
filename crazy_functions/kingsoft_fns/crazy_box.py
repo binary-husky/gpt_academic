@@ -553,9 +553,20 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
     Returns: [拆分1， 拆分2]
     """
     model = llm_kwargs['llm_model']
-    all_tokens = bridge_all.model_info[llm_kwargs['llm_model']]['max_token']
+    if model.find('&') != -1:  # 判断是否多模型，如果多模型，那么使用tokens最少的进行拆分
+        models = str(model).split('&')
+        _tokens = []
+        _num_func = {}
+        for _model in models:
+            num_s = bridge_all.model_info[_model]['max_token']
+            _tokens.append(num_s)
+            _num_func[num_s] = _model
+        all_tokens = min(_tokens)
+        get_token_num = bridge_all.model_info[_num_func[all_tokens]]['token_cnt']
+    else:
+        all_tokens = bridge_all.model_info[model]['max_token']
+        get_token_num = bridge_all.model_info[model]['token_cnt']
     max_token = all_tokens/2 - all_tokens/4  # 考虑到对话+回答会超过tokens,所以/2
-    get_token_num = bridge_all.model_info[model]['token_cnt']
     segments = []
     if type(inputs) is list:
         if get_token_num(str(inputs)) > max_token:
@@ -788,19 +799,24 @@ def write_test_cases(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot
         test_case = []
         for value in file_classification[file_name]:
             test_case_content = value.splitlines()
-            index = find_index_inlist(test_case_content, ['---'])
-            gpt_response_split = test_case_content[index+1:]  # 过滤掉表头
-            for i in gpt_response_split:
+            for i in test_case_content:
+                pattern = r'(-{3,}|\:{1}\-{1}\:{1}|\:{1}\-{2}\:{1})'
+                i = re.sub(pattern, '---', i)
                 if i.find('|') != -1:
                     test_case.append([func_box.clean_br_string(i) for i in i.split('|')[1:]])
                 elif i.find('｜') != -1:
                     test_case.append([func_box.clean_br_string(i) for i in i.split('｜')[1:]])
                 else:
-                    func_box.通知机器人(f'脏数据过滤，这个不符合写入测试用例的条件 \n\n预期写入数据`{i}`\n\n```\n{gpt_response_split}\n```')
-        sort_test_case = name_sorting(list(set(test_case)), 0)  # 去重加排序
+                    func_box.通知机器人(f'脏数据过滤，这个不符合写入测试用例的条件 \n\n预期写入数据`{i}`\n\n```\n{test_case_content}\n```')
+        # 去重加排序
+        reduction_test_case = [x for i, x in enumerate(test_case) if x not in test_case[:i]]
+        sort_test_case = name_sorting(reduction_test_case, 0)
+        index = find_index_inlist(sort_test_case, ['---', ':-:'])
+        gpt_response_split = sort_test_case[index + 1:]  # 过滤掉表头
+        # 正式准备写入文件
         xlsx_heandle = ExcelHandle(ipaddr=llm_kwargs['ipaddr'], temp_file=template_file, sheet=sheet)
         xlsx_heandle.split_merged_cells()  # 先把合并的单元格拆分，避免写入失败
-        file_path = xlsx_heandle.lpvoid_lpbuffe(sort_test_case, filename=long_name_processing(file_name))
+        file_path = xlsx_heandle.lpvoid_lpbuffe(gpt_response_split, filename=long_name_processing(file_name))
         chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, to_tabs=True)}\n\n'
         chatbot[-1] = ([you_say, chat_file_list])
         yield from toolbox.update_ui(chatbot, history)

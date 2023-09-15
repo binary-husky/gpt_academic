@@ -172,15 +172,15 @@ def reload_javascript():
             <script src="file=docs/waifu_plugin/jquery-ui.min.js"></script>
             <script src="file=docs/waifu_plugin/autoload.js"></script>
         """
-    css = css_html()
-    js += javascript_html()
+    # css = css_html()
+    # js += javascript_html()
     js += '<script async src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>'
     js += '<script async type="module" src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>'
     js += '<script async type="module" src="http://spin.js.org/spin.umd.js"></script><link type="text/css" href="https://spin.js.org/spin.css" rel="stylesheet" />'
     def template_response(*args, **kwargs):
         res = GradioTemplateResponseOriginal(*args, **kwargs)
         res.body = res.body.replace(b'</html>', f'{js}</html>'.encode("utf8"))
-        res.body = res.body.replace(b'</body>', f'{css}</body>'.encode("utf8"))
+        # res.body = res.body.replace(b'</body>', f'{css}</body>'.encode("utf8"))
         res.init_headers()
         return res
     gr.routes.templates.TemplateResponse = template_response

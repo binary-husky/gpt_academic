@@ -108,10 +108,10 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
                         raise RuntimeError("用户取消了程序。")
         else:
             raise RuntimeError("意外Json结构：" + delta)
-    if json_data['finish_reason'] == 'content_filter':
-        raise RuntimeError("由于提问含不合规内容被Azure过滤。")
-    if json_data['finish_reason'] == 'length':
-        raise ConnectionAbortedError("正常结束，但显示Token不足，导致输出不完整，请削减单次输入的文本量。")
+        if json_data['finish_reason'] == 'content_filter':
+            raise RuntimeError(f"由于提问含不合规内容被Azure过滤。{result}")
+        if json_data['finish_reason'] == 'length':
+            raise ConnectionAbortedError(f"正常结束，但显示Token不足，导致输出不完整，请削减单次输入的文本量。{result}")
     return result
 
 
