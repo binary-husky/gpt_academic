@@ -715,7 +715,7 @@ class nougat_interface():
 
     def nougat_with_timeout(self, command, cwd, timeout=3600):
         import subprocess
-        logging.info('正在执行命令', command)
+        logging.info(f'正在执行命令 {command}')
         process = subprocess.Popen(command, shell=True, cwd=cwd)
         try:
             stdout, stderr = process.communicate(timeout=timeout)
