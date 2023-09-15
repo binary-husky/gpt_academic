@@ -1,5 +1,6 @@
 from toolbox import update_ui, promote_file_to_downloadzone, gen_time_str
-from toolbox import CatchException, report_execption, write_results_to_file
+from toolbox import CatchException, report_execption
+from toolbox import write_history_to_file, promote_file_to_downloadzone
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import read_and_clean_pdf_text
 from .crazy_utils import input_clipping
@@ -99,8 +100,8 @@ do not have too much repetitive information, numerical values using the original
         _, final_results = input_clipping("", final_results, max_token_limit=3200)
         yield from update_ui(chatbot=chatbot, history=final_results) # 注意这里的历史记录被替代了
 
-    res = write_results_to_file(file_write_buffer, file_name=gen_time_str())
-    promote_file_to_downloadzone(res.split('\t')[-1], chatbot=chatbot)
+    res = write_history_to_file(file_write_buffer)
+    promote_file_to_downloadzone(res, chatbot=chatbot)
     yield from update_ui(chatbot=chatbot, history=final_results) # 刷新界面
 
 

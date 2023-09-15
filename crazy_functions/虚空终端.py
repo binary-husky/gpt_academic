@@ -25,11 +25,12 @@ explain_msg = """
 
 1. 请用**自然语言**描述您需要做什么。例如：
     - 「请调用插件，为我翻译PDF论文，论文我刚刚放到上传区了」
-    - 「请调用插件翻译PDF论文，地址为https://aaa/bbb/ccc.pdf」
+    - 「请调用插件翻译PDF论文，地址为https://openreview.net/pdf?id=rJl0r3R9KX」
     - 「把Arxiv论文翻译成中文PDF，arxiv论文的ID是1812.10695，记得用插件！」
     - 「生成一张图片，图中鲜花怒放，绿草如茵，用插件实现」
     - 「用插件翻译README，Github网址是https://github.com/facebookresearch/co-tracker」
     - 「我不喜欢当前的界面颜色，修改配置，把主题THEME更换为THEME="High-Contrast"」
+    - 「请调用插件，解析python源代码项目，代码我刚刚打包拖到上传区了」
     - 「请问Transformer网络的结构是怎样的？」
 
 2. 您可以打开插件下拉菜单以了解本项目的各种能力。    
@@ -45,7 +46,7 @@ explain_msg = """
 
 from pydantic import BaseModel, Field
 from typing import List
-from toolbox import CatchException, update_ui, gen_time_str
+from toolbox import CatchException, update_ui, is_the_upload_folder
 from toolbox import update_ui_lastest_msg, disable_auto_promotion
 from request_llm.bridge_all import predict_no_ui_long_connection
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
@@ -111,7 +112,7 @@ def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
 
     # 用简单的关键词检测用户意图
     is_certain, _ = analyze_intention_with_simple_rules(txt)
-    if txt.startswith('private_upload/') and len(txt) == 34:
+    if is_the_upload_folder(txt):
         state.set_state(chatbot=chatbot, key='has_provided_explaination', value=False)
         appendix_msg = "\n\n**很好，您已经上传了文件**，现在请您描述您的需求。"
         

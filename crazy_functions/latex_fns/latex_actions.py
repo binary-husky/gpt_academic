@@ -1,4 +1,4 @@
-from toolbox import update_ui, update_ui_lastest_msg    # 刷新Gradio前端界面
+from toolbox import update_ui, update_ui_lastest_msg, get_log_folder
 from toolbox import zip_folder, objdump, objload, promote_file_to_downloadzone
 from .latex_toolbox import PRESERVE, TRANSFORM
 from .latex_toolbox import set_forbidden_text, set_forbidden_text_begin_end, set_forbidden_text_careful_brace
@@ -363,7 +363,7 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
             if mode!='translate_zh':
                 yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 使用latexdiff生成论文转化前后对比 ...', chatbot, history) # 刷新Gradio前端界面
                 print(    f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
-                ok = compile_latex_with_timeout(f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
+                ok = compile_latex_with_timeout(f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex', os.getcwd())
 
                 yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 正在编译对比PDF ...', chatbot, history)   # 刷新Gradio前端界面
                 ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex', work_folder)
@@ -439,9 +439,9 @@ def write_html(sp_file_contents, sp_file_result, chatbot, project_folder):
                 trans = k
                 ch.add_row(a=orig, b=trans)
         create_report_file_name = f"{gen_time_str()}.trans.html"
-        ch.save_file(create_report_file_name)
-        shutil.copyfile(pj('./gpt_log/', create_report_file_name), pj(project_folder, create_report_file_name))
-        promote_file_to_downloadzone(file=f'./gpt_log/{create_report_file_name}', chatbot=chatbot)
+        res = ch.save_file(create_report_file_name)
+        shutil.copyfile(res, pj(project_folder, create_report_file_name))
+        promote_file_to_downloadzone(file=res, chatbot=chatbot)
     except:
         from toolbox import trimmed_format_exc
         print('writing html result failed:', trimmed_format_exc())

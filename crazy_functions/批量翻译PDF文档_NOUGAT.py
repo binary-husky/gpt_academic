@@ -86,30 +86,7 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     # 开始正式执行任务
     yield from 解析PDF_基于NOUGAT(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt)
 
-    
-def nougat_with_timeout(command, cwd, timeout=3600):
-    import subprocess
-    process = subprocess.Popen(command, shell=True, cwd=cwd)
-    try:
-        stdout, stderr = process.communicate(timeout=timeout)
-    except subprocess.TimeoutExpired:
-        process.kill()
-        stdout, stderr = process.communicate()
-        print("Process timed out!")
-        return False
-    return True
 
-
-def NOUGAT_parse_pdf(fp):
-    import glob
-    from toolbox import get_log_folder, gen_time_str
-    dst = os.path.join(get_log_folder(plugin_name='nougat'), gen_time_str())
-    os.makedirs(dst)
-    nougat_with_timeout(f'nougat --out "{os.path.abspath(dst)}" "{os.path.abspath(fp)}"', os.getcwd())
-    res = glob.glob(os.path.join(dst,'*.mmd'))
-    if len(res) == 0:
-        raise RuntimeError("Nougat解析论文失败。")
-    return res[0]
 
 
 def 解析PDF_基于NOUGAT(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
@@ -119,9 +96,11 @@ def 解析PDF_基于NOUGAT(file_manifest, project_folder, llm_kwargs, plugin_kwa
     generated_conclusion_files = []
     generated_html_files = []
     DST_LANG = "中文"
+    from crazy_functions.crazy_utils import nougat_interface, construct_html
+    nougat_handle = nougat_interface()
     for index, fp in enumerate(file_manifest):
         chatbot.append(["当前进度：", f"正在解析论文，请稍候。（第一次运行时，需要花费较长时间下载NOUGAT参数）"]); yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-        fpp = NOUGAT_parse_pdf(fp)
+        fpp = yield from nougat_handle.NOUGAT_parse_pdf(fp, chatbot, history)
 
         with open(fpp, 'r', encoding='utf8') as f:
             article_content = f.readlines()
@@ -222,50 +201,3 @@ def 解析PDF_基于NOUGAT(file_manifest, project_folder, llm_kwargs, plugin_kwa
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
 
-
-class construct_html():
-    def __init__(self) -> None:
-        self.css = """
-.row {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.column {
-  flex: 1;
-  padding: 10px;
-}
-
-.table-header {
-  font-weight: bold;
-  border-bottom: 1px solid black;
-}
-
-.table-row {
-  border-bottom: 1px solid lightgray;
-}
-
-.table-cell {
-  padding: 5px;
-}
-        """
-        self.html_string = f'<!DOCTYPE html><head><meta charset="utf-8"><title>翻译结果</title><style>{self.css}</style></head>'
-
-
-    def add_row(self, a, b):
-        tmp = """
-<div class="row table-row">
-    <div class="column table-cell">REPLACE_A</div>
-    <div class="column table-cell">REPLACE_B</div>
-</div>
-        """
-        from toolbox import markdown_convertion
-        tmp = tmp.replace('REPLACE_A', markdown_convertion(a))
-        tmp = tmp.replace('REPLACE_B', markdown_convertion(b))
-        self.html_string += tmp
-
-
-    def save_file(self, file_name):
-        with open(os.path.join(get_log_folder(), file_name), 'w', encoding='utf8') as f:
-            f.write(self.html_string.encode('utf-8', 'ignore').decode())
-        return os.path.join(get_log_folder(), file_name)

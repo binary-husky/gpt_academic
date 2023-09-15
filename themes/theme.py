@@ -8,6 +8,9 @@ if THEME == 'Chuanhu-Small-and-Beautiful':
 elif THEME == 'High-Contrast':
     from .contrast import adjust_theme, advanced_css
     theme_declaration = ""
+elif '/' in THEME:
+    from .gradios import adjust_theme, advanced_css
+    theme_declaration = ""
 else:
     from .default import adjust_theme, advanced_css
     theme_declaration = ""

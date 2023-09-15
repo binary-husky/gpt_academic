@@ -1,5 +1,6 @@
 from toolbox import update_ui
-from toolbox import CatchException, report_execption, write_results_to_file
+from toolbox import CatchException, report_execption
+from toolbox import write_history_to_file, promote_file_to_downloadzone
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 fast_debug = False
 
@@ -27,7 +28,8 @@ def 生成函数注释(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
             if not fast_debug: time.sleep(2)
 
     if not fast_debug: 
-        res = write_results_to_file(history)
+        res = write_history_to_file(history)
+        promote_file_to_downloadzone(res, chatbot=chatbot)
         chatbot.append(("完成了吗？", res))
         yield from update_ui(chatbot=chatbot, history=history, msg=msg) # 刷新界面
 
