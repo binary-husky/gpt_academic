@@ -130,6 +130,12 @@ def html_tag_color(tag, color=None, font='black'):
     return tag
 
 
+def html_folded_code(txt):
+    # 使用markdown的代码块折叠多余的信息，最多显示三行，详情可以全局搜索language-folded
+    mark_txt = f'```folded\n{txt}\n```'
+    return mark_txt
+
+
 def html_a_blank(__href, name=''):
     if not name:
         name = __href
