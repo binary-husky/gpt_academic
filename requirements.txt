@@ -40,3 +40,4 @@ rich
 pypdf2==2.12.1
 websocket-client
 scipdf_parser>=0.3
+commentjson

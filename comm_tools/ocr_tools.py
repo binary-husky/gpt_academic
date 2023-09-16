@@ -16,7 +16,7 @@ from comm_tools import database_processor
 class Paddle_ocr_select():
 
     def __init__(self, ipaddr='', trust_value=0.9):
-        self.font_path = os.path.join(func_box.base_path, 'docs/fonts/simfang.ttf')
+        self.font_path = os.path.join(func_box.base_path, 'docs/OCR/fonts/simfang.ttf')
         self.ipaddr = ipaddr
         self.trust_value = trust_value
 

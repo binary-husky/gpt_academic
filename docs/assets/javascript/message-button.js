@@ -144,7 +144,6 @@ function addLatestMessageButtons(botElement) {
     var gradioDelLastBtn = gradioApp().querySelector('#gr-dellast-btn');
     deleteButton.addEventListener('click', () => {
         gradioDelLastBtn.click();
-        chatbotContentChanged(2);
     });
 
     messageBtnRowLeading.appendChild(regenerateButton);

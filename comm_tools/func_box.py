@@ -603,6 +603,33 @@ def replace_expected_text(prompt: str, content: str, expect='{{{v}}}'):
     return content
 
 
+def get_geoip():
+    from comm_tools.webui_local import I18nAuto
+    i18n = I18nAuto()
+    try:
+        with toolbox.ProxyNetworkActivate():
+            response = requests.get("https://ipapi.co/json/", timeout=5)
+        data = response.json()
+    except:
+        data = {"error": True, "reason": "连接ipapi失败"}
+    if "error" in data.keys():
+        logging.warning(f"无法获取IP地址信息。\n{data}")
+        if data["reason"] == "RateLimited":
+            return (
+                i18n("您的IP区域：未知。")
+            )
+        else:
+            return i18n("获取IP地理位置失败。原因：") + f"{data['reason']}" + i18n("。你仍然可以使用聊天功能。")
+    else:
+        country = data["country_name"]
+        if country == "China":
+            text = "**您的IP区域：中国。请立即检查代理设置，在不受支持的地区使用API可能导致账号被封禁。**"
+        else:
+            text = i18n("您的IP区域：") + f"{country}。"
+        logging.info(text)
+        return text
+
+
 class YamlHandle:
 
     def __init__(self, file=os.path.join(prompt_path, 'ai_common.yaml')):
@@ -647,5 +674,4 @@ class JsonHandle:
 
 
 if __name__ == '__main__':
-    # print(split_csv_by_quarter('/Users/kilig/Desktop/testbug/国际客户端项目-缺陷池-Win端-全部缺陷.csv'))
     print(html_view_blank('/Users/kilig/Job/Python-project/kso_gpt/config.py', to_tabs=True))

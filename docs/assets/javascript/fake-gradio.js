@@ -45,10 +45,8 @@ function transUpload() {
     chatbotUploader = gradioApp().querySelector("#upload-files-btn");
     chatbotUploader.removeEventListener('click', handleClick);
     grUploader = gradioApp().querySelector("#upload-index-file > .center.flex");
-
     // let uploaderEvents = ["click", "drag", "dragend", "dragenter", "dragleave", "dragover", "dragstart", "drop"];
     // transEventListeners(chatbotUploader, grUploader, uploaderEvents);
-
     chatbotUploader.addEventListener('click', handleClick);
 }
 

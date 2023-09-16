@@ -119,43 +119,10 @@ span.svelte-1gfkn6j:not(.has-info) {
     margin-bottom: unset;
 }
 
-/*更新注意这里*/
-.sm_select .svelte-1gfkn6j {
-    float: left;
-    width: auto;
-    line-height: 151% !important;
-}
-.sm_select .wrap [class*="svelte-"] {
-    border-radius: var(--block-title-radius);;
-    width: auto;
-    background-color: #f6f6f6 !important;
-}
-.dark .sm_select .wrap [class*="svelte-"] {
-    background-color: #515151 !important;
-}
-.sm_checkbox {
-    position: relative !important;
-    z-index: 5 !important;
-    bottom: 5px;
-    padding: 0 !important;
-}
-
-.sm_select .token[class*="svelte-"] {
-    padding: 1.5% !important;
-    max-height: 20px !important;
-
-}
-.sm_select .wrap-inner[class*="svelte-"] {
-    padding: 0 !important;
-    flex-wrap: unset !important;
-    overflow: hidden !important;
-}
 #colum_1 {
     z-index: 2;
 }
-.sm_select .block.svelte-mppz8v {
-    width: 10% !important;
-}
+
 
 /* usage_display */
 .insert_block {

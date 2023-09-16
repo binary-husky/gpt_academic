@@ -55,11 +55,9 @@ def write_private(ipaddr, models, chatbot):
 
 
 def end_predict(chatbot, history, llm_kwargs):
-    # 暂时无用
     count_time = round(time.time() - llm_kwargs['start_time'], 3)
     count_tokens = func_box.num_tokens_from_string(listing=history)
-    status = f"<p>本次对话耗时: {func_box.html_tag_color(tag=f'{count_time}s')}" \
-             f'\t 本次对话使用tokens: {func_box.html_tag_color(count_tokens)}</p>'
+    status = f"本次对话耗时: `{count_time}s` \t 本次对话使用tokens: `{count_tokens}`"
     yield from update_ui(chatbot=chatbot, history=history, msg=status, end_code=1)  # 刷新界面
 
 
@@ -109,8 +107,6 @@ def ArgsGeneralWrapper(f):
         chatbot_with_cookie.write_list(chatbot)
         txt_passon = txt
         if encrypt in models: txt_passon = func_box.encryption_str(txt)
-        if cookies.get(''):
-            cookies['']
         # 插件会传多参数，如果是插件，那么更新知识库 和 默认高级参数
         if len(args) > 1:
             plugin_kwargs['advanced_arg'] = ''
@@ -120,11 +116,7 @@ def ArgsGeneralWrapper(f):
             txt_passon = yield from Langchain_cn.knowledge_base_query(txt_passon, chatbot_with_cookie, history,
                                                                       llm_kwargs, plugin_kwargs)
         if cookies.get('lock_plugin', None) is None:
-            # 正常状态
-            if len(args) == 0:  # 插件通道
-                yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, )
-            else:               # 对话通道，或者基础功能通道
-                yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
+            yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
         else:
             # 处理少数情况下的特殊插件的锁定状态
             module, fn_name = cookies['lock_plugin'].split('->')
@@ -163,9 +155,9 @@ def update_ui(chatbot, history, msg='正常', end_code=0, *args):  # 刷新界�
         chatbot_gr = chatbot
     event = [cookies, chatbot_gr, history, msg]
     if end_code:
-        yield event + [gr.Button.update(visible=False), gr.Button.update(visible=True, variant='primary')]
+        yield event + [gr.Button.update(visible=False), gr.Button.update(visible=True)]
     else:
-        yield event + [gr.Button.update(visible=True, variant='secondary'), gr.Button.update(visible=False)]
+        yield event + [gr.Button.update(visible=True), gr.Button.update(visible=False)]
 
 
 def update_ui_lastest_msg(lastmsg, chatbot, history, delay=1):  # 刷新界面

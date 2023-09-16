@@ -215,13 +215,12 @@ def prompt_save(txt, name, prompt: gr.Dataset, pro_select, cls_name, ipaddr: gr.
         else:
             result = prompt_retrieval(is_all=cls_name, hosts=tab_cls)
             prompt['samples'] = result
-            return "", "", cls_update, gr.Dataset.update(samples=result, visible=True), prompt, gr.Tabs.update(
-                selected='chatbot')
+            return "", "", cls_update, gr.Dataset.update(samples=result, visible=True), prompt
     elif not txt or not name:
         raise gr.Error('!!!!编辑框 or 名称不能为空!!!!')
 
 
-def prompt_input(txt: str, prompt_str, name_str,  index, data: gr.Dataset, tabs_index):
+def prompt_input(txt: str, prompt_str, name_str,  index, data: gr.Dataset):
     """
     点击dataset的值使用Prompt
     Args:
@@ -265,12 +264,12 @@ def show_prompt_result(index, data: gr.Dataset, chatbot, pro_edit, pro_name):
                 chatbot.append([list_copy[i]])
             else:
                 chatbot.append([list_copy[i], list_copy[i + 1]])
-            yield chatbot, pro_edit, pro_name, gr.Tabs.update(), gr.Accordion.update()
+            yield chatbot, pro_edit, pro_name, gr.Accordion.update()
     elif click[2] is None:
         pro_edit = click[1]
         pro_name = click[3]
         chatbot.append([click[3], click[1]])
-    yield chatbot, pro_edit, pro_name, gr.Tabs.update(selected='func_tab'), gr.Accordion.update(open=True)
+    yield chatbot, pro_edit, pro_name, gr.Accordion.update(open=True)
 
 
 # TODO < -------------------------------- 搜索函数注册区 -------------------------------->
@@ -363,11 +362,11 @@ def diff_list(txt='', percent=0.70, switch: list = None, lst: dict = None, sp=15
 def reuse_chat(result, chatbot, history, say):
     """复用对话记录"""
     if result is None or result == []:
-        return chatbot, history, gr.update(), gr.update(), gr.Column.update()
+        return chatbot, history, gr.update(), gr.update()
     else:
         chatbot += result
         history += [func_box.pattern_html(_) for i in result for _ in i]
-        return chatbot, history, say, gr.Tabs.update(selected='chatbot'), gr.Column.update(visible=False)
+        return chatbot, history, say
 
 
 def draw_results(txt, prompt: dict, percent, switch, ipaddr: gr.Request):
@@ -387,9 +386,16 @@ def draw_results(txt, prompt: dict, percent, switch, ipaddr: gr.Request):
     return gr.Dataset.update(samples=data, visible=True), prompt
 
 
-
 # TODO < -------------------------------- 页面刷新函数注册区 -------------------------------->
-def refresh_load_data(prompt, crazy_list, request: gr.Request):
+def mobile_access(request: gr.Request): # 为适配手机端
+    user_agent = request.kwargs['headers']['user-agent'].lower()
+    if user_agent.find('android') != -1 or user_agent.find('iphone') != -1:
+        return gr.Dropdown.update(show_label=False)
+    else:
+        return gr.update()
+
+
+def refresh_load_data(prompt, request: gr.Request):
     """
     Args:
         prompt: prompt dataset组件
@@ -399,15 +405,13 @@ def refresh_load_data(prompt, crazy_list, request: gr.Request):
     is_all = toolbox.get_conf('preset_prompt')[0]['value']
     data = prompt_retrieval(is_all=is_all)
     prompt['samples'] = data
-    selected = random.sample(crazy_list, 4)
     know_list = ['新建分类'] + os.listdir(func_box.knowledge_path)
     load_list, user_list = func_box.get_directory_list(os.path.join(func_box.knowledge_path, '公共知识库'),
                                                        request.client.host)
     know_cls = gr.Dropdown.update(choices=know_list, value='公共知识库')
-    know_load = gr.Dropdown.update(choices=load_list, label='公共知识库')
+    know_load = gr.Dropdown.update(choices=load_list, label='公共知识库', show_label=True)
     know_user = gr.Dropdown.update(choices=user_list)
     select_list = filter_database_tables()
     outputs = [gr.Dataset.update(samples=data, visible=True), prompt, gr.Dropdown.update(choices=select_list),
-               gr.Dataset.update(samples=[[i] for i in selected]), selected,
                know_cls, know_user, know_load]
     return outputs

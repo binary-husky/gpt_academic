@@ -46,7 +46,7 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
         except Exception as e:
             error_str = trimmed_format_exc()
             chatbot.append(['请检查链接是否有效',
-                            f'{func_box.html_a_blank(url)} \n\n请检查一下哦，这个链接我们访问不了，是否开启分享？是否设置密码？是否是轻文档？下面是什么错误？\n\n ```\n\n{str(error_str)}\n```'])
+                            f'{func_box.html_a_blank(url)} \n\n请检查一下哦，这个链接我们访问不了，是否开启分享？是否设置密码？是否是云文档？下面是什么错误？\n\n ```\n\n{str(error_str)}\n```'])
             func_box.通知机器人(f"{link_limit}\n\n```\n{error_str}\n```\n\n```\n{llm_kwargs}\n```")
             yield from update_ui(chatbot, history)
     # 腾讯文档

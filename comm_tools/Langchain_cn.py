@@ -180,7 +180,7 @@ def obtaining_knowledge_base_files(cls_select, cls_name, vs_id, chatbot, kai_han
         vs_path = os.path.join(func_box.knowledge_path, cls_select)
         you_say = f'请检查知识库内文件{"  ".join([func_box.html_tag_color(i)for i in vs_id])}'
         chatbot.append([you_say, None])
-        yield chatbot, gr.Column.update(visible=False), '🏃🏻‍ 正在努力轮询中....请稍等， tips：知识库可以多选，但不要贪杯哦～️', kai_handle
+        yield chatbot, '🏃🏻‍ 正在努力轮询中....请稍等， tips：知识库可以多选，但不要贪杯哦～️', kai_handle
         kai_files = {}
         for id in vs_id:
             if kai_handle['know_obj'].get(id, None):
@@ -195,9 +195,9 @@ def obtaining_knowledge_base_files(cls_select, cls_name, vs_id, chatbot, kai_han
         chatbot[-1] = [you_say, f'检查完成，当前选择的知识库内可用文件如下：'
                                 f'\n\n {func_box.to_markdown_tabs(head=["所属知识库", "文件", "文件类型"], tabs=tabs, column=True)}\n\n'
                                 f'🤩 快来向我提问吧～']
-        yield chatbot, gr.Column.update(visible=False), '✅ 检查完成', kai_handle
+        yield chatbot, '✅ 检查完成', kai_handle
     else:
-        yield chatbot, gr.update(), 'Done', kai_handle
+        yield chatbot, 'Done', kai_handle
 
 
 def single_step_thread_building_knowledge(cls_name, know_id, file_manifest, llm_kwargs):

@@ -22,10 +22,10 @@
     --message-list-background-hover: #F3F3F3;
     --message-list-background-selected: #EAEAEA;
 
-    --menu-width: 320px;
+    --menu-width: 280px;
     --menu-background-fill: var(--background-fill-primary);
 
-    --toolbox-width: 280px;
+    --toolbox-width: 320px;
     --toolbox-background-fill: var(--background-fill-secondary);
     
     .dark {
@@ -126,6 +126,7 @@ body.popup-open {
 #status-display {
     display: flex;
     min-height: 2em;
+    max-height: 4em;
     align-items: flex-end;
     justify-content: flex-end;
     transition: all 0.6s;
@@ -398,6 +399,7 @@ body.popup-open {
     /* padding: 8px 6px; */
     min-height: 82px;
     /* max-height: 166px; */
+    z-index: 2;
     background: var(--chatbot-blur-background-color);
     -webkit-backdrop-filter: blur(24px);
     backdrop-filter: blur(24px);
@@ -895,7 +897,7 @@ input:checked + .chatbot-input-more-span {
     #toolbox-area > .gradio-box > .gradio-tabs > div.tab-nav > button {
         display: inline-block;
         position: relative;
-        padding: 8px 2rem;
+        padding: 8px 1.6rem;
         border: none;
         white-space: nowrap;
         width: auto;

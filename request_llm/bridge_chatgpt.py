@@ -209,12 +209,10 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                 # 数据流的第一帧不携带content
                 is_head_of_the_stream = False;
                 continue
-
             if chunk:
                 try:
                     # 前者是API2D的结束条件，后者是OPENAI的结束条件
-                    if ('data: [DONE]' in chunk_decoded) or (
-                            len(json.loads(chunk_decoded[6:])['choices'][0]["delta"]) == 0):
+                    if ('data: [DONE]' in chunk_decoded) or (len(json.loads(chunk_decoded[6:])['choices'][0]["delta"]) == 0):
                         # 判定为数据流的结束，gpt_replying_buffer也写完了
                         logging.info(f'[response] {gpt_replying_buffer}')
                         break

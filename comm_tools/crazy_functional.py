@@ -2,15 +2,16 @@ from comm_tools.toolbox import HotReload  # HotReload 的意思是热更新，�
 from langchain import agents
 
 # < -------------------初始化插件模块--------------- >
-function_plugins = {}
+
 
 def get_crazy_functions():
     get_functions_学术优化()
     get_functions_文档读取()
     get_functions_代码解析()
     get_functions_多功能插件()
-    get_functions_金山专用()
+    get_functions_云文档处理()
     return function_plugins
+
 
 def get_functions_学术优化():
     # < -------------------学术研究--------------- >
@@ -106,7 +107,7 @@ def get_functions_文档读取():
     from crazy_functions import 批量翻译PDF文档_多线程
     from crazy_functions import 理解PDF文档内容
     from crazy_functions import 批量Markdown翻译
-    function_plugins['文档处理理解'] = {
+    function_plugins['文档处理'] = {
         "Markdown/Readme英译中": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "primary",
@@ -232,7 +233,7 @@ def get_functions_多功能插件():
     from crazy_functions.交互功能函数模板 import 交互功能模板函数
     from crazy_functions.语音助手 import 语音助手
     from crazy_functions.虚空终端 import 虚空终端
-    function_plugins['好玩的插件'] = {
+    function_plugins['多功能'] = {
         "询问多个GPT模型": {
             "Color": "primary",  # 按钮颜色
             "Function": HotReload(询问多个大语言模型.同时问询)
@@ -311,17 +312,17 @@ def get_functions_多功能插件():
 
     }
 
-def get_functions_金山专用():
-    # < -------------------金山文档专用--------------- >
-    from crazy_functions import KDOCS_轻文档分析
+def get_functions_云文档处理():
+    # < -------------------云文档专用--------------- >
+    from crazy_functions import KDOCS_云文档分析
     from crazy_functions import 总结音视频
     from crazy_functions import KDOCS_流程图_图片分析
     desc = '高级参数详细说明请查看项目自述文档, 若有更改，提交前请使用Json检查器检查是否符合要求'
-    function_plugins['金山文档专用'] = {
+    function_plugins['云文档'] = {
         "文档提取测试点": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_轻文档分析.KDocs_文档提取测试点),
+            "Function": HotReload(KDOCS_云文档分析.KDocs_文档提取测试点),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
@@ -334,7 +335,7 @@ def get_functions_金山专用():
         "测试点转测试用例": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_轻文档分析.KDocs_转客户端测试用例),
+            "Function": HotReload(KDOCS_云文档分析.KDocs_转客户端测试用例),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
@@ -349,7 +350,7 @@ def get_functions_金山专用():
         "文档转客户端测试用例": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_轻文档分析.KDocs_转客户端测试用例),
+            "Function": HotReload(KDOCS_云文档分析.KDocs_转客户端测试用例),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
@@ -365,7 +366,7 @@ def get_functions_金山专用():
         "文档转客户端测试用例(多阶段生成)": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_轻文档分析.Kdocs_多阶段生成回答),
+            "Function": HotReload(KDOCS_云文档分析.Kdocs_多阶段生成回答),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
@@ -394,7 +395,7 @@ def get_functions_金山专用():
         "文档转接口测试用例": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_轻文档分析.KDocs_转接口测试用例),
+            "Function": HotReload(KDOCS_云文档分析.KDocs_转接口测试用例),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
@@ -410,7 +411,7 @@ def get_functions_金山专用():
         "测试用例检查优化": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_轻文档分析.KDocs_测试用例检查优化),
+            "Function": HotReload(KDOCS_云文档分析.KDocs_测试用例检查优化),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
@@ -424,7 +425,7 @@ def get_functions_金山专用():
         "文档需求分析问答": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_轻文档分析.KDocs_需求分析问答),
+            "Function": HotReload(KDOCS_云文档分析.KDocs_需求分析问答),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
@@ -438,7 +439,7 @@ def get_functions_金山专用():
         "文档转流程图": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_轻文档分析.KDocs_文档转流程图),
+            "Function": HotReload(KDOCS_云文档分析.KDocs_文档转流程图),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
@@ -475,3 +476,11 @@ def crazy_func_to_tool():
         for func in crazy_kwargs[crazy]:
             crazy_tools.append(agents.Tool(name=crazy, func=crazy_kwargs[crazy][func]['Function'], description=func))
     return crazy_tools
+
+function_plugins = {}
+crazy_fns_role = get_crazy_functions()
+crazy_classification = [i for i in crazy_fns_role]
+crazy_fns = {}
+for role in crazy_fns_role:
+    for k in crazy_fns_role[role]:
+        crazy_fns[k] = crazy_fns_role[role][k]

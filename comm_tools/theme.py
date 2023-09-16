@@ -75,13 +75,12 @@ def adjust_theme():
                 c900="#2B2B2B",
                 c950="#171717",
             ),
-
             radius_size=gr.themes.sizes.radius_sm,
         ).set(
-            button_primary_background_fill="*primary_500",
+            # button_primary_background_fill="*primary_500",
             button_primary_background_fill_dark="*primary_600",
-            button_primary_background_fill_hover="*primary_400",
-            button_primary_border_color="*primary_500",
+            # button_primary_background_fill_hover="*primary_400",
+            # button_primary_border_color="*primary_500",
             button_primary_border_color_dark="*primary_600",
             button_primary_text_color="white",
             button_primary_text_color_dark="white",
@@ -90,13 +89,14 @@ def adjust_theme():
             button_secondary_background_fill_dark="*neutral_900",
             button_secondary_text_color="*neutral_800",
             button_secondary_text_color_dark="white",
-            background_fill_primary="*neutral_50",
-            background_fill_primary_dark="#1F1F1F",
-            block_title_text_color="*primary_500",
+            # background_fill_primary="#F7F7F7",
+            # background_fill_primary_dark="#1F1F1F",
+            # block_title_text_color="*primary_500",
             block_title_background_fill_dark="*primary_900",
             block_label_background_fill_dark="*primary_900",
             input_background_fill="#F6F6F6",
-            chatbot_code_background_color="*neutral_950",
+            # chatbot_code_background_color="*neutral_950",
+            # gradio 会把这个几个chatbot打头的变量应用到其他md渲染的地方，鬼晓得怎么想的。。。
             chatbot_code_background_color_dark="*neutral_950",
         )
     except:
@@ -110,17 +110,9 @@ with open(os.path.join(func_box.base_path, 'docs/assets/custom.css'), "r", encod
 custom_css = customCSS
 
 
-def get_html(filename):
-    path = os.path.join(func_box.base_path, "docs/assets", "html", filename)
-    if os.path.exists(path):
-        with open(path, encoding="utf8") as file:
-            return file.read()
-    return ""
-
-
 def webpath(fn):
-    if fn.startswith(func_box.base_path):
-        web_path = os.path.relpath(fn, func_box.base_path).replace('\\', '/')
+    if fn.startswith(func_box.base_path,):
+        web_path = os.path.relpath(fn, func_box.base_path,).replace('\\', '/')
     else:
         web_path = os.path.abspath(fn)
     return f'file={web_path}?{os.path.getmtime(fn)}'
@@ -157,31 +149,64 @@ def list_scripts(scriptdirname, extension):
 
 
 def reload_javascript():
-    print("Reloading javascript...")
-    js = ''
-    if ADD_CHUANHU:
-        with open(os.path.join(func_box.base_path, "docs/assets/custom.js"), "r", encoding="utf-8") as f, \
-                open(os.path.join(func_box.base_path, "docs/assets/external-scripts.js"), "r", encoding="utf-8") as f1:
-            customJS = f.read()
-            externalScripts = f1.read()
-        js += f'<script>{customJS}</script><script async>{externalScripts}</script>'
-    # 添加一个萌萌的看板娘
+    js = javascript_html()
+    js += '<script async type="module" src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>'
+    js += '<script async type="module" src="http://spin.js.org/spin.umd.js"></script><link type="text/css" href="https://spin.js.org/spin.css" rel="stylesheet" />'
+    waifu_js = ''
     if ADD_WAIFU:
-        js += """
+        waifu_js += """
             <script src="file=docs/waifu_plugin/jquery.min.js"></script>
             <script src="file=docs/waifu_plugin/jquery-ui.min.js"></script>
             <script src="file=docs/waifu_plugin/autoload.js"></script>
         """
-    # css = css_html()
-    # js += javascript_html()
-    js += '<script async src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>'
-    js += '<script async type="module" src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>'
-    js += '<script async type="module" src="http://spin.js.org/spin.umd.js"></script><link type="text/css" href="https://spin.js.org/spin.css" rel="stylesheet" />'
+    meta = """
+        <meta name="apple-mobile-web-app-title" content="川虎 Chat">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="application-name" content="川虎 Chat">
+        <meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover'>
+        <meta name="theme-color" content="#ffffff">
+    """
+    css = css_html()
     def template_response(*args, **kwargs):
         res = GradioTemplateResponseOriginal(*args, **kwargs)
-        res.body = res.body.replace(b'</html>', f'{js}</html>'.encode("utf8"))
-        # res.body = res.body.replace(b'</body>', f'{css}</body>'.encode("utf8"))
+        res.body = res.body.replace(b'</head>', f'{meta}{js}</head>'.encode("utf8"))
+        # res.body = res.body.replace(b'</head>', f'{js}</head>'.encode("utf8"))
+        res.body = res.body.replace(b'</body>', f'{css}</body>'.encode("utf8"))
         res.init_headers()
         return res
+
     gr.routes.templates.TemplateResponse = template_response
+
+
 GradioTemplateResponseOriginal = gr.routes.templates.TemplateResponse
+
+
+def add_classes_to_gradio_component(comp):
+    """
+    this adds gradio-* to the component for css styling (ie gradio-button to gr.Button), as well as some others
+    code from stable-diffusion-webui <AUTOMATIC1111/stable-diffusion-webui>
+    """
+    comp.elem_classes = [f"gradio-{comp.get_block_name()}", *(comp.elem_classes or [])]
+
+    if getattr(comp, 'multiselect', False):
+        comp.elem_classes.append('multiselect')
+
+
+def IOComponent_init(self, *args, **kwargs):
+    res = original_IOComponent_init(self, *args, **kwargs)
+    add_classes_to_gradio_component(self)
+
+    return res
+
+original_IOComponent_init = gr.components.IOComponent.__init__
+gr.components.IOComponent.__init__ = IOComponent_init
+
+
+def BlockContext_init(self, *args, **kwargs):
+    res = original_BlockContext_init(self, *args, **kwargs)
+    add_classes_to_gradio_component(self)
+
+    return res
+
+original_BlockContext_init = gr.blocks.BlockContext.__init__
+gr.blocks.BlockContext.__init__ = BlockContext_init

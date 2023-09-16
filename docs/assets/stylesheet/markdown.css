@@ -28,7 +28,8 @@
     border-radius: 6px !important;
     margin: 0 2px 0 2px;
     padding: .1em .4em .08em .4em !important;
-    background-color: rgba(175,184,193,0.2) !important;
+    background-color: rgb(19 18 18) !important;
+    color: #ff6e67;
     border: none !important;
     font-size: var(--text-md) !important;
 }
