@@ -305,8 +305,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
             self.signals_prompt_edit()
             self.signals_plugin()
             self.signals_langchain_cn()
-            self.demo.load(fn=func_signals.mobile_access, inputs=[],
-                           outputs=[self.langchain_dropdown])
+            # self.demo.load(fn=func_signals.mobile_access, inputs=[],
+            #                outputs=[self.sm_btn_column, self.langchain_dropdown])
             self.demo.load(fn=func_signals.refresh_load_data,
                            inputs=[self.pro_fp_state],
                            outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check,

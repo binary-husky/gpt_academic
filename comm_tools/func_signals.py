@@ -390,9 +390,9 @@ def draw_results(txt, prompt: dict, percent, switch, ipaddr: gr.Request):
 def mobile_access(request: gr.Request): # 为适配手机端
     user_agent = request.kwargs['headers']['user-agent'].lower()
     if user_agent.find('android') != -1 or user_agent.find('iphone') != -1:
-        return gr.Dropdown.update(show_label=False)
+        return gr.Column.update(visible=False), gr.Dropdown.update(show_label=False)
     else:
-        return gr.update()
+        return gr.update(), gr.update()
 
 
 def refresh_load_data(prompt, request: gr.Request):

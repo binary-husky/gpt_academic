@@ -82,7 +82,7 @@ div.svelte-15lo0d8>*, div.svelte-15lo0d8>.form>* {
     gap: unset;
 }
 #gr-more-sm-column {
-    min-width: min(55%, 100%) !important;
+    min-width: min(30%, 100%) !important;
 }
 /* 小按钮 */
 #gr-chat-sm-column {
@@ -109,6 +109,8 @@ div.svelte-15lo0d8>*, div.svelte-15lo0d8>.form>* {
     min-width: min(25%, 100%) !important;
     max-width: max-content !important;
     margin-right: 7px;
+    justify-content: center;
+    align-items: center;
 }
 /* 强制隐藏 */
 .hide.svelte-vt1mxs {

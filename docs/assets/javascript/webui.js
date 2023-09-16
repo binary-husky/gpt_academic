@@ -42,8 +42,6 @@ function showMask(obj) {
         document.body.appendChild(mask);
         // mask.classList.add('transparent-mask');
     }
-    
-    
 
     mask.addEventListener('click', () => {
         if (obj == "box") {
