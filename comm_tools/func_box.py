@@ -140,12 +140,13 @@ def html_a_blank(__href, name=''):
     if not name:
         name = __href
     a = f'<a href="{__href}" target="_blank" class="svelte-xrr240">{name}</a>'
+    a = f"[{__href}]({name})"
     return a
 
 
 def html_local_file(file):
     if os.path.exists(file):
-        file = f'/gradio/file={file.replace(base_path, ".")}'
+        file = f'file={file.replace(base_path, ".")}'
     return file
 
 
@@ -155,6 +156,7 @@ def html_view_blank(__href: str, file_name='', to_tabs=False):
     if not file_name:
         file_name = __href.split('/')[-1]
     a = f'<a href="{__href}" target="_blank" class="svelte-xrr240">{file_name}</a>'
+    a = f"[{file_name}]({__href})"
     if to_tabs:
         a = "\n\n" + to_markdown_tabs(head=['下载地址', '插件复用地址'], tabs=[[a], [__file]]) + "\n\n"
     return a
@@ -182,6 +184,8 @@ def html_local_img(__file, layout='left', max_width=None, max_height=None):
     if max_height is not None:
         style += f"max-height: {max_height};"
     a = f'<div align="{layout}"><img src="file={__file}" style="{style}"></div>'
+    __file = html_local_file(__file)
+    a = f'![{__file}]({__file})'
     return a
 
 
