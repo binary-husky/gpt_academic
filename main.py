@@ -206,8 +206,11 @@ def main():
         md_dropdown.select(on_md_dropdown_changed, [md_dropdown], [chatbot] )
 
         def on_theme_dropdown_changed(theme, secret_css):
-            adjust_theme, css_part1, _ = load_dynamic_theme(theme)
-            css_part2 = adjust_theme()._get_theme_css()
+            adjust_theme, css_part1, _, adjust_dynamic_theme = load_dynamic_theme(theme)
+            if adjust_dynamic_theme:
+                css_part2 = adjust_dynamic_theme._get_theme_css()
+            else:
+                css_part2 = adjust_theme()._get_theme_css()
             return css_part2 + css_part1
         
         theme_handle = theme_dropdown.select(on_theme_dropdown_changed, [theme_dropdown, secret_css], [secret_css])

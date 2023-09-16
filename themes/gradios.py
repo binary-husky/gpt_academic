@@ -3,6 +3,15 @@ import logging
 from toolbox import get_conf, ProxyNetworkActivate
 CODE_HIGHLIGHT, ADD_WAIFU, LAYOUT = get_conf('CODE_HIGHLIGHT', 'ADD_WAIFU', 'LAYOUT')
 
+def dynamic_set_theme(THEME):
+    set_theme = gr.themes.ThemeClass()
+    with ProxyNetworkActivate():
+        logging.info('正在下载Gradio主题，请稍等。')
+        if THEME.startswith('Huggingface-'): THEME = THEME.lstrip('Huggingface-')
+        if THEME.startswith('huggingface-'): THEME = THEME.lstrip('huggingface-')
+        set_theme = set_theme.from_hub(THEME.lower())
+    return set_theme
+
 def adjust_theme():
 
     try:
