@@ -1,6 +1,6 @@
-from toolbox import CatchException, report_execption, get_log_folder
+from toolbox import CatchException, report_execption, write_results_to_file
 from toolbox import update_ui, promote_file_to_downloadzone, update_ui_lastest_msg, disable_auto_promotion
-from toolbox import write_history_to_file, promote_file_to_downloadzone
+from toolbox import write_history_to_file, get_log_folder
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 from .crazy_utils import read_and_clean_pdf_text
@@ -11,7 +11,7 @@ import os
 import math
 
 @CatchException
-def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port, only_chinese=True):
 
     disable_auto_promotion(chatbot)
     # 基本信息：功能、贡献者
@@ -51,15 +51,16 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     # 开始正式执行任务
     grobid_url = get_avail_grobid_url()
     if grobid_url is not None:
-        yield from 解析PDF_基于GROBID(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, grobid_url)
+        yield from 解析PDF_基于GROBID(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, grobid_url, only_chinese=only_chinese)
     else:
         yield from update_ui_lastest_msg("GROBID服务不可用，请检查config中的GROBID_URL。作为替代，现在将执行效果稍差的旧版代码。", chatbot, history, delay=3)
         yield from 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt)
 
 
-def 解析PDF_基于GROBID(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, grobid_url):
+def 解析PDF_基于GROBID(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, grobid_url, only_chinese=True):
     import copy
-    TOKEN_LIMIT_PER_FRAGMENT = 1280
+    import tiktoken
+    TOKEN_LIMIT_PER_FRAGMENT = 200
     generated_conclusion_files = []
     generated_html_files = []
     DST_LANG = "中文"
@@ -131,9 +132,39 @@ def 解析PDF_基于GROBID(file_manifest, project_folder, llm_kwargs, plugin_kwa
             sys_prompt_array=[
                 "请你作为一个学术翻译，负责把学术论文准确翻译成中文。注意文章中的每一句话都要翻译。" for _ in inputs_array],
         )
-        res_path = write_history_to_file(meta +  ["# Meta Translation" , paper_meta_info] + gpt_response_collection, file_basename=None, file_fullname=None)
-        promote_file_to_downloadzone(res_path, rename_file=os.path.basename(fp)+'.md', chatbot=chatbot)
-        generated_conclusion_files.append(res_path)
+        if only_chinese:
+            # 直接提取出翻译的内容，然后保存下去：
+            chinese_list = []
+            # 记录当前的大章节标题：
+            last_section_name = ""
+            for index, value in enumerate(gpt_response_collection):
+                # 先挑选偶数序列号：
+                if index % 2 != 0:
+                    # 先提取当前英文标题：
+                    cur_section_name = gpt_response_collection[index-1].split('\n')[0].split(" Part")[0]
+
+                    # 如果index是1的话，则直接使用first section name：
+                    if cur_section_name != last_section_name:
+                        cur_value = cur_section_name + '\n'
+                        last_section_name = copy.deepcopy(cur_section_name)
+                    else:
+                        cur_value = ""
+                    # 再判断翻译是否错误，如果错误，则直接贴原来的英文：
+                    if "The OpenAI account associated" in value:
+                        cur_value += gpt_response_collection[index-1]
+                    else:
+                        # 再做一个小修改：重新修改当前part的标题，默认用英文的
+                        cur_value += value
+
+                    chinese_list.append(cur_value)
+        
+            res_path = write_history_to_file(meta +  ["# Meta Translation" , paper_meta_info] + chinese_list, file_basename=None, file_fullname=None)
+            promote_file_to_downloadzone(res_path, rename_file=os.path.basename(fp)+'.md', chatbot=chatbot)
+            generated_conclusion_files.append(res_path)
+        else:
+            res_path = write_history_to_file(meta +  ["# Meta Translation" , paper_meta_info] + gpt_response_collection, file_basename=None, file_fullname=None)
+            promote_file_to_downloadzone(res_path, rename_file=os.path.basename(fp)+'.md', chatbot=chatbot)
+            generated_conclusion_files.append(res_path)
 
         ch = construct_html() 
         orig = ""
@@ -143,7 +174,10 @@ def 解析PDF_基于GROBID(file_manifest, project_folder, llm_kwargs, plugin_kwa
             if i%2==0:
                 gpt_response_collection_html[i] = inputs_show_user_array[i//2]
             else:
-                gpt_response_collection_html[i] = gpt_response_collection_html[i]
+                # 先提取当前英文标题：
+                cur_section_name = gpt_response_collection[i-1].split('\n')[0].split(" Part")[0]
+                cur_value = cur_section_name + "\n" + gpt_response_collection_html[i]
+                gpt_response_collection_html[i] = cur_value
 
         final = ["", "", "一、论文概况",  "", "Abstract", paper_meta_info,  "二、论文翻译",  ""]
         final.extend(gpt_response_collection_html)
@@ -164,7 +198,7 @@ def 解析PDF_基于GROBID(file_manifest, project_folder, llm_kwargs, plugin_kwa
 
 def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
     import copy
-    TOKEN_LIMIT_PER_FRAGMENT = 1280
+    TOKEN_LIMIT_PER_FRAGMENT = 200
     generated_conclusion_files = []
     generated_html_files = []
     from crazy_functions.crazy_utils import construct_html
@@ -176,20 +210,25 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
 
         # 递归地切割PDF文件
         from .crazy_utils import breakdown_txt_to_satisfy_token_limit_for_pdf
+        # from .crazy_utils import split_main_text
         from request_llm.bridge_all import model_info
         enc = model_info["gpt-3.5-turbo"]['tokenizer']
-        def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))
+        def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))        
         paper_fragments = breakdown_txt_to_satisfy_token_limit_for_pdf(
-            txt=file_content,  get_token_fn=get_token_num, limit=TOKEN_LIMIT_PER_FRAGMENT)
+            txt=file_content,  get_token_fn=get_token_num, limit=256)
         page_one_fragments = breakdown_txt_to_satisfy_token_limit_for_pdf(
-            txt=page_one, get_token_fn=get_token_num, limit=TOKEN_LIMIT_PER_FRAGMENT//4)
-
+            txt=page_one, get_token_fn=get_token_num, limit=TOKEN_LIMIT_PER_FRAGMENT)
+        ## 用我这个分段切分。
+        # paper_fragments = split_main_text(text=file_content, max_token=TOKEN_LIMIT_PER_FRAGMENT)
+        # page_one_fragments = split_main_text(text=page_one, max_token=TOKEN_LIMIT_PER_FRAGMENT)
+        
         # 为了更好的效果，我们剥离Introduction之后的部分（如果有）
-        paper_meta = page_one_fragments[0].split('introduction')[0].split('Introduction')[0].split('INTRODUCTION')[0]
+        # paper_meta = page_one_fragments[0].split('introduction')[0].split('Introduction')[0].split('INTRODUCTION')[0]
+        paper_meta = page_one_fragments[:]
         
         # 单线，获取文章meta信息
         paper_meta_info = yield from request_gpt_model_in_new_thread_with_ui_alive(
-            inputs=f"以下是一篇学术论文的基础信息，请从中提取出“标题”、“收录会议或期刊”、“作者”、“摘要”、“编号”、“作者邮箱”这六个部分。请用markdown格式输出，最后用中文翻译摘要部分。请提取：{paper_meta}",
+            inputs=f"以下是一篇学术论文的基础信息，请从中提取出“标题”、“收录会议或期刊”、“作者”、“摘要”、“作者单位”、“作者邮箱”这六个部分。请用markdown格式输出，最后用中文翻译摘要部分，不要提取Introduction部分的内容。请提取：{paper_meta}",
             inputs_show_user=f"请从{fp}中提取出“标题”、“收录会议或期刊”等基本信息。",
             llm_kwargs=llm_kwargs,
             chatbot=chatbot, history=[],
@@ -205,24 +244,62 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
             chatbot=chatbot,
             history_array=[[paper_meta] for _ in paper_fragments],
             sys_prompt_array=[
-                "请你作为一个学术翻译，负责把学术论文准确翻译成中文。注意文章中的每一句话都要翻译。" for _ in paper_fragments],
+                "请你作为一个学术翻译，负责把学术论文的部分章节文本，准确翻译成中文。注意：1. 文章中的每一句话都要翻译，并且消除输入文本前后的无意义乱码，2. 请自动识别小章节标题(小标题长度不要超过20个字符，也不要少于3个字符)，并且用'### xxx'的markdown格式标记出来。" for _ in paper_fragments],
             # max_workers=5  # OpenAI所允许的最大并行过载
         )
         gpt_response_collection_md = copy.deepcopy(gpt_response_collection)
         # 整理报告的格式
-        for i,k in enumerate(gpt_response_collection_md): 
-            if i%2==0:
-                gpt_response_collection_md[i] = f"\n\n---\n\n ## 原文[{i//2}/{len(gpt_response_collection_md)//2}]： \n\n {paper_fragments[i//2].replace('#', '')}  \n\n---\n\n ## 翻译[{i//2}/{len(gpt_response_collection_md)//2}]：\n "
+        add_origin = True
+        for i, k in enumerate(gpt_response_collection_md): 
+            if i % 2 ==0:
+                cur_trans = gpt_response_collection_md[i]
+                # 做个小小的处理，把翻译的结果中非常长的“#”去掉
+                temp_trans = ""
+                for line_text in cur_trans.split('\n'):
+                    if len(line_text) == 0:
+                        # print("空行")
+                        temp_trans += "\n\n"
+                    else:
+                        if "#" in line_text[0]:
+                            if len(line_text.split(' ')) > 12:                                
+                                temp_trans += line_text.replace('#', '')
+                            else:
+                                temp_trans += line_text
+                                temp_trans += "\n\n"
+                        else:
+                            temp_trans += line_text + "\n\n"
+                
+                # gpt_response_collection_md[i] = f"\n\n---\n\n ## 原文[{i//2}/{len(gpt_response_collection_md)//2}]： \n\n {paper_fragments[i//2].replace('#', '')}  \n\n---\n\n ## 翻译[{i//2}/{len(gpt_response_collection_md)//2}]：\n "
+                if add_origin:
+                    gpt_response_collection_md[i] = f"\n\n---\n\n ## 原文[{i//2}/{len(gpt_response_collection_md)//2}]： \n\n {paper_fragments[i//2].replace('#', '')}  \n\n---\n\n ## 翻译[{i//2}/{len(gpt_response_collection_md)//2}]：\n "
+                else:
+                    gpt_response_collection_md[i] = ""                
             else:
-                gpt_response_collection_md[i] = gpt_response_collection_md[i]
+                cur_trans = gpt_response_collection_md[i]
+                # 做个小小的处理，把翻译的结果中非常长的“#”去掉
+                temp_trans = ""
+                for line_text in cur_trans.split('\n'):
+                    if len(line_text) == 0:
+                        # print("空行")
+                        temp_trans += "\n\n"
+                    else:
+                        if "#" in line_text[0]:
+                            if len(line_text) > 12:                                
+                                temp_trans += line_text.replace('#', '')
+                            else:
+                                temp_trans += line_text
+                                temp_trans += "\n\n"
+                        else:
+                            temp_trans += line_text + "\n\n"
+                            
+                gpt_response_collection_md[i] = temp_trans
         final = ["一、论文概况\n\n---\n\n", paper_meta_info.replace('# ', '### ') + '\n\n---\n\n', "二、论文翻译", ""]
         final.extend(gpt_response_collection_md)
         create_report_file_name = f"{os.path.basename(fp)}.trans.md"
-        res = write_history_to_file(final, create_report_file_name)
-        promote_file_to_downloadzone(res, chatbot=chatbot)
+        res = write_results_to_file(final, file_name=create_report_file_name)
 
         # 更新UI
-        generated_conclusion_files.append(f'{get_log_folder()}/{create_report_file_name}')
+        generated_conclusion_files.append(f'./gpt_log/{create_report_file_name}')
         chatbot.append((f"{fp}完成了吗？", res))
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 

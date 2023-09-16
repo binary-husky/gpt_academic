@@ -47,7 +47,7 @@ def markdown_to_dict(article_content):
 
 
 @CatchException
-def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port, only_chinese=True):
 
     disable_auto_promotion(chatbot)
     # 基本信息：功能、贡献者
@@ -84,12 +84,12 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
         return
 
     # 开始正式执行任务
-    yield from 解析PDF_基于NOUGAT(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt)
+    yield from 解析PDF_基于NOUGAT(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, only_chinese)
 
 
 
 
-def 解析PDF_基于NOUGAT(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
+def 解析PDF_基于NOUGAT(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, only_chinese=True):
     import copy
     import tiktoken
     TOKEN_LIMIT_PER_FRAGMENT = 1280
@@ -100,7 +100,7 @@ def 解析PDF_基于NOUGAT(file_manifest, project_folder, llm_kwargs, plugin_kwa
     nougat_handle = nougat_interface()
     for index, fp in enumerate(file_manifest):
         chatbot.append(["当前进度：", f"正在解析论文，请稍候。（第一次运行时，需要花费较长时间下载NOUGAT参数）"]); yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-        fpp = yield from nougat_handle.NOUGAT_parse_pdf(fp, chatbot, history)
+        fpp = nougat_handle.NOUGAT_parse_pdf(fp)
 
         with open(fpp, 'r', encoding='utf8') as f:
             article_content = f.readlines()
@@ -170,19 +170,52 @@ def 解析PDF_基于NOUGAT(file_manifest, project_folder, llm_kwargs, plugin_kwa
             sys_prompt_array=[
                 "请你作为一个学术翻译，负责把学术论文准确翻译成中文。注意文章中的每一句话都要翻译。" for _ in inputs_array],
         )
-        res_path = write_history_to_file(meta +  ["# Meta Translation" , paper_meta_info] + gpt_response_collection, file_basename=None, file_fullname=None)
-        promote_file_to_downloadzone(res_path, rename_file=os.path.basename(fp)+'.md', chatbot=chatbot)
-        generated_conclusion_files.append(res_path)
+        if only_chinese:
+            # 直接提取出翻译的内容，然后保存下去：
+            chinese_list = []
+            # 记录当前的大章节标题：
+            last_section_name = ""
+            for index, value in enumerate(gpt_response_collection):
+                # 先挑选偶数序列号：
+                if index % 2 != 0:
+                    # 先提取当前英文标题：
+                    cur_section_name = gpt_response_collection[index-1].split('\n')[0].split(" Part")[0]
+
+                    # 如果index是1的话，则直接使用first section name：
+                    if cur_section_name != last_section_name:
+                        cur_value = cur_section_name + '\n'
+                        last_section_name = copy.deepcopy(cur_section_name)
+                    else:
+                        cur_value = ""
+                    # 再判断翻译是否错误，如果错误，则直接贴原来的英文：
+                    if "The OpenAI account associated" in value:
+                        cur_value += gpt_response_collection[index-1]
+                    else:
+                        # 再做一个小修改：重新修改当前part的标题，默认用英文的
+                        cur_value += value
+
+                    chinese_list.append(cur_value)
+            res_path = write_history_to_file(meta +  ["# Meta Translation" , paper_meta_info] + chinese_list, file_basename=None, file_fullname=None)
+            promote_file_to_downloadzone(res_path, rename_file=os.path.basename(fp)+'.md', chatbot=chatbot)
+            generated_conclusion_files.append(res_path)
+        else:
+            res_path = write_history_to_file(meta +  ["# Meta Translation" , paper_meta_info] + gpt_response_collection, file_basename=None, file_fullname=None)
+            promote_file_to_downloadzone(res_path, rename_file=os.path.basename(fp)+'.md', chatbot=chatbot)
+            generated_conclusion_files.append(res_path)
 
         ch = construct_html() 
         orig = ""
         trans = ""
         gpt_response_collection_html = copy.deepcopy(gpt_response_collection)
+        # 叠加HTML文件
         for i,k in enumerate(gpt_response_collection_html): 
             if i%2==0:
                 gpt_response_collection_html[i] = inputs_show_user_array[i//2]
             else:
-                gpt_response_collection_html[i] = gpt_response_collection_html[i]
+                # 先提取当前英文标题：
+                cur_section_name = gpt_response_collection[i-1].split('\n')[0].split(" Part")[0]
+                cur_value = cur_section_name + "\n" + gpt_response_collection_html[i]
+                gpt_response_collection_html[i] = cur_value
 
         final = ["", "", "一、论文概况",  "", "Abstract", paper_meta_info,  "二、论文翻译",  ""]
         final.extend(gpt_response_collection_html)
