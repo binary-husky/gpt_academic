@@ -76,12 +76,28 @@ def filter_database_tables():
 
 
 # TODO < -------------------------------- 对话函数注册区 ----------------------------------->
+def clear_input(inputs, cookies, select, ipaddr: gr.Request):
+    user_path = os.path.join(func_box.history_path, ipaddr.client.host)
+    file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
+    index = 2
+    if not cookies.get('first_chat'):
+        select_file = inputs
+        while select_file in only_name:  # 重名处理
+            select_file = f"{index}_{inputs}"
+            index += 1
+        cookies['first_chat'] = func_box.replace_special_chars(str(select_file)[:10])
+        only_name = [cookies['first_chat']] + only_name
+    output = ['', inputs, gr.update(visible=True), gr.update(visible=False),
+              gr.Radio.update(choices=only_name, value=cookies['first_chat'])]
+    return output
+
+
 def clear_chat_cookie(cookie, ipaddr: gr.Request):
     user_path = os.path.join(func_box.history_path, ipaddr.client.host)
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
     output = [[], [], cookie, '已重置对话记录和对话Cookies',
-              gr.Radio.update(choices=['新对话']+only_name, value='新对话'),
-              "新对话"]
+              gr.Radio.update(choices=['新对话']+only_name, value='新对话'), "新对话"
+              ]
     return output
 
 
@@ -114,7 +130,7 @@ def rename_history(old_file, filename: str,  ipaddr: gr.Request):
     return gr.Radio.update(choices=only_name, value=new_name)
 
 
-def delete_history(_, filename, ipaddr: gr.Request):
+def delete_history(cookies, filename, ipaddr: gr.Request):
     user_path = os.path.join(func_box.history_path, ipaddr.client.host)
     full_path = os.path.join(user_path, f"{filename}.json")
     if not os.path.exists(full_path):
@@ -124,7 +140,9 @@ def delete_history(_, filename, ipaddr: gr.Request):
             raise gr.Error('文件或许已不存在')
     os.remove(full_path)
     file_list, only_name, new_path, new_name = func_box.get_files_list(os.path.join(func_box.history_path, ipaddr.client.host), filter_format=['.json'])
-    return gr.Radio.update(choices=only_name, value=new_name)
+    history_handle = func_box.HistoryJsonHandle(new_path)
+    chatbot, history, cookies = history_handle.update_for_history(cookies, new_name)
+    return gr.Radio.update(choices=only_name, value=new_name), chatbot, history, cookies
 
 
 def import_history(file, ipaddr: gr.Request):

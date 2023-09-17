@@ -79,8 +79,6 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         self.retryBtn.click(fn=ArgsGeneralWrapper(predict), inputs=self.input_combo+[gr.State('RetryChat')],
                                  outputs=self.output_combo, show_progress=True)
 
-    def __clear_input(self, inputs):
-        return '', inputs, self.cancelBtn.update(visible=True), self.submitBtn.update(visible=False)
 
     def signals_prompt_func(self):
         self.pro_private_check.select(fn=func_signals.prompt_reduce,
@@ -245,8 +243,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                                     inputs=[self.saveFileName, self.historySelectList],
                                     outputs=[self.historySelectList],
                                     _js='(a,b,c,d)=>{return saveChatHistory(a,b,c,d);}')
-        self.historyDeleteBtn.click(func_signals.delete_history, inputs=[gr.State('占位耶'), self.historySelectList],
-                                    outputs=[self.historySelectList],
+        self.historyDeleteBtn.click(func_signals.delete_history, inputs=[self.def_cookies, self.historySelectList],
+                                    outputs=[self.historySelectList, self.chatbot, self.history, self.cookies],
                                     _js='(a,b,c)=>{return showConfirmationDialog(a, b, c);}')
         self.uploadFileBtn.upload(fn=func_signals.import_history, inputs=[self.uploadFileBtn], outputs=[self.historySelectList])
         self.historyRefreshBtn.click(func_signals.refresh_history, inputs=None, outputs=[self.historySelectList])
@@ -261,8 +259,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         self.output_combo = [self.cookies, self.chatbot, self.history, self.status_display, self.cancelBtn, self.submitBtn,]
         self.predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=self.input_combo,
                                  outputs=self.output_combo, show_progress=True)
-        self.clear_agrs = dict(fn=self.__clear_input, inputs=[self.user_input], outputs=[self.user_input, self.input_copy,
-                                                                                  self.cancelBtn, self.submitBtn])
+        self.clear_agrs = dict(fn=func_signals.clear_input, inputs=[self.user_input, self.cookies, self.historySelectList],
+                               outputs=[self.user_input, self.input_copy, self.cancelBtn, self.submitBtn, self.historySelectList])
 
         # 提交按钮、重置按钮
         submit_handle = self.user_input.submit(**self.clear_agrs).then(**self.predict_args)

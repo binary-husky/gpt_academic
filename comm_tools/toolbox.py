@@ -80,11 +80,9 @@ def ArgsGeneralWrapper(f):
             'temperature': temperature,
             'last_chat': txt
         })
-        if not cookies.get('first_chat'):
-            cookies['first_chat'] = func_box.replace_special_chars(str(txt)[:10])
-            if not cookies['first_chat'] and args:
-                cookies['first_chat'] = args[0]
-                cookies['first_chat'] += "_" + func_box.created_atime()
+        if not cookies.get('first_chat') and args:
+            cookies['first_chat'] = args[0]
+            cookies['first_chat'] += "_" + func_box.created_atime()
         llm_kwargs = {
             'api_key': cookies['api_key'],
             'llm_model': llm_model,
