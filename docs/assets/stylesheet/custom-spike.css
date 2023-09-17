@@ -124,3 +124,23 @@ code.language-folded {
     -webkit-box-orient: vertical;
     overflow: auto;
 }
+
+.toggle-button-hide {
+    opacity: 0;
+}
+
+.user .message-btn-column {
+    position: absolute;
+    left: -23px !important;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-content: end;
+    gap: 2px;
+}
+
+.user .message-btn-column :hover {
+    background-color: unset !important;
+    /*display: block !important;*/
+    color: unset !important;
+}

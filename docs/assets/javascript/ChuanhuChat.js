@@ -348,7 +348,7 @@ function chatbotContentChanged(attempt = 1, force = false) {
             saveHistoryHtml();
             disableSendBtn();
 
-            gradioApp().querySelectorAll('#chuanhu-chatbot .message-wrap .message.bot').forEach(addChuanhuButton);
+            gradioApp().querySelectorAll('#chuanhu-chatbot .message-wrap .message.bot, #chuanhu-chatbot .message-wrap .message.user').forEach(addChuanhuButton);
 
             if (chatbotIndicator.classList.contains('hide')) { // generation finished
                 setLatestMessage();

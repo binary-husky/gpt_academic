@@ -79,7 +79,16 @@ function addChuanhuButton(botElement) {
         chatbotContentChanged(1); // to set md or raw in read-only history html
     });
     // botElement.insertBefore(toggleButton, copyButton);
-
+        // CSS样式
+    toggleButton.classList.add('toggle-button-hide'); // 添加初始隐藏样式
+    // 鼠标悬浮时显示按钮
+    toggleButton.addEventListener('mouseover', () => {
+        toggleButton.classList.remove('toggle-button-hide');
+    });
+    // 鼠标离开时隐藏按钮
+    toggleButton.addEventListener('mouseout', () => {
+        toggleButton.classList.add('toggle-button-hide');
+    });
     var messageBtnColumn = document.createElement('div');
     messageBtnColumn.classList.add('message-btn-column');
     messageBtnColumn.appendChild(toggleButton);
