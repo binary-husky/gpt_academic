@@ -331,8 +331,23 @@ def get_directory_list(folder_path, user_info='temp'):
     return allow_list, build_list
 
 
+def get_files_list(folder_path, filter_format: list):
+    # 获取符合条件的文件列表
+    file_list = [os.path.join(folder_path, f) for f in os.listdir(folder_path)
+                 if os.path.isfile(os.path.join(folder_path, f))
+                 and os.path.splitext(f)[1] in filter_format]
+    # 使用文件修改时间排序文件列表
+    sorted_files = sorted(file_list, key=lambda x: os.path.getmtime(x), reverse=True)
+    only_name = [os.path.splitext(os.path.basename(f))[0] for f in sorted_files]
+    # 获取最新的文件名
+    newest_file = only_name[0] if only_name else None
+    newest_file_path = sorted_files[0] if only_name else None
+    return sorted_files, only_name, newest_file_path, newest_file,
+
+
 base_path = os.path.dirname(os.path.dirname(__file__))
 prompt_path = os.path.join(base_path, 'users_data')
+history_path = os.path.join(prompt_path, 'history')
 knowledge_path = os.path.join(prompt_path, 'knowledge')
 users_path = os.path.join(base_path, 'private_upload')
 logs_path = os.path.join(base_path, 'gpt_log')
@@ -419,7 +434,7 @@ def num_tokens_from_string(listing: list, encoding_name: str = 'cl100k_base') ->
     count_tokens = 0
     for i in listing:
         encoding = tiktoken.get_encoding(encoding_name)
-        count_tokens += len(encoding.encode(i))
+        count_tokens += len(encoding.encode(str(i)))
     return count_tokens
 
 
@@ -476,14 +491,13 @@ def get_html(filename):
     return ""
 
 
-
 def thread_write_chat(chatbot, ipaddr, models):
     """
     对话记录写入数据库
     """
     chatbot = copy.copy(chatbot)
     # i_say = pattern_html(chatbot[-1][0])
-    i_say = chatbot[-1][0]
+    i_say = chatbot[-1]
     encrypt, private, _ = toolbox.get_conf('switch_model')[0]['key']
     gpt_result = []
     for i in chatbot:
@@ -495,10 +509,68 @@ def thread_write_chat(chatbot, ipaddr, models):
         SqliteHandle(f'ai_common_{ipaddr}').inset_prompt({i_say: gpt_result}, '')
 
 
+def thread_write_chat_json(chatbot, history, system, ipaddr):
+    chatbot = copy.copy(chatbot)
+    cookies = chatbot.get_cookies()
+    file_path = os.path.join(history_path, ipaddr)
+    os.makedirs(file_path, exist_ok=True)
+    file_name = os.path.join(file_path, f"{cookies['first_chat']}.json")
+    history_json_handle = HistoryJsonHandle(file_name)
+    history_json_handle.base_data_format['system_prompt'] = system
+    kwargs = cookies.get('is_plugin', False)
+    history_json_handle.analysis_chat_history(chatbot, history, kwargs)
+
+
+class HistoryJsonHandle:
+
+    def __init__(self, file_name):
+        from comm_tools.overwrites import escape_markdown
+        self.escape_markdown = escape_markdown
+        self.chat_format = {'on_chat': []}
+        self.plugin_format = {}
+        self.base_data_format = {
+            'system_prompt': None,
+            'chat': [],
+            'history': [],
+        }
+        self.chat_tag = 'raw-message hideM'
+        self.file_name = file_name
+        if os.path.exists(self.file_name):
+            with open(self.file_name, 'r') as fp:
+                self.base_data_format.update(json.load(fp))
+
+    def analysis_chat_history(self, chat_list: list[list], history: list, kwargs: dict):
+        self.base_data_format['history'] = history
+        new_chat = chat_list[-1]
+        handle_chat = []
+        for i in new_chat:
+            if str(i).find(self.chat_tag) != -1:
+                pattern = re.compile(r'<div class="raw-message hideM">(.*?)</div>')
+                match = pattern.search(str(i))
+                i = self.escape_markdown(match.group()[1], reverse=True)
+                handle_chat.append(i)
+            else:
+                handle_chat.append(i)
+        self.chat_format['on_chat'] = handle_chat
+        if kwargs:
+            self.chat_format['plugin'] = kwargs
+        self.base_data_format['chat'].append(self.chat_format)
+        with open(self.file_name, 'w') as fp:
+            json.dump(self.base_data_format, fp, indent=2, ensure_ascii=False)
+        return self
+
+
 def git_log_list():
     ll = Shell("git log --pretty=format:'%s | %h' -n 10").read()[1].splitlines()
-
     return [i.split('|') for i in ll if 'branch' not in i][:5]
+
+
+def replace_special_chars(file_name):
+    # 除了中文外，该正则表达式匹配任何一个不是数字、字母、下划线、.、空格的字符，避免文件名有问题
+    new_name = re.sub(r'[^\u4e00-\u9fa5\d\w\s\.\_]', '', file_name).rstrip().replace(' ', '_')
+    if not new_name:
+        new_name = created_atime()
+    return new_name
 
 
 def to_markdown_tabs(head: list, tabs: list, alignment=':---:', column=False):
@@ -684,4 +756,5 @@ class JsonHandle:
 
 
 if __name__ == '__main__':
-    print(html_view_blank('/Users/kilig/Job/Python-project/kso_gpt/config.py', to_tabs=True))
+    print(get_files_list('/Users/kilig/Job/Python-project/kso_gpt/users_data/history/192.168.0.102', ['.json']))
+

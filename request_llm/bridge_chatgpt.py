@@ -211,13 +211,17 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                 continue
             if chunk:
                 try:
+                    # 有的data: 后面没有空格，所以起点是第五个
+                    data_stream = chunk_decoded[chunk_decoded.find('{'):]
+                    # 处理数据流的主体
+                    chunkjson = json.loads(data_stream)
+                    if not chunkjson.get('choices'):
+                        chunkjson = chunkjson['data']
                     # 前者是API2D的结束条件，后者是OPENAI的结束条件
-                    if ('data: [DONE]' in chunk_decoded) or (len(json.loads(chunk_decoded[6:])['choices'][0]["delta"]) == 0):
+                    if ('data: [DONE]' in chunk_decoded) or (len(chunkjson['choices'][0]["delta"]) == 0):
                         # 判定为数据流的结束，gpt_replying_buffer也写完了
                         logging.info(f'[response] {gpt_replying_buffer}')
                         break
-                    # 处理数据流的主体
-                    chunkjson = json.loads(chunk_decoded[6:])
                     status_text = f"finish_reason: {chunkjson['choices'][0].get('finish_reason', 'null')}"
                     # 如果这里抛出异常，一般是文本过长，详情见get_full_error的输出
                     gpt_replying_buffer = gpt_replying_buffer + chunkjson['choices'][0]["delta"]["content"]
@@ -286,10 +290,13 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         "Content-Type": "application/json",
         "Authorization": f"Bearer {api_key}"
     }
-    if API_ORG.startswith('org-'): headers.update({"OpenAI-Organization": API_ORG})
+    if API_ORG.startswith('org-'):
+        headers.update({"OpenAI-Organization": API_ORG})
     if llm_kwargs['llm_model'].startswith('azure-') or llm_kwargs['llm_model'].startswith('proxy-'):
         headers.update({"api-key": api_key})
-
+    if llm_kwargs['llm_model'].startswith('aigc-'):
+        aigc_uuid, = get_conf('AIGC_UUID')
+        headers.update(aigc_uuid)
     conversation_cnt = len(history) // 2
 
     messages = [{"role": "system", "content": system_prompt}]
@@ -297,10 +304,10 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         for index in range(0, 2 * conversation_cnt, 2):
             what_i_have_asked = {}
             what_i_have_asked["role"] = "user"
-            what_i_have_asked["content"] = history[index]
+            what_i_have_asked["content"] = str(history[index])
             what_gpt_answer = {}
             what_gpt_answer["role"] = "assistant"
-            what_gpt_answer["content"] = history[index + 1]
+            what_gpt_answer["content"] = str(history[index + 1])
             if what_i_have_asked["content"] != "":
                 if what_gpt_answer["content"] == "": continue
                 if what_gpt_answer["content"] == timeout_bot_msg: continue
@@ -315,7 +322,10 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     messages.append(what_i_ask_now)
 
     payload = {
-        "model": str(llm_kwargs['llm_model']).replace('api2d-', '').replace('proxy-', ''),
+        "model": str(llm_kwargs['llm_model']).replace(
+            'api2d-', '').replace(
+            'proxy-', '').replace(
+            'aigc-', ''),
         "messages": messages,
         "temperature": llm_kwargs['temperature'],  # 1.0,
         "top_p": llm_kwargs['top_p'],  # 1.0,

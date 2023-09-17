@@ -80,6 +80,11 @@ def ArgsGeneralWrapper(f):
             'top_p': top_p,
             'temperature': temperature,
         })
+        if not cookies.get('first_chat'):
+            cookies['first_chat'] = func_box.replace_special_chars(str(txt)[:10])
+            if not cookies['first_chat'] and args:
+                cookies['first_chat'] = args[0]
+                cookies['first_chat'] += "_" + func_box.created_atime()
         llm_kwargs = {
             'api_key': cookies['api_key'],
             'llm_model': llm_model,
@@ -111,10 +116,14 @@ def ArgsGeneralWrapper(f):
         if len(args) > 1:
             plugin_kwargs['advanced_arg'] = ''
             plugin_kwargs.update({'parameters_def': args[1]})
+            cookies['is_plugin'] = {'func': {args[0]: txt_passon}, 'kwargs': plugin_kwargs}
+        elif len(args) == 1:
+            cookies['is_plugin'] = {'func': {args[0]: txt_passon}, 'kwargs': plugin_kwargs}
         elif len(args) == 0:
+            cookies['is_plugin'] = False
             plugin_kwargs['advanced_arg'] = ''
-            txt_passon = yield from Langchain_cn.knowledge_base_query(txt_passon, chatbot_with_cookie, history,
-                                                                      llm_kwargs, plugin_kwargs)
+            txt_passon = yield from Langchain_cn.knowledge_base_query(txt_passon, chatbot_with_cookie, history,                                                 llm_kwargs, plugin_kwargs)
+
         if cookies.get('lock_plugin', None) is None:
             yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
         else:
@@ -128,10 +137,10 @@ def ArgsGeneralWrapper(f):
             if len(args) != 0 and 'files_to_promote' in final_cookies and len(final_cookies['files_to_promote']) > 0:
                 chatbot_with_cookie.append(["检测到**滞留的缓存文档**，请及时处理。", "请及时点击“**保存当前对话**”获取所有滞留文档。"])
                 yield from update_ui(chatbot_with_cookie, final_cookies['history'], msg="检测到被滞留的缓存文档")
-        # 将对话记录写入数据库
+        # 将对话记录写入文件
         yield from end_predict(chatbot_with_cookie, history, llm_kwargs)
-        threading.Thread(target=func_box.thread_write_chat,
-                         args=(chatbot_with_cookie, ipaddr.client.host, models)).start()
+        threading.Thread(target=func_box.thread_write_chat_json,
+                         args=(chatbot_with_cookie, history, system_prompt, ipaddr.client.host)).start()
     return decorated
 
 
@@ -796,6 +805,13 @@ def is_proxy_key(key):
         return False
 
 
+def is_aigc_key(key):
+    if key.startswith('aigc-') and len(key) == 37:
+        return True
+    else:
+        return False
+
+
 def is_any_api_key(key):
     if ',' in key:
         keys = key.split(',')
@@ -803,7 +819,7 @@ def is_any_api_key(key):
             if is_any_api_key(k): return True
         return False
     else:
-        return is_openai_api_key(key) or is_api2d_key(key) or is_proxy_key(key) or is_azure_api_key(key)
+        return is_openai_api_key(key) or is_api2d_key(key) or is_proxy_key(key) or is_aigc_key(key) or is_azure_api_key(key)
 
 
 def what_keys(keys):
@@ -814,13 +830,14 @@ def what_keys(keys):
         if is_openai_api_key(k):
             avail_key_list['OpenAI Key'] += 1
 
-    for k in key_list:
         if is_api2d_key(k):
             avail_key_list['API2D Key'] += 1
 
-    for k in key_list:
-        if is_proxy_key(k):
+        if is_aigc_key(k):
             avail_key_list['Proxy Key'] += 1
+
+        if is_proxy_key(k):
+            avail_key_list['AIGC Key'] += 1
 
         if is_azure_api_key(k):
             avail_key_list['Azure Key'] += 1
@@ -847,6 +864,11 @@ def select_api_key(keys, llm_model):
     if llm_model.startswith('proxy-'):
         for k in key_list:
             if is_proxy_key(k): avail_key_list.append(k.replace('proxy-', ''))
+
+    if llm_model.startswith('aigc-'):
+        for k in key_list:
+            if is_aigc_key(k): avail_key_list.append(k.replace('aigc-', ''))
+
     if llm_model.startswith('azure-'):
         for k in key_list:
             if is_azure_api_key(k): avail_key_list.append(k)

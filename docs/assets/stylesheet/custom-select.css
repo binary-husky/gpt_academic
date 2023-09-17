@@ -10,7 +10,7 @@
 .normal_mut_select .svelte-1gfkn6j {
     float: left;
     width: auto;
-    line-height: 250% !important;
+    line-height: 260% !important;
 }
 .normal_mut_select .token[class*="svelte-"] {
     padding: 5px
@@ -83,6 +83,7 @@ div.svelte-15lo0d8>*, div.svelte-15lo0d8>.form>* {
 }
 #gr-more-sm-column {
     min-width: min(30%, 100%) !important;
+    margin-left: -0.5%;
 }
 /* 小按钮 */
 #gr-chat-sm-column {
@@ -112,10 +113,10 @@ div.svelte-15lo0d8>*, div.svelte-15lo0d8>.form>* {
     justify-content: center;
     align-items: center;
 }
-/* 强制隐藏 */
-.hide.svelte-vt1mxs {
-    display: none !important;
-}
+/*!* 强制隐藏 *!*/
+/*.hide.svelte-vt1mxs {*/
+/*    display: none !important;*/
+/*}*/
 
 code.language-folded {
     display: -webkit-box;

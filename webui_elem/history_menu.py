@@ -33,8 +33,8 @@ class LeftElem:
             with gr.Column(scale=6, elem_id="history-select-wrap"):
                 self.historySelectList = gr.Radio(
                     label=i18n("从列表中加载对话"),
-                    # choices=get_history_names(),
-                    # value=get_first_history_name(),
+                    choices=['123', '213'],
+                    value='123',
                     # multiselect=False,
                     container=False,
                     elem_id="history-select-dropdown"

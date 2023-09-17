@@ -48,12 +48,15 @@ class LazyloadTiktoken(object):
         return encoder.decode(*args, **kwargs)
 
 # Endpoint 重定向
-API_URL_REDIRECT, AZURE_ENDPOINT, AZURE_ENGINE, PROXY_API_URL, PROXY_TEST_API_URL = toolbox.get_conf("API_URL_REDIRECT", "AZURE_ENDPOINT", "AZURE_ENGINE", 'PROXY_API_URL', 'PROXY_TEST_API_URL')
+API_URL_REDIRECT, AZURE_ENDPOINT, AZURE_ENGINE, PROXY_API_URL, PROXY_TEST_API_URL, AIGC_API_URL = (
+    toolbox.get_conf("API_URL_REDIRECT", "AZURE_ENDPOINT", "AZURE_ENGINE",
+                     'PROXY_API_URL', 'PROXY_TEST_API_URL', 'AIGC_API_URL'))
 openai_endpoint = "https://api.openai.com/v1/chat/completions"
 api2d_endpoint = "https://openai.api2d.net/v1/chat/completions"
 newbing_endpoint = "wss://sydney.bing.com/sydney/ChatHub"
 proxy_endpoint = PROXY_API_URL
 proxy_test_ndpoint = PROXY_TEST_API_URL
+aigc_endpoint = AIGC_API_URL
 azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
 # 兼容旧版的配置
 try:
@@ -121,6 +124,14 @@ model_info = {
         "max_token": 8192,
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
+    },
+    "aigc-35": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": aigc_endpoint,
+        "max_token": 4096,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
     },
     "proxy-gpt-35-turbo-version-0301": {
         "fn_with_ui": chatgpt_ui,

@@ -499,14 +499,6 @@ def json_args_return(kwargs, keys: list, default=None) -> list:
     return temp
 
 
-def replace_special_chars(file_name):
-    # 除了中文外，该正则表达式匹配任何一个不是数字、字母、下划线、.、空格的字符，避免文件名有问题
-    new_name = re.sub(r'[^\u4e00-\u9fa5\d\w\s\.\_]', '', file_name).rstrip().replace(' ', '_')
-    if not new_name:
-        new_name = func_box.created_atime()
-    return new_name
-
-
 def long_name_processing(file_name):
     """
     Args:
@@ -519,7 +511,7 @@ def long_name_processing(file_name):
         temp = file_name.splitlines()
         for i in temp:
             if i:
-                file_name = replace_special_chars(i)
+                file_name = func_box.replace_special_chars(i)
                 break
     if file_name.find('.') != -1:
         file_name = "".join(file_name.split('.')[:-1])

@@ -26,12 +26,12 @@
     white-space: break-spaces;
     font-family: var(--font-mono) !important;
     border-radius: 6px !important;
-    margin: 0 2px 0 2px;
-    padding: .1em .4em .08em .4em !important;
+    /*margin: 0 2px 0 2px;*/
+    /*padding: .1em .4em .08em .4em !important;*/
     background-color: rgb(19 18 18) !important;
     color: #ff6e67;
     border: none !important;
-    font-size: var(--text-md) !important;
+    /*font-size: var(--text-md) !important;*/
 }
 /* 代码块 */
 .md-message pre,

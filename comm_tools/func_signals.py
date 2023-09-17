@@ -75,6 +75,23 @@ def filter_database_tables():
     return split_tab_new
 
 
+# TODO < -------------------------------- 对话函数注册区 ----------------------------------->
+def clear_chat_cookie(cookie, ipaddr: gr.Request):
+    file_list, only_name, new_path, new_name = func_box.get_files_list(os.path.join(func_box.history_path, ipaddr.client.host), filter_format=['.json'])
+    return [], [], cookie, '已重置对话记录和对话Cookies', gr.Radio.update(choices=['新对话']+only_name, value='新对话')
+
+
+def select_conversation(select, ipaddr: gr.Request):
+    user_path = os.path.join(func_box.history_path, ipaddr.client.host)
+    user_history = [f for f in os.listdir(user_path) if f.endswith('.json') and select == os.path.splitext(f)[0]]
+    if not user_history:
+        return [], []
+    history_handle = func_box.HistoryJsonHandle(os.path.join(user_path, user_history[0]))
+    chatbot = [i['on_chat'] for i in history_handle.base_data_format['chat']]
+    history = history_handle.base_data_format['history']
+    return chatbot, history
+
+
 # TODO < -------------------------------- 基础功能函数注册区 -------------------------------->
 def prompt_retrieval(is_all, hosts='', search=False):
     """
@@ -411,7 +428,13 @@ def refresh_load_data(prompt, request: gr.Request):
     know_cls = gr.Dropdown.update(choices=know_list, value='公共知识库')
     know_load = gr.Dropdown.update(choices=load_list, label='公共知识库', show_label=True)
     know_user = gr.Dropdown.update(choices=user_list)
+    file_list, only_name, new_path, new_name = func_box.get_files_list(os.path.join(func_box.history_path, request.client.host), filter_format=['.json'])
+
+    history_handle = func_box.HistoryJsonHandle(new_path)
+    chatbot = [i['on_chat'] for i in history_handle.base_data_format['chat']]
+    history = history_handle.base_data_format['history']
     select_list = filter_database_tables()
     outputs = [gr.Dataset.update(samples=data, visible=True), prompt, gr.Dropdown.update(choices=select_list),
+               gr.Radio.update(choices=only_name, value=new_name, visible=True), chatbot, history,
                know_cls, know_user, know_load]
     return outputs

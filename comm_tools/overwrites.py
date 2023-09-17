@@ -4,12 +4,16 @@
 # @Author : Spike
 # @Descr   :
 import re
+import os
+import gradio as gr
 from typing import List, Tuple, Dict
 from gradio_client import utils as client_utils
 from gradio import utils
+from collections import namedtuple
+from comm_tools import func_box, toolbox
 
 
-def escape_markdown(text):
+def escape_markdown(text, reverse=False):
     """
     Escape Markdown special characters to HTML-safe equivalents.
     """
@@ -36,8 +40,14 @@ def escape_markdown(text):
         ':': '&#58;',
         '\n': '<br>',
     }
-    text = text.replace('    ', '&nbsp;&nbsp;&nbsp;&nbsp;')
-    return ''.join(escape_chars.get(c, c) for c in text)
+    if reverse:
+        text = text.replace('&nbsp;&nbsp;&nbsp;&nbsp;', '    ')
+        for k in escape_chars:
+            text = text.replace(escape_chars[k], k)
+        return text
+    else:
+        text = text.replace('    ', '&nbsp;&nbsp;&nbsp;&nbsp;')
+        return ''.join(escape_chars.get(c, c) for c in text)
 
 
 def clip_rawtext(chat_message, need_escape=True):
@@ -142,3 +152,119 @@ def postprocess_chat_messages(self, chat_message, role):
         return chat_message
     else:
         raise ValueError(f"Invalid message for Chatbot component: {chat_message}")
+
+def webpath(fn):
+    if fn.startswith(func_box.base_path,):
+        web_path = os.path.relpath(fn, func_box.base_path,).replace('\\', '/')
+    else:
+        web_path = os.path.abspath(fn)
+    return f'file={web_path}?{os.path.getmtime(fn)}'
+
+
+ScriptFile = namedtuple("ScriptFile", ["basedir", "filename", "path"])
+
+
+def javascript_html():
+    head = ""
+    for script in list_scripts("javascript", ".js"):
+        head += f'<script type="text/javascript" src="{webpath(script.path)}"></script>\n'
+    for script in list_scripts("javascript", ".mjs"):
+        head += f'<script type="module" src="{webpath(script.path)}"></script>\n'
+    return head
+
+
+def css_html():
+    head = ""
+    for cssfile in list_scripts("stylesheet", ".css"):
+        head += f'<link rel="stylesheet" property="stylesheet" href="{webpath(cssfile.path)}">'
+    return head
+
+
+def list_scripts(scriptdirname, extension):
+    scripts_list = []
+    scripts_dir = os.path.join(func_box.base_path, "docs/assets", scriptdirname)
+    if os.path.exists(scripts_dir):
+        for filename in sorted(os.listdir(scripts_dir)):
+            scripts_list.append(ScriptFile(func_box.base_path, filename, os.path.join(scripts_dir, filename)))
+    scripts_list = [x for x in scripts_list if
+                    os.path.splitext(x.path)[1].lower() == extension and os.path.isfile(x.path)]
+    return scripts_list
+
+
+def reload_javascript():
+    js = javascript_html()
+    js += '<script async type="module" src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>'
+    js += '<script async type="module" src="http://spin.js.org/spin.umd.js"></script><link type="text/css" href="https://spin.js.org/spin.css" rel="stylesheet" />'
+    waifu_js = ''
+    ADD_WAIFU, = toolbox.get_conf('ADD_WAIFU')
+    if ADD_WAIFU:
+        waifu_js += """
+            <script src="file=docs/waifu_plugin/jquery.min.js"></script>
+            <script src="file=docs/waifu_plugin/jquery-ui.min.js"></script>
+            <script src="file=docs/waifu_plugin/autoload.js"></script>
+        """
+    meta = """
+        <meta name="apple-mobile-web-app-title" content="川虎 Chat">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="application-name" content="川虎 Chat">
+        <meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover'>
+        <meta name="theme-color" content="#ffffff">
+    """
+    css = css_html()
+    def template_response(*args, **kwargs):
+        res = GradioTemplateResponseOriginal(*args, **kwargs)
+        res.body = res.body.replace(b'</head>', f'{meta}{js}</head>'.encode("utf8"))
+        res.body = res.body.replace(b'</html>', f'{waifu_js}</html>'.encode("utf8"))
+        # res.body = res.body.replace(b'</head>', f'{js}</head>'.encode("utf8"))
+        res.body = res.body.replace(b'</body>', f'{css}</body>'.encode("utf8"))
+        res.init_headers()
+        return res
+
+    gr.routes.templates.TemplateResponse = template_response
+
+
+GradioTemplateResponseOriginal = gr.routes.templates.TemplateResponse
+
+
+def add_classes_to_gradio_component(comp):
+    """
+    this adds gradio-* to the component for css styling (ie gradio-button to gr.Button), as well as some others
+    code from stable-diffusion-webui <AUTOMATIC1111/stable-diffusion-webui>
+    """
+    comp.elem_classes = [f"gradio-{comp.get_block_name()}", *(comp.elem_classes or [])]
+
+    if getattr(comp, 'multiselect', False):
+        comp.elem_classes.append('multiselect')
+
+
+def IOComponent_init(self, *args, **kwargs):
+    res = original_IOComponent_init(self, *args, **kwargs)
+    add_classes_to_gradio_component(self)
+
+    return res
+
+original_IOComponent_init = gr.components.IOComponent.__init__
+gr.components.IOComponent.__init__ = IOComponent_init
+
+
+def BlockContext_init(self, *args, **kwargs):
+    res = original_BlockContext_init(self, *args, **kwargs)
+    add_classes_to_gradio_component(self)
+
+    return res
+
+original_BlockContext_init = gr.blocks.BlockContext.__init__
+gr.blocks.BlockContext.__init__ = BlockContext_init
+
+
+if __name__ == '__main__':
+    test = """
+    在 Python 中可以使用第三方库 `html2text` 将 HTML 格式的文本转换成 Markdown 格式的文本。该库可以通过 pip 工具进行安装，安装方法如下：
+```
+pip install html2text
+```
+    """
+    test2 = """
+    <br>&nbsp;&nbsp;&nbsp;&nbsp;在 Python 中可以使用第三方库 &#96;html2text&#96; 将 HTML 格式的文本转换成 Markdown 格式的文本。该库可以通过 pip 工具进行安装，安装方法如下：<br><br>&#96;&#96;&#96;<br>pip install html2text<br>&#96;&#96;&#96;<br>&nbsp;&nbsp;&nbsp;&nbsp;
+"""
+    print(escape_markdown(test, reverse=True))

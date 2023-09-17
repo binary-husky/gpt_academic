@@ -5,7 +5,7 @@ import logging
 from request_llm.bridge_all import predict
 from comm_tools.toolbox import find_free_port, on_file_uploaded, get_user_upload, \
     get_conf, ArgsGeneralWrapper
-from comm_tools.overwrites import postprocess_chat_messages, postprocess
+from comm_tools.overwrites import postprocess_chat_messages, postprocess, reload_javascript
 # 问询记录, python 版本建议3.9+（越新越好）
 # 一些普通功能模块
 from comm_tools.core_functional import get_core_functions
@@ -18,8 +18,7 @@ gr.Chatbot._postprocess_chat_messages = postprocess_chat_messages
 gr.Chatbot.postprocess = postprocess
 
 # 做一些外观色彩上的调整
-from comm_tools.theme import adjust_theme, custom_css, reload_javascript
-
+from comm_tools.theme import adjust_theme
 set_theme = adjust_theme()
 
 # 代理与自动更新
@@ -155,7 +154,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                 if not role_fns[k].get("AsButton", True): continue
                 click_handle = role_fns[k]["Button"].click(**self.clear_agrs).then(
                                   ArgsGeneralWrapper(role_fns[k]["Function"]),
-                                  [*self.input_combo, gr.State(PORT), gr.State(role_fns[k].get('Parameters', False))],
+                                  [*self.input_combo, gr.State(k),
+                                   gr.State(role_fns[k].get('Parameters', False))],
                                   self.output_combo)
                 # click_handle.then(on_report_generated, [self.cookies, self.file_upload, self.chatbot],
                 #                   [self.cookies, self.file_upload, self.chatbot])
@@ -183,13 +183,14 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         def route(k, ipaddr: gr.Request, *args, **kwargs):
             if k in [r"打开插件列表", r"请先从插件列表中选择"]: return
             append = list(args)
-            append[-2] = func_box.txt_converter_json(append[-2])
-            append.insert(-1, ipaddr)
+            append[-1] = func_box.txt_converter_json(append[-1])
+            append.append(ipaddr)
+            append.append(k)
             args = tuple(append)
             yield from ArgsGeneralWrapper(crazy_fns[k]["Function"])(*args, **kwargs)
 
         click_handle = self.switchy_bt.click(**self.clear_agrs).then(
-            route, [self.switchy_bt, *self.input_combo, gr.State(PORT)], self.output_combo)
+            route, [self.switchy_bt, *self.input_combo], self.output_combo)
         # click_handle.then(on_report_generated,
         #       [self.cookies, self.file_upload, self.chatbot],
         #       [self.cookies, self.file_upload, self.chatbot])
@@ -230,6 +231,10 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                        outputs=[self.langchain_dropdown, self.chatbot])
         self.langchain_stop.click(fn=lambda: '已暂停构建任务', inputs=None, outputs=[self.langchain_status], cancels=[submit_id])
 
+    def signals_history(self):
+        self.historySelectList.input(fn=func_signals.select_conversation, inputs=[self.historySelectList],
+                                      outputs=[self.chatbot, self.history])
+
     def signals_input_setting(self):
         # 注册input
         self.input_combo = [self.cookies, self.max_length_sl, self.default_worker_num, self.model_select_dropdown,
@@ -248,7 +253,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         click_handle = self.submitBtn.click(**self.clear_agrs).then(**self.predict_args)
         self.cancel_handles.append(submit_handle)
         self.cancel_handles.append(click_handle)
-        self.emptyBtn.click(lambda: ([], [], "已重置"), None, [self.chatbot, self.history, self.status_display])
+        self.emptyBtn.click(func_signals.clear_chat_cookie, [self.def_cookies],
+                            [self.chatbot, self.history, self.cookies, self.status_display, self.historySelectList])
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay(self, is_open=False):
@@ -266,7 +272,9 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         # threading.Thread(target=warm_up_modules, name="warm-up", daemon=True).start()
 
     def block_title(self):
-        self.cookies = gr.State({'api_key': API_KEY, 'llm_model': LLM_MODEL, 'local': self.__url})
+        share_cookie = {'api_key': API_KEY, 'llm_model': LLM_MODEL, 'local': self.__url}
+        self.cookies = gr.State(share_cookie)
+        self.def_cookies = gr.State(share_cookie)
         self.history = gr.State([])
         with gr.Row(elem_id="chuanhu-header"):
             gr.HTML(get_html("header_title.html").format(
@@ -299,6 +307,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                     self.draw_popup_config()
                     self.draw_popup_fakec()
             # 函数注册，需要在Blocks下进行
+            self.signals_history()
             self.signals_input_setting()
             self.signals_sm_btn()
             self.signals_prompt_func()
@@ -310,6 +319,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
             self.demo.load(fn=func_signals.refresh_load_data,
                            inputs=[self.pro_fp_state],
                            outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check,
+                                    self.historySelectList, self.chatbot, self.history,
                                     self.langchain_classifi, self.langchain_select, self.langchain_dropdown])
 
         # Start

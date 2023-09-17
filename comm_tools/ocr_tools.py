@@ -6,7 +6,7 @@
 import os.path
 import requests
 from comm_tools import func_box
-from paddleocr import PaddleOCR, draw_ocr, PPStructure, save_structure_res
+from paddleocr import PaddleOCR, draw_ocr
 import concurrent.futures
 from comm_tools import database_processor
 # Paddleocr目前支持的多语言语种可以通过修改lang参数进行切换
