@@ -3,7 +3,7 @@ import gradio as gr
 import logging
 
 from request_llm.bridge_all import predict
-from comm_tools.toolbox import find_free_port, on_file_uploaded, get_user_upload, \
+from comm_tools.toolbox import find_free_port, on_file_uploaded, \
     get_conf, ArgsGeneralWrapper
 from comm_tools.overwrites import postprocess_chat_messages, postprocess, reload_javascript
 # 问询记录, python 版本建议3.9+（越新越好）
@@ -66,11 +66,18 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         self.sm_upload.upload(on_file_uploaded, [self.sm_upload, self.chatbot, self.user_input, self.cookies],
                               [self.chatbot, self.user_input])
         self.sm_code_block.click(fn=lambda x: x+'```\n\n```', inputs=[self.user_input], outputs=[self.user_input])
-        self.sm_upload_history.click(get_user_upload, [self.chatbot, self.user_input], outputs=[self.chatbot])
+        self.sm_upload_history.click(func_signals.get_user_upload, [self.chatbot, self.user_input],
+                                     outputs=[self.chatbot])
         self.langchain_dropdown.select(fn=Langchain_cn.obtaining_knowledge_base_files,
-                                       inputs=[self.langchain_classifi, self.langchain_class_name, self.langchain_dropdown, self.chatbot, self.langchain_know_kwargs, self.models_box],
+                                       inputs=[self.langchain_classifi, self.langchain_class_name,
+                                               self.langchain_dropdown, self.chatbot, self.langchain_know_kwargs,
+                                               self.models_box],
                                        outputs=[self.chatbot, self.status_display, self.langchain_know_kwargs]
                                        )
+        self.delLastBtn.click(func_signals.delete_latest_chat, inputs=[self.chatbot, self.history, self.cookies],
+                              outputs=[self.chatbot, self.history, self.cookies])
+        self.retryBtn.click(fn=ArgsGeneralWrapper(predict), inputs=self.input_combo+[gr.State('RetryChat')],
+                                 outputs=self.output_combo, show_progress=True)
 
     def __clear_input(self, inputs):
         return '', inputs, self.cancelBtn.update(visible=True), self.submitBtn.update(visible=False)
@@ -326,9 +333,9 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
             # self.demo.load(fn=func_signals.mobile_access, inputs=[],
             #                outputs=[self.sm_btn_column, self.langchain_dropdown])
             self.demo.load(fn=func_signals.refresh_load_data,
-                           inputs=[self.pro_fp_state],
+                           inputs=[self.pro_fp_state, self.cookies],
                            outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check,
-                                    self.historySelectList, self.chatbot, self.history, self.saveFileName,
+                                    self.historySelectList, self.chatbot, self.history, self.cookies, self.saveFileName,
                                     self.langchain_classifi, self.langchain_select, self.langchain_dropdown])
 
         # Start

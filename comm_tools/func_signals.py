@@ -91,12 +91,7 @@ def select_history(select, cookies, ipaddr: gr.Request):
     if not user_history:
         return [], []
     history_handle = func_box.HistoryJsonHandle(os.path.join(user_path, user_history[0]))
-    try:
-        chatbot = [i['on_chat'] for i in history_handle.base_data_format['chat']]
-        history = history_handle.base_data_format['history']
-        cookies['is_plugin'] = history_handle.base_data_format['chat'][-1].get('plugin', '')
-    except ValueError:
-        raise gr.Error('对话文件已损坏，请检查或删除吧')
+    chatbot, history, cookies = history_handle.update_for_history(cookies, select)
     return chatbot, history, select, cookies
 
 
@@ -143,6 +138,36 @@ def refresh_history(ipaddr: gr.Request):
     user_path = os.path.join(func_box.history_path, ipaddr.client.host)
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
     return gr.Radio.update(choices=only_name, value=new_name)
+
+
+# TODO < -------------------------------- 小按钮函数注册区 -------------------------------->
+def delete_latest_chat(chatbot, history, cookies: dict, ipaddr: gr.Request):
+    select = cookies.get('first_chat', '')
+    user_path = os.path.join(func_box.history_path, ipaddr.client.host, f"{select}.json")
+    history_handle = func_box.HistoryJsonHandle(user_path)
+    history_handle.delete_the_latest_chat()
+    chatbot, history, cookies = history_handle.update_for_history(cookies, select)
+    return chatbot, history, cookies
+
+
+def get_user_upload(chatbot, txt, ipaddr: gr.Request):
+    """
+    获取用户上传过的文件
+    """
+    private_upload = './private_upload'
+    user_history = os.path.join(private_upload, ipaddr.client.host)
+    history = """| 编号 | 目录 | 目录内文件 |\n| --- | --- | --- |\n"""
+    count_num = 1
+    for root, d, file in os.walk(user_history):
+        if txt in str(file) or txt in root:
+            file_link = "<br>".join([f'{func_box.html_view_blank(f"{root}/{i}")}' for i in file])
+            history += f'| {count_num} | {root} | {file_link} |\n'
+            count_num += 1
+    chatbot.append([None,  # 'Load Submission History like `{txt}`....',
+                    f'{history}\n\n'
+                    f'[Local Message] 请自行复制以上目录 or 目录+文件, 填入输入框以供函数区高亮按钮使用\n\n'
+                    f'{func_box.html_tag_color("提交前记得请检查头尾空格哦～")}\n\n'])
+    return chatbot
 
 
 # TODO < -------------------------------- 基础功能函数注册区 -------------------------------->
@@ -465,7 +490,7 @@ def mobile_access(request: gr.Request): # 为适配手机端
         return gr.update(), gr.update()
 
 
-def refresh_load_data(prompt, request: gr.Request):
+def refresh_load_data(prompt, cookies, request: gr.Request):
     """
     Args:
         prompt: prompt dataset组件
@@ -482,12 +507,10 @@ def refresh_load_data(prompt, request: gr.Request):
     know_load = gr.Dropdown.update(choices=load_list, label='公共知识库', show_label=True)
     know_user = gr.Dropdown.update(choices=user_list)
     file_list, only_name, new_path, new_name = func_box.get_files_list(os.path.join(func_box.history_path, request.client.host), filter_format=['.json'])
-
     history_handle = func_box.HistoryJsonHandle(new_path)
-    chatbot = [i['on_chat'] for i in history_handle.base_data_format['chat']]
-    history = history_handle.base_data_format['history']
+    chatbot, history, cookies = history_handle.update_for_history(cookies, new_name)
     select_list = filter_database_tables()
     outputs = [gr.Dataset.update(samples=data, visible=True), prompt, gr.Dropdown.update(choices=select_list),
-               gr.Radio.update(choices=only_name, value=new_name, visible=True), chatbot, history, new_name,
-               know_cls, know_user, know_load]
+               gr.Radio.update(choices=only_name, value=new_name, visible=True), chatbot, history, cookies,
+               new_name, know_cls, know_user, know_load]
     return outputs

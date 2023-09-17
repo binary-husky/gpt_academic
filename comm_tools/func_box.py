@@ -197,7 +197,7 @@ def ipaddr():
             return ip[i][0][1]
 
 
-def encryption_str(txt: str):
+def encryption_str(txt: str) -> object:
     """(关键字)(加密间隔)匹配机制（关键字间隔）"""
     txt = str(txt)
     pattern = re.compile(r"(Authorization|WPS-Sid|Cookie)(:|\s+)\s*([\w-]+?)(,|$|\s)", re.IGNORECASE)
@@ -532,16 +532,18 @@ class HistoryJsonHandle:
             'system_prompt': None,
             'chat': [],
             'history': [],
+            'last_chat': ''
         }
         self.chat_tag = 'raw-message hideM'
         self.file_name = file_name
-        if os.path.exists(self.file_name):
+        if os.path.exists(str(self.file_name)):
             with open(self.file_name, 'r') as fp:
                 self.base_data_format.update(json.load(fp))
 
     def analysis_chat_history(self, chat_list: list[list], history: list, kwargs: dict):
         self.base_data_format['history'] = history
         new_chat = chat_list[-1]
+        self.base_data_format['last_chat'] = new_chat[0]
         handle_chat = []
         for i in new_chat:
             if str(i).find(self.chat_tag) != -1:
@@ -558,6 +560,26 @@ class HistoryJsonHandle:
         with open(self.file_name, 'w') as fp:
             json.dump(self.base_data_format, fp, indent=2, ensure_ascii=False)
         return self
+
+    def delete_the_latest_chat(self):
+        self.base_data_format['chat'] = self.base_data_format['chat'][:-1]
+        self.base_data_format['history'] = self.base_data_format['history'][:-2]
+        with open(self.file_name, 'w') as fp:
+            json.dump(self.base_data_format, fp, indent=2, ensure_ascii=False)
+        return self
+
+    def update_for_history(self, cookies, select):
+        try:
+            chatbot = [i['on_chat'] for i in self.base_data_format['chat']]
+            history = self.base_data_format['history']
+            cookies['is_plugin'] = self.base_data_format['chat'][-1].get('plugin', '')
+            cookies['first_chat'] = select
+            cookies['last_chat'] = self.base_data_format['last_chat']
+            if not cookies['last_chat']:
+                cookies['last_chat'] = self.base_data_format['chat'][-1]['on_chat'][0]
+            return chatbot, history, cookies
+        except Exception:
+            return [], [], cookies
 
 
 def git_log_list():
@@ -756,5 +778,5 @@ class JsonHandle:
 
 
 if __name__ == '__main__':
-    print(get_files_list('/Users/kilig/Job/Python-project/kso_gpt/users_data/history/192.168.0.102', ['.json']))
+    print(get_files_list('', ['.json']))
 

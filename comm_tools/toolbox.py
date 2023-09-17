@@ -65,7 +65,6 @@ def ArgsGeneralWrapper(f):
     """
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
-
     def decorated(cookies, max_length, worker_num, llm_model,
                   langchain, know_dict, know_cls,
                   vector_score, vector_top_k, vector_size,
@@ -79,6 +78,7 @@ def ArgsGeneralWrapper(f):
         cookies.update({
             'top_p': top_p,
             'temperature': temperature,
+            'last_chat': txt
         })
         if not cookies.get('first_chat'):
             cookies['first_chat'] = func_box.replace_special_chars(str(txt)[:10])
@@ -116,16 +116,30 @@ def ArgsGeneralWrapper(f):
         if len(args) > 1:
             plugin_kwargs['advanced_arg'] = ''
             plugin_kwargs.update({'parameters_def': args[1]})
-            cookies['is_plugin'] = {'func': {args[0]: txt_passon}, 'kwargs': plugin_kwargs}
-        elif len(args) == 1:
-            cookies['is_plugin'] = {'func': {args[0]: txt_passon}, 'kwargs': plugin_kwargs}
+            cookies['is_plugin'] = {'func_name': args[0], 'input': txt_passon, 'kwargs': plugin_kwargs}
+        elif len(args) == 1 and 'RetryChat' not in args:
+            cookies['is_plugin'] = {'func_name': args[0], 'input': txt_passon, 'kwargs': plugin_kwargs}
         elif len(args) == 0:
             cookies['is_plugin'] = False
             plugin_kwargs['advanced_arg'] = ''
-            txt_passon = yield from Langchain_cn.knowledge_base_query(txt_passon, chatbot_with_cookie, history,                                                 llm_kwargs, plugin_kwargs)
-
+            txt_passon = yield from Langchain_cn.knowledge_base_query(txt_passon,
+                                    chatbot_with_cookie, history, llm_kwargs, plugin_kwargs)
         if cookies.get('lock_plugin', None) is None:
-            yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
+            is_try = args[0] if 'RetryChat' in args else None
+            if is_try:
+                txt_passon = cookies.get('last_chat', txt_passon)
+                if cookies.get('is_plugin', ''):
+                    from comm_tools.crazy_functional import crazy_fns
+                    func_name = cookies['is_plugin']['func_name']
+                    txt_passon = cookies['is_plugin']['input']
+                    try_f = crazy_fns.get(func_name, False)
+                    if try_f: try_f = try_f['Function']
+                else:
+                    try_f = f
+                    args = ()
+                yield from try_f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
+            else:
+                yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
         else:
             # 处理少数情况下的特殊插件的锁定状态
             module, fn_name = cookies['lock_plugin'].split('->')
@@ -634,24 +648,7 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
         chatbot._cookies.update({'file_to_promote': [new_path] + current})
 
 
-def get_user_upload(chatbot, txt, ipaddr: gr.Request):
-    """
-    获取用户上传过的文件
-    """
-    private_upload = './private_upload'
-    user_history = os.path.join(private_upload, ipaddr.client.host)
-    history = """| 编号 | 目录 | 目录内文件 |\n| --- | --- | --- |\n"""
-    count_num = 1
-    for root, d, file in os.walk(user_history):
-        if txt in str(file) or txt in root:
-            file_link = "<br>".join([f'{func_box.html_view_blank(f"{root}/{i}")}' for i in file])
-            history += f'| {count_num} | {root} | {file_link} |\n'
-            count_num += 1
-    chatbot.append([None,  # 'Load Submission History like `{txt}`....',
-                    f'{history}\n\n'
-                    f'[Local Message] 请自行复制以上目录 or 目录+文件, 填入输入框以供函数区高亮按钮使用\n\n'
-                    f'{func_box.html_tag_color("提交前记得请检查头尾空格哦～")}\n\n'])
-    return chatbot
+
 
 
 def disable_auto_promotion(chatbot):
