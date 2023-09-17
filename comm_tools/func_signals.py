@@ -77,19 +77,72 @@ def filter_database_tables():
 
 # TODO < -------------------------------- 对话函数注册区 ----------------------------------->
 def clear_chat_cookie(cookie, ipaddr: gr.Request):
-    file_list, only_name, new_path, new_name = func_box.get_files_list(os.path.join(func_box.history_path, ipaddr.client.host), filter_format=['.json'])
-    return [], [], cookie, '已重置对话记录和对话Cookies', gr.Radio.update(choices=['新对话']+only_name, value='新对话')
+    user_path = os.path.join(func_box.history_path, ipaddr.client.host)
+    file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
+    output = [[], [], cookie, '已重置对话记录和对话Cookies',
+              gr.Radio.update(choices=['新对话']+only_name, value='新对话'),
+              "新对话"]
+    return output
 
 
-def select_conversation(select, ipaddr: gr.Request):
+def select_history(select, cookies, ipaddr: gr.Request):
     user_path = os.path.join(func_box.history_path, ipaddr.client.host)
     user_history = [f for f in os.listdir(user_path) if f.endswith('.json') and select == os.path.splitext(f)[0]]
     if not user_history:
         return [], []
     history_handle = func_box.HistoryJsonHandle(os.path.join(user_path, user_history[0]))
-    chatbot = [i['on_chat'] for i in history_handle.base_data_format['chat']]
-    history = history_handle.base_data_format['history']
-    return chatbot, history
+    try:
+        chatbot = [i['on_chat'] for i in history_handle.base_data_format['chat']]
+        history = history_handle.base_data_format['history']
+        cookies['is_plugin'] = history_handle.base_data_format['chat'][-1].get('plugin', '')
+    except ValueError:
+        raise gr.Error('对话文件已损坏，请检查或删除吧')
+    return chatbot, history, select, cookies
+
+
+def rename_history(old_file, filename: str,  ipaddr: gr.Request):
+    filename = filename.strip(' \n')
+    if filename == "":
+        return gr.update()
+    if not filename.endswith(".json"):
+        filename += ".json"
+    user_path = os.path.join(func_box.history_path, ipaddr.client.host)
+    full_path = os.path.join(user_path, filename)
+    if not os.path.exists(os.path.join(user_path, f"{old_file}.json")):
+        return gr.Error(f'{old_file}历史文件不存在，请刷新页面后尝试')
+    repeat_file_index = 2
+    while os.path.exists(full_path):     # 命名重复检测
+        full_path = os.path.join(user_path, f"{repeat_file_index}_{filename}")
+        repeat_file_index += 1
+    os.rename(os.path.join(user_path, f"{old_file}.json"), full_path)
+    file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
+    return gr.Radio.update(choices=only_name, value=new_name)
+
+
+def delete_history(_, filename, ipaddr: gr.Request):
+    user_path = os.path.join(func_box.history_path, ipaddr.client.host)
+    full_path = os.path.join(user_path, f"{filename}.json")
+    if not os.path.exists(full_path):
+        if filename == 'CANCELED':
+            return gr.update()
+        else:
+            raise gr.Error('文件或许已不存在')
+    os.remove(full_path)
+    file_list, only_name, new_path, new_name = func_box.get_files_list(os.path.join(func_box.history_path, ipaddr.client.host), filter_format=['.json'])
+    return gr.Radio.update(choices=only_name, value=new_name)
+
+
+def import_history(file, ipaddr: gr.Request):
+    user_path = os.path.join(func_box.history_path, ipaddr.client.host)
+    os.rename(file.name, os.path.join(user_path, os.path.basename(file.name)))
+    file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
+    return gr.Radio.update(choices=only_name, value=new_name)
+
+
+def refresh_history(ipaddr: gr.Request):
+    user_path = os.path.join(func_box.history_path, ipaddr.client.host)
+    file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
+    return gr.Radio.update(choices=only_name, value=new_name)
 
 
 # TODO < -------------------------------- 基础功能函数注册区 -------------------------------->
@@ -435,6 +488,6 @@ def refresh_load_data(prompt, request: gr.Request):
     history = history_handle.base_data_format['history']
     select_list = filter_database_tables()
     outputs = [gr.Dataset.update(samples=data, visible=True), prompt, gr.Dropdown.update(choices=select_list),
-               gr.Radio.update(choices=only_name, value=new_name, visible=True), chatbot, history,
+               gr.Radio.update(choices=only_name, value=new_name, visible=True), chatbot, history, new_name,
                know_cls, know_user, know_load]
     return outputs

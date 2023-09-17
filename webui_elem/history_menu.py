@@ -59,8 +59,10 @@ class LeftElem:
                     # container=False,
                 )
             with gr.Column(scale=1):
-                self.renameHistoryBtn = gr.Button(i18n("💾 Rename Chat"), elem_id="gr-history-save-btn")
-                self.exportMarkdownBtn = gr.Button(i18n("📝 Export as Markdown"), elem_id="gr-markdown-export-btn")
+                self.renameHistoryBtn = gr.Button(i18n("💾 Rename Chat"),
+                                                  elem_id="gr-history-save-btn")
+                self.exportMarkdownBtn = gr.Button(i18n("📝 Export as Markdown"),
+                                                   elem_id="gr-markdown-export-btn")
 
     def draw_history_area(self):
         with gr.Column(elem_id="menu-area"):

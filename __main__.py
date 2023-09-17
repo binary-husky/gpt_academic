@@ -232,8 +232,17 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         self.langchain_stop.click(fn=lambda: '已暂停构建任务', inputs=None, outputs=[self.langchain_status], cancels=[submit_id])
 
     def signals_history(self):
-        self.historySelectList.input(fn=func_signals.select_conversation, inputs=[self.historySelectList],
-                                      outputs=[self.chatbot, self.history])
+        self.historySelectList.input(fn=func_signals.select_history, inputs=[self.historySelectList, self.cookies],
+                                      outputs=[self.chatbot, self.history, self.saveFileName, self.cookies])
+        self.renameHistoryBtn.click(func_signals.rename_history,
+                                    inputs=[self.saveFileName, self.historySelectList],
+                                    outputs=[self.historySelectList],
+                                    _js='(a,b,c,d)=>{return saveChatHistory(a,b,c,d);}')
+        self.historyDeleteBtn.click(func_signals.delete_history, inputs=[gr.State('占位耶'), self.historySelectList],
+                                    outputs=[self.historySelectList],
+                                    _js='(a,b,c)=>{return showConfirmationDialog(a, b, c);}')
+        self.uploadFileBtn.upload(fn=func_signals.import_history, inputs=[self.uploadFileBtn], outputs=[self.historySelectList])
+        self.historyRefreshBtn.click(func_signals.refresh_history, inputs=None, outputs=[self.historySelectList])
 
     def signals_input_setting(self):
         # 注册input
@@ -254,7 +263,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         self.cancel_handles.append(submit_handle)
         self.cancel_handles.append(click_handle)
         self.emptyBtn.click(func_signals.clear_chat_cookie, [self.def_cookies],
-                            [self.chatbot, self.history, self.cookies, self.status_display, self.historySelectList])
+                            [self.chatbot, self.history, self.cookies, self.status_display, self.historySelectList, self.saveFileName])
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay(self, is_open=False):
@@ -319,7 +328,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
             self.demo.load(fn=func_signals.refresh_load_data,
                            inputs=[self.pro_fp_state],
                            outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check,
-                                    self.historySelectList, self.chatbot, self.history,
+                                    self.historySelectList, self.chatbot, self.history, self.saveFileName,
                                     self.langchain_classifi, self.langchain_select, self.langchain_dropdown])
 
         # Start
