@@ -491,6 +491,10 @@ def get_html(filename):
     return ""
 
 
+def md_division_line():
+    gr.Markdown("---", elem_classes="hr-line")
+
+
 def thread_write_chat(chatbot, ipaddr, models):
     """
     对话记录写入数据库
@@ -518,21 +522,23 @@ def thread_write_chat_json(chatbot, history, system, ipaddr):
     history_json_handle = HistoryJsonHandle(file_name)
     history_json_handle.base_data_format['system_prompt'] = system
     kwargs = cookies.get('is_plugin', False)
-    history_json_handle.analysis_chat_history(chatbot, history, kwargs)
+    history_json_handle.analysis_chat_history(chatbot, history, cookies, kwargs)
 
 
 class HistoryJsonHandle:
 
     def __init__(self, file_name):
         from comm_tools.overwrites import escape_markdown
+        default_params, = toolbox.get_conf('LLMS_DEFAULT_PARAMETER')
         self.escape_markdown = escape_markdown
+        self.default_params = default_params
         self.chat_format = {'on_chat': []}
         self.plugin_format = {}
         self.base_data_format = {
             'system_prompt': None,
             'chat': [],
             'history': [],
-            'last_chat': ''
+            'chat_llms': {}
         }
         self.chat_tag = 'raw-message hideM'
         self.file_name = file_name
@@ -540,7 +546,10 @@ class HistoryJsonHandle:
             with open(self.file_name, 'r') as fp:
                 self.base_data_format.update(json.load(fp))
 
-    def analysis_chat_history(self, chat_list: list[list], history: list, kwargs: dict):
+    def analysis_chat_history(self, chat_list: list[list], history: list, cookies: dict, kwargs: dict):
+        copy_cookies = copy.copy(cookies)
+        copy_cookies.pop('is_plugin')
+        self.base_data_format['chat_llms'].update(copy_cookies)
         self.base_data_format['history'] = history
         new_chat = chat_list[-1]
         self.base_data_format['last_chat'] = new_chat[0]
@@ -568,18 +577,24 @@ class HistoryJsonHandle:
             json.dump(self.base_data_format, fp, indent=2, ensure_ascii=False)
         return self
 
-    def update_for_history(self, cookies, select):
+    def update_for_history(self, cookies: dict, select):
+        # cookies.update(self.base_data_format['chat_llms'])
+        llms = self.base_data_format['chat_llms']
+        llms_combo = [llms.get(key, self.default_params[key]) for key in self.default_params]
+        llms_combo.append(self.base_data_format['system_prompt'])
         try:
             chatbot = [i['on_chat'] for i in self.base_data_format['chat']]
             history = self.base_data_format['history']
             cookies['is_plugin'] = self.base_data_format['chat'][-1].get('plugin', '')
             cookies['first_chat'] = select
-            cookies['last_chat'] = self.base_data_format['last_chat']
-            if not cookies['last_chat']:
+            if not cookies.get('last_chat'):
                 cookies['last_chat'] = self.base_data_format['chat'][-1]['on_chat'][0]
-            return chatbot, history, cookies
+            return [chatbot, history, cookies, *llms_combo]
         except Exception:
-            return [], [], cookies
+            return [[], [], cookies, *llms_combo]
+
+
+
 
 
 def git_log_list():

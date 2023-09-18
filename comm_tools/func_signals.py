@@ -107,8 +107,8 @@ def select_history(select, cookies, ipaddr: gr.Request):
     if not user_history:
         return [], []
     history_handle = func_box.HistoryJsonHandle(os.path.join(user_path, user_history[0]))
-    chatbot, history, cookies = history_handle.update_for_history(cookies, select)
-    return chatbot, history, select, cookies
+    history_update_combo = history_handle.update_for_history(cookies, select)
+    return [*history_update_combo, select]
 
 
 def rename_history(old_file, filename: str,  ipaddr: gr.Request):
@@ -141,8 +141,8 @@ def delete_history(cookies, filename, ipaddr: gr.Request):
     os.remove(full_path)
     file_list, only_name, new_path, new_name = func_box.get_files_list(os.path.join(func_box.history_path, ipaddr.client.host), filter_format=['.json'])
     history_handle = func_box.HistoryJsonHandle(new_path)
-    chatbot, history, cookies = history_handle.update_for_history(cookies, new_name)
-    return gr.Radio.update(choices=only_name, value=new_name), chatbot, history, cookies
+    history_update_combo = history_handle.update_for_history(cookies, new_name)
+    return [gr.Radio.update(choices=only_name, value=new_name), *history_update_combo]
 
 
 def import_history(file, ipaddr: gr.Request):
@@ -164,8 +164,8 @@ def delete_latest_chat(chatbot, history, cookies: dict, ipaddr: gr.Request):
     user_path = os.path.join(func_box.history_path, ipaddr.client.host, f"{select}.json")
     history_handle = func_box.HistoryJsonHandle(user_path)
     history_handle.delete_the_latest_chat()
-    chatbot, history, cookies = history_handle.update_for_history(cookies, select)
-    return chatbot, history, cookies
+    history_update_combo = history_handle.update_for_history(cookies, select)
+    return history_update_combo
 
 
 def get_user_upload(chatbot, txt, ipaddr: gr.Request):
@@ -508,7 +508,7 @@ def mobile_access(request: gr.Request): # 为适配手机端
         return gr.update(), gr.update()
 
 
-def refresh_load_data(prompt, cookies, request: gr.Request):
+def refresh_load_data(prompt, request: gr.Request):
     """
     Args:
         prompt: prompt dataset组件
@@ -524,11 +524,17 @@ def refresh_load_data(prompt, cookies, request: gr.Request):
     know_cls = gr.Dropdown.update(choices=know_list, value='公共知识库')
     know_load = gr.Dropdown.update(choices=load_list, label='公共知识库', show_label=True)
     know_user = gr.Dropdown.update(choices=user_list)
-    file_list, only_name, new_path, new_name = func_box.get_files_list(os.path.join(func_box.history_path, request.client.host), filter_format=['.json'])
-    history_handle = func_box.HistoryJsonHandle(new_path)
-    chatbot, history, cookies = history_handle.update_for_history(cookies, new_name)
     select_list = filter_database_tables()
     outputs = [gr.Dataset.update(samples=data, visible=True), prompt, gr.Dropdown.update(choices=select_list),
-               gr.Radio.update(choices=only_name, value=new_name, visible=True), chatbot, history, cookies,
-               new_name, know_cls, know_user, know_load]
+                know_cls, know_user, know_load]
+    return outputs
+
+
+def refresh_user_data(cookies, ipaddr: gr.Request):
+    user_path = os.path.join(func_box.history_path, ipaddr.client.host)
+    file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
+    history_handle = func_box.HistoryJsonHandle(new_path)
+    history_update_combo = history_handle.update_for_history(cookies, new_name)
+    outputs = [gr.Radio.update(choices=only_name, value=new_name, visible=True), *history_update_combo,
+               new_name]
     return outputs

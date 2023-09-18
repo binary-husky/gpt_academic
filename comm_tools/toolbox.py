@@ -68,34 +68,34 @@ def ArgsGeneralWrapper(f):
     def decorated(cookies, max_length, worker_num, llm_model,
                   langchain, know_dict, know_cls,
                   vector_score, vector_top_k, vector_size,
-                  txt, top_p, temperature, ocr_trust,
-                  chatbot, history, system_prompt, models, plugin_advanced_arg, ipaddr: gr.Request, *args):
+                  txt, top_p, temperature, n_choices, stop_sequence,
+                  max_context, max_generation, presence_penalty,
+                  frequency_penalty, logit_bias, user_identifier,
+                  ocr_trust,chatbot, history, system_prompt, models, plugin_advanced_arg, ipaddr: gr.Request, *args):
         """"""
         # 引入一个有cookie的chatbot
         from comm_tools import Langchain_cn
         start_time = time.time()
         encrypt, private, _ = get_conf('switch_model')[0]['key']
+        real_llm = {
+            'top_p': top_p, 'temperature': temperature, 'n_choices': n_choices, 'stop': stop_sequence,
+            'max_context': max_context, 'max_generation': max_generation, 'presence_penalty': presence_penalty,
+            'frequency_penalty': frequency_penalty, 'logit_bias': logit_bias,  'user': user_identifier,
+        }
         cookies.update({
-            'top_p': top_p,
-            'temperature': temperature,
-            'last_chat': txt
+            **real_llm,
+            'last_chat': txt,
+            'system_prompt': system_prompt,
         })
         if not cookies.get('first_chat') and args:
             cookies['first_chat'] = args[0]
             cookies['first_chat'] += "_" + func_box.created_atime()
         llm_kwargs = {
-            'api_key': cookies['api_key'],
-            'llm_model': llm_model,
-            'top_p': top_p,
-            'max_length': max_length,
-            'temperature': temperature,
-            'worker_num': worker_num,
-            'ipaddr': ipaddr.client.host,
-            'start_time': start_time,
-            'ocr': ocr_trust,
-            'know_dict': know_dict,
-            'know_cls': know_cls,
-            'know_id': langchain,
+            'api_key': cookies['api_key'], 'llm_model': llm_model,
+            **real_llm,
+            'worker_num': worker_num, 'ipaddr': ipaddr.client.host, 'ocr': ocr_trust,
+            'start_time': start_time, 'max_length': max_length,
+            'know_dict': know_dict, 'know_cls': know_cls, 'know_id': langchain,
             'vector': {
                 'score': vector_score,
                 'top-k': vector_top_k,

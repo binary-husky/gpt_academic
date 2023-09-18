@@ -237,14 +237,19 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         self.langchain_stop.click(fn=lambda: '已暂停构建任务', inputs=None, outputs=[self.langchain_status], cancels=[submit_id])
 
     def signals_history(self):
+        self.llms_cookies_combo = [self.chatbot, self.history, self.cookies,
+                              self.top_p, self.temperature, self.n_choices_slider, self.stop_sequence_txt,
+                              self.max_context_length_slider, self.max_generation_slider, self.presence_penalty_slider,
+                              self.frequency_penalty_slider, self.logit_bias_txt, self.user_identifier_txt, self.system_prompt
+                              ]
         self.historySelectList.input(fn=func_signals.select_history, inputs=[self.historySelectList, self.cookies],
-                                      outputs=[self.chatbot, self.history, self.saveFileName, self.cookies])
+                                      outputs=[*self.llms_cookies_combo, self.saveFileName])
         self.renameHistoryBtn.click(func_signals.rename_history,
                                     inputs=[self.saveFileName, self.historySelectList],
                                     outputs=[self.historySelectList],
                                     _js='(a,b,c,d)=>{return saveChatHistory(a,b,c,d);}')
         self.historyDeleteBtn.click(func_signals.delete_history, inputs=[self.def_cookies, self.historySelectList],
-                                    outputs=[self.historySelectList, self.chatbot, self.history, self.cookies],
+                                    outputs=[self.historySelectList, *self.llms_cookies_combo],
                                     _js='(a,b,c)=>{return showConfirmationDialog(a, b, c);}')
         self.uploadFileBtn.upload(fn=func_signals.import_history, inputs=[self.uploadFileBtn], outputs=[self.historySelectList])
         self.historyRefreshBtn.click(func_signals.refresh_history, inputs=None, outputs=[self.historySelectList])
@@ -253,8 +258,11 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         # 注册input
         self.input_combo = [self.cookies, self.max_length_sl, self.default_worker_num, self.model_select_dropdown,
                             self.langchain_dropdown, self.langchain_know_kwargs, self.langchain_classifi,
-                            self.vector_search_score, self.vector_search_top_k, self.vector_chunk_size,
-                            self.input_copy, self.top_p, self.temperature, self.ocr_identifying_trust, self.chatbot,
+                            self.vector_search_score, self.vector_search_top_k, self.vector_chunk_size, self.input_copy,
+                            self.top_p, self.temperature,  self.n_choices_slider, self.stop_sequence_txt,
+                            self.max_context_length_slider, self.max_generation_slider, self.presence_penalty_slider,
+                            self.frequency_penalty_slider, self.logit_bias_txt, self.user_identifier_txt,
+                            self.ocr_identifying_trust, self.chatbot,
                             self.history, self.system_prompt, self.models_box, self.plugin_advanced_arg]
         self.output_combo = [self.cookies, self.chatbot, self.history, self.status_display, self.cancelBtn, self.submitBtn,]
         self.predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=self.input_combo,
@@ -268,7 +276,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         self.cancel_handles.append(submit_handle)
         self.cancel_handles.append(click_handle)
         self.emptyBtn.click(func_signals.clear_chat_cookie, [self.def_cookies],
-                            [self.chatbot, self.history, self.cookies, self.status_display, self.historySelectList, self.saveFileName])
+                            [*self.llms_cookies_combo, self.status_display, self.historySelectList, self.saveFileName])
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay(self, is_open=False):
@@ -331,10 +339,12 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
             # self.demo.load(fn=func_signals.mobile_access, inputs=[],
             #                outputs=[self.sm_btn_column, self.langchain_dropdown])
             self.demo.load(fn=func_signals.refresh_load_data,
-                           inputs=[self.pro_fp_state, self.cookies],
+                           inputs=[self.pro_fp_state],
                            outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check,
-                                    self.historySelectList, self.chatbot, self.history, self.cookies, self.saveFileName,
                                     self.langchain_classifi, self.langchain_select, self.langchain_dropdown])
+            self.demo.load(fn=func_signals.refresh_user_data,
+                           inputs=[self.cookies],
+                           outputs=[self.historySelectList, *self.llms_cookies_combo, self.saveFileName])
 
         # Start
         self.auto_opentab_delay()

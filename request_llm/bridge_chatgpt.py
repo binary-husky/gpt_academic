@@ -329,10 +329,15 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         "messages": messages,
         "temperature": llm_kwargs['temperature'],  # 1.0,
         "top_p": llm_kwargs['top_p'],  # 1.0,
-        "n": 1,
+        "n": llm_kwargs['n_choices'],
+        "stop": llm_kwargs['stop'],
+        "max_context": llm_kwargs['max_context'],
+        "max_generation": llm_kwargs['max_generation'],
+        "presence_penalty": llm_kwargs['presence_penalty'],
+        "frequency_penalty": llm_kwargs['frequency_penalty'],
+        "logit_bias": llm_kwargs['logit_bias'],
+        "user": llm_kwargs['user'],
         "stream": stream,
-        "presence_penalty": 0,
-        "frequency_penalty": 0,
     }
     try:
         print("\033[1;35m", f"{llm_kwargs['llm_model']}_{llm_kwargs['ipaddr']} :", "\033[0m", f"{conversation_cnt} : {inputs[:100]} ..........")
