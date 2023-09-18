@@ -216,7 +216,7 @@ def get_reduce_token_percent(text):
         return 0.5, '不详'
 
 
-def write_history_to_file(history, file_basename=None, file_fullname=None):
+def write_history_to_file(history, file_basename=None, file_fullname=None, auto_caption=True):
     """
     将对话记录history以Markdown格式写入文件中。如果没有指定文件名，则使用当前时间生成文件名。
     """
@@ -235,7 +235,7 @@ def write_history_to_file(history, file_basename=None, file_fullname=None):
                 if type(content) != str: content = str(content)
             except:
                 continue
-            if i % 2 == 0:
+            if i % 2 == 0 and auto_caption:
                 f.write('## ')
             try:
                 f.write(content)
