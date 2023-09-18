@@ -250,7 +250,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                                     inputs=[self.saveFileName, self.historySelectList],
                                     outputs=[self.historySelectList],
                                     _js='(a,b,c,d)=>{return saveChatHistory(a,b,c,d);}')
-        self.historyDeleteBtn.click(func_signals.delete_history, inputs=[self.def_cookies, self.historySelectList],
+        self.historyDeleteBtn.click(func_signals.delete_history, inputs=[self.cookies, self.historySelectList],
                                     outputs=[self.historySelectList, *self.llms_cookies_combo],
                                     _js='(a,b,c)=>{return showConfirmationDialog(a, b, c);}')
         self.uploadFileBtn.upload(fn=func_signals.import_history, inputs=[self.uploadFileBtn], outputs=[self.historySelectList])
@@ -277,7 +277,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         click_handle = self.submitBtn.click(**self.clear_agrs).then(**self.predict_args)
         self.cancel_handles.append(submit_handle)
         self.cancel_handles.append(click_handle)
-        self.emptyBtn.click(func_signals.clear_chat_cookie, [self.def_cookies],
+        self.emptyBtn.click(func_signals.clear_chat_cookie, [],
                             [*self.llms_cookies_combo, self.status_display, self.historySelectList, self.saveFileName])
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
@@ -296,9 +296,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         # threading.Thread(target=warm_up_modules, name="warm-up", daemon=True).start()
 
     def block_title(self):
-        share_cookie = {'api_key': API_KEY, 'llm_model': LLM_MODEL, 'local': self.__url}
-        self.cookies = gr.State(share_cookie)
-        self.def_cookies = gr.State(share_cookie)
+        self.cookies = gr.State({'api_key': API_KEY, 'llm_model': LLM_MODEL, 'local': self.__url})
         self.history = gr.State([])
         with gr.Row(elem_id="chuanhu-header"):
             gr.HTML(get_html("header_title.html").format(

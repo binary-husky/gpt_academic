@@ -92,7 +92,9 @@ def clear_input(inputs, cookies, select, ipaddr: gr.Request):
     return output
 
 
-def clear_chat_cookie(cookie, ipaddr: gr.Request):
+def clear_chat_cookie(ipaddr: gr.Request):
+    API_KEY, LLM_MODEL = toolbox.get_conf('API_KEY', 'LLM_MODEL')
+    cookie = {'api_key': API_KEY, 'llm_model': LLM_MODEL}
     user_path = os.path.join(func_box.history_path, ipaddr.client.host)
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
     default_params, = toolbox.get_conf('LLMS_DEFAULT_PARAMETER')
