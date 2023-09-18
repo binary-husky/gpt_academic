@@ -150,24 +150,26 @@ class RightElem:
                     self.stop_sequence_txt = gr.Textbox(show_label=True, placeholder=i18n("停止符，用英文逗号隔开..."),
                                                         label="stop", value=default_params['stop'], lines=1,
                                                         ).style(container=False)
-                    self.max_context_length_slider = gr.Slider(minimum=1, maximum=32768, value=default_params['max_context'],
-                                                               step=1, interactive=True, label="max context",
-                                                               ).style(container=False)
-                    self.max_generation_slider = gr.Slider(minimum=1, maximum=32768, value=default_params['max_generation'],
-                                                           step=1, interactive=True, label="max generations",
-                                                           ).style(container=False)
                     self.presence_penalty_slider = gr.Slider(minimum=-2.0, mmaximum=default_params['presence_penalty'], value=0.0,
                                                              step=0.01, interactive=True, label="presence penalty",
                                                              ).style(container=False)
                     self.frequency_penalty_slider = gr.Slider(minimum=-2.0, maximum=default_params['n_choices'], value=0.0, step=0.01,
                                                               interactive=True, label="frequency penalty",
                                                               ).style(container=False)
-                    self.logit_bias_txt = gr.Textbox(show_label=True, placeholder=f"word:likelihood",
-                                                     label="logit bias", value=default_params['logit_bias'], lines=1,
-                                                     ).style(container=False)
+
                     self.user_identifier_txt = gr.Textbox(show_label=True, placeholder=i18n("用于定位滥用行为"),
                                                           label=i18n("用户名"), value=default_params['user'], lines=1,
                                                           ).style(container=False)
+                    func_box.md_division_line()
+                    self.max_context_length_slider = gr.Slider(minimum=1, maximum=32768, value=default_params['max_context'],
+                                                               step=1, interactive=True, label="max context",
+                                                               ).style(container=False)
+                    self.max_generation_slider = gr.Slider(minimum=1, maximum=32768, value=default_params['max_generation'],
+                                                           step=1, interactive=True, label="max generations",
+                                                           ).style(container=False)
+                    self.logit_bias_txt = gr.Textbox(show_label=True, placeholder=f"word:likelihood",
+                                                     label="logit bias", value=default_params['logit_bias'], lines=1,
+                                                     ).style(container=False)
                     self.max_length_sl = gr.Slider(minimum=256, maximum=4096, value=4096, step=1, interactive=True,
                                                    label="MaxLength", visible=False
                                                    ).style(container=False)
@@ -189,7 +191,8 @@ class RightElem:
                     self.ocr_identifying_trust = gr.Slider(minimum=0.01, maximum=1.0, value=0.60, step=0.01, interactive=True,
                                                    label="OCR 识别信任指数").style(container=False)
 
-            self.models_box = gr.CheckboxGroup(choices=switch_model['key'], value=switch_model['value'], label="对话模式")
+                func_box.md_division_line()
+                self.models_box = gr.CheckboxGroup(choices=switch_model['key'], value=switch_model['value'], label="对话模式")
             # temp = gr.Markdown(self.description)
 
     def _darw_private_operation(self):

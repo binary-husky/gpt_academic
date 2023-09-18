@@ -238,10 +238,12 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
 
     def signals_history(self):
         self.llms_cookies_combo = [self.chatbot, self.history, self.cookies,
-                              self.top_p, self.temperature, self.n_choices_slider, self.stop_sequence_txt,
-                              self.max_context_length_slider, self.max_generation_slider, self.presence_penalty_slider,
-                              self.frequency_penalty_slider, self.logit_bias_txt, self.user_identifier_txt, self.system_prompt
-                              ]
+                                   self.top_p, self.temperature, self.n_choices_slider, self.stop_sequence_txt,
+                                   self.presence_penalty_slider, self.frequency_penalty_slider,
+                                   self.user_identifier_txt,
+                                   self.max_context_length_slider, self.max_generation_slider, self.logit_bias_txt,
+                                   self.system_prompt
+                                   ]
         self.historySelectList.input(fn=func_signals.select_history, inputs=[self.historySelectList, self.cookies],
                                       outputs=[*self.llms_cookies_combo, self.saveFileName])
         self.renameHistoryBtn.click(func_signals.rename_history,

@@ -333,6 +333,7 @@ def get_directory_list(folder_path, user_info='temp'):
 
 def get_files_list(folder_path, filter_format: list):
     # 获取符合条件的文件列表
+    os.makedirs(folder_path, exist_ok=True)
     file_list = [os.path.join(folder_path, f) for f in os.listdir(folder_path)
                  if os.path.isfile(os.path.join(folder_path, f))
                  and os.path.splitext(f)[1] in filter_format]
