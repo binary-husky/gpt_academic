@@ -146,14 +146,14 @@ class RightElem:
                                                  label="Temperature",).style(container=False)
                     self.n_choices_slider = gr.Slider(minimum=1, maximum=10, value=default_params['n_choices'], step=1,
                                                       interactive=True, label="n choices",
-                                                      )
+                                                      ).style(container=False)
                     self.stop_sequence_txt = gr.Textbox(show_label=True, placeholder=i18n("停止符，用英文逗号隔开..."),
                                                         label="stop", value=default_params['stop'], lines=1,
                                                         ).style(container=False)
                     self.presence_penalty_slider = gr.Slider(minimum=-2.0, mmaximum=default_params['presence_penalty'], value=0.0,
                                                              step=0.01, interactive=True, label="presence penalty",
                                                              ).style(container=False)
-                    self.frequency_penalty_slider = gr.Slider(minimum=-2.0, maximum=default_params['n_choices'], value=0.0, step=0.01,
+                    self.frequency_penalty_slider = gr.Slider(minimum=-2.0, maximum=2, value=default_params['frequency_penalty'], step=0.01,
                                                               interactive=True, label="frequency penalty",
                                                               ).style(container=False)
 

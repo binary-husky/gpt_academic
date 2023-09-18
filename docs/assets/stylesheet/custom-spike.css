@@ -138,9 +138,22 @@ code.language-folded {
     align-content: end;
     gap: 2px;
 }
-
-.user .message-btn-column :hover {
-    background-color: unset !important;
-    /*display: block !important;*/
-    color: unset !important;
+.message-btn-column .chuanhu-btn {
+    position: absolute;
+    bottom: 0;
 }
+.user .message-btn-column .chuanhu-btn {
+
+}
+.bot .message-btn-column .chuanhu-btn {
+    left: -15px;
+}
+.message-btn-column .toggle-md-btn {
+    margin-bottom: 20px;
+}
+/*.user .message-btn-column:hover {*/
+/*    background-color: unset !important;*/
+/*    !*display: block !important;*!*/
+/*    color: unset !important;*/
+/*}*/
+

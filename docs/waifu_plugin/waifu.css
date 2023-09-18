@@ -1,6 +1,6 @@
 .waifu {
     position: fixed;
-    bottom: 0;
+    bottom: 7%;
     z-index: 1;
     font-size: 0;
     -webkit-transform: translateY(3px);

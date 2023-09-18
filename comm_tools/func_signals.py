@@ -85,7 +85,7 @@ def clear_input(inputs, cookies, select, ipaddr: gr.Request):
         while select_file in only_name:  # 重名处理
             select_file = f"{index}_{inputs}"
             index += 1
-        cookies['first_chat'] = func_box.replace_special_chars(str(select_file)[:10])
+        cookies['first_chat'] = func_box.replace_special_chars(str(select_file)[:25])
         only_name = [cookies['first_chat']] + only_name
     output = ['', inputs, gr.update(visible=True), gr.update(visible=False),
               gr.Radio.update(choices=only_name, value=cookies['first_chat'])]
