@@ -530,9 +530,7 @@ class HistoryJsonHandle:
 
     def __init__(self, file_name):
         from comm_tools.overwrites import escape_markdown
-        default_params, = toolbox.get_conf('LLMS_DEFAULT_PARAMETER')
         self.escape_markdown = escape_markdown
-        self.default_params = default_params
         self.chat_format = {'on_chat': []}
         self.plugin_format = {}
         self.base_data_format = {
@@ -581,7 +579,8 @@ class HistoryJsonHandle:
     def update_for_history(self, cookies: dict, select):
         # cookies.update(self.base_data_format['chat_llms'])
         llms = self.base_data_format['chat_llms']
-        llms_combo = [llms.get(key, self.default_params[key]) for key in self.default_params]
+        default_params, = toolbox.get_conf('LLMS_DEFAULT_PARAMETER')
+        llms_combo = [llms.get(key, default_params[key]) for key in default_params]
         llms_combo.append(self.base_data_format['system_prompt'])
         try:
             chatbot = [i['on_chat'] for i in self.base_data_format['chat']]

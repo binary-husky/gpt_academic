@@ -95,9 +95,10 @@ def clear_input(inputs, cookies, select, ipaddr: gr.Request):
 def clear_chat_cookie(cookie, ipaddr: gr.Request):
     user_path = os.path.join(func_box.history_path, ipaddr.client.host)
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
-    output = [[], [], cookie, '已重置对话记录和对话Cookies',
-              gr.Radio.update(choices=['新对话']+only_name, value='新对话'), "新对话"
-              ]
+    default_params, = toolbox.get_conf('LLMS_DEFAULT_PARAMETER')
+    llms_combo = [cookie.get(key, default_params[key]) for key in default_params]
+    output = [[], [], cookie, *llms_combo+[''],  '已重置对话记录和对话Cookies',
+              gr.Radio.update(choices=['新对话']+only_name, value='新对话'), "新对话"]
     return output
 
 
