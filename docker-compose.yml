@@ -6,7 +6,7 @@
 version: '3'
 services:
   gpt_academic_full_capability:
-    image: docker pull ghcr.io/binary-husky/gpt_academic_with_all_capacity:master
+    image: ghcr.io/binary-husky/gpt_academic_with_all_capacity:master
     environment:
     # 请查阅 `config.py`或者 github wiki 以查看所有的配置信息
       API_KEY:                  '  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                        '
