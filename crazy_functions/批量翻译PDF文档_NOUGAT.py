@@ -93,7 +93,7 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
 def 解析PDF_基于NOUGAT(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
     import copy
     import tiktoken
-    TOKEN_LIMIT_PER_FRAGMENT = 512
+    TOKEN_LIMIT_PER_FRAGMENT = 1024
     generated_conclusion_files = []
     generated_html_files = []
     DST_LANG = "中文"
