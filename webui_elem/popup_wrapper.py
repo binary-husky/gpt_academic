@@ -145,6 +145,35 @@ class Training:
                 self._draw_training_status()
 
 
+class AdvancedSearch:
+
+    def __init__(self):
+        pass
+
+    def draw_popup_search(self):
+        with gr.Box(elem_id="spike-search"):
+            with gr.Row():
+                gr.Markdown("## " + i18n("高级搜索"))
+                gr.HTML(get_html("close_btn.html").format(
+                    obj="box"), elem_classes="close-btn")
+            with gr.Box(elem_classes='search-box-pop'):
+                with gr.Row(elem_classes='search-show'):
+                    self.pro_results = gr.Chatbot(label='提示词和对话记录').style()
+                with gr.Row(elem_classes='search-example'):
+                    self.pro_prompt_state = gr.State({'samples': None})
+                    self.pro_prompt_list = gr.Dataset(components=[gr.HTML(visible=False)], samples_per_page=10,
+                                                          visible=False, label='搜索结果',
+                                                          samples=[[". . ."] for i in range(20)], type='index')
+                with gr.Row(elem_classes='input-search'):
+                    self.pro_search_txt = gr.Textbox(show_label=False, elem_classes='search_txt',
+                                                     placeholder="输入你想要搜索的对话记录或提示词").style(container=False)
+                    self.pro_entry_btn = gr.Button("搜索", variant="primary", elem_classes='short_btn').style(
+                        full_width=False, size="sm")
+                    self.pro_reuse_btn = gr.Button("复用下文", variant="secondary", elem_classes='short_btn').style(
+                        full_width=False, size="sm")
+                    self.pro_clear_btn = gr.Button("重置搜索", variant="stop", elem_classes='short_btn').style(
+                        full_width=False, size="sm")
+
 class Config:
 
     def __init__(self):

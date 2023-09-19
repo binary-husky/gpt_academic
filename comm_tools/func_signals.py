@@ -99,7 +99,7 @@ def clear_chat_cookie(ipaddr: gr.Request):
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
     default_params, = toolbox.get_conf('LLMS_DEFAULT_PARAMETER')
     llms_combo = [cookie.get(key, default_params[key]) for key in default_params]
-    output = [[], [], cookie, *llms_combo+[''],  '已重置对话记录和对话Cookies',
+    output = [[], [], cookie, *llms_combo,  '已重置对话记录和对话Cookies',
               gr.Radio.update(choices=['新对话']+only_name, value='新对话'), "新对话"]
     return output
 
@@ -109,9 +109,10 @@ def select_history(select, cookies, ipaddr: gr.Request):
     user_history = [f for f in os.listdir(user_path) if f.endswith('.json') and select == os.path.splitext(f)[0]]
     if not user_history:
         return [], []
-    history_handle = func_box.HistoryJsonHandle(os.path.join(user_path, user_history[0]))
+    file_path = os.path.join(user_path, user_history[0])
+    history_handle = func_box.HistoryJsonHandle(file_path)
     history_update_combo = history_handle.update_for_history(cookies, select)
-    return [*history_update_combo, select]
+    return [*history_update_combo, select, gr.Button.update(link=func_box.html_local_file(file_path))]
 
 
 def rename_history(old_file, filename: str,  ipaddr: gr.Request):
@@ -150,15 +151,56 @@ def delete_history(cookies, filename, ipaddr: gr.Request):
 
 def import_history(file, ipaddr: gr.Request):
     user_path = os.path.join(func_box.history_path, ipaddr.client.host)
-    os.rename(file.name, os.path.join(user_path, os.path.basename(file.name)))
+    index = 2
+    new_file = os.path.basename(file.name)
+    while new_file in os.listdir(user_path):
+        new_file = f'{index}_{os.path.basename(file.name)}'
+        index += 1
+    os.rename(file.name, os.path.join(user_path, new_file))
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
     return gr.Radio.update(choices=only_name, value=new_name)
 
 
-def refresh_history(ipaddr: gr.Request):
+def refresh_history(cookies, ipaddr: gr.Request):
     user_path = os.path.join(func_box.history_path, ipaddr.client.host)
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
-    return gr.Radio.update(choices=only_name, value=new_name)
+    history_handle = func_box.HistoryJsonHandle(new_path)
+    history_update_combo = history_handle.update_for_history(cookies, new_name)
+    return [gr.Radio.update(choices=only_name, value=new_name), *history_update_combo]
+
+
+def download_history_json(select, ipaddr: gr.Request):
+    user_path = os.path.join(func_box.history_path, ipaddr.client.host)
+    file_path = os.path.join(user_path, f"{select}.json")
+    if not os.path.exists(file_path):
+        return gr.Error('当前对话记录空，导出失败')
+    link = func_box.html_local_file(file_path)
+    raise f'下载链接:[{select}]({link})， 对话记录导出json成功'
+
+
+def download_history_md(select, ipaddr: gr.Request):
+    user_path = os.path.join(func_box.history_path, ipaddr.client.host)
+    file_path = os.path.join(user_path, f"{select}.json")
+    if not os.path.exists(file_path):
+        raise gr.Error('当前对话记录空，导出失败')
+    history_handle = func_box.HistoryJsonHandle(file_path)
+    history_list = history_handle.base_data_format['chat']
+    system = history_handle.base_data_format['chat_llms'].get('system_prompt').replace('\n', '\n> ')
+    mark_down = f"> {func_box.html_tag_color(tag='System Prompt:', color='#ff6e67')} {system}\n\n"
+    for i in history_list:
+        chat = i.get('on_chat', ["", ""])
+        user, bot = str(chat[0]).replace('\n', '\n> '), str(chat[1]).replace('\n', '\n> ')
+        mark_down += f"> {func_box.html_tag_color(tag='User:', color='#3e9855')} \n{user}\n\n"
+        mark_down += f"> {func_box.html_tag_color(tag='Bot:', color='#bc8af4')} \n{bot}\n\n"
+    mark_down += f"```json\n# 对话调优参数\n{history_handle.base_data_format['chat_llms']}\n```"
+    is_plugin = history_list[-1].get('is_plugin')
+    if is_plugin:
+        mark_down += f"```json\n# 插件调优参数\n{is_plugin}\n```"
+    file_path = os.path.join(user_path, f'{select}.md')
+    with open(file=file_path, mode='w') as f:
+        f.write(mark_down)
+    link = func_box.html_local_file(file_path)
+    return f'下载链接:[{select}]({link}), 对话记录转换为markdown成功'
 
 
 # TODO < -------------------------------- 小按钮函数注册区 -------------------------------->

@@ -221,8 +221,8 @@ body.popup-open {
 #chuanhu-popup {
     display: none;
     z-index: 99999;
-    width: 680px;
-    height: 400px;
+    width: 65%;
+    height: 730px;
     padding: 0;
 }
 #chuanhu-popup.showBox {
@@ -236,7 +236,6 @@ body.popup-open {
 .hideBox {
     display: none;
 }
-
 
 #chuanhu-header {
     position: fixed;
@@ -701,7 +700,7 @@ input:checked + .chatbot-input-more-span {
 
 #chuanhu-popup > .gradio-box > .gradio-tabs {
     display: block;
-    height: 322px;
+    height: 652px;
     /* margin: 16px 24px; */
 }
 

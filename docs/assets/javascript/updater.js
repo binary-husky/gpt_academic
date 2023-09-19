@@ -169,10 +169,11 @@ function closeUpdateToast() {
     document.querySelector('.chuanhu-mask')?.remove();
 }
 function manualCheckUpdate() {
-    openUpdateToast();
-    updateLatestVersion();
-    currentTime = new Date().getTime();
-    localStorage.setItem('lastCheckTime', currentTime);
+    // openUpdateToast();
+    // updateLatestVersion();
+    // currentTime = new Date().getTime();
+    // localStorage.setItem('lastCheckTime', currentTime);
+
 }
 function noUpdate(message="") {
     localStorage.setItem('isLatestVersion', 'true');

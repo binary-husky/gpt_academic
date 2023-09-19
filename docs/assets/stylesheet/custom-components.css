@@ -1,5 +1,8 @@
 
 /* user-info */
+#user-info {
+    display: none;
+}
 #user-info.block {
     white-space: nowrap;
     position: absolute;

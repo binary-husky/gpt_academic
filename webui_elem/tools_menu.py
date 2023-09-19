@@ -53,6 +53,7 @@ class RightElem:
                 with gr.Row():
                     self.pro_del_btn = gr.Button("删除提示词", ).style(size='sm', full_width=True)
                     self.pro_new_btn = gr.Button("保存提示词", variant="primary").style(size='sm', full_width=True)
+            func_box.md_division_line()
             with gr.Accordion("上传提示词", open=False) as self.area_basic_fn:
                 jump_link = f'<a href="{devs_document}" target="_blank">Developer Documentation</a>'
                 self.pro_devs_link = gr.HTML(jump_link)
@@ -196,32 +197,12 @@ class RightElem:
             # temp = gr.Markdown(self.description)
 
     def _darw_private_operation(self):
-        with gr.TabItem('个人中心', id='private', elem_id='chuanhu-toolbox-tabs'):
+        with gr.TabItem('个人中心', id='private', elem_id='chuanhu-toolbox-tabs',):
             with gr.Row():
                 gr.Markdown('####  粉身碎骨浑不怕 要留清白在人间\n\n'
                             '这里是删除个人文件信息的地方，`注意！！这里的所有操作不可逆，请谨慎操作！！！！`')
             with gr.Row():
                 gr.Markdown('待完善')
-
-    def _draw_chat_search(self):
-        with gr.TabItem('提示词、对话记录搜索', elem_id='chuanhu-toolbox-tabs') as self.prompt_tab:
-            with gr.Row():
-                self.pro_search_txt = gr.Textbox(show_label=False, elem_classes='search_txt',
-                                                 placeholder="输入你想要搜索的对话记录或提示词").style(
-                    container=False)
-                self.pro_entry_btn = gr.Button("搜索", variant="primary", elem_classes='short_btn ').style(
-                    full_width=False, size="sm")
-                self.pro_reuse_btn = gr.Button("复用上下文", variant="secondary", elem_classes='short_btn ').style(
-                    full_width=False, size="sm")
-                self.pro_clear_btn = gr.Button("重置对话记录", variant="stop", elem_classes='short_btn ').style(
-                    full_width=False, size="sm")
-            with gr.Row():
-                self.pro_prompt_list = gr.Dataset(components=[gr.HTML(visible=False)], samples_per_page=10,
-                                                  label='Results',
-                                                  samples=[[". . ."] for i in range(20)], type='index')
-                self.pro_prompt_state = gr.State({'samples': None})
-            with gr.Row():
-                self.pro_results = gr.Chatbot(label='提示词和对话记录', elem_id='main_chatbot').style()
 
     def draw_tools_area(self):
         with gr.Column(elem_id="toolbox-area", scale=1):
@@ -233,4 +214,3 @@ class RightElem:
                     self._draw_langchain_base()
                     self._draw_setting_chat()
                     self._darw_private_operation()
-                    self._draw_chat_search()

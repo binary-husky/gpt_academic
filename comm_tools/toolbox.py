@@ -152,7 +152,7 @@ def ArgsGeneralWrapper(f):
         # 将对话记录写入文件
         yield from end_predict(chatbot_with_cookie, history, llm_kwargs)
         threading.Thread(target=func_box.thread_write_chat_json,
-                         args=(chatbot_with_cookie, history, system_prompt, ipaddr.client.host)).start()
+                         args=(chatbot_with_cookie, history, ipaddr.client.host)).start()
     return decorated
 
 

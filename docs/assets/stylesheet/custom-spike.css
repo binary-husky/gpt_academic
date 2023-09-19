@@ -108,7 +108,7 @@ div.svelte-15lo0d8>*, div.svelte-15lo0d8>.form>* {
 /*  */
 .gr-know-sm-column {
     min-width: min(25%, 100%) !important;
-    max-width: max-content !important;
+    max-width: min-content !important;
     margin-right: 7px;
     justify-content: center;
     align-items: center;
@@ -156,4 +156,24 @@ code.language-folded {
 /*    !*display: block !important;*!*/
 /*    color: unset !important;*/
 /*}*/
+.search_txt {
+    min-width: min(60%, 100%) !important;
+}
+.short_btn {
+    position: relative;
+    min-width: min(10%,100%) !important;
+    overflow: hidden;
+}
 
+.search-show {
+    min-height: 64%;
+    max-height: 64%;
+}
+.search-example {
+    min-height: 30%;
+    max-height: 30%;
+    overflow: auto;
+}
+.input-search {
+    min-width: 10%;
+}

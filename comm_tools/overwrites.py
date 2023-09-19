@@ -198,10 +198,10 @@ def reload_javascript():
     waifu_js = ''
     ADD_WAIFU, = toolbox.get_conf('ADD_WAIFU')
     if ADD_WAIFU:
-        waifu_js += """
-            <script src="file=docs/waifu_plugin/jquery.min.js"></script>
-            <script src="file=docs/waifu_plugin/jquery-ui.min.js"></script>
-            <script src="file=docs/waifu_plugin/autoload.js"></script>
+        waifu_js += f"""
+            <script src="{webpath('docs/waifu_plugin/jquery.min.js')}"></script>
+            <script src="{webpath('docs/waifu_plugin/jquery-ui.min.js')}"></script>
+            <script src="{webpath('docs/waifu_plugin/autoload.js')}"></script>
         """
     meta = """
         <meta name="apple-mobile-web-app-title" content="川虎 Chat">

@@ -30,6 +30,7 @@ var statusDisplay = null;
 
 var historySelector = null;
 var chuanhuPopup = null;
+var searchBox = null;
 var settingBox = null;
 var trainingBox = null;
 var popupWrapper = null;
@@ -88,6 +89,7 @@ function initialize() {
     chuanhuPopup = gradioApp().querySelector('#chuanhu-popup');
     settingBox = gradioApp().querySelector('#chuanhu-setting');
     trainingBox = gradioApp().querySelector('#chuanhu-training');
+    searchBox = gradioApp().querySelector('#spike-search');
     popupWrapper = gradioApp().querySelector('#popup-wrapper');
     chuanhuHeader = gradioApp().querySelector('#chuanhu-header');
     menu = gradioApp().querySelector('#menu-area');
@@ -125,10 +127,21 @@ function initialize() {
     // setHistroyPanel();
     // trainBody.classList.add('hide-body');
 
-    
-
+    // 提示词点击后，光标重定向到输入框
+    const buttonsParent = gradioApp().getElementById('prompt_list');
+    const inputElement = gradioApp().getElementById('user-input-tb');
+    const textarea = inputElement.querySelector('[data-testid=textbox]');
+    if (buttonsParent && inputElement && textarea) {
+        buttonsParent.querySelectorAll('button').forEach((button) => {
+            button.addEventListener('click', () => {
+                textarea.focus();
+            });
+        });
+    }
     return true;
 }
+
+
 
 function gradioApp() {
     const elems = document.getElementsByTagName('gradio-app');

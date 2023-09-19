@@ -49,10 +49,10 @@ get_html = func_box.get_html
 from webui_elem.history_menu import LeftElem
 from webui_elem.chatbot_area import ChatbotElem
 from webui_elem.tools_menu import RightElem
-from webui_elem.popup_wrapper import Settings, Training, Config, FakeComponents
+from webui_elem.popup_wrapper import Settings, Training, Config, FakeComponents, AdvancedSearch
 
 
-class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, FakeComponents):
+class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, FakeComponents, AdvancedSearch):
 
     def __init__(self):
         super().__init__()
@@ -96,10 +96,10 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
 
     def signals_prompt_edit(self):
         self.pro_clear_btn.click(fn=lambda: [], inputs=None, outputs=self.pro_results)
-        self.prompt_tab.select(fn=func_signals.draw_results,
-                               inputs=[self.pro_search_txt, self.pro_prompt_state, self.pro_tf_slider,
-                                       self.pro_private_check],
-                               outputs=[self.pro_prompt_list, self.pro_prompt_state])
+        # self.prompt_tab.select(fn=func_signals.draw_results,
+        #                        inputs=[self.pro_search_txt, self.pro_prompt_state, self.pro_tf_slider,
+        #                                self.pro_private_check],
+        #                        outputs=[self.pro_prompt_list, self.pro_prompt_state])
         self.pro_search_txt.submit(fn=func_signals.draw_results,
                                    inputs=[self.pro_search_txt, self.pro_prompt_state, self.pro_tf_slider,
                                          self.pro_private_check],
@@ -253,8 +253,14 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         self.historyDeleteBtn.click(func_signals.delete_history, inputs=[self.cookies, self.historySelectList],
                                     outputs=[self.historySelectList, *self.llms_cookies_combo],
                                     _js='(a,b,c)=>{return showConfirmationDialog(a, b, c);}')
-        self.uploadFileBtn.upload(fn=func_signals.import_history, inputs=[self.uploadFileBtn], outputs=[self.historySelectList])
-        self.historyRefreshBtn.click(func_signals.refresh_history, inputs=None, outputs=[self.historySelectList])
+        self.uploadFileBtn.upload(fn=func_signals.import_history, inputs=[self.uploadFileBtn],
+                                  outputs=[self.historySelectList])
+        self.historyRefreshBtn.click(func_signals.refresh_history, inputs=[self.cookies],
+                                     outputs=[self.historySelectList, *self.llms_cookies_combo])
+        self.historyDownloadBtn.click(func_signals.download_history_json, inputs=[self.historySelectList],
+                                      outputs=[self.status_display])
+        self.historyMarkdownDownloadBtn.click(func_signals.download_history_md, inputs=[self.historySelectList],
+                                              outputs=[self.status_display])
 
     def signals_input_setting(self):
         # 注册input
@@ -278,7 +284,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         self.cancel_handles.append(submit_handle)
         self.cancel_handles.append(click_handle)
         self.emptyBtn.click(func_signals.clear_chat_cookie, [],
-                            [*self.llms_cookies_combo, self.status_display, self.historySelectList, self.saveFileName])
+                            [*self.llms_cookies_combo, self.status_display,
+                             self.historySelectList, self.saveFileName])
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay(self, is_open=False):
@@ -296,7 +303,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         # threading.Thread(target=warm_up_modules, name="warm-up", daemon=True).start()
 
     def block_title(self):
-        self.cookies = gr.State({'api_key': API_KEY, 'llm_model': LLM_MODEL, 'local': self.__url})
+        self.cookies = gr.State({'api_key': API_KEY, 'llm_model': LLM_MODEL})
         self.history = gr.State([])
         with gr.Row(elem_id="chuanhu-header"):
             gr.HTML(get_html("header_title.html").format(
@@ -328,6 +335,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                     self.draw_popup_training()
                     self.draw_popup_config()
                     self.draw_popup_fakec()
+                    self.draw_popup_search()
             # 函数注册，需要在Blocks下进行
             self.signals_history()
             self.signals_input_setting()
@@ -344,14 +352,15 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                                     self.langchain_classifi, self.langchain_select, self.langchain_dropdown])
             self.demo.load(fn=func_signals.refresh_user_data,
                            inputs=[self.cookies],
-                           outputs=[self.historySelectList, *self.llms_cookies_combo, self.saveFileName])
+                           outputs=[self.historySelectList, *self.llms_cookies_combo,
+                                    self.saveFileName])
 
         # Start
         self.auto_opentab_delay()
         self.demo.queue(concurrency_count=CONCURRENT_COUNT)
         # 过滤掉不允许用户访问的路径
-        self.demo.blocked_paths = func_box.get_files_and_dirs(path=func_box.base_path,
-                                                              filter_allow=['private_upload', 'gpt_log', 'docs'])
+        self.demo.blocked_paths = func_box.get_files_and_dirs(
+            path=func_box.base_path, filter_allow=['private_upload', 'gpt_log', 'docs', ''])
         login_html = ''
         # self.demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
         #     server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, auth_message=login_html,
