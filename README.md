@@ -158,7 +158,7 @@ python main.py
 docker-compose up
 ```
 
-1. 仅ChatGPT（推荐大多数人选择）
+1. 仅ChatGPT+文心一言+spark等在线模型（推荐大多数人选择）
 [![basic](https://github.com/binary-husky/gpt_academic/actions/workflows/build-without-local-llms.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-without-local-llms.yml)
 [![basiclatex](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-latex.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-latex.yml)
 [![basicaudio](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-audio-assistant.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-audio-assistant.yml)
@@ -168,7 +168,7 @@ docker-compose up
 docker-compose up
 ```
 
-P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以直接使用docker-compose获取Latex功能（修改docker-compose.yml，保留方案4并删除其他方案）。
+P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以直接使用方案4或者方案0获取Latex功能。
 
 2. ChatGPT + ChatGLM2 + MOSS + LLAMA2 + 通义千问（需要熟悉[Nvidia Docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#installing-on-ubuntu-and-debian)运行时）
 [![chatglm](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-chatglm.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-chatglm.yml)
@@ -309,6 +309,7 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 
 ### II：版本:
 - version 3.60（todo）: 优化虚空终端，引入code interpreter和更多插件
+- version 3.53: 支持动态选择不同界面主题，提高稳定性&解决多用户冲突问题
 - version 3.50: 使用自然语言调用本项目的所有函数插件（虚空终端），支持插件分类，改进UI，设计新主题
 - version 3.49: 支持百度千帆平台和文心一言
 - version 3.48: 支持阿里达摩院通义千问，上海AI-Lab书生，讯飞星火
