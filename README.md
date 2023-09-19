@@ -101,9 +101,11 @@ cd gpt_academic
 
 2. 配置API_KEY
 
-在`config.py`中，配置API KEY等设置，[点击查看特殊网络环境设置方法](https://github.com/binary-husky/gpt_academic/issues/1) 。
+在`config.py`中，配置API KEY等设置，[点击查看特殊网络环境设置方法](https://github.com/binary-husky/gpt_academic/issues/1) 。[Wiki页面](https://github.com/binary-husky/gpt_academic/wiki/%E9%A1%B9%E7%9B%AE%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E)。
 
-(P.S. 程序运行时会优先检查是否存在名为`config_private.py`的私密配置文件，并用其中的配置覆盖`config.py`的同名配置。因此，如果您能理解我们的配置读取逻辑，我们强烈建议您在`config.py`旁边创建一个名为`config_private.py`的新配置文件，并把`config.py`中的配置转移（复制）到`config_private.py`中（仅复制您修改过的配置条目即可）。`config_private.py`不受git管控，可以让您的隐私信息更加安全。P.S.项目同样支持通过`环境变量`配置大多数选项，环境变量的书写格式参考`docker-compose`文件。读取优先级: `环境变量` > `config_private.py` > `config.py`)
+「 程序会优先检查是否存在名为`config_private.py`的私密配置文件，并用其中的配置覆盖`config.py`的同名配置。如您能理解该读取逻辑，我们强烈建议您在`config.py`旁边创建一个名为`config_private.py`的新配置文件，并把`config.py`中的配置转移（复制）到`config_private.py`中（仅复制您修改过的配置条目即可）。 」
+
+「 支持通过`环境变量`配置项目，环境变量的书写格式参考`docker-compose.yml`文件或者我们的[Wiki页面](https://github.com/binary-husky/gpt_academic/wiki/%E9%A1%B9%E7%9B%AE%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E)。配置读取优先级: `环境变量` > `config_private.py` > `config.py`。 」
 
 
 3. 安装依赖
@@ -111,7 +113,7 @@ cd gpt_academic
 # （选择I: 如熟悉python）（python版本3.9以上，越新越好），备注：使用官方pip源或者阿里pip源,临时换源方法：python -m pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 python -m pip install -r requirements.txt
 
-# （选择II: 如不熟悉python）使用anaconda，步骤也是类似的 (https://www.bilibili.com/video/BV1rc411W7Dr)：
+# （选择II: 使用Anaconda）步骤也是类似的 (https://www.bilibili.com/video/BV1rc411W7Dr)：
 conda create -n gptac_venv python=3.11    # 创建anaconda环境
 conda activate gptac_venv                 # 激活anaconda环境
 python -m pip install -r requirements.txt # 这个步骤和pip安装一样的步骤
@@ -149,26 +151,25 @@ python main.py
 
 ### 安装方法II：使用Docker
 
+0. 部署项目的全部能力（这个是包含cuda和latex的大型镜像。如果您网速慢、硬盘小或没有显卡，则不推荐使用这个，建议使用方案1）（需要熟悉[Nvidia Docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#installing-on-ubuntu-and-debian)运行时）
 [![fullcapacity](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-all-capacity.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-audio-assistant.yml)
 
-1. 仅ChatGPT（推荐大多数人选择，等价于docker-compose方案1）
+``` sh
+# 修改docker-compose.yml，保留方案0并删除其他方案。修改docker-compose.yml中方案0的配置，参考其中注释即可
+docker-compose up
+```
+
+1. 仅ChatGPT+文心一言+spark等在线模型（推荐大多数人选择）
 [![basic](https://github.com/binary-husky/gpt_academic/actions/workflows/build-without-local-llms.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-without-local-llms.yml)
 [![basiclatex](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-latex.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-latex.yml)
 [![basicaudio](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-audio-assistant.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-audio-assistant.yml)
 
-
 ``` sh
-git clone --depth=1 https://github.com/binary-husky/gpt_academic.git  # 下载项目
-cd gpt_academic                                 # 进入路径
-nano config.py                                      # 用任意文本编辑器编辑config.py, 配置 “Proxy”， “API_KEY” 以及 “WEB_PORT” (例如50923) 等
-docker build -t gpt-academic .                      # 安装
-
-#（最后一步-Linux操作系统）用`--net=host`更方便快捷
-docker run --rm -it --net=host gpt-academic
-#（最后一步-MacOS/Windows操作系统）只能用-p选项将容器上的端口(例如50923)暴露给主机上的端口
-docker run --rm -it -e WEB_PORT=50923 -p 50923:50923 gpt-academic
+# 修改docker-compose.yml，保留方案1并删除其他方案。修改docker-compose.yml中方案1的配置，参考其中注释即可
+docker-compose up
 ```
-P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以直接使用docker-compose获取Latex功能（修改docker-compose.yml，保留方案4并删除其他方案）。
+
+P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以直接使用方案4或者方案0获取Latex功能。
 
 2. ChatGPT + ChatGLM2 + MOSS + LLAMA2 + 通义千问（需要熟悉[Nvidia Docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#installing-on-ubuntu-and-debian)运行时）
 [![chatglm](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-chatglm.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-chatglm.yml)
@@ -309,6 +310,7 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 
 ### II：版本:
 - version 3.60（todo）: 优化虚空终端，引入code interpreter和更多插件
+- version 3.53: 支持动态选择不同界面主题，提高稳定性&解决多用户冲突问题
 - version 3.50: 使用自然语言调用本项目的所有函数插件（虚空终端），支持插件分类，改进UI，设计新主题
 - version 3.49: 支持百度千帆平台和文心一言
 - version 3.48: 支持阿里达摩院通义千问，上海AI-Lab书生，讯飞星火
