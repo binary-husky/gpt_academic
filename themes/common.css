@@ -19,3 +19,8 @@
 .wrap.svelte-xwlu1w {
     min-height: var(--size-32);
 }
+
+/* status bar height */
+.min.svelte-1yrv54 {
+    min-height: var(--size-12);
+}
