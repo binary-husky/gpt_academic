@@ -149,25 +149,25 @@ python main.py
 
 ### 安装方法II：使用Docker
 
+0. 部署项目的全部能力（这个是包含cuda和latex的大型镜像。如果您网速慢、硬盘小或没有显卡，则不推荐使用这个，建议使用方案1）（需要熟悉[Nvidia Docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#installing-on-ubuntu-and-debian)运行时）
+
 [![fullcapacity](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-all-capacity.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-audio-assistant.yml)
 
-1. 仅ChatGPT（推荐大多数人选择，等价于docker-compose方案1）
+``` sh
+# 修改docker-compose.yml，保留方案0并删除其他方案。修改docker-compose.yml中方案0的配置，参考其中注释即可
+docker-compose up
+```
+
+1. 仅ChatGPT（推荐大多数人选择）
 [![basic](https://github.com/binary-husky/gpt_academic/actions/workflows/build-without-local-llms.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-without-local-llms.yml)
 [![basiclatex](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-latex.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-latex.yml)
 [![basicaudio](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-audio-assistant.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-audio-assistant.yml)
 
-
 ``` sh
-git clone --depth=1 https://github.com/binary-husky/gpt_academic.git  # 下载项目
-cd gpt_academic                                 # 进入路径
-nano config.py                                      # 用任意文本编辑器编辑config.py, 配置 “Proxy”， “API_KEY” 以及 “WEB_PORT” (例如50923) 等
-docker build -t gpt-academic .                      # 安装
-
-#（最后一步-Linux操作系统）用`--net=host`更方便快捷
-docker run --rm -it --net=host gpt-academic
-#（最后一步-MacOS/Windows操作系统）只能用-p选项将容器上的端口(例如50923)暴露给主机上的端口
-docker run --rm -it -e WEB_PORT=50923 -p 50923:50923 gpt-academic
+# 修改docker-compose.yml，保留方案1并删除其他方案。修改docker-compose.yml中方案1的配置，参考其中注释即可
+docker-compose up
 ```
+
 P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以直接使用docker-compose获取Latex功能（修改docker-compose.yml，保留方案4并删除其他方案）。
 
 2. ChatGPT + ChatGLM2 + MOSS + LLAMA2 + 通义千问（需要熟悉[Nvidia Docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#installing-on-ubuntu-and-debian)运行时）
