@@ -65,11 +65,6 @@ def 连接bing搜索回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, histor
     system_prompt   给gpt的静默提醒
     web_port        当前软件运行的端口号
     """
-    history = []    # 清空历史，以免输入溢出
-    chatbot.append((f"请结合互联网信息回答以下问题：{txt}",
-                    "[Local Message] 请注意，您正在调用一个[函数插件]的模板，该模板可以实现ChatGPT联网信息综合。该函数面向希望实现更多有趣功能的开发者，它可以作为创建新功能函数的模板。您若希望分享新的功能模组，请不吝PR！"))
-    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
-
     # ------------- < 第1步：爬取搜索引擎的结果 > -------------
     from comm_tools.toolbox import get_conf
     proxies, = get_conf('proxies')
@@ -82,10 +77,16 @@ def 连接bing搜索回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, histor
         return
     # ------------- < 第2步：依次访问网页 > -------------
     max_search_result = 8   # 最多收纳多少个网页的结果
+    i_say_1 = f"请结合互联网信息回答以下问题：{txt}"
+    gpt_say_1 = ''
+    from comm_tools import func_box
+    chatbot.append([i_say_1, gpt_say_1])
     for index, url in enumerate(urls[:max_search_result]):
         res = scrape_text(url['link'], proxies)
         history.extend([f"第{index}份搜索结果：", res])
-        chatbot.append([f"第{index}份搜索结果：", res[:500]+"......"])
+        tag = func_box.html_tag_color(f"第{index}份搜索结果：")
+        gpt_say_1 += f'{tag}\n\n```folded\n{res}\n```\n\n'
+        chatbot[-1] = [i_say_1, gpt_say_1]
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
 
     # ------------- < 第3步：ChatGPT综合 > -------------
@@ -101,6 +102,7 @@ def 连接bing搜索回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, histor
         sys_prompt="请从给定的若干条搜索结果中抽取信息，对最相关的两个搜索结果进行总结，然后回答问题。"
     )
     chatbot[-1] = (i_say, gpt_say)
-    history.append(i_say);history.append(gpt_say)
+    history.append(i_say)
+    history.append(gpt_say)
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
 

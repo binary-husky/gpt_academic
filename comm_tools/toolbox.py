@@ -47,13 +47,6 @@ class ChatBotWithCookies(list):
         return self._cookies
 
 
-def write_private(ipaddr, models, chatbot):
-    encrypt, private, _ = get_conf('switch_model')[0]['key']
-    private_key, = get_conf('private_key')
-    transparent_address_private = f'<p style="display:none;">\n{private_key}\n{ipaddr.client.host}\n</p>'
-    transparent_address = f'<p style="display:none;">\n{ipaddr.client.host}\n</p>'
-
-
 def end_predict(chatbot, history, llm_kwargs):
     count_time = round(time.time() - llm_kwargs['start_time'], 3)
     count_tokens = func_box.num_tokens_from_string(listing=history)
@@ -71,12 +64,12 @@ def ArgsGeneralWrapper(f):
                   txt, top_p, temperature, n_choices, stop_sequence,
                   max_context, max_generation, presence_penalty,
                   frequency_penalty, logit_bias, user_identifier,
-                  ocr_trust,chatbot, history, system_prompt, models, plugin_advanced_arg, ipaddr: gr.Request, *args):
+                  ocr_trust, chatbot, single_turn, use_websearch,
+                  history, system_prompt, models, plugin_advanced_arg, ipaddr: gr.Request, *args):
         """"""
         # 引入一个有cookie的chatbot
         from comm_tools import Langchain_cn
         start_time = time.time()
-        encrypt, private, _ = get_conf('switch_model')[0]['key']
         real_llm = {
             'top_p': top_p, 'temperature': temperature, 'n_choices': n_choices, 'stop': stop_sequence,
             'max_context': max_context, 'max_generation': max_generation, 'presence_penalty': presence_penalty,
@@ -109,7 +102,7 @@ def ArgsGeneralWrapper(f):
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
         txt_passon = txt
-        if encrypt in models: txt_passon = func_box.encryption_str(txt)
+        if 'input加密' in models: txt_passon = func_box.encryption_str(txt)
         # 插件会传多参数，如果是插件，那么更新知识库 和 默认高级参数
         if len(args) > 1:
             plugin_kwargs['advanced_arg'] = ''
@@ -122,39 +115,59 @@ def ArgsGeneralWrapper(f):
             plugin_kwargs['advanced_arg'] = ''
             txt_passon = yield from Langchain_cn.knowledge_base_query(txt_passon,
                                     chatbot_with_cookie, history, llm_kwargs, plugin_kwargs)
-        if cookies.get('lock_plugin', None) is None:
-            is_try = args[0] if 'RetryChat' in args else None
-            if is_try:
-                txt_passon = cookies.get('last_chat', txt_passon)
-                if cookies.get('is_plugin', ''):
-                    from comm_tools.crazy_functional import crazy_fns
-                    func_name = cookies['is_plugin']['func_name']
-                    txt_passon = cookies['is_plugin']['input']
-                    try_f = crazy_fns.get(func_name, False)
-                    if try_f: try_f = try_f['Function']
-                else:
-                    try_f = f
-                    args = ()
-                yield from try_f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
-            else:
-                yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
-        else:
-            # 处理少数情况下的特殊插件的锁定状态
-            module, fn_name = cookies['lock_plugin'].split('->')
-            f_hot_reload = getattr(importlib.import_module(module, fn_name), fn_name)
-            yield from f_hot_reload(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
-            # 判断一下用户是否错误地通过对话通道进入，如果是，则进行提醒
-            final_cookies = chatbot_with_cookie.get_cookies()
-            # len(args) != 0 代表“提交”键对话通道，或者基础功能通道
-            if len(args) != 0 and 'files_to_promote' in final_cookies and len(final_cookies['files_to_promote']) > 0:
-                chatbot_with_cookie.append(["检测到**滞留的缓存文档**，请及时处理。", "请及时点击“**保存当前对话**”获取所有滞留文档。"])
-                yield from update_ui(chatbot_with_cookie, final_cookies['history'], msg="检测到被滞留的缓存文档")
+        # 根据cookie 或 其他配置决定到底走哪一步
+        yield from func_decision_tree(f, cookies, single_turn, use_websearch,
+                                      txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie,
+                                      history, system_prompt, args)
         # 将对话记录写入文件
         yield from end_predict(chatbot_with_cookie, history, llm_kwargs)
         threading.Thread(target=func_box.thread_write_chat_json,
                          args=(chatbot_with_cookie, history, ipaddr.client.host)).start()
     return decorated
 
+
+def func_decision_tree(func, cookies, single_turn, use_websearch,
+                       txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie,
+                       history, system_prompt, args):
+    if cookies.get('lock_plugin', None) is None:
+        is_try = args[0] if 'RetryChat' in args else None
+        if is_try:
+            if not txt_passon:  # 如果输入框为空，那么就用之前的
+                txt_passon = cookies.get('last_chat', txt_passon)
+            if cookies.get('is_plugin', ''):
+                from comm_tools.crazy_functional import crazy_fns
+                func_name = cookies['is_plugin']['func_name']
+                txt_passon = cookies['is_plugin']['input']
+                plugin_kwargs.update(cookies['is_plugin']['kwargs'])
+                try_f = crazy_fns.get(func_name, False)
+                if try_f: try_f = try_f['Function']
+            else:
+                try_f = func
+                args = ()
+            yield from try_f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
+        else:
+            if use_websearch:
+                from comm_tools.crazy_functional import crazy_fns
+                google_search = crazy_fns['连接网络回答问题（输入问题后点击该插件，需要访问谷歌）']['Function']
+                bing_search = crazy_fns['连接网络回答问题（中文Bing版，输入问题后点击该插件）']['Function']
+                func = google_search
+            if single_turn:
+                yield from func(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, [], system_prompt, *args)
+            else:
+                yield from func(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
+    else:
+        # 处理少数情况下的特殊插件的锁定状态
+        module, fn_name = cookies['lock_plugin'].split('->')
+        f_hot_reload = getattr(importlib.import_module(module, fn_name), fn_name)
+        yield from f_hot_reload(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt,
+                                *args)
+        # 判断一下用户是否错误地通过对话通道进入，如果是，则进行提醒
+        final_cookies = chatbot_with_cookie.get_cookies()
+        # len(args) != 0 代表“提交”键对话通道，或者基础功能通道
+        if len(args) != 0 and 'files_to_promote' in final_cookies and len(final_cookies['files_to_promote']) > 0:
+            chatbot_with_cookie.append(
+                ["检测到**滞留的缓存文档**，请及时处理。", "请及时点击“**保存当前对话**”获取所有滞留文档。"])
+            yield from update_ui(chatbot_with_cookie, final_cookies['history'], msg="检测到被滞留的缓存文档")
 
 def update_ui(chatbot, history, msg='正常', end_code=0, *args):  # 刷新界面
     """

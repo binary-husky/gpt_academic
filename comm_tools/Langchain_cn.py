@@ -174,8 +174,7 @@ def obtain_classification_knowledge_base(cls_name, ipaddr: gr.Request):
 
 
 def obtaining_knowledge_base_files(cls_select, cls_name, vs_id, chatbot, kai_handle, model, ipaddr: gr.Request):
-    _, _, preload_knowledge = toolbox.get_conf('switch_model')[0]['key']
-    if vs_id and preload_knowledge in model:
+    if vs_id and '预加载知识库' in model:
         cls_select = classification_filtering_tag(cls_select, cls_name, ipaddr.client.host)
         vs_path = os.path.join(func_box.knowledge_path, cls_select)
         you_say = f'请检查知识库内文件{"  ".join([func_box.html_tag_color(i)for i in vs_id])}'

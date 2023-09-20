@@ -4,7 +4,8 @@
 # @Author : Spike
 # @Descr   :
 import gradio as gr
-from comm_tools import webui_local, func_box, toolbox, func_signals
+from comm_tools import webui_local, func_box, toolbox
+from webui_elem import func_signals
 
 i18n = webui_local.I18nAuto()
 get_html = func_box.get_html

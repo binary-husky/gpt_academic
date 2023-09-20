@@ -92,7 +92,11 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
             else:
                 raise RuntimeError("OpenAI拒绝了请求：" + error_msg)
         if ('data: [DONE]' in chunk): break  # api2d 正常完成
-        json_data = json.loads(chunk.lstrip('data:'))['choices'][0]
+        json_index = chunk.find('{')
+        try:
+            json_data = json.loads(chunk[json_index:])['choices'][0]
+        except:
+            json_data = json.loads(chunk[json_index:])['data']['choices'][0]
         delta = json_data["delta"]
         if len(delta) == 0: break
         if "role" in delta: continue

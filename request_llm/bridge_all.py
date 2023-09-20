@@ -538,7 +538,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
                 chat_string = []
                 for i in range(n_model):
                     chat_string.append(f"<font color=\"{colors[i]}\">【{str(models[i])}】: </font> "
-                                       f"\n\n```\n{window_mutex[i][0]}\n```\n\n---\n\n")
+                                       f"\n\n{window_mutex[i][0]}\n\n---\n\n")
                 res = ''.join(chat_string)
                 # # # # # # # # # # #
                 observe_window[0] = res
@@ -556,7 +556,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
 
         for i, future in enumerate(futures):  # wait and get
             return_string_collect.append(f"<font color=\"{colors[i]}\">【{str(models[i])}】: </font> "
-                                         f"\n\n```\n{window_mutex[i][0]}\n```\n\n---\n\n")
+                                         f"\n\n{window_mutex[i][0]}\n\n---\n\n")
         window_mutex[-1] = False # stop mutex thread
         res = ''.join(return_string_collect)
         return res

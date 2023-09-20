@@ -135,7 +135,7 @@ class RightElem:
             self.langchain_error = gr.Markdown(value='')
 
     def _draw_setting_chat(self):
-        switch_model, worker_num = toolbox.get_conf('switch_model', 'DEFAULT_WORKER_NUM')
+        worker_num, = toolbox.get_conf('DEFAULT_WORKER_NUM')
         with gr.TabItem('调优', id='sett_tab', elem_id='chuanhu-toolbox-tabs'):
             with gr.Box():
                 # gr.Markdown(func_box.get_html('what_news.html').replace('{%v}', 'LLMs调优参数'))
@@ -193,7 +193,7 @@ class RightElem:
                                                    label="OCR 识别信任指数").style(container=False)
 
                 func_box.md_division_line()
-                self.models_box = gr.CheckboxGroup(choices=switch_model['key'], value=switch_model['value'], label="对话模式")
+                self.models_box = gr.CheckboxGroup(choices=['input加密', '预加载知识库'], value=['input加密'], label="对话模式")
             # temp = gr.Markdown(self.description)
 
     def _darw_private_operation(self):

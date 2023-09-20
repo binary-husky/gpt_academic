@@ -23,8 +23,8 @@ set_theme = adjust_theme()
 
 # 代理与自动更新
 from comm_tools.check_proxy import check_proxy, auto_update
-from comm_tools import func_box, func_signals
-from comm_tools.check_proxy import get_current_version
+from comm_tools import func_box
+from webui_elem import func_signals
 
 os.makedirs("gpt_log", exist_ok=True)
 try:
@@ -126,7 +126,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         )
 
     def signals_plugin(self):
-        from comm_tools.crazy_functional import crazy_fns_role, crazy_classification, crazy_fns
+        from comm_tools.crazy_functional import crazy_fns_role, crazy_fns
         fn_btn_dict = {crazy_fns_role[role][k]['Button']: {role: k} for role in crazy_fns_role for k in crazy_fns_role[role] if crazy_fns_role[role][k].get('Button')}
         def show_plugin_btn(plu_list):
             new_btn_list = []
@@ -245,7 +245,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                                    self.system_prompt
                                    ]
         self.historySelectList.input(fn=func_signals.select_history, inputs=[self.historySelectList, self.cookies],
-                                      outputs=[*self.llms_cookies_combo, self.saveFileName])
+                                     outputs=[*self.llms_cookies_combo, self.saveFileName])
         self.renameHistoryBtn.click(func_signals.rename_history,
                                     inputs=[self.saveFileName, self.historySelectList],
                                     outputs=[self.historySelectList],
@@ -270,13 +270,15 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                             self.top_p, self.temperature,  self.n_choices_slider, self.stop_sequence_txt,
                             self.max_context_length_slider, self.max_generation_slider, self.presence_penalty_slider,
                             self.frequency_penalty_slider, self.logit_bias_txt, self.user_identifier_txt,
-                            self.ocr_identifying_trust, self.chatbot,
+                            self.ocr_identifying_trust, self.chatbot, self.single_turn_checkbox, self.use_websearch_checkbox,
                             self.history, self.system_prompt, self.models_box, self.plugin_advanced_arg]
         self.output_combo = [self.cookies, self.chatbot, self.history, self.status_display, self.cancelBtn, self.submitBtn,]
         self.predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=self.input_combo,
                                  outputs=self.output_combo, show_progress=True)
-        self.clear_agrs = dict(fn=func_signals.clear_input, inputs=[self.user_input, self.cookies, self.historySelectList],
-                               outputs=[self.user_input, self.input_copy, self.cancelBtn, self.submitBtn, self.historySelectList])
+        self.clear_agrs = dict(fn=func_signals.clear_input,
+                               inputs=[self.user_input, self.cookies],
+                               outputs=[self.user_input, self.input_copy, self.cancelBtn,
+                                        self.submitBtn, self.historySelectList])
 
         # 提交按钮、重置按钮
         submit_handle = self.user_input.submit(**self.clear_agrs).then(**self.predict_args)
@@ -286,6 +288,14 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         self.emptyBtn.click(func_signals.clear_chat_cookie, [],
                             [*self.llms_cookies_combo, self.status_display,
                              self.historySelectList, self.saveFileName])
+        self.changeSingleSessionBtn.click(
+            fn=lambda value: gr.Checkbox.update(value=value), inputs=[self.single_turn_checkbox],
+            outputs=[self.single_turn_checkbox], _js='(a)=>{return bgChangeSingleSession(a);}'
+        )
+        self.changeOnlineSearchBtn.click(
+            fn=lambda value: gr.Checkbox.update(value=value), inputs=[self.use_websearch_checkbox],
+            outputs=[self.use_websearch_checkbox], _js='(a)=>{return bgChangeOnlineSearch(a);}'
+        )
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay(self, is_open=False):
