@@ -807,3 +807,10 @@ class construct_html():
         with open(os.path.join(get_log_folder(), file_name), 'w', encoding='utf8') as f:
             f.write(self.html_string.encode('utf-8', 'ignore').decode())
         return os.path.join(get_log_folder(), file_name)
+
+
+def get_plugin_arg(plugin_kwargs, key, default):
+    # 如果参数是空的
+    if (key in plugin_kwargs) and (plugin_kwargs[key] == ""): plugin_kwargs.pop(key)
+    # 正常情况
+    return plugin_kwargs.get(key, default)

@@ -527,6 +527,7 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
         if 'files_to_promote' in chatbot._cookies: current = chatbot._cookies['files_to_promote']
         else: current = []
         chatbot._cookies.update({'files_to_promote': [new_path] + current})
+    return new_path
 
 def disable_auto_promotion(chatbot):
     chatbot._cookies.update({'files_to_promote': []})
