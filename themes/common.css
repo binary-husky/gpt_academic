@@ -24,3 +24,29 @@
 .min.svelte-1yrv54 {
     min-height: var(--size-12);
 }
+
+/* copy btn */
+.message-btn-row {
+    width: 19px;
+    height: 19px;
+    position: absolute;
+    left: calc(100% + 3px);
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+}
+/* .message-btn-row-leading, .message-btn-row-trailing {
+    display: inline-flex;
+    gap: 4px;
+} */
+.message-btn-row button {
+    font-size: 18px;
+    align-self: center;
+    align-items: center;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    display: inline-flex;
+    flex-direction: row;
+    gap: 4px;
+    padding-block: 2px !important;
+}
