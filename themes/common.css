@@ -54,21 +54,32 @@
 
 /* Scrollbar Width */
 ::-webkit-scrollbar {
-width: 12px;
+    width: 12px;
 }
 
 /* Scrollbar Track */
 ::-webkit-scrollbar-track {
-background: #f1f1f1; 
+    background: #f1f1f1;
+    border-radius: 12px;
 }
 
 /* Scrollbar Handle */
 ::-webkit-scrollbar-thumb {
-background: #888; 
-border-radius: 12px; /* Round the edges of the thumb */
+    background: #888;
+    border-radius: 12px;
 }
 
 /* Scrollbar Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-background: #555; 
+    background: #555;
+}
+
+/* input btns: clear, reset, stop */
+#input-panel button {
+    min-width: min(80px, 100%);
+}
+
+/* input btns: clear, reset, stop */
+#input-panel2 button {
+    min-width: min(80px, 100%);
 }
