@@ -285,6 +285,7 @@ def main():
 
     auto_opentab_delay()
     demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
+        quiet=True,
         server_name="0.0.0.0", 
         server_port=PORT,
         favicon_path="docs/logo.png", 
