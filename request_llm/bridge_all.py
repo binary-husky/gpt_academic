@@ -145,6 +145,15 @@ model_info = {
         "token_cnt": get_token_num_gpt35,
     },
 
+    "azure-gpt-4":{
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": azure_endpoint,
+        "max_token": 8192,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+
     # api_2d
     "api2d-gpt-3.5-turbo": {
         "fn_with_ui": chatgpt_ui,
