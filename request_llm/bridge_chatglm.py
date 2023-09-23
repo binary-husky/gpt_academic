@@ -3,7 +3,7 @@ from transformers import AutoModel, AutoTokenizer
 import time
 import threading
 import importlib
-from toolbox import update_ui, get_conf
+from toolbox import update_ui, get_conf, ProxyNetworkActivate
 from multiprocessing import Process, Pipe
 
 load_message = "ChatGLM尚未加载，加载需要一段时间。注意，取决于`config.py`的配置，ChatGLM消耗大量的内存（CPU）或显存（GPU），也许会导致低配计算机卡死 ……"
@@ -48,16 +48,17 @@ class GetGLMHandle(Process):
 
         while True:
             try:
-                if self.chatglm_model is None:
-                    self.chatglm_tokenizer = AutoTokenizer.from_pretrained(_model_name_, trust_remote_code=True)
-                    if device=='cpu':
-                        self.chatglm_model = AutoModel.from_pretrained(_model_name_, trust_remote_code=True).float()
+                with ProxyNetworkActivate('Download_LLM'):
+                    if self.chatglm_model is None:
+                        self.chatglm_tokenizer = AutoTokenizer.from_pretrained(_model_name_, trust_remote_code=True)
+                        if device=='cpu':
+                            self.chatglm_model = AutoModel.from_pretrained(_model_name_, trust_remote_code=True).float()
+                        else:
+                            self.chatglm_model = AutoModel.from_pretrained(_model_name_, trust_remote_code=True).half().cuda()
+                        self.chatglm_model = self.chatglm_model.eval()
+                        break
                     else:
-                        self.chatglm_model = AutoModel.from_pretrained(_model_name_, trust_remote_code=True).half().cuda()
-                    self.chatglm_model = self.chatglm_model.eval()
-                    break
-                else:
-                    break
+                        break
             except:
                 retry += 1
                 if retry > 3: 

@@ -5,7 +5,7 @@ CODE_HIGHLIGHT, ADD_WAIFU, LAYOUT = get_conf('CODE_HIGHLIGHT', 'ADD_WAIFU', 'LAY
 
 def dynamic_set_theme(THEME):
     set_theme = gr.themes.ThemeClass()
-    with ProxyNetworkActivate():
+    with ProxyNetworkActivate('Download_Gradio_Theme'):
         logging.info('正在下载Gradio主题，请稍等。')
         if THEME.startswith('Huggingface-'): THEME = THEME.lstrip('Huggingface-')
         if THEME.startswith('huggingface-'): THEME = THEME.lstrip('huggingface-')
@@ -16,7 +16,7 @@ def adjust_theme():
 
     try:
         set_theme = gr.themes.ThemeClass()
-        with ProxyNetworkActivate():
+        with ProxyNetworkActivate('Download_Gradio_Theme'):
             logging.info('正在下载Gradio主题，请稍等。')
             THEME, = get_conf('THEME')
             if THEME.startswith('Huggingface-'): THEME = THEME.lstrip('Huggingface-')
