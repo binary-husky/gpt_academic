@@ -651,7 +651,7 @@ class knowledge_archive_interface():
             from toolbox import ProxyNetworkActivate
             print('Checking Text2vec ...')
             from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-            with ProxyNetworkActivate():    # 临时地激活代理网络
+            with ProxyNetworkActivate('Download_LLM'):    # 临时地激活代理网络
                 self.text2vec_large_chinese = HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
 
         return self.text2vec_large_chinese
