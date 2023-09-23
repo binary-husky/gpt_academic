@@ -50,3 +50,11 @@
     gap: 4px;
     padding-block: 2px !important;
 }
+
+/* input btns: clear, reset, stop */
+#input-panel button {
+    min-width: min(80px,100%);
+}
+#input-panel2 button {
+    min-width: min(80px,100%);
+}
