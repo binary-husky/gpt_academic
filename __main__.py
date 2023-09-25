@@ -291,7 +291,9 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         self.cancel_handles.append(click_handle)
         self.emptyBtn.click(func_signals.clear_chat_cookie, [],
                             [*self.llms_cookies_combo, self.status_display,
-                             self.historySelectList, self.saveFileName])
+                             self.historySelectList, self.saveFileName]
+                            ).then(fn=lambda : gr.Files.update(value=None),
+                                   inputs=[], outputs=[self.sm_upload])
         self.changeSingleSessionBtn.click(
             fn=lambda value: gr.Checkbox.update(value=value), inputs=[self.single_turn_checkbox],
             outputs=[self.single_turn_checkbox], _js='(a)=>{return bgChangeSingleSession(a);}'

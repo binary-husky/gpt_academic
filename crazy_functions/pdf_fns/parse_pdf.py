@@ -1,8 +1,8 @@
 from functools import lru_cache
-from toolbox import gen_time_str
-from toolbox import promote_file_to_downloadzone
-from toolbox import write_history_to_file, promote_file_to_downloadzone
-from colorful import *
+from comm_tools.toolbox import gen_time_str
+from comm_tools.toolbox import promote_file_to_downloadzone
+from comm_tools.toolbox import write_history_to_file, promote_file_to_downloadzone
+from comm_tools.colorful import *
 import requests
 import random
 import copy

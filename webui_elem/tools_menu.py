@@ -196,14 +196,6 @@ class RightElem:
                 self.models_box = gr.CheckboxGroup(choices=['input加密', '预加载知识库'], value=['input加密'], label="对话模式")
             # temp = gr.Markdown(self.description)
 
-    def _darw_private_operation(self):
-        with gr.TabItem('个人中心', id='private', elem_id='chuanhu-toolbox-tabs',):
-            with gr.Row():
-                gr.Markdown('####  粉身碎骨浑不怕 要留清白在人间\n\n'
-                            '这里是删除个人文件信息的地方，`注意！！这里的所有操作不可逆，请谨慎操作！！！！`')
-            with gr.Row():
-                gr.Markdown('待完善')
-
     def draw_tools_area(self):
         with gr.Column(elem_id="toolbox-area", scale=1):
             with gr.Box(elem_id="chuanhu-toolbox"):
@@ -213,4 +205,3 @@ class RightElem:
                     self._draw_plugin_chat()
                     self._draw_langchain_base()
                     self._draw_setting_chat()
-                    self._darw_private_operation()

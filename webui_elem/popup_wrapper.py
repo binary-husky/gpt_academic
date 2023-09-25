@@ -75,11 +75,20 @@ class Settings:
                 # container=False, elem_classes="view-only-textbox no-container",
             )
 
+    def _darw_private_operation(self):
+        with gr.TabItem('个人中心', id='private', elem_id='bout-tab',):
+            with gr.Row():
+                gr.Markdown('####  粉身碎骨浑不怕 要留清白在人间\n\n'
+                            '这里是删除个人文件信息的地方，`注意！！这里的所有操作不可逆，请谨慎操作！！！！`')
+            with gr.Row():
+                gr.Markdown('待完善')
+
     def _draw_setting_info(self):
         with gr.Tab(label=i18n("关于"), elem_id="about-tab"):
             gr.Markdown("# " + i18n("川虎Chat"))
             gr.HTML(get_html("footer.html").format(versions=''), elem_id="footer")
             gr.Markdown('', elem_id="description")
+
 
     def draw_popup_settings(self):
         with gr.Box(elem_id="chuanhu-setting"):
@@ -91,6 +100,7 @@ class Settings:
                 self._draw_setting_model()
                 self._draw_setting_senior()
                 self._draw_setting_network()
+                self._darw_private_operation()
                 self._draw_setting_info()
 
 

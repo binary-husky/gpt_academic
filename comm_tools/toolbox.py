@@ -78,7 +78,6 @@ def ArgsGeneralWrapper(f):
         }
         cookies.update({
             **real_llm,
-            'last_chat': txt,
             'system_prompt': system_prompt,
         })
         if not cookies.get('first_chat') and args:
@@ -135,6 +134,7 @@ def func_decision_tree(func, cookies, single_turn, use_websearch,
         if is_try:
             user_data = user_data_processing.get_user_basedata(chatbot_with_cookie, llm_kwargs['ipaddr'])
             plugin = user_data['chat'][-1].get('plugin')
+            txt_passon = cookies['last_chat']
             if plugin:
                 from comm_tools.crazy_functional import crazy_fns
                 func_name = plugin['func_name']
@@ -147,7 +147,6 @@ def func_decision_tree(func, cookies, single_turn, use_websearch,
             else:
                 try_f = func
                 args = ()
-            cookies.update({'last_chat': txt_passon})
             yield from try_f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
         else:
             if use_websearch:
@@ -159,6 +158,7 @@ def func_decision_tree(func, cookies, single_turn, use_websearch,
                 yield from func(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, [], system_prompt, *args)
             else:
                 yield from func(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
+        cookies.update({'last_chat': txt_passon})
     else:
         # 处理少数情况下的特殊插件的锁定状态
         module, fn_name = cookies['lock_plugin'].split('->')
