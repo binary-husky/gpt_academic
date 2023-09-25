@@ -1,0 +1,26 @@
+/* hide remove all button */
+.remove-all.svelte-aqlk7e.svelte-aqlk7e.svelte-aqlk7e {
+    visibility: hidden;
+}
+
+/* hide selector border */
+#input-plugin-group .wrap.svelte-aqlk7e.svelte-aqlk7e.svelte-aqlk7e {
+    border: 0px;
+    box-shadow: none;
+}
+
+/* hide selector label */
+#input-plugin-group .svelte-1gfkn6j {
+    visibility: hidden;
+}
+
+
+/* height of the upload box */
+.wrap.svelte-xwlu1w {
+    min-height: var(--size-32);
+}
+
+/* status bar height */
+.min.svelte-1yrv54 {
+    min-height: var(--size-12);
+}

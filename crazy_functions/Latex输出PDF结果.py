@@ -80,7 +80,7 @@ def move_project(project_folder, arxiv_id=None):
     shutil.copytree(src=project_folder, dst=new_workfolder)
     return new_workfolder
 
-def arxiv_download(chatbot, history, txt):
+def arxiv_download(chatbot, history, txt, allow_cache=True):
     def check_cached_translation_pdf(arxiv_id):
         translation_dir = pj(ARXIV_CACHE_DIR, arxiv_id, 'translation')
         if not os.path.exists(translation_dir):
@@ -117,7 +117,7 @@ def arxiv_download(chatbot, history, txt):
     arxiv_id = url_.split('/abs/')[-1]
     if 'v' in arxiv_id: arxiv_id = arxiv_id[:10]
     cached_translation_pdf = check_cached_translation_pdf(arxiv_id)
-    if cached_translation_pdf: return cached_translation_pdf, arxiv_id
+    if cached_translation_pdf and allow_cache: return cached_translation_pdf, arxiv_id
 
     url_tar = url_.replace('/abs/', '/e-print/')
     translation_dir = pj(ARXIV_CACHE_DIR, arxiv_id, 'e-print')
@@ -229,6 +229,9 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
     # <-------------- more requirements ------------->
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     more_req = plugin_kwargs.get("advanced_arg", "")
+    no_cache = more_req.startswith("--no-cache")
+    if no_cache: more_req.lstrip("--no-cache")
+    allow_cache = not no_cache
     _switch_prompt_ = partial(switch_prompt, more_requirement=more_req)
 
     # <-------------- check deps ------------->
@@ -245,7 +248,7 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
 
     # <-------------- clear history and read input ------------->
     history = []
-    txt, arxiv_id = yield from arxiv_download(chatbot, history, txt)
+    txt, arxiv_id = yield from arxiv_download(chatbot, history, txt, allow_cache)
     if txt.endswith('.pdf'):
         report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"发现已经存在翻译好的PDF文档")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面

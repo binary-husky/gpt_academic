@@ -77,6 +77,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
 
     stream_response = response.iter_lines()
     result = ''
+    json_data = None
     while True:
         try:
             chunk = next(stream_response).decode()
@@ -105,7 +106,8 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
             if not console_slience: print(delta["content"], end='')
             if observe_window is not None:
                 # 观测窗，把已经获取的数据显示出去
-                if len(observe_window) >= 1: observe_window[0] += delta["content"]
+                if len(observe_window) >= 1:
+                    observe_window[0] += delta["content"]
                 # 看门狗，如果超过期限没有喂狗，则终止
                 if len(observe_window) >= 2:
                     if (time.time() - observe_window[1]) > watch_dog_patience:
