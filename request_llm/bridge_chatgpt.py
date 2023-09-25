@@ -299,8 +299,8 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     if llm_kwargs['llm_model'].startswith('azure-') or llm_kwargs['llm_model'].startswith('proxy-'):
         headers.update({"api-key": api_key})
     if llm_kwargs['llm_model'].startswith('aigc-'):
-        aigc_uuid, = get_conf('AIGC_UUID')
-        headers.update(aigc_uuid)
+        aigc_kwargs,  = get_conf('AIGC_KWARGS')
+        headers.update(aigc_kwargs)
     conversation_cnt = len(history) // 2
 
     messages = [{"role": "system", "content": system_prompt}]

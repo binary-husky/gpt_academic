@@ -515,17 +515,6 @@ def thread_write_chat(chatbot, ipaddr, models):
         SqliteHandle(f'ai_common_{ipaddr}').inset_prompt({i_say: gpt_result}, '')
 
 
-def thread_write_chat_json(chatbot, history, ipaddr):
-    chatbot = copy.copy(chatbot)
-    cookies = chatbot.get_cookies()
-    file_path = os.path.join(history_path, ipaddr)
-    os.makedirs(file_path, exist_ok=True)
-    file_name = os.path.join(file_path, f"{cookies['first_chat']}.json")
-    history_json_handle = user_data_processing.HistoryJsonHandle(file_name)
-    kwargs = cookies.get('is_plugin', False)
-    history_json_handle.analysis_chat_history(chatbot, history, cookies, kwargs)
-
-
 def git_log_list():
     ll = Shell("git log --pretty=format:'%s | %h' -n 10").read()[1].splitlines()
     return [i.split('|') for i in ll if 'branch' not in i][:5]

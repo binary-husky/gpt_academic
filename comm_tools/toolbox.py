@@ -3,6 +3,7 @@ import importlib
 import inspect
 import gradio as gr
 from comm_tools import func_box
+from comm_tools import user_data_processing
 import gradio
 import shutil
 import glob
@@ -121,8 +122,8 @@ def ArgsGeneralWrapper(f):
                                       history, system_prompt, args)
         # 将对话记录写入文件
         yield from end_predict(chatbot_with_cookie, history, llm_kwargs)
-        threading.Thread(target=func_box.thread_write_chat_json,
-                         args=(chatbot_with_cookie, history, ipaddr.client.host)).start()
+        threading.Thread(target=user_data_processing.thread_write_chat_json,
+                         args=(chatbot_with_cookie, ipaddr.client.host)).start()
     return decorated
 
 
@@ -132,18 +133,21 @@ def func_decision_tree(func, cookies, single_turn, use_websearch,
     if cookies.get('lock_plugin', None) is None:
         is_try = args[0] if 'RetryChat' in args else None
         if is_try:
-            if not txt_passon:  # 如果输入框为空，那么就用之前的
-                txt_passon = cookies.get('last_chat', txt_passon)
-            if cookies.get('is_plugin', ''):
+            user_data = user_data_processing.get_user_basedata(chatbot_with_cookie, llm_kwargs['ipaddr'])
+            plugin = user_data['chat'][-1].get('plugin')
+            if plugin:
                 from comm_tools.crazy_functional import crazy_fns
-                func_name = cookies['is_plugin']['func_name']
-                txt_passon = cookies['is_plugin']['input']
-                plugin_kwargs.update(cookies['is_plugin']['kwargs'])
+                func_name = plugin['func_name']
+                if not txt_passon:
+                    txt_passon = plugin['input']
+                plugin_kwargs.update(plugin['kwargs'])
+                cookies['is_plugin'] = {'func_name': func_name, 'input': txt_passon, 'kwargs': plugin_kwargs}
                 try_f = crazy_fns.get(func_name, False)
                 if try_f: try_f = try_f['Function']
             else:
                 try_f = func
                 args = ()
+            cookies.update({'last_chat': txt_passon})
             yield from try_f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
         else:
             if use_websearch:
@@ -168,6 +172,7 @@ def func_decision_tree(func, cookies, single_turn, use_websearch,
             chatbot_with_cookie.append(
                 ["检测到**滞留的缓存文档**，请及时处理。", "请及时点击“**保存当前对话**”获取所有滞留文档。"])
             yield from update_ui(chatbot_with_cookie, final_cookies['history'], msg="检测到被滞留的缓存文档")
+
 
 def update_ui(chatbot, history, msg='正常', end_code=0, *args):  # 刷新界面
     """

@@ -202,7 +202,11 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         self.cancel_handles.append(click_handle)
         # 终止按钮的回调函数注册
         self.cancelBtn.click(fn=lambda: (self.cancelBtn.update(visible=False), self.submitBtn.update(visible=True)),
-            inputs=[], outputs=[self.cancelBtn, self.submitBtn], cancels=self.cancel_handles)
+            inputs=[], outputs=[self.cancelBtn, self.submitBtn], cancels=self.cancel_handles).then(
+            fn=func_signals.stop_chat_refresh, inputs=[self.chatbot, self.history],
+            outputs=[]
+        )
+
 
     def signals_langchain_cn(self):
         def update_drop(x, llms, cls_name, ipaddr: gr.Request):

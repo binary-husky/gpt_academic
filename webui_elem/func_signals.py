@@ -89,9 +89,16 @@ def clear_input(inputs, cookies, ipaddr: gr.Request):
             index += 1
         cookies['first_chat'] = select_file
         only_name = [cookies['first_chat']] + only_name
+        # 先写入一个空文件占位
+        with open(os.path.join(user_path, cookies['first_chat']+".json"), mode='w') as f:  f.write('{}')
     output = ['', inputs, gr.update(visible=True), gr.update(visible=False),
               gr.Radio.update(choices=only_name, value=cookies['first_chat'])]
     return output
+
+
+def stop_chat_refresh(chatbot, ipaddr: gr.Request):
+    user_path = os.path.join(func_box.history_path, ipaddr.client.host)
+    user_data_processing.thread_write_chat_json(chatbot, ipaddr.client.host)
 
 
 def clear_chat_cookie(ipaddr: gr.Request):
@@ -195,7 +202,7 @@ def download_history_md(select, ipaddr: gr.Request):
         mark_down += f"> {func_box.html_tag_color(tag='User:', color='#3e9855')} \n{user}\n\n"
         mark_down += f"> {func_box.html_tag_color(tag='Bot:', color='#bc8af4')} \n{bot}\n\n"
     mark_down += f"```json\n# 对话调优参数\n{history_handle.base_data_format['chat_llms']}\n```"
-    is_plugin = history_list[-1].get('is_plugin')
+    is_plugin = history_list[-1].get('plugin')
     if is_plugin:
         mark_down += f"```json\n# 插件调优参数\n{is_plugin}\n```"
     file_path = os.path.join(user_path, f'{select}.md')
