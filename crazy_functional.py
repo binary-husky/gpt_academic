@@ -6,6 +6,7 @@ def get_crazy_functions():
     from crazy_functions.生成函数注释 import 批量生成函数注释
     from crazy_functions.解析项目源代码 import 解析项目本身
     from crazy_functions.解析项目源代码 import 解析一个Python项目
+    from crazy_functions.解析项目源代码 import 解析一个Matlab项目
     from crazy_functions.解析项目源代码 import 解析一个C项目的头文件
     from crazy_functions.解析项目源代码 import 解析一个C项目
     from crazy_functions.解析项目源代码 import 解析一个Golang项目
@@ -76,6 +77,13 @@ def get_crazy_functions():
             "AsButton": True,
             "Info": "批量总结word文档 | 输入参数为路径",
             "Function": HotReload(总结word文档)
+        },
+        "解析整个Matlab项目": {
+            "Group": "编程",
+            "Color": "stop",
+            "AsButton": False,
+            "Info": "解析一个Matlab项目的所有源文件(.m) | 输入参数为路径",
+            "Function": HotReload(解析一个Matlab项目)
         },
         "解析整个C++项目头文件": {
             "Group": "编程",
