@@ -527,7 +527,7 @@ def get_crazy_functions():
             "动态代码解释器（CodeInterpreter）": {
                 "Group": "智能体",
                 "Color": "stop",
-                "AsButton": True,
+                "AsButton": False,
                 "Function": HotReload(函数动态生成)
             }
         })
