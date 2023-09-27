@@ -251,20 +251,23 @@ def get_crazy_functions():
             "Info": "对中文Latex项目全文进行润色处理 | 输入参数为路径或上传压缩包",
             "Function": HotReload(Latex中文润色)
         },
-        "Latex项目全文中译英（输入路径或上传压缩包）": {
-            "Group": "学术",
-            "Color": "stop",
-            "AsButton": False,  # 加入下拉菜单中
-            "Info": "对Latex项目全文进行中译英处理 | 输入参数为路径或上传压缩包",
-            "Function": HotReload(Latex中译英)
-        },
-        "Latex项目全文英译中（输入路径或上传压缩包）": {
-            "Group": "学术",
-            "Color": "stop",
-            "AsButton": False,  # 加入下拉菜单中
-            "Info": "对Latex项目全文进行英译中处理 | 输入参数为路径或上传压缩包",
-            "Function": HotReload(Latex英译中)
-        },
+
+        # 被新插件取代
+        # "Latex项目全文中译英（输入路径或上传压缩包）": {
+        #     "Group": "学术",
+        #     "Color": "stop",
+        #     "AsButton": False,  # 加入下拉菜单中
+        #     "Info": "对Latex项目全文进行中译英处理 | 输入参数为路径或上传压缩包",
+        #     "Function": HotReload(Latex中译英)
+        # },
+        # "Latex项目全文英译中（输入路径或上传压缩包）": {
+        #     "Group": "学术",
+        #     "Color": "stop",
+        #     "AsButton": False,  # 加入下拉菜单中
+        #     "Info": "对Latex项目全文进行英译中处理 | 输入参数为路径或上传压缩包",
+        #     "Function": HotReload(Latex英译中)
+        # },
+        
         "批量Markdown中译英（输入路径或上传压缩包）": {
             "Group": "编程",
             "Color": "stop",
