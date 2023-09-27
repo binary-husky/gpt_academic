@@ -184,7 +184,7 @@ PATH_PRIVATE_UPLOAD = "private_upload"
 # 日志文件夹的位置，请勿修改
 PATH_LOGGING = "gpt_log"
 # 除了连接OpenAI之外，还有哪些场合允许使用代理，请勿修改
-WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid"]
+WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid", "Warmup_Modules"]
 
 
 """
