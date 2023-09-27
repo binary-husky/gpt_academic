@@ -266,7 +266,7 @@ def main():
             cookies.update({'uuid': uuid.uuid4()})
             return cookies
         demo.load(init_cookie, inputs=[cookies, chatbot], outputs=[cookies])
-        demo.load(lambda: 0, inputs=None, outputs=None, _js='()=>{ChatBotHeight();}')
+        demo.load(lambda: 0, inputs=None, outputs=None, _js='()=>{GptAcademicJavaScriptInit();}')
         
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay():
@@ -285,6 +285,7 @@ def main():
 
     auto_opentab_delay()
     demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
+        quiet=True,
         server_name="0.0.0.0", 
         server_port=PORT,
         favicon_path="docs/logo.png", 

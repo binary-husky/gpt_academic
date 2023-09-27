@@ -651,7 +651,7 @@ class knowledge_archive_interface():
             from toolbox import ProxyNetworkActivate
             print('Checking Text2vec ...')
             from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-            with ProxyNetworkActivate():    # 临时地激活代理网络
+            with ProxyNetworkActivate('Download_LLM'):    # 临时地激活代理网络
                 self.text2vec_large_chinese = HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
 
         return self.text2vec_large_chinese
@@ -807,3 +807,10 @@ class construct_html():
         with open(os.path.join(get_log_folder(), file_name), 'w', encoding='utf8') as f:
             f.write(self.html_string.encode('utf-8', 'ignore').decode())
         return os.path.join(get_log_folder(), file_name)
+
+
+def get_plugin_arg(plugin_kwargs, key, default):
+    # 如果参数是空的
+    if (key in plugin_kwargs) and (plugin_kwargs[key] == ""): plugin_kwargs.pop(key)
+    # 正常情况
+    return plugin_kwargs.get(key, default)

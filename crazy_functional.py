@@ -39,7 +39,7 @@ def get_crazy_functions():
 
     function_plugins = {
         "虚空终端": {
-            "Group": "对话|编程|学术",
+            "Group": "对话|编程|学术|智能体",
             "Color": "stop",
             "AsButton": True,
             "Function": HotReload(虚空终端)
@@ -521,6 +521,18 @@ def get_crazy_functions():
     except:
         print('Load function plugin failed')
 
+    try:
+        from crazy_functions.函数动态生成 import 函数动态生成
+        function_plugins.update({
+            "动态代码解释器（CodeInterpreter）": {
+                "Group": "智能体",
+                "Color": "stop",
+                "AsButton": True,
+                "Function": HotReload(函数动态生成)
+            }
+        })
+    except:
+        print('Load function plugin failed')
 
     # try:
     #     from crazy_functions.CodeInterpreter import 虚空终端CodeInterpreter

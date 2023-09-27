@@ -1,4 +1,85 @@
-function ChatBotHeight() {
+function gradioApp() {
+    // https://github.com/GaiZhenbiao/ChuanhuChatGPT/tree/main/web_assets/javascript
+    const elems = document.getElementsByTagName('gradio-app');
+    const elem = elems.length == 0 ? document : elems[0];
+    if (elem !== document) {
+        elem.getElementById = function(id) {
+            return document.getElementById(id);
+        };
+    }
+    return elem.shadowRoot ? elem.shadowRoot : elem;
+}
+
+
+const copiedIcon = '<span><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height=".8em" width=".8em" xmlns="http://www.w3.org/2000/svg"><polyline points="20 6 9 17 4 12"></polyline></svg></span>';
+const copyIcon = '<span><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height=".8em" width=".8em" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></span>';
+
+
+function addCopyButton(botElement) {
+    // https://github.com/GaiZhenbiao/ChuanhuChatGPT/tree/main/web_assets/javascript
+    // Copy bot button
+    const messageBtnColumnElement = botElement.querySelector('.message-btn-row');
+    if (messageBtnColumnElement) {
+        // Do something if .message-btn-column exists, for example, remove it
+        // messageBtnColumnElement.remove();
+        return;
+    }
+    
+    var copyButton = document.createElement('button');
+    copyButton.classList.add('copy-bot-btn');
+    copyButton.setAttribute('aria-label', 'Copy');
+    copyButton.innerHTML = copyIcon;
+    copyButton.addEventListener('click', async () => {
+        const textToCopy = botElement.innerText;
+        try {
+            if ("clipboard" in navigator) {
+                await navigator.clipboard.writeText(textToCopy);
+                copyButton.innerHTML = copiedIcon;
+                setTimeout(() => {
+                    copyButton.innerHTML = copyIcon;
+                }, 1500);
+            } else {
+                const textArea = document.createElement("textarea");
+                textArea.value = textToCopy;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    copyButton.innerHTML = copiedIcon;
+                    setTimeout(() => {
+                        copyButton.innerHTML = copyIcon;
+                    }, 1500);
+                } catch (error) {
+                    console.error("Copy failed: ", error);
+                }
+                document.body.removeChild(textArea);
+            }
+        } catch (error) {
+            console.error("Copy failed: ", error);
+        }
+    });
+    var messageBtnColumn = document.createElement('div');
+    messageBtnColumn.classList.add('message-btn-row');
+    messageBtnColumn.appendChild(copyButton);
+    botElement.appendChild(messageBtnColumn);
+}
+
+function chatbotContentChanged(attempt = 1, force = false) {
+    // https://github.com/GaiZhenbiao/ChuanhuChatGPT/tree/main/web_assets/javascript
+    for (var i = 0; i < attempt; i++) {
+        setTimeout(() => {
+            gradioApp().querySelectorAll('#gpt-chatbot .message-wrap .message.bot').forEach(addCopyButton);
+        }, i === 0 ? 0 : 200);
+    }
+}
+
+function GptAcademicJavaScriptInit() {
+    chatbotIndicator = gradioApp().querySelector('#gpt-chatbot > div.wrap');
+    var chatbotObserver = new MutationObserver(() => {
+        chatbotContentChanged(1);
+    });
+    chatbotObserver.observe(chatbotIndicator, { attributes: true, childList: true, subtree: true });
+
     function update_height(){
         var { panel_height_target, chatbot_height, chatbot } = get_elements(true);
         if (panel_height_target!=chatbot_height)

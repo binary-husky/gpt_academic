@@ -527,6 +527,7 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
         if 'files_to_promote' in chatbot._cookies: current = chatbot._cookies['files_to_promote']
         else: current = []
         chatbot._cookies.update({'files_to_promote': [new_path] + current})
+    return new_path
 
 def disable_auto_promotion(chatbot):
     chatbot._cookies.update({'files_to_promote': []})
@@ -955,7 +956,19 @@ class ProxyNetworkActivate():
     """
     这段代码定义了一个名为TempProxy的空上下文管理器, 用于给一小段代码上代理
     """
+    def __init__(self, task=None) -> None:
+        self.task = task
+        if not task:
+            # 不给定task, 那么我们默认代理生效
+            self.valid = True
+        else:
+            # 给定了task, 我们检查一下
+            from toolbox import get_conf
+            WHEN_TO_USE_PROXY, = get_conf('WHEN_TO_USE_PROXY')
+            self.valid = (task in WHEN_TO_USE_PROXY)
+
     def __enter__(self):
+        if not self.valid: return self
         from toolbox import get_conf
         proxies, = get_conf('proxies')
         if 'no_proxy' in os.environ: os.environ.pop('no_proxy')
