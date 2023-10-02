@@ -115,7 +115,7 @@ def ArgsGeneralWrapper(f):
             plugin_kwargs['advanced_arg'] = ''
             txt_passon = yield from Langchain_cn.knowledge_base_query(txt_passon,
                                     chatbot_with_cookie, history, llm_kwargs, plugin_kwargs)
-        # 根据cookie 或 其他配置决定到底走哪一步
+        # 根据cookie 或 对话配置决定到底走哪一步
         yield from func_decision_tree(f, cookies, single_turn, use_websearch,
                                       txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie,
                                       history, system_prompt, args)

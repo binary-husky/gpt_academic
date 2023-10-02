@@ -17,63 +17,26 @@ class Settings:
 
     def _draw_setting_model(self):
         with gr.Tab(label=i18n("模型")):
+            self.usageTxt = gr.Markdown(i18n(
+                "**发送消息** 或 **提交key** 以显示额度"), elem_id="usage-display",
+                elem_classes="insert-block", visible=False)
             self.keyTxt = gr.Textbox(
                 show_label=True, placeholder=f"Your API-key...",
                 # value=hide_middle_chars(user_api_key.value),
                 type="password",  # visible=not HIDE_MY_KEY,
                 label="API-Key",
             )
-            self.usageTxt = gr.Markdown(i18n(
-                "**发送消息** 或 **提交key** 以显示额度"), elem_id="usage-display",
-                elem_classes="insert-block", visible=False)
-            self.language_select_dropdown = gr.Dropdown(
-                label=i18n("选择回复语言（针对搜索&索引功能）"),
-                # choices=REPLY_LANGUAGES, multiselect=False,
-                # value=REPLY_LANGUAGES[0],
-            )
+            self.models_box = gr.CheckboxGroup(choices=['input加密', '预加载知识库'], value=['input加密'],
+                                               label="对话模式")
 
     def _draw_setting_senior(self):
         with gr.Tab(label=i18n("高级")):
             gr.HTML(get_html("appearance_switcher.html").format(
                 label=i18n("切换亮暗色主题")), elem_classes="insert-block", visible=False)
-            self.use_streaming_checkbox = gr.Checkbox(
-                label=i18n("实时传输回答"), value=True,
-                # visible=ENABLE_STREAMING_OPTION,
-                elem_classes="switch-checkbox"
-            )
-            self.name_chat_method = gr.Dropdown(
-                label=i18n("对话命名方式"),
-                # choices=HISTORY_NAME_METHODS,
-                multiselect=False,
-                interactive=True,
-                # value=HISTORY_NAME_METHODS[chat_name_method_index],
-            )
             self.single_turn_checkbox = gr.Checkbox(label=i18n(
                 "单轮对话"), value=False, elem_classes="switch-checkbox",
                 elem_id="gr-single-session-cb", visible=False)
             # checkUpdateBtn = gr.Button(i18n("🔄 检查更新..."), visible=check_update)
-
-    def _draw_setting_network(self):
-        with gr.Tab(i18n("网络")):
-            gr.Markdown(
-                i18n("⚠️ 为保证API-Key安全，请在配置文件`config.json`中修改网络设置"),
-                elem_id="netsetting-warning")
-            self.default_btn = gr.Button(i18n("🔙 恢复默认网络设置"))
-            # 网络代理
-            self.proxyTxt = gr.Textbox(
-                show_label=True,mplaceholder=i18n("未设置代理..."),
-                label=i18n("代理地址"), # value=config.http_proxy,
-                lines=1, interactive=False,
-                # container=False, elem_classes="view-only-textbox no-container",
-            )
-            # changeProxyBtn = gr.Button(i18n("🔄 设置代理地址"))
-            # 优先展示自定义的api_host
-            self.apihostTxt = gr.Textbox(
-                show_label=True, placeholder="api.openai.com",
-                label="OpenAI API-Host", # value=config.api_host or shared.API_HOST,
-                lines=1, interactive=False,
-                # container=False, elem_classes="view-only-textbox no-container",
-            )
 
     def _darw_private_operation(self):
         with gr.TabItem('个人中心', id='private', elem_id='bout-tab',):
@@ -99,7 +62,6 @@ class Settings:
             with gr.Tabs(elem_id="chuanhu-setting-tabs"):
                 self._draw_setting_model()
                 self._draw_setting_senior()
-                self._draw_setting_network()
                 self._darw_private_operation()
                 self._draw_setting_info()
 

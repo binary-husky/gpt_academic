@@ -142,7 +142,7 @@ class RightElem:
                 default_params, = toolbox.get_conf('LLMS_DEFAULT_PARAMETER')
                 with gr.Accordion(label='LLMs调优参数', open=False):
                     self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=default_params['top_p'], step=0.01, interactive=True,
-                                           label="Top-p (nucleus sampling)", ).style(container=False)
+                                           label="Top-p", ).style(container=False)
                     self.temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True,
                                                  label="Temperature",).style(container=False)
                     self.n_choices_slider = gr.Slider(minimum=1, maximum=10, value=default_params['n_choices'], step=1,
@@ -193,7 +193,6 @@ class RightElem:
                                                    label="OCR 识别信任指数").style(container=False)
 
                 func_box.md_division_line()
-                self.models_box = gr.CheckboxGroup(choices=['input加密', '预加载知识库'], value=['input加密'], label="对话模式")
             # temp = gr.Markdown(self.description)
 
     def draw_tools_area(self):
