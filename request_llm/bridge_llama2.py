@@ -30,7 +30,7 @@ class GetONNXGLMHandle(LocalLLMHandle):
         with open(os.path.expanduser('~/.cache/huggingface/token'), 'w') as f:
             f.write(huggingface_token)
         model_id = 'meta-llama/Llama-2-7b-chat-hf'
-        with ProxyNetworkActivate():
+        with ProxyNetworkActivate('Download_LLM'):
             self._tokenizer = AutoTokenizer.from_pretrained(model_id, use_auth_token=huggingface_token)
             # use fp16
             model = AutoModelForCausalLM.from_pretrained(model_id, use_auth_token=huggingface_token).eval()

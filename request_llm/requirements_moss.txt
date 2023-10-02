@@ -1,5 +1,4 @@
 torch
-transformers==4.25.1
 sentencepiece
 datasets
 accelerate

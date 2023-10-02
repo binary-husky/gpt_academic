@@ -75,6 +75,15 @@ def filter_database_tables():
     split_tab_new = ['新建分类'] + preset + split_tab
     return split_tab_new
 
+# TODO < -------------------------------- 弹窗数注册区 ----------------------------------->
+def on_theme_dropdown_changed(theme, secret_css):
+    from themes.theme import load_dynamic_theme
+    adjust_theme, css_part1, _, adjust_dynamic_theme = load_dynamic_theme(theme)
+    if adjust_dynamic_theme:
+        css_part2 = adjust_dynamic_theme._get_theme_css()
+    else:
+        css_part2 = adjust_theme()._get_theme_css()
+    return css_part2 + css_part1
 
 # TODO < -------------------------------- 对话函数注册区 ----------------------------------->
 def clear_input(inputs, cookies, ipaddr: gr.Request):

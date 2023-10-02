@@ -263,6 +263,18 @@ function checkChatMoreMask() {
     }
 }
 
+function setThemeClass(css) {
+    var existingStyles = document.querySelectorAll("style[data-loaded-css]");
+    for (var i = 0; i < existingStyles.length; i++) {
+        var style = existingStyles[i];
+        style.parentNode.removeChild(style);
+    }
+    var styleElement = document.createElement('style');
+    styleElement.setAttribute('data-loaded-css', css);
+    styleElement.innerHTML = css;
+    document.head.appendChild(styleElement);
+}
+
 /*
 function setHistroyPanel() {
     const historySelectorInput = gradioApp().querySelector('#history-select-dropdown input');

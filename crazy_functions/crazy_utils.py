@@ -643,7 +643,7 @@ class knowledge_archive_interface():
             from comm_tools.toolbox import ProxyNetworkActivate
             print('Checking Text2vec ...')
             from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-            with ProxyNetworkActivate():    # 临时地激活代理网络
+            with ProxyNetworkActivate('Download_LLM'):    # 临时地激活代理网络
                 self.text2vec_large_chinese = HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
         return self.text2vec_large_chinese
 
@@ -728,7 +728,7 @@ class nougat_interface():
 
 
     def NOUGAT_parse_pdf(self, fp, chatbot, history):
-        from toolbox import update_ui_lastest_msg
+        from comm_tools.toolbox import update_ui_lastest_msg
 
         yield from update_ui_lastest_msg("正在解析论文, 请稍候。进度：正在排队, 等待线程锁...", 
                                          chatbot=chatbot, history=history, delay=0)
@@ -787,6 +787,7 @@ TABLE_CSS = """
 </div>
 """
 
+
 class construct_html():
     def __init__(self) -> None:
         self.css = HTML_CSS
@@ -795,13 +796,20 @@ class construct_html():
 
     def add_row(self, a, b):
         tmp = TABLE_CSS
-        tmp = tmp.replace('REPLACE_A', toolbox.markdown_convertion(a))
-        tmp = tmp.replace('REPLACE_B', toolbox.markdown_convertion(b))
+        from comm_tools.toolbox import markdown_convertion
+        tmp = tmp.replace('REPLACE_A', markdown_convertion(a))
+        tmp = tmp.replace('REPLACE_B', markdown_convertion(b))
         self.html_string += tmp
 
 
     def save_file(self, file_name):
-        with open(os.path.join(toolbox.get_log_folder(), file_name), 'w', encoding='utf8') as f:
+        with open(os.path.join(get_log_folder(), file_name), 'w', encoding='utf8') as f:
             f.write(self.html_string.encode('utf-8', 'ignore').decode())
-        return os.path.join(toolbox.get_log_folder(), file_name)
+        return os.path.join(get_log_folder(), file_name)
 
+
+def get_plugin_arg(plugin_kwargs, key, default):
+    # 如果参数是空的
+    if (key in plugin_kwargs) and (plugin_kwargs[key] == ""): plugin_kwargs.pop(key)
+    # 正常情况
+    return plugin_kwargs.get(key, default)

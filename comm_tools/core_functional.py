@@ -12,7 +12,8 @@ def get_core_functions():
             # 前缀，会被加在你的输入之前。例如，用来描述你的要求，例如翻译、解释代码、润色等等
             "Prefix":   r"Below is a paragraph from an academic paper. Polish the writing to meet the academic style, " +
                         r"improve the spelling, grammar, clarity, concision and overall readability. When necessary, rewrite the whole sentence. " +
-                        r"Furthermore, list all modification and explain the reasons to do so in markdown table." + "\n\n",
+                        r"Firstly, you should provide the polished paragraph. "
+                        r"Secondly, you should list all your modification and explain the reasons to do so in markdown table." + "\n\n",
             # 后缀，会被加在你的输入之后。例如，配合前缀可以把你的输入内容用引号圈起来
             "Suffix":   r"",
             # 按钮颜色 (默认 secondary)
@@ -28,17 +29,18 @@ def get_core_functions():
             "Suffix":   r"",
         },
         "查找语法错误": {
-            "Prefix":   r"Can you help me ensure that the grammar and the spelling is correct? " +
-                        r"Do not try to polish the text, if no mistake is found, tell me that this paragraph is good." +
-                        r"If you find grammar or spelling mistakes, please list mistakes you find in a two-column markdown table, " +
-                        r"put the original text the first column, " +
-                        r"put the corrected text in the second column and highlight the key words you fixed.""\n"
+            "Prefix":   r"Help me ensure that the grammar and the spelling is correct. "
+                        r"Do not try to polish the text, if no mistake is found, tell me that this paragraph is good. "
+                        r"If you find grammar or spelling mistakes, please list mistakes you find in a two-column markdown table, "
+                        r"put the original text the first column, "
+                        r"put the corrected text in the second column and highlight the key words you fixed. "
+                        r"Finally, please provide the proofreaded text.""\n\n"
                         r"Example:""\n"
                         r"Paragraph: How is you? Do you knows what is it?""\n"
                         r"| Original sentence | Corrected sentence |""\n"
                         r"| :--- | :--- |""\n"
                         r"| How **is** you? | How **are** you? |""\n"
-                        r"| Do you **knows** what **is** **it**? | Do you **know** what **it** **is** ? |""\n"
+                        r"| Do you **knows** what **is** **it**? | Do you **know** what **it** **is** ? |""\n\n"
                         r"Below is a paragraph from an academic paper. "
                         r"You need to report all grammar and spelling mistakes as the example before."
                         + "\n\n",

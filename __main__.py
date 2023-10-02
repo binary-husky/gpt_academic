@@ -10,6 +10,7 @@ from comm_tools.overwrites import postprocess_chat_messages, postprocess, reload
 # 一些普通功能模块
 from comm_tools.core_functional import get_core_functions
 from comm_tools import Langchain_cn, webui_local
+
 functional = get_core_functions()
 
 # 处理markdown文本格式的转变 暂时屏蔽这个高亮代码
@@ -19,6 +20,7 @@ gr.Chatbot.postprocess = postprocess
 
 # 做一些外观色彩上的调整
 from comm_tools.theme import adjust_theme
+
 set_theme = adjust_theme()
 
 # 代理与自动更新
@@ -34,7 +36,7 @@ except:
 print("所有问询记录将自动保存在本地目录./gpt_log/chat_secrets.log, 请注意自我隐私保护哦！")
 
 # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
-proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, LAYOUT, API_KEY, AVAIL_LLM_MODELS, LOCAL_PORT= \
+proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, LAYOUT, API_KEY, AVAIL_LLM_MODELS, LOCAL_PORT = \
     get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'LAYOUT',
              'API_KEY', 'AVAIL_LLM_MODELS', 'LOCAL_PORT')
 
@@ -65,7 +67,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
     def signals_sm_btn(self):
         self.sm_upload.upload(on_file_uploaded, [self.sm_upload, self.chatbot, self.user_input, self.cookies],
                               [self.chatbot, self.user_input])
-        self.sm_code_block.click(fn=lambda x: x+'```\n\n```', inputs=[self.user_input], outputs=[self.user_input])
+        self.sm_code_block.click(fn=lambda x: x + '```\n\n```', inputs=[self.user_input], outputs=[self.user_input])
         self.sm_upload_history.click(func_signals.get_user_upload, [self.chatbot, self.user_input],
                                      outputs=[self.chatbot])
         self.langchain_dropdown.select(fn=Langchain_cn.obtaining_knowledge_base_files,
@@ -76,9 +78,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                                        )
         self.delLastBtn.click(func_signals.delete_latest_chat, inputs=[self.chatbot, self.history, self.cookies],
                               outputs=[self.chatbot, self.history, self.cookies])
-        self.retryBtn.click(fn=ArgsGeneralWrapper(predict), inputs=self.input_combo+[gr.State('RetryChat')],
-                                 outputs=self.output_combo, show_progress=True)
-
+        self.retryBtn.click(fn=ArgsGeneralWrapper(predict), inputs=self.input_combo + [gr.State('RetryChat')],
+                            outputs=self.output_combo, show_progress=True)
 
     def signals_prompt_func(self):
         self.pro_private_check.select(fn=func_signals.prompt_reduce,
@@ -91,7 +92,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                                             self.pro_fp_state],
                                     outputs=[self.user_input, self.pro_edit_txt, self.pro_name_txt])
         self.pro_upload_btn.upload(fn=func_signals.prompt_upload_refresh,
-                                   inputs=[self.pro_upload_btn, self.pro_prompt_state, self.pro_private_check, self.pro_class_name],
+                                   inputs=[self.pro_upload_btn, self.pro_prompt_state, self.pro_private_check,
+                                           self.pro_class_name],
                                    outputs=[self.pro_func_prompt, self.pro_prompt_state, self.pro_private_check])
 
     def signals_prompt_edit(self):
@@ -102,7 +104,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         #                        outputs=[self.pro_prompt_list, self.pro_prompt_state])
         self.pro_search_txt.submit(fn=func_signals.draw_results,
                                    inputs=[self.pro_search_txt, self.pro_prompt_state, self.pro_tf_slider,
-                                         self.pro_private_check],
+                                           self.pro_private_check],
                                    outputs=[self.pro_prompt_list, self.pro_prompt_state])
         self.pro_entry_btn.click(fn=func_signals.draw_results,
                                  inputs=[self.pro_search_txt, self.pro_prompt_state, self.pro_tf_slider,
@@ -111,12 +113,14 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         self.pro_prompt_list.click(fn=func_signals.show_prompt_result,
                                    inputs=[self.pro_prompt_list, self.pro_prompt_state, self.pro_results,
                                            self.pro_edit_txt, self.pro_name_txt],
-                                   outputs=[self.pro_results, self.pro_edit_txt, self.pro_name_txt, self.prompt_edit_area])
+                                   outputs=[self.pro_results, self.pro_edit_txt, self.pro_name_txt,
+                                            self.prompt_edit_area])
         self.pro_del_btn.click(func_signals.prompt_delete,
                                inputs=[self.pro_name_txt, self.pro_fp_state, self.pro_private_check],
                                outputs=[self.pro_func_prompt, self.pro_fp_state])
         self.pro_new_btn.click(fn=func_signals.prompt_save,
-                               inputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_fp_state, self.pro_private_check, self.pro_class_name],
+                               inputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_fp_state, self.pro_private_check,
+                                       self.pro_class_name],
                                outputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_private_check,
                                         self.pro_func_prompt, self.pro_fp_state])
         self.pro_reuse_btn.click(
@@ -127,7 +131,9 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
 
     def signals_plugin(self):
         from comm_tools.crazy_functional import crazy_fns_role, crazy_fns
-        fn_btn_dict = {crazy_fns_role[role][k]['Button']: {role: k} for role in crazy_fns_role for k in crazy_fns_role[role] if crazy_fns_role[role][k].get('Button')}
+        fn_btn_dict = {crazy_fns_role[role][k]['Button']: {role: k} for role in crazy_fns_role for k in
+                       crazy_fns_role[role] if crazy_fns_role[role][k].get('Button')}
+
         def show_plugin_btn(plu_list):
             new_btn_list = []
             fns_list = []
@@ -149,7 +155,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                 return [*new_btn_list, gr.Dropdown.update(choices=fns_list)]
 
         # 文件上传区，接收文件后与chatbot的互动
-        self.file_upload.upload(on_file_uploaded, [self.file_upload, self.chatbot, self.user_input, self.cookies], [self.chatbot, self.user_input])
+        self.file_upload.upload(on_file_uploaded, [self.file_upload, self.chatbot, self.user_input, self.cookies],
+                                [self.chatbot, self.user_input])
         # 函数插件-固定按钮区
         self.plugin_dropdown.select(fn=show_plugin_btn, inputs=[self.plugin_dropdown],
                                     outputs=[*fn_btn_dict.keys(), self.dropdown_fn])
@@ -158,10 +165,10 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
             for k in role_fns:
                 if not role_fns[k].get("AsButton", True): continue
                 click_handle = role_fns[k]["Button"].click(**self.clear_agrs).then(
-                                  ArgsGeneralWrapper(role_fns[k]["Function"]),
-                                  [*self.input_combo, gr.State(k),
-                                   gr.State(role_fns[k].get('Parameters', False))],
-                                  self.output_combo)
+                    ArgsGeneralWrapper(role_fns[k]["Function"]),
+                    [*self.input_combo, gr.State(k),
+                     gr.State(role_fns[k].get('Parameters', False))],
+                    self.output_combo)
                 # click_handle.then(on_report_generated, [self.cookies, self.file_upload, self.chatbot],
                 #                   [self.cookies, self.file_upload, self.chatbot])
                 self.cancel_handles.append(click_handle)
@@ -178,11 +185,14 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
             temp_dict = dict(visible=True, interactive=True, value=str(fns_value), label=fns_lable)
             #  是否唤起高级插件参数区
             if crazy_fns[k].get("AdvancedArgs", False):
-                ret.update({self.plugin_advanced_arg: gr.update(**temp_dict), self.area_crazy_fn: gr.update(open=False)})
+                ret.update(
+                    {self.plugin_advanced_arg: gr.update(**temp_dict), self.area_crazy_fn: gr.update(open=False)})
             else:
                 ret.update({self.plugin_advanced_arg: gr.update(visible=False, label=f"插件[{k}]不需要高级参数。")})
             return ret
-        self.dropdown_fn.select(on_dropdown_changed, [self.dropdown_fn], [self.switchy_bt, self.plugin_advanced_arg, self.area_crazy_fn])
+
+        self.dropdown_fn.select(on_dropdown_changed, [self.dropdown_fn],
+                                [self.switchy_bt, self.plugin_advanced_arg, self.area_crazy_fn])
 
         # 随变按钮的回调函数注册
         def route(k, ipaddr: gr.Request, *args, **kwargs):
@@ -202,43 +212,50 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         self.cancel_handles.append(click_handle)
         # 终止按钮的回调函数注册
         self.cancelBtn.click(fn=lambda: (self.cancelBtn.update(visible=False), self.submitBtn.update(visible=True)),
-            inputs=[], outputs=[self.cancelBtn, self.submitBtn], cancels=self.cancel_handles).then(
+                             inputs=[], outputs=[self.cancelBtn, self.submitBtn], cancels=self.cancel_handles).then(
             fn=func_signals.stop_chat_refresh, inputs=[self.chatbot, self.history],
             outputs=[]
         )
 
-
     def signals_langchain_cn(self):
         def update_drop(x, llms, cls_name, ipaddr: gr.Request):
-            _, available, _,  = Langchain_cn.obtain_classification_knowledge_base(cls_name, ipaddr)
+            _, available, _, = Langchain_cn.obtain_classification_knowledge_base(cls_name, ipaddr)
             x = x['know_name']
             if not x:
                 return available, gr.update()
             return available, gr.update(label="当前模型：" + llms + "&" + '&'.join([x]))
+
         self.langchain_classifi.select(fn=Langchain_cn.obtain_classification_knowledge_base,
                                        inputs=[self.langchain_classifi],
                                        outputs=[self.langchain_select, self.langchain_dropdown, self.langchain_status]
                                        ).then(fn=func_box.new_button_display,
                                               inputs=[self.langchain_classifi], outputs=[self.langchain_class_name])
         self.langchain_upload.upload(fn=on_file_uploaded,
-                                     inputs=[self.langchain_upload, gr.State(''), self.langchain_know_kwargs, self.cookies],
+                                     inputs=[self.langchain_upload, gr.State(''), self.langchain_know_kwargs,
+                                             self.cookies],
                                      outputs=[self.langchain_status, self.langchain_know_kwargs])
 
         def clear_file(kw):
             kw.update({'file_path': ''})
             return kw, f'已清空本地文件调用路径参数'
+
         self.langchain_upload.clear(fn=clear_file,
                                     inputs=[self.langchain_know_kwargs],
                                     outputs=[self.langchain_know_kwargs, self.langchain_status])
 
         submit_id = self.langchain_submit.click(fn=Langchain_cn.knowledge_base_writing,
-                                                inputs=[self.langchain_classifi, self.langchain_class_name, self.langchain_links, self.langchain_select, self.langchain_name, self.langchain_know_kwargs],
-                                                outputs=[self.langchain_status, self.langchain_error, self.langchain_classifi, self.langchain_select, self.langchain_dropdown, self.langchain_know_kwargs]
+                                                inputs=[self.langchain_classifi, self.langchain_class_name,
+                                                        self.langchain_links, self.langchain_select,
+                                                        self.langchain_name, self.langchain_know_kwargs],
+                                                outputs=[self.langchain_status, self.langchain_error,
+                                                         self.langchain_classifi, self.langchain_select,
+                                                         self.langchain_dropdown, self.langchain_know_kwargs]
                                                 )
         submit_id.then(fn=update_drop,
                        inputs=[self.langchain_know_kwargs, self.model_select_dropdown, self.langchain_classifi],
                        outputs=[self.langchain_dropdown, self.chatbot])
-        self.langchain_stop.click(fn=lambda: '已暂停构建任务', inputs=None, outputs=[self.langchain_status], cancels=[submit_id])
+        self.langchain_stop.click(fn=lambda: '已暂停构建任务', inputs=None, outputs=[self.langchain_status],
+                                  cancels=[submit_id])
 
     def signals_history(self):
         self.llms_cookies_combo = [self.chatbot, self.history, self.cookies,
@@ -271,12 +288,14 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         self.input_combo = [self.cookies, self.max_length_sl, self.default_worker_num, self.model_select_dropdown,
                             self.langchain_dropdown, self.langchain_know_kwargs, self.langchain_classifi,
                             self.vector_search_score, self.vector_search_top_k, self.vector_chunk_size, self.input_copy,
-                            self.top_p, self.temperature,  self.n_choices_slider, self.stop_sequence_txt,
+                            self.top_p, self.temperature, self.n_choices_slider, self.stop_sequence_txt,
                             self.max_context_length_slider, self.max_generation_slider, self.presence_penalty_slider,
                             self.frequency_penalty_slider, self.logit_bias_txt, self.user_identifier_txt,
-                            self.ocr_identifying_trust, self.chatbot, self.single_turn_checkbox, self.use_websearch_checkbox,
+                            self.ocr_identifying_trust, self.chatbot, self.single_turn_checkbox,
+                            self.use_websearch_checkbox,
                             self.history, self.system_prompt, self.models_box, self.plugin_advanced_arg]
-        self.output_combo = [self.cookies, self.chatbot, self.history, self.status_display, self.cancelBtn, self.submitBtn,]
+        self.output_combo = [self.cookies, self.chatbot, self.history, self.status_display, self.cancelBtn,
+                             self.submitBtn, ]
         self.predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=self.input_combo,
                                  outputs=self.output_combo, show_progress=True)
         self.clear_agrs = dict(fn=func_signals.clear_input,
@@ -292,7 +311,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         self.emptyBtn.click(func_signals.clear_chat_cookie, [],
                             [*self.llms_cookies_combo, self.status_display,
                              self.historySelectList, self.saveFileName]
-                            ).then(fn=lambda : gr.Files.update(value=None),
+                            ).then(fn=lambda: gr.Files.update(value=None),
                                    inputs=[], outputs=[self.sm_upload])
         self.changeSingleSessionBtn.click(
             fn=lambda value: gr.Checkbox.update(value=value), inputs=[self.single_turn_checkbox],
@@ -302,6 +321,13 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
             fn=lambda value: gr.Checkbox.update(value=value), inputs=[self.use_websearch_checkbox],
             outputs=[self.use_websearch_checkbox], _js='(a)=>{return bgChangeOnlineSearch(a);}'
         )
+
+    def signals_input_popup(self):
+        self.theme_dropdown.select(func_signals.on_theme_dropdown_changed, [self.theme_dropdown, self.secret_css],
+                                   [self.secret_css]).then(
+            None, [self.secret_css], None, _js="(css) => {return setThemeClass(css)}")
+
+
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay(self, is_open=False):
@@ -360,6 +386,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
             self.signals_prompt_edit()
             self.signals_plugin()
             self.signals_langchain_cn()
+            # self.signals_input_popup()
             # self.demo.load(fn=func_signals.mobile_access, inputs=[],
             #                outputs=[self.sm_btn_column, self.langchain_dropdown])
             self.demo.load(fn=func_signals.refresh_load_data,
@@ -384,9 +411,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         #     favicon_path='./docs/wps_logo.png')
 
 
-
-
 from comm_tools import base_api
+
 app = base_api.app
 PORT = LOCAL_PORT if WEB_PORT <= 0 else WEB_PORT
 reload_javascript()
@@ -395,5 +421,6 @@ chatbot_main.main()
 gradio_app = gr.mount_gradio_app(app, chatbot_main.demo, '/gradio')
 if __name__ == '__main__':
     import uvicorn
+
     app_reload, = get_conf('app_reload')
-    uvicorn. run("__main__:app", host="0.0.0.0", port=PORT, reload=app_reload)
+    uvicorn.run("__main__:app", host="0.0.0.0", port=PORT, reload=app_reload)

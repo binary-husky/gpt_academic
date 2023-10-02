@@ -4,7 +4,7 @@
 # @Author : Spike
 # @Descr   :
 import gradio as gr
-from comm_tools import webui_local, func_box
+from comm_tools import webui_local, func_box, toolbox
 
 i18n = webui_local.I18nAuto()
 get_html = func_box.get_html
@@ -31,6 +31,12 @@ class Settings:
 
     def _draw_setting_senior(self):
         with gr.Tab(label=i18n("高级")):
+            self.secret_css, self.secret_font = gr.Textbox(visible=False), gr.Textbox(visible=False)
+            AVAIL_THEMES, latex_option = toolbox.get_conf('AVAIL_THEMES', 'latex_option')
+            self.theme_dropdown = gr.Dropdown(AVAIL_THEMES, value=AVAIL_THEMES[0], label=i18n("更换UI主题"),
+                                         interactive=True).style(container=False)
+            self.latex_option = gr.Dropdown(AVAIL_THEMES, value=latex_option[0], label=i18n("更换Latex输出格式"),
+                                       interactive=True).style(container=False)
             gr.HTML(get_html("appearance_switcher.html").format(
                 label=i18n("切换亮暗色主题")), elem_classes="insert-block", visible=False)
             self.single_turn_checkbox = gr.Checkbox(label=i18n(

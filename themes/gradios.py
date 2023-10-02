@@ -1,11 +1,11 @@
 import gradio as gr
 import logging
-from toolbox import get_conf, ProxyNetworkActivate
+from comm_tools.toolbox import get_conf, ProxyNetworkActivate
 CODE_HIGHLIGHT, ADD_WAIFU, LAYOUT = get_conf('CODE_HIGHLIGHT', 'ADD_WAIFU', 'LAYOUT')
 
 def dynamic_set_theme(THEME):
     set_theme = gr.themes.ThemeClass()
-    with ProxyNetworkActivate():
+    with ProxyNetworkActivate('Download_Gradio_Theme'):
         logging.info('正在下载Gradio主题，请稍等。')
         if THEME.startswith('Huggingface-'): THEME = THEME.lstrip('Huggingface-')
         if THEME.startswith('huggingface-'): THEME = THEME.lstrip('huggingface-')
@@ -13,10 +13,9 @@ def dynamic_set_theme(THEME):
     return set_theme
 
 def adjust_theme():
-
     try:
         set_theme = gr.themes.ThemeClass()
-        with ProxyNetworkActivate():
+        with ProxyNetworkActivate('Download_Gradio_Theme'):
             logging.info('正在下载Gradio主题，请稍等。')
             THEME, = get_conf('THEME')
             if THEME.startswith('Huggingface-'): THEME = THEME.lstrip('Huggingface-')
@@ -45,7 +44,7 @@ def adjust_theme():
         gr.routes.templates.TemplateResponse = gradio_new_template_fn   # override gradio template
     except Exception as e:
         set_theme = None
-        from toolbox import trimmed_format_exc
+        from comm_tools.toolbox import trimmed_format_exc
         logging.error('gradio版本较旧, 不能自定义字体和颜色:', trimmed_format_exc())
     return set_theme
 

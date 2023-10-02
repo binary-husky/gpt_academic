@@ -150,6 +150,14 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
+    "gpt-4-32k": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": openai_endpoint,
+        "max_token": 32768,
+        "tokenizer": tokenizer_gpt4,
+        "token_cnt": get_token_num_gpt4,
+    },
     # azure openai
     "azure-gpt-3.5":{
         "fn_with_ui": chatgpt_ui,
@@ -174,6 +182,14 @@ model_info = {
         "max_token": 32000,
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
+    },
+    "azure-gpt-4":{
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": azure_endpoint,
+        "max_token": 8192,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
     },
     # api_2d
     "api2d-gpt-3.5-turbo": {

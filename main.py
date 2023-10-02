@@ -258,33 +258,6 @@ def main():
 
         md_dropdown.select(on_md_dropdown_changed, [md_dropdown], [chatbot])
 
-        def on_theme_dropdown_changed(theme, secret_css):
-            adjust_theme, css_part1, _, adjust_dynamic_theme = load_dynamic_theme(theme)
-            if adjust_dynamic_theme:
-                css_part2 = adjust_dynamic_theme._get_theme_css()
-            else:
-                css_part2 = adjust_theme()._get_theme_css()
-            return css_part2 + css_part1
-
-        theme_handle = theme_dropdown.select(on_theme_dropdown_changed, [theme_dropdown, secret_css], [secret_css])
-        theme_handle.then(
-            None,
-            [secret_css],
-            None,
-            _js="""(css) => {
-                var existingStyles = document.querySelectorAll("style[data-loaded-css]");
-                for (var i = 0; i < existingStyles.length; i++) {
-                    var style = existingStyles[i];
-                    style.parentNode.removeChild(style);
-                }
-                var styleElement = document.createElement('style');
-                styleElement.setAttribute('data-loaded-css', css);
-                styleElement.innerHTML = css;
-                document.head.appendChild(styleElement);
-            }
-            """
-        )
-
         # 随变按钮的回调函数注册
         def route(request: gr.Request, k, *args, **kwargs):
             if k in [r"打开插件列表", r"请先从插件列表中选择"]: return
@@ -329,7 +302,7 @@ def main():
             return cookies
 
         demo.load(init_cookie, inputs=[cookies, chatbot], outputs=[cookies])
-        demo.load(lambda: 0, inputs=None, outputs=None, _js='()=>{ChatBotHeight();}')
+        demo.load(lambda: 0, inputs=None, outputs=None, _js='()=>{GptAcademicJavaScriptInit();}')
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay():
@@ -352,6 +325,7 @@ def main():
 
     auto_opentab_delay()
     demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
+        quiet=True,
         server_name="0.0.0.0",
         server_port=PORT,
         favicon_path="docs/logo.png",

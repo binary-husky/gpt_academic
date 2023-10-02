@@ -74,7 +74,7 @@ def plugin_test(main_input, plugin, advanced_arg=None):
         plugin_kwargs['plugin_kwargs'] = advanced_arg
     my_working_plugin = silence_stdout(plugin)(**plugin_kwargs)
 
-    with Live(Markdown(""), auto_refresh=False) as live:
+    with Live(Markdown(""), auto_refresh=False, vertical_overflow="visible") as live:
         for cookies, chat, hist, msg in my_working_plugin:
             md_str = vt.chat_to_markdown_str(chat)
             md = Markdown(md_str)

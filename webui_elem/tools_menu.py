@@ -186,13 +186,11 @@ class RightElem:
                     self.vector_chunk_size = gr.Slider(minimum=100, maximum=1000, value=521, step=1, interactive=True,
                                            label="CHUNK-SIZE", ).style(container=False)
                 func_box.md_division_line()
-                with gr.Accordion(label='工具调试参数', open=False):
+                with gr.Accordion(label='工具调试参数', open=True):
                     self.pro_tf_slider = gr.Slider(minimum=0.01, maximum=1.0, value=0.70, step=0.01, interactive=True,
                                                    label="搜索匹配系数").style(container=False)
                     self.ocr_identifying_trust = gr.Slider(minimum=0.01, maximum=1.0, value=0.60, step=0.01, interactive=True,
                                                    label="OCR 识别信任指数").style(container=False)
-
-                func_box.md_division_line()
             # temp = gr.Markdown(self.description)
 
     def draw_tools_area(self):

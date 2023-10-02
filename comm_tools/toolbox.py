@@ -34,6 +34,7 @@ pj = os.path.join
 
 
 class ChatBotWithCookies(list):
+
     def __init__(self, cookie):
         self._cookies = cookie
 
@@ -59,6 +60,7 @@ def ArgsGeneralWrapper(f):
     """
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
+
     def decorated(cookies, max_length, worker_num, llm_model,
                   langchain, know_dict, know_cls,
                   vector_score, vector_top_k, vector_size,
@@ -74,7 +76,7 @@ def ArgsGeneralWrapper(f):
         real_llm = {
             'top_p': top_p, 'temperature': temperature, 'n_choices': n_choices, 'stop': stop_sequence,
             'max_context': max_context, 'max_generation': max_generation, 'presence_penalty': presence_penalty,
-            'frequency_penalty': frequency_penalty, 'logit_bias': logit_bias,  'user': user_identifier,
+            'frequency_penalty': frequency_penalty, 'logit_bias': logit_bias, 'user': user_identifier,
         }
         cookies.update({
             **real_llm,
@@ -114,7 +116,8 @@ def ArgsGeneralWrapper(f):
             cookies['is_plugin'] = False
             plugin_kwargs['advanced_arg'] = ''
             txt_passon = yield from Langchain_cn.knowledge_base_query(txt_passon,
-                                    chatbot_with_cookie, history, llm_kwargs, plugin_kwargs)
+                                                                      chatbot_with_cookie, history, llm_kwargs,
+                                                                      plugin_kwargs)
         # 根据cookie 或 对话配置决定到底走哪一步
         yield from func_decision_tree(f, cookies, single_turn, use_websearch,
                                       txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie,
@@ -123,6 +126,7 @@ def ArgsGeneralWrapper(f):
         yield from end_predict(chatbot_with_cookie, history, llm_kwargs)
         threading.Thread(target=user_data_processing.thread_write_chat_json,
                          args=(chatbot_with_cookie, ipaddr.client.host)).start()
+
     return decorated
 
 
@@ -157,7 +161,8 @@ def func_decision_tree(func, cookies, single_turn, use_websearch,
             if single_turn:
                 yield from func(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, [], system_prompt, *args)
             else:
-                yield from func(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
+                yield from func(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt,
+                                *args)
         cookies.update({'last_chat': txt_passon})
     else:
         # 处理少数情况下的特殊插件的锁定状态
@@ -418,7 +423,7 @@ def text_divide_paragraph(input_str):
     return input_str
 
 
-@lru_cache(maxsize=128) # 使用 lru缓存 加快转换速度
+@lru_cache(maxsize=128)  # 使用 lru缓存 加快转换速度
 def markdown_convertion(txt):
     """
     将Markdown格式的文本转换为HTML格式。如果包含数学公式，则先将公式转换为HTML格式。
@@ -471,6 +476,7 @@ def markdown_convertion(txt):
                                   '<script type="math/tex; mode=display">')
         content = content.replace('</script>\n</script>', '</script>')
         return content
+
     def is_equation(txt):
         """
         判定是否为公式 | 测试1 写出洛伦兹定律，使用tex格式公式 测试2 给出柯西不等式，使用latex格式 测试3 写出麦克斯韦方程组
@@ -478,16 +484,16 @@ def markdown_convertion(txt):
         if '```' in txt and '```reference' not in txt: return False
         if '$' not in txt and '\\[' not in txt: return False
         mathpatterns = {
-            r'(?<!\\|\$)(\$)([^\$]+)(\$)': {'allow_multi_lines': False},                            #  $...$
-            r'(?<!\\)(\$\$)([^\$]+)(\$\$)': {'allow_multi_lines': True},                            # $$...$$
-            r'(?<!\\)(\\\[)(.+?)(\\\])': {'allow_multi_lines': False},                              # \[...\]
+            r'(?<!\\|\$)(\$)([^\$]+)(\$)': {'allow_multi_lines': False},  #  $...$
+            r'(?<!\\)(\$\$)([^\$]+)(\$\$)': {'allow_multi_lines': True},  # $$...$$
+            r'(?<!\\)(\\\[)(.+?)(\\\])': {'allow_multi_lines': False},  # \[...\]
             # r'(?<!\\)(\\\()(.+?)(\\\))': {'allow_multi_lines': False},                            # \(...\)
             # r'(?<!\\)(\\begin{([a-z]+?\*?)})(.+?)(\\end{\2})': {'allow_multi_lines': True},       # \begin...\end
             # r'(?<!\\)(\$`)([^`]+)(`\$)': {'allow_multi_lines': False},                            # $`...`$
         }
         matches = []
         for pattern, property in mathpatterns.items():
-            flags = re.ASCII|re.DOTALL if property['allow_multi_lines'] else re.ASCII
+            flags = re.ASCII | re.DOTALL if property['allow_multi_lines'] else re.ASCII
             matches.extend(re.findall(pattern, txt, flags))
         if len(matches) == 0: return False
         contain_any_eq = False
@@ -495,16 +501,17 @@ def markdown_convertion(txt):
         for match in matches:
             if len(match) != 3: return False
             eq_canidate = match[1]
-            if illegal_pattern.search(eq_canidate): 
+            if illegal_pattern.search(eq_canidate):
                 return False
-            else: 
+            else:
                 contain_any_eq = True
         return contain_any_eq
 
     if is_equation(txt):  # 有$标识的公式符号，且没有代码段```的标识
         # convert everything to html format
         split = markdown.markdown(text='---')
-        convert_stage_1 = markdown.markdown(text=txt, extensions=['sane_lists', 'tables', 'mdx_math', 'fenced_code'], extension_configs=markdown_extension_configs)
+        convert_stage_1 = markdown.markdown(text=txt, extensions=['sane_lists', 'tables', 'mdx_math', 'fenced_code'],
+                                            extension_configs=markdown_extension_configs)
         convert_stage_1 = markdown_bug_hunt(convert_stage_1)
         # 1. convert to easy-to-copy tex (do not render math)
         convert_stage_2_1, n = re.subn(find_equation_pattern, replace_math_no_render, convert_stage_1, flags=re.DOTALL)
@@ -605,7 +612,7 @@ def extract_archive(file_path, dest_dir):
                 print("Successfully extracted rar archive to {}".format(dest_dir))
         except:
             print("Rar format requires additional dependencies to install")
-            return '\n\n解压失败! 需要安装pip install rarfile来解压rar文件'
+            return '\n\n解压失败! 需要安装pip install rarfile来解压rar文件。建议：使用zip压缩格式。'
 
     # 第三方库，需要预先pip install py7zr
     elif file_extension == '.7z':
@@ -657,14 +664,12 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
     if not os.path.exists(new_path): shutil.copyfile(file, new_path)
     # 将文件添加到chatbot cookie中，避免多用户干扰
     if chatbot:
-        if 'file_to_promote' in chatbot._cookies:
-            current = chatbot._cookies['file_to_promote']
+        if 'files_to_promote' in chatbot._cookies:
+            current = chatbot._cookies['files_to_promote']
         else:
             current = []
-        chatbot._cookies.update({'file_to_promote': [new_path] + current})
-
-
-
+        chatbot._cookies.update({'files_to_promote': [new_path] + current})
+    return new_path
 
 
 def disable_auto_promotion(chatbot):
@@ -672,13 +677,15 @@ def disable_auto_promotion(chatbot):
     return
 
 
-
 def is_the_upload_folder(string):
     PATH_PRIVATE_UPLOAD, = get_conf('PATH_PRIVATE_UPLOAD')
     pattern = r'^PATH_PRIVATE_UPLOAD/[A-Za-z0-9_-]+/\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}$'
     pattern = pattern.replace('PATH_PRIVATE_UPLOAD', PATH_PRIVATE_UPLOAD)
-    if re.match(pattern, string): return True
-    else: return False
+    if re.match(pattern, string):
+        return True
+    else:
+        return False
+
 
 def del_outdated_uploads(outdate_time_seconds):
     PATH_PRIVATE_UPLOAD, = get_conf('PATH_PRIVATE_UPLOAD')
@@ -689,9 +696,12 @@ def del_outdated_uploads(outdate_time_seconds):
     for subdirectory in glob.glob(f'{PATH_PRIVATE_UPLOAD}/*/*'):
         subdirectory_time = os.path.getmtime(subdirectory)
         if subdirectory_time < one_hour_ago:
-            try: shutil.rmtree(subdirectory)
-            except: pass
+            try:
+                shutil.rmtree(subdirectory)
+            except:
+                pass
     return
+
 
 def on_file_uploaded(files, chatbot, txt, cookies, ipaddr: gr.Request):
     """
@@ -743,7 +753,7 @@ def on_report_generated(cookies, files, chatbot, request):
     if 'file_to_promote' in cookies:
         report_files = cookies['file_to_promote']
         cookies.pop('file_to_promote')
-    
+
     # 移除过时的旧文件从而节省空间&保护隐私
     outdate_time_seconds = 60
     del_outdated_uploads(outdate_time_seconds)
@@ -761,24 +771,24 @@ def on_report_generated(cookies, files, chatbot, request):
         file_origin_name = os.path.basename(file.orig_name)
         this_file_path = pj(target_path_base, file_origin_name)
         shutil.move(file.name, this_file_path)
-        upload_msg += extract_archive(file_path=this_file_path, dest_dir=this_file_path+'.extract')
+        upload_msg += extract_archive(file_path=this_file_path, dest_dir=this_file_path + '.extract')
     # 整理文件集合
     moved_files = [fp for fp in glob.glob(f'{target_path_base}/**/*', recursive=True)]
     txt = target_path_base
     # 输出消息
     moved_files_str = '\t\n\n'.join(moved_files)
-    chatbot.append(['我上传了文件，请查收', 
+    chatbot.append(['我上传了文件，请查收',
                     f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
                     f'\n\n调用路径参数已自动修正到: \n\n{txt}' +
-                    f'\n\n现在您点击任意函数插件时，以上文件将被作为输入参数'+upload_msg])
-    
+                    f'\n\n现在您点击任意函数插件时，以上文件将被作为输入参数' + upload_msg])
+
     # 记录近期文件
     cookies.update({
         'most_recent_uploaded': {
             'path': target_path_base,
             'time': time.time(),
             'time_str': time_tag
-    }})
+        }})
     return chatbot, txt, cookies
 
 
@@ -832,7 +842,8 @@ def is_any_api_key(key):
             if is_any_api_key(k): return True
         return False
     else:
-        return is_openai_api_key(key) or is_api2d_key(key) or is_proxy_key(key) or is_aigc_key(key) or is_azure_api_key(key)
+        return is_openai_api_key(key) or is_api2d_key(key) or is_proxy_key(key) or is_aigc_key(key) or is_azure_api_key(
+            key)
 
 
 def what_keys(keys):
@@ -928,7 +939,8 @@ def read_env_variable(arg, default_value):
             elif env_arg == 'False':
                 r = False
             else:
-                print('enter True or False, but have:', env_arg); r = default_value
+                print('enter True or False, but have:', env_arg);
+                r = default_value
         elif isinstance(default_value, int):
             r = int(env_arg)
         elif isinstance(default_value, float):
@@ -1175,22 +1187,40 @@ def get_log_folder(user='default', plugin_name='shared'):
 
 class ProxyNetworkActivate():
     """
-    这段代码定义了一个名为TempProxy的空上下文管理器, 用于给一小段代码上代理
+    这段代码定义了一个名为TempProxy的空上下文管理器，用于给一小段代码上代理
     """
 
+    def __init__(self, task=None) -> None:
+        self.task = task
+        if not task:
+            # 不给定 task，那么我们默认代理生效
+            self.valid = True
+        else:
+            # 给定了 task，我们检查一下
+            WHEN_TO_USE_PROXY, = get_conf('WHEN_TO_USE_PROXY')
+            self.valid = (task in WHEN_TO_USE_PROXY)
+
     def __enter__(self):
+        if not self.valid:
+            return None  # 返回 None，表示不执行代理操作
+
         proxies, = get_conf('proxies')
-        if 'no_proxy' in os.environ: os.environ.pop('no_proxy')
+        if 'no_proxy' in os.environ:
+            os.environ.pop('no_proxy')
         if proxies is not None:
-            if 'http' in proxies: os.environ['HTTP_PROXY'] = proxies['http']
-            if 'https' in proxies: os.environ['HTTPS_PROXY'] = proxies['https']
+            if 'http' in proxies:
+                os.environ['HTTP_PROXY'] = proxies['http']
+            if 'https' in proxies:
+                os.environ['HTTPS_PROXY'] = proxies['https']
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         os.environ['no_proxy'] = '*'
-        if 'HTTP_PROXY' in os.environ: os.environ.pop('HTTP_PROXY')
-        if 'HTTPS_PROXY' in os.environ: os.environ.pop('HTTPS_PROXY')
-        return
+        if 'HTTP_PROXY' in os.environ:
+            os.environ.pop('HTTP_PROXY')
+        if 'HTTPS_PROXY' in os.environ:
+            os.environ.pop('HTTPS_PROXY')
+        return None  # 返回 None，表示没有处理异常
 
 
 def objdump(obj, file='objdump.tmp'):
@@ -1323,4 +1353,3 @@ def get_chat_default_kwargs():
     }
 
     return default_chat_kwargs
-
