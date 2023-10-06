@@ -18,6 +18,7 @@ import logging
 import traceback
 import requests
 import importlib
+import random
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
@@ -288,9 +289,19 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     what_i_ask_now["role"] = "user"
     what_i_ask_now["content"] = inputs
     messages.append(what_i_ask_now)
+    model = llm_kwargs['llm_model'].strip('api2d-')
+    if model == "gpt-3.5-random": # 随机选择, 绕过openai访问频率限制
+        model = random.choice([
+            "gpt-3.5-turbo", 
+            "gpt-3.5-turbo-16k",
+            "gpt-3.5-turbo-0613",
+            "gpt-3.5-turbo-16k-0613",
+            "gpt-3.5-turbo-0301",
+        ])
+        logging.info("Random select model:" + model)
 
     payload = {
-        "model": llm_kwargs['llm_model'].strip('api2d-'),
+        "model": model,
         "messages": messages, 
         "temperature": llm_kwargs['temperature'],  # 1.0,
         "top_p": llm_kwargs['top_p'],  # 1.0,
