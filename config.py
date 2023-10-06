@@ -50,6 +50,7 @@ DEFAULT_WORKER_NUM = 3
 # 色彩主题, 可选 ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast"]
 # 更多主题, 请查阅Gradio主题商店: https://huggingface.co/spaces/gradio/theme-gallery 可选 ["Gstaff/Xkcd", "NoCrypt/Miku", ...]
 THEME = "Chuanhu-Small-and-Beautiful"
+AVAIL_THEMES = ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast", "Gstaff/Xkcd", "NoCrypt/Miku"]
 
 
 # 对话窗的高度 （仅在LAYOUT="TOP-DOWN"时生效）
@@ -62,7 +63,10 @@ CODE_HIGHLIGHT = True
 
 # 窗口布局
 LAYOUT = "LEFT-RIGHT"   # "LEFT-RIGHT"（左右布局） # "TOP-DOWN"（上下布局）
-DARK_MODE = True        # 暗色模式 / 亮色模式
+
+
+# 暗色模式 / 亮色模式
+DARK_MODE = True        
 
 
 # 发送请求到OpenAI后，等待多久判定为超时
@@ -81,13 +85,13 @@ LLM_MODEL = "gpt-3.5-turbo" # 可选 "chatglm"
 AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "api2d-gpt-3.5-turbo", "spark", "azure-gpt-3.5"]
 
 # 插件分类默认选项
-DEFAULT_FN_GROUPS = ['对话', '编程', '学术']
+DEFAULT_FN_GROUPS = ['对话', '编程', '学术', '智能体']
 
 
 # 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
 LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
 AVAIL_LLM_MODELS = ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5", "api2d-gpt-3.5-turbo", 
-                    "gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "stack-claude"]
+                    "gpt-4", "gpt-4-32k", "azure-gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "stack-claude"]
 # P.S. 其他可用的模型还包括 ["qianfan", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613", 
 # "spark", "sparkv2", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"]
 
@@ -186,10 +190,19 @@ GROBID_URLS = [
 
 # 是否允许通过自然语言描述修改本页的配置，该功能具有一定的危险性，默认关闭
 ALLOW_RESET_CONFIG = False
+
+
 # 临时的上传文件夹位置，请勿修改
 PATH_PRIVATE_UPLOAD = "private_upload"
+
+
 # 日志文件夹的位置，请勿修改
 PATH_LOGGING = "gpt_log"
+
+
+# 除了连接OpenAI之外，还有哪些场合允许使用代理，请勿修改
+WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid", "Warmup_Modules"]
+
 
 """
 在线大模型配置关联关系示意图

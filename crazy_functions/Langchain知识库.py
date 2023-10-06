@@ -53,14 +53,14 @@ def 知识库问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
     print('Checking Text2vec ...')
     from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-    with ProxyNetworkActivate():    # 临时地激活代理网络
+    with ProxyNetworkActivate('Download_LLM'):    # 临时地激活代理网络
         HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
 
     # < -------------------构建知识库--------------- >
     chatbot.append(['<br/>'.join(file_manifest), "正在构建知识库..."])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
     print('Establishing knowledge archive ...')
-    with ProxyNetworkActivate():    # 临时地激活代理网络
+    with ProxyNetworkActivate('Download_LLM'):    # 临时地激活代理网络
         kai = knowledge_archive_interface()
         kai.feed_archive(file_manifest=file_manifest, id=kai_id)
     kai_files = kai.get_loaded_file()

@@ -1,7 +1,7 @@
 pydantic==1.10.11
 tiktoken>=0.3.3
 requests[socks]
-transformers
+transformers>=4.27.1
 python-markdown-math
 beautifulsoup4
 prompt_toolkit

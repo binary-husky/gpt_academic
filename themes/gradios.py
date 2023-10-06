@@ -3,23 +3,29 @@ import logging
 from toolbox import get_conf, ProxyNetworkActivate
 CODE_HIGHLIGHT, ADD_WAIFU, LAYOUT = get_conf('CODE_HIGHLIGHT', 'ADD_WAIFU', 'LAYOUT')
 
+def dynamic_set_theme(THEME):
+    set_theme = gr.themes.ThemeClass()
+    with ProxyNetworkActivate('Download_Gradio_Theme'):
+        logging.info('正在下载Gradio主题，请稍等。')
+        if THEME.startswith('Huggingface-'): THEME = THEME.lstrip('Huggingface-')
+        if THEME.startswith('huggingface-'): THEME = THEME.lstrip('huggingface-')
+        set_theme = set_theme.from_hub(THEME.lower())
+    return set_theme
+
 def adjust_theme():
 
     try:
         set_theme = gr.themes.ThemeClass()
-        with ProxyNetworkActivate():
+        with ProxyNetworkActivate('Download_Gradio_Theme'):
             logging.info('正在下载Gradio主题，请稍等。')
             THEME, = get_conf('THEME')
             if THEME.startswith('Huggingface-'): THEME = THEME.lstrip('Huggingface-')
             if THEME.startswith('huggingface-'): THEME = THEME.lstrip('huggingface-')
             set_theme = set_theme.from_hub(THEME.lower())
 
-        if LAYOUT=="TOP-DOWN": 
-            js = ""
-        else:
-            with open('themes/common.js', 'r', encoding='utf8') as f: 
-                js = f"<script>{f.read()}</script>"
-            
+        with open('themes/common.js', 'r', encoding='utf8') as f: 
+            js = f"<script>{f.read()}</script>"
+
         # 添加一个萌萌的看板娘
         if ADD_WAIFU:
             js += """

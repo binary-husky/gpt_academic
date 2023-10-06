@@ -216,7 +216,7 @@ def get_reduce_token_percent(text):
         return 0.5, '不详'
 
 
-def write_history_to_file(history, file_basename=None, file_fullname=None):
+def write_history_to_file(history, file_basename=None, file_fullname=None, auto_caption=True):
     """
     将对话记录history以Markdown格式写入文件中。如果没有指定文件名，则使用当前时间生成文件名。
     """
@@ -235,7 +235,7 @@ def write_history_to_file(history, file_basename=None, file_fullname=None):
                 if type(content) != str: content = str(content)
             except:
                 continue
-            if i % 2 == 0:
+            if i % 2 == 0 and auto_caption:
                 f.write('## ')
             try:
                 f.write(content)
@@ -472,7 +472,7 @@ def extract_archive(file_path, dest_dir):
                 print("Successfully extracted rar archive to {}".format(dest_dir))
         except:
             print("Rar format requires additional dependencies to install")
-            return '\n\n解压失败! 需要安装pip install rarfile来解压rar文件'
+            return '\n\n解压失败! 需要安装pip install rarfile来解压rar文件。建议：使用zip压缩格式。'
 
     # 第三方库，需要预先pip install py7zr
     elif file_extension == '.7z':
@@ -523,10 +523,11 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
     # 把文件复制过去
     if not os.path.exists(new_path): shutil.copyfile(file, new_path)
     # 将文件添加到chatbot cookie中，避免多用户干扰
-    if chatbot:
+    if chatbot is not None:
         if 'files_to_promote' in chatbot._cookies: current = chatbot._cookies['files_to_promote']
         else: current = []
         chatbot._cookies.update({'files_to_promote': [new_path] + current})
+    return new_path
 
 def disable_auto_promotion(chatbot):
     chatbot._cookies.update({'files_to_promote': []})
@@ -580,7 +581,7 @@ def on_file_uploaded(request: gradio.Request, files, chatbot, txt, txt2, checkbo
     
     # 整理文件集合
     moved_files = [fp for fp in glob.glob(f'{target_path_base}/**/*', recursive=True)]
-    if "底部输入区" in checkboxes: 
+    if "浮动输入区" in checkboxes: 
         txt, txt2 = "", target_path_base
     else:
         txt, txt2 = target_path_base, ""
@@ -955,7 +956,19 @@ class ProxyNetworkActivate():
     """
     这段代码定义了一个名为TempProxy的空上下文管理器, 用于给一小段代码上代理
     """
+    def __init__(self, task=None) -> None:
+        self.task = task
+        if not task:
+            # 不给定task, 那么我们默认代理生效
+            self.valid = True
+        else:
+            # 给定了task, 我们检查一下
+            from toolbox import get_conf
+            WHEN_TO_USE_PROXY, = get_conf('WHEN_TO_USE_PROXY')
+            self.valid = (task in WHEN_TO_USE_PROXY)
+
     def __enter__(self):
+        if not self.valid: return self
         from toolbox import get_conf
         proxies, = get_conf('proxies')
         if 'no_proxy' in os.environ: os.environ.pop('no_proxy')
