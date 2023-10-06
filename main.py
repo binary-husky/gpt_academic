@@ -10,6 +10,7 @@ def main():
     proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION = get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION')
     CHATBOT_HEIGHT, LAYOUT, AVAIL_LLM_MODELS, AUTO_CLEAR_TXT = get_conf('CHATBOT_HEIGHT', 'LAYOUT', 'AVAIL_LLM_MODELS', 'AUTO_CLEAR_TXT')
     ENABLE_AUDIO, AUTO_CLEAR_TXT, PATH_LOGGING, AVAIL_THEMES, THEME = get_conf('ENABLE_AUDIO', 'AUTO_CLEAR_TXT', 'PATH_LOGGING', 'AVAIL_THEMES', 'THEME')
+    DARK_MODE, = get_conf('DARK_MODE')
 
     # 如果WEB_PORT是-1, 则随机选取WEB端口
     PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
@@ -69,7 +70,7 @@ def main():
     cancel_handles = []
     with gr.Blocks(title="GPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
         gr.HTML(title_html)
-        secret_css, secret_font = gr.Textbox(visible=False), gr.Textbox(visible=False)
+        secret_css, dark_mode = gr.Textbox(visible=False), gr.Textbox(DARK_MODE, visible=False)
         cookies = gr.State(load_chat_cookies())
         with gr_L1():
             with gr_L2(scale=2, elem_id="gpt-chat"):
@@ -294,19 +295,30 @@ def main():
             cookies.update({'uuid': uuid.uuid4()})
             return cookies
         demo.load(init_cookie, inputs=[cookies, chatbot], outputs=[cookies])
+        darkmode_js = """(dark) => {
+            dark = dark == "True";
+            if (document.querySelectorAll('.dark').length) {
+                if (!dark){
+                    document.querySelectorAll('.dark').forEach(el => el.classList.remove('dark'));
+                }
+            } else {
+                if (dark){
+                    document.querySelector('body').classList.add('dark');
+                }
+            }
+        }"""
+        demo.load(None, inputs=[dark_mode], outputs=None, _js=darkmode_js)    # 配置暗色主题或亮色主题
         demo.load(None, inputs=[gr.Textbox(LAYOUT, visible=False)], outputs=None, _js='(LAYOUT)=>{GptAcademicJavaScriptInit(LAYOUT);}')
         
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay():
         import threading, webbrowser, time
         print(f"如果浏览器没有自动打开，请复制并转到以下URL：")
-        print(f"\t（亮色主题）: http://localhost:{PORT}")
-        print(f"\t（暗色主题）: http://localhost:{PORT}/?__theme=dark")
+        if DARK_MODE:   print(f"\t「暗色主题已启用（支持动态切换主题）」: http://localhost:{PORT}")
+        else:           print(f"\t「亮色主题已启用（支持动态切换主题）」: http://localhost:{PORT}")
         def open():
             time.sleep(2)       # 打开浏览器
-            DARK_MODE, = get_conf('DARK_MODE')
-            if DARK_MODE: webbrowser.open_new_tab(f"http://localhost:{PORT}/?__theme=dark")
-            else: webbrowser.open_new_tab(f"http://localhost:{PORT}")
+            webbrowser.open_new_tab(f"http://localhost:{PORT}")
         threading.Thread(target=open, name="open-browser", daemon=True).start()
         threading.Thread(target=auto_update, name="self-upgrade", daemon=True).start()
         threading.Thread(target=warm_up_modules, name="warm-up", daemon=True).start()

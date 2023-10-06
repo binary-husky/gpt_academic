@@ -17,7 +17,7 @@
 }
 
 /* 小按钮 */
-.sm.svelte-1ipelgc {
+#basic-panel .sm {
     font-family: "Microsoft YaHei UI", "Helvetica", "Microsoft YaHei", "ui-sans-serif", "sans-serif", "system-ui";
     --button-small-text-weight: 600;
     --button-small-text-size:   16px;
@@ -27,7 +27,7 @@
     border-top-left-radius:     6px;
 }
 
-#plugin-panel .sm.svelte-1ipelgc {
+#plugin-panel .sm {
     font-family: "Microsoft YaHei UI", "Helvetica", "Microsoft YaHei", "ui-sans-serif", "sans-serif", "system-ui";
     --button-small-text-weight: 400;
     --button-small-text-size:   14px;
