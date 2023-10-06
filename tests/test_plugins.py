@@ -6,11 +6,14 @@
 import os, sys
 def validate_path(): dir_name = os.path.dirname(__file__); root_dir_assume = os.path.abspath(dir_name +  '/..'); os.chdir(root_dir_assume); sys.path.append(root_dir_assume)
 validate_path() # 返回项目根路径
-from tests.test_utils import plugin_test
 
 if __name__ == "__main__":
+    from tests.test_utils import plugin_test
+    plugin_test(plugin='crazy_functions.函数动态生成->函数动态生成', main_input='交换图像的蓝色通道和红色通道', advanced_arg={"file_path_arg": "./build/ants.jpg"})
+
     # plugin_test(plugin='crazy_functions.虚空终端->虚空终端', main_input='修改api-key为sk-jhoejriotherjep')
-    plugin_test(plugin='crazy_functions.批量翻译PDF文档_NOUGAT->批量翻译PDF文档', main_input='crazy_functions/test_project/pdf_and_word/aaai.pdf')
+
+    # plugin_test(plugin='crazy_functions.批量翻译PDF文档_NOUGAT->批量翻译PDF文档', main_input='crazy_functions/test_project/pdf_and_word/aaai.pdf')
 
     # plugin_test(plugin='crazy_functions.虚空终端->虚空终端', main_input='调用插件，对C:/Users/fuqingxu/Desktop/旧文件/gpt/chatgpt_academic/crazy_functions/latex_fns中的python文件进行解析')
 

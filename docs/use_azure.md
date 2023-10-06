@@ -107,6 +107,12 @@ AZURE_API_KEY = "填入azure openai api的密钥"
 AZURE_API_VERSION = "2023-05-15"  # 默认使用 2023-05-15 版本，无需修改
 AZURE_ENGINE = "填入部署名" # 见上述图片
 
+
+# 例如
+API_KEY = '6424e9d19e674092815cea1cb35e67a5'
+AZURE_ENDPOINT = 'https://rhtjjjjjj.openai.azure.com/'
+AZURE_ENGINE = 'qqwe'
+LLM_MODEL = "azure-gpt-3.5" # 可选 ↓↓↓
 ```
 
 
