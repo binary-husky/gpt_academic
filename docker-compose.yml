@@ -1,4 +1,28 @@
-#【请修改完参数后，删除此行】请在以下方案中选择一种，然后删除其他的方案，最后docker-compose up运行 | Please choose from one of these options below, delete other options as well as This Line
+## ===================================================
+# docker-compose.yml
+## ===================================================
+# 1. 请在以下方案中选择任意一种，然后删除其他的方案
+# 2. 修改你选择的方案中的environment环境变量，详情请见github wiki或者config.py
+# 3. 选择一种暴露服务端口的方法，并对相应的配置做出修改：
+    # 【方法1: 适用于Linux，很方便，可惜windows不支持】与宿主的网络融合为一体，这个是默认配置
+    # network_mode: "host"
+    # 【方法2: 适用于所有系统包括Windows和MacOS】端口映射，把容器的端口映射到宿主的端口（注意您需要先删除network_mode: "host"，再追加以下内容）
+    # ports:
+    #   - "12345:12345"  # 注意！12345必须与WEB_PORT环境变量相互对应
+# 4. 最后`docker-compose up`运行
+# 5. 如果希望使用显卡，请关注 LOCAL_MODEL_DEVICE 和 英伟达显卡运行时 选项
+## ===================================================
+# 1. Please choose one of the following options and delete the others.
+# 2. Modify the environment variables in the selected option, see GitHub wiki or config.py for more details.
+# 3. Choose a method to expose the server port and make the corresponding configuration changes:
+    # [Method 1: Suitable for Linux, convenient, but not supported for Windows] Fusion with the host network, this is the default configuration
+    # network_mode: "host"
+    # [Method 2: Suitable for all systems including Windows and MacOS] Port mapping, mapping the container port to the host port (note that you need to delete network_mode: "host" first, and then add the following content)
+    # ports:
+    # - "12345: 12345" # Note! 12345 must correspond to the WEB_PORT environment variable.
+# 4. Finally, run `docker-compose up`.
+# 5. If you want to use a graphics card, pay attention to the LOCAL_MODEL_DEVICE and Nvidia GPU runtime options.
+## ===================================================
 
 ## ===================================================
 ## 【方案零】 部署项目的全部能力（这个是包含cuda和latex的大型镜像。如果您网速慢、硬盘小或没有显卡，则不推荐使用这个）
@@ -39,10 +63,14 @@ services:
     #             count: 1
     #             capabilities: [gpu]
 
-    # 与宿主的网络融合
+    # 【WEB_PORT暴露方法1: 适用于Linux】与宿主的网络融合
     network_mode: "host"
 
-    # 不使用代理网络拉取最新代码
+    # 【WEB_PORT暴露方法2: 适用于所有系统】端口映射
+    # ports:
+    #   - "12345:12345"  # 12345必须与WEB_PORT相互对应
+
+    # 启动容器后，运行main.py主程序
     command: >
       bash -c "python3 -u main.py"
 

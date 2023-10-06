@@ -5,6 +5,9 @@
 
 FROM fuqingxu/python311_texlive_ctex:latest
 
+# 删除文档文件以节约空间
+rm -rf /usr/local/texlive/2023/texmf-dist/doc
+
 # 指定路径
 WORKDIR /gpt
 
