@@ -23,12 +23,9 @@ def adjust_theme():
             if THEME.startswith('huggingface-'): THEME = THEME.lstrip('huggingface-')
             set_theme = set_theme.from_hub(THEME.lower())
 
-        if LAYOUT=="TOP-DOWN": 
-            js = ""
-        else:
-            with open('themes/common.js', 'r', encoding='utf8') as f: 
-                js = f"<script>{f.read()}</script>"
-            
+        with open('themes/common.js', 'r', encoding='utf8') as f: 
+            js = f"<script>{f.read()}</script>"
+
         # 添加一个萌萌的看板娘
         if ADD_WAIFU:
             js += """

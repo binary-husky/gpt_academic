@@ -57,12 +57,9 @@ def adjust_theme():
             button_cancel_text_color_dark="white",
         )
 
-        if LAYOUT=="TOP-DOWN": 
-            js = ""
-        else:
-            with open('themes/common.js', 'r', encoding='utf8') as f: 
-                js = f"<script>{f.read()}</script>"
-            
+        with open('themes/common.js', 'r', encoding='utf8') as f: 
+            js = f"<script>{f.read()}</script>"
+        
         # 添加一个萌萌的看板娘
         if ADD_WAIFU:
             js += """

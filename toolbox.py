@@ -523,7 +523,7 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
     # 把文件复制过去
     if not os.path.exists(new_path): shutil.copyfile(file, new_path)
     # 将文件添加到chatbot cookie中，避免多用户干扰
-    if chatbot:
+    if chatbot is not None:
         if 'files_to_promote' in chatbot._cookies: current = chatbot._cookies['files_to_promote']
         else: current = []
         chatbot._cookies.update({'files_to_promote': [new_path] + current})
@@ -581,7 +581,7 @@ def on_file_uploaded(request: gradio.Request, files, chatbot, txt, txt2, checkbo
     
     # 整理文件集合
     moved_files = [fp for fp in glob.glob(f'{target_path_base}/**/*', recursive=True)]
-    if "底部输入区" in checkboxes: 
+    if "浮动输入区" in checkboxes: 
         txt, txt2 = "", target_path_base
     else:
         txt, txt2 = target_path_base, ""

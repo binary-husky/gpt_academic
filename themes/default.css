@@ -9,8 +9,8 @@
     border-radius: 4px;
 }
 
-#plugin-panel .dropdown-arrow.svelte-p5edak {
-    width: 50px;
+#plugin-panel .dropdown-arrow {
+    width: 25px;
 }
 #plugin-panel input.svelte-aqlk7e.svelte-aqlk7e.svelte-aqlk7e {
     padding-left: 5px;

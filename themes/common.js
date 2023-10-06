@@ -74,13 +74,8 @@ function chatbotContentChanged(attempt = 1, force = false) {
     }
 }
 
-function GptAcademicJavaScriptInit() {
-    chatbotIndicator = gradioApp().querySelector('#gpt-chatbot > div.wrap');
-    var chatbotObserver = new MutationObserver(() => {
-        chatbotContentChanged(1);
-    });
-    chatbotObserver.observe(chatbotIndicator, { attributes: true, childList: true, subtree: true });
-
+function chatbotAutoHeight(){
+    // 自动调整高度
     function update_height(){
         var { panel_height_target, chatbot_height, chatbot } = get_elements(true);
         if (panel_height_target!=chatbot_height)
@@ -110,6 +105,15 @@ function GptAcademicJavaScriptInit() {
     }, 50); // 每100毫秒执行一次
 }
 
+function GptAcademicJavaScriptInit(LAYOUT = "LEFT-RIGHT") {
+    chatbotIndicator = gradioApp().querySelector('#gpt-chatbot > div.wrap');
+    var chatbotObserver = new MutationObserver(() => {
+        chatbotContentChanged(1);
+    });
+    chatbotObserver.observe(chatbotIndicator, { attributes: true, childList: true, subtree: true });
+    if (LAYOUT === "LEFT-RIGHT") {chatbotAutoHeight();}
+}
+
 function get_elements(consider_state_panel=false) {
     var chatbot = document.querySelector('#gpt-chatbot > div.wrap.svelte-18telvq');
     if (!chatbot) {
@@ -118,14 +122,14 @@ function get_elements(consider_state_panel=false) {
     const panel1 = document.querySelector('#input-panel').getBoundingClientRect();
     const panel2 = document.querySelector('#basic-panel').getBoundingClientRect()
     const panel3 = document.querySelector('#plugin-panel').getBoundingClientRect();
-    const panel4 = document.querySelector('#interact-panel').getBoundingClientRect();
+    // const panel4 = document.querySelector('#interact-panel').getBoundingClientRect();
     const panel5 = document.querySelector('#input-panel2').getBoundingClientRect();
     const panel_active = document.querySelector('#state-panel').getBoundingClientRect();
     if (consider_state_panel || panel_active.height < 25){
         document.state_panel_height = panel_active.height;
     }
     // 25 是chatbot的label高度, 16 是右侧的gap
-    var panel_height_target = panel1.height + panel2.height + panel3.height + panel4.height + panel5.height - 25 + 16*3;
+    var panel_height_target = panel1.height + panel2.height + panel3.height + 0 + 0 - 25 + 16*2;
     // 禁止动态的state-panel高度影响
     panel_height_target = panel_height_target + (document.state_panel_height-panel_active.height)
     var panel_height_target = parseInt(panel_height_target);

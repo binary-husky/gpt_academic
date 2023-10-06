@@ -18,8 +18,16 @@ def main():
 
     initial_prompt = "Serve me as a writing and programming assistant."
     title_html = f"<h1 align=\"center\">GPT 学术优化 {get_current_version()}</h1>{theme_declaration}"
-    description =  "代码开源和更新[地址🚀](https://github.com/binary-husky/gpt_academic)，"
-    description += "感谢热情的[开发者们❤️](https://github.com/binary-husky/gpt_academic/graphs/contributors)"
+    description =  "Github源代码开源和更新[地址🚀](https://github.com/binary-husky/gpt_academic), "
+    description += "感谢热情的[开发者们❤️](https://github.com/binary-husky/gpt_academic/graphs/contributors)."
+    description += "</br></br>常见问题请查阅[项目Wiki](https://github.com/binary-husky/gpt_academic/wiki), "
+    description += "如遇到Bug请前往[Bug反馈](https://github.com/binary-husky/gpt_academic/issues)."
+    description += "</br></br>普通对话使用说明: 1. 输入问题; 2. 点击提交"
+    description += "</br></br>基础功能区使用说明: 1. 输入文本; 2. 点击任意基础功能区按钮"
+    description += "</br></br>函数插件区使用说明: 1. 输入路径/问题, 或者上传文件; 2. 点击任意函数插件区按钮"
+    description += "</br></br>虚空终端使用说明: 点击虚空终端, 然后根据提示输入指令, 再次点击虚空终端"
+    description += "</br></br>如何保存对话: 点击保存当前的对话按钮"
+    description += "</br></br>如何语音对话: 请阅读Wiki"
 
     # 问询记录, python 版本建议3.9+（越新越好）
     import logging, uuid
@@ -73,11 +81,11 @@ def main():
                     with gr.Row():
                         txt = gr.Textbox(show_label=False, placeholder="Input question here.").style(container=False)
                     with gr.Row():
-                        submitBtn = gr.Button("提交", variant="primary")
+                        submitBtn = gr.Button("提交", elem_id="elem_submit", variant="primary")
                     with gr.Row():
-                        resetBtn = gr.Button("重置", variant="secondary"); resetBtn.style(size="sm")
-                        stopBtn = gr.Button("停止", variant="secondary"); stopBtn.style(size="sm")
-                        clearBtn = gr.Button("清除", variant="secondary", visible=False); clearBtn.style(size="sm")
+                        resetBtn = gr.Button("重置", elem_id="elem_reset", variant="secondary"); resetBtn.style(size="sm")
+                        stopBtn = gr.Button("停止", elem_id="elem_stop", variant="secondary"); stopBtn.style(size="sm")
+                        clearBtn = gr.Button("清除", elem_id="elem_clear", variant="secondary", visible=False); clearBtn.style(size="sm")
                     if ENABLE_AUDIO: 
                         with gr.Row():
                             audio_mic = gr.Audio(source="microphone", type="numpy", streaming=True, show_label=False).style(container=False)
@@ -88,7 +96,7 @@ def main():
                         for k in functional:
                             if ("Visible" in functional[k]) and (not functional[k]["Visible"]): continue
                             variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
-                            functional[k]["Button"] = gr.Button(k, variant=variant)
+                            functional[k]["Button"] = gr.Button(k, variant=variant, info_str=f'基础功能区: {k}')
                             functional[k]["Button"].style(size="sm")
                 with gr.Accordion("函数插件区", open=True, elem_id="plugin-panel") as area_crazy_fn:
                     with gr.Row():
@@ -101,7 +109,9 @@ def main():
                             if not plugin.get("AsButton", True): continue
                             visible = True if match_group(plugin['Group'], DEFAULT_FN_GROUPS) else False
                             variant = plugins[k]["Color"] if "Color" in plugin else "secondary"
-                            plugin['Button'] = plugins[k]['Button'] = gr.Button(k, variant=variant, visible=visible).style(size="sm")
+                            info = plugins[k].get("Info", k)
+                            plugin['Button'] = plugins[k]['Button'] = gr.Button(k, variant=variant, 
+                                visible=visible, info_str=f'函数插件区: {info}').style(size="sm")
                     with gr.Row():
                         with gr.Accordion("更多函数插件", open=True):
                             dropdown_fn_list = []
@@ -118,15 +128,26 @@ def main():
                                 switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary").style(size="sm")
                     with gr.Row():
                         with gr.Accordion("点击展开“文件上传区”。上传本地文件/压缩包供函数插件调用。", open=False) as area_file_up:
-                            file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)", file_count="multiple")
-                with gr.Accordion("更换模型 & SysPrompt & 交互界面布局", open=(LAYOUT == "TOP-DOWN"), elem_id="interact-panel"):
-                    system_prompt = gr.Textbox(show_label=True, placeholder=f"System Prompt", label="System prompt", value=initial_prompt)
+                            file_upload = gr.Files(label="任何文件, 推荐上传压缩文件(zip, tar)", file_count="multiple", elem_id="elem_upload")
+
+
+        with gr.Floating(init_x="0%", init_y="0%", visible=True, width=None, drag="forbidden"):
+            with gr.Row():
+                with gr.Tab("上传文件", elem_id="interact-panel"):
+                    gr.Markdown("请上传本地文件/压缩包供“函数插件区”功能调用。请注意: 上传文件后会自动把输入区修改为相应路径。")
+                    file_upload_2 = gr.Files(label="任何文件, 推荐上传压缩文件(zip, tar)", file_count="multiple")
+    
+                with gr.Tab("更换模型 & Prompt", elem_id="interact-panel"):
+                    md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(container=False)
                     top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01,interactive=True, label="Top-p (nucleus sampling)",)
                     temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature",)
-                    max_length_sl = gr.Slider(minimum=256, maximum=8192, value=4096, step=1, interactive=True, label="Local LLM MaxLength",)
-                    checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区", "底部输入区", "输入清除键", "插件参数区"], value=["基础功能区", "函数插件区"], label="显示/隐藏功能区")
-                    md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(container=False)
+                    max_length_sl = gr.Slider(minimum=256, maximum=1024*32, value=4096, step=128, interactive=True, label="Local LLM MaxLength",)
+                    system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt", label="System prompt", value=initial_prompt)
+
+                with gr.Tab("界面外观", elem_id="interact-panel"):
                     theme_dropdown = gr.Dropdown(AVAIL_THEMES, value=THEME, label="更换UI主题").style(container=False)
+                    checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区", "浮动输入区", "输入清除键", "插件参数区"], 
+                                                  value=["基础功能区", "函数插件区"], label="显示/隐藏功能区", elem_id='cbs').style(container=False)
                     dark_mode_btn = gr.Button("切换界面明暗 ☀", variant="secondary").style(size="sm")
                     dark_mode_btn.click(None, None, None, _js="""() => {
                             if (document.querySelectorAll('.dark').length) {
@@ -136,13 +157,17 @@ def main():
                             }
                         }""",
                     )
+                with gr.Tab("帮助", elem_id="interact-panel"):
                     gr.Markdown(description)
-                with gr.Accordion("备选输入区", open=True, visible=False, elem_id="input-panel2") as area_input_secondary:
-                    with gr.Row():
-                        txt2 = gr.Textbox(show_label=False, placeholder="Input question here.", label="输入区2").style(container=False)
-                    with gr.Row():
-                        submitBtn2 = gr.Button("提交", variant="primary")
-                    with gr.Row():
+
+        with gr.Floating(init_x="20%", init_y="50%", visible=False, width="40%", drag="top") as area_input_secondary:
+            with gr.Accordion("浮动输入区", open=True, elem_id="input-panel2"):
+                with gr.Row() as row:
+                    row.style(equal_height=True)
+                    with gr.Column(scale=10):
+                        txt2 = gr.Textbox(show_label=False, placeholder="Input question here.", lines=8, label="输入区2").style(container=False)
+                    with gr.Column(scale=1, min_width=40):
+                        submitBtn2 = gr.Button("提交", variant="primary"); submitBtn2.style(size="sm")
                         resetBtn2 = gr.Button("重置", variant="secondary"); resetBtn2.style(size="sm")
                         stopBtn2 = gr.Button("停止", variant="secondary"); stopBtn2.style(size="sm")
                         clearBtn2 = gr.Button("清除", variant="secondary", visible=False); clearBtn2.style(size="sm")
@@ -152,12 +177,12 @@ def main():
             ret = {}
             ret.update({area_basic_fn: gr.update(visible=("基础功能区" in a))})
             ret.update({area_crazy_fn: gr.update(visible=("函数插件区" in a))})
-            ret.update({area_input_primary: gr.update(visible=("底部输入区" not in a))})
-            ret.update({area_input_secondary: gr.update(visible=("底部输入区" in a))})
+            ret.update({area_input_primary: gr.update(visible=("浮动输入区" not in a))})
+            ret.update({area_input_secondary: gr.update(visible=("浮动输入区" in a))})
             ret.update({clearBtn: gr.update(visible=("输入清除键" in a))})
             ret.update({clearBtn2: gr.update(visible=("输入清除键" in a))})
             ret.update({plugin_advanced_arg: gr.update(visible=("插件参数区" in a))})
-            if "底部输入区" in a: ret.update({txt: gr.update(value="")})
+            if "浮动输入区" in a: ret.update({txt: gr.update(value="")})
             return ret
         checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn, area_input_primary, area_input_secondary, txt, txt2, clearBtn, clearBtn2, plugin_advanced_arg] )
         # 整理反复出现的控件句柄组合
@@ -185,6 +210,7 @@ def main():
             cancel_handles.append(click_handle)
         # 文件上传区，接收文件后与chatbot的互动
         file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt, txt2, checkboxes, cookies], [chatbot, txt, txt2, cookies])
+        file_upload_2.upload(on_file_uploaded, [file_upload_2, chatbot, txt, txt2, checkboxes, cookies], [chatbot, txt, txt2, cookies])
         # 函数插件-固定按钮区
         for k in plugins:
             if not plugins[k].get("AsButton", True): continue
@@ -194,7 +220,8 @@ def main():
         # 函数插件-下拉菜单与随变按钮的互动
         def on_dropdown_changed(k):
             variant = plugins[k]["Color"] if "Color" in plugins[k] else "secondary"
-            ret = {switchy_bt: gr.update(value=k, variant=variant)}
+            info = plugins[k].get("Info", k)
+            ret = {switchy_bt: gr.update(value=k, variant=variant, info_str=f'函数插件区: {info}')}
             if plugins[k].get("AdvancedArgs", False): # 是否唤起高级插件参数区
                 ret.update({plugin_advanced_arg: gr.update(visible=True,  label=f"插件[{k}]的高级参数说明：" + plugins[k].get("ArgsReminder", [f"没有提供高级参数功能说明"]))})
             else:
@@ -267,7 +294,7 @@ def main():
             cookies.update({'uuid': uuid.uuid4()})
             return cookies
         demo.load(init_cookie, inputs=[cookies, chatbot], outputs=[cookies])
-        demo.load(lambda: 0, inputs=None, outputs=None, _js='()=>{GptAcademicJavaScriptInit();}')
+        demo.load(None, inputs=[gr.Textbox(LAYOUT, visible=False)], outputs=None, _js='(LAYOUT)=>{GptAcademicJavaScriptInit(LAYOUT);}')
         
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay():

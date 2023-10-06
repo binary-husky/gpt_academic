@@ -48,6 +48,7 @@ DEFAULT_WORKER_NUM = 3
 THEME = "Default"
 AVAIL_THEMES = ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast", "Gstaff/Xkcd", "NoCrypt/Miku"]
 
+
 # 对话窗的高度 （仅在LAYOUT="TOP-DOWN"时生效）
 CHATBOT_HEIGHT = 1115
 
@@ -58,7 +59,10 @@ CODE_HIGHLIGHT = True
 
 # 窗口布局
 LAYOUT = "LEFT-RIGHT"   # "LEFT-RIGHT"（左右布局） # "TOP-DOWN"（上下布局）
-DARK_MODE = True        # 暗色模式 / 亮色模式
+
+
+# 暗色模式 / 亮色模式
+DARK_MODE = True        
 
 
 # 发送请求到OpenAI后，等待多久判定为超时
@@ -179,10 +183,16 @@ GROBID_URLS = [
 
 # 是否允许通过自然语言描述修改本页的配置，该功能具有一定的危险性，默认关闭
 ALLOW_RESET_CONFIG = False
+
+
 # 临时的上传文件夹位置，请勿修改
 PATH_PRIVATE_UPLOAD = "private_upload"
+
+
 # 日志文件夹的位置，请勿修改
 PATH_LOGGING = "gpt_log"
+
+
 # 除了连接OpenAI之外，还有哪些场合允许使用代理，请勿修改
 WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid", "Warmup_Modules"]
 
