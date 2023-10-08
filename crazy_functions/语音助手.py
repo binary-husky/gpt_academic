@@ -6,6 +6,7 @@ import threading, time
 import numpy as np
 from .live_audio.aliyunASR import AliyunASR
 import json
+import re
 
 class WatchDog():
     def __init__(self, timeout, bark_fn, interval=3, msg="") -> None:
@@ -38,9 +39,21 @@ def chatbot2history(chatbot):
     history = []
     for c in chatbot:
         for q in c:
-            if q not in ["[请讲话]", "[等待GPT响应]", "[正在等您说完问题]"]:
+            if q in ["[ 请讲话 ]", "[ 等待GPT响应 ]", "[ 正在等您说完问题 ]"]:
+                continue
+            elif q.startswith("[ 正在等您说完问题 ]"):
+                continue
+            else:
                 history.append(q.strip('<div class="markdown-body">').strip('</div>').strip('<p>').strip('</p>'))
     return history
+
+def visualize_audio(chatbot, audio_shape):
+    if len(chatbot) == 0: chatbot.append(["[ 请讲话 ]", "[ 正在等您说完问题 ]"])
+    chatbot[-1] = list(chatbot[-1])
+    p1 = '「'
+    p2 = '」'
+    chatbot[-1][-1] = re.sub(p1+r'(.*)'+p2, '', chatbot[-1][-1])
+    chatbot[-1][-1] += (p1+f"`{audio_shape}`"+p2)
 
 class AsyncGptTask():
     def __init__(self) -> None:
@@ -81,8 +94,9 @@ class InterviewAssistant(AliyunASR):
         self.capture_interval = 0.5 # second
         self.stop = False
         self.parsed_text = ""   # 下个句子中已经说完的部分, 由 test_on_result_chg() 写入
-        self.parsed_sentence = ""   # 某段话的整个句子,由 test_on_sentence_end() 写入
+        self.parsed_sentence = ""   # 某段话的整个句子, 由 test_on_sentence_end() 写入
         self.buffered_sentence = ""    #
+        self.audio_shape = ""   # 音频的可视化表现, 由 audio_convertion_thread() 写入
         self.event_on_result_chg = threading.Event()
         self.event_on_entence_end = threading.Event()
         self.event_on_commit_question = threading.Event()
@@ -117,7 +131,7 @@ class InterviewAssistant(AliyunASR):
     def begin(self, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
         # main plugin function
         self.init(chatbot)
-        chatbot.append(["[请讲话]", "[正在等您说完问题]"])
+        chatbot.append(["[ 请讲话 ]", "[ 正在等您说完问题 ]"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         self.plugin_wd.begin_watch()
         self.agt = AsyncGptTask()
@@ -157,14 +171,18 @@ class InterviewAssistant(AliyunASR):
 
                 self.commit_wd.begin_watch()
                 chatbot[-1] = list(chatbot[-1])
-                chatbot[-1] = [self.buffered_sentence, "[等待GPT响应]"]
+                chatbot[-1] = [self.buffered_sentence, "[ 等待GPT响应 ]"]
                 yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
                 # add gpt task 创建子线程请求gpt，避免线程阻塞
                 history = chatbot2history(chatbot)
                 self.agt.add_async_gpt_task(self.buffered_sentence, len(chatbot)-1, llm_kwargs, history, system_prompt)
                 
                 self.buffered_sentence = ""
-                chatbot.append(["[请讲话]", "[正在等您说完问题]"])
+                chatbot.append(["[ 请讲话 ]", "[ 正在等您说完问题 ]"])
+                yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+
+            if not self.event_on_result_chg.is_set() and not self.event_on_entence_end.is_set() and not self.event_on_commit_question.is_set():
+                visualize_audio(chatbot, self.audio_shape)
                 yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
         if len(self.stop_msg) != 0:
