@@ -15,8 +15,8 @@ class Settings:
     def __init__(self):
         pass
 
-    def _draw_setting_model(self):
-        with gr.Tab(label=i18n("模型")):
+    def _draw_setting_senior(self):
+        with gr.Tab(label=i18n("高级")):
             self.usageTxt = gr.Markdown(i18n(
                 "**发送消息** 或 **提交key** 以显示额度"), elem_id="usage-display",
                 elem_classes="insert-block", visible=False)
@@ -25,24 +25,23 @@ class Settings:
                 # value=hide_middle_chars(user_api_key.value),
                 type="password",  # visible=not HIDE_MY_KEY,
                 label="API-Key",
-            )
+            ).style(container=False)
             self.models_box = gr.CheckboxGroup(choices=['input加密', '预加载知识库'], value=['input加密'],
-                                               label="对话模式")
-
-    def _draw_setting_senior(self):
-        with gr.Tab(label=i18n("高级")):
+                                               label="对话模式").style(container=False)
             self.secret_css, self.secret_font = gr.Textbox(visible=False), gr.Textbox(visible=False)
             AVAIL_THEMES, latex_option = toolbox.get_conf('AVAIL_THEMES', 'latex_option')
             self.theme_dropdown = gr.Dropdown(AVAIL_THEMES, value=AVAIL_THEMES[0], label=i18n("更换UI主题"),
-                                         interactive=True).style(container=False)
-            self.latex_option = gr.Dropdown(AVAIL_THEMES, value=latex_option[0], label=i18n("更换Latex输出格式"),
-                                       interactive=True).style(container=False)
+                                              interactive=True, allow_custom_value=True,
+                                              info='更多主题, 请查阅Gradio主题商店: '
+                                                   'https://huggingface.co/spaces/gradio/theme-gallery',
+                                              ).style(container=False)
+            self.latex_option = gr.Dropdown(latex_option, value=latex_option[0], label=i18n("更换Latex输出格式"),
+                                            interactive=True).style(container=False)
             gr.HTML(get_html("appearance_switcher.html").format(
                 label=i18n("切换亮暗色主题")), elem_classes="insert-block", visible=False)
             self.single_turn_checkbox = gr.Checkbox(label=i18n(
                 "单轮对话"), value=False, elem_classes="switch-checkbox",
                 elem_id="gr-single-session-cb", visible=False)
-            # checkUpdateBtn = gr.Button(i18n("🔄 检查更新..."), visible=check_update)
 
     def _darw_private_operation(self):
         with gr.TabItem('个人中心', id='private', elem_id='bout-tab',):
@@ -66,7 +65,6 @@ class Settings:
                 gr.HTML(get_html("close_btn.html").format(
                     obj="box"), elem_classes="close-btn")
             with gr.Tabs(elem_id="chuanhu-setting-tabs"):
-                self._draw_setting_model()
                 self._draw_setting_senior()
                 self._darw_private_operation()
                 self._draw_setting_info()
@@ -131,17 +129,6 @@ class AdvancedSearch:
     def draw_popup_search(self):
         with gr.Box(elem_id="spike-search"):
             with gr.Row():
-                gr.Markdown("## " + i18n("高级搜索"))
-                gr.HTML(get_html("close_btn.html").format(
-                    obj="box"), elem_classes="close-btn")
-            with gr.Box(elem_classes='search-box-pop'):
-                with gr.Row(elem_classes='search-show'):
-                    self.pro_results = gr.Chatbot(label='提示词和对话记录').style()
-                with gr.Row(elem_classes='search-example'):
-                    self.pro_prompt_state = gr.State({'samples': None})
-                    self.pro_prompt_list = gr.Dataset(components=[gr.HTML(visible=False)], samples_per_page=10,
-                                                          visible=False, label='搜索结果',
-                                                          samples=[[". . ."] for i in range(20)], type='index')
                 with gr.Row(elem_classes='input-search'):
                     self.pro_search_txt = gr.Textbox(show_label=False, elem_classes='search_txt',
                                                      placeholder="输入你想要搜索的对话记录或提示词").style(container=False)
@@ -151,6 +138,19 @@ class AdvancedSearch:
                         full_width=False, size="sm")
                     self.pro_clear_btn = gr.Button("重置搜索", variant="stop", elem_classes='short_btn').style(
                         full_width=False, size="sm")
+                # gr.Markdown("## " + i18n("高级搜索"))
+                gr.HTML(get_html("close_btn.html").format(
+                    obj="box"), elem_classes="close-btn")
+            with gr.Box(elem_classes='search-box-pop'):
+                with gr.Row(elem_classes='search-example'):
+                    self.pro_prompt_state = gr.State({'samples': None})
+                    self.pro_prompt_list = gr.Dataset(components=[gr.HTML(visible=False)], samples_per_page=10,
+                                                          visible=False, label='搜索结果',
+                                                          samples=[[". . ."] for i in range(20)], type='index')
+                with gr.Row(elem_classes='search-show'):
+                    self.pro_results = gr.Chatbot(label='提示词和对话记录').style()
+
+
 
 class Config:
 

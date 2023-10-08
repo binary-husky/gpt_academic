@@ -18,11 +18,6 @@ functional = get_core_functions()
 gr.Chatbot._postprocess_chat_messages = postprocess_chat_messages
 gr.Chatbot.postprocess = postprocess
 
-# 做一些外观色彩上的调整
-from comm_tools.theme import adjust_theme
-
-set_theme = adjust_theme()
-
 # 代理与自动更新
 from comm_tools.check_proxy import check_proxy, auto_update
 from comm_tools import func_box
@@ -282,6 +277,12 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                                       outputs=[self.status_display])
         self.historyMarkdownDownloadBtn.click(func_signals.download_history_md, inputs=[self.historySelectList],
                                               outputs=[self.status_display])
+        self.historySearchTextbox.submit(fn=func_signals.draw_results,
+                                         inputs=[self.historySearchTextbox, self.pro_prompt_state,
+                                                 self.pro_tf_slider, self.pro_private_check],
+                                         outputs=[self.pro_prompt_list, self.pro_prompt_state],
+                                         ).then(fn=lambda x: x, inputs=[self.historySearchTextbox],
+                                                outputs=[self.pro_search_txt]).then(None, None, None, _js='openSearch()')
 
     def signals_input_setting(self):
         # 注册input
@@ -322,10 +323,13 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
             outputs=[self.use_websearch_checkbox], _js='(a)=>{return bgChangeOnlineSearch(a);}'
         )
 
-    def signals_input_popup(self):
-        self.theme_dropdown.select(func_signals.on_theme_dropdown_changed, [self.theme_dropdown, self.secret_css],
-                                   [self.secret_css]).then(
+    def signals_settings_popup(self):
+        self.theme_dropdown.select(func_signals.on_theme_dropdown_changed, [self.theme_dropdown],
+                                   [self.secret_css, self.theme_dropdown]).then(
             None, [self.secret_css], None, _js="(css) => {return setThemeClass(css)}")
+        self.latex_option.select(fn=func_signals.switch_latex_output,
+                                 inputs=[self.latex_option], outputs=[self.chatbot])
+
 
 
 
@@ -364,7 +368,9 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
             ), visible=False)
 
     def main(self):
-        with gr.Blocks(title=self.app_name, theme=set_theme) as self.demo:
+        # 做一些外观色彩上的调整
+        from comm_tools.theme import adjust_theme
+        with gr.Blocks(title=self.app_name, theme=adjust_theme) as self.demo:
             self.block_title()
             with gr.Row(equal_height=True, elem_id="chuanhu-body"):
                 self.draw_history_area()
@@ -386,7 +392,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
             self.signals_prompt_edit()
             self.signals_plugin()
             self.signals_langchain_cn()
-            # self.signals_input_popup()
+            self.signals_settings_popup()
             # self.demo.load(fn=func_signals.mobile_access, inputs=[],
             #                outputs=[self.sm_btn_column, self.langchain_dropdown])
             self.demo.load(fn=func_signals.refresh_load_data,

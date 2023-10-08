@@ -6,7 +6,6 @@
 import json
 import os
 import copy
-import re
 from comm_tools import toolbox
 from comm_tools import func_box
 from bs4 import BeautifulSoup

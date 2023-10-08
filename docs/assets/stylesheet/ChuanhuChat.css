@@ -221,8 +221,8 @@ body.popup-open {
 #chuanhu-popup {
     display: none;
     z-index: 99999;
-    width: 65%;
-    height: 730px;
+    width: 55%;
+    height: 620px;
     padding: 0;
 }
 #chuanhu-popup.showBox {
@@ -717,7 +717,7 @@ input:checked + .chatbot-input-more-span {
     border: none;
     padding: 16px;
     width: 180px;
-    height: 100%;
+    height: 83%;
     overflow: auto;
     background: var(--background-fill-secondary);
     border-bottom-left-radius: var(--block-radius);

@@ -258,13 +258,4 @@ gr.blocks.BlockContext.__init__ = BlockContext_init
 
 
 if __name__ == '__main__':
-    test = """
-    在 Python 中可以使用第三方库 `html2text` 将 HTML 格式的文本转换成 Markdown 格式的文本。该库可以通过 pip 工具进行安装，安装方法如下：
-```
-pip install html2text
-```
-    """
-    test2 = """
-    <br>&nbsp;&nbsp;&nbsp;&nbsp;在 Python 中可以使用第三方库 &#96;html2text&#96; 将 HTML 格式的文本转换成 Markdown 格式的文本。该库可以通过 pip 工具进行安装，安装方法如下：<br><br>&#96;&#96;&#96;<br>pip install html2text<br>&#96;&#96;&#96;<br>&nbsp;&nbsp;&nbsp;&nbsp;
-"""
-    print(escape_markdown(test, reverse=True))
+    pass

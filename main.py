@@ -21,7 +21,7 @@ def main():
     # 如果WEB_PORT是-1, 则随机选取WEB端口
     PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
     from check_proxy import get_current_version
-    from themes.theme import adjust_theme, advanced_css, theme_declaration, load_dynamic_theme
+    from comm_tools.theme import adjust_theme, advanced_css, theme_declaration
 
     initial_prompt = "Serve me as a writing and programming assistant."
     title_html = f"<h1 align=\"center\">GPT 学术优化 {get_current_version()}</h1>{theme_declaration}"

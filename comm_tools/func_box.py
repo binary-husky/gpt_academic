@@ -62,7 +62,6 @@ class Shell(object):
         else:
             sysout = self.subp.stdout.read()
             syserr = self.subp.stderr.read()
-            self.subp.stdin
             if sysout:
                 logger.debug(f"{self.args} \n{sysout}")
                 return 1, sysout
@@ -206,21 +205,40 @@ def encryption_str(txt: str) -> object:
     return result
 
 
-def tree_out(dir=os.path.dirname(__file__), line=2, more=''):
+def tree_out(dir=os.path.dirname(__file__), line=2,  filter='' , more=''):
     """
     获取本地文件的树形结构转化为Markdown代码文本
+    Args:
+        dir: 指定目录，不指定则当前目录
+        line: 深入检索文档深度
+        more: 添加更多命令
+        filter: 过滤文件
+    Returns: None
     """
-    out = Shell(f'tree {dir} -F -I "__*|.*|venv|*.png|*.xlsx" -L {line} {more}').read()[1]
-    localfile = os.path.join(os.path.dirname(__file__), '.tree.md')
+    filter_list = '__*|.*|venv|*.png|*.xlsx'
+    if filter: filter_list += f'|{filter}'
+    out = Shell(f'tree {dir} -F -I "{filter_list}" -L {line} {more}').read()[1]
+    localfile = os.path.join(dir, '.tree.md')
     with open(localfile, 'w') as f:
         f.write('```\n')
         ll = out.splitlines()
-        for i in range(len(ll)):
-            if i == 0:
-                f.write(ll[i].split('/')[-2] + '\n')
+        file = []
+        dir_f = []
+        for i in ll:
+            # 过滤出常规的文件夹内文件
+            if'│\xa0\xa0     ├' in i or '│\xa0\xa0 ├──' in i or '│\xa0\xa0 └──' in i or '│\xa0\xa0 │' in i:
+                dir_f.append(i)
+            elif '    ├──' in i or '    └──' in i:  # 过滤字符串末尾的文件夹内文件
+                i = i.replace('    ', '│\xa0\xa0')
+                dir_f.append(i)
+            elif i.endswith('/'):  # 文件夹处理
+                i = i.replace('└──', '├──')
+                dir_f.append(i)
             else:
-                f.write(ll[i] + '\n')
-        f.write('```\n')
+                file.append(i)
+        file[-3] = file[-3].replace('├──', '└──')
+        f.write('\n'.join(dir_f) + '\n'.join(file))
+        f.write('\n```\n')
 
 
 def chat_history(log: list, split=0):
@@ -711,5 +729,6 @@ class JsonHandle:
 
 
 if __name__ == '__main__':
-    print(get_files_list('', ['.json']))
+    # print(get_files_list('', ['.json']))
+    tree_out(dir='/Users/kilig/Job/Python-project/kso_gpt/', line=2)
 

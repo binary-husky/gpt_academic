@@ -17,21 +17,19 @@ from comm_tools import user_data_processing
 
 # 处理latex options
 user_latex_option, = toolbox.get_conf('latex_option')
-if user_latex_option == "default":
-    latex_delimiters_set = [
+latex_delimiters_dict = {
+    'default': [
         {"left": "$$", "right": "$$", "display": True},
         {"left": "$", "right": "$", "display": False},
         {"left": "\\(", "right": "\\)", "display": False},
         {"left": "\\[", "right": "\\]", "display": True},
-    ]
-elif user_latex_option == "strict":
-    latex_delimiters_set = [
+    ],
+    'strict': [
         {"left": "$$", "right": "$$", "display": True},
         {"left": "\\(", "right": "\\)", "display": False},
         {"left": "\\[", "right": "\\]", "display": True},
-    ]
-elif user_latex_option == "all":
-    latex_delimiters_set = [
+    ],
+    'all': [
         {"left": "$$", "right": "$$", "display": True},
         {"left": "$", "right": "$", "display": False},
         {"left": "\\(", "right": "\\)", "display": False},
@@ -41,16 +39,19 @@ elif user_latex_option == "all":
         {"left": "\\begin{alignat}", "right": "\\end{alignat}", "display": True},
         {"left": "\\begin{gather}", "right": "\\end{gather}", "display": True},
         {"left": "\\begin{CD}", "right": "\\end{CD}", "display": True},
-    ]
-elif user_latex_option == "disabled":
-    latex_delimiters_set = []
-else:
-    latex_delimiters_set = [
+    ],
+    'disabled': [],
+    'else': [
         {"left": "$$", "right": "$$", "display": True},
         {"left": "$", "right": "$", "display": False},
         {"left": "\\(", "right": "\\)", "display": False},
         {"left": "\\[", "right": "\\]", "display": True},
     ]
+
+}
+if user_latex_option not in list(latex_delimiters_dict):
+    user_latex_option = 'else'
+latex_delimiters_set = user_latex_option
 
 
 def spinner_chatbot_loading(chatbot):
@@ -76,14 +77,28 @@ def filter_database_tables():
     return split_tab_new
 
 # TODO < -------------------------------- 弹窗数注册区 ----------------------------------->
-def on_theme_dropdown_changed(theme, secret_css):
-    from themes.theme import load_dynamic_theme
-    adjust_theme, css_part1, _, adjust_dynamic_theme = load_dynamic_theme(theme)
+def on_theme_dropdown_changed(theme, ):
+    from comm_tools.theme import load_dynamic_theme
+    adjust_theme, adjust_dynamic_theme = load_dynamic_theme(theme)
     if adjust_dynamic_theme:
-        css_part2 = adjust_dynamic_theme._get_theme_css()
+        try:
+            css_part2 = adjust_dynamic_theme._get_theme_css()
+        except:
+            raise
     else:
-        css_part2 = adjust_theme()._get_theme_css()
-    return css_part2 + css_part1
+        css_part2 = adjust_theme._get_theme_css()
+    return css_part2, gr.update()
+
+
+def switch_latex_output(select):
+    if select not in list(latex_delimiters_dict):
+        latex = latex_delimiters_dict['else']
+    else:
+        latex = latex_delimiters_dict[select]
+    return gr.Chatbot.update(latex_delimiters=latex)
+
+
+
 
 # TODO < -------------------------------- 对话函数注册区 ----------------------------------->
 def clear_input(inputs, cookies, ipaddr: gr.Request):
@@ -126,7 +141,10 @@ def select_history(select, cookies, ipaddr: gr.Request):
     user_path = os.path.join(func_box.history_path, ipaddr.client.host)
     user_history = [f for f in os.listdir(user_path) if f.endswith('.json') and select == os.path.splitext(f)[0]]
     if not user_history:
-        return [], []
+        default_params, API_KEY = toolbox.get_conf('LLMS_DEFAULT_PARAMETER', 'API_KEY')
+        llms_combo = [cookies.get(key, default_params[key]) for key in default_params]
+        cookies = {'api_key': API_KEY}
+        return [[], [], cookies, *llms_combo, '新对话', '']
     file_path = os.path.join(user_path, user_history[0])
     history_handle = user_data_processing.HistoryJsonHandle(file_path)
     history_update_combo = history_handle.update_for_history(cookies, select)
