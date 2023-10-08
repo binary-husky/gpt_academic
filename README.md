@@ -1,6 +1,6 @@
 > **Note**
 >
-> 2023.7.8: Gradio, Pydantic依赖调整，已修改 `requirements.txt`。请及时**更新代码**，安装依赖时，请严格选择`requirements.txt`中**指定的版本**
+> 2023.10.8: Gradio, Pydantic依赖调整，已修改 `requirements.txt`。请及时**更新代码**，安装依赖时，请严格选择`requirements.txt`中**指定的版本**
 >
 > `pip install -r requirements.txt`
 
@@ -310,6 +310,8 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 
 ### II：版本:
 - version 3.60（todo）: 优化虚空终端，引入code interpreter和更多插件
+- version 3.55: 重构前端界面，引入悬浮窗口与菜单栏
+- version 3.54: 新增动态代码解释器（Code Interpreter）（待完善）
 - version 3.53: 支持动态选择不同界面主题，提高稳定性&解决多用户冲突问题
 - version 3.50: 使用自然语言调用本项目的所有函数插件（虚空终端），支持插件分类，改进UI，设计新主题
 - version 3.49: 支持百度千帆平台和文心一言
@@ -331,7 +333,7 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 - version 2.0: 引入模块化函数插件
 - version 1.0: 基础功能
 
-gpt_academic开发者QQ群-2：610599535
+GPT Academic开发者QQ群：`610599535`
 
 - 已知问题
     - 某些浏览器翻译插件干扰此软件前端的运行
