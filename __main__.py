@@ -31,9 +31,9 @@ except:
 print("所有问询记录将自动保存在本地目录./gpt_log/chat_secrets.log, 请注意自我隐私保护哦！")
 
 # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
-proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, LAYOUT, API_KEY, AVAIL_LLM_MODELS, LOCAL_PORT = \
+proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, LAYOUT, API_KEY, AVAIL_LLM_MODELS = \
     get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'LAYOUT',
-             'API_KEY', 'AVAIL_LLM_MODELS', 'LOCAL_PORT')
+             'API_KEY', 'AVAIL_LLM_MODELS')
 
 proxy_info = check_proxy(proxies)
 # 如果WEB_PORT是-1, 则随机选取WEB端口
@@ -420,13 +420,12 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
 from comm_tools import base_api
 
 app = base_api.app
-PORT = LOCAL_PORT if WEB_PORT <= 0 else WEB_PORT
+PORT = WEB_PORT if WEB_PORT <= 0 else WEB_PORT
 reload_javascript()
 chatbot_main = ChatBot()
 chatbot_main.main()
 gradio_app = gr.mount_gradio_app(app, chatbot_main.demo, '/gradio')
 if __name__ == '__main__':
     import uvicorn
-
     app_reload, = get_conf('app_reload')
     uvicorn.run("__main__:app", host="0.0.0.0", port=PORT, reload=app_reload)
