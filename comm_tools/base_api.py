@@ -21,8 +21,8 @@ def check_cookie(cookie):
         'Cookie': f"{auth_cookie_tag}={cookie}",
         "Origin": ''
     }
-    resp = requests.get(url=auth_url, headers=header, verify=False).json()
     try:
+        resp = requests.get(url=auth_url, headers=header, verify=False).json()
         user = auth_func_based(resp)
     except:
         user = cancel_verification
