@@ -74,10 +74,10 @@ def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_h
                error, gr.Dropdown.update(), gr.Dropdown.update(),
                gr.Dropdown.update(),  kai_handle)
         return
-    # < -------------------预热文本向量化模组--------------- >
-    yield ('正在加载向量化模型...', '', gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(), kai_handle)
-    with toolbox.ProxyNetworkActivate():    # 临时地激活代理网络
-        HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
+    # # < -------------------预热文本向量化模组--------------- >
+    # yield ('正在加载向量化模型...', '', gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(), kai_handle)
+    # with toolbox.ProxyNetworkActivate():    # 临时地激活代理网络
+    #     HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
     # < -------------------构建知识库--------------- >
     tab_show = [os.path.basename(i) for i in file_manifest]
     preprocessing_files = func_box.to_markdown_tabs(head=['文件'], tabs=[tab_show])
