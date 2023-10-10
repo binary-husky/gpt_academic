@@ -709,7 +709,7 @@ def on_file_uploaded(files, chatbot, txt, cookies, ipaddr: gr.Request):
     """
     if len(files) == 0:
         return chatbot, txt
-    private_upload = './private_upload'
+    private_upload = func_box.users_path.replace(func_box.base_path, '.')
     #     shutil.rmtree('./private_upload/')  不需要删除文件
     if type(ipaddr) is str:
         ipaddr = ipaddr
