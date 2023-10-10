@@ -94,6 +94,11 @@ def main():
                         status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {proxy_info}", elem_id="state-panel")
                 with gr.Accordion("基础功能区", open=True, elem_id="basic-panel") as area_basic_fn:
                     with gr.Row():
+                        customize_btns = []
+                        for k in range(1):
+                            customize_btn = gr.Button(f"自定义按钮{k+1}", visible=False, variant="secondary", info_str=f'基础功能区: 自定义按钮')
+                            customize_btn.style(size="sm")
+                            customize_btns.append(customize_btn)
                         for k in functional:
                             if ("Visible" in functional[k]) and (not functional[k]["Visible"]): continue
                             variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
@@ -149,6 +154,8 @@ def main():
                     theme_dropdown = gr.Dropdown(AVAIL_THEMES, value=THEME, label="更换UI主题").style(container=False)
                     checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区", "浮动输入区", "输入清除键", "插件参数区"], 
                                                   value=["基础功能区", "函数插件区"], label="显示/隐藏功能区", elem_id='cbs').style(container=False)
+                    checkboxes_2 = gr.CheckboxGroup(["自定义菜单"], 
+                                                  value=[], label="显示/隐藏功能区", elem_id='cbs').style(container=False)
                     dark_mode_btn = gr.Button("切换界面明暗 ☀", variant="secondary").style(size="sm")
                     dark_mode_btn.click(None, None, None, _js="""() => {
                             if (document.querySelectorAll('.dark').length) {
@@ -173,6 +180,34 @@ def main():
                         stopBtn2 = gr.Button("停止", variant="secondary"); stopBtn2.style(size="sm")
                         clearBtn2 = gr.Button("清除", variant="secondary", visible=False); clearBtn2.style(size="sm")
 
+        with gr.Floating(init_x="20%", init_y="50%", visible=False, width="40%", drag="top") as area_customize:
+            with gr.Accordion("自定义菜单", open=True, elem_id="edit-panel"):
+                with gr.Row() as row:
+                    with gr.Column(scale=10):
+                        basic_fn_title = gr.Textbox(show_label=False, placeholder="输入按钮名称", lines=1).style(container=False)
+                        basic_fn_prefix = gr.Textbox(show_label=False, placeholder="输入提示前缀", lines=4).style(container=False)
+                        basic_fn_suffix = gr.Textbox(show_label=False, placeholder="输入提示后缀", lines=4).style(container=False)
+                    with gr.Column(scale=1, min_width=40):
+                        basic_fn_confirm = gr.Button("确认", variant="primary"); basic_fn_confirm.style(size="sm")
+                        def assign_btn(cookies_, basic_fn_title, basic_fn_prefix, basic_fn_suffix, customize_btn):
+                            ret = {}
+                            customize_fn_overwrite_ = cookies_['customize_fn_overwrite']
+                            customize_fn_overwrite_.update({
+                                f"自定义按钮1":
+                                    {
+                                        "Prefix":basic_fn_prefix,
+                                        "Suffix":basic_fn_suffix,
+                                    }
+                                }
+                            )
+                            cookies_.update(customize_fn_overwrite_)
+                            ret.update({
+                                customize_btns[0]: gr.update(visible=True, value=basic_fn_title),
+                                cookies: cookies_
+                            })
+                            return ret
+                        basic_fn_confirm.click(assign_btn, [cookies, basic_fn_title, basic_fn_prefix, basic_fn_suffix, customize_btns[0]], [cookies, customize_btns[0]])
+
         # 功能区显示开关与功能区的互动
         def fn_area_visibility(a):
             ret = {}
@@ -186,6 +221,14 @@ def main():
             if "浮动输入区" in a: ret.update({txt: gr.update(value="")})
             return ret
         checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn, area_input_primary, area_input_secondary, txt, txt2, clearBtn, clearBtn2, plugin_advanced_arg] )
+
+        # 功能区显示开关与功能区的互动
+        def fn_area_visibility_2(a):
+            ret = {}
+            ret.update({area_customize: gr.update(visible=("自定义菜单" in a))})
+            return ret
+        checkboxes_2.select(fn_area_visibility_2, [checkboxes_2], [area_customize] )
+
         # 整理反复出现的控件句柄组合
         input_combo = [cookies, max_length_sl, md_dropdown, txt, txt2, top_p, temperature, chatbot, history, system_prompt, plugin_advanced_arg]
         output_combo = [cookies, chatbot, history, status]
@@ -208,6 +251,9 @@ def main():
         for k in functional:
             if ("Visible" in functional[k]) and (not functional[k]["Visible"]): continue
             click_handle = functional[k]["Button"].click(fn=ArgsGeneralWrapper(predict), inputs=[*input_combo, gr.State(True), gr.State(k)], outputs=output_combo)
+            cancel_handles.append(click_handle)
+        for btn in customize_btns:
+            click_handle = btn.click(fn=ArgsGeneralWrapper(predict), inputs=[*input_combo, gr.State(True), gr.State(btn.value)], outputs=output_combo)
             cancel_handles.append(click_handle)
         # 文件上传区，接收文件后与chatbot的互动
         file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt, txt2, checkboxes, cookies], [chatbot, txt, txt2, cookies])
