@@ -201,7 +201,7 @@ def 语音助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
         import nls
         from scipy import io
     except:
-        chatbot.append(["导入依赖失败", "使用该模块需要额外依赖, 安装方法:```pip install --upgrade aliyun-python-sdk-core==2.13.3 pyOpenSSL scipy git+https://github.com/aliyun/alibabacloud-nls-python-sdk.git```"])
+        chatbot.append(["导入依赖失败", "使用该模块需要额外依赖, 安装方法:```pip install --upgrade aliyun-python-sdk-core==2.13.3 pyOpenSSL webrtcvad scipy git+https://github.com/aliyun/alibabacloud-nls-python-sdk.git```"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
 
