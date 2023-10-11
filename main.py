@@ -1,4 +1,7 @@
 import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
+import pickle
+import codecs
+import base64
 
 def main():
     import gradio as gr
@@ -72,7 +75,7 @@ def main():
     predefined_btns = {}
     with gr.Blocks(title="GPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
         gr.HTML(title_html)
-        secret_css, dark_mode = gr.Textbox(visible=False), gr.Textbox(DARK_MODE, visible=False)
+        secret_css, dark_mode, persistent_cookie = gr.Textbox(visible=False), gr.Textbox(DARK_MODE, visible=False), gr.Textbox(visible=False)
         cookies = gr.State(load_chat_cookies())
         with gr_L1():
             with gr_L2(scale=2, elem_id="gpt-chat"):
@@ -182,6 +185,17 @@ def main():
                         stopBtn2 = gr.Button("停止", variant="secondary"); stopBtn2.style(size="sm")
                         clearBtn2 = gr.Button("清除", variant="secondary", visible=False); clearBtn2.style(size="sm")
 
+        def to_cookie_str(d):
+            # Pickle the dictionary and encode it as a string
+            pickled_dict = pickle.dumps(d)
+            cookie_value = base64.b64encode(pickled_dict).decode('utf-8')
+            return cookie_value
+        
+        def from_cookie_str(c):
+            # Decode the base64-encoded string and unpickle it into a dictionary
+            pickled_dict = base64.b64decode(c.encode('utf-8'))
+            return pickle.loads(pickled_dict)
+
         with gr.Floating(init_x="20%", init_y="50%", visible=False, width="40%", drag="top") as area_customize:
             with gr.Accordion("自定义菜单", open=True, elem_id="edit-panel"):
                 with gr.Row() as row:
@@ -193,12 +207,14 @@ def main():
                         basic_fn_suffix = gr.Textbox(show_label=False, placeholder="输入新提示后缀", lines=4).style(container=False)
                     with gr.Column(scale=1, min_width=40):
                         basic_fn_confirm = gr.Button("确认", variant="primary"); basic_fn_confirm.style(size="sm")
-                        def assign_btn(cookies_, basic_btn_dropdown_, basic_fn_title, basic_fn_prefix, basic_fn_suffix):
+                        basic_fn_load = gr.Button("加载", variant="primary"); basic_fn_load.style(size="sm")
+                        def assign_btn(persistent_cookie_, cookies_, basic_btn_dropdown_, basic_fn_title, basic_fn_prefix, basic_fn_suffix):
                             ret = {}
                             customize_fn_overwrite_ = cookies_['customize_fn_overwrite']
                             customize_fn_overwrite_.update({
                                 basic_btn_dropdown_:
                                     {
+                                        "Title":basic_fn_title,
                                         "Prefix":basic_fn_prefix,
                                         "Suffix":basic_fn_suffix,
                                     }
@@ -206,16 +222,38 @@ def main():
                             )
                             cookies_.update(customize_fn_overwrite_)
                             if basic_btn_dropdown_ in customize_btns:
-                                ret.update({
-                                    customize_btns[basic_btn_dropdown_]: gr.update(visible=True, value=basic_fn_title),
-                                })
+                                ret.update({customize_btns[basic_btn_dropdown_]: gr.update(visible=True, value=basic_fn_title)})
                             else:
-                                ret.update({
-                                    predefined_btns[basic_btn_dropdown_]: gr.update(visible=True, value=basic_fn_title),
-                                })
+                                ret.update({predefined_btns[basic_btn_dropdown_]: gr.update(visible=True, value=basic_fn_title)})
                             ret.update({cookies: cookies_})
+                            try: persistent_cookie_ = from_cookie_str(persistent_cookie_)    # persistent cookie to dict
+                            except: persistent_cookie_ = {}
+                            persistent_cookie_.update({"custom_bnt": cookies_['customize_fn_overwrite']})   # dict update new value
+                            persistent_cookie_ = to_cookie_str(persistent_cookie_)         # persistent cookie to dict
+                            ret.update({persistent_cookie: persistent_cookie_})                             # write persistent cookie
                             return ret
-                        basic_fn_confirm.click(assign_btn, [cookies, basic_btn_dropdown, basic_fn_title, basic_fn_prefix, basic_fn_suffix], [cookies, *customize_btns.values(), *predefined_btns.values()])
+                        
+                        def reflesh_btn(persistent_cookie_, cookies_):
+                            ret = {}
+                            for k in customize_btns:
+                                ret.update({customize_btns[k]: gr.update(visible=False, value="")})
+
+                            try: persistent_cookie_ = from_cookie_str(persistent_cookie_)    # persistent cookie to dict
+                            except: return ret
+                            
+                            customize_fn_overwrite_ = persistent_cookie_.get("custom_bnt", {})
+                            cookies_.update(customize_fn_overwrite_)
+                            ret.update({cookies: cookies_})
+
+                            for k,v in persistent_cookie_["custom_bnt"].items():
+                                if k in customize_btns: ret.update({customize_btns[k]: gr.update(visible=True, value=v['Title'])})
+                                else: ret.update({predefined_btns[k]: gr.update(visible=True, value=v['Title'])})
+                            return ret
+                        
+                        basic_fn_load.click(reflesh_btn, [persistent_cookie, cookies],[cookies, *customize_btns.values(), *predefined_btns.values()])
+                        h = basic_fn_confirm.click(assign_btn, [persistent_cookie, cookies, basic_btn_dropdown, basic_fn_title, basic_fn_prefix, basic_fn_suffix], 
+                                                   [persistent_cookie, cookies, *customize_btns.values(), *predefined_btns.values()])
+                        h.then(None, [persistent_cookie], None, _js="""(persistent_cookie)=>{setCookie("persistent_cookie", persistent_cookie, 5);}""") # save persistent cookie
 
         # 功能区显示开关与功能区的互动
         def fn_area_visibility(a):
@@ -362,11 +400,10 @@ def main():
                 }
             }
         }"""
-        load_cookie_js = """(cookies) => {
-            console.log(cookies);
-            return cookies;
+        load_cookie_js = """(persistent_cookie) => {
+            return getCookie("persistent_cookie");
         }"""
-        demo.load(None, inputs=[cookies], outputs=[cookies], _js=load_cookie_js)    # 配置暗色主题或亮色主题
+        demo.load(None, inputs=None, outputs=[persistent_cookie], _js=load_cookie_js)
         demo.load(None, inputs=[dark_mode], outputs=None, _js=darkmode_js)    # 配置暗色主题或亮色主题
         demo.load(None, inputs=[gr.Textbox(LAYOUT, visible=False)], outputs=None, _js='(LAYOUT)=>{GptAcademicJavaScriptInit(LAYOUT);}')
         

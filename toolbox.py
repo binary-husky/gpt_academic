@@ -629,6 +629,7 @@ def load_chat_cookies():
     for k in range(NUM_CUSTOM_BASIC_BTN):
         customize_fn_overwrite_.update({  
             "自定义按钮" + str(k+1):{
+                "Title":    r"自定义按钮" + str(k+1),
                 "Prefix":   r"请在自定义菜单中定义提示词前缀.",
                 "Suffix":   r"请在自定义菜单中定义提示词后缀",
             }
