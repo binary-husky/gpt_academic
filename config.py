@@ -125,6 +125,11 @@ AUTHENTICATION = []
 CUSTOM_PATH = "/"
 
 
+# HTTPS 秘钥和证书（不需要修改）
+SSL_KEYFILE = ""
+SSL_CERTFILE = ""
+
+
 # 极少数情况下，openai的官方KEY需要伴随组织编码（格式如org-xxxxxxxxxxxxxxxxxxxxxxxx）使用
 API_ORG = ""
 
