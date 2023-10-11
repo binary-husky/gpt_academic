@@ -426,6 +426,7 @@ def main():
         server_name="0.0.0.0", 
         ssl_keyfile=None if SSL_KEYFILE == "" else SSL_KEYFILE,
         ssl_certfile=None if SSL_CERTFILE == "" else SSL_CERTFILE,
+        ssl_verify=False,
         server_port=PORT,
         favicon_path="docs/logo.png", 
         auth=AUTHENTICATION if len(AUTHENTICATION) != 0 else None,
