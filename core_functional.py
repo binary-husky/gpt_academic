@@ -91,13 +91,13 @@ def handle_core_functionality(additional_fn, inputs, history, chatbot):
     import core_functional
     importlib.reload(core_functional)    # 热更新prompt
     core_functional = core_functional.get_core_functions()
-    if additional_fn not in core_functional:
+    addition = chatbot._cookies['customize_fn_overwrite']
+    if additional_fn in addition:
         # 自定义功能
-        addition = chatbot._cookies['customize_fn_overwrite']
         inputs = addition[additional_fn]["Prefix"] + inputs + addition[additional_fn]["Suffix"]
         return inputs, history
     else:
-    # 预制功能
+        # 预制功能
         if "PreProcess" in core_functional[additional_fn]: inputs = core_functional[additional_fn]["PreProcess"](inputs)  # 获取预处理函数（如果有的话）
         inputs = core_functional[additional_fn]["Prefix"] + inputs + core_functional[additional_fn]["Suffix"]
         if core_functional[additional_fn].get("AutoClearHistory", False):

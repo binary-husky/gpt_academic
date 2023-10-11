@@ -140,7 +140,7 @@ AZURE_API_KEY = "填入azure openai api的密钥"    # 建议直接在API_KEY处
 AZURE_ENGINE = "填入你亲手写的部署名"            # 读 docs\use_azure.md
 
 
-# 使用Newbing
+# 使用Newbing (不推荐使用，未来将删除)
 NEWBING_STYLE = "creative"  # ["creative", "balanced", "precise"]
 NEWBING_COOKIES = """
 put your new bing cookies here
@@ -196,6 +196,9 @@ PATH_LOGGING = "gpt_log"
 # 除了连接OpenAI之外，还有哪些场合允许使用代理，请勿修改
 WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid", "Warmup_Modules"]
 
+
+# 自定义按钮的最大数量限制
+NUM_CUSTOM_BASIC_BTN = 4
 
 """
 在线大模型配置关联关系示意图

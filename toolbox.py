@@ -621,13 +621,14 @@ def on_report_generated(cookies, files, chatbot):
 
 def load_chat_cookies():
     API_KEY, LLM_MODEL, AZURE_API_KEY = get_conf('API_KEY', 'LLM_MODEL', 'AZURE_API_KEY')
+    DARK_MODE, NUM_CUSTOM_BASIC_BTN = get_conf('DARK_MODE', 'NUM_CUSTOM_BASIC_BTN')
     if is_any_api_key(AZURE_API_KEY):
         if is_any_api_key(API_KEY): API_KEY = API_KEY + ',' + AZURE_API_KEY
         else: API_KEY = AZURE_API_KEY
     customize_fn_overwrite_ = {}
-    for k in range(1):
+    for k in range(NUM_CUSTOM_BASIC_BTN):
         customize_fn_overwrite_.update({  
-            f"自定义按钮{k+1}":{
+            "自定义按钮" + str(k+1):{
                 "Prefix":   r"请在自定义菜单中定义提示词前缀.",
                 "Suffix":   r"请在自定义菜单中定义提示词后缀",
             }

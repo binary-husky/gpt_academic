@@ -10,7 +10,7 @@ def main():
     proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION = get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION')
     CHATBOT_HEIGHT, LAYOUT, AVAIL_LLM_MODELS, AUTO_CLEAR_TXT = get_conf('CHATBOT_HEIGHT', 'LAYOUT', 'AVAIL_LLM_MODELS', 'AUTO_CLEAR_TXT')
     ENABLE_AUDIO, AUTO_CLEAR_TXT, PATH_LOGGING, AVAIL_THEMES, THEME = get_conf('ENABLE_AUDIO', 'AUTO_CLEAR_TXT', 'PATH_LOGGING', 'AVAIL_THEMES', 'THEME')
-    DARK_MODE, = get_conf('DARK_MODE')
+    DARK_MODE, NUM_CUSTOM_BASIC_BTN = get_conf('DARK_MODE', 'NUM_CUSTOM_BASIC_BTN')
 
     # 如果WEB_PORT是-1, 则随机选取WEB端口
     PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
@@ -68,6 +68,8 @@ def main():
         CHATBOT_HEIGHT /= 2
 
     cancel_handles = []
+    customize_btns = {}
+    predefined_btns = {}
     with gr.Blocks(title="GPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
         gr.HTML(title_html)
         secret_css, dark_mode = gr.Textbox(visible=False), gr.Textbox(DARK_MODE, visible=False)
@@ -94,16 +96,16 @@ def main():
                         status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {proxy_info}", elem_id="state-panel")
                 with gr.Accordion("基础功能区", open=True, elem_id="basic-panel") as area_basic_fn:
                     with gr.Row():
-                        customize_btns = []
-                        for k in range(1):
-                            customize_btn = gr.Button(f"自定义按钮{k+1}", visible=False, variant="secondary", info_str=f'基础功能区: 自定义按钮')
+                        for k in range(NUM_CUSTOM_BASIC_BTN):
+                            customize_btn = gr.Button("自定义按钮" + str(k+1), visible=False, variant="secondary", info_str=f'基础功能区: 自定义按钮')
                             customize_btn.style(size="sm")
-                            customize_btns.append(customize_btn)
+                            customize_btns.update({"自定义按钮" + str(k+1): customize_btn})
                         for k in functional:
                             if ("Visible" in functional[k]) and (not functional[k]["Visible"]): continue
                             variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
                             functional[k]["Button"] = gr.Button(k, variant=variant, info_str=f'基础功能区: {k}')
                             functional[k]["Button"].style(size="sm")
+                            predefined_btns.update({k: functional[k]["Button"]})
                 with gr.Accordion("函数插件区", open=True, elem_id="plugin-panel") as area_crazy_fn:
                     with gr.Row():
                         gr.Markdown("插件可读取“输入区”文本/路径作为参数（上传文件自动修正路径）")
@@ -184,16 +186,21 @@ def main():
             with gr.Accordion("自定义菜单", open=True, elem_id="edit-panel"):
                 with gr.Row() as row:
                     with gr.Column(scale=10):
-                        basic_fn_title = gr.Textbox(show_label=False, placeholder="输入按钮名称", lines=1).style(container=False)
-                        basic_fn_prefix = gr.Textbox(show_label=False, placeholder="输入提示前缀", lines=4).style(container=False)
-                        basic_fn_suffix = gr.Textbox(show_label=False, placeholder="输入提示后缀", lines=4).style(container=False)
+                        AVAIL_BTN = [btn for btn in customize_btns.keys()] + [k for k in functional]
+                        basic_btn_dropdown = gr.Dropdown(AVAIL_BTN, value="自定义按钮1", label="选择一个需要自定义按钮").style(container=False)
+                        # def on_btn_dropdown_changed(k):
+                        #     return {chatbot: gr.update(label="当前模型："+k)}
+                        # basic_btn_dropdown.select(on_btn_dropdown_changed, [md_dropdown], [chatbot] )
+                        basic_fn_title = gr.Textbox(show_label=False, placeholder="输入新按钮名称", lines=1).style(container=False)
+                        basic_fn_prefix = gr.Textbox(show_label=False, placeholder="输入新提示前缀", lines=4).style(container=False)
+                        basic_fn_suffix = gr.Textbox(show_label=False, placeholder="输入新提示后缀", lines=4).style(container=False)
                     with gr.Column(scale=1, min_width=40):
                         basic_fn_confirm = gr.Button("确认", variant="primary"); basic_fn_confirm.style(size="sm")
-                        def assign_btn(cookies_, basic_fn_title, basic_fn_prefix, basic_fn_suffix, customize_btn):
+                        def assign_btn(cookies_, basic_btn_dropdown_, basic_fn_title, basic_fn_prefix, basic_fn_suffix):
                             ret = {}
                             customize_fn_overwrite_ = cookies_['customize_fn_overwrite']
                             customize_fn_overwrite_.update({
-                                f"自定义按钮1":
+                                basic_btn_dropdown_:
                                     {
                                         "Prefix":basic_fn_prefix,
                                         "Suffix":basic_fn_suffix,
@@ -201,12 +208,17 @@ def main():
                                 }
                             )
                             cookies_.update(customize_fn_overwrite_)
-                            ret.update({
-                                customize_btns[0]: gr.update(visible=True, value=basic_fn_title),
-                                cookies: cookies_
-                            })
+                            if basic_btn_dropdown_ in customize_btns:
+                                ret.update({
+                                    customize_btns[basic_btn_dropdown_]: gr.update(visible=True, value=basic_fn_title),
+                                })
+                            else:
+                                ret.update({
+                                    predefined_btns[basic_btn_dropdown_]: gr.update(visible=True, value=basic_fn_title),
+                                })
+                            ret.update({cookies: cookies_})
                             return ret
-                        basic_fn_confirm.click(assign_btn, [cookies, basic_fn_title, basic_fn_prefix, basic_fn_suffix, customize_btns[0]], [cookies, customize_btns[0]])
+                        basic_fn_confirm.click(assign_btn, [cookies, basic_btn_dropdown, basic_fn_title, basic_fn_prefix, basic_fn_suffix], [cookies, *customize_btns.values(), *predefined_btns.values()])
 
         # 功能区显示开关与功能区的互动
         def fn_area_visibility(a):
@@ -252,7 +264,7 @@ def main():
             if ("Visible" in functional[k]) and (not functional[k]["Visible"]): continue
             click_handle = functional[k]["Button"].click(fn=ArgsGeneralWrapper(predict), inputs=[*input_combo, gr.State(True), gr.State(k)], outputs=output_combo)
             cancel_handles.append(click_handle)
-        for btn in customize_btns:
+        for btn in customize_btns.values():
             click_handle = btn.click(fn=ArgsGeneralWrapper(predict), inputs=[*input_combo, gr.State(True), gr.State(btn.value)], outputs=output_combo)
             cancel_handles.append(click_handle)
         # 文件上传区，接收文件后与chatbot的互动
