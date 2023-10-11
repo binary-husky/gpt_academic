@@ -188,9 +188,6 @@ def main():
                     with gr.Column(scale=10):
                         AVAIL_BTN = [btn for btn in customize_btns.keys()] + [k for k in functional]
                         basic_btn_dropdown = gr.Dropdown(AVAIL_BTN, value="自定义按钮1", label="选择一个需要自定义按钮").style(container=False)
-                        # def on_btn_dropdown_changed(k):
-                        #     return {chatbot: gr.update(label="当前模型："+k)}
-                        # basic_btn_dropdown.select(on_btn_dropdown_changed, [md_dropdown], [chatbot] )
                         basic_fn_title = gr.Textbox(show_label=False, placeholder="输入新按钮名称", lines=1).style(container=False)
                         basic_fn_prefix = gr.Textbox(show_label=False, placeholder="输入新提示前缀", lines=4).style(container=False)
                         basic_fn_suffix = gr.Textbox(show_label=False, placeholder="输入新提示后缀", lines=4).style(container=False)
@@ -365,6 +362,11 @@ def main():
                 }
             }
         }"""
+        load_cookie_js = """(cookies) => {
+            console.log(cookies);
+            return cookies;
+        }"""
+        demo.load(None, inputs=[cookies], outputs=[cookies], _js=load_cookie_js)    # 配置暗色主题或亮色主题
         demo.load(None, inputs=[dark_mode], outputs=None, _js=darkmode_js)    # 配置暗色主题或亮色主题
         demo.load(None, inputs=[gr.Textbox(LAYOUT, visible=False)], outputs=None, _js='(LAYOUT)=>{GptAcademicJavaScriptInit(LAYOUT);}')
         
