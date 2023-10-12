@@ -40,6 +40,21 @@ def get_full_error(chunk, stream_response):
             break
     return chunk
 
+def decode_chunk(chunk):
+    # 提前读取一些信息 （用于判断异常）
+    chunk_decoded = chunk.decode()
+    chunkjson = None
+    has_choices = False
+    has_content = False
+    has_role = False
+    try: 
+        chunkjson = json.loads(chunk_decoded[6:])
+        has_choices = 'choices' in chunkjson
+        if has_choices: has_content = "content" in chunkjson['choices'][0]["delta"]
+        if has_choices: has_role = "role" in chunkjson['choices'][0]["delta"]
+    except: 
+        pass
+    return chunk_decoded, chunkjson, has_choices, has_content, has_role
 
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=None, console_slience=False):
     """
@@ -192,7 +207,9 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                 yield from update_ui(chatbot=chatbot, history=history, msg="非OpenAI官方接口返回了错误:" + chunk.decode()) # 刷新界面
                 return
             
-            chunk_decoded = chunk.decode()
+            # 提前读取一些信息 （用于判断异常）
+            chunk_decoded, chunkjson, has_choices, has_content, has_role = decode_chunk(chunk)
+
             if is_head_of_the_stream and (r'"object":"error"' not in chunk_decoded) and (r"content" not in chunk_decoded):
                 # 数据流的第一帧不携带content
                 is_head_of_the_stream = False; continue
@@ -200,15 +217,23 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             if chunk:
                 try:
                     # 前者是API2D的结束条件，后者是OPENAI的结束条件
-                    if ('data: [DONE]' in chunk_decoded) or (len(json.loads(chunk_decoded[6:])['choices'][0]["delta"]) == 0):
+                    if ('data: [DONE]' in chunk_decoded) or (len(chunkjson['choices'][0]["delta"]) == 0):
                         # 判定为数据流的结束，gpt_replying_buffer也写完了
                         logging.info(f'[response] {gpt_replying_buffer}')
                         break
                     # 处理数据流的主体
-                    chunkjson = json.loads(chunk_decoded[6:])
                     status_text = f"finish_reason: {chunkjson['choices'][0].get('finish_reason', 'null')}"
                     # 如果这里抛出异常，一般是文本过长，详情见get_full_error的输出
-                    gpt_replying_buffer = gpt_replying_buffer + chunkjson['choices'][0]["delta"]["content"]
+                    if has_content:
+                        # 正常情况
+                        gpt_replying_buffer = gpt_replying_buffer + chunkjson['choices'][0]["delta"]["content"]
+                    elif has_role:
+                        # 一些第三方接口的出现这样的错误，兼容一下吧
+                        continue
+                    else:
+                        # 一些垃圾第三方接口的出现这样的错误
+                        gpt_replying_buffer = gpt_replying_buffer + chunkjson['choices'][0]["delta"]["content"]
+
                     history[-1] = gpt_replying_buffer
                     chatbot[-1] = (history[-2], history[-1])
                     yield from update_ui(chatbot=chatbot, history=history, msg=status_text) # 刷新界面
