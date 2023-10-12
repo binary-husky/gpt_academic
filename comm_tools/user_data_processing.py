@@ -87,7 +87,6 @@ def _get_user_object(chatbot, ipaddr):
     file_path = os.path.join(func_box.history_path, ipaddr)
     os.makedirs(file_path, exist_ok=True)
     file_name = os.path.join(file_path, f"{cookies['first_chat']}.json")
-
     return file_name, cookies
 
 

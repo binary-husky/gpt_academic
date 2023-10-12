@@ -9,6 +9,7 @@ import sqlite3
 import functools
 import time
 import psutil
+
 # 连接到数据库
 
 base_path = os.path.dirname(os.path.dirname(__file__))
@@ -23,6 +24,7 @@ def connect_db_close(cls_method):
         result = cls_method(cls, *args, **kwargs)
         cls._close_db()
         return result
+
     return wrapper
 
 
@@ -32,6 +34,7 @@ def ipaddr():
     for i in ip:
         if ip[i][0][3]:
             return ip[i][0][1]
+    return '127.0.0.1'
 
 
 class SqliteHandle:
@@ -90,7 +93,8 @@ class SqliteHandle:
         return temp_all
 
     def query_table_columns(self):
-        result = self.__cursor.execute(f"SELECT name, sql FROM sqlite_master WHERE type='table' AND name='{self.__table}';").fetchall()
+        result = self.__cursor.execute(
+            f"SELECT name, sql FROM sqlite_master WHERE type='table' AND name='{self.__table}';").fetchall()
         return result
 
     def add_column_type(self, column, column_type='TEXT'):
@@ -134,7 +138,8 @@ class SqliteHandle:
         query = []
         if individual_priority:
             try:
-                query = self.__cursor.execute(f"SELECT result FROM `prompt_{individual_priority}` WHERE prompt LIKE '{name}'").fetchall()
+                query = self.__cursor.execute(
+                    f"SELECT result FROM `prompt_{individual_priority}` WHERE prompt LIKE '{name}'").fetchall()
             except:
                 pass
         if not query:
@@ -162,12 +167,13 @@ def cp_db_data(incloud_tab='prompt_'):
 def batch_inset_prompt(json_path=None):
     if json_path: json_path = export_path
     for json_ in os.listdir(json_path):
-        with open(os.path.join(json_path, json_), 'r') as f:
+        with open(os.path.join(json_path, json_), 'r', encoding='utf-8') as f:
             data_list = json.load(f)
         for i in data_list:
             source = os.path.basename(os.path.join(json_path, json_)).split('.')[0]
             source_addr = ipaddr()
-            sqlite_handle(table=f"prompt_{source}_sys", database='ai_prompt_cp.db').inset_prompt(prompt={i['act']: i['prompt']}, source=source_addr)
+            sqlite_handle(table=f"prompt_{source}_sys", database='ai_prompt_cp.db').inset_prompt(
+                prompt={i['act']: i['prompt']}, source=source_addr)
 
 
 def batch_add_source():
@@ -259,6 +265,7 @@ def main():
         database_separation()
     else:
         print('必须选一个带**')
+
 
 sqlite_handle = SqliteHandle
 if __name__ == '__main__':

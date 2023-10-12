@@ -208,7 +208,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         # 终止按钮的回调函数注册
         self.cancelBtn.click(fn=lambda: (self.cancelBtn.update(visible=False), self.submitBtn.update(visible=True)),
                              inputs=[], outputs=[self.cancelBtn, self.submitBtn], cancels=self.cancel_handles).then(
-            fn=func_signals.stop_chat_refresh, inputs=[self.chatbot, self.history],
+            fn=func_signals.stop_chat_refresh, inputs=[self.chatbot, self.cookies],
             outputs=[]
         )
 

@@ -193,6 +193,8 @@ def ipaddr():
     # 获取本地ipx
     ip = psutil.net_if_addrs()
     for i in ip:
+        if i == '以太网':
+            return ip[i][1].address
         if ip[i][0][3]:
             return ip[i][0][1]
 
@@ -730,5 +732,6 @@ class JsonHandle:
 
 if __name__ == '__main__':
     # print(get_files_list('', ['.json']))
-    tree_out(dir='/Users/kilig/Job/Python-project/kso_gpt/', line=2)
+    # tree_out(dir='/Users/kilig/Job/Python-project/kso_gpt/', line=2)
+    ipaddr()
 
