@@ -11,12 +11,10 @@ rm -rf /usr/local/texlive/2023/texmf-dist/doc
 # 指定路径
 WORKDIR /gpt
 
-RUN pip3 install gradio openai numpy arxiv rich
+RUN pip3 install openai numpy arxiv rich
 RUN pip3 install colorama Markdown pygments pymupdf
-RUN pip3 install python-docx moviepy pdfminer 
-RUN pip3 install zh_langchain==0.2.1
+RUN pip3 install python-docx pdfminer 
 RUN pip3 install nougat-ocr
-RUN pip3 install aliyun-python-sdk-core==2.13.3 pyOpenSSL webrtcvad scipy git+https://github.com/aliyun/alibabacloud-nls-python-sdk.git
 
 # 装载项目文件
 COPY . .
