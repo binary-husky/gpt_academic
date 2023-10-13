@@ -26,7 +26,13 @@ def get_meta_information(url, chatbot, history):
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7', 
         'Connection': 'keep-alive'
     }
-    session.proxies.update(proxies)
+    try:
+        session.proxies.update(proxies)
+    except:
+        report_execption(chatbot, history,
+                    a=f"获取代理失败 无代理状态下很可能无法访问OpenAI家族的模型及谷歌学术 建议：检查USE_PROXY选项是否修改。",
+                    b=f"尝试直接连接")
+        yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
     session.headers.update(headers)
 
     response = session.get(url)
