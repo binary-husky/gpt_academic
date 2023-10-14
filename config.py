@@ -182,7 +182,8 @@ HUGGINGFACE_ACCESS_TOKEN = "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"
 # 获取方法：复制以下空间https://huggingface.co/spaces/qingxu98/grobid，设为public，然后GROBID_URL = "https://(你的hf用户名如qingxu98)-(你的填写的空间名如grobid).hf.space"
 GROBID_URLS = [
     "https://qingxu98-grobid.hf.space","https://qingxu98-grobid2.hf.space","https://qingxu98-grobid3.hf.space",
-    "https://shaocongma-grobid.hf.space","https://FBR123-grobid.hf.space", "https://yeku-grobid.hf.space", 
+    "https://qingxu98-grobid4.hf.space","https://qingxu98-grobid5.hf.space", "https://qingxu98-grobid6.hf.space", 
+    "https://qingxu98-grobid7.hf.space", "https://qingxu98-grobid8.hf.space", 
 ]
 
 
