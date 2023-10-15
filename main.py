@@ -160,7 +160,7 @@ def main():
                     checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区", "浮动输入区", "输入清除键", "插件参数区"], 
                                                   value=["基础功能区", "函数插件区"], label="显示/隐藏功能区", elem_id='cbs').style(container=False)
                     checkboxes_2 = gr.CheckboxGroup(["自定义菜单"], 
-                                                  value=[], label="显示/隐藏功能区", elem_id='cbs').style(container=False)
+                                                  value=[], label="显示/隐藏自定义菜单", elem_id='cbs').style(container=False)
                     dark_mode_btn = gr.Button("切换界面明暗 ☀", variant="secondary").style(size="sm")
                     dark_mode_btn.click(None, None, None, _js="""() => {
                             if (document.querySelectorAll('.dark').length) {
@@ -201,13 +201,13 @@ def main():
                 with gr.Row() as row:
                     with gr.Column(scale=10):
                         AVAIL_BTN = [btn for btn in customize_btns.keys()] + [k for k in functional]
-                        basic_btn_dropdown = gr.Dropdown(AVAIL_BTN, value="自定义按钮1", label="选择一个需要自定义按钮").style(container=False)
+                        basic_btn_dropdown = gr.Dropdown(AVAIL_BTN, value="自定义按钮1", label="选择一个需要自定义基础功能区按钮").style(container=False)
                         basic_fn_title = gr.Textbox(show_label=False, placeholder="输入新按钮名称", lines=1).style(container=False)
                         basic_fn_prefix = gr.Textbox(show_label=False, placeholder="输入新提示前缀", lines=4).style(container=False)
                         basic_fn_suffix = gr.Textbox(show_label=False, placeholder="输入新提示后缀", lines=4).style(container=False)
-                    with gr.Column(scale=1, min_width=40):
-                        basic_fn_confirm = gr.Button("确认", variant="primary"); basic_fn_confirm.style(size="sm")
-                        basic_fn_load = gr.Button("加载", variant="primary"); basic_fn_load.style(size="sm")
+                    with gr.Column(scale=1, min_width=70):
+                        basic_fn_confirm = gr.Button("确认并保存", variant="primary"); basic_fn_confirm.style(size="sm")
+                        basic_fn_load    = gr.Button("加载已保存", variant="primary"); basic_fn_load.style(size="sm")
                         def assign_btn(persistent_cookie_, cookies_, basic_btn_dropdown_, basic_fn_title, basic_fn_prefix, basic_fn_suffix):
                             ret = {}
                             customize_fn_overwrite_ = cookies_['customize_fn_overwrite']
@@ -228,7 +228,7 @@ def main():
                             ret.update({cookies: cookies_})
                             try: persistent_cookie_ = from_cookie_str(persistent_cookie_)    # persistent cookie to dict
                             except: persistent_cookie_ = {}
-                            persistent_cookie_.update({"custom_bnt": cookies_['customize_fn_overwrite']})   # dict update new value
+                            persistent_cookie_["custom_bnt"] = customize_fn_overwrite_   # dict update new value
                             persistent_cookie_ = to_cookie_str(persistent_cookie_)         # persistent cookie to dict
                             ret.update({persistent_cookie: persistent_cookie_})                             # write persistent cookie
                             return ret
@@ -242,10 +242,11 @@ def main():
                             except: return ret
                             
                             customize_fn_overwrite_ = persistent_cookie_.get("custom_bnt", {})
-                            cookies_.update(customize_fn_overwrite_)
+                            cookies_['customize_fn_overwrite'] = customize_fn_overwrite_
                             ret.update({cookies: cookies_})
 
                             for k,v in persistent_cookie_["custom_bnt"].items():
+                                if v['Title'] == "": continue
                                 if k in customize_btns: ret.update({customize_btns[k]: gr.update(visible=True, value=v['Title'])})
                                 else: ret.update({predefined_btns[k]: gr.update(visible=True, value=v['Title'])})
                             return ret
