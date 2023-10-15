@@ -120,9 +120,11 @@ def clear_input(inputs, cookies, ipaddr: gr.Request):
     return output
 
 
-def stop_chat_refresh(chatbot, ipaddr: gr.Request):
-    user_path = os.path.join(func_box.history_path, ipaddr.client.host)
-    user_data_processing.thread_write_chat_json(chatbot, ipaddr.client.host)
+def stop_chat_refresh(chatbot, cookies, ipaddr: gr.Request):
+    chatbot_with_cookie = toolbox.ChatBotWithCookies(cookies)
+    chatbot_with_cookie.write_list(chatbot)
+    # user_path = os.path.join(func_box.history_path, ipaddr.client.host)
+    user_data_processing.thread_write_chat_json(chatbot_with_cookie, ipaddr.client.host)
 
 
 def clear_chat_cookie(ipaddr: gr.Request):

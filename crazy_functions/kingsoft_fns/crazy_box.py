@@ -237,7 +237,8 @@ class ExcelHandle:
                                               f'\n\n```\n\n{toolbox.trimmed_format_exc()}```\n\n')
             # 增加起始行号
             start_row += 1
-        self.merge_same_cells()  # 还原被拆分的合并单元格
+        merge_cell, = toolbox.get_conf('merge_cell')
+        if merge_cell: self.merge_same_cells()  # 还原被拆分的合并单元格
         # 保存 Excel 文件
         time_stamp = time.strftime("%Y-%m-%d-%H", time.localtime())
         if filename == '':
@@ -245,7 +246,7 @@ class ExcelHandle:
         else:
             f"{time_stamp}_{filename}"
         test_case_path = f'{os.path.join(self.user_path, filename)}.xlsx'
-        # 遇到遇到文件无法保存时，再拆开图片
+        # 遇到文件无法保存时，再拆开图片
         try:
             self.workbook.save(test_case_path)
         except Exception as f:
