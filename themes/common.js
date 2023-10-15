@@ -10,9 +10,33 @@ function gradioApp() {
     return elem.shadowRoot ? elem.shadowRoot : elem;
 }
 
+function setCookie(name, value, days) {
+    var expires = "";
+  
+    if (days) {
+      var date = new Date();
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+      expires = "; expires=" + date.toUTCString();
+    }
+  
+    document.cookie = name + "=" + value + expires + "; path=/";
+}
 
-
-
+function getCookie(name) {
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var cookies = decodedCookie.split(';');
+  
+    for (var i = 0; i < cookies.length; i++) {
+      var cookie = cookies[i].trim();
+  
+      if (cookie.indexOf(name + "=") === 0) {
+        return cookie.substring(name.length + 1, cookie.length);
+      }
+    }
+  
+    return null;
+  }
+  
 function addCopyButton(botElement) {
     // https://github.com/GaiZhenbiao/ChuanhuChatGPT/tree/main/web_assets/javascript
     // Copy bot button

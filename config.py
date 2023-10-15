@@ -83,9 +83,9 @@ DEFAULT_FN_GROUPS = ['对话', '编程', '学术', '智能体']
 
 # 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
 LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
-AVAIL_LLM_MODELS = ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5", "api2d-gpt-3.5-turbo", 
+AVAIL_LLM_MODELS = ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5", "api2d-gpt-3.5-turbo",
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "stack-claude"]
-# P.S. 其他可用的模型还包括 ["qianfan", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613", 
+# P.S. 其他可用的模型还包括 ["qianfan", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613",  "gpt-3.5-random"
 # "spark", "sparkv2", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"]
 
 
@@ -125,6 +125,11 @@ AUTHENTICATION = []
 CUSTOM_PATH = "/"
 
 
+# HTTPS 秘钥和证书（不需要修改）
+SSL_KEYFILE = ""
+SSL_CERTFILE = ""
+
+
 # 极少数情况下，openai的官方KEY需要伴随组织编码（格式如org-xxxxxxxxxxxxxxxxxxxxxxxx）使用
 API_ORG = ""
 
@@ -140,7 +145,7 @@ AZURE_API_KEY = "填入azure openai api的密钥"    # 建议直接在API_KEY处
 AZURE_ENGINE = "填入你亲手写的部署名"            # 读 docs\use_azure.md
 
 
-# 使用Newbing
+# 使用Newbing (不推荐使用，未来将删除)
 NEWBING_STYLE = "creative"  # ["creative", "balanced", "precise"]
 NEWBING_COOKIES = """
 put your new bing cookies here
@@ -197,6 +202,9 @@ PATH_LOGGING = "gpt_log"
 # 除了连接OpenAI之外，还有哪些场合允许使用代理，请勿修改
 WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid", "Warmup_Modules"]
 
+
+# 自定义按钮的最大数量限制
+NUM_CUSTOM_BASIC_BTN = 4
 
 """
 在线大模型配置关联关系示意图

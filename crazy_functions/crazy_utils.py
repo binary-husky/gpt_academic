@@ -69,12 +69,15 @@ def request_gpt_model_in_new_thread_with_ui_alive(
     yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
     executor = ThreadPoolExecutor(max_workers=16)
     mutable = ["", time.time(), ""]
+    # 看门狗耐心
+    watch_dog_patience = 5
+    # 请求任务
     def _req_gpt(inputs, history, sys_prompt):
         retry_op = retry_times_at_unknown_error
         exceeded_cnt = 0
         while True:
             # watchdog error
-            if len(mutable) >= 2 and (time.time()-mutable[1]) > 5: 
+            if len(mutable) >= 2 and (time.time()-mutable[1]) > watch_dog_patience: 
                 raise RuntimeError("检测到程序终止。")
             try:
                 # 【第一种情况】：顺利完成
@@ -193,6 +196,9 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     # 跨线程传递
     mutable = [["", time.time(), "等待中"] for _ in range(n_frag)]
 
+    # 看门狗耐心
+    watch_dog_patience = 5
+
     # 子线程任务
     def _req_gpt(index, inputs, history, sys_prompt):
         gpt_say = ""
@@ -201,7 +207,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         mutable[index][2] = "执行中"
         while True:
             # watchdog error
-            if len(mutable[index]) >= 2 and (time.time()-mutable[index][1]) > 5: 
+            if len(mutable[index]) >= 2 and (time.time()-mutable[index][1]) > watch_dog_patience: 
                 raise RuntimeError("检测到程序终止。")
             try:
                 # 【第一种情况】：顺利完成
@@ -275,7 +281,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         # 在前端打印些好玩的东西
         for thread_index, _ in enumerate(worker_done):
             print_something_really_funny = "[ ...`"+mutable[thread_index][0][-scroller_max_len:].\
-                replace('\n', '').replace('```', '...').replace(
+                replace('\n', '').replace('`', '.').replace(
                     ' ', '.').replace('<br/>', '.....').replace('$', '.')+"`... ]"
             observe_win.append(print_something_really_funny)
         # 在前端打印些好玩的东西
@@ -301,7 +307,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
             gpt_res = f.result()
             chatbot.append([inputs_show_user, gpt_res])
             yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
-            time.sleep(0.3)
+            time.sleep(0.5)
     return gpt_response_collection
 
 
