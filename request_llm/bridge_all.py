@@ -48,17 +48,14 @@ class LazyloadTiktoken(object):
         return encoder.decode(*args, **kwargs)
 
 # Endpoint 重定向
-API_URL_REDIRECT, AZURE_ENDPOINT, AZURE_ENGINE, PROXY_API_URL, PROXY_TEST_API_URL, AIGC_API_URL = (
-    toolbox.get_conf("API_URL_REDIRECT", "AZURE_ENDPOINT", "AZURE_ENGINE",
-                     'PROXY_API_URL', 'PROXY_TEST_API_URL', 'AIGC_API_URL'))
+API_URL_REDIRECT, PROXY_API_URL,  PROXY_TEST_API_URL, AIGC_API_URL = (
+    toolbox.get_conf("API_URL_REDIRECT", 'PROXY_API_URL', 'PROXY_TEST_API_URL', 'AIGC_API_URL'))
 openai_endpoint = "https://api.openai.com/v1/chat/completions"
 api2d_endpoint = "https://openai.api2d.net/v1/chat/completions"
 newbing_endpoint = "wss://sydney.bing.com/sydney/ChatHub"
 proxy_endpoint = PROXY_API_URL
 proxy_test_ndpoint = PROXY_TEST_API_URL
 aigc_endpoint = AIGC_API_URL
-if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
-azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
 # 兼容旧版的配置
 try:
     API_URL, = toolbox.get_conf("API_URL")
@@ -158,15 +155,6 @@ model_info = {
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
     },
-    # azure openai
-    "azure-gpt-3.5":{
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": azure_endpoint,
-        "max_token": 4096,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
     "proxy-gpt-4": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
@@ -182,14 +170,6 @@ model_info = {
         "max_token": 32000,
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
-    },
-    "azure-gpt-4":{
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": azure_endpoint,
-        "max_token": 8192,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
     },
     # api_2d
     "api2d-gpt-3.5-turbo": {
@@ -234,6 +214,21 @@ model_info = {
         "token_cnt": get_token_num_gpt35,
     },
 }
+# Azure
+AZURE_ENDPOINT, AZURE_ENGINE_DICT, AZURE_URL_VERSION = toolbox.get_conf('AZURE_ENDPOINT', 'AZURE_ENGINE_DICT', 'AZURE_URL_VERSION')
+for azure in AZURE_ENGINE_DICT:
+    if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
+    azure_endpoint = AZURE_ENDPOINT + str(AZURE_URL_VERSION).replace('{v}', azure)
+    model_info.update({
+        f"azure-{azure}": {
+            "fn_with_ui": chatgpt_ui,
+            "fn_without_ui": chatgpt_noui,
+            "endpoint": azure_endpoint,
+            "max_token": AZURE_ENGINE_DICT[azure],
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
 
 # -=-=-=-=-=-=- 以下部分是新加入的模型，可能附带额外依赖 -=-=-=-=-=-=-
 if "claude-1-100k" in AVAIL_LLM_MODELS or "claude-2" in AVAIL_LLM_MODELS:
