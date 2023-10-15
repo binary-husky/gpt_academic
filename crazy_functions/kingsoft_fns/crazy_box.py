@@ -203,7 +203,9 @@ class ExcelHandle:
         # 定义边框样式
         border_style = Side(style='thin', color="000000")
         self.border = Border(left=border_style, right=border_style, top=border_style, bottom=border_style)
-        if not sheet: self.sheet = '测试要点'
+        if str(self.sheet) not in self.workbook.sheetnames:
+            self.sheet = self.workbook.active.title
+
 
     def lpvoid_lpbuffe(self, data_list: list, filename=''):
         # 加载现有的 Excel 文件        # 选择要操作的工作表, 默认是测试要点
@@ -579,7 +581,7 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
                 chatbot.append([None,
                                 f'{func_box.html_tag_color(input_[:10])}...对话数据预计会超出{all_tokens}tokens限制, 拆分中...'])
                 yield from toolbox.update_ui(chatbot, history)
-                segments.extend(crazy_utils.breakdown_txt_to_satisfy_token_limit(input_, get_token_num, max_token))
+                segments.extend(crazy_utils.breakdown_txt_to_satisfy_token_limit_for_pdf(input_, get_token_num, max_token))
             else:
                 segments.append(input_)
     yield from toolbox.update_ui(chatbot, history)
@@ -736,13 +738,16 @@ def name_de_add_sort(response, index=0):
     de_result = [list(tpl) for tpl in unique_tuples]
     d = {}
     for i, v in enumerate(de_result):
-        if v[index] not in d:
-            d[v[index]] = i
+        if len(v) >= index:
+            if v[index] not in d:
+                d[v[index]] = i
+        else:
+            d[v[len(v)]] = i
     de_result.sort(key=lambda x: d[x[index]])
     return de_result
 
 
-def parsing_json_in_text(txt_data: list, old_case, filter_list: list = 'None----', tags='插件补充的用例'):
+def parsing_json_in_text(txt_data: list, old_case, filter_list: list = 'None----', tags='插件补充的用例', sort_index=0):
     response = []
     desc = '\n\n---\n\n'.join(txt_data)
     for index in range(len(old_case)):
@@ -781,7 +786,7 @@ def parsing_json_in_text(txt_data: list, old_case, filter_list: list = 'None----
                 old_case[index].append(new_case + [tags])
         response.extend(old_case[index])
     # 按照名称排列重组
-    response = name_de_add_sort(response, 0)
+    response = name_de_add_sort(response, sort_index)
     return response, desc
 
 
@@ -796,7 +801,7 @@ def write_test_cases(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot
         file_key: 存入历史文件
     Returns: None
     """
-    template_file, sheet = json_args_return(plugin_kwargs, ['写入指定模版', '写入指定Sheet'])
+    template_file, sheet, sort_index = json_args_return(plugin_kwargs, ['写入指定模版', '写入指定Sheet', '用例下标排序'])
     file_classification = file_classification_to_dict(gpt_response_collection)
     chat_file_list = ''
     you_say = '准备将测试用例写入Excel中...'
@@ -819,7 +824,7 @@ def write_test_cases(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot
                     print('脏数据过滤，这个不符合写入测试用例的条件')
                     # func_box.通知机器人(f'脏数据过滤，这个不符合写入测试用例的条件 \n\n预期写入数据`{i}`\n\n```\n{test_case_content}\n```')
         # test_case
-        sort_test_case = name_de_add_sort(test_case, 0)
+        sort_test_case = name_de_add_sort(test_case, sort_index)
         # 正式准备写入文件
         xlsx_heandle = ExcelHandle(ipaddr=llm_kwargs['ipaddr'], temp_file=template_file, sheet=sheet)
         xlsx_heandle.split_merged_cells()  # 先把合并的单元格拆分，避免写入失败
@@ -832,7 +837,7 @@ def write_test_cases(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot
 
 
 def supplementary_test_case(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history):
-    template_file, sheet = json_args_return(plugin_kwargs, ['写入指定模版', '写入指定Sheet'])
+    template_file, sheet, sort_index= json_args_return(plugin_kwargs, ['写入指定模版', '写入指定Sheet', '用例下标排序'])
     if not sheet:
         sheet, = json_args_return(plugin_kwargs, ['读取指定Sheet'])
     file_classification = file_classification_to_dict(gpt_response_collection)
@@ -845,7 +850,7 @@ def supplementary_test_case(gpt_response_collection, llm_kwargs, plugin_kwargs, 
         old_file = plugin_kwargs['上阶段文件']
         old_case = plugin_kwargs[old_file]['原测试用例数据']
         header = plugin_kwargs[old_file]['原测试用例表头']
-        test_case, desc = parsing_json_in_text(file_classification[file_name], old_case, filter_list=header)
+        test_case, desc = parsing_json_in_text(file_classification[file_name], old_case, filter_list=header, sort_index=sort_index)
         file_path = ExcelHandle(ipaddr=llm_kwargs['ipaddr'],
                                 temp_file=template_file, sheet=sheet).lpvoid_lpbuffe(
             test_case, filename=long_name_processing(file_name))
