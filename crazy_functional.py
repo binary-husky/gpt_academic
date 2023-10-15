@@ -190,10 +190,10 @@ def get_crazy_functions():
             "Info": "多线程解析并翻译此项目的源码 | 不需要输入参数",
             "Function": HotReload(解析项目本身)
         },
-        "[插件demo]历史上的今天": {
+        "历史上的今天": {
             "Group": "对话",
             "AsButton": True,
-            "Info": "查看历史上的今天事件 | 不需要输入参数",
+            "Info": "查看历史上的今天事件 (这是一个面向开发者的插件Demo) | 不需要输入参数",
             "Function": HotReload(高阶功能模板函数)
         },
         "精准翻译PDF论文": {
@@ -252,7 +252,7 @@ def get_crazy_functions():
             "Function": HotReload(Latex中文润色)
         },
 
-        # 被新插件取代
+        # 已经被新插件取代
         # "Latex项目全文中译英（输入路径或上传压缩包）": {
         #     "Group": "学术",
         #     "Color": "stop",
@@ -260,6 +260,8 @@ def get_crazy_functions():
         #     "Info": "对Latex项目全文进行中译英处理 | 输入参数为路径或上传压缩包",
         #     "Function": HotReload(Latex中译英)
         # },
+
+        # 已经被新插件取代
         # "Latex项目全文英译中（输入路径或上传压缩包）": {
         #     "Group": "学术",
         #     "Color": "stop",
@@ -395,7 +397,7 @@ def get_crazy_functions():
     try:
         from crazy_functions.批量Markdown翻译 import Markdown翻译指定语言
         function_plugins.update({
-            "Markdown翻译（手动指定语言）": {
+            "Markdown翻译（指定翻译成何种语言）": {
                 "Group": "编程",
                 "Color": "stop",
                 "AsButton": False,
@@ -440,7 +442,7 @@ def get_crazy_functions():
     try:
         from crazy_functions.交互功能函数模板 import 交互功能模板函数
         function_plugins.update({
-            "交互功能模板函数": {
+            "交互功能模板Demo函数（查找wallhaven.cc的壁纸）": {
                 "Group": "对话",
                 "Color": "stop",
                 "AsButton": False,
@@ -500,11 +502,11 @@ def get_crazy_functions():
         if ENABLE_AUDIO:
             from crazy_functions.语音助手 import 语音助手
             function_plugins.update({
-                "实时音频采集": {
+                "实时语音对话": {
                     "Group": "对话",
                     "Color": "stop",
                     "AsButton": True,
-                    "Info": "开始语言对话 | 没有输入参数",
+                    "Info": "这是一个时刻聆听着的语音对话助手 | 没有输入参数",
                     "Function": HotReload(语音助手)
                 }
             })
@@ -537,18 +539,6 @@ def get_crazy_functions():
     except:
         print('Load function plugin failed')
 
-    # try:
-    #     from crazy_functions.CodeInterpreter import 虚空终端CodeInterpreter
-    #     function_plugins.update({
-    #         "CodeInterpreter（开发中，仅供测试）": {
-    #             "Group": "编程|对话",
-    #             "Color": "stop",
-    #             "AsButton": False,
-    #             "Function": HotReload(虚空终端CodeInterpreter)
-    #         }
-    #     })
-    # except:
-    #     print('Load function plugin failed')
 
     # try:
     #     from crazy_functions.chatglm微调工具 import 微调数据集生成
