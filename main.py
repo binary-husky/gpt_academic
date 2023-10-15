@@ -409,19 +409,21 @@ def main():
         demo.load(None, inputs=[gr.Textbox(LAYOUT, visible=False)], outputs=None, _js='(LAYOUT)=>{GptAcademicJavaScriptInit(LAYOUT);}')
         
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
-    def auto_opentab_delay():
+    def run_delayed_tasks():
         import threading, webbrowser, time
         print(f"如果浏览器没有自动打开，请复制并转到以下URL：")
         if DARK_MODE:   print(f"\t「暗色主题已启用（支持动态切换主题）」: http://localhost:{PORT}")
         else:           print(f"\t「亮色主题已启用（支持动态切换主题）」: http://localhost:{PORT}")
-        def open():
-            time.sleep(2)       # 打开浏览器
-            webbrowser.open_new_tab(f"http://localhost:{PORT}")
-        threading.Thread(target=open, name="open-browser", daemon=True).start()
-        threading.Thread(target=auto_update, name="self-upgrade", daemon=True).start()
-        threading.Thread(target=warm_up_modules, name="warm-up", daemon=True).start()
 
-    auto_opentab_delay()
+        def auto_updates(): time.sleep(0); auto_update()
+        def open_browser(): time.sleep(2); webbrowser.open_new_tab(f"http://localhost:{PORT}")
+        def warm_up_mods(): time.sleep(4); warm_up_modules()
+        
+        threading.Thread(target=auto_updates, name="self-upgrade", daemon=True).start() # 查看自动更新
+        threading.Thread(target=open_browser, name="open-browser", daemon=True).start() # 打开浏览器页面
+        threading.Thread(target=warm_up_mods, name="warm-up", daemon=True).start()      # 预热tiktoken模块
+
+    run_delayed_tasks()
     demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
         quiet=True,
         server_name="0.0.0.0", 
