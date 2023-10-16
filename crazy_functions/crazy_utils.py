@@ -767,54 +767,6 @@ def try_install_deps(deps, reload_m=[]):
         importlib.reload(__import__(m))
 
 
-HTML_CSS = """
-.row {
-  display: flex;
-  flex-wrap: wrap;
-}
-.column {
-  flex: 1;
-  padding: 10px;
-}
-.table-header {
-  font-weight: bold;
-  border-bottom: 1px solid black;
-}
-.table-row {
-  border-bottom: 1px solid lightgray;
-}
-.table-cell {
-  padding: 5px;
-}
-"""
-
-TABLE_CSS = """
-<div class="row table-row">
-    <div class="column table-cell">REPLACE_A</div>
-    <div class="column table-cell">REPLACE_B</div>
-</div>
-"""
-
-class construct_html():
-    def __init__(self) -> None:
-        self.css = HTML_CSS
-        self.html_string = f'<!DOCTYPE html><head><meta charset="utf-8"><title>翻译结果</title><style>{self.css}</style></head>'
-
-
-    def add_row(self, a, b):
-        tmp = TABLE_CSS
-        from toolbox import markdown_convertion
-        tmp = tmp.replace('REPLACE_A', markdown_convertion(a))
-        tmp = tmp.replace('REPLACE_B', markdown_convertion(b))
-        self.html_string += tmp
-
-
-    def save_file(self, file_name):
-        with open(os.path.join(get_log_folder(), file_name), 'w', encoding='utf8') as f:
-            f.write(self.html_string.encode('utf-8', 'ignore').decode())
-        return os.path.join(get_log_folder(), file_name)
-
-
 def get_plugin_arg(plugin_kwargs, key, default):
     # 如果参数是空的
     if (key in plugin_kwargs) and (plugin_kwargs[key] == ""): plugin_kwargs.pop(key)

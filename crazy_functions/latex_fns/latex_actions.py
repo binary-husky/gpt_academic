@@ -423,7 +423,7 @@ def write_html(sp_file_contents, sp_file_result, chatbot, project_folder):
     # write html
     try:
         import shutil
-        from ..crazy_utils import construct_html
+        from crazy_functions.pdf_fns.report_gen_html import construct_html
         from toolbox import gen_time_str
         ch = construct_html() 
         orig = ""
