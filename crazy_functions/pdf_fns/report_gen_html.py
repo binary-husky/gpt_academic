@@ -24,17 +24,17 @@ class construct_html():
         """
         template_ = template
         if len(a.split('\n')) == 1:
-            template_ = template_.replace("__PRIMARY_HEADER__", markdown_convertion(a[:10]) + ' ...')
+            template_ = template_.replace("__PRIMARY_HEADER__", a[:20])
             template_ = template_.replace("__PRIMARY_MSG__", markdown_convertion(a))
         else:
-            template_ = template_.replace("__PRIMARY_HEADER__", markdown_convertion(a.split('\n')[0]))
+            template_ = template_.replace("__PRIMARY_HEADER__", a.split('\n')[0])
             template_ = template_.replace("__PRIMARY_MSG__", markdown_convertion('\n'.join(a.split('\n')[1:])))
 
         if len(b.split('\n')) == 1:
-            template_ = template_.replace("__SECONDARY_HEADER__", markdown_convertion(b[:10]) + ' ...')
+            template_ = template_.replace("__SECONDARY_HEADER__", b[:20])
             template_ = template_.replace("__SECONDARY_MSG__", markdown_convertion(b))
         else:
-            template_ = template_.replace("__SECONDARY_HEADER__", markdown_convertion(b.split('\n')[0]))
+            template_ = template_.replace("__SECONDARY_HEADER__", b.split('\n')[0])
             template_ = template_.replace("__SECONDARY_MSG__", markdown_convertion('\n'.join(b.split('\n')[1:])))
         self.html_string += template_
 
