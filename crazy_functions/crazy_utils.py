@@ -721,8 +721,10 @@ class nougat_interface():
 
     def nougat_with_timeout(self, command, cwd, timeout=3600):
         import subprocess
+        from toolbox import ProxyNetworkActivate
         logging.info(f'正在执行命令 {command}')
-        process = subprocess.Popen(command, shell=True, cwd=cwd)
+        with ProxyNetworkActivate("Nougat_Download"):
+            process = subprocess.Popen(command, shell=True, cwd=cwd, env=os.environ)
         try:
             stdout, stderr = process.communicate(timeout=timeout)
         except subprocess.TimeoutExpired:
