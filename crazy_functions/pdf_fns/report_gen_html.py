@@ -23,8 +23,10 @@ class construct_html():
             },
         """
         def std(str):
-            str = str.replace(r'`',r'\`')
-            str += ' '
+            str = str.replace(r'`',r'&#96;')
+            if str.endswith("\\"): str += ' '
+            if str.endswith("}"): str += ' '
+            if str.endswith("$"): str += ' '
             return str
 
         template_ = template
