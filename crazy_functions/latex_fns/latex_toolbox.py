@@ -366,6 +366,14 @@ def insert_abstract(tex_content):
         # insert "abs_str" on the next line
         modified_tex = tex_content[:end_line_index+1] + '\n\n' + insert_missing_abs_str + '\n\n' + tex_content[end_line_index+1:]
         return modified_tex
+    elif r"\begin{document}" in tex_content:
+        # find the position of "\maketitle"
+        find_index = tex_content.index(r"\begin{document}")
+        # find the nearest ending line
+        end_line_index = tex_content.find("\n", find_index)
+        # insert "abs_str" on the next line
+        modified_tex = tex_content[:end_line_index+1] + '\n\n' + insert_missing_abs_str + '\n\n' + tex_content[end_line_index+1:]
+        return modified_tex
     else:
         return tex_content
 
