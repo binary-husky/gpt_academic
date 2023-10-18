@@ -13,29 +13,37 @@ class construct_html():
         template = """
             {
                 primary_col: {
-                    header: `__PRIMARY_HEADER__`,
-                    msg: `__PRIMARY_MSG__`,
+                    header: String.raw`__PRIMARY_HEADER__`,
+                    msg: String.raw`__PRIMARY_MSG__`,
                 },
                 secondary_rol: {
-                    header: `__SECONDARY_HEADER__`,
-                    msg: `__SECONDARY_MSG__`,
+                    header: String.raw`__SECONDARY_HEADER__`,
+                    msg: String.raw`__SECONDARY_MSG__`,
                 }
             },
         """
-        template_ = template
-        if len(a.split('\n')) == 1:
-            template_ = template_.replace("__PRIMARY_HEADER__", a[:20])
-            template_ = template_.replace("__PRIMARY_MSG__", markdown_convertion(a))
-        else:
-            template_ = template_.replace("__PRIMARY_HEADER__", a.split('\n')[0])
-            template_ = template_.replace("__PRIMARY_MSG__", markdown_convertion('\n'.join(a.split('\n')[1:])))
+        def std(str):
+            str = str.replace(r'`',r'\`')
+            str += ' '
+            return str
 
-        if len(b.split('\n')) == 1:
-            template_ = template_.replace("__SECONDARY_HEADER__", b[:20])
-            template_ = template_.replace("__SECONDARY_MSG__", markdown_convertion(b))
+        template_ = template
+        a_lines = a.split('\n')
+        b_lines = b.split('\n')
+
+        if len(a_lines) == 1 or len(a_lines[0]) > 50:
+            template_ = template_.replace("__PRIMARY_HEADER__", std(a[:20]))
+            template_ = template_.replace("__PRIMARY_MSG__", std(markdown_convertion(a)))
         else:
-            template_ = template_.replace("__SECONDARY_HEADER__", b.split('\n')[0])
-            template_ = template_.replace("__SECONDARY_MSG__", markdown_convertion('\n'.join(b.split('\n')[1:])))
+            template_ = template_.replace("__PRIMARY_HEADER__", std(a_lines[0]))
+            template_ = template_.replace("__PRIMARY_MSG__", std(markdown_convertion('\n'.join(a_lines[1:]))))
+
+        if len(b_lines) == 1 or len(b_lines[0]) > 50:
+            template_ = template_.replace("__SECONDARY_HEADER__", std(b[:20]))
+            template_ = template_.replace("__SECONDARY_MSG__", std(markdown_convertion(b)))
+        else:
+            template_ = template_.replace("__SECONDARY_HEADER__", std(b_lines[0]))
+            template_ = template_.replace("__SECONDARY_MSG__", std(markdown_convertion('\n'.join(b_lines[1:]))))
         self.html_string += template_
 
     def save_file(self, file_name):
