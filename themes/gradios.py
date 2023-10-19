@@ -3,6 +3,9 @@ import logging
 from toolbox import get_conf, ProxyNetworkActivate
 CODE_HIGHLIGHT, ADD_WAIFU, LAYOUT = get_conf('CODE_HIGHLIGHT', 'ADD_WAIFU', 'LAYOUT')
 
+from pathlib import Path
+root = Path(__file__).parents[1].resolve().as_posix() + "/"
+
 def dynamic_set_theme(THEME):
     set_theme = gr.themes.ThemeClass()
     with ProxyNetworkActivate('Download_Gradio_Theme'):
@@ -23,7 +26,7 @@ def adjust_theme():
             if THEME.startswith('huggingface-'): THEME = THEME.lstrip('huggingface-')
             set_theme = set_theme.from_hub(THEME.lower())
 
-        with open('themes/common.js', 'r', encoding='utf8') as f: 
+        with open(root + 'themes/common.js', 'r', encoding='utf8') as f: 
             js = f"<script>{f.read()}</script>"
 
         # 添加一个萌萌的看板娘
@@ -46,7 +49,7 @@ def adjust_theme():
         logging.error('gradio版本较旧, 不能自定义字体和颜色:', trimmed_format_exc())
     return set_theme
 
-# with open("themes/default.css", "r", encoding="utf-8") as f:
+# with open(root + "themes/default.css", "r", encoding="utf-8") as f:
 #     advanced_css = f.read()
-with open("themes/common.css", "r", encoding="utf-8") as f:
+with open(root + "themes/common.css", "r", encoding="utf-8") as f:
     advanced_css = f.read()

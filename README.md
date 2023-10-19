@@ -1,3 +1,12 @@
+# ChatGPT Academic Wrapper
+
+使用以下命令安装 ChatGPT Academic：
+```sh
+pip install chatgpt-academic
+```
+配置项目请使用 [环境变量](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明#4-环境变量格式说明)。
+安装完成后，使用 `chatgpt-academic` 或 `gpta` 命令启动程序。
+
 > **Note**
 >
 > 2023.10.8: Gradio, Pydantic依赖调整，已修改 `requirements.txt`。请及时**更新代码**，安装依赖时，请严格选择`requirements.txt`中**指定的版本**

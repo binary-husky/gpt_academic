@@ -1,0 +1,60 @@
+# pyproject.toml, for more information about configuration options, see
+# https://setuptools.pypa.io/en/stable/userguide/pyproject_config.html
+
+[build-system]
+requires = ["setuptools", "setuptools_scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chatgpt-academic"
+authors = [
+  { name="Fu Qingxu", email="qingxu.fu@outlook.com" },
+]
+description = "ChatGPT Academic"
+readme = "README.md"
+dynamic = ["version", "dependencies"]
+requires-python = ">=3.8,<3.13"
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/haiiliin/gpt_academic/"
+
+[project.scripts]
+chatgpt-academic = "main:main"
+gpta = "main:main"
+
+[tool.setuptools]
+py-modules = [
+    "check_proxy",
+    "colorful",
+    "config",
+    "core_functional",
+    "crazy_functional",
+    "main",
+    "multi_language",
+    "toolbox",
+]
+
+[tool.setuptools.packages.find]
+include = [
+    "crazy_functions*",
+    "docs*",
+    "gradio*",
+    "request_llm*",
+    "themes*",
+]
+
+[tool.setuptools.package-data]
+docs = ["logo.png"]
+gradio = ["version.txt", "templates/**", "test_data/**"]
+themes = ["*.js", "*.css"]
+
+[tool.setuptools.dynamic.dependencies]
+file = "requirements.txt"
+
+[tool.setuptools_scm]
+root = "."
