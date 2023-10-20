@@ -79,7 +79,7 @@ jobs:
       - name: Build installer
         run: |
           .\venv\Scripts\activate
-          pyinstaller setup.spec
+          pyinstaller setup.spec --noconfirm
           makensis setup.nsi
         env:
           CHATGPT_ACADEMIC_VERSION: ${{ github.ref_name }}
