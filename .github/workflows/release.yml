@@ -15,9 +15,6 @@ on:
 permissions:
   contents: read
 
-env:
-  CHATGPT_ACADEMIC_VERSION: ${{ github.ref_name }}
-
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -42,7 +39,7 @@ jobs:
           password: ${{ secrets.PYPI_PASSWORD }}
       - name: Upload wheels to release
         run: |
-          gh release upload --clobber ${{ env.CHATGPT_ACADEMIC_VERSION }} dist/*.tar.gz dist/*.whl
+          gh release upload --clobber ${{ github.ref_name }} dist/*.tar.gz dist/*.whl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -83,8 +80,10 @@ jobs:
           .\venv\Scripts\activate
           pyinstaller setup.spec
           makensis setup.nsi
+        env:
+          CHATGPT_ACADEMIC_VERSION: ${{ github.ref_name }}
       - name: Upload binaries to release
         run: |
-          gh release upload --clobber ${{ env.CHATGPT_ACADEMIC_VERSION }} (get-item .\dist\*.exe)
+          gh release upload --clobber ${{ github.ref_name }} (get-item .\dist\*.exe)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
