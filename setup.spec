@@ -13,6 +13,7 @@ for pkg in ["docs.waifu_plugin", "gradio", "gradio_client", "request_llm", "them
 
 
 datas += [("docs/logo.ico", "docs"), ("docs/logo.png", "docs")]
+hiddenimports += ['tiktoken_ext.openai_public', 'tiktoken_ext']
 
 
 a = Analysis(
