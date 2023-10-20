@@ -41,8 +41,7 @@ class AutoGenGeneral(PluginMultiprocessManager):
                 'model': self.llm_kwargs['llm_model'], 
                 'api_key': self.llm_kwargs['api_key'],
             },]
-            autogen_work_dir = get_log_folder('autogen')
-            code_execution_config={"work_dir": autogen_work_dir, "use_docker":True}
+            code_execution_config={"work_dir": self.autogen_work_dir, "use_docker":True}
             agents = self.define_agents()
             user_proxy = None
             assistant = None
