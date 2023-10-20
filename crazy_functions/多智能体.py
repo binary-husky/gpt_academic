@@ -15,84 +15,13 @@ Testing:
 
 
 from toolbox import CatchException, update_ui, gen_time_str, trimmed_format_exc, ProxyNetworkActivate
-from toolbox import report_execption, get_log_folder, update_ui_lastest_msg, Singleton
+from toolbox import get_conf, select_api_key, update_ui_lastest_msg, Singleton
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, get_plugin_arg
 from crazy_functions.crazy_utils import input_clipping, try_install_deps
 from crazy_functions.agent_fns.persistent import GradioMultiuserManagerForPersistentClasses
-from crazy_functions.agent_fns.pipe import PluginMultiprocessManager, PipeCom
-from crazy_functions.agent_fns.echo_agent import EchoDemo
+from crazy_functions.agent_fns.auto_agent import AutoGenMath
 import time
 
-class AutoGenWorker(PluginMultiprocessManager):
-
-    def gpt_academic_print_override(self, user_proxy, message, sender):
-        self.child_conn.send(PipeCom("show", sender.name + '\n\n---\n\n' + message['content']))
-
-    def gpt_academic_get_human_input(self, user_proxy, message):
-        # ⭐⭐ 子进程
-        patience = 300
-        begin_waiting_time = time.time()
-        self.child_conn.send(PipeCom("interact", message))
-        while True:
-            time.sleep(0.5)
-            if self.child_conn.poll(): 
-                wait_success = True
-                break
-            if time.time() - begin_waiting_time > patience:
-                self.child_conn.send(PipeCom("done", ""))
-                wait_success = False
-                break
-        if wait_success:
-            return self.child_conn.recv().content
-        else:
-            raise TimeoutError("等待用户输入超时")
-
-    def do_audogen(self, input):
-        # ⭐⭐ 子进程
-        input = input.content
-        with ProxyNetworkActivate("AutoGen"):
-            from autogen import AssistantAgent, UserProxyAgent
-            config_list = [{
-                'model': 'gpt-3.5-turbo-16k', 
-                'api_key': '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',
-            },]
-
-
-            autogen_work_dir = get_log_folder('autogen')
-            code_execution_config={"work_dir": autogen_work_dir, "use_docker":True}
-            # create an AssistantAgent instance named "assistant"
-            assistant = AssistantAgent(
-                name="assistant",
-                llm_config={
-                    "config_list": config_list,
-                }
-            )
-            # create a UserProxyAgent instance named "user_proxy"
-            user_proxy = UserProxyAgent(
-                name="user_proxy",
-                human_input_mode="ALWAYS",
-                is_termination_msg=lambda x: x.get("content", "").rstrip().endswith("TERMINATE"),
-            )
-
-            # assistant = AssistantAgent("assistant", llm_config={"config_list": config_list}, code_execution_config=code_execution_config)
-            # user_proxy = UserProxyAgent("user_proxy", code_execution_config=code_execution_config)
-            
-            user_proxy._print_received_message = lambda a,b: self.gpt_academic_print_override(user_proxy, a, b)
-            assistant._print_received_message = lambda a,b: self.gpt_academic_print_override(user_proxy, a, b)
-            user_proxy.get_human_input = lambda a: self.gpt_academic_get_human_input(user_proxy, a)
-            # user_proxy.initiate_chat(assistant, message=input)
-            try:
-                user_proxy.initiate_chat(assistant, message=input)
-            except Exception as e:
-                tb_str = '```\n' + trimmed_format_exc() + '```'
-                self.child_conn.send(PipeCom("done", "AutoGen 执行失败: \n\n" + tb_str))
-
-    def subprocess_worker(self, child_conn):
-        # ⭐⭐ 子进程
-        self.child_conn = child_conn
-        while True:
-            msg = self.child_conn.recv() # PipeCom
-            self.do_audogen(msg)
 
 @CatchException
 def 多智能体终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
@@ -105,16 +34,41 @@ def 多智能体终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
     system_prompt   给gpt的静默提醒
     web_port        当前软件运行的端口号
     """
+    # 检查当前的模型是否符合要求
+    supported_llms = ['gpt-3.5-turbo-16k', 'gpt-4', 'gpt-4-32k']
+    llm_kwargs['api_key'] = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
+    if llm_kwargs['llm_model'] not in supported_llms:
+        chatbot.append([f"处理任务: {txt}", f"当前插件只支持{str(supported_llms)}, 当前模型{llm_kwargs['llm_model']}."])
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+        return
+    
+    # 检查当前的模型是否符合要求
+    API_URL_REDIRECT, = get_conf('API_URL_REDIRECT')
+    if len(API_URL_REDIRECT) > 0:
+        chatbot.append([f"处理任务: {txt}", f"暂不支持中转."])
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+        return
+    
+    # 尝试导入依赖，如果缺少依赖，则给出安装建议
+    try:
+        import autogen, docker
+    except:
+        chatbot.append([ f"处理任务: {txt}", 
+            f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pyautogen docker```。"])
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+        return
+    
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
         import autogen
+        import glob, os, time, subprocess
+        subprocess.Popen(['docker', '--version'])
     except:
-        report_execption(chatbot, history,
-                         a=f"解析项目: {txt}",
-                         b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pyautogen```。")
+        chatbot.append([f"处理任务: {txt}", f"缺少docker运行环境！"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
-
+    
+    # 解锁插件
     chatbot.get_cookies()['lock_plugin'] = None
     persistent_class_multi_user_manager = GradioMultiuserManagerForPersistentClasses()
     user_uuid = chatbot.get_cookies().get('uuid')
@@ -130,7 +84,7 @@ def 多智能体终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
         history = []
         chatbot.append(["正在启动: 多智能体终端", "插件动态生成, 执行开始, 作者 Microsoft & Binary-Husky."])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-        executor = AutoGenWorker(llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
+        executor = AutoGenMath(llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
         persistent_class_multi_user_manager.set(persistent_key, executor)
         exit_reason = yield from executor.main_process_ui_control(txt, create_or_resume="create")
 
