@@ -69,13 +69,10 @@ jobs:
           .\venv\Scripts\activate
           python -m pip install -r requirements.txt
           python -m pip install .
-          python -m pip install torch
           python -m pip install pyinstaller
       - name: Build installer
         run: |
           pyinstaller setup.spec
-      - name: Build setup installer
-        run: |
           makensis setup.nsi
       - name: Upload artifacts
         uses: actions/upload-artifact@v3

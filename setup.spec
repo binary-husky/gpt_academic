@@ -2,13 +2,17 @@
 
 from PyInstaller.building.api import PYZ, EXE, COLLECT
 from PyInstaller.building.build_main import Analysis
-from PyInstaller.utils.hooks import collect_all, collect_submodules
+from PyInstaller.utils.hooks import collect_all
 
 
 datas, binaries, hiddenimports = [], [], []
-for pkg in ["docs", "gradio", "gradio_client", "request_llm", "themes"]:
+for pkg in ["docs.waifu_plugin", "gradio", "gradio_client", "request_llm", "themes", "tqdm", "requests", "regex",
+            "packaging", "filelock", "numpy", "safetensors", "yaml"]:
     tmp_ret = collect_all(pkg)
     datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
+
+
+datas += [("docs/logo.ico", "docs"), ("docs/logo.png", "docs")]
 
 
 a = Analysis(
@@ -41,6 +45,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=[r'docs\logo.ico'],
 )
 coll = COLLECT(
     exe,
