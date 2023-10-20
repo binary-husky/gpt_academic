@@ -1,0 +1,90 @@
+# This workflow will upload a Python Package using Twine when a release is created
+# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+env:
+  CHATGPT_ACADEMIC_VERSION: ${{ github.ref_name }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+      - name: Build package
+        run: python -m build
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@v1.8.5
+        with:
+          user: hailin
+          password: ${{ secrets.PYPI_PASSWORD }}
+      - name: Upload wheels to release
+        run: |
+          gh release upload --clobber ${{ env.CHATGPT_ACADEMIC_VERSION }} dist/*.tar.gz dist/*.whl
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  installer:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Setup NSIS
+        run: |
+          # Install NSIS
+          iwr -useb get.scoop.sh -outfile 'install.ps1'
+          ./install.ps1 -RunAsAdmin
+          scoop update
+          scoop bucket add extras
+          scoop install nsis
+
+          # Print NSIS version and header info
+          makensis -VERSION
+          makensis -HDRINFO
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install virtualenv
+      - name: Create virtualenv
+        run: |
+          virtualenv venv
+          .\venv\Scripts\activate
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install .
+          python -m pip install pyinstaller
+      - name: Build installer
+        run: |
+          .\venv\Scripts\activate
+          pyinstaller setup.spec
+          makensis setup.nsi
+      - name: Upload binaries to release
+        run: |
+          gh release upload --clobber ${{ env.CHATGPT_ACADEMIC_VERSION }} (get-item .\dist\*.exe)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
