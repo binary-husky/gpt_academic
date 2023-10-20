@@ -4,9 +4,11 @@
 # - 3 运行 docker run -v /home/fuqingxu/arxiv_cache:/root/arxiv_cache --rm -it --net=host gpt-academic-nolocal-latex
 
 FROM fuqingxu/python311_texlive_ctex:latest
-
-# 删除文档文件以节约空间
-rm -rf /usr/local/texlive/2023/texmf-dist/doc
+ENV PATH "$PATH:/usr/local/texlive/2022/bin/x86_64-linux"
+ENV PATH "$PATH:/usr/local/texlive/2023/bin/x86_64-linux"
+ENV PATH "$PATH:/usr/local/texlive/2024/bin/x86_64-linux"
+ENV PATH "$PATH:/usr/local/texlive/2025/bin/x86_64-linux"
+ENV PATH "$PATH:/usr/local/texlive/2026/bin/x86_64-linux"
 
 # 指定路径
 WORKDIR /gpt
