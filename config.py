@@ -200,7 +200,8 @@ PATH_LOGGING = "gpt_log"
 
 
 # 除了连接OpenAI之外，还有哪些场合允许使用代理，请勿修改
-WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid", "Warmup_Modules", "Nougat_Download"]
+WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid", 
+                     "Warmup_Modules", "Nougat_Download", "AutoGen"]
 
 
 # 自定义按钮的最大数量限制
