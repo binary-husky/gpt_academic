@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "chatgpt-academic"
 authors = [
-  { name="Fu Qingxu", email="qingxu.fu@outlook.com" },
+  { name="Wang Hailin", email="wanghailin@tongji.edu.cn" },
 ]
 description = "ChatGPT Academic"
 readme = "README.md"

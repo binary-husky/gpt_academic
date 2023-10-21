@@ -4,7 +4,7 @@
 !define PRODUCT_NAME "ChatGPT-Academic"
 !define PRODUCT_VERSION "$%CHATGPT_ACADEMIC_VERSION%"
 !define PRODUCT_PUBLISHER "haiiliin"
-!define PRODUCT_WEB_SITE "https://github.com/haiiliin/gpt_academic/"
+!define PRODUCT_WEB_SITE "https://github.com/haiiliin/chatgpt-academic/"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\chatgpt-academic.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
