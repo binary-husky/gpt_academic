@@ -9,7 +9,7 @@ pip install chatgpt-academic
 
 > **Note**
 >
-> 2023.10.8: Gradio, Pydantic依赖调整，已修改 `requirements.txt`。请及时**更新代码**，安装依赖时，请严格选择`requirements.txt`中**指定的版本**
+> 2023.10.8: Gradio, Pydantic依赖调整，已修改 `requirements.txt`。请及时**更新代码**，安装依赖时，请严格选择`requirements.txt`中**指定的版本**。
 >
 > `pip install -r requirements.txt`
 
@@ -25,7 +25,7 @@ To translate this project to arbitrary language with GPT, read and run [`multi_l
 >
 > 1.请注意只有 **高亮** 标识的函数插件（按钮）才支持读取文件，部分插件位于插件区的**下拉菜单**中。另外我们以**最高优先级**欢迎和处理任何新插件的PR。
 >
-> 2.本项目中每个文件的功能都在[自译解报告`self_analysis.md`](https://github.com/binary-husky/gpt_academic/wiki/GPT‐Academic项目自译解报告)详细说明。随着版本的迭代，您也可以随时自行点击相关函数插件，调用GPT重新生成项目的自我解析报告。常见问题[`wiki`](https://github.com/binary-husky/gpt_academic/wiki)。[安装方法](#installation) | [配置说明](https://github.com/binary-husky/gpt_academic/wiki/%E9%A1%B9%E7%9B%AE%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E)。
+> 2.本项目中每个文件的功能都在[自译解报告`self_analysis.md`](https://github.com/binary-husky/gpt_academic/wiki/GPT‐Academic项目自译解报告)详细说明。随着版本的迭代，您也可以随时自行点击相关函数插件，调用GPT重新生成项目的自我解析报告。常见问题[`wiki`](https://github.com/binary-husky/gpt_academic/wiki)。[常规安装方法](#installation) | [一键安装脚本](https://github.com/binary-husky/gpt_academic/releases) | [配置说明](https://github.com/binary-husky/gpt_academic/wiki/%E9%A1%B9%E7%9B%AE%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E)。
 > 
 > 3.本项目兼容并鼓励尝试国产大语言模型ChatGLM和Moss等等。支持多个api-key共存，可在配置文件中填写如`API_KEY="openai-key1,openai-key2,azure-key3,api2d-key4"`。需要临时更换`API_KEY`时，在输入区输入临时的`API_KEY`然后回车键提交后即可生效。
 

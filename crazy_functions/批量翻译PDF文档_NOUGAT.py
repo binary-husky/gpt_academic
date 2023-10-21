@@ -80,7 +80,7 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     # 如果没找到任何文件
     if len(file_manifest) == 0:
         report_execption(chatbot, history,
-                         a=f"解析项目: {txt}", b=f"找不到任何.tex或.pdf文件: {txt}")
+                         a=f"解析项目: {txt}", b=f"找不到任何.pdf拓展名的文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
 
