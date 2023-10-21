@@ -21,7 +21,7 @@ classifiers = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/haiiliin/gpt_academic/"
+"Homepage" = "https://github.com/haiiliin/chatgpt-academic/"
 
 [project.scripts]
 chatgpt-academic = "main:main"
