@@ -54,7 +54,7 @@ gradio = ["version.txt", "templates/**", "test_data/**"]
 themes = ["*.js", "*.css"]
 
 [tool.setuptools.dynamic.dependencies]
-file = "requirements.txt"
+file = ["requirements.txt", "gradio/requirements.txt"]
 
 [tool.setuptools.dynamic.optional-dependencies]
 chatglm.file = "request_llm/requirements_chatglm.txt"

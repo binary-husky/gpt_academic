@@ -20,32 +20,3 @@ rich
 pypdf2==2.12.1
 websocket-client
 scipdf_parser>=0.3
-
-# required by gradio
-aiofiles
-aiohttp
-altair>=4.2.0
-fastapi
-ffmpy
-gradio-client>=0.2.4
-httpx
-huggingface-hub>=0.13.0
-jinja2
-markdown-it-py[linkify]>=2.0.0
-markupsafe
-matplotlib
-mdit-py-plugins<=0.3.3
-# numpy
-orjson
-pandas
-pillow
-# pydantic
-pydub
-# pygments>=2.12.0
-python-multipart
-pyyaml
-# requests
-semantic-version
-typing-extensions
-uvicorn>=0.14.0
-websockets>=10.0
