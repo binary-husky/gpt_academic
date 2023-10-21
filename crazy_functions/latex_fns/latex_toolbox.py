@@ -308,7 +308,10 @@ def merge_tex_files_(project_foler, main_file, mode):
         fp = os.path.join(project_foler, f)
         fp_ = find_tex_file_ignore_case(fp)
         if fp_:
-            with open(fp_, 'r', encoding='utf-8', errors='replace') as fx: c = fx.read()
+            try:
+                with open(fp_, 'r', encoding='utf-8', errors='replace') as fx: c = fx.read()
+            except:
+                c = f"\n\nWarning from GPT-Academic: LaTex source file is missing!\n\n"
         else:
             raise RuntimeError(f'找不到{fp}，Tex源文件缺失！')
         c = merge_tex_files_(project_foler, c, mode)
