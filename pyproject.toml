@@ -12,7 +12,7 @@ authors = [
 ]
 description = "ChatGPT Academic"
 readme = "README.md"
-dynamic = ["version", "dependencies"]
+dynamic = ["version", "dependencies", "optional-dependencies"]
 requires-python = ">=3.8,<3.13"
 classifiers = [
     "Programming Language :: Python",
@@ -55,6 +55,15 @@ themes = ["*.js", "*.css"]
 
 [tool.setuptools.dynamic.dependencies]
 file = "requirements.txt"
+
+[tool.setuptools.dynamic.optional-dependencies]
+chatglm.file = "request_llm/requirements_chatglm.txt"
+chatglm_onnx.file = "request_llm/requirements_chatglm_onnx.txt"
+jittorllms.file = "request_llm/requirements_jittorllms.txt"
+moss.file = "request_llm/requirements_moss.txt"
+newbing.file = "request_llm/requirements_newbing.txt"
+qwen.file = "request_llm/requirements_qwen.txt"
+slackclaude.file = "request_llm/requirements_slackclaude.txt"
 
 [tool.setuptools_scm]
 root = "."
