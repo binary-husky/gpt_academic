@@ -1,6 +1,9 @@
 # ChatGPT Academic Wrapper
 
-使用以下命令安装 ChatGPT Academic：
+[gpt_academic](https://github.com/binary-husky/gpt_academic) 的一个分支，提供了一个 Python 库和 Windows 安装程序，以方便安装。
+
+你可以到 [GitHub Release](https://github.com/haiiliin/chatgpt-academic/releases) 页面下载 ChatGPT Academic 的离线安装包，解压后安装即可使用。
+或者也可以使用以下命令安装 ChatGPT Academic：
 ```sh
 pip install chatgpt-academic
 ```
