@@ -52,8 +52,9 @@ class Settings:
                 gr.Markdown('待完善')
 
     def _draw_setting_info(self):
+        APPNAME, = toolbox.get_conf('APPNAME')
         with gr.Tab(label=i18n("关于"), elem_id="about-tab"):
-            gr.Markdown("# " + i18n("川虎Chat"))
+            gr.Markdown("# " + i18n(APPNAME))
             gr.HTML(get_html("footer.html").format(versions=''), elem_id="footer")
             gr.Markdown('', elem_id="description")
 

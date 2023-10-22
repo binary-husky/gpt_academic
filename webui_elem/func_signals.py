@@ -13,7 +13,7 @@ from concurrent.futures import ThreadPoolExecutor
 from comm_tools import toolbox
 from comm_tools.database_processor import SqliteHandle
 from comm_tools import func_box
-from comm_tools import user_data_processing
+from comm_tools import history_processor
 
 # 处理latex options
 user_latex_option, = toolbox.get_conf('latex_option')

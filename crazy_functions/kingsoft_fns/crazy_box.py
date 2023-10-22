@@ -123,7 +123,7 @@ class Utils:
         user_path = os.path.join(func_box.users_path, hosts, 'markdown')
         os.makedirs(user_path, exist_ok=True)
         md_file = os.path.join(user_path, f"{file_name}.md")
-        with open(file=md_file, mode='w') as f:
+        with open(file=md_file, mode='w', encoding='utf-8') as f:
             f.write(data)
         return md_file
 
@@ -139,7 +139,7 @@ class Utils:
         user_path = os.path.join(func_box.users_path, hosts, 'view_html')
         os.makedirs(user_path, exist_ok=True)
         md_file = os.path.join(user_path, f"{file_name}.html")
-        with open(file=md_file, mode='w') as f:
+        with open(file=md_file, mode='w', encoding='utf-8') as f:
             f.write(data)
         return md_file
 
@@ -478,7 +478,7 @@ def file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_
             plugin_kwargs['写入指定Sheet'] = ex_handle.sheet
             yield from toolbox.update_ui(chatbot, history)
         else:
-            with open(file_path, mode='r') as f:
+            with open(file_path, mode='r', encoding='utf-8') as f:
                 file_content = f.read()
                 file_limit.extend([title, file_content])
         yield from toolbox.update_ui(chatbot, history)
@@ -726,7 +726,7 @@ def batch_recognition_images_to_md(img_list, ipaddr):
             img_content, img_result, _ = ocr_tools.Paddle_ocr_select(ipaddr=ipaddr, trust_value=True
                                                                      ).img_def_content(img_path=img)
             temp_file = os.path.join(func_box.users_path, ipaddr, 'ocr_to_md', img_content.splitlines()[0][:20] + '.md')
-            with open(temp_file, mode='w') as f:
+            with open(temp_file, mode='w', encoding='utf-8') as f:
                 f.write(f"{func_box.html_view_blank(temp_file)}\n\n" + img_content)
             temp_list.append(temp_list)
         else:

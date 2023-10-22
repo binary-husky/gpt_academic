@@ -49,7 +49,7 @@ class HistoryJsonHandle:
         # 在写入前，记得删除key
         if self.base_data_format['chat_llms'].get('api-key'):
             del self.base_data_format['chat_llms']['api-key']
-        with open(self.file_name, 'w') as fp:
+        with open(self.file_name, 'w', encoding='utf-8') as fp:
             json.dump(self.base_data_format, fp, indent=2, ensure_ascii=False)
         return self
 
@@ -61,7 +61,7 @@ class HistoryJsonHandle:
             pass
         if self.base_data_format['chat_llms'].get('api-key'):
             del self.base_data_format['chat_llms']['api-key']
-        with open(self.file_name, 'w') as fp:
+        with open(self.file_name, 'w', encoding='utf-8') as fp:
             json.dump(self.base_data_format, fp, indent=2, ensure_ascii=False)
         return self
 
