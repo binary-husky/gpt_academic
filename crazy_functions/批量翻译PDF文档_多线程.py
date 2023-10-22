@@ -63,7 +63,7 @@ def 解析PDF_基于GROBID(file_manifest, project_folder, llm_kwargs, plugin_kwa
     generated_conclusion_files = []
     generated_html_files = []
     DST_LANG = "中文"
-    from crazy_functions.crazy_utils import construct_html
+    from crazy_functions.pdf_fns.report_gen_html import construct_html
     for index, fp in enumerate(file_manifest):
         chatbot.append(["当前进度：", f"正在连接GROBID服务，请稍候: {grobid_url}\n如果等待时间过长，请修改config中的GROBID_URL，可修改成本地GROBID服务。"]); yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         article_dict = parse_pdf(fp, grobid_url)
@@ -86,7 +86,7 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
     TOKEN_LIMIT_PER_FRAGMENT = 1024
     generated_conclusion_files = []
     generated_html_files = []
-    from crazy_functions.crazy_utils import construct_html
+    from crazy_functions.pdf_fns.report_gen_html import construct_html
     for index, fp in enumerate(file_manifest):
         # 读取PDF文件
         file_content, page_one = read_and_clean_pdf_text(fp)
