@@ -1,10 +1,7 @@
 # 本源代码中, ⭐ = 关键步骤
 """
 测试：
-    - 裁剪图像，保留下半部分
-    - 交换图像的蓝色通道和红色通道
-    - 将图像转为灰度图像
-    - 将csv文件转excel表格
+    - show me the solution of $x^2=cos(x)$, solve this problem with figure, and plot and save image to t.jpg
 
 Testing: 
     - Crop the image, keeping the bottom half. 
@@ -35,7 +32,8 @@ def 多智能体终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
     web_port        当前软件运行的端口号
     """
     # 检查当前的模型是否符合要求
-    supported_llms = ['gpt-3.5-turbo-16k', 'gpt-4', 'gpt-4-32k']
+    supported_llms = ['gpt-3.5-turbo-16k', 'gpt-4', 'gpt-4-32k', 
+                      'api2d-gpt-3.5-turbo-16k', 'api2d-gpt-4']
     llm_kwargs['api_key'] = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
     if llm_kwargs['llm_model'] not in supported_llms:
         chatbot.append([f"处理任务: {txt}", f"当前插件只支持{str(supported_llms)}, 当前模型{llm_kwargs['llm_model']}."])

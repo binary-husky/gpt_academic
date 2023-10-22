@@ -182,6 +182,15 @@ model_info = {
         "token_cnt": get_token_num_gpt4,
     },
 
+    "api2d-gpt-3.5-turbo-16k": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": api2d_endpoint,
+        "max_token": 1024*16,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+
     # 将 chatglm 直接对齐到 chatglm2
     "chatglm": {
         "fn_with_ui": chatglm_ui,
