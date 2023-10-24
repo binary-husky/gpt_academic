@@ -3,9 +3,6 @@ import pickle
 import codecs
 import base64
 
-from pathlib import Path
-root = Path(__file__).parent.resolve().as_posix() + "/"
-
 def main():
     import gradio as gr
     if gr.__version__ not in ['3.32.6']: 
@@ -434,7 +431,7 @@ def main():
         ssl_certfile=None if SSL_CERTFILE == "" else SSL_CERTFILE,
         ssl_verify=False,
         server_port=PORT,
-        favicon_path=root + "docs/logo.png", 
+        favicon_path=os.path.join(os.path.dirname(__file__), "docs/logo.png"), 
         auth=AUTHENTICATION if len(AUTHENTICATION) != 0 else None,
         blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile"])
 
