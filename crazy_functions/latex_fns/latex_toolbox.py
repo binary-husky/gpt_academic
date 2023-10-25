@@ -318,6 +318,40 @@ def merge_tex_files_(project_foler, main_file, mode):
         main_file = main_file[:s.span()[0]] + c + main_file[s.span()[1]:]
     return main_file
 
+
+def find_title_and_abs(main_file):
+
+    def extract_abstract_1(text):
+        pattern = r"\\abstract\{(.*?)\}"
+        match = re.search(pattern, text, re.DOTALL)
+        if match:
+            return match.group(1)
+        else:
+            return None
+
+    def extract_abstract_2(text):
+        pattern = r"\\begin\{abstract\}(.*?)\\end\{abstract\}"
+        match = re.search(pattern, text, re.DOTALL)
+        if match:
+            return match.group(1)
+        else:
+            return None
+
+    def extract_title(string):
+        pattern = r"\\title\{(.*?)\}"
+        match = re.search(pattern, string, re.DOTALL)
+
+        if match:
+            return match.group(1)
+        else:
+            return None
+
+    abstract = extract_abstract_1(main_file)
+    if abstract is None:
+        abstract = extract_abstract_2(main_file)
+    title = extract_title(main_file)
+    return title, abstract
+
 def merge_tex_files(project_foler, main_file, mode):
     """
     Merge Tex project recrusively

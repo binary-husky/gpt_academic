@@ -205,13 +205,12 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         retry_op = retry_times_at_unknown_error
         exceeded_cnt = 0
         mutable[index][2] = "执行中"
+        detect_timeout = lambda: len(mutable[index]) >= 2 and (time.time()-mutable[index][1]) > watch_dog_patience
         while True:
             # watchdog error
-            if len(mutable[index]) >= 2 and (time.time()-mutable[index][1]) > watch_dog_patience: 
-                raise RuntimeError("检测到程序终止。")
+            if detect_timeout(): raise RuntimeError("检测到程序终止。")
             try:
                 # 【第一种情况】：顺利完成
-                # time.sleep(10); raise RuntimeError("测试")
                 gpt_say = predict_no_ui_long_connection(
                     inputs=inputs, llm_kwargs=llm_kwargs, history=history, 
                     sys_prompt=sys_prompt, observe_window=mutable[index], console_slience=True
@@ -219,7 +218,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                 mutable[index][2] = "已成功"
                 return gpt_say
             except ConnectionAbortedError as token_exceeded_error:
-                # 【第二种情况】：Token溢出，
+                # 【第二种情况】：Token溢出
                 if handle_token_exceed:
                     exceeded_cnt += 1
                     # 【选择处理】 尝试计算比例，尽可能多地保留文本
@@ -240,6 +239,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     return gpt_say # 放弃
             except:
                 # 【第三种情况】：其他错误
+                if detect_timeout(): raise RuntimeError("检测到程序终止。")
                 tb_str = '```\n' + trimmed_format_exc() + '```'
                 print(tb_str)
                 gpt_say += f"[Local Message] 警告，线程{index}在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
@@ -256,6 +256,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     for i in range(wait):
                         mutable[index][2] = f"{fail_info}等待重试 {wait-i}"; time.sleep(1)
                     # 开始重试
+                    if detect_timeout(): raise RuntimeError("检测到程序终止。")
                     mutable[index][2] = f"重试中 {retry_times_at_unknown_error-retry_op}/{retry_times_at_unknown_error}"
                     continue # 返回重试
                 else:
