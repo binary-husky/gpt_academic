@@ -49,7 +49,7 @@ var ICONS_GROUP
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "dist\chatgpt-academic-${PRODUCT_VERSION}-setup.exe"
+OutFile "dist\chatgpt-academic-${PRODUCT_VERSION}-$%CHATGPT_SETUP_SUFFIX%.exe"
 InstallDir "C:\ChatGPT-Academic"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show

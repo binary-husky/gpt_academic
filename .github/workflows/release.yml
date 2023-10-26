@@ -47,6 +47,18 @@ jobs:
 
   installer:
     runs-on: windows-latest
+    strategy:
+      matrix:
+        extra:
+          - "default"
+          - "chatglm"
+          - "chatglm_onnx"
+          - "jittorllms"
+          - "moss"
+          - "newbing"
+          - "qwen"
+          - "slackclaude"
+          - "all"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -78,8 +90,22 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
           python -m pip install -r gradio/requirements.txt
-          python -m pip install .
           python -m pip install pyinstaller
+      - name: Install the package and dependencies
+        run: |
+          if ("${{ matrix.extra }}" = "default") {
+            python -m pip install .
+          }
+          elseif ("${{ matrix.extra }}" = "all") {
+            python -m pip install .[chatglm,chatglm_onnx,jittorllms,moss,newbing,qwen,slackclaude]
+          }
+          else {
+            python -m pip install .[${{ matrix.extra }}]
+          }
+
+          if ("${{ matrix.extra }}" = "all" || "${{ matrix.extra }}" = "moss") {
+            git clone --depth=1 https://github.com/OpenLMLab/MOSS.git request_llm/moss
+          }
       - name: Build installer
         run: |
           .\venv\Scripts\activate
@@ -87,6 +113,7 @@ jobs:
           makensis setup.nsi
         env:
           CHATGPT_ACADEMIC_VERSION: ${{ github.ref_name }}
+          CHATGPT_SETUP_SUFFIX: setup-${{ matrix.extra }}
       - name: Upload binaries to release
         run: |
           gh release upload --clobber ${{ github.ref_name }} (get-item .\dist\*.exe)
