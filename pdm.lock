@@ -2,7 +2,7 @@
 # It is not intended for manual editing.
 
 [metadata]
-groups = ["default"]
+groups = ["default", "slackclaude", "chatglm", "newbing", "moss", "dev", "jittorllms", "qwen", "chatglm_onnx"]
 cross_platform = true
 static_urls = false
 lock_version = "4.3"
