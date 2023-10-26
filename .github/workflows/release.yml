@@ -57,7 +57,7 @@ jobs:
           - "chatglm"
           - "chatglm_onnx"
           - "jittorllms"
-          - "moss"
+          # - "moss"  # triton dependency resolve error
           - "newbing"
           - "qwen"
           - "slackclaude"
