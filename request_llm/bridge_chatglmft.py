@@ -87,7 +87,7 @@ class GetGLMFTHandle(Process):
                             new_prefix_state_dict[k[len("transformer.prefix_encoder."):]] = v
                     model.transformer.prefix_encoder.load_state_dict(new_prefix_state_dict)
 
-                    if model_args['quantization_bit'] is not None:
+                    if model_args['quantization_bit'] is not None and model_args['quantization_bit'] != 0:
                         print(f"Quantized to {model_args['quantization_bit']} bit")
                         model = model.quantize(model_args['quantization_bit'])
                     model = model.cuda()
