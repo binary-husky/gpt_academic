@@ -1,3 +1,6 @@
 [submodule "gradio"]
 	path = gradio
 	url = https://github.com/haiiliin/gradio.git
+[submodule "request_llm/moss"]
+	path = request_llm/moss
+	url = https://github.com/OpenLMLab/MOSS.git
