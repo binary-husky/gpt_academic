@@ -73,6 +73,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+dev = [
+    "pyinstaller>=6.1.0",
+]
 chatglm = [
     "protobuf",
     "cpm_kernels",

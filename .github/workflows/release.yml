@@ -49,6 +49,17 @@ jobs:
 
   installer:
     runs-on: windows-latest
+    strategy:
+      matrix:
+        extra:
+          - ""
+          - "chatglm"
+          - "chatglm_onnx"
+          - "jittorllms"
+          - "moss"
+          - "newbing"
+          - "qwen"
+          - "slackclaude"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -69,26 +80,25 @@ jobs:
           # Print NSIS version and header info
           makensis -VERSION
           makensis -HDRINFO
+      - uses: actions/cache@v3
+        id: cache
+        with:
+          path: .venv
+          key: ${{ runner.os }}-${{ matrix.extra }}-${{ hashFiles('**/pdm.lock') }}
       - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
           python -m pip install --upgrade pip
-          pip install virtualenv
-      - name: Create virtualenv
-        run: |
-          virtualenv venv
-          .\venv\Scripts\activate
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
-          python -m pip install -r gradio/requirements.txt
-          python -m pip install .
-          python -m pip install pyinstaller
+          pip install pdm
+          pdm install --group dev --group ${{ matrix.extra }}
       - name: Build installer
         run: |
-          .\venv\Scripts\activate
-          pyinstaller setup.spec --noconfirm
+          pdm venv activate in-project
+          pdm run pyinstaller setup.spec --noconfirm
           makensis setup.nsi
         env:
           CHATGPT_ACADEMIC_VERSION: ${{ github.ref_name }}
+          CHATGPT_SETUP_SUFFIX: setup-${{ matrix.extra }}
       - name: Upload binaries to release
         if: github.event_name == 'release'
         run: |
