@@ -27,12 +27,14 @@ var cancelBtn = null;
 var sliders = null;
 var updateChuanhuBtn = null;
 var statusDisplay = null;
-
 var historySelector = null;
 var chuanhuPopup = null;
+
 var searchBox = null;
 var settingBox = null;
 var trainingBox = null;
+var promptBox = null;
+
 var popupWrapper = null;
 var chuanhuHeader = null;
 var menu = null;
@@ -90,6 +92,7 @@ function initialize() {
     settingBox = gradioApp().querySelector('#chuanhu-setting');
     trainingBox = gradioApp().querySelector('#chuanhu-training');
     searchBox = gradioApp().querySelector('#spike-search');
+    promptBox = gradioApp().querySelector('#spike-prompt');
     popupWrapper = gradioApp().querySelector('#popup-wrapper');
     chuanhuHeader = gradioApp().querySelector('#chuanhu-header');
     menu = gradioApp().querySelector('#menu-area');

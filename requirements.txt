@@ -26,7 +26,7 @@ Levenshtein
 paddleocr
 qrcode
 pypinyin
-zh_langchain
+zh_langchain==0.2.1
 rich
 moviepy
 SpeechRecognition

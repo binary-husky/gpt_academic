@@ -25,7 +25,7 @@ class RightElem:
                 obj="toolbox"), elem_classes="close-btn")
 
     def _draw_function_chat(self):
-        preset_prompt, devs_document = toolbox.get_conf('preset_prompt', 'devs_document')
+        preset_prompt, = toolbox.get_conf('preset_prompt')
         with gr.TabItem('基础', id='func_tab', elem_id='chuanhu-toolbox-tabs'):
             with gr.Box():
                 with gr.Row():
@@ -35,40 +35,14 @@ class RightElem:
                 with gr.Row():
                     self.pro_class_name = gr.Textbox(show_label=False, placeholder='*必填，保存Prompt同时创建分类',
                                                      visible=False).style(container=False)
-            with gr.Accordion("提示词编辑保存", open=False) as self.prompt_edit_area:
-                Tips = "用 BORF 分析法设计GPT 提示词:\n" \
-                       "1、阐述背景 B(Background): 说明背景，为chatGPT提供充足的信息\n" \
-                       "2、定义目标 O(Objectives):“我们希望实现什么”\n" \
-                       "3、定义关键结果 R(key Result):“我要什么具体效果”\n" \
-                       "4、试验并调整，改进 E(Evolve):三种改进方法自由组合\n" \
-                       "\t 改进输入：从答案的不足之处着手改进背景B,目标O与关键结果R\n" \
-                       "\t 改进答案：在后续对话中指正chatGPT答案缺点\n" \
-                       "\t 重新生成：尝试在`提示词`不变的情况下多次生成结果，优中选优\n" \
-                       "\t 熟练使用占位符{{{v}}}:  当`提示词`存在占位符，则优先将{{{v}}}替换为预期文本"
-                self.pro_edit_txt = gr.Textbox(show_label=False, lines=7,
-                                               elem_classes='no_padding_input',
-                                               placeholder=Tips).style()
-                with gr.Row():
-                    self.pro_name_txt = gr.Textbox(show_label=False, placeholder='提示词名称').style(container=False)
-                with gr.Row():
-                    self.pro_del_btn = gr.Button("删除提示词", ).style(size='sm', full_width=True)
-                    self.pro_new_btn = gr.Button("保存提示词", variant="primary").style(size='sm', full_width=True)
             func_box.md_division_line()
-            with gr.Accordion("上传提示词", open=False) as self.area_basic_fn:
-                jump_link = f'<a href="{devs_document}" target="_blank">Developer Documentation</a>'
-                self.pro_devs_link = gr.HTML(jump_link)
-                self.pro_upload_btn = gr.File(file_count='single', file_types=['.yaml', '.json'],
-                                              label=f'上传你的提示词文件, 编写格式请遵循上述开发者文档', )
             self.pro_func_prompt = gr.Dataset(components=[gr.HTML()], label="提示词列表", visible=False,
                                               samples=[['...', ""] for i in range(20)], type='index',
                                               elem_id='prompt_list', samples_per_page=10, )
             self.pro_fp_state = gr.State({'samples': None})
-            func_box.md_division_line()
             self.system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt",
                                             label="System prompt", value=self.initial_prompt)
-            self.use_websearch_checkbox = gr.Checkbox(label=i18n(
-                "使用在线搜索"), value=False, elem_classes="switch-checkbox", elem_id="gr-websearch-cb",
-                visible=False)
+
 
     def _draw_plugin_chat(self):
         with gr.TabItem('插件', id='plug_tab', elem_id='chuanhu-toolbox-tabs'):

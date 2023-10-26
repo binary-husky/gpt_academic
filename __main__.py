@@ -46,10 +46,10 @@ get_html = func_box.get_html
 from webui_elem.history_menu import LeftElem
 from webui_elem.chatbot_area import ChatbotElem
 from webui_elem.tools_menu import RightElem
-from webui_elem.popup_wrapper import Settings, Training, Config, FakeComponents, AdvancedSearch
+from webui_elem.popup_wrapper import Settings, Training, Config, FakeComponents, AdvancedSearch, Prompt
 
 
-class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, FakeComponents, AdvancedSearch):
+class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, FakeComponents, AdvancedSearch, Prompt):
 
     def __init__(self):
         super().__init__()
@@ -282,7 +282,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                                                  self.pro_tf_slider, self.pro_private_check],
                                          outputs=[self.pro_prompt_list, self.pro_prompt_state],
                                          ).then(fn=lambda x: x, inputs=[self.historySearchTextbox],
-                                                outputs=[self.pro_search_txt]).then(None, None, None, _js='openSearch()')
+                                                outputs=[self.pro_search_txt]).then(None, None, None, _js='()=>{openSearch();}')
 
     def signals_input_setting(self):
         # 注册input
@@ -337,8 +337,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
     def auto_opentab_delay(self, is_open=False):
         import threading, webbrowser, time
         print(f"如果浏览器没有自动打开，请复制并转到以下URL：")
-        print(f"\t（亮色主题）: http://localhost:{PORT}")
-        print(f"\t（暗色主题）: {self.__url}/?__theme=dark")
+        print(f"\t（亮色主题）: http://localhost:{PORT}/gradio/")
+        print(f"\t（暗色主题）: {self.__url}/gradio/?__theme=dark")
         if is_open:
             def open():
                 time.sleep(2)  # 打开浏览器
@@ -384,6 +384,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                     self.draw_popup_config()
                     self.draw_popup_fakec()
                     self.draw_popup_search()
+                    self.draw_popup_prompt()
             # 函数注册，需要在Blocks下进行
             self.signals_history()
             self.signals_input_setting()

@@ -1,36 +1,44 @@
-
-function openSettingBox() {
+function addHideBoxClassExcept(element) {
     chuanhuPopup.classList.add('showBox');
     popupWrapper.classList.add('showBox');
-    settingBox.classList.remove('hideBox');
-    searchBox.classList.add('hideBox')
-    trainingBox.classList.add('hideBox');
+    let boxes = [settingBox, trainingBox, searchBox, promptBox]
+    for (let box of boxes) {
+        if (box !== element) {
+            box.classList.add('hideBox');
+        }
+        else {
+            box.classList.remove('hideBox');
+        }
+    }
     showMask("box");
+}
+
+
+function openSettingBox() {
+    addHideBoxClassExcept(settingBox)
 
 }
 
 function openTrainingBox() {
-    chuanhuPopup.classList.add('showBox');
-    popupWrapper.classList.add('showBox');
-    trainingBox.classList.remove('hideBox');
-    searchBox.classList.add('hideBox')
-    settingBox.classList.add('hideBox');
-    showMask("box");
+    addHideBoxClassExcept(trainingBox)
+
 }
 
 function openSearch() {
-    chuanhuPopup.classList.add('showBox');
-    popupWrapper.classList.add('showBox');
-    searchBox.classList.remove('hideBox')
-    trainingBox.classList.add('hideBox');
-    settingBox.classList.add('hideBox');
-    showMask("box");
+    addHideBoxClassExcept(searchBox)
+
+}
+
+function openPrompt() {
+    addHideBoxClassExcept(promptBox)
 }
 
 function openChatMore() {
     chatbotArea.classList.add('show-chat-more');
     showMask("chat-more");
 }
+
+
 
 function closeChatMore() {
     chatbotArea.classList.remove('show-chat-more');

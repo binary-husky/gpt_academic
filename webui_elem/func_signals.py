@@ -16,7 +16,6 @@ from comm_tools import func_box
 from comm_tools import history_processor
 
 # 处理latex options
-user_latex_option, = toolbox.get_conf('latex_option')
 latex_delimiters_dict = {
     'default': [
         {"left": "$$", "right": "$$", "display": True},
@@ -49,9 +48,6 @@ latex_delimiters_dict = {
     ]
 
 }
-if user_latex_option not in list(latex_delimiters_dict):
-    user_latex_option = 'else'
-latex_delimiters_set = user_latex_option
 
 
 def spinner_chatbot_loading(chatbot):
@@ -124,7 +120,7 @@ def stop_chat_refresh(chatbot, cookies, ipaddr: gr.Request):
     chatbot_with_cookie = toolbox.ChatBotWithCookies(cookies)
     chatbot_with_cookie.write_list(chatbot)
     # user_path = os.path.join(func_box.history_path, ipaddr.client.host)
-    user_data_processing.thread_write_chat_json(chatbot_with_cookie, ipaddr.client.host)
+    history_processor.thread_write_chat_json(chatbot_with_cookie, ipaddr.client.host)
 
 
 def clear_chat_cookie(ipaddr: gr.Request):
@@ -148,7 +144,7 @@ def select_history(select, cookies, ipaddr: gr.Request):
         cookies = {'api_key': API_KEY}
         return [[], [], cookies, *llms_combo, '新对话', '']
     file_path = os.path.join(user_path, user_history[0])
-    history_handle = user_data_processing.HistoryJsonHandle(file_path)
+    history_handle = history_processor.HistoryJsonHandle(file_path)
     history_update_combo = history_handle.update_for_history(cookies, select)
     return [*history_update_combo, select, gr.Button.update(link=func_box.html_local_file(file_path))]
 
@@ -182,7 +178,7 @@ def delete_history(cookies, filename, ipaddr: gr.Request):
             raise gr.Error('文件或许已不存在')
     os.remove(full_path)
     file_list, only_name, new_path, new_name = func_box.get_files_list(os.path.join(func_box.history_path, ipaddr.client.host), filter_format=['.json'])
-    history_handle = user_data_processing.HistoryJsonHandle(new_path)
+    history_handle = history_processor.HistoryJsonHandle(new_path)
     history_update_combo = history_handle.update_for_history(cookies, new_name)
     return [gr.Radio.update(choices=only_name, value=new_name), *history_update_combo]
 
@@ -202,7 +198,7 @@ def import_history(file, ipaddr: gr.Request):
 def refresh_history(cookies, ipaddr: gr.Request):
     user_path = os.path.join(func_box.history_path, ipaddr.client.host)
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
-    history_handle = user_data_processing.HistoryJsonHandle(new_path)
+    history_handle = history_processor.HistoryJsonHandle(new_path)
     history_update_combo = history_handle.update_for_history(cookies, new_name)
     return [gr.Radio.update(choices=only_name, value=new_name), *history_update_combo]
 
@@ -221,7 +217,7 @@ def download_history_md(select, ipaddr: gr.Request):
     file_path = os.path.join(user_path, f"{select}.json")
     if not os.path.exists(file_path):
         raise gr.Error('当前对话记录空，导出失败')
-    history_handle = user_data_processing.HistoryJsonHandle(file_path)
+    history_handle = history_processor.HistoryJsonHandle(file_path)
     history_list = history_handle.base_data_format['chat']
     system = history_handle.base_data_format['chat_llms'].get('system_prompt').replace('\n', '\n> ')
     mark_down = f"> {func_box.html_tag_color(tag='System Prompt:', color='#ff6e67')} {system}\n\n"
@@ -245,7 +241,7 @@ def download_history_md(select, ipaddr: gr.Request):
 def delete_latest_chat(chatbot, history, cookies: dict, ipaddr: gr.Request):
     select = cookies.get('first_chat', '')
     user_path = os.path.join(func_box.history_path, ipaddr.client.host, f"{select}.json")
-    history_handle = user_data_processing.HistoryJsonHandle(user_path)
+    history_handle = history_processor.HistoryJsonHandle(user_path)
     history_handle.delete_the_latest_chat()
     history_update_combo = history_handle.update_for_history(cookies, select)
     return history_update_combo
@@ -616,7 +612,7 @@ def refresh_load_data(prompt, request: gr.Request):
 def refresh_user_data(cookies, ipaddr: gr.Request):
     user_path = os.path.join(func_box.history_path, ipaddr.client.host)
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
-    history_handle = user_data_processing.HistoryJsonHandle(new_path)
+    history_handle = history_processor.HistoryJsonHandle(new_path)
     history_update_combo = history_handle.update_for_history(cookies, new_name)
     outputs = [gr.Radio.update(choices=only_name, value=new_name, visible=True), *history_update_combo,
                new_name]

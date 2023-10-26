@@ -221,8 +221,8 @@ body.popup-open {
 #chuanhu-popup {
     display: none;
     z-index: 99999;
-    width: 55%;
-    height: 620px;
+    width: 60%;
+    height: 820px;
     padding: 0;
 }
 #chuanhu-popup.showBox {
@@ -405,7 +405,7 @@ body.popup-open {
 }
 
 #chatbot-input-box {
-    max-width: 800px;
+    max-width: 80%;
     /* margin: 0 auto; */
     gap: 20px;
     padding: 16px 16px 24px;
@@ -604,8 +604,8 @@ input:checked + .chatbot-input-more-span {
     padding-left: env(safe-area-inset-left);
 }
 #menu-area.showSide {
-    width: var(--menu-width);
-    max-width: var(--menu-width);
+    width: var(--toolbox-width);
+    max-width: var(--toolbox-width);
     height: calc(100*var(--vh) - 65px);
     visibility: visible;
     /* margin-right: 16px; */
@@ -700,7 +700,7 @@ input:checked + .chatbot-input-more-span {
 
 #chuanhu-popup > .gradio-box > .gradio-tabs {
     display: block;
-    height: 652px;
+    height: 895px;
     /* margin: 16px 24px; */
 }
 

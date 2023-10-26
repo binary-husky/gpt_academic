@@ -10,6 +10,13 @@ i18n = webui_local.I18nAuto()
 get_html = func_box.get_html
 
 
+def popup_title(txt):
+    with gr.Row():
+        gr.Markdown(txt)
+        gr.HTML(get_html("close_btn.html").format(
+            obj="box"), elem_classes="close-btn")
+
+
 class Settings:
 
     def __init__(self):
@@ -40,11 +47,11 @@ class Settings:
             gr.HTML(get_html("appearance_switcher.html").format(
                 label=i18n("切换亮暗色主题")), elem_classes="insert-block", visible=False)
             self.single_turn_checkbox = gr.Checkbox(label=i18n(
-                "单轮对话"), value=False, elem_classes="switch-checkbox",
+                "无记忆对话"), value=False, elem_classes="switch-checkbox",
                 elem_id="gr-single-session-cb", visible=False)
 
     def _darw_private_operation(self):
-        with gr.TabItem('个人中心', id='private', elem_id='bout-tab',):
+        with gr.TabItem('个人中心', id='private', elem_id='about-tab',):
             with gr.Row():
                 gr.Markdown('####  粉身碎骨浑不怕 要留清白在人间\n\n'
                             '这里是删除个人文件信息的地方，`注意！！这里的所有操作不可逆，请谨慎操作！！！！`')
@@ -61,10 +68,7 @@ class Settings:
 
     def draw_popup_settings(self):
         with gr.Box(elem_id="chuanhu-setting"):
-            with gr.Row():
-                gr.Markdown("## " + i18n("设置"))
-                gr.HTML(get_html("close_btn.html").format(
-                    obj="box"), elem_classes="close-btn")
+            popup_title("## " + i18n("设置"))
             with gr.Tabs(elem_id="chuanhu-setting-tabs"):
                 self._draw_setting_senior()
                 self._darw_private_operation()
@@ -111,10 +115,7 @@ class Training:
 
     def draw_popup_training(self):
         with gr.Box(elem_id="chuanhu-training"):
-            with gr.Row():
-                gr.Markdown("## " + i18n("训练"))
-                gr.HTML(get_html("close_btn.html").format(
-                    obj="box"), elem_classes="close-btn")
+            popup_title("## " + i18n("训练"))
             with gr.Tabs(elem_id="chuanhu-training-tabs"):
                 self._draw_title()
                 self._draw_prepare_dataset()
@@ -176,6 +177,51 @@ class Config:
                 renameChat_i18n=i18n("重命名该对话"),
                 validFileName_i18n=i18n("请输入有效的文件名，不要包含以下特殊字符："),
             ))
+
+
+class Prompt:
+
+    def __init__(self):
+        pass
+
+    def _draw_tabs_prompt(self):
+        preset_prompt, devs_document = toolbox.get_conf('preset_prompt', 'devs_document')
+        with gr.TabItem('提示词', id='prompt'):
+            with gr.Row() as self.prompt_edit_area:
+                Tips = "用 BORF 分析法设计GPT 提示词:\n" \
+                       "1、阐述背景 B(Background): 说明背景，为chatGPT提供充足的信息\n" \
+                       "2、定义目标 O(Objectives):“我们希望实现什么”\n" \
+                       "3、定义关键结果 R(key Result):“我要什么具体效果”\n" \
+                       "4、试验并调整，改进 E(Evolve):三种改进方法自由组合\n" \
+                       "\t 改进输入：从答案的不足之处着手改进背景B,目标O与关键结果R\n" \
+                       "\t 改进答案：在后续对话中指正chatGPT答案缺点\n" \
+                       "\t 重新生成：尝试在`提示词`不变的情况下多次生成结果，优中选优\n" \
+                       "\t 熟练使用占位符{{{v}}}:  当`提示词`存在占位符，则优先将{{{v}}}替换为预期文本"
+                self.pro_edit_txt = gr.Textbox(show_label=False, lines=7,
+                                               elem_classes='no_padding_input',
+                                               placeholder=Tips).style()
+                with gr.Row():
+                    self.pro_name_txt = gr.Textbox(show_label=False, placeholder='提示词名称').style(container=False)
+                with gr.Row():
+                    self.pro_del_btn = gr.Button("删除提示词", ).style(size='sm', full_width=True)
+                    self.pro_new_btn = gr.Button("保存提示词", variant="primary").style(size='sm', full_width=True)
+            func_box.md_division_line()
+            with gr.Row() as self.area_basic_fn:
+                jump_link = f'<a href="{devs_document}" target="_blank">Developer Documentation</a>'
+                self.pro_devs_link = gr.HTML(jump_link)
+                self.pro_upload_btn = gr.File(file_count='single', file_types=['.yaml', '.json'],
+                                              label=f'上传你的提示词文件, 编写格式请遵循上述开发者文档', )
+
+    def _draw_tabs_masks(self):
+        with gr.TabItem('Masks 🎭', id='masks'):
+            self.masks_dataset = gr.Dataframe
+
+    def draw_popup_prompt(self):
+        with gr.Box(elem_id="spike-prompt"):
+            popup_title("## " + i18n("提示词 对话面具"))
+            with gr.Tabs(elem_id="prompt-tabs"):
+                self._draw_tabs_prompt()
+                self._draw_tabs_masks()
 
 
 class FakeComponents:

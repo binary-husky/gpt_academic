@@ -735,10 +735,13 @@ def batch_recognition_images_to_md(img_list, ipaddr):
 
 
 def name_de_add_sort(response, index=0):
+    if type(index) is not int:
+        return response   # 如果不是数字下标，那么不排序
     unique_tuples = set(tuple(lst) for lst in response)
     de_result = [list(tpl) for tpl in unique_tuples]
     d = {}
     for i, v in enumerate(de_result):
+
         if len(v) >= index:
             if v[index] not in d:
                 d[v[index]] = i

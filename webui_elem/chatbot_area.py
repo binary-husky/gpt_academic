@@ -32,12 +32,13 @@ class ChatbotElem:
                 elem_id="chatbot-header-btn-bar")
 
     def _draw_chatbot_body(self):
-        avatar_images, = toolbox.get_conf('avatar_images')
+        avatar_images, latex_option = toolbox.get_conf('avatar_images', 'latex_option')
         with gr.Row():
+            latex_format = func_signals.latex_delimiters_dict[latex_option[0]]
             self.chatbot = gr.Chatbot(
                 label="Chuanhu Chat",
                 elem_id="chuanhu-chatbot",
-                latex_delimiters=func_signals.latex_delimiters_set,
+                latex_delimiters=latex_format,
                 # height=700,
                 show_label=False,
                 avatar_images=avatar_images,
@@ -58,6 +59,9 @@ class ChatbotElem:
                             self.sm_upload = gr.Files(label='🔗 上传', type='file', elem_id='upload-index-file',
                                                       elem_classes='sm_btn', visible=False, interactive=True)
 
+                            self.use_websearch_checkbox = gr.Checkbox(label=i18n(
+                                "使用在线搜索"), value=False, elem_classes="switch-checkbox", elem_id="gr-websearch-cb",
+                                visible=False)
                         with gr.Column(scale=1, elem_id='gr-chat-sm-column', elem_classes='') as self.sm_btn_column:
                                 self.sm_code_block = gr.Button(value='< > 代码块', elem_id='sm_code_btn')
                                 self.sm_upload_history = gr.Button("🥷 我的文件", elem_id='sm_file_btn')
@@ -67,6 +71,7 @@ class ChatbotElem:
                                                                   show_label=True, interactive=True, label='知识库',
                                                                   multiselect=True, container=False,
                                                                   elem_classes='sm_select', elem_id='')
+
 
                     with gr.Row(elem_id="chatbot-input-tb-row"):
                         with gr.Column(min_width=225, scale=12):

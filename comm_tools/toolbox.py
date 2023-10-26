@@ -124,7 +124,7 @@ def ArgsGeneralWrapper(f):
                                       history, system_prompt, args)
         # 将对话记录写入文件
         yield from end_predict(chatbot_with_cookie, history, llm_kwargs)
-        threading.Thread(target=user_data_processing.thread_write_chat_json,
+        threading.Thread(target=history_processor.thread_write_chat_json,
                          args=(chatbot_with_cookie, ipaddr.client.host)).start()
 
     return decorated
@@ -136,7 +136,7 @@ def func_decision_tree(func, cookies, single_turn, use_websearch,
     if cookies.get('lock_plugin', None) is None:
         is_try = args[0] if 'RetryChat' in args else None
         if is_try:
-            user_data = user_data_processing.get_user_basedata(chatbot_with_cookie, llm_kwargs['ipaddr'])
+            user_data = history_processor.get_user_basedata(chatbot_with_cookie, llm_kwargs['ipaddr'])
             plugin = user_data['chat'][-1].get('plugin')
             txt_passon = cookies['last_chat']
             if plugin:
