@@ -12,12 +12,120 @@ authors = [
 ]
 description = "ChatGPT Academic"
 readme = "README.md"
-dynamic = ["version", "dependencies", "optional-dependencies"]
+dynamic = ["version"]
 requires-python = ">=3.8,<3.13"
 classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+]
+dependencies = [
+    "pydantic==1.10.11",
+    "tiktoken>=0.3.3",
+    "requests[socks]",
+    "transformers>=4.27.1",
+    "python-markdown-math",
+    "beautifulsoup4",
+    "prompt_toolkit",
+    "latex2mathml",
+    "python-docx",
+    "mdtex2html",
+    "anthropic",
+    "colorama",
+    "Markdown",
+    "pygments",
+    "pymupdf",
+    "openai",
+    "numpy",
+    "arxiv",
+    "rich",
+    "pypdf2==2.12.1",
+    "websocket-client",
+    "scipdf_parser>=0.3",
+    # required by gradio
+    "aiofiles",
+    "aiohttp",
+    "altair>=4.2.0",
+    "fastapi",
+    "ffmpy",
+    "gradio-client>=0.2.4",
+    "httpx",
+    "huggingface-hub>=0.13.0",
+    "jinja2",
+    "markdown-it-py[linkify]>=2.0.0",
+    "markupsafe",
+    "matplotlib",
+    "mdit-py-plugins<=0.3.3",
+    "numpy",
+    "orjson",
+    "pandas",
+    "pillow",
+    "pydantic",
+    "pydub",
+    "pygments>=2.12.0",
+    "python-multipart",
+    "pyyaml",
+    "requests",
+    "semantic-version",
+    "typing-extensions",
+    "uvicorn>=0.14.0",
+    "websockets>=10.0",
+]
+
+[project.optional-dependencies]
+chatglm = [
+    "protobuf",
+    "cpm_kernels",
+    "torch>=1.10",
+    "mdtex2html",
+    "sentencepiece",
+]
+chatglm_onnx = [
+    "protobuf",
+    "cpm_kernels",
+    "torch>=1.10",
+    "mdtex2html",
+    "sentencepiece",
+    "numpy",
+    "onnxruntime",
+    "sentencepiece",
+    "streamlit",
+    "streamlit-chat",
+]
+jittorllms = [
+    "jittor>=1.3.7.9",
+    "jtorch>=0.1.3",
+    "torch",
+    "torchvision",
+    "pandas",
+    "jieba",
+]
+moss = [
+    "torch",
+    "sentencepiece",
+    "datasets",
+    "accelerate",
+    "matplotlib",
+    "huggingface_hub",
+    "triton",
+    "streamlit",
+]
+newbing = [
+    "BingImageCreator",
+    "certifi",
+    "httpx",
+    "prompt_toolkit",
+    "requests",
+    "rich",
+    "websockets",
+    "httpx[socks]",
+]
+qwen = [
+    "modelscope",
+    "transformers_stream_generator",
+]
+slackclaude = [
+    "slack-sdk==3.21.3",
 ]
 
 [project.urls]
@@ -52,18 +160,6 @@ include = [
 docs = ["logo.png"]
 gradio = ["version.txt", "templates/**", "test_data/**"]
 themes = ["*.js", "*.css"]
-
-[tool.setuptools.dynamic.dependencies]
-file = ["requirements.txt", "gradio/requirements.txt"]
-
-[tool.setuptools.dynamic.optional-dependencies]
-chatglm.file = "request_llm/requirements_chatglm.txt"
-chatglm_onnx.file = "request_llm/requirements_chatglm_onnx.txt"
-jittorllms.file = "request_llm/requirements_jittorllms.txt"
-moss.file = "request_llm/requirements_moss.txt"
-newbing.file = "request_llm/requirements_newbing.txt"
-qwen.file = "request_llm/requirements_qwen.txt"
-slackclaude.file = "request_llm/requirements_slackclaude.txt"
 
 [tool.setuptools_scm]
 root = "."
