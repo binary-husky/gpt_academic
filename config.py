@@ -141,8 +141,14 @@ SLACK_CLAUDE_USER_TOKEN = ''
 
 # 如果需要使用AZURE 详情请见额外文档 docs\use_azure.md
 AZURE_ENDPOINT = "https://你亲手写的api名称.openai.azure.com/"
+AZURE_URL_VERSION = 'openai/deployments/{v}/chat/completions?api-version=2023-05-15'  # {v}作为占位符
 AZURE_API_KEY = "填入azure openai api的密钥"    # 建议直接在API_KEY处填写，该选项即将被弃用
-AZURE_ENGINE = "填入你亲手写的部署名"            # 读 docs\use_azure.md
+AZURE_ENGINE_DICT = {
+    'gpt-35-16k': 1024 * 16,
+    'gpt-4': 1024 * 8
+}  # 读 docs\use_azure.md key填入你的部署名，value请自行计算模型对应最大Token数，如3.5 = 4096 = 1024 * 4即可
+AVAIL_LLM_MODELS.extend([f"azure-{i}" for i in AZURE_ENGINE_DICT])  # 自动加入模型列表
+
 
 
 # 使用Newbing (不推荐使用，未来将删除)
