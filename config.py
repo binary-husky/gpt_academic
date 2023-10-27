@@ -233,7 +233,7 @@ NUM_CUSTOM_BASIC_BTN = 4
 │   ├── AZURE_ENGINE
 │   └── API_URL_REDIRECT
 │
-├── "azure-gpt-3.5" 等azure模型（多个azure模型，需要动态切换）
+├── "azure-gpt-3.5" 等azure模型（多个azure模型，需要动态切换，高优先级）
 │   └── AZURE_CFG_ARRAY
 │
 ├── "spark" 星火认知大模型 spark & sparkv2

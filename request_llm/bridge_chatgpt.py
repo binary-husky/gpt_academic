@@ -56,6 +56,17 @@ def decode_chunk(chunk):
         pass
     return chunk_decoded, chunkjson, has_choices, has_content, has_role
 
+from functools import lru_cache
+@lru_cache(maxsize=32)
+def verify_endpoint(endpoint):
+    """
+        检查endpoint是否可用
+    """
+    if "你亲手写的api名称" in endpoint:
+        raise ValueError("Endpoint不正确, 请检查AZURE_ENDPOINT的配置! 当前的Endpoint为:" + endpoint)
+    print(endpoint)
+    return endpoint
+
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=None, console_slience=False):
     """
     发送至chatGPT，等待回复，一次性完成，不显示中间过程。但内部用stream的方法避免中途网线被掐。
@@ -77,7 +88,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
         try:
             # make a POST request to the API endpoint, stream=False
             from .bridge_all import model_info
-            endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
+            endpoint = verify_endpoint(model_info[llm_kwargs['llm_model']]['endpoint'])
             response = requests.post(endpoint, headers=headers, proxies=proxies,
                                     json=payload, stream=True, timeout=TIMEOUT_SECONDS); break
         except requests.exceptions.ReadTimeout as e:
@@ -169,14 +180,22 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         yield from update_ui(chatbot=chatbot, history=history, msg="api-key不满足要求") # 刷新界面
         return
         
+    # 检查endpoint是否合法
+    try:
+        from .bridge_all import model_info
+        endpoint = verify_endpoint(model_info[llm_kwargs['llm_model']]['endpoint'])
+    except:
+        tb_str = '```\n' + trimmed_format_exc() + '```'
+        chatbot[-1] = (inputs, tb_str)
+        yield from update_ui(chatbot=chatbot, history=history, msg="Endpoint不满足要求") # 刷新界面
+        return
+    
     history.append(inputs); history.append("")
 
     retry = 0
     while True:
         try:
             # make a POST request to the API endpoint, stream=True
-            from .bridge_all import model_info
-            endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
             response = requests.post(endpoint, headers=headers, proxies=proxies,
                                     json=payload, stream=True, timeout=TIMEOUT_SECONDS);break
         except:
