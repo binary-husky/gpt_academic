@@ -304,6 +304,13 @@ def prompt_retrieval(is_all, hosts='', search=False):
         return retrieval
 
 
+def change_check_txt(checkbox):
+    if checkbox:
+        return gr.Checkbox.update(label='复用')
+    else:
+        return gr.Checkbox.update(label='编辑')
+
+
 def prompt_reduce(is_all, prompt: gr.Dataset, ipaddr: gr.Request):  # is_all, ipaddr: gr.Request
     """
     刷新提示词

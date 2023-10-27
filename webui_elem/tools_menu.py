@@ -27,22 +27,22 @@ class RightElem:
     def _draw_function_chat(self):
         preset_prompt, = toolbox.get_conf('preset_prompt')
         with gr.TabItem('基础', id='func_tab', elem_id='chuanhu-toolbox-tabs'):
-            with gr.Box():
-                with gr.Row():
-                    self.pro_private_check = gr.Dropdown(choices=[], value=preset_prompt['value'],
-                                                         label='选择提示词分类', elem_classes='normal_select'
-                                                         ).style(container=False)
-                with gr.Row():
-                    self.pro_class_name = gr.Textbox(show_label=False, placeholder='*必填，保存Prompt同时创建分类',
-                                                     visible=False).style(container=False)
+            self.system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt",
+                                            label="System prompt", value=self.initial_prompt)
+
             func_box.md_division_line()
+            self.sm_upload = gr.Files(label='Upload file', type='file', elem_id='upload-index-file',
+                                      visible=True, interactive=True, container=False)
+            func_box.md_division_line()
+            with gr.Row():
+                self.pro_search_txt = gr.Textbox(placeholder='搜索提示词/Masks', show_label=False, elem_classes='pm_search',
+                                                 container=False)
+                self.multiplexing_edit_check = gr.Checkbox(value=True, label='复用', show_label=True, elem_classes='pm_check',
+                                                     interactive=True, container=False)
             self.pro_func_prompt = gr.Dataset(components=[gr.HTML()], label="提示词列表", visible=False,
                                               samples=[['...', ""] for i in range(20)], type='index',
                                               elem_id='prompt_list', samples_per_page=10, )
             self.pro_fp_state = gr.State({'samples': None})
-            self.system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt",
-                                            label="System prompt", value=self.initial_prompt)
-
 
     def _draw_plugin_chat(self):
         with gr.TabItem('插件', id='plug_tab', elem_id='chuanhu-toolbox-tabs'):

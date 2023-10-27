@@ -177,3 +177,13 @@ code.language-folded {
 .input-search {
     min-width: 10%;
 }
+
+.pm_search {
+    min-width: 75% !important;
+    margin-left: 10px !important;
+    margin-bottom: 10px !important;
+}
+.pm_check {
+    min-width: 10% !important;
+    margin-top: 8px !important;
+}

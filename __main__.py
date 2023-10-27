@@ -62,6 +62,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
     def signals_sm_btn(self):
         self.sm_upload.upload(on_file_uploaded, [self.sm_upload, self.chatbot, self.user_input, self.cookies],
                               [self.chatbot, self.user_input])
+        self.sm_upload.clear(fn=lambda : gr.Files.update(value=None), inputs=[], outputs=[self.sm_upload])
         self.sm_code_block.click(fn=lambda x: x + '```\n\n```', inputs=[self.user_input], outputs=[self.user_input])
         self.sm_upload_history.click(func_signals.get_user_upload, [self.chatbot, self.user_input],
                                      outputs=[self.chatbot])
@@ -77,6 +78,9 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                             outputs=self.output_combo, show_progress=True)
 
     def signals_prompt_func(self):
+        self.multiplexing_edit_check.change(fn=func_signals.change_check_txt,
+                                            inputs=[self.multiplexing_edit_check],
+                                            outputs=[self.multiplexing_edit_check])
         self.pro_private_check.select(fn=func_signals.prompt_reduce,
                                       inputs=[self.pro_private_check, self.pro_fp_state],
                                       outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check]
