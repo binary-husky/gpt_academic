@@ -318,7 +318,10 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     what_i_ask_now["role"] = "user"
     what_i_ask_now["content"] = inputs
     messages.append(what_i_ask_now)
-    model = llm_kwargs['llm_model'].strip('api2d-')
+    model = llm_kwargs['llm_model']
+    if llm_kwargs['llm_model'].startswith('api2d-'):
+        model = llm_kwargs['llm_model'][len('api2d-'):]
+
     if model == "gpt-3.5-random": # 随机选择, 绕过openai访问频率限制
         model = random.choice([
             "gpt-3.5-turbo", 

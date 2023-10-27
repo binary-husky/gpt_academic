@@ -36,12 +36,8 @@ class AutoGenGeneral(PluginMultiprocessManager):
         # ⭐⭐ 子进程执行
         input = input.content
         with ProxyNetworkActivate("AutoGen"):
-            from autogen import AssistantAgent, UserProxyAgent
-            config_list = [{
-                'model': self.llm_kwargs['llm_model'], 
-                'api_key': self.llm_kwargs['api_key'],
-            },]
-            code_execution_config={"work_dir": self.autogen_work_dir, "use_docker":True}
+            config_list = self.get_config_list()
+            code_execution_config={"work_dir": self.autogen_work_dir, "use_docker":self.use_docker}
             agents = self.define_agents()
             user_proxy = None
             assistant = None
@@ -66,6 +62,20 @@ class AutoGenGeneral(PluginMultiprocessManager):
             except Exception as e:
                 tb_str = '```\n' + trimmed_format_exc() + '```'
                 self.child_conn.send(PipeCom("done", "AutoGen 执行失败: \n\n" + tb_str))
+
+    def get_config_list(self):
+        model = self.llm_kwargs['llm_model']
+        api_base = None
+        if self.llm_kwargs['llm_model'].startswith('api2d-'):
+            model = self.llm_kwargs['llm_model'][len('api2d-'):]
+            api_base = "https://openai.api2d.net/v1"
+        config_list = [{
+                'model': model, 
+                'api_key': self.llm_kwargs['api_key'],
+            },]
+        if api_base is not None:
+            config_list[0]['api_base'] = api_base
+        return config_list
 
     def subprocess_worker(self, child_conn):
         # ⭐⭐ 子进程执行
