@@ -484,6 +484,30 @@ if "llama2" in AVAIL_LLM_MODELS:   # llama2
     except:
         print(trimmed_format_exc())
 
+# <-- 用于定义和切换多个azure模型 -->
+AZURE_CFG_ARRAY, = get_conf("AZURE_CFG_ARRAY")
+if len(AZURE_CFG_ARRAY) > 0:
+    for azure_model_name, azure_cfg_dict in AZURE_CFG_ARRAY.items():
+        # 可能会覆盖之前的配置，但这是意料之中的
+        if not azure_model_name.startswith('azure'): 
+            raise ValueError("AZURE_CFG_ARRAY中配置的模型必须以azure开头")
+        endpoint_ = azure_cfg_dict["AZURE_ENDPOINT"] + \
+            f'openai/deployments/{azure_cfg_dict["AZURE_ENGINE"]}/chat/completions?api-version=2023-05-15'
+        model_info.update({
+            azure_model_name: {
+                "fn_with_ui": chatgpt_ui,
+                "fn_without_ui": chatgpt_noui,
+                "endpoint": endpoint_,
+                "azure_api_key": azure_cfg_dict["AZURE_API_KEY"],
+                "max_token": azure_cfg_dict["AZURE_MODEL_MAX_TOKEN"],
+                "tokenizer": tokenizer_gpt35,   # tokenizer只用于粗估token数量
+                "token_cnt": get_token_num_gpt35,
+            }
+        })
+        if azure_model_name not in AVAIL_LLM_MODELS:
+            azure_model_name += [azure_model_name]
+
+
 
 
 def LLM_CATCH_EXCEPTION(f):
