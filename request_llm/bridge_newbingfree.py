@@ -141,10 +141,10 @@ class NewBingHandle(Process):
             except:
                 self.success = False
                 tb_str = '\n```\n' + trimmed_format_exc() + '\n```\n'
-                self.child.send(f'[Local Message] 不能加载Newbing组件。{tb_str}')
+                self.child.send(f'[Local Message] 不能加载Newbing组件，请注意Newbing组件已不再维护。{tb_str}')
                 self.child.send('[Fail]')
                 self.child.send('[Finish]')
-                raise RuntimeError(f"不能加载Newbing组件。")
+                raise RuntimeError(f"不能加载Newbing组件，请注意Newbing组件已不再维护。")
 
         self.success = True
         try:

@@ -64,6 +64,7 @@ class SparkRequestInstance():
         self.api_key = XFYUN_API_KEY
         self.gpt_url = "ws://spark-api.xf-yun.com/v1.1/chat"
         self.gpt_url_v2 = "ws://spark-api.xf-yun.com/v2.1/chat"
+        self.gpt_url_v3 = "ws://spark-api.xf-yun.com/v3.1/chat"
 
         self.time_to_yield_event = threading.Event()
         self.time_to_exit_event = threading.Event()
@@ -87,6 +88,8 @@ class SparkRequestInstance():
     def create_blocking_request(self, inputs, llm_kwargs, history, system_prompt):
         if llm_kwargs['llm_model'] == 'sparkv2':
             gpt_url = self.gpt_url_v2
+        elif llm_kwargs['llm_model'] == 'sparkv3':
+            gpt_url = self.gpt_url_v3
         else:
             gpt_url = self.gpt_url
 
@@ -168,6 +171,11 @@ def gen_params(appid, inputs, llm_kwargs, history, system_prompt):
     """
     通过appid和用户的提问来生成请参数
     """
+    domains = {
+        "spark": "general",
+        "sparkv2": "generalv2",
+        "sparkv3": "generalv3",
+    }
     data = {
         "header": {
             "app_id": appid,
@@ -175,7 +183,7 @@ def gen_params(appid, inputs, llm_kwargs, history, system_prompt):
         },
         "parameter": {
             "chat": {
-                "domain": "generalv2" if llm_kwargs['llm_model'] == 'sparkv2' else "general",
+                "domain": domains[llm_kwargs['llm_model']],
                 "temperature": llm_kwargs["temperature"],
                 "random_threshold": 0.5,
                 "max_tokens": 4096,
