@@ -83,8 +83,11 @@ DEFAULT_FN_GROUPS = ['对话', '编程', '学术', '智能体']
 
 # 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
 LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
-AVAIL_LLM_MODELS = ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5", "api2d-gpt-3.5-turbo",
-                    "gpt-4", "gpt-4-32k", "azure-gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "stack-claude"]
+AVAIL_LLM_MODELS = [
+    "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5", "api2d-gpt-3.5-turbo",
+    "gpt-4", "gpt-4-32k", "azure-gpt-4", "api2d-gpt-4", 
+    "chatglm", "moss", "newbing", "stack-claude"
+]
 # P.S. 其他可用的模型还包括 ["qianfan", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613",  "gpt-3.5-random"
 # "spark", "sparkv2", "sparkv3", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"]
 
@@ -139,16 +142,14 @@ SLACK_CLAUDE_BOT_ID = ''
 SLACK_CLAUDE_USER_TOKEN = ''
 
 
-# 如果需要使用AZURE 详情请见额外文档 docs\use_azure.md
+# 如果需要使用AZURE（方法一：单个azure模型部署）详情请见额外文档 docs\use_azure.md
 AZURE_ENDPOINT = "https://你亲手写的api名称.openai.azure.com/"
-AZURE_URL_VERSION = 'openai/deployments/{v}/chat/completions?api-version=2023-05-15'  # {v}作为占位符
 AZURE_API_KEY = "填入azure openai api的密钥"    # 建议直接在API_KEY处填写，该选项即将被弃用
-AZURE_ENGINE_DICT = {
-    'gpt-35-16k': 1024 * 16,
-    'gpt-4': 1024 * 8
-}  # 读 docs\use_azure.md key填入你的部署名，value请自行计算模型对应最大Token数，如3.5 = 4096 = 1024 * 4即可
-AVAIL_LLM_MODELS.extend([f"azure-{i}" for i in AZURE_ENGINE_DICT])  # 自动加入模型列表
+AZURE_ENGINE = "填入你亲手写的部署名"            # 读 docs\use_azure.md
 
+
+# 如果需要使用AZURE（方法二：多个azure模型部署+动态切换）详情请见额外文档 docs\use_azure.md
+AZURE_CFG_ARRAY = {}
 
 
 # 使用Newbing (不推荐使用，未来将删除)
@@ -222,12 +223,15 @@ NUM_CUSTOM_BASIC_BTN = 4
 │   ├── API_ORG（不常用）
 │   └── API_URL_REDIRECT（不常用）
 │
-├── "azure-gpt-3.5" 等azure模型
+├── "azure-gpt-3.5" 等azure模型（单个azure模型，不需要动态切换）
 │   ├── API_KEY
 │   ├── AZURE_ENDPOINT
 │   ├── AZURE_API_KEY
 │   ├── AZURE_ENGINE
 │   └── API_URL_REDIRECT
+│
+├── "azure-gpt-3.5" 等azure模型（多个azure模型，需要动态切换）
+│   └── AZURE_CFG_ARRAY
 │
 ├── "spark" 星火认知大模型 spark & sparkv2
 │   ├── XFYUN_APPID

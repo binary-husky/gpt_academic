@@ -48,10 +48,12 @@ class LazyloadTiktoken(object):
         return encoder.decode(*args, **kwargs)
 
 # Endpoint 重定向
-API_URL_REDIRECT, = get_conf("API_URL_REDIRECT")
+API_URL_REDIRECT, AZURE_ENDPOINT, AZURE_ENGINE = get_conf("API_URL_REDIRECT", "AZURE_ENDPOINT", "AZURE_ENGINE")
 openai_endpoint = "https://api.openai.com/v1/chat/completions"
 api2d_endpoint = "https://openai.api2d.net/v1/chat/completions"
 newbing_endpoint = "wss://sydney.bing.com/sydney/ChatHub"
+if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
+azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
 # 兼容旧版的配置
 try:
     API_URL, = get_conf("API_URL")
@@ -141,6 +143,25 @@ model_info = {
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
     },
+    
+    # azure openai
+    "azure-gpt-3.5":{
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": azure_endpoint,
+        "max_token": 4096,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+
+    "azure-gpt-4":{
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": azure_endpoint,
+        "max_token": 8192,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
 
     # api_2d
     "api2d-gpt-3.5-turbo": {
@@ -187,21 +208,6 @@ model_info = {
         "token_cnt": get_token_num_gpt35,
     },
 }
-# Azure 多模型支持
-AZURE_ENDPOINT, AZURE_ENGINE_DICT, AZURE_URL_VERSION = get_conf('AZURE_ENDPOINT', 'AZURE_ENGINE_DICT', 'AZURE_URL_VERSION')
-for azure in AZURE_ENGINE_DICT:
-    if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
-    azure_endpoint = AZURE_ENDPOINT + str(AZURE_URL_VERSION).replace('{v}', azure)
-    model_info.update({
-        f"azure-{azure}": {
-            "fn_with_ui": chatgpt_ui,
-            "fn_without_ui": chatgpt_noui,
-            "endpoint": azure_endpoint,
-            "max_token": AZURE_ENGINE_DICT[azure],
-            "tokenizer": tokenizer_gpt35,
-            "token_cnt": get_token_num_gpt35,
-        },
-    })
 
 # -=-=-=-=-=-=- 以下部分是新加入的模型，可能附带额外依赖 -=-=-=-=-=-=-
 if "claude-1-100k" in AVAIL_LLM_MODELS or "claude-2" in AVAIL_LLM_MODELS:
@@ -468,6 +474,30 @@ if "llama2" in AVAIL_LLM_MODELS:   # llama2
         })
     except:
         print(trimmed_format_exc())
+
+# <-- 用于定义和切换多个azure模型 -->
+AZURE_CFG_ARRAY, = get_conf("AZURE_CFG_ARRAY")
+if len(AZURE_CFG_ARRAY) > 0:
+    for azure_model_name, azure_cfg_dict in AZURE_CFG_ARRAY.items():
+        # 可能会覆盖之前的配置，但这是意料之中的
+        if not azure_model_name.startswith('azure'): 
+            raise ValueError("AZURE_CFG_ARRAY中配置的模型必须以azure开头")
+        endpoint_ = azure_cfg_dict["AZURE_ENDPOINT"] + \
+            f'openai/deployments/{azure_cfg_dict["AZURE_ENGINE"]}/chat/completions?api-version=2023-05-15'
+        model_info.update({
+            azure_model_name: {
+                "fn_with_ui": chatgpt_ui,
+                "fn_without_ui": chatgpt_noui,
+                "endpoint": endpoint_,
+                "azure_api_key": azure_cfg_dict["AZURE_API_KEY"],
+                "max_token": azure_cfg_dict["AZURE_MODEL_MAX_TOKEN"],
+                "tokenizer": tokenizer_gpt35,   # tokenizer只用于粗估token数量
+                "token_cnt": get_token_num_gpt35,
+            }
+        })
+        if azure_model_name not in AVAIL_LLM_MODELS:
+            azure_model_name += [azure_model_name]
+
 
 
 
