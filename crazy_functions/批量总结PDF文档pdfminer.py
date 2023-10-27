@@ -2,11 +2,11 @@
 from comm_tools.toolbox import update_ui
 from comm_tools.toolbox import CatchException, report_execption, write_results_to_file
 =======
-from toolbox import update_ui
-from toolbox import CatchException, report_execption
+from comm_tools.toolbox import update_ui
+from comm_tools.toolbox import CatchException, report_execption
 >>>>>>> master
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-from toolbox import write_history_to_file, promote_file_to_downloadzone
+from comm_tools.toolbox import write_history_to_file, promote_file_to_downloadzone
 
 fast_debug = False
 

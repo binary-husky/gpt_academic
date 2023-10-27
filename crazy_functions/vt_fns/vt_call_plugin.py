@@ -7,8 +7,9 @@ import copy, json, pickle, os, sys, time
 
 
 def read_avail_plugin_enum():
-    from crazy_functional import get_crazy_functions
-    plugin_arr = get_crazy_functions()
+    from comm_tools.crazy_functional import crazy_fns
+    # plugin_arr = get_crazy_functions()
+    plugin_arr = crazy_fns
     # remove plugins with out explaination
     plugin_arr = {k: v for k, v in plugin_arr.items() if 'Info' in v}
     plugin_arr_info = {"F_{:04d}".format(i): v["Info"] for i, v in enumerate(plugin_arr.values(), start=1)}
@@ -124,5 +125,7 @@ def execute_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prom
     fn_name = fn.__name__
     msg = f'{llm_kwargs["llm_model"]}为您选择了插件: `{fn_name}`\n\n插件说明：{plugin["Info"]}\n\n插件参数：{plugin_sel.plugin_arg}\n\n假如偏离了您的要求，按停止键终止。'
     yield from update_ui_lastest_msg(lastmsg=msg, chatbot=chatbot, history=history, delay=2)
+    if plugin.get('Parameters'):
+        plugin_kwargs.update({'advanced_arg': plugin['Parameters']})
     yield from fn(plugin_sel.plugin_arg, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, -1)
     return

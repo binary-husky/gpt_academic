@@ -27,11 +27,13 @@ def get_functions_学术优化():
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "primary",
             "AsButton": False,  # 加入下拉菜单中
+            "Info": "对英文Latex项目全文进行润色处理 | 输入参数为路径或上传压缩包",
             "Function": HotReload(Latex英文润色)
         },
         "读Tex论文写摘要": {
             "Color": "primary",  # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
+            "Info": "读取Tex论文并写摘要 | 输入参数为路径",
             "Function": HotReload(读文章写摘要)
         },
         # "[测试功能] 批量总结PDF文档pdfminer": {
@@ -42,18 +44,21 @@ def get_functions_学术优化():
         "谷歌学术检索助手（输入谷歌学术搜索页url）": {
             "Color": "primary",
             "AsButton": True,  # 加入下拉菜单中
+            "Info": "使用谷歌学术检索助手搜索指定URL的结果 | 输入参数为谷歌学术搜索页的URL",
             "Function": HotReload(谷歌检索小助手)
         },
         "英文Latex项目全文纠错（输入路径或上传压缩包）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "primary",
             "AsButton": False,  # 加入下拉菜单中
+            "Info": "对英文Latex项目全文进行纠错处理 | 输入参数为路径或上传压缩包",
             "Function": HotReload(Latex全文润色.Latex英文纠错)
         },
         "中文Latex项目全文润色（输入路径或上传压缩包）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "primary",
             "AsButton": False,  # 加入下拉菜单中
+            "Info": "对中文Latex项目全文进行润色处理 | 输入参数为路径或上传压缩包",
             "Function": HotReload(Latex全文润色.Latex中文润色)
         },
         "Latex项目全文中译英（输入路径或上传压缩包）": {
@@ -80,19 +85,21 @@ def get_functions_学术优化():
             "ArgsReminder": "如果有必要, 请在此处追加更细致的矫错指令（使用英文）。",
             "Function": HotReload(Latex输出PDF结果.Latex英文纠错加PDF对比)
         },
-        "Arixv翻译（输入arxivID）[需Latex]": {
+        "Arixv论文精细翻译（输入arxivID）[需Latex]": {
             "Color": "primary",
             "AsButton": False,
             "AdvancedArgs": True,
+            "Info": "Arixv论文精细翻译 | 输入参数arxiv论文的ID，比如1812.10695",
             "ArgsReminder":
                 "如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不Latex英文纠错加PDF对比准确的问题。 " +
                 "例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: " + 'If the term "agent" is used in this section, it should be translated to "智能体". ',
             "Function": HotReload(Latex输出PDF结果.Latex翻译中文并重新编译PDF)
         },
-        "本地论文翻译（上传Latex压缩包）[需Latex]": {
+        "本地Latex论文精细翻译（上传Latex压缩包）[需Latex]": {
             "Color": "primary",
             "AsButton": False,
             "AdvancedArgs": True,
+            "Info": "本地Latex论文精细翻译 | 输入参数是路径",
             "ArgsReminder":
                 "如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 " +
                 "例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: " + 'If the term "agent" is used in this section, it should be translated to "智能体". ',
@@ -112,33 +119,39 @@ def get_functions_文档读取():
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "primary",
             "AsButton": True,
+            "Info": "将Markdown翻译为中文 | 输入参数为路径或URL",
             "Function": HotReload(批量Markdown翻译.Markdown英译中)
         },
         "批量Markdown中译英": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "primary",
             "AsButton": True,  # 加入下拉菜单中
+            "Info": "批量将Markdown文件中文翻译为英文 | 输入参数为路径或上传压缩包",
             "Function": HotReload(批量Markdown翻译.Markdown中译英)
         },
         "批量总结Word文档": {
             "AsButton": False,
             "Color": "primary",
+            "Info": "批量总结word文档 | 输入参数为路径",
             "Function": HotReload(总结word文档)
         },
-        "批量翻译PDF文档（多线程）": {
+        "精准翻译PDF论文": {
             "Color": "primary",
             "AsButton": True,  # 加入下拉菜单中
+            "Info": "精准翻译PDF论文为中文 | 输入参数为路径",
             "Function": HotReload(批量翻译PDF文档_多线程.批量翻译PDF文档)
         },
         "[测试功能] 批量总结PDF文档": {
             "Color": "primary",
             "AsButton": False,  # 加入下拉菜单中
+            "Info": "批量总结PDF文档的内容 | 输入参数为路径",
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Function": HotReload(批量总结PDF文档)
         },
         "理解PDF文档内容 （模仿ChatPDF）": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Color": "primary",
+            "Info": "理解PDF文档的内容并进行回答 | 输入参数为路径",
             "AsButton": True,  # 加入下拉菜单中
             "Function": HotReload(理解PDF文档内容.理解PDF文档内容标准文件输入)
         },
@@ -167,41 +180,61 @@ def get_functions_代码解析():
         "批量生成函数注释": {
             "Color": "primary",  # 按钮颜色
             "AsButton": False,
+            "Info": "批量生成函数的注释 | 输入参数为路径",
             "Function": HotReload(生成函数注释.批量生成函数注释)
+        },
+        "解析整个Matlab项目": {
+            "Color": "stop",
+            "AsButton": False,
+            "Info": "解析一个Matlab项目的所有源文件(.m) | 输入参数为路径",
+            "Function": HotReload(解析项目源代码.解析一个Matlab项目)
         },
         "解析一个C项目的头文件": {
             "Color": "primary",  # 按钮颜色
             "AsButton": True,
+            "Info": "解析一个C++项目的所有头文件(.h/.hpp) | 输入参数为路径",
             "Function": HotReload(解析项目源代码.解析一个C项目的头文件)
         },
         "解析整个C++项目（.cpp/.hpp/.c/.h）": {
             "Color": "primary",  # 按钮颜色
             "AsButton": False,  # 加入下拉菜单中
+            "Info": "解析一个C++项目的所有源文件（.cpp/.hpp/.c/.h）| 输入参数为路径",
             "Function": HotReload(解析项目源代码.解析一个C项目)
         },
         "解析一个Golang项目": {
             "Color": "primary",  # 按钮颜色
             "AsButton": False,
+            "Info": "解析一个Go项目的所有源文件 | 输入参数为路径",
             "Function": HotReload(解析项目源代码.解析一个Golang项目)
         },
         "解析一个Rust项目": {
             "Color": "primary",  # 按钮颜色
             "AsButton": False,
+            "Info": "解析一个Rust项目的所有源文件 | 输入参数为路径",
             "Function": HotReload(解析项目源代码.解析一个Rust项目)
         },
         "解析一个Java项目": {
             "Color": "primary",  # 按钮颜色
             "AsButton": True,
+            "Info": "解析一个Java项目的所有源文件 | 输入参数为路径",
             "Function": HotReload(解析项目源代码.解析一个Java项目)
         },
         "解析一个前端项目": {
             "Color": "primary",  # 按钮颜色
             "AsButton": False,
+            "Info": "解析一个前端项目的所有源文件（js,ts,css等） | 输入参数为路径",
             "Function": HotReload(解析项目源代码.解析一个前端项目)
+        },
+        "解析整个Lua项目": {
+            "Color": "stop",
+            "AsButton": False,  # 加入下拉菜单中
+            "Info": "解析一个Lua项目的所有源文件 | 输入参数为路径",
+            "Function": HotReload(解析项目源代码.解析一个Lua项目)
         },
         "解析一个CSharp项目": {
             "Color": "primary",  # 按钮颜色
             "AsButton": False,
+            "Info": "解析一个CSharp项目的所有源文件 | 输入参数为路径",
             "Function": HotReload(解析项目源代码.解析一个CSharp项目)
         },
         "解析项目源代码（手动指定和筛选源代码文件类型）": {
@@ -212,10 +245,11 @@ def get_functions_代码解析():
             # 高级参数输入区的显示提示
             "Function": HotReload(解析项目源代码.解析任意code项目)
         },
-        "[测试功能] 解析Jupyter Notebook文件": {
+        "解析Jupyter Notebook文件": {
             "Color": "primary",
             "AsButton": False,
             "Function": HotReload(解析ipynb文件),
+            "Info": "解析Jupyter Notebook文件 | 输入参数为路径",
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": "若输入0，则不解析notebook中的Markdown块",  # 高级参数输入区的显示提示
         },
@@ -233,7 +267,14 @@ def get_functions_多功能插件():
     from crazy_functions.交互功能函数模板 import 交互功能模板函数
     from crazy_functions.语音助手 import 语音助手
     from crazy_functions.虚空终端 import 虚空终端
+    from crazy_functions.函数动态生成 import 函数动态生成
     function_plugins['多功能'] = {
+        "动态代码解释器（CodeInterpreter）": {
+            "Group": "智能体",
+            "Color": "stop",
+            "AsButton": False,
+            "Function": HotReload(函数动态生成)
+        },
         "询问多个GPT模型": {
             "Color": "primary",  # 按钮颜色
             "Function": HotReload(询问多个大语言模型.同时问询)
@@ -241,6 +282,7 @@ def get_functions_多功能插件():
         "[插件demo] 历史上的今天": {
             # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
             "Function": HotReload(高阶功能模板函数),
+            "Info": "查看历史上的今天事件 (这是一个面向开发者的插件Demo) | 不需要输入参数",
             "AsButton": True,
         },
 
@@ -268,11 +310,13 @@ def get_functions_多功能插件():
         "连接网络回答问题（中文Bing版，输入问题后点击该插件）": {
             "Color": "primary",
             "AsButton": False,  # 加入下拉菜单中
+            "Info": "连接网络回答问题（需要访问中文Bing）| 输入参数是一个问题",
             "Function": HotReload(连接bing搜索回答问题)
         },
         "连接网络回答问题（输入问题后点击该插件，需要访问谷歌）": {
             "Color": "primary",
             "AsButton": True,  # 加入下拉菜单中
+            "Info": "连接网络回答问题（需要访问谷歌）| 输入参数是一个问题",
             "Function": HotReload(连接网络回答问题)
         },
         "询问多个GPT模型（手动指定询问哪些模型）": {
@@ -286,12 +330,14 @@ def get_functions_多功能插件():
             "Color": "primary",
             "AsButton": True,
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+            "Info": "图片生成 | 输入参数字符串，提供图像的内容",
             "ArgsReminder": "在这里输入分辨率, 如256x256（默认）",  # 高级参数输入区的显示提示
             "Function": HotReload(图片生成)
         },
         "数学动画生成（Manim）": {
             "Color": "primary",
             "AsButton": False,
+            "Info": "按照自然语言描述生成一个动画 | 输入参数是一段话",
             "Function": HotReload(动画生成)
         },
         "交互功能模板函数": {
@@ -299,12 +345,14 @@ def get_functions_多功能插件():
             "AsButton": False,
             "Function": HotReload(交互功能模板函数)
         },
-        "实时音频采集": {
-            "Color": "primary",
+        "实时语音对话": {
+            "Group": "对话",
+            "Color": "stop",
             "AsButton": True,
+            "Info": "这是一个时刻聆听着的语音对话助手 | 没有输入参数",
             "Function": HotReload(语音助手)
         },
-        "自动终端": {
+        "插件代理助手": {
             "Color": "primary",
             "AsButton": False,
             "Function": HotReload(虚空终端)
@@ -455,6 +503,7 @@ def get_functions_云文档处理():
             "AdvancedArgs": True,
             "Function": HotReload(总结音视频.Kdocs音频提取总结),
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
+            "Info": "批量总结音频或视频 | 输入参数为路径",
             "Parameters": {
                 "提示词分类": '插件定制',
                 "预期产出提示词": '总结摘要提取',
@@ -485,3 +534,7 @@ crazy_fns = {}
 for role in crazy_fns_role:
     for k in crazy_fns_role[role]:
         crazy_fns[k] = crazy_fns_role[role][k]
+
+
+if __name__ == '__main__':
+    print(crazy_fns)

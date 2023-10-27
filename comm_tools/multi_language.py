@@ -33,7 +33,7 @@ import functools
 import re
 import pickle
 import time
-from toolbox import get_conf
+from comm_tools.toolbox import get_conf
 
 CACHE_FOLDER, = get_conf('PATH_LOGGING')
 

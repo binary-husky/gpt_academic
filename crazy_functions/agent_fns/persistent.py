@@ -1,4 +1,4 @@
-from toolbox import Singleton
+from comm_tools.toolbox import Singleton
 @Singleton
 class GradioMultiuserManagerForPersistentClasses():
     def __init__(self):

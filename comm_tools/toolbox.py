@@ -155,9 +155,8 @@ def func_decision_tree(func, cookies, single_turn, use_websearch,
         else:
             if use_websearch:
                 from comm_tools.crazy_functional import crazy_fns
-                google_search = crazy_fns['连接网络回答问题（输入问题后点击该插件，需要访问谷歌）']['Function']
-                bing_search = crazy_fns['连接网络回答问题（中文Bing版，输入问题后点击该插件）']['Function']
-                func = google_search
+                plugin_agent = crazy_fns['插件代理助手']['Function']
+                func = plugin_agent
             if single_turn:
                 yield from func(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, [], system_prompt, *args)
             else:

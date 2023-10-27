@@ -1,4 +1,4 @@
-from toolbox import get_log_folder, update_ui, gen_time_str, trimmed_format_exc, promote_file_to_downloadzone
+from comm_tools.toolbox import get_log_folder, update_ui, gen_time_str, trimmed_format_exc, promote_file_to_downloadzone
 import time, os
 
 class PipeCom():

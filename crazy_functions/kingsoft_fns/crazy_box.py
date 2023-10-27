@@ -614,7 +614,10 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     chatbot.append([None, f'接下来使用的Prompt是`{prompt_cls}`分类下的：`{kwargs_prompt}`'
                           f', 你可以在{func_box.html_tag_color("自定义插件参数")}中指定另一个Prompt哦～'])
     time.sleep(1)
-    prompt = database_processor.SqliteHandle(table=prompt_cls_tab).find_prompt_result(kwargs_prompt)
+    if kwargs_prompt:
+        prompt = database_processor.SqliteHandle(table=prompt_cls_tab).find_prompt_result(kwargs_prompt)
+    else:
+        prompt = ''
     for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
         content_limit = yield from split_content_limit(inputs, llm_kwargs, chatbot, history)
         try:
