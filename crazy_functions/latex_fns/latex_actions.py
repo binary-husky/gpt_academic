@@ -1,6 +1,5 @@
 from comm_tools.toolbox import update_ui, update_ui_lastest_msg, get_log_folder
 from comm_tools.toolbox import zip_folder, objdump, objload, promote_file_to_downloadzone
-
 from .latex_toolbox import PRESERVE, TRANSFORM
 from .latex_toolbox import set_forbidden_text, set_forbidden_text_begin_end, set_forbidden_text_careful_brace
 from .latex_toolbox import reverse_forbidden_text_careful_brace, reverse_forbidden_text, convert_to_linklist, \
@@ -404,10 +403,15 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
             ok = compile_latex_with_timeout(
                 f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex', work_folder_modified)
 
-            if mode!='translate_zh':
-                yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 使用latexdiff生成论文转化前后对比 ...', chatbot, history) # 刷新Gradio前端界面
-                print(    f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
-                ok = compile_latex_with_timeout(f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex', os.getcwd())
+            if mode != 'translate_zh':
+                yield from update_ui_lastest_msg(
+                    f'尝试第 {n_fix}/{max_try} 次编译, 使用latexdiff生成论文转化前后对比 ...', chatbot,
+                    history)  # 刷新Gradio前端界面
+                print(
+                    f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
+                ok = compile_latex_with_timeout(
+                    f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex',
+                    os.getcwd())
 
                 yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 正在编译对比PDF ...', chatbot,
                                                  history)  # 刷新Gradio前端界面
@@ -474,8 +478,8 @@ def write_html(sp_file_contents, sp_file_result, chatbot, project_folder):
     # write html
     try:
         import shutil
-        from ..crazy_utils import construct_html
-        from comm_tools.toolbox import gen_time_str
+        from crazy_functions.pdf_fns.report_gen_html import construct_html
+        from toolbox import gen_time_str
         ch = construct_html()
         orig = ""
         trans = ""

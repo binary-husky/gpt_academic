@@ -73,7 +73,7 @@ def produce_report_markdown(gpt_response_collection, meta, paper_meta_info, chat
     return res_path
 
 def translate_pdf(article_dict, llm_kwargs, chatbot, fp, generated_conclusion_files, TOKEN_LIMIT_PER_FRAGMENT, DST_LANG):
-    from crazy_functions.crazy_utils import construct_html
+    from crazy_functions.pdf_fns.report_gen_html import construct_html
     from crazy_functions.crazy_utils import breakdown_txt_to_satisfy_token_limit_for_pdf
     from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
     from crazy_functions.crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency

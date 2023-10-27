@@ -43,9 +43,8 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
 
     # 如果没找到任何文件
     if len(file_manifest) == 0:
-        report_execption(chatbot, history,
-                         a=f"解析项目: {txt}", b=f"找不到任何.tex或.pdf文件: {txt}")
-        yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
+        report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"找不到任何.pdf拓展名的文件: {txt}")
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
 
     # 开始正式执行任务
@@ -67,7 +66,7 @@ def 解析PDF_基于GROBID(file_manifest, project_folder, llm_kwargs, plugin_kwa
     generated_conclusion_files = []
     generated_html_files = []
     DST_LANG = "中文"
-    from crazy_functions.crazy_utils import construct_html
+    from crazy_functions.pdf_fns.report_gen_html import construct_html
     for index, fp in enumerate(file_manifest):
         chatbot.append(["当前进度：",
                         f"正在连接GROBID服务，请稍候: {grobid_url}\n如果等待时间过长，请修改config中的GROBID_URL，可修改成本地GROBID服务。"]);
@@ -93,7 +92,7 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
     TOKEN_LIMIT_PER_FRAGMENT = 1024
     generated_conclusion_files = []
     generated_html_files = []
-    from crazy_functions.crazy_utils import construct_html
+    from crazy_functions.pdf_fns.report_gen_html import construct_html
     for index, fp in enumerate(file_manifest):
         # 读取PDF文件
         file_content, page_one = read_and_clean_pdf_text(fp)

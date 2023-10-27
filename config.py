@@ -48,6 +48,7 @@ DEFAULT_WORKER_NUM = 3
 THEME = "Default"
 AVAIL_THEMES = ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast", "Gstaff/Xkcd", "NoCrypt/Miku"]
 
+
 # 对话窗的高度 （仅在LAYOUT="TOP-DOWN"时生效）
 CHATBOT_HEIGHT = 1115
 
@@ -58,7 +59,10 @@ CODE_HIGHLIGHT = True
 
 # 窗口布局
 LAYOUT = "LEFT-RIGHT"   # "LEFT-RIGHT"（左右布局） # "TOP-DOWN"（上下布局）
-DARK_MODE = True        # 暗色模式 / 亮色模式
+
+
+# 暗色模式 / 亮色模式
+DARK_MODE = True        
 
 
 # 发送请求到OpenAI后，等待多久判定为超时
@@ -81,8 +85,9 @@ DEFAULT_FN_GROUPS = ['对话', '编程', '学术', '智能体']
 LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
 AVAIL_LLM_MODELS = ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5", "api2d-gpt-3.5-turbo",
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "stack-claude"]
-# P.S. 其他可用的模型还包括 ["qianfan", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613",
-# "spark", "sparkv2", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"]
+
+# P.S. 其他可用的模型还包括 ["qianfan", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613",  "gpt-3.5-random"
+# "spark", "sparkv2", "sparkv3", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"]
 
 
 # 百度千帆（LLM_MODEL="qianfan"）
@@ -121,6 +126,11 @@ AUTHENTICATION = []
 CUSTOM_PATH = "/"
 
 
+# HTTPS 秘钥和证书（不需要修改）
+SSL_KEYFILE = ""
+SSL_CERTFILE = ""
+
+
 # 极少数情况下，openai的官方KEY需要伴随组织编码（格式如org-xxxxxxxxxxxxxxxxxxxxxxxx）使用
 API_ORG = ""
 
@@ -139,7 +149,7 @@ AZURE_ENGINE_DICT = {
 }  # 读 docs\use_azure.md key是你的部署名，value请自行计算模型各自最大Token数，如3.5 = 4096 = 1024 * 4即可
 AVAIL_LLM_MODELS.extend([f"azure-{i}" for i in AZURE_ENGINE_DICT])  # 自动加入模型列表
 
-# 使用Newbing
+# 使用Newbing (不推荐使用，未来将删除)
 NEWBING_STYLE = "creative"  # ["creative", "balanced", "precise"]
 NEWBING_COOKIES = """
 put your new bing cookies here
@@ -176,19 +186,30 @@ HUGGINGFACE_ACCESS_TOKEN = "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"
 # 获取方法：复制以下空间https://huggingface.co/spaces/qingxu98/grobid，设为public，然后GROBID_URL = "https://(你的hf用户名如qingxu98)-(你的填写的空间名如grobid).hf.space"
 GROBID_URLS = [
     "https://qingxu98-grobid.hf.space","https://qingxu98-grobid2.hf.space","https://qingxu98-grobid3.hf.space",
-    "https://shaocongma-grobid.hf.space","https://FBR123-grobid.hf.space", "https://yeku-grobid.hf.space",
+    "https://qingxu98-grobid4.hf.space","https://qingxu98-grobid5.hf.space", "https://qingxu98-grobid6.hf.space", 
+    "https://qingxu98-grobid7.hf.space", "https://qingxu98-grobid8.hf.space",
 ]
 
 
 # 是否允许通过自然语言描述修改本页的配置，该功能具有一定的危险性，默认关闭
 ALLOW_RESET_CONFIG = False
+
+
 # 临时的上传文件夹位置，请勿修改
 PATH_PRIVATE_UPLOAD = "private_upload"
+
+
 # 日志文件夹的位置，请勿修改
 PATH_LOGGING = "gpt_log"
-# 除了连接OpenAI之外，还有哪些场合允许使用代理，请勿修改
-WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid", "Warmup_Modules"]
 
+
+# 除了连接OpenAI之外，还有哪些场合允许使用代理，请勿修改
+WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid", 
+                     "Warmup_Modules", "Nougat_Download", "AutoGen"]
+
+
+# 自定义按钮的最大数量限制
+NUM_CUSTOM_BASIC_BTN = 4
 
 """
 在线大模型配置关联关系示意图

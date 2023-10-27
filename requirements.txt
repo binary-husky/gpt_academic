@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 gradio==3.43.2
+=======
+./docs/gradio-3.32.6-py3-none-any.whl
+>>>>>>> master
 pydantic==1.10.11
 tiktoken>=0.3.3
 requests[socks]

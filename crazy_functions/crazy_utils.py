@@ -72,12 +72,15 @@ def request_gpt_model_in_new_thread_with_ui_alive(
     yield from toolbox.update_ui(chatbot=chatbot, history=[]) # 刷新界面
     executor = ThreadPoolExecutor(max_workers=16)
     mutable = ["", time.time(), ""]
+    # 看门狗耐心
+    watch_dog_patience = 5
+    # 请求任务
     def _req_gpt(inputs, history, sys_prompt):
         retry_op = retry_times_at_unknown_error
         exceeded_cnt = 0
         while True:
             # watchdog error
-            if len(mutable) >= 2 and (time.time()-mutable[1]) > 5: 
+            if len(mutable) >= 2 and (time.time()-mutable[1]) > watch_dog_patience: 
                 raise RuntimeError("检测到程序终止。")
             try:
                 # 【第一种情况】：顺利完成
@@ -197,6 +200,9 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     # 跨线程传递
     mutable = [[f"", time.time(), "等待中"] for _ in range(n_frag)]
 
+    # 看门狗耐心
+    watch_dog_patience = 5
+
     # 子线程任务
     def _req_gpt(index, inputs, history, sys_prompt):
         gpt_say = ""
@@ -205,7 +211,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         mutable[index][2] = "执行中"
         while True:
             # watchdog error
-            if len(mutable[index]) >= 2 and (time.time()-mutable[index][1]) > 5: 
+            if len(mutable[index]) >= 2 and (time.time()-mutable[index][1]) > watch_dog_patience: 
                 raise RuntimeError("检测到程序终止。")
             try:
                 # 【第一种情况】：顺利完成
@@ -307,7 +313,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
             gpt_res = f.result()
             chatbot.append([inputs_show_user, gpt_res])
             yield from toolbox.update_ui(chatbot=chatbot, history=[]) # 刷新界面
-            time.sleep(0.3)
+            time.sleep(0.5)
     return gpt_response_collection
 
 
@@ -716,8 +722,10 @@ class nougat_interface():
 
     def nougat_with_timeout(self, command, cwd, timeout=3600):
         import subprocess
+        from comm_tools.toolbox import ProxyNetworkActivate
         logging.info(f'正在执行命令 {command}')
-        process = subprocess.Popen(command, shell=True, cwd=cwd)
+        with ProxyNetworkActivate("Nougat_Download"):
+            process = subprocess.Popen(command, shell=True, cwd=cwd, env=os.environ)
         try:
             stdout, stderr = process.communicate(timeout=timeout)
         except subprocess.TimeoutExpired:
@@ -749,7 +757,6 @@ class nougat_interface():
         return res[0]
 
 
-
 def try_install_deps(deps, reload_m=[]):
     import subprocess, sys, importlib
     for dep in deps:
@@ -758,55 +765,6 @@ def try_install_deps(deps, reload_m=[]):
     importlib.reload(site)
     for m in reload_m:
         importlib.reload(__import__(m))
-
-
-HTML_CSS = """
-.row {
-  display: flex;
-  flex-wrap: wrap;
-}
-.column {
-  flex: 1;
-  padding: 10px;
-}
-.table-header {
-  font-weight: bold;
-  border-bottom: 1px solid black;
-}
-.table-row {
-  border-bottom: 1px solid lightgray;
-}
-.table-cell {
-  padding: 5px;
-}
-"""
-
-TABLE_CSS = """
-<div class="row table-row">
-    <div class="column table-cell">REPLACE_A</div>
-    <div class="column table-cell">REPLACE_B</div>
-</div>
-"""
-
-
-class construct_html():
-    def __init__(self) -> None:
-        self.css = HTML_CSS
-        self.html_string = f'<!DOCTYPE html><head><meta charset="utf-8"><title>翻译结果</title><style>{self.css}</style></head>'
-
-
-    def add_row(self, a, b):
-        tmp = TABLE_CSS
-        from comm_tools.toolbox import markdown_convertion
-        tmp = tmp.replace('REPLACE_A', markdown_convertion(a))
-        tmp = tmp.replace('REPLACE_B', markdown_convertion(b))
-        self.html_string += tmp
-
-
-    def save_file(self, file_name):
-        with open(os.path.join(get_log_folder(), file_name), 'w', encoding='utf8') as f:
-            f.write(self.html_string.encode('utf-8', 'ignore').decode())
-        return os.path.join(get_log_folder(), file_name)
 
 
 def get_plugin_arg(plugin_kwargs, key, default):

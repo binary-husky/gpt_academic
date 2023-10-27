@@ -155,14 +155,6 @@ model_info = {
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
     },
-    "proxy-gpt-4": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": proxy_endpoint.replace('%v', 'gpt-4'),
-        "max_token": 8192,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
-    },
     "proxy-gpt-4-32k": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
@@ -453,6 +445,22 @@ if "sparkv2" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
         from .bridge_spark import predict as spark_ui
         model_info.update({
             "sparkv2": {
+                "fn_with_ui": spark_ui,
+                "fn_without_ui": spark_noui,
+                "endpoint": None,
+                "max_token": 4096,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            }
+        })
+    except:
+        print(trimmed_format_exc())
+if "sparkv3" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
+    try:
+        from .bridge_spark import predict_no_ui_long_connection as spark_noui
+        from .bridge_spark import predict as spark_ui
+        model_info.update({
+            "sparkv3": {
                 "fn_with_ui": spark_ui,
                 "fn_without_ui": spark_noui,
                 "endpoint": None,
