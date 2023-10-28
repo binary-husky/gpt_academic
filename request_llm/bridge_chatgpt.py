@@ -49,7 +49,7 @@ def decode_chunk(chunk):
     has_role = False
     try: 
         chunkjson = json.loads(chunk_decoded[6:])
-        has_choices = 'choices' in chunkjson
+        has_choices = ('choices' in chunkjson) and (len(chunkjson['choices']) > 0)
         if has_choices: has_content = "content" in chunkjson['choices'][0]["delta"]
         if has_choices: has_role = "role" in chunkjson['choices'][0]["delta"]
     except: 
@@ -216,6 +216,9 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             
             if chunk:
                 try:
+                    if not has_choices:
+                        # 一些垃圾第三方接口的出现这样的错误
+                        continue
                     # 前者是API2D的结束条件，后者是OPENAI的结束条件
                     if ('data: [DONE]' in chunk_decoded) or (len(chunkjson['choices'][0]["delta"]) == 0):
                         # 判定为数据流的结束，gpt_replying_buffer也写完了
