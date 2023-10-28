@@ -29,6 +29,12 @@ proxies, TIMEOUT_SECONDS, MAX_RETRY, API_ORG, AZURE_CFG_ARRAY = \
 timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check proxy settings in config.py.' + \
                   '网络错误，检查代理服务器是否可用，以及代理设置的格式是否正确，格式须是[协议]://[地址]:[端口]，缺一不可。'
 
+def report_invalid_key(key):
+    if get_conf("BLOCK_INVALID_APIKEY"): 
+        # 实验性功能，自动检测并屏蔽失效的KEY，请勿使用
+        from request_llms.key_manager import ApiKeyManager
+        api_key = ApiKeyManager().add_key_to_blacklist(key)
+
 def get_full_error(chunk, stream_response):
     """
         获取完整的从Openai返回的报错
@@ -83,7 +89,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
         用于负责跨越线程传递已经输出的部分，大部分时候仅仅为了fancy的视觉效果，留空即可。observe_window[0]：观测窗。observe_window[1]：看门狗
     """
     watch_dog_patience = 5 # 看门狗的耐心, 设置5秒即可
-    headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt=sys_prompt, stream=True)
+    headers, payload, api_key = generate_payload(inputs, llm_kwargs, history, system_prompt=sys_prompt, stream=True)
     retry = 0
     while True:
         try:
@@ -113,6 +119,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
             if "reduce the length" in error_msg:
                 raise ConnectionAbortedError("OpenAI拒绝了请求:" + error_msg)
             else:
+                if "API key has been deactivated" in error_msg: report_invalid_key(api_key)
                 raise RuntimeError("OpenAI拒绝了请求：" + error_msg)
         if ('data: [DONE]' in chunk): break # api2d 正常完成
         json_data = json.loads(chunk.lstrip('data:'))['choices'][0]
@@ -175,7 +182,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         time.sleep(2)
 
     try:
-        headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt, stream)
+        headers, payload, api_key = generate_payload(inputs, llm_kwargs, history, system_prompt, stream)
     except RuntimeError as e:
         chatbot[-1] = (inputs, f"您提供的api-key不满足要求，不包含任何可用于{llm_kwargs['llm_model']}的api-key。您可能选择了错误的模型或请求源。")
         yield from update_ui(chatbot=chatbot, history=history, msg="api-key不满足要求") # 刷新界面
@@ -223,7 +230,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     yield from update_ui(chatbot=chatbot, history=history, msg="检测到有缺陷的非OpenAI官方接口，建议选择更稳定的接口。")
                     break
                 # 其他情况，直接返回报错
-                chatbot, history = handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
+                chatbot, history = handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg, api_key)
                 yield from update_ui(chatbot=chatbot, history=history, msg="非OpenAI官方接口返回了错误:" + chunk.decode()) # 刷新界面
                 return
             
@@ -265,12 +272,12 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     chunk = get_full_error(chunk, stream_response)
                     chunk_decoded = chunk.decode()
                     error_msg = chunk_decoded
-                    chatbot, history = handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
+                    chatbot, history = handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg, api_key)
                     yield from update_ui(chatbot=chatbot, history=history, msg="Json异常" + error_msg) # 刷新界面
                     print(error_msg)
                     return
 
-def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg):
+def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg, api_key=""):
     from .bridge_all import model_info
     openai_website = ' 请登录OpenAI查看详情 https://platform.openai.com/signup'
     if "reduce the length" in error_msg:
@@ -281,15 +288,15 @@ def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
     elif "does not exist" in error_msg:
         chatbot[-1] = (chatbot[-1][0], f"[Local Message] Model {llm_kwargs['llm_model']} does not exist. 模型不存在, 或者您没有获得体验资格.")
     elif "Incorrect API key" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] Incorrect API key. OpenAI以提供了不正确的API_KEY为由, 拒绝服务. " + openai_website)
+        chatbot[-1] = (chatbot[-1][0], "[Local Message] Incorrect API key. OpenAI以提供了不正确的API_KEY为由, 拒绝服务. " + openai_website); report_invalid_key(api_key)
     elif "exceeded your current quota" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] You exceeded your current quota. OpenAI以账户额度不足为由, 拒绝服务." + openai_website)
+        chatbot[-1] = (chatbot[-1][0], "[Local Message] You exceeded your current quota. OpenAI以账户额度不足为由, 拒绝服务." + openai_website); report_invalid_key(api_key)
     elif "account is not active" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] Your account is not active. OpenAI以账户失效为由, 拒绝服务." + openai_website)
+        chatbot[-1] = (chatbot[-1][0], "[Local Message] Your account is not active. OpenAI以账户失效为由, 拒绝服务." + openai_website); report_invalid_key(api_key)
     elif "associated with a deactivated account" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] You are associated with a deactivated account. OpenAI以账户失效为由, 拒绝服务." + openai_website)
+        chatbot[-1] = (chatbot[-1][0], "[Local Message] You are associated with a deactivated account. OpenAI以账户失效为由, 拒绝服务." + openai_website); report_invalid_key(api_key)
     elif "API key has been deactivated" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] API key has been deactivated. OpenAI以账户失效为由, 拒绝服务." + openai_website)
+        chatbot[-1] = (chatbot[-1][0], "[Local Message] API key has been deactivated. OpenAI以账户失效为由, 拒绝服务." + openai_website); report_invalid_key(api_key)
     elif "bad forward key" in error_msg:
         chatbot[-1] = (chatbot[-1][0], "[Local Message] Bad forward key. API2D账户额度不足.")
     elif "Not enough point" in error_msg:
@@ -371,6 +378,6 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         print(f" {llm_kwargs['llm_model']} : {conversation_cnt} : {inputs[:100]} ..........")
     except:
         print('输入中可能存在乱码。')
-    return headers,payload
+    return headers, payload, api_key
 
 
