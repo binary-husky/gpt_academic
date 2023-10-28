@@ -90,7 +90,7 @@ class PluginMultiprocessManager():
             for f in change_list: 
                 res = promote_file_to_downloadzone(f)
                 file_links += f'<br/><a href="file={res}" target="_blank">{res}</a>'
-                yield from self.immediate_showoff_when_possible(file_path)
+                yield from self.immediate_showoff_when_possible(f)
 
             self.chatbot.append(['检测到新生文档.', f'文档清单如下: {file_links}'])
             yield from update_ui(chatbot=self.chatbot, history=self.history)
