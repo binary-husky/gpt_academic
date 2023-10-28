@@ -31,7 +31,7 @@ class ApiKeyManager():
         if self.log:
             with open(
                 os.path.join(get_log_folder(user='admin', plugin_name='api_key_manager'), 'invalid_key.log'), 'a+', encoding='utf8') as f:
-                summary = 'num blacklist keys' + len(self.key_black_list) + 'num valid keys' + len(self.remain_keys)
+                summary = 'num blacklist keys:' + str(len(self.key_black_list)) + '\tnum valid keys:' + str(len(self.remain_keys))
                 f.write('\n\n' + summary + '\n')
                 f.write('---- <add blacklist key> ----\n')
                 f.write(key)
