@@ -44,7 +44,7 @@ class GetGLMFTHandle(Process):
             self.info = "依赖检测通过"
             self.success = True
         except:
-            self.info = "缺少ChatGLMFT的依赖，如果要使用ChatGLMFT，除了基础的pip依赖以外，您还需要运行`pip install -r request_llm/requirements_chatglm.txt`安装ChatGLM的依赖。"
+            self.info = "缺少ChatGLMFT的依赖，如果要使用ChatGLMFT，除了基础的pip依赖以外，您还需要运行`pip install -r request_llms/requirements_chatglm.txt`安装ChatGLM的依赖。"
             self.success = False
 
     def ready(self):
@@ -59,7 +59,7 @@ class GetGLMFTHandle(Process):
                 if self.chatglmft_model is None:
                     from transformers import AutoConfig
                     import torch
-                    # conf = 'request_llm/current_ptune_model.json'
+                    # conf = 'request_llms/current_ptune_model.json'
                     # if not os.path.exists(conf): raise RuntimeError('找不到微调模型信息')
                     # with open(conf, 'r', encoding='utf8') as f:
                     #     model_args = json.loads(f.read())
@@ -140,7 +140,7 @@ glmft_handle = None
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=[], console_slience=False):
     """
         多线程方法
-        函数的说明请见 request_llm/bridge_all.py
+        函数的说明请见 request_llms/bridge_all.py
     """
     global glmft_handle
     if glmft_handle is None:
@@ -171,7 +171,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
 def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream = True, additional_fn=None):
     """
         单线程方法
-        函数的说明请见 request_llm/bridge_all.py
+        函数的说明请见 request_llms/bridge_all.py
     """
     chatbot.append((inputs, ""))
 

@@ -28,8 +28,8 @@ class GetGLMHandle(Process):
             self.success = True
         except:
             from toolbox import trimmed_format_exc
-            self.info = r"缺少jittorllms的依赖，如果要使用jittorllms，除了基础的pip依赖以外，您还需要运行`pip install -r request_llm/requirements_jittorllms.txt -i https://pypi.jittor.org/simple -I`"+\
-                        r"和`git clone https://gitlink.org.cn/jittor/JittorLLMs.git --depth 1 request_llm/jittorllms`两个指令来安装jittorllms的依赖（在项目根目录运行这两个指令）。" +\
+            self.info = r"缺少jittorllms的依赖，如果要使用jittorllms，除了基础的pip依赖以外，您还需要运行`pip install -r request_llms/requirements_jittorllms.txt -i https://pypi.jittor.org/simple -I`"+\
+                        r"和`git clone https://gitlink.org.cn/jittor/JittorLLMs.git --depth 1 request_llms/jittorllms`两个指令来安装jittorllms的依赖（在项目根目录运行这两个指令）。" +\
                         r"警告：安装jittorllms依赖后将完全破坏现有的pytorch环境，建议使用docker环境！" + trimmed_format_exc()
             self.success = False
 
@@ -45,8 +45,8 @@ class GetGLMHandle(Process):
             env = os.environ.get("PATH", "")
             os.environ["PATH"] = env.replace('/cuda/bin', '/x/bin')
             root_dir_assume = os.path.abspath(os.path.dirname(__file__) +  '/..')
-            os.chdir(root_dir_assume + '/request_llm/jittorllms')
-            sys.path.append(root_dir_assume + '/request_llm/jittorllms')
+            os.chdir(root_dir_assume + '/request_llms/jittorllms')
+            sys.path.append(root_dir_assume + '/request_llms/jittorllms')
         validate_path() # validate path so you can run from base directory
 
         def load_model():
@@ -109,7 +109,7 @@ llama_glm_handle = None
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=[], console_slience=False):
     """
         多线程方法
-        函数的说明请见 request_llm/bridge_all.py
+        函数的说明请见 request_llms/bridge_all.py
     """
     global llama_glm_handle
     if llama_glm_handle is None:
@@ -140,7 +140,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
 def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream = True, additional_fn=None):
     """
         单线程方法
-        函数的说明请见 request_llm/bridge_all.py
+        函数的说明请见 request_llms/bridge_all.py
     """
     chatbot.append((inputs, ""))
 

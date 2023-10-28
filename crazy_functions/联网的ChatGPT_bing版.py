@@ -2,7 +2,7 @@ from toolbox import CatchException, update_ui
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, input_clipping
 import requests
 from bs4 import BeautifulSoup
-from request_llm.bridge_all import model_info
+from request_llms.bridge_all import model_info
 
 
 def bing_search(query, proxies=None):

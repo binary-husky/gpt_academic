@@ -120,7 +120,7 @@ def get_local_llm_predict_fns(LLMSingletonClass, model_name):
     def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=[], console_slience=False):
         """
             ⭐多线程方法
-            函数的说明请见 request_llm/bridge_all.py
+            函数的说明请见 request_llms/bridge_all.py
         """
         _llm_handle = LLMSingletonClass()
         if len(observe_window) >= 1: observe_window[0] = load_message + "\n\n" + _llm_handle.info
@@ -146,7 +146,7 @@ def get_local_llm_predict_fns(LLMSingletonClass, model_name):
     def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream = True, additional_fn=None):
         """
             ⭐单线程方法
-            函数的说明请见 request_llm/bridge_all.py
+            函数的说明请见 request_llms/bridge_all.py
         """
         chatbot.append((inputs, ""))
 

@@ -24,12 +24,12 @@ class GetGLMHandle(Process):
     def check_dependency(self): # 主进程执行
         try:
             import datasets, os
-            assert os.path.exists('request_llm/moss/models')
+            assert os.path.exists('request_llms/moss/models')
             self.info = "依赖检测通过"
             self.success = True
         except:
             self.info = """
-            缺少MOSS的依赖，如果要使用MOSS，除了基础的pip依赖以外，您还需要运行`pip install -r request_llm/requirements_moss.txt`和`git clone https://github.com/OpenLMLab/MOSS.git request_llm/moss`安装MOSS的依赖。
+            缺少MOSS的依赖，如果要使用MOSS，除了基础的pip依赖以外，您还需要运行`pip install -r request_llms/requirements_moss.txt`和`git clone https://github.com/OpenLMLab/MOSS.git request_llms/moss`安装MOSS的依赖。
             """
             self.success = False
         return self.success
@@ -110,8 +110,8 @@ class GetGLMHandle(Process):
         def validate_path():
             import os, sys
             root_dir_assume = os.path.abspath(os.path.dirname(__file__) +  '/..')
-            os.chdir(root_dir_assume + '/request_llm/moss')
-            sys.path.append(root_dir_assume + '/request_llm/moss')
+            os.chdir(root_dir_assume + '/request_llms/moss')
+            sys.path.append(root_dir_assume + '/request_llms/moss')
         validate_path() # validate path so you can run from base directory
 
         try:
@@ -176,7 +176,7 @@ moss_handle = None
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=[], console_slience=False):
     """
         多线程方法
-        函数的说明请见 request_llm/bridge_all.py
+        函数的说明请见 request_llms/bridge_all.py
     """
     global moss_handle
     if moss_handle is None:
@@ -206,7 +206,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
 def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream = True, additional_fn=None):
     """
         单线程方法
-        函数的说明请见 request_llm/bridge_all.py
+        函数的说明请见 request_llms/bridge_all.py
     """
     chatbot.append((inputs, ""))
 

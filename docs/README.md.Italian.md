@@ -109,12 +109,12 @@ python -m pip install -r requirements.txt # questo passaggio funziona allo stess
 
 【Passaggio facoltativo】 Se si desidera supportare ChatGLM di Tsinghua/MOSS di Fudan come backend, è necessario installare ulteriori dipendenze (prerequisiti: conoscenza di Python, esperienza con Pytorch e computer sufficientemente potente):
 ```sh
-# 【Passaggio facoltativo I】 Supporto a ChatGLM di Tsinghua. Note su ChatGLM di Tsinghua: in caso di errore "Call ChatGLM fail 不能正常加载ChatGLM的参数" , fare quanto segue: 1. Per impostazione predefinita, viene installata la versione di torch + cpu; per usare CUDA, è necessario disinstallare torch e installare nuovamente torch + cuda; 2. Se non è possibile caricare il modello a causa di una configurazione insufficiente del computer, è possibile modificare la precisione del modello in request_llm/bridge_chatglm.py, cambiando AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) in AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
-python -m pip install -r request_llm/requirements_chatglm.txt  
+# 【Passaggio facoltativo I】 Supporto a ChatGLM di Tsinghua. Note su ChatGLM di Tsinghua: in caso di errore "Call ChatGLM fail 不能正常加载ChatGLM的参数" , fare quanto segue: 1. Per impostazione predefinita, viene installata la versione di torch + cpu; per usare CUDA, è necessario disinstallare torch e installare nuovamente torch + cuda; 2. Se non è possibile caricare il modello a causa di una configurazione insufficiente del computer, è possibile modificare la precisione del modello in request_llms/bridge_chatglm.py, cambiando AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) in AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
+python -m pip install -r request_llms/requirements_chatglm.txt  
 
 # 【Passaggio facoltativo II】 Supporto a MOSS di Fudan
-python -m pip install -r request_llm/requirements_moss.txt
-git clone https://github.com/OpenLMLab/MOSS.git request_llm/moss  # Si prega di notare che quando si esegue questa riga di codice, si deve essere nella directory radice del progetto
+python -m pip install -r request_llms/requirements_moss.txt
+git clone https://github.com/OpenLMLab/MOSS.git request_llms/moss  # Si prega di notare che quando si esegue questa riga di codice, si deve essere nella directory radice del progetto
 
 # 【Passaggio facoltativo III】 Assicurati che il file di configurazione config.py includa tutti i modelli desiderati, al momento tutti i modelli supportati sono i seguenti (i modelli della serie jittorllms attualmente supportano solo la soluzione docker):
 AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "newbing", "moss"] # + ["jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]

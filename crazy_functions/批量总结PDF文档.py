@@ -21,7 +21,7 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
         TOKEN_LIMIT_PER_FRAGMENT = 2500
 
         from .crazy_utils import breakdown_txt_to_satisfy_token_limit_for_pdf
-        from request_llm.bridge_all import model_info
+        from request_llms.bridge_all import model_info
         enc = model_info["gpt-3.5-turbo"]['tokenizer']
         def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))
         paper_fragments = breakdown_txt_to_satisfy_token_limit_for_pdf(

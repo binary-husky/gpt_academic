@@ -5,7 +5,7 @@ import datetime
 
 def gen_image(llm_kwargs, prompt, resolution="256x256"):
     import requests, json, time, os
-    from request_llm.bridge_all import model_info
+    from request_llms.bridge_all import model_info
 
     proxies, = get_conf('proxies')
     # Set up OpenAI API key and model 

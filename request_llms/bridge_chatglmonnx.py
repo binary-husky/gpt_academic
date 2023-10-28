@@ -1,5 +1,5 @@
-model_name = "Qwen"
-cmd_to_install = "`pip install -r request_llm/requirements_qwen.txt`"
+model_name = "ChatGLM-ONNX"
+cmd_to_install = "`pip install -r request_llms/requirements_chatglm_onnx.txt`"
 
 
 from transformers import AutoModel, AutoTokenizer
@@ -9,6 +9,8 @@ import importlib
 from toolbox import update_ui, get_conf
 from multiprocessing import Process, Pipe
 from .local_llm_class import LocalLLMHandle, get_local_llm_predict_fns, SingletonLocalLLM
+
+from .chatglmoonx import ChatGLMModel, chat_template
 
 
 
@@ -26,19 +28,16 @@ class GetONNXGLMHandle(LocalLLMHandle):
     def load_model_and_tokenizer(self):
         # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行
         import os, glob
-        import os
-        import platform
-        from modelscope import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
-
-        model_id = 'qwen/Qwen-7B-Chat'
-        revision = 'v1.0.1'
-        self._tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision, trust_remote_code=True)
-        # use fp16
-        model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto", revision=revision, trust_remote_code=True, fp16=True).eval()
-        model.generation_config = GenerationConfig.from_pretrained(model_id, trust_remote_code=True)  # 可指定不同的生成长度、top_p等相关超参
-        self._model = model
-
-        return self._model, self._tokenizer
+        if not len(glob.glob("./request_llms/ChatGLM-6b-onnx-u8s8/chatglm-6b-int8-onnx-merged/*.bin")) >= 7: # 该模型有七个 bin 文件
+            from huggingface_hub import snapshot_download
+            snapshot_download(repo_id="K024/ChatGLM-6b-onnx-u8s8", local_dir="./request_llms/ChatGLM-6b-onnx-u8s8")
+        def create_model():
+            return ChatGLMModel(
+                tokenizer_path = "./request_llms/ChatGLM-6b-onnx-u8s8/chatglm-6b-int8-onnx-merged/sentencepiece.model",
+                onnx_model_path = "./request_llms/ChatGLM-6b-onnx-u8s8/chatglm-6b-int8-onnx-merged/chatglm-6b-int8.onnx"
+            )
+        self._model = create_model()
+        return self._model, None
 
     def llm_stream_generator(self, **kwargs):
         # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行
@@ -52,14 +51,20 @@ class GetONNXGLMHandle(LocalLLMHandle):
 
         query, max_length, top_p, temperature, history = adaptor(kwargs)
 
-        for response in self._model.chat(self._tokenizer, query, history=history, stream=True):
-            yield response
+        prompt = chat_template(history, query)
+        for answer in self._model.generate_iterate(
+            prompt,
+            max_generated_tokens=max_length,
+            top_k=1,
+            top_p=top_p,
+            temperature=temperature,
+        ):
+            yield answer
         
     def try_to_import_special_deps(self, **kwargs):
         # import something that will raise error if the user does not install requirement_*.txt
-        # 🏃‍♂️🏃‍♂️🏃‍♂️ 主进程执行
-        import importlib
-        importlib.import_module('modelscope')
+        # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行
+        pass
 
 
 # ------------------------------------------------------------------------------------------------------------------------

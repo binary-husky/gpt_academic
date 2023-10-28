@@ -1,5 +1,5 @@
 model_name = "LLaMA"
-cmd_to_install = "`pip install -r request_llm/requirements_chatglm.txt`"
+cmd_to_install = "`pip install -r request_llms/requirements_chatglm.txt`"
 
 
 from transformers import AutoModelForCausalLM, AutoTokenizer, TextIteratorStreamer

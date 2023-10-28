@@ -99,7 +99,7 @@ class ClaudeHandle(Process):
             self.info = "依赖检测通过，等待Claude响应。注意目前不能多人同时调用Claude接口（有线程锁），否则将导致每个人的Claude问询历史互相渗透。调用Claude时，会自动使用已配置的代理。"
             self.success = True
         except:
-            self.info = "缺少的依赖，如果要使用Claude，除了基础的pip依赖以外，您还需要运行`pip install -r request_llm/requirements_slackclaude.txt`安装Claude的依赖，然后重启程序。"
+            self.info = "缺少的依赖，如果要使用Claude，除了基础的pip依赖以外，您还需要运行`pip install -r request_llms/requirements_slackclaude.txt`安装Claude的依赖，然后重启程序。"
             self.success = False
 
     def ready(self):
@@ -204,7 +204,7 @@ claude_handle = None
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=None, console_slience=False):
     """
         多线程方法
-        函数的说明请见 request_llm/bridge_all.py
+        函数的说明请见 request_llms/bridge_all.py
     """
     global claude_handle
     if (claude_handle is None) or (not claude_handle.success):
@@ -234,7 +234,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
 def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream=True, additional_fn=None):
     """
         单线程方法
-        函数的说明请见 request_llm/bridge_all.py
+        函数的说明请见 request_llms/bridge_all.py
     """
     chatbot.append((inputs, "[Local Message]: 等待Claude响应中 ..."))
 

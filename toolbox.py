@@ -878,7 +878,7 @@ def clip_history(inputs, history, tokenizer, max_token_limit):
     直到历史记录的标记数量降低到阈值以下。
     """
     import numpy as np
-    from request_llm.bridge_all import model_info
+    from request_llms.bridge_all import model_info
     def get_token_num(txt): 
         return len(tokenizer.encode(txt, disallowed_special=()))
     input_token_num = get_token_num(inputs)
@@ -1069,7 +1069,7 @@ def get_plugin_handle(plugin_name):
 def get_chat_handle():
     """
     """
-    from request_llm.bridge_all import predict_no_ui_long_connection
+    from request_llms.bridge_all import predict_no_ui_long_connection
     return predict_no_ui_long_connection
 
 def get_plugin_default_kwargs():

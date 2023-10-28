@@ -136,7 +136,7 @@ SSL_CERTFILE = ""
 API_ORG = ""
 
 
-# 如果需要使用Slack Claude，使用教程详情见 request_llm/README.md
+# 如果需要使用Slack Claude，使用教程详情见 request_llms/README.md
 SLACK_CLAUDE_BOT_ID = ''   
 SLACK_CLAUDE_USER_TOKEN = ''
 
