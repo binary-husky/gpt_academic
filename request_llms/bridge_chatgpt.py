@@ -45,16 +45,18 @@ def decode_chunk(chunk):
     chunk_decoded = chunk.decode()
     chunkjson = None
     has_choices = False
+    choice_valid = False
     has_content = False
     has_role = False
     try: 
         chunkjson = json.loads(chunk_decoded[6:])
-        has_choices = ('choices' in chunkjson) and (len(chunkjson['choices']) > 0)
-        if has_choices: has_content = "content" in chunkjson['choices'][0]["delta"]
-        if has_choices: has_role = "role" in chunkjson['choices'][0]["delta"]
+        has_choices = 'choices' in chunkjson
+        if has_choices: choice_valid = (len(chunkjson['choices']) > 0)
+        if has_choices and choice_valid: has_content = "content" in chunkjson['choices'][0]["delta"]
+        if has_choices and choice_valid: has_role = "role" in chunkjson['choices'][0]["delta"]
     except: 
         pass
-    return chunk_decoded, chunkjson, has_choices, has_content, has_role
+    return chunk_decoded, chunkjson, has_choices, choice_valid, has_content, has_role
 
 from functools import lru_cache
 @lru_cache(maxsize=32)
@@ -64,7 +66,6 @@ def verify_endpoint(endpoint):
     """
     if "你亲手写的api名称" in endpoint:
         raise ValueError("Endpoint不正确, 请检查AZURE_ENDPOINT的配置! 当前的Endpoint为:" + endpoint)
-    print(endpoint)
     return endpoint
 
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=None, console_slience=False):
@@ -97,7 +98,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
             if retry > MAX_RETRY: raise TimeoutError
             if MAX_RETRY!=0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
 
-    stream_response =  response.iter_lines()
+    stream_response = response.iter_lines()
     result = ''
     json_data = None
     while True:
@@ -213,6 +214,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         while True:
             try:
                 chunk = next(stream_response)
+                print(chunk)
             except StopIteration:
                 # 非OpenAI官方接口的出现这样的报错，OpenAI和API2D不会走这里
                 chunk_decoded = chunk.decode()
@@ -227,7 +229,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                 return
             
             # 提前读取一些信息 （用于判断异常）
-            chunk_decoded, chunkjson, has_choices, has_content, has_role = decode_chunk(chunk)
+            chunk_decoded, chunkjson, has_choices, choice_valid, has_content, has_role = decode_chunk(chunk)
 
             if is_head_of_the_stream and (r'"object":"error"' not in chunk_decoded) and (r"content" not in chunk_decoded):
                 # 数据流的第一帧不携带content
@@ -235,7 +237,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             
             if chunk:
                 try:
-                    if not has_choices:
+                    if has_choices and not choice_valid:
                         # 一些垃圾第三方接口的出现这样的错误
                         continue
                     # 前者是API2D的结束条件，后者是OPENAI的结束条件
@@ -287,6 +289,8 @@ def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
         chatbot[-1] = (chatbot[-1][0], "[Local Message] Your account is not active. OpenAI以账户失效为由, 拒绝服务." + openai_website)
     elif "associated with a deactivated account" in error_msg:
         chatbot[-1] = (chatbot[-1][0], "[Local Message] You are associated with a deactivated account. OpenAI以账户失效为由, 拒绝服务." + openai_website)
+    elif "API key has been deactivated" in error_msg:
+        chatbot[-1] = (chatbot[-1][0], "[Local Message] API key has been deactivated. OpenAI以账户失效为由, 拒绝服务." + openai_website)
     elif "bad forward key" in error_msg:
         chatbot[-1] = (chatbot[-1][0], "[Local Message] Bad forward key. API2D账户额度不足.")
     elif "Not enough point" in error_msg:
