@@ -483,6 +483,22 @@ if "llama2" in AVAIL_LLM_MODELS:   # llama2
         })
     except:
         print(trimmed_format_exc())
+if "zhipuai" in AVAIL_LLM_MODELS:   # zhipuai
+    try:
+        from .bridge_zhipu import predict_no_ui_long_connection as zhipu_noui
+        from .bridge_zhipu import predict as zhipu_ui
+        model_info.update({
+            "zhipuai": {
+                "fn_with_ui": zhipu_ui,
+                "fn_without_ui": zhipu_noui,
+                "endpoint": None,
+                "max_token": 4096,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            }
+        })
+    except:
+        print(trimmed_format_exc())
 
 # <-- 用于定义和切换多个azure模型 -->
 AZURE_CFG_ARRAY, = get_conf("AZURE_CFG_ARRAY")

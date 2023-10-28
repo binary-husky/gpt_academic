@@ -7,6 +7,7 @@ import os
 import gradio
 import shutil
 import glob
+import math
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
 pj = os.path.join
@@ -372,6 +373,26 @@ def markdown_convertion(txt):
                 contain_any_eq = True
         return contain_any_eq
 
+    def fix_markdown_indent(txt):
+        # fix markdown indent
+        if (' - ' not in txt) or ('. ' not in txt): 
+            return txt # do not need to fix, fast escape
+        # walk through the lines and fix non-standard indentation
+        lines = txt.split("\n")
+        pattern = re.compile(r'^\s+-')
+        activated = False
+        for i, line in enumerate(lines):
+            if line.startswith('- ') or line.startswith('1. '):
+                activated = True
+            if activated and pattern.match(line):
+                stripped_string = line.lstrip()
+                num_spaces = len(line) - len(stripped_string)
+                if (num_spaces % 4) == 3:
+                    num_spaces_should_be = math.ceil(num_spaces/4) * 4
+                    lines[i] = ' ' * num_spaces_should_be + stripped_string
+        return '\n'.join(lines)
+
+    txt = fix_markdown_indent(txt)
     if is_equation(txt):  # 有$标识的公式符号，且没有代码段```的标识
         # convert everything to html format
         split = markdown.markdown(text='---')

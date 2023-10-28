@@ -222,7 +222,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
 
     watch_dog_patience = 5  # 看门狗 (watchdog) 的耐心, 设置5秒即可
     response = ""
-    observe_window[0] = "[Local Message]: 等待Claude响应中 ..."
+    observe_window[0] = "[Local Message] 等待Claude响应中 ..."
     for response in claude_handle.stream_chat(query=inputs, history=history_feedin, system_prompt=sys_prompt, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
         observe_window[0] = preprocess_newbing_out_simple(response)
         if len(observe_window) >= 2:
@@ -236,7 +236,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         单线程方法
         函数的说明请见 request_llms/bridge_all.py
     """
-    chatbot.append((inputs, "[Local Message]: 等待Claude响应中 ..."))
+    chatbot.append((inputs, "[Local Message] 等待Claude响应中 ..."))
 
     global claude_handle
     if (claude_handle is None) or (not claude_handle.success):
@@ -255,14 +255,14 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     for i in range(len(history)//2):
         history_feedin.append([history[2*i], history[2*i+1]])
 
-    chatbot[-1] = (inputs, "[Local Message]: 等待Claude响应中 ...")
-    response = "[Local Message]: 等待Claude响应中 ..."
+    chatbot[-1] = (inputs, "[Local Message] 等待Claude响应中 ...")
+    response = "[Local Message] 等待Claude响应中 ..."
     yield from update_ui(chatbot=chatbot, history=history, msg="Claude响应缓慢，尚未完成全部响应，请耐心完成后再提交新问题。")
     for response in claude_handle.stream_chat(query=inputs, history=history_feedin, system_prompt=system_prompt):
         chatbot[-1] = (inputs, preprocess_newbing_out(response))
         yield from update_ui(chatbot=chatbot, history=history, msg="Claude响应缓慢，尚未完成全部响应，请耐心完成后再提交新问题。")
-    if response == "[Local Message]: 等待Claude响应中 ...":
-        response = "[Local Message]: Claude响应异常，请刷新界面重试 ..."
+    if response == "[Local Message] 等待Claude响应中 ...":
+        response = "[Local Message] Claude响应异常，请刷新界面重试 ..."
     history.extend([inputs, response])
     logging.info(f'[raw_input] {inputs}')
     logging.info(f'[response] {response}')

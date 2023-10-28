@@ -166,14 +166,14 @@ def get_local_llm_predict_fns(LLMSingletonClass, model_name):
             history_feedin.append([history[2*i], history[2*i+1]] )
 
         # 开始接收回复
-        response = f"[Local Message]: 等待{model_name}响应中 ..."
+        response = f"[Local Message] 等待{model_name}响应中 ..."
         for response in _llm_handle.stream_chat(query=inputs, history=history_feedin, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
             chatbot[-1] = (inputs, response)
             yield from update_ui(chatbot=chatbot, history=history)
 
         # 总结输出
-        if response == f"[Local Message]: 等待{model_name}响应中 ...":
-            response = f"[Local Message]: {model_name}响应异常 ..."
+        if response == f"[Local Message] 等待{model_name}响应中 ...":
+            response = f"[Local Message] {model_name}响应异常 ..."
         history.extend([inputs, response])
         yield from update_ui(chatbot=chatbot, history=history)
 

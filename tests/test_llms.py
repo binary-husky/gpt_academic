@@ -17,7 +17,8 @@ if __name__ == "__main__":
     # from request_llms.bridge_claude import predict_no_ui_long_connection
     # from request_llms.bridge_internlm import predict_no_ui_long_connection
     # from request_llms.bridge_qwen import predict_no_ui_long_connection
-    from request_llms.bridge_spark import predict_no_ui_long_connection
+    # from request_llms.bridge_spark import predict_no_ui_long_connection
+    from request_llms.bridge_zhipu import predict_no_ui_long_connection
 
     llm_kwargs = {
         'max_length': 4096,

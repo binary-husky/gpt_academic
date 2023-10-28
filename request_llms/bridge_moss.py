@@ -219,7 +219,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             moss_handle = None
             return
     else:
-        response = "[Local Message]: 等待MOSS响应中 ..."
+        response = "[Local Message] 等待MOSS响应中 ..."
         chatbot[-1] = (inputs, response)
         yield from update_ui(chatbot=chatbot, history=history)
 
@@ -238,7 +238,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         yield from update_ui(chatbot=chatbot, history=history)
 
     # 总结输出
-    if response == "[Local Message]: 等待MOSS响应中 ...":
-        response = "[Local Message]: MOSS响应异常 ..."
+    if response == "[Local Message] 等待MOSS响应中 ...":
+        response = "[Local Message] MOSS响应异常 ..."
     history.extend([inputs, response.strip('<|MOSS|>: ')])
     yield from update_ui(chatbot=chatbot, history=history)
