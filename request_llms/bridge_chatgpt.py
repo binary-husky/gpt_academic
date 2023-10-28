@@ -214,7 +214,6 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         while True:
             try:
                 chunk = next(stream_response)
-                print(chunk)
             except StopIteration:
                 # 非OpenAI官方接口的出现这样的报错，OpenAI和API2D不会走这里
                 chunk_decoded = chunk.decode()
