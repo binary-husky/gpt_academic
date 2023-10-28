@@ -505,7 +505,7 @@ if len(AZURE_CFG_ARRAY) > 0:
             }
         })
         if azure_model_name not in AVAIL_LLM_MODELS:
-            azure_model_name += [azure_model_name]
+            AVAIL_LLM_MODELS += [azure_model_name]
 
 
 
