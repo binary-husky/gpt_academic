@@ -1,6 +1,6 @@
 > **Note**
 >
-> 2023.10.8: Gradio, Pydantic依赖调整，已修改 `requirements.txt`。请及时**更新代码**，安装依赖时，请严格选择`requirements.txt`中**指定的版本**。
+> 2023.10.28: 紧急修复了若干问题，安装依赖时，请选择`requirements.txt`中**指定的版本**。
 >
 > `pip install -r requirements.txt`
 
@@ -310,6 +310,7 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 
 ### II：版本:
 - version 3.60（todo）: 优化虚空终端，引入code interpreter和更多插件
+- version 3.56: 支持动态追加基础功能按钮，新汇报PDF汇总页面
 - version 3.55: 重构前端界面，引入悬浮窗口与菜单栏
 - version 3.54: 新增动态代码解释器（Code Interpreter）（待完善）
 - version 3.53: 支持动态选择不同界面主题，提高稳定性&解决多用户冲突问题
@@ -344,7 +345,14 @@ GPT Academic开发者QQ群：`610599535`
 1. `Chuanhu-Small-and-Beautiful` [网址](https://github.com/GaiZhenbiao/ChuanhuChatGPT/)
 
 
-### IV：参考与学习
+### IV：本项目的开发分支
+
+1. `master` 分支: 主分支，稳定版
+
+2. `frontier` 分支: 开发分支，测试版
+
+
+### V：参考与学习
 
 ```
 代码中参考了很多其他优秀项目中的设计，顺序不分先后：
