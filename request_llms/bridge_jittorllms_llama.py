@@ -53,7 +53,7 @@ class GetGLMHandle(Process):
             import types
             try:
                 if self.jittorllms_model is None:
-                    device, = get_conf('LOCAL_MODEL_DEVICE')
+                    device = get_conf('LOCAL_MODEL_DEVICE')
                     from .jittorllms.models import get_model
                     # availabel_models = ["chatglm", "pangualpha", "llama", "chatrwkv"]
                     args_dict = {'model': 'llama'}

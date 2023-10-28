@@ -14,7 +14,7 @@ def main():
     CHATBOT_HEIGHT, LAYOUT, AVAIL_LLM_MODELS, AUTO_CLEAR_TXT = get_conf('CHATBOT_HEIGHT', 'LAYOUT', 'AVAIL_LLM_MODELS', 'AUTO_CLEAR_TXT')
     ENABLE_AUDIO, AUTO_CLEAR_TXT, PATH_LOGGING, AVAIL_THEMES, THEME = get_conf('ENABLE_AUDIO', 'AUTO_CLEAR_TXT', 'PATH_LOGGING', 'AVAIL_THEMES', 'THEME')
     DARK_MODE, NUM_CUSTOM_BASIC_BTN, SSL_KEYFILE, SSL_CERTFILE = get_conf('DARK_MODE', 'NUM_CUSTOM_BASIC_BTN', 'SSL_KEYFILE', 'SSL_CERTFILE')
-    INIT_SYS_PROMPT, = get_conf('INIT_SYS_PROMPT')
+    INIT_SYS_PROMPT = get_conf('INIT_SYS_PROMPT')
 
     # 如果WEB_PORT是-1, 则随机选取WEB端口
     PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
@@ -48,7 +48,7 @@ def main():
 
     # 高级函数插件
     from crazy_functional import get_crazy_functions
-    DEFAULT_FN_GROUPS, = get_conf('DEFAULT_FN_GROUPS')
+    DEFAULT_FN_GROUPS = get_conf('DEFAULT_FN_GROUPS')
     plugins = get_crazy_functions()
     all_plugin_groups = list(set([g for _, plugin in plugins.items() for g in plugin['Group'].split('|')]))
     match_group = lambda tags, groups: any([g in groups for g in tags.split('|')])
@@ -436,7 +436,7 @@ def main():
         blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile"])
 
     # 如果需要在二级路径下运行
-    # CUSTOM_PATH, = get_conf('CUSTOM_PATH')
+    # CUSTOM_PATH = get_conf('CUSTOM_PATH')
     # if CUSTOM_PATH != "/": 
     #     from toolbox import run_gradio_in_subpath
     #     run_gradio_in_subpath(demo, auth=AUTHENTICATION, port=PORT, custom_path=CUSTOM_PATH)

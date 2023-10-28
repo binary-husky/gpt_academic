@@ -498,7 +498,7 @@ def get_crazy_functions():
 
     try:
         from toolbox import get_conf
-        ENABLE_AUDIO, = get_conf('ENABLE_AUDIO')
+        ENABLE_AUDIO = get_conf('ENABLE_AUDIO')
         if ENABLE_AUDIO:
             from crazy_functions.语音助手 import 语音助手
             function_plugins.update({

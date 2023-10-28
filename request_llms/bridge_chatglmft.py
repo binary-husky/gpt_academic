@@ -63,7 +63,7 @@ class GetGLMFTHandle(Process):
                     # if not os.path.exists(conf): raise RuntimeError('找不到微调模型信息')
                     # with open(conf, 'r', encoding='utf8') as f:
                     #     model_args = json.loads(f.read())
-                    CHATGLM_PTUNING_CHECKPOINT, = get_conf('CHATGLM_PTUNING_CHECKPOINT')
+                    CHATGLM_PTUNING_CHECKPOINT = get_conf('CHATGLM_PTUNING_CHECKPOINT')
                     assert os.path.exists(CHATGLM_PTUNING_CHECKPOINT), "找不到微调模型检查点"
                     conf = os.path.join(CHATGLM_PTUNING_CHECKPOINT, "config.json")
                     with open(conf, 'r', encoding='utf8') as f:

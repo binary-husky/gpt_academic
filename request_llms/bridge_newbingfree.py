@@ -62,7 +62,7 @@ class NewBingHandle(Process):
 
     async def async_run(self):
         # 读取配置
-        NEWBING_STYLE, = get_conf('NEWBING_STYLE')
+        NEWBING_STYLE = get_conf('NEWBING_STYLE')
         from request_llms.bridge_all import model_info
         endpoint = model_info['newbing']['endpoint']
         while True:

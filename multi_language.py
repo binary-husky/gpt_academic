@@ -38,7 +38,7 @@ from toolbox import get_conf
 
 CACHE_ONLY = os.environ.get('CACHE_ONLY', False)
 
-CACHE_FOLDER, = get_conf('PATH_LOGGING')
+CACHE_FOLDER = get_conf('PATH_LOGGING')
 
 blacklist = ['multi-language', CACHE_FOLDER, '.git', 'private_upload', 'multi_language.py', 'build', '.github', '.vscode', '__pycache__', 'venv']
 

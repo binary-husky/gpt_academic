@@ -146,14 +146,14 @@ class ClaudeHandle(Process):
         self.local_history = []
         if (self.claude_model is None) or (not self.success):
             # 代理设置
-            proxies, = get_conf('proxies')
+            proxies = get_conf('proxies')
             if proxies is None:
                 self.proxies_https = None
             else:
                 self.proxies_https = proxies['https']
 
             try:
-                SLACK_CLAUDE_USER_TOKEN, = get_conf('SLACK_CLAUDE_USER_TOKEN')
+                SLACK_CLAUDE_USER_TOKEN = get_conf('SLACK_CLAUDE_USER_TOKEN')
                 self.claude_model = SlackClient(token=SLACK_CLAUDE_USER_TOKEN, proxy=self.proxies_https)
                 print('Claude组件初始化成功。')
             except:

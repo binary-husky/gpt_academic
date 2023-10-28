@@ -5,7 +5,7 @@ from toolbox import update_ui, get_conf, update_ui_lastest_msg
 model_name = '智谱AI大模型'
 
 def validate_key():
-    ZHIPUAI_API_KEY, = get_conf("ZHIPUAI_API_KEY")
+    ZHIPUAI_API_KEY = get_conf("ZHIPUAI_API_KEY")
     if ZHIPUAI_API_KEY == '': return False
     return True
 

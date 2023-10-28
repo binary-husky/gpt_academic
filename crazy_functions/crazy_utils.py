@@ -181,7 +181,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     assert len(inputs_array) == len(history_array)
     assert len(inputs_array) == len(sys_prompt_array)
     if max_workers == -1: # 读取配置文件
-        try: max_workers, = get_conf('DEFAULT_WORKER_NUM')
+        try: max_workers = get_conf('DEFAULT_WORKER_NUM')
         except: max_workers = 8
         if max_workers <= 0: max_workers = 3
     # 屏蔽掉 chatglm的多线程，可能会导致严重卡顿
@@ -602,7 +602,7 @@ def get_files_from_everything(txt, type): # type='.md'
         import requests
         from toolbox import get_conf
         from toolbox import get_log_folder, gen_time_str
-        proxies, = get_conf('proxies')
+        proxies = get_conf('proxies')
         try:
             r = requests.get(txt, proxies=proxies)
         except:

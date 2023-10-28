@@ -20,7 +20,7 @@ class PluginMultiprocessManager():
         self.system_prompt = system_prompt
         self.web_port = web_port
         self.alive = True
-        self.use_docker, = get_conf('AUTOGEN_USE_DOCKER')
+        self.use_docker = get_conf('AUTOGEN_USE_DOCKER')
 
         # create a thread to monitor self.heartbeat, terminate the instance if no heartbeat for a long time
         timeout_seconds = 5*60

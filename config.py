@@ -223,6 +223,10 @@ WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid",
                      "Warmup_Modules", "Nougat_Download", "AutoGen"]
 
 
+# *实验性功能*: 自动检测并屏蔽失效的KEY，请勿使用
+BLOCK_INVALID_APIKEY = False
+
+
 # 自定义按钮的最大数量限制
 NUM_CUSTOM_BASIC_BTN = 4
 

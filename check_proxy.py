@@ -46,7 +46,7 @@ def backup_and_download(current_version, remote_version):
         return new_version_dir
     os.makedirs(new_version_dir)
     shutil.copytree('./', backup_dir, ignore=lambda x, y: ['history'])
-    proxies, = get_conf('proxies')
+    proxies = get_conf('proxies')
     r = requests.get(
         'https://github.com/binary-husky/chatgpt_academic/archive/refs/heads/master.zip', proxies=proxies, stream=True)
     zip_file_path = backup_dir+'/master.zip'
@@ -113,7 +113,7 @@ def auto_update(raise_error=False):
         import requests
         import time
         import json
-        proxies, = get_conf('proxies')
+        proxies = get_conf('proxies')
         response = requests.get(
             "https://raw.githubusercontent.com/binary-husky/chatgpt_academic/master/version", proxies=proxies, timeout=5)
         remote_json_data = json.loads(response.text)
@@ -167,5 +167,5 @@ if __name__ == '__main__':
     import os
     os.environ['no_proxy'] = '*'  # 避免代理网络产生意外污染
     from toolbox import get_conf
-    proxies, = get_conf('proxies')
+    proxies = get_conf('proxies')
     check_proxy(proxies)
