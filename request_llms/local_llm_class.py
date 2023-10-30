@@ -114,7 +114,7 @@ class LocalLLMHandle(Process):
     
 
 
-def get_local_llm_predict_fns(LLMSingletonClass, model_name):
+def get_local_llm_predict_fns(LLMSingletonClass, model_name, history_format='classic'):
     load_message = f"{model_name}尚未加载，加载需要一段时间。注意，取决于`config.py`的配置，{model_name}消耗大量的内存（CPU）或显存（GPU），也许会导致低配计算机卡死 ……"
 
     def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=[], console_slience=False):
@@ -126,11 +126,30 @@ def get_local_llm_predict_fns(LLMSingletonClass, model_name):
         if len(observe_window) >= 1: observe_window[0] = load_message + "\n\n" + _llm_handle.info
         if not _llm_handle.running: raise RuntimeError(_llm_handle.info)
 
-        # chatglm 没有 sys_prompt 接口，因此把prompt加入 history
-        history_feedin = []
-        history_feedin.append([sys_prompt, "Certainly!"])
-        for i in range(len(history)//2):
-            history_feedin.append([history[2*i], history[2*i+1]] )
+        if history_format == 'classic':
+            # 没有 sys_prompt 接口，因此把prompt加入 history
+            history_feedin = []
+            history_feedin.append([sys_prompt, "Certainly!"])
+            for i in range(len(history)//2):
+                history_feedin.append([history[2*i], history[2*i+1]] )
+        elif history_format == 'chatglm3':
+            # 有 sys_prompt 接口
+            conversation_cnt = len(history) // 2
+            history_feedin = [{"role": "system", "content": sys_prompt}]
+            if conversation_cnt:
+                for index in range(0, 2*conversation_cnt, 2):
+                    what_i_have_asked = {}
+                    what_i_have_asked["role"] = "user"
+                    what_i_have_asked["content"] = history[index]
+                    what_gpt_answer = {}
+                    what_gpt_answer["role"] = "assistant"
+                    what_gpt_answer["content"] = history[index+1]
+                    if what_i_have_asked["content"] != "":
+                        if what_gpt_answer["content"] == "": continue
+                        history_feedin.append(what_i_have_asked)
+                        history_feedin.append(what_gpt_answer)
+                    else:
+                        history_feedin[-1]['content'] = what_gpt_answer['content']
 
         watch_dog_patience = 5 # 看门狗 (watchdog) 的耐心, 设置5秒即可
         response = ""
@@ -160,10 +179,30 @@ def get_local_llm_predict_fns(LLMSingletonClass, model_name):
             inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
         # 处理历史信息
-        history_feedin = []
-        history_feedin.append([system_prompt, "Certainly!"])
-        for i in range(len(history)//2):
-            history_feedin.append([history[2*i], history[2*i+1]] )
+        if history_format == 'classic':
+            # 没有 sys_prompt 接口，因此把prompt加入 history
+            history_feedin = []
+            history_feedin.append([system_prompt, "Certainly!"])
+            for i in range(len(history)//2):
+                history_feedin.append([history[2*i], history[2*i+1]] )
+        elif history_format == 'chatglm3':
+            # 有 sys_prompt 接口
+            conversation_cnt = len(history) // 2
+            history_feedin = [{"role": "system", "content": system_prompt}]
+            if conversation_cnt:
+                for index in range(0, 2*conversation_cnt, 2):
+                    what_i_have_asked = {}
+                    what_i_have_asked["role"] = "user"
+                    what_i_have_asked["content"] = history[index]
+                    what_gpt_answer = {}
+                    what_gpt_answer["role"] = "assistant"
+                    what_gpt_answer["content"] = history[index+1]
+                    if what_i_have_asked["content"] != "":
+                        if what_gpt_answer["content"] == "": continue
+                        history_feedin.append(what_i_have_asked)
+                        history_feedin.append(what_gpt_answer)
+                    else:
+                        history_feedin[-1]['content'] = what_gpt_answer['content']
 
         # 开始接收回复
         response = f"[Local Message] 等待{model_name}响应中 ..."
