@@ -8,7 +8,7 @@ from multiprocessing import Process, Pipe
 model_name = '星火认知大模型'
 
 def validate_key():
-    XFYUN_APPID = get_conf('XFYUN_APPID', )
+    XFYUN_APPID = get_conf('XFYUN_APPID')
     if XFYUN_APPID == '00000000' or XFYUN_APPID == '': 
         return False
     return True
