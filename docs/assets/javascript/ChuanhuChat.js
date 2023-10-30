@@ -131,6 +131,13 @@ function initialize() {
     // trainBody.classList.add('hide-body');
 
     // 提示词点击后，光标重定向到输入框
+    move_cursor()
+    //
+    check_move_list()
+    return true;
+}
+
+function move_cursor() {
     const buttonsParent = gradioApp().getElementById('prompt_list');
     const inputElement = gradioApp().getElementById('user-input-tb');
     const textarea = inputElement.querySelector('[data-testid=textbox]');
@@ -141,10 +148,15 @@ function initialize() {
             });
         });
     }
-    return true;
 }
 
+function check_move_list(){
+    const promptList = document.getElementById('prompt_list');
 
+    if (!promptList.querySelector('.label #pm_check')) {
+        promptList.querySelector('.label').appendChild(document.getElementById('pm_check'));
+    }
+}
 
 function gradioApp() {
     const elems = document.getElementsByTagName('gradio-app');

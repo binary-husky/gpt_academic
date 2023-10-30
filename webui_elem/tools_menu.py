@@ -35,9 +35,8 @@ class RightElem:
                                       visible=True, interactive=True, container=False)
             func_box.md_division_line()
             with gr.Row():
-                self.pro_search_txt = gr.Textbox(placeholder='搜索提示词/Masks', show_label=False, elem_classes='pm_search',
-                                                 container=False)
-                self.multiplexing_edit_check = gr.Checkbox(value=True, label='复用', show_label=True, elem_classes='pm_check',
+                self.pro_search_txt = gr.Textbox(placeholder='搜索提示词/Masks', show_label=False, elem_classes='pm_search',)
+                self.multiplexing_edit_check = gr.Checkbox(value=True, label='复用', show_label=True, elem_id='pm_check',
                                                      interactive=True, container=False)
             self.pro_func_prompt = gr.Dataset(components=[gr.HTML()], label="提示词列表", visible=False,
                                               samples=[['...', ""] for i in range(20)], type='index',
