@@ -222,7 +222,7 @@ body.popup-open {
     display: none;
     z-index: 99999;
     width: 60%;
-    height: 820px;
+    height: 80%;
     padding: 0;
 }
 #chuanhu-popup.showBox {
@@ -684,6 +684,7 @@ input:checked + .chatbot-input-more-span {
 #chuanhu-popup > .gradio-box > .gradio-row:first-of-type {
     padding: 24px !important;
     border-bottom: 1.8px solid var(--border-color-primary);
+    height: 70px;
 }
 #toolbox-area > .gradio-box > .gradio-row:first-of-type * ,
 #chuanhu-popup > .gradio-box > .gradio-row:first-of-type * {
@@ -700,7 +701,7 @@ input:checked + .chatbot-input-more-span {
 
 #chuanhu-popup > .gradio-box > .gradio-tabs {
     display: block;
-    height: 895px;
+    height: 100%;
     /* margin: 16px 24px; */
 }
 
@@ -717,7 +718,7 @@ input:checked + .chatbot-input-more-span {
     border: none;
     padding: 16px;
     width: 180px;
-    height: 83%;
+    height: calc(100% - 70px);
     overflow: auto;
     background: var(--background-fill-secondary);
     border-bottom-left-radius: var(--block-radius);

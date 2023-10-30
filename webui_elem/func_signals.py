@@ -468,7 +468,7 @@ def show_prompt_result(index, data: gr.Dataset, chatbot, pro_edit, pro_name):
         pro_edit = click[1]
         pro_name = click[3]
         chatbot.append([click[3], click[1]])
-    yield chatbot, pro_edit, pro_name, gr.Accordion.update(open=True)
+    yield chatbot, pro_edit, pro_name
 
 
 # TODO < -------------------------------- 搜索函数注册区 -------------------------------->

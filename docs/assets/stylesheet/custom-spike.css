@@ -187,3 +187,6 @@ code.language-folded {
     min-width: 10% !important;
     margin-top: 8px !important;
 }
+.column_left {
+    min-width: 40% !important;
+}

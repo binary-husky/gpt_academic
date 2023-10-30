@@ -188,12 +188,12 @@ class Prompt:
         preset_prompt, devs_document = toolbox.get_conf('preset_prompt', 'devs_document')
         with gr.TabItem('提示词', id='prompt'):
             with gr.Row():
-                with gr.Column() as self.area_basic_fn:
+                with gr.Column(elem_classes='column_left') as self.prompt_upload_column:
                     jump_link = f'<a href="{devs_document}" target="_blank">Developer Documentation</a>'
                     self.pro_devs_link = gr.HTML(jump_link)
                     self.pro_upload_btn = gr.File(file_count='single', file_types=['.yaml', '.json'],
                                                   label=f'上传你的提示词文件, 编写格式请遵循上述开发者文档', )
-                with gr.Column() as self.prompt_edit_area:
+                with gr.Column(elem_classes='column_right') as self.prompt_edit_column:
                     Tips = "用 BORF 分析法设计GPT 提示词:\n" \
                            "1、阐述背景 B(Background): 说明背景，为chatGPT提供充足的信息\n" \
                            "2、定义目标 O(Objectives):“我们希望实现什么”\n" \
@@ -212,7 +212,6 @@ class Prompt:
                         self.pro_private_check = gr.Dropdown(choices=[], value=preset_prompt['value'],
                                                              label='保存提示词分类', elem_classes='normal_select'
                                                              ).style(container=False)
-                    with gr.Row():
                         self.pro_class_name = gr.Textbox(show_label=False,
                                                          placeholder='*必填，保存Prompt同时创建分类',
                                                          visible=False).style(container=False)
@@ -222,7 +221,7 @@ class Prompt:
 
     def _draw_tabs_masks(self):
         with gr.TabItem('Masks 🎭', id='masks'):
-            self.masks_dataset = gr.Dataframe
+            self.masks_dataset = gr.Dataframe(value=[['user', '你好']],  headers=['role', 'content'], col_count=2, show_label=False)
 
     def draw_popup_prompt(self):
         with gr.Box(elem_id="spike-prompt"):

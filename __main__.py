@@ -112,8 +112,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         self.pro_prompt_list.click(fn=func_signals.show_prompt_result,
                                    inputs=[self.pro_prompt_list, self.pro_prompt_state, self.pro_results,
                                            self.pro_edit_txt, self.pro_name_txt],
-                                   outputs=[self.pro_results, self.pro_edit_txt, self.pro_name_txt,
-                                            self.prompt_edit_area])
+                                   outputs=[self.pro_results, self.pro_edit_txt, self.pro_name_txt])
         self.pro_del_btn.click(func_signals.prompt_delete,
                                inputs=[self.pro_name_txt, self.pro_fp_state, self.pro_private_check],
                                outputs=[self.pro_func_prompt, self.pro_fp_state])
