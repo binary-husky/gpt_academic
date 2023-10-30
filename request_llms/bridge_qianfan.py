@@ -75,7 +75,7 @@ def generate_message_payload(inputs, llm_kwargs, history, system_prompt):
 
 
 def generate_from_baidu_qianfan(inputs, llm_kwargs, history, system_prompt):
-    BAIDU_CLOUD_QIANFAN_MODEL,  = get_conf('BAIDU_CLOUD_QIANFAN_MODEL')
+    BAIDU_CLOUD_QIANFAN_MODEL = get_conf('BAIDU_CLOUD_QIANFAN_MODEL')
 
     url_lib = {
         "ERNIE-Bot":            "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions" ,

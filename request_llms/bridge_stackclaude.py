@@ -36,7 +36,7 @@ try:
         CHANNEL_ID = None
 
         async def open_channel(self):
-            response = await self.conversations_open(users=get_conf('SLACK_CLAUDE_BOT_ID')[0])
+            response = await self.conversations_open(users=get_conf('SLACK_CLAUDE_BOT_ID'))
             self.CHANNEL_ID = response["channel"]["id"]
 
         async def chat(self, text):
@@ -51,7 +51,7 @@ try:
                 # TODO：暂时不支持历史消息，因为在同一个频道里存在多人使用时历史消息渗透问题
                 resp = await self.conversations_history(channel=self.CHANNEL_ID, oldest=self.LAST_TS, limit=1)
                 msg = [msg for msg in resp["messages"]
-                    if msg.get("user") == get_conf('SLACK_CLAUDE_BOT_ID')[0]]
+                    if msg.get("user") == get_conf('SLACK_CLAUDE_BOT_ID')]
                 return msg
             except (SlackApiError, KeyError) as e:
                 raise RuntimeError(f"获取Slack消息失败。")
