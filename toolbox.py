@@ -732,7 +732,6 @@ def select_api_key(keys, llm_model):
         raise RuntimeError(f"您提供的api-key不满足要求，不包含任何可用于{llm_model}的api-key。您可能选择了错误的模型或请求源（右下角更换模型菜单中可切换openai,azure,claude,api2d等请求源）。")
 
     api_key = random.choice(avail_key_list) # 随机负载均衡
-    if ENABLE
     return api_key
 
 def read_env_variable(arg, default_value):
