@@ -585,6 +585,23 @@ def draw_results(txt, prompt: dict, percent, switch, ipaddr: gr.Request):
     return gr.Dataset.update(samples=data, visible=True), prompt
 
 
+# TODO < -------------------------------- 面具编辑函数注册区 -------------------------------->
+def mask_setting_role(data):
+    """
+    Args:
+        data: 为每行数据预设一个角色
+    Returns:
+    """
+    setting_set = []
+    for i, item in enumerate(data):
+        if i % 2 == 0:
+            item[0] = 'user'
+        else:
+            item[0] = 'bot'
+        setting_set.append(item)
+    return setting_set
+
+
 # TODO < -------------------------------- 页面刷新函数注册区 -------------------------------->
 def mobile_access(request: gr.Request): # 为适配手机端
     user_agent = request.kwargs['headers']['user-agent'].lower()

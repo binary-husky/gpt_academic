@@ -221,7 +221,11 @@ class Prompt:
 
     def _draw_tabs_masks(self):
         with gr.TabItem('Masks 🎭', id='masks'):
-            self.masks_dataset = gr.Dataframe(value=[['user', '你好']],  headers=['role', 'content'], col_count=2, show_label=False)
+            def_user = i18n('接下来你将扮演xxx角色，你会xxx技能，你将按照xxx要求，回答我的问题')
+            def_bot = i18n('作为xxx，请说出您的请求xx，我将按照xxxx')
+            self.masks_dataset = gr.Dataframe(value=[['user', def_user], ['bot', def_bot]],  headers=['role', 'content'], col_count=(2, 'fixed'),
+                                              interactive=True, show_label=False, row_count=(2, "dynamic"),
+                                              min_width=10, wrap=True, type='array', elem_id='mask_tabs')
 
     def draw_popup_prompt(self):
         with gr.Box(elem_id="spike-prompt"):

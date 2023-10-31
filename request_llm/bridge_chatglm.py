@@ -43,6 +43,8 @@ class GetGLMHandle(Process):
             _model_name_ = "THUDM/chatglm2-6b-int4"
         elif LOCAL_MODEL_QUANT == "INT8":       # INT8
             _model_name_ = "THUDM/chatglm2-6b-int8"
+        elif LOCAL_MODEL_QUANT == "glm3":
+            _model_name_ = "THUDM/chatglm3-6b"
         else:
             _model_name_ = "THUDM/chatglm2-6b"  # FP16
 
@@ -53,6 +55,8 @@ class GetGLMHandle(Process):
                         self.chatglm_tokenizer = AutoTokenizer.from_pretrained(_model_name_, trust_remote_code=True)
                         if device=='cpu':
                             self.chatglm_model = AutoModel.from_pretrained(_model_name_, trust_remote_code=True).float()
+                        if device=='gpu':
+                            self.chatglm_model = AutoModel.from_pretrained(_model_name_, trust_remote_code=True).half().to('mps')
                         else:
                             self.chatglm_model = AutoModel.from_pretrained(_model_name_, trust_remote_code=True).half().cuda()
                         self.chatglm_model = self.chatglm_model.eval()

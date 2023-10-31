@@ -127,6 +127,11 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
             outputs=[self.chatbot, self.history, self.user_input]
         )
 
+    def signals_masks(self):
+        self.masks_dataset.change(fn=func_signals.mask_setting_role,
+                                  inputs=[self.masks_dataset],
+                                  outputs=[self.masks_dataset])
+
     def signals_plugin(self):
         from comm_tools.crazy_functional import crazy_fns_role, crazy_fns
         fn_btn_dict = {crazy_fns_role[role][k]['Button']: {role: k} for role in crazy_fns_role for k in
@@ -397,6 +402,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
             self.signals_plugin()
             self.signals_langchain_cn()
             self.signals_settings_popup()
+            self.signals_masks()
             # self.demo.load(fn=func_signals.mobile_access, inputs=[],
             #                outputs=[self.sm_btn_column, self.langchain_dropdown])
             self.demo.load(fn=func_signals.refresh_load_data,

@@ -192,3 +192,6 @@ code.language-folded {
 .column_left {
     min-width: 40% !important;
 }
+#mask_tabs .sort-button {
+    display: none;
+}
