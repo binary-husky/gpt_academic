@@ -1,42 +1,29 @@
+model_name = "ChatGLM"
+cmd_to_install = "`pip install -r request_llms/requirements_chatglm.txt`"
+
 
 from transformers import AutoModel, AutoTokenizer
-import time
-import threading
-import importlib
-from toolbox import update_ui, get_conf, ProxyNetworkActivate
-from multiprocessing import Process, Pipe
+from toolbox import get_conf, ProxyNetworkActivate
+from .local_llm_class import LocalLLMHandle, get_local_llm_predict_fns, SingletonLocalLLM
 
-load_message = "ChatGLM尚未加载，加载需要一段时间。注意，取决于`config.py`的配置，ChatGLM消耗大量的内存（CPU）或显存（GPU），也许会导致低配计算机卡死 ……"
 
-#################################################################################
-class GetGLMHandle(Process):
-    def __init__(self):
-        super().__init__(daemon=True)
-        self.parent, self.child = Pipe()
-        self.chatglm_model = None
-        self.chatglm_tokenizer = None
-        self.info = ""
-        self.success = True
-        self.check_dependency()
-        self.start()
-        self.threadLock = threading.Lock()
-        
-    def check_dependency(self):
-        try:
-            import sentencepiece
-            self.info = "依赖检测通过"
-            self.success = True
-        except:
-            self.info = "缺少ChatGLM的依赖，如果要使用ChatGLM，除了基础的pip依赖以外，您还需要运行`pip install -r request_llms/requirements_chatglm.txt`安装ChatGLM的依赖。"
-            self.success = False
 
-    def ready(self):
-        return self.chatglm_model is not None
+# ------------------------------------------------------------------------------------------------------------------------
+# 🔌💻 Local Model
+# ------------------------------------------------------------------------------------------------------------------------
+@SingletonLocalLLM
+class GetGLM2Handle(LocalLLMHandle):
 
-    def run(self):
-        # 子进程执行
-        # 第一次运行，加载参数
-        retry = 0
+    def load_model_info(self):
+        # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行
+        self.model_name = model_name
+        self.cmd_to_install = cmd_to_install
+
+    def load_model_and_tokenizer(self):
+        # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行
+        import os, glob
+        import os
+        import platform
         LOCAL_MODEL_QUANT, device = get_conf('LOCAL_MODEL_QUANT', 'LOCAL_MODEL_DEVICE')
 
         if LOCAL_MODEL_QUANT == "INT4":         # INT4
@@ -46,122 +33,47 @@ class GetGLMHandle(Process):
         else:
             _model_name_ = "THUDM/chatglm2-6b"  # FP16
 
-        while True:
-            try:
-                with ProxyNetworkActivate('Download_LLM'):
-                    if self.chatglm_model is None:
-                        self.chatglm_tokenizer = AutoTokenizer.from_pretrained(_model_name_, trust_remote_code=True)
-                        if device=='cpu':
-                            self.chatglm_model = AutoModel.from_pretrained(_model_name_, trust_remote_code=True).float()
-                        else:
-                            self.chatglm_model = AutoModel.from_pretrained(_model_name_, trust_remote_code=True).half().cuda()
-                        self.chatglm_model = self.chatglm_model.eval()
-                        break
-                    else:
-                        break
-            except:
-                retry += 1
-                if retry > 3: 
-                    self.child.send('[Local Message] Call ChatGLM fail 不能正常加载ChatGLM的参数。')
-                    raise RuntimeError("不能正常加载ChatGLM的参数！")
-
-        while True:
-            # 进入任务等待状态
-            kwargs = self.child.recv()
-            # 收到消息，开始请求
-            try:
-                for response, history in self.chatglm_model.stream_chat(self.chatglm_tokenizer, **kwargs):
-                    self.child.send(response)
-                    # # 中途接收可能的终止指令（如果有的话）
-                    # if self.child.poll(): 
-                    #     command = self.child.recv()
-                    #     if command == '[Terminate]': break
-            except:
-                from toolbox import trimmed_format_exc
-                self.child.send('[Local Message] Call ChatGLM fail.' + '\n```\n' + trimmed_format_exc() + '\n```\n')
-            # 请求处理结束，开始下一个循环
-            self.child.send('[Finish]')
-
-    def stream_chat(self, **kwargs):
-        # 主进程执行
-        self.threadLock.acquire()
-        self.parent.send(kwargs)
-        while True:
-            res = self.parent.recv()
-            if res != '[Finish]':
-                yield res
+        with ProxyNetworkActivate('Download_LLM'):
+            chatglm_tokenizer = AutoTokenizer.from_pretrained(_model_name_, trust_remote_code=True)
+            if device=='cpu':
+                chatglm_model = AutoModel.from_pretrained(_model_name_, trust_remote_code=True).float()
             else:
-                break
-        self.threadLock.release()
-    
-global glm_handle
-glm_handle = None
-#################################################################################
-def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=[], console_slience=False):
-    """
-        多线程方法
-        函数的说明请见 request_llms/bridge_all.py
-    """
-    global glm_handle
-    if glm_handle is None:
-        glm_handle = GetGLMHandle()
-        if len(observe_window) >= 1: observe_window[0] = load_message + "\n\n" + glm_handle.info
-        if not glm_handle.success: 
-            error = glm_handle.info
-            glm_handle = None
-            raise RuntimeError(error)
+                chatglm_model = AutoModel.from_pretrained(_model_name_, trust_remote_code=True).half().cuda()
+            chatglm_model = chatglm_model.eval()
 
-    # chatglm 没有 sys_prompt 接口，因此把prompt加入 history
-    history_feedin = []
-    history_feedin.append(["What can I do?", sys_prompt])
-    for i in range(len(history)//2):
-        history_feedin.append([history[2*i], history[2*i+1]] )
+        self._model = chatglm_model
+        self._tokenizer = chatglm_tokenizer
+        return self._model, self._tokenizer
 
-    watch_dog_patience = 5 # 看门狗 (watchdog) 的耐心, 设置5秒即可
-    response = ""
-    for response in glm_handle.stream_chat(query=inputs, history=history_feedin, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
-        if len(observe_window) >= 1:  observe_window[0] = response
-        if len(observe_window) >= 2:  
-            if (time.time()-observe_window[1]) > watch_dog_patience:
-                raise RuntimeError("程序终止。")
-    return response
+    def llm_stream_generator(self, **kwargs):
+        # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行
+        def adaptor(kwargs):
+            query = kwargs['query']
+            max_length = kwargs['max_length']
+            top_p = kwargs['top_p']
+            temperature = kwargs['temperature']
+            history = kwargs['history']
+            return query, max_length, top_p, temperature, history
 
+        query, max_length, top_p, temperature, history = adaptor(kwargs)
+
+        for response, history in self._model.stream_chat(self._tokenizer, 
+                                                         query, 
+                                                         history, 
+                                                         max_length=max_length,
+                                                         top_p=top_p,
+                                                         temperature=temperature,
+                                                         ):
+            yield response
+        
+    def try_to_import_special_deps(self, **kwargs):
+        # import something that will raise error if the user does not install requirement_*.txt
+        # 🏃‍♂️🏃‍♂️🏃‍♂️ 主进程执行
+        import importlib
+        # importlib.import_module('modelscope')
 
 
-def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream = True, additional_fn=None):
-    """
-        单线程方法
-        函数的说明请见 request_llms/bridge_all.py
-    """
-    chatbot.append((inputs, ""))
-
-    global glm_handle
-    if glm_handle is None:
-        glm_handle = GetGLMHandle()
-        chatbot[-1] = (inputs, load_message + "\n\n" + glm_handle.info)
-        yield from update_ui(chatbot=chatbot, history=[])
-        if not glm_handle.success: 
-            glm_handle = None
-            return
-
-    if additional_fn is not None:
-        from core_functional import handle_core_functionality
-        inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
-
-    # 处理历史信息
-    history_feedin = []
-    history_feedin.append(["What can I do?", system_prompt] )
-    for i in range(len(history)//2):
-        history_feedin.append([history[2*i], history[2*i+1]] )
-
-    # 开始接收chatglm的回复
-    response = "[Local Message] 等待ChatGLM响应中 ..."
-    for response in glm_handle.stream_chat(query=inputs, history=history_feedin, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
-        chatbot[-1] = (inputs, response)
-        yield from update_ui(chatbot=chatbot, history=history)
-
-    # 总结输出
-    if response == "[Local Message] 等待ChatGLM响应中 ...":
-        response = "[Local Message] ChatGLM响应异常 ..."
-    history.extend([inputs, response])
-    yield from update_ui(chatbot=chatbot, history=history)
+# ------------------------------------------------------------------------------------------------------------------------
+# 🔌💻 GPT-Academic Interface
+# ------------------------------------------------------------------------------------------------------------------------
+predict_no_ui_long_connection, predict = get_local_llm_predict_fns(GetGLM2Handle, model_name)

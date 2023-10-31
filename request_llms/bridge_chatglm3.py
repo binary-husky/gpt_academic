@@ -12,7 +12,7 @@ from .local_llm_class import LocalLLMHandle, get_local_llm_predict_fns, Singleto
 # 🔌💻 Local Model
 # ------------------------------------------------------------------------------------------------------------------------
 @SingletonLocalLLM
-class GetONNXGLMHandle(LocalLLMHandle):
+class GetGLM3Handle(LocalLLMHandle):
 
     def load_model_info(self):
         # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行
@@ -69,10 +69,10 @@ class GetONNXGLMHandle(LocalLLMHandle):
         # import something that will raise error if the user does not install requirement_*.txt
         # 🏃‍♂️🏃‍♂️🏃‍♂️ 主进程执行
         import importlib
-        importlib.import_module('modelscope')
+        # importlib.import_module('modelscope')
 
 
 # ------------------------------------------------------------------------------------------------------------------------
 # 🔌💻 GPT-Academic Interface
 # ------------------------------------------------------------------------------------------------------------------------
-predict_no_ui_long_connection, predict = get_local_llm_predict_fns(GetONNXGLMHandle, model_name, history_format='chatglm3')
+predict_no_ui_long_connection, predict = get_local_llm_predict_fns(GetGLM3Handle, model_name, history_format='chatglm3')
