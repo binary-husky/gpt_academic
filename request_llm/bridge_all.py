@@ -21,6 +21,8 @@ from .bridge_chatglm import predict as chatglm_ui
 
 from .bridge_chatglm import predict_no_ui_long_connection as chatglm_noui
 from .bridge_chatglm import predict as chatglm_ui
+from .bridge_chatglm3 import predict_no_ui_long_connection as chatglm3_noui
+from .bridge_chatglm3 import predict as chatglm3_ui
 
 from .bridge_qianfan import predict_no_ui_long_connection as qianfan_noui
 from .bridge_qianfan import predict as qianfan_ui
@@ -208,6 +210,15 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
+    "chatglm3": {
+        "fn_with_ui": chatglm3_ui,
+        "fn_without_ui": chatglm3_noui,
+        "endpoint": None,
+        "max_token": 1024,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+
     "qianfan": {
         "fn_with_ui": qianfan_ui,
         "fn_without_ui": qianfan_noui,
