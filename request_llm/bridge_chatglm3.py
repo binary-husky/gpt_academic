@@ -7,8 +7,6 @@ from toolbox import update_ui, get_conf, ProxyNetworkActivate, clip_history
 from multiprocessing import Process, Pipe
 
 load_message = "ChatGLM尚未加载，加载需要一段时间。注意，取决于`config.py`的配置，ChatGLM消耗大量的内存（CPU）或显存（GPU），也许会导致低配计算机卡死 ……"
-timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check proxy settings in config.py.' + \
-                  '网络错误，检查代理服务器是否可用，以及代理设置的格式是否正确，格式须是[协议]://[地址]:[端口]，缺一不可。'
 #################################################################################
 class GetGLMHandle(Process):
     def __init__(self):
@@ -51,11 +49,11 @@ class GetGLMHandle(Process):
             try:
                 with ProxyNetworkActivate('Download_LLM'):
                     if self.chatglm_model is None:
-                        self.chatglm_tokenizer = AutoTokenizer.from_pretrained('/root/.cache/huggingface/hub/models--THUDM--chatglm3-6b/snapshots/fc3235f807ef5527af598c05f04f2ffd17f48bab', trust_remote_code=True)
+                        self.chatglm_tokenizer = AutoTokenizer.from_pretrained(_model_name_, trust_remote_code=True)
                         if device=='cpu':
                             self.chatglm_model = AutoModel.from_pretrained(_model_name_, trust_remote_code=True).float()
                         else:
-                            self.chatglm_model = AutoModel.from_pretrained('/root/.cache/huggingface/hub/models--THUDM--chatglm3-6b/snapshots/fc3235f807ef5527af598c05f04f2ffd17f48bab', trust_remote_code=True).half().cuda()
+                            self.chatglm_model = AutoModel.from_pretrained(_model_name_, trust_remote_code=True).half().cuda()
                         self.chatglm_model = self.chatglm_model.eval()
                         break
                     else:
@@ -125,13 +123,10 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
             what_gpt_answer["content"] = history[index+1]
             if what_i_have_asked["content"] != "":
                 if what_gpt_answer["content"] == "": continue
-                if what_gpt_answer["content"] == timeout_bot_msg: continue
                 history_feedin.append(what_i_have_asked)
                 history_feedin.append(what_gpt_answer)
             else:
                 history_feedin[-1]['content'] = what_gpt_answer['content']
-    #history = clip_history(inputs=inputs, history=history, tokenizer=llm_kwargs['llm_model']['tokenizer'], 
-    #                max_token_limit=(llm_kwargs['llm_model']['max_token'])) # history至少释放二分之一
 
     watch_dog_patience = 5 # 看门狗 (watchdog) 的耐心, 设置5秒即可
     response = ""
@@ -177,13 +172,10 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             what_gpt_answer["content"] = history[index+1]
             if what_i_have_asked["content"] != "":
                 if what_gpt_answer["content"] == "": continue
-                if what_gpt_answer["content"] == timeout_bot_msg: continue
                 history_feedin.append(what_i_have_asked)
                 history_feedin.append(what_gpt_answer)
             else:
                 history_feedin[-1]['content'] = what_gpt_answer['content']
-    #history = clip_history(inputs=inputs, history=history, tokenizer=llm_kwargs['llm_model']['tokenizer'], 
-    #                max_token_limit=(llm_kwargs['llm_model']['max_token'])) # history至少释放二分之一
 
     # 开始接收chatglm的回复
     response = "[Local Message]: 等待ChatGLM响应中 ..."
