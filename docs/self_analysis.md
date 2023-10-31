@@ -217,7 +217,7 @@ toolbox.py是一个工具类库，其中主要包含了一些函数装饰器和�
 
 ## [31/48] 请对下面的程序文件做一个概述: crazy_functions\读文章写摘要.py
 
-这个程序文件是一个Python模块，文件名为crazy_functions\读文章写摘要.py。该模块包含了两个函数，其中主要函数是"读文章写摘要"函数，其实现了解析给定文件夹中的tex文件，对其中每个文件的内容进行摘要生成，并根据各论文片段的摘要，最终生成全文摘要。第二个函数是"解析Paper"函数，用于解析单篇论文文件。其中用到了一些工具函数和库，如update_ui、CatchException、report_execption、write_results_to_file等。
+这个程序文件是一个Python模块，文件名为crazy_functions\读文章写摘要.py。该模块包含了两个函数，其中主要函数是"读文章写摘要"函数，其实现了解析给定文件夹中的tex文件，对其中每个文件的内容进行摘要生成，并根据各论文片段的摘要，最终生成全文摘要。第二个函数是"解析Paper"函数，用于解析单篇论文文件。其中用到了一些工具函数和库，如update_ui、CatchException、report_exception、write_results_to_file等。
 
 ## [32/48] 请对下面的程序文件做一个概述: crazy_functions\谷歌检索小助手.py
 

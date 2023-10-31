@@ -1,4 +1,4 @@
-from toolbox import CatchException, report_execption, get_log_folder, gen_time_str
+from toolbox import CatchException, report_exception, get_log_folder, gen_time_str
 from toolbox import update_ui, promote_file_to_downloadzone, update_ui_lastest_msg, disable_auto_promotion
 from toolbox import write_history_to_file, promote_file_to_downloadzone
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
@@ -62,7 +62,7 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
         import nougat
         import tiktoken
     except:
-        report_execption(chatbot, history,
+        report_exception(chatbot, history,
                          a=f"解析项目: {txt}",
                          b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade nougat-ocr tiktoken```。")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
@@ -79,7 +79,7 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
 
     # 如果没找到任何文件
     if len(file_manifest) == 0:
-        report_execption(chatbot, history,
+        report_exception(chatbot, history,
                          a=f"解析项目: {txt}", b=f"找不到任何.pdf拓展名的文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return

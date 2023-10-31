@@ -9,6 +9,7 @@ import shutil
 import glob
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
+import warnings
 pj = os.path.join
 
 """
@@ -179,6 +180,11 @@ def HotReload(f):
         yield from f_hot_reload(*args, **kwargs)
     return decorated
 
+def deprecated(func):
+    def wrapper(*args, **kwargs):
+        warnings.warn(f"{func.__name__} is deprecated.", category=DeprecationWarning)
+        return func(*args, **kwargs)
+    return wrapper
 
 """
 ========================================================================
@@ -186,7 +192,7 @@ def HotReload(f):
 其他小工具:
     - write_history_to_file:    将结果写入markdown文件中
     - regular_txt_to_markdown:  将普通文本转换为Markdown格式的文本。
-    - report_execption:         向chatbot中添加简单的意外错误信息
+    - report_exception:         向chatbot中添加简单的意外错误信息
     - text_divide_paragraph:    将文本按照段落分隔符分割开，生成带有段落标签的HTML代码。
     - markdown_convertion:      用多种方式组合，将markdown转化为好看的html
     - format_io:                接管gradio默认的markdown处理方式
@@ -258,8 +264,16 @@ def regular_txt_to_markdown(text):
 
 
 
-
+@deprecated
 def report_execption(chatbot, history, a, b):
+    """
+    向chatbot中添加错误信息
+    """
+    chatbot.append((a, b))
+    history.extend([a, b])
+
+
+def report_exception(chatbot, history, a, b):
     """
     向chatbot中添加错误信息
     """
