@@ -134,6 +134,8 @@ class LocalLLMHandle(Process):
         if self.info == "`准备就绪`":
             yield "`正在等待线程锁，排队中请稍后 ...`"
         with self.threadLock:
+            if self.parent.poll():
+                while self.parent.poll(): self.parent.recv()
             self.parent.send(kwargs)
             std_out = ""
             std_out_clip_len = 4096
