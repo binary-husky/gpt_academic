@@ -266,9 +266,9 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                                    self.presence_penalty_slider, self.frequency_penalty_slider,
                                    self.user_identifier_txt,
                                    self.max_context_length_slider, self.max_generation_slider, self.logit_bias_txt,
-                                   self.system_prompt
-                                   ]
-        self.historySelectList.input(fn=func_signals.select_history, inputs=[self.historySelectList, self.cookies],
+                                   self.system_prompt, self.model_select_dropdown]
+        self.historySelectList.input(fn=func_signals.select_history,
+                                     inputs=[self.historySelectList, self.model_select_dropdown, self.cookies],
                                      outputs=[*self.llms_cookies_combo, self.saveFileName])
         self.renameHistoryBtn.click(func_signals.rename_history,
                                     inputs=[self.saveFileName, self.historySelectList],
@@ -317,7 +317,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         click_handle = self.submitBtn.click(**self.clear_agrs).then(**self.predict_args)
         self.cancel_handles.append(submit_handle)
         self.cancel_handles.append(click_handle)
-        self.emptyBtn.click(func_signals.clear_chat_cookie, [],
+        self.emptyBtn.click(func_signals.clear_chat_cookie, [self.model_select_dropdown],
                             [*self.llms_cookies_combo, self.status_display,
                              self.historySelectList, self.saveFileName]
                             ).then(fn=lambda: gr.Files.update(value=None),
@@ -410,7 +410,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                            outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check,
                                     self.langchain_classifi, self.langchain_select, self.langchain_dropdown])
             self.demo.load(fn=func_signals.refresh_user_data,
-                           inputs=[self.cookies],
+                           inputs=[self.cookies, self.model_select_dropdown],
                            outputs=[self.historySelectList, *self.llms_cookies_combo,
                                     self.saveFileName])
 

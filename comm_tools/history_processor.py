@@ -6,6 +6,7 @@
 import json
 import os
 import copy
+import gradio as gr
 from comm_tools import toolbox
 from comm_tools import func_box
 from bs4 import BeautifulSoup
@@ -70,9 +71,11 @@ class HistoryJsonHandle:
     def update_for_history(self, cookies: dict, select):
         cookies.update(self.base_data_format['chat_llms'])
         llms = self.base_data_format['chat_llms']
-        default_params, = toolbox.get_conf('LLMS_DEFAULT_PARAMETER')
+        default_params, LLM_MODEL, = toolbox.get_conf('LLMS_DEFAULT_PARAMETER', 'LLM_MODEL')
         llms_combo = [llms.get(key, default_params[key]) for key in default_params]
-        llms_combo.append(self.base_data_format['chat_llms'].get('system_prompt', ''))
+        llms_combo[-1] = self.base_data_format['chat_llms'].get('system_prompt', '')
+        llm_select = self.base_data_format['chat_llms'].get('llm_model', LLM_MODEL)
+        llms_combo.append(gr.Dropdown.update(value=llm_select))
         try:
             chatbot = [i['on_chat'] for i in self.base_data_format['chat']]
             history = self.base_data_format['chat_llms'].get('history', [])

@@ -123,26 +123,26 @@ def stop_chat_refresh(chatbot, cookies, ipaddr: gr.Request):
     history_processor.thread_write_chat_json(chatbot_with_cookie, ipaddr.client.host)
 
 
-def clear_chat_cookie(ipaddr: gr.Request):
-    API_KEY, LLM_MODEL = toolbox.get_conf('API_KEY', 'LLM_MODEL')
-    cookie = {'api_key': API_KEY, 'llm_model': LLM_MODEL}
+def clear_chat_cookie(llm_model, ipaddr: gr.Request):
+    API_KEY, = toolbox.get_conf('API_KEY')
+    cookie = {'api_key': API_KEY, 'llm_model': llm_model}
     user_path = os.path.join(func_box.history_path, ipaddr.client.host)
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
     default_params, = toolbox.get_conf('LLMS_DEFAULT_PARAMETER')
-    llms_combo = [cookie.get(key, default_params[key]) for key in default_params]
+    llms_combo = [cookie.get(key, default_params[key]) for key in default_params] + [gr.Dropdown.update(value=llm_model)]
     output = [[], [], cookie, *llms_combo,  '已重置对话记录和对话Cookies',
               gr.Radio.update(choices=['新对话']+only_name, value='新对话'), "新对话"]
     return output
 
 
-def select_history(select, cookies, ipaddr: gr.Request):
+def select_history(select, llm_select, cookies, ipaddr: gr.Request):
     user_path = os.path.join(func_box.history_path, ipaddr.client.host)
     user_history = [f for f in os.listdir(user_path) if f.endswith('.json') and select == os.path.splitext(f)[0]]
     if not user_history:
         default_params, API_KEY = toolbox.get_conf('LLMS_DEFAULT_PARAMETER', 'API_KEY')
         llms_combo = [cookies.get(key, default_params[key]) for key in default_params]
         cookies = {'api_key': API_KEY}
-        return [[], [], cookies, *llms_combo, '新对话', '']
+        return [[], [], cookies, *llms_combo, llm_select, select]
     file_path = os.path.join(user_path, user_history[0])
     history_handle = history_processor.HistoryJsonHandle(file_path)
     history_update_combo = history_handle.update_for_history(cookies, select)
@@ -628,12 +628,12 @@ def refresh_load_data(prompt, request: gr.Request):
     know_load = gr.Dropdown.update(choices=load_list, label='公共知识库', show_label=True)
     know_user = gr.Dropdown.update(choices=user_list)
     select_list = filter_database_tables()
-    outputs = [gr.Dataset.update(samples=data, visible=True), prompt, gr.Dropdown.update(choices=select_list),
+    outputs = [gr.Dataset.update(samples=data, visible=True), prompt, gr.Dropdown.update(choices=select_list, value='3123'),
                 know_cls, know_user, know_load]
     return outputs
 
 
-def refresh_user_data(cookies, ipaddr: gr.Request):
+def refresh_user_data(cookies, select,  ipaddr: gr.Request):
     user_path = os.path.join(func_box.history_path, ipaddr.client.host)
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
     history_handle = history_processor.HistoryJsonHandle(new_path)
