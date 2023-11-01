@@ -91,28 +91,25 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                                             self.pro_fp_state],
                                     outputs=[self.user_input, self.pro_edit_txt, self.pro_name_txt])
         self.pro_upload_btn.upload(fn=func_signals.prompt_upload_refresh,
-                                   inputs=[self.pro_upload_btn, self.pro_prompt_state, self.pro_private_check,
+                                   inputs=[self.pro_upload_btn, self.pro_history_state, self.pro_private_check,
                                            self.pro_class_name],
-                                   outputs=[self.pro_func_prompt, self.pro_prompt_state, self.pro_private_check])
+                                   outputs=[self.pro_func_prompt, self.pro_history_state, self.pro_private_check])
 
     def signals_prompt_edit(self):
-        self.pro_clear_btn.click(fn=lambda: [], inputs=None, outputs=self.pro_results)
         # self.prompt_tab.select(fn=func_signals.draw_results,
         #                        inputs=[self.pro_search_txt, self.pro_prompt_state, self.pro_tf_slider,
         #                                self.pro_private_check],
         #                        outputs=[self.pro_prompt_list, self.pro_prompt_state])
         self.pro_search_txt.submit(fn=func_signals.draw_results,
-                                   inputs=[self.pro_search_txt, self.pro_prompt_state, self.pro_tf_slider,
-                                           self.pro_private_check],
-                                   outputs=[self.pro_prompt_list, self.pro_prompt_state])
+                                   inputs=[self.pro_search_txt, self.pro_history_state, self.pro_tf_slider],
+                                   outputs=[self.pro_history_list, self.pro_history_state])
         self.pro_entry_btn.click(fn=func_signals.draw_results,
-                                 inputs=[self.pro_search_txt, self.pro_prompt_state, self.pro_tf_slider,
-                                         self.pro_private_check],
-                                 outputs=[self.pro_prompt_list, self.pro_prompt_state])
-        self.pro_prompt_list.click(fn=func_signals.show_prompt_result,
-                                   inputs=[self.pro_prompt_list, self.pro_prompt_state, self.pro_results,
-                                           self.pro_edit_txt, self.pro_name_txt],
-                                   outputs=[self.pro_results, self.pro_edit_txt, self.pro_name_txt])
+                                 inputs=[self.pro_search_txt, self.pro_history_state, self.pro_tf_slider],
+                                 outputs=[self.pro_history_list, self.pro_history_state])
+        self.pro_history_list.click(fn=func_signals.show_prompt_result,
+                                    inputs=[self.pro_history_list, self.pro_history_state, self.cookies],
+                                    outputs=[self.historySelectList, *self.llms_cookies_combo],
+                                    ).then(None, None, None, _js='()=>{closeBtnClick();}')
         self.pro_del_btn.click(func_signals.prompt_delete,
                                inputs=[self.pro_name_txt, self.pro_fp_state, self.pro_private_check],
                                outputs=[self.pro_func_prompt, self.pro_fp_state])
@@ -121,11 +118,6 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                                        self.pro_class_name],
                                outputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_private_check,
                                         self.pro_func_prompt, self.pro_fp_state])
-        self.pro_reuse_btn.click(
-            fn=func_signals.reuse_chat,
-            inputs=[self.pro_results, self.chatbot, self.history, self.user_input],
-            outputs=[self.chatbot, self.history, self.user_input]
-        )
 
     def signals_masks(self):
         self.masks_dataset.change(fn=func_signals.mask_setting_role,
@@ -286,9 +278,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         self.historyMarkdownDownloadBtn.click(func_signals.download_history_md, inputs=[self.historySelectList],
                                               outputs=[self.status_display])
         self.historySearchTextbox.submit(fn=func_signals.draw_results,
-                                         inputs=[self.historySearchTextbox, self.pro_prompt_state,
-                                                 self.pro_tf_slider, self.pro_private_check],
-                                         outputs=[self.pro_prompt_list, self.pro_prompt_state],
+                                         inputs=[self.historySearchTextbox, self.pro_history_state, self.pro_tf_slider],
+                                         outputs=[self.pro_history_list, self.pro_history_state],
                                          ).then(fn=lambda x: x, inputs=[self.historySearchTextbox],
                                                 outputs=[self.pro_search_txt]).then(None, None, None, _js='()=>{openSearch();}')
 
@@ -410,7 +401,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                            outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check,
                                     self.langchain_classifi, self.langchain_select, self.langchain_dropdown])
             self.demo.load(fn=func_signals.refresh_user_data,
-                           inputs=[self.cookies, self.model_select_dropdown],
+                           inputs=[self.cookies],
                            outputs=[self.historySelectList, *self.llms_cookies_combo,
                                     self.saveFileName])
 

@@ -20,7 +20,7 @@ class LeftElem:
             with gr.Row(elem_id="chuanhu-history-search-row"):
                 with gr.Column(min_width=150, scale=2):
                     self.historySearchTextbox = gr.Textbox(show_label=False, container=False,
-                                                           placeholder=i18n("搜索（支持正则）..."), lines=1,
+                                                           placeholder=i18n("搜索对话详情..."), lines=1,
                                                            elem_id="history-search-tb")
                 with gr.Column(min_width=52, scale=1, elem_id="gr-history-header-btns"):
                     self.uploadFileBtn = gr.UploadButton(

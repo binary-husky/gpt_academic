@@ -81,7 +81,7 @@ function chatMoreBtnClick() {
     }
 }
 
-function closeBtnClick(obj) {
+function closeBtnClick(obj = "box") {
     if (obj == "box") {
         closeBox();
     } else if (obj == "toolbox") {

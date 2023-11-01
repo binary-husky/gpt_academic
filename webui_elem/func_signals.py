@@ -6,10 +6,8 @@
 import os, random
 import copy
 import gradio as gr
-import time
-import Levenshtein
+import re
 
-from concurrent.futures import ThreadPoolExecutor
 from comm_tools import toolbox
 from comm_tools.database_processor import SqliteHandle
 from comm_tools import func_box
@@ -445,7 +443,7 @@ def prompt_input(txt: str, prompt_str, name_str,  index, data: gr.Dataset):
     return new_txt, data_str, data_name
 
 
-def show_prompt_result(index, data: gr.Dataset, chatbot, pro_edit, pro_name):
+def show_prompt_result(index, data: gr.Dataset, cookies, ipaddr: gr.Request):
     """
     查看Prompt的对话记录结果
     Args:
@@ -456,73 +454,35 @@ def show_prompt_result(index, data: gr.Dataset, chatbot, pro_edit, pro_name):
         返回注册函数所需的对象
     """
     click = data['samples'][index]
-    if func_box.str_is_list(click[2]):
-        list_copy = eval(click[2])
-        for i in range(0, len(list_copy), 2):
-            if i + 1 >= len(list_copy):  # 如果下标越界了，单独处理最后一个元素
-                chatbot.append([list_copy[i]])
-            else:
-                chatbot.append([list_copy[i], list_copy[i + 1]])
-            yield chatbot, pro_edit, pro_name, gr.Accordion.update()
-    elif click[2] is None:
-        pro_edit = click[1]
-        pro_name = click[3]
-        chatbot.append([click[3], click[1]])
-    yield chatbot, pro_edit, pro_name
+    file_name = click[2]
+    user_path = os.path.join(func_box.history_path, ipaddr.client.host)
+    history_handle = history_processor.HistoryJsonHandle(os.path.join(user_path, file_name+".json"))
+    cookie_combo = history_handle.update_for_history(cookies, file_name)
+    return gr.Radio.update(value=file_name), *cookie_combo
 
 
 # TODO < -------------------------------- 搜索函数注册区 -------------------------------->
-def diff_list(txt='', percent=0.70, switch: list = None, lst: dict = None, sp=15, hosts=''):
+def diff_list(txt='', percent=0.70, sp=15, hosts=''):
     """
     按照搜索结果统计相似度的文本，两组文本相似度>70%的将统计在一起，取最长的作为key
     Args:
         txt (str): 过滤文本
         percent (int): TF系数，用于计算文本相似度
-        switch (list): 过滤个人或所有人的Prompt
         lst：指定一个列表或字典
         sp: 截取展示的文本长度
         hosts : 请求人的ip
     Returns:
         返回一个列表
     """
-    is_all = toolbox.get_conf('preset_prompt')[0]['value']
-    count_dict = {}
-    if not lst:
-        lst = {}
-        tabs = SqliteHandle().get_tables()
-        if is_all in switch:
-            data, source = SqliteHandle(f"ai_common_{hosts}").get_prompt_value(txt)
-            lst.update(data)
-        else:
-            for tab in tabs:
-                if tab.startswith('ai_common'):
-                    data, source = SqliteHandle(f"{tab}").get_prompt_value(txt)
-                    lst.update(data)
-        data, source = SqliteHandle(f"ai_private_{hosts}").get_prompt_value(txt)
-        lst.update(data)
+    lst = {}
+    file_list, only_name, new_path, new_name = func_box.get_files_list(os.path.join(func_box.history_path, hosts), filter_format=['.json'])
+    for i in file_list:
+        chat_list = history_processor.HistoryJsonHandle(i).base_data_format.get('chat')
+        file_name = os.path.splitext(os.path.basename(i))[0]
+        chat_str = ''.join([u for k in chat_list for u in k['on_chat'] if u is not None])
+        lst.update({chat_str: file_name})
     # diff 数据，根据precent系数归类数据
-    str_ = time.time()
-    def tf_factor_calcul(i):
-        found = False
-        dict_copy = count_dict.copy()
-        for key in dict_copy.keys():
-            str_tf = Levenshtein.jaro_winkler(i, key)
-            if str_tf >= percent:
-                if len(i) > len(key):
-                    count_dict[i] = count_dict.copy()[key] + 1
-                    count_dict.pop(key)
-                else:
-                    count_dict[key] += 1
-                found = True
-                break
-        if not found: count_dict[i] = 1
-
-    with ThreadPoolExecutor(100) as executor:
-        executor.map(tf_factor_calcul, lst)
-    print('计算耗时', time.time() - str_)
-    sorted_dict = sorted(count_dict.items(), key=lambda x: x[1], reverse=True)
-    if switch:
-        sorted_dict += prompt_retrieval(is_all=switch, hosts=hosts, search=True)
+    sorted_dict = sorted(lst.items(), key=lambda x: x[1], reverse=True)
     dateset_list = []
     for key in sorted_dict:
         # 开始匹配关键字
@@ -548,7 +508,7 @@ def diff_list(txt='', percent=0.70, switch: list = None, lst: dict = None, sp=15
                 show = show.replace('<', '')
             else:
                 show = str(key[0][start:index + sp]).replace('<', '').replace(txt, func_box.html_tag_color(txt))
-            show += f"  {func_box.html_tag_color(' X ' + str(key[1]))}"
+            show += f"  {func_box.html_tag_color(' in ' + str(key[1]))}"
             if lst.get(key[0]):
                 be_value = lst[key[0]]
             else:
@@ -568,19 +528,18 @@ def reuse_chat(result, chatbot, history, say):
         return chatbot, history, say
 
 
-def draw_results(txt, prompt: dict, percent, switch, ipaddr: gr.Request):
+def draw_results(txt, prompt: dict, percent, ipaddr: gr.Request):
     """
     绘制搜索结果
     Args:
         txt (str): 过滤文本
         prompt : 原始的dataset对象
         percent (int): TF系数，用于计算文本相似度
-        switch (list): 过滤个人或所有人的Prompt
         ipaddr : 请求人信息
     Returns:
         注册函数所需的元祖对象
     """
-    data = diff_list(txt, percent=percent, switch=switch, hosts=ipaddr.client.host)
+    data = diff_list(txt, percent=percent, hosts=ipaddr.client.host)
     prompt['samples'] = data
     return gr.Dataset.update(samples=data, visible=True), prompt
 
@@ -628,12 +587,12 @@ def refresh_load_data(prompt, request: gr.Request):
     know_load = gr.Dropdown.update(choices=load_list, label='公共知识库', show_label=True)
     know_user = gr.Dropdown.update(choices=user_list)
     select_list = filter_database_tables()
-    outputs = [gr.Dataset.update(samples=data, visible=True), prompt, gr.Dropdown.update(choices=select_list, value='3123'),
+    outputs = [gr.Dataset.update(samples=data, visible=True), prompt, gr.Dropdown.update(choices=select_list),
                 know_cls, know_user, know_load]
     return outputs
 
 
-def refresh_user_data(cookies, select,  ipaddr: gr.Request):
+def refresh_user_data(cookies,  ipaddr: gr.Request):
     user_path = os.path.join(func_box.history_path, ipaddr.client.host)
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
     history_handle = history_processor.HistoryJsonHandle(new_path)
