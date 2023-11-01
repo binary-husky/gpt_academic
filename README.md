@@ -61,7 +61,7 @@ Latex论文一键校对 | [函数插件] 仿Grammarly对Latex文章进行语法�
 
 - 新界面（修改`config.py`中的LAYOUT选项即可实现“左右布局”和“上下布局”的切换）
 <div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/230361456-61078362-a966-4eb5-b49e-3c62ef18b860.gif" width="700" >
+<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/d81137c3-affd-4cd1-bb5e-b15610389762" width="700" >
 </div>
 
 
