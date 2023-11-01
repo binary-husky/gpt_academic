@@ -49,7 +49,7 @@ def 解析PDF(file_name, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
         gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(i_say, i_say_show_user,  # i_say=真正给chatgpt的提问， i_say_show_user=给用户看的提问
                                                                            llm_kwargs, chatbot, 
                                                                            history=["The main idea of the previous section is?", last_iteration_result], # 迭代上一次的结果
-                                                                           sys_prompt="Extract the main idea of this section.用中文回答我"  # 提示
+                                                                           sys_prompt="Extract the main idea of this section, answer me with Chinese."  # 提示
                                                                         ) 
         iteration_results.append(gpt_say)
         last_iteration_result = gpt_say
