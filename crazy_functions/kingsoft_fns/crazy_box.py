@@ -929,6 +929,12 @@ def result_written_to_markdwon(gpt_response_collection, llm_kwargs, plugin_kwarg
     return file_limit
 
 
+def detach_cloud_links(link_limit):
+    units = Utils()
+    wps_links = units.split_startswith_txt(link_limit, domain_name=['kdocs', 'wps'])
+    qq_link = units.split_startswith_txt(link_limit, domain_name=['docs.qq'])
+    return wps_links, qq_link
+
 # <---------------------------------------一些Tips----------------------------------------->
 previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传，多个文件请上传压缩包，' \
                         f'{func_box.html_tag_color("如果是网络文件或金山文档链接，请粘贴到输入框")}, 然后再次点击该插件' \

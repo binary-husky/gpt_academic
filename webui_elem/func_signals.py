@@ -598,7 +598,7 @@ def refresh_load_data(prompt, request: gr.Request):
     is_all = toolbox.get_conf('preset_prompt')[0]['value']
     data = prompt_retrieval(is_all=is_all)
     prompt['samples'] = data
-    know_list = ['新建分类'] + os.listdir(func_box.knowledge_path)
+    know_list = os.listdir(func_box.knowledge_path)
     load_list, user_list = func_box.get_directory_list(os.path.join(func_box.knowledge_path, '知识库'),
                                                        request.client.host)
     know_cls = gr.Dropdown.update(choices=know_list, value='知识库')

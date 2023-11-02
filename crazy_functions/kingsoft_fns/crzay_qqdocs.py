@@ -127,7 +127,7 @@ def get_qqdocs_from_everything(txt, type: list=[''], ipaddr='temp'):
         ipaddr: 用户信息
     Returns:
     """
-    link_limit = crazy_box.Utils().split_startswith_txt(link_limit=txt)
+    link_limit = crazy_box.Utils().split_startswith_txt(link_limit=txt, domain_name=['docs.qq'])
     file_manifest = []
     success = ''
     project_folder = os.path.join(func_box.users_path, ipaddr, 'qqdocs')

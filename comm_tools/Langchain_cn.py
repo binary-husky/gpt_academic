@@ -5,8 +5,7 @@ from comm_tools import toolbox
 from crazy_functions import crazy_utils
 import gradio as gr
 from comm_tools import func_box, database_processor
-from crazy_functions.kingsoft_fns import crazy_box, crzay_kingsoft
-from langchain.embeddings.huggingface import HuggingFaceEmbeddings
+from crazy_functions.kingsoft_fns import crazy_box, crzay_kingsoft, crzay_qqdocs
 
 
 def classification_filtering_tag(cls_select, ipaddr):
@@ -51,6 +50,8 @@ def knowledge_base_writing(cls_select, links: str, select, name, kai_handle, ipa
     # 网络文件
     try:
         task_info, kdocs_manifest_tmp, _ = crzay_kingsoft.get_kdocs_from_everything(links, type='', ipaddr=ipaddr.client.host)
+        task_info, kdocs_manifest_tmp, _ = crzay_kingsoft.get(links, type='', ipaddr=ipaddr.client.host)
+
         if kdocs_manifest_tmp:
             error += task_info
             yield (f"", error, gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(), kai_handle)

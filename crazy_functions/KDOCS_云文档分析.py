@@ -11,8 +11,7 @@ from comm_tools.toolbox import update_ui, CatchException, trimmed_format_exc, ge
 
 
 def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, file_types):
-    wps_links = crazy_box.Utils().split_startswith_txt(link_limit, domain_name=['kdocs', 'wps'])
-    qq_link = crazy_box.Utils().split_startswith_txt(link_limit, domain_name=['docs.qq'])
+    wps_links, qq_link = crazy_box.detach_cloud_links(link_limit)
     files = [file for file in link_limit.splitlines() if os.path.exists(file)]
     if not wps_links and not files and not qq_link:
         devs_document, = get_conf('devs_document')
@@ -24,7 +23,6 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
                               f'\n\n`还是不懂？那就来👺` {devs_document}'))
         yield from update_ui(chatbot, history)
         return
-    file_limit = []
     # 爬虫读取
     gpt_say = "网页爬虫和文件处理准备工作中...."
     chatbot.append([link_limit, gpt_say])
@@ -54,6 +52,7 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
         success, file_manifest, _ = crzay_qqdocs.get_qqdocs_from_everything(txt=url, type=file_types, ipaddr=llm_kwargs['ipaddr'])
         files.extend(file_manifest)
     # 提交文件给file_extraction_intype读取
+    file_limit = []
     yield from crazy_box.file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_kwargs, plugin_kwargs)
     yield from update_ui(chatbot, history)
     know_dict, = crazy_box.json_args_return(plugin_kwargs, keys=['自动录入知识库'], default={})

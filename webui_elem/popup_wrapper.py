@@ -255,7 +255,7 @@ class Prompt:
         with gr.Box(elem_id="spike-prompt"):
             devs_document, = toolbox.get_conf('devs_document')
             jump_link = f'<a href="{devs_document}" target="_blank">Developer Documentation</a>'
-            popup_title("## " + i18n(f"百宝袋\n\n{jump_link}"))
+            popup_title("### " + i18n(f"百宝袋\n{jump_link}"))
             with gr.Tabs(elem_id="prompt-tabs"):
                 self._draw_tabs_prompt()
                 self._draw_tabs_masks()
