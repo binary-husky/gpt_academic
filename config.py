@@ -53,6 +53,18 @@ AVAIL_THEMES = ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast", "Gsta
 INIT_SYS_PROMPT = "Serve me as a writing and programming assistant."
 
 
+# 核采样 (Top-p)
+TOP_P = 1
+
+
+# 回复随机性 (值越大越随机, 范围: 0-2)
+TEMPERATURE = 1
+
+
+# 生成文本最大长度
+MAX_LENGTH = 4096
+
+
 # 对话窗的高度 （仅在LAYOUT="TOP-DOWN"时生效）
 CHATBOT_HEIGHT = 1115
 
