@@ -405,7 +405,7 @@ body.popup-open {
 }
 
 #chatbot-input-box {
-    max-width: 80%;
+    max-width: 999px;
     /* margin: 0 auto; */
     gap: 20px;
     padding: 16px 16px 24px;
@@ -900,7 +900,7 @@ input:checked + .chatbot-input-more-span {
         padding: 8px 1.6rem;
         border: none;
         white-space: nowrap;
-        width: auto;
+        width: 33.3%;
         text-align: center;
         background: var(--button-secondary-background-fill);
         transition: font-size 0.3s ease-in-out;

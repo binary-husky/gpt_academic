@@ -26,11 +26,11 @@ function openTrainingBox() {
 
 function openSearch() {
     addHideBoxClassExcept(searchBox)
-
 }
 
 function openPrompt() {
     addHideBoxClassExcept(promptBox)
+    remove_red_dot()
 }
 
 function openChatMore() {
@@ -97,6 +97,7 @@ function closeBox() {
     settingBox.classList.add('hideBox');
     document.querySelector('.chuanhu-mask')?.remove();
     document.body.classList.remove('popup-open');
+    red_dot_detection()
 }
 
 function closeSide(sideArea) {

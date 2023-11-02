@@ -31,3 +31,22 @@ function btn_move_to_tab() {
         mk_btn_wrap.appendChild(mk_clear)
     }
 }
+
+function red_dot_detection() {
+    const langchainTab = document.getElementById('langchain_tab');
+    const hasGeneratingAttr = langchainTab.querySelector('[generating]');
+    if (hasGeneratingAttr) {
+        const btn = document.getElementById("prompt-mask-btn")
+        const dot = document.createElement('span');
+        dot.className = 'red-dot';
+        btn.appendChild(dot);
+    }
+}
+
+function remove_red_dot() {
+    const btn = document.getElementById("prompt-mask-btn");
+    const redDot = btn.querySelector('.red-dot');
+    if (redDot) {
+        btn.removeChild(redDot);
+    }
+}

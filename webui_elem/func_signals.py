@@ -166,12 +166,12 @@ def rename_history(old_file, filename: str,  ipaddr: gr.Request):
     return gr.Radio.update(choices=only_name, value=new_name)
 
 
-def delete_history(cookies, filename, ipaddr: gr.Request):
+def delete_history(cookies, filename, info, ipaddr: gr.Request):
     user_path = os.path.join(func_box.history_path, ipaddr.client.host)
     full_path = os.path.join(user_path, f"{filename}.json")
     if not os.path.exists(full_path):
         if filename == 'CANCELED':
-            return [gr.update() for i in range(15)]
+            return [gr.update() for i in range(16)]
         else:
             raise gr.Error('文件或许已不存在')
     os.remove(full_path)
@@ -563,6 +563,22 @@ def mask_setting_role(data):
     return setting_set
 
 
+def mask_del_new_row(data):
+    if len(data) == 1:
+        return [['system', '']]
+    if data:
+        return data[:-1]
+    else:
+        return data
+
+
+def mask_clear_all(data, state, info):
+    if state == 'CANCELED':
+        return data
+    else:
+        return [['system', '']]
+
+
 # TODO < -------------------------------- 页面刷新函数注册区 -------------------------------->
 def mobile_access(request: gr.Request): # 为适配手机端
     user_agent = request.kwargs['headers']['user-agent'].lower()
@@ -583,10 +599,10 @@ def refresh_load_data(prompt, request: gr.Request):
     data = prompt_retrieval(is_all=is_all)
     prompt['samples'] = data
     know_list = ['新建分类'] + os.listdir(func_box.knowledge_path)
-    load_list, user_list = func_box.get_directory_list(os.path.join(func_box.knowledge_path, '公共知识库'),
+    load_list, user_list = func_box.get_directory_list(os.path.join(func_box.knowledge_path, '知识库'),
                                                        request.client.host)
-    know_cls = gr.Dropdown.update(choices=know_list, value='公共知识库')
-    know_load = gr.Dropdown.update(choices=load_list, label='公共知识库', show_label=True)
+    know_cls = gr.Dropdown.update(choices=know_list, value='知识库')
+    know_load = gr.Dropdown.update(choices=load_list, label='知识库', show_label=True)
     know_user = gr.Dropdown.update(choices=user_list)
     select_list = filter_database_tables()
     outputs = [gr.Dataset.update(samples=data, visible=True), prompt, gr.Dropdown.update(choices=select_list),

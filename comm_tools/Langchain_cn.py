@@ -9,28 +9,26 @@ from crazy_functions.kingsoft_fns import crazy_box, crzay_kingsoft
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 
 
-def classification_filtering_tag(cls_select, cls_name, ipaddr):
-    if cls_select == '新建分类':
-        cls_select = cls_name
-    elif cls_select == '个人知识库':
+def classification_filtering_tag(cls_select, ipaddr):
+    if cls_select == '个人知识库':
         cls_select = os.path.join(cls_select, ipaddr)
     return cls_select
 
 
-def knowledge_base_writing(cls_select, cls_name, links: str, select, name, kai_handle, ipaddr: gr.Request):
+def knowledge_base_writing(cls_select, links: str, select, name, kai_handle, ipaddr: gr.Request):
     # < --------------------读取参数--------------- >
-    cls_select = classification_filtering_tag(cls_select, cls_name, ipaddr.client.host)
+    cls_select = classification_filtering_tag(cls_select, ipaddr.client.host)
     if not cls_select:
         raise gr.Error('新建分类名称请不要为空')
     vector_path = os.path.join(func_box.knowledge_path, cls_select)
-    if name and select != '新建知识库':
+    if name and select:
         kai_id = name
         os.rename(os.path.join(vector_path, select), os.path.join(vector_path, name))
         _, load_file = func_box.get_directory_list(vector_path, ipaddr.client.host)
         yield '', f'更名成功～ `{select}` -> `{name}`', gr.Dropdown.update(), gr.Dropdown.update(choices=load_file, value=kai_id), gr.Dropdown.update(), kai_handle
         if not links and not kai_handle.get('file_list'): return  # 如果文件和链接都为空，那么就有必要往下执行了
-    elif name and select == '新建知识库': kai_id = name
-    elif select and select != '新建知识库': kai_id = select
+    elif select:
+        kai_id = select
     else:
         kai_id = func_box.created_atime()
         waring = '新建知识库时，知识库名称建议不要为空，本次知识库名称取用服务器时间`kai_id`为知识库名称！！！'
@@ -122,7 +120,7 @@ def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
             if llm_kwargs['know_dict']['know_obj'].get(id, False):
                 kai = llm_kwargs['know_dict']['know_obj'][id]
             else:
-                know_cls = classification_filtering_tag(know_cls, know_cls, llm_kwargs['ipaddr'])
+                know_cls = classification_filtering_tag(know_cls, llm_kwargs['ipaddr'])
                 vs_path = os.path.join(func_box.knowledge_path, know_cls)
                 kai = crazy_utils.knowledge_archive_interface(vs_path=vs_path)
                 llm_kwargs['know_dict']['know_obj'][id] = kai
@@ -173,9 +171,20 @@ def obtain_classification_knowledge_base(cls_name, ipaddr: gr.Request):
     return gr.Dropdown.update(choices=user_list), gr.Dropdown.update(choices=load_list, label=f'{cls_name}'), status
 
 
-def obtaining_knowledge_base_files(cls_select, cls_name, vs_id, chatbot, kai_handle, model, ipaddr: gr.Request):
+def want_to_rename_it(cls_name, select, ipaddr: gr.Request):
+    if cls_name == '个人知识库':
+        load_path = os.path.join(func_box.knowledge_path, '个人知识库', ipaddr.client.host)
+    else:
+        load_path = os.path.join(func_box.knowledge_path, cls_name)
+    load_list, user_list = func_box.get_directory_list(load_path, ipaddr.client.host)
+    if select in load_list:
+        return gr.Button.update(visible=True)
+    else:
+        return gr.update(visible=False)
+
+def obtaining_knowledge_base_files(cls_select, vs_id, chatbot, kai_handle, model, ipaddr: gr.Request):
     if vs_id and '预加载知识库' in model:
-        cls_select = classification_filtering_tag(cls_select, cls_name, ipaddr.client.host)
+        cls_select = classification_filtering_tag(cls_select, ipaddr.client.host)
         vs_path = os.path.join(func_box.knowledge_path, cls_select)
         you_say = f'请检查知识库内文件{"  ".join([func_box.html_tag_color(i)for i in vs_id])}'
         chatbot.append([you_say, None])
@@ -200,7 +209,7 @@ def obtaining_knowledge_base_files(cls_select, cls_name, vs_id, chatbot, kai_han
 
 
 def single_step_thread_building_knowledge(cls_name, know_id, file_manifest, llm_kwargs):
-    cls_select = classification_filtering_tag(cls_name, cls_name, llm_kwargs['ipaddr'])
+    cls_select = classification_filtering_tag(cls_name, llm_kwargs['ipaddr'])
     vector_path = os.path.join(func_box.knowledge_path, cls_select)
     os.makedirs(vector_path, exist_ok=True)
     def thread_task():

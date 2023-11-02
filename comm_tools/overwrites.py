@@ -38,7 +38,7 @@ def escape_markdown(text, reverse=False):
         '|': '&#124;',
         '$': '&#36;',
         ':': '&#58;',
-        '\n': '<br>',
+        # '\n': '<br>',
     }
     if reverse:
         text = text.replace('&nbsp;&nbsp;&nbsp;&nbsp;', '    ')

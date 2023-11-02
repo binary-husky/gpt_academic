@@ -78,35 +78,6 @@ class RightElem:
                                                  placeholder="这里是特殊函数插件的高级参数输入区").style()
                 self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary", visible=False)
 
-    def _draw_langchain_base(self):
-        spl, = toolbox.get_conf('spl')
-        with gr.TabItem('知识库', id='langchain_tab', elem_id='chuanhu-toolbox-tabs'):
-            with gr.Box():
-                with gr.Row():
-                    self.langchain_classifi = gr.Dropdown(choices=[], value="公共知识库", interactive=True, label="选择知识库分类",
-                                                        elem_classes='normal_select').style(container=False)
-                with gr.Row():
-                    self.langchain_class_name = gr.Textbox(show_label=False, placeholder='*必填，构建知识库同时创建分类', elem_classes='no_padding_input',
-                                                          visible=False, interactive=True).style()
-            with gr.Box():
-                self.langchain_upload = gr.Files(label="解析支持多类型文档，多文件建议使用zip上传", file_count="multiple", file_types=spl)
-                self.langchain_links = gr.Textbox(show_label=False, placeholder='网络文件,多个链接使用换行间隔',
-                                                  elem_classes='no_padding_input').style()
-                self.langchain_know_kwargs = gr.State({'file_path': '', 'know_name': '', 'know_obj': {}, 'file_list': []})
-                #  file_path 是上传文件存储的地址，know_name，know_obj是ql向量化后的对象
-            func_box.md_division_line()
-            with gr.Box():
-                with gr.Row():
-                    self.langchain_select = gr.Dropdown(choices=[], value=r"新建知识库",
-                                                        interactive=True, label="新建or增量重构", elem_classes='normal_select').style(container=False)
-                with gr.Row():
-                    self.langchain_name = gr.Textbox(show_label=False, placeholder='知识库名称or重命名').style(container=False)
-            with gr.Row():
-                self.langchain_submit = gr.Button(value='构建/更新知识库', variant='primary').style(size='sm')
-                self.langchain_stop = gr.Button(value='停止构建').style(size='sm')
-            self.langchain_status = gr.Markdown(value='')
-            self.langchain_error = gr.Markdown(value='')
-
     def _draw_setting_chat(self):
         worker_num, = toolbox.get_conf('DEFAULT_WORKER_NUM')
         with gr.TabItem('调优', id='sett_tab', elem_id='chuanhu-toolbox-tabs'):
@@ -173,5 +144,4 @@ class RightElem:
                 with gr.Tabs(elem_id=""):
                     self._draw_function_chat()
                     self._draw_plugin_chat()
-                    self._draw_langchain_base()
                     self._draw_setting_chat()

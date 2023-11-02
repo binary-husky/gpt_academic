@@ -152,7 +152,7 @@ function gradioApp() {
 
 function showConfirmationDialog(a, file, c) {
     if (file != "") {
-        var result = confirm(i18n(deleteConfirm_i18n_pref) + file + i18n(deleteConfirm_i18n_suff));
+        var result = confirm(i18n(deleteConfirm_i18n_pref) + c + ` "${file}"` + i18n(deleteConfirm_i18n_suff));
         if (result) {
             return [a, file, c];
         }

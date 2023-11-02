@@ -198,3 +198,12 @@ code.language-folded {
 .controls-wrap {
     gap: 10px;
 }
+.red-dot {
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+}

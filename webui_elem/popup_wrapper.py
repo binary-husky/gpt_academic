@@ -156,7 +156,7 @@ class Config:
                 enableCheckUpdate_config='',
                 hideHistoryWhenNotLoggedIn_config='',
                 forView_i18n=i18n("仅供查看"),
-                deleteConfirm_i18n_pref=i18n("你真的要删除 "),
+                deleteConfirm_i18n_pref=i18n("你真的要"),
                 deleteConfirm_i18n_suff=i18n(" 吗？"),
                 usingLatest_i18n=i18n("您使用的就是最新版！"),
                 updatingMsg_i18n=i18n("正在尝试更新..."),
@@ -179,12 +179,10 @@ class Prompt:
         preset_prompt, devs_document = toolbox.get_conf('preset_prompt', 'devs_document')
         with gr.TabItem('提示词', id='prompt'):
             with gr.Row():
-                with gr.Column(elem_classes='column_left') as self.prompt_upload_column:
-                    jump_link = f'<a href="{devs_document}" target="_blank">Developer Documentation</a>'
-                    self.pro_devs_link = gr.HTML(jump_link)
+                with gr.Column(elem_classes='column_left'):
                     self.pro_upload_btn = gr.File(file_count='single', file_types=['.yaml', '.json'],
                                                   label=f'上传你的提示词文件, 编写格式请遵循上述开发者文档', )
-                with gr.Column(elem_classes='column_right') as self.prompt_edit_column:
+                with gr.Column(elem_classes='column_right'):
                     Tips = "用 BORF 分析法设计GPT 提示词:\n" \
                            "1、阐述背景 B(Background): 说明背景，为chatGPT提供充足的信息\n" \
                            "2、定义目标 O(Objectives):“我们希望实现什么”\n" \
@@ -217,15 +215,51 @@ class Prompt:
                                               headers=['role', 'content'], col_count=(2, 'fixed'),
                                               interactive=True, show_label=False, row_count=(1, "dynamic"),
                                               wrap=True, type='array', elem_id='mask_tabs')
-            self.masks_delete_btm = gr.Button('Del New Row', size='sm', elem_id='mk_del')
+            self.masks_delete_btm = gr.Button('Del New row', size='sm', elem_id='mk_del')
             self.masks_clear_btn = gr.Button(value='Clear All', size='sm', elem_id='mk_clear')
+
+    def _draw_langchain_base(self):
+        spl, = toolbox.get_conf('spl')
+        with gr.TabItem('知识库构建', id='langchain_tab', elem_id='langchain_tab'):
+            with gr.Row():
+                with gr.Column(elem_classes='column_left'):
+                    self.langchain_upload = gr.Files(label="解析支持多类型文档，多文件建议使用zip上传",
+                                                     file_count="multiple", file_types=spl)
+                    self.langchain_links = gr.Textbox(show_label=False, placeholder='网络文件,多个链接使用换行间隔',
+                                                      elem_classes='no_padding_input').style()
+                    self.langchain_know_kwargs = gr.State(
+                        {'file_path': '', 'know_name': '', 'know_obj': {}, 'file_list': []})
+                    #  file_path 是上传文件存储的地址，know_name，know_obj是ql向量化后的对象
+                with gr.Column(elem_classes='column_right'):
+                    with gr.Row():
+                        self.langchain_classifi = gr.Dropdown(choices=[], value="知识库", interactive=True,
+                                                              label="选择知识库分类", allow_custom_value=True,
+                                                              elem_classes='normal_select').style(container=False)
+                        self.langchain_cls_name = gr.Textbox(show_label=False, placeholder='已有知识库重命名',
+                                                             container=False,
+                                                            visible=False)
+                    with gr.Row():
+                        self.langchain_select = gr.Dropdown(choices=[], value=r"", allow_custom_value=True,
+                                                            interactive=True, label="新建or增量重构",
+                                                            elem_classes='normal_select').style(container=False)
+                        self.langchain_name = gr.Textbox(show_label=False, placeholder='已有知识库重命名', container=False,
+                                                         visible=False)
+                    with gr.Row():
+                        self.langchain_submit = gr.Button(value='构建/更新知识库', variant='primary').style(size='sm')
+                        self.langchain_stop = gr.Button(value='停止构建').style(size='sm')
+            func_box.md_division_line()
+            self.langchain_status = gr.Markdown(value='')
+            self.langchain_error = gr.Markdown(value='')
 
     def draw_popup_prompt(self):
         with gr.Box(elem_id="spike-prompt"):
-            popup_title("## " + i18n("提示词 对话面具"))
+            devs_document, = toolbox.get_conf('devs_document')
+            jump_link = f'<a href="{devs_document}" target="_blank">Developer Documentation</a>'
+            popup_title("## " + i18n(f"百宝袋\n\n{jump_link}"))
             with gr.Tabs(elem_id="prompt-tabs"):
                 self._draw_tabs_prompt()
                 self._draw_tabs_masks()
+                self._draw_langchain_base()
 
 
 class FakeComponents:

@@ -44,7 +44,7 @@ class GetGLMHandle(Process):
         elif LOCAL_MODEL_QUANT == "INT8":       # INT8
             _model_name_ = "THUDM/chatglm2-6b-int8"
         elif LOCAL_MODEL_QUANT == "glm3":
-            _model_name_ = "THUDM/chatglm3-6b"
+            _model_name_ = "/Users/kilig/Job/Python-project/kso_gpt/users_data/THUMD/chatglm3-6b"
         else:
             _model_name_ = "THUDM/chatglm2-6b"  # FP16
 

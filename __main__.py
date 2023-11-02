@@ -67,8 +67,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         self.sm_upload_history.click(func_signals.get_user_upload, [self.chatbot, self.user_input],
                                      outputs=[self.chatbot])
         self.langchain_dropdown.select(fn=Langchain_cn.obtaining_knowledge_base_files,
-                                       inputs=[self.langchain_classifi, self.langchain_class_name,
-                                               self.langchain_dropdown, self.chatbot, self.langchain_know_kwargs,
+                                       inputs=[self.langchain_classifi, self.langchain_dropdown,
+                                               self.chatbot, self.langchain_know_kwargs,
                                                self.models_box],
                                        outputs=[self.chatbot, self.status_display, self.langchain_know_kwargs]
                                        )
@@ -120,9 +120,16 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                                         self.pro_func_prompt, self.pro_fp_state])
 
     def signals_masks(self):
-        self.masks_dataset.change(fn=func_signals.mask_setting_role,
-                                  inputs=[self.masks_dataset],
+        self.masks_dataset.change(fn=func_signals.mask_setting_role, inputs=[self.masks_dataset],
                                   outputs=[self.masks_dataset])
+        self.masks_delete_btm.click(fn=func_signals.mask_del_new_row, inputs=[self.masks_dataset],
+                                    outputs=[self.masks_dataset])
+        self.masks_clear_btn.click(func_signals.mask_clear_all,
+                                   inputs=[self.masks_dataset,
+                                           gr.HTML(value=i18n('Mask Tab'), visible=False),
+                                           gr.HTML(value=i18n('Clear All'), visible=False)],
+                                   outputs=[self.masks_dataset],
+                                   _js='(a,b,c)=>{return showConfirmationDialog(a,b,c);}')
 
     def signals_plugin(self):
         from comm_tools.crazy_functional import crazy_fns_role, crazy_fns
@@ -223,8 +230,10 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         self.langchain_classifi.select(fn=Langchain_cn.obtain_classification_knowledge_base,
                                        inputs=[self.langchain_classifi],
                                        outputs=[self.langchain_select, self.langchain_dropdown, self.langchain_status]
-                                       ).then(fn=func_box.new_button_display,
-                                              inputs=[self.langchain_classifi], outputs=[self.langchain_class_name])
+                                       )
+        self.langchain_select.change(fn=Langchain_cn.want_to_rename_it,
+                                     inputs=[self.langchain_classifi, self.langchain_select],
+                                     outputs=[self.langchain_name])
         self.langchain_upload.upload(fn=on_file_uploaded,
                                      inputs=[self.langchain_upload, gr.State(''), self.langchain_know_kwargs,
                                              self.cookies],
@@ -239,8 +248,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                                     outputs=[self.langchain_know_kwargs, self.langchain_status])
 
         submit_id = self.langchain_submit.click(fn=Langchain_cn.knowledge_base_writing,
-                                                inputs=[self.langchain_classifi, self.langchain_class_name,
-                                                        self.langchain_links, self.langchain_select,
+                                                inputs=[self.langchain_classifi, self.langchain_links,
+                                                        self.langchain_select,
                                                         self.langchain_name, self.langchain_know_kwargs],
                                                 outputs=[self.langchain_status, self.langchain_error,
                                                          self.langchain_classifi, self.langchain_select,
@@ -266,9 +275,10 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                                     inputs=[self.saveFileName, self.historySelectList],
                                     outputs=[self.historySelectList],
                                     _js='(a,b,c,d)=>{return saveChatHistory(a,b,c,d);}')
-        self.historyDeleteBtn.click(func_signals.delete_history, inputs=[self.cookies, self.historySelectList],
+        self.historyDeleteBtn.click(func_signals.delete_history,
+                                    inputs=[self.cookies, self.historySelectList, self.historyDeleteBtn],
                                     outputs=[self.historySelectList, *self.llms_cookies_combo],
-                                    _js='(a,b,c)=>{return showConfirmationDialog(a, b, c);}')
+                                    _js='(a,b,c)=>{return showConfirmationDialog(a,b,c);}')
         self.uploadFileBtn.upload(fn=func_signals.import_history, inputs=[self.uploadFileBtn],
                                   outputs=[self.historySelectList])
         self.historyRefreshBtn.click(func_signals.refresh_history, inputs=[self.cookies],
