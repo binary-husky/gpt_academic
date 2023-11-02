@@ -131,31 +131,11 @@ function initialize() {
     // trainBody.classList.add('hide-body');
 
     // 提示词点击后，光标重定向到输入框
-    move_cursor()
+    move_cursor();
     //
-    check_move_list()
+    check_move_list();
+    btn_move_to_tab();
     return true;
-}
-
-function move_cursor() {
-    const buttonsParent = gradioApp().getElementById('prompt_list');
-    const inputElement = gradioApp().getElementById('user-input-tb');
-    const textarea = inputElement.querySelector('[data-testid=textbox]');
-    if (buttonsParent && inputElement && textarea) {
-        buttonsParent.querySelectorAll('button').forEach((button) => {
-            button.addEventListener('click', () => {
-                textarea.focus();
-            });
-        });
-    }
-}
-
-function check_move_list(){
-    const promptList = document.getElementById('prompt_list');
-
-    if (!promptList.querySelector('.label #pm_check')) {
-        promptList.querySelector('.label').appendChild(document.getElementById('pm_check'));
-    }
 }
 
 function gradioApp() {

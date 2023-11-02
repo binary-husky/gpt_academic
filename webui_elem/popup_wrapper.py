@@ -213,10 +213,12 @@ class Prompt:
     def _draw_tabs_masks(self):
         with gr.TabItem('Masks 🎭', id='masks'):
             def_sys = i18n('你是一个xxx角色，你会xxx技能，你将按照xxx要求，回答我的问题')
-            self.masks_dataset = gr.Dataframe(value=[['system', def_sys]], datatype='str',
+            self.masks_dataset = gr.Dataframe(value=[['system', def_sys]], datatype='markdown',
                                               headers=['role', 'content'], col_count=(2, 'fixed'),
                                               interactive=True, show_label=False, row_count=(1, "dynamic"),
                                               wrap=True, type='array', elem_id='mask_tabs')
+            self.masks_delete_btm = gr.Button('Del New Row', size='sm', elem_id='mk_del')
+            self.masks_clear_btn = gr.Button(value='Clear All', size='sm', elem_id='mk_clear')
 
     def draw_popup_prompt(self):
         with gr.Box(elem_id="spike-prompt"):
