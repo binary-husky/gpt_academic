@@ -97,14 +97,14 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
 
     def signals_prompt_edit(self):
         # self.prompt_tab.select(fn=func_signals.draw_results,
-        #                        inputs=[self.pro_search_txt, self.pro_prompt_state, self.pro_tf_slider,
+        #                        inputs=[self.history_search_txt, self.pro_prompt_state, self.pro_tf_slider,
         #                                self.pro_private_check],
         #                        outputs=[self.pro_prompt_list, self.pro_prompt_state])
-        self.pro_search_txt.submit(fn=func_signals.draw_results,
-                                   inputs=[self.pro_search_txt, self.pro_history_state, self.pro_tf_slider],
+        self.history_search_txt.submit(fn=func_signals.draw_results,
+                                   inputs=[self.history_search_txt, self.pro_history_state, self.pro_tf_slider],
                                    outputs=[self.pro_history_list, self.pro_history_state])
         self.pro_entry_btn.click(fn=func_signals.draw_results,
-                                 inputs=[self.pro_search_txt, self.pro_history_state, self.pro_tf_slider],
+                                 inputs=[self.history_search_txt, self.pro_history_state, self.pro_tf_slider],
                                  outputs=[self.pro_history_list, self.pro_history_state])
         self.pro_history_list.click(fn=func_signals.show_prompt_result,
                                     inputs=[self.pro_history_list, self.pro_history_state, self.cookies],
@@ -281,7 +281,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                                          inputs=[self.historySearchTextbox, self.pro_history_state, self.pro_tf_slider],
                                          outputs=[self.pro_history_list, self.pro_history_state],
                                          ).then(fn=lambda x: x, inputs=[self.historySearchTextbox],
-                                                outputs=[self.pro_search_txt]).then(None, None, None, _js='()=>{openSearch();}')
+                                                outputs=[self.history_search_txt]).then(None, None, None, _js='()=>{openSearch();}')
 
     def signals_input_setting(self):
         # 注册input

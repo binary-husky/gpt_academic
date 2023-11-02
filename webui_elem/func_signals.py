@@ -205,9 +205,9 @@ def download_history_json(select, ipaddr: gr.Request):
     user_path = os.path.join(func_box.history_path, ipaddr.client.host)
     file_path = os.path.join(user_path, f"{select}.json")
     if not os.path.exists(file_path):
-        return gr.Error('当前对话记录空，导出失败')
-    link = func_box.html_local_file(file_path)
-    raise f'下载链接:[{select}]({link})， 对话记录导出json成功'
+        raise gr.Error('当前对话记录空，导出失败')
+    link = func_box.link_mtime_to_md(file_path)
+    return f'下载链接:{link}， 对话记录导出json成功'
 
 
 def download_history_md(select, ipaddr: gr.Request):
@@ -231,8 +231,8 @@ def download_history_md(select, ipaddr: gr.Request):
     file_path = os.path.join(user_path, f'{select}.md')
     with open(file=file_path, mode='w') as f:
         f.write(mark_down)
-    link = func_box.html_local_file(file_path)
-    return f'下载链接:[{select}]({link}), 对话记录转换为markdown成功'
+    link = func_box.link_mtime_to_md(file_path)
+    return f'下载链接:{link}, 对话记录转换为markdown成功'
 
 
 # TODO < -------------------------------- 小按钮函数注册区 -------------------------------->
@@ -553,10 +553,12 @@ def mask_setting_role(data):
     """
     setting_set = []
     for i, item in enumerate(data):
-        if i % 2 == 0:
-            item[0] = 'user'
+        if i == 0 :
+            item[0] = 'system'
+        elif i % 2 == 0:
+            item[0] = 'assistant'
         else:
-            item[0] = 'bot'
+            item[0] = 'user'
         setting_set.append(item)
     return setting_set
 

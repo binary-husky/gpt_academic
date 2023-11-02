@@ -149,6 +149,11 @@ def html_local_file(file):
         file = f'file={file.replace(base_path, ".")}'
     return file
 
+def link_mtime_to_md(file):
+    link_local = html_local_file(file)
+    link_name = os.path.basename(file)
+    a = f"[{link_name}]({link_local}?{os.path.getmtime(file)})"
+    return a
 
 def html_view_blank(__href: str, file_name='', to_tabs=False):
     __file = __href.replace(base_path, ".")
