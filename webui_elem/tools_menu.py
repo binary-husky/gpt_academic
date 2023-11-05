@@ -27,21 +27,27 @@ class RightElem:
     def _draw_function_chat(self):
         preset_prompt, = toolbox.get_conf('preset_prompt')
         with gr.TabItem('基础', id='func_tab', elem_id='chuanhu-toolbox-tabs'):
-            self.system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt",
-                                            label="System prompt", value=self.initial_prompt)
-
-            func_box.md_division_line()
-            self.sm_upload = gr.Files(label='Upload file', type='file', elem_id='upload-index-file',
-                                      visible=True, interactive=True, container=False)
-            func_box.md_division_line()
             with gr.Row():
-                self.prompt_search_txt = gr.Textbox(placeholder='搜索提示词/Masks', show_label=False, elem_classes='pm_search',)
+                self.preset_prompt, = toolbox.get_conf('preset_prompt')
+                self.pro_private_check = gr.Dropdown(choices=[], value=self.preset_prompt['value'],
+                                                     label='提示词分类', elem_classes='normal_select',
+                                                     allow_custom_value=True)
+            with gr.Row():
+                self.prompt_search_txt = gr.Textbox(placeholder='搜索提示词/面具', show_label=False,
+                                                    elem_classes='pm_search',)
                 self.multiplexing_edit_check = gr.Checkbox(value=True, label='复用', show_label=True, elem_id='pm_check',
                                                      interactive=True, container=False)
-            self.pro_func_prompt = gr.Dataset(components=[gr.HTML()], label="提示词列表", visible=False,
+            self.pro_func_prompt = gr.Dataset(components=[gr.HTML()], label="Prompt/Masks", visible=False,
                                               samples=[['...', ""] for i in range(20)], type='index',
                                               elem_id='prompt_list', samples_per_page=10, )
             self.pro_fp_state = gr.State({'samples': None})
+            func_box.md_division_line()
+            self.system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt",
+                                            label="System prompt", value=self.initial_prompt)
+            func_box.md_division_line()
+            self.sm_upload = gr.Files(label='Upload file Edit', type='file', elem_id='upload-index-file',
+                                      visible=True, interactive=True)
+
 
     def _draw_plugin_chat(self):
         with gr.TabItem('插件', id='plug_tab', elem_id='chuanhu-toolbox-tabs'):
@@ -128,13 +134,14 @@ class RightElem:
                     self.vector_search_top_k = gr.Slider(minimum=1, maximum=10, value=4, step=1, interactive=True,
                                                  label="TOP-K",).style(container=False)
                     self.vector_chunk_size = gr.Slider(minimum=100, maximum=1000, value=521, step=1, interactive=True,
-                                           label="CHUNK-SIZE", ).style(container=False)
+                                                       label="CHUNK-SIZE", ).style(container=False)
                 func_box.md_division_line()
                 with gr.Accordion(label='工具调试参数', open=True):
-                    self.pro_tf_slider = gr.Slider(minimum=0.01, maximum=1.0, value=0.70, step=0.01, interactive=True,
-                                                   label="搜索匹配系数").style(container=False)
-                    self.ocr_identifying_trust = gr.Slider(minimum=0.01, maximum=1.0, value=0.60, step=0.01, interactive=True,
-                                                   label="OCR 识别信任指数").style(container=False)
+                    self.pro_tf_slider = gr.Slider(minimum=0.01, maximum=100, value=15, step=1, interactive=True,
+                                                   label="搜索展示详细字符").style(container=False)
+                    self.ocr_identifying_trust = gr.Slider(minimum=0.01, maximum=1.0, value=0.60, step=0.01,
+                                                           interactive=True,
+                                                           label="OCR 识别信任指数").style(container=False)
             # temp = gr.Markdown(self.description)
 
     def draw_tools_area(self):

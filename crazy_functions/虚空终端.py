@@ -132,8 +132,6 @@ def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
         chatbot.append((None, explain_msg+appendix_msg))
         yield from update_ui(chatbot=chatbot, history=history)
         from crazy_functions.kingsoft_fns import crazy_box
-        args_keys = [False, False]
-        task_tag = '插件代理'
         plugin_kwargs['显示过程'] = True
         yield from crazy_box.submit_multithreaded_tasks([txt],  [txt], llm_kwargs, chatbot, history, plugin_kwargs)
         return
@@ -143,7 +141,7 @@ def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
 def 虚空终端主路由(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     history = []
     chatbot.append((None, f"正在执行任务: {txt}"))
-    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+    yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
     # ⭐ ⭐ ⭐ 分析用户意图
     is_certain, user_intention = analyze_intention_with_simple_rules(txt)

@@ -207,3 +207,11 @@ code.language-folded {
     background-color: red;
     border-radius: 50%;
 }
+/* 这个没有必要存在，阻碍用户继续编写 */
+.wrap.default.full[class*="svelte-"] {
+    display: none;
+}
+
+#mask_tabs .table[class*="svelte-"] {
+    overflow: unset;
+}

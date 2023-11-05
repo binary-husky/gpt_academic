@@ -465,6 +465,14 @@ def num_tokens_from_string(listing: list, encoding_name: str = 'cl100k_base') ->
     return count_tokens
 
 
+def check_list_format(input_string):
+    try:
+        list_object = ast.literal_eval(input_string)
+        return list_object
+    except:
+        return False
+
+
 def txt_converter_json(input_string):
     try:
         if input_string.startswith("{") and input_string.endswith("}"):

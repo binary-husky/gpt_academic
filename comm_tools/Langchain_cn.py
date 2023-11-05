@@ -183,6 +183,7 @@ def want_to_rename_it(cls_name, select, ipaddr: gr.Request):
     else:
         return gr.update(visible=False)
 
+
 def obtaining_knowledge_base_files(cls_select, vs_id, chatbot, kai_handle, model, ipaddr: gr.Request):
     if vs_id and '预加载知识库' in model:
         cls_select = classification_filtering_tag(cls_select, ipaddr.client.host)

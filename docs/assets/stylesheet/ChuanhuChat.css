@@ -708,8 +708,8 @@ input:checked + .chatbot-input-more-span {
 #chuanhu-popup > .gradio-box > .gradio-tabs > div.tabitem {
     border: none;
     border-radius: 0;
-    overflow: auto;
-    height: 100%;
+    overflow: auto !important;
+    height: calc(100% - 70px);
     padding: 16px 24px;
 }
 #chuanhu-popup > .gradio-box > .gradio-tabs > div.tab-nav {
@@ -872,6 +872,7 @@ input:checked + .chatbot-input-more-span {
     #toolbox-area > .gradio-box > .gradio-tabs > div.tabitem {
         height: calc(100% - 35px);
         overflow-y: auto;
+        overflow-x: clip;
         border-style: none;
         padding: 0;
         /* 理论上不该是0，但这里考虑内部gradio有好多container有padding了 */

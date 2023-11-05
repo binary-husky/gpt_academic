@@ -133,17 +133,13 @@ class AdvancedSearch:
             popup_title("## " + i18n("高级搜索"))
             with gr.Box():
                 with gr.Row():
-                    with gr.Row(elem_classes='input-search'):
-                        self.history_search_txt = gr.Textbox(show_label=False, elem_classes='search_txt',
-                                                         placeholder="输入你想要搜索的对话记录或提示词").style(container=False)
-                        self.pro_entry_btn = gr.Button("搜索", variant="primary", elem_classes='short_btn').style(
-                            full_width=False, size="sm")
-                with gr.Box(elem_classes='search-box-pop'):
-                    with gr.Row(elem_classes='search-example'):
-                        self.pro_history_state = gr.State({'samples': None})
-                        self.pro_history_list = gr.Dataset(components=[gr.HTML(visible=False)], samples_per_page=10,
-                                                              visible=False, label='搜索结果',
-                                                              samples=[[". . ."] for i in range(20)], type='index')
+                    self.history_search_txt = gr.Textbox(show_label=False, elem_classes='search_txt',
+                                                         placeholder="输入你想要搜索的对话记录").style(container=False)
+                with gr.Row(elem_classes='search-example'):
+                    self.pro_history_state = gr.State({'samples': None})
+                    self.pro_history_list = gr.Dataset(components=[gr.HTML(visible=False)], samples_per_page=10,
+                                                          visible=False, label='搜索结果',
+                                                          samples=[[". . ."] for i in range(20)], type='index')
 
 class Config:
 
@@ -176,7 +172,7 @@ class Prompt:
         pass
 
     def _draw_tabs_prompt(self):
-        preset_prompt, devs_document = toolbox.get_conf('preset_prompt', 'devs_document')
+        self.preset_prompt, self.devs_document = toolbox.get_conf('preset_prompt', 'devs_document')
         with gr.TabItem('提示词', id='prompt'):
             with gr.Row():
                 with gr.Column(elem_classes='column_left'):
@@ -196,14 +192,11 @@ class Prompt:
                                                    elem_classes='no_padding_input',
                                                    placeholder=Tips).style()
                     with gr.Row():
-                        self.pro_name_txt = gr.Textbox(show_label=False, placeholder='提示词名称').style(container=False)
-                    with gr.Row():
-                        self.pro_private_check = gr.Dropdown(choices=[], value=preset_prompt['value'],
-                                                             label='保存提示词分类', elem_classes='normal_select'
+                        self.prompt_cls_select = gr.Dropdown(choices=[], value=self.preset_prompt['value'],
+                                                             label='提示词分类', elem_classes='normal_select',
+                                                             allow_custom_value=True, interactive=True
                                                              ).style(container=False)
-                        self.pro_class_name = gr.Textbox(show_label=False,
-                                                         placeholder='*必填，保存Prompt同时创建分类',
-                                                         visible=False).style(container=False)
+                        self.pro_name_txt = gr.Textbox(show_label=False, placeholder='提示词名称').style(container=False)
                     with gr.Row():
                         self.pro_del_btn = gr.Button("删除提示词", ).style(size='sm', full_width=True)
                         self.pro_new_btn = gr.Button("保存提示词", variant="primary").style(size='sm', full_width=True)
@@ -215,15 +208,25 @@ class Prompt:
                                               headers=['role', 'content'], col_count=(2, 'fixed'),
                                               interactive=True, show_label=False, row_count=(1, "dynamic"),
                                               wrap=True, type='array', elem_id='mask_tabs')
-            self.masks_delete_btm = gr.Button('Del New row', size='sm', elem_id='mk_del')
+            self.masks_delete_btn = gr.Button('Del New row', size='sm', elem_id='mk_del')
             self.masks_clear_btn = gr.Button(value='Clear All', size='sm', elem_id='mk_clear')
+            with gr.Row():
+                self.mask_cls_select = gr.Dropdown(choices=[], value=self.preset_prompt['value'],
+                                                      label='Masks分类', elem_classes='normal_select',
+                                                      allow_custom_value=True, interactive=True
+                                                      ).style(container=False)
+                self.masks_name_txt = gr.Textbox(show_label=False, placeholder='面具名称').style(container=False)
+            with gr.Row():
+                self.masks_del_btn = gr.Button("删除面具", ).style(size='sm', full_width=True)
+                self.masks_new_btn = gr.Button("保存面具", variant="primary").style(size='sm', full_width=True)
+
 
     def _draw_langchain_base(self):
         spl, = toolbox.get_conf('spl')
         with gr.TabItem('知识库构建', id='langchain_tab', elem_id='langchain_tab'):
             with gr.Row():
                 with gr.Column(elem_classes='column_left'):
-                    self.langchain_upload = gr.Files(label="解析支持多类型文档，多文件建议使用zip上传",
+                    self.langchain_upload = gr.Files(label="支持解析多类型文档，多文件建议使用zip上传",
                                                      file_count="multiple", file_types=spl)
                     self.langchain_links = gr.Textbox(show_label=False, placeholder='网络文件,多个链接使用换行间隔',
                                                       elem_classes='no_padding_input').style()
@@ -256,7 +259,7 @@ class Prompt:
             devs_document, = toolbox.get_conf('devs_document')
             jump_link = f'<a href="{devs_document}" target="_blank">Developer Documentation</a>'
             popup_title("### " + i18n(f"百宝袋\n{jump_link}"))
-            with gr.Tabs(elem_id="prompt-tabs"):
+            with gr.Tabs(elem_id="treasure-bag") as self.treasure_bag:
                 self._draw_tabs_prompt()
                 self._draw_tabs_masks()
                 self._draw_langchain_base()

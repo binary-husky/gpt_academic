@@ -50,3 +50,10 @@ function remove_red_dot() {
         btn.removeChild(redDot);
     }
 }
+
+function reuse_or_edit(check, b, c, d, e, f) {
+  if (check === false) {
+      openPrompt()
+  }
+  return [check, b, c, d, e, f]
+}

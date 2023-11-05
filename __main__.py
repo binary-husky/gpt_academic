@@ -84,28 +84,29 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         self.pro_private_check.select(fn=func_signals.prompt_reduce,
                                       inputs=[self.pro_private_check, self.pro_fp_state],
                                       outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check]
-                                      ).then(fn=func_box.new_button_display, inputs=[self.pro_private_check],
-                                             outputs=[self.pro_class_name])
+                                      )
         self.pro_func_prompt.select(fn=func_signals.prompt_input,
-                                    inputs=[self.user_input, self.pro_edit_txt, self.pro_name_txt, self.pro_func_prompt,
-                                            self.pro_fp_state],
-                                    outputs=[self.user_input, self.pro_edit_txt, self.pro_name_txt])
+                                    inputs=[self.multiplexing_edit_check, self.user_input, self.model_select_dropdown,
+                                            self.pro_func_prompt, self.pro_fp_state],
+                                    outputs=[self.treasure_bag,
+                                             self.prompt_cls_select, self.pro_edit_txt, self.pro_name_txt,
+                                             self.mask_cls_select, self.masks_dataset, self.masks_name_txt,
+                                             *self.llms_cookies_combo, gr.State(),
+                                             self.historySelectList, self.saveFileName,
+                                             self.user_input],
+                                    _js='(a,b,c,e,f)=>{return reuse_or_edit(a,b,c,e,f);}')
+        self.prompt_search_txt.submit(fn=func_signals.prompt_search,
+                                      inputs=[self.pro_private_check, self.prompt_search_txt,
+                                              self.pro_tf_slider, self.pro_fp_state],
+                                      outputs=[self.pro_func_prompt, self.pro_fp_state])
         self.pro_upload_btn.upload(fn=func_signals.prompt_upload_refresh,
-                                   inputs=[self.pro_upload_btn, self.pro_history_state, self.pro_private_check,
-                                           self.pro_class_name],
+                                   inputs=[self.pro_upload_btn, self.pro_history_state, self.pro_private_check],
                                    outputs=[self.pro_func_prompt, self.pro_history_state, self.pro_private_check])
 
     def signals_prompt_edit(self):
-        # self.prompt_tab.select(fn=func_signals.draw_results,
-        #                        inputs=[self.history_search_txt, self.pro_prompt_state, self.pro_tf_slider,
-        #                                self.pro_private_check],
-        #                        outputs=[self.pro_prompt_list, self.pro_prompt_state])
         self.history_search_txt.submit(fn=func_signals.draw_results,
                                    inputs=[self.history_search_txt, self.pro_history_state, self.pro_tf_slider],
                                    outputs=[self.pro_history_list, self.pro_history_state])
-        self.pro_entry_btn.click(fn=func_signals.draw_results,
-                                 inputs=[self.history_search_txt, self.pro_history_state, self.pro_tf_slider],
-                                 outputs=[self.pro_history_list, self.pro_history_state])
         self.pro_history_list.click(fn=func_signals.show_prompt_result,
                                     inputs=[self.pro_history_list, self.pro_history_state, self.cookies],
                                     outputs=[self.historySelectList, *self.llms_cookies_combo],
@@ -114,15 +115,13 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                                inputs=[self.pro_name_txt, self.pro_fp_state, self.pro_private_check],
                                outputs=[self.pro_func_prompt, self.pro_fp_state])
         self.pro_new_btn.click(fn=func_signals.prompt_save,
-                               inputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_fp_state, self.pro_private_check,
-                                       self.pro_class_name],
-                               outputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_private_check,
-                                        self.pro_func_prompt, self.pro_fp_state])
+                               inputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_fp_state, self.pro_private_check],
+                               outputs=[self.pro_func_prompt, self.pro_fp_state])
 
     def signals_masks(self):
         self.masks_dataset.change(fn=func_signals.mask_setting_role, inputs=[self.masks_dataset],
                                   outputs=[self.masks_dataset])
-        self.masks_delete_btm.click(fn=func_signals.mask_del_new_row, inputs=[self.masks_dataset],
+        self.masks_delete_btn.click(fn=func_signals.mask_del_new_row, inputs=[self.masks_dataset],
                                     outputs=[self.masks_dataset])
         self.masks_clear_btn.click(func_signals.mask_clear_all,
                                    inputs=[self.masks_dataset,
@@ -130,6 +129,10 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                                            gr.HTML(value=i18n('Clear All'), visible=False)],
                                    outputs=[self.masks_dataset],
                                    _js='(a,b,c)=>{return showConfirmationDialog(a,b,c);}')
+        self.masks_new_btn.click(fn=func_signals.prompt_save,
+                                 inputs=[self.masks_dataset, self.masks_name_txt,
+                                         self.pro_fp_state, self.mask_cls_select],
+                                 outputs=[self.pro_func_prompt, self.pro_fp_state])
 
     def signals_plugin(self):
         from comm_tools.crazy_functional import crazy_fns_role, crazy_fns
@@ -338,9 +341,6 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
             None, [self.secret_css], None, _js="(css) => {return setThemeClass(css)}")
         self.latex_option.select(fn=func_signals.switch_latex_output,
                                  inputs=[self.latex_option], outputs=[self.chatbot])
-
-
-
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def auto_opentab_delay(self, is_open=False):

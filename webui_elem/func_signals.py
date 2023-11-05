@@ -59,6 +59,9 @@ def spinner_chatbot_loading(chatbot):
     loading_msg[-1] = tuple(temp_list)
     return loading_msg
 
+def get_database_cls(t):
+    return "_".join(str(t).split('_')[1:-1])
+
 
 def filter_database_tables():
     tables = SqliteHandle(database='ai_prompt.db').get_tables()
@@ -66,8 +69,8 @@ def filter_database_tables():
     split_tab = []
     for t in tables:
         if str(t).startswith('prompt_') and str(t).endswith('_sys'):
-            split_tab.append("_".join(str(t).split('_')[1:-1]))
-    split_tab_new = ['新建分类'] + preset + split_tab
+            split_tab.append(get_database_cls(t))
+    split_tab_new = preset + split_tab
     return split_tab_new
 
 # TODO < -------------------------------- 弹窗数注册区 ----------------------------------->
@@ -266,37 +269,42 @@ def get_user_upload(chatbot, txt, ipaddr: gr.Request):
 
 
 # TODO < -------------------------------- 基础功能函数注册区 -------------------------------->
-def prompt_retrieval(is_all, hosts='', search=False):
+def prompt_retrieval(prompt_cls, hosts, search=False):
     """
     上传文件，将文件转换为字典，然后存储到数据库，并刷新Prompt区域
     Args:
         is_all： prompt类型
         hosts： 查询的用户ip
-        search：支持搜索，搜索时将key作为key
     Returns:
         返回一个列表
     """
     all_, personal = toolbox.get_conf('preset_prompt')[0]['key']
     count_dict = {}
-    hosts = func_box.non_personal_tag(is_all, hosts)
-    if all_ == is_all:
+    hosts = func_box.non_personal_tag(prompt_cls, hosts)
+    if all_ == prompt_cls:
         for tab in SqliteHandle('prompt_').get_tables():
-            if tab.startswith('prompt'):
+            if tab.startswith('prompt') and str(tab).endswith('sys'):
                 data, source = SqliteHandle(tab).get_prompt_value(None)
-                if data: count_dict.update(data)
-    elif personal == is_all:
+                if data: count_dict.update({get_database_cls(tab): data})
         data, source = SqliteHandle(f'prompt_{hosts}').get_prompt_value(None)
-        if data: count_dict.update(data)
-    elif hosts and is_all != '新建分类':
+        if data: count_dict.update({personal: data})
+    elif personal == prompt_cls:
         data, source = SqliteHandle(f'prompt_{hosts}').get_prompt_value(None)
-        if data: count_dict.update(data)
+        if data: count_dict.update({personal: data})
+    elif hosts and prompt_cls:
+        data, source = SqliteHandle(f'prompt_{hosts}').get_prompt_value(None)
+        if data: count_dict.update({prompt_cls: data})
     retrieval = []
-    if count_dict != {}:
-        for key in count_dict:
-            if not search:
-                retrieval.append([key, count_dict[key]])
-            else:
-                retrieval.append([count_dict[key], key])
+    if count_dict != {}:  # 上面是一段屎山， 不知道自己为什么要这样写，能用就行
+        for cls in count_dict:
+            for key in count_dict[cls]:
+                content = count_dict[cls][key]
+                if func_box.check_list_format(content):
+                    show_key = f'🎭 '+ key
+                else:
+                    show_key = key
+                retrieval.append([show_key, key, content, cls])
+        retrieval.reverse()
         return retrieval
     else:
         return retrieval
@@ -319,13 +327,12 @@ def prompt_reduce(is_all, prompt: gr.Dataset, ipaddr: gr.Request):  # is_all, ip
     Returns:
         返回注册函数所需的对象
     """
-    tab_cls = func_box.non_personal_tag(is_all, ipaddr.client.host)
-    data = prompt_retrieval(is_all=is_all, hosts=tab_cls)
+    data = prompt_retrieval(prompt_cls=is_all, hosts=ipaddr.client.host)
     prompt['samples'] = data
     return gr.Dataset.update(samples=data, visible=True), prompt, is_all
 
 
-def prompt_upload_refresh(file, prompt, pro_select, cls_name, ipaddr: gr.Request):
+def prompt_upload_refresh(file, prompt, pro_select, ipaddr: gr.Request):
     """
     上传文件，将文件转换为字典，然后存储到数据库，并刷新Prompt区域
     Args:
@@ -336,14 +343,7 @@ def prompt_upload_refresh(file, prompt, pro_select, cls_name, ipaddr: gr.Request
         注册函数所需的元祖对象
     """
     user_info = ipaddr.client.host
-    if pro_select == '新建分类':
-        if not cls_name:
-            result = [[f'{func_box.html_tag_color("若选择新建分类，分类名不能为空", color="red")}', '']]
-            prompt['samples'] = [[f'{func_box.html_tag_color("选择新建分类，分类名不能为空", color="red")}', '']]
-            return gr.update(), gr.Dataset.update(samples=result, visible=True), prompt, pro_select
-        tab_cls = func_box.non_personal_tag(cls_name, ipaddr.client.host)
-    else:
-        tab_cls = func_box.non_personal_tag(pro_select, ipaddr.client.host)
+    tab_cls = func_box.non_personal_tag(pro_select, ipaddr.client.host)
     if file.name.endswith('json'):
         upload_data = func_box.check_json_format(file.name)
     elif file.name.endswith('yaml'):
@@ -352,7 +352,7 @@ def prompt_upload_refresh(file, prompt, pro_select, cls_name, ipaddr: gr.Request
         upload_data = {}
     if upload_data != {}:
         status = SqliteHandle(f'prompt_{tab_cls}').inset_prompt(upload_data, user_info)
-        ret_data = prompt_retrieval(is_all=tab_cls, hosts=tab_cls)
+        ret_data = prompt_retrieval(prompt_cls=tab_cls, hosts=ipaddr.client.host)
         return gr.Dataset.update(samples=ret_data, visible=True), prompt, tab_cls
     else:
         prompt['samples'] = [
@@ -369,17 +369,18 @@ def prompt_delete(pro_name, prompt_dict, select_check, ipaddr: gr.Request):
     tab_cls = func_box.non_personal_tag(select_check, ipaddr.client.host)
     sqlite_handle = SqliteHandle(table=f'prompt_{tab_cls}')
     _, source = sqlite_handle.get_prompt_value(find=pro_name)
-    if not _: raise gr.Error('无法找到提示词，或请不要在所有人分类下删除提示词')
+    if not _:
+        raise gr.Error('无法找到提示词，或请不要在所有人分类下删除提示词')
     if source in ipaddr.client.host:
         sqlite_handle.delete_prompt(pro_name)
     else:
         raise gr.Error('无法删除不属于你创建的提示词，如有紧急需求，请联系管理员')
-    data = prompt_retrieval(is_all=select_check, hosts=tab_cls)
+    data = prompt_retrieval(prompt_cls=select_check, hosts=ipaddr.client.host)
     prompt_dict['samples'] = data
     return gr.Dataset.update(samples=data, visible=True), prompt_dict
 
 
-def prompt_save(txt, name, prompt: gr.Dataset, pro_select, cls_name, ipaddr: gr.Request):
+def prompt_save(txt, name, prompt: gr.Dataset, pro_select, ipaddr: gr.Request):
     """
     编辑和保存Prompt
     Args:
@@ -390,34 +391,26 @@ def prompt_save(txt, name, prompt: gr.Dataset, pro_select, cls_name, ipaddr: gr.
     Returns:
         返回注册函数所需的对象
     """
+    if not pro_select:
+        raise gr.Error('提示词分类不能为空 ！')
     user_info = ipaddr.client.host
-    if pro_select == '新建分类':
-        if not cls_name:
-            raise gr.Error('选择新建分类，分类名不能为空')
-        tab_cls = func_box.non_personal_tag(cls_name, ipaddr.client.host)
-    else:
-        tab_cls = func_box.non_personal_tag(pro_select, ipaddr.client.host)
+    tab_cls = func_box.non_personal_tag(pro_select, ipaddr.client.host)
     if txt and name:
-        all_, personal = toolbox.get_conf('preset_prompt')[0]['key']
-        if pro_select == all_:
-            cls_name = personal
-        elif pro_select != '新建分类':
-            cls_name = pro_select
         sql_obj = SqliteHandle(f'prompt_{tab_cls}')
-        cls_update = gr.Dropdown.update(value=cls_name, choices=filter_database_tables())
         _, source = sql_obj.get_prompt_value(name)
         status = sql_obj.inset_prompt({name: txt}, user_info)
         if status:
-            raise gr.Error('!!!!已有其他人保存同名的prompt，请修改prompt名称后再保存')
+            raise gr.Error('!!!!已有其他人保存同名的配置，请修改名称后再保存')
         else:
-            result = prompt_retrieval(is_all=cls_name, hosts=tab_cls)
+            all_, personal = toolbox.get_conf('preset_prompt')[0]['key']
+            result = prompt_retrieval(prompt_cls=all_, hosts=ipaddr.client.host)
             prompt['samples'] = result
-            return "", "", cls_update, gr.Dataset.update(samples=result, visible=True), prompt
+            return gr.Dataset.update(samples=result, visible=True), prompt
     elif not txt or not name:
-        raise gr.Error('!!!!编辑框 or 名称不能为空!!!!')
+        raise gr.Error('!!!!编辑区域 or 名称不能为空!!!!')
 
 
-def prompt_input(txt: str, prompt_str, name_str,  index, data: gr.Dataset):
+def prompt_input(edit_check, input_txt: str, llm_select, index, data, ipaddr: gr.Request):
     """
     点击dataset的值使用Prompt
     Args:
@@ -427,20 +420,49 @@ def prompt_input(txt: str, prompt_str, name_str,  index, data: gr.Dataset):
     Returns:
         返回注册函数所需的对象
     """
-    data_str = str(data['samples'][index][1])
-    data_name = str(data['samples'][index][0])
-    rp_str = '{{{v}}}'
-    def str_v_handle(__str):
-        temp_ = data_str
-        if temp_.find(rp_str) != -1 and __str:
-            txt_temp = temp_.replace(rp_str, __str)
+
+    data_name = str(data['samples'][index][1])
+    data_str = str(data['samples'][index][2])
+    data_cls = str(data['samples'][index][3])
+    mask_ = func_box.check_list_format(data_str)
+    chatbot_cookie = clear_chat_cookie(llm_model=llm_select, ipaddr=ipaddr)
+    mask_comb = [gr.update() for i in range(3)]
+    prompt_comb = [gr.update() for i in range(3)]
+    tab_select = gr.update()
+    if edit_check:
+        if mask_:
+            for i, item in enumerate(mask_):
+                if i == 0:
+                    chatbot_cookie[-5] = item[1]
+                elif i % 2 == 0:
+                    chatbot_cookie[0].append(item[1])
+                    chatbot_cookie[1].append(item[1])
+                else:
+                    chatbot_cookie[0].append(item[1])
+                    chatbot_cookie[1].append(item[1])
+            chatbot_cookie[2].update({'first_chat': data_name})
         else:
-            txt_temp = temp_ + txt
-        return txt_temp
-    new_txt = str_v_handle(txt)
-    if prompt_str != '' or name_str != '':
-        data_str, data_name = prompt_str, name_str
-    return new_txt, data_str, data_name
+            if data_str.find('{{{v}}}') != -1:
+                input_txt = data_str.replace('{{{v}}}', input_txt)
+            else:
+                input_txt = input_txt + data_str
+    else:
+        if mask_:
+            tab_select = gr.Tabs.update(selected='masks')
+            mask_comb = [data_cls, mask_, data_name]
+        else:
+            tab_select = gr.Tabs.update(selected='prompt')
+            prompt_comb = [data_cls, data_str, data_name]
+    all_comb = [tab_select] + prompt_comb + mask_comb + chatbot_cookie + [input_txt]
+
+    return all_comb
+
+
+def prompt_search(tab_cls, sear_txt, sp, data_base, ipaddr: gr.Request):
+    sorted_dict = prompt_retrieval(prompt_cls=tab_cls, hosts=ipaddr.client.host)
+    search_result = search_highlight(sorted_dict, sear_txt, False,[0, 2, 3], sp)
+    data_base['samples'] = search_result
+    return gr.Dataset.update(samples=search_result, visible=True), data_base
 
 
 def show_prompt_result(index, data: gr.Dataset, cookies, ipaddr: gr.Request):
@@ -462,32 +484,12 @@ def show_prompt_result(index, data: gr.Dataset, cookies, ipaddr: gr.Request):
 
 
 # TODO < -------------------------------- 搜索函数注册区 -------------------------------->
-def diff_list(txt='', percent=0.70, sp=15, hosts=''):
-    """
-    按照搜索结果统计相似度的文本，两组文本相似度>70%的将统计在一起，取最长的作为key
-    Args:
-        txt (str): 过滤文本
-        percent (int): TF系数，用于计算文本相似度
-        lst：指定一个列表或字典
-        sp: 截取展示的文本长度
-        hosts : 请求人的ip
-    Returns:
-        返回一个列表
-    """
-    lst = {}
-    file_list, only_name, new_path, new_name = func_box.get_files_list(os.path.join(func_box.history_path, hosts), filter_format=['.json'])
-    for i in file_list:
-        chat_list = history_processor.HistoryJsonHandle(i).base_data_format.get('chat')
-        file_name = os.path.splitext(os.path.basename(i))[0]
-        chat_str = ''.join([u for k in chat_list for u in k['on_chat'] if u is not None])
-        lst.update({chat_str: file_name})
-    # diff 数据，根据precent系数归类数据
-    sorted_dict = sorted(lst.items(), key=lambda x: x[1], reverse=True)
+def search_highlight(sorted_dict, txt, source, keyword: list, sp):
     dateset_list = []
     for key in sorted_dict:
         # 开始匹配关键字
-        index = str(key[0]).lower().find(txt.lower())
-        index_ = str(key[1]).lower().find(txt.lower())
+        index = str(key[keyword[0]]).lower().find(txt.lower())
+        index_ = str(key[keyword[1]]).lower().find(txt.lower())
         if index != -1 or index_ != -1:
             if index == -1: index = index_  # 增加搜索prompt 名称
             # sp=split 用于判断在哪里启动、在哪里断开
@@ -508,15 +510,11 @@ def diff_list(txt='', percent=0.70, sp=15, hosts=''):
                 show = show.replace('<', '')
             else:
                 show = str(key[0][start:index + sp]).replace('<', '').replace(txt, func_box.html_tag_color(txt))
-            show += f"  {func_box.html_tag_color(' in ' + str(key[1]))}"
-            if lst.get(key[0]):
-                be_value = lst[key[0]]
-            else:
-                be_value = None
-            value = be_value
-            dateset_list.append([show, key[0], value, key[1]])
+            if source:
+                show += f"  {func_box.html_tag_color(' in ' + str(key[1]))}"
+            if not show: show = key[keyword[0]]
+            dateset_list.append([show, key[keyword[0]], key[keyword[1]], key[keyword[2]]])
     return dateset_list
-
 
 def reuse_chat(result, chatbot, history, say):
     """复用对话记录"""
@@ -534,14 +532,23 @@ def draw_results(txt, prompt: dict, percent, ipaddr: gr.Request):
     Args:
         txt (str): 过滤文本
         prompt : 原始的dataset对象
-        percent (int): TF系数，用于计算文本相似度
+        percent (int): 最大显示文本
         ipaddr : 请求人信息
     Returns:
         注册函数所需的元祖对象
     """
-    data = diff_list(txt, percent=percent, hosts=ipaddr.client.host)
-    prompt['samples'] = data
-    return gr.Dataset.update(samples=data, visible=True), prompt
+    lst = {}
+    file_list, only_name, new_path, new_name = func_box.get_files_list(
+        os.path.join(func_box.history_path, ipaddr.clent.host), filter_format=['.json'])
+    for i in file_list:
+        chat_list = history_processor.HistoryJsonHandle(i).base_data_format.get('chat')
+        file_name = os.path.splitext(os.path.basename(i))[0]
+        chat_str = ''.join([u for k in chat_list for u in k['on_chat'] if u is not None])
+        lst.update({chat_str: file_name})
+    sorted_dict = sorted(lst.items(), key=lambda x: x[1], reverse=True)
+    search_result = search_highlight(sorted_dict, txt, True, [0, 1, 0], percent)
+    prompt['samples'] = search_result
+    return gr.Dataset.update(samples=search_result, visible=True), prompt
 
 
 # TODO < -------------------------------- 面具编辑函数注册区 -------------------------------->
@@ -596,7 +603,7 @@ def refresh_load_data(prompt, request: gr.Request):
         预期是每次刷新页面，加载最新数据
     """
     is_all = toolbox.get_conf('preset_prompt')[0]['value']
-    data = prompt_retrieval(is_all=is_all)
+    data = prompt_retrieval(prompt_cls=is_all, hosts=request.client.host)
     prompt['samples'] = data
     know_list = os.listdir(func_box.knowledge_path)
     load_list, user_list = func_box.get_directory_list(os.path.join(func_box.knowledge_path, '知识库'),
