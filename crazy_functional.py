@@ -539,18 +539,18 @@ def get_crazy_functions():
     except:
         print('Load function plugin failed')
 
-    # try:
-    #     from crazy_functions.多智能体 import 多智能体终端
-    #     function_plugins.update({
-    #         "多智能体终端（微软AutoGen）": {
-    #             "Group": "智能体",
-    #             "Color": "stop",
-    #             "AsButton": True,
-    #             "Function": HotReload(多智能体终端)
-    #         }
-    #     })
-    # except:
-    #     print('Load function plugin failed')
+    try:
+        from crazy_functions.多智能体 import 多智能体终端
+        function_plugins.update({
+            "多智能体终端（微软AutoGen）": {
+                "Group": "智能体",
+                "Color": "stop",
+                "AsButton": True,
+                "Function": HotReload(多智能体终端)
+            }
+        })
+    except:
+        print('Load function plugin failed')
 
     # try:
     #     from crazy_functions.chatglm微调工具 import 微调数据集生成

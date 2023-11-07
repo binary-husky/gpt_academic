@@ -3,6 +3,8 @@ from toolbox import report_execption, get_log_folder, update_ui_lastest_msg, Sin
 from crazy_functions.agent_fns.pipe import PluginMultiprocessManager, PipeCom
 from crazy_functions.agent_fns.general import AutoGenGeneral
 import time
+from autogen import AssistantAgent, UserProxyAgent
+
 
 
 class AutoGenMath(AutoGenGeneral):
