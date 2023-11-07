@@ -19,13 +19,13 @@ RUN python3 -m pip install aliyun-python-sdk-core==2.13.3 pyOpenSSL webrtcvad sc
 WORKDIR /gpt
 RUN git clone --depth=1 https://github.com/binary-husky/gpt_academic.git
 WORKDIR /gpt/gpt_academic
-RUN git clone --depth=1 https://github.com/OpenLMLab/MOSS.git request_llm/moss
+RUN git clone --depth=1 https://github.com/OpenLMLab/MOSS.git request_llms/moss
 
 RUN python3 -m pip install -r requirements.txt
-RUN python3 -m pip install -r request_llm/requirements_moss.txt
-RUN python3 -m pip install -r request_llm/requirements_qwen.txt
-RUN python3 -m pip install -r request_llm/requirements_chatglm.txt
-RUN python3 -m pip install -r request_llm/requirements_newbing.txt
+RUN python3 -m pip install -r request_llms/requirements_moss.txt
+RUN python3 -m pip install -r request_llms/requirements_qwen.txt
+RUN python3 -m pip install -r request_llms/requirements_chatglm.txt
+RUN python3 -m pip install -r request_llms/requirements_newbing.txt
 RUN python3 -m pip install nougat-ocr
 
 

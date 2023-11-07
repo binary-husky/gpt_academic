@@ -13,7 +13,7 @@ class PaperFileGroup():
         self.sp_file_tag = []
 
         # count_token
-        from request_llm.bridge_all import model_info
+        from request_llms.bridge_all import model_info
         enc = model_info["gpt-3.5-turbo"]['tokenizer']
         def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))
         self.get_token_num = get_token_num
@@ -118,7 +118,7 @@ def get_files_from_everything(txt, preference=''):
     if txt.startswith('http'):
         import requests
         from toolbox import get_conf
-        proxies, = get_conf('proxies')
+        proxies = get_conf('proxies')
         # 网络的远程文件
         if preference == 'Github':
             logging.info('正在从github下载资源 ...')

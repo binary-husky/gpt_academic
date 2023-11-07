@@ -1,5 +1,5 @@
 model_name = "ChatGLM-ONNX"
-cmd_to_install = "`pip install -r request_llm/requirements_chatglm_onnx.txt`"
+cmd_to_install = "`pip install -r request_llms/requirements_chatglm_onnx.txt`"
 
 
 from transformers import AutoModel, AutoTokenizer
@@ -28,13 +28,13 @@ class GetONNXGLMHandle(LocalLLMHandle):
     def load_model_and_tokenizer(self):
         # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行
         import os, glob
-        if not len(glob.glob("./request_llm/ChatGLM-6b-onnx-u8s8/chatglm-6b-int8-onnx-merged/*.bin")) >= 7: # 该模型有七个 bin 文件
+        if not len(glob.glob("./request_llms/ChatGLM-6b-onnx-u8s8/chatglm-6b-int8-onnx-merged/*.bin")) >= 7: # 该模型有七个 bin 文件
             from huggingface_hub import snapshot_download
-            snapshot_download(repo_id="K024/ChatGLM-6b-onnx-u8s8", local_dir="./request_llm/ChatGLM-6b-onnx-u8s8")
+            snapshot_download(repo_id="K024/ChatGLM-6b-onnx-u8s8", local_dir="./request_llms/ChatGLM-6b-onnx-u8s8")
         def create_model():
             return ChatGLMModel(
-                tokenizer_path = "./request_llm/ChatGLM-6b-onnx-u8s8/chatglm-6b-int8-onnx-merged/sentencepiece.model",
-                onnx_model_path = "./request_llm/ChatGLM-6b-onnx-u8s8/chatglm-6b-int8-onnx-merged/chatglm-6b-int8.onnx"
+                tokenizer_path = "./request_llms/ChatGLM-6b-onnx-u8s8/chatglm-6b-int8-onnx-merged/sentencepiece.model",
+                onnx_model_path = "./request_llms/ChatGLM-6b-onnx-u8s8/chatglm-6b-int8-onnx-merged/chatglm-6b-int8.onnx"
             )
         self._model = create_model()
         return self._model, None

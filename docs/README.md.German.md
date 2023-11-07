@@ -103,12 +103,12 @@ python -m pip install -r requirements.txt # Same step as pip installation
 
 [Optional Step] If supporting Tsinghua ChatGLM/Fudan MOSS as backend, additional dependencies need to be installed (Prerequisites: Familiar with Python + Used Pytorch + Sufficient computer configuration):
 ```sh
-# [Optional Step I] Support Tsinghua ChatGLM. Remark: If encountering "Call ChatGLM fail Cannot load ChatGLM parameters", please refer to the following: 1: The above default installation is torch+cpu version. To use cuda, uninstall torch and reinstall torch+cuda; 2: If the model cannot be loaded due to insufficient machine configuration, you can modify the model precision in `request_llm/bridge_chatglm.py`, and modify all AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) to AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
-python -m pip install -r request_llm/requirements_chatglm.txt  
+# [Optional Step I] Support Tsinghua ChatGLM. Remark: If encountering "Call ChatGLM fail Cannot load ChatGLM parameters", please refer to the following: 1: The above default installation is torch+cpu version. To use cuda, uninstall torch and reinstall torch+cuda; 2: If the model cannot be loaded due to insufficient machine configuration, you can modify the model precision in `request_llms/bridge_chatglm.py`, and modify all AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) to AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
+python -m pip install -r request_llms/requirements_chatglm.txt  
 
 # [Optional Step II] Support Fudan MOSS
-python -m pip install -r request_llm/requirements_moss.txt
-git clone https://github.com/OpenLMLab/MOSS.git request_llm/moss # When executing this line of code, you must be in the project root path
+python -m pip install -r request_llms/requirements_moss.txt
+git clone https://github.com/OpenLMLab/MOSS.git request_llms/moss # When executing this line of code, you must be in the project root path
 
 # [Optional Step III] Make sure the AVAIL_LLM_MODELS in the config.py configuration file contains the expected models. Currently supported models are as follows (jittorllms series currently only supports docker solutions):
 AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "newbing", "moss"] # + ["jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]

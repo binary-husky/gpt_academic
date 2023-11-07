@@ -91,7 +91,7 @@ AVAIL_LLM_MODELS = ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
                     "api2d-gpt-3.5-turbo", 'api2d-gpt-3.5-turbo-16k', 
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "api2d-gpt-4", 
                     "chatglm", "moss", "newbing", "claude-2"]
-# P.S. 其他可用的模型还包括 ["qianfan", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613",  "gpt-3.5-random"
+# P.S. 其他可用的模型还包括 ["zhipuai", "qianfan", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613",  "gpt-3.5-random"
 # "spark", "sparkv2", "sparkv3", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"]
 
 
@@ -140,7 +140,7 @@ SSL_CERTFILE = ""
 API_ORG = ""
 
 
-# 如果需要使用Slack Claude，使用教程详情见 request_llm/README.md
+# 如果需要使用Slack Claude，使用教程详情见 request_llms/README.md
 SLACK_CLAUDE_BOT_ID = ''   
 SLACK_CLAUDE_USER_TOKEN = ''
 
@@ -174,6 +174,11 @@ ALIYUN_SECRET=""    # （无需填写）
 XFYUN_APPID = "00000000"
 XFYUN_API_SECRET = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
 XFYUN_API_KEY = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
+
+# 接入智谱大模型
+ZHIPUAI_API_KEY = ""
+ZHIPUAI_MODEL = "chatglm_turbo"
 
 
 # Claude API KEY
@@ -216,6 +221,10 @@ PATH_LOGGING = "gpt_log"
 # 除了连接OpenAI之外，还有哪些场合允许使用代理，请勿修改
 WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid", 
                      "Warmup_Modules", "Nougat_Download", "AutoGen"]
+
+
+# *实验性功能*: 自动检测并屏蔽失效的KEY，请勿使用
+BLOCK_INVALID_APIKEY = False
 
 
 # 自定义按钮的最大数量限制

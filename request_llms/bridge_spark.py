@@ -8,7 +8,7 @@ from multiprocessing import Process, Pipe
 model_name = '星火认知大模型'
 
 def validate_key():
-    XFYUN_APPID,  = get_conf('XFYUN_APPID', )
+    XFYUN_APPID = get_conf('XFYUN_APPID')
     if XFYUN_APPID == '00000000' or XFYUN_APPID == '': 
         return False
     return True
@@ -16,7 +16,7 @@ def validate_key():
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=[], console_slience=False):
     """
         ⭐多线程方法
-        函数的说明请见 request_llm/bridge_all.py
+        函数的说明请见 request_llms/bridge_all.py
     """
     watch_dog_patience = 5
     response = ""
@@ -36,13 +36,13 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
 def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream = True, additional_fn=None):
     """
         ⭐单线程方法
-        函数的说明请见 request_llm/bridge_all.py
+        函数的说明请见 request_llms/bridge_all.py
     """
     chatbot.append((inputs, ""))
     yield from update_ui(chatbot=chatbot, history=history)
 
     if validate_key() is False:
-        yield from update_ui_lastest_msg(lastmsg="[Local Message]: 请配置讯飞星火大模型的XFYUN_APPID, XFYUN_API_KEY, XFYUN_API_SECRET", chatbot=chatbot, history=history, delay=0)
+        yield from update_ui_lastest_msg(lastmsg="[Local Message] 请配置讯飞星火大模型的XFYUN_APPID, XFYUN_API_KEY, XFYUN_API_SECRET", chatbot=chatbot, history=history, delay=0)
         return
 
     if additional_fn is not None:
@@ -57,7 +57,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         yield from update_ui(chatbot=chatbot, history=history)
 
     # 总结输出
-    if response == f"[Local Message]: 等待{model_name}响应中 ...":
-        response = f"[Local Message]: {model_name}响应异常 ..."
+    if response == f"[Local Message] 等待{model_name}响应中 ...":
+        response = f"[Local Message] {model_name}响应异常 ..."
     history.extend([inputs, response])
     yield from update_ui(chatbot=chatbot, history=history)

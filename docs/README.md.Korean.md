@@ -104,11 +104,11 @@ python -m pip install -r requirements.txt # 이 단계도 pip install의 단계�
 # 1 : 기본 설치된 것들은 torch + cpu 버전입니다. cuda를 사용하려면 torch를 제거한 다음 torch + cuda를 다시 설치해야합니다.
 # 2 : 모델을 로드할 수 없는 기계 구성 때문에, AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True)를
 # AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)로 변경합니다.
-python -m pip install -r request_llm/requirements_chatglm.txt  
+python -m pip install -r request_llms/requirements_chatglm.txt  
 
 # [선택 사항 II] Fudan MOSS 지원
-python -m pip install -r request_llm/requirements_moss.txt
-git clone https://github.com/OpenLMLab/MOSS.git request_llm/moss  # 다음 코드 줄을 실행할 때 프로젝트 루트 경로에 있어야합니다.
+python -m pip install -r request_llms/requirements_moss.txt
+git clone https://github.com/OpenLMLab/MOSS.git request_llms/moss  # 다음 코드 줄을 실행할 때 프로젝트 루트 경로에 있어야합니다.
 
 # [선택 사항III] AVAIL_LLM_MODELS config.py 구성 파일에 기대하는 모델이 포함되어 있는지 확인하십시오.
 # 현재 지원되는 전체 모델 :

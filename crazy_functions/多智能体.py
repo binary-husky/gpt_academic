@@ -41,7 +41,7 @@ def 多智能体终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
         return
     
     # 检查当前的模型是否符合要求
-    API_URL_REDIRECT, = get_conf('API_URL_REDIRECT')
+    API_URL_REDIRECT = get_conf('API_URL_REDIRECT')
     if len(API_URL_REDIRECT) > 0:
         chatbot.append([f"处理任务: {txt}", f"暂不支持中转."])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面

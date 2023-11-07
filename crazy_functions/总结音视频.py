@@ -41,7 +41,7 @@ def split_audio_file(filename, split_duration=1000):
 def AnalyAudio(parse_prompt, file_manifest, llm_kwargs, chatbot, history):
     import os, requests
     from moviepy.editor import AudioFileClip
-    from request_llm.bridge_all import model_info
+    from request_llms.bridge_all import model_info
 
     # 设置OpenAI密钥和模型
     api_key = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
@@ -79,7 +79,7 @@ def AnalyAudio(parse_prompt, file_manifest, llm_kwargs, chatbot, history):
 
             chatbot.append([f"将 {i} 发送到openai音频解析终端 (whisper)，当前参数：{parse_prompt}", "正在处理 ..."])
             yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
-            proxies, = get_conf('proxies')
+            proxies = get_conf('proxies')
             response = requests.post(url, headers=headers, files=files, data=data, proxies=proxies).text
 
             chatbot.append(["音频解析结果", response])
