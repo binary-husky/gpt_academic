@@ -5,18 +5,18 @@ from multiprocessing import Process, Pipe
 from contextlib import redirect_stdout
 from request_llms.queued_pipe import create_queue_pipe
 
-class DebugLock(object):
+class ThreadLock(object):
     def __init__(self):
         self._lock = threading.Lock()
 
     def acquire(self):
-        print("acquiring", self)
+        # print("acquiring", self)
         #traceback.print_tb
         self._lock.acquire()
-        print("acquired", self)
+        # print("acquired", self)
 
     def release(self):
-        print("released", self)
+        # print("released", self)
         #traceback.print_tb
         self._lock.release()
 
@@ -85,7 +85,7 @@ class LocalLLMHandle(Process):
         self.is_main_process = False    # state wrap for child process
         self.start()
         self.is_main_process = True     # state wrap for child process
-        self.threadLock = DebugLock()
+        self.threadLock = ThreadLock()
 
     def get_state(self):
         # ⭐run in main process
@@ -159,7 +159,7 @@ class LocalLLMHandle(Process):
             try:
                 for response_full in self.llm_stream_generator(**kwargs):
                     self.child.send(response_full)
-                    print('debug' + response_full)
+                    # print('debug' + response_full)
                 self.child.send('[Finish]')
                 # 请求处理结束，开始下一个循环
             except:
@@ -200,7 +200,7 @@ class LocalLLMHandle(Process):
                 if res.startswith(self.std_tag):
                     new_output = res[len(self.std_tag):]
                     std_out = std_out[:std_out_clip_len]
-                    print(new_output, end='')
+                    # print(new_output, end='')
                     std_out = new_output + std_out
                     yield self.std_tag + '\n```\n' + std_out + '\n```\n'
                 elif res == '[Finish]':

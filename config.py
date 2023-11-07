@@ -90,9 +90,13 @@ LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
 AVAIL_LLM_MODELS = ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
                     "api2d-gpt-3.5-turbo", 'api2d-gpt-3.5-turbo-16k', 
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "api2d-gpt-4", 
-                    "chatglm", "moss", "newbing", "claude-2"]
+                    "chatglm3", "moss", "newbing", "claude-2"]
 # P.S. 其他可用的模型还包括 ["zhipuai", "qianfan", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613",  "gpt-3.5-random"
 # "spark", "sparkv2", "sparkv3", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"]
+
+
+# 定义界面上“询问多个GPT模型”插件应该使用哪些模型，请从AVAIL_LLM_MODELS中选择，并在不同模型之间用`&`间隔，例如"gpt-3.5-turbo&chatglm3&azure-gpt-4"
+MULTI_QUERY_LLM_MODELS = "gpt-3.5-turbo&chatglm3"
 
 
 # 百度千帆（LLM_MODEL="qianfan"）
