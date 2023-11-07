@@ -32,7 +32,7 @@ def 多智能体终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
     web_port        当前软件运行的端口号
     """
     # 检查当前的模型是否符合要求
-    supported_llms = ['gpt-3.5-turbo-16k', 'gpt-4', 'gpt-4-32k', 
+    supported_llms = ['gpt-3.5-turbo-16k', 'gpt-3.5-turbo-1106', 'gpt-4', 'gpt-4-32k', 'gpt-4-1106-preview', 
                       'api2d-gpt-3.5-turbo-16k', 'api2d-gpt-4']
     llm_kwargs['api_key'] = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
     if llm_kwargs['llm_model'] not in supported_llms:
