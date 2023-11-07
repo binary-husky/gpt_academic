@@ -128,7 +128,7 @@ python -m pip install -r request_llm/requirements_moss.txt
 git clone https://github.com/OpenLMLab/MOSS.git request_llm/moss  # Note that when executing this line of code, it must be in the project root.
 
 # 【Optional Step III】Ensure that the AVAIL_LLM_MODELS in the config.py configuration file contains the expected model. Currently, all supported models are as follows (jittorllms series currently only supports the docker solution):
-AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "newbing", "moss"] # + ["jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
+AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "azure-gpt-3.5", "api2d-gpt-3.5-turbo", 'api2d-gpt-3.5-turbo-16k', "gpt-4", "gpt-4-32k", "gpt-4-1106-preview", "azure-gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "claude-2"]
 ```
 
 </p>
