@@ -433,7 +433,7 @@ def main():
         server_port=PORT,
         favicon_path=os.path.join(os.path.dirname(__file__), "docs/logo.png"), 
         auth=AUTHENTICATION if len(AUTHENTICATION) != 0 else None,
-        blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile","gpt_log/admin"])
+        blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile",f"{PATH_LOGGING}/admin"])
 
     # 如果需要在二级路径下运行
     # CUSTOM_PATH = get_conf('CUSTOM_PATH')
@@ -442,7 +442,7 @@ def main():
     #     run_gradio_in_subpath(demo, auth=AUTHENTICATION, port=PORT, custom_path=CUSTOM_PATH)
     # else: 
     #     demo.launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, favicon_path="docs/logo.png",
-    #                 blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile"])
+    #                 blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile",f"{PATH_LOGGING}/admin"])
 
 if __name__ == "__main__":
     main()
