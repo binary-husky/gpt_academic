@@ -1,8 +1,11 @@
 > **Note**
->
+> 
 > 2023.10.28: 紧急修复了若干问题，安装依赖时，请选择`requirements.txt`中**指定的版本**。
->
+> 
 > `pip install -r requirements.txt`
+>
+> 2023.11.7: 本项目开源免费，**近期发现有人蔑视开源协议，利用本项目违法圈钱**，请各位提高警惕，谨防上当受骗。
+
 
 
 # <div align=center><img src="docs/logo.png" width="40"> GPT 学术优化 (GPT Academic)</div>
