@@ -14,7 +14,7 @@ def main():
     CHATBOT_HEIGHT, LAYOUT, AVAIL_LLM_MODELS, AUTO_CLEAR_TXT = get_conf('CHATBOT_HEIGHT', 'LAYOUT', 'AVAIL_LLM_MODELS', 'AUTO_CLEAR_TXT')
     ENABLE_AUDIO, AUTO_CLEAR_TXT, PATH_LOGGING, AVAIL_THEMES, THEME = get_conf('ENABLE_AUDIO', 'AUTO_CLEAR_TXT', 'PATH_LOGGING', 'AVAIL_THEMES', 'THEME')
     DARK_MODE, NUM_CUSTOM_BASIC_BTN, SSL_KEYFILE, SSL_CERTFILE = get_conf('DARK_MODE', 'NUM_CUSTOM_BASIC_BTN', 'SSL_KEYFILE', 'SSL_CERTFILE')
-    INIT_SYS_PROMPT, = get_conf('INIT_SYS_PROMPT')
+    INIT_SYS_PROMPT, TOP_P, TEMPERATURE, MAX_LENGTH = get_conf('INIT_SYS_PROMPT', 'TOP_P', 'TEMPERATURE', 'MAX_LENGTH')
 
     # 如果WEB_PORT是-1, 则随机选取WEB端口
     PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
@@ -150,9 +150,9 @@ def main():
     
                 with gr.Tab("更换模型 & Prompt", elem_id="interact-panel"):
                     md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(container=False)
-                    top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01,interactive=True, label="Top-p (nucleus sampling)",)
-                    temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature",)
-                    max_length_sl = gr.Slider(minimum=256, maximum=1024*32, value=4096, step=128, interactive=True, label="Local LLM MaxLength",)
+                    top_p = gr.Slider(minimum=-0, maximum=1.0, value=TOP_P, step=0.01,interactive=True, label="Top-p (nucleus sampling)",)
+                    temperature = gr.Slider(minimum=-0, maximum=2.0, value=TEMPERATURE, step=0.01, interactive=True, label="Temperature",)
+                    max_length_sl = gr.Slider(minimum=256, maximum=1024*32, value=MAX_LENGTH, step=128, interactive=True, label="Local LLM MaxLength",)
                     system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt", label="System prompt", value=INIT_SYS_PROMPT)
 
                 with gr.Tab("界面外观", elem_id="interact-panel"):
