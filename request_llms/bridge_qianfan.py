@@ -78,8 +78,9 @@ def generate_from_baidu_qianfan(inputs, llm_kwargs, history, system_prompt):
     BAIDU_CLOUD_QIANFAN_MODEL = get_conf('BAIDU_CLOUD_QIANFAN_MODEL')
 
     url_lib = {
-        "ERNIE-Bot":            "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions" ,
-        "ERNIE-Bot-turbo":      "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/eb-instant"  ,
+        "ERNIE-Bot-4":          "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions_pro",
+        "ERNIE-Bot":            "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions",
+        "ERNIE-Bot-turbo":      "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/eb-instant",
         "BLOOMZ-7B":            "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/bloomz_7b1",
 
         "Llama-2-70B-Chat":     "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/llama_2_70b",
