@@ -112,7 +112,7 @@ git clone https://github.com/OpenLMLab/MOSS.git request_llm/moss  # 다음 코�
 
 # [선택 사항III] AVAIL_LLM_MODELS config.py 구성 파일에 기대하는 모델이 포함되어 있는지 확인하십시오.
 # 현재 지원되는 전체 모델 :
-AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "newbing", "moss"] # + ["jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
+AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "azure-gpt-3.5", "api2d-gpt-3.5-turbo", 'api2d-gpt-3.5-turbo-16k', "gpt-4", "gpt-4-32k", "gpt-4-1106-preview", "azure-gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "claude-2"]
 ```
 
 </p>
