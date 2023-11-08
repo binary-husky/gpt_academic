@@ -78,10 +78,6 @@ def ArgsGeneralWrapper(f):
             'max_context': max_context, 'max_generation': max_generation, 'presence_penalty': presence_penalty,
             'frequency_penalty': frequency_penalty, 'logit_bias': logit_bias, 'user': user_identifier,
         }
-        cookies.update({
-            **real_llm,
-            'system_prompt': system_prompt,
-        })
         if not cookies.get('first_chat') and args:
             cookies['first_chat'] = args[0]
             cookies['first_chat'] += "_" + func_box.created_atime()
@@ -97,6 +93,10 @@ def ArgsGeneralWrapper(f):
                 'size': vector_size
             }
         }
+        cookies.update({
+            **llm_kwargs,
+            'system_prompt': system_prompt,
+        })
         plugin_kwargs = {
             "advanced_arg": plugin_advanced_arg,
             "parameters_def": ''

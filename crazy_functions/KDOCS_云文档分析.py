@@ -4,6 +4,8 @@
 # @Author : Spike
 # @Descr   :
 import os.path
+import gradio as gr
+
 from comm_tools import func_box, ocr_tools, Langchain_cn
 from crazy_functions.kingsoft_fns import crazy_box, crzay_kingsoft, crzay_qqdocs
 from comm_tools.toolbox import update_ui, CatchException, trimmed_format_exc, get_conf
@@ -13,16 +15,22 @@ from comm_tools.toolbox import update_ui, CatchException, trimmed_format_exc, ge
 def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, file_types):
     wps_links, qq_link = crazy_box.detach_cloud_links(link_limit)
     files = [file for file in link_limit.splitlines() if os.path.exists(file)]
+    file_limit = []
     if not wps_links and not files and not qq_link:
-        devs_document, = get_conf('devs_document')
-        chatbot.append((link_limit, f'输入框空空如也？{link_limit}\n\n'
-                              f'请在输入框中输入需要解析的文档链接或本地文件地址，然后再点击对应的插件，文档支持类型{func_box.html_tag_color(file_types)}'
-                              f'链接需要是可访问的，格式如下，如果有多个文档则用换行或空格隔开，输入后再点击对应的插件'
-                              f'\n\n xxxx https://kdocs.cn/l/xxxxxxxxxx'
-                              f'\n\n https://kdocs.cn/l/xxxxxxxxxx'
-                              f'\n\n`还是不懂？那就来👺` {devs_document}'))
-        yield from update_ui(chatbot, history)
-        return
+        if len(link_limit) > 100:
+            title = crazy_box.long_name_processing(link_limit)
+            file_limit.extend([title, link_limit])
+            return file_limit
+        else:
+            devs_document, = get_conf('devs_document')
+            chatbot.append((link_limit, f'输入框空空如也？{link_limit[:100]}\n\n'
+                                  f'请在输入框中输入需要解析的文档链接或本地文件地址，然后再点击对应的插件，文档支持类型{func_box.html_tag_color(file_types)}'
+                                  f'链接需要是可访问的，格式如下，如果有多个文档则用换行或空格隔开，输入后再点击对应的插件'
+                                  f'\n\n xxxx https://kdocs.cn/l/xxxxxxxxxx'
+                                  f'\n\n https://kdocs.cn/l/xxxxxxxxxx'
+                                  f'\n\n`还是不懂？那就来👺` {devs_document}'))
+            yield from update_ui(chatbot, history)
+            return
     # 爬虫读取
     gpt_say = "网页爬虫和文件处理准备工作中...."
     chatbot.append([link_limit, gpt_say])
@@ -52,7 +60,6 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
         success, file_manifest, _ = crzay_qqdocs.get_qqdocs_from_everything(txt=url, type=file_types, ipaddr=llm_kwargs['ipaddr'])
         files.extend(file_manifest)
     # 提交文件给file_extraction_intype读取
-    file_limit = []
     yield from crazy_box.file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_kwargs, plugin_kwargs)
     yield from update_ui(chatbot, history)
     know_dict, = crazy_box.json_args_return(plugin_kwargs, keys=['自动录入知识库'], default={})
@@ -132,7 +139,7 @@ func_kwargs = {
 
 @CatchException
 def Kdocs_多阶段生成回答(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    file_types = ['md', 'txt', 'pdf', 'xmind', '智能文档']
+    file_types = ['md', 'txt', 'pdf', 'xmind', '智能文档', 'xlsx']
     file_limit = yield from func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, file_types)
     if not file_limit:
         return

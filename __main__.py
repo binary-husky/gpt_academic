@@ -60,6 +60,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         # self.__gr_url = gr.State(self.__url)
 
     def signals_sm_btn(self):
+        self.model_select_dropdown.select(func_signals.update_chat, inputs=[self.model_select_dropdown],
+                                          outputs=[self.chatbot])
         self.sm_upload.upload(on_file_uploaded, [self.sm_upload, self.chatbot, self.user_input, self.cookies],
                               [self.chatbot, self.user_input])
         self.sm_upload.clear(fn=lambda : gr.Files.update(value=None), inputs=[], outputs=[self.sm_upload])
@@ -408,7 +410,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
             #                outputs=[self.sm_btn_column, self.langchain_dropdown])
             self.demo.load(fn=func_signals.refresh_load_data,
                            inputs=[self.pro_fp_state],
-                           outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check,
+                           outputs=[self.pro_func_prompt, self.pro_fp_state,
+                                    self.pro_private_check, self.prompt_cls_select, self.mask_cls_select,
                                     self.langchain_classifi, self.langchain_select, self.langchain_dropdown])
             self.demo.load(fn=func_signals.refresh_user_data,
                            inputs=[self.cookies],

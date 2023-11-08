@@ -211,6 +211,7 @@ hr.append-display {
 .message .md-message {
     display: block;
     padding: 0 !important;
+    overflow-x: auto;
 }
 .message .raw-message p {
     margin:0 !important;

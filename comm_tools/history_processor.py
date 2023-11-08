@@ -77,7 +77,8 @@ class HistoryJsonHandle:
         llm_select = self.base_data_format['chat_llms'].get('llm_model', LLM_MODEL)
         llms_combo.append(gr.Dropdown.update(value=llm_select))
         try:
-            chatbot = [i['on_chat'] for i in self.base_data_format['chat']]
+            chatbot = gr.Chatbot.update(value=[i['on_chat'] for i in self.base_data_format['chat']],
+                                        avatar_images=func_box.get_avatar_img(llm_select))
             history = self.base_data_format['chat_llms'].get('history', [])
             cookies['first_chat'] = select
             cookies['last_chat'] = self.base_data_format['chat'][-1]['on_chat'][0]

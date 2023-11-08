@@ -95,9 +95,10 @@ def switch_latex_output(select):
     return gr.Chatbot.update(latex_delimiters=latex)
 
 
-
-
 # TODO < -------------------------------- 对话函数注册区 ----------------------------------->
+def update_chat(llm_s):
+    return gr.Chatbot.update(avatar_images=func_box.get_avatar_img(llm_s))
+
 def clear_input(inputs, cookies, ipaddr: gr.Request):
     user_path = os.path.join(func_box.history_path, ipaddr.client.host)
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
@@ -420,7 +421,6 @@ def prompt_input(edit_check, input_txt: str, llm_select, index, data, ipaddr: gr
     Returns:
         返回注册函数所需的对象
     """
-
     data_name = str(data['samples'][index][1])
     data_str = str(data['samples'][index][2])
     data_cls = str(data['samples'][index][3])
@@ -442,11 +442,13 @@ def prompt_input(edit_check, input_txt: str, llm_select, index, data, ipaddr: gr
                     chatbot_cookie[1].append(item[1])
             chatbot_cookie[2].update({'first_chat': data_name})
         else:
+            chatbot_cookie = [gr.update() for i in chatbot_cookie]
             if data_str.find('{{{v}}}') != -1:
                 input_txt = data_str.replace('{{{v}}}', input_txt)
             else:
                 input_txt = input_txt + data_str
     else:
+        chatbot_cookie = [gr.update() for i in chatbot_cookie]
         if mask_:
             tab_select = gr.Tabs.update(selected='masks')
             mask_comb = [data_cls, mask_, data_name]
@@ -612,8 +614,9 @@ def refresh_load_data(prompt, request: gr.Request):
     know_load = gr.Dropdown.update(choices=load_list, label='知识库', show_label=True)
     know_user = gr.Dropdown.update(choices=user_list)
     select_list = filter_database_tables()
-    outputs = [gr.Dataset.update(samples=data, visible=True), prompt, gr.Dropdown.update(choices=select_list),
-                know_cls, know_user, know_load]
+    outputs = [gr.Dataset.update(samples=data, visible=True), prompt,
+               gr.update(choices=select_list), gr.update(choices=select_list), gr.update(choices=select_list),
+               know_cls, know_user, know_load]
     return outputs
 
 

@@ -355,7 +355,8 @@ function chatbotContentChanged(attempt = 1, force = false) {
             // clearMessageRows();
             saveHistoryHtml();
             disableSendBtn();
-
+            //
+            addShowAllButton();
             gradioApp().querySelectorAll('#chuanhu-chatbot .message-wrap .message.bot, #chuanhu-chatbot .message-wrap .message.user').forEach(addChuanhuButton);
 
             if (chatbotIndicator.classList.contains('hide')) { // generation finished

@@ -172,7 +172,7 @@ class Prompt:
         pass
 
     def _draw_tabs_prompt(self):
-        self.preset_prompt, self.devs_document = toolbox.get_conf('preset_prompt', 'devs_document')
+        self.devs_document = toolbox.get_conf('devs_document')
         with gr.TabItem('提示词', id='prompt'):
             with gr.Row():
                 with gr.Column(elem_classes='column_left'):
@@ -192,7 +192,7 @@ class Prompt:
                                                    elem_classes='no_padding_input',
                                                    placeholder=Tips).style()
                     with gr.Row():
-                        self.prompt_cls_select = gr.Dropdown(choices=[], value=self.preset_prompt['value'],
+                        self.prompt_cls_select = gr.Dropdown(choices=[], value='',
                                                              label='提示词分类', elem_classes='normal_select',
                                                              allow_custom_value=True, interactive=True
                                                              ).style(container=False)
@@ -211,7 +211,7 @@ class Prompt:
             self.masks_delete_btn = gr.Button('Del New row', size='sm', elem_id='mk_del')
             self.masks_clear_btn = gr.Button(value='Clear All', size='sm', elem_id='mk_clear')
             with gr.Row():
-                self.mask_cls_select = gr.Dropdown(choices=[], value=self.preset_prompt['value'],
+                self.mask_cls_select = gr.Dropdown(choices=[], value='',
                                                       label='Masks分类', elem_classes='normal_select',
                                                       allow_custom_value=True, interactive=True
                                                       ).style(container=False)

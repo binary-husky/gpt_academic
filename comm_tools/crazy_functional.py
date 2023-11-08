@@ -402,7 +402,7 @@ def get_functions_云文档处理():
                 "提示词分类": '插件定制',
                 "格式化文档提示词": '提取文档测试点',
                 "预期产出提示词": '文档转测试用例',
-                '写入指定模版': 'https://www.kdocs.cn/l/civeYz1Wg2OK',
+                '写入指定模版': './docs/template/客户端测试用例模版.xlsx',
                 '写入指定Sheet': '测试要点',
                 "显示过程": False,
             }
@@ -416,8 +416,8 @@ def get_functions_云文档处理():
             "Parameters": {
                 "开启OCR": True,
                 "提示词分类": "插件定制",
-                # "多模型并行": "proxy-gpt-35-turbo-16k&proxy-gpt-4",
-                # "自动录入知识库": {'个人知识库': '需求文稿'},
+                "多模型并行": "gpt-35-16k&",
+                "自动录入知识库": {'个人知识库': '需求文稿'},
                 '用例下标排序': 1,
                 "阶段性产出": {
                     "编写测试用例": {
@@ -432,8 +432,8 @@ def get_functions_云文档处理():
                         }
                     }
                 },
-                "写入指定模版": "./docs/template/测试用例模版.xlsx",
-                "写入指定Sheet": "模版",
+                "写入指定模版": "./docs/template/客户端测试用例模版.xlsx",
+                "写入指定Sheet": "测试要点",
                 "显示过程": False
             }
         },
@@ -448,7 +448,7 @@ def get_functions_云文档处理():
                 "提示词分类": '插件定制',
                 '格式化文档提示词': '文档转Markdown_分割',
                 "预期产出提示词": '接口文档转测试用例',
-                '写入指定模版': 'https://www.kdocs.cn/l/ckuTJWR6vBtJ',
+                '写入指定模版': './docs/template/接口测试用例模板.xlsx',
                 '写入指定Sheet': '测试要点',
                 "显示过程": False,
             }

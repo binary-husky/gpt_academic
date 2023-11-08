@@ -125,6 +125,9 @@ code.language-folded {
     overflow: auto;
 }
 
+.unclamp {
+ -webkit-line-clamp: unset !important;
+}
 .toggle-button-hide {
     opacity: 0;
 }
@@ -214,4 +217,8 @@ code.language-folded {
 
 #mask_tabs .table[class*="svelte-"] {
     overflow: unset;
+}
+#show-all-btn {
+    right: 35px;
+    margin: -2px;
 }

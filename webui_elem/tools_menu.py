@@ -30,10 +30,10 @@ class RightElem:
             with gr.Row():
                 self.preset_prompt, = toolbox.get_conf('preset_prompt')
                 self.pro_private_check = gr.Dropdown(choices=[], value=self.preset_prompt['value'],
-                                                     label='提示词分类', elem_classes='normal_select',
+                                                     label='提示词/Masks分类', elem_classes='normal_select',
                                                      allow_custom_value=True)
             with gr.Row():
-                self.prompt_search_txt = gr.Textbox(placeholder='搜索提示词/面具', show_label=False,
+                self.prompt_search_txt = gr.Textbox(placeholder='搜索提示词/Masks', show_label=False,
                                                     elem_classes='pm_search',)
                 self.multiplexing_edit_check = gr.Checkbox(value=True, label='复用', show_label=True, elem_id='pm_check',
                                                      interactive=True, container=False)

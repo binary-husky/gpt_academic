@@ -607,6 +607,7 @@ ol:not(.options), ul:not(.options) {
 .message .md-message {
     display: block;
     padding: 0 !important;
+    overflow-x: auto;
 }
 .message .raw-message {
     display: block;

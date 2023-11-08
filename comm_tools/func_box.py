@@ -161,7 +161,7 @@ def html_view_blank(__href: str, file_name='', to_tabs=False):
     if not file_name:
         file_name = __href.split('/')[-1]
     a = f'<a href="{__href}" target="_blank" class="svelte-xrr240">{file_name}</a>'
-    a = f"[{file_name}]({__href})"
+    a = link_mtime_to_md(__file)
     if to_tabs:
         a = "\n\n" + to_markdown_tabs(head=['下载地址', '插件复用地址'], tabs=[[a], [__file]]) + "\n\n"
     return a
@@ -369,7 +369,7 @@ def get_files_list(folder_path, filter_format: list):
     # 获取最新的文件名
     newest_file = only_name[0] if only_name else None
     newest_file_path = sorted_files[0] if only_name else None
-    return sorted_files, only_name, newest_file_path, newest_file,
+    return sorted_files, only_name, newest_file_path, newest_file
 
 
 base_path = os.path.dirname(os.path.dirname(__file__))
@@ -743,8 +743,20 @@ class JsonHandle:
         return data
 
 
+def get_avatar_img(llm_s):
+    chat_bot_path = os.path.join(base_path, 'docs', 'imgs', 'chatbot')
+    file_list, only_name, new_path, new_name = get_files_list(chat_bot_path, filter_format=['.png'])
+    chat_img = ''
+    for i in range(len(only_name)):
+        if only_name[i] in llm_s:
+            chat_img = file_list[i]
+    if chat_img:
+        return ['./docs/assets/imgs/tester.png', chat_img.replace(base_path, '.')]
+    else:
+        return ['./docs/assets/imgs/tester.png', './docs/assets/imgs/user.png']
+
 if __name__ == '__main__':
     # print(get_files_list('', ['.json']))
     # tree_out(dir='/Users/kilig/Job/Python-project/kso_gpt/', line=2)
-    ipaddr()
+    get_avatar_img('')
 

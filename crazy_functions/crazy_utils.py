@@ -139,11 +139,10 @@ def request_gpt_model_in_new_thread_with_ui_alive(
     return final_result
 
 def can_multi_process(llm):
-    if llm.startswith('gpt-'): return True
-    if llm.startswith('api2d-'): return True
-    if llm.startswith('azure-'): return True
-    if llm.startswith('proxy-'): return True
-    if llm.startswith('aigc-'): return True
+    OPEN_WORKER_LLMS, =  toolbox.get_conf('OPEN_WORKER_LLMS')
+    for work in OPEN_WORKER_LLMS:
+        if llm.startswith(work):
+            return True
     return False
 
 def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
@@ -220,7 +219,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     inputs=inputs, llm_kwargs=llm_kwargs, history=history, 
                     sys_prompt=sys_prompt, observe_window=mutable[index], console_slience=True
                 )
-                mutable[index][2] = "已成功"
+                mutable[index][2] = f"``folded\n{gpt_say}\n``"  # 已完成
                 if 'raise ConnectionAbortedError jsokf' in gpt_say:  # 超出Tokens限制错误标记位
                     mutable[index][2] = "!!超出Tokens限制，捕获了已生成的回答，但回答结尾会损失部分数据!!"
                 return gpt_say
