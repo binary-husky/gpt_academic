@@ -94,7 +94,7 @@ def main():
                         clearBtn = gr.Button("清除", elem_id="elem_clear", variant="secondary", visible=False); clearBtn.style(size="sm")
                     if ENABLE_AUDIO: 
                         with gr.Row():
-                            audio_mic = gr.Audio(source="microphone", type="numpy", streaming=True, show_label=False).style(container=False)
+                            audio_mic = gr.Audio(source="microphone", type="numpy", elem_id="elem_audio", streaming=True, show_label=False).style(container=False)
                     with gr.Row():
                         status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {proxy_info}", elem_id="state-panel")
                 with gr.Accordion("基础功能区", open=True, elem_id="basic-panel") as area_basic_fn:
