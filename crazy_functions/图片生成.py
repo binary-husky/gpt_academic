@@ -3,7 +3,7 @@ from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 import datetime
 
 
-def gen_image(llm_kwargs, prompt, resolution="256x256"):
+def gen_image(llm_kwargs, prompt, resolution="1024x1024", model="dall-e-2"):
     import requests, json, time, os
     from request_llms.bridge_all import model_info
 
@@ -23,6 +23,7 @@ def gen_image(llm_kwargs, prompt, resolution="256x256"):
         'prompt': prompt,
         'n': 1,
         'size': resolution,
+        'model': model,
         'response_format': 'url'
     }
     response = requests.post(url, headers=headers, json=data, proxies=proxies)
@@ -58,7 +59,7 @@ def 图片生成(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     chatbot.append(("这是什么功能？", "[Local Message] 生成图像, 请先把模型切换至gpt-*或者api2d-*。如果中文效果不理想, 请尝试英文Prompt。正在处理中 ....."))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
-    resolution = plugin_kwargs.get("advanced_arg", '256x256')
+    resolution = plugin_kwargs.get("advanced_arg", '1024x1024')
     image_url, image_path = gen_image(llm_kwargs, prompt, resolution)
     chatbot.append([prompt,  
         f'图像中转网址: <br/>`{image_url}`<br/>'+
@@ -67,3 +68,29 @@ def 图片生成(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
         f'本地文件预览: <br/><div align="center"><img src="file={image_path}"></div>'
     ])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
+
+@CatchException
+def 图片生成_DALLE3(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    """
+    txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
+    llm_kwargs      gpt模型参数，如温度和top_p等，一般原样传递下去就行
+    plugin_kwargs   插件模型的参数，暂时没有用武之地
+    chatbot         聊天显示框的句柄，用于显示给用户
+    history         聊天历史，前情提要
+    system_prompt   给gpt的静默提醒
+    web_port        当前软件运行的端口号
+    """
+    history = []    # 清空历史，以免输入溢出
+    chatbot.append(("这是什么功能？", "[Local Message] 生成图像, 请先把模型切换至gpt-*或者api2d-*。如果中文效果不理想, 请尝试英文Prompt。正在处理中 ....."))
+    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
+    if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
+    resolution = plugin_kwargs.get("advanced_arg", '1024x1024')
+    image_url, image_path = gen_image(llm_kwargs, prompt, resolution)
+    chatbot.append([prompt,  
+        f'图像中转网址: <br/>`{image_url}`<br/>'+
+        f'中转网址预览: <br/><div align="center"><img src="{image_url}"></div>'
+        f'本地文件地址: <br/>`{image_path}`<br/>'+
+        f'本地文件预览: <br/><div align="center"><img src="file={image_path}"></div>'
+    ])
+    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
+

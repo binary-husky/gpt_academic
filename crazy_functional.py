@@ -349,16 +349,27 @@ def get_crazy_functions():
         print('Load function plugin failed')
 
     try:
-        from crazy_functions.图片生成 import 图片生成
+        from crazy_functions.图片生成 import 图片生成, 图片生成_DALLE3
         function_plugins.update({
             "图片生成（先切换模型到openai或api2d）": {
                 "Group": "对话",
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-                "ArgsReminder": "在这里输入分辨率, 如256x256（默认）",  # 高级参数输入区的显示提示
-                "Info": "图片生成 | 输入参数字符串，提供图像的内容",
+                "ArgsReminder": "在这里输入分辨率, 如1024x1024（默认）",  # 高级参数输入区的显示提示
+                "Info": "使用DALLE2生成图片 | 输入参数字符串，提供图像的内容",
                 "Function": HotReload(图片生成)
+            },
+        })
+        function_plugins.update({
+            "图片生成_DALLE3（先切换模型到openai或api2d）": {
+                "Group": "对话",
+                "Color": "stop",
+                "AsButton": False,
+                "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+                "ArgsReminder": "在这里输入分辨率, 如1024x1024（默认）",  # 高级参数输入区的显示提示
+                "Info": "使用DALLE3生成图片 | 输入参数字符串，提供图像的内容",
+                "Function": HotReload(图片生成_DALLE3)
             },
         })
     except:
