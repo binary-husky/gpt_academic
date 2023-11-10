@@ -349,16 +349,16 @@ def get_crazy_functions():
         print('Load function plugin failed')
 
     try:
-        from crazy_functions.图片生成 import 图片生成, 图片生成_DALLE3
+        from crazy_functions.图片生成 import 图片生成_DALLE2, 图片生成_DALLE3, 图片修改_DALLE2
         function_plugins.update({
-            "图片生成（先切换模型到openai或api2d）": {
+            "图片生成_DALLE2（先切换模型到openai或api2d）": {
                 "Group": "对话",
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
                 "ArgsReminder": "在这里输入分辨率, 如1024x1024（默认），支持 256x256, 512x512, 1024x1024",  # 高级参数输入区的显示提示
                 "Info": "使用DALLE2生成图片 | 输入参数字符串，提供图像的内容",
-                "Function": HotReload(图片生成)
+                "Function": HotReload(图片生成_DALLE2)
             },
         })
         function_plugins.update({
@@ -372,6 +372,17 @@ def get_crazy_functions():
                 "Function": HotReload(图片生成_DALLE3)
             },
         })
+        # function_plugins.update({
+        #     "图片修改_DALLE2（启动DALLE2图像修改向导程序）": {
+        #         "Group": "对话",
+        #         "Color": "stop",
+        #         "AsButton": False,
+        #         "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+        #         "ArgsReminder": "在这里输入分辨率, 如1024x1024（默认），支持 1024x1024, 1792x1024, 1024x1792",  # 高级参数输入区的显示提示
+        #         # "Info": "使用DALLE2修改图片 | 输入参数字符串，提供图像的内容",
+        #         "Function": HotReload(图片修改_DALLE2)
+        #     },
+        # })
     except:
         print('Load function plugin failed')
 
