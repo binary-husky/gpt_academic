@@ -19,6 +19,11 @@ from crazy_functions.agent_fns.persistent import GradioMultiuserManagerForPersis
 from crazy_functions.agent_fns.auto_agent import AutoGenMath
 import time
 
+def remove_model_prefix(llm):
+    if llm.startswith('api2d-'): llm = llm.replace('api2d-', '')
+    if llm.startswith('azure-'): llm = llm.replace('azure-', '')
+    return llm
+
 
 @CatchException
 def 多智能体终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
@@ -32,10 +37,16 @@ def 多智能体终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
     web_port        当前软件运行的端口号
     """
     # 检查当前的模型是否符合要求
-    supported_llms = ['gpt-3.5-turbo-16k', 'gpt-4', 'gpt-4-32k', 
-                      'api2d-gpt-3.5-turbo-16k', 'api2d-gpt-4']
+    supported_llms = [
+        'gpt-3.5-16k',
+        'gpt-3.5-turbo-16k',
+        'gpt-3.5-turbo-1106',
+        'gpt-4', 
+        'gpt-4-32k', 
+        'gpt-4-1106-preview',
+    ]
     llm_kwargs['api_key'] = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
-    if llm_kwargs['llm_model'] not in supported_llms:
+    if remove_model_prefix(llm_kwargs['llm_model']) not in supported_llms:
         chatbot.append([f"处理任务: {txt}", f"当前插件只支持{str(supported_llms)}, 当前模型{llm_kwargs['llm_model']}."])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
