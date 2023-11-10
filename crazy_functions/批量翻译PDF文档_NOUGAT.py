@@ -73,6 +73,11 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
 
     from .crazy_utils import get_files_from_everything
     success, file_manifest, project_folder = get_files_from_everything(txt, type='.pdf')
+    success_mmd, file_manifest_mmd, _ = get_files_from_everything(txt, type='.mmd')
+    success = success or success_mmd
+    file_manifest += file_manifest_mmd
+    chatbot.append(["文件列表：", ", ".join([e.split('/')[-1] for e in file_manifest])]); 
+    yield from update_ui(      chatbot=chatbot, history=history) 
     # 检测输入参数，如没有给定输入参数，直接退出
     if not success:
         if txt == "": txt = '空空如也的输入栏'
@@ -101,9 +106,13 @@ def 解析PDF_基于NOUGAT(file_manifest, project_folder, llm_kwargs, plugin_kwa
     from crazy_functions.pdf_fns.report_gen_html import construct_html
     nougat_handle = nougat_interface()
     for index, fp in enumerate(file_manifest):
-        chatbot.append(["当前进度：", f"正在解析论文，请稍候。（第一次运行时，需要花费较长时间下载NOUGAT参数）"]); yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-        fpp = yield from nougat_handle.NOUGAT_parse_pdf(fp, chatbot, history)
-        promote_file_to_downloadzone(fpp, rename_file=os.path.basename(fpp)+'.nougat.mmd', chatbot=chatbot)
+        if fp.endswith('pdf'):
+            chatbot.append(["当前进度：", f"正在解析论文，请稍候。（第一次运行时，需要花费较长时间下载NOUGAT参数）"]); yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+            fpp = yield from nougat_handle.NOUGAT_parse_pdf(fp, chatbot, history)
+            promote_file_to_downloadzone(fpp, rename_file=os.path.basename(fpp)+'.nougat.mmd', chatbot=chatbot)
+        else:
+            chatbot.append(["当前论文无需解析：", fp]); yield from update_ui(      chatbot=chatbot, history=history)
+            fpp = fp
         with open(fpp, 'r', encoding='utf8') as f:
             article_content = f.readlines()
         article_dict = markdown_to_dict(article_content)
