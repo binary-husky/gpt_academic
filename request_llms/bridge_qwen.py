@@ -30,10 +30,9 @@ class GetONNXGLMHandle(LocalLLMHandle):
         from modelscope import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
 
         model_id = 'qwen/Qwen-7B-Chat'
-        revision = 'v1.0.1'
-        self._tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision, trust_remote_code=True)
+        self._tokenizer = AutoTokenizer.from_pretrained('Qwen/Qwen-7B-Chat', trust_remote_code=True, resume_download=True)
         # use fp16
-        model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto", revision=revision, trust_remote_code=True, fp16=True).eval()
+        model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto", trust_remote_code=True, fp16=True).eval()
         model.generation_config = GenerationConfig.from_pretrained(model_id, trust_remote_code=True)  # 可指定不同的生成长度、top_p等相关超参
         self._model = model
 
