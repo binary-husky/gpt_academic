@@ -3,11 +3,6 @@
 测试：
     - show me the solution of $x^2=cos(x)$, solve this problem with figure, and plot and save image to t.jpg
 
-Testing: 
-    - Crop the image, keeping the bottom half. 
-    - Swap the blue channel and red channel of the image. 
-    - Convert the image to grayscale. 
-    - Convert the CSV file to an Excel spreadsheet.
 """
 
 

@@ -55,12 +55,14 @@ class PluginMultiprocessManager:
 
     def send_command(self, cmd):
         # ⭐ run in main process
+        repeated = False
         if cmd == self.last_user_input:
-            print('repeated input detected, ignore')
+            repeated = True
             cmd = ""
         else:
             self.last_user_input = cmd
         self.parent_conn.send(PipeCom("user_input", cmd))
+        return repeated, cmd
 
     def immediate_showoff_when_possible(self, fp):
         # ⭐ 主进程
@@ -111,7 +113,7 @@ class PluginMultiprocessManager:
         if create_or_resume == 'create':
             self.cnt = 1
             self.parent_conn = self.launch_subprocess_with_pipe() # ⭐⭐⭐
-        self.send_command(txt)
+        repeated, cmd_to_autogen = self.send_command(txt)
         if txt == 'exit': 
             self.chatbot.append([f"结束", "结束信号已明确，终止AutoGen程序。"])
             yield from update_ui(chatbot=self.chatbot, history=self.history)
@@ -143,7 +145,9 @@ class PluginMultiprocessManager:
                     break
                 if msg.cmd == "show":
                     yield from self.overwatch_workdir_file_change()
-                    self.chatbot.append([f"运行阶段-{self.cnt}", msg.content])
+                    notice = ""
+                    if repeated: notice = "（自动忽略重复的输入）"
+                    self.chatbot.append([f"运行阶段-{self.cnt}（上次用户反馈输入为: 「{cmd_to_autogen}」{notice}", msg.content])
                     self.cnt += 1
                     yield from update_ui(chatbot=self.chatbot, history=self.history)
                 if msg.cmd == "interact":
