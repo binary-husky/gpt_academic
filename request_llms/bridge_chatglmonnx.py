@@ -8,7 +8,7 @@ import threading
 import importlib
 from toolbox import update_ui, get_conf
 from multiprocessing import Process, Pipe
-from .local_llm_class import LocalLLMHandle, get_local_llm_predict_fns, SingletonLocalLLM
+from .local_llm_class import LocalLLMHandle, get_local_llm_predict_fns
 
 from .chatglmoonx import ChatGLMModel, chat_template
 
@@ -17,7 +17,6 @@ from .chatglmoonx import ChatGLMModel, chat_template
 # ------------------------------------------------------------------------------------------------------------------------
 # 🔌💻 Local Model
 # ------------------------------------------------------------------------------------------------------------------------
-@SingletonLocalLLM
 class GetONNXGLMHandle(LocalLLMHandle):
 
     def load_model_info(self):

@@ -4,14 +4,13 @@ cmd_to_install = "`pip install -r request_llms/requirements_chatglm.txt`"
 
 from transformers import AutoModel, AutoTokenizer
 from toolbox import get_conf, ProxyNetworkActivate
-from .local_llm_class import LocalLLMHandle, get_local_llm_predict_fns, SingletonLocalLLM
+from .local_llm_class import LocalLLMHandle, get_local_llm_predict_fns
 
 
 
 # ------------------------------------------------------------------------------------------------------------------------
 # 🔌💻 Local Model
 # ------------------------------------------------------------------------------------------------------------------------
-@SingletonLocalLLM
 class GetGLM2Handle(LocalLLMHandle):
 
     def load_model_info(self):

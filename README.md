@@ -4,7 +4,7 @@
 > 
 > `pip install -r requirements.txt`
 >
-> 2023.11.7: 本项目开源免费，**近期发现有人蔑视开源协议，利用本项目违法圈钱**，请各位提高警惕，谨防上当受骗。
+> 2023.11.7: 本项目开源免费，近期发现有人蔑视开源协议并利用本项目违规圈钱，请提高警惕，谨防上当受骗。
 
 
 
@@ -139,7 +139,7 @@ git clone --depth=1 https://github.com/OpenLMLab/MOSS.git request_llms/moss  # �
 参考wiki：https://github.com/binary-husky/gpt_academic/wiki/%E9%80%82%E9%85%8DRWKV-Runner
 
 # 【可选步骤IV】确保config.py配置文件的AVAIL_LLM_MODELS包含了期望的模型，目前支持的全部模型如下(jittorllms系列目前仅支持docker方案)：
-AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "newbing", "moss"] # + ["jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
+AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "moss"] # + ["jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
 ```
 
 </p>
@@ -288,7 +288,8 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 
 
 ### II：版本:
-- version 3.60（todo）: 优化虚空终端，引入code interpreter和更多插件
+- version 3.60（todo）: 优化虚空终端，并引入AutoGen作为新一代插件的基石
+- version 3.57: 支持GLM3，星火v3，文心一言v4，修复本地模型的并发BUG
 - version 3.56: 支持动态追加基础功能按钮，新汇报PDF汇总页面
 - version 3.55: 重构前端界面，引入悬浮窗口与菜单栏
 - version 3.54: 新增动态代码解释器（Code Interpreter）（待完善）

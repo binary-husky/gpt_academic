@@ -5,9 +5,9 @@ from transformers import AutoModel, AutoTokenizer
 import time
 import threading
 import importlib
-from toolbox import update_ui, get_conf
+from toolbox import update_ui, get_conf, ProxyNetworkActivate
 from multiprocessing import Process, Pipe
-from .local_llm_class import LocalLLMHandle, get_local_llm_predict_fns, SingletonLocalLLM
+from .local_llm_class import LocalLLMHandle, get_local_llm_predict_fns
 
 
 # ------------------------------------------------------------------------------------------------------------------------
@@ -34,7 +34,6 @@ def combine_history(prompt, hist):
 # ------------------------------------------------------------------------------------------------------------------------
 # 🔌💻 Local Model
 # ------------------------------------------------------------------------------------------------------------------------
-@SingletonLocalLLM
 class GetInternlmHandle(LocalLLMHandle):
 
     def load_model_info(self):
@@ -53,14 +52,15 @@ class GetInternlmHandle(LocalLLMHandle):
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
         device = get_conf('LOCAL_MODEL_DEVICE')
-        if self._model is None:
-            tokenizer = AutoTokenizer.from_pretrained("internlm/internlm-chat-7b", trust_remote_code=True)
-            if device=='cpu':
-                model = AutoModelForCausalLM.from_pretrained("internlm/internlm-chat-7b", trust_remote_code=True).to(torch.bfloat16)
-            else:
-                model = AutoModelForCausalLM.from_pretrained("internlm/internlm-chat-7b", trust_remote_code=True).to(torch.bfloat16).cuda()
+        with ProxyNetworkActivate('Download_LLM'):
+            if self._model is None:
+                tokenizer = AutoTokenizer.from_pretrained("internlm/internlm-chat-7b", trust_remote_code=True)
+                if device=='cpu':
+                    model = AutoModelForCausalLM.from_pretrained("internlm/internlm-chat-7b", trust_remote_code=True).to(torch.bfloat16)
+                else:
+                    model = AutoModelForCausalLM.from_pretrained("internlm/internlm-chat-7b", trust_remote_code=True).to(torch.bfloat16).cuda()
 
-            model = model.eval()
+                model = model.eval()
         return model, tokenizer
 
     def llm_stream_generator(self, **kwargs):

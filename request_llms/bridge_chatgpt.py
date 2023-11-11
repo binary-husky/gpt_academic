@@ -7,8 +7,7 @@
     1. predict: 正常对话时使用，具备完备的交互功能，不可多线程
 
     具备多线程调用能力的函数
-    2. predict_no_ui：高级实验性功能模块调用，不会实时显示在界面上，参数简单，可以多线程并行，方便实现复杂的功能逻辑
-    3. predict_no_ui_long_connection：在实验过程中发现调用predict_no_ui处理长文档时，和openai的连接容易断掉，这个函数用stream的方式解决这个问题，同样支持多线程
+    2. predict_no_ui_long_connection：支持多线程
 """
 
 import json
@@ -351,6 +350,7 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         model = random.choice([
             "gpt-3.5-turbo", 
             "gpt-3.5-turbo-16k",
+            "gpt-3.5-turbo-1106",
             "gpt-3.5-turbo-0613",
             "gpt-3.5-turbo-16k-0613",
             "gpt-3.5-turbo-0301",
