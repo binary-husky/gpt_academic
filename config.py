@@ -211,7 +211,7 @@ ALLOW_RESET_CONFIG = False
 
 
 # 在使用AutoGen插件时，是否使用Docker容器运行代码
-AUTOGEN_USE_DOCKER = True
+AUTOGEN_USE_DOCKER = False
 
 
 # 临时的上传文件夹位置，请勿修改

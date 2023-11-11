@@ -15,6 +15,7 @@ Markdown
 pygments
 pymupdf
 openai
+pyautogen
 numpy
 arxiv
 rich

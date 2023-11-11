@@ -548,7 +548,7 @@ def LLM_CATCH_EXCEPTION(f):
     return decorated
 
 
-def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience=False):
+def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, observe_window=[], console_slience=False):
     """
     发送至LLM，等待回复，一次性完成，不显示中间过程。但内部用stream的方法避免中途网线被掐。
     inputs：

@@ -41,11 +41,11 @@ def 多智能体终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
         "azure-gpt-4",
         "azure-gpt-4-32k",
     ]
-    llm_kwargs['api_key'] = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
     if llm_kwargs['llm_model'] not in supported_llms:
         chatbot.append([f"处理任务: {txt}", f"当前插件只支持{str(supported_llms)}, 当前模型{llm_kwargs['llm_model']}."])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
+    llm_kwargs['api_key'] = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
     
     # 检查当前的模型是否符合要求
     API_URL_REDIRECT = get_conf('API_URL_REDIRECT')
@@ -56,7 +56,9 @@ def 多智能体终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
     
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
-        import autogen, docker
+        import autogen
+        if get_conf("AUTOGEN_USE_DOCKER"):
+            import docker
     except:
         chatbot.append([ f"处理任务: {txt}", 
             f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pyautogen docker```。"])
@@ -67,7 +69,8 @@ def 多智能体终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
     try:
         import autogen
         import glob, os, time, subprocess
-        subprocess.Popen(['docker', '--version'])
+        if get_conf("AUTOGEN_USE_DOCKER"):
+            subprocess.Popen(["docker", "--version"])
     except:
         chatbot.append([f"处理任务: {txt}", f"缺少docker运行环境！"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面

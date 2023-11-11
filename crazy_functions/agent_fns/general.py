@@ -9,17 +9,27 @@ def gpt_academic_generate_oai_reply(
     sender,
     config,
 ):
-    from .bridge_autogen import Completion
     llm_config = self.llm_config if config is None else config
     if llm_config is False:
         return False, None
     if messages is None:
         messages = self._oai_messages[sender]
 
-    response = Completion.create(
-        context=messages[-1].pop("context", None), messages=self._oai_system_message + messages, **llm_config
+    inputs = messages[-1]['content']
+    history = []
+    for message in messages[:-1]:
+        history.append(message['content'])
+    context=messages[-1].pop("context", None)
+    assert context is None, "预留参数 context 未实现"
+
+    reply = predict_no_ui_long_connection(
+        inputs=inputs,
+        llm_kwargs=llm_config,
+        history=history,
+        sys_prompt=self._oai_system_message[0]['content'],
+        console_slience=True
     )
-    return True, Completion.extract_text_or_function_call(response)[0]
+    return True, reply
 
 class AutoGenGeneral(PluginMultiprocessManager):
     def gpt_academic_print_override(self, user_proxy, message, sender):
@@ -45,32 +55,6 @@ class AutoGenGeneral(PluginMultiprocessManager):
         else:
             raise TimeoutError("等待用户输入超时")
 
-    # def gpt_academic_generate_oai_reply(self, agent, messages, sender, config):
-    #     from .bridge_autogen import Completion
-    #     if messages is None:
-    #         messages = agent._oai_messages[sender]
-
-    #     def instantiate(
-    #         cls,
-    #         template: Union[str, None],
-    #         context: Optional[Dict] = None,
-    #         allow_format_str_template: Optional[bool] = False,
-    #     ):
-    #         if not context or template is None:
-    #             return template
-    #         if isinstance(template, str):
-    #             return template.format(**context) if allow_format_str_template else template
-    #         return template(context)
-
-    #     res = predict_no_ui_long_connection(
-    #         messages[-1].pop("context", None), 
-    #         llm_kwargs=self.llm_kwargs, 
-    #         history=messages, 
-    #         sys_prompt=agent._oai_system_message,
-    #         observe_window=None, 
-    #         console_slience=False)
-    #     return True, res
-
     def define_agents(self):
         raise NotImplementedError
 
@@ -85,7 +69,7 @@ class AutoGenGeneral(PluginMultiprocessManager):
             for agent_kwargs in agents:
                 agent_cls = agent_kwargs.pop('cls')
                 kwargs = {
-                    'llm_config':{},
+                    'llm_config':self.llm_kwargs,
                     'code_execution_config':code_execution_config
                 }
                 kwargs.update(agent_kwargs)
