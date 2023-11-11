@@ -94,7 +94,7 @@ model_info = {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
         "endpoint": openai_endpoint,
-        "max_token": 1024*16,
+        "max_token": 16385,
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
@@ -112,7 +112,16 @@ model_info = {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
         "endpoint": openai_endpoint,
-        "max_token": 1024 * 16,
+        "max_token": 16385,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+
+    "gpt-3.5-turbo-1106": {#16k
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": openai_endpoint,
+        "max_token": 16385,
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
@@ -131,6 +140,15 @@ model_info = {
         "fn_without_ui": chatgpt_noui,
         "endpoint": openai_endpoint,
         "max_token": 32768,
+        "tokenizer": tokenizer_gpt4,
+        "token_cnt": get_token_num_gpt4,
+    },
+
+    "gpt-4-1106-preview": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": openai_endpoint,
+        "max_token": 128000,
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
     },
@@ -159,11 +177,11 @@ model_info = {
         "fn_without_ui": chatgpt_noui,
         "endpoint": azure_endpoint,
         "max_token": 8192,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
+        "tokenizer": tokenizer_gpt4,
+        "token_cnt": get_token_num_gpt4,
     },
 
-    # api_2d
+    # api_2d (此后不需要在此处添加api2d的接口了，因为下面的代码会自动添加)
     "api2d-gpt-3.5-turbo": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
@@ -180,15 +198,6 @@ model_info = {
         "max_token": 8192,
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
-    },
-
-    "api2d-gpt-3.5-turbo-16k": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": api2d_endpoint,
-        "max_token": 1024*16,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
     },
 
     # 将 chatglm 直接对齐到 chatglm2
@@ -225,6 +234,13 @@ model_info = {
         "token_cnt": get_token_num_gpt35,
     },
 }
+
+# -=-=-=-=-=-=- api2d 对齐支持 -=-=-=-=-=-=-
+for model in AVAIL_LLM_MODELS:
+    if model.startswith('api2d-') and (model.replace('api2d-','') in model_info.keys()):
+        mi = model_info[model.replace('api2d-','')]
+        mi.update({"endpoint": api2d_endpoint})
+        model_info.update({model: mi})
 
 # -=-=-=-=-=-=- 以下部分是新加入的模型，可能附带额外依赖 -=-=-=-=-=-=-
 if "claude-1-100k" in AVAIL_LLM_MODELS or "claude-2" in AVAIL_LLM_MODELS:

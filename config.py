@@ -87,9 +87,10 @@ DEFAULT_FN_GROUPS = ['对话', '编程', '学术', '智能体']
 
 # 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
 LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
-AVAIL_LLM_MODELS = ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
-                    "api2d-gpt-3.5-turbo", 'api2d-gpt-3.5-turbo-16k', 
-                    "gpt-4", "gpt-4-32k", "azure-gpt-4", "api2d-gpt-4", 
+AVAIL_LLM_MODELS = ["gpt-3.5-turbo-1106","gpt-4-1106-preview",
+                    "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
+                    "api2d-gpt-3.5-turbo", 'api2d-gpt-3.5-turbo-16k',
+                    "gpt-4", "gpt-4-32k", "azure-gpt-4", "api2d-gpt-4",
                     "chatglm3", "moss", "newbing", "claude-2"]
 # P.S. 其他可用的模型还包括 ["zhipuai", "qianfan", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613",  "gpt-3.5-random"
 # "spark", "sparkv2", "sparkv3", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"]

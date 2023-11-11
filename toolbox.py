@@ -625,13 +625,14 @@ def on_file_uploaded(request: gradio.Request, files, chatbot, txt, txt2, checkbo
 
 
 def on_report_generated(cookies, files, chatbot):
-    from toolbox import find_recent_files
-    PATH_LOGGING = get_conf('PATH_LOGGING')
+    # from toolbox import find_recent_files
+    # PATH_LOGGING = get_conf('PATH_LOGGING')
     if 'files_to_promote' in cookies:
         report_files = cookies['files_to_promote']
         cookies.pop('files_to_promote')
     else:
-        report_files = find_recent_files(PATH_LOGGING)
+        report_files = []
+    #     report_files = find_recent_files(PATH_LOGGING)
     if len(report_files) == 0:
         return cookies, None, chatbot
     # files.extend(report_files)
