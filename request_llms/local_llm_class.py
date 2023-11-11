@@ -76,7 +76,6 @@ class LocalLLMHandle(Process):
         self.parent_state, self.child_state = create_queue_pipe()
         # allow redirect_stdout
         self.std_tag = "[Subprocess Message] "
-        self.child.write = lambda x: self.child.send(self.std_tag + x)
         self.running = True
         self._model = None
         self._tokenizer = None
@@ -137,6 +136,8 @@ class LocalLLMHandle(Process):
     def run(self):
         # 🏃‍♂️🏃‍♂️🏃‍♂️ run in child process
         # 第一次运行，加载参数
+        self.child.flush = lambda *args: None
+        self.child.write = lambda x: self.child.send(self.std_tag + x)
         reset_tqdm_output()
         self.set_state("`尝试加载模型`")
         try:
@@ -220,7 +221,7 @@ def get_local_llm_predict_fns(LLMSingletonClass, model_name, history_format='cla
         """
             refer to request_llms/bridge_all.py
         """
-        _llm_handle = LLMSingletonClass()
+        _llm_handle = SingletonLocalLLM(LLMSingletonClass)()
         if len(observe_window) >= 1:
             observe_window[0] = load_message + "\n\n" + _llm_handle.get_state()
         if not _llm_handle.running:
@@ -268,7 +269,7 @@ def get_local_llm_predict_fns(LLMSingletonClass, model_name, history_format='cla
         """
         chatbot.append((inputs, ""))
 
-        _llm_handle = LLMSingletonClass()
+        _llm_handle = SingletonLocalLLM(LLMSingletonClass)()
         chatbot[-1] = (inputs, load_message + "\n\n" + _llm_handle.get_state())
         yield from update_ui(chatbot=chatbot, history=[])
         if not _llm_handle.running:

@@ -7,7 +7,7 @@ import threading
 import importlib
 from toolbox import update_ui, get_conf
 from multiprocessing import Process, Pipe
-from .local_llm_class import LocalLLMHandle, get_local_llm_predict_fns, SingletonLocalLLM
+from .local_llm_class import LocalLLMHandle, get_local_llm_predict_fns
 
 
 # ------------------------------------------------------------------------------------------------------------------------
@@ -34,7 +34,6 @@ def combine_history(prompt, hist):
 # ------------------------------------------------------------------------------------------------------------------------
 # 🔌💻 Local Model
 # ------------------------------------------------------------------------------------------------------------------------
-@SingletonLocalLLM
 class GetInternlmHandle(LocalLLMHandle):
 
     def load_model_info(self):
