@@ -1,6 +1,6 @@
 import time
 import threading
-from toolbox import update_ui
+from toolbox import update_ui, Singleton
 from multiprocessing import Process, Pipe
 from contextlib import redirect_stdout
 from request_llms.queued_pipe import create_queue_pipe
@@ -26,23 +26,20 @@ class ThreadLock(object):
     def __exit__(self, type, value, traceback):
         self.release()
 
-def SingletonLocalLLM(cls):
-    """
-    Singleton Decroator for LocalLLMHandle
-    """
-    _instance = {}
+@Singleton
+class GetSingletonHandle():
+    def __init__(self):
+        self.llm_model_already_running = {}
 
-    def _singleton(*args, **kargs):
-        if cls not in _instance:
-            _instance[cls] = cls(*args, **kargs)
-            return _instance[cls]
-        elif _instance[cls].corrupted:
-            _instance[cls] = cls(*args, **kargs)
-            return _instance[cls]
+    def get_llm_model_instance(self, cls, *args, **kargs):
+        if cls not in self.llm_model_already_running:
+            self.llm_model_already_running[cls] = cls(*args, **kargs)
+            return self.llm_model_already_running[cls]
+        elif self.llm_model_already_running[cls].corrupted:
+            self.llm_model_already_running[cls] = cls(*args, **kargs)
+            return self.llm_model_already_running[cls]
         else:
-            return _instance[cls]
-    return _singleton
-
+            return self.llm_model_already_running[cls]
 
 def reset_tqdm_output():
     import sys, tqdm
@@ -221,7 +218,7 @@ def get_local_llm_predict_fns(LLMSingletonClass, model_name, history_format='cla
         """
             refer to request_llms/bridge_all.py
         """
-        _llm_handle = SingletonLocalLLM(LLMSingletonClass)()
+        _llm_handle = GetSingletonHandle().get_llm_model_instance(LLMSingletonClass)
         if len(observe_window) >= 1:
             observe_window[0] = load_message + "\n\n" + _llm_handle.get_state()
         if not _llm_handle.running:
@@ -269,7 +266,7 @@ def get_local_llm_predict_fns(LLMSingletonClass, model_name, history_format='cla
         """
         chatbot.append((inputs, ""))
 
-        _llm_handle = SingletonLocalLLM(LLMSingletonClass)()
+        _llm_handle = GetSingletonHandle().get_llm_model_instance(LLMSingletonClass)
         chatbot[-1] = (inputs, load_message + "\n\n" + _llm_handle.get_state())
         yield from update_ui(chatbot=chatbot, history=[])
         if not _llm_handle.running:
