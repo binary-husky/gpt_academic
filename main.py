@@ -1,6 +1,5 @@
 import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 import pickle
-import codecs
 import base64
 
 def main():

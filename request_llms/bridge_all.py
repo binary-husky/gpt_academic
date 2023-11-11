@@ -242,6 +242,13 @@ for model in AVAIL_LLM_MODELS:
         mi.update({"endpoint": api2d_endpoint})
         model_info.update({model: mi})
 
+# -=-=-=-=-=-=- azure 对齐支持 -=-=-=-=-=-=-
+for model in AVAIL_LLM_MODELS:
+    if model.startswith('azure-') and (model.replace('azure-','') in model_info.keys()):
+        mi = model_info[model.replace('azure-','')]
+        mi.update({"endpoint": azure_endpoint})
+        model_info.update({model: mi})
+
 # -=-=-=-=-=-=- 以下部分是新加入的模型，可能附带额外依赖 -=-=-=-=-=-=-
 if "claude-1-100k" in AVAIL_LLM_MODELS or "claude-2" in AVAIL_LLM_MODELS:
     from .bridge_claude import predict_no_ui_long_connection as claude_noui
@@ -564,7 +571,7 @@ def LLM_CATCH_EXCEPTION(f):
     return decorated
 
 
-def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience=False):
+def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, observe_window=[], console_slience=False):
     """
     发送至LLM，等待回复，一次性完成，不显示中间过程。但内部用stream的方法避免中途网线被掐。
     inputs：

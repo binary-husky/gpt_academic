@@ -74,7 +74,7 @@ def get_crazy_functions():
         "批量总结Word文档": {
             "Group": "学术",
             "Color": "stop",
-            "AsButton": True,
+            "AsButton": False,
             "Info": "批量总结word文档 | 输入参数为路径",
             "Function": HotReload(总结word文档)
         },
@@ -178,6 +178,13 @@ def get_crazy_functions():
             "Info": "批量生成函数的注释 | 输入参数为路径",
             "Function": HotReload(批量生成函数注释)
         },
+        "精准翻译PDF论文": {
+            "Group": "学术",
+            "Color": "stop",
+            "AsButton": True,  
+            "Info": "精准翻译PDF论文为中文 | 输入参数为路径",
+            "Function": HotReload(批量翻译PDF文档)
+        },
         "保存当前的对话": {
             "Group": "对话",
             "AsButton": True,
@@ -195,13 +202,6 @@ def get_crazy_functions():
             "AsButton": True,
             "Info": "查看历史上的今天事件 (这是一个面向开发者的插件Demo) | 不需要输入参数",
             "Function": HotReload(高阶功能模板函数)
-        },
-        "精准翻译PDF论文": {
-            "Group": "学术",
-            "Color": "stop",
-            "AsButton": True,  
-            "Info": "精准翻译PDF论文为中文 | 输入参数为路径",
-            "Function": HotReload(批量翻译PDF文档)
         },
         "询问多个GPT模型": {
             "Group": "对话",
@@ -561,18 +561,15 @@ def get_crazy_functions():
     except:
         print('Load function plugin failed')
 
-    # try:
-    #     from crazy_functions.多智能体 import 多智能体终端
-    #     function_plugins.update({
-    #         "多智能体终端（微软AutoGen）": {
-    #             "Group": "智能体",
-    #             "Color": "stop",
-    #             "AsButton": True,
-    #             "Function": HotReload(多智能体终端)
-    #         }
-    #     })
-    # except:
-    #     print('Load function plugin failed')
+    from crazy_functions.多智能体 import 多智能体终端
+    function_plugins.update({
+        "AutoGen多智能体终端": {
+            "Group": "智能体",
+            "Color": "stop",
+            "AsButton": True,
+            "Function": HotReload(多智能体终端)
+        }
+    })
 
     # try:
     #     from crazy_functions.chatglm微调工具 import 微调数据集生成
