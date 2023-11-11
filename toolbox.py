@@ -80,7 +80,7 @@ def ArgsGeneralWrapper(f):
         }
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
-        
+        print('[plugin is called]:', f)
         if cookies.get('lock_plugin', None) is None:
             # 正常状态
             if len(args) == 0:  # 插件通道
