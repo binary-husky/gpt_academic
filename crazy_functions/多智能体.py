@@ -48,11 +48,13 @@ def 多智能体终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
         "azure-gpt-4",
         "azure-gpt-4-32k",
     ]
-    if llm_kwargs['llm_model'] not in supported_llms:
-        chatbot.append([f"处理任务: {txt}", f"当前插件只支持{str(supported_llms)}, 当前模型{llm_kwargs['llm_model']}."])
+    from request_llms.bridge_all import model_info
+    if model_info[llm_kwargs['llm_model']]["max_token"] < 8000: # 至少是8k上下文的模型
+        chatbot.append([f"处理任务: {txt}", f"当前插件只支持{str(supported_llms)}, 当前模型{llm_kwargs['llm_model']}的最大上下文长度太短, 不能支撑AutoGen运行。"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
-    llm_kwargs['api_key'] = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
+    if model_info[llm_kwargs['llm_model']]["endpoint"] is not None: # 如果不是本地模型，加载API_KEY
+        llm_kwargs['api_key'] = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
     
     # 检查当前的模型是否符合要求
     API_URL_REDIRECT = get_conf('API_URL_REDIRECT')

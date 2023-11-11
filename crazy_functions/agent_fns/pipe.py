@@ -21,7 +21,7 @@ class PluginMultiprocessManager:
         # self.web_port = web_port
         self.alive = True
         self.use_docker = get_conf("AUTOGEN_USE_DOCKER")
-
+        self.last_user_input = ""
         # create a thread to monitor self.heartbeat, terminate the instance if no heartbeat for a long time
         timeout_seconds = 5 * 60
         self.heartbeat_watchdog = WatchDog(timeout=timeout_seconds, bark_fn=self.terminate, interval=5)
@@ -55,6 +55,11 @@ class PluginMultiprocessManager:
 
     def send_command(self, cmd):
         # ⭐ run in main process
+        if cmd == self.last_user_input:
+            print('repeated input detected, ignore')
+            cmd = ""
+        else:
+            self.last_user_input = cmd
         self.parent_conn.send(PipeCom("user_input", cmd))
 
     def immediate_showoff_when_possible(self, fp):

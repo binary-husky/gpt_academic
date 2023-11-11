@@ -29,6 +29,7 @@ def gpt_academic_generate_oai_reply(
         sys_prompt=self._oai_system_message[0]['content'],
         console_slience=True
     )
+    assumed_done = reply.endswith('\nTERMINATE')
     return True, reply
 
 class AutoGenGeneral(PluginMultiprocessManager):
