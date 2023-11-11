@@ -201,7 +201,7 @@ class LocalLLMHandle(Process):
                 if res.startswith(self.std_tag):
                     new_output = res[len(self.std_tag):]
                     std_out = std_out[:std_out_clip_len]
-                    # print(new_output, end='')
+                    print(new_output, end='')
                     std_out = new_output + std_out
                     yield self.std_tag + '\n```\n' + std_out + '\n```\n'
                 elif res == '[Finish]':
