@@ -82,7 +82,7 @@ def translate_pdf(article_dict, llm_kwargs, chatbot, fp, generated_conclusion_fi
     # title
     title = article_dict.get('title', '无法获取 title'); prompt += f'title:{title}\n\n'
     # authors
-    authors = article_dict.get('authors', '无法获取 authors'); prompt += f'authors:{authors}\n\n'
+    authors = article_dict.get('authors', '无法获取 authors')[:100]; prompt += f'authors:{authors}\n\n'
     # abstract
     abstract = article_dict.get('abstract', '无法获取 abstract'); prompt += f'abstract:{abstract}\n\n'
     # command
