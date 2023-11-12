@@ -171,6 +171,15 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
+    
+    "azure-gpt-35-turbo-16k":{
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": azure_endpoint,
+        "max_token": 16384,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
 
     "azure-gpt-4":{
         "fn_with_ui": chatgpt_ui,
@@ -179,6 +188,16 @@ model_info = {
         "max_token": 8192,
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
+    },
+    
+    "azure-gpt-4-32k":{
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": azure_endpoint,
+        "max_token": 32768,
+        "tokenizer": tokenizer_gpt4,
+        "token_cnt": get_token_num_gpt4,
+    },
     },
 
     # api_2d (此后不需要在此处添加api2d的接口了，因为下面的代码会自动添加)
