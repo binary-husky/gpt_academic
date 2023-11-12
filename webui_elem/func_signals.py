@@ -65,12 +65,11 @@ def get_database_cls(t):
 
 def filter_database_tables():
     tables = SqliteHandle(database='ai_prompt.db').get_tables()
-    preset = toolbox.get_conf('preset_prompt')[0]['key']
     split_tab = []
     for t in tables:
         if str(t).startswith('prompt_') and str(t).endswith('_sys'):
             split_tab.append(get_database_cls(t))
-    split_tab_new = preset + split_tab
+    split_tab_new = split_tab
     return split_tab_new
 
 # TODO < -------------------------------- 弹窗数注册区 ----------------------------------->
@@ -280,6 +279,7 @@ def prompt_retrieval(prompt_cls, hosts, search=False):
         返回一个列表
     """
     all_, personal = toolbox.get_conf('preset_prompt')[0]['key']
+    if not prompt_cls: prompt_cls = all_  # 保底
     count_dict = {}
     hosts = func_box.non_personal_tag(prompt_cls, hosts)
     if all_ == prompt_cls:
@@ -363,20 +363,20 @@ def prompt_upload_refresh(file, prompt, pro_select, ipaddr: gr.Request):
 
 def prompt_delete(pro_name, prompt_dict, select_check, ipaddr: gr.Request):
     if not pro_name:
-        raise gr.Error('删除的提示词名称不能为空')
-    find_prompt = [i for i in prompt_dict['samples'] if i[0] == pro_name]
+        raise gr.Error('删除的名称输入不能为空')
+    find_prompt = [i for i in prompt_dict['samples'] if i[1] == pro_name]
     if not any(find_prompt):
-        raise gr.Error('无法找到提示词')
+        raise gr.Error(f'无法找到 {pro_name}')
     tab_cls = func_box.non_personal_tag(select_check, ipaddr.client.host)
     sqlite_handle = SqliteHandle(table=f'prompt_{tab_cls}')
     _, source = sqlite_handle.get_prompt_value(find=pro_name)
     if not _:
-        raise gr.Error('无法找到提示词，或请不要在所有人分类下删除提示词')
+        raise gr.Error(f'无法找到 {pro_name}，或请不要在所有人分类下删除')
     if source in ipaddr.client.host:
         sqlite_handle.delete_prompt(pro_name)
     else:
-        raise gr.Error('无法删除不属于你创建的提示词，如有紧急需求，请联系管理员')
-    data = prompt_retrieval(prompt_cls=select_check, hosts=ipaddr.client.host)
+        raise gr.Error(f'无法删除不属于你创建的 {pro_name}，如有紧急需求，请联系管理员')
+    data = prompt_retrieval(prompt_cls=None, hosts=ipaddr.client.host)
     prompt_dict['samples'] = data
     return gr.Dataset.update(samples=data, visible=True), prompt_dict
 
@@ -393,7 +393,7 @@ def prompt_save(txt, name, prompt: gr.Dataset, pro_select, ipaddr: gr.Request):
         返回注册函数所需的对象
     """
     if not pro_select:
-        raise gr.Error('提示词分类不能为空 ！')
+        raise gr.Error('保存分类不能为空 ！')
     user_info = ipaddr.client.host
     tab_cls = func_box.non_personal_tag(pro_select, ipaddr.client.host)
     if txt and name:
@@ -431,15 +431,8 @@ def prompt_input(edit_check, input_txt: str, llm_select, index, data, ipaddr: gr
     tab_select = gr.update()
     if edit_check:
         if mask_:
-            for i, item in enumerate(mask_):
-                if i == 0:
-                    chatbot_cookie[-5] = item[1]
-                elif i % 2 == 0:
-                    chatbot_cookie[0].append(item[1])
-                    chatbot_cookie[1].append(item[1])
-                else:
-                    chatbot_cookie[0].append(item[1])
-                    chatbot_cookie[1].append(item[1])
+            _item, chatbot_cookie[0], chatbot_cookie[1] = mask_to_chatbot(mask_)
+            chatbot_cookie[-5] = _item[0][1]  # system
             chatbot_cookie[2].update({'first_chat': data_name})
         else:
             chatbot_cookie = [gr.update() for i in chatbot_cookie]
@@ -541,7 +534,7 @@ def draw_results(txt, prompt: dict, percent, ipaddr: gr.Request):
     """
     lst = {}
     file_list, only_name, new_path, new_name = func_box.get_files_list(
-        os.path.join(func_box.history_path, ipaddr.clent.host), filter_format=['.json'])
+        os.path.join(func_box.history_path, ipaddr.client.host), filter_format=['.json'])
     for i in file_list:
         chat_list = history_processor.HistoryJsonHandle(i).base_data_format.get('chat')
         file_name = os.path.splitext(os.path.basename(i))[0]
@@ -554,22 +547,34 @@ def draw_results(txt, prompt: dict, percent, ipaddr: gr.Request):
 
 
 # TODO < -------------------------------- 面具编辑函数注册区 -------------------------------->
+def mask_to_chatbot(data):
+    population = []
+    history = []
+    chatbot = []
+    for i, item in enumerate(data):
+        if i == 0 :
+            item[0] = 'system'
+        elif i % 2 == 0:
+            item[0] = 'assistant'
+            history.append(item[1])
+        else:
+            item[0] = 'user'
+            history.append(item[1])
+        population.append(item)
+    for you, bot in zip(history[0::2], history[1::2]):
+        if not you: you=None
+        if not bot: bot=None
+        chatbot.append([you, bot])
+    return population, chatbot, history
+
 def mask_setting_role(data):
     """
     Args:
         data: 为每行数据预设一个角色
     Returns:
     """
-    setting_set = []
-    for i, item in enumerate(data):
-        if i == 0 :
-            item[0] = 'system'
-        elif i % 2 == 0:
-            item[0] = 'assistant'
-        else:
-            item[0] = 'user'
-        setting_set.append(item)
-    return setting_set
+    setting_set, zip_chat, _ = mask_to_chatbot(data)
+    return setting_set, zip_chat
 
 
 def mask_del_new_row(data):
@@ -604,7 +609,9 @@ def refresh_load_data(prompt, request: gr.Request):
     Returns:
         预期是每次刷新页面，加载最新数据
     """
-    is_all = toolbox.get_conf('preset_prompt')[0]['value']
+    preset_prompt = toolbox.get_conf('preset_prompt')[0]
+    all = preset_prompt['key']
+    is_all = preset_prompt['value']
     data = prompt_retrieval(prompt_cls=is_all, hosts=request.client.host)
     prompt['samples'] = data
     know_list = os.listdir(func_box.knowledge_path)
@@ -615,7 +622,8 @@ def refresh_load_data(prompt, request: gr.Request):
     know_user = gr.Dropdown.update(choices=user_list)
     select_list = filter_database_tables()
     outputs = [gr.Dataset.update(samples=data, visible=True), prompt,
-               gr.update(choices=select_list), gr.update(choices=select_list), gr.update(choices=select_list),
+               gr.update(choices=all+select_list), gr.update(choices=[all[1]]+select_list),
+               gr.update(choices=[all[1]]+select_list),
                know_cls, know_user, know_load]
     return outputs
 

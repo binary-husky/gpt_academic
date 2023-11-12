@@ -378,6 +378,7 @@ knowledge_path = os.path.join(prompt_path, 'knowledge')
 users_path = os.path.join(base_path, 'private_upload')
 logs_path = os.path.join(base_path, 'gpt_log')
 history_path = os.path.join(logs_path, 'history')
+assets_path = os.path.join(base_path, 'docs', 'assets')
 os.makedirs(knowledge_path, exist_ok=True)
 import os
 import csv
@@ -468,7 +469,10 @@ def num_tokens_from_string(listing: list, encoding_name: str = 'cl100k_base') ->
 def check_list_format(input_string):
     try:
         list_object = ast.literal_eval(input_string)
-        return list_object
+        if isinstance(list_object, list):
+            return list_object
+        else:
+            return False
     except:
         return False
 
@@ -744,7 +748,7 @@ class JsonHandle:
 
 
 def get_avatar_img(llm_s):
-    chat_bot_path = os.path.join(base_path, 'docs', 'imgs', 'chatbot')
+    chat_bot_path = os.path.join(assets_path, 'imgs')
     file_list, only_name, new_path, new_name = get_files_list(chat_bot_path, filter_format=['.png'])
     chat_img = ''
     for i in range(len(only_name)):

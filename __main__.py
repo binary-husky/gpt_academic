@@ -114,15 +114,15 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                                     outputs=[self.historySelectList, *self.llms_cookies_combo],
                                     ).then(None, None, None, _js='()=>{closeBtnClick();}')
         self.pro_del_btn.click(func_signals.prompt_delete,
-                               inputs=[self.pro_name_txt, self.pro_fp_state, self.pro_private_check],
+                               inputs=[self.pro_name_txt, self.pro_fp_state, self.prompt_cls_select],
                                outputs=[self.pro_func_prompt, self.pro_fp_state])
         self.pro_new_btn.click(fn=func_signals.prompt_save,
-                               inputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_fp_state, self.pro_private_check],
+                               inputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_fp_state, self.prompt_cls_select],
                                outputs=[self.pro_func_prompt, self.pro_fp_state])
 
     def signals_masks(self):
         self.masks_dataset.change(fn=func_signals.mask_setting_role, inputs=[self.masks_dataset],
-                                  outputs=[self.masks_dataset])
+                                  outputs=[self.masks_dataset, self.mask_preview_chat])
         self.masks_delete_btn.click(fn=func_signals.mask_del_new_row, inputs=[self.masks_dataset],
                                     outputs=[self.masks_dataset])
         self.masks_clear_btn.click(func_signals.mask_clear_all,
@@ -131,6 +131,9 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
                                            gr.HTML(value=i18n('Clear All'), visible=False)],
                                    outputs=[self.masks_dataset],
                                    _js='(a,b,c)=>{return showConfirmationDialog(a,b,c);}')
+        self.masks_del_btn.click(func_signals.prompt_delete,
+                               inputs=[self.masks_name_txt, self.pro_fp_state, self.mask_cls_select],
+                               outputs=[self.pro_func_prompt, self.pro_fp_state])
         self.masks_new_btn.click(fn=func_signals.prompt_save,
                                  inputs=[self.masks_dataset, self.masks_name_txt,
                                          self.pro_fp_state, self.mask_cls_select],

@@ -204,22 +204,26 @@ class Prompt:
     def _draw_tabs_masks(self):
         with gr.TabItem('Masks 🎭', id='masks'):
             def_sys = i18n('你是一个xxx角色，你会xxx技能，你将按照xxx要求，回答我的问题')
-            self.masks_dataset = gr.Dataframe(value=[['system', def_sys]], datatype='markdown',
-                                              headers=['role', 'content'], col_count=(2, 'fixed'),
-                                              interactive=True, show_label=False, row_count=(1, "dynamic"),
-                                              wrap=True, type='array', elem_id='mask_tabs')
-            self.masks_delete_btn = gr.Button('Del New row', size='sm', elem_id='mk_del')
-            self.masks_clear_btn = gr.Button(value='Clear All', size='sm', elem_id='mk_clear')
             with gr.Row():
-                self.mask_cls_select = gr.Dropdown(choices=[], value='',
-                                                      label='Masks分类', elem_classes='normal_select',
-                                                      allow_custom_value=True, interactive=True
-                                                      ).style(container=False)
-                self.masks_name_txt = gr.Textbox(show_label=False, placeholder='面具名称').style(container=False)
-            with gr.Row():
-                self.masks_del_btn = gr.Button("删除面具", ).style(size='sm', full_width=True)
-                self.masks_new_btn = gr.Button("保存面具", variant="primary").style(size='sm', full_width=True)
-
+                with gr.Column(elem_classes='column_left'):
+                    self.mask_preview_chat = gr.Chatbot(label='Preview')
+                with gr.Column(elem_classes='column_right'):
+                    self.masks_dataset = gr.Dataframe(value=[['system', def_sys]], datatype='markdown',
+                                                      headers=['role', 'content'], col_count=(2, 'fixed'),
+                                                      interactive=True, show_label=False, row_count=(1, "dynamic"),
+                                                      wrap=True, type='array', elem_id='mask_tabs')
+                    self.masks_delete_btn = gr.Button('Del New row', size='sm', elem_id='mk_del')
+                    self.masks_clear_btn = gr.Button(value='Clear All', size='sm', elem_id='mk_clear')
+                    with gr.Row():
+                        self.mask_cls_select = gr.Dropdown(choices=[], value='',
+                                                           label='Masks分类', elem_classes='normal_select',
+                                                           allow_custom_value=True, interactive=True
+                                                           ).style(container=False)
+                        self.masks_name_txt = gr.Textbox(show_label=False, placeholder='Mask名称').style(
+                            container=False)
+                    with gr.Row():
+                        self.masks_del_btn = gr.Button("删除Mask", ).style(size='sm', full_width=True)
+                        self.masks_new_btn = gr.Button("保存Mask", variant="primary").style(size='sm', full_width=True)
 
     def _draw_langchain_base(self):
         spl, = toolbox.get_conf('spl')

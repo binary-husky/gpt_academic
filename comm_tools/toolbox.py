@@ -111,6 +111,7 @@ def ArgsGeneralWrapper(f):
             plugin_kwargs.update({'parameters_def': args[1]})
             cookies['is_plugin'] = {'func_name': args[0], 'input': txt_passon, 'kwargs': plugin_kwargs}
         elif len(args) == 1 and 'RetryChat' not in args:
+            history = history[:-2]   # 不采取失败的对话历史
             cookies['is_plugin'] = {'func_name': args[0], 'input': txt_passon, 'kwargs': plugin_kwargs}
         elif len(args) == 0:
             cookies['is_plugin'] = False
