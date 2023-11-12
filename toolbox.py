@@ -158,7 +158,7 @@ def CatchException(f):
                 chatbot_with_cookie.clear()
                 chatbot_with_cookie.append(["插件调度异常", "异常原因"])
             chatbot_with_cookie[-1] = (chatbot_with_cookie[-1][0],
-                           f"[Local Message] 实验性函数调用出错: \n\n{tb_str} \n\n当前代理可用性: \n\n{check_proxy(proxies)}")
+                           f"[Local Message] 插件调用出错: \n\n{tb_str} \n\n当前代理可用性: \n\n{check_proxy(proxies)}")
             yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=f'异常 {e}') # 刷新界面
     return decorated
 
@@ -1103,14 +1103,11 @@ def get_chat_handle():
 def get_plugin_default_kwargs():
     """
     """
-    from toolbox import get_conf, ChatBotWithCookies
-
-    WEB_PORT, LLM_MODEL, API_KEY = \
-        get_conf('WEB_PORT', 'LLM_MODEL', 'API_KEY')
-
+    from toolbox import ChatBotWithCookies
+    cookies = load_chat_cookies()
     llm_kwargs = {
-        'api_key': API_KEY,
-        'llm_model': LLM_MODEL,
+        'api_key': cookies['api_key'],
+        'llm_model': cookies['llm_model'],
         'top_p':1.0, 
         'max_length': None,
         'temperature':1.0,
@@ -1125,25 +1122,21 @@ def get_plugin_default_kwargs():
         "chatbot_with_cookie": chatbot,
         "history": [],
         "system_prompt": "You are a good AI.", 
-        "web_port": WEB_PORT
+        "web_port": None
     }
     return DEFAULT_FN_GROUPS_kwargs
 
 def get_chat_default_kwargs():
     """
     """
-    from toolbox import get_conf
-
-    LLM_MODEL, API_KEY = get_conf('LLM_MODEL', 'API_KEY')
-
+    cookies = load_chat_cookies()
     llm_kwargs = {
-        'api_key': API_KEY,
-        'llm_model': LLM_MODEL,
+        'api_key': cookies['api_key'],
+        'llm_model': cookies['llm_model'],
         'top_p':1.0, 
         'max_length': None,
         'temperature':1.0,
     }
-
     default_chat_kwargs = {
         "inputs": "Hello there, are you ready?",
         "llm_kwargs": llm_kwargs,
@@ -1155,3 +1148,6 @@ def get_chat_default_kwargs():
 
     return default_chat_kwargs
 
+def get_max_token(llm_kwargs):
+    from request_llms.bridge_all import model_info
+    return model_info[llm_kwargs['llm_model']]['max_token']
