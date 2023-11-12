@@ -7,6 +7,80 @@ import gradio as gr
 from comm_tools import func_box, database_processor
 from crazy_functions.kingsoft_fns import crazy_box, crzay_kingsoft, crzay_qqdocs
 
+from zh_langchain.chains.local_doc_qa import LocalDocQA
+from zh_langchain.configs import model_config
+
+
+class knowledge_archive_interface():
+    def __init__(self, vs_path) -> None:
+        self.current_id = ""
+        self.kai_path = None
+        import nltk
+        if model_config.NLTK_DATA_PATH not in nltk.data.path:
+            nltk.data.path = [model_config.NLTK_DATA_PATH] + nltk.data.path
+        self.qa_handle = LocalDocQA()
+        self.qa_handle.init_cfg()
+        self.text2vec_large_chinese = None
+        self.vs_root_path = vs_path
+        self.ds_docstore = ''
+
+    def get_chinese_text2vec(self):
+        if self.text2vec_large_chinese is None:
+            # < -------------------预热文本向量化模组--------------- >
+            from comm_tools.toolbox import ProxyNetworkActivate
+            print('Checking Text2vec ...')
+            from langchain.embeddings.huggingface import HuggingFaceEmbeddings
+            with ProxyNetworkActivate('Download_LLM'):  # 临时地激活代理网络
+                self.text2vec_large_chinese = HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
+        return self.text2vec_large_chinese
+
+    def filter_quarterly_files(self, files):
+        database_files = list(self.get_loaded_file())
+
+    def construct_vector_store(self, vs_id, files):
+        for file in files:
+            assert os.path.exists(file), "输入文件不存在"
+        vs_path = os.path.join(self.vs_root_path, vs_id)
+        vs_path, loaded_files = self.qa_handle.init_knowledge_vector_store(filepath=files, vs_path=vs_path,
+                                                                           sentence_size=100,
+                                                                           text2vec=self.get_chinese_text2vec())
+        return self, vs_path
+
+    def get_current_archive_id(self):
+        return self.current_id
+
+    def get_loaded_file(self):
+        return self.qa_handle.get_loaded_file()
+
+    def get_init_file(self, vs_id):
+        from langchain.vectorstores import FAISS
+        vs_path = os.path.join(self.vs_root_path, vs_id)
+        self.qa_handle.vector_store = FAISS.load_local(vs_path, self.get_chinese_text2vec())
+        ds = self.qa_handle.vector_store.docstore
+        self.ds_docstore = ds
+        file_dict = {ds._dict[k].metadata['source']: {vs_id: ds._dict[k].metadata['filetype']} for k in ds._dict}
+        return self, file_dict
+
+    def answer_with_archive_by_id(self, txt, vs_id, llm_kwargs=None, VECTOR_SEARCH_SCORE_THRESHOLD=0,
+                                  VECTOR_SEARCH_TOP_K=4, CHUNK_SIZE=521):
+        if llm_kwargs:
+            vector_config = llm_kwargs.get('vector')
+            VECTOR_SEARCH_SCORE_THRESHOLD = vector_config['score']
+            VECTOR_SEARCH_TOP_K = vector_config['top-k']
+            CHUNK_SIZE = vector_config['size']
+        self.kai_path = os.path.join(self.vs_root_path, vs_id)
+        if not os.path.exists(self.kai_path):
+            return '', '', False
+        resp, prompt = self.qa_handle.get_knowledge_based_conent_test(
+            query=txt,
+            vs_path=self.kai_path,
+            score_threshold=VECTOR_SEARCH_SCORE_THRESHOLD,
+            vector_search_top_k=VECTOR_SEARCH_TOP_K,
+            chunk_conent=True,
+            chunk_size=CHUNK_SIZE,
+            text2vec=self.get_chinese_text2vec(),
+        )
+        return resp, prompt, True
 
 def classification_filtering_tag(cls_select, ipaddr):
     if cls_select == '个人知识库':
@@ -84,7 +158,7 @@ def knowledge_base_writing(cls_select, links: str, select, name, kai_handle, ipa
            error, gr.Dropdown.update(), gr.Dropdown.update(),
            gr.update(), kai_handle)
     with toolbox.ProxyNetworkActivate():    # 临时地激活代理网络
-        kai = crazy_utils.knowledge_archive_interface(vs_path=vector_path)
+        kai = knowledge_archive_interface(vs_path=vector_path)
         qa_handle, vs_path = kai.construct_vector_store(vs_id=kai_id, files=file_manifest)
     with open(os.path.join(vector_path, kai_id, ipaddr.client.host), mode='w') as f: pass
     _, kai_files = kai.get_init_file(kai_id)
@@ -123,7 +197,7 @@ def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
             else:
                 know_cls = classification_filtering_tag(know_cls, llm_kwargs['ipaddr'])
                 vs_path = os.path.join(func_box.knowledge_path, know_cls)
-                kai = crazy_utils.knowledge_archive_interface(vs_path=vs_path)
+                kai = knowledge_archive_interface(vs_path=vs_path)
                 llm_kwargs['know_dict']['know_obj'][id] = kai
             # < -------------------查询向量数据库--------------- >
             prompt_cls = '知识库提示词'
@@ -196,7 +270,7 @@ def obtaining_knowledge_base_files(cls_select, vs_id, chatbot, kai_handle, model
             if kai_handle['know_obj'].get(id, None):
                 kai = kai_handle['know_obj'][id]
             else:
-                kai = crazy_utils.knowledge_archive_interface(vs_path=vs_path)
+                kai = knowledge_archive_interface(vs_path=vs_path)
             qa_handle, _dict = kai.get_init_file(vs_id=id)
             kai_files.update(_dict)
             kai_handle['know_obj'].update({id: qa_handle})
@@ -215,7 +289,7 @@ def single_step_thread_building_knowledge(cls_name, know_id, file_manifest, llm_
     vector_path = os.path.join(func_box.knowledge_path, cls_select)
     os.makedirs(vector_path, exist_ok=True)
     def thread_task():
-        kai = crazy_utils.knowledge_archive_interface(vs_path=vector_path)
+        kai = knowledge_archive_interface(vs_path=vector_path)
         qa_handle, vs_path = kai.construct_vector_store(vs_id=know_id, files=file_manifest)
         llm_kwargs['know_dict']['know_obj'][know_id] = qa_handle
     threading.Thread(target=thread_task, ).start()

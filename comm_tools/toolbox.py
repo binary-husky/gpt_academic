@@ -1238,13 +1238,11 @@ class ProxyNetworkActivate():
             self.valid = True
         else:
             # 给定了task, 我们检查一下
-            from toolbox import get_conf
             WHEN_TO_USE_PROXY = get_conf('WHEN_TO_USE_PROXY')
             self.valid = (task in WHEN_TO_USE_PROXY)
 
     def __enter__(self):
         if not self.valid: return self
-        from toolbox import get_conf
         proxies = get_conf('proxies')
         if 'no_proxy' in os.environ: os.environ.pop('no_proxy')
         if proxies is not None:

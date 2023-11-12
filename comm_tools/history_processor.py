@@ -31,6 +31,7 @@ class HistoryJsonHandle:
     def analysis_chat_history(self, chat_list: list[list], cookies: dict):
         copy_cookies = copy.copy(cookies)
         copy_cookies.pop('api_key')
+        copy_cookies.pop('know_dict')
         if cookies.get('plugin_state'):
             copy_cookies.pop('plugin_state')
         self.base_data_format['chat_llms'].update(copy_cookies)

@@ -630,79 +630,7 @@ def get_files_from_everything(txt, type, ipaddr='temp'): # type='.md'
 
 import os
 import shutil
-from zh_langchain.chains.local_doc_qa import LocalDocQA
-from zh_langchain.configs import model_config
-class knowledge_archive_interface():
-    def __init__(self, vs_path) -> None:
-        self.current_id = ""
-        self.kai_path = None
-        import nltk
-        if model_config.NLTK_DATA_PATH not in nltk.data.path: nltk.data.path = [model_config.NLTK_DATA_PATH] + nltk.data.path
-        self.qa_handle = LocalDocQA()
-        self.qa_handle.init_cfg()
-        self.text2vec_large_chinese = None
-        self.vs_root_path = vs_path
-        self.ds_docstore = ''
 
-    def get_chinese_text2vec(self):
-        if self.text2vec_large_chinese is None:
-            # < -------------------预热文本向量化模组--------------- >
-            from comm_tools.toolbox import ProxyNetworkActivate
-            print('Checking Text2vec ...')
-            from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-            with ProxyNetworkActivate('Download_LLM'):    # 临时地激活代理网络
-                self.text2vec_large_chinese = HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
-        return self.text2vec_large_chinese
-
-
-    def filter_quarterly_files(self, files):
-        database_files = list(self.get_loaded_file())
-
-
-    def construct_vector_store(self, vs_id, files):
-        for file in files:
-            assert os.path.exists(file), "输入文件不存在"
-        vs_path = os.path.join(self.vs_root_path, vs_id)
-        vs_path, loaded_files = self.qa_handle.init_knowledge_vector_store(filepath=files, vs_path=vs_path,
-                                                                           sentence_size=100,
-                                                                           text2vec=self.get_chinese_text2vec())
-        return self, vs_path
-
-    def get_current_archive_id(self):
-        return self.current_id
-    
-    def get_loaded_file(self):
-        return self.qa_handle.get_loaded_file()
-
-    def get_init_file(self, vs_id):
-        from langchain.vectorstores import FAISS
-        vs_path = os.path.join(self.vs_root_path, vs_id)
-        self.qa_handle.vector_store = FAISS.load_local(vs_path, self.get_chinese_text2vec())
-        ds = self.qa_handle.vector_store.docstore
-        self.ds_docstore = ds
-        file_dict = {ds._dict[k].metadata['source']: {vs_id :ds._dict[k].metadata['filetype']} for k in ds._dict}
-        return self, file_dict
-
-    def answer_with_archive_by_id(self, txt, vs_id, llm_kwargs=None, VECTOR_SEARCH_SCORE_THRESHOLD=0,
-                                  VECTOR_SEARCH_TOP_K=4, CHUNK_SIZE=521):
-        if llm_kwargs:
-            vector_config = llm_kwargs.get('vector')
-            VECTOR_SEARCH_SCORE_THRESHOLD = vector_config['score']
-            VECTOR_SEARCH_TOP_K = vector_config['top-k']
-            CHUNK_SIZE = vector_config['size']
-        self.kai_path = os.path.join(self.vs_root_path, vs_id)
-        if not os.path.exists(self.kai_path):
-            return '', '', False
-        resp, prompt = self.qa_handle.get_knowledge_based_conent_test(
-            query=txt,
-            vs_path=self.kai_path,
-            score_threshold=VECTOR_SEARCH_SCORE_THRESHOLD,
-            vector_search_top_k=VECTOR_SEARCH_TOP_K, 
-            chunk_conent=True,
-            chunk_size=CHUNK_SIZE,
-            text2vec=self.get_chinese_text2vec(),
-        )
-        return resp, prompt, True
 
 
 def Singleton(cls):
