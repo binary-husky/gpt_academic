@@ -304,7 +304,7 @@ def json_convert_dict(file):
 
 
 def non_personal_tag(select, ipaddr):
-    all_, personal = toolbox.get_conf('preset_prompt')[0]['key']
+    all_, personal = toolbox.get_conf('preset_prompt')['key']
     if select and personal != select and all_ != select:
         tab_cls = select + '_sys'
     else:
@@ -608,7 +608,7 @@ def qr_code_generation(data, icon_path=None, file_name='qc_icon.png'):
     img_w, img_h = img.size
     # 打开logo
     if not icon_path:
-        icon_path, = toolbox.get_conf('qc_icon_path')
+        icon_path = toolbox.get_conf('qc_icon_path')
     logo = Image.open(icon_path)
     # logo大小为二维码的四分之一
     logo_w = img_w // 4
@@ -632,7 +632,7 @@ def created_atime():
 
 
 def 通知机器人(error):
-    robot_hook, = toolbox.get_conf('robot_hook')
+    robot_hook = toolbox.get_conf('robot_hook')
     if not robot_hook: return
     title = '## 警告警告\n'
     results = "> <font color='red'>{}</font>".format('哈喽小主，chatbot 遇到意料之外的状况了呢，详情请查看以下报错信息')

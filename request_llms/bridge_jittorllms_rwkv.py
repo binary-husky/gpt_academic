@@ -27,8 +27,8 @@ class GetGLMHandle(Process):
             self.success = True
         except:
             from comm_tools.toolbox import trimmed_format_exc
-            self.info = r"缺少jittorllms的依赖，如果要使用jittorllms，除了基础的pip依赖以外，您还需要运行`pip install -r request_llm/requirements_jittorllms.txt -i https://pypi.jittor.org/simple -I`"+\
-                        r"和`git clone https://gitlink.org.cn/jittor/JittorLLMs.git --depth 1 request_llm/jittorllms`两个指令来安装jittorllms的依赖（在项目根目录运行这两个指令）。" +\
+            self.info = r"缺少jittorllms的依赖，如果要使用jittorllms，除了基础的pip依赖以外，您还需要运行`pip install -r request_llms/requirements_jittorllms.txt -i https://pypi.jittor.org/simple -I`"+\
+                        r"和`git clone https://gitlink.org.cn/jittor/JittorLLMs.git --depth 1 request_llms/jittorllms`两个指令来安装jittorllms的依赖（在项目根目录运行这两个指令）。" +\
                         r"警告：安装jittorllms依赖后将完全破坏现有的pytorch环境，建议使用docker环境！" + trimmed_format_exc()
             self.success = False
 
@@ -44,15 +44,15 @@ class GetGLMHandle(Process):
             env = os.environ.get("PATH", "")
             os.environ["PATH"] = env.replace('/cuda/bin', '/x/bin')
             root_dir_assume = os.path.abspath(os.path.dirname(__file__) +  '/..')
-            os.chdir(root_dir_assume + '/request_llm/jittorllms')
-            sys.path.append(root_dir_assume + '/request_llm/jittorllms')
+            os.chdir(root_dir_assume + '/request_llms/jittorllms')
+            sys.path.append(root_dir_assume + '/request_llms/jittorllms')
         validate_path() # validate path so you can run from base directory
 
         def load_model():
             import types
             try:
                 if self.jittorllms_model is None:
-                    device, = get_conf('LOCAL_MODEL_DEVICE')
+                    device = get_conf('LOCAL_MODEL_DEVICE')
                     from .jittorllms.models import get_model
                     # availabel_models = ["chatglm", "pangualpha", "llama", "chatrwkv"]
                     args_dict = {'model': 'chatrwkv'}
@@ -108,7 +108,7 @@ rwkv_glm_handle = None
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=[], console_slience=False):
     """
         多线程方法
-        函数的说明请见 request_llm/bridge_all.py
+        函数的说明请见 request_llms/bridge_all.py
     """
     global rwkv_glm_handle
     if rwkv_glm_handle is None:
@@ -139,7 +139,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
 def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream = True, additional_fn=None):
     """
         单线程方法
-        函数的说明请见 request_llm/bridge_all.py
+        函数的说明请见 request_llms/bridge_all.py
     """
     chatbot.append((inputs, ""))
 
@@ -162,13 +162,13 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         history_feedin.append([history[2*i], history[2*i+1]] )
 
     # 开始接收jittorllms的回复
-    response = "[Local Message]: 等待jittorllms响应中 ..."
+    response = "[Local Message] 等待jittorllms响应中 ..."
     for response in rwkv_glm_handle.stream_chat(query=inputs, history=history_feedin, system_prompt=system_prompt, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
         chatbot[-1] = (inputs, response)
         yield from update_ui(chatbot=chatbot, history=history)
 
     # 总结输出
-    if response == "[Local Message]: 等待jittorllms响应中 ...":
-        response = "[Local Message]: jittorllms响应异常 ..."
+    if response == "[Local Message] 等待jittorllms响应中 ...":
+        response = "[Local Message] jittorllms响应异常 ..."
     history.extend([inputs, response])
     yield from update_ui(chatbot=chatbot, history=history)

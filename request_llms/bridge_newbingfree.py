@@ -54,7 +54,7 @@ class NewBingHandle(Process):
             self.info = "依赖检测通过，等待NewBing响应。注意目前不能多人同时调用NewBing接口（有线程锁），否则将导致每个人的NewBing问询历史互相渗透。调用NewBing时，会自动使用已配置的代理。"
             self.success = True
         except:
-            self.info = "缺少的依赖，如果要使用Newbing，除了基础的pip依赖以外，您还需要运行`pip install -r request_llm/requirements_newbing.txt`安装Newbing的依赖。"
+            self.info = "缺少的依赖，如果要使用Newbing，除了基础的pip依赖以外，您还需要运行`pip install -r request_llms/requirements_newbing.txt`安装Newbing的依赖。"
             self.success = False
 
     def ready(self):
@@ -62,8 +62,8 @@ class NewBingHandle(Process):
 
     async def async_run(self):
         # 读取配置
-        NEWBING_STYLE, = get_conf('NEWBING_STYLE')
-        from request_llm.bridge_all import model_info
+        NEWBING_STYLE = get_conf('NEWBING_STYLE')
+        from request_llms.bridge_all import model_info
         endpoint = model_info['newbing']['endpoint']
         while True:
             # 等待
@@ -181,7 +181,7 @@ newbingfree_handle = None
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=[], console_slience=False):
     """
         多线程方法
-        函数的说明请见 request_llm/bridge_all.py
+        函数的说明请见 request_llms/bridge_all.py
     """
     global newbingfree_handle
     if (newbingfree_handle is None) or (not newbingfree_handle.success):
@@ -199,7 +199,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
 
     watch_dog_patience = 5 # 看门狗 (watchdog) 的耐心, 设置5秒即可
     response = ""
-    if len(observe_window) >= 1: observe_window[0] = "[Local Message]: 等待NewBing响应中 ..."
+    if len(observe_window) >= 1: observe_window[0] = "[Local Message] 等待NewBing响应中 ..."
     for response in newbingfree_handle.stream_chat(query=inputs, history=history_feedin, system_prompt=sys_prompt, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
         if len(observe_window) >= 1:  observe_window[0] = preprocess_newbing_out_simple(response)
         if len(observe_window) >= 2:  
@@ -210,9 +210,9 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
 def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream = True, additional_fn=None):
     """
         单线程方法
-        函数的说明请见 request_llm/bridge_all.py
+        函数的说明请见 request_llms/bridge_all.py
     """
-    chatbot.append((inputs, "[Local Message]: 等待NewBing响应中 ..."))
+    chatbot.append((inputs, "[Local Message] 等待NewBing响应中 ..."))
 
     global newbingfree_handle
     if (newbingfree_handle is None) or (not newbingfree_handle.success):
@@ -231,13 +231,13 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     for i in range(len(history)//2):
         history_feedin.append([history[2*i], history[2*i+1]] )
 
-    chatbot[-1] = (inputs, "[Local Message]: 等待NewBing响应中 ...")
-    response = "[Local Message]: 等待NewBing响应中 ..."
+    chatbot[-1] = (inputs, "[Local Message] 等待NewBing响应中 ...")
+    response = "[Local Message] 等待NewBing响应中 ..."
     yield from update_ui(chatbot=chatbot, history=history, msg="NewBing响应缓慢，尚未完成全部响应，请耐心完成后再提交新问题。")
     for response in newbingfree_handle.stream_chat(query=inputs, history=history_feedin, system_prompt=system_prompt, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
         chatbot[-1] = (inputs, preprocess_newbing_out(response))
         yield from update_ui(chatbot=chatbot, history=history, msg="NewBing响应缓慢，尚未完成全部响应，请耐心完成后再提交新问题。")
-    if response == "[Local Message]: 等待NewBing响应中 ...": response = "[Local Message]: NewBing响应异常，请刷新界面重试 ..."
+    if response == "[Local Message] 等待NewBing响应中 ...": response = "[Local Message] NewBing响应异常，请刷新界面重试 ..."
     history.extend([inputs, response])
     logging.info(f'[raw_input] {inputs}')
     logging.info(f'[response] {response}')

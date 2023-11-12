@@ -50,11 +50,16 @@ class ChatbotElem:
             with gr.Box(elem_id="chatbot-input-box"):
                 with gr.Row(elem_id="chatbot-input-row"):
                     with gr.Row(elem_id='gr-more-sm-row'):
+                        self.sm_upload = gr.Files(label='Upload file Edit', type='file',
+                                                  elem_id='upload-index-file',
+                                                  visible=True, interactive=True)
                         with gr.Column(scale=1, elem_id='gr-more-sm-column'):
                             gr.HTML(get_html("chatbot_more.html").format(
-                                single_turn_label=i18n("无记忆对话"), websearch_label=i18n("插件代理"),
+                                single_turn_label=i18n("无记忆对话"), plugin_agent_label=i18n("插件代理"),
                                 upload_file_label=i18n("上传文件"), uploaded_files_label=i18n("预提交文件"),
-                                uploaded_files_tip=i18n("选择对应插件进行提交处理，或在基础中调整")
+                                uploaded_files_tip=i18n("选择对应插件进行提交处理，或在基础中调整"),
+                                plugin_agent_tip=i18n('对话提交自动选择插件'),
+                                single_turn_tip=i18n('对话提交不参考上下文')
                             ))
                             self.use_websearch_checkbox = gr.Checkbox(label=i18n(
                                 "使用插件代理"), value=False, elem_classes="switch-checkbox", elem_id="gr-websearch-cb",

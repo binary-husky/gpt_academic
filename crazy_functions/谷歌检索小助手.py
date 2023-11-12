@@ -18,7 +18,7 @@ def get_meta_information(url, chatbot, history):
     from urllib.parse import urlparse
     session = requests.session()
 
-    proxies, = get_conf('proxies')
+    proxies = get_conf('proxies')
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
         'Accept-Encoding': 'gzip, deflate, br',

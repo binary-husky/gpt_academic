@@ -19,7 +19,7 @@ from openpyxl.styles import PatternFill
 from openpyxl.styles import Alignment
 from openpyxl.styles import Font
 from crazy_functions import crazy_utils
-from request_llm import bridge_all
+from request_llms import bridge_all
 from crazy_functions.kingsoft_fns import crzay_kingsoft
 
 
@@ -237,7 +237,7 @@ class ExcelHandle:
                                               f'\n\n```\n\n{toolbox.trimmed_format_exc()}```\n\n')
             # 增加起始行号
             start_row += 1
-        merge_cell, = toolbox.get_conf('merge_cell')
+        merge_cell = toolbox.get_conf('merge_cell')
         if merge_cell: self.merge_same_cells()  # 还原被拆分的合并单元格
         # 保存 Excel 文件
         time_stamp = time.strftime("%Y-%m-%d-%H", time.localtime())

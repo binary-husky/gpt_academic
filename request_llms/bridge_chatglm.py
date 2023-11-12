@@ -1,13 +1,9 @@
-model_name = "Qwen"
-cmd_to_install = "`pip install -r request_llm/requirements_qwen.txt`"
+model_name = "ChatGLM"
+cmd_to_install = "`pip install -r request_llms/requirements_chatglm.txt`"
 
 
 from transformers import AutoModel, AutoTokenizer
-import time
-import threading
-import importlib
-from comm_tools.toolbox import update_ui, get_conf
-from multiprocessing import Process, Pipe
+from comm_tools.toolbox import get_conf, ProxyNetworkActivate
 from .local_llm_class import LocalLLMHandle, get_local_llm_predict_fns, SingletonLocalLLM
 
 
@@ -16,7 +12,7 @@ from .local_llm_class import LocalLLMHandle, get_local_llm_predict_fns, Singleto
 # 🔌💻 Local Model
 # ------------------------------------------------------------------------------------------------------------------------
 @SingletonLocalLLM
-class GetONNXGLMHandle(LocalLLMHandle):
+class GetGLM2Handle(LocalLLMHandle):
 
     def load_model_info(self):
         # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行
@@ -28,16 +24,25 @@ class GetONNXGLMHandle(LocalLLMHandle):
         import os, glob
         import os
         import platform
-        from modelscope import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
+        LOCAL_MODEL_QUANT, device = get_conf('LOCAL_MODEL_QUANT', 'LOCAL_MODEL_DEVICE')
 
-        model_id = 'qwen/Qwen-7B-Chat'
-        revision = 'v1.0.1'
-        self._tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision, trust_remote_code=True)
-        # use fp16
-        model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto", revision=revision, trust_remote_code=True, fp16=True).eval()
-        model.generation_config = GenerationConfig.from_pretrained(model_id, trust_remote_code=True)  # 可指定不同的生成长度、top_p等相关超参
-        self._model = model
+        if LOCAL_MODEL_QUANT == "INT4":         # INT4
+            _model_name_ = "THUDM/chatglm2-6b-int4"
+        elif LOCAL_MODEL_QUANT == "INT8":       # INT8
+            _model_name_ = "THUDM/chatglm2-6b-int8"
+        else:
+            _model_name_ = "THUDM/chatglm2-6b"  # FP16
 
+        with ProxyNetworkActivate('Download_LLM'):
+            chatglm_tokenizer = AutoTokenizer.from_pretrained(_model_name_, trust_remote_code=True)
+            if device=='cpu':
+                chatglm_model = AutoModel.from_pretrained(_model_name_, trust_remote_code=True).float()
+            else:
+                chatglm_model = AutoModel.from_pretrained(_model_name_, trust_remote_code=True).half().cuda()
+            chatglm_model = chatglm_model.eval()
+
+        self._model = chatglm_model
+        self._tokenizer = chatglm_tokenizer
         return self._model, self._tokenizer
 
     def llm_stream_generator(self, **kwargs):
@@ -52,17 +57,23 @@ class GetONNXGLMHandle(LocalLLMHandle):
 
         query, max_length, top_p, temperature, history = adaptor(kwargs)
 
-        for response in self._model.chat(self._tokenizer, query, history=history, stream=True):
+        for response, history in self._model.stream_chat(self._tokenizer, 
+                                                         query, 
+                                                         history, 
+                                                         max_length=max_length,
+                                                         top_p=top_p,
+                                                         temperature=temperature,
+                                                         ):
             yield response
         
     def try_to_import_special_deps(self, **kwargs):
         # import something that will raise error if the user does not install requirement_*.txt
         # 🏃‍♂️🏃‍♂️🏃‍♂️ 主进程执行
         import importlib
-        importlib.import_module('modelscope')
+        # importlib.import_module('modelscope')
 
 
 # ------------------------------------------------------------------------------------------------------------------------
 # 🔌💻 GPT-Academic Interface
 # ------------------------------------------------------------------------------------------------------------------------
-predict_no_ui_long_connection, predict = get_local_llm_predict_fns(GetONNXGLMHandle, model_name)
+predict_no_ui_long_connection, predict = get_local_llm_predict_fns(GetGLM2Handle, model_name)

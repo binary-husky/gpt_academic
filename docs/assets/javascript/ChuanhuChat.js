@@ -46,6 +46,8 @@ var currentTime = new Date().getTime();
 
 let windowWidth = window.innerWidth; // 初始窗口宽度
 
+var uploadedFilesCountElement = null
+var uploadIndexFileElement = null
 function addInit() {
     var needInit = {chatbotIndicator, uploaderIndicator};
 
@@ -97,6 +99,8 @@ function initialize() {
     chuanhuHeader = gradioApp().querySelector('#chuanhu-header');
     menu = gradioApp().querySelector('#menu-area');
     toolbox = gradioApp().querySelector('#toolbox-area');
+    uploadedFilesCountElement = document.getElementById('uploaded-files-count');
+    uploadIndexFileElement = document.getElementById('upload-index-file');
     // trainBody = gradioApp().querySelector('#train-body');
 
     // if (loginUserForm) {
@@ -135,6 +139,7 @@ function initialize() {
     //
     check_move_list();
     btn_move_to_tab();
+    add_func_event();
     return true;
 }
 

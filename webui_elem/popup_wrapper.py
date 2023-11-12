@@ -59,7 +59,7 @@ class Settings:
                 gr.Markdown('待完善')
 
     def _draw_setting_info(self):
-        APPNAME, = toolbox.get_conf('APPNAME')
+        APPNAME = toolbox.get_conf('APPNAME')
         with gr.Tab(label=i18n("关于"), elem_id="about-tab"):
             gr.Markdown("# " + i18n(APPNAME))
             gr.HTML(get_html("footer.html").format(versions=''), elem_id="footer")
@@ -226,7 +226,7 @@ class Prompt:
                         self.masks_new_btn = gr.Button("保存Mask", variant="primary").style(size='sm', full_width=True)
 
     def _draw_langchain_base(self):
-        spl, = toolbox.get_conf('spl')
+        spl = toolbox.get_conf('spl')
         with gr.TabItem('知识库构建', id='langchain_tab', elem_id='langchain_tab'):
             with gr.Row():
                 with gr.Column(elem_classes='column_left'):
@@ -260,7 +260,7 @@ class Prompt:
 
     def draw_popup_prompt(self):
         with gr.Box(elem_id="spike-prompt"):
-            devs_document, = toolbox.get_conf('devs_document')
+            devs_document = toolbox.get_conf('devs_document')
             jump_link = f'<a href="{devs_document}" target="_blank">Developer Documentation</a>'
             popup_title("### " + i18n(f"百宝袋\n{jump_link}"))
             with gr.Tabs(elem_id="treasure-bag") as self.treasure_bag:

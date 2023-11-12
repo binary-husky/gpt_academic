@@ -32,7 +32,7 @@ def check_cookie(cookie):
         return user
 
 
-favicon_path, = toolbox.get_conf('favicon_path')
+favicon_path = toolbox.get_conf('favicon_path')
 @app.get("/favicon.ico")  # 设置icon
 async def get_favicon():
    return RedirectResponse(url=f'/gradio/file={favicon_path}')

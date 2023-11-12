@@ -8,7 +8,7 @@ import logging
 
 def input_clipping(inputs, history, max_token_limit):
     import numpy as np
-    from request_llm.bridge_all import model_info
+    from request_llms.bridge_all import model_info
     enc = model_info["gpt-3.5-turbo"]['tokenizer']
     def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))
 
@@ -66,7 +66,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
     """
     import time
     from concurrent.futures import ThreadPoolExecutor
-    from request_llm.bridge_all import predict_no_ui_long_connection
+    from request_llms.bridge_all import predict_no_ui_long_connection
     # 用户反馈
     chatbot.append([inputs_show_user, ""])
     yield from toolbox.update_ui(chatbot=chatbot, history=[]) # 刷新界面
@@ -181,7 +181,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     """
     import time, random
     from concurrent.futures import ThreadPoolExecutor
-    from request_llm.bridge_all import predict_no_ui_long_connection
+    from request_llms.bridge_all import predict_no_ui_long_connection
     assert len(inputs_array) == len(history_array)
     assert len(inputs_array) == len(sys_prompt_array)
     if max_workers == -1: # 读取配置文件
@@ -603,7 +603,8 @@ def get_files_from_everything(txt, type, ipaddr='temp'): # type='.md'
     if txt.startswith('http') and txt.find('kdocs') == -1 and txt.find('wps') == -1:
         # 网络的远程文件
         import requests
-        proxies, = toolbox.get_conf('proxies')
+
+        proxies = toolbox.get_conf('proxies')
         r = requests.get(txt, proxies=proxies).content
         name = r.splitlines()[0]
         project_folder = os.path.join(func_box.users_path, ipaddr, 'Download')

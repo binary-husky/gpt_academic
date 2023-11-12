@@ -19,7 +19,7 @@ from comm_tools import ocr_tools
 class Kdocs:
 
     def __init__(self, url):
-        WPS_COOKIES, = toolbox.get_conf('WPS_COOKIES',)
+        WPS_COOKIES = toolbox.get_conf('WPS_COOKIES',)
         self.url = url
         self.cookies = WPS_COOKIES
         self.headers = {

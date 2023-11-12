@@ -196,7 +196,7 @@ def reload_javascript():
     js += '<script async type="module" src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>'
     js += '<script async type="module" src="http://spin.js.org/spin.umd.js"></script><link type="text/css" href="https://spin.js.org/spin.css" rel="stylesheet" />'
     waifu_js = ''
-    ADD_WAIFU, = toolbox.get_conf('ADD_WAIFU')
+    ADD_WAIFU = toolbox.get_conf('ADD_WAIFU')
     if ADD_WAIFU:
         waifu_js += f"""
             <script src="{webpath('docs/waifu_plugin/jquery.min.js')}"></script>

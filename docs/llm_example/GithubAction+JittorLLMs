@@ -16,12 +16,12 @@ WORKDIR /gpt
 RUN git clone --depth=1 https://github.com/binary-husky/gpt_academic.git
 WORKDIR /gpt/gpt_academic
 RUN python3 -m pip install -r requirements.txt
-RUN python3 -m pip install -r request_llm/requirements_chatglm.txt
-RUN python3 -m pip install -r request_llm/requirements_newbing.txt
-RUN python3 -m pip install -r request_llm/requirements_jittorllms.txt -i https://pypi.jittor.org/simple -I
+RUN python3 -m pip install -r request_llms/requirements_chatglm.txt
+RUN python3 -m pip install -r request_llms/requirements_newbing.txt
+RUN python3 -m pip install -r request_llms/requirements_jittorllms.txt -i https://pypi.jittor.org/simple -I
 
 # 下载JittorLLMs
-RUN git clone https://github.com/binary-husky/JittorLLMs.git --depth 1 request_llm/jittorllms
+RUN git clone https://github.com/binary-husky/JittorLLMs.git --depth 1 request_llms/jittorllms
 
 # 禁用缓存，确保更新代码
 ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache

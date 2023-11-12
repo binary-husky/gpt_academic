@@ -130,7 +130,7 @@ def arxiv_download(chatbot, history, txt, allow_cache=True):
         yield from update_ui_lastest_msg("调用缓存", chatbot=chatbot, history=history)  # 刷新界面
     else:
         yield from update_ui_lastest_msg("开始下载", chatbot=chatbot, history=history)  # 刷新界面
-        proxies, = get_conf('proxies')
+        proxies = get_conf('proxies')
         r = requests.get(url_tar, proxies=proxies)
         with open(dst, 'wb+') as f:
             f.write(r.content)

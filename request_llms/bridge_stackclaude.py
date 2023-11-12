@@ -36,7 +36,7 @@ try:
         CHANNEL_ID = None
 
         async def open_channel(self):
-            response = await self.conversations_open(users=get_conf('SLACK_CLAUDE_BOT_ID')[0])
+            response = await self.conversations_open(users=get_conf('SLACK_CLAUDE_BOT_ID'))
             self.CHANNEL_ID = response["channel"]["id"]
 
         async def chat(self, text):
@@ -51,7 +51,7 @@ try:
                 # TODO：暂时不支持历史消息，因为在同一个频道里存在多人使用时历史消息渗透问题
                 resp = await self.conversations_history(channel=self.CHANNEL_ID, oldest=self.LAST_TS, limit=1)
                 msg = [msg for msg in resp["messages"]
-                    if msg.get("user") == get_conf('SLACK_CLAUDE_BOT_ID')[0]]
+                    if msg.get("user") == get_conf('SLACK_CLAUDE_BOT_ID')]
                 return msg
             except (SlackApiError, KeyError) as e:
                 raise RuntimeError(f"获取Slack消息失败。")
@@ -99,7 +99,7 @@ class ClaudeHandle(Process):
             self.info = "依赖检测通过，等待Claude响应。注意目前不能多人同时调用Claude接口（有线程锁），否则将导致每个人的Claude问询历史互相渗透。调用Claude时，会自动使用已配置的代理。"
             self.success = True
         except:
-            self.info = "缺少的依赖，如果要使用Claude，除了基础的pip依赖以外，您还需要运行`pip install -r request_llm/requirements_slackclaude.txt`安装Claude的依赖，然后重启程序。"
+            self.info = "缺少的依赖，如果要使用Claude，除了基础的pip依赖以外，您还需要运行`pip install -r request_llms/requirements_slackclaude.txt`安装Claude的依赖，然后重启程序。"
             self.success = False
 
     def ready(self):
@@ -146,14 +146,14 @@ class ClaudeHandle(Process):
         self.local_history = []
         if (self.claude_model is None) or (not self.success):
             # 代理设置
-            proxies, = get_conf('proxies')
+            proxies = get_conf('proxies')
             if proxies is None:
                 self.proxies_https = None
             else:
                 self.proxies_https = proxies['https']
 
             try:
-                SLACK_CLAUDE_USER_TOKEN, = get_conf('SLACK_CLAUDE_USER_TOKEN')
+                SLACK_CLAUDE_USER_TOKEN = get_conf('SLACK_CLAUDE_USER_TOKEN')
                 self.claude_model = SlackClient(token=SLACK_CLAUDE_USER_TOKEN, proxy=self.proxies_https)
                 print('Claude组件初始化成功。')
             except:
@@ -204,7 +204,7 @@ claude_handle = None
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=None, console_slience=False):
     """
         多线程方法
-        函数的说明请见 request_llm/bridge_all.py
+        函数的说明请见 request_llms/bridge_all.py
     """
     global claude_handle
     if (claude_handle is None) or (not claude_handle.success):
@@ -222,7 +222,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
 
     watch_dog_patience = 5  # 看门狗 (watchdog) 的耐心, 设置5秒即可
     response = ""
-    observe_window[0] = "[Local Message]: 等待Claude响应中 ..."
+    observe_window[0] = "[Local Message] 等待Claude响应中 ..."
     for response in claude_handle.stream_chat(query=inputs, history=history_feedin, system_prompt=sys_prompt, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
         observe_window[0] = preprocess_newbing_out_simple(response)
         if len(observe_window) >= 2:
@@ -234,9 +234,9 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
 def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream=True, additional_fn=None):
     """
         单线程方法
-        函数的说明请见 request_llm/bridge_all.py
+        函数的说明请见 request_llms/bridge_all.py
     """
-    chatbot.append((inputs, "[Local Message]: 等待Claude响应中 ..."))
+    chatbot.append((inputs, "[Local Message] 等待Claude响应中 ..."))
 
     global claude_handle
     if (claude_handle is None) or (not claude_handle.success):
@@ -255,14 +255,14 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     for i in range(len(history)//2):
         history_feedin.append([history[2*i], history[2*i+1]])
 
-    chatbot[-1] = (inputs, "[Local Message]: 等待Claude响应中 ...")
-    response = "[Local Message]: 等待Claude响应中 ..."
+    chatbot[-1] = (inputs, "[Local Message] 等待Claude响应中 ...")
+    response = "[Local Message] 等待Claude响应中 ..."
     yield from update_ui(chatbot=chatbot, history=history, msg="Claude响应缓慢，尚未完成全部响应，请耐心完成后再提交新问题。")
     for response in claude_handle.stream_chat(query=inputs, history=history_feedin, system_prompt=system_prompt):
         chatbot[-1] = (inputs, preprocess_newbing_out(response))
         yield from update_ui(chatbot=chatbot, history=history, msg="Claude响应缓慢，尚未完成全部响应，请耐心完成后再提交新问题。")
-    if response == "[Local Message]: 等待Claude响应中 ...":
-        response = "[Local Message]: Claude响应异常，请刷新界面重试 ..."
+    if response == "[Local Message] 等待Claude响应中 ...":
+        response = "[Local Message] Claude响应异常，请刷新界面重试 ..."
     history.extend([inputs, response])
     logging.info(f'[raw_input] {inputs}')
     logging.info(f'[response] {response}')

@@ -1,4 +1,4 @@
-from comm_tools.toolbox import HotReload  # HotReload 的意思是热更新，修改函数插件后，不需要重启程序，代码直接生效
+from toolbox import HotReload  # HotReload 的意思是热更新，修改函数插件后，不需要重启程序，代码直接生效
 
 
 def get_crazy_functions():
@@ -35,7 +35,6 @@ def get_crazy_functions():
     from crazy_functions.Latex全文翻译 import Latex英译中
     from crazy_functions.批量Markdown翻译 import Markdown中译英
     from crazy_functions.虚空终端 import 虚空终端
-
 
     function_plugins = {
         "虚空终端": {
@@ -199,7 +198,7 @@ def get_crazy_functions():
         "精准翻译PDF论文": {
             "Group": "学术",
             "Color": "stop",
-            "AsButton": True,  
+            "AsButton": True,
             "Info": "精准翻译PDF论文为中文 | 输入参数为路径",
             "Function": HotReload(批量翻译PDF文档)
         },
@@ -269,7 +268,7 @@ def get_crazy_functions():
         #     "Info": "对Latex项目全文进行英译中处理 | 输入参数为路径或上传压缩包",
         #     "Function": HotReload(Latex英译中)
         # },
-        
+
         "批量Markdown中译英（输入路径或上传压缩包）": {
             "Group": "编程",
             "Color": "stop",
@@ -301,7 +300,7 @@ def get_crazy_functions():
                 "Group": "对话",
                 "Color": "stop",
                 "AsButton": False,  # 加入下拉菜单中
-                "Info": "连接网络回答问题（需要访问谷歌）| 输入参数是一个问题",
+                # "Info": "连接网络回答问题（需要访问谷歌）| 输入参数是一个问题",
                 "Function": HotReload(连接网络回答问题)
             }
         })
@@ -326,7 +325,8 @@ def get_crazy_functions():
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-                "ArgsReminder": "输入时用逗号隔开, *代表通配符, 加了^代表不匹配; 不输入代表全部匹配。例如: \"*.c, ^*.cpp, config.toml, ^*.toml\"",  # 高级参数输入区的显示提示
+                "ArgsReminder": "输入时用逗号隔开, *代表通配符, 加了^代表不匹配; 不输入代表全部匹配。例如: \"*.c, ^*.cpp, config.toml, ^*.toml\"",
+                # 高级参数输入区的显示提示
                 "Function": HotReload(解析任意code项目)
             },
         })
@@ -341,7 +341,8 @@ def get_crazy_functions():
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-                "ArgsReminder": "支持任意数量的llm接口，用&符号分隔。例如chatglm&gpt-3.5-turbo&api2d-gpt-4",  # 高级参数输入区的显示提示
+                "ArgsReminder": "支持任意数量的llm接口，用&符号分隔。例如chatglm&gpt-3.5-turbo&api2d-gpt-4",
+                # 高级参数输入区的显示提示
                 "Function": HotReload(同时问询_指定模型)
             },
         })
@@ -349,16 +350,28 @@ def get_crazy_functions():
         print('Load function plugin failed')
 
     try:
-        from crazy_functions.图片生成 import 图片生成
+        from crazy_functions.图片生成 import 图片生成, 图片生成_DALLE3
         function_plugins.update({
             "图片生成（先切换模型到openai或api2d）": {
                 "Group": "对话",
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-                "ArgsReminder": "在这里输入分辨率, 如256x256（默认）",  # 高级参数输入区的显示提示
-                "Info": "图片生成 | 输入参数字符串，提供图像的内容",
+                "ArgsReminder": "在这里输入分辨率, 如1024x1024（默认），支持 256x256, 512x512, 1024x1024",  # 高级参数输入区的显示提示
+                "Info": "使用DALLE2生成图片 | 输入参数字符串，提供图像的内容",
                 "Function": HotReload(图片生成)
+            },
+        })
+        function_plugins.update({
+            "图片生成_DALLE3（先切换模型到openai或api2d）": {
+                "Group": "对话",
+                "Color": "stop",
+                "AsButton": False,
+                "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+                "ArgsReminder": "在这里输入分辨率, 如1024x1024（默认），支持 1024x1024, 1792x1024, 1024x1792",
+                # 高级参数输入区的显示提示
+                "Info": "使用DALLE3生成图片 | 输入参数字符串，提供图像的内容",
+                "Function": HotReload(图片生成_DALLE3)
             },
         })
     except:
@@ -497,8 +510,8 @@ def get_crazy_functions():
         print('Load function plugin failed')
 
     try:
-        from comm_tools.toolbox import get_conf
-        ENABLE_AUDIO, = get_conf('ENABLE_AUDIO')
+        from toolbox import get_conf
+        ENABLE_AUDIO = get_conf('ENABLE_AUDIO')
         if ENABLE_AUDIO:
             from crazy_functions.语音助手 import 语音助手
             function_plugins.update({
@@ -566,8 +579,6 @@ def get_crazy_functions():
     # except:
     #     print('Load function plugin failed')
 
-
-
     """
     设置默认值:
     - 默认 Group = 对话
@@ -586,7 +597,3 @@ def get_crazy_functions():
             function_plugins[name]["Color"] = 'secondary'
 
     return function_plugins
-
-if __name__ == '__main__':
-
-    print(get_crazy_functions())

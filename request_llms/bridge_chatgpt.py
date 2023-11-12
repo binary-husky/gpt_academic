@@ -22,11 +22,9 @@ import random
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
-from comm_tools.toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history, trimmed_format_exc, \
-    is_the_upload_folder
-
-proxies, TIMEOUT_SECONDS, MAX_RETRY, API_ORG = \
-    get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'API_ORG')
+from comm_tools.toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history, trimmed_format_exc, is_the_upload_folder
+proxies, TIMEOUT_SECONDS, MAX_RETRY, API_ORG, AZURE_CFG_ARRAY = \
+    get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'API_ORG', 'AZURE_CFG_ARRAY')
 
 timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check proxy settings in config.py.' + \
                   '网络错误，检查代理服务器是否可用，以及代理设置的格式是否正确，格式须是[协议]://[地址]:[端口]，缺一不可。'
@@ -48,16 +46,28 @@ def decode_chunk(chunk):
     chunk_decoded = chunk.decode()
     chunkjson = None
     has_choices = False
+    choice_valid = False
     has_content = False
     has_role = False
     try: 
         chunkjson = json.loads(chunk_decoded[6:])
         has_choices = 'choices' in chunkjson
-        if has_choices: has_content = "content" in chunkjson['choices'][0]["delta"]
-        if has_choices: has_role = "role" in chunkjson['choices'][0]["delta"]
+        if has_choices: choice_valid = (len(chunkjson['choices']) > 0)
+        if has_choices and choice_valid: has_content = "content" in chunkjson['choices'][0]["delta"]
+        if has_choices and choice_valid: has_role = "role" in chunkjson['choices'][0]["delta"]
     except: 
         pass
-    return chunk_decoded, chunkjson, has_choices, has_content, has_role
+    return chunk_decoded, chunkjson, has_choices, choice_valid, has_content, has_role
+
+from functools import lru_cache
+@lru_cache(maxsize=32)
+def verify_endpoint(endpoint):
+    """
+        检查endpoint是否可用
+    """
+    if "你亲手写的api名称" in endpoint:
+        raise ValueError("Endpoint不正确, 请检查AZURE_ENDPOINT的配置! 当前的Endpoint为:" + endpoint)
+    return endpoint
 
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=None,
                                   console_slience=False):
@@ -81,7 +91,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
         try:
             # make a POST request to the API endpoint, stream=False
             from .bridge_all import model_info
-            endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
+            endpoint = verify_endpoint(model_info[llm_kwargs['llm_model']]['endpoint'])
             response = requests.post(endpoint, headers=headers, proxies=proxies,
                                      json=payload, stream=True, timeout=TIMEOUT_SECONDS);
             break
@@ -182,16 +192,22 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                        f"您提供的api-key不满足要求，不包含任何可用于{llm_kwargs['llm_model']}的api-key。您可能选择了错误的模型或请求源。")
         yield from update_ui(chatbot=chatbot, history=history, msg="api-key不满足要求")  # 刷新界面
         return
-
-    history.append(inputs);
-    history.append("")
+        
+    # 检查endpoint是否合法
+    try:
+        from .bridge_all import model_info
+        endpoint = verify_endpoint(model_info[llm_kwargs['llm_model']]['endpoint'])
+    except:
+        tb_str = '```\n' + trimmed_format_exc() + '```'
+        chatbot[-1] = (inputs, tb_str)
+        yield from update_ui(chatbot=chatbot, history=history, msg="Endpoint不满足要求") # 刷新界面
+        return
+    history.append(inputs); history.append("")
 
     retry = 0
     while True:
         try:
             # make a POST request to the API endpoint, stream=True
-            from .bridge_all import model_info
-            endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
             response = requests.post(endpoint, headers=headers, proxies=proxies,
                                      json=payload, stream=True, timeout=TIMEOUT_SECONDS);
             break
@@ -226,7 +242,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                 return
 
             # 提前读取一些信息 （用于判断异常）
-            chunk_decoded, chunkjson, has_choices, has_content, has_role = decode_chunk(chunk)
+            chunk_decoded, chunkjson, has_choices, choice_valid, has_content, has_role = decode_chunk(chunk)
 
             if is_head_of_the_stream and (r'"object":"error"' not in chunk_decoded) and (r"content" not in chunk_decoded):
                 # 数据流的第一帧不携带content
@@ -295,8 +311,9 @@ def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
         chatbot[-1] = (
         chatbot[-1][0], "[Local Message] Your account is not active. OpenAI以账户失效为由, 拒绝服务." + openai_website)
     elif "associated with a deactivated account" in error_msg:
-        chatbot[-1] = (chatbot[-1][0],
-                       "[Local Message] You are associated with a deactivated account. OpenAI以账户失效为由, 拒绝服务." + openai_website)
+        chatbot[-1] = (chatbot[-1][0], "[Local Message] You are associated with a deactivated account. OpenAI以账户失效为由, 拒绝服务." + openai_website)
+    elif "API key has been deactivated" in error_msg:
+        chatbot[-1] = (chatbot[-1][0], "[Local Message] API key has been deactivated. OpenAI以账户失效为由, 拒绝服务." + openai_website)
     elif "bad forward key" in error_msg:
         chatbot[-1] = (chatbot[-1][0], "[Local Message] Bad forward key. API2D账户额度不足.")
     elif "Not enough point" in error_msg:
@@ -330,6 +347,10 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     if llm_kwargs['llm_model'].startswith('aigc-'):
         aigc_kwargs,  = get_conf('AIGC_KWARGS')
         headers.update(aigc_kwargs)
+    if llm_kwargs['llm_model'] in AZURE_CFG_ARRAY.keys():
+        azure_api_key_unshared = AZURE_CFG_ARRAY[llm_kwargs['llm_model']]["AZURE_API_KEY"]
+        headers.update({"api-key": azure_api_key_unshared})
+
     conversation_cnt = len(history) // 2
 
     messages = [{"role": "system", "content": system_prompt}]
@@ -361,6 +382,7 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         model = random.choice([
             "gpt-3.5-turbo", 
             "gpt-3.5-turbo-16k",
+            "gpt-3.5-turbo-1106",
             "gpt-3.5-turbo-0613",
             "gpt-3.5-turbo-16k-0613",
             "gpt-3.5-turbo-0301",

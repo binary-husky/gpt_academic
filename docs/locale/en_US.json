@@ -101,11 +101,9 @@
     "⚠️ 为保证API-Key安全，请在配置文件`config.json`中修改网络设置": "⚠️ To ensure the security of API-Key, please modify the network settings in the configuration file `config.json`.",
     "网络": "Network",
     "暂时未知": "Unknown",
-
     "剩余配额不足，[进一步了解](https://github.com/GaiZhenbiao/ChuanhuChatGPT/wiki/常见问题#you-exceeded-your-current-quota-please-check-your-plan-and-billing-details)": "Insufficient remaining quota, [learn more](https://github.com/GaiZhenbiao/ChuanhuChatGPT/wiki/常见问题#you-exceeded-your-current-quota-please-check-your-plan-and-billing-details)",
     "你没有权限访问 GPT4，[进一步了解](https://github.com/GaiZhenbiao/ChuanhuChatGPT/issues/843)": "You do not have permission to access GPT-4, [learn more](https://github.com/GaiZhenbiao/ChuanhuChatGPT/issues/843)",
     "请查看 config_example.json，配置 Azure OpenAI": "Please review config_example.json to configure Azure OpenAI",
-
     "微调": "Fine-tuning",
     "训练状态": "Training Status",
     "查看[使用介绍](https://github.com/GaiZhenbiao/ChuanhuChatGPT/wiki/使用教程#微调-gpt-35)": "View the [usage guide](https://github.com/GaiZhenbiao/ChuanhuChatGPT/wiki/使用教程#微调-gpt-35) for more details",

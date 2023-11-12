@@ -125,11 +125,11 @@ def stop_chat_refresh(chatbot, cookies, ipaddr: gr.Request):
 
 
 def clear_chat_cookie(llm_model, ipaddr: gr.Request):
-    API_KEY, = toolbox.get_conf('API_KEY')
+    API_KEY = toolbox.get_conf('API_KEY')
     cookie = {'api_key': API_KEY, 'llm_model': llm_model}
     user_path = os.path.join(func_box.history_path, ipaddr.client.host)
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
-    default_params, = toolbox.get_conf('LLMS_DEFAULT_PARAMETER')
+    default_params = toolbox.get_conf('LLMS_DEFAULT_PARAMETER')
     llms_combo = [cookie.get(key, default_params[key]) for key in default_params] + [gr.Dropdown.update(value=llm_model)]
     output = [[], [], cookie, *llms_combo,  '已重置对话记录和对话Cookies',
               gr.Radio.update(choices=['新对话']+only_name, value='新对话'), "新对话"]
@@ -278,7 +278,7 @@ def prompt_retrieval(prompt_cls, hosts, search=False):
     Returns:
         返回一个列表
     """
-    all_, personal = toolbox.get_conf('preset_prompt')[0]['key']
+    all_, personal = toolbox.get_conf('preset_prompt')['key']
     if not prompt_cls: prompt_cls = all_  # 保底
     count_dict = {}
     hosts = func_box.non_personal_tag(prompt_cls, hosts)
@@ -403,7 +403,7 @@ def prompt_save(txt, name, prompt: gr.Dataset, pro_select, ipaddr: gr.Request):
         if status:
             raise gr.Error('!!!!已有其他人保存同名的配置，请修改名称后再保存')
         else:
-            all_, personal = toolbox.get_conf('preset_prompt')[0]['key']
+            all_, personal = toolbox.get_conf('preset_prompt')['key']
             result = prompt_retrieval(prompt_cls=all_, hosts=ipaddr.client.host)
             prompt['samples'] = result
             return gr.Dataset.update(samples=result, visible=True), prompt
@@ -609,7 +609,7 @@ def refresh_load_data(prompt, request: gr.Request):
     Returns:
         预期是每次刷新页面，加载最新数据
     """
-    preset_prompt = toolbox.get_conf('preset_prompt')[0]
+    preset_prompt = toolbox.get_conf('preset_prompt')
     all = preset_prompt['key']
     is_all = preset_prompt['value']
     data = prompt_retrieval(prompt_cls=is_all, hosts=request.client.host)

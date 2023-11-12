@@ -1,5 +1,5 @@
 model_name = "InternLM"
-cmd_to_install = "`pip install -r request_llm/requirements_chatglm.txt`"
+cmd_to_install = "`pip install -r request_llms/requirements_chatglm.txt`"
 
 from transformers import AutoModel, AutoTokenizer
 import time
@@ -52,7 +52,7 @@ class GetInternlmHandle(LocalLLMHandle):
         # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行
         import torch
         from transformers import AutoModelForCausalLM, AutoTokenizer
-        device, = get_conf('LOCAL_MODEL_DEVICE')
+        device = get_conf('LOCAL_MODEL_DEVICE')
         if self._model is None:
             tokenizer = AutoTokenizer.from_pretrained("internlm/internlm-chat-7b", trust_remote_code=True)
             if device=='cpu':

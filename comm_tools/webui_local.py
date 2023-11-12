@@ -8,21 +8,21 @@ import os
 import locale
 import logging
 import commentjson as json
-from comm_tools import toolbox, func_box
+from comm_tools.toolbox import get_conf
+from comm_tools import func_box
 
 
 class I18nAuto:
     def __init__(self):
-        language, = toolbox.get_conf("LOCAL_LANGUAGE")
-        language = os.environ.get("LANGUAGE", language)
+        language = os.environ.get("LANGUAGE", 'auto')
         language = language.replace("-", "_")
         if language == "auto":
             language = locale.getdefaultlocale()[0] # get the language code of the system (ex. zh_CN)
         self.language_map = {}
         self.language_file = os.path.join(func_box.base_path, 'docs', 'locale')
-        self.file_is_exists = os.path.isfile(f"{self.language_file}/{language}.json")
-        if self.file_is_exists:
-            with open(f"{self.language_file}/{language}.json", "r", encoding="utf-8") as f:
+        self.file_is_exists = f"{self.language_file}/{language}.json"
+        if os.path.isfile(self.file_is_exists):
+            with open(self.file_is_exists, "r", encoding="utf-8") as f:
                 self.language_map.update(json.load(f))
         else:
             logging.warning(f"Language file for {language} does not exist. Using English instead.")
@@ -34,4 +34,7 @@ class I18nAuto:
         if self.file_is_exists and key in self.language_map:
             return self.language_map[key]
         else:
+            self.language_map.update({key: key})
+            with open(self.file_is_exists, 'w', encoding='utf-8') as f:
+                f.write(json.dumps(self.language_map,  indent=4, ensure_ascii=False))
             return key

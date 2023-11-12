@@ -33,7 +33,7 @@ def knowledge_base_writing(cls_select, links: str, select, name, kai_handle, ipa
         waring = '新建知识库时，知识库名称建议不要为空，本次知识库名称取用服务器时间`kai_id`为知识库名称！！！'
         yield '', waring, gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(), kai_handle
     # < --------------------限制上班时间段构建知识库--------------- >
-    reject_build_switch, = toolbox.get_conf('reject_build_switch')
+    reject_build_switch = toolbox.get_conf('reject_build_switch')
     if reject_build_switch:
         if not func_box.check_expected_time():
             raise gr.Error('上班时间段不允许启动构建知识库任务，若有紧急任务请联系管理员')

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import List
 from comm_tools.toolbox import update_ui_lastest_msg, disable_auto_promotion
-from request_llm.bridge_all import predict_no_ui_long_connection
+from request_llms.bridge_all import predict_no_ui_long_connection
 from crazy_functions.json_fns.pydantic_io import GptJsonIO, JsonStringError
 import copy, json, pickle, os, sys, time
 

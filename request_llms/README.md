@@ -2,7 +2,7 @@
 
 ## ChatGLM
 
-- 安装依赖 `pip install -r request_llm/requirements_chatglm.txt`
+- 安装依赖 `pip install -r request_llms/requirements_chatglm.txt`
 - 修改配置，在config.py中将LLM_MODEL的值改为"chatglm"
 
 ``` sh

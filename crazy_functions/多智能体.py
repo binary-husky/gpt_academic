@@ -1,10 +1,7 @@
 # 本源代码中, ⭐ = 关键步骤
 """
 测试：
-    - 裁剪图像，保留下半部分
-    - 交换图像的蓝色通道和红色通道
-    - 将图像转为灰度图像
-    - 将csv文件转excel表格
+    - show me the solution of $x^2=cos(x)$, solve this problem with figure, and plot and save image to t.jpg
 
 Testing: 
     - Crop the image, keeping the bottom half. 
@@ -22,6 +19,11 @@ from crazy_functions.agent_fns.persistent import GradioMultiuserManagerForPersis
 from crazy_functions.agent_fns.auto_agent import AutoGenMath
 import time
 
+def remove_model_prefix(llm):
+    if llm.startswith('api2d-'): llm = llm.replace('api2d-', '')
+    if llm.startswith('azure-'): llm = llm.replace('azure-', '')
+    return llm
+
 
 @CatchException
 def 多智能体终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
@@ -35,15 +37,22 @@ def 多智能体终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
     web_port        当前软件运行的端口号
     """
     # 检查当前的模型是否符合要求
-    supported_llms = ['gpt-3.5-turbo-16k', 'gpt-4', 'gpt-4-32k']
+    supported_llms = [
+        'gpt-3.5-16k',
+        'gpt-3.5-turbo-16k',
+        'gpt-3.5-turbo-1106',
+        'gpt-4', 
+        'gpt-4-32k', 
+        'gpt-4-1106-preview',
+    ]
     llm_kwargs['api_key'] = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
-    if llm_kwargs['llm_model'] not in supported_llms:
+    if remove_model_prefix(llm_kwargs['llm_model']) not in supported_llms:
         chatbot.append([f"处理任务: {txt}", f"当前插件只支持{str(supported_llms)}, 当前模型{llm_kwargs['llm_model']}."])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
     
     # 检查当前的模型是否符合要求
-    API_URL_REDIRECT, = get_conf('API_URL_REDIRECT')
+    API_URL_REDIRECT = get_conf('API_URL_REDIRECT')
     if len(API_URL_REDIRECT) > 0:
         chatbot.append([f"处理任务: {txt}", f"暂不支持中转."])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面

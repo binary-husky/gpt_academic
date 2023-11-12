@@ -21,7 +21,7 @@ class QQDocs:
         self.link = link
         self.link_id = self.split_link_id()
         self.file_info_dict = {'tag': '',}
-        self.cookies, = toolbox.get_conf('QQ_COOKIES')
+        self.cookies = toolbox.get_conf('QQ_COOKIES')
         self.file_info_header = {
             'Host': self._hosts,
             'sec-ch-ua': '"Chromium";v="116", "Not)A;Brand";v="24", "Microsoft Edge";v="116"',

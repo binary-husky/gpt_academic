@@ -1,24 +1,27 @@
 > **Note**
->
-> 2023.10.8: Gradio, Pydantic依赖调整，已修改 `requirements.txt`。请及时**更新代码**，安装依赖时，请严格选择`requirements.txt`中**指定的版本**。
->
+> 
+> 2023.10.28: 紧急修复了若干问题，安装依赖时，请选择`requirements.txt`中**指定的版本**。
+> 
 > `pip install -r requirements.txt`
+>
+> 2023.11.7: 本项目开源免费，近期发现有人蔑视开源协议并利用本项目违规圈钱，请提高警惕，谨防上当受骗。
+
 
 
 # <div align=center><img src="docs/logo.png" width="40"> GPT 学术优化 (GPT Academic)</div>
 
-**如果喜欢这个项目，请给它一个Star；如果您发明了好用的快捷键或函数插件，欢迎发pull requests！**
+**如果喜欢这个项目，请给它一个Star；如果您发明了好用的快捷键或插件，欢迎发pull requests！**
 
-If you like this project, please give it a Star. If you've come up with more useful academic shortcuts or functional plugins, feel free to open an issue or pull request. We also have a README in [English|](docs/README_EN.md)[日本語|](docs/README_JP.md)[한국어|](https://github.com/mldljyh/ko_gpt_academic)[Русский|](docs/README_RS.md)[Français](docs/README_FR.md) translated by this project itself.
+If you like this project, please give it a Star. We also have a README in [English|](docs/README_EN.md)[日本語|](docs/README_JP.md)[한국어|](https://github.com/mldljyh/ko_gpt_academic)[Русский|](docs/README_RS.md)[Français](docs/README_FR.md) translated by this project itself.
 To translate this project to arbitrary language with GPT, read and run [`multi_language.py`](multi_language.py) (experimental).
 
 > **Note**
 >
-> 1.请注意只有 **高亮** 标识的函数插件（按钮）才支持读取文件，部分插件位于插件区的**下拉菜单**中。另外我们以**最高优先级**欢迎和处理任何新插件的PR。
+> 1.请注意只有 **高亮** 标识的插件（按钮）才支持读取文件，部分插件位于插件区的**下拉菜单**中。另外我们以**最高优先级**欢迎和处理任何新插件的PR。
 >
-> 2.本项目中每个文件的功能都在[自译解报告`self_analysis.md`](https://github.com/binary-husky/gpt_academic/wiki/GPT‐Academic项目自译解报告)详细说明。随着版本的迭代，您也可以随时自行点击相关函数插件，调用GPT重新生成项目的自我解析报告。常见问题[`wiki`](https://github.com/binary-husky/gpt_academic/wiki)。[常规安装方法](#installation) | [一键安装脚本](https://github.com/binary-husky/gpt_academic/releases) | [配置说明](https://github.com/binary-husky/gpt_academic/wiki/%E9%A1%B9%E7%9B%AE%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E)。
+> 2.本项目中每个文件的功能都在[自译解报告`self_analysis.md`](https://github.com/binary-husky/gpt_academic/wiki/GPT‐Academic项目自译解报告)详细说明。随着版本的迭代，您也可以随时自行点击相关函数插件，调用GPT重新生成项目的自我解析报告。常见问题[`wiki`](https://github.com/binary-husky/gpt_academic/wiki)。[常规安装方法](#installation) | [一键安装脚本](https://github.com/binary-husky/gpt_academic/releases) | [配置说明](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)。
 > 
-> 3.本项目兼容并鼓励尝试国产大语言模型ChatGLM和Moss等等。支持多个api-key共存，可在配置文件中填写如`API_KEY="openai-key1,openai-key2,azure-key3,api2d-key4"`。需要临时更换`API_KEY`时，在输入区输入临时的`API_KEY`然后回车键提交后即可生效。
+> 3.本项目兼容并鼓励尝试国产大语言模型ChatGLM等。支持多个api-key共存，可在配置文件中填写如`API_KEY="openai-key1,openai-key2,azure-key3,api2d-key4"`。需要临时更换`API_KEY`时，在输入区输入临时的`API_KEY`然后回车键提交后即可生效。
 
 
  
@@ -61,7 +64,7 @@ Latex论文一键校对 | [函数插件] 仿Grammarly对Latex文章进行语法�
 
 - 新界面（修改`config.py`中的LAYOUT选项即可实现“左右布局”和“上下布局”的切换）
 <div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/230361456-61078362-a966-4eb5-b49e-3c62ef18b860.gif" width="700" >
+<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/d81137c3-affd-4cd1-bb5e-b15610389762" width="700" >
 </div>
 
 
@@ -101,16 +104,16 @@ cd gpt_academic
 
 2. 配置API_KEY
 
-在`config.py`中，配置API KEY等设置，[点击查看特殊网络环境设置方法](https://github.com/binary-husky/gpt_academic/issues/1) 。[Wiki页面](https://github.com/binary-husky/gpt_academic/wiki/%E9%A1%B9%E7%9B%AE%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E)。
+在`config.py`中，配置API KEY等设置，[点击查看特殊网络环境设置方法](https://github.com/binary-husky/gpt_academic/issues/1) 。[Wiki页面](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)。
 
 「 程序会优先检查是否存在名为`config_private.py`的私密配置文件，并用其中的配置覆盖`config.py`的同名配置。如您能理解该读取逻辑，我们强烈建议您在`config.py`旁边创建一个名为`config_private.py`的新配置文件，并把`config.py`中的配置转移（复制）到`config_private.py`中（仅复制您修改过的配置条目即可）。 」
 
-「 支持通过`环境变量`配置项目，环境变量的书写格式参考`docker-compose.yml`文件或者我们的[Wiki页面](https://github.com/binary-husky/gpt_academic/wiki/%E9%A1%B9%E7%9B%AE%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E)。配置读取优先级: `环境变量` > `config_private.py` > `config.py`。 」
+「 支持通过`环境变量`配置项目，环境变量的书写格式参考`docker-compose.yml`文件或者我们的[Wiki页面](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)。配置读取优先级: `环境变量` > `config_private.py` > `config.py`。 」
 
 
 3. 安装依赖
 ```sh
-# （选择I: 如熟悉python）（python版本3.9以上，越新越好），备注：使用官方pip源或者阿里pip源,临时换源方法：python -m pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
+# （选择I: 如熟悉python, python>=3.9）备注：使用官方pip源或者阿里pip源, 临时换源方法：python -m pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 python -m pip install -r requirements.txt
 
 # （选择II: 使用Anaconda）步骤也是类似的 (https://www.bilibili.com/video/BV1rc411W7Dr)：
@@ -126,17 +129,17 @@ python -m pip install -r requirements.txt # 这个步骤和pip安装一样的步
 【可选步骤】如果需要支持清华ChatGLM2/复旦MOSS作为后端，需要额外安装更多依赖（前提条件：熟悉Python + 用过Pytorch + 电脑配置够强）：
 ```sh
 # 【可选步骤I】支持清华ChatGLM2。清华ChatGLM备注：如果遇到"Call ChatGLM fail 不能正常加载ChatGLM的参数" 错误，参考如下： 1：以上默认安装的为torch+cpu版，使用cuda需要卸载torch重新安装torch+cuda； 2：如因本机配置不够无法加载模型，可以修改request_llm/bridge_chatglm.py中的模型精度, 将 AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) 都修改为 AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
-python -m pip install -r request_llm/requirements_chatglm.txt  
+python -m pip install -r request_llms/requirements_chatglm.txt  
 
 # 【可选步骤II】支持复旦MOSS
-python -m pip install -r request_llm/requirements_moss.txt
-git clone --depth=1 https://github.com/OpenLMLab/MOSS.git request_llm/moss  # 注意执行此行代码时，必须处于项目根路径
+python -m pip install -r request_llms/requirements_moss.txt
+git clone --depth=1 https://github.com/OpenLMLab/MOSS.git request_llms/moss  # 注意执行此行代码时，必须处于项目根路径
 
 # 【可选步骤III】支持RWKV Runner
 参考wiki：https://github.com/binary-husky/gpt_academic/wiki/%E9%80%82%E9%85%8DRWKV-Runner
 
 # 【可选步骤IV】确保config.py配置文件的AVAIL_LLM_MODELS包含了期望的模型，目前支持的全部模型如下(jittorllms系列目前仅支持docker方案)：
-AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "newbing", "moss"] # + ["jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
+AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "moss"] # + ["jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
 ```
 
 </p>
@@ -151,11 +154,11 @@ python main.py
 
 ### 安装方法II：使用Docker
 
-0. 部署项目的全部能力（这个是包含cuda和latex的大型镜像。如果您网速慢、硬盘小或没有显卡，则不推荐使用这个，建议使用方案1）（需要熟悉[Nvidia Docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#installing-on-ubuntu-and-debian)运行时）
-[![fullcapacity](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-all-capacity.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-audio-assistant.yml)
+0. 部署项目的全部能力（这个是包含cuda和latex的大型镜像。但如果您网速慢、硬盘小，则不推荐使用这个）
+[![fullcapacity](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-all-capacity.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-all-capacity.yml)
 
 ``` sh
-# 修改docker-compose.yml，保留方案0并删除其他方案。修改docker-compose.yml中方案0的配置，参考其中注释即可
+# 修改docker-compose.yml，保留方案0并删除其他方案。然后运行：
 docker-compose up
 ```
 
@@ -165,7 +168,7 @@ docker-compose up
 [![basicaudio](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-audio-assistant.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-audio-assistant.yml)
 
 ``` sh
-# 修改docker-compose.yml，保留方案1并删除其他方案。修改docker-compose.yml中方案1的配置，参考其中注释即可
+# 修改docker-compose.yml，保留方案1并删除其他方案。然后运行：
 docker-compose up
 ```
 
@@ -175,48 +178,30 @@ P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以
 [![chatglm](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-chatglm.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-chatglm.yml)
 
 ``` sh
-# 修改docker-compose.yml，保留方案2并删除其他方案。修改docker-compose.yml中方案2的配置，参考其中注释即可
-docker-compose up
-```
-
-3. ChatGPT + LLAMA + 盘古 + RWKV（需要熟悉[Nvidia Docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#installing-on-ubuntu-and-debian)运行时）
-[![jittorllms](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-jittorllms.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-jittorllms.yml)
-
-``` sh
-# 修改docker-compose.yml，保留方案3并删除其他方案。修改docker-compose.yml中方案3的配置，参考其中注释即可
+# 修改docker-compose.yml，保留方案2并删除其他方案。然后运行：
 docker-compose up
 ```
 
 
 ### 安装方法III：其他部署姿势
-1. 一键运行脚本。
+1. **Windows一键运行脚本**。
 完全不熟悉python环境的Windows用户可以下载[Release](https://github.com/binary-husky/gpt_academic/releases)中发布的一键运行脚本安装无本地模型的版本。
 脚本的贡献来源是[oobabooga](https://github.com/oobabooga/one-click-installers)。
 
-2. 使用docker-compose运行。
-请阅读docker-compose.yml后，按照其中的提示操作即可
+2. 使用第三方API、Azure等、文心一言、星火等，见[Wiki页面](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)
 
-3. 如何使用反代URL
-按照`config.py`中的说明配置API_URL_REDIRECT即可。
+3. 云服务器远程部署避坑指南。
+请访问[云服务器远程部署wiki](https://github.com/binary-husky/gpt_academic/wiki/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BF%9C%E7%A8%8B%E9%83%A8%E7%BD%B2%E6%8C%87%E5%8D%97)
 
-4. 微软云AzureAPI
-按照`config.py`中的说明配置即可（AZURE_ENDPOINT等四个配置）
-
-5. 远程云服务器部署（需要云服务器知识与经验）。
-请访问[部署wiki-1](https://github.com/binary-husky/gpt_academic/wiki/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BF%9C%E7%A8%8B%E9%83%A8%E7%BD%B2%E6%8C%87%E5%8D%97)
-
-6. 使用Sealos[一键部署](https://github.com/binary-husky/gpt_academic/issues/993)。
-
-7. 使用WSL2（Windows Subsystem for Linux 子系统）。
-请访问[部署wiki-2](https://github.com/binary-husky/gpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2)
-
-8. 如何在二级网址（如`http://localhost/subpath`）下运行。
-请访问[FastAPI运行说明](docs/WithFastapi.md)
+4. 一些新型的部署平台或方法
+    - 使用Sealos[一键部署](https://github.com/binary-husky/gpt_academic/issues/993)。
+    - 使用WSL2（Windows Subsystem for Linux 子系统）。请访问[部署wiki-2](https://github.com/binary-husky/gpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2)
+    - 如何在二级网址（如`http://localhost/subpath`）下运行。请访问[FastAPI运行说明](docs/WithFastapi.md)
 
 
 # Advanced Usage
 ### I：自定义新的便捷按钮（学术快捷键）
-任意文本编辑器打开`core_functional.py`，添加条目如下，然后重启程序即可。（如果按钮已经添加成功并可见，那么前缀、后缀都支持热修改，无需重启程序即可生效。）
+任意文本编辑器打开`core_functional.py`，添加条目如下，然后重启程序。（如按钮已存在，那么前缀、后缀都支持热修改，无需重启程序即可生效。）
 例如
 ```
 "超级英译中": {
@@ -232,14 +217,13 @@ docker-compose up
 </div>
 
 ### II：自定义函数插件
-
 编写强大的函数插件来执行任何你想得到的和想不到的任务。
 本项目的插件编写、调试难度很低，只要您具备一定的python基础知识，就可以仿照我们提供的模板实现自己的插件功能。
 详情请参考[函数插件指南](https://github.com/binary-husky/gpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)。
 
 
-# Latest Update
-### I：新功能动态
+# Updates
+### I：动态
 
 1. 对话保存功能。在函数插件区调用 `保存当前的对话` 即可将当前对话保存为可读+可复原的html文件，
 另外在函数插件区（下拉菜单）调用 `载入对话历史存档` ，即可还原之前的会话。
@@ -280,28 +264,23 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 <img src="https://user-images.githubusercontent.com/96192199/236432361-67739153-73e8-43fe-8111-b61296edabd9.png" width="500" >
 </div>
 
-7. 新增MOSS大语言模型支持
-<div align="center">
-<img src="https://user-images.githubusercontent.com/96192199/236639178-92836f37-13af-4fdd-984d-b4450fe30336.png" width="500" >
-</div>
-
-8. OpenAI图像生成
+7. OpenAI图像生成
 <div align="center">
 <img src="https://github.com/binary-husky/gpt_academic/assets/96192199/bc7ab234-ad90-48a0-8d62-f703d9e74665" width="500" >
 </div>
 
-9. OpenAI音频解析与总结
+8. OpenAI音频解析与总结
 <div align="center">
 <img src="https://github.com/binary-husky/gpt_academic/assets/96192199/709ccf95-3aee-498a-934a-e1c22d3d5d5b" width="500" >
 </div>
 
-10. Latex全文校对纠错
+9. Latex全文校对纠错
 <div align="center">
 <img src="https://github.com/binary-husky/gpt_academic/assets/96192199/651ccd98-02c9-4464-91e1-77a6b7d1b033" height="200" > ===>
 <img src="https://github.com/binary-husky/gpt_academic/assets/96192199/476f66d9-7716-4537-b5c1-735372c25adb" height="200">
 </div>
 
-11. 语言、主题切换
+10. 语言、主题切换
 <div align="center">
 <img src="https://github.com/binary-husky/gpt_academic/assets/96192199/b6799499-b6fb-4f0c-9c8e-1b441872f4e8" width="500" >
 </div>
@@ -309,7 +288,9 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 
 
 ### II：版本:
-- version 3.60（todo）: 优化虚空终端，引入code interpreter和更多插件
+- version 3.60（todo）: 优化虚空终端，并引入AutoGen作为新一代插件的基石
+- version 3.57: 支持GLM3，星火v3，文心一言v4，修复本地模型的并发BUG
+- version 3.56: 支持动态追加基础功能按钮，新汇报PDF汇总页面
 - version 3.55: 重构前端界面，引入悬浮窗口与菜单栏
 - version 3.54: 新增动态代码解释器（Code Interpreter）（待完善）
 - version 3.53: 支持动态选择不同界面主题，提高稳定性&解决多用户冲突问题
@@ -344,7 +325,13 @@ GPT Academic开发者QQ群：`610599535`
 1. `Chuanhu-Small-and-Beautiful` [网址](https://github.com/GaiZhenbiao/ChuanhuChatGPT/)
 
 
-### IV：参考与学习
+### IV：本项目的开发分支
+
+1. `master` 分支: 主分支，稳定版
+2. `frontier` 分支: 开发分支，测试版
+
+
+### V：参考与学习
 
 ```
 代码中参考了很多其他优秀项目中的设计，顺序不分先后：

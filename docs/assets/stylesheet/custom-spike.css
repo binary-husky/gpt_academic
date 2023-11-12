@@ -222,3 +222,12 @@ code.language-folded {
     right: 35px;
     margin: -2px;
 }
+
+#upload-index-file {
+    width: 200px;
+    display: none;
+    position: fixed;
+    bottom: 110px;
+    opacity: 0.90;
+    backdrop-filter: blur(24px);
+}

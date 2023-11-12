@@ -110,3 +110,30 @@ function handleShowAllButtonClick(event) {
        }
     }
 }
+
+// 函数：当鼠标悬浮在 'uploaded-files-count' 或 'upload-index-file' 上时，改变 'upload-index-file' 的 display 样式为 flex
+function showUploadIndexFile() {
+    uploadIndexFileElement.style.display = "flex";
+}
+
+// 函数：当鼠标离开 'uploaded-files-count' 2秒 后，检查是否还处于 'upload-index-file' hover状态 ，如果否，则改变 'upload-index-file' 的 display样式 为 none
+function hideUploadIndexFile() {
+    setTimeout(function(){
+        if (!isHover(uploadIndexFileElement)) {
+            uploadIndexFileElement.style.display = "none";
+        }
+    }, 1000);
+}
+
+function isHover(e) {
+    return (e.parentElement.querySelector(':hover') === e);
+}
+
+function add_func_event() {
+    // 监听上传文件计数器元素和 upload-index-file 元素的 hover(in JS handle by mouseenter and mouseleave) 和 non-hover 事件
+    uploadedFilesCountElement.addEventListener("mouseenter", showUploadIndexFile);
+    uploadedFilesCountElement.addEventListener("mouseleave", hideUploadIndexFile);
+
+    uploadIndexFileElement.addEventListener("mouseenter", showUploadIndexFile);
+    uploadIndexFileElement.addEventListener("mouseleave", hideUploadIndexFile);
+}

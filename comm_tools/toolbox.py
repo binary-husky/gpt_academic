@@ -7,6 +7,7 @@ from comm_tools import history_processor
 import gradio
 import shutil
 import glob
+import math
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
 import shutil
@@ -507,6 +508,26 @@ def markdown_convertion(txt):
                 contain_any_eq = True
         return contain_any_eq
 
+    def fix_markdown_indent(txt):
+        # fix markdown indent
+        if (' - ' not in txt) or ('. ' not in txt): 
+            return txt # do not need to fix, fast escape
+        # walk through the lines and fix non-standard indentation
+        lines = txt.split("\n")
+        pattern = re.compile(r'^\s+-')
+        activated = False
+        for i, line in enumerate(lines):
+            if line.startswith('- ') or line.startswith('1. '):
+                activated = True
+            if activated and pattern.match(line):
+                stripped_string = line.lstrip()
+                num_spaces = len(line) - len(stripped_string)
+                if (num_spaces % 4) == 3:
+                    num_spaces_should_be = math.ceil(num_spaces/4) * 4
+                    lines[i] = ' ' * num_spaces_should_be + stripped_string
+        return '\n'.join(lines)
+
+    txt = fix_markdown_indent(txt)
     if is_equation(txt):  # 有$标识的公式符号，且没有代码段```的标识
         # convert everything to html format
         split = markdown.markdown(text='---')
@@ -676,7 +697,7 @@ def disable_auto_promotion(chatbot):
 
 
 def is_the_upload_folder(string):
-    PATH_PRIVATE_UPLOAD, = get_conf('PATH_PRIVATE_UPLOAD')
+    PATH_PRIVATE_UPLOAD = get_conf('PATH_PRIVATE_UPLOAD')
     pattern = r'^PATH_PRIVATE_UPLOAD/[A-Za-z0-9_-]+/\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}$'
     pattern = pattern.replace('PATH_PRIVATE_UPLOAD', PATH_PRIVATE_UPLOAD)
     if re.match(pattern, string):
@@ -686,7 +707,7 @@ def is_the_upload_folder(string):
 
 
 def del_outdated_uploads(outdate_time_seconds):
-    PATH_PRIVATE_UPLOAD, = get_conf('PATH_PRIVATE_UPLOAD')
+    PATH_PRIVATE_UPLOAD = get_conf('PATH_PRIVATE_UPLOAD')
     current_time = time.time()
     one_hour_ago = current_time - outdate_time_seconds
     # Get a list of all subdirectories in the PATH_PRIVATE_UPLOAD folder
@@ -757,9 +778,9 @@ def on_report_generated(cookies, files, chatbot, request):
     del_outdated_uploads(outdate_time_seconds)
 
     # 创建工作路径
-    user_name = "default" if not request.username else request.username
+    user_name = "default" if not request.username else request.client.host
     time_tag = gen_time_str()
-    PATH_PRIVATE_UPLOAD, = get_conf('PATH_PRIVATE_UPLOAD')
+    PATH_PRIVATE_UPLOAD = get_conf('PATH_PRIVATE_UPLOAD')
     target_path_base = pj(PATH_PRIVATE_UPLOAD, user_name, time_tag)
     os.makedirs(target_path_base, exist_ok=True)
 
@@ -790,12 +811,24 @@ def on_report_generated(cookies, files, chatbot, request):
     return chatbot, txt, cookies
 
 
+
 def load_chat_cookies():
     API_KEY, LLM_MODEL, AZURE_API_KEY = get_conf('API_KEY', 'LLM_MODEL', 'AZURE_API_KEY')
-    DARK_MODE, NUM_CUSTOM_BASIC_BTN = get_conf('DARK_MODE', 'NUM_CUSTOM_BASIC_BTN')
+    AZURE_CFG_ARRAY, NUM_CUSTOM_BASIC_BTN = get_conf('AZURE_CFG_ARRAY', 'NUM_CUSTOM_BASIC_BTN')
+
+    # deal with azure openai key
     if is_any_api_key(AZURE_API_KEY):
         if is_any_api_key(API_KEY): API_KEY = API_KEY + ',' + AZURE_API_KEY
         else: API_KEY = AZURE_API_KEY
+    if len(AZURE_CFG_ARRAY) > 0:
+        for azure_model_name, azure_cfg_dict in AZURE_CFG_ARRAY.items():
+            if not azure_model_name.startswith('azure'): 
+                raise ValueError("AZURE_CFG_ARRAY中配置的模型必须以azure开头")
+            AZURE_API_KEY_ = azure_cfg_dict["AZURE_API_KEY"]
+            if is_any_api_key(AZURE_API_KEY_):
+                if is_any_api_key(API_KEY): API_KEY = API_KEY + ',' + AZURE_API_KEY_
+                else: API_KEY = AZURE_API_KEY_
+
     customize_fn_overwrite_ = {}
     for k in range(NUM_CUSTOM_BASIC_BTN):
         customize_fn_overwrite_.update({  
@@ -809,7 +842,7 @@ def load_chat_cookies():
 
 
 def is_openai_api_key(key):
-    CUSTOM_API_KEY_PATTERN, = get_conf('CUSTOM_API_KEY_PATTERN')
+    CUSTOM_API_KEY_PATTERN = get_conf('CUSTOM_API_KEY_PATTERN')
     if len(CUSTOM_API_KEY_PATTERN) != 0:
         API_MATCH_ORIGINAL = re.match(CUSTOM_API_KEY_PATTERN, key)
     else:
@@ -1016,6 +1049,7 @@ def get_conf(*args):
     for arg in args:
         r = read_single_conf_with_lru_cache(arg)
         res.append(r)
+    if len(res) == 1: return res[0]
     return res
 
 
@@ -1090,6 +1124,7 @@ def clip_history(inputs, history, tokenizer, max_token_limit):
     直到历史记录的标记数量降低到阈值以下。
     """
     import numpy as np
+    from request_llms.bridge_all import model_info
     def get_token_num(txt):
         return len(tokenizer.encode(txt, disallowed_special=()))
 
@@ -1185,7 +1220,7 @@ def gen_time_str():
 
 
 def get_log_folder(user='default', plugin_name='shared'):
-    PATH_LOGGING, = get_conf('PATH_LOGGING')
+    PATH_LOGGING = get_conf('PATH_LOGGING')
     _dir = pj(PATH_LOGGING, user, plugin_name)
     if not os.path.exists(_dir): os.makedirs(_dir)
     return _dir
@@ -1202,17 +1237,16 @@ class ProxyNetworkActivate():
             # 不给定 task，那么我们默认代理生效
             self.valid = True
         else:
-            # 给定了 task，我们检查一下
-            WHEN_TO_USE_PROXY, = get_conf('WHEN_TO_USE_PROXY')
+            # 给定了task, 我们检查一下
+            from toolbox import get_conf
+            WHEN_TO_USE_PROXY = get_conf('WHEN_TO_USE_PROXY')
             self.valid = (task in WHEN_TO_USE_PROXY)
 
     def __enter__(self):
-        if not self.valid:
-            return None  # 返回 None，表示不执行代理操作
-
-        proxies, = get_conf('proxies')
-        if 'no_proxy' in os.environ:
-            os.environ.pop('no_proxy')
+        if not self.valid: return self
+        from toolbox import get_conf
+        proxies = get_conf('proxies')
+        if 'no_proxy' in os.environ: os.environ.pop('no_proxy')
         if proxies is not None:
             if 'http' in proxies:
                 os.environ['HTTP_PROXY'] = proxies['http']
@@ -1261,7 +1295,7 @@ def Singleton(cls):
 """
 ========================================================================
 第四部分
-接驳虚空终端:
+接驳void-terminal:
     - set_conf:                     在运行过程中动态地修改配置
     - set_multi_conf:               在运行过程中动态地修改多个配置
     - get_plugin_handle:            获取插件的句柄
@@ -1277,7 +1311,7 @@ def set_conf(key, value):
     read_single_conf_with_lru_cache.cache_clear()
     get_conf.cache_clear()
     os.environ[key] = str(value)
-    altered, = get_conf(key)
+    altered = get_conf(key)
     return altered
 
 
@@ -1301,7 +1335,7 @@ def get_plugin_handle(plugin_name):
 def get_chat_handle():
     """
     """
-    from request_llm.bridge_all import predict_no_ui_long_connection
+    from request_llms.bridge_all import predict_no_ui_long_connection
     return predict_no_ui_long_connection
 
 

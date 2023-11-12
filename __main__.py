@@ -2,7 +2,7 @@ import os
 import gradio as gr
 import logging
 
-from request_llm.bridge_all import predict
+from request_llms.bridge_all import predict
 from comm_tools.toolbox import find_free_port, on_file_uploaded, \
     get_conf, ArgsGeneralWrapper
 from comm_tools.overwrites import postprocess_chat_messages, postprocess, reload_javascript
@@ -55,7 +55,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         super().__init__()
         self.initial_prompt = ""
         self.cancel_handles = []
-        self.app_name, = get_conf('APPNAME')
+        self.app_name = get_conf('APPNAME')
         self.__url = f'http://{func_box.ipaddr()}:{PORT}'
         # self.__gr_url = gr.State(self.__url)
 
@@ -444,5 +444,5 @@ chatbot_main.main()
 gradio_app = gr.mount_gradio_app(app, chatbot_main.demo, '/gradio')
 if __name__ == '__main__':
     import uvicorn
-    app_reload, = get_conf('app_reload')
+    app_reload = get_conf('app_reload')
     uvicorn.run("__main__:app", host="0.0.0.0", port=PORT, reload=app_reload)

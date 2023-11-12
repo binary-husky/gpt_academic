@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 from comm_tools.toolbox import get_log_folder, update_ui, gen_time_str, trimmed_format_exc, promote_file_to_downloadzone
+=======
+from toolbox import get_log_folder, update_ui, gen_time_str, get_conf, promote_file_to_downloadzone
+from crazy_functions.agent_fns.watchdog import WatchDog
+>>>>>>> master
 import time, os
 
 class PipeCom():
@@ -19,6 +24,16 @@ class PluginMultiprocessManager():
         self.system_prompt = system_prompt
         self.web_port = web_port
         self.alive = True
+        self.use_docker = get_conf('AUTOGEN_USE_DOCKER')
+
+        # create a thread to monitor self.heartbeat, terminate the instance if no heartbeat for a long time
+        timeout_seconds = 5*60
+        self.heartbeat_watchdog = WatchDog(timeout=timeout_seconds, bark_fn=self.terminate, interval=5)
+        self.heartbeat_watchdog.begin_watch()
+
+    def feed_heartbeat_watchdog(self):
+        # feed this `dog`, so the dog will not `bark` (bark_fn will terminate the instance)
+        self.heartbeat_watchdog.feed()
 
     def is_alive(self):
         return self.alive
@@ -50,7 +65,7 @@ class PluginMultiprocessManager():
         # 获取fp的拓展名
         file_type = fp.split('.')[-1]
         # 如果是文本文件, 则直接显示文本内容
-        if file_type in ['png', 'jpg']:
+        if file_type.lower() in ['png', 'jpg']:
             image_path = os.path.abspath(fp)
             self.chatbot.append(['检测到新生图像:', f'本地文件预览: <br/><div align="center"><img src="file={image_path}"></div>'])
             yield from update_ui(chatbot=self.chatbot, history=self.history)
@@ -79,7 +94,7 @@ class PluginMultiprocessManager():
             for f in change_list: 
                 res = promote_file_to_downloadzone(f)
                 file_links += f'<br/><a href="file={res}" target="_blank">{res}</a>'
-                yield from self.immediate_showoff_when_possible(file_path)
+                yield from self.immediate_showoff_when_possible(f)
 
             self.chatbot.append(['检测到新生文档.', f'文档清单如下: {file_links}'])
             yield from update_ui(chatbot=self.chatbot, history=self.history)
@@ -98,9 +113,17 @@ class PluginMultiprocessManager():
             self.terminate()
             return "terminate"
         
+        # patience = 10
+        
         while True:
             time.sleep(0.5)
+            if not self.alive:
+                # the heartbeat watchdog might have it killed
+                self.terminate()
+                return "terminate"
+
             if self.parent_conn.poll(): 
+                self.feed_heartbeat_watchdog()
                 if '[GPT-Academic] 等待中' in self.chatbot[-1][-1]:
                     self.chatbot.pop(-1)    # remove the last line
                 msg = self.parent_conn.recv() # PipeCom
@@ -124,10 +147,17 @@ class PluginMultiprocessManager():
                     # do not terminate here, leave the subprocess_worker instance alive
                     return "wait_feedback"
             else:
+                self.feed_heartbeat_watchdog()
                 if '[GPT-Academic] 等待中' not in self.chatbot[-1][-1]:
+                    # begin_waiting_time = time.time()
                     self.chatbot.append(["[GPT-Academic] 等待AutoGen执行结果 ...", "[GPT-Academic] 等待中"])
                 self.chatbot[-1] = [self.chatbot[-1][0], self.chatbot[-1][1].replace("[GPT-Academic] 等待中", "[GPT-Academic] 等待中.")]
                 yield from update_ui(chatbot=self.chatbot, history=self.history)
+                # if time.time() - begin_waiting_time > patience:
+                #     self.chatbot.append([f"结束", "等待超时, 终止AutoGen程序。"])
+                #     yield from update_ui(chatbot=self.chatbot, history=self.history)
+                #     self.terminate()
+                #     return "terminate"
 
         self.terminate()
         return "terminate"

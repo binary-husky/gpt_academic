@@ -8,7 +8,7 @@ import gradio as gr
 from comm_tools import webui_local, func_box, toolbox
 from comm_tools.crazy_functional import crazy_fns_role, crazy_classification, crazy_fns
 
-default_plugin, = toolbox.get_conf('default_plugin')
+default_plugin = toolbox.get_conf('default_plugin')
 i18n = webui_local.I18nAuto()
 get_html = func_box.get_html
 
@@ -25,10 +25,10 @@ class RightElem:
                 obj="toolbox"), elem_classes="close-btn")
 
     def _draw_function_chat(self):
-        preset_prompt, = toolbox.get_conf('preset_prompt')
+        preset_prompt = toolbox.get_conf('preset_prompt')
         with gr.TabItem('基础', id='func_tab', elem_id='chuanhu-toolbox-tabs'):
             with gr.Row():
-                self.preset_prompt, = toolbox.get_conf('preset_prompt')
+                self.preset_prompt = toolbox.get_conf('preset_prompt')
                 self.pro_private_check = gr.Dropdown(choices=[], value=self.preset_prompt['value'],
                                                      label='提示词/Masks分类', elem_classes='normal_select',
                                                      allow_custom_value=True)
@@ -44,10 +44,6 @@ class RightElem:
             func_box.md_division_line()
             self.system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt",
                                             label="System prompt", value=self.initial_prompt)
-            func_box.md_division_line()
-            self.sm_upload = gr.Files(label='Upload file Edit', type='file', elem_id='upload-index-file',
-                                      visible=True, interactive=True)
-
 
     def _draw_plugin_chat(self):
         with gr.TabItem('插件', id='plug_tab', elem_id='chuanhu-toolbox-tabs'):
@@ -85,11 +81,11 @@ class RightElem:
                 self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary", visible=False)
 
     def _draw_setting_chat(self):
-        worker_num, = toolbox.get_conf('DEFAULT_WORKER_NUM')
+        worker_num = toolbox.get_conf('DEFAULT_WORKER_NUM')
         with gr.TabItem('调优', id='sett_tab', elem_id='chuanhu-toolbox-tabs'):
             with gr.Box():
                 # gr.Markdown(func_box.get_html('what_news.html').replace('{%v}', 'LLMs调优参数'))
-                default_params, = toolbox.get_conf('LLMS_DEFAULT_PARAMETER')
+                default_params = toolbox.get_conf('LLMS_DEFAULT_PARAMETER')
                 with gr.Accordion(label='LLMs调优参数', open=False):
                     self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=default_params['top_p'], step=0.01, interactive=True,
                                            label="Top-p", ).style(container=False)

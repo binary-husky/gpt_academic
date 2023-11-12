@@ -10,7 +10,7 @@ from comm_tools import func_box
 from comm_tools import toolbox
 
 
-WEB_PORT, = toolbox.get_conf('WEB_PORT')
+WEB_PORT = toolbox.get_conf('WEB_PORT')
 PORT = toolbox.find_free_port() if WEB_PORT <= 0 else WEB_PORT
 
 

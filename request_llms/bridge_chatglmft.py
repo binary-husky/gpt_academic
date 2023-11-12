@@ -44,7 +44,7 @@ class GetGLMFTHandle(Process):
             self.info = "依赖检测通过"
             self.success = True
         except:
-            self.info = "缺少ChatGLMFT的依赖，如果要使用ChatGLMFT，除了基础的pip依赖以外，您还需要运行`pip install -r request_llm/requirements_chatglm.txt`安装ChatGLM的依赖。"
+            self.info = "缺少ChatGLMFT的依赖，如果要使用ChatGLMFT，除了基础的pip依赖以外，您还需要运行`pip install -r request_llms/requirements_chatglm.txt`安装ChatGLM的依赖。"
             self.success = False
 
     def ready(self):
@@ -59,11 +59,11 @@ class GetGLMFTHandle(Process):
                 if self.chatglmft_model is None:
                     from transformers import AutoConfig
                     import torch
-                    # conf = 'request_llm/current_ptune_model.json'
+                    # conf = 'request_llms/current_ptune_model.json'
                     # if not os.path.exists(conf): raise RuntimeError('找不到微调模型信息')
                     # with open(conf, 'r', encoding='utf8') as f:
                     #     model_args = json.loads(f.read())
-                    CHATGLM_PTUNING_CHECKPOINT, = get_conf('CHATGLM_PTUNING_CHECKPOINT')
+                    CHATGLM_PTUNING_CHECKPOINT = get_conf('CHATGLM_PTUNING_CHECKPOINT')
                     assert os.path.exists(CHATGLM_PTUNING_CHECKPOINT), "找不到微调模型检查点"
                     conf = os.path.join(CHATGLM_PTUNING_CHECKPOINT, "config.json")
                     with open(conf, 'r', encoding='utf8') as f:
@@ -139,7 +139,7 @@ glmft_handle = None
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=[], console_slience=False):
     """
         多线程方法
-        函数的说明请见 request_llm/bridge_all.py
+        函数的说明请见 request_llms/bridge_all.py
     """
     global glmft_handle
     if glmft_handle is None:
@@ -170,7 +170,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
 def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream = True, additional_fn=None):
     """
         单线程方法
-        函数的说明请见 request_llm/bridge_all.py
+        函数的说明请见 request_llms/bridge_all.py
     """
     chatbot.append((inputs, ""))
 
@@ -194,13 +194,13 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         history_feedin.append([history[2*i], history[2*i+1]] )
 
     # 开始接收chatglmft的回复
-    response = "[Local Message]: 等待ChatGLMFT响应中 ..."
+    response = "[Local Message] 等待ChatGLMFT响应中 ..."
     for response in glmft_handle.stream_chat(query=inputs, history=history_feedin, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
         chatbot[-1] = (inputs, response)
         yield from update_ui(chatbot=chatbot, history=history)
 
     # 总结输出
-    if response == "[Local Message]: 等待ChatGLMFT响应中 ...":
-        response = "[Local Message]: ChatGLMFT响应异常 ..."
+    if response == "[Local Message] 等待ChatGLMFT响应中 ...":
+        response = "[Local Message] ChatGLMFT响应异常 ..."
     history.extend([inputs, response])
     yield from update_ui(chatbot=chatbot, history=history)

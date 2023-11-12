@@ -33,7 +33,7 @@ def 解析docx(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot
         print(file_content)
         # private_upload里面的文件名在解压zip后容易出现乱码（rar和7z格式正常），故可以只分析文章内容，不输入文件名
         from .crazy_utils import breakdown_txt_to_satisfy_token_limit_for_pdf
-        from request_llm.bridge_all import model_info
+        from request_llms.bridge_all import model_info
         max_token = model_info[llm_kwargs['llm_model']]['max_token']
         TOKEN_LIMIT_PER_FRAGMENT = max_token * 3 // 4
         paper_fragments = breakdown_txt_to_satisfy_token_limit_for_pdf(

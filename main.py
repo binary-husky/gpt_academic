@@ -11,8 +11,8 @@ def main():
     if gr.__version__ not in ['3.32.6']:
         raise ModuleNotFoundError(
             "使用项目内置Gradio获取最优体验! 请运行 `pip install -r requirements.txt` 指令安装内置Gradio及其他依赖, 详情信息见requirements.txt.")
-    from request_llm.bridge_all import predict
-    from comm_tools.toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, \
+    from request_llms.bridge_all import predict
+    from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, \
         load_chat_cookies, DummyWith
     # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
     proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION = get_conf('proxies', 'WEB_PORT', 'LLM_MODEL',
@@ -23,13 +23,13 @@ def main():
                                                                                'PATH_LOGGING', 'AVAIL_THEMES', 'THEME')
     DARK_MODE, NUM_CUSTOM_BASIC_BTN, SSL_KEYFILE, SSL_CERTFILE = get_conf('DARK_MODE', 'NUM_CUSTOM_BASIC_BTN',
                                                                           'SSL_KEYFILE', 'SSL_CERTFILE')
+    INIT_SYS_PROMPT = get_conf('INIT_SYS_PROMPT')
 
     # 如果WEB_PORT是-1, 则随机选取WEB端口
     PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
     from check_proxy import get_current_version
     from themes.theme import adjust_theme, advanced_css, theme_declaration, load_dynamic_theme
 
-    initial_prompt = "Serve me as a writing and programming assistant."
     title_html = f"<h1 align=\"center\">GPT 学术优化 {get_current_version()}</h1>{theme_declaration}"
     description = "Github源代码开源和更新[地址🚀](https://github.com/binary-husky/gpt_academic), "
     description += "感谢热情的[开发者们❤️](https://github.com/binary-husky/gpt_academic/graphs/contributors)."
@@ -61,7 +61,7 @@ def main():
 
     # 高级函数插件
     from crazy_functional import get_crazy_functions
-    DEFAULT_FN_GROUPS, = get_conf('DEFAULT_FN_GROUPS')
+    DEFAULT_FN_GROUPS = get_conf('DEFAULT_FN_GROUPS')
     plugins = get_crazy_functions()
     all_plugin_groups = list(set([g for _, plugin in plugins.items() for g in plugin['Group'].split('|')]))
     match_group = lambda tags, groups: any([g in groups for g in tags.split('|')])
@@ -190,7 +190,7 @@ def main():
                     max_length_sl = gr.Slider(minimum=256, maximum=1024 * 32, value=4096, step=128, interactive=True,
                                               label="Local LLM MaxLength", )
                     system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt",
-                                               label="System prompt", value=initial_prompt)
+                                               label="System prompt", value=INIT_SYS_PROMPT)
 
                 with gr.Tab("界面外观", elem_id="interact-panel"):
                     theme_dropdown = gr.Dropdown(AVAIL_THEMES, value=THEME, label="更换UI主题").style(container=False)
@@ -534,16 +534,16 @@ def main():
         server_port=PORT,
         favicon_path=os.path.join(os.path.dirname(__file__), "docs/logo.png"),
         auth=AUTHENTICATION if len(AUTHENTICATION) != 0 else None,
-        blocked_paths=["config.py", "config_private.py", "docker-compose.yml", "Dockerfile"])
+        blocked_paths=["config.py", "config_private.py", "docker-compose.yml", "Dockerfile", f"{PATH_LOGGING}/admin"])
 
     # 如果需要在二级路径下运行
-    # CUSTOM_PATH, = get_conf('CUSTOM_PATH')
+    # CUSTOM_PATH = get_conf('CUSTOM_PATH')
     # if CUSTOM_PATH != "/":
-    #     from comm_tools.toolbox import run_gradio_in_subpath
+    #     from toolbox import run_gradio_in_subpath
     #     run_gradio_in_subpath(demo, auth=AUTHENTICATION, port=PORT, custom_path=CUSTOM_PATH)
     # else:
     #     demo.launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, favicon_path="docs/logo.png",
-    #                 blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile"])
+    #                 blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile",f"{PATH_LOGGING}/admin"])
 
 
 if __name__ == "__main__":
