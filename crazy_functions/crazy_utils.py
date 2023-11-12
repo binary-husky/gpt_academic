@@ -748,7 +748,7 @@ class nougat_interface():
 
         yield from update_ui_lastest_msg("正在解析论文, 请稍候。进度：正在加载NOUGAT... （提示：首次运行需要花费较长时间下载NOUGAT参数）", 
                                          chatbot=chatbot, history=history, delay=0)
-        self.nougat_with_timeout(f'nougat --out "{os.path.abspath(dst)}" "{os.path.abspath(fp)}" --recompute --no-skipping --markdown --batchsize 8', os.getcwd(), timeout=3600)
+        self.nougat_with_timeout(f'nougat --out "{os.path.abspath(dst)}" "{os.path.abspath(fp)}" --batchsize 8', os.getcwd(), timeout=3600)
         res = glob.glob(os.path.join(dst,'*.mmd'))
         if len(res) == 0:
             self.threadLock.release()
