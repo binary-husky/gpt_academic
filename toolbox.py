@@ -1146,3 +1146,9 @@ def get_chat_default_kwargs():
 def get_max_token(llm_kwargs):
     from request_llms.bridge_all import model_info
     return model_info[llm_kwargs['llm_model']]['max_token']
+
+def check_packages(packages=[]):
+    import importlib.util
+    for p in packages:
+        spam_spec = importlib.util.find_spec(p)
+        if spam_spec is None: raise ModuleNotFoundError

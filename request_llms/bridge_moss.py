@@ -1,8 +1,6 @@
 
-from transformers import AutoModel, AutoTokenizer
 import time
 import threading
-import importlib
 from toolbox import update_ui, get_conf
 from multiprocessing import Process, Pipe
 
