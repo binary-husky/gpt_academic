@@ -8,7 +8,7 @@
     具备多线程调用能力的函数：在函数插件中被调用，灵活而简洁
     2. predict_no_ui_long_connection(...)
 """
-import tiktoken
+import tiktoken, copy
 from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor
 from toolbox import get_conf, trimmed_format_exc
@@ -238,14 +238,14 @@ model_info = {
 # -=-=-=-=-=-=- api2d 对齐支持 -=-=-=-=-=-=-
 for model in AVAIL_LLM_MODELS:
     if model.startswith('api2d-') and (model.replace('api2d-','') in model_info.keys()):
-        mi = model_info[model.replace('api2d-','')]
+        mi = copy.deepcopy(model_info[model.replace('api2d-','')])
         mi.update({"endpoint": api2d_endpoint})
         model_info.update({model: mi})
 
 # -=-=-=-=-=-=- azure 对齐支持 -=-=-=-=-=-=-
 for model in AVAIL_LLM_MODELS:
     if model.startswith('azure-') and (model.replace('azure-','') in model_info.keys()):
-        mi = model_info[model.replace('azure-','')]
+        mi = copy.deepcopy(model_info[model.replace('azure-','')])
         mi.update({"endpoint": azure_endpoint})
         model_info.update({model: mi})
 
