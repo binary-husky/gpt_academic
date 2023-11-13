@@ -279,9 +279,12 @@ def text_divide_paragraph(text):
     
     if '```' in text:
         # careful input
-        return pre + text + suf
+        return text
+    elif '</div>' in text:
+        # careful input
+        return text
     else:
-        # wtf input
+        # whatever input
         lines = text.split("\n")
         for i, line in enumerate(lines):
             lines[i] = lines[i].replace(" ", "&nbsp;")

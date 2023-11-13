@@ -16,6 +16,9 @@ from toolbox import get_conf, trimmed_format_exc
 from .bridge_chatgpt import predict_no_ui_long_connection as chatgpt_noui
 from .bridge_chatgpt import predict as chatgpt_ui
 
+from .bridge_chatgpt_vision import predict_no_ui_long_connection as chatgpt_vision_noui
+from .bridge_chatgpt_vision import predict as chatgpt_vision_ui
+
 from .bridge_chatglm import predict_no_ui_long_connection as chatglm_noui
 from .bridge_chatglm import predict as chatglm_ui
 
@@ -162,6 +165,16 @@ model_info = {
         "token_cnt": get_token_num_gpt4,
     },
     
+    "gpt-4-vision-preview": {
+        "fn_with_ui": chatgpt_vision_ui,
+        "fn_without_ui": chatgpt_vision_noui,
+        "endpoint": openai_endpoint,
+        "max_token": 4096,
+        "tokenizer": tokenizer_gpt4,
+        "token_cnt": get_token_num_gpt4,
+    },
+
+
     # azure openai
     "azure-gpt-3.5":{
         "fn_with_ui": chatgpt_ui,
