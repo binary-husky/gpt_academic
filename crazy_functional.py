@@ -40,7 +40,7 @@ def get_crazy_functions():
 
     function_plugins = {
         "虚空终端": {
-            "Group": "对话|编程|学术|智能体",
+            "Group": "对话&作图|编程|学术|智能体",
             "Color": "stop",
             "AsButton": True,
             "Function": HotReload(虚空终端)
@@ -53,20 +53,20 @@ def get_crazy_functions():
             "Function": HotReload(解析一个Python项目)
         },
         "载入对话历史存档（先上传存档或输入路径）": {
-            "Group": "对话",
+            "Group": "对话&作图",
             "Color": "stop",
             "AsButton": False,
             "Info": "载入对话历史存档 | 输入参数为路径",
             "Function": HotReload(载入对话历史存档)
         },
         "删除所有本地对话历史记录（谨慎操作）": {
-            "Group": "对话",
+            "Group": "对话&作图",
             "AsButton": False,
             "Info": "删除所有本地对话历史记录，谨慎操作 | 不需要输入参数",
             "Function": HotReload(删除所有本地对话历史记录)
         },
         "清除所有缓存文件（谨慎操作）": {
-            "Group": "对话",
+            "Group": "对话&作图",
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
             "Info": "清除所有缓存文件，谨慎操作 | 不需要输入参数",
@@ -180,19 +180,19 @@ def get_crazy_functions():
             "Function": HotReload(批量生成函数注释)
         },
         "保存当前的对话": {
-            "Group": "对话",
+            "Group": "对话&作图",
             "AsButton": True,
             "Info": "保存当前的对话 | 不需要输入参数",
             "Function": HotReload(对话历史存档)
         },
         "[多线程Demo]解析此项目本身（源码自译解）": {
-            "Group": "对话|编程",
+            "Group": "对话&作图|编程",
             "AsButton": False,  # 加入下拉菜单中
             "Info": "多线程解析并翻译此项目的源码 | 不需要输入参数",
             "Function": HotReload(解析项目本身)
         },
         "历史上的今天": {
-            "Group": "对话",
+            "Group": "对话&作图",
             "AsButton": True,
             "Info": "查看历史上的今天事件 (这是一个面向开发者的插件Demo) | 不需要输入参数",
             "Function": HotReload(高阶功能模板函数)
@@ -205,7 +205,7 @@ def get_crazy_functions():
             "Function": HotReload(批量翻译PDF文档)
         },
         "询问多个GPT模型": {
-            "Group": "对话",
+            "Group": "对话&作图",
             "Color": "stop",
             "AsButton": True,
             "Function": HotReload(同时问询)
@@ -300,7 +300,7 @@ def get_crazy_functions():
         from crazy_functions.联网的ChatGPT import 连接网络回答问题
         function_plugins.update({
             "连接网络回答问题（输入问题后点击该插件，需要访问谷歌）": {
-                "Group": "对话",
+                "Group": "对话&作图",
                 "Color": "stop",
                 "AsButton": False,  # 加入下拉菜单中
                 # "Info": "连接网络回答问题（需要访问谷歌）| 输入参数是一个问题",
@@ -310,7 +310,7 @@ def get_crazy_functions():
         from crazy_functions.联网的ChatGPT_bing版 import 连接bing搜索回答问题
         function_plugins.update({
             "连接网络回答问题（中文Bing版，输入问题后点击该插件）": {
-                "Group": "对话",
+                "Group": "对话&作图",
                 "Color": "stop",
                 "AsButton": False,  # 加入下拉菜单中
                 "Info": "连接网络回答问题（需要访问中文Bing）| 输入参数是一个问题",
@@ -341,7 +341,7 @@ def get_crazy_functions():
         from crazy_functions.询问多个大语言模型 import 同时问询_指定模型
         function_plugins.update({
             "询问多个GPT模型（手动指定询问哪些模型）": {
-                "Group": "对话",
+                "Group": "对话&作图",
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
@@ -357,7 +357,7 @@ def get_crazy_functions():
         from crazy_functions.图片生成 import 图片生成_DALLE2, 图片生成_DALLE3
         function_plugins.update({
             "图片生成_DALLE2 （先切换模型到openai或api2d）": {
-                "Group": "对话",
+                "Group": "对话&作图",
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
@@ -368,7 +368,7 @@ def get_crazy_functions():
         })
         function_plugins.update({
             "图片生成_DALLE3 （先切换模型到openai或api2d）": {
-                "Group": "对话",
+                "Group": "对话&作图",
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
@@ -385,7 +385,7 @@ def get_crazy_functions():
         from crazy_functions.总结音视频 import 总结音视频
         function_plugins.update({
             "批量总结音视频（输入路径或上传压缩包）": {
-                "Group": "对话",
+                "Group": "对话&作图",
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,
@@ -402,7 +402,7 @@ def get_crazy_functions():
         from crazy_functions.数学动画生成manim import 动画生成
         function_plugins.update({
             "数学动画生成（Manim）": {
-                "Group": "对话",
+                "Group": "对话&作图",
                 "Color": "stop",
                 "AsButton": False,
                 "Info": "按照自然语言描述生成一个动画 | 输入参数是一段话",
@@ -433,7 +433,7 @@ def get_crazy_functions():
         from crazy_functions.Langchain知识库 import 知识库问答
         function_plugins.update({
             "构建知识库（先上传文件素材,再运行此插件）": {
-                "Group": "对话",
+                "Group": "对话&作图",
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,
@@ -449,7 +449,7 @@ def get_crazy_functions():
         from crazy_functions.Langchain知识库 import 读取知识库作答
         function_plugins.update({
             "知识库问答（构建知识库后,再运行此插件）": {
-                "Group": "对话",
+                "Group": "对话&作图",
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,
@@ -465,7 +465,7 @@ def get_crazy_functions():
         from crazy_functions.交互功能函数模板 import 交互功能模板函数
         function_plugins.update({
             "交互功能模板Demo函数（查找wallhaven.cc的壁纸）": {
-                "Group": "对话",
+                "Group": "对话&作图",
                 "Color": "stop",
                 "AsButton": False,
                 "Function": HotReload(交互功能模板函数)
@@ -527,7 +527,7 @@ def get_crazy_functions():
             from crazy_functions.语音助手 import 语音助手
             function_plugins.update({
                 "实时语音对话": {
-                    "Group": "对话",
+                    "Group": "对话&作图",
                     "Color": "stop",
                     "AsButton": True,
                     "Info": "这是一个时刻聆听着的语音对话助手 | 没有输入参数",
