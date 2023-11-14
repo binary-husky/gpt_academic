@@ -156,7 +156,7 @@ def 图片生成_DALLE3_Standard(prompt, llm_kwargs, plugin_kwargs, chatbot, his
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     resolution = plugin_kwargs.get("advanced_arg", '1024x1024')
-    image_url, image_path = gen_image_dalle3(standard, llm_kwargs, prompt, resolution)
+    image_url, image_path = gen_image_dalle3("standard", llm_kwargs, prompt, resolution)
     chatbot.append([prompt,  
         f'图像中转网址: <br/>`{image_url}`<br/>'+
         f'中转网址预览: <br/><div align="center"><img src="{image_url}"></div>'
@@ -173,7 +173,7 @@ def 图片生成_DALLE3_HD(prompt, llm_kwargs, plugin_kwargs, chatbot, history, 
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     resolution = plugin_kwargs.get("advanced_arg", '1024x1024')
-    image_url, image_path = gen_image_dalle3(HD, llm_kwargs, prompt, resolution)
+    image_url, image_path = gen_image_dalle3("HD", llm_kwargs, prompt, resolution)
     chatbot.append([prompt,  
         f'图像中转网址: <br/>`{image_url}`<br/>'+
         f'中转网址预览: <br/><div align="center"><img src="{image_url}"></div>'
