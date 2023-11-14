@@ -354,7 +354,7 @@ def get_crazy_functions():
         print('Load function plugin failed')
 
     try:
-        from crazy_functions.图片生成 import 图片生成_DALLE2, 图片生成_DALLE3_Standard， 图片生成_DALLE3_HD
+        from crazy_functions.图片生成 import 图片生成_DALLE2, 图片生成_DALLE3_Standard, 图片生成_DALLE3_HD
         function_plugins.update({
             "图片生成_DALLE2 （先切换模型到openai或api2d）": {
                 "Group": "对话",
