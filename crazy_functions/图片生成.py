@@ -42,6 +42,47 @@ def gen_image(llm_kwargs, prompt, resolution="1024x1024", model="dall-e-2"):
     return image_url, file_path+file_name
 
 
+def gen_image_dalle3(quality, llm_kwargs, prompt, resolution="1024x1024", model="dall-e-3"):
+    import requests, json, time, os
+    from request_llms.bridge_all import model_info
+
+    proxies = get_conf('proxies')
+    # Set up OpenAI API key and model 
+    api_key = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
+    chat_endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
+    # 'https://api.openai.com/v1/chat/completions'
+    img_endpoint = chat_endpoint.replace('chat/completions','images/generations')
+    # # Generate the image
+    url = img_endpoint
+    headers = {
+        'Authorization': f"Bearer {api_key}",
+        'Content-Type': 'application/json'
+    }
+    data = {
+        'prompt': prompt,
+        'n': 1,
+        'size': resolution,
+        'quality': quality,
+        'model': model,
+        'response_format': 'url'
+    }
+    response = requests.post(url, headers=headers, json=data, proxies=proxies)
+    print(response.content)
+    try:
+        image_url = json.loads(response.content.decode('utf8'))['data'][0]['url']
+    except:
+        raise RuntimeError(response.content.decode())
+    # 文件保存到本地
+    r = requests.get(image_url, proxies=proxies)
+    file_path = f'{get_log_folder()}/image_gen/'
+    os.makedirs(file_path, exist_ok=True)
+    file_name = 'Image' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + '.png'
+    with open(file_path+file_name, 'wb+') as f: f.write(r.content)
+
+
+    return image_url, file_path+file_name
+
+
 def edit_image(llm_kwargs, prompt, image_path, resolution="1024x1024", model="dall-e-2"):
     import requests, json, time, os
     from request_llms.bridge_all import model_info
@@ -109,13 +150,30 @@ def 图片生成_DALLE2(prompt, llm_kwargs, plugin_kwargs, chatbot, history, sys
 
 
 @CatchException
-def 图片生成_DALLE3(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 图片生成_DALLE3_Standard(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     history = []    # 清空历史，以免输入溢出
     chatbot.append(("这是什么功能？", "[Local Message] 生成图像, 请先把模型切换至gpt-*或者api2d-*。如果中文效果不理想, 请尝试英文Prompt。正在处理中 ....."))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     resolution = plugin_kwargs.get("advanced_arg", '1024x1024')
-    image_url, image_path = gen_image(llm_kwargs, prompt, resolution)
+    image_url, image_path = gen_image_dalle3(standard, llm_kwargs, prompt, resolution)
+    chatbot.append([prompt,  
+        f'图像中转网址: <br/>`{image_url}`<br/>'+
+        f'中转网址预览: <br/><div align="center"><img src="{image_url}"></div>'
+        f'本地文件地址: <br/>`{image_path}`<br/>'+
+        f'本地文件预览: <br/><div align="center"><img src="file={image_path}"></div>'
+    ])
+    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
+
+
+@CatchException
+def 图片生成_DALLE3_HD(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    history = []    # 清空历史，以免输入溢出
+    chatbot.append(("这是什么功能？", "[Local Message] 生成图像, 请先把模型切换至gpt-*或者api2d-*。如果中文效果不理想, 请尝试英文Prompt。正在处理中 ....."))
+    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
+    if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
+    resolution = plugin_kwargs.get("advanced_arg", '1024x1024')
+    image_url, image_path = gen_image_dalle3(HD, llm_kwargs, prompt, resolution)
     chatbot.append([prompt,  
         f'图像中转网址: <br/>`{image_url}`<br/>'+
         f'中转网址预览: <br/><div align="center"><img src="{image_url}"></div>'
