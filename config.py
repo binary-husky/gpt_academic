@@ -82,7 +82,7 @@ MAX_RETRY = 2
 
 
 # 插件分类默认选项
-DEFAULT_FN_GROUPS = ['对话', '编程', '学术', '智能体']
+DEFAULT_FN_GROUPS = ['对话&作图', '编程', '学术', '智能体']
 
 
 # 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
