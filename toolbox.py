@@ -813,6 +813,11 @@ def read_single_conf_with_lru_cache(arg):
             r = getattr(importlib.import_module('config'), arg)
 
     # 在读取API_KEY时，检查一下是不是忘了改config
+    if arg == 'API_URL_REDIRECT':
+        oai_rd = r.get("https://api.openai.com/v1/chat/completions", None) # API_URL_REDIRECT填写格式是错误的，请阅读`https://github.com/binary-husky/gpt_academic/wiki/项目配置说明`
+        if oai_rd and not oai_rd.endswith('/completions'):
+            print亮红( "\n\n[API_URL_REDIRECT] API_URL_REDIRECT填错了。请阅读`https://github.com/binary-husky/gpt_academic/wiki/项目配置说明`。如果您确信自己没填错，无视此消息即可。")
+            time.sleep(5)
     if arg == 'API_KEY':
         print亮蓝(f"[API_KEY] 本项目现已支持OpenAI和Azure的api-key。也支持同时填写多个api-key，如API_KEY=\"openai-key1,openai-key2,azure-key3\"")
         print亮蓝(f"[API_KEY] 您既可以在config.py中修改api-key(s)，也可以在问题输入区输入临时的api-key(s)，然后回车键提交后即可生效。")

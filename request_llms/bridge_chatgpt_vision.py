@@ -198,7 +198,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     # 前者是API2D的结束条件，后者是OPENAI的结束条件
                     if ('data: [DONE]' in chunk_decoded) or (len(chunkjson['choices'][0]["delta"]) == 0):
                         # 判定为数据流的结束，gpt_replying_buffer也写完了
-                        lastmsg = chatbot[-1][-1] + f"<br/><br/>{llm_kwargs['llm_model']}调用结束，该模型不具备上下文对话能力，如需追问，请及时切换模型。"
+                        lastmsg = chatbot[-1][-1] + f"\n\n\n\n「{llm_kwargs['llm_model']}调用结束，该模型不具备上下文对话能力，如需追问，请及时切换模型。」"
                         yield from update_ui_lastest_msg(lastmsg, chatbot, history, delay=1)
                         logging.info(f'[response] {gpt_replying_buffer}')
                         break
