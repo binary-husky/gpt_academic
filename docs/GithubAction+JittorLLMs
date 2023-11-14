@@ -1,6 +1,10 @@
 # 从NVIDIA源，从而支持显卡运损（检查宿主的nvidia-smi中的cuda版本必须>=11.3）
 FROM nvidia/cuda:11.3.1-runtime-ubuntu20.04
 ARG useProxyNetwork=''
+
+# 创建非root用户
+RUN useradd -ms /bin/bash gpt_academic
+
 RUN apt-get update
 RUN apt-get install -y curl proxychains curl g++
 RUN apt-get install -y git python python3 python-dev python3-dev --fix-missing
@@ -29,6 +33,9 @@ RUN git pull
 
 # 预热Tiktoken模块
 RUN python3  -c 'from check_proxy import warm_up_modules; warm_up_modules()'
+
+# 切换到非root用户
+USER gpt_academic
 
 # 启动
 CMD ["python3", "-u", "main.py"]

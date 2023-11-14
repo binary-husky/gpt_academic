@@ -10,6 +10,9 @@ ENV PATH "$PATH:/usr/local/texlive/2024/bin/x86_64-linux"
 ENV PATH "$PATH:/usr/local/texlive/2025/bin/x86_64-linux"
 ENV PATH "$PATH:/usr/local/texlive/2026/bin/x86_64-linux"
 
+# 创建非root用户
+RUN useradd -ms /bin/bash gpt_academic
+
 # 指定路径
 WORKDIR /gpt
 
@@ -27,6 +30,9 @@ RUN pip3 install -r requirements.txt
 
 # 可选步骤，用于预热模块
 RUN python3  -c 'from check_proxy import warm_up_modules; warm_up_modules()'
+
+# 切换到非root用户
+USER gpt_academic
 
 # 启动
 CMD ["python3", "-u", "main.py"]
