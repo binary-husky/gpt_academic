@@ -29,9 +29,9 @@ class knowledge_archive_interface():
             # < -------------------预热文本向量化模组--------------- >
             from comm_tools.toolbox import ProxyNetworkActivate
             print('Checking Text2vec ...')
-            from langchain.embeddings.huggingface import HuggingFaceEmbeddings
+            from langchain.embeddings import HuggingFaceEmbeddings
             with ProxyNetworkActivate('Download_LLM'):  # 临时地激活代理网络
-                self.text2vec_large_chinese = HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
+                self.text2vec_large_chinese = HuggingFaceEmbeddings(model_name="shibing624/text2vec-base-chinese")
         return self.text2vec_large_chinese
 
     def filter_quarterly_files(self, files):

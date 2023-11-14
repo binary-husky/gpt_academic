@@ -80,5 +80,9 @@
     "设置保存文件名": "设置保存文件名",
     "对话历史记录": "对话历史记录",
     "💾 Rename Chat": "💾 Rename Chat",
-    "📝 Export as Markdown": "📝 Export as Markdown"
+    "📝 Export as Markdown": "📝 Export as Markdown",
+    "您的IP区域：": "您的IP区域：",
+    "您的IP区域：未知。": "您的IP区域：未知。",
+    "获取IP地理位置失败。原因：": "获取IP地理位置失败。原因：",
+    "。你仍然可以使用聊天功能。": "。你仍然可以使用聊天功能。"
 }
