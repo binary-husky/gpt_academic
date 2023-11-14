@@ -374,7 +374,7 @@ def get_crazy_functions():
                 "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
                 "ArgsReminder": "在这里输入分辨率, 如1024x1024（默认），支持 1024x1024, 1792x1024, 1024x1792",  # 高级参数输入区的显示提示
                 "Info": "使用DALLE3 standard质量生成图片 | 输入参数字符串，提供图像的内容",
-                "Function": HotReload(图片生成_DALLE3)
+                "Function": HotReload(图片生成_DALLE3_Standard)
             },
         })
         function_plugins.update({
@@ -385,7 +385,7 @@ def get_crazy_functions():
                 "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
                 "ArgsReminder": "在这里输入分辨率, 如1024x1024（默认），支持 1024x1024, 1792x1024, 1024x1792",  # 高级参数输入区的显示提示
                 "Info": "使用DALLE3 HD质量生成图片 | 输入参数字符串，提供图像的内容",
-                "Function": HotReload(图片生成_DALLE3)
+                "Function": HotReload(图片生成_DALLE3_HD)
             },
         })
     except:
