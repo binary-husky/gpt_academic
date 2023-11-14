@@ -354,7 +354,7 @@ def get_crazy_functions():
         print('Load function plugin failed')
 
     try:
-        from crazy_functions.图片生成 import 图片生成_DALLE2, 图片生成_DALLE3_Standard, 图片生成_DALLE3_HD
+        from crazy_functions.图片生成 import 图片生成_DALLE2, 图片生成_DALLE3
         function_plugins.update({
             "图片生成_DALLE2 （先切换模型到openai或api2d）": {
                 "Group": "对话",
@@ -367,25 +367,14 @@ def get_crazy_functions():
             },
         })
         function_plugins.update({
-            "图片生成_DALLE3_Standard （先切换模型到openai或api2d）": {
+            "图片生成_DALLE3 （先切换模型到openai或api2d）": {
                 "Group": "对话",
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-                "ArgsReminder": "在这里输入分辨率, 如1024x1024（默认），支持 1024x1024, 1792x1024, 1024x1792",  # 高级参数输入区的显示提示
-                "Info": "使用DALLE3 standard质量生成图片 | 输入参数字符串，提供图像的内容",
-                "Function": HotReload(图片生成_DALLE3_Standard)
-            },
-        })
-        function_plugins.update({
-            "图片生成_DALLE3_HD （先切换模型到openai或api2d）": {
-                "Group": "对话",
-                "Color": "stop",
-                "AsButton": False,
-                "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-                "ArgsReminder": "在这里输入分辨率, 如1024x1024（默认），支持 1024x1024, 1792x1024, 1024x1792",  # 高级参数输入区的显示提示
-                "Info": "使用DALLE3 HD质量生成图片 | 输入参数字符串，提供图像的内容",
-                "Function": HotReload(图片生成_DALLE3_HD)
+                "ArgsReminder": "在这里输入分辨率, 如1024x1024（默认），支持 1024x1024, 1792x1024, 1024x1792。如需生成高清图像，请输入 1024x1024-HD, 1792x1024-HD, 1024x1792-HD。",  # 高级参数输入区的显示提示
+                "Info": "使用DALLE3生成图片 | 输入参数字符串，提供图像的内容",
+                "Function": HotReload(图片生成_DALLE3)
             },
         })
     except:
