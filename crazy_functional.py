@@ -281,7 +281,7 @@ def get_crazy_functions():
     }
 
     # -=--=- 尚未充分测试的实验性插件 & 需要额外依赖的插件 -=--=-
-        try:
+    try:
         from crazy_functions.文本文件Token计算器 import 文本文件Token计算器
         function_plugins.update({
             "文本文件Token计算器": {
