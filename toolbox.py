@@ -577,6 +577,64 @@ def del_outdated_uploads(outdate_time_seconds):
             except: pass
     return
 
+
+def html_local_file(file):
+    base_path = os.path.dirname(__file__)  # 项目目录
+    if os.path.exists(str(file)):
+        file = f'file={file.replace(base_path, ".")}'
+    return file
+
+
+def html_local_img(__file, layout='left', max_width=None, max_height=None, md=True):
+    style = ''
+    if max_width is not None:
+        style += f"max-width: {max_width};"
+    if max_height is not None:
+        style += f"max-height: {max_height};"
+    __file = html_local_file(__file)
+    a = f'<div align="{layout}"><img src="{__file}" style="{style}"></div>'
+    if md:
+        a = f'![{__file}]({__file})'
+    return a
+
+def file_manifest_filter_type(file_list, filter_: list = None):
+    new_list = []
+    if not filter_: filter_ = ['png', 'jpg', 'jpeg']
+    for file in file_list:
+        if str(os.path.basename(file)).split('.')[-1] in filter_:
+            new_list.append(html_local_img(file, md=False))
+        else:
+            new_list.append(file)
+    return new_list
+
+def to_markdown_tabs(head: list, tabs: list, alignment=':---:', column=False):
+    """
+    Args:
+        head: 表头：[]
+        tabs: 表值：[[列1], [列2], [列3], [列4]]
+        alignment: :--- 左对齐， :---: 居中对齐， ---: 右对齐
+        column: True to keep data in columns, False to keep data in rows (default).
+    Returns:
+        A string representation of the markdown table.
+    """
+    if column:
+        transposed_tabs = list(map(list, zip(*tabs)))
+    else:
+        transposed_tabs = tabs
+    # Find the maximum length among the columns
+    max_len = max(len(column) for column in transposed_tabs)
+
+    tab_format = "| %s "
+    tabs_list = "".join([tab_format % i for i in head]) + '|\n'
+    tabs_list += "".join([tab_format % alignment for i in head]) + '|\n'
+
+    for i in range(max_len):
+        row_data = [tab[i] if i < len(tab) else '' for tab in transposed_tabs]
+        row_data = file_manifest_filter_type(row_data, filter_=None)
+        tabs_list += "".join([tab_format % i for i in row_data]) + '|\n'
+
+    return tabs_list
+
 def on_file_uploaded(request: gradio.Request, files, chatbot, txt, txt2, checkboxes, cookies):
     """
     当文件被上传时的回调函数
@@ -605,6 +663,7 @@ def on_file_uploaded(request: gradio.Request, files, chatbot, txt, txt2, checkbo
     
     # 整理文件集合
     moved_files = [fp for fp in glob.glob(f'{target_path_base}/**/*', recursive=True)]
+    moved_files_str = to_markdown_tabs(head=['文件'], tabs=[moved_files])
     if "浮动输入区" in checkboxes: 
         txt, txt2 = "", target_path_base
     else:
@@ -1150,6 +1209,36 @@ def get_chat_default_kwargs():
     }
 
     return default_chat_kwargs
+
+
+def get_pictures_list(path):
+    file_manifest = [f for f in glob.glob(f'{path}/**/*.jpg', recursive=True)]
+    file_manifest += [f for f in glob.glob(f'{path}/**/*.jpeg', recursive=True)]
+    file_manifest += [f for f in glob.glob(f'{path}/**/*.png', recursive=True)]
+    return file_manifest
+
+
+import base64
+def have_any_recent_upload_image_files(chatbot):
+    _5min = 5 * 60
+    if chatbot is None: return False, None    # chatbot is None
+    most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
+    if not most_recent_uploaded: return False, None   # most_recent_uploaded is None
+    if time.time() - most_recent_uploaded["time"] < _5min:
+        most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
+        path = most_recent_uploaded['path']
+        file_manifest = get_pictures_list(path)
+        if len(file_manifest) == 0: return False, None
+        return True, file_manifest # most_recent_uploaded is new
+    else:
+        return False, None  # most_recent_uploaded is too old
+
+
+# Function to encode the image
+def encode_image(image_path):
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode('utf-8')
+
 
 def get_max_token(llm_kwargs):
     from request_llms.bridge_all import model_info
