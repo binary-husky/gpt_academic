@@ -133,7 +133,6 @@ function add_func_event() {
     // 监听上传文件计数器元素和 upload-index-file 元素的 hover(in JS handle by mouseenter and mouseleave) 和 non-hover 事件
     uploadedFilesCountElement.addEventListener("mouseenter", showUploadIndexFile);
     uploadedFilesCountElement.addEventListener("mouseleave", hideUploadIndexFile);
-
     uploadIndexFileElement.addEventListener("mouseenter", showUploadIndexFile);
     uploadIndexFileElement.addEventListener("mouseleave", hideUploadIndexFile);
 }

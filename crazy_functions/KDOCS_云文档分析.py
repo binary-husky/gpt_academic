@@ -5,17 +5,21 @@
 # @Descr   :
 import os.path
 import gradio as gr
-
 from comm_tools import func_box, ocr_tools, Langchain_cn
 from crazy_functions.kingsoft_fns import crazy_box, crzay_kingsoft, crzay_qqdocs
 from comm_tools.toolbox import update_ui, CatchException, trimmed_format_exc, get_conf
-
 
 
 def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, file_types):
     wps_links, qq_link = crazy_box.detach_cloud_links(link_limit)
     files = [file for file in link_limit.splitlines() if os.path.exists(file)]
     file_limit = []
+    if llm_kwargs.get('most_recent_uploaded'):  # 获取文件
+        files.append(llm_kwargs.get('most_recent_uploaded').get('path'))
+    user_input_prompt = link_limit
+    for item in wps_links+qq_link+files:       # 增加用户需求
+        user_input_prompt = str(link_limit).replace(item, '')
+    plugin_kwargs['user_input_prompt'] = user_input_prompt
     if not wps_links and not files and not qq_link:
         if len(link_limit) > 100:
             title = crazy_box.long_name_processing(link_limit)

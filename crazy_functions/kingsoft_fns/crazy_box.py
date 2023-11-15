@@ -634,7 +634,9 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
                                                                          plugin_kwargs)
                 except Exception as f:
                     func_box.通知机器人(f'读取知识库失败，请检查{f}')
-            inputs_array.append(func_box.replace_expected_text(prompt, content=limit, expect='{{{v}}}'))
+            sys_prompt = func_box.replace_expected_text(prompt, content=limit, expect='{{{v}}}')
+            user_prompt = plugin_kwargs.get('user_input_prompt', '')
+            inputs_array.append(sys_prompt+user_prompt)
             inputs_show_user_array.append(you_say + task_tag)
     yield from toolbox.update_ui(chatbot, history)
     return inputs_array, inputs_show_user_array
