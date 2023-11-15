@@ -262,7 +262,8 @@ def get_functions_多功能插件():
     from crazy_functions import 询问多个大语言模型
     from crazy_functions.联网的ChatGPT_bing版 import 连接bing搜索回答问题
     from crazy_functions.联网的ChatGPT import 连接网络回答问题
-    from crazy_functions.图片生成 import 图片生成
+    from crazy_functions.图片生成 import 图片生成_DALLE2
+    from crazy_functions.图片生成 import 图片生成_DALLE3
     from crazy_functions.数学动画生成manim import 动画生成
     from crazy_functions.交互功能函数模板 import 交互功能模板函数
     from crazy_functions.语音助手 import 语音助手
@@ -322,13 +323,24 @@ def get_functions_多功能插件():
             "ArgsReminder": "支持任意数量的llm接口，用&符号分隔。例如chatglm&gpt-3.5-turbo&api2d-gpt-4",  # 高级参数输入区的显示提示
             "Function": HotReload(询问多个大语言模型.同时问询_指定模型)
         },
-        "openai 图片生成": {
-            "Color": "primary",
-            "AsButton": True,
+        "图片生成_DALLE2 （先切换模型到openai或api2d）": {
+            "Group": "对话",
+            "Color": "stop",
+            "AsButton": False,
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "Info": "图片生成 | 输入参数字符串，提供图像的内容",
-            "ArgsReminder": "在这里输入分辨率, 如256x256（默认）",  # 高级参数输入区的显示提示
-            "Function": HotReload(图片生成)
+            "ArgsReminder": "在这里输入分辨率, 如1024x1024（默认），支持 256x256, 512x512, 1024x1024",  # 高级参数输入区的显示提示
+            "Info": "使用DALLE2生成图片 | 输入参数字符串，提供图像的内容",
+            "Function": HotReload(图片生成_DALLE2)
+        },
+        "图片生成_DALLE3 （先切换模型到openai或api2d）": {
+            "Group": "对话",
+            "Color": "stop",
+            "AsButton": False,
+            "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+            "ArgsReminder": "在这里输入分辨率, 如1024x1024（默认），支持 1024x1024, 1792x1024, 1024x1792",
+            # 高级参数输入区的显示提示
+            "Info": "使用DALLE3生成图片 | 输入参数字符串，提供图像的内容",
+            "Function": HotReload(图片生成_DALLE3)
         },
         "数学动画生成（Manim）": {
             "Color": "primary",

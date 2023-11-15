@@ -8,13 +8,16 @@
     具备多线程调用能力的函数：在函数插件中被调用，灵活而简洁
     2. predict_no_ui_long_connection(...)
 """
-import tiktoken
+import tiktoken, copy
 from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor
 from comm_tools.toolbox import get_conf, trimmed_format_exc
 
 from .bridge_chatgpt import predict_no_ui_long_connection as chatgpt_noui
 from .bridge_chatgpt import predict as chatgpt_ui
+
+from .bridge_chatgpt_vision import predict_no_ui_long_connection as chatgpt_vision_noui
+from .bridge_chatgpt_vision import predict as chatgpt_vision_ui
 
 from .bridge_chatglm import predict_no_ui_long_connection as chatglm_noui
 from .bridge_chatglm import predict as chatglm_ui
@@ -181,7 +184,15 @@ model_info = {
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
     },
-    # api_2d
+    "gpt-4-vision-preview": {
+        "fn_with_ui": chatgpt_vision_ui,
+        "fn_without_ui": chatgpt_vision_noui,
+        "endpoint": openai_endpoint,
+        "max_token": 4096,
+        "tokenizer": tokenizer_gpt4,
+        "token_cnt": get_token_num_gpt4,
+    },
+    # api_2d (此后不需要在此处添加api2d的接口了，因为下面的代码会自动添加)
     "api2d-gpt-3.5-turbo": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
@@ -255,6 +266,20 @@ for azure in AZURE_ENGINE_DICT:
             "token_cnt": get_token_num_gpt35,
         },
     })
+
+# -=-=-=-=-=-=- api2d 对齐支持 -=-=-=-=-=-=-
+for model in AVAIL_LLM_MODELS:
+    if model.startswith('api2d-') and (model.replace('api2d-','') in model_info.keys()):
+        mi = copy.deepcopy(model_info[model.replace('api2d-','')])
+        mi.update({"endpoint": api2d_endpoint})
+        model_info.update({model: mi})
+
+# -=-=-=-=-=-=- azure 对齐支持 -=-=-=-=-=-=-
+for model in AVAIL_LLM_MODELS:
+    if model.startswith('azure-') and (model.replace('azure-','') in model_info.keys()):
+        mi = copy.deepcopy(model_info[model.replace('azure-','')])
+        mi.update({"endpoint": azure_endpoint})
+        model_info.update({model: mi})
 
 # -=-=-=-=-=-=- 以下部分是新加入的模型，可能附带额外依赖 -=-=-=-=-=-=-
 if "claude-1-100k" in AVAIL_LLM_MODELS or "claude-2" in AVAIL_LLM_MODELS:
@@ -571,13 +596,13 @@ def LLM_CATCH_EXCEPTION(f):
         try:
             return f(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience)
         except Exception as e:
-            tb_str = '\n```\n' + toolbox.trimmed_format_exc() + '\n```\n'
+            tb_str = '\n```\n' + trimmed_format_exc() + '\n```\n'
             observe_window[0] = tb_str
             return tb_str
     return decorated
 
 
-def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience=False):
+def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, observe_window=[], console_slience=False):
     """
     发送至LLM，等待回复，一次性完成，不显示中间过程。但内部用stream的方法避免中途网线被掐。
     inputs：

@@ -1,6 +1,6 @@
 import time
 import threading
-from comm_tools.toolbox import update_ui
+from comm_tools.toolbox import update_ui, Singleton, trimmed_format_exc, trimmed_format_exc
 from multiprocessing import Process, Pipe
 from contextlib import redirect_stdout
 from request_llms.queued_pipe import create_queue_pipe
@@ -26,23 +26,20 @@ class ThreadLock(object):
     def __exit__(self, type, value, traceback):
         self.release()
 
-def SingletonLocalLLM(cls):
-    """
-    Singleton Decroator for LocalLLMHandle
-    """
-    _instance = {}
+@Singleton
+class GetSingletonHandle():
+    def __init__(self):
+        self.llm_model_already_running = {}
 
-    def _singleton(*args, **kargs):
-        if cls not in _instance:
-            _instance[cls] = cls(*args, **kargs)
-            return _instance[cls]
-        elif _instance[cls].corrupted:
-            _instance[cls] = cls(*args, **kargs)
-            return _instance[cls]
+    def get_llm_model_instance(self, cls, *args, **kargs):
+        if cls not in self.llm_model_already_running:
+            self.llm_model_already_running[cls] = cls(*args, **kargs)
+            return self.llm_model_already_running[cls]
+        elif self.llm_model_already_running[cls].corrupted:
+            self.llm_model_already_running[cls] = cls(*args, **kargs)
+            return self.llm_model_already_running[cls]
         else:
-            return _instance[cls]
-    return _singleton
-
+            return self.llm_model_already_running[cls]
 
 def reset_tqdm_output():
     import sys, tqdm
@@ -76,7 +73,6 @@ class LocalLLMHandle(Process):
         self.parent_state, self.child_state = create_queue_pipe()
         # allow redirect_stdout
         self.std_tag = "[Subprocess Message] "
-        self.child.write = lambda x: self.child.send(self.std_tag + x)
         self.running = True
         self._model = None
         self._tokenizer = None
@@ -137,6 +133,8 @@ class LocalLLMHandle(Process):
     def run(self):
         # 🏃‍♂️🏃‍♂️🏃‍♂️ run in child process
         # 第一次运行，加载参数
+        self.child.flush = lambda *args: None
+        self.child.write = lambda x: self.child.send(self.std_tag + x)
         reset_tqdm_output()
         self.set_state("`尝试加载模型`")
         try:
@@ -145,7 +143,6 @@ class LocalLLMHandle(Process):
         except:
             self.set_state("`加载模型失败`")
             self.running = False
-            from toolbox import trimmed_format_exc
             self.child.send(
                 f'[Local Message] 不能正常加载{self.model_name}的参数.' + '\n```\n' + trimmed_format_exc() + '\n```\n')
             self.child.send('[FinishBad]')
@@ -163,7 +160,6 @@ class LocalLLMHandle(Process):
                 self.child.send('[Finish]')
                 # 请求处理结束，开始下一个循环
             except:
-                from toolbox import trimmed_format_exc
                 self.child.send(
                     f'[Local Message] 调用{self.model_name}失败.' + '\n```\n' + trimmed_format_exc() + '\n```\n')
                 self.child.send('[Finish]')
@@ -220,7 +216,7 @@ def get_local_llm_predict_fns(LLMSingletonClass, model_name, history_format='cla
         """
             refer to request_llms/bridge_all.py
         """
-        _llm_handle = LLMSingletonClass()
+        _llm_handle = GetSingletonHandle().get_llm_model_instance(LLMSingletonClass)
         if len(observe_window) >= 1:
             observe_window[0] = load_message + "\n\n" + _llm_handle.get_state()
         if not _llm_handle.running:
@@ -268,14 +264,14 @@ def get_local_llm_predict_fns(LLMSingletonClass, model_name, history_format='cla
         """
         chatbot.append((inputs, ""))
 
-        _llm_handle = LLMSingletonClass()
+        _llm_handle = GetSingletonHandle().get_llm_model_instance(LLMSingletonClass)
         chatbot[-1] = (inputs, load_message + "\n\n" + _llm_handle.get_state())
         yield from update_ui(chatbot=chatbot, history=[])
         if not _llm_handle.running:
             raise RuntimeError(_llm_handle.get_state())
 
         if additional_fn is not None:
-            from core_functional import handle_core_functionality
+            from comm_tools.core_functional import handle_core_functionality
             inputs, history = handle_core_functionality(
                 additional_fn, inputs, history, chatbot)
 

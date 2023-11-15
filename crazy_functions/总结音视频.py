@@ -2,9 +2,9 @@ import glob, os
 from comm_tools import func_box
 from moviepy.editor import AudioFileClip
 from crazy_functions.kingsoft_fns import crazy_box, crzay_kingsoft
-from comm_tools.toolbox import CatchException, report_execption, select_api_key, update_ui, get_conf
+from comm_tools.toolbox import CatchException, select_api_key, update_ui, get_conf
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, get_files_from_everything
-from comm_tools.toolbox import write_history_to_file, promote_file_to_downloadzone, get_log_folder
+from comm_tools.toolbox import write_history_to_file, promote_file_to_downloadzone, get_log_folder, report_exception
 
 
 def split_audio_file(filename, split_duration=1000):
@@ -148,7 +148,7 @@ def 总结音视频(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     try:
         from moviepy.editor import AudioFileClip
     except:
-        report_execption(chatbot, history,
+        report_exception(chatbot, history,
                          a=f"解析项目: {txt}",
                          b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade moviepy```。")
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
@@ -162,7 +162,7 @@ def 总结音视频(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
         project_folder = txt
     else:
         if txt == "": txt = '空空如也的输入栏'
-        report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"找不到本地项目或无权访问: {txt}")
+        report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"找不到本地项目或无权访问: {txt}")
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
         return
 
@@ -177,7 +177,7 @@ def 总结音视频(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
 
     # 如果没找到任何文件
     if len(file_manifest) == 0:
-        report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"找不到任何音频或视频文件: {txt}")
+        report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"找不到任何音频或视频文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
         return
 
@@ -221,7 +221,7 @@ def Kdocs音频提取总结(txt, llm_kwargs, plugin_kwargs, chatbot, history, sy
     if os.path.exists(txt) or txt.find('http') != -1:
         project_folder = txt
     else:
-        report_execption(chatbot, history, a=None, b=f"{crazy_box.previously_on_plugins}")
+        report_exception(chatbot, history, a=None, b=f"{crazy_box.previously_on_plugins}")
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
         return
     # 搜索需要处理的文件清单
@@ -237,7 +237,7 @@ def Kdocs音频提取总结(txt, llm_kwargs, plugin_kwargs, chatbot, history, sy
             file_manifest += file_manifest_tmp
     # 如果没找到任何文件
     if len(file_manifest) == 0:
-        report_execption(chatbot, history, a=f"解析项目: {txt}", b=f"{crazy_box.previously_on_plugins}")
+        report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"{crazy_box.previously_on_plugins}")
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
         return
     # 将音频转换为文字

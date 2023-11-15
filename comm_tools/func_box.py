@@ -182,17 +182,28 @@ def html_download_blank(__href, dir_name=''):
     return a
 
 
-def html_local_img(__file, layout='left', max_width=None, max_height=None):
+def html_local_img(__file, layout='left', max_width=None, max_height=None, md=True):
     style = ''
     if max_width is not None:
         style += f"max-width: {max_width};"
     if max_height is not None:
         style += f"max-height: {max_height};"
-    a = f'<div align="{layout}"><img src="file={__file}" style="{style}"></div>'
     __file = html_local_file(__file)
-    a = f'![{__file}]({__file})'
+    a = f'<div align="{layout}"><img src="{__file}" style="{style}"></div>'
+    if md:
+        a = f'![{__file}]({__file})'
     return a
 
+
+def file_manifest_filter_type(file_list, filter_: list = None):
+    new_list = []
+    if not filter_: filter_ = ['png', 'jpg', 'jpeg']
+    for file in file_list:
+        if str(os.path.basename(file)).split('.')[-1] in filter_:
+            new_list.append(html_local_img(file, md=False))
+        else:
+            new_list.append(file)
+    return new_list
 
 def ipaddr():
     # 获取本地ipx
@@ -588,7 +599,9 @@ def to_markdown_tabs(head: list, tabs: list, alignment=':---:', column=False):
 
     for i in range(max_len):
         row_data = [tab[i] if i < len(tab) else '' for tab in transposed_tabs]
+        row_data = file_manifest_filter_type(row_data, filter_=None)
         tabs_list += "".join([tab_format % i for i in row_data]) + '|\n'
+
     return tabs_list
 
 

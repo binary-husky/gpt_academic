@@ -1,6 +1,7 @@
 from comm_tools.toolbox import update_ui, get_log_folder
 from comm_tools.toolbox import write_history_to_file, promote_file_to_downloadzone
-from comm_tools.toolbox import CatchException, report_execption, get_conf
+from comm_tools.toolbox import CatchException, report_exception, get_conf
+
 import re, requests, unicodedata, os
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 
@@ -144,7 +145,7 @@ def 下载arxiv论文并翻译摘要(txt, llm_kwargs, plugin_kwargs, chatbot, hi
     try:
         import bs4
     except:
-        report_execption(chatbot, history, 
+        report_exception(chatbot, history, 
             a = f"解析项目: {txt}", 
             b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade beautifulsoup4```。")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
@@ -157,7 +158,7 @@ def 下载arxiv论文并翻译摘要(txt, llm_kwargs, plugin_kwargs, chatbot, hi
     try:
         pdf_path, info = download_arxiv_(txt)
     except:
-        report_execption(chatbot, history, 
+        report_exception(chatbot, history, 
             a = f"解析项目: {txt}", 
             b = f"下载pdf文件未成功")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面

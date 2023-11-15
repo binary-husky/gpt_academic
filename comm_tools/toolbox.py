@@ -82,7 +82,7 @@ def ArgsGeneralWrapper(f):
         if not cookies.get('first_chat') and args:
             cookies['first_chat'] = args[0]
             cookies['first_chat'] += "_" + func_box.created_atime()
-        llm_kwargs = {
+        cookies.update({
             'api_key': cookies['api_key'], 'llm_model': llm_model,
             **real_llm,
             'worker_num': worker_num, 'ipaddr': ipaddr.client.host, 'ocr': ocr_trust,
@@ -92,12 +92,10 @@ def ArgsGeneralWrapper(f):
                 'score': vector_score,
                 'top-k': vector_top_k,
                 'size': vector_size
-            }
-        }
-        cookies.update({
-            **llm_kwargs,
+            },
             'system_prompt': system_prompt,
         })
+        llm_kwargs = cookies
         plugin_kwargs = {
             "advanced_arg": plugin_advanced_arg,
             "parameters_def": ''
@@ -243,9 +241,8 @@ def CatchException(f):
                 chatbot_with_cookie.clear()
                 chatbot_with_cookie.append(["插件调度异常", "异常原因"])
             chatbot_with_cookie[-1] = (chatbot_with_cookie[-1][0],
-                                       f"[Local Message] 实验性函数调用出错: \n\n{tb_str} \n\n当前代理可用性: \n\n{check_proxy(proxies)}")
-            yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=f'异常 {e}')  # 刷新界面
-
+                           f"[Local Message] 插件调用出错: \n\n{tb_str} \n\n当前代理可用性: \n\n{check_proxy(proxies)}")
+            yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=f'异常 {e}') # 刷新界面
     return decorated
 
 
@@ -281,7 +278,7 @@ def HotReload(f):
 其他小工具:
     - write_history_to_file:    将结果写入markdown文件中
     - regular_txt_to_markdown:  将普通文本转换为Markdown格式的文本。
-    - report_execption:         向chatbot中添加简单的意外错误信息
+    - report_exception:         向chatbot中添加简单的意外错误信息
     - text_divide_paragraph:    将文本按照段落分隔符分割开，生成带有段落标签的HTML代码。
     - markdown_convertion:      用多种方式组合，将markdown转化为好看的html
     - format_io:                接管gradio默认的markdown处理方式
@@ -384,17 +381,16 @@ def regular_txt_to_markdown(text):
     return text
 
 
-def report_execption(chatbot, history, a, b):
+
+
+def report_exception(chatbot, history, a, b):
     """
     向chatbot中添加错误信息
     """
     chatbot.append((a, b))
     history.extend([a, b])
 
-
 import re
-
-
 def text_divide_paragraph(input_str):
     if input_str:
         code_blocks = re.findall(r'```[\s\S]*?```', input_str)
@@ -743,7 +739,7 @@ def on_file_uploaded(files, chatbot, txt, cookies, ipaddr: gr.Request):
         shutil.copy(file.name, f'{time_tag_path}/{file_origin_name}')
         err_msg += extract_archive(f'{time_tag_path}/{file_origin_name}',
                                    dest_dir=f'{time_tag_path}/{file_origin_name}.extract')
-    moved_files = [fp for fp in glob.glob(f'{time_tag_path}/**/*', recursive=True)]
+    moved_files = [fp for fp in glob.glob(f'{time_tag_path}/**/*', recursive=True) ]
     moved_files_str = func_box.to_markdown_tabs(head=['文件'], tabs=[moved_files])
     if type(chatbot) is str:
         chatbot = f'[Local Message] 收到以下文件: \n\n{moved_files_str}' \
@@ -765,7 +761,7 @@ def on_file_uploaded(files, chatbot, txt, cookies, ipaddr: gr.Request):
                 'time': time.time(),
                 'time_str': time_tag
             }})
-    return chatbot, txt
+    return chatbot, gr.update()
 
 
 def on_report_generated(cookies, files, chatbot, request):
@@ -809,7 +805,6 @@ def on_report_generated(cookies, files, chatbot, request):
             'time_str': time_tag
         }})
     return chatbot, txt, cookies
-
 
 
 def load_chat_cookies():
@@ -1022,6 +1017,11 @@ def read_single_conf_with_lru_cache(arg):
             r = getattr(importlib.import_module('config'), arg)
 
     # 在读取API_KEY时，检查一下是不是忘了改config
+    if arg == 'API_URL_REDIRECT':
+        oai_rd = r.get("https://api.openai.com/v1/chat/completions", None) # API_URL_REDIRECT填写格式是错误的，请阅读`https://github.com/binary-husky/gpt_academic/wiki/项目配置说明`
+        if oai_rd and not oai_rd.endswith('/completions'):
+            print亮红( "\n\n[API_URL_REDIRECT] API_URL_REDIRECT填错了。请阅读`https://github.com/binary-husky/gpt_academic/wiki/项目配置说明`。如果您确信自己没填错，无视此消息即可。")
+            time.sleep(5)
     if arg == 'API_KEY':
         print亮蓝(
             f"[API_KEY] 本项目现已支持OpenAI和Azure的api-key。也支持同时填写多个api-key，如API_KEY=\"openai-key1,openai-key2,azure-key3\"")
@@ -1340,15 +1340,11 @@ def get_chat_handle():
 def get_plugin_default_kwargs():
     """
     """
-    from comm_tools.toolbox import get_conf, ChatBotWithCookies
-
-    WEB_PORT, LLM_MODEL, API_KEY = \
-        get_conf('WEB_PORT', 'LLM_MODEL', 'API_KEY')
-
+    cookies = load_chat_cookies()
     llm_kwargs = {
-        'api_key': API_KEY,
-        'llm_model': LLM_MODEL,
-        'top_p': 1.0,
+        'api_key': cookies['api_key'],
+        'llm_model': cookies['llm_model'],
+        'top_p':1.0,
         'max_length': None,
         'temperature': 1.0,
     }
@@ -1361,8 +1357,8 @@ def get_plugin_default_kwargs():
         "plugin_kwargs": {},
         "chatbot_with_cookie": chatbot,
         "history": [],
-        "system_prompt": "You are a good AI.",
-        "web_port": WEB_PORT
+        "system_prompt": "You are a good AI.", 
+        "web_port": None
     }
     return default_plugin_kwargs
 
@@ -1370,17 +1366,14 @@ def get_plugin_default_kwargs():
 def get_chat_default_kwargs():
     """
     """
-
-    LLM_MODEL, API_KEY = get_conf('LLM_MODEL', 'API_KEY')
-
+    cookies = load_chat_cookies()
     llm_kwargs = {
-        'api_key': API_KEY,
-        'llm_model': LLM_MODEL,
-        'top_p': 1.0,
+        'api_key': cookies['api_key'],
+        'llm_model': cookies['llm_model'],
+        'top_p':1.0,
         'max_length': None,
         'temperature': 1.0,
     }
-
     default_chat_kwargs = {
         "inputs": "Hello there, are you ready?",
         "llm_kwargs": llm_kwargs,
@@ -1391,3 +1384,44 @@ def get_chat_default_kwargs():
     }
 
     return default_chat_kwargs
+
+
+def get_pictures_list(path):
+    file_manifest = [f for f in glob.glob(f'{path}/**/*.jpg', recursive=True)]
+    file_manifest += [f for f in glob.glob(f'{path}/**/*.jpeg', recursive=True)]
+    file_manifest += [f for f in glob.glob(f'{path}/**/*.png', recursive=True)]
+    return file_manifest
+
+
+import base64
+def have_any_recent_upload_image_files(chatbot):
+    _5min = 5 * 60
+    if chatbot is None: return False, None    # chatbot is None
+    most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
+    if not most_recent_uploaded: return False, None   # most_recent_uploaded is None
+    if time.time() - most_recent_uploaded["time"] < _5min:
+        most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
+        path = most_recent_uploaded['path']
+        file_manifest = get_pictures_list(path)
+        if len(file_manifest) == 0: return False, None
+        return True, file_manifest # most_recent_uploaded is new
+    else:
+        return False, None  # most_recent_uploaded is too old
+
+
+# Function to encode the image
+def encode_image(image_path):
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode('utf-8')
+
+
+def get_max_token(llm_kwargs):
+    from request_llms.bridge_all import model_info
+    return model_info[llm_kwargs['llm_model']]['max_token']
+
+
+def check_packages(packages=[]):
+    import importlib.util
+    for p in packages:
+        spam_spec = importlib.util.find_spec(p)
+        if spam_spec is None: raise ModuleNotFoundError

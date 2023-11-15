@@ -2,7 +2,6 @@ import os;
 
 os.environ['no_proxy'] = '*'  # 避免代理网络产生意外污染
 import pickle
-import codecs
 import base64
 
 
@@ -41,6 +40,7 @@ def main():
     description += "</br></br>虚空终端使用说明: 点击虚空终端, 然后根据提示输入指令, 再次点击虚空终端"
     description += "</br></br>如何保存对话: 点击保存当前的对话按钮"
     description += "</br></br>如何语音对话: 请阅读Wiki"
+    description += "</br></br>如何临时更换API_KEY: 在输入区输入临时API_KEY后提交（网页刷新后失效）"
 
     # 问询记录, python 版本建议3.9+（越新越好）
     import logging, uuid
@@ -112,8 +112,8 @@ def main():
                         clearBtn.style(size="sm")
                     if ENABLE_AUDIO:
                         with gr.Row():
-                            audio_mic = gr.Audio(source="microphone", type="numpy", streaming=True,
-                                                 show_label=False).style(container=False)
+                            audio_mic = gr.Audio(source="microphone", type="numpy", elem_id="elem_audio",
+                                                 streaming=True, show_label=False).style(container=False)
                     with gr.Row():
                         status = gr.Markdown(
                             f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {proxy_info}",

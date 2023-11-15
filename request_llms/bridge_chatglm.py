@@ -2,16 +2,15 @@ model_name = "ChatGLM"
 cmd_to_install = "`pip install -r request_llms/requirements_chatglm.txt`"
 
 
-from transformers import AutoModel, AutoTokenizer
 from comm_tools.toolbox import get_conf, ProxyNetworkActivate
-from .local_llm_class import LocalLLMHandle, get_local_llm_predict_fns, SingletonLocalLLM
+from .local_llm_class import LocalLLMHandle, get_local_llm_predict_fns
+
 
 
 
 # ------------------------------------------------------------------------------------------------------------------------
 # 🔌💻 Local Model
 # ------------------------------------------------------------------------------------------------------------------------
-@SingletonLocalLLM
 class GetGLM2Handle(LocalLLMHandle):
 
     def load_model_info(self):
@@ -24,6 +23,7 @@ class GetGLM2Handle(LocalLLMHandle):
         import os, glob
         import os
         import platform
+        from transformers import AutoModel, AutoTokenizer
         LOCAL_MODEL_QUANT, device = get_conf('LOCAL_MODEL_QUANT', 'LOCAL_MODEL_DEVICE')
 
         if LOCAL_MODEL_QUANT == "INT4":         # INT4

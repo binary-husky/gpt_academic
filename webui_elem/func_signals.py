@@ -98,6 +98,14 @@ def switch_latex_output(select):
 def update_chat(llm_s):
     return gr.Chatbot.update(avatar_images=func_box.get_avatar_img(llm_s))
 
+def sm_upload_clear(cookie: dict):
+    upload_ho = cookie.get('most_recent_uploaded')
+    if upload_ho:
+        cookie.pop('most_recent_uploaded')
+    return gr.update(value=None), cookie
+
+
+
 def clear_input(inputs, cookies, ipaddr: gr.Request):
     user_path = os.path.join(func_box.history_path, ipaddr.client.host)
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])

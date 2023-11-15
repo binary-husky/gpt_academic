@@ -1,21 +1,5 @@
 gradio==3.43.2
 pydantic==1.10.11
-tiktoken>=0.3.3
-requests[socks]
-transformers>=4.27.1
-python-markdown-math
-beautifulsoup4
-prompt_toolkit
-latex2mathml
-python-docx
-mdtex2html
-anthropic
-colorama
-Markdown
-pygments
-openai
-numpy
-arxiv
 pyperclip
 scikit-learn
 psutil
@@ -39,3 +23,5 @@ pypdf2==2.12.1
 websocket-client
 scipdf_parser>=0.3
 commentjson
+numpy
+rich

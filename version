@@ -1,5 +1,5 @@
 {
-  "version": 3.57,
+  "version": 3.60,
   "show_feature": true,
-  "new_feature": "支持文心一言v4和星火v3 <-> 支持GLM3和智谱的API <-> 解决本地模型并发BUG <-> 支持动态追加基础功能按钮 <-> 新汇报PDF汇总页面 <-> 重新编译Gradio优化使用体验"
+  "new_feature": "11月12日紧急BUG修复 <-> AutoGen多智能体插件测试版 <-> 修复本地模型在Windows下的加载BUG <-> 支持文心一言v4和星火v3 <-> 支持GLM3和智谱的API <-> 解决本地模型并发BUG <-> 支持动态追加基础功能按钮 <-> 新汇报PDF汇总页面 <-> 重新编译Gradio优化使用体验"
 }
