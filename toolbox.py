@@ -74,6 +74,7 @@ def ArgsGeneralWrapper(f):
             'max_length': max_length,
             'temperature':temperature,
             'client_ip': request.client.host,
+            'most_recent_uploaded': cookies.get('most_recent_uploaded')
         }
         plugin_kwargs = {
             "advanced_arg": plugin_advanced_arg,
@@ -660,17 +661,15 @@ def on_file_uploaded(request: gradio.Request, files, chatbot, txt, txt2, checkbo
         this_file_path = pj(target_path_base, file_origin_name)
         shutil.move(file.name, this_file_path)
         upload_msg += extract_archive(file_path=this_file_path, dest_dir=this_file_path+'.extract')
-    
-    # 整理文件集合
-    moved_files = [fp for fp in glob.glob(f'{target_path_base}/**/*', recursive=True)]
-    moved_files_str = to_markdown_tabs(head=['文件'], tabs=[moved_files])
+
     if "浮动输入区" in checkboxes: 
         txt, txt2 = "", target_path_base
     else:
         txt, txt2 = target_path_base, ""
 
-    # 输出消息
-    moved_files_str = '\t\n\n'.join(moved_files)
+    # 整理文件集合 输出消息
+    moved_files = [fp for fp in glob.glob(f'{target_path_base}/**/*', recursive=True)]
+    moved_files_str = to_markdown_tabs(head=['文件'], tabs=[moved_files])
     chatbot.append(['我上传了文件，请查收', 
                     f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
                     f'\n\n调用路径参数已自动修正到: \n\n{txt}' +
