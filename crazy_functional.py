@@ -281,6 +281,20 @@ def get_crazy_functions():
     }
 
     # -=--=- 尚未充分测试的实验性插件 & 需要额外依赖的插件 -=--=-
+        try:
+        from crazy_functions.文本文件Token计算器 import 文本文件Token计算器
+        function_plugins.update({
+            "文本文件Token计算器": {
+                "Group": "编程|学术|智能体",
+                "AsButton": True,
+                "Info": "文本文件Token计算器 | 输入参数为路径",
+                "Function": HotReload(文本文件Token计算器)
+            }
+        })
+    except:
+        print(trimmed_format_exc())
+        print('Load function plugin failed')
+        
     try:
         from crazy_functions.下载arxiv论文翻译摘要 import 下载arxiv论文并翻译摘要
         function_plugins.update({
