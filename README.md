@@ -1,6 +1,6 @@
 > **Note**
 > 
-> 2023.11.12: 紧急修复了endpoint异常的问题。
+> 2023.11.12: 某些依赖包尚不兼容python 3.12，推荐python 3.11。
 > 
 > 2023.11.7: 安装依赖时，请选择`requirements.txt`中**指定的版本**。 安装命令：`pip install -r requirements.txt`。本项目开源免费，近期发现有人蔑视开源协议并利用本项目违规圈钱，请提高警惕，谨防上当受骗。
 
@@ -108,7 +108,7 @@ cd gpt_academic
 
 3. 安装依赖
 ```sh
-# （选择I: 如熟悉python, python>=3.9）备注：使用官方pip源或者阿里pip源, 临时换源方法：python -m pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
+# （选择I: 如熟悉python, python推荐版本 3.9 ~ 3.11）备注：使用官方pip源或者阿里pip源, 临时换源方法：python -m pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 python -m pip install -r requirements.txt
 
 # （选择II: 使用Anaconda）步骤也是类似的 (https://www.bilibili.com/video/BV1rc411W7Dr)：
