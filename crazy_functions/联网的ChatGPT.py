@@ -67,7 +67,7 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     """
     # ------------- < 第1步：爬取搜索引擎的结果 > -------------
     from comm_tools.toolbox import get_conf
-    proxies, = get_conf('proxies')
+    proxies = get_conf('proxies')
     urls = google(txt, proxies)
     history = []
     if len(urls) == 0:

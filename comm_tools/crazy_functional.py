@@ -174,7 +174,7 @@ def get_functions_代码解析():
         "解析整个Python项目": {
             "Color": "primary",  # 按钮颜色
             "AsButton": True,
-            "Info": "解析一个Python项目的所有源文件(.py) | 输入参数为路径",
+            "Info": "解析Python项目的所有源文件(.py) | 输入参数为路径",
             "Function": HotReload(解析项目源代码.解析一个Python项目)
         },
         "批量生成函数注释": {
@@ -186,7 +186,7 @@ def get_functions_代码解析():
         "解析整个Matlab项目": {
             "Color": "stop",
             "AsButton": False,
-            "Info": "解析一个Matlab项目的所有源文件(.m) | 输入参数为路径",
+            "Info": "解析Matlab项目的所有源文件(.m) | 输入参数为路径",
             "Function": HotReload(解析项目源代码.解析一个Matlab项目)
         },
         "解析一个C项目的头文件": {
@@ -371,55 +371,75 @@ def get_functions_多功能插件():
 def get_functions_云文档处理():
     # < -------------------云文档专用--------------- >
     from crazy_functions import KDOCS_云文档分析
-    from crazy_functions import 总结音视频
     from crazy_functions import KDOCS_流程图_图片分析
     desc = '高级参数详细说明请查看项目自述文档, 若有更改，提交前请使用Json检查器检查是否符合要求'
     function_plugins['云文档'] = {
         "文档提取测试点": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_云文档分析.KDocs_文档提取测试点),
+            "Function": HotReload(KDOCS_云文档分析.Kdocs_多阶段生成回答),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
-                '开启OCR': True,
-                "提示词分类": '插件定制',
-                '格式化文档提示词': '提取文档测试点',
-                "显示过程": True,
+                "开启OCR": True,
+                "提示词分类": "插件定制",
+                '用例下标排序': None,
+                "阶段性产出": {
+                    "格式化文档": {
+                        "提示词": "提取文档测试点",
+                        "调用方法": "结果写入Markdown"
+                    },
+                },
+                "处理文件类型": ['md', 'txt', 'pdf', 'xmind', '智能文档']
             }
         },
         "测试点转测试用例": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_云文档分析.KDocs_转客户端测试用例),
+            "Function": HotReload(KDOCS_云文档分析.Kdocs_多阶段生成回答),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
-                '开启OCR': True,
-                "提示词分类": '插件定制',
-                "预期产出提示词": '文档转测试用例',
-                '写入指定模版': 'https://www.kdocs.cn/l/civeYz1Wg2OK',
-                '写入指定Sheet': '测试要点',
-                "显示过程": False,
-            }
+                "开启OCR": True,
+                "提示词分类": "插件定制",
+                '用例下标排序': None,
+                "阶段性产出": {
+                    "预期产出": {
+                        "提示词": "文档转测试用例",
+                        "调用方法": "写入测试用例",
+                    }
+                },
+                "写入指定模版": "./docs/template/客户端测试用例模版.xlsx",
+                "写入指定Sheet": "测试要点",
+            },
+            "处理文件类型": ['md', 'txt', 'pdf', 'xmind', '智能文档']
         },
         "文档转客户端测试用例": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_云文档分析.KDocs_转客户端测试用例),
+            "Function": HotReload(KDOCS_云文档分析.Kdocs_多阶段生成回答),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
-                '开启OCR': True,
-                "提示词分类": '插件定制',
-                "格式化文档提示词": '提取文档测试点',
-                "预期产出提示词": '文档转测试用例',
-                '写入指定模版': './docs/template/客户端测试用例模版.xlsx',
-                '写入指定Sheet': '测试要点',
-                "显示过程": False,
+                "开启OCR": True,
+                "提示词分类": "插件定制",
+                '用例下标排序': None,
+                "阶段性产出": {
+                    "格式化文档": {
+                        "提示词": "提取文档测试点",
+                        "调用方法": "结果写入Markdown"
+                    },
+                    "预期产出": {
+                        "提示词": "文档转测试用例",
+                        "调用方法": "写入测试用例",
+                    }
+                },
+                "写入指定模版": "./docs/template/客户端测试用例模版.xlsx",
+                "写入指定Sheet": "测试要点",
+                "处理文件类型": ['md', 'txt', 'pdf', 'xmind', '智能文档']
             }
         },
-        "文档转客户端测试用例(多阶段生成)": {
+        "文档转客户端测试用例(全配置)": {
             "Color": "primary",
             "AsButton": True,
             "Function": HotReload(KDOCS_云文档分析.Kdocs_多阶段生成回答),
@@ -446,75 +466,115 @@ def get_functions_云文档处理():
                 },
                 "写入指定模版": "./docs/template/客户端测试用例模版.xlsx",
                 "写入指定Sheet": "测试要点",
-                "显示过程": False
+                "处理文件类型": ['md', 'txt', 'pdf', 'xmind', '智能文档', 'xlsx']
             }
         },
         "文档转接口测试用例": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_云文档分析.KDocs_转接口测试用例),
+            "Function": HotReload(KDOCS_云文档分析.Kdocs_多阶段生成回答),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
-                '开启OCR': True,
-                "提示词分类": '插件定制',
-                '格式化文档提示词': '文档转Markdown_分割',
-                "预期产出提示词": '接口文档转测试用例',
-                '写入指定模版': './docs/template/接口测试用例模板.xlsx',
-                '写入指定Sheet': '测试要点',
-                "显示过程": False,
+                "开启OCR": True,
+                "提示词分类": "插件定制",
+                '用例下标排序': None,
+                "阶段性产出": {
+                    "格式化文档": {
+                        "提示词": "文档转Markdown_分割",
+                        "调用方法": "结果写入Markdown"
+                    },
+                    "预期产出": {
+                        "提示词": "接口文档转测试用例",
+                        "调用方法": "写入测试用例",
+                    }
+                },
+                "写入指定模版": "./docs/template/接口测试用例模板.xlsx",
+                "写入指定Sheet": "测试要点",
+                "处理文件类型": ['md', 'txt', 'pdf', 'xmind', '智能文档']
             }
         },
         "测试用例检查优化": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_云文档分析.KDocs_测试用例检查优化),
+            "Function": HotReload(KDOCS_云文档分析.Kdocs_多阶段生成回答),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
-                '开启OCR': True,
-                '读取指定Sheet': '测试要点',
-                "提示词分类": '插件定制',
-                "预期产出提示词": '补充测试用例场景',
-                "显示过程": False,
-            }
+                "开启OCR": True,
+                "提示词分类": "插件定制",
+                '用例下标排序': None,
+                "阶段性产出": {
+                    "预期产出": {
+                        "提示词": "接口文档转测试用例",
+                        "调用方法": "补充测试用例",
+                    }
+                },
+                "写入指定模版": "./docs/template/接口测试用例模板.xlsx",
+                "写入指定Sheet": "测试要点",
+            },
+            "处理文件类型": ['xlsx']
         },
         "文档需求分析问答": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_云文档分析.KDocs_需求分析问答),
+            "Function": HotReload(KDOCS_云文档分析.Kdocs_多阶段生成回答),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
-                '开启OCR': False,
-                "提示词分类": '插件定制',
-                '格式化文档提示词': '文档转Markdown',
-                "预期产出提示词": '需求分析对话',
-                "显示过程": True,
+                "开启OCR": True,
+                "提示词分类": "插件定制",
+                '用例下标排序': None,
+                "阶段性产出": {
+                    "格式化文档": {
+                        "提示词": "文档转Markdown",
+                        "调用方法": "结果写入Markdown",
+                    },
+                    "预期产出": {
+                        "提示词": "需求分析对话",
+                        "调用方法": "结果写入Markdown",
+                    }
+                },
+                "处理文件类型": ['md', 'txt', 'pdf', 'xmind', '智能文档']
             }
         },
         "文档转流程图": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_云文档分析.KDocs_文档转流程图),
+            "Function": HotReload(KDOCS_云文档分析.Kdocs_多阶段生成回答),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
-                '开启OCR': True,
-                "提示词分类": '插件定制',
-                '格式化文档提示词': '文档转Markdown',
+                "开启OCR": True,
+                "提示词分类": "插件定制",
+                '用例下标排序': None,
+                "阶段性产出": {
+                    "格式化文档": {
+                        "提示词": "文档转Markdown",
+                        "调用方法": "Markdown转换为流程图",
+                    }
+                },
+                "处理文件类型": ['md', 'txt', 'pdf', 'xmind', '智能文档']
             }
         },
         "批量总结音视频": {
             "Color": "primary",
             "AsButton": True,
             "AdvancedArgs": True,
-            "Function": HotReload(总结音视频.Kdocs音频提取总结),
+            "Function": HotReload(KDOCS_云文档分析.Kdocs_多阶段生成回答),
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Info": "批量总结音频或视频 | 输入参数为路径",
             "Parameters": {
-                "提示词分类": '插件定制',
-                "预期产出提示词": '总结摘要提取',
+                "开启OCR": True,
+                "提示词分类": "插件定制",
+                '用例下标排序': None,
+                "阶段性产出": {
+                    "格式化文档": {
+                        "提示词": "总结摘要提取",
+                        "调用方法": "Markdown转换为流程图",
+                    }
+                },
+                "处理文件类型": ['.mp4', '.m4a', '.wav', '.mpga', '.mpeg', '.mp3', '.avi', '.mkv', '.flac', '.aac'],
             }
         },
         "批量理解流程图、图片": {

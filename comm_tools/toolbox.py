@@ -233,7 +233,7 @@ def CatchException(f):
             yield from f(main_input, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, args, kwargs)
         except Exception as e:
             from comm_tools.check_proxy import check_proxy
-            proxies, = get_conf('proxies')
+            proxies = get_conf('proxies')
             tb_str = '```\n' + trimmed_format_exc() + '```'
             func_box.通知机器人(
                 f'f请求参数：```\n{main_input}\n{plugin_kwargs}\n```\n\n错误信息{tb_str}\n\n错误来源：{llm_kwargs.get("ipaddr", None)}')

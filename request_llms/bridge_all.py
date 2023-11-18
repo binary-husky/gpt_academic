@@ -52,14 +52,10 @@ class LazyloadTiktoken(object):
         return encoder.decode(*args, **kwargs)
 
 # Endpoint 重定向
-API_URL_REDIRECT, PROXY_API_URL,  PROXY_TEST_API_URL, AIGC_API_URL = (
-    get_conf("API_URL_REDIRECT", 'PROXY_API_URL', 'PROXY_TEST_API_URL', 'AIGC_API_URL'))
+API_URL_REDIRECT = get_conf("API_URL_REDIRECT")
 openai_endpoint = "https://api.openai.com/v1/chat/completions"
 api2d_endpoint = "https://openai.api2d.net/v1/chat/completions"
 newbing_endpoint = "wss://sydney.bing.com/sydney/ChatHub"
-proxy_endpoint = PROXY_API_URL
-proxy_test_ndpoint = PROXY_TEST_API_URL
-aigc_endpoint = AIGC_API_URL
 # 兼容旧版的配置
 try:
     API_URL = get_conf("API_URL")
@@ -136,30 +132,6 @@ model_info = {
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
     },
-    "aigc-35": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": aigc_endpoint,
-        "max_token": 4096,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-    "proxy-gpt-35-turbo-version-0301": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": proxy_endpoint.replace('%v', 'gpt-35-turbo-version-0301'),
-        "max_token": 4096,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-    "proxy-gpt-35-turbo-16k": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": proxy_test_ndpoint.replace('%v', 'gpt-35-turbo-16k'),
-        "max_token": 1024 * 16,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
     "gpt-4-32k": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
@@ -179,7 +151,7 @@ model_info = {
     "gpt-3.5-random": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
-        "endpoint": proxy_endpoint.replace('%v', 'gpt-4-32k'),
+        "endpoint": openai_endpoint,
         "max_token": 32000,
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,

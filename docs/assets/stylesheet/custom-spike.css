@@ -120,7 +120,7 @@ div.svelte-15lo0d8>*, div.svelte-15lo0d8>.form>* {
 
 code.language-folded {
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: auto;
 }
@@ -230,4 +230,28 @@ code.language-folded {
     bottom: 110px;
     opacity: 0.90;
     backdrop-filter: blur(24px);
+}
+[class*="gradio-container-"] h1 {
+    font-weight: 700 !important;
+    font-size: 28px !important;
+}
+[class*="gradio-container-"] h2 {
+    font-weight: 600 !important;
+    font-size: 24px !important;
+}
+[class*="gradio-container-"] h3 {
+    font-weight: 500 !important;
+    font-size: 20px !important;
+}
+[class*="gradio-container-"] h4 {
+    font-weight: 400 !important;
+    font-size: 16px !important;
+}
+[class*="gradio-container-"] h5 {
+    font-weight: 300 !important;
+    font-size: 14px !important;
+}
+[class*="gradio-container-"] h6 {
+    font-weight: 200 !important;
+    font-size: 12px !important;
 }

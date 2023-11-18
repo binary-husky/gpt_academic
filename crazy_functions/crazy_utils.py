@@ -139,7 +139,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
     return final_result
 
 def can_multi_process(llm):
-    OPEN_WORKER_LLMS, =  toolbox.get_conf('OPEN_WORKER_LLMS')
+    OPEN_WORKER_LLMS = toolbox.get_conf('OPEN_WORKER_LLMS')
     for work in OPEN_WORKER_LLMS:
         if llm.startswith(work):
             return True
@@ -182,7 +182,6 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     import time, random
     from concurrent.futures import ThreadPoolExecutor
     from request_llms.bridge_all import predict_no_ui_long_connection
-    assert len(inputs_array) == len(history_array)
     assert len(inputs_array) == len(sys_prompt_array)
     if max_workers == -1: # 读取配置文件
         try: max_workers = llm_kwargs.get('worker_num', 3)
@@ -194,7 +193,8 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     executor = ThreadPoolExecutor(max_workers=max_workers)
     n_frag = len(inputs_array)
     # 用户反馈
-    chatbot.append(["可以开始了吗？", ""])
+    you_say = "\n\n".join([f"```folded\n{i}\n```" for i in inputs_array])
+    chatbot.append([you_say, ""])
     yield from toolbox.update_ui(chatbot=chatbot, history=[]) # 刷新界面
     # 跨线程传递
     mutable = [[f"", time.time(), "等待中"] for _ in range(n_frag)]

@@ -21,7 +21,7 @@ from openpyxl.styles import Font
 from crazy_functions import crazy_utils
 from request_llms import bridge_all
 from crazy_functions.kingsoft_fns import crzay_kingsoft
-
+from moviepy.editor import AudioFileClip
 
 class Utils:
 
@@ -434,6 +434,7 @@ def file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_
     """
     # 文件读取
     file_routing = []
+    include_files, =  json_args_return(plugin_kwargs, keys=['处理文件类型'])
     if type(file_types) is dict: files = [files[f] for f in files]
     for t in file_types:
         for f in files:
@@ -453,6 +454,9 @@ def file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_
         elif file_path.endswith('xmind'):
             file_content, _path = XmindHandle().xmind_2_md(pathSource=file_path)
             file_limit.extend([title, file_content])
+        elif func_box.file_manifest_filter_type([file_path], include_files) and 'mp4' in include_files:
+            txt_manifest = yield from audio_comparison_of_video_converters([file_path], chatbot, history)
+            file_limit.extend(txt_manifest)
         elif file_path.endswith('xlsx') or file_path.endswith('xls'):
             sheet, = json_args_return(plugin_kwargs, keys=['读取指定Sheet'], default='测试要点')
             # 创建文件对象
@@ -590,7 +594,7 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
 
 
 def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history,
-                            default_prompt: str = False, knowledge_base: bool = False, task_tag=''):
+                            kwargs_prompt: str = False, knowledge_base: bool = False, task_tag=''):
     """
     Args:
         gpt_response_collection:  多线程GPT的返回结果or文件读取处理后的结果
@@ -598,21 +602,18 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
         chatbot: 对话组件
         history: 历史对话
         llm_kwargs:  调优参数
-        default_prompt: 默认Prompt, 如果为False，则不添加提示词
+        kwargs_prompt: Prompt名称, 如果为False，则不添加提示词
         knowledge_base: 是否启用知识库
     Returns: 下次使用？
         inputs_array， inputs_show_user_array
     """
     inputs_array = []
     inputs_show_user_array = []
-    kwargs_prompt, prompt_cls = json_args_return(plugin_kwargs, ['预期产出提示词', '提示词分类'])
-    if not prompt_cls or prompt_cls == '个人':  # 当提示词分类获取不到或个人时，使用个人prompt
-        prompt_cls_tab = f'prompt_{llm_kwargs["ipaddr"]}'
-    else:
-        prompt_cls_tab = f'prompt_{prompt_cls}_sys'
-    if default_prompt: kwargs_prompt = default_prompt
-    chatbot.append([None, f'接下来使用的Prompt是`{prompt_cls}`分类下的：`{kwargs_prompt}`'
-                          f', 你可以在{func_box.html_tag_color("自定义插件参数")}中指定另一个Prompt哦～'])
+    prompt_cls, = json_args_return(plugin_kwargs, ['提示词分类'])
+    prompt_cls_tab = func_box.prompt_personal_tag(prompt_cls, ipaddr=llm_kwargs["ipaddr"])
+    prompt_show = f'接下来使用的Prompt是`{prompt_cls}`分类下的：`{kwargs_prompt}`, 你可以在{func_box.html_tag_color("自定义插件参数")}中指定另一个Prompt哦～'
+    if prompt_show not in str(chatbot):
+        chatbot.append([None, prompt_show])
     time.sleep(1)
     if kwargs_prompt:
         prompt = database_processor.SqliteHandle(table=prompt_cls_tab).find_prompt_result(kwargs_prompt)
@@ -634,9 +635,10 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
                                                                          plugin_kwargs)
                 except Exception as f:
                     func_box.通知机器人(f'读取知识库失败，请检查{f}')
-            sys_prompt = func_box.replace_expected_text(prompt, content=limit, expect='{{{v}}}')
+            # 拼接内容与提示词
+            plugin_prompt = func_box.replace_expected_text(prompt, content=limit, expect='{{{v}}}')
             user_prompt = plugin_kwargs.get('user_input_prompt', '')
-            inputs_array.append(sys_prompt+user_prompt)
+            inputs_array.append(plugin_prompt+user_prompt)
             inputs_show_user_array.append(you_say + task_tag)
     yield from toolbox.update_ui(chatbot, history)
     return inputs_array, inputs_show_user_array
@@ -677,24 +679,13 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
             # max_workers=5,  # OpenAI所允许的最大并行过载
             scroller_max_len=80,
         )
-        # 是否展示任务结果
-        kwargs_is_show, = json_args_return(plugin_kwargs, ['显示过程'])
-        if kwargs_is_show:
-            for results in list(zip(inputs_array, gpt_response_collection[1::2])):
-                chatbot.append(results)
-                history.extend(results)
-                yield from toolbox.update_ui(chatbot, history)
     return gpt_response_collection
 
 
-def func_拆分与提问(file_limit, llm_kwargs, plugin_kwargs, chatbot, history, args_keys: list, task_tag: str = ''):
-    if args_keys[1]:
-        plugin_kwargs['关联知识库'] = args_keys[1]
-    multi_model_parallelism, = json_args_return(plugin_kwargs, ['多模型并行'], llm_kwargs['llm_model'])
-    llm_kwargs['llm_model'] = multi_model_parallelism
+def func_拆分与提问(file_limit, llm_kwargs, plugin_kwargs, chatbot, history, plugin_prompt, knowledge_base, task_tag: str = ''):
     split_content_limit = yield from input_output_processing(file_limit, llm_kwargs, plugin_kwargs,
-                                                             chatbot, history, default_prompt=args_keys[0],
-                                                             knowledge_base=args_keys[1], task_tag=task_tag)
+                                                             chatbot, history, kwargs_prompt=plugin_prompt,
+                                                             knowledge_base=knowledge_base, task_tag=task_tag)
     inputs_array, inputs_show_user_array = split_content_limit
     gpt_response_collection = yield from submit_multithreaded_tasks(inputs_array, inputs_show_user_array,
                                                                     llm_kwargs, chatbot, history,
@@ -941,6 +932,34 @@ def detach_cloud_links(link_limit):
     wps_links = units.split_startswith_txt(link_limit, domain_name=['kdocs', 'wps'])
     qq_link = units.split_startswith_txt(link_limit, domain_name=['docs.qq'])
     return wps_links, qq_link
+
+
+def audio_extraction_text(file):
+    import speech_recognition as sr
+    # 打开音频文件
+    r = sr.Recognizer()
+    with sr.AudioFile(file) as source:
+        # 读取音频文件的内容
+        audio_content = r.record(source)
+        # 使用Google的文字转话服务将音频转换为文字
+        text = r.recognize_google(audio_content, language='zh-CN')
+    return text
+
+
+def audio_comparison_of_video_converters(files, chatbot, history):
+    temp_chat = ''
+    chatbot.append(['可以开始了么', temp_chat])
+    temp_list = []
+    for file in files:
+        temp_chat += f'正在将{func_box.html_view_blank(file)}文件转换为可提取的音频文件.\n\n'
+        chatbot[-1] = ['可以开始了么', temp_chat]
+        yield from toolbox.update_ui(chatbot=chatbot, history=history)
+        temp_path = os.path.join(os.path.dirname(file), f"{os.path.basename(file)}.wav")
+        videoclip = AudioFileClip(file)
+        videoclip.write_audiofile(temp_path)
+        temp_list.extend((temp_path, audio_extraction_text(temp_path)))
+    return temp_list
+
 
 # <---------------------------------------一些Tips----------------------------------------->
 previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传，多个文件请上传压缩包，' \

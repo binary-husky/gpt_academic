@@ -1,8 +1,6 @@
 function move_cursor() {
     const buttonsParent = gradioApp().getElementById('prompt_list');
-    const inputElement = gradioApp().getElementById('user-input-tb');
-    const textarea = inputElement.querySelector('[data-testid=textbox]');
-    if (buttonsParent && inputElement && textarea) {
+    if (buttonsParent && user_input_tb && user_input_ta) {
         buttonsParent.querySelectorAll('button').forEach((button) => {
             button.addEventListener('click', () => {
                 textarea.focus();
@@ -96,18 +94,18 @@ function handleShowAllButtonClick(event) {
 
     var codeWrap = event.target.closest('.code_wrap');
 
-    if(!codeWrap) { // 找不到外围code_wrap则退出运行
+    if (!codeWrap) { // 找不到外围code_wrap则退出运行
         console.warn("Can't find the parent .code_wrap element.");
         return;
     }
     var languageFoldedElement = codeWrap.querySelector('.language-folded');
 
-    if(languageFoldedElement){
-       if (languageFoldedElement.classList.contains('unclamp')) {
-           languageFoldedElement.classList.remove('unclamp');
-       } else {
-           languageFoldedElement.classList.add('unclamp');
-       }
+    if (languageFoldedElement) {
+        if (languageFoldedElement.classList.contains('unclamp')) {
+            languageFoldedElement.classList.remove('unclamp');
+        } else {
+            languageFoldedElement.classList.add('unclamp');
+        }
     }
 }
 
@@ -118,7 +116,7 @@ function showUploadIndexFile() {
 
 // 函数：当鼠标离开 'uploaded-files-count' 2秒 后，检查是否还处于 'upload-index-file' hover状态 ，如果否，则改变 'upload-index-file' 的 display样式 为 none
 function hideUploadIndexFile() {
-    setTimeout(function(){
+    setTimeout(function () {
         if (!isHover(uploadIndexFileElement)) {
             uploadIndexFileElement.style.display = "none";
         }
@@ -135,4 +133,61 @@ function add_func_event() {
     uploadedFilesCountElement.addEventListener("mouseleave", hideUploadIndexFile);
     uploadIndexFileElement.addEventListener("mouseenter", showUploadIndexFile);
     uploadIndexFileElement.addEventListener("mouseleave", hideUploadIndexFile);
+}
+
+async function add_func_paste(input) {
+    let paste_files = [];
+    if (input) {
+        input.addEventListener("paste", async function (e) {
+            const clipboardData = e.clipboardData || window.clipboardData;
+            const items = clipboardData.items;
+            if (items) {
+                for (i = 0; i < items.length; i++) {
+                    if (items[i].kind === "file") { // 确保是文件类型
+                        const file = items[i].getAsFile();
+                        // 将每一个粘贴的文件添加到files数组中
+                        paste_files.push(file);
+                        e.preventDefault();
+                    }
+                }
+                if (paste_files.length > 0) {
+                   // 按照文件列表执行批量上传逻辑
+                   await paste_upload_files(paste_files);
+                   paste_files = []
+                }
+            }
+        });
+    }
+}
+
+function paste_upload_files(files) {
+    const uploadInput = uploadIndexFileElement.querySelector("input[type=file]");
+    if (files && files.length > 0) {
+        // 执行具体的上传逻辑
+        if (uploadInput) {
+            toast_push('🚀上传文件中', 2000)
+            let event = new Event("change");
+            Object.defineProperty(event, "target", {value: uploadInput, enumerable: true});
+            Object.defineProperty(event, "currentTarget", {value: uploadInput, enumerable: true});
+            Object.defineProperty(uploadInput, "files", {value: files, enumerable: true});
+            uploadInput.dispatchEvent(event);
+            // toast_push('🎉上传文件成功', 2000)
+        }
+    }
+}
+
+//提示信息 封装
+function toast_push(msg, duration) {
+    duration = isNaN(duration) ? 3000 : duration;
+    const m = document.createElement('div');
+    m.innerHTML = msg;
+    m.style.cssText = "font-size:  var(--text-md) !important; color: rgb(255, 255, 255);background-color: rgba(0, 0, 0, 0.6);padding: 10px 15px;margin: 0 0 0 -60px;border-radius: 4px;position: fixed;    top: 50%;left: 50%;width: 130px;text-align: center;";
+    document.body.appendChild(m);
+    setTimeout(function () {
+        var d = 0.5;
+        m.style.opacity = '0';
+        setTimeout(function () {
+            document.body.removeChild(m)
+        }, d * 1000);
+    }, duration);
 }

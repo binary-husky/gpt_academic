@@ -20,7 +20,7 @@ Please describe in natural language what you want to do.
 
 5. If you don't need to upload a file, you can simply repeat your command again.
 """
-explain_msg = """
+explain_msg = f"""
 > 无法识别意图，询问方法请参考以下说明，准备为您转发到常规对话中...
 
 ## 插件代理说明:
@@ -132,7 +132,6 @@ def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
         chatbot.append((None, explain_msg+appendix_msg))
         yield from update_ui(chatbot=chatbot, history=history)
         from crazy_functions.kingsoft_fns import crazy_box
-        plugin_kwargs['显示过程'] = True
         yield from crazy_box.submit_multithreaded_tasks([txt],  [txt], llm_kwargs, chatbot, history, plugin_kwargs)
         return
 

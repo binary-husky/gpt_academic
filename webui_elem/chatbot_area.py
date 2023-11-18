@@ -74,12 +74,11 @@ class ChatbotElem:
                                                                   multiselect=True, container=False,
                                                                   elem_classes='sm_select', elem_id='')
 
-
                     with gr.Row(elem_id="chatbot-input-tb-row"):
                         with gr.Column(min_width=225, scale=12):
                             self.user_input = gr.Textbox(
                                 elem_id="user-input-tb", show_label=False,
-                                placeholder=i18n("在这里输入"), elem_classes="no-container",
+                                placeholder=i18n("在这里输入，支持粘贴上传文件"), elem_classes="no-container",
                                 max_lines=5,
                                 # container=False
                             )

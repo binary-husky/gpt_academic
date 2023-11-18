@@ -119,7 +119,7 @@ def get_files_from_everything(txt, preference=''):
     if txt.startswith('http'):
         import requests
         from comm_tools.toolbox import get_conf
-        proxies, = get_conf('proxies')
+        proxies = get_conf('proxies')
         # 网络的远程文件
         if preference == 'Github':
             logging.info('正在从github下载资源 ...')

@@ -76,6 +76,7 @@ function initialize() {
     loginUserForm = gradioApp().querySelector(".gradio-container > .main > .wrap > .panel > .form")
     gradioContainer = gradioApp().querySelector(".gradio-container");
     user_input_tb = gradioApp().getElementById('user-input-tb');
+
     userInfoDiv = gradioApp().getElementById("user-info");
     appTitleDiv = gradioApp().getElementById("app-title");
     chatbotArea = gradioApp().querySelector('#chatbot-area');
@@ -167,6 +168,7 @@ function showConfirmationDialog(a, file, c) {
 
 function selectHistory() {
     user_input_ta = user_input_tb.querySelector("textarea");
+    add_func_paste(user_input_ta)
     if (user_input_ta) {
         disableSendBtn();
         // 在 textarea 上监听 keydown 事件

@@ -314,12 +314,12 @@ def json_convert_dict(file):
     return new_dict
 
 
-def non_personal_tag(select, ipaddr):
+def prompt_personal_tag(select, ipaddr):
     all_, personal = toolbox.get_conf('preset_prompt')['key']
     if select and personal != select and all_ != select:
-        tab_cls = select + '_sys'
+        tab_cls = "prompt_" + select + '_sys'
     else:
-        tab_cls = ipaddr
+        tab_cls = "prompt_" + str(ipaddr)
     return tab_cls
 
 

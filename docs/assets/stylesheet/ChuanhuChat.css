@@ -408,7 +408,7 @@ body.popup-open {
     max-width: 999px;
     /* margin: 0 auto; */
     gap: 20px;
-    padding: 16px 16px 24px;
+    padding: 6px 16px 24px;
     padding-bottom: max(24px, calc( env(safe-area-inset-bottom) + 6px));
     display: flex;
     background: none;

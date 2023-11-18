@@ -289,19 +289,19 @@ def prompt_retrieval(prompt_cls, hosts, search=False):
     all_, personal = toolbox.get_conf('preset_prompt')['key']
     if not prompt_cls: prompt_cls = all_  # 保底
     count_dict = {}
-    hosts = func_box.non_personal_tag(prompt_cls, hosts)
+    hosts = func_box.prompt_personal_tag(prompt_cls, hosts)
     if all_ == prompt_cls:
         for tab in SqliteHandle('prompt_').get_tables():
             if tab.startswith('prompt') and str(tab).endswith('sys'):
                 data, source = SqliteHandle(tab).get_prompt_value(None)
                 if data: count_dict.update({get_database_cls(tab): data})
-        data, source = SqliteHandle(f'prompt_{hosts}').get_prompt_value(None)
+        data, source = SqliteHandle(f'{hosts}').get_prompt_value(None)
         if data: count_dict.update({personal: data})
     elif personal == prompt_cls:
-        data, source = SqliteHandle(f'prompt_{hosts}').get_prompt_value(None)
+        data, source = SqliteHandle(f'{hosts}').get_prompt_value(None)
         if data: count_dict.update({personal: data})
     elif hosts and prompt_cls:
-        data, source = SqliteHandle(f'prompt_{hosts}').get_prompt_value(None)
+        data, source = SqliteHandle(f'{hosts}').get_prompt_value(None)
         if data: count_dict.update({prompt_cls: data})
     retrieval = []
     if count_dict != {}:  # 上面是一段屎山， 不知道自己为什么要这样写，能用就行
@@ -352,7 +352,7 @@ def prompt_upload_refresh(file, prompt, pro_select, ipaddr: gr.Request):
         注册函数所需的元祖对象
     """
     user_info = ipaddr.client.host
-    tab_cls = func_box.non_personal_tag(pro_select, ipaddr.client.host)
+    tab_cls = func_box.prompt_personal_tag(pro_select, ipaddr.client.host)
     if file.name.endswith('json'):
         upload_data = func_box.check_json_format(file.name)
     elif file.name.endswith('yaml'):
@@ -360,7 +360,7 @@ def prompt_upload_refresh(file, prompt, pro_select, ipaddr: gr.Request):
     else:
         upload_data = {}
     if upload_data != {}:
-        status = SqliteHandle(f'prompt_{tab_cls}').inset_prompt(upload_data, user_info)
+        status = SqliteHandle(f'{tab_cls}').inset_prompt(upload_data, user_info)
         ret_data = prompt_retrieval(prompt_cls=tab_cls, hosts=ipaddr.client.host)
         return gr.Dataset.update(samples=ret_data, visible=True), prompt, tab_cls
     else:
@@ -375,8 +375,8 @@ def prompt_delete(pro_name, prompt_dict, select_check, ipaddr: gr.Request):
     find_prompt = [i for i in prompt_dict['samples'] if i[1] == pro_name]
     if not any(find_prompt):
         raise gr.Error(f'无法找到 {pro_name}')
-    tab_cls = func_box.non_personal_tag(select_check, ipaddr.client.host)
-    sqlite_handle = SqliteHandle(table=f'prompt_{tab_cls}')
+    tab_cls = func_box.prompt_personal_tag(select_check, ipaddr.client.host)
+    sqlite_handle = SqliteHandle(table=f'{tab_cls}')
     _, source = sqlite_handle.get_prompt_value(find=pro_name)
     if not _:
         raise gr.Error(f'无法找到 {pro_name}，或请不要在所有人分类下删除')
@@ -403,9 +403,9 @@ def prompt_save(txt, name, prompt: gr.Dataset, pro_select, ipaddr: gr.Request):
     if not pro_select:
         raise gr.Error('保存分类不能为空 ！')
     user_info = ipaddr.client.host
-    tab_cls = func_box.non_personal_tag(pro_select, ipaddr.client.host)
+    tab_cls = func_box.prompt_personal_tag(pro_select, ipaddr.client.host)
     if txt and name:
-        sql_obj = SqliteHandle(f'prompt_{tab_cls}')
+        sql_obj = SqliteHandle(f'{tab_cls}')
         _, source = sql_obj.get_prompt_value(name)
         status = sql_obj.inset_prompt({name: txt}, user_info)
         if status:
