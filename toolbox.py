@@ -4,6 +4,7 @@ import time
 import inspect
 import re
 import os
+import base64
 import gradio
 import shutil
 import glob
@@ -1217,7 +1218,6 @@ def get_pictures_list(path):
     return file_manifest
 
 
-import base64
 def have_any_recent_upload_image_files(chatbot):
     _5min = 5 * 60
     if chatbot is None: return False, None    # chatbot is None
