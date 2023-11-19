@@ -85,7 +85,7 @@ def ArgsGeneralWrapper(f):
         cookies.update({
             'api_key': cookies['api_key'], 'llm_model': llm_model,
             **real_llm,
-            'worker_num': worker_num, 'ipaddr': ipaddr.client.host, 'ocr': ocr_trust,
+            'worker_num': worker_num, 'ipaddr': func_box.user_client_mark(ipaddr), 'ocr': ocr_trust,
             'start_time': start_time, 'max_length': max_length,
             'know_dict': know_dict, 'know_cls': know_cls, 'know_id': langchain,
             'vector': {
@@ -125,7 +125,7 @@ def ArgsGeneralWrapper(f):
         # 将对话记录写入文件
         yield from end_predict(chatbot_with_cookie, history, llm_kwargs)
         threading.Thread(target=history_processor.thread_write_chat_json,
-                         args=(chatbot_with_cookie, ipaddr.client.host)).start()
+                         args=(chatbot_with_cookie, func_box.user_client_mark(ipaddr))).start()
 
     return decorated
 
@@ -729,7 +729,7 @@ def on_file_uploaded(files, chatbot, txt, cookies, ipaddr: gr.Request):
     if type(ipaddr) is str:
         ipaddr = ipaddr
     else:
-        ipaddr = ipaddr.client.host
+        ipaddr = func_box.user_client_mark(ipaddr)
     time_tag = func_box.created_atime()
     time_tag_path = os.path.join(private_upload, ipaddr, time_tag)
     os.makedirs(f'{time_tag_path}', exist_ok=True)
@@ -772,9 +772,9 @@ def on_report_generated(cookies, files, chatbot, request):
     # 移除过时的旧文件从而节省空间&保护隐私
     outdate_time_seconds = 60
     del_outdated_uploads(outdate_time_seconds)
-
+    user = func_box.user_client_mark(request)
     # 创建工作路径
-    user_name = "default" if not request.username else request.client.host
+    user_name = "default" if not user else 'default'
     time_tag = gen_time_str()
     PATH_PRIVATE_UPLOAD = get_conf('PATH_PRIVATE_UPLOAD')
     target_path_base = pj(PATH_PRIVATE_UPLOAD, user_name, time_tag)

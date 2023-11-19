@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
-from comm_tools import toolbox
+from comm_tools import toolbox, func_box
 
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="!secret")
@@ -44,7 +44,7 @@ async def check_authentication(request: Request, call_next):
         return await call_next(request)
     pattern = re.compile(r".*\/private_upload\/.*")
     if pattern.match(request.url.path):
-        if request.client.host not in request.url.path:
+        if func_box.user_client_mark(request) not in request.url.path:
             return JSONResponse(content={'detail': '小伙汁，你坏坏，不能私自下载其他人的文件哦～'})
     cookie = request.cookies.get(f'{auth_cookie_tag}', '')
     user = check_cookie(cookie)

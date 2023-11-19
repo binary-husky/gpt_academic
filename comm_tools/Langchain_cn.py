@@ -90,14 +90,15 @@ def classification_filtering_tag(cls_select, ipaddr):
 
 def knowledge_base_writing(cls_select, links: str, select, name, kai_handle, ipaddr: gr.Request):
     # < --------------------读取参数--------------- >
-    cls_select = classification_filtering_tag(cls_select, ipaddr.client.host)
+    user_addr = func_box.user_client_mark(ipaddr)
+    cls_select = classification_filtering_tag(cls_select, user_addr)
     if not cls_select:
         raise gr.Error('新建分类名称请不要为空')
     vector_path = os.path.join(func_box.knowledge_path, cls_select)
     if name and select:
         kai_id = name
         os.rename(os.path.join(vector_path, select), os.path.join(vector_path, name))
-        _, load_file = func_box.get_directory_list(vector_path, ipaddr.client.host)
+        _, load_file = func_box.get_directory_list(vector_path, user_addr)
         yield '', f'更名成功～ `{select}` -> `{name}`', gr.Dropdown.update(), gr.Dropdown.update(choices=load_file, value=kai_id), gr.Dropdown.update(), kai_handle
         if not links and not kai_handle.get('file_list'): return  # 如果文件和链接都为空，那么就有必要往下执行了
     elif select:
@@ -123,8 +124,8 @@ def knowledge_base_writing(cls_select, links: str, select, name, kai_handle, ipa
         file_manifest += file_manifest_tmp
     # 网络文件
     try:
-        task_info, kdocs_manifest_tmp, _ = crzay_kingsoft.get_kdocs_from_everything(links, type='', ipaddr=ipaddr.client.host)
-        task_info, kdocs_manifest_tmp, _ = crzay_kingsoft.get(links, type='', ipaddr=ipaddr.client.host)
+        task_info, kdocs_manifest_tmp, _ = crzay_kingsoft.get_kdocs_from_everything(links, type='', ipaddr=user_addr)
+        task_info, kdocs_manifest_tmp, _ = crzay_kingsoft.get(links, type='', ipaddr=user_addr)
 
         if kdocs_manifest_tmp:
             error += task_info
@@ -160,13 +161,13 @@ def knowledge_base_writing(cls_select, links: str, select, name, kai_handle, ipa
     with toolbox.ProxyNetworkActivate():    # 临时地激活代理网络
         kai = knowledge_archive_interface(vs_path=vector_path)
         qa_handle, vs_path = kai.construct_vector_store(vs_id=kai_id, files=file_manifest)
-    with open(os.path.join(vector_path, kai_id, ipaddr.client.host), mode='w') as f: pass
+    with open(os.path.join(vector_path, kai_id, user_addr), mode='w') as f: pass
     _, kai_files = kai.get_init_file(kai_id)
     kai_handle['file_list'] = [os.path.basename(file) for file in kai_files if os.path.exists(file)]
     kai_files = func_box.to_markdown_tabs(head=['文件'], tabs=[tab_show])
     kai_handle['know_obj'].update({kai_id: qa_handle})
     kai_handle['know_name'] = kai_id
-    load_list, user_list = func_box.get_directory_list(vector_path, ipaddr.client.host)
+    load_list, user_list = func_box.get_directory_list(vector_path, user_addr)
     yield (f'构建完成, 当前知识库内有效的文件如下, 已自动帮您选中知识库，现在你可以畅快的开始提问啦～\n\n{kai_files}',
            error, gr.Dropdown.update(value=cls_select, choices=load_list),
            gr.Dropdown.update(value='新建知识库', choices=load_list),
@@ -233,11 +234,12 @@ def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
 
 
 def obtain_classification_knowledge_base(cls_name, ipaddr: gr.Request):
+    user = func_box.user_client_mark(ipaddr)
     if cls_name == '个人知识库':
-        load_path = os.path.join(func_box.knowledge_path, '个人知识库', ipaddr.client.host)
+        load_path = os.path.join(func_box.knowledge_path, '个人知识库', user)
     else:
         load_path = os.path.join(func_box.knowledge_path, cls_name)
-    load_list, user_list = func_box.get_directory_list(load_path, ipaddr.client.host)
+    load_list, user_list = func_box.get_directory_list(load_path, user)
     know_user_build = toolbox.get_conf('know_user_build')
     if know_user_build: mesg = '构建重构没有任何限制，你可以更改config中的`know_user_build`，限制只能重构构建个人的知识库'
     else: mesg = '你只能重构自己上传的知识库哦😎'
@@ -247,11 +249,12 @@ def obtain_classification_knowledge_base(cls_name, ipaddr: gr.Request):
 
 
 def want_to_rename_it(cls_name, select, ipaddr: gr.Request):
+    user = func_box.user_client_mark(ipaddr)
     if cls_name == '个人知识库':
-        load_path = os.path.join(func_box.knowledge_path, '个人知识库', ipaddr.client.host)
+        load_path = os.path.join(func_box.knowledge_path, '个人知识库', user)
     else:
         load_path = os.path.join(func_box.knowledge_path, cls_name)
-    load_list, user_list = func_box.get_directory_list(load_path, ipaddr.client.host)
+    load_list, user_list = func_box.get_directory_list(load_path, user)
     if select in load_list:
         return gr.Button.update(visible=True)
     else:
@@ -260,7 +263,7 @@ def want_to_rename_it(cls_name, select, ipaddr: gr.Request):
 
 def obtaining_knowledge_base_files(cls_select, vs_id, chatbot, kai_handle, model, ipaddr: gr.Request):
     if vs_id and '预加载知识库' in model:
-        cls_select = classification_filtering_tag(cls_select, ipaddr.client.host)
+        cls_select = classification_filtering_tag(cls_select, func_box.user_client_mark(ipaddr))
         vs_path = os.path.join(func_box.knowledge_path, cls_select)
         you_say = f'请检查知识库内文件{"  ".join([func_box.html_tag_color(i)for i in vs_id])}'
         chatbot.append([you_say, None])

@@ -149,11 +149,13 @@ def html_local_file(file):
         file = f'file={file.replace(base_path, ".")}'
     return file
 
+
 def link_mtime_to_md(file):
     link_local = html_local_file(file)
     link_name = os.path.basename(file)
     a = f"[{link_name}]({link_local}?{os.path.getmtime(file)})"
     return a
+
 
 def html_view_blank(__href: str, file_name='', to_tabs=False):
     __file = __href.replace(base_path, ".")
@@ -205,6 +207,7 @@ def file_manifest_filter_type(file_list, filter_: list = None):
             new_list.append(file)
     return new_list
 
+
 def ipaddr():
     # 获取本地ipx
     ip = psutil.net_if_addrs()
@@ -215,6 +218,13 @@ def ipaddr():
             return ip[i][0][1]
 
 
+def user_client_mark(request: gr.Request):
+    if request.username:
+        return request.username
+    else:
+        return request.client.host
+
+
 def encryption_str(txt: str) -> object:
     """(关键字)(加密间隔)匹配机制（关键字间隔）"""
     txt = str(txt)
@@ -223,7 +233,7 @@ def encryption_str(txt: str) -> object:
     return result
 
 
-def tree_out(dir=os.path.dirname(__file__), line=2,  filter='' , more=''):
+def tree_out(dir=os.path.dirname(__file__), line=2, filter='', more=''):
     """
     获取本地文件的树形结构转化为Markdown代码文本
     Args:
@@ -244,7 +254,7 @@ def tree_out(dir=os.path.dirname(__file__), line=2,  filter='' , more=''):
         dir_f = []
         for i in ll:
             # 过滤出常规的文件夹内文件
-            if'│\xa0\xa0     ├' in i or '│\xa0\xa0 ├──' in i or '│\xa0\xa0 └──' in i or '│\xa0\xa0 │' in i:
+            if '│\xa0\xa0     ├' in i or '│\xa0\xa0 ├──' in i or '│\xa0\xa0 └──' in i or '│\xa0\xa0 │' in i:
                 dir_f.append(i)
             elif '    ├──' in i or '    └──' in i:  # 过滤字符串末尾的文件夹内文件
                 i = i.replace('    ', '│\xa0\xa0')
@@ -341,6 +351,8 @@ def str_is_list(s):
 
 
 import datetime
+
+
 def check_expected_time():
     current_time = datetime.datetime.now().time()
     morning_start = datetime.time(9, 0)
@@ -772,8 +784,8 @@ def get_avatar_img(llm_s):
     else:
         return ['./docs/assets/imgs/tester.png', './docs/assets/imgs/user.png']
 
+
 if __name__ == '__main__':
     # print(get_files_list('', ['.json']))
     # tree_out(dir='/Users/kilig/Job/Python-project/kso_gpt/', line=2)
     get_avatar_img('')
-
