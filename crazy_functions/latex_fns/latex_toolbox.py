@@ -352,6 +352,7 @@ def find_title_and_abs(main_file):
     title = extract_title(main_file)
     return title, abstract
 
+
 def merge_tex_files(project_foler, main_file, mode):
     """
     Merge Tex project recrusively

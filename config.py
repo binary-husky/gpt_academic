@@ -235,11 +235,6 @@ BLOCK_INVALID_APIKEY = False
 # 自定义按钮的最大数量限制
 NUM_CUSTOM_BASIC_BTN = 4
 
-
-# LATEX实验性功能
-LATEX_EXPERIMENTAL = False
-
-
 """
 在线大模型配置关联关系示意图
 │

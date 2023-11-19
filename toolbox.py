@@ -544,13 +544,15 @@ def find_recent_files(directory):
 
 
 def file_already_in_downloadzone(file, user_path):
-    parent_path = user_path
-    child_path = file
-    if os.path.commonpath([parent_path, child_path]) == parent_path:
-        return True
-    else:
+    try:
+        parent_path = os.path.abspath(user_path)
+        child_path = os.path.abspath(file)
+        if os.path.samefile(os.path.commonpath([parent_path, child_path]), parent_path):
+            return True
+        else:
+            return False
+    except:
         return False
-
 
 def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
     # 将文件复制一份到下载区
@@ -564,6 +566,7 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
     if file_already_in_downloadzone(file, user_path):
         new_path = file
     else:
+        user_path = get_log_folder(user_name, plugin_name='downloadzone')
         if rename_file is None: rename_file = f'{gen_time_str()}-{os.path.basename(file)}'
         new_path = pj(user_path, rename_file)
         # 如果已经存在，先删除
