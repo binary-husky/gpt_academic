@@ -1,6 +1,7 @@
-from toolbox import CatchException, update_ui, promote_file_to_downloadzone, get_log_folder
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from toolbox import CatchException, update_ui, promote_file_to_downloadzone, get_log_folder, get_user
 import re
+
+f_prefix = 'GPT-Academic对话存档'
 
 def write_chat_to_file(chatbot, history=None, file_name=None):
     """
@@ -9,8 +10,8 @@ def write_chat_to_file(chatbot, history=None, file_name=None):
     import os
     import time
     if file_name is None:
-        file_name = 'chatGPT对话历史' + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + '.html'
-    fp = os.path.join(get_log_folder(), file_name)
+        file_name = f_prefix + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + '.html'
+    fp = os.path.join(get_log_folder(get_user(chatbot), plugin_name='chat_history'), file_name)
     with open(fp, 'w', encoding='utf8') as f:
         from themes.theme import advanced_css
         f.write(f'<!DOCTYPE html><head><meta charset="utf-8"><title>对话历史</title><style>{advanced_css}</style></head>')
@@ -80,7 +81,7 @@ def 对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
     """
 
     chatbot.append(("保存当前对话", 
-        f"[Local Message] {write_chat_to_file(chatbot, history)}，您可以调用“载入对话历史存档”还原当下的对话。\n警告！被保存的对话历史可以被使用该系统的任何人查阅。"))
+        f"[Local Message] {write_chat_to_file(chatbot, history)}，您可以调用下拉菜单中的“载入对话历史存档”还原当下的对话。"))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
 
 def hide_cwd(str):
@@ -106,7 +107,12 @@ def 载入对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     if not success:
         if txt == "": txt = '空空如也的输入栏'
         import glob
-        local_history = "<br/>".join(["`"+hide_cwd(f)+f" ({gen_file_preview(f)})"+"`" for f in glob.glob(f'{get_log_folder()}/**/chatGPT对话历史*.html', recursive=True)])
+        local_history = "<br/>".join([
+            "`"+hide_cwd(f)+f" ({gen_file_preview(f)})"+"`" 
+            for f in glob.glob(
+                f'{get_log_folder(get_user(chatbot), plugin_name="chat_history")}/**/{f_prefix}*.html', 
+                recursive=True
+            )])
         chatbot.append([f"正在查找对话历史文件（html格式）: {txt}", f"找不到任何html文件: {txt}。但本地存储了以下历史文件，您可以将任意一个文件路径粘贴到输入区，然后重试：<br/>{local_history}"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
@@ -132,8 +138,12 @@ def 删除所有本地对话历史记录(txt, llm_kwargs, plugin_kwargs, chatbot
     """
 
     import glob, os
-    local_history = "<br/>".join(["`"+hide_cwd(f)+"`" for f in glob.glob(f'{get_log_folder()}/**/chatGPT对话历史*.html', recursive=True)])
-    for f in glob.glob(f'{get_log_folder()}/**/chatGPT对话历史*.html', recursive=True):
+    local_history = "<br/>".join([
+        "`"+hide_cwd(f)+"`" 
+        for f in glob.glob(
+            f'{get_log_folder(get_user(chatbot), plugin_name="chat_history")}/**/{f_prefix}*.html', recursive=True
+        )])
+    for f in glob.glob(f'{get_log_folder(get_user(chatbot), plugin_name="chat_history")}/**/{f_prefix}*.html', recursive=True):
         os.remove(f)
     chatbot.append([f"删除所有历史对话文件", f"已删除<br/>{local_history}"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面

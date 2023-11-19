@@ -13,6 +13,7 @@
 
         4. Run `python multi_language.py`. 
             Note: You need to run it multiple times to increase translation coverage because GPT makes mistakes sometimes.
+           (You can also run `CACHE_ONLY=True python multi_language.py` to use cached translation mapping)
 
         5. Find the translated program in `multi-language\English\*`
    
@@ -35,7 +36,9 @@ import pickle
 import time
 from toolbox import get_conf
 
-CACHE_FOLDER, = get_conf('PATH_LOGGING')
+CACHE_ONLY = os.environ.get('CACHE_ONLY', False)
+
+CACHE_FOLDER = get_conf('PATH_LOGGING')
 
 blacklist = ['multi-language', CACHE_FOLDER, '.git', 'private_upload', 'multi_language.py', 'build', '.github', '.vscode', '__pycache__', 'venv']
 
@@ -336,7 +339,10 @@ def step_1_core_key_translate():
         if d not in cached_translation_keys: 
             need_translate.append(d)
 
-    need_translate_mapping = trans(need_translate, language=LANG_STD, special=True)
+    if CACHE_ONLY:
+        need_translate_mapping = {}
+    else:
+        need_translate_mapping = trans(need_translate, language=LANG_STD, special=True)
     map_to_json(need_translate_mapping, language=LANG_STD)
     cached_translation = read_map_from_json(language=LANG_STD)
     cached_translation = dict(sorted(cached_translation.items(), key=lambda x: -len(x[0])))
@@ -476,8 +482,10 @@ def step_2_core_key_translate():
         if d not in cached_translation_keys: 
             need_translate.append(d)
 
-
-    up = trans_json(need_translate, language=LANG, special=False)
+    if CACHE_ONLY:
+        up = {}
+    else:
+        up = trans_json(need_translate, language=LANG, special=False)
     map_to_json(up, language=LANG)
     cached_translation = read_map_from_json(language=LANG)
     LANG_STD = 'std'

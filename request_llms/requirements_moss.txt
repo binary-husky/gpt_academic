@@ -1,0 +1,9 @@
+torch
+sentencepiece
+datasets
+accelerate
+matplotlib
+huggingface_hub
+triton
+streamlit
+

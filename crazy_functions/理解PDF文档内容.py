@@ -1,5 +1,5 @@
 from toolbox import update_ui
-from toolbox import CatchException, report_execption
+from toolbox import CatchException, report_exception
 from .crazy_utils import read_and_clean_pdf_text
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 fast_debug = False
@@ -19,7 +19,7 @@ def 解析PDF(file_name, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     TOKEN_LIMIT_PER_FRAGMENT = 2500
 
     from .crazy_utils import breakdown_txt_to_satisfy_token_limit_for_pdf
-    from request_llm.bridge_all import model_info
+    from request_llms.bridge_all import model_info
     enc = model_info["gpt-3.5-turbo"]['tokenizer']
     def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))
     paper_fragments = breakdown_txt_to_satisfy_token_limit_for_pdf(
@@ -49,7 +49,7 @@ def 解析PDF(file_name, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
         gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(i_say, i_say_show_user,  # i_say=真正给chatgpt的提问， i_say_show_user=给用户看的提问
                                                                            llm_kwargs, chatbot, 
                                                                            history=["The main idea of the previous section is?", last_iteration_result], # 迭代上一次的结果
-                                                                           sys_prompt="Extract the main idea of this section."  # 提示
+                                                                           sys_prompt="Extract the main idea of this section, answer me with Chinese."  # 提示
                                                                         ) 
         iteration_results.append(gpt_say)
         last_iteration_result = gpt_say
@@ -81,7 +81,7 @@ def 理解PDF文档内容标准文件输入(txt, llm_kwargs, plugin_kwargs, chat
     try:
         import fitz
     except:
-        report_execption(chatbot, history, 
+        report_exception(chatbot, history, 
             a = f"解析项目: {txt}", 
             b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pymupdf```。")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
@@ -96,7 +96,7 @@ def 理解PDF文档内容标准文件输入(txt, llm_kwargs, plugin_kwargs, chat
     else:
         if txt == "":
             txt = '空空如也的输入栏'
-        report_execption(chatbot, history,
+        report_exception(chatbot, history,
                          a=f"解析项目: {txt}", b=f"找不到本地项目或无权访问: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
@@ -105,7 +105,7 @@ def 理解PDF文档内容标准文件输入(txt, llm_kwargs, plugin_kwargs, chat
     file_manifest = [f for f in glob.glob(f'{project_folder}/**/*.pdf', recursive=True)]
     # 如果没找到任何文件
     if len(file_manifest) == 0:
-        report_execption(chatbot, history,
+        report_exception(chatbot, history,
                          a=f"解析项目: {txt}", b=f"找不到任何.tex或.pdf文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return

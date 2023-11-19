@@ -308,12 +308,50 @@ def merge_tex_files_(project_foler, main_file, mode):
         fp = os.path.join(project_foler, f)
         fp_ = find_tex_file_ignore_case(fp)
         if fp_:
-            with open(fp_, 'r', encoding='utf-8', errors='replace') as fx: c = fx.read()
+            try:
+                with open(fp_, 'r', encoding='utf-8', errors='replace') as fx: c = fx.read()
+            except:
+                c = f"\n\nWarning from GPT-Academic: LaTex source file is missing!\n\n"
         else:
             raise RuntimeError(f'找不到{fp}，Tex源文件缺失！')
         c = merge_tex_files_(project_foler, c, mode)
         main_file = main_file[:s.span()[0]] + c + main_file[s.span()[1]:]
     return main_file
+
+
+def find_title_and_abs(main_file):
+
+    def extract_abstract_1(text):
+        pattern = r"\\abstract\{(.*?)\}"
+        match = re.search(pattern, text, re.DOTALL)
+        if match:
+            return match.group(1)
+        else:
+            return None
+
+    def extract_abstract_2(text):
+        pattern = r"\\begin\{abstract\}(.*?)\\end\{abstract\}"
+        match = re.search(pattern, text, re.DOTALL)
+        if match:
+            return match.group(1)
+        else:
+            return None
+
+    def extract_title(string):
+        pattern = r"\\title\{(.*?)\}"
+        match = re.search(pattern, string, re.DOTALL)
+
+        if match:
+            return match.group(1)
+        else:
+            return None
+
+    abstract = extract_abstract_1(main_file)
+    if abstract is None:
+        abstract = extract_abstract_2(main_file)
+    title = extract_title(main_file)
+    return title, abstract
+
 
 def merge_tex_files(project_foler, main_file, mode):
     """
@@ -342,9 +380,40 @@ def merge_tex_files(project_foler, main_file, mode):
         pattern_opt2 = re.compile(r"\\abstract\{(.*?)\}", flags=re.DOTALL)
         match_opt1 = pattern_opt1.search(main_file)
         match_opt2 = pattern_opt2.search(main_file)
+        if (match_opt1 is None) and (match_opt2 is None):
+            # "Cannot find paper abstract section!"
+            main_file = insert_abstract(main_file)
+        match_opt1 = pattern_opt1.search(main_file)
+        match_opt2 = pattern_opt2.search(main_file)
         assert (match_opt1 is not None) or (match_opt2 is not None), "Cannot find paper abstract section!"
     return main_file
 
+
+insert_missing_abs_str = r"""
+\begin{abstract}
+The GPT-Academic program cannot find abstract section in this paper.
+\end{abstract}
+"""
+
+def insert_abstract(tex_content):
+    if "\\maketitle" in tex_content:
+        # find the position of "\maketitle"
+        find_index = tex_content.index("\\maketitle")
+        # find the nearest ending line
+        end_line_index = tex_content.find("\n", find_index)
+        # insert "abs_str" on the next line
+        modified_tex = tex_content[:end_line_index+1] + '\n\n' + insert_missing_abs_str + '\n\n' + tex_content[end_line_index+1:]
+        return modified_tex
+    elif r"\begin{document}" in tex_content:
+        # find the position of "\maketitle"
+        find_index = tex_content.index(r"\begin{document}")
+        # find the nearest ending line
+        end_line_index = tex_content.find("\n", find_index)
+        # insert "abs_str" on the next line
+        modified_tex = tex_content[:end_line_index+1] + '\n\n' + insert_missing_abs_str + '\n\n' + tex_content[end_line_index+1:]
+        return modified_tex
+    else:
+        return tex_content
 
 """
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=

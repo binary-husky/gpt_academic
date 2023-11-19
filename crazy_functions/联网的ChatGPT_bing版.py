@@ -2,7 +2,7 @@ from toolbox import CatchException, update_ui
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, input_clipping
 import requests
 from bs4 import BeautifulSoup
-from request_llm.bridge_all import model_info
+from request_llms.bridge_all import model_info
 
 
 def bing_search(query, proxies=None):
@@ -72,7 +72,7 @@ def 连接bing搜索回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, histor
 
     # ------------- < 第1步：爬取搜索引擎的结果 > -------------
     from toolbox import get_conf
-    proxies, = get_conf('proxies')
+    proxies = get_conf('proxies')
     urls = bing_search(txt, proxies)
     history = []
     if len(urls) == 0:

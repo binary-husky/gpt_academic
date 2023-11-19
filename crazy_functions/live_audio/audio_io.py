@@ -35,7 +35,7 @@ class RealtimeAudioDistribution():
     def read(self, uuid):
         if uuid in self.data:
             res = self.data.pop(uuid)
-            print('\r read-', len(res), '-', max(res), end='', flush=True)
+            # print('\r read-', len(res), '-', max(res), end='', flush=True)
         else:
             res = None
         return res
