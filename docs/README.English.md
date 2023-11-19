@@ -326,25 +326,26 @@ You can change the theme by modifying the `THEME` option (config.py).
 1. `master` branch: Main branch, stable version
 2. `frontier` branch: Development branch, test version
 
+***
+
 ### V: References and Learning
 
-```
+
 The code references the designs of many other excellent projects, in no particular order:
 
-# THU ChatGLM2-6B:
-https://github.com/THUDM/ChatGLM2-6B
+[THU ChatGLM2-6B](https://github.com/THUDM/ChatGLM2-6B)
 
-# THU JittorLLMs:
-https://github.com/Jittor/JittorLLMs
 
-# ChatPaper:
-https://github.com/kaixindelele/ChatPaper
+[THU JittorLLMs](https://github.com/Jittor/JittorLLMs)
 
-# Edge-GPT:
-https://github.com/acheong08/EdgeGPT
 
-# ChuanhuChatGPT:
-https://github.com/GaiZhenbiao/ChuanhuChatGPT
+[ChatPaper](https://github.com/kaixindelele/ChatPaper)
+
+
+[Edge-GPT](https://github.com/acheong08/EdgeGPT)
+
+
+[ChuanhuChatGPT](https://github.com/GaiZhenbiao/ChuanhuChatGPT)
 
 
 
