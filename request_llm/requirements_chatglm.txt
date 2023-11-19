@@ -1,5 +1,0 @@
-protobuf
-cpm_kernels
-torch>=1.10
-mdtex2html
-sentencepiece
