@@ -11,7 +11,7 @@ import math
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
 pj = os.path.join
-
+default_user_name = 'default_user'
 """
 ========================================================================
 第一部分
@@ -61,11 +61,16 @@ def ArgsGeneralWrapper(f):
         txt_passon = txt
         if txt == "" and txt2 != "": txt_passon = txt2
         # 引入一个有cookie的chatbot
+        if request.username is not None:
+            user_name = request.username
+        else:
+            user_name = default_user_name
         cookies.update({
             'top_p':top_p,
             'api_key': cookies['api_key'],
             'llm_model': llm_model,
             'temperature':temperature,
+            'user_name': user_name,
         })
         llm_kwargs = {
             'api_key': cookies['api_key'],
@@ -537,40 +542,60 @@ def find_recent_files(directory):
 
     return recent_files
 
+
+def file_already_in_downloadzone(file, user_path):
+    try:
+        parent_path = os.path.abspath(user_path)
+        child_path = os.path.abspath(file)
+        if os.path.samefile(os.path.commonpath([parent_path, child_path]), parent_path):
+            return True
+        else:
+            return False
+    except:
+        return False
+
 def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
     # 将文件复制一份到下载区
     import shutil
-    if rename_file is None: rename_file = f'{gen_time_str()}-{os.path.basename(file)}'
-    new_path = pj(get_log_folder(), rename_file)
-    # 如果已经存在，先删除
-    if os.path.exists(new_path) and not os.path.samefile(new_path, file): os.remove(new_path)
-    # 把文件复制过去
-    if not os.path.exists(new_path): shutil.copyfile(file, new_path)
-    # 将文件添加到chatbot cookie中，避免多用户干扰
+    if chatbot is not None:
+        user_name = get_user(chatbot)
+    else:
+        user_name = default_user_name
+
+    user_path = get_log_folder(user_name, plugin_name=None)
+    if file_already_in_downloadzone(file, user_path):
+        new_path = file
+    else:
+        user_path = get_log_folder(user_name, plugin_name='downloadzone')
+        if rename_file is None: rename_file = f'{gen_time_str()}-{os.path.basename(file)}'
+        new_path = pj(user_path, rename_file)
+        # 如果已经存在，先删除
+        if os.path.exists(new_path) and not os.path.samefile(new_path, file): os.remove(new_path)
+        # 把文件复制过去
+        if not os.path.exists(new_path): shutil.copyfile(file, new_path)
+    # 将文件添加到chatbot cookie中
     if chatbot is not None:
         if 'files_to_promote' in chatbot._cookies: current = chatbot._cookies['files_to_promote']
         else: current = []
         chatbot._cookies.update({'files_to_promote': [new_path] + current})
     return new_path
 
+
 def disable_auto_promotion(chatbot):
     chatbot._cookies.update({'files_to_promote': []})
     return
 
-def is_the_upload_folder(string):
-    PATH_PRIVATE_UPLOAD = get_conf('PATH_PRIVATE_UPLOAD')
-    pattern = r'^PATH_PRIVATE_UPLOAD/[A-Za-z0-9_-]+/\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}$'
-    pattern = pattern.replace('PATH_PRIVATE_UPLOAD', PATH_PRIVATE_UPLOAD)
-    if re.match(pattern, string): return True
-    else: return False
 
-def del_outdated_uploads(outdate_time_seconds):
-    PATH_PRIVATE_UPLOAD = get_conf('PATH_PRIVATE_UPLOAD')
+def del_outdated_uploads(outdate_time_seconds, target_path_base=None):
+    if target_path_base is None:
+        user_upload_dir = get_conf('PATH_PRIVATE_UPLOAD')
+    else:
+        user_upload_dir = target_path_base
     current_time = time.time()
     one_hour_ago = current_time - outdate_time_seconds
-    # Get a list of all subdirectories in the PATH_PRIVATE_UPLOAD folder
+    # Get a list of all subdirectories in the user_upload_dir folder
     # Remove subdirectories that are older than one hour
-    for subdirectory in glob.glob(f'{PATH_PRIVATE_UPLOAD}/*/*'):
+    for subdirectory in glob.glob(f'{user_upload_dir}/*'):
         subdirectory_time = os.path.getmtime(subdirectory)
         if subdirectory_time < one_hour_ago:
             try: shutil.rmtree(subdirectory)
@@ -583,17 +608,16 @@ def on_file_uploaded(request: gradio.Request, files, chatbot, txt, txt2, checkbo
     """
     if len(files) == 0:
         return chatbot, txt
-    
-    # 移除过时的旧文件从而节省空间&保护隐私
-    outdate_time_seconds = 60
-    del_outdated_uploads(outdate_time_seconds)
 
     # 创建工作路径
-    user_name = "default" if not request.username else request.username
+    user_name = default_user_name if not request.username else request.username
     time_tag = gen_time_str()
-    PATH_PRIVATE_UPLOAD = get_conf('PATH_PRIVATE_UPLOAD')
-    target_path_base = pj(PATH_PRIVATE_UPLOAD, user_name, time_tag)
+    target_path_base = get_upload_folder(user_name, tag=time_tag)
     os.makedirs(target_path_base, exist_ok=True)
+    
+    # 移除过时的旧文件从而节省空间&保护隐私
+    outdate_time_seconds = 3600 # 一小时
+    del_outdated_uploads(outdate_time_seconds, get_upload_folder(user_name))
 
     # 逐个文件转移到目标路径
     upload_msg = ''
@@ -1003,11 +1027,34 @@ def gen_time_str():
     import time
     return time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
 
-def get_log_folder(user='default', plugin_name='shared'):
+def get_log_folder(user=default_user_name, plugin_name='shared'):
+    if user is None: user = default_user_name
     PATH_LOGGING = get_conf('PATH_LOGGING')
-    _dir = pj(PATH_LOGGING, user, plugin_name)
+    if plugin_name is None:
+        _dir = pj(PATH_LOGGING, user)
+    else:
+        _dir = pj(PATH_LOGGING, user, plugin_name)
     if not os.path.exists(_dir): os.makedirs(_dir)
     return _dir
+
+def get_upload_folder(user=default_user_name, tag=None):
+    PATH_PRIVATE_UPLOAD = get_conf('PATH_PRIVATE_UPLOAD')
+    if user is None: user = default_user_name
+    if tag is None or len(tag)==0:
+        target_path_base = pj(PATH_PRIVATE_UPLOAD, user)
+    else:
+        target_path_base = pj(PATH_PRIVATE_UPLOAD, user, tag)
+    return target_path_base
+
+def is_the_upload_folder(string):
+    PATH_PRIVATE_UPLOAD = get_conf('PATH_PRIVATE_UPLOAD')
+    pattern = r'^PATH_PRIVATE_UPLOAD[\\/][A-Za-z0-9_-]+[\\/]\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}$'
+    pattern = pattern.replace('PATH_PRIVATE_UPLOAD', PATH_PRIVATE_UPLOAD)
+    if re.match(pattern, string): return True
+    else: return False
+
+def get_user(chatbotwithcookies):
+    return chatbotwithcookies._cookies.get('user_name', default_user_name)
 
 class ProxyNetworkActivate():
     """
