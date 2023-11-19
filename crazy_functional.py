@@ -1,4 +1,5 @@
 from toolbox import HotReload  # HotReload 的意思是热更新，修改函数插件后，不需要重启程序，代码直接生效
+from toolbox import trimmed_format_exc
 
 
 def get_crazy_functions():
@@ -292,6 +293,7 @@ def get_crazy_functions():
             }
         })
     except:
+        print(trimmed_format_exc())
         print('Load function plugin failed')
 
     try:
@@ -316,6 +318,7 @@ def get_crazy_functions():
             }
         })
     except:
+        print(trimmed_format_exc())
         print('Load function plugin failed')
 
     try:
@@ -331,6 +334,7 @@ def get_crazy_functions():
             },
         })
     except:
+        print(trimmed_format_exc())
         print('Load function plugin failed')
 
     try:
@@ -346,22 +350,35 @@ def get_crazy_functions():
             },
         })
     except:
+        print(trimmed_format_exc())
         print('Load function plugin failed')
 
     try:
-        from crazy_functions.图片生成 import 图片生成
+        from crazy_functions.图片生成 import 图片生成_DALLE2, 图片生成_DALLE3
         function_plugins.update({
-            "图片生成（先切换模型到openai或api2d）": {
+            "图片生成_DALLE2 （先切换模型到openai或api2d）": {
                 "Group": "对话",
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-                "ArgsReminder": "在这里输入分辨率, 如256x256（默认）",  # 高级参数输入区的显示提示
-                "Info": "图片生成 | 输入参数字符串，提供图像的内容",
-                "Function": HotReload(图片生成)
+                "ArgsReminder": "在这里输入分辨率, 如1024x1024（默认），支持 256x256, 512x512, 1024x1024",  # 高级参数输入区的显示提示
+                "Info": "使用DALLE2生成图片 | 输入参数字符串，提供图像的内容",
+                "Function": HotReload(图片生成_DALLE2)
+            },
+        })
+        function_plugins.update({
+            "图片生成_DALLE3 （先切换模型到openai或api2d）": {
+                "Group": "对话",
+                "Color": "stop",
+                "AsButton": False,
+                "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+                "ArgsReminder": "在这里输入分辨率, 如1024x1024（默认），支持 1024x1024, 1792x1024, 1024x1792。如需生成高清图像，请输入 1024x1024-HD, 1792x1024-HD, 1024x1792-HD。",  # 高级参数输入区的显示提示
+                "Info": "使用DALLE3生成图片 | 输入参数字符串，提供图像的内容",
+                "Function": HotReload(图片生成_DALLE3)
             },
         })
     except:
+        print(trimmed_format_exc())
         print('Load function plugin failed')
 
     try:
@@ -378,6 +395,7 @@ def get_crazy_functions():
             }
         })
     except:
+        print(trimmed_format_exc())
         print('Load function plugin failed')
 
     try:
@@ -392,6 +410,7 @@ def get_crazy_functions():
             }
         })
     except:
+        print(trimmed_format_exc())
         print('Load function plugin failed')
 
     try:
@@ -407,6 +426,7 @@ def get_crazy_functions():
             }
         })
     except:
+        print(trimmed_format_exc())
         print('Load function plugin failed')
 
     try:
@@ -422,6 +442,7 @@ def get_crazy_functions():
             }
         })
     except:
+        print(trimmed_format_exc())
         print('Load function plugin failed')
 
     try:
@@ -437,6 +458,7 @@ def get_crazy_functions():
             }
         })
     except:
+        print(trimmed_format_exc())
         print('Load function plugin failed')
 
     try:
@@ -450,6 +472,7 @@ def get_crazy_functions():
             }
         })
     except:
+        print(trimmed_format_exc())
         print('Load function plugin failed')
 
     try:
@@ -494,11 +517,12 @@ def get_crazy_functions():
             }
         })
     except:
+        print(trimmed_format_exc())
         print('Load function plugin failed')
 
     try:
         from toolbox import get_conf
-        ENABLE_AUDIO, = get_conf('ENABLE_AUDIO')
+        ENABLE_AUDIO = get_conf('ENABLE_AUDIO')
         if ENABLE_AUDIO:
             from crazy_functions.语音助手 import 语音助手
             function_plugins.update({
@@ -511,6 +535,7 @@ def get_crazy_functions():
                 }
             })
     except:
+        print(trimmed_format_exc())
         print('Load function plugin failed')
 
     try:
@@ -524,6 +549,7 @@ def get_crazy_functions():
             }
         })
     except:
+        print(trimmed_format_exc())
         print('Load function plugin failed')
 
     try:
@@ -537,19 +563,21 @@ def get_crazy_functions():
             }
         })
     except:
+        print(trimmed_format_exc())
         print('Load function plugin failed')
 
     try:
         from crazy_functions.多智能体 import 多智能体终端
         function_plugins.update({
-            "多智能体终端（微软AutoGen）": {
+            "AutoGen多智能体终端（仅供测试）": {
                 "Group": "智能体",
                 "Color": "stop",
-                "AsButton": True,
+                "AsButton": False,
                 "Function": HotReload(多智能体终端)
             }
         })
     except:
+        print(trimmed_format_exc())
         print('Load function plugin failed')
 
     # try:

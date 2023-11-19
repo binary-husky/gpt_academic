@@ -1,6 +1,6 @@
 import gradio as gr
 from toolbox import get_conf
-THEME, = get_conf('THEME')
+THEME = get_conf('THEME')
 
 def load_dynamic_theme(THEME):
     adjust_dynamic_theme = None

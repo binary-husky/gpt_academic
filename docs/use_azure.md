@@ -1,3 +1,42 @@
+# 微软Azure云接入指南
+
+## 方法一（旧方法，只能接入一个Azure模型）
+
+- 通过以下教程，获取AZURE_ENDPOINT，AZURE_API_KEY，AZURE_ENGINE，直接修改 config 配置即可。配置的修改方法见本项目wiki。
+
+## 方法二（新方法，接入多个Azure模型，并支持动态切换）
+
+- 在方法一的基础上，注册并获取多组 AZURE_ENDPOINT，AZURE_API_KEY，AZURE_ENGINE
+- 修改config中的AZURE_CFG_ARRAY和AVAIL_LLM_MODELS配置项，按照格式填入多个Azure模型的配置，如下所示：
+
+```
+AZURE_CFG_ARRAY = {
+    "azure-gpt-3.5": # 第一个模型，azure模型必须以"azure-"开头，注意您还需要将"azure-gpt-3.5"加入AVAIL_LLM_MODELS（模型下拉菜单）
+    {
+        "AZURE_ENDPOINT": "https://你亲手写的api名称.openai.azure.com/",
+        "AZURE_API_KEY": "cccccccccccccccccccccccccccccccc",
+        "AZURE_ENGINE": "填入你亲手写的部署名1",
+        "AZURE_MODEL_MAX_TOKEN": 4096,
+    },
+    "azure-gpt-4":  # 第二个模型，azure模型必须以"azure-"开头，注意您还需要将"azure-gpt-4"加入AVAIL_LLM_MODELS（模型下拉菜单）
+    {
+        "AZURE_ENDPOINT": "https://你亲手写的api名称.openai.azure.com/",
+        "AZURE_API_KEY": "dddddddddddddddddddddddddddddddd",
+        "AZURE_ENGINE": "填入你亲手写的部署名2",
+        "AZURE_MODEL_MAX_TOKEN": 8192,
+    },
+    "azure-gpt-3.5-16k":  # 第三个模型，azure模型必须以"azure-"开头，注意您还需要将"azure-gpt-3.5-16k"加入AVAIL_LLM_MODELS（模型下拉菜单）
+    {
+        "AZURE_ENDPOINT": "https://你亲手写的api名称.openai.azure.com/",
+        "AZURE_API_KEY": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "AZURE_ENGINE": "填入你亲手写的部署名3",
+        "AZURE_MODEL_MAX_TOKEN": 16384,
+    },
+}
+```
+
+
+
 # 通过微软Azure云服务申请 Openai API
 
 由于Openai和微软的关系，现在是可以通过微软的Azure云计算服务直接访问openai的api，免去了注册和网络的问题。

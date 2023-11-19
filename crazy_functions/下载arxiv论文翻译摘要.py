@@ -1,6 +1,6 @@
 from toolbox import update_ui, get_log_folder
 from toolbox import write_history_to_file, promote_file_to_downloadzone
-from toolbox import CatchException, report_execption, get_conf
+from toolbox import CatchException, report_exception, get_conf
 import re, requests, unicodedata, os
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 def download_arxiv_(url_pdf):
@@ -43,7 +43,7 @@ def download_arxiv_(url_pdf):
     file_path = download_dir+title_str
 
     print('下载中')
-    proxies, = get_conf('proxies')
+    proxies = get_conf('proxies')
     r = requests.get(requests_pdf_url, proxies=proxies)
     with open(file_path, 'wb+') as f:
         f.write(r.content)
@@ -77,7 +77,7 @@ def get_name(_url_):
     #     print('在缓存中')
     #     return arxiv_recall[_url_]
 
-    proxies, = get_conf('proxies')
+    proxies = get_conf('proxies')
     res = requests.get(_url_, proxies=proxies)
 
     bs = BeautifulSoup(res.text, 'html.parser')
@@ -144,7 +144,7 @@ def 下载arxiv论文并翻译摘要(txt, llm_kwargs, plugin_kwargs, chatbot, hi
     try:
         import bs4
     except:
-        report_execption(chatbot, history, 
+        report_exception(chatbot, history, 
             a = f"解析项目: {txt}", 
             b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade beautifulsoup4```。")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
@@ -157,7 +157,7 @@ def 下载arxiv论文并翻译摘要(txt, llm_kwargs, plugin_kwargs, chatbot, hi
     try:
         pdf_path, info = download_arxiv_(txt)
     except:
-        report_execption(chatbot, history, 
+        report_exception(chatbot, history, 
             a = f"解析项目: {txt}", 
             b = f"下载pdf文件未成功")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面

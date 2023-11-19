@@ -94,5 +94,8 @@
     "解析一个Matlab项目": "AnalyzeAMatlabProject",
     "函数动态生成": "DynamicFunctionGeneration",
     "多智能体终端": "MultiAgentTerminal",
-    "多智能体": "MultiAgent"
+    "多智能体": "MultiAgent",
+    "图片生成_DALLE2": "ImageGeneration_DALLE2",
+    "图片生成_DALLE3": "ImageGeneration_DALLE3",
+    "图片修改_DALLE2": "ImageModification_DALLE2"
 }

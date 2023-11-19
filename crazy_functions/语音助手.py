@@ -2,7 +2,7 @@ from toolbox import update_ui
 from toolbox import CatchException, get_conf, markdown_convertion
 from crazy_functions.crazy_utils import input_clipping
 from crazy_functions.agent_fns.watchdog import WatchDog
-from request_llm.bridge_all import predict_no_ui_long_connection
+from request_llms.bridge_all import predict_no_ui_long_connection
 import threading, time
 import numpy as np
 from .live_audio.aliyunASR import AliyunASR

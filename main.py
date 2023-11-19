@@ -1,26 +1,25 @@
 import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 import pickle
-import codecs
 import base64
 
 def main():
     import gradio as gr
     if gr.__version__ not in ['3.32.6']: 
         raise ModuleNotFoundError("使用项目内置Gradio获取最优体验! 请运行 `pip install -r requirements.txt` 指令安装内置Gradio及其他依赖, 详情信息见requirements.txt.")
-    from request_llm.bridge_all import predict
+    from request_llms.bridge_all import predict
     from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, load_chat_cookies, DummyWith
     # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
     proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION = get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION')
     CHATBOT_HEIGHT, LAYOUT, AVAIL_LLM_MODELS, AUTO_CLEAR_TXT = get_conf('CHATBOT_HEIGHT', 'LAYOUT', 'AVAIL_LLM_MODELS', 'AUTO_CLEAR_TXT')
     ENABLE_AUDIO, AUTO_CLEAR_TXT, PATH_LOGGING, AVAIL_THEMES, THEME = get_conf('ENABLE_AUDIO', 'AUTO_CLEAR_TXT', 'PATH_LOGGING', 'AVAIL_THEMES', 'THEME')
     DARK_MODE, NUM_CUSTOM_BASIC_BTN, SSL_KEYFILE, SSL_CERTFILE = get_conf('DARK_MODE', 'NUM_CUSTOM_BASIC_BTN', 'SSL_KEYFILE', 'SSL_CERTFILE')
+    INIT_SYS_PROMPT = get_conf('INIT_SYS_PROMPT')
 
     # 如果WEB_PORT是-1, 则随机选取WEB端口
     PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
     from check_proxy import get_current_version
     from themes.theme import adjust_theme, advanced_css, theme_declaration, load_dynamic_theme
 
-    initial_prompt = "Serve me as a writing and programming assistant."
     title_html = f"<h1 align=\"center\">GPT 学术优化 {get_current_version()}</h1>{theme_declaration}"
     description =  "Github源代码开源和更新[地址🚀](https://github.com/binary-husky/gpt_academic), "
     description += "感谢热情的[开发者们❤️](https://github.com/binary-husky/gpt_academic/graphs/contributors)."
@@ -32,6 +31,7 @@ def main():
     description += "</br></br>虚空终端使用说明: 点击虚空终端, 然后根据提示输入指令, 再次点击虚空终端"
     description += "</br></br>如何保存对话: 点击保存当前的对话按钮"
     description += "</br></br>如何语音对话: 请阅读Wiki"
+    description += "</br></br>如何临时更换API_KEY: 在输入区输入临时API_KEY后提交（网页刷新后失效）"
 
     # 问询记录, python 版本建议3.9+（越新越好）
     import logging, uuid
@@ -48,7 +48,7 @@ def main():
 
     # 高级函数插件
     from crazy_functional import get_crazy_functions
-    DEFAULT_FN_GROUPS, = get_conf('DEFAULT_FN_GROUPS')
+    DEFAULT_FN_GROUPS = get_conf('DEFAULT_FN_GROUPS')
     plugins = get_crazy_functions()
     all_plugin_groups = list(set([g for _, plugin in plugins.items() for g in plugin['Group'].split('|')]))
     match_group = lambda tags, groups: any([g in groups for g in tags.split('|')])
@@ -94,7 +94,7 @@ def main():
                         clearBtn = gr.Button("清除", elem_id="elem_clear", variant="secondary", visible=False); clearBtn.style(size="sm")
                     if ENABLE_AUDIO: 
                         with gr.Row():
-                            audio_mic = gr.Audio(source="microphone", type="numpy", streaming=True, show_label=False).style(container=False)
+                            audio_mic = gr.Audio(source="microphone", type="numpy", elem_id="elem_audio", streaming=True, show_label=False).style(container=False)
                     with gr.Row():
                         status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {proxy_info}", elem_id="state-panel")
                 with gr.Accordion("基础功能区", open=True, elem_id="basic-panel") as area_basic_fn:
@@ -153,7 +153,7 @@ def main():
                     top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01,interactive=True, label="Top-p (nucleus sampling)",)
                     temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature",)
                     max_length_sl = gr.Slider(minimum=256, maximum=1024*32, value=4096, step=128, interactive=True, label="Local LLM MaxLength",)
-                    system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt", label="System prompt", value=initial_prompt)
+                    system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt", label="System prompt", value=INIT_SYS_PROMPT)
 
                 with gr.Tab("界面外观", elem_id="interact-panel"):
                     theme_dropdown = gr.Dropdown(AVAIL_THEMES, value=THEME, label="更换UI主题").style(container=False)
@@ -433,16 +433,16 @@ def main():
         server_port=PORT,
         favicon_path=os.path.join(os.path.dirname(__file__), "docs/logo.png"), 
         auth=AUTHENTICATION if len(AUTHENTICATION) != 0 else None,
-        blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile"])
+        blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile",f"{PATH_LOGGING}/admin"])
 
     # 如果需要在二级路径下运行
-    # CUSTOM_PATH, = get_conf('CUSTOM_PATH')
+    # CUSTOM_PATH = get_conf('CUSTOM_PATH')
     # if CUSTOM_PATH != "/": 
     #     from toolbox import run_gradio_in_subpath
     #     run_gradio_in_subpath(demo, auth=AUTHENTICATION, port=PORT, custom_path=CUSTOM_PATH)
     # else: 
     #     demo.launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, favicon_path="docs/logo.png",
-    #                 blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile"])
+    #                 blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile",f"{PATH_LOGGING}/admin"])
 
 if __name__ == "__main__":
     main()

@@ -49,6 +49,10 @@ THEME = "Default"
 AVAIL_THEMES = ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast", "Gstaff/Xkcd", "NoCrypt/Miku"]
 
 
+# 默认的系统提示词（system prompt）
+INIT_SYS_PROMPT = "Serve me as a writing and programming assistant."
+
+
 # 对话窗的高度 （仅在LAYOUT="TOP-DOWN"时生效）
 CHATBOT_HEIGHT = 1115
 
@@ -83,17 +87,23 @@ DEFAULT_FN_GROUPS = ['对话', '编程', '学术', '智能体']
 
 # 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
 LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
-AVAIL_LLM_MODELS = ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
-                    "api2d-gpt-3.5-turbo", 'api2d-gpt-3.5-turbo-16k', "api2d-gpt-4",
-                    "gpt-4", "gpt-4-32k", "azure-gpt-4", "chatglm", "moss", "newbing", "stack-claude"]
-# P.S. 其他可用的模型还包括 ["qianfan", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613",  "gpt-3.5-random"
-# "spark", "sparkv2", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"]
+AVAIL_LLM_MODELS = ["gpt-3.5-turbo-1106","gpt-4-1106-preview",
+                    "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
+                    "api2d-gpt-3.5-turbo", 'api2d-gpt-3.5-turbo-16k',
+                    "gpt-4", "gpt-4-32k", "azure-gpt-4", "api2d-gpt-4",
+                    "chatglm3", "moss", "newbing", "claude-2"]
+# P.S. 其他可用的模型还包括 ["zhipuai", "qianfan", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613",  "gpt-3.5-random"
+# "spark", "sparkv2", "sparkv3", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"]
+
+
+# 定义界面上“询问多个GPT模型”插件应该使用哪些模型，请从AVAIL_LLM_MODELS中选择，并在不同模型之间用`&`间隔，例如"gpt-3.5-turbo&chatglm3&azure-gpt-4"
+MULTI_QUERY_LLM_MODELS = "gpt-3.5-turbo&chatglm3"
 
 
 # 百度千帆（LLM_MODEL="qianfan"）
 BAIDU_CLOUD_API_KEY = ''
 BAIDU_CLOUD_SECRET_KEY = ''
-BAIDU_CLOUD_QIANFAN_MODEL = 'ERNIE-Bot'    # 可选 "ERNIE-Bot"(文心一言), "ERNIE-Bot-turbo", "BLOOMZ-7B", "Llama-2-70B-Chat", "Llama-2-13B-Chat", "Llama-2-7B-Chat"
+BAIDU_CLOUD_QIANFAN_MODEL = 'ERNIE-Bot'    # 可选 "ERNIE-Bot-4"(文心大模型4.0), "ERNIE-Bot"(文心一言), "ERNIE-Bot-turbo", "BLOOMZ-7B", "Llama-2-70B-Chat", "Llama-2-13B-Chat", "Llama-2-7B-Chat"
 
 
 # 如果使用ChatGLM2微调模型，请把 LLM_MODEL="chatglmft"，并在此处指定模型路径
@@ -135,15 +145,19 @@ SSL_CERTFILE = ""
 API_ORG = ""
 
 
-# 如果需要使用Slack Claude，使用教程详情见 request_llm/README.md
+# 如果需要使用Slack Claude，使用教程详情见 request_llms/README.md
 SLACK_CLAUDE_BOT_ID = ''   
 SLACK_CLAUDE_USER_TOKEN = ''
 
 
-# 如果需要使用AZURE 详情请见额外文档 docs\use_azure.md
+# 如果需要使用AZURE（方法一：单个azure模型部署）详情请见额外文档 docs\use_azure.md
 AZURE_ENDPOINT = "https://你亲手写的api名称.openai.azure.com/"
 AZURE_API_KEY = "填入azure openai api的密钥"    # 建议直接在API_KEY处填写，该选项即将被弃用
 AZURE_ENGINE = "填入你亲手写的部署名"            # 读 docs\use_azure.md
+
+
+# 如果需要使用AZURE（方法二：多个azure模型部署+动态切换）详情请见额外文档 docs\use_azure.md
+AZURE_CFG_ARRAY = {}
 
 
 # 使用Newbing (不推荐使用，未来将删除)
@@ -165,6 +179,11 @@ ALIYUN_SECRET=""    # （无需填写）
 XFYUN_APPID = "00000000"
 XFYUN_API_SECRET = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
 XFYUN_API_KEY = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
+
+# 接入智谱大模型
+ZHIPUAI_API_KEY = ""
+ZHIPUAI_MODEL = "chatglm_turbo"
 
 
 # Claude API KEY
@@ -193,7 +212,7 @@ ALLOW_RESET_CONFIG = False
 
 
 # 在使用AutoGen插件时，是否使用Docker容器运行代码
-AUTOGEN_USE_DOCKER = True
+AUTOGEN_USE_DOCKER = False
 
 
 # 临时的上传文件夹位置，请勿修改
@@ -207,6 +226,10 @@ PATH_LOGGING = "gpt_log"
 # 除了连接OpenAI之外，还有哪些场合允许使用代理，请勿修改
 WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid", 
                      "Warmup_Modules", "Nougat_Download", "AutoGen"]
+
+
+# *实验性功能*: 自动检测并屏蔽失效的KEY，请勿使用
+BLOCK_INVALID_APIKEY = False
 
 
 # 自定义按钮的最大数量限制
@@ -226,12 +249,15 @@ LATEX_EXPERIMENTAL = False
 │   ├── API_ORG（不常用）
 │   └── API_URL_REDIRECT（不常用）
 │
-├── "azure-gpt-3.5" 等azure模型
+├── "azure-gpt-3.5" 等azure模型（单个azure模型，不需要动态切换）
 │   ├── API_KEY
 │   ├── AZURE_ENDPOINT
 │   ├── AZURE_API_KEY
 │   ├── AZURE_ENGINE
 │   └── API_URL_REDIRECT
+│
+├── "azure-gpt-3.5" 等azure模型（多个azure模型，需要动态切换，高优先级）
+│   └── AZURE_CFG_ARRAY
 │
 ├── "spark" 星火认知大模型 spark & sparkv2
 │   ├── XFYUN_APPID

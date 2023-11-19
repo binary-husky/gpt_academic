@@ -1,5 +1,5 @@
 from toolbox import update_ui
-from toolbox import CatchException, report_execption
+from toolbox import CatchException, report_exception
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from toolbox import write_history_to_file, promote_file_to_downloadzone
 
@@ -138,7 +138,7 @@ def 批量总结PDF文档pdfminer(txt, llm_kwargs, plugin_kwargs, chatbot, histo
     try:
         import pdfminer, bs4
     except:
-        report_execption(chatbot, history, 
+        report_exception(chatbot, history, 
             a = f"解析项目: {txt}", 
             b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pdfminer beautifulsoup4```。")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
@@ -147,7 +147,7 @@ def 批量总结PDF文档pdfminer(txt, llm_kwargs, plugin_kwargs, chatbot, histo
         project_folder = txt
     else:
         if txt == "": txt = '空空如也的输入栏'
-        report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
+        report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
     file_manifest = [f for f in glob.glob(f'{project_folder}/**/*.tex', recursive=True)] + \
@@ -155,7 +155,7 @@ def 批量总结PDF文档pdfminer(txt, llm_kwargs, plugin_kwargs, chatbot, histo
                     # [f for f in glob.glob(f'{project_folder}/**/*.cpp', recursive=True)] + \
                     # [f for f in glob.glob(f'{project_folder}/**/*.c', recursive=True)]
     if len(file_manifest) == 0:
-        report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何.tex或pdf文件: {txt}")
+        report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何.tex或pdf文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
     yield from 解析Paper(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt)
