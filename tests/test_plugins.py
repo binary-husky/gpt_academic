@@ -9,7 +9,11 @@ validate_path() # 返回项目根路径
 
 if __name__ == "__main__":
     from tests.test_utils import plugin_test
-    plugin_test(plugin='crazy_functions.函数动态生成->函数动态生成', main_input='交换图像的蓝色通道和红色通道', advanced_arg={"file_path_arg": "./build/ants.jpg"})
+    # plugin_test(plugin='crazy_functions.函数动态生成->函数动态生成', main_input='交换图像的蓝色通道和红色通道', advanced_arg={"file_path_arg": "./build/ants.jpg"})
+
+    # plugin_test(plugin='crazy_functions.Latex输出PDF结果->Latex翻译中文并重新编译PDF', main_input="2307.07522")
+
+    plugin_test(plugin='crazy_functions.Latex输出PDF结果->Latex翻译中文并重新编译PDF', main_input="G:/SEAFILE_LOCAL/50503047/我的资料库/学位/paperlatex/aaai/Fu_8368_with_appendix")
 
     # plugin_test(plugin='crazy_functions.虚空终端->虚空终端', main_input='修改api-key为sk-jhoejriotherjep')
 

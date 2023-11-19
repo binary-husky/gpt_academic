@@ -32,10 +32,10 @@ services:
   gpt_academic_full_capability:
     image: ghcr.io/binary-husky/gpt_academic_with_all_capacity:master
     environment:
-    # 请查阅 `config.py`或者 github wiki 以查看所有的配置信息
+      # 请查阅 `config.py`或者 github wiki 以查看所有的配置信息
       API_KEY:                  '  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                        '
-    # USE_PROXY:                '  True                                                                       '
-    # proxies:                  '  { "http": "http://localhost:10881", "https": "http://localhost:10881", }   '
+      # USE_PROXY:                '  True                                                                       '
+      # proxies:                  '  { "http": "http://localhost:10881", "https": "http://localhost:10881", }   '
       LLM_MODEL:                '  gpt-3.5-turbo                                                              '
       AVAIL_LLM_MODELS:         '  ["gpt-3.5-turbo", "gpt-4", "qianfan", "sparkv2", "spark", "chatglm"]       '
       BAIDU_CLOUD_API_KEY :     '  bTUtwEAveBrQipEowUvDwYWq                                                   '
@@ -51,7 +51,7 @@ services:
       THEME:                    '  Chuanhu-Small-and-Beautiful                                                '
       ALIYUN_ACCESSKEY:         '  LTAI5t6BrFUzxRXVGUWnekh1                                                   '
       ALIYUN_SECRET:            '  eHmI20SVWIwQZxCiTD2bGQVspP9i68                                             '
-    # LOCAL_MODEL_DEVICE:       '  cuda                                                                       '
+      # LOCAL_MODEL_DEVICE:       '  cuda                                                                       '
 
     # 加载英伟达显卡运行时
     # runtime: nvidia
@@ -137,7 +137,7 @@ services:
 
     # P.S. 通过对 command 进行微调，可以便捷地安装额外的依赖
     # command: >
-    #   bash -c "pip install -r request_llm/requirements_qwen.txt && python3 -u main.py"
+    #   bash -c "pip install -r request_llms/requirements_qwen.txt && python3 -u main.py"
 
 ### ===================================================
 ### 【方案三】 如果需要运行ChatGPT + LLAMA + 盘古 + RWKV本地模型

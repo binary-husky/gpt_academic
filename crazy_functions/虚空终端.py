@@ -48,7 +48,7 @@ from pydantic import BaseModel, Field
 from typing import List
 from toolbox import CatchException, update_ui, is_the_upload_folder
 from toolbox import update_ui_lastest_msg, disable_auto_promotion
-from request_llm.bridge_all import predict_no_ui_long_connection
+from request_llms.bridge_all import predict_no_ui_long_connection
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from crazy_functions.crazy_utils import input_clipping
 from crazy_functions.json_fns.pydantic_io import GptJsonIO, JsonStringError

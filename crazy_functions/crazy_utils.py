@@ -5,7 +5,7 @@ import logging
 
 def input_clipping(inputs, history, max_token_limit):
     import numpy as np
-    from request_llm.bridge_all import model_info
+    from request_llms.bridge_all import model_info
     enc = model_info["gpt-3.5-turbo"]['tokenizer']
     def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))
 
@@ -63,18 +63,21 @@ def request_gpt_model_in_new_thread_with_ui_alive(
     """
     import time
     from concurrent.futures import ThreadPoolExecutor
-    from request_llm.bridge_all import predict_no_ui_long_connection
+    from request_llms.bridge_all import predict_no_ui_long_connection
     # 用户反馈
     chatbot.append([inputs_show_user, ""])
     yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
     executor = ThreadPoolExecutor(max_workers=16)
     mutable = ["", time.time(), ""]
+    # 看门狗耐心
+    watch_dog_patience = 5
+    # 请求任务
     def _req_gpt(inputs, history, sys_prompt):
         retry_op = retry_times_at_unknown_error
         exceeded_cnt = 0
         while True:
             # watchdog error
-            if len(mutable) >= 2 and (time.time()-mutable[1]) > 5: 
+            if len(mutable) >= 2 and (time.time()-mutable[1]) > watch_dog_patience: 
                 raise RuntimeError("检测到程序终止。")
             try:
                 # 【第一种情况】：顺利完成
@@ -174,11 +177,11 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     """
     import time, random
     from concurrent.futures import ThreadPoolExecutor
-    from request_llm.bridge_all import predict_no_ui_long_connection
+    from request_llms.bridge_all import predict_no_ui_long_connection
     assert len(inputs_array) == len(history_array)
     assert len(inputs_array) == len(sys_prompt_array)
     if max_workers == -1: # 读取配置文件
-        try: max_workers, = get_conf('DEFAULT_WORKER_NUM')
+        try: max_workers = get_conf('DEFAULT_WORKER_NUM')
         except: max_workers = 8
         if max_workers <= 0: max_workers = 3
     # 屏蔽掉 chatglm的多线程，可能会导致严重卡顿
@@ -193,19 +196,21 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     # 跨线程传递
     mutable = [["", time.time(), "等待中"] for _ in range(n_frag)]
 
+    # 看门狗耐心
+    watch_dog_patience = 5
+
     # 子线程任务
     def _req_gpt(index, inputs, history, sys_prompt):
         gpt_say = ""
         retry_op = retry_times_at_unknown_error
         exceeded_cnt = 0
         mutable[index][2] = "执行中"
+        detect_timeout = lambda: len(mutable[index]) >= 2 and (time.time()-mutable[index][1]) > watch_dog_patience
         while True:
             # watchdog error
-            if len(mutable[index]) >= 2 and (time.time()-mutable[index][1]) > 5: 
-                raise RuntimeError("检测到程序终止。")
+            if detect_timeout(): raise RuntimeError("检测到程序终止。")
             try:
                 # 【第一种情况】：顺利完成
-                # time.sleep(10); raise RuntimeError("测试")
                 gpt_say = predict_no_ui_long_connection(
                     inputs=inputs, llm_kwargs=llm_kwargs, history=history, 
                     sys_prompt=sys_prompt, observe_window=mutable[index], console_slience=True
@@ -213,7 +218,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                 mutable[index][2] = "已成功"
                 return gpt_say
             except ConnectionAbortedError as token_exceeded_error:
-                # 【第二种情况】：Token溢出，
+                # 【第二种情况】：Token溢出
                 if handle_token_exceed:
                     exceeded_cnt += 1
                     # 【选择处理】 尝试计算比例，尽可能多地保留文本
@@ -234,6 +239,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     return gpt_say # 放弃
             except:
                 # 【第三种情况】：其他错误
+                if detect_timeout(): raise RuntimeError("检测到程序终止。")
                 tb_str = '```\n' + trimmed_format_exc() + '```'
                 print(tb_str)
                 gpt_say += f"[Local Message] 警告，线程{index}在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
@@ -250,6 +256,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     for i in range(wait):
                         mutable[index][2] = f"{fail_info}等待重试 {wait-i}"; time.sleep(1)
                     # 开始重试
+                    if detect_timeout(): raise RuntimeError("检测到程序终止。")
                     mutable[index][2] = f"重试中 {retry_times_at_unknown_error-retry_op}/{retry_times_at_unknown_error}"
                     continue # 返回重试
                 else:
@@ -275,7 +282,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         # 在前端打印些好玩的东西
         for thread_index, _ in enumerate(worker_done):
             print_something_really_funny = "[ ...`"+mutable[thread_index][0][-scroller_max_len:].\
-                replace('\n', '').replace('```', '...').replace(
+                replace('\n', '').replace('`', '.').replace(
                     ' ', '.').replace('<br/>', '.....').replace('$', '.')+"`... ]"
             observe_win.append(print_something_really_funny)
         # 在前端打印些好玩的东西
@@ -301,7 +308,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
             gpt_res = f.result()
             chatbot.append([inputs_show_user, gpt_res])
             yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
-            time.sleep(0.3)
+            time.sleep(0.5)
     return gpt_response_collection
 
 
@@ -596,7 +603,7 @@ def get_files_from_everything(txt, type): # type='.md'
         import requests
         from toolbox import get_conf
         from toolbox import get_log_folder, gen_time_str
-        proxies, = get_conf('proxies')
+        proxies = get_conf('proxies')
         try:
             r = requests.get(txt, proxies=proxies)
         except:
@@ -715,8 +722,10 @@ class nougat_interface():
 
     def nougat_with_timeout(self, command, cwd, timeout=3600):
         import subprocess
+        from toolbox import ProxyNetworkActivate
         logging.info(f'正在执行命令 {command}')
-        process = subprocess.Popen(command, shell=True, cwd=cwd)
+        with ProxyNetworkActivate("Nougat_Download"):
+            process = subprocess.Popen(command, shell=True, cwd=cwd, env=os.environ)
         try:
             stdout, stderr = process.communicate(timeout=timeout)
         except subprocess.TimeoutExpired:
@@ -759,54 +768,6 @@ def try_install_deps(deps, reload_m=[]):
     importlib.reload(site)
     for m in reload_m:
         importlib.reload(__import__(m))
-
-
-HTML_CSS = """
-.row {
-  display: flex;
-  flex-wrap: wrap;
-}
-.column {
-  flex: 1;
-  padding: 10px;
-}
-.table-header {
-  font-weight: bold;
-  border-bottom: 1px solid black;
-}
-.table-row {
-  border-bottom: 1px solid lightgray;
-}
-.table-cell {
-  padding: 5px;
-}
-"""
-
-TABLE_CSS = """
-<div class="row table-row">
-    <div class="column table-cell">REPLACE_A</div>
-    <div class="column table-cell">REPLACE_B</div>
-</div>
-"""
-
-class construct_html():
-    def __init__(self) -> None:
-        self.css = HTML_CSS
-        self.html_string = f'<!DOCTYPE html><head><meta charset="utf-8"><title>翻译结果</title><style>{self.css}</style></head>'
-
-
-    def add_row(self, a, b):
-        tmp = TABLE_CSS
-        from toolbox import markdown_convertion
-        tmp = tmp.replace('REPLACE_A', markdown_convertion(a))
-        tmp = tmp.replace('REPLACE_B', markdown_convertion(b))
-        self.html_string += tmp
-
-
-    def save_file(self, file_name):
-        with open(os.path.join(get_log_folder(), file_name), 'w', encoding='utf8') as f:
-            f.write(self.html_string.encode('utf-8', 'ignore').decode())
-        return os.path.join(get_log_folder(), file_name)
 
 
 def get_plugin_arg(plugin_kwargs, key, default):

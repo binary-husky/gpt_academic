@@ -1,5 +1,5 @@
 from toolbox import update_ui
-from toolbox import CatchException, report_execption
+from toolbox import CatchException, report_exception
 from toolbox import write_history_to_file, promote_file_to_downloadzone
 fast_debug = True
 
@@ -13,7 +13,7 @@ class PaperFileGroup():
         self.sp_file_tag = []
 
         # count_token
-        from request_llm.bridge_all import model_info
+        from request_llms.bridge_all import model_info
         enc = model_info["gpt-3.5-turbo"]['tokenizer']
         def get_token_num(txt): return len(
             enc.encode(txt, disallowed_special=()))
@@ -131,7 +131,7 @@ def 解析ipynb文件(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
     else:
         if txt == "":
             txt = '空空如也的输入栏'
-        report_execption(chatbot, history,
+        report_exception(chatbot, history,
                          a=f"解析项目: {txt}", b=f"找不到本地项目或无权访问: {txt}")
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
         return
@@ -141,7 +141,7 @@ def 解析ipynb文件(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
         file_manifest = [f for f in glob.glob(
             f'{project_folder}/**/*.ipynb', recursive=True)]
     if len(file_manifest) == 0:
-        report_execption(chatbot, history,
+        report_exception(chatbot, history,
                          a=f"解析项目: {txt}", b=f"找不到任何.ipynb文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
         return

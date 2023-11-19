@@ -1,6 +1,6 @@
 import glob, time, os, re, logging
 from toolbox import update_ui, trimmed_format_exc, gen_time_str, disable_auto_promotion
-from toolbox import CatchException, report_execption, get_log_folder
+from toolbox import CatchException, report_exception, get_log_folder
 from toolbox import write_history_to_file, promote_file_to_downloadzone
 fast_debug = False
 
@@ -13,7 +13,7 @@ class PaperFileGroup():
         self.sp_file_tag = []
 
         # count_token
-        from request_llm.bridge_all import model_info
+        from request_llms.bridge_all import model_info
         enc = model_info["gpt-3.5-turbo"]['tokenizer']
         def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))
         self.get_token_num = get_token_num
@@ -118,7 +118,7 @@ def get_files_from_everything(txt, preference=''):
     if txt.startswith('http'):
         import requests
         from toolbox import get_conf
-        proxies, = get_conf('proxies')
+        proxies = get_conf('proxies')
         # 网络的远程文件
         if preference == 'Github':
             logging.info('正在从github下载资源 ...')
@@ -165,7 +165,7 @@ def Markdown英译中(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
     try:
         import tiktoken
     except:
-        report_execption(chatbot, history,
+        report_exception(chatbot, history,
                          a=f"解析项目: {txt}",
                          b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade tiktoken```。")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
@@ -177,12 +177,12 @@ def Markdown英译中(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
     if not success:
         # 什么都没有
         if txt == "": txt = '空空如也的输入栏'
-        report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
+        report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
 
     if len(file_manifest) == 0:
-        report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何.md文件: {txt}")
+        report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何.md文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
 
@@ -205,7 +205,7 @@ def Markdown中译英(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
     try:
         import tiktoken
     except:
-        report_execption(chatbot, history,
+        report_exception(chatbot, history,
                          a=f"解析项目: {txt}",
                          b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade tiktoken```。")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
@@ -215,11 +215,11 @@ def Markdown中译英(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
     if not success:
         # 什么都没有
         if txt == "": txt = '空空如也的输入栏'
-        report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
+        report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
     if len(file_manifest) == 0:
-        report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何.md文件: {txt}")
+        report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何.md文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
     yield from 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, language='zh->en')
@@ -238,7 +238,7 @@ def Markdown翻译指定语言(txt, llm_kwargs, plugin_kwargs, chatbot, history,
     try:
         import tiktoken
     except:
-        report_execption(chatbot, history,
+        report_exception(chatbot, history,
                          a=f"解析项目: {txt}",
                          b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade tiktoken```。")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
@@ -248,11 +248,11 @@ def Markdown翻译指定语言(txt, llm_kwargs, plugin_kwargs, chatbot, history,
     if not success:
         # 什么都没有
         if txt == "": txt = '空空如也的输入栏'
-        report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
+        report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
     if len(file_manifest) == 0:
-        report_execption(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何.md文件: {txt}")
+        report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何.md文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
     

@@ -1,4 +1,4 @@
-from toolbox import CatchException, report_execption, get_log_folder, gen_time_str
+from toolbox import CatchException, report_exception, get_log_folder, gen_time_str, check_packages
 from toolbox import update_ui, promote_file_to_downloadzone, update_ui_lastest_msg, disable_auto_promotion
 from toolbox import write_history_to_file, promote_file_to_downloadzone
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
@@ -6,9 +6,8 @@ from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_an
 from .crazy_utils import read_and_clean_pdf_text
 from .pdf_fns.parse_pdf import parse_pdf, get_avail_grobid_url, translate_pdf
 from colorful import *
-import copy
 import os
-import math
+
 
 @CatchException
 def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
@@ -22,11 +21,9 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
-        import fitz
-        import tiktoken
-        import scipdf
+        check_packages(["fitz", "tiktoken", "scipdf"])
     except:
-        report_execption(chatbot, history,
+        report_exception(chatbot, history,
                          a=f"解析项目: {txt}",
                          b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pymupdf tiktoken scipdf_parser```。")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
@@ -43,8 +40,8 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
 
     # 如果没找到任何文件
     if len(file_manifest) == 0:
-        report_execption(chatbot, history,
-                         a=f"解析项目: {txt}", b=f"找不到任何.tex或.pdf文件: {txt}")
+        report_exception(chatbot, history,
+                         a=f"解析项目: {txt}", b=f"找不到任何.pdf拓展名的文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
 
@@ -63,7 +60,7 @@ def 解析PDF_基于GROBID(file_manifest, project_folder, llm_kwargs, plugin_kwa
     generated_conclusion_files = []
     generated_html_files = []
     DST_LANG = "中文"
-    from crazy_functions.crazy_utils import construct_html
+    from crazy_functions.pdf_fns.report_gen_html import construct_html
     for index, fp in enumerate(file_manifest):
         chatbot.append(["当前进度：", f"正在连接GROBID服务，请稍候: {grobid_url}\n如果等待时间过长，请修改config中的GROBID_URL，可修改成本地GROBID服务。"]); yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         article_dict = parse_pdf(fp, grobid_url)
@@ -86,7 +83,7 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
     TOKEN_LIMIT_PER_FRAGMENT = 1024
     generated_conclusion_files = []
     generated_html_files = []
-    from crazy_functions.crazy_utils import construct_html
+    from crazy_functions.pdf_fns.report_gen_html import construct_html
     for index, fp in enumerate(file_manifest):
         # 读取PDF文件
         file_content, page_one = read_and_clean_pdf_text(fp)
@@ -95,7 +92,7 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
 
         # 递归地切割PDF文件
         from .crazy_utils import breakdown_txt_to_satisfy_token_limit_for_pdf
-        from request_llm.bridge_all import model_info
+        from request_llms.bridge_all import model_info
         enc = model_info["gpt-3.5-turbo"]['tokenizer']
         def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))
         paper_fragments = breakdown_txt_to_satisfy_token_limit_for_pdf(

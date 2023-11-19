@@ -1,13 +1,13 @@
 from pydantic import BaseModel, Field
 from typing import List
 from toolbox import update_ui_lastest_msg, get_conf
-from request_llm.bridge_all import predict_no_ui_long_connection
+from request_llms.bridge_all import predict_no_ui_long_connection
 from crazy_functions.json_fns.pydantic_io import GptJsonIO
 import copy, json, pickle, os, sys
 
 
 def modify_configuration_hot(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention):
-    ALLOW_RESET_CONFIG, = get_conf('ALLOW_RESET_CONFIG')
+    ALLOW_RESET_CONFIG = get_conf('ALLOW_RESET_CONFIG')
     if not ALLOW_RESET_CONFIG:
         yield from update_ui_lastest_msg(
             lastmsg=f"当前配置不允许被修改！如需激活本功能，请在config.py中设置ALLOW_RESET_CONFIG=True后重启软件。", 
@@ -66,7 +66,7 @@ def modify_configuration_hot(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         )
 
 def modify_configuration_reboot(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_intention):
-    ALLOW_RESET_CONFIG, = get_conf('ALLOW_RESET_CONFIG')
+    ALLOW_RESET_CONFIG = get_conf('ALLOW_RESET_CONFIG')
     if not ALLOW_RESET_CONFIG:
         yield from update_ui_lastest_msg(
             lastmsg=f"当前配置不允许被修改！如需激活本功能，请在config.py中设置ALLOW_RESET_CONFIG=True后重启软件。", 
