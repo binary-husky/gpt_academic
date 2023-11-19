@@ -95,11 +95,14 @@ class LatexPaperSplit():
         self.abstract = "unknown"
 
     def read_title_and_abstract(self, txt):
-        title, abstract = find_title_and_abs(txt)
-        if title is not None: 
-            self.title = title.replace('\n', ' ').replace('\\\\', ' ').replace('  ', '').replace('  ', '')
-        if abstract is not None: 
-            self.abstract = abstract.replace('\n', ' ').replace('\\\\', ' ').replace('  ', '').replace('  ', '')
+        try:
+            title, abstract = find_title_and_abs(txt)
+            if title is not None: 
+                self.title = title.replace('\n', ' ').replace('\\\\', ' ').replace('  ', '').replace('  ', '')
+            if abstract is not None: 
+                self.abstract = abstract.replace('\n', ' ').replace('\\\\', ' ').replace('  ', '').replace('  ', '')
+        except:
+            pass
 
     def merge_result(self, arr, mode, msg, buggy_lines=[], buggy_line_surgery_n_lines=10):
         """
@@ -265,12 +268,12 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
 
     else:
         #  <-------- gpt 多线程请求 ----------> 
-        LATEX_EXPERIMENTAL, = get_conf('LATEX_EXPERIMENTAL')
         history_array = [[""] for _ in range(n_split)]
-        if LATEX_EXPERIMENTAL:
-            paper_meta = f"The paper you processing is `{lps.title}`, a part of the abstraction is `{lps.abstract}`"
-            paper_meta_max_len = 888
-            history_array = [[ paper_meta[:paper_meta_max_len] + '...',  "Understand, what should I do?"] for _ in range(n_split)]
+        # LATEX_EXPERIMENTAL, = get_conf('LATEX_EXPERIMENTAL')
+        # if LATEX_EXPERIMENTAL:
+        #     paper_meta = f"The paper you processing is `{lps.title}`, a part of the abstraction is `{lps.abstract}`"
+        #     paper_meta_max_len = 888
+        #     history_array = [[ paper_meta[:paper_meta_max_len] + '...',  "Understand, what should I do?"] for _ in range(n_split)]
 
         gpt_response_collection = yield from request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
             inputs_array=inputs_array,
