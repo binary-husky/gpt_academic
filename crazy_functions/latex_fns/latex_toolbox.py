@@ -308,6 +308,8 @@ def merge_tex_files_(project_foler, main_file, mode):
         fp = os.path.join(project_foler, f)
         fp_ = find_tex_file_ignore_case(fp)
         if fp_:
+            # 确保fp_是tex文档, 防止与文件夹命名冲突
+            if not fp_.endswith('.tex'): fp_+='.tex'
             try:
                 with open(fp_, 'r', encoding='utf-8', errors='replace') as fx: c = fx.read()
             except:
