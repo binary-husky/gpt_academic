@@ -1,4 +1,4 @@
-from toolbox import update_ui, get_conf, trimmed_format_exc, get_log_folder
+from toolbox import update_ui, get_conf, trimmed_format_exc, get_max_token
 import threading
 import os
 import logging
@@ -92,7 +92,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
                     # 【选择处理】 尝试计算比例，尽可能多地保留文本
                     from toolbox import get_reduce_token_percent
                     p_ratio, n_exceed = get_reduce_token_percent(str(token_exceeded_error))
-                    MAX_TOKEN = 4096
+                    MAX_TOKEN = get_max_token(llm_kwargs)
                     EXCEED_ALLO = 512 + 512 * exceeded_cnt
                     inputs, history = input_clipping(inputs, history, max_token_limit=MAX_TOKEN-EXCEED_ALLO)
                     mutable[0] += f'[Local Message] 警告，文本过长将进行截断，Token溢出数：{n_exceed}。\n\n'
@@ -224,7 +224,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     # 【选择处理】 尝试计算比例，尽可能多地保留文本
                     from toolbox import get_reduce_token_percent
                     p_ratio, n_exceed = get_reduce_token_percent(str(token_exceeded_error))
-                    MAX_TOKEN = 4096
+                    MAX_TOKEN = get_max_token(llm_kwargs)
                     EXCEED_ALLO = 512 + 512 * exceeded_cnt
                     inputs, history = input_clipping(inputs, history, max_token_limit=MAX_TOKEN-EXCEED_ALLO)
                     gpt_say += f'[Local Message] 警告，文本过长将进行截断，Token溢出数：{n_exceed}。\n\n'
