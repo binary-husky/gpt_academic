@@ -271,6 +271,10 @@ NUM_CUSTOM_BASIC_BTN = 4
 │   ├── BAIDU_CLOUD_API_KEY
 │   └── BAIDU_CLOUD_SECRET_KEY
 │
+├── "zhipuai" 智谱AI大模型chatglm_turbo
+│   ├── ZHIPUAI_API_KEY
+│   └── ZHIPUAI_MODEL
+│
 └── "newbing" Newbing接口不再稳定，不推荐使用
     ├── NEWBING_STYLE
     └── NEWBING_COOKIES
