@@ -19,7 +19,7 @@ def download_huggingface_model(model_name, max_retry, local_dir):
 # ------------------------------------------------------------------------------------------------------------------------
 # 🔌💻 Local Model
 # ------------------------------------------------------------------------------------------------------------------------
-class GetONNXGLMHandle(LocalLLMHandle):
+class GetCoderLMHandle(LocalLLMHandle):
 
     def load_model_info(self):
         # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行
@@ -85,4 +85,4 @@ class GetONNXGLMHandle(LocalLLMHandle):
 # ------------------------------------------------------------------------------------------------------------------------
 # 🔌💻 GPT-Academic Interface
 # ------------------------------------------------------------------------------------------------------------------------
-predict_no_ui_long_connection, predict = get_local_llm_predict_fns(GetONNXGLMHandle, model_name, history_format='chatglm3')
+predict_no_ui_long_connection, predict = get_local_llm_predict_fns(GetCoderLMHandle, model_name, history_format='chatglm3')
