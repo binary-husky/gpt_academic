@@ -91,8 +91,8 @@ AVAIL_LLM_MODELS = ["gpt-3.5-turbo-1106","gpt-4-1106-preview",
                     "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
                     "api2d-gpt-3.5-turbo", 'api2d-gpt-3.5-turbo-16k',
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "api2d-gpt-4",
-                    "chatglm3", "moss", "newbing", "claude-2"]
-# P.S. 其他可用的模型还包括 ["zhipuai", "qianfan", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613",  "gpt-3.5-random"
+                    "chatglm3", "moss", "claude-2"]
+# P.S. 其他可用的模型还包括 ["zhipuai", "qianfan", "deepseekcoder", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613",  "gpt-3.5-random"
 # "spark", "sparkv2", "sparkv3", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"]
 
 
@@ -271,11 +271,31 @@ NUM_CUSTOM_BASIC_BTN = 4
 │   ├── BAIDU_CLOUD_API_KEY
 │   └── BAIDU_CLOUD_SECRET_KEY
 │
-├── "newbing" Newbing接口不再稳定，不推荐使用
+├── "zhipuai" 智谱AI大模型chatglm_turbo
+│   ├── ZHIPUAI_API_KEY
+│   └── ZHIPUAI_MODEL
+│
+└── "newbing" Newbing接口不再稳定，不推荐使用
     ├── NEWBING_STYLE
     └── NEWBING_COOKIES
 
     
+本地大模型示意图
+│
+├── "chatglm3"
+├── "chatglm"
+├── "chatglm_onnx"
+├── "chatglmft"
+├── "internlm"
+├── "moss"
+├── "jittorllms_pangualpha"
+├── "jittorllms_llama"
+├── "deepseekcoder"
+├── "qwen"
+├──  RWKV的支持见Wiki
+└── "llama2"
+
+
 用户图形界面布局依赖关系示意图
 │
 ├── CHATBOT_HEIGHT 对话窗的高度
@@ -286,7 +306,7 @@ NUM_CUSTOM_BASIC_BTN = 4
 ├── THEME 色彩主题
 ├── AUTO_CLEAR_TXT 是否在提交时自动清空输入框
 ├── ADD_WAIFU 加一个live2d装饰
-├── ALLOW_RESET_CONFIG 是否允许通过自然语言描述修改本页的配置，该功能具有一定的危险性
+└── ALLOW_RESET_CONFIG 是否允许通过自然语言描述修改本页的配置，该功能具有一定的危险性
 
 
 插件在线服务配置依赖关系示意图
@@ -298,7 +318,7 @@ NUM_CUSTOM_BASIC_BTN = 4
 │   ├── ALIYUN_ACCESSKEY
 │   └── ALIYUN_SECRET
 │
-├── PDF文档精准解析
-│   └── GROBID_URLS
+└── PDF文档精准解析
+    └── GROBID_URLS
 
 """
