@@ -21,11 +21,7 @@ class GptAcademicState():
     def reset(self):
         pass
 
-    def lock_plugin(self, chatbot):
-        chatbot._cookies['plugin_state'] = pickle.dumps(self)
-
-    def unlock_plugin(self, chatbot):
-        self.reset()
+    def dump_state(self, chatbot):
         chatbot._cookies['plugin_state'] = pickle.dumps(self)
 
     def set_state(self, chatbot, key, value):

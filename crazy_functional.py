@@ -377,16 +377,16 @@ def get_crazy_functions():
                 "Function": HotReload(图片生成_DALLE3)
             },
         })
-        # function_plugins.update({
-        #     "图片修改_DALLE2 （先切换模型到openai或api2d）": {
-        #         "Group": "对话",
-        #         "Color": "stop",
-        #         "AsButton": True,
-        #         "AdvancedArgs": False,  # 调用时，唤起高级参数输入区（默认False）
-        #         # "Info": "使用DALLE2修改图片 | 输入参数字符串，提供图像的内容",
-        #         "Function": HotReload(图片修改_DALLE2)
-        #     },
-        # })
+        function_plugins.update({
+            "图片修改_DALLE2 （先切换模型到openai或api2d）": {
+                "Group": "对话",
+                "Color": "stop",
+                "AsButton": False,
+                "AdvancedArgs": False,  # 调用时，唤起高级参数输入区（默认False）
+                # "Info": "使用DALLE2修改图片 | 输入参数字符串，提供图像的内容",
+                "Function": HotReload(图片修改_DALLE2)
+            },
+        })
     except:
         print(trimmed_format_exc())
         print('Load function plugin failed')

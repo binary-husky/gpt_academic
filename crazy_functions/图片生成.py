@@ -58,8 +58,10 @@ def edit_image(llm_kwargs, prompt, image_path, resolution="1024x1024", model="da
     headers = {
         'Authorization': f"Bearer {api_key}",
     }
-    make_transparent(image_path, image_path+'.transparent.png')
-    image_path = image_path+'.transparent.png'
+    make_transparent(image_path, image_path+'.tsp.png')
+    make_square_image(image_path+'.tsp.png', image_path+'.tspsq.png')
+    resize_image(image_path+'.tspsq.png', image_path+'.ready.png', max_size=1024)
+    image_path = image_path+'.ready.png'
     with open(image_path, 'rb') as f:
         file_content = f.read()
         files = {
@@ -134,6 +136,7 @@ def 图片生成_DALLE3(prompt, llm_kwargs, plugin_kwargs, chatbot, history, sys
     ])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 界面更新
 
+
 class ImageEditState(GptAcademicState):
     # 尚未完成
     def get_image_file(self, x):
@@ -146,18 +149,27 @@ class ImageEditState(GptAcademicState):
         file = None if not confirm else file_manifest[0]
         return confirm, file
     
+    def lock_plugin(self, chatbot):
+        chatbot._cookies['lock_plugin'] = 'crazy_functions.图片生成->图片修改_DALLE2'
+        self.dump_state(chatbot)
+
+    def unlock_plugin(self, chatbot):
+        self.reset()
+        chatbot._cookies['lock_plugin'] = None
+        self.dump_state(chatbot)
+
     def get_resolution(self, x):
         return (x in ['256x256', '512x512', '1024x1024']), x
-    
+
     def get_prompt(self, x):
         confirm = (len(x)>=5) and (not self.get_resolution(x)[0]) and (not self.get_image_file(x)[0])
         return confirm, x
-    
+
     def reset(self):
         self.req = [
-            {'value':None, 'description': '请先上传图像（必须是.png格式）, 然后再次点击本插件',    'verify_fn': self.get_image_file},
-            {'value':None, 'description': '请输入分辨率,可选：256x256, 512x512 或 1024x1024',   'verify_fn': self.get_resolution},
-            {'value':None, 'description': '请输入修改需求,建议您使用英文提示词',                 'verify_fn': self.get_prompt},
+            {'value':None, 'description': '请先上传图像（必须是.png格式）, 然后再次点击本插件',                      'verify_fn': self.get_image_file},
+            {'value':None, 'description': '请输入分辨率,可选：256x256, 512x512 或 1024x1024, 然后再次点击本插件',   'verify_fn': self.get_resolution},
+            {'value':None, 'description': '请输入修改需求,建议您使用英文提示词, 然后再次点击本插件',                 'verify_fn': self.get_prompt},
         ]
         self.info = ""
 
@@ -167,7 +179,7 @@ class ImageEditState(GptAcademicState):
                 confirm, res = r['verify_fn'](prompt)
                 if confirm:
                     r['value'] = res
-                    self.set_state(chatbot, 'dummy_key', 'dummy_value')
+                    self.dump_state(chatbot)
                     break
         return self
 
@@ -186,8 +198,9 @@ def 图片修改_DALLE2(prompt, llm_kwargs, plugin_kwargs, chatbot, history, sys
     history = []    # 清空历史
     state = ImageEditState.get_state(chatbot, ImageEditState)
     state = state.feed(prompt, chatbot)
+    state.lock_plugin(chatbot)
     if not state.already_obtained_all_materials():
-        chatbot.append(["图片修改（先上传图片,再输入修改需求,最后输入分辨率）", state.next_req()])
+        chatbot.append(["图片修改\n\n1. 上传图片（图片中需要修改的位置用橡皮擦擦除为纯白色，即RGB=255,255,255）\n2. 输入分辨率 \n3. 输入修改需求", state.next_req()])
         yield from update_ui(chatbot=chatbot, history=history)
         return
 
@@ -196,29 +209,52 @@ def 图片修改_DALLE2(prompt, llm_kwargs, plugin_kwargs, chatbot, history, sys
     prompt = state.req[2]['value']
     chatbot.append(["图片修改, 执行中", f"图片:`{image_path}`<br/>分辨率:`{resolution}`<br/>修改需求:`{prompt}`"])
     yield from update_ui(chatbot=chatbot, history=history)
-
     image_url, image_path = edit_image(llm_kwargs, prompt, image_path, resolution)
-    chatbot.append([prompt,  
+    chatbot.append([prompt,
         f'图像中转网址: <br/>`{image_url}`<br/>'+
         f'中转网址预览: <br/><div align="center"><img src="{image_url}"></div>'
         f'本地文件地址: <br/>`{image_path}`<br/>'+
         f'本地文件预览: <br/><div align="center"><img src="file={image_path}"></div>'
     ])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 界面更新
+    state.unlock_plugin(chatbot)
 
 def make_transparent(input_image_path, output_image_path):
     from PIL import Image
     image = Image.open(input_image_path)
     image = image.convert("RGBA")
-
     data = image.getdata()
-
     new_data = []
     for item in data:
         if item[0] == 255 and item[1] == 255 and item[2] == 255:
             new_data.append((255, 255, 255, 0))
         else:
             new_data.append(item)
-
     image.putdata(new_data)
     image.save(output_image_path, "PNG")
+
+def resize_image(input_path, output_path, max_size=1024):
+    from PIL import Image
+    with Image.open(input_path) as img:
+        width, height = img.size
+        if width > max_size or height > max_size:
+            if width >= height:
+                new_width = max_size
+                new_height = int((max_size / width) * height)
+            else:
+                new_height = max_size
+                new_width = int((max_size / height) * width)
+
+            resized_img = img.resize(size=(new_width, new_height))
+            resized_img.save(output_path)
+        else:
+            img.save(output_path)
+
+def make_square_image(input_path, output_path):
+    from PIL import Image
+    with Image.open(input_path) as img:
+        width, height = img.size
+        size = max(width, height)
+        new_img = Image.new("RGBA", (size, size), color="black")
+        new_img.paste(img, ((size - width) // 2, (size - height) // 2))
+        new_img.save(output_path)
