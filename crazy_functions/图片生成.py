@@ -54,19 +54,23 @@ def edit_image(llm_kwargs, prompt, image_path, resolution="1024x1024", model="da
     img_endpoint = chat_endpoint.replace('chat/completions','images/edits')
     # # Generate the image
     url = img_endpoint
+    n = 1
     headers = {
         'Authorization': f"Bearer {api_key}",
-        'Content-Type': 'application/json'
     }
-    data = {
-        'image': open(image_path, 'rb'),
-        'prompt': prompt,
-        'n': 1,
-        'size': resolution,
-        'model': model,
-        'response_format': 'url'
-    }
-    response = requests.post(url, headers=headers, json=data, proxies=proxies)
+    make_transparent(image_path, image_path+'.transparent.png')
+    image_path = image_path+'.transparent.png'
+    with open(image_path, 'rb') as f:
+        file_content = f.read()
+        files = {
+            'image': (os.path.basename(image_path), file_content),
+            # 'mask': ('mask.png', open('mask.png', 'rb'))
+            'prompt':   (None, prompt),
+            "n":        (None, str(n)),
+            'size':     (None, resolution),
+        }
+
+    response = requests.post(url, headers=headers, files=files, proxies=proxies)
     print(response.content)
     try:
         image_url = json.loads(response.content.decode('utf8'))['data'][0]['url']
@@ -187,14 +191,14 @@ def 图片修改_DALLE2(prompt, llm_kwargs, plugin_kwargs, chatbot, history, sys
         yield from update_ui(chatbot=chatbot, history=history)
         return
 
-    image_path = state.req[0]
-    resolution = state.req[1]
-    prompt = state.req[2]
+    image_path = state.req[0]['value']
+    resolution = state.req[1]['value']
+    prompt = state.req[2]['value']
     chatbot.append(["图片修改, 执行中", f"图片:`{image_path}`<br/>分辨率:`{resolution}`<br/>修改需求:`{prompt}`"])
     yield from update_ui(chatbot=chatbot, history=history)
 
     image_url, image_path = edit_image(llm_kwargs, prompt, image_path, resolution)
-    chatbot.append([state.prompt,  
+    chatbot.append([prompt,  
         f'图像中转网址: <br/>`{image_url}`<br/>'+
         f'中转网址预览: <br/><div align="center"><img src="{image_url}"></div>'
         f'本地文件地址: <br/>`{image_path}`<br/>'+
@@ -202,3 +206,19 @@ def 图片修改_DALLE2(prompt, llm_kwargs, plugin_kwargs, chatbot, history, sys
     ])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 界面更新
 
+def make_transparent(input_image_path, output_image_path):
+    from PIL import Image
+    image = Image.open(input_image_path)
+    image = image.convert("RGBA")
+
+    data = image.getdata()
+
+    new_data = []
+    for item in data:
+        if item[0] == 255 and item[1] == 255 and item[2] == 255:
+            new_data.append((255, 255, 255, 0))
+        else:
+            new_data.append(item)
+
+    image.putdata(new_data)
+    image.save(output_image_path, "PNG")
