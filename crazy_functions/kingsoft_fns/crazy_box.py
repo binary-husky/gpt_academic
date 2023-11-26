@@ -23,6 +23,7 @@ from request_llms import bridge_all
 from crazy_functions.kingsoft_fns import crzay_kingsoft
 from moviepy.editor import AudioFileClip
 
+
 class Utils:
 
     def __init__(self):
@@ -155,7 +156,7 @@ class Utils:
         os.makedirs(user_path, exist_ok=True)
         md_file = self.write_markdown(data, hosts, file_name)
         html_file = os.path.join(user_path, f"{file_name}.html")
-        func_box.Shell(f'npx markmap-cli --no-open "{md_file}" -o "{html_file}"').read()
+        func_box.Shell(f'npx markmap-cli --no-open "{md_file}" -o "{html_file}"').start()
         return md_file, html_file
 
     def split_startswith_txt(self, link_limit, start='http', domain_name: list = ['']):
@@ -214,7 +215,7 @@ class ExcelHandle:
         else:
             worksheet = self.workbook.create_sheet(self.sheet)
         # 定义起始行号
-        start_row = find_index_inlist(self.read_as_dict()[self.sheet], ['操作步骤', '前置条件', '预期结果']) + 2
+        start_row = find_index_inlist(self.read_as_dict()[self.sheet], ['前置条件', '操作步骤', '预期结果']) + 2
         # 创建一个黄色的填充样式
         # 遍历数据列表
         for row_data in data_list:
@@ -224,8 +225,8 @@ class ExcelHandle:
                 try:
                     cell.value = str(value).strip()
                     cell.border = self.border
-                    cell.alignment = Alignment(horizontal='center', vertical='center',
-                                               wrapText=True)  # 设置水平和垂直方向均居中对齐，并自动换行
+                    cell.alignment = Alignment(horizontal='left', vertical='center',
+                                               wrapText=True)  # 设置水平方向居左对齐，并垂直方向居中对齐，并自动换行
                     # 判断 value 是否为 '插件补充的用例'
                     if '插件补充的用例' in str(value):
                         cell.fill = self.yellow_fill
@@ -594,7 +595,7 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
 
 
 def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history,
-                            kwargs_prompt: str = False, knowledge_base: bool = False, task_tag=''):
+                            kwargs_prompt: str = False, knowledge_base: bool = False):
     """
     Args:
         gpt_response_collection:  多线程GPT的返回结果or文件读取处理后的结果
@@ -611,10 +612,6 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     inputs_show_user_array = []
     prompt_cls, = json_args_return(plugin_kwargs, ['提示词分类'])
     prompt_cls_tab = func_box.prompt_personal_tag(prompt_cls, ipaddr=llm_kwargs["ipaddr"])
-    prompt_show = f'接下来使用的Prompt是`{prompt_cls}`分类下的：`{kwargs_prompt}`, 你可以在{func_box.html_tag_color("自定义插件参数")}中指定另一个Prompt哦～'
-    if prompt_show not in str(chatbot):
-        chatbot.append([None, prompt_show])
-    time.sleep(1)
     if kwargs_prompt:
         prompt = database_processor.SqliteHandle(table=prompt_cls_tab).find_prompt_result(kwargs_prompt)
     else:
@@ -639,7 +636,8 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
             plugin_prompt = func_box.replace_expected_text(prompt, content=limit, expect='{{{v}}}')
             user_prompt = plugin_kwargs.get('user_input_prompt', '')
             inputs_array.append(plugin_prompt+user_prompt)
-            inputs_show_user_array.append(you_say + task_tag)
+            inputs_show_user_array.append(you_say)
+    plugin_kwargs['user_input_prompt'] = ''   # 组合后去除 user_input_prompt
     yield from toolbox.update_ui(chatbot, history)
     return inputs_array, inputs_show_user_array
 
@@ -685,7 +683,7 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
 def func_拆分与提问(file_limit, llm_kwargs, plugin_kwargs, chatbot, history, plugin_prompt, knowledge_base, task_tag: str = ''):
     split_content_limit = yield from input_output_processing(file_limit, llm_kwargs, plugin_kwargs,
                                                              chatbot, history, kwargs_prompt=plugin_prompt,
-                                                             knowledge_base=knowledge_base, task_tag=task_tag)
+                                                             knowledge_base=knowledge_base)
     inputs_array, inputs_show_user_array = split_content_limit
     gpt_response_collection = yield from submit_multithreaded_tasks(inputs_array, inputs_show_user_array,
                                                                     llm_kwargs, chatbot, history,
@@ -861,7 +859,7 @@ def supplementary_test_case(gpt_response_collection, llm_kwargs, plugin_kwargs, 
             test_case, filename=long_name_processing(file_name))
         md = Utils().write_markdown(data=desc, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(file_name))
         chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, to_tabs=True)}\n\n' \
-                          f'---\n\n{file_name}补充思路如下：\t{func_box.html_view_blank(__href=md, to_tabs=True)}\n\n'
+                          f'{file_name}补充思路如下：\t{func_box.html_view_blank(__href=md, to_tabs=True)}\n\n--\n\n'
         chatbot[-1] = ([you_say, chat_file_list])
         yield from toolbox.update_ui(chatbot, history)
         files_limit.append(file_path)

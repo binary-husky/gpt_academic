@@ -15,73 +15,49 @@ import tempfile
 import shutil
 import logging
 import requests
-import yaml
 import tiktoken
 import copy
-import pyperclip
 import random
 import gradio as gr
-import numpy as np
-
+import csv
+import datetime
+import qrcode
 logger = logging
-from sklearn.feature_extraction.text import CountVectorizer
 
-from scipy.linalg import norm
+from PIL import Image, ImageOps
 from bs4 import BeautifulSoup
 from comm_tools import toolbox
 from comm_tools.database_processor import SqliteHandle
-from comm_tools import history_processor
 
 """contextlib 是 Python 标准库中的一个模块，提供了一些工具函数和装饰器，用于支持编写上下文管理器和处理上下文的常见任务，例如资源管理、异常处理等。
 官网：https://docs.python.org/3/library/contextlib.html"""
 
 
-class Shell(object):
-    def __init__(self, args, stream=False):
-        self.args = args
-        self.subp = subprocess.Popen(args, shell=True,
-                                     stdin=subprocess.PIPE, stderr=subprocess.PIPE,
+class Shell:
+    def __init__(self, args):
+        self.__args = args
+        self.subp = subprocess.Popen(self.__args, shell=True,
+                                     stdin=subprocess.PIPE,  stderr=subprocess.PIPE,
                                      stdout=subprocess.PIPE, encoding='utf-8',
                                      errors='ignore', close_fds=True)
-        self.__stream = stream
-        self.__temp = ''
+        self._thread = None
+        self.__result = ''
+        self.__error_msg = ''
 
-    def read(self):
-        logger.debug(f'The command being executed is: "{self.args}"')
-        if self.__stream:
-            sysout = self.subp.stdout
-            try:
-                with sysout as std:
-                    for i in std:
-                        logger.info(i.rstrip())
-                        self.__temp += i
-            except KeyboardInterrupt as p:
-                return 3, self.__temp + self.subp.stderr.read()
-            finally:
-                return 3, self.__temp + self.subp.stderr.read()
-        else:
-            sysout = self.subp.stdout.read()
-            syserr = self.subp.stderr.read()
-            if sysout:
-                logger.debug(f"{self.args} \n{sysout}")
-                return 1, sysout
-            elif syserr:
-                logger.error(f"{self.args} \n{syserr}")
-                return 0, syserr
-            else:
-                logger.debug(f"{self.args} \n{[sysout], [sysout]}")
-                return 2, '\n{}\n{}'.format(sysout, sysout)
-
-    def sync(self):
-        logger.debug('The command being executed is: "{}"'.format(self.args))
-        for i in self.subp.stdout:
-            logger.debug(i.rstrip())
-            self.__temp += i
-            yield self.__temp
-        for i in self.subp.stderr:
-            logger.debug(i.rstrip())
-            self.__temp += i
-            yield self.__temp
+    def start(self):
+        sys_out = self.subp.stdout
+        logging.debug(f'Start running commands: {self.__args}')
+        try:
+            for i in sys_out:
+                logging.info(i.rstrip())
+                self.__result += i
+        except KeyboardInterrupt as p:
+            return self.__result
+        except Exception as p:
+            return self.__result
+        finally:
+            self.__error_msg = self.subp.stderr.read()
+            return self.__result
 
 
 def timeStatistics(func):
@@ -96,7 +72,6 @@ def timeStatistics(func):
         ums = startTiem - endTiem
         print('func:{} > Time-consuming: {}'.format(func, ums))
         return obj
-
     return statistics
 
 
@@ -190,21 +165,23 @@ def html_local_img(__file, layout='left', max_width=None, max_height=None, md=Tr
         style += f"max-width: {max_width};"
     if max_height is not None:
         style += f"max-height: {max_height};"
+    file_name = os.path.basename(__file)
     __file = html_local_file(__file)
     a = f'<div align="{layout}"><img src="{__file}" style="{style}"></div>'
     if md:
-        a = f'![{__file}]({__file})'
+        a = f'![{file_name}]({__file})'
     return a
 
 
-def file_manifest_filter_type(file_list, filter_: list = None):
+def file_manifest_filter_type(file_list, filter_: list = None, md_type=False):
     new_list = []
-    if not filter_: filter_ = ['png', 'jpg', 'jpeg']
+    if not filter_:
+        filter_ = ['png', 'jpg', 'jpeg', 'bmp', 'svg', 'webp', 'ico', 'tif', 'tiff', 'raw', 'eps']
     for file in file_list:
         if str(os.path.basename(file)).split('.')[-1] in filter_:
-            new_list.append(html_local_img(file, md=False))
+            new_list.append(html_local_img(file, md=md_type))
         else:
-            new_list.append(file)
+            new_list.append(link_mtime_to_md(file))
     return new_list
 
 
@@ -245,7 +222,7 @@ def tree_out(dir=os.path.dirname(__file__), line=2, filter='', more=''):
     """
     filter_list = '__*|.*|venv|*.png|*.xlsx'
     if filter: filter_list += f'|{filter}'
-    out = Shell(f'tree {dir} -F -I "{filter_list}" -L {line} {more}').read()[1]
+    out = Shell(f'tree {dir} -F -I "{filter_list}" -L {line} {more}').start()
     localfile = os.path.join(dir, '.tree.md')
     with open(localfile, 'w', encoding='utf-8') as f:
         f.write('```\n')
@@ -269,42 +246,12 @@ def tree_out(dir=os.path.dirname(__file__), line=2, filter='', more=''):
         f.write('\n```\n')
 
 
-def chat_history(log: list, split=0):
-    """
-    auto_gpt 使用的代码，后续会迁移
-    """
-    if split:
-        log = log[split:]
-    chat = ''
-    history = ''
-    for i in log:
-        chat += f'{i[0]}\n\n'
-        history += f'{i[1]}\n\n'
-    return chat, history
-
-
-def df_similarity(s1, s2):
-    """弃用，会警告，这个库不会用"""
-
-    def add_space(s):
-        return ' '.join(list(s))
-
-    # 将字中间加入空格
-    s1, s2 = add_space(s1), add_space(s2)
-    # 转化为TF矩阵
-    cv = CountVectorizer(tokenizer=lambda s: s.split())
-    corpus = [s1, s2]
-    vectors = cv.fit_transform(corpus).toarray()
-    # 计算TF系数
-    return np.dot(vectors[0], vectors[1]) / (norm(vectors[0]) * norm(vectors[1]))
-
-
 def check_json_format(file):
     """
     检查上传的Json文件是否符合规范
     """
     new_dict = {}
-    data = JsonHandle(file).load()
+    data = json.load(file)
     if type(data) is list and len(data) > 0:
         if type(data[0]) is dict:
             for i in data:
@@ -333,27 +280,8 @@ def prompt_personal_tag(select, ipaddr):
     return tab_cls
 
 
-def copy_result(history):
-    """复制history"""
-    if history != []:
-        pyperclip.copy(history[-1])
-        return '已将结果复制到剪切板'
-    else:
-        return "无对话记录，复制错误！！"
-
-
-def str_is_list(s):
-    try:
-        list_ast = ast.literal_eval(s)
-        return isinstance(list_ast, list)
-    except (SyntaxError, ValueError):
-        return False
-
-
-import datetime
-
-
 def check_expected_time():
+    """检查是否工作时间"""
     current_time = datetime.datetime.now().time()
     morning_start = datetime.time(9, 0)
     morning_end = datetime.time(12, 0)
@@ -402,10 +330,6 @@ users_path = os.path.join(base_path, 'private_upload')
 logs_path = os.path.join(base_path, 'gpt_log')
 history_path = os.path.join(logs_path, 'history')
 assets_path = os.path.join(base_path, 'docs', 'assets')
-os.makedirs(knowledge_path, exist_ok=True)
-import os
-import csv
-import datetime
 
 
 def split_csv_by_quarter(file_path, date_format='%Y-%m-%d %H:%M:%S'):
@@ -520,32 +444,6 @@ def clean_br_string(s):
     return s
 
 
-def update_btn(self: gr.Button = None,
-               value: str = '',
-               variant: str = '',
-               visible: bool = True,
-               interactive: bool = True,
-               elem_id: str = '',
-               label: str = None
-               ):
-    if self:
-        if not variant: variant = self.variant
-        if visible is None: visible = self.visible
-        if not value: value = self.value
-        if interactive is None: interactive = self.interactive
-        if not elem_id: elem_id = self.elem_id
-        if label is None: label = self.label
-    return {
-        "variant": variant,
-        "visible": visible,
-        "value": value,
-        "interactive": interactive,
-        'elem_id': elem_id,
-        'label': label,
-        "__type__": "update",
-    }
-
-
 def get_html(filename):
     path = os.path.join(base_path, "docs/assets/html", filename)
     if os.path.exists(path):
@@ -558,25 +456,8 @@ def md_division_line():
     gr.Markdown("---", elem_classes="hr-line")
 
 
-def thread_write_chat(chatbot, ipaddr, models):
-    """
-    对话记录写入数据库
-    """
-    chatbot = copy.copy(chatbot)
-    # i_say = pattern_html(chatbot[-1][0])
-    i_say = chatbot[-1]
-    gpt_result = []
-    for i in chatbot:
-        for v in i:
-            gpt_result.append(v)
-    if '隐私模式' in models:
-        SqliteHandle(f'ai_private_{ipaddr}').inset_prompt({i_say: gpt_result}, '')
-    else:
-        SqliteHandle(f'ai_common_{ipaddr}').inset_prompt({i_say: gpt_result}, '')
-
-
 def git_log_list():
-    ll = Shell("git log --pretty=format:'%s | %h' -n 10").read()[1].splitlines()
+    ll = Shell("git log --pretty=format:'%s | %h' -n 10").start().splitlines()
     return [i.split('|') for i in ll if 'branch' not in i][:5]
 
 
@@ -615,10 +496,6 @@ def to_markdown_tabs(head: list, tabs: list, alignment=':---:', column=False):
         tabs_list += "".join([tab_format % i for i in row_data]) + '|\n'
 
     return tabs_list
-
-
-from PIL import Image, ImageOps
-import qrcode
 
 
 def qr_code_generation(data, icon_path=None, file_name='qc_icon.png'):
@@ -700,76 +577,6 @@ def replace_expected_text(prompt: str, content: str, expect='{{{v}}}'):
         else:
             content = content + prompt
     return content
-
-
-def get_geoip():
-    from comm_tools.webui_local import I18nAuto
-    i18n = I18nAuto()
-    try:
-        with toolbox.ProxyNetworkActivate():
-            response = requests.get("https://ipapi.co/json/", timeout=5)
-        data = response.json()
-    except:
-        data = {"error": True, "reason": "连接ipapi失败"}
-    if "error" in data.keys():
-        logging.warning(f"无法获取IP地址信息。\n{data}")
-        if data["reason"] == "RateLimited":
-            return (
-                i18n("您的IP区域：未知。")
-            )
-        else:
-            return i18n("获取IP地理位置失败。原因：") + f"{data['reason']}" + i18n("。你仍然可以使用聊天功能。")
-    else:
-        country = data["country_name"]
-        if country == "China":
-            text = "**您的IP区域：中国。请立即检查代理设置，在不受支持的地区使用API可能导致账号被封禁。**"
-        else:
-            text = i18n("您的IP区域：") + f"{country}。"
-        logging.info(text)
-        return text
-
-
-class YamlHandle:
-
-    def __init__(self, file=os.path.join(prompt_path, 'ai_common.yaml')):
-        if not os.path.exists(file):
-            Shell(f'touch {file}').read()
-        self.file = file
-        self._load = self.load()
-
-    def load(self) -> dict:
-        with open(file=self.file, mode='r') as f:
-            data = yaml.safe_load(f)
-            return data
-
-    def update(self, key, value):
-        date = self._load
-        if not date:
-            date = {}
-        date[key] = value
-        with open(file=self.file, mode='w') as f:
-            yaml.dump(date, f, allow_unicode=True)
-        return date
-
-    def dump_dict(self, new_dict):
-        date = self._load
-        if not date:
-            date = {}
-        date.update(new_dict)
-        with open(file=self.file, mode='w') as f:
-            yaml.dump(date, f, allow_unicode=True)
-        return date
-
-
-class JsonHandle:
-
-    def __init__(self, file):
-        self.file = file
-
-    def load(self) -> object:
-        with open(self.file, 'r') as f:
-            data = json.load(f)
-        return data
 
 
 def get_avatar_img(llm_s):

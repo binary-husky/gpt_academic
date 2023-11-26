@@ -8,6 +8,7 @@ import copy
 import gradio as gr
 import re
 
+import yaml
 from comm_tools import toolbox
 from comm_tools.database_processor import SqliteHandle
 from comm_tools import func_box
@@ -359,7 +360,7 @@ def prompt_upload_refresh(file, prompt, pro_select, ipaddr: gr.Request):
     if file.name.endswith('json'):
         upload_data = func_box.check_json_format(file.name)
     elif file.name.endswith('yaml'):
-        upload_data = func_box.YamlHandle(file.name).load()
+        upload_data = yaml.load(file.file)
     else:
         upload_data = {}
     if upload_data != {}:
@@ -384,7 +385,7 @@ def prompt_delete(pro_name, prompt_dict, select_check, ipaddr: gr.Request):
     _, source = sqlite_handle.get_prompt_value(find=pro_name)
     if not _:
         raise gr.Error(f'无法找到 {pro_name}，或请不要在所有人分类下删除')
-    if source in user_addr or '127.0.0.1' == user_addr:
+    if str(source) in user_addr or '127.0.0.1' == user_addr:
         sqlite_handle.delete_prompt(pro_name)
     else:
         raise gr.Error(f'无法删除不属于你创建的 {pro_name}，如有紧急需求，请联系管理员')

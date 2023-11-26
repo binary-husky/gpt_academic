@@ -120,9 +120,6 @@ class RightElem:
                     self.max_length_sl = gr.Slider(minimum=256, maximum=4096, value=4096, step=1, interactive=True,
                                                    label="MaxLength", visible=False
                                                    ).style(container=False)
-                    self.default_worker_num = gr.Slider(minimum=1, maximum=30, value=worker_num, step=1, interactive=True,
-                                                   label="多线程最大并行数"
-                                                        ).style(container=False)
                 func_box.md_division_line()
                 with gr.Accordion(label='Langchain调优参数'):
                     self.vector_search_score = gr.Slider(minimum=0, maximum=1100, value=500, step=1, interactive=True,
@@ -133,6 +130,9 @@ class RightElem:
                                                        label="CHUNK-SIZE", ).style(container=False)
                 func_box.md_division_line()
                 with gr.Accordion(label='工具调试参数', open=True):
+                    self.default_worker_num = gr.Slider(minimum=1, maximum=30, value=worker_num, step=1,
+                                                        interactive=True, label="插件多线程最大并行"
+                                                        ).style(container=False)
                     self.pro_tf_slider = gr.Slider(minimum=0.01, maximum=100, value=15, step=1, interactive=True,
                                                    label="搜索展示详细字符").style(container=False)
                     self.ocr_identifying_trust = gr.Slider(minimum=0.01, maximum=1.0, value=0.60, step=0.01,

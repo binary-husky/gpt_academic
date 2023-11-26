@@ -343,9 +343,9 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         headers.update({"OpenAI-Organization": API_ORG})
     if llm_kwargs['llm_model'].startswith('azure-'):
         headers.update({"api-key": api_key})
-    if llm_kwargs['llm_model'] in AZURE_CFG_ARRAY.keys():
-        azure_api_key_unshared = AZURE_CFG_ARRAY[llm_kwargs['llm_model']]["AZURE_API_KEY"]
-        headers.update({"api-key": azure_api_key_unshared})
+        if llm_kwargs['llm_model'] in AZURE_CFG_ARRAY.keys():
+            azure_api_key_unshared = AZURE_CFG_ARRAY[llm_kwargs['llm_model']]["AZURE_API_KEY"]
+            headers.update({"api-key": azure_api_key_unshared})
 
     conversation_cnt = len(history) // 2
 
@@ -370,7 +370,9 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     what_i_ask_now["role"] = "user"
     what_i_ask_now["content"] = inputs
     messages.append(what_i_ask_now)
-    model = llm_kwargs['llm_model'].replace('api2d-', '')
+    model = llm_kwargs['llm_model']
+    if llm_kwargs['llm_model'].startswith('api2d-'):
+        model = llm_kwargs['llm_model'].replace('api2d-', '')
     if model == "gpt-3.5-random": # 随机选择, 绕过openai访问频率限制
         model = random.choice([
             "gpt-3.5-turbo", 
@@ -383,6 +385,7 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         logging.info("Random select model:" + model)
 
     payload = {
+        "model": model,
         "messages": messages,
         "temperature": llm_kwargs['temperature'],  # 1.0,
         "top_p": llm_kwargs['top_p'],  # 1.0,

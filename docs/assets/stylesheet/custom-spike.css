@@ -216,7 +216,7 @@ code.language-folded {
 }
 
 #mask_tabs .table[class*="svelte-"] {
-    overflow: unset;
+    overflow: auto;
 }
 #show-all-btn {
     right: 35px;

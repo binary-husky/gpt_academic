@@ -23,6 +23,7 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
     if not wps_links and not files and not qq_link:
         if len(link_limit) > 100:
             title = crazy_box.long_name_processing(link_limit)
+            chatbot.append([f"```folded\n{link_limit}\n```", None])
             file_limit.extend([title, link_limit])
             plugin_kwargs['user_input_prompt'] = ''
             return file_limit
@@ -106,12 +107,11 @@ def Kdocs_多阶段生成回答(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
         knowledge = multi_stage_config[stage].get('关联知识库', False)
         file_count[stage] = []
         multi_model_parallelism, = crazy_box.json_args_return(plugin_kwargs, ['多模型并行'], llm_kwargs['llm_model'])
-        llm_kwargs['llm_model'] = multi_model_parallelism
-        chatbot.append([f'开始执行`{stage}`动作，使用`{prompt}`提问后，调用`{func}保存回答`', None])
+        llm_kwargs['llm_model'] = str(multi_model_parallelism).rstrip('&')
+        chatbot.append([None, f'开始执行`{stage}`动作，使用`{prompt}`提问后，调用`{func}`保存回答'])
         yield from update_ui(chatbot=chatbot, history=history)
         file_limit = yield from crazy_box.func_拆分与提问(file_limit, llm_kwargs, plugin_kwargs, chatbot, history,
-                                                          plugin_prompt=prompt, knowledge_base=knowledge,
-                                                          task_tag="_" + stage)
+                                                          plugin_prompt=prompt, knowledge_base=knowledge)
         if func and func_kwargs.get(func, False):
             plugin_kwargs[stage] = yield from func_kwargs[func](file_limit, llm_kwargs, plugin_kwargs,  chatbot, history)
             file_limit = []

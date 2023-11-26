@@ -369,7 +369,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         with gr.Row(elem_id="chuanhu-header"):
             gr.HTML(get_html("header_title.html").format(
                 app_title=self.app_name), elem_id="app-title")
-            self.status_display = gr.Markdown(func_box.get_geoip(), elem_id="status-display")
+            self.status_display = gr.Markdown(proxy_info, elem_id="status-display")
         with gr.Row(elem_id="float-display"):
             self.user_info = gr.Markdown(
                 value="getting user info...", elem_id="user-info")
@@ -429,6 +429,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
         self.demo.blocked_paths = func_box.get_files_and_dirs(
             path=func_box.base_path, filter_allow=['private_upload', 'gpt_log', 'docs', ''])
         login_html = ''
+        self.demo.auth = AUTHENTICATION
+        self.demo.auth_message = login_html
         # self.demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
         #     server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, auth_message=login_html,
         #     allowed_paths=['private_upload'], ssl_verify=False, share=True,
@@ -436,13 +438,13 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
 
 
 from comm_tools import base_api
-
 app = base_api.app
 PORT = WEB_PORT if WEB_PORT <= 0 else WEB_PORT
 reload_javascript()
 chatbot_main = ChatBot()
 chatbot_main.main()
-gradio_app = gr.mount_gradio_app(app, chatbot_main.demo, '/gradio')
+gradio_app = gr.mount_gradio_app(app, chatbot_main.demo, '/gradio', )
+
 if __name__ == '__main__':
     import uvicorn
     app_reload = get_conf('app_reload')

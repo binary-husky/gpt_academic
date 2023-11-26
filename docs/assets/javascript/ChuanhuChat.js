@@ -63,10 +63,9 @@ function addInit() {
             return false;
         }
     }
-
     chatbotObserver.observe(chatbotIndicator, { attributes: true, childList: true, subtree: true });
     chatListObserver.observe(chatListIndicator, { attributes: true });
-    
+
     return true;
 }
 

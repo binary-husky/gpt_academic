@@ -16,11 +16,11 @@ PORT = toolbox.find_free_port() if WEB_PORT <= 0 else WEB_PORT
 
 def check_proxy_free(port):
     if not port: port = PORT
-    proxy_state = func_box.Shell(f'lsof -i :{port}').read()[1].splitlines()
+    proxy_state = func_box.Shell(f'lsof -i :{port}').start().splitlines()
     if proxy_state != ["", ""]:
         print('Kill Old Server')
         for i in proxy_state[1:]:
-            func_box.Shell(f'kill -9 {i.split()[1]}').read()
+            func_box.Shell(f'kill -9 {i.split()[1]}').start()
         import time
         time.sleep(5)
 

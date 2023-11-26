@@ -44,8 +44,9 @@ async def check_authentication(request: Request, call_next):
         return await call_next(request)
     pattern = re.compile(r".*\/private_upload\/.*")
     if pattern.match(request.url.path):
-        if func_box.user_client_mark(request) not in request.url.path:
-            return JSONResponse(content={'detail': '小伙汁，你坏坏，不能私自下载其他人的文件哦～'})
+        if not toolbox.get_conf('AUTHENTICATION'):    # 暂时没办法拿到用户信息
+            if request.client.host not in request.url.path:
+                return JSONResponse(content={'detail': "You're bad. You can't download other people's files."})
     cookie = request.cookies.get(f'{auth_cookie_tag}', '')
     user = check_cookie(cookie)
     if not user:

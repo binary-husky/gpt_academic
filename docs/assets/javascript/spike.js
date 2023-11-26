@@ -1,9 +1,11 @@
+var uploadInputElement = null
+
 function move_cursor() {
     const buttonsParent = gradioApp().getElementById('prompt_list');
     if (buttonsParent && user_input_tb && user_input_ta) {
         buttonsParent.querySelectorAll('button').forEach((button) => {
             button.addEventListener('click', () => {
-                textarea.focus();
+                user_input_ta.focus();
             });
         });
     }
@@ -111,7 +113,7 @@ function handleShowAllButtonClick(event) {
 
 // 函数：当鼠标悬浮在 'uploaded-files-count' 或 'upload-index-file' 上时，改变 'upload-index-file' 的 display 样式为 flex
 function showUploadIndexFile() {
-    uploadIndexFileElement.style.display = "flex";
+    uploadIndexFileElement.style.display = "flow-root";
 }
 
 // 函数：当鼠标离开 'uploaded-files-count' 2秒 后，检查是否还处于 'upload-index-file' hover状态 ，如果否，则改变 'upload-index-file' 的 display样式 为 none
@@ -135,7 +137,7 @@ function add_func_event() {
     uploadIndexFileElement.addEventListener("mouseleave", hideUploadIndexFile);
 }
 
-async function add_func_paste(input) {
+function add_func_paste(input) {
     let paste_files = [];
     if (input) {
         input.addEventListener("paste", async function (e) {
@@ -147,33 +149,80 @@ async function add_func_paste(input) {
                         const file = items[i].getAsFile();
                         // 将每一个粘贴的文件添加到files数组中
                         paste_files.push(file);
-                        e.preventDefault();
+                        e.preventDefault();  // 避免粘贴文件名到输入框
                     }
                 }
                 if (paste_files.length > 0) {
-                   // 按照文件列表执行批量上传逻辑
-                   await paste_upload_files(paste_files);
-                   paste_files = []
+                    // 按照文件列表执行批量上传逻辑
+                    await paste_upload_files(paste_files);
+                    paste_files = []
+
                 }
             }
         });
     }
 }
 
-function paste_upload_files(files) {
-    const uploadInput = uploadIndexFileElement.querySelector("input[type=file]");
+async function paste_upload_files(files) {
+    uploadInputElement = uploadIndexFileElement.querySelector("input[type=file]");
+    let totalSizeMb = 0
     if (files && files.length > 0) {
         // 执行具体的上传逻辑
-        if (uploadInput) {
-            toast_push('🚀上传文件中', 2000)
+        if (uploadInputElement) {
+            for (let i = 0; i < files.length; i++) {
+                // 将从文件数组中获取的文件大小(单位为字节)转换为MB，
+                totalSizeMb += files[i].size / 1024 / 1024;
+            }
+            // 检查文件总大小是否超过20MB
+            if (totalSizeMb > 20) {
+                toast_push('⚠️文件夹大于20MB 🚀上传文件中', 2000)
+                // return;  // 如果超过了指定大小, 可以不进行后续上传操作
+            }
+             // 监听change事件， 原生Gradio可以实现
+            // uploadInputElement.addEventListener('change', function(){replace_input_string()});
             let event = new Event("change");
-            Object.defineProperty(event, "target", {value: uploadInput, enumerable: true});
-            Object.defineProperty(event, "currentTarget", {value: uploadInput, enumerable: true});
-            Object.defineProperty(uploadInput, "files", {value: files, enumerable: true});
-            uploadInput.dispatchEvent(event);
+            Object.defineProperty(event, "target", {value: uploadInputElement, enumerable: true});
+            Object.defineProperty(event, "currentTarget", {value: uploadInputElement, enumerable: true});
+            Object.defineProperty(uploadInputElement, "files", {value: files, enumerable: true});
+            uploadInputElement.dispatchEvent(event);
             // toast_push('🎉上传文件成功', 2000)
         }
     }
+}
+
+function replace_input_string() {
+    let attempts = 0;
+    const maxAttempts = 50;  // 超时处理5秒～
+    function findAndReplaceDownloads(){
+        const filePreviewElement = uploadIndexFileElement.querySelector('.file-preview');
+        if (filePreviewElement) {
+            const downloadLinks = filePreviewElement.querySelectorAll('.download a');
+            // Run the rest of your code only if links are found
+            if(downloadLinks.length > 0){
+               const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
+               downloadLinks.forEach(function (downloadLink) {
+                   let http_links = downloadLink.getAttribute('href')
+                   let name_links = downloadLink.getAttribute('download')
+                   let fileExtension = http_links.substring(http_links.lastIndexOf('.'));
+                   if (imageExtensions.includes(fileExtension)) {
+                       user_input_ta.value += `![${name_links}](${http_links})`;
+                   } else {
+                       user_input_ta.value += `[${name_links}](${http_links})`;
+                   }
+                   user_input_ta.style.height = 'auto';
+                   user_input_ta.style.height = (user_input_ta.scrollHeight) + 'px';
+               });
+               clearInterval(manager);
+           }
+       }
+       attempts++;
+       if(attempts >= maxAttempts ){
+          // Do something after max failed attempts.
+          clearInterval(manager)
+          console.log("Failed to find downloads");
+       }
+    }
+    let manager = setInterval(findAndReplaceDownloads,100);
 }
 
 //提示信息 封装

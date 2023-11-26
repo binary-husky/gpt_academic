@@ -24,11 +24,13 @@ def check_proxy(proxies):
         print(result)
         return result
 
+
 def _check_with_backup_source(proxies):
     import random, string, requests
     random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=32))
     try: return requests.get(f"http://{random_string}.edns.ip-api.com/json", proxies=proxies, timeout=4).json()['dns']['geo']
     except: return None
+
 
 def backup_and_download(current_version, remote_version):
     """
@@ -162,6 +164,7 @@ def warm_up_modules():
         enc.encode("模块预热", disallowed_special=())
         enc = model_info["gpt-4"]['tokenizer']
         enc.encode("模块预热", disallowed_special=())
+
 
 if __name__ == '__main__':
     import os

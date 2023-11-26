@@ -736,32 +736,25 @@ def on_file_uploaded(files, chatbot, txt, cookies, ipaddr: gr.Request):
     err_msg = ''
     for file in files:
         file_origin_name = os.path.basename(file.orig_name)
-        shutil.copy(file.name, f'{time_tag_path}/{file_origin_name}')
+        new_file = os.path.join(time_tag_path, file_origin_name)
+        shutil.copy(file.name, new_file)
         err_msg += extract_archive(f'{time_tag_path}/{file_origin_name}',
                                    dest_dir=f'{time_tag_path}/{file_origin_name}.extract')
-    moved_files = [fp for fp in glob.glob(f'{time_tag_path}/**/*', recursive=True) ]
+    moved_files = [fp for fp in glob.glob(f'{time_tag_path}/**/*', recursive=True)]
     moved_files_str = func_box.to_markdown_tabs(head=['文件'], tabs=[moved_files])
     if type(chatbot) is str:
-        chatbot = f'[Local Message] 收到以下文件: \n\n{moved_files_str}' \
-                  f'\n\n调用路径参数已自动修正到: \n\n{time_tag_path}' \
-                  f'\n\n现在你可以开始构建属于自己的知识库啦～'
-        chatbot = markdown_convertion(chatbot)
         if not txt:
             txt = {'file_path': '', 'know_name': '', 'know_obj': {}, 'file_list': []}
         txt.update({'file_path': time_tag_path})
     else:
-        txt = f'{time_tag_path}'
-        chatbot.append(['上传文件修正',
-                        f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
-                        f'\n\n调用路径参数已自动修正到: \n\n{txt}' +
-                        f'\n\n现在您点击任意“高亮”标识的函数插件时，以上文件将被作为输入参数' + err_msg])
+        txt = "\n".join(func_box.file_manifest_filter_type(moved_files, md_type=True))
         cookies.update({
             'most_recent_uploaded': {
                 'path': f'{time_tag_path}',
                 'time': time.time(),
                 'time_str': time_tag
             }})
-    return chatbot, gr.update()
+    return chatbot, txt,
 
 
 def on_report_generated(cookies, files, chatbot, request):
@@ -855,19 +848,9 @@ def is_api2d_key(key):
     return bool(API_MATCH_API2D)
 
 
-def is_proxy_key(key):
-    if key.startswith('proxy-') and len(key) == 38:
-        return True
-    else:
-        return False
-
-
-def is_aigc_key(key):
-    if key.startswith('aigc-') and len(key) == 37:
-        return True
-    else:
-        return False
-
+def is_open_sess_key(key):
+    API_OPEN_SESS = re.match('sess-[a-zA-Z0-9]{40}$', key)
+    return API_OPEN_SESS
 
 def is_any_api_key(key):
     if ',' in key:
@@ -876,8 +859,7 @@ def is_any_api_key(key):
             if is_any_api_key(k): return True
         return False
     else:
-        return is_openai_api_key(key) or is_api2d_key(key) or is_proxy_key(key) or is_aigc_key(key) or is_azure_api_key(
-            key)
+        return is_openai_api_key(key) or is_api2d_key(key) or is_azure_api_key(key) or is_open_sess_key(key)
 
 
 def what_keys(keys):
@@ -891,18 +873,11 @@ def what_keys(keys):
         if is_api2d_key(k):
             avail_key_list['API2D Key'] += 1
 
-        if is_aigc_key(k):
-            avail_key_list['Proxy Key'] += 1
-
-        if is_proxy_key(k):
-            avail_key_list['AIGC Key'] += 1
-
         if is_azure_api_key(k):
             avail_key_list['Azure Key'] += 1
     return f"检测到： \n" \
            f"OpenAI Key {avail_key_list['OpenAI Key']} 个\n" \
            f"API2D Key {avail_key_list['API2D Key']} 个\n" \
-           f"Proxy Key {avail_key_list['API2D Key']} 个\n" \
            f"Azure Key {avail_key_list['Azure Key']} 个,"
 
 
@@ -913,19 +888,15 @@ def select_api_key(keys, llm_model):
 
     if llm_model.startswith('gpt-'):
         for k in key_list:
-            if is_openai_api_key(k): avail_key_list.append(k)
+            if is_openai_api_key(k):
+                avail_key_list.append(k)
+            elif is_open_sess_key(k):
+                avail_key_list.append(k)
 
     if llm_model.startswith('api2d-'):
         for k in key_list:
             if is_api2d_key(k): avail_key_list.append(k)
 
-    if llm_model.startswith('proxy-'):
-        for k in key_list:
-            if is_proxy_key(k): avail_key_list.append(k.replace('proxy-', ''))
-
-    if llm_model.startswith('aigc-'):
-        for k in key_list:
-            if is_aigc_key(k): avail_key_list.append(k.replace('aigc-', ''))
 
     if llm_model.startswith('azure-'):
         for k in key_list:
