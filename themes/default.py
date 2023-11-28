@@ -60,7 +60,7 @@ def adjust_theme():
 
         with open(os.path.join(theme_dir, 'common.js'), 'r', encoding='utf8') as f: 
             js = f"<script>{f.read()}</script>"
-            
+
         # 添加一个萌萌的看板娘
         if ADD_WAIFU:
             js += """
@@ -68,7 +68,9 @@ def adjust_theme():
                 <script src="file=docs/waifu_plugin/jquery-ui.min.js"></script>
                 <script src="file=docs/waifu_plugin/autoload.js"></script>
             """
-        gradio_original_template_fn = gr.routes.templates.TemplateResponse
+        if not hasattr(gr, 'RawTemplateResponse'):
+            gr.RawTemplateResponse = gr.routes.templates.TemplateResponse
+        gradio_original_template_fn = gr.RawTemplateResponse
         def gradio_new_template_fn(*args, **kwargs):
             res = gradio_original_template_fn(*args, **kwargs)
             res.body = res.body.replace(b'</html>', f'{js}</html>'.encode("utf8"))
