@@ -73,6 +73,7 @@ def move_project(project_folder, arxiv_id=None):
 
     # align subfolder if there is a folder wrapper
     items = glob.glob(pj(project_folder,'*'))
+    items = [item for item in items if os.path.basename(item)!='__MACOSX']
     if len(glob.glob(pj(project_folder,'*.tex'))) == 0 and len(items) == 1:
         if os.path.isdir(items[0]): project_folder = items[0]
 
@@ -213,7 +214,6 @@ def Latex英文纠错加PDF对比(txt, llm_kwargs, plugin_kwargs, chatbot, histo
 
     # <-------------- we are done ------------->
     return success
-
 
 # ========================================= 插件主程序2 =====================================================    
 
