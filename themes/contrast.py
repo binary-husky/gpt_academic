@@ -1,6 +1,8 @@
+import os
 import gradio as gr
 from toolbox import get_conf
 CODE_HIGHLIGHT, ADD_WAIFU, LAYOUT = get_conf('CODE_HIGHLIGHT', 'ADD_WAIFU', 'LAYOUT')
+theme_dir = os.path.dirname(__file__)
 
 def adjust_theme():
 
@@ -57,7 +59,7 @@ def adjust_theme():
             button_cancel_text_color_dark="white",
         )
 
-        with open('themes/common.js', 'r', encoding='utf8') as f: 
+        with open(os.path.join(theme_dir, 'common.js'), 'r', encoding='utf8') as f: 
             js = f"<script>{f.read()}</script>"
         
         # 添加一个萌萌的看板娘
@@ -67,7 +69,9 @@ def adjust_theme():
                 <script src="file=docs/waifu_plugin/jquery-ui.min.js"></script>
                 <script src="file=docs/waifu_plugin/autoload.js"></script>
             """
-        gradio_original_template_fn = gr.routes.templates.TemplateResponse
+        if not hasattr(gr, 'RawTemplateResponse'):
+            gr.RawTemplateResponse = gr.routes.templates.TemplateResponse
+        gradio_original_template_fn = gr.RawTemplateResponse
         def gradio_new_template_fn(*args, **kwargs):
             res = gradio_original_template_fn(*args, **kwargs)
             res.body = res.body.replace(b'</html>', f'{js}</html>'.encode("utf8"))
@@ -79,7 +83,7 @@ def adjust_theme():
         print('gradio版本较旧, 不能自定义字体和颜色')
     return set_theme
 
-with open("themes/contrast.css", "r", encoding="utf-8") as f:
+with open(os.path.join(theme_dir, 'contrast.css'), "r", encoding="utf-8") as f:
     advanced_css = f.read()
-with open("themes/common.css", "r", encoding="utf-8") as f:
+with open(os.path.join(theme_dir, 'common.css'), "r", encoding="utf-8") as f:
     advanced_css += f.read()
