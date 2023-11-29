@@ -213,6 +213,8 @@ async function paste_upload_files(files) {
             Object.defineProperty(uploadInputElement, "files", {value: files, enumerable: true});
             uploadInputElement.dispatchEvent(event);
             // toast_push('🎉上传文件成功', 2000)
+        } else {
+            toast_push('⚠️请先删除上传区中的历史文件，再尝试粘贴。', 2000)
         }
     }
 }
@@ -221,7 +223,7 @@ function toast_push(msg, duration) {
     duration = isNaN(duration) ? 3000 : duration;
     const m = document.createElement('div');
     m.innerHTML = msg;
-    m.style.cssText = "font-size:  var(--text-md) !important; color: rgb(255, 255, 255);background-color: rgba(0, 0, 0, 0.6);padding: 10px 15px;margin: 0 0 0 -60px;border-radius: 4px;position: fixed;    top: 50%;left: 50%;width: 130px;text-align: center;";
+    m.style.cssText = "font-size:  var(--text-md) !important; color: rgb(255, 255, 255);background-color: rgba(0, 0, 0, 0.6);padding: 10px 15px;margin: 0 0 0 -60px;border-radius: 4px;position: fixed;    top: 50%;left: 50%;width: auto; text-align: center;";
     document.body.appendChild(m);
     setTimeout(function () {
         var d = 0.5;
