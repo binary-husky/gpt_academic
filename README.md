@@ -67,7 +67,7 @@ To translate this project to arbitrary language with GPT, read and run [`multi_l
 读论文、[翻译](https://www.bilibili.com/video/BV1KT411x7Wn)论文 | [插件] 一键解读latex/pdf论文全文并生成摘要
 Latex全文[翻译](https://www.bilibili.com/video/BV1nk4y1Y7Js/)、[润色](https://www.bilibili.com/video/BV1FT411H7c5/) | [插件] 一键翻译或润色latex论文
 批量注释生成 | [插件] 一键批量生成函数注释
-Markdown[中英互译](https://www.bilibili.com/video/BV1yo4y157jV/) | [插件] 看到上面5种语言的[README](https://github.com/binary-husky/gpt_academic/blob/master/docs/README_EN.md)了吗？
+Markdown[中英互译](https://www.bilibili.com/video/BV1yo4y157jV/) | [插件] 看到上面5种语言的[README](https://github.com/binary-husky/gpt_academic/blob/master/docs/README_EN.md)了吗？就是出自他的手笔
 chat分析报告生成 | [插件] 运行后自动生成总结汇报
 [PDF论文全文翻译功能](https://www.bilibili.com/video/BV1KT411x7Wn) | [插件] PDF论文提取题目&摘要+翻译全文（多线程）
 [Arxiv小助手](https://www.bilibili.com/video/BV1LM4y1279X) | [插件] 输入arxiv文章url即可一键翻译摘要+下载PDF
@@ -79,7 +79,7 @@ Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼�
 公式/图片/表格显示 | 可以同时显示公式的[tex形式和渲染形式](https://user-images.githubusercontent.com/96192199/230598842-1d7fcddd-815d-40ee-af60-baf488a199df.png)，支持公式、代码高亮
 ⭐AutoGen多智能体插件 | [插件] 借助微软AutoGen，探索多Agent的智能涌现可能！
 启动暗色[主题](https://github.com/binary-husky/gpt_academic/issues/173) | 在浏览器url后面添加```/?__theme=dark```可以切换dark主题
-[多LLM模型](https://www.bilibili.com/video/BV1wT411p7yf)支持 | 同时被GPT3.5、GPT4、[清华ChatGLM2](https://github.com/THUDM/ChatGLM2-6B)、[复旦MOSS](https://github.com/OpenLMLab/MOSS)同时伺候的感觉一定会很不错吧？
+[多LLM模型](https://www.bilibili.com/video/BV1wT411p7yf)支持 | 同时被GPT3.5、GPT4、[清华ChatGLM2](https://github.com/THUDM/ChatGLM2-6B)、[复旦MOSS](https://github.com/OpenLMLab/MOSS)伺候的感觉一定会很不错吧？
 ⭐ChatGLM2微调模型 | 支持加载ChatGLM2微调模型，提供ChatGLM2微调辅助插件
 更多LLM模型接入，支持[huggingface部署](https://huggingface.co/spaces/qingxu98/gpt-academic) | 加入Newbing接口(新必应)，引入清华[Jittorllms](https://github.com/Jittor/JittorLLMs)支持[LLaMA](https://github.com/facebookresearch/llama)和[盘古α](https://openi.org.cn/pangu/)
 ⭐[void-terminal](https://github.com/binary-husky/void-terminal) pip包 | 脱离GUI，在Python中直接调用本项目的所有函数插件（开发中）
@@ -95,7 +95,7 @@ Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼�
 </div>
 
 
-- 所有按钮都通过读取functional.py动态生成，可随意加自定义功能，解放粘贴板
+- 所有按钮都通过读取functional.py动态生成，可随意加自定义功能，解放剪贴板
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/231975334-b4788e91-4887-412f-8b43-2b9c5f41d248.gif" width="700" >
 </div>
@@ -105,7 +105,7 @@ Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼�
 <img src="https://user-images.githubusercontent.com/96192199/231980294-f374bdcb-3309-4560-b424-38ef39f04ebd.gif" width="700" >
 </div>
 
-- 如果输出包含公式，会同时以tex形式和渲染形式显示，方便复制和阅读
+- 如果输出包含公式，会以tex形式和渲染形式同时显示，方便复制和阅读
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/230598842-1d7fcddd-815d-40ee-af60-baf488a199df.png" width="700" >
 </div>
@@ -134,9 +134,9 @@ Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼�
 
     在`config.py`中，配置API KEY等设置，[点击查看特殊网络环境设置方法](https://github.com/binary-husky/gpt_academic/issues/1) 。 [Wiki-项目配置说明](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)。
 
-    「 程序会优先检查是否存在名为`config_private.py`的私密配置文件，并用其中的配置覆盖`config.py`的同名配置。如您能理解该读取逻辑，我们强烈建议您在`config.py`旁边创建一个名为`config_private.py`的新配置文件，并把`config.py`中的配置转移（复制）到`config_private.py`中（仅复制您修改过的配置条目即可）。 」
+    「 程序会优先检查是否存在名为`config_private.py`的私密配置文件，并用其中的配置覆盖`config.py`的同名配置。如您能理解该读取逻辑，我们强烈建议您在`config.py`旁边创建一个名为`config_private.py`的新配置文件，并把`config.py`中的配置转移（复制）到`config_private.py`中（仅复制您修改过的配置条目即可） 」。
 
-    「 支持通过`环境变量`配置项目，环境变量的书写格式参考`docker-compose.yml`文件或者我们的[Wiki页面](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)。配置读取优先级: `环境变量` > `config_private.py` > `config.py`。 」
+    「 支持通过`环境变量`配置项目，环境变量的书写格式参考`docker-compose.yml`文件或者我们的[Wiki页面](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)。配置读取优先级: `环境变量` > `config_private.py` > `config.py` 」。
 
 
 3. 安装依赖
@@ -203,7 +203,7 @@ AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-
 
 P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以直接使用方案4或者方案0获取Latex功能。
 
-2. ChatGPT + ChatGLM2 + MOSS + LLAMA2 + 通义千问（需要熟悉[Nvidia Docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#installing-on-ubuntu-and-debian)运行时）
+2. ChatGPT + ChatGLM2 + MOSS + LLAMA2 + 通义千问（需要熟悉[Nvidia Docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#installing-on-ubuntu-and-debian)运行）
 [![chatglm](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-chatglm.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-chatglm.yml)
 
     ``` sh
@@ -215,7 +215,7 @@ P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以
 ### 安装方法III：其他部署姿势
 1. **Windows一键运行脚本**。
 完全不熟悉python环境的Windows用户可以下载[Release](https://github.com/binary-husky/gpt_academic/releases)中发布的一键运行脚本安装无本地模型的版本。
-脚本的贡献来源是[oobabooga](https://github.com/oobabooga/one-click-installers)。
+脚本的贡献来源：[oobabooga](https://github.com/oobabooga/one-click-installers)。
 
 2. 使用第三方API、Azure等、文心一言、星火等，见[Wiki页面](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)
 
@@ -231,7 +231,7 @@ P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以
 # Advanced Usage
 ### I：自定义新的便捷按钮（学术快捷键）
 
-任意文本编辑器打开`core_functional.py`，添加条目如下，然后重启程序。（如按钮已存在，那么前缀、后缀都支持热修改，无需重启程序即可生效。）
+任意文本编辑器打开`core_functional.py`，添加如下条目，然后重启程序。（如果按钮已存在，那么可以直接修改（前缀、后缀都已支持热修改），无需重启程序即可生效。）
 例如
 
 ```python
@@ -352,7 +352,7 @@ GPT Academic开发者QQ群：`610599535`
 
 - 已知问题
     - 某些浏览器翻译插件干扰此软件前端的运行
-    - 官方Gradio目前有很多兼容性Bug，请务必使用`requirement.txt`安装Gradio
+    - 官方Gradio目前有很多兼容性Bug，请**务必使用`requirement.txt`安装Gradio**
 
 ### III：主题
 可以通过修改`THEME`选项（config.py）变更主题
