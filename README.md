@@ -19,11 +19,11 @@
 [![Wiki][Wiki-image]][Wiki-url]
 [![PR][PRs-image]][PRs-url]
 
-[License-image]: https://img.shields.io/badge/LICENSE-GPL3.0-black?&style=for-the-badge
+[License-image]: https://img.shields.io/badge/LICENSE-GPL3.0-orange?&style=for-the-badge
 [Github-image]: https://img.shields.io/badge/github-12100E.svg?&style=for-the-badge&logo=github&logoColor=white
 [Releases-image]: https://img.shields.io/badge/Releases-v3.6.0-blue?style=flat-square
 [Installation-image]: https://img.shields.io/badge/Installation-v3.6.1-blue?style=flat-square
-[Wiki-image]: https://img.shields.io/badge/wiki-项目文档-yellow?style=flat-square
+[Wiki-image]: https://img.shields.io/badge/wiki-项目文档-black?style=flat-square
 [PRs-image]: https://img.shields.io/badge/PRs-welcome-pink?style=flat-square
 
 [License-url]: https://github.com/binary-husky/gpt_academic/blob/master/LICENSE
