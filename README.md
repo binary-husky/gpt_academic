@@ -12,17 +12,21 @@
 </h1>
 
 [![Github][Github-image]][Github-url]
+[![License][License-image]][License-url]
+
 [![Releases][Releases-image]][Releases-url]
 [![Installation][Installation-image]][Installation-url]
 [![Wiki][Wiki-image]][Wiki-url]
 [![PR][PRs-image]][PRs-url]
 
-[Github-image]: https://img.shields.io/badge/github-12100E.svg?&logo=github&logoColor=white?style=flat-square
+[License-image]: https://img.shields.io/badge/LICENSE-GPL3.0-black?&style=for-the-badge
+[Github-image]: https://img.shields.io/badge/github-12100E.svg?&style=for-the-badge&logo=github&logoColor=white
 [Releases-image]: https://img.shields.io/badge/Releases-v3.6.0-blue?style=flat-square
 [Installation-image]: https://img.shields.io/badge/Installation-v3.6.1-blue?style=flat-square
-[Wiki-image]: https://img.shields.io/badge/wiki-项目文档-black?style=flat-square
+[Wiki-image]: https://img.shields.io/badge/wiki-项目文档-yellow?style=flat-square
 [PRs-image]: https://img.shields.io/badge/PRs-welcome-pink?style=flat-square
 
+[License-url]: https://github.com/binary-husky/gpt_academic/blob/master/LICENSE
 [Github-url]: https://github.com/binary-husky/gpt_academic
 [Releases-url]: https://github.com/binary-husky/gpt_academic/releases
 [Installation-url]: https://github.com/binary-husky/gpt_academic#installation
