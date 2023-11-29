@@ -5,7 +5,6 @@
 # @Descr   :
 import os
 import json
-import requests
 import re
 import time
 import xmindparser
@@ -426,13 +425,6 @@ def find_index_inlist(data_list: list, search_terms: list) -> int:
 
 
 def file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_kwargs, plugin_kwargs):
-    """
-    Args:
-        file_routing: 文件路径
-        file_limit:  存储解析后的文档list
-        chatbot: 对话组件
-    Returns: None
-    """
     # 文件读取
     file_routing = []
     include_files, =  json_args_return(plugin_kwargs, keys=['处理文件类型'])
@@ -718,7 +710,7 @@ def batch_recognition_images_to_md(img_list, ipaddr):
     for img in img_list:
         if os.path.exists(img):
             img_content, img_result, _ = ocr_tools.Paddle_ocr_select(ipaddr=ipaddr, trust_value=True
-                                                                     ).img_def_content(img_path=img)
+                                                                     ).img_def_content(img_path=img, img_tag=img)
             temp_file = os.path.join(func_box.users_path, ipaddr, 'ocr_to_md', img_content.splitlines()[0][:20] + '.md')
             with open(temp_file, mode='w', encoding='utf-8') as f:
                 f.write(f"{func_box.html_view_blank(temp_file)}\n\n" + img_content)
@@ -744,10 +736,10 @@ def name_de_add_sort(response, index=0):
         de_result.sort(key=lambda x: d[x[index]])
         return de_result
     except:
-        from comm_tools import trimmed_format_exc
+        from comm_tools.toolbox import trimmed_format_exc
         tb_str = '```\n' + trimmed_format_exc() + '```'
         print(tb_str)
-
+        return response
 
 
 def parsing_json_in_text(txt_data: list, old_case, filter_list: list = 'None----', tags='插件补充的用例', sort_index=0):
