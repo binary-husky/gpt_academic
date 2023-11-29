@@ -17,11 +17,11 @@
 [![Wiki][Wiki-image]][Wiki-url]
 [![PR][PRs-image]][PRs-url]
 
-[Github-image]: https://img.shields.io/badge/github-12100E.svg?&logo=github&logoColor=white
-[Releases-image]: https://img.shields.io/badge/Releases-v3.6.0-blue
-[Installation-image]: https://img.shields.io/badge/Installation-v3.6.1-blue
-[Wiki-image]: https://img.shields.io/badge/wiki-000000.svg?logo=wikipedia
-[PRs-image]: https://img.shields.io/badge/PRs-welcome-pink
+[Github-image]: https://img.shields.io/badge/github-12100E.svg?&logo=github&logoColor=white?style=flat-square
+[Releases-image]: https://img.shields.io/badge/Releases-v3.6.0-blue?style=flat-square
+[Installation-image]: https://img.shields.io/badge/Installation-v3.6.1-blue?style=flat-square
+[Wiki-image]: https://img.shields.io/badge/wiki-项目文档-black?style=flat-square
+[PRs-image]: https://img.shields.io/badge/PRs-welcome-pink?style=flat-square
 
 [Github-url]: https://github.com/binary-husky/gpt_academic
 [Releases-url]: https://github.com/binary-husky/gpt_academic/releases
