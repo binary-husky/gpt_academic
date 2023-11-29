@@ -122,7 +122,7 @@ function chatbotAutoHeight(){
             chatbot.style.maxHeight = pixelString; chatbot.style.height = pixelString; 
         }
     }
-
+    monitoring_input_box()
     update_height();
     setInterval(function() {
         update_height_slow()
@@ -161,3 +161,103 @@ function get_elements(consider_state_panel=false) {
     var chatbot_height = parseInt(chatbot_height);
     return { panel_height_target, chatbot_height, chatbot };
 }
+
+
+function add_func_paste(input) {
+    let paste_files = [];
+    if (input) {
+        input.addEventListener("paste", async function (e) {
+            const clipboardData = e.clipboardData || window.clipboardData;
+            const items = clipboardData.items;
+            if (items) {
+                for (i = 0; i < items.length; i++) {
+                    if (items[i].kind === "file") { // 确保是文件类型
+                        const file = items[i].getAsFile();
+                        // 将每一个粘贴的文件添加到files数组中
+                        paste_files.push(file);
+                        e.preventDefault();  // 避免粘贴文件名到输入框
+                    }
+                }
+                if (paste_files.length > 0) {
+                    // 按照文件列表执行批量上传逻辑
+                    await paste_upload_files(paste_files);
+                    paste_files = []
+
+                }
+            }
+        });
+    }
+}
+
+
+async function paste_upload_files(files) {
+    const uploadInputElement = elem_upload_float.querySelector("input[type=file]");
+    let totalSizeMb = 0
+    if (files && files.length > 0) {
+        // 执行具体的上传逻辑
+        if (uploadInputElement) {
+            for (let i = 0; i < files.length; i++) {
+                // 将从文件数组中获取的文件大小(单位为字节)转换为MB，
+                totalSizeMb += files[i].size / 1024 / 1024;
+            }
+            // 检查文件总大小是否超过20MB
+            if (totalSizeMb > 20) {
+                toast_push('⚠️文件夹大于20MB 🚀上传文件中', 2000)
+                // return;  // 如果超过了指定大小, 可以不进行后续上传操作
+            }
+             // 监听change事件， 原生Gradio可以实现
+            // uploadInputElement.addEventListener('change', function(){replace_input_string()});
+            let event = new Event("change");
+            Object.defineProperty(event, "target", {value: uploadInputElement, enumerable: true});
+            Object.defineProperty(event, "currentTarget", {value: uploadInputElement, enumerable: true});
+            Object.defineProperty(uploadInputElement, "files", {value: files, enumerable: true});
+            uploadInputElement.dispatchEvent(event);
+            // toast_push('🎉上传文件成功', 2000)
+        }
+    }
+}
+//提示信息 封装
+function toast_push(msg, duration) {
+    duration = isNaN(duration) ? 3000 : duration;
+    const m = document.createElement('div');
+    m.innerHTML = msg;
+    m.style.cssText = "font-size:  var(--text-md) !important; color: rgb(255, 255, 255);background-color: rgba(0, 0, 0, 0.6);padding: 10px 15px;margin: 0 0 0 -60px;border-radius: 4px;position: fixed;    top: 50%;left: 50%;width: 130px;text-align: center;";
+    document.body.appendChild(m);
+    setTimeout(function () {
+        var d = 0.5;
+        m.style.opacity = '0';
+        setTimeout(function () {
+            document.body.removeChild(m)
+        }, d * 1000);
+    }, duration);
+}
+
+var elem_upload = null;
+var elem_upload_float = null;
+var elem_input_main = null;
+var elem_input_float = null;
+
+
+function monitoring_input_box() {
+    elem_upload = document.getElementById('elem_upload')
+    elem_upload_float = document.getElementById('elem_upload_float')
+    elem_input_main = document.getElementById('user_input_main')
+    elem_input_float = document.getElementById('user_input_float')
+    if (elem_input_main) {
+        if (elem_input_main.querySelector("textarea")) {
+            add_func_paste(elem_input_main.querySelector("textarea"))
+        }
+    }
+    if (elem_input_float) {
+        if (elem_input_float.querySelector("textarea")){
+            add_func_paste(elem_input_float.querySelector("textarea"))
+        }
+    }
+}
+
+
+// 监视页面变化
+window.addEventListener("DOMContentLoaded", function () {
+    // const ga = document.getElementsByTagName("gradio-app");
+    gradioApp().addEventListener("render", monitoring_input_box);
+});
