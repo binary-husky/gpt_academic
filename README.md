@@ -214,8 +214,7 @@ P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以
 
 ### 安装方法III：其他部署姿势
 1. **Windows一键运行脚本**。
-完全不熟悉python环境的Windows用户可以下载[Release](https://github.com/binary-husky/gpt_academic/releases)中发布的一键运行脚本安装无本地模型的版本。
-脚本的贡献来源：[oobabooga](https://github.com/oobabooga/one-click-installers)。
+完全不熟悉python环境的Windows用户可以下载[Release](https://github.com/binary-husky/gpt_academic/releases)中发布的一键运行脚本安装无本地模型的版本。脚本贡献来源：[oobabooga](https://github.com/oobabooga/one-click-installers)。
 
 2. 使用第三方API、Azure等、文心一言、星火等，见[Wiki页面](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)
 
@@ -250,6 +249,7 @@ P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以
 
 ### II：自定义函数插件
 编写强大的函数插件来执行任何你想得到的和想不到的任务。
+
 本项目的插件编写、调试难度很低，只要您具备一定的python基础知识，就可以仿照我们提供的模板实现自己的插件功能。
 详情请参考[函数插件指南](https://github.com/binary-husky/gpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)。
 
