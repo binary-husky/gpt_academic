@@ -283,10 +283,10 @@ def find_tex_file_ignore_case(fp):
     dir_name = os.path.dirname(fp)
     base_name = os.path.basename(fp)
     # 如果输入的文件路径是正确的
-    if os.path.exists(pj(dir_name, base_name)): return pj(dir_name, base_name)
+    if os.path.isfile(pj(dir_name, base_name)): return pj(dir_name, base_name)
     # 如果不正确，试着加上.tex后缀试试
     if not base_name.endswith('.tex'): base_name+='.tex'
-    if os.path.exists(pj(dir_name, base_name)): return pj(dir_name, base_name)
+    if os.path.isfile(pj(dir_name, base_name)): return pj(dir_name, base_name)
     # 如果还找不到，解除大小写限制，再试一次
     import glob
     for f in glob.glob(dir_name+'/*.tex'):
@@ -317,6 +317,41 @@ def merge_tex_files_(project_foler, main_file, mode):
         c = merge_tex_files_(project_foler, c, mode)
         main_file = main_file[:s.span()[0]] + c + main_file[s.span()[1]:]
     return main_file
+
+
+def find_title_and_abs(main_file):
+
+    def extract_abstract_1(text):
+        pattern = r"\\abstract\{(.*?)\}"
+        match = re.search(pattern, text, re.DOTALL)
+        if match:
+            return match.group(1)
+        else:
+            return None
+
+    def extract_abstract_2(text):
+        pattern = r"\\begin\{abstract\}(.*?)\\end\{abstract\}"
+        match = re.search(pattern, text, re.DOTALL)
+        if match:
+            return match.group(1)
+        else:
+            return None
+
+    def extract_title(string):
+        pattern = r"\\title\{(.*?)\}"
+        match = re.search(pattern, string, re.DOTALL)
+
+        if match:
+            return match.group(1)
+        else:
+            return None
+
+    abstract = extract_abstract_1(main_file)
+    if abstract is None:
+        abstract = extract_abstract_2(main_file)
+    title = extract_title(main_file)
+    return title, abstract
+
 
 def merge_tex_files(project_foler, main_file, mode):
     """

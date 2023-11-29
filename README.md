@@ -1,6 +1,6 @@
 > **Note**
 > 
-> 2023.11.12: 紧急修复了endpoint异常的问题。
+> 2023.11.12: 某些依赖包尚不兼容python 3.12，推荐python 3.11。
 > 
 > 2023.11.7: 安装依赖时，请选择`requirements.txt`中**指定的版本**。 安装命令：`pip install -r requirements.txt`。本项目开源免费，近期发现有人蔑视开源协议并利用本项目违规圈钱，请提高警惕，谨防上当受骗。
 
@@ -28,7 +28,7 @@ To translate this project to arbitrary language with GPT, read and run [`multi_l
 
 功能（⭐= 近期新增功能） | 描述
 --- | ---
-⭐[接入新模型](https://github.com/binary-husky/gpt_academic/wiki/%E5%A6%82%E4%BD%95%E5%88%87%E6%8D%A2%E6%A8%A1%E5%9E%8B)！ | 百度[千帆](https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Nlks5zkzu)与文心一言, [通义千问](https://modelscope.cn/models/qwen/Qwen-7B-Chat/summary)，上海AI-Lab[书生](https://github.com/InternLM/InternLM)，讯飞[星火](https://xinghuo.xfyun.cn/)，[LLaMa2](https://huggingface.co/meta-llama/Llama-2-7b-chat-hf)，智谱API，DALLE3
+⭐[接入新模型](https://github.com/binary-husky/gpt_academic/wiki/%E5%A6%82%E4%BD%95%E5%88%87%E6%8D%A2%E6%A8%A1%E5%9E%8B)！ | 百度[千帆](https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Nlks5zkzu)与文心一言, 通义千问[Qwen](https://modelscope.cn/models/qwen/Qwen-7B-Chat/summary)，上海AI-Lab[书生](https://github.com/InternLM/InternLM)，讯飞[星火](https://xinghuo.xfyun.cn/)，[LLaMa2](https://huggingface.co/meta-llama/Llama-2-7b-chat-hf)，[智谱API](https://open.bigmodel.cn/)，DALLE3, [DeepseekCoder](https://coder.deepseek.com/)
 润色、翻译、代码解释 | 一键润色、翻译、查找论文语法错误、解释代码
 [自定义快捷键](https://www.bilibili.com/video/BV14s4y1E7jN) | 支持自定义快捷键
 模块化设计 | 支持自定义强大的[插件](https://github.com/binary-husky/gpt_academic/tree/master/crazy_functions)，插件支持[热更新](https://github.com/binary-husky/gpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)
@@ -92,36 +92,38 @@ Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼�
 ### 安装方法I：直接运行 (Windows, Linux or MacOS) 
 
 1. 下载项目
-```sh
-git clone --depth=1 https://github.com/binary-husky/gpt_academic.git
-cd gpt_academic
-```
+
+    ```sh
+    git clone --depth=1 https://github.com/binary-husky/gpt_academic.git
+    cd gpt_academic
+    ```
 
 2. 配置API_KEY
 
-在`config.py`中，配置API KEY等设置，[点击查看特殊网络环境设置方法](https://github.com/binary-husky/gpt_academic/issues/1) 。[Wiki页面](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)。
+    在`config.py`中，配置API KEY等设置，[点击查看特殊网络环境设置方法](https://github.com/binary-husky/gpt_academic/issues/1) 。[Wiki页面](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)。
 
-「 程序会优先检查是否存在名为`config_private.py`的私密配置文件，并用其中的配置覆盖`config.py`的同名配置。如您能理解该读取逻辑，我们强烈建议您在`config.py`旁边创建一个名为`config_private.py`的新配置文件，并把`config.py`中的配置转移（复制）到`config_private.py`中（仅复制您修改过的配置条目即可）。 」
+    「 程序会优先检查是否存在名为`config_private.py`的私密配置文件，并用其中的配置覆盖`config.py`的同名配置。如您能理解该读取逻辑，我们强烈建议您在`config.py`旁边创建一个名为`config_private.py`的新配置文件，并把`config.py`中的配置转移（复制）到`config_private.py`中（仅复制您修改过的配置条目即可）。 」
 
-「 支持通过`环境变量`配置项目，环境变量的书写格式参考`docker-compose.yml`文件或者我们的[Wiki页面](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)。配置读取优先级: `环境变量` > `config_private.py` > `config.py`。 」
+    「 支持通过`环境变量`配置项目，环境变量的书写格式参考`docker-compose.yml`文件或者我们的[Wiki页面](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)。配置读取优先级: `环境变量` > `config_private.py` > `config.py`。 」
 
 
 3. 安装依赖
-```sh
-# （选择I: 如熟悉python, python>=3.9）备注：使用官方pip源或者阿里pip源, 临时换源方法：python -m pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
-python -m pip install -r requirements.txt
+    ```sh
+    # （选择I: 如熟悉python, python推荐版本 3.9 ~ 3.11）备注：使用官方pip源或者阿里pip源, 临时换源方法：python -m pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
+    python -m pip install -r requirements.txt
 
-# （选择II: 使用Anaconda）步骤也是类似的 (https://www.bilibili.com/video/BV1rc411W7Dr)：
-conda create -n gptac_venv python=3.11    # 创建anaconda环境
-conda activate gptac_venv                 # 激活anaconda环境
-python -m pip install -r requirements.txt # 这个步骤和pip安装一样的步骤
-```
+    # （选择II: 使用Anaconda）步骤也是类似的 (https://www.bilibili.com/video/BV1rc411W7Dr)：
+    conda create -n gptac_venv python=3.11    # 创建anaconda环境
+    conda activate gptac_venv                 # 激活anaconda环境
+    python -m pip install -r requirements.txt # 这个步骤和pip安装一样的步骤
+    ```
 
 
 <details><summary>如果需要支持清华ChatGLM2/复旦MOSS/RWKV作为后端，请点击展开此处</summary>
 <p>
 
 【可选步骤】如果需要支持清华ChatGLM2/复旦MOSS作为后端，需要额外安装更多依赖（前提条件：熟悉Python + 用过Pytorch + 电脑配置够强）：
+
 ```sh
 # 【可选步骤I】支持清华ChatGLM2。清华ChatGLM备注：如果遇到"Call ChatGLM fail 不能正常加载ChatGLM的参数" 错误，参考如下： 1：以上默认安装的为torch+cpu版，使用cuda需要卸载torch重新安装torch+cuda； 2：如因本机配置不够无法加载模型，可以修改request_llm/bridge_chatglm.py中的模型精度, 将 AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) 都修改为 AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
 python -m pip install -r request_llms/requirements_chatglm.txt  
@@ -143,39 +145,39 @@ AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-
 
 
 4. 运行
-```sh
-python main.py
-```
+    ```sh
+    python main.py
+    ```
 
 ### 安装方法II：使用Docker
 
 0. 部署项目的全部能力（这个是包含cuda和latex的大型镜像。但如果您网速慢、硬盘小，则不推荐使用这个）
 [![fullcapacity](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-all-capacity.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-all-capacity.yml)
 
-``` sh
-# 修改docker-compose.yml，保留方案0并删除其他方案。然后运行：
-docker-compose up
-```
+    ``` sh
+    # 修改docker-compose.yml，保留方案0并删除其他方案。然后运行：
+    docker-compose up
+    ```
 
 1. 仅ChatGPT+文心一言+spark等在线模型（推荐大多数人选择）
 [![basic](https://github.com/binary-husky/gpt_academic/actions/workflows/build-without-local-llms.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-without-local-llms.yml)
 [![basiclatex](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-latex.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-latex.yml)
 [![basicaudio](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-audio-assistant.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-audio-assistant.yml)
 
-``` sh
-# 修改docker-compose.yml，保留方案1并删除其他方案。然后运行：
-docker-compose up
-```
+    ``` sh
+    # 修改docker-compose.yml，保留方案1并删除其他方案。然后运行：
+    docker-compose up
+    ```
 
 P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以直接使用方案4或者方案0获取Latex功能。
 
 2. ChatGPT + ChatGLM2 + MOSS + LLAMA2 + 通义千问（需要熟悉[Nvidia Docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#installing-on-ubuntu-and-debian)运行时）
 [![chatglm](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-chatglm.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-chatglm.yml)
 
-``` sh
-# 修改docker-compose.yml，保留方案2并删除其他方案。然后运行：
-docker-compose up
-```
+    ``` sh
+    # 修改docker-compose.yml，保留方案2并删除其他方案。然后运行：
+    docker-compose up
+    ```
 
 
 ### 安装方法III：其他部署姿势
@@ -196,9 +198,11 @@ docker-compose up
 
 # Advanced Usage
 ### I：自定义新的便捷按钮（学术快捷键）
+
 任意文本编辑器打开`core_functional.py`，添加条目如下，然后重启程序。（如按钮已存在，那么前缀、后缀都支持热修改，无需重启程序即可生效。）
 例如
-```
+
+```python
 "超级英译中": {
     # 前缀，会被加在你的输入之前。例如，用来描述你的要求，例如翻译、解释代码、润色等等
     "Prefix": "请翻译把下面一段内容成中文，然后用一个markdown表格逐一解释文中出现的专有名词：\n\n", 
@@ -207,6 +211,7 @@ docker-compose up
     "Suffix": "",
 },
 ```
+
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/226899272-477c2134-ed71-4326-810c-29891fe4a508.png" width="500" >
 </div>
@@ -283,6 +288,7 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 
 
 ### II：版本:
+
 - version 3.70（todo）: 优化AutoGen插件主题并设计一系列衍生插件
 - version 3.60: 引入AutoGen作为新一代插件的基石
 - version 3.57: 支持GLM3，星火v3，文心一言v4，修复本地模型的并发BUG
@@ -303,7 +309,7 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 - version 3.0: 对chatglm和其他小型llm的支持
 - version 2.6: 重构了插件结构，提高了交互性，加入更多插件
 - version 2.5: 自更新，解决总结大工程源代码时文本过长、token溢出的问题
-- version 2.4: (1)新增PDF全文翻译功能; (2)新增输入区切换位置的功能; (3)新增垂直布局选项; (4)多线程函数插件优化。
+- version 2.4: 新增PDF全文翻译功能; 新增输入区切换位置的功能
 - version 2.3: 增强多线程交互性
 - version 2.2: 函数插件支持热重载
 - version 2.1: 可折叠式布局
@@ -325,6 +331,7 @@ GPT Academic开发者QQ群：`610599535`
 
 1. `master` 分支: 主分支，稳定版
 2. `frontier` 分支: 开发分支，测试版
+3. 如何接入其他大模型：[接入其他大模型](request_llms/README.md)
 
 
 ### V：参考与学习
