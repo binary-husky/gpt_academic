@@ -135,9 +135,9 @@ Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼�
     cd gpt_academic
     ```
 
-2. 配置API_KEY
+2. 配置API_KEY等变量
 
-    在`config.py`中，配置API KEY等设置，[点击查看特殊网络环境设置方法](https://github.com/binary-husky/gpt_academic/issues/1) 。 [Wiki-项目配置说明](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)。
+    在`config.py`中，配置API KEY等变量。[特殊网络环境设置方法](https://github.com/binary-husky/gpt_academic/issues/1)、[Wiki-项目配置说明](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)。
 
     「 程序会优先检查是否存在名为`config_private.py`的私密配置文件，并用其中的配置覆盖`config.py`的同名配置。如您能理解以上读取逻辑，我们强烈建议您在`config.py`同路径下创建一个名为`config_private.py`的新配置文件，并使用`config_private.py`配置项目，以确保更新或其他用户无法轻易查看您的私有配置 」。
 
