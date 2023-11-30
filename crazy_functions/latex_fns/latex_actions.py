@@ -418,6 +418,7 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
                     merge_pdfs(origin_pdf, result_pdf, concat_pdf)
                     promote_file_to_downloadzone(concat_pdf, rename_file=None, chatbot=chatbot)  # promote file to web UI
                 except Exception as e:
+                    print(e)
                     pass
             return True # 成功啦
         else:
