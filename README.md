@@ -4,7 +4,7 @@
 > 
 > 2023.11.7: 安装依赖时，请选择`requirements.txt`中**指定的版本**。 安装命令：`pip install -r requirements.txt`。本项目开源免费，近期发现有人蔑视开源协议并利用本项目违规圈钱，请提高警惕，谨防上当受骗。
 
-<br><br>
+<br>
 
 <div align=center>
 <h1 aligh="center">
@@ -13,14 +13,13 @@
 
 [![Github][Github-image]][Github-url]
 [![License][License-image]][License-url]
-
 [![Releases][Releases-image]][Releases-url]
 [![Installation][Installation-image]][Installation-url]
 [![Wiki][Wiki-image]][Wiki-url]
 [![PR][PRs-image]][PRs-url]
 
-[License-image]: https://img.shields.io/badge/LICENSE-GPL3.0-orange?&style=for-the-badge
-[Github-image]: https://img.shields.io/badge/github-12100E.svg?&style=for-the-badge&logo=github&logoColor=white
+[License-image]: https://img.shields.io/badge/LICENSE-GPL3.0-orange?&style=flat-square
+[Github-image]: https://img.shields.io/badge/github-12100E.svg?&style=flat-square
 [Releases-image]: https://img.shields.io/badge/Releases-v3.6.0-blue?style=flat-square
 [Installation-image]: https://img.shields.io/badge/Installation-v3.6.1-blue?style=flat-square
 [Wiki-image]: https://img.shields.io/badge/wiki-项目文档-black?style=flat-square
@@ -35,14 +34,14 @@
 
 
 </div>
+<br>
 
 **如果喜欢这个项目，请给它一个Star；如果您发明了好用的快捷键或插件，欢迎发pull requests！**
 
 If you like this project, please give it a Star. Read this in [English](docs/README.English.md) | [日本語](docs/README.Japanese.md) | [한국어](docs/README.Korean.md) | [Русский](docs/README.Russian.md) | [Français](docs/README.French.md). All translations have been provided by the project itself. To translate this project to arbitrary language with GPT, read and run [`multi_language.py`](multi_language.py) (experimental).
-<br><br>
+<br>
 
-> **Note**
->
+
 > 1.请注意只有 **高亮** 标识的插件（按钮）才支持读取文件，部分插件位于插件区的**下拉菜单**中。另外我们以**最高优先级**欢迎和处理任何新插件的PR。
 >
 > 2.本项目中每个文件的功能都在[自译解报告](https://github.com/binary-husky/gpt_academic/wiki/GPT‐Academic项目自译解报告)`self_analysis.md`详细说明。随着版本的迭代，您也可以随时自行点击相关函数插件，调用GPT重新生成项目的自我解析报告。常见问题请查阅wiki。
@@ -51,8 +50,6 @@ If you like this project, please give it a Star. Read this in [English](docs/REA
 > 3.本项目兼容并鼓励尝试国产大语言模型ChatGLM等。支持多个api-key共存，可在配置文件中填写如`API_KEY="openai-key1,openai-key2,azure-key3,api2d-key4"`。需要临时更换`API_KEY`时，在输入区输入临时的`API_KEY`然后回车键提交后即可生效。
 
 <br><br>
-
-# Features Overview
 
 <div align="center">
 
@@ -117,6 +114,8 @@ Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼�
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/232537274-deca0563-7aa6-4b5d-94a2-b7c453c47794.png" width="700" >
 </div>
+
+<br><br>
 
 # Installation
 ### 安装方法I：直接运行 (Windows, Linux or MacOS) 
@@ -224,6 +223,7 @@ P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以
     - 使用WSL2（Windows Subsystem for Linux 子系统）。请访问[部署wiki-2](https://github.com/binary-husky/gpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2)
     - 如何在二级网址（如`http://localhost/subpath`）下运行。请访问[FastAPI运行说明](docs/WithFastapi.md)
 
+<br><br>
 
 # Advanced Usage
 ### I：自定义新的便捷按钮（学术快捷键）
@@ -250,6 +250,7 @@ P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以
 本项目的插件编写、调试难度很低，只要您具备一定的python基础知识，就可以仿照我们提供的模板实现自己的插件功能。
 详情请参考[函数插件指南](https://github.com/binary-husky/gpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)。
 
+<br><br>
 
 # Updates
 ### I：动态
