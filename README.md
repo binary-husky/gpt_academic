@@ -38,23 +38,17 @@
 
 **如果喜欢这个项目，请给它一个Star；如果您发明了好用的快捷键或插件，欢迎发pull requests！**
 
-If you like this project, please give it a Star. 
-
-
-Read this in [English](docs/README.English.md) | [日本語](docs/README.Japanese.md) | [한국어](docs/README.Korean.md) | [Русский](docs/README.Russian.md) | [Français](docs/README.French.md). All translations have been provided by the project itself.
-
-To translate this project to arbitrary language with GPT, read and run [`multi_language.py`](multi_language.py) (experimental).
+If you like this project, please give it a Star. Read this in [English](docs/README.English.md) | [日本語](docs/README.Japanese.md) | [한국어](docs/README.Korean.md) | [Русский](docs/README.Russian.md) | [Français](docs/README.French.md). All translations have been provided by the project itself. To translate this project to arbitrary language with GPT, read and run [`multi_language.py`](multi_language.py) (experimental).
 <br><br>
 
 > **Note**
 >
-> 1. 请注意只有 **高亮** 标识的插件（按钮）才支持读取文件，部分插件位于插件区的**下拉菜单**中。另外我们以**最高优先级**欢迎和处理任何新插件的PR。
+> 1.请注意只有 **高亮** 标识的插件（按钮）才支持读取文件，部分插件位于插件区的**下拉菜单**中。另外我们以**最高优先级**欢迎和处理任何新插件的PR。
 >
-> 2. 本项目中每个文件的功能都在[自译解报告](https://github.com/binary-husky/gpt_academic/wiki/GPT‐Academic项目自译解报告)`self_analysis.md`详细说明。随着版本的迭代，您也可以随时自行点击相关函数插件，调用GPT重新生成项目的自我解析报告。常见问题请查阅wiki。
->
+> 2.本项目中每个文件的功能都在[自译解报告](https://github.com/binary-husky/gpt_academic/wiki/GPT‐Academic项目自译解报告)`self_analysis.md`详细说明。随着版本的迭代，您也可以随时自行点击相关函数插件，调用GPT重新生成项目的自我解析报告。常见问题请查阅wiki。
 >    [![常规安装方法](https://img.shields.io/static/v1?label=&message=常规安装方法&color=gray)](#installation)  [![一键安装脚本](https://img.shields.io/static/v1?label=&message=一键安装脚本&color=gray)](https://github.com/binary-husky/gpt_academic/releases)  [![配置说明](https://img.shields.io/static/v1?label=&message=配置说明&color=gray)](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明) [![wiki](https://img.shields.io/static/v1?label=&message=wiki&color=gray)]([https://github.com/binary-husky/gpt_academic/wiki/项目配置说明](https://github.com/binary-husky/gpt_academic/wiki))
 > 
-> 3. 本项目兼容并鼓励尝试国产大语言模型ChatGLM等。支持多个api-key共存，可在配置文件中填写如`API_KEY="openai-key1,openai-key2,azure-key3,api2d-key4"`。需要临时更换`API_KEY`时，在输入区输入临时的`API_KEY`然后回车键提交后即可生效。
+> 3.本项目兼容并鼓励尝试国产大语言模型ChatGLM等。支持多个api-key共存，可在配置文件中填写如`API_KEY="openai-key1,openai-key2,azure-key3,api2d-key4"`。需要临时更换`API_KEY`时，在输入区输入临时的`API_KEY`然后回车键提交后即可生效。
 
 <br><br>
 
@@ -91,7 +85,6 @@ Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼�
 ⭐虚空终端插件 | [插件] 能够使用自然语言直接调度本项目其他插件
 更多新功能展示 (图像生成等) …… | 见本文档结尾处 ……
 </div>
-
 
 
 - 新界面（修改`config.py`中的LAYOUT选项即可实现“左右布局”和“上下布局”的切换）
@@ -208,7 +201,7 @@ AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-
 
 P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以直接使用方案4或者方案0获取Latex功能。
 
-2. ChatGPT + ChatGLM2 + MOSS + LLAMA2 + 通义千问（需要熟悉[Nvidia Docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#installing-on-ubuntu-and-debian)运行）
+2. ChatGPT + ChatGLM2 + MOSS + LLAMA2 + 通义千问（需要熟悉[Nvidia Docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#installing-on-ubuntu-and-debian)运行时）
 [![chatglm](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-chatglm.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-chatglm.yml)
 
     ``` sh
@@ -254,7 +247,6 @@ P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以
 
 ### II：自定义函数插件
 编写强大的函数插件来执行任何你想得到的和想不到的任务。
-
 本项目的插件编写、调试难度很低，只要您具备一定的python基础知识，就可以仿照我们提供的模板实现自己的插件功能。
 详情请参考[函数插件指南](https://github.com/binary-husky/gpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)。
 
@@ -357,7 +349,7 @@ GPT Academic开发者QQ群：`610599535`
 
 - 已知问题
     - 某些浏览器翻译插件干扰此软件前端的运行
-    - 官方Gradio目前有很多兼容性Bug，请**务必使用`requirement.txt`安装Gradio**
+    - 官方Gradio目前有很多兼容性问题，请**务必使用`requirement.txt`安装Gradio**
 
 ### III：主题
 可以通过修改`THEME`选项（config.py）变更主题
