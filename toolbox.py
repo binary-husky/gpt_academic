@@ -563,7 +563,8 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
         user_name = get_user(chatbot)
     else:
         user_name = default_user_name
-
+    if not os.path.exists(file):
+        raise FileNotFoundError(f'文件{file}不存在')
     user_path = get_log_folder(user_name, plugin_name=None)
     if file_already_in_downloadzone(file, user_path):
         new_path = file
