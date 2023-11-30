@@ -416,6 +416,8 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
                     from .latex_toolbox import merge_pdfs
                     concat_pdf = pj(work_folder_modified, f'comparison.pdf')
                     merge_pdfs(origin_pdf, result_pdf, concat_pdf)
+                    if os.path.exists(pj(work_folder, '..', 'translation')):
+                        shutil.copyfile(concat_pdf, pj(work_folder, '..', 'translation', 'comparison.pdf'))
                     promote_file_to_downloadzone(concat_pdf, rename_file=None, chatbot=chatbot)  # promote file to web UI
                 except Exception as e:
                     print(e)
