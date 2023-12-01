@@ -6,7 +6,9 @@ from toolbox import ProxyNetworkActivate
 from toolbox import get_conf
 from .local_llm_class import LocalLLMHandle, get_local_llm_predict_fns
 from threading import Thread
+import torch
 
+MAX_INPUT_TOKEN_LENGTH = get_conf("MAX_INPUT_TOKEN_LENGTH")
 def download_huggingface_model(model_name, max_retry, local_dir):
     from huggingface_hub import snapshot_download
     for i in range(1, max_retry):
@@ -36,9 +38,46 @@ class GetCoderLMHandle(LocalLLMHandle):
             #     tokenizer = download_huggingface_model(model_name, max_retry=128, local_dir=local_dir)
             tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
             self._streamer = TextIteratorStreamer(tokenizer)
-            model = AutoModelForCausalLM.from_pretrained(model_name, trust_remote_code=True)
+            device_map = {
+                "transformer.word_embeddings": 0,
+                "transformer.word_embeddings_layernorm": 0,
+                "lm_head": 0,
+                "transformer.h": 0,
+                "transformer.ln_f": 0,
+                "model.embed_tokens": 0,
+                "model.layers": 0,
+                "model.norm": 0,
+            }
+
+            # 检查量化配置
+            quantization_type = get_conf('LOCAL_MODEL_QUANT')
+
             if get_conf('LOCAL_MODEL_DEVICE') != 'cpu':
-                model = model.cuda()
+                if quantization_type == "INT8":
+                    from transformers import BitsAndBytesConfig
+                    # 使用 INT8 量化
+                    model = AutoModelForCausalLM.from_pretrained(model_name, trust_remote_code=True, load_in_8bit=True,
+                                                                 device_map=device_map)
+                elif quantization_type == "INT4":
+                    from transformers import BitsAndBytesConfig
+                    # 使用 INT4 量化
+                    bnb_config = BitsAndBytesConfig(
+                        load_in_4bit=True,
+                        bnb_4bit_use_double_quant=True,
+                        bnb_4bit_quant_type="nf4",
+                        bnb_4bit_compute_dtype=torch.bfloat16
+                    )
+                    model = AutoModelForCausalLM.from_pretrained(model_name, trust_remote_code=True,
+                                                                 quantization_config=bnb_config, device_map=device_map)
+                else:
+                    # 使用默认的 FP16
+                    model = AutoModelForCausalLM.from_pretrained(model_name, trust_remote_code=True,
+                                                                 torch_dtype=torch.bfloat16, device_map=device_map)
+            else:
+                # CPU 模式
+                model = AutoModelForCausalLM.from_pretrained(model_name, trust_remote_code=True,
+                                                             torch_dtype=torch.bfloat16)
+
         return model, tokenizer
 
     def llm_stream_generator(self, **kwargs):
@@ -54,7 +93,10 @@ class GetCoderLMHandle(LocalLLMHandle):
         query, max_length, top_p, temperature, history = adaptor(kwargs)
         history.append({ 'role': 'user', 'content': query})
         messages = history
-        inputs = self._tokenizer.apply_chat_template(messages, return_tensors="pt").to(self._model.device)
+        inputs = self._tokenizer.apply_chat_template(messages, return_tensors="pt")
+        if inputs.shape[1] > MAX_INPUT_TOKEN_LENGTH:
+            inputs = inputs[:, -MAX_INPUT_TOKEN_LENGTH:]
+        inputs = inputs.to(self._model.device)
         generation_kwargs = dict(
                                     inputs=inputs, 
                                     max_new_tokens=max_length,
