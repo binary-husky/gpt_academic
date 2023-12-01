@@ -282,6 +282,20 @@ def get_crazy_functions():
 
     # -=--=- 尚未充分测试的实验性插件 & 需要额外依赖的插件 -=--=-
     try:
+        from crazy_functions.文本文件Token计算器 import 文本文件Token计算器
+        function_plugins.update({
+            "文本文件Token计算器": {
+                "Group": "编程|学术|智能体",
+                "AsButton": True,
+                "Info": "文本文件Token计算器 | 输入参数为路径",
+                "Function": HotReload(文本文件Token计算器)
+            }
+        })
+    except:
+        print(trimmed_format_exc())
+        print('Load function plugin failed')
+        
+    try:
         from crazy_functions.下载arxiv论文翻译摘要 import 下载arxiv论文并翻译摘要
         function_plugins.update({
             "一键下载arxiv论文并翻译摘要（先在input输入编号，如1812.10695）": {
@@ -372,7 +386,7 @@ def get_crazy_functions():
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-                "ArgsReminder": "在这里输入自定义参数“分辨率-质量(可选)-风格(可选)”, 参数示例“1024x1024-hd-vivid” || 分辨率支持 1024x1024(默认)//1792x1024//1024x1792 || 质量支持 -standard(默认)//-hd || 风格支持 -vivid(默认)//-natural", # 高级参数输入区的显示提示
+                "ArgsReminder": "在这里输入自定义参数“分辨率-质量(可选)-风格(可选)”, 参数示例“1024x1024-hd-vivid” || 分辨率支持 1024x1024(默认)//1792x1024//1024x1792 || 质量支持 -standard(默认)//-hd || 风格支持 -vivid(默认)//-natural",  # 高级参数输入区的显示提示
                 "Info": "使用DALLE3生成图片 | 输入参数字符串，提供图像的内容",
                 "Function": HotReload(图片生成_DALLE3)
             },
@@ -489,7 +503,7 @@ def get_crazy_functions():
         })
         from crazy_functions.Latex输出PDF结果 import Latex翻译中文并重新编译PDF
         function_plugins.update({
-            "Arxiv论文精细翻译（输入arxivID）[需Latex]": {
+            "Arixv论文精细翻译（输入arxivID）[需Latex]": {
                 "Group": "学术",
                 "Color": "stop",
                 "AsButton": False,
