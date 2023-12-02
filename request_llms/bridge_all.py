@@ -431,12 +431,12 @@ if "chatglm_onnx" in AVAIL_LLM_MODELS:
         })
     except:
         print(trimmed_format_exc())
-if "qwen" in AVAIL_LLM_MODELS:
+if "qwen-1_8B" in AVAIL_LLM_MODELS:  # qwen-1.8B
     try:
-        from .bridge_qwen import predict_no_ui_long_connection as qwen_noui
-        from .bridge_qwen import predict as qwen_ui
+        from .bridge_qwen_1_8B import predict_no_ui_long_connection as qwen_noui
+        from .bridge_qwen_1_8B import predict as qwen_ui
         model_info.update({
-            "qwen": {
+            "qwen-1_8B": {
                 "fn_with_ui": qwen_ui,
                 "fn_without_ui": qwen_noui,
                 "endpoint": None,
@@ -447,6 +447,24 @@ if "qwen" in AVAIL_LLM_MODELS:
         })
     except:
         print(trimmed_format_exc())
+
+if "qwen-7B" in AVAIL_LLM_MODELS:  # qwen-7B
+    try:
+        from .bridge_qwen_7B import predict_no_ui_long_connection as qwen_noui
+        from .bridge_qwen_7B import predict as qwen_ui
+        model_info.update({
+            "qwen-7B": {
+                "fn_with_ui": qwen_ui,
+                "fn_without_ui": qwen_noui,
+                "endpoint": None,
+                "max_token": 4096,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            }
+        })
+    except:
+        print(trimmed_format_exc())
+
 if "chatgpt_website" in AVAIL_LLM_MODELS:   # 接入一些逆向工程https://github.com/acheong08/ChatGPT-to-API/
     try:
         from .bridge_chatgpt_website import predict_no_ui_long_connection as chatgpt_website_noui

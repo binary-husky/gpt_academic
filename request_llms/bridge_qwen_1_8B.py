@@ -1,4 +1,4 @@
-model_name = "Qwen"
+model_name = "Qwen1_8B"
 cmd_to_install = "`pip install -r request_llms/requirements_qwen.txt`"
 
 
@@ -30,8 +30,8 @@ class GetQwenLMHandle(LocalLLMHandle):
         from modelscope import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
 
         with ProxyNetworkActivate('Download_LLM'):
-            model_id = 'qwen/Qwen-7B-Chat'  #在这里更改路径，如果你已经下载好了的话，同时，别忘记tokenizer
-            self._tokenizer = AutoTokenizer.from_pretrained('Qwen/Qwen-7B-Chat', trust_remote_code=True, resume_download=True)
+            model_id = 'Qwen/Qwen-1_8B-Chat'
+            self._tokenizer = AutoTokenizer.from_pretrained('Qwen/Qwen-1_8B-Chat', trust_remote_code=True, resume_download=True)
             # use fp16
             model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto", trust_remote_code=True, fp16=True).eval()
             model.generation_config = GenerationConfig.from_pretrained(model_id, trust_remote_code=True)  # 可指定不同的生成长度、top_p等相关超参

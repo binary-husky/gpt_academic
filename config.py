@@ -91,10 +91,10 @@ AVAIL_LLM_MODELS = ["gpt-3.5-turbo-1106","gpt-4-1106-preview","gpt-4-vision-prev
                     "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
                     "api2d-gpt-3.5-turbo", 'api2d-gpt-3.5-turbo-16k',
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "api2d-gpt-4",
-                    "chatglm3", "moss", "claude-2","qwen"]
-# P.S. 其他可用的模型还包括 ["zhipuai", "qianfan", "deepseekcoder", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613",  "gpt-3.5-random"
+                    "chatglm3", "moss", "claude-2","qwen-1_8B","qwen-7B"]
+# P.S. 其他可用的模型还包括 ["zhipuai", "qianfan", "deepseekcoder", "llama2", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613",  "gpt-3.5-random"
 # "spark", "sparkv2", "sparkv3", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"]
-# 如果你需要使用Qwen的本地模型，比如qwen1.8b，那么还需要在request_llms\bridge_qwen.py设置一下模型的路径！
+# 如果你需要使用Qwen的本地模型，比如qwen1.8b，那么还需要在request_llms下找到对应的文件，设置一下模型的路径！
 
 # 定义界面上“询问多个GPT模型”插件应该使用哪些模型，请从AVAIL_LLM_MODELS中选择，并在不同模型之间用`&`间隔，例如"gpt-3.5-turbo&chatglm3&azure-gpt-4"
 MULTI_QUERY_LLM_MODELS = "gpt-3.5-turbo&chatglm3"
@@ -291,7 +291,8 @@ NUM_CUSTOM_BASIC_BTN = 4
 ├── "jittorllms_pangualpha"
 ├── "jittorllms_llama"
 ├── "deepseekcoder"
-├── "qwen"
+├── "qwen-1_8B"
+├── "qwen-7B"
 ├──  RWKV的支持见Wiki
 └── "llama2"
 
