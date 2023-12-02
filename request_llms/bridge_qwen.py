@@ -30,7 +30,7 @@ class GetQwenLMHandle(LocalLLMHandle):
         from modelscope import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
 
         with ProxyNetworkActivate('Download_LLM'):
-            model_id = 'qwen/Qwen-7B-Chat'
+            model_id = 'qwen/Qwen-7B-Chat'  #在这里更改路径，如果你已经下载好了的话，同时，别忘记tokenizer
             self._tokenizer = AutoTokenizer.from_pretrained('Qwen/Qwen-7B-Chat', trust_remote_code=True, resume_download=True)
             # use fp16
             model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto", trust_remote_code=True, fp16=True).eval()
@@ -51,7 +51,7 @@ class GetQwenLMHandle(LocalLLMHandle):
 
         query, max_length, top_p, temperature, history = adaptor(kwargs)
 
-        for response in self._model.chat(self._tokenizer, query, history=history, stream=True):
+        for response in self._model.chat_stream(self._tokenizer, query, history=history):
             yield response
         
     def try_to_import_special_deps(self, **kwargs):
