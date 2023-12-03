@@ -1,42 +1,69 @@
-> **Note**
+> **Caution**
 > 
 > 2023.11.12: 某些依赖包尚不兼容python 3.12，推荐python 3.11。
 > 
 > 2023.11.7: 安装依赖时，请选择`requirements.txt`中**指定的版本**。 安装命令：`pip install -r requirements.txt`。本项目开源免费，近期发现有人蔑视开源协议并利用本项目违规圈钱，请提高警惕，谨防上当受骗。
 
+<br>
+
+<div align=center>
+<h1 aligh="center">
+<img src="docs/logo.png" width="40"> GPT 学术优化 (GPT Academic)
+</h1>
+
+[![Github][Github-image]][Github-url]
+[![License][License-image]][License-url]
+[![Releases][Releases-image]][Releases-url]
+[![Installation][Installation-image]][Installation-url]
+[![Wiki][Wiki-image]][Wiki-url]
+[![PR][PRs-image]][PRs-url]
+
+[License-image]: https://img.shields.io/badge/LICENSE-GPL3.0-orange?&style=flat-square
+[Github-image]: https://img.shields.io/badge/github-12100E.svg?&style=flat-square
+[Releases-image]: https://img.shields.io/badge/Releases-v3.6.0-blue?style=flat-square
+[Installation-image]: https://img.shields.io/badge/Installation-v3.6.1-blue?style=flat-square
+[Wiki-image]: https://img.shields.io/badge/wiki-项目文档-black?style=flat-square
+[PRs-image]: https://img.shields.io/badge/PRs-welcome-pink?style=flat-square
+
+[License-url]: https://github.com/binary-husky/gpt_academic/blob/master/LICENSE
+[Github-url]: https://github.com/binary-husky/gpt_academic
+[Releases-url]: https://github.com/binary-husky/gpt_academic/releases
+[Installation-url]: https://github.com/binary-husky/gpt_academic#installation
+[Wiki-url]: https://github.com/binary-husky/gpt_academic/wiki
+[PRs-url]: https://github.com/binary-husky/gpt_academic/pulls
 
 
-# <div align=center><img src="docs/logo.png" width="40"> GPT 学术优化 (GPT Academic)</div>
+</div>
+<br>
 
 **如果喜欢这个项目，请给它一个Star；如果您发明了好用的快捷键或插件，欢迎发pull requests！**
 
-If you like this project, please give it a Star. We also have a README in [English|](docs/README.English.md)[日本語|](docs/README.Japanese.md)[한국어|](docs/README.Korean.md)[Русский|](docs/README.Russian.md)[Français](docs/README.French.md) translated by this project itself.
-To translate this project to arbitrary language with GPT, read and run [`multi_language.py`](multi_language.py) (experimental).
+If you like this project, please give it a Star. Read this in [English](docs/README.English.md) | [日本語](docs/README.Japanese.md) | [한국어](docs/README.Korean.md) | [Русский](docs/README.Russian.md) | [Français](docs/README.French.md). All translations have been provided by the project itself. To translate this project to arbitrary language with GPT, read and run [`multi_language.py`](multi_language.py) (experimental).
+<br>
 
-> **Note**
->
+
 > 1.请注意只有 **高亮** 标识的插件（按钮）才支持读取文件，部分插件位于插件区的**下拉菜单**中。另外我们以**最高优先级**欢迎和处理任何新插件的PR。
 >
-> 2.本项目中每个文件的功能都在[自译解报告`self_analysis.md`](https://github.com/binary-husky/gpt_academic/wiki/GPT‐Academic项目自译解报告)详细说明。随着版本的迭代，您也可以随时自行点击相关函数插件，调用GPT重新生成项目的自我解析报告。常见问题[`wiki`](https://github.com/binary-husky/gpt_academic/wiki)。[常规安装方法](#installation) | [一键安装脚本](https://github.com/binary-husky/gpt_academic/releases) | [配置说明](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)。
+> 2.本项目中每个文件的功能都在[自译解报告](https://github.com/binary-husky/gpt_academic/wiki/GPT‐Academic项目自译解报告)`self_analysis.md`详细说明。随着版本的迭代，您也可以随时自行点击相关函数插件，调用GPT重新生成项目的自我解析报告。常见问题请查阅wiki。
+>    [![常规安装方法](https://img.shields.io/static/v1?label=&message=常规安装方法&color=gray)](#installation)  [![一键安装脚本](https://img.shields.io/static/v1?label=&message=一键安装脚本&color=gray)](https://github.com/binary-husky/gpt_academic/releases)  [![配置说明](https://img.shields.io/static/v1?label=&message=配置说明&color=gray)](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明) [![wiki](https://img.shields.io/static/v1?label=&message=wiki&color=gray)]([https://github.com/binary-husky/gpt_academic/wiki/项目配置说明](https://github.com/binary-husky/gpt_academic/wiki))
 > 
 > 3.本项目兼容并鼓励尝试国产大语言模型ChatGLM等。支持多个api-key共存，可在配置文件中填写如`API_KEY="openai-key1,openai-key2,azure-key3,api2d-key4"`。需要临时更换`API_KEY`时，在输入区输入临时的`API_KEY`然后回车键提交后即可生效。
 
-
- 
+<br><br>
 
 <div align="center">
 
 功能（⭐= 近期新增功能） | 描述
 --- | ---
-⭐[接入新模型](https://github.com/binary-husky/gpt_academic/wiki/%E5%A6%82%E4%BD%95%E5%88%87%E6%8D%A2%E6%A8%A1%E5%9E%8B)！ | 百度[千帆](https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Nlks5zkzu)与文心一言, 通义千问[Qwen](https://modelscope.cn/models/qwen/Qwen-7B-Chat/summary)，上海AI-Lab[书生](https://github.com/InternLM/InternLM)，讯飞[星火](https://xinghuo.xfyun.cn/)，[LLaMa2](https://huggingface.co/meta-llama/Llama-2-7b-chat-hf)，[智谱API](https://open.bigmodel.cn/)，DALLE3, [DeepseekCoder](https://coder.deepseek.com/)
+⭐[接入新模型](https://github.com/binary-husky/gpt_academic/wiki/%E5%A6%82%E4%BD%95%E5%88%87%E6%8D%A2%E6%A8%A1%E5%9E%8B) | 百度[千帆](https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Nlks5zkzu)与文心一言, 通义千问[Qwen](https://modelscope.cn/models/qwen/Qwen-7B-Chat/summary)，上海AI-Lab[书生](https://github.com/InternLM/InternLM)，讯飞[星火](https://xinghuo.xfyun.cn/)，[LLaMa2](https://huggingface.co/meta-llama/Llama-2-7b-chat-hf)，[智谱API](https://open.bigmodel.cn/)，DALLE3, [DeepseekCoder](https://coder.deepseek.com/)
 润色、翻译、代码解释 | 一键润色、翻译、查找论文语法错误、解释代码
 [自定义快捷键](https://www.bilibili.com/video/BV14s4y1E7jN) | 支持自定义快捷键
 模块化设计 | 支持自定义强大的[插件](https://github.com/binary-husky/gpt_academic/tree/master/crazy_functions)，插件支持[热更新](https://github.com/binary-husky/gpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)
-[程序剖析](https://www.bilibili.com/video/BV1cj411A7VW) | [插件] 一键可以剖析Python/C/C++/Java/Lua/...项目树 或 [自我剖析](https://www.bilibili.com/video/BV1cj411A7VW)
+[程序剖析](https://www.bilibili.com/video/BV1cj411A7VW) | [插件] 一键剖析Python/C/C++/Java/Lua/...项目树 或 [自我剖析](https://www.bilibili.com/video/BV1cj411A7VW)
 读论文、[翻译](https://www.bilibili.com/video/BV1KT411x7Wn)论文 | [插件] 一键解读latex/pdf论文全文并生成摘要
 Latex全文[翻译](https://www.bilibili.com/video/BV1nk4y1Y7Js/)、[润色](https://www.bilibili.com/video/BV1FT411H7c5/) | [插件] 一键翻译或润色latex论文
 批量注释生成 | [插件] 一键批量生成函数注释
-Markdown[中英互译](https://www.bilibili.com/video/BV1yo4y157jV/) | [插件] 看到上面5种语言的[README](https://github.com/binary-husky/gpt_academic/blob/master/docs/README_EN.md)了吗？
+Markdown[中英互译](https://www.bilibili.com/video/BV1yo4y157jV/) | [插件] 看到上面5种语言的[README](https://github.com/binary-husky/gpt_academic/blob/master/docs/README_EN.md)了吗？就是出自他的手笔
 chat分析报告生成 | [插件] 运行后自动生成总结汇报
 [PDF论文全文翻译功能](https://www.bilibili.com/video/BV1KT411x7Wn) | [插件] PDF论文提取题目&摘要+翻译全文（多线程）
 [Arxiv小助手](https://www.bilibili.com/video/BV1LM4y1279X) | [插件] 输入arxiv文章url即可一键翻译摘要+下载PDF
@@ -48,22 +75,22 @@ Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼�
 公式/图片/表格显示 | 可以同时显示公式的[tex形式和渲染形式](https://user-images.githubusercontent.com/96192199/230598842-1d7fcddd-815d-40ee-af60-baf488a199df.png)，支持公式、代码高亮
 ⭐AutoGen多智能体插件 | [插件] 借助微软AutoGen，探索多Agent的智能涌现可能！
 启动暗色[主题](https://github.com/binary-husky/gpt_academic/issues/173) | 在浏览器url后面添加```/?__theme=dark```可以切换dark主题
-[多LLM模型](https://www.bilibili.com/video/BV1wT411p7yf)支持 | 同时被GPT3.5、GPT4、[清华ChatGLM2](https://github.com/THUDM/ChatGLM2-6B)、[复旦MOSS](https://github.com/OpenLMLab/MOSS)同时伺候的感觉一定会很不错吧？
+[多LLM模型](https://www.bilibili.com/video/BV1wT411p7yf)支持 | 同时被GPT3.5、GPT4、[清华ChatGLM2](https://github.com/THUDM/ChatGLM2-6B)、[复旦MOSS](https://github.com/OpenLMLab/MOSS)伺候的感觉一定会很不错吧？
 ⭐ChatGLM2微调模型 | 支持加载ChatGLM2微调模型，提供ChatGLM2微调辅助插件
 更多LLM模型接入，支持[huggingface部署](https://huggingface.co/spaces/qingxu98/gpt-academic) | 加入Newbing接口(新必应)，引入清华[Jittorllms](https://github.com/Jittor/JittorLLMs)支持[LLaMA](https://github.com/facebookresearch/llama)和[盘古α](https://openi.org.cn/pangu/)
 ⭐[void-terminal](https://github.com/binary-husky/void-terminal) pip包 | 脱离GUI，在Python中直接调用本项目的所有函数插件（开发中）
-⭐虚空终端插件 | [插件] 用自然语言，直接调度本项目其他插件
+⭐虚空终端插件 | [插件] 能够使用自然语言直接调度本项目其他插件
 更多新功能展示 (图像生成等) …… | 见本文档结尾处 ……
 </div>
 
 
 - 新界面（修改`config.py`中的LAYOUT选项即可实现“左右布局”和“上下布局”的切换）
 <div align="center">
-<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/d81137c3-affd-4cd1-bb5e-b15610389762" width="700" >
+<img src="https://user-images.githubusercontent.com/96192199/279702205-d81137c3-affd-4cd1-bb5e-b15610389762.gif" width="700" >
 </div>
 
 
-- 所有按钮都通过读取functional.py动态生成，可随意加自定义功能，解放粘贴板
+- 所有按钮都通过读取functional.py动态生成，可随意加自定义功能，解放剪贴板
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/231975334-b4788e91-4887-412f-8b43-2b9c5f41d248.gif" width="700" >
 </div>
@@ -73,12 +100,12 @@ Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼�
 <img src="https://user-images.githubusercontent.com/96192199/231980294-f374bdcb-3309-4560-b424-38ef39f04ebd.gif" width="700" >
 </div>
 
-- 如果输出包含公式，会同时以tex形式和渲染形式显示，方便复制和阅读
+- 如果输出包含公式，会以tex形式和渲染形式同时显示，方便复制和阅读
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/230598842-1d7fcddd-815d-40ee-af60-baf488a199df.png" width="700" >
 </div>
 
-- 懒得看项目代码？整个工程直接给chatgpt炫嘴里
+- 懒得看项目代码？直接把整个工程炫ChatGPT嘴里
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/226935232-6b6a73ce-8900-4aee-93f9-733c7e6fef53.png" width="700" >
 </div>
@@ -87,6 +114,8 @@ Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼�
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/232537274-deca0563-7aa6-4b5d-94a2-b7c453c47794.png" width="700" >
 </div>
+
+<br><br>
 
 # Installation
 ### 安装方法I：直接运行 (Windows, Linux or MacOS) 
@@ -98,13 +127,13 @@ Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼�
     cd gpt_academic
     ```
 
-2. 配置API_KEY
+2. 配置API_KEY等变量
 
-    在`config.py`中，配置API KEY等设置，[点击查看特殊网络环境设置方法](https://github.com/binary-husky/gpt_academic/issues/1) 。[Wiki页面](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)。
+    在`config.py`中，配置API KEY等变量。[特殊网络环境设置方法](https://github.com/binary-husky/gpt_academic/issues/1)、[Wiki-项目配置说明](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)。
 
-    「 程序会优先检查是否存在名为`config_private.py`的私密配置文件，并用其中的配置覆盖`config.py`的同名配置。如您能理解该读取逻辑，我们强烈建议您在`config.py`旁边创建一个名为`config_private.py`的新配置文件，并把`config.py`中的配置转移（复制）到`config_private.py`中（仅复制您修改过的配置条目即可）。 」
+    「 程序会优先检查是否存在名为`config_private.py`的私密配置文件，并用其中的配置覆盖`config.py`的同名配置。如您能理解以上读取逻辑，我们强烈建议您在`config.py`同路径下创建一个名为`config_private.py`的新配置文件，并使用`config_private.py`配置项目，以确保更新或其他用户无法轻易查看您的私有配置 」。
 
-    「 支持通过`环境变量`配置项目，环境变量的书写格式参考`docker-compose.yml`文件或者我们的[Wiki页面](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)。配置读取优先级: `环境变量` > `config_private.py` > `config.py`。 」
+    「 支持通过`环境变量`配置项目，环境变量的书写格式参考`docker-compose.yml`文件或者我们的[Wiki页面](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)。配置读取优先级: `环境变量` > `config_private.py` > `config.py` 」。
 
 
 3. 安装依赖
@@ -151,7 +180,7 @@ AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-
 
 ### 安装方法II：使用Docker
 
-0. 部署项目的全部能力（这个是包含cuda和latex的大型镜像。但如果您网速慢、硬盘小，则不推荐使用这个）
+0. 部署项目的全部能力（这个是包含cuda和latex的大型镜像。但如果您网速慢、硬盘小，则不推荐该方法部署完整项目）
 [![fullcapacity](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-all-capacity.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-all-capacity.yml)
 
     ``` sh
@@ -180,26 +209,26 @@ P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以
     ```
 
 
-### 安装方法III：其他部署姿势
+### 安装方法III：其他部署方法
 1. **Windows一键运行脚本**。
-完全不熟悉python环境的Windows用户可以下载[Release](https://github.com/binary-husky/gpt_academic/releases)中发布的一键运行脚本安装无本地模型的版本。
-脚本的贡献来源是[oobabooga](https://github.com/oobabooga/one-click-installers)。
+完全不熟悉python环境的Windows用户可以下载[Release](https://github.com/binary-husky/gpt_academic/releases)中发布的一键运行脚本安装无本地模型的版本。脚本贡献来源：[oobabooga](https://github.com/oobabooga/one-click-installers)。
 
 2. 使用第三方API、Azure等、文心一言、星火等，见[Wiki页面](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)
 
 3. 云服务器远程部署避坑指南。
 请访问[云服务器远程部署wiki](https://github.com/binary-husky/gpt_academic/wiki/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BF%9C%E7%A8%8B%E9%83%A8%E7%BD%B2%E6%8C%87%E5%8D%97)
 
-4. 一些新型的部署平台或方法
+4. 在其他平台部署&二级网址部署
     - 使用Sealos[一键部署](https://github.com/binary-husky/gpt_academic/issues/993)。
     - 使用WSL2（Windows Subsystem for Linux 子系统）。请访问[部署wiki-2](https://github.com/binary-husky/gpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2)
     - 如何在二级网址（如`http://localhost/subpath`）下运行。请访问[FastAPI运行说明](docs/WithFastapi.md)
 
+<br><br>
 
 # Advanced Usage
 ### I：自定义新的便捷按钮（学术快捷键）
 
-任意文本编辑器打开`core_functional.py`，添加条目如下，然后重启程序。（如按钮已存在，那么前缀、后缀都支持热修改，无需重启程序即可生效。）
+任意文本编辑器打开`core_functional.py`，添加如下条目，然后重启程序。（如果按钮已存在，那么可以直接修改（前缀、后缀都已支持热修改），无需重启程序即可生效。）
 例如
 
 ```python
@@ -221,6 +250,7 @@ P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以
 本项目的插件编写、调试难度很低，只要您具备一定的python基础知识，就可以仿照我们提供的模板实现自己的插件功能。
 详情请参考[函数插件指南](https://github.com/binary-husky/gpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)。
 
+<br><br>
 
 # Updates
 ### I：动态
@@ -320,7 +350,7 @@ GPT Academic开发者QQ群：`610599535`
 
 - 已知问题
     - 某些浏览器翻译插件干扰此软件前端的运行
-    - 官方Gradio目前有很多兼容性Bug，请务必使用`requirement.txt`安装Gradio
+    - 官方Gradio目前有很多兼容性问题，请**务必使用`requirement.txt`安装Gradio**
 
 ### III：主题
 可以通过修改`THEME`选项（config.py）变更主题

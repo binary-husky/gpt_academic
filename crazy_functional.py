@@ -499,7 +499,7 @@ def get_crazy_functions():
         })
         from crazy_functions.Latex输出PDF结果 import Latex翻译中文并重新编译PDF
         function_plugins.update({
-            "Arixv论文精细翻译（输入arxivID）[需Latex]": {
+            "Arxiv论文精细翻译（输入arxivID）[需Latex]": {
                 "Group": "学术",
                 "Color": "stop",
                 "AsButton": False,
