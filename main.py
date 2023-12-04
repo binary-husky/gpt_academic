@@ -85,7 +85,7 @@ def main():
             with gr_L2(scale=1, elem_id="gpt-panel"):
                 with gr.Accordion("输入区", open=True, elem_id="input-panel") as area_input_primary:
                     with gr.Row():
-                        txt = gr.Textbox(show_label=False, placeholder="Input question here.").style(container=False)
+                        txt = gr.Textbox(show_label=False, placeholder="Input question here.", elem_id='user_input_main').style(container=False)
                     with gr.Row():
                         submitBtn = gr.Button("提交", elem_id="elem_submit", variant="primary")
                     with gr.Row():
@@ -146,7 +146,7 @@ def main():
             with gr.Row():
                 with gr.Tab("上传文件", elem_id="interact-panel"):
                     gr.Markdown("请上传本地文件/压缩包供“函数插件区”功能调用。请注意: 上传文件后会自动把输入区修改为相应路径。")
-                    file_upload_2 = gr.Files(label="任何文件, 推荐上传压缩文件(zip, tar)", file_count="multiple")
+                    file_upload_2 = gr.Files(label="任何文件, 推荐上传压缩文件(zip, tar)", file_count="multiple", elem_id="elem_upload_float")
     
                 with gr.Tab("更换模型 & Prompt", elem_id="interact-panel"):
                     md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(container=False)
@@ -178,7 +178,8 @@ def main():
                 with gr.Row() as row:
                     row.style(equal_height=True)
                     with gr.Column(scale=10):
-                        txt2 = gr.Textbox(show_label=False, placeholder="Input question here.", lines=8, label="输入区2").style(container=False)
+                        txt2 = gr.Textbox(show_label=False, placeholder="Input question here.",
+                                          elem_id='user_input_float', lines=8, label="输入区2").style(container=False)
                     with gr.Column(scale=1, min_width=40):
                         submitBtn2 = gr.Button("提交", variant="primary"); submitBtn2.style(size="sm")
                         resetBtn2 = gr.Button("重置", variant="secondary"); resetBtn2.style(size="sm")
