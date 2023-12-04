@@ -101,6 +101,8 @@ MULTI_QUERY_LLM_MODELS = "gpt-3.5-turbo&chatglm3"
 
 
 # 选择本地模型变体（只有当AVAIL_LLM_MODELS包含了对应本地模型时，才会起作用）
+# 如果你选择Qwen系列的模型，那么请在下面的QWEN_MODEL_SELECTION中指定具体的模型
+# 也可以是具体的模型路径
 QWEN_MODEL_SELECTION = "Qwen/Qwen-1_8B-Chat-Int8"
 
 

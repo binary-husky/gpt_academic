@@ -22,7 +22,7 @@ class GetQwenLMHandle(LocalLLMHandle):
         from transformers import AutoModelForCausalLM, AutoTokenizer
         from transformers.generation import GenerationConfig
         with ProxyNetworkActivate('Download_LLM'):
-            model_id = get_conf('QWEN_MODEL_SELECTION') #在这里更改路径，如果你已经下载好了的话，同时，别忘记tokenizer
+            model_id = get_conf('QWEN_MODEL_SELECTION')
             self._tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True, resume_download=True)
             # use fp16
             model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto", trust_remote_code=True).eval()
