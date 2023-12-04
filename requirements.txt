@@ -4,7 +4,7 @@ tiktoken>=0.3.3
 requests[socks]
 pydantic==1.10.11
 transformers>=4.27.1
-scipdf_parser>=0.52
+scipdf_parser
 python-markdown-math
 websocket-client
 beautifulsoup4
