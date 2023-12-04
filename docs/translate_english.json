@@ -1666,7 +1666,7 @@
     "连接bing搜索回答问题": "ConnectBingSearchAnswerQuestion",
     "联网的ChatGPT_bing版": "OnlineChatGPT_BingEdition",
     "Markdown翻译指定语言": "TranslateMarkdownToSpecifiedLanguage",
-    "Langchain知识库": "LangchainKnowledgeBase",
+    "知识库问答": "LangchainKnowledgeBase",
     "Latex英文纠错加PDF对比": "CorrectEnglishInLatexWithPDFComparison",
     "Latex输出PDF结果": "OutputPDFFromLatex",
     "Latex翻译中文并重新编译PDF": "TranslateChineseToEnglishInLatexAndRecompilePDF",

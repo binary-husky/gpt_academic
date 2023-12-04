@@ -15,7 +15,7 @@
     "删除所有本地对话历史记录": "DeleteAllLocalConversationHistoryRecords",
     "批量Markdown翻译": "BatchTranslateMarkdown",
     "连接bing搜索回答问题": "ConnectBingSearchAnswerQuestion",
-    "Langchain知识库": "LangchainKnowledgeBase",
+    "知识库问答": "LangchainKnowledgeBase",
     "Latex输出PDF结果": "OutputPDFFromLatex",
     "把字符太少的块清除为回车": "ClearBlocksWithTooFewCharactersToNewline",
     "Latex精细分解与转化": "DecomposeAndConvertLatex",

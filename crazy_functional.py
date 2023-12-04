@@ -440,7 +440,7 @@ def get_crazy_functions():
         print('Load function plugin failed')
 
     try:
-        from crazy_functions.Langchain知识库 import 知识库问答
+        from crazy_functions.知识库问答 import 知识库问答
         function_plugins.update({
             "构建知识库（先上传文件素材,再运行此插件）": {
                 "Group": "对话",
@@ -456,7 +456,7 @@ def get_crazy_functions():
         print('Load function plugin failed')
 
     try:
-        from crazy_functions.Langchain知识库 import 读取知识库作答
+        from crazy_functions.知识库问答 import 读取知识库作答
         function_plugins.update({
             "知识库问答（构建知识库后,再运行此插件）": {
                 "Group": "对话",
