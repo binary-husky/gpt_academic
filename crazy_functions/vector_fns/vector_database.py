@@ -301,7 +301,6 @@ class knowledge_archive_interface():
         self.threadLock.acquire()
         # import uuid
         self.current_id = id
-        from zh_langchain import construct_vector_store
         self.qa_handle, self.kai_path = construct_vector_store(   
             vs_id=self.current_id, 
             files=file_manifest, 
@@ -323,7 +322,6 @@ class knowledge_archive_interface():
         self.threadLock.acquire()
         if not self.current_id == id:
             self.current_id = id
-            from zh_langchain import construct_vector_store
             self.qa_handle, self.kai_path = construct_vector_store(   
                 vs_id=self.current_id, 
                 files=[], 

@@ -1,7 +1,10 @@
 from toolbox import CatchException, update_ui, ProxyNetworkActivate, update_ui_lastest_msg
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, get_files_from_everything
 
-
+install_msg ="""
+pip3 install torch --index-url https://download.pytorch.org/whl/cpu
+pip3 install langchain sentence-transformers unstructured[local-inference] faiss-cpu nltk beautifulsoup4 bitsandbytes tabulate icetk
+"""
 
 @CatchException
 def 知识库文件注入(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
@@ -29,11 +32,11 @@ def 知识库文件注入(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
         # from langchain.embeddings.huggingface import HuggingFaceEmbeddings
         from crazy_functions.vector_fns.vector_database import knowledge_archive_interface
     except Exception as e:
-        chatbot.append(["依赖不足", "导入依赖失败。正在尝试自动安装，请查看终端的输出或耐心等待..."])
+        chatbot.append(["依赖不足", f"{str(e)}\n\n导入依赖失败。请用以下命令安装" + install_msg])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-        from .crazy_utils import try_install_deps
-        try_install_deps(['zh_langchain==0.2.1', 'pypinyin'], reload_m=['pypinyin', 'zh_langchain'])
-        yield from update_ui_lastest_msg("安装完成，您可以再次重试。", chatbot, history)
+        # from .crazy_utils import try_install_deps
+        # try_install_deps(['zh_langchain==0.2.1', 'pypinyin'], reload_m=['pypinyin', 'zh_langchain'])
+        # yield from update_ui_lastest_msg("安装完成，您可以再次重试。", chatbot, history)
         return
 
     # < --------------------读取文件--------------- >
@@ -81,11 +84,11 @@ def 读取知识库作答(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
         # from langchain.embeddings.huggingface import HuggingFaceEmbeddings
         from crazy_functions.vector_fns.vector_database import knowledge_archive_interface
     except Exception as e:
-        chatbot.append(["依赖不足", "导入依赖失败。正在尝试自动安装，请查看终端的输出或耐心等待..."])
+        chatbot.append(["依赖不足", f"{str(e)}\n\n导入依赖失败。请用以下命令安装" + install_msg])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-        from .crazy_utils import try_install_deps
-        try_install_deps(['zh_langchain==0.2.1', 'pypinyin'], reload_m=['pypinyin', 'zh_langchain'])
-        yield from update_ui_lastest_msg("安装完成，您可以再次重试。", chatbot, history)
+        # from .crazy_utils import try_install_deps
+        # try_install_deps(['zh_langchain==0.2.1', 'pypinyin'], reload_m=['pypinyin', 'zh_langchain'])
+        # yield from update_ui_lastest_msg("安装完成，您可以再次重试。", chatbot, history)
         return
 
     # < -------------------  --------------- >
