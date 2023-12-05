@@ -1463,7 +1463,7 @@
     "数学动画生成manim": "GenerateMathematicalAnimationsWithManim",
     "Markdown翻译指定语言": "TranslateMarkdownToSpecifiedLanguage",
     "知识库问答": "KnowledgeBaseQA",
-    "知识库问答": "LangchainKnowledgeBase",
+    "知识库文件注入": "LangchainKnowledgeBase",
     "读取知识库作答": "ReadKnowledgeBaseAndAnswerQuestions",
     "交互功能模板函数": "InteractiveFunctionTemplateFunctions",
     "交互功能函数模板": "InteractiveFunctionFunctionTemplates",

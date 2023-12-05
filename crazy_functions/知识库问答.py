@@ -4,7 +4,7 @@ from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, get_file
 
 
 @CatchException
-def 知识库问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 知识库文件注入(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     """
     txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数, 如温度和top_p等, 一般原样传递下去就行
@@ -25,9 +25,9 @@ def 知识库问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
 
     # resolve deps
     try:
-        from zh_langchain import construct_vector_store
-        from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-        from .crazy_utils import knowledge_archive_interface
+        # from zh_langchain import construct_vector_store
+        # from langchain.embeddings.huggingface import HuggingFaceEmbeddings
+        from crazy_functions.vector_fns.vector_database import knowledge_archive_interface
     except Exception as e:
         chatbot.append(["依赖不足", "导入依赖失败。正在尝试自动安装，请查看终端的输出或耐心等待..."])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
@@ -68,7 +68,7 @@ def 知识库问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     # chatbot.append(['知识库构建成功', "正在将知识库存储至cookie中"])
     # yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
     # chatbot._cookies['langchain_plugin_embedding'] = kai.get_current_archive_id()
-    # chatbot._cookies['lock_plugin'] = 'crazy_functions.知识库问答->读取知识库作答'
+    # chatbot._cookies['lock_plugin'] = 'crazy_functions.知识库文件注入->读取知识库作答'
     # chatbot.append(['完成', "“根据知识库作答”函数插件已经接管问答系统, 提问吧! 但注意, 您接下来不能再使用其他插件了，刷新页面即可以退出知识库问答模式。"])
     chatbot.append(['构建完成', f"当前知识库内的有效文件：\n\n---\n\n{kai_files}\n\n---\n\n请切换至“知识库问答”插件进行知识库访问, 或者使用此插件继续上传更多文件。"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
@@ -77,9 +77,9 @@ def 知识库问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
 def 读取知识库作答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port=-1):
     # resolve deps
     try:
-        from zh_langchain import construct_vector_store
-        from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-        from .crazy_utils import knowledge_archive_interface
+        # from zh_langchain import construct_vector_store
+        # from langchain.embeddings.huggingface import HuggingFaceEmbeddings
+        from crazy_functions.vector_fns.vector_database import knowledge_archive_interface
     except Exception as e:
         chatbot.append(["依赖不足", "导入依赖失败。正在尝试自动安装，请查看终端的输出或耐心等待..."])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面

@@ -48,11 +48,11 @@ if __name__ == "__main__":
     # for lang in ["English", "French", "Japanese", "Korean", "Russian", "Italian", "German", "Portuguese", "Arabic"]:
     #     plugin_test(plugin='crazy_functions.批量Markdown翻译->Markdown翻译指定语言', main_input="README.md", advanced_arg={"advanced_arg": lang})
 
-    # plugin_test(plugin='crazy_functions.知识库问答->知识库问答', main_input="./")
+    # plugin_test(plugin='crazy_functions.知识库文件注入->知识库文件注入', main_input="./")
 
-    # plugin_test(plugin='crazy_functions.知识库问答->读取知识库作答', main_input="What is the installation method？")
+    # plugin_test(plugin='crazy_functions.知识库文件注入->读取知识库作答', main_input="What is the installation method？")
 
-    # plugin_test(plugin='crazy_functions.知识库问答->读取知识库作答', main_input="远程云服务器部署？")
+    # plugin_test(plugin='crazy_functions.知识库文件注入->读取知识库作答', main_input="远程云服务器部署？")
     
     # plugin_test(plugin='crazy_functions.Latex输出PDF结果->Latex翻译中文并重新编译PDF', main_input="2210.03629")
     

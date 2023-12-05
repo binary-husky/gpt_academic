@@ -49,14 +49,14 @@ class VoidTerminal():
         pass
     
 vt = VoidTerminal()
-vt.get_conf = silence_stdout_fn(get_conf)
-vt.set_conf = silence_stdout_fn(set_conf)
-vt.set_multi_conf = silence_stdout_fn(set_multi_conf)
-vt.get_plugin_handle = silence_stdout_fn(get_plugin_handle)
-vt.get_plugin_default_kwargs = silence_stdout_fn(get_plugin_default_kwargs)
-vt.get_chat_handle = silence_stdout_fn(get_chat_handle)
-vt.get_chat_default_kwargs = silence_stdout_fn(get_chat_default_kwargs)
-vt.chat_to_markdown_str = chat_to_markdown_str
+vt.get_conf = (get_conf)
+vt.set_conf = (set_conf)
+vt.set_multi_conf = (set_multi_conf)
+vt.get_plugin_handle = (get_plugin_handle)
+vt.get_plugin_default_kwargs = (get_plugin_default_kwargs)
+vt.get_chat_handle = (get_chat_handle)
+vt.get_chat_default_kwargs = (get_chat_default_kwargs)
+vt.chat_to_markdown_str = (chat_to_markdown_str)
 proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT, API_KEY = \
     vt.get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'LAYOUT', 'API_KEY')
 

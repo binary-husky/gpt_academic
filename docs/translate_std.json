@@ -75,7 +75,7 @@
     "解析docx": "ParseDocx",
     "解析源代码新": "ParsingSourceCodeNew",
     "总结音视频": "SummaryAudioVideo",
-    "知识库问答": "UpdateKnowledgeArchive",
+    "知识库文件注入": "UpdateKnowledgeArchive",
     "多文件润色": "ProofreadMultipleFiles",
     "多文件翻译": "TranslateMultipleFiles",
     "解析PDF": "ParsePDF",

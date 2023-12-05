@@ -440,7 +440,7 @@ def get_crazy_functions():
         print('Load function plugin failed')
 
     try:
-        from crazy_functions.知识库问答 import 知识库问答
+        from crazy_functions.知识库问答 import 知识库文件注入
         function_plugins.update({
             "构建知识库（先上传文件素材,再运行此插件）": {
                 "Group": "对话",
@@ -448,7 +448,7 @@ def get_crazy_functions():
                 "AsButton": False,
                 "AdvancedArgs": True,
                 "ArgsReminder": "此处待注入的知识库名称id, 默认为default。文件进入知识库后可长期保存。可以通过再次调用本插件的方式，向知识库追加更多文档。",
-                "Function": HotReload(知识库问答)
+                "Function": HotReload(知识库文件注入)
             }
         })
     except:
@@ -458,7 +458,7 @@ def get_crazy_functions():
     try:
         from crazy_functions.知识库问答 import 读取知识库作答
         function_plugins.update({
-            "知识库问答（构建知识库后,再运行此插件）": {
+            "知识库文件注入（构建知识库后,再运行此插件）": {
                 "Group": "对话",
                 "Color": "stop",
                 "AsButton": False,
