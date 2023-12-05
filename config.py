@@ -15,13 +15,13 @@ API_KEY = "此处填API密钥"    # 可同时填写多个API-KEY，用英文逗�
 USE_PROXY = False
 if USE_PROXY:
     """
+    代理网络的地址，打开你的代理软件查看代理协议(socks5h / http)、地址(localhost)和端口(11284)
     填写格式是 [协议]://  [地址] :[端口]，填写之前不要忘记把USE_PROXY改成True，如果直接在海外服务器部署，此处不修改
             <配置教程&视频教程> https://github.com/binary-husky/gpt_academic/issues/1>
     [协议] 常见协议无非socks5h/http; 例如 v2**y 和 ss* 的默认本地协议是socks5h; 而cl**h 的默认本地协议是http
-    [地址] 懂的都懂，不懂就填localhost或者127.0.0.1肯定错不了（localhost意思是代理软件安装在本机上）
+    [地址] 填localhost或者127.0.0.1（localhost意思是代理软件安装在本机上）
     [端口] 在代理软件的设置里找。虽然不同的代理软件界面不一样，但端口号都应该在最显眼的位置上
     """
-    # 代理网络的地址，打开你的*学*网软件查看代理的协议(socks5h / http)、地址(localhost)和端口(11284)
     proxies = {
         #          [协议]://  [地址]  :[端口]
         "http":  "socks5h://localhost:11284",  # 再例如  "http":  "http://127.0.0.1:7890",
@@ -98,6 +98,12 @@ AVAIL_LLM_MODELS = ["gpt-3.5-turbo-1106","gpt-4-1106-preview","gpt-4-vision-prev
 
 # 定义界面上“询问多个GPT模型”插件应该使用哪些模型，请从AVAIL_LLM_MODELS中选择，并在不同模型之间用`&`间隔，例如"gpt-3.5-turbo&chatglm3&azure-gpt-4"
 MULTI_QUERY_LLM_MODELS = "gpt-3.5-turbo&chatglm3"
+
+
+# 选择本地模型变体（只有当AVAIL_LLM_MODELS包含了对应本地模型时，才会起作用）
+# 如果你选择Qwen系列的模型，那么请在下面的QWEN_MODEL_SELECTION中指定具体的模型
+# 也可以是具体的模型路径
+QWEN_MODEL_SELECTION = "Qwen/Qwen-1_8B-Chat-Int8"
 
 
 # 百度千帆（LLM_MODEL="qianfan"）
