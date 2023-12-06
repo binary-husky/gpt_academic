@@ -552,7 +552,7 @@ if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
                 "fn_with_ui": deepseekcoder_ui,
                 "fn_without_ui": deepseekcoder_noui,
                 "endpoint": None,
-                "max_token": 4096,
+                "max_token": 2048,
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
             }
