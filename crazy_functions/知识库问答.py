@@ -1,9 +1,10 @@
-from toolbox import CatchException, update_ui, ProxyNetworkActivate, update_ui_lastest_msg
+from toolbox import CatchException, update_ui, ProxyNetworkActivate, update_ui_lastest_msg, get_log_folder, get_user
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, get_files_from_everything
 
 install_msg ="""
 pip3 install torch --index-url https://download.pytorch.org/whl/cpu
-pip3 install langchain sentence-transformers unstructured[local-inference] faiss-cpu nltk beautifulsoup4 bitsandbytes tabulate icetk
+pip3 install transformers --upgrade
+pip3 install langchain sentence-transformers unstructured[all-docs] faiss-cpu nltk beautifulsoup4 bitsandbytes tabulate icetk --upgrade
 """
 
 @CatchException
@@ -65,8 +66,9 @@ def 知识库文件注入(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     print('Establishing knowledge archive ...')
     with ProxyNetworkActivate('Download_LLM'):    # 临时地激活代理网络
         kai = knowledge_archive_interface()
-        kai.feed_archive(file_manifest=file_manifest, id=kai_id)
-    kai_files = kai.get_loaded_file()
+        vs_path = get_log_folder(user=get_user(chatbot), plugin_name='vec_store')
+        kai.feed_archive(file_manifest=file_manifest, vs_path=vs_path, id=kai_id)
+    kai_files = kai.get_loaded_file(vs_path=vs_path)
     kai_files = '<br/>'.join(kai_files)
     # chatbot.append(['知识库构建成功', "正在将知识库存储至cookie中"])
     # yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
@@ -96,7 +98,8 @@ def 读取知识库作答(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
 
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     kai_id = plugin_kwargs.get("advanced_arg", 'default')
-    resp, prompt = kai.answer_with_archive_by_id(txt, kai_id)
+    vs_path = get_log_folder(user=get_user(chatbot), plugin_name='vec_store')
+    resp, prompt = kai.answer_with_archive_by_id(txt, kai_id, vs_path)
 
     chatbot.append((txt, f'[知识库 {kai_id}] ' + prompt))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
