@@ -2,9 +2,14 @@ from toolbox import CatchException, update_ui, ProxyNetworkActivate, update_ui_l
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, get_files_from_everything
 
 install_msg ="""
-pip3 install torch --index-url https://download.pytorch.org/whl/cpu
-pip3 install transformers --upgrade
-pip3 install langchain sentence-transformers unstructured[all-docs] faiss-cpu nltk beautifulsoup4 bitsandbytes tabulate icetk --upgrade
+
+1. python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+2. python -m pip install transformers protobuf langchain sentence-transformers  faiss-cpu nltk beautifulsoup4 bitsandbytes tabulate icetk --upgrade
+
+3. python -m pip install unstructured[all-docs] --upgrade
+
+4. python -c 'import nltk; nltk.download("punkt")' 
 """
 
 @CatchException

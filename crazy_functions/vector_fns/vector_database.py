@@ -199,8 +199,7 @@ class LocalDocQA:
             self.vector_store.save_local(vs_path)
             return vs_path, loaded_files
         else:
-            self.vector_store = FAISS.load_local(vs_path, text2vec)
-            return vs_path, loaded_files
+            raise RuntimeError("文件加载失败，请检查文件格式是否正确")
         
     def get_loaded_file(self, vs_path):
         ds = self.vector_store.docstore
