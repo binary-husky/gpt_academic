@@ -33,7 +33,7 @@ services:
     image: ghcr.io/binary-husky/gpt_academic_nolocal:master # (Auto Built by Dockerfile: docs/GithubAction+NoLocal)
     environment:
       # 请查阅 `config.py` 以查看所有的配置信息
-      API_KEY:                  '    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                                            '
+      API_KEY:                  '    sk-------------------------------------------------                                            '
       USE_PROXY:                '    False                                                                                          '
       LLM_MODEL:                '    gpt-4-1106-preview                                                                             '
       AVAIL_LLM_MODELS:         '    ["gpt-4-1106-preview","gpt-4-vision-preview","gpt-3.5-turbo-1106"]                             '
