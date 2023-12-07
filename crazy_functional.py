@@ -591,6 +591,20 @@ def get_crazy_functions():
         print('Load function plugin failed')
 
     # try:
+    #     from crazy_functions.互动小游戏 import 随机小游戏
+    #     function_plugins.update({
+    #         "随机小游戏": {
+    #             "Group": "智能体",
+    #             "Color": "stop",
+    #             "AsButton": True,
+    #             "Function": HotReload(随机小游戏)
+    #         }
+    #     })
+    # except:
+    #     print(trimmed_format_exc())
+    #     print('Load function plugin failed')
+
+    # try:
     #     from crazy_functions.chatglm微调工具 import 微调数据集生成
     #     function_plugins.update({
     #         "黑盒模型学习: 微调数据集生成 (先上传数据集)": {
