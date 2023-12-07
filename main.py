@@ -425,15 +425,10 @@ def main():
 
     run_delayed_tasks()
     demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
-        quiet=True,
         server_name="0.0.0.0", 
-        ssl_keyfile=None if SSL_KEYFILE == "" else SSL_KEYFILE,
-        ssl_certfile=None if SSL_CERTFILE == "" else SSL_CERTFILE,
-        ssl_verify=False,
+        share=False,
         server_port=PORT,
-        favicon_path=os.path.join(os.path.dirname(__file__), "docs/logo.png"), 
-        auth=AUTHENTICATION if len(AUTHENTICATION) != 0 else None,
-        blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile",f"{PATH_LOGGING}/admin"])
+        auth=AUTHENTICATION)
 
     # 如果需要在二级路径下运行
     # CUSTOM_PATH = get_conf('CUSTOM_PATH')
