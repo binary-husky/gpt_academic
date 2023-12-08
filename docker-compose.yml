@@ -9,7 +9,7 @@
     # 【方法2: 适用于所有系统包括Windows和MacOS】端口映射，把容器的端口映射到宿主的端口（注意您需要先删除network_mode: "host"，再追加以下内容）
     # ports:
     #   - "12345:12345"  # 注意！12345必须与WEB_PORT环境变量相互对应
-# 4. 最后`docker-compose up`运行
+# 4. 最后`docker-compose up -d`运行
 # 5. 如果希望使用显卡，请关注 LOCAL_MODEL_DEVICE 和 英伟达显卡运行时 选项
 ## ===================================================
 # 1. Please choose one of the following options and delete the others.
@@ -20,7 +20,7 @@
     # [Method 2: Suitable for all systems including Windows and MacOS] Port mapping, mapping the container port to the host port (note that you need to delete network_mode: "host" first, and then add the following content)
     # ports:
     # - "12345: 12345" # Note! 12345 must correspond to the WEB_PORT environment variable.
-# 4. Finally, run `docker-compose up`.
+# 4. Finally, run `docker-compose up -d`.
 # 5. If you want to use a graphics card, pay attention to the LOCAL_MODEL_DEVICE and Nvidia GPU runtime options.
 ## ===================================================
 
@@ -33,13 +33,14 @@ services:
     image: ghcr.io/binary-husky/gpt_academic_nolocal:master # (Auto Built by Dockerfile: docs/GithubAction+NoLocal)
     environment:
       # 请查阅 `config.py` 以查看所有的配置信息
-      API_KEY:                  '    sk-------------------------------------------------                                            '
+      API_KEY:                  '    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                                            '
       USE_PROXY:                '    False                                                                                          '
       LLM_MODEL:                '    gpt-4-1106-preview                                                                             '
       AVAIL_LLM_MODELS:         '    ["gpt-4-1106-preview","gpt-4-vision-preview","gpt-3.5-turbo-1106"]                             '
       WEB_PORT:                 '    54351                                                                                          '
       ADD_WAIFU:                '    True                                                                                           '
-      THEME:                    '    Chuanhu-Small-and-Beautiful                                                                    '
+      THEME:                    '    gradio/soft                                                                                    '
+      AVAIL_THEMES:             '    ["Default", "gradio/soft", "Chuanhu-Small-and-Beautiful", "High-Contrast", "Gstaff/Xkcd", "NoCrypt/Miku"]'
       DEFAULT_WORKER_NUM:       '    16                                                                                             '
       AUTHENTICATION:           '    [("admin","StartDash")]                                                                        '
 

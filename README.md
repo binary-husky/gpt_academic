@@ -124,7 +124,7 @@ Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼�
 1. 下载项目
 
     ```sh
-    git clone --depth=1 https://github.com/binary-husky/gpt_academic.git
+    git clone --depth=1 https://github.com/GrayArashiAI/gpt_academic.git
     cd gpt_academic
     ```
 
@@ -184,7 +184,7 @@ pip install peft
 
 4. 运行
     ```sh
-    python main.py
+    nohup python main.py > output.log 2>&1 &
     ```
 
 ### 安装方法II：使用Docker
