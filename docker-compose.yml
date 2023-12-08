@@ -33,14 +33,14 @@ services:
     image: ghcr.io/binary-husky/gpt_academic_nolocal:master # (Auto Built by Dockerfile: docs/GithubAction+NoLocal)
     environment:
       # 请查阅 `config.py` 以查看所有的配置信息
-      API_KEY:                  '    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                                            '
+      API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                                            '
       USE_PROXY:                '    False                                                                                          '
       LLM_MODEL:                '    gpt-4-1106-preview                                                                             '
       AVAIL_LLM_MODELS:         '    ["gpt-4-1106-preview","gpt-4-vision-preview","gpt-3.5-turbo-1106"]                             '
       WEB_PORT:                 '    54351                                                                                          '
       ADD_WAIFU:                '    True                                                                                           '
       THEME:                    '    gradio/soft                                                                                    '
-      AVAIL_THEMES:             '    ["Default", "gradio/soft", "Chuanhu-Small-and-Beautiful", "High-Contrast", "Gstaff/Xkcd", "NoCrypt/Miku"]'
+      AVAIL_THEMES:             '    ["Default", "gradio/soft", "ParityError/Interstellar", "Chuanhu-Small-and-Beautiful", "NoCrypt/Miku"]'
       DEFAULT_WORKER_NUM:       '    16                                                                                             '
       AUTHENTICATION:           '    [("admin","StartDash")]                                                                        '
 

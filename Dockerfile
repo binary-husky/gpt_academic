@@ -7,9 +7,9 @@ FROM python:3.11
 
 
 # 非必要步骤，更换pip源 （以下三行，可以删除）
-RUN echo '[global]' > /etc/pip.conf && \
-    echo 'index-url = https://mirrors.aliyun.com/pypi/simple/' >> /etc/pip.conf && \
-    echo 'trusted-host = mirrors.aliyun.com' >> /etc/pip.conf
+# RUN echo '[global]' > /etc/pip.conf && \
+#     echo 'index-url = https://mirrors.aliyun.com/pypi/simple/' >> /etc/pip.conf && \
+#     echo 'trusted-host = mirrors.aliyun.com' >> /etc/pip.conf
 
 
 # 进入工作路径（必要）
