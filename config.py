@@ -46,7 +46,7 @@ DEFAULT_WORKER_NUM = 16
 # 色彩主题, 可选 ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast"]
 # 更多主题, 请查阅Gradio主题商店: https://huggingface.co/spaces/gradio/theme-gallery 可选 ["Gstaff/Xkcd", "NoCrypt/Miku", ...]
 THEME = "gradio/soft"
-AVAIL_THEMES = ["Default", "gradio/soft", "ParityError/Interstellar", "Chuanhu-Small-and-Beautiful", "NoCrypt/Miku"]
+AVAIL_THEMES = ["Default", "gradio/soft", "Chuanhu-Small-and-Beautiful", "NoCrypt/Miku"]
 
 
 # 默认的系统提示词（system prompt）

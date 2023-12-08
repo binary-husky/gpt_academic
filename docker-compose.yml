@@ -40,7 +40,7 @@ services:
       WEB_PORT:                 '    54351                                                                                          '
       ADD_WAIFU:                '    True                                                                                           '
       THEME:                    '    gradio/soft                                                                                    '
-      AVAIL_THEMES:             '    ["Default", "gradio/soft", "ParityError/Interstellar", "Chuanhu-Small-and-Beautiful", "NoCrypt/Miku"]'
+      AVAIL_THEMES:             '    ["Default", "gradio/soft", "Chuanhu-Small-and-Beautiful", "NoCrypt/Miku"]'
       DEFAULT_WORKER_NUM:       '    16                                                                                             '
       AUTHENTICATION:           '    [("admin","StartDash")]                                                                        '
 
