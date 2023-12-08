@@ -242,7 +242,7 @@ class LocalDocQA:
 
 def construct_vector_store(vs_id, vs_path, files, sentence_size, history, one_conent, one_content_segmentation, text2vec):
     for file in files:
-        assert os.path.exists(file), "输入文件不存在"
+        assert os.path.exists(file), "输入文件不存在：" + file
     import nltk
     if NLTK_DATA_PATH not in nltk.data.path: nltk.data.path = [NLTK_DATA_PATH] + nltk.data.path
     local_doc_qa = LocalDocQA()

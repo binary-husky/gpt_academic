@@ -23,11 +23,13 @@ RUN pip3 install -r requirements.txt
 
 
 # 装载项目文件，安装剩余依赖（必要）
-RUN pip3 install torch --index-url https://download.pytorch.org/whl/cpu
-RUN pip3 install langchain sentence-transformers unstructured[local-inference] faiss-cpu nltk beautifulsoup4 bitsandbytes tabulate icetk
-
-COPY .cache /root/.cache
 COPY . .
 RUN pip3 install -r requirements.txt
+
+
+# 非必要步骤，用于预热模块（可以删除）
+RUN python3  -c 'from check_proxy import warm_up_modules; warm_up_modules()'
+
+
 # 启动（必要）
-CMD ["python3", "-u", "tests/test_vector_plugins.py"]
+CMD ["python3", "-u", "main.py"]

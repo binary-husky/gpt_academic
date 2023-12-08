@@ -51,7 +51,7 @@ def 知识库文件注入(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     for sp in spl:
         _, file_manifest_tmp, _ = get_files_from_everything(txt, type=f'.{sp}')
         file_manifest += file_manifest_tmp
-    
+
     if len(file_manifest) == 0:
         chatbot.append(["没有找到任何可读取文件", "当前支持的格式包括: txt, md, docx, pptx, pdf, json等"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
