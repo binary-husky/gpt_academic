@@ -237,6 +237,10 @@ WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid",
 BLOCK_INVALID_APIKEY = False
 
 
+# 启用插件热加载
+PLUGIN_HOT_RELOAD = False
+
+
 # 自定义按钮的最大数量限制
 NUM_CUSTOM_BASIC_BTN = 4
 
