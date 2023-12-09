@@ -120,7 +120,6 @@ CHATGLM_PTUNING_CHECKPOINT = "" # 例如"/home/hmp/ChatGLM2-6B/ptuning/output/6b
 LOCAL_MODEL_DEVICE = "cpu" # 可选 "cuda"
 LOCAL_MODEL_QUANT = "FP16" # 默认 "FP16" "INT4" 启用量化INT4版本 "INT8" 启用量化INT8版本
 
-
 # 设置gradio的并行线程数（不需要修改）
 CONCURRENT_COUNT = 100
 
@@ -236,6 +235,10 @@ WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid",
 
 # *实验性功能*: 自动检测并屏蔽失效的KEY，请勿使用
 BLOCK_INVALID_APIKEY = False
+
+
+# 启用插件热加载
+PLUGIN_HOT_RELOAD = False
 
 
 # 自定义按钮的最大数量限制

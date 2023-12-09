@@ -167,6 +167,14 @@ git clone --depth=1 https://github.com/OpenLMLab/MOSS.git request_llms/moss  # �
 
 # 【可选步骤IV】确保config.py配置文件的AVAIL_LLM_MODELS包含了期望的模型，目前支持的全部模型如下(jittorllms系列目前仅支持docker方案)：
 AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "moss"] # + ["jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
+
+# 【可选步骤V】支持本地模型INT8,INT4量化（这里所指的模型本身不是量化版本，目前deepseek-coder支持，后面测试后会加入更多模型量化选择）
+pip install bitsandbyte
+# windows用户安装bitsandbytes需要使用下面bitsandbytes-windows-webui
+python -m pip install bitsandbytes --prefer-binary --extra-index-url=https://jllllll.github.io/bitsandbytes-windows-webui
+pip install -U git+https://github.com/huggingface/transformers.git
+pip install -U git+https://github.com/huggingface/accelerate.git
+pip install peft
 ```
 
 </p>
