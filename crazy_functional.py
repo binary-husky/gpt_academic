@@ -355,7 +355,7 @@ def get_crazy_functions():
         print('Load function plugin failed')
 
     try:
-        from crazy_functions.图片生成 import 图片生成_DALLE2, 图片生成_DALLE3
+        from crazy_functions.图片生成 import 图片生成_DALLE2, 图片生成_DALLE3, 图片修改_DALLE2
         function_plugins.update({
             "图片生成_DALLE2 （先切换模型到openai或api2d）": {
                 "Group": "对话",
@@ -373,10 +373,19 @@ def get_crazy_functions():
                 "Color": "stop",
                 "AsButton": False,
                 "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-                "ArgsReminder": "在这里输入分辨率, 如1024x1024（默认），支持 1024x1024, 1792x1024, 1024x1792",
-                # 高级参数输入区的显示提示
+                "ArgsReminder": "在这里输入分辨率, 如1024x1024（默认），支持 1024x1024, 1792x1024, 1024x1792。如需生成高清图像，请输入 1024x1024-HD, 1792x1024-HD, 1024x1792-HD。",  # 高级参数输入区的显示提示
                 "Info": "使用DALLE3生成图片 | 输入参数字符串，提供图像的内容",
                 "Function": HotReload(图片生成_DALLE3)
+            },
+        })
+        function_plugins.update({
+            "图片修改_DALLE2 （先切换模型到openai或api2d）": {
+                "Group": "对话",
+                "Color": "stop",
+                "AsButton": False,
+                "AdvancedArgs": False,  # 调用时，唤起高级参数输入区（默认False）
+                # "Info": "使用DALLE2修改图片 | 输入参数字符串，提供图像的内容",
+                "Function": HotReload(图片修改_DALLE2)
             },
         })
     except:
@@ -432,7 +441,7 @@ def get_crazy_functions():
         print('Load function plugin failed')
 
     try:
-        from crazy_functions.Langchain知识库 import 知识库问答
+        from crazy_functions.知识库问答 import 知识库文件注入
         function_plugins.update({
             "构建知识库（先上传文件素材,再运行此插件）": {
                 "Group": "对话",
@@ -440,7 +449,7 @@ def get_crazy_functions():
                 "AsButton": False,
                 "AdvancedArgs": True,
                 "ArgsReminder": "此处待注入的知识库名称id, 默认为default。文件进入知识库后可长期保存。可以通过再次调用本插件的方式，向知识库追加更多文档。",
-                "Function": HotReload(知识库问答)
+                "Function": HotReload(知识库文件注入)
             }
         })
     except:
@@ -448,9 +457,9 @@ def get_crazy_functions():
         print('Load function plugin failed')
 
     try:
-        from crazy_functions.Langchain知识库 import 读取知识库作答
+        from crazy_functions.知识库问答 import 读取知识库作答
         function_plugins.update({
-            "知识库问答（构建知识库后,再运行此插件）": {
+            "知识库文件注入（构建知识库后,再运行此插件）": {
                 "Group": "对话",
                 "Color": "stop",
                 "AsButton": False,
@@ -491,7 +500,7 @@ def get_crazy_functions():
         })
         from crazy_functions.Latex输出PDF结果 import Latex翻译中文并重新编译PDF
         function_plugins.update({
-            "Arixv论文精细翻译（输入arxivID）[需Latex]": {
+            "Arxiv论文精细翻译（输入arxivID）[需Latex]": {
                 "Group": "学术",
                 "Color": "stop",
                 "AsButton": False,
@@ -570,17 +579,24 @@ def get_crazy_functions():
 
     try:
         from crazy_functions.多智能体 import 多智能体终端
-        function_plugins.update({
-            "AutoGen多智能体终端（仅供测试）": {
-                "Group": "智能体",
-                "Color": "stop",
-                "AsButton": False,
-                "Function": HotReload(多智能体终端)
-            }
-        })
+        function_plugins.update()
     except:
         print(trimmed_format_exc())
         print('Load function plugin failed')
+
+    # try:
+    #     from crazy_functions.互动小游戏 import 随机小游戏
+    #     function_plugins.update({
+    #         "随机小游戏": {
+    #             "Group": "智能体",
+    #             "Color": "stop",
+    #             "AsButton": True,
+    #             "Function": HotReload(随机小游戏)
+    #         }
+    #     })
+    # except:
+    #     print(trimmed_format_exc())
+    #     print('Load function plugin failed')
 
     # try:
     #     from crazy_functions.chatglm微调工具 import 微调数据集生成

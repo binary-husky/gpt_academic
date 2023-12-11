@@ -1,10 +1,5 @@
-<<<<<<< HEAD
 from comm_tools.toolbox import CatchException, update_ui, gen_time_str, trimmed_format_exc, ProxyNetworkActivate
-from comm_tools.toolbox import report_execption, get_log_folder, update_ui_lastest_msg, Singleton
-=======
-from toolbox import CatchException, update_ui, gen_time_str, trimmed_format_exc, ProxyNetworkActivate
-from toolbox import report_exception, get_log_folder, update_ui_lastest_msg, Singleton
->>>>>>> master
+from comm_tools.toolbox import report_exception, get_log_folder, update_ui_lastest_msg, Singleton
 from crazy_functions.agent_fns.pipe import PluginMultiprocessManager, PipeCom
 from crazy_functions.agent_fns.general import AutoGenGeneral
 

@@ -48,6 +48,7 @@
     color: #fff;
     padding: 0;
     margin: 0;
+    margin-right: 20px;
     background-color: unset;
     text-shadow: none;
     font-family: var(--font-mono);

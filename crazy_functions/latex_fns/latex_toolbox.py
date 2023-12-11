@@ -283,10 +283,10 @@ def find_tex_file_ignore_case(fp):
     dir_name = os.path.dirname(fp)
     base_name = os.path.basename(fp)
     # 如果输入的文件路径是正确的
-    if os.path.exists(pj(dir_name, base_name)): return pj(dir_name, base_name)
+    if os.path.isfile(pj(dir_name, base_name)): return pj(dir_name, base_name)
     # 如果不正确，试着加上.tex后缀试试
     if not base_name.endswith('.tex'): base_name+='.tex'
-    if os.path.exists(pj(dir_name, base_name)): return pj(dir_name, base_name)
+    if os.path.isfile(pj(dir_name, base_name)): return pj(dir_name, base_name)
     # 如果还找不到，解除大小写限制，再试一次
     import glob
     for f in glob.glob(dir_name+'/*.tex'):
@@ -317,6 +317,41 @@ def merge_tex_files_(project_foler, main_file, mode):
         c = merge_tex_files_(project_foler, c, mode)
         main_file = main_file[:s.span()[0]] + c + main_file[s.span()[1]:]
     return main_file
+
+
+def find_title_and_abs(main_file):
+
+    def extract_abstract_1(text):
+        pattern = r"\\abstract\{(.*?)\}"
+        match = re.search(pattern, text, re.DOTALL)
+        if match:
+            return match.group(1)
+        else:
+            return None
+
+    def extract_abstract_2(text):
+        pattern = r"\\begin\{abstract\}(.*?)\\end\{abstract\}"
+        match = re.search(pattern, text, re.DOTALL)
+        if match:
+            return match.group(1)
+        else:
+            return None
+
+    def extract_title(string):
+        pattern = r"\\title\{(.*?)\}"
+        match = re.search(pattern, string, re.DOTALL)
+
+        if match:
+            return match.group(1)
+        else:
+            return None
+
+    abstract = extract_abstract_1(main_file)
+    if abstract is None:
+        abstract = extract_abstract_2(main_file)
+    title = extract_title(main_file)
+    return title, abstract
+
 
 def merge_tex_files(project_foler, main_file, mode):
     """
@@ -458,11 +493,38 @@ def compile_latex_with_timeout(command, cwd, timeout=60):
         return False
     return True
 
+def run_in_subprocess_wrapper_func(func, args, kwargs, return_dict, exception_dict):
+    import sys
+    try:
+        result = func(*args, **kwargs)
+        return_dict['result'] = result
+    except Exception as e:
+        exc_info = sys.exc_info()
+        exception_dict['exception'] = exc_info
 
+def run_in_subprocess(func):
+    import multiprocessing
+    def wrapper(*args, **kwargs):
+        return_dict = multiprocessing.Manager().dict()
+        exception_dict = multiprocessing.Manager().dict()
+        process = multiprocessing.Process(target=run_in_subprocess_wrapper_func, 
+                                            args=(func, args, kwargs, return_dict, exception_dict))
+        process.start()
+        process.join()
+        process.close()
+        if 'exception' in exception_dict:
+            # ooops, the subprocess ran into an exception
+            exc_info = exception_dict['exception']
+            raise exc_info[1].with_traceback(exc_info[2])
+        if 'result' in return_dict.keys():
+            # If the subprocess ran successfully, return the result
+            return return_dict['result']
+    return wrapper
 
-def merge_pdfs(pdf1_path, pdf2_path, output_path):
-    import PyPDF2
+def _merge_pdfs(pdf1_path, pdf2_path, output_path):
+    import PyPDF2   # PyPDF2这个库有严重的内存泄露问题，把它放到子进程中运行，从而方便内存的释放
     Percent = 0.95
+    # raise RuntimeError('PyPDF2 has a serious memory leak problem, please use other tools to merge PDF files.')
     # Open the first PDF file
     with open(pdf1_path, 'rb') as pdf1_file:
         pdf1_reader = PyPDF2.PdfFileReader(pdf1_file)
@@ -496,3 +558,5 @@ def merge_pdfs(pdf1_path, pdf2_path, output_path):
             # Save the merged PDF file
             with open(output_path, 'wb') as output_file:
                 output_writer.write(output_file)
+
+merge_pdfs = run_in_subprocess(_merge_pdfs) # PyPDF2这个库有严重的内存泄露问题，把它放到子进程中运行，从而方便内存的释放

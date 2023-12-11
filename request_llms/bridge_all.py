@@ -534,6 +534,22 @@ if "zhipuai" in AVAIL_LLM_MODELS:   # zhipuai
         })
     except:
         print(trimmed_format_exc())
+if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
+    try:
+        from .bridge_deepseekcoder import predict_no_ui_long_connection as deepseekcoder_noui
+        from .bridge_deepseekcoder import predict as deepseekcoder_ui
+        model_info.update({
+            "deepseekcoder": {
+                "fn_with_ui": deepseekcoder_ui,
+                "fn_without_ui": deepseekcoder_noui,
+                "endpoint": None,
+                "max_token": 2048,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            }
+        })
+    except:
+        print(trimmed_format_exc())
 
 # <-- 用于定义和切换多个azure模型 -->
 AZURE_CFG_ARRAY = get_conf("AZURE_CFG_ARRAY")

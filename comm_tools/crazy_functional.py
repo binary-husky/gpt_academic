@@ -273,6 +273,7 @@ def get_functions_多功能插件():
     from crazy_functions.语音助手 import 语音助手
     from crazy_functions.虚空终端 import 虚空终端
     from crazy_functions.函数动态生成 import 函数动态生成
+    from crazy_functions.多智能体 import 多智能体终端
     function_plugins['多功能'] = {
         "动态代码解释器（CodeInterpreter）": {
             "Group": "智能体",
@@ -286,7 +287,12 @@ def get_functions_多功能插件():
             "Info": "查看历史上的今天事件 (这是一个面向开发者的插件Demo) | 不需要输入参数",
             "AsButton": True,
         },
-
+        "AutoGen多智能体终端（仅供测试）": {
+            "Group": "智能体",
+            "Color": "stop",
+            "AsButton": False,
+            "Function": HotReload(多智能体终端)
+        },
         "保存当前的对话": {
             "AsButton": True,
             "Function": HotReload(对话历史存档.对话历史存档)
@@ -341,7 +347,7 @@ def get_functions_多功能插件():
             "Color": "stop",
             "AsButton": False,
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "在这里输入分辨率, 如1024x1024（默认），支持 1024x1024, 1792x1024, 1024x1792",
+            "ArgsReminder": "在这里输入分辨率, 如1024x1024（默认），支持 1024x1024, 1792x1024, 1024x1792。如需生成高清图像，请输入 1024x1024-HD, 1792x1024-HD, 1024x1792-HD。",
             # 高级参数输入区的显示提示
             "Info": "使用DALLE3生成图片 | 输入参数字符串，提供图像的内容",
             "Function": HotReload(图片生成_DALLE3)
@@ -389,11 +395,11 @@ def get_functions_云文档处理():
                 "开启OCR": True,
                 "提示词分类": "插件定制",
                 '用例下标排序': None,
-                "阶段性产出": {{
+                "阶段性产出": [{
                     "提示词": "提取文档测试点",
                     "调用方法": "结果写入Markdown"
                 },
-                },
+                ],
                 "处理文件类型": ['md', 'txt', 'pdf', 'xmind', '智能文档']
             }
         },

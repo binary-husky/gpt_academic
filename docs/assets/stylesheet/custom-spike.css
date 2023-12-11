@@ -219,7 +219,8 @@ code.language-folded {
     overflow: auto;
 }
 #show-all-btn {
-    right: 35px;
+    top: 30px;
+    right: 10px;
     margin: -2px;
 }
 

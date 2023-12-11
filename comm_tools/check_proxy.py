@@ -5,7 +5,6 @@ def check_proxy(proxies):
     try:
         response = requests.get("https://ipapi.co/json/", proxies=proxies, timeout=4)
         data = response.json()
-        # print(f'查询代理的地理位置，返回的结果是{data}')
         if 'country_name' in data:
             country = data['country_name']
             result = f"代理配置 {proxies_https}, 代理所在地：{country}"
@@ -49,8 +48,8 @@ def backup_and_download(current_version, remote_version):
     os.makedirs(new_version_dir)
     shutil.copytree('./', backup_dir, ignore=lambda x, y: ['history'])
     proxies = get_conf('proxies')
-    r = requests.get(
-        'https://github.com/binary-husky/chatgpt_academic/archive/refs/heads/master.zip', proxies=proxies, stream=True)
+    try:    r = requests.get('https://github.com/binary-husky/chatgpt_academic/archive/refs/heads/master.zip', proxies=proxies, stream=True)
+    except: r = requests.get('https://public.gpt-academic.top/publish/master.zip', proxies=proxies, stream=True)
     zip_file_path = backup_dir+'/master.zip'
     with open(zip_file_path, 'wb+') as f:
         f.write(r.content)
@@ -113,11 +112,10 @@ def auto_update(raise_error=False):
     try:
         from comm_tools.toolbox import get_conf
         import requests
-        import time
         import json
         proxies = get_conf('proxies')
-        response = requests.get(
-            "https://raw.githubusercontent.com/binary-husky/chatgpt_academic/master/version", proxies=proxies, timeout=5)
+        try:    response = requests.get("https://raw.githubusercontent.com/binary-husky/chatgpt_academic/master/version", proxies=proxies, timeout=5)
+        except: response = requests.get("https://public.gpt-academic.top/publish/version", proxies=proxies, timeout=5)
         remote_json_data = json.loads(response.text)
         remote_version = remote_json_data['version']
         if remote_json_data["show_feature"]:
@@ -156,7 +154,7 @@ def auto_update(raise_error=False):
         print(msg)
 
 def warm_up_modules():
-    print('正在执行一些模块的预热...')
+    print('正在执行一些模块的预热 ...')
     from comm_tools.toolbox import ProxyNetworkActivate
     from request_llms.bridge_all import model_info
     with ProxyNetworkActivate("Warmup_Modules"):
@@ -164,6 +162,13 @@ def warm_up_modules():
         enc.encode("模块预热", disallowed_special=())
         enc = model_info["gpt-4"]['tokenizer']
         enc.encode("模块预热", disallowed_special=())
+        
+def warm_up_vectordb():
+    print('正在执行一些模块的预热 ...')
+    from toolbox import ProxyNetworkActivate
+    with ProxyNetworkActivate("Warmup_Modules"):
+        import nltk
+        with ProxyNetworkActivate("Warmup_Modules"): nltk.download("punkt")
 
 
 if __name__ == '__main__':

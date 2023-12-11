@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-from comm_tools.toolbox import CatchException, update_ui, gen_time_str, trimmed_format_exc, ProxyNetworkActivate
-from comm_tools.toolbox import report_execption, get_log_folder, update_ui_lastest_msg, Singleton
-=======
-from toolbox import trimmed_format_exc, get_conf, ProxyNetworkActivate
->>>>>>> master
+from comm_tools.toolbox import trimmed_format_exc, get_conf, ProxyNetworkActivate
 from crazy_functions.agent_fns.pipe import PluginMultiprocessManager, PipeCom
 from request_llms.bridge_all import predict_no_ui_long_connection
 import time

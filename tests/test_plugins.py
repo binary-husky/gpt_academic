@@ -11,7 +11,9 @@ if __name__ == "__main__":
     from tests.test_utils import plugin_test
     # plugin_test(plugin='crazy_functions.函数动态生成->函数动态生成', main_input='交换图像的蓝色通道和红色通道', advanced_arg={"file_path_arg": "./build/ants.jpg"})
 
-    plugin_test(plugin='crazy_functions.Latex输出PDF结果->Latex翻译中文并重新编译PDF', main_input="2307.07522")
+    # plugin_test(plugin='crazy_functions.Latex输出PDF结果->Latex翻译中文并重新编译PDF', main_input="2307.07522")
+
+    plugin_test(plugin='crazy_functions.Latex输出PDF结果->Latex翻译中文并重新编译PDF', main_input="G:/SEAFILE_LOCAL/50503047/我的资料库/学位/paperlatex/aaai/Fu_8368_with_appendix")
 
     # plugin_test(plugin='crazy_functions.虚空终端->虚空终端', main_input='修改api-key为sk-jhoejriotherjep')
 
@@ -46,11 +48,11 @@ if __name__ == "__main__":
     # for lang in ["English", "French", "Japanese", "Korean", "Russian", "Italian", "German", "Portuguese", "Arabic"]:
     #     plugin_test(plugin='crazy_functions.批量Markdown翻译->Markdown翻译指定语言', main_input="README.md", advanced_arg={"advanced_arg": lang})
 
-    # plugin_test(plugin='crazy_functions.Langchain知识库->知识库问答', main_input="./")
+    # plugin_test(plugin='crazy_functions.知识库文件注入->知识库文件注入', main_input="./")
 
-    # plugin_test(plugin='crazy_functions.Langchain知识库->读取知识库作答', main_input="What is the installation method？")
+    # plugin_test(plugin='crazy_functions.知识库文件注入->读取知识库作答', main_input="What is the installation method？")
 
-    # plugin_test(plugin='crazy_functions.Langchain知识库->读取知识库作答', main_input="远程云服务器部署？")
+    # plugin_test(plugin='crazy_functions.知识库文件注入->读取知识库作答', main_input="远程云服务器部署？")
     
     # plugin_test(plugin='crazy_functions.Latex输出PDF结果->Latex翻译中文并重新编译PDF', main_input="2210.03629")
     

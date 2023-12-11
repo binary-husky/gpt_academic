@@ -1,12 +1,14 @@
 import markdown
 import importlib
 import inspect
-import gradio as gr
 from comm_tools import func_box
 from comm_tools import history_processor
-import gradio
+import re
+import os
+import base64
 import shutil
 import glob
+import gradio as gr
 import math
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
@@ -19,7 +21,7 @@ import threading
 
 ############################### 插件输入输出接驳区 #######################################
 pj = os.path.join
-
+default_user_name = 'default_user'
 """
 ========================================================================
 第一部分
@@ -110,7 +112,7 @@ def ArgsGeneralWrapper(f):
             plugin_kwargs.update({'parameters_def': args[1]})
             cookies['is_plugin'] = {'func_name': args[0], 'input': txt_passon, 'kwargs': plugin_kwargs}
         elif len(args) == 1 and 'RetryChat' not in args:
-            history = history[:-2]   # 不采取失败的对话历史
+            history = history[:-2]  # 不采取失败的对话历史
             cookies['is_plugin'] = {'func_name': args[0], 'input': txt_passon, 'kwargs': plugin_kwargs}
         elif len(args) == 0:
             cookies['is_plugin'] = False
@@ -187,10 +189,10 @@ def update_ui(chatbot, history, msg='正常', end_code=0, *args):  # 刷新界�
     # 解决插件锁定时的界面显示问题
     if cookies.get('lock_plugin', None):
         label = cookies.get('llm_model', "") + " | " + "正在锁定插件" + cookies.get('lock_plugin', None)
-        chatbot_gr = gradio.update(value=chatbot, label=label)
+        chatbot_gr = gr.update(value=chatbot, label=label)
         if cookies.get('label', "") != label: cookies['label'] = label  # 记住当前的label
     elif cookies.get('label', None):
-        chatbot_gr = gradio.update(value=chatbot, label=cookies.get('llm_model', ""))
+        chatbot_gr = gr.update(value=chatbot, label=cookies.get('llm_model', ""))
         cookies['label'] = None  # 清空label
     else:
         chatbot_gr = chatbot
@@ -239,8 +241,9 @@ def CatchException(f):
                 chatbot_with_cookie.clear()
                 chatbot_with_cookie.append(["插件调度异常", "异常原因"])
             chatbot_with_cookie[-1] = (chatbot_with_cookie[-1][0],
-                           f"[Local Message] 插件调用出错: \n\n{tb_str} \n\n当前代理可用性: \n\n{check_proxy(proxies)}")
-            yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=f'异常 {e}') # 刷新界面
+                                       f"[Local Message] 插件调用出错: \n\n{tb_str} \n\n当前代理可用性: \n\n{check_proxy(proxies)}")
+            yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=f'异常 {e}')  # 刷新界面
+
     return decorated
 
 
@@ -254,18 +257,16 @@ def HotReload(f):
     最后，使用yield from语句返回重新加载过的函数，并在被装饰的函数上执行。
     最终，装饰器函数返回内部函数。这个内部函数可以将函数的原始定义更新为最新版本，并执行函数的新版本。
     """
-
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        fn_name = f.__name__
-        f_hot_reload = getattr(importlib.reload(inspect.getmodule(f)), fn_name)
-        try:
-            yield from f_hot_reload(*args, **kwargs)
-        except TypeError:
-            args = tuple(args[element] for element in range(len(args)) if element != 6)
+    if get_conf('PLUGIN_HOT_RELOAD'):
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            fn_name = f.__name__
+            f_hot_reload = getattr(importlib.reload(inspect.getmodule(f)), fn_name)
             yield from f_hot_reload(*args, **kwargs)
 
-    return decorated
+        return decorated
+    else:
+        return f
 
 
 ####################################### 其他小工具 #####################################
@@ -379,8 +380,6 @@ def regular_txt_to_markdown(text):
     return text
 
 
-
-
 def report_exception(chatbot, history, a, b):
     """
     向chatbot中添加错误信息
@@ -388,7 +387,10 @@ def report_exception(chatbot, history, a, b):
     chatbot.append((a, b))
     history.extend([a, b])
 
+
 import re
+
+
 def text_divide_paragraph(input_str):
     if input_str:
         code_blocks = re.findall(r'```[\s\S]*?```', input_str)
@@ -504,8 +506,8 @@ def markdown_convertion(txt):
 
     def fix_markdown_indent(txt):
         # fix markdown indent
-        if (' - ' not in txt) or ('. ' not in txt): 
-            return txt # do not need to fix, fast escape
+        if (' - ' not in txt) or ('. ' not in txt):
+            return txt  # do not need to fix, fast escape
         # walk through the lines and fix non-standard indentation
         lines = txt.split("\n")
         pattern = re.compile(r'^\s+-')
@@ -517,7 +519,7 @@ def markdown_convertion(txt):
                 stripped_string = line.lstrip()
                 num_spaces = len(line) - len(stripped_string)
                 if (num_spaces % 4) == 3:
-                    num_spaces_should_be = math.ceil(num_spaces/4) * 4
+                    num_spaces_should_be = math.ceil(num_spaces / 4) * 4
                     lines[i] = ' ' * num_spaces_should_be + stripped_string
         return '\n'.join(lines)
 
@@ -668,19 +670,44 @@ def find_recent_files(directory):
     return recent_files
 
 
+def file_already_in_downloadzone(file, user_path):
+    try:
+        parent_path = os.path.abspath(user_path)
+        child_path = os.path.abspath(file)
+        if os.path.samefile(os.path.commonpath([parent_path, child_path]), parent_path):
+            return True
+        else:
+            return False
+    except:
+        return False
+
+
 def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
     # 将文件复制一份到下载区
     import shutil
-    if rename_file is None: rename_file = f'{gen_time_str()}-{os.path.basename(file)}'
-    new_path = pj(get_log_folder(), rename_file)
-    # 如果已经存在，先删除
-    if os.path.exists(new_path) and not os.path.samefile(new_path, file): os.remove(new_path)
-    # 把文件复制过去
-    if not os.path.exists(new_path): shutil.copyfile(file, new_path)
-    # 将文件添加到chatbot cookie中，避免多用户干扰
     if chatbot is not None:
-        if 'files_to_promote' in chatbot._cookies: current = chatbot._cookies['files_to_promote']
-        else: current = []
+        user_name = get_user(chatbot)
+    else:
+        user_name = default_user_name
+    if not os.path.exists(file):
+        raise FileNotFoundError(f'文件{file}不存在')
+    user_path = get_log_folder(user_name, plugin_name=None)
+    if file_already_in_downloadzone(file, user_path):
+        new_path = file
+    else:
+        user_path = get_log_folder(user_name, plugin_name='downloadzone')
+        if rename_file is None: rename_file = f'{gen_time_str()}-{os.path.basename(file)}'
+        new_path = pj(user_path, rename_file)
+        # 如果已经存在，先删除
+        if os.path.exists(new_path) and not os.path.samefile(new_path, file): os.remove(new_path)
+        # 把文件复制过去
+        if not os.path.exists(new_path): shutil.copyfile(file, new_path)
+    # 将文件添加到chatbot cookie中
+    if chatbot is not None:
+        if 'files_to_promote' in chatbot._cookies:
+            current = chatbot._cookies['files_to_promote']
+        else:
+            current = []
         chatbot._cookies.update({'files_to_promote': [new_path] + current})
     return new_path
 
@@ -700,13 +727,16 @@ def is_the_upload_folder(string):
         return False
 
 
-def del_outdated_uploads(outdate_time_seconds):
-    PATH_PRIVATE_UPLOAD = get_conf('PATH_PRIVATE_UPLOAD')
+def del_outdated_uploads(outdate_time_seconds, target_path_base=None):
+    if target_path_base is None:
+        user_upload_dir = get_conf('PATH_PRIVATE_UPLOAD')
+    else:
+        user_upload_dir = target_path_base
     current_time = time.time()
     one_hour_ago = current_time - outdate_time_seconds
-    # Get a list of all subdirectories in the PATH_PRIVATE_UPLOAD folder
+    # Get a list of all subdirectories in the user_upload_dir folder
     # Remove subdirectories that are older than one hour
-    for subdirectory in glob.glob(f'{PATH_PRIVATE_UPLOAD}/*/*'):
+    for subdirectory in glob.glob(f'{user_upload_dir}/*'):
         subdirectory_time = os.path.getmtime(subdirectory)
         if subdirectory_time < one_hour_ago:
             try:
@@ -716,12 +746,67 @@ def del_outdated_uploads(outdate_time_seconds):
     return
 
 
-def on_file_uploaded(files, chatbot, txt, cookies, ipaddr: gr.Request):
+def html_local_file(file):
+    base_path = os.path.dirname(__file__)  # 项目目录
+    if os.path.exists(str(file)):
+        file = f'file={file.replace(base_path, ".")}'
+    return file
+
+
+def html_local_img(__file, layout='left', max_width=None, max_height=None, md=True):
+    style = ''
+    if max_width is not None:
+        style += f"max-width: {max_width};"
+    if max_height is not None:
+        style += f"max-height: {max_height};"
+    __file = html_local_file(__file)
+    a = f'<div align="{layout}"><img src="{__file}" style="{style}"></div>'
+    if md:
+        a = f'![{__file}]({__file})'
+    return a
+
+
+def file_manifest_filter_type(file_list, filter_: list = None):
+    new_list = []
+    if not filter_: filter_ = ['png', 'jpg', 'jpeg']
+    for file in file_list:
+        if str(os.path.basename(file)).split('.')[-1] in filter_:
+            new_list.append(html_local_img(file, md=False))
+        else:
+            new_list.append(file)
+    return new_list
+
+
+def to_markdown_tabs(head: list, tabs: list, alignment=':---:', column=False):
     """
-    当文件被上传时的回调函数
+    Args:
+        head: 表头：[]
+        tabs: 表值：[[列1], [列2], [列3], [列4]]
+        alignment: :--- 左对齐， :---: 居中对齐， ---: 右对齐
+        column: True to keep data in columns, False to keep data in rows (default).
+    Returns:
+        A string representation of the markdown table.
     """
-    if len(files) == 0:
-        return chatbot, txt
+    if column:
+        transposed_tabs = list(map(list, zip(*tabs)))
+    else:
+        transposed_tabs = tabs
+    # Find the maximum length among the columns
+    max_len = max(len(column) for column in transposed_tabs)
+
+    tab_format = "| %s "
+    tabs_list = "".join([tab_format % i for i in head]) + '|\n'
+    tabs_list += "".join([tab_format % alignment for i in head]) + '|\n'
+
+    for i in range(max_len):
+        row_data = [tab[i] if i < len(tab) else '' for tab in transposed_tabs]
+        row_data = file_manifest_filter_type(row_data, filter_=None)
+        tabs_list += "".join([tab_format % i for i in row_data]) + '|\n'
+
+    return tabs_list
+
+
+def on_file_uploaded(files, chatbot, txt,  cookies, ipaddr: gr.Request):
     private_upload = func_box.users_path.replace(func_box.base_path, '.')
     #     shutil.rmtree('./private_upload/')  不需要删除文件
     if type(ipaddr) is str:
@@ -767,9 +852,12 @@ def on_report_generated(cookies, files, chatbot, request):
     # 创建工作路径
     user_name = "default" if not user else 'default'
     time_tag = gen_time_str()
-    PATH_PRIVATE_UPLOAD = get_conf('PATH_PRIVATE_UPLOAD')
-    target_path_base = pj(PATH_PRIVATE_UPLOAD, user_name, time_tag)
+    target_path_base = get_upload_folder(user_name, tag=time_tag)
     os.makedirs(target_path_base, exist_ok=True)
+
+    # 移除过时的旧文件从而节省空间&保护隐私
+    outdate_time_seconds = 3600  # 一小时
+    del_outdated_uploads(outdate_time_seconds, get_upload_folder(user_name))
 
     # 逐个文件转移到目标路径
     upload_msg = ''
@@ -778,11 +866,10 @@ def on_report_generated(cookies, files, chatbot, request):
         this_file_path = pj(target_path_base, file_origin_name)
         shutil.move(file.name, this_file_path)
         upload_msg += extract_archive(file_path=this_file_path, dest_dir=this_file_path + '.extract')
-    # 整理文件集合
-    moved_files = [fp for fp in glob.glob(f'{target_path_base}/**/*', recursive=True)]
     txt = target_path_base
-    # 输出消息
-    moved_files_str = '\t\n\n'.join(moved_files)
+    # 整理文件集合 输出消息
+    moved_files = [fp for fp in glob.glob(f'{target_path_base}/**/*', recursive=True)]
+    moved_files_str = to_markdown_tabs(head=['文件'], tabs=[moved_files])
     chatbot.append(['我上传了文件，请查收',
                     f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
                     f'\n\n调用路径参数已自动修正到: \n\n{txt}' +
@@ -804,24 +891,28 @@ def load_chat_cookies():
 
     # deal with azure openai key
     if is_any_api_key(AZURE_API_KEY):
-        if is_any_api_key(API_KEY): API_KEY = API_KEY + ',' + AZURE_API_KEY
-        else: API_KEY = AZURE_API_KEY
+        if is_any_api_key(API_KEY):
+            API_KEY = API_KEY + ',' + AZURE_API_KEY
+        else:
+            API_KEY = AZURE_API_KEY
     if len(AZURE_CFG_ARRAY) > 0:
         for azure_model_name, azure_cfg_dict in AZURE_CFG_ARRAY.items():
-            if not azure_model_name.startswith('azure'): 
+            if not azure_model_name.startswith('azure'):
                 raise ValueError("AZURE_CFG_ARRAY中配置的模型必须以azure开头")
             AZURE_API_KEY_ = azure_cfg_dict["AZURE_API_KEY"]
             if is_any_api_key(AZURE_API_KEY_):
-                if is_any_api_key(API_KEY): API_KEY = API_KEY + ',' + AZURE_API_KEY_
-                else: API_KEY = AZURE_API_KEY_
+                if is_any_api_key(API_KEY):
+                    API_KEY = API_KEY + ',' + AZURE_API_KEY_
+                else:
+                    API_KEY = AZURE_API_KEY_
 
     customize_fn_overwrite_ = {}
     for k in range(NUM_CUSTOM_BASIC_BTN):
-        customize_fn_overwrite_.update({  
-            "自定义按钮" + str(k+1):{
-                "Title":    r"",
-                "Prefix":   r"请在自定义菜单中定义提示词前缀.",
-                "Suffix":   r"请在自定义菜单中定义提示词后缀",
+        customize_fn_overwrite_.update({
+            "自定义按钮" + str(k + 1): {
+                "Title": r"",
+                "Prefix": r"请在自定义菜单中定义提示词前缀.",
+                "Suffix": r"请在自定义菜单中定义提示词后缀",
             }
         })
     return {'api_key': API_KEY, 'llm_model': LLM_MODEL, 'customize_fn_overwrite': customize_fn_overwrite_}
@@ -849,6 +940,7 @@ def is_api2d_key(key):
 def is_open_sess_key(key):
     API_OPEN_SESS = re.match('sess-[a-zA-Z0-9]{40}$', key)
     return API_OPEN_SESS
+
 
 def is_any_api_key(key):
     if ',' in key:
@@ -894,7 +986,6 @@ def select_api_key(keys, llm_model):
     if llm_model.startswith('api2d-'):
         for k in key_list:
             if is_api2d_key(k): avail_key_list.append(k)
-
 
     if llm_model.startswith('azure-'):
         for k in key_list:
@@ -987,9 +1078,11 @@ def read_single_conf_with_lru_cache(arg):
 
     # 在读取API_KEY时，检查一下是不是忘了改config
     if arg == 'API_URL_REDIRECT':
-        oai_rd = r.get("https://api.openai.com/v1/chat/completions", None) # API_URL_REDIRECT填写格式是错误的，请阅读`https://github.com/binary-husky/gpt_academic/wiki/项目配置说明`
+        oai_rd = r.get("https://api.openai.com/v1/chat/completions",
+                       None)  # API_URL_REDIRECT填写格式是错误的，请阅读`https://github.com/binary-husky/gpt_academic/wiki/项目配置说明`
         if oai_rd and not oai_rd.endswith('/completions'):
-            print亮红( "\n\n[API_URL_REDIRECT] API_URL_REDIRECT填错了。请阅读`https://github.com/binary-husky/gpt_academic/wiki/项目配置说明`。如果您确信自己没填错，无视此消息即可。")
+            print亮红(
+                "\n\n[API_URL_REDIRECT] API_URL_REDIRECT填错了。请阅读`https://github.com/binary-husky/gpt_academic/wiki/项目配置说明`。如果您确信自己没填错，无视此消息即可。")
             time.sleep(5)
     if arg == 'API_KEY':
         print亮蓝(
@@ -1013,7 +1106,14 @@ def read_single_conf_with_lru_cache(arg):
 
 @lru_cache(maxsize=128)
 def get_conf(*args):
-    # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
+    """
+    本项目的所有配置都集中在config.py中。 修改配置有三种方法，您只需要选择其中一种即可：
+        - 直接修改config.py
+        - 创建并修改config_private.py
+        - 修改环境变量（修改docker-compose.yml等价于修改容器内部的环境变量）
+
+    注意：如果您使用docker-compose部署，请修改docker-compose（等价于修改容器内部的环境变量）
+    """
     res = []
     for arg in args:
         r = read_single_conf_with_lru_cache(arg)
@@ -1188,11 +1288,29 @@ def gen_time_str():
     return time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
 
 
-def get_log_folder(user='default', plugin_name='shared'):
+def get_log_folder(user=default_user_name, plugin_name='shared'):
+    if user is None: user = default_user_name
     PATH_LOGGING = get_conf('PATH_LOGGING')
-    _dir = pj(PATH_LOGGING, user, plugin_name)
+    if plugin_name is None:
+        _dir = pj(PATH_LOGGING, user)
+    else:
+        _dir = pj(PATH_LOGGING, user, plugin_name)
     if not os.path.exists(_dir): os.makedirs(_dir)
     return _dir
+
+
+def get_upload_folder(user=default_user_name, tag=None):
+    PATH_PRIVATE_UPLOAD = get_conf('PATH_PRIVATE_UPLOAD')
+    if user is None: user = default_user_name
+    if tag is None or len(tag) == 0:
+        target_path_base = pj(PATH_PRIVATE_UPLOAD, user)
+    else:
+        target_path_base = pj(PATH_PRIVATE_UPLOAD, user, tag)
+    return target_path_base
+
+
+def get_user(chatbotwithcookies):
+    return chatbotwithcookies._cookies.get('user_name', default_user_name)
 
 
 class ProxyNetworkActivate():
@@ -1274,7 +1392,6 @@ def Singleton(cls):
 
 
 def set_conf(key, value):
-    from comm_tools.toolbox import read_single_conf_with_lru_cache, get_conf
     read_single_conf_with_lru_cache.cache_clear()
     get_conf.cache_clear()
     os.environ[key] = str(value)
@@ -1313,7 +1430,7 @@ def get_plugin_default_kwargs():
     llm_kwargs = {
         'api_key': cookies['api_key'],
         'llm_model': cookies['llm_model'],
-        'top_p':1.0,
+        'top_p': 1.0,
         'max_length': None,
         'temperature': 1.0,
     }
@@ -1326,7 +1443,7 @@ def get_plugin_default_kwargs():
         "plugin_kwargs": {},
         "chatbot_with_cookie": chatbot,
         "history": [],
-        "system_prompt": "You are a good AI.", 
+        "system_prompt": "You are a good AI.",
         "web_port": None
     }
     return default_plugin_kwargs
@@ -1339,7 +1456,7 @@ def get_chat_default_kwargs():
     llm_kwargs = {
         'api_key': cookies['api_key'],
         'llm_model': cookies['llm_model'],
-        'top_p':1.0,
+        'top_p': 1.0,
         'max_length': None,
         'temperature': 1.0,
     }
@@ -1362,18 +1479,17 @@ def get_pictures_list(path):
     return file_manifest
 
 
-import base64
 def have_any_recent_upload_image_files(chatbot):
     _5min = 5 * 60
-    if chatbot is None: return False, None    # chatbot is None
+    if chatbot is None: return False, None  # chatbot is None
     most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
-    if not most_recent_uploaded: return False, None   # most_recent_uploaded is None
+    if not most_recent_uploaded: return False, None  # most_recent_uploaded is None
     if time.time() - most_recent_uploaded["time"] < _5min:
         most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
         path = most_recent_uploaded['path']
         file_manifest = get_pictures_list(path)
         if len(file_manifest) == 0: return False, None
-        return True, file_manifest # most_recent_uploaded is new
+        return True, file_manifest  # most_recent_uploaded is new
     else:
         return False, None  # most_recent_uploaded is too old
 

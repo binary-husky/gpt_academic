@@ -12,7 +12,7 @@ from threading import Thread
 # ------------------------------------------------------------------------------------------------------------------------
 # 🔌💻 Local Model
 # ------------------------------------------------------------------------------------------------------------------------
-class GetONNXGLMHandle(LocalLLMHandle):
+class GetLlamaHandle(LocalLLMHandle):
 
     def load_model_info(self):
         # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行
@@ -87,4 +87,4 @@ class GetONNXGLMHandle(LocalLLMHandle):
 # ------------------------------------------------------------------------------------------------------------------------
 # 🔌💻 GPT-Academic Interface
 # ------------------------------------------------------------------------------------------------------------------------
-predict_no_ui_long_connection, predict = get_local_llm_predict_fns(GetONNXGLMHandle, model_name)
+predict_no_ui_long_connection, predict = get_local_llm_predict_fns(GetLlamaHandle, model_name)

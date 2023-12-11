@@ -56,11 +56,11 @@ vt.get_plugin_handle = silence_stdout_fn(get_plugin_handle)
 vt.get_plugin_default_kwargs = silence_stdout_fn(get_plugin_default_kwargs)
 vt.get_chat_handle = silence_stdout_fn(get_chat_handle)
 vt.get_chat_default_kwargs = silence_stdout_fn(get_chat_default_kwargs)
-vt.chat_to_markdown_str = chat_to_markdown_str
+vt.chat_to_markdown_str = (chat_to_markdown_str)
 proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT, API_KEY = \
     vt.get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'LAYOUT', 'API_KEY')
 
-def plugin_test(main_input, plugin, advanced_arg=None):
+def plugin_test(main_input, plugin, advanced_arg=None, debug=True):
     from rich.live import Live
     from rich.markdown import Markdown
 
@@ -72,7 +72,10 @@ def plugin_test(main_input, plugin, advanced_arg=None):
     plugin_kwargs['main_input'] = main_input
     if advanced_arg is not None:
         plugin_kwargs['plugin_kwargs'] = advanced_arg
-    my_working_plugin = silence_stdout(plugin)(**plugin_kwargs)
+    if debug:
+        my_working_plugin = (plugin)(**plugin_kwargs)
+    else:
+        my_working_plugin = silence_stdout(plugin)(**plugin_kwargs)
 
     with Live(Markdown(""), auto_refresh=False, vertical_overflow="visible") as live:
         for cookies, chat, hist, msg in my_working_plugin:

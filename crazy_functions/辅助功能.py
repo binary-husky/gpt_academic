@@ -2,10 +2,12 @@
 # @Time   : 2023/4/19
 # @Author : Spike
 # @Descr   :
-from comm_tools.toolbox import update_ui, get_conf
+from comm_tools.toolbox import update_ui, get_conf, get_user
 from comm_tools.toolbox import CatchException
-
+from comm_tools.toolbox import default_user_name
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+import shutil
+import os
 
 
 @CatchException
@@ -34,10 +36,19 @@ def 清除缓存(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     chatbot.append(['清除本地缓存数据', '执行中. 删除数据'])
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
-    import shutil, os
-    PATH_PRIVATE_UPLOAD, PATH_LOGGING = get_conf('PATH_PRIVATE_UPLOAD', 'PATH_LOGGING')
-    shutil.rmtree(PATH_LOGGING, ignore_errors=True)
-    shutil.rmtree(PATH_PRIVATE_UPLOAD, ignore_errors=True)
+    def _get_log_folder(user=default_user_name):
+        PATH_LOGGING = get_conf('PATH_LOGGING')
+        _dir = os.path.join(PATH_LOGGING, user)
+        if not os.path.exists(_dir): os.makedirs(_dir)
+        return _dir
+
+    def _get_upload_folder(user=default_user_name):
+        PATH_PRIVATE_UPLOAD = get_conf('PATH_PRIVATE_UPLOAD')
+        _dir = os.path.join(PATH_PRIVATE_UPLOAD, user)
+        return _dir
+
+    shutil.rmtree(_get_log_folder(get_user(chatbot)), ignore_errors=True)
+    shutil.rmtree(_get_upload_folder(get_user(chatbot)), ignore_errors=True)
 
     chatbot.append(['清除本地缓存数据', '执行完成'])
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面

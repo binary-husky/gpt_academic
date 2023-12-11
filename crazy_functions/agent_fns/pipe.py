@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-from comm_tools.toolbox import get_log_folder, update_ui, gen_time_str, trimmed_format_exc, promote_file_to_downloadzone
-=======
-from toolbox import get_log_folder, update_ui, gen_time_str, get_conf, promote_file_to_downloadzone
+from comm_tools.toolbox import get_log_folder, update_ui, gen_time_str, get_conf, promote_file_to_downloadzone
 from crazy_functions.agent_fns.watchdog import WatchDog
->>>>>>> master
 import time, os
 
 class PipeCom:

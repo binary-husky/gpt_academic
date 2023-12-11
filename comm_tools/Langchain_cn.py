@@ -7,8 +7,8 @@ import gradio as gr
 from comm_tools import func_box, database_processor
 from crazy_functions.kingsoft_fns import crazy_box, crzay_kingsoft, crzay_qqdocs
 
-from zh_langchain.chains.local_doc_qa import LocalDocQA
-from zh_langchain.configs import model_config
+from crazy_functions.vector_fns.vector_database import LocalDocQA
+from crazy_functions.vector_fns import vector_database
 
 
 class knowledge_archive_interface():
@@ -16,8 +16,8 @@ class knowledge_archive_interface():
         self.current_id = ""
         self.kai_path = None
         import nltk
-        if model_config.NLTK_DATA_PATH not in nltk.data.path:
-            nltk.data.path = [model_config.NLTK_DATA_PATH] + nltk.data.path
+        if vector_database.NLTK_DATA_PATH not in nltk.data.path:
+            nltk.data.path = [vector_database.NLTK_DATA_PATH] + nltk.data.path
         self.qa_handle = LocalDocQA()
         self.qa_handle.init_cfg()
         self.text2vec_large_chinese = None
@@ -31,11 +31,11 @@ class knowledge_archive_interface():
             print('Checking Text2vec ...')
             from langchain.embeddings import HuggingFaceEmbeddings
             with ProxyNetworkActivate('Download_LLM'):  # 临时地激活代理网络
-                self.text2vec_large_chinese = HuggingFaceEmbeddings(model_name="shibing624/text2vec-base-chinese")
+                self.text2vec_large_chinese = HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
         return self.text2vec_large_chinese
 
     def filter_quarterly_files(self, files):
-        database_files = list(self.get_loaded_file())
+        database_files = list(self.get_loaded_file(files))
 
     def construct_vector_store(self, vs_id, files):
         for file in files:
@@ -49,8 +49,8 @@ class knowledge_archive_interface():
     def get_current_archive_id(self):
         return self.current_id
 
-    def get_loaded_file(self):
-        return self.qa_handle.get_loaded_file()
+    def get_loaded_file(self, files):
+        return self.qa_handle.get_loaded_file(files)
 
     def get_init_file(self, vs_id):
         from langchain.vectorstores import FAISS
@@ -82,6 +82,7 @@ class knowledge_archive_interface():
         )
         return resp, prompt, True
 
+
 def classification_filtering_tag(cls_select, ipaddr):
     if cls_select == '个人知识库':
         cls_select = os.path.join(cls_select, ipaddr)
@@ -99,7 +100,8 @@ def knowledge_base_writing(cls_select, links: str, select, name, kai_handle, ipa
         kai_id = name
         os.rename(os.path.join(vector_path, select), os.path.join(vector_path, name))
         _, load_file = func_box.get_directory_list(vector_path, user_addr)
-        yield '', f'更名成功～ `{select}` -> `{name}`', gr.Dropdown.update(), gr.Dropdown.update(choices=load_file, value=kai_id), gr.Dropdown.update(), kai_handle
+        yield '', f'更名成功～ `{select}` -> `{name}`', gr.Dropdown.update(), gr.Dropdown.update(choices=load_file,
+                                                                                                value=kai_id), gr.Dropdown.update(), kai_handle
         if not links and not kai_handle.get('file_list'): return  # 如果文件和链接都为空，那么就有必要往下执行了
     elif select:
         kai_id = select
@@ -116,7 +118,7 @@ def knowledge_base_writing(cls_select, links: str, select, name, kai_handle, ipa
     yield '开始咯开始咯～', '', gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(), kai_handle
     files = kai_handle['file_path']
     file_manifest = []
-    spl,  = toolbox.get_conf('spl')
+    spl = toolbox.get_conf('spl')
     # 本地文件
     error = ''
     for sp in spl:
@@ -125,8 +127,7 @@ def knowledge_base_writing(cls_select, links: str, select, name, kai_handle, ipa
     # 网络文件
     try:
         task_info, kdocs_manifest_tmp, _ = crzay_kingsoft.get_kdocs_from_everything(links, type='', ipaddr=user_addr)
-        task_info, kdocs_manifest_tmp, _ = crzay_kingsoft.get(links, type='', ipaddr=user_addr)
-
+        # task_info, kdocs_manifest_tmp, _ = crzay_kingsoft.get(links, type='', ipaddr=user_addr)
         if kdocs_manifest_tmp:
             error += task_info
             yield (f"", error, gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(), kai_handle)
@@ -144,9 +145,10 @@ def knowledge_base_writing(cls_select, links: str, select, name, kai_handle, ipa
         types = "\t".join(f"`{s}`" for s in spl)
         link_type = f'\n\n目录: https://www.kdocs.cn/{func_box.html_tag_color("ent")}/41000207/{func_box.html_tag_color("130730080903")}\n\n' \
                     f'分享文件: https://www.kdocs.cn/l/{func_box.html_tag_color("cpfcxiGjEvqK")}'
-        yield (f'没有找到任何可读取文件， 当前支持解析的本地文件格式如下: \n\n{types}\n\n在线文档链接支持如下: {link_type}',
-               error, gr.Dropdown.update(), gr.Dropdown.update(),
-               gr.Dropdown.update(),  kai_handle)
+        yield (
+        f'没有找到任何可读取文件， 当前支持解析的本地文件格式如下: \n\n{types}\n\n在线文档链接支持如下: {link_type}',
+        error, gr.Dropdown.update(), gr.Dropdown.update(),
+        gr.Dropdown.update(), kai_handle)
         return
     # # < -------------------预热文本向量化模组--------------- >
     # yield ('正在加载向量化模型...', '', gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(), kai_handle)
@@ -158,10 +160,11 @@ def knowledge_base_writing(cls_select, links: str, select, name, kai_handle, ipa
     yield (f'正在准备将以下文件向量化，生成知识库文件，若文件数据较多，可能需要等待几小时：\n\n{preprocessing_files}',
            error, gr.Dropdown.update(), gr.Dropdown.update(),
            gr.update(), kai_handle)
-    with toolbox.ProxyNetworkActivate():    # 临时地激活代理网络
+    with toolbox.ProxyNetworkActivate():  # 临时地激活代理网络
         kai = knowledge_archive_interface(vs_path=vector_path)
         qa_handle, vs_path = kai.construct_vector_store(vs_id=kai_id, files=file_manifest)
-    with open(os.path.join(vector_path, kai_id, user_addr), mode='w') as f: pass
+    with open(os.path.join(vector_path, kai_id, user_addr), mode='w') as f:
+        pass
     _, kai_files = kai.get_init_file(kai_id)
     kai_handle['file_list'] = [os.path.basename(file) for file in kai_files if os.path.exists(file)]
     kai_files = func_box.to_markdown_tabs(head=['文件'], tabs=[tab_show])
@@ -203,8 +206,10 @@ def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
             # < -------------------查询向量数据库--------------- >
             prompt_cls = '知识库提示词'
             resp, prompt, _ok = kai.answer_with_archive_by_id(new_txt, id, llm_kwargs)
-            referenced_documents = "\n".join([f"{k}: " + doc.page_content for k, doc in enumerate(resp['source_documents'])])
-            source_documents = "\n".join({func_box.html_view_blank(doc.metadata.get('source', '')): '' for k, doc in enumerate(resp['source_documents'])})
+            referenced_documents = "\n".join(
+                [f"{k}: " + doc.page_content for k, doc in enumerate(resp['source_documents'])])
+            source_documents = "\n".join({func_box.html_view_blank(doc.metadata.get('source', '')): '' for k, doc in
+                                          enumerate(resp['source_documents'])})
             if not referenced_documents:
                 gpt_say += f"`{id}`知识库中没有与问题匹配的文本，所以不会提供任何参考文本，你可以在Settings-更改`知识库检索相关度`中进行调优。\n"
                 chatbot[-1] = [txt, gpt_say]
@@ -241,8 +246,10 @@ def obtain_classification_knowledge_base(cls_name, ipaddr: gr.Request):
         load_path = os.path.join(func_box.knowledge_path, cls_name)
     load_list, user_list = func_box.get_directory_list(load_path, user)
     know_user_build = toolbox.get_conf('know_user_build')
-    if know_user_build: mesg = '构建重构没有任何限制，你可以更改config中的`know_user_build`，限制只能重构构建个人的知识库'
-    else: mesg = '你只能重构自己上传的知识库哦😎'
+    if know_user_build:
+        mesg = '构建重构没有任何限制，你可以更改config中的`know_user_build`，限制只能重构构建个人的知识库'
+    else:
+        mesg = '你只能重构自己上传的知识库哦😎'
     status = f"{mesg}" \
              f"\n\n{func_box.to_markdown_tabs(head=['可编辑知识库', '可用知识库'], tabs=[user_list, load_list], column=False)}\n\n"
     return gr.Dropdown.update(choices=user_list), gr.Dropdown.update(choices=load_list, label=f'{cls_name}'), status
@@ -265,7 +272,7 @@ def obtaining_knowledge_base_files(cls_select, vs_id, chatbot, kai_handle, model
     if vs_id and '预加载知识库' in model:
         cls_select = classification_filtering_tag(cls_select, func_box.user_client_mark(ipaddr))
         vs_path = os.path.join(func_box.knowledge_path, cls_select)
-        you_say = f'请检查知识库内文件{"  ".join([func_box.html_tag_color(i)for i in vs_id])}'
+        you_say = f'请检查知识库内文件{"  ".join([func_box.html_tag_color(i) for i in vs_id])}'
         chatbot.append([you_say, None])
         yield chatbot, '🏃🏻‍ 正在努力轮询中....请稍等， tips：知识库可以多选，但不要贪杯哦～️', kai_handle
         kai_files = {}
@@ -277,7 +284,8 @@ def obtaining_knowledge_base_files(cls_select, vs_id, chatbot, kai_handle, model
             qa_handle, _dict = kai.get_init_file(vs_id=id)
             kai_files.update(_dict)
             kai_handle['know_obj'].update({id: qa_handle})
-        tabs = [[_id, func_box.html_view_blank(file), kai_files[file][_id]] for file in kai_files for _id in kai_files[file]]
+        tabs = [[_id, func_box.html_view_blank(file), kai_files[file][_id]] for file in kai_files for _id in
+                kai_files[file]]
         kai_handle['file_list'] = [os.path.basename(file) for file in kai_files if os.path.exists(file)]
         chatbot[-1] = [you_say, f'检查完成，当前选择的知识库内可用文件如下：'
                                 f'\n\n {func_box.to_markdown_tabs(head=["所属知识库", "文件", "文件类型"], tabs=tabs, column=True)}\n\n'
@@ -291,9 +299,10 @@ def single_step_thread_building_knowledge(cls_name, know_id, file_manifest, llm_
     cls_select = classification_filtering_tag(cls_name, llm_kwargs['ipaddr'])
     vector_path = os.path.join(func_box.knowledge_path, cls_select)
     os.makedirs(vector_path, exist_ok=True)
+
     def thread_task():
         kai = knowledge_archive_interface(vs_path=vector_path)
         qa_handle, vs_path = kai.construct_vector_store(vs_id=know_id, files=file_manifest)
         llm_kwargs['know_dict']['know_obj'][know_id] = qa_handle
-    threading.Thread(target=thread_task, ).start()
 
+    threading.Thread(target=thread_task, ).start()
