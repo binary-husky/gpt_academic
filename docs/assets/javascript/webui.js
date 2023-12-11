@@ -1,7 +1,7 @@
 function addHideBoxClassExcept(element) {
     chuanhuPopup.classList.add('showBox');
     popupWrapper.classList.add('showBox');
-    let boxes = [settingBox, trainingBox, searchBox, promptBox]
+    let boxes = [settingBox, searchBox, promptBox]
     for (let box of boxes) {
         if (box !== element) {
             box.classList.add('hideBox');
@@ -19,10 +19,6 @@ function openSettingBox() {
 
 }
 
-function openTrainingBox() {
-    addHideBoxClassExcept(trainingBox)
-
-}
 
 function openSearch() {
     addHideBoxClassExcept(searchBox)
@@ -93,7 +89,6 @@ function closeBtnClick(obj = "box") {
 function closeBox() {
     chuanhuPopup.classList.remove('showBox');
     popupWrapper.classList.remove('showBox');
-    trainingBox.classList.add('hideBox');
     settingBox.classList.add('hideBox');
     document.querySelector('.chuanhu-mask')?.remove();
     document.body.classList.remove('popup-open');

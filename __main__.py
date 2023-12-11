@@ -46,10 +46,10 @@ get_html = func_box.get_html
 from webui_elem.history_menu import LeftElem
 from webui_elem.chatbot_area import ChatbotElem
 from webui_elem.tools_menu import RightElem
-from webui_elem.popup_wrapper import Settings, Training, Config, FakeComponents, AdvancedSearch, Prompt
+from webui_elem.popup_wrapper import Settings, Config, FakeComponents, AdvancedSearch, Prompt
 
 
-class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, FakeComponents, AdvancedSearch, Prompt):
+class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents, AdvancedSearch, Prompt):
 
     def __init__(self):
         super().__init__()
@@ -395,7 +395,6 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Training, Config, Fake
             with gr.Row(elem_id="popup-wrapper"):
                 with gr.Box(elem_id="chuanhu-popup"):
                     self.draw_popup_settings()
-                    self.draw_popup_training()
                     self.draw_popup_config()
                     self.draw_popup_fakec()
                     self.draw_popup_search()

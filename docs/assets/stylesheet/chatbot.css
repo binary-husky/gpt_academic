@@ -65,7 +65,7 @@ hr.append-display {
     width: 42px;
 }
 #chatbot-input-tb-row {
-    min-width: min(80%,100%) !important;
+    min-width: min(87%,100%) !important;
     gap: 0;
     justify-content: end;
     border-radius: 21px;

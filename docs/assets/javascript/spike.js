@@ -240,3 +240,15 @@ function toast_push(msg, duration) {
         }, d * 1000);
     }, duration);
 }
+
+
+function sm_move_more_label() {
+    let more_label_group = chatbotArea.querySelector('#chatbot-input-more-area').querySelector('.chatbot-input-more-label-group');
+    let more_sm_btn = chatbotArea.querySelector('#gr-chat-sm-column');
+    let more_sm_select = chatbotArea.querySelector('#gr-know-sm-column');
+
+    if (more_label_group && !more_label_group.contains(more_sm_btn) && !more_label_group.contains(more_sm_select)) {
+        more_label_group.insertBefore(more_sm_select, more_label_group.firstChild);
+        more_label_group.appendChild(more_sm_btn);
+    }
+}

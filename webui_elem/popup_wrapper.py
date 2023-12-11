@@ -75,54 +75,6 @@ class Settings:
                 self._draw_setting_info()
 
 
-class Training:
-
-    def __init__(self):
-        pass
-
-    def _draw_title(self):
-        with gr.Tab(label="OpenAI " + i18n("微调")):
-            self.openai_train_status = gr.Markdown(label=i18n("训练状态"), value=i18n(
-                "查看[使用介绍](https://github.com/GaiZhenbiao/ChuanhuChatGPT/wiki/使用教程#微调-gpt-35)"))
-
-    def _draw_prepare_dataset(self):
-        with gr.Tab(label=i18n("准备数据集")):
-            self.dataset_preview_json = gr.JSON(
-                label=i18n("数据集预览"), readonly=True)
-            self.dataset_selection = gr.Files(label=i18n("选择数据集"), file_types=[
-                ".xlsx", ".jsonl"], file_count="single")
-            self.upload_to_openai_btn = gr.Button(
-                i18n("上传到OpenAI"), variant="primary", interactive=False)
-
-    def _draw_pre_training(self):
-        with gr.Tab(label=i18n("训练")):
-            self.openai_ft_file_id = gr.Textbox(label=i18n(
-                "文件ID"), value="", lines=1, placeholder=i18n("上传到 OpenAI 后自动填充"))
-            self.openai_ft_suffix = gr.Textbox(label=i18n(
-                "模型名称后缀"), value="", lines=1, placeholder=i18n("可选，用于区分不同的模型"))
-            self.openai_train_epoch_slider = gr.Slider(label=i18n(
-                "训练轮数（Epochs）"), minimum=1, maximum=100, value=3, step=1, interactive=True)
-            self.openai_start_train_btn = gr.Button(
-                i18n("开始训练"), variant="primary", interactive=False)
-
-    def _draw_training_status(self):
-        with gr.Tab(label=i18n("状态")):
-            self.openai_status_refresh_btn = gr.Button(i18n("刷新状态"))
-            self.openai_cancel_all_jobs_btn = gr.Button(
-                i18n("取消所有任务"))
-            self.add_to_models_btn = gr.Button(
-                i18n("添加训练好的模型到模型列表"), interactive=False)
-
-    def draw_popup_training(self):
-        with gr.Box(elem_id="chuanhu-training"):
-            popup_title("## " + i18n("训练"))
-            with gr.Tabs(elem_id="chuanhu-training-tabs"):
-                self._draw_title()
-                self._draw_prepare_dataset()
-                self._draw_pre_training()
-                self._draw_training_status()
-
-
 class AdvancedSearch:
 
     def __init__(self):
@@ -258,6 +210,33 @@ class Prompt:
             self.langchain_status = gr.Markdown(value='')
             self.langchain_error = gr.Markdown(value='')
 
+    def _draw_popup_training(self):
+        with gr.TabItem('OpenAi'+i18n('预训练'), id='training_tab', elem_id='training_tab'):
+            self.openai_train_status = gr.Markdown(label=i18n("训练状态"), value=i18n(
+                "查看[使用介绍](https://github.com/GaiZhenbiao/ChuanhuChatGPT/wiki/使用教程#微调-gpt-35)"))
+            with gr.Row():
+                with gr.Column(elem_classes='column_left'):
+                    self.dataset_selection = gr.Files(label=i18n("选择数据集"), file_types=[
+                        ".xlsx", ".jsonl"], file_count="single")
+                    self.dataset_preview_json = gr.JSON(
+                        label=i18n("数据集预览"), readonly=True)
+                    self.upload_to_openai_btn = gr.Button(
+                        i18n("上传到OpenAI"), variant="primary", interactive=False)
+                with gr.Column(elem_classes='column_right'):
+                    self.openai_ft_file_id = gr.Textbox(label=i18n(
+                        "文件ID"), value="", lines=1, placeholder=i18n("上传到 OpenAI 后自动填充"))
+                    self.openai_ft_suffix = gr.Textbox(label=i18n(
+                        "模型名称后缀"), value="", lines=1, placeholder=i18n("可选，用于区分不同的模型"))
+                    self.openai_train_epoch_slider = gr.Slider(label=i18n(
+                        "训练轮数（Epochs）"), minimum=1, maximum=100, value=3, step=1, interactive=True)
+                    self.openai_start_train_btn = gr.Button(
+                        i18n("开始训练"), variant="primary", interactive=False)
+                    self.openai_status_refresh_btn = gr.Button(i18n("刷新状态"))
+                    self.openai_cancel_all_jobs_btn = gr.Button(
+                        i18n("取消所有任务"))
+                    self.add_to_models_btn = gr.Button(
+                        i18n("添加训练好的模型到模型列表"), interactive=False)
+
     def draw_popup_prompt(self):
         with gr.Box(elem_id="spike-prompt"):
             devs_document = toolbox.get_conf('devs_document')
@@ -267,6 +246,7 @@ class Prompt:
                 self._draw_tabs_prompt()
                 self._draw_tabs_masks()
                 self._draw_langchain_base()
+                self._draw_popup_training()
 
 
 class FakeComponents:

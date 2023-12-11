@@ -80,6 +80,7 @@ div.svelte-15lo0d8>*, div.svelte-15lo0d8>.form>* {
 }
 #gr-more-sm-row {
     gap: unset;
+    min-width: min(0px, 100%);
 }
 #gr-more-sm-column {
     min-width: min(30%, 100%) !important;
@@ -87,17 +88,17 @@ div.svelte-15lo0d8>*, div.svelte-15lo0d8>.form>* {
 }
 /* 小按钮 */
 #gr-chat-sm-column {
-    min-width: min(10%, 100%) !important;
-    max-height: 42px;
-    gap: 22%;
+    min-width: min(100%, 100%) !important;
+    gap: 25%;
+    max-width: 70px !important;
     display: flex;
-    justify-content: start;
     align-content: center;
     flex-direction: row;
-    max-width: 62px;
-    margin-left: 1%;;
+    margin-top: 2px;
+    margin-right: 10px;
 }
 #gr-chat-sm-column button {
+    margin-left: 12px !important;
     box-shadow: none;
     justify-content: center;
     align-items: center;
@@ -105,10 +106,17 @@ div.svelte-15lo0d8>*, div.svelte-15lo0d8>.form>* {
     width: 24px;
     display: flex;
 }
+.chatbot-full-width #gr-chat-sm-column {
+    min-width: min(12%, 100%) !important;
+    gap: 22%;
+}
+.chatbot-full-width #gr-chat-sm-column button {
+    margin-left: unset;
+}
 /*  */
-.gr-know-sm-column {
-    min-width: min(25%, 100%) !important;
-    max-width: min-content !important;
+#gr-know-sm-column {
+    min-width: min(30%, 100%) !important;
+    max-width: 220px !important;
     margin-right: 7px;
     justify-content: center;
     align-items: center;

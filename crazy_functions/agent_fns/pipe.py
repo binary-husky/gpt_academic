@@ -2,6 +2,7 @@ from comm_tools.toolbox import get_log_folder, update_ui, gen_time_str, get_conf
 from crazy_functions.agent_fns.watchdog import WatchDog
 import time, os
 
+
 class PipeCom:
     def __init__(self, cmd, content) -> None:
         self.cmd = cmd

@@ -384,7 +384,9 @@ body.popup-open {
 }
 .is-gpt .show-on-gpt {
     /* visibility: visible; */
-    display: block;
+    /* display: block;*/
+    margin-top: 2px;
+    display: none;
 }
 
 #chatbot-footer {

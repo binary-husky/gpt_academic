@@ -32,7 +32,6 @@ var chuanhuPopup = null;
 
 var searchBox = null;
 var settingBox = null;
-var trainingBox = null;
 var promptBox = null;
 
 var popupWrapper = null;
@@ -92,7 +91,6 @@ function initialize() {
     historySelector = gradioApp().querySelector('#history-select-dropdown');
     chuanhuPopup = gradioApp().querySelector('#chuanhu-popup');
     settingBox = gradioApp().querySelector('#chuanhu-setting');
-    trainingBox = gradioApp().querySelector('#chuanhu-training');
     searchBox = gradioApp().querySelector('#spike-search');
     promptBox = gradioApp().querySelector('#spike-prompt');
     popupWrapper = gradioApp().querySelector('#popup-wrapper');
@@ -121,7 +119,6 @@ function initialize() {
     checkModel();
 
     settingBox.classList.add('hideBox');
-    trainingBox.classList.add('hideBox');
 
     if (!historyLoaded) loadHistoryHtml();
     if (!usernameGotten) getUserInfo();
@@ -140,6 +137,7 @@ function initialize() {
     check_move_list();
     btn_move_to_tab();
     add_func_event();
+    sm_move_more_label();
     return true;
 }
 
@@ -309,8 +307,10 @@ function setScrollShadow() {
 function setPopupBoxPosition() {
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
-    popupWrapper.style.height = `${screenHeight}px`;
-    popupWrapper.style.width = `${screenWidth}px`;
+    if (popupWrapper) {
+        popupWrapper.style.height = `${screenHeight}px`;
+        popupWrapper.style.width = `${screenWidth}px`;
+    }
     // const popupBoxWidth = 680;
     // const popupBoxHeight = 400;
     // chuanhuPopup.style.left = `${(screenWidth - popupBoxWidth) / 2}px`;

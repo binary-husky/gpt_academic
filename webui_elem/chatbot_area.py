@@ -68,7 +68,7 @@ class ChatbotElem:
                                 self.sm_code_block = gr.Button(value='< > 代码块', elem_id='sm_code_btn')
                                 self.sm_upload_history = gr.Button("🥷 我的文件", elem_id='sm_file_btn')
 
-                        with gr.Column(scale=1, elem_classes='gr-know-sm-column') as self.sm_know_select:
+                        with gr.Column(scale=1, elem_id='gr-know-sm-column') as self.sm_know_select:
                             self.langchain_dropdown = gr.Dropdown(choices=[], value=[],
                                                                   show_label=True, interactive=True, label='知识库',
                                                                   multiselect=True, container=False,
