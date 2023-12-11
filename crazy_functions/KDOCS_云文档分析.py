@@ -102,9 +102,9 @@ def Kdocs_多阶段生成回答(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
     multi_stage_config, = crazy_box.json_args_return(plugin_kwargs, keys=['阶段性产出'], default={})
     file_count = {}
     for stage in multi_stage_config:
-        prompt = multi_stage_config[stage].get('提示词', False)
-        func = multi_stage_config[stage].get('调用方法', False)
-        knowledge = multi_stage_config[stage].get('关联知识库', False)
+        prompt = stage.get('提示词', False)
+        func = stage.get('调用方法', False)
+        knowledge = stage.get('关联知识库', False)
         file_count[stage] = []
         multi_model_parallelism, = crazy_box.json_args_return(plugin_kwargs, ['多模型并行'], llm_kwargs['llm_model'])
         llm_kwargs['llm_model'] = str(multi_model_parallelism).rstrip('&')

@@ -137,10 +137,9 @@ def html_view_blank(__href: str, file_name='', to_tabs=False):
     __href = html_local_file(__href)
     if not file_name:
         file_name = __href.split('/')[-1]
-    a = f'<a href="{__href}" target="_blank" class="svelte-xrr240">{file_name}</a>'
-    a = link_mtime_to_md(__file)
+    a = f'> {__href}'
     if to_tabs:
-        a = "\n\n" + to_markdown_tabs(head=['下载地址', '插件复用地址'], tabs=[[a], [__file]]) + "\n\n"
+        a = "\n\n" + to_markdown_tabs(head=['下载地址', '插件复用地址'], tabs=[[__file], [a]]) + "\n\n"
     return a
 
 
@@ -180,8 +179,10 @@ def file_manifest_filter_type(file_list, filter_: list = None, md_type=False):
     for file in file_list:
         if str(os.path.basename(file)).split('.')[-1] in filter_:
             new_list.append(html_local_img(file, md=md_type))
-        else:
+        elif os.path.exists(file):
             new_list.append(link_mtime_to_md(file))
+        else:
+            new_list.append(file)
     return new_list
 
 
@@ -494,7 +495,6 @@ def to_markdown_tabs(head: list, tabs: list, alignment=':---:', column=False):
         row_data = [tab[i] if i < len(tab) else '' for tab in transposed_tabs]
         row_data = file_manifest_filter_type(row_data, filter_=None)
         tabs_list += "".join([tab_format % i for i in row_data]) + '|\n'
-
     return tabs_list
 
 

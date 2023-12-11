@@ -138,12 +138,10 @@ def func_decision_tree(func, cookies, single_turn, use_websearch,
         if is_try:
             user_data = history_processor.get_user_basedata(chatbot_with_cookie, llm_kwargs['ipaddr'])
             plugin = user_data['chat'][-1].get('plugin')
-            txt_passon = cookies['last_chat']
             if plugin:
+                txt_passon = plugin['input']
                 from comm_tools.crazy_functional import crazy_fns
                 func_name = plugin['func_name']
-                if not txt_passon:
-                    txt_passon = plugin['input']
                 plugin_kwargs.update(plugin['kwargs'])
                 cookies['is_plugin'] = {'func_name': func_name, 'input': txt_passon, 'kwargs': plugin_kwargs}
                 try_f = crazy_fns.get(func_name, False)

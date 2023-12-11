@@ -851,7 +851,7 @@ def supplementary_test_case(gpt_response_collection, llm_kwargs, plugin_kwargs, 
             test_case, filename=long_name_processing(file_name))
         md = Utils().write_markdown(data=desc, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(file_name))
         chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, to_tabs=True)}\n\n' \
-                          f'{file_name}补充思路如下：\t{func_box.html_view_blank(__href=md, to_tabs=True)}\n\n--\n\n'
+                          f'{file_name}补充思路如下：\t{func_box.html_view_blank(__href=md, to_tabs=True)}\n\n---\n\n'
         chatbot[-1] = ([you_say, chat_file_list])
         yield from toolbox.update_ui(chatbot, history)
         files_limit.append(file_path)
