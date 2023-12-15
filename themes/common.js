@@ -129,14 +129,7 @@ function chatbotAutoHeight(){
     }, 50); // 每100毫秒执行一次
 }
 
-function GptAcademicJavaScriptInit(LAYOUT = "LEFT-RIGHT") {
-    chatbotIndicator = gradioApp().querySelector('#gpt-chatbot > div.wrap');
-    var chatbotObserver = new MutationObserver(() => {
-        chatbotContentChanged(1);
-    });
-    chatbotObserver.observe(chatbotIndicator, { attributes: true, childList: true, subtree: true });
-    if (LAYOUT === "LEFT-RIGHT") {chatbotAutoHeight();}
-}
+
 
 function get_elements(consider_state_panel=false) {
     var chatbot = document.querySelector('#gpt-chatbot > div.wrap.svelte-18telvq');
@@ -263,3 +256,48 @@ window.addEventListener("DOMContentLoaded", function () {
     // const ga = document.getElementsByTagName("gradio-app");
     gradioApp().addEventListener("render", monitoring_input_box);
 });
+
+function audio_fn_init() {
+    let audio_component = document.getElementById('elem_audio');
+    if (audio_component){
+        let buttonElement = audio_component.querySelector('button');
+        let specificElement = audio_component.querySelector('.hide.sr-only');
+        specificElement.remove();
+
+        buttonElement.childNodes[1].nodeValue = '启动麦克风';
+        buttonElement.addEventListener('click', function(event) {
+            event.stopPropagation();
+            toast_push('您启动了麦克风!下一步请点击“实时语音对话”启动语音对话。');
+        });
+
+        // 查找语音插件按钮
+        let buttons = document.querySelectorAll('button');
+        let audio_button = null;
+        for(let button of buttons){
+            if (button.textContent.includes('语音')){
+                audio_button = button;
+                break;
+            }
+        }
+        if (audio_button){
+            audio_button.addEventListener('click', function() {
+                toast_push('您点击了“实时语音对话”启动语音对话。');
+            });
+            let parent_element = audio_component.parentElement; // 将buttonElement移动到audio_button的内部
+            audio_button.appendChild(audio_component);
+            parent_element.remove();
+            audio_component.style.cssText = 'width: 250px;right: 0px;display: inline-flex;flex-flow: row-reverse wrap;place-content: stretch space-between;align-items: center;background-color: #ffffff00;';
+        }
+
+    }
+}
+
+function GptAcademicJavaScriptInit(LAYOUT = "LEFT-RIGHT") {
+    audio_fn_init();
+    chatbotIndicator = gradioApp().querySelector('#gpt-chatbot > div.wrap');
+    var chatbotObserver = new MutationObserver(() => {
+        chatbotContentChanged(1);
+    });
+    chatbotObserver.observe(chatbotIndicator, { attributes: true, childList: true, subtree: true });
+    if (LAYOUT === "LEFT-RIGHT") {chatbotAutoHeight();}
+}
