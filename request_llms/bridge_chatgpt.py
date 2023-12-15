@@ -51,7 +51,8 @@ def decode_chunk(chunk):
         chunkjson = json.loads(chunk_decoded[6:])
         has_choices = 'choices' in chunkjson
         if has_choices: choice_valid = (len(chunkjson['choices']) > 0)
-        if has_choices and choice_valid: has_content = "content" in chunkjson['choices'][0]["delta"]
+        if has_choices and choice_valid: has_content = ("content" in chunkjson['choices'][0]["delta"])
+        if has_content: has_content = (chunkjson['choices'][0]["delta"]["content"] is not None)
         if has_choices and choice_valid: has_role = "role" in chunkjson['choices'][0]["delta"]
     except: 
         pass
