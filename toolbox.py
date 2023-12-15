@@ -1007,14 +1007,19 @@ def clip_history(inputs, history, tokenizer, max_token_limit):
     def get_token_num(txt): 
         return len(tokenizer.encode(txt, disallowed_special=()))
     input_token_num = get_token_num(inputs)
+
+    if max_token_limit < 5000:   output_token_expect = 256  # 4k & 2k models
+    elif max_token_limit < 9000: output_token_expect = 512  # 8k models
+    else: output_token_expect = 1024                        # 16k & 32k models
+
     if input_token_num < max_token_limit * 3 / 4:
         # 当输入部分的token占比小于限制的3/4时，裁剪时
         # 1. 把input的余量留出来
         max_token_limit = max_token_limit - input_token_num
         # 2. 把输出用的余量留出来
-        max_token_limit = max_token_limit - 128
+        max_token_limit = max_token_limit - output_token_expect
         # 3. 如果余量太小了，直接清除历史
-        if max_token_limit < 128:
+        if max_token_limit < output_token_expect:
             history = []
             return history
     else:
