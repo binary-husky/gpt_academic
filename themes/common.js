@@ -285,6 +285,7 @@ function audio_fn_init() {
             });
             let parent_element = audio_component.parentElement; // 将buttonElement移动到audio_button的内部
             audio_button.appendChild(audio_component);
+            buttonElement.style.cssText = 'border-color: #00ffe0;border-width: 2px; height: 25px;'
             parent_element.remove();
             audio_component.style.cssText = 'width: 250px;right: 0px;display: inline-flex;flex-flow: row-reverse wrap;place-content: stretch space-between;align-items: center;background-color: #ffffff00;';
         }
