@@ -590,19 +590,19 @@ def get_crazy_functions():
         print(trimmed_format_exc())
         print('Load function plugin failed')
 
-    # try:
-    #     from crazy_functions.互动小游戏 import 随机小游戏
-    #     function_plugins.update({
-    #         "随机小游戏": {
-    #             "Group": "智能体",
-    #             "Color": "stop",
-    #             "AsButton": True,
-    #             "Function": HotReload(随机小游戏)
-    #         }
-    #     })
-    # except:
-    #     print(trimmed_format_exc())
-    #     print('Load function plugin failed')
+    try:
+        from crazy_functions.互动小游戏 import 随机小游戏
+        function_plugins.update({
+            "随机互动小游戏（仅供测试）": {
+                "Group": "智能体",
+                "Color": "stop",
+                "AsButton": False,
+                "Function": HotReload(随机小游戏)
+            }
+        })
+    except:
+        print(trimmed_format_exc())
+        print('Load function plugin failed')
 
     # try:
     #     from crazy_functions.chatglm微调工具 import 微调数据集生成
