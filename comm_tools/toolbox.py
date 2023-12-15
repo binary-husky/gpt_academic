@@ -87,8 +87,8 @@ def ArgsGeneralWrapper(f):
         cookies.update({
             'api_key': cookies['api_key'], 'llm_model': llm_model,
             **real_llm,
-            'worker_num': worker_num, 'ipaddr': func_box.user_client_mark(ipaddr), 'ocr': ocr_trust,
-            'start_time': start_time, 'max_length': max_length,
+            'worker_num': worker_num, 'ipaddr': func_box.user_client_mark(ipaddr),
+            'start_time': start_time, 'max_length': max_length, 'ocr': ocr_trust,
             'know_dict': know_dict, 'know_cls': know_cls, 'know_id': langchain,
             'vector': {
                 'score': vector_score,
@@ -235,8 +235,6 @@ def CatchException(f):
             from comm_tools.check_proxy import check_proxy
             proxies = get_conf('proxies')
             tb_str = '```\n' + trimmed_format_exc() + '```'
-            func_box.通知机器人(
-                f'f请求参数：```\n{main_input}\n{plugin_kwargs}\n```\n\n错误信息{tb_str}\n\n错误来源：{llm_kwargs.get("ipaddr", None)}')
             if len(chatbot_with_cookie) == 0:
                 chatbot_with_cookie.clear()
                 chatbot_with_cookie.append(["插件调度异常", "异常原因"])

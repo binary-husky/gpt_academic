@@ -181,9 +181,7 @@ class Utils:
 class ExcelHandle:
 
     def __init__(self, ipaddr='temp', temp_file='', sheet='测试要点'):
-        self.user_path = os.path.join(func_box.base_path, 'private_upload', ipaddr, 'test_case',
-                                      func_box.created_atime())
-        os.makedirs(f'{self.user_path}', exist_ok=True)
+        self.user_path = os.path.join(func_box.base_path, 'private_upload', ipaddr, 'test_case')
         if not temp_file:
             temp_file = os.path.join(func_box.base_path, 'docs/template/客户端测试用例模版.xlsx')
         if os.path.exists(temp_file):
@@ -240,12 +238,9 @@ class ExcelHandle:
         merge_cell = toolbox.get_conf('merge_cell')
         if merge_cell: self.merge_same_cells()  # 还原被拆分的合并单元格
         # 保存 Excel 文件
-        time_stamp = time.strftime("%Y-%m-%d-%H", time.localtime())
-        if filename == '':
-            filename = time.strftime("%Y-%m-%d-%H", time.localtime()) + '_temp'
-        else:
-            f"{time_stamp}_{filename}"
-        test_case_path = f'{os.path.join(self.user_path, filename)}.xlsx'
+        file_path = os.path.join(self.user_path, filename)
+        os.makedirs(file_path, exist_ok=True)
+        test_case_path = f'{os.path.join(file_path, func_box.created_atime())}.xlsx'
         # 遇到文件无法保存时，再拆开图片
         try:
             self.workbook.save(test_case_path)
@@ -650,7 +645,7 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
         # if len(inputs_array[0]) > 200:
         #     inputs_show_user = inputs_array[0][:100]+f"\n\n{func_box.html_tag_color('......超过200个字符折叠......')}\n\n"+inputs_array[0][-100:]
         # else:
-        inputs_show_user = inputs_array[0]
+        inputs_show_user = None   # 不重复展示
         gpt_say = yield from crazy_utils.request_gpt_model_in_new_thread_with_ui_alive(
             inputs=inputs_array[0], inputs_show_user=inputs_show_user,
             llm_kwargs=llm_kwargs, chatbot=chatbot, history=[],

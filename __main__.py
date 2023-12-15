@@ -1,6 +1,5 @@
 import os
 import gradio as gr
-import logging
 
 from request_llms.bridge_all import predict
 from comm_tools.toolbox import find_free_port, on_file_uploaded, \
@@ -10,6 +9,7 @@ from comm_tools.overwrites import postprocess_chat_messages, postprocess, reload
 # 一些普通功能模块
 from comm_tools.core_functional import get_core_functions
 from comm_tools import Langchain_cn, webui_local
+from comm_tools.logger_handle import logger
 
 functional = get_core_functions()
 
@@ -24,10 +24,6 @@ from comm_tools import func_box
 from webui_elem import func_signals
 
 os.makedirs("gpt_log", exist_ok=True)
-try:
-    logging.basicConfig(filename="gpt_log/chat_secrets.log", level=logging.INFO, encoding="utf-8")
-except:
-    logging.basicConfig(filename="gpt_log/chat_secrets.log", level=logging.INFO)
 print("所有问询记录将自动保存在本地目录./gpt_log/chat_secrets.log, 请注意自我隐私保护哦！")
 
 # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到

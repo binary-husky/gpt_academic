@@ -13,7 +13,6 @@ import psutil
 import re
 import tempfile
 import shutil
-import logging
 import requests
 import tiktoken
 import copy
@@ -22,11 +21,11 @@ import gradio as gr
 import csv
 import datetime
 import qrcode
-logger = logging
 
 from PIL import Image, ImageOps
 from bs4 import BeautifulSoup
 from comm_tools import toolbox
+from comm_tools.logger_handle import logger
 from comm_tools.database_processor import SqliteHandle
 
 """contextlib 是 Python 标准库中的一个模块，提供了一些工具函数和装饰器，用于支持编写上下文管理器和处理上下文的常见任务，例如资源管理、异常处理等。
@@ -46,10 +45,10 @@ class Shell:
 
     def start(self):
         sys_out = self.subp.stdout
-        logging.debug(f'Start running commands: {self.__args}')
+        logger.debug(f'Start running commands: {self.__args}')
         try:
             for i in sys_out:
-                logging.info(i.rstrip())
+                logger.info(i.rstrip())
                 self.__result += i
         except KeyboardInterrupt as p:
             return self.__result

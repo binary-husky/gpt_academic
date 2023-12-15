@@ -109,6 +109,7 @@ div.svelte-15lo0d8>*, div.svelte-15lo0d8>.form>* {
 .chatbot-full-width #gr-chat-sm-column {
     min-width: min(12%, 100%) !important;
     gap: 22%;
+    margin-right: 15px;
 }
 .chatbot-full-width #gr-chat-sm-column button {
     margin-left: unset;

@@ -100,20 +100,19 @@ def Kdocs_多阶段生成回答(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
     if not file_limit:
         return
     multi_stage_config, = crazy_box.json_args_return(plugin_kwargs, keys=['阶段性产出'], default={})
-    file_count = {}
+    gpt_results_count = {}
     for stage in multi_stage_config:
         prompt = stage.get('提示词', False)
         func = stage.get('调用方法', False)
         knowledge = stage.get('关联知识库', False)
-        file_count[stage] = []
         multi_model_parallelism, = crazy_box.json_args_return(plugin_kwargs, ['多模型并行'], llm_kwargs['llm_model'])
         llm_kwargs['llm_model'] = str(multi_model_parallelism).rstrip('&')
-        chatbot.append([None, f'开始执行`{stage}`动作，使用`{prompt}`提问后，调用`{func}`保存回答'])
+        chatbot.append([None, f'开始解析`{stage}`动作，使用`{prompt}`提问后，调用`{func}`保存回答'])
         yield from update_ui(chatbot=chatbot, history=history)
         file_limit = yield from crazy_box.func_拆分与提问(file_limit, llm_kwargs, plugin_kwargs, chatbot, history,
                                                           plugin_prompt=prompt, knowledge_base=knowledge)
         if func and func_kwargs.get(func, False):
-            plugin_kwargs[stage] = yield from func_kwargs[func](file_limit, llm_kwargs, plugin_kwargs,  chatbot, history)
+            gpt_results_count[prompt] = yield from func_kwargs[func](file_limit, llm_kwargs, plugin_kwargs,  chatbot, history)
             file_limit = []
         else:
             chatbot.append(['为什么跳过？', '你没有指定调用方法 or 方法错误，跳过生成结果，直接将上次的结果提交给下阶段'])
@@ -121,7 +120,7 @@ def Kdocs_多阶段生成回答(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
             file_limit = [[limit, "".join(content_limit[limit])] for limit in content_limit]
             yield from update_ui(chatbot=chatbot, history=history)
         if stage != [i for i in multi_stage_config][-1]:
-            yield from crazy_box.file_extraction_intype(plugin_kwargs[stage], [''], file_limit, chatbot, history, llm_kwargs, plugin_kwargs)
+            yield from crazy_box.file_extraction_intype(gpt_results_count[prompt], [''], file_limit, chatbot, history, llm_kwargs, plugin_kwargs)
 
     if not multi_stage_config:
         chatbot.append(['发生了什么事情？', f'!!!!! 自定义参数中的Json存在问题，请仔细检查以下配置是否符合JSON编码格式\n\n```\n{plugin_kwargs["advanced_arg"]}```'])

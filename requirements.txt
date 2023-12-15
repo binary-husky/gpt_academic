@@ -25,3 +25,4 @@ scipdf_parser>=0.3
 commentjson
 numpy
 rich
+loguru
