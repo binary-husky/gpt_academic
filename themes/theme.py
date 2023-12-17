@@ -70,15 +70,20 @@ def from_cookie_str(c):
 """
 
 js_code_for_css_changing = """(css) => {
+    var existingStyles = document.querySelectorAll("body > gradio-app > div > style")
+    for (var i = 0; i < existingStyles.length; i++) {
+        var style = existingStyles[i];
+        style.parentNode.removeChild(style);
+    }
     var existingStyles = document.querySelectorAll("style[data-loaded-css]");
     for (var i = 0; i < existingStyles.length; i++) {
         var style = existingStyles[i];
         style.parentNode.removeChild(style);
     }
     var styleElement = document.createElement('style');
-    styleElement.setAttribute('data-loaded-css', css);
+    styleElement.setAttribute('data-loaded-css', 'placeholder');
     styleElement.innerHTML = css;
-    document.head.appendChild(styleElement);
+    document.body.appendChild(styleElement);
 }
 """
 
