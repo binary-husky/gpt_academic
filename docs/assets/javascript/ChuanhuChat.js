@@ -64,7 +64,7 @@ function addInit() {
     }
     chatbotObserver.observe(chatbotIndicator, { attributes: true, childList: true, subtree: true });
     chatListObserver.observe(chatListIndicator, { attributes: true });
-
+    setDragUploader();
     return true;
 }
 

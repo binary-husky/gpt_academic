@@ -186,6 +186,8 @@ async function paste_upload_files(files) {
             Object.defineProperty(uploadInputElement, "files", {value: files, enumerable: true});
             uploadInputElement.dispatchEvent(event);
             // toast_push('🎉上传文件成功', 2000)
+        } else {
+            toast_push('请先清除上传文件区后，再执行上传', 1000)
         }
     }
 }
@@ -252,3 +254,56 @@ function sm_move_more_label() {
         more_label_group.appendChild(more_sm_btn);
     }
 }
+
+var hintArea;
+function setDragUploader() {
+    input = chatbotArea;
+    if (input) {
+        const dragEvents = ["dragover", "dragenter"];
+        const leaveEvents = ["dragleave", "dragend", "drop"];
+        const onDrag = function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!chatbotArea.classList.contains("with-file")) {
+                chatbotArea.classList.add("dragging");
+                draggingHint();
+            } else {
+                toast_push('请先清除上传文件区后，再执行上传', 1000)
+            }
+        };
+
+        const onLeave = function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            chatbotArea.classList.remove("dragging");
+            if (hintArea) {
+                hintArea.remove();
+            }
+        };
+
+        dragEvents.forEach(event => {
+            input.addEventListener(event, onDrag);
+        });
+
+        leaveEvents.forEach(event => {
+            input.addEventListener(event, onLeave);
+        });
+
+        input.addEventListener("drop", async function (e) {
+            const files = e.dataTransfer.files;
+            await paste_upload_files(files);
+        });
+    }
+}
+
+function draggingHint() {
+    hintArea = chatbotArea.querySelector(".dragging-hint");
+    if (hintArea) {
+        return;
+    }
+    hintArea = document.createElement("div");
+    hintArea.classList.add("dragging-hint");
+    hintArea.innerHTML = `<div class="dragging-hint-text"><p>释放文件以上传</p></div>`;
+    chatbotArea.appendChild(hintArea);
+}
+

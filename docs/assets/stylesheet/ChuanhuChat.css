@@ -27,6 +27,7 @@
 
     --toolbox-width: 320px;
     --toolbox-background-fill: var(--background-fill-secondary);
+    --dragging-hint-background-color: #F9F9F9BB;
     
     .dark {
         --chatbot-blur-background-color: #12111166;
@@ -38,6 +39,7 @@
 
         --message-list-background-hover: #202020;
         --message-list-background-selected: #2F3030;
+        --dragging-hint-background-color: #515151BB;
     }
 }
 

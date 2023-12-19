@@ -56,7 +56,7 @@ class ChatbotElem:
                         with gr.Column(scale=1, elem_id='gr-more-sm-column'):
                             gr.HTML(get_html("chatbot_more.html").format(
                                 single_turn_label=i18n("无记忆"), plugin_agent_label=i18n("插件代理"),
-                                upload_file_label=i18n("上传文件"), uploaded_files_label=i18n("预提交文件"),
+                                upload_file_label=i18n("上传文件"), uploaded_files_label=i18n("文件预览区"),
                                 uploaded_files_tip=i18n("点击高亮插件，这些文件会被插件解析一起提交"),
                                 plugin_agent_tip=i18n('对话自动选择插件'),
                                 single_turn_tip=i18n('对话不参考上下文')
