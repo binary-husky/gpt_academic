@@ -603,7 +603,35 @@ def get_crazy_functions():
     except:
         print(trimmed_format_exc())
         print('Load function plugin failed')
+    try:
+        from crazy_functions.批量总结PDF文档_初步 import 批量总结PDF文档_初步
+        function_plugins.update({
+            "批量总结PDF文档_初步": {
+                "Group": "学术",
+                "Color": "stop",
+                "AsButton": False,
+                "Info": "批量总结PDF文档的内容(仅做初步提炼) | 输入参数为路径",
+                "Function": HotReload(批量总结PDF文档_初步)
+            }
+        })
+    except:
+        print(trimmed_format_exc())
+        print('Load function plugin failed')
 
+    try:
+        from crazy_functions.批量总结Markdown文档_进阶 import 批量总结Markdown文档_进阶
+        function_plugins.update({
+            "批量总结Markdown文档_进阶": {
+                "Group": "学术",
+                "Color": "stop",
+                "AsButton": False,
+                "Info": "批量总结Markdown文档的内容(在初步提炼的基础上进一步总结) | 输入参数为路径",
+                "Function": HotReload(批量总结Markdown文档_进阶)
+            }
+        })
+    except:
+        print(trimmed_format_exc())
+        print('Load function plugin failed')
     # try:
     #     from crazy_functions.chatglm微调工具 import 微调数据集生成
     #     function_plugins.update({
