@@ -12,13 +12,6 @@ class PaperFileGroup():
         self.sp_file_index = []
         self.sp_file_tag = []
 
-        # count_token
-        from request_llms.bridge_all import model_info
-        enc = model_info["gpt-3.5-turbo"]['tokenizer']
-        def get_token_num(txt): return len(
-            enc.encode(txt, disallowed_special=()))
-        self.get_token_num = get_token_num
-
     def run_file_split(self, max_token_limit=1900):
         """
         将长文本分离开来
@@ -29,9 +22,8 @@ class PaperFileGroup():
                 self.sp_file_index.append(index)
                 self.sp_file_tag.append(self.file_paths[index])
             else:
-                from .crazy_utils import breakdown_txt_to_satisfy_token_limit_for_pdf
-                segments = breakdown_txt_to_satisfy_token_limit_for_pdf(
-                    file_content, self.get_token_num, max_token_limit)
+                from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit
+                segments = breakdown_text_to_satisfy_token_limit(file_content, max_token_limit)
                 for j, segment in enumerate(segments):
                     self.sp_file_contents.append(segment)
                     self.sp_file_index.append(index)
