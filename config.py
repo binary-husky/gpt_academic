@@ -92,8 +92,9 @@ AVAIL_LLM_MODELS = ["gpt-3.5-turbo-1106","gpt-4-1106-preview","gpt-4-vision-prev
                     "api2d-gpt-3.5-turbo", 'api2d-gpt-3.5-turbo-16k',
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "api2d-gpt-4",
                     "chatglm3", "moss", "claude-2"]
-# P.S. 其他可用的模型还包括 ["zhipuai", "qianfan", "deepseekcoder", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613",  "gpt-3.5-random"
-# "spark", "sparkv2", "sparkv3", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"]
+# P.S. 其他可用的模型还包括 ["zhipuai", "qianfan", "deepseekcoder", "llama2", "qwen-local", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613",  "gpt-3.5-random"
+# "spark", "sparkv2", "sparkv3", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"
+# “qwen-turbo", "qwen-plus", "qwen-max"]
 
 
 # 定义界面上“询问多个GPT模型”插件应该使用哪些模型，请从AVAIL_LLM_MODELS中选择，并在不同模型之间用`&`间隔，例如"gpt-3.5-turbo&chatglm3&azure-gpt-4"
@@ -103,7 +104,11 @@ MULTI_QUERY_LLM_MODELS = "gpt-3.5-turbo&chatglm3"
 # 选择本地模型变体（只有当AVAIL_LLM_MODELS包含了对应本地模型时，才会起作用）
 # 如果你选择Qwen系列的模型，那么请在下面的QWEN_MODEL_SELECTION中指定具体的模型
 # 也可以是具体的模型路径
-QWEN_MODEL_SELECTION = "Qwen/Qwen-1_8B-Chat-Int8"
+QWEN_LOCAL_MODEL_SELECTION = "Qwen/Qwen-1_8B-Chat-Int8"
+
+
+# 接入通义千问在线大模型 https://dashscope.console.aliyun.com/
+DASHSCOPE_API_KEY = "此处填阿里灵积云API秘钥" # 阿里灵积云API_KEY
 
 
 # 百度千帆（LLM_MODEL="qianfan"）
@@ -284,6 +289,9 @@ NUM_CUSTOM_BASIC_BTN = 4
 │   ├── ZHIPUAI_API_KEY
 │   └── ZHIPUAI_MODEL
 │
+├── "qwen-turbo" 等通义千问大模型
+│   └──  DASHSCOPE_API_KEY
+│
 └── "newbing" Newbing接口不再稳定，不推荐使用
     ├── NEWBING_STYLE
     └── NEWBING_COOKIES
@@ -300,7 +308,7 @@ NUM_CUSTOM_BASIC_BTN = 4
 ├── "jittorllms_pangualpha"
 ├── "jittorllms_llama"
 ├── "deepseekcoder"
-├── "qwen"
+├── "qwen-local"
 ├──  RWKV的支持见Wiki
 └── "llama2"
 

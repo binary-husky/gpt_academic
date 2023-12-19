@@ -2932,7 +2932,7 @@
     "3. 输入修改需求": "3. Enter modification requirements",
     "刷新界面 由于请求gpt需要一段时间": "Refreshing the interface takes some time due to the request for gpt",
     "随机小游戏": "Random mini game",
-    "那么请在下面的QWEN_MODEL_SELECTION中指定具体的模型": "So please specify the specific model in QWEN_MODEL_SELECTION below",
+    "那么请在下面的QWEN_LOCAL_MODEL_SELECTION中指定具体的模型": "So please specify the specific model in QWEN_LOCAL_MODEL_SELECTION below",
     "表值": "Table value",
     "我画你猜": "I draw, you guess",
     "狗": "Dog",
