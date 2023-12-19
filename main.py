@@ -1,6 +1,17 @@
 import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
-import pickle
-import base64
+
+help_menu_description = \
+"""Github源代码开源和更新[地址🚀](https://github.com/binary-husky/gpt_academic), 
+感谢热情的[开发者们❤️](https://github.com/binary-husky/gpt_academic/graphs/contributors).
+</br></br>常见问题请查阅[项目Wiki](https://github.com/binary-husky/gpt_academic/wiki), 
+如遇到Bug请前往[Bug反馈](https://github.com/binary-husky/gpt_academic/issues).
+</br></br>普通对话使用说明: 1. 输入问题; 2. 点击提交
+</br></br>基础功能区使用说明: 1. 输入文本; 2. 点击任意基础功能区按钮
+</br></br>函数插件区使用说明: 1. 输入路径/问题, 或者上传文件; 2. 点击任意函数插件区按钮
+</br></br>虚空终端使用说明: 点击虚空终端, 然后根据提示输入指令, 再次点击虚空终端
+</br></br>如何保存对话: 点击保存当前的对话按钮
+</br></br>如何语音对话: 请阅读Wiki
+</br></br>如何临时更换API_KEY: 在输入区输入临时API_KEY后提交（网页刷新后失效）"""
 
 def main():
     import gradio as gr
@@ -8,7 +19,7 @@ def main():
         raise ModuleNotFoundError("使用项目内置Gradio获取最优体验! 请运行 `pip install -r requirements.txt` 指令安装内置Gradio及其他依赖, 详情信息见requirements.txt.")
     from request_llms.bridge_all import predict
     from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, load_chat_cookies, DummyWith
-    # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
+    # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址
     proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION = get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION')
     CHATBOT_HEIGHT, LAYOUT, AVAIL_LLM_MODELS, AUTO_CLEAR_TXT = get_conf('CHATBOT_HEIGHT', 'LAYOUT', 'AVAIL_LLM_MODELS', 'AUTO_CLEAR_TXT')
     ENABLE_AUDIO, AUTO_CLEAR_TXT, PATH_LOGGING, AVAIL_THEMES, THEME = get_conf('ENABLE_AUDIO', 'AUTO_CLEAR_TXT', 'PATH_LOGGING', 'AVAIL_THEMES', 'THEME')
@@ -18,21 +29,11 @@ def main():
     # 如果WEB_PORT是-1, 则随机选取WEB端口
     PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
     from check_proxy import get_current_version
-    from themes.theme import adjust_theme, advanced_css, theme_declaration, load_dynamic_theme
-
+    from themes.theme import adjust_theme, advanced_css, theme_declaration
+    from themes.theme import js_code_for_css_changing, js_code_for_darkmode_init, js_code_for_toggle_darkmode, js_code_for_persistent_cookie_init
+    from themes.theme import load_dynamic_theme, to_cookie_str, from_cookie_str, init_cookie
     title_html = f"<h1 align=\"center\">GPT 学术优化 {get_current_version()}</h1>{theme_declaration}"
-    description =  "Github源代码开源和更新[地址🚀](https://github.com/binary-husky/gpt_academic), "
-    description += "感谢热情的[开发者们❤️](https://github.com/binary-husky/gpt_academic/graphs/contributors)."
-    description += "</br></br>常见问题请查阅[项目Wiki](https://github.com/binary-husky/gpt_academic/wiki), "
-    description += "如遇到Bug请前往[Bug反馈](https://github.com/binary-husky/gpt_academic/issues)."
-    description += "</br></br>普通对话使用说明: 1. 输入问题; 2. 点击提交"
-    description += "</br></br>基础功能区使用说明: 1. 输入文本; 2. 点击任意基础功能区按钮"
-    description += "</br></br>函数插件区使用说明: 1. 输入路径/问题, 或者上传文件; 2. 点击任意函数插件区按钮"
-    description += "</br></br>虚空终端使用说明: 点击虚空终端, 然后根据提示输入指令, 再次点击虚空终端"
-    description += "</br></br>如何保存对话: 点击保存当前的对话按钮"
-    description += "</br></br>如何语音对话: 请阅读Wiki"
-    description += "</br></br>如何临时更换API_KEY: 在输入区输入临时API_KEY后提交（网页刷新后失效）"
-
+    
     # 问询记录, python 版本建议3.9+（越新越好）
     import logging, uuid
     os.makedirs(PATH_LOGGING, exist_ok=True)
@@ -85,7 +86,7 @@ def main():
             with gr_L2(scale=1, elem_id="gpt-panel"):
                 with gr.Accordion("输入区", open=True, elem_id="input-panel") as area_input_primary:
                     with gr.Row():
-                        txt = gr.Textbox(show_label=False, placeholder="Input question here.").style(container=False)
+                        txt = gr.Textbox(show_label=False, placeholder="Input question here.", elem_id='user_input_main').style(container=False)
                     with gr.Row():
                         submitBtn = gr.Button("提交", elem_id="elem_submit", variant="primary")
                     with gr.Row():
@@ -146,7 +147,7 @@ def main():
             with gr.Row():
                 with gr.Tab("上传文件", elem_id="interact-panel"):
                     gr.Markdown("请上传本地文件/压缩包供“函数插件区”功能调用。请注意: 上传文件后会自动把输入区修改为相应路径。")
-                    file_upload_2 = gr.Files(label="任何文件, 推荐上传压缩文件(zip, tar)", file_count="multiple")
+                    file_upload_2 = gr.Files(label="任何文件, 推荐上传压缩文件(zip, tar)", file_count="multiple", elem_id="elem_upload_float")
     
                 with gr.Tab("更换模型 & Prompt", elem_id="interact-panel"):
                     md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(container=False)
@@ -162,39 +163,24 @@ def main():
                     checkboxes_2 = gr.CheckboxGroup(["自定义菜单"], 
                                                   value=[], label="显示/隐藏自定义菜单", elem_id='cbs').style(container=False)
                     dark_mode_btn = gr.Button("切换界面明暗 ☀", variant="secondary").style(size="sm")
-                    dark_mode_btn.click(None, None, None, _js="""() => {
-                            if (document.querySelectorAll('.dark').length) {
-                                document.querySelectorAll('.dark').forEach(el => el.classList.remove('dark'));
-                            } else {
-                                document.querySelector('body').classList.add('dark');
-                            }
-                        }""",
+                    dark_mode_btn.click(None, None, None, _js=js_code_for_toggle_darkmode,
                     )
                 with gr.Tab("帮助", elem_id="interact-panel"):
-                    gr.Markdown(description)
+                    gr.Markdown(help_menu_description)
 
         with gr.Floating(init_x="20%", init_y="50%", visible=False, width="40%", drag="top") as area_input_secondary:
             with gr.Accordion("浮动输入区", open=True, elem_id="input-panel2"):
                 with gr.Row() as row:
                     row.style(equal_height=True)
                     with gr.Column(scale=10):
-                        txt2 = gr.Textbox(show_label=False, placeholder="Input question here.", lines=8, label="输入区2").style(container=False)
+                        txt2 = gr.Textbox(show_label=False, placeholder="Input question here.",
+                                          elem_id='user_input_float', lines=8, label="输入区2").style(container=False)
                     with gr.Column(scale=1, min_width=40):
                         submitBtn2 = gr.Button("提交", variant="primary"); submitBtn2.style(size="sm")
                         resetBtn2 = gr.Button("重置", variant="secondary"); resetBtn2.style(size="sm")
                         stopBtn2 = gr.Button("停止", variant="secondary"); stopBtn2.style(size="sm")
                         clearBtn2 = gr.Button("清除", variant="secondary", visible=False); clearBtn2.style(size="sm")
 
-        def to_cookie_str(d):
-            # Pickle the dictionary and encode it as a string
-            pickled_dict = pickle.dumps(d)
-            cookie_value = base64.b64encode(pickled_dict).decode('utf-8')
-            return cookie_value
-        
-        def from_cookie_str(c):
-            # Decode the base64-encoded string and unpickle it into a dictionary
-            pickled_dict = base64.b64decode(c.encode('utf-8'))
-            return pickle.loads(pickled_dict)
 
         with gr.Floating(init_x="20%", init_y="50%", visible=False, width="40%", drag="top") as area_customize:
             with gr.Accordion("自定义菜单", open=True, elem_id="edit-panel"):
@@ -226,11 +212,11 @@ def main():
                             else:
                                 ret.update({predefined_btns[basic_btn_dropdown_]: gr.update(visible=True, value=basic_fn_title)})
                             ret.update({cookies: cookies_})
-                            try: persistent_cookie_ = from_cookie_str(persistent_cookie_)    # persistent cookie to dict
+                            try: persistent_cookie_ = from_cookie_str(persistent_cookie_)   # persistent cookie to dict
                             except: persistent_cookie_ = {}
-                            persistent_cookie_["custom_bnt"] = customize_fn_overwrite_   # dict update new value
-                            persistent_cookie_ = to_cookie_str(persistent_cookie_)         # persistent cookie to dict
-                            ret.update({persistent_cookie: persistent_cookie_})                             # write persistent cookie
+                            persistent_cookie_["custom_bnt"] = customize_fn_overwrite_      # dict update new value
+                            persistent_cookie_ = to_cookie_str(persistent_cookie_)          # persistent cookie to dict
+                            ret.update({persistent_cookie: persistent_cookie_})             # write persistent cookie
                             return ret
                         
                         def reflesh_btn(persistent_cookie_, cookies_):
@@ -251,10 +237,11 @@ def main():
                                 else: ret.update({predefined_btns[k]: gr.update(visible=True, value=v['Title'])})
                             return ret
                         
-                        basic_fn_load.click(reflesh_btn, [persistent_cookie, cookies],[cookies, *customize_btns.values(), *predefined_btns.values()])
+                        basic_fn_load.click(reflesh_btn, [persistent_cookie, cookies], [cookies, *customize_btns.values(), *predefined_btns.values()])
                         h = basic_fn_confirm.click(assign_btn, [persistent_cookie, cookies, basic_btn_dropdown, basic_fn_title, basic_fn_prefix, basic_fn_suffix], 
                                                    [persistent_cookie, cookies, *customize_btns.values(), *predefined_btns.values()])
-                        h.then(None, [persistent_cookie], None, _js="""(persistent_cookie)=>{setCookie("persistent_cookie", persistent_cookie, 5);}""") # save persistent cookie
+                        # save persistent cookie
+                        h.then(None, [persistent_cookie], None, _js="""(persistent_cookie)=>{setCookie("persistent_cookie", persistent_cookie, 5);}""")
 
         # 功能区显示开关与功能区的互动
         def fn_area_visibility(a):
@@ -341,18 +328,7 @@ def main():
             None,
             [secret_css],
             None,
-            _js="""(css) => {
-                var existingStyles = document.querySelectorAll("style[data-loaded-css]");
-                for (var i = 0; i < existingStyles.length; i++) {
-                    var style = existingStyles[i];
-                    style.parentNode.removeChild(style);
-                }
-                var styleElement = document.createElement('style');
-                styleElement.setAttribute('data-loaded-css', css);
-                styleElement.innerHTML = css;
-                document.head.appendChild(styleElement);
-            }
-            """
+            _js=js_code_for_css_changing
         )
         # 随变按钮的回调函数注册
         def route(request: gr.Request, k, *args, **kwargs):
@@ -384,27 +360,10 @@ def main():
                 rad.feed(cookies['uuid'].hex, audio)
             audio_mic.stream(deal_audio, inputs=[audio_mic, cookies])
 
-        def init_cookie(cookies, chatbot):
-            # 为每一位访问的用户赋予一个独一无二的uuid编码
-            cookies.update({'uuid': uuid.uuid4()})
-            return cookies
+
         demo.load(init_cookie, inputs=[cookies, chatbot], outputs=[cookies])
-        darkmode_js = """(dark) => {
-            dark = dark == "True";
-            if (document.querySelectorAll('.dark').length) {
-                if (!dark){
-                    document.querySelectorAll('.dark').forEach(el => el.classList.remove('dark'));
-                }
-            } else {
-                if (dark){
-                    document.querySelector('body').classList.add('dark');
-                }
-            }
-        }"""
-        load_cookie_js = """(persistent_cookie) => {
-            return getCookie("persistent_cookie");
-        }"""
-        demo.load(None, inputs=None, outputs=[persistent_cookie], _js=load_cookie_js)
+        darkmode_js = js_code_for_darkmode_init
+        demo.load(None, inputs=None, outputs=[persistent_cookie], _js=js_code_for_persistent_cookie_init)
         demo.load(None, inputs=[dark_mode], outputs=None, _js=darkmode_js)    # 配置暗色主题或亮色主题
         demo.load(None, inputs=[gr.Textbox(LAYOUT, visible=False)], outputs=None, _js='(LAYOUT)=>{GptAcademicJavaScriptInit(LAYOUT);}')
         
@@ -417,7 +376,7 @@ def main():
 
         def auto_updates(): time.sleep(0); auto_update()
         def open_browser(): time.sleep(2); webbrowser.open_new_tab(f"http://localhost:{PORT}")
-        def warm_up_mods(): time.sleep(4); warm_up_modules()
+        def warm_up_mods(): time.sleep(6); warm_up_modules()
         
         threading.Thread(target=auto_updates, name="self-upgrade", daemon=True).start() # 查看自动更新
         threading.Thread(target=open_browser, name="open-browser", daemon=True).start() # 打开浏览器页面

@@ -1,2 +1,4 @@
 modelscope
 transformers_stream_generator
+auto-gptq
+optimum

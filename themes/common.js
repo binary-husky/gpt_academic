@@ -122,21 +122,14 @@ function chatbotAutoHeight(){
             chatbot.style.maxHeight = pixelString; chatbot.style.height = pixelString; 
         }
     }
-
+    monitoring_input_box()
     update_height();
     setInterval(function() {
         update_height_slow()
     }, 50); // 每100毫秒执行一次
 }
 
-function GptAcademicJavaScriptInit(LAYOUT = "LEFT-RIGHT") {
-    chatbotIndicator = gradioApp().querySelector('#gpt-chatbot > div.wrap');
-    var chatbotObserver = new MutationObserver(() => {
-        chatbotContentChanged(1);
-    });
-    chatbotObserver.observe(chatbotIndicator, { attributes: true, childList: true, subtree: true });
-    if (LAYOUT === "LEFT-RIGHT") {chatbotAutoHeight();}
-}
+
 
 function get_elements(consider_state_panel=false) {
     var chatbot = document.querySelector('#gpt-chatbot > div.wrap.svelte-18telvq');
@@ -160,4 +153,190 @@ function get_elements(consider_state_panel=false) {
     var chatbot_height = chatbot.style.height;
     var chatbot_height = parseInt(chatbot_height);
     return { panel_height_target, chatbot_height, chatbot };
+}
+
+
+function add_func_paste(input) {
+    let paste_files = [];
+    if (input) {
+        input.addEventListener("paste", async function (e) {
+            const clipboardData = e.clipboardData || window.clipboardData;
+            const items = clipboardData.items;
+            if (items) {
+                for (i = 0; i < items.length; i++) {
+                    if (items[i].kind === "file") { // 确保是文件类型
+                        const file = items[i].getAsFile();
+                        // 将每一个粘贴的文件添加到files数组中
+                        paste_files.push(file);
+                        e.preventDefault();  // 避免粘贴文件名到输入框
+                    }
+                }
+                if (paste_files.length > 0) {
+                    // 按照文件列表执行批量上传逻辑
+                    await upload_files(paste_files);
+                    paste_files = []
+
+                }
+            }
+        });
+    }
+}
+
+function add_func_drag(elem) {
+    if (elem) {
+        const dragEvents = ["dragover", "dragenter"];
+        const leaveEvents = ["dragleave", "dragend", "drop"];
+
+        const onDrag = function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (elem_upload_float.querySelector("input[type=file]")) {
+                toast_push('释放以上传文件', 50)
+            } else {
+                toast_push('⚠️请先删除上传区中的历史文件，再尝试上传。', 50)
+            }
+        };
+
+        const onLeave = function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        dragEvents.forEach(event => {
+            elem.addEventListener(event, onDrag);
+        });
+
+        leaveEvents.forEach(event => {
+            elem.addEventListener(event, onLeave);
+        });
+
+        elem.addEventListener("drop", async function (e) {
+            const files = e.dataTransfer.files;
+            await upload_files(files);
+        });
+    }
+}
+
+async function upload_files(files) {
+    const uploadInputElement = elem_upload_float.querySelector("input[type=file]");
+    let totalSizeMb = 0
+    if (files && files.length > 0) {
+        // 执行具体的上传逻辑
+        if (uploadInputElement) {
+            for (let i = 0; i < files.length; i++) {
+                // 将从文件数组中获取的文件大小(单位为字节)转换为MB，
+                totalSizeMb += files[i].size / 1024 / 1024;
+            }
+            // 检查文件总大小是否超过20MB
+            if (totalSizeMb > 20) {
+                toast_push('⚠️文件夹大于20MB 🚀上传文件中', 2000)
+                // return;  // 如果超过了指定大小, 可以不进行后续上传操作
+            }
+             // 监听change事件， 原生Gradio可以实现
+            // uploadInputElement.addEventListener('change', function(){replace_input_string()});
+            let event = new Event("change");
+            Object.defineProperty(event, "target", {value: uploadInputElement, enumerable: true});
+            Object.defineProperty(event, "currentTarget", {value: uploadInputElement, enumerable: true});
+            Object.defineProperty(uploadInputElement, "files", {value: files, enumerable: true});
+            uploadInputElement.dispatchEvent(event);
+            // toast_push('🎉上传文件成功', 2000)
+        } else {
+            toast_push('⚠️请先删除上传区中的历史文件，再尝试上传。', 2000)
+        }
+    }
+}
+//提示信息 封装
+function toast_push(msg, duration) {
+    duration = isNaN(duration) ? 3000 : duration;
+    const m = document.createElement('div');
+    m.innerHTML = msg;
+    m.style.cssText = "font-size:  var(--text-md) !important; color: rgb(255, 255, 255);background-color: rgba(0, 0, 0, 0.6);padding: 10px 15px;margin: 0 0 0 -60px;border-radius: 4px;position: fixed;    top: 50%;left: 50%;width: auto; text-align: center;";
+    document.body.appendChild(m);
+    setTimeout(function () {
+        var d = 0.5;
+        m.style.opacity = '0';
+        setTimeout(function () {
+            document.body.removeChild(m)
+        }, d * 1000);
+    }, duration);
+}
+
+var elem_upload = null;
+var elem_upload_float = null;
+var elem_input_main = null;
+var elem_input_float = null;
+var gptChatbot = null;
+
+function monitoring_input_box() {
+    elem_upload = document.getElementById('elem_upload')
+    elem_upload_float = document.getElementById('elem_upload_float')
+    elem_input_main = document.getElementById('user_input_main')
+    elem_input_float = document.getElementById('user_input_float')
+    if (elem_input_main) {
+        if (elem_input_main.querySelector("textarea")) {
+            add_func_paste(elem_input_main.querySelector("textarea"))
+        }
+    }
+    if (elem_input_float) {
+        if (elem_input_float.querySelector("textarea")){
+            add_func_paste(elem_input_float.querySelector("textarea"))
+        }
+    }
+    gptChatbot = document.getElementById('gpt-chatbot')
+    if (gptChatbot) {
+        add_func_drag(gptChatbot)
+    }
+}
+
+
+// 监视页面变化
+window.addEventListener("DOMContentLoaded", function () {
+    // const ga = document.getElementsByTagName("gradio-app");
+    gradioApp().addEventListener("render", monitoring_input_box);
+});
+
+function audio_fn_init() {
+    let audio_component = document.getElementById('elem_audio');
+    if (audio_component){
+        let buttonElement = audio_component.querySelector('button');
+        let specificElement = audio_component.querySelector('.hide.sr-only');
+        specificElement.remove();
+
+        buttonElement.childNodes[1].nodeValue = '启动麦克风';
+        buttonElement.addEventListener('click', function(event) {
+            event.stopPropagation();
+            toast_push('您启动了麦克风!下一步请点击“实时语音对话”启动语音对话。');
+        });
+
+        // 查找语音插件按钮
+        let buttons = document.querySelectorAll('button');
+        let audio_button = null;
+        for(let button of buttons){
+            if (button.textContent.includes('语音')){
+                audio_button = button;
+                break;
+            }
+        }
+        if (audio_button){
+            audio_button.addEventListener('click', function() {
+                toast_push('您点击了“实时语音对话”启动语音对话。');
+            });
+            let parent_element = audio_component.parentElement; // 将buttonElement移动到audio_button的内部
+            audio_button.appendChild(audio_component);
+            buttonElement.style.cssText = 'border-color: #00ffe0;border-width: 2px; height: 25px;'
+            parent_element.remove();
+            audio_component.style.cssText = 'width: 250px;right: 0px;display: inline-flex;flex-flow: row-reverse wrap;place-content: stretch space-between;align-items: center;background-color: #ffffff00;';
+        }
+
+    }
+}
+
+function GptAcademicJavaScriptInit(LAYOUT = "LEFT-RIGHT") {
+    audio_fn_init();
+    chatbotIndicator = gradioApp().querySelector('#gpt-chatbot > div.wrap');
+    var chatbotObserver = new MutationObserver(() => {
+        chatbotContentChanged(1);
+    });
+    chatbotObserver.observe(chatbotIndicator, { attributes: true, childList: true, subtree: true });
+    if (LAYOUT === "LEFT-RIGHT") {chatbotAutoHeight();}
 }

@@ -18,15 +18,15 @@
 [![Wiki][Wiki-image]][Wiki-url]
 [![PR][PRs-image]][PRs-url]
 
-[License-image]: https://img.shields.io/badge/LICENSE-GPL3.0-orange?&style=flat-square
-[Github-image]: https://img.shields.io/badge/github-12100E.svg?&style=flat-square
-[Releases-image]: https://img.shields.io/badge/Releases-v3.6.0-blue?style=flat-square
-[Installation-image]: https://img.shields.io/badge/Installation-v3.6.1-blue?style=flat-square
+[Github-image]: https://img.shields.io/badge/github-12100E.svg?style=flat-square
+[License-image]: https://img.shields.io/github/license/binary-husky/gpt_academic?label=License&style=flat-square&color=orange
+[Releases-image]: https://img.shields.io/github/release/binary-husky/gpt_academic?label=Release&style=flat-square&color=blue
+[Installation-image]: https://img.shields.io/badge/dynamic/json?color=blue&url=https://raw.githubusercontent.com/binary-husky/gpt_academic/master/version&query=$.version&label=Installation&style=flat-square
 [Wiki-image]: https://img.shields.io/badge/wiki-项目文档-black?style=flat-square
 [PRs-image]: https://img.shields.io/badge/PRs-welcome-pink?style=flat-square
 
-[License-url]: https://github.com/binary-husky/gpt_academic/blob/master/LICENSE
 [Github-url]: https://github.com/binary-husky/gpt_academic
+[License-url]: https://github.com/binary-husky/gpt_academic/blob/master/LICENSE
 [Releases-url]: https://github.com/binary-husky/gpt_academic/releases
 [Installation-url]: https://github.com/binary-husky/gpt_academic#installation
 [Wiki-url]: https://github.com/binary-husky/gpt_academic/wiki
@@ -38,7 +38,8 @@
 
 **如果喜欢这个项目，请给它一个Star；如果您发明了好用的快捷键或插件，欢迎发pull requests！**
 
-If you like this project, please give it a Star. Read this in [English](docs/README.English.md) | [日本語](docs/README.Japanese.md) | [한국어](docs/README.Korean.md) | [Русский](docs/README.Russian.md) | [Français](docs/README.French.md). All translations have been provided by the project itself. To translate this project to arbitrary language with GPT, read and run [`multi_language.py`](multi_language.py) (experimental).
+If you like this project, please give it a Star.
+Read this in [English](docs/README.English.md) | [日本語](docs/README.Japanese.md) | [한국어](docs/README.Korean.md) | [Русский](docs/README.Russian.md) | [Français](docs/README.French.md). All translations have been provided by the project itself. To translate this project to arbitrary language with GPT, read and run [`multi_language.py`](multi_language.py) (experimental).
 <br>
 
 
@@ -47,7 +48,7 @@ If you like this project, please give it a Star. Read this in [English](docs/REA
 > 2.本项目中每个文件的功能都在[自译解报告](https://github.com/binary-husky/gpt_academic/wiki/GPT‐Academic项目自译解报告)`self_analysis.md`详细说明。随着版本的迭代，您也可以随时自行点击相关函数插件，调用GPT重新生成项目的自我解析报告。常见问题请查阅wiki。
 >    [![常规安装方法](https://img.shields.io/static/v1?label=&message=常规安装方法&color=gray)](#installation)  [![一键安装脚本](https://img.shields.io/static/v1?label=&message=一键安装脚本&color=gray)](https://github.com/binary-husky/gpt_academic/releases)  [![配置说明](https://img.shields.io/static/v1?label=&message=配置说明&color=gray)](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明) [![wiki](https://img.shields.io/static/v1?label=&message=wiki&color=gray)]([https://github.com/binary-husky/gpt_academic/wiki/项目配置说明](https://github.com/binary-husky/gpt_academic/wiki))
 > 
-> 3.本项目兼容并鼓励尝试国产大语言模型ChatGLM等。支持多个api-key共存，可在配置文件中填写如`API_KEY="openai-key1,openai-key2,azure-key3,api2d-key4"`。需要临时更换`API_KEY`时，在输入区输入临时的`API_KEY`然后回车键提交后即可生效。
+> 3.本项目兼容并鼓励尝试国产大语言模型ChatGLM等。支持多个api-key共存，可在配置文件中填写如`API_KEY="openai-key1,openai-key2,azure-key3,api2d-key4"`。需要临时更换`API_KEY`时，在输入区输入临时的`API_KEY`然后回车键提交即可生效。
 
 <br><br>
 
@@ -166,6 +167,14 @@ git clone --depth=1 https://github.com/OpenLMLab/MOSS.git request_llms/moss  # �
 
 # 【可选步骤IV】确保config.py配置文件的AVAIL_LLM_MODELS包含了期望的模型，目前支持的全部模型如下(jittorllms系列目前仅支持docker方案)：
 AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "moss"] # + ["jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
+
+# 【可选步骤V】支持本地模型INT8,INT4量化（这里所指的模型本身不是量化版本，目前deepseek-coder支持，后面测试后会加入更多模型量化选择）
+pip install bitsandbyte
+# windows用户安装bitsandbytes需要使用下面bitsandbytes-windows-webui
+python -m pip install bitsandbytes --prefer-binary --extra-index-url=https://jllllll.github.io/bitsandbytes-windows-webui
+pip install -U git+https://github.com/huggingface/transformers.git
+pip install -U git+https://github.com/huggingface/accelerate.git
+pip install peft
 ```
 
 </p>

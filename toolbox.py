@@ -180,12 +180,15 @@ def HotReload(f):
     最后，使用yield from语句返回重新加载过的函数，并在被装饰的函数上执行。
     最终，装饰器函数返回内部函数。这个内部函数可以将函数的原始定义更新为最新版本，并执行函数的新版本。
     """
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        fn_name = f.__name__
-        f_hot_reload = getattr(importlib.reload(inspect.getmodule(f)), fn_name)
-        yield from f_hot_reload(*args, **kwargs)
-    return decorated
+    if get_conf('PLUGIN_HOT_RELOAD'):
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            fn_name = f.__name__
+            f_hot_reload = getattr(importlib.reload(inspect.getmodule(f)), fn_name)
+            yield from f_hot_reload(*args, **kwargs)
+        return decorated
+    else:
+        return f
 
 
 """
@@ -916,7 +919,14 @@ def read_single_conf_with_lru_cache(arg):
 
 @lru_cache(maxsize=128)
 def get_conf(*args):
-    # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
+    """
+    本项目的所有配置都集中在config.py中。 修改配置有三种方法，您只需要选择其中一种即可：
+        - 直接修改config.py
+        - 创建并修改config_private.py
+        - 修改环境变量（修改docker-compose.yml等价于修改容器内部的环境变量）
+
+    注意：如果您使用docker-compose部署，请修改docker-compose（等价于修改容器内部的环境变量）
+    """
     res = []
     for arg in args:
         r = read_single_conf_with_lru_cache(arg)
@@ -997,14 +1007,19 @@ def clip_history(inputs, history, tokenizer, max_token_limit):
     def get_token_num(txt): 
         return len(tokenizer.encode(txt, disallowed_special=()))
     input_token_num = get_token_num(inputs)
+
+    if max_token_limit < 5000:   output_token_expect = 256  # 4k & 2k models
+    elif max_token_limit < 9000: output_token_expect = 512  # 8k models
+    else: output_token_expect = 1024                        # 16k & 32k models
+
     if input_token_num < max_token_limit * 3 / 4:
         # 当输入部分的token占比小于限制的3/4时，裁剪时
         # 1. 把input的余量留出来
         max_token_limit = max_token_limit - input_token_num
         # 2. 把输出用的余量留出来
-        max_token_limit = max_token_limit - 128
+        max_token_limit = max_token_limit - output_token_expect
         # 3. 如果余量太小了，直接清除历史
-        if max_token_limit < 128:
+        if max_token_limit < output_token_expect:
             history = []
             return history
     else:
