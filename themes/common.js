@@ -173,7 +173,7 @@ function add_func_paste(input) {
                 }
                 if (paste_files.length > 0) {
                     // 按照文件列表执行批量上传逻辑
-                    await paste_upload_files(paste_files);
+                    await upload_files(paste_files);
                     paste_files = []
 
                 }
@@ -182,8 +182,42 @@ function add_func_paste(input) {
     }
 }
 
+function add_func_drag(elem) {
+    if (elem) {
+        const dragEvents = ["dragover", "dragenter"];
+        const leaveEvents = ["dragleave", "dragend", "drop"];
 
-async function paste_upload_files(files) {
+        const onDrag = function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (elem_upload_float.querySelector("input[type=file]")) {
+                toast_push('释放以上传文件', 50)
+            } else {
+                toast_push('⚠️请先删除上传区中的历史文件，再尝试上传。', 50)
+            }
+        };
+
+        const onLeave = function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        dragEvents.forEach(event => {
+            elem.addEventListener(event, onDrag);
+        });
+
+        leaveEvents.forEach(event => {
+            elem.addEventListener(event, onLeave);
+        });
+
+        elem.addEventListener("drop", async function (e) {
+            const files = e.dataTransfer.files;
+            await upload_files(files);
+        });
+    }
+}
+
+async function upload_files(files) {
     const uploadInputElement = elem_upload_float.querySelector("input[type=file]");
     let totalSizeMb = 0
     if (files && files.length > 0) {
@@ -207,7 +241,7 @@ async function paste_upload_files(files) {
             uploadInputElement.dispatchEvent(event);
             // toast_push('🎉上传文件成功', 2000)
         } else {
-            toast_push('⚠️请先删除上传区中的历史文件，再尝试粘贴。', 2000)
+            toast_push('⚠️请先删除上传区中的历史文件，再尝试上传。', 2000)
         }
     }
 }
@@ -231,7 +265,7 @@ var elem_upload = null;
 var elem_upload_float = null;
 var elem_input_main = null;
 var elem_input_float = null;
-
+var gptChatbot = null;
 
 function monitoring_input_box() {
     elem_upload = document.getElementById('elem_upload')
@@ -247,6 +281,10 @@ function monitoring_input_box() {
         if (elem_input_float.querySelector("textarea")){
             add_func_paste(elem_input_float.querySelector("textarea"))
         }
+    }
+    gptChatbot = document.getElementById('gpt-chatbot')
+    if (gptChatbot) {
+        add_func_drag(gptChatbot)
     }
 }
 
