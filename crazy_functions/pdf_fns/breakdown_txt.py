@@ -76,7 +76,7 @@ def cut(limit, get_token_fn, txt_tocut, must_break_at_empty_line, break_anyway=F
             remain_txt_to_cut = post
             remain_txt_to_cut, remain_txt_to_cut_storage = maintain_storage(remain_txt_to_cut, remain_txt_to_cut_storage)
             process = fin_len/total_len
-            print(f'\r正在文本切分 {int(process*100)}%', end='')
+            print(f'正在文本切分 {int(process*100)}%')
             if len(remain_txt_to_cut.strip()) == 0:
                 break
     return res

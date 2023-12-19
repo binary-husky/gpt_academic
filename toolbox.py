@@ -583,7 +583,8 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
     if chatbot is not None:
         if 'files_to_promote' in chatbot._cookies: current = chatbot._cookies['files_to_promote']
         else: current = []
-        chatbot._cookies.update({'files_to_promote': [new_path] + current})
+        if new_path not in current: # 避免把同一个文件添加多次
+            chatbot._cookies.update({'files_to_promote': [new_path] + current})
     return new_path
 
 
