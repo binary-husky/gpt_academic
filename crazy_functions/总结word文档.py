@@ -29,7 +29,6 @@ def 解析docx(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot
             except:
                 raise RuntimeError('请先将.doc文档转换为.docx文档。')
 
-        print(file_content)
         # private_upload里面的文件名在解压zip后容易出现乱码（rar和7z格式正常），故可以只分析文章内容，不输入文件名
         from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit
         from request_llms.bridge_all import model_info
