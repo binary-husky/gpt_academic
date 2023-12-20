@@ -165,14 +165,15 @@ def cp_db_data(incloud_tab='prompt_'):
 
 
 def batch_inset_prompt(json_path=None):
-    if json_path: json_path = export_path
+    if not json_path:
+        json_path = export_path
     for json_ in os.listdir(json_path):
         with open(os.path.join(json_path, json_), 'r', encoding='utf-8') as f:
             data_list = json.load(f)
         for i in data_list:
             source = os.path.basename(os.path.join(json_path, json_)).split('.')[0]
-            source_addr = ipaddr()
-            sqlite_handle(table=f"prompt_{source}_sys", database='ai_prompt_cp.db').inset_prompt(
+            source_addr = '127.0.0.1'
+            sqlite_handle(table=f"prompt_{source}_sys", database='ai_prompt_cp.db', auto=False).inset_prompt(
                 prompt={i['act']: i['prompt']}, source=source_addr)
 
 
