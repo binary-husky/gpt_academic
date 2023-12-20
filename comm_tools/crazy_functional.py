@@ -274,6 +274,7 @@ def get_functions_多功能插件():
     from crazy_functions.虚空终端 import 虚空终端
     from crazy_functions.函数动态生成 import 函数动态生成
     from crazy_functions.多智能体 import 多智能体终端
+    from crazy_functions.互动小游戏 import 随机小游戏
     function_plugins['多功能'] = {
         "动态代码解释器（CodeInterpreter）": {
             "Group": "智能体",
@@ -292,6 +293,13 @@ def get_functions_多功能插件():
             "Color": "stop",
             "AsButton": False,
             "Function": HotReload(多智能体终端)
+
+        },
+        "随机互动小游戏（仅供测试）": {
+            "Group": "智能体",
+            "Color": "stop",
+            "AsButton": False,
+            "Function": HotReload(随机小游戏)
         },
         "保存当前的对话": {
             "AsButton": True,

@@ -348,8 +348,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
     def auto_opentab_delay(self, is_open=False):
         import threading, webbrowser, time
         print(f"如果浏览器没有自动打开，请复制并转到以下URL：")
-        print(f"\t（亮色主题）: http://localhost:{PORT}/gradio/")
-        print(f"\t（暗色主题）: {self.__url}/gradio/?__theme=dark")
+        print(f"\t 本地访问: http://localhost:{PORT}/gradio/")
+        print(f"\t 局域网访问: {self.__url}/gradio/")
         if is_open:
             def open():
                 time.sleep(2)  # 打开浏览器
