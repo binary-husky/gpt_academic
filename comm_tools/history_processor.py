@@ -15,7 +15,7 @@ from bs4 import BeautifulSoup
 class HistoryJsonHandle:
 
     def __init__(self, file_name):
-        from comm_tools.overwrites import escape_markdown
+        from webui_elem.overwrites import escape_markdown
         self.escape_markdown = escape_markdown
         self.plugin_format = {}
         self.base_data_format = {

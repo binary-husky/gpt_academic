@@ -5,7 +5,8 @@
 # @Descr   :
 
 import gradio as gr
-from comm_tools import webui_local, func_box, toolbox
+from comm_tools import func_box, toolbox
+from webui_elem import webui_local
 from comm_tools.crazy_functional import crazy_fns_role, crazy_classification, crazy_fns
 
 default_plugin = toolbox.get_conf('default_plugin')
@@ -133,7 +134,7 @@ class RightElem:
                     self.default_worker_num = gr.Slider(minimum=1, maximum=30, value=worker_num, step=1,
                                                         interactive=True, label="插件多线程最大并行"
                                                         ).style(container=False)
-                    self.pro_tf_slider = gr.Slider(minimum=0.01, maximum=100, value=15, step=1, interactive=True,
+                    self.pro_tf_slider = gr.Slider(minimum=1, maximum=200, value=15, step=1, interactive=True,
                                                    label="搜索展示详细字符").style(container=False)
                     self.ocr_identifying_trust = gr.Slider(minimum=0.01, maximum=1.0, value=0.60, step=0.01,
                                                            interactive=True,

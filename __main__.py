@@ -4,12 +4,11 @@ import gradio as gr
 from request_llms.bridge_all import predict
 from comm_tools.toolbox import find_free_port, on_file_uploaded, \
     get_conf, ArgsGeneralWrapper
-from comm_tools.overwrites import postprocess_chat_messages, postprocess, reload_javascript
+from webui_elem.overwrites import postprocess_chat_messages, postprocess, reload_javascript
 # 问询记录, python 版本建议3.9+（越新越好）
 # 一些普通功能模块
 from comm_tools.core_functional import get_core_functions
-from comm_tools import Langchain_cn, webui_local
-from comm_tools.logger_handle import logger
+from comm_tools import Langchain_cn
 
 functional = get_core_functions()
 
@@ -21,7 +20,7 @@ gr.Chatbot.postprocess = postprocess
 # 代理与自动更新
 from comm_tools.check_proxy import check_proxy, auto_update
 from comm_tools import func_box
-from webui_elem import func_signals
+from webui_elem import func_signals, webui_local
 
 os.makedirs("gpt_log", exist_ok=True)
 print("所有问询记录将自动保存在本地目录./gpt_log/chat_secrets.log, 请注意自我隐私保护哦！")
@@ -40,9 +39,9 @@ i18n = webui_local.I18nAuto()
 get_html = func_box.get_html
 
 from webui_elem.history_menu import LeftElem
-from webui_elem.chatbot_area import ChatbotElem
-from webui_elem.tools_menu import RightElem
-from webui_elem.popup_wrapper import Settings, Config, FakeComponents, AdvancedSearch, Prompt
+from webui_elem.layout_chatbot_area import ChatbotElem
+from webui_elem.layout_tools_menu import RightElem
+from webui_elem.layout_popup_wrapper import Settings, Config, FakeComponents, AdvancedSearch, Prompt
 
 
 class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents, AdvancedSearch, Prompt):
@@ -380,7 +379,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
 
     def main(self):
         # 做一些外观色彩上的调整
-        from comm_tools.theme import adjust_theme
+        from webui_elem.theme import adjust_theme
         with gr.Blocks(title=self.app_name, theme=adjust_theme) as self.demo:
             self.block_title()
             with gr.Row(equal_height=True, elem_id="chuanhu-body"):

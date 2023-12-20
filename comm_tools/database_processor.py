@@ -14,7 +14,7 @@ import psutil
 
 base_path = os.path.dirname(os.path.dirname(__file__))
 users_data = os.path.join(base_path, 'users_data')
-export_path = os.path.join(users_data, 'export_prompt')
+export_path = os.path.join(base_path, 'docs', 'export_prompt')
 
 
 def connect_db_close(cls_method):
@@ -196,7 +196,7 @@ def batch_export_prompt(incloud_tab='prompt_'):
             if file_dict:
                 os.makedirs(export_path, exist_ok=True)
                 with open(os.path.join(export_path, f"{source}.json"), mode='w', encoding='utf-8') as f:
-                    f.write(json.dumps(file_dict, ensure_ascii=False))
+                    f.write(json.dumps(file_dict, indent=4, ensure_ascii=False))
                     print(f'{source}已导出', os.path.join(export_path, f"{source}.json"))
 
 

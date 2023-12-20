@@ -6,7 +6,6 @@
 import os, random
 import copy
 import gradio as gr
-import re
 
 import yaml
 from comm_tools import toolbox
@@ -75,7 +74,7 @@ def filter_database_tables():
 
 # TODO < -------------------------------- 弹窗数注册区 ----------------------------------->
 def on_theme_dropdown_changed(theme, ):
-    from comm_tools.theme import load_dynamic_theme
+    from webui_elem.theme import load_dynamic_theme
     adjust_theme, adjust_dynamic_theme = load_dynamic_theme(theme)
     if adjust_dynamic_theme:
         try:
