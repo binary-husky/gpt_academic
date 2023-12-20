@@ -545,7 +545,20 @@ def get_files_from_everything(txt, type): # type='.md'
 @Singleton
 class nougat_interface():
     def __init__(self):
+        def model_check(model_tag):
+            if model_tag in ['0.1.0-small', '0.1.0-base']: return model_tag
+            return '0.1.0-small'
+
+        import argparse
         self.threadLock = threading.Lock()
+        self.arg_parser = argparse.ArgumentParser()
+        self.arg_parser.add_argument('--batchsize', type=int)
+        self.arg_parser.add_argument('--model', type=model_check)
+        self.arg_parser.add_argument('--recompute', action='store_true')
+        self.arg_parser.add_argument('--full-precision', action='store_true')
+        self.arg_parser.add_argument('--no-markdown', action='store_true')
+        self.arg_parser.add_argument('--no-skipping', action='store_true')
+        self.arg_parser.add_argument('--pages', type=str)
 
     def nougat_with_timeout(self, command, cwd, timeout=3600):
         import subprocess
@@ -563,7 +576,7 @@ class nougat_interface():
         return True
 
 
-    def NOUGAT_parse_pdf(self, fp, chatbot, history):
+    def NOUGAT_parse_pdf(self, fp, chatbot, history, advanced_cfg=''):
         from toolbox import update_ui_lastest_msg
 
         yield from update_ui_lastest_msg("正在解析论文, 请稍候。进度：正在排队, 等待线程锁...", 
@@ -576,7 +589,10 @@ class nougat_interface():
 
         yield from update_ui_lastest_msg("正在解析论文, 请稍候。进度：正在加载NOUGAT... （提示：首次运行需要花费较长时间下载NOUGAT参数）", 
                                          chatbot=chatbot, history=history, delay=0)
-        self.nougat_with_timeout(f'nougat --out "{os.path.abspath(dst)}" "{os.path.abspath(fp)}"', os.getcwd(), timeout=3600)
+        self.nougat_with_timeout(
+            f'nougat --out "{os.path.abspath(dst)}" "{os.path.abspath(fp)}" {self.parse_argument(advanced_cfg)}',
+            os.getcwd(), timeout=3600
+        )
         res = glob.glob(os.path.join(dst,'*.mmd'))
         if len(res) == 0:
             self.threadLock.release()
@@ -585,6 +601,87 @@ class nougat_interface():
         return res[0]
 
 
+    def NOUGAT_API_parse_pdf(self, fp, chatbot, history, nougat_url, advanced_cfg=''):
+        from toolbox import update_ui_lastest_msg
+
+        yield from update_ui_lastest_msg("正在解析论文, 请稍候。",
+                                         chatbot=chatbot, history=history, delay=0)
+
+        import requests
+        from toolbox import get_log_folder, gen_time_str
+        dst = os.path.join(get_log_folder(plugin_name='nougat'), gen_time_str())
+        os.makedirs(dst)
+
+        ret = requests.post(
+            f'{nougat_url}/predict{self.parse_api_argument(advanced_cfg)}',
+            files={"file": open(fp, "rb")}
+        )
+        if ret.status_code != 200:
+            raise RuntimeError("Nougat解析论文失败。")
+
+        with open(os.path.join(dst, '*.mmd'), 'w') as f:
+            f.write(ret.json())
+        return os.path.join(dst, '*.mmd')
+
+
+    def parse_argument(self, argument_string):
+        args, _ = self.arg_parser.parse_known_args(argument_string.split())
+        reduce_args = []
+        for k, v in args.__dict__.items():
+            if (v is not None) and (v is not False):
+                reduce_args.append('--' + k.replace('_', '-'))
+            if not isinstance(v, bool) and v is not None:
+                reduce_args.append(str(v))
+
+        return ' '.join(reduce_args)
+
+
+    def parse_api_argument(self, argument_string):
+        def parse_pages(pages_string):
+            if pages_string.count(',') > 0:
+                pages_list = pages_string.split(',')
+                page_start = pages_list[0].split('-')[0] if '-' in pages_list[0] else pages_list[0]
+                page_end = pages_list[-1].split('-')[-1] if '-' in pages_list[-1] else pages_list[-1]
+            else:
+                if '-' in pages_string:
+                    page_start = pages_string.split('-')[0]
+                    page_end = pages_string.split('-')[-1]
+                else:
+                    page_start = page_end = int(pages_string)
+
+            return page_start, page_end
+
+        args, _ = self.arg_parser.parse_known_args(argument_string.split())
+        reduce_args = []
+        for k, v in args.__dict__.items():
+            arg_pair = ''
+            if (v is not None) and (v is not False):
+                if k == 'pages':
+                    page_start, page_end = parse_pages(v)
+                    arg_pair = f'start={page_start}&stop={page_end}'
+                elif k not in ['model', 'full_precision']:
+                    arg_pair = f'{k}={int(v)}'
+            if arg_pair:
+                reduce_args.append(arg_pair)
+
+        return '?' + '&'.join(reduce_args)
+
+    @staticmethod
+    def get_avail_nougat_url():
+        import random
+        import requests
+        NOUGAT_URLS = get_conf('NOUGAT_URLS')
+        if len(NOUGAT_URLS) == 0: return None
+        try:
+            _nougat_url = random.choice(NOUGAT_URLS)  # 随机负载均衡
+            if _nougat_url.endswith('/'): _nougat_url = _nougat_url.rstrip('/')
+            ret = requests.get(_nougat_url + '/')
+            if ret.status_code == 200:
+                return _nougat_url
+            else:
+                return None
+        except:
+            return None
 
 
 def try_install_deps(deps, reload_m=[]):

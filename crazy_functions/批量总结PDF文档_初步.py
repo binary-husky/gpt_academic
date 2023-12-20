@@ -29,14 +29,9 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
 
             TOKEN_LIMIT_PER_FRAGMENT = 2500
 
-            from .crazy_utils import breakdown_txt_to_satisfy_token_limit_for_pdf
-            from request_llms.bridge_all import model_info
-            enc = model_info["gpt-3.5-turbo"]['tokenizer']
-            def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))
-            paper_fragments = breakdown_txt_to_satisfy_token_limit_for_pdf(
-                txt=file_content,  get_token_fn=get_token_num, limit=TOKEN_LIMIT_PER_FRAGMENT)
-            page_one_fragments = breakdown_txt_to_satisfy_token_limit_for_pdf(
-                txt=str(page_one), get_token_fn=get_token_num, limit=TOKEN_LIMIT_PER_FRAGMENT//4)
+            from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit
+            paper_fragments = breakdown_text_to_satisfy_token_limit(txt=file_content, limit=TOKEN_LIMIT_PER_FRAGMENT, llm_model=llm_kwargs['llm_model'])
+            page_one_fragments = breakdown_text_to_satisfy_token_limit(txt=str(page_one), limit=TOKEN_LIMIT_PER_FRAGMENT // 4, llm_model=llm_kwargs['llm_model'])
             # 为了更好的效果，我们剥离Introduction之后的部分（如果有）
             paper_meta = page_one_fragments[0].split('introduction')[0].split('Introduction')[0].split('INTRODUCTION')[0]
 

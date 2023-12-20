@@ -54,7 +54,7 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
-        "批量翻译PDF文档。函数插件贡献者: Binary-Husky"])
+        "批量翻译PDF文档。函数插件贡献者: Binary-Husky，Joshua Reed"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # 清空历史，以免输入溢出
@@ -104,11 +104,13 @@ def 解析PDF_基于NOUGAT(file_manifest, project_folder, llm_kwargs, plugin_kwa
     DST_LANG = "中文"
     from crazy_functions.crazy_utils import nougat_interface
     from crazy_functions.pdf_fns.report_gen_html import construct_html
+    if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
+    advanced_cfg = plugin_kwargs.get("advanced_arg", '')
     nougat_handle = nougat_interface()
     for index, fp in enumerate(file_manifest):
         if fp.endswith('pdf'):
             chatbot.append(["当前进度：", f"正在解析论文，请稍候。（第一次运行时，需要花费较长时间下载NOUGAT参数）"]); yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-            fpp = yield from nougat_handle.NOUGAT_parse_pdf(fp, chatbot, history)
+            fpp = yield from nougat_handle.NOUGAT_parse_pdf(fp, chatbot, history, advanced_cfg=advanced_cfg)
             promote_file_to_downloadzone(fpp, rename_file=os.path.basename(fpp)+'.nougat.mmd', chatbot=chatbot)
         else:
             chatbot.append(["当前论文无需解析：", fp]); yield from update_ui(      chatbot=chatbot, history=history)
@@ -123,3 +125,87 @@ def 解析PDF_基于NOUGAT(file_manifest, project_folder, llm_kwargs, plugin_kwa
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
 
+@CatchException
+def 批量翻译PDF文档_API(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+
+    disable_auto_promotion(chatbot)
+    # 基本信息：功能、贡献者
+    chatbot.append([
+        "函数插件功能？",
+        "使用NOUGAT_API批量翻译PDF文档。函数插件贡献者: Binary-Husky，Joshua Reed。\n"
+        + "官方版本API仅支持页码范围选择，若要支持更多参数，请移步https://github.com/leike0813/nougat",
+    ])
+    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+
+    # 清空历史，以免输入溢出
+    history = []
+
+    from .crazy_utils import get_files_from_everything
+    success, file_manifest, project_folder = get_files_from_everything(txt, type='.pdf')
+    if len(file_manifest) > 0:
+        # 尝试导入依赖，如果缺少依赖，则给出安装建议
+        try:
+            import tiktoken
+        except:
+            report_exception(chatbot, history,
+                             a=f"解析项目: {txt}",
+                             b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade tiktoken```。")
+            yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+            return
+    success_mmd, file_manifest_mmd, _ = get_files_from_everything(txt, type='.mmd')
+    success = success or success_mmd
+    file_manifest += file_manifest_mmd
+    chatbot.append(["文件列表：", ", ".join([e.split('/')[-1] for e in file_manifest])]);
+    yield from update_ui(chatbot=chatbot, history=history)
+    # 检测输入参数，如没有给定输入参数，直接退出
+    if not success:
+        if txt == "": txt = '空空如也的输入栏'
+
+    # 如果没找到任何文件
+    if len(file_manifest) == 0:
+        report_exception(chatbot, history,
+                         a=f"解析项目: {txt}", b=f"找不到任何.pdf拓展名的文件: {txt}")
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+        return
+
+    # 开始正式执行任务
+    yield from 解析PDF_基于NOUGAT_API(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt)
+
+
+def 解析PDF_基于NOUGAT_API(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
+    import copy
+    import tiktoken
+    TOKEN_LIMIT_PER_FRAGMENT = 1024
+    generated_conclusion_files = []
+    generated_html_files = []
+    DST_LANG = "中文"
+    from crazy_functions.crazy_utils import nougat_interface
+    from crazy_functions.pdf_fns.report_gen_html import construct_html
+    if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
+    advanced_cfg = plugin_kwargs.get("advanced_arg", '')
+    nougat_handle = nougat_interface()
+    chatbot.append(["当前进度：", f"正在检查NOUGAT服务可用性..."]);
+    yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
+    nougat_url = nougat_handle.get_avail_nougat_url()
+    if nougat_url is None:
+        report_exception(chatbot, history,
+                         a=f"检查结果：", b="NOUGAT服务不可用，请检查config中的NOUGAT_URL")
+        yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
+        return
+
+    for index, fp in enumerate(file_manifest):
+        if fp.endswith('pdf'):
+            chatbot.append(["当前进度：", f"正在解析论文，请稍候。"]); yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+            fpp = yield from nougat_handle.NOUGAT_API_parse_pdf(fp, chatbot, history, nougat_url, advanced_cfg=advanced_cfg)
+            promote_file_to_downloadzone(fpp, rename_file=os.path.basename(fpp)+'.nougat.mmd', chatbot=chatbot)
+        else:
+            chatbot.append(["当前论文无需解析：", fp]); yield from update_ui(chatbot=chatbot, history=history)
+            fpp = fp
+        with open(fpp, 'r', encoding='utf8') as f:
+            article_content = f.readlines()
+        article_dict = markdown_to_dict(article_content)
+        logging.info(article_dict)
+        yield from translate_pdf(article_dict, llm_kwargs, chatbot, fp, generated_conclusion_files, TOKEN_LIMIT_PER_FRAGMENT, DST_LANG)
+
+    chatbot.append(("给出输出文件清单", str(generated_conclusion_files + generated_html_files)))
+    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面

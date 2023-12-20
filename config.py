@@ -217,6 +217,10 @@ GROBID_URLS = [
 ]
 
 
+# NOUGAT_API主机地址
+NOUGAT_URLS = ["http://localhost:8503"] # 此处填写NOUGAT_API的主机地址
+
+
 # 是否允许通过自然语言描述修改本页的配置，该功能具有一定的危险性，默认关闭
 ALLOW_RESET_CONFIG = False
 

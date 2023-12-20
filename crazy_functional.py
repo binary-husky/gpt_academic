@@ -549,13 +549,24 @@ def get_crazy_functions():
         print('Load function plugin failed')
 
     try:
-        from crazy_functions.批量翻译PDF文档_NOUGAT import 批量翻译PDF文档
+        from crazy_functions.批量翻译PDF文档_NOUGAT import 批量翻译PDF文档, 批量翻译PDF文档_API
         function_plugins.update({
             "精准翻译PDF文档（NOUGAT）": {
                 "Group": "学术",
                 "Color": "stop",
                 "AsButton": False,
+                "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+                "ArgsReminder": "在这里输入自定义参数, 支持的参数有: --batchsize BATCHSIZE, --model MODEL_TAG, --recompute, --full-precision, --no-markdown --no-skipping, --pages PAGES/-p PAGES", # 高级参数输入区的显示提示
                 "Function": HotReload(批量翻译PDF文档)
+            },
+            "精准翻译PDF文档（NOUGAT_API）": {
+                "Group": "学术",
+                "Color": "stop",
+                "AsButton": False,
+                "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+                "ArgsReminder": "在这里输入自定义参数, 支持的参数有: --batchsize BATCHSIZE, --recompute, --no-markdown --no-skipping, --pages PAGES/-p PAGES (官方版本的API仅支持--pages参数)",
+                # 高级参数输入区的显示提示
+                "Function": HotReload(批量翻译PDF文档_API)
             }
         })
     except:
