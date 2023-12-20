@@ -6,7 +6,6 @@
 import os.path
 import requests
 from comm_tools import func_box
-from paddleocr import PaddleOCR, draw_ocr
 import concurrent.futures
 from comm_tools import database_processor
 # Paddleocr目前支持的多语言语种可以通过修改lang参数进行切换
@@ -14,13 +13,13 @@ from comm_tools import database_processor
 
 
 class Paddle_ocr_select():
-
     def __init__(self, ipaddr='', trust_value=0.9):
         self.font_path = os.path.join(func_box.base_path, 'docs/OCR/fonts/simfang.ttf')
         self.ipaddr = ipaddr
         self.trust_value = trust_value
 
     def img_def_content(self, img_path, img_tag, show_result: bool=True):
+        from paddleocr import PaddleOCR, draw_ocr
         model_dir = os.path.join(func_box.base_path, 'docs', 'OCR', 'ch_PP-OCRv3_rec_infer')
         det_dir = os.path.join(func_box.base_path, 'docs', 'OCR', 'ch_PP-OCRv3_det_infer')
         cls_dir = os.path.join(func_box.base_path, 'docs', 'OCR', 'ch_ppocr_mobile_v2.0_cls_infer')

@@ -10,7 +10,6 @@ Levenshtein
 paddleocr
 qrcode
 pypinyin
-zh_langchain==0.2.1
 moviepy
 SpeechRecognition
 pyDes
@@ -19,7 +18,6 @@ xmindparser
 xmind
 rich
 pypdf2==2.12.1
-protobuf==3.18
 transformers>=4.27.1
 scipdf_parser>=0.52
 python-markdown-math
@@ -29,3 +27,5 @@ commentjson
 numpy
 rich
 loguru
+tiktoken
+latex2mathml
