@@ -302,6 +302,14 @@ function cancel_loading_status() {
     if (loadingStyle) {
         document.head.removeChild(loadingStyle);
     }
+    let clearButton = document.querySelectorAll('div[id*="elem_upload"] button[aria-label="Clear"]');
+    for (let button of clearButton) {
+        button.addEventListener('click', function () {
+            setTimeout(function () {
+                register_upload_event();
+            }, 50);
+        });
+    }
 }
 function register_upload_event() {
     elem_upload_float = document.getElementById('elem_upload_float')
