@@ -123,7 +123,7 @@ function initialize() {
     if (!historyLoaded) loadHistoryHtml();
     if (!usernameGotten) getUserInfo();
 
-    setUpdater();
+    // setUpdater();
 
     setChatbotScroll();
     setTimeout(showOrHideUserInfo(), 2000);

@@ -17,29 +17,30 @@ function setUpdater() {
     }
 }
 
-var statusObserver = new MutationObserver(function (mutationsList) {
-    for (const mutation of mutationsList) {
-        if (mutation.type === 'attributes' || mutation.type === 'childList') {
-            if (statusDisplay.innerHTML.includes('<span id="update-status"')) {
-                if (getUpdateStatus() === "success") {
-                    updatingInfoElement.innerText = i18n(updateSuccess_i18n);
-                    noUpdateHtml();
-                    localStorage.setItem('isLatestVersion', 'true');
-                    isLatestVersion = true;
-                    enableUpdateBtns();
-                } else if (getUpdateStatus() === "failure") {
-                    updatingInfoElement.innerHTML = i18n(updateFailure_i18n);
-                    disableUpdateBtn_enableCancelBtn();
-                } else if (getUpdateStatus() != "") {
-                    updatingInfoElement.innerText = getUpdateStatus();
-                    enableUpdateBtns();
-                }
-                updateStatus.parentNode.removeChild(updateStatus);
-                if (updateSpinner) updateSpinner.stop();
-            }
-        }
-    }
-});
+// 注释更新代码
+// var statusObserver = new MutationObserver(function (mutationsList) {
+//     for (const mutation of mutationsList) {
+//         if (mutation.type === 'attributes' || mutation.type === 'childList') {
+//             if (statusDisplay.innerHTML.includes('<span id="update-status"')) {
+//                 if (getUpdateStatus() === "success") {
+//                     updatingInfoElement.innerText = i18n(updateSuccess_i18n);
+//                     noUpdateHtml();
+//                     localStorage.setItem('isLatestVersion', 'true');
+//                     isLatestVersion = true;
+//                     enableUpdateBtns();
+//                 } else if (getUpdateStatus() === "failure") {
+//                     updatingInfoElement.innerHTML = i18n(updateFailure_i18n);
+//                     disableUpdateBtn_enableCancelBtn();
+//                 } else if (getUpdateStatus() != "") {
+//                     updatingInfoElement.innerText = getUpdateStatus();
+//                     enableUpdateBtns();
+//                 }
+//                 updateStatus.parentNode.removeChild(updateStatus);
+//                 if (updateSpinner) updateSpinner.stop();
+//             }
+//         }
+//     }
+// });
 
 var showingUpdateInfo = false;
 async function getLatestRelease() {
