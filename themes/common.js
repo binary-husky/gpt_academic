@@ -1,3 +1,7 @@
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+//  第 1 部分: 工具函数
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
 function gradioApp() {
     // https://github.com/GaiZhenbiao/ChuanhuChatGPT/tree/main/web_assets/javascript
     const elems = document.getElementsByTagName('gradio-app');
@@ -36,6 +40,51 @@ function getCookie(name) {
 
     return null;
 }
+
+let toastCount = 0;
+function toast_push(msg, duration) {
+    duration = isNaN(duration) ? 3000 : duration;
+    const existingToasts = document.querySelectorAll('.toast');
+    existingToasts.forEach(toast => {
+        toast.style.top = `${parseInt(toast.style.top, 10) - 70}px`;
+    });
+    const m = document.createElement('div');
+    m.innerHTML = msg;
+    m.classList.add('toast');
+    m.style.cssText = `font-size: var(--text-md) !important; color: rgb(255, 255, 255); background-color: rgba(0, 0, 0, 0.6); padding: 10px 15px; border-radius: 4px; position: fixed; top: ${50 + toastCount * 70}%; left: 50%; transform: translateX(-50%); width: auto; text-align: center; transition: top 0.3s;`;
+    document.body.appendChild(m);
+    setTimeout(function () {
+        m.style.opacity = '0';
+        setTimeout(function () {
+            document.body.removeChild(m);
+            toastCount--;
+        }, 500);
+    }, duration);
+    toastCount++;
+}
+
+function toast_up(msg) {
+    var m = document.getElementById('toast_up');
+    if (m) {
+        document.body.removeChild(m); // remove the loader from the body
+    }
+    m = document.createElement('div');
+    m.id = 'toast_up';
+    m.innerHTML = msg;
+    m.style.cssText = "font-size: var(--text-md) !important; color: rgb(255, 255, 255); background-color: rgba(0, 0, 100, 0.6); padding: 10px 15px; margin: 0 0 0 -60px; border-radius: 4px; position: fixed; top: 50%; left: 50%; width: auto; text-align: center;";
+    document.body.appendChild(m);
+}
+function toast_down() {
+    var m = document.getElementById('toast_up');
+    if (m) {
+        document.body.removeChild(m); // remove the loader from the body
+    }
+}
+
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+//  第 2 部分: 复制按钮
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 function addCopyButton(botElement) {
     // https://github.com/GaiZhenbiao/ChuanhuChatGPT/tree/main/web_assets/javascript
@@ -98,6 +147,12 @@ function chatbotContentChanged(attempt = 1, force = false) {
     }
 }
 
+
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+//  第 3 部分: chatbot动态高度调整
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
 function chatbotAutoHeight() {
     // 自动调整高度
     function update_height() {
@@ -127,8 +182,6 @@ function chatbotAutoHeight() {
     }, 50); // 每100毫秒执行一次
 }
 
-
-
 function get_elements(consider_state_panel = false) {
     var chatbot = document.querySelector('#gpt-chatbot > div.wrap.svelte-18telvq');
     if (!chatbot) {
@@ -153,6 +206,18 @@ function get_elements(consider_state_panel = false) {
     return { panel_height_target, chatbot_height, chatbot };
 }
 
+
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+//  第 4 部分: 粘贴、拖拽文件上传
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+var elem_upload = null;
+var elem_upload_float = null;
+var elem_input_main = null;
+var elem_input_float = null;
+var elem_chatbot = null;
+var exist_file_msg = '⚠️请先删除上传区（左上方）中的历史文件，再尝试上传。'
 
 function add_func_paste(input) {
     let paste_files = [];
@@ -182,20 +247,21 @@ function add_func_paste(input) {
 
 function add_func_drag(elem) {
     if (elem) {
-        const dragEvents = ["dragover", "dragenter"];
+        const dragEvents = ["dragover"];
         const leaveEvents = ["dragleave", "dragend", "drop"];
 
         const onDrag = function (e) {
             e.preventDefault();
             e.stopPropagation();
             if (elem_upload_float.querySelector("input[type=file]")) {
-                toast_push('释放以上传文件', 50)
+                toast_up('⚠️释放以上传文件')
             } else {
-                toast_push('⚠️请先删除上传区中的历史文件，再尝试上传。', 50)
+                toast_up(exist_file_msg)
             }
         };
 
         const onLeave = function (e) {
+            toast_down();
             e.preventDefault();
             e.stopPropagation();
         };
@@ -237,35 +303,11 @@ async function upload_files(files) {
             Object.defineProperty(event, "currentTarget", { value: uploadInputElement, enumerable: true });
             Object.defineProperty(uploadInputElement, "files", { value: files, enumerable: true });
             uploadInputElement.dispatchEvent(event);
-
-            // toast_push('🎉上传文件成功', 2000)
         } else {
-            toast_push('⚠️请先删除上传区中的历史文件，再尝试上传。', 3000)
+            toast_push(exist_file_msg, 3000)
         }
     }
 }
-//提示信息 封装
-function toast_push(msg, duration) {
-    duration = isNaN(duration) ? 3000 : duration;
-    const m = document.createElement('div');
-    m.innerHTML = msg;
-    m.style.cssText = "font-size:  var(--text-md) !important; color: rgb(255, 255, 255);background-color: rgba(0, 0, 0, 0.6);padding: 10px 15px;margin: 0 0 0 -60px;border-radius: 4px;position: fixed;    top: 50%;left: 50%;width: auto; text-align: center;";
-    document.body.appendChild(m);
-    setTimeout(function () {
-        var d = 0.5;
-        m.style.opacity = '0';
-        setTimeout(function () {
-            document.body.removeChild(m)
-        }, d * 1000);
-    }, duration);
-}
-
-var elem_upload = null;
-var elem_upload_float = null;
-var elem_input_main = null;
-var elem_input_float = null;
-var gptChatbot = null;
-
 
 function begin_loading_status() {
     // Create the loader div and add styling
@@ -293,6 +335,7 @@ function begin_loading_status() {
     }`;
     document.head.appendChild(styleSheet);
 }
+
 function cancel_loading_status() {
     var loadingElement = document.getElementById('Js_File_Loading');
     if (loadingElement) {
@@ -311,6 +354,7 @@ function cancel_loading_status() {
         });
     }
 }
+
 function register_upload_event() {
     elem_upload_float = document.getElementById('elem_upload_float')
     const upload_component = elem_upload_float.querySelector("input[type=file]");
@@ -321,6 +365,7 @@ function register_upload_event() {
         });
     }
 }
+
 function monitoring_input_box() {
     register_upload_event();
 
@@ -328,6 +373,7 @@ function monitoring_input_box() {
     elem_upload_float = document.getElementById('elem_upload_float')
     elem_input_main = document.getElementById('user_input_main')
     elem_input_float = document.getElementById('user_input_float')
+    elem_chatbot = document.getElementById('gpt-chatbot')
 
     if (elem_input_main) {
         if (elem_input_main.querySelector("textarea")) {
@@ -339,9 +385,8 @@ function monitoring_input_box() {
             add_func_paste(elem_input_float.querySelector("textarea"))
         }
     }
-    gptChatbot = document.getElementById('gpt-chatbot')
-    if (gptChatbot) {
-        add_func_drag(gptChatbot)
+    if (elem_chatbot) {
+        add_func_drag(elem_chatbot)
     }
 }
 
@@ -351,6 +396,14 @@ window.addEventListener("DOMContentLoaded", function () {
     // const ga = document.getElementsByTagName("gradio-app");
     gradioApp().addEventListener("render", monitoring_input_box);
 });
+
+
+
+
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+//  第 5 部分: 音频按钮样式变化
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 function audio_fn_init() {
     let audio_component = document.getElementById('elem_audio');
@@ -387,6 +440,13 @@ function audio_fn_init() {
 
     }
 }
+
+
+
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+//  第 6 部分: JS初始化函数
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 function GptAcademicJavaScriptInit(LAYOUT = "LEFT-RIGHT") {
     audio_fn_init();
