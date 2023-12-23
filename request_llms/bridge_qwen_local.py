@@ -1,4 +1,4 @@
-model_name = "Qwen_local"
+model_name = "Qwen_Local"
 cmd_to_install = "`pip install -r request_llms/requirements_qwen_local.txt`"
 
 from toolbox import ProxyNetworkActivate, get_conf
