@@ -5,16 +5,6 @@ from toolbox import check_packages, report_exception
 
 model_name = 'Qwen'
 
-def validate_key():
-    DASHSCOPE_API_KEY = get_conf("DASHSCOPE_API_KEY")
-    if DASHSCOPE_API_KEY == '': return False
-    return True
-
-if not validate_key():
-    raise RuntimeError('请配置DASHSCOPE_API_KEY')
-os.environ['DASHSCOPE_API_KEY'] = get_conf("DASHSCOPE_API_KEY")
-
-
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=[], console_slience=False):
     """
         ⭐多线程方法
@@ -45,6 +35,12 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         check_packages(["dashscope"])
     except:
         yield from update_ui_lastest_msg(f"导入软件依赖失败。使用该模型需要额外依赖，安装方法```pip install --upgrade dashscope```。",
+                                         chatbot=chatbot, history=history, delay=0)
+        return
+
+    # 检查DASHSCOPE_API_KEY
+    if get_conf("DASHSCOPE_API_KEY") == "":
+        yield from update_ui_lastest_msg(f"请配置 DASHSCOPE_API_KEY。",
                                          chatbot=chatbot, history=history, delay=0)
         return
 
