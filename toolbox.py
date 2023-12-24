@@ -1129,7 +1129,7 @@ def get_user(chatbotwithcookies):
 
 class ProxyNetworkActivate():
     """
-    这段代码定义了一个名为TempProxy的空上下文管理器, 用于给一小段代码上代理
+    这段代码定义了一个名为ProxyNetworkActivate的空上下文管理器, 用于给一小段代码上代理
     """
     def __init__(self, task=None) -> None:
         self.task = task
