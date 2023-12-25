@@ -220,7 +220,6 @@ function get_elements(consider_state_panel = false) {
     height_target = height_target + (document.state_panel_height - panel_active.height)
     var height_target = parseInt(height_target);
     var chatbot_height = chatbot.style.height;
-    console.log(panel1.top, panel2.top, panel3.top, panel_active.top, height_target, chatbot_height);
     // 交换输入区位置，使得输入区始终可用
     if (!swapped){
         if (panel1.top!=0 && panel1.top < 0){ swap_input_area(); }
