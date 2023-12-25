@@ -828,14 +828,14 @@ def on_file_uploaded(files, chatbot, txt,  cookies, ipaddr: gr.Request):
             txt = {'file_path': '', 'know_name': '', 'know_obj': {}, 'file_list': []}
         txt.update({'file_path': time_tag_path})
     else:
-        txt = "\n".join(func_box.file_manifest_filter_type(moved_files, md_type=True))
+        txt += "\n".join(func_box.file_manifest_filter_type(moved_files, md_type=True))
         cookies.update({
             'most_recent_uploaded': {
                 'path': f'{time_tag_path}',
                 'time': time.time(),
                 'time_str': time_tag
             }})
-    return chatbot, txt,
+    return chatbot, txt
 
 
 def on_report_generated(cookies, files, chatbot, request):
@@ -1061,7 +1061,8 @@ def read_env_variable(arg, default_value):
 def read_single_conf_with_lru_cache(arg):
     from comm_tools.colorful import print亮红, print亮绿, print亮蓝
     # 将上一层目录添加到Python的搜索路径中
-    sys.path.append(func_box.base_path)
+    if func_box.base_path not in sys.path:
+        sys.path.append(func_box.base_path)
     try:
         # 优先级1. 获取环境变量作为配置
         default_ref = getattr(importlib.import_module('config'), arg)  # 读取默认值作为数据类型转换的参考

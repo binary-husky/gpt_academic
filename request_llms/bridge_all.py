@@ -29,6 +29,10 @@ from .bridge_qianfan import predict_no_ui_long_connection as qianfan_noui
 from .bridge_qianfan import predict as qianfan_ui
 
 
+from .bridge_google_gemini import predict as genai_ui
+from .bridge_google_gemini import predict_no_ui_long_connection  as genai_noui
+
+
 colors = ['#FF00FF', '#00FFFF', '#FF0000', '#990099', '#009999', '#990044']
 
 class LazyloadTiktoken(object):
@@ -214,9 +218,17 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
-    "qianfan": {
-        "fn_with_ui": qianfan_ui,
-        "fn_without_ui": qianfan_noui,
+    "gemini-pro": {
+        "fn_with_ui": genai_ui,
+        "fn_without_ui": genai_noui,
+        "endpoint": None,
+        "max_token": 2000,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+    "gemini-pro-vision": {
+        "fn_with_ui": genai_ui,
+        "fn_without_ui": genai_noui,
         "endpoint": None,
         "max_token": 2000,
         "tokenizer": tokenizer_gpt35,

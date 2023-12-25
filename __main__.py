@@ -316,7 +316,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         self.clear_agrs = dict(fn=func_signals.clear_input,
                                inputs=[self.user_input, self.cookies],
                                outputs=[self.user_input, self.input_copy, self.cancelBtn,
-                                        self.submitBtn, self.historySelectList])
+                                        self.submitBtn, self.historySelectList, self.sm_upload])
 
         # 提交按钮、重置按钮
         submit_handle = self.user_input.submit(**self.clear_agrs).then(**self.predict_args)

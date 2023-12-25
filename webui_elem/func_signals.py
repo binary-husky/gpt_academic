@@ -106,7 +106,6 @@ def sm_upload_clear(cookie: dict):
     return gr.update(value=None), cookie
 
 
-
 def clear_input(inputs, cookies, ipaddr: gr.Request):
     user_addr = func_box.user_client_mark(ipaddr)
     user_path = os.path.join(func_box.history_path, user_addr)
@@ -123,7 +122,7 @@ def clear_input(inputs, cookies, ipaddr: gr.Request):
         # 先写入一个空文件占位
         with open(os.path.join(user_path, cookies['first_chat']+".json"), mode='w') as f:  f.write('{}')
     output = ['', inputs, gr.update(visible=True), gr.update(visible=False),
-              gr.Radio.update(choices=only_name, value=cookies['first_chat'])]
+              gr.Radio.update(choices=only_name, value=cookies['first_chat']), gr.update(value=None)]
     return output
 
 
@@ -225,7 +224,7 @@ def download_history_json(select, ipaddr: gr.Request):
 
 
 def download_history_md(select, ipaddr: gr.Request):
-    user_path = os.path.join(func_box.history_path, ifunc_box.user_client_mark(ipaddr))
+    user_path = os.path.join(func_box.history_path, func_box.user_client_mark(ipaddr))
     file_path = os.path.join(user_path, f"{select}.json")
     if not os.path.exists(file_path):
         raise gr.Error('当前对话记录空，导出失败')

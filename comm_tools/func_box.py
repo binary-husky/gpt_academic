@@ -168,6 +168,17 @@ def html_local_img(__file, layout='left', max_width=None, max_height=None, md=Tr
     return a
 
 
+def files_filter_encode(file_list):
+    new_list = []
+    filter_ = ['png', 'jpg', 'jpeg', 'bmp', 'svg', 'webp', 'ico', 'tif', 'tiff', 'raw', 'eps']
+    for file in file_list:
+        file = str(file).replace('file=', '')
+        if os.path.exists(file):
+            if str(os.path.basename(file)).split('.')[-1] in filter_:
+                new_list.append(file)
+    return new_list
+
+
 def file_manifest_filter_type(file_list, filter_: list = None, md_type=False):
     new_list = []
     if not filter_:
