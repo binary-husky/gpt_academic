@@ -211,8 +211,12 @@ function get_elements(consider_state_panel = false) {
         // 调整高度
         const chatbot_height_exceed = 15;
         const chatbot_height_exceed_m = 10;
-        if (panel3.bottom >= window.innerHeight - chatbot_height_exceed) {
+        b_panel = Math.max(panel1.bottom, panel2.bottom, panel3.bottom)
+        if (b_panel >= window.innerHeight - chatbot_height_exceed) {
             height_target = window.innerHeight - chatbot.getBoundingClientRect().top - chatbot_height_exceed_m;
+        }
+        else if (b_panel < window.innerHeight * 0.75) {
+            height_target = window.innerHeight * 0.8;
         }
     }
     var chatbot_height = parseInt(chatbot_height);
