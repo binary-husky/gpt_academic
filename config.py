@@ -141,7 +141,7 @@ AUTO_CLEAR_TXT = False
 
 
 # 加一个live2d装饰
-ADD_WAIFU = False
+ADD_WAIFU = True
 
 
 # 设置用户名和密码（不需要修改）（相关功能不稳定，与gradio版本和网络都相关，如果本地使用不建议加这个）
