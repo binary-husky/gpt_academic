@@ -21,10 +21,10 @@ class GoogleChatInit:
     def __conversation_user(self, user_input):
         what_i_have_asked = {"role": "user", "parts": []}
         if 'vision' not in self.url_gemini:
-            input_, encode_img = input_encode_handle(user_input)
-        else:
             input_ = user_input
             encode_img = []
+        else:
+            input_, encode_img = input_encode_handler(user_input)
         what_i_have_asked['parts'].append({'text': input_})
         if encode_img:
             for data in encode_img:
