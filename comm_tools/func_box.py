@@ -170,7 +170,7 @@ def html_local_img(__file, layout='left', max_width=None, max_height=None, md=Tr
     return a
 
 
-def files_filter_encode(file_list):
+def files_filter_handler(file_list):
     new_list = []
     filter_ = ['png', 'jpg', 'jpeg', 'bmp', 'svg', 'webp', 'ico', 'tif', 'tiff', 'raw', 'eps']
     for file in file_list:
@@ -179,6 +179,23 @@ def files_filter_encode(file_list):
             if str(os.path.basename(file)).split('.')[-1] in filter_:
                 new_list.append(file)
     return new_list
+
+
+def input_encode_handler(inputs):
+    md_encode = []
+    pattern_md_file = r"(!?\[[^\]]+\]\([^\)]+\))"
+    matches_path = re.findall(pattern_md_file, inputs)
+    for md_path in matches_path:
+        pattern_file = r"\((file=.*)\)"
+        matches_path = re.findall(pattern_file, md_path)
+        encode_file = files_filter_handler(file_list=matches_path)
+        if encode_file:
+            md_encode.extend([{
+                "data": toolbox.encode_image(i),
+                "type": os.path.splitext(i)[1].replace('.', '')
+            } for i in encode_file])
+            inputs = inputs.replace(md_path, '')
+    return inputs, md_encode
 
 
 def file_manifest_filter_type(file_list, filter_: list = None, md_type=False):

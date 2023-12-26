@@ -22,10 +22,10 @@ class GoogleChatInit:
     def __conversation_user(self, user_input):
         what_i_have_asked = {"role": "user", "parts": []}
         if 'vision' not in self.url_gemini:
-            input_, encode_img = self.input_encode_handle(user_input)
-        else:
             input_ = user_input
             encode_img = []
+        else:
+            input_, encode_img = func_box.input_encode_handler(user_input)
         what_i_have_asked['parts'].append({'text': input_})
         if encode_img:
             for data in encode_img:
@@ -49,22 +49,6 @@ class GoogleChatInit:
                 messages.append(what_i_have_asked)
                 messages.append(what_gpt_answer)
         return messages
-
-    def input_encode_handle(self, inputs):
-        md_encode = []
-        pattern_md_file = r"(!?\[[^\]]+\]\([^\)]+\))"
-        matches_path = re.findall(pattern_md_file, inputs)
-        for md_path in matches_path:
-            pattern_file = r"\((file=.*)\)"
-            matches_path = re.findall(pattern_file, md_path)
-            encode_file = func_box.files_filter_encode(file_list=matches_path)
-            if encode_file:
-                md_encode.extend([{
-                    "data": toolbox.encode_image(i),
-                    "type": os.path.splitext(i)[1].replace('.', '')
-                } for i in encode_file])
-                inputs = inputs.replace(md_path, '')
-        return inputs, md_encode
 
     def generate_chat(self, inputs, llm_kwargs, history, system_prompt):
         headers, payload = self.generate_message_payload(inputs, llm_kwargs, history, system_prompt)
