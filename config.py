@@ -70,7 +70,7 @@ LAYOUT = "LEFT-RIGHT"   # "LEFT-RIGHT"（左右布局） # "TOP-DOWN"（上下�
 
 
 # 暗色模式 / 亮色模式
-DARK_MODE = True        
+DARK_MODE = False
 
 
 # 发送请求到OpenAI后，等待多久判定为超时
