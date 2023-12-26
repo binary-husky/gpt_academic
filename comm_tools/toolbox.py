@@ -3,11 +3,7 @@ import importlib
 import inspect
 from comm_tools import func_box
 from comm_tools import history_processor
-import re
-import os
 import base64
-import shutil
-import glob
 import gradio as gr
 import math
 from latex2mathml.converter import convert as tex2mathml
@@ -18,6 +14,7 @@ import time
 import glob
 import sys
 import threading
+from comm_tools.path_handle import init_path
 
 ############################### 插件输入输出接驳区 #######################################
 pj = os.path.join
@@ -805,7 +802,7 @@ def to_markdown_tabs(head: list, tabs: list, alignment=':---:', column=False):
 
 
 def on_file_uploaded(files, chatbot, txt,  cookies, ipaddr: gr.Request):
-    private_upload = func_box.users_path.replace(func_box.base_path, '.')
+    private_upload = init_path.prompt_path.replace(init_path.base_path, '.')
     #     shutil.rmtree('./private_upload/')  不需要删除文件
     if type(ipaddr) is str:
         ipaddr = ipaddr
@@ -1014,7 +1011,7 @@ def read_env_variable(arg, default_value):
         set GPT_ACADEMIC_AUTHENTICATION=[("username", "password"), ("username2", "password2")]
     """
     from comm_tools.colorful import print亮红, print亮绿
-    sys.path.append(func_box.base_path)
+    sys.path.append(init_path.base_path)
     arg_with_prefix = "GPT_ACADEMIC_" + arg
     if arg_with_prefix in os.environ:
         env_arg = os.environ[arg_with_prefix]
@@ -1061,8 +1058,8 @@ def read_env_variable(arg, default_value):
 def read_single_conf_with_lru_cache(arg):
     from comm_tools.colorful import print亮红, print亮绿, print亮蓝
     # 将上一层目录添加到Python的搜索路径中
-    if func_box.base_path not in sys.path:
-        sys.path.append(func_box.base_path)
+    if init_path.base_path not in sys.path:
+        sys.path.append(init_path.base_path)
     try:
         # 优先级1. 获取环境变量作为配置
         default_ref = getattr(importlib.import_module('config'), arg)  # 读取默认值作为数据类型转换的参考

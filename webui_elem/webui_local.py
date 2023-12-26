@@ -8,8 +8,7 @@ import os
 import locale
 import logging
 import commentjson as json
-from comm_tools.toolbox import get_conf
-from comm_tools import func_box
+from comm_tools.path_handle import init_path
 
 
 class I18nAuto:
@@ -19,7 +18,7 @@ class I18nAuto:
         if language == "auto":
             language = locale.getdefaultlocale()[0] # get the language code of the system (ex. zh_CN)
         self.language_map = {}
-        self.language_file = os.path.join(func_box.base_path, 'docs', 'locale')
+        self.language_file = os.path.join(init_path.base_path, 'docs', 'locale')
         self.file_is_exists = f"{self.language_file}/{language}.json"
         if os.path.isfile(self.file_is_exists):
             with open(self.file_is_exists, "r", encoding="utf-8") as f:

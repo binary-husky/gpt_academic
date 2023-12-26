@@ -5,6 +5,7 @@
 # @Descr   :
 from comm_tools import toolbox
 from comm_tools import func_box, ocr_tools
+from comm_tools.path_handle import init_path
 from crazy_functions.kingsoft_fns import crazy_box, crzay_kingsoft
 import os
 
@@ -12,7 +13,7 @@ import os
 def ocr_batch_processing(file_manifest, chatbot, history, llm_kwargs):
     process = ''
     if not file_manifest:
-        chatbot.append([[f.replace(func_box.base_path, '.') for f in file_manifest], '阿欧，没有找到符合要求的文件呢'])
+        chatbot.append([[f.replace(init_path.base_path, '.') for f in file_manifest], '阿欧，没有找到符合要求的文件呢'])
     for pic_path in file_manifest:
         if pic_path.endswith('xmind'):
             i_say, process = [func_box.html_view_blank(pic_path) + "\n\n开始解析", None]

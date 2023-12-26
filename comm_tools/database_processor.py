@@ -39,9 +39,9 @@ class SqliteHandle:
         if self.__table not in self.get_tables():
             self.create_tab()
 
-    def __del__(self):
-        self.__cursor.close()
-        self.__connect.close()
+    # def __del__(self):
+    #     self.__cursor.close()
+    #     self.__connect.close()
 
     def create_tab(self):
         self.__cursor.execute(f"CREATE TABLE `{self.__table}` ('prompt' TEXT UNIQUE, 'result' TEXT, 'source' TEXT)")
@@ -74,7 +74,6 @@ class SqliteHandle:
             user_account['user'] = row[0]
             user_account['password'] = row[1]
         return user_account
-
 
     def get_prompt_value_temp(self):
         temp_all = {}

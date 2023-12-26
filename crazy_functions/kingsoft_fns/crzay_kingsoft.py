@@ -15,6 +15,8 @@ from comm_tools import toolbox, func_box
 from crazy_functions.kingsoft_fns import crazy_box
 from crazy_functions import crazy_utils
 from comm_tools import ocr_tools
+from comm_tools.path_handle import init_path
+
 
 class Kdocs:
 
@@ -420,7 +422,7 @@ def get_kdocs_from_everything(txt, type=[''], ipaddr='temp'):
     link_limit = crazy_box.Utils().split_startswith_txt(link_limit=txt, domain_name=['kdocs', 'wps'])
     file_manifest = []
     success = ''
-    project_folder = os.path.join(func_box.users_path, ipaddr, 'kdocs')
+    project_folder = os.path.join(init_path.prompt_path, ipaddr, 'kdocs')
     os.makedirs(project_folder, exist_ok=True)
     if link_limit:
         for limit in link_limit:

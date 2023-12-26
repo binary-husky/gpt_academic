@@ -6,6 +6,7 @@
 import os.path
 import gradio as gr
 from comm_tools import func_box, ocr_tools, Langchain_cn
+from comm_tools.path_handle import init_path
 from crazy_functions.kingsoft_fns import crazy_box, crzay_kingsoft, crzay_qqdocs
 from comm_tools.toolbox import update_ui, CatchException, trimmed_format_exc, get_conf
 
@@ -76,7 +77,7 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
     if files and know_dict:
         cls_name, = list(know_dict.keys())
         know_id, = list(know_dict.values())
-        you_say = f'请将`{str(files).replace(func_box.base_path, "")}`文件录入`cls_name`分类下的`{cls_name}`'
+        you_say = f'请将`{str(files).replace(init_path.base_path, "")}`文件录入`cls_name`分类下的`{cls_name}`'
         chatbot.append([you_say, None])
         yield from update_ui(chatbot, history)
         Langchain_cn.single_step_thread_building_knowledge(cls_name=cls_name, know_id=know_id, file_manifest=files, llm_kwargs=llm_kwargs)

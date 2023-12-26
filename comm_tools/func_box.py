@@ -26,6 +26,7 @@ from PIL import Image, ImageOps
 from bs4 import BeautifulSoup
 from comm_tools import toolbox
 from comm_tools.logger_handle import logger
+from comm_tools.path_handle import init_path
 from comm_tools.database_processor import SqliteHandle
 
 
@@ -33,7 +34,7 @@ class Shell:
     def __init__(self, args):
         self.__args = args
         self.subp = subprocess.Popen(self.__args, shell=True,
-                                     stdin=subprocess.PIPE,  stderr=subprocess.PIPE,
+                                     stdin=subprocess.PIPE, stderr=subprocess.PIPE,
                                      stdout=subprocess.PIPE, encoding='utf-8',
                                      errors='ignore', close_fds=True)
         self._thread = None
@@ -68,6 +69,7 @@ def timeStatistics(func):
         ums = startTiem - endTiem
         print('func:{} > Time-consuming: {}'.format(func, ums))
         return obj
+
     return statistics
 
 
@@ -117,7 +119,7 @@ def html_a_blank(__href, name=''):
 
 def html_local_file(file):
     if os.path.exists(str(file)):
-        file = f'file={file.replace(base_path, ".")}'
+        file = f'file={file.replace(init_path.base_path, ".")}'
     return file
 
 
@@ -129,7 +131,7 @@ def link_mtime_to_md(file):
 
 
 def html_view_blank(__href: str, file_name='', to_tabs=False):
-    __file = __href.replace(base_path, ".")
+    __file = __href.replace(init_path.base_path, ".")
     __href = html_local_file(__href)
     if not file_name:
         file_name = __href.split('/')[-1]
@@ -331,15 +333,6 @@ def get_files_list(folder_path, filter_format: list):
     return sorted_files, only_name, newest_file_path, newest_file
 
 
-base_path = os.path.dirname(os.path.dirname(__file__))
-prompt_path = os.path.join(base_path, 'users_data')
-knowledge_path = os.path.join(prompt_path, 'knowledge')
-users_path = os.path.join(base_path, 'private_upload')
-logs_path = os.path.join(base_path, 'gpt_log')
-history_path = os.path.join(logs_path, 'history')
-assets_path = os.path.join(base_path, 'docs', 'assets')
-
-
 def split_csv_by_quarter(file_path, date_format='%Y-%m-%d %H:%M:%S'):
     # 获取文件名和扩展名
     file_name, file_ext = os.path.splitext(file_path)
@@ -453,7 +446,7 @@ def clean_br_string(s):
 
 
 def get_html(filename):
-    path = os.path.join(base_path, "docs/assets/html", filename)
+    path = os.path.join(init_path.base_path, "docs/assets/html", filename)
     if os.path.exists(path):
         with open(path, encoding="utf8") as file:
             return file.read()
@@ -530,7 +523,7 @@ def qr_code_generation(data, icon_path=None, file_name='qc_icon.png'):
     w = (img_w - logo_w) // 2
     h = (img_h - logo_h) // 2
     img.paste(logo, (w, h))
-    qr_path = os.path.join(logs_path, file_name)
+    qr_path = os.path.join(init_path.logs_path, file_name)
     img.save(qr_path)
     return qr_path
 
@@ -587,14 +580,14 @@ def replace_expected_text(prompt: str, content: str, expect='{{{v}}}'):
 
 
 def get_avatar_img(llm_s):
-    chat_bot_path = os.path.join(assets_path, 'imgs')
+    chat_bot_path = os.path.join(init_path.assets_path, 'imgs')
     file_list, only_name, new_path, new_name = get_files_list(chat_bot_path, filter_format=['.png'])
     chat_img = ''
     for i in range(len(only_name)):
         if only_name[i] in llm_s:
             chat_img = file_list[i]
     if chat_img:
-        return ['./docs/assets/imgs/tester.png', chat_img.replace(base_path, '.')]
+        return ['./docs/assets/imgs/tester.png', chat_img.replace(init_path.base_path, '.')]
     else:
         return ['./docs/assets/imgs/tester.png', './docs/assets/imgs/user.png']
 

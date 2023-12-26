@@ -8,24 +8,25 @@ import requests
 from comm_tools import func_box
 import concurrent.futures
 from comm_tools import database_processor
+from comm_tools.path_handle import init_path
 # Paddleocr目前支持的多语言语种可以通过修改lang参数进行切换
 # 例如`ch`, `en`, `fr`, `german`, `korean`, `japan`
 
 
 class Paddle_ocr_select():
     def __init__(self, ipaddr='', trust_value=0.9):
-        self.font_path = os.path.join(func_box.base_path, 'docs/OCR/fonts/simfang.ttf')
+        self.font_path = os.path.join(init_path.base_path, 'docs/OCR/fonts/simfang.ttf')
         self.ipaddr = ipaddr
         self.trust_value = trust_value
 
     def img_def_content(self, img_path, img_tag, show_result: bool=True):
         from paddleocr import PaddleOCR, draw_ocr
-        model_dir = os.path.join(func_box.base_path, 'docs', 'OCR', 'ch_PP-OCRv3_rec_infer')
-        det_dir = os.path.join(func_box.base_path, 'docs', 'OCR', 'ch_PP-OCRv3_det_infer')
-        cls_dir = os.path.join(func_box.base_path, 'docs', 'OCR', 'ch_ppocr_mobile_v2.0_cls_infer')
+        model_dir = os.path.join(init_path.base_path, 'docs', 'OCR', 'ch_PP-OCRv3_rec_infer')
+        det_dir = os.path.join(init_path.base_path, 'docs', 'OCR', 'ch_PP-OCRv3_det_infer')
+        cls_dir = os.path.join(init_path.base_path, 'docs', 'OCR', 'ch_ppocr_mobile_v2.0_cls_infer')
         ocr = PaddleOCR(use_angle_cls=True, cls_model_dir=cls_dir,
                         rec_model_dir=model_dir, det_model_dir=det_dir)
-        save_path = os.path.join(func_box.users_path, self.ipaddr, 'ocr_temp')
+        save_path = os.path.join(init_path.prompt_path, self.ipaddr, 'ocr_temp')
         os.makedirs(save_path, exist_ok=True)
         if img_path.startswith('http'):
             response = requests.get(url=img_path, verify=False)

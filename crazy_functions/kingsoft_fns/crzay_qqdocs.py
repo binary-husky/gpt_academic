@@ -12,6 +12,7 @@ import requests
 from comm_tools import func_box
 from comm_tools import toolbox
 from crazy_functions.kingsoft_fns import crazy_box
+from comm_tools.path_handle import init_path
 
 
 class QQDocs:
@@ -130,7 +131,7 @@ def get_qqdocs_from_everything(txt, type: list=[''], ipaddr='temp'):
     link_limit = crazy_box.Utils().split_startswith_txt(link_limit=txt, domain_name=['docs.qq'])
     file_manifest = []
     success = ''
-    project_folder = os.path.join(func_box.users_path, ipaddr, 'qqdocs')
+    project_folder = os.path.join(init_path.prompt_path, ipaddr, 'qqdocs')
     os.makedirs(project_folder, exist_ok=True)
     for limit in link_limit:
         file_manifest += get_qqdocs_files(limit, project_folder, type, ipaddr)

@@ -21,6 +21,7 @@ from crazy_functions import crazy_utils
 from request_llms import bridge_all
 from crazy_functions.kingsoft_fns import crzay_kingsoft
 from moviepy.editor import AudioFileClip
+from comm_tools.path_handle import init_path
 
 
 class Utils:
@@ -120,7 +121,7 @@ class Utils:
             file_name: 另取文件名
         Returns: 写入的文件地址
         """
-        user_path = os.path.join(func_box.users_path, hosts, 'markdown')
+        user_path = os.path.join(init_path.prompt_path, hosts, 'markdown')
         os.makedirs(user_path, exist_ok=True)
         md_file = os.path.join(user_path, f"{file_name}.md")
         with open(file=md_file, mode='w', encoding='utf-8') as f:
@@ -136,7 +137,7 @@ class Utils:
         Returns: 写入的文件地址
         """
         data = toolbox.markdown_convertion(data)
-        user_path = os.path.join(func_box.users_path, hosts, 'view_html')
+        user_path = os.path.join(init_path.prompt_path, hosts, 'view_html')
         os.makedirs(user_path, exist_ok=True)
         md_file = os.path.join(user_path, f"{file_name}.html")
         with open(file=md_file, mode='w', encoding='utf-8') as f:
@@ -151,7 +152,7 @@ class Utils:
             file_name: 要写入的文件名
         Returns: [md, 流程图] 文件
         """
-        user_path = os.path.join(func_box.users_path, hosts, 'mark_map')
+        user_path = os.path.join(init_path.prompt_path, hosts, 'mark_map')
         os.makedirs(user_path, exist_ok=True)
         md_file = self.write_markdown(data, hosts, file_name)
         html_file = os.path.join(user_path, f"{file_name}.html")
@@ -181,18 +182,18 @@ class Utils:
 class ExcelHandle:
 
     def __init__(self, ipaddr='temp', temp_file='', sheet='测试要点'):
-        self.user_path = os.path.join(func_box.base_path, 'private_upload', ipaddr, 'test_case')
+        self.user_path = os.path.join(init_path.base_path, 'private_upload', ipaddr, 'test_case')
         if not temp_file:
-            temp_file = os.path.join(func_box.base_path, 'docs/template/客户端测试用例模版.xlsx')
+            temp_file = os.path.join(init_path.base_path, 'docs/template/客户端测试用例模版.xlsx')
         if os.path.exists(temp_file):
             self.template_excel = temp_file
         elif temp_file.startswith('http'):
             self.template_excel = \
             crzay_kingsoft.get_kdocs_files(temp_file, project_folder=self.user_path, type='xlsx', ipaddr=ipaddr)[0]
         else:
-            self.template_excel = os.path.join(func_box.base_path, 'docs/template/客户端测试用例模版.xlsx')
+            self.template_excel = os.path.join(init_path.base_path, 'docs/template/客户端测试用例模版.xlsx')
         if not self.template_excel:
-            self.template_excel = os.path.join(func_box.base_path, 'docs/template/客户端测试用例模版.xlsx')
+            self.template_excel = os.path.join(init_path.base_path, 'docs/template/客户端测试用例模版.xlsx')
         self.workbook = load_workbook(self.template_excel)
         self.sheet = sheet
         self.yellow_fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
@@ -429,7 +430,7 @@ def file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_
             _, routing, _ = crazy_utils.get_files_from_everything(f, t, ipaddr=llm_kwargs['ipaddr'])
             file_routing.extend(routing)
     for file_path in file_routing:
-        chatbot.append(['检查文件是否符合格式要求，并解析文件', f'`{file_path.replace(func_box.base_path, ".")}`' +
+        chatbot.append(['检查文件是否符合格式要求，并解析文件', f'`{file_path.replace(init_path.base_path, ".")}`' +
                         f"\t...正在解析本地文件\n\n"])
         yield from toolbox.update_ui(chatbot, history)
         title = long_name_processing(os.path.basename(file_path))
@@ -706,7 +707,7 @@ def batch_recognition_images_to_md(img_list, ipaddr):
         if os.path.exists(img):
             img_content, img_result, _ = ocr_tools.Paddle_ocr_select(ipaddr=ipaddr, trust_value=True
                                                                      ).img_def_content(img_path=img, img_tag=img)
-            temp_file = os.path.join(func_box.users_path, ipaddr, 'ocr_to_md', img_content.splitlines()[0][:20] + '.md')
+            temp_file = os.path.join(init_path.prompt_path, ipaddr, 'ocr_to_md', img_content.splitlines()[0][:20] + '.md')
             with open(temp_file, mode='w', encoding='utf-8') as f:
                 f.write(f"{func_box.html_view_blank(temp_file)}\n\n" + img_content)
             temp_list.append(temp_list)

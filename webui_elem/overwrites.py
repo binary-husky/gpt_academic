@@ -10,7 +10,8 @@ from typing import List, Tuple, Dict
 from gradio_client import utils as client_utils
 from gradio import utils
 from collections import namedtuple
-from comm_tools import func_box, toolbox
+from comm_tools import toolbox
+from comm_tools.path_handle import init_path
 
 
 def escape_markdown(text, reverse=False):
@@ -154,8 +155,8 @@ def postprocess_chat_messages(self, chat_message, role):
         raise ValueError(f"Invalid message for Chatbot component: {chat_message}")
 
 def webpath(fn):
-    if fn.startswith(func_box.base_path,):
-        web_path = os.path.relpath(fn, func_box.base_path,).replace('\\', '/')
+    if fn.startswith(init_path.base_path,):
+        web_path = os.path.relpath(fn, init_path.base_path,).replace('\\', '/')
     else:
         web_path = os.path.abspath(fn)
     return f'file={web_path}?{os.path.getmtime(fn)}'
@@ -182,10 +183,10 @@ def css_html():
 
 def list_scripts(scriptdirname, extension):
     scripts_list = []
-    scripts_dir = os.path.join(func_box.base_path, "docs/assets", scriptdirname)
+    scripts_dir = os.path.join(init_path.base_path, "docs/assets", scriptdirname)
     if os.path.exists(scripts_dir):
         for filename in sorted(os.listdir(scripts_dir)):
-            scripts_list.append(ScriptFile(func_box.base_path, filename, os.path.join(scripts_dir, filename)))
+            scripts_list.append(ScriptFile(init_path.base_path, filename, os.path.join(scripts_dir, filename)))
     scripts_list = [x for x in scripts_list if
                     os.path.splitext(x.path)[1].lower() == extension and os.path.isfile(x.path)]
     return scripts_list
