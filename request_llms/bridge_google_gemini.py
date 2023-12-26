@@ -58,7 +58,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         match = re.search(r'\"text\":\s*\"(.*?)\"', results)
         error_match = re.search(r'\"message\":\s*\"(.*?)\"', results)
         if match:
-            gpt_replying_buffer += match.group(1).replace(r'\\', '\\')  # 不知道为什么Gemini会返回双斜杠捏
+            gpt_replying_buffer += match.group(1).replace('\\n', '\n')  # 不知道为什么Gemini会返回双斜杠捏
             chatbot[-1] = (inputs, gpt_replying_buffer)
             history[-1] = gpt_replying_buffer
             yield from update_ui(chatbot=chatbot, history=history)
