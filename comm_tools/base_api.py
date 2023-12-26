@@ -16,6 +16,7 @@ app.add_middleware(SessionMiddleware, secret_key="!secret")
 cancel_verification, auth_url, auth_cookie_tag, auth_func_based, routing_address = (
     toolbox.get_conf('cancel_verification', 'auth_url', 'auth_cookie_tag', 'auth_func_based', 'routing_address'))
 
+
 def check_cookie(cookie):
     header = {
         'Cookie': f"{auth_cookie_tag}={cookie}",
@@ -33,9 +34,11 @@ def check_cookie(cookie):
 
 
 favicon_path = toolbox.get_conf('favicon_path')
+
+
 @app.get("/favicon.ico")  # 设置icon
 async def get_favicon():
-   return RedirectResponse(url=f'/gradio/file={favicon_path}')
+    return RedirectResponse(url=f'/gradio/file={favicon_path}')
 
 
 @app.middleware("https")
@@ -44,7 +47,7 @@ async def check_authentication(request: Request, call_next):
         return await call_next(request)
     pattern = re.compile(r".*\/private_upload\/.*")
     if pattern.match(request.url.path):
-        if not toolbox.get_conf('AUTHENTICATION'):    # 暂时没办法拿到用户信息，所以不禁止用户访问
+        if not toolbox.get_conf('AUTHENTICATION'):  # 暂时没办法拿到用户信息，所以不禁止用户访问
             if request.client.host not in request.url.path:
                 return JSONResponse(content={'detail': "You're bad. You can't download other people's files."})
     cookie = request.cookies.get(f'{auth_cookie_tag}', '')

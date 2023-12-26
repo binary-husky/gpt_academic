@@ -38,7 +38,7 @@ os.environ['no_proxy'] = '*'  # 避免代理网络产生意外污染
 i18n = webui_local.I18nAuto()
 get_html = func_box.get_html
 
-from webui_elem.history_menu import LeftElem
+from webui_elem.layout_history_menu import LeftElem
 from webui_elem.layout_chatbot_area import ChatbotElem
 from webui_elem.layout_tools_menu import RightElem
 from webui_elem.layout_popup_wrapper import Settings, Config, FakeComponents, AdvancedSearch, Prompt
@@ -104,8 +104,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
 
     def signals_prompt_edit(self):
         self.history_search_txt.submit(fn=func_signals.draw_results,
-                                   inputs=[self.history_search_txt, self.pro_history_state, self.pro_tf_slider],
-                                   outputs=[self.pro_history_list, self.pro_history_state])
+                                       inputs=[self.history_search_txt, self.pro_history_state, self.pro_tf_slider],
+                                       outputs=[self.pro_history_list, self.pro_history_state])
         self.pro_history_list.click(fn=func_signals.show_prompt_result,
                                     inputs=[self.pro_history_list, self.pro_history_state, self.cookies],
                                     outputs=[self.historySelectList, *self.llms_cookies_combo],
@@ -129,8 +129,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                                    outputs=[self.masks_dataset],
                                    _js='(a,b,c)=>{return showConfirmationDialog(a,b,c);}')
         self.masks_del_btn.click(func_signals.prompt_delete,
-                               inputs=[self.masks_name_txt, self.pro_fp_state, self.mask_cls_select],
-                               outputs=[self.pro_func_prompt, self.pro_fp_state])
+                                 inputs=[self.masks_name_txt, self.pro_fp_state, self.mask_cls_select],
+                                 outputs=[self.pro_func_prompt, self.pro_fp_state])
         self.masks_new_btn.click(fn=func_signals.prompt_save,
                                  inputs=[self.masks_dataset, self.masks_name_txt,
                                          self.pro_fp_state, self.mask_cls_select],
@@ -296,7 +296,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                                          inputs=[self.historySearchTextbox, self.pro_history_state, self.pro_tf_slider],
                                          outputs=[self.pro_history_list, self.pro_history_state],
                                          ).then(fn=lambda x: x, inputs=[self.historySearchTextbox],
-                                                outputs=[self.history_search_txt]).then(None, None, None, _js='()=>{openSearch();}')
+                                                outputs=[self.history_search_txt]).then(None, None, None,
+                                                                                        _js='()=>{openSearch();}')
 
     def signals_input_setting(self):
         # 注册input
@@ -421,9 +422,9 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         self.demo.queue(concurrency_count=CONCURRENT_COUNT)
         # 过滤掉不允许用户访问的路径
         self.demo.blocked_paths = func_box.get_files_and_dirs(
-            path=func_box.base_path, filter_allow=['private_upload', 'gpt_log', 'docs', ''])
-        login_html = ''
-        self.demo.auth = AUTHENTICATION
+            path=func_box.base_path, filter_allow=['private_upload', 'gpt_log', 'docs'])
+        login_html = '登陆即注册，请记住你自己的账号和密码'
+        self.demo.auth = func_signals.user_login
         self.demo.auth_message = login_html
         # self.demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
         #     server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, auth_message=login_html,
@@ -432,6 +433,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
 
 
 from comm_tools import base_api
+
 app = base_api.app
 PORT = WEB_PORT if WEB_PORT <= 0 else WEB_PORT
 reload_javascript()
@@ -441,5 +443,6 @@ gradio_app = gr.mount_gradio_app(app, chatbot_main.demo, '/gradio', )
 
 if __name__ == '__main__':
     import uvicorn
+
     app_reload = get_conf('app_reload')
     uvicorn.run("__main__:app", host="0.0.0.0", port=PORT, reload=app_reload)

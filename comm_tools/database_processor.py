@@ -6,7 +6,6 @@
 import json
 import os.path
 import sqlite3
-import functools
 import time
 import psutil
 
@@ -15,17 +14,6 @@ import psutil
 base_path = os.path.dirname(os.path.dirname(__file__))
 users_data = os.path.join(base_path, 'users_data')
 export_path = os.path.join(base_path, 'docs', 'export_prompt')
-
-
-def connect_db_close(cls_method):
-    @functools.wraps(cls_method)
-    def wrapper(cls=None, *args, **kwargs):
-        cls._connect_db()
-        result = cls_method(cls, *args, **kwargs)
-        cls._close_db()
-        return result
-
-    return wrapper
 
 
 def ipaddr():
@@ -39,25 +27,19 @@ def ipaddr():
 
 class SqliteHandle:
     def __init__(self, table='ai_common', database='ai_private.db', auto=True):
-        self.prompt_path = users_data
         self.__database = database
         if auto:  # 自动查库
-            if table.startswith('ai_private_') or table.startswith('ai_common_') or table.startswith('ocr'):
+            if table.startswith('ocr'):
                 self.__database = 'ai_private.db'
             elif table.startswith('prompt_'):
                 self.__database = 'ai_prompt.db'
-        self.__connect = sqlite3.connect(os.path.join(self.prompt_path, self.__database))
+        self.__connect = sqlite3.connect(os.path.join(users_data, self.__database))
         self.__cursor = self.__connect.cursor()
         self.__table = table
         if self.__table not in self.get_tables():
             self.create_tab()
 
-    def new_connect_db(self):
-        """多线程操作时，每个线程新建独立的connect"""
-        self.__connect = sqlite3.connect(os.path.join(self.prompt_path, self.__database))
-        self.__cursor = self.__connect.cursor()
-
-    def new_close_db(self):
+    def __del__(self):
         self.__cursor.close()
         self.__connect.close()
 
@@ -84,9 +66,18 @@ class SqliteHandle:
             source = row[2]
         return temp_all, source
 
+    def get_user_account(self, user):
+        user_account = {}
+        result = self.__cursor.execute(f"SELECT prompt, result, source FROM `{self.__table}` WHERE prompt = ?",
+                                       (f"%{user}%",)).fetchall()
+        for row in result:
+            user_account['user'] = row[0]
+            user_account['password'] = row[1]
+        return user_account
+
+
     def get_prompt_value_temp(self):
         temp_all = {}
-        ss = self.__table
         result = self.__cursor.execute(f"SELECT prompt, result FROM `{self.__table}`").fetchall()
         for row in result:
             temp_all[row[0]] = row[1]
