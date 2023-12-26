@@ -2,6 +2,7 @@ pydantic==1.10.11
 pypdf2==2.12.1
 tiktoken>=0.3.3
 requests[socks]
+protobuf==3.18
 transformers>=4.27.1
 scipdf_parser>=0.52
 python-markdown-math

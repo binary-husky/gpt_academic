@@ -493,11 +493,38 @@ def compile_latex_with_timeout(command, cwd, timeout=60):
         return False
     return True
 
+def run_in_subprocess_wrapper_func(func, args, kwargs, return_dict, exception_dict):
+    import sys
+    try:
+        result = func(*args, **kwargs)
+        return_dict['result'] = result
+    except Exception as e:
+        exc_info = sys.exc_info()
+        exception_dict['exception'] = exc_info
 
+def run_in_subprocess(func):
+    import multiprocessing
+    def wrapper(*args, **kwargs):
+        return_dict = multiprocessing.Manager().dict()
+        exception_dict = multiprocessing.Manager().dict()
+        process = multiprocessing.Process(target=run_in_subprocess_wrapper_func, 
+                                            args=(func, args, kwargs, return_dict, exception_dict))
+        process.start()
+        process.join()
+        process.close()
+        if 'exception' in exception_dict:
+            # ooops, the subprocess ran into an exception
+            exc_info = exception_dict['exception']
+            raise exc_info[1].with_traceback(exc_info[2])
+        if 'result' in return_dict.keys():
+            # If the subprocess ran successfully, return the result
+            return return_dict['result']
+    return wrapper
 
-def merge_pdfs(pdf1_path, pdf2_path, output_path):
-    import PyPDF2
+def _merge_pdfs(pdf1_path, pdf2_path, output_path):
+    import PyPDF2   # PyPDF2这个库有严重的内存泄露问题，把它放到子进程中运行，从而方便内存的释放
     Percent = 0.95
+    # raise RuntimeError('PyPDF2 has a serious memory leak problem, please use other tools to merge PDF files.')
     # Open the first PDF file
     with open(pdf1_path, 'rb') as pdf1_file:
         pdf1_reader = PyPDF2.PdfFileReader(pdf1_file)
@@ -531,3 +558,5 @@ def merge_pdfs(pdf1_path, pdf2_path, output_path):
             # Save the merged PDF file
             with open(output_path, 'wb') as output_file:
                 output_writer.write(output_file)
+
+merge_pdfs = run_in_subprocess(_merge_pdfs) # PyPDF2这个库有严重的内存泄露问题，把它放到子进程中运行，从而方便内存的释放

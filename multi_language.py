@@ -182,12 +182,12 @@ cached_translation = read_map_from_json(language=LANG)
 def trans(word_to_translate, language, special=False):
     if len(word_to_translate) == 0: return {}
     from crazy_functions.crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
-    from toolbox import get_conf, ChatBotWithCookies
-    proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT, API_KEY = \
-        get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'LAYOUT', 'API_KEY')
+    from toolbox import get_conf, ChatBotWithCookies, load_chat_cookies
+    
+    cookies = load_chat_cookies()
     llm_kwargs = {
-        'api_key': API_KEY,
-        'llm_model': LLM_MODEL,
+        'api_key': cookies['api_key'],
+        'llm_model': cookies['llm_model'],
         'top_p':1.0, 
         'max_length': None,
         'temperature':0.4,
@@ -245,15 +245,15 @@ def trans(word_to_translate, language, special=False):
 def trans_json(word_to_translate, language, special=False):
     if len(word_to_translate) == 0: return {}
     from crazy_functions.crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
-    from toolbox import get_conf, ChatBotWithCookies
-    proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, CHATBOT_HEIGHT, LAYOUT, API_KEY = \
-        get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'CHATBOT_HEIGHT', 'LAYOUT', 'API_KEY')
+    from toolbox import get_conf, ChatBotWithCookies, load_chat_cookies
+    
+    cookies = load_chat_cookies()
     llm_kwargs = {
-        'api_key': API_KEY,
-        'llm_model': LLM_MODEL,
+        'api_key': cookies['api_key'],
+        'llm_model': cookies['llm_model'],
         'top_p':1.0, 
         'max_length': None,
-        'temperature':0.1,
+        'temperature':0.4,
     }
     import random
     N_EACH_REQ = random.randint(16, 32)

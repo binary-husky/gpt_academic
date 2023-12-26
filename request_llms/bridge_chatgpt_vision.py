@@ -15,29 +15,16 @@ import requests
 import base64
 import os
 import glob
+from toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history, trimmed_format_exc, is_the_upload_folder, \
+    update_ui_lastest_msg, get_max_token, encode_image, have_any_recent_upload_image_files
 
-from toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history, trimmed_format_exc, is_the_upload_folder, update_ui_lastest_msg, get_max_token
+
 proxies, TIMEOUT_SECONDS, MAX_RETRY, API_ORG, AZURE_CFG_ARRAY = \
     get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'API_ORG', 'AZURE_CFG_ARRAY')
 
 timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check proxy settings in config.py.' + \
                   '网络错误，检查代理服务器是否可用，以及代理设置的格式是否正确，格式须是[协议]://[地址]:[端口]，缺一不可。'
 
-def have_any_recent_upload_image_files(chatbot):
-    _5min = 5 * 60
-    if chatbot is None: return False, None    # chatbot is None
-    most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
-    if not most_recent_uploaded: return False, None   # most_recent_uploaded is None
-    if time.time() - most_recent_uploaded["time"] < _5min: 
-        most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
-        path = most_recent_uploaded['path']
-        file_manifest = [f for f in glob.glob(f'{path}/**/*.jpg', recursive=True)]
-        file_manifest += [f for f in glob.glob(f'{path}/**/*.jpeg', recursive=True)]
-        file_manifest += [f for f in glob.glob(f'{path}/**/*.png', recursive=True)]
-        if len(file_manifest) == 0: return False, None
-        return True, file_manifest # most_recent_uploaded is new
-    else: 
-        return False, None  # most_recent_uploaded is too old
 
 def report_invalid_key(key):
     if get_conf("BLOCK_INVALID_APIKEY"): 
@@ -258,10 +245,6 @@ def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg,
         chatbot[-1] = (chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str} \n\n{regular_txt_to_markdown(chunk_decoded)}")
     return chatbot, history
 
-# Function to encode the image
-def encode_image(image_path):
-    with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode('utf-8')
 
 def generate_payload(inputs, llm_kwargs, history, system_prompt, image_paths):
     """

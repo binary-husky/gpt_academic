@@ -431,16 +431,48 @@ if "chatglm_onnx" in AVAIL_LLM_MODELS:
         })
     except:
         print(trimmed_format_exc())
-if "qwen" in AVAIL_LLM_MODELS:
+if "qwen-local" in AVAIL_LLM_MODELS:
+    try:
+        from .bridge_qwen_local import predict_no_ui_long_connection as qwen_local_noui
+        from .bridge_qwen_local import predict as qwen_local_ui
+        model_info.update({
+            "qwen-local": {
+                "fn_with_ui": qwen_local_ui,
+                "fn_without_ui": qwen_local_noui,
+                "endpoint": None,
+                "max_token": 4096,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            }
+        })
+    except:
+        print(trimmed_format_exc())
+if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-max" in AVAIL_LLM_MODELS:   # zhipuai
     try:
         from .bridge_qwen import predict_no_ui_long_connection as qwen_noui
         from .bridge_qwen import predict as qwen_ui
         model_info.update({
-            "qwen": {
+            "qwen-turbo": {
                 "fn_with_ui": qwen_ui,
                 "fn_without_ui": qwen_noui,
                 "endpoint": None,
-                "max_token": 4096,
+                "max_token": 6144,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "qwen-plus": {
+                "fn_with_ui": qwen_ui,
+                "fn_without_ui": qwen_noui,
+                "endpoint": None,
+                "max_token": 30720,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "qwen-max": {
+                "fn_with_ui": qwen_ui,
+                "fn_without_ui": qwen_noui,
+                "endpoint": None,
+                "max_token": 28672,
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
             }
@@ -552,7 +584,7 @@ if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
                 "fn_with_ui": deepseekcoder_ui,
                 "fn_without_ui": deepseekcoder_noui,
                 "endpoint": None,
-                "max_token": 4096,
+                "max_token": 2048,
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
             }

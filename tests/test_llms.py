@@ -16,8 +16,9 @@ if __name__ == "__main__":
     # from request_llms.bridge_jittorllms_llama import predict_no_ui_long_connection
     # from request_llms.bridge_claude import predict_no_ui_long_connection
     # from request_llms.bridge_internlm import predict_no_ui_long_connection
-    from request_llms.bridge_deepseekcoder import predict_no_ui_long_connection
-    # from request_llms.bridge_qwen import predict_no_ui_long_connection
+    # from request_llms.bridge_deepseekcoder import predict_no_ui_long_connection
+    # from request_llms.bridge_qwen_7B import predict_no_ui_long_connection
+    from request_llms.bridge_qwen_local import predict_no_ui_long_connection
     # from request_llms.bridge_spark import predict_no_ui_long_connection
     # from request_llms.bridge_zhipu import predict_no_ui_long_connection
     # from request_llms.bridge_chatglm3 import predict_no_ui_long_connection

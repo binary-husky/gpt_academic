@@ -1,5 +1,5 @@
 {
-  "version": 3.61,
+  "version": 3.64,
   "show_feature": true,
-  "new_feature": "修复潜在的多用户冲突问题 <-> 接入Deepseek Coder <-> AutoGen多智能体插件测试版 <-> 修复本地模型在Windows下的加载BUG <-> 支持文心一言v4和星火v3 <-> 支持GLM3和智谱的API <-> 解决本地模型并发BUG <-> 支持动态追加基础功能按钮"
+  "new_feature": "支持直接拖拽文件到上传区 <-> 支持将图片粘贴到输入区 <-> 修复若干隐蔽的内存BUG <-> 修复多用户冲突问题 <-> 接入Deepseek Coder <-> AutoGen多智能体插件测试版"
 }

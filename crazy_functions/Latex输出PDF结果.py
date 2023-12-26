@@ -88,6 +88,9 @@ def arxiv_download(chatbot, history, txt, allow_cache=True):
         target_file = pj(translation_dir, 'translate_zh.pdf')
         if os.path.exists(target_file):
             promote_file_to_downloadzone(target_file, rename_file=None, chatbot=chatbot)
+            target_file_compare = pj(translation_dir, 'comparison.pdf')
+            if os.path.exists(target_file_compare):
+                promote_file_to_downloadzone(target_file_compare, rename_file=None, chatbot=chatbot)
             return target_file
         return False
     def is_float(s):

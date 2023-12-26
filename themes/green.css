@@ -256,13 +256,13 @@ textarea.svelte-1pie7s6 {
     max-height: 95% !important;
     overflow-y: auto !important;
 }*/
-.app.svelte-1mya07g.svelte-1mya07g {
+/* .app.svelte-1mya07g.svelte-1mya07g {
     max-width: 100%;
     position: relative;
     padding: var(--size-4);
     width: 100%;
     height: 100%;
-}
+} */
 
 .gradio-container-3-32-2 h1 {
     font-weight: 700 !important;
