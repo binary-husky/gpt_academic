@@ -175,7 +175,6 @@ class LatexPaperFileGroup():
         self.sp_file_contents = []
         self.sp_file_index = []
         self.sp_file_tag = []
-
         # count_token
         from request_llms.bridge_all import model_info
         enc = model_info["gpt-3.5-turbo"]['tokenizer']
@@ -192,13 +191,12 @@ class LatexPaperFileGroup():
                 self.sp_file_index.append(index)
                 self.sp_file_tag.append(self.file_paths[index])
             else:
-                from ..crazy_utils import breakdown_txt_to_satisfy_token_limit_for_pdf
-                segments = breakdown_txt_to_satisfy_token_limit_for_pdf(file_content, self.get_token_num, max_token_limit)
+                from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit
+                segments = breakdown_text_to_satisfy_token_limit(file_content, max_token_limit)
                 for j, segment in enumerate(segments):
                     self.sp_file_contents.append(segment)
                     self.sp_file_index.append(index)
                     self.sp_file_tag.append(self.file_paths[index] + f".part-{j}.tex")
-        print('Segmentation: done')
 
     def merge_result(self):
         self.file_result = ["" for _ in range(len(self.file_paths))]
@@ -404,7 +402,7 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
             result_pdf = pj(work_folder_modified, f'merge_diff.pdf')    # get pdf path
             promote_file_to_downloadzone(result_pdf, rename_file=None, chatbot=chatbot)  # promote file to web UI
         if modified_pdf_success:
-            yield from update_ui_lastest_msg(f'转化PDF编译已经成功, 即将退出 ...', chatbot, history)    # 刷新Gradio前端界面
+            yield from update_ui_lastest_msg(f'转化PDF编译已经成功, 正在尝试生成对比PDF, 请稍候 ...', chatbot, history)    # 刷新Gradio前端界面
             result_pdf = pj(work_folder_modified, f'{main_file_modified}.pdf') # get pdf path
             origin_pdf = pj(work_folder_original, f'{main_file_original}.pdf') # get pdf path
             if os.path.exists(pj(work_folder, '..', 'translation')):
@@ -416,8 +414,11 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
                     from .latex_toolbox import merge_pdfs
                     concat_pdf = pj(work_folder_modified, f'comparison.pdf')
                     merge_pdfs(origin_pdf, result_pdf, concat_pdf)
+                    if os.path.exists(pj(work_folder, '..', 'translation')):
+                        shutil.copyfile(concat_pdf, pj(work_folder, '..', 'translation', 'comparison.pdf'))
                     promote_file_to_downloadzone(concat_pdf, rename_file=None, chatbot=chatbot)  # promote file to web UI
                 except Exception as e:
+                    print(e)
                     pass
             return True # 成功啦
         else:

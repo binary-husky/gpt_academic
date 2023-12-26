@@ -4,6 +4,7 @@ import time
 import inspect
 import re
 import os
+import base64
 import gradio
 import shutil
 import glob
@@ -79,6 +80,7 @@ def ArgsGeneralWrapper(f):
             'max_length': max_length,
             'temperature':temperature,
             'client_ip': request.client.host,
+            'most_recent_uploaded': cookies.get('most_recent_uploaded')
         }
         plugin_kwargs = {
             "advanced_arg": plugin_advanced_arg,
@@ -178,12 +180,15 @@ def HotReload(f):
     最后，使用yield from语句返回重新加载过的函数，并在被装饰的函数上执行。
     最终，装饰器函数返回内部函数。这个内部函数可以将函数的原始定义更新为最新版本，并执行函数的新版本。
     """
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        fn_name = f.__name__
-        f_hot_reload = getattr(importlib.reload(inspect.getmodule(f)), fn_name)
-        yield from f_hot_reload(*args, **kwargs)
-    return decorated
+    if get_conf('PLUGIN_HOT_RELOAD'):
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            fn_name = f.__name__
+            f_hot_reload = getattr(importlib.reload(inspect.getmodule(f)), fn_name)
+            yield from f_hot_reload(*args, **kwargs)
+        return decorated
+    else:
+        return f
 
 
 """
@@ -561,7 +566,8 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
         user_name = get_user(chatbot)
     else:
         user_name = default_user_name
-
+    if not os.path.exists(file):
+        raise FileNotFoundError(f'文件{file}不存在')
     user_path = get_log_folder(user_name, plugin_name=None)
     if file_already_in_downloadzone(file, user_path):
         new_path = file
@@ -577,7 +583,8 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
     if chatbot is not None:
         if 'files_to_promote' in chatbot._cookies: current = chatbot._cookies['files_to_promote']
         else: current = []
-        chatbot._cookies.update({'files_to_promote': [new_path] + current})
+        if new_path not in current: # 避免把同一个文件添加多次
+            chatbot._cookies.update({'files_to_promote': [new_path] + current})
     return new_path
 
 
@@ -601,6 +608,64 @@ def del_outdated_uploads(outdate_time_seconds, target_path_base=None):
             try: shutil.rmtree(subdirectory)
             except: pass
     return
+
+
+def html_local_file(file):
+    base_path = os.path.dirname(__file__)  # 项目目录
+    if os.path.exists(str(file)):
+        file = f'file={file.replace(base_path, ".")}'
+    return file
+
+
+def html_local_img(__file, layout='left', max_width=None, max_height=None, md=True):
+    style = ''
+    if max_width is not None:
+        style += f"max-width: {max_width};"
+    if max_height is not None:
+        style += f"max-height: {max_height};"
+    __file = html_local_file(__file)
+    a = f'<div align="{layout}"><img src="{__file}" style="{style}"></div>'
+    if md:
+        a = f'![{__file}]({__file})'
+    return a
+
+def file_manifest_filter_type(file_list, filter_: list = None):
+    new_list = []
+    if not filter_: filter_ = ['png', 'jpg', 'jpeg']
+    for file in file_list:
+        if str(os.path.basename(file)).split('.')[-1] in filter_:
+            new_list.append(html_local_img(file, md=False))
+        else:
+            new_list.append(file)
+    return new_list
+
+def to_markdown_tabs(head: list, tabs: list, alignment=':---:', column=False):
+    """
+    Args:
+        head: 表头：[]
+        tabs: 表值：[[列1], [列2], [列3], [列4]]
+        alignment: :--- 左对齐， :---: 居中对齐， ---: 右对齐
+        column: True to keep data in columns, False to keep data in rows (default).
+    Returns:
+        A string representation of the markdown table.
+    """
+    if column:
+        transposed_tabs = list(map(list, zip(*tabs)))
+    else:
+        transposed_tabs = tabs
+    # Find the maximum length among the columns
+    max_len = max(len(column) for column in transposed_tabs)
+
+    tab_format = "| %s "
+    tabs_list = "".join([tab_format % i for i in head]) + '|\n'
+    tabs_list += "".join([tab_format % alignment for i in head]) + '|\n'
+
+    for i in range(max_len):
+        row_data = [tab[i] if i < len(tab) else '' for tab in transposed_tabs]
+        row_data = file_manifest_filter_type(row_data, filter_=None)
+        tabs_list += "".join([tab_format % i for i in row_data]) + '|\n'
+
+    return tabs_list
 
 def on_file_uploaded(request: gradio.Request, files, chatbot, txt, txt2, checkboxes, cookies):
     """
@@ -626,16 +691,15 @@ def on_file_uploaded(request: gradio.Request, files, chatbot, txt, txt2, checkbo
         this_file_path = pj(target_path_base, file_origin_name)
         shutil.move(file.name, this_file_path)
         upload_msg += extract_archive(file_path=this_file_path, dest_dir=this_file_path+'.extract')
-    
-    # 整理文件集合
-    moved_files = [fp for fp in glob.glob(f'{target_path_base}/**/*', recursive=True)]
+
     if "浮动输入区" in checkboxes: 
         txt, txt2 = "", target_path_base
     else:
         txt, txt2 = target_path_base, ""
 
-    # 输出消息
-    moved_files_str = '\t\n\n'.join(moved_files)
+    # 整理文件集合 输出消息
+    moved_files = [fp for fp in glob.glob(f'{target_path_base}/**/*', recursive=True)]
+    moved_files_str = to_markdown_tabs(head=['文件'], tabs=[moved_files])
     chatbot.append(['我上传了文件，请查收', 
                     f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
                     f'\n\n调用路径参数已自动修正到: \n\n{txt}' +
@@ -856,7 +920,14 @@ def read_single_conf_with_lru_cache(arg):
 
 @lru_cache(maxsize=128)
 def get_conf(*args):
-    # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
+    """
+    本项目的所有配置都集中在config.py中。 修改配置有三种方法，您只需要选择其中一种即可：
+        - 直接修改config.py
+        - 创建并修改config_private.py
+        - 修改环境变量（修改docker-compose.yml等价于修改容器内部的环境变量）
+
+    注意：如果您使用docker-compose部署，请修改docker-compose（等价于修改容器内部的环境变量）
+    """
     res = []
     for arg in args:
         r = read_single_conf_with_lru_cache(arg)
@@ -937,14 +1008,19 @@ def clip_history(inputs, history, tokenizer, max_token_limit):
     def get_token_num(txt): 
         return len(tokenizer.encode(txt, disallowed_special=()))
     input_token_num = get_token_num(inputs)
+
+    if max_token_limit < 5000:   output_token_expect = 256  # 4k & 2k models
+    elif max_token_limit < 9000: output_token_expect = 512  # 8k models
+    else: output_token_expect = 1024                        # 16k & 32k models
+
     if input_token_num < max_token_limit * 3 / 4:
         # 当输入部分的token占比小于限制的3/4时，裁剪时
         # 1. 把input的余量留出来
         max_token_limit = max_token_limit - input_token_num
         # 2. 把输出用的余量留出来
-        max_token_limit = max_token_limit - 128
+        max_token_limit = max_token_limit - output_token_expect
         # 3. 如果余量太小了，直接清除历史
-        if max_token_limit < 128:
+        if max_token_limit < output_token_expect:
             history = []
             return history
     else:
@@ -1053,7 +1129,7 @@ def get_user(chatbotwithcookies):
 
 class ProxyNetworkActivate():
     """
-    这段代码定义了一个名为TempProxy的空上下文管理器, 用于给一小段代码上代理
+    这段代码定义了一个名为ProxyNetworkActivate的空上下文管理器, 用于给一小段代码上代理
     """
     def __init__(self, task=None) -> None:
         self.task = task
@@ -1197,6 +1273,35 @@ def get_chat_default_kwargs():
     }
 
     return default_chat_kwargs
+
+
+def get_pictures_list(path):
+    file_manifest = [f for f in glob.glob(f'{path}/**/*.jpg', recursive=True)]
+    file_manifest += [f for f in glob.glob(f'{path}/**/*.jpeg', recursive=True)]
+    file_manifest += [f for f in glob.glob(f'{path}/**/*.png', recursive=True)]
+    return file_manifest
+
+
+def have_any_recent_upload_image_files(chatbot):
+    _5min = 5 * 60
+    if chatbot is None: return False, None    # chatbot is None
+    most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
+    if not most_recent_uploaded: return False, None   # most_recent_uploaded is None
+    if time.time() - most_recent_uploaded["time"] < _5min:
+        most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
+        path = most_recent_uploaded['path']
+        file_manifest = get_pictures_list(path)
+        if len(file_manifest) == 0: return False, None
+        return True, file_manifest # most_recent_uploaded is new
+    else:
+        return False, None  # most_recent_uploaded is too old
+
+
+# Function to encode the image
+def encode_image(image_path):
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode('utf-8')
+
 
 def get_max_token(llm_kwargs):
     from request_llms.bridge_all import model_info

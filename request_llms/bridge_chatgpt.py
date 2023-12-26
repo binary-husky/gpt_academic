@@ -51,7 +51,8 @@ def decode_chunk(chunk):
         chunkjson = json.loads(chunk_decoded[6:])
         has_choices = 'choices' in chunkjson
         if has_choices: choice_valid = (len(chunkjson['choices']) > 0)
-        if has_choices and choice_valid: has_content = "content" in chunkjson['choices'][0]["delta"]
+        if has_choices and choice_valid: has_content = ("content" in chunkjson['choices'][0]["delta"])
+        if has_content: has_content = (chunkjson['choices'][0]["delta"]["content"] is not None)
         if has_choices and choice_valid: has_role = "role" in chunkjson['choices'][0]["delta"]
     except: 
         pass
@@ -101,20 +102,25 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     result = ''
     json_data = None
     while True:
-        try: chunk = next(stream_response).decode()
+        try: chunk = next(stream_response)
         except StopIteration: 
             break
         except requests.exceptions.ConnectionError:
-            chunk = next(stream_response).decode() # 失败了，重试一次？再失败就没办法了。
-        if len(chunk)==0: continue
-        if not chunk.startswith('data:'): 
-            error_msg = get_full_error(chunk.encode('utf8'), stream_response).decode()
+            chunk = next(stream_response) # 失败了，重试一次？再失败就没办法了。
+        chunk_decoded, chunkjson, has_choices, choice_valid, has_content, has_role = decode_chunk(chunk)
+        if len(chunk_decoded)==0: continue
+        if not chunk_decoded.startswith('data:'): 
+            error_msg = get_full_error(chunk, stream_response).decode()
             if "reduce the length" in error_msg:
                 raise ConnectionAbortedError("OpenAI拒绝了请求:" + error_msg)
             else:
                 raise RuntimeError("OpenAI拒绝了请求：" + error_msg)
-        if ('data: [DONE]' in chunk): break # api2d 正常完成
-        json_data = json.loads(chunk.lstrip('data:'))['choices'][0]
+        if ('data: [DONE]' in chunk_decoded): break # api2d 正常完成
+        # 提前读取一些信息 （用于判断异常）
+        if has_choices and not choice_valid:
+            # 一些垃圾第三方接口的出现这样的错误
+            continue
+        json_data = chunkjson['choices'][0]
         delta = json_data["delta"]
         if len(delta) == 0: break
         if "role" in delta: continue

@@ -159,7 +159,15 @@ def warm_up_modules():
         enc.encode("模块预热", disallowed_special=())
         enc = model_info["gpt-4"]['tokenizer']
         enc.encode("模块预热", disallowed_special=())
+        
+def warm_up_vectordb():
+    print('正在执行一些模块的预热 ...')
+    from toolbox import ProxyNetworkActivate
+    with ProxyNetworkActivate("Warmup_Modules"):
+        import nltk
+        with ProxyNetworkActivate("Warmup_Modules"): nltk.download("punkt")
 
+        
 if __name__ == '__main__':
     import os
     os.environ['no_proxy'] = '*'  # 避免代理网络产生意外污染
