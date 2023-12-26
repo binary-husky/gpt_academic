@@ -68,8 +68,7 @@ class SqliteHandle:
 
     def get_user_account(self, user):
         user_account = {}
-        result = self.__cursor.execute(f"SELECT prompt, result, source FROM `{self.__table}` WHERE prompt = ?",
-                                       (f"%{user}%",)).fetchall()
+        result = self.__cursor.execute(f"SELECT prompt, result, source FROM `{self.__table}` WHERE prompt = '{user}'").fetchall()
         for row in result:
             user_account['user'] = row[0]
             user_account['password'] = row[1]
