@@ -658,7 +658,7 @@ def refresh_user_data(cookies, ipaddr: gr.Request):
 
 # TODO < -------------------------------- 页面登陆函数注册区 -------------------------------->
 def user_login(user, password):
-    sql_handle = SqliteHandle(database='user_login', table='user')
+    sql_handle = SqliteHandle(database='user_login.db', table='user')
     user_account = sql_handle.get_user_account(user)
     if user_account.get('user'):
         if user == user_account['user'] and password == user_account['password']:
