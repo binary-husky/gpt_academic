@@ -28,7 +28,7 @@ class ChatbotElem:
                 visible=False, container=False,
             )
             gr.HTML(get_html("chatbot_header_btn.html").format(
-                json_label=i18n("历史记录（JSON）"), md_label=i18n("导出为 Markdown")),
+                json_label=i18n("历史记录（JSON）"), md_label=i18n("导出为 Markdown"), masks_label=i18n('转换为 Masks')),
                 elem_id="chatbot-header-btn-bar")
 
     def _draw_chatbot_body(self):

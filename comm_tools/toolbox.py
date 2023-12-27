@@ -231,7 +231,7 @@ def CatchException(f):
         except Exception as e:
             from comm_tools.check_proxy import check_proxy
             proxies = get_conf('proxies')
-            tb_str = '```\n' + trimmed_format_exc() + '```'
+            tb_str = '```error\n' + trimmed_format_exc() + '```'
             if len(chatbot_with_cookie) == 0:
                 chatbot_with_cookie.clear()
                 chatbot_with_cookie.append(["插件调度异常", "异常原因"])

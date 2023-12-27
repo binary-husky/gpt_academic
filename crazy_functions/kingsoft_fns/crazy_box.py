@@ -642,10 +642,6 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
     Returns:  将对话结果返回[输入, 输出]
     """
     if len(inputs_array) == 1:
-        # 折叠输出
-        # if len(inputs_array[0]) > 200:
-        #     inputs_show_user = inputs_array[0][:100]+f"\n\n{func_box.html_tag_color('......超过200个字符折叠......')}\n\n"+inputs_array[0][-100:]
-        # else:
         inputs_show_user = None   # 不重复展示
         gpt_say = yield from crazy_utils.request_gpt_model_in_new_thread_with_ui_alive(
             inputs=inputs_array[0], inputs_show_user=inputs_show_user,

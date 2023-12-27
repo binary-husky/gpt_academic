@@ -88,7 +88,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         self.pro_func_prompt.select(fn=func_signals.prompt_input,
                                     inputs=[self.multiplexing_edit_check, self.user_input, self.model_select_dropdown,
                                             self.pro_func_prompt, self.pro_fp_state],
-                                    outputs=[self.treasure_bag,
+                                    outputs=[self.treasure_bag_tab,
                                              self.prompt_cls_select, self.pro_edit_txt, self.pro_name_txt,
                                              self.mask_cls_select, self.masks_dataset, self.masks_name_txt,
                                              *self.llms_cookies_combo, gr.State(),
@@ -293,6 +293,11 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                                       outputs=[self.status_display])
         self.historyMarkdownDownloadBtn.click(func_signals.download_history_md, inputs=[self.historySelectList],
                                               outputs=[self.status_display])
+        self.historyMasksConverterBtn.click(func_signals.converter_history_masks,
+                                            inputs=[self.chatbot, self.system_prompt], outputs=[self.masks_dataset]
+                                            ).then(lambda: gr.Tabs.update('masks'),
+                                                   inputs=None, outputs=[self.treasure_bag_tab],
+                                                   _js='()=>{open_treasure_chest();}')
         self.historySearchTextbox.submit(fn=func_signals.draw_results,
                                          inputs=[self.historySearchTextbox, self.pro_history_state, self.pro_tf_slider],
                                          outputs=[self.pro_history_list, self.pro_history_state],
@@ -349,8 +354,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
     def auto_opentab_delay(self, is_open=False):
         import threading, webbrowser, time
         print(f"如果浏览器没有自动打开，请复制并转到以下URL：")
-        print(f"\t 本地访问: http://localhost:{PORT}/gradio/")
-        print(f"\t 局域网访问: {self.__url}/gradio/")
+        print(f"\t 本地访问: http://localhost:{PORT}/spike/")
+        print(f"\t 局域网访问: {self.__url}/spike/")
         if is_open:
             def open():
                 time.sleep(2)  # 打开浏览器
@@ -440,7 +445,7 @@ PORT = WEB_PORT if WEB_PORT <= 0 else WEB_PORT
 reload_javascript()
 chatbot_main = ChatBot()
 chatbot_main.main()
-gradio_app = gr.mount_gradio_app(app, chatbot_main.demo, '/gradio', )
+gradio_app = gr.mount_gradio_app(app, chatbot_main.demo, '/spike', )
 
 if __name__ == '__main__':
     import uvicorn

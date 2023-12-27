@@ -6,7 +6,7 @@
 import json, re
 import requests
 from pydantic import BaseModel
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, status, Response
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
 from comm_tools import toolbox, func_box
@@ -38,12 +38,12 @@ favicon_path = toolbox.get_conf('favicon_path')
 
 @app.get("/favicon.ico")  # 设置icon
 async def get_favicon():
-    return RedirectResponse(url=f'/gradio/file={favicon_path}')
+    return RedirectResponse(url=f'/spike/file={favicon_path}')
 
 
 @app.middleware("https")
 async def check_authentication(request: Request, call_next):
-    if request.url.path == '/gradio/api/predict' or request.url.path == '/gradio/reset':
+    if request.url.path == '/spike/api/predict' or request.url.path == '/spike/reset':
         return await call_next(request)
     pattern = re.compile(r".*\/private_upload\/.*")
     if pattern.match(request.url.path):
@@ -63,10 +63,18 @@ async def homepage(request: Request):
     cookie = request.cookies.get(f'{auth_cookie_tag}', '')
     user = check_cookie(cookie)
     if user:
-        return RedirectResponse(url='/gradio/')
+        return RedirectResponse(url='/spike/')
     else:
         new_website_url = "https://console.4wps.net/#/login"  # 新网站的URL
         return RedirectResponse(new_website_url)
+
+
+@app.get("/logout")
+async def logout():
+    response = RedirectResponse(url='/', status_code=status.HTTP_302_FOUND)
+    response.delete_cookie('access-token')
+    response.delete_cookie('access-token-unsecure')
+    return response
 
 
 if __name__ == '__main__':

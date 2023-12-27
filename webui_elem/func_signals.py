@@ -253,6 +253,14 @@ def download_history_md(select, ipaddr: gr.Request):
     return f'下载链接:{link}, 对话记录转换为markdown成功'
 
 
+def converter_history_masks(chatbot, system_prompt, ipaddr: gr.Request):
+    mask_dataset = [['system', system_prompt]]
+    for i in chatbot:
+        mask_dataset.append(['user', i[0]])
+        mask_dataset.append(['assistant', i[1]])
+    return gr.Dataframe.update(value=mask_dataset)
+
+
 # TODO < -------------------------------- 小按钮函数注册区 -------------------------------->
 def delete_latest_chat(chatbot, history, cookies: dict, ipaddr: gr.Request):
     select = cookies.get('first_chat', '')

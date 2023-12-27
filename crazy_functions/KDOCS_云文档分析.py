@@ -106,8 +106,6 @@ def Kdocs_多阶段生成回答(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
         prompt = stage.get('提示词', False)
         func = stage.get('调用方法', False)
         knowledge = stage.get('关联知识库', False)
-        multi_model_parallelism, = crazy_box.json_args_return(plugin_kwargs, ['多模型并行'], llm_kwargs['llm_model'])
-        llm_kwargs['llm_model'] = str(multi_model_parallelism).rstrip('&')
         chatbot.append([None, f'开始解析`{stage}`动作，使用`{prompt}`提问后，调用`{func}`保存回答'])
         yield from update_ui(chatbot=chatbot, history=history)
         file_limit = yield from crazy_box.func_拆分与提问(file_limit, llm_kwargs, plugin_kwargs, chatbot, history,

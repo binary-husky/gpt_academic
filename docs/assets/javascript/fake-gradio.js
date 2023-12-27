@@ -9,10 +9,11 @@ function jsonDownloadClick() {
     gradioApp().querySelector('#gr-history-download-btn').click();
 }
 function mdDownloadClick() {
-    gradioApp().querySelector('#gr-markdown-export-btn').click();
-    gradioApp().querySelector('#gr-history-mardown-download-btn').click();
-
+    gradioApp().querySelector('#gr-history-markdown-download-btn').click();
     // downloadHistory(username, currentChatName, ".md");
+}
+function masksConverterClick() {
+    gradioApp().querySelector('#gr-history-masks-converter-btn').click();
 }
 
 // index files

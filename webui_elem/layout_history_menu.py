@@ -41,12 +41,10 @@ class LeftElem:
                     elem_id="history-select-dropdown"
                 )
             with gr.Row(visible=False):
-                with gr.Column(min_width=42, scale=1):
-                    self.historyDeleteBtn = gr.Button(i18n("🗑️"), elem_id="gr-history-delete-btn")
-                with gr.Column(min_width=42, scale=1):
-                    self.historyDownloadBtn = gr.Button(i18n("⏬"), elem_id="gr-history-download-btn")
-                with gr.Column(min_width=42, scale=1):
-                    self.historyMarkdownDownloadBtn = gr.Button(i18n("⤵️"), elem_id="gr-history-mardown-download-btn")
+                self.historyDeleteBtn = gr.Button(i18n("🗑️"), elem_id="gr-history-delete-btn")
+                self.historyDownloadBtn = gr.Button(i18n("⏬"), elem_id="gr-history-download-btn")
+                self.historyMarkdownDownloadBtn = gr.Button(i18n("⤵️"), elem_id="gr-history-markdown-download-btn")
+                self.historyMasksConverterBtn = gr.Button('mask', elem_id='gr-history-masks-converter-btn')
 
     def _draw_history_edit(self):
         with gr.Row(visible=False):

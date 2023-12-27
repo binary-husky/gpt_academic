@@ -149,7 +149,7 @@ def html_iframe_code(html_file):
 
 def html_download_blank(__href, dir_name=''):
     if os.path.exists(__href):
-        __href = f'/gradio/file={__href}'
+        __href = f'/spike/file={__href}'
     if not dir_name:
         dir_name = str(__href).split('/')[-1]
     a = f'<a href="{__href}" target="_blank" download="{dir_name}" class="svelte-xrr240">{dir_name}</a>'

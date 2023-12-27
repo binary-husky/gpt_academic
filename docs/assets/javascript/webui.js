@@ -24,7 +24,7 @@ function openSearch() {
     addHideBoxClassExcept(searchBox)
 }
 
-function openPrompt() {
+function open_treasure_chest() {
     addHideBoxClassExcept(promptBox)
     remove_red_dot()
 }

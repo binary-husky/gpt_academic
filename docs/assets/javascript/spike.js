@@ -53,7 +53,7 @@ function remove_red_dot() {
 
 function reuse_or_edit(check, b, c, d, e, f) {
     if (check === false) {
-        openPrompt()
+        open_treasure_chest()
     }
     return [check, b, c, d, e, f]
 }

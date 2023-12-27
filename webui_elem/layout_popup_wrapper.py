@@ -52,12 +52,14 @@ class Settings:
                 elem_id="gr-single-session-cb", visible=False)
 
     def _darw_private_operation(self):
-        with gr.TabItem('个人中心', id='private', elem_id='about-tab',):
+        with gr.TabItem('个人中心', id='private', elem_id='about-tab'):
             with gr.Row():
                 gr.Markdown('####  粉身碎骨浑不怕 要留清白在人间\n\n'
                             '这里是删除个人文件信息的地方，`注意！！这里的所有操作不可逆，请谨慎操作！！！！`')
             with gr.Row():
                 gr.Markdown('待完善')
+            with gr.Row():
+                self.exit_login_btn = gr.LogoutButton(icon='', link='/logout')
 
     def _draw_setting_info(self):
         APPNAME = toolbox.get_conf('APPNAME')
@@ -243,7 +245,7 @@ class Prompt:
             devs_document = toolbox.get_conf('devs_document')
             jump_link = f'<a href="{devs_document}" target="_blank">Developer Documentation</a>'
             popup_title("### " + i18n(f"百宝袋\n{jump_link}"))
-            with gr.Tabs(elem_id="treasure-bag") as self.treasure_bag:
+            with gr.Tabs(elem_id="treasure-bag") as self.treasure_bag_tab:
                 self._draw_tabs_prompt()
                 self._draw_tabs_masks()
                 self._draw_langchain_base()
