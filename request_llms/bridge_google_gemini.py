@@ -70,7 +70,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             chatbot[-1] = (inputs, gpt_replying_buffer + f"对话错误，请查看message\n\n```\n{error_match.group(1)}\n```")
             yield from update_ui(chatbot=chatbot, history=history)
             raise '对话错误'
-    if gpt_replying_buffer:
+    if not gpt_replying_buffer:
         history = history[-2]  # 错误的不纳入对话
         chatbot[-1] = (inputs, gpt_replying_buffer + f"触发了Google的安全访问策略，没有回答\n\n```\n{gpt_security_policy}\n```")
         yield from update_ui(chatbot=chatbot, history=history)
