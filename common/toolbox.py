@@ -146,6 +146,7 @@ def func_decision_tree(func, cookies, single_turn, use_websearch,
                 try_f = crazy_fns.get(func_name, False)
                 if try_f: try_f = try_f['Function']
             else:
+                txt_passon = cookies.get('last_chat', '')
                 try_f = func
                 args = ()
             yield from try_f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
@@ -230,6 +231,8 @@ def CatchException(f):
             yield from f(main_input, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, args, kwargs)
         except Exception as e:
             from common.check_proxy import check_proxy
+            from webui_elem.func_signals import stop_chat_refresh
+            stop_chat_refresh(chatbot_with_cookie, chatbot_with_cookie.get_cookies(), llm_kwargs.get('ipaddr'))
             proxies = get_conf('proxies')
             tb_str = '```error\n' + trimmed_format_exc() + '```'
             if len(chatbot_with_cookie) == 0:

@@ -419,9 +419,9 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                                     self.pro_private_check, self.prompt_cls_select, self.mask_cls_select,
                                     self.langchain_classifi, self.langchain_select, self.langchain_dropdown])
             self.demo.load(fn=func_signals.refresh_user_data,
-                           inputs=[self.cookies],
+                           inputs=[self.cookies, gr.State(proxy_info)],
                            outputs=[self.historySelectList, *self.llms_cookies_combo,
-                                    self.saveFileName])
+                                    self.saveFileName, self.status_display])
 
         # Start
         self.auto_opentab_delay()

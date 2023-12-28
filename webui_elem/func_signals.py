@@ -131,10 +131,14 @@ def clear_input(inputs, cookies, ipaddr: gr.Request):
 
 
 def stop_chat_refresh(chatbot, cookies, ipaddr: gr.Request):
+    if isinstance(ipaddr, gr.Request):
+        user = func_box.user_client_mark(ipaddr)
+    else:
+        user = ipaddr
     chatbot_with_cookie = toolbox.ChatBotWithCookies(cookies)
     chatbot_with_cookie.write_list(chatbot)
     # user_path = os.path.join(init_path.history_path, ipaddr.client.host)
-    history_processor.thread_write_chat_json(chatbot_with_cookie, func_box.user_client_mark(ipaddr))
+    history_processor.thread_write_chat_json(chatbot_with_cookie, user)
 
 
 def clear_chat_cookie(llm_model, ipaddr: gr.Request):
@@ -654,13 +658,13 @@ def refresh_load_data(prompt, request: gr.Request):
     return outputs
 
 
-def refresh_user_data(cookies, ipaddr: gr.Request):
+def refresh_user_data(cookies, proxy_info, ipaddr: gr.Request):
     user_path = os.path.join(init_path.history_path, func_box.user_client_mark(ipaddr))
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
     history_handle = history_processor.HistoryJsonHandle(new_path)
     history_update_combo = history_handle.update_for_history(cookies, new_name)
     outputs = [gr.Radio.update(choices=only_name, value=new_name, visible=True), *history_update_combo,
-               new_name]
+               new_name, gr.Markdown.update(value=f"你好，`{func_box.user_client_mark(ipaddr)}`\n\n {proxy_info}")]
     return outputs
 
 
