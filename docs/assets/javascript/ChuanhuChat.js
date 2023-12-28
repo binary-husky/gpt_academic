@@ -47,6 +47,8 @@ let windowWidth = window.innerWidth; // 初始窗口宽度
 
 var uploadedFilesCountElement = null
 var uploadIndexFileElement = null
+
+var chatbotAreaBottom = null
 function addInit() {
     var needInit = {chatbotIndicator, uploaderIndicator};
 

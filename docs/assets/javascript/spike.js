@@ -114,9 +114,14 @@ function handleShowAllButtonClick(event) {
 // 函数：当鼠标悬浮在 'uploaded-files-count' 或 'upload-index-file' 上时，改变 'upload-index-file' 的 display 样式为 flex
 function showUploadIndexFile() {
     uploadIndexFileElement.style.display = "flow-root";
-    const more_height =  chatbotArea.querySelector('#chatbot-input-more-area').getBoundingClientRect().top
-    uploadIndexFileElement.style.bottom = more_height + 'px'
+    let more_height_bottom =  chatbotArea.querySelector('#chatbot-input-more-area').getBoundingClientRect().bottom;
+    let upload_height_bottom = chatbotArea.querySelector('#upload-index-file').getBoundingClientRect().bottom;
+    let result_add = (upload_height_bottom - more_height_bottom) * 2.1;
+    if (result_add > 0) {
+        uploadIndexFileElement.style.bottom = 110 + result_add + 'px';
+    }
 }
+
 
 // 函数：当鼠标离开 'uploaded-files-count' 2秒 后，检查是否还处于 'upload-index-file' hover状态 ，如果否，则改变 'upload-index-file' 的 display样式 为 none
 function hideUploadIndexFile() {

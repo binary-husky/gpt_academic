@@ -26,7 +26,7 @@ class Paddle_ocr_select():
         cls_dir = os.path.join(init_path.base_path, 'docs', 'OCR', 'ch_ppocr_mobile_v2.0_cls_infer')
         ocr = PaddleOCR(use_angle_cls=True, cls_model_dir=cls_dir,
                         rec_model_dir=model_dir, det_model_dir=det_dir)
-        save_path = os.path.join(init_path.prompt_path, self.ipaddr, 'ocr_temp')
+        save_path = os.path.join(init_path.users_path, self.ipaddr, 'ocr_temp')
         os.makedirs(save_path, exist_ok=True)
         if img_path.startswith('http'):
             response = requests.get(url=img_path, verify=False)

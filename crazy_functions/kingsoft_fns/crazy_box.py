@@ -121,7 +121,7 @@ class Utils:
             file_name: 另取文件名
         Returns: 写入的文件地址
         """
-        user_path = os.path.join(init_path.prompt_path, hosts, 'markdown')
+        user_path = os.path.join(init_path.users_path, hosts, 'markdown')
         os.makedirs(user_path, exist_ok=True)
         md_file = os.path.join(user_path, f"{file_name}.md")
         with open(file=md_file, mode='w', encoding='utf-8') as f:
@@ -137,7 +137,7 @@ class Utils:
         Returns: 写入的文件地址
         """
         data = toolbox.markdown_convertion(data)
-        user_path = os.path.join(init_path.prompt_path, hosts, 'view_html')
+        user_path = os.path.join(init_path.users_path, hosts, 'view_html')
         os.makedirs(user_path, exist_ok=True)
         md_file = os.path.join(user_path, f"{file_name}.html")
         with open(file=md_file, mode='w', encoding='utf-8') as f:
@@ -152,7 +152,7 @@ class Utils:
             file_name: 要写入的文件名
         Returns: [md, 流程图] 文件
         """
-        user_path = os.path.join(init_path.prompt_path, hosts, 'mark_map')
+        user_path = os.path.join(init_path.users_path, hosts, 'mark_map')
         os.makedirs(user_path, exist_ok=True)
         md_file = self.write_markdown(data, hosts, file_name)
         html_file = os.path.join(user_path, f"{file_name}.html")
@@ -703,7 +703,7 @@ def batch_recognition_images_to_md(img_list, ipaddr):
         if os.path.exists(img):
             img_content, img_result, _ = ocr_tools.Paddle_ocr_select(ipaddr=ipaddr, trust_value=True
                                                                      ).img_def_content(img_path=img, img_tag=img)
-            temp_file = os.path.join(init_path.prompt_path, ipaddr, 'ocr_to_md', img_content.splitlines()[0][:20] + '.md')
+            temp_file = os.path.join(init_path.users_path, ipaddr, 'ocr_to_md', img_content.splitlines()[0][:20] + '.md')
             with open(temp_file, mode='w', encoding='utf-8') as f:
                 f.write(f"{func_box.html_view_blank(temp_file)}\n\n" + img_content)
             temp_list.append(temp_list)

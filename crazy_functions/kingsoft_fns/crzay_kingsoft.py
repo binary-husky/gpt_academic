@@ -422,7 +422,7 @@ def get_kdocs_from_everything(txt, type=[''], ipaddr='temp'):
     link_limit = crazy_box.Utils().split_startswith_txt(link_limit=txt, domain_name=['kdocs', 'wps'])
     file_manifest = []
     success = ''
-    project_folder = os.path.join(init_path.prompt_path, ipaddr, 'kdocs')
+    project_folder = os.path.join(init_path.users_path, ipaddr, 'kdocs')
     os.makedirs(project_folder, exist_ok=True)
     if link_limit:
         for limit in link_limit:

@@ -159,7 +159,7 @@ class Prompt:
     def _draw_tabs_masks(self):
         with gr.TabItem('Masks 🎭', id='masks'):
             def_sys = i18n('你是一个xxx角色，你会xxx技能，你将按照xxx要求，回答我的问题')
-            self.masks_dataset = gr.Dataframe(value=[['system', def_sys]], datatype='markdown',
+            self.masks_dataset = gr.Dataframe(value=[['system', def_sys]], datatype='str',
                                               headers=['role', 'content'], col_count=(2, 'fixed'),
                                               interactive=True, show_label=False, row_count=(1, "dynamic"),
                                               wrap=True, type='array', elem_id='mask_tabs')
@@ -167,7 +167,8 @@ class Prompt:
             self.masks_clear_btn = gr.Button(value='Clear All', size='sm', elem_id='mk_clear')
             with gr.Row():
                 with gr.Column(elem_classes='column_left'):
-                    self.mask_preview_chat = gr.Chatbot(label='Preview')
+                    with gr.Accordion('Chatbot Preview', open=False):
+                        self.mask_preview_chat = gr.Chatbot(label='', show_label=False)
                 with gr.Column(elem_classes='column_right'):
                     with gr.Row():
                         self.mask_cls_select = gr.Dropdown(choices=[], value='',

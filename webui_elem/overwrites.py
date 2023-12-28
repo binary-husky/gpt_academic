@@ -154,9 +154,10 @@ def postprocess_chat_messages(self, chat_message, role):
     else:
         raise ValueError(f"Invalid message for Chatbot component: {chat_message}")
 
+
 def webpath(fn):
-    if fn.startswith(init_path.base_path,):
-        web_path = os.path.relpath(fn, init_path.base_path,).replace('\\', '/')
+    if fn.startswith(init_path.base_path, ):
+        web_path = os.path.relpath(fn, init_path.base_path, ).replace('\\', '/')
     else:
         web_path = os.path.abspath(fn)
     return f'file={web_path}?{os.path.getmtime(fn)}'
@@ -212,6 +213,7 @@ def reload_javascript():
         <meta name="theme-color" content="#ffffff">
     """
     css = css_html()
+
     def template_response(*args, **kwargs):
         res = GradioTemplateResponseOriginal(*args, **kwargs)
         res.body = res.body.replace(b'</head>', f'{meta}{js}</head>'.encode("utf8"))
@@ -244,6 +246,7 @@ def IOComponent_init(self, *args, **kwargs):
 
     return res
 
+
 original_IOComponent_init = gr.components.IOComponent.__init__
 gr.components.IOComponent.__init__ = IOComponent_init
 
@@ -254,9 +257,9 @@ def BlockContext_init(self, *args, **kwargs):
 
     return res
 
+
 original_BlockContext_init = gr.blocks.BlockContext.__init__
 gr.blocks.BlockContext.__init__ = BlockContext_init
-
 
 if __name__ == '__main__':
     pass

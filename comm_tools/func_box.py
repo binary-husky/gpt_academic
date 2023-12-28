@@ -27,7 +27,7 @@ from bs4 import BeautifulSoup
 from comm_tools import toolbox
 from comm_tools.logger_handle import logger
 from comm_tools.path_handle import init_path
-from comm_tools.database_processor import SqliteHandle
+from webui_elem.overwrites import escape_markdown
 
 
 class Shell:
@@ -130,13 +130,12 @@ def link_mtime_to_md(file):
     return a
 
 
-def html_view_blank(__href: str, file_name='', to_tabs=False):
+def html_view_blank(__href: str, to_tabs=False):
     __file = __href.replace(init_path.base_path, ".")
     __href = html_local_file(__href)
-    if not file_name:
-        file_name = __href.split('/')[-1]
-    a = f'> {__href}'
+    a = link_mtime_to_md(__file)
     if to_tabs:
+        a = f' {__file}'
         a = "\n\n" + to_markdown_tabs(head=['下载地址', '插件复用地址'], tabs=[[__file], [a]]) + "\n\n"
     return a
 
@@ -579,6 +578,14 @@ def get_files_and_dirs(path, filter_allow):
                 result.append(item)
     return result
 
+
+def match_chat_information(text):
+    pattern = r'<div class="raw-message hideM"><pre>(.*?)</pre></div>'
+    match = re.search(pattern, text, flags=re.DOTALL)
+    if match:
+        return escape_markdown(match.group(1), reverse=True)
+    else:
+        return text
 
 def replace_expected_text(prompt: str, content: str, expect='{{{v}}}'):
     """ 查找prompt中expect相关占位符，并将content替换到prompt中

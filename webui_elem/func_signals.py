@@ -256,8 +256,8 @@ def download_history_md(select, ipaddr: gr.Request):
 def converter_history_masks(chatbot, system_prompt, ipaddr: gr.Request):
     mask_dataset = [['system', system_prompt]]
     for i in chatbot:
-        mask_dataset.append(['user', i[0]])
-        mask_dataset.append(['assistant', i[1]])
+        mask_dataset.append(['user', func_box.match_chat_information(i[0])])
+        mask_dataset.append(['assistant', func_box.match_chat_information(i[1])])
     return gr.Dataframe.update(value=mask_dataset)
 
 
@@ -387,7 +387,7 @@ def prompt_upload_refresh(file, prompt, pro_select, ipaddr: gr.Request):
 def prompt_delete(pro_name, prompt_dict, select_check, ipaddr: gr.Request):
     user_addr = func_box.user_client_mark(ipaddr)
     if not pro_name:
-        raise gr.Error('删除的名称输入不能为空')
+        raise gr.Error('删除名称不能为空')
     find_prompt = [i for i in prompt_dict['samples'] if i[1] == pro_name]
     if not any(find_prompt):
         raise gr.Error(f'无法找到 {pro_name}')
@@ -396,7 +396,7 @@ def prompt_delete(pro_name, prompt_dict, select_check, ipaddr: gr.Request):
     _, source = sqlite_handle.get_prompt_value(find=pro_name)
     if not _:
         raise gr.Error(f'无法找到 {pro_name}，或请不要在所有人分类下删除')
-    if str(source) in user_addr or '127.0.0.1' == user_addr:
+    if str(source) in user_addr or '127.0.0.1' == user_addr or 'spike' == user_addr:
         sqlite_handle.delete_prompt(pro_name)
     else:
         raise gr.Error(f'无法删除不属于你创建的 {pro_name}，如有紧急需求，请联系管理员')

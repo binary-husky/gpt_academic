@@ -632,7 +632,7 @@ def get_files_from_everything(txt, type, ipaddr='temp'):  # type='.md'
         proxies = get_conf('proxies')
         r = requests.get(txt, proxies=proxies).content
         name = r.splitlines()[0]
-        project_folder = os.path.join(init_path.prompt_path, ipaddr, 'Download')
+        project_folder = os.path.join(init_path.users_path, ipaddr, 'Download')
         os.makedirs(project_folder, exist_ok=True)
         temp_file = f'{project_folder}/{name[:30]}_{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())}{type}'
         with open(temp_file, 'wb') as f:
