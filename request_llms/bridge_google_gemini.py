@@ -52,9 +52,11 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             yield from update_ui(chatbot=chatbot, history=history, msg="请求超时" + retry_msg)  # 刷新界面
             if retry > MAX_RETRY: raise TimeoutError
     gpt_replying_buffer = ""
+    gpt_security_policy = ""
     history.extend([inputs, ''])
     for response in stream_response:
         results = response.decode("utf-8")    # 被这个解码给耍了。。
+        gpt_security_policy += results
         match = re.search(r'\"text\":\s*\"(.*)\"', results, flags=re.DOTALL)
         error_match = re.search(r'\"message\":\s*\"(.*)\"', results, flags=re.DOTALL)
         if match:
@@ -65,9 +67,13 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             yield from update_ui(chatbot=chatbot, history=history)
         if error_match:
             history = history[-2]  # 错误的不纳入对话
-            chatbot[-1] = (inputs, gpt_replying_buffer + f"\n\n```\n{error_match.group(1)}\n```")
+            chatbot[-1] = (inputs, gpt_replying_buffer + f"对话错误，请查看message\n\n```\n{error_match.group(1)}\n```")
             yield from update_ui(chatbot=chatbot, history=history)
-            raise '对话错误'
+            raise Exception('对话错误')
+    if not gpt_replying_buffer:
+        history = history[-2]  # 错误的不纳入对话
+        chatbot[-1] = (inputs, gpt_replying_buffer + f"触发了Google的安全访问策略，没有回答\n\n```\n{gpt_security_policy}\n```")
+        yield from update_ui(chatbot=chatbot, history=history)
 
 
 if __name__ == '__main__':
