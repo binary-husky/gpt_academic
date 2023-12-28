@@ -25,7 +25,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
         match = re.search(r'\"text\":\s*\"(.*?)\"', results)
         error_match = re.search(r'\"message\":\s*\"(.*?)\"', results)
         if match:
-            match_str = match.group(1).replace(r'\\', '\\')
+            match_str = json.loads('{"text": "%s"}' % match.group(1))
             if len(observe_window) >= 1:
                 observe_window[0] = match_str
             if len(observe_window) >= 2:
