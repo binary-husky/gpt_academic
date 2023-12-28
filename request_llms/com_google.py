@@ -8,7 +8,7 @@ import re
 import json
 import requests
 from typing import List, Dict, Tuple
-from toolbox import files_filter_handler, get_conf, input_encode_handler
+from toolbox import get_conf, input_encode_handler
 
 proxies, TIMEOUT_SECONDS = get_conf('proxies', 'TIMEOUT_SECONDS')
 
