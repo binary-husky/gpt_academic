@@ -16,8 +16,8 @@ validate_path() # validate path so you can run from base directory
 
 # ==============================================================================================================================
 
-from comm_tools.colorful import *
-from comm_tools.toolbox import get_conf, ChatBotWithCookies
+from common.colorful import *
+from common.toolbox import get_conf, ChatBotWithCookies
 import os
 import sys
 from functools import wraps
@@ -160,20 +160,20 @@ def test_Markdown多语言():
             print(cb)
 
 def test_Langchain知识库():
-    from comm_tools.Langchain知识库 import 知识库问答
+    from common.Langchain知识库 import 知识库问答
     txt = "./"
     chatbot = ChatBotWithCookies(llm_kwargs)
     for cookies, cb, hist, msg in silence_stdout(知识库问答)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
         cli_printer.print(cb)   #  print(cb)
     
     chatbot = ChatBotWithCookies(cookies)
-    from comm_tools.Langchain知识库 import 读取知识库作答
+    from common.Langchain知识库 import 读取知识库作答
     txt = "What is the installation method？"
     for cookies, cb, hist, msg in silence_stdout(读取知识库作答)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
         cli_printer.print(cb)   #  print(cb)
 
 def test_Langchain知识库读取():
-    from comm_tools.Langchain知识库 import 读取知识库作答
+    from common.Langchain知识库 import 读取知识库作答
     txt = "远程云服务器部署？"
     for cookies, cb, hist, msg in silence_stdout(读取知识库作答)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
         cli_printer.print(cb)   #  print(cb)

@@ -24,9 +24,9 @@ import qrcode
 
 from PIL import Image, ImageOps
 from bs4 import BeautifulSoup
-from comm_tools import toolbox
-from comm_tools.logger_handle import logger
-from comm_tools.path_handle import init_path
+from common import toolbox
+from common.logger_handle import logger
+from common.path_handle import init_path
 from webui_elem.overwrites import escape_markdown
 
 

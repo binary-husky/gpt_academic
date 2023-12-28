@@ -1,5 +1,5 @@
-from comm_tools.toolbox import update_ui, update_ui_lastest_msg, get_log_folder
-from comm_tools.toolbox import get_conf, objdump, objload, promote_file_to_downloadzone
+from common.toolbox import update_ui, update_ui_lastest_msg, get_log_folder
+from common.toolbox import get_conf, objdump, objload, promote_file_to_downloadzone
 from .latex_toolbox import PRESERVE, TRANSFORM
 from .latex_toolbox import set_forbidden_text, set_forbidden_text_begin_end, set_forbidden_text_careful_brace
 from .latex_toolbox import reverse_forbidden_text_careful_brace, reverse_forbidden_text, convert_to_linklist, \
@@ -502,7 +502,7 @@ def write_html(sp_file_contents, sp_file_result, chatbot, project_folder):
     try:
         import shutil
         from crazy_functions.pdf_fns.report_gen_html import construct_html
-        from comm_tools.toolbox import gen_time_str
+        from common.toolbox import gen_time_str
         ch = construct_html()
         orig = ""
         trans = ""
@@ -521,5 +521,5 @@ def write_html(sp_file_contents, sp_file_result, chatbot, project_folder):
         shutil.copyfile(res, pj(project_folder, create_report_file_name))
         promote_file_to_downloadzone(file=res, chatbot=chatbot)
     except:
-        from comm_tools.toolbox import trimmed_format_exc
+        from common.toolbox import trimmed_format_exc
         print('writing html result failed:', trimmed_format_exc())

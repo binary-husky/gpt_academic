@@ -1,4 +1,4 @@
-from comm_tools.toolbox import trimmed_format_exc, get_conf, ProxyNetworkActivate
+from common.toolbox import trimmed_format_exc, get_conf, ProxyNetworkActivate
 from crazy_functions.agent_fns.pipe import PluginMultiprocessManager, PipeCom
 from request_llms.bridge_all import predict_no_ui_long_connection
 import time

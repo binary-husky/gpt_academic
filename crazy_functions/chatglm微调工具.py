@@ -1,4 +1,4 @@
-from comm_tools.toolbox import CatchException, update_ui, promote_file_to_downloadzone
+from common.toolbox import CatchException, update_ui, promote_file_to_downloadzone
 from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 import datetime, json
 

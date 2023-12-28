@@ -11,7 +11,7 @@ import time
 from loguru import logger
 from typing import cast
 from types import FrameType
-from comm_tools.path_handle import init_path
+from common.path_handle import init_path
 
 format_ = "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | " \
           "<level>{level}</level> | " \

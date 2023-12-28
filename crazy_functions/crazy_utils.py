@@ -1,7 +1,7 @@
-from comm_tools import func_box
-from comm_tools.toolbox import update_ui, get_conf, trimmed_format_exc, get_max_token, Singleton, get_log_folder, \
+from common import func_box
+from common.toolbox import update_ui, get_conf, trimmed_format_exc, get_max_token, Singleton, get_log_folder, \
     gen_time_str
-from comm_tools.path_handle import init_path
+from common.path_handle import init_path
 import threading
 import os
 import logging
@@ -98,7 +98,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
                 if handle_token_exceed:
                     exceeded_cnt += 1
                     # 【选择处理】 尝试计算比例，尽可能多地保留文本
-                    from comm_tools.toolbox import get_reduce_token_percent
+                    from common.toolbox import get_reduce_token_percent
                     p_ratio, n_exceed = get_reduce_token_percent(str(token_exceeded_error))
                     MAX_TOKEN = get_max_token(llm_kwargs)
                     EXCEED_ALLO = 512 + 512 * exceeded_cnt
@@ -237,7 +237,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                 if handle_token_exceed:
                     exceeded_cnt += 1
                     # 【选择处理】 尝试计算比例，尽可能多地保留文本
-                    from comm_tools.toolbox import get_reduce_token_percent
+                    from common.toolbox import get_reduce_token_percent
                     p_ratio, n_exceed = get_reduce_token_percent(str(token_exceeded_error))
                     MAX_TOKEN = get_max_token(llm_kwargs)
                     EXCEED_ALLO = 512 + 512 * exceeded_cnt
@@ -666,7 +666,7 @@ class nougat_interface():
 
     def nougat_with_timeout(self, command, cwd, timeout=3600):
         import subprocess
-        from comm_tools.toolbox import ProxyNetworkActivate
+        from common.toolbox import ProxyNetworkActivate
         logging.info(f'正在执行命令 {command}')
         with ProxyNetworkActivate("Nougat_Download"):
             process = subprocess.Popen(command, shell=True, cwd=cwd, env=os.environ)
@@ -680,7 +680,7 @@ class nougat_interface():
         return True
 
     def NOUGAT_parse_pdf(self, fp, chatbot, history):
-        from comm_tools.toolbox import update_ui_lastest_msg
+        from common.toolbox import update_ui_lastest_msg
 
         yield from update_ui_lastest_msg("正在解析论文, 请稍候。进度：正在排队, 等待线程锁...",
                                          chatbot=chatbot, history=history, delay=0)

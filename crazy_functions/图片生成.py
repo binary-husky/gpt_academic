@@ -1,4 +1,4 @@
-from comm_tools.toolbox import CatchException, update_ui, get_conf, select_api_key, get_log_folder
+from common.toolbox import CatchException, update_ui, get_conf, select_api_key, get_log_folder
 from crazy_functions.multi_stage.multi_stage_utils import GptAcademicState
 
 

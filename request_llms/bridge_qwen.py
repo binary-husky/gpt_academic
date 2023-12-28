@@ -6,7 +6,7 @@ import time
 import threading
 import importlib
 from multiprocessing import Process, Pipe
-from comm_tools.toolbox import ProxyNetworkActivate, get_conf
+from common.toolbox import ProxyNetworkActivate, get_conf
 from .local_llm_class import LocalLLMHandle, get_local_llm_predict_fns
 
 

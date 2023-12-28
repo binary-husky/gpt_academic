@@ -10,8 +10,8 @@ from typing import List, Tuple, Dict
 from gradio_client import utils as client_utils
 from gradio import utils
 from collections import namedtuple
-from comm_tools import toolbox
-from comm_tools.path_handle import init_path
+from common import toolbox
+from common.path_handle import init_path
 
 
 def escape_markdown(text, reverse=False):

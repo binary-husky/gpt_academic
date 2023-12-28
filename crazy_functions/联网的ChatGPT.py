@@ -1,4 +1,4 @@
-from comm_tools.toolbox import CatchException, update_ui
+from common.toolbox import CatchException, update_ui
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, input_clipping
 import requests
 from bs4 import BeautifulSoup
@@ -66,7 +66,7 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     web_port        当前软件运行的端口号
     """
     # ------------- < 第1步：爬取搜索引擎的结果 > -------------
-    from comm_tools.toolbox import get_conf
+    from common.toolbox import get_conf
     proxies = get_conf('proxies')
     urls = google(txt, proxies)
     history = []
@@ -79,7 +79,7 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     max_search_result = 5   # 最多收纳多少个网页的结果
     i_say_1 = f"请结合互联网信息回答以下问题：{txt}"
     gpt_say_1 = ''
-    from comm_tools import func_box
+    from common import func_box
     chatbot.append([i_say_1, gpt_say_1])
     for index, url in enumerate(urls[:max_search_result]):
         res = scrape_text(url['link'], proxies)

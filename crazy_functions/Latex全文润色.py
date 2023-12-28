@@ -1,5 +1,5 @@
-from comm_tools.toolbox import update_ui, trimmed_format_exc, promote_file_to_downloadzone, get_log_folder
-from comm_tools.toolbox import CatchException, report_exception, write_history_to_file, zip_folder
+from common.toolbox import update_ui, trimmed_format_exc, promote_file_to_downloadzone, get_log_folder
+from common.toolbox import CatchException, report_exception, write_history_to_file, zip_folder
 
 
 

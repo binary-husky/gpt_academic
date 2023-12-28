@@ -1,5 +1,5 @@
-from comm_tools.toolbox import update_ui, promote_file_to_downloadzone
-from comm_tools.toolbox import CatchException, report_exception, write_history_to_file
+from common.toolbox import update_ui, promote_file_to_downloadzone
+from common.toolbox import CatchException, report_exception, write_history_to_file
 fast_debug = False
 
 class PaperFileGroup():

@@ -1,7 +1,7 @@
 import glob, time, os, re, logging
-from comm_tools.toolbox import update_ui, trimmed_format_exc, gen_time_str, disable_auto_promotion
-from comm_tools.toolbox import CatchException, report_exception, get_log_folder
-from comm_tools.toolbox import write_history_to_file, promote_file_to_downloadzone
+from common.toolbox import update_ui, trimmed_format_exc, gen_time_str, disable_auto_promotion
+from common.toolbox import CatchException, report_exception, get_log_folder
+from common.toolbox import write_history_to_file, promote_file_to_downloadzone
 
 fast_debug = False
 
@@ -118,7 +118,7 @@ def get_files_from_everything(txt, preference=''):
     success = True
     if txt.startswith('http'):
         import requests
-        from comm_tools.toolbox import get_conf
+        from common.toolbox import get_conf
         proxies = get_conf('proxies')
         # 网络的远程文件
         if preference == 'Github':

@@ -1,7 +1,7 @@
 # From project chatglm-langchain
 
 import threading
-from comm_tools.toolbox import Singleton
+from common.toolbox import Singleton
 import os
 import shutil
 import os
@@ -278,7 +278,7 @@ class knowledge_archive_interface():
     def get_chinese_text2vec(self):
         if self.text2vec_large_chinese is None:
             # < -------------------预热文本向量化模组--------------- >
-            from comm_tools.toolbox import ProxyNetworkActivate
+            from common.toolbox import ProxyNetworkActivate
             print('Checking Text2vec ...')
             from langchain.embeddings.huggingface import HuggingFaceEmbeddings
             with ProxyNetworkActivate('Download_LLM'):  # 临时地激活代理网络

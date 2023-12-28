@@ -1,4 +1,4 @@
-from comm_tools.toolbox import get_conf
+from common.toolbox import get_conf
 import threading
 import logging
 

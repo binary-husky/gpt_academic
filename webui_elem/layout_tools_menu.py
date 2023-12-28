@@ -5,9 +5,9 @@
 # @Descr   :
 
 import gradio as gr
-from comm_tools import func_box, toolbox
+from common import func_box, toolbox
 from webui_elem import webui_local
-from comm_tools.crazy_functional import crazy_fns_role, crazy_classification, crazy_fns
+from common.crazy_functional import crazy_fns_role, crazy_classification, crazy_fns
 
 default_plugin = toolbox.get_conf('default_plugin')
 i18n = webui_local.I18nAuto()

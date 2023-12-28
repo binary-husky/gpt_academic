@@ -7,10 +7,10 @@ import json
 import os
 import copy
 import gradio as gr
-from comm_tools import toolbox
-from comm_tools import func_box
+from common import toolbox
+from common import func_box
 from bs4 import BeautifulSoup
-from comm_tools.path_handle import init_path
+from common.path_handle import init_path
 
 
 class HistoryJsonHandle:

@@ -1,10 +1,10 @@
-from comm_tools.toolbox import get_conf
-from comm_tools.toolbox import set_conf
-from comm_tools.toolbox import set_multi_conf
-from comm_tools.toolbox import get_plugin_handle
-from comm_tools.toolbox import get_plugin_default_kwargs
-from comm_tools.toolbox import get_chat_handle
-from comm_tools.toolbox import get_chat_default_kwargs
+from common.toolbox import get_conf
+from common.toolbox import set_conf
+from common.toolbox import set_multi_conf
+from common.toolbox import get_plugin_handle
+from common.toolbox import get_plugin_default_kwargs
+from common.toolbox import get_chat_handle
+from common.toolbox import get_chat_default_kwargs
 from functools import wraps
 import sys
 import os

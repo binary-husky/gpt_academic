@@ -143,7 +143,7 @@ class AliyunASR():
         import nls  # pip install git+https://github.com/aliyun/alibabacloud-nls-python-sdk.git
         import tempfile
         from scipy import io
-        from comm_tools.toolbox import get_conf
+        from common.toolbox import get_conf
         from .audio_io import change_sample_rate
         from .audio_io import RealtimeAudioDistribution
         NEW_SAMPLERATE = 16000
@@ -226,7 +226,7 @@ class AliyunASR():
         r = sr.stop()
 
     def get_token(self):
-        from comm_tools.toolbox import get_conf
+        from common.toolbox import get_conf
         import json
         from aliyunsdkcore.request import CommonRequest
         from aliyunsdkcore.client import AcsClient

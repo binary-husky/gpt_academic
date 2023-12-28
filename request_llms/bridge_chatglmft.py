@@ -5,7 +5,7 @@ import os
 import json
 import threading
 import importlib
-from comm_tools.toolbox import update_ui, get_conf
+from common.toolbox import update_ui, get_conf
 from multiprocessing import Process, Pipe
 
 load_message = "ChatGLMFT尚未加载，加载需要一段时间。注意，取决于`config.py`的配置，ChatGLMFT消耗大量的内存（CPU）或显存（GPU），也许会导致低配计算机卡死 ……"
@@ -116,7 +116,7 @@ class GetGLMFTHandle(Process):
                     #     command = self.child.recv()
                     #     if command == '[Terminate]': break
             except:
-                from comm_tools.toolbox import trimmed_format_exc
+                from common.toolbox import trimmed_format_exc
                 self.child.send('[Local Message] Call ChatGLMFT fail.' + '\n```\n' + trimmed_format_exc() + '\n```\n')
             # 请求处理结束，开始下一个循环
             self.child.send('[Finish]')
@@ -184,7 +184,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             return
 
     if additional_fn is not None:
-        from comm_tools.core_functional import handle_core_functionality
+        from common.core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
     # 处理历史信息

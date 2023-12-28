@@ -1,7 +1,7 @@
 import threading
 from request_llms.bridge_all import predict_no_ui_long_connection
-from comm_tools.toolbox import update_ui
-from comm_tools.toolbox import CatchException, write_results_to_file, report_execption
+from common.toolbox import update_ui
+from common.toolbox import CatchException, write_results_to_file, report_execption
 from .crazy_utils import breakdown_txt_to_satisfy_token_limit
 
 def extract_code_block_carefully(txt):

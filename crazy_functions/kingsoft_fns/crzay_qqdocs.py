@@ -9,10 +9,10 @@ import time
 import os
 import requests
 
-from comm_tools import func_box
-from comm_tools import toolbox
+from common import func_box
+from common import toolbox
 from crazy_functions.kingsoft_fns import crazy_box
-from comm_tools.path_handle import init_path
+from common.path_handle import init_path
 
 
 class QQDocs:

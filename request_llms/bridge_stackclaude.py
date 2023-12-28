@@ -1,11 +1,11 @@
 from .bridge_newbingfree import preprocess_newbing_out, preprocess_newbing_out_simple
 from multiprocessing import Process, Pipe
-from comm_tools.toolbox import update_ui, trimmed_format_exc
+from common.toolbox import update_ui, trimmed_format_exc
 import threading
 import importlib
 import logging
 import time
-from comm_tools.toolbox import get_conf
+from common.toolbox import get_conf
 import asyncio
 load_message = "正在加载Claude组件，请稍候..."
 
@@ -248,7 +248,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             return
 
     if additional_fn is not None:
-        from comm_tools.core_functional import handle_core_functionality
+        from common.core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
     history_feedin = []

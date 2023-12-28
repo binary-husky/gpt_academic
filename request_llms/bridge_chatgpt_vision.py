@@ -14,7 +14,7 @@ import logging
 import requests
 import os
 import glob
-from comm_tools.toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history, trimmed_format_exc, is_the_upload_folder, \
+from common.toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history, trimmed_format_exc, is_the_upload_folder, \
     update_ui_lastest_msg, get_max_token, encode_image, have_any_recent_upload_image_files
 
 
@@ -97,7 +97,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
 
     user_input = inputs
     if additional_fn is not None:
-        from comm_tools.core_functional import handle_core_functionality
+        from common.core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
     raw_input = inputs
@@ -240,7 +240,7 @@ def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg,
     elif "Not enough point" in error_msg:
         chatbot[-1] = (chatbot[-1][0], "[Local Message] Not enough point. API2D账户点数不足.")
     else:
-        from comm_tools.toolbox import regular_txt_to_markdown
+        from common.toolbox import regular_txt_to_markdown
         tb_str = '```\n' + trimmed_format_exc() + '```'
         chatbot[-1] = (chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str} \n\n{regular_txt_to_markdown(chunk_decoded)}")
     return chatbot, history

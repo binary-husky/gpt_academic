@@ -8,7 +8,7 @@ import os
 import locale
 import logging
 import commentjson as json
-from comm_tools.path_handle import init_path
+from common.path_handle import init_path
 
 
 class I18nAuto:

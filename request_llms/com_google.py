@@ -8,8 +8,8 @@ import re
 import json
 import requests
 from typing import List, Dict, Tuple
-from comm_tools import func_box
-from comm_tools import toolbox
+from common import func_box
+from common import toolbox
 
 proxies, TIMEOUT_SECONDS = toolbox.get_conf('proxies', 'TIMEOUT_SECONDS')
 

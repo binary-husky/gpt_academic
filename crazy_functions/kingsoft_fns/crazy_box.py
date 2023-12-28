@@ -10,7 +10,7 @@ import time
 import xmindparser
 from typing import Dict
 import typing as typing
-from comm_tools import func_box, ocr_tools, toolbox, database_processor, Langchain_cn
+from common import func_box, ocr_tools, toolbox, database_processor, Langchain_cn
 from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Border, Side
@@ -21,7 +21,7 @@ from crazy_functions import crazy_utils
 from request_llms import bridge_all
 from crazy_functions.kingsoft_fns import crzay_kingsoft
 from moviepy.editor import AudioFileClip
-from comm_tools.path_handle import init_path
+from common.path_handle import init_path
 
 
 class Utils:
@@ -728,7 +728,7 @@ def name_de_add_sort(response, index=0):
         de_result.sort(key=lambda x: d[x[index]])
         return de_result
     except:
-        from comm_tools.toolbox import trimmed_format_exc
+        from common.toolbox import trimmed_format_exc
         tb_str = '```\n' + trimmed_format_exc() + '```'
         print(tb_str)
         return response

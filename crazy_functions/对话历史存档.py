@@ -1,4 +1,4 @@
-from comm_tools.toolbox import CatchException, update_ui, promote_file_to_downloadzone, get_log_folder, get_user
+from common.toolbox import CatchException, update_ui, promote_file_to_downloadzone, get_log_folder, get_user
 import re
 
 f_prefix = 'GPT-Academic对话存档'

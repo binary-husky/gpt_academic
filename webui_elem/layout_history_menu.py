@@ -4,7 +4,7 @@
 # @Author : Spike
 # @Descr   :
 import gradio as gr
-from comm_tools import func_box
+from common import func_box
 from webui_elem import webui_local
 
 i18n = webui_local.I18nAuto()

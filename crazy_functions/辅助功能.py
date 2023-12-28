@@ -2,9 +2,9 @@
 # @Time   : 2023/4/19
 # @Author : Spike
 # @Descr   :
-from comm_tools.toolbox import update_ui, get_conf, get_user
-from comm_tools.toolbox import CatchException
-from comm_tools.toolbox import default_user_name
+from common.toolbox import update_ui, get_conf, get_user
+from common.toolbox import CatchException
+from common.toolbox import default_user_name
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 import shutil
 import os

@@ -3,12 +3,12 @@
 # @Time   : 2023/8/27
 # @Author : Spike
 # @Descr   :
-from comm_tools import crazy_functional
+from common import crazy_functional
 
 from langchain.vectorstores import FAISS
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.schema import Document
-from comm_tools.toolbox import ProxyNetworkActivate
+from common.toolbox import ProxyNetworkActivate
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 text2vec_large_chinese = HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
 

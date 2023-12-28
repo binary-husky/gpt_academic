@@ -2,7 +2,7 @@ from transformers import AutoModel, AutoTokenizer
 import time
 import threading
 import importlib
-from comm_tools.toolbox import update_ui, get_conf
+from common.toolbox import update_ui, get_conf
 from multiprocessing import Process, Pipe
 
 load_message = "jittorllms尚未加载，加载需要一段时间。注意，请避免混用多种jittor模型，否则可能导致显存溢出而造成卡顿，取决于`config.py`的配置，jittorllms消耗大量的内存（CPU）或显存（GPU），也许会导致低配计算机卡死 ……"
@@ -26,7 +26,7 @@ class GetGLMHandle(Process):
             self.info = "依赖检测通过"
             self.success = True
         except:
-            from comm_tools.toolbox import trimmed_format_exc
+            from common.toolbox import trimmed_format_exc
             self.info = r"缺少jittorllms的依赖，如果要使用jittorllms，除了基础的pip依赖以外，您还需要运行`pip install -r request_llms/requirements_jittorllms.txt -i https://pypi.jittor.org/simple -I`"+\
                         r"和`git clone https://gitlink.org.cn/jittor/JittorLLMs.git --depth 1 request_llms/jittorllms`两个指令来安装jittorllms的依赖（在项目根目录运行这两个指令）。" +\
                         r"警告：安装jittorllms依赖后将完全破坏现有的pytorch环境，建议使用docker环境！" + trimmed_format_exc()
@@ -84,7 +84,7 @@ class GetGLMHandle(Process):
                     print(response)
                     self.child.send(response)
             except:
-                from comm_tools.toolbox import trimmed_format_exc
+                from common.toolbox import trimmed_format_exc
                 print(trimmed_format_exc())
                 self.child.send('[Local Message] Call jittorllms fail.')
             # 请求处理结束，开始下一个循环
@@ -153,7 +153,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             return
 
     if additional_fn is not None:
-        from comm_tools.core_functional import handle_core_functionality
+        from common.core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
     # 处理历史信息

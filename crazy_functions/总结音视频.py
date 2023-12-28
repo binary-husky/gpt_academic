@@ -1,10 +1,10 @@
 import glob, os
-from comm_tools import func_box
+from common import func_box
 from moviepy.editor import AudioFileClip
 from crazy_functions.kingsoft_fns import crazy_box, crzay_kingsoft
-from comm_tools.toolbox import CatchException, select_api_key, update_ui, get_conf
+from common.toolbox import CatchException, select_api_key, update_ui, get_conf
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, get_files_from_everything
-from comm_tools.toolbox import write_history_to_file, promote_file_to_downloadzone, get_log_folder, report_exception
+from common.toolbox import write_history_to_file, promote_file_to_downloadzone, get_log_folder, report_exception
 
 
 def split_audio_file(filename, split_duration=1000):

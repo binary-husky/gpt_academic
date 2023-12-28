@@ -11,7 +11,7 @@ import websockets
 import time
 import threading
 import importlib
-from comm_tools.toolbox import update_ui
+from common.toolbox import update_ui
 
 
 def random_hash():
@@ -95,7 +95,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         additional_fn代表点击的哪个按钮，按钮见functional.py
     """
     if additional_fn is not None:
-        from comm_tools.core_functional import handle_core_functionality
+        from common.core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
     raw_input = "What I would like to say is the following: " + inputs

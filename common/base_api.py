@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from fastapi import FastAPI, Request, status, Response
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
-from comm_tools import toolbox, func_box
+from common import toolbox, func_box
 
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="!secret")

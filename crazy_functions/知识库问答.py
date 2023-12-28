@@ -1,4 +1,4 @@
-from comm_tools.toolbox import CatchException, update_ui, ProxyNetworkActivate, update_ui_lastest_msg, get_log_folder, get_user
+from common.toolbox import CatchException, update_ui, ProxyNetworkActivate, update_ui_lastest_msg, get_log_folder, get_user
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, get_files_from_everything
 
 install_msg ="""

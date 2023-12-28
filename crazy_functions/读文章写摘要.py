@@ -1,6 +1,6 @@
-from comm_tools.toolbox import update_ui
-from comm_tools.toolbox import CatchException, report_exception
-from comm_tools.toolbox import write_history_to_file, promote_file_to_downloadzone
+from common.toolbox import update_ui
+from common.toolbox import CatchException, report_exception
+from common.toolbox import write_history_to_file, promote_file_to_downloadzone
 
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 

@@ -48,8 +48,8 @@ explain_msg = f"""
 
 from pydantic import BaseModel, Field
 from typing import List
-from comm_tools.toolbox import CatchException, update_ui, is_the_upload_folder
-from comm_tools.toolbox import update_ui_lastest_msg, disable_auto_promotion
+from common.toolbox import CatchException, update_ui, is_the_upload_folder
+from common.toolbox import update_ui_lastest_msg, disable_auto_promotion
 from request_llms.bridge_all import predict_no_ui_long_connection
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from crazy_functions.crazy_utils import input_clipping

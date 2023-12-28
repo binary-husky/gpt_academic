@@ -3,7 +3,7 @@
 # 'stop' 颜色对应 theme.py 中的 color_er
 # 默认按钮颜色是 secondary
 import importlib
-from comm_tools.toolbox import clear_line_break
+from common.toolbox import clear_line_break
 
 
 def get_core_functions():

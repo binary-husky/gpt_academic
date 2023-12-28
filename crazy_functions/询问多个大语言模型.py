@@ -1,4 +1,4 @@
-from comm_tools.toolbox import CatchException, update_ui, get_conf
+from common.toolbox import CatchException, update_ui, get_conf
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 import datetime
 

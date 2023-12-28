@@ -1,6 +1,6 @@
 import gradio as gr
 import logging
-from comm_tools.toolbox import get_conf, ProxyNetworkActivate
+from common.toolbox import get_conf, ProxyNetworkActivate
 
 CODE_HIGHLIGHT, ADD_WAIFU, AVAIL_THEMES = get_conf('CODE_HIGHLIGHT', 'ADD_WAIFU', 'AVAIL_THEMES')
 

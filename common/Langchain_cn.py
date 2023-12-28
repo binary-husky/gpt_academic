@@ -1,10 +1,10 @@
 import os.path
 import threading
 
-from comm_tools import toolbox
+from common import toolbox
 from crazy_functions import crazy_utils
 import gradio as gr
-from comm_tools import func_box, database_processor
+from common import func_box, database_processor
 from crazy_functions.kingsoft_fns import crazy_box, crzay_kingsoft, crzay_qqdocs
 
 from crazy_functions.vector_fns.vector_database import LocalDocQA
@@ -27,7 +27,7 @@ class knowledge_archive_interface():
     def get_chinese_text2vec(self):
         if self.text2vec_large_chinese is None:
             # < -------------------预热文本向量化模组--------------- >
-            from comm_tools.toolbox import ProxyNetworkActivate
+            from common.toolbox import ProxyNetworkActivate
             print('Checking Text2vec ...')
             from langchain.embeddings import HuggingFaceEmbeddings
             with ProxyNetworkActivate('Download_LLM'):  # 临时地激活代理网络

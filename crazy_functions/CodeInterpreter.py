@@ -1,7 +1,7 @@
 from collections.abc import Callable, Iterable, Mapping
 from typing import Any
-from comm_tools.toolbox import CatchException, update_ui, gen_time_str, trimmed_format_exc
-from comm_tools.toolbox import promote_file_to_downloadzone, get_log_folder
+from common.toolbox import CatchException, update_ui, gen_time_str, trimmed_format_exc
+from common.toolbox import promote_file_to_downloadzone, get_log_folder
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import input_clipping, try_install_deps
 from multiprocessing import Process, Pipe

@@ -2,14 +2,14 @@ import os
 import gradio as gr
 
 from request_llms.bridge_all import predict
-from comm_tools.toolbox import find_free_port, on_file_uploaded, \
+from common.toolbox import find_free_port, on_file_uploaded, \
     get_conf, ArgsGeneralWrapper
 from webui_elem.overwrites import postprocess_chat_messages, postprocess, reload_javascript
 # 问询记录, python 版本建议3.9+（越新越好）
 # 一些普通功能模块
-from comm_tools.core_functional import get_core_functions
-from comm_tools import Langchain_cn
-from comm_tools.logger_handle import init_path
+from common.core_functional import get_core_functions
+from common import Langchain_cn
+from common.logger_handle import init_path
 
 functional = get_core_functions()
 
@@ -19,8 +19,8 @@ gr.Chatbot._postprocess_chat_messages = postprocess_chat_messages
 gr.Chatbot.postprocess = postprocess
 
 # 代理与自动更新
-from comm_tools.check_proxy import check_proxy, auto_update
-from comm_tools import func_box
+from common.check_proxy import check_proxy, auto_update
+from common import func_box
 from webui_elem import func_signals, webui_local
 
 os.makedirs("gpt_log", exist_ok=True)
@@ -138,7 +138,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                                  outputs=[self.pro_func_prompt, self.pro_fp_state])
 
     def signals_plugin(self):
-        from comm_tools.crazy_functional import crazy_fns_role, crazy_fns
+        from common.crazy_functional import crazy_fns_role, crazy_fns
         fn_btn_dict = {crazy_fns_role[role][k]['Button']: {role: k} for role in crazy_fns_role for k in
                        crazy_fns_role[role] if crazy_fns_role[role][k].get('Button')}
 
@@ -438,7 +438,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         #     favicon_path='./docs/wps_logo.png')
 
 
-from comm_tools import base_api
+from common import base_api
 
 app = base_api.app
 PORT = WEB_PORT if WEB_PORT <= 0 else WEB_PORT
@@ -449,7 +449,7 @@ gradio_app = gr.mount_gradio_app(app, chatbot_main.demo, '/spike', )
 
 if __name__ == '__main__':
     import uvicorn
-    from comm_tools.logger_handle import loggers, Loggers
+    from common.logger_handle import loggers, Loggers
     app_reload = get_conf('app_reload')
     config = uvicorn.Config("__main__:app", host="0.0.0.0", port=PORT, reload=app_reload)
     server = uvicorn.Server(config)

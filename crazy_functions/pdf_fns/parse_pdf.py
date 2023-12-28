@@ -1,10 +1,10 @@
 from functools import lru_cache
-from comm_tools.toolbox import gen_time_str
-from comm_tools.toolbox import promote_file_to_downloadzone
-from comm_tools.toolbox import write_history_to_file, promote_file_to_downloadzone
-from comm_tools.toolbox import get_conf
-from comm_tools.toolbox import ProxyNetworkActivate
-from comm_tools.colorful import *
+from common.toolbox import gen_time_str
+from common.toolbox import promote_file_to_downloadzone
+from common.toolbox import write_history_to_file, promote_file_to_downloadzone
+from common.toolbox import get_conf
+from common.toolbox import ProxyNetworkActivate
+from common.colorful import *
 import requests
 import random
 import copy

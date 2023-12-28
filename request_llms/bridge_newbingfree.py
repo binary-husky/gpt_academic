@@ -19,7 +19,7 @@ import logging
 import asyncio
 import importlib
 import threading
-from comm_tools.toolbox import update_ui, get_conf, trimmed_format_exc
+from common.toolbox import update_ui, get_conf, trimmed_format_exc
 from multiprocessing import Process, Pipe
 
 def preprocess_newbing_out(s):
@@ -224,7 +224,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             return
 
     if additional_fn is not None:
-        from comm_tools.core_functional import handle_core_functionality
+        from common.core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
     history_feedin = []

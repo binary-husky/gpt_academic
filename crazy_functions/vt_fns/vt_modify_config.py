@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import List
-from comm_tools.toolbox import update_ui_lastest_msg, get_conf
+from common.toolbox import update_ui_lastest_msg, get_conf
 from request_llms.bridge_all import predict_no_ui_long_connection
 from crazy_functions.json_fns.pydantic_io import GptJsonIO
 import copy, json, pickle, os, sys
@@ -58,7 +58,7 @@ def modify_configuration_hot(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         )
 
         # ⭐ ⭐ ⭐ 立即应用配置
-        from comm_tools.toolbox import set_conf
+        from common.toolbox import set_conf
         set_conf(explicit_conf, user_intention.new_option_value)
 
         yield from update_ui_lastest_msg(

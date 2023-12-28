@@ -1,8 +1,8 @@
 import markdown
 import importlib
 import inspect
-from comm_tools import func_box
-from comm_tools import history_processor
+from common import func_box
+from common import history_processor
 import base64
 import gradio as gr
 import math
@@ -14,7 +14,7 @@ import time
 import glob
 import sys
 import threading
-from comm_tools.path_handle import init_path
+from common.path_handle import init_path
 
 ############################### 插件输入输出接驳区 #######################################
 pj = os.path.join
@@ -71,7 +71,7 @@ def ArgsGeneralWrapper(f):
                   history, system_prompt, models, plugin_advanced_arg, ipaddr: gr.Request, *args):
         """"""
         # 引入一个有cookie的chatbot
-        from comm_tools import Langchain_cn
+        from common import Langchain_cn
         start_time = time.time()
         real_llm = {
             'top_p': top_p, 'temperature': temperature, 'n_choices': n_choices, 'stop': stop_sequence,
@@ -139,7 +139,7 @@ def func_decision_tree(func, cookies, single_turn, use_websearch,
             plugin = user_data['chat'][-1].get('plugin')
             if plugin:
                 txt_passon = plugin['input']
-                from comm_tools.crazy_functional import crazy_fns
+                from common.crazy_functional import crazy_fns
                 func_name = plugin['func_name']
                 plugin_kwargs.update(plugin['kwargs'])
                 cookies['is_plugin'] = {'func_name': func_name, 'input': txt_passon, 'kwargs': plugin_kwargs}
@@ -151,7 +151,7 @@ def func_decision_tree(func, cookies, single_turn, use_websearch,
             yield from try_f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
         else:
             if use_websearch:
-                from comm_tools.crazy_functional import crazy_fns
+                from common.crazy_functional import crazy_fns
                 plugin_agent = crazy_fns['插件代理助手']['Function']
                 func = plugin_agent
             if single_turn:
@@ -229,7 +229,7 @@ def CatchException(f):
         try:
             yield from f(main_input, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, args, kwargs)
         except Exception as e:
-            from comm_tools.check_proxy import check_proxy
+            from common.check_proxy import check_proxy
             proxies = get_conf('proxies')
             tb_str = '```error\n' + trimmed_format_exc() + '```'
             if len(chatbot_with_cookie) == 0:
@@ -1010,7 +1010,7 @@ def read_env_variable(arg, default_value):
         set GPT_ACADEMIC_AVAIL_LLM_MODELS=["gpt-3.5-turbo", "chatglm"]
         set GPT_ACADEMIC_AUTHENTICATION=[("username", "password"), ("username2", "password2")]
     """
-    from comm_tools.colorful import print亮红, print亮绿
+    from common.colorful import print亮红, print亮绿
     sys.path.append(init_path.base_path)
     arg_with_prefix = "GPT_ACADEMIC_" + arg
     if arg_with_prefix in os.environ:
@@ -1056,7 +1056,7 @@ def read_env_variable(arg, default_value):
 
 @lru_cache(maxsize=128)
 def read_single_conf_with_lru_cache(arg):
-    from comm_tools.colorful import print亮红, print亮绿, print亮蓝
+    from common.colorful import print亮红, print亮绿, print亮蓝
     # 将上一层目录添加到Python的搜索路径中
     if init_path.base_path not in sys.path:
         sys.path.append(init_path.base_path)

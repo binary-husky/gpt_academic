@@ -11,11 +11,11 @@ import requests
 import urllib.parse
 
 from bs4 import BeautifulSoup
-from comm_tools import toolbox, func_box
+from common import toolbox, func_box
 from crazy_functions.kingsoft_fns import crazy_box
 from crazy_functions import crazy_utils
-from comm_tools import ocr_tools
-from comm_tools.path_handle import init_path
+from common import ocr_tools
+from common.path_handle import init_path
 
 
 class Kdocs:

@@ -5,10 +5,10 @@
 # @Descr   :
 import os.path
 import gradio as gr
-from comm_tools import func_box, ocr_tools, Langchain_cn
-from comm_tools.path_handle import init_path
+from common import func_box, ocr_tools, Langchain_cn
+from common.path_handle import init_path
 from crazy_functions.kingsoft_fns import crazy_box, crzay_kingsoft, crzay_qqdocs
-from comm_tools.toolbox import update_ui, CatchException, trimmed_format_exc, get_conf
+from common.toolbox import update_ui, CatchException, trimmed_format_exc, get_conf
 
 
 def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, history, file_types):

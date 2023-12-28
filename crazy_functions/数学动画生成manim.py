@@ -1,4 +1,4 @@
-from comm_tools.toolbox import CatchException, update_ui, gen_time_str
+from common.toolbox import CatchException, update_ui, gen_time_str
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import input_clipping
 

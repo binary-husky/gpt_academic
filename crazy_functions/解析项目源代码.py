@@ -1,5 +1,5 @@
-from comm_tools.toolbox import update_ui, promote_file_to_downloadzone, disable_auto_promotion
-from comm_tools.toolbox import CatchException, report_exception, write_history_to_file
+from common.toolbox import update_ui, promote_file_to_downloadzone, disable_auto_promotion
+from common.toolbox import CatchException, report_exception, write_history_to_file
 
 from .crazy_utils import input_clipping
 

@@ -3,9 +3,9 @@
 # @Time   : 2023/7/23
 # @Author : Spike
 # @Descr   :
-from comm_tools import toolbox
-from comm_tools import func_box, ocr_tools
-from comm_tools.path_handle import init_path
+from common import toolbox
+from common import func_box, ocr_tools
+from common.path_handle import init_path
 from crazy_functions.kingsoft_fns import crazy_box, crzay_kingsoft
 import os
 

@@ -1,7 +1,7 @@
 
 import time
-from comm_tools.toolbox import update_ui, get_conf, update_ui_lastest_msg
-from comm_tools.toolbox import check_packages, report_exception
+from common.toolbox import update_ui, get_conf, update_ui_lastest_msg
+from common.toolbox import check_packages, report_exception
 
 model_name = '智谱AI大模型'
 
@@ -51,7 +51,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         return
 
     if additional_fn is not None:
-        from comm_tools.core_functional import handle_core_functionality
+        from common.core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
     # 开始接收回复    

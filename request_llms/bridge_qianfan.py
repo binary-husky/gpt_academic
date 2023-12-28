@@ -3,7 +3,7 @@ import time, requests, json
 from multiprocessing import Process, Pipe
 from functools import wraps
 from datetime import datetime, timedelta
-from comm_tools.toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history, trimmed_format_exc, get_conf
+from common.toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history, trimmed_format_exc, get_conf
 
 model_name = '千帆大模型平台'
 timeout_bot_msg = '[Local Message] Request timeout. Network error.'
@@ -140,7 +140,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     chatbot.append((inputs, ""))
 
     if additional_fn is not None:
-        from comm_tools.core_functional import handle_core_functionality
+        from common.core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
     yield from update_ui(chatbot=chatbot, history=history)

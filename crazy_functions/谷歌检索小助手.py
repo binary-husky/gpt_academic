@@ -1,6 +1,6 @@
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-from comm_tools.toolbox import CatchException, report_exception, promote_file_to_downloadzone
-from comm_tools.toolbox import update_ui, update_ui_lastest_msg, disable_auto_promotion, write_history_to_file
+from common.toolbox import CatchException, report_exception, promote_file_to_downloadzone
+from common.toolbox import update_ui, update_ui_lastest_msg, disable_auto_promotion, write_history_to_file
 import logging
 import requests
 import time
@@ -14,7 +14,7 @@ def get_meta_information(url, chatbot, history):
     import difflib
     import re
     from bs4 import BeautifulSoup
-    from comm_tools.toolbox import get_conf
+    from common.toolbox import get_conf
     from urllib.parse import urlparse
     session = requests.session()
 

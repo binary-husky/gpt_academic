@@ -1,6 +1,6 @@
 import time
 import threading
-from comm_tools.toolbox import update_ui, Singleton, trimmed_format_exc, trimmed_format_exc
+from common.toolbox import update_ui, Singleton, trimmed_format_exc, trimmed_format_exc
 from multiprocessing import Process, Pipe
 from contextlib import redirect_stdout
 from request_llms.queued_pipe import create_queue_pipe
@@ -271,7 +271,7 @@ def get_local_llm_predict_fns(LLMSingletonClass, model_name, history_format='cla
             raise RuntimeError(_llm_handle.get_state())
 
         if additional_fn is not None:
-            from comm_tools.core_functional import handle_core_functionality
+            from common.core_functional import handle_core_functionality
             inputs, history = handle_core_functionality(
                 additional_fn, inputs, history, chatbot)
 

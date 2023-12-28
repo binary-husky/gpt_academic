@@ -1,5 +1,5 @@
-from comm_tools.toolbox import update_ui
-from comm_tools.toolbox import CatchException, report_exception
+from common.toolbox import update_ui
+from common.toolbox import CatchException, report_exception
 
 from .crazy_utils import read_and_clean_pdf_text
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive

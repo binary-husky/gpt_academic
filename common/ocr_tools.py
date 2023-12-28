@@ -5,10 +5,10 @@
 # @Descr   :
 import os.path
 import requests
-from comm_tools import func_box
+from common import func_box
 import concurrent.futures
-from comm_tools import database_processor
-from comm_tools.path_handle import init_path
+from common import database_processor
+from common.path_handle import init_path
 # Paddleocr目前支持的多语言语种可以通过修改lang参数进行切换
 # 例如`ch`, `en`, `fr`, `german`, `korean`, `japan`
 

@@ -8,11 +8,11 @@ import copy
 import gradio as gr
 
 import yaml
-from comm_tools import toolbox
-from comm_tools.database_processor import SqliteHandle
-from comm_tools import func_box
-from comm_tools import history_processor
-from comm_tools.path_handle import init_path
+from common import toolbox
+from common.database_processor import SqliteHandle
+from common import func_box
+from common import history_processor
+from common.path_handle import init_path
 
 # 处理latex options
 latex_delimiters_dict = {
