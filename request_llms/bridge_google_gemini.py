@@ -3,7 +3,7 @@
 # @Time   : 2023/12/21
 # @Author : Spike
 # @Descr   :
-
+import json
 import re
 import time
 from request_llms.com_google import GoogleChatInit
@@ -25,7 +25,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
         match = re.search(r'\"text\":\s*\"(.*?)\"', results)
         error_match = re.search(r'\"message\":\s*\"(.*?)\"', results)
         if match:
-            match_str = match.group(1).replace(r'\\', '\\')
+            match_str = json.loads('{"text": "%s"}' % match.group(1))
             if len(observe_window) >= 1:
                 observe_window[0] = match_str
             if len(observe_window) >= 2:
@@ -54,11 +54,12 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     gpt_replying_buffer = ""
     history.extend([inputs, ''])
     for response in stream_response:
-        results = response.decode()
-        match = re.search(r'\"text\":\s*\"(.*?)\"', results)
-        error_match = re.search(r'\"message\":\s*\"(.*?)\"', results)
+        results = response.decode("utf-8")    # 被这个解码给耍了。。
+        match = re.search(r'\"text\":\s*\"(.*)\"', results, flags=re.DOTALL)
+        error_match = re.search(r'\"message\":\s*\"(.*)\"', results, flags=re.DOTALL)
         if match:
-            gpt_replying_buffer += match.group(1).replace('\\n', '\n')  # 不知道为什么Gemini会返回双斜杠捏
+            paraphrase = json.loads('{"text": "%s"}' % match.group(1))
+            gpt_replying_buffer += paraphrase['text']    # 使用 json 解析库进行处理
             chatbot[-1] = (inputs, gpt_replying_buffer)
             history[-1] = gpt_replying_buffer
             yield from update_ui(chatbot=chatbot, history=history)
