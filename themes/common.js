@@ -486,6 +486,58 @@ function audio_fn_init() {
 function minor_ui_adjustment() {
     let cbsc_area = document.getElementById('cbsc');
     cbsc_area.style.paddingTop = '15px';
+    var bar_btn_width = [];
+    // 自动隐藏超出范围的toolbar按钮
+    function auto_hide_toolbar() {
+        var qq = document.getElementById('tooltip');
+        var tab_nav = qq.getElementsByClassName('tab-nav');
+        if (tab_nav.length == 0){ return; }
+        var btn_list = tab_nav[0].getElementsByTagName('button')
+        if (btn_list.length == 0){ return; }
+        // 获取页面宽度
+        var page_width = document.documentElement.clientWidth;
+        // 总是保留的按钮数量
+        const always_preserve = 2;
+        // 获取最后一个按钮的右侧位置
+        var cur_right = btn_list[always_preserve-1].getBoundingClientRect().right;
+        if (bar_btn_width.length == 0){
+            // 首次运行，记录每个按钮的宽度
+            for (var i = 0; i < btn_list.length; i++) { 
+                bar_btn_width.push(btn_list[i].getBoundingClientRect().width);
+            }
+        }
+        // 处理每一个按钮
+        for (var i = always_preserve; i < btn_list.length; i++) {
+            var element = btn_list[i];
+            var element_right = element.getBoundingClientRect().right;
+            if (element_right!=0){ cur_right = element_right; }
+            if (element.style.display === 'none') {
+                if ((cur_right + bar_btn_width[i]) < (page_width * 0.37)) {
+                    // 恢复显示当前按钮
+                    element.style.display = 'block';
+                    console.log('show');
+                    return;
+                }else{
+                    return;
+                }
+            } else {
+                if (cur_right > (page_width * 0.38)) {
+                    // 隐藏当前按钮以及右侧所有按钮
+                    for (var j = i; j < btn_list.length; j++) {
+                        if (btn_list[j].style.display !== 'none') {
+                            btn_list[j].style.display = 'none';
+                        }
+                    }
+                    console.log('show');
+                    return;
+                }
+            }
+        }
+    }
+
+    setInterval(function () {
+        auto_hide_toolbar()
+    }, 200); // 每50毫秒执行一次
 }
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
