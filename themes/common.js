@@ -483,8 +483,10 @@ function audio_fn_init() {
     }
 }
 
-
-
+function minor_ui_adjustment() {
+    let cbsc_area = document.getElementById('cbsc');
+    cbsc_area.style.paddingTop = '15px';
+}
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //  第 6 部分: JS初始化函数
@@ -492,6 +494,7 @@ function audio_fn_init() {
 
 function GptAcademicJavaScriptInit(LAYOUT = "LEFT-RIGHT") {
     audio_fn_init();
+    minor_ui_adjustment();
     chatbotIndicator = gradioApp().querySelector('#gpt-chatbot > div.wrap');
     var chatbotObserver = new MutationObserver(() => {
         chatbotContentChanged(1);

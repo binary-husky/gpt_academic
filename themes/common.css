@@ -94,6 +94,10 @@
     background-color: var(--block-background-fill) !important;
 }
 
+#cbsc {
+    background-color: var(--block-background-fill) !important;
+}
+
 #interact-panel .form {
     border: hidden
 }

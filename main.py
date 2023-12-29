@@ -161,10 +161,9 @@ def main():
                     checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区", "浮动输入区", "输入清除键", "插件参数区"], 
                                                   value=["基础功能区", "函数插件区"], label="显示/隐藏功能区", elem_id='cbs').style(container=False)
                     checkboxes_2 = gr.CheckboxGroup(["自定义菜单"], 
-                                                  value=[], label="显示/隐藏自定义菜单", elem_id='cbs').style(container=False)
+                                                  value=[], label="显示/隐藏自定义菜单", elem_id='cbsc').style(container=False)
                     dark_mode_btn = gr.Button("切换界面明暗 ☀", variant="secondary").style(size="sm")
-                    dark_mode_btn.click(None, None, None, _js=js_code_for_toggle_darkmode,
-                    )
+                    dark_mode_btn.click(None, None, None, _js=js_code_for_toggle_darkmode)
                 with gr.Tab("帮助", elem_id="interact-panel"):
                     gr.Markdown(help_menu_description)
 
