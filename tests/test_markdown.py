@@ -29,16 +29,20 @@ md = """
 请随时告诉我您的需求，我会尽力提供帮助。如果您有任何问题或需要解答的议题，请随时提问。
 """
 
+
 def validate_path():
     import os, sys
-    dir_name = os.path.dirname(__file__)
-    root_dir_assume = os.path.abspath(os.path.dirname(__file__) +  '/..')
+
+    os.path.dirname(__file__)
+    root_dir_assume = os.path.abspath(os.path.dirname(__file__) + "/..")
     os.chdir(root_dir_assume)
     sys.path.append(root_dir_assume)
-validate_path() # validate path so you can run from base directory
+
+
+validate_path()  # validate path so you can run from base directory
 from toolbox import markdown_convertion
 
 html = markdown_convertion(md)
 print(html)
-with open('test.html', 'w', encoding='utf-8') as f:
+with open("test.html", "w", encoding="utf-8") as f:
     f.write(html)
