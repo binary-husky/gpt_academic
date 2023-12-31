@@ -2,7 +2,7 @@
 > 
 > 2023.11.12: 某些依赖包尚不兼容python 3.12，推荐python 3.11。
 > 
-> 2023.11.7: 安装依赖时，请选择`requirements.txt`中**指定的版本**。 安装命令：`pip install -r requirements.txt`。本项目开源免费，请提高警惕，谨防上当受骗。
+> 2023.12.26: 安装依赖时，请选择`requirements.txt`中**指定的版本**。 安装命令：`pip install -r requirements.txt`。本项目完全开源免费，您可通过订阅[在线服务](https://github.com/binary-husky/gpt_academic/wiki/online)的方式鼓励本项目的发展。
 
 <br>
 
