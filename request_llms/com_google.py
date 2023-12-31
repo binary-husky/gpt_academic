@@ -7,7 +7,7 @@ import os
 import re
 import requests
 from typing import List, Dict, Tuple
-from toolbox import get_conf, encode_image
+from toolbox import get_conf, encode_image, get_pictures_list
 
 proxies, TIMEOUT_SECONDS = get_conf('proxies', 'TIMEOUT_SECONDS')
 
@@ -35,20 +35,15 @@ def files_filter_handler(file_list):
     return new_list
 
 
-def input_encode_handler(inputs):
+def input_encode_handler(inputs, llm_kwargs):
+    if llm_kwargs['most_recent_uploaded'].get('path'):
+        image_paths = get_pictures_list(llm_kwargs['most_recent_uploaded']['path'])
     md_encode = []
-    pattern_md_file = r"(!?\[[^\]]+\]\([^\)]+\))"
-    matches_path = re.findall(pattern_md_file, inputs)
-    for md_path in matches_path:
-        pattern_file = r"\((file=.*)\)"
-        matches_path = re.findall(pattern_file, md_path)
-        encode_file = files_filter_handler(file_list=matches_path)
-        if encode_file:
-            md_encode.extend([{
-                "data": encode_image(i),
-                "type": os.path.splitext(i)[1].replace('.', '')
-            } for i in encode_file])
-            inputs = inputs.replace(md_path, '')
+    for md_path in image_paths:
+        md_encode.append({
+            "data": encode_image(md_path),
+            "type": os.path.splitext(md_path)[1].replace('.', '')
+        })
     return inputs, md_encode
 
 
@@ -127,13 +122,19 @@ class GoogleChatInit:
     def __init__(self):
         self.url_gemini = 'https://generativelanguage.googleapis.com/v1beta/models/%m:streamGenerateContent?key=%k'
 
-    def __conversation_user(self, user_input):
+    def generate_chat(self, inputs, llm_kwargs, history, system_prompt):
+        headers, payload = self.generate_message_payload(inputs, llm_kwargs, history, system_prompt)
+        response = requests.post(url=self.url_gemini, headers=headers, data=json.dumps(payload),
+                                 stream=True, proxies=proxies, timeout=TIMEOUT_SECONDS)
+        return response.iter_lines()
+
+    def __conversation_user(self, user_input, llm_kwargs):
         what_i_have_asked = {"role": "user", "parts": []}
         if 'vision' not in self.url_gemini:
             input_ = user_input
             encode_img = []
         else:
-            input_, encode_img = input_encode_handler(user_input)
+            input_, encode_img = input_encode_handler(user_input, llm_kwargs=llm_kwargs)
         what_i_have_asked['parts'].append({'text': input_})
         if encode_img:
             for data in encode_img:
@@ -144,12 +145,12 @@ class GoogleChatInit:
                     }})
         return what_i_have_asked
 
-    def __conversation_history(self, history):
+    def __conversation_history(self, history, llm_kwargs):
         messages = []
         conversation_cnt = len(history) // 2
         if conversation_cnt:
             for index in range(0, 2 * conversation_cnt, 2):
-                what_i_have_asked = self.__conversation_user(history[index])
+                what_i_have_asked = self.__conversation_user(history[index], llm_kwargs)
                 what_gpt_answer = {
                     "role": "model",
                     "parts": [{"text": history[index + 1]}]
@@ -157,12 +158,6 @@ class GoogleChatInit:
                 messages.append(what_i_have_asked)
                 messages.append(what_gpt_answer)
         return messages
-
-    def generate_chat(self, inputs, llm_kwargs, history, system_prompt):
-        headers, payload = self.generate_message_payload(inputs, llm_kwargs, history, system_prompt)
-        response = requests.post(url=self.url_gemini, headers=headers, data=json.dumps(payload),
-                                 stream=True, proxies=proxies, timeout=TIMEOUT_SECONDS)
-        return response.iter_lines()
 
     def generate_message_payload(self, inputs, llm_kwargs, history, system_prompt) -> Tuple[Dict, Dict]:
         messages = [
@@ -176,14 +171,14 @@ class GoogleChatInit:
         )
         header = {'Content-Type': 'application/json'}
         if 'vision' not in self.url_gemini:  # 不是vision 才处理history
-            messages.extend(self.__conversation_history(history))  # 处理 history
-        messages.append(self.__conversation_user(inputs))  # 处理用户对话
+            messages.extend(self.__conversation_history(history, llm_kwargs))  # 处理 history
+        messages.append(self.__conversation_user(inputs, llm_kwargs))  # 处理用户对话
         payload = {
             "contents": messages,
             "generationConfig": {
+                # "maxOutputTokens": 800,
                 "stopSequences": str(llm_kwargs.get('stop', '')).split(' '),
                 "temperature": llm_kwargs.get('temperature', 1),
-                # "maxOutputTokens": 800,
                 "topP": llm_kwargs.get('top_p', 0.8),
                 "topK": 10
             }
@@ -193,6 +188,5 @@ class GoogleChatInit:
 
 if __name__ == '__main__':
     google = GoogleChatInit()
-    # print(gootle.generate_message_payload('你好呀', {},
-    #                                                 ['123123', '3123123'], ''))
+    # print(gootle.generate_message_payload('你好呀', {},  ['123123', '3123123'], ''))
     # gootle.input_encode_handle('123123[123123](./123123), ![53425](./asfafa/fff.jpg)')

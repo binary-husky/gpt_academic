@@ -4,9 +4,10 @@
 # @Descr   :
 import json
 import re
+import os
 import time
 from request_llms.com_google import GoogleChatInit
-from toolbox import get_conf, update_ui, update_ui_lastest_msg
+from toolbox import get_conf, update_ui, update_ui_lastest_msg, have_any_recent_upload_image_files, trimmed_format_exc
 
 proxies, TIMEOUT_SECONDS, MAX_RETRY = get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY')
 timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check proxy settings in config.py.' + \
@@ -48,7 +49,16 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     if get_conf("GEMINI_API_KEY") == "":
         yield from update_ui_lastest_msg(f"请配置 GEMINI_API_KEY。", chatbot=chatbot, history=history, delay=0)
         return
-    
+
+    if "vision" in llm_kwargs["llm_model"]:
+        have_recent_file, image_paths = have_any_recent_upload_image_files(chatbot)
+        def make_media_input(inputs, image_paths): 
+            for image_path in image_paths:
+                inputs = inputs + f'<br/><br/><div align="center"><img src="file={os.path.abspath(image_path)}"></div>'
+            return inputs
+        if have_recent_file:
+            inputs = make_media_input(inputs, image_paths)
+
     chatbot.append((inputs, ""))
     yield from update_ui(chatbot=chatbot, history=history)
     genai = GoogleChatInit()
@@ -59,10 +69,9 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             break
         except Exception as e:
             retry += 1
-            chatbot[-1] = ((chatbot[-1][0], timeout_bot_msg))
-            retry_msg = f"，正在重试 ({retry}/{MAX_RETRY}) ……" if MAX_RETRY > 0 else ""
-            yield from update_ui(chatbot=chatbot, history=history, msg="请求超时" + retry_msg)  # 刷新界面
-            if retry > MAX_RETRY: raise TimeoutError
+            chatbot[-1] = ((chatbot[-1][0], trimmed_format_exc()))
+            yield from update_ui(chatbot=chatbot, history=history, msg="请求失败")  # 刷新界面
+            return
     gpt_replying_buffer = ""
     gpt_security_policy = ""
     history.extend([inputs, ''])
@@ -94,7 +103,6 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
 
 if __name__ == '__main__':
     import sys
-
     llm_kwargs = {'llm_model': 'gemini-pro'}
     result = predict('Write long a story about a magic backpack.', llm_kwargs, llm_kwargs, [])
     for i in result:
