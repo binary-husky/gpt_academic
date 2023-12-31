@@ -203,6 +203,7 @@ ANTHROPIC_API_KEY = ""
 # 自定义API KEY格式
 CUSTOM_API_KEY_PATTERN = ""
 
+
 # Google Gemini API-Key
 GEMINI_API_KEY = ''
 
@@ -294,6 +295,9 @@ NUM_CUSTOM_BASIC_BTN = 4
 │
 ├── "qwen-turbo" 等通义千问大模型
 │   └──  DASHSCOPE_API_KEY
+│
+├── "Gemini"
+│   └──  GEMINI_API_KEY
 │
 └── "newbing" Newbing接口不再稳定，不推荐使用
     ├── NEWBING_STYLE

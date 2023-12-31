@@ -61,7 +61,9 @@ def ArgsGeneralWrapper(f):
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
 
-    def decorated(request: gradio.Request, cookies, max_length, llm_model, txt, txt2, top_p, temperature, chatbot,
+    def decorated(request: gradio.Request,
+                  cookies, max_length, llm_model,
+                  txt, txt2, top_p, temperature, chatbot,
                   history, system_prompt, plugin_advanced_arg, *args):
         txt_passon = txt
         if txt == "" and txt2 != "": txt_passon = txt2
@@ -95,16 +97,14 @@ def ArgsGeneralWrapper(f):
         if cookies.get('lock_plugin', None) is None:
             # 正常状态
             if len(args) == 0:  # 插件通道
-                yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt,
-                             request)
-            else:  # 对话通道，或者基础功能通道
+                yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, request)
+            else:               # 对话通道，或者基础功能通道
                 yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
         else:
             # 处理少数情况下的特殊插件的锁定状态
             module, fn_name = cookies['lock_plugin'].split('->')
             f_hot_reload = getattr(importlib.import_module(module, fn_name), fn_name)
-            yield from f_hot_reload(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt,
-                                    request)
+            yield from f_hot_reload(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, request)
             # 判断一下用户是否错误地通过对话通道进入，如果是，则进行提醒
             final_cookies = chatbot_with_cookie.get_cookies()
             # len(args) != 0 代表“提交”键对话通道，或者基础功能通道
@@ -128,10 +128,10 @@ def update_ui(chatbot, history, msg='正常', **kwargs):  # 刷新界面
     if cookies.get('lock_plugin', None):
         label = cookies.get('llm_model', "") + " | " + "正在锁定插件" + cookies.get('lock_plugin', None)
         chatbot_gr = gradio.update(value=chatbot, label=label)
-        if cookies.get('label', "") != label: cookies['label'] = label  # 记住当前的label
+        if cookies.get('label', "") != label: cookies['label'] = label   # 记住当前的label
     elif cookies.get('label', None):
         chatbot_gr = gradio.update(value=chatbot, label=cookies.get('llm_model', ""))
-        cookies['label'] = None  # 清空label
+        cookies['label'] = None    # 清空label
     else:
         chatbot_gr = chatbot
 

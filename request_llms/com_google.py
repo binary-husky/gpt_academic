@@ -1,9 +1,7 @@
-#! .\venv\
 # encoding: utf-8
 # @Time   : 2023/12/25
 # @Author : Spike
 # @Descr   :
-import os.path
 import re
 import json
 import requests
@@ -11,7 +9,6 @@ from typing import List, Dict, Tuple
 from toolbox import get_conf, input_encode_handler
 
 proxies, TIMEOUT_SECONDS = get_conf('proxies', 'TIMEOUT_SECONDS')
-
 
 class GoogleChatInit:
 

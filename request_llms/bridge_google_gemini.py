@@ -1,4 +1,3 @@
-#! .\venv\
 # encoding: utf-8
 # @Time   : 2023/12/21
 # @Author : Spike
@@ -7,7 +6,7 @@ import json
 import re
 import time
 from request_llms.com_google import GoogleChatInit
-from toolbox import get_conf, update_ui
+from toolbox import get_conf, update_ui, update_ui_lastest_msg
 
 proxies, TIMEOUT_SECONDS, MAX_RETRY = get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY')
 timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check proxy settings in config.py.' + \
@@ -16,27 +15,40 @@ timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check 
 
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=None,
                                   console_slience=False):
+    # 检查API_KEY
+    if get_conf("GEMINI_API_KEY") == "":
+        raise ValueError(f"请配置 GEMINI_API_KEY。")
+    
     genai = GoogleChatInit()
     watch_dog_patience = 5  # 看门狗的耐心, 设置5秒即可
     gpt_replying_buffer = ''
     stream_response = genai.generate_chat(inputs, llm_kwargs, history, sys_prompt)
     for response in stream_response:
         results = response.decode()
-        match = re.search(r'\"text\":\s*\"(.*?)\"', results)
-        error_match = re.search(r'\"message\":\s*\"(.*?)\"', results)
+        match = re.search(r'"text":\s*"((?:[^"\\]|\\.)*)"', results, flags=re.DOTALL)
+        error_match = re.search(r'\"message\":\s*\"(.*?)\"', results, flags=re.DOTALL)
         if match:
-            match_str = json.loads('{"text": "%s"}' % match.group(1))
+            try:
+                paraphrase = json.loads('{"text": "%s"}' % match.group(1))
+            except:
+                raise ValueError(f"解析GEMINI消息出错。")
+            buffer = paraphrase['text']
+            gpt_replying_buffer += buffer
             if len(observe_window) >= 1:
-                observe_window[0] = match_str
+                observe_window[0] = gpt_replying_buffer
             if len(observe_window) >= 2:
                 if (time.time() - observe_window[1]) > watch_dog_patience: raise RuntimeError("程序终止。")
-            gpt_replying_buffer += match_str  # 不知道为什么Gemini会返回双斜杠捏
         if error_match:
-            raise f'{gpt_replying_buffer} 对话错误'
+            raise RuntimeError(f'{gpt_replying_buffer} 对话错误')
     return gpt_replying_buffer
 
 
 def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream=True, additional_fn=None):
+    # 检查API_KEY
+    if get_conf("GEMINI_API_KEY") == "":
+        yield from update_ui_lastest_msg(f"请配置 GEMINI_API_KEY。", chatbot=chatbot, history=history, delay=0)
+        return
+    
     chatbot.append((inputs, ""))
     yield from update_ui(chatbot=chatbot, history=history)
     genai = GoogleChatInit()
@@ -57,10 +69,13 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     for response in stream_response:
         results = response.decode("utf-8")    # 被这个解码给耍了。。
         gpt_security_policy += results
-        match = re.search(r'\"text\":\s*\"(.*)\"', results, flags=re.DOTALL)
+        match = re.search(r'"text":\s*"((?:[^"\\]|\\.)*)"', results, flags=re.DOTALL)
         error_match = re.search(r'\"message\":\s*\"(.*)\"', results, flags=re.DOTALL)
         if match:
-            paraphrase = json.loads('{"text": "%s"}' % match.group(1))
+            try:
+                paraphrase = json.loads('{"text": "%s"}' % match.group(1))
+            except:
+                raise ValueError(f"解析GEMINI消息出错。")
             gpt_replying_buffer += paraphrase['text']    # 使用 json 解析库进行处理
             chatbot[-1] = (inputs, gpt_replying_buffer)
             history[-1] = gpt_replying_buffer
@@ -69,7 +84,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             history = history[-2]  # 错误的不纳入对话
             chatbot[-1] = (inputs, gpt_replying_buffer + f"对话错误，请查看message\n\n```\n{error_match.group(1)}\n```")
             yield from update_ui(chatbot=chatbot, history=history)
-            raise '对话错误'
+            raise RuntimeError('对话错误')
     if not gpt_replying_buffer:
         history = history[-2]  # 错误的不纳入对话
         chatbot[-1] = (inputs, gpt_replying_buffer + f"触发了Google的安全访问策略，没有回答\n\n```\n{gpt_security_policy}\n```")
