@@ -332,8 +332,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         self.cancel_handles.append(click_handle)
         self.emptyBtn.click(func_signals.clear_chat_cookie, [self.model_select_dropdown],
                             [*self.llms_cookies_combo, self.status_display,
-                             self.historySelectList, self.saveFileName]
-                            )
+                             self.historySelectList, self.saveFileName])
         self.changeSingleSessionBtn.click(
             fn=lambda value: gr.Checkbox.update(value=value), inputs=[self.single_turn_checkbox],
             outputs=[self.single_turn_checkbox], _js='(a)=>{return bgChangeSingleSession(a);}'

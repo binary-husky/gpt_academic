@@ -22,15 +22,17 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     stream_response = genai.generate_chat(inputs, llm_kwargs, history, sys_prompt)
     for response in stream_response:
         results = response.decode()
-        match = re.search(r'\"text\":\s*\"(.*?)\"', results)
+        match = re.search(r'"text":\s*"((?:[^"\\]|\\.)*)"', results, flags=re.DOTALL)
         error_match = re.search(r'\"message\":\s*\"(.*?)\"', results)
         if match:
-            match_str = json.loads('{"text": "%s"}' % match.group(1))
-            if len(observe_window) >= 1:
-                observe_window[0] = match_str
-            if len(observe_window) >= 2:
-                if (time.time() - observe_window[1]) > watch_dog_patience: raise RuntimeError("程序终止。")
-            gpt_replying_buffer += match_str  # 不知道为什么Gemini会返回双斜杠捏
+            if match.group(1):
+                match_str = json.loads('{"text": "%s"}' % match.group(1))
+                if len(observe_window) >= 1:
+                    observe_window[0] = match_str['text']
+                if len(observe_window) >= 2:
+                    if (time.time() - observe_window[1]) > watch_dog_patience:
+                        raise RuntimeError("程序终止。")
+                gpt_replying_buffer += match_str['text']
         if error_match:
             raise f'{gpt_replying_buffer} 对话错误'
     return gpt_replying_buffer
@@ -50,14 +52,15 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             chatbot[-1] = ((chatbot[-1][0], timeout_bot_msg))
             retry_msg = f"，正在重试 ({retry}/{MAX_RETRY}) ……" if MAX_RETRY > 0 else ""
             yield from update_ui(chatbot=chatbot, history=history, msg="请求超时" + retry_msg)  # 刷新界面
-            if retry > MAX_RETRY: raise TimeoutError
+            if retry > MAX_RETRY:
+                return
     gpt_replying_buffer = ""
     gpt_security_policy = ""
     history.extend([inputs, ''])
     for response in stream_response:
         results = response.decode("utf-8")    # 被这个解码给耍了。。
         gpt_security_policy += results
-        match = re.search(r'\"text\":\s*\"(.*)\"', results, flags=re.DOTALL)
+        match = re.search(r'"text":\s*"((?:[^"\\]|\\.)*)"', results, flags=re.DOTALL)
         error_match = re.search(r'\"message\":\s*\"(.*)\"', results, flags=re.DOTALL)
         if match:
             paraphrase = json.loads('{"text": "%s"}' % match.group(1))

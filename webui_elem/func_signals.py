@@ -125,7 +125,7 @@ def clear_input(inputs, cookies, ipaddr: gr.Request):
         # 先写入一个空文件占位
         with open(os.path.join(user_path, cookies['first_chat'] + ".json"), mode='w') as f:
             f.write('{}')
-    output = ['', inputs, gr.update(visible=True), gr.update(visible=False),
+    output = [gr.update(value=''), inputs, gr.update(visible=True), gr.update(visible=False),
               gr.Radio.update(choices=only_name, value=cookies['first_chat']), gr.update(value=None)]
     return output
 

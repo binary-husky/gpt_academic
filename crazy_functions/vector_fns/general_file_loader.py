@@ -6,6 +6,7 @@ from langchain.text_splitter import CharacterTextSplitter
 import re
 from typing import List
 
+
 class ChineseTextSplitter(CharacterTextSplitter):
     def __init__(self, pdf: bool = False, sentence_size: int = None, **kwargs):
         super().__init__(**kwargs)
@@ -26,7 +27,7 @@ class ChineseTextSplitter(CharacterTextSplitter):
                 sent_list.append(ele)
         return sent_list
 
-    def split_text(self, text: str) -> List[str]:   ##此处需要进一步优化逻辑
+    def split_text(self, text: str) -> List[str]:  ##此处需要进一步优化逻辑
         if self.pdf:
             text = re.sub(r"\n{3,}", r"\n", text)
             text = re.sub('\s', " ", text)
@@ -61,10 +62,10 @@ class ChineseTextSplitter(CharacterTextSplitter):
                 ls = ls[:id] + [i for i in ele1_ls if i] + ls[id + 1:]
         return ls
 
+
 def load_file(filepath, sentence_size):
     loader = UnstructuredFileLoader(filepath, mode="elements")
     textsplitter = ChineseTextSplitter(pdf=False, sentence_size=sentence_size)
     docs = loader.load_and_split(text_splitter=textsplitter)
     # write_check_file(filepath, docs)
     return docs
-
