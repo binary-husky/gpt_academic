@@ -466,6 +466,9 @@ def read_and_clean_pdf_text(fp):
                     return True
                 else:
                     return False
+            # 对于某些PDF会有第一个段落就以小写字母开头,为了避免索引错误直接返回
+            if starts_with_lowercase_word(meta_txt[0]):
+                return meta_txt
             for _ in range(100):
                 for index, block_txt in enumerate(meta_txt):
                     if starts_with_lowercase_word(block_txt):
