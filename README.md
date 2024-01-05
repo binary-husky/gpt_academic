@@ -227,8 +227,10 @@ P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以
 3. 云服务器远程部署避坑指南。
 请访问[云服务器远程部署wiki](https://github.com/binary-husky/gpt_academic/wiki/%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%BF%9C%E7%A8%8B%E9%83%A8%E7%BD%B2%E6%8C%87%E5%8D%97)
 
-4. 在其他平台部署&二级网址部署
-    - 使用Sealos[一键部署](https://github.com/binary-husky/gpt_academic/issues/993)。
+4. 在 sealos 上一键部署
+   [![](https://raw.githubusercontent.com/labring-actions/templates/main/Deploy-on-Sealos.svg)](https://cloud.sealos.io/?openapp=system-template%3FtemplateName%3Dgpt-academic)
+   
+5. 在其他平台部署&二级网址部署
     - 使用WSL2（Windows Subsystem for Linux 子系统）。请访问[部署wiki-2](https://github.com/binary-husky/gpt_academic/wiki/%E4%BD%BF%E7%94%A8WSL2%EF%BC%88Windows-Subsystem-for-Linux-%E5%AD%90%E7%B3%BB%E7%BB%9F%EF%BC%89%E9%83%A8%E7%BD%B2)
     - 如何在二级网址（如`http://localhost/subpath`）下运行。请访问[FastAPI运行说明](docs/WithFastapi.md)
 
