@@ -1,5 +1,33 @@
+<<<<<<< HEAD
 gradio>=3.23
 requests[socks]
 mdtex2html
 Markdown
 latex2mathml
+=======
+./docs/gradio-3.32.6-py3-none-any.whl
+pypdf2==2.12.1
+tiktoken>=0.3.3
+requests[socks]
+pydantic==1.10.11
+protobuf==3.18
+transformers>=4.27.1
+scipdf_parser>=0.52
+python-markdown-math
+websocket-client
+beautifulsoup4
+prompt_toolkit
+latex2mathml
+python-docx
+mdtex2html
+anthropic
+pyautogen
+colorama
+Markdown
+pygments
+pymupdf
+openai
+arxiv
+numpy
+rich
+>>>>>>> d883c7f34bcbb60b45767fd7eedeba2a703b7f13

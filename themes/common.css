@@ -1,0 +1,118 @@
+/* hide remove all button */
+.remove-all.svelte-aqlk7e.svelte-aqlk7e.svelte-aqlk7e {
+    visibility: hidden;
+}
+
+/* hide selector border */
+#input-plugin-group .wrap.svelte-aqlk7e.svelte-aqlk7e.svelte-aqlk7e {
+    border: 0px;
+    box-shadow: none;
+}
+
+#input-plugin-group .secondary-wrap.svelte-aqlk7e.svelte-aqlk7e.svelte-aqlk7e {
+    border: none;
+    min-width: 0;
+}
+
+/* hide selector label */
+#input-plugin-group .svelte-1gfkn6j {
+    visibility: hidden;
+}
+
+
+/* height of the upload box */
+.wrap.svelte-xwlu1w {
+    min-height: var(--size-32);
+}
+
+/* status bar height */
+.min.svelte-1yrv54 {
+    min-height: var(--size-12);
+}
+
+/* copy btn */
+.message-btn-row {
+    width: 19px;
+    height: 19px;
+    position: absolute;
+    left: calc(100% + 3px);
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+}
+/* .message-btn-row-leading, .message-btn-row-trailing {
+    display: inline-flex;
+    gap: 4px;
+} */
+.message-btn-row button {
+    font-size: 18px;
+    align-self: center;
+    align-items: center;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    display: inline-flex;
+    flex-direction: row;
+    gap: 4px;
+    padding-block: 2px !important;
+}
+
+
+/* Scrollbar Width */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+/* Scrollbar Track */
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 12px;
+}
+
+/* Scrollbar Handle */
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 12px;
+}
+
+/* Scrollbar Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* input btns: clear, reset, stop */
+#input-panel button {
+    min-width: min(80px, 100%);
+}
+
+/* input btns: clear, reset, stop */
+#input-panel2 button {
+    min-width: min(80px, 100%);
+}
+
+
+#cbs {
+    background-color: var(--block-background-fill) !important;
+}
+
+#cbsc {
+    background-color: var(--block-background-fill) !important;
+}
+
+#interact-panel .form {
+    border: hidden
+}
+
+.drag-area {
+    border: solid;
+    border-width: thin;
+    user-select: none;
+    padding-left: 2%;
+}
+
+.floating-component #input-panel2 {
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border: solid;
+    border-width: thin;
+    border-top-width: 0;
+}
