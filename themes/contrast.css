@@ -17,7 +17,7 @@
     --button-primary-text-color-hover: #FFFFFF;
     --button-secondary-text-color: #FFFFFF;
     --button-secondary-text-color-hover: #FFFFFF;
-    
+
 
     --border-bottom-right-radius: 0px;
     --border-bottom-left-radius:  0px;
@@ -51,8 +51,8 @@
     --button-primary-border-color-hover: #3cff00;
     --button-secondary-border-color: #3cff00;
     --button-secondary-border-color-hover: #3cff00;
-    
-    
+
+
     --body-background-fill: #000000;
     --background-fill-primary: #000000;
     --background-fill-secondary: #000000;
@@ -103,7 +103,7 @@
     --button-primary-text-color-hover: #FFFFFF;
     --button-secondary-text-color: #FFFFFF;
     --button-secondary-text-color-hover: #FFFFFF;
-    
+
 
 
     --border-bottom-right-radius: 0px;
@@ -138,8 +138,8 @@
     --button-primary-border-color-hover: #3cff00;
     --button-secondary-border-color: #3cff00;
     --button-secondary-border-color-hover: #3cff00;
-    
-    
+
+
     --body-background-fill: #000000;
     --background-fill-primary: #000000;
     --background-fill-secondary: #000000;
@@ -479,4 +479,3 @@
 .dark .codehilite .vi { color: #89DDFF } /* Name.Variable.Instance */
 .dark .codehilite .vm { color: #82AAFF } /* Name.Variable.Magic */
 .dark .codehilite .il { color: #F78C6C } /* Literal.Number.Integer.Long */
-

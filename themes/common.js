@@ -197,7 +197,7 @@ function swap_input_area() {
     // Swap the elements
     parent.insertBefore(element2, element1);
     parent.insertBefore(element1, nextSibling);
-    if (swapped) {swapped = false;} 
+    if (swapped) {swapped = false;}
     else {swapped = true;}
 }
 
@@ -502,7 +502,7 @@ function minor_ui_adjustment() {
         var cur_right = btn_list[always_preserve-1].getBoundingClientRect().right;
         if (bar_btn_width.length == 0){
             // 首次运行，记录每个按钮的宽度
-            for (var i = 0; i < btn_list.length; i++) { 
+            for (var i = 0; i < btn_list.length; i++) {
                 bar_btn_width.push(btn_list[i].getBoundingClientRect().width);
             }
         }

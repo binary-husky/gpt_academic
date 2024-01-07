@@ -2,9 +2,9 @@
 
 
 > **Nota**
-> 
+>
 > Este README foi traduzido pelo GPT (implementado por um plugin deste projeto) e não é 100% confiável. Por favor, verifique cuidadosamente o resultado da tradução.
-> 
+>
 > 7 de novembro de 2023: Ao instalar as dependências, favor selecionar as **versões especificadas** no `requirements.txt`. Comando de instalação: `pip install -r requirements.txt`.
 
 # <div align=center><img src="logo.png" width="40"> GPT Acadêmico</div>
@@ -15,12 +15,12 @@ Para traduzir este projeto para qualquer idioma utilizando o GPT, leia e execute
 > **Nota**
 >
 > 1. Observe que apenas os plugins (botões) marcados em **destaque** são capazes de ler arquivos, alguns plugins estão localizados no **menu suspenso** do plugin area. Também damos boas-vindas e prioridade máxima a qualquer novo plugin via PR.
-> 
+>
 > 2. As funcionalidades de cada arquivo deste projeto estão detalhadamente explicadas em [autoanálise `self_analysis.md`](https://github.com/binary-husky/gpt_academic/wiki/GPT‐Academic项目自译解报告). Com a iteração das versões, você também pode clicar nos plugins de funções relevantes a qualquer momento para chamar o GPT para regerar o relatório de autonálise do projeto. Perguntas frequentes [`wiki`](https://github.com/binary-husky/gpt_academic/wiki) | [Método de instalação convencional](#installation) | [Script de instalação em um clique](https://github.com/binary-husky/gpt_academic/releases) | [Explicação de configuração](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)。
 >
 > 3. Este projeto é compatível e encoraja o uso de modelos de linguagem chineses, como ChatGLM. Vários api-keys podem ser usados simultaneamente, podendo ser especificados no arquivo de configuração como `API_KEY="openai-key1,openai-key2,azure-key3,api2d-key4"`. Quando precisar alterar temporariamente o `API_KEY`, insira o `API_KEY` temporário na área de entrada e pressione Enter para que ele seja efetivo.
 
- 
+
 <div align="center">
 
 Funcionalidades (⭐= funcionalidade recentemente adicionada) | Descrição
@@ -89,7 +89,7 @@ Apresentação de mais novas funcionalidades (geração de imagens, etc.) ... | 
 </div>
 
 # Instalação
-### Método de instalação I: Executar diretamente (Windows, Linux ou MacOS) 
+### Método de instalação I: Executar diretamente (Windows, Linux ou MacOS)
 
 1. Baixe o projeto
 ```sh
@@ -124,7 +124,7 @@ python -m pip install -r requirements.txt # Este passo é igual ao da instalaç�
 [Opcional] Se você quiser suporte para o ChatGLM2 do THU/ MOSS do Fudan, precisará instalar dependências extras (pré-requisitos: familiarizado com o Python + já usou o PyTorch + o computador tem configuração suficiente):
 ```sh
 # [Opcional Passo I] Suporte para ChatGLM2 do THU. Observações sobre o ChatGLM2 do THU: Se você encontrar o erro "Call ChatGLM fail 不能正常加载ChatGLM的参数" (Falha ao chamar o ChatGLM, não é possível carregar os parâmetros do ChatGLM), consulte o seguinte: 1: A versão instalada por padrão é a versão torch+cpu. Se você quiser usar a versão cuda, desinstale o torch e reinstale uma versão com torch+cuda; 2: Se a sua configuração não for suficiente para carregar o modelo, você pode modificar a precisão do modelo em request_llm/bridge_chatglm.py, alterando todas as ocorrências de AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) para AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
-python -m pip install -r request_llms/requirements_chatglm.txt  
+python -m pip install -r request_llms/requirements_chatglm.txt
 
 # [Opcional Passo II] Suporte para MOSS do Fudan
 python -m pip install -r request_llms/requirements_moss.txt
@@ -202,8 +202,8 @@ Por exemplo:
 ```
 "超级英译中": {
     # Prefixo, adicionado antes do seu input. Por exemplo, usado para descrever sua solicitação, como traduzir, explicar o código, revisar, etc.
-    "Prefix": "Por favor, traduza o parágrafo abaixo para o chinês e explique cada termo técnico dentro de uma tabela markdown:\n\n", 
-    
+    "Prefix": "Por favor, traduza o parágrafo abaixo para o chinês e explique cada termo técnico dentro de uma tabela markdown:\n\n",
+
     # Sufixo, adicionado após o seu input. Por exemplo, em conjunto com o prefixo, pode-se colocar seu input entre aspas.
     "Suffix": "",
 },
@@ -355,4 +355,3 @@ https://github.com/oobabooga/instaladores-de-um-clique
 # Mais:
 https://github.com/gradio-app/gradio
 https://github.com/fghrsh/live2d_demo
-
