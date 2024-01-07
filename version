@@ -1,5 +1,5 @@
 {
-  "version": 3.64,
+  "version": 3.65,
   "show_feature": true,
-  "new_feature": "支持直接拖拽文件到上传区 <-> 支持将图片粘贴到输入区 <-> 修复若干隐蔽的内存BUG <-> 修复多用户冲突问题 <-> 接入Deepseek Coder <-> AutoGen多智能体插件测试版"
+  "new_feature": "支持Gemini-pro <-> 支持直接拖拽文件到上传区 <-> 支持将图片粘贴到输入区 <-> 修复若干隐蔽的内存BUG <-> 修复多用户冲突问题 <-> 接入Deepseek Coder <-> AutoGen多智能体插件测试版"
 }

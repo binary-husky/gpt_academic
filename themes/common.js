@@ -74,10 +74,102 @@ function toast_up(msg) {
     m.style.cssText = "font-size: var(--text-md) !important; color: rgb(255, 255, 255); background-color: rgba(0, 0, 100, 0.6); padding: 10px 15px; margin: 0 0 0 -60px; border-radius: 4px; position: fixed; top: 50%; left: 50%; width: auto; text-align: center;";
     document.body.appendChild(m);
 }
+
 function toast_down() {
     var m = document.getElementById('toast_up');
     if (m) {
         document.body.removeChild(m); // remove the loader from the body
+    }
+}
+
+function begin_loading_status() {
+    // Create the loader div and add styling
+    var loader = document.createElement('div');
+    loader.id = 'Js_File_Loading';
+    var C1 = document.createElement('div');
+    var C2 = document.createElement('div');
+    // var C3 = document.createElement('span');
+    // C3.textContent = '上传中...'
+    // C3.style.position = "fixed";
+    // C3.style.top = "50%";
+    // C3.style.left = "50%";
+    // C3.style.width = "80px";
+    // C3.style.height = "80px";
+    // C3.style.margin = "-40px 0 0 -40px";
+
+    C1.style.position = "fixed";
+    C1.style.top = "50%";
+    C1.style.left = "50%";
+    C1.style.width = "80px";
+    C1.style.height = "80px";
+    C1.style.borderLeft = "12px solid #00f3f300";
+    C1.style.borderRight = "12px solid #00f3f300";
+    C1.style.borderTop = "12px solid #82aaff";
+    C1.style.borderBottom = "12px solid #82aaff"; // Added for effect
+    C1.style.borderRadius = "50%";
+    C1.style.margin = "-40px 0 0 -40px";
+    C1.style.animation = "spinAndPulse 2s linear infinite";
+    
+    C2.style.position = "fixed";
+    C2.style.top = "50%";
+    C2.style.left = "50%";
+    C2.style.width = "40px";
+    C2.style.height = "40px";
+    C2.style.borderLeft = "12px solid #00f3f300";
+    C2.style.borderRight = "12px solid #00f3f300";
+    C2.style.borderTop = "12px solid #33c9db";
+    C2.style.borderBottom = "12px solid #33c9db"; // Added for effect
+    C2.style.borderRadius = "50%";
+    C2.style.margin = "-20px 0 0 -20px";
+    C2.style.animation = "spinAndPulse2 2s linear infinite";
+
+    loader.appendChild(C1);
+    loader.appendChild(C2);
+    // loader.appendChild(C3);
+    document.body.appendChild(loader); // Add the loader to the body
+
+    // Set the CSS animation keyframes for spin and pulse to be synchronized
+    var styleSheet = document.createElement('style');
+    styleSheet.id = 'Js_File_Loading_Style';
+    styleSheet.textContent = `
+    @keyframes spinAndPulse {
+        0% { transform: rotate(0deg) scale(1); }
+        25% { transform: rotate(90deg) scale(1.1); }
+        50% { transform: rotate(180deg) scale(1); }
+        75% { transform: rotate(270deg) scale(0.9); }
+        100% { transform: rotate(360deg) scale(1); }
+    }
+
+    @keyframes spinAndPulse2 {
+        0% { transform: rotate(-90deg);}
+        25% { transform: rotate(-180deg);}
+        50% { transform: rotate(-270deg);}
+        75% { transform: rotate(-360deg);}
+        100% { transform: rotate(-450deg);}
+    }
+    `;
+    document.head.appendChild(styleSheet);
+}
+
+
+function cancel_loading_status() {
+    // remove the loader from the body
+    var loadingElement = document.getElementById('Js_File_Loading');
+    if (loadingElement) {
+        document.body.removeChild(loadingElement);
+    }
+    var loadingStyle = document.getElementById('Js_File_Loading_Style');
+    if (loadingStyle) {
+        document.head.removeChild(loadingStyle);
+    }
+    // create new listen event
+    let clearButton = document.querySelectorAll('div[id*="elem_upload"] button[aria-label="Clear"]');
+    for (let button of clearButton) {
+        button.addEventListener('click', function () {
+            setTimeout(function () {
+                register_upload_event();
+            }, 50);
+        });
     }
 }
 
@@ -94,8 +186,7 @@ function addCopyButton(botElement) {
 
     const messageBtnColumnElement = botElement.querySelector('.message-btn-row');
     if (messageBtnColumnElement) {
-        // Do something if .message-btn-column exists, for example, remove it
-        // messageBtnColumnElement.remove();
+        // if .message-btn-column exists
         return;
     }
 
@@ -154,7 +245,7 @@ function chatbotContentChanged(attempt = 1, force = false) {
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 function chatbotAutoHeight() {
-    // 自动调整高度
+    // 自动调整高度：立即
     function update_height() {
         var { height_target, chatbot_height, chatbot } = get_elements(true);
         if (height_target != chatbot_height) {
@@ -163,23 +254,25 @@ function chatbotAutoHeight() {
         }
     }
 
+    // 自动调整高度：缓慢
     function update_height_slow() {
         var { height_target, chatbot_height, chatbot } = get_elements();
         if (height_target != chatbot_height) {
+            // sign = (height_target - chatbot_height)/Math.abs(height_target - chatbot_height);
+            // speed = Math.max(Math.abs(height_target - chatbot_height), 1);
             new_panel_height = (height_target - chatbot_height) * 0.5 + chatbot_height;
             if (Math.abs(new_panel_height - height_target) < 10) {
                 new_panel_height = height_target;
             }
-            // console.log(chatbot_height, height_target, new_panel_height);
             var pixelString = new_panel_height.toString() + 'px';
             chatbot.style.maxHeight = pixelString; chatbot.style.height = pixelString;
         }
     }
     monitoring_input_box()
     update_height();
-    setInterval(function () {
-        update_height_slow()
-    }, 50); // 每50毫秒执行一次
+    window.addEventListener('resize', function() { update_height(); });
+    window.addEventListener('scroll', function() { update_height_slow(); });
+    setInterval(function () { update_height_slow() }, 50); // 每50毫秒执行一次
 }
 
 swapped = false;
@@ -222,7 +315,7 @@ function get_elements(consider_state_panel = false) {
     var chatbot_height = chatbot.style.height;
     // 交换输入区位置，使得输入区始终可用
     if (!swapped){
-        if (panel1.top!=0 && panel1.top < 0){ swap_input_area(); }
+        if (panel1.top!=0 && (panel1.bottom + panel1.top)/2 < 0){ swap_input_area(); }
     }
     else if (swapped){
         if (panel2.top!=0 && panel2.top > 0){ swap_input_area(); }
@@ -259,9 +352,47 @@ var elem_upload_float = null;
 var elem_input_main = null;
 var elem_input_float = null;
 var elem_chatbot = null;
+var elem_upload_component_float = null;
+var elem_upload_component = null;
 var exist_file_msg = '⚠️请先删除上传区（左上方）中的历史文件，再尝试上传。'
 
-function add_func_paste(input) {
+function locate_upload_elems(){
+    elem_upload = document.getElementById('elem_upload')
+    elem_upload_float = document.getElementById('elem_upload_float')
+    elem_input_main = document.getElementById('user_input_main')
+    elem_input_float = document.getElementById('user_input_float')
+    elem_chatbot = document.getElementById('gpt-chatbot')
+    elem_upload_component_float = elem_upload_float.querySelector("input[type=file]");
+    elem_upload_component = elem_upload.querySelector("input[type=file]");
+}
+
+async function upload_files(files) {
+    let totalSizeMb = 0
+    elem_upload_component_float = elem_upload_float.querySelector("input[type=file]");
+    if (files && files.length > 0) {
+        // 执行具体的上传逻辑
+        if (elem_upload_component_float) {
+            for (let i = 0; i < files.length; i++) {
+                // 将从文件数组中获取的文件大小(单位为字节)转换为MB，
+                totalSizeMb += files[i].size / 1024 / 1024;
+            }
+            // 检查文件总大小是否超过20MB
+            if (totalSizeMb > 20) {
+                toast_push('⚠️文件夹大于 20MB 🚀上传文件中', 3000);
+            }
+            let event = new Event("change");
+            Object.defineProperty(event, "target", { value: elem_upload_component_float, enumerable: true });
+            Object.defineProperty(event, "currentTarget", { value: elem_upload_component_float, enumerable: true });
+            Object.defineProperty(elem_upload_component_float, "files", { value: files, enumerable: true });
+            elem_upload_component_float.dispatchEvent(event);
+        } else {
+            console.log(exist_file_msg);
+            toast_push(exist_file_msg, 3000);
+        }
+    }
+}
+
+function register_func_paste(input) {
     let paste_files = [];
     if (input) {
         input.addEventListener("paste", async function (e) {
@@ -287,7 +418,7 @@ function add_func_paste(input) {
     }
 }
 
-function add_func_drag(elem) {
+function register_func_drag(elem) {
     if (elem) {
         const dragEvents = ["dragover"];
         const leaveEvents = ["dragleave", "dragend", "drop"];
@@ -323,113 +454,74 @@ function add_func_drag(elem) {
     }
 }
 
-async function upload_files(files) {
-    const uploadInputElement = elem_upload_float.querySelector("input[type=file]");
-    let totalSizeMb = 0
-    if (files && files.length > 0) {
-        // 执行具体的上传逻辑
-        if (uploadInputElement) {
-            for (let i = 0; i < files.length; i++) {
-                // 将从文件数组中获取的文件大小(单位为字节)转换为MB，
-                totalSizeMb += files[i].size / 1024 / 1024;
-            }
-            // 检查文件总大小是否超过20MB
-            if (totalSizeMb > 20) {
-                toast_push('⚠️文件夹大于 20MB 🚀上传文件中', 3000)
-                // return;  // 如果超过了指定大小, 可以不进行后续上传操作
-            }
-            // 监听change事件， 原生Gradio可以实现
-            // uploadInputElement.addEventListener('change', function(){replace_input_string()});
-            let event = new Event("change");
-            Object.defineProperty(event, "target", { value: uploadInputElement, enumerable: true });
-            Object.defineProperty(event, "currentTarget", { value: uploadInputElement, enumerable: true });
-            Object.defineProperty(uploadInputElement, "files", { value: files, enumerable: true });
-            uploadInputElement.dispatchEvent(event);
-        } else {
-            toast_push(exist_file_msg, 3000)
-        }
-    }
-}
-
-function begin_loading_status() {
-    // Create the loader div and add styling
-    var loader = document.createElement('div');
-    loader.id = 'Js_File_Loading';
-    loader.style.position = "absolute";
-    loader.style.top = "50%";
-    loader.style.left = "50%";
-    loader.style.width = "60px";
-    loader.style.height = "60px";
-    loader.style.border = "16px solid #f3f3f3";
-    loader.style.borderTop = "16px solid #3498db";
-    loader.style.borderRadius = "50%";
-    loader.style.animation = "spin 2s linear infinite";
-    loader.style.transform = "translate(-50%, -50%)";
-    document.body.appendChild(loader); // Add the loader to the body
-    // Set the CSS animation keyframes
-    var styleSheet = document.createElement('style');
-    // styleSheet.type = 'text/css';
-    styleSheet.id = 'Js_File_Loading_Style'
-    styleSheet.innerText = `
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }`;
-    document.head.appendChild(styleSheet);
-}
-
-function cancel_loading_status() {
-    var loadingElement = document.getElementById('Js_File_Loading');
-    if (loadingElement) {
-        document.body.removeChild(loadingElement); // remove the loader from the body
-    }
-    var loadingStyle = document.getElementById('Js_File_Loading_Style');
-    if (loadingStyle) {
-        document.head.removeChild(loadingStyle);
-    }
-    let clearButton = document.querySelectorAll('div[id*="elem_upload"] button[aria-label="Clear"]');
-    for (let button of clearButton) {
-        button.addEventListener('click', function () {
-            setTimeout(function () {
-                register_upload_event();
-            }, 50);
+function elem_upload_component_pop_message(elem) {
+    if (elem) {
+        const dragEvents = ["dragover"];
+        const leaveEvents = ["dragleave", "dragend", "drop"];
+        dragEvents.forEach(event => {
+            elem.addEventListener(event, function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (elem_upload_float.querySelector("input[type=file]")) {
+                    toast_up('⚠️释放以上传文件')
+                } else {
+                    toast_up(exist_file_msg)
+                }
+            });
         });
-    }
-}
-
-function register_upload_event() {
-    elem_upload_float = document.getElementById('elem_upload_float')
-    const upload_component = elem_upload_float.querySelector("input[type=file]");
-    if (upload_component) {
-        upload_component.addEventListener('change', function (event) {
+        leaveEvents.forEach(event => {
+            elem.addEventListener(event, function (e) {
+                toast_down();
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        });
+        elem.addEventListener("drop", async function (e) {
             toast_push('正在上传中，请稍等。', 2000);
             begin_loading_status();
         });
     }
 }
 
+function register_upload_event() {
+    locate_upload_elems();
+    if (elem_upload_float) {
+        _upload = document.querySelector("#elem_upload_float div.center.boundedheight.flex")
+        elem_upload_component_pop_message(_upload);
+    }
+    if (elem_upload_component_float) {
+        elem_upload_component_float.addEventListener('change', function (event) {
+            toast_push('正在上传中，请稍等。', 2000);
+            begin_loading_status();
+        });
+    }
+    if (elem_upload_component) {
+        elem_upload_component.addEventListener('change', function (event) {
+            toast_push('正在上传中，请稍等。', 2000);
+            begin_loading_status();
+        });
+    }else{
+        toast_push("oppps", 3000);
+    }
+}
+
 function monitoring_input_box() {
     register_upload_event();
 
-    elem_upload = document.getElementById('elem_upload')
-    elem_upload_float = document.getElementById('elem_upload_float')
-    elem_input_main = document.getElementById('user_input_main')
-    elem_input_float = document.getElementById('user_input_float')
-    elem_chatbot = document.getElementById('gpt-chatbot')
-
     if (elem_input_main) {
         if (elem_input_main.querySelector("textarea")) {
-            add_func_paste(elem_input_main.querySelector("textarea"))
+            register_func_paste(elem_input_main.querySelector("textarea"))
         }
     }
     if (elem_input_float) {
         if (elem_input_float.querySelector("textarea")) {
-            add_func_paste(elem_input_float.querySelector("textarea"))
+            register_func_paste(elem_input_float.querySelector("textarea"))
         }
     }
     if (elem_chatbot) {
-        add_func_drag(elem_chatbot)
+        register_func_drag(elem_chatbot)
     }
+
 }
 
 
@@ -515,7 +607,7 @@ function minor_ui_adjustment() {
                 if ((cur_right + bar_btn_width[i]) < (page_width * 0.37)) {
                     // 恢复显示当前按钮
                     element.style.display = 'block';
-                    console.log('show');
+                    // console.log('show');
                     return;
                 }else{
                     return;
@@ -528,7 +620,7 @@ function minor_ui_adjustment() {
                             btn_list[j].style.display = 'none';
                         }
                     }
-                    console.log('show');
+                    // console.log('show');
                     return;
                 }
             }
