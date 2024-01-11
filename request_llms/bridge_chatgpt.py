@@ -18,7 +18,7 @@ import traceback
 import requests
 import importlib
 import random
-
+from common.logger_handle import logger
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
 from common.toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history, trimmed_format_exc, is_the_upload_folder
@@ -99,7 +99,8 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
             retry += 1
             traceback.print_exc()
             if retry > MAX_RETRY: raise TimeoutError
-            if MAX_RETRY != 0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
+            if MAX_RETRY != 0:
+                logger.warning(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
 
     stream_response = response.iter_lines()
     result = ''
@@ -129,7 +130,8 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
         if "role" in delta: continue
         if "content" in delta:
             result += delta["content"]
-            if not console_slience: print(delta["content"], end='')
+            if not console_slience:
+                print(delta["content"], end='')
             if observe_window is not None:
                 # 观测窗，把已经获取的数据显示出去
                 if len(observe_window) >= 1:
@@ -284,13 +286,14 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     error_msg = chunk_decoded
                     chatbot, history = handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
                     yield from update_ui(chatbot=chatbot, history=history, msg="Json异常" + error_msg)  # 刷新界面
-                    print(error_msg)
+                    logger.error(error_msg)
                     return
 
 
 def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg):
     from .bridge_all import model_info
-    openai_website = ' 请登录OpenAI查看详情 https://platform.openai.com/signup'
+    api_key_encryption = llm_kwargs['api_key'][:8] + '****' + llm_kwargs['api_key'][:5]
+    openai_website = f' 请登录OpenAI查看详情 https://platform.openai.com/signup  api-key: `{api_key_encryption}`'
     if "reduce the length" in error_msg:
         if len(history) >= 2: history[-1] = ""; history[-2] = ""  # 清除当前溢出的输入：history[-2] 是本次输入, history[-1] 是本次输出
         history = clip_history(inputs=inputs, history=history,
@@ -303,7 +306,7 @@ def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
                        f"[Local Message] Model {llm_kwargs['llm_model']} does not exist. 模型不存在, 或者您没有获得体验资格.")
     elif "Incorrect API key" in error_msg:
         chatbot[-1] = (chatbot[-1][0],
-                       "[Local Message] Incorrect API key. OpenAI以提供了不正确的API_KEY为由, 拒绝服务. " + openai_website)
+                       f"[Local Message] Incorrect API key. OpenAI以提供了不正确的API_KEY为由, 拒绝服务." + openai_website)
     elif "exceeded your current quota" in error_msg:
         chatbot[-1] = (chatbot[-1][0],
                        "[Local Message] You exceeded your current quota. OpenAI以账户额度不足为由, 拒绝服务." + openai_website)
@@ -400,10 +403,6 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         "user": llm_kwargs['user'],
         "stream": stream,
     }
-    try:
-        print("\033[1;35m", f"{llm_kwargs['llm_model']}_{llm_kwargs['ipaddr']} :", "\033[0m", f"{conversation_cnt} : {inputs[:100]} ..........")
-    except:
-        print('输入中可能存在乱码。')
     return headers, payload
 
 

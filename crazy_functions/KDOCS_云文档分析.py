@@ -7,7 +7,7 @@ import os.path
 import gradio as gr
 from common import func_box, ocr_tools, Langchain_cn
 from common.path_handle import init_path
-from crazy_functions.kingsoft_fns import crazy_box, crzay_kingsoft, crzay_qqdocs
+from crazy_functions.kingsoft_fns import crazy_box, docs_kingsoft, docs_qqdocs
 from common.toolbox import update_ui, CatchException, trimmed_format_exc, get_conf
 
 
@@ -44,15 +44,15 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
     for url in wps_links:
         try:
             yield from update_ui(chatbot, history)  # 增加中间过渡
-            if crzay_kingsoft.if_kdocs_url_isap(url) and '智能文档' in file_types:
+            if docs_kingsoft.if_kdocs_url_isap(url) and '智能文档' in file_types:
                 # TODO 智能文档解析
-                yield from crzay_kingsoft.smart_document_extraction(url, llm_kwargs, plugin_kwargs, chatbot, history, files)
+                yield from docs_kingsoft.smart_document_extraction(url, llm_kwargs, plugin_kwargs, chatbot, history, files)
             else:
                 gpt_say += f'正在解析文档链接，如果文件类型符合`{file_types}`,将下载并解析...'
                 chatbot[-1] = [link_limit, gpt_say]
                 yield from update_ui(chatbot, history)
                 for t in file_types:
-                    success, file_manifest, _ = crzay_kingsoft.get_kdocs_from_everything(txt=url, type=t, ipaddr=llm_kwargs['ipaddr'])
+                    success, file_manifest, _ = docs_kingsoft.get_kdocs_from_everything(txt=url, type=t, ipaddr=llm_kwargs['ipaddr'])
                     files.extend(file_manifest)
                     if success:
                         chatbot.append(['进度如何？', success])
@@ -64,7 +64,7 @@ def func_文档批量处理(link_limit, llm_kwargs, plugin_kwargs, chatbot, hist
             yield from update_ui(chatbot, history)
     # 腾讯文档
     for url in qq_link:
-        success, file_manifest, _ = crzay_qqdocs.get_qqdocs_from_everything(txt=url, type=file_types, ipaddr=llm_kwargs['ipaddr'])
+        success, file_manifest, _ = docs_qqdocs.get_qqdocs_from_everything(txt=url, type=file_types, ipaddr=llm_kwargs['ipaddr'])
         files.extend(file_manifest)
     # 提交文件给file_extraction_intype读取
     yield from crazy_box.file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_kwargs, plugin_kwargs)
@@ -120,7 +120,9 @@ def Kdocs_多阶段生成回答(link_limit, llm_kwargs, plugin_kwargs, chatbot, 
             yield from update_ui(chatbot=chatbot, history=history)
         if stage != [i for i in multi_stage_config][-1]:
             yield from crazy_box.file_extraction_intype(gpt_results_count[prompt], [''], file_limit, chatbot, history, llm_kwargs, plugin_kwargs)
-
+    apply_history = crazy_box.json_args_return(plugin_kwargs, ['上下文处理'])
+    if apply_history:
+        chatbot.append([None, '插件配置参数已开启`上下文处理`，请注意使用插件时注意上下文token限制。'])
     if not multi_stage_config:
         chatbot.append(['发生了什么事情？', f'!!!!! 自定义参数中的Json存在问题，请仔细检查以下配置是否符合JSON编码格式\n\n```\n{plugin_kwargs["advanced_arg"]}```'])
         yield from update_ui(chatbot=chatbot, history=history)

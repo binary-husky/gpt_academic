@@ -53,7 +53,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             retry_msg = f"，正在重试 ({retry}/{MAX_RETRY}) ……" if MAX_RETRY > 0 else ""
             yield from update_ui(chatbot=chatbot, history=history, msg="请求超时" + retry_msg)  # 刷新界面
             if retry > MAX_RETRY:
-                return
+                return Exception('对话错误')
     gpt_replying_buffer = ""
     gpt_security_policy = ""
     history.extend([inputs, ''])
@@ -72,11 +72,12 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             history = history[-2]  # 错误的不纳入对话
             chatbot[-1] = (inputs, gpt_replying_buffer + f"对话错误，请查看message\n\n```\n{error_match.group(1)}\n```")
             yield from update_ui(chatbot=chatbot, history=history)
-            raise Exception('对话错误')
+            return Exception('对话错误')
     if not gpt_replying_buffer:
         history = history[-2]  # 错误的不纳入对话
         chatbot[-1] = (inputs, gpt_replying_buffer + f"触发了Google的安全访问策略，没有回答\n\n```\n{gpt_security_policy}\n```")
         yield from update_ui(chatbot=chatbot, history=history)
+        return Exception('对话错误')
 
 
 if __name__ == '__main__':

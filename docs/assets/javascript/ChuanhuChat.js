@@ -47,8 +47,27 @@ let windowWidth = window.innerWidth; // 初始窗口宽度
 
 var uploadedFilesCountElement = null
 var uploadIndexFileElement = null
+var uploadIndexFileHeight = null
+var uoloadIndexLinkElement = null
+var validImgExtensions = ['png', 'jpg', 'jpeg', 'bmp', 'svg', 'webp', 'ico', 'tif', 'tiff', 'raw', 'eps', 'gif'];
+// 创建一个ResizeObserver实例
+var uploadHeightObserver = new ResizeObserver(entries => {
+    if (uoloadIndexLinkElement) {  // 如果上传文件的链接存在，则添加鼠标悬停事件
+        uoloadIndexLinkElement.addEventListener('mouseover', showPreview);
+        uoloadIndexLinkElement.addEventListener('mouseout', hidePreview);
+    }
+    for (let entry of entries) {
+    // 获取新的文本框高度
+    const textboxHeight = entry.target.offsetHeight;
+    if (textboxHeight !== uploadIndexFileHeight) {
+      // 更新uploadIndexFile的高度
+      uploadIndexFileElement.style.bottom = 70 + + textboxHeight + `px`;
+      // 更新uploadIndexFileHeight以便下一次比较使用
+      uploadIndexFileHeight = textboxHeight;
+    }
+  }
+});
 
-var chatbotAreaBottom = null
 function addInit() {
     var needInit = {chatbotIndicator, uploaderIndicator};
 
@@ -66,6 +85,7 @@ function addInit() {
     }
     chatbotObserver.observe(chatbotIndicator, { attributes: true, childList: true, subtree: true });
     chatListObserver.observe(chatListIndicator, { attributes: true });
+    uploadHeightObserver.observe(user_input_tb.querySelector('[data-testid="textbox"]'))
     setDragUploader();
     return true;
 }
@@ -99,8 +119,10 @@ function initialize() {
     chuanhuHeader = gradioApp().querySelector('#chuanhu-header');
     menu = gradioApp().querySelector('#menu-area');
     toolbox = gradioApp().querySelector('#toolbox-area');
-    uploadedFilesCountElement = document.getElementById('uploaded-files-count');
-    uploadIndexFileElement = document.getElementById('upload-index-file');
+    uploadedFilesCountElement = gradioApp().querySelector('#uploaded-files-count');
+    uploadIndexFileElement = gradioApp().querySelector('#upload-index-file');
+    uoloadIndexLinkElement = uploadedFilesCountElement.querySelector('a');
+    uploadIndexFileHeight = uploadIndexFileElement.offsetHeight;
     // trainBody = gradioApp().querySelector('#train-body');
 
     // if (loginUserForm) {
@@ -140,6 +162,7 @@ function initialize() {
     btn_move_to_tab();
     add_func_event();
     sm_move_more_label();
+
     return true;
 }
 

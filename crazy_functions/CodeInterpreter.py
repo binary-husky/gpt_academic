@@ -112,7 +112,7 @@ def init_module_instance(module):
     return init_f()
 
 def for_immediate_show_off_when_possible(file_type, fp, chatbot):
-    if file_type in ['png', 'jpg']:
+    if file_type in :
         image_path = os.path.abspath(fp)
         chatbot.append(['这是一张图片, 展示如下:',  
             f'本地文件地址: <br/>`{image_path}`<br/>'+

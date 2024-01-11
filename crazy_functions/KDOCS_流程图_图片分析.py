@@ -6,7 +6,7 @@
 from common import toolbox
 from common import func_box, ocr_tools
 from common.path_handle import init_path
-from crazy_functions.kingsoft_fns import crazy_box, crzay_kingsoft
+from crazy_functions.kingsoft_fns import crazy_box, docs_kingsoft
 import os
 
 

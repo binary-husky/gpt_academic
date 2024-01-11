@@ -764,7 +764,7 @@ def html_local_img(__file, layout='left', max_width=None, max_height=None, md=Tr
 
 def file_manifest_filter_type(file_list, filter_: list = None):
     new_list = []
-    if not filter_: filter_ = ['png', 'jpg', 'jpeg']
+    if not filter_: filter_ = func_box.valid_img_extensions
     for file in file_list:
         if str(os.path.basename(file)).split('.')[-1] in filter_:
             new_list.append(html_local_img(file, md=False))
@@ -820,7 +820,8 @@ def on_file_uploaded(files, chatbot, txt,  cookies, ipaddr: gr.Request):
         err_msg += extract_archive(f'{time_tag_path}/{file_origin_name}',
                                    dest_dir=f'{time_tag_path}/{file_origin_name}.extract')
     moved_files = [fp for fp in glob.glob(f'{time_tag_path}/**/*', recursive=True)]
-    moved_files_str = func_box.to_markdown_tabs(head=['文件'], tabs=[moved_files])
+    moved_view = [[i] for i in moved_files]
+    moved_files_str = func_box.to_markdown_tabs(head=['Preview' for i in moved_files], tabs=moved_view)
     if type(chatbot) is str:
         if not txt:
             txt = {'file_path': '', 'know_name': '', 'know_obj': {}, 'file_list': []}

@@ -111,15 +111,10 @@ function handleShowAllButtonClick(event) {
     }
 }
 
+
 // 函数：当鼠标悬浮在 'uploaded-files-count' 或 'upload-index-file' 上时，改变 'upload-index-file' 的 display 样式为 flex
 function showUploadIndexFile() {
     uploadIndexFileElement.style.display = "flow-root";
-    let more_height_bottom =  chatbotArea.querySelector('#chatbot-input-more-area').getBoundingClientRect().bottom;
-    let upload_height_bottom = chatbotArea.querySelector('#upload-index-file').getBoundingClientRect().bottom;
-    let result_add = (upload_height_bottom - more_height_bottom) * 2.1;
-    if (result_add > 0) {
-        uploadIndexFileElement.style.bottom = 110 + result_add + 'px';
-    }
 }
 
 
@@ -185,7 +180,7 @@ async function paste_upload_files(files) {
                 toast_push('⚠️文件夹大于20MB 🚀上传文件中', 2000)
                 // return;  // 如果超过了指定大小, 可以不进行后续上传操作
             }
-             // 监听change事件， 原生Gradio可以实现
+            // 监听change事件， 原生Gradio可以实现
             // uploadInputElement.addEventListener('change', function(){replace_input_string()});
             let event = new Event("change");
             Object.defineProperty(event, "target", {value: uploadInputElement, enumerable: true});
@@ -202,36 +197,37 @@ async function paste_upload_files(files) {
 function replace_input_string() {
     let attempts = 0;
     const maxAttempts = 50;  // 超时处理5秒～
-    function findAndReplaceDownloads(){
+    function findAndReplaceDownloads() {
         const filePreviewElement = uploadIndexFileElement.querySelector('.file-preview');
         if (filePreviewElement) {
             const downloadLinks = filePreviewElement.querySelectorAll('.download a');
             // Run the rest of your code only if links are found
-            if(downloadLinks.length > 0){
-               const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
-               downloadLinks.forEach(function (downloadLink) {
-                   let http_links = downloadLink.getAttribute('href')
-                   let name_links = downloadLink.getAttribute('download')
-                   let fileExtension = http_links.substring(http_links.lastIndexOf('.'));
-                   if (imageExtensions.includes(fileExtension)) {
-                       user_input_ta.value += `![${name_links}](${http_links})`;
-                   } else {
-                       user_input_ta.value += `[${name_links}](${http_links})`;
-                   }
-                   user_input_ta.style.height = 'auto';
-                   user_input_ta.style.height = (user_input_ta.scrollHeight) + 'px';
-               });
-               clearInterval(manager);
-           }
-       }
-       attempts++;
-       if(attempts >= maxAttempts ){
-          // Do something after max failed attempts.
-          clearInterval(manager)
-          console.log("Failed to find downloads");
-       }
+            if (downloadLinks.length > 0) {
+                const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
+                downloadLinks.forEach(function (downloadLink) {
+                    let http_links = downloadLink.getAttribute('href')
+                    let name_links = downloadLink.getAttribute('download')
+                    let fileExtension = http_links.substring(http_links.lastIndexOf('.'));
+                    if (imageExtensions.includes(fileExtension)) {
+                        user_input_ta.value += `![${name_links}](${http_links})`;
+                    } else {
+                        user_input_ta.value += `[${name_links}](${http_links})`;
+                    }
+                    user_input_ta.style.height = 'auto';
+                    user_input_ta.style.height = (user_input_ta.scrollHeight) + 'px';
+                });
+                clearInterval(manager);
+            }
+        }
+        attempts++;
+        if (attempts >= maxAttempts) {
+            // Do something after max failed attempts.
+            clearInterval(manager)
+            console.log("Failed to find downloads");
+        }
     }
-    let manager = setInterval(findAndReplaceDownloads,100);
+
+    let manager = setInterval(findAndReplaceDownloads, 100);
 }
 
 //提示信息 封装
@@ -263,6 +259,7 @@ function sm_move_more_label() {
 }
 
 var hintArea;
+
 function setDragUploader() {
     input = chatbotArea;
     if (input) {
@@ -314,3 +311,31 @@ function draggingHint() {
     chatbotArea.appendChild(hintArea);
 }
 
+
+function insertFilePreview(fileRow) {
+    if (fileRow) {
+        // 判断是否已经添加过预览
+        if (fileRow.getElementsByClassName('td-preview').length > 0) {
+            return;
+        }
+        let tdElem = document.createElement("td");
+        tdElem.className = "td-preview";  // 增加标识
+        let link = fileRow.querySelector('.download a');
+        if (!link) {
+            return;
+        }
+        let extension = link.download.split('.').pop();
+        if (validImgExtensions.includes(extension)) {     // 对于图片, 建立 <img>
+            let img = document.createElement("img");
+            img.src = link.href;
+            img.className = 'td-a-preview'
+            tdElem.appendChild(img);
+        } else {          // 对于其他文件， 建立 <iframe>
+            let iframe = document.createElement('iframe');
+            iframe.src = link.href;
+            iframe.className = 'td-a-preview'
+            tdElem.appendChild(iframe);
+        }
+        fileRow.appendChild(tdElem);
+    }
+}

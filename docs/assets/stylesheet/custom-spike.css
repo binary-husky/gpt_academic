@@ -235,12 +235,16 @@ code.language-folded {
 }
 
 #upload-index-file {
-    width: 200px;
+    width: auto;
     display: none;
     position: fixed;
     bottom: 110px;
     opacity: 0.90;
     backdrop-filter: blur(24px);
+}
+.td-a-preview {
+    max-width: 200px !important;
+    max-height: 150px !important;
 }
 [class*="gradio-container-"] h1 {
     font-weight: 700 !important;

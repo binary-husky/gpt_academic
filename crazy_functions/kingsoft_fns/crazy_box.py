@@ -19,7 +19,7 @@ from openpyxl.styles import Alignment
 from openpyxl.styles import Font
 from crazy_functions import crazy_utils
 from request_llms import bridge_all
-from crazy_functions.kingsoft_fns import crzay_kingsoft
+from crazy_functions.kingsoft_fns import docs_kingsoft
 from moviepy.editor import AudioFileClip
 from common.path_handle import init_path
 
@@ -32,7 +32,7 @@ class Utils:
         self.find_document_source = ['wpsDocumentLink', 'wpsDocumentName', 'wpsDocumentType']
         self.find_document_tags = ['WPSDocument']
         self.find_picture_tags = ['picture', 'processon']
-        self.picture_format = ['.jpeg', '.jpg', '.png', '.gif', '.bmp', '.tiff']
+        self.picture_format = func_box.valid_img_extensions
         self.comments = []
 
     def find_all_text_keys(self, dictionary, parent_type=None, text_values=None, filter_type=''):
@@ -463,7 +463,7 @@ def file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_
                 active_content = xlsx_dict.get(active_sheet)
                 file_limit.extend([title, active_content])
                 chatbot.append(['可以开始了么？',
-                                f'无法在`{os.path.basename(file_path)}`找到`{sheet}`工作表'
+                                f'无法在`{os.path.basename(file_path)}`找到`{sheet}`工作表，'
                                 f'将读取上次预览的活动工作表`{active_sheet}`，'
                                 f'若你的用例工作表是其他名称, 请及时暂停插件运行，并在自定义插件配置中更改'
                                 f'{func_box.html_tag_color("读取指定Sheet")}。'])
@@ -641,11 +641,17 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
         plugin_kwargs: 插件调优参数
     Returns:  将对话结果返回[输入, 输出]
     """
+    apply_history = json_args_return(plugin_kwargs, ['上下文处理'])
+    if apply_history:
+        history_array = [[history] for _ in range(len(inputs_array))]
+    else:
+        history_array = [[""] for _ in range(len(inputs_array))]
+    # 是否要多线程处理
     if len(inputs_array) == 1:
         inputs_show_user = None   # 不重复展示
         gpt_say = yield from crazy_utils.request_gpt_model_in_new_thread_with_ui_alive(
             inputs=inputs_array[0], inputs_show_user=inputs_show_user,
-            llm_kwargs=llm_kwargs, chatbot=chatbot, history=[],
+            llm_kwargs=llm_kwargs, chatbot=chatbot, history=history_array[0],
             sys_prompt="", refresh_interval=0.1
         )
         gpt_response_collection = [inputs_show_user_array[0], gpt_say]
@@ -656,11 +662,13 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
             inputs_show_user_array=inputs_show_user_array,
             llm_kwargs=llm_kwargs,
             chatbot=chatbot,
-            history_array=[[""] for _ in range(len(inputs_array))],
+            history_array=history_array,
             sys_prompt_array=["" for _ in range(len(inputs_array))],
             # max_workers=5,  # OpenAI所允许的最大并行过载
             scroller_max_len=80,
         )
+    if apply_history:
+        history.extend(gpt_response_collection)
     return gpt_response_collection
 
 

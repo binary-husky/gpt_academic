@@ -13,6 +13,7 @@ from common.database_processor import SqliteHandle
 from common import func_box
 from common import history_processor
 from common.path_handle import init_path
+from common.logger_handle import logger
 
 # 处理latex options
 latex_delimiters_dict = {
@@ -127,7 +128,9 @@ def clear_input(inputs, cookies, ipaddr: gr.Request):
             f.write('{}')
     output = [gr.update(value=''), inputs, gr.update(visible=True), gr.update(visible=False),
               gr.Radio.update(choices=only_name, value=cookies['first_chat']), gr.update(value=None)]
-    return output
+    yield output
+    logger.info(f"{cookies['llm_model']}_{user_addr}: {inputs[:100]} {'.'*10}")
+
 
 
 def stop_chat_refresh(chatbot, cookies, ipaddr: gr.Request):

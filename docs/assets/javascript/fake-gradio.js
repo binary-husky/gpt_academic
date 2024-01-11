@@ -28,6 +28,10 @@ function setUploader() {
             chatbotArea.classList.add('with-file');
             fileCount = fileInput.querySelectorAll('tbody > tr.file').length;
             fileCountSpan.innerText = fileCount;
+
+            //插入td 放入文件预览
+            var filesRowsList = Array.from(fileInput.querySelectorAll('tbody > tr.file'));
+            filesRowsList.forEach(insertFilePreview);
         } else {
             chatbotArea.classList.remove('with-file');
             fileCount = 0;

@@ -1,7 +1,7 @@
 import glob, os
 from common import func_box
 from moviepy.editor import AudioFileClip
-from crazy_functions.kingsoft_fns import crazy_box, crzay_kingsoft
+from crazy_functions.kingsoft_fns import crazy_box, docs_kingsoft
 from common.toolbox import CatchException, select_api_key, update_ui, get_conf
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, get_files_from_everything
 from common.toolbox import write_history_to_file, promote_file_to_downloadzone, get_log_folder, report_exception

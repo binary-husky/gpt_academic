@@ -50,7 +50,7 @@ class ChatbotElem:
             with gr.Box(elem_id="chatbot-input-box"):
                 with gr.Row(elem_id="chatbot-input-row"):
                     with gr.Row(elem_id='gr-more-sm-row'):
-                        self.sm_upload = gr.Files(label='上传文件编辑', type='file',
+                        self.sm_upload = gr.Files(label='File Preview', type='file',
                                                   elem_id='upload-index-file',
                                                   visible=True, interactive=True)
                         with gr.Column(scale=1, elem_id='gr-more-sm-column'):

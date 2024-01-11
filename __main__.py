@@ -74,8 +74,9 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                                        )
         self.delLastBtn.click(func_signals.delete_latest_chat, inputs=[self.chatbot, self.history, self.cookies],
                               outputs=[self.chatbot, self.history, self.cookies])
-        self.retryBtn.click(fn=ArgsGeneralWrapper(predict), inputs=self.input_combo + [gr.State('RetryChat')],
+        self.retry_queue = self.retryBtn.click(fn=ArgsGeneralWrapper(predict), inputs=self.input_combo + [gr.State('RetryChat')],
                             outputs=self.output_combo, show_progress=True)
+        self.cancel_handles.append(self.retry_queue)
 
     def signals_prompt_func(self):
         self.multiplexing_edit_check.change(fn=func_signals.change_check_txt,
@@ -429,7 +430,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         self.demo.blocked_paths = func_box.get_files_and_dirs(
             path=init_path.base_path, filter_allow=['private_upload', 'gpt_log', 'docs'])
         login_html = '登陆即注册，请记住你自己的账号和密码'
-        self.demo.auth = func_signals.user_login
+        if AUTHENTICATION == 'SQL':
+            self.demo.auth = func_signals.user_login
         self.demo.auth_message = login_html
         # self.demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
         #     server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, auth_message=login_html,
@@ -448,9 +450,10 @@ gradio_app = gr.mount_gradio_app(app, chatbot_main.demo, '/spike', )
 
 if __name__ == '__main__':
     import uvicorn
-    from common.logger_handle import loggers, Loggers
+    from common.logger_handle import init_config, logger
+    logger.info('start...')
     app_reload = get_conf('app_reload')
     config = uvicorn.Config("__main__:app", host="0.0.0.0", port=PORT, reload=app_reload)
     server = uvicorn.Server(config)
-    Loggers.init_config()
+    init_config()
     server.run()

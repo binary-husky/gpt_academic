@@ -171,11 +171,10 @@ def html_local_img(__file, layout='left', max_width=None, max_height=None, md=Tr
 
 def files_filter_handler(file_list):
     new_list = []
-    filter_ = ['png', 'jpg', 'jpeg', 'bmp', 'svg', 'webp', 'ico', 'tif', 'tiff', 'raw', 'eps']
     for file in file_list:
         file = str(file).replace('file=', '')
         if os.path.exists(file):
-            if str(os.path.basename(file)).split('.')[-1] in filter_:
+            if str(os.path.basename(file)).split('.')[-1] in valid_img_extensions:
                 new_list.append(file)
     return new_list
 
@@ -191,7 +190,9 @@ def input_encode_handler(inputs):
         if encode_file:
             md_encode.extend([{
                 "data": toolbox.encode_image(i),
-                "type": os.path.splitext(i)[1].replace('.', '')
+                "type": os.path.splitext(i)[1].replace(
+                    '.', '').replace(
+                    'jpg', 'jpeg')  # google 识别不了jpg图片格式，狗日的
             } for i in encode_file])
             inputs = inputs.replace(md_path, '')
     return inputs, md_encode
@@ -200,7 +201,7 @@ def input_encode_handler(inputs):
 def file_manifest_filter_type(file_list, filter_: list = None, md_type=False):
     new_list = []
     if not filter_:
-        filter_ = ['png', 'jpg', 'jpeg', 'bmp', 'svg', 'webp', 'ico', 'tif', 'tiff', 'raw', 'eps']
+        filter_ = valid_img_extensions
     for file in file_list:
         if str(os.path.basename(file)).split('.')[-1] in filter_:
             new_list.append(html_local_img(file, md=md_type))
@@ -587,6 +588,7 @@ def match_chat_information(text):
     else:
         return text
 
+
 def replace_expected_text(prompt: str, content: str, expect='{{{v}}}'):
     """ 查找prompt中expect相关占位符，并将content替换到prompt中
     Args:
@@ -615,6 +617,8 @@ def get_avatar_img(llm_s):
     else:
         return ['./docs/assets/imgs/tester.png', './docs/assets/imgs/user.png']
 
+
+valid_img_extensions = ['png', 'jpg', 'jpeg', 'bmp', 'svg', 'webp', 'ico', 'tif', 'tiff', 'raw', 'eps', 'gif']
 
 if __name__ == '__main__':
     # print(get_files_list('', ['.json']))
