@@ -47,7 +47,7 @@ def 批量分析流程图或图片(txt, llm_kwargs, plugin_kwargs, chatbot, hist
     chatbot_with_cookie = toolbox.ChatBotWithCookies(chatbot)
     chatbot_with_cookie.write_list(chatbot)
     file_handle = crazy_box.Utils()
-    task_info, kdocs_manifest_tmp, proj_dir = crzay_kingsoft.get_kdocs_from_everything(txt, type='', ipaddr=llm_kwargs['ipaddr'])
+    task_info, kdocs_manifest_tmp, proj_dir = docs_kingsoft.get_kdocs_from_everything(txt, type='', ipaddr=llm_kwargs['ipaddr'])
     if txt:
         if os.path.exists(txt):
             file_manifest = file_handle.global_search_for_files(txt, matching=file_handle.picture_format+['.xmind'])

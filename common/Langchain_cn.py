@@ -126,7 +126,7 @@ def knowledge_base_writing(cls_select, links: str, select, name, kai_handle, ipa
         file_manifest += file_manifest_tmp
     # 网络文件
     try:
-        task_info, kdocs_manifest_tmp, _ = crzay_kingsoft.get_kdocs_from_everything(links, type='', ipaddr=user_addr)
+        task_info, kdocs_manifest_tmp, _ = docs_kingsoft.get_kdocs_from_everything(links, type='', ipaddr=user_addr)
         # task_info, kdocs_manifest_tmp, _ = crzay_kingsoft.get(links, type='', ipaddr=user_addr)
         if kdocs_manifest_tmp:
             error += task_info

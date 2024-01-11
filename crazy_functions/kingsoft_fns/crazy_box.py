@@ -189,7 +189,7 @@ class ExcelHandle:
             self.template_excel = temp_file
         elif temp_file.startswith('http'):
             self.template_excel = \
-            crzay_kingsoft.get_kdocs_files(temp_file, project_folder=self.user_path, type='xlsx', ipaddr=ipaddr)[0]
+            docs_kingsoft.get_kdocs_files(temp_file, project_folder=self.user_path, type='xlsx', ipaddr=ipaddr)[0]
         else:
             self.template_excel = os.path.join(init_path.base_path, 'docs/template/客户端测试用例模版.xlsx')
         if not self.template_excel:
