@@ -12,7 +12,7 @@ from toolbox import get_conf, encode_image, get_pictures_list
 proxies, TIMEOUT_SECONDS = get_conf("proxies", "TIMEOUT_SECONDS")
 
 """
-========================================================================
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 第五部分 一些文件处理方法
 files_filter_handler 根据type过滤文件
 input_encode_handler 提取input中的文件，并解析
@@ -21,6 +21,7 @@ link_mtime_to_md 文件增加本地时间参数，避免下载到缓存文件
 html_view_blank 超链接
 html_local_file 本地文件取相对路径
 to_markdown_tabs 文件list 转换为 md tab
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 """
 
 
