@@ -244,6 +244,9 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     if has_choices and not choice_valid:
                         # 一些垃圾第三方接口的出现这样的错误
                         continue
+                    if len(chunk_decoded) > 0 and (chunkjson is None):
+                        # 传递进来一些奇怪的东西
+                        raise ValueError(f'无法读取以下数据，请检查配置。\n\n{chunk_decoded}')
                     # 前者是API2D的结束条件，后者是OPENAI的结束条件
                     if ('data: [DONE]' in chunk_decoded) or (len(chunkjson['choices'][0]["delta"]) == 0):
                         # 判定为数据流的结束，gpt_replying_buffer也写完了
