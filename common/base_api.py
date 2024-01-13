@@ -5,6 +5,7 @@
 # @Descr   :
 import json, re
 import requests
+import httpx
 from pydantic import BaseModel
 from fastapi import FastAPI, Request, status, Response
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
@@ -49,14 +50,19 @@ async def check_authentication(request: Request, call_next):
     if pattern.match(request.url.path):
         if not toolbox.get_conf('AUTHENTICATION'):  # 暂时没办法拿到用户信息，所以不禁止用户访问
             if request.client.host not in request.url.path:
-                return JSONResponse(content={'detail': "You're bad. You can't download other people's files."})
+                return JSONResponse(content={'Error': "You can't download other people's files."})
+        else:
+            async with httpx.AsyncClient() as client:
+                res = await client.get(str(request.base_url)+'spike/user', cookies=request.cookies)
+                res_user = res.text[1:-1]
+            if res_user not in request.url.path:
+                return JSONResponse(content={'Error': "You can't download other people's files."})
     cookie = request.cookies.get(f'{auth_cookie_tag}', '')
     user = check_cookie(cookie)
     if not user:
         new_website_url = "https://console.4wps.net/#/login"  # 新网站的URL
         return RedirectResponse(new_website_url)
     return await call_next(request)
-
 
 @app.get('/')
 async def homepage(request: Request):
