@@ -195,11 +195,11 @@ def markdown_convertion(txt):
     find_equation_pattern = r'<script type="math/tex(?:.*?)>(.*?)</script>'
 
     txt = fix_markdown_indent(txt)
-    txt = fix_code_segment_indent(txt)
+    # txt = fix_code_segment_indent(txt)
     if is_equation(txt):  # 有$标识的公式符号，且没有代码段```的标识
         # convert everything to html format
         split = markdown.markdown(text='---')
-        convert_stage_1 = markdown.markdown(text=txt, extensions=['sane_lists', 'tables', 'mdx_math', 'fenced_code'],
+        convert_stage_1 = markdown.markdown(text=txt, extensions=['sane_lists', 'tables', 'mdx_math', 'pymdownx.superfences'],
                                             extension_configs=markdown_extension_configs)
         convert_stage_1 = markdown_bug_hunt(convert_stage_1)
         # 1. convert to easy-to-copy tex (do not render math)
@@ -209,7 +209,7 @@ def markdown_convertion(txt):
         # cat them together
         return pre + convert_stage_2_1 + f'{split}' + convert_stage_2_2 + suf
     else:
-        return pre + markdown.markdown(txt, extensions=['sane_lists', 'tables', 'fenced_code', 'codehilite']) + suf
+        return pre + markdown.markdown(txt, extensions=['sane_lists', 'tables', 'pymdownx.superfences', 'codehilite']) + suf
 
 
 def close_up_code_segment_during_stream(gpt_reply):
@@ -250,7 +250,7 @@ def format_io(self, y):
     if gpt_reply is not None: gpt_reply = close_up_code_segment_during_stream(gpt_reply)
     # process
     y[-1] = (
-        None if i_ask is None else markdown.markdown(i_ask, extensions=['fenced_code', 'tables']),
+        None if i_ask is None else markdown.markdown(i_ask, extensions=['pymdownx.superfences', 'tables']),
         None if gpt_reply is None else markdown_convertion(gpt_reply)
     )
     return y

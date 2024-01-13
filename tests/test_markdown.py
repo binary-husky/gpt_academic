@@ -73,6 +73,50 @@ md = """
 """
 
 
+md = """
+要将NTFS格式转换为ext4格式，需要执行以下步骤：
+
+1. 首先，确保你的NTFS分区已经挂载。可以使用`df -lh`命令来检查。
+
+2. 创建一个ext4文件系统。打开终端并执行以下命令：
+    ```
+    sudo mkfs.ext4 /dev/sdc1
+    ```
+    注意将`/dev/sdc1`替换为你要转换的NTFS分区的设备名称。
+
+3. 等待文件系统创建完成。这可能需要一些时间。
+
+4. 将新的ext4文件系统挂载到指定的挂载点。执行以下命令：
+    ```
+    sudo mkdir /mnt/mydrive
+    sudo mount -t ext4 /dev/sdc1 /mnt/mydrive
+    ```
+    注意将`/mnt/mydrive`替换为你要挂载的目录。
+
+5. 现在，可以将数据从原始NTFS分区复制到新的ext4分区。执行以下命令：
+    ```
+    sudo rsync -avxP /media/fuqingxu/eb63a8fa-cee9-48a5-9f05-b1388c3fda9e /mnt/mydrive
+    ```
+    注意将`/media/fuqingxu/eb63a8fa-cee9-48a5-9f05-b1388c3fda9e`替换为你的原始NTFS分区的挂载点。
+
+6. 等待数据复制完成。这可能需要一些时间，具体取决于数据量。
+
+7. 确认数据已经成功复制到新的ext4分区后，可以卸载原始NTFS分区。执行以下命令：
+    ```
+    sudo umount /media/fuqingxu/eb63a8fa-cee9-48a5-9f05-b1388c3fda9e
+    ```
+
+8. 现在，你可以将新的ext4分区重新挂载到原来的位置。执行以下命令：
+    ```
+    sudo umount /mnt/mydrive
+    sudo mount -t ext4 /dev/sdc1 /media/fuqingxu/eb63a8fa-cee9-48a5-9f05-b1388c3fda9e
+    ```
+
+完成上述步骤后，NTFS分区将被转换为ext4格式，并且数据将被复制到新的分区中。请确保在执行任何操作之前备份重要数据。
+
+
+"""
+
 def validate_path():
     import os, sys
 
