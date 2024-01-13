@@ -2,6 +2,7 @@ import markdown
 import re
 import os
 import math
+from textwrap import dedent
 from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
 from shared_utils.config_loader import get_conf as get_conf
@@ -32,7 +33,148 @@ def text_divide_paragraph(text):
         text = "</br>".join(lines)
         return pre + text + suf
 
+def tex2mathml_catch_exception(content, *args, **kwargs):
+    try:
+        content = tex2mathml(content, *args, **kwargs)
+    except:
+        content = content
+    return content
 
+def replace_math_no_render(match):
+    content = match.group(1)
+    if 'mode=display' in match.group(0):
+        content = content.replace('\n', '</br>')
+        return f"<font color=\"#00FF00\">$$</font><font color=\"#FF00FF\">{content}</font><font color=\"#00FF00\">$$</font>"
+    else:
+        return f"<font color=\"#00FF00\">$</font><font color=\"#FF00FF\">{content}</font><font color=\"#00FF00\">$</font>"
+
+def replace_math_render(match):
+    content = match.group(1)
+    if 'mode=display' in match.group(0):
+        if '\\begin{aligned}' in content:
+            content = content.replace('\\begin{aligned}', '\\begin{array}')
+            content = content.replace('\\end{aligned}', '\\end{array}')
+            content = content.replace('&', ' ')
+        content = tex2mathml_catch_exception(content, display="block")
+        return content
+    else:
+        return tex2mathml_catch_exception(content)
+
+def markdown_bug_hunt(content):
+    """
+    解决一个mdx_math的bug（单$包裹begin命令时多余<script>）
+    """
+    content = content.replace('<script type="math/tex">\n<script type="math/tex; mode=display">',
+                                '<script type="math/tex; mode=display">')
+    content = content.replace('</script>\n</script>', '</script>')
+    return content
+
+def is_equation(txt):
+    """
+    判定是否为公式 | 测试1 写出洛伦兹定律，使用tex格式公式 测试2 给出柯西不等式，使用latex格式 测试3 写出麦克斯韦方程组
+    """
+    if '```' in txt and '```reference' not in txt: return False
+    if '$' not in txt and '\\[' not in txt: return False
+    mathpatterns = {
+        r'(?<!\\|\$)(\$)([^\$]+)(\$)': {'allow_multi_lines': False},                       #  $...$
+        r'(?<!\\)(\$\$)([^\$]+)(\$\$)': {'allow_multi_lines': True},                       # $$...$$
+        r'(?<!\\)(\\\[)(.+?)(\\\])': {'allow_multi_lines': False},                         # \[...\]
+        # r'(?<!\\)(\\\()(.+?)(\\\))': {'allow_multi_lines': False},                       # \(...\)
+        # r'(?<!\\)(\\begin{([a-z]+?\*?)})(.+?)(\\end{\2})': {'allow_multi_lines': True},  # \begin...\end
+        # r'(?<!\\)(\$`)([^`]+)(`\$)': {'allow_multi_lines': False},                       # $`...`$
+    }
+    matches = []
+    for pattern, property in mathpatterns.items():
+        flags = re.ASCII | re.DOTALL if property['allow_multi_lines'] else re.ASCII
+        matches.extend(re.findall(pattern, txt, flags))
+    if len(matches) == 0: return False
+    contain_any_eq = False
+    illegal_pattern = re.compile(r'[^\x00-\x7F]|echo')
+    for match in matches:
+        if len(match) != 3: return False
+        eq_canidate = match[1]
+        if illegal_pattern.search(eq_canidate):
+            return False
+        else:
+            contain_any_eq = True
+    return contain_any_eq
+
+def fix_markdown_indent(txt):
+    # fix markdown indent
+    if (' - ' not in txt) or ('. ' not in txt):
+        # do not need to fix, fast escape
+        return txt
+    # walk through the lines and fix non-standard indentation
+    lines = txt.split("\n")
+    pattern = re.compile(r'^\s+-')
+    activated = False
+    for i, line in enumerate(lines):
+        if line.startswith('- ') or line.startswith('1. '):
+            activated = True
+        if activated and pattern.match(line):
+            stripped_string = line.lstrip()
+            num_spaces = len(line) - len(stripped_string)
+            if (num_spaces % 4) == 3:
+                num_spaces_should_be = math.ceil(num_spaces / 4) * 4
+                lines[i] = ' ' * num_spaces_should_be + stripped_string
+    return '\n'.join(lines)
+
+FENCED_BLOCK_RE = re.compile(
+    dedent(r'''
+        (?P<fence>^[ \t]*(?:~{3,}|`{3,}))[ ]*                      # opening fence
+        ((\{(?P<attrs>[^\}\n]*)\})|                              # (optional {attrs} or
+        (\.?(?P<lang>[\w#.+-]*)[ ]*)?                            # optional (.)lang
+        (hl_lines=(?P<quot>"|')(?P<hl_lines>.*?)(?P=quot)[ ]*)?) # optional hl_lines)
+        \n                                                       # newline (end of opening fence)
+        (?P<code>.*?)(?<=\n)                                     # the code block
+        (?P=fence)[ ]*$                                          # closing fence
+    '''),
+    re.MULTILINE | re.DOTALL | re.VERBOSE
+)
+
+def get_line_range(re_match_obj, txt):
+    start_pos, end_pos = re_match_obj.regs[0]
+    num_newlines_before = txt[:start_pos+1].count('\n')
+    line_start = num_newlines_before
+    line_end = num_newlines_before + txt[start_pos:end_pos].count('\n')+1
+    return line_start, line_end
+
+def fix_code_segment_indent(txt):
+    lines = []
+    change_any = False
+    txt_tmp = txt
+    while True:
+        re_match_obj = FENCED_BLOCK_RE.search(txt_tmp)
+        if not re_match_obj: break
+        if len(lines) == 0: lines = txt.split("\n")
+        
+        # 清空 txt_tmp 对应的位置方便下次搜索
+        start_pos, end_pos = re_match_obj.regs[0]
+        txt_tmp = txt_tmp[:start_pos] + ' '*(end_pos-start_pos) + txt_tmp[end_pos:]
+        line_start, line_end = get_line_range(re_match_obj, txt)
+        
+        # 获取公共缩进
+        shared_indent_cnt = 1e5
+        for i in range(line_start, line_end):
+            stripped_string = lines[i].lstrip()
+            num_spaces = len(lines[i]) - len(stripped_string)
+            if num_spaces < shared_indent_cnt:
+                shared_indent_cnt = num_spaces
+
+        # 修复缩进
+        if (shared_indent_cnt < 1e5) and (shared_indent_cnt % 4) == 3:
+            num_spaces_should_be = math.ceil(shared_indent_cnt / 4) * 4
+            for i in range(line_start, line_end):
+                add_n = num_spaces_should_be - shared_indent_cnt
+                lines[i] = ' ' * add_n + lines[i]
+            if not change_any: # 遇到第一个
+                change_any = True
+
+    if change_any:
+        return '\n'.join(lines)
+    else:
+        return txt
+    
 @lru_cache(maxsize=128) # 使用 lru缓存 加快转换速度
 def markdown_convertion(txt):
     """
@@ -52,92 +194,8 @@ def markdown_convertion(txt):
     }
     find_equation_pattern = r'<script type="math/tex(?:.*?)>(.*?)</script>'
 
-    def tex2mathml_catch_exception(content, *args, **kwargs):
-        try:
-            content = tex2mathml(content, *args, **kwargs)
-        except:
-            content = content
-        return content
-
-    def replace_math_no_render(match):
-        content = match.group(1)
-        if 'mode=display' in match.group(0):
-            content = content.replace('\n', '</br>')
-            return f"<font color=\"#00FF00\">$$</font><font color=\"#FF00FF\">{content}</font><font color=\"#00FF00\">$$</font>"
-        else:
-            return f"<font color=\"#00FF00\">$</font><font color=\"#FF00FF\">{content}</font><font color=\"#00FF00\">$</font>"
-
-    def replace_math_render(match):
-        content = match.group(1)
-        if 'mode=display' in match.group(0):
-            if '\\begin{aligned}' in content:
-                content = content.replace('\\begin{aligned}', '\\begin{array}')
-                content = content.replace('\\end{aligned}', '\\end{array}')
-                content = content.replace('&', ' ')
-            content = tex2mathml_catch_exception(content, display="block")
-            return content
-        else:
-            return tex2mathml_catch_exception(content)
-
-    def markdown_bug_hunt(content):
-        """
-        解决一个mdx_math的bug（单$包裹begin命令时多余<script>）
-        """
-        content = content.replace('<script type="math/tex">\n<script type="math/tex; mode=display">',
-                                  '<script type="math/tex; mode=display">')
-        content = content.replace('</script>\n</script>', '</script>')
-        return content
-
-    def is_equation(txt):
-        """
-        判定是否为公式 | 测试1 写出洛伦兹定律，使用tex格式公式 测试2 给出柯西不等式，使用latex格式 测试3 写出麦克斯韦方程组
-        """
-        if '```' in txt and '```reference' not in txt: return False
-        if '$' not in txt and '\\[' not in txt: return False
-        mathpatterns = {
-            r'(?<!\\|\$)(\$)([^\$]+)(\$)': {'allow_multi_lines': False},                       #  $...$
-            r'(?<!\\)(\$\$)([^\$]+)(\$\$)': {'allow_multi_lines': True},                       # $$...$$
-            r'(?<!\\)(\\\[)(.+?)(\\\])': {'allow_multi_lines': False},                         # \[...\]
-            # r'(?<!\\)(\\\()(.+?)(\\\))': {'allow_multi_lines': False},                       # \(...\)
-            # r'(?<!\\)(\\begin{([a-z]+?\*?)})(.+?)(\\end{\2})': {'allow_multi_lines': True},  # \begin...\end
-            # r'(?<!\\)(\$`)([^`]+)(`\$)': {'allow_multi_lines': False},                       # $`...`$
-        }
-        matches = []
-        for pattern, property in mathpatterns.items():
-            flags = re.ASCII | re.DOTALL if property['allow_multi_lines'] else re.ASCII
-            matches.extend(re.findall(pattern, txt, flags))
-        if len(matches) == 0: return False
-        contain_any_eq = False
-        illegal_pattern = re.compile(r'[^\x00-\x7F]|echo')
-        for match in matches:
-            if len(match) != 3: return False
-            eq_canidate = match[1]
-            if illegal_pattern.search(eq_canidate):
-                return False
-            else:
-                contain_any_eq = True
-        return contain_any_eq
-
-    def fix_markdown_indent(txt):
-        # fix markdown indent
-        if (' - ' not in txt) or ('. ' not in txt):
-            return txt  # do not need to fix, fast escape
-        # walk through the lines and fix non-standard indentation
-        lines = txt.split("\n")
-        pattern = re.compile(r'^\s+-')
-        activated = False
-        for i, line in enumerate(lines):
-            if line.startswith('- ') or line.startswith('1. '):
-                activated = True
-            if activated and pattern.match(line):
-                stripped_string = line.lstrip()
-                num_spaces = len(line) - len(stripped_string)
-                if (num_spaces % 4) == 3:
-                    num_spaces_should_be = math.ceil(num_spaces / 4) * 4
-                    lines[i] = ' ' * num_spaces_should_be + stripped_string
-        return '\n'.join(lines)
-
     txt = fix_markdown_indent(txt)
+    txt = fix_code_segment_indent(txt)
     if is_equation(txt):  # 有$标识的公式符号，且没有代码段```的标识
         # convert everything to html format
         split = markdown.markdown(text='---')
