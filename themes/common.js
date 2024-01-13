@@ -109,7 +109,7 @@ function begin_loading_status() {
     C1.style.borderRadius = "50%";
     C1.style.margin = "-40px 0 0 -40px";
     C1.style.animation = "spinAndPulse 2s linear infinite";
-    
+
     C2.style.position = "fixed";
     C2.style.top = "50%";
     C2.style.left = "50%";
@@ -270,8 +270,8 @@ function chatbotAutoHeight() {
     }
     monitoring_input_box()
     update_height();
-    window.addEventListener('resize', function() { update_height(); });
-    window.addEventListener('scroll', function() { update_height_slow(); });
+    window.addEventListener('resize', function () { update_height(); });
+    window.addEventListener('scroll', function () { update_height_slow(); });
     setInterval(function () { update_height_slow() }, 50); // 每50毫秒执行一次
 }
 
@@ -290,8 +290,8 @@ function swap_input_area() {
     // Swap the elements
     parent.insertBefore(element2, element1);
     parent.insertBefore(element1, nextSibling);
-    if (swapped) {swapped = false;}
-    else {swapped = true;}
+    if (swapped) { swapped = false; }
+    else { swapped = true; }
 }
 
 function get_elements(consider_state_panel = false) {
@@ -314,18 +314,18 @@ function get_elements(consider_state_panel = false) {
     var height_target = parseInt(height_target);
     var chatbot_height = chatbot.style.height;
     // 交换输入区位置，使得输入区始终可用
-    if (!swapped){
-        if (panel1.top!=0 && (panel1.bottom + panel1.top)/2 < 0){ swap_input_area(); }
+    if (!swapped) {
+        if (panel1.top != 0 && (panel1.bottom + panel1.top) / 2 < 0) { swap_input_area(); }
     }
-    else if (swapped){
-        if (panel2.top!=0 && panel2.top > 0){ swap_input_area(); }
+    else if (swapped) {
+        if (panel2.top != 0 && panel2.top > 0) { swap_input_area(); }
     }
     // 调整高度
     const err_tor = 5;
-    if (Math.abs(panel1.left - chatbot.getBoundingClientRect().left) < err_tor){
+    if (Math.abs(panel1.left - chatbot.getBoundingClientRect().left) < err_tor) {
         // 是否处于窄屏模式
         height_target = window.innerHeight * 0.6;
-    }else{
+    } else {
         // 调整高度
         const chatbot_height_exceed = 15;
         const chatbot_height_exceed_m = 10;
@@ -356,7 +356,7 @@ var elem_upload_component_float = null;
 var elem_upload_component = null;
 var exist_file_msg = '⚠️请先删除上传区（左上方）中的历史文件，再尝试上传。'
 
-function locate_upload_elems(){
+function locate_upload_elems() {
     elem_upload = document.getElementById('elem_upload')
     elem_upload_float = document.getElementById('elem_upload_float')
     elem_input_main = document.getElementById('user_input_main')
@@ -386,7 +386,6 @@ async function upload_files(files) {
             Object.defineProperty(elem_upload_component_float, "files", { value: files, enumerable: true });
             elem_upload_component_float.dispatchEvent(event);
         } else {
-            // console.log(exist_file_msg);
             toast_push(exist_file_msg, 3000);
         }
     }
@@ -500,7 +499,7 @@ function register_upload_event() {
             toast_push('正在上传中，请稍等。', 2000);
             begin_loading_status();
         });
-    }else{
+    } else {
         toast_push("oppps", 3000);
     }
 }
@@ -583,16 +582,16 @@ function minor_ui_adjustment() {
     function auto_hide_toolbar() {
         var qq = document.getElementById('tooltip');
         var tab_nav = qq.getElementsByClassName('tab-nav');
-        if (tab_nav.length == 0){ return; }
+        if (tab_nav.length == 0) { return; }
         var btn_list = tab_nav[0].getElementsByTagName('button')
-        if (btn_list.length == 0){ return; }
+        if (btn_list.length == 0) { return; }
         // 获取页面宽度
         var page_width = document.documentElement.clientWidth;
         // 总是保留的按钮数量
         const always_preserve = 2;
         // 获取最后一个按钮的右侧位置
-        var cur_right = btn_list[always_preserve-1].getBoundingClientRect().right;
-        if (bar_btn_width.length == 0){
+        var cur_right = btn_list[always_preserve - 1].getBoundingClientRect().right;
+        if (bar_btn_width.length == 0) {
             // 首次运行，记录每个按钮的宽度
             for (var i = 0; i < btn_list.length; i++) {
                 bar_btn_width.push(btn_list[i].getBoundingClientRect().width);
@@ -602,14 +601,13 @@ function minor_ui_adjustment() {
         for (var i = always_preserve; i < btn_list.length; i++) {
             var element = btn_list[i];
             var element_right = element.getBoundingClientRect().right;
-            if (element_right!=0){ cur_right = element_right; }
+            if (element_right != 0) { cur_right = element_right; }
             if (element.style.display === 'none') {
                 if ((cur_right + bar_btn_width[i]) < (page_width * 0.37)) {
                     // 恢复显示当前按钮
                     element.style.display = 'block';
-                    // console.log('show');
                     return;
-                }else{
+                } else {
                     return;
                 }
             } else {
@@ -620,7 +618,6 @@ function minor_ui_adjustment() {
                             btn_list[j].style.display = 'none';
                         }
                     }
-                    // console.log('show');
                     return;
                 }
             }
@@ -637,25 +634,23 @@ function minor_ui_adjustment() {
 //  第 6 部分: 避免滑动
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 let prevented_offset = 0;
-function limit_scroll_position(){
+function limit_scroll_position() {
     let scrollableDiv = document.querySelector('#gpt-chatbot > div.wrap');
     scrollableDiv.addEventListener('wheel', function (e) {
         let preventScroll = false;
-        if (e.deltaX != 0) {return;}
-        if (e.deltaY < 0 && this.scrollTop === 0) {
-            preventScroll = true; // check scroll up condition
-        }
-        if (e.deltaY > 0 && this.scrollHeight - this.clientHeight - this.scrollTop <= 0) {
-            preventScroll = true; // check scroll down condition
-        }
+        if (e.deltaX != 0) { prevented_offset = 0; return;}
+        if (this.scrollHeight == this.clientHeight) { prevented_offset = 0; return;}
+        if (e.deltaY < 0) { prevented_offset = 0; return;}
+        if (e.deltaY > 0 && this.scrollHeight - this.clientHeight - this.scrollTop <= 1) { preventScroll = true; }
+
         if (preventScroll) {
             prevented_offset += e.deltaY;
-            if (Math.abs(prevented_offset) > 1e3) {
-                if (prevented_offset >  1e3) {prevented_offset =  1e3;}
-                if (prevented_offset < -1e3) {prevented_offset = -1e3;}
+            if (Math.abs(prevented_offset) > 499) {
+                if (prevented_offset > 500) { prevented_offset = 500; }
+                if (prevented_offset < -500) { prevented_offset = -500; }
                 preventScroll = false;
             }
-        }else{
+        } else {
             prevented_offset = 0;
         }
         if (preventScroll) {
