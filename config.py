@@ -198,6 +198,12 @@ ZHIPUAI_API_KEY = ""
 ZHIPUAI_MODEL = "chatglm_turbo"
 
 
+# # 火山引擎YUNQUE大模型
+# YUNQUE_SECRET_KEY = ""
+# YUNQUE_ACCESS_KEY = ""
+# YUNQUE_MODEL = ""
+
+
 # Claude API KEY
 ANTHROPIC_API_KEY = ""
 
