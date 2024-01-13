@@ -95,12 +95,12 @@ def switch_latex_output(select):
         latex = latex_delimiters_dict['else']
     else:
         latex = latex_delimiters_dict[select]
-    return gr.Chatbot.update(latex_delimiters=latex)
+    return gr.update(latex_delimiters=latex)
 
 
 # TODO < -------------------------------- 对话函数注册区 ----------------------------------->
 def update_chat(llm_s):
-    return gr.Chatbot.update(avatar_images=func_box.get_avatar_img(llm_s))
+    return gr.update(avatar_images=func_box.get_avatar_img(llm_s))
 
 
 def sm_upload_clear(cookie: dict):
@@ -127,7 +127,7 @@ def clear_input(inputs, cookies, ipaddr: gr.Request):
         with open(os.path.join(user_path, cookies['first_chat'] + ".json"), mode='w') as f:
             f.write('{}')
     output = [gr.update(value=''), inputs, gr.update(visible=True), gr.update(visible=False),
-              gr.Radio.update(choices=only_name, value=cookies['first_chat']), gr.update(value=None)]
+              gr.update(choices=only_name, value=cookies['first_chat']), gr.update(value=None)]
     yield output
     logger.info(f"{cookies['llm_model']}_{user_addr}: {inputs[:100]} {'.'*10}")
 
@@ -151,9 +151,9 @@ def clear_chat_cookie(llm_model, ipaddr: gr.Request):
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
     default_params = toolbox.get_conf('LLMS_DEFAULT_PARAMETER')
     llms_combo = [cookie.get(key, default_params[key]) for key in default_params] + [
-        gr.Dropdown.update(value=llm_model)]
+        gr.update(value=llm_model)]
     output = [[], [], cookie, *llms_combo, '已重置对话记录和对话Cookies',
-              gr.Radio.update(choices=['新对话'] + only_name, value='新对话'), "新对话"]
+              gr.update(choices=['新对话'] + only_name, value='新对话'), "新对话"]
     return output
 
 
@@ -168,7 +168,7 @@ def select_history(select, llm_select, cookies, ipaddr: gr.Request):
     file_path = os.path.join(user_path, user_history[0])
     history_handle = history_processor.HistoryJsonHandle(file_path)
     history_update_combo = history_handle.update_for_history(cookies, select)
-    return [*history_update_combo, select, gr.Button.update(link=func_box.html_local_file(file_path))]
+    return [*history_update_combo, select, gr.update(link=func_box.html_local_file(file_path))]
 
 
 def rename_history(old_file, filename: str, ipaddr: gr.Request):
@@ -187,7 +187,7 @@ def rename_history(old_file, filename: str, ipaddr: gr.Request):
         repeat_file_index += 1
     os.rename(os.path.join(user_path, f"{old_file}.json"), full_path)
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
-    return gr.Radio.update(choices=only_name, value=new_name)
+    return gr.update(choices=only_name, value=new_name)
 
 
 def delete_history(cookies, filename, info, ipaddr: gr.Request):
@@ -203,7 +203,7 @@ def delete_history(cookies, filename, info, ipaddr: gr.Request):
         os.path.join(init_path.history_path, func_box.user_client_mark(ipaddr)), filter_format=['.json'])
     history_handle = history_processor.HistoryJsonHandle(new_path)
     history_update_combo = history_handle.update_for_history(cookies, new_name)
-    return [gr.Radio.update(choices=only_name, value=new_name), *history_update_combo]
+    return [gr.update(choices=only_name, value=new_name), *history_update_combo]
 
 
 def import_history(file, ipaddr: gr.Request):
@@ -215,7 +215,7 @@ def import_history(file, ipaddr: gr.Request):
         index += 1
     os.rename(file.name, os.path.join(user_path, new_file))
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
-    return gr.Radio.update(choices=only_name, value=new_name)
+    return gr.update(choices=only_name, value=new_name)
 
 
 def refresh_history(cookies, ipaddr: gr.Request):
@@ -223,7 +223,7 @@ def refresh_history(cookies, ipaddr: gr.Request):
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
     history_handle = history_processor.HistoryJsonHandle(new_path)
     history_update_combo = history_handle.update_for_history(cookies, new_name)
-    return [gr.Radio.update(choices=only_name, value=new_name), *history_update_combo]
+    return [gr.update(choices=only_name, value=new_name), *history_update_combo]
 
 
 def download_history_json(select, ipaddr: gr.Request):
@@ -265,7 +265,7 @@ def converter_history_masks(chatbot, system_prompt, ipaddr: gr.Request):
     for i in chatbot:
         mask_dataset.append(['user', func_box.match_chat_information(i[0])])
         mask_dataset.append(['assistant', func_box.match_chat_information(i[1])])
-    return gr.Dataframe.update(value=mask_dataset)
+    return gr.update(value=mask_dataset)
 
 
 # TODO < -------------------------------- 小按钮函数注册区 -------------------------------->
@@ -343,9 +343,9 @@ def prompt_retrieval(prompt_cls, hosts, search=False):
 
 def change_check_txt(checkbox):
     if checkbox:
-        return gr.Checkbox.update(label='复用')
+        return gr.update(label='复用')
     else:
-        return gr.Checkbox.update(label='编辑')
+        return gr.update(label='编辑')
 
 
 def prompt_reduce(is_all, prompt: gr.Dataset, ipaddr: gr.Request):  # is_all, ipaddr: gr.Request
@@ -360,7 +360,7 @@ def prompt_reduce(is_all, prompt: gr.Dataset, ipaddr: gr.Request):  # is_all, ip
     """
     data = prompt_retrieval(prompt_cls=is_all, hosts=func_box.user_client_mark(ipaddr))
     prompt['samples'] = data
-    return gr.Dataset.update(samples=data, visible=True), prompt, is_all
+    return gr.update(samples=data, visible=True), prompt, is_all
 
 
 def prompt_upload_refresh(file, prompt, pro_select, ipaddr: gr.Request):
@@ -384,7 +384,7 @@ def prompt_upload_refresh(file, prompt, pro_select, ipaddr: gr.Request):
     if upload_data != {}:
         status = SqliteHandle(f'{tab_cls}').inset_prompt(upload_data, user_info)
         ret_data = prompt_retrieval(prompt_cls=tab_cls, hosts=func_box.user_client_mark(ipaddr))
-        return gr.Dataset.update(samples=ret_data, visible=True), prompt, tab_cls
+        return gr.update(samples=ret_data, visible=True), prompt, tab_cls
     else:
         prompt['samples'] = [
             [f'{func_box.html_tag_color("数据解析失败，请检查文件是否符合规范", color="red")}', tab_cls]]
@@ -409,7 +409,7 @@ def prompt_delete(pro_name, prompt_dict, select_check, ipaddr: gr.Request):
         raise gr.Error(f'无法删除不属于你创建的 {pro_name}，如有紧急需求，请联系管理员')
     data = prompt_retrieval(prompt_cls=None, hosts=user_addr)
     prompt_dict['samples'] = data
-    return gr.Dataset.update(samples=data, visible=True), prompt_dict
+    return gr.update(samples=data, visible=True), prompt_dict
 
 
 def prompt_save(txt, name, prompt: gr.Dataset, pro_select, ipaddr: gr.Request):
@@ -434,10 +434,9 @@ def prompt_save(txt, name, prompt: gr.Dataset, pro_select, ipaddr: gr.Request):
         if status:
             raise gr.Error('!!!!已有其他人保存同名的配置，请修改名称后再保存')
         else:
-            all_, personal = toolbox.get_conf('preset_prompt')['key']
-            result = prompt_retrieval(prompt_cls=all_, hosts=func_box.user_client_mark(ipaddr))
+            result = prompt_retrieval(prompt_cls=pro_select, hosts=func_box.user_client_mark(ipaddr))
             prompt['samples'] = result
-            return gr.Dataset.update(samples=result, visible=True), prompt
+            return gr.update(samples=result, visible=True), prompt
     elif not txt or not name:
         raise gr.Error('!!!!编辑区域 or 名称不能为空!!!!')
 
@@ -474,10 +473,10 @@ def prompt_input(edit_check, input_txt: str, llm_select, index, data, ipaddr: gr
     else:
         chatbot_cookie = [gr.update() for i in chatbot_cookie]
         if mask_:
-            tab_select = gr.Tabs.update(selected='masks')
+            tab_select = gr.update(selected='masks')
             mask_comb = [data_cls, mask_, data_name]
         else:
-            tab_select = gr.Tabs.update(selected='prompt')
+            tab_select = gr.update(selected='prompt')
             prompt_comb = [data_cls, data_str, data_name]
     all_comb = [tab_select] + prompt_comb + mask_comb + chatbot_cookie + [input_txt]
 
@@ -488,7 +487,7 @@ def prompt_search(tab_cls, sear_txt, sp, data_base, ipaddr: gr.Request):
     sorted_dict = prompt_retrieval(prompt_cls=tab_cls, hosts=func_box.user_client_mark(ipaddr))
     search_result = search_highlight(sorted_dict, sear_txt, False, [0, 2, 3], sp)
     data_base['samples'] = search_result
-    return gr.Dataset.update(samples=search_result, visible=True), data_base
+    return gr.update(samples=search_result, visible=True), data_base
 
 
 def show_prompt_result(index, data: gr.Dataset, cookies, ipaddr: gr.Request):
@@ -506,7 +505,7 @@ def show_prompt_result(index, data: gr.Dataset, cookies, ipaddr: gr.Request):
     user_path = os.path.join(init_path.history_path, func_box.user_client_mark(ipaddr))
     history_handle = history_processor.HistoryJsonHandle(os.path.join(user_path, file_name + ".json"))
     cookie_combo = history_handle.update_for_history(cookies, file_name)
-    return gr.Radio.update(value=file_name), *cookie_combo
+    return gr.update(value=file_name), *cookie_combo
 
 
 # TODO < -------------------------------- 搜索函数注册区 -------------------------------->
@@ -575,7 +574,7 @@ def draw_results(txt, prompt: dict, percent, ipaddr: gr.Request):
     sorted_dict = sorted(lst.items(), key=lambda x: x[1], reverse=True)
     search_result = search_highlight(sorted_dict, txt, True, [0, 1, 0], percent)
     prompt['samples'] = search_result
-    return gr.Dataset.update(samples=search_result, visible=True), prompt
+    return gr.update(samples=search_result, visible=True), prompt
 
 
 # TODO < -------------------------------- 面具编辑函数注册区 -------------------------------->
@@ -630,7 +629,7 @@ def mask_clear_all(data, state, info):
 def mobile_access(request: gr.Request):  # 为适配手机端
     user_agent = request.kwargs['headers']['user-agent'].lower()
     if user_agent.find('android') != -1 or user_agent.find('iphone') != -1:
-        return gr.Column.update(visible=False), gr.Dropdown.update(show_label=False)
+        return gr.update(visible=False), gr.Dropdown.update(show_label=False)
     else:
         return gr.update(), gr.update()
 
@@ -650,11 +649,11 @@ def refresh_load_data(prompt, request: gr.Request):
     prompt['samples'] = data
     know_list = os.listdir(init_path.knowledge_path)
     load_list, user_list = func_box.get_directory_list(os.path.join(init_path.knowledge_path, '知识库'), user_addr)
-    know_cls = gr.Dropdown.update(choices=know_list, value='知识库')
-    know_load = gr.Dropdown.update(choices=load_list, label='知识库', show_label=True)
-    know_user = gr.Dropdown.update(choices=user_list)
+    know_cls = gr.update(choices=know_list, value='知识库')
+    know_load = gr.update(choices=load_list, label='知识库', show_label=True)
+    know_user = gr.update(choices=user_list)
     select_list = filter_database_tables()
-    outputs = [gr.Dataset.update(samples=data, visible=True), prompt,
+    outputs = [gr.update(samples=data, visible=True), prompt,
                gr.update(choices=all + select_list), gr.update(choices=[all[1]] + select_list),
                gr.update(choices=[all[1]] + select_list),
                know_cls, know_user, know_load]
@@ -666,8 +665,8 @@ def refresh_user_data(cookies, proxy_info, ipaddr: gr.Request):
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
     history_handle = history_processor.HistoryJsonHandle(new_path)
     history_update_combo = history_handle.update_for_history(cookies, new_name)
-    outputs = [gr.Radio.update(choices=only_name, value=new_name, visible=True), *history_update_combo,
-               new_name, gr.Markdown.update(value=f"你好，`{func_box.user_client_mark(ipaddr)}`\n\n {proxy_info}")]
+    outputs = [gr.update(choices=only_name, value=new_name, visible=True), *history_update_combo,
+               new_name, gr.update(value=f"你好，`{func_box.user_client_mark(ipaddr)}`\n\n {proxy_info}")]
     return outputs
 
 

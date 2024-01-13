@@ -50,6 +50,7 @@ var uploadIndexFileElement = null
 var uploadIndexFileHeight = null
 var uoloadIndexLinkElement = null
 var validImgExtensions = ['png', 'jpg', 'jpeg', 'bmp', 'svg', 'webp', 'ico', 'tif', 'tiff', 'raw', 'eps', 'gif'];
+var validDocsExtensions = ['html', 'htm', 'xhtml', 'css', 'js', 'pdf', 'txt', 'json', 'xml', 'md'];
 // 创建一个ResizeObserver实例
 var uploadHeightObserver = new ResizeObserver(entries => {
     if (uoloadIndexLinkElement) {  // 如果上传文件的链接存在，则添加鼠标悬停事件

@@ -32,19 +32,19 @@ class Settings:
                 show_label=True, placeholder=f"Your API-key...",
                 # value=hide_middle_chars(user_api_key.value),
                 type="password",  # visible=not HIDE_MY_KEY,
-                label="API-Key",
-            ).style(container=False)
+                label="API-Key", container=False
+            )
             self.models_box = gr.CheckboxGroup(choices=['input加密', '预加载知识库'], value=['input加密'],
-                                               label="对话模式").style(container=False)
+                                               label="对话模式", container=False)
             self.secret_css, self.secret_font = gr.Textbox(visible=False), gr.Textbox(visible=False)
             AVAIL_THEMES, latex_option = toolbox.get_conf('AVAIL_THEMES', 'latex_option')
             self.theme_dropdown = gr.Dropdown(AVAIL_THEMES, value=AVAIL_THEMES[0], label=i18n("更换UI主题"),
-                                              interactive=True, allow_custom_value=True,
+                                              interactive=True, allow_custom_value=True, container=False,
                                               info='更多主题, 请查阅Gradio主题商店: '
                                                    'https://huggingface.co/spaces/gradio/theme-gallery',
-                                              ).style(container=False)
+                                              )
             self.latex_option = gr.Dropdown(latex_option, value=latex_option[0], label=i18n("更换Latex输出格式"),
-                                            interactive=True).style(container=False)
+                                            interactive=True, container=False)
             gr.HTML(get_html("appearance_switcher.html").format(
                 label=i18n("切换亮暗色主题")), elem_classes="insert-block", visible=False)
             self.single_turn_checkbox = gr.Checkbox(label=i18n(
@@ -89,7 +89,7 @@ class AdvancedSearch:
             with gr.Box():
                 with gr.Row():
                     self.history_search_txt = gr.Textbox(show_label=False, elem_classes='search_txt',
-                                                         placeholder="输入你想要搜索的对话记录").style(container=False)
+                                                         placeholder="输入你想要搜索的对话记录", container=False)
                 with gr.Row(elem_classes='search-example'):
                     self.pro_history_state = gr.State({'samples': None})
                     self.pro_history_list = gr.Dataset(components=[gr.HTML(visible=False)], samples_per_page=10,
@@ -129,32 +129,33 @@ class Prompt:
     def _draw_tabs_prompt(self):
         self.devs_document = toolbox.get_conf('devs_document')
         with gr.TabItem('提示词', id='prompt'):
+            Tips = "用 BORF 分析法设计GPT 提示词:\n" \
+                   "1、阐述背景 B(Background): 说明背景，为chatGPT提供充足的信息\n" \
+                   "2、定义目标 O(Objectives):“我们希望实现什么”\n" \
+                   "3、定义关键结果 R(key Result):“我要什么具体效果”\n" \
+                   "4、试验并调整，改进 E(Evolve):三种改进方法自由组合\n" \
+                   "\t 改进输入：从答案的不足之处着手改进背景B,目标O与关键结果R\n" \
+                   "\t 改进答案：在后续对话中指正chatGPT答案缺点\n" \
+                   "\t 重新生成：尝试在`提示词`不变的情况下多次生成结果，优中选优\n" \
+                   "\t 熟练使用占位符{{{v}}}:  当`提示词`存在占位符，则优先将{{{v}}}替换为预期文本"
+            self.pro_edit_txt = gr.Textbox(show_label=False, lines=12,
+                                           elem_classes='no_padding_input',
+                                           placeholder=Tips)
             with gr.Row():
                 with gr.Column(elem_classes='column_left'):
-                    self.pro_upload_btn = gr.File(file_count='single', file_types=['.yaml', '.json'],
-                                                  label=f'上传你的提示词文件, 编写格式请遵循上述开发者文档', )
+                    with gr.Accordion('Prompt Upload', open=False):
+                        self.pro_upload_btn = gr.File(file_count='single', file_types=['.yaml', '.json'],
+                                                      label=f'上传你的提示词文件, 编写格式请遵循上述开发者文档', )
                 with gr.Column(elem_classes='column_right'):
-                    Tips = "用 BORF 分析法设计GPT 提示词:\n" \
-                           "1、阐述背景 B(Background): 说明背景，为chatGPT提供充足的信息\n" \
-                           "2、定义目标 O(Objectives):“我们希望实现什么”\n" \
-                           "3、定义关键结果 R(key Result):“我要什么具体效果”\n" \
-                           "4、试验并调整，改进 E(Evolve):三种改进方法自由组合\n" \
-                           "\t 改进输入：从答案的不足之处着手改进背景B,目标O与关键结果R\n" \
-                           "\t 改进答案：在后续对话中指正chatGPT答案缺点\n" \
-                           "\t 重新生成：尝试在`提示词`不变的情况下多次生成结果，优中选优\n" \
-                           "\t 熟练使用占位符{{{v}}}:  当`提示词`存在占位符，则优先将{{{v}}}替换为预期文本"
-                    self.pro_edit_txt = gr.Textbox(show_label=False, lines=12,
-                                                   elem_classes='no_padding_input',
-                                                   placeholder=Tips).style()
                     with gr.Row():
                         self.prompt_cls_select = gr.Dropdown(choices=[], value='',
                                                              label='提示词分类', elem_classes='normal_select',
-                                                             allow_custom_value=True, interactive=True
-                                                             ).style(container=False)
-                        self.pro_name_txt = gr.Textbox(show_label=False, placeholder='提示词名称').style(container=False)
+                                                             allow_custom_value=True, interactive=True, container=False
+                                                             )
+                        self.pro_name_txt = gr.Textbox(show_label=False, placeholder='提示词名称', container=False)
                     with gr.Row():
-                        self.pro_del_btn = gr.Button("删除提示词", ).style(size='sm', full_width=True)
-                        self.pro_new_btn = gr.Button("保存提示词", variant="primary").style(size='sm', full_width=True)
+                        self.pro_del_btn = gr.Button("删除提示词", size='sm', full_width=True)
+                        self.pro_new_btn = gr.Button("保存提示词", variant="primary", size='sm', full_width=True)
 
     def _draw_tabs_masks(self):
         with gr.TabItem('Masks 🎭', id='masks'):
@@ -173,13 +174,12 @@ class Prompt:
                     with gr.Row():
                         self.mask_cls_select = gr.Dropdown(choices=[], value='',
                                                            label='Masks分类', elem_classes='normal_select',
-                                                           allow_custom_value=True, interactive=True
-                                                           ).style(container=False)
-                        self.masks_name_txt = gr.Textbox(show_label=False, placeholder='Mask名称').style(
-                            container=False)
+                                                           allow_custom_value=True, interactive=True, container=False
+                                                           )
+                        self.masks_name_txt = gr.Textbox(show_label=False, placeholder='Mask名称', container=False)
                     with gr.Row():
-                        self.masks_del_btn = gr.Button("删除Mask", ).style(size='sm', full_width=True)
-                        self.masks_new_btn = gr.Button("保存Mask", variant="primary").style(size='sm', full_width=True)
+                        self.masks_del_btn = gr.Button("删除Mask", size='sm', full_width=True)
+                        self.masks_new_btn = gr.Button("保存Mask", variant="primary", size='sm', full_width=True)
 
     def _draw_langchain_base(self):
         spl = toolbox.get_conf('spl')
@@ -189,7 +189,7 @@ class Prompt:
                     self.langchain_upload = gr.Files(label="支持解析多类型文档，多文件建议使用zip上传",
                                                      file_count="multiple", file_types=spl)
                     self.langchain_links = gr.Textbox(show_label=False, placeholder='网络文件,多个链接使用换行间隔',
-                                                      elem_classes='no_padding_input').style()
+                                                      elem_classes='no_padding_input')
                     self.langchain_know_kwargs = gr.State(
                         {'file_path': '', 'know_name': '', 'know_obj': {}, 'file_list': []})
                     #  file_path 是上传文件存储的地址，know_name，know_obj是ql向量化后的对象
@@ -197,19 +197,19 @@ class Prompt:
                     with gr.Row():
                         self.langchain_classifi = gr.Dropdown(choices=[], value="知识库", interactive=True,
                                                               label="选择知识库分类", allow_custom_value=True,
-                                                              elem_classes='normal_select').style(container=False)
+                                                              elem_classes='normal_select', container=False)
                         self.langchain_cls_name = gr.Textbox(show_label=False, placeholder='已有知识库重命名',
                                                              container=False,
                                                             visible=False)
                     with gr.Row():
                         self.langchain_select = gr.Dropdown(choices=[], value=r"", allow_custom_value=True,
                                                             interactive=True, label="新建or增量重构",
-                                                            elem_classes='normal_select').style(container=False)
+                                                            elem_classes='normal_select', container=False)
                         self.langchain_name = gr.Textbox(show_label=False, placeholder='已有知识库重命名', container=False,
                                                          visible=False)
                     with gr.Row():
-                        self.langchain_submit = gr.Button(value='构建/更新知识库', variant='primary').style(size='sm')
-                        self.langchain_stop = gr.Button(value='停止构建').style(size='sm')
+                        self.langchain_submit = gr.Button(value='构建/更新知识库', variant='primary', size='sm')
+                        self.langchain_stop = gr.Button(value='停止构建', size='sm')
             func_box.md_division_line()
             self.langchain_status = gr.Markdown(value='')
             self.langchain_error = gr.Markdown(value='')

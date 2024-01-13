@@ -147,7 +147,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
             new_btn_list = []
             fns_list = []
             if not plu_list:
-                return [*[fns.update(visible=False) for fns in fn_btn_dict], gr.Dropdown.update(choices=[])]
+                return [*[fns.update(visible=False) for fns in fn_btn_dict], gr.update(choices=[])]
             else:
                 for fns in fn_btn_dict:
                     if list(fn_btn_dict[fns].keys())[0] in plu_list:
@@ -161,7 +161,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                                 fns_list.append(k)
                             elif crazy_fns_role[role][k].get('AdvancedArgs', False):
                                 fns_list.append(k)
-                return [*new_btn_list, gr.Dropdown.update(choices=fns_list)]
+                return [*new_btn_list, gr.update(choices=fns_list)]
 
         # 文件上传区，接收文件后与chatbot的互动
         self.file_upload.upload(on_file_uploaded, [self.file_upload, self.chatbot, self.user_input, self.cookies],
@@ -296,7 +296,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                                               outputs=[self.status_display])
         self.historyMasksConverterBtn.click(func_signals.converter_history_masks,
                                             inputs=[self.chatbot, self.system_prompt], outputs=[self.masks_dataset]
-                                            ).then(lambda: gr.Tabs.update('masks'),
+                                            ).then(lambda: gr.update('masks'),
                                                    inputs=None, outputs=[self.treasure_bag_tab],
                                                    _js='()=>{open_treasure_chest();}')
         self.historySearchTextbox.submit(fn=func_signals.draw_results,
@@ -335,11 +335,11 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                             [*self.llms_cookies_combo, self.status_display,
                              self.historySelectList, self.saveFileName])
         self.changeSingleSessionBtn.click(
-            fn=lambda value: gr.Checkbox.update(value=value), inputs=[self.single_turn_checkbox],
+            fn=lambda value: gr.update(value=value), inputs=[self.single_turn_checkbox],
             outputs=[self.single_turn_checkbox], _js='(a)=>{return bgChangeSingleSession(a);}'
         )
         self.changeOnlineSearchBtn.click(
-            fn=lambda value: gr.Checkbox.update(value=value), inputs=[self.use_websearch_checkbox],
+            fn=lambda value: gr.update(value=value), inputs=[self.use_websearch_checkbox],
             outputs=[self.use_websearch_checkbox], _js='(a)=>{return bgChangeOnlineSearch(a);}'
         )
 

@@ -100,22 +100,23 @@ def knowledge_base_writing(cls_select, links: str, select, name, kai_handle, ipa
         kai_id = name
         os.rename(os.path.join(vector_path, select), os.path.join(vector_path, name))
         _, load_file = func_box.get_directory_list(vector_path, user_addr)
-        yield '', f'更名成功～ `{select}` -> `{name}`', gr.Dropdown.update(), gr.Dropdown.update(choices=load_file,
-                                                                                                value=kai_id), gr.Dropdown.update(), kai_handle
+        yield ('', f'更名成功～ `{select}` -> `{name}`',
+               gr.update(), gr.update(choices=load_file,
+                                      value=kai_id), gr.update(), kai_handle)
         if not links and not kai_handle.get('file_list'): return  # 如果文件和链接都为空，那么就有必要往下执行了
     elif select:
         kai_id = select
     else:
         kai_id = func_box.created_atime()
         waring = '新建知识库时，知识库名称建议不要为空，本次知识库名称取用服务器时间`kai_id`为知识库名称！！！'
-        yield '', waring, gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(), kai_handle
+        yield '', waring, gr.Dropdown.update(), gr.update(), gr.Dropdown.update(), kai_handle
     # < --------------------限制上班时间段构建知识库--------------- >
     reject_build_switch = toolbox.get_conf('reject_build_switch')
     if reject_build_switch:
         if not func_box.check_expected_time():
             raise gr.Error('上班时间段不允许启动构建知识库任务，若有紧急任务请联系管理员')
     # < --------------------读取文件正式开始--------------- >
-    yield '开始咯开始咯～', '', gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(), kai_handle
+    yield '开始咯开始咯～', '', gr.update(), gr.update(), gr.update(), kai_handle
     files = kai_handle['file_path']
     file_manifest = []
     spl = toolbox.get_conf('spl')
@@ -130,12 +131,12 @@ def knowledge_base_writing(cls_select, links: str, select, name, kai_handle, ipa
         # task_info, kdocs_manifest_tmp, _ = crzay_kingsoft.get(links, type='', ipaddr=user_addr)
         if kdocs_manifest_tmp:
             error += task_info
-            yield (f"", error, gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(), kai_handle)
+            yield (f"", error, gr.update(), gr.update(), gr.update(), kai_handle)
     except:
         import traceback
         error_str = traceback.format_exc()
         error += f'提取出错文件错误啦\n\n```\n{error_str}\n```'
-        yield (f"", error, gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(), kai_handle)
+        yield (f"", error, gr.update(), gr.update(), gr.update(), kai_handle)
         kdocs_manifest_tmp = []
     file_manifest += kdocs_manifest_tmp
     # < --------------------缺陷文件拆分--------------- >

@@ -330,7 +330,7 @@ function insertFilePreview(fileRow) {
             img.src = link.href;
             img.className = 'td-a-preview'
             tdElem.appendChild(img);
-        } else {          // 对于其他文件， 建立 <iframe>
+        } else if (validDocsExtensions.includes(extension)) {  // 对于可读其他文件， 建立 <iframe>
             let iframe = document.createElement('iframe');
             iframe.src = link.href;
             iframe.className = 'td-a-preview'

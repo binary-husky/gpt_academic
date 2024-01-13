@@ -433,14 +433,14 @@ def main():
             fns_list = []
             if not group_list:  # 处理特殊情况：没有选择任何插件组
                 return [*[plugin['Button'].update(visible=False) for _, plugin in plugins_as_btn.items()],
-                        gr.Dropdown.update(choices=[])]
+                        gr.update(choices=[])]
             for k, plugin in plugins.items():
                 if plugin.get("AsButton", True):
                     btn_list.append(plugin['Button'].update(visible=match_group(plugin['Group'], group_list)))  # 刷新按钮
                     if plugin.get('AdvancedArgs', False): dropdown_fn_list.append(k)  # 对于需要高级参数的插件，亦在下拉菜单中显示
                 elif match_group(plugin['Group'], group_list):
                     fns_list.append(k)  # 刷新下拉列表
-            return [*btn_list, gr.Dropdown.update(choices=fns_list)]
+            return [*btn_list, gr.update(choices=fns_list)]
 
         plugin_group_sel.select(fn=on_group_change, inputs=[plugin_group_sel],
                                 outputs=[*[plugin['Button'] for name, plugin in plugins_as_btn.items()], dropdown])

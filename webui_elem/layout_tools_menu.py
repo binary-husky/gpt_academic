@@ -50,10 +50,11 @@ class RightElem:
         with gr.TabItem('插件', id='plug_tab', elem_id='chuanhu-toolbox-tabs'):
             with gr.Accordion("上传本地文件可供高亮函数插件调用", open=False, visible=False) as self.area_file_up:
                 self.file_upload = gr.Files(label="任何文件, 但推荐上传压缩文件(zip, tar)",
-                                            file_count="multiple").style()
+                                            file_count="multiple")
             self.plugin_dropdown = gr.Dropdown(choices=crazy_classification, label='选择插件分类', value=default_plugin,
-                                               multiselect=True, interactive=True, elem_classes='normal_mut_select'
-                                               ).style(container=False)
+                                               multiselect=True, interactive=True, elem_classes='normal_mut_select',
+                                               container=False
+                                               )
             with gr.Accordion("函数插件区/高亮插件需要输入框支持", open=True) as self.area_crazy_fn:
                 with gr.Row():
                     for role in crazy_fns_role:
@@ -61,10 +62,11 @@ class RightElem:
                             if not crazy_fns_role[role][k].get("AsButton", True): continue
                             if role not in default_plugin:
                                 variant = crazy_fns_role[role][k]["Color"] if "Color" in crazy_fns_role[role][k] else "secondary"
-                                crazy_fns_role[role][k]['Button'] = gr.Button(k, variant=variant, visible=False).style(size="sm")
+                                crazy_fns_role[role][k]['Button'] = gr.Button(k, variant=variant, visible=False, size="sm")
                             else:
                                 variant = crazy_fns[k]["Color"] if "Color" in crazy_fns_role[role][k] else "secondary"
-                                crazy_fns_role[role][k]['Button'] = gr.Button(k, variant=variant, visible=True).style(size="sm")
+                                crazy_fns_role[role][k]['Button'] = gr.Button(k, variant=variant,
+                                                                              visible=True, size="sm")
             func_box.md_division_line()
             with gr.Accordion("更多函数插件/自定义插件参数", open=True, ):
                 dropdown_fn_list = []
@@ -75,10 +77,10 @@ class RightElem:
                                 dropdown_fn_list.append(k)
                             elif crazy_fns_role[role][k].get('AdvancedArgs', False):
                                 dropdown_fn_list.append(k)
-                self.dropdown_fn = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", interactive=True, show_label=False, label="").style(
-                    container=False)
+                self.dropdown_fn = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", interactive=True,
+                                               show_label=False, label="", container=False)
                 self.plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False, elem_classes='no_padding_input',
-                                                 placeholder="这里是特殊函数插件的高级参数输入区").style()
+                                                 placeholder="这里是特殊函数插件的高级参数输入区")
                 self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary", visible=False)
 
     def _draw_setting_chat(self):
@@ -89,56 +91,58 @@ class RightElem:
                 default_params = toolbox.get_conf('LLMS_DEFAULT_PARAMETER')
                 with gr.Accordion(label='LLMs调优参数', open=False):
                     self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=default_params['top_p'], step=0.01, interactive=True,
-                                           label="Top-p", ).style(container=False)
+                                           label="Top-p", container=False)
                     self.temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True,
-                                                 label="Temperature",).style(container=False)
+                                                 label="Temperature", container=False)
                     self.n_choices_slider = gr.Slider(minimum=1, maximum=10, value=default_params['n_choices'], step=1,
-                                                      interactive=True, label="n choices",
-                                                      ).style(container=False)
+                                                      interactive=True, label="n choices", container=False
+                                                      )
                     self.stop_sequence_txt = gr.Textbox(show_label=True, placeholder=i18n("停止符，用英文逗号隔开..."),
                                                         label="stop", value=default_params['stop'], lines=1,
-                                                        ).style(container=False)
+                                                        container=False
+                                                        )
                     self.presence_penalty_slider = gr.Slider(minimum=-2.0, mmaximum=default_params['presence_penalty'], value=0.0,
                                                              step=0.01, interactive=True, label="presence penalty",
-                                                             ).style(container=False)
+                                                             container=False
+                                                             )
                     self.frequency_penalty_slider = gr.Slider(minimum=-2.0, maximum=2, value=default_params['frequency_penalty'], step=0.01,
                                                               interactive=True, label="frequency penalty",
-                                                              ).style(container=False)
+                                                              container=False)
 
                     self.user_identifier_txt = gr.Textbox(show_label=True, placeholder=i18n("用于定位滥用行为"),
                                                           label=i18n("用户名"), value=default_params['user'], lines=1,
-                                                          ).style(container=False)
+                                                          container=False)
                     func_box.md_division_line()
                     self.max_context_length_slider = gr.Slider(minimum=1, maximum=32768, value=default_params['max_context'],
                                                                step=1, interactive=True, label="max context",
-                                                               ).style(container=False)
+                                                               container=False)
                     self.max_generation_slider = gr.Slider(minimum=1, maximum=32768, value=default_params['max_generation'],
                                                            step=1, interactive=True, label="max generations",
-                                                           ).style(container=False)
+                                                           container=False)
                     self.logit_bias_txt = gr.Textbox(show_label=True, placeholder=f"word:likelihood",
                                                      label="logit bias", value=default_params['logit_bias'], lines=1,
-                                                     ).style(container=False)
+                                                     container=False)
                     self.max_length_sl = gr.Slider(minimum=256, maximum=4096, value=4096, step=1, interactive=True,
-                                                   label="MaxLength", visible=False
-                                                   ).style(container=False)
+                                                   label="MaxLength", visible=False,
+                                                   container=False)
                 func_box.md_division_line()
                 with gr.Accordion(label='Langchain调优参数'):
                     self.vector_search_score = gr.Slider(minimum=0, maximum=1100, value=500, step=1, interactive=True,
-                                           label="SCORE-THRESHOLD", ).style(container=False)
+                                                         label="SCORE-THRESHOLD", container=False)
                     self.vector_search_top_k = gr.Slider(minimum=1, maximum=10, value=4, step=1, interactive=True,
-                                                 label="TOP-K",).style(container=False)
+                                                         label="TOP-K", container=False)
                     self.vector_chunk_size = gr.Slider(minimum=100, maximum=1000, value=521, step=1, interactive=True,
-                                                       label="CHUNK-SIZE", ).style(container=False)
+                                                       label="CHUNK-SIZE", container=False)
                 func_box.md_division_line()
                 with gr.Accordion(label='工具调试参数', open=True):
                     self.default_worker_num = gr.Slider(minimum=1, maximum=30, value=worker_num, step=1,
-                                                        interactive=True, label="插件多线程最大并行"
-                                                        ).style(container=False)
+                                                        interactive=True, label="插件多线程最大并行", container=False
+                                                        )
                     self.pro_tf_slider = gr.Slider(minimum=1, maximum=200, value=15, step=1, interactive=True,
-                                                   label="搜索展示详细字符").style(container=False)
+                                                   label="搜索展示详细字符", container=False)
                     self.ocr_identifying_trust = gr.Slider(minimum=0.01, maximum=1.0, value=0.60, step=0.01,
-                                                           interactive=True,
-                                                           label="OCR 识别信任指数").style(container=False)
+                                                           interactive=True, container=False,
+                                                           label="OCR 识别信任指数")
             # temp = gr.Markdown(self.description)
 
     def draw_tools_area(self):

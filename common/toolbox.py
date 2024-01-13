@@ -196,9 +196,9 @@ def update_ui(chatbot, history, msg='正常', end_code=0, *args):  # 刷新界�
         chatbot_gr = chatbot
     event = [cookies, chatbot_gr, history, msg]
     if end_code:
-        yield event + [gr.Button.update(visible=False), gr.Button.update(visible=True)]
+        yield event + [gr.update(visible=False), gr.update(visible=True)]
     else:
-        yield event + [gr.Button.update(visible=True), gr.Button.update(visible=False)]
+        yield event + [gr.update(visible=True), gr.update(visible=False)]
 
 
 def update_ui_lastest_msg(lastmsg, chatbot, history, delay=1):  # 刷新界面
