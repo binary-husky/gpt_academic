@@ -386,7 +386,7 @@ async function upload_files(files) {
             Object.defineProperty(elem_upload_component_float, "files", { value: files, enumerable: true });
             elem_upload_component_float.dispatchEvent(event);
         } else {
-            console.log(exist_file_msg);
+            // console.log(exist_file_msg);
             toast_push(exist_file_msg, 3000);
         }
     }
@@ -632,6 +632,40 @@ function minor_ui_adjustment() {
     }, 200); // 每50毫秒执行一次
 }
 
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+//  第 6 部分: 避免滑动
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+let prevented_offset = 0;
+function limit_scroll_position(){
+    let scrollableDiv = document.querySelector('#gpt-chatbot > div.wrap');
+    scrollableDiv.addEventListener('wheel', function (e) {
+        let preventScroll = false;
+        if (e.deltaX != 0) {return;}
+        if (e.deltaY < 0 && this.scrollTop === 0) {
+            preventScroll = true; // check scroll up condition
+        }
+        if (e.deltaY > 0 && this.scrollHeight - this.clientHeight - this.scrollTop <= 0) {
+            preventScroll = true; // check scroll down condition
+        }
+        if (preventScroll) {
+            prevented_offset += e.deltaY;
+            if (Math.abs(prevented_offset) > 1e3) {
+                if (prevented_offset >  1e3) {prevented_offset =  1e3;}
+                if (prevented_offset < -1e3) {prevented_offset = -1e3;}
+                preventScroll = false;
+                // console.log(prevented_offset);
+            }
+        }else{
+            prevented_offset = 0;
+        }
+        if (preventScroll) {
+            e.preventDefault();
+            return;
+        }
+    }, { passive: false }); // Passive event listener option should be false
+}
+
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //  第 6 部分: JS初始化函数
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -645,4 +679,5 @@ function GptAcademicJavaScriptInit(LAYOUT = "LEFT-RIGHT") {
     });
     chatbotObserver.observe(chatbotIndicator, { attributes: true, childList: true, subtree: true });
     if (LAYOUT === "LEFT-RIGHT") { chatbotAutoHeight(); }
+    if (LAYOUT === "LEFT-RIGHT") { limit_scroll_position(); }
 }
