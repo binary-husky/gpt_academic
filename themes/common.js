@@ -654,7 +654,6 @@ function limit_scroll_position(){
                 if (prevented_offset >  1e3) {prevented_offset =  1e3;}
                 if (prevented_offset < -1e3) {prevented_offset = -1e3;}
                 preventScroll = false;
-                // console.log(prevented_offset);
             }
         }else{
             prevented_offset = 0;
