@@ -1,8 +1,8 @@
 > **Caution**
-> 
+>
 > 2023.11.12: 某些依赖包尚不兼容python 3.12，推荐python 3.11。
-> 
-> 2023.11.7: 安装依赖时，请选择`requirements.txt`中**指定的版本**。 安装命令：`pip install -r requirements.txt`。本项目开源免费，请提高警惕，谨防上当受骗。
+>
+> 2023.12.26: 安装依赖时，请选择`requirements.txt`中**指定的版本**。 安装命令：`pip install -r requirements.txt`。本项目完全开源免费，您可通过订阅[在线服务](https://github.com/binary-husky/gpt_academic/wiki/online)的方式鼓励本项目的发展。
 
 <br>
 
@@ -47,7 +47,7 @@ Read this in [English](docs/README.English.md) | [日本語](docs/README.Japanes
 >
 > 2.本项目中每个文件的功能都在[自译解报告](https://github.com/binary-husky/gpt_academic/wiki/GPT‐Academic项目自译解报告)`self_analysis.md`详细说明。随着版本的迭代，您也可以随时自行点击相关函数插件，调用GPT重新生成项目的自我解析报告。常见问题请查阅wiki。
 >    [![常规安装方法](https://img.shields.io/static/v1?label=&message=常规安装方法&color=gray)](#installation)  [![一键安装脚本](https://img.shields.io/static/v1?label=&message=一键安装脚本&color=gray)](https://github.com/binary-husky/gpt_academic/releases)  [![配置说明](https://img.shields.io/static/v1?label=&message=配置说明&color=gray)](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明) [![wiki](https://img.shields.io/static/v1?label=&message=wiki&color=gray)]([https://github.com/binary-husky/gpt_academic/wiki/项目配置说明](https://github.com/binary-husky/gpt_academic/wiki))
-> 
+>
 > 3.本项目兼容并鼓励尝试国产大语言模型ChatGLM等。支持多个api-key共存，可在配置文件中填写如`API_KEY="openai-key1,openai-key2,azure-key3,api2d-key4"`。需要临时更换`API_KEY`时，在输入区输入临时的`API_KEY`然后回车键提交即可生效。
 
 <br><br>
@@ -119,7 +119,7 @@ Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼�
 <br><br>
 
 # Installation
-### 安装方法I：直接运行 (Windows, Linux or MacOS) 
+### 安装方法I：直接运行 (Windows, Linux or MacOS)
 
 1. 下载项目
 
@@ -156,7 +156,7 @@ Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼�
 
 ```sh
 # 【可选步骤I】支持清华ChatGLM2。清华ChatGLM备注：如果遇到"Call ChatGLM fail 不能正常加载ChatGLM的参数" 错误，参考如下： 1：以上默认安装的为torch+cpu版，使用cuda需要卸载torch重新安装torch+cuda； 2：如因本机配置不够无法加载模型，可以修改request_llm/bridge_chatglm.py中的模型精度, 将 AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) 都修改为 AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
-python -m pip install -r request_llms/requirements_chatglm.txt  
+python -m pip install -r request_llms/requirements_chatglm.txt
 
 # 【可选步骤II】支持复旦MOSS
 python -m pip install -r request_llms/requirements_moss.txt
@@ -243,8 +243,8 @@ P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以
 ```python
 "超级英译中": {
     # 前缀，会被加在你的输入之前。例如，用来描述你的要求，例如翻译、解释代码、润色等等
-    "Prefix": "请翻译把下面一段内容成中文，然后用一个markdown表格逐一解释文中出现的专有名词：\n\n", 
-    
+    "Prefix": "请翻译把下面一段内容成中文，然后用一个markdown表格逐一解释文中出现的专有名词：\n\n",
+
     # 后缀，会被加在你的输入之后。例如，配合前缀可以把你的输入内容用引号圈起来。
     "Suffix": "",
 },

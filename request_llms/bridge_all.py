@@ -498,22 +498,6 @@ if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-
         })
     except:
         print(trimmed_format_exc())
-if "chatgpt_website" in AVAIL_LLM_MODELS:   # 接入一些逆向工程https://github.com/acheong08/ChatGPT-to-API/
-    try:
-        from .bridge_chatgpt_website import predict_no_ui_long_connection as chatgpt_website_noui
-        from .bridge_chatgpt_website import predict as chatgpt_website_ui
-        model_info.update({
-            "chatgpt_website": {
-                "fn_with_ui": chatgpt_website_ui,
-                "fn_without_ui": chatgpt_website_noui,
-                "endpoint": openai_endpoint,
-                "max_token": 4096,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            }
-        })
-    except:
-        print(trimmed_format_exc())
 if "spark" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
     try:
         from .bridge_spark import predict_no_ui_long_connection as spark_noui

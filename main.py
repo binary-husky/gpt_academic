@@ -15,7 +15,7 @@ help_menu_description = \
 
 def main():
     import gradio as gr
-    if gr.__version__ not in ['3.32.6']: 
+    if gr.__version__ not in ['3.32.6', '3.32.7']: 
         raise ModuleNotFoundError("使用项目内置Gradio获取最优体验! 请运行 `pip install -r requirements.txt` 指令安装内置Gradio及其他依赖, 详情信息见requirements.txt.")
     from request_llms.bridge_all import predict
     from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, load_chat_cookies, DummyWith
@@ -139,17 +139,17 @@ def main():
                             with gr.Row():
                                 switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary").style(size="sm")
                     with gr.Row():
-                        with gr.Accordion("点击展开“文件上传区”。上传本地文件/压缩包供函数插件调用。", open=False) as area_file_up:
+                        with gr.Accordion("点击展开“文件下载区”。", open=False) as area_file_up:
                             file_upload = gr.Files(label="任何文件, 推荐上传压缩文件(zip, tar)", file_count="multiple", elem_id="elem_upload")
 
 
-        with gr.Floating(init_x="0%", init_y="0%", visible=True, width=None, drag="forbidden"):
+        with gr.Floating(init_x="0%", init_y="0%", visible=True, width=None, drag="forbidden", elem_id="tooltip"):
             with gr.Row():
                 with gr.Tab("上传文件", elem_id="interact-panel"):
                     gr.Markdown("请上传本地文件/压缩包供“函数插件区”功能调用。请注意: 上传文件后会自动把输入区修改为相应路径。")
                     file_upload_2 = gr.Files(label="任何文件, 推荐上传压缩文件(zip, tar)", file_count="multiple", elem_id="elem_upload_float")
     
-                with gr.Tab("更换模型 & Prompt", elem_id="interact-panel"):
+                with gr.Tab("更换模型", elem_id="interact-panel"):
                     md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(container=False)
                     top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01,interactive=True, label="Top-p (nucleus sampling)",)
                     temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature",)
@@ -161,10 +161,9 @@ def main():
                     checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区", "浮动输入区", "输入清除键", "插件参数区"], 
                                                   value=["基础功能区", "函数插件区"], label="显示/隐藏功能区", elem_id='cbs').style(container=False)
                     checkboxes_2 = gr.CheckboxGroup(["自定义菜单"], 
-                                                  value=[], label="显示/隐藏自定义菜单", elem_id='cbs').style(container=False)
+                                                  value=[], label="显示/隐藏自定义菜单", elem_id='cbsc').style(container=False)
                     dark_mode_btn = gr.Button("切换界面明暗 ☀", variant="secondary").style(size="sm")
-                    dark_mode_btn.click(None, None, None, _js=js_code_for_toggle_darkmode,
-                    )
+                    dark_mode_btn.click(None, None, None, _js=js_code_for_toggle_darkmode)
                 with gr.Tab("帮助", elem_id="interact-panel"):
                     gr.Markdown(help_menu_description)
 

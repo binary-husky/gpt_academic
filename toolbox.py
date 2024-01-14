@@ -14,6 +14,7 @@ from functools import wraps, lru_cache
 
 pj = os.path.join
 default_user_name = 'default_user'
+
 """
 ========================================================================
 第一部分
@@ -174,8 +175,12 @@ def CatchException(f):
             if len(chatbot_with_cookie) == 0:
                 chatbot_with_cookie.clear()
                 chatbot_with_cookie.append(["插件调度异常", "异常原因"])
+<<<<<<< HEAD
             chatbot_with_cookie[-1] = (chatbot_with_cookie[-1][0],
                                        f"[Local Message] 插件调用出错: \n\n{tb_str} \n\n当前代理可用性: \n\n{check_proxy(proxies)}")
+=======
+            chatbot_with_cookie[-1] = (chatbot_with_cookie[-1][0], f"[Local Message] 插件调用出错: \n\n{tb_str} \n")
+>>>>>>> 2bc65a99ca151dedb7f1c2427a90962a8d38a147
             yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=f'异常 {e}')  # 刷新界面
 
     return decorated
@@ -322,7 +327,11 @@ def markdown_convertion(txt):
     suf = '</div>'
     if txt.startswith(pre) and txt.endswith(suf):
         # print('警告，输入了已经经过转化的字符串，二次转化可能出问题')
+<<<<<<< HEAD
         return txt  # 已经被转化过，不需要再次转化
+=======
+        return txt # 已经被转化过，不需要再次转化
+>>>>>>> 2bc65a99ca151dedb7f1c2427a90962a8d38a147
 
     markdown_extension_configs = {
         'mdx_math': {
@@ -375,12 +384,21 @@ def markdown_convertion(txt):
         if '```' in txt and '```reference' not in txt: return False
         if '$' not in txt and '\\[' not in txt: return False
         mathpatterns = {
+<<<<<<< HEAD
             r'(?<!\\|\$)(\$)([^\$]+)(\$)': {'allow_multi_lines': False},  #  $...$
             r'(?<!\\)(\$\$)([^\$]+)(\$\$)': {'allow_multi_lines': True},  # $$...$$
             r'(?<!\\)(\\\[)(.+?)(\\\])': {'allow_multi_lines': False},  # \[...\]
             # r'(?<!\\)(\\\()(.+?)(\\\))': {'allow_multi_lines': False},                            # \(...\)
             # r'(?<!\\)(\\begin{([a-z]+?\*?)})(.+?)(\\end{\2})': {'allow_multi_lines': True},       # \begin...\end
             # r'(?<!\\)(\$`)([^`]+)(`\$)': {'allow_multi_lines': False},                            # $`...`$
+=======
+            r'(?<!\\|\$)(\$)([^\$]+)(\$)': {'allow_multi_lines': False},                       #  $...$
+            r'(?<!\\)(\$\$)([^\$]+)(\$\$)': {'allow_multi_lines': True},                       # $$...$$
+            r'(?<!\\)(\\\[)(.+?)(\\\])': {'allow_multi_lines': False},                         # \[...\]
+            # r'(?<!\\)(\\\()(.+?)(\\\))': {'allow_multi_lines': False},                       # \(...\)
+            # r'(?<!\\)(\\begin{([a-z]+?\*?)})(.+?)(\\end{\2})': {'allow_multi_lines': True},  # \begin...\end
+            # r'(?<!\\)(\$`)([^`]+)(`\$)': {'allow_multi_lines': False},                       # $`...`$
+>>>>>>> 2bc65a99ca151dedb7f1c2427a90962a8d38a147
         }
         matches = []
         for pattern, property in mathpatterns.items():
@@ -454,8 +472,12 @@ def close_up_code_segment_during_stream(gpt_reply):
     segments = gpt_reply.split('```')
     n_mark = len(segments) - 1
     if n_mark % 2 == 1:
+<<<<<<< HEAD
         # print('输出代码片段中！')
         return gpt_reply + '\n```'
+=======
+        return gpt_reply + '\n```' # 输出代码片段中！
+>>>>>>> 2bc65a99ca151dedb7f1c2427a90962a8d38a147
     else:
         return gpt_reply
 
@@ -599,7 +621,11 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
             current = chatbot._cookies['files_to_promote']
         else:
             current = []
+<<<<<<< HEAD
         if new_path not in current:  # 避免把同一个文件添加多次
+=======
+        if new_path not in current: # 避免把同一个文件添加多次
+>>>>>>> 2bc65a99ca151dedb7f1c2427a90962a8d38a147
             chatbot._cookies.update({'files_to_promote': [new_path] + current})
     return new_path
 
@@ -661,10 +687,16 @@ def on_file_uploaded(request: gradio.Request, files, chatbot, txt, txt2, checkbo
                     f'\n\n调用路径参数已自动修正到: \n\n{txt}' +
                     f'\n\n现在您点击任意函数插件时，以上文件将被作为输入参数' + upload_msg])
 
+<<<<<<< HEAD
     if "浮动输入区" in checkboxes:
         txt, txt2 = "", "\n".join(file_manifest_filter_type(moved_files, md_type=True))
     else:
         txt, txt2 = "\n".join(file_manifest_filter_type(moved_files, md_type=True)), ""
+=======
+    txt, txt2 = target_path_base, ""
+    if "浮动输入区" in checkboxes:
+        txt, txt2 = txt2, txt
+>>>>>>> 2bc65a99ca151dedb7f1c2427a90962a8d38a147
 
     # 记录近期文件
     cookies.update({
@@ -718,8 +750,13 @@ def load_chat_cookies():
     customize_fn_overwrite_ = {}
     for k in range(NUM_CUSTOM_BASIC_BTN):
         customize_fn_overwrite_.update({
+<<<<<<< HEAD
             "自定义按钮" + str(k + 1): {
                 "Title": r"",
+=======
+            "自定义按钮" + str(k+1):{
+                "Title":  r"",
+>>>>>>> 2bc65a99ca151dedb7f1c2427a90962a8d38a147
                 "Prefix": r"请在自定义菜单中定义提示词前缀.",
                 "Suffix": r"请在自定义菜单中定义提示词后缀",
             }
@@ -828,6 +865,7 @@ def read_env_variable(arg, default_value):
     try:
         if isinstance(default_value, bool):
             env_arg = env_arg.strip()
+<<<<<<< HEAD
             if env_arg == 'True':
                 r = True
             elif env_arg == 'False':
@@ -835,6 +873,11 @@ def read_env_variable(arg, default_value):
             else:
                 print('enter True or False, but have:', env_arg);
                 r = default_value
+=======
+            if env_arg == 'True': r = True
+            elif env_arg == 'False': r = False
+            else: print('Enter True or False, but have:', env_arg); r = default_value
+>>>>>>> 2bc65a99ca151dedb7f1c2427a90962a8d38a147
         elif isinstance(default_value, int):
             r = int(env_arg)
         elif isinstance(default_value, float):
@@ -864,7 +907,11 @@ def read_single_conf_with_lru_cache(arg):
     from colorful import print亮红, print亮绿, print亮蓝
     try:
         # 优先级1. 获取环境变量作为配置
+<<<<<<< HEAD
         default_ref = getattr(importlib.import_module('config'), arg)  # 读取默认值作为数据类型转换的参考
+=======
+        default_ref = getattr(importlib.import_module('config'), arg) # 读取默认值作为数据类型转换的参考
+>>>>>>> 2bc65a99ca151dedb7f1c2427a90962a8d38a147
         r = read_env_variable(arg, default_ref)
     except:
         try:
@@ -879,8 +926,12 @@ def read_single_conf_with_lru_cache(arg):
         oai_rd = r.get("https://api.openai.com/v1/chat/completions",
                        None)  # API_URL_REDIRECT填写格式是错误的，请阅读`https://github.com/binary-husky/gpt_academic/wiki/项目配置说明`
         if oai_rd and not oai_rd.endswith('/completions'):
+<<<<<<< HEAD
             print亮红(
                 "\n\n[API_URL_REDIRECT] API_URL_REDIRECT填错了。请阅读`https://github.com/binary-husky/gpt_academic/wiki/项目配置说明`。如果您确信自己没填错，无视此消息即可。")
+=======
+            print亮红("\n\n[API_URL_REDIRECT] API_URL_REDIRECT填错了。请阅读`https://github.com/binary-husky/gpt_academic/wiki/项目配置说明`。如果您确信自己没填错，无视此消息即可。")
+>>>>>>> 2bc65a99ca151dedb7f1c2427a90962a8d38a147
             time.sleep(5)
     if arg == 'API_KEY':
         print亮蓝(
@@ -892,7 +943,11 @@ def read_single_conf_with_lru_cache(arg):
         else:
             print亮红("[API_KEY] 您的 API_KEY 不满足任何一种已知的密钥格式，请在config文件中修改API密钥之后再运行。")
     if arg == 'proxies':
+<<<<<<< HEAD
         if not read_single_conf_with_lru_cache('USE_PROXY'): r = None  # 检查USE_PROXY，防止proxies单独起作用
+=======
+        if not read_single_conf_with_lru_cache('USE_PROXY'): r = None # 检查USE_PROXY，防止proxies单独起作用
+>>>>>>> 2bc65a99ca151dedb7f1c2427a90962a8d38a147
         if r is None:
             print亮红(
                 '[PROXY] 网络代理状态：未配置。无代理状态下很可能无法访问OpenAI家族的模型。建议：检查USE_PROXY选项是否修改。')
@@ -986,7 +1041,7 @@ def clip_history(inputs, history, tokenizer, max_token_limit):
     reduce the length of history by clipping.
     this function search for the longest entries to clip, little by little,
     until the number of token of history is reduced under threshold.
-    通过裁剪来缩短历史记录的长度。 
+    通过裁剪来缩短历史记录的长度。
     此函数逐渐地搜索最长的条目进行剪辑，
     直到历史记录的标记数量降低到阈值以下。
     """
@@ -1031,7 +1086,11 @@ def clip_history(inputs, history, tokenizer, max_token_limit):
         where = np.argmax(everything_token)
         encoded = tokenizer.encode(everything[where], disallowed_special=())
         clipped_encoded = encoded[:len(encoded) - delta]
+<<<<<<< HEAD
         everything[where] = tokenizer.decode(clipped_encoded)[:-1]  # -1 to remove the may-be illegal char
+=======
+        everything[where] = tokenizer.decode(clipped_encoded)[:-1] # -1 to remove the may-be illegal char
+>>>>>>> 2bc65a99ca151dedb7f1c2427a90962a8d38a147
         everything_token[where] = get_token_num(everything[where])
         n_token = get_token_num('\n'.join(everything))
 
