@@ -3,8 +3,9 @@ import re
 import os
 import math
 from textwrap import dedent
+from functools import lru_cache
+from pymdownx.superfences import fence_div_format, fence_code_format
 from latex2mathml.converter import convert as tex2mathml
-from functools import wraps, lru_cache
 from shared_utils.config_loader import get_conf as get_conf
 
 pj = os.path.join
@@ -17,10 +18,16 @@ markdown_extension_configs = {
     },
 }
 
-
 code_highlight_configs = {
     "pymdownx.superfences": {
         'css_class': 'codehilite',
+        "custom_fences": [
+            {
+                'name': 'mermaid',
+                'class': 'mermaid',
+                'format': fence_code_format
+            }
+        ]
     },
     "pymdownx.highlight": {
         'css_class': 'codehilite',

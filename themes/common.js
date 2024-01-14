@@ -229,6 +229,27 @@ function addCopyButton(botElement) {
     botElement.appendChild(messageBtnColumn);
 }
 
+
+let timeoutID = null;
+let lastInvocationTime = 0;
+let lastArgs = null;
+function do_something_but_not_too_frequently(min_interval, func) {
+    return function(...args) {
+        lastArgs = args;
+        const now = Date.now();
+        if (!lastInvocationTime || (now - lastInvocationTime) >= min_interval) {
+            lastInvocationTime = now;
+            func.apply(this, args);
+        } else if (!timeoutID) {
+            timeoutID = setTimeout(() => {
+                timeoutID = null;
+                lastInvocationTime = Date.now();
+                func.apply(this, lastArgs);
+            }, min_interval - (now - lastInvocationTime));      
+        } 
+    }
+}
+
 function chatbotContentChanged(attempt = 1, force = false) {
     // https://github.com/GaiZhenbiao/ChuanhuChatGPT/tree/main/web_assets/javascript
     for (var i = 0; i < attempt; i++) {
@@ -236,6 +257,13 @@ function chatbotContentChanged(attempt = 1, force = false) {
             gradioApp().querySelectorAll('#gpt-chatbot .message-wrap .message.bot').forEach(addCopyButton);
         }, i === 0 ? 0 : 200);
     }
+
+    const run_mermaid_render = do_something_but_not_too_frequently(500, function () {
+        const blocks = document.querySelectorAll(`pre.mermaid, diagram-div`);
+        if (blocks.length == 0) { return; }
+        uml("mermaid");
+    });
+    run_mermaid_render();
 }
 
 
@@ -660,8 +688,10 @@ function limit_scroll_position() {
     }, { passive: false }); // Passive event listener option should be false
 }
 
+
+
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-//  第 6 部分: JS初始化函数
+//  第 7 部分: JS初始化函数
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 function GptAcademicJavaScriptInit(LAYOUT = "LEFT-RIGHT") {
@@ -674,4 +704,6 @@ function GptAcademicJavaScriptInit(LAYOUT = "LEFT-RIGHT") {
     chatbotObserver.observe(chatbotIndicator, { attributes: true, childList: true, subtree: true });
     if (LAYOUT === "LEFT-RIGHT") { chatbotAutoHeight(); }
     if (LAYOUT === "LEFT-RIGHT") { limit_scroll_position(); }
+    // setInterval(function () { uml("mermaid") }, 5000); // 每50毫秒执行一次
+
 }
