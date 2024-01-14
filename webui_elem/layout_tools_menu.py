@@ -1,4 +1,3 @@
-#! .\venv\
 # encoding: utf-8
 # @Time   : 2023/9/16
 # @Author : Spike
@@ -101,7 +100,7 @@ class RightElem:
                                                         label="stop", value=default_params['stop'], lines=1,
                                                         container=False
                                                         )
-                    self.presence_penalty_slider = gr.Slider(minimum=-2.0, mmaximum=default_params['presence_penalty'], value=0.0,
+                    self.presence_penalty_slider = gr.Slider(minimum=-2.0, maximum=default_params['presence_penalty'], value=0.0,
                                                              step=0.01, interactive=True, label="presence penalty",
                                                              container=False
                                                              )

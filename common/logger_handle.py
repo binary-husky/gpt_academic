@@ -1,4 +1,3 @@
-#! .\venv\
 # encoding: utf-8
 # @Time   : 2023/12/6
 # @Author : Spike

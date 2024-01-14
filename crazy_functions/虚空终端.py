@@ -131,7 +131,7 @@ def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
         state.lock_plugin(chatbot=chatbot)
         chatbot.append((None, explain_msg+appendix_msg))
         yield from update_ui(chatbot=chatbot, history=history)
-        from crazy_functions.kingsoft_fns import crazy_box
+        from crazy_functions.reader_fns import crazy_box
         yield from crazy_box.submit_multithreaded_tasks([txt],  [txt], llm_kwargs, chatbot, history, plugin_kwargs)
         return
 

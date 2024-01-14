@@ -1,4 +1,3 @@
-#! .\venv\
 # encoding: utf-8
 # @Time   : 2023/4/18
 # @Author : Spike
@@ -620,7 +619,26 @@ def get_avatar_img(llm_s):
 
 valid_img_extensions = ['png', 'jpg', 'jpeg', 'bmp', 'svg', 'webp', 'ico', 'tif', 'tiff', 'raw', 'eps', 'gif']
 
+
+def split_parse_url(url, tag: list | None, index=1) -> str:
+    url_parts = re.split('[/?=&#]+', url)
+    if not tag and url:
+        return url_parts[index]
+    for i in range(len(url_parts)):
+        if url_parts[i] in tag:
+            return url_parts[i + index]
+
+
+def split_domain_url(link_limit, start='http', domain_name: list = ['']) -> list:
+    link = str(link_limit).split()
+    links = []
+    for i in link:
+        if i.startswith(start) and any(name in i for name in domain_name):
+            links.append(i)
+    return links
+
+
 if __name__ == '__main__':
     # print(get_files_list('', ['.json']))
     # tree_out(dir='/Users/kilig/Job/Python-project/kso_gpt/', line=2)
-    get_avatar_img('')
+    print(split_parse_url('https://docs.qq.com/slide/DS2FGRVdxdE1LTURI?_bid=1&client=drive_file', [], index=3))

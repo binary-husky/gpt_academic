@@ -1,4 +1,3 @@
-#! .\venv\
 # encoding: utf-8
 # @Time   : 2023/6/15
 # @Author : Spike
@@ -7,7 +6,7 @@ import os.path
 import gradio as gr
 from common import func_box, ocr_tools, Langchain_cn
 from common.path_handle import init_path
-from crazy_functions.kingsoft_fns import crazy_box, docs_kingsoft, docs_qqdocs
+from crazy_functions.reader_fns import crazy_box, docs_kingsoft, docs_qqdocs
 from common.toolbox import update_ui, CatchException, trimmed_format_exc, get_conf
 
 

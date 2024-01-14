@@ -5,7 +5,7 @@ from common import toolbox
 from crazy_functions import crazy_utils
 import gradio as gr
 from common import func_box, database_processor
-from crazy_functions.kingsoft_fns import crazy_box, docs_kingsoft, docs_qqdocs
+from crazy_functions.reader_fns import crazy_box, docs_kingsoft, docs_qqdocs
 
 from crazy_functions.vector_fns.vector_database import LocalDocQA
 from crazy_functions.vector_fns import vector_database

@@ -1,4 +1,3 @@
-#! .\venv\
 # encoding: utf-8
 # @Time   : 2023/7/23
 # @Author : Spike
@@ -6,7 +5,7 @@
 from common import toolbox
 from common import func_box, ocr_tools
 from common.path_handle import init_path
-from crazy_functions.kingsoft_fns import crazy_box, docs_kingsoft
+from crazy_functions.reader_fns import crazy_box, docs_kingsoft
 import os
 
 

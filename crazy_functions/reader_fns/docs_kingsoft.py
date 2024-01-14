@@ -1,8 +1,7 @@
-#! .\venv\
 # encoding: utf-8
 # @Time   : 2023/7/29
 # @Author : Spike
-# @Descr   :
+# @Descr   : 金山云文档
 import os
 import re
 import time
@@ -12,7 +11,7 @@ import urllib.parse
 
 from bs4 import BeautifulSoup
 from common import toolbox, func_box
-from crazy_functions.kingsoft_fns import crazy_box
+from crazy_functions.reader_fns import crazy_box
 from crazy_functions import crazy_utils
 from common import ocr_tools
 from common.path_handle import init_path
@@ -21,7 +20,7 @@ from common.path_handle import init_path
 class Kdocs:
 
     def __init__(self, url):
-        WPS_COOKIES = toolbox.get_conf('WPS_COOKIES',)
+        WPS_COOKIES = toolbox.get_conf('WPS_COOKIES', )
         self.url = url
         self.cookies = WPS_COOKIES
         self.headers = {
@@ -41,7 +40,7 @@ class Kdocs:
             'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.82',
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
 
-            }
+        }
         self.parm_otl_data = {"connid": "",
                               "args": {"password": "", "readonly": False, "modifyPassword": "", "sync": True,
                                        "startVersion": 0, "endVersion": 0},
@@ -58,13 +57,13 @@ class Kdocs:
         self.bulk_download_url = 'https://www.kdocs.cn/kfc/batch/v2/files/download'
         self.bulk_continue_url = 'https://www.kdocs.cn/kfc/batch/v2/files/download/continue'
         self.task_result_url = 'https://www.kdocs.cn/kfc/batch/v2/files/download/progress'
-        self.file_comments_ulr  = 'https://www.kdocs.cn/api/v3/office/outline/file/%f/comment'
-        self.url_share_tag = ''
-        self.url_dirs_tag = ''
-        self.split_link_tags()
+        self.file_comments_ulr = 'https://www.kdocs.cn/api/v3/office/outline/file/%f/comment'
+        self.url_share_tag = func_box.split_parse_url(url, ['l'])
+        self.url_dirs_tag = func_box.split_parse_url(url, ['ent'])
         if self.url_share_tag:
             self.file_info_parm = self.get_file_info_parm()
-        self.docs_old_type = ['.docs', '.doc', '.pptx', '.ppt', '.xls', '.xlsx', '.pdf', '.csv', '.txt', '.pom', '.pof', '.xmind']
+        self.docs_old_type = ['.docs', '.doc', '.pptx', '.ppt', '.xls', '.xlsx', '.pdf', '.csv', '.txt', '.pom', '.pof',
+                              '.xmind']
         self.to_img_type = {'.pom': '.png', '.pof': '.png'}
         self.media_type = ['.mp4', '.m4a', '.wav', '.mpga', '.mpeg', '.mp3', '.avi', '.mkv', '.flac', '.aac']
         self.smart_type = {'.otl': 'pdf', '.ksheet': 'xlsx'}
@@ -92,14 +91,14 @@ class Kdocs:
     def submit_batch_download_tasks(self):
         # 提交目录转换任务
         params_continue = {"task_id": "", "download_as": [
-                            {"suffix": ".otl", "as": ".pdf"},
-                            {"suffix": ".ksheet", "as": ".xlsx"},
-                            {"suffix": ".pof", "as": ".png"},
-                            {"suffix": ".pom", "as": ".png"}]}
+            {"suffix": ".otl", "as": ".pdf"},
+            {"suffix": ".ksheet", "as": ".xlsx"},
+            {"suffix": ".pof", "as": ".png"},
+            {"suffix": ".pom", "as": ".png"}]}
         parm_bulk_download = {'file_ids': [], 'csrfmiddlewaretoken': self.cookies['csrf']}
         parm_bulk_download.update({'file_ids': [self.url_dirs_tag]})
         dw_response = requests.post(self.bulk_download_url, cookies=self.cookies, headers=self.ex_headers,
-                                 json=parm_bulk_download, verify=False).json()
+                                    json=parm_bulk_download, verify=False).json()
         if dw_response.get('data', False):
             task_id = dw_response['data']['task_id']
             task_info = dw_response['data'].get('online_file'), dw_response['data'].get('online_fnum')
@@ -141,7 +140,7 @@ class Kdocs:
         link_name = self.file_info_parm['fname']
         for t in self.to_img_type:
             if t in link_name:
-                link_name = link_name+self.to_img_type[t]
+                link_name = link_name + self.to_img_type[t]
         link = ''
         for t in self.docs_old_type:
             if t in link_name and file_type in link_name:
@@ -154,7 +153,7 @@ class Kdocs:
                 file_type = t
             if t in link_name and file_type in link_name:
                 link = self.get_kdocs_intelligence_link(type=self.smart_type[t])
-                link_name = link_name+f".{self.smart_type[t]}"
+                link_name = link_name + f".{self.smart_type[t]}"
         return link, link_name
 
     def get_media_link(self):
@@ -217,22 +216,6 @@ class Kdocs:
                 return response_link.json()['data']['url']
         return None
 
-    def split_link_tags(self):
-        # 提取tag，给后续请求试用
-        url_parts = re.split('[/\?&#]+', self.url)
-        try:
-            try:
-                l_index = url_parts.index('l')
-                otl_url_str = url_parts[l_index + 1]
-                self.url_share_tag = otl_url_str
-            except ValueError:
-                l_index = url_parts.index('ent')
-                otl_url_str = url_parts[-1]
-                self.url_dirs_tag = otl_url_str
-        except ValueError:
-            print('既不是在线文档，也不是文档目录')
-            return ''
-
     def get_file_content(self):
         """
         爬虫解析文档内容
@@ -253,7 +236,7 @@ class Kdocs:
 
     def get_file_pic_url(self, pic_dict: dict):
         parm_shapes_data = {"objects": [], "expire": 86400000, "support_webp": True, "with_thumbnail": True,
-                                 "support_lossless": True}
+                            "support_lossless": True}
         otl_url_str = self.url_share_tag
         if otl_url_str is None: return
         for pic in pic_dict:
@@ -277,7 +260,6 @@ class Kdocs:
     def url_decode(url):
         decoded_url = urllib.parse.unquote(url)
         return decoded_url
-
 
     def bs4_file_info(self, html_str):
         """
@@ -306,7 +288,7 @@ class Kdocs:
             group_id = json_data['file_info']['file']['group_id']
             self.headers['x-csrf-rand'] = json_data['csrf_token']
             self.parm_otl_data.update({'connid': file_connid, 'group': file_group, 'front_ver': file_front_ver,
-                                       'file_id': file_id, 'group_id':group_id})
+                                       'file_id': file_id, 'group_id': group_id})
             return True
         else:
             return None
@@ -338,7 +320,7 @@ def get_docs_content(url, image_processing=False):
     desc_tag = utils.comments
     comments_desc = kdocs.get_comments_desc(tag=desc_tag)
     for key in comments_desc:
-        index = content.find(key)+len(key)
+        index = content.find(key) + len(key)
         content = content[:index] + f"\n 补充说明: {comments_desc[key]}" + content[index:]
     return _all, content, empty_picture_count, pic_dict_convert, file_dict
 
@@ -358,7 +340,8 @@ def get_kdocs_dir(limit, project_folder, type, ipaddr):
     resp = kdocs.wps_file_download(link)
     content = resp.content
     temp_file = os.path.join(project_folder, kdocs.url_dirs_tag + '.zip')
-    with open(temp_file, 'wb') as f: f.write(content)
+    with open(temp_file, 'wb') as f:
+        f.write(content)
     decompress_directory = os.path.join(project_folder, 'extract', kdocs.url_dirs_tag)
     toolbox.extract_archive(temp_file, decompress_directory)
     file_list = []
@@ -388,7 +371,7 @@ def get_kdocs_files(limit, project_folder, type, ipaddr):
         tag = content.splitlines()[0][:20]
         for i in pic_dict:  # 增加OCR选项
             img_content, img_result, _ = ocr_tools.Paddle_ocr_select(ipaddr=ipaddr, trust_value=True
-                                                                  ).img_def_content(img_path=pic_dict[i], img_tag=i)
+                                                                     ).img_def_content(img_path=pic_dict[i], img_tag=i)
             content = str(content).replace(f"{i}", f"{func_box.html_local_img(img_result)}\n```{img_content}```")
             name = tag + '.md'
             content = content.encode('utf-8')
@@ -419,7 +402,7 @@ def get_kdocs_from_everything(txt, type=[''], ipaddr='temp'):
         ipaddr: 用户信息
     Returns:
     """
-    link_limit = crazy_box.Utils().split_startswith_txt(link_limit=txt, domain_name=['kdocs', 'wps'])
+    link_limit = func_box.split_domain_url(link_limit=txt, domain_name=['kdocs', 'wps'])
     file_manifest = []
     success = ''
     project_folder = os.path.join(init_path.users_path, ipaddr, 'kdocs')
@@ -479,7 +462,6 @@ def smart_document_extraction(url, llm_kwargs, plugin_kwargs, chatbot, history, 
     temp_list = [title, content]
     temp_file = yield from crazy_box.result_written_to_markdwon(temp_list, llm_kwargs, plugin_kwargs, chatbot, history)
     files.extend(temp_file)
-
 
 
 if __name__ == '__main__':

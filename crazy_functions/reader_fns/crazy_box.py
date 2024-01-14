@@ -1,4 +1,3 @@
-#! .\venv\
 # encoding: utf-8
 # @Time   : 2023/6/14
 # @Author : Spike
@@ -6,20 +5,9 @@
 import os
 import json
 import re
-import time
-import xmindparser
-from typing import Dict
-import typing as typing
 from common import func_box, ocr_tools, toolbox, database_processor, Langchain_cn
-from openpyxl import load_workbook
-from openpyxl.utils import get_column_letter
-from openpyxl.styles import Border, Side
-from openpyxl.styles import PatternFill
-from openpyxl.styles import Alignment
-from openpyxl.styles import Font
 from crazy_functions import crazy_utils
 from request_llms import bridge_all
-from crazy_functions.kingsoft_fns import docs_kingsoft
 from moviepy.editor import AudioFileClip
 from common.path_handle import init_path
 
@@ -159,14 +147,6 @@ class Utils:
         func_box.Shell(f'npx markmap-cli --no-open "{md_file}" -o "{html_file}"').start()
         return md_file, html_file
 
-    def split_startswith_txt(self, link_limit, start='http', domain_name: list = ['']):
-        link = str(link_limit).split()
-        links = []
-        for i in link:
-            if i.startswith(start) and any(name in i for name in domain_name):
-                links.append(i)
-        return links
-
     def global_search_for_files(self, file_path, matching: list):
         file_list = []
         if os.path.isfile(file_path):
@@ -177,230 +157,6 @@ class Utils:
                     if str(math).lower() in str(file).lower():
                         file_list.append(os.path.join(root, file))
         return file_list
-
-
-class ExcelHandle:
-
-    def __init__(self, ipaddr='temp', temp_file='', sheet='测试要点'):
-        self.user_path = os.path.join(init_path.base_path, 'private_upload', ipaddr, 'test_case')
-        if not temp_file:
-            temp_file = os.path.join(init_path.base_path, 'docs/template/客户端测试用例模版.xlsx')
-        if os.path.exists(temp_file):
-            self.template_excel = temp_file
-        elif temp_file.startswith('http'):
-            self.template_excel = \
-            docs_kingsoft.get_kdocs_files(temp_file, project_folder=self.user_path, type='xlsx', ipaddr=ipaddr)[0]
-        else:
-            self.template_excel = os.path.join(init_path.base_path, 'docs/template/客户端测试用例模版.xlsx')
-        if not self.template_excel:
-            self.template_excel = os.path.join(init_path.base_path, 'docs/template/客户端测试用例模版.xlsx')
-        self.workbook = load_workbook(self.template_excel)
-        self.sheet = sheet
-        self.yellow_fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
-        self.green_fill = PatternFill(start_color="1abc9c", end_color="1abc9c", fill_type="solid")
-        self.red_fill = PatternFill(start_color="ff7f50", end_color="ff7f50", fill_type="solid")
-        # 定义边框样式
-        border_style = Side(style='thin', color="000000")
-        self.border = Border(left=border_style, right=border_style, top=border_style, bottom=border_style)
-        if str(self.sheet) not in self.workbook.sheetnames:
-            self.sheet = self.workbook.active.title
-
-
-    def lpvoid_lpbuffe(self, data_list: list, filename=''):
-        # 加载现有的 Excel 文件        # 选择要操作的工作表, 默认是测试要点
-        if self.sheet in self.workbook.sheetnames:
-            worksheet = self.workbook[self.sheet]
-        else:
-            worksheet = self.workbook.create_sheet(self.sheet)
-        # 定义起始行号
-        start_row = find_index_inlist(self.read_as_dict()[self.sheet], ['前置条件', '操作步骤', '预期结果']) + 2
-        # 创建一个黄色的填充样式
-        # 遍历数据列表
-        for row_data in data_list:
-            # 写入每一行的数据到指定的单元格范围
-            for col_num, value in enumerate(row_data, start=1):
-                cell = worksheet.cell(row=start_row, column=col_num)
-                try:
-                    cell.value = str(value).strip()
-                    cell.border = self.border
-                    cell.alignment = Alignment(horizontal='left', vertical='center',
-                                               wrapText=True)  # 设置水平方向居左对齐，并垂直方向居中对齐，并自动换行
-                    # 判断 value 是否为 '插件补充的用例'
-                    if '插件补充的用例' in str(value):
-                        cell.fill = self.yellow_fill
-                    font = Font(name='苹方-简', size=11)
-                    cell.font = font
-                except Exception:
-                    print(row_data, value)
-                    func_box.通知机器人(error=f'写入excel错误啦\n\n```\n\n{row_data}\n\n{value}\n\n```'
-                                              f'\n\n```\n\n{toolbox.trimmed_format_exc()}```\n\n')
-            # 增加起始行号
-            start_row += 1
-        merge_cell = toolbox.get_conf('merge_cell')
-        if merge_cell: self.merge_same_cells()  # 还原被拆分的合并单元格
-        # 保存 Excel 文件
-        file_path = os.path.join(self.user_path, filename)
-        os.makedirs(file_path, exist_ok=True)
-        test_case_path = f'{os.path.join(file_path, func_box.created_atime())}.xlsx'
-        # 遇到文件无法保存时，再拆开图片
-        try:
-            self.workbook.save(test_case_path)
-        except Exception as f:
-            test_case_path = self.template_excel
-        return test_case_path
-
-    def read_as_dict(self, only_sheet=True):
-        data_dict = {}
-        # 遍历每个工作表
-        if only_sheet:
-            sheet_list = [self.sheet]
-        else:
-            sheet_list = self.workbook.sheetnames
-        for sheet_name in sheet_list:
-            sheet = self.workbook[sheet_name]
-            sheet_data = []
-            # 遍历每一行
-            sheet_temp_count = 0
-            for row in sheet.iter_rows(values_only=True):
-                # 过滤尾部的空行
-                row = tuple(x for x in row if x is not None and x != row[-1])
-                if row:
-                    sheet_data.append(row)
-                else:
-                    sheet_temp_count += 1
-                if sheet_temp_count >= 20: break
-            # 将工作表名作为字典的键，行数据作为值
-            data_dict[sheet_name] = sheet_data
-        return data_dict
-
-    def split_merged_cells(self):
-        # 加载Excel文件
-        ws = self.workbook[self.sheet]
-        # 获取合并单元格的范围
-        merged_ranges = list(ws.merged_cells.ranges)
-        for merged_range in merged_ranges:
-            # 获取合并单元格的起始行、起始列、结束行、结束列
-            start_row = merged_range.min_row
-            start_col = merged_range.min_col
-            end_row = merged_range.max_row
-            end_col = merged_range.max_col
-            # 获取合并单元格的值
-            value = ws.cell(start_row, start_col).value
-            # 拆分合并单元格
-            ws.unmerge_cells(str(merged_range))
-            # 在每个拆分后的单元格中填入值
-            for row in range(start_row, end_row + 1):
-                for col in range(start_col, end_col + 1):
-                    cell = ws.cell(row, col)
-                    cell.value = value
-        # 保存结果
-        self.workbook.save(self.template_excel)
-
-    def merge_same_cells(self, truncation=10):
-        # 加载xlsx文件
-        ws = self.workbook[self.sheet]
-        # 遍历每个单元格（列优先遍历）
-        column_counter = {'row': 0, 'col': 0}
-        for col_index in range(1, ws.max_column + 1):
-            col_letter = get_column_letter(col_index)
-            row_start = None
-            last_column_empty = True
-            for row_index in range(1, ws.max_row + 1):
-                current_cell = ws[f"{col_letter}{row_index}"]
-                next_cell = ws[f"{col_letter}{row_index + 1}"]
-                # 当前单元格与下个单元格内容相同时，都不为空，并记录合并范围row_start
-                if row_start is None and current_cell.value == next_cell.value and current_cell.value is not None:
-                    row_start = row_index
-                # 当前单元格与下个单元格内容不同时或任何一个为空时，记录合并范围row_end，并执行合并
-                elif row_start is not None and (
-                        current_cell.value != next_cell.value or current_cell.value is None or next_cell.value is None):
-                    row_end = row_index
-                    ws.merge_cells(f"{col_letter}{row_start}:{col_letter}{row_end}")
-                    row_start = None
-                # # 设置边框样式
-                current_cell.border = self.border
-                next_cell.border = self.border
-                # 当列超过10行为空，跳出循环
-                if not current_cell.value:
-                    column_counter['row'] += 1
-                    if column_counter['row'] > truncation:
-                        column_counter['row'] = 0
-                        break
-                # 检查当前列是否为空
-            if all(cell.value is None for cell in ws[col_letter]):
-                if last_column_empty:  # 如果上一列也为空，增加计数器
-                    column_counter['col'] += 1
-                    if column_counter['col'] > truncation:  # 如果空列超过所设定的上限，跳出循环
-                        break
-                else:  # 如果上一列非空，重置计数器
-                    column_counter['col'] = 1
-                    last_column_empty = True
-            else:  # 如果当前列非空，重置计数器和 last_column_empty 标记
-                last_column_empty = False
-                column_counter['col'] = 0
-        self.workbook.save(self.template_excel)
-
-
-class XmindHandle():
-
-    def __int__(self):
-        pass
-
-    def _WalkTopic(self, dictXmind: Dict, resultDict: Dict):
-        strTitle: typing.AnyStr = dictXmind['title']
-        if 'topics' in dictXmind:
-            pass
-            # print(dictXmind['topics'])
-            listTopics: typing.List = dictXmind['topics']
-
-            if (listTopics.__len__() > 0):
-                resultDict[strTitle] = {}
-                for topic in listTopics:
-                    self._WalkTopic(topic, resultDict[strTitle])
-        else:
-            resultDict[strTitle] = strTitle
-
-    def _Print2MDList(self, dictOri: typing.Dict) -> typing.AnyStr:
-        levelOri = 0
-        listStr = []
-
-        def Print2MDListInternal(dictContent: typing.Dict, level):
-            if type(dictContent).__name__ != 'dict':
-                return
-            level = level + 1
-            for topic, topicDict in dictContent.items():
-                listStr.append('  ' * (level - 1))
-                listStr.append('- ')
-                listStr.append(topic)
-                listStr.append('\n')
-                Print2MDListInternal(topicDict, level)
-
-        Print2MDListInternal(dictOri, levelOri)
-        return ''.join(listStr)
-
-    def xmind_2_md(self, pathSource):
-        try:
-            dictSheet = xmindparser.xmind_to_dict(pathSource)
-
-        except:
-            import xmind
-            workbook = xmind.load(pathSource)
-            sheet = workbook.getPrimarySheet()
-            dictSheet = [sheet.getData()]
-        dictResult: Dict = {}
-        xm_content = ''
-        md_path = []
-        for canvas in dictSheet:
-            self._WalkTopic(canvas['topic'], dictResult)
-            strResult = self._Print2MDList(dictResult)
-            xm_content += strResult
-            temp_path = os.path.join(os.path.dirname(os.path.dirname(pathSource)), 'markdown')
-            os.makedirs(temp_path, exist_ok=True)
-            pathOutput = os.path.join(temp_path, f'{os.path.basename(pathSource)}_{canvas["title"]}.md')
-            with open(pathOutput, 'w', encoding='utf-8') as f:
-                f.write(strResult)
-                md_path.append(pathOutput)
-        return xm_content, md_path
 
 
 # <---------------------------------------乱七八糟的方法，有点用，很好用----------------------------------------->
@@ -423,7 +179,7 @@ def find_index_inlist(data_list: list, search_terms: list) -> int:
 def file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_kwargs, plugin_kwargs):
     # 文件读取
     file_routing = []
-    include_files, =  json_args_return(plugin_kwargs, keys=['处理文件类型'])
+    include_files, = json_args_return(plugin_kwargs, keys=['处理文件类型'])
     if type(file_types) is dict: files = [files[f] for f in files]
     for t in file_types:
         for f in files:
@@ -575,7 +331,8 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
                 chatbot.append([None,
                                 f'{func_box.html_tag_color(input_[:10])}...对话数据预计会超出{all_tokens}tokens限制, 拆分中...'])
                 yield from toolbox.update_ui(chatbot, history)
-                segments.extend(crazy_utils.breakdown_txt_to_satisfy_token_limit_for_pdf(input_, get_token_num, max_token))
+                segments.extend(
+                    crazy_utils.breakdown_txt_to_satisfy_token_limit_for_pdf(input_, get_token_num, max_token))
             else:
                 segments.append(input_)
     yield from toolbox.update_ui(chatbot, history)
@@ -623,9 +380,9 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
             # 拼接内容与提示词
             plugin_prompt = func_box.replace_expected_text(prompt, content=limit, expect='{{{v}}}')
             user_prompt = plugin_kwargs.get('user_input_prompt', '')
-            inputs_array.append(plugin_prompt+user_prompt)
+            inputs_array.append(plugin_prompt + user_prompt)
             inputs_show_user_array.append(you_say)
-    plugin_kwargs['user_input_prompt'] = ''   # 组合后去除 user_input_prompt
+    plugin_kwargs['user_input_prompt'] = ''  # 组合后去除 user_input_prompt
     yield from toolbox.update_ui(chatbot, history)
     return inputs_array, inputs_show_user_array
 
@@ -648,7 +405,7 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
         history_array = [[""] for _ in range(len(inputs_array))]
     # 是否要多线程处理
     if len(inputs_array) == 1:
-        inputs_show_user = None   # 不重复展示
+        inputs_show_user = None  # 不重复展示
         gpt_say = yield from crazy_utils.request_gpt_model_in_new_thread_with_ui_alive(
             inputs=inputs_array[0], inputs_show_user=inputs_show_user,
             llm_kwargs=llm_kwargs, chatbot=chatbot, history=history_array[0],
@@ -672,7 +429,8 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
     return gpt_response_collection
 
 
-def func_拆分与提问(file_limit, llm_kwargs, plugin_kwargs, chatbot, history, plugin_prompt, knowledge_base, task_tag: str = ''):
+def func_拆分与提问(file_limit, llm_kwargs, plugin_kwargs, chatbot, history, plugin_prompt, knowledge_base,
+                    task_tag: str = ''):
     split_content_limit = yield from input_output_processing(file_limit, llm_kwargs, plugin_kwargs,
                                                              chatbot, history, kwargs_prompt=plugin_prompt,
                                                              knowledge_base=knowledge_base)
@@ -711,7 +469,8 @@ def batch_recognition_images_to_md(img_list, ipaddr):
         if os.path.exists(img):
             img_content, img_result, _ = ocr_tools.Paddle_ocr_select(ipaddr=ipaddr, trust_value=True
                                                                      ).img_def_content(img_path=img, img_tag=img)
-            temp_file = os.path.join(init_path.users_path, ipaddr, 'ocr_to_md', img_content.splitlines()[0][:20] + '.md')
+            temp_file = os.path.join(init_path.users_path, ipaddr, 'ocr_to_md',
+                                     img_content.splitlines()[0][:20] + '.md')
             with open(temp_file, mode='w', encoding='utf-8') as f:
                 f.write(f"{func_box.html_view_blank(temp_file)}\n\n" + img_content)
             temp_list.append(temp_list)
@@ -722,7 +481,7 @@ def batch_recognition_images_to_md(img_list, ipaddr):
 
 def name_de_add_sort(response, index=0):
     if type(index) is not int:
-        return response   # 如果不是数字下标，那么不排序
+        return response  # 如果不是数字下标，那么不排序
     try:
         unique_tuples = set(tuple(lst) for lst in response)
         de_result = [list(tpl) for tpl in unique_tuples]
@@ -769,7 +528,7 @@ def parsing_json_in_text(txt_data: list, old_case, filter_list: list = 'None----
         if len(txt_data) != len(old_case): index = -1  # 兼容一下哈
         # 过滤掉产出带的表头数据
         filtered_supplementary_data = [data for data in supplementary_data
-                                     if filter_list[:5] != data[:5] or filter_list[-5:] != data[-5:]]
+                                       if filter_list[:5] != data[:5] or filter_list[-5:] != data[-5:]]
         # 检查 filtered_supplementary_data 是否为空
         if not filtered_supplementary_data:
             max_length = 0  # 或其他合适的默认值
@@ -796,7 +555,8 @@ def write_test_cases(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot
         file_key: 存入历史文件
     Returns: None
     """
-    template_file, sheet, sort_index = json_args_return(plugin_kwargs, ['写入指定模版', '写入指定Sheet', '用例下标排序'])
+    template_file, sheet, sort_index = json_args_return(plugin_kwargs,
+                                                        ['写入指定模版', '写入指定Sheet', '用例下标排序'])
     file_classification = file_classification_to_dict(gpt_response_collection)
     chat_file_list = ''
     you_say = '准备将测试用例写入Excel中...'
@@ -832,7 +592,8 @@ def write_test_cases(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot
 
 
 def supplementary_test_case(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history):
-    template_file, sheet, sort_index= json_args_return(plugin_kwargs, ['写入指定模版', '写入指定Sheet', '用例下标排序'])
+    template_file, sheet, sort_index = json_args_return(plugin_kwargs,
+                                                        ['写入指定模版', '写入指定Sheet', '用例下标排序'])
     if not sheet:
         sheet, = json_args_return(plugin_kwargs, ['读取指定Sheet'])
     file_classification = file_classification_to_dict(gpt_response_collection)
@@ -845,7 +606,8 @@ def supplementary_test_case(gpt_response_collection, llm_kwargs, plugin_kwargs, 
         old_file = plugin_kwargs['上阶段文件']
         old_case = plugin_kwargs[old_file]['原测试用例数据']
         header = plugin_kwargs[old_file]['原测试用例表头']
-        test_case, desc = parsing_json_in_text(file_classification[file_name], old_case, filter_list=header, sort_index=sort_index)
+        test_case, desc = parsing_json_in_text(file_classification[file_name], old_case, filter_list=header,
+                                               sort_index=sort_index)
         file_path = ExcelHandle(ipaddr=llm_kwargs['ipaddr'],
                                 temp_file=template_file, sheet=sheet).lpvoid_lpbuffe(
             test_case, filename=long_name_processing(file_name))
@@ -918,9 +680,8 @@ def result_written_to_markdwon(gpt_response_collection, llm_kwargs, plugin_kwarg
 
 
 def detach_cloud_links(link_limit):
-    units = Utils()
-    wps_links = units.split_startswith_txt(link_limit, domain_name=['kdocs', 'wps'])
-    qq_link = units.split_startswith_txt(link_limit, domain_name=['docs.qq'])
+    wps_links = func_box.split_domain_url(link_limit, domain_name=['kdocs', 'wps'])
+    qq_link = func_box.split_domain_url(link_limit, domain_name=['docs.qq'])
     return wps_links, qq_link
 
 

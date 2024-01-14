@@ -1,8 +1,7 @@
-#! .\venv\
 # encoding: utf-8
 # @Time   : 2023/9/2
 # @Author : Spike
-# @Descr   :
+# @Descr   : 腾讯云文档
 import re
 import json
 import time
@@ -11,7 +10,7 @@ import requests
 
 from common import func_box
 from common import toolbox
-from crazy_functions.kingsoft_fns import crazy_box
+from crazy_functions.reader_fns import crazy_box
 from common.path_handle import init_path
 
 
@@ -20,7 +19,7 @@ class QQDocs:
     def __init__(self, link):
         self._hosts = 'docs.qq.com'
         self.link = link
-        self.link_id = self.split_link_id()
+        self.link_id = func_box.split_parse_url(link, None, index=3)
         self.file_info_dict = {'tag': '',}
         self.cookies = toolbox.get_conf('QQ_COOKIES')
         self.file_info_header = {
@@ -34,18 +33,6 @@ class QQDocs:
         self.blind_task_url = 'https://docs.qq.com/v1/export/export_office'
         self.obtain_d_link_url = 'https://docs.qq.com/v1/export/query_progress'
         self.get_file_info()
-
-    def split_link_id(self):
-        # 提取tag，给后续请求使用
-        url_parts = re.split('[/\?&#]+', self.link)
-        try:
-            l_index = url_parts.index(self._hosts)
-            url_id = url_parts[l_index + 2]
-            self.link_id = url_id
-            return url_id
-        except ValueError:
-            print('既不是在线文档，也不是文档目录')
-            return ''
 
     def get_file_info(self):
         file_info_params = {
@@ -128,7 +115,7 @@ def get_qqdocs_from_everything(txt, type: list=[''], ipaddr='temp'):
         ipaddr: 用户信息
     Returns:
     """
-    link_limit = crazy_box.Utils().split_startswith_txt(link_limit=txt, domain_name=['docs.qq'])
+    link_limit = func_box.split_domain_url(link_limit=txt, domain_name=['docs.qq'])
     file_manifest = []
     success = ''
     project_folder = os.path.join(init_path.users_path, ipaddr, 'qqdocs')

@@ -425,13 +425,13 @@ def breakdown_txt_to_satisfy_token_limit_for_pdf(txt, get_token_fn, limit):
                     return cut(txt, must_break_at_empty_line=False, break_anyway=True)
 
 
-def read_and_clean_pdf_text(fp):
+def read_and_clean_pdf_text(fp, user=''):
     """
     这个函数用于分割pdf，用了很多trick，逻辑较乱，效果奇好
 
     **输入参数说明**
     - `fp`：需要读取和清理文本的pdf文件路径
-
+    - user: 用户名，用于生成pdf图片的保存路径
     **输出参数说明**
     - `meta_txt`：清理后的文本内容字符串
     - `page_one_meta`：第一页清理后的文本内容列表
@@ -470,6 +470,10 @@ def read_and_clean_pdf_text(fp):
         """
         return abs((a - b) / max(a, b)) < 0.02
 
+    def clear_soh(a: str):
+        #  去除掉文本中的 \x01 字符
+        return a.replace('\x01', '')
+
     with fitz.open(fp) as doc:
         meta_txt = []
         meta_font = []
@@ -487,24 +491,35 @@ def read_and_clean_pdf_text(fp):
                         txt_line = "".join([wtf['text'] for wtf in l['spans']])
                         if len(txt_line) == 0: continue
                         pf = primary_ffsize(l)
-                        meta_line.append([txt_line, pf, l['bbox'], l])
+                        meta_line.append([clear_soh(txt_line), pf, l['bbox'], l])
                         for wtf in l['spans']:  # for l in t['lines']:
-                            meta_span.append([wtf['text'], wtf['size'], len(wtf['text'])])
+                            meta_span.append([clear_soh(wtf['text']), wtf['size'], len(wtf['text'])])
+                elif 'image' in t:  # 提取出文件的图片
+                    init_path.pdf_save_img_path = os.path.join(init_path.users_path, user, 'pdf_img', doc.name)
+                    bbox_tag = "-".join([str(int(i)) for i in l["bbox"]])
+                    save_file_name = os.path.join(init_path.pdf_save_img_path,
+                                                  f'{index}-{t["size"]}_{bbox_tag}.{t["ext"]}')
+                    with open(save_file_name, 'wb') as f:
+                        f.write(t['image'])
+                    pf = primary_ffsize(l)
+                    meta_line.append([f"\n![{index}-img]({save_file_name})\n\n", pf, l['bbox'], l])
+                    meta_span.append([f"\n![{index}-img]({save_file_name})\n\n", 11, len(save_file_name)])
                     # meta_line.append(["NEW_BLOCK", pf])
             # 块元提取                           for each word segment with in line                       for each line         cross-line words                          for each block
-            meta_txt.extend([" ".join(["".join([wtf['text'] for wtf in l['spans']]) for l in t['lines']]).replace(
+            meta_txt.extend([" ".join(["".join([clear_soh(wtf['text']) for wtf in l['spans']]) for l in t['lines']]).replace(
                 '- ', '') for t in text_areas['blocks'] if 'lines' in t])
             meta_font.extend([np.mean([np.mean([wtf['size'] for wtf in l['spans']])
                                        for l in t['lines']]) for t in text_areas['blocks'] if 'lines' in t])
             if index == 0:
-                page_one_meta = [" ".join(["".join([wtf['text'] for wtf in l['spans']]) for l in t['lines']]).replace(
+                page_one_meta = [" ".join(["".join([clear_soh(wtf['text']) for wtf in l['spans']]) for l in t['lines']]).replace(
                     '- ', '') for t in text_areas['blocks'] if 'lines' in t]
 
         ############################## <第 2 步，获取正文主字体> ##################################
         try:
             fsize_statiscs = {}
             for span in meta_span:
-                if span[1] not in fsize_statiscs: fsize_statiscs[span[1]] = 0
+                if span[1] not in fsize_statiscs:
+                    fsize_statiscs[span[1]] = 0
                 fsize_statiscs[span[1]] += span[2]
             main_fsize = max(fsize_statiscs, key=fsize_statiscs.get)
             if REMOVE_FOOT_NOTE:
