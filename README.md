@@ -65,7 +65,7 @@ Read this in [English](docs/README.English.md) | [日本語](docs/README.Japanes
 Latex全文[翻译](https://www.bilibili.com/video/BV1nk4y1Y7Js/)、[润色](https://www.bilibili.com/video/BV1FT411H7c5/) | [插件] 一键翻译或润色latex论文
 批量注释生成 | [插件] 一键批量生成函数注释
 Markdown[中英互译](https://www.bilibili.com/video/BV1yo4y157jV/) | [插件] 看到上面5种语言的[README](https://github.com/binary-husky/gpt_academic/blob/master/docs/README_EN.md)了吗？就是出自他的手笔
-支持mermaid图像渲染 | 支持让GPT生成流程图、状态转移图、甘特图、饼状图、GitGraph等等（3.7版本）
+⭐支持mermaid图像渲染 | 支持让GPT生成[流程图](https://www.bilibili.com/video/BV18c41147H9/)、状态转移图、甘特图、饼状图、GitGraph等等（3.7版本）
 [PDF论文全文翻译功能](https://www.bilibili.com/video/BV1KT411x7Wn) | [插件] PDF论文提取题目&摘要+翻译全文（多线程）
 [Arxiv小助手](https://www.bilibili.com/video/BV1LM4y1279X) | [插件] 输入arxiv文章url即可一键翻译摘要+下载PDF
 Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼写纠错+输出对照PDF
