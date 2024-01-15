@@ -65,7 +65,7 @@ Read this in [English](docs/README.English.md) | [日本語](docs/README.Japanes
 Latex全文[翻译](https://www.bilibili.com/video/BV1nk4y1Y7Js/)、[润色](https://www.bilibili.com/video/BV1FT411H7c5/) | [插件] 一键翻译或润色latex论文
 批量注释生成 | [插件] 一键批量生成函数注释
 Markdown[中英互译](https://www.bilibili.com/video/BV1yo4y157jV/) | [插件] 看到上面5种语言的[README](https://github.com/binary-husky/gpt_academic/blob/master/docs/README_EN.md)了吗？就是出自他的手笔
-chat分析报告生成 | [插件] 运行后自动生成总结汇报
+⭐支持mermaid图像渲染 | 支持让GPT生成[流程图](https://www.bilibili.com/video/BV18c41147H9/)、状态转移图、甘特图、饼状图、GitGraph等等（3.7版本）
 [PDF论文全文翻译功能](https://www.bilibili.com/video/BV1KT411x7Wn) | [插件] PDF论文提取题目&摘要+翻译全文（多线程）
 [Arxiv小助手](https://www.bilibili.com/video/BV1LM4y1279X) | [插件] 输入arxiv文章url即可一键翻译摘要+下载PDF
 Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼写纠错+输出对照PDF
@@ -308,9 +308,9 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 <img src="https://github.com/binary-husky/gpt_academic/assets/96192199/bc7ab234-ad90-48a0-8d62-f703d9e74665" width="500" >
 </div>
 
-8. OpenAI音频解析与总结
+8. 基于mermaid的流图、脑图绘制
 <div align="center">
-<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/709ccf95-3aee-498a-934a-e1c22d3d5d5b" width="500" >
+<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/c518b82f-bd53-46e2-baf5-ad1b081c1da4" width="500" >
 </div>
 
 9. Latex全文校对纠错
