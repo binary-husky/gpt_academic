@@ -68,7 +68,7 @@ const uml = async className => {
             messageFontSize: "16px"
         }
     }
-    console.log('启动渲染');
+    // console.log('启动渲染');
     // 加载配置 Load up the config
     mermaid.mermaidAPI.globalReset() // 全局复位
     const config = (typeof mermaidConfig === "undefined") ? defaultConfig : mermaidConfig
