@@ -111,6 +111,7 @@ js_code_for_toggle_darkmode = """() => {
     } else {
         document.querySelector('body').classList.add('dark');
     }
+    document.querySelectorAll('code2').forEach(code => {code.remove();})
 }"""
 
 

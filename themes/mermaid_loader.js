@@ -93,6 +93,9 @@ const uml = async className => {
             messageFontSize: "16px"
         }
     }
+    if (document.body.classList.contains("dark")) {
+        defaultConfig.theme = "dark"
+    }
     // console.log('启动渲染');
     // 加载配置 Load up the config
     mermaid.mermaidAPI.globalReset() // 全局复位
