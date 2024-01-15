@@ -102,6 +102,10 @@ const uml = async className => {
             messageFontSize: "16px"
         }
     }
+    if (document.body.classList.contains("dark")) {
+        defaultConfig.theme = "dark"
+    }
+    
     const Module = await import('./file=themes/mermaid_editor.js');
 
     function do_render(block, code, codeContent) {
