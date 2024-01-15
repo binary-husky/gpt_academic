@@ -13,10 +13,11 @@ import xml.etree.ElementTree as ET
 class DocxHandler:
 
     def __init__(self, docx_path, output_dir):
+        self.output_dir = os.path.join(output_dir, 'word')
         # Ensure the output directory exists
         os.makedirs(output_dir, exist_ok=True)
         self.output_dir = output_dir
-        self.markdown_content = ""
+        self.markdown_content = ''
         try:
             self.doc = Document(docx_path)
         except Exception as e:
@@ -124,7 +125,7 @@ class DocxHandler:
             header_index += 1
         return markdown
 
-    def docx_to_markdown(self):
+    def get_markdown(self):
         # 遍历文档的所有元素
         for element in self.doc.element.body.iter():
             # 处理段落
@@ -139,8 +140,9 @@ class DocxHandler:
 
         return self.markdown_content
 
-    def docx_save_markdown(self):
-        self.docx_to_markdown()
+    def save_markdown(self):
+        if not self.markdown_content:
+            self.markdown_content = self.get_markdown()
         # Save Markdown file
         markdown_file_path = os.path.join(self.output_dir, 'output.md')
         try:

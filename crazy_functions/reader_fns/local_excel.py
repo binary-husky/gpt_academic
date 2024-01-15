@@ -15,13 +15,16 @@ from crazy_functions.reader_fns import crazy_box
 from common import func_box
 from common import toolbox
 
+import xmind
+from xmind.core.topic import TopicElement
+
 
 class XlsxHandler:
 
     def __init__(self, xlsx_path, output_dir, sheet='测试要点'):
         # Ensure the output directory exists
-        os.makedirs(output_dir, exist_ok=True)
-        self.output_dir = output_dir
+        self.output_dir = os.path.join(output_dir, 'excel')
+        os.makedirs(self.output_dir, exist_ok=True)
         self.template_excel = xlsx_path
         self.sheet = sheet
         self.workbook = load_workbook(self.template_excel)
@@ -42,7 +45,8 @@ class XlsxHandler:
         else:
             worksheet = self.workbook.create_sheet(self.sheet)
         # 定义起始行号
-        start_row = crazy_box.find_index_inlist(self.read_as_dict()[self.sheet], ['前置条件', '操作步骤', '预期结果']) + 2
+        start_row = crazy_box.find_index_inlist(self.read_as_dict()[self.sheet],
+                                                ['前置条件', '操作步骤', '预期结果']) + 2
         # 创建一个黄色的填充样式
         # 遍历数据列表
         for row_data in data_list:
@@ -168,3 +172,31 @@ class XlsxHandler:
                 last_column_empty = False
                 column_counter['col'] = 0
         self.workbook.save(self.template_excel)
+
+    def to_xmind(self):
+        """只能用 xmind8 打开 心态炸了"""
+        file_name = os.path.splitext(os.path.basename(self.template_excel))[0]
+        file_path = os.path.join(self.output_dir, f"{file_name}.xmind")
+        # 创建一个新的XMind工作簿
+        xmind_book = xmind.load(file_path)  # 创建新的工作簿
+        fields_dict = self.read_as_dict()
+        for topic in fields_dict:
+            x_sheet = xmind_book.createSheet()
+            x_sheet.setTitle(topic)
+            root_topic = x_sheet.getRootTopic()  # 获取根主题
+            root_topic.setTitle(topic)  # 设置根主题标题为用例标签
+            for data in fields_dict[topic]:
+                for i, sub_data in enumerate(data):
+                    child_topic = root_topic.addSubTopic()  # 创建子子主题
+                    child_topic.setTitle(sub_data)
+                    root_topic.addSubTopic(child_topic)  # 将子主题添加到根主题下
+        # 保存工作簿
+        xmind.save(xmind_book, file_path)
+
+
+if __name__ == '__main__':
+    xlsx_h = XlsxHandler(
+        '/Users/kilig/Job/Python-project/kso_gpt/private_upload/127.0.0.1/test_case/20231122_161254/一需求背景_编写测试用例.xlsx',
+        './test')
+    xx = xlsx_h.to_xmind()
+    print(2121)
