@@ -108,8 +108,8 @@ const uml = async className => {
     
     const Module = await import('./file=themes/mermaid_editor.js');
 
-    function do_render(block, code, codeContent) {
-        var rendered_content = mermaid.render(`_diagram_${i}`, code);
+    function do_render(block, code, codeContent, cnt) {
+        var rendered_content = mermaid.render(`_diagram_${cnt}`, code);
         ////////////////////////////// 记录有哪些代码已经被渲染了 ///////////////////////////////////
         let codeFinishRenderElement = block.querySelector("code_finish_render"); // 如果block下已存在code_already_rendered元素，则获取它
         if (codeFinishRenderElement) {                                             // 如果block下已存在code_already_rendered元素
@@ -148,7 +148,7 @@ const uml = async className => {
     const config = (typeof mermaidConfig === "undefined") ? defaultConfig : mermaidConfig
     mermaid.initialize(config)
     // 查找需要渲染的元素 Find all of our Mermaid sources and render them.
-    const blocks = document.querySelectorAll(`pre.${className}`);
+    const blocks = document.querySelectorAll(`pre.mermaid`);
 
     for (let i = 0; i < blocks.length; i++) {
         var block = blocks[i]
@@ -174,12 +174,12 @@ const uml = async className => {
 
         ////////////////////////////// 在这里才真正开始渲染 ///////////////////////////////////
         try {
-            do_render(block, code, codeContent);
+            do_render(block, code, codeContent, i);
             // console.log("渲染", codeContent);
         } catch (err) {
             try {
                 var lines = code.split('\n'); if (lines.length < 2) { continue; }
-                do_render(block, removeLastLine(code), codeContent);
+                do_render(block, removeLastLine(code), codeContent, i);
                 // console.log("渲染", codeContent);
             } catch (err) {
                 console.log("以下代码不能渲染", code, removeLastLine(code), err);
