@@ -51,6 +51,31 @@ const uml = async className => {
         return text
     }
 
+    function createOrUpdateHyperlink(parentElement, linkText, linkHref) {
+        // Search for an existing anchor element within the parentElement
+        let existingAnchor = parentElement.querySelector("a");
+    
+        // Check if an anchor element already exists
+        if (existingAnchor) {
+            // Update the hyperlink reference if it's different from the current one
+            if (existingAnchor.href !== linkHref) {
+                existingAnchor.href = linkHref;
+            }
+            // Update the target attribute to ensure it opens in a new tab
+            existingAnchor.target = '_blank';
+    
+            // If the text must be dynamic, uncomment and use the following line:
+            // existingAnchor.textContent = linkText;
+        } else {
+            // If no anchor exists, create one and append it to the parentElement
+            let anchorElement = document.createElement("a");
+            anchorElement.href = linkHref; // Set hyperlink reference
+            anchorElement.textContent = linkText; // Set text displayed
+            anchorElement.target = '_blank'; // Ensure it opens in a new tab
+            parentElement.appendChild(anchorElement); // Append the new anchor element to the parent
+        }
+    }
+
     // 给出配置 Provide a default config in case one is not specified
     const defaultConfig = {
         startOnLoad: false,
@@ -78,7 +103,7 @@ const uml = async className => {
     const blocks = document.querySelectorAll(`pre.${className}, diagram-div`);
     for (let i = 0; i < blocks.length; i++) {
         var block = blocks[i]
-        // const res = await mermaid.render(`_diagram_${i}`, getFromCode(parentEl))
+        /////////////////////////////////////////////////////////////////
         var code = getFromCode(block);
         let code2Element = document.createElement("code2"); // 创建一个新的code2元素
         let existingCode2Element = block.querySelector("code2"); // 如果block下已存在code2元素，则获取它
@@ -96,7 +121,6 @@ const uml = async className => {
             code2Element.textContent = codeContent;
             block.appendChild(code2Element); // 将新创建的code2元素添加到block中
         }
-
         /////////////////////////////////////////////////////////////////
         //尝试获取已存在的<div class='mermaid_render'>
         let mermaidRender = block.querySelector(".mermaid_render");
@@ -105,6 +129,16 @@ const uml = async className => {
             mermaidRender.classList.add("mermaid_render");
             block.appendChild(mermaidRender);               // 将新创建的元素附加到block
         }
+        let pako_encode = 'pako:eNpVjzFPw0AMhf-K5QmkZmHMgEQT6FIJJLolHUziq6_k7qKLo6hK-t-50A7gyXrve37yjE1oGXM0XZgaoahwKGsPaV6qQqId1NFwhCx7Xnas4ILnywLbh12AQULfW396vPHbFYJi3q8Yg4r139ebVfzm3z0vUFZ76jX0x7_OYQoLvFb2Q9L5_45ETqm3ylBuKGsoQkHxjvBkzMRf4s6iEqPc1SfcoOPoyLbpsXlVa1RhxzXmaW3Z0NhpjbW_JpRGDZ8X32CuceQNjn1LyqWlUySHqbUb-PoDqCFfzA'
+        var x = {
+            "code": codeContent,
+            "mermaid": "{\n  \"theme\": \"default\"\n}",
+            "autoSync": true,
+            "updateDiagram": false
+        };
+        const Module = await import('./file=themes/mermaid_editor.js')
+        pako_encode = Module.serializeState(x)
+        createOrUpdateHyperlink(block, "点击这里编辑脑图", "https://mermaid.live/edit#"+pako_encode)
         /////////////////////////////////////////////////////////////////
         const content = await mermaid.render(`_diagram_${i}`, code)
         mermaidRender.innerHTML = content
