@@ -26,6 +26,8 @@ class ZhipuRequestInstance():
         )
         for event in response.events():
             if event.event == "add":
+                # if self.result_buf == "" and event.data.startswith(" "):
+                #     event.data = event.data.lstrip(" ") # 每次智谱为啥都要带个空格开头呢？
                 self.result_buf += event.data
                 yield self.result_buf
             elif event.event == "error" or event.event == "interrupted":
