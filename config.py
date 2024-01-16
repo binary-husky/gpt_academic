@@ -195,7 +195,7 @@ XFYUN_API_KEY = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 # 接入智谱大模型
 ZHIPUAI_API_KEY = ""
-ZHIPUAI_MODEL = "chatglm_turbo"
+ZHIPUAI_MODEL = "glm-4" # 可选 "glm-3-turbo" "glm-4"
 
 
 # # 火山引擎YUNQUE大模型
