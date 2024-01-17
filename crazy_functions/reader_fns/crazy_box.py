@@ -525,7 +525,7 @@ def result_extract_to_test_cases(gpt_response_collection, llm_kwargs, plugin_kwa
         test_case = reader_fns.MdProcessor(file_classification[file_name]).tabs_to_list()
         sort_test_case = name_de_add_sort(test_case, sort_index)
         # 正式准备写入文件
-        save_path = os.path.join(init_path.users_path, 'test_case')
+        save_path = os.path.join(init_path.users_path, llm_kwargs['ipaddr'], 'test_case')
         xlsx_handler = reader_fns.XlsxHandler(template_file, output_dir=save_path, sheet=sheet)
         xlsx_handler.split_merged_cells()  # 先把合并的单元格拆分，避免写入失败
         file_path = xlsx_handler.list_write_to_excel(sort_test_case, save_as_name=long_name_processing(file_name))
@@ -553,7 +553,7 @@ def result_supplementary_to_test_case(gpt_response_collection, llm_kwargs, plugi
         header = plugin_kwargs[old_file]['原测试用例表头']
         test_case, desc = parsing_json_in_text(file_classification[file_name], old_case, filter_list=header,
                                                sort_index=sort_index)
-        save_path = os.path.join(init_path.users_path, 'test_case')
+        save_path = os.path.join(init_path.users_path, llm_kwargs['ipaddr'], 'test_case')
         # 写入excel
         xlsx_handler = reader_fns.XlsxHandler(template_file, output_dir=save_path, sheet=sheet)
         file_path = xlsx_handler.list_write_to_excel(test_case, save_as_name=long_name_processing(file_name))
