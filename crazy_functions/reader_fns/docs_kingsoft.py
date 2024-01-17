@@ -13,8 +13,6 @@ from bs4 import BeautifulSoup
 from common import toolbox, func_box
 from crazy_functions.reader_fns import crazy_box
 from crazy_functions import crazy_utils
-from common import ocr_tools
-from common.path_handle import init_path
 
 
 class Kdocs:
@@ -325,13 +323,12 @@ def get_docs_content(url, image_processing=False):
     return _all, content, empty_picture_count, pic_dict_convert, file_dict
 
 
-def get_kdocs_dir(limit, project_folder, type, ipaddr):
+def get_kdocs_dir(limit, types, project_folder):
     """
     Args:
         limit: 文档目录路径
         project_folder: 写入的文件
-        type: 文件类型, 不过这里没用到
-        ipaddr:  文件所属标识
+        types: 文件类型, 不过这里没用到
     Returns: [文件列表], 目录内文件信息, 失败信息
     """
     kdocs = Kdocs(limit)
@@ -345,18 +342,16 @@ def get_kdocs_dir(limit, project_folder, type, ipaddr):
     decompress_directory = os.path.join(project_folder, 'extract', kdocs.url_dirs_tag)
     toolbox.extract_archive(temp_file, decompress_directory)
     file_list = []
-    img_list = []
-    for f_t in kdocs.docs_old_type:
-        _, file_, _ = crazy_utils.get_files_from_everything(decompress_directory, type=f_t, ipaddr=ipaddr)
-        file_list += file_
-    for i_t in crazy_box.Utils().picture_format:
-        _, file_, _ = crazy_utils.get_files_from_everything(decompress_directory, type=i_t, ipaddr=ipaddr)
-        file_list += file_
-    file_list += crazy_box.batch_recognition_images_to_md(img_list, ipaddr)
-    return file_list, task_info, task_faillist
+    file_mapping = {}
+    for t in types:
+        success, file_manifest = crazy_utils.get_files_from_everything(decompress_directory, t, project_folder)
+        file_list.extend(file_manifest)
+    for fp in file_list:
+        file_mapping[func_box.local_relative_path(fp)] = limit
+    return file_mapping, task_info, task_faillist
 
 
-def get_kdocs_files(limit, project_folder, type, ipaddr):
+def get_kdocs_files(limit, project_folder, type):
     """
     Args:
         limit: 金山文档分享文件地址
@@ -365,57 +360,42 @@ def get_kdocs_files(limit, project_folder, type, ipaddr):
         ipaddr: 用户信息
     Returns: [提取的文件list]
     """
-    if type == 'otl':
-        _, content, _, pic_dict, _ = get_docs_content(limit)
-        name = 'temp.md'
-        tag = content.splitlines()[0][:20]
-        for i in pic_dict:  # 增加OCR选项
-            img_content, img_result, _ = ocr_tools.Paddle_ocr_select(ipaddr=ipaddr, trust_value=True
-                                                                     ).img_def_content(img_path=pic_dict[i], img_tag=i)
-            content = str(content).replace(f"{i}", f"{func_box.html_local_img(img_result)}\n```{img_content}```")
-            name = tag + '.md'
-            content = content.encode('utf-8')
-    elif type or type == '':
-        kdocs = Kdocs(limit)
-        link, name = kdocs.document_aggregation_download(file_type=type)
-        tag = kdocs.url_share_tag
-        if link:
-            resp = requests.get(url=link, verify=False)
-            content = resp.content
-        else:
-            return []
+    kdocs = Kdocs(limit)
+    link, name = kdocs.document_aggregation_download(file_type=type)
+    tag = kdocs.url_share_tag
+    if link:
+        resp = requests.get(url=link, verify=False)
+        content = resp.content
     else:
-        return []
+        return None
     if content:
         tag_path = os.path.join(project_folder, tag)
         temp_file = os.path.join(os.path.join(project_folder, tag, name))
         os.makedirs(tag_path, exist_ok=True)
-        with open(temp_file, 'wb') as f: f.write(content)
-        return [temp_file]
+        with open(temp_file, 'wb') as f:
+            f.write(content)
+        return {func_box.local_relative_path(temp_file): limit}
 
 
-def get_kdocs_from_everything(txt, type=[''], ipaddr='temp'):
+def get_kdocs_from_limit(link_limit, project_folder, type=['']):
     """
     Args:
-        txt: kudos 文件分享码
+        link_limit: kudos 文件分享链接
         type: type=='' 时，将支持所有文件类型
-        ipaddr: 用户信息
+        project_folder: 存放地址
     Returns:
     """
-    link_limit = func_box.split_domain_url(link_limit=txt, domain_name=['kdocs', 'wps'])
-    file_manifest = []
+    file_mapping = {}
     success = ''
-    project_folder = os.path.join(init_path.users_path, ipaddr, 'kdocs')
-    os.makedirs(project_folder, exist_ok=True)
-    if link_limit:
-        for limit in link_limit:
-            if '/ent/' in limit:
-                file_list, info, fail = get_kdocs_dir(limit, project_folder, type, ipaddr)
-                file_manifest += file_list
-                success += f"{limit}文件信息如下：{info}\n\n 下载任务状况：{fail}\n\n"
-            else:
-                file_manifest += get_kdocs_files(limit, project_folder, type, ipaddr)
-    return success, file_manifest, project_folder
+    project_folder = os.path.join(project_folder, 'k_docs')
+    for limit in link_limit:
+        if '/ent/' in limit:
+            files, info, fail = get_kdocs_dir(limit, project_folder, type)
+            file_mapping.update(files)
+            success += f"{limit}文件信息如下：{info}\n\n 下载任务状况：{fail}\n\n"
+        else:
+            file_mapping.update(get_kdocs_files(limit, project_folder, type))
+    return success, file_mapping
 
 
 def smart_document_extraction(url, llm_kwargs, plugin_kwargs, chatbot, history, files):
@@ -460,7 +440,7 @@ def smart_document_extraction(url, llm_kwargs, plugin_kwargs, chatbot, history, 
         yield from toolbox.update_ui(chatbot, history)
     title = crazy_box.long_name_processing(content)
     temp_list = [title, content]
-    temp_file = yield from crazy_box.result_written_to_markdwon(temp_list, llm_kwargs, plugin_kwargs, chatbot, history)
+    temp_file = yield from crazy_box.result_written_to_markdown(temp_list, llm_kwargs, plugin_kwargs, chatbot, history)
     files.extend(temp_file)
 
 

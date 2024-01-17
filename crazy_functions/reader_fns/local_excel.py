@@ -16,18 +16,25 @@ from common import func_box
 from common import toolbox
 
 import xmind
-from xmind.core.topic import TopicElement
 
 
 class XlsxHandler:
 
-    def __init__(self, xlsx_path, output_dir, sheet='测试要点'):
-        # Ensure the output directory exists
+    def __init__(self, xlsx_path, output_dir=None, sheet='测试要点'):
+        """
+        Args:
+            xlsx_path: 文件路径
+            output_dir: 保存路径，如果没有另存为操作，可以为空
+            sheet:
+        """
+        if output_dir:
+            self.output_dir = os.path.join(output_dir, 'excel')
+            os.makedirs(self.output_dir, exist_ok=True)
         self.output_dir = os.path.join(output_dir, 'excel')
-        os.makedirs(self.output_dir, exist_ok=True)
         self.template_excel = xlsx_path
         self.sheet = sheet
         self.workbook = load_workbook(self.template_excel)
+        self.file_name = os.path.splitext(os.path.basename(self.template_excel))[0]
         # 定义填充样式
         self.yellow_fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
         self.green_fill = PatternFill(start_color="1abc9c", end_color="1abc9c", fill_type="solid")
@@ -38,8 +45,8 @@ class XlsxHandler:
         if str(self.sheet) not in self.workbook.sheetnames:
             self.sheet = self.workbook.active.title
 
-    def lpvoid_lpbuffe(self, data_list: list, filename=''):
-        # 加载现有的 Excel 文件        # 选择要操作的工作表, 默认是测试要点
+    def list_write_to_excel(self, data_list: list, save_as_name=''):
+        # 加载现有的 Excel 文件
         if self.sheet in self.workbook.sheetnames:
             worksheet = self.workbook[self.sheet]
         else:
@@ -70,11 +77,11 @@ class XlsxHandler:
             # 增加起始行号
             start_row += 1
         merge_cell = toolbox.get_conf('merge_cell')
-        if merge_cell: self.merge_same_cells()  # 还原被拆分的合并单元格
-        # 保存 Excel 文件
-        file_path = os.path.join(self.output_dir, filename)
-        os.makedirs(file_path, exist_ok=True)
-        test_case_path = f'{os.path.join(file_path, func_box.created_atime())}.xlsx'
+        if merge_cell:
+            self.merge_same_cells()  # 还原被拆分的合并单元格
+        if save_as_name:
+            save_as_name = f'{save_as_name}_'
+        test_case_path = os.path.join(self.output_dir, f'{save_as_name}{func_box.created_atime()}.xlsx')
         # 遇到文件无法保存时，再拆开图片
         try:
             self.workbook.save(test_case_path)
@@ -175,8 +182,7 @@ class XlsxHandler:
 
     def to_xmind(self):
         """只能用 xmind8 打开 心态炸了"""
-        file_name = os.path.splitext(os.path.basename(self.template_excel))[0]
-        file_path = os.path.join(self.output_dir, f"{file_name}.xmind")
+        file_path = os.path.join(self.output_dir, f"{self.file_name}.xmind")
         # 创建一个新的XMind工作簿
         xmind_book = xmind.load(file_path)  # 创建新的工作簿
         fields_dict = self.read_as_dict()
@@ -195,8 +201,4 @@ class XlsxHandler:
 
 
 if __name__ == '__main__':
-    xlsx_h = XlsxHandler(
-        '/Users/kilig/Job/Python-project/kso_gpt/private_upload/127.0.0.1/test_case/20231122_161254/一需求背景_编写测试用例.xlsx',
-        './test')
-    xx = xlsx_h.to_xmind()
-    print(2121)
+    pass

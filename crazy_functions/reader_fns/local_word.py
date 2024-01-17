@@ -12,16 +12,22 @@ import xml.etree.ElementTree as ET
 
 class DocxHandler:
 
-    def __init__(self, docx_path, output_dir):
-        self.output_dir = os.path.join(output_dir, 'word')
-        # Ensure the output directory exists
-        os.makedirs(output_dir, exist_ok=True)
+    def __init__(self, docx_path, output_dir=None):
+        """
+        Args:
+            docx_path: 读取文件路径
+            output_dir: 保存路径，如果没有另存为操作，可以为空
+        """
+        if output_dir:
+            self.output_dir = os.path.join(output_dir, 'word')
+            os.makedirs(output_dir, exist_ok=True)
         self.output_dir = output_dir
         self.markdown_content = ''
         try:
             self.doc = Document(docx_path)
         except Exception as e:
             raise ValueError(f"Error reading document: {e}")
+        self.file_name = os.path.basename(docx_path).split('.')[0]
 
     def __extract_attribute_from_xml(self, xml_data, e_tag='blip', e_attr='embed') -> str:
         """从XML数据中提取属性"""
@@ -126,7 +132,7 @@ class DocxHandler:
         return markdown
 
     def get_markdown(self):
-        # 遍历文档的所有元素
+        """提取docx文件、保留段落转换为Markdown格式"""
         for element in self.doc.element.body.iter():
             # 处理段落
             if element.tag.endswith('p') and not self.__is_inside_table(element):
@@ -141,10 +147,11 @@ class DocxHandler:
         return self.markdown_content
 
     def save_markdown(self):
+        """保存Markdown文件"""
         if not self.markdown_content:
             self.markdown_content = self.get_markdown()
         # Save Markdown file
-        markdown_file_path = os.path.join(self.output_dir, 'output.md')
+        markdown_file_path = os.path.join(self.output_dir, f'{self.file_name}.md')
         try:
             with open(markdown_file_path, 'w', encoding='utf-8') as f:
                 f.write(self.markdown_content)

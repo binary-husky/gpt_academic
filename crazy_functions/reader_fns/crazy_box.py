@@ -5,11 +5,12 @@
 import os
 import json
 import re
-from common import func_box, ocr_tools, toolbox, database_processor, Langchain_cn
+from common import func_box, toolbox, database_processor, Langchain_cn
 from crazy_functions import crazy_utils
 from request_llms import bridge_all
 from moviepy.editor import AudioFileClip
 from common.path_handle import init_path
+from crazy_functions import reader_fns
 
 
 class Utils:
@@ -116,22 +117,6 @@ class Utils:
             f.write(data)
         return md_file
 
-    def md_2_html(self, data, hosts, file_name):
-        """
-        Args: 将data写入md文件
-            data: 数据
-            hosts: 用户标识
-            file_name: 另取文件名
-        Returns: 写入的文件地址
-        """
-        data = toolbox.markdown_convertion(data)
-        user_path = os.path.join(init_path.users_path, hosts, 'view_html')
-        os.makedirs(user_path, exist_ok=True)
-        md_file = os.path.join(user_path, f"{file_name}.html")
-        with open(file=md_file, mode='w', encoding='utf-8') as f:
-            f.write(data)
-        return md_file
-
     def markdown_to_flow_chart(self, data, hosts, file_name):
         """
         Args: 调用markmap-cli
@@ -176,49 +161,37 @@ def find_index_inlist(data_list: list, search_terms: list) -> int:
     return 0  # 如果没有找到匹配的元素，则返回初始坐标
 
 
-def file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_kwargs, plugin_kwargs):
+def file_extraction_intype(file_mapping, chatbot, history, llm_kwargs, plugin_kwargs):
     # 文件读取
-    file_routing = []
-    include_files, = json_args_return(plugin_kwargs, keys=['处理文件类型'])
-    if type(file_types) is dict: files = [files[f] for f in files]
-    for t in file_types:
-        for f in files:
-            _, routing, _ = crazy_utils.get_files_from_everything(f, t, ipaddr=llm_kwargs['ipaddr'])
-            file_routing.extend(routing)
-    for file_path in file_routing:
-        chatbot.append(['检查文件是否符合格式要求，并解析文件', f'`{file_path.replace(init_path.base_path, ".")}`' +
-                        f"\t...正在解析本地文件\n\n"])
+    file_limit = {}
+    for file_path in file_mapping:
+        chatbot.append([None, f'`{file_path.replace(init_path.base_path, ".")}`\t...正在解析本地文件\n\n'])
         yield from toolbox.update_ui(chatbot, history)
-        title = long_name_processing(os.path.basename(file_path))
         if file_path.endswith('pdf'):
-            file_content, _ = crazy_utils.read_and_clean_pdf_text(file_path)
-            content = "".join(file_content)
-            file_limit.extend([title, content])
+            _content, _ = crazy_utils.read_and_clean_pdf_text(file_path)
+            file_content = "".join(_content)
         elif file_path.endswith('docx') or file_path.endswith('doc'):
-            pass
+            save_path = os.path.join(init_path.users_path, llm_kwargs['ipaddr'])
+            file_content = reader_fns.DocxHandler(file_path, save_path).get_markdown()
         elif file_path.endswith('xmind'):
-            file_content, _path = XmindHandle().xmind_2_md(pathSource=file_path)
-            file_limit.extend([title, file_content])
-        elif func_box.file_manifest_filter_type([file_path], include_files) and 'mp4' in include_files:
-            txt_manifest = yield from audio_comparison_of_video_converters([file_path], chatbot, history)
-            file_limit.extend(txt_manifest)
+            file_content = reader_fns.XmindHandle(file_path).get_markdown()
+        elif file_path.endswith('mp4'):
+            file_content = yield from audio_comparison_of_video_converters([file_path], chatbot, history)
         elif file_path.endswith('xlsx') or file_path.endswith('xls'):
             sheet, = json_args_return(plugin_kwargs, keys=['读取指定Sheet'], default='测试要点')
             # 创建文件对象
-            ex_handle = ExcelHandle(temp_file=file_path, sheet=sheet)
+            ex_handle = reader_fns.XlsxHandler(file_path, sheet=sheet)
             if sheet in ex_handle.workbook.sheetnames:
                 ex_handle.split_merged_cells()
                 xlsx_dict = ex_handle.read_as_dict()
                 file_content = xlsx_dict.get(sheet)
-                file_limit.extend([title, file_content])
             else:
                 active_sheet = ex_handle.workbook.active.title
                 ex_handle.sheet = active_sheet
                 ex_handle.split_merged_cells()
                 xlsx_dict = ex_handle.read_as_dict()
-                active_content = xlsx_dict.get(active_sheet)
-                file_limit.extend([title, active_content])
-                chatbot.append(['可以开始了么？',
+                file_content = xlsx_dict.get(active_sheet)
+                chatbot.append([None,
                                 f'无法在`{os.path.basename(file_path)}`找到`{sheet}`工作表，'
                                 f'将读取上次预览的活动工作表`{active_sheet}`，'
                                 f'若你的用例工作表是其他名称, 请及时暂停插件运行，并在自定义插件配置中更改'
@@ -229,8 +202,9 @@ def file_extraction_intype(files, file_types, file_limit, chatbot, history, llm_
         else:
             with open(file_path, mode='r', encoding='utf-8') as f:
                 file_content = f.read()
-                file_limit.extend([title, file_content])
+        file_limit[file_path] = file_content
         yield from toolbox.update_ui(chatbot, history)
+    return file_limit
 
 
 def json_args_return(kwargs, keys: list, default=None) -> list:
@@ -505,27 +479,10 @@ def parsing_json_in_text(txt_data: list, old_case, filter_list: list = 'None----
     response = []
     desc = '\n\n---\n\n'.join(txt_data)
     for index in range(len(old_case)):
-        supplementary_data = []
-        content_data = txt_data[index]
-        if 'raise ConnectionAbortedError jsokf' in content_data:
-            # 尝试修复超出Token限制导致的Json数据结构错误
-            content_data = "\n".join([item for item in str(content_data).splitlines() if item != ''][:-1])
-            if re.search(r'[^\w\s\]]', content_data[-1]):  # 判断是不是有,号之类的特殊字符
-                content_data = content_data[:-1]  # 有则排除
-            content_data += ']'
-        # 尝试补充一些错误的JSON数据
-        fix_data = content_data.replace('][', '],[').replace(']\n[', '],[')
-        fix_data = fix_data.replace('\n...\n', '').replace('\n\n...\n\n', '')
-        pattern = r'\[[^\[\]]*\]'
-        result = re.findall(pattern, fix_data)
-        for sp in result:
-            __list = []
-            try:
-                __list = json.loads(sp)
-                supplementary_data.append(__list)
-            except:
-                func_box.通知机器人(f'{sp} 测试用例转dict失败了来看看')
-        if len(txt_data) != len(old_case): index = -1  # 兼容一下哈
+        # 获取所有Json
+        supplementary_data = reader_fns.MdProcessor(txt_data[index]).json_to_list()
+        # 兼容一下哈
+        if len(txt_data) != len(old_case): index = -1
         # 过滤掉产出带的表头数据
         filtered_supplementary_data = [data for data in supplementary_data
                                        if filter_list[:5] != data[:5] or filter_list[-5:] != data[-5:]]
@@ -544,7 +501,7 @@ def parsing_json_in_text(txt_data: list, old_case, filter_list: list = 'None----
     return response, desc
 
 
-def write_test_cases(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history):
+def result_extract_to_test_cases(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history):
     """
     Args:
         gpt_response_collection: [输入文件标题， 输出]
@@ -562,36 +519,24 @@ def write_test_cases(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot
     you_say = '准备将测试用例写入Excel中...'
     chatbot.append([you_say, chat_file_list])
     yield from toolbox.update_ui(chatbot, history)
-    files_limit = []
+    files_limit = {}
     for file_name in file_classification:
-        test_case = []
-        for value in file_classification[file_name]:
-            test_case_content = value.splitlines()
-            for i in test_case_content:
-                if re.findall(r'\|\s*[:|-]+\s*\|', i):  # 过滤表头
-                    test_case = test_case[:-1]
-                    continue
-                if i.find('|') != -1:
-                    test_case.append([func_box.clean_br_string(i) for i in i.split('|')[1:]])
-                elif i.find('｜') != -1:
-                    test_case.append([func_box.clean_br_string(i) for i in i.split('｜')[1:]])
-                else:
-                    print('脏数据过滤，这个不符合写入测试用例的条件')
-                    # func_box.通知机器人(f'脏数据过滤，这个不符合写入测试用例的条件 \n\n预期写入数据`{i}`\n\n```\n{test_case_content}\n```')
-        # test_case
+        # 处理md数据
+        test_case = reader_fns.MdProcessor(file_classification[file_name]).tabs_to_list()
         sort_test_case = name_de_add_sort(test_case, sort_index)
         # 正式准备写入文件
-        xlsx_heandle = ExcelHandle(ipaddr=llm_kwargs['ipaddr'], temp_file=template_file, sheet=sheet)
-        xlsx_heandle.split_merged_cells()  # 先把合并的单元格拆分，避免写入失败
-        file_path = xlsx_heandle.lpvoid_lpbuffe(sort_test_case, filename=long_name_processing(file_name))
+        save_path = os.path.join(init_path.users_path, 'test_case')
+        xlsx_handler = reader_fns.XlsxHandler(template_file, output_dir=save_path, sheet=sheet)
+        xlsx_handler.split_merged_cells()  # 先把合并的单元格拆分，避免写入失败
+        file_path = xlsx_handler.list_write_to_excel(sort_test_case, save_as_name=long_name_processing(file_name))
         chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, to_tabs=True)}\n\n'
         chatbot[-1] = ([you_say, chat_file_list])
         yield from toolbox.update_ui(chatbot, history)
-        files_limit.append(file_path)
+        files_limit.update({file_path: file_name})
     return files_limit
 
 
-def supplementary_test_case(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history):
+def result_supplementary_to_test_case(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history):
     template_file, sheet, sort_index = json_args_return(plugin_kwargs,
                                                         ['写入指定模版', '写入指定Sheet', '用例下标排序'])
     if not sheet:
@@ -601,26 +546,29 @@ def supplementary_test_case(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     you_say = '准备将测试用例写入Excel中...'
     chatbot.append([you_say, chat_file_list])
     yield from toolbox.update_ui(chatbot, history)
-    files_limit = []
+    files_limit = {}
     for file_name in file_classification:
         old_file = plugin_kwargs['上阶段文件']
         old_case = plugin_kwargs[old_file]['原测试用例数据']
         header = plugin_kwargs[old_file]['原测试用例表头']
         test_case, desc = parsing_json_in_text(file_classification[file_name], old_case, filter_list=header,
                                                sort_index=sort_index)
-        file_path = ExcelHandle(ipaddr=llm_kwargs['ipaddr'],
-                                temp_file=template_file, sheet=sheet).lpvoid_lpbuffe(
-            test_case, filename=long_name_processing(file_name))
-        md = Utils().write_markdown(data=desc, hosts=llm_kwargs['ipaddr'], file_name=long_name_processing(file_name))
+        save_path = os.path.join(init_path.users_path, 'test_case')
+        # 写入excel
+        xlsx_handler = reader_fns.XlsxHandler(template_file, output_dir=save_path, sheet=sheet)
+        file_path = xlsx_handler.list_write_to_excel(test_case, save_as_name=long_name_processing(file_name))
+        # 写入 markdown
+        md_path = os.path.join(save_path, f"{long_name_processing(file_name)}.md")
+        reader_fns.MdHandler(md_path).save_markdown(desc)
         chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, to_tabs=True)}\n\n' \
-                          f'{file_name}补充思路如下：\t{func_box.html_view_blank(__href=md, to_tabs=True)}\n\n---\n\n'
+                          f'{file_name}补充思路如下：\t{func_box.html_view_blank(__href=md_path, to_tabs=True)}\n\n---\n\n'
         chatbot[-1] = ([you_say, chat_file_list])
         yield from toolbox.update_ui(chatbot, history)
-        files_limit.append(file_path)
+        files_limit.update({file_path: file_name})
     return files_limit
 
 
-def transfer_flow_chart(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history):
+def result_converter_to_flow_chart(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history):
     """
     Args: 将输出结果写入md，并转换为流程图
         gpt_response_collection: [输入、输出]
@@ -631,7 +579,7 @@ def transfer_flow_chart(gpt_response_collection, llm_kwargs, plugin_kwargs, chat
         None
     """
     file_classification = file_classification_to_dict(gpt_response_collection)
-    file_limit = []
+    file_limit = {}
     chat_file_list = ''
     you_say = '请将Markdown结果转换为流程图~'
     chatbot.append([you_say, chat_file_list])
@@ -639,19 +587,19 @@ def transfer_flow_chart(gpt_response_collection, llm_kwargs, plugin_kwargs, chat
         inputs_count = ''
         for value in file_classification[file_name]:
             inputs_count += str(value).replace('```', '')  # 去除头部和尾部的代码块, 避免流程图堆在一块
-        md, html = Utils().markdown_to_flow_chart(data=inputs_count, hosts=llm_kwargs['ipaddr'],
-                                                  file_name=long_name_processing(file_name))
-        chat_file_list += "View: " + func_box.html_view_blank(md,
-                                                              to_tabs=True) + '\n\n--- \n\n View: ' + func_box.html_view_blank(
-            html)
+        save_path = os.path.join(init_path.users_path, llm_kwargs['ipaddr'])
+        md_file = os.path.join(save_path, f"{long_name_processing(file_name)}.md")
+        html_file = reader_fns.MdHandler(md_path=md_file, output_dir=save_path).save_mark_map()
+        chat_file_list += "View: " + func_box.html_view_blank(md_file, to_tabs=True) + \
+                          '\n\n--- \n\n View: ' + func_box.html_view_blank(html_file)
         chatbot.append((you_say, chat_file_list))
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
-        file_limit.append(md)
+        file_limit.update({md_file: file_name})
     # f'tips: 双击空白处可以放大～\n\n' f'{func_box.html_iframe_code(html_file=html)}'  无用，不允许内嵌网页了
     return file_limit
 
 
-def result_written_to_markdwon(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history, stage=''):
+def result_written_to_markdown(gpt_response_collection, llm_kwargs, plugin_kwargs, chatbot, history, stage=''):
     """
     Args: 将输出结果写入md
         gpt_response_collection: [输入、输出]
@@ -679,10 +627,114 @@ def result_written_to_markdwon(gpt_response_collection, llm_kwargs, plugin_kwarg
     return file_limit
 
 
-def detach_cloud_links(link_limit):
+def detach_cloud_links(link_limit, chatbot, history, llm_kwargs):
+    fp_mapping = {}
+    if isinstance(chatbot, list) and isinstance(history, list):
+        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='正在解析云文件链接...')
+    save_path = os.path.join(init_path.users_path, llm_kwargs['ipaddr'])
+    # wps云文档下载
     wps_links = func_box.split_domain_url(link_limit, domain_name=['kdocs', 'wps'])
+    wps_status, wps_mapping = reader_fns.get_kdocs_from_limit(wps_links, save_path)
+    fp_mapping.update(wps_mapping)
+
+    # qq云文档下载
     qq_link = func_box.split_domain_url(link_limit, domain_name=['docs.qq'])
-    return wps_links, qq_link
+    qq_status, qq_mapping = reader_fns.get_qqdocs_from_limit(qq_link, save_path)
+    fp_mapping.update(qq_mapping)
+
+    # 飞书云文档下载
+    feishu_link = func_box.split_domain_url(link_limit, domain_name=['lg0v2tirko'])
+    feishu_status, feishu_mapping = reader_fns.get_feishu_from_limit(feishu_link, save_path)
+    fp_mapping.update(feishu_mapping)
+    download_status = ''
+    if wps_status or qq_status or feishu_status:
+        download_status = "\n".join([wps_status, qq_status, feishu_status])
+    return fp_mapping, download_status
+
+
+def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugin_kwargs):
+    ocr_switch, = json_args_return(plugin_kwargs, ['开启OCR'])
+    img_mapping = func_box.extract_link_pf(content, func_box.valid_img_extensions)
+    # 如果开启了OCR，并且文中存在图片链接，处理图片
+    if ocr_switch and img_mapping:
+        vision_bro = f"检测到识图开关为`{ocr_switch}`，并且文中存在图片链接，正在识别图片中的文字...解析进度如下："
+        vision_loading_statsu = {i: "Loading..." for i in img_mapping}
+        vision_start = func_box.html_folded_code(json.dumps(vision_loading_statsu, indent=4, ensure_ascii=False))
+        chatbot.append([None, vision_bro + vision_start])
+        yield from toolbox.update_ui(chatbot, history, '正在调用`Vision`组件，已启用多线程解析，请稍等')
+        # 识别图片中的文字
+        save_path = os.path.join(init_path.users_path, llm_kwargs['ipaddr'], 'img_vision')
+        vision_submission = reader_fns.submit_threads_img_handle(img_mapping, save_path, ocr_switch)
+        chatbot[-1] = [None, vision_bro]
+        for t in vision_submission:
+            try:
+                img_content, img_path, status = vision_submission[t].result()
+                vision_loading_statsu.update({t: img_content})
+                vision_end = func_box.html_folded_code(json.dumps(vision_loading_statsu, indent=4, ensure_ascii=False))
+                chatbot[-1] = [None, vision_bro + vision_end]
+                if status and status != '本次识别结果读取数据库缓存':  # 出现异常，不替换文本
+                    content = content.replace(img_mapping[t], f'{img_mapping[t]}\n\n{img_content}')
+                yield from toolbox.update_ui(chatbot, history)
+            except Exception as e:
+                status = f'`{t}` `{e}` 识别失败，过滤这个图片\n\n'
+                vision_loading_statsu.update({t: status})
+                vision_end = func_box.html_folded_code(json.dumps(vision_loading_statsu, indent=4, ensure_ascii=False))
+                chatbot[-1] = [None, vision_bro + vision_end]
+                yield from toolbox.update_ui(chatbot, history)
+    return content.replace(init_path.base_path, '.')  # 增加保障，防止路径泄露
+
+
+def content_clear_links(user_input, clear_fp_map, clear_link_map):
+    """清除文本中已处理的链接"""
+    for link in clear_link_map:
+        user_input = user_input.replace(link, '')
+    for pf in clear_fp_map:
+        user_input = user_input.replace(clear_fp_map[pf], '')
+    return user_input
+
+
+def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugin_kwargs, valid_types):
+    embedding_content = []  # 对话内容
+    chatbot.append([user_input, None])
+    yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='🕵🏻‍超级侦探，正在办案～')
+    # 云文件
+    fp_mapping, download_status = yield from detach_cloud_links(user_input, chatbot, history, llm_kwargs)
+    # 本地文件
+    fp_mapping.update(func_box.extract_link_pf(user_input, valid_types))
+    content_mapping = yield from file_extraction_intype(fp_mapping, chatbot, history, llm_kwargs, plugin_kwargs)
+    if content_mapping:
+        mapping_data = func_box.html_folded_code(json.dumps(content_mapping, indent=4, ensure_ascii=False))
+        map_bro_say = f'数据解析完成，提取`fp mapping`如下：\n\n{mapping_data}'
+        if download_status:
+            map_bro_say += f'\n\n下载云文档似乎出了点问题？请检查\n\n```\n{download_status}\n```'
+        chatbot.append([None, map_bro_say])
+        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='数据解析完成！')
+        for content_fp in content_mapping:  # 一个文件一个对话
+            file_content = content_mapping[content_fp]
+            # 将解析的数据提交到正文
+            input_handle = user_input.replace(fp_mapping[content_fp], file_content)
+            # 将其他文件链接清除
+            user_clear = content_clear_links(input_handle, fp_mapping, content_mapping)
+            # 识别图片链接内容
+            complete_input = yield from content_img_vision_analyze(user_clear, chatbot, history,
+                                                                   llm_kwargs, plugin_kwargs)
+            embedding_content.extend([os.path.basename(content_fp), complete_input])
+
+    elif len(user_input) > 50:  # 没有探测到任何文件，并且提交大于50个字符，那么运行往下走
+        chatbot[-1] = [user_input, None]
+        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='没有探测到文件')
+        embedding_content.extend([user_input, user_input])
+    else:
+        devs_document = toolbox.get_conf('devs_document')
+        status = '没有探测到任何文件，并且提交字符少于50，无法完成后续任务'
+        status += f'请在输入框中输入需要解析的云文档链接或本地文件地址，然后再点击对应的插件\n\n' \
+                  f'插件支持解析文档类型{func_box.html_tag_color(valid_types)}' \
+                  f'链接需要是可访问的，格式如下，如果有多个文档则用换行或空格隔开，输入后再点击对应的插件' \
+                  f"有问题？请联系`@spike` or 查看开发文档{devs_document}"
+        chatbot[-1] = [user_input, status]
+        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='没有探测到数据')
+    # 提交知识库 ... 未适配
+    return embedding_content
 
 
 def audio_extraction_text(file):

@@ -16,24 +16,26 @@ timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check 
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=None,
                                   console_slience=False):
     genai = GoogleChatInit()
-    watch_dog_patience = 5  # 看门狗的耐心, 设置5秒即可
+    watch_dog_patience = 10  # 看门狗的耐心, 设置10秒即可
     gpt_replying_buffer = ''
     stream_response = genai.generate_chat(inputs, llm_kwargs, history, sys_prompt)
     for response in stream_response:
-        results = response.decode()
-        match = re.search(r'"text":\s*"((?:[^"\\]|\\.)*)"', results, flags=re.DOTALL)
-        error_match = re.search(r'\"message\":\s*\"(.*?)\"', results)
-        if match:
-            if match.group(1):
-                match_str = json.loads('{"text": "%s"}' % match.group(1))
-                if len(observe_window) >= 1:
-                    observe_window[0] = match_str['text']
-                if len(observe_window) >= 2:
-                    if (time.time() - observe_window[1]) > watch_dog_patience:
-                        raise RuntimeError("程序终止。")
-                gpt_replying_buffer += match_str['text']
-        if error_match:
+        results = response.decode("utf-8")
+        text_match = re.search(genai.text_pattern, results)
+        error_match = re.search(genai.error_pattern, results)
+        if text_match:
+            match_str = json.loads('{"text": "%s"}' % text_match.group(1))
+            gpt_replying_buffer += match_str['text']
+        elif error_match:
+            if len(observe_window) >= 3:
+                observe_window[2] = error_match.group(1)
             raise f'{gpt_replying_buffer} 对话错误'
+        # 观测窗
+        if len(observe_window) >= 1:
+            observe_window[0] = gpt_replying_buffer
+        if len(observe_window) >= 2:
+            if (time.time() - observe_window[1]) > watch_dog_patience:
+                raise RuntimeError("程序终止。")
     return gpt_replying_buffer
 
 
@@ -57,12 +59,12 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     gpt_security_policy = ""
     history.extend([inputs, ''])
     for response in stream_response:
-        results = response.decode("utf-8")    # 被这个解码给耍了。。
+        results = response.decode("utf-8")
         gpt_security_policy += results
-        match = re.search(r'"text":\s*"((?:[^"\\]|\\.)*)"', results, flags=re.DOTALL)
-        error_match = re.search(r'\"message\":\s*\"(.*)\"', results, flags=re.DOTALL)
-        if match:
-            paraphrase = json.loads('{"text": "%s"}' % match.group(1))
+        text_match = re.search(genai.text_pattern, results)
+        error_match = re.search(genai.error_pattern, results)
+        if text_match:
+            paraphrase = json.loads('{"text": "%s"}' % text_match.group(1))
             gpt_replying_buffer += paraphrase['text']    # 使用 json 解析库进行处理
             chatbot[-1] = (inputs, gpt_replying_buffer)
             history[-1] = gpt_replying_buffer
@@ -81,7 +83,6 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
 
 if __name__ == '__main__':
     import sys
-
     llm_kwargs = {'llm_model': 'gemini-pro'}
     result = predict('Write long a story about a magic backpack.', llm_kwargs, llm_kwargs, [])
     for i in result:

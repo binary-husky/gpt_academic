@@ -176,7 +176,7 @@ def func_decision_tree(func, cookies, single_turn, use_websearch,
             yield from update_ui(chatbot_with_cookie, final_cookies['history'], msg="检测到被滞留的缓存文档")
 
 
-def update_ui(chatbot, history, msg='正常', end_code=0, *args):  # 刷新界面
+def update_ui(chatbot, history, msg=None, end_code=0, *args):  # 刷新界面
     """
     刷新用户界面
     """
@@ -194,6 +194,8 @@ def update_ui(chatbot, history, msg='正常', end_code=0, *args):  # 刷新界�
         cookies['label'] = None  # 清空label
     else:
         chatbot_gr = chatbot
+    if not msg:
+        msg = gr.update()
     event = [cookies, chatbot_gr, history, msg]
     if end_code:
         yield event + [gr.update(visible=False), gr.update(visible=True)]
@@ -810,7 +812,7 @@ def on_file_uploaded(files, chatbot, txt,  cookies, ipaddr: gr.Request):
     else:
         ipaddr = func_box.user_client_mark(ipaddr)
     time_tag = func_box.created_atime()
-    time_tag_path = os.path.join(private_upload, ipaddr, time_tag)
+    time_tag_path = os.path.join(private_upload, ipaddr, 'temp', time_tag)
     os.makedirs(f'{time_tag_path}', exist_ok=True)
     err_msg = ''
     for file in files:

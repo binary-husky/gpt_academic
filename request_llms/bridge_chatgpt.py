@@ -112,7 +112,8 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
             break
         except requests.exceptions.ConnectionError:
             chunk = next(stream_response).decode()  # 失败了，重试一次？再失败就没办法了。
-        if len(chunk) == 0: continue
+        if len(chunk) == 0:
+            continue
         if not chunk.startswith('data:'):
             error_msg = get_full_error(chunk.encode('utf8'), stream_response).decode()
             if "reduce the length" in error_msg:

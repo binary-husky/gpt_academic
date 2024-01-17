@@ -116,16 +116,23 @@ def html_a_blank(__href, name=''):
     return a
 
 
+# 绝对路径转相对路径
+def local_relative_path(file):
+    return file.replace(init_path.base_path, ".")
+
+
 def html_local_file(file):
     if os.path.exists(str(file)):
-        file = f'file={file.replace(init_path.base_path, ".")}'
+        file = f'file={local_relative_path(file)}'
     return file
 
 
-def link_mtime_to_md(file):
+def link_mtime_to_md(file, time_stamp=True):
     link_local = html_local_file(file)
     link_name = os.path.basename(file)
-    a = f"[{link_name}]({link_local}?{os.path.getmtime(file)})"
+    a = f"[{link_name}]({link_local})"
+    if time_stamp:
+        a += f"?{os.path.getmtime(file)}"
     return a
 
 
@@ -168,33 +175,39 @@ def html_local_img(__file, layout='left', max_width=None, max_height=None, md=Tr
     return a
 
 
-def files_filter_handler(file_list):
-    new_list = []
-    for file in file_list:
-        file = str(file).replace('file=', '')
-        if os.path.exists(file):
-            if str(os.path.basename(file)).split('.')[-1] in valid_img_extensions:
-                new_list.append(file)
-    return new_list
+# 提取markdown链接
+def extract_link_pf(text, valid_types: list):
+    file_mapping_links = {}
+    pattern_link = r"(!?\[[^\]]+\]\([^\)]+\))"
+    matches_path = re.findall(pattern_link, text)
+    for md_link in matches_path:
+        pattern_file = r"\(file=(.*?)\)"
+        matches_path = re.findall(pattern_file, md_link)
+        pattern_local = r"\((/[^)]+)\)"
+        matches_local = re.findall(pattern_local, md_link)
+        if matches_path:
+            for t in valid_types:
+                if str(t).lower() in str(os.path.splitext(os.path.basename(matches_path[0]))[-1]).lower():
+                    file_mapping_links.update({local_relative_path(matches_path[0]): md_link})
+        elif matches_local:
+            if os.path.exists(matches_local[0]):
+                for t in valid_types:
+                    if str(t).lower() in str(os.path.splitext(os.path.basename(matches_local[0]))[-1]).lower():
+                        file_mapping_links.update({local_relative_path(matches_local[0]): md_link})
+
+    return file_mapping_links
 
 
-def input_encode_handler(inputs):
-    md_encode = []
-    pattern_md_file = r"(!?\[[^\]]+\]\([^\)]+\))"
-    matches_path = re.findall(pattern_md_file, inputs)
-    for md_path in matches_path:
-        pattern_file = r"\((file=.*)\)"
-        matches_path = re.findall(pattern_file, md_path)
-        encode_file = files_filter_handler(file_list=matches_path)
-        if encode_file:
-            md_encode.extend([{
-                "data": toolbox.encode_image(i),
-                "type": os.path.splitext(i)[1].replace(
-                    '.', '').replace(
-                    'jpg', 'jpeg')  # google 识别不了jpg图片格式，狗日的
-            } for i in encode_file])
-            inputs = inputs.replace(md_path, '')
-    return inputs, md_encode
+# 批量转换图片为base64
+def batch_encode_image(files: dict):
+    encode_map = {}
+    for fp in files:
+        file_type = os.path.basename(fp).split('.')[-1]
+        encode_map[fp] = {
+            "data": toolbox.encode_image(fp),
+            "type": file_type.replace('jpg', 'jpeg')  # google 识别不了jpg图片格式，狗日的
+        }
+    return encode_map
 
 
 def file_manifest_filter_type(file_list, filter_: list = None, md_type=False):
@@ -205,7 +218,7 @@ def file_manifest_filter_type(file_list, filter_: list = None, md_type=False):
         if str(os.path.basename(file)).split('.')[-1] in filter_:
             new_list.append(html_local_img(file, md=md_type))
         elif os.path.exists(file):
-            new_list.append(link_mtime_to_md(file))
+            new_list.append(link_mtime_to_md(file, time_stamp=False))
         else:
             new_list.append(file)
     return new_list
@@ -455,12 +468,6 @@ def txt_converter_json(input_string):
         return input_string
 
 
-def clean_br_string(s):
-    s = re.sub('<\s*br\s*/?>', '\n', s)  # 使用正则表达式同时匹配<br>、<br/>、<br />、< br>和< br/>
-    s = s.replace(' ', '')  # 去除所有空格
-    return s
-
-
 def get_html(filename):
     path = os.path.join(init_path.base_path, "docs/assets/html", filename)
     if os.path.exists(path):
@@ -621,12 +628,13 @@ valid_img_extensions = ['png', 'jpg', 'jpeg', 'bmp', 'svg', 'webp', 'ico', 'tif'
 
 
 def split_parse_url(url, tag: list | None, index=1) -> str:
-    url_parts = re.split('[/?=&#]+', url)
-    if not tag and url:
-        return url_parts[index]
-    for i in range(len(url_parts)):
-        if url_parts[i] in tag:
-            return url_parts[i + index]
+    if url:  # 有url 才往下走
+        url_parts = re.split('[/?=&#]+', url)
+        if not tag and url:
+            return url_parts[index]
+        for i in range(len(url_parts)):
+            if url_parts[i] in tag:
+                return url_parts[i + index]
 
 
 def split_domain_url(link_limit, start='http', domain_name: list = ['']) -> list:
@@ -641,4 +649,5 @@ def split_domain_url(link_limit, start='http', domain_name: list = ['']) -> list
 if __name__ == '__main__':
     # print(get_files_list('', ['.json']))
     # tree_out(dir='/Users/kilig/Job/Python-project/kso_gpt/', line=2)
-    print(split_parse_url('https://docs.qq.com/slide/DS2FGRVdxdE1LTURI?_bid=1&client=drive_file', [], index=3))
+    ff = """| 飞书推送通道余额 | 尼日利亚资金监控（监控发送时间）：账户名称｜币种｜余额墨西哥资金监控（监控发送时间）：账户名称｜币种｜余额![image-rId4.png](/Users/kilig/Job/Python-project/kso_gpt/private_upload/127.0.0.1/image-rId4.png) | 频率"""
+    print(extract_link_pf(ff, valid_img_extensions))

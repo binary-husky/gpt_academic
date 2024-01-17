@@ -229,7 +229,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     sys_prompt=sys_prompt, observe_window=mutable[index], console_slience=True
                 )
                 mutable[index][2] = f"``folded\n{gpt_say}\n``"  # 已完成
-                if 'raise ConnectionAbortedError jsokf' in gpt_say:  # 超出Tokens限制错误标记位
+                if 'raise ConnectionAbortedError' in gpt_say:  # 超出Tokens限制错误标记位
                     mutable[index][2] = "!!超出Tokens限制，捕获了已生成的回答，但回答结尾会损失部分数据!!"
                 return gpt_say
             except ConnectionAbortedError as token_exceeded_error:
@@ -625,7 +625,7 @@ def read_and_clean_pdf_text(fp, user=''):
     return meta_txt, page_one_meta
 
 
-def get_files_from_everything(txt, type, ipaddr='temp'):  # type='.md'
+def get_files_from_everything(txt, type, project_folder=''):  # type='.md'
     """
     这个函数是用来获取指定目录下所有指定类型（如.md）的文件，并且对于网络上的文件，也可以获取它。
     下面是对每个参数和返回值的说明：
@@ -643,11 +643,11 @@ def get_files_from_everything(txt, type, ipaddr='temp'):  # type='.md'
     if txt.startswith('http') and txt.find('kdocs') == -1 and txt.find('wps') == -1:
         # 网络的远程文件
         import requests
-
         proxies = get_conf('proxies')
         r = requests.get(txt, proxies=proxies).content
         name = r.splitlines()[0]
-        project_folder = os.path.join(init_path.users_path, ipaddr, 'Download')
+        if not project_folder:
+            project_folder = os.path.join(init_path.users_path, 'temp_download')
         os.makedirs(project_folder, exist_ok=True)
         temp_file = f'{project_folder}/{name[:30]}_{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())}{type}'
         with open(temp_file, 'wb') as f:

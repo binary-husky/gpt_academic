@@ -86,7 +86,7 @@ class QQDocs:
                 print(f'下载任务进度： {json_resp.get("progress")}')
 
 
-def get_qqdocs_files(limit, project_folder, file_types, ipaddr):
+def get_qqdocs_files(limit, project_folder, file_types):
     """
     Args:
         limit: 腾讯文档分享文件地址
@@ -103,26 +103,25 @@ def get_qqdocs_files(limit, project_folder, file_types, ipaddr):
             file_path = os.path.join(project_folder, f_name)
             with open(file_path, mode='wb') as f:
                 f.write(resp.content)
-            return [file_path]
-    return []
+            return {func_box.local_relative_path(file_path): limit}
+    return {}
 
 
-def get_qqdocs_from_everything(txt, type: list=[''], ipaddr='temp'):
+def get_qqdocs_from_limit(link_limit, project_folder, types: list=['']):
     """
     Args:
-        txt: kudos 文件分享码
+        link_limit: kudos 文件分享地址
         type: type=='' 时，将支持所有文件类型
-        ipaddr: 用户信息
+        project_folder: 存放地址
     Returns:
     """
-    link_limit = func_box.split_domain_url(link_limit=txt, domain_name=['docs.qq'])
-    file_manifest = []
+    file_mapping = {}
     success = ''
-    project_folder = os.path.join(init_path.users_path, ipaddr, 'qqdocs')
+    project_folder = os.path.join(project_folder, 'qq_docs')
     os.makedirs(project_folder, exist_ok=True)
     for limit in link_limit:
-        file_manifest += get_qqdocs_files(limit, project_folder, type, ipaddr)
-    return success, file_manifest, project_folder
+        file_mapping.update(get_qqdocs_files(limit, project_folder, type))
+    return success, file_mapping
 
 
 

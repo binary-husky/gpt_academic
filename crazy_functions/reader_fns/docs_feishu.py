@@ -6,7 +6,6 @@ import requests
 from common import func_box
 from common import toolbox
 from common.path_handle import init_path
-import time
 import os
 
 
@@ -17,14 +16,14 @@ class Feishu:
         if headers:
             self.header_cookies = headers
         else:
-            self.header_cookies = {}  # toolbox.get_conf('FEISHU_HEADER_COOIKIES')
+            self.header_cookies = toolbox.get_conf('FEISHU_HEADER_COOKIE')
         self.base_host = 'https://lg0v2tirko.feishu.cn'
         self.share_tag = func_box.split_parse_url(url, None, 3)
         self.share_file_type = func_box.split_parse_url(url, None, 2)
         self.header_cookies.update({'referer': f'{self.base_host}/{self.share_file_type}/{self.share_tag}'})
         self.file_download_url = 'https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/all/%t/'
         self.file_mapping = {
-            'docx': 'pdf',
+            'docx': 'docx',
             'sheet': 'xlsx',
             'file': False
             # 'bitable': 'xlsx' 这较难支持，。。。
@@ -84,33 +83,36 @@ class Feishu:
         return response['data']['entities']['nodes']['name']
 
 
-def get_feishu_from_everything(txt, type: list = [''], ipaddr='temp'):
+def get_feishu_file(link, project_folder):
+    feishu_docs = Feishu(link)
+    file_download_url, file_name = feishu_docs.query_download_task()
+    if file_download_url:
+        file_path = os.path.join(project_folder, file_name)
+        resp = requests.get(url=file_download_url, headers=feishu_docs.header_cookies, verify=False)
+        with open(file_path, mode='wb') as f:
+            f.write(resp.content)
+        return {func_box.local_relative_path(file_path): link}
+    else:
+        return {}
+
+
+def get_feishu_from_limit(link_limit,  project_folder, types=None):
     """
     Args:
-        txt: kudos 文件分享码
-        type: type=='' 时，将支持所有文件类型
-        ipaddr: 用户信息
+        link_limit: kudos 文件分享码
+        project_folder: 存放地址
+        types: 暂时没用到
     Returns:
     """
-    link_limit = func_box.split_domain_url(link_limit=txt, domain_name=[Feishu('').base_host])
-    file_manifest = []
     success = ''
-    project_folder = os.path.join(init_path.users_path, ipaddr, 'feishu')
+    file_mapping = {}
+    project_folder = os.path.join(project_folder, 'feishu')
     os.makedirs(project_folder, exist_ok=True)
     for limit in link_limit:
-        feishu_docs = Feishu(limit)
-        file_download_url, file_name = feishu_docs.query_download_task()
-        if file_download_url:
-            file_path = os.path.join(project_folder, file_name)
-            resp = requests.get(url=file_download_url, headers=feishu_docs.header_cookies, verify=False)
-            with open(file_path, mode='wb') as f:
-                f.write(resp.content)
-            file_manifest.append(file_path)
-            success += f'{limit} 下载成功\n'
-        else:
-            success += f'{limit} 下载失败\n'
-    return success, file_manifest, project_folder
+        file_mapping.update(get_feishu_file(limit, project_folder))
+    return success, file_mapping
 
 
 if __name__ == '__main__':
-    pass
+
+    ff = get_feishu_from_everything([],'./test')

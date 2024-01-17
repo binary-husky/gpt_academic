@@ -17,22 +17,25 @@ class GoogleChatInit:
 
     def __init__(self):
         self.url_gemini = 'https://generativelanguage.googleapis.com/v1beta/models/%m:streamGenerateContent?key=%k'
+        self.text_pattern = re.compile(r'"text":\s*"((?:[^"\\]|\\.)*)"', flags=re.DOTALL)
+        self.error_pattern = re.compile(r'\"message\":\s*\"(.*?)\"', flags=re.DOTALL)
 
-    def __conversation_user(self, user_input):
+    def __conversation_user(self, user_input: str):
         what_i_have_asked = {"role": "user", "parts": []}
         if 'vision' not in self.url_gemini:
-            input_ = user_input
-            encode_img = []
+            encode_img_map = {}
         else:
-            input_, encode_img = func_box.input_encode_handler(user_input)
-        what_i_have_asked['parts'].append({'text': input_})
-        if encode_img:
-            for data in encode_img:
-                what_i_have_asked['parts'].append(
-                    {'inline_data': {
-                        "mime_type": f"image/{data['type']}",
-                        "data": data['data']
-                    }})
+            img_mapping = func_box.extract_link_pf(user_input, func_box.valid_img_extensions)
+            encode_img_map = func_box.batch_encode_image(img_mapping)
+            for i in encode_img_map:  # 替换图片链接
+                user_input = user_input.replace(img_mapping[i], '')
+        what_i_have_asked['parts'].append({'text': user_input})
+        for fp in encode_img_map:
+            what_i_have_asked['parts'].append(
+                {'inline_data': {
+                    "mime_type": f"image/{encode_img_map[fp]['type']}",
+                    "data": encode_img_map[fp]['data']
+                }})
         return what_i_have_asked
 
     def __conversation_history(self, history):
@@ -84,14 +87,3 @@ class GoogleChatInit:
 
 if __name__ == '__main__':
     gootle = GoogleChatInit()
-    # print(gootle.generate_message_payload('你好呀', {},
-    #                                                 ['123123', '3123123'], ''))
-    # gootle.input_encode_handle('123123[123123](./123123), ![53425](./asfafa/fff.jpg)')
-
-    test = '1234124125412412'
-
-    def testfff(t: str):
-        ff = t.replace('1', '   hhh')
-        print(ff)
-    testfff(test)
-    print(test)

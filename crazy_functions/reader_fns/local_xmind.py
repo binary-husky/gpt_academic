@@ -1,7 +1,7 @@
 # encoding: utf-8
 # @Time   : 2024/1/15
 # @Author : Spike
-# @Descr   : Word 文件处理工具
+# @Descr   : xmind 文件处理工具
 import os
 import xmindparser
 from os import PathLike
@@ -13,9 +13,15 @@ import openpyxl
 
 class XmindHandle:
 
-    def __init__(self, xmind_path, output_dir):
-        self.output_dir = os.path.join(output_dir, 'xmind')
-        os.makedirs(self.output_dir, exist_ok=True)
+    def __init__(self, xmind_path, output_dir=None):
+        """
+        Args:
+            xmind_path: 读取文件路径
+            output_dir: 保存路径，如果没有另存为操作，可以为空
+        """
+        if output_dir:
+            self.output_dir = os.path.join(output_dir, 'xmind')
+            os.makedirs(self.output_dir, exist_ok=True)
         self.xmind_path = xmind_path
         try:  # xmindparser
             self.dictSheet = xmindparser.xmind_to_dict(xmind_path)
@@ -128,4 +134,4 @@ class XmindHandle:
 
 
 if __name__ == '__main__':
-    XmindHandle('/Users/kilig/Desktop/整体系统.xmind', './test').get_markdown()
+    pass

@@ -5,6 +5,7 @@ from common.toolbox import promote_file_to_downloadzone, get_log_folder
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import input_clipping, try_install_deps
 from multiprocessing import Process, Pipe
+from common import func_box
 import os
 import time
 
@@ -112,7 +113,7 @@ def init_module_instance(module):
     return init_f()
 
 def for_immediate_show_off_when_possible(file_type, fp, chatbot):
-    if file_type in :
+    if file_type in func_box.valid_img_extensions:
         image_path = os.path.abspath(fp)
         chatbot.append(['这是一张图片, 展示如下:',  
             f'本地文件地址: <br/>`{image_path}`<br/>'+
