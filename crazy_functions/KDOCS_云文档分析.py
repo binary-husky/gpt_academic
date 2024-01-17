@@ -48,7 +48,7 @@ def Kdocs_多阶段生成回答(user_input, llm_kwargs, plugin_kwargs, chatbot, 
             embedding_mapping = yield from crazy_box.file_extraction_intype(gpt_results_count[prompt], chatbot, history, llm_kwargs,
                                                         plugin_kwargs)
             for i in embedding_mapping:
-                embedding_limit.extend([os.path.join(i), embedding_mapping[i]])
+                embedding_limit.extend([os.path.basename(i), embedding_mapping[i]])
     apply_history = crazy_box.json_args_return(plugin_kwargs, ['上下文处理'])
     if apply_history:
         chatbot.append([None, '插件配置参数已开启`上下文处理`，请注意使用插件时注意上下文token限制。'])
