@@ -47,7 +47,7 @@ async def check_authentication(request: Request, call_next):
         return await call_next(request)
     pattern = re.compile(r".*\/private_upload\/.*")
     if pattern.match(request.url.path):
-        if not toolbox.get_conf('AUTHENTICATION'):  # 暂时没办法拿到用户信息，所以不禁止用户访问
+        if toolbox.get_conf('AUTHENTICATION') != 'SQL':  # 暂时没办法拿到用户信息，所以不禁止用户访问
             if request.client.host not in request.url.path:
                 return JSONResponse(content={'Error': "You can't download other people's files."})
         else:
