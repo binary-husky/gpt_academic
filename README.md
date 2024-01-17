@@ -1,4 +1,6 @@
-> **Caution**
+> [!IMPORTANT]
+>
+> 全力支持Qwen、GLM、DeepseekCoder等国内中文大语言基座模型！
 >
 > 2023.11.12: 某些依赖包尚不兼容python 3.12，推荐python 3.11。
 >
@@ -42,13 +44,11 @@ If you like this project, please give it a Star.
 Read this in [English](docs/README.English.md) | [日本語](docs/README.Japanese.md) | [한국어](docs/README.Korean.md) | [Русский](docs/README.Russian.md) | [Français](docs/README.French.md). All translations have been provided by the project itself. To translate this project to arbitrary language with GPT, read and run [`multi_language.py`](multi_language.py) (experimental).
 <br>
 
-
-> 1.请注意只有 **高亮** 标识的插件（按钮）才支持读取文件，部分插件位于插件区的**下拉菜单**中。另外我们以**最高优先级**欢迎和处理任何新插件的PR。
->
-> 2.本项目中每个文件的功能都在[自译解报告](https://github.com/binary-husky/gpt_academic/wiki/GPT‐Academic项目自译解报告)`self_analysis.md`详细说明。随着版本的迭代，您也可以随时自行点击相关函数插件，调用GPT重新生成项目的自我解析报告。常见问题请查阅wiki。
+> [!NOTE]
+> 1.本项目中每个文件的功能都在[自译解报告](https://github.com/binary-husky/gpt_academic/wiki/GPT‐Academic项目自译解报告)`self_analysis.md`详细说明。随着版本的迭代，您也可以随时自行点击相关函数插件，调用GPT重新生成项目的自我解析报告。常见问题请查阅wiki。
 >    [![常规安装方法](https://img.shields.io/static/v1?label=&message=常规安装方法&color=gray)](#installation)  [![一键安装脚本](https://img.shields.io/static/v1?label=&message=一键安装脚本&color=gray)](https://github.com/binary-husky/gpt_academic/releases)  [![配置说明](https://img.shields.io/static/v1?label=&message=配置说明&color=gray)](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明) [![wiki](https://img.shields.io/static/v1?label=&message=wiki&color=gray)]([https://github.com/binary-husky/gpt_academic/wiki/项目配置说明](https://github.com/binary-husky/gpt_academic/wiki))
 >
-> 3.本项目兼容并鼓励尝试国产大语言模型ChatGLM等。支持多个api-key共存，可在配置文件中填写如`API_KEY="openai-key1,openai-key2,azure-key3,api2d-key4"`。需要临时更换`API_KEY`时，在输入区输入临时的`API_KEY`然后回车键提交即可生效。
+> 2.本项目兼容并鼓励尝试国内中文大语言基座模型如通义千问，智谱GLM等。支持多个api-key共存，可在配置文件中填写如`API_KEY="openai-key1,openai-key2,azure-key3,api2d-key4"`。需要临时更换`API_KEY`时，在输入区输入临时的`API_KEY`然后回车键提交即可生效。
 
 <br><br>
 
@@ -56,7 +56,7 @@ Read this in [English](docs/README.English.md) | [日本語](docs/README.Japanes
 
 功能（⭐= 近期新增功能） | 描述
 --- | ---
-⭐[接入新模型](https://github.com/binary-husky/gpt_academic/wiki/%E5%A6%82%E4%BD%95%E5%88%87%E6%8D%A2%E6%A8%A1%E5%9E%8B) | 百度[千帆](https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Nlks5zkzu)与文心一言, 通义千问[Qwen](https://modelscope.cn/models/qwen/Qwen-7B-Chat/summary)，上海AI-Lab[书生](https://github.com/InternLM/InternLM)，讯飞[星火](https://xinghuo.xfyun.cn/)，[LLaMa2](https://huggingface.co/meta-llama/Llama-2-7b-chat-hf)，[智谱API](https://open.bigmodel.cn/)，DALLE3, [DeepseekCoder](https://coder.deepseek.com/)
+⭐[接入新模型](https://github.com/binary-husky/gpt_academic/wiki/%E5%A6%82%E4%BD%95%E5%88%87%E6%8D%A2%E6%A8%A1%E5%9E%8B) | 百度[千帆](https://cloud.baidu.com/doc/WENXINWORKSHOP/s/Nlks5zkzu)与文心一言, 通义千问[Qwen](https://modelscope.cn/models/qwen/Qwen-7B-Chat/summary)，上海AI-Lab[书生](https://github.com/InternLM/InternLM)，讯飞[星火](https://xinghuo.xfyun.cn/)，[LLaMa2](https://huggingface.co/meta-llama/Llama-2-7b-chat-hf)，[智谱GLM4](https://open.bigmodel.cn/)，DALLE3, [DeepseekCoder](https://coder.deepseek.com/)
 润色、翻译、代码解释 | 一键润色、翻译、查找论文语法错误、解释代码
 [自定义快捷键](https://www.bilibili.com/video/BV14s4y1E7jN) | 支持自定义快捷键
 模块化设计 | 支持自定义强大的[插件](https://github.com/binary-husky/gpt_academic/tree/master/crazy_functions)，插件支持[热更新](https://github.com/binary-husky/gpt_academic/wiki/%E5%87%BD%E6%95%B0%E6%8F%92%E4%BB%B6%E6%8C%87%E5%8D%97)
@@ -77,7 +77,6 @@ Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼�
 ⭐AutoGen多智能体插件 | [插件] 借助微软AutoGen，探索多Agent的智能涌现可能！
 启动暗色[主题](https://github.com/binary-husky/gpt_academic/issues/173) | 在浏览器url后面添加```/?__theme=dark```可以切换dark主题
 [多LLM模型](https://www.bilibili.com/video/BV1wT411p7yf)支持 | 同时被GPT3.5、GPT4、[清华ChatGLM2](https://github.com/THUDM/ChatGLM2-6B)、[复旦MOSS](https://github.com/OpenLMLab/MOSS)伺候的感觉一定会很不错吧？
-⭐ChatGLM2微调模型 | 支持加载ChatGLM2微调模型，提供ChatGLM2微调辅助插件
 更多LLM模型接入，支持[huggingface部署](https://huggingface.co/spaces/qingxu98/gpt-academic) | 加入Newbing接口(新必应)，引入清华[Jittorllms](https://github.com/Jittor/JittorLLMs)支持[LLaMA](https://github.com/facebookresearch/llama)和[盘古α](https://openi.org.cn/pangu/)
 ⭐[void-terminal](https://github.com/binary-husky/void-terminal) pip包 | 脱离GUI，在Python中直接调用本项目的所有函数插件（开发中）
 ⭐虚空终端插件 | [插件] 能够使用自然语言直接调度本项目其他插件
@@ -152,10 +151,10 @@ Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼�
 <details><summary>如果需要支持清华ChatGLM2/复旦MOSS/RWKV作为后端，请点击展开此处</summary>
 <p>
 
-【可选步骤】如果需要支持清华ChatGLM2/复旦MOSS作为后端，需要额外安装更多依赖（前提条件：熟悉Python + 用过Pytorch + 电脑配置够强）：
+【可选步骤】如果需要支持清华ChatGLM3/复旦MOSS作为后端，需要额外安装更多依赖（前提条件：熟悉Python + 用过Pytorch + 电脑配置够强）：
 
 ```sh
-# 【可选步骤I】支持清华ChatGLM2。清华ChatGLM备注：如果遇到"Call ChatGLM fail 不能正常加载ChatGLM的参数" 错误，参考如下： 1：以上默认安装的为torch+cpu版，使用cuda需要卸载torch重新安装torch+cuda； 2：如因本机配置不够无法加载模型，可以修改request_llm/bridge_chatglm.py中的模型精度, 将 AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) 都修改为 AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
+# 【可选步骤I】支持清华ChatGLM3。清华ChatGLM备注：如果遇到"Call ChatGLM fail 不能正常加载ChatGLM的参数" 错误，参考如下： 1：以上默认安装的为torch+cpu版，使用cuda需要卸载torch重新安装torch+cuda； 2：如因本机配置不够无法加载模型，可以修改request_llm/bridge_chatglm.py中的模型精度, 将 AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) 都修改为 AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
 python -m pip install -r request_llms/requirements_chatglm.txt
 
 # 【可选步骤II】支持复旦MOSS
@@ -197,7 +196,7 @@ pip install peft
     docker-compose up
     ```
 
-1. 仅ChatGPT+文心一言+spark等在线模型（推荐大多数人选择）
+1. 仅ChatGPT + GLM4 + 文心一言+spark等在线模型（推荐大多数人选择）
 [![basic](https://github.com/binary-husky/gpt_academic/actions/workflows/build-without-local-llms.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-without-local-llms.yml)
 [![basiclatex](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-latex.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-latex.yml)
 [![basicaudio](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-audio-assistant.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-audio-assistant.yml)
@@ -209,7 +208,7 @@ pip install peft
 
 P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以直接使用方案4或者方案0获取Latex功能。
 
-2. ChatGPT + ChatGLM2 + MOSS + LLAMA2 + 通义千问（需要熟悉[Nvidia Docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#installing-on-ubuntu-and-debian)运行时）
+2. ChatGPT + GLM3 + MOSS + LLAMA2 + 通义千问（需要熟悉[Nvidia Docker](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#installing-on-ubuntu-and-debian)运行时）
 [![chatglm](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-chatglm.yml/badge.svg?branch=master)](https://github.com/binary-husky/gpt_academic/actions/workflows/build-with-chatglm.yml)
 
     ``` sh
