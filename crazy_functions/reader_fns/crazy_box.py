@@ -731,6 +731,10 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
                   f'插件支持解析文档类型{func_box.html_tag_color(valid_types)}' \
                   f'链接需要是可访问的，格式如下，如果有多个文档则用换行或空格隔开，输入后再点击对应的插件' \
                   f"有问题？请联系`@spike` or 查看开发文档{devs_document}"
+        # 识别图片链接内容
+        complete_input = yield from content_img_vision_analyze(user_input, chatbot, history,
+                                                               llm_kwargs, plugin_kwargs)
+        embedding_content = [user_input, complete_input]
         chatbot[-1] = [user_input, status]
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='没有探测到数据')
     # 提交知识库 ... 未适配
