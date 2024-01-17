@@ -20,7 +20,7 @@ class DocxHandler:
         """
         if output_dir:
             self.output_dir = os.path.join(output_dir, 'word')
-            os.makedirs(output_dir, exist_ok=True)
+            os.makedirs(self.output_dir, exist_ok=True)
         self.markdown_content = ''
         try:
             self.doc = Document(docx_path)
