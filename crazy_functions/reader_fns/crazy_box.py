@@ -672,7 +672,7 @@ def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugi
                 vision_loading_statsu.update({t: img_content})
                 vision_end = func_box.html_folded_code(json.dumps(vision_loading_statsu, indent=4, ensure_ascii=False))
                 chatbot[-1] = [None, vision_bro + vision_end]
-                if status and status != '本次识别结果读取数据库缓存':  # 出现异常，不替换文本
+                if not status or status != '本次识别结果读取数据库缓存':  # 出现异常，不替换文本
                     content = content.replace(img_mapping[t], f'{img_mapping[t]}\n\n{img_content}')
                 yield from toolbox.update_ui(chatbot, history)
             except Exception as e:

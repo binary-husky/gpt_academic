@@ -91,7 +91,8 @@ class ImgHandler:
                 content, file_path, status = self.get_paddle_ocr(kwargs)
             else:
                 content, file_path, status = self.get_llm_vision(kwargs)
-            cache_sql.inset_prompt({cache_tag: content}, file_path)
+            if not status:
+                cache_sql.inset_prompt({cache_tag: content}, file_path)
         return content, file_path, status
 
 
