@@ -90,9 +90,9 @@ LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
 AVAIL_LLM_MODELS = ["gpt-3.5-turbo-1106","gpt-4-1106-preview","gpt-4-vision-preview",
                     "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "api2d-gpt-4",
-                    "gemini-pro", "chatglm3", "moss", "claude-2"]
+                    "gemini-pro", "chatglm3", "claude-2", "zhipuai"]
 # P.S. 其他可用的模型还包括 [
-# "qwen-turbo", "qwen-plus", "qwen-max"
+# "moss", "qwen-turbo", "qwen-plus", "qwen-max"
 # "zhipuai", "qianfan", "deepseekcoder", "llama2", "qwen-local", "gpt-3.5-turbo-0613", 
 # "gpt-3.5-turbo-16k-0613",  "gpt-3.5-random", "api2d-gpt-3.5-turbo", 'api2d-gpt-3.5-turbo-16k',
 # "spark", "sparkv2", "sparkv3", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"
