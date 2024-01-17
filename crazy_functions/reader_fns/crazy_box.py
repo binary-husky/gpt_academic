@@ -167,20 +167,20 @@ def file_extraction_intype(file_mapping, chatbot, history, llm_kwargs, plugin_kw
     for file_path in file_mapping:
         chatbot.append([None, f'`{file_path.replace(init_path.base_path, ".")}`\t...正在解析本地文件\n\n'])
         yield from toolbox.update_ui(chatbot, history)
+        save_path = os.path.join(init_path.users_path, llm_kwargs['ipaddr'])
         if file_path.endswith('pdf'):
             _content, _ = crazy_utils.read_and_clean_pdf_text(file_path)
             file_content = "".join(_content)
         elif file_path.endswith('docx') or file_path.endswith('doc'):
-            save_path = os.path.join(init_path.users_path, llm_kwargs['ipaddr'])
             file_content = reader_fns.DocxHandler(file_path, save_path).get_markdown()
         elif file_path.endswith('xmind'):
-            file_content = reader_fns.XmindHandle(file_path).get_markdown()
+            file_content = reader_fns.XmindHandle(file_path, save_path).get_markdown()
         elif file_path.endswith('mp4'):
             file_content = yield from audio_comparison_of_video_converters([file_path], chatbot, history)
         elif file_path.endswith('xlsx') or file_path.endswith('xls'):
             sheet, = json_args_return(plugin_kwargs, keys=['读取指定Sheet'], default='测试要点')
             # 创建文件对象
-            ex_handle = reader_fns.XlsxHandler(file_path, sheet=sheet)
+            ex_handle = reader_fns.XlsxHandler(file_path, save_path, sheet=sheet)
             if sheet in ex_handle.workbook.sheetnames:
                 ex_handle.split_merged_cells()
                 xlsx_dict = ex_handle.read_as_dict()
