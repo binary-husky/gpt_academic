@@ -772,5 +772,4 @@ previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传�
 if __name__ == '__main__':
     test = [1, 2, 3, 4, [12], 33, 1]
 
-    # with open('/Users/kilig/Desktop/test.md', mode='r') as f:
-    #     content = f.read()
+    print(long_name_processing('【支付系统】支付通道余额新建表更新保存.docx'))

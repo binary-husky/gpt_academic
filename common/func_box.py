@@ -486,8 +486,8 @@ def git_log_list():
 
 
 def replace_special_chars(file_name):
-    # 除了中文外，该正则表达式匹配任何一个不是数字、字母、下划线、.、空格的字符，避免文件名有问题
-    new_name = re.sub(r'[^\u4e00-\u9fa5\d\w\s\.\_]', '', file_name).rstrip().replace(' ', '_')
+    # 该正则表达式匹配除了数字、字母、下划线、点、空格、中文字符、【和】以外的所有字符
+    new_name = re.sub(r'[^\d\w\s\.\_\u4e00-\u9fff【】]', '', file_name).rstrip().replace(' ', '_')
     if not new_name:
         new_name = created_atime()
     return new_name
@@ -649,5 +649,4 @@ def split_domain_url(link_limit, start='http', domain_name: list = ['']) -> list
 if __name__ == '__main__':
     # print(get_files_list('', ['.json']))
     # tree_out(dir='/Users/kilig/Job/Python-project/kso_gpt/', line=2)
-    ff = """| 飞书推送通道余额 | 尼日利亚资金监控（监控发送时间）：账户名称｜币种｜余额墨西哥资金监控（监控发送时间）：账户名称｜币种｜余额![image-rId4.png](/Users/kilig/Job/Python-project/kso_gpt/private_upload/127.0.0.1/image-rId4.png) | 频率"""
-    print(extract_link_pf(ff, valid_img_extensions))
+    print(extract_link_pf('', valid_img_extensions))
