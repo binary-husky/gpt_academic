@@ -40,10 +40,11 @@ def Kdocs_多阶段生成回答(user_input, llm_kwargs, plugin_kwargs, chatbot, 
                                                                      chatbot, history)
             embedding_limit = []
         else:
-            chatbot.append(['为什么跳过？', '你没有指定调用方法 or 方法错误，跳过生成结果，直接将上次的结果提交给下阶段'])
-            content_limit = crazy_box.file_classification_to_dict(embedding_limit)
-            embedding_limit = [[limit, "".join(content_limit[limit])] for limit in content_limit]
-            yield from update_ui(chatbot=chatbot, history=history)
+            if stage != [i for i in multi_stage_config][-1]:
+                chatbot.append(['为什么跳过？', '你没有指定调用方法 or 方法错误，跳过生成结果，直接将上次的结果提交给下阶段'])
+                content_limit = crazy_box.file_classification_to_dict(embedding_limit)
+                embedding_limit = [[limit, "".join(content_limit[limit])] for limit in content_limit]
+                yield from update_ui(chatbot=chatbot, history=history)
         if stage != [i for i in multi_stage_config][-1]:
             embedding_mapping = yield from crazy_box.file_extraction_intype(gpt_results_count[prompt], chatbot, history, llm_kwargs,
                                                         plugin_kwargs)

@@ -484,13 +484,9 @@ def get_functions_云文档处理():
                 "开启OCR": {"vision_model": 'gemini-pro-vision'},
                 "提示词分类": "插件定制",
                 '用例下标排序': None,
+                "上下文处理": True,
                 "阶段性产出": [{
-                    "提示词": "文档转Markdown",
-                    "调用方法": "结果写入Markdown",
-                }, {
-                    "提示词": "需求分析对话",
-                    "调用方法": "结果写入Markdown",
-                }
+                    "提示词": "需求分析对话"}
                 ],
                 "处理文件类型": ['md', 'txt', 'pdf', 'xmind', '智能文档']
             }
@@ -524,6 +520,7 @@ def get_functions_云文档处理():
                 "开启OCR": {"vision_model": 'gemini-pro-vision'},
                 "提示词分类": "插件定制",
                 '用例下标排序': None,
+                "上下文处理": True,
                 "阶段性产出": [{
                     "提示词": "总结摘要提取",
                     "调用方法": "Markdown转换为流程图",
