@@ -1,10 +1,8 @@
-> [!IMPORTANT]
->
-> 全力支持Qwen、GLM、DeepseekCoder等国内中文大语言基座模型！
->
-> 2023.11.12: 某些依赖包尚不兼容python 3.12，推荐python 3.11。
->
-> 2023.12.26: 安装依赖时，请选择`requirements.txt`中**指定的版本**。 安装命令：`pip install -r requirements.txt`。本项目完全开源免费，您可通过订阅[在线服务](https://github.com/binary-husky/gpt_academic/wiki/online)的方式鼓励本项目的发展。
+> [!IMPORTANT]  
+> 2024.1.16: 恭迎GLM4，全力支持Qwen、GLM、DeepseekCoder等国内中文大语言基座模型！
+> 
+> 2024.1.17: 某些依赖包尚不兼容python 3.12，推荐python 3.11。  
+> 2024.1.17: 安装依赖时，请选择`requirements.txt`中**指定的版本**。 安装命令：`pip install -r requirements.txt`。本项目完全开源免费，您可通过订阅[在线服务](https://github.com/binary-husky/gpt_academic/wiki/online)的方式鼓励本项目的发展。
 
 <br>
 
