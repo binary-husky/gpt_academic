@@ -603,6 +603,20 @@ def get_crazy_functions():
     except:
         print(trimmed_format_exc())
         print('Load function plugin failed')
+        
+    try:
+        from crazy_functions.高级功能函数模板 import 测试图表渲染
+        function_plugins.update({
+            "绘制逻辑关系（测试图表渲染）": {
+                "Group": "智能体",
+                "Color": "stop",
+                "AsButton": True,
+                "Function": HotReload(测试图表渲染)
+            }
+        })
+    except:
+        print(trimmed_format_exc())
+        print('Load function plugin failed')
 
     # try:
     #     from crazy_functions.chatglm微调工具 import 微调数据集生成
