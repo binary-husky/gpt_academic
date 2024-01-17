@@ -132,7 +132,7 @@ def link_mtime_to_md(file, time_stamp=True):
     link_name = os.path.basename(file)
     a = f"[{link_name}]({link_local})"
     if time_stamp:
-        a += f"?{os.path.getmtime(file)}"
+        a = a[:-1] + f")?{os.path.getmtime(file)}"
     return a
 
 

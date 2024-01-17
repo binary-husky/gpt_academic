@@ -84,6 +84,7 @@ function addShowAllButton() {
                 // 将span添加到button，并将button添加到父节点
                 show_button.appendChild(span_show_svg);
                 codeWraps[i].appendChild(show_button);
+                codeWraps[i].querySelector('.language-folded').classList.add('clamp_2')
                 // 给button添加监听事件
                 show_button.addEventListener('click', handleShowAllButtonClick);
             }
@@ -105,8 +106,10 @@ function handleShowAllButtonClick(event) {
     if (languageFoldedElement) {
         if (languageFoldedElement.classList.contains('unclamp')) {
             languageFoldedElement.classList.remove('unclamp');
+            languageFoldedElement.classList.add('clamp_2')
         } else {
             languageFoldedElement.classList.add('unclamp');
+            languageFoldedElement.classList.remove('clamp_2')
         }
     }
 }

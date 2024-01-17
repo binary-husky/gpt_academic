@@ -129,13 +129,15 @@ div.svelte-15lo0d8>*, div.svelte-15lo0d8>.form>* {
 
 code.language-folded {
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: unset;
     -webkit-box-orient: vertical;
     overflow: auto;
 }
-
+.clamp_2 {
+    -webkit-line-clamp: 2 !important;
+}
 .unclamp {
- -webkit-line-clamp: unset !important;
+    -webkit-line-clamp: unset !important;
 }
 .toggle-button-hide {
     opacity: 0;

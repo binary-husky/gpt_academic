@@ -659,7 +659,7 @@ def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugi
     if ocr_switch and img_mapping:
         vision_bro = f"检测到识图开关为`{ocr_switch}`，并且文中存在图片链接，正在识别图片中的文字...解析进度如下："
         vision_loading_statsu = {i: "Loading..." for i in img_mapping}
-        vision_start = f"```python\n{json.dumps(vision_loading_statsu, indent=4, ensure_ascii=False)}\n```"
+        vision_start = func_box.html_folded_code(json.dumps(vision_loading_statsu, indent=4, ensure_ascii=False))
         chatbot.append([None, vision_bro + vision_start])
         yield from toolbox.update_ui(chatbot, history, '正在调用`Vision`组件，已启用多线程解析，请稍等')
         # 识别图片中的文字
@@ -670,7 +670,7 @@ def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugi
             try:
                 img_content, img_path, status = vision_submission[t].result()
                 vision_loading_statsu.update({t: img_content})
-                vision_end = f"```python\n{json.dumps(vision_loading_statsu, indent=4, ensure_ascii=False)}\n```"
+                vision_end = func_box.html_folded_code(json.dumps(vision_loading_statsu, indent=4, ensure_ascii=False))
                 chatbot[-1] = [None, vision_bro + vision_end]
                 if not status or status != '本次识别结果读取数据库缓存':  # 出现异常，不替换文本
                     content = content.replace(img_mapping[t], f'{img_mapping[t]}\n\n{img_content}')
@@ -720,7 +720,7 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
                                                                    llm_kwargs, plugin_kwargs)
             embedding_content.extend([os.path.basename(content_fp), complete_input])
 
-    elif len(user_input) > 50:  # 没有探测到任何文件，并且提交大于50个字符，那么运行往下走
+    elif len(user_input) > 100:  # 没有探测到任何文件，并且提交大于50个字符，那么运行往下走
         chatbot[-1] = [user_input, None]
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='没有探测到文件')
         embedding_content.extend([user_input, user_input])

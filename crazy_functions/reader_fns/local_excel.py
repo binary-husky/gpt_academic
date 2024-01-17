@@ -80,7 +80,7 @@ class XlsxHandler:
             self.merge_same_cells()  # 还原被拆分的合并单元格
         if save_as_name:
             save_as_name = f'{save_as_name}_'
-        test_case_path = os.path.join(self.output_dir, f'{save_as_name}{func_box.created_atime()}.xlsx')
+        test_case_path = os.path.join(self.output_dir, f'{save_as_name}.xlsx')
         # 遇到文件无法保存时，再拆开图片
         try:
             self.workbook.save(test_case_path)
