@@ -70,13 +70,13 @@ class DocxHandler:
                 blip = graphic.graphicData.pic.blipFill.blip
                 if blip and hasattr(blip, "embed"):
                     image_part = doc.part.related_parts[blip.embed]
-                    image_path = os.path.join(self.output_dir, f'image-{blip.embed}.png')
+                    image_path = os.path.join(self.output_dir, f'{self.file_name}-image-{blip.embed}.png')
                     with open(image_path, 'wb') as f:
                         f.write(image_part.blob)
         else:
             embed = self.__extract_attribute_from_xml(inline.xml)
             image_part = doc.part.related_parts[embed]
-            image_path = os.path.join(self.output_dir, f'image-{embed}.png')
+            image_path = os.path.join(self.output_dir, f'{self.file_name}-image-{embed}.png')
             with open(image_path, 'wb') as f:
                 f.write(image_part.blob)
 
