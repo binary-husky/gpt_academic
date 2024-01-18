@@ -19,7 +19,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     # 检查API_KEY
     if get_conf("GEMINI_API_KEY") == "":
         raise ValueError(f"请配置 GEMINI_API_KEY。")
-    
+
     genai = GoogleChatInit()
     watch_dog_patience = 5  # 看门狗的耐心, 设置5秒即可
     gpt_replying_buffer = ''
@@ -49,6 +49,11 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     if get_conf("GEMINI_API_KEY") == "":
         yield from update_ui_lastest_msg(f"请配置 GEMINI_API_KEY。", chatbot=chatbot, history=history, delay=0)
         return
+
+    # 适配润色区域
+    if additional_fn is not None:
+        from core_functional import handle_core_functionality
+        inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
     if "vision" in llm_kwargs["llm_model"]:
         have_recent_file, image_paths = have_any_recent_upload_image_files(chatbot)
