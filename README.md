@@ -1,6 +1,6 @@
 > [!IMPORTANT]  
-> 2024.1.18: 更新3.70版本，支持Mermaid绘图库（让大模型绘制脑图）
-> 2024.1.17: 恭迎GLM4，全力支持Qwen、GLM、DeepseekCoder等国内中文大语言基座模型！
+> 2024.1.18: 更新3.70版本，支持Mermaid绘图库（让大模型绘制脑图）  
+> 2024.1.17: 恭迎GLM4，全力支持Qwen、GLM、DeepseekCoder等国内中文大语言基座模型！  
 > 2024.1.17: 某些依赖包尚不兼容python 3.12，推荐python 3.11。  
 > 2024.1.17: 安装依赖时，请选择`requirements.txt`中**指定的版本**。 安装命令：`pip install -r requirements.txt`。本项目完全开源免费，您可通过订阅[在线服务](https://github.com/binary-husky/gpt_academic/wiki/online)的方式鼓励本项目的发展。
 
@@ -324,8 +324,8 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 
 
 ### II：版本:
-
-- version 3.70（todo）: 优化AutoGen插件主题并设计一系列衍生插件
+- version 3.80(TODO): 优化AutoGen插件主题并设计一系列衍生插件
+- version 3.70: 引入Mermaid绘图，实现GPT画脑图等功能   
 - version 3.60: 引入AutoGen作为新一代插件的基石
 - version 3.57: 支持GLM3，星火v3，文心一言v4，修复本地模型的并发BUG
 - version 3.56: 支持动态追加基础功能按钮，新汇报PDF汇总页面
