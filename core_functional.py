@@ -50,7 +50,7 @@ def get_core_functions():
             "Prefix":   r"Please translate following sentence to English:" + "\n\n",
             "Suffix":   r"",
         },
-        "学术中英互译": {
+        "学术英中互译": {
             "Prefix":   r"I want you to act as a scientific English-Chinese translator, " +
                         r"I will provide you with some paragraphs in one language " +
                         r"and your task is to accurately and academically translate the paragraphs only into the other language. " +
