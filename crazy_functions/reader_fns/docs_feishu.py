@@ -83,8 +83,8 @@ class Feishu:
         return response['data']['entities']['nodes']['name']
 
 
-def get_feishu_file(link, project_folder):
-    feishu_docs = Feishu(link)
+def get_feishu_file(link, project_folder, header=None):
+    feishu_docs = Feishu(link, header)
     file_download_url, file_name = feishu_docs.query_download_task()
     if file_download_url:
         file_path = os.path.join(project_folder, file_name)
@@ -96,12 +96,12 @@ def get_feishu_file(link, project_folder):
         return {}
 
 
-def get_feishu_from_limit(link_limit,  project_folder, types=None):
+def get_feishu_from_limit(link_limit,  project_folder, header=None):
     """
     Args:
         link_limit: kudos 文件分享码
         project_folder: 存放地址
-        types: 暂时没用到
+        header: 飞书cookie
     Returns:
     """
     success = ''
@@ -109,10 +109,9 @@ def get_feishu_from_limit(link_limit,  project_folder, types=None):
     project_folder = os.path.join(project_folder, 'feishu')
     os.makedirs(project_folder, exist_ok=True)
     for limit in link_limit:
-        file_mapping.update(get_feishu_file(limit, project_folder))
+        file_mapping.update(get_feishu_file(limit, project_folder, header))
     return success, file_mapping
 
 
 if __name__ == '__main__':
-
-    ff = get_feishu_from_everything([],'./test')
+    pass

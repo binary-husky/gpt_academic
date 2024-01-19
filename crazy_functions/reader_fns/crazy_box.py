@@ -631,20 +631,32 @@ def detach_cloud_links(link_limit, chatbot, history, llm_kwargs):
     if isinstance(chatbot, list) and isinstance(history, list):
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='正在解析云文件链接...')
     save_path = os.path.join(init_path.users_path, llm_kwargs['ipaddr'])
-    # wps云文档下载
-    wps_links = func_box.split_domain_url(link_limit, domain_name=['kdocs', 'wps'])
-    wps_status, wps_mapping = reader_fns.get_kdocs_from_limit(wps_links, save_path)
-    fp_mapping.update(wps_mapping)
-
-    # qq云文档下载
-    qq_link = func_box.split_domain_url(link_limit, domain_name=['docs.qq'])
-    qq_status, qq_mapping = reader_fns.get_qqdocs_from_limit(qq_link, save_path)
-    fp_mapping.update(qq_mapping)
-
-    # 飞书云文档下载
-    feishu_link = func_box.split_domain_url(link_limit, domain_name=['lg0v2tirko'])
-    feishu_status, feishu_mapping = reader_fns.get_feishu_from_limit(feishu_link, save_path)
-    fp_mapping.update(feishu_mapping)
+    wps_status, qq_status, feishu_status = '', '', ''
+    try:
+        # wps云文档下载
+        wps_links = func_box.split_domain_url(link_limit, domain_name=['kdocs', 'wps'])
+        wps_status, wps_mapping = reader_fns.get_kdocs_from_limit(wps_links, save_path, llm_kwargs.get('wps_cookies'))
+        fp_mapping.update(wps_mapping)
+    except Exception as e:
+        chatbot[-1][1] += f'ERROR: {e}'
+        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='下载WPS文档出错了')
+    try:
+        # qq云文档下载
+        qq_link = func_box.split_domain_url(link_limit, domain_name=['docs.qq'])
+        qq_status, qq_mapping = reader_fns.get_qqdocs_from_limit(qq_link, save_path, llm_kwargs.get('qq_cookies'))
+        fp_mapping.update(qq_mapping)
+    except Exception as e:
+        chatbot[-1][1] += f'ERROR: {e}'
+        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='下载QQ文档出错了')
+    try:
+        # 飞书云文档下载
+        feishu_link = func_box.split_domain_url(link_limit, domain_name=['lg0v2tirko'])
+        feishu_status, feishu_mapping = reader_fns.get_feishu_from_limit(feishu_link, save_path,
+                                                                         llm_kwargs.get('feishu_cookies'))
+        fp_mapping.update(feishu_mapping)
+    except Exception as e:
+        chatbot[-1][1] += f'ERROR: {e}'
+        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='下载飞书文档出错了')
     download_status = ''
     if wps_status or qq_status or feishu_status:
         download_status = "\n".join([wps_status, qq_status, feishu_status])

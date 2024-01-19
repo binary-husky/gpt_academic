@@ -4,24 +4,23 @@
 # @Descr   : 腾讯云文档
 import re
 import json
-import time
 import os
 import requests
-
 from common import func_box
 from common import toolbox
-from crazy_functions.reader_fns import crazy_box
-from common.path_handle import init_path
 
 
 class QQDocs:
 
-    def __init__(self, link):
+    def __init__(self, link, cookies=None):
+        if cookies:
+            self.cookies = cookies
+        else:
+            self.cookies = toolbox.get_conf('QQ_COOKIES')
         self._hosts = 'docs.qq.com'
         self.link = link
         self.link_id = func_box.split_parse_url(link, None, index=3)
         self.file_info_dict = {'tag': '',}
-        self.cookies = toolbox.get_conf('QQ_COOKIES')
         self.file_info_header = {
             'Host': self._hosts,
             'sec-ch-ua': '"Chromium";v="116", "Not)A;Brand";v="24", "Microsoft Edge";v="116"',
@@ -86,32 +85,28 @@ class QQDocs:
                 print(f'下载任务进度： {json_resp.get("progress")}')
 
 
-def get_qqdocs_files(limit, project_folder, file_types):
+def get_qqdocs_files(limit, project_folder, cookies=None):
     """
     Args:
+        cookies:
         limit: 腾讯文档分享文件地址
         project_folder: 存储地址
-        file_types: 指定的文件类型
-        ipaddr: 用户信息
     Returns: [提取的文件list]
     """
-    qqdocs = QQDocs(limit)
+    qqdocs = QQDocs(limit, cookies)
     d_link, f_name = qqdocs.obtain_file_download_link()
-    for _type in file_types:
-        if _type in f_name:
-            resp = requests.get(url=d_link, verify=False)
-            file_path = os.path.join(project_folder, f_name)
-            with open(file_path, mode='wb') as f:
-                f.write(resp.content)
-            return {func_box.local_relative_path(file_path): limit}
-    return {}
+    resp = requests.get(url=d_link, verify=False)
+    file_path = os.path.join(project_folder, f_name)
+    with open(file_path, mode='wb') as f:
+        f.write(resp.content)
+    return {func_box.local_relative_path(file_path): limit}
 
 
-def get_qqdocs_from_limit(link_limit, project_folder, types: list=['']):
+def get_qqdocs_from_limit(link_limit, project_folder, cookies=None):
     """
     Args:
+        cookies:
         link_limit: kudos 文件分享地址
-        type: type=='' 时，将支持所有文件类型
         project_folder: 存放地址
     Returns:
     """
@@ -120,9 +115,8 @@ def get_qqdocs_from_limit(link_limit, project_folder, types: list=['']):
     project_folder = os.path.join(project_folder, 'qq_docs')
     os.makedirs(project_folder, exist_ok=True)
     for limit in link_limit:
-        file_mapping.update(get_qqdocs_files(limit, project_folder, type))
+        file_mapping.update(get_qqdocs_files(limit, project_folder, cookies))
     return success, file_mapping
-
 
 
 if __name__ == '__main__':

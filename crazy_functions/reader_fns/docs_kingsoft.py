@@ -17,10 +17,12 @@ from crazy_functions import crazy_utils
 
 class Kdocs:
 
-    def __init__(self, url):
-        WPS_COOKIES = toolbox.get_conf('WPS_COOKIES', )
+    def __init__(self, url, cookies=None):
+        if cookies:
+            self.cookies = cookies
+        else:
+            self.cookies = toolbox.get_conf('WPS_COOKIES')
         self.url = url
-        self.cookies = WPS_COOKIES
         self.headers = {
             'accept-language': 'en-US,en;q=0.9,ja;q=0.8',
             'content-type': 'text/plain;charset=UTF-8',
@@ -323,15 +325,15 @@ def get_docs_content(url, image_processing=False):
     return _all, content, empty_picture_count, pic_dict_convert, file_dict
 
 
-def get_kdocs_dir(limit, types, project_folder):
+def get_kdocs_dir(limit, project_folder, cookies=None):
     """
     Args:
         limit: 文档目录路径
+        cookies:
         project_folder: 写入的文件
-        types: 文件类型, 不过这里没用到
     Returns: [文件列表], 目录内文件信息, 失败信息
     """
-    kdocs = Kdocs(limit)
+    kdocs = Kdocs(limit, cookies)
     task_id, task_info = kdocs.submit_batch_download_tasks()
     link, task_faillist = kdocs.polling_batch_download_tasks(task_id)
     resp = kdocs.wps_file_download(link)
@@ -343,25 +345,23 @@ def get_kdocs_dir(limit, types, project_folder):
     toolbox.extract_archive(temp_file, decompress_directory)
     file_list = []
     file_mapping = {}
-    for t in types:
-        success, file_manifest = crazy_utils.get_files_from_everything(decompress_directory, t, project_folder)
-        file_list.extend(file_manifest)
+    success, file_manifest = crazy_utils.get_files_from_everything(decompress_directory, '', project_folder)
+    file_list.extend(file_manifest)
     for fp in file_list:
         file_mapping[func_box.local_relative_path(fp)] = limit
     return file_mapping, task_info, task_faillist
 
 
-def get_kdocs_files(limit, project_folder, type):
+def get_kdocs_files(limit, project_folder, cookies=None):
     """
     Args:
         limit: 金山文档分享文件地址
+        cookies:
         project_folder: 存储地址
-        type: 指定的文件类型
-        ipaddr: 用户信息
     Returns: [提取的文件list]
     """
-    kdocs = Kdocs(limit)
-    link, name = kdocs.document_aggregation_download(file_type=type)
+    kdocs = Kdocs(limit, cookies)
+    link, name = kdocs.document_aggregation_download(file_type='')
     tag = kdocs.url_share_tag
     if link:
         resp = requests.get(url=link, verify=False)
@@ -377,11 +377,11 @@ def get_kdocs_files(limit, project_folder, type):
         return {func_box.local_relative_path(temp_file): limit}
 
 
-def get_kdocs_from_limit(link_limit, project_folder, type=['']):
+def get_kdocs_from_limit(link_limit, project_folder, cookies=None):
     """
     Args:
+        cookies:
         link_limit: kudos 文件分享链接
-        type: type=='' 时，将支持所有文件类型
         project_folder: 存放地址
     Returns:
     """
@@ -390,58 +390,12 @@ def get_kdocs_from_limit(link_limit, project_folder, type=['']):
     project_folder = os.path.join(project_folder, 'k_docs')
     for limit in link_limit:
         if '/ent/' in limit:
-            files, info, fail = get_kdocs_dir(limit, project_folder, type)
+            files, info, fail = get_kdocs_dir(limit, project_folder, cookies)
             file_mapping.update(files)
             success += f"{limit}文件信息如下：{info}\n\n 下载任务状况：{fail}\n\n"
         else:
-            file_mapping.update(get_kdocs_files(limit, project_folder, type))
+            file_mapping.update(get_kdocs_files(limit, project_folder, cookies))
     return success, file_mapping
-
-
-def smart_document_extraction(url, llm_kwargs, plugin_kwargs, chatbot, history, files):
-    img_ocr, = crazy_box.json_args_return(plugin_kwargs, ['开启OCR'])
-    ovs_data, content, empty_picture_count, pic_dict, kdocs_dict = get_docs_content(url, image_processing=img_ocr)
-    if img_ocr:
-        you_say = '请检查数据，并进行处理'
-        if pic_dict:  # 当有图片文件时，再去提醒
-            title = crazy_box.long_name_processing(content)
-            ocr_process = f'检测到`{title}`文档中存在{func_box.html_tag_color(empty_picture_count)}张图片，为了产出结果不存在遗漏，正在逐一进行识别\n\n' \
-                          f'> 红框为采用的文案,可信指数低于 {func_box.html_tag_color(llm_kwargs["ocr"])} 将不采用, 可在Setting 中进行配置\n\n'
-            chatbot.append([you_say, ocr_process])
-        else:
-            ocr_process = ''
-        if pic_dict:
-            yield from toolbox.update_ui(chatbot, history, '正在调用OCR组件，已启用多线程解析，请稍等')
-            ocr_func = ocr_tools.Paddle_ocr_select(ipaddr=llm_kwargs['ipaddr'],
-                                                   trust_value=llm_kwargs['ocr']).identify_cache
-            thread_submission = ocr_tools.submit_threads_ocr(pic_dict, func=ocr_func,
-                                                             max_threads=llm_kwargs.get('worker_num', 5))
-            for t in thread_submission:
-                try:
-                    img_content, img_result, error = thread_submission[t].result()
-                    content = str(content).replace(f"{t}",
-                                                   f"{func_box.html_local_img(img_result)}\n```{img_content}```")
-                    if error:
-                        ocr_process += f'`tips: {error}`'
-                    ocr_process += f'{t} 识别完成，识别效果如下{func_box.html_local_img(img_result)}\n\n'
-                    chatbot[-1] = [you_say, ocr_process]
-                    yield from toolbox.update_ui(chatbot, history)
-                except Exception:
-                    ocr_process += f'{t} 识别失败，过滤这个图片\n\n'
-                    chatbot[-1] = [you_say, ocr_process]
-                    yield from toolbox.update_ui(chatbot, history)
-
-    else:
-        if empty_picture_count >= 5:
-            chatbot.append(['请检查文档内容', f'\n\n 需求文档中没有{func_box.html_tag_color("描述")}的图片数量' \
-                                              f'有{func_box.html_tag_color(empty_picture_count)}张，生成的测试用例可能存在遗漏点，'
-                                              f'可以参考以下方法对图片进行描述补充，或在自定义插件参数中开始OCR功能\n\n' \
-                                              f'{func_box.html_local_img("docs/imgs/pic_desc.png")}'])
-        yield from toolbox.update_ui(chatbot, history)
-    title = crazy_box.long_name_processing(content)
-    temp_list = [title, content]
-    temp_file = yield from crazy_box.result_written_to_markdown(temp_list, llm_kwargs, plugin_kwargs, chatbot, history)
-    files.extend(temp_file)
 
 
 if __name__ == '__main__':
