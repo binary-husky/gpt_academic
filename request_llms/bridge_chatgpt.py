@@ -394,13 +394,13 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         "temperature": llm_kwargs['temperature'],  # 1.0,
         "top_p": llm_kwargs['top_p'],  # 1.0,
         "n": llm_kwargs['n_choices'],
-        "stop": llm_kwargs['stop'],
-        "presence_penalty": llm_kwargs['presence_penalty'],
-        "frequency_penalty": llm_kwargs['frequency_penalty'],
+        "stop": llm_kwargs.get('stop', ''),
+        "presence_penalty": llm_kwargs.get('presence_penalty', 2.0),
+        "frequency_penalty": llm_kwargs.get('frequency_penalty', 0),
         # "max_context": llm_kwargs['max_context'],  用了会报错，不知道咋回事
         # "max_generation": llm_kwargs['max_generation'],
         # "logit_bias": llm_kwargs['logit_bias'],
-        "user": llm_kwargs['user'],
+        "user": llm_kwargs.get('user_identifier', ''),
         "stream": stream,
     }
     return headers, payload

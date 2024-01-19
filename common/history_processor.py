@@ -30,8 +30,8 @@ class HistoryJsonHandle:
 
     def analysis_chat_history(self, chat_list: list[list], cookies: dict):
         copy_cookies = copy.copy(cookies)
-        copy_cookies.pop('api_key')
-        copy_cookies.pop('know_dict')
+        if cookies.get('api_key'):
+            copy_cookies.pop('api_key')
         if cookies.get('plugin_state'):
             copy_cookies.pop('plugin_state')
         self.base_data_format['chat_llms'].update(copy_cookies)
@@ -73,7 +73,7 @@ class HistoryJsonHandle:
         cookies.update(self.base_data_format['chat_llms'])
         llms = self.base_data_format['chat_llms']
         default_params, LLM_MODEL, = toolbox.get_conf('LLM_DEFAULT_PARAMETER', 'LLM_MODEL')
-        llms_combo = [llms.get(key, default_params[key]) for key in default_params]
+        llms_combo = [gr.update(value=llms.get(key, default_params[key]), show_label=True) for key in default_params]
         llms_combo[-1] = self.base_data_format['chat_llms'].get('system_prompt', '')
         llm_select = str(self.base_data_format['chat_llms'].get('llm_model', LLM_MODEL)).split('&')[0]
         llms_combo.append(gr.update(value=llm_select))

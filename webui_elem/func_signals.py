@@ -648,9 +648,9 @@ def refresh_load_data(prompt, request: gr.Request):
     prompt['samples'] = data
     know_list = os.listdir(init_path.knowledge_path)
     load_list, user_list = func_box.get_directory_list(os.path.join(init_path.knowledge_path, '知识库'), user_addr)
-    know_cls = gr.update(choices=know_list, value='知识库')
+    know_cls = gr.update(choices=know_list, value='知识库', show_label=True)
     know_load = gr.update(choices=load_list, label='知识库', show_label=True)
-    know_user = gr.update(choices=user_list)
+    know_user = gr.update(choices=user_list, show_label=True)
     select_list = filter_database_tables()
     outputs = [gr.update(samples=data, visible=True), prompt,
                gr.update(choices=all + select_list), gr.update(choices=[all[1]] + select_list),

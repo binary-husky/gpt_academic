@@ -248,6 +248,9 @@ code.language-folded {
     max-width: 200px !important;
     max-height: 150px !important;
 }
+.danger_btn {
+    background: #cd0c0c !important;
+}
 [class*="gradio-container-"] h1 {
     font-weight: 700 !important;
     font-size: 28px !important;

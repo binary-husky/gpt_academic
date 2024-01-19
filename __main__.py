@@ -74,8 +74,9 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                                        )
         self.delLastBtn.click(func_signals.delete_latest_chat, inputs=[self.chatbot, self.history, self.cookies],
                               outputs=[self.chatbot, self.history, self.cookies])
-        self.retry_queue = self.retryBtn.click(fn=ArgsGeneralWrapper(predict), inputs=self.input_combo + [gr.State('RetryChat')],
-                            outputs=self.output_combo, show_progress=True)
+        self.retry_queue = self.retryBtn.click(fn=ArgsGeneralWrapper(predict),
+                                               inputs=self.input_combo + [gr.State('RetryChat')],
+                                               outputs=self.output_combo, show_progress=True)
         self.cancel_handles.append(self.retry_queue)
 
     def signals_prompt_func(self):
@@ -308,24 +309,31 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
 
     def signals_input_setting(self):
         # 注册input
-        self.input_combo = [self.cookies, self.max_length_sl, self.default_worker_num, self.model_select_dropdown,
-                            self.langchain_dropdown, self.langchain_know_kwargs, self.langchain_classifi,
-                            self.vector_search_score, self.vector_search_top_k, self.vector_chunk_size, self.input_copy,
+        self.input_combo = [self.cookies, self.max_length_sl, self.model_select_dropdown, self.input_copy,
                             self.top_p, self.temperature, self.n_choices_slider, self.stop_sequence_txt,
                             self.max_context_length_slider, self.max_generation_slider, self.presence_penalty_slider,
                             self.frequency_penalty_slider, self.logit_bias_txt, self.user_identifier_txt,
-                            self.ocr_identifying_trust, self.chatbot, self.single_turn_checkbox,
-                            self.use_websearch_checkbox,
-                            self.history, self.system_prompt, self.models_box, self.plugin_advanced_arg]
+                            self.chatbot, self.history, self.system_prompt, self.plugin_advanced_arg,
+                            self.single_turn_checkbox, self.use_websearch_checkbox]
+        # 知识库
+        self.know_combo = [self.langchain_dropdown, self.langchain_know_kwargs, self.langchain_classifi,
+                           self.vector_search_score, self.vector_search_top_k, self.vector_chunk_size]
+        self.input_combo.extend(self.know_combo)
+        # 高级设置
+        self.setting_combo = [self.models_box, self.default_worker_num, self.ocr_identifying_trust]
+        self.input_combo.extend(self.setting_combo)
+        # 个人信息
+        self.user_combo = [self.openai_keys, self.wps_cookie, self.qq_cookie, self.feishu_cookie]
+        self.input_combo.extend(self.user_combo)
+
         self.output_combo = [self.cookies, self.chatbot, self.history, self.status_display, self.cancelBtn,
-                             self.submitBtn, ]
+                             self.submitBtn]
         self.predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=self.input_combo,
                                  outputs=self.output_combo, show_progress=True)
         self.clear_agrs = dict(fn=func_signals.clear_input,
                                inputs=[self.user_input, self.cookies],
                                outputs=[self.user_input, self.input_copy, self.cancelBtn,
                                         self.submitBtn, self.historySelectList, self.sm_upload])
-
         # 提交按钮、重置按钮
         submit_handle = self.user_input.submit(**self.clear_agrs).then(**self.predict_args)
         click_handle = self.submitBtn.click(**self.clear_agrs).then(**self.predict_args)
@@ -451,6 +459,7 @@ gradio_app = gr.mount_gradio_app(app, chatbot_main.demo, '/spike', )
 if __name__ == '__main__':
     import uvicorn
     from common.logger_handle import init_config, logger
+
     logger.info('start...')
     app_reload = get_conf('app_reload')
     config = uvicorn.Config("__main__:app", host="0.0.0.0", port=PORT, reload=app_reload)

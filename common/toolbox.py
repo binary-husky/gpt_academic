@@ -63,48 +63,57 @@ def ArgsGeneralWrapper(f):
     装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
     """
 
-    def decorated(cookies, max_length, worker_num, llm_model,
-                  langchain, know_dict, know_cls,
-                  vector_score, vector_top_k, vector_size,
-                  txt, top_p, temperature, n_choices, stop_sequence,
+    def decorated(cookies, max_length, llm_model, txt,  # 调优参数
+                  top_p, temperature, n_choices, stop_sequence,
                   max_context, max_generation, presence_penalty,
                   frequency_penalty, logit_bias, user_identifier,
-                  ocr_trust, chatbot, single_turn, use_websearch,
-                  history, system_prompt, models, plugin_advanced_arg, ipaddr: gr.Request, *args):
+                  chatbot, history, system_prompt, plugin_advanced_arg,
+                  # 输入栏模式
+                  single_mode, agent_mode,
+                  # 知识库
+                  langchain, know_dict, know_cls,
+                  vector_score, vector_top_k, vector_size,
+                  # 高级设置
+                  models, worker_num, ocr_trust,
+                  # 个人信息配置
+                  openai_key, wps_cookies, qq_cookies, feishu_header,
+                  ipaddr: gr.Request, *args):  # 参数来源__main__.py self.input_combo
         """"""
-        # 引入一个有cookie的chatbot
         from common import Langchain_cn
         start_time = time.time()
         real_llm = {
+            'llm_model': llm_model,
             'top_p': top_p, 'temperature': temperature, 'n_choices': n_choices, 'stop': stop_sequence,
             'max_context': max_context, 'max_generation': max_generation, 'presence_penalty': presence_penalty,
-            'frequency_penalty': frequency_penalty, 'logit_bias': logit_bias, 'user': user_identifier,
+            'frequency_penalty': frequency_penalty, 'logit_bias': logit_bias, 'user_identifier': user_identifier,
+            'system_prompt': system_prompt, 'ipaddr': func_box.user_client_mark(ipaddr),
         }
-        if not cookies.get('first_chat') and args:
-            cookies['first_chat'] = args[0]
-            cookies['first_chat'] += "_" + func_box.created_atime()
-        cookies.update({
-            'api_key': cookies['api_key'], 'llm_model': llm_model,
-            **real_llm,
-            'worker_num': worker_num, 'ipaddr': func_box.user_client_mark(ipaddr),
-            'start_time': start_time, 'max_length': max_length, 'ocr': ocr_trust,
+        llm_kwargs = {   # 这些不会写入对话记录哦
+            **real_llm, 'api_key': cookies.get('api_key')+f",{openai_key}",
+            'worker_num': worker_num, 'start_time': start_time, 'ocr': ocr_trust,
             'know_dict': know_dict, 'know_cls': know_cls, 'know_id': langchain,
             'vector': {
                 'score': vector_score,
                 'top-k': vector_top_k,
                 'size': vector_size
-            },
-            'system_prompt': system_prompt,
-        })
-        llm_kwargs = cookies
+            }, 'max_length': max_length,
+            'wps_cookies': wps_cookies, 'qq_cookies': qq_cookies, 'feishu_header': feishu_header,
+        }
+        # 对话参数
+        if not cookies.get('first_chat') and args:
+            cookies['first_chat'] = args[0]
+            cookies['first_chat'] += "_" + func_box.created_atime()
         plugin_kwargs = {
             "advanced_arg": plugin_advanced_arg,
             "parameters_def": ''
         }
+        # 引入一个有cookie的chatbot
+        cookies.update({**real_llm})
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
         txt_passon = txt
         if 'input加密' in models: txt_passon = func_box.encryption_str(txt)
+        if 'OCR缓存' in models: llm_kwargs.update({'ocr_cache': True})
         # 插件会传多参数，如果是插件，那么更新知识库 和 默认高级参数
         if len(args) > 1:
             plugin_kwargs['advanced_arg'] = ''
@@ -120,7 +129,7 @@ def ArgsGeneralWrapper(f):
                                                                       chatbot_with_cookie, history, llm_kwargs,
                                                                       plugin_kwargs)
         # 根据cookie 或 对话配置决定到底走哪一步
-        yield from func_decision_tree(f, cookies, single_turn, use_websearch,
+        yield from func_decision_tree(f, cookies, single_mode, agent_mode,
                                       txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie,
                                       history, system_prompt, args)
         # 将对话记录写入文件
@@ -131,7 +140,7 @@ def ArgsGeneralWrapper(f):
     return decorated
 
 
-def func_decision_tree(func, cookies, single_turn, use_websearch,
+def func_decision_tree(func, cookies, single_mode, agent_mode,
                        txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie,
                        history, system_prompt, args):
     if cookies.get('lock_plugin', None) is None:
@@ -153,11 +162,11 @@ def func_decision_tree(func, cookies, single_turn, use_websearch,
                 args = ()
             yield from try_f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
         else:
-            if use_websearch:
+            if agent_mode:
                 from common.crazy_functional import crazy_fns
                 plugin_agent = crazy_fns['插件代理助手']['Function']
                 func = plugin_agent
-            if single_turn:
+            if single_mode:
                 yield from func(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, [], system_prompt, *args)
             else:
                 yield from func(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt,

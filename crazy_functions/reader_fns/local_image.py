@@ -60,11 +60,11 @@ class ImgHandler:
         result = ocr.ocr(self.img_path, cls=True)
         result = result[0]
         if show_result:
-            txts_select, self.img_path, draw_error = self._content_draw_result(result)
+            txt_select, self.img_path, draw_error = self._content_draw_result(result)
         else:
             draw_error = ''
-            txts_select = result
-        return '\n'.join(txts_select), self.img_path, draw_error
+            txt_select = result
+        return '\n'.join(txt_select), self.img_path, draw_error
 
     def get_llm_vision(self, plugin_kwargs):
         from request_llms.bridge_google_gemini import predict_no_ui_long_connection
@@ -78,39 +78,34 @@ class ImgHandler:
         vision_result = predict_no_ui_long_connection(input_, vision_model, observe_window=watchdog)
         return vision_result, self.img_path, watchdog[2]
 
-    def identify_cache(self, cache_tag, kwargs):
+    def identify_cache(self, cache_tag, cor_cache, kwargs):
         cache_sql = database_processor.SqliteHandle('ocr_cache')
         cache_tag = str(cache_tag) + str(kwargs)  # 避免不同vision_model读缓存
         cache = cache_sql.get_prompt_value(find=cache_tag)
-        temp_cont, file_path = cache
-        if file_path:
-            content = temp_cont[cache_tag]
+        cache_cont, file_path = cache
+        if cache_cont and cor_cache:
+            content = cache_cont[cache_tag]
             status = '本次识别结果读取数据库缓存'
         else:
             if isinstance(kwargs, bool):
                 content, file_path, status = self.get_paddle_ocr(kwargs)
             else:
                 content, file_path, status = self.get_llm_vision(kwargs)
-            if not status:
+            if not status:  # 没有错误才落库
                 cache_sql.inset_prompt({cache_tag: content}, file_path)
         return content, file_path, status
 
 
-def submit_threads_img_handle(ocr_mapping, output_dir, model_kwargs, max_threads=10):
+def submit_threads_img_handle(ocr_mapping, output_dir, cor_cache: bool = False, model_kwargs=True, max_threads=10):
     threads = {}
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=max_threads)
     # 提交任务，并将线程对象作为键，字典的键作为值存储
     for key in ocr_mapping:
         obj = ImgHandler(img_path=key, output_dir=output_dir).identify_cache
-        threads[key] = executor.submit(obj, key, model_kwargs)
+        threads[key] = executor.submit(obj, key, cor_cache, model_kwargs)
     # 返回线程字典
     return threads
 
 
 if __name__ == '__main__':
-    sql_handler = database_processor.SqliteHandle('prompt_图片理解_sys')
-    prompt = sql_handler.find_prompt_result('llm-vision')
-    from common import func_box
-    input_ = func_box.replace_expected_text(prompt, content='12412412412',
-                                            expect='{{{v}}}')
-    print(input_)
+    pass

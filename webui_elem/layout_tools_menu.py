@@ -83,12 +83,19 @@ class RightElem:
                 self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary", visible=False)
 
     def _draw_setting_chat(self):
-        worker_num = toolbox.get_conf('DEFAULT_WORKER_NUM')
         with gr.TabItem('调优', id='sett_tab', elem_id='chuanhu-toolbox-tabs'):
             with gr.Box():
                 # gr.Markdown(func_box.get_html('what_news.html').replace('{%v}', 'LLMs调优参数'))
-                default_params = toolbox.get_conf('LLM_DEFAULT_PARAMETER')
-                with gr.Accordion(label='LLMs调优参数', open=False):
+                with gr.Accordion(label='Langchain调优参数'):
+                    self.vector_search_score = gr.Slider(minimum=0, maximum=1100, value=500, step=1, interactive=True,
+                                                         label="SCORE-THRESHOLD", show_label=True).style(container=False)
+                    self.vector_search_top_k = gr.Slider(minimum=1, maximum=10, value=4, step=1, interactive=True,
+                                                         label="TOP-K", show_label=True).style(container=False)
+                    self.vector_chunk_size = gr.Slider(minimum=100, maximum=1000, value=521, step=1, interactive=True,
+                                                       label="CHUNK-SIZE", show_label=True).style(container=False)
+                func_box.md_division_line()
+                with gr.Accordion(label='LLMs调优参数', open=True):
+                    default_params = toolbox.get_conf('LLM_DEFAULT_PARAMETER')
                     self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=default_params['top_p'], step=0.01,
                                            interactive=True, show_label=True,
                                            label="Top-p", container=False)
@@ -100,19 +107,20 @@ class RightElem:
                                                       )
                     self.stop_sequence_txt = gr.Textbox(show_label=True, placeholder=i18n("停止符，用英文逗号隔开..."),
                                                         label="stop", value=default_params['stop'], lines=1,
-                                                        container=False
-                                                        )
-                    self.presence_penalty_slider = gr.Slider(minimum=-2.0, maximum=default_params['presence_penalty'], value=0.0,
+                                                        container=False)
+                    self.presence_penalty_slider = gr.Slider(minimum=-2.0, maximum=5,
                                                              step=0.01, interactive=True, label="presence penalty",
                                                              container=False, show_label=True,
+                                                             value=default_params['presence_penalty'],
                                                              )
-                    self.frequency_penalty_slider = gr.Slider(minimum=-2.0, maximum=2, value=default_params['frequency_penalty'], step=0.01,
+                    self.frequency_penalty_slider = gr.Slider(minimum=-2.0, maximum=2,
+                                                              value=default_params['frequency_penalty'], step=0.01,
                                                               interactive=True, label="frequency penalty",
                                                               container=False, show_label=True)
 
                     self.user_identifier_txt = gr.Textbox(show_label=True, placeholder=i18n("用于定位滥用行为"),
-                                                          label=i18n("用户名"), value=default_params['user'], lines=1,
-                                                          container=False)
+                                                          label=i18n("用户名"), value=default_params['user_identifier'],
+                                                          lines=1, container=False)
                     func_box.md_division_line()
                     self.max_context_length_slider = gr.Slider(minimum=1, maximum=32768, value=default_params['max_context'],
                                                                step=1, interactive=True, label="max context",
@@ -126,24 +134,6 @@ class RightElem:
                     self.max_length_sl = gr.Slider(minimum=256, maximum=4096, value=4096, step=1, interactive=True,
                                                    label="MaxLength", visible=False,
                                                    container=False)
-                func_box.md_division_line()
-                with gr.Accordion(label='Langchain调优参数'):
-                    self.vector_search_score = gr.Slider(minimum=0, maximum=1100, value=500, step=1, interactive=True,
-                                                         label="SCORE-THRESHOLD", container=False)
-                    self.vector_search_top_k = gr.Slider(minimum=1, maximum=10, value=4, step=1, interactive=True,
-                                                         label="TOP-K", container=False)
-                    self.vector_chunk_size = gr.Slider(minimum=100, maximum=1000, value=521, step=1, interactive=True,
-                                                       label="CHUNK-SIZE", container=False)
-                func_box.md_division_line()
-                with gr.Accordion(label='工具调试参数', open=True):
-                    self.default_worker_num = gr.Slider(minimum=1, maximum=30, value=worker_num, step=1,
-                                                        interactive=True, label="插件多线程最大并行", container=False
-                                                        )
-                    self.pro_tf_slider = gr.Slider(minimum=1, maximum=200, value=15, step=1, interactive=True,
-                                                   label="搜索展示详细字符", container=False)
-                    self.ocr_identifying_trust = gr.Slider(minimum=0.01, maximum=1.0, value=0.60, step=0.01,
-                                                           interactive=True, container=False,
-                                                           label="OCR 识别信任指数")
             # temp = gr.Markdown(self.description)
 
     def draw_tools_area(self):

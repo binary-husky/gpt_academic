@@ -12,7 +12,6 @@ from moviepy.editor import AudioFileClip
 from common.path_handle import init_path
 from crazy_functions import reader_fns
 
-
 class Utils:
 
     def __init__(self):
@@ -439,11 +438,11 @@ def batch_recognition_images_to_md(img_list, ipaddr):
     Returns: [文件list]
     """
     temp_list = []
+    save_path = os.path.join(init_path.users_path, ipaddr, 'ocr_to_md')
     for img in img_list:
         if os.path.exists(img):
-            img_content, img_result, _ = ocr_tools.Paddle_ocr_select(ipaddr=ipaddr, trust_value=True
-                                                                     ).img_def_content(img_path=img, img_tag=img)
-            temp_file = os.path.join(init_path.users_path, ipaddr, 'ocr_to_md',
+            img_content, img_result, _ = reader_fns.ImgHandler(img, save_path).get_paddle_ocr()
+            temp_file = os.path.join(save_path,
                                      img_content.splitlines()[0][:20] + '.md')
             with open(temp_file, mode='w', encoding='utf-8') as f:
                 f.write(f"{func_box.html_view_blank(temp_file)}\n\n" + img_content)
@@ -654,6 +653,7 @@ def detach_cloud_links(link_limit, chatbot, history, llm_kwargs):
 
 def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugin_kwargs):
     ocr_switch, = json_args_return(plugin_kwargs, ['开启OCR'])
+    cor_cache = llm_kwargs.get('cor_cache', False)
     img_mapping = func_box.extract_link_pf(content, func_box.valid_img_extensions)
     # 如果开启了OCR，并且文中存在图片链接，处理图片
     if ocr_switch and img_mapping:
@@ -664,7 +664,7 @@ def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugi
         yield from toolbox.update_ui(chatbot, history, '正在调用`Vision`组件，已启用多线程解析，请稍等')
         # 识别图片中的文字
         save_path = os.path.join(init_path.users_path, llm_kwargs['ipaddr'], 'img_vision')
-        vision_submission = reader_fns.submit_threads_img_handle(img_mapping, save_path, ocr_switch)
+        vision_submission = reader_fns.submit_threads_img_handle(img_mapping, save_path, cor_cache, ocr_switch)
         chatbot[-1] = [None, vision_bro]
         for t in vision_submission:
             try:
