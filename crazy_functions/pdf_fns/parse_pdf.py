@@ -74,7 +74,7 @@ def produce_report_markdown(gpt_response_collection, meta, paper_meta_info, chat
 
 def translate_pdf(article_dict, llm_kwargs, chatbot, fp, generated_conclusion_files, TOKEN_LIMIT_PER_FRAGMENT, DST_LANG):
     from crazy_functions.pdf_fns.report_gen_html import construct_html
-    from crazy_functions.crazy_utils import breakdown_txt_to_satisfy_token_limit_for_pdf
+    from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit
     from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
     from crazy_functions.crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 
@@ -116,7 +116,7 @@ def translate_pdf(article_dict, llm_kwargs, chatbot, fp, generated_conclusion_fi
             # find a smooth token limit to achieve even seperation
             count = int(math.ceil(raw_token_num / TOKEN_LIMIT_PER_FRAGMENT))
             token_limit_smooth = raw_token_num // count + count
-            return breakdown_txt_to_satisfy_token_limit_for_pdf(txt, get_token_fn=get_token_num, limit=token_limit_smooth)
+            return breakdown_text_to_satisfy_token_limit(txt, limit=token_limit_smooth, llm_model=llm_kwargs['llm_model'])
 
     for section in article_dict.get('sections'):
         if len(section['text']) == 0: continue

@@ -2,9 +2,9 @@
 
 
 > **Remarque**
-> 
+>
 > Ce README a été traduit par GPT (implémenté par le plugin de ce projet) et n'est pas fiable à 100 %. Veuillez examiner attentivement les résultats de la traduction.
-> 
+>
 > 7 novembre 2023 : Lors de l'installation des dépendances, veuillez choisir les versions **spécifiées** dans le fichier `requirements.txt`. Commande d'installation : `pip install -r requirements.txt`.
 
 
@@ -12,7 +12,7 @@
 
 **Si vous aimez ce projet, merci de lui donner une étoile ; si vous avez inventé des raccourcis ou des plugins utiles, n'hésitez pas à envoyer des demandes d'extraction !**
 
-Si vous aimez ce projet, veuillez lui donner une étoile. 
+Si vous aimez ce projet, veuillez lui donner une étoile.
 Pour traduire ce projet dans une langue arbitraire avec GPT, lisez et exécutez [`multi_language.py`](multi_language.py) (expérimental).
 
 > **Remarque**
@@ -22,7 +22,7 @@ Pour traduire ce projet dans une langue arbitraire avec GPT, lisez et exécutez 
 > 2. Les fonctionnalités de chaque fichier de ce projet sont spécifiées en détail dans [le rapport d'auto-analyse `self_analysis.md`](https://github.com/binary-husky/gpt_academic/wiki/GPT‐Academic个项目自译解报告). Vous pouvez également cliquer à tout moment sur les plugins de fonctions correspondants pour appeler GPT et générer un rapport d'auto-analyse du projet. Questions fréquemment posées [wiki](https://github.com/binary-husky/gpt_academic/wiki). [Méthode d'installation standard](#installation) | [Script d'installation en un clic](https://github.com/binary-husky/gpt_academic/releases) | [Instructions de configuration](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)..
 >
 > 3. Ce projet est compatible avec et recommande l'expérimentation de grands modèles de langage chinois tels que ChatGLM, etc. Prend en charge plusieurs clés API, vous pouvez les remplir dans le fichier de configuration comme `API_KEY="openai-key1,openai-key2,azure-key3,api2d-key4"`. Pour changer temporairement la clé API, entrez la clé API temporaire dans la zone de saisie, puis appuyez sur Entrée pour soumettre et activer celle-ci.
- 
+
 
 <div align="center">
 
@@ -128,7 +128,7 @@ python -m pip install -r requirements.txt # This step is the same as the pip ins
 [Optional Steps] If you need to support Tsinghua ChatGLM2/Fudan MOSS as backends, you need to install additional dependencies (Prerequisites: Familiar with Python + Have used PyTorch + Sufficient computer configuration):
 ```sh
 # [Optional Step I] Support Tsinghua ChatGLM2. Comment on this note: If you encounter the error "Call ChatGLM generated an error and cannot load the parameters of ChatGLM", refer to the following: 1: The default installation is the torch+cpu version. To use cuda, you need to uninstall torch and reinstall torch+cuda; 2: If the model cannot be loaded due to insufficient computer configuration, you can modify the model precision in request_llm/bridge_chatglm.py. Change AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) to AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True).
-python -m pip install -r request_llms/requirements_chatglm.txt  
+python -m pip install -r request_llms/requirements_chatglm.txt
 
 # [Optional Step II] Support Fudan MOSS
 python -m pip install -r request_llms/requirements_moss.txt
@@ -201,7 +201,7 @@ Par exemple:
 "Traduction avancée de l'anglais vers le français": {
     # Préfixe, ajouté avant votre saisie. Par exemple, utilisez-le pour décrire votre demande, telle que la traduction, l'explication du code, l'amélioration, etc.
     "Prefix": "Veuillez traduire le contenu suivant en français, puis expliquer chaque terme propre à la langue anglaise utilisé dans le texte à l'aide d'un tableau markdown : \n\n",
-    
+
     # Suffixe, ajouté après votre saisie. Par exemple, en utilisant le préfixe, vous pouvez entourer votre contenu par des guillemets.
     "Suffix": "",
 },
@@ -354,4 +354,3 @@ https://github.com/oobabooga/one-click-installers
 # Plus：
 https://github.com/gradio-app/gradio
 https://github.com/fghrsh/live2d_demo
-

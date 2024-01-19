@@ -250,8 +250,8 @@ def find_main_tex_file(file_manifest, mode):
     else: # if len(canidates) >= 2 通过一些Latex模板中常见（但通常不会出现在正文）的单词，对不同latex源文件扣分，取评分最高者返回
         canidates_score = []
         # 给出一些判定模板文档的词作为扣分项
-        unexpected_words = ['\LaTeX', 'manuscript', 'Guidelines', 'font', 'citations', 'rejected', 'blind review', 'reviewers']
-        expected_words = ['\input', '\ref', '\cite']
+        unexpected_words = ['\\LaTeX', 'manuscript', 'Guidelines', 'font', 'citations', 'rejected', 'blind review', 'reviewers']
+        expected_words = ['\\input', '\\ref', '\\cite']
         for texf in canidates:
             canidates_score.append(0)
             with open(texf, 'r', encoding='utf8', errors='ignore') as f:

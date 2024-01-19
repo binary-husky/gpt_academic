@@ -148,7 +148,7 @@ def clear_chat_cookie(llm_model, ipaddr: gr.Request):
     cookie = {'api_key': API_KEY, 'llm_model': llm_model}
     user_path = os.path.join(init_path.history_path, func_box.user_client_mark(ipaddr))
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
-    default_params = toolbox.get_conf('LLMS_DEFAULT_PARAMETER')
+    default_params = toolbox.get_conf('LLM_DEFAULT_PARAMETER')
     llms_combo = [cookie.get(key, default_params[key]) for key in default_params] + [
         gr.update(value=llm_model)]
     output = [[], [], cookie, *llms_combo, '已重置对话记录和对话Cookies',
@@ -160,7 +160,7 @@ def select_history(select, llm_select, cookies, ipaddr: gr.Request):
     user_path = os.path.join(init_path.history_path, func_box.user_client_mark(ipaddr))
     user_history = [f for f in os.listdir(user_path) if f.endswith('.json') and select == os.path.splitext(f)[0]]
     if not user_history:
-        default_params, API_KEY = toolbox.get_conf('LLMS_DEFAULT_PARAMETER', 'API_KEY')
+        default_params, API_KEY = toolbox.get_conf('LLM_DEFAULT_PARAMETER', 'API_KEY')
         llms_combo = [cookies.get(key, default_params[key]) for key in default_params]
         cookies = {'api_key': API_KEY}
         return [[], [], cookies, *llms_combo, llm_select, select]

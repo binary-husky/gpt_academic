@@ -75,7 +75,7 @@ def patch_and_restart(path):
     import glob
     from common.colorful import print亮黄, print亮绿, print亮红
     # if not using config_private, move origin config.py as config_private.py
-    if not os.path.exists('../config_private.py'):
+    if not os.path.exists('../users_data/config_private.py'):
         print亮黄('由于您没有设置config_private.py私密配置，现将您的现有配置移动至config_private.py以防止配置丢失，',
               '另外您可以随时在history子文件夹下找回旧版的程序。')
         shutil.copyfile('config.py', 'config_private.py')

@@ -17,8 +17,6 @@ class GoogleChatInit:
 
     def __init__(self):
         self.url_gemini = 'https://generativelanguage.googleapis.com/v1beta/models/%m:streamGenerateContent?key=%k'
-        self.text_pattern = re.compile(r'"text":\s*"((?:[^"\\]|\\.)*)"', flags=re.DOTALL)
-        self.error_pattern = re.compile(r'\"message\":\s*\"(.*?)\"', flags=re.DOTALL)
 
     def __conversation_user(self, user_input: str):
         what_i_have_asked = {"role": "user", "parts": []}
@@ -56,7 +54,20 @@ class GoogleChatInit:
         headers, payload = self.generate_message_payload(inputs, llm_kwargs, history, system_prompt)
         response = requests.post(url=self.url_gemini, headers=headers, data=json.dumps(payload),
                                  stream=True, proxies=proxies, timeout=TIMEOUT_SECONDS)
-        return response.iter_lines()
+        bro_results = ''
+        for resp in response.iter_lines():
+            results = resp.decode("utf-8")
+            bro_results += results
+            text_pattern = re.compile(r'"text":\s*"((?:[^"\\]|\\.)*)"', flags=re.DOTALL)
+            error_pattern = re.compile(r'"message":\s*"((?:[^"\\]|\\.)*)"', flags=re.DOTALL)
+            text_match = re.search(text_pattern, results)
+            error_match = re.search(error_pattern, results)
+            # 预处理
+            if text_match:
+                text_match = json.loads('{"text": "%s"}' % text_match.group(1))['text']
+            if error_match:
+                error_match = json.loads('{"text": "%s"}' % text_match.group(1))['text']
+            yield text_match, error_match, bro_results
 
     def generate_message_payload(self, inputs, llm_kwargs, history, system_prompt) -> Tuple[Dict, Dict]:
         messages = [

@@ -90,11 +90,14 @@ DEFAULT_FN_GROUPS = ['对话', '编程', '学术', '智能体']
 LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
 AVAIL_LLM_MODELS = ["gpt-3.5-turbo-1106","gpt-4-1106-preview","gpt-4-vision-preview",
                     "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
-                    "api2d-gpt-3.5-turbo", 'api2d-gpt-3.5-turbo-16k',
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "api2d-gpt-4",
-                    "chatglm3", "moss", "claude-2"]
-# P.S. 其他可用的模型还包括 ["zhipuai", "qianfan", "deepseekcoder", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613",  "gpt-3.5-random"
-# "spark", "sparkv2", "sparkv3", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"]
+                    "gemini-pro", "chatglm3", "claude-2", "zhipuai"]
+# P.S. 其他可用的模型还包括 [
+# "moss", "qwen-turbo", "qwen-plus", "qwen-max"
+# "zhipuai", "qianfan", "deepseekcoder", "llama2", "qwen-local", "gpt-3.5-turbo-0613", 
+# "gpt-3.5-turbo-16k-0613",  "gpt-3.5-random", "api2d-gpt-3.5-turbo", 'api2d-gpt-3.5-turbo-16k',
+# "spark", "sparkv2", "sparkv3", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"
+# ]
 
 
 # 定义界面上“询问多个GPT模型”插件应该使用哪些模型，请从AVAIL_LLM_MODELS中选择，并在不同模型之间用`&`间隔，例如"gpt-3.5-turbo&chatglm3&azure-gpt-4"
@@ -104,7 +107,11 @@ MULTI_QUERY_LLM_MODELS = "gpt-3.5-turbo&chatglm3"
 # 选择本地模型变体（只有当AVAIL_LLM_MODELS包含了对应本地模型时，才会起作用）
 # 如果你选择Qwen系列的模型，那么请在下面的QWEN_MODEL_SELECTION中指定具体的模型
 # 也可以是具体的模型路径
-QWEN_MODEL_SELECTION = "Qwen/Qwen-1_8B-Chat-Int8"
+QWEN_LOCAL_MODEL_SELECTION = "Qwen/Qwen-1_8B-Chat-Int8"
+
+
+# 接入通义千问在线大模型 https://dashscope.console.aliyun.com/
+DASHSCOPE_API_KEY = "" # 阿里灵积云API_KEY
 
 
 # 百度千帆（LLM_MODEL="qianfan"）
@@ -189,7 +196,7 @@ XFYUN_API_KEY = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 # 接入智谱大模型
 ZHIPUAI_API_KEY = ""
-ZHIPUAI_MODEL = "chatglm_turbo"
+ZHIPUAI_MODEL = "glm-4" # 可选 "glm-3-turbo" "glm-4"
 
 
 # Claude API KEY
@@ -198,6 +205,10 @@ ANTHROPIC_API_KEY = ""
 
 # 自定义API KEY格式
 CUSTOM_API_KEY_PATTERN = ""
+
+
+# Google Gemini API-Key
+GEMINI_API_KEY = ''
 
 
 # HUGGINGFACE的TOKEN，下载LLAMA时起作用 https://huggingface.co/docs/hub/security-tokens
@@ -285,6 +296,12 @@ NUM_CUSTOM_BASIC_BTN = 4
 │   ├── ZHIPUAI_API_KEY
 │   └── ZHIPUAI_MODEL
 │
+├── "qwen-turbo" 等通义千问大模型
+│   └──  DASHSCOPE_API_KEY
+│
+├── "Gemini"
+│   └──  GEMINI_API_KEY
+│
 └── "newbing" Newbing接口不再稳定，不推荐使用
     ├── NEWBING_STYLE
     └── NEWBING_COOKIES
@@ -301,7 +318,7 @@ NUM_CUSTOM_BASIC_BTN = 4
 ├── "jittorllms_pangualpha"
 ├── "jittorllms_llama"
 ├── "deepseekcoder"
-├── "qwen"
+├── "qwen-local"
 ├──  RWKV的支持见Wiki
 └── "llama2"
 

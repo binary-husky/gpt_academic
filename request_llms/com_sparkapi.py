@@ -72,12 +72,12 @@ class SparkRequestInstance():
 
         self.result_buf = ""
 
-    def generate(self, inputs, llm_kwargs, history, system_prompt):
+    def generate(self, inputs, llm_kwargs, history, system_prompt, use_image_api=False):
         llm_kwargs = llm_kwargs
         history = history
         system_prompt = system_prompt
         import _thread as thread
-        thread.start_new_thread(self.create_blocking_request, (inputs, llm_kwargs, history, system_prompt))
+        thread.start_new_thread(self.create_blocking_request, (inputs, llm_kwargs, history, system_prompt, use_image_api))
         while True:
             self.time_to_yield_event.wait(timeout=1)
             if self.time_to_yield_event.is_set():
@@ -86,7 +86,7 @@ class SparkRequestInstance():
                 return self.result_buf
 
 
-    def create_blocking_request(self, inputs, llm_kwargs, history, system_prompt):
+    def create_blocking_request(self, inputs, llm_kwargs, history, system_prompt, use_image_api):
         if llm_kwargs['llm_model'] == 'sparkv2':
             gpt_url = self.gpt_url_v2
         elif llm_kwargs['llm_model'] == 'sparkv3':
@@ -94,10 +94,12 @@ class SparkRequestInstance():
         else:
             gpt_url = self.gpt_url
         file_manifest = []
-        if llm_kwargs.get('most_recent_uploaded'):
+        if use_image_api and llm_kwargs.get('most_recent_uploaded'):
             if llm_kwargs['most_recent_uploaded'].get('path'):
                 file_manifest = get_pictures_list(llm_kwargs['most_recent_uploaded']['path'])
-                gpt_url = self.gpt_url_img
+                if len(file_manifest) > 0:
+                    print('正在使用讯飞图片理解API')
+                    gpt_url = self.gpt_url_img
         wsParam = Ws_Param(self.appid, self.api_key, self.api_secret, gpt_url)
         websocket.enableTrace(False)
         wsUrl = wsParam.create_url()

@@ -146,10 +146,11 @@ def request_gpt_model_in_new_thread_with_ui_alive(
 
 
 def can_multi_process(llm):
-    OPEN_WORKER_LLMS = get_conf('OPEN_WORKER_LLMS')
-    for work in OPEN_WORKER_LLMS:
-        if llm.startswith(work):
-            return True
+    if llm.startswith('gpt-'): return True
+    if llm.startswith('api2d-'): return True
+    if llm.startswith('azure-'): return True
+    if llm.startswith('spark'): return True
+    if llm.startswith('zhipuai'): return True
     return False
 
 
@@ -331,37 +332,6 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
             yield from update_ui(chatbot=chatbot, history=[])  # 刷新界面
             time.sleep(0.5)
     return gpt_response_collection
-
-
-def breakdown_txt_to_satisfy_token_limit(txt, get_token_fn, limit):
-    def cut(txt_tocut, must_break_at_empty_line):  # 递归
-        if get_token_fn(txt_tocut) <= limit:
-            return [txt_tocut]
-        else:
-            lines = txt_tocut.split('\n')
-            estimated_line_cut = limit / get_token_fn(txt_tocut) * len(lines)
-            estimated_line_cut = int(estimated_line_cut)
-            for cnt in reversed(range(estimated_line_cut)):
-                if must_break_at_empty_line:
-                    if lines[cnt] != "":
-                        continue
-                print(cnt)
-                prev = "\n".join(lines[:cnt])
-                post = "\n".join(lines[cnt:])
-                if get_token_fn(prev) < limit:
-                    break
-            if cnt == 0:
-                raise RuntimeError("存在一行极长的文本！")
-            # print(len(post))
-            # 列表递归接龙
-            result = [prev]
-            result.extend(cut(post, must_break_at_empty_line))
-            return result
-
-    try:
-        return cut(txt, must_break_at_empty_line=True)
-    except RuntimeError:
-        return cut(txt, must_break_at_empty_line=False)
 
 
 def force_breakdown(txt, limit, get_token_fn):
@@ -594,7 +564,9 @@ def read_and_clean_pdf_text(fp, user=''):
                     return True
                 else:
                     return False
-
+            # 对于某些PDF会有第一个段落就以小写字母开头,为了避免索引错误将其更改为大写
+            if starts_with_lowercase_word(meta_txt[0]):
+                meta_txt[0] = meta_txt[0].capitalize()
             for _ in range(100):
                 for index, block_txt in enumerate(meta_txt):
                     if starts_with_lowercase_word(block_txt):

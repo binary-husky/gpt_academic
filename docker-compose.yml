@@ -229,4 +229,3 @@ services:
     # 不使用代理网络拉取最新代码
     command: >
       bash -c "python3 -u main.py"
-

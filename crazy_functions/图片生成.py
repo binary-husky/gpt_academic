@@ -103,10 +103,13 @@ def 图片生成_DALLE2(prompt, llm_kwargs, plugin_kwargs, chatbot, history, sys
     system_prompt   给gpt的静默提醒
     web_port        当前软件运行的端口号
     """
-    history = []  # 清空历史,以免输入溢出
-    chatbot.append(("您正在调用“图像生成”插件。",
-                    "[Local Message] 生成图像, 请先把模型切换至gpt-*或者api2d-*。如果中文Prompt效果不理想, 请尝试英文Prompt。正在处理中 ....."))
-    yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面 由于请求gpt需要一段时间,我们先及时地做一次界面更新
+    history = []    # 清空历史,以免输入溢出
+    if prompt.strip() == "":
+        chatbot.append((prompt, "[Local Message] 图像生成提示为空白，请在“输入区”输入图像生成提示。"))
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 界面更新
+        return
+    chatbot.append(("您正在调用“图像生成”插件。", "[Local Message] 生成图像, 请先把模型切换至gpt-*。如果中文Prompt效果不理想, 请尝试英文Prompt。正在处理中 ....."))
+    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 由于请求gpt需要一段时间,我们先及时地做一次界面更新
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     resolution = plugin_kwargs.get("advanced_arg", '1024x1024')
     image_url, image_path = gen_image(llm_kwargs, prompt, resolution)
@@ -121,10 +124,13 @@ def 图片生成_DALLE2(prompt, llm_kwargs, plugin_kwargs, chatbot, history, sys
 
 @CatchException
 def 图片生成_DALLE3(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    history = []  # 清空历史,以免输入溢出
-    chatbot.append(("您正在调用“图像生成”插件。",
-                    "[Local Message] 生成图像, 请先把模型切换至gpt-*或者api2d-*。如果中文Prompt效果不理想, 请尝试英文Prompt。正在处理中 ....."))
-    yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面 由于请求gpt需要一段时间,我们先及时地做一次界面更新
+    history = []    # 清空历史,以免输入溢出
+    if prompt.strip() == "":
+        chatbot.append((prompt, "[Local Message] 图像生成提示为空白，请在“输入区”输入图像生成提示。"))
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 界面更新
+        return
+    chatbot.append(("您正在调用“图像生成”插件。", "[Local Message] 生成图像, 请先把模型切换至gpt-*。如果中文Prompt效果不理想, 请尝试英文Prompt。正在处理中 ....."))
+    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 由于请求gpt需要一段时间,我们先及时地做一次界面更新
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     resolution_arg = plugin_kwargs.get("advanced_arg", '1024x1024-standard-vivid').lower()
     parts = resolution_arg.split('-')
@@ -140,7 +146,7 @@ def 图片生成_DALLE3(prompt, llm_kwargs, plugin_kwargs, chatbot, history, sys
     image_url, image_path = gen_image(llm_kwargs, prompt, resolution, model="dall-e-3", quality=quality, style=style)
     markd_show = func_box.to_markdown_tabs(head=['图像中转网址预览', '图像本地文件预览'],
                                            tabs=[[f'<div align="center"><img src="{image_url}"></div>',
-                                                  f'[Full Screen Preview]({image_url})'] ,
+                                                  f'[Full Screen Preview]({image_url})'],
                                                  [func_box.html_local_img(image_path),
                                                  f'[Full Screen Preview](file={image_path})']])
     chatbot.append([prompt, markd_show])

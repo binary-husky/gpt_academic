@@ -26,7 +26,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
 
     from .com_sparkapi import SparkRequestInstance
     sri = SparkRequestInstance()
-    for response in sri.generate(inputs, llm_kwargs, history, sys_prompt):
+    for response in sri.generate(inputs, llm_kwargs, history, sys_prompt, use_image_api=False):
         if len(observe_window) >= 1:
             observe_window[0] = response
         if len(observe_window) >= 2:
@@ -53,7 +53,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     # 开始接收回复    
     from .com_sparkapi import SparkRequestInstance
     sri = SparkRequestInstance()
-    for response in sri.generate(inputs, llm_kwargs, history, system_prompt):
+    for response in sri.generate(inputs, llm_kwargs, history, system_prompt, use_image_api=True):
         chatbot[-1] = (inputs, response)
         yield from update_ui(chatbot=chatbot, history=history)
 

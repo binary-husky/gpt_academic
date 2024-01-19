@@ -300,11 +300,12 @@ def get_functions_多功能插件():
             "Color": "stop",
             "AsButton": False,
             "Function": HotReload(随机小游戏)
-        },
-        "保存当前的对话": {
-            "AsButton": True,
-            "Function": HotReload(对话历史存档.对话历史存档)
-        },
+        }
+        ,
+        # "保存当前的对话": {
+        #     "AsButton": True,
+        #     "Function": HotReload(对话历史存档.对话历史存档)
+        # },
         # "[多线程Demo] 解析此项目本身（源码自译解）": {
         #     "Function": HotReload(解析项目源代码.解析项目本身),
         #     "AsButton": False,  # 加入下拉菜单中
@@ -313,15 +314,15 @@ def get_functions_多功能插件():
         #     # HotReload 的意思是热更新，修改函数插件代码后，不需要重启程序，代码直接生效
         #     "AsButton": False,  # 加入下拉菜单中
         #     "Function": HotReload(全项目切换英文)
-        "载入对话历史存档（先上传存档或输入路径）": {
-            "Color": "primary",
-            "AsButton": False,
-            "Function": HotReload(对话历史存档.载入对话历史存档)
-        },
-        "删除所有本地对话历史记录（请谨慎操作）": {
-            "AsButton": False,
-            "Function": HotReload(对话历史存档.删除所有本地对话历史记录)
-        },
+        # "载入对话历史存档（先上传存档或输入路径）": {
+        #     "Color": "primary",
+        #     "AsButton": False,
+        #     "Function": HotReload(对话历史存档.载入对话历史存档)
+        # },
+        # "删除所有本地对话历史记录（请谨慎操作）": {
+        #     "AsButton": False,
+        #     "Function": HotReload(对话历史存档.删除所有本地对话历史记录)
+        # },
         "连接网络回答问题（Bing）": {
             "Color": "primary",
             "AsButton": False,  # 加入下拉菜单中

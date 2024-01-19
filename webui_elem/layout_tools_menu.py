@@ -8,7 +8,7 @@ from common import func_box, toolbox
 from webui_elem import webui_local
 from common.crazy_functional import crazy_fns_role, crazy_classification, crazy_fns
 
-default_plugin = toolbox.get_conf('default_plugin')
+default_plugin = toolbox.get_conf('DEFAULT_FN_GROUPS')
 i18n = webui_local.I18nAuto()
 get_html = func_box.get_html
 
@@ -30,14 +30,14 @@ class RightElem:
             with gr.Row():
                 self.preset_prompt = toolbox.get_conf('preset_prompt')
                 self.pro_private_check = gr.Dropdown(choices=[], value=self.preset_prompt['value'],
-                                                     label='提示词/Masks分类', elem_classes='normal_select',
+                                                     label='提示词分类', elem_classes='normal_select',
                                                      allow_custom_value=True)
             with gr.Row():
-                self.prompt_search_txt = gr.Textbox(placeholder='搜索提示词/Masks', show_label=False,
+                self.prompt_search_txt = gr.Textbox(placeholder='搜索提示词', show_label=False,
                                                     elem_classes='pm_search',)
                 self.multiplexing_edit_check = gr.Checkbox(value=True, label='复用', show_label=True, elem_id='pm_check',
                                                      interactive=True, container=False)
-            self.pro_func_prompt = gr.Dataset(components=[gr.HTML()], label="Prompt/Masks", visible=False,
+            self.pro_func_prompt = gr.Dataset(components=[gr.HTML()], label="Prompt", visible=False,
                                               samples=[['...', ""] for i in range(20)], type='index',
                                               elem_id='prompt_list', samples_per_page=10, )
             self.pro_fp_state = gr.State({'samples': None})
@@ -87,14 +87,16 @@ class RightElem:
         with gr.TabItem('调优', id='sett_tab', elem_id='chuanhu-toolbox-tabs'):
             with gr.Box():
                 # gr.Markdown(func_box.get_html('what_news.html').replace('{%v}', 'LLMs调优参数'))
-                default_params = toolbox.get_conf('LLMS_DEFAULT_PARAMETER')
+                default_params = toolbox.get_conf('LLM_DEFAULT_PARAMETER')
                 with gr.Accordion(label='LLMs调优参数', open=False):
-                    self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=default_params['top_p'], step=0.01, interactive=True,
+                    self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=default_params['top_p'], step=0.01,
+                                           interactive=True, show_label=True,
                                            label="Top-p", container=False)
                     self.temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True,
                                                  label="Temperature", container=False)
-                    self.n_choices_slider = gr.Slider(minimum=1, maximum=10, value=default_params['n_choices'], step=1,
-                                                      interactive=True, label="n choices", container=False
+                    self.n_choices_slider = gr.Slider(minimum=1, maximum=10, value=default_params['n_choices'],
+                                                      step=1, show_label=True,
+                                                      interactive=True, label="n choices", container=False,
                                                       )
                     self.stop_sequence_txt = gr.Textbox(show_label=True, placeholder=i18n("停止符，用英文逗号隔开..."),
                                                         label="stop", value=default_params['stop'], lines=1,
@@ -102,11 +104,11 @@ class RightElem:
                                                         )
                     self.presence_penalty_slider = gr.Slider(minimum=-2.0, maximum=default_params['presence_penalty'], value=0.0,
                                                              step=0.01, interactive=True, label="presence penalty",
-                                                             container=False
+                                                             container=False, show_label=True,
                                                              )
                     self.frequency_penalty_slider = gr.Slider(minimum=-2.0, maximum=2, value=default_params['frequency_penalty'], step=0.01,
                                                               interactive=True, label="frequency penalty",
-                                                              container=False)
+                                                              container=False, show_label=True)
 
                     self.user_identifier_txt = gr.Textbox(show_label=True, placeholder=i18n("用于定位滥用行为"),
                                                           label=i18n("用户名"), value=default_params['user'], lines=1,

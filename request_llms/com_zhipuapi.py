@@ -1,4 +1,4 @@
-from common.toolbox import get_conf
+from toolbox import get_conf
 import threading
 import logging
 
@@ -26,6 +26,8 @@ class ZhipuRequestInstance():
         )
         for event in response.events():
             if event.event == "add":
+                # if self.result_buf == "" and event.data.startswith(" "):
+                #     event.data = event.data.lstrip(" ") # 每次智谱为啥都要带个空格开头呢？
                 self.result_buf += event.data
                 yield self.result_buf
             elif event.event == "error" or event.event == "interrupted":
@@ -35,7 +37,8 @@ class ZhipuRequestInstance():
                 break
             else:
                 raise RuntimeError("Unknown error:" + str(event))
-            
+        if self.result_buf == "":
+            yield "智谱没有返回任何数据, 请检查ZHIPUAI_API_KEY和ZHIPUAI_MODEL是否填写正确."
         logging.info(f'[raw_input] {inputs}')
         logging.info(f'[response] {self.result_buf}')
         return self.result_buf

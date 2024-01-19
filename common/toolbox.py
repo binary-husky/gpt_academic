@@ -1,4 +1,5 @@
 import markdown
+import re
 import importlib
 import inspect
 from common import func_box
@@ -19,6 +20,7 @@ from common.path_handle import init_path
 ############################### 插件输入输出接驳区 #######################################
 pj = os.path.join
 default_user_name = 'default_user'
+
 """
 ========================================================================
 第一部分
@@ -203,6 +205,7 @@ def update_ui(chatbot, history, msg=None, end_code=0, *args):  # 刷新界面
         yield event + [gr.update(visible=True), gr.update(visible=False)]
 
 
+
 def update_ui_lastest_msg(lastmsg, chatbot, history, delay=1):  # 刷新界面
     """
     刷新用户界面
@@ -238,8 +241,7 @@ def CatchException(f):
             if len(chatbot_with_cookie) == 0:
                 chatbot_with_cookie.clear()
                 chatbot_with_cookie.append(["插件调度异常", "异常原因"])
-            chatbot_with_cookie[-1] = (chatbot_with_cookie[-1][0],
-                                       f"[Local Message] 插件调用出错: \n\n{tb_str} \n\n当前代理可用性: \n\n{check_proxy(proxies)}")
+            chatbot_with_cookie[-1] = (chatbot_with_cookie[-1][0], f"[Local Message] 插件调用出错: \n\n{tb_str} \n")
             yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=f'异常 {e}')  # 刷新界面
 
     return decorated
@@ -386,9 +388,6 @@ def report_exception(chatbot, history, a, b):
     history.extend([a, b])
 
 
-import re
-
-
 def text_divide_paragraph(input_str):
     if input_str:
         code_blocks = re.findall(r'```[\s\S]*?```', input_str)
@@ -425,16 +424,12 @@ def markdown_convertion(txt):
     """
     pre = '<div class="md-message">'
     suf = '</div>'
-    raw_pre = '<div class="raw-message hideM">'
-    raw_suf = '</div>'
     txt = txt.replace('</code><p><code>', '</code><code>'  # 解决代码块断层的问题
                       ).replace('</code></p></pre>', '</code></pre>').replace('</code><p></code>', '</code></code>')
     if txt.startswith(pre) and txt.endswith(suf):
         # print('警告，输入了已经经过转化的字符串，二次转化可能出问题')
-        return txt  # 已经被转化过，不需要再次转化
-    if txt.startswith(raw_pre) and txt.endswith(raw_suf):
-        return txt  # 已经被转化过，不需要再次转化
-    raw_hide = raw_pre + re.sub(r"\n+", "\n", txt) + raw_suf
+        return txt # 已经被转化过，不需要再次转化
+
     markdown_extension_configs = {
         'mdx_math': {
             'enable_dollar_delimiter': True,
@@ -479,12 +474,12 @@ def markdown_convertion(txt):
         if '```' in txt and '```reference' not in txt: return False
         if '$' not in txt and '\\[' not in txt: return False
         mathpatterns = {
-            r'(?<!\\|\$)(\$)([^\$]+)(\$)': {'allow_multi_lines': False},  #  $...$
-            r'(?<!\\)(\$\$)([^\$]+)(\$\$)': {'allow_multi_lines': True},  # $$...$$
-            r'(?<!\\)(\\\[)(.+?)(\\\])': {'allow_multi_lines': False},  # \[...\]
-            # r'(?<!\\)(\\\()(.+?)(\\\))': {'allow_multi_lines': False},                            # \(...\)
-            # r'(?<!\\)(\\begin{([a-z]+?\*?)})(.+?)(\\end{\2})': {'allow_multi_lines': True},       # \begin...\end
-            # r'(?<!\\)(\$`)([^`]+)(`\$)': {'allow_multi_lines': False},                            # $`...`$
+            r'(?<!\\|\$)(\$)([^\$]+)(\$)': {'allow_multi_lines': False},                       #  $...$
+            r'(?<!\\)(\$\$)([^\$]+)(\$\$)': {'allow_multi_lines': True},                       # $$...$$
+            r'(?<!\\)(\\\[)(.+?)(\\\])': {'allow_multi_lines': False},                         # \[...\]
+            # r'(?<!\\)(\\\()(.+?)(\\\))': {'allow_multi_lines': False},                       # \(...\)
+            # r'(?<!\\)(\\begin{([a-z]+?\*?)})(.+?)(\\end{\2})': {'allow_multi_lines': True},  # \begin...\end
+            # r'(?<!\\)(\$`)([^`]+)(`\$)': {'allow_multi_lines': False},                       # $`...`$
         }
         matches = []
         for pattern, property in mathpatterns.items():
@@ -536,7 +531,7 @@ def markdown_convertion(txt):
                                        flags=re.DOTALL)
         # cat them together
         context = pre + convert_stage_2_1 + f'{split}' + convert_stage_2_2 + suf
-        return raw_hide + context  # 破坏html 结构，并显示源码
+        return context  # 破坏html 结构，并显示源码
     else:
         return pre + markdown.markdown(txt, extensions=['sane_lists', 'tables', 'fenced_code', 'codehilite']) + suf
 
@@ -561,8 +556,7 @@ def close_up_code_segment_during_stream(gpt_reply):
     segments = gpt_reply.split('```')
     n_mark = len(segments) - 1
     if n_mark % 2 == 1:
-        # print('输出代码片段中！')
-        return gpt_reply + '\n```'
+        return gpt_reply + '\n```' # 输出代码片段中！
     else:
         return gpt_reply
 
@@ -654,7 +648,8 @@ def find_recent_files(directory):
     current_time = time.time()
     one_minute_ago = current_time - 60
     recent_files = []
-
+    if not os.path.exists(directory):
+        os.makedirs(directory, exist_ok=True)
     for filename in os.listdir(directory):
         file_path = pj(directory, filename)
         if file_path.endswith('.log'):
@@ -706,7 +701,8 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
             current = chatbot._cookies['files_to_promote']
         else:
             current = []
-        chatbot._cookies.update({'files_to_promote': [new_path] + current})
+        if new_path not in current: # 避免把同一个文件添加多次
+            chatbot._cookies.update({'files_to_promote': [new_path] + current})
     return new_path
 
 
@@ -873,7 +869,6 @@ def on_report_generated(cookies, files, chatbot, request):
                     f'[Local Message] 收到以下文件: \n\n{moved_files_str}' +
                     f'\n\n调用路径参数已自动修正到: \n\n{txt}' +
                     f'\n\n现在您点击任意函数插件时，以上文件将被作为输入参数' + upload_msg])
-
     # 记录近期文件
     cookies.update({
         'most_recent_uploaded': {
@@ -882,6 +877,23 @@ def on_report_generated(cookies, files, chatbot, request):
             'time_str': time_tag
         }})
     return chatbot, txt, cookies
+
+def on_report_generated(cookies, files, chatbot):
+    # from toolbox import find_recent_files
+    # PATH_LOGGING = get_conf('PATH_LOGGING')
+    if 'files_to_promote' in cookies:
+        report_files = cookies['files_to_promote']
+        cookies.pop('files_to_promote')
+    else:
+        report_files = []
+    #     report_files = find_recent_files(PATH_LOGGING)
+    if len(report_files) == 0:
+        return cookies, None, chatbot
+    # files.extend(report_files)
+    file_links = ''
+    for f in report_files: file_links += f'<br/><a href="file={os.path.abspath(f)}" target="_blank">{f}</a>'
+    chatbot.append(['报告如何远程获取？', f'报告已经添加到右侧“文件上传区”（可能处于折叠状态），请查收。{file_links}'])
+    return cookies, report_files, chatbot
 
 
 def load_chat_cookies():
@@ -908,8 +920,8 @@ def load_chat_cookies():
     customize_fn_overwrite_ = {}
     for k in range(NUM_CUSTOM_BASIC_BTN):
         customize_fn_overwrite_.update({
-            "自定义按钮" + str(k + 1): {
-                "Title": r"",
+            "自定义按钮" + str(k+1):{
+                "Title":  r"",
                 "Prefix": r"请在自定义菜单中定义提示词前缀.",
                 "Suffix": r"请在自定义菜单中定义提示词后缀",
             }
@@ -951,6 +963,7 @@ def is_any_api_key(key):
         return is_openai_api_key(key) or is_api2d_key(key) or is_azure_api_key(key) or is_open_sess_key(key)
 
 
+
 def what_keys(keys):
     avail_key_list = {'OpenAI Key': 0, "Azure Key": 0, "API2D Key": 0}
     key_list = keys.split(',')
@@ -959,15 +972,18 @@ def what_keys(keys):
         if is_openai_api_key(k):
             avail_key_list['OpenAI Key'] += 1
 
+    for k in key_list:
         if is_api2d_key(k):
             avail_key_list['API2D Key'] += 1
 
+    for k in key_list:
         if is_azure_api_key(k):
             avail_key_list['Azure Key'] += 1
     return f"检测到： \n" \
            f"OpenAI Key {avail_key_list['OpenAI Key']} 个\n" \
            f"API2D Key {avail_key_list['API2D Key']} 个\n" \
            f"Azure Key {avail_key_list['Azure Key']} 个,"
+
 
 
 def select_api_key(keys, llm_model):
@@ -1014,8 +1030,7 @@ def read_env_variable(arg, default_value):
         set GPT_ACADEMIC_AVAIL_LLM_MODELS=["gpt-3.5-turbo", "chatglm"]
         set GPT_ACADEMIC_AUTHENTICATION=[("username", "password"), ("username2", "password2")]
     """
-    from common.colorful import print亮红, print亮绿
-    sys.path.append(init_path.base_path)
+    from colorful import print亮红, print亮绿
     arg_with_prefix = "GPT_ACADEMIC_" + arg
     if arg_with_prefix in os.environ:
         env_arg = os.environ[arg_with_prefix]
@@ -1027,13 +1042,9 @@ def read_env_variable(arg, default_value):
     try:
         if isinstance(default_value, bool):
             env_arg = env_arg.strip()
-            if env_arg == 'True':
-                r = True
-            elif env_arg == 'False':
-                r = False
-            else:
-                print('enter True or False, but have:', env_arg);
-                r = default_value
+            if env_arg == 'True': r = True
+            elif env_arg == 'False': r = False
+            else: print('Enter True or False, but have:', env_arg); r = default_value
         elif isinstance(default_value, int):
             r = int(env_arg)
         elif isinstance(default_value, float):
@@ -1066,7 +1077,7 @@ def read_single_conf_with_lru_cache(arg):
         sys.path.append(init_path.base_path)
     try:
         # 优先级1. 获取环境变量作为配置
-        default_ref = getattr(importlib.import_module('config'), arg)  # 读取默认值作为数据类型转换的参考
+        default_ref = getattr(importlib.import_module('config'), arg) # 读取默认值作为数据类型转换的参考
         r = read_env_variable(arg, default_ref)
     except:
         try:
@@ -1081,8 +1092,7 @@ def read_single_conf_with_lru_cache(arg):
         oai_rd = r.get("https://api.openai.com/v1/chat/completions",
                        None)  # API_URL_REDIRECT填写格式是错误的，请阅读`https://github.com/binary-husky/gpt_academic/wiki/项目配置说明`
         if oai_rd and not oai_rd.endswith('/completions'):
-            print亮红(
-                "\n\n[API_URL_REDIRECT] API_URL_REDIRECT填错了。请阅读`https://github.com/binary-husky/gpt_academic/wiki/项目配置说明`。如果您确信自己没填错，无视此消息即可。")
+            print亮红("\n\n[API_URL_REDIRECT] API_URL_REDIRECT填错了。请阅读`https://github.com/binary-husky/gpt_academic/wiki/项目配置说明`。如果您确信自己没填错，无视此消息即可。")
             time.sleep(5)
     if arg == 'API_KEY':
         print亮蓝(
@@ -1094,7 +1104,7 @@ def read_single_conf_with_lru_cache(arg):
         else:
             print亮红("[API_KEY] 您的 API_KEY 不满足任何一种已知的密钥格式，请在config文件中修改API密钥之后再运行。")
     if arg == 'proxies':
-        if not read_single_conf_with_lru_cache('USE_PROXY'): r = None  # 检查USE_PROXY，防止proxies单独起作用
+        if not read_single_conf_with_lru_cache('USE_PROXY'): r = None # 检查USE_PROXY，防止proxies单独起作用
         if r is None:
             print亮红(
                 '[PROXY] 网络代理状态：未配置。无代理状态下很可能无法访问OpenAI家族的模型。建议：检查USE_PROXY选项是否修改。')
@@ -1230,7 +1240,7 @@ def clip_history(inputs, history, tokenizer, max_token_limit):
         where = np.argmax(everything_token)
         encoded = tokenizer.encode(everything[where], disallowed_special=())
         clipped_encoded = encoded[:len(encoded) - delta]
-        everything[where] = tokenizer.decode(clipped_encoded)[:-1]  # -1 to remove the may-be illegal char
+        everything[where] = tokenizer.decode(clipped_encoded)[:-1] # -1 to remove the may-be illegal char
         everything_token[where] = get_token_num(everything[where])
         n_token = get_token_num('\n'.join(everything))
 
@@ -1320,7 +1330,7 @@ def get_user(chatbotwithcookies):
 
 class ProxyNetworkActivate():
     """
-    这段代码定义了一个名为TempProxy的空上下文管理器，用于给一小段代码上代理
+    这段代码定义了一个名为ProxyNetworkActivate的空上下文管理器, 用于给一小段代码上代理
     """
 
     def __init__(self, task=None) -> None:
@@ -1452,6 +1462,7 @@ def get_plugin_default_kwargs():
         "web_port": None
     }
     return default_plugin_kwargs
+
 
 
 def get_chat_default_kwargs():

@@ -18,7 +18,7 @@ help_menu_description = \
 
 def main():
     import gradio as gr
-    if gr.__version__ not in ['3.32.6']:
+    if gr.__version__ not in ['3.32.6', '3.32.7']:
         raise ModuleNotFoundError(
             "使用项目内置Gradio获取最优体验! 请运行 `pip install -r requirements.txt` 指令安装内置Gradio及其他依赖, 详情信息见requirements.txt.")
     from request_llms.bridge_all import predict
@@ -171,12 +171,11 @@ def main():
                             with gr.Row():
                                 switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary").style(size="sm")
                     with gr.Row():
-                        with gr.Accordion("点击展开“文件上传区”。上传本地文件/压缩包供函数插件调用。",
-                                          open=False) as area_file_up:
+                        with gr.Accordion("点击展开“文件下载区”。", open=False) as area_file_up:
                             file_upload = gr.Files(label="任何文件, 推荐上传压缩文件(zip, tar)", file_count="multiple",
                                                    elem_id="elem_upload")
 
-        with gr.Floating(init_x="0%", init_y="0%", visible=True, width=None, drag="forbidden"):
+        with gr.Floating(init_x="0%", init_y="0%", visible=True, width=None, drag="forbidden", elem_id="tooltip"):
             with gr.Row():
                 with gr.Tab("上传文件", elem_id="interact-panel"):
                     gr.Markdown(
@@ -184,7 +183,7 @@ def main():
                     file_upload_2 = gr.Files(label="任何文件, 推荐上传压缩文件(zip, tar)", file_count="multiple",
                                              elem_id="elem_upload_float")
 
-                with gr.Tab("更换模型 & Prompt", elem_id="interact-panel"):
+                with gr.Tab("更换模型", elem_id="interact-panel"):
                     md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(
                         container=False)
                     top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01, interactive=True,
@@ -203,11 +202,10 @@ def main():
                         value=["基础功能区", "函数插件区"], label="显示/隐藏功能区", elem_id='cbs').style(
                         container=False)
                     checkboxes_2 = gr.CheckboxGroup(["自定义菜单"],
-                                                    value=[], label="显示/隐藏自定义菜单", elem_id='cbs').style(
+                                                    value=[], label="显示/隐藏自定义菜单", elem_id='cbsc').style(
                         container=False)
                     dark_mode_btn = gr.Button("切换界面明暗 ☀", variant="secondary").style(size="sm")
-                    dark_mode_btn.click(None, None, None, _js=js_code_for_toggle_darkmode,
-                                        )
+                    dark_mode_btn.click(None, None, None, _js=js_code_for_toggle_darkmode)
                 with gr.Tab("帮助", elem_id="interact-panel"):
                     gr.Markdown(help_menu_description)
 
@@ -368,9 +366,11 @@ def main():
             cancel_handles.append(click_handle)
         # 文件上传区，接收文件后与chatbot的互动
         file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt, txt2, checkboxes, cookies],
-                           [chatbot, txt, txt2, cookies])
+                           [chatbot, txt, txt2, cookies]).then(None, None, None,
+                                                               _js=r"()=>{toast_push('上传完毕 ...'); cancel_loading_status();}")
         file_upload_2.upload(on_file_uploaded, [file_upload_2, chatbot, txt, txt2, checkboxes, cookies],
-                             [chatbot, txt, txt2, cookies])
+                             [chatbot, txt, txt2, cookies]).then(None, None, None,
+                                                                 _js=r"()=>{toast_push('上传完毕 ...'); cancel_loading_status();}")
         # 函数插件-固定按钮区
         for k in plugins:
             if not plugins[k].get("AsButton", True): continue
@@ -433,14 +433,14 @@ def main():
             fns_list = []
             if not group_list:  # 处理特殊情况：没有选择任何插件组
                 return [*[plugin['Button'].update(visible=False) for _, plugin in plugins_as_btn.items()],
-                        gr.update(choices=[])]
+                        gr.Dropdown.update(choices=[])]
             for k, plugin in plugins.items():
                 if plugin.get("AsButton", True):
                     btn_list.append(plugin['Button'].update(visible=match_group(plugin['Group'], group_list)))  # 刷新按钮
                     if plugin.get('AdvancedArgs', False): dropdown_fn_list.append(k)  # 对于需要高级参数的插件，亦在下拉菜单中显示
                 elif match_group(plugin['Group'], group_list):
                     fns_list.append(k)  # 刷新下拉列表
-            return [*btn_list, gr.update(choices=fns_list)]
+            return [*btn_list, gr.Dropdown.update(choices=fns_list)]
 
         plugin_group_sel.select(fn=on_group_change, inputs=[plugin_group_sel],
                                 outputs=[*[plugin['Button'] for name, plugin in plugins_as_btn.items()], dropdown])
