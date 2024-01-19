@@ -21,8 +21,8 @@ class ZhipuRequestInstance():
         response = zhipuai.model_api.sse_invoke(
             model=ZHIPUAI_MODEL,
             prompt=generate_message_payload(inputs, llm_kwargs, history, system_prompt),
-            top_p=llm_kwargs['top_p'],
-            temperature=llm_kwargs['temperature'],
+            top_p=llm_kwargs['top_p']*0.7,              # 智谱的API抽风，手动*0.7给做个线性变换
+            temperature=llm_kwargs['temperature']*0.95, # 智谱的API抽风，手动*0.7给做个线性变换
         )
         for event in response.events():
             if event.event == "add":
