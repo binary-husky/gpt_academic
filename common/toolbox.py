@@ -111,26 +111,26 @@ def ArgsGeneralWrapper(f):
         cookies.update({**real_llm})
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
-        txt_passon = txt
+        txt_proc = txt
         if 'input加密' in models: txt_passon = func_box.encryption_str(txt)
         if 'OCR缓存' in models: llm_kwargs.update({'ocr_cache': True})
         # 插件会传多参数，如果是插件，那么更新知识库 和 默认高级参数
         if len(args) > 1:
             plugin_kwargs['advanced_arg'] = ''
             plugin_kwargs.update({'parameters_def': args[1]})
-            cookies['is_plugin'] = {'func_name': args[0], 'input': txt_passon, 'kwargs': plugin_kwargs}
+            cookies['is_plugin'] = {'func_name': args[0], 'input': txt_proc, 'kwargs': plugin_kwargs}
         elif len(args) == 1 and 'RetryChat' not in args:
             history = history[:-2]  # 不采取重试的对话历史
-            cookies['is_plugin'] = {'func_name': args[0], 'input': txt_passon, 'kwargs': plugin_kwargs}
+            cookies['is_plugin'] = {'func_name': args[0], 'input': txt_proc, 'kwargs': plugin_kwargs}
         elif len(args) == 0 or 'RetryChat' in args:
             cookies['is_plugin'] = False
             plugin_kwargs['advanced_arg'] = ''
-            txt_passon = yield from Langchain_cn.knowledge_base_query(txt_passon,
+            txt_proc = yield from Langchain_cn.knowledge_base_query(txt_proc,
                                                                       chatbot_with_cookie, history, llm_kwargs,
                                                                       plugin_kwargs)
         # 根据cookie 或 对话配置决定到底走哪一步
         yield from func_decision_tree(f, cookies, single_mode, agent_mode,
-                                      txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie,
+                                      txt_proc, llm_kwargs, plugin_kwargs, chatbot_with_cookie,
                                       history, system_prompt, args)
         # 将对话记录写入文件
         yield from end_predict(chatbot_with_cookie, history, llm_kwargs)
@@ -141,7 +141,7 @@ def ArgsGeneralWrapper(f):
 
 
 def func_decision_tree(func, cookies, single_mode, agent_mode,
-                       txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie,
+                       txt_proc, llm_kwargs, plugin_kwargs, chatbot_with_cookie,
                        history, system_prompt, args):
     if cookies.get('lock_plugin', None) is None:
         is_try = args[0] if 'RetryChat' in args else None
@@ -149,34 +149,34 @@ def func_decision_tree(func, cookies, single_mode, agent_mode,
             user_data = history_processor.get_user_basedata(chatbot_with_cookie, llm_kwargs['ipaddr'])
             plugin = user_data['chat'][-1].get('plugin')
             if plugin:
-                txt_passon = plugin['input']
+                txt_proc = plugin['input']
                 from common.crazy_functional import crazy_fns
                 func_name = plugin['func_name']
                 plugin_kwargs.update(plugin['kwargs'])
-                cookies['is_plugin'] = {'func_name': func_name, 'input': txt_passon, 'kwargs': plugin_kwargs}
+                cookies['is_plugin'] = {'func_name': func_name, 'input': txt_proc, 'kwargs': plugin_kwargs}
                 try_f = crazy_fns.get(func_name, False)
                 if try_f: try_f = try_f['Function']
             else:
-                txt_passon = cookies.get('last_chat', '')
+                txt_proc = cookies.get('last_chat', '')
                 try_f = func
                 args = ()
-            yield from try_f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
+            yield from try_f(txt_proc, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
         else:
             if agent_mode:
                 from common.crazy_functional import crazy_fns
                 plugin_agent = crazy_fns['插件代理助手']['Function']
                 func = plugin_agent
             if single_mode:
-                yield from func(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, [], system_prompt, *args)
+                yield from func(txt_proc, llm_kwargs, plugin_kwargs, chatbot_with_cookie, [], system_prompt, *args)
             else:
-                yield from func(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt,
+                yield from func(txt_proc, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt,
                                 *args)
-        cookies.update({'last_chat': txt_passon})
+        cookies.update({'last_chat': txt_proc})
     else:
         # 处理少数情况下的特殊插件的锁定状态
         module, fn_name = cookies['lock_plugin'].split('->')
         f_hot_reload = getattr(importlib.import_module(module, fn_name), fn_name)
-        yield from f_hot_reload(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt,
+        yield from f_hot_reload(txt_proc, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt,
                                 *args)
         # 判断一下用户是否错误地通过对话通道进入，如果是，则进行提醒
         final_cookies = chatbot_with_cookie.get_cookies()
