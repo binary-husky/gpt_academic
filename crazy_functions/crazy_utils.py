@@ -465,7 +465,7 @@ def read_and_clean_pdf_text(fp, user=''):
                         for wtf in l['spans']:  # for l in t['lines']:
                             meta_span.append([clear_soh(wtf['text']), wtf['size'], len(wtf['text'])])
                 elif 'image' in t:  # 提取出文件的图片
-                    init_path.pdf_save_img_path = os.path.join(init_path.users_private_path, user, 'pdf_img', doc.name)
+                    init_path.pdf_save_img_path = os.path.join(init_path.private_files_path, user, 'pdf_img', doc.name)
                     bbox_tag = "-".join([str(int(i)) for i in l["bbox"]])
                     save_file_name = os.path.join(init_path.pdf_save_img_path,
                                                   f'{index}-{t["size"]}_{bbox_tag}.{t["ext"]}')
@@ -619,7 +619,7 @@ def get_files_from_everything(txt, type, project_folder=''):  # type='.md'
         r = requests.get(txt, proxies=proxies).content
         name = r.splitlines()[0]
         if not project_folder:
-            project_folder = os.path.join(init_path.users_private_path, 'temp_download')
+            project_folder = os.path.join(init_path.private_files_path, 'temp_download')
         os.makedirs(project_folder, exist_ok=True)
         temp_file = f'{project_folder}/{name[:30]}_{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())}{type}'
         with open(temp_file, 'wb') as f:

@@ -186,11 +186,11 @@ def extract_link_pf(text, valid_types: list):
         pattern_local = r"\((/[^)]+)\)"
         matches_local = re.findall(pattern_local, md_link)
         if matches_path:
-            if matches_path[0].split('.')[-1] == valid_types:
+            if matches_path[0].split('.')[-1] in valid_types:
                 file_mapping_links.update({local_relative_path(matches_path[0]): md_link})
         elif matches_local:
             if os.path.exists(matches_local[0]):
-                if matches_local[0].split('.')[-1] == valid_types:
+                if matches_local[0].split('.')[-1] in valid_types:
                     file_mapping_links.update({local_relative_path(matches_local[0]): md_link})
     return file_mapping_links
 
@@ -649,5 +649,4 @@ def split_domain_url(link_limit, start='http', domain_name: list = ['']) -> list
 
 if __name__ == '__main__':
     # print(get_files_list('', ['.json']))
-    # tree_out(dir='/Users/kilig/Job/Python-project/kso_gpt/', line=2)
     print(extract_link_pf('', valid_img_extensions))

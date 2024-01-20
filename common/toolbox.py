@@ -810,7 +810,7 @@ def to_markdown_tabs(head: list, tabs: list, alignment=':---:', column=False):
 
 
 def on_file_uploaded(files, chatbot, txt,  cookies, ipaddr: gr.Request):
-    private_upload = init_path.users_private_path.replace(init_path.base_path, '.')
+    private_upload = init_path.private_files_path.replace(init_path.base_path, '.')
     #     shutil.rmtree('./private_upload/')  不需要删除文件
     if type(ipaddr) is str:
         ipaddr = ipaddr

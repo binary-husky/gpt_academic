@@ -109,7 +109,7 @@ class Utils:
             file_name: 另取文件名
         Returns: 写入的文件地址
         """
-        user_path = os.path.join(init_path.users_private_path, hosts, 'markdown')
+        user_path = os.path.join(init_path.private_files_path, hosts, 'markdown')
         os.makedirs(user_path, exist_ok=True)
         md_file = os.path.join(user_path, f"{file_name}.md")
         with open(file=md_file, mode='w', encoding='utf-8') as f:
@@ -124,7 +124,7 @@ class Utils:
             file_name: 要写入的文件名
         Returns: [md, 流程图] 文件
         """
-        user_path = os.path.join(init_path.users_private_path, hosts, 'mark_map')
+        user_path = os.path.join(init_path.private_files_path, hosts, 'mark_map')
         os.makedirs(user_path, exist_ok=True)
         md_file = self.write_markdown(data, hosts, file_name)
         html_file = os.path.join(user_path, f"{file_name}.html")
@@ -164,9 +164,9 @@ def file_extraction_intype(file_mapping, chatbot, history, llm_kwargs, plugin_kw
     # 文件读取
     file_limit = {}
     for file_path in file_mapping:
-        chatbot.append([None, f'`{file_path.replace(init_path.base_path, ".")}`\t...正在解析本地文件\n\n'])
+        chatbot[-1][1] = chatbot[-1][1] + f'`{file_path.replace(init_path.base_path, ".")}`\t...正在解析本地文件\n\n'
         yield from toolbox.update_ui(chatbot, history)
-        save_path = os.path.join(init_path.users_private_path, llm_kwargs['ipaddr'])
+        save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'])
         if file_path.endswith('pdf'):
             _content, _ = crazy_utils.read_and_clean_pdf_text(file_path)
             file_content = "".join(_content)
@@ -293,7 +293,7 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
     if type(inputs) is list:
         if get_token_num(str(inputs)) > max_token:
             chatbot.append([None,
-                            f'{func_box.html_tag_color(inputs[0][:10])}...对话数据预计会超出{all_tokens}tokens限制, 拆分中...'])
+                            f'{func_box.html_tag_color(inputs[0][:10])}... 对话数据预计会超出`{all_tokens}v token`限制, 拆分中'])
             segments.extend(split_list_token_limit(data=inputs, get_num=get_token_num, max_num=max_token))
         else:
             segments.append(json.dumps(inputs, ensure_ascii=False))
@@ -302,7 +302,7 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
         for input_ in inputs:
             if get_token_num(input_) > max_token:
                 chatbot.append([None,
-                                f'{func_box.html_tag_color(input_[:10])}...对话数据预计会超出{all_tokens}tokens限制, 拆分中...'])
+                                f'{func_box.html_tag_color(input_[:10])}... 对话数据预计会超出`{all_tokens}token`限制, 拆分中'])
                 yield from toolbox.update_ui(chatbot, history)
                 segments.extend(
                     crazy_utils.breakdown_txt_to_satisfy_token_limit_for_pdf(input_, get_token_num, max_token))
@@ -438,7 +438,7 @@ def batch_recognition_images_to_md(img_list, ipaddr):
     Returns: [文件list]
     """
     temp_list = []
-    save_path = os.path.join(init_path.users_private_path, ipaddr, 'ocr_to_md')
+    save_path = os.path.join(init_path.private_files_path, ipaddr, 'ocr_to_md')
     for img in img_list:
         if os.path.exists(img):
             img_content, img_result, _ = reader_fns.ImgHandler(img, save_path).get_paddle_ocr()
@@ -524,7 +524,7 @@ def result_extract_to_test_cases(gpt_response_collection, llm_kwargs, plugin_kwa
         test_case = reader_fns.MdProcessor(file_classification[file_name]).tabs_to_list()
         sort_test_case = name_de_add_sort(test_case, sort_index)
         # 正式准备写入文件
-        save_path = os.path.join(init_path.users_private_path, llm_kwargs['ipaddr'], 'test_case')
+        save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'], 'test_case')
         xlsx_handler = reader_fns.XlsxHandler(template_file, output_dir=save_path, sheet=sheet)
         xlsx_handler.split_merged_cells()  # 先把合并的单元格拆分，避免写入失败
         file_path = xlsx_handler.list_write_to_excel(sort_test_case, save_as_name=long_name_processing(file_name))
@@ -552,7 +552,7 @@ def result_supplementary_to_test_case(gpt_response_collection, llm_kwargs, plugi
         header = plugin_kwargs[old_file]['原测试用例表头']
         test_case, desc = parsing_json_in_text(file_classification[file_name], old_case, filter_list=header,
                                                sort_index=sort_index)
-        save_path = os.path.join(init_path.users_private_path, llm_kwargs['ipaddr'], 'test_case')
+        save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'], 'test_case')
         # 写入excel
         xlsx_handler = reader_fns.XlsxHandler(template_file, output_dir=save_path, sheet=sheet)
         file_path = xlsx_handler.list_write_to_excel(test_case, save_as_name=long_name_processing(file_name))
@@ -586,7 +586,7 @@ def result_converter_to_flow_chart(gpt_response_collection, llm_kwargs, plugin_k
         inputs_count = ''
         for value in file_classification[file_name]:
             inputs_count += str(value).replace('```', '')  # 去除头部和尾部的代码块, 避免流程图堆在一块
-        save_path = os.path.join(init_path.users_private_path, llm_kwargs['ipaddr'])
+        save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'])
         md_file = os.path.join(save_path, f"{long_name_processing(file_name)}.md")
         html_file = reader_fns.MdHandler(md_path=md_file, output_dir=save_path).save_mark_map()
         chat_file_list += "View: " + func_box.html_view_blank(md_file, to_tabs=True) + \
@@ -630,7 +630,7 @@ def detach_cloud_links(link_limit, chatbot, history, llm_kwargs, valid_types):
     fp_mapping = {}
     if isinstance(chatbot, list) and isinstance(history, list):
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='正在解析云文件链接...')
-    save_path = os.path.join(init_path.users_private_path, llm_kwargs['ipaddr'])
+    save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'])
     wps_status, qq_status, feishu_status = '', '', ''
     try:
         # wps云文档下载
@@ -665,9 +665,9 @@ def detach_cloud_links(link_limit, chatbot, history, llm_kwargs, valid_types):
         download_status = "\n".join([wps_status, qq_status, feishu_status]).strip('\n')
     # 筛选文件
     for fp in fp_mapping:
-        if fp_mapping[fp].split('.')[-1] not in valid_types:
-            fp_mapping.pop(fp)  # 过滤不能处理的文件
+        if fp.split('.')[-1] not in valid_types:
             download_status += '\n\n' + f'过滤掉了`{fp_mapping[fp]}`，因为不是插件能够接收处理的文件类型`{valid_types}`'
+            fp_mapping.pop(fp)  # 过滤不能处理的文件
     return fp_mapping, download_status
 
 
@@ -683,7 +683,7 @@ def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugi
         chatbot.append([None, vision_bro + vision_start])
         yield from toolbox.update_ui(chatbot, history, '正在调用`Vision`组件，已启用多线程解析，请稍等')
         # 识别图片中的文字
-        save_path = os.path.join(init_path.users_private_path, llm_kwargs['ipaddr'], 'img_vision')
+        save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'])
         vision_submission = reader_fns.submit_threads_img_handle(img_mapping, save_path, cor_cache, ocr_switch)
         chatbot[-1] = [None, vision_bro]
         for t in vision_submission:
@@ -715,7 +715,7 @@ def content_clear_links(user_input, clear_fp_map, clear_link_map):
 
 def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugin_kwargs, valid_types):
     embedding_content = []  # 对话内容
-    chatbot.append([user_input, None])
+    chatbot.append([user_input, '🕵🏻‍超级侦探，正在办案～'])
     yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='🕵🏻‍超级侦探，正在办案～')
     # 云文件
     fp_mapping, download_status = yield from detach_cloud_links(user_input, chatbot, history, llm_kwargs, valid_types)

@@ -283,7 +283,7 @@ def get_user_upload(chatbot, txt, ipaddr: gr.Request):
     """
     获取用户上传过的文件
     """
-    private_upload = init_path.private_upload_path.replace(init_path.base_path, '.')
+    private_upload = init_path.private_files_path.replace(init_path.base_path, '.')
     user_history = os.path.join(private_upload, func_box.user_client_mark(ipaddr))
     history = """| 编号 | 目录 | 目录内文件 |\n| --- | --- | --- |\n"""
     count_num = 1

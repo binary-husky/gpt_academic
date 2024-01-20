@@ -15,7 +15,7 @@ class InitPath:
         self.logs_path = os.path.join(self.base_path, 'gpt_log')
         self.users_private_path = os.path.join(self.base_path, 'users_private')
         self.private_knowledge_path = os.path.join(self.users_private_path, 'knowledge')
-        self.private_upload_path = os.path.join(self.users_private_path, 'upload')
+        self.private_files_path = os.path.join(self.users_private_path, 'files')
         self.private_history_path = os.path.join(self.users_private_path, 'history')
         self.private_db_path = os.path.join(self.users_private_path, 'db')
 

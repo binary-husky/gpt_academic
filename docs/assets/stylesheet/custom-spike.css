@@ -257,6 +257,7 @@ code.language-folded {
     position: fixed;
     opacity: 0.90;
     margin-top: -30px;
+    width: auto;
     margin-left: 570px;
     backdrop-filter: blur(24px);
     z-index: 99999999999999;

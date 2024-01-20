@@ -52,8 +52,7 @@ def Kdocs_多阶段生成回答(user_input, llm_kwargs, plugin_kwargs, chatbot, 
                 embedding_limit.extend([os.path.basename(i), embedding_mapping[i]])
     apply_history = crazy_box.json_args_return(plugin_kwargs, ['上下文处理'])
     if apply_history:
-        chatbot.append([None, '插件配置参数已开启`上下文处理`，请注意使用插件时注意上下文token限制。'])
+        chatbot[-1][1] = chatbot[-1][1] + '插件配置参数已开启`上下文处理`，请注意使用插件时注意上下文token限制。'
     if not multi_stage_config:
-        chatbot.append(['发生了什么事情？',
-                        f'!!!!! 自定义参数中的Json存在问题，请仔细检查以下配置是否符合JSON编码格式\n\n```\n{plugin_kwargs["advanced_arg"]}```'])
-        yield from update_ui(chatbot=chatbot, history=history)
+        chatbot[-1][1] = chatbot[-1][1] + f'!!!!! 自定义参数中的Json存在问题，请仔细检查以下配置是否符合JSON编码格式\n\n```\n{plugin_kwargs["advanced_arg"]}```'
+

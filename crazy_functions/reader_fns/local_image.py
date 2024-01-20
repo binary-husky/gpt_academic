@@ -67,7 +67,7 @@ class ImgHandler:
         return '\n'.join(txt_select), self.img_path, draw_error
 
     def get_llm_vision(self, plugin_kwargs):
-        from request_llms.bridge_google_gemini import predict_no_ui_long_connection
+        from request_llms.bridge_all import predict_no_ui_long_connection
         from common import func_box
         vision_model = {'llm_model': plugin_kwargs['vision_model']}
         sql_handler = db_handler.PromptDb('图片理解_sys')
@@ -75,16 +75,17 @@ class ImgHandler:
         input_ = func_box.replace_expected_text(prompt, content=func_box.html_local_img(self.img_path),
                                                 expect='{{{v}}}')
         watchdog = ["", time.time(), ""]
-        vision_result = predict_no_ui_long_connection(input_, vision_model, observe_window=watchdog)
+        vision_result = predict_no_ui_long_connection(input_, vision_model, [],
+                                                      '', observe_window=watchdog)
         return vision_result, self.img_path, watchdog[2]
 
     def identify_cache(self, cache_tag, cor_cache, kwargs):
         cache_sql = db_handler.OcrCacheDb()
         cache_tag = str(cache_tag) + str(kwargs)  # 避免不同vision_model读缓存
-        cache = cache_sql.get_prompt_value(find=cache_tag)
-        cache_cont, file_path = cache
+        cache_cont = cache_sql.get_cashed(tag=cache_tag)
         if cache_cont and cor_cache:
             content = cache_cont[cache_tag]
+            file_path = cache_tag
             status = '本次识别结果读取数据库缓存'
         else:
             if isinstance(kwargs, bool):
@@ -92,7 +93,7 @@ class ImgHandler:
             else:
                 content, file_path, status = self.get_llm_vision(kwargs)
             if not status:  # 没有错误才落库
-                cache_sql.inset_prompt({cache_tag: content}, file_path)
+                cache_sql.update_cashed(cache_tag, content)
         return content, file_path, status
 
 

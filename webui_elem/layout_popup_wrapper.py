@@ -261,14 +261,13 @@ class Prompt:
 
     def draw_popup_prompt(self):
         with gr.Box(elem_id="spike-prompt"):
-            devs_document = toolbox.get_conf('devs_document')
-            jump_link = f'<a href="{devs_document}" target="_blank">Developer Documentation</a>'
-            popup_title("### " + i18n(f"百宝袋\n{jump_link}"))
+            popup_title("### " + i18n(f"百宝袋"))
             with gr.Tabs(elem_id="treasure-bag") as self.treasure_bag_tab:
                 self._draw_tabs_prompt()
                 self._draw_tabs_masks()
                 self._draw_langchain_base()
                 self._draw_popup_training()
+
 
 
 class FakeComponents:
