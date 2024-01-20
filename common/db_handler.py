@@ -91,7 +91,7 @@ class PromptDb(SqliteHandler):
         temp_all = {}
         source = ''
         if find:
-            result = self.execute_query(f"SELECT prompt, result, source FROM `{self.table}` WHERE prompt LIKE ? (f"%{find}%",)")
+            result = self.execute_query(f"SELECT prompt, result, source FROM `{self.table}` WHERE prompt = '{find}'")
         else:
             result = self.execute_query(f"SELECT prompt, result, source FROM `{self.table}`")
         for row in result:
@@ -139,7 +139,7 @@ class PromptDb(SqliteHandler):
         return error_status
 
     def delete_prompt(self, name):
-        self.execute_ddl_delete(f"DELETE from `{self.table}` where prompt = '{name}'")
+        self.execute_dml_tcl(f"DELETE from `{self.table}` where prompt = '{name}'")
 
     def update_value(self, new_source):
         query = f"UPDATE {self.table} SET source=source || ' ' || '{new_source}'"

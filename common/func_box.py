@@ -473,6 +473,10 @@ def get_html(filename):
     return ""
 
 
+def spike_toast(content='保存成功', title='Success'):
+    return get_html('gradio_toast.html').format(title=title, content=content)
+
+
 def md_division_line():
     gr.Markdown("---", elem_classes="hr-line")
 

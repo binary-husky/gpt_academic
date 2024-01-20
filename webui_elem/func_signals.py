@@ -4,6 +4,8 @@
 # @Descr   :
 import os, random
 import copy
+import time
+
 import gradio as gr
 
 import yaml
@@ -408,7 +410,10 @@ def prompt_delete(pro_name, prompt_dict, select_check, ipaddr: gr.Request):
         raise gr.Error(f'无法删除不属于你创建的 {pro_name}，如有紧急需求，请联系管理员')
     data = prompt_retrieval(prompt_cls=None, hosts=user_addr)
     prompt_dict['samples'] = data
-    return gr.update(samples=data, visible=True), prompt_dict
+    toast = gr.update(value=func_box.spike_toast(f'`{name}` 删除成功'), visible=True)
+    yield gr.update(samples=data, visible=True), prompt_dict, toast
+    time.sleep(1)
+    yield gr.update(samples=data, visible=True), prompt_dict, gr.update(visible=False)
 
 
 def prompt_save(txt, name, prompt: gr.Dataset, pro_select, ipaddr: gr.Request):
@@ -431,11 +436,14 @@ def prompt_save(txt, name, prompt: gr.Dataset, pro_select, ipaddr: gr.Request):
         _, source = sql_obj.get_prompt_value(name)
         status = sql_obj.inset_prompt({name: txt}, user_info)
         if status:
-            raise gr.Error('!!!!已有其他人保存同名的配置，请修改名称后再保存')
+            raise gr.Error('!!!!已有其他人保存同名的配置，请修改名   称后再保存')
         else:
             result = prompt_retrieval(prompt_cls=pro_select, hosts=func_box.user_client_mark(ipaddr))
             prompt['samples'] = result
-            return gr.update(samples=result, visible=True), prompt
+            toast = gr.update(value=func_box.spike_toast(f'`{name}` 保存成功'), visible=True)
+            yield gr.update(samples=result, visible=True), prompt, toast
+            time.sleep(1)
+            yield gr.update(samples=result, visible=True), prompt, gr.update(visible=False)
     elif not txt or not name:
         raise gr.Error('!!!!编辑区域 or 名称不能为空!!!!')
 
@@ -665,7 +673,7 @@ def refresh_user_data(cookies, proxy_info, ipaddr: gr.Request):
     history_handle = history_handler.HistoryJsonHandle(new_path)
     history_update_combo = history_handle.update_for_history(cookies, new_name)
     outputs = [gr.update(choices=only_name, value=new_name, visible=True), *history_update_combo,
-               new_name, gr.update(value=f"你好，`{func_box.user_client_mark(ipaddr)}`\n\n {proxy_info}")]
+               new_name, gr.update(value=f"你好，`{func_box.user_client_mark(ipaddr)}` {proxy_info}")]
     return outputs
 
 

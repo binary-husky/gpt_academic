@@ -161,6 +161,7 @@ class Prompt:
                     with gr.Accordion('Prompt Upload', open=False):
                         self.pro_upload_btn = gr.File(file_count='single', file_types=['.yaml', '.json'],
                                                       label=f'上传你的提示词文件, 编写格式请遵循上述开发者文档', )
+                    self.prompt_status = gr.Markdown(value='')
                 with gr.Column(elem_classes='column_right'):
                     with gr.Row():
                         self.prompt_cls_select = gr.Dropdown(choices=[], value='',
@@ -185,6 +186,7 @@ class Prompt:
                 with gr.Column(elem_classes='column_left'):
                     with gr.Accordion('Chatbot Preview', open=False):
                         self.mask_preview_chat = gr.Chatbot(label='', show_label=False)
+                    self.mask_status = gr.Markdown(value='')
                 with gr.Column(elem_classes='column_right'):
                     with gr.Row():
                         self.mask_cls_select = gr.Dropdown(choices=[], value='',

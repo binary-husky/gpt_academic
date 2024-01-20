@@ -330,6 +330,7 @@ input:checked + .apSlider::before {
 
 .nav-item-dropdown, .dropdown-trigger {
     position: relative;
+    margin-top: 1px;
 }
 .nav-item-dropdown:hover>.dropdown-menu {
     display: block;

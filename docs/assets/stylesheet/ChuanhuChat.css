@@ -6,7 +6,7 @@
     --chatbot-background-color-light: #F3F3F3;
     --chatbot-background-color-dark: #121111;
     --message-user-background-color-light: #95EC69;
-    --message-user-background-color-dark: #26B561;
+    --message-user-background-color-dark: #00ab46;
     --message-bot-background-color-light: #FFFFFF;
     --message-bot-background-color-dark: #2C2C2C;
     --switch-checkbox-color-light: #e5e7eb;
@@ -133,8 +133,12 @@ body.popup-open {
     justify-content: flex-end;
     transition: all 0.6s;
 }
-#status-display p {
+.chatbot-full-width #status-display p {
     font-size: .85em;
+}
+
+#status-display p {
+    font-size: .75em;
     font-family: ui-monospace, "SF Mono", "SFMono-Regular", "Menlo", "Consolas", "Liberation Mono", "Microsoft Yahei UI", "Microsoft Yahei", monospace;
     /* Windows下中文的monospace会fallback为新宋体，实在太丑，这里折中使用微软雅黑 */
     color: var(--body-text-color-subdued);
@@ -413,7 +417,7 @@ body.popup-open {
     /* margin: 0 auto; */
     gap: 20px;
     padding: 6px 16px 24px;
-    padding-bottom: max(24px, calc( env(safe-area-inset-bottom) + 6px));
+    padding-bottom: max(15px, calc( env(safe-area-inset-bottom) + 6px));
     display: flex;
     background: none;
     align-self: end;

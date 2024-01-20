@@ -115,10 +115,10 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                                     ).then(None, None, None, _js='()=>{closeBtnClick();}')
         self.pro_del_btn.click(func_signals.prompt_delete,
                                inputs=[self.pro_name_txt, self.pro_fp_state, self.prompt_cls_select],
-                               outputs=[self.pro_func_prompt, self.pro_fp_state])
+                               outputs=[self.pro_func_prompt, self.pro_fp_state, self.spike_toast])
         self.pro_new_btn.click(fn=func_signals.prompt_save,
                                inputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_fp_state, self.prompt_cls_select],
-                               outputs=[self.pro_func_prompt, self.pro_fp_state])
+                               outputs=[self.pro_func_prompt, self.pro_fp_state, self.spike_toast])
 
     def signals_masks(self):
         self.masks_dataset.change(fn=func_signals.mask_setting_role, inputs=[self.masks_dataset],
@@ -133,11 +133,11 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                                    _js='(a,b,c)=>{return showConfirmationDialog(a,b,c);}')
         self.masks_del_btn.click(func_signals.prompt_delete,
                                  inputs=[self.masks_name_txt, self.pro_fp_state, self.mask_cls_select],
-                                 outputs=[self.pro_func_prompt, self.pro_fp_state])
+                                 outputs=[self.pro_func_prompt, self.pro_fp_state, self.spike_toast])
         self.masks_new_btn.click(fn=func_signals.prompt_save,
                                  inputs=[self.masks_dataset, self.masks_name_txt,
                                          self.pro_fp_state, self.mask_cls_select],
-                                 outputs=[self.pro_func_prompt, self.pro_fp_state])
+                                 outputs=[self.pro_func_prompt, self.pro_fp_state, self.spike_toast])
 
     def signals_plugin(self):
         from common.crazy_functional import crazy_fns_role, crazy_fns

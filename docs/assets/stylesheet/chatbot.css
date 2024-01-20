@@ -158,10 +158,10 @@ hr.append-display {
         max-height: calc(100*var(--vh) - 140px - var(--line-sm)*1rem - 2*var(--block-label-margin) );
     } */
     [data-testid = "bot"] {
-        max-width: calc(100% - 84px) !important;
+        max-width: calc(100% - 19px) !important;
     }
     [data-testid = "user"] {
-        max-width: calc(100% - 84px) !important;
+        max-width: calc(100% - 19px) !important;
     }
 
     #app-title {
@@ -361,8 +361,12 @@ img.avatar-image {
     border-radius: 50% !important;
 }
 .avatar-container {
+    display: none;
     width: 32px !important;
     height: 32px !important;
     background-color: transparent;
     background-size: cover;
+}
+.chatbot-full-width .avatar-container {
+    display: flex;
 }

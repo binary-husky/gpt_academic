@@ -17,6 +17,7 @@ class ChatbotElem:
         pass
 
     def _draw_chatbot_head(self):
+        self.spike_toast = gr.HTML(func_box.spike_toast(''), visible=False, elem_id='spike-toast-info')
         with gr.Row(elem_id="chatbot-header"):
             self.model_select_dropdown = gr.Dropdown(
                 label=i18n("选择模型"), choices=AVAIL_LLM_MODELS, multiselect=False, value=LLM_MODEL, interactive=True,
