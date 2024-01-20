@@ -1,6 +1,7 @@
-from toolbox import CatchException, update_ui, gen_time_str
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-from .crazy_utils import input_clipping
+import os
+from toolbox import CatchException, update_ui, gen_time_str, promote_file_to_downloadzone
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from crazy_functions.crazy_utils import input_clipping
 
 def inspect_dependency(chatbot, history):
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
@@ -27,9 +28,10 @@ def eval_manim(code):
     class_name = get_class_name(code)
 
     try: 
+        time_str = gen_time_str()
         subprocess.check_output([sys.executable, '-c', f"from gpt_log.MyAnimation import {class_name}; {class_name}().render()"])
-        shutil.move('media/videos/1080p60/{class_name}.mp4', f'gpt_log/{class_name}-{gen_time_str()}.mp4')
-        return f'gpt_log/{gen_time_str()}.mp4'
+        shutil.move(f'media/videos/1080p60/{class_name}.mp4', f'gpt_log/{class_name}-{time_str}.mp4')
+        return f'gpt_log/{time_str}.mp4'
     except subprocess.CalledProcessError as e:
         output = e.output.decode()
         print(f"Command returned non-zero exit status {e.returncode}: {output}.")
@@ -94,6 +96,8 @@ def 动画生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     res = eval_manim(code)
 
     chatbot.append(("生成的视频文件路径", res))
+    if os.path.exists(res):
+        promote_file_to_downloadzone(res, chatbot=chatbot)
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
 
 # 在这里放一些网上搜集的demo，辅助gpt生成代码
