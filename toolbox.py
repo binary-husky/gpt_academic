@@ -10,6 +10,7 @@ import glob
 from functools import wraps
 from shared_utils.config_loader import get_conf
 from shared_utils.config_loader import set_conf
+from shared_utils.config_loader import set_multi_conf
 from shared_utils.advanced_markdown_format import format_io
 from shared_utils.advanced_markdown_format import markdown_convertion
 from shared_utils.key_pattern_manager import select_api_key
