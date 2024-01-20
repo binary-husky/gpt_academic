@@ -164,7 +164,7 @@ def file_extraction_intype(file_mapping, chatbot, history, llm_kwargs, plugin_kw
     # 文件读取
     file_limit = {}
     for file_path in file_mapping:
-        chatbot[-1][1] = chatbot[-1][1] + f'`{file_path.replace(init_path.base_path, ".")}`\t...正在解析本地文件\n\n'
+        chatbot[-1][1] = chatbot[-1][1] + f'\n\n`{file_path.replace(init_path.base_path, ".")}`\t...正在解析本地文件\n\n'
         yield from toolbox.update_ui(chatbot, history)
         save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'])
         if file_path.endswith('pdf'):
@@ -591,7 +591,7 @@ def result_converter_to_flow_chart(gpt_response_collection, llm_kwargs, plugin_k
         html_file = reader_fns.MdHandler(md_path=md_file, output_dir=save_path).save_mark_map()
         chat_file_list += "View: " + func_box.html_view_blank(md_file, to_tabs=True) + \
                           '\n\n--- \n\n View: ' + func_box.html_view_blank(html_file)
-        chatbot.append((you_say, chat_file_list))
+        chatbot.append([you_say, chat_file_list])
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
         file_limit.update({md_file: file_name})
     # f'tips: 双击空白处可以放大～\n\n' f'{func_box.html_iframe_code(html_file=html)}'  无用，不允许内嵌网页了
@@ -727,8 +727,8 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
     content_mapping = yield from file_extraction_intype(fp_mapping, chatbot, history, llm_kwargs, plugin_kwargs)
     if content_mapping:
         mapping_data = func_box.html_folded_code(json.dumps(content_mapping, indent=4, ensure_ascii=False))
-        map_bro_say = f'数据解析完成，提取`fp mapping`如下：\n\n{mapping_data}'
-        chatbot.append([None, map_bro_say])
+        map_bro_say = f'\n\n数据解析完成，提取`fp mapping`如下：\n\n{mapping_data}'
+        chatbot[-1][1] += map_bro_say
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='数据解析完成！')
         for content_fp in content_mapping:  # 一个文件一个对话
             file_content = content_mapping[content_fp]
@@ -750,10 +750,10 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
         embedding_content.extend([user_input, user_input])
     else:
         devs_document = toolbox.get_conf('devs_document')
-        status = '没有探测到任何文件，并且提交字符少于50，无法完成后续任务'
-        status += f'请在输入框中输入需要解析的云文档链接或本地文件地址，如果有多个文档则用换行或空格隔开，然后再点击对应的插件\n\n' \
-                  f'插件支持解析文档类型`{valid_types}`' \
-                  f"有问题？请联系`@spike` or 查看开发文档{devs_document}"
+        status = '\n\n没有探测到任何文件，并且提交字符少于50，无法完成后续任务' \
+                 f'请在输入框中输入需要解析的云文档链接或本地文件地址，如果有多个文档则用换行或空格隔开，然后再点击对应的插件\n\n' \
+                 f'插件支持解析文档类型`{valid_types}`' \
+                 f"有问题？请联系`@spike` or 查看开发文档{devs_document}"
         if chatbot[-1][1] is None:
             chatbot[-1][1] = status
         chatbot[-1][1] += status
