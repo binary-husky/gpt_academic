@@ -11,7 +11,7 @@
 import tiktoken, copy
 from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor
-from toolbox import get_conf, trimmed_format_exc
+from toolbox import get_conf, trimmed_format_exc, apply_gpt_academic_string_mask
 
 from .bridge_chatgpt import predict_no_ui_long_connection as chatgpt_noui
 from .bridge_chatgpt import predict as chatgpt_ui
@@ -668,6 +668,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
     """
     import threading, time, copy
 
+    inputs = apply_gpt_academic_string_mask(inputs, mode="show_llm")
     model = llm_kwargs['llm_model']
     n_model = 1
     if '&' not in model:
@@ -741,6 +742,7 @@ def predict(inputs, llm_kwargs, *args, **kwargs):
     additional_fn代表点击的哪个按钮，按钮见functional.py
     """
 
+    inputs = apply_gpt_academic_string_mask(inputs, mode="show_llm")
     method = model_info[llm_kwargs['llm_model']]["fn_with_ui"]  # 如果这里报错，检查config中的AVAIL_LLM_MODELS选项
     yield from method(inputs, llm_kwargs, *args, **kwargs)
 

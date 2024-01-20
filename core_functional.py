@@ -3,6 +3,7 @@
 # 'stop' 颜色对应 theme.py 中的 color_er
 import importlib
 from toolbox import clear_line_break
+from toolbox import build_gpt_academic_masked_string
 from textwrap import dedent
 
 def get_core_functions():
@@ -32,12 +33,12 @@ def get_core_functions():
             "Prefix":   r"",
             # 后缀，会被加在你的输入之后。例如，配合前缀可以把你的输入内容用引号圈起来
             "Suffix":
-                dedent("\n"+r'''
+                dedent("\n"+f'''
                     ==============================
                     使用mermaid flowchart对以上文本进行总结，概括上述段落的内容以及内在逻辑关系，例如：
 
                     以下是对以上文本的总结，以mermaid flowchart的形式展示：
-                    ```mermaid
+                    ```{build_gpt_academic_masked_string(text_show_llm="mermaid", text_show_render="")}
                     flowchart LR
                         A["节点名1"] --> B("节点名2")
                         B --> C{"节点名3"}
