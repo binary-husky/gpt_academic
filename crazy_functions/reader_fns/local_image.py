@@ -6,8 +6,8 @@ import time
 import os.path
 import requests
 import concurrent.futures
-from common import database_processor
-from common.path_handle import init_path
+from common import db_handler
+from common.path_handler import init_path
 
 
 # Paddleocr目前支持的多语言语种可以通过修改lang参数进行切换
@@ -70,7 +70,7 @@ class ImgHandler:
         from request_llms.bridge_google_gemini import predict_no_ui_long_connection
         from common import func_box
         vision_model = {'llm_model': plugin_kwargs['vision_model']}
-        sql_handler = database_processor.SqliteHandle('prompt_图片理解_sys')
+        sql_handler = db_handler.PromptDb('图片理解_sys')
         prompt = sql_handler.find_prompt_result('llm-vision')
         input_ = func_box.replace_expected_text(prompt, content=func_box.html_local_img(self.img_path),
                                                 expect='{{{v}}}')
@@ -79,7 +79,7 @@ class ImgHandler:
         return vision_result, self.img_path, watchdog[2]
 
     def identify_cache(self, cache_tag, cor_cache, kwargs):
-        cache_sql = database_processor.SqliteHandle('ocr_cache')
+        cache_sql = db_handler.OcrCacheDb()
         cache_tag = str(cache_tag) + str(kwargs)  # 避免不同vision_model读缓存
         cache = cache_sql.get_prompt_value(find=cache_tag)
         cache_cont, file_path = cache

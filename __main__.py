@@ -9,7 +9,7 @@ from webui_elem.overwrites import postprocess_chat_messages, postprocess, reload
 # 一些普通功能模块
 from common.core_functional import get_core_functions
 from common import Langchain_cn
-from common.logger_handle import init_path
+from common.logger_handler import init_path
 
 functional = get_core_functions()
 
@@ -458,7 +458,7 @@ gradio_app = gr.mount_gradio_app(app, chatbot_main.demo, '/spike', )
 
 if __name__ == '__main__':
     import uvicorn
-    from common.logger_handle import init_config, logger
+    from common.logger_handler import init_config, logger
 
     logger.info('start...')
     app_reload = get_conf('app_reload')

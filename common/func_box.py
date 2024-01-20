@@ -24,8 +24,8 @@ import qrcode
 from PIL import Image, ImageOps
 from bs4 import BeautifulSoup
 from common import toolbox
-from common.logger_handle import logger
-from common.path_handle import init_path
+from common.logger_handler import logger
+from common.path_handler import init_path
 from webui_elem.overwrites import escape_markdown
 
 
@@ -132,7 +132,7 @@ def link_mtime_to_md(file, time_stamp=True):
     link_name = os.path.basename(file)
     a = f"[{link_name}]({link_local})"
     if time_stamp:
-        a = a[:-1] + f")?{os.path.getmtime(file)}"
+        a = a[:-1] + f"?{os.path.getmtime(file)})"
     return a
 
 
@@ -310,9 +310,9 @@ def json_convert_dict(file):
 def prompt_personal_tag(select, ipaddr):
     all_, personal = toolbox.get_conf('preset_prompt')['key']
     if select and personal != select and all_ != select:
-        tab_cls = "prompt_" + select + '_sys'
+        tab_cls = select + '_sys'
     else:
-        tab_cls = "prompt_" + str(ipaddr)
+        tab_cls = str(ipaddr)
     return tab_cls
 
 

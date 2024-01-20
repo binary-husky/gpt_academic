@@ -9,7 +9,7 @@ import gradio as gr
 from common import toolbox
 from common import func_box
 from bs4 import BeautifulSoup
-from common.path_handle import init_path
+from common.path_handler import init_path
 
 
 class HistoryJsonHandle:
@@ -91,7 +91,7 @@ class HistoryJsonHandle:
 def _get_user_object(chatbot, ipaddr):
     chatbot = copy.copy(chatbot)
     cookies = chatbot.get_cookies()
-    file_path = os.path.join(init_path.history_path, ipaddr)
+    file_path = os.path.join(init_path.private_history_path, ipaddr)
     os.makedirs(file_path, exist_ok=True)
     file_name = os.path.join(file_path, f"{cookies['first_chat']}.json")
     return file_name, cookies

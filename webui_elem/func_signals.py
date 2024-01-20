@@ -8,11 +8,11 @@ import gradio as gr
 
 import yaml
 from common import toolbox
-from common.database_processor import SqliteHandle
+from common import db_handler
 from common import func_box
-from common import history_processor
-from common.path_handle import init_path
-from common.logger_handle import logger
+from common import history_handler
+from common.path_handler import init_path
+from common.logger_handler import logger
 
 # 处理latex options
 latex_delimiters_dict = {
@@ -62,14 +62,14 @@ def spinner_chatbot_loading(chatbot):
 
 
 def get_database_cls(t):
-    return "_".join(str(t).split('_')[1:-1])
+    return "_".join(str(t).split('_')[0:-1])
 
 
 def filter_database_tables():
-    tables = SqliteHandle(database='ai_prompt.db').get_tables()
+    tables = db_handler.PromptDb(None).get_tables()
     split_tab = []
     for t in tables:
-        if str(t).startswith('prompt_') and str(t).endswith('_sys'):
+        if str(t).endswith('_sys'):
             split_tab.append(get_database_cls(t))
     split_tab_new = split_tab
     return split_tab_new
@@ -111,7 +111,7 @@ def sm_upload_clear(cookie: dict):
 
 def clear_input(inputs, cookies, ipaddr: gr.Request):
     user_addr = func_box.user_client_mark(ipaddr)
-    user_path = os.path.join(init_path.history_path, user_addr)
+    user_path = os.path.join(init_path.private_history_path, user_addr)
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
     index = 2
     if not cookies.get('first_chat'):
@@ -139,14 +139,14 @@ def stop_chat_refresh(chatbot, cookies, ipaddr: gr.Request):
         user = ipaddr
     chatbot_with_cookie = toolbox.ChatBotWithCookies(cookies)
     chatbot_with_cookie.write_list(chatbot)
-    # user_path = os.path.join(init_path.history_path, ipaddr.client.host)
-    history_processor.thread_write_chat_json(chatbot_with_cookie, user)
+    # user_path = os.path.join(init_path.private_history_path, ipaddr.client.host)
+    history_handler.thread_write_chat_json(chatbot_with_cookie, user)
 
 
 def clear_chat_cookie(llm_model, ipaddr: gr.Request):
     API_KEY = toolbox.get_conf('API_KEY')
     cookie = {'api_key': API_KEY, 'llm_model': llm_model}
-    user_path = os.path.join(init_path.history_path, func_box.user_client_mark(ipaddr))
+    user_path = os.path.join(init_path.private_history_path, func_box.user_client_mark(ipaddr))
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
     default_params = toolbox.get_conf('LLM_DEFAULT_PARAMETER')
     llms_combo = [cookie.get(key, default_params[key]) for key in default_params] + [
@@ -157,7 +157,7 @@ def clear_chat_cookie(llm_model, ipaddr: gr.Request):
 
 
 def select_history(select, llm_select, cookies, ipaddr: gr.Request):
-    user_path = os.path.join(init_path.history_path, func_box.user_client_mark(ipaddr))
+    user_path = os.path.join(init_path.private_history_path, func_box.user_client_mark(ipaddr))
     user_history = [f for f in os.listdir(user_path) if f.endswith('.json') and select == os.path.splitext(f)[0]]
     if not user_history:
         default_params, API_KEY = toolbox.get_conf('LLM_DEFAULT_PARAMETER', 'API_KEY')
@@ -165,7 +165,7 @@ def select_history(select, llm_select, cookies, ipaddr: gr.Request):
         cookies = {'api_key': API_KEY}
         return [[], [], cookies, *llms_combo, llm_select, select]
     file_path = os.path.join(user_path, user_history[0])
-    history_handle = history_processor.HistoryJsonHandle(file_path)
+    history_handle = history_handler.HistoryJsonHandle(file_path)
     history_update_combo = history_handle.update_for_history(cookies, select)
     return [*history_update_combo, select, gr.update(link=func_box.html_local_file(file_path))]
 
@@ -176,7 +176,7 @@ def rename_history(old_file, filename: str, ipaddr: gr.Request):
         return gr.update()
     if not filename.endswith(".json"):
         filename += ".json"
-    user_path = os.path.join(init_path.history_path, func_box.user_client_mark(ipaddr))
+    user_path = os.path.join(init_path.private_history_path, func_box.user_client_mark(ipaddr))
     full_path = os.path.join(user_path, filename)
     if not os.path.exists(os.path.join(user_path, f"{old_file}.json")):
         return gr.Error(f'{old_file}历史文件不存在，请刷新页面后尝试')
@@ -190,7 +190,7 @@ def rename_history(old_file, filename: str, ipaddr: gr.Request):
 
 
 def delete_history(cookies, filename, info, ipaddr: gr.Request):
-    user_path = os.path.join(init_path.history_path, func_box.user_client_mark(ipaddr))
+    user_path = os.path.join(init_path.private_history_path, func_box.user_client_mark(ipaddr))
     full_path = os.path.join(user_path, f"{filename}.json")
     if not os.path.exists(full_path):
         if filename == 'CANCELED':
@@ -199,14 +199,14 @@ def delete_history(cookies, filename, info, ipaddr: gr.Request):
             raise gr.Error('文件或许已不存在')
     os.remove(full_path)
     file_list, only_name, new_path, new_name = func_box.get_files_list(
-        os.path.join(init_path.history_path, func_box.user_client_mark(ipaddr)), filter_format=['.json'])
-    history_handle = history_processor.HistoryJsonHandle(new_path)
+        os.path.join(init_path.private_history_path, func_box.user_client_mark(ipaddr)), filter_format=['.json'])
+    history_handle = history_handler.HistoryJsonHandle(new_path)
     history_update_combo = history_handle.update_for_history(cookies, new_name)
     return [gr.update(choices=only_name, value=new_name), *history_update_combo]
 
 
 def import_history(file, ipaddr: gr.Request):
-    user_path = os.path.join(init_path.history_path, func_box.user_client_mark(ipaddr))
+    user_path = os.path.join(init_path.private_history_path, func_box.user_client_mark(ipaddr))
     index = 2
     new_file = os.path.basename(file.name)
     while new_file in os.listdir(user_path):
@@ -218,15 +218,15 @@ def import_history(file, ipaddr: gr.Request):
 
 
 def refresh_history(cookies, ipaddr: gr.Request):
-    user_path = os.path.join(init_path.history_path, func_box.user_client_mark(ipaddr))
+    user_path = os.path.join(init_path.private_history_path, func_box.user_client_mark(ipaddr))
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
-    history_handle = history_processor.HistoryJsonHandle(new_path)
+    history_handle = history_handler.HistoryJsonHandle(new_path)
     history_update_combo = history_handle.update_for_history(cookies, new_name)
     return [gr.update(choices=only_name, value=new_name), *history_update_combo]
 
 
 def download_history_json(select, ipaddr: gr.Request):
-    user_path = os.path.join(init_path.history_path, func_box.user_client_mark(ipaddr))
+    user_path = os.path.join(init_path.private_history_path, func_box.user_client_mark(ipaddr))
     file_path = os.path.join(user_path, f"{select}.json")
     if not os.path.exists(file_path):
         raise gr.Error('当前对话记录空，导出失败')
@@ -235,11 +235,11 @@ def download_history_json(select, ipaddr: gr.Request):
 
 
 def download_history_md(select, ipaddr: gr.Request):
-    user_path = os.path.join(init_path.history_path, func_box.user_client_mark(ipaddr))
+    user_path = os.path.join(init_path.private_history_path, func_box.user_client_mark(ipaddr))
     file_path = os.path.join(user_path, f"{select}.json")
     if not os.path.exists(file_path):
         raise gr.Error('当前对话记录空，导出失败')
-    history_handle = history_processor.HistoryJsonHandle(file_path)
+    history_handle = history_handler.HistoryJsonHandle(file_path)
     history_list = history_handle.base_data_format['chat']
     system = history_handle.base_data_format['chat_llms'].get('system_prompt').replace('\n', '\n> ')
     mark_down = f"> {func_box.html_tag_color(tag='System Prompt:', color='#ff6e67')} {system}\n\n"
@@ -270,8 +270,8 @@ def converter_history_masks(chatbot, system_prompt, ipaddr: gr.Request):
 # TODO < -------------------------------- 小按钮函数注册区 -------------------------------->
 def delete_latest_chat(chatbot, history, cookies: dict, ipaddr: gr.Request):
     select = cookies.get('first_chat', '')
-    user_path = os.path.join(init_path.history_path, func_box.user_client_mark(ipaddr), f"{select}.json")
-    history_handle = history_processor.HistoryJsonHandle(user_path)
+    user_path = os.path.join(init_path.private_history_path, func_box.user_client_mark(ipaddr), f"{select}.json")
+    history_handle = history_handler.HistoryJsonHandle(user_path)
     history_handle.delete_the_latest_chat()
     history_update_combo = history_handle.update_for_history(cookies, select)
     return history_update_combo
@@ -281,7 +281,7 @@ def get_user_upload(chatbot, txt, ipaddr: gr.Request):
     """
     获取用户上传过的文件
     """
-    private_upload = './private_upload'
+    private_upload = init_path.private_upload_path.replace(init_path.base_path, '.')
     user_history = os.path.join(private_upload, func_box.user_client_mark(ipaddr))
     history = """| 编号 | 目录 | 目录内文件 |\n| --- | --- | --- |\n"""
     count_num = 1
@@ -310,22 +310,22 @@ def prompt_retrieval(prompt_cls, hosts, search=False):
     all_, personal = toolbox.get_conf('preset_prompt')['key']
     if not prompt_cls: prompt_cls = all_  # 保底
     count_dict = {}
-    hosts = func_box.prompt_personal_tag(prompt_cls, hosts)
+    hosts_tabs = func_box.prompt_personal_tag(prompt_cls, hosts)
     if all_ == prompt_cls:
-        for tab in SqliteHandle('prompt_').get_tables():
+        for tab in db_handler.PromptDb(None).get_tables():
             if tab.startswith('prompt') and str(tab).endswith('sys'):
-                data, source = SqliteHandle(tab).get_prompt_value(None)
+                data, source = db_handler.PromptDb(tab).get_prompt_value(None)
                 if data: count_dict.update({get_database_cls(tab): data})
-        data, source = SqliteHandle(f'{hosts}').get_prompt_value(None)
+        data, source = db_handler.PromptDb(f'{hosts_tabs}').get_prompt_value(None)
         if data: count_dict.update({personal: data})
     elif personal == prompt_cls:
-        data, source = SqliteHandle(f'{hosts}').get_prompt_value(None)
+        data, source = db_handler.PromptDb(f'{hosts_tabs}').get_prompt_value(None)
         if data: count_dict.update({personal: data})
-    elif hosts and prompt_cls:
-        data, source = SqliteHandle(f'{hosts}').get_prompt_value(None)
+    elif hosts_tabs and prompt_cls:
+        data, source = db_handler.PromptDb(f'{hosts_tabs}').get_prompt_value(None)
         if data: count_dict.update({prompt_cls: data})
     retrieval = []
-    if count_dict != {}:  # 上面是一段屎山， 不知道自己为什么要这样写，能用就行
+    if count_dict != {}:  # 上面是一段屎山， 不知道自己为什么要这样写，反正能用
         for cls in count_dict:
             for key in count_dict[cls]:
                 content = count_dict[cls][key]
@@ -381,7 +381,7 @@ def prompt_upload_refresh(file, prompt, pro_select, ipaddr: gr.Request):
     else:
         upload_data = {}
     if upload_data != {}:
-        status = SqliteHandle(f'{tab_cls}').inset_prompt(upload_data, user_info)
+        status = db_handler.PromptDb(f'{tab_cls}').inset_prompt(upload_data, user_info)
         ret_data = prompt_retrieval(prompt_cls=tab_cls, hosts=func_box.user_client_mark(ipaddr))
         return gr.update(samples=ret_data, visible=True), prompt, tab_cls
     else:
@@ -398,7 +398,7 @@ def prompt_delete(pro_name, prompt_dict, select_check, ipaddr: gr.Request):
     if not any(find_prompt):
         raise gr.Error(f'无法找到 {pro_name}')
     tab_cls = func_box.prompt_personal_tag(select_check, user_addr)
-    sqlite_handle = SqliteHandle(table=f'{tab_cls}')
+    sqlite_handle = db_handler.PromptDb(table=f'{tab_cls}')
     _, source = sqlite_handle.get_prompt_value(find=pro_name)
     if not _:
         raise gr.Error(f'无法找到 {pro_name}，或请不要在所有人分类下删除')
@@ -427,7 +427,7 @@ def prompt_save(txt, name, prompt: gr.Dataset, pro_select, ipaddr: gr.Request):
     user_info = func_box.user_client_mark(ipaddr)
     tab_cls = func_box.prompt_personal_tag(pro_select, func_box.user_client_mark(ipaddr))
     if txt and name:
-        sql_obj = SqliteHandle(f'{tab_cls}')
+        sql_obj = db_handler.PromptDb(f'{tab_cls}')
         _, source = sql_obj.get_prompt_value(name)
         status = sql_obj.inset_prompt({name: txt}, user_info)
         if status:
@@ -501,8 +501,8 @@ def show_prompt_result(index, data: gr.Dataset, cookies, ipaddr: gr.Request):
     """
     click = data['samples'][index]
     file_name = click[2]
-    user_path = os.path.join(init_path.history_path, func_box.user_client_mark(ipaddr))
-    history_handle = history_processor.HistoryJsonHandle(os.path.join(user_path, file_name + ".json"))
+    user_path = os.path.join(init_path.private_history_path, func_box.user_client_mark(ipaddr))
+    history_handle = history_handler.HistoryJsonHandle(os.path.join(user_path, file_name + ".json"))
     cookie_combo = history_handle.update_for_history(cookies, file_name)
     return gr.update(value=file_name), *cookie_combo
 
@@ -564,9 +564,9 @@ def draw_results(txt, prompt: dict, percent, ipaddr: gr.Request):
     """
     lst = {}
     file_list, only_name, new_path, new_name = func_box.get_files_list(
-        os.path.join(init_path.history_path, func_box.user_client_mark(ipaddr)), filter_format=['.json'])
+        os.path.join(init_path.private_history_path, func_box.user_client_mark(ipaddr)), filter_format=['.json'])
     for i in file_list:
-        chat_list = history_processor.HistoryJsonHandle(i).base_data_format.get('chat')
+        chat_list = history_handler.HistoryJsonHandle(i).base_data_format.get('chat')
         file_name = os.path.splitext(os.path.basename(i))[0]
         chat_str = ''.join([u for k in chat_list for u in k['on_chat'] if u is not None])
         lst.update({chat_str: file_name})
@@ -646,8 +646,8 @@ def refresh_load_data(prompt, request: gr.Request):
     is_all = preset_prompt['value']
     data = prompt_retrieval(prompt_cls=is_all, hosts=user_addr)
     prompt['samples'] = data
-    know_list = os.listdir(init_path.knowledge_path)
-    load_list, user_list = func_box.get_directory_list(os.path.join(init_path.knowledge_path, '知识库'), user_addr)
+    know_list = os.listdir(init_path.private_knowledge_path)
+    load_list, user_list = func_box.get_directory_list(os.path.join(init_path.private_knowledge_path, '知识库'), user_addr)
     know_cls = gr.update(choices=know_list, value='知识库', show_label=True)
     know_load = gr.update(choices=load_list, label='知识库', show_label=True)
     know_user = gr.update(choices=user_list, show_label=True)
@@ -660,9 +660,9 @@ def refresh_load_data(prompt, request: gr.Request):
 
 
 def refresh_user_data(cookies, proxy_info, ipaddr: gr.Request):
-    user_path = os.path.join(init_path.history_path, func_box.user_client_mark(ipaddr))
+    user_path = os.path.join(init_path.private_history_path, func_box.user_client_mark(ipaddr))
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
-    history_handle = history_processor.HistoryJsonHandle(new_path)
+    history_handle = history_handler.HistoryJsonHandle(new_path)
     history_update_combo = history_handle.update_for_history(cookies, new_name)
     outputs = [gr.update(choices=only_name, value=new_name, visible=True), *history_update_combo,
                new_name, gr.update(value=f"你好，`{func_box.user_client_mark(ipaddr)}`\n\n {proxy_info}")]
@@ -671,7 +671,7 @@ def refresh_user_data(cookies, proxy_info, ipaddr: gr.Request):
 
 # TODO < -------------------------------- 页面登陆函数注册区 -------------------------------->
 def user_login(user, password):
-    sql_handle = SqliteHandle(database='user_login.db', table='user')
+    sql_handle = db_handler.UserDb()
     user_account = sql_handle.get_user_account(user)
     if user_account.get('user'):
         if user == user_account['user'] and password == user_account['password']:
@@ -679,5 +679,5 @@ def user_login(user, password):
         else:
             return False
     else:
-        sql_handle.inset_prompt({user: password}, '')
+        sql_handle.update_user(user, password)
         return True

@@ -4,7 +4,8 @@ import threading
 from common import toolbox
 from crazy_functions import crazy_utils
 import gradio as gr
-from common import func_box, database_processor
+from common import func_box, db_handler
+from common.path_handler import init_path
 from crazy_functions.reader_fns import crazy_box, docs_kingsoft, docs_qqdocs
 
 from crazy_functions.vector_fns.vector_database import LocalDocQA
@@ -95,7 +96,7 @@ def knowledge_base_writing(cls_select, links: str, select, name, kai_handle, ipa
     cls_select = classification_filtering_tag(cls_select, user_addr)
     if not cls_select:
         raise gr.Error('新建分类名称请不要为空')
-    vector_path = os.path.join(func_box.knowledge_path, cls_select)
+    vector_path = os.path.join(init_path.private_knowledge_path, cls_select)
     if name and select:
         kai_id = name
         os.rename(os.path.join(vector_path, select), os.path.join(vector_path, name))
@@ -147,9 +148,9 @@ def knowledge_base_writing(cls_select, links: str, select, name, kai_handle, ipa
         link_type = f'\n\n目录: https://www.kdocs.cn/{func_box.html_tag_color("ent")}/41000207/{func_box.html_tag_color("130730080903")}\n\n' \
                     f'分享文件: https://www.kdocs.cn/l/{func_box.html_tag_color("cpfcxiGjEvqK")}'
         yield (
-        f'没有找到任何可读取文件， 当前支持解析的本地文件格式如下: \n\n{types}\n\n在线文档链接支持如下: {link_type}',
-        error, gr.Dropdown.update(), gr.Dropdown.update(),
-        gr.Dropdown.update(), kai_handle)
+            f'没有找到任何可读取文件， 当前支持解析的本地文件格式如下: \n\n{types}\n\n在线文档链接支持如下: {link_type}',
+            error, gr.Dropdown.update(), gr.Dropdown.update(),
+            gr.Dropdown.update(), kai_handle)
         return
     # # < -------------------预热文本向量化模组--------------- >
     # yield ('正在加载向量化模型...', '', gr.Dropdown.update(), gr.Dropdown.update(), gr.Dropdown.update(), kai_handle)
@@ -201,7 +202,7 @@ def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
                 kai = llm_kwargs['know_dict']['know_obj'][id]
             else:
                 know_cls = classification_filtering_tag(know_cls, llm_kwargs['ipaddr'])
-                vs_path = os.path.join(func_box.knowledge_path, know_cls)
+                vs_path = os.path.join(init_path.private_knowledge_path, know_cls)
                 kai = knowledge_archive_interface(vs_path=vs_path)
                 llm_kwargs['know_dict']['know_obj'][id] = kai
             # < -------------------查询向量数据库--------------- >
@@ -220,7 +221,7 @@ def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
                     tips = f'匹配中了`{id}`知识库，使用的Prompt是`{prompt_cls}`分类下的`{prompt_name}`, 插件自定义参数允许指定其他Prompt哦～'
                     if tips not in str(chatbot):
                         gpt_say += tips
-                    prompt_con = database_processor.SqliteHandle(table=f'prompt_{prompt_cls}_sys').find_prompt_result(
+                    prompt_con = db_handler.PromptDb(table=f'{prompt_cls}_sys').find_prompt_result(
                         prompt_name)
                 else:
                     prompt_name = '引用知识库回答'
@@ -228,7 +229,7 @@ def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
                            f'`{prompt_name}`, 你可以保存一个同名的Prompt到个人分类下，知识库问答会优先使用个人分类下的提示词。'
                     if tips not in str(chatbot):
                         gpt_say += tips
-                    prompt_con = database_processor.SqliteHandle(table=f'prompt_{prompt_cls}_sys').find_prompt_result(
+                    prompt_con = db_handler.PromptDb(table=f'{prompt_cls}_sys').find_prompt_result(
                         prompt_name, individual_priority=llm_kwargs['ipaddr'])
                 gpt_say += f"\n\n引用文档:\n\n> {source_documents}"
                 chatbot[-1] = [txt, gpt_say]
@@ -242,9 +243,9 @@ def knowledge_base_query(txt, chatbot, history, llm_kwargs, plugin_kwargs):
 def obtain_classification_knowledge_base(cls_name, ipaddr: gr.Request):
     user = func_box.user_client_mark(ipaddr)
     if cls_name == '个人知识库':
-        load_path = os.path.join(func_box.knowledge_path, '个人知识库', user)
+        load_path = os.path.join(init_path.private_knowledge_path, '个人知识库', user)
     else:
-        load_path = os.path.join(func_box.knowledge_path, cls_name)
+        load_path = os.path.join(init_path.private_knowledge_path, cls_name)
     load_list, user_list = func_box.get_directory_list(load_path, user)
     know_user_build = toolbox.get_conf('know_user_build')
     if know_user_build:
@@ -259,9 +260,9 @@ def obtain_classification_knowledge_base(cls_name, ipaddr: gr.Request):
 def want_to_rename_it(cls_name, select, ipaddr: gr.Request):
     user = func_box.user_client_mark(ipaddr)
     if cls_name == '个人知识库':
-        load_path = os.path.join(func_box.knowledge_path, '个人知识库', user)
+        load_path = os.path.join(init_path.private_knowledge_path, '个人知识库', user)
     else:
-        load_path = os.path.join(func_box.knowledge_path, cls_name)
+        load_path = os.path.join(init_path.private_knowledge_path, cls_name)
     load_list, user_list = func_box.get_directory_list(load_path, user)
     if select in load_list:
         return gr.Button.update(visible=True)
@@ -272,7 +273,7 @@ def want_to_rename_it(cls_name, select, ipaddr: gr.Request):
 def obtaining_knowledge_base_files(cls_select, vs_id, chatbot, kai_handle, model, ipaddr: gr.Request):
     if vs_id and '预加载知识库' in model:
         cls_select = classification_filtering_tag(cls_select, func_box.user_client_mark(ipaddr))
-        vs_path = os.path.join(func_box.knowledge_path, cls_select)
+        vs_path = os.path.join(init_path.private_knowledge_path, cls_select)
         you_say = f'请检查知识库内文件{"  ".join([func_box.html_tag_color(i) for i in vs_id])}'
         chatbot.append([you_say, None])
         yield chatbot, '🏃🏻‍ 正在努力轮询中....请稍等， tips：知识库可以多选，但不要贪杯哦～️', kai_handle
@@ -298,7 +299,7 @@ def obtaining_knowledge_base_files(cls_select, vs_id, chatbot, kai_handle, model
 
 def single_step_thread_building_knowledge(cls_name, know_id, file_manifest, llm_kwargs):
     cls_select = classification_filtering_tag(cls_name, llm_kwargs['ipaddr'])
-    vector_path = os.path.join(func_box.knowledge_path, cls_select)
+    vector_path = os.path.join(init_path.private_knowledge_path, cls_select)
     os.makedirs(vector_path, exist_ok=True)
 
     def thread_task():

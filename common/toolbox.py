@@ -3,7 +3,7 @@ import re
 import importlib
 import inspect
 from common import func_box
-from common import history_processor
+from common import history_handler
 import base64
 import gradio as gr
 import math
@@ -15,7 +15,7 @@ import time
 import glob
 import sys
 import threading
-from common.path_handle import init_path
+from common.path_handler import init_path
 
 ############################### 插件输入输出接驳区 #######################################
 pj = os.path.join
@@ -134,7 +134,7 @@ def ArgsGeneralWrapper(f):
                                       history, system_prompt, args)
         # 将对话记录写入文件
         yield from end_predict(chatbot_with_cookie, history, llm_kwargs)
-        threading.Thread(target=history_processor.thread_write_chat_json,
+        threading.Thread(target=history_handler.thread_write_chat_json,
                          args=(chatbot_with_cookie, func_box.user_client_mark(ipaddr))).start()
 
     return decorated
@@ -146,7 +146,7 @@ def func_decision_tree(func, cookies, single_mode, agent_mode,
     if cookies.get('lock_plugin', None) is None:
         is_try = args[0] if 'RetryChat' in args else None
         if is_try:
-            user_data = history_processor.get_user_basedata(chatbot_with_cookie, llm_kwargs['ipaddr'])
+            user_data = history_handler.get_user_basedata(chatbot_with_cookie, llm_kwargs['ipaddr'])
             plugin = user_data['chat'][-1].get('plugin')
             if plugin:
                 txt_proc = plugin['input']
@@ -810,7 +810,7 @@ def to_markdown_tabs(head: list, tabs: list, alignment=':---:', column=False):
 
 
 def on_file_uploaded(files, chatbot, txt,  cookies, ipaddr: gr.Request):
-    private_upload = init_path.users_path.replace(init_path.base_path, '.')
+    private_upload = init_path.users_private_path.replace(init_path.base_path, '.')
     #     shutil.rmtree('./private_upload/')  不需要删除文件
     if type(ipaddr) is str:
         ipaddr = ipaddr

@@ -5,7 +5,7 @@
 import requests
 from common import func_box
 from common import toolbox
-from common.path_handle import init_path
+from common.path_handler import init_path
 import os
 import json
 

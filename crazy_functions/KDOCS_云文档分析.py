@@ -5,7 +5,7 @@
 import os.path
 import gradio as gr
 from common import func_box, Langchain_cn
-from common.path_handle import init_path
+from common.path_handler import init_path
 from crazy_functions.reader_fns import crazy_box, docs_kingsoft, docs_qqdocs
 from common.toolbox import update_ui, CatchException, trimmed_format_exc, get_conf
 

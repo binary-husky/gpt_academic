@@ -142,6 +142,7 @@ history
 ssr_conf
 config_private.py
 users_data/config_private.py
+users_private/
 gpt_log
 private.md
 private_upload

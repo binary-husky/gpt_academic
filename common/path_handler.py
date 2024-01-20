@@ -9,12 +9,15 @@ class InitPath:
 
     def __init__(self):
         self.base_path = os.path.dirname(os.path.dirname(__file__))
-        self.prompt_path = os.path.join(self.base_path, 'users_data')
-        self.knowledge_path = os.path.join(self.prompt_path, 'knowledge')
-        self.users_path = os.path.join(self.base_path, 'private_upload')
+        self.docs_path = os.path.join(self.base_path, 'docs')
+        self.assets_path = os.path.join(self.docs_path, 'assets')
+        self.prompt_export_path = os.path.join(self.docs_path, 'prompt_export')
         self.logs_path = os.path.join(self.base_path, 'gpt_log')
-        self.history_path = os.path.join(self.logs_path, 'history')
-        self.assets_path = os.path.join(self.base_path, 'docs', 'assets')
+        self.users_private_path = os.path.join(self.base_path, 'users_private')
+        self.private_knowledge_path = os.path.join(self.users_private_path, 'knowledge')
+        self.private_upload_path = os.path.join(self.users_private_path, 'upload')
+        self.private_history_path = os.path.join(self.users_private_path, 'history')
+        self.private_db_path = os.path.join(self.users_private_path, 'db')
 
     def __getattribute__(self, name):
         """

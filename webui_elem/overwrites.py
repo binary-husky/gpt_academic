@@ -10,7 +10,7 @@ from gradio_client import utils as client_utils
 from gradio import utils
 from collections import namedtuple
 from common import toolbox
-from common.path_handle import init_path
+from common.path_handler import init_path
 
 
 def escape_markdown(text, reverse=False):

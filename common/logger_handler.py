@@ -10,7 +10,7 @@ import time
 from loguru import logger
 from typing import cast
 from types import FrameType
-from common.path_handle import init_path
+from common.path_handler import init_path
 
 
 class InterceptHandler(logging.Handler):
