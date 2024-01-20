@@ -80,7 +80,7 @@ def 解析PDF_基于GROBID(file_manifest, project_folder, llm_kwargs, plugin_kwa
         if article_dict is None: raise RuntimeError("解析PDF失败，请检查PDF是否损坏。")
         yield from translate_pdf(article_dict, llm_kwargs, chatbot, fp, generated_conclusion_files,
                                  TOKEN_LIMIT_PER_FRAGMENT, DST_LANG)
-    chatbot.append(["给出输出文件清单", str(generated_conclusion_files + generated_html_files]))
+    chatbot.append(["给出输出文件清单", str(generated_conclusion_files + generated_html_files)])
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
 
@@ -183,7 +183,7 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
         # 重命名文件
         rename_file = f'翻译-{os.path.basename(html_path)}'
         promote_file_to_downloadzone(html_path, rename_file=rename_file, chatbot=chatbot)
-    chatbot.append(["给出输出文件清单", str(generated_conclusion_files + generated_html_files]))
+    chatbot.append(["给出输出文件清单", str(generated_conclusion_files + generated_html_files)])
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
 

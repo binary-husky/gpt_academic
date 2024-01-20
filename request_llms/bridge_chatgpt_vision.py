@@ -78,7 +78,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
 
     if is_any_api_key(inputs):
         chatbot._cookies['api_key'] = inputs
-        chatbot.append(["输入已识别为openai的api_key", what_keys(inputs]))
+        chatbot.append(["输入已识别为openai的api_key", what_keys(inputs)])
         yield from update_ui(chatbot=chatbot, history=history, msg="api_key已导入") # 刷新界面
         return
     elif not is_any_api_key(chatbot._cookies['api_key']):
@@ -226,15 +226,15 @@ def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg,
     elif "does not exist" in error_msg:
         chatbot[-1] = [chatbot[-1][0], f"[Local Message] Model {llm_kwargs['llm_model']} does not exist. 模型不存在, 或者您没有获得体验资格."]
     elif "Incorrect API key" in error_msg:
-        chatbot[-1] = [chatbot[-1][0], "[Local Message] Incorrect API key. OpenAI以提供了不正确的API_KEY为由, 拒绝服务. " + openai_website); report_invalid_key(api_key]
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] Incorrect API key. OpenAI以提供了不正确的API_KEY为由, 拒绝服务. " + openai_website + str(report_invalid_key(api_key))]
     elif "exceeded your current quota" in error_msg:
-        chatbot[-1] = [chatbot[-1][0], "[Local Message] You exceeded your current quota. OpenAI以账户额度不足为由, 拒绝服务." + openai_website); report_invalid_key(api_key]
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] You exceeded your current quota. OpenAI以账户额度不足为由, 拒绝服务." + openai_website + str(report_invalid_key(api_key))]
     elif "account is not active" in error_msg:
-        chatbot[-1] = [chatbot[-1][0], "[Local Message] Your account is not active. OpenAI以账户失效为由, 拒绝服务." + openai_website); report_invalid_key(api_key]
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] Your account is not active. OpenAI以账户失效为由, 拒绝服务."+ openai_website + str(report_invalid_key(api_key))]
     elif "associated with a deactivated account" in error_msg:
-        chatbot[-1] = [chatbot[-1][0], "[Local Message] You are associated with a deactivated account. OpenAI以账户失效为由, 拒绝服务." + openai_website); report_invalid_key(api_key]
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] You are associated with a deactivated account. OpenAI以账户失效为由, 拒绝服务."+ openai_website + str(report_invalid_key(api_key))]
     elif "API key has been deactivated" in error_msg:
-        chatbot[-1] = [chatbot[-1][0], "[Local Message] API key has been deactivated. OpenAI以账户失效为由, 拒绝服务." + openai_website); report_invalid_key(api_key]
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] API key has been deactivated. OpenAI以账户失效为由, 拒绝服务."+ openai_website + str(report_invalid_key(api_key))]
     elif "bad forward key" in error_msg:
         chatbot[-1] = [chatbot[-1][0], "[Local Message] Bad forward key. API2D账户额度不足."]
     elif "Not enough point" in error_msg:

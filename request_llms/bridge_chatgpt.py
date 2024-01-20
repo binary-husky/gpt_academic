@@ -161,7 +161,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     """
     if is_any_api_key(inputs):
         chatbot._cookies['api_key'] = inputs
-        chatbot.append(["输入已识别为openai的api_key", what_keys(inputs]))
+        chatbot.append(["输入已识别为openai的api_key", what_keys(inputs)])
         yield from update_ui(chatbot=chatbot, history=history, msg="api_key已导入")  # 刷新界面
         return
     elif not is_any_api_key(chatbot._cookies['api_key']):

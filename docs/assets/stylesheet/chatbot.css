@@ -120,7 +120,7 @@ hr.append-display {
     min-width: calc(var(--text-md)*var(--line-md) + 2*var(--spacing-xl));
 }
 [data-testid = "bot"] {
-    max-width: calc(85% - 40px);
+    max-width: calc(90% - 40px);
     border-bottom-left-radius: 0 !important;
 }
 [data-testid = "user"] {
