@@ -139,7 +139,7 @@ def Latex英文润色(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
-        "对整个Latex项目进行润色。函数插件贡献者: Binary-Husky。（注意，此插件不调用Latex，如果有Latex环境，请使用“Latex英文纠错+高亮”插件）"])
+        "对整个Latex项目进行润色。函数插件贡献者: Binary-Husky。（注意，此插件不调用Latex，如果有Latex环境，请使用「Latex英文纠错+高亮修正位置(需Latex)插件」"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议

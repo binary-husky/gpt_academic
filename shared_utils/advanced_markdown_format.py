@@ -301,6 +301,17 @@ def close_up_code_segment_during_stream(gpt_reply):
     else:
         return gpt_reply
 
+def simple_markdown_convertion(txt):
+    pre = '<div class="markdown-body">'
+    suf = "</div>"
+    if txt.startswith(pre) and txt.endswith(suf):
+        return txt  # 已经被转化过，不需要再次转化
+    txt = markdown.markdown(
+        txt,
+        extensions=["pymdownx.superfences", "tables", "pymdownx.highlight"],
+        extension_configs=code_highlight_configs,
+    )
+    return pre + txt + suf
 
 def format_io(self, y):
     """
@@ -319,13 +330,9 @@ def format_io(self, y):
         gpt_reply = close_up_code_segment_during_stream(gpt_reply)
     # 处理提问与输出
     y[-1] = (
-        None
-        if i_ask is None
-        else markdown.markdown(
-            i_ask,
-            extensions=["pymdownx.superfences", "tables", "pymdownx.highlight"],
-            extension_configs=code_highlight_configs,
-        ),
+        # 输入部分
+        None if i_ask is None else simple_markdown_convertion(i_ask),
+        # 输出部分
         None if gpt_reply is None else markdown_convertion(gpt_reply),
     )
     return y

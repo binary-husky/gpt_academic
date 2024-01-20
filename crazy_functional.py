@@ -32,8 +32,6 @@ def get_crazy_functions():
     from crazy_functions.理解PDF文档内容 import 理解PDF文档内容标准文件输入
     from crazy_functions.Latex全文润色 import Latex中文润色
     from crazy_functions.Latex全文润色 import Latex英文纠错
-    from crazy_functions.Latex全文翻译 import Latex中译英
-    from crazy_functions.Latex全文翻译 import Latex英译中
     from crazy_functions.批量Markdown翻译 import Markdown中译英
     from crazy_functions.虚空终端 import 虚空终端
 
@@ -237,13 +235,7 @@ def get_crazy_functions():
             "Info": "对英文Latex项目全文进行润色处理 | 输入参数为路径或上传压缩包",
             "Function": HotReload(Latex英文润色),
         },
-        "英文Latex项目全文纠错（输入路径或上传压缩包）": {
-            "Group": "学术",
-            "Color": "stop",
-            "AsButton": False,  # 加入下拉菜单中
-            "Info": "对英文Latex项目全文进行纠错处理 | 输入参数为路径或上传压缩包",
-            "Function": HotReload(Latex英文纠错),
-        },
+
         "中文Latex项目全文润色（输入路径或上传压缩包）": {
             "Group": "学术",
             "Color": "stop",
@@ -251,6 +243,14 @@ def get_crazy_functions():
             "Info": "对中文Latex项目全文进行润色处理 | 输入参数为路径或上传压缩包",
             "Function": HotReload(Latex中文润色),
         },
+        # 已经被新插件取代
+        # "英文Latex项目全文纠错（输入路径或上传压缩包）": {
+        #     "Group": "学术",
+        #     "Color": "stop",
+        #     "AsButton": False,  # 加入下拉菜单中
+        #     "Info": "对英文Latex项目全文进行纠错处理 | 输入参数为路径或上传压缩包",
+        #     "Function": HotReload(Latex英文纠错),
+        # },
         # 已经被新插件取代
         # "Latex项目全文中译英（输入路径或上传压缩包）": {
         #     "Group": "学术",
@@ -523,6 +523,7 @@ def get_crazy_functions():
 
     try:
         from crazy_functions.Latex输出PDF结果 import Latex英文纠错加PDF对比
+        from crazy_functions.Latex输出PDF结果 import Latex翻译中文并重新编译PDF
 
         function_plugins.update(
             {
@@ -533,13 +534,7 @@ def get_crazy_functions():
                     "AdvancedArgs": True,
                     "ArgsReminder": "如果有必要, 请在此处追加更细致的矫错指令（使用英文）。",
                     "Function": HotReload(Latex英文纠错加PDF对比),
-                }
-            }
-        )
-        from crazy_functions.Latex输出PDF结果 import Latex翻译中文并重新编译PDF
-
-        function_plugins.update(
-            {
+                },
                 "Arxiv论文精细翻译（输入arxivID）[需Latex]": {
                     "Group": "学术",
                     "Color": "stop",
@@ -550,11 +545,7 @@ def get_crazy_functions():
                     + 'If the term "agent" is used in this section, it should be translated to "智能体". ',
                     "Info": "Arixv论文精细翻译 | 输入参数arxiv论文的ID，比如1812.10695",
                     "Function": HotReload(Latex翻译中文并重新编译PDF),
-                }
-            }
-        )
-        function_plugins.update(
-            {
+                },
                 "本地Latex论文精细翻译（上传Latex项目）[需Latex]": {
                     "Group": "学术",
                     "Color": "stop",

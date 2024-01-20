@@ -83,7 +83,8 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
             history=this_iteration_history_feed,   # 迭代之前的分析
             sys_prompt="你是一个程序架构分析师，正在分析一个项目的源代码。" + sys_prompt_additional)
         
-        summary = "请用一句话概括这些文件的整体功能"
+        diagram_code = make_diagram(this_iteration_files, result, this_iteration_history_feed)
+        summary = "请用一句话概括这些文件的整体功能。\n\n" + diagram_code
         summary_result = yield from request_gpt_model_in_new_thread_with_ui_alive(
             inputs=summary, 
             inputs_show_user=summary, 
@@ -104,6 +105,9 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
     chatbot.append(("完成了吗？", res))
     yield from update_ui(chatbot=chatbot, history=history_to_return) # 刷新界面
 
+def make_diagram(this_iteration_files, result, this_iteration_history_feed):
+    from crazy_functions.diagram_fns.file_tree import build_file_tree_mermaid_diagram
+    return build_file_tree_mermaid_diagram(this_iteration_history_feed[0::2], this_iteration_history_feed[1::2], "项目示意图")
 
 @CatchException
 def 解析项目本身(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
