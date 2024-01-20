@@ -52,7 +52,7 @@ def get_plugin_default_kwargs():
     }
     chatbot = ChatBotWithCookies(llm_kwargs)
 
-    # txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port
+    # txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request
     DEFAULT_FN_GROUPS_kwargs = {
         "main_input": "./README.md",
         "llm_kwargs": llm_kwargs,
@@ -60,7 +60,7 @@ def get_plugin_default_kwargs():
         "chatbot_with_cookie": chatbot,
         "history": [],
         "system_prompt": "You are a good AI.",
-        "web_port": None,
+        "user_request": None,
     }
     return DEFAULT_FN_GROUPS_kwargs
 

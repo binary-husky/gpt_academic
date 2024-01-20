@@ -154,8 +154,16 @@ const uml = async className => {
         var block = blocks[i]
         ////////////////////////////// 如果代码没有发生变化，就不渲染了 ///////////////////////////////////
         var code = getFromCode(block);
-        let codeContent = block.querySelector("code").textContent; // 获取code元素中的文本内容
-        let codePendingRenderElement = block.querySelector("code_pending_render"); // 如果block下已存在code_already_rendered元素，则获取它
+        let code_elem = block.querySelector("code");
+        let codeContent = code_elem.textContent; // 获取code元素中的文本内容
+
+        // 判断codeContent是否包含'<gpt_academic_hide_mermaid_code>'，如果是，则使code_elem隐藏
+        if (codeContent.indexOf('<gpt_academic_hide_mermaid_code>') !== -1) {
+            code_elem.style.display = "none";
+        }
+
+        // 如果block下已存在code_already_rendered元素，则获取它
+        let codePendingRenderElement = block.querySelector("code_pending_render");
         if (codePendingRenderElement) {                               // 如果block下已存在code_pending_render元素
             codePendingRenderElement.style.display = "none";
             if (codePendingRenderElement.textContent !== codeContent) {

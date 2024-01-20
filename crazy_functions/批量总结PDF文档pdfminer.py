@@ -124,7 +124,7 @@ def 解析Paper(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbo
 
 
 @CatchException
-def 批量总结PDF文档pdfminer(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 批量总结PDF文档pdfminer(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     history = []    # 清空历史，以免输入溢出
     import glob, os
 

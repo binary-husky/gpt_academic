@@ -135,7 +135,7 @@ def 多文件润色(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
 
 
 @CatchException
-def Latex英文润色(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def Latex英文润色(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
@@ -173,7 +173,7 @@ def Latex英文润色(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
 
 
 @CatchException
-def Latex中文润色(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def Latex中文润色(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
@@ -209,7 +209,7 @@ def Latex中文润色(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
 
 
 @CatchException
-def Latex英文纠错(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def Latex英文纠错(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
