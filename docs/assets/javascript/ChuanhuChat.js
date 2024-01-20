@@ -1,6 +1,3 @@
-
-// ChuanhuChat core javascript
-
 const MAX_HISTORY_LENGTH = 32;
 
 var key_down_history = [];
@@ -48,26 +45,12 @@ let windowWidth = window.innerWidth; // 初始窗口宽度
 var uploadedFilesCountElement = null
 var uploadIndexFileElement = null
 var uploadIndexFileHeight = null
-var uoloadIndexLinkElement = null
-var validImgExtensions = ['png', 'jpg', 'jpeg', 'bmp', 'svg', 'webp', 'ico', 'tif', 'tiff', 'raw', 'eps', 'gif'];
-var validDocsExtensions = ['html', 'htm', 'xhtml', 'css', 'js', 'pdf', 'txt', 'json', 'xml', 'md'];
-// 创建一个ResizeObserver实例
-var uploadHeightObserver = new ResizeObserver(entries => {
-    if (uoloadIndexLinkElement) {  // 如果上传文件的链接存在，则添加鼠标悬停事件
-        uoloadIndexLinkElement.addEventListener('mouseover', showPreview);
-        uoloadIndexLinkElement.addEventListener('mouseout', hidePreview);
-    }
-    for (let entry of entries) {
-    // 获取新的文本框高度
-    const textboxHeight = entry.target.offsetHeight;
-    if (textboxHeight !== uploadIndexFileHeight) {
-      // 更新uploadIndexFile的高度
-      uploadIndexFileElement.style.bottom = 70 + + textboxHeight + `px`;
-      // 更新uploadIndexFileHeight以便下一次比较使用
-      uploadIndexFileHeight = textboxHeight;
-    }
-  }
-});
+var uploadIndexLinkElement = null
+const validImgExtensions = ['png', 'jpg', 'jpeg', 'bmp', 'svg', 'webp', 'ico', 'tif', 'tiff', 'raw', 'eps', 'gif'];
+const validDocsExtensions = ['html', 'htm', 'xhtml', 'css', 'js', 'pdf', 'txt', 'json', 'xml', 'md'];
+const validAudioExtensions = ['mp3', 'wav', 'aac'];
+const validVideoExtensions = ['mp4', 'm4a', 'wav', 'mpeg', 'avi', 'mkv', 'flac', 'aac']
+
 
 function addInit() {
     var needInit = {chatbotIndicator, uploaderIndicator};
@@ -86,7 +69,6 @@ function addInit() {
     }
     chatbotObserver.observe(chatbotIndicator, { attributes: true, childList: true, subtree: true });
     chatListObserver.observe(chatListIndicator, { attributes: true });
-    uploadHeightObserver.observe(user_input_tb.querySelector('[data-testid="textbox"]'))
     setDragUploader();
     return true;
 }
@@ -122,7 +104,7 @@ function initialize() {
     toolbox = gradioApp().querySelector('#toolbox-area');
     uploadedFilesCountElement = gradioApp().querySelector('#uploaded-files-count');
     uploadIndexFileElement = gradioApp().querySelector('#upload-index-file');
-    uoloadIndexLinkElement = uploadedFilesCountElement.querySelector('a');
+    uploadIndexLinkElement = uploadedFilesCountElement.querySelector('a');
     uploadIndexFileHeight = uploadIndexFileElement.offsetHeight;
     // trainBody = gradioApp().querySelector('#train-body');
 

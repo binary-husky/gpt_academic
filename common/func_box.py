@@ -186,15 +186,12 @@ def extract_link_pf(text, valid_types: list):
         pattern_local = r"\((/[^)]+)\)"
         matches_local = re.findall(pattern_local, md_link)
         if matches_path:
-            for t in valid_types:
-                if str(t).lower() in str(os.path.splitext(os.path.basename(matches_path[0]))[-1]).lower():
-                    file_mapping_links.update({local_relative_path(matches_path[0]): md_link})
+            if matches_path[0].split('.')[-1] == valid_types:
+                file_mapping_links.update({local_relative_path(matches_path[0]): md_link})
         elif matches_local:
             if os.path.exists(matches_local[0]):
-                for t in valid_types:
-                    if str(t).lower() in str(os.path.splitext(os.path.basename(matches_local[0]))[-1]).lower():
-                        file_mapping_links.update({local_relative_path(matches_local[0]): md_link})
-
+                if matches_local[0].split('.')[-1] == valid_types:
+                    file_mapping_links.update({local_relative_path(matches_local[0]): md_link})
     return file_mapping_links
 
 

@@ -7,6 +7,7 @@ from common import func_box
 from common import toolbox
 from common.path_handle import init_path
 import os
+import json
 
 
 class Feishu:
@@ -15,6 +16,8 @@ class Feishu:
         self.url = url
         if headers:
             self.header_cookies = headers
+            if isinstance(headers, str):
+                self.header_cookies = json.loads(headers)
         else:
             self.header_cookies = toolbox.get_conf('FEISHU_HEADER_COOKIE')
         self.base_host = 'https://lg0v2tirko.feishu.cn'

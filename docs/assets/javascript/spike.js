@@ -321,24 +321,47 @@ function insertFilePreview(fileRow) {
         if (fileRow.getElementsByClassName('td-preview').length > 0) {
             return;
         }
+
         let tdElem = document.createElement("td");
         tdElem.className = "td-preview";  // 增加标识
+
         let link = fileRow.querySelector('.download a');
         if (!link) {
             return;
         }
+
         let extension = link.download.split('.').pop();
+
         if (validImgExtensions.includes(extension)) {     // 对于图片, 建立 <img>
             let img = document.createElement("img");
             img.src = link.href;
-            img.className = 'td-a-preview'
+            img.className = 'td-a-preview';
             tdElem.appendChild(img);
         } else if (validDocsExtensions.includes(extension)) {  // 对于可读其他文件， 建立 <iframe>
             let iframe = document.createElement('iframe');
             iframe.src = link.href;
-            iframe.className = 'td-a-preview'
+            iframe.className = 'td-a-preview';
             tdElem.appendChild(iframe);
+        } else if(validAudioExtensions.includes(extension)) {   //对于音频文件，建立<audio>
+            let audio = document.createElement('audio');
+            audio.controls = true;    //增加控制条
+            audio.src = link.href;
+            audio.className = 'td-a-preview'
+            tdElem.appendChild(audio);
+        } else if(validVideoExtensions.includes(extension)) {   //对于视频文件，建立<video>
+             let video = document.createElement('video');
+             video.controls = true;      //增加控制条
+             video.src = link.href;
+             video.className = 'td-a-preview'
+             tdElem.appendChild(video);
+        } else {   // 对于不能在网页中预览的，增加一个提示
+            let textNode = document.createTextNode("无法预览此类型的文件");
+            let para = document.createElement('p');
+            para.style.width = "100px";
+            para.style.height = "75px";
+            tdElem.appendChild(textNode);
         }
+
         fileRow.appendChild(tdElem);
     }
 }

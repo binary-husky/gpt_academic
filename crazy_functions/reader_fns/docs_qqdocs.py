@@ -14,6 +14,8 @@ class QQDocs:
 
     def __init__(self, link, cookies=None):
         if cookies:
+            if isinstance(cookies, str):
+                self.cookies = json.loads(cookies)
             self.cookies = cookies
         else:
             self.cookies = toolbox.get_conf('QQ_COOKIES')

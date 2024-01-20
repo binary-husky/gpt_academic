@@ -626,7 +626,7 @@ def result_written_to_markdown(gpt_response_collection, llm_kwargs, plugin_kwarg
     return file_limit
 
 
-def detach_cloud_links(link_limit, chatbot, history, llm_kwargs):
+def detach_cloud_links(link_limit, chatbot, history, llm_kwargs, valid_types):
     fp_mapping = {}
     if isinstance(chatbot, list) and isinstance(history, list):
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='正在解析云文件链接...')
@@ -638,7 +638,8 @@ def detach_cloud_links(link_limit, chatbot, history, llm_kwargs):
         wps_status, wps_mapping = reader_fns.get_kdocs_from_limit(wps_links, save_path, llm_kwargs.get('wps_cookies'))
         fp_mapping.update(wps_mapping)
     except Exception as e:
-        chatbot[-1][1] += f'ERROR: {e}'
+        error = toolbox.trimmed_format_exc()
+        wps_status += f'# 下载WPS文档出错了 \n ERROR: {error} \n'
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='下载WPS文档出错了')
     try:
         # qq云文档下载
@@ -646,20 +647,27 @@ def detach_cloud_links(link_limit, chatbot, history, llm_kwargs):
         qq_status, qq_mapping = reader_fns.get_qqdocs_from_limit(qq_link, save_path, llm_kwargs.get('qq_cookies'))
         fp_mapping.update(qq_mapping)
     except Exception as e:
-        chatbot[-1][1] += f'ERROR: {e}'
+        error = toolbox.trimmed_format_exc()
+        wps_status += f'# 下载QQ文档出错了 \n ERROR: {error}'
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='下载QQ文档出错了')
     try:
         # 飞书云文档下载
         feishu_link = func_box.split_domain_url(link_limit, domain_name=['lg0v2tirko'])
         feishu_status, feishu_mapping = reader_fns.get_feishu_from_limit(feishu_link, save_path,
-                                                                         llm_kwargs.get('feishu_cookies'))
+                                                                         llm_kwargs.get('feishu_header'))
         fp_mapping.update(feishu_mapping)
     except Exception as e:
-        chatbot[-1][1] += f'ERROR: {e}'
+        error = toolbox.trimmed_format_exc()
+        wps_status += f'# 下载飞书文档出错了 \n ERROR: {error}'
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='下载飞书文档出错了')
     download_status = ''
     if wps_status or qq_status or feishu_status:
-        download_status = "\n".join([wps_status, qq_status, feishu_status])
+        download_status = "\n".join([wps_status, qq_status, feishu_status]).strip('\n')
+    # 筛选文件
+    for fp in fp_mapping:
+        if fp_mapping[fp].split('.')[-1] not in valid_types:
+            fp_mapping.pop(fp)  # 过滤不能处理的文件
+            download_status += '\n\n' + f'过滤掉了`{fp_mapping[fp]}`，因为不是插件能够接收处理的文件类型`{valid_types}`'
     return fp_mapping, download_status
 
 
@@ -710,15 +718,16 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
     chatbot.append([user_input, None])
     yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='🕵🏻‍超级侦探，正在办案～')
     # 云文件
-    fp_mapping, download_status = yield from detach_cloud_links(user_input, chatbot, history, llm_kwargs)
+    fp_mapping, download_status = yield from detach_cloud_links(user_input, chatbot, history, llm_kwargs, valid_types)
+    if download_status:
+        chatbot[-1][1] = f'\n\n下载云文档似乎出了点问题？\n\n```python\n{download_status}\n```\n\n'
+        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='🕵🏻 ‍出师未捷身先死🏴‍☠️')
     # 本地文件
     fp_mapping.update(func_box.extract_link_pf(user_input, valid_types))
     content_mapping = yield from file_extraction_intype(fp_mapping, chatbot, history, llm_kwargs, plugin_kwargs)
     if content_mapping:
         mapping_data = func_box.html_folded_code(json.dumps(content_mapping, indent=4, ensure_ascii=False))
         map_bro_say = f'数据解析完成，提取`fp mapping`如下：\n\n{mapping_data}'
-        if download_status:
-            map_bro_say += f'\n\n下载云文档似乎出了点问题？请检查\n\n```\n{download_status}\n```'
         chatbot.append([None, map_bro_say])
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='数据解析完成！')
         for content_fp in content_mapping:  # 一个文件一个对话
@@ -733,21 +742,21 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
             embedding_content.extend([os.path.basename(content_fp), complete_input])
 
     elif len(user_input) > 100:  # 没有探测到任何文件，并且提交大于50个字符，那么运行往下走
-        chatbot[-1] = [user_input, None]
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='没有探测到文件')
-        embedding_content.extend([user_input, user_input])
-    else:
-        devs_document = toolbox.get_conf('devs_document')
-        status = '没有探测到任何文件，并且提交字符少于50，无法完成后续任务'
-        status += f'请在输入框中输入需要解析的云文档链接或本地文件地址，然后再点击对应的插件\n\n' \
-                  f'插件支持解析文档类型{func_box.html_tag_color(valid_types)}' \
-                  f'链接需要是可访问的，格式如下，如果有多个文档则用换行或空格隔开，输入后再点击对应的插件' \
-                  f"有问题？请联系`@spike` or 查看开发文档{devs_document}"
         # 识别图片链接内容
         complete_input = yield from content_img_vision_analyze(user_input, chatbot, history,
                                                                llm_kwargs, plugin_kwargs)
         embedding_content = [user_input, complete_input]
-        chatbot[-1] = [user_input, status]
+        embedding_content.extend([user_input, user_input])
+    else:
+        devs_document = toolbox.get_conf('devs_document')
+        status = '没有探测到任何文件，并且提交字符少于50，无法完成后续任务'
+        status += f'请在输入框中输入需要解析的云文档链接或本地文件地址，如果有多个文档则用换行或空格隔开，然后再点击对应的插件\n\n' \
+                  f'插件支持解析文档类型`{valid_types}`' \
+                  f"有问题？请联系`@spike` or 查看开发文档{devs_document}"
+        if chatbot[-1][1] is None:
+            chatbot[-1][1] = status
+        chatbot[-1][1] += status
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='没有探测到数据')
     # 提交知识库 ... 未适配
     return embedding_content

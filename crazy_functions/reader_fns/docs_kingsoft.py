@@ -20,6 +20,8 @@ class Kdocs:
     def __init__(self, url, cookies=None):
         if cookies:
             self.cookies = cookies
+            if isinstance(cookies, str):
+                self.cookies = json.loads(cookies)
         else:
             self.cookies = toolbox.get_conf('WPS_COOKIES')
         self.url = url

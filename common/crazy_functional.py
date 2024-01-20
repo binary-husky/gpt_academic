@@ -427,7 +427,7 @@ def get_functions_云文档处理():
                 }],
                 "写入指定模版": "./docs/template/测试用例模版.xlsx",
                 "写入指定Sheet": "测试要点",
-                "处理文件类型": ['md', 'txt', 'pdf', 'xmind', '智能文档']
+                "处理文件类型": ['md', 'txt', 'pdf', 'docx', 'xmind', '智能文档']
             }
         },
         "接口文档转测试用例": {
@@ -450,7 +450,7 @@ def get_functions_云文档处理():
                 ],
                 "写入指定模版": "./docs/template/接口测试用例模板.xlsx",
                 "写入指定Sheet": "测试要点",
-                "处理文件类型": ['md', 'txt', 'pdf', 'xmind', '智能文档']
+                "处理文件类型": ['md', 'txt', 'pdf', 'docx', 'xmind', '智能文档']
             }
         },
         "测试用例检查优化": {
@@ -488,7 +488,7 @@ def get_functions_云文档处理():
                 "阶段性产出": [{
                     "提示词": "需求分析对话"}
                 ],
-                "处理文件类型": ['md', 'txt', 'pdf', 'xmind', '智能文档']
+                "处理文件类型": ['md', 'txt', 'pdf', 'docx', 'xmind', '智能文档']
             }
         },
         "文档转流程图": {
@@ -506,7 +506,7 @@ def get_functions_云文档处理():
                     "调用方法": "Markdown转换为流程图",
                 }
                 ],
-                "处理文件类型": ['md', 'txt', 'pdf', 'xmind', '智能文档']
+                "处理文件类型": ['md', 'txt', 'pdf', 'docx', 'xmind', '智能文档']
             }
         },
         "批量总结音视频": {
@@ -559,7 +559,7 @@ def get_functions_云文档处理():
                 "上下文处理": False,
                 "写入指定模版": "./docs/template/测试用例模版.xlsx",
                 "写入指定Sheet": "测试要点",
-                "处理文件类型": ['md', 'txt', 'pdf', 'xmind', '智能文档', 'xlsx']
+                "处理文件类型": ['md', 'txt', 'pdf', 'xmind', 'docx', '智能文档', 'xlsx']
             }
         },
 
