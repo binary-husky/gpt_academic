@@ -27,9 +27,10 @@ def eval_manim(code):
     class_name = get_class_name(code)
 
     try: 
+        time_str = gen_time_str()
         subprocess.check_output([sys.executable, '-c', f"from gpt_log.MyAnimation import {class_name}; {class_name}().render()"])
-        shutil.move('media/videos/1080p60/{class_name}.mp4', f'gpt_log/{class_name}-{gen_time_str()}.mp4')
-        return f'gpt_log/{gen_time_str()}.mp4'
+        shutil.move(f'media/videos/1080p60/{class_name}.mp4', f'gpt_log/{class_name}-{time_str}.mp4')
+        return f'gpt_log/{time_str}.mp4'
     except subprocess.CalledProcessError as e:
         output = e.output.decode()
         print(f"Command returned non-zero exit status {e.returncode}: {output}.")
