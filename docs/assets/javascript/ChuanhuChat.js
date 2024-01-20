@@ -141,6 +141,7 @@ function initialize() {
     // 提示词点击后，光标重定向到输入框
     move_cursor();
     //
+    toast_move_main()
     check_move_list();
     btn_move_to_tab();
     add_func_event();

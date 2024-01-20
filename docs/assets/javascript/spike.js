@@ -11,6 +11,13 @@ function move_cursor() {
     }
 }
 
+function toast_move_main() {
+    const spike_toast_info = gradioApp().getElementById('spike-toast-info');
+    const gradio_main = gradioApp().querySelector('.gradio-container > .main')
+    if (!gradio_main.querySelector('#spike-toast-info')) {
+        gradio_main.appendChild(spike_toast_info);
+    }
+}
 function check_move_list() {
     const promptList = document.getElementById('prompt_list');
     const pm_check = document.getElementById('pm_check');

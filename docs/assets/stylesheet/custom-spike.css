@@ -244,24 +244,7 @@ code.language-folded {
     opacity: 0.90;
     backdrop-filter: blur(24px);
 }
-#spike-toast-info {
-    position: fixed;
-    opacity: 0.90;
-    margin-left: 10px;
-    width: 340px;
-    margin-top: -30px;
-    backdrop-filter: blur(24px);
-    z-index: 99999999999999;
-}
-.chatbot-full-width #spike-toast-info {
-    position: fixed;
-    opacity: 0.90;
-    margin-top: -30px;
-    width: auto;
-    margin-left: 570px;
-    backdrop-filter: blur(24px);
-    z-index: 99999999999999;
-}
+
 #spike-toast-info .wrap.center {
     display: none !important;
 }
