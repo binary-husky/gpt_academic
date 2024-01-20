@@ -26,7 +26,7 @@ def 猜你想问(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
         history=history,
         sys_prompt=system_prompt
     )
-    chatbot[-1] = (show_say, gpt_say)
+    chatbot[-1] = [show_say, gpt_say]
     history.extend([show_say, gpt_say])
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 

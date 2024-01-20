@@ -123,13 +123,13 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
 
     raw_input = inputs
     logging.info(f'[raw_input] {raw_input}')
-    chatbot.append((inputs, ""))
+    chatbot.append([inputs, ""])
     yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
 
     try:
         headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt, stream)
     except RuntimeError as e:
-        chatbot[-1] = (inputs, f"您提供的api-key不满足要求，不包含任何可用于{llm_kwargs['llm_model']}的api-key。您可能选择了错误的模型或请求源。")
+        chatbot[-1] = [inputs, f"您提供的api-key不满足要求，不包含任何可用于{llm_kwargs['llm_model']}的api-key。您可能选择了错误的模型或请求源。"]
         yield from update_ui(chatbot=chatbot, history=history, msg="api-key不满足要求") # 刷新界面
         return
         
@@ -145,7 +145,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                                     json=payload, stream=True, timeout=TIMEOUT_SECONDS);break
         except:
             retry += 1
-            chatbot[-1] = ((chatbot[-1][0], timeout_bot_msg))
+            chatbot[-1] = [(chatbot[-1][0], timeout_bot_msg)]
             retry_msg = f"，正在重试 ({retry}/{MAX_RETRY}) ……" if MAX_RETRY > 0 else ""
             yield from update_ui(chatbot=chatbot, history=history, msg="请求超时"+retry_msg) # 刷新界面
             if retry > MAX_RETRY: raise TimeoutError
@@ -186,7 +186,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     if "content" in delta:
                         gpt_replying_buffer = gpt_replying_buffer + delta["content"]
                     history[-1] = gpt_replying_buffer
-                    chatbot[-1] = (history[-2], history[-1])
+                    chatbot[-1] = [history[-2], history[-1]]
                     yield from update_ui(chatbot=chatbot, history=history, msg=status_text) # 刷新界面
                 except Exception as e:
                     yield from update_ui(chatbot=chatbot, history=history, msg="Json解析不合常规") # 刷新界面
@@ -205,26 +205,26 @@ def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
         if len(history) >= 2: history[-1] = ""; history[-2] = "" # 清除当前溢出的输入：history[-2] 是本次输入, history[-1] 是本次输出
         history = clip_history(inputs=inputs, history=history, tokenizer=model_info[llm_kwargs['llm_model']]['tokenizer'], 
                                                max_token_limit=(model_info[llm_kwargs['llm_model']]['max_token'])) # history至少释放二分之一
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] Reduce the length. 本次输入过长, 或历史数据过长. 历史缓存数据已部分释放, 您可以请再次尝试. (若再次失败则更可能是因为输入过长.)")
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] Reduce the length. 本次输入过长, 或历史数据过长. 历史缓存数据已部分释放, 您可以请再次尝试. (若再次失败则更可能是因为输入过长.)"]
                         # history = []    # 清除历史
     elif "does not exist" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], f"[Local Message] Model {llm_kwargs['llm_model']} does not exist. 模型不存在, 或者您没有获得体验资格.")
+        chatbot[-1] = [chatbot[-1][0], f"[Local Message] Model {llm_kwargs['llm_model']} does not exist. 模型不存在, 或者您没有获得体验资格."]
     elif "Incorrect API key" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] Incorrect API key. OpenAI以提供了不正确的API_KEY为由, 拒绝服务. " + openai_website)
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] Incorrect API key. OpenAI以提供了不正确的API_KEY为由, 拒绝服务. " + openai_website]
     elif "exceeded your current quota" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] You exceeded your current quota. OpenAI以账户额度不足为由, 拒绝服务." + openai_website)
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] You exceeded your current quota. OpenAI以账户额度不足为由, 拒绝服务." + openai_website]
     elif "account is not active" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] Your account is not active. OpenAI以账户失效为由, 拒绝服务." + openai_website)
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] Your account is not active. OpenAI以账户失效为由, 拒绝服务." + openai_website]
     elif "associated with a deactivated account" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] You are associated with a deactivated account. OpenAI以账户失效为由, 拒绝服务." + openai_website)
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] You are associated with a deactivated account. OpenAI以账户失效为由, 拒绝服务." + openai_website]
     elif "bad forward key" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] Bad forward key. API2D账户额度不足.")
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] Bad forward key. API2D账户额度不足."]
     elif "Not enough point" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] Not enough point. API2D账户点数不足.")
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] Not enough point. API2D账户点数不足."]
     else:
         from common.toolbox import regular_txt_to_markdown
         tb_str = '```\n' + trimmed_format_exc() + '```'
-        chatbot[-1] = (chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str} \n\n{regular_txt_to_markdown(chunk_decoded)}")
+        chatbot[-1] = [chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str} \n\n{regular_txt_to_markdown(chunk_decoded)}"]
     return chatbot, history
 
 def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):

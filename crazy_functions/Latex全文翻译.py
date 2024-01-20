@@ -98,7 +98,7 @@ def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
     res = write_history_to_file(gpt_response_collection, create_report_file_name)
     promote_file_to_downloadzone(res, chatbot=chatbot)
     history = gpt_response_collection
-    chatbot.append((f"{fp}完成了吗？", res))
+    chatbot.append([f"{fp}完成了吗？", res])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
 

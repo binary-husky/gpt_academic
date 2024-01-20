@@ -49,7 +49,7 @@ def 解析docx(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot
                 sys_prompt="总结文章。"
             )
 
-            chatbot[-1] = (i_say_show_user, gpt_say)
+            chatbot[-1] = [i_say_show_user, gpt_say]
             history.extend([i_say_show_user,gpt_say])
             this_paper_history.extend([i_say_show_user,gpt_say])
 
@@ -70,12 +70,12 @@ def 解析docx(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot
 
         res = write_history_to_file(history)
         promote_file_to_downloadzone(res, chatbot=chatbot)
-        chatbot.append(("完成了吗？", res))
+        chatbot.append(["完成了吗？", res])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     res = write_history_to_file(history)
     promote_file_to_downloadzone(res, chatbot=chatbot)
-    chatbot.append(("所有文件都总结完成了吗？", res))
+    chatbot.append(["所有文件都总结完成了吗？", res])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
 

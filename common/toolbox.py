@@ -393,7 +393,7 @@ def report_exception(chatbot, history, a, b):
     """
     向chatbot中添加错误信息
     """
-    chatbot.append((a, b))
+    chatbot.append([1])
     history.extend([a, b])
 
 

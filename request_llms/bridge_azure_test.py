@@ -54,7 +54,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
 
     raw_input = inputs
     logging.info(f'[raw_input] {raw_input}')
-    chatbot.append((inputs, ""))
+    chatbot.append([inputs, ""])
     yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
 
     
@@ -74,7 +74,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         
         except:
             retry += 1
-            chatbot[-1] = ((chatbot[-1][0], "获取response失败，重试中。。。"))
+            chatbot[-1] = [(chatbot[-1][0], "获取response失败，重试中。。。")]
             retry_msg = f"，正在重试 ({retry}/{MAX_RETRY}) ……" if MAX_RETRY > 0 else ""
             yield from update_ui(chatbot=chatbot, history=history, msg="请求超时"+retry_msg) # 刷新界面
             if retry > MAX_RETRY: raise TimeoutError
@@ -91,7 +91,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     
             except StopIteration:                
                 from common.toolbox import regular_txt_to_markdown; tb_str = '```\n' + trimmed_format_exc() + '```'
-                chatbot[-1] = (chatbot[-1][0], f"[Local Message] 远程返回错误: \n\n{tb_str} \n\n{regular_txt_to_markdown(chunk)}")
+                chatbot[-1] = [chatbot[-1][0], f"[Local Message] 远程返回错误: \n\n{tb_str} \n\n{regular_txt_to_markdown(chunk)}"]
                 yield from update_ui(chatbot=chatbot, history=history, msg="远程返回错误:" + chunk) # 刷新界面
                 return            
             
@@ -110,7 +110,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     gpt_replying_buffer = gpt_replying_buffer + chunk["choices"][0]["delta"]["content"]                               
                        
                     history[-1] = gpt_replying_buffer
-                    chatbot[-1] = (history[-2], history[-1])
+                    chatbot[-1] = [history[-2], history[-1]]
                     yield from update_ui(chatbot=chatbot, history=history, msg=status_text) # 刷新界面
 
                 except Exception as e:

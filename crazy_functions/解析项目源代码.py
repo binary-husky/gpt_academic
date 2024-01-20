@@ -47,7 +47,7 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
     history_to_return = report_part_1
     res = write_history_to_file(report_part_1)
     promote_file_to_downloadzone(res, chatbot=chatbot)
-    chatbot.append(("完成？", "逐个文件分析已完成。" + res + "\n\n正在开始汇总。"))
+    chatbot.append(["完成？", "逐个文件分析已完成。" + res + "\n\n正在开始汇总。"])
     yield from update_ui(chatbot=chatbot, history=history_to_return) # 刷新界面
 
     ############################## <第二步，综合，单线程，分组+迭代处理> ##################################
@@ -102,7 +102,7 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
     history_to_return.extend(report_part_2)
     res = write_history_to_file(history_to_return)
     promote_file_to_downloadzone(res, chatbot=chatbot)
-    chatbot.append(("完成了吗？", res))
+    chatbot.append(["完成了吗？", res])
     yield from update_ui(chatbot=chatbot, history=history_to_return) # 刷新界面
 
 

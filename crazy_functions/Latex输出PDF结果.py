@@ -207,11 +207,11 @@ def Latex英文纠错加PDF对比(txt, llm_kwargs, plugin_kwargs, chatbot, histo
     # <-------------- zip PDF ------------->
     zip_res = zip_result(project_folder)
     if success:
-        chatbot.append((f"成功啦", '请查收结果（压缩包）...'))
+        chatbot.append([f"成功啦", '请查收结果（压缩包）...'])
         yield from update_ui(chatbot=chatbot, history=history); time.sleep(1) # 刷新界面
         promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
     else:
-        chatbot.append((f"失败了", '虽然PDF生成失败了, 但请查收结果（压缩包）, 内含已经翻译的Tex文档, 也是可读的, 您可以到Github Issue区, 用该压缩包+对话历史存档进行反馈 ...'))
+        chatbot.append([f"失败了", '虽然PDF生成失败了, 但请查收结果（压缩包）, 内含已经翻译的Tex文档, 也是可读的, 您可以到Github Issue区, 用该压缩包+对话历史存档进行反馈 ...'])
         yield from update_ui(chatbot=chatbot, history=history); time.sleep(1) # 刷新界面
         promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
 
@@ -293,11 +293,11 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
     # <-------------- zip PDF ------------->
     zip_res = zip_result(project_folder)
     if success:
-        chatbot.append((f"成功啦", '请查收结果（压缩包）...'))
+        chatbot.append([f"成功啦", '请查收结果（压缩包）...'])
         yield from update_ui(chatbot=chatbot, history=history); time.sleep(1) # 刷新界面
         promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
     else:
-        chatbot.append((f"失败了", '虽然PDF生成失败了, 但请查收结果（压缩包）, 内含已经翻译的Tex文档, 您可以到Github Issue区, 用该压缩包进行反馈。如系统是Linux，请检查系统字体（见Github wiki） ...'))
+        chatbot.append([f"失败了", '虽然PDF生成失败了, 但请查收结果（压缩包）, 内含已经翻译的Tex文档, 您可以到Github Issue区, 用该压缩包进行反馈。如系统是Linux，请检查系统字体（见Github wiki） ...'])
         yield from update_ui(chatbot=chatbot, history=history); time.sleep(1) # 刷新界面
         promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
 

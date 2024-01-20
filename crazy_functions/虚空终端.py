@@ -111,7 +111,7 @@ def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     # 获取当前虚空终端状态
     state = VoidTerminalState.get_state(chatbot)
     appendix_msg = ""
-    chatbot.append((txt, f'由`{llm_kwargs["llm_model"]}`作为插件代理人，正在识别您的意图，请稍等...'))
+    chatbot.append([txt, f'由`{llm_kwargs["llm_model"]}`作为插件代理人，正在识别您的意图，请稍等...'])
     # 用简单的关键词检测用户意图
     is_certain, _ = analyze_intention_with_simple_rules(txt)
     if is_the_upload_folder(txt):
@@ -129,7 +129,7 @@ def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
         # 如果意图模糊，提示，并转发到普通对话
         state.set_state(chatbot=chatbot, key='has_provided_explaination', value=True)
         state.lock_plugin(chatbot=chatbot)
-        chatbot.append((None, explain_msg+appendix_msg))
+        chatbot.append([None, explain_msg+appendix_msg])
         yield from update_ui(chatbot=chatbot, history=history)
         from crazy_functions.reader_fns import crazy_box
         yield from crazy_box.submit_multithreaded_tasks([txt],  [txt], llm_kwargs, chatbot, history, plugin_kwargs)
@@ -139,7 +139,7 @@ def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
 
 def 虚空终端主路由(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     history = []
-    chatbot.append((None, f"正在执行任务: {txt}"))
+    chatbot.append([None, f"正在执行任务: {txt}"])
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
     # ⭐ ⭐ ⭐ 分析用户意图

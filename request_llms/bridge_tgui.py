@@ -136,7 +136,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         if tgui_say != mutable[0]:
             tgui_say = mutable[0]
             history[-1] = tgui_say
-            chatbot[-1] = (history[-2], history[-1])
+            chatbot[-1] = [history[-2], history[-1]]
             yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
 

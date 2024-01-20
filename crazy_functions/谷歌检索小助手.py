@@ -190,5 +190,5 @@ def 谷歌检索小助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     yield from update_ui(chatbot=chatbot, history=history, msg=msg)  # 刷新界面
     path = write_history_to_file(history)
     promote_file_to_downloadzone(path, chatbot=chatbot)
-    chatbot.append(("完成了吗？", path));
+    chatbot.append(["完成了吗？", path]);
     yield from update_ui(chatbot=chatbot, history=history, msg=msg)  # 刷新界面

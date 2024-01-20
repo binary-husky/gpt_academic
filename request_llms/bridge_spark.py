@@ -38,7 +38,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         ⭐单线程方法
         函数的说明请见 request_llms/bridge_all.py
     """
-    chatbot.append((inputs, ""))
+    chatbot.append([inputs, ""])
     yield from update_ui(chatbot=chatbot, history=history)
 
     if validate_key() is False:
@@ -54,7 +54,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     from .com_sparkapi import SparkRequestInstance
     sri = SparkRequestInstance()
     for response in sri.generate(inputs, llm_kwargs, history, system_prompt, use_image_api=True):
-        chatbot[-1] = (inputs, response)
+        chatbot[-1] = [inputs, response]
         yield from update_ui(chatbot=chatbot, history=history)
 
     # 总结输出

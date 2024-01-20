@@ -145,12 +145,12 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         单线程方法
         函数的说明请见 request_llms/bridge_all.py
     """
-    chatbot.append((inputs, ""))
+    chatbot.append([inputs, ""])
 
     global pangu_glm_handle
     if pangu_glm_handle is None:
         pangu_glm_handle = GetGLMHandle()
-        chatbot[-1] = (inputs, load_message + "\n\n" + pangu_glm_handle.info)
+        chatbot[-1] = [inputs, load_message + "\n\n" + pangu_glm_handle.info]
         yield from update_ui(chatbot=chatbot, history=[])
         if not pangu_glm_handle.success: 
             pangu_glm_handle = None
@@ -168,7 +168,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     # 开始接收jittorllms的回复
     response = "[Local Message] 等待jittorllms响应中 ..."
     for response in pangu_glm_handle.stream_chat(query=inputs, history=history_feedin, system_prompt=system_prompt, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
-        chatbot[-1] = (inputs, response)
+        chatbot[-1] = [inputs, response]
         yield from update_ui(chatbot=chatbot, history=history)
 
     # 总结输出

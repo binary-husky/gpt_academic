@@ -102,7 +102,7 @@ def AnalyAudio(parse_prompt, file_manifest, llm_kwargs, chatbot, history):
                 sys_prompt=f"总结音频。音频文件名{fp}"
             )
 
-            chatbot[-1] = (i_say_show_user, gpt_say)
+            chatbot[-1] = [i_say_show_user, gpt_say]
             history.extend([i_say_show_user, gpt_say])
             audio_history.extend([i_say_show_user, gpt_say])
 
@@ -124,7 +124,7 @@ def AnalyAudio(parse_prompt, file_manifest, llm_kwargs, chatbot, history):
 
         res = write_history_to_file(history)
         promote_file_to_downloadzone(res, chatbot=chatbot)
-        chatbot.append((f"第{index + 1}段音频完成了吗？", res))
+        chatbot.append([f"第{index + 1}段音频完成了吗？", res])
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
     # 删除中间文件夹
@@ -132,7 +132,7 @@ def AnalyAudio(parse_prompt, file_manifest, llm_kwargs, chatbot, history):
     shutil.rmtree(f"{get_log_folder(plugin_name='audio')}/mp3")
     res = write_history_to_file(history)
     promote_file_to_downloadzone(res, chatbot=chatbot)
-    chatbot.append(("所有音频都总结完成了吗？", res))
+    chatbot.append(["所有音频都总结完成了吗？", res])
     yield from update_ui(chatbot=chatbot, history=history)
 
 

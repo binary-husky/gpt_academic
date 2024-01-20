@@ -101,7 +101,7 @@ def 连接bing搜索回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, histor
         llm_kwargs=llm_kwargs, chatbot=chatbot, history=history,
         sys_prompt="请从给定的若干条搜索结果中抽取信息，对最相关的两个搜索结果进行总结，然后回答问题。"
     )
-    chatbot[-1] = (i_say, gpt_say)
+    chatbot[-1] = [i_say, gpt_say]
     history.append(i_say)
     history.append(gpt_say)
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新

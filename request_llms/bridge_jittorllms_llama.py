@@ -144,12 +144,12 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         单线程方法
         函数的说明请见 request_llms/bridge_all.py
     """
-    chatbot.append((inputs, ""))
+    chatbot.append([inputs, ""])
 
     global llama_glm_handle
     if llama_glm_handle is None:
         llama_glm_handle = GetGLMHandle()
-        chatbot[-1] = (inputs, load_message + "\n\n" + llama_glm_handle.info)
+        chatbot[-1] = [inputs, load_message + "\n\n" + llama_glm_handle.info]
         yield from update_ui(chatbot=chatbot, history=[])
         if not llama_glm_handle.success: 
             llama_glm_handle = None
@@ -167,7 +167,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     # 开始接收jittorllms的回复
     response = "[Local Message] 等待jittorllms响应中 ..."
     for response in llama_glm_handle.stream_chat(query=inputs, history=history_feedin, system_prompt=system_prompt, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
-        chatbot[-1] = (inputs, response)
+        chatbot[-1] = [inputs, response]
         yield from update_ui(chatbot=chatbot, history=history)
 
     # 总结输出

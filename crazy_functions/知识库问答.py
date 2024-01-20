@@ -29,7 +29,7 @@ def 知识库文件注入(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     kai_id = plugin_kwargs.get("advanced_arg", 'default')
 
-    chatbot.append((f"向`{kai_id}`知识库中添加文件。", "[Local Message] 从一批文件(txt, md, tex)中读取数据构建知识库, 然后进行问答。"))
+    chatbot.append([f"向`{kai_id}`知识库中添加文件。", "[Local Message] 从一批文件(txt, md, tex)中读取数据构建知识库, 然后进行问答。"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # resolve deps
@@ -106,7 +106,7 @@ def 读取知识库作答(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     vs_path = get_log_folder(user=get_user(chatbot), plugin_name='vec_store')
     resp, prompt = kai.answer_with_archive_by_id(txt, kai_id, vs_path)
 
-    chatbot.append((txt, f'[知识库 {kai_id}] ' + prompt))
+    chatbot.append([txt, f'[知识库 {kai_id}] ' + prompt])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
     gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
         inputs=prompt, inputs_show_user=txt, 

@@ -112,7 +112,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     """
     from anthropic import Anthropic
     if len(ANTHROPIC_API_KEY) == 0:
-        chatbot.append((inputs, "没有设置ANTHROPIC_API_KEY"))
+        chatbot.append([inputs, "没有设置ANTHROPIC_API_KEY"])
         yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
         return
     
@@ -122,13 +122,13 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
 
     raw_input = inputs
     logging.info(f'[raw_input] {raw_input}')
-    chatbot.append((inputs, ""))
+    chatbot.append([inputs, ""])
     yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
 
     try:
         prompt = generate_payload(inputs, llm_kwargs, history, system_prompt, stream)
     except RuntimeError as e:
-        chatbot[-1] = (inputs, f"您提供的api-key不满足要求，不包含任何可用于{llm_kwargs['llm_model']}的api-key。您可能选择了错误的模型或请求源。")
+        chatbot[-1] = [inputs, f"您提供的api-key不满足要求，不包含任何可用于{llm_kwargs['llm_model']}的api-key。您可能选择了错误的模型或请求源。"]
         yield from update_ui(chatbot=chatbot, history=history, msg="api-key不满足要求") # 刷新界面
         return
 
@@ -153,7 +153,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             break
         except:
             retry += 1
-            chatbot[-1] = ((chatbot[-1][0], timeout_bot_msg))
+            chatbot[-1] = [(chatbot[-1][0], timeout_bot_msg)]
             retry_msg = f"，正在重试 ({retry}/{MAX_RETRY}) ……" if MAX_RETRY > 0 else ""
             yield from update_ui(chatbot=chatbot, history=history, msg="请求超时"+retry_msg) # 刷新界面
             if retry > MAX_RETRY: raise TimeoutError
@@ -164,13 +164,13 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         try:
             gpt_replying_buffer = gpt_replying_buffer + completion.completion
             history[-1] = gpt_replying_buffer
-            chatbot[-1] = (history[-2], history[-1])
+            chatbot[-1] = [history[-2], history[-1]]
             yield from update_ui(chatbot=chatbot, history=history, msg='正常') # 刷新界面
 
         except Exception as e:
             from common.toolbox import regular_txt_to_markdown
             tb_str = '```\n' + trimmed_format_exc() + '```'
-            chatbot[-1] = (chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str}")
+            chatbot[-1] = [chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str}"]
             yield from update_ui(chatbot=chatbot, history=history, msg="Json异常" + tb_str) # 刷新界面
             return
         

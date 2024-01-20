@@ -78,19 +78,19 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
 
     if is_any_api_key(inputs):
         chatbot._cookies['api_key'] = inputs
-        chatbot.append(("输入已识别为openai的api_key", what_keys(inputs)))
+        chatbot.append(["输入已识别为openai的api_key", what_keys(inputs]))
         yield from update_ui(chatbot=chatbot, history=history, msg="api_key已导入") # 刷新界面
         return
     elif not is_any_api_key(chatbot._cookies['api_key']):
-        chatbot.append((inputs, "缺少api_key。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。"))
+        chatbot.append([inputs, "缺少api_key。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。"])
         yield from update_ui(chatbot=chatbot, history=history, msg="缺少api_key") # 刷新界面
         return
     if not have_recent_file:
-        chatbot.append((inputs, "没有检测到任何近期上传的图像文件，请上传jpg格式的图片，此外，请注意拓展名需要小写"))
+        chatbot.append([inputs, "没有检测到任何近期上传的图像文件，请上传jpg格式的图片，此外，请注意拓展名需要小写"])
         yield from update_ui(chatbot=chatbot, history=history, msg="等待图片") # 刷新界面
         return
     if os.path.exists(inputs):
-        chatbot.append((inputs, "已经接收到您上传的文件，您不需要再重复强调该文件的路径了，请直接输入您的问题。"))
+        chatbot.append([inputs, "已经接收到您上传的文件，您不需要再重复强调该文件的路径了，请直接输入您的问题。"])
         yield from update_ui(chatbot=chatbot, history=history, msg="等待指令") # 刷新界面
         return
 
@@ -106,19 +106,19 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         for image_path in image_paths:
             inputs = inputs + f'<br/><br/><div align="center"><img src="file={os.path.abspath(image_path)}"></div>'
         return inputs
-    chatbot.append((make_media_input(inputs, image_paths), ""))
+    chatbot.append([make_media_input(inputs, image_paths), ""])
     yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
 
     # check mis-behavior
     if is_the_upload_folder(user_input):
-        chatbot[-1] = (inputs, f"[Local Message] 检测到操作错误！当您上传文档之后，需点击“**函数插件区**”按钮进行处理，请勿点击“提交”按钮或者“基础功能区”按钮。")
+        chatbot[-1] = [inputs, f"[Local Message] 检测到操作错误！当您上传文档之后，需点击“**函数插件区**”按钮进行处理，请勿点击“提交”按钮或者“基础功能区”按钮。"]
         yield from update_ui(chatbot=chatbot, history=history, msg="正常") # 刷新界面
         time.sleep(2)
 
     try:
         headers, payload, api_key = generate_payload(inputs, llm_kwargs, history, system_prompt, image_paths)
     except RuntimeError as e:
-        chatbot[-1] = (inputs, f"您提供的api-key不满足要求，不包含任何可用于{llm_kwargs['llm_model']}的api-key。您可能选择了错误的模型或请求源。")
+        chatbot[-1] = [inputs, f"您提供的api-key不满足要求，不包含任何可用于{llm_kwargs['llm_model']}的api-key。您可能选择了错误的模型或请求源。"]
         yield from update_ui(chatbot=chatbot, history=history, msg="api-key不满足要求") # 刷新界面
         return
         
@@ -128,7 +128,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         endpoint = verify_endpoint(model_info[llm_kwargs['llm_model']]['endpoint'])
     except:
         tb_str = '```\n' + trimmed_format_exc() + '```'
-        chatbot[-1] = (inputs, tb_str)
+        chatbot[-1] = [inputs, tb_str]
         yield from update_ui(chatbot=chatbot, history=history, msg="Endpoint不满足要求") # 刷新界面
         return
 
@@ -143,7 +143,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                                     json=payload, stream=True, timeout=TIMEOUT_SECONDS);break
         except:
             retry += 1
-            chatbot[-1] = ((chatbot[-1][0], timeout_bot_msg))
+            chatbot[-1] = [(chatbot[-1][0], timeout_bot_msg)]
             retry_msg = f"，正在重试 ({retry}/{MAX_RETRY}) ……" if MAX_RETRY > 0 else ""
             yield from update_ui(chatbot=chatbot, history=history, msg="请求超时"+retry_msg) # 刷新界面
             if retry > MAX_RETRY: raise TimeoutError
@@ -202,7 +202,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                         gpt_replying_buffer = gpt_replying_buffer + chunkjson['choices'][0]["delta"]["content"]
 
                     history[-1] = gpt_replying_buffer
-                    chatbot[-1] = (history[-2], history[-1])
+                    chatbot[-1] = [history[-2], history[-1]]
                     yield from update_ui(chatbot=chatbot, history=history, msg=status_text) # 刷新界面
                 except Exception as e:
                     yield from update_ui(chatbot=chatbot, history=history, msg="Json解析不合常规") # 刷新界面
@@ -222,27 +222,27 @@ def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg,
         if len(history) >= 2: history[-1] = ""; history[-2] = "" # 清除当前溢出的输入：history[-2] 是本次输入, history[-1] 是本次输出
         history = clip_history(inputs=inputs, history=history, tokenizer=model_info[llm_kwargs['llm_model']]['tokenizer'], 
                                                max_token_limit=(model_info[llm_kwargs['llm_model']]['max_token'])) # history至少释放二分之一
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] Reduce the length. 本次输入过长, 或历史数据过长. 历史缓存数据已部分释放, 您可以请再次尝试. (若再次失败则更可能是因为输入过长.)")
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] Reduce the length. 本次输入过长, 或历史数据过长. 历史缓存数据已部分释放, 您可以请再次尝试. (若再次失败则更可能是因为输入过长.)"]
     elif "does not exist" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], f"[Local Message] Model {llm_kwargs['llm_model']} does not exist. 模型不存在, 或者您没有获得体验资格.")
+        chatbot[-1] = [chatbot[-1][0], f"[Local Message] Model {llm_kwargs['llm_model']} does not exist. 模型不存在, 或者您没有获得体验资格."]
     elif "Incorrect API key" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] Incorrect API key. OpenAI以提供了不正确的API_KEY为由, 拒绝服务. " + openai_website); report_invalid_key(api_key)
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] Incorrect API key. OpenAI以提供了不正确的API_KEY为由, 拒绝服务. " + openai_website); report_invalid_key(api_key]
     elif "exceeded your current quota" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] You exceeded your current quota. OpenAI以账户额度不足为由, 拒绝服务." + openai_website); report_invalid_key(api_key)
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] You exceeded your current quota. OpenAI以账户额度不足为由, 拒绝服务." + openai_website); report_invalid_key(api_key]
     elif "account is not active" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] Your account is not active. OpenAI以账户失效为由, 拒绝服务." + openai_website); report_invalid_key(api_key)
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] Your account is not active. OpenAI以账户失效为由, 拒绝服务." + openai_website); report_invalid_key(api_key]
     elif "associated with a deactivated account" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] You are associated with a deactivated account. OpenAI以账户失效为由, 拒绝服务." + openai_website); report_invalid_key(api_key)
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] You are associated with a deactivated account. OpenAI以账户失效为由, 拒绝服务." + openai_website); report_invalid_key(api_key]
     elif "API key has been deactivated" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] API key has been deactivated. OpenAI以账户失效为由, 拒绝服务." + openai_website); report_invalid_key(api_key)
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] API key has been deactivated. OpenAI以账户失效为由, 拒绝服务." + openai_website); report_invalid_key(api_key]
     elif "bad forward key" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] Bad forward key. API2D账户额度不足.")
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] Bad forward key. API2D账户额度不足."]
     elif "Not enough point" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] Not enough point. API2D账户点数不足.")
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] Not enough point. API2D账户点数不足."]
     else:
         from common.toolbox import regular_txt_to_markdown
         tb_str = '```\n' + trimmed_format_exc() + '```'
-        chatbot[-1] = (chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str} \n\n{regular_txt_to_markdown(chunk_decoded)}")
+        chatbot[-1] = [chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str} \n\n{regular_txt_to_markdown(chunk_decoded)}"]
     return chatbot, history
 
 

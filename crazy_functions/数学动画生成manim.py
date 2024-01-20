@@ -92,7 +92,7 @@ def 动画生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     code = get_code_block(gpt_say)
     res = eval_manim(code)
 
-    chatbot.append(("生成的视频文件路径", res))
+    chatbot.append(["生成的视频文件路径", res])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
 
 # 在这里放一些网上搜集的demo，辅助gpt生成代码

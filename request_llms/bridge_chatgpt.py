@@ -161,7 +161,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     """
     if is_any_api_key(inputs):
         chatbot._cookies['api_key'] = inputs
-        chatbot.append(("输入已识别为openai的api_key", what_keys(inputs)))
+        chatbot.append(["输入已识别为openai的api_key", what_keys(inputs]))
         yield from update_ui(chatbot=chatbot, history=history, msg="api_key已导入")  # 刷新界面
         return
     elif not is_any_api_key(chatbot._cookies['api_key']):
@@ -177,7 +177,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
 
     raw_input = inputs
     logging.info(f'[raw_input] {raw_input}')
-    chatbot.append((inputs, ""))
+    chatbot.append([inputs, ""])
     yield from update_ui(chatbot=chatbot, history=history, msg="等待响应")  # 刷新界面
 
     # check mis-behavior
@@ -201,7 +201,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         endpoint = verify_endpoint(model_info[llm_kwargs['llm_model']]['endpoint'])
     except:
         tb_str = '```\n' + trimmed_format_exc() + '```'
-        chatbot[-1] = (inputs, tb_str)
+        chatbot[-1] = [inputs, tb_str]
         yield from update_ui(chatbot=chatbot, history=history, msg="Endpoint不满足要求") # 刷新界面
         return
     history.append(inputs); history.append("")
@@ -215,7 +215,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             break
         except:
             retry += 1
-            chatbot[-1] = ((chatbot[-1][0], timeout_bot_msg))
+            chatbot[-1] = [(chatbot[-1][0], timeout_bot_msg)]
             retry_msg = f"，正在重试 ({retry}/{MAX_RETRY}) ……" if MAX_RETRY > 0 else ""
             yield from update_ui(chatbot=chatbot, history=history, msg="请求超时" + retry_msg)  # 刷新界面
             if retry > MAX_RETRY: raise TimeoutError
@@ -277,7 +277,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                         gpt_replying_buffer = gpt_replying_buffer + chunkjson['choices'][0]["delta"]["content"]
 
                     history[-1] = gpt_replying_buffer
-                    chatbot[-1] = (history[-2], history[-1])
+                    chatbot[-1] = [history[-2], history[-1]]
                     yield from update_ui(chatbot=chatbot, history=history, msg=status_text)  # 刷新界面
                 except Exception as e:
                     yield from update_ui(chatbot=chatbot, history=history, msg="Json解析不合常规")  # 刷新界面
@@ -314,13 +314,13 @@ def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
         chatbot[-1] = (
         chatbot[-1][0], "[Local Message] Your account is not active. OpenAI以账户失效为由, 拒绝服务." + openai_website)
     elif "associated with a deactivated account" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] You are associated with a deactivated account. OpenAI以账户失效为由, 拒绝服务." + openai_website)
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] You are associated with a deactivated account. OpenAI以账户失效为由, 拒绝服务." + openai_website]
     elif "API key has been deactivated" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] API key has been deactivated. OpenAI以账户失效为由, 拒绝服务." + openai_website)
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] API key has been deactivated. OpenAI以账户失效为由, 拒绝服务." + openai_website]
     elif "bad forward key" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] Bad forward key. API2D账户额度不足.")
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] Bad forward key. API2D账户额度不足."]
     elif "Not enough point" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] Not enough point. API2D账户点数不足.")
+        chatbot[-1] = [chatbot[-1][0], "[Local Message] Not enough point. API2D账户点数不足."]
     else:
         from common.toolbox import regular_txt_to_markdown
         tb_str = '```\n' + trimmed_format_exc() + '```'

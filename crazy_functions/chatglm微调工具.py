@@ -43,11 +43,11 @@ def 微调数据集生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     web_port        当前软件运行的端口号
     """
     history = []    # 清空历史，以免输入溢出
-    chatbot.append(("这是什么功能？", "[Local Message] 微调数据集生成"))
+    chatbot.append(["这是什么功能？", "[Local Message] 微调数据集生成"])
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     args = plugin_kwargs.get("advanced_arg", None)
     if args is None: 
-        chatbot.append(("没给定指令", "退出"))
+        chatbot.append(["没给定指令", "退出"])
         yield from update_ui(chatbot=chatbot, history=history); return
     else:
         arguments = string_to_options(arguments=args)
@@ -92,11 +92,11 @@ def 启动微调(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     """
     import subprocess
     history = []    # 清空历史，以免输入溢出
-    chatbot.append(("这是什么功能？", "[Local Message] 微调数据集生成"))
+    chatbot.append(["这是什么功能？", "[Local Message] 微调数据集生成"])
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     args = plugin_kwargs.get("advanced_arg", None)
     if args is None: 
-        chatbot.append(("没给定指令", "退出"))
+        chatbot.append(["没给定指令", "退出"])
         yield from update_ui(chatbot=chatbot, history=history); return
     else:
         arguments = string_to_options(arguments=args)

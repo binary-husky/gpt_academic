@@ -330,7 +330,7 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
         if mode != 'translate_zh' or "binary" in final_tex: f.write(final_tex)
 
     #  <-------- 整理结果, 退出 ---------->
-    chatbot.append((f"完成了吗？", 'GPT结果已输出, 即将编译PDF'))
+    chatbot.append([f"完成了吗？", 'GPT结果已输出, 即将编译PDF'])
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
     #  <-------- 返回 ---------->

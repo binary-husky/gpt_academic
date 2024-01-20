@@ -53,7 +53,7 @@ def 全项目切换英文(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys_
             file_content = f.read()
         i_say_show_user =f'[{index}/{len(file_manifest)}] 接下来请将以下代码中包含的所有中文转化为英文，只输出转化后的英文代码，请用代码块输出代码: {os.path.abspath(fp)}'
         i_say_show_user_buffer.append(i_say_show_user)
-        chatbot.append((i_say_show_user, "[Local Message] 等待多线程操作，中间过程不予显示."))
+        chatbot.append([i_say_show_user, "[Local Message] 等待多线程操作，中间过程不予显示."])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
 
@@ -95,7 +95,7 @@ def 全项目切换英文(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys_
     for h in handles:
         h.daemon = True
         h.start()
-    chatbot.append(('开始了吗？', f'多线程操作已经开始'))
+    chatbot.append(['开始了吗？', f'多线程操作已经开始'])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # 第8步：循环轮询各个线程是否执行完毕
@@ -111,7 +111,7 @@ def 全项目切换英文(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys_
             observe_win.append("[ ..."+observe_window[thread_index][0][-60:].replace('\n','').replace('```','...').replace(' ','.').replace('<br/>','.....').replace('$','.')+"... ]")
         stat = [f'执行中: {obs}\n\n' if alive else '已完成\n\n' for alive, obs in zip(th_alive, observe_win)]
         stat_str = ''.join(stat)
-        chatbot[-1] = (chatbot[-1][0], f'多线程操作已经开始，完成情况: \n\n{stat_str}' + ''.join(['.']*(cnt%10+1)))
+        chatbot[-1] = [chatbot[-1][0], f'多线程操作已经开始，完成情况: \n\n{stat_str}' + ''.join(['.']*(cnt%10+1))]
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # 第9步：把结果写入文件
@@ -127,12 +127,12 @@ def 全项目切换英文(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys_
                 f.write(gpt_say)
         else:  # 失败
             shutil.copyfile(file_manifest[index], where_to_relocate)
-        chatbot.append((i_say_show_user, f'[Local Message] 已完成{os.path.abspath(fp)}的转化，\n\n存入{os.path.abspath(where_to_relocate)}'))
+        chatbot.append([i_say_show_user, f'[Local Message] 已完成{os.path.abspath(fp)}的转化，\n\n存入{os.path.abspath(where_to_relocate)}'])
         history.append(i_say_show_user); history.append(gpt_say)
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         time.sleep(1)
 
     # 第10步：备份一个文件
     res = write_results_to_file(history)
-    chatbot.append(("生成一份任务执行报告", res))
+    chatbot.append(["生成一份任务执行报告", res])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面

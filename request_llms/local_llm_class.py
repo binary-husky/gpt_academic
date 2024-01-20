@@ -262,10 +262,10 @@ def get_local_llm_predict_fns(LLMSingletonClass, model_name, history_format='cla
         """
             refer to request_llms/bridge_all.py
         """
-        chatbot.append((inputs, ""))
+        chatbot.append([inputs, ""])
 
         _llm_handle = GetSingletonHandle().get_llm_model_instance(LLMSingletonClass)
-        chatbot[-1] = (inputs, load_message + "\n\n" + _llm_handle.get_state())
+        chatbot[-1] = [inputs, load_message + "\n\n" + _llm_handle.get_state()]
         yield from update_ui(chatbot=chatbot, history=[])
         if not _llm_handle.running:
             raise RuntimeError(_llm_handle.get_state())
@@ -305,7 +305,7 @@ def get_local_llm_predict_fns(LLMSingletonClass, model_name, history_format='cla
         # 开始接收回复
         response = f"[Local Message] 等待{model_name}响应中 ..."
         for response in _llm_handle.stream_chat(query=inputs, history=history_feedin, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
-            chatbot[-1] = (inputs, response)
+            chatbot[-1] = [inputs, response]
             yield from update_ui(chatbot=chatbot, history=history)
 
         # 总结输出

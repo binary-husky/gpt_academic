@@ -205,19 +205,19 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         单线程方法
         函数的说明请见 request_llms/bridge_all.py
     """
-    chatbot.append((inputs, ""))
+    chatbot.append([inputs, ""])
 
     global moss_handle
     if moss_handle is None:
         moss_handle = GetGLMHandle()
-        chatbot[-1] = (inputs, load_message + "\n\n" + moss_handle.info)
+        chatbot[-1] = [inputs, load_message + "\n\n" + moss_handle.info]
         yield from update_ui(chatbot=chatbot, history=[])
         if not moss_handle.success: 
             moss_handle = None
             return
     else:
         response = "[Local Message] 等待MOSS响应中 ..."
-        chatbot[-1] = (inputs, response)
+        chatbot[-1] = [inputs, response]
         yield from update_ui(chatbot=chatbot, history=history)
 
     if additional_fn is not None:
@@ -231,7 +231,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
 
     # 开始接收chatglm的回复
     for response in moss_handle.stream_chat(query=inputs, history=history_feedin, sys_prompt=system_prompt, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
-        chatbot[-1] = (inputs, response.strip('<|MOSS|>: '))
+        chatbot[-1] = [inputs, response.strip('<|MOSS|>: ')]
         yield from update_ui(chatbot=chatbot, history=history)
 
     # 总结输出

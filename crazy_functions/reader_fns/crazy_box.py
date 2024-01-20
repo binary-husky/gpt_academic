@@ -529,7 +529,7 @@ def result_extract_to_test_cases(gpt_response_collection, llm_kwargs, plugin_kwa
         xlsx_handler.split_merged_cells()  # 先把合并的单元格拆分，避免写入失败
         file_path = xlsx_handler.list_write_to_excel(sort_test_case, save_as_name=long_name_processing(file_name))
         chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, to_tabs=True)}\n\n'
-        chatbot[-1] = ([you_say, chat_file_list])
+        chatbot[-1] = [[you_say, chat_file_list]]
         yield from toolbox.update_ui(chatbot, history)
         files_limit.update({file_path: file_name})
     return files_limit
@@ -561,7 +561,7 @@ def result_supplementary_to_test_case(gpt_response_collection, llm_kwargs, plugi
         reader_fns.MdHandler(md_path).save_markdown(desc)
         chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, to_tabs=True)}\n\n' \
                           f'{file_name}补充思路如下：\t{func_box.html_view_blank(__href=md_path, to_tabs=True)}\n\n---\n\n'
-        chatbot[-1] = ([you_say, chat_file_list])
+        chatbot[-1] = [[you_say, chat_file_list]]
         yield from toolbox.update_ui(chatbot, history)
         files_limit.update({file_path: file_name})
     return files_limit

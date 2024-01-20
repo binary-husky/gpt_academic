@@ -119,7 +119,7 @@ def 解析PDF_基于NOUGAT(file_manifest, project_folder, llm_kwargs, plugin_kwa
         logging.info(article_dict)
         yield from translate_pdf(article_dict, llm_kwargs, chatbot, fp, generated_conclusion_files, TOKEN_LIMIT_PER_FRAGMENT, DST_LANG)
 
-    chatbot.append(("给出输出文件清单", str(generated_conclusion_files + generated_html_files)))
+    chatbot.append(["给出输出文件清单", str(generated_conclusion_files + generated_html_files]))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
 

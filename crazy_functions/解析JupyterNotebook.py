@@ -99,14 +99,14 @@ def ipynb解释(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbo
 
     #  <-------- 整理结果，退出 ---------->
     block_result = "  \n".join(gpt_response_collection)
-    chatbot.append(("解析的结果如下", block_result))
+    chatbot.append(["解析的结果如下", block_result])
     history.extend(["解析的结果如下", block_result])
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
     #  <-------- 写入文件，退出 ---------->
     res = write_history_to_file(history)
     promote_file_to_downloadzone(res, chatbot=chatbot)
-    chatbot.append(("完成了吗？", res))
+    chatbot.append(["完成了吗？", res])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
 @CatchException
