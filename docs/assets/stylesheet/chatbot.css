@@ -124,7 +124,7 @@ hr.append-display {
     border-bottom-left-radius: 0 !important;
 }
 [data-testid = "user"] {
-    max-width: calc(85% - 40px);
+    max-width: calc(90% - 40px);
     width: auto !important;
     border-bottom-right-radius: 0 !important;
 }

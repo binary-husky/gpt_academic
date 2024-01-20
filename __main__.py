@@ -436,7 +436,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         self.demo.queue(concurrency_count=CONCURRENT_COUNT)
         # 过滤掉不允许用户访问的路径
         self.demo.blocked_paths = func_box.get_files_and_dirs(
-            path=init_path.base_path, filter_allow=['private_upload', 'gpt_log', 'docs'])
+            path=init_path.base_path, filter_allow=['users_private', 'gpt_log', 'docs'])
         login_html = '登陆即注册，请记住你自己的账号和密码'
         if AUTHENTICATION == 'SQL':
             self.demo.auth = func_signals.user_login

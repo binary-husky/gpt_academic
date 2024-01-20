@@ -66,7 +66,7 @@ class GoogleChatInit:
             if text_match:
                 text_match = json.loads('{"text": "%s"}' % text_match.group(1))['text']
             if error_match:
-                error_match = json.loads('{"text": "%s"}' % text_match.group(1))['text']
+                error_match = json.loads('{"message": "%s"}' % text_match.group(1))['message']
             yield text_match, error_match, bro_results
 
     def generate_message_payload(self, inputs, llm_kwargs, history, system_prompt) -> Tuple[Dict, Dict]:

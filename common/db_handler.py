@@ -107,19 +107,19 @@ class PromptDb(SqliteHandler):
         return temp_all
 
     def find_prompt_result(self, name, individual_priority=False):
-        query = []
+        result = []
         if individual_priority:
             try:
-                query = f"SELECT result FROM `prompt_{individual_priority}` WHERE prompt LIKE '{name}'"
-                self.execute_query(query)
+                query = f"SELECT result FROM `prompt_{individual_priority}` WHERE prompt = '{name}'"
+                result = self.execute_query(query)
             except:
                 pass
-        if not query:
-            query = f"SELECT result FROM `{self.table}` WHERE prompt LIKE '{name}'"
-            self.execute_query(query)
-            return query[0][0]
+        if not result:
+            query = f"SELECT result FROM `{self.table}` WHERE prompt = '{name}'"
+            result = self.execute_query(query)
+            return result[0][0]
         else:
-            return query[0][0]
+            return result[0][0]
 
     def inset_prompt(self, prompt: dict, source=''):
         error_status = ''
@@ -158,7 +158,10 @@ class OcrCacheDb(SqliteHandler):
             CREATE TABLE `{self.table}` 
             (id INTEGER PRIMARY KEY AUTOINCREMENT, 'tag' TEXT UNIQUE, 'result' TEXT)
             """
-            self.execute_ddl_create(create_sql)
+            try:
+                self.execute_ddl_create(create_sql)
+            except:
+                pass
 
     def get_cashed(self, tag):
         result = self.execute_query(f"SELECT result FROM `{self.table}` WHERE tag = '{tag}'")

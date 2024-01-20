@@ -2,6 +2,7 @@
 # @Time   : 2023/6/14
 # @Author : Spike
 # @Descr   :
+import copy
 import os
 import json
 import re
@@ -684,6 +685,10 @@ def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugi
         yield from toolbox.update_ui(chatbot, history, '正在调用`Vision`组件，已启用多线程解析，请稍等')
         # 识别图片中的文字
         save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'])
+        if isinstance(ocr_switch, dict):  # 如果是字典，那么就是自定义OCR参数
+            ocr_switch_copy = copy.deepcopy(llm_kwargs)
+            ocr_switch_copy.update(ocr_switch)
+            ocr_switch = ocr_switch_copy
         vision_submission = reader_fns.submit_threads_img_handle(img_mapping, save_path, cor_cache, ocr_switch)
         chatbot[-1] = [None, vision_bro]
         for t in vision_submission:
