@@ -248,7 +248,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     continue  # 返回重试
                 else:
                     # 【选择放弃】
-                    tb_str = '```\n' + trimmed_format_exc() + '```'
+                    tb_str = trimmed_format_exc()
                     gpt_say += f"[Local Message] 警告，线程{index}在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                     if len(mutable[index][0]) > 0: gpt_say += "此线程失败前收到的回答：\n\n" + mutable[index][0]
                     mutable[index][2] = "输入过长已放弃"
@@ -257,7 +257,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                 # 【第三种情况】：其他错误
 
                 if detect_timeout(): raise RuntimeError("检测到程序终止。")
-                tb_str = '```\n' + trimmed_format_exc() + '```'
+                tb_str = trimmed_format_exc()
                 print(tb_str)
                 gpt_say += f"[Local Message] 警告，线程{index}在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                 if len(mutable[index][0]) > 0: gpt_say += "此线程失败前收到的回答：\n\n" + mutable[index][0]
@@ -312,7 +312,6 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                                if not done else f'`{mutable[thread_index][2]}`\n\n'
                                for thread_index, done, obs in zip(range(len(worker_done)), worker_done, observe_win)])
         # 在前端打印些好玩的东西
-        stat_str = stat_str.replace('```folded\n```', '```folded\n').replace('```\n```', '```\n')
         chatbot[-1] = [chatbot[-1][0], f'多线程操作已经开始，完成情况: \n\n{stat_str}' + ''.join(['.'] * (cnt % 10 + 1))]
         yield from update_ui(chatbot=chatbot, history=[])  # 刷新界面
         if all(worker_done):

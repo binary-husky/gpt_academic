@@ -294,7 +294,8 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
     if type(inputs) is list:
         if get_token_num(str(inputs)) > max_token:
             chatbot.append([None,
-                            f'{func_box.html_tag_color(inputs[0][:10])}... 对话数据预计会超出`{all_tokens}v token`限制, 拆分中'])
+                            f'{func_box.html_tag_color(inputs[0][:20])}... 对话数据预计会超出`{all_tokens} token`限制, '
+                            f'将按照模型最大可接收token拆分为多线程运行'])
             segments.extend(split_list_token_limit(data=inputs, get_num=get_token_num, max_num=max_token))
         else:
             segments.append(json.dumps(inputs, ensure_ascii=False))
@@ -303,7 +304,8 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
         for input_ in inputs:
             if get_token_num(input_) > max_token:
                 chatbot.append([None,
-                                f'{func_box.html_tag_color(input_[:10])}... 对话数据预计会超出`{all_tokens}token`限制, 拆分中'])
+                                f'{func_box.html_tag_color(input_[:20])} 对话数据预计会超出`{all_tokens} token`限制, '
+                                f'将按照模型最大可接收token拆分为多线程运行'])
                 yield from toolbox.update_ui(chatbot, history)
                 segments.extend(
                     crazy_utils.breakdown_txt_to_satisfy_token_limit_for_pdf(input_, get_token_num, max_token))
@@ -353,10 +355,8 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
                     func_box.通知机器人(f'读取知识库失败，请检查{f}')
             # 拼接内容与提示词
             plugin_prompt = func_box.replace_expected_text(prompt, content=limit, expect='{{{v}}}')
-            user_prompt = plugin_kwargs.get('user_input_prompt', '')
-            inputs_array.append(plugin_prompt + user_prompt)
+            inputs_array.append(plugin_prompt)
             inputs_show_user_array.append(you_say)
-    plugin_kwargs['user_input_prompt'] = ''  # 组合后去除 user_input_prompt
     yield from toolbox.update_ui(chatbot, history)
     return inputs_array, inputs_show_user_array
 
@@ -677,12 +677,13 @@ def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugi
     cor_cache = llm_kwargs.get('cor_cache', False)
     img_mapping = func_box.extract_link_pf(content, func_box.valid_img_extensions)
     # 如果开启了OCR，并且文中存在图片链接，处理图片
+    gpt_bro_say = chatbot[-1][1]
     if ocr_switch and img_mapping:
-        vision_bro = f"检测到识图开关为`{ocr_switch}`，并且文中存在图片链接，正在识别图片中的文字...解析进度如下："
-        vision_loading_statsu = {i: "Loading..." for i in img_mapping}
-        vision_start = func_box.html_folded_code(json.dumps(vision_loading_statsu, indent=4, ensure_ascii=False))
-        chatbot.append([None, vision_bro + vision_start])
-        yield from toolbox.update_ui(chatbot, history, '正在调用`Vision`组件，已启用多线程解析，请稍等')
+        vision_bro = f"\n\n检测到识图开关为`{ocr_switch}`，并且文中存在图片链接，正在识别图片中的文字...解析进度如下："
+        vision_loading_statsu = {os.path.basename(i): "Loading..." for i in img_mapping}
+        vision_bro += func_box.html_folded_code(json.dumps(vision_loading_statsu, indent=4, ensure_ascii=False))
+        yield from toolbox.update_ui_lastest_msg(lastmsg=gpt_bro_say + vision_bro, chatbot=chatbot,
+                                                 history=history, delay=0.1)
         # 识别图片中的文字
         save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'])
         if isinstance(ocr_switch, dict):  # 如果是字典，那么就是自定义OCR参数
@@ -693,18 +694,17 @@ def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugi
         for t in vision_submission:
             try:
                 img_content, img_path, status = vision_submission[t].result()
-                vision_loading_statsu.update({t: img_content})
+                vision_loading_statsu.update({os.path.basename(t): img_content})
                 vision_end = func_box.html_folded_code(json.dumps(vision_loading_statsu, indent=4, ensure_ascii=False))
-                chatbot[-1] = [None, vision_bro + vision_end]
+                yield from toolbox.update_ui_lastest_msg(lastmsg=gpt_bro_say + vision_end, chatbot=chatbot, history=history, delay=0.1)
                 if not status or status != '本次识别结果读取数据库缓存':  # 出现异常，不替换文本
-                    content = content.replace(img_mapping[t], f'{img_mapping[t]}\n\n{img_content}')
-                yield from toolbox.update_ui(chatbot, history)
+                    content = content.replace(img_mapping[t], f'{img_mapping[t]}\n{img_content}')
             except Exception as e:
-                status = f'`{t}` `{e}` 识别失败，过滤这个图片\n\n'
-                vision_loading_statsu.update({t: status})
+                status = f'`{t}` `{toolbox.trimmed_format_exc()}` 识别失败，过滤这个图片\n\n'
+                vision_loading_statsu.update({t: status})   # 错误展示完整路径
                 vision_end = func_box.html_folded_code(json.dumps(vision_loading_statsu, indent=4, ensure_ascii=False))
-                chatbot[-1] = [None, vision_bro + vision_end]
-                yield from toolbox.update_ui(chatbot, history)
+                yield from toolbox.update_ui_lastest_msg(lastmsg=gpt_bro_say + vision_end, chatbot=chatbot,
+                                                         history=history, delay=0.1)
     return content.replace(init_path.base_path, '.')  # 增加保障，防止路径泄露
 
 
@@ -724,14 +724,16 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
     # 云文件
     fp_mapping, download_status = yield from detach_cloud_links(user_input, chatbot, history, llm_kwargs, valid_types)
     if download_status:
-        chatbot[-1][1] = f'\n\n下载云文档似乎出了点问题？\n\n```python\n{download_status}\n```\n\n'
+        chatbot[-1][1] += f'\n\n下载云文档似乎出了点问题？\n\n```python\n{download_status}\n```\n\n'
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='🕵🏻 ‍出师未捷身先死🏴‍☠️')
     # 本地文件
     fp_mapping.update(func_box.extract_link_pf(user_input, valid_types))
     content_mapping = yield from file_extraction_intype(fp_mapping, chatbot, history, llm_kwargs, plugin_kwargs)
     if content_mapping:
-        mapping_data = func_box.html_folded_code(json.dumps(content_mapping, indent=4, ensure_ascii=False))
-        map_bro_say = f'\n\n数据解析完成，提取`fp mapping`如下：\n\n{mapping_data}'
+        mapping_data = "\n\n".join([f"{func_box.html_folded_code(content_mapping[fp].replace(init_path.base_path, '.'))}"
+                                    for fp in content_mapping])
+        # mapping_data = func_box.html_folded_code(json.dumps(content_mapping, indent=4, ensure_ascii=False))
+        map_bro_say = f'数据解析完成，提取文档信息如下：\n\n{mapping_data}'
         chatbot[-1][1] += map_bro_say
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='数据解析完成！')
         for content_fp in content_mapping:  # 一个文件一个对话
@@ -800,5 +802,4 @@ previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传�
 
 if __name__ == '__main__':
     test = [1, 2, 3, 4, [12], 33, 1]
-
-    print(long_name_processing('【支付系统】支付通道余额新建表更新保存.docx'))
+    print(long_name_processing('tedt_q3123-3kkkkkk'))

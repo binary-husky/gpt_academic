@@ -61,7 +61,7 @@ class Settings:
                 "**发送消息** 或 **提交key** 以显示额度"), elem_id="usage-display",
                 elem_classes="insert-block", visible=False)
             self.openai_keys = gr.Textbox(
-                show_label=True, placeholder=f"Your API-key...",
+                show_label=True, placeholder=f"Your OpenAi-API-key...",
                 # value=hide_middle_chars(user_api_key.value),
                 type="password",  # visible=not HIDE_MY_KEY,
                 label="API-Key").style(container=False)

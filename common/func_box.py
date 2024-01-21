@@ -487,6 +487,8 @@ def git_log_list():
 
 
 def replace_special_chars(file_name):
+    if '-' in file_name:  # 避免文件名太长
+        file_name = file_name.rsplit('-', 1)[0]
     # 该正则表达式匹配除了数字、字母、下划线、点、空格、中文字符、【和】以外的所有字符
     new_name = re.sub(r'[^\d\w\s\.\_\u4e00-\u9fff【】]', '', file_name).rstrip().replace(' ', '_')
     if not new_name:

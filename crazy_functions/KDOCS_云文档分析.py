@@ -46,6 +46,7 @@ def Kdocs_多阶段生成回答(user_input, llm_kwargs, plugin_kwargs, chatbot, 
                 embedding_limit = [[limit, "".join(content_limit[limit])] for limit in content_limit]
                 yield from update_ui(chatbot=chatbot, history=history)
         if stage != [i for i in multi_stage_config][-1]:
+            chatbot.append(['进入下一步', ''])
             embedding_mapping = yield from crazy_box.file_extraction_intype(gpt_results_count[prompt], chatbot, history, llm_kwargs,
                                                         plugin_kwargs)
             for i in embedding_mapping:

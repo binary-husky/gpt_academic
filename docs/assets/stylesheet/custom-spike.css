@@ -129,7 +129,7 @@ div.svelte-15lo0d8>*, div.svelte-15lo0d8>.form>* {
 
 code.language-folded {
     display: -webkit-box;
-    -webkit-line-clamp: unset;
+    -webkit-line-clamp: 10;   /*展示一点点*/
     -webkit-box-orient: vertical;
     overflow: auto;
 }

@@ -111,7 +111,9 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
         except StopIteration: 
             break
         except requests.exceptions.ConnectionError:
-            chunk = next(stream_response) # 失败了，重试一次？再失败就没办法了。
+            chunk = next(stream_response)  # 失败了，重试一次？再失败就没办法了。
+        except requests.exceptions.ChunkedEncodingError:
+            chunk = next(stream_response)
         chunk_decoded, chunkjson, has_choices, choice_valid, has_content, has_role = decode_chunk(chunk)
         if len(chunk_decoded)==0: continue
         if not chunk_decoded.startswith('data:'): 
