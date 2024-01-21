@@ -32,30 +32,6 @@ code_highlight_configs = {
 }
 
 
-def text_divide_paragraph(text):
-    """
-    将文本按照段落分隔符分割开，生成带有段落标签的HTML代码。
-    """
-    pre = '<div class="markdown-body">'
-    suf = "</div>"
-    if text.startswith(pre) and text.endswith(suf):
-        return text
-
-    if "```" in text:
-        # careful input
-        return text
-    elif "</div>" in text:
-        # careful input
-        return text
-    else:
-        # whatever input
-        lines = text.split("\n")
-        for i, line in enumerate(lines):
-            lines[i] = lines[i].replace(" ", "&nbsp;")
-        text = "</br>".join(lines)
-        return pre + text + suf
-
-
 def tex2mathml_catch_exception(content, *args, **kwargs):
     try:
         content = tex2mathml(content, *args, **kwargs)
@@ -301,17 +277,42 @@ def close_up_code_segment_during_stream(gpt_reply):
     else:
         return gpt_reply
 
+
+def compat_non_markdown_input(text):
+    """
+    改善非markdown输入的显示效果，例如将空格转换为&nbsp;，将换行符转换为</br>等。
+    """
+
+    if "```" in text:
+        # careful input：markdown输入
+        return text
+    elif "</div>" in text:
+        # careful input：html输入
+        return text
+    else:
+        # whatever input：非markdown输入
+        lines = text.split("\n")
+        for i, line in enumerate(lines):
+            lines[i] = lines[i].replace(" ", "&nbsp;")  # 空格转换为&nbsp;
+        text = "</br>".join(lines)  # 换行符转换为</br>
+        return text
+
+
+@lru_cache(maxsize=128)  # 使用lru缓存
 def simple_markdown_convertion(txt):
     pre = '<div class="markdown-body">'
     suf = "</div>"
     if txt.startswith(pre) and txt.endswith(suf):
         return txt  # 已经被转化过，不需要再次转化
+    
+    txt = compat_non_markdown_input(txt)    # 兼容非markdown输入
     txt = markdown.markdown(
         txt,
         extensions=["pymdownx.superfences", "tables", "pymdownx.highlight"],
         extension_configs=code_highlight_configs,
     )
     return pre + txt + suf
+
 
 def format_io(self, y):
     """
@@ -322,9 +323,6 @@ def format_io(self, y):
     i_ask, gpt_reply = y[-1]
     i_ask = apply_gpt_academic_string_mask(i_ask, mode="show_render")
     gpt_reply = apply_gpt_academic_string_mask(gpt_reply, mode="show_render")
-    # 输入部分太自由，预处理一波
-    if i_ask is not None:
-        i_ask = text_divide_paragraph(i_ask)
     # 当代码输出半截的时候，试着补上后个```
     if gpt_reply is not None:
         gpt_reply = close_up_code_segment_during_stream(gpt_reply)

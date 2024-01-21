@@ -35,6 +35,7 @@ def get_core_functions():
             "Suffix":
                 dedent("\n"+f'''
                     ==============================
+
                     使用mermaid flowchart对以上文本进行总结，概括上述段落的内容以及内在逻辑关系，例如：
 
                     以下是对以上文本的总结，以mermaid flowchart的形式展示：
