@@ -486,6 +486,26 @@ def get_crazy_functions():
         print('Load function plugin failed')
 
     try:
+        from crazy_functions.Latex输出PDF结果 import PDF翻译中文并重新编译PDF
+        function_plugins.update({
+            "PDF翻译中文并重新编译PDF [先上传pdf，再运行此插件]": {
+                "Group": "学术",
+                "Color": "stop",
+                "AsButton": False,
+                "AdvancedArgs": True,
+                "ArgsReminder":
+                    "如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 " +
+                    "例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: " +
+                    'If the term "agent" is used in this section, it should be translated to "智能体". ',
+                "Info": "PDF翻译中文并重新编译PDF | 输入参数为路径",
+                "Function": HotReload(PDF翻译中文并重新编译PDF)
+            }
+        })
+    except:
+        print(trimmed_format_exc())
+        print('Load function plugin failed')
+
+    try:
         from crazy_functions.Latex输出PDF结果 import Latex英文纠错加PDF对比
         function_plugins.update({
             "Latex英文纠错+高亮修正位置 [需Latex]": {
