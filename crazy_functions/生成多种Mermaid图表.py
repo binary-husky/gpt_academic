@@ -174,9 +174,9 @@ def 解析历史输入(history,llm_kwargs,chatbot):
             llm_kwargs=llm_kwargs, chatbot=chatbot, history=[], 
             sys_prompt=""
         )
-        if gpt_say in ['1','2','3','4']:         #判断返回是否正确
+        if gpt_say in ['1','2','3','4','5','6','7','8']:     #判断返回是否正确
             break
-    if gpt_say not in ['1','2','3','4']:
+    if gpt_say not in ['1','2','3','4','5','6','7','8']:
         gpt_say = '1'
     ############################## <第 3 步，根据选择的图表类型绘制图表> ##################################
     if gpt_say == '1':
