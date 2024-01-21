@@ -677,11 +677,10 @@ def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugi
     cor_cache = llm_kwargs.get('cor_cache', False)
     img_mapping = func_box.extract_link_pf(content, func_box.valid_img_extensions)
     # 如果开启了OCR，并且文中存在图片链接，处理图片
-    gpt_bro_say = chatbot[-1][1]
+    gpt_bro_say = chatbot[-1][1] + f"\n\n检测到识图开关为`{ocr_switch}`，并且文中存在图片链接，正在识别图片中的文字，解析进度如下：\n\n"
     if ocr_switch and img_mapping:
-        vision_bro = f"\n\n检测到识图开关为`{ocr_switch}`，并且文中存在图片链接，正在识别图片中的文字...解析进度如下："
         vision_loading_statsu = {os.path.basename(i): "Loading..." for i in img_mapping}
-        vision_bro += func_box.html_folded_code(json.dumps(vision_loading_statsu, indent=4, ensure_ascii=False))
+        vision_bro = func_box.html_folded_code(json.dumps(vision_loading_statsu, indent=4, ensure_ascii=False))
         yield from toolbox.update_ui_lastest_msg(lastmsg=gpt_bro_say + vision_bro, chatbot=chatbot,
                                                  history=history, delay=0.1)
         # 识别图片中的文字
