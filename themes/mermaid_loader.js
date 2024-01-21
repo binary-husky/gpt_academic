@@ -106,7 +106,7 @@ const uml = async className => {
         defaultConfig.theme = "dark"
     }
     
-    const Module = await import('./file=themes/mermaid_editor.js');
+    const Module = await import('/file=themes/mermaid_editor.js');
 
     function do_render(block, code, codeContent, cnt) {
         var rendered_content = mermaid.render(`_diagram_${cnt}`, code);
