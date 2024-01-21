@@ -74,7 +74,7 @@ def get_crazy_functions():
             "Group": "对话",
             "Color": "stop",
             "AsButton": False,
-            "Info" : "基于当前对话生成多种Mermaid图表,图表类型由对话模型自行判断",
+            "Info" : "基于当前对话或PDF生成多种Mermaid图表,图表类型由模型判断",
             "Function": HotReload(生成多种Mermaid图表),
         },
         "批量总结Word文档": {
