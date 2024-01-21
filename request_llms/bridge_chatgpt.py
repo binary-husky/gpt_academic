@@ -106,7 +106,8 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     result = ''
     json_data = None
     while True:
-        try: chunk = next(stream_response)
+        try:
+            chunk = next(stream_response)
         except StopIteration: 
             break
         except requests.exceptions.ConnectionError:

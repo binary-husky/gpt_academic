@@ -181,7 +181,7 @@ def extract_link_pf(text, valid_types: list):
     pattern_link = r'(!?\[[^\]]*\].*\([^)]*[^\)].*\))'
     matches_path = re.findall(pattern_link, text)
     for md_link in matches_path:
-        pattern_file = r"\(file=(/[^)].*)\)"
+        pattern_file = r"\(file=(.*)\)"
         matches_path = re.findall(pattern_file, md_link)
         pattern_local = r"\((/[^)].*)\)"
         matches_local = re.findall(pattern_local, md_link)

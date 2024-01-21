@@ -29,7 +29,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
         elif error_match:
             if len(observe_window) >= 3:
                 observe_window[2] = error_match
-            raise f'{gpt_replying_buffer} 对话错误'
+            return f'{results} 对话错误'
         # 观测窗
         if len(observe_window) >= 1:
             observe_window[0] = gpt_replying_buffer

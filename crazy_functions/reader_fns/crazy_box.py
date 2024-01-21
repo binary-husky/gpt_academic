@@ -165,7 +165,7 @@ def file_extraction_intype(file_mapping, chatbot, history, llm_kwargs, plugin_kw
     # 文件读取
     file_limit = {}
     for file_path in file_mapping:
-        chatbot[-1][1] = chatbot[-1][1] + f'\n\n`{file_path.replace(init_path.base_path, ".")}`\t...正在解析本地文件\n\n'
+        chatbot[-1][1] = chatbot[-1][1] + f'\n\n`{file_path.replace(init_path.base_path, ".")}`\t 正在解析本地文件\n\n'
         yield from toolbox.update_ui(chatbot, history)
         save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'])
         if file_path.endswith('pdf'):
@@ -191,11 +191,11 @@ def file_extraction_intype(file_mapping, chatbot, history, llm_kwargs, plugin_kw
                 ex_handle.split_merged_cells()
                 xlsx_dict = ex_handle.read_as_dict()
                 file_content = xlsx_dict.get(active_sheet)
-                chatbot.append([None,
-                                f'无法在`{os.path.basename(file_path)}`找到`{sheet}`工作表，'
-                                f'将读取上次预览的活动工作表`{active_sheet}`，'
-                                f'若你的用例工作表是其他名称, 请及时暂停插件运行，并在自定义插件配置中更改'
-                                f'{func_box.html_tag_color("读取指定Sheet")}。'])
+                xlsx_bro = f'\n\n无法在`{os.path.basename(file_path)}`找到`{sheet}`工作表，' \
+                           f'将读取上次预览的活动工作表`{active_sheet}`，' \
+                           f'若你的用例工作表是其他名称, 请及时暂停插件运行，并在自定义插件配置中更改' \
+                           f'{func_box.html_tag_color("读取指定Sheet")}。'
+                chatbot[-1][1] = chatbot[-1][1] + xlsx_bro
             plugin_kwargs['写入指定模版'] = file_path
             plugin_kwargs['写入指定Sheet'] = ex_handle.sheet
             yield from toolbox.update_ui(chatbot, history)
@@ -530,7 +530,7 @@ def result_extract_to_test_cases(gpt_response_collection, llm_kwargs, plugin_kwa
         xlsx_handler.split_merged_cells()  # 先把合并的单元格拆分，避免写入失败
         file_path = xlsx_handler.list_write_to_excel(sort_test_case, save_as_name=long_name_processing(file_name))
         chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, to_tabs=True)}\n\n'
-        chatbot[-1] = [[you_say, chat_file_list]]
+        chatbot[-1] = [you_say, chat_file_list]
         yield from toolbox.update_ui(chatbot, history)
         files_limit.update({file_path: file_name})
     return files_limit
@@ -562,7 +562,7 @@ def result_supplementary_to_test_case(gpt_response_collection, llm_kwargs, plugi
         reader_fns.MdHandler(md_path).save_markdown(desc)
         chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, to_tabs=True)}\n\n' \
                           f'{file_name}补充思路如下：\t{func_box.html_view_blank(__href=md_path, to_tabs=True)}\n\n---\n\n'
-        chatbot[-1] = [[you_say, chat_file_list]]
+        chatbot[-1] = [you_say, chat_file_list]
         yield from toolbox.update_ui(chatbot, history)
         files_limit.update({file_path: file_name})
     return files_limit
@@ -690,7 +690,6 @@ def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugi
             ocr_switch_copy.update(ocr_switch)
             ocr_switch = ocr_switch_copy
         vision_submission = reader_fns.submit_threads_img_handle(img_mapping, save_path, cor_cache, ocr_switch)
-        chatbot[-1] = [None, vision_bro]
         for t in vision_submission:
             try:
                 img_content, img_path, status = vision_submission[t].result()
