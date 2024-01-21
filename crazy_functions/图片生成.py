@@ -93,7 +93,7 @@ def edit_image(llm_kwargs, prompt, image_path, resolution="1024x1024", model="da
 
 
 @CatchException
-def 图片生成_DALLE2(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 图片生成_DALLE2(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     """
     txt             输入栏用户输入的文本,例如需要翻译的一段话,再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数,如温度和top_p等,一般原样传递下去就行
@@ -101,7 +101,7 @@ def 图片生成_DALLE2(prompt, llm_kwargs, plugin_kwargs, chatbot, history, sys
     chatbot         聊天显示框的句柄,用于显示给用户
     history         聊天历史,前情提要
     system_prompt   给gpt的静默提醒
-    web_port        当前软件运行的端口号
+    user_request    当前用户的请求信息（IP地址等）
     """
     history = []    # 清空历史,以免输入溢出
     if prompt.strip() == "":
@@ -123,7 +123,7 @@ def 图片生成_DALLE2(prompt, llm_kwargs, plugin_kwargs, chatbot, history, sys
 
 
 @CatchException
-def 图片生成_DALLE3(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 图片生成_DALLE3(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     history = []    # 清空历史,以免输入溢出
     if prompt.strip() == "":
         chatbot.append((prompt, "[Local Message] 图像生成提示为空白，请在“输入区”输入图像生成提示。"))
@@ -209,7 +209,7 @@ class ImageEditState(GptAcademicState):
         return all([x['value'] is not None for x in self.req])
 
 @CatchException
-def 图片修改_DALLE2(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 图片修改_DALLE2(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     # 尚未完成
     history = []    # 清空历史
     state = ImageEditState.get_state(chatbot, ImageEditState)

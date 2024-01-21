@@ -69,7 +69,7 @@ def read_file_to_chat(chatbot, history, file_name):
     return chatbot, history    
 
 @CatchException
-def 对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     """
     txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数，如温度和top_p等，一般原样传递下去就行
@@ -77,7 +77,7 @@ def 对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
     chatbot         聊天显示框的句柄，用于显示给用户
     history         聊天历史，前情提要
     system_prompt   给gpt的静默提醒
-    web_port        当前软件运行的端口号
+    user_request    当前用户的请求信息（IP地址等）
     """
 
     chatbot.append(("保存当前对话", 
@@ -91,7 +91,7 @@ def hide_cwd(str):
     return str.replace(current_path, replace_path)
 
 @CatchException
-def 载入对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 载入对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     """
     txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数，如温度和top_p等，一般原样传递下去就行
@@ -99,7 +99,7 @@ def 载入对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     chatbot         聊天显示框的句柄，用于显示给用户
     history         聊天历史，前情提要
     system_prompt   给gpt的静默提醒
-    web_port        当前软件运行的端口号
+    user_request    当前用户的请求信息（IP地址等）
     """
     from .crazy_utils import get_files_from_everything
     success, file_manifest, _ = get_files_from_everything(txt, type='.html')
@@ -126,7 +126,7 @@ def 载入对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         return
 
 @CatchException
-def 删除所有本地对话历史记录(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 删除所有本地对话历史记录(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     """
     txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数，如温度和top_p等，一般原样传递下去就行
@@ -134,7 +134,7 @@ def 删除所有本地对话历史记录(txt, llm_kwargs, plugin_kwargs, chatbot
     chatbot         聊天显示框的句柄，用于显示给用户
     history         聊天历史，前情提要
     system_prompt   给gpt的静默提醒
-    web_port        当前软件运行的端口号
+    user_request    当前用户的请求信息（IP地址等）
     """
 
     import glob, os

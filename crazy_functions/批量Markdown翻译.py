@@ -153,7 +153,7 @@ def get_files_from_everything(txt, preference=''):
 
 
 @CatchException
-def Markdown英译中(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def Markdown英译中(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
@@ -193,7 +193,7 @@ def Markdown英译中(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
 
 
 @CatchException
-def Markdown中译英(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def Markdown中译英(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
@@ -226,7 +226,7 @@ def Markdown中译英(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
 
 
 @CatchException
-def Markdown翻译指定语言(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def Markdown翻译指定语言(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
