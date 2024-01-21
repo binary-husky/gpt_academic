@@ -291,11 +291,12 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
         get_token_num = bridge_all.model_info[model]['token_cnt']
     max_token = all_tokens / 2 - all_tokens / 4  # 考虑到对话+回答会超过tokens,所以/2
     segments = []
+    gpt_latest_msg = chatbot[-1][1]
     if type(inputs) is list:
         if get_token_num(str(inputs)) > max_token:
-            chatbot.append([None,
-                            f'{func_box.html_tag_color(inputs[0][:20])}... 对话数据预计会超出`{all_tokens} token`限制, '
-                            f'将按照模型最大可接收token拆分为多线程运行'])
+            bro_say = gpt_latest_msg + f'\n\n{func_box.html_tag_color(inputs[0][:20])} 对话数据预计会超出`{all_tokens}' \
+                                        f'token`限制, 将按照模型最大可接收token拆分为多线程运行'
+            yield from toolbox.update_ui_lastest_msg(bro_say, chatbot, history)
             segments.extend(split_list_token_limit(data=inputs, get_num=get_token_num, max_num=max_token))
         else:
             segments.append(json.dumps(inputs, ensure_ascii=False))
@@ -303,10 +304,9 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
         inputs = inputs.split('\n---\n')
         for input_ in inputs:
             if get_token_num(input_) > max_token:
-                chatbot.append([None,
-                                f'{func_box.html_tag_color(input_[:20])} 对话数据预计会超出`{all_tokens} token`限制, '
-                                f'将按照模型最大可接收token拆分为多线程运行'])
-                yield from toolbox.update_ui(chatbot, history)
+                bro_say = gpt_latest_msg + f'\n\n{func_box.html_tag_color(input_[0][:20])} 对话数据预计会超出`{all_tokens}' \
+                                          f'token`限制, 将按照模型最大可接收token拆分为多线程运行'
+                yield from toolbox.update_ui_lastest_msg(bro_say, chatbot, history)
                 segments.extend(
                     crazy_utils.breakdown_txt_to_satisfy_token_limit_for_pdf(input_, get_token_num, max_token))
             else:

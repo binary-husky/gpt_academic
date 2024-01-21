@@ -53,7 +53,6 @@ class XlsxHandler:
         # 定义起始行号
         start_row = crazy_box.find_index_inlist(self.read_as_dict()[self.sheet],
                                                 ['前置条件', '操作步骤', '预期结果']) + 2
-        # 创建一个黄色的填充样式
         # 遍历数据列表
         for row_data in data_list:
             # 写入每一行的数据到指定的单元格范围
