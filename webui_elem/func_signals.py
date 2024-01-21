@@ -315,7 +315,7 @@ def prompt_retrieval(prompt_cls, hosts, search=False):
     hosts_tabs = func_box.prompt_personal_tag(prompt_cls, hosts)
     if all_ == prompt_cls:
         for tab in db_handler.PromptDb(None).get_tables():
-            if tab.startswith('prompt') and str(tab).endswith('sys'):
+            if str(tab).endswith('sys'):
                 data, source = db_handler.PromptDb(tab).get_prompt_value(None)
                 if data: count_dict.update({get_database_cls(tab): data})
         data, source = db_handler.PromptDb(f'{hosts_tabs}').get_prompt_value(None)

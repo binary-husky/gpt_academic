@@ -244,7 +244,9 @@ code.language-folded {
     opacity: 0.90;
     backdrop-filter: blur(24px);
 }
-
+#spike-toast-info {
+    z-index: 99999999999999;
+}
 #spike-toast-info .wrap.center {
     display: none !important;
 }
