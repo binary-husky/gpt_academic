@@ -156,3 +156,7 @@ class DocxHandler:
                 f.write(self.markdown_content)
         except IOError as e:
             raise IOError(f"Error writing markdown file: {e}")
+
+
+if __name__ == '__main__':
+    pass

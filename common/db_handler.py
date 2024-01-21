@@ -8,6 +8,7 @@ import shutil
 import sqlite3
 import psutil
 from common.path_handler import init_path
+from common.logger_handler import logger
 from pydantic import BaseModel, FilePath
 from typing import Dict, AnyStr, Union
 
@@ -135,7 +136,7 @@ class PromptDb(SqliteHandler):
                 self.execute_dml_tcl(replace)
             else:
                 error_status += f'【{key}】权限不足，该分类下已有其他人保存重名的提示词，请更改提示词名称后再提交～'
-                print(f'{source} 保存名称为[key]的提示词失败，因为该分类下已有其他人保存重名的提示词')
+                logger.warning(f'{source} 保存名称为【{key}】的提示词失败，因为该分类下已有其他人保存重名的提示词')
         return error_status
 
     def delete_prompt(self, name):

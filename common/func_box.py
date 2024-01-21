@@ -178,12 +178,12 @@ def html_local_img(__file, layout='left', max_width=None, max_height=None, md=Tr
 # 提取markdown链接
 def extract_link_pf(text, valid_types: list):
     file_mapping_links = {}
-    pattern_link = r"(!?\[[^\]]+\]\([^\)]+\))"
+    pattern_link = r'(!?\[[^\]]*\].*\([^)]*[^\)].*\))'
     matches_path = re.findall(pattern_link, text)
     for md_link in matches_path:
-        pattern_file = r"\(file=(.*?)\)"
+        pattern_file = r"\(file=(/[^)].*)\)"
         matches_path = re.findall(pattern_file, md_link)
-        pattern_local = r"\((/[^)]+)\)"
+        pattern_local = r"\((/[^)].*)\)"
         matches_local = re.findall(pattern_local, md_link)
         if matches_path:
             if matches_path[0].split('.')[-1] in valid_types:
@@ -649,4 +649,4 @@ def split_domain_url(link_limit, start='http', domain_name: list = ['']) -> list
 
 if __name__ == '__main__':
     # print(get_files_list('', ['.json']))
-    print(extract_link_pf('', valid_img_extensions))
+    pass
