@@ -22,6 +22,8 @@ from shared_utils.connect_void_terminal import get_plugin_default_kwargs
 from shared_utils.connect_void_terminal import get_chat_default_kwargs
 from shared_utils.text_mask import apply_gpt_academic_string_mask
 from shared_utils.text_mask import build_gpt_academic_masked_string
+from shared_utils.text_mask import apply_gpt_academic_string_mask_langbased
+from shared_utils.text_mask import build_gpt_academic_masked_string_langbased
 
 pj = os.path.join
 default_user_name = "default_user"
