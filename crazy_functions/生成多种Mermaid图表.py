@@ -1,5 +1,6 @@
 from toolbox import CatchException, update_ui
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from .crazy_utils import read_and_clean_pdf_text
 import datetime
 
 #暂时只写了这几种的PROMPT
@@ -143,7 +144,7 @@ def 解析历史输入(history,llm_kwargs,chatbot):
     from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit
     txt = breakdown_text_to_satisfy_token_limit(txt=txt, limit=TOKEN_LIMIT_PER_FRAGMENT, llm_model=llm_kwargs['llm_model'])
     ############################## <第 1 步，迭代地历遍整个文章，提取精炼信息> ##################################
-    i_say_show_user = f'首先你从历史记录中提取摘要。'; gpt_say = "[Local Message] 收到。"   # 用户提示
+    i_say_show_user = f'首先你从历史记录或文件中提取摘要。'; gpt_say = "[Local Message] 收到。"   # 用户提示
     chatbot.append([i_say_show_user, gpt_say]); yield from update_ui(chatbot=chatbot, history=history)    # 更新UI
     results = []
     MAX_WORD_TOTAL = 4096
@@ -205,6 +206,21 @@ def 解析历史输入(history,llm_kwargs,chatbot):
     history.append(gpt_say)
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
 
+def 输入区文件处理(txt):
+    if txt == "": return False, txt
+    success = True
+    import glob
+    from .crazy_utils import get_files_from_everything
+    file_pdf,pdf_manifest,folder_pdf = get_files_from_everything(txt, '.pdf')
+    if not file_pdf or len(pdf_manifest) == 0:
+        return False, txt   #如不是pdf文件则返回输入区内容
+    final_result = ""
+    for index, fp in enumerate(pdf_manifest):
+        file_content, page_one = read_and_clean_pdf_text(fp) # （尝试）按照章节切割PDF
+        file_content = file_content.encode('utf-8', 'ignore').decode()   # avoid reading non-utf8 chars
+        final_result += file_content
+    return True, final_result
+    
 @CatchException
 def 生成多种Mermaid图表(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     """
@@ -216,9 +232,12 @@ def 生成多种Mermaid图表(txt, llm_kwargs, plugin_kwargs, chatbot, history, 
     system_prompt   给gpt的静默提醒
     web_port        当前软件运行的端口号
     """
+    import os
     chatbot.append([
         "函数插件功能？", 
-        "根据当前聊天历史绘制多种mermaid图表的功能，将会首先判断适合的图表类型，随后绘制图表。函数插件贡献者: Menghuan1918"])
+        "根据当前聊天历史或PDF中绘制多种mermaid图表的功能，将会首先判断适合的图表类型，随后绘制图表。函数插件贡献者: Menghuan1918"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-    if txt == "": txt = "空白的输入栏" # :)虽然暂时没用到输入栏内容
+    if os.path.exists(txt):     #如输入区无内容则直接解析历史记录
+        file_exist, txt = 输入区文件处理(txt)
+    history.append(txt)     #将解析后的txt传递加入到历史中
     yield from 解析历史输入(history,llm_kwargs,chatbot)
