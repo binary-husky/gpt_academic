@@ -1,8 +1,8 @@
 """
-========================================================================
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 第一部分：来自EdgeGPT.py
 https://github.com/acheong08/EdgeGPT
-========================================================================
+=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 """
 """
 Main.py
@@ -196,9 +196,9 @@ class _ChatHubRequest:
         self,
         prompt: str,
         conversation_style: CONVERSATION_STYLE_TYPE,
-        options = None,
-        webpage_context = None,
-        search_result = False,
+        options=None,
+        webpage_context=None,
+        search_result=False,
     ) -> None:
         """
         Updates request object
@@ -294,9 +294,9 @@ class _Conversation:
 
     def __init__(
         self,
-        proxy = None,
-        async_mode = False,
-        cookies = None,
+        proxy=None,
+        async_mode=False,
+        cookies=None,
     ) -> None:
         if async_mode:
             return
@@ -350,8 +350,8 @@ class _Conversation:
 
     @staticmethod
     async def create(
-        proxy = None,
-        cookies = None,
+        proxy=None,
+        cookies=None,
     ):
         self = _Conversation(async_mode=True)
         self.struct = {
@@ -418,8 +418,8 @@ class _ChatHub:
     def __init__(
         self,
         conversation: _Conversation,
-        proxy = None,
-        cookies = None,
+        proxy=None,
+        cookies=None,
     ) -> None:
         self.session = None
         self.wss = None
@@ -441,7 +441,7 @@ class _ChatHub:
         conversation_style: CONVERSATION_STYLE_TYPE = None,
         raw: bool = False,
         options: dict = None,
-        webpage_context = None,
+        webpage_context=None,
         search_result: bool = False,
     ) -> Generator[str, None, None]:
         """
@@ -452,10 +452,12 @@ class _ChatHub:
             ws_cookies = []
             for cookie in self.cookies:
                 ws_cookies.append(f"{cookie['name']}={cookie['value']}")
-            req_header.update({
-                'Cookie': ';'.join(ws_cookies),
-            })
-            
+            req_header.update(
+                {
+                    "Cookie": ";".join(ws_cookies),
+                }
+            )
+
         timeout = aiohttp.ClientTimeout(total=30)
         self.session = aiohttp.ClientSession(timeout=timeout)
 
@@ -521,9 +523,9 @@ class _ChatHub:
             msg = await self.wss.receive()
             try:
                 objects = msg.data.split(DELIMITER)
-            except :
+            except:
                 continue
-            
+
             for obj in objects:
                 if obj is None or not obj:
                     continue
@@ -624,8 +626,8 @@ class Chatbot:
 
     def __init__(
         self,
-        proxy = None,
-        cookies = None,
+        proxy=None,
+        cookies=None,
     ) -> None:
         self.proxy = proxy
         self.chat_hub: _ChatHub = _ChatHub(
@@ -636,8 +638,8 @@ class Chatbot:
 
     @staticmethod
     async def create(
-        proxy = None,
-        cookies = None,
+        proxy=None,
+        cookies=None,
     ):
         self = Chatbot.__new__(Chatbot)
         self.proxy = proxy
@@ -654,7 +656,7 @@ class Chatbot:
         wss_link: str = "wss://sydney.bing.com/sydney/ChatHub",
         conversation_style: CONVERSATION_STYLE_TYPE = None,
         options: dict = None,
-        webpage_context = None,
+        webpage_context=None,
         search_result: bool = False,
     ) -> dict:
         """
@@ -680,7 +682,7 @@ class Chatbot:
         conversation_style: CONVERSATION_STYLE_TYPE = None,
         raw: bool = False,
         options: dict = None,
-        webpage_context = None,
+        webpage_context=None,
         search_result: bool = False,
     ) -> Generator[str, None, None]:
         """

@@ -5,7 +5,7 @@ import glob, os, requests, time
 pj = os.path.join
 ARXIV_CACHE_DIR = os.path.expanduser(f"~/arxiv_cache/")
 
-# =================================== 工具函数 ===============================================
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- 工具函数 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # 专业词汇声明  = 'If the term "agent" is used in this section, it should be translated to "智能体". '
 def switch_prompt(pfg, mode, more_requirement):
     """
@@ -142,7 +142,7 @@ def arxiv_download(chatbot, history, txt, allow_cache=True):
     from toolbox import extract_archive
     extract_archive(file_path=dst, dest_dir=extract_dst)
     return extract_dst, arxiv_id
-# ========================================= 插件主程序1 =====================================================    
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= 插件主程序1 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=    
 
 
 @CatchException
@@ -218,7 +218,7 @@ def Latex英文纠错加PDF对比(txt, llm_kwargs, plugin_kwargs, chatbot, histo
     # <-------------- we are done ------------->
     return success
 
-# ========================================= 插件主程序2 =====================================================    
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= 插件主程序2 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=    
 
 @CatchException
 def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):

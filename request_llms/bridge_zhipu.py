@@ -42,7 +42,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     try:
         check_packages(["zhipuai"])
     except:
-        yield from update_ui_lastest_msg(f"导入软件依赖失败。使用该模型需要额外依赖，安装方法```pip install --upgrade zhipuai```。",
+        yield from update_ui_lastest_msg(f"导入软件依赖失败。使用该模型需要额外依赖，安装方法```pip install zhipuai==1.0.7```。",
                                          chatbot=chatbot, history=history, delay=0)
         return
     

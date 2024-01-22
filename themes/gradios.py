@@ -31,8 +31,15 @@ def adjust_theme():
                 THEME = THEME.lstrip("huggingface-")
             set_theme = set_theme.from_hub(THEME.lower())
 
-        with open(os.path.join(theme_dir, "common.js"), "r", encoding="utf8") as f:
-            js = f"<script>{f.read()}</script>"
+        js = ""
+        for jsf in [
+            os.path.join(theme_dir, "common.js"),
+            os.path.join(theme_dir, "mermaid.min.js"),
+            os.path.join(theme_dir, "mermaid_loader.js"),
+        ]:
+            with open(jsf, "r", encoding="utf8") as f:
+                js += f"<script>{f.read()}</script>"
+
 
         # 添加一个萌萌的看板娘
         if ADD_WAIFU:

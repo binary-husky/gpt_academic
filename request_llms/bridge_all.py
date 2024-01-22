@@ -594,6 +594,23 @@ if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
         })
     except:
         print(trimmed_format_exc())
+# if "skylark" in AVAIL_LLM_MODELS:
+#     try:
+#         from .bridge_skylark2 import predict_no_ui_long_connection as skylark_noui
+#         from .bridge_skylark2 import predict as skylark_ui
+#         model_info.update({
+#             "skylark": {
+#                 "fn_with_ui": skylark_ui,
+#                 "fn_without_ui": skylark_noui,
+#                 "endpoint": None,
+#                 "max_token": 4096,
+#                 "tokenizer": tokenizer_gpt35,
+#                 "token_cnt": get_token_num_gpt35,
+#             }
+#         })
+#     except:
+#         print(trimmed_format_exc())
+
 
 # <-- 用于定义和切换多个azure模型 -->
 AZURE_CFG_ARRAY = get_conf("AZURE_CFG_ARRAY")
