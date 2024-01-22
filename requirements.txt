@@ -1,6 +1,6 @@
 gradio==3.43.2
 pypdf2==2.12.1
-zhipuai==1.0.7
+zhipuai
 tiktoken>=0.3.3
 requests[socks]
 pydantic==1.10.11
