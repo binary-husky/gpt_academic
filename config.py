@@ -193,9 +193,9 @@ XFYUN_API_SECRET = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
 XFYUN_API_KEY = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 
-# 接入智谱大模型
+# 接入智谱大模型   可选 "glm-3-turbo" "glm-4" "glm-4v"
 ZHIPUAI_API_KEY = ""
-ZHIPUAI_MODEL = "glm-4" # 可选 "glm-3-turbo" "glm-4"
+
 
 
 # # 火山引擎YUNQUE大模型
