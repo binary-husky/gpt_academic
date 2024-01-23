@@ -21,9 +21,7 @@ SELECT_PROMPT = """
 #没有思维导图!!!测试发现模型始终会优先选择思维导图
 #流程图
 PROMPT_1 = """
-{subject}
-==========
-请给出上方内容的流程图，充分考虑其之间的逻辑，使用mermaid语法，mermaid语法举例：
+请你给出围绕“{subject}”的逻辑关系图，使用mermaid语法，mermaid语法举例：
 ```mermaid
 graph TD
     P(编程) --> L1(Python)
@@ -35,9 +33,7 @@ graph TD
 """
 #序列图
 PROMPT_2 = """
-{subject}
-==========
-请给出上方内容的序列图，充分考虑其之间的逻辑，使用mermaid语法，mermaid语法举例：
+请你给出围绕“{subject}”的序列图，使用mermaid语法，mermaid语法举例：
 ```mermaid
 sequenceDiagram
     participant A as 用户
@@ -50,9 +46,7 @@ sequenceDiagram
 """
 #类图
 PROMPT_3 = """
-{subject}
-==========
-请给出上方内容的类图，充分考虑其之间的逻辑，使用mermaid语法，定义类属性时不能使用逗号,mermaid语法举例：
+请你给出围绕“{subject}”的类图，使用mermaid语法，mermaid语法举例：
 ```mermaid
 classDiagram
     Class01 <|-- AveryLongClass : Cool
@@ -72,9 +66,7 @@ classDiagram
 """
 #饼图
 PROMPT_4 = """
-{subject}
-==========
-请给出上方内容的饼图，充分考虑其之间的逻辑，使用mermaid语法，mermaid语法举例：
+请你给出围绕“{subject}”的饼图，使用mermaid语法，mermaid语法举例：
 ```mermaid
 pie title Pets adopted by volunteers
     "狗" : 386
@@ -84,9 +76,7 @@ pie title Pets adopted by volunteers
 """
 #甘特图
 PROMPT_5 = """
-{subject}
-==========
-请给出上方内容的甘特图，充分考虑其之间的逻辑，使用mermaid语法，mermaid语法举例：
+请你给出围绕“{subject}”的甘特图，使用mermaid语法，mermaid语法举例：
 ```mermaid
 gantt
     title 项目开发流程
@@ -102,9 +92,7 @@ gantt
 """
 #状态图
 PROMPT_6 = """
-{subject}
-==========
-请给出上方内容的状态图，充分考虑其之间的逻辑，使用mermaid语法，mermaid语法举例：
+请你给出围绕“{subject}”的状态图，使用mermaid语法，mermaid语法举例：
 ```mermaid
 stateDiagram-v2
    [*] --> Still
@@ -117,9 +105,7 @@ stateDiagram-v2
 """
 #实体关系图
 PROMPT_7 = """
-{subject}
-==========
-请给出上方内容的实体关系图，充分考虑其之间的逻辑，使用mermaid语法，mermaid语法举例：
+请你给出围绕“{subject}”的实体关系图，使用mermaid语法，mermaid语法举例：
 ```mermaid
 erDiagram
     CUSTOMER ||--o{ ORDER : places
@@ -141,9 +127,7 @@ erDiagram
 """
 #象限提示图
 PROMPT_8 = """
-{subject}
-==========
-请给出上方内容的象限提示图，充分考虑其之间的逻辑，使用mermaid语法，mermaid语法举例：
+请你给出围绕“{subject}”的象限图，使用mermaid语法，mermaid语法举例：
 ```mermaid
 graph LR
     A[Hard skill] --> B(Programming)
