@@ -16,9 +16,9 @@ SELECT_PROMPT = """
 6 状态图
 7 实体关系图
 8 象限提示图
-9 思维导图
 不需要解释原因，仅需要输出单个不带任何标点符号的数字。
 """
+#没有思维导图!!!测试发现模型始终会优先选择思维导图
 #流程图
 PROMPT_1 = """
 {subject}
@@ -212,7 +212,7 @@ def 解析历史输入(history,llm_kwargs,chatbot,plugin_kwargs):
         i_say_show_user = f'接下来将判断适合的图表类型,如连续3次判断失败将会使用流程图进行绘制'; gpt_say = "[Local Message] 收到。"   # 用户提示
         chatbot.append([i_say_show_user, gpt_say]); yield from update_ui(chatbot=chatbot, history=[])    # 更新UI
         i_say = SELECT_PROMPT.format(subject=results_txt)
-        i_say_show_user = f'请判断适合使用的流程图类型,其中数字对应关系为:1-流程图,2-序列图,3-类图,4-饼图,5-甘特图,6-状态图,7-实体关系图,8-象限提示图,9-思维导图。'
+        i_say_show_user = f'请判断适合使用的流程图类型,其中数字对应关系为:1-流程图,2-序列图,3-类图,4-饼图,5-甘特图,6-状态图,7-实体关系图,8-象限提示图。由于不管提供文本是什么,模型大概率认为"思维导图"最合适,因此思维导图仅能通过参数调用。'
         for i in range(3):
             gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
                 inputs=i_say,
