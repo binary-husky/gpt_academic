@@ -52,7 +52,7 @@ sequenceDiagram
 PROMPT_3 = """
 {subject}
 ==========
-请给出上方内容的类图，充分考虑其之间的逻辑，使用mermaid语法，mermaid语法举例：
+请给出上方内容的类图，充分考虑其之间的逻辑，使用mermaid语法，定义类属性时不能使用逗号,mermaid语法举例：
 ```mermaid
 classDiagram
     Class01 <|-- AveryLongClass : Cool
@@ -248,7 +248,7 @@ def 解析历史输入(history,llm_kwargs,chatbot,plugin_kwargs):
         inputs=i_say,
         inputs_show_user=i_say_show_user,
         llm_kwargs=llm_kwargs, chatbot=chatbot, history=[], 
-        sys_prompt="你精通使用mermaid语法来绘制图表,请避免在mermaid语法中使用不允许的字符,并充分考虑图表的可读性。"
+        sys_prompt="你精通使用mermaid语法来绘制图表,首先确保语法正确,其次避免在mermaid语法中使用不允许的字符,此外也应当分考虑图表的可读性。"
     )
     history.append(gpt_say)
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
@@ -259,13 +259,22 @@ def 输入区文件处理(txt):
     import glob
     from .crazy_utils import get_files_from_everything
     file_pdf,pdf_manifest,folder_pdf = get_files_from_everything(txt, '.pdf')
-    if not file_pdf or len(pdf_manifest) == 0:
-        return False, txt   #如不是pdf文件则返回输入区内容
+    file_md,md_manifest,folder_md = get_files_from_everything(txt, '.md')
+    if len(pdf_manifest) == 0 and len(md_manifest) == 0:
+        return False, txt   #如输入区内容不是文件则直接返回输入区内容
+    
     final_result = ""
-    for index, fp in enumerate(pdf_manifest):
-        file_content, page_one = read_and_clean_pdf_text(fp) # （尝试）按照章节切割PDF
-        file_content = file_content.encode('utf-8', 'ignore').decode()   # avoid reading non-utf8 chars
-        final_result += file_content
+    if file_pdf:
+        for index, fp in enumerate(pdf_manifest):
+            file_content, page_one = read_and_clean_pdf_text(fp) # （尝试）按照章节切割PDF
+            file_content = file_content.encode('utf-8', 'ignore').decode()   # avoid reading non-utf8 chars
+            final_result += "\n" + file_content
+    if file_md:
+        for index, fp in enumerate(md_manifest):
+            with open(fp, 'r', encoding='utf-8', errors='replace') as f:
+                file_content = f.read()
+            file_content = file_content.encode('utf-8', 'ignore').decode()
+            final_result += "\n" + file_content
     return True, final_result
     
 @CatchException
@@ -300,6 +309,8 @@ def 生成多种Mermaid图表(txt, llm_kwargs, plugin_kwargs, chatbot, history, 
     
     if os.path.exists(txt):     #如输入区无内容则直接解析历史记录
         file_exist, txt = 输入区文件处理(txt)
+    else:
+        file_exist = False
 
     if file_exist : history = []    #如输入区内容为文件则清空历史记录
     history.append(txt)     #将解析后的txt传递加入到历史中
