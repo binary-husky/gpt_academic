@@ -3,7 +3,7 @@ from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import read_and_clean_pdf_text
 import datetime
 
-#暂时只写了这几种的PROMPT
+#以下是每类图表的PROMPT
 SELECT_PROMPT = """
 “{subject}”
 =============
@@ -16,11 +16,14 @@ SELECT_PROMPT = """
 6 状态图
 7 实体关系图
 8 象限提示图
+9 思维导图
 不需要解释原因，仅需要输出单个不带任何标点符号的数字。
 """
 #流程图
 PROMPT_1 = """
-请你给出围绕“{subject}”的逻辑关系图，使用mermaid语法，mermaid语法举例：
+{subject}
+==========
+请给出上方内容的流程图，充分考虑其之间的逻辑，使用mermaid语法，mermaid语法举例：
 ```mermaid
 graph TD
     P(编程) --> L1(Python)
@@ -32,7 +35,9 @@ graph TD
 """
 #序列图
 PROMPT_2 = """
-请你给出围绕“{subject}”的序列图，使用mermaid语法，mermaid语法举例：
+{subject}
+==========
+请给出上方内容的序列图，充分考虑其之间的逻辑，使用mermaid语法，mermaid语法举例：
 ```mermaid
 sequenceDiagram
     participant A as 用户
@@ -45,7 +50,9 @@ sequenceDiagram
 """
 #类图
 PROMPT_3 = """
-请你给出围绕“{subject}”的类图，使用mermaid语法，mermaid语法举例：
+{subject}
+==========
+请给出上方内容的类图，充分考虑其之间的逻辑，使用mermaid语法，mermaid语法举例：
 ```mermaid
 classDiagram
     Class01 <|-- AveryLongClass : Cool
@@ -65,7 +72,9 @@ classDiagram
 """
 #饼图
 PROMPT_4 = """
-请你给出围绕“{subject}”的饼图，使用mermaid语法，mermaid语法举例：
+{subject}
+==========
+请给出上方内容的饼图，充分考虑其之间的逻辑，使用mermaid语法，mermaid语法举例：
 ```mermaid
 pie title Pets adopted by volunteers
     "狗" : 386
@@ -75,7 +84,9 @@ pie title Pets adopted by volunteers
 """
 #甘特图
 PROMPT_5 = """
-请你给出围绕“{subject}”的甘特图，使用mermaid语法，mermaid语法举例：
+{subject}
+==========
+请给出上方内容的甘特图，充分考虑其之间的逻辑，使用mermaid语法，mermaid语法举例：
 ```mermaid
 gantt
     title 项目开发流程
@@ -91,7 +102,9 @@ gantt
 """
 #状态图
 PROMPT_6 = """
-请你给出围绕“{subject}”的状态图，使用mermaid语法，mermaid语法举例：
+{subject}
+==========
+请给出上方内容的状态图，充分考虑其之间的逻辑，使用mermaid语法，mermaid语法举例：
 ```mermaid
 stateDiagram-v2
    [*] --> Still
@@ -104,7 +117,9 @@ stateDiagram-v2
 """
 #实体关系图
 PROMPT_7 = """
-请你给出围绕“{subject}”的实体关系图，使用mermaid语法，mermaid语法举例：
+{subject}
+==========
+请给出上方内容的实体关系图，充分考虑其之间的逻辑，使用mermaid语法，mermaid语法举例：
 ```mermaid
 erDiagram
     CUSTOMER ||--o{ ORDER : places
@@ -126,13 +141,40 @@ erDiagram
 """
 #象限提示图
 PROMPT_8 = """
-请你给出围绕“{subject}”的象限图，使用mermaid语法，mermaid语法举例：
+{subject}
+==========
+请给出上方内容的象限提示图，充分考虑其之间的逻辑，使用mermaid语法，mermaid语法举例：
 ```mermaid
 graph LR
     A[Hard skill] --> B(Programming)
     A[Hard skill] --> C(Design)
     D[Soft skill] --> E(Coordination)
     D[Soft skill] --> F(Communication)
+```
+"""
+#思维导图
+PROMPT_9 = """
+{subject}
+==========
+请给出上方内容的思维导图，充分考虑其之间的逻辑，使用mermaid语法，mermaid语法举例：
+```mermaid
+mindmap
+  root((mindmap))
+    Origins
+      Long history
+      ::icon(fa fa-book)
+      Popularisation
+        British popular psychology author Tony Buzan
+    Research
+      On effectiveness<br/>and features
+      On Automatic creation
+        Uses
+            Creative techniques
+            Strategic planning
+            Argument mapping
+    Tools
+      Pen and paper
+      Mermaid
 ```
 """
 
@@ -166,11 +208,11 @@ def 解析历史输入(history,llm_kwargs,chatbot,plugin_kwargs):
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     gpt_say = plugin_kwargs.get("advanced_arg", "")     #将图表类型参数赋值为插件参数  
     results_txt = '\n'.join(results)    #合并摘要
-    if gpt_say not in ['1','2','3','4','5','6','7','8']:    #如插件参数不正确则使用对话模型判断
+    if gpt_say not in ['1','2','3','4','5','6','7','8','9']:    #如插件参数不正确则使用对话模型判断
         i_say_show_user = f'接下来将判断适合的图表类型,如连续3次判断失败将会使用流程图进行绘制'; gpt_say = "[Local Message] 收到。"   # 用户提示
         chatbot.append([i_say_show_user, gpt_say]); yield from update_ui(chatbot=chatbot, history=[])    # 更新UI
         i_say = SELECT_PROMPT.format(subject=results_txt)
-        i_say_show_user = f'请判断适合使用的流程图类型,其中数字对应关系为:1-流程图,2-序列图,3-类图,4-饼图,5-甘特图,6-状态图,7-实体关系图,8-象限提示图'
+        i_say_show_user = f'请判断适合使用的流程图类型,其中数字对应关系为:1-流程图,2-序列图,3-类图,4-饼图,5-甘特图,6-状态图,7-实体关系图,8-象限提示图,9-思维导图。'
         for i in range(3):
             gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
                 inputs=i_say,
@@ -178,9 +220,9 @@ def 解析历史输入(history,llm_kwargs,chatbot,plugin_kwargs):
                 llm_kwargs=llm_kwargs, chatbot=chatbot, history=[], 
                 sys_prompt=""
             )
-            if gpt_say in ['1','2','3','4','5','6','7','8']:     #判断返回是否正确
+            if gpt_say in ['1','2','3','4','5','6','7','8','9']:     #判断返回是否正确
                 break
-        if gpt_say not in ['1','2','3','4','5','6','7','8']:
+        if gpt_say not in ['1','2','3','4','5','6','7','8','9']:
             gpt_say = '1'
     ############################## <第 3 步，根据选择的图表类型绘制图表> ##################################
     if gpt_say == '1':
@@ -199,6 +241,8 @@ def 解析历史输入(history,llm_kwargs,chatbot,plugin_kwargs):
         i_say = PROMPT_7.replace("{subject}", results_txt)      #由于实体关系图用到了{}符号
     elif gpt_say == '8':
         i_say = PROMPT_8.format(subject=results_txt)
+    elif gpt_say == '9':
+        i_say = PROMPT_9.format(subject=results_txt)
     i_say_show_user = f'请根据判断结果绘制相应的图表。'
     gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
         inputs=i_say,
