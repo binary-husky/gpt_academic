@@ -31,6 +31,20 @@ code_highlight_configs = {
     },
 }
 
+code_highlight_configs_block_mermaid = {
+    "pymdownx.superfences": {
+        "css_class": "codehilite",
+        # "custom_fences": [
+        #     {"name": "mermaid", "class": "mermaid", "format": fence_code_format}
+        # ],
+    },
+    "pymdownx.highlight": {
+        "css_class": "codehilite",
+        "guess_lang": True,
+        # 'auto_title': True,
+        # 'linenums': True
+    },
+}
 
 def tex2mathml_catch_exception(content, *args, **kwargs):
     try:
