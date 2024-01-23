@@ -243,12 +243,12 @@ def 解析历史输入(history,llm_kwargs,chatbot,plugin_kwargs):
         i_say = PROMPT_8.format(subject=results_txt)
     elif gpt_say == '9':
         i_say = PROMPT_9.format(subject=results_txt)
-    i_say_show_user = f'请根据判断结果绘制相应的图表。'
+    i_say_show_user = f'请根据判断结果绘制相应的图表。如需绘制思维导图请使用参数调用,同时过大的图表可能需要复制到在线编辑器中进行渲染。'
     gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
         inputs=i_say,
         inputs_show_user=i_say_show_user,
         llm_kwargs=llm_kwargs, chatbot=chatbot, history=[], 
-        sys_prompt=""
+        sys_prompt="你精通使用mermaid语法来绘制图表,请避免在mermaid语法中使用不允许的字符,并充分考虑图表的可读性。"
     )
     history.append(gpt_say)
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新

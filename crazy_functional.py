@@ -77,7 +77,7 @@ def get_crazy_functions():
             "Info" : "基于当前对话或PDF生成多种Mermaid图表,图表类型由模型判断",
             "Function": HotReload(生成多种Mermaid图表),
             "AdvancedArgs": True,
-            "ArgsReminder": "请输入图类型对应的数字:1-流程图,2-序列图,3-类图,4-饼图,5-甘特图,6-状态图,7-实体关系图,8-象限提示图,9-思维导图",
+            "ArgsReminder": "请输入图类型对应的数字,不输入则为模型自行判断:1-流程图,2-序列图,3-类图,4-饼图,5-甘特图,6-状态图,7-实体关系图,8-象限提示图,9-思维导图",
         },
         "批量总结Word文档": {
             "Group": "学术",
