@@ -43,13 +43,14 @@ def get_core_functions():
             # 后缀，会被加在你的输入之后。例如，配合前缀可以把你的输入内容用引号圈起来
             "Suffix":
                 # dedent() 函数用于去除多行字符串的缩进
+                #   ```{build_gpt_academic_masked_string(text_show_llm="mermaid", text_show_render="")}
                 dedent("\n"+f'''
                     ==============================
 
                     使用mermaid flowchart对以上文本进行总结，概括上述段落的内容以及内在逻辑关系，例如：
 
                     以下是对以上文本的总结，以mermaid flowchart的形式展示：
-                    ```{build_gpt_academic_masked_string(text_show_llm="mermaid", text_show_render="")}
+                    ```mermaid
                     flowchart LR
                         A["节点名1"] --> B("节点名2")
                         B --> C{"节点名3"}
