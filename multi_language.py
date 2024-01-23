@@ -352,9 +352,9 @@ def step_1_core_key_translate():
         chinese_core_keys_norepeat_mapping.update({k:cached_translation[k]})
     chinese_core_keys_norepeat_mapping = dict(sorted(chinese_core_keys_norepeat_mapping.items(), key=lambda x: -len(x[0])))
 
-    # ===============================================
+    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     # copy
-    # ===============================================
+    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     def copy_source_code():
 
         from toolbox import get_conf
@@ -367,9 +367,9 @@ def step_1_core_key_translate():
         shutil.copytree('./', backup_dir, ignore=lambda x, y: blacklist)
     copy_source_code()
 
-    # ===============================================
+    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     # primary key replace
-    # ===============================================
+    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     directory_path = f'./multi-language/{LANG}/'
     for root, dirs, files in os.walk(directory_path):
         for file in files:
@@ -389,9 +389,9 @@ def step_1_core_key_translate():
 
 def step_2_core_key_translate():
 
-    # =================================================================================================
+    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
     # step2 
-    # =================================================================================================
+    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
     def load_string(strings, string_input):
         string_ = string_input.strip().strip(',').strip().strip('.').strip()
@@ -492,9 +492,9 @@ def step_2_core_key_translate():
     cached_translation.update(read_map_from_json(language=LANG_STD))
     cached_translation = dict(sorted(cached_translation.items(), key=lambda x: -len(x[0])))
 
-    # ===============================================
+    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     # literal key replace
-    # ===============================================
+    # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
     directory_path = f'./multi-language/{LANG}/'
     for root, dirs, files in os.walk(directory_path):
         for file in files:

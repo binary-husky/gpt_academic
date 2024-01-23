@@ -28,6 +28,9 @@ from .bridge_chatglm3 import predict as chatglm3_ui
 from .bridge_qianfan import predict_no_ui_long_connection as qianfan_noui
 from .bridge_qianfan import predict as qianfan_ui
 
+from .bridge_google_gemini import predict as genai_ui
+from .bridge_google_gemini import predict_no_ui_long_connection  as genai_noui
+
 colors = ['#FF00FF', '#00FFFF', '#FF0000', '#990099', '#009999', '#990044']
 
 class LazyloadTiktoken(object):
@@ -243,6 +246,22 @@ model_info = {
         "fn_without_ui": qianfan_noui,
         "endpoint": None,
         "max_token": 2000,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+    "gemini-pro": {
+        "fn_with_ui": genai_ui,
+        "fn_without_ui": genai_noui,
+        "endpoint": None,
+        "max_token": 1024 * 32,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+    "gemini-pro-vision": {
+        "fn_with_ui": genai_ui,
+        "fn_without_ui": genai_noui,
+        "endpoint": None,
+        "max_token": 1024 * 32,
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
@@ -479,22 +498,6 @@ if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-
         })
     except:
         print(trimmed_format_exc())
-if "chatgpt_website" in AVAIL_LLM_MODELS:   # 接入一些逆向工程https://github.com/acheong08/ChatGPT-to-API/
-    try:
-        from .bridge_chatgpt_website import predict_no_ui_long_connection as chatgpt_website_noui
-        from .bridge_chatgpt_website import predict as chatgpt_website_ui
-        model_info.update({
-            "chatgpt_website": {
-                "fn_with_ui": chatgpt_website_ui,
-                "fn_without_ui": chatgpt_website_noui,
-                "endpoint": openai_endpoint,
-                "max_token": 4096,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            }
-        })
-    except:
-        print(trimmed_format_exc())
 if "spark" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
     try:
         from .bridge_spark import predict_no_ui_long_connection as spark_noui
@@ -591,6 +594,23 @@ if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
         })
     except:
         print(trimmed_format_exc())
+# if "skylark" in AVAIL_LLM_MODELS:
+#     try:
+#         from .bridge_skylark2 import predict_no_ui_long_connection as skylark_noui
+#         from .bridge_skylark2 import predict as skylark_ui
+#         model_info.update({
+#             "skylark": {
+#                 "fn_with_ui": skylark_ui,
+#                 "fn_without_ui": skylark_noui,
+#                 "endpoint": None,
+#                 "max_token": 4096,
+#                 "tokenizer": tokenizer_gpt35,
+#                 "token_cnt": get_token_num_gpt35,
+#             }
+#         })
+#     except:
+#         print(trimmed_format_exc())
+
 
 # <-- 用于定义和切换多个azure模型 -->
 AZURE_CFG_ARRAY = get_conf("AZURE_CFG_ARRAY")

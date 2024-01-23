@@ -8,8 +8,8 @@ try {
             live2d_settings['modelId'] = 5;                  // 默认模型 ID
             live2d_settings['modelTexturesId'] = 1;          // 默认材质 ID
             live2d_settings['modelStorage'] = false;         // 不储存模型 ID
-            live2d_settings['waifuSize']            = '210x187';  
-            live2d_settings['waifuTipsSize']        = '187x52';  
+            live2d_settings['waifuSize']            = '210x187';
+            live2d_settings['waifuTipsSize']        = '187x52';
             live2d_settings['canSwitchModel']       = true;
             live2d_settings['canSwitchTextures']    = true;
             live2d_settings['canSwitchHitokoto']    = false;

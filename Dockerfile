@@ -18,7 +18,6 @@ WORKDIR /gpt
 
 # 安装大部分依赖，利用Docker缓存加速以后的构建 （以下三行，可以删除）
 COPY requirements.txt ./
-COPY ./docs/gradio-3.32.6-py3-none-any.whl ./docs/gradio-3.32.6-py3-none-any.whl
 RUN pip3 install -r requirements.txt
 
 
