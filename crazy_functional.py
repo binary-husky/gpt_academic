@@ -70,7 +70,7 @@ def get_crazy_functions():
             "Info": "清除所有缓存文件，谨慎操作 | 不需要输入参数",
             "Function": HotReload(清除缓存),
         },
-        "生成多种Mermaid图表(从当前对话或文件(.pdf)中生产图表）": {
+        "生成多种Mermaid图表(从当前对话或文件(.pdf/.md)中生产图表）": {
             "Group": "对话",
             "Color": "stop",
             "AsButton": False,
