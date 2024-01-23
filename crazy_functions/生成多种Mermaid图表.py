@@ -1,4 +1,4 @@
-from toolbox import CatchException, update_ui
+from toolbox import CatchException, update_ui, report_exception
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import read_and_clean_pdf_text
 import datetime
@@ -136,7 +136,7 @@ graph LR
 ```
 """
 
-def 解析历史输入(history,llm_kwargs,chatbot):
+def 解析历史输入(history,llm_kwargs,chatbot,plugin_kwargs):
     ############################## <第 0 步，切割输入> ##################################
     # 借用PDF切割中的函数对文本进行切割
     TOKEN_LIMIT_PER_FRAGMENT = 2500
@@ -163,22 +163,25 @@ def 解析历史输入(history,llm_kwargs,chatbot):
         results.append(gpt_say)
         last_iteration_result = gpt_say
     ############################## <第 2 步，根据整理的摘要选择图表类型> ##################################
-    i_say_show_user = f'接下来将判断适合的图表类型,如连续3次判断失败将会使用流程图进行绘制'; gpt_say = "[Local Message] 收到。"   # 用户提示
-    chatbot.append([i_say_show_user, gpt_say]); yield from update_ui(chatbot=chatbot, history=[])    # 更新UI
-    results_txt = '\n'.join(results)
-    i_say = SELECT_PROMPT.format(subject=results_txt)
-    i_say_show_user = f'请判断适合使用的流程图类型,其中数字对应关系为:1-流程图,2-序列图,3-类图,4-饼图,5-甘特图,6-状态图,7-实体关系图,8-象限提示图'
-    for i in range(3):
-        gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
-            inputs=i_say,
-            inputs_show_user=i_say_show_user,
-            llm_kwargs=llm_kwargs, chatbot=chatbot, history=[], 
-            sys_prompt=""
-        )
-        if gpt_say in ['1','2','3','4','5','6','7','8']:     #判断返回是否正确
-            break
-    if gpt_say not in ['1','2','3','4','5','6','7','8']:
-        gpt_say = '1'
+    if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
+    gpt_say = plugin_kwargs.get("advanced_arg", "")     #将图表类型参数赋值为插件参数  
+    results_txt = '\n'.join(results)    #合并摘要
+    if gpt_say not in ['1','2','3','4','5','6','7','8']:    #如插件参数不正确则使用对话模型判断
+        i_say_show_user = f'接下来将判断适合的图表类型,如连续3次判断失败将会使用流程图进行绘制'; gpt_say = "[Local Message] 收到。"   # 用户提示
+        chatbot.append([i_say_show_user, gpt_say]); yield from update_ui(chatbot=chatbot, history=[])    # 更新UI
+        i_say = SELECT_PROMPT.format(subject=results_txt)
+        i_say_show_user = f'请判断适合使用的流程图类型,其中数字对应关系为:1-流程图,2-序列图,3-类图,4-饼图,5-甘特图,6-状态图,7-实体关系图,8-象限提示图'
+        for i in range(3):
+            gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
+                inputs=i_say,
+                inputs_show_user=i_say_show_user,
+                llm_kwargs=llm_kwargs, chatbot=chatbot, history=[], 
+                sys_prompt=""
+            )
+            if gpt_say in ['1','2','3','4','5','6','7','8']:     #判断返回是否正确
+                break
+        if gpt_say not in ['1','2','3','4','5','6','7','8']:
+            gpt_say = '1'
     ############################## <第 3 步，根据选择的图表类型绘制图表> ##################################
     if gpt_say == '1':
         i_say = PROMPT_1.format(subject=results_txt)
@@ -193,7 +196,7 @@ def 解析历史输入(history,llm_kwargs,chatbot):
     elif gpt_say == '6':
         i_say = PROMPT_6.format(subject=results_txt)
     elif gpt_say == '7':
-        i_say = PROMPT_7.format(subject=results_txt)
+        i_say = PROMPT_7.replace("{subject}", results_txt)      #由于实体关系图用到了{}符号
     elif gpt_say == '8':
         i_say = PROMPT_8.format(subject=results_txt)
     i_say_show_user = f'请根据判断结果绘制相应的图表。'
@@ -233,11 +236,28 @@ def 生成多种Mermaid图表(txt, llm_kwargs, plugin_kwargs, chatbot, history, 
     web_port        当前软件运行的端口号
     """
     import os
+
+    # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？", 
-        "根据当前聊天历史或PDF中绘制多种mermaid图表的功能，将会首先判断适合的图表类型，随后绘制图表。函数插件贡献者: Menghuan1918"])
+        "根据当前聊天历史或PDF中(文件内容优先)绘制多种mermaid图表，将会由对话模型首先判断适合的图表类型，随后绘制图表。\
+        \n您也可以使用插件参数指定绘制的图表类型,函数插件贡献者: Menghuan1918"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+
+    # 尝试导入依赖，如果缺少依赖，则给出安装建议
+    try:
+        import fitz
+    except:
+        report_exception(chatbot, history, 
+            a = f"解析项目: {txt}", 
+            b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pymupdf```。")
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+        return
+    
     if os.path.exists(txt):     #如输入区无内容则直接解析历史记录
         file_exist, txt = 输入区文件处理(txt)
+
+    if file_exist : history = []    #如输入区内容为文件则清空历史记录
     history.append(txt)     #将解析后的txt传递加入到历史中
-    yield from 解析历史输入(history,llm_kwargs,chatbot)
+    
+    yield from 解析历史输入(history,llm_kwargs,chatbot,plugin_kwargs)  

@@ -70,12 +70,14 @@ def get_crazy_functions():
             "Info": "清除所有缓存文件，谨慎操作 | 不需要输入参数",
             "Function": HotReload(清除缓存),
         },
-        "生成多种Mermaid图表（从当前对话内容中生产多种图表）": {
+        "生成多种Mermaid图表(从当前对话或文件(.pdf)中生产图表）": {
             "Group": "对话",
             "Color": "stop",
             "AsButton": False,
             "Info" : "基于当前对话或PDF生成多种Mermaid图表,图表类型由模型判断",
             "Function": HotReload(生成多种Mermaid图表),
+            "AdvancedArgs": True,
+            "ArgsReminder": "请输入图类型对应的数字:1-流程图,2-序列图,3-类图,4-饼图,5-甘特图,6-状态图,7-实体关系图,8-象限提示图",
         },
         "批量总结Word文档": {
             "Group": "学术",
