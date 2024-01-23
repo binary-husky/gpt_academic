@@ -3,7 +3,6 @@
 # 'stop' 颜色对应 theme.py 中的 color_er
 import importlib
 from toolbox import clear_line_break
-from toolbox import build_gpt_academic_masked_string
 from toolbox import apply_gpt_academic_string_mask_langbased
 from toolbox import build_gpt_academic_masked_string_langbased
 from textwrap import dedent
@@ -43,7 +42,6 @@ def get_core_functions():
             # 后缀，会被加在你的输入之后。例如，配合前缀可以把你的输入内容用引号圈起来
             "Suffix":
                 # dedent() 函数用于去除多行字符串的缩进
-                #   ```{build_gpt_academic_masked_string(text_show_llm="mermaid", text_show_render="")}
                 dedent("\n"+f'''
                     ==============================
 
