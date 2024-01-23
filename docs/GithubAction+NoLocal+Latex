@@ -18,7 +18,7 @@ WORKDIR /gpt
 
 RUN pip3 install openai numpy arxiv rich
 RUN pip3 install colorama Markdown pygments pymupdf
-RUN pip3 install python-docx pdfminer 
+RUN pip3 install python-docx pdfminer
 RUN pip3 install nougat-ocr
 
 # 装载项目文件

@@ -2,9 +2,9 @@
 
 
 > **注意**
-> 
+>
 > 此READMEはGPTによる翻訳で生成されました（このプロジェクトのプラグインによって実装されています）、翻訳結果は100%正確ではないため、注意してください。
-> 
+>
 > 2023年11月7日: 依存関係をインストールする際は、`requirements.txt`で**指定されたバージョン**を選択してください。 インストールコマンド: `pip install -r requirements.txt`。
 
 
@@ -18,11 +18,11 @@ GPTを使用してこのプロジェクトを任意の言語に翻訳するに�
 > 1. **強調された** プラグイン（ボタン）のみがファイルを読み込むことができることに注意してください。一部のプラグインは、プラグインエリアのドロップダウンメニューにあります。また、新しいプラグインのPRを歓迎し、最優先で対応します。
 >
 > 2. このプロジェクトの各ファイルの機能は、[自己分析レポート`self_analysis.md`](https://github.com/binary-husky/gpt_academic/wiki/GPT‐Academic%E9%A1%B9%E7%9B%AE%E8%87%AA%E8%AF%91%E8%A7%A3%E5%A0%82)で詳しく説明されています。バージョンが進化するにつれて、関連する関数プラグインをクリックして、プロジェクトの自己分析レポートをGPTで再生成することもできます。よくある質問については、[`wiki`](https://github.com/binary-husky/gpt_academic/wiki)をご覧ください。[標準的なインストール方法](#installation) | [ワンクリックインストールスクリプト](https://github.com/binary-husky/gpt_academic/releases) | [構成の説明](https://github.com/binary-husky/gpt_academic/wiki/Project-Configuration-Explain)。
-> 
+>
 > 3. このプロジェクトは、[ChatGLM](https://www.chatglm.dev/)などの中国製の大規模言語モデルも互換性があり、試してみることを推奨しています。複数のAPIキーを共存させることができ、設定ファイルに`API_KEY="openai-key1,openai-key2,azure-key3,api2d-key4"`のように記入できます。`API_KEY`を一時的に変更する必要がある場合は、入力エリアに一時的な`API_KEY`を入力し、Enterキーを押して提出すると有効になります。
 
 
- 
+
 
 <div align="center">
 
@@ -189,7 +189,7 @@ Python環境に詳しくないWindowsユーザーは、[リリース](https://gi
 "超级英译中"： {
     # プレフィックス、入力の前に追加されます。例えば、要求を記述するために使用されます。翻訳、コードの解説、校正など
     "プレフィックス"： "下記の内容を中国語に翻訳し、専門用語を一つずつマークダウンテーブルで解説してください：\n\n"、
-    
+
     # サフィックス、入力の後に追加されます。プレフィックスと一緒に使用して、入力内容を引用符で囲むことができます。
     "サフィックス"： ""、
 }、
@@ -342,4 +342,3 @@ https://github.com/oobabooga/one-click-installers
 # その他：
 https://github.com/gradio-app/gradio
 https://github.com/fghrsh/live2d_demo
-

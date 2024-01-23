@@ -12,7 +12,7 @@
 
 **Se ti piace questo progetto, per favore dagli una stella; se hai idee o plugin utili, fai una pull request!**
 
-Se ti piace questo progetto, dagli una stella. 
+Se ti piace questo progetto, dagli una stella.
 Per tradurre questo progetto in qualsiasi lingua con GPT, leggi ed esegui [`multi_language.py`](multi_language.py) (sperimentale).
 
 > **Nota**
@@ -20,11 +20,11 @@ Per tradurre questo progetto in qualsiasi lingua con GPT, leggi ed esegui [`mult
 > 1. Fai attenzione che solo i plugin (pulsanti) **evidenziati** supportano la lettura dei file, alcuni plugin si trovano nel **menu a tendina** nell'area dei plugin. Inoltre, accogliamo e gestiamo con **massima priorità** qualsiasi nuovo plugin attraverso pull request.
 >
 > 2. Le funzioni di ogni file in questo progetto sono descritte in dettaglio nel [rapporto di traduzione automatica del progetto `self_analysis.md`](https://github.com/binary-husky/gpt_academic/wiki/GPT‐Academic项目自译解报告). Con l'iterazione della versione, puoi anche fare clic sui plugin delle funzioni rilevanti in qualsiasi momento per richiamare GPT e rigenerare il rapporto di auto-analisi del progetto. Domande frequenti [`wiki`](https://github.com/binary-husky/gpt_academic/wiki) | [Metodo di installazione standard](#installazione) | [Script di installazione one-click](https://github.com/binary-husky/gpt_academic/releases) | [Configurazione](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明)。
-> 
+>
 > 3. Questo progetto è compatibile e incoraggia l'uso di modelli di linguaggio di grandi dimensioni nazionali, come ChatGLM. Supporto per la coesistenza di più chiavi API, puoi compilare nel file di configurazione come `API_KEY="openai-key1,openai-key2,azure-key3,api2d-key4"`. Quando è necessario sostituire temporaneamente `API_KEY`, inserisci temporaneamente `API_KEY` nell'area di input e premi Invio per confermare.
 
 
- 
+
 
 <div align="center">
 
@@ -128,7 +128,7 @@ python -m pip install -r requirements.txt # Questo passaggio è identico alla pr
 [Optional] Se desideri utilizzare ChatGLM2 di Tsinghua/Fudan MOSS come backend, è necessario installare ulteriori dipendenze (Requisiti: conoscenza di Python + esperienza con Pytorch + hardware potente):
 ```sh
 # [Optional Step I] Supporto per ChatGLM2 di Tsinghua. Note di ChatGLM di Tsinghua: Se si verifica l'errore "Call ChatGLM fail non può caricare i parametri di ChatGLM", fare riferimento a quanto segue: 1: L'installazione predefinita è la versione torch+cpu, per usare cuda è necessario disinstallare torch ed installare nuovamente la versione con torch+cuda; 2: Se il modello non può essere caricato a causa di una configurazione insufficiente, è possibile modificare la precisione del modello in request_llm/bridge_chatglm.py, sostituendo AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) con AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
-python -m pip install -r request_llms/requirements_chatglm.txt  
+python -m pip install -r request_llms/requirements_chatglm.txt
 
 # [Optional Step II] Supporto per Fudan MOSS
 python -m pip install -r request_llms/requirements_moss.txt
@@ -206,8 +206,8 @@ Ad esempio,
 ```
 "Traduzione avanzata Cinese-Inglese": {
      # Prefisso, sarà aggiunto prima del tuo input. Ad esempio, utilizzato per descrivere la tua richiesta, come traduzione, spiegazione del codice, rifinitura, ecc.
-     "Prefisso": "Si prega di tradurre il seguente testo in cinese e fornire spiegazione per i termini tecnici utilizzati, utilizzando una tabella in markdown uno per uno:\n\n", 
-     
+     "Prefisso": "Si prega di tradurre il seguente testo in cinese e fornire spiegazione per i termini tecnici utilizzati, utilizzando una tabella in markdown uno per uno:\n\n",
+
      # Suffisso, sarà aggiunto dopo il tuo input. Ad esempio, in combinazione con il prefisso, puoi circondare il tuo input con virgolette.
      "Suffisso": "",
 },
@@ -224,7 +224,7 @@ La scrittura di plugin per questo progetto è facile e richiede solo conoscenze 
 # Aggiornamenti
 ### I: Aggiornamenti
 
-1. Funzionalità di salvataggio della conversazione. Chiamare `Salva la conversazione corrente` nell'area del plugin per salvare la conversazione corrente come un file html leggibile e ripristinabile. 
+1. Funzionalità di salvataggio della conversazione. Chiamare `Salva la conversazione corrente` nell'area del plugin per salvare la conversazione corrente come un file html leggibile e ripristinabile.
 Inoltre, nella stessa area del plugin (menu a tendina) chiamare `Carica la cronologia della conversazione` per ripristinare una conversazione precedente.
 Suggerimento: fare clic su `Carica la cronologia della conversazione` senza specificare un file per visualizzare la tua cronologia di archiviazione HTML.
 <div align="center">
@@ -358,4 +358,3 @@ https://github.com/oobabooga/one-click-installers
 # Altre risorse:
 https://github.com/gradio-app/gradio
 https://github.com/fghrsh/live2d_demo
-

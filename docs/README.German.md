@@ -2,9 +2,9 @@
 
 
 > **Hinweis**
-> 
-> Dieses README wurde mithilfe der GPT-Übersetzung (durch das Plugin dieses Projekts) erstellt und ist nicht zu 100 % zuverlässig. Bitte überprüfen Sie die Übersetzungsergebnisse sorgfältig. 
-> 
+>
+> Dieses README wurde mithilfe der GPT-Übersetzung (durch das Plugin dieses Projekts) erstellt und ist nicht zu 100 % zuverlässig. Bitte überprüfen Sie die Übersetzungsergebnisse sorgfältig.
+>
 > 7. November 2023: Beim Installieren der Abhängigkeiten bitte nur die in der `requirements.txt` **angegebenen Versionen** auswählen. Installationsbefehl: `pip install -r requirements.txt`.
 
 
@@ -12,19 +12,19 @@
 
 **Wenn Ihnen dieses Projekt gefällt, geben Sie ihm bitte einen Star. Wenn Sie praktische Tastenkombinationen oder Plugins entwickelt haben, sind Pull-Anfragen willkommen!**
 
-Wenn Ihnen dieses Projekt gefällt, geben Sie ihm bitte einen Star. 
+Wenn Ihnen dieses Projekt gefällt, geben Sie ihm bitte einen Star.
 Um dieses Projekt mit GPT in eine beliebige Sprache zu übersetzen, lesen Sie [`multi_language.py`](multi_language.py) (experimentell).
 
 > **Hinweis**
 >
 > 1. Beachten Sie bitte, dass nur die mit **hervorgehobenen** Plugins (Schaltflächen) Dateien lesen können. Einige Plugins befinden sich im **Drop-down-Menü** des Plugin-Bereichs. Außerdem freuen wir uns über jede neue Plugin-PR mit **höchster Priorität**.
-> 
+>
 > 2. Die Funktionen jeder Datei in diesem Projekt sind im [Selbstanalysebericht `self_analysis.md`](https://github.com/binary-husky/gpt_academic/wiki/GPT-Academic-Selbstanalysebericht) ausführlich erläutert. Sie können jederzeit auf die relevanten Funktions-Plugins klicken und GPT aufrufen, um den Selbstanalysebericht des Projekts neu zu generieren. Häufig gestellte Fragen finden Sie im [`Wiki`](https://github.com/binary-husky/gpt_academic/wiki). [Standardinstallationsmethode](#installation) | [Ein-Klick-Installationsskript](https://github.com/binary-husky/gpt_academic/releases) | [Konfigurationsanleitung](https://github.com/binary-husky/gpt_academic/wiki/Projekt-Konfigurationsanleitung).
-> 
+>
 > 3. Dieses Projekt ist kompatibel mit und unterstützt auch die Verwendung von inländischen Sprachmodellen wie ChatGLM. Die gleichzeitige Verwendung mehrerer API-Schlüssel ist möglich, indem Sie sie in der Konfigurationsdatei wie folgt angeben: `API_KEY="openai-key1,openai-key2,azure-key3,api2d-key4"`. Wenn Sie den `API_KEY` vorübergehend ändern möchten, geben Sie vorübergehend den temporären `API_KEY` im Eingabebereich ein und drücken Sie die Eingabetaste, um die Änderung wirksam werden zu lassen.
 
 
- 
+
 
 <div align="center">
 
@@ -93,7 +93,7 @@ Weitere Funktionen anzeigen (z. B. Bildgenerierung) …… | Siehe das Ende dies
 </div>
 
 # Installation
-### Installation Method I: Run directly (Windows, Linux or MacOS) 
+### Installation Method I: Run directly (Windows, Linux or MacOS)
 
 1. Download the project
 ```sh
@@ -128,7 +128,7 @@ python -m pip install -r requirements.txt # This step is the same as installing 
 [Optional] If you need to support Tsinghua ChatGLM2/Fudan MOSS as the backend, you need to install additional dependencies (Prerequisites: Familiar with Python + Have used PyTorch + Strong computer configuration):
 ```sh
 # [Optional Step I] Support Tsinghua ChatGLM2. Tsinghua ChatGLM note: If you encounter the error "Call ChatGLM fail cannot load ChatGLM parameters normally", refer to the following: 1: The default installation above is torch+cpu version. To use cuda, you need to uninstall torch and reinstall torch+cuda; 2: If you cannot load the model due to insufficient computer configuration, you can modify the model accuracy in request_llm/bridge_chatglm.py. Change AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) to AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
-python -m pip install -r request_llms/requirements_chatglm.txt  
+python -m pip install -r request_llms/requirements_chatglm.txt
 
 # [Optional Step II] Support Fudan MOSS
 python -m pip install -r request_llms/requirements_moss.txt
@@ -207,8 +207,8 @@ Beispiel:
 ```
 "Übersetzung von Englisch nach Chinesisch": {
     # Präfix, wird vor Ihrer Eingabe hinzugefügt. Zum Beispiel, um Ihre Anforderungen zu beschreiben, z.B. Übersetzen, Code erklären, verbessern usw.
-    "Präfix": "Bitte übersetzen Sie den folgenden Abschnitt ins Chinesische und erklären Sie dann jedes Fachwort in einer Markdown-Tabelle:\n\n", 
-    
+    "Präfix": "Bitte übersetzen Sie den folgenden Abschnitt ins Chinesische und erklären Sie dann jedes Fachwort in einer Markdown-Tabelle:\n\n",
+
     # Suffix, wird nach Ihrer Eingabe hinzugefügt. Zum Beispiel, um Ihre Eingabe in Anführungszeichen zu setzen.
     "Suffix": "",
 },
@@ -361,4 +361,3 @@ https://github.com/oobabooga/one-click-installers
 # Weitere:
 https://github.com/gradio-app/gradio
 https://github.com/fghrsh/live2d_demo
-
