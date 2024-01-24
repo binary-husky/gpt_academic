@@ -3,7 +3,7 @@ from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import read_and_clean_pdf_text
 import datetime
 
-#暂时只写了这几种的PROMPT
+#以下是每类图表的PROMPT
 SELECT_PROMPT = """
 “{subject}”
 =============
@@ -18,6 +18,7 @@ SELECT_PROMPT = """
 8 象限提示图
 不需要解释原因，仅需要输出单个不带任何标点符号的数字。
 """
+#没有思维导图!!!测试发现模型始终会优先选择思维导图
 #流程图
 PROMPT_1 = """
 请你给出围绕“{subject}”的逻辑关系图，使用mermaid语法，mermaid语法举例：
@@ -135,6 +136,31 @@ graph LR
     D[Soft skill] --> F(Communication)
 ```
 """
+#思维导图
+PROMPT_9 = """
+{subject}
+==========
+请给出上方内容的思维导图，充分考虑其之间的逻辑，使用mermaid语法，mermaid语法举例：
+```mermaid
+mindmap
+  root((mindmap))
+    Origins
+      Long history
+      ::icon(fa fa-book)
+      Popularisation
+        British popular psychology author Tony Buzan
+    Research
+      On effectiveness<br/>and features
+      On Automatic creation
+        Uses
+            Creative techniques
+            Strategic planning
+            Argument mapping
+    Tools
+      Pen and paper
+      Mermaid
+```
+"""
 
 def 解析历史输入(history,llm_kwargs,chatbot,plugin_kwargs):
     ############################## <第 0 步，切割输入> ##################################
@@ -166,11 +192,11 @@ def 解析历史输入(history,llm_kwargs,chatbot,plugin_kwargs):
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     gpt_say = plugin_kwargs.get("advanced_arg", "")     #将图表类型参数赋值为插件参数  
     results_txt = '\n'.join(results)    #合并摘要
-    if gpt_say not in ['1','2','3','4','5','6','7','8']:    #如插件参数不正确则使用对话模型判断
+    if gpt_say not in ['1','2','3','4','5','6','7','8','9']:    #如插件参数不正确则使用对话模型判断
         i_say_show_user = f'接下来将判断适合的图表类型,如连续3次判断失败将会使用流程图进行绘制'; gpt_say = "[Local Message] 收到。"   # 用户提示
         chatbot.append([i_say_show_user, gpt_say]); yield from update_ui(chatbot=chatbot, history=[])    # 更新UI
         i_say = SELECT_PROMPT.format(subject=results_txt)
-        i_say_show_user = f'请判断适合使用的流程图类型,其中数字对应关系为:1-流程图,2-序列图,3-类图,4-饼图,5-甘特图,6-状态图,7-实体关系图,8-象限提示图'
+        i_say_show_user = f'请判断适合使用的流程图类型,其中数字对应关系为:1-流程图,2-序列图,3-类图,4-饼图,5-甘特图,6-状态图,7-实体关系图,8-象限提示图。由于不管提供文本是什么,模型大概率认为"思维导图"最合适,因此思维导图仅能通过参数调用。'
         for i in range(3):
             gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
                 inputs=i_say,
@@ -178,9 +204,9 @@ def 解析历史输入(history,llm_kwargs,chatbot,plugin_kwargs):
                 llm_kwargs=llm_kwargs, chatbot=chatbot, history=[], 
                 sys_prompt=""
             )
-            if gpt_say in ['1','2','3','4','5','6','7','8']:     #判断返回是否正确
+            if gpt_say in ['1','2','3','4','5','6','7','8','9']:     #判断返回是否正确
                 break
-        if gpt_say not in ['1','2','3','4','5','6','7','8']:
+        if gpt_say not in ['1','2','3','4','5','6','7','8','9']:
             gpt_say = '1'
     ############################## <第 3 步，根据选择的图表类型绘制图表> ##################################
     if gpt_say == '1':
@@ -199,12 +225,14 @@ def 解析历史输入(history,llm_kwargs,chatbot,plugin_kwargs):
         i_say = PROMPT_7.replace("{subject}", results_txt)      #由于实体关系图用到了{}符号
     elif gpt_say == '8':
         i_say = PROMPT_8.format(subject=results_txt)
-    i_say_show_user = f'请根据判断结果绘制相应的图表。'
+    elif gpt_say == '9':
+        i_say = PROMPT_9.format(subject=results_txt)
+    i_say_show_user = f'请根据判断结果绘制相应的图表。如需绘制思维导图请使用参数调用,同时过大的图表可能需要复制到在线编辑器中进行渲染。'
     gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
         inputs=i_say,
         inputs_show_user=i_say_show_user,
         llm_kwargs=llm_kwargs, chatbot=chatbot, history=[], 
-        sys_prompt=""
+        sys_prompt="你精通使用mermaid语法来绘制图表,首先确保语法正确,其次避免在mermaid语法中使用不允许的字符,此外也应当分考虑图表的可读性。"
     )
     history.append(gpt_say)
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
@@ -215,13 +243,22 @@ def 输入区文件处理(txt):
     import glob
     from .crazy_utils import get_files_from_everything
     file_pdf,pdf_manifest,folder_pdf = get_files_from_everything(txt, '.pdf')
-    if not file_pdf or len(pdf_manifest) == 0:
-        return False, txt   #如不是pdf文件则返回输入区内容
+    file_md,md_manifest,folder_md = get_files_from_everything(txt, '.md')
+    if len(pdf_manifest) == 0 and len(md_manifest) == 0:
+        return False, txt   #如输入区内容不是文件则直接返回输入区内容
+    
     final_result = ""
-    for index, fp in enumerate(pdf_manifest):
-        file_content, page_one = read_and_clean_pdf_text(fp) # （尝试）按照章节切割PDF
-        file_content = file_content.encode('utf-8', 'ignore').decode()   # avoid reading non-utf8 chars
-        final_result += file_content
+    if file_pdf:
+        for index, fp in enumerate(pdf_manifest):
+            file_content, page_one = read_and_clean_pdf_text(fp) # （尝试）按照章节切割PDF
+            file_content = file_content.encode('utf-8', 'ignore').decode()   # avoid reading non-utf8 chars
+            final_result += "\n" + file_content
+    if file_md:
+        for index, fp in enumerate(md_manifest):
+            with open(fp, 'r', encoding='utf-8', errors='replace') as f:
+                file_content = f.read()
+            file_content = file_content.encode('utf-8', 'ignore').decode()
+            final_result += "\n" + file_content
     return True, final_result
     
 @CatchException
@@ -240,7 +277,7 @@ def 生成多种Mermaid图表(txt, llm_kwargs, plugin_kwargs, chatbot, history, 
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？", 
-        "根据当前聊天历史或PDF中(文件内容优先)绘制多种mermaid图表，将会由对话模型首先判断适合的图表类型，随后绘制图表。\
+        "根据当前聊天历史或文件中(文件内容优先)绘制多种mermaid图表，将会由对话模型首先判断适合的图表类型，随后绘制图表。\
         \n您也可以使用插件参数指定绘制的图表类型,函数插件贡献者: Menghuan1918"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
@@ -256,6 +293,8 @@ def 生成多种Mermaid图表(txt, llm_kwargs, plugin_kwargs, chatbot, history, 
     
     if os.path.exists(txt):     #如输入区无内容则直接解析历史记录
         file_exist, txt = 输入区文件处理(txt)
+    else:
+        file_exist = False
 
     if file_exist : history = []    #如输入区内容为文件则清空历史记录
     history.append(txt)     #将解析后的txt传递加入到历史中
