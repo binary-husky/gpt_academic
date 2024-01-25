@@ -1,7 +1,7 @@
 from toolbox import update_ui, trimmed_format_exc, get_conf, get_log_folder, promote_file_to_downloadzone
 from toolbox import CatchException, report_exception, update_ui_lastest_msg, zip_result, gen_time_str
 from functools import partial
-import glob, os, requests, time
+import glob, os, requests, time, tarfile
 pj = os.path.join
 ARXIV_CACHE_DIR = os.path.expanduser(f"~/arxiv_cache/")
 
@@ -104,7 +104,7 @@ def arxiv_download(chatbot, history, txt, allow_cache=True):
     if ('.' in txt) and ('/' not in txt) and is_float(txt[:10]): # is arxiv ID
         txt = 'https://arxiv.org/abs/' + txt[:10]
     if not txt.startswith('https://arxiv.org'): 
-        return txt, None
+        return txt, None    # 是本地文件，跳过下载
     
     # <-------------- inspect format ------------->
     chatbot.append([f"检测到arxiv文档连接", '尝试下载 ...']) 
@@ -250,7 +250,14 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
 
     # <-------------- clear history and read input ------------->
     history = []
-    txt, arxiv_id = yield from arxiv_download(chatbot, history, txt, allow_cache)
+    try:
+        txt, arxiv_id = yield from arxiv_download(chatbot, history, txt, allow_cache)
+    except tarfile.ReadError as e:
+        yield from update_ui_lastest_msg(
+            "无法自动下载该论文的Latex源码，请前往arxiv打开此论文下载页面，点other Formats，然后download source手动下载latex源码包。接下来调用本地Latex翻译插件即可。", 
+            chatbot=chatbot, history=history)
+        return
+
     if txt.endswith('.pdf'):
         report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"发现已经存在翻译好的PDF文档")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
