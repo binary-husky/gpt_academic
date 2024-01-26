@@ -31,6 +31,20 @@ code_highlight_configs = {
     },
 }
 
+code_highlight_configs_block_mermaid = {
+    "pymdownx.superfences": {
+        "css_class": "codehilite",
+        # "custom_fences": [
+        #     {"name": "mermaid", "class": "mermaid", "format": fence_code_format}
+        # ],
+    },
+    "pymdownx.highlight": {
+        "css_class": "codehilite",
+        "guess_lang": True,
+        # 'auto_title': True,
+        # 'linenums': True
+    },
+}
 
 def tex2mathml_catch_exception(content, *args, **kwargs):
     try:
@@ -278,13 +292,25 @@ def close_up_code_segment_during_stream(gpt_reply):
         return gpt_reply
 
 
+def special_render_issues_for_mermaid(text):
+    # 用不太优雅的方式处理一个core_functional.py中出现的mermaid渲染特例：
+    # 我不希望"总结绘制脑图"prompt中的mermaid渲染出来
+    @lru_cache(maxsize=1)
+    def get_special_case():
+        from core_functional import get_core_functions
+        special_case = get_core_functions()["总结绘制脑图"]["Suffix"]
+        return special_case
+    if text.endswith(get_special_case()): text = text.replace("```mermaid", "```")
+    return text
+
+
 def compat_non_markdown_input(text):
     """
     改善非markdown输入的显示效果，例如将空格转换为&nbsp;，将换行符转换为</br>等。
     """
-
     if "```" in text:
         # careful input：markdown输入
+        text = special_render_issues_for_mermaid(text)  # 处理特殊的渲染问题
         return text
     elif "</div>" in text:
         # careful input：html输入
@@ -299,19 +325,18 @@ def compat_non_markdown_input(text):
 
 
 @lru_cache(maxsize=128)  # 使用lru缓存
-def simple_markdown_convertion(txt):
+def simple_markdown_convertion(text):
     pre = '<div class="markdown-body">'
     suf = "</div>"
-    if txt.startswith(pre) and txt.endswith(suf):
-        return txt  # 已经被转化过，不需要再次转化
-    
-    txt = compat_non_markdown_input(txt)    # 兼容非markdown输入
-    txt = markdown.markdown(
-        txt,
+    if text.startswith(pre) and text.endswith(suf):
+        return text  # 已经被转化过，不需要再次转化
+    text = compat_non_markdown_input(text)    # 兼容非markdown输入
+    text = markdown.markdown(
+        text,
         extensions=["pymdownx.superfences", "tables", "pymdownx.highlight"],
         extension_configs=code_highlight_configs,
     )
-    return pre + txt + suf
+    return pre + text + suf
 
 
 def format_io(self, y):
