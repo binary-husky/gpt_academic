@@ -37,7 +37,7 @@ def 多智能体终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
         'gpt-3.5-turbo-1106',
         "gpt-4",
         "gpt-4-32k",
-        'gpt-4-1106-preview',
+        'gpt-4-turbo-preview',
         "azure-gpt-3.5-turbo-16k",
         "azure-gpt-3.5-16k",
         "azure-gpt-4",
