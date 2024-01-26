@@ -232,7 +232,7 @@ def 解析历史输入(history,llm_kwargs,chatbot,plugin_kwargs):
         inputs=i_say,
         inputs_show_user=i_say_show_user,
         llm_kwargs=llm_kwargs, chatbot=chatbot, history=[], 
-        sys_prompt="你精通使用mermaid语法来绘制图表,首先确保语法正确,其次避免在mermaid语法中使用不允许的字符,此外也应当分考虑图表的可读性。"
+        sys_prompt="你精通使用mermaid语法来绘制图表,首先确保语法正确,其次避免在mermaid语法中使用不允许的字符"
     )
     history.append(gpt_say)
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
