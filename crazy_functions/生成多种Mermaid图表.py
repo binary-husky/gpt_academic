@@ -1,6 +1,5 @@
 from toolbox import CatchException, update_ui, report_exception
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-from .crazy_utils import read_and_clean_pdf_text
 import datetime
 
 #以下是每类图表的PROMPT
@@ -162,7 +161,7 @@ mindmap
 ```
 """
 
-def 解析历史输入(history,llm_kwargs,chatbot,plugin_kwargs):
+def 解析历史输入(history,llm_kwargs,file_manifest,chatbot,plugin_kwargs):
     ############################## <第 0 步，切割输入> ##################################
     # 借用PDF切割中的函数对文本进行切割
     TOKEN_LIMIT_PER_FRAGMENT = 2500
@@ -170,8 +169,6 @@ def 解析历史输入(history,llm_kwargs,chatbot,plugin_kwargs):
     from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit
     txt = breakdown_text_to_satisfy_token_limit(txt=txt, limit=TOKEN_LIMIT_PER_FRAGMENT, llm_model=llm_kwargs['llm_model'])
     ############################## <第 1 步，迭代地历遍整个文章，提取精炼信息> ##################################
-    i_say_show_user = f'首先你从历史记录或文件中提取摘要。'; gpt_say = "[Local Message] 收到。"   # 用户提示
-    chatbot.append([i_say_show_user, gpt_say]); yield from update_ui(chatbot=chatbot, history=history)    # 更新UI
     results = []
     MAX_WORD_TOTAL = 4096
     n_txt = len(txt)
@@ -179,7 +176,7 @@ def 解析历史输入(history,llm_kwargs,chatbot,plugin_kwargs):
     if n_txt >= 20: print('文章极长，不能达到预期效果')
     for i in range(n_txt):
         NUM_OF_WORD = MAX_WORD_TOTAL // n_txt
-        i_say = f"Read this section, recapitulate the content of this section with less than {NUM_OF_WORD} words: {txt[i]}"
+        i_say = f"Read this section, recapitulate the content of this section with less than {NUM_OF_WORD} words in Chinese: {txt[i]}"
         i_say_show_user = f"[{i+1}/{n_txt}] Read this section, recapitulate the content of this section with less than {NUM_OF_WORD} words: {txt[i][:200]} ...."
         gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(i_say, i_say_show_user,  # i_say=真正给chatgpt的提问， i_say_show_user=给用户看的提问
                                                                            llm_kwargs, chatbot, 
@@ -236,30 +233,6 @@ def 解析历史输入(history,llm_kwargs,chatbot,plugin_kwargs):
     )
     history.append(gpt_say)
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
-
-def 输入区文件处理(txt):
-    if txt == "": return False, txt
-    success = True
-    import glob
-    from .crazy_utils import get_files_from_everything
-    file_pdf,pdf_manifest,folder_pdf = get_files_from_everything(txt, '.pdf')
-    file_md,md_manifest,folder_md = get_files_from_everything(txt, '.md')
-    if len(pdf_manifest) == 0 and len(md_manifest) == 0:
-        return False, txt   #如输入区内容不是文件则直接返回输入区内容
-    
-    final_result = ""
-    if file_pdf:
-        for index, fp in enumerate(pdf_manifest):
-            file_content, page_one = read_and_clean_pdf_text(fp) # （尝试）按照章节切割PDF
-            file_content = file_content.encode('utf-8', 'ignore').decode()   # avoid reading non-utf8 chars
-            final_result += "\n" + file_content
-    if file_md:
-        for index, fp in enumerate(md_manifest):
-            with open(fp, 'r', encoding='utf-8', errors='replace') as f:
-                file_content = f.read()
-            file_content = file_content.encode('utf-8', 'ignore').decode()
-            final_result += "\n" + file_content
-    return True, final_result
     
 @CatchException
 def 生成多种Mermaid图表(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
@@ -280,23 +253,44 @@ def 生成多种Mermaid图表(txt, llm_kwargs, plugin_kwargs, chatbot, history, 
         "根据当前聊天历史或文件中(文件内容优先)绘制多种mermaid图表，将会由对话模型首先判断适合的图表类型，随后绘制图表。\
         \n您也可以使用插件参数指定绘制的图表类型,函数插件贡献者: Menghuan1918"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-
-    # 尝试导入依赖，如果缺少依赖，则给出安装建议
-    try:
-        import fitz
-    except:
-        report_exception(chatbot, history, 
-            a = f"解析项目: {txt}", 
-            b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pymupdf```。")
-        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-        return
     
     if os.path.exists(txt):     #如输入区无内容则直接解析历史记录
-        file_exist, txt = 输入区文件处理(txt)
+        from crazy_functions.file_fns.Get_txt_from_file import get_txt_from_file
+        file_exist, final_result, page_one, file_manifest, excption = get_txt_from_file(txt, chatbot, history)
     else:
         file_exist = False
+        excption = ""
+        file_manifest = []
 
-    if file_exist : history = []    #如输入区内容为文件则清空历史记录
-    history.append(txt)     #将解析后的txt传递加入到历史中
-    
-    yield from 解析历史输入(history,llm_kwargs,chatbot,plugin_kwargs)  
+    if excption != "":
+        if excption == "word":
+            report_exception(chatbot, history, 
+                a = f"解析项目: {txt}", 
+                b = f"找到了.doc文件，但是该文件格式不被支持，请先转化为.docx格式。")
+            
+        elif excption == "pdf":
+            report_exception(chatbot, history, 
+                a = f"解析项目: {txt}", 
+                b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pymupdf```。")
+        
+        elif excption == "word_pip":
+                report_exception(chatbot, history,
+                    a=f"解析项目: {txt}",
+                    b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade python-docx pywin32```。")
+
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+
+    else:
+        if not file_exist:
+            history.append(txt)     #如输入区不是文件则将输入区内容加入历史记录
+            i_say_show_user = f'首先你从历史记录中提取摘要。'; gpt_say = "[Local Message] 收到。"   # 用户提示
+            chatbot.append([i_say_show_user, gpt_say]); yield from update_ui(chatbot=chatbot, history=history)    # 更新UI
+            yield from 解析历史输入(history,llm_kwargs,file_manifest,chatbot,plugin_kwargs)
+        else:
+            file_num = len(file_manifest)
+            for i in range(file_num):     #依次处理文件
+                i_say_show_user = f"[{i+1}/{file_num}]处理文件{file_manifest[i]}"; gpt_say = "[Local Message] 收到。"   # 用户提示
+                chatbot.append([i_say_show_user, gpt_say]); yield from update_ui(chatbot=chatbot, history=history)    # 更新UI
+                history = []    #如输入区内容为文件则清空历史记录
+                history.append(final_result[i])
+                yield from 解析历史输入(history,llm_kwargs,file_manifest,chatbot,plugin_kwargs)
