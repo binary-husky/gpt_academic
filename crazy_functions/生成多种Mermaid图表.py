@@ -250,7 +250,7 @@ def 生成多种Mermaid图表(txt, llm_kwargs, plugin_kwargs, chatbot, history, 
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？", 
-        "根据当前聊天历史或文件中(文件内容优先)绘制多种mermaid图表，将会由对话模型首先判断适合的图表类型，随后绘制图表。\
+        "根据当前聊天历史或指定的路径文件(文件内容优先)绘制多种mermaid图表，将会由对话模型首先判断适合的图表类型，随后绘制图表。\
         \n您也可以使用插件参数指定绘制的图表类型,函数插件贡献者: Menghuan1918"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
     
