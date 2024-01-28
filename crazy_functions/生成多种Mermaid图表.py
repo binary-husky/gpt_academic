@@ -255,8 +255,8 @@ def 生成多种Mermaid图表(txt, llm_kwargs, plugin_kwargs, chatbot, history, 
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
     
     if os.path.exists(txt):     #如输入区无内容则直接解析历史记录
-        from crazy_functions.file_fns.Get_txt_from_file import get_txt_from_file
-        file_exist, final_result, page_one, file_manifest, excption = get_txt_from_file(txt, chatbot, history)
+        from crazy_functions.pdf_fns.parse_word import extract_text_from_files
+        file_exist, final_result, page_one, file_manifest, excption = extract_text_from_files(txt, chatbot, history)
     else:
         file_exist = False
         excption = ""

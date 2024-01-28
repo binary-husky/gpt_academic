@@ -1,8 +1,7 @@
-from toolbox import update_ui
-from ..crazy_utils import read_and_clean_pdf_text, get_files_from_everything
+from crazy_functions.crazy_utils import read_and_clean_pdf_text, get_files_from_everything
 import os
 import re
-def get_txt_from_file(txt, chatbot, history):
+def extract_text_from_files(txt, chatbot, history):
     """
     查找pdf/md/word并获取文本内容并返回状态以及文本
 
