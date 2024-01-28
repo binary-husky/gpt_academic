@@ -57,10 +57,12 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
 
     if "vision" in llm_kwargs["llm_model"]:
         have_recent_file, image_paths = have_any_recent_upload_image_files(chatbot)
-        def make_media_input(inputs, image_paths): 
+
+        def make_media_input(inputs, image_paths):
             for image_path in image_paths:
                 inputs = inputs + f'<br/><br/><div align="center"><img src="file={os.path.abspath(image_path)}"></div>'
             return inputs
+
         if have_recent_file:
             inputs = make_media_input(inputs, image_paths)
 
@@ -81,7 +83,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     gpt_security_policy = ""
     history.extend([inputs, ''])
     for response in stream_response:
-        results = response.decode("utf-8")    # 被这个解码给耍了。。
+        results = response.decode("utf-8")  # 被这个解码给耍了。。
         gpt_security_policy += results
         match = re.search(r'"text":\s*"((?:[^"\\]|\\.)*)"', results, flags=re.DOTALL)
         error_match = re.search(r'\"message\":\s*\"(.*)\"', results, flags=re.DOTALL)
@@ -90,7 +92,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                 paraphrase = json.loads('{"text": "%s"}' % match.group(1))
             except:
                 raise ValueError(f"解析GEMINI消息出错。")
-            gpt_replying_buffer += paraphrase['text']    # 使用 json 解析库进行处理
+            gpt_replying_buffer += paraphrase['text']  # 使用 json 解析库进行处理
             chatbot[-1] = (inputs, gpt_replying_buffer)
             history[-1] = gpt_replying_buffer
             yield from update_ui(chatbot=chatbot, history=history)
@@ -101,13 +103,14 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             raise RuntimeError('对话错误')
     if not gpt_replying_buffer:
         history = history[-2]  # 错误的不纳入对话
-        chatbot[-1] = (inputs, gpt_replying_buffer + f"触发了Google的安全访问策略，没有回答\n\n```\n{gpt_security_policy}\n```")
+        chatbot[-1] = (
+        inputs, gpt_replying_buffer + f"触发了Google的安全访问策略，没有回答\n\n```\n{gpt_security_policy}\n```")
         yield from update_ui(chatbot=chatbot, history=history)
-
 
 
 if __name__ == '__main__':
     import sys
+
     llm_kwargs = {'llm_model': 'gemini-pro'}
     result = predict('Write long a story about a magic backpack.', llm_kwargs, llm_kwargs, [])
     for i in result:
