@@ -1,9 +1,9 @@
 https://fastly.jsdelivr.net/gh/binary-husky/gradio-fix@gpt-academic/release/gradio-3.32.7-py3-none-any.whl
 pypdf2==2.12.1
-zhipuai
+zhipuai>=2
 tiktoken>=0.3.3
 requests[socks]
-pydantic==1.10.11
+pydantic
 protobuf==3.18
 transformers>=4.27.1
 scipdf_parser>=0.52

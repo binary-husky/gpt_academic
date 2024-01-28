@@ -193,9 +193,9 @@ XFYUN_API_SECRET = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
 XFYUN_API_KEY = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 
-# 接入智谱大模型   可选 "glm-3-turbo" "glm-4" "glm-4v"
+# 接入智谱大模型
 ZHIPUAI_API_KEY = ""
-
+ZHIPUAI_MODEL = "glm-4" # 可选 "glm-3-turbo" "glm-4"
 
 
 # # 火山引擎YUNQUE大模型
@@ -210,9 +210,6 @@ ANTHROPIC_API_KEY = ""
 
 # 自定义API KEY格式
 CUSTOM_API_KEY_PATTERN = ""
-
-# Google Gemini API-Key
-GEMINI_API_KEY = ''
 
 
 # Google Gemini API-Key

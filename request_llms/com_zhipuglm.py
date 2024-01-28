@@ -1,16 +1,19 @@
 # encoding: utf-8
 # @Time   : 2024/1/22
-# @Author : Spike
+# @Author : Kilig947 & binary husky
 # @Descr   : 兼容最新的智谱Ai
 from toolbox import get_conf, have_any_recent_upload_image_files
 from zhipuai import ZhipuAI
 from .com_google import input_encode_handler
+import logging
 
 
 class ZhipuChatInit:
 
     def __init__(self):
-        ZHIPUAI_API_KEY = get_conf("ZHIPUAI_API_KEY")
+        ZHIPUAI_API_KEY, ZHIPUAI_MODEL = get_conf("ZHIPUAI_API_KEY", "ZHIPUAI_MODEL")
+        if len(ZHIPUAI_MODEL) > 0:
+            logging.error('ZHIPUAI_MODEL 配置项选项已经弃用，请在LLM_MODEL中配置')
         self.zhipu_bro = ZhipuAI(api_key=ZHIPUAI_API_KEY)
         self.model = 'glm-4'
 

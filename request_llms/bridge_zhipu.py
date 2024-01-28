@@ -12,8 +12,7 @@ def validate_key():
     return True
 
 
-def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=[],
-                                  console_slience=False):
+def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=[], console_slience=False):
     """
         ⭐多线程方法
         函数的说明请见 request_llms/bridge_all.py
@@ -48,14 +47,12 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     try:
         check_packages(["zhipuai"])
     except:
-        yield from update_ui_lastest_msg(
-            f"导入软件依赖失败。使用该模型需要额外依赖，安装方法```pip install --upgrade zhipuai```。",
+        yield from update_ui_lastest_msg(f"导入软件依赖失败。使用该模型需要额外依赖，安装方法```pip install --upgrade zhipuai```。",
             chatbot=chatbot, history=history, delay=0)
         return
 
     if validate_key() is False:
-        yield from update_ui_lastest_msg(lastmsg="[Local Message] 请配置ZHIPUAI_API_KEY", chatbot=chatbot,
-                                         history=history, delay=0)
+        yield from update_ui_lastest_msg(lastmsg="[Local Message] 请配置ZHIPUAI_API_KEY", chatbot=chatbot, history=history, delay=0)
         return
 
     if additional_fn is not None:
@@ -79,3 +76,5 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     for chunk, results in zhipu_bro_init.generate_chat(inputs, llm_kwargs, history, system_prompt):
         chatbot[-1] = [inputs, results]
         yield from update_ui(chatbot=chatbot, history=history)
+    history.extend([inputs, results])
+    yield from update_ui(chatbot=chatbot, history=history)
