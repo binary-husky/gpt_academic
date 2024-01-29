@@ -12,7 +12,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from common.path_handler import init_path
 from common.logger_handler import logger
 from pydantic import BaseModel, FilePath
-from typing import Dict, AnyStr, Union
+from typing import Dict, Union
 
 
 
@@ -32,7 +32,7 @@ class Database(BaseModel):
         table： 链接的表
     """
     database: Union[str, FilePath]
-    table: AnyStr | None = None
+    table: str | None = None
 
 
 class SqliteHandler:
@@ -54,18 +54,18 @@ class SqliteHandler:
             f"SELECT name, sql FROM sqlite_master WHERE type='table' AND name='{self.table}';").fetchall()
         return result
 
-    def execute_query(self, query: AnyStr):
+    def execute_query(self, query: str):
         # 获取查询结果并返回
         self.__cursor.execute(query)
         result = self.__cursor.fetchall()
         return result
 
-    def execute_dml_tcl(self, query: AnyStr, params=None):
+    def execute_dml_tcl(self, query: str, params=None):
         """创建ddl : 增删改查操作语句 执行tcl: 事务控制语句"""
         self.__cursor.execute(query, params)
         self.__connect.commit()
 
-    def execute_ddl_create(self, create: AnyStr):
+    def execute_ddl_create(self, create: str):
         if create.upper().strip().startswith('CREATE'):
             self.__cursor.execute(create)
 
