@@ -62,7 +62,10 @@ class SqliteHandler:
 
     def execute_dml_tcl(self, query: str, params=None):
         """创建ddl : 增删改查操作语句 执行tcl: 事务控制语句"""
-        self.__cursor.execute(query, params)
+        if params:
+            self.__cursor.execute(query, params)
+        else:
+            self.__cursor.execute(query)
         self.__connect.commit()
 
     def execute_ddl_create(self, create: str):
