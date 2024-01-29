@@ -1,0 +1,6 @@
+[
+    {
+        "act": "llm-vision",
+        "prompt": "{{{v}}}\nUnderstand the content of the pictures and give detailed Chinese explanations"
+    }
+]

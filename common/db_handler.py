@@ -3,14 +3,17 @@
 # @Author : Spike
 # @Descr   :
 import json
+import sys
 import os.path
 import shutil
 import sqlite3
 import psutil
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from common.path_handler import init_path
 from common.logger_handler import logger
 from pydantic import BaseModel, FilePath
 from typing import Dict, AnyStr, Union
+
 
 
 def ipaddr():
