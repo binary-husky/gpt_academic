@@ -113,6 +113,8 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
             error_msg = get_full_error(chunk, stream_response).decode()
             if "reduce the length" in error_msg:
                 raise ConnectionAbortedError("OpenAI拒绝了请求:" + error_msg)
+            elif """type":"upstream_error","param":"307""" in error_msg:
+                raise ConnectionAbortedError("正常结束，但显示Token不足，导致输出不完整，请削减单次输入的文本量。")
             else:
                 raise RuntimeError("OpenAI拒绝了请求：" + error_msg)
         if ('data: [DONE]' in chunk_decoded): break # api2d 正常完成
