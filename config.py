@@ -208,6 +208,11 @@ ZHIPUAI_MODEL = "glm-4" # 可选 "glm-3-turbo" "glm-4"
 ANTHROPIC_API_KEY = ""
 
 
+# Mathpix
+MATHPIX_APPID = ""
+MATHPIX_APPKEY = ""
+
+
 # 自定义API KEY格式
 CUSTOM_API_KEY_PATTERN = ""
 
@@ -351,6 +356,9 @@ NUM_CUSTOM_BASIC_BTN = 4
 │   └── ALIYUN_SECRET
 │
 └── PDF文档精准解析
-    └── GROBID_URLS
+    ├── GROBID_URLS
+    ├── MATHPIX_APPID
+    └── MATHPIX_APPKEY
+    
 
 """
