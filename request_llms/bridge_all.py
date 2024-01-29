@@ -599,18 +599,9 @@ if "zhipuai" in AVAIL_LLM_MODELS:   # zhipuai 是glm-4的别名，向后兼容�
         print(trimmed_format_exc())
 if "glm-4" in AVAIL_LLM_MODELS \
     or "glm-4v" in AVAIL_LLM_MODELS \
-    or "glm-3-turbo" in AVAIL_LLM_MODELS \
-    or "zhipuai" in AVAIL_LLM_MODELS:
+    or "glm-3-turbo" in AVAIL_LLM_MODELS:
     try:
         model_info.update({
-            "zhipuai": {
-                "fn_with_ui": zhipu_ui,
-                "fn_without_ui": zhipu_noui,
-                "endpoint": None,
-                "max_token": 10124 * 8,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            },
             "glm-4": {
                 "fn_with_ui": zhipu_ui,
                 "fn_without_ui": zhipu_noui,

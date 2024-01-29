@@ -57,6 +57,10 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
 
     if "vision" in llm_kwargs["llm_model"]:
         have_recent_file, image_paths = have_any_recent_upload_image_files(chatbot)
+        if not have_recent_file:
+            chatbot.append((inputs, "没有检测到任何近期上传的图像文件，请上传jpg格式的图片，此外，请注意拓展名需要小写"))
+            yield from update_ui(chatbot=chatbot, history=history, msg="等待图片") # 刷新界面
+            return
         def make_media_input(inputs, image_paths): 
             for image_path in image_paths:
                 inputs = inputs + f'<br/><br/><div align="center"><img src="file={os.path.abspath(image_path)}"></div>'
