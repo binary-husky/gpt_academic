@@ -222,7 +222,7 @@ class UserDb(SqliteHandler):
         return user_account
 
     def update_user(self, username, password):
-        self.execute_dml_tcl(f"REPLACE INTO `{self.table}` (username, username) VALUES ('{username}', '{password}')")
+        self.execute_dml_tcl(f"REPLACE INTO `{self.table}` (username, password) VALUES ('{username}', '{password}')")
 
 
 class DatabaseSqlite:
