@@ -195,7 +195,7 @@ XFYUN_API_KEY = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 # 接入智谱大模型
 ZHIPUAI_API_KEY = ""
-ZHIPUAI_MODEL = "glm-4" # 可选 "glm-3-turbo" "glm-4"
+ZHIPUAI_MODEL = "" # 此选项已废弃，不再需要填写
 
 
 # # 火山引擎YUNQUE大模型
@@ -208,7 +208,7 @@ ZHIPUAI_MODEL = "glm-4" # 可选 "glm-3-turbo" "glm-4"
 ANTHROPIC_API_KEY = ""
 
 
-# Mathpix
+# Mathpix 拥有执行PDF的OCR功能，但是需要注册账号
 MATHPIX_APPID = ""
 MATHPIX_APPKEY = ""
 
@@ -302,9 +302,8 @@ NUM_CUSTOM_BASIC_BTN = 4
 │   ├── BAIDU_CLOUD_API_KEY
 │   └── BAIDU_CLOUD_SECRET_KEY
 │
-├── "zhipuai" 智谱AI大模型chatglm_turbo
-│   ├── ZHIPUAI_API_KEY
-│   └── ZHIPUAI_MODEL
+├── "glm-4", "glm-3-turbo", "zhipuai" 智谱AI大模型
+│   └── ZHIPUAI_API_KEY
 │
 ├── "qwen-turbo" 等通义千问大模型
 │   └──  DASHSCOPE_API_KEY
