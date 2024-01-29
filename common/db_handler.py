@@ -60,9 +60,9 @@ class SqliteHandler:
         result = self.__cursor.fetchall()
         return result
 
-    def execute_dml_tcl(self, query: AnyStr):
+    def execute_dml_tcl(self, query: AnyStr, params=None):
         """创建ddl : 增删改查操作语句 执行tcl: 事务控制语句"""
-        self.__cursor.execute(query)
+        self.__cursor.execute(query, params)
         self.__connect.commit()
 
     def execute_ddl_create(self, create: AnyStr):
@@ -134,9 +134,9 @@ class PromptDb(SqliteHandler):
             if source in user_info or not user_info or '127.0.0.1' == source or 'spike' == source:
                 replace = f"""
                             REPLACE INTO `{self.table}` (prompt, result, source)
-                            VALUES ('{key}', '{prompt[key]}', '{user_info}')
+                            VALUES (?, ?, ?)
                           """
-                self.execute_dml_tcl(replace)
+                self.execute_dml_tcl(replace, (key, prompt[key], user_info))
             else:
                 error_status += f'【{key}】权限不足，该分类下已有其他人保存重名的提示词，请更改提示词名称后再提交～'
                 logger.warning(f'{source} 保存名称为【{key}】的提示词失败，因为该分类下已有其他人保存重名的提示词')
@@ -181,7 +181,9 @@ class OcrCacheDb(SqliteHandler):
         return result
 
     def update_cashed(self, tag, result):
-        self.execute_dml_tcl(f"REPLACE INTO `{self.table}` (tag, result) VALUES ('{tag}', '{result}')")
+        replace = f"REPLACE INTO `{self.table}` (tag, result) VALUES (?, ?)"
+        params = tag, result
+        self.execute_dml_tcl(replace, params)
 
 
 class UserDb(SqliteHandler):
@@ -284,5 +286,5 @@ def main_argument():
 
 if __name__ == '__main__':
     main_argument()
-    # prompt_database_rename()
+    __batch_inset_prompt()
 
