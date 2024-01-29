@@ -799,4 +799,4 @@ previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传�
 
 if __name__ == '__main__':
     test = [1, 2, 3, 4, [12], 33, 1]
-    print(long_name_processing('对应逻辑（page）        操作名        事件名（page_event_status）-firebase平台                埋点说明'))
+    print(long_name_processing(''))

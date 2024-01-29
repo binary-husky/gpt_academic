@@ -371,7 +371,7 @@ function clearChatbot() {
 
 function chatbotContentChanged(attempt = 1, force = false) {
     for (var i = 0; i < attempt; i++) {
-        // gradioApp().querySelectorAll('#chuanhu-chatbot .message-wrap .message.bot').forEach(mermaidCodeAdd)
+
         setTimeout(() => {
             // clearMessageRows();
             saveHistoryHtml();
@@ -379,7 +379,7 @@ function chatbotContentChanged(attempt = 1, force = false) {
             //
             addShowAllButton();
             gradioApp().querySelectorAll('#chuanhu-chatbot .message-wrap .message.bot, #chuanhu-chatbot .message-wrap .message.user').forEach(addChuanhuButton);
-
+            gradioApp().querySelectorAll('#chuanhu-chatbot .message-wrap .message.bot .language-mermaid').forEach(mermaidEditAdd)
             if (chatbotIndicator.classList.contains('hide')) { // generation finished
                 setLatestMessage();
                 setChatList();
