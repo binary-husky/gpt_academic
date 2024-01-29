@@ -150,7 +150,25 @@ model_info = {
         "token_cnt": get_token_num_gpt4,
     },
 
+    "gpt-4-turbo-preview": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": openai_endpoint,
+        "max_token": 128000,
+        "tokenizer": tokenizer_gpt4,
+        "token_cnt": get_token_num_gpt4,
+    },
+
     "gpt-4-1106-preview": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": openai_endpoint,
+        "max_token": 128000,
+        "tokenizer": tokenizer_gpt4,
+        "token_cnt": get_token_num_gpt4,
+    },
+
+    "gpt-4-0125-preview": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
         "endpoint": openai_endpoint,
@@ -562,16 +580,32 @@ if "llama2" in AVAIL_LLM_MODELS:   # llama2
         })
     except:
         print(trimmed_format_exc())
-if "zhipuai" in AVAIL_LLM_MODELS:   # zhipuai
+if "glm-4" in AVAIL_LLM_MODELS or "glm-4v" in AVAIL_LLM_MODELS or "glm-3-turbo" in AVAIL_LLM_MODELS:   # zhipuai
     try:
         from .bridge_zhipu import predict_no_ui_long_connection as zhipu_noui
         from .bridge_zhipu import predict as zhipu_ui
         model_info.update({
-            "zhipuai": {
+            "glm-4": {
                 "fn_with_ui": zhipu_ui,
                 "fn_without_ui": zhipu_noui,
                 "endpoint": None,
-                "max_token": 4096,
+                "max_token": 10124 * 8,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "glm-4v": {
+                "fn_with_ui": zhipu_ui,
+                "fn_without_ui": zhipu_noui,
+                "endpoint": None,
+                "max_token": 10124 * 8,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "glm-3-turbo": {
+                "fn_with_ui": zhipu_ui,
+                "fn_without_ui": zhipu_noui,
+                "endpoint": None,
+                "max_token": 10124 * 4,
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
             }

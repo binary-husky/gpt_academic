@@ -1,5 +1,5 @@
-import { deflate, inflate } from 'https://fastly.jsdelivr.net/gh/nodeca/pako@master/dist/pako.esm.mjs';
-import { toUint8Array, fromUint8Array, toBase64, fromBase64 } from 'https://cdn.jsdelivr.net/npm/js-base64@3.7.2/base64.mjs';
+import { deflate, inflate } from '/file=themes/pako.esm.mjs';
+import { toUint8Array, fromUint8Array, toBase64, fromBase64 } from '/file=themes/base64.mjs';
 
 const base64Serde = {
     serialize: (state) => {

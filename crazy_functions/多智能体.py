@@ -50,14 +50,7 @@ def 多智能体终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
         return
     if model_info[llm_kwargs['llm_model']]["endpoint"] is not None: # 如果不是本地模型，加载API_KEY
         llm_kwargs['api_key'] = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
-    
-    # 检查当前的模型是否符合要求
-    API_URL_REDIRECT = get_conf('API_URL_REDIRECT')
-    if len(API_URL_REDIRECT) > 0:
-        chatbot.append([f"处理任务: {txt}", f"暂不支持中转."])
-        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-        return
-    
+
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
         import autogen
