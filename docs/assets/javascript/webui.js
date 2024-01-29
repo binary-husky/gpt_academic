@@ -127,6 +127,7 @@ function menuClick() {
     if (menuOpening) {
         closeSide(menu);
         wantOpenMenu = false;
+
     } else {
         if (windowWidth < 1024 && toolboxOpening) {
             closeSide(toolbox);

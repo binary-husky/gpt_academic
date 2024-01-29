@@ -239,10 +239,9 @@ def long_name_processing(file_name):
     if type(file_name) is list:
         file_name = file_name[0]
     if len(file_name) > 20:
-        temp = file_name.splitlines()
-        for i in temp:
+        for i in file_name.splitlines():
             if i:
-                file_name = func_box.replace_special_chars(i)
+                file_name = func_box.replace_special_chars(i[:20])  # 限制文件名最长20个字符
                 break
     if file_name.find('.') != -1:
         file_name = "".join(file_name.split('.')[:-1])
@@ -704,7 +703,7 @@ def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugi
                 vision_end = func_box.html_folded_code(json.dumps(vision_loading_statsu, indent=4, ensure_ascii=False))
                 yield from toolbox.update_ui_lastest_msg(lastmsg=gpt_bro_say + vision_end, chatbot=chatbot,
                                                          history=history, delay=0.1)
-    return content.replace(init_path.base_path, '.')  # 增加保障，防止路径泄露
+    return content.replace(init_path.base_path, 'file=.')  # 增加保障，防止路径泄露
 
 
 def content_clear_links(user_input, clear_fp_map, clear_link_map):
@@ -751,8 +750,7 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
         # 识别图片链接内容
         complete_input = yield from content_img_vision_analyze(user_input, chatbot, history,
                                                                llm_kwargs, plugin_kwargs)
-        embedding_content = [user_input, complete_input]
-        embedding_content.extend([user_input, user_input])
+        embedding_content.extend([long_name_processing(user_input), complete_input])
     else:
         devs_document = toolbox.get_conf('devs_document')
         status = '\n\n没有探测到任何文件，并且提交字符少于50，无法完成后续任务' \
@@ -801,4 +799,4 @@ previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传�
 
 if __name__ == '__main__':
     test = [1, 2, 3, 4, [12], 33, 1]
-    print(long_name_processing('tedt_q3123-3kkkkkk'))
+    print(long_name_processing('对应逻辑（page）        操作名        事件名（page_event_status）-firebase平台                埋点说明'))

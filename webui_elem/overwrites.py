@@ -165,18 +165,18 @@ def webpath(fn):
 ScriptFile = namedtuple("ScriptFile", ["basedir", "filename", "path"])
 
 
-def javascript_html():
+def javascript_html(dirs='javascript', module=True):
     head = ""
-    for script in list_scripts("javascript", ".js"):
+    for script in list_scripts(dirs, ".js"):
         head += f'<script type="text/javascript" src="{webpath(script.path)}"></script>\n'
-    for script in list_scripts("javascript", ".mjs"):
+    for script in list_scripts(dirs, ".mjs"):
         head += f'<script type="module" src="{webpath(script.path)}"></script>\n'
     return head
 
 
-def css_html():
+def css_html(dirs='stylesheet'):
     head = ""
-    for cssfile in list_scripts("stylesheet", ".css"):
+    for cssfile in list_scripts(dirs, ".css"):
         head += f'<link rel="stylesheet" property="stylesheet" href="{webpath(cssfile.path)}">'
     return head
 
@@ -193,17 +193,18 @@ def list_scripts(scriptdirname, extension):
 
 
 def reload_javascript():
-    js = javascript_html()
-    js += '<script async type="module" src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>'
-    js += '<script async type="module" src="http://spin.js.org/spin.umd.js"></script><link type="text/css" href="https://spin.js.org/spin.css" rel="stylesheet" />'
+    spike_js = javascript_html()
     waifu_js = ''
     ADD_WAIFU = toolbox.get_conf('ADD_WAIFU')
     if ADD_WAIFU:
         waifu_js += f"""
-            <script src="{webpath('docs/waifu_plugin/jquery.min.js')}"></script>
-            <script src="{webpath('docs/waifu_plugin/jquery-ui.min.js')}"></script>
-            <script src="{webpath('docs/waifu_plugin/autoload.js')}"></script>
+            <script src="{webpath('docs/assets/plugins/waifu_plugin/jquery.min.js')}"></script>
+            <script src="{webpath('docs/assets/plugins/waifu_plugin/jquery-ui.min.js')}"></script>
+            <script src="{webpath('docs/assets/plugins/waifu_plugin/autoload.js')}"></script>
         """
+    plugins_js = javascript_html('plugins/')
+    spike_css = css_html()
+    # plugins_css = css_html('/plugins')
     meta = """
         <meta name="apple-mobile-web-app-title" content="川虎 Chat">
         <meta name="apple-mobile-web-app-capable" content="yes">
@@ -211,14 +212,13 @@ def reload_javascript():
         <meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover'>
         <meta name="theme-color" content="#ffffff">
     """
-    css = css_html()
-
     def template_response(*args, **kwargs):
         res = GradioTemplateResponseOriginal(*args, **kwargs)
-        res.body = res.body.replace(b'</head>', f'{meta}{js}</head>'.encode("utf8"))
+        res.body = res.body.replace(b'</head>', f'{meta}{spike_js}{plugins_js}</head>'.encode("utf8"))
         res.body = res.body.replace(b'</html>', f'{waifu_js}</html>'.encode("utf8"))
         # res.body = res.body.replace(b'</head>', f'{js}</head>'.encode("utf8"))
-        res.body = res.body.replace(b'</body>', f'{css}</body>'.encode("utf8"))
+        res.body = res.body.replace(b'</body>', f'{spike_css}</body>'.encode("utf8"))
+
         res.init_headers()
         return res
 

@@ -257,6 +257,10 @@ code.language-folded {
 .danger_btn {
     background: #cd0c0c !important;
 }
+/*[id^="d_diagram"] {*/
+/*    display: none;*/
+/*}*/
+
 [class*="gradio-container-"] h1 {
     font-weight: 700 !important;
     font-size: 28px !important;

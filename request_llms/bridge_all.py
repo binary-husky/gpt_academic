@@ -619,7 +619,7 @@ def LLM_CATCH_EXCEPTION(f):
         try:
             return f(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience)
         except Exception as e:
-            tb_str = '\n```\n' + trimmed_format_exc() + '\n```\n'
+            tb_str = '\n' + trimmed_format_exc() + '\\n'
             observe_window[0] = tb_str
             return tb_str
     return decorated

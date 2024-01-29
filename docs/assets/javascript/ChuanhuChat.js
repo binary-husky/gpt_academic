@@ -18,6 +18,7 @@ var apSwitch = null;
 var messageBotDivs = null;
 var loginUserForm = null;
 var logginUser = null;
+var chatbotMsg = null;
 var updateToast = null;
 var sendBtn = null;
 var cancelBtn = null;
@@ -30,7 +31,6 @@ var chuanhuPopup = null;
 var searchBox = null;
 var settingBox = null;
 var promptBox = null;
-
 var popupWrapper = null;
 var chuanhuHeader = null;
 var menu = null;
@@ -69,6 +69,7 @@ function addInit() {
     }
     chatbotObserver.observe(chatbotIndicator, { attributes: true, childList: true, subtree: true });
     chatListObserver.observe(chatListIndicator, { attributes: true });
+    chatbotObserverMsg.observe(chatbotWrap, { attributes: true, childList: true, subtree: true });
     setDragUploader();
     return true;
 }
@@ -85,6 +86,7 @@ function initialize() {
     chatbotArea = gradioApp().querySelector('#chatbot-area');
     chatbot = gradioApp().querySelector('#chuanhu-chatbot');
     chatbotWrap = gradioApp().querySelector('#chuanhu-chatbot > .wrapper > .wrap');
+    chatbotMsg = chatbotWrap.querySelector('.message-wrap');
     apSwitch = gradioApp().querySelector('.apSwitch input[type="checkbox"]');
     updateToast = gradioApp().querySelector("#toast-update");
     sendBtn = gradioApp().getElementById("submit-btn");
@@ -159,6 +161,7 @@ function gradioApp() {
             return document.getElementById(id);
         };
     }
+
     return elem.shadowRoot ? elem.shadowRoot : elem;
 }
 
@@ -261,10 +264,12 @@ function checkModel() {
 
 function toggleDarkMode(isEnabled) {
     if (isEnabled) {
+        mermaidConfig.theme = 'dark'
         document.body.classList.add("dark");
         document.querySelector('meta[name="theme-color"]').setAttribute('content', '#171717');
         document.body.style.setProperty("background-color", "var(--neutral-950)", "important");
     } else {
+        mermaidConfig.theme = 'default'
         document.body.classList.remove("dark");
         document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff');
         document.body.style.backgroundColor = "";
@@ -366,6 +371,7 @@ function clearChatbot() {
 
 function chatbotContentChanged(attempt = 1, force = false) {
     for (var i = 0; i < attempt; i++) {
+        // gradioApp().querySelectorAll('#chuanhu-chatbot .message-wrap .message.bot').forEach(mermaidCodeAdd)
         setTimeout(() => {
             // clearMessageRows();
             saveHistoryHtml();
@@ -389,13 +395,10 @@ function chatbotContentChanged(attempt = 1, force = false) {
                     }
                 }, 200);
             }
-        
-            
         }, i === 0 ? 0 : 200);
     }
     // 理论上是不需要多次尝试执行的，可惜gradio的bug导致message可能没有渲染完毕，所以尝试500ms后再次执行
 }
-
 var chatbotObserver = new MutationObserver(() => {
     chatbotContentChanged(1);
     if (chatbotIndicator.classList.contains('hide')) {
@@ -433,6 +436,7 @@ window.addEventListener("DOMContentLoaded", function () {
     isInIframe = (window.self !== window.top);
     historyLoaded = false;
 });
+
 window.addEventListener('resize', ()=>{
     // setChatbotHeight();
     updateVH();

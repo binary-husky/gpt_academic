@@ -74,6 +74,7 @@ class DocxHandler:
                     with open(image_path, 'wb') as f:
                         f.write(image_part.blob)
         else:
+            # 对话内嵌表格的图片
             embed = self.__extract_attribute_from_xml(inline.xml)
             image_part = doc.part.related_parts[embed]
             image_path = os.path.join(self.output_dir, f'{self.file_name}-image-{embed}.png')
@@ -81,7 +82,7 @@ class DocxHandler:
                 f.write(image_part.blob)
 
         # 返回Markdown图片链接，如果没有找到图片则返回空字符串
-        return f"![{os.path.basename(image_path)}]({image_path})" if image_path else ""
+        return f"![{os.path.basename(image_path)}]({image_path})\n" if image_path else ""
 
     def _process_paragraph(self, element, doc):
         """处理段落中的文本和图片"""
@@ -119,7 +120,7 @@ class DocxHandler:
                             cell_text += run.text.replace('\n', '<br>')  # 替换换行符
                         for inline in run.element.iter():
                             if inline.tag.endswith('drawing'):
-                                image_markdown = self.__extract_and_save_image(inline, doc)
+                                image_markdown = self.__extract_and_save_image(inline, doc).replace('\n', '<br>')
                                 cell_text += image_markdown
                 row_data.append(cell_text)
             # 将表格行转换为Markdown格式
@@ -154,6 +155,7 @@ class DocxHandler:
         try:
             with open(markdown_file_path, 'w', encoding='utf-8') as f:
                 f.write(self.markdown_content)
+            return markdown_file_path
         except IOError as e:
             raise IOError(f"Error writing markdown file: {e}")
 
