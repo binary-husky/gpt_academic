@@ -240,12 +240,14 @@ def __batch_inset_prompt(json_path=None):
     if not json_path:
         json_path = init_path.prompt_export_path
     for json_ in os.listdir(json_path):
+        print('-------', json_, '--------')
         with open(os.path.join(json_path, json_), 'r', encoding='utf-8') as f:
             data_list = json.load(f)
         for i in data_list:
             source = os.path.basename(os.path.join(json_path, json_)).split('.')[0]
             source_addr = 'spike'  # 嘻嘻，加上管理员权限
             PromptDb(table=f"{source}_sys").inset_prompt(prompt={i['act']: i['prompt']}, source=source_addr)
+            print(f"{source} {i['act']} 已导入")
 
 
 def __batch_export_prompt():
@@ -285,6 +287,6 @@ def main_argument():
 
 
 if __name__ == '__main__':
-    main_argument()
+    # main_argument()
     __batch_inset_prompt()
 
