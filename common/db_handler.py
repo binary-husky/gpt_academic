@@ -89,7 +89,10 @@ class PromptDb(SqliteHandler):
         if self.table and self.table not in self.get_tables():
             # 如果访问的表不存在，则创建表
             create_sql = f"CREATE TABLE `{self.table}` ('prompt' TEXT UNIQUE, 'result' TEXT, 'source' TEXT)"
-            self.execute_ddl_create(create_sql)
+            try:
+                self.execute_ddl_create(create_sql)
+            except:
+                print(f'创建表{self.table}失败，可能是因为已存在该表, {self.get_tables()}')
 
     def get_prompt_value(self, find=None):
         temp_all = {}
