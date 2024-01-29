@@ -50,7 +50,7 @@ async function mermaidReplaceOld(parentCodeElement) {
     let old_mermaid_div = document.createElement('div');
     old_mermaid_div.classList.add('mermaid_render');
     let codeFinishRenderElement = chatbot.querySelector("code_finish_render svg");
-    console.log('mermaidReplaceOld', codeFinishRenderElement)
+    // console.log('mermaidReplaceOld', codeFinishRenderElement)
     if (codeFinishRenderElement) {
         old_mermaid_div.innerHTML = codeFinishRenderElement.outerHTML;
     }
