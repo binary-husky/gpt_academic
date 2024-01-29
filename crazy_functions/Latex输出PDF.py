@@ -432,6 +432,11 @@ def PDF翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot, h
         report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"不支持同时处理多个pdf文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
         return
+    app_id, app_key = get_conf('MATHPIX_APPID', 'MATHPIX_APPKEY')
+    if len(app_id) == 0 or len(app_key) == 0:
+        report_exception(chatbot, history, a=f"请配置 MATHPIX_APPID 和 MATHPIX_APPKEY")
+        yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
+        return
 
     # <-------------- convert pdf into tex ------------->
     project_folder = pdf2tex_project(file_manifest[0])

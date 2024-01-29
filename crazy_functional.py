@@ -532,7 +532,7 @@ def get_crazy_functions():
         print("Load function plugin failed")
 
     try:
-        from crazy_functions.Latex输出PDF结果 import PDF翻译中文并重新编译PDF
+        from crazy_functions.Latex输出PDF import PDF翻译中文并重新编译PDF
         function_plugins.update({
             "PDF翻译中文并重新编译PDF [先上传pdf，再运行此插件]": {
                 "Group": "学术",
@@ -552,8 +552,8 @@ def get_crazy_functions():
         print('Load function plugin failed')
 
     try:
-        from crazy_functions.Latex输出PDF结果 import Latex英文纠错加PDF对比
-        from crazy_functions.Latex输出PDF结果 import Latex翻译中文并重新编译PDF
+        from crazy_functions.Latex输出PDF import Latex英文纠错加PDF对比
+        from crazy_functions.Latex输出PDF import Latex翻译中文并重新编译PDF
 
         function_plugins.update(
             {
