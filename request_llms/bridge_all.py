@@ -31,6 +31,9 @@ from .bridge_qianfan import predict as qianfan_ui
 from .bridge_google_gemini import predict as genai_ui
 from .bridge_google_gemini import predict_no_ui_long_connection  as genai_noui
 
+from .bridge_zhipu import predict_no_ui_long_connection as zhipu_noui
+from .bridge_zhipu import predict as zhipu_ui
+        
 colors = ['#FF00FF', '#00FFFF', '#FF0000', '#990099', '#009999', '#990044']
 
 class LazyloadTiktoken(object):
@@ -580,11 +583,34 @@ if "llama2" in AVAIL_LLM_MODELS:   # llama2
         })
     except:
         print(trimmed_format_exc())
-if "glm-4" in AVAIL_LLM_MODELS or "glm-4v" in AVAIL_LLM_MODELS or "glm-3-turbo" in AVAIL_LLM_MODELS:   # zhipuai
+if "zhipuai" in AVAIL_LLM_MODELS:   # zhipuai 是glm-4的别名，向后兼容配置
     try:
-        from .bridge_zhipu import predict_no_ui_long_connection as zhipu_noui
-        from .bridge_zhipu import predict as zhipu_ui
         model_info.update({
+            "zhipuai": {
+                "fn_with_ui": zhipu_ui,
+                "fn_without_ui": zhipu_noui,
+                "endpoint": None,
+                "max_token": 10124 * 8,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+        })
+    except:
+        print(trimmed_format_exc())
+if "glm-4" in AVAIL_LLM_MODELS \
+    or "glm-4v" in AVAIL_LLM_MODELS \
+    or "glm-3-turbo" in AVAIL_LLM_MODELS \
+    or "zhipuai" in AVAIL_LLM_MODELS:
+    try:
+        model_info.update({
+            "zhipuai": {
+                "fn_with_ui": zhipu_ui,
+                "fn_without_ui": zhipu_noui,
+                "endpoint": None,
+                "max_token": 10124 * 8,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
             "glm-4": {
                 "fn_with_ui": zhipu_ui,
                 "fn_without_ui": zhipu_noui,

@@ -49,8 +49,8 @@ class ZhipuChatInit:
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
         self.model = llm_kwargs['llm_model']
-        messages.extend(self.__conversation_history(history))  # 处理 history
-        messages.append(self.__conversation_user(inputs))  # 处理用户对话
+        messages.extend(self.__conversation_history(history, llm_kwargs))  # 处理 history
+        messages.append(self.__conversation_user(inputs, llm_kwargs))  # 处理用户对话
         response = self.zhipu_bro.chat.completions.create(
             model=self.model, messages=messages, stream=True,
             temperature=llm_kwargs.get('temperature', 0.95)*0.95,  # 石乐志，只能传默认的temperature 和 top_p
