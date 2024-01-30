@@ -119,18 +119,54 @@ async function svgInitPz(svgElement, content) {
             controlIconsEnabled: true,
         };
         svgElement.style = `width: ${svg_width}px; height: ${svg_height}px;`;
-        window.panZoomTiger = svgPanZoom(svgElement, init_params);
+        let panZoomTiger = svgPanZoom(svgElement, init_params);
         let pako_encode_link = await pako_encode(content)
         let fore_btn = await createForeignObject(svg_width, svgEditIcon, pako_encode_link)
         if (foreign) {
             svgElement.outerHTML = fore_btn.outerHTML
         } else {
-           svgElement.appendChild(fore_btn)
+            svgElement.appendChild(fore_btn)
         }
-        console.log(svgElement)
+        addClickEvent(svgElement, panZoomTiger)
     }
 }
 
+function addClickEvent(svgElement, panZoomTiger) {
+    // 支持双击选择SVG文本
+    let svgTextEle = svgElement.querySelectorAll('text')
+    for (let i = 0; i < svgTextEle.length; i++) {
+        // 监听鼠标悬停事件
+        svgTextEle[i].addEventListener('mouseover', function (e) {
+            panZoomTiger.disableDblClickZoom();
+            panZoomTiger.disablePan()
+        });
+        svgTextEle[i].addEventListener('mouseout', function (e) {
+            panZoomTiger.enableDblClickZoom();
+            panZoomTiger.enablePan()
+        });
+        svgTextEle[i].addEventListener('dblclick', function (e) {
+            let range = document.createRange();
+            range.selectNodeContents(svgTextEle[i]);
+            let sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        });
+        // console.log(svgElement)
+    }
+    svgElement.addEventListener('click', function (e) {
+        // 如果点击的不是 svgTextEle 元素则移出选择
+        if (!e.target.closest('svg text')) {
+            let sel = window.getSelection ? window.getSelection() : document.selection;
+            if (sel) {
+                if (sel.removeAllRanges) {
+                    sel.removeAllRanges();
+                } else if (sel.empty) {  // IE 浏览器
+                    sel.empty();
+                }
+            }
+        }
+    });
+}
 
 async function createForeignObject(svg_width, svgIcon, link) {
     // 创建 <foreignObject> 元素
