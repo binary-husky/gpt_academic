@@ -81,8 +81,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
 
     def signals_prompt_func(self):
         self.multiplexing_edit_check.change(fn=func_signals.change_check_txt,
-                                            inputs=[self.multiplexing_edit_check],
-                                            outputs=[self.multiplexing_edit_check])
+                                            inputs=[self.multiplexing_edit_check, self.pro_fp_state],
+                                            outputs=[self.pro_func_prompt])
         self.pro_private_check.select(fn=func_signals.prompt_reduce,
                                       inputs=[self.pro_private_check, self.pro_fp_state],
                                       outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check]

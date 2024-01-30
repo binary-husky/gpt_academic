@@ -34,10 +34,11 @@ class RightElem:
                                                      allow_custom_value=True)
             with gr.Row():
                 self.prompt_search_txt = gr.Textbox(placeholder='搜索提示词', show_label=False,
-                                                    elem_classes='pm_search',)
-                self.multiplexing_edit_check = gr.Checkbox(value=True, label='复用', show_label=True, elem_id='pm_check',
-                                                     interactive=True, container=False)
-            self.pro_func_prompt = gr.Dataset(components=[gr.HTML()], label="Prompt", visible=False,
+                                                    elem_classes='pm_search', )
+                self.multiplexing_edit_check = gr.Checkbox(value=True, show_label=True, elem_id='pm_check',
+                                                           container=False, elem_classes='switch-checkbox',
+                                                           interactive=True, label='')
+            self.pro_func_prompt = gr.Dataset(components=[gr.HTML()], label="Prompt - 复用", visible=False,
                                               samples=[['...', ""] for i in range(20)], type='index',
                                               elem_id='prompt_list', samples_per_page=10, )
             self.pro_fp_state = gr.State({'samples': None})
@@ -60,8 +61,10 @@ class RightElem:
                         for k in crazy_fns_role[role]:
                             if not crazy_fns_role[role][k].get("AsButton", True): continue
                             if role not in default_plugin:
-                                variant = crazy_fns_role[role][k]["Color"] if "Color" in crazy_fns_role[role][k] else "secondary"
-                                crazy_fns_role[role][k]['Button'] = gr.Button(k, variant=variant, visible=False, size="sm")
+                                variant = crazy_fns_role[role][k]["Color"] if "Color" in crazy_fns_role[role][
+                                    k] else "secondary"
+                                crazy_fns_role[role][k]['Button'] = gr.Button(k, variant=variant, visible=False,
+                                                                              size="sm")
                             else:
                                 variant = crazy_fns[k]["Color"] if "Color" in crazy_fns_role[role][k] else "secondary"
                                 crazy_fns_role[role][k]['Button'] = gr.Button(k, variant=variant,
@@ -78,8 +81,9 @@ class RightElem:
                                 dropdown_fn_list.append(k)
                 self.dropdown_fn = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", interactive=True,
                                                show_label=False, label="", container=False)
-                self.plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False, elem_classes='no_padding_input',
-                                                 placeholder="这里是特殊函数插件的高级参数输入区")
+                self.plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False,
+                                                      elem_classes='no_padding_input',
+                                                      placeholder="这里是特殊函数插件的高级参数输入区")
                 self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary", visible=False)
 
     def _draw_setting_chat(self):
@@ -88,7 +92,8 @@ class RightElem:
                 # gr.Markdown(func_box.get_html('what_news.html').replace('{%v}', 'LLMs调优参数'))
                 with gr.Accordion(label='Langchain调优参数'):
                     self.vector_search_score = gr.Slider(minimum=0, maximum=1100, value=500, step=1, interactive=True,
-                                                         label="SCORE-THRESHOLD", show_label=True).style(container=False)
+                                                         label="SCORE-THRESHOLD", show_label=True).style(
+                        container=False)
                     self.vector_search_top_k = gr.Slider(minimum=1, maximum=10, value=4, step=1, interactive=True,
                                                          label="TOP-K", show_label=True).style(container=False)
                     self.vector_chunk_size = gr.Slider(minimum=100, maximum=1000, value=521, step=1, interactive=True,
@@ -122,10 +127,12 @@ class RightElem:
                                                           label=i18n("用户名"), value=default_params['user_identifier'],
                                                           lines=1, container=False)
                     func_box.md_division_line()
-                    self.max_context_length_slider = gr.Slider(minimum=1, maximum=32768, value=default_params['max_context'],
+                    self.max_context_length_slider = gr.Slider(minimum=1, maximum=32768,
+                                                               value=default_params['max_context'],
                                                                step=1, interactive=True, label="max context",
                                                                container=False)
-                    self.max_generation_slider = gr.Slider(minimum=1, maximum=32768, value=default_params['max_generation'],
+                    self.max_generation_slider = gr.Slider(minimum=1, maximum=32768,
+                                                           value=default_params['max_generation'],
                                                            step=1, interactive=True, label="max generations",
                                                            container=False)
                     self.logit_bias_txt = gr.Textbox(show_label=True, placeholder=f"word:likelihood",
