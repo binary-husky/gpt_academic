@@ -101,7 +101,7 @@ do not have too much repetitive information, numerical values using the original
 
 
 @CatchException
-def 批量总结PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 批量总结PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     import glob, os
 
     # 基本信息：功能、贡献者

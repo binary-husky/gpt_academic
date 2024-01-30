@@ -31,23 +31,9 @@ def adjust_theme():
                 THEME = THEME.lstrip("huggingface-")
             set_theme = set_theme.from_hub(THEME.lower())
 
-        js = ""
-        for jsf in [
-            os.path.join(theme_dir, "common.js"),
-            os.path.join(theme_dir, "mermaid.min.js"),
-            os.path.join(theme_dir, "mermaid_loader.js"),
-        ]:
-            with open(jsf, "r", encoding="utf8") as f:
-                js += f"<script>{f.read()}</script>"
-
-
-        # 添加一个萌萌的看板娘
-        if ADD_WAIFU:
-            js += """
-                <script src="file=docs/waifu_plugin/jquery.min.js"></script>
-                <script src="file=docs/waifu_plugin/jquery-ui.min.js"></script>
-                <script src="file=docs/waifu_plugin/autoload.js"></script>
-            """
+        from themes.common import get_common_html_javascript_code
+        js = get_common_html_javascript_code()
+        
         if not hasattr(gr, "RawTemplateResponse"):
             gr.RawTemplateResponse = gr.routes.templates.TemplateResponse
         gradio_original_template_fn = gr.RawTemplateResponse

@@ -5,7 +5,7 @@ from request_llms.bridge_all import predict_no_ui_long_connection
 from crazy_functions.game_fns.game_utils import get_code_block, is_same_thing
 
 @CatchException
-def 随机小游戏(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 随机小游戏(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     from crazy_functions.game_fns.game_interactive_story import MiniGame_ResumeStory
     # 清空历史
     history = []
@@ -23,7 +23,7 @@ def 随机小游戏(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_
 
 
 @CatchException
-def 随机小游戏1(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 随机小游戏1(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     from crazy_functions.game_fns.game_ascii_art import MiniGame_ASCII_Art
     # 清空历史
     history = []

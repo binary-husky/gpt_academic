@@ -284,8 +284,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         # 在前端打印些好玩的东西
         for thread_index, _ in enumerate(worker_done):
             print_something_really_funny = "[ ...`"+mutable[thread_index][0][-scroller_max_len:].\
-                replace('\n', '').replace('`', '.').replace(
-                    ' ', '.').replace('<br/>', '.....').replace('$', '.')+"`... ]"
+                replace('\n', '').replace('`', '.').replace(' ', '.').replace('<br/>', '.....').replace('$', '.')+"`... ]"
             observe_win.append(print_something_really_funny)
         # 在前端打印些好玩的东西
         stat_str = ''.join([f'`{mutable[thread_index][2]}`: {obs}\n\n' 

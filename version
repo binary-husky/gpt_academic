@@ -1,5 +1,5 @@
 {
-  "version": 3.70,
+  "version": 3.71,
   "show_feature": true,
-  "new_feature": "支持Mermaid绘图库（让大模型绘制脑图） <-> 支持Gemini-pro <-> 支持直接拖拽文件到上传区 <-> 支持将图片粘贴到输入区 <-> 修复若干隐蔽的内存BUG <-> 修复多用户冲突问题 <-> 接入Deepseek Coder <-> AutoGen多智能体插件测试版"
+  "new_feature": "用绘图功能增强部分插件 <-> 基础功能区支持自动切换中英提示词 <-> 支持Mermaid绘图库（让大模型绘制脑图） <-> 支持Gemini-pro <-> 支持直接拖拽文件到上传区 <-> 支持将图片粘贴到输入区"
 }

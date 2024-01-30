@@ -21,7 +21,7 @@ def remove_model_prefix(llm):
 
 
 @CatchException
-def 多智能体终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 多智能体终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     """
     txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数，如温度和top_p等，一般原样传递下去就行
@@ -29,7 +29,7 @@ def 多智能体终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
     chatbot         聊天显示框的句柄，用于显示给用户
     history         聊天历史，前情提要
     system_prompt   给gpt的静默提醒
-    web_port        当前软件运行的端口号
+    user_request    当前用户的请求信息（IP地址等）
     """
     # 检查当前的模型是否符合要求
     supported_llms = [
@@ -89,7 +89,7 @@ def 多智能体终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
         history = []
         chatbot.append(["正在启动: 多智能体终端", "插件动态生成, 执行开始, 作者 Microsoft & Binary-Husky."])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-        executor = AutoGenMath(llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
+        executor = AutoGenMath(llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request)
         persistent_class_multi_user_manager.set(persistent_key, executor)
         exit_reason = yield from executor.main_process_ui_control(txt, create_or_resume="create")
 

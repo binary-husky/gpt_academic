@@ -10,7 +10,7 @@ import os
 
 
 @CatchException
-def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
 
     disable_auto_promotion(chatbot)
     # 基本信息：功能、贡献者
