@@ -67,10 +67,10 @@ body.popup-open {
     text-align: center;
     /* margin: 32px 0 4px 0; */
 }
-#about-tab {
+.tab-center {
     text-align: center;
 }
-#about-tab img {
+.tab-center img {
     margin: 0 auto;
 }
 
@@ -127,18 +127,18 @@ body.popup-open {
 /* status-display */
 #status-display {
     display: flex;
-    min-height: 2em;
-    max-height: 4em;
-    align-items: flex-end;
-    justify-content: flex-end;
+    height: 58px;
+    max-height: 58px;
     transition: all 0.6s;
-}
-.chatbot-full-width #status-display p {
-    font-size: .85em;
+    overflow: auto !important;
+    left: 5px;
+    top: 6px;
+    align-items: center;
+    text-align: center;
 }
 
 #status-display p {
-    font-size: .75em;
+    font-size: .85em;
     font-family: ui-monospace, "SF Mono", "SFMono-Regular", "Menlo", "Consolas", "Liberation Mono", "Microsoft Yahei UI", "Microsoft Yahei", monospace;
     /* Windows下中文的monospace会fallback为新宋体，实在太丑，这里折中使用微软雅黑 */
     color: var(--body-text-color-subdued);
@@ -244,6 +244,7 @@ body.popup-open {
 }
 
 #chuanhu-header {
+    display: none;
     position: fixed;
     top: 0;
     z-index: 1000;
@@ -281,8 +282,8 @@ body.popup-open {
     /* margin-top: 54px; */
     /* height: calc(100*var(--vh) - 72px); */
     position: absolute;
-    top: 65px;
-    height: calc(100*var(--vh) - 65px);
+    /*top: 65px;*/
+    height: calc(100*var(--vh));
 }
 
 #chuanhu-area {
@@ -536,6 +537,9 @@ button.chatbot-input-more-btn:active .sm-round-bg {
 .chatbot-full-width #chatbot-input-more-area > span > div:hover > label {
     background: var(--chatbot-input-more-background-fullwidth-hover);
 }
+.hover-background:hover {
+    background: var(--chatbot-input-more-background-fullwidth-hover);
+}
 .chatbot-full-width #chatbot-input-more-btn-div {
     display: none;
 }
@@ -614,7 +618,7 @@ input:checked + .chatbot-input-more-span {
 #menu-area.showSide {
     width: var(--toolbox-width);
     max-width: var(--toolbox-width);
-    height: calc(100*var(--vh) - 65px);
+    height: calc(100*var(--vh));
     visibility: visible;
     /* margin-right: 16px; */
     border-right: 0.5px solid var(--border-color-primary);
@@ -626,7 +630,7 @@ input:checked + .chatbot-input-more-span {
 }
 #toolbox-area.showSide {
     width: var(--toolbox-width);
-    height: calc(100*var(--vh) - 65px);
+    height: calc(100*var(--vh));
     visibility: visible;
     /* margin-left: 16px; */
 }
@@ -999,7 +1003,7 @@ input:checked + .chatbot-input-more-span {
     box-shadow: none;
 }
 #chuanhu-history-body {
-    height: calc(100% - 66px);
+    height: calc(100%);
     overflow-y: auto;
     overflow-x: hidden;
     padding-bottom: 6px;

@@ -1,5 +1,5 @@
-import { deflate, inflate } from '/file=docs/assets/plugins/pako.esm.mjs';
-import { toUint8Array, fromUint8Array, toBase64, fromBase64 } from '/file=docs/assets/plugins/base64.mjs';
+import { deflate, inflate } from '/spike/file=docs/assets/plugins/pako.esm.mjs';
+import { toUint8Array, fromUint8Array, toBase64, fromBase64 } from '/spike/file=docs/assets/plugins/base64.mjs';
 
 const base64Serde = {
     serialize: (state) => {

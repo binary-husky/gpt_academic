@@ -52,7 +52,7 @@ class Settings:
 
     def _darw_private_operation(self):
         with gr.TabItem('个人中心', id='private'):
-            with gr.Row(elem_id='about-tab'):
+            with gr.Row(elem_classes='tab-center'):
                 gr.Markdown('#### 粉身碎骨浑不怕 要留清白在人间\n\n'
                             '`这里的东西只有你自己能看，不要告诉别人哦`\n\n' \
                             + func_box.html_tag_color('我们不会保存你的个人信息，页面刷新后这里的信息就会被丢弃',
@@ -78,7 +78,7 @@ class Settings:
 
     def _draw_setting_info(self):
         APPNAME = toolbox.get_conf('APPNAME')
-        with gr.Tab(label=i18n("关于"), elem_id="about-tab"):
+        with gr.Tab(label=i18n("关于"), elem_id="tab-center"):
             gr.Markdown("# " + i18n(APPNAME))
             gr.HTML(get_html("footer.html").format(versions=''), elem_id="footer")
             gr.Markdown('', elem_id="description")

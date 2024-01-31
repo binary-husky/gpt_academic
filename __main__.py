@@ -66,6 +66,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         self.sm_code_block.click(fn=lambda x: x + '```\n\n```', inputs=[self.user_input], outputs=[self.user_input])
         self.sm_upload_history.click(func_signals.get_user_upload, [self.chatbot, self.user_input],
                                      outputs=[self.chatbot])
+        self.sm_history.click(fn=None, inputs=None, outputs=None, _js='()=>{menuClick();}')
         self.langchain_dropdown.select(fn=Langchain_cn.obtaining_knowledge_base_files,
                                        inputs=[self.langchain_classifi, self.langchain_dropdown,
                                                self.chatbot, self.langchain_know_kwargs,
@@ -379,7 +380,6 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         with gr.Row(elem_id="chuanhu-header"):
             gr.HTML(get_html("header_title.html").format(
                 app_title=self.app_name), elem_id="app-title")
-            self.status_display = gr.Markdown(proxy_info, elem_id="status-display")
         with gr.Row(elem_id="float-display"):
             self.user_info = gr.Markdown(
                 value="getting user info...", elem_id="user-info")
@@ -447,9 +447,9 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         #     favicon_path='./docs/wps_logo.png')
 
 
-from common import base_api
+from common.api_server import base
 
-app = base_api.app
+app = base.app
 PORT = WEB_PORT if WEB_PORT <= 0 else WEB_PORT
 reload_javascript()
 chatbot_main = ChatBot()

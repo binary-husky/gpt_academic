@@ -18,6 +18,7 @@ var apSwitch = null;
 var messageBotDivs = null;
 var loginUserForm = null;
 var logginUser = null;
+var chuanhuBody = null;
 var chatbotMsg = null;
 var updateToast = null;
 var sendBtn = null;
@@ -27,7 +28,7 @@ var updateChuanhuBtn = null;
 var statusDisplay = null;
 var historySelector = null;
 var chuanhuPopup = null;
-
+var waifuStatus = null;
 var searchBox = null;
 var settingBox = null;
 var promptBox = null;
@@ -86,6 +87,7 @@ function initialize() {
     chatbotArea = gradioApp().querySelector('#chatbot-area');
     chatbot = gradioApp().querySelector('#chuanhu-chatbot');
     chatbotWrap = gradioApp().querySelector('#chuanhu-chatbot > .wrapper > .wrap');
+    chuanhuBody = gradioApp().querySelector('#chuanhu-body');
     chatbotMsg = chatbotWrap.querySelector('.message-wrap');
     apSwitch = gradioApp().querySelector('.apSwitch input[type="checkbox"]');
     updateToast = gradioApp().querySelector("#toast-update");
@@ -94,7 +96,7 @@ function initialize() {
     sliders = gradioApp().querySelectorAll('input[type="range"]');
     updateChuanhuBtn = gradioApp().getElementById("update-chuanhu-btn");
     statusDisplay = gradioApp().querySelector('#status-display');
-
+    waifuStatus = document.querySelector('.waifu')
     historySelector = gradioApp().querySelector('#history-select-dropdown');
     chuanhuPopup = gradioApp().querySelector('#chuanhu-popup');
     settingBox = gradioApp().querySelector('#chuanhu-setting');
@@ -148,7 +150,7 @@ function initialize() {
     btn_move_to_tab();
     add_func_event();
     sm_move_more_label();
-
+    addHistoryBtn();
     return true;
 }
 

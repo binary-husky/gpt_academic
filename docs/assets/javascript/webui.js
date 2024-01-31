@@ -5,8 +5,7 @@ function addHideBoxClassExcept(element) {
     for (let box of boxes) {
         if (box !== element) {
             box.classList.add('hideBox');
-        }
-        else {
+        } else {
             box.classList.remove('hideBox');
         }
     }
@@ -33,7 +32,6 @@ function openChatMore() {
     chatbotArea.classList.add('show-chat-more');
     showMask("chat-more");
 }
-
 
 
 function closeChatMore() {
@@ -98,13 +96,16 @@ function closeBox() {
 function closeSide(sideArea) {
     document.body.classList.remove('popup-open');
     sideArea.classList.remove('showSide');
-    if (sideArea == toolbox) {
+    if (sideArea === toolbox) {
         chuanhuHeader.classList.remove('under-box');
         chatbotArea.classList.remove('toolbox-open')
         toolboxOpening = false;
-    } else if (sideArea == menu) {
+    } else if (sideArea === menu) {
         chatbotArea.classList.remove('menu-open')
         menuOpening = false;
+        if (waifuStatus) {
+            waifuStatus.style.display = 'none'
+        }
     }
     adjustMask();
 }
@@ -118,6 +119,9 @@ function openSide(sideArea) {
     } else if (sideArea == menu) {
         chatbotArea.classList.add('menu-open')
         menuOpening = true;
+        if (waifuStatus) {
+            waifuStatus.style.display = 'flex'
+        }
     }
     // document.body.classList.add('popup-open');
 }
@@ -127,14 +131,16 @@ function menuClick() {
     if (menuOpening) {
         closeSide(menu);
         wantOpenMenu = false;
-
+        click_toggle_move(tog_history_btn, true);
     } else {
         if (windowWidth < 1024 && toolboxOpening) {
             closeSide(toolbox);
             wantOpenToolbox = false;
+            click_toggle_move(tog_history_btn, true);
         }
         openSide(menu);
         wantOpenMenu = true;
+        click_toggle_move(tog_history_btn, false);
     }
     adjustSide();
 }
@@ -160,20 +166,25 @@ var toolboxOpening = false;
 var shouldAutoClose = true;
 var wantOpenMenu = windowWidth > 768;
 var wantOpenToolbox = windowWidth >= 1024;
+var wantCloseToolbox = windowWidth < 1400;
 
 function adjustSide() {
     if (windowWidth >= 1024) {
         shouldAutoClose = true;
         if (wantOpenMenu) {
             openSide(menu);
-            if (wantOpenToolbox) openSide(toolbox);
+            if (wantCloseToolbox) {
+                closeSide(toolbox);
+            } else if (wantOpenToolbox) {
+                openSide(toolbox);
+            }
         } else if (wantOpenToolbox) {
             openSide(toolbox);
         } else {
             closeSide(menu);
             closeSide(toolbox);
         }
-    } else if (windowWidth > 768 && windowWidth < 1024 ) {
+    } else if (windowWidth > 768 && windowWidth < 1024) {
         shouldAutoClose = true;
         if (wantOpenToolbox) {
             if (wantOpenMenu) {
@@ -191,7 +202,7 @@ function adjustSide() {
                 closeSide(toolbox);
                 openSide(menu);
             }
-        } else if (!wantOpenMenu && !wantOpenToolbox){
+        } else if (!wantOpenMenu && !wantOpenToolbox) {
             closeSide(menu);
             closeSide(toolbox);
         }
@@ -204,6 +215,60 @@ function adjustSide() {
     checkChatbotWidth();
     adjustMask();
 }
+
+function add_tooltip_toggle(elem, text) {
+    if (elem) {
+        elem.setAttribute('aria-label', text);
+        elem.classList.add('tooltip-toggle')
+        elem.classList.add('hover-background')
+    }
+}
+
+function click_toggle_move(elem, open) {
+    if (elem) {
+        if (open) {
+            add_tooltip_toggle(elem, 'Open sidebar');
+            elem.style.left = '30px';
+            elem.querySelector('svg').style.transform = 'scaleX(-1)';
+        } else {
+            add_tooltip_toggle(elem, 'Close sidebar');
+            elem.style.left = '290px';
+            elem.querySelector('svg').style.transform = 'scaleY(-1)';
+        }
+    }
+}
+
+var tog_history_btn;
+var historyToggleButtonStyle = {
+    display: 'flex',
+    position: 'fixed',
+    left: '290px',
+    top: '50%',
+    zIndex: 4,
+    minWidth: 'min(25px, 100%)',
+    borderRadius: '7px',
+    boxShadow: 'rgba(0, 0, 0, 0.19) 0 10px 20px, rgba(0, 0, 0, 0.23) 0 5px 5px'
+};
+function addHistoryBtn() {
+    tog_history_btn = chuanhuBody.querySelector('#history-toggle-button');
+    if (!tog_history_btn) {
+        let tog_btn = document.createElement('button');
+        tog_btn.id = 'history-toggle-button'
+        tog_btn.innerHTML = closeHistoryIcon;
+        Object.assign(tog_btn.style, historyToggleButtonStyle);
+        if (wantOpenMenu) {
+            click_toggle_move(tog_btn, false)
+        } else {
+            click_toggle_move(tog_btn, true)
+        }
+        tog_btn.addEventListener('click', () => {
+            menuClick();
+        });
+        chuanhuBody.appendChild(tog_btn);
+        tog_history_btn = chuanhuBody.querySelector('#history-toggle-button');
+    }
+}
+
 
 function adjustMask() {
     var sideMask = null;
@@ -220,18 +285,24 @@ function adjustMask() {
 
     if (windowWidth > 768) {
         sideMask.style.backgroundColor = 'rgba(0, 0, 0, 0)';
-        setTimeout(() => {sideMask.style.display = 'none'; }, 100);
+        setTimeout(() => {
+            sideMask.style.display = 'none';
+        }, 100);
         return;
     }
     // if (windowWidth <= 768)
     if (menuOpening || toolboxOpening) {
         document.body.classList.add('popup-open');
         sideMask.style.display = 'block';
-        setTimeout(() => {sideMask.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';}, 200);
+        setTimeout(() => {
+            sideMask.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        }, 200);
         sideMask.classList.add('mask-blur');
     } else if (!menuOpening && !toolboxOpening) {
         sideMask.style.backgroundColor = 'rgba(0, 0, 0, 0)';
-        setTimeout(() => {sideMask.style.display = 'none'; }, 100);
+        setTimeout(() => {
+            sideMask.style.display = 'none';
+        }, 100);
     }
 }
 
@@ -240,8 +311,10 @@ function checkChatbotWidth() {
     // if (chatbotWidth > 488) {
     if (windowWidth > 768) {
         chatbotArea.classList.add('chatbot-full-width');
+        if (tog_history_btn) { tog_history_btn.style.display = 'flex' } else {historyToggleButtonStyle.display = 'flex'}
     } else {
         chatbotArea.classList.remove('chatbot-full-width');
+        if (tog_history_btn) { tog_history_btn.style.display = 'none' } else {historyToggleButtonStyle.display = 'none'}
     }
 
     if (windowWidth > 768) {
@@ -320,7 +393,7 @@ function setHistroyPanel() {
 
 
 // function testTrain() {
-    
+
 //     trainBody.classList.toggle('hide-body');
 //     trainingBox.classList.remove('hideBox');
 

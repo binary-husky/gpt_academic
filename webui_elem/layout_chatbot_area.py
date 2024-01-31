@@ -65,8 +65,9 @@ class ChatbotElem:
                                 "使用插件代理"), value=False, elem_classes="switch-checkbox", elem_id="gr-websearch-cb",
                                 visible=False)
                         with gr.Column(scale=1, elem_id='gr-chat-sm-column', elem_classes='') as self.sm_btn_column:
-                                self.sm_code_block = gr.Button(value='< > 代码块', elem_id='sm_code_btn')
-                                self.sm_upload_history = gr.Button("🥷 我的文件", elem_id='sm_file_btn')
+                            self.sm_code_block = gr.Button(value='< > 代码块', elem_id='sm_code_btn')
+                            self.sm_upload_history = gr.Button("🥷 我的文件", elem_id='sm_file_btn')
+                            self.sm_history = gr.Button("📜 历史记录", elem_id='sm_history_btn')
 
                         with gr.Column(scale=1, elem_id='gr-know-sm-column') as self.sm_know_select:
                             self.langchain_dropdown = gr.Dropdown(choices=[], value=[],

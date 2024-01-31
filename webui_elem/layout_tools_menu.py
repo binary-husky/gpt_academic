@@ -147,7 +147,8 @@ class RightElem:
         with gr.Column(elem_id="toolbox-area", scale=1):
             with gr.Box(elem_id="chuanhu-toolbox"):
                 self._draw_tools_head()
-                with gr.Tabs(elem_id=""):
+                self.status_display = gr.Markdown('', elem_id="status-display")
+                with gr.Tabs(elem_id="toolbox-tabs"):
                     self._draw_function_chat()
                     self._draw_plugin_chat()
                     self._draw_setting_chat()
