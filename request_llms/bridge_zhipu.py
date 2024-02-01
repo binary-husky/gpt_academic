@@ -77,9 +77,11 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             return
         if have_recent_file:
             inputs = make_media_input(inputs, image_paths)
-    yield from update_ui_lastest_msg(inputs, chatbot, history)
+            chatbot[-1] = [inputs, ""]
+            yield from update_ui(chatbot=chatbot, history=history)
 
-    # 开始接收回复    
+
+    # 开始接收回复
     from .com_zhipuglm import ZhipuChatInit
     zhipu_bro_init = ZhipuChatInit()
     for chunk, response in zhipu_bro_init.generate_chat(inputs, llm_kwargs, history, system_prompt):
