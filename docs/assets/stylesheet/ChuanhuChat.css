@@ -143,6 +143,27 @@ body.popup-open {
     /* Windows下中文的monospace会fallback为新宋体，实在太丑，这里折中使用微软雅黑 */
     color: var(--body-text-color-subdued);
 }
+#copyright_display {
+    border-bottom: 1px solid var(--border-color-primary) !important;
+    display: flex;
+    height: 54px;
+    max-height: 54px;
+    transition: all 0.6s;
+    top: 6px;
+    align-items: center;
+    text-align: center;
+}
+#copyright_display pre {
+    color: var(--message-user-background-color-dark) !important;
+    font-size: .25em;
+    font-family: ui-monospace, "SF Mono", "SFMono-Regular", "Menlo", "Consolas", "Liberation Mono", "Microsoft Yahei UI", "Microsoft Yahei", monospace;
+    /* Windows下中文的monospace会fallback为新宋体，实在太丑，这里折中使用微软雅黑 */
+
+    margin-left: 77px;
+}
+.dark #copyright_display pre {
+    color: var(--body-text-color-subdued) !important;
+}
 
 #chatbot-ctrl-btns {
     align-self: end;

@@ -7,13 +7,13 @@ def check_proxy(proxies):
         data = response.json()
         if 'country_name' in data:
             country = data['country_name']
-            result = f"所在服务器区域: {country}"
+            result = f"当前访问服务器所在区域: {country}"
         elif 'error' in data:
             alternative = _check_with_backup_source(proxies)
             if alternative is None:
-                result = f"所在服务器区域: 未知，IP查询频率受限"
+                result = f"当前访问服务器所在区域: 未知，IP查询频率受限"
             else:
-                result = f"所在服务器区域: {alternative}"
+                result = f"当前访问服务器所在区域: {alternative}"
         else:
             result = f"服务器区域数据解析失败：{data}"
         print(result)

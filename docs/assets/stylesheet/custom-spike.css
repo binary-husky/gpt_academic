@@ -270,7 +270,12 @@ code.language-folded {
 .gradio-tabs {
     border-top: 1px solid var(--border-color-primary);
 }
-
+#history-toggle-button {
+    opacity: 0.5 !important;
+}
+#history-toggle-button:hover {
+    opacity: 1 !important;
+}
 .status_row {
     max-height: 45px;
     height: 45px;

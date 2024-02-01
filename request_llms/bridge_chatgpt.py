@@ -299,7 +299,8 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
 
 def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg):
     from .bridge_all import model_info
-    api_key_encryption = llm_kwargs['api_key'][:8] + '****' + llm_kwargs['api_key'][:5]
+    use_ket = llm_kwargs.get('use-key', '')
+    api_key_encryption = use_ket[:8] + '****' + use_ket[-5:]
     openai_website = f' 请登录OpenAI查看详情 https://platform.openai.com/signup  api-key: `{api_key_encryption}`'
     if "reduce the length" in error_msg:
         if len(history) >= 2: history[-1] = ""; history[-2] = ""  # 清除当前溢出的输入：history[-2] 是本次输入, history[-1] 是本次输出
@@ -345,7 +346,7 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
             "你提供了错误的API_KEY。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。")
 
     api_key = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
-
+    llm_kwargs.update({'use-key': api_key})
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {api_key}"

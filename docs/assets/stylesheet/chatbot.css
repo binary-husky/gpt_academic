@@ -108,7 +108,6 @@ hr.append-display {
 .dark [data-testid = "user"] {
     background-color: var(--message-user-background-color-dark) !important;
 }
-
 /* 对话气泡 */
 .message {
     border-radius: var(--radius-xl) !important;

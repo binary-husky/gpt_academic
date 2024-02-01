@@ -131,17 +131,15 @@ function menuClick() {
     if (menuOpening) {
         closeSide(menu);
         wantOpenMenu = false;
-        click_toggle_move(tog_history_btn, true);
     } else {
         if (windowWidth < 1024 && toolboxOpening) {
             closeSide(toolbox);
             wantOpenToolbox = false;
-            click_toggle_move(tog_history_btn, true);
         }
         openSide(menu);
         wantOpenMenu = true;
-        click_toggle_move(tog_history_btn, false);
     }
+    click_toggle_move(tog_history_btn, wantOpenMenu);
     adjustSide();
 }
 
@@ -226,7 +224,7 @@ function add_tooltip_toggle(elem, text) {
 
 function click_toggle_move(elem, open) {
     if (elem) {
-        if (open) {
+        if (!open) {
             add_tooltip_toggle(elem, 'Open sidebar');
             elem.style.left = '30px';
             elem.querySelector('svg').style.transform = 'scaleX(-1)';
@@ -254,13 +252,9 @@ function addHistoryBtn() {
     if (!tog_history_btn) {
         let tog_btn = document.createElement('button');
         tog_btn.id = 'history-toggle-button'
-        tog_btn.innerHTML = closeHistoryIcon;
+        tog_btn.innerHTML = HistoryStateIcon;
+        click_toggle_move(tog_btn, wantOpenMenu)
         Object.assign(tog_btn.style, historyToggleButtonStyle);
-        if (wantOpenMenu) {
-            click_toggle_move(tog_btn, false)
-        } else {
-            click_toggle_move(tog_btn, true)
-        }
         tog_btn.addEventListener('click', () => {
             menuClick();
         });
