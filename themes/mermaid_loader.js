@@ -105,7 +105,7 @@ const uml = async className => {
     if (document.body.classList.contains("dark")) {
         defaultConfig.theme = "dark"
     }
-    
+
     const Module = await import('/file=themes/mermaid_editor.js');
 
     function do_render(block, code, codeContent, cnt) {
@@ -128,6 +128,9 @@ const uml = async className => {
         if (!mermaidRender) {
             mermaidRender = document.createElement("div");  // 不存在，创建新的<div class='mermaid_render'>
             mermaidRender.classList.add("mermaid_render");
+            mermaidRender.style.position = "relative";
+            mermaidRender.style.border = "solid";
+            mermaidRender.style.borderWidth = "thin";
             block.appendChild(mermaidRender);               // 将新创建的元素附加到block
         }
         mermaidRender.innerHTML = rendered_content
@@ -195,3 +198,12 @@ const uml = async className => {
         }
     }
 }
+
+
+// block <pre class='mermaid'>
+// code     <code>
+//          <code_pending_render>
+//          <code_finish_render>
+//          <div class="mermaid_render">
+                //          <div> zoom btn
+//          <div> copy btn
