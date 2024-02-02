@@ -174,6 +174,7 @@ const uml = async className => {
             // 增加style overflow auto
             mermaidRender.style.overflow = "auto";
             mermaidRender.style.position = "relative";
+            mermaidRender.style.display = "flex";
             block.appendChild(mermaidRender);               // 将新创建的元素附加到block
         }
         mermaidRender.innerHTML = svgCode;
