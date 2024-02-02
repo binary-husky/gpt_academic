@@ -171,10 +171,12 @@ const uml = async className => {
             first_time_create = true;
             mermaidRender = document.createElement("div");  // 不存在，创建新的<div class='mermaid_render'>
             mermaidRender.classList.add("mermaid_render");
+
             // 增加style overflow auto
             mermaidRender.style.overflow = "auto";
             mermaidRender.style.position = "relative";
             mermaidRender.style.display = "flex";
+
             block.appendChild(mermaidRender);               // 将新创建的元素附加到block
         }
         mermaidRender.innerHTML = svgCode;
@@ -329,4 +331,5 @@ function make_zoom_btn(svgElement) {
     div.appendChild(resetButton)
     return div
 }
+
 
