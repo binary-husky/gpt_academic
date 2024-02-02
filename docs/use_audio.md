@@ -3,7 +3,7 @@
 
 ## 1. 安装额外依赖
 ```
-pip install --upgrade pyOpenSSL scipy git+https://github.com/aliyun/alibabacloud-nls-python-sdk.git
+pip install --upgrade pyOpenSSL webrtcvad scipy git+https://github.com/aliyun/alibabacloud-nls-python-sdk.git
 ```
 
 如果因为特色网络问题导致上述命令无法执行：
