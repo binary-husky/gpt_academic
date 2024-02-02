@@ -273,6 +273,8 @@ def main():
         cancel_handles.append(submitBtn2.click(**predict_args))
         resetBtn.click(None, None, [chatbot, history, status], _js=js_code_reset)   # 先在前端快速清除chatbot&status
         resetBtn2.click(None, None, [chatbot, history, status], _js=js_code_reset)  # 先在前端快速清除chatbot&status
+        resetBtn.click(lambda: ([], [], "已重置"), None, [chatbot, history, status])    # 再在后端清除history
+        resetBtn2.click(lambda: ([], [], "已重置"), None, [chatbot, history, status])   # 再在后端清除history
         clearBtn.click(None, None, [txt, txt2], _js=js_code_clear)
         clearBtn2.click(None, None, [txt, txt2], _js=js_code_clear)
         if AUTO_CLEAR_TXT:
