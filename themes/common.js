@@ -747,12 +747,14 @@ function loadLive2D() {
 }
 
 function set_checkbox(key, bool) {
+    set_success = false;
     document.getElementById("cbsc").querySelector('[data-testid="checkbox-group"]').querySelectorAll('label').forEach(label => {
         // Get the span text
         const spanText = label.querySelector('span').textContent;
         if (spanText === key) {
             label.classList.add('selected');
             label.querySelector('input').checked = bool;
+            set_success = true;
             return
         }
     });
@@ -762,10 +764,13 @@ function set_checkbox(key, bool) {
         if (spanText === key) {
             label.classList.add('selected');
             label.querySelector('input').checked = bool;
+            set_success = true;
             return
         }
     });
-    console.log("设置checkbox失败，没有找到对应的key")
+    if (!set_success){
+        console.log("设置checkbox失败，没有找到对应的key")
+    }
 }
 
 function apply_cookie_for_checkbox(dark) {
