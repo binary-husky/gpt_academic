@@ -242,14 +242,14 @@ function do_something_but_not_too_frequently(min_interval, func) {
             // 现在就执行
             setTimeout(() => {
                 func.apply(this, lastArgs);
-            }, 0);   
+            }, 0);
         } else if (!timeoutID) {
             // 等一会执行
             timeoutID = setTimeout(() => {
                 timeoutID = null;
                 lastInvocationTime = Date.now();
                 func.apply(this, lastArgs);
-            }, min_interval - (now - lastInvocationTime));      
+            }, min_interval - (now - lastInvocationTime));
         } else {
             // 压根不执行
         }
@@ -263,13 +263,8 @@ function chatbotContentChanged(attempt = 1, force = false) {
             gradioApp().querySelectorAll('#gpt-chatbot .message-wrap .message.bot').forEach(addCopyButton);
         }, i === 0 ? 0 : 200);
     }
+    // we have moved mermaid-related code to gradio-fix repository: binary-husky/gradio-fix@32150d0
 
-    const run_mermaid_render = do_something_but_not_too_frequently(1000, function () {
-        const blocks = document.querySelectorAll(`pre.mermaid, diagram-div`);
-        if (blocks.length == 0) { return; }
-        uml("mermaid");
-    });
-    run_mermaid_render();
 }
 
 
