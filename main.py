@@ -29,8 +29,8 @@ def main():
     # 如果WEB_PORT是-1, 则随机选取WEB端口
     PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
     from check_proxy import get_current_version
-    from themes.theme import adjust_theme, advanced_css, theme_declaration
-    from themes.theme import js_code_for_css_changing, js_code_for_darkmode_init, js_code_for_toggle_darkmode, js_code_for_persistent_cookie_init
+    from themes.theme import adjust_theme, advanced_css, theme_declaration, js_code_clear, js_code_reset, js_code_show_or_hide
+    from themes.theme import js_code_for_css_changing, js_code_for_apply_cookie, js_code_for_toggle_darkmode, js_code_for_persistent_cookie_init
     from themes.theme import load_dynamic_theme, to_cookie_str, from_cookie_str, init_cookie
     title_html = f"<h1 align=\"center\">GPT 学术优化 {get_current_version()}</h1>{theme_declaration}"
 
@@ -178,7 +178,7 @@ def main():
                         submitBtn2 = gr.Button("提交", variant="primary"); submitBtn2.style(size="sm")
                         resetBtn2 = gr.Button("重置", variant="secondary"); resetBtn2.style(size="sm")
                         stopBtn2 = gr.Button("停止", variant="secondary"); stopBtn2.style(size="sm")
-                        clearBtn2 = gr.Button("清除", variant="secondary", visible=False); clearBtn2.style(size="sm")
+                        clearBtn2 = gr.Button("清除", elem_id="elem_clear2", variant="secondary", visible=False); clearBtn2.style(size="sm")
 
 
         with gr.Floating(init_x="20%", init_y="50%", visible=False, width="40%", drag="top") as area_customize:
@@ -245,16 +245,13 @@ def main():
         # 功能区显示开关与功能区的互动
         def fn_area_visibility(a):
             ret = {}
-            ret.update({area_basic_fn: gr.update(visible=("基础功能区" in a))})
-            ret.update({area_crazy_fn: gr.update(visible=("函数插件区" in a))})
             ret.update({area_input_primary: gr.update(visible=("浮动输入区" not in a))})
             ret.update({area_input_secondary: gr.update(visible=("浮动输入区" in a))})
-            ret.update({clearBtn: gr.update(visible=("输入清除键" in a))})
-            ret.update({clearBtn2: gr.update(visible=("输入清除键" in a))})
             ret.update({plugin_advanced_arg: gr.update(visible=("插件参数区" in a))})
             if "浮动输入区" in a: ret.update({txt: gr.update(value="")})
             return ret
-        checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn, area_input_primary, area_input_secondary, txt, txt2, clearBtn, clearBtn2, plugin_advanced_arg] )
+        checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn, area_input_primary, area_input_secondary, txt, txt2, plugin_advanced_arg] )
+        checkboxes.select(None, [checkboxes], None, _js=js_code_show_or_hide)
 
         # 功能区显示开关与功能区的互动
         def fn_area_visibility_2(a):
@@ -272,15 +269,15 @@ def main():
         cancel_handles.append(txt2.submit(**predict_args))
         cancel_handles.append(submitBtn.click(**predict_args))
         cancel_handles.append(submitBtn2.click(**predict_args))
-        resetBtn.click(lambda: ([], [], "已重置"), None, [chatbot, history, status])
-        resetBtn2.click(lambda: ([], [], "已重置"), None, [chatbot, history, status])
-        clearBtn.click(lambda: ("",""), None, [txt, txt2])
-        clearBtn2.click(lambda: ("",""), None, [txt, txt2])
+        resetBtn.click(None, None, [chatbot, history, status], _js=js_code_reset)   # 先在前端快速清除chatbot&status
+        resetBtn2.click(None, None, [chatbot, history, status], _js=js_code_reset)  # 先在前端快速清除chatbot&status
+        clearBtn.click(None, None, [txt, txt2], _js=js_code_clear)
+        clearBtn2.click(None, None, [txt, txt2], _js=js_code_clear)
         if AUTO_CLEAR_TXT:
-            submitBtn.click(lambda: ("",""), None, [txt, txt2])
-            submitBtn2.click(lambda: ("",""), None, [txt, txt2])
-            txt.submit(lambda: ("",""), None, [txt, txt2])
-            txt2.submit(lambda: ("",""), None, [txt, txt2])
+            submitBtn.click(None, None, [txt, txt2], _js=js_code_clear)
+            submitBtn2.click(None, None, [txt, txt2], _js=js_code_clear)
+            txt.submit(None, None, [txt, txt2], _js=js_code_clear)
+            txt2.submit(None, None, [txt, txt2], _js=js_code_clear)
         # 基础功能区的回调函数注册
         for k in functional:
             if ("Visible" in functional[k]) and (not functional[k]["Visible"]): continue
@@ -360,10 +357,9 @@ def main():
             audio_mic.stream(deal_audio, inputs=[audio_mic, cookies])
 
 
-        demo.load(init_cookie, inputs=[cookies, chatbot], outputs=[cookies])
-        darkmode_js = js_code_for_darkmode_init
+        demo.load(init_cookie, inputs=[cookies], outputs=[cookies])
         demo.load(None, inputs=None, outputs=[persistent_cookie], _js=js_code_for_persistent_cookie_init)
-        demo.load(None, inputs=[dark_mode], outputs=None, _js=darkmode_js)    # 配置暗色主题或亮色主题
+        demo.load(None, inputs=[dark_mode], outputs=None, _js=js_code_for_apply_cookie)    # 配置暗色主题或亮色主题
         demo.load(None, inputs=[gr.Textbox(LAYOUT, visible=False)], outputs=None, _js='(LAYOUT)=>{GptAcademicJavaScriptInit(LAYOUT);}')
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
