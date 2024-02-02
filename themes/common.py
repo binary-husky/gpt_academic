@@ -13,7 +13,6 @@ def get_common_html_javascript_code():
         for jsf in [
             "file=themes/waifu_plugin/jquery.min.js",
             "file=themes/waifu_plugin/jquery-ui.min.js",
-            "file=themes/waifu_plugin/autoload.js",
         ]:
             js += f"""<script src="{jsf}"></script>\n"""
     return js

@@ -91,44 +91,6 @@ js_code_for_css_changing = """(css) => {
 }
 """
 
-js_code_for_apply_cookie = """(dark) => {
-    //////////////////  darkmode  ///////////////////
-    if (getCookie("js_darkmode_cookie")){
-        dark = getCookie("js_darkmode_cookie")
-    }
-    dark = dark == "True";
-    if (document.querySelectorAll('.dark').length) {
-        if (!dark){
-            document.querySelectorAll('.dark').forEach(el => el.classList.remove('dark'));
-        }
-    } else {
-        if (dark){
-            document.querySelector('body').classList.add('dark');
-        }
-    }
-
-    ////////////////////// clearButton ///////////////////////////
-    if (getCookie("js_clearbtn_show_cookie")){
-        bool_value = getCookie("js_clearbtn_show_cookie")
-    }
-    bool_value = bool_value == "True";
-    let searchString = "输入清除键";
-    if (bool_value) {
-        let clearButton = document.getElementById("elem_clear");
-        let clearButton2 = document.getElementById("elem_clear2");
-        clearButton.style.display = "block";
-        clearButton2.style.display = "block";
-        setCookie("js_clearbtn_show_cookie", "True", 365);
-    } else {
-        let clearButton = document.getElementById("elem_clear");
-        let clearButton2 = document.getElementById("elem_clear2");
-        clearButton.style.display = "none";
-        clearButton2.style.display = "none";
-        setCookie("js_clearbtn_show_cookie", "False", 365);
-    }
-
-}
-"""
 
 js_code_for_toggle_darkmode = """() => {
     if (document.querySelectorAll('.dark').length) {
@@ -165,7 +127,7 @@ js_code_clear = """
 js_code_show_or_hide = """
 (display_panel_arr)=>{
 setTimeout(() => {
-
+    // get conf
     display_panel_arr = []
     document.getElementById("cbs").querySelector('[data-testid="checkbox-group"]').querySelectorAll('label').forEach(label => {
         // Get the span text
@@ -175,9 +137,7 @@ setTimeout(() => {
         if (label.classList.contains('selected')){
             display_panel_arr.push(spanText)
         }
-
     });
-    console.log('wow');
 
     ////////////////////// 输入清除键 ///////////////////////////
     let searchString = "输入清除键";
@@ -215,6 +175,40 @@ setTimeout(() => {
         ele = document.getElementById("plugin-panel");
         ele.style.display = "none";
     }
+
+}, 50);
+}
+"""
+
+
+
+js_code_show_or_hide_group2 = """
+(display_panel_arr)=>{
+setTimeout(() => {
+
+    // get conf
+    display_panel_arr = []
+    document.getElementById("cbsc").querySelector('[data-testid="checkbox-group"]').querySelectorAll('label').forEach(label => {
+        // Get the span text
+        const spanText = label.querySelector('span').textContent;
+        // Get the input value
+        const inputValue = label.querySelector('input').value;
+        if (label.classList.contains('selected')){
+            display_panel_arr.push(spanText)
+        }
+    });
+
+    ////////////////////// 添加Live2D形象 ///////////////////////////
+    let searchString = "添加Live2D形象";
+    let ele = "none";
+    if (display_panel_arr.includes(searchString)) {
+        setCookie("js_live2d_show_cookie", "True", 365);
+        loadLive2D();
+    } else {
+        setCookie("js_live2d_show_cookie", "False", 365);
+        $('.waifu').hide();
+    }
+
 
 }, 50);
 }
