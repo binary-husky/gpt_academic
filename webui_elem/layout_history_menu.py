@@ -66,7 +66,7 @@ class LeftElem:
         with gr.Column(elem_id="menu-area"):
             with gr.Column(elem_id="chuanhu-history"):
                 with gr.Box():
-                    self.copyright_display = gr.HTML(f"<pre>{copyright_ascii}</pre>", elem_id="copyright_display")
+                    self.copyright_display = gr.HTML(f"", elem_id="copyright_display")
                     self._draw_history_head()
                     self._draw_history_body()
                     self._draw_history_edit()
@@ -76,12 +76,3 @@ class LeftElem:
                     gr.HTML(get_html("func_nav.html"))
                 # gr.HTML(get_html("footer.html").format(versions=versions_html()), elem_id="footer")
                 # gr.Markdown(CHUANHU_DESCRIPTION, elem_id="chuanhu-author")
-
-copyright_ascii = """ ██░ ██ ▓█████  ██▓     ██▓     ▒█████       ▄████  ██▓███  ▄▄▄█████▓
-▓██░ ██▒▓█   ▀ ▓██▒    ▓██▒    ▒██▒  ██▒    ██▒ ▀█▒▓██░  ██▒▓  ██▒ ▓▒
-▒██▀▀██░▒███   ▒██░    ▒██░    ▒██░  ██▒   ▒██░▄▄▄░▓██░ ██▓▒▒ ▓██░ ▒░
-░▓█ ░██ ▒▓█  ▄ ▒██░    ▒██░    ▒██   ██░   ░▓█  ██▓▒██▄█▓▒ ▒░ ▓██▓ ░ 
-░▓█▒░██▓░▒████▒░██████▒░██████▒░ ████▓▒░   ░▒▓███▀▒▒██▒ ░  ░  ▒██▒ ░ 
- ▒ ░░▒░▒░░ ▒░ ░░ ▒░▓  ░░ ▒░▓  ░░ ▒░▒░▒░     ░▒   ▒ ▒▓▒░ ░  ░  ▒ ░░   
- ▒ ░▒░ ░ ░ ░  ░░ ░ ▒  ░░ ░ ▒  ░  ░ ▒ ▒░      ░   ░ ░▒ ░         ░    
- ░  ░░ ░   ░     ░ ░     ░ ░   ░ ░ ░ ▒     ░ ░   ░ ░░         ░      """

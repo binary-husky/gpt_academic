@@ -36,16 +36,20 @@
 /* 代码块 */
 .md-message pre,
 .md-message pre[class*=language-] {
-    color: #fff;
+    color: #e7e7e2;
     overflow-x: auto;
     overflow-y: hidden;
     padding: var(--spacing-xl) 1.2em !important;
     border-radius: var(--radius-lg) !important;
+    background: #282c34 !important
+}
+.dark .md-message pre,
+.md-message pre[class*=language-] {
     background: var(--neutral-950) !important;
 }
 .md-message pre code,
 .md-message pre code[class*=language-] {
-    color: #fff;
+    color: #e7e7e2;
     padding: 0;
     margin: 0;
     margin-right: 20px;

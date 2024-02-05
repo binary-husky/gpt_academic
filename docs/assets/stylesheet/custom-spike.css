@@ -276,6 +276,31 @@ code.language-folded {
 #history-toggle-button:hover {
     opacity: 1 !important;
 }
+#foreign-edit {
+    opacity: 0.9 !important;
+}
+#foreign-edit:hover {
+    opacity: 1 !important;
+    box-shadow: rgba(0, 0, 0, 0.19) 0 10px 20px, rgba(0, 0, 0, 0.23) 0 5px 5px
+}
+
+#svg-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.closeButton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+}
+
 .status_row {
     max-height: 45px;
     height: 45px;

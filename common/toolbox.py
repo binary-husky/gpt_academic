@@ -79,7 +79,6 @@ def ArgsGeneralWrapper(f):
                   openai_key, wps_cookies, qq_cookies, feishu_header,
                   ipaddr: gr.Request, *args):  # 参数来源__main__.py self.input_combo
         """"""
-        from common import Langchain_cn
         start_time = time.time()
         real_llm = {
             'llm_model': llm_model,
@@ -88,8 +87,8 @@ def ArgsGeneralWrapper(f):
             'frequency_penalty': frequency_penalty, 'logit_bias': logit_bias, 'user_identifier': user_identifier,
             'system_prompt': system_prompt, 'ipaddr': func_box.user_client_mark(ipaddr),
         }
-        llm_kwargs = {   # 这些不会写入对话记录哦
-            **real_llm, 'api_key': cookies.get('api_key')+f",{openai_key}",
+        llm_kwargs = {  # 这些不会写入对话记录哦
+            **real_llm, 'api_key': cookies.get('api_key') + f",{openai_key}",
             'worker_num': worker_num, 'start_time': start_time, 'ocr': ocr_trust,
             'know_dict': know_dict, 'know_cls': know_cls, 'know_id': langchain,
             'vector': {
@@ -107,27 +106,16 @@ def ArgsGeneralWrapper(f):
             "advanced_arg": plugin_advanced_arg,
             "parameters_def": ''
         }
-        # 引入一个有cookie的chatbot
         cookies.update({**real_llm})
+        # 这里的cookie是引用，所以后面赋值会同步到chatbot中，所以后续传cookie还是chatbot.get_cookies()都是一样的
         chatbot_with_cookie = ChatBotWithCookies(cookies)
+        # 引入一个有cookie的chatbot
         chatbot_with_cookie.write_list(chatbot)
-        txt_proc = txt
-        if 'input加密' in models: txt_passon = func_box.encryption_str(txt)
-        if 'OCR缓存' in models: llm_kwargs.update({'ocr_cache': True})
-        # 插件会传多参数，如果是插件，那么更新知识库 和 默认高级参数
-        if len(args) > 1:
-            plugin_kwargs['advanced_arg'] = ''
-            plugin_kwargs.update({'parameters_def': args[1]})
-            cookies['is_plugin'] = {'func_name': args[0], 'input': txt_proc, 'kwargs': plugin_kwargs}
-        elif len(args) == 1 and 'RetryChat' not in args:
-            history = history[:-2]  # 不采取重试的对话历史
-            cookies['is_plugin'] = {'func_name': args[0], 'input': txt_proc, 'kwargs': plugin_kwargs}
-        elif len(args) == 0 or 'RetryChat' in args:
-            cookies['is_plugin'] = False
-            plugin_kwargs['advanced_arg'] = ''
-            txt_proc = yield from Langchain_cn.knowledge_base_query(txt_proc,
-                                                                    chatbot_with_cookie, history, llm_kwargs,
-                                                                    plugin_kwargs)
+        # 根据提交处理器判断需要对提交做什么处理
+        txt_proc = yield from model_selection(txt, models, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history)
+        # 根据args判断需要对提交和历史对话做什么处理
+        txt_proc, history = yield from plugins_selection(txt_proc, history, plugin_kwargs,
+                                                         args, cookies, chatbot_with_cookie, llm_kwargs)
         # 根据cookie 或 对话配置决定到底走哪一步
         yield from func_decision_tree(f, cookies, single_mode, agent_mode,
                                       txt_proc, llm_kwargs, plugin_kwargs, chatbot_with_cookie,
@@ -138,6 +126,41 @@ def ArgsGeneralWrapper(f):
                          args=(chatbot_with_cookie, func_box.user_client_mark(ipaddr))).start()
 
     return decorated
+
+
+def model_selection(txt, models, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history):
+    txt_proc = txt
+    if 'input加密' in models: txt_proc = func_box.encryption_str(txt_proc)
+    if 'OCR缓存' in models: llm_kwargs.update({'ocr_cache': True})
+    if '文档RAG' in models:
+        from crazy_functions.reader_fns.crazy_box import user_input_embedding_content, input_retrieval_file
+        fp_file = yield from input_retrieval_file(txt_proc, chatbot_with_cookie, history, llm_kwargs, ['*'])
+        if fp_file:  # 提前检测，有文件才进入下一步
+            input_embedding_content = yield from user_input_embedding_content(txt_proc, chatbot_with_cookie, history,
+                                                                              llm_kwargs, plugin_kwargs, ['*'],
+                                                                              fp_file)
+            txt_proc = "\n\n---\n\n".join([v for i, v in enumerate(input_embedding_content) if i % 2 == 1])
+    return txt_proc
+
+
+def plugins_selection(txt_proc, history, plugin_kwargs, args, cookies, chatbot_with_cookie,  llm_kwargs):
+    # 插件会传多参数，如果是插件，那么更新知识库 和 默认高级参数
+
+    if len(args) > 1:
+        plugin_kwargs['advanced_arg'] = ''
+        plugin_kwargs.update({'parameters_def': args[1]})
+        cookies['is_plugin'] = {'func_name': args[0], 'input': txt_proc, 'kwargs': plugin_kwargs}
+    elif len(args) == 1 and 'RetryChat' not in args:
+        history = history[:-2]  # 不采取重试的对话历史
+        cookies['is_plugin'] = {'func_name': args[0], 'input': txt_proc, 'kwargs': plugin_kwargs}
+    elif len(args) == 0 or 'RetryChat' in args:
+        from common import Langchain_cn
+        cookies['is_plugin'] = False
+        plugin_kwargs['advanced_arg'] = ''
+        txt_proc = yield from Langchain_cn.knowledge_base_query(txt_proc,
+                                                                chatbot_with_cookie, history, llm_kwargs,
+                                                                plugin_kwargs)
+    return txt_proc, history
 
 
 def func_decision_tree(func, cookies, single_mode, agent_mode,
@@ -214,7 +237,6 @@ def update_ui(chatbot, history, msg=None, end_code=0, *args):  # 刷新界面
         yield event + [gr.update(visible=False), gr.update(visible=True)]
     else:
         yield event + [gr.update(visible=True), gr.update(visible=False)]
-
 
 
 def update_ui_lastest_msg(lastmsg, chatbot, history, delay=1):  # 刷新界面
@@ -439,7 +461,7 @@ def markdown_convertion(txt):
                       ).replace('</code></p></pre>', '</code></pre>').replace('</code><p></code>', '</code></code>')
     if txt.startswith(pre) and txt.endswith(suf):
         # print('警告，输入了已经经过转化的字符串，二次转化可能出问题')
-        return txt # 已经被转化过，不需要再次转化
+        return txt  # 已经被转化过，不需要再次转化
 
     markdown_extension_configs = {
         'mdx_math': {
@@ -485,9 +507,9 @@ def markdown_convertion(txt):
         if '```' in txt and '```reference' not in txt: return False
         if '$' not in txt and '\\[' not in txt: return False
         mathpatterns = {
-            r'(?<!\\|\$)(\$)([^\$]+)(\$)': {'allow_multi_lines': False},                       #  $...$
-            r'(?<!\\)(\$\$)([^\$]+)(\$\$)': {'allow_multi_lines': True},                       # $$...$$
-            r'(?<!\\)(\\\[)(.+?)(\\\])': {'allow_multi_lines': False},                         # \[...\]
+            r'(?<!\\|\$)(\$)([^\$]+)(\$)': {'allow_multi_lines': False},  #  $...$
+            r'(?<!\\)(\$\$)([^\$]+)(\$\$)': {'allow_multi_lines': True},  # $$...$$
+            r'(?<!\\)(\\\[)(.+?)(\\\])': {'allow_multi_lines': False},  # \[...\]
             # r'(?<!\\)(\\\()(.+?)(\\\))': {'allow_multi_lines': False},                       # \(...\)
             # r'(?<!\\)(\\begin{([a-z]+?\*?)})(.+?)(\\end{\2})': {'allow_multi_lines': True},  # \begin...\end
             # r'(?<!\\)(\$`)([^`]+)(`\$)': {'allow_multi_lines': False},                       # $`...`$
@@ -567,7 +589,7 @@ def close_up_code_segment_during_stream(gpt_reply):
     segments = gpt_reply.split('```')
     n_mark = len(segments) - 1
     if n_mark % 2 == 1:
-        return gpt_reply + '\n```' # 输出代码片段中！
+        return gpt_reply + '\n```'  # 输出代码片段中！
     else:
         return gpt_reply
 
@@ -712,7 +734,7 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
             current = chatbot._cookies['files_to_promote']
         else:
             current = []
-        if new_path not in current: # 避免把同一个文件添加多次
+        if new_path not in current:  # 避免把同一个文件添加多次
             chatbot._cookies.update({'files_to_promote': [new_path] + current})
     return new_path
 
@@ -811,7 +833,7 @@ def to_markdown_tabs(head: list, tabs: list, alignment=':---:', column=False):
     return tabs_list
 
 
-def on_file_uploaded(files, chatbot, txt,  cookies, ipaddr: gr.Request):
+def on_file_uploaded(files, chatbot, txt, cookies, ipaddr: gr.Request):
     private_upload = init_path.private_files_path.replace(init_path.base_path, '.')
     #     shutil.rmtree('./private_upload/')  不需要删除文件
     if type(ipaddr) is str:
@@ -889,6 +911,7 @@ def on_report_generated(cookies, files, chatbot, request):
         }})
     return chatbot, txt, cookies
 
+
 def on_report_generated(cookies, files, chatbot):
     # from toolbox import find_recent_files
     # PATH_LOGGING = get_conf('PATH_LOGGING')
@@ -931,8 +954,8 @@ def load_chat_cookies():
     customize_fn_overwrite_ = {}
     for k in range(NUM_CUSTOM_BASIC_BTN):
         customize_fn_overwrite_.update({
-            "自定义按钮" + str(k+1):{
-                "Title":  r"",
+            "自定义按钮" + str(k + 1): {
+                "Title": r"",
                 "Prefix": r"请在自定义菜单中定义提示词前缀.",
                 "Suffix": r"请在自定义菜单中定义提示词后缀",
             }
@@ -974,7 +997,6 @@ def is_any_api_key(key):
         return is_openai_api_key(key) or is_api2d_key(key) or is_azure_api_key(key) or is_open_sess_key(key)
 
 
-
 def what_keys(keys):
     avail_key_list = {'OpenAI Key': 0, "Azure Key": 0, "API2D Key": 0}
     key_list = keys.split(',')
@@ -994,7 +1016,6 @@ def what_keys(keys):
            f"OpenAI Key {avail_key_list['OpenAI Key']} 个\n" \
            f"API2D Key {avail_key_list['API2D Key']} 个\n" \
            f"Azure Key {avail_key_list['Azure Key']} 个,"
-
 
 
 def select_api_key(keys, llm_model):
@@ -1053,9 +1074,13 @@ def read_env_variable(arg, default_value):
     try:
         if isinstance(default_value, bool):
             env_arg = env_arg.strip()
-            if env_arg == 'True': r = True
-            elif env_arg == 'False': r = False
-            else: print('Enter True or False, but have:', env_arg); r = default_value
+            if env_arg == 'True':
+                r = True
+            elif env_arg == 'False':
+                r = False
+            else:
+                print('Enter True or False, but have:', env_arg);
+                r = default_value
         elif isinstance(default_value, int):
             r = int(env_arg)
         elif isinstance(default_value, float):
@@ -1088,7 +1113,7 @@ def read_single_conf_with_lru_cache(arg):
         sys.path.append(init_path.base_path)
     try:
         # 优先级1. 获取环境变量作为配置
-        default_ref = getattr(importlib.import_module('config'), arg) # 读取默认值作为数据类型转换的参考
+        default_ref = getattr(importlib.import_module('config'), arg)  # 读取默认值作为数据类型转换的参考
         r = read_env_variable(arg, default_ref)
     except:
         try:
@@ -1103,7 +1128,8 @@ def read_single_conf_with_lru_cache(arg):
         oai_rd = r.get("https://api.openai.com/v1/chat/completions",
                        None)  # API_URL_REDIRECT填写格式是错误的，请阅读`https://github.com/binary-husky/gpt_academic/wiki/项目配置说明`
         if oai_rd and not oai_rd.endswith('/completions'):
-            print亮红("\n\n[API_URL_REDIRECT] API_URL_REDIRECT填错了。请阅读`https://github.com/binary-husky/gpt_academic/wiki/项目配置说明`。如果您确信自己没填错，无视此消息即可。")
+            print亮红(
+                "\n\n[API_URL_REDIRECT] API_URL_REDIRECT填错了。请阅读`https://github.com/binary-husky/gpt_academic/wiki/项目配置说明`。如果您确信自己没填错，无视此消息即可。")
             time.sleep(5)
     if arg == 'API_KEY':
         print亮蓝(
@@ -1115,7 +1141,7 @@ def read_single_conf_with_lru_cache(arg):
         else:
             print亮红("[API_KEY] 您的 API_KEY 不满足任何一种已知的密钥格式，请在config文件中修改API密钥之后再运行。")
     if arg == 'proxies':
-        if not read_single_conf_with_lru_cache('USE_PROXY'): r = None # 检查USE_PROXY，防止proxies单独起作用
+        if not read_single_conf_with_lru_cache('USE_PROXY'): r = None  # 检查USE_PROXY，防止proxies单独起作用
         if r is None:
             print亮红(
                 '[PROXY] 网络代理状态：未配置。无代理状态下很可能无法访问OpenAI家族的模型。建议：检查USE_PROXY选项是否修改。')
@@ -1220,9 +1246,12 @@ def clip_history(inputs, history, tokenizer, max_token_limit):
 
     input_token_num = get_token_num(inputs)
 
-    if max_token_limit < 5000:   output_token_expect = 256  # 4k & 2k models
-    elif max_token_limit < 9000: output_token_expect = 512  # 8k models
-    else: output_token_expect = 1024                        # 16k & 32k models
+    if max_token_limit < 5000:
+        output_token_expect = 256  # 4k & 2k models
+    elif max_token_limit < 9000:
+        output_token_expect = 512  # 8k models
+    else:
+        output_token_expect = 1024  # 16k & 32k models
 
     if input_token_num < max_token_limit * 3 / 4:
         # 当输入部分的token占比小于限制的3/4时，裁剪时
@@ -1251,7 +1280,7 @@ def clip_history(inputs, history, tokenizer, max_token_limit):
         where = np.argmax(everything_token)
         encoded = tokenizer.encode(everything[where], disallowed_special=())
         clipped_encoded = encoded[:len(encoded) - delta]
-        everything[where] = tokenizer.decode(clipped_encoded)[:-1] # -1 to remove the may-be illegal char
+        everything[where] = tokenizer.decode(clipped_encoded)[:-1]  # -1 to remove the may-be illegal char
         everything_token[where] = get_token_num(everything[where])
         n_token = get_token_num('\n'.join(everything))
 
@@ -1473,7 +1502,6 @@ def get_plugin_default_kwargs():
         "web_port": None
     }
     return default_plugin_kwargs
-
 
 
 def get_chat_default_kwargs():

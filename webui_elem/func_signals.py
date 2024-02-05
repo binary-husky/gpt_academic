@@ -660,7 +660,8 @@ def refresh_load_data(prompt, request: gr.Request):
     know_load = gr.update(choices=load_list, label='知识库', show_label=True)
     know_user = gr.update(choices=user_list, show_label=True)
     select_list = filter_database_tables()
-    outputs = [gr.update(samples=data, visible=True), prompt,
+    favicon_appname = func_box.favicon_ascii()
+    outputs = [gr.update(samples=data, visible=True), prompt, favicon_appname,
                gr.update(choices=all + select_list), gr.update(choices=[all[1]] + select_list),
                gr.update(choices=[all[1]] + select_list),
                know_cls, know_user, know_load]

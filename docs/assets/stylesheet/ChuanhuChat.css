@@ -146,13 +146,14 @@ body.popup-open {
 #copyright_display {
     border-bottom: 1px solid var(--border-color-primary) !important;
     display: flex;
-    height: 54px;
-    max-height: 54px;
+    height: 40px;
+    max-height: 40px;
     transition: all 0.6s;
-    top: 6px;
+    top: 20px;
     align-items: center;
     text-align: center;
 }
+
 #copyright_display pre {
     color: var(--message-user-background-color-dark) !important;
     font-size: .25em;
@@ -991,7 +992,7 @@ input:checked + .chatbot-input-more-span {
     padding-inline: 12px;
 }
 #chuanhu-history-header {
-    margin-top: 12px;
+    margin-top: 30px;
     height: 42px;
     margin-bottom: 12px;
 }

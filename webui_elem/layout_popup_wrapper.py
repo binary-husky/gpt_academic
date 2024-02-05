@@ -24,7 +24,8 @@ class Settings:
 
     def _draw_setting_senior(self):
         with gr.Tab(label=i18n("高级")):
-            self.models_box = gr.CheckboxGroup(choices=['input加密', '预加载知识库', 'OCR缓存'], value=['input加密'],
+            self.models_box = gr.CheckboxGroup(choices=['input加密', '预加载知识库', 'OCR缓存', '文档RAG'],
+                                               value=['input加密', '文档RAG'],
                                                label="提交开关").style(container=False)
             worker_num = toolbox.get_conf('DEFAULT_WORKER_NUM')
             self.default_worker_num = gr.Slider(minimum=1, maximum=30, value=worker_num, step=1,

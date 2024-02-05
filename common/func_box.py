@@ -187,11 +187,11 @@ def extract_link_pf(text, valid_types: list):
         pattern_local = r"\((/[^)].*)\)"
         matches_local = re.findall(pattern_local, md_link)
         if matches_path:
-            if matches_path[0].split('.')[-1] in valid_types:
+            if matches_path[0].split('.')[-1] in valid_types or valid_types == ['*']:
                 file_mapping_links.update({local_relative_path(matches_path[0]): md_link})
         elif matches_local:
             if os.path.exists(matches_local[0]):
-                if matches_local[0].split('.')[-1] in valid_types:
+                if matches_local[0].split('.')[-1] in valid_types or valid_types == ['*']:
                     file_mapping_links.update({local_relative_path(matches_local[0]): md_link})
     return file_mapping_links
 
@@ -553,6 +553,17 @@ def qr_code_generation(data, icon_path=None, file_name='qc_icon.png'):
     qr_path = os.path.join(init_path.logs_path, file_name)
     img.save(qr_path)
     return qr_path
+
+
+def favicon_ascii():
+    from pyfiglet import Figlet
+    fonts = ['modular', 'big_money-se', 'lean', 'big_money-sw', 'dos_rebel',
+             'swamp_land', 'arrows', 'epic', 'ansi_shadow', 'bloody']
+    # 'doh', 'slant_relief', 'alpha', 'ogre',  'isometric1', 这些效果不好
+    font = random.choice(fonts)
+    fig = Figlet(font=font, width=300)
+    appname = toolbox.get_conf('APPNAME')
+    return f"<pre class='{font}'>{fig.renderText(appname)}</pre>"
 
 
 def created_atime():

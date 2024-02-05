@@ -423,7 +423,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
             #                outputs=[self.sm_btn_column, self.langchain_dropdown])
             self.demo.load(fn=func_signals.refresh_load_data,
                            inputs=[self.pro_fp_state],
-                           outputs=[self.pro_func_prompt, self.pro_fp_state,
+                           outputs=[self.pro_func_prompt, self.pro_fp_state, self.copyright_display,
                                     self.pro_private_check, self.prompt_cls_select, self.mask_cls_select,
                                     self.langchain_classifi, self.langchain_select, self.langchain_dropdown])
             self.demo.load(fn=func_signals.refresh_user_data,
