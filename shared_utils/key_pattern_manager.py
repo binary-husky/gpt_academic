@@ -14,7 +14,7 @@ def is_openai_api_key(key):
     if len(CUSTOM_API_KEY_PATTERN) != 0:
         API_MATCH_ORIGINAL = re.match(CUSTOM_API_KEY_PATTERN, key)
     else:
-        API_MATCH_ORIGINAL = re.match(r"sk-[a-zA-Z0-9]{48}$", key)
+        API_MATCH_ORIGINAL = re.match(r"sk-[a-zA-Z0-9]{48}$|sess-[a-zA-Z0-9]{40}$", key)
     return bool(API_MATCH_ORIGINAL)
 
 
