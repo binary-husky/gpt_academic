@@ -153,7 +153,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             break
         except:
             retry += 1
-            chatbot[-1] = [(chatbot[-1][0], timeout_bot_msg)]
+            chatbot[-1] = [chatbot[-1][0], timeout_bot_msg]
             retry_msg = f"，正在重试 ({retry}/{MAX_RETRY}) ……" if MAX_RETRY > 0 else ""
             yield from update_ui(chatbot=chatbot, history=history, msg="请求超时"+retry_msg) # 刷新界面
             if retry > MAX_RETRY: raise TimeoutError
