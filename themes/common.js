@@ -344,7 +344,7 @@ function get_elements(consider_state_panel = false) {
     var chatbot_height = chatbot.style.height;
     // 交换输入区位置，使得输入区始终可用
     if (!swapped) {
-        if (panel1.top != 0 && (panel1.bottom + panel1.top) / 2 < 0) { swap_input_area(); }
+        if (panel1.top != 0 && (0.9 * panel1.bottom + 0.1 * panel1.top) < 0) { swap_input_area(); }
     }
     else if (swapped) {
         if (panel2.top != 0 && panel2.top > 0) { swap_input_area(); }
