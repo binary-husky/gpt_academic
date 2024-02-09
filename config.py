@@ -86,10 +86,8 @@ DEFAULT_FN_GROUPS = ['对话', '编程', '学术', '智能体']
 
 
 # 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
-LLM_MODEL = "gpt-4-turbo-preview" # 可选 ↓↓↓
-AVAIL_LLM_MODELS = ["gpt-4-turbo-preview","gpt-4-vision-preview","gpt-3.5-turbo-0125"]
-# P.S. 其他可用的模型还包括 ["zhipuai", "qianfan", "deepseekcoder", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613",  "gpt-3.5-random"
-# "spark", "sparkv2", "sparkv3", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"]
+LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
+AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "gpt-4-turbo-preview","gpt-4-vision-preview"]
 
 
 # 定义界面上“询问多个GPT模型”插件应该使用哪些模型，请从AVAIL_LLM_MODELS中选择，并在不同模型之间用`&`间隔，例如"gpt-3.5-turbo&chatglm3&azure-gpt-4"
