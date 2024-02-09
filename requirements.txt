@@ -1,4 +1,4 @@
-https://fastly.jsdelivr.net/gh/binary-husky/gradio-fix@gpt-academic/release/gradio-3.32.7-py3-none-any.whl
+https://public.gpt-academic.top/publish/gradio-3.32.7-py3-none-any.whl
 pypdf2==2.12.1
 zhipuai<2
 tiktoken>=0.3.3
