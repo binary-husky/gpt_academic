@@ -26,8 +26,8 @@ class PaperFileGroup():
                 self.sp_file_index.append(index)
                 self.sp_file_tag.append(self.file_paths[index])
             else:
-                from .crazy_utils import breakdown_txt_to_satisfy_token_limit_for_pdf
-                segments = breakdown_txt_to_satisfy_token_limit_for_pdf(file_content, self.get_token_num, max_token_limit)
+                from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit
+                segments = breakdown_text_to_satisfy_token_limit(file_content, max_token_limit)
                 for j, segment in enumerate(segments):
                     self.sp_file_contents.append(segment)
                     self.sp_file_index.append(index)
@@ -135,11 +135,11 @@ def 多文件润色(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
 
 
 @CatchException
-def Latex英文润色(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def Latex英文润色(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
-        "对整个Latex项目进行润色。函数插件贡献者: Binary-Husky。（注意，此插件不调用Latex，如果有Latex环境，请使用“Latex英文纠错+高亮”插件）"])
+        "对整个Latex项目进行润色。函数插件贡献者: Binary-Husky。（注意，此插件不调用Latex，如果有Latex环境，请使用「Latex英文纠错+高亮修正位置(需Latex)插件」"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
@@ -173,7 +173,7 @@ def Latex英文润色(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
 
 
 @CatchException
-def Latex中文润色(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def Latex中文润色(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
@@ -209,7 +209,7 @@ def Latex中文润色(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
 
 
 @CatchException
-def Latex英文纠错(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def Latex英文纠错(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",

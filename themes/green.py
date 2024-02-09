@@ -1,8 +1,10 @@
 import os
 import gradio as gr
 from toolbox import get_conf
-CODE_HIGHLIGHT, ADD_WAIFU, LAYOUT = get_conf('CODE_HIGHLIGHT', 'ADD_WAIFU', 'LAYOUT')
+
+CODE_HIGHLIGHT, ADD_WAIFU, LAYOUT = get_conf("CODE_HIGHLIGHT", "ADD_WAIFU", "LAYOUT")
 theme_dir = os.path.dirname(__file__)
+
 
 def adjust_theme():
     try:
@@ -50,7 +52,6 @@ def adjust_theme():
                 c900="#2B2B2B",
                 c950="#171717",
             ),
-
             radius_size=gr.themes.sizes.radius_sm,
         ).set(
             button_primary_background_fill="*primary_500",
@@ -75,35 +76,32 @@ def adjust_theme():
             chatbot_code_background_color_dark="*neutral_950",
         )
 
-        with open(os.path.join(theme_dir, 'common.js'), 'r', encoding='utf8') as f: 
-            js = f"<script>{f.read()}</script>"
+        from themes.common import get_common_html_javascript_code
+        js = get_common_html_javascript_code()
 
-        # 添加一个萌萌的看板娘
-        if ADD_WAIFU:
-            js += """
-                <script src="file=docs/waifu_plugin/jquery.min.js"></script>
-                <script src="file=docs/waifu_plugin/jquery-ui.min.js"></script>
-                <script src="file=docs/waifu_plugin/autoload.js"></script>
-            """
-
-        with open(os.path.join(theme_dir, 'green.js'), 'r', encoding='utf8') as f: 
+        with open(os.path.join(theme_dir, "green.js"), "r", encoding="utf8") as f:
             js += f"<script>{f.read()}</script>"
 
-        if not hasattr(gr, 'RawTemplateResponse'):
+        if not hasattr(gr, "RawTemplateResponse"):
             gr.RawTemplateResponse = gr.routes.templates.TemplateResponse
         gradio_original_template_fn = gr.RawTemplateResponse
+
         def gradio_new_template_fn(*args, **kwargs):
             res = gradio_original_template_fn(*args, **kwargs)
-            res.body = res.body.replace(b'</html>', f'{js}</html>'.encode("utf8"))
+            res.body = res.body.replace(b"</html>", f"{js}</html>".encode("utf8"))
             res.init_headers()
             return res
-        gr.routes.templates.TemplateResponse = gradio_new_template_fn   # override gradio template
+
+        gr.routes.templates.TemplateResponse = (
+            gradio_new_template_fn  # override gradio template
+        )
     except:
         set_theme = None
-        print('gradio版本较旧, 不能自定义字体和颜色')
+        print("gradio版本较旧, 不能自定义字体和颜色")
     return set_theme
 
-with open(os.path.join(theme_dir, 'green.css'), "r", encoding="utf-8") as f:
+
+with open(os.path.join(theme_dir, "green.css"), "r", encoding="utf-8") as f:
     advanced_css = f.read()
-with open(os.path.join(theme_dir, 'common.css'), "r", encoding="utf-8") as f:
+with open(os.path.join(theme_dir, "common.css"), "r", encoding="utf-8") as f:
     advanced_css += f.read()

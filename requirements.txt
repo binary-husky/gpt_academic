@@ -1,11 +1,14 @@
-./docs/gradio-3.32.6-py3-none-any.whl
+https://fastly.jsdelivr.net/gh/binary-husky/gradio-fix@gpt-academic/release/gradio-3.32.7-py3-none-any.whl
 pypdf2==2.12.1
+zhipuai<2
 tiktoken>=0.3.3
 requests[socks]
 pydantic==1.10.11
+protobuf==3.18
 transformers>=4.27.1
 scipdf_parser>=0.52
 python-markdown-math
+pymdown-extensions
 websocket-client
 beautifulsoup4
 prompt_toolkit
@@ -22,3 +25,4 @@ openai
 arxiv
 numpy
 rich
+gradio_client==0.8.1

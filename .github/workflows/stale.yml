@@ -15,7 +15,7 @@ jobs:
     permissions:
       issues: write
       pull-requests: read
-    
+
     steps:
       - uses: actions/stale@v8
         with:

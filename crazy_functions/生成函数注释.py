@@ -36,7 +36,7 @@ def 生成函数注释(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
 
 
 @CatchException
-def 批量生成函数注释(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 批量生成函数注释(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     history = []    # 清空历史，以免输入溢出
     import glob, os
     if os.path.exists(txt):

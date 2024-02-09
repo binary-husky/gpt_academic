@@ -165,7 +165,7 @@ toolbox.py是一个工具类库，其中主要包含了一些函数装饰器和�
 
 3. read_file_to_chat(chatbot, history, file_name)：从传入的文件中读取内容，解析出对话历史记录并更新聊天显示框。
 
-4. 对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)：一个主要函数，用于保存当前对话记录并提醒用户。如果用户希望加载历史记录，则调用read_file_to_chat()来更新聊天显示框。如果用户希望删除历史记录，调用删除所有本地对话历史记录()函数完成删除操作。
+4. 对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request)：一个主要函数，用于保存当前对话记录并提醒用户。如果用户希望加载历史记录，则调用read_file_to_chat()来更新聊天显示框。如果用户希望删除历史记录，调用删除所有本地对话历史记录()函数完成删除操作。
 
 ## [19/48] 请对下面的程序文件做一个概述: crazy_functions\总结word文档.py
 

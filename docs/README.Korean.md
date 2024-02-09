@@ -27,7 +27,7 @@ GPT를 사용하여 이 프로젝트를 임의의 언어로 번역하려면 [`mu
 
 
 
- 
+
 
 <div align="center">
 
@@ -130,7 +130,7 @@ python -m pip install -r requirements.txt # This step is the same as the pip ins
 [Optional Step] If you need support for Tsinghua ChatGLM2/Fudan MOSS as the backend, you need to install additional dependencies (Prerequisites: Familiar with Python + Have used Pytorch + Sufficient computer configuration):
 ```sh
 # [Optional Step I] Support for Tsinghua ChatGLM2. Note for Tsinghua ChatGLM: If you encounter the error "Call ChatGLM fail cannot load ChatGLM parameters", refer to the following: 1: The default installation above is torch+cpu version. To use cuda, uninstall torch and reinstall torch+cuda; 2: If you cannot load the model due to insufficient computer configuration, you can modify the model precision in request_llm/bridge_chatglm.py, change AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) to AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
-python -m pip install -r request_llms/requirements_chatglm.txt  
+python -m pip install -r request_llms/requirements_chatglm.txt
 
 # [Optional Step II] Support for Fudan MOSS
 python -m pip install -r request_llms/requirements_moss.txt
@@ -208,8 +208,8 @@ Please visit the [cloud server remote deployment wiki](https://github.com/binary
 ```
 "초급영문 번역": {
     # 접두사, 입력 내용 앞에 추가됩니다. 예를 들어 요구 사항을 설명하는 데 사용됩니다. 예를 들어 번역, 코드 설명, 교정 등
-    "Prefix": "다음 내용을 한국어로 번역하고 전문 용어에 대한 설명을 적용한 마크다운 표를 사용하세요:\n\n", 
-    
+    "Prefix": "다음 내용을 한국어로 번역하고 전문 용어에 대한 설명을 적용한 마크다운 표를 사용하세요:\n\n",
+
     # 접미사, 입력 내용 뒤에 추가됩니다. 예를 들어 접두사와 함께 입력 내용을 따옴표로 감쌀 수 있습니다.
     "Suffix": "",
 },
@@ -361,4 +361,3 @@ https://github.com/oobabooga/one-click-installers
 # 더보기：
 https://github.com/gradio-app/gradio
 https://github.com/fghrsh/live2d_demo
-

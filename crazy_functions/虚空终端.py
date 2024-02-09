@@ -104,7 +104,7 @@ def analyze_intention_with_simple_rules(txt):
 
 
 @CatchException
-def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     disable_auto_promotion(chatbot=chatbot)
     # 获取当前虚空终端状态
     state = VoidTerminalState.get_state(chatbot)
@@ -121,7 +121,7 @@ def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
         state.set_state(chatbot=chatbot, key='has_provided_explaination', value=True)
         state.unlock_plugin(chatbot=chatbot)
         yield from update_ui(chatbot=chatbot, history=history)
-        yield from 虚空终端主路由(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port)
+        yield from 虚空终端主路由(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request)
         return
     else:
         # 如果意图模糊，提示
@@ -133,7 +133,7 @@ def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
 
 
 
-def 虚空终端主路由(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 虚空终端主路由(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     history = []
     chatbot.append(("虚空终端状态: ", f"正在执行任务: {txt}"))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
