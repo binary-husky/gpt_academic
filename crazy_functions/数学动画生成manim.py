@@ -1,6 +1,7 @@
-from toolbox import CatchException, update_ui, gen_time_str
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-from .crazy_utils import input_clipping
+import os
+from toolbox import CatchException, update_ui, gen_time_str, promote_file_to_downloadzone
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from crazy_functions.crazy_utils import input_clipping
 
 def inspect_dependency(chatbot, history):
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
@@ -27,9 +28,10 @@ def eval_manim(code):
     class_name = get_class_name(code)
 
     try: 
+        time_str = gen_time_str()
         subprocess.check_output([sys.executable, '-c', f"from gpt_log.MyAnimation import {class_name}; {class_name}().render()"])
-        shutil.move('media/videos/1080p60/{class_name}.mp4', f'gpt_log/{class_name}-{gen_time_str()}.mp4')
-        return f'gpt_log/{gen_time_str()}.mp4'
+        shutil.move(f'media/videos/1080p60/{class_name}.mp4', f'gpt_log/{class_name}-{time_str}.mp4')
+        return f'gpt_log/{time_str}.mp4'
     except subprocess.CalledProcessError as e:
         output = e.output.decode()
         print(f"Command returned non-zero exit status {e.returncode}: {output}.")
@@ -48,7 +50,7 @@ def get_code_block(reply):
     return matches[0].strip('python') #  code block
 
 @CatchException
-def 动画生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 动画生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     """
     txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数，如温度和top_p等，一般原样传递下去就行
@@ -56,7 +58,7 @@ def 动画生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     chatbot         聊天显示框的句柄，用于显示给用户
     history         聊天历史，前情提要
     system_prompt   给gpt的静默提醒
-    web_port        当前软件运行的端口号
+    user_request    当前用户的请求信息（IP地址等）
     """
     # 清空历史，以免输入溢出
     history = []    
@@ -94,6 +96,8 @@ def 动画生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     res = eval_manim(code)
 
     chatbot.append(("生成的视频文件路径", res))
+    if os.path.exists(res):
+        promote_file_to_downloadzone(res, chatbot=chatbot)
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
 
 # 在这里放一些网上搜集的demo，辅助gpt生成代码

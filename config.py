@@ -86,8 +86,8 @@ DEFAULT_FN_GROUPS = ['对话', '编程', '学术', '智能体']
 
 
 # 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
-LLM_MODEL = "gpt-4-1106-preview" # 可选 ↓↓↓
-AVAIL_LLM_MODELS = ["gpt-4-1106-preview","gpt-4-vision-preview","gpt-3.5-turbo-1106"]
+LLM_MODEL = "gpt-4-turbo-preview" # 可选 ↓↓↓
+AVAIL_LLM_MODELS = ["gpt-4-turbo-preview","gpt-4-vision-preview","gpt-3.5-turbo-0125"]
 # P.S. 其他可用的模型还包括 ["zhipuai", "qianfan", "deepseekcoder", "llama2", "qwen", "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613",  "gpt-3.5-random"
 # "spark", "sparkv2", "sparkv3", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"]
 
@@ -99,7 +99,11 @@ MULTI_QUERY_LLM_MODELS = "gpt-3.5-turbo&chatglm3"
 # 选择本地模型变体（只有当AVAIL_LLM_MODELS包含了对应本地模型时，才会起作用）
 # 如果你选择Qwen系列的模型，那么请在下面的QWEN_MODEL_SELECTION中指定具体的模型
 # 也可以是具体的模型路径
-QWEN_MODEL_SELECTION = "Qwen/Qwen-1_8B-Chat-Int8"
+QWEN_LOCAL_MODEL_SELECTION = "Qwen/Qwen-1_8B-Chat-Int8"
+
+
+# 接入通义千问在线大模型 https://dashscope.console.aliyun.com/
+DASHSCOPE_API_KEY = "" # 阿里灵积云API_KEY
 
 
 # 百度千帆（LLM_MODEL="qianfan"）
@@ -184,7 +188,13 @@ XFYUN_API_KEY = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
 # 接入智谱大模型
 ZHIPUAI_API_KEY = ""
-ZHIPUAI_MODEL = "chatglm_turbo"
+ZHIPUAI_MODEL = "glm-4" # 可选 "glm-3-turbo" "glm-4"
+
+
+# # 火山引擎YUNQUE大模型
+# YUNQUE_SECRET_KEY = ""
+# YUNQUE_ACCESS_KEY = ""
+# YUNQUE_MODEL = ""
 
 
 # Claude API KEY
@@ -193,6 +203,10 @@ ANTHROPIC_API_KEY = ""
 
 # 自定义API KEY格式
 CUSTOM_API_KEY_PATTERN = ""
+
+
+# Google Gemini API-Key
+GEMINI_API_KEY = ''
 
 
 # HUGGINGFACE的TOKEN，下载LLAMA时起作用 https://huggingface.co/docs/hub/security-tokens
@@ -231,6 +245,10 @@ WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid",
 
 # *实验性功能*: 自动检测并屏蔽失效的KEY，请勿使用
 BLOCK_INVALID_APIKEY = False
+
+
+# 启用插件热加载
+PLUGIN_HOT_RELOAD = False
 
 
 # 自定义按钮的最大数量限制
@@ -276,6 +294,12 @@ NUM_CUSTOM_BASIC_BTN = 4
 │   ├── ZHIPUAI_API_KEY
 │   └── ZHIPUAI_MODEL
 │
+├── "qwen-turbo" 等通义千问大模型
+│   └──  DASHSCOPE_API_KEY
+│
+├── "Gemini"
+│   └──  GEMINI_API_KEY
+│
 └── "newbing" Newbing接口不再稳定，不推荐使用
     ├── NEWBING_STYLE
     └── NEWBING_COOKIES
@@ -292,7 +316,7 @@ NUM_CUSTOM_BASIC_BTN = 4
 ├── "jittorllms_pangualpha"
 ├── "jittorllms_llama"
 ├── "deepseekcoder"
-├── "qwen"
+├── "qwen-local"
 ├──  RWKV的支持见Wiki
 └── "llama2"
 

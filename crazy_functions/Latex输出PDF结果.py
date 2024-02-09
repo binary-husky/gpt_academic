@@ -1,11 +1,11 @@
 from toolbox import update_ui, trimmed_format_exc, get_conf, get_log_folder, promote_file_to_downloadzone
 from toolbox import CatchException, report_exception, update_ui_lastest_msg, zip_result, gen_time_str
 from functools import partial
-import glob, os, requests, time
+import glob, os, requests, time, tarfile
 pj = os.path.join
 ARXIV_CACHE_DIR = os.path.expanduser(f"~/arxiv_cache/")
 
-# =================================== 工具函数 ===============================================
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- 工具函数 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 # 专业词汇声明  = 'If the term "agent" is used in this section, it should be translated to "智能体". '
 def switch_prompt(pfg, mode, more_requirement):
     """
@@ -104,7 +104,7 @@ def arxiv_download(chatbot, history, txt, allow_cache=True):
     if ('.' in txt) and ('/' not in txt) and is_float(txt[:10]): # is arxiv ID
         txt = 'https://arxiv.org/abs/' + txt[:10]
     if not txt.startswith('https://arxiv.org'): 
-        return txt, None
+        return txt, None    # 是本地文件，跳过下载
     
     # <-------------- inspect format ------------->
     chatbot.append([f"检测到arxiv文档连接", '尝试下载 ...']) 
@@ -142,11 +142,11 @@ def arxiv_download(chatbot, history, txt, allow_cache=True):
     from toolbox import extract_archive
     extract_archive(file_path=dst, dest_dir=extract_dst)
     return extract_dst, arxiv_id
-# ========================================= 插件主程序1 =====================================================    
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= 插件主程序1 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=    
 
 
 @CatchException
-def Latex英文纠错加PDF对比(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def Latex英文纠错加PDF对比(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     # <-------------- information about this plugin ------------->
     chatbot.append([ "函数插件功能？",
         "对整个Latex项目进行纠错, 用latex编译为PDF对修正处做高亮。函数插件贡献者: Binary-Husky。注意事项: 目前仅支持GPT3.5/GPT4，其他模型转化效果未知。目前对机器学习类文献转化效果最好，其他类型文献转化效果未知。仅在Windows系统进行了测试，其他操作系统表现未知。"])
@@ -218,10 +218,10 @@ def Latex英文纠错加PDF对比(txt, llm_kwargs, plugin_kwargs, chatbot, histo
     # <-------------- we are done ------------->
     return success
 
-# ========================================= 插件主程序2 =====================================================    
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= 插件主程序2 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=    
 
 @CatchException
-def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     # <-------------- information about this plugin ------------->
     chatbot.append([
         "函数插件功能？",
@@ -250,7 +250,14 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
 
     # <-------------- clear history and read input ------------->
     history = []
-    txt, arxiv_id = yield from arxiv_download(chatbot, history, txt, allow_cache)
+    try:
+        txt, arxiv_id = yield from arxiv_download(chatbot, history, txt, allow_cache)
+    except tarfile.ReadError as e:
+        yield from update_ui_lastest_msg(
+            "无法自动下载该论文的Latex源码，请前往arxiv打开此论文下载页面，点other Formats，然后download source手动下载latex源码包。接下来调用本地Latex翻译插件即可。", 
+            chatbot=chatbot, history=history)
+        return
+
     if txt.endswith('.pdf'):
         report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"发现已经存在翻译好的PDF文档")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面

@@ -2,7 +2,7 @@ from toolbox import CatchException, update_ui, get_conf, select_api_key, get_log
 from crazy_functions.multi_stage.multi_stage_utils import GptAcademicState
 
 
-def gen_image(llm_kwargs, prompt, resolution="1024x1024", model="dall-e-2", quality=None):
+def gen_image(llm_kwargs, prompt, resolution="1024x1024", model="dall-e-2", quality=None, style=None):
     import requests, json, time, os
     from request_llms.bridge_all import model_info
 
@@ -25,7 +25,10 @@ def gen_image(llm_kwargs, prompt, resolution="1024x1024", model="dall-e-2", qual
         'model': model,
         'response_format': 'url'
     }
-    if quality is not None: data.update({'quality': quality})
+    if quality is not None:
+        data['quality'] = quality
+    if style is not None:
+        data['style'] = style
     response = requests.post(url, headers=headers, json=data, proxies=proxies)
     print(response.content)
     try:
@@ -90,7 +93,7 @@ def edit_image(llm_kwargs, prompt, image_path, resolution="1024x1024", model="da
 
 
 @CatchException
-def 图片生成_DALLE2(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 图片生成_DALLE2(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     """
     txt             输入栏用户输入的文本,例如需要翻译的一段话,再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数,如温度和top_p等,一般原样传递下去就行
@@ -98,10 +101,14 @@ def 图片生成_DALLE2(prompt, llm_kwargs, plugin_kwargs, chatbot, history, sys
     chatbot         聊天显示框的句柄,用于显示给用户
     history         聊天历史,前情提要
     system_prompt   给gpt的静默提醒
-    web_port        当前软件运行的端口号
+    user_request    当前用户的请求信息（IP地址等）
     """
     history = []    # 清空历史,以免输入溢出
-    chatbot.append(("您正在调用“图像生成”插件。", "[Local Message] 生成图像, 请先把模型切换至gpt-*或者api2d-*。如果中文Prompt效果不理想, 请尝试英文Prompt。正在处理中 ....."))
+    if prompt.strip() == "":
+        chatbot.append((prompt, "[Local Message] 图像生成提示为空白，请在“输入区”输入图像生成提示。"))
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 界面更新
+        return
+    chatbot.append(("您正在调用“图像生成”插件。", "[Local Message] 生成图像, 请先把模型切换至gpt-*。如果中文Prompt效果不理想, 请尝试英文Prompt。正在处理中 ....."))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 由于请求gpt需要一段时间,我们先及时地做一次界面更新
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     resolution = plugin_kwargs.get("advanced_arg", '1024x1024')
@@ -116,18 +123,27 @@ def 图片生成_DALLE2(prompt, llm_kwargs, plugin_kwargs, chatbot, history, sys
 
 
 @CatchException
-def 图片生成_DALLE3(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 图片生成_DALLE3(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     history = []    # 清空历史,以免输入溢出
-    chatbot.append(("您正在调用“图像生成”插件。", "[Local Message] 生成图像, 请先把模型切换至gpt-*或者api2d-*。如果中文Prompt效果不理想, 请尝试英文Prompt。正在处理中 ....."))
+    if prompt.strip() == "":
+        chatbot.append((prompt, "[Local Message] 图像生成提示为空白，请在“输入区”输入图像生成提示。"))
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 界面更新
+        return
+    chatbot.append(("您正在调用“图像生成”插件。", "[Local Message] 生成图像, 请先把模型切换至gpt-*。如果中文Prompt效果不理想, 请尝试英文Prompt。正在处理中 ....."))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 由于请求gpt需要一段时间,我们先及时地做一次界面更新
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
-    resolution = plugin_kwargs.get("advanced_arg", '1024x1024').lower()
-    if resolution.endswith('-hd'):
-        resolution = resolution.replace('-hd', '')
-        quality = 'hd'
-    else:
-        quality = 'standard'
-    image_url, image_path = gen_image(llm_kwargs, prompt, resolution, model="dall-e-3", quality=quality)
+    resolution_arg = plugin_kwargs.get("advanced_arg", '1024x1024-standard-vivid').lower()
+    parts = resolution_arg.split('-')
+    resolution = parts[0] # 解析分辨率
+    quality = 'standard' # 质量与风格默认值
+    style = 'vivid'
+    # 遍历检查是否有额外参数
+    for part in parts[1:]:
+        if part in ['hd', 'standard']:
+            quality = part
+        elif part in ['vivid', 'natural']:
+            style = part
+    image_url, image_path = gen_image(llm_kwargs, prompt, resolution, model="dall-e-3", quality=quality, style=style)
     chatbot.append([prompt,  
         f'图像中转网址: <br/>`{image_url}`<br/>'+
         f'中转网址预览: <br/><div align="center"><img src="{image_url}"></div>'
@@ -193,7 +209,7 @@ class ImageEditState(GptAcademicState):
         return all([x['value'] is not None for x in self.req])
 
 @CatchException
-def 图片修改_DALLE2(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 图片修改_DALLE2(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     # 尚未完成
     history = []    # 清空历史
     state = ImageEditState.get_state(chatbot, ImageEditState)

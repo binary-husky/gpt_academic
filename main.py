@@ -1,14 +1,25 @@
 import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
-import pickle
-import base64
+
+help_menu_description = \
+"""Github源代码开源和更新[地址🚀](https://github.com/binary-husky/gpt_academic),
+感谢热情的[开发者们❤️](https://github.com/binary-husky/gpt_academic/graphs/contributors).
+</br></br>常见问题请查阅[项目Wiki](https://github.com/binary-husky/gpt_academic/wiki),
+如遇到Bug请前往[Bug反馈](https://github.com/binary-husky/gpt_academic/issues).
+</br></br>普通对话使用说明: 1. 输入问题; 2. 点击提交
+</br></br>基础功能区使用说明: 1. 输入文本; 2. 点击任意基础功能区按钮
+</br></br>函数插件区使用说明: 1. 输入路径/问题, 或者上传文件; 2. 点击任意函数插件区按钮
+</br></br>虚空终端使用说明: 点击虚空终端, 然后根据提示输入指令, 再次点击虚空终端
+</br></br>如何保存对话: 点击保存当前的对话按钮
+</br></br>如何语音对话: 请阅读Wiki
+</br></br>如何临时更换API_KEY: 在输入区输入临时API_KEY后提交（网页刷新后失效）"""
 
 def main():
     import gradio as gr
-    if gr.__version__ not in ['3.32.6']: 
+    if gr.__version__ not in ['3.32.6', '3.32.7', '3.32.8']:
         raise ModuleNotFoundError("使用项目内置Gradio获取最优体验! 请运行 `pip install -r requirements.txt` 指令安装内置Gradio及其他依赖, 详情信息见requirements.txt.")
     from request_llms.bridge_all import predict
     from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, load_chat_cookies, DummyWith
-    # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
+    # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址
     proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION = get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION')
     CHATBOT_HEIGHT, LAYOUT, AVAIL_LLM_MODELS, AUTO_CLEAR_TXT = get_conf('CHATBOT_HEIGHT', 'LAYOUT', 'AVAIL_LLM_MODELS', 'AUTO_CLEAR_TXT')
     ENABLE_AUDIO, AUTO_CLEAR_TXT, PATH_LOGGING, AVAIL_THEMES, THEME = get_conf('ENABLE_AUDIO', 'AUTO_CLEAR_TXT', 'PATH_LOGGING', 'AVAIL_THEMES', 'THEME')
@@ -18,20 +29,10 @@ def main():
     # 如果WEB_PORT是-1, 则随机选取WEB端口
     PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
     from check_proxy import get_current_version
-    from themes.theme import adjust_theme, advanced_css, theme_declaration, load_dynamic_theme
-
+    from themes.theme import adjust_theme, advanced_css, theme_declaration
+    from themes.theme import js_code_for_css_changing, js_code_for_darkmode_init, js_code_for_toggle_darkmode, js_code_for_persistent_cookie_init
+    from themes.theme import load_dynamic_theme, to_cookie_str, from_cookie_str, init_cookie
     title_html = f"<h1 align=\"center\">GPT 学术优化 {get_current_version()}</h1>{theme_declaration}"
-    description =  "Github源代码开源和更新[地址🚀](https://github.com/binary-husky/gpt_academic), "
-    description += "感谢热情的[开发者们❤️](https://github.com/binary-husky/gpt_academic/graphs/contributors)."
-    description += "</br></br>常见问题请查阅[项目Wiki](https://github.com/binary-husky/gpt_academic/wiki), "
-    description += "如遇到Bug请前往[Bug反馈](https://github.com/binary-husky/gpt_academic/issues)."
-    description += "</br></br>普通对话使用说明: 1. 输入问题; 2. 点击提交"
-    description += "</br></br>基础功能区使用说明: 1. 输入文本; 2. 点击任意基础功能区按钮"
-    description += "</br></br>函数插件区使用说明: 1. 输入路径/问题, 或者上传文件; 2. 点击任意函数插件区按钮"
-    description += "</br></br>虚空终端使用说明: 点击虚空终端, 然后根据提示输入指令, 再次点击虚空终端"
-    description += "</br></br>如何保存对话: 点击保存当前的对话按钮"
-    description += "</br></br>如何语音对话: 请阅读Wiki"
-    description += "</br></br>如何临时更换API_KEY: 在输入区输入临时API_KEY后提交（网页刷新后失效）"
 
     # 问询记录, python 版本建议3.9+（越新越好）
     import logging, uuid
@@ -85,14 +86,14 @@ def main():
             with gr_L2(scale=1, elem_id="gpt-panel"):
                 with gr.Accordion("输入区", open=True, elem_id="input-panel") as area_input_primary:
                     with gr.Row():
-                        txt = gr.Textbox(show_label=False, placeholder="Input question here.").style(container=False)
+                        txt = gr.Textbox(show_label=False, placeholder="Input question here.", elem_id='user_input_main').style(container=False)
                     with gr.Row():
                         submitBtn = gr.Button("提交", elem_id="elem_submit", variant="primary")
                     with gr.Row():
                         resetBtn = gr.Button("重置", elem_id="elem_reset", variant="secondary"); resetBtn.style(size="sm")
                         stopBtn = gr.Button("停止", elem_id="elem_stop", variant="secondary"); stopBtn.style(size="sm")
                         clearBtn = gr.Button("清除", elem_id="elem_clear", variant="secondary", visible=False); clearBtn.style(size="sm")
-                    if ENABLE_AUDIO: 
+                    if ENABLE_AUDIO:
                         with gr.Row():
                             audio_mic = gr.Audio(source="microphone", type="numpy", elem_id="elem_audio", streaming=True, show_label=False).style(container=False)
                     with gr.Row():
@@ -113,7 +114,7 @@ def main():
                     with gr.Row():
                         gr.Markdown("插件可读取“输入区”文本/路径作为参数（上传文件自动修正路径）")
                     with gr.Row(elem_id="input-plugin-group"):
-                        plugin_group_sel = gr.Dropdown(choices=all_plugin_groups, label='', show_label=False, value=DEFAULT_FN_GROUPS, 
+                        plugin_group_sel = gr.Dropdown(choices=all_plugin_groups, label='', show_label=False, value=DEFAULT_FN_GROUPS,
                                                       multiselect=True, interactive=True, elem_classes='normal_mut_select').style(container=False)
                     with gr.Row():
                         for k, plugin in plugins.items():
@@ -121,7 +122,7 @@ def main():
                             visible = True if match_group(plugin['Group'], DEFAULT_FN_GROUPS) else False
                             variant = plugins[k]["Color"] if "Color" in plugin else "secondary"
                             info = plugins[k].get("Info", k)
-                            plugin['Button'] = plugins[k]['Button'] = gr.Button(k, variant=variant, 
+                            plugin['Button'] = plugins[k]['Button'] = gr.Button(k, variant=variant,
                                 visible=visible, info_str=f'函数插件区: {info}').style(size="sm")
                     with gr.Row():
                         with gr.Accordion("更多函数插件", open=True):
@@ -133,22 +134,22 @@ def main():
                             with gr.Row():
                                 dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="", show_label=False).style(container=False)
                             with gr.Row():
-                                plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False, 
+                                plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False,
                                                                  placeholder="这里是特殊函数插件的高级参数输入区").style(container=False)
                             with gr.Row():
                                 switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary").style(size="sm")
                     with gr.Row():
-                        with gr.Accordion("点击展开“文件上传区”。上传本地文件/压缩包供函数插件调用。", open=False) as area_file_up:
+                        with gr.Accordion("点击展开“文件下载区”。", open=False) as area_file_up:
                             file_upload = gr.Files(label="任何文件, 推荐上传压缩文件(zip, tar)", file_count="multiple", elem_id="elem_upload")
 
 
-        with gr.Floating(init_x="0%", init_y="0%", visible=True, width=None, drag="forbidden"):
+        with gr.Floating(init_x="0%", init_y="0%", visible=True, width=None, drag="forbidden", elem_id="tooltip"):
             with gr.Row():
                 with gr.Tab("上传文件", elem_id="interact-panel"):
                     gr.Markdown("请上传本地文件/压缩包供“函数插件区”功能调用。请注意: 上传文件后会自动把输入区修改为相应路径。")
-                    file_upload_2 = gr.Files(label="任何文件, 推荐上传压缩文件(zip, tar)", file_count="multiple")
-    
-                with gr.Tab("更换模型 & Prompt", elem_id="interact-panel"):
+                    file_upload_2 = gr.Files(label="任何文件, 推荐上传压缩文件(zip, tar)", file_count="multiple", elem_id="elem_upload_float")
+
+                with gr.Tab("更换模型", elem_id="interact-panel"):
                     md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(container=False)
                     top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01,interactive=True, label="Top-p (nucleus sampling)",)
                     temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature",)
@@ -157,44 +158,28 @@ def main():
 
                 with gr.Tab("界面外观", elem_id="interact-panel"):
                     theme_dropdown = gr.Dropdown(AVAIL_THEMES, value=THEME, label="更换UI主题").style(container=False)
-                    checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区", "浮动输入区", "输入清除键", "插件参数区"], 
+                    checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区", "浮动输入区", "输入清除键", "插件参数区"],
                                                   value=["基础功能区", "函数插件区"], label="显示/隐藏功能区", elem_id='cbs').style(container=False)
-                    checkboxes_2 = gr.CheckboxGroup(["自定义菜单"], 
-                                                  value=[], label="显示/隐藏自定义菜单", elem_id='cbs').style(container=False)
+                    checkboxes_2 = gr.CheckboxGroup(["自定义菜单"],
+                                                  value=[], label="显示/隐藏自定义菜单", elem_id='cbsc').style(container=False)
                     dark_mode_btn = gr.Button("切换界面明暗 ☀", variant="secondary").style(size="sm")
-                    dark_mode_btn.click(None, None, None, _js="""() => {
-                            if (document.querySelectorAll('.dark').length) {
-                                document.querySelectorAll('.dark').forEach(el => el.classList.remove('dark'));
-                            } else {
-                                document.querySelector('body').classList.add('dark');
-                            }
-                        }""",
-                    )
+                    dark_mode_btn.click(None, None, None, _js=js_code_for_toggle_darkmode)
                 with gr.Tab("帮助", elem_id="interact-panel"):
-                    gr.Markdown(description)
+                    gr.Markdown(help_menu_description)
 
         with gr.Floating(init_x="20%", init_y="50%", visible=False, width="40%", drag="top") as area_input_secondary:
             with gr.Accordion("浮动输入区", open=True, elem_id="input-panel2"):
                 with gr.Row() as row:
                     row.style(equal_height=True)
                     with gr.Column(scale=10):
-                        txt2 = gr.Textbox(show_label=False, placeholder="Input question here.", lines=8, label="输入区2").style(container=False)
+                        txt2 = gr.Textbox(show_label=False, placeholder="Input question here.",
+                                          elem_id='user_input_float', lines=8, label="输入区2").style(container=False)
                     with gr.Column(scale=1, min_width=40):
                         submitBtn2 = gr.Button("提交", variant="primary"); submitBtn2.style(size="sm")
                         resetBtn2 = gr.Button("重置", variant="secondary"); resetBtn2.style(size="sm")
                         stopBtn2 = gr.Button("停止", variant="secondary"); stopBtn2.style(size="sm")
                         clearBtn2 = gr.Button("清除", variant="secondary", visible=False); clearBtn2.style(size="sm")
 
-        def to_cookie_str(d):
-            # Pickle the dictionary and encode it as a string
-            pickled_dict = pickle.dumps(d)
-            cookie_value = base64.b64encode(pickled_dict).decode('utf-8')
-            return cookie_value
-        
-        def from_cookie_str(c):
-            # Decode the base64-encoded string and unpickle it into a dictionary
-            pickled_dict = base64.b64decode(c.encode('utf-8'))
-            return pickle.loads(pickled_dict)
 
         with gr.Floating(init_x="20%", init_y="50%", visible=False, width="40%", drag="top") as area_customize:
             with gr.Accordion("自定义菜单", open=True, elem_id="edit-panel"):
@@ -226,13 +211,13 @@ def main():
                             else:
                                 ret.update({predefined_btns[basic_btn_dropdown_]: gr.update(visible=True, value=basic_fn_title)})
                             ret.update({cookies: cookies_})
-                            try: persistent_cookie_ = from_cookie_str(persistent_cookie_)    # persistent cookie to dict
+                            try: persistent_cookie_ = from_cookie_str(persistent_cookie_)   # persistent cookie to dict
                             except: persistent_cookie_ = {}
-                            persistent_cookie_["custom_bnt"] = customize_fn_overwrite_   # dict update new value
-                            persistent_cookie_ = to_cookie_str(persistent_cookie_)         # persistent cookie to dict
-                            ret.update({persistent_cookie: persistent_cookie_})                             # write persistent cookie
+                            persistent_cookie_["custom_bnt"] = customize_fn_overwrite_      # dict update new value
+                            persistent_cookie_ = to_cookie_str(persistent_cookie_)          # persistent cookie to dict
+                            ret.update({persistent_cookie: persistent_cookie_})             # write persistent cookie
                             return ret
-                        
+
                         def reflesh_btn(persistent_cookie_, cookies_):
                             ret = {}
                             for k in customize_btns:
@@ -240,7 +225,7 @@ def main():
 
                             try: persistent_cookie_ = from_cookie_str(persistent_cookie_)    # persistent cookie to dict
                             except: return ret
-                            
+
                             customize_fn_overwrite_ = persistent_cookie_.get("custom_bnt", {})
                             cookies_['customize_fn_overwrite'] = customize_fn_overwrite_
                             ret.update({cookies: cookies_})
@@ -250,11 +235,12 @@ def main():
                                 if k in customize_btns: ret.update({customize_btns[k]: gr.update(visible=True, value=v['Title'])})
                                 else: ret.update({predefined_btns[k]: gr.update(visible=True, value=v['Title'])})
                             return ret
-                        
-                        basic_fn_load.click(reflesh_btn, [persistent_cookie, cookies],[cookies, *customize_btns.values(), *predefined_btns.values()])
-                        h = basic_fn_confirm.click(assign_btn, [persistent_cookie, cookies, basic_btn_dropdown, basic_fn_title, basic_fn_prefix, basic_fn_suffix], 
+
+                        basic_fn_load.click(reflesh_btn, [persistent_cookie, cookies], [cookies, *customize_btns.values(), *predefined_btns.values()])
+                        h = basic_fn_confirm.click(assign_btn, [persistent_cookie, cookies, basic_btn_dropdown, basic_fn_title, basic_fn_prefix, basic_fn_suffix],
                                                    [persistent_cookie, cookies, *customize_btns.values(), *predefined_btns.values()])
-                        h.then(None, [persistent_cookie], None, _js="""(persistent_cookie)=>{setCookie("persistent_cookie", persistent_cookie, 5);}""") # save persistent cookie
+                        # save persistent cookie
+                        h.then(None, [persistent_cookie], None, _js="""(persistent_cookie)=>{setCookie("persistent_cookie", persistent_cookie, 5);}""")
 
         # 功能区显示开关与功能区的互动
         def fn_area_visibility(a):
@@ -304,8 +290,8 @@ def main():
             click_handle = btn.click(fn=ArgsGeneralWrapper(predict), inputs=[*input_combo, gr.State(True), gr.State(btn.value)], outputs=output_combo)
             cancel_handles.append(click_handle)
         # 文件上传区，接收文件后与chatbot的互动
-        file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt, txt2, checkboxes, cookies], [chatbot, txt, txt2, cookies])
-        file_upload_2.upload(on_file_uploaded, [file_upload_2, chatbot, txt, txt2, checkboxes, cookies], [chatbot, txt, txt2, cookies])
+        file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt, txt2, checkboxes, cookies], [chatbot, txt, txt2, cookies]).then(None, None, None,   _js=r"()=>{toast_push('上传完毕 ...'); cancel_loading_status();}")
+        file_upload_2.upload(on_file_uploaded, [file_upload_2, chatbot, txt, txt2, checkboxes, cookies], [chatbot, txt, txt2, cookies]).then(None, None, None, _js=r"()=>{toast_push('上传完毕 ...'); cancel_loading_status();}")
         # 函数插件-固定按钮区
         for k in plugins:
             if not plugins[k].get("AsButton", True): continue
@@ -335,24 +321,13 @@ def main():
             else:
                 css_part2 = adjust_theme()._get_theme_css()
             return css_part2 + css_part1
-        
+
         theme_handle = theme_dropdown.select(on_theme_dropdown_changed, [theme_dropdown, secret_css], [secret_css])
         theme_handle.then(
             None,
             [secret_css],
             None,
-            _js="""(css) => {
-                var existingStyles = document.querySelectorAll("style[data-loaded-css]");
-                for (var i = 0; i < existingStyles.length; i++) {
-                    var style = existingStyles[i];
-                    style.parentNode.removeChild(style);
-                }
-                var styleElement = document.createElement('style');
-                styleElement.setAttribute('data-loaded-css', css);
-                styleElement.innerHTML = css;
-                document.head.appendChild(styleElement);
-            }
-            """
+            _js=js_code_for_css_changing
         )
         # 随变按钮的回调函数注册
         def route(request: gr.Request, k, *args, **kwargs):
@@ -371,43 +346,26 @@ def main():
             if not group_list: # 处理特殊情况：没有选择任何插件组
                 return [*[plugin['Button'].update(visible=False) for _, plugin in plugins_as_btn.items()], gr.Dropdown.update(choices=[])]
             for k, plugin in plugins.items():
-                if plugin.get("AsButton", True): 
+                if plugin.get("AsButton", True):
                     btn_list.append(plugin['Button'].update(visible=match_group(plugin['Group'], group_list))) # 刷新按钮
                     if plugin.get('AdvancedArgs', False): dropdown_fn_list.append(k) # 对于需要高级参数的插件，亦在下拉菜单中显示
                 elif match_group(plugin['Group'], group_list): fns_list.append(k) # 刷新下拉列表
             return [*btn_list, gr.Dropdown.update(choices=fns_list)]
         plugin_group_sel.select(fn=on_group_change, inputs=[plugin_group_sel], outputs=[*[plugin['Button'] for name, plugin in plugins_as_btn.items()], dropdown])
-        if ENABLE_AUDIO: 
+        if ENABLE_AUDIO:
             from crazy_functions.live_audio.audio_io import RealtimeAudioDistribution
             rad = RealtimeAudioDistribution()
             def deal_audio(audio, cookies):
                 rad.feed(cookies['uuid'].hex, audio)
             audio_mic.stream(deal_audio, inputs=[audio_mic, cookies])
 
-        def init_cookie(cookies, chatbot):
-            # 为每一位访问的用户赋予一个独一无二的uuid编码
-            cookies.update({'uuid': uuid.uuid4()})
-            return cookies
+
         demo.load(init_cookie, inputs=[cookies, chatbot], outputs=[cookies])
-        darkmode_js = """(dark) => {
-            dark = dark == "True";
-            if (document.querySelectorAll('.dark').length) {
-                if (!dark){
-                    document.querySelectorAll('.dark').forEach(el => el.classList.remove('dark'));
-                }
-            } else {
-                if (dark){
-                    document.querySelector('body').classList.add('dark');
-                }
-            }
-        }"""
-        load_cookie_js = """(persistent_cookie) => {
-            return getCookie("persistent_cookie");
-        }"""
-        demo.load(None, inputs=None, outputs=[persistent_cookie], _js=load_cookie_js)
+        darkmode_js = js_code_for_darkmode_init
+        demo.load(None, inputs=None, outputs=[persistent_cookie], _js=js_code_for_persistent_cookie_init)
         demo.load(None, inputs=[dark_mode], outputs=None, _js=darkmode_js)    # 配置暗色主题或亮色主题
         demo.load(None, inputs=[gr.Textbox(LAYOUT, visible=False)], outputs=None, _js='(LAYOUT)=>{GptAcademicJavaScriptInit(LAYOUT);}')
-        
+
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def run_delayed_tasks():
         import threading, webbrowser, time
@@ -417,25 +375,25 @@ def main():
 
         def auto_updates(): time.sleep(0); auto_update()
         def open_browser(): time.sleep(2); webbrowser.open_new_tab(f"http://localhost:{PORT}")
-        def warm_up_mods(): time.sleep(4); warm_up_modules()
-        
+        def warm_up_mods(): time.sleep(6); warm_up_modules()
+
         threading.Thread(target=auto_updates, name="self-upgrade", daemon=True).start() # 查看自动更新
         threading.Thread(target=open_browser, name="open-browser", daemon=True).start() # 打开浏览器页面
         threading.Thread(target=warm_up_mods, name="warm-up", daemon=True).start()      # 预热tiktoken模块
 
     run_delayed_tasks()
     demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
-        server_name="0.0.0.0", 
+        server_name="0.0.0.0",
         share=False,
         server_port=PORT,
         auth=AUTHENTICATION)
 
     # 如果需要在二级路径下运行
     # CUSTOM_PATH = get_conf('CUSTOM_PATH')
-    # if CUSTOM_PATH != "/": 
+    # if CUSTOM_PATH != "/":
     #     from toolbox import run_gradio_in_subpath
     #     run_gradio_in_subpath(demo, auth=AUTHENTICATION, port=PORT, custom_path=CUSTOM_PATH)
-    # else: 
+    # else:
     #     demo.launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, favicon_path="docs/logo.png",
     #                 blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile",f"{PATH_LOGGING}/admin"])
 
