@@ -233,6 +233,16 @@ class Prompt:
             self.langchain_status = gr.Markdown(value='')
             self.langchain_error = gr.Markdown(value='')
 
+    def _draw_popup_files_processor(self):
+        with gr.TabItem(i18n('Read everything.'), id='files', elem_id='reader'):
+            with gr.Row():
+                with gr.Column(elem_classes='column_left'):
+                    self.reader_upload = gr.File(label='上传文件')
+                    self.reader_choice = gr.Dropdown(choices=['to Markdown'], allow_custom_value=False)
+                with gr.Column(elem_classes='column_right'):
+                    pass
+
+
     def _draw_popup_training(self):
         with gr.TabItem('OpenAi' + i18n('预训练'), id='training_tab', elem_id='training_tab'):
             self.openai_train_status = gr.Markdown(label=i18n("训练状态"), value=i18n(
@@ -268,7 +278,6 @@ class Prompt:
                 self._draw_tabs_masks()
                 self._draw_langchain_base()
                 self._draw_popup_training()
-
 
 
 class FakeComponents:

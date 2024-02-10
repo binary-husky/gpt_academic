@@ -64,6 +64,11 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     # 开始接收回复    
     from .com_zhipuglm import ZhipuChatInit
     zhipu_bro_init = ZhipuChatInit()
+    glm_say = ''
     for chunk, results in zhipu_bro_init.generate_chat(inputs, llm_kwargs, history, system_prompt):
         chatbot[-1] = [inputs, results]
+        glm_say = results
+        yield from update_ui(chatbot=chatbot, history=history)
+    if glm_say:   # 加上对话历史记录
+        history.extend([inputs, glm_say])
         yield from update_ui(chatbot=chatbot, history=history)
