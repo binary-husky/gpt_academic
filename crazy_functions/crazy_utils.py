@@ -395,7 +395,7 @@ def breakdown_txt_to_satisfy_token_limit_for_pdf(txt, get_token_fn, limit):
                     return cut(txt, must_break_at_empty_line=False, break_anyway=True)
 
 
-def read_and_clean_pdf_text(fp, user=''):
+def read_and_clean_pdf_text(fp, save_path=''):
     """
     这个函数用于分割pdf，用了很多trick，逻辑较乱，效果奇好
 
@@ -450,6 +450,7 @@ def read_and_clean_pdf_text(fp, user=''):
 
         meta_line = []
         meta_span = []
+        page_one_meta = []  # 在这里初始化 page_one_meta 为一个空列表
         ############################## <第 1 步，搜集初始信息> ##################################
         for index, page in enumerate(doc):
             # file_content += page.get_text()
@@ -465,10 +466,12 @@ def read_and_clean_pdf_text(fp, user=''):
                         for wtf in l['spans']:  # for l in t['lines']:
                             meta_span.append([clear_soh(wtf['text']), wtf['size'], len(wtf['text'])])
                 elif 'image' in t:  # 提取出文件的图片
-                    init_path.pdf_save_img_path = os.path.join(init_path.private_files_path, user, 'pdf_img', doc.name)
-                    bbox_tag = "-".join([str(int(i)) for i in l["bbox"]])
-                    save_file_name = os.path.join(init_path.pdf_save_img_path,
-                                                  f'{index}-{t["size"]}_{bbox_tag}.{t["ext"]}')
+                    if save_path:
+                        pdf_save_img_path = save_path
+                    else:
+                        pdf_save_img_path = os.path.join(init_path.private_files_path, 'temp_file', 'pdf_img', doc.name)
+                    bbox_tag = "-".join([str(int(i)) for i in t["bbox"]])
+                    save_file_name = os.path.join(pdf_save_img_path, f'{index}-{t["size"]}_{bbox_tag}.{t["ext"]}')
                     with open(save_file_name, 'wb') as f:
                         f.write(t['image'])
                     pf = primary_ffsize(l)

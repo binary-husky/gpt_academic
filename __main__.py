@@ -140,6 +140,11 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                                          self.pro_fp_state, self.mask_cls_select],
                                  outputs=[self.pro_func_prompt, self.pro_fp_state, self.spike_toast])
 
+    def signals_reader(self):
+        self.reader_upload.upload(fn=func_signals.reader_analysis_output,
+                                  inputs=[self.reader_upload, self.reader_choice],
+                                  outputs=[self.reader_show, self.reader_copy, self.spike_toast])
+
     def signals_plugin(self):
         from common.crazy_functional import crazy_fns_role, crazy_fns
         fn_btn_dict = {crazy_fns_role[role][k]['Button']: {role: k} for role in crazy_fns_role for k in
@@ -417,6 +422,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
             self.signals_prompt_edit()
             self.signals_plugin()
             self.signals_langchain_cn()
+            self.signals_reader()
             self.signals_settings_popup()
             self.signals_masks()
             # self.demo.load(fn=func_signals.mobile_access, inputs=[],

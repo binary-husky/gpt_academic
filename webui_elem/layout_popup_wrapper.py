@@ -237,11 +237,19 @@ class Prompt:
         with gr.TabItem(i18n('Read everything.'), id='files', elem_id='reader'):
             with gr.Row():
                 with gr.Column(elem_classes='column_left'):
-                    self.reader_upload = gr.File(label='上传文件')
-                    self.reader_choice = gr.Dropdown(choices=['to Markdown'], allow_custom_value=False)
+                    self.reader_upload = gr.File(label='上传文件', elem_id='reader-file',
+                                                 show_label=False)
+                with gr.Column(elem_classes='column_left'):
+                    self.reader_choice = gr.Dropdown(label='Read Mode', choices=['Markdown', 'Developing...'],
+                                                     value='Markdown', allow_custom_value=False, interactive=True,)
+                with gr.Column(elem_classes='column_left'):
+                    missing_description = """
+                    ## File Preview\n\n
+                    上传文件自动解析为GPT可接收文本,并自动计算对话预计消耗`Token`
+                    """
+                    self.reader_show = gr.Markdown(missing_description)
                 with gr.Column(elem_classes='column_right'):
-                    pass
-
+                    self.reader_copy = gr.Textbox(label='File Edit', lines=15, max_lines=30, show_copy_button=True)
 
     def _draw_popup_training(self):
         with gr.TabItem('OpenAi' + i18n('预训练'), id='training_tab', elem_id='training_tab'):
@@ -277,6 +285,7 @@ class Prompt:
                 self._draw_tabs_prompt()
                 self._draw_tabs_masks()
                 self._draw_langchain_base()
+                self._draw_popup_files_processor()
                 self._draw_popup_training()
 
 

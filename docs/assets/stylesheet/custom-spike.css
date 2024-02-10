@@ -307,6 +307,9 @@ code.language-folded {
     overflow: auto;
 
 }
+#reader-file{
+    max-height: 87px !important;
+}
 [class*="gradio-container-"] h1 {
     font-weight: 700 !important;
     font-size: 28px !important;

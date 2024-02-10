@@ -519,7 +519,7 @@ def to_markdown_tabs(head: list, tabs: list, alignment=':---:', column=False):
     tabs_list += "".join([tab_format % alignment for i in head]) + '|\n'
 
     for i in range(max_len):
-        row_data = [tab[i] if i < len(tab) else '' for tab in transposed_tabs]
+        row_data = [str(tab[i]).replace('\n', '<b>') if i < len(tab) else '' for tab in transposed_tabs]
         row_data = file_manifest_filter_type(row_data, filter_=None)
         tabs_list += "".join([tab_format % i for i in row_data]) + '|\n'
     return tabs_list
@@ -640,7 +640,7 @@ def get_avatar_img(llm_s):
 
 
 valid_img_extensions = ['png', 'jpg', 'jpeg', 'bmp', 'svg', 'webp', 'ico', 'tif', 'tiff', 'raw', 'eps', 'gif']
-
+vain_open_extensions = ['exe', 'dll', 'so', 'bin', 'dat', 'img', 'ISO']
 
 def split_parse_url(url, tag: list | None, index=1) -> str:
     if url:  # 有url 才往下走

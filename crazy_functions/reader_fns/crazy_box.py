@@ -162,6 +162,46 @@ def find_index_inlist(data_list: list, search_terms: list) -> int:
     return 0  # 如果没有找到匹配的元素，则返回初始坐标
 
 
+def file_reader_content(file_path, save_path, plugin_kwargs):
+    reader_statsu = ''
+    if file_path.endswith('pdf'):
+        _content, _ = crazy_utils.read_and_clean_pdf_text(file_path, save_path)
+        file_content = "".join(_content)
+    elif file_path.endswith('docx') or file_path.endswith('doc'):
+        file_content = reader_fns.DocxHandler(file_path, save_path).get_markdown()
+    elif file_path.endswith('xmind'):
+        file_content = reader_fns.XmindHandle(file_path, save_path).get_markdown()
+    elif file_path.endswith('mp4'):
+        file_content = video_converters(file_path)
+    elif file_path.endswith('xlsx') or file_path.endswith('xls'):
+        sheet, = json_args_return(plugin_kwargs, keys=['读取指定Sheet'], default='测试要点')
+        # 创建文件对象
+        ex_handle = reader_fns.XlsxHandler(file_path, save_path, sheet=sheet)
+        if sheet in ex_handle.workbook.sheetnames:
+            ex_handle.split_merged_cells()
+            xlsx_dict = ex_handle.read_as_dict()
+            file_content = xlsx_dict.get(sheet)
+        else:
+            active_sheet = ex_handle.workbook.active.title
+            ex_handle.sheet = active_sheet
+            ex_handle.split_merged_cells()
+            xlsx_dict = ex_handle.read_as_dict()
+            file_content = xlsx_dict.get(active_sheet)
+            reader_statsu += f'\n\n无法在`{os.path.basename(file_path)}`找到`{sheet}`工作表，' \
+                             f'将读取上次预览的活动工作表`{active_sheet}`，' \
+                             f'若你的用例工作表是其他名称, 请及时暂停插件运行，并在自定义插件配置中更改' \
+                             f'{func_box.html_tag_color("读取指定Sheet")}。'
+        plugin_kwargs['写入指定模版'] = file_path
+        plugin_kwargs['写入指定Sheet'] = ex_handle.sheet
+    elif file_path.split('.')[-1] not in func_box.vain_open_extensions:
+        try:
+            with open(file_path, mode='r', encoding='utf-8') as f:
+                file_content = f.read()
+        except Exception as e:
+            reader_statsu += f'An error occurred while reading the file: {e}'
+    return file_content, reader_statsu
+
+
 def file_extraction_intype(file_mapping, chatbot, history, llm_kwargs, plugin_kwargs):
     # 文件读取
     file_limit = {}
@@ -169,41 +209,9 @@ def file_extraction_intype(file_mapping, chatbot, history, llm_kwargs, plugin_kw
         chatbot[-1][1] = chatbot[-1][1] + f'\n\n`{file_path.replace(init_path.base_path, ".")}`\t 正在解析本地文件\n\n'
         yield from toolbox.update_ui(chatbot, history)
         save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'])
-        if file_path.endswith('pdf'):
-            _content, _ = crazy_utils.read_and_clean_pdf_text(file_path)
-            file_content = "".join(_content)
-        elif file_path.endswith('docx') or file_path.endswith('doc'):
-            file_content = reader_fns.DocxHandler(file_path, save_path).get_markdown()
-        elif file_path.endswith('xmind'):
-            file_content = reader_fns.XmindHandle(file_path, save_path).get_markdown()
-        elif file_path.endswith('mp4'):
-            file_content = yield from audio_comparison_of_video_converters([file_path], chatbot, history)
-        elif file_path.endswith('xlsx') or file_path.endswith('xls'):
-            sheet, = json_args_return(plugin_kwargs, keys=['读取指定Sheet'], default='测试要点')
-            # 创建文件对象
-            ex_handle = reader_fns.XlsxHandler(file_path, save_path, sheet=sheet)
-            if sheet in ex_handle.workbook.sheetnames:
-                ex_handle.split_merged_cells()
-                xlsx_dict = ex_handle.read_as_dict()
-                file_content = xlsx_dict.get(sheet)
-            else:
-                active_sheet = ex_handle.workbook.active.title
-                ex_handle.sheet = active_sheet
-                ex_handle.split_merged_cells()
-                xlsx_dict = ex_handle.read_as_dict()
-                file_content = xlsx_dict.get(active_sheet)
-                xlsx_bro = f'\n\n无法在`{os.path.basename(file_path)}`找到`{sheet}`工作表，' \
-                           f'将读取上次预览的活动工作表`{active_sheet}`，' \
-                           f'若你的用例工作表是其他名称, 请及时暂停插件运行，并在自定义插件配置中更改' \
-                           f'{func_box.html_tag_color("读取指定Sheet")}。'
-                chatbot[-1][1] = chatbot[-1][1] + xlsx_bro
-            plugin_kwargs['写入指定模版'] = file_path
-            plugin_kwargs['写入指定Sheet'] = ex_handle.sheet
-            yield from toolbox.update_ui(chatbot, history)
-        else:
-            with open(file_path, mode='r', encoding='utf-8') as f:
-                file_content = f.read()
-        file_limit[file_path] = file_content
+        content, status = file_reader_content(file_path, save_path, plugin_kwargs)
+        file_limit[file_path] = content
+        chatbot[-1][1] += status
         yield from toolbox.update_ui(chatbot, history)
     return file_limit
 
@@ -792,6 +800,13 @@ def audio_extraction_text(file):
     return text
 
 
+def video_converters(file):
+    temp_path = os.path.join(os.path.dirname(file), f"{os.path.basename(file)}.wav")
+    videoclip = AudioFileClip(file)
+    videoclip.write_audiofile(temp_path)
+    return audio_extraction_text(temp_path)
+
+
 def audio_comparison_of_video_converters(files, chatbot, history):
     temp_chat = ''
     chatbot.append(['可以开始了么', temp_chat])
@@ -800,10 +815,8 @@ def audio_comparison_of_video_converters(files, chatbot, history):
         temp_chat += f'正在将{func_box.html_view_blank(file)}文件转换为可提取的音频文件.\n\n'
         chatbot[-1] = ['可以开始了么', temp_chat]
         yield from toolbox.update_ui(chatbot=chatbot, history=history)
-        temp_path = os.path.join(os.path.dirname(file), f"{os.path.basename(file)}.wav")
-        videoclip = AudioFileClip(file)
-        videoclip.write_audiofile(temp_path)
-        temp_list.extend((temp_path, audio_extraction_text(temp_path)))
+        converter_results = video_converters(file)
+        temp_list.extend((file, converter_results))
     return temp_list
 
 

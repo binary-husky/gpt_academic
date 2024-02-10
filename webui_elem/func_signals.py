@@ -130,8 +130,7 @@ def clear_input(inputs, cookies, ipaddr: gr.Request):
     output = [gr.update(value=''), inputs, gr.update(visible=True), gr.update(visible=False),
               gr.update(choices=only_name, value=cookies['first_chat']), gr.update(value=None)]
     yield output
-    logger.info(f"{cookies['llm_model']}_{user_addr}: {inputs[:100]} {'.'*10}")
-
+    logger.info(f"{cookies['llm_model']}_{user_addr}: {inputs[:100]} {'.' * 10}")
 
 
 def stop_chat_refresh(chatbot, cookies, ipaddr: gr.Request):
@@ -410,7 +409,7 @@ def prompt_delete(pro_name, prompt_dict, select_check, ipaddr: gr.Request):
         raise gr.Error(f'无法删除不属于你创建的 {pro_name}，如有紧急需求，请联系管理员')
     data = prompt_retrieval(prompt_cls=None, hosts=user_addr)
     prompt_dict['samples'] = data
-    toast = gr.update(value=func_box.spike_toast(f'`{name}` 删除成功'), visible=True)
+    toast = gr.update(value=func_box.spike_toast(f'`{pro_name}` 删除成功'), visible=True)
     yield gr.update(samples=data, visible=True), prompt_dict, toast
     time.sleep(1)
     yield gr.update(samples=data, visible=True), prompt_dict, gr.update(visible=False)
@@ -632,6 +631,22 @@ def mask_clear_all(data, state, info):
         return [['system', '']]
 
 
+def reader_analysis_output(file: gr.File, choice, ipaddr: gr.Request):
+    from crazy_functions.reader_fns.crazy_box import file_reader_content
+    user_mark = func_box.user_client_mark(ipaddr)
+    save_path = os.path.join(init_path.private_files_path, user_mark, 'reader')
+    content, status = file_reader_content(file_path=file.name, save_path=save_path, plugin_kwargs={})
+    if isinstance(content, list):
+        content = func_box.to_markdown_tabs(head=content[0], tabs=content[1:], column=True)
+    tokens = func_box.num_tokens_from_string([content])
+
+    toast = gr.update(value=func_box.spike_toast(content=f'Submitting a dialog is expected to consume: `{tokens}`',
+                                                 title='Completed'), visible=True)
+    yield content, gr.Textbox.update(label=f'{tokens} Token', value=content), toast
+    time.sleep(2)
+    yield content, gr.Textbox.update(label=f'{tokens} Token', value=content), gr.update(visible=False)
+
+
 # TODO < -------------------------------- 页面刷新函数注册区 -------------------------------->
 def mobile_access(request: gr.Request):  # 为适配手机端
     user_agent = request.kwargs['headers']['user-agent'].lower()
@@ -655,7 +670,8 @@ def refresh_load_data(prompt, request: gr.Request):
     data = prompt_retrieval(prompt_cls=is_all, hosts=user_addr)
     prompt['samples'] = data
     know_list = os.listdir(init_path.private_knowledge_path)
-    load_list, user_list = func_box.get_directory_list(os.path.join(init_path.private_knowledge_path, '知识库'), user_addr)
+    load_list, user_list = func_box.get_directory_list(os.path.join(init_path.private_knowledge_path, '知识库'),
+                                                       user_addr)
     know_cls = gr.update(choices=know_list, value='知识库', show_label=True)
     know_load = gr.update(choices=load_list, label='知识库', show_label=True)
     know_user = gr.update(choices=user_list, show_label=True)
