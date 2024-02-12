@@ -12,6 +12,12 @@ class PaperFileGroup():
         self.sp_file_index = []
         self.sp_file_tag = []
 
+        # count_token
+        from request_llms.bridge_all import model_info
+        enc = model_info["gpt-3.5-turbo"]['tokenizer']
+        def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))
+        self.get_token_num = get_token_num
+
     def run_file_split(self, max_token_limit=1900):
         """
         将长文本分离开来
@@ -54,7 +60,7 @@ def parseNotebook(filename, enable_markdown=1):
         Code += f"This is {idx+1}th code block: \n"
         Code += code+"\n"
 
-    return Code 
+    return Code
 
 
 def ipynb解释(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
