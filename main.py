@@ -65,7 +65,7 @@ def main():
     proxy_info = check_proxy(proxies)
 
     gr_L1 = lambda: gr.Row().style()
-    gr_L2 = lambda scale, elem_id: gr.Column(scale=scale, elem_id=elem_id)
+    gr_L2 = lambda scale, elem_id: gr.Column(scale=scale, elem_id=elem_id, min_width=400)
     if LAYOUT == "TOP-DOWN":
         gr_L1 = lambda: DummyWith()
         gr_L2 = lambda scale, elem_id: gr.Row()
