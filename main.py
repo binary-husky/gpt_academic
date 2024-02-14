@@ -225,6 +225,16 @@ def main():
                             persistent_cookie_ = to_cookie_str(persistent_cookie_)          # persistent cookie to dict
                             ret.update({py_pickle_cookie: persistent_cookie_})             # write persistent cookie
                             return ret
+
+                        # update btn
+                        h = basic_fn_confirm.click(assign_btn, [py_pickle_cookie, cookies, basic_btn_dropdown, basic_fn_title, basic_fn_prefix, basic_fn_suffix],
+                                                   [py_pickle_cookie, cookies, *customize_btns.values(), *predefined_btns.values()])
+                        h.then(None, [py_pickle_cookie], None, _js="""(py_pickle_cookie)=>{setCookie("py_pickle_cookie", py_pickle_cookie, 365);}""")
+                        # clean up btn
+                        h2 = basic_fn_clean.click(assign_btn, [py_pickle_cookie, cookies, basic_btn_dropdown, basic_fn_title, basic_fn_prefix, basic_fn_suffix, gr.State(True)],
+                                                   [py_pickle_cookie, cookies, *customize_btns.values(), *predefined_btns.values()])
+                        h2.then(None, [py_pickle_cookie], None, _js="""(py_pickle_cookie)=>{setCookie("py_pickle_cookie", py_pickle_cookie, 365);}""")
+
                         def persistent_cookie_reload(persistent_cookie_, cookies_):
                             ret = {}
                             for k in customize_btns:
@@ -242,14 +252,6 @@ def main():
                                 if k in customize_btns: ret.update({customize_btns[k]: gr.update(visible=True, value=v['Title'])})
                                 else: ret.update({predefined_btns[k]: gr.update(visible=True, value=v['Title'])})
                             return ret
-                        # update btn
-                        h = basic_fn_confirm.click(assign_btn, [py_pickle_cookie, cookies, basic_btn_dropdown, basic_fn_title, basic_fn_prefix, basic_fn_suffix],
-                                                   [py_pickle_cookie, cookies, *customize_btns.values(), *predefined_btns.values()])
-                        h.then(None, [py_pickle_cookie], None, _js="""(py_pickle_cookie)=>{setCookie("py_pickle_cookie", py_pickle_cookie, 365);}""")
-                        # clean up btn
-                        h2 = basic_fn_clean.click(assign_btn, [py_pickle_cookie, cookies, basic_btn_dropdown, basic_fn_title, basic_fn_prefix, basic_fn_suffix, gr.State(True)],
-                                                   [py_pickle_cookie, cookies, *customize_btns.values(), *predefined_btns.values()])
-                        h2.then(None, [py_pickle_cookie], None, _js="""(py_pickle_cookie)=>{setCookie("py_pickle_cookie", py_pickle_cookie, 365);}""")
 
         # 功能区显示开关与功能区的互动
         def fn_area_visibility(a):
@@ -367,6 +369,7 @@ def main():
             def deal_audio(audio, cookies):
                 rad.feed(cookies['uuid'].hex, audio)
             audio_mic.stream(deal_audio, inputs=[audio_mic, cookies])
+
 
         demo.load(init_cookie, inputs=[cookies], outputs=[cookies])
         demo.load(persistent_cookie_reload, inputs = [py_pickle_cookie, cookies],
