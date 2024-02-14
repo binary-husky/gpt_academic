@@ -746,35 +746,61 @@ function loadLive2D() {
     } catch (err) { console.log("[Error] JQuery is not defined.") }
 }
 
-function set_checkbox(key, bool) {
+function get_checkbox_selected_items(elem_id){
+    display_panel_arr = [];
+    document.getElementById(elem_id).querySelector('[data-testid="checkbox-group"]').querySelectorAll('label').forEach(label => {
+        // Get the span text
+        const spanText = label.querySelector('span').textContent;
+        // Get the input value
+        const checked = label.querySelector('input').checked;
+        if (checked) {
+            display_panel_arr.push(spanText)
+        }
+    });
+    return display_panel_arr;
+}
+
+function set_checkbox(key, bool, set_twice=false) {
     set_success = false;
-    document.getElementById("cbsc").querySelector('[data-testid="checkbox-group"]').querySelectorAll('label').forEach(label => {
-        // Get the span text
-        const spanText = label.querySelector('span').textContent;
-        if (spanText === key) {
-            label.classList.add('selected');
-            label.querySelector('input').checked = bool;
-            set_success = true;
-            return
-        }
+    elem_ids = ["cbsc", "cbs"]
+    elem_ids.forEach(id => {
+        document.getElementById(id).querySelector('[data-testid="checkbox-group"]').querySelectorAll('label').forEach(label => {
+            // Get the span text
+            const spanText = label.querySelector('span').textContent;
+            if (spanText === key) {
+                if (bool){
+                    label.classList.add('selected');
+                } else {
+                    if (label.classList.contains('selected')) {
+                        label.classList.remove('selected');
+                    }
+                }
+                if (set_twice){
+                    setTimeout(() => {
+                        if (bool){
+                            label.classList.add('selected');
+                        } else {
+                            if (label.classList.contains('selected')) {
+                                label.classList.remove('selected');
+                            }
+                        }
+                    }, 5000);
+                }
+
+                label.querySelector('input').checked = bool;
+                set_success = true;
+                return
+            }
+        });
     });
-    document.getElementById("cbs").querySelector('[data-testid="checkbox-group"]').querySelectorAll('label').forEach(label => {
-        // Get the span text
-        const spanText = label.querySelector('span').textContent;
-        if (spanText === key) {
-            label.classList.add('selected');
-            label.querySelector('input').checked = bool;
-            set_success = true;
-            return
-        }
-    });
+
     if (!set_success){
         console.log("设置checkbox失败，没有找到对应的key")
     }
 }
 
 function apply_cookie_for_checkbox(dark) {
-    console.log("apply_cookie_for_checkboxes")
+    // console.log("apply_cookie_for_checkboxes")
     let searchString = "输入清除键";
     let bool_value = "False";
 
@@ -831,16 +857,7 @@ function apply_cookie_for_checkbox(dark) {
     } else {
         // do not have cookie
         // get conf
-        display_panel_arr = []
-        document.getElementById("cbsc").querySelector('[data-testid="checkbox-group"]').querySelectorAll('label').forEach(label => {
-            // Get the span text
-            const spanText = label.querySelector('span').textContent;
-            // Get the input value
-            const inputValue = label.querySelector('input').value;
-            if (label.classList.contains('selected')) {
-                display_panel_arr.push(spanText)
-            }
-        });
+        display_panel_arr = get_checkbox_selected_items("cbsc");
         searchString = "添加Live2D形象";
         if (display_panel_arr.includes(searchString)) {
             loadLive2D();

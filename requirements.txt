@@ -4,7 +4,7 @@ pypdf2==2.12.1
 zhipuai>=2
 tiktoken>=0.3.3
 requests[socks]
-pydantic
+pydantic==2.5.2
 protobuf==3.18
 transformers>=4.27.1
 scipdf_parser>=0.52

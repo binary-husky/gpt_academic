@@ -128,16 +128,7 @@ js_code_show_or_hide = """
 (display_panel_arr)=>{
 setTimeout(() => {
     // get conf
-    display_panel_arr = []
-    document.getElementById("cbs").querySelector('[data-testid="checkbox-group"]').querySelectorAll('label').forEach(label => {
-        // Get the span text
-        const spanText = label.querySelector('span').textContent;
-        // Get the input value
-        const inputValue = label.querySelector('input').value;
-        if (label.classList.contains('selected')){
-            display_panel_arr.push(spanText)
-        }
-    });
+    display_panel_arr = get_checkbox_selected_items("cbs");
 
     ////////////////////// 输入清除键 ///////////////////////////
     let searchString = "输入清除键";
@@ -185,18 +176,9 @@ setTimeout(() => {
 js_code_show_or_hide_group2 = """
 (display_panel_arr)=>{
 setTimeout(() => {
-
+    // console.log("display_panel_arr");
     // get conf
-    display_panel_arr = []
-    document.getElementById("cbsc").querySelector('[data-testid="checkbox-group"]').querySelectorAll('label').forEach(label => {
-        // Get the span text
-        const spanText = label.querySelector('span').textContent;
-        // Get the input value
-        const inputValue = label.querySelector('input').value;
-        if (label.classList.contains('selected')){
-            display_panel_arr.push(spanText)
-        }
-    });
+    display_panel_arr = get_checkbox_selected_items("cbsc");
 
     ////////////////////// 添加Live2D形象 ///////////////////////////
     let searchString = "添加Live2D形象";
