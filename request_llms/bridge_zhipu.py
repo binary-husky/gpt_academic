@@ -65,7 +65,8 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     if additional_fn is not None:
         from core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
-    yield from update_ui(chatbot=chatbot, history=history)
+        chatbot[-1] = [inputs, ""]
+        yield from update_ui(chatbot=chatbot, history=history)
 
     if llm_kwargs["llm_model"] == "zhipuai":
         llm_kwargs["llm_model"] = zhipuai_default_model
