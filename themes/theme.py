@@ -104,7 +104,7 @@ js_code_for_toggle_darkmode = """() => {
 }"""
 
 
-js_code_for_persistent_cookie_init = """(persistent_cookie, cookie) => {
+js_code_for_persistent_cookie_init = """(py_pickle_cookie, cookie) => {
     return [getCookie("py_pickle_cookie"), cookie];
 }
 """
