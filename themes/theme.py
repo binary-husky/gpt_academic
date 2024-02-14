@@ -46,8 +46,7 @@ cookie相关工具函数
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 """
 
-
-def init_cookie(cookies, chatbot):
+def init_cookie(cookies):
     # 为每一位访问的用户赋予一个独一无二的uuid编码
     cookies.update({"uuid": uuid.uuid4()})
     return cookies
@@ -91,31 +90,107 @@ js_code_for_css_changing = """(css) => {
 }
 """
 
-js_code_for_darkmode_init = """(dark) => {
-    dark = dark == "True";
-    if (document.querySelectorAll('.dark').length) {
-        if (!dark){
-            document.querySelectorAll('.dark').forEach(el => el.classList.remove('dark'));
-        }
-    } else {
-        if (dark){
-            document.querySelector('body').classList.add('dark');
-        }
-    }
-}
-"""
 
 js_code_for_toggle_darkmode = """() => {
     if (document.querySelectorAll('.dark').length) {
+        setCookie("js_darkmode_cookie", "False", 365);
         document.querySelectorAll('.dark').forEach(el => el.classList.remove('dark'));
     } else {
+        setCookie("js_darkmode_cookie", "True", 365);
         document.querySelector('body').classList.add('dark');
     }
     document.querySelectorAll('code_pending_render').forEach(code => {code.remove();})
 }"""
 
 
-js_code_for_persistent_cookie_init = """(persistent_cookie) => {
-    return getCookie("persistent_cookie");
+js_code_for_persistent_cookie_init = """(py_pickle_cookie, cookie) => {
+    return [getCookie("py_pickle_cookie"), cookie];
+}
+"""
+
+
+js_code_reset = """
+(a,b,c)=>{
+    return [[], [], "已重置"];
+}
+"""
+
+
+js_code_clear = """
+(a,b)=>{
+    return ["", ""];
+}
+"""
+
+
+js_code_show_or_hide = """
+(display_panel_arr)=>{
+setTimeout(() => {
+    // get conf
+    display_panel_arr = get_checkbox_selected_items("cbs");
+
+    ////////////////////// 输入清除键 ///////////////////////////
+    let searchString = "输入清除键";
+    let ele = "none";
+    if (display_panel_arr.includes(searchString)) {
+        let clearButton = document.getElementById("elem_clear");
+        let clearButton2 = document.getElementById("elem_clear2");
+        clearButton.style.display = "block";
+        clearButton2.style.display = "block";
+        setCookie("js_clearbtn_show_cookie", "True", 365);
+    } else {
+        let clearButton = document.getElementById("elem_clear");
+        let clearButton2 = document.getElementById("elem_clear2");
+        clearButton.style.display = "none";
+        clearButton2.style.display = "none";
+        setCookie("js_clearbtn_show_cookie", "False", 365);
+    }
+
+    ////////////////////// 基础功能区 ///////////////////////////
+    searchString = "基础功能区";
+    if (display_panel_arr.includes(searchString)) {
+        ele = document.getElementById("basic-panel");
+        ele.style.display = "block";
+    } else {
+        ele = document.getElementById("basic-panel");
+        ele.style.display = "none";
+    }
+
+    ////////////////////// 函数插件区 ///////////////////////////
+    searchString = "函数插件区";
+    if (display_panel_arr.includes(searchString)) {
+        ele = document.getElementById("plugin-panel");
+        ele.style.display = "block";
+    } else {
+        ele = document.getElementById("plugin-panel");
+        ele.style.display = "none";
+    }
+
+}, 50);
+}
+"""
+
+
+
+js_code_show_or_hide_group2 = """
+(display_panel_arr)=>{
+setTimeout(() => {
+    // console.log("display_panel_arr");
+    // get conf
+    display_panel_arr = get_checkbox_selected_items("cbsc");
+
+    ////////////////////// 添加Live2D形象 ///////////////////////////
+    let searchString = "添加Live2D形象";
+    let ele = "none";
+    if (display_panel_arr.includes(searchString)) {
+        setCookie("js_live2d_show_cookie", "True", 365);
+        loadLive2D();
+    } else {
+        setCookie("js_live2d_show_cookie", "False", 365);
+        $('.waifu').hide();
+    }
+
+
+}, 50);
 }
 """

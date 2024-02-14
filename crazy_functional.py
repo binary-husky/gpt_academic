@@ -70,11 +70,11 @@ def get_crazy_functions():
             "Info": "清除所有缓存文件，谨慎操作 | 不需要输入参数",
             "Function": HotReload(清除缓存),
         },
-        "生成多种Mermaid图表(从当前对话或文件(.pdf/.md)中生产图表）": {
+        "生成多种Mermaid图表(从当前对话或路径(.pdf/.md/.docx)中生产图表）": {
             "Group": "对话",
             "Color": "stop",
             "AsButton": False,
-            "Info" : "基于当前对话或PDF生成多种Mermaid图表,图表类型由模型判断",
+            "Info" : "基于当前对话或文件生成多种Mermaid图表,图表类型由模型判断",
             "Function": HotReload(生成多种Mermaid图表),
             "AdvancedArgs": True,
             "ArgsReminder": "请输入图类型对应的数字,不输入则为模型自行判断:1-流程图,2-序列图,3-类图,4-饼图,5-甘特图,6-状态图,7-实体关系图,8-象限提示图,9-思维导图",
@@ -532,8 +532,9 @@ def get_crazy_functions():
         print("Load function plugin failed")
 
     try:
-        from crazy_functions.Latex输出PDF结果 import Latex英文纠错加PDF对比
-        from crazy_functions.Latex输出PDF结果 import Latex翻译中文并重新编译PDF
+        from crazy_functions.Latex输出PDF import Latex英文纠错加PDF对比
+        from crazy_functions.Latex输出PDF import Latex翻译中文并重新编译PDF
+        from crazy_functions.Latex输出PDF import PDF翻译中文并重新编译PDF
 
         function_plugins.update(
             {
@@ -550,9 +551,9 @@ def get_crazy_functions():
                     "Color": "stop",
                     "AsButton": False,
                     "AdvancedArgs": True,
-                    "ArgsReminder": "如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "
-                    + "例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
-                    + 'If the term "agent" is used in this section, it should be translated to "智能体". ',
+                    "ArgsReminder": r"如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "
+                                    r"例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
+                                    r'If the term "agent" is used in this section, it should be translated to "智能体". ',
                     "Info": "Arixv论文精细翻译 | 输入参数arxiv论文的ID，比如1812.10695",
                     "Function": HotReload(Latex翻译中文并重新编译PDF),
                 },
@@ -561,11 +562,22 @@ def get_crazy_functions():
                     "Color": "stop",
                     "AsButton": False,
                     "AdvancedArgs": True,
-                    "ArgsReminder": "如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "
-                    + "例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
-                    + 'If the term "agent" is used in this section, it should be translated to "智能体". ',
+                    "ArgsReminder": r"如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "
+                                    r"例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
+                                    r'If the term "agent" is used in this section, it should be translated to "智能体". ',
                     "Info": "本地Latex论文精细翻译 | 输入参数是路径",
                     "Function": HotReload(Latex翻译中文并重新编译PDF),
+                },
+                "PDF翻译中文并重新编译PDF（上传PDF）[需Latex]": {
+                    "Group": "学术",
+                    "Color": "stop",
+                    "AsButton": False,
+                    "AdvancedArgs": True,
+                    "ArgsReminder": r"如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "
+                                    r"例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
+                                    r'If the term "agent" is used in this section, it should be translated to "智能体". ',
+                    "Info": "PDF翻译中文，并重新编译PDF | 输入参数为路径",
+                    "Function": HotReload(PDF翻译中文并重新编译PDF)
                 }
             }
         )

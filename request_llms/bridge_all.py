@@ -31,6 +31,9 @@ from .bridge_qianfan import predict as qianfan_ui
 from .bridge_google_gemini import predict as genai_ui
 from .bridge_google_gemini import predict_no_ui_long_connection  as genai_noui
 
+from .bridge_zhipu import predict_no_ui_long_connection as zhipu_noui
+from .bridge_zhipu import predict as zhipu_ui
+
 colors = ['#FF00FF', '#00FFFF', '#FF0000', '#990099', '#009999', '#990044']
 
 class LazyloadTiktoken(object):
@@ -44,13 +47,13 @@ class LazyloadTiktoken(object):
         tmp = tiktoken.encoding_for_model(model)
         print('加载tokenizer完毕')
         return tmp
-    
+
     def encode(self, *args, **kwargs):
-        encoder = self.get_encoder(self.model) 
+        encoder = self.get_encoder(self.model)
         return encoder.encode(*args, **kwargs)
-    
+
     def decode(self, *args, **kwargs):
-        encoder = self.get_encoder(self.model) 
+        encoder = self.get_encoder(self.model)
         return encoder.decode(*args, **kwargs)
 
 # Endpoint 重定向
@@ -63,7 +66,7 @@ azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/compl
 # 兼容旧版的配置
 try:
     API_URL = get_conf("API_URL")
-    if API_URL != "https://api.openai.com/v1/chat/completions": 
+    if API_URL != "https://api.openai.com/v1/chat/completions":
         openai_endpoint = API_URL
         print("警告！API_URL配置选项将被弃用，请更换为API_URL_REDIRECT配置")
 except:
@@ -95,7 +98,7 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
-    
+
     "gpt-3.5-turbo-16k": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
@@ -185,7 +188,7 @@ model_info = {
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
     },
-    
+
     "gpt-4-vision-preview": {
         "fn_with_ui": chatgpt_vision_ui,
         "fn_without_ui": chatgpt_vision_noui,
@@ -215,16 +218,25 @@ model_info = {
         "token_cnt": get_token_num_gpt4,
     },
 
-    # api_2d (此后不需要在此处添加api2d的接口了，因为下面的代码会自动添加)
-    "api2d-gpt-3.5-turbo": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": api2d_endpoint,
-        "max_token": 4096,
+    # 智谱AI
+    "glm-4": {
+        "fn_with_ui": zhipu_ui,
+        "fn_without_ui": zhipu_noui,
+        "endpoint": None,
+        "max_token": 10124 * 8,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+    "glm-3-turbo": {
+        "fn_with_ui": zhipu_ui,
+        "fn_without_ui": zhipu_noui,
+        "endpoint": None,
+        "max_token": 10124 * 4,
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
 
+    # api_2d (此后不需要在此处添加api2d的接口了，因为下面的代码会自动添加)
     "api2d-gpt-4": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
@@ -580,19 +592,17 @@ if "llama2" in AVAIL_LLM_MODELS:   # llama2
         })
     except:
         print(trimmed_format_exc())
-if "zhipuai" in AVAIL_LLM_MODELS:   # zhipuai
+if "zhipuai" in AVAIL_LLM_MODELS:   # zhipuai 是glm-4的别名，向后兼容配置
     try:
-        from .bridge_zhipu import predict_no_ui_long_connection as zhipu_noui
-        from .bridge_zhipu import predict as zhipu_ui
         model_info.update({
             "zhipuai": {
                 "fn_with_ui": zhipu_ui,
                 "fn_without_ui": zhipu_noui,
                 "endpoint": None,
-                "max_token": 4096,
+                "max_token": 10124 * 8,
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
-            }
+            },
         })
     except:
         print(trimmed_format_exc())
@@ -635,7 +645,7 @@ AZURE_CFG_ARRAY = get_conf("AZURE_CFG_ARRAY")
 if len(AZURE_CFG_ARRAY) > 0:
     for azure_model_name, azure_cfg_dict in AZURE_CFG_ARRAY.items():
         # 可能会覆盖之前的配置，但这是意料之中的
-        if not azure_model_name.startswith('azure'): 
+        if not azure_model_name.startswith('azure'):
             raise ValueError("AZURE_CFG_ARRAY中配置的模型必须以azure开头")
         endpoint_ = azure_cfg_dict["AZURE_ENDPOINT"] + \
             f'openai/deployments/{azure_cfg_dict["AZURE_ENGINE"]}/chat/completions?api-version=2023-05-15'
@@ -701,7 +711,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
         executor = ThreadPoolExecutor(max_workers=4)
         models = model.split('&')
         n_model = len(models)
-        
+
         window_len = len(observe_window)
         assert window_len==3
         window_mutex = [["", time.time(), ""] for _ in range(n_model)] + [True]
@@ -720,7 +730,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
                 time.sleep(0.25)
                 if not window_mutex[-1]: break
                 # 看门狗（watchdog）
-                for i in range(n_model): 
+                for i in range(n_model):
                     window_mutex[i][1] = observe_window[1]
                 # 观察窗（window）
                 chat_string = []
