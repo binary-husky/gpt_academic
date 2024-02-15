@@ -140,6 +140,8 @@ def model_selection(txt, models, llm_kwargs, plugin_kwargs, chatbot_with_cookie,
                                                                               llm_kwargs, plugin_kwargs, ['*'],
                                                                               fp_file)
             txt_proc = "\n\n---\n\n".join([v for i, v in enumerate(input_embedding_content) if i % 2 == 1])
+        else:
+            yield from update_ui(chatbot_with_cookie, history, msg='Switching to normal dialog...')
     return txt_proc
 
 
