@@ -129,7 +129,9 @@ div.svelte-15lo0d8>*, div.svelte-15lo0d8>.form>* {
 /*.hide.svelte-vt1mxs {*/
 /*    display: none !important;*/
 /*}*/
-
+.elem-center {
+    align-items: center;
+}
 code.language-folded {
     display: -webkit-box;
     -webkit-line-clamp: 10;   /*展示一点点*/

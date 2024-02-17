@@ -9,9 +9,10 @@ pypdf2==2.12.1
 transformers>=4.27.1
 scipdf_parser>=0.52
 scipdf_parser>=0.3
+langchain==0.0.354
+langchain-experimental==0.0.47
 
 # Dependencies
-zhipuai
 requests[socks]
 pyperclip
 scikit-learn

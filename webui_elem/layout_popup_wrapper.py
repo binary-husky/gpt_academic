@@ -202,7 +202,17 @@ class Prompt:
     def _draw_langchain_base(self):
         spl = toolbox.get_conf('spl')
         with gr.TabItem('知识库构建', id='langchain_tab', elem_id='langchain_tab'):
-            with gr.Row():
+            with gr.Row(elem_classes='elem-center'):
+                self.knowledge_base_select = gr.Dropdown(choices=[], value="新建知识库", interactive=True,
+                                                         label="选择现有知识库或新建知识库", allow_custom_value=True,
+                                                         elem_classes='normal_select', container=False)
+
+                with gr.Row() as self.new_knowledge_base:
+                    pass
+
+                with gr.Row() as self.edit_knowledge_base:
+                    pass
+
                 with gr.Column(elem_classes='column_left'):
                     self.langchain_upload = gr.Files(label="支持解析多类型文档，多文件建议使用zip上传",
                                                      file_count="multiple", file_types=spl)
@@ -221,7 +231,7 @@ class Prompt:
                     with gr.Row():
                         self.langchain_select = gr.Dropdown(choices=[], value=r"", allow_custom_value=True,
                                                             interactive=True, label="新建or增量重构",
-                                                            elem_classes=['normal_select', 'remove-sr-hide'],
+                                                            elem_classes=['normal_select'],
                                                             container=False)
                         self.langchain_name = gr.Textbox(show_label=False, placeholder='已有知识库重命名',
                                                          container=False, visible=False,
@@ -241,7 +251,7 @@ class Prompt:
                                                  show_label=False)
                 with gr.Column(elem_classes='column_left'):
                     self.reader_choice = gr.Dropdown(label='Read Mode', choices=['Markdown', 'Developing...'],
-                                                     value='Markdown', allow_custom_value=False, interactive=True,)
+                                                     value='Markdown', allow_custom_value=False, interactive=True, )
                 with gr.Column(elem_classes='column_left'):
                     missing_description = """
                     ## File Preview\n\n
