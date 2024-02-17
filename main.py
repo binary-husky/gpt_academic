@@ -103,20 +103,17 @@ def main():
                 with gr.Accordion("输入区", open=True, elem_id="input-panel") as area_input_primary:
                     with gr.Row():
                         txt = gr.Textbox(show_label=False, placeholder="Input question here.",
-                                         elem_id='user_input_main').style(container=False)
+                                         elem_id='user_input_main', container=False)
                     with gr.Row():
                         submitBtn = gr.Button("提交", elem_id="elem_submit", variant="primary")
                     with gr.Row():
-                        resetBtn = gr.Button("重置", elem_id="elem_reset", variant="secondary");
-                        resetBtn.style(size="sm")
-                        stopBtn = gr.Button("停止", elem_id="elem_stop", variant="secondary");
-                        stopBtn.style(size="sm")
-                        clearBtn = gr.Button("清除", elem_id="elem_clear", variant="secondary", visible=False);
-                        clearBtn.style(size="sm")
+                        resetBtn = gr.Button("重置", elem_id="elem_reset", variant="secondary", size="sm")
+                        stopBtn = gr.Button("停止", elem_id="elem_stop", variant="secondary", size="sm")
+                        clearBtn = gr.Button("清除", elem_id="elem_clear", variant="secondary", size="sm", visible=False)
                     if ENABLE_AUDIO:
                         with gr.Row():
                             audio_mic = gr.Audio(source="microphone", type="numpy", elem_id="elem_audio",
-                                                 streaming=True, show_label=False).style(container=False)
+                                                 streaming=True, show_label=False, container=False)
                     with gr.Row():
                         status = gr.Markdown(
                             f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {proxy_info}",
@@ -125,14 +122,12 @@ def main():
                     with gr.Row():
                         for k in range(NUM_CUSTOM_BASIC_BTN):
                             customize_btn = gr.Button("自定义按钮" + str(k + 1), visible=False, variant="secondary",
-                                                      info_str=f'基础功能区: 自定义按钮')
-                            customize_btn.style(size="sm")
+                                                      info_str=f'基础功能区: 自定义按钮', size="sm")
                             customize_btns.update({"自定义按钮" + str(k + 1): customize_btn})
                         for k in functional:
                             if ("Visible" in functional[k]) and (not functional[k]["Visible"]): continue
                             variant = functional[k]["Color"] if "Color" in functional[k] else "secondary"
-                            functional[k]["Button"] = gr.Button(k, variant=variant, info_str=f'基础功能区: {k}')
-                            functional[k]["Button"].style(size="sm")
+                            functional[k]["Button"] = gr.Button(k, variant=variant, info_str=f'基础功能区: {k}', size="sm")
                             predefined_btns.update({k: functional[k]["Button"]})
                 with gr.Accordion("函数插件区", open=True, elem_id="plugin-panel") as area_crazy_fn:
                     with gr.Row():
@@ -141,17 +136,16 @@ def main():
                         plugin_group_sel = gr.Dropdown(choices=all_plugin_groups, label='', show_label=False,
                                                        value=DEFAULT_FN_GROUPS,
                                                        multiselect=True, interactive=True,
-                                                       elem_classes='normal_mut_select').style(container=False)
+                                                       elem_classes='normal_mut_select', container=False)
                     with gr.Row():
                         for k, plugin in plugins.items():
                             if not plugin.get("AsButton", True): continue
                             visible = True if match_group(plugin['Group'], DEFAULT_FN_GROUPS) else False
                             variant = plugins[k]["Color"] if "Color" in plugin else "secondary"
                             info = plugins[k].get("Info", k)
-                            plugin['Button'] = plugins[k]['Button'] = gr.Button(k, variant=variant,
+                            plugin['Button'] = plugins[k]['Button'] = gr.Button(k, variant=variant, size="sm",
                                                                                 visible=visible,
-                                                                                info_str=f'函数插件区: {info}').style(
-                                size="sm")
+                                                                                info_str=f'函数插件区: {info}')
                     with gr.Row():
                         with gr.Accordion("更多函数插件", open=True):
                             dropdown_fn_list = []
@@ -162,14 +156,14 @@ def main():
                                 elif plugin.get('AdvancedArgs', False):
                                     dropdown_fn_list.append(k)  # 对于需要高级参数的插件，亦在下拉菜单中显示
                             with gr.Row():
-                                dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="",
-                                                       show_label=False).style(container=False)
+                                dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="", container=False,
+                                                       show_label=False)
                             with gr.Row():
                                 plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False,
-                                                                 placeholder="这里是特殊函数插件的高级参数输入区").style(
-                                    container=False)
+                                                                 placeholder="这里是特殊函数插件的高级参数输入区",
+                                                                 container=False)
                             with gr.Row():
-                                switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary").style(size="sm")
+                                switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary", size="sm")
                     with gr.Row():
                         with gr.Accordion("点击展开“文件下载区”。", open=False) as area_file_up:
                             file_upload = gr.Files(label="任何文件, 推荐上传压缩文件(zip, tar)", file_count="multiple",
@@ -184,8 +178,8 @@ def main():
                                              elem_id="elem_upload_float")
 
                 with gr.Tab("更换模型", elem_id="interact-panel"):
-                    md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(
-                        container=False)
+                    md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源",
+                                              container=False)
                     top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01, interactive=True,
                                       label="Top-p (nucleus sampling)", )
                     temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True,
@@ -196,10 +190,11 @@ def main():
                                                label="System prompt", value=INIT_SYS_PROMPT)
 
                 with gr.Tab("界面外观", elem_id="interact-panel"):
-                    theme_dropdown = gr.Dropdown(AVAIL_THEMES, value=THEME, label="更换UI主题").style(container=False)
+                    theme_dropdown = gr.Dropdown(AVAIL_THEMES, value=THEME, label="更换UI主题",
+                                                 container=False)
                     checkboxes = gr.CheckboxGroup(
                         ["基础功能区", "函数插件区", "浮动输入区", "输入清除键", "插件参数区"],
-                        value=["基础功能区", "函数插件区"], label="显示/隐藏功能区", elem_id='cbs').style(
+                        value=["基础功能区", "函数插件区"], label="显示/隐藏功能区", elem_id='cbs',
                         container=False)
                     checkboxes_2 = gr.CheckboxGroup(["自定义菜单"],
                                                     value=[], label="显示/隐藏自定义菜单", elem_id='cbsc').style(

@@ -1,4 +1,3 @@
-
 def check_proxy(proxies):
     import requests
     proxies_https = proxies['https'] if proxies is not None else '无'
@@ -27,8 +26,11 @@ def check_proxy(proxies):
 def _check_with_backup_source(proxies):
     import random, string, requests
     random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=32))
-    try: return requests.get(f"http://{random_string}.edns.ip-api.com/json", proxies=proxies, timeout=4).json()['dns']['geo']
-    except: return None
+    try:
+        return requests.get(f"http://{random_string}.edns.ip-api.com/json", proxies=proxies, timeout=4).json()['dns'][
+            'geo']
+    except:
+        return None
 
 
 def backup_and_download(current_version, remote_version):
@@ -48,9 +50,12 @@ def backup_and_download(current_version, remote_version):
     os.makedirs(new_version_dir)
     shutil.copytree('./', backup_dir, ignore=lambda x, y: ['history'])
     proxies = get_conf('proxies')
-    try:    r = requests.get('https://github.com/binary-husky/chatgpt_academic/archive/refs/heads/master.zip', proxies=proxies, stream=True)
-    except: r = requests.get('https://public.gpt-academic.top/publish/master.zip', proxies=proxies, stream=True)
-    zip_file_path = backup_dir+'/master.zip'
+    try:
+        r = requests.get('https://github.com/binary-husky/chatgpt_academic/archive/refs/heads/master.zip',
+                         proxies=proxies, stream=True)
+    except:
+        r = requests.get('https://public.gpt-academic.top/publish/master.zip', proxies=proxies, stream=True)
+    zip_file_path = backup_dir + '/master.zip'
     with open(zip_file_path, 'wb+') as f:
         f.write(r.content)
     dst_path = new_version_dir
@@ -77,19 +82,21 @@ def patch_and_restart(path):
     # if not using config_private, move origin config.py as config_private.py
     if not os.path.exists('../users_data/config_private.py'):
         print亮黄('由于您没有设置config_private.py私密配置，现将您的现有配置移动至config_private.py以防止配置丢失，',
-              '另外您可以随时在history子文件夹下找回旧版的程序。')
+                  '另外您可以随时在history子文件夹下找回旧版的程序。')
         shutil.copyfile('config.py', 'config_private.py')
     path_new_version = glob.glob(path + '/*-master')[0]
     dir_util.copy_tree(path_new_version, './')
     print亮绿('代码已经更新，即将更新pip包依赖……')
     for i in reversed(range(5)): time.sleep(1); print(i)
-    try: 
+    try:
         import subprocess
         subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt'])
     except:
-        print亮红('pip包依赖安装出现问题，需要手动安装新增的依赖库 `python -m pip install -r requirements.txt`，然后在用常规的`python main.py`的方式启动。')
+        print亮红(
+            'pip包依赖安装出现问题，需要手动安装新增的依赖库 `python -m pip install -r requirements.txt`，然后在用常规的`python main.py`的方式启动。')
     print亮绿('更新完成，您可以随时在history子文件夹下找回旧版的程序，5s之后重启')
-    print亮红('假如重启失败，您可能需要手动安装新增的依赖库 `python -m pip install -r requirements.txt`，然后在用常规的`python main.py`的方式启动。')
+    print亮红(
+        '假如重启失败，您可能需要手动安装新增的依赖库 `python -m pip install -r requirements.txt`，然后在用常规的`python main.py`的方式启动。')
     print(' ------------------------------ -----------------------------------')
     for i in reversed(range(8)): time.sleep(1); print(i)
     os.execl(sys.executable, sys.executable, *sys.argv)
@@ -114,8 +121,11 @@ def auto_update(raise_error=False):
         import requests
         import json
         proxies = get_conf('proxies')
-        try:    response = requests.get("https://raw.githubusercontent.com/binary-husky/chatgpt_academic/master/version", proxies=proxies, timeout=5)
-        except: response = requests.get("https://public.gpt-academic.top/publish/version", proxies=proxies, timeout=5)
+        try:
+            response = requests.get("https://raw.githubusercontent.com/binary-husky/chatgpt_academic/master/version",
+                                    proxies=proxies, timeout=5)
+        except:
+            response = requests.get("https://public.gpt-academic.top/publish/version", proxies=proxies, timeout=5)
         remote_json_data = json.loads(response.text)
         remote_version = remote_json_data['version']
         if remote_json_data["show_feature"]:
@@ -125,7 +135,7 @@ def auto_update(raise_error=False):
         with open('../version', 'r', encoding='utf8') as f:
             current_version = f.read()
             current_version = json.loads(current_version)['version']
-        if (remote_version - current_version) >= 0.01-1e-5:
+        if (remote_version - current_version) >= 0.01 - 1e-5:
             from common.colorful import print亮黄
             print亮黄(
                 f'\n新版本可用。新版本:{remote_version}，当前版本:{current_version}。{new_feature}')
@@ -153,6 +163,7 @@ def auto_update(raise_error=False):
             msg += trimmed_format_exc()
         print(msg)
 
+
 def warm_up_modules():
     print('正在执行一些模块的预热 ...')
     from common.toolbox import ProxyNetworkActivate
@@ -162,7 +173,8 @@ def warm_up_modules():
         enc.encode("模块预热", disallowed_special=())
         enc = model_info["gpt-4"]['tokenizer']
         enc.encode("模块预热", disallowed_special=())
-        
+
+
 def warm_up_vectordb():
     print('正在执行一些模块的预热 ...')
     from toolbox import ProxyNetworkActivate
@@ -173,7 +185,9 @@ def warm_up_vectordb():
 
 if __name__ == '__main__':
     import os
+
     os.environ['no_proxy'] = '*'  # 避免代理网络产生意外污染
     from common.toolbox import get_conf
+
     proxies = get_conf('proxies')
     check_proxy(proxies)

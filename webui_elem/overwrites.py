@@ -228,7 +228,7 @@ def reload_javascript():
 GradioTemplateResponseOriginal = gr.routes.templates.TemplateResponse
 
 
-def add_classes_to_gradio_component(comp):
+def add_classes_to_gradio_component(comp, is_show=False):
     """
     this adds gradio-* to the component for css styling (ie gradio-button to gr.Button), as well as some others
     code from stable-diffusion-webui <AUTOMATIC1111/stable-diffusion-webui>
@@ -238,11 +238,16 @@ def add_classes_to_gradio_component(comp):
     if getattr(comp, 'multiselect', False):
         comp.elem_classes.append('multiselect')
 
+    if is_show:    # defy GradioDeprecationWarning 𝙄 𝙘𝙖𝙣 𝙙𝙤 𝙬𝙝𝙖𝙩𝙚𝙫𝙚𝙧 𝙩𝙝𝙚 𝙛**𝙠 𝙄 𝙬𝙖𝙣𝙩 ！！！
+        comp.show_label = True
+
 
 def IOComponent_init(self, *args, **kwargs):
+    is_show = False
+    if kwargs.get('show_label'):
+        is_show = True
     res = original_IOComponent_init(self, *args, **kwargs)
-    add_classes_to_gradio_component(self)
-
+    add_classes_to_gradio_component(self, is_show)
     return res
 
 
@@ -251,9 +256,11 @@ gr.components.IOComponent.__init__ = IOComponent_init
 
 
 def BlockContext_init(self, *args, **kwargs):
+    is_show = False
+    if kwargs.get('show_label'):
+        is_show = True
     res = original_BlockContext_init(self, *args, **kwargs)
-    add_classes_to_gradio_component(self)
-
+    add_classes_to_gradio_component(self, is_show)
     return res
 
 

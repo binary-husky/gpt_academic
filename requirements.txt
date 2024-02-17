@@ -39,3 +39,4 @@ loguru
 tiktoken
 latex2mathml
 pyfiglet
+starlette

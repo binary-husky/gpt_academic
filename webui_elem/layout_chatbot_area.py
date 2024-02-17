@@ -25,7 +25,7 @@ class ChatbotElem:
             )
             self.lora_select_dropdown = gr.Dropdown(
                 label=i18n("选择LoRA模型"), choices=[], multiselect=False, interactive=True,
-                visible=False, container=False,
+                visible=False, container=False
             )
             gr.HTML(get_html("chatbot_header_btn.html").format(
                 json_label=i18n("历史记录（JSON）"), md_label=i18n("导出为 Markdown"), masks_label=i18n('转换为 Masks')),
@@ -73,7 +73,7 @@ class ChatbotElem:
                             self.langchain_dropdown = gr.Dropdown(choices=[], value=[],
                                                                   show_label=True, interactive=True, label='知识库',
                                                                   multiselect=True, container=False,
-                                                                  elem_classes='sm_select', elem_id='')
+                                                                  elem_classes=['sm_select', 'remove-sr-hide'])
 
                     with gr.Row(elem_id="chatbot-input-tb-row"):
                         with gr.Column(min_width=225, scale=12):

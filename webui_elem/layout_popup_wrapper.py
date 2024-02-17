@@ -26,25 +26,25 @@ class Settings:
         with gr.Tab(label=i18n("高级")):
             self.models_box = gr.CheckboxGroup(choices=['input加密', '预加载知识库', 'OCR缓存', '文档RAG'],
                                                value=['input加密', '文档RAG'],
-                                               label="提交开关").style(container=False)
+                                               label="提交开关", container=False)
             worker_num = toolbox.get_conf('DEFAULT_WORKER_NUM')
             self.default_worker_num = gr.Slider(minimum=1, maximum=30, value=worker_num, step=1,
                                                 show_label=True, interactive=True, label="插件多线程最大并行",
-                                                ).style(container=False)
+                                                container=False)
             self.pro_tf_slider = gr.Slider(minimum=1, maximum=200, value=15, step=1, interactive=True,
-                                           label="搜索展示详细字符", show_label=True).style(container=False)
+                                           label="搜索展示详细字符", show_label=True, container=False)
             self.ocr_identifying_trust = gr.Slider(minimum=0.01, maximum=1.0, value=0.60, step=0.01,
-                                                   interactive=True, show_label=True,
-                                                   label="Paddleocr OCR 识别信任指数").style(container=False)
+                                                   interactive=True, show_label=True, container=False,
+                                                   label="Paddleocr OCR 识别信任指数")
             self.secret_css, self.secret_font = gr.Textbox(visible=False), gr.Textbox(visible=False)
             AVAIL_THEMES, latex_option = toolbox.get_conf('AVAIL_THEMES', 'latex_option')
             self.theme_dropdown = gr.Dropdown(AVAIL_THEMES, value=AVAIL_THEMES[0], label=i18n("更换UI主题"),
                                               interactive=True, allow_custom_value=True,
                                               info='更多主题, 请查阅Gradio主题商店: '
                                                    'https://huggingface.co/spaces/gradio/theme-gallery',
-                                              ).style(container=False)
+                                              container=False)
             self.latex_option = gr.Dropdown(latex_option, value=latex_option[0], label=i18n("更换Latex输出格式"),
-                                            interactive=True, ).style(container=False)
+                                            interactive=True, container=False)
             gr.HTML(get_html("appearance_switcher.html").format(
                 label=i18n("切换亮暗色主题")), elem_classes="insert-block", visible=False)
             self.single_turn_checkbox = gr.Checkbox(label=i18n(
@@ -65,16 +65,15 @@ class Settings:
                 show_label=True, placeholder=f"Your OpenAi-API-key...",
                 # value=hide_middle_chars(user_api_key.value),
                 type="password",  # visible=not HIDE_MY_KEY,
-                label="API-Key").style(container=False)
+                label="API-Key", container=False)
             self.wps_cookie = gr.Textbox(lines=3, label='WPS Cookies', type='password',
-                                         placeholder=f"Your WPS cookies json...", ).style(container=False)
+                                         placeholder=f"Your WPS cookies json...", container=False)
             self.qq_cookie = gr.Textbox(lines=3, label='QQ Cookies', type='password',
-                                        placeholder=f"Your QQ cookies json...", ).style(container=False)
+                                        placeholder=f"Your QQ cookies json...", container=False)
             self.feishu_cookie = gr.Textbox(lines=3, label='Feishu Header', type='password',
-                                            placeholder=f"Your Feishu header json...", ).style(container=False)
+                                            placeholder=f"Your Feishu header json...", container=False)
             with gr.Row():
-                self.info_perish_btn = gr.Button('清除我来过的痕迹', variant='stop',
-                                                 full_width=True, elem_classes='danger_btn')
+                self.info_perish_btn = gr.Button('清除我来过的痕迹', variant='stop', elem_classes='danger_btn')
                 self.exit_login_btn = gr.LogoutButton(icon='', link='/logout')
 
     def _draw_setting_info(self):
@@ -103,7 +102,7 @@ class AdvancedSearch:
             popup_title("## " + i18n("高级搜索"))
             with gr.Box():
                 with gr.Row():
-                    self.history_search_txt = gr.Textbox(show_label=False, elem_classes='search_txt',
+                    self.history_search_txt = gr.Textbox(show_label=False, elem_classes=['search_txt'],
                                                          placeholder="输入你想要搜索的对话记录", container=False)
                 with gr.Row(elem_classes='search-example'):
                     self.pro_history_state = gr.State({'samples': None})
@@ -166,13 +165,13 @@ class Prompt:
                 with gr.Column(elem_classes='column_right'):
                     with gr.Row():
                         self.prompt_cls_select = gr.Dropdown(choices=[], value='',
-                                                             label='提示词分类', elem_classes='normal_select',
-                                                             allow_custom_value=True, interactive=True, container=False
-                                                             )
+                                                             label='提示词分类',
+                                                             elem_classes=['normal_select', 'remove-sr-hide'],
+                                                             allow_custom_value=True, interactive=True, container=False)
                         self.pro_name_txt = gr.Textbox(show_label=False, placeholder='提示词名称', container=False)
                     with gr.Row():
-                        self.pro_del_btn = gr.Button("删除提示词", size='sm', full_width=True)
-                        self.pro_new_btn = gr.Button("保存提示词", variant="primary", size='sm', full_width=True)
+                        self.pro_del_btn = gr.Button("删除提示词", size='sm')
+                        self.pro_new_btn = gr.Button("保存提示词", variant="primary", size='sm')
 
     def _draw_tabs_masks(self):
         with gr.TabItem('Prompt Masks 🎭', id='masks'):
@@ -191,13 +190,14 @@ class Prompt:
                 with gr.Column(elem_classes='column_right'):
                     with gr.Row():
                         self.mask_cls_select = gr.Dropdown(choices=[], value='',
-                                                           label='Masks分类', elem_classes='normal_select',
+                                                           label='Masks分类',
+                                                           elem_classes=['normal_select', 'remove-sr-hide'],
                                                            allow_custom_value=True, interactive=True, container=False
                                                            )
                         self.masks_name_txt = gr.Textbox(show_label=False, placeholder='Mask名称', container=False)
                     with gr.Row():
-                        self.masks_del_btn = gr.Button("删除Mask", size='sm', full_width=True)
-                        self.masks_new_btn = gr.Button("保存Mask", variant="primary", size='sm', full_width=True)
+                        self.masks_del_btn = gr.Button("删除Mask", size='sm')
+                        self.masks_new_btn = gr.Button("保存Mask", variant="primary", size='sm')
 
     def _draw_langchain_base(self):
         spl = toolbox.get_conf('spl')
@@ -217,15 +217,15 @@ class Prompt:
                                                               label="选择知识库分类", allow_custom_value=True,
                                                               elem_classes='normal_select', container=False)
                         self.langchain_cls_name = gr.Textbox(show_label=False, placeholder='已有知识库重命名',
-                                                             container=False,
-                                                             visible=False)
+                                                             container=False, visible=False)
                     with gr.Row():
                         self.langchain_select = gr.Dropdown(choices=[], value=r"", allow_custom_value=True,
                                                             interactive=True, label="新建or增量重构",
-                                                            elem_classes='normal_select', container=False)
+                                                            elem_classes=['normal_select', 'remove-sr-hide'],
+                                                            container=False)
                         self.langchain_name = gr.Textbox(show_label=False, placeholder='已有知识库重命名',
-                                                         container=False,
-                                                         visible=False)
+                                                         container=False, visible=False,
+                                                         elem_classes=['normal_select'])
                     with gr.Row():
                         self.langchain_submit = gr.Button(value='构建/更新知识库', variant='primary', size='sm')
                         self.langchain_stop = gr.Button(value='停止构建', size='sm')
@@ -259,8 +259,7 @@ class Prompt:
                 with gr.Column(elem_classes='column_left'):
                     self.dataset_selection = gr.Files(label=i18n("选择数据集"), file_types=[
                         ".xlsx", ".jsonl"], file_count="single")
-                    self.dataset_preview_json = gr.JSON(
-                        label=i18n("数据集预览"), readonly=True)
+                    self.dataset_preview_json = gr.JSON(label=i18n("数据集预览"))
                     self.upload_to_openai_btn = gr.Button(
                         i18n("上传到OpenAI"), variant="primary", interactive=False)
                 with gr.Column(elem_classes='column_right'):
