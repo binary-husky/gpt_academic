@@ -455,7 +455,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
 
 from common.api_server import base
 
-app = base.app
+app = base.create_app()
 PORT = WEB_PORT if WEB_PORT <= 0 else WEB_PORT
 reload_javascript()
 chatbot_main = ChatBot()

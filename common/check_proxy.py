@@ -175,5 +175,5 @@ if __name__ == '__main__':
     import os
     os.environ['no_proxy'] = '*'  # 避免代理网络产生意外污染
     from common.toolbox import get_conf
-    proxies, = get_conf('proxies')
+    proxies = get_conf('proxies')
     check_proxy(proxies)
