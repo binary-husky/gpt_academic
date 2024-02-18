@@ -130,7 +130,16 @@ div.svelte-15lo0d8>*, div.svelte-15lo0d8>.form>* {
 /*    display: none !important;*/
 /*}*/
 .elem-center {
-    align-items: center;
+    display: grid !important;
+    place-items: center !important;
+}
+.elem-box-solid {
+    border: 1px solid var(--message-user-background-color-light);
+    border-radius: 5px;
+    padding: 10px;
+}
+.dark .elem-box-solid {
+    border: 1px solid var(--message-user-background-color-dark);
 }
 code.language-folded {
     display: -webkit-box;
@@ -263,6 +272,9 @@ code.language-folded {
     max-height: 150px !important;
 }
 .danger_btn {
+    background: #940909 !important;
+}
+.danger_btn:hover {
     background: #cd0c0c !important;
 }
 /*[id^="d_diagram"] {*/
@@ -312,6 +324,54 @@ code.language-folded {
 #reader-file{
     max-height: 87px !important;
 }
+.kb-select-list {
+    min-width: min(20%, 100%) !important;
+    max-width: 20% !important;
+}
+.kb-info-fragment {
+    max-height: 222px !important;
+    overflow: auto;
+}
+/* 把radio做成列表 */
+#knowledge-base-select {
+    height: calc(100% - 90px);
+}
+fieldset#knowledge-base-select .wrap {
+    gap: 0;
+}
+fieldset#knowledge-base-select .wrap label {
+    width: 100%;
+    background: none;
+    padding: 10px 16px 10px;
+    box-shadow: none;
+    justify-content: space-between;
+}
+fieldset#knowledge-base-select .wrap label:hover {
+    background: var(--message-list-background-hover);
+}
+fieldset#knowledge-base-select .wrap label:active {
+    background: var(--message-list-background-selected);
+}
+fieldset#knowledge-base-select .wrap label.selected {
+    color: var(--checkbox-label-text-color);
+    background: var(--chatbot-blur-background-color);
+    padding: 10px 64px 10px 16px;
+}
+fieldset#knowledge-base-select .wrap label:not(.selected) .chat-selected-btns{
+    display: none;
+}
+fieldset#knowledge-base-select .wrap label > span {
+    /* font-size: small; */
+    margin-left: 0;
+    /* text-overflow: ellipsis; */
+    white-space: nowrap;
+    word-break: break-all;
+    overflow: auto;
+}
+fieldset#knowledge-base-select .wrap label > input {
+    display: none;
+}
+
 [class*="gradio-container-"] h1 {
     font-weight: 700 !important;
     font-size: 28px !important;

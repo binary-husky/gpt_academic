@@ -18,6 +18,7 @@ function toast_move_main() {
         gradio_main.appendChild(spike_toast_info);
     }
 }
+
 function check_move_list() {
     const promptList = document.getElementById('prompt_list');
     const pm_check = document.getElementById('pm_check');
@@ -349,18 +350,18 @@ function insertFilePreview(fileRow) {
             iframe.src = link.href;
             iframe.className = 'td-a-preview';
             tdElem.appendChild(iframe);
-        } else if(validAudioExtensions.includes(extension)) {   //对于音频文件，建立<audio>
+        } else if (validAudioExtensions.includes(extension)) {   //对于音频文件，建立<audio>
             let audio = document.createElement('audio');
             audio.controls = true;    //增加控制条
             audio.src = link.href;
             audio.className = 'td-a-preview'
             tdElem.appendChild(audio);
-        } else if(validVideoExtensions.includes(extension)) {   //对于视频文件，建立<video>
-             let video = document.createElement('video');
-             video.controls = true;      //增加控制条
-             video.src = link.href;
-             video.className = 'td-a-preview'
-             tdElem.appendChild(video);
+        } else if (validVideoExtensions.includes(extension)) {   //对于视频文件，建立<video>
+            let video = document.createElement('video');
+            video.controls = true;      //增加控制条
+            video.src = link.href;
+            video.className = 'td-a-preview'
+            tdElem.appendChild(video);
         } else {   // 对于不能在网页中预览的，增加一个提示
             let textNode = document.createTextNode("无法预览此类型的文件");
             let para = document.createElement('p');
@@ -372,3 +373,46 @@ function insertFilePreview(fileRow) {
         fileRow.appendChild(tdElem);
     }
 }
+
+function traverse_kb_tables() {
+// 获取包含label的容器元素
+const container = document.getElementById('knowledge-base-select').querySelector('.svelte-1p9xokt');
+
+// 创建一个新的表格元素
+const table = document.createElement('table');
+table.style.width = '100%';
+table.border = '1';
+
+// 创建一个表格体元素
+const tbody = document.createElement('tbody');
+
+// 遍历每个label元素
+container.querySelectorAll('label').forEach(label => {
+  // 获取span中的内容并分割成数组
+  const values = label.querySelector('input').value.split(',').map(value => value.trim());
+
+  // 创建一个表格行
+  const tr = document.createElement('tr');
+
+  // 遍历值数组并创建单元格，除了最后一个值，它将包含radio按钮
+  values.slice(0, -1).forEach(value => {
+    const td = document.createElement('td');
+    td.textContent = value;
+    tr.appendChild(td);
+  });
+
+  // 创建一个包含radio按钮的单元格
+  const radioTd = document.createElement('td');
+  radioTd.appendChild(label.cloneNode(true)); // 克隆整个label，包括input和span
+
+  // 将radio按钮的单元格添加到行中
+  tr.appendChild(radioTd);
+
+  // 将行添加到表格体
+  tbody.appendChild(tr);
+});
+
+// 将新的表格体内容添加到原来的表格中
+container.querySelector('table').appendChild(tbody);
+}
+

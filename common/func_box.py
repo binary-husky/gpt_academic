@@ -482,6 +482,10 @@ def md_division_line():
     gr.Markdown("---", elem_classes="hr-line")
 
 
+def html_checkoutBox():
+    html = '<input type="checkbox" name="test" data-testid="checkbox" class="svelte-1ojmf70">'
+    return html
+
 def git_log_list():
     ll = Shell("git log --pretty=format:'%s | %h' -n 10").start().splitlines()
     return [i.split('|') for i in ll if 'branch' not in i][:5]

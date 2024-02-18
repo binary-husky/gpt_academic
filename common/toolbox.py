@@ -452,6 +452,17 @@ def text_divide_paragraph(input_str):
     return input_str
 
 
+def markdown_to_html(txt):
+    markdown_extension_configs = {
+        'mdx_math': {
+            'enable_dollar_delimiter': True,
+            'use_gitlab_delimiters': False,
+        },
+    }
+    convert_stage_1 = markdown.markdown(text=txt, extensions=['sane_lists', 'tables', 'mdx_math', 'fenced_code'],
+                                        extension_configs=markdown_extension_configs)
+    return convert_stage_1
+
 @lru_cache(maxsize=128)  # 使用 lru缓存 加快转换速度
 def markdown_convertion(txt):
     """

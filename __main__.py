@@ -8,7 +8,6 @@ from webui_elem.overwrites import postprocess_chat_messages, postprocess, reload
 # 问询记录, python 版本建议3.9+（越新越好）
 # 一些普通功能模块
 from common.core_functional import get_core_functions
-from common import Langchain_cn
 from common.logger_handler import init_path
 
 functional = get_core_functions()
@@ -67,12 +66,11 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         self.sm_upload_history.click(func_signals.get_user_upload, [self.chatbot, self.user_input],
                                      outputs=[self.chatbot])
         self.sm_history.click(fn=None, inputs=None, outputs=None, _js='()=>{menuClick();}')
-        self.langchain_dropdown.select(fn=Langchain_cn.obtaining_knowledge_base_files,
-                                       inputs=[self.langchain_classifi, self.langchain_dropdown,
-                                               self.chatbot, self.langchain_know_kwargs,
-                                               self.models_box],
-                                       outputs=[self.chatbot, self.status_display, self.langchain_know_kwargs]
-                                       )
+        # self.langchain_dropdown.select(fn=Langchain_cn.obtaining_knowledge_base_files,
+        #                                inputs=[self.langchain_dropdown, self.chatbot,
+        #                                        self.models_box],
+        #                                outputs=[self.chatbot, self.status_display]
+        #                                )
         self.delLastBtn.click(func_signals.delete_latest_chat, inputs=[self.chatbot, self.history, self.cookies],
                               outputs=[self.chatbot, self.history, self.cookies])
         self.retry_queue = self.retryBtn.click(fn=ArgsGeneralWrapper(predict),
@@ -233,47 +231,9 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
             outputs=[]
         )
 
-    def signals_langchain_cn(self):
-        def update_drop(x, llms, cls_name, ipaddr: gr.Request):
-            _, available, _, = Langchain_cn.obtain_classification_knowledge_base(cls_name, ipaddr)
-            x = x['know_name']
-            if not x:
-                return available, gr.update()
-            return available, gr.update(label="当前模型：" + llms + "&" + '&'.join([x]))
-
-        self.langchain_classifi.select(fn=Langchain_cn.obtain_classification_knowledge_base,
-                                       inputs=[self.langchain_classifi],
-                                       outputs=[self.langchain_select, self.langchain_dropdown, self.langchain_status]
-                                       )
-        self.langchain_select.change(fn=Langchain_cn.want_to_rename_it,
-                                     inputs=[self.langchain_classifi, self.langchain_select],
-                                     outputs=[self.langchain_name])
-        self.langchain_upload.upload(fn=on_file_uploaded,
-                                     inputs=[self.langchain_upload, gr.State(''), self.langchain_know_kwargs,
-                                             self.cookies],
-                                     outputs=[self.langchain_status, self.langchain_know_kwargs])
-
-        def clear_file(kw):
-            kw.update({'file_path': ''})
-            return kw, f'已清空本地文件调用路径参数'
-
-        self.langchain_upload.clear(fn=clear_file,
-                                    inputs=[self.langchain_know_kwargs],
-                                    outputs=[self.langchain_know_kwargs, self.langchain_status])
-
-        submit_id = self.langchain_submit.click(fn=Langchain_cn.knowledge_base_writing,
-                                                inputs=[self.langchain_classifi, self.langchain_links,
-                                                        self.langchain_select,
-                                                        self.langchain_name, self.langchain_know_kwargs],
-                                                outputs=[self.langchain_status, self.langchain_error,
-                                                         self.langchain_classifi, self.langchain_select,
-                                                         self.langchain_dropdown, self.langchain_know_kwargs]
-                                                )
-        submit_id.then(fn=update_drop,
-                       inputs=[self.langchain_know_kwargs, self.model_select_dropdown, self.langchain_classifi],
-                       outputs=[self.langchain_dropdown, self.chatbot])
-        self.langchain_stop.click(fn=lambda: '已暂停构建任务', inputs=None, outputs=[self.langchain_status],
-                                  cancels=[submit_id])
+    def signals_knowledge_base(self):
+        self.knowledge_base_select.select(fn=func_signals.kb_select_show, inputs=[self.knowledge_base_select],
+                                          outputs=[self.new_knowledge_base, self.edit_knowledge_base])
 
     def signals_history(self):
         self.llms_cookies_combo = [self.chatbot, self.history, self.cookies,
@@ -322,7 +282,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                             self.chatbot, self.history, self.system_prompt, self.plugin_advanced_arg,
                             self.single_turn_checkbox, self.use_websearch_checkbox]
         # 知识库
-        self.know_combo = [self.langchain_dropdown, self.langchain_know_kwargs, self.langchain_classifi,
+        self.know_combo = [self.langchain_dropdown, gr.State(''), gr.State(''),
                            self.vector_search_score, self.vector_search_top_k, self.vector_chunk_size]
         self.input_combo.extend(self.know_combo)
         # 高级设置
@@ -421,7 +381,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
             self.signals_prompt_func()
             self.signals_prompt_edit()
             self.signals_plugin()
-            self.signals_langchain_cn()
+            self.signals_knowledge_base()
             self.signals_reader()
             self.signals_settings_popup()
             self.signals_masks()
@@ -431,7 +391,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                            inputs=[self.pro_fp_state],
                            outputs=[self.pro_func_prompt, self.pro_fp_state, self.copyright_display,
                                     self.pro_private_check, self.prompt_cls_select, self.mask_cls_select,
-                                    self.langchain_classifi, self.langchain_select, self.langchain_dropdown])
+                                    gr.State(''), gr.State(''), self.langchain_dropdown])
             self.demo.load(fn=func_signals.refresh_user_data,
                            inputs=[self.cookies, gr.State(proxy_info)],
                            outputs=[self.historySelectList, *self.llms_cookies_combo,

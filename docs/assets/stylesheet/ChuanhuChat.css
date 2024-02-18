@@ -745,7 +745,7 @@ input:checked + .chatbot-input-more-span {
     border: none;
     border-radius: 0;
     overflow: auto !important;
-    height: calc(100% - 70px);
+    height: 100%;
     padding: 16px 24px;
 }
 #chuanhu-popup > .gradio-box > .gradio-tabs > div.tab-nav {

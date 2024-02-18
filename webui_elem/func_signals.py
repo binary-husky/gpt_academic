@@ -706,3 +706,14 @@ def user_login(user, password):
     else:
         sql_handle.update_user(user, password)
         return True
+
+
+# TODO < -------------------------------- 知识库函数注册区 -------------------------------------->
+def kb_select_show(select: gr.Dropdown):
+    if select == '新建知识库':
+        return gr.update(visible=True), gr.update(visible=True)
+    else:
+        return gr.update(visible=False), gr.update(visible=True)
+
+
+

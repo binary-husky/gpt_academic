@@ -3,6 +3,8 @@
 # @Author : Spike
 # @Descr   :
 import gradio as gr
+import pandas as pd
+
 from common import func_box, toolbox
 from webui_elem import webui_local
 
@@ -199,49 +201,102 @@ class Prompt:
                         self.masks_del_btn = gr.Button("删除Mask", size='sm')
                         self.masks_new_btn = gr.Button("保存Mask", variant="primary", size='sm')
 
-    def _draw_langchain_base(self):
+    def _draw_knowledge_base(self):
         spl = toolbox.get_conf('spl')
-        with gr.TabItem('知识库构建', id='langchain_tab', elem_id='langchain_tab'):
-            with gr.Row(elem_classes='elem-center'):
-                self.knowledge_base_select = gr.Dropdown(choices=[], value="新建知识库", interactive=True,
+        with (gr.TabItem('知识库管理', id='langchain_tab', elem_id='langchain_tab')):
+            with gr.Column():
+                self.knowledge_base_select = gr.Dropdown(choices=['312', '33213'], value="新建知识库", interactive=True,
                                                          label="选择现有知识库或新建知识库", allow_custom_value=True,
-                                                         elem_classes='normal_select', container=False)
+                                                         container=False, show_label=True)
 
-                with gr.Row() as self.new_knowledge_base:
-                    pass
+                with gr.Column(elem_classes='elem-box-solid') as self.new_knowledge_base:
+                    with gr.Row():
+                        self.new_kb_name = gr.Textbox(label='知识库名称', placeholder='知识库命名，尽量不要使用中文',
+                                                      show_label=True, container=False)
+                    with gr.Row():
+                        self.new_kb_introduce = gr.TextArea(label='知识库简介', placeholder='知识库简介，方便Agent调用',
+                                                            show_label=True, container=False,
+                                                            lines=3, max_lines=4)
+                    with gr.Row():
+                        with gr.Column(elem_classes='column_left'):
+                            self.new_kb_vector_types = gr.Dropdown(choices=[], value="test", interactive=True,
+                                                                   label="向量库类型", allow_custom_value=True,
+                                                                   container=False, show_label=True,
+                                                                   elem_classes='normal_select')
+                        with gr.Column(elem_classes='column_right'):
+                            self.new_kb_embedding_model = gr.Dropdown(choices=[], value="test", interactive=True,
+                                                                      label="Embedding模型", allow_custom_value=True,
+                                                                      container=False, show_label=True,
+                                                                      elem_classes='normal_select')
+                    with gr.Row():
+                        self.new_kb_confirm = gr.Button(value='新建', size='lg')
 
-                with gr.Row() as self.edit_knowledge_base:
-                    pass
+                with gr.Column(visible=False) as self.edit_knowledge_base:
+                    with gr.Row():
+                        self.edit_kb_upload = gr.File(label='上传知识文件', elem_id='reader-file',
+                                                      show_label=True, container=False)
+                    with gr.Row():
+                        self.edit_kb_cloud = gr.Textbox(show_label=False, placeholder='云文件链接,多个链接使用换行间隔',
+                                                        elem_classes='no_padding_input')
+                    with gr.Row():
+                        self.edit_kb_introduce = gr.TextArea(label='知识库简介', lines=3, max_lines=4,
+                                                             placeholder='这个人很懒，什么都没有留下', container=False,
+                                                             show_label=True)
+                    with gr.Column(elem_classes='elem-box-solid'):
+                        with gr.Row():
+                            self.edit_kb_max_paragraph = gr.Number(label='单段文本最大长度', value=250, show_label=True,
+                                                                   interactive=True)
+                            self.edit_kb_similarity_paragraph = gr.Number(label='相邻文本重合长度', value=50,
+                                                                          show_label=True, interactive=True)
+                            self.edit_kb_tokenizer_select = gr.Dropdown(choices=[], value="中文标题增强",
+                                                                        interactive=True,
+                                                                        label="内置分词器选择", allow_custom_value=True,
+                                                                        show_label=True)
+                        self.edit_kb_confirm = gr.Button(value='添加文件到知识库', size='lg')
 
-                with gr.Column(elem_classes='column_left'):
-                    self.langchain_upload = gr.Files(label="支持解析多类型文档，多文件建议使用zip上传",
-                                                     file_count="multiple", file_types=spl)
-                    self.langchain_links = gr.Textbox(show_label=False, placeholder='网络文件,多个链接使用换行间隔',
-                                                      elem_classes='no_padding_input')
-                    self.langchain_know_kwargs = gr.State(
-                        {'file_path': '', 'know_name': '', 'know_obj': {}, 'file_list': []})
-                    #  file_path 是上传文件存储的地址，know_name，know_obj是ql向量化后的对象
-                with gr.Column(elem_classes='column_right'):
+                    func_box.md_division_line()
                     with gr.Row():
-                        self.langchain_classifi = gr.Dropdown(choices=[], value="知识库", interactive=True,
-                                                              label="选择知识库分类", allow_custom_value=True,
-                                                              elem_classes='normal_select', container=False)
-                        self.langchain_cls_name = gr.Textbox(show_label=False, placeholder='已有知识库重命名',
-                                                             container=False, visible=False)
+                        self.edit_kb_file_desc = gr.Markdown('### 选择文件后可对向量库及片段内容进行调整')
                     with gr.Row():
-                        self.langchain_select = gr.Dropdown(choices=[], value=r"", allow_custom_value=True,
-                                                            interactive=True, label="新建or增量重构",
-                                                            elem_classes=['normal_select'],
-                                                            container=False)
-                        self.langchain_name = gr.Textbox(show_label=False, placeholder='已有知识库重命名',
-                                                         container=False, visible=False,
-                                                         elem_classes=['normal_select'])
-                    with gr.Row():
-                        self.langchain_submit = gr.Button(value='构建/更新知识库', variant='primary', size='sm')
-                        self.langchain_stop = gr.Button(value='停止构建', size='sm')
-            func_box.md_division_line()
-            self.langchain_status = gr.Markdown(value='')
-            self.langchain_error = gr.Markdown(value='')
+                        with gr.Column(scale=1, elem_classes=['kb-select-list', 'elem-box-solid']):
+                            self.edit_kb_file_list = gr.Radio(label='知识库内文件', show_label=True, container=False,
+                                                              choices=['3123', '312321'], value='',
+                                                              elem_id='knowledge-base-select')
+                            with gr.Row():
+                                self.edit_kb_info_reload_vector = gr.Button(value='关于本项目', size='sm',
+                                                                            variant='primary')
+                                self.edit_kb_info_vector_del = gr.Button(value='删除知识库', size='sm',
+                                                                         elem_classes='danger_btn')
+                        with gr.Column(scale=4):
+                            data = [i for i in range(5)]
+                            temp_pd = pd.DataFrame(data={
+                                '文档加载器': data, '分词器': data, '文档片段数量': data, '源文件': data, '向量库': data
+                            })
+                            with gr.Column(elem_classes='elem-box-solid'):
+                                with gr.Row():
+                                    self.edit_kb_file_info = gr.Dataframe(label='文件详情', value=temp_pd,
+                                                                          interactive=False,
+                                                                          type='pandas'
+                                                                          )
+                                with gr.Row():
+                                    self.edit_kb_info_reload_vector = gr.Button(value='重载向量数据', size='sm',
+                                                                                variant='primary')
+                                    self.edit_kb_info_vector_del = gr.Button(value='删除向量数据', size='sm')
+                                    self.edit_kb_info_know_del = gr.Button(value='删除数据源', size='sm')
+
+                            temp_num_pd = pd.DataFrame(data={
+                                'N': [0], '内容': [''], '删除': ['']
+                            })
+                            with gr.Column(elem_classes='elem-box-solid'):
+                                with gr.Row():
+                                    self.edit_kb_file_fragment = gr.Dataframe(label='文档片段编辑', value=temp_num_pd,
+                                                                              interactive=False, type='pandas',
+                                                                              elem_classes='kb-info-fragment'
+                                                                              )
+                                with gr.Row():
+                                    self.edit_kb_info_reload_vector = gr.Button(value='保存更改', size='sm',
+                                                                                variant='primary')
+                                    self.edit_kb_file_fragment_add = gr.Button(value='新增一行', size='sm')
 
     def _draw_popup_files_processor(self):
         with gr.TabItem(i18n('Read everything.'), id='files', elem_id='reader'):
@@ -293,7 +348,7 @@ class Prompt:
             with gr.Tabs(elem_id="treasure-bag") as self.treasure_bag_tab:
                 self._draw_tabs_prompt()
                 self._draw_tabs_masks()
-                self._draw_langchain_base()
+                self._draw_knowledge_base()
                 self._draw_popup_files_processor()
                 self._draw_popup_training()
 
