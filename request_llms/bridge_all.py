@@ -560,12 +560,20 @@ if "sparkv2" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
         })
     except:
         print(trimmed_format_exc())
-if "sparkv3" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
+if "sparkv3" in AVAIL_LLM_MODELS or "sparkv3.5" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
     try:
         from .bridge_spark import predict_no_ui_long_connection as spark_noui
         from .bridge_spark import predict as spark_ui
         model_info.update({
             "sparkv3": {
+                "fn_with_ui": spark_ui,
+                "fn_without_ui": spark_noui,
+                "endpoint": None,
+                "max_token": 4096,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "sparkv3.5": {
                 "fn_with_ui": spark_ui,
                 "fn_without_ui": spark_noui,
                 "endpoint": None,
