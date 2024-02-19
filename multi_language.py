@@ -321,7 +321,7 @@ def step_1_core_key_translate():
                 continue
             print(files)
             for file in files:
-                if file.endswith('.py'):
+                if file.endswith('.py') or file.endswith('.pyw'):
                     file_path = os.path.join(root, file)
                     chinese_characters.extend(extract_chinese_characters(file_path))
         return chinese_characters
