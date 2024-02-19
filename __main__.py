@@ -252,7 +252,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                                               self.new_kb_embedding_model, self.new_kb_introduce],
                                       outputs=show_hide_combo + [self.knowledge_base_state_dict]
                                       + [self.knowledge_base_select, self.edit_kb_introduce,
-                                         self.edit_kb_file_list, self.edit_kb_file_info, self.edit_kb_file_fragment])
+                                         self.edit_kb_file_list, self.edit_kb_file_details, self.edit_kb_file_fragment])
 
     def signals_history(self):
         self.llms_cookies_combo = [self.chatbot, self.history, self.cookies,

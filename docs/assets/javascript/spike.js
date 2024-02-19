@@ -374,45 +374,28 @@ function insertFilePreview(fileRow) {
     }
 }
 
-function traverse_kb_tables() {
-// 获取包含label的容器元素
-const container = document.getElementById('knowledge-base-select').querySelector('.svelte-1p9xokt');
+function addInputListeners() {
+    for (const key in input_storage_mapping) {
+        if (input_storage_mapping.hasOwnProperty(key)) {
+            const inputElement = input_storage_mapping[key];
+            inputElement.addEventListener('input', (function(key) {
+                return function() {
+                    localStorage.setItem(key, this.value);
+                };
+            })(key));
+        }
+    }
+}
 
-// 创建一个新的表格元素
-const table = document.createElement('table');
-table.style.width = '100%';
-table.border = '1';
-
-// 创建一个表格体元素
-const tbody = document.createElement('tbody');
-
-// 遍历每个label元素
-container.querySelectorAll('label').forEach(label => {
-  // 获取span中的内容并分割成数组
-  const values = label.querySelector('input').value.split(',').map(value => value.trim());
-
-  // 创建一个表格行
-  const tr = document.createElement('tr');
-
-  // 遍历值数组并创建单元格，除了最后一个值，它将包含radio按钮
-  values.slice(0, -1).forEach(value => {
-    const td = document.createElement('td');
-    td.textContent = value;
-    tr.appendChild(td);
-  });
-
-  // 创建一个包含radio按钮的单元格
-  const radioTd = document.createElement('td');
-  radioTd.appendChild(label.cloneNode(true)); // 克隆整个label，包括input和span
-
-  // 将radio按钮的单元格添加到行中
-  tr.appendChild(radioTd);
-
-  // 将行添加到表格体
-  tbody.appendChild(tr);
-});
-
-// 将新的表格体内容添加到原来的表格中
-container.querySelector('table').appendChild(tbody);
+function fillInputsFromCache() {
+    for (const key in input_storage_mapping) {
+        if (input_storage_mapping.hasOwnProperty(key)) {
+            const inputElement = input_storage_mapping[key];
+            const cachedValue = localStorage.getItem(key);
+            if (cachedValue && cachedValue !== 'undefined') {
+                inputElement.value = cachedValue;
+            }
+        }
+    }
 }
 

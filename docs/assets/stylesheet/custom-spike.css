@@ -241,10 +241,11 @@ code.language-folded {
 /* 这个没有必要存在，阻碍用户继续编写 */
 /* 2.0 还是有必要的。。 在很卡的机器上卡顿明显，增加loading 并针对一些区域做注释*/
 #chuanhu-history .wrap.default.full[class*="svelte-"] {
+    background: unset !important;
     display: none;
 }
 #spike-prompt .wrap.default.full[class*="svelte-"] {
-    display: none;
+    background: unset !important;
 }
 
 #mask_tabs .table[class*="svelte-"] {
@@ -348,6 +349,7 @@ code.language-folded {
 /* 把radio做成列表 */
 #knowledge-base-select {
     height: calc(100% - 90px);
+    overflow: auto;
 }
 fieldset#knowledge-base-select .wrap {
     gap: 0;

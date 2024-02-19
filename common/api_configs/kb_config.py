@@ -31,7 +31,6 @@ DEFAULT_SEARCH_ENGINE = "duckduckgo"
 # 搜索引擎匹配结题数量
 SEARCH_ENGINE_TOP_K = 3
 
-
 # Bing 搜索必备变量
 # 使用 Bing 搜索需要使用 Bing Subscription Key,需要在azure port中申请试用bing search
 # 具体申请方式请见
@@ -66,9 +65,9 @@ KB_INFO = {
     "samples": "关于本项目issue的解答",
 }
 
-
 # 通常情况下不需要更改以下内容
 from common.path_handler import init_path
+
 # 知识库默认存储路径
 KB_ROOT_PATH = init_path.private_knowledge_path
 if not os.path.exists(KB_ROOT_PATH):
@@ -95,7 +94,7 @@ kbs_config = {
         "user": "",
         "password": "",
         "secure": True,
-        },
+    },
     "pg": {
         "connection_uri": "postgresql://postgres:postgres@127.0.0.1:5432/langchain_chatchat",
     },
@@ -107,17 +106,22 @@ kbs_config = {
         "user": "",
         "password": ""
     },
-    "milvus_kwargs":{
-        "search_params":{"metric_type": "L2"}, #在此处增加search_params
-        "index_params":{"metric_type": "L2","index_type": "HNSW"} # 在此处增加index_params
+    "milvus_kwargs": {
+        "search_params": {"metric_type": "L2"},  # 在此处增加search_params
+        "index_params": {"metric_type": "L2", "index_type": "HNSW"}  # 在此处增加index_params
     },
     "chromadb": {}
 }
-
+file_details_template = {
+    '文档加载器': [], '分词器': [], '文档片段数量': [], '向量库': [], '源文件': []
+}
+file_fragment_template = {
+    'N': [], '内容': [], '删除': []
+}
 # TextSplitter配置项，如果你不明白其中的含义，就不要修改。
 text_splitter_dict = {
     "ChineseRecursiveTextSplitter": {
-        "source": "huggingface",   # 选择tiktoken则使用openai的方法
+        "source": "huggingface",  # 选择tiktoken则使用openai的方法
         "tokenizer_name_or_path": "",
     },
     "SpacyTextSplitter": {

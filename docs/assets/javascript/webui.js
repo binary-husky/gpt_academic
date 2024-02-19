@@ -15,7 +15,7 @@ function addHideBoxClassExcept(element) {
 
 function openSettingBox() {
     addHideBoxClassExcept(settingBox)
-
+    fillInputsFromCache()
 }
 
 

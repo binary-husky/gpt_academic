@@ -714,6 +714,7 @@ def user_login(user, password):
 
 # TODO < -------------------------------- 知识库函数注册区 -------------------------------------->
 from common.knowledge_base.kb_service import base
+from common.api_configs import kb_config
 
 
 def kb_select_show(select: gr.Dropdown):
@@ -764,6 +765,7 @@ def kb_new_confirm(kb_name, kb_type, kb_model, kb_info):
         raise gr.Error(f'{kb_name} 已存在同名知识库，请重新命名')
 
     kb = base.KBServiceFactory.get_service(kb_name, kb_type, kb_model)
+    kb.kb_info = kb_info
     try:
         kb.create_kb()
     except Exception as e:
@@ -778,8 +780,11 @@ def kb_new_confirm(kb_name, kb_type, kb_model, kb_info):
     }
 
     edit_output = {
-        'kb_list': gr.update(choices=[select_name] + base.kb_dict_to_list(kb_name_tm),
-                             value=select_name),
-        'kb_info': kb.kb_info
+        'kb__name_list': gr.update(choices=[select_name] + base.kb_dict_to_list(kb_name_tm),
+                                   value=select_name),
+        'kb_info_txt': kb.kb_info,
+        'kb_file_list': gr.Radio.update(choices=[], value=''),
+        'kb_file_details': gr.Dataframe.update(value=pd.DataFrame(data=kb_config.file_details_template)),
+        'kb_file_fragment': gr.Dataframe.update(value=pd.DataFrame(data=kb_config.file_fragment_template))
     }
     return list(new_output.values()) + list(edit_output.values())

@@ -51,7 +51,7 @@ const validImgExtensions = ['png', 'jpg', 'jpeg', 'bmp', 'svg', 'webp', 'ico', '
 const validDocsExtensions = ['html', 'htm', 'xhtml', 'css', 'js', 'pdf', 'txt', 'json', 'xml', 'md'];
 const validAudioExtensions = ['mp3', 'wav', 'aac'];
 const validVideoExtensions = ['mp4', 'm4a', 'wav', 'mpeg', 'avi', 'mkv', 'flac', 'aac']
-
+var input_storage_mapping = {}
 
 function addInit() {
     var needInit = {chatbotIndicator, uploaderIndicator};
@@ -110,13 +110,19 @@ function initialize() {
     uploadIndexFileElement = gradioApp().querySelector('#upload-index-file');
     uploadIndexLinkElement = uploadedFilesCountElement.querySelector('a');
     uploadIndexFileHeight = uploadIndexFileElement.offsetHeight;
+    input_storage_mapping = {
+    "apiKeys": gradioApp().querySelector('#api-keys-input input'),
+    "wpsCookies": gradioApp().querySelector('#wps-cookies-input textarea'),
+    "qqCookies": gradioApp().querySelector('#qq-cookies-input textarea'),
+    "feishuCookies": gradioApp().querySelector('#feishu-cookies-input textarea')
+    }
     // trainBody = gradioApp().querySelector('#train-body');
 
     // if (loginUserForm) {
     // localStorage.setItem("userLogged", true);
     // userLogged = true;
     // }
-
+    addInputListeners()
     adjustDarkMode();
     adjustSide();
     setChatList();
@@ -278,9 +284,14 @@ function toggleDarkMode(isEnabled) {
     }
 }
 function adjustDarkMode() {
+    const savedPreference = localStorage.getItem('darkMode');
     const darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    apSwitch.checked = darkModeQuery.matches;
-    toggleDarkMode(darkModeQuery.matches);
+
+    const useDarkMode = savedPreference === 'true' || (savedPreference === null && darkModeQuery.matches);
+
+    apSwitch.checked = useDarkMode;
+
+    toggleDarkMode(useDarkMode);
     darkModeQuery.addEventListener("change", (e) => {
         apSwitch.checked = e.matches;
         toggleDarkMode(e.matches);
@@ -292,6 +303,7 @@ function adjustDarkMode() {
 function btnToggleDarkMode() {
     apSwitch.checked = !apSwitch.checked;
     toggleDarkMode(apSwitch.checked);
+    localStorage.setItem('darkMode', apSwitch.checked);
 }
 
 function setScrollShadow() {

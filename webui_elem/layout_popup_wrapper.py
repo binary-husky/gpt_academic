@@ -41,24 +41,24 @@ class Settings:
             self.secret_css, self.secret_font = gr.Textbox(visible=False), gr.Textbox(visible=False)
             AVAIL_THEMES, latex_option = toolbox.get_conf('AVAIL_THEMES', 'latex_option')
             self.theme_dropdown = gr.Dropdown(AVAIL_THEMES, value=AVAIL_THEMES[0], label=i18n("更换UI主题"),
-                                              interactive=True, allow_custom_value=True,
+                                              interactive=True, allow_custom_value=True, show_label=True,
                                               info='更多主题, 请查阅Gradio主题商店: '
                                                    'https://huggingface.co/spaces/gradio/theme-gallery',
                                               container=False)
             self.latex_option = gr.Dropdown(latex_option, value=latex_option[0], label=i18n("更换Latex输出格式"),
-                                            interactive=True, container=False)
+                                            interactive=True, container=False, show_label=True,)
             gr.HTML(get_html("appearance_switcher.html").format(
                 label=i18n("切换亮暗色主题")), elem_classes="insert-block", visible=False)
-            self.single_turn_checkbox = gr.Checkbox(label=i18n(
-                "无记忆对话"), value=False, elem_classes="switch-checkbox",
-                elem_id="gr-single-session-cb", visible=False)
+            self.single_turn_checkbox = gr.Checkbox(label=i18n("无记忆对话"),
+                                                    value=False, elem_classes="switch-checkbox",
+                                                    elem_id="gr-single-session-cb", visible=False)
 
     def _darw_private_operation(self):
         with gr.TabItem('个人中心', id='private'):
             with gr.Row(elem_classes='tab-center'):
                 gr.Markdown('#### 粉身碎骨浑不怕 要留清白在人间\n\n'
-                            '`这里的东西只有你自己能看，不要告诉别人哦`\n\n' \
-                            + func_box.html_tag_color('我们不会保存你的个人信息，页面刷新后这里的信息就会被丢弃',
+                            '`这里的东西只有你自己能看，不要告诉别人哦`\n\n'\
+                            + func_box.html_tag_color('我们不会保存你的个人信息，清除浏览器缓存后这里的信息就会被丢弃',
                                                       color='rgb(227 179 51)'))
             self.usageTxt = gr.Markdown(i18n(
                 "**发送消息** 或 **提交key** 以显示额度"), elem_id="usage-display",
@@ -67,13 +67,16 @@ class Settings:
                 show_label=True, placeholder=f"Your OpenAi-API-key...",
                 # value=hide_middle_chars(user_api_key.value),
                 type="password",  # visible=not HIDE_MY_KEY,
-                label="API-Key", container=False)
-            self.wps_cookie = gr.Textbox(lines=3, label='WPS Cookies', type='password',
-                                         placeholder=f"Your WPS cookies json...", container=False)
-            self.qq_cookie = gr.Textbox(lines=3, label='QQ Cookies', type='password',
-                                        placeholder=f"Your QQ cookies json...", container=False)
-            self.feishu_cookie = gr.Textbox(lines=3, label='Feishu Header', type='password',
-                                            placeholder=f"Your Feishu header json...", container=False)
+                label="API-Key", container=False, elem_id='api-keys-input')
+            self.wps_cookie = gr.Textbox(lines=3, label='WPS Cookies', type='password', show_label=True,
+                                         placeholder=f"Your WPS cookies dict...", container=False,
+                                         elem_id='wps-cookies-input')
+            self.qq_cookie = gr.Textbox(lines=3, label='QQ Cookies', type='password', show_label=True,
+                                        placeholder=f"Your QQ cookies dict...", container=False,
+                                        elem_id='qq-cookies-input')
+            self.feishu_cookie = gr.Textbox(lines=3, label='Feishu Header', type='password', show_label=True,
+                                            placeholder=f"Your Feishu header dict...", container=False,
+                                            elem_id='feishu-cookies-input')
             with gr.Row():
                 self.info_perish_btn = gr.Button('清除我来过的痕迹', variant='stop', elem_classes='danger_btn')
                 self.exit_login_btn = gr.LogoutButton(icon='', link='/logout')
@@ -215,7 +218,8 @@ class Prompt:
                 from common.utils import list_embed_models
                 kbs_config_list = list(kbs_config.keys())
                 with gr.Column(elem_classes='column_left'):
-                    self.new_kb_vector_types = gr.Dropdown(choices=kbs_config, value=kbs_config_list[0], interactive=True,
+                    self.new_kb_vector_types = gr.Dropdown(choices=kbs_config, value=kbs_config_list[0],
+                                                           interactive=True,
                                                            label="向量库类型", allow_custom_value=True,
                                                            container=False, show_label=True,
                                                            elem_classes='normal_select')
@@ -224,7 +228,7 @@ class Prompt:
                     self.new_kb_embedding_model = gr.Dropdown(choices=embed_list, value=EMBEDDING_MODEL,
                                                               label="Embedding模型", allow_custom_value=True,
                                                               container=False, show_label=True,
-                                                              elem_classes='normal_select', interactive=True,)
+                                                              elem_classes='normal_select', interactive=True, )
             with gr.Row():
                 self.new_kb_confirm_btn = gr.Button(value='新建', size='lg')
 
@@ -272,27 +276,19 @@ class Prompt:
                         self.edit_kb_info_vector_del = gr.Button(value='删除知识库', size='sm',
                                                                  elem_classes='danger_btn')
                 with gr.Column(scale=4):
-                    data = [i for i in range(5)]
-                    temp_pd = pd.DataFrame(data={
-                        '文档加载器': [], '分词器': [], '文档片段数量': [], '向量库': [], '源文件': []
-                    })
                     with gr.Column(elem_classes='elem-box-solid'):
                         with gr.Row():
-                            self.edit_kb_file_info = gr.Dataframe(label='文件详情', value=temp_pd, type='pandas',
-                                                                  interactive=False,
-                                                                  )
+                            self.edit_kb_file_details = gr.Dataframe(label='文件详情', value=[], type='pandas',
+                                                                     interactive=False, )
                         with gr.Row():
                             self.edit_kb_info_reload_vector = gr.Button(value='重载向量数据', size='sm',
                                                                         variant='primary')
                             self.edit_kb_info_vector_del = gr.Button(value='删除向量数据', size='sm')
                             self.edit_kb_info_know_del = gr.Button(value='删除数据源', size='sm')
 
-                    temp_num_pd = pd.DataFrame(data={
-                        'N': data, '内容': data, '删除': data
-                    })
                     with gr.Column(elem_classes='elem-box-solid'):
                         with gr.Row():
-                            self.edit_kb_file_fragment = gr.Dataframe(label='文档片段编辑', value=temp_num_pd,
+                            self.edit_kb_file_fragment = gr.Dataframe(label='文档片段编辑', value=[],
                                                                       interactive=True, type='pandas',
                                                                       elem_classes='kb-info-fragment',
                                                                       col_count=(3, 'fixed'),
