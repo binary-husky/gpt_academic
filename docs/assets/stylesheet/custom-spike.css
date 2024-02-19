@@ -243,6 +243,9 @@ code.language-folded {
 #chuanhu-history .wrap.default.full[class*="svelte-"] {
     display: none;
 }
+#spike-prompt .wrap.default.full[class*="svelte-"] {
+    display: none;
+}
 
 #mask_tabs .table[class*="svelte-"] {
     overflow: auto;
@@ -330,7 +333,17 @@ code.language-folded {
 }
 .kb-info-fragment {
     max-height: 222px !important;
-    overflow: auto;
+    overflow: auto !important;
+}
+/*无用不管了*/
+/*.kb-info-fragment thead {   */
+/*    position: sticky; !* 使用粘性定位 *!*/
+/*    top: 0; !* 设置头部固定在顶部的位置 *!*/
+/*    !*background-color: #fff; !* 设置头部背景颜色，以防被滚动内容覆盖 *!*!*/
+/*    z-index: 10; !* 确保头部在其他内容之上 *!*/
+/*}*/
+.kb-info-fragment .controls-wrap {
+   display: none !important;
 }
 /* 把radio做成列表 */
 #knowledge-base-select {

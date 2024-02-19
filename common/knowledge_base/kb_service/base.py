@@ -1,4 +1,5 @@
 import operator
+import re
 from abc import ABC, abstractmethod
 
 import os
@@ -340,6 +341,46 @@ class KBServiceFactory:
         return KBServiceFactory.get_service("default", SupportedVSType.DEFAULT)
 
 
+class EmbeddingsFunAdapter(Embeddings):
+    def __init__(self, embed_model: str = EMBEDDING_MODEL):
+        self.embed_model = embed_model
+
+    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+        embeddings = embed_texts(texts=texts, embed_model=self.embed_model, to_query=False).data
+        return normalize(embeddings).tolist()
+
+    def embed_query(self, text: str) -> List[float]:
+        embeddings = embed_texts(texts=[text], embed_model=self.embed_model, to_query=True).data
+        query_embed = embeddings[0]
+        query_embed_2d = np.reshape(query_embed, (1, -1))  # 将一维数组转换为二维数组
+        normalized_query_embed = normalize(query_embed_2d)
+        return normalized_query_embed[0].tolist()  # 将结果转换为一维数组并返回
+
+    async def aembed_documents(self, texts: List[str]) -> List[List[float]]:
+        embeddings = (await aembed_texts(texts=texts, embed_model=self.embed_model, to_query=False)).data
+        return normalize(embeddings).tolist()
+
+    async def aembed_query(self, text: str) -> List[float]:
+        embeddings = (await aembed_texts(texts=[text], embed_model=self.embed_model, to_query=True)).data
+        query_embed = embeddings[0]
+        query_embed_2d = np.reshape(query_embed, (1, -1))  # 将一维数组转换为二维数组
+        normalized_query_embed = normalize(query_embed_2d)
+        return normalized_query_embed[0].tolist()  # 将结果转换为一维数组并返回
+
+
+def score_threshold_process(score_threshold, k, docs):
+    if score_threshold is not None:
+        cmp = (
+            operator.le
+        )
+        docs = [
+            (doc, similarity)
+            for doc, similarity in docs
+            if cmp(similarity, score_threshold)
+        ]
+    return docs[:k]
+
+
 def get_kb_details() -> List[Dict]:
     kbs_in_folder = list_kbs_from_folder()
     kbs_in_db = KBService.list_kbs()
@@ -416,41 +457,43 @@ def get_kb_file_details(kb_name: str) -> List[Dict]:
     return data
 
 
-class EmbeddingsFunAdapter(Embeddings):
-    def __init__(self, embed_model: str = EMBEDDING_MODEL):
-        self.embed_model = embed_model
+def kb_list_to_dict(kb_list) -> dict:
+    kb_name_tm = {}
+    # 正则表达式匹配 name 和括号内的 type 和 model
+    pattern = re.compile(r'^(?P<name>.+)\((?P<type>.+) @ (?P<model>.+)\)$')
 
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        embeddings = embed_texts(texts=texts, embed_model=self.embed_model, to_query=False).data
-        return normalize(embeddings).tolist()
-
-    def embed_query(self, text: str) -> List[float]:
-        embeddings = embed_texts(texts=[text], embed_model=self.embed_model, to_query=True).data
-        query_embed = embeddings[0]
-        query_embed_2d = np.reshape(query_embed, (1, -1))  # 将一维数组转换为二维数组
-        normalized_query_embed = normalize(query_embed_2d)
-        return normalized_query_embed[0].tolist()  # 将结果转换为一维数组并返回
-
-    async def aembed_documents(self, texts: List[str]) -> List[List[float]]:
-        embeddings = (await aembed_texts(texts=texts, embed_model=self.embed_model, to_query=False)).data
-        return normalize(embeddings).tolist()
-
-    async def aembed_query(self, text: str) -> List[float]:
-        embeddings = (await aembed_texts(texts=[text], embed_model=self.embed_model, to_query=True)).data
-        query_embed = embeddings[0]
-        query_embed_2d = np.reshape(query_embed, (1, -1))  # 将一维数组转换为二维数组
-        normalized_query_embed = normalize(query_embed_2d)
-        return normalized_query_embed[0].tolist()  # 将结果转换为一维数组并返回
+    for kb in kb_list:
+        # 使用正则表达式匹配字符串
+        match = pattern.match(kb)
+        if match:
+            # 从匹配结果中提取组
+            name = match.group('name').strip()
+            types = match.group('type').strip()
+            model = match.group('model').strip()
+            # 创建字典并添加到结果字典中
+            kb_name_tm[name] = {"type": types, "model": model}
+    return kb_name_tm
 
 
-def score_threshold_process(score_threshold, k, docs):
-    if score_threshold is not None:
-        cmp = (
-            operator.le
-        )
-        docs = [
-            (doc, similarity)
-            for doc, similarity in docs
-            if cmp(similarity, score_threshold)
-        ]
-    return docs[:k]
+def kb_details_to_dict():
+    kb_name_tm = {}
+    for kb in get_kb_details():
+        name = kb['kb_name']
+        types = kb['vs_type']
+        model = kb['embed_model']
+        kb_name_tm[name] = {"type": types, "model": model}
+    return kb_name_tm
+
+
+def kb_dict_to_list(kb_tm) -> list:
+    list_tm = []
+    for kb in kb_tm:
+        kb_select = f'{kb} ({kb_tm[kb]["type"]} @ {kb_tm[kb]["model"]})'
+        list_tm.append(kb_select)
+    return list_tm
+
+
+def kb_name_tm_merge(kb_name, kb_type, kb_model):
+    return f"{kb_name} ({kb_type} @ {kb_model})"
+
+

@@ -115,7 +115,8 @@ class ZhipuChatInit:
                 bro_results += bro_chunk
                 yield bro_chunk, bro_results
             else:
-                print(chunk)
+                # print(chunk)
+                pass
 
 
 if __name__ == '__main__':

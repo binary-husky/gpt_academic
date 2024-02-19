@@ -4,11 +4,15 @@
 # @Descr   :
 import os, random
 import copy
+import re
 import time
 
 import gradio as gr
+import pandas as pd
 
 import yaml
+from yarl import URL
+
 from common import toolbox
 from common import db_handler
 from common import func_box
@@ -127,7 +131,7 @@ def clear_input(inputs, cookies, ipaddr: gr.Request):
         # 先写入一个空文件占位
         with open(os.path.join(user_path, cookies['first_chat'] + ".json"), mode='w') as f:
             f.write('{}')
-    output = [gr.update(value=''), inputs, gr.update(visible=True), gr.update(visible=False),
+    output = [gr.update(value=''), inputs, gr.update(visible=True), gr.update(), gr.update(visible=False),
               gr.update(choices=only_name, value=cookies['first_chat']), gr.update(value=None)]
     yield output
     logger.info(f"{cookies['llm_model']}_{user_addr}: {inputs[:100]} {'.' * 10}")
@@ -709,6 +713,9 @@ def user_login(user, password):
 
 
 # TODO < -------------------------------- 知识库函数注册区 -------------------------------------->
+from common.knowledge_base.kb_service import base
+
+
 def kb_select_show(select: gr.Dropdown):
     if select == '新建知识库':
         return gr.update(visible=True), gr.update(visible=True)
@@ -716,4 +723,63 @@ def kb_select_show(select: gr.Dropdown):
         return gr.update(visible=False), gr.update(visible=True)
 
 
+def kb_name_change_btn(name):
+    if name:
+        return gr.Button.update(variant='primary')
+    else:
+        return gr.Button.update(variant='secondary')
 
+
+def kb_upload_btn(upload: gr.Files, cloud: str):
+    if upload or URL(cloud).host:
+        return gr.Button.update(variant='primary')
+    else:
+        return gr.Button.update(variant='secondary')
+
+
+def kb_date_add_row(source_data: pd.DataFrame):
+    # 添加一行数据
+    last_index = source_data.iloc[-1].iloc[0]
+    # 检查最后一行的第一个元素是否为整数类型
+    if last_index.dtype == 'int64':
+        new_index = last_index + 1
+    else:
+        new_index = 'ErrorType'
+    new_row_data = [new_index, '', '']
+    source_data.loc[len(source_data)] = new_row_data
+
+    return gr.update(value=source_data)
+
+
+def kb_new_confirm(kb_name, kb_type, kb_model, kb_info):
+    kb_name_tm = base.kb_details_to_dict()
+
+    if not kb_name or not kb_type or not kb_model:
+        keywords = {"知识库名称": kb_name, "向量类型": kb_type, "Embedding 模型": kb_model}
+        error_keyword = " - ".join([f"【{i}】" for i in keywords if not keywords[i]])
+        raise gr.Error(f'字段错误、无法创建, 缺失字段如下：{error_keyword}')
+
+    kb_server_list = base.KBServiceFactory.get_service_by_name(kb_name)
+    if kb_name in kb_name_tm or kb_server_list is not None:
+        raise gr.Error(f'{kb_name} 已存在同名知识库，请重新命名')
+
+    kb = base.KBServiceFactory.get_service(kb_name, kb_type, kb_model)
+    try:
+        kb.create_kb()
+    except Exception as e:
+        msg = f"创建知识库出错： {e}"
+        logger.error(f'{e.__class__.__name__}: {msg}')
+        raise gr.Error(msg)
+    select_name = base.kb_name_tm_merge(kb_name, kb_type, kb_model)
+    new_output = {
+        'new_clo': gr.update(visible=False),
+        'edit_clo': gr.update(visible=True),
+        'kb_dict': {'kb_name': kb_name, 'kb_info': kb_info, 'kb_obj': kb},
+    }
+
+    edit_output = {
+        'kb_list': gr.update(choices=[select_name] + base.kb_dict_to_list(kb_name_tm),
+                             value=select_name),
+        'kb_info': kb.kb_info
+    }
+    return list(new_output.values()) + list(edit_output.values())

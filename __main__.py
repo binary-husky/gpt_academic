@@ -232,8 +232,27 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         )
 
     def signals_knowledge_base(self):
+        show_hide_combo = [self.new_knowledge_base, self.edit_knowledge_base]
+
         self.knowledge_base_select.select(fn=func_signals.kb_select_show, inputs=[self.knowledge_base_select],
-                                          outputs=[self.new_knowledge_base, self.edit_knowledge_base])
+                                          outputs=show_hide_combo)
+        self.new_kb_name.change(fn=func_signals.kb_name_change_btn, inputs=[self.new_kb_name],
+                                outputs=[self.new_kb_confirm_btn])
+
+        self.edit_kb_upload.change(fn=func_signals.kb_upload_btn, inputs=[self.edit_kb_upload, self.edit_kb_cloud],
+                                   outputs=[self.edit_kb_confirm_btn])
+        self.edit_kb_cloud.change(fn=func_signals.kb_upload_btn, inputs=[self.edit_kb_upload, self.edit_kb_cloud],
+                                  outputs=[self.edit_kb_confirm_btn])
+
+        self.edit_kb_file_fragment_add.click(func_signals.kb_date_add_row, inputs=[self.edit_kb_file_fragment],
+                                             outputs=[self.edit_kb_file_fragment])
+
+        self.new_kb_confirm_btn.click(fn=func_signals.kb_new_confirm,
+                                      inputs=[self.new_kb_name, self.new_kb_vector_types,
+                                              self.new_kb_embedding_model, self.new_kb_introduce],
+                                      outputs=show_hide_combo + [self.knowledge_base_state_dict]
+                                      + [self.knowledge_base_select, self.edit_kb_introduce,
+                                         self.edit_kb_file_list, self.edit_kb_file_info, self.edit_kb_file_fragment])
 
     def signals_history(self):
         self.llms_cookies_combo = [self.chatbot, self.history, self.cookies,
@@ -298,7 +317,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                                  outputs=self.output_combo, show_progress=True)
         self.clear_agrs = dict(fn=func_signals.clear_input,
                                inputs=[self.user_input, self.cookies],
-                               outputs=[self.user_input, self.input_copy, self.cancelBtn,
+                               outputs=[self.user_input, self.input_copy, self.cancelBtn, self.chatbot,
                                         self.submitBtn, self.historySelectList, self.sm_upload])
         # 提交按钮、重置按钮
         submit_handle = self.user_input.submit(**self.clear_agrs).then(**self.predict_args)
