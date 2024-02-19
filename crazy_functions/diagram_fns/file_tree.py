@@ -10,7 +10,7 @@ class FileNode:
         self.parenting_ship = []
         self.comment = ""
         self.comment_maxlen_show = 50
-        
+
     @staticmethod
     def add_linebreaks_at_spaces(string, interval=10):
         return '\n'.join(string[i:i+interval] for i in range(0, len(string), interval))

@@ -22,10 +22,10 @@ def extract_text_from_files(txt, chatbot, history):
     file_manifest = []
     excption = ""
 
-    if txt == "": 
+    if txt == "":
         final_result.append(txt)
         return False, final_result, page_one, file_manifest, excption   #如输入区内容不是文件则直接返回输入区内容
-    
+
     #查找输入区内容中的文件
     file_pdf,pdf_manifest,folder_pdf = get_files_from_everything(txt, '.pdf')
     file_md,md_manifest,folder_md = get_files_from_everything(txt, '.md')
@@ -35,12 +35,12 @@ def extract_text_from_files(txt, chatbot, history):
     if file_doc:
         excption = "word"
         return False, final_result, page_one, file_manifest, excption
-    
+
     file_num = len(pdf_manifest) + len(md_manifest) + len(word_manifest)
     if file_num == 0:
         final_result.append(txt)
         return False, final_result, page_one, file_manifest, excption   #如输入区内容不是文件则直接返回输入区内容
-    
+
     if file_pdf:
         try:    # 尝试导入依赖，如果缺少依赖，则给出安装建议
             import fitz
@@ -61,7 +61,7 @@ def extract_text_from_files(txt, chatbot, history):
                 file_content = f.read()
             file_content = file_content.encode('utf-8', 'ignore').decode()
             headers = re.findall(r'^#\s(.*)$', file_content, re.MULTILINE)  #接下来提取md中的一级/二级标题作为摘要
-            if len(headers) > 0: 
+            if len(headers) > 0:
                 page_one.append("\n".join(headers)) #合并所有的标题,以换行符分割
             else:
                 page_one.append("")
@@ -81,5 +81,5 @@ def extract_text_from_files(txt, chatbot, history):
             page_one.append(file_content[:200])
             final_result.append(file_content)
             file_manifest.append(os.path.relpath(fp, folder_word))
-            
+
     return True, final_result, page_one, file_manifest, excption

@@ -85,10 +85,10 @@ def 解析Paper(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbo
             msg = '正常'
             # ** gpt request **
             gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
-                inputs=i_say, 
-                inputs_show_user=i_say_show_user, 
+                inputs=i_say,
+                inputs_show_user=i_say_show_user,
                 llm_kwargs=llm_kwargs,
-                chatbot=chatbot, 
+                chatbot=chatbot,
                 history=[],
                 sys_prompt="总结文章。"
             )  # 带超时倒计时
@@ -106,10 +106,10 @@ def 解析Paper(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbo
         msg = '正常'
         # ** gpt request **
         gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
-            inputs=i_say, 
-            inputs_show_user=i_say, 
+            inputs=i_say,
+            inputs_show_user=i_say,
             llm_kwargs=llm_kwargs,
-            chatbot=chatbot, 
+            chatbot=chatbot,
             history=history,
             sys_prompt="总结文章。"
         )  # 带超时倒计时
@@ -138,8 +138,8 @@ def 批量总结PDF文档pdfminer(txt, llm_kwargs, plugin_kwargs, chatbot, histo
     try:
         import pdfminer, bs4
     except:
-        report_exception(chatbot, history, 
-            a = f"解析项目: {txt}", 
+        report_exception(chatbot, history,
+            a = f"解析项目: {txt}",
             b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pdfminer beautifulsoup4```。")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return

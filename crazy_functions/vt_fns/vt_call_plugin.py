@@ -35,9 +35,9 @@ def get_recent_file_prompt_support(chatbot):
     most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
     path = most_recent_uploaded['path']
     prompt =   "\nAdditional Information:\n"
-    prompt =   "In case that this plugin requires a path or a file as argument," 
-    prompt += f"it is important for you to know that the user has recently uploaded a file, located at: `{path}`" 
-    prompt += f"Only use it when necessary, otherwise, you can ignore this file." 
+    prompt =   "In case that this plugin requires a path or a file as argument,"
+    prompt += f"it is important for you to know that the user has recently uploaded a file, located at: `{path}`"
+    prompt += f"Only use it when necessary, otherwise, you can ignore this file."
     return prompt
 
 def get_inputs_show_user(inputs, plugin_arr_enum_prompt):
@@ -82,7 +82,7 @@ def execute_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prom
         msg += "\n但您可以尝试再试一次\n"
         yield from update_ui_lastest_msg(lastmsg=msg, chatbot=chatbot, history=history, delay=2)
         return
-    
+
     # ⭐ ⭐ ⭐ 确认插件参数
     if not have_any_recent_upload_files(chatbot):
         appendix_info = ""
@@ -99,7 +99,7 @@ def execute_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prom
     inputs = f"A plugin named {plugin_sel.plugin_selection} is selected, " + \
              "you should extract plugin_arg from the user requirement, the user requirement is: \n\n" + \
              ">> " + (txt + appendix_info).rstrip('\n').replace('\n','\n>> ') + '\n\n' + \
-             gpt_json_io.format_instructions 
+             gpt_json_io.format_instructions
     run_gpt_fn = lambda inputs, sys_prompt: predict_no_ui_long_connection(
         inputs=inputs, llm_kwargs=llm_kwargs, history=[], sys_prompt=sys_prompt, observe_window=[])
     plugin_sel = gpt_json_io.generate_output_auto_repair(run_gpt_fn(inputs, ""), run_gpt_fn)

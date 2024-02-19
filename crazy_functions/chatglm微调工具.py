@@ -46,7 +46,7 @@ def 微调数据集生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     chatbot.append(("这是什么功能？", "[Local Message] 微调数据集生成"))
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     args = plugin_kwargs.get("advanced_arg", None)
-    if args is None: 
+    if args is None:
         chatbot.append(("没给定指令", "退出"))
         yield from update_ui(chatbot=chatbot, history=history); return
     else:
@@ -69,7 +69,7 @@ def 微调数据集生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
             sys_prompt_array=[arguments.system_prompt for _ in (batch)],
             max_workers=10  # OpenAI所允许的最大并行过载
         )
-    
+
         with open(txt+'.generated.json', 'a+', encoding='utf8') as f:
             for b, r in zip(batch, res[1::2]):
                 f.write(json.dumps({"content":b, "summary":r}, ensure_ascii=False)+'\n')
@@ -95,12 +95,12 @@ def 启动微调(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     chatbot.append(("这是什么功能？", "[Local Message] 微调数据集生成"))
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     args = plugin_kwargs.get("advanced_arg", None)
-    if args is None: 
+    if args is None:
         chatbot.append(("没给定指令", "退出"))
         yield from update_ui(chatbot=chatbot, history=history); return
     else:
         arguments = string_to_options(arguments=args)
-      
+
 
 
     pre_seq_len = arguments.pre_seq_len             # 128

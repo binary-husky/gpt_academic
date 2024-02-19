@@ -8,7 +8,7 @@ import random
 
 class MiniGame_ASCII_Art(GptAcademicGameBaseState):
     def step(self, prompt, chatbot, history):
-        if self.step_cnt == 0:  
+        if self.step_cnt == 0:
             chatbot.append(["我画你猜（动物）", "请稍等..."])
         else:
             if prompt.strip() == 'exit':

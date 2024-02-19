@@ -82,15 +82,15 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
             if retry > MAX_RETRY: raise TimeoutError
             if MAX_RETRY!=0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
     result = ''
-    try: 
+    try:
         for completion in stream:
             result += completion.completion
             if not console_slience: print(completion.completion, end='')
-            if observe_window is not None: 
+            if observe_window is not None:
                 # 观测窗，把已经获取的数据显示出去
                 if len(observe_window) >= 1: observe_window[0] += completion.completion
                 # 看门狗，如果超过期限没有喂狗，则终止
-                if len(observe_window) >= 2:  
+                if len(observe_window) >= 2:
                     if (time.time()-observe_window[1]) > watch_dog_patience:
                         raise RuntimeError("用户取消了程序。")
     except Exception as e:
@@ -114,7 +114,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         chatbot.append((inputs, "没有设置ANTHROPIC_API_KEY"))
         yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
         return
-    
+
     if additional_fn is not None:
         from core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
@@ -148,7 +148,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                 stream=True,
                 temperature = llm_kwargs['temperature']
             )
-            
+
             break
         except:
             retry += 1
@@ -158,7 +158,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             if retry > MAX_RETRY: raise TimeoutError
 
     gpt_replying_buffer = ""
-    
+
     for completion in stream:
         try:
             gpt_replying_buffer = gpt_replying_buffer + completion.completion
@@ -172,7 +172,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             chatbot[-1] = (chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str}")
             yield from update_ui(chatbot=chatbot, history=history, msg="Json异常" + tb_str) # 刷新界面
             return
-        
+
 
 
 

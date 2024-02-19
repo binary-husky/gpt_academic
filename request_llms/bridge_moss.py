@@ -18,7 +18,7 @@ class GetGLMHandle(Process):
         if self.check_dependency():
             self.start()
             self.threadLock = threading.Lock()
-        
+
     def check_dependency(self): # 主进程执行
         try:
             import datasets, os
@@ -54,9 +54,9 @@ class GetGLMHandle(Process):
         from models.tokenization_moss import MossTokenizer
 
         parser = argparse.ArgumentParser()
-        parser.add_argument("--model_name", default="fnlp/moss-moon-003-sft-int4", 
-                            choices=["fnlp/moss-moon-003-sft", 
-                                    "fnlp/moss-moon-003-sft-int8", 
+        parser.add_argument("--model_name", default="fnlp/moss-moon-003-sft-int4",
+                            choices=["fnlp/moss-moon-003-sft",
+                                    "fnlp/moss-moon-003-sft-int8",
                                     "fnlp/moss-moon-003-sft-int4"], type=str)
         parser.add_argument("--gpu", default="0", type=str)
         args = parser.parse_args()
@@ -76,7 +76,7 @@ class GetGLMHandle(Process):
 
         config = MossConfig.from_pretrained(model_path)
         self.tokenizer = MossTokenizer.from_pretrained(model_path)
-        if num_gpus > 1:  
+        if num_gpus > 1:
             print("Waiting for all devices to be ready, it may take a few minutes...")
             with init_empty_weights():
                 raw_model = MossForCausalLM._from_config(config, torch_dtype=torch.float16)
@@ -135,15 +135,15 @@ class GetGLMHandle(Process):
                 inputs = self.tokenizer(self.prompt, return_tensors="pt")
                 with torch.no_grad():
                     outputs = self.model.generate(
-                        inputs.input_ids.cuda(), 
-                        attention_mask=inputs.attention_mask.cuda(), 
-                        max_length=2048, 
-                        do_sample=True, 
-                        top_k=40, 
-                        top_p=0.8, 
+                        inputs.input_ids.cuda(),
+                        attention_mask=inputs.attention_mask.cuda(),
+                        max_length=2048,
+                        do_sample=True,
+                        top_k=40,
+                        top_p=0.8,
                         temperature=0.7,
                         repetition_penalty=1.02,
-                        num_return_sequences=1, 
+                        num_return_sequences=1,
                         eos_token_id=106068,
                         pad_token_id=self.tokenizer.pad_token_id)
                     response = self.tokenizer.decode(outputs[0][inputs.input_ids.shape[1]:], skip_special_tokens=True)
@@ -167,7 +167,7 @@ class GetGLMHandle(Process):
             else:
                 break
         self.threadLock.release()
-    
+
 global moss_handle
 moss_handle = None
 #################################################################################
@@ -180,7 +180,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     if moss_handle is None:
         moss_handle = GetGLMHandle()
         if len(observe_window) >= 1: observe_window[0] = load_message + "\n\n" + moss_handle.info
-        if not moss_handle.success: 
+        if not moss_handle.success:
             error = moss_handle.info
             moss_handle = None
             raise RuntimeError(error)
@@ -194,7 +194,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     response = ""
     for response in moss_handle.stream_chat(query=inputs, history=history_feedin, sys_prompt=sys_prompt, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
         if len(observe_window) >= 1:  observe_window[0] = response
-        if len(observe_window) >= 2:  
+        if len(observe_window) >= 2:
             if (time.time()-observe_window[1]) > watch_dog_patience:
                 raise RuntimeError("程序终止。")
     return response
@@ -213,7 +213,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         moss_handle = GetGLMHandle()
         chatbot[-1] = (inputs, load_message + "\n\n" + moss_handle.info)
         yield from update_ui(chatbot=chatbot, history=[])
-        if not moss_handle.success: 
+        if not moss_handle.success:
             moss_handle = None
             return
     else:

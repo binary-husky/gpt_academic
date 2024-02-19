@@ -56,15 +56,15 @@ class GetGLM2Handle(LocalLLMHandle):
 
         query, max_length, top_p, temperature, history = adaptor(kwargs)
 
-        for response, history in self._model.stream_chat(self._tokenizer, 
-                                                         query, 
-                                                         history, 
+        for response, history in self._model.stream_chat(self._tokenizer,
+                                                         query,
+                                                         history,
                                                          max_length=max_length,
                                                          top_p=top_p,
                                                          temperature=temperature,
                                                          ):
             yield response
-        
+
     def try_to_import_special_deps(self, **kwargs):
         # import something that will raise error if the user does not install requirement_*.txt
         # 🏃‍♂️🏃‍♂️🏃‍♂️ 主进程执行

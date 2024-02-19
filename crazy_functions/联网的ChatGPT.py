@@ -40,10 +40,10 @@ def scrape_text(url, proxies) -> str:
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36',
         'Content-Type': 'text/plain',
     }
-    try: 
+    try:
         response = requests.get(url, headers=headers, proxies=proxies, timeout=8)
         if response.encoding == "ISO-8859-1": response.encoding = response.apparent_encoding
-    except: 
+    except:
         return "无法连接到该网页"
     soup = BeautifulSoup(response.text, "html.parser")
     for script in soup(["script", "style"]):
@@ -66,7 +66,7 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     user_request    当前用户的请求信息（IP地址等）
     """
     history = []    # 清空历史，以免输入溢出
-    chatbot.append((f"请结合互联网信息回答以下问题：{txt}", 
+    chatbot.append((f"请结合互联网信息回答以下问题：{txt}",
                     "[Local Message] 请注意，您正在调用一个[函数插件]的模板，该模板可以实现ChatGPT联网信息综合。该函数面向希望实现更多有趣功能的开发者，它可以作为创建新功能函数的模板。您若希望分享新的功能模组，请不吝PR！"))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
 
@@ -91,13 +91,13 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     # ------------- < 第3步：ChatGPT综合 > -------------
     i_say = f"从以上搜索结果中抽取信息，然后回答问题：{txt}"
     i_say, history = input_clipping(    # 裁剪输入，从最长的条目开始裁剪，防止爆token
-        inputs=i_say, 
-        history=history, 
+        inputs=i_say,
+        history=history,
         max_token_limit=model_info[llm_kwargs['llm_model']]['max_token']*3//4
     )
     gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
-        inputs=i_say, inputs_show_user=i_say, 
-        llm_kwargs=llm_kwargs, chatbot=chatbot, history=history, 
+        inputs=i_say, inputs_show_user=i_say,
+        llm_kwargs=llm_kwargs, chatbot=chatbot, history=history,
         sys_prompt="请从给定的若干条搜索结果中抽取信息，对最相关的两个搜索结果进行总结，然后回答问题。"
     )
     chatbot[-1] = (i_say, gpt_say)

@@ -68,7 +68,7 @@ def 解析PDF_基于GROBID(file_manifest, project_folder, llm_kwargs, plugin_kwa
         with open(grobid_json_res, 'w+', encoding='utf8') as f:
             f.write(json.dumps(article_dict, indent=4, ensure_ascii=False))
         promote_file_to_downloadzone(grobid_json_res, chatbot=chatbot)
-        
+
         if article_dict is None: raise RuntimeError("解析PDF失败，请检查PDF是否损坏。")
         yield from translate_pdf(article_dict, llm_kwargs, chatbot, fp, generated_conclusion_files, TOKEN_LIMIT_PER_FRAGMENT, DST_LANG)
     chatbot.append(("给出输出文件清单", str(generated_conclusion_files + generated_html_files)))
@@ -97,7 +97,7 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
 
         # 为了更好的效果，我们剥离Introduction之后的部分（如果有）
         paper_meta = page_one_fragments[0].split('introduction')[0].split('Introduction')[0].split('INTRODUCTION')[0]
-        
+
         # 单线，获取文章meta信息
         paper_meta_info = yield from request_gpt_model_in_new_thread_with_ui_alive(
             inputs=f"以下是一篇学术论文的基础信息，请从中提取出“标题”、“收录会议或期刊”、“作者”、“摘要”、“编号”、“作者邮箱”这六个部分。请用markdown格式输出，最后用中文翻译摘要部分。请提取：{paper_meta}",
@@ -121,7 +121,7 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
         )
         gpt_response_collection_md = copy.deepcopy(gpt_response_collection)
         # 整理报告的格式
-        for i,k in enumerate(gpt_response_collection_md): 
+        for i,k in enumerate(gpt_response_collection_md):
             if i%2==0:
                 gpt_response_collection_md[i] = f"\n\n---\n\n ## 原文[{i//2}/{len(gpt_response_collection_md)//2}]： \n\n {paper_fragments[i//2].replace('#', '')}  \n\n---\n\n ## 翻译[{i//2}/{len(gpt_response_collection_md)//2}]：\n "
             else:
@@ -139,18 +139,18 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
 
         # write html
         try:
-            ch = construct_html() 
+            ch = construct_html()
             orig = ""
             trans = ""
             gpt_response_collection_html = copy.deepcopy(gpt_response_collection)
-            for i,k in enumerate(gpt_response_collection_html): 
+            for i,k in enumerate(gpt_response_collection_html):
                 if i%2==0:
                     gpt_response_collection_html[i] = paper_fragments[i//2].replace('#', '')
                 else:
                     gpt_response_collection_html[i] = gpt_response_collection_html[i]
             final = ["论文概况", paper_meta_info.replace('# ', '### '),  "二、论文翻译",  ""]
             final.extend(gpt_response_collection_html)
-            for i, k in enumerate(final): 
+            for i, k in enumerate(final):
                 if i%2==0:
                     orig = k
                 if i%2==1:

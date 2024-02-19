@@ -82,13 +82,13 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
             inputs=inputs, inputs_show_user=inputs_show_user, llm_kwargs=llm_kwargs, chatbot=chatbot,
             history=this_iteration_history_feed,   # 迭代之前的分析
             sys_prompt="你是一个程序架构分析师，正在分析一个项目的源代码。" + sys_prompt_additional)
-        
+
         diagram_code = make_diagram(this_iteration_files, result, this_iteration_history_feed)
         summary = "请用一句话概括这些文件的整体功能。\n\n" + diagram_code
         summary_result = yield from request_gpt_model_in_new_thread_with_ui_alive(
-            inputs=summary, 
-            inputs_show_user=summary, 
-            llm_kwargs=llm_kwargs, 
+            inputs=summary,
+            inputs_show_user=summary,
+            llm_kwargs=llm_kwargs,
             chatbot=chatbot,
             history=[i_say, result],   # 迭代之前的分析
             sys_prompt="你是一个程序架构分析师，正在分析一个项目的源代码。" + sys_prompt_additional)

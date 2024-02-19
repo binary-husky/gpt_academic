@@ -81,7 +81,7 @@ def patch_and_restart(path):
     dir_util.copy_tree(path_new_version, './')
     print亮绿('代码已经更新，即将更新pip包依赖……')
     for i in reversed(range(5)): time.sleep(1); print(i)
-    try: 
+    try:
         import subprocess
         subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt'])
     except:
@@ -159,7 +159,7 @@ def warm_up_modules():
         enc.encode("模块预热", disallowed_special=())
         enc = model_info["gpt-4"]['tokenizer']
         enc.encode("模块预热", disallowed_special=())
-        
+
 def warm_up_vectordb():
     print('正在执行一些模块的预热 ...')
     from toolbox import ProxyNetworkActivate
@@ -167,7 +167,7 @@ def warm_up_vectordb():
         import nltk
         with ProxyNetworkActivate("Warmup_Modules"): nltk.download("punkt")
 
-        
+
 if __name__ == '__main__':
     import os
     os.environ['no_proxy'] = '*'  # 避免代理网络产生意外污染

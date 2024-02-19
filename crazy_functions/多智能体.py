@@ -57,11 +57,11 @@ def 多智能体终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
         if get_conf("AUTOGEN_USE_DOCKER"):
             import docker
     except:
-        chatbot.append([ f"处理任务: {txt}", 
+        chatbot.append([ f"处理任务: {txt}",
             f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pyautogen docker```。"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
-    
+
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
         import autogen
@@ -72,7 +72,7 @@ def 多智能体终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
         chatbot.append([f"处理任务: {txt}", f"缺少docker运行环境！"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
-    
+
     # 解锁插件
     chatbot.get_cookies()['lock_plugin'] = None
     persistent_class_multi_user_manager = GradioMultiuserManagerForPersistentClasses()

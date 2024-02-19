@@ -89,7 +89,7 @@ class GptJsonIO():
                  error + "\n\n" + \
                 "Now, fix this json string. \n\n"
         return prompt
-    
+
     def generate_output_auto_repair(self, response, gpt_gen_fn):
         """
         response: string containing canidate json

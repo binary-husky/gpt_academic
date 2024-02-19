@@ -59,7 +59,7 @@ def apply_gpt_academic_string_mask_langbased(string, lang_reference):
             lang_reference = "hello world"
         输出1
             "注意，lang_reference这段文字是：英语"
-            
+
         输入2
             string = "注意，lang_reference这段文字是中文"   # 注意这里没有掩码tag，所以不会被处理
             lang_reference = "hello world"

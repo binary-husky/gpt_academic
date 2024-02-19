@@ -53,7 +53,7 @@ class PaperFileGroup():
 def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, language='en'):
     from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 
-    #  <-------- 读取Markdown文件，删除其中的所有注释 ----------> 
+    #  <-------- 读取Markdown文件，删除其中的所有注释 ---------->
     pfg = PaperFileGroup()
 
     for index, fp in enumerate(file_manifest):
@@ -63,23 +63,23 @@ def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
             pfg.file_paths.append(fp)
             pfg.file_contents.append(file_content)
 
-    #  <-------- 拆分过长的Markdown文件 ----------> 
+    #  <-------- 拆分过长的Markdown文件 ---------->
     pfg.run_file_split(max_token_limit=1500)
     n_split = len(pfg.sp_file_contents)
 
-    #  <-------- 多线程翻译开始 ----------> 
+    #  <-------- 多线程翻译开始 ---------->
     if language == 'en->zh':
-        inputs_array = ["This is a Markdown file, translate it into Chinese, do not modify any existing Markdown commands:" + 
+        inputs_array = ["This is a Markdown file, translate it into Chinese, do not modify any existing Markdown commands:" +
                         f"\n\n{frag}" for frag in pfg.sp_file_contents]
         inputs_show_user_array = [f"翻译 {f}" for f in pfg.sp_file_tag]
         sys_prompt_array = ["You are a professional academic paper translator." for _ in range(n_split)]
     elif language == 'zh->en':
-        inputs_array = [f"This is a Markdown file, translate it into English, do not modify any existing Markdown commands:" + 
+        inputs_array = [f"This is a Markdown file, translate it into English, do not modify any existing Markdown commands:" +
                         f"\n\n{frag}" for frag in pfg.sp_file_contents]
         inputs_show_user_array = [f"翻译 {f}" for f in pfg.sp_file_tag]
         sys_prompt_array = ["You are a professional academic paper translator." for _ in range(n_split)]
     else:
-        inputs_array = [f"This is a Markdown file, translate it into {language}, do not modify any existing Markdown commands, only answer me with translated results:" + 
+        inputs_array = [f"This is a Markdown file, translate it into {language}, do not modify any existing Markdown commands, only answer me with translated results:" +
                         f"\n\n{frag}" for frag in pfg.sp_file_contents]
         inputs_show_user_array = [f"翻译 {f}" for f in pfg.sp_file_tag]
         sys_prompt_array = ["You are a professional academic paper translator." for _ in range(n_split)]
@@ -103,7 +103,7 @@ def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
     except:
         logging.error(trimmed_format_exc())
 
-    #  <-------- 整理结果，退出 ----------> 
+    #  <-------- 整理结果，退出 ---------->
     create_report_file_name = gen_time_str() + f"-chatgpt.md"
     res = write_history_to_file(gpt_response_collection, file_basename=create_report_file_name)
     promote_file_to_downloadzone(res, chatbot=chatbot)
@@ -255,7 +255,7 @@ def Markdown翻译指定语言(txt, llm_kwargs, plugin_kwargs, chatbot, history,
         report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何.md文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
-    
+
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     language = plugin_kwargs.get("advanced_arg", 'Chinese')
     yield from 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, language=language)

@@ -40,7 +40,7 @@ def switch_prompt(pfg, mode, more_requirement):
 
 
 def desend_to_extracted_folder_if_exist(project_folder):
-    """ 
+    """
     Descend into the extracted folder if it exists, otherwise return the original folder.
 
     Args:
@@ -56,7 +56,7 @@ def desend_to_extracted_folder_if_exist(project_folder):
 
 
 def move_project(project_folder, arxiv_id=None):
-    """ 
+    """
     Create a new work folder and copy the project folder to it.
 
     Args:
@@ -112,9 +112,9 @@ def arxiv_download(chatbot, history, txt, allow_cache=True):
     if ('.' in txt) and ('/' not in txt) and is_float(txt[:10]):  # is arxiv ID
         txt = 'https://arxiv.org/abs/' + txt[:10]
 
-    if not txt.startswith('https://arxiv.org'): 
+    if not txt.startswith('https://arxiv.org'):
         return txt, None    # 是本地文件，跳过下载
-    
+
     # <-------------- inspect format ------------->
     chatbot.append([f"检测到arxiv文档连接", '尝试下载 ...'])
     yield from update_ui(chatbot=chatbot, history=history)
@@ -214,7 +214,7 @@ def pdf2tex_project(pdf_file_path):
         return None
 
 
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= 插件主程序1 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=    
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= 插件主程序1 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 
 @CatchException
@@ -291,7 +291,7 @@ def Latex英文纠错加PDF对比(txt, llm_kwargs, plugin_kwargs, chatbot, histo
     return success
 
 
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= 插件主程序2 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=    
+# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= 插件主程序2 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 @CatchException
 def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
@@ -326,7 +326,7 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
         txt, arxiv_id = yield from arxiv_download(chatbot, history, txt, allow_cache)
     except tarfile.ReadError as e:
         yield from update_ui_lastest_msg(
-            "无法自动下载该论文的Latex源码，请前往arxiv打开此论文下载页面，点other Formats，然后download source手动下载latex源码包。接下来调用本地Latex翻译插件即可。", 
+            "无法自动下载该论文的Latex源码，请前往arxiv打开此论文下载页面，点other Formats，然后download source手动下载latex源码包。接下来调用本地Latex翻译插件即可。",
             chatbot=chatbot, history=history)
         return
 
@@ -385,7 +385,7 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
     return success
 
 
-#  =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- 插件主程序3  =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=   
+#  =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- 插件主程序3  =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 @CatchException
 def PDF翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
