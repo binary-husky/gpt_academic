@@ -28,6 +28,7 @@ class DocxHandler:
             raise ValueError(f"Error reading document: {e}")
         self.file_name = os.path.basename(docx_path).split('.')[0]
 
+
     def __extract_attribute_from_xml(self, xml_data, e_tag='blip', e_attr='embed') -> str:
         """从XML数据中提取属性"""
         root = ET.fromstring(xml_data)
@@ -59,6 +60,13 @@ class DocxHandler:
         else:
             return 0
 
+    def __save_img(self, blob, name):
+        image_path = os.path.join(self.output_dir, f'{self.file_name}-image')
+        os.makedirs(image_path, exist_ok=True)
+        image_save = os.path.join(image_path, f'{name}.png')
+        with open(image_save, 'wb') as f:
+            f.write(blob)
+
     def __extract_and_save_image(self, inline, doc):
         """提取并保存内嵌图片"""
         image_path = ""
@@ -70,16 +78,12 @@ class DocxHandler:
                 blip = graphic.graphicData.pic.blipFill.blip
                 if blip and hasattr(blip, "embed"):
                     image_part = doc.part.related_parts[blip.embed]
-                    image_path = os.path.join(self.output_dir, f'{self.file_name}-image-{blip.embed}.png')
-                    with open(image_path, 'wb') as f:
-                        f.write(image_part.blob)
+                    self.__save_img(image_part.blob, blip.embed)
         else:
             # 对话内嵌表格的图片
             embed = self.__extract_attribute_from_xml(inline.xml)
             image_part = doc.part.related_parts[embed]
-            image_path = os.path.join(self.output_dir, f'{self.file_name}-image-{embed}.png')
-            with open(image_path, 'wb') as f:
-                f.write(image_part.blob)
+            self.__save_img(image_part.blob, embed)
 
         # 返回Markdown图片链接，如果没有找到图片则返回空字符串
         return f"![{os.path.basename(image_path)}]({image_path})\n" if image_path else ""

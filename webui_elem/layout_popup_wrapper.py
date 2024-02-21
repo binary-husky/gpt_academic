@@ -6,6 +6,7 @@ import gradio as gr
 import pandas as pd
 
 from common import func_box, toolbox
+from common.api_configs import LOADER_ENHANCE, ZH_TITLE_ENHANCE
 from webui_elem import webui_local
 
 i18n = webui_local.I18nAuto()
@@ -26,8 +27,10 @@ class Settings:
 
     def _draw_setting_senior(self):
         with gr.Tab(label=i18n("高级")):
-            self.models_box = gr.CheckboxGroup(choices=['input加密', '预加载知识库', 'OCR缓存', '文档RAG'],
-                                               value=['input加密', '文档RAG'],
+            self.models_box = gr.CheckboxGroup(choices=['input加密', '预加载知识库', 'OCR缓存', '文档RAG',
+                                                        'gpt4-v自动识图', 'gemini-v自动识图', 'glm-v自动识图'],
+                                               value=['input加密', '文档RAG', 'gpt4-v自动识图',
+                                                      'gemini-v自动识图', 'glm-v自动识图'],
                                                label="提交开关", container=False)
             worker_num = toolbox.get_conf('DEFAULT_WORKER_NUM')
             self.default_worker_num = gr.Slider(minimum=1, maximum=30, value=worker_num, step=1,
@@ -46,7 +49,7 @@ class Settings:
                                                    'https://huggingface.co/spaces/gradio/theme-gallery',
                                               container=False)
             self.latex_option = gr.Dropdown(latex_option, value=latex_option[0], label=i18n("更换Latex输出格式"),
-                                            interactive=True, container=False, show_label=True,)
+                                            interactive=True, container=False, show_label=True, )
             gr.HTML(get_html("appearance_switcher.html").format(
                 label=i18n("切换亮暗色主题")), elem_classes="insert-block", visible=False)
             self.single_turn_checkbox = gr.Checkbox(label=i18n("无记忆对话"),
@@ -57,7 +60,7 @@ class Settings:
         with gr.TabItem('个人中心', id='private'):
             with gr.Row(elem_classes='tab-center'):
                 gr.Markdown('#### 粉身碎骨浑不怕 要留清白在人间\n\n'
-                            '`这里的东西只有你自己能看，不要告诉别人哦`\n\n'\
+                            '`这里的东西只有你自己能看，不要告诉别人哦`\n\n' \
                             + func_box.html_tag_color('我们不会保存你的个人信息，清除浏览器缓存后这里的信息就会被丢弃',
                                                       color='rgb(227 179 51)'))
             self.usageTxt = gr.Markdown(i18n(
@@ -237,15 +240,15 @@ class Prompt:
         from common.api_configs import TEXT_SPLITTER_NAME, text_splitter_dict
         with gr.Column(visible=False) as self.edit_knowledge_base:
             with gr.Row():
-                self.edit_kb_upload = gr.File(label='上传知识文件', elem_id='reader-file',
-                                              show_label=True, container=False)
+                self.edit_kb_upload = gr.Files(label='上传知识文件', elem_id='reader-file',
+                                               show_label=True, container=False)
             with gr.Row():
                 self.edit_kb_cloud = gr.Textbox(show_label=False, placeholder='云文件链接,多个链接使用换行间隔',
                                                 elem_classes='no_padding_input')
             with gr.Row():
-                self.edit_kb_introduce = gr.TextArea(label='知识库简介', lines=3, max_lines=4,
-                                                     placeholder='这个人很懒，什么都没有留下', container=False,
-                                                     show_label=True)
+                self.edit_kb_introduce = gr.Textbox(label='知识库简介', lines=3, max_lines=4,
+                                                    placeholder='这个人很懒，什么都没有留下', container=False,
+                                                    show_label=True)
             with gr.Column(elem_classes='elem-box-solid'):
                 with gr.Row():
                     self.edit_kb_max_paragraph = gr.Number(label='单段文本最大长度', value=250, show_label=True,
@@ -256,10 +259,10 @@ class Prompt:
                                                                 value=TEXT_SPLITTER_NAME,
                                                                 label="内置分词器选择", allow_custom_value=True,
                                                                 show_label=True)
-                    self.edit_kb_tokenizer_select = gr.Dropdown(choices=[], value="中文标题增强",
-                                                                interactive=True,
-                                                                label="Loader增强模式", allow_custom_value=True,
-                                                                show_label=True)
+                    self.edit_kb_loader_select = gr.Dropdown(choices=LOADER_ENHANCE, value=ZH_TITLE_ENHANCE,
+                                                             interactive=True,
+                                                             label="Loader增强模式", allow_custom_value=True,
+                                                             show_label=True)
                 self.edit_kb_confirm_btn = gr.Button(value='添加文件到知识库', size='lg')
 
             func_box.md_division_line()
@@ -268,12 +271,12 @@ class Prompt:
             with gr.Row():
                 with gr.Column(scale=1, elem_classes=['kb-select-list', 'elem-box-solid']):
                     self.edit_kb_file_list = gr.Radio(label='知识库内文件', show_label=True, container=False,
-                                                      choices=['3123', '312321'], value='',
+                                                      choices=[], value='',
                                                       elem_id='knowledge-base-select')
                     with gr.Row():
                         self.edit_kb_info_reload_vector = gr.Button(value='关于本项目', size='sm',
                                                                     variant='primary')
-                        self.edit_kb_info_vector_del = gr.Button(value='删除知识库', size='sm',
+                        self.edit_knowledge_base_del = gr.Button(value='删除知识库', size='sm',
                                                                  elem_classes='danger_btn')
                 with gr.Column(scale=4):
                     with gr.Column(elem_classes='elem-box-solid'):
@@ -290,9 +293,10 @@ class Prompt:
                         with gr.Row():
                             self.edit_kb_file_fragment = gr.Dataframe(label='文档片段编辑', value=[],
                                                                       interactive=True, type='pandas',
+                                                                      overflow_row_behaviour='paginate',
                                                                       elem_classes='kb-info-fragment',
                                                                       col_count=(3, 'fixed'),
-                                                                      row_count=(1, 'dynamic'), )
+                                                                      row_count=(1, 'dynamic'), datatype='markdown')
                         with gr.Row():
                             self.edit_kb_info_fragment_save = gr.Button(value='保存更改', size='sm',
                                                                         variant='primary')

@@ -18,8 +18,9 @@ from langchain.text_splitter import TextSplitter
 from pathlib import Path
 from common.utils import run_in_thread_pool, get_model_worker_config
 import json
-from typing import List, Union,Dict, Tuple, Generator
+from typing import List, Union, Dict, Tuple, Generator
 import chardet
+from common.func_box import valid_img_extensions
 
 
 def validate_kb_name(knowledge_base_id: str) -> bool:
@@ -71,7 +72,7 @@ def list_files_from_folder(kb_name: str):
                 for target_entry in target_it:
                     process_entry(target_entry)
         elif entry.is_file():
-            file_path = (Path(os.path.relpath(entry.path, doc_path)).as_posix()) # 路径统一为 posix 格式
+            file_path = (Path(os.path.relpath(entry.path, doc_path)).as_posix())  # 路径统一为 posix 格式
             result.append(file_path)
         elif entry.is_dir():
             with os.scandir(entry.path) as it:
@@ -90,15 +91,10 @@ LOADER_DICT = {"UnstructuredHTMLLoader": ['.html', '.htm'],
                "UnstructuredMarkdownLoader": ['.md'],
                "JSONLoader": [".json"],
                "JSONLinesLoader": [".jsonl"],
-               "CSVLoader": [".csv"],
-               # "FilteredCSVLoader": [".csv"], 如果使用自定义分割csv
-               "RapidOCRPDFLoader": [".pdf"],
-               "RapidOCRDocLoader": ['.docx', '.doc'],
-               "RapidOCRPPTLoader": ['.ppt', '.pptx', ],
-               "RapidOCRLoader": ['.png', '.jpg', '.jpeg', '.bmp'],
                "UnstructuredFileLoader": ['.eml', '.msg', '.rst',
                                           '.rtf', '.txt', '.xml',
-                                          '.epub', '.odt','.tsv'],
+                                          '.epub', '.odt', '.tsv'],
+               "CSVLoader": [".csv"],
                "UnstructuredEmailLoader": ['.eml', '.msg'],
                "UnstructuredEPubLoader": ['.epub'],
                "UnstructuredExcelLoader": ['.xlsx', '.xls', '.xlsd'],
@@ -115,13 +111,36 @@ LOADER_DICT = {"UnstructuredHTMLLoader": ['.html', '.htm'],
                "UnstructuredPowerPointLoader": ['.ppt', '.pptx'],
                "EverNoteLoader": ['.enex'],
                }
+
+RapidFile = {
+    # "FilteredCSVLoader": [".csv"], 如果使用自定义分割csv
+    "RapidOCRPDFLoader": [".pdf"],
+    "RapidOCRDocLoader": ['.docx', '.doc'],
+    "RapidOCRPPTLoader": ['.ppt', '.pptx', ],
+    "RapidOCRLoader": ['.png', '.jpg', '.jpeg', '.bmp'],
+}
+RapidFile.update(LOADER_DICT)
+ReaderFile = {
+    "ReaderPDFEve": ['.pdf'],
+    # "ReaderIMGEve": valid_img_extensions,   # 使用OCR
+    "ReaderDocxEve": ['.docx'],
+    "ReaderAudioEve": ['.mp4', '.m4a', '.wav', '.mpga', '.mpeg', '.mp3', '.avi', '.mkv', '.flac', '.aac'],
+    "ReaderMarkdownEve": ['.md'],
+    "ReaderExcelEve": ['.xlsx', '.xlsx'],
+    "ReaderVisionEve": [f".{i}" for i in valid_img_extensions],  # 还是使用vision
+}
+ReaderFile.update(LOADER_DICT)
+
 SUPPORTED_EXTS = [ext for sublist in LOADER_DICT.values() for ext in sublist]
+ReaderFile_EXTS = [ext for sublist in ReaderFile.values() for ext in sublist]
+RapidFile_EXTS = [ext for sublist in RapidFile.values() for ext in sublist]
 
 
 # patch json.dumps to disable ensure_ascii
 def _new_json_dumps(obj, **kwargs):
     kwargs["ensure_ascii"] = False
     return _origin_json_dumps(obj, **kwargs)
+
 
 if json.dumps is not _new_json_dumps:
     _origin_json_dumps = json.dumps
@@ -132,6 +151,7 @@ class JSONLinesLoader(langchain.document_loaders.JSONLoader):
     '''
     行式 Json 加载器，要求文件扩展名为 .jsonl
     '''
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._json_lines = True
@@ -145,22 +165,35 @@ def get_LoaderClass(file_extension):
         if file_extension in extensions:
             return LoaderClass
 
+
+def get_RapidClass(file_extension):
+    for LoaderClass, extensions in RapidFile.items():
+        if file_extension in extensions:
+            return LoaderClass
+
+
+def get_ReaderClass(file_extension):
+    for LoaderClass, extensions in ReaderFile.items():
+        if file_extension in extensions:
+            return LoaderClass
+
+
 def get_loader(loader_name: str, file_path: str, loader_kwargs: Dict = None):
     '''
     根据loader_name和文件路径或内容返回文档加载器。
     '''
     loader_kwargs = loader_kwargs or {}
     try:
-        if loader_name in ["RapidOCRPDFLoader", "RapidOCRLoader", "FilteredCSVLoader",
-                           "RapidOCRDocLoader", "RapidOCRPPTLoader"]:
-            document_loaders_module = importlib.import_module('document_loaders')
+        if loader_name in RapidFile.keys():
+            document_loaders_module = importlib.import_module('common.document_loaders')
+        elif loader_name in ReaderFile.keys():
+            document_loaders_module = importlib.import_module('common.document_loaders')
         else:
             document_loaders_module = importlib.import_module('langchain.document_loaders')
         DocumentLoader = getattr(document_loaders_module, loader_name)
     except Exception as e:
         msg = f"为文件{file_path}查找加载器{loader_name}时出错：{e}"
-        logger.error(f'{e.__class__.__name__}: {msg}',
-                     exc_info=e if log_verbose else None)
+        logger.error(f'{e.__class__.__name__}: {msg}')
         document_loaders_module = importlib.import_module('langchain.document_loaders')
         DocumentLoader = getattr(document_loaders_module, "UnstructuredFileLoader")
 
@@ -261,7 +294,7 @@ def make_text_splitter(
         text_splitter_module = importlib.import_module('langchain.text_splitter')
         TextSplitter = getattr(text_splitter_module, "RecursiveCharacterTextSplitter")
         text_splitter = TextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-        
+
     # If you use SpacyTextSplitter you can use GPU to do split likes Issue #1287
     # text_splitter._tokenizer.max_length = 37016792
     # text_splitter._tokenizer.prefer_gpu()
@@ -274,6 +307,8 @@ class KnowledgeFile:
             filename: str,
             knowledge_base_name: str,
             loader_kwargs: Dict = {},
+            text_splitter_name: str = TEXT_SPLITTER_NAME,
+            loader_enhance: list = []
     ):
         '''
         对应知识库目录中的文件，必须是磁盘上存在的才能进行向量化等操作。
@@ -281,14 +316,23 @@ class KnowledgeFile:
         self.kb_name = knowledge_base_name
         self.filename = str(Path(filename).as_posix())
         self.ext = os.path.splitext(filename)[-1].lower()
-        if self.ext not in SUPPORTED_EXTS:
-            raise ValueError(f"暂未支持的文件格式 {self.filename}")
         self.loader_kwargs = loader_kwargs
         self.filepath = get_file_path(knowledge_base_name, filename)
         self.docs = None
         self.splited_docs = None
-        self.document_loader_name = get_LoaderClass(self.ext)
-        self.text_splitter_name = TEXT_SPLITTER_NAME
+        if 'RapidOCRTitleUP' in loader_enhance:
+            if self.ext not in RapidFile_EXTS:
+                raise ValueError(f"暂未支持的文件格式 {self.filename}")
+            self.document_loader_name = get_RapidClass(self.ext)
+        elif 'ReaderMarkdown' in loader_enhance:
+            if self.ext not in ReaderFile_EXTS:
+                raise ValueError(f"暂未支持的文件格式 {self.filename}")
+            self.document_loader_name = get_ReaderClass(self.ext)
+        else:
+            if self.ext not in SUPPORTED_EXTS:
+                raise ValueError(f"暂未支持的文件格式 {self.filename}")
+            self.document_loader_name = get_LoaderClass(self.ext)
+        self.text_splitter_name = text_splitter_name
 
     def file2docs(self, refresh: bool = False):
         if self.docs is None or refresh:
@@ -302,7 +346,7 @@ class KnowledgeFile:
     def docs2texts(
             self,
             docs: List[Document] = None,
-            zh_title_enhance: bool = ZH_TITLE_ENHANCE,
+            loader_enhance: bool = ZH_TITLE_ENHANCE,
             refresh: bool = False,
             chunk_size: int = CHUNK_SIZE,
             chunk_overlap: int = OVERLAP_SIZE,
@@ -324,14 +368,14 @@ class KnowledgeFile:
             return []
 
         print(f"文档切分示例：{docs[0]}")
-        if zh_title_enhance:
+        if 'RapidOCRTitleUP' in loader_enhance:
             docs = func_zh_title_enhance(docs)
         self.splited_docs = docs
         return self.splited_docs
 
     def file2text(
             self,
-            zh_title_enhance: bool = ZH_TITLE_ENHANCE,
+            loader_enhance: bool = ZH_TITLE_ENHANCE,
             refresh: bool = False,
             chunk_size: int = CHUNK_SIZE,
             chunk_overlap: int = OVERLAP_SIZE,
@@ -340,7 +384,7 @@ class KnowledgeFile:
         if self.splited_docs is None or refresh:
             docs = self.file2docs()
             self.splited_docs = self.docs2texts(docs=docs,
-                                                zh_title_enhance=zh_title_enhance,
+                                                loader_enhance=loader_enhance,
                                                 refresh=refresh,
                                                 chunk_size=chunk_size,
                                                 chunk_overlap=chunk_overlap,
@@ -361,7 +405,7 @@ def files2docs_in_thread(
         files: List[Union[KnowledgeFile, Tuple[str, str], Dict]],
         chunk_size: int = CHUNK_SIZE,
         chunk_overlap: int = OVERLAP_SIZE,
-        zh_title_enhance: bool = ZH_TITLE_ENHANCE,
+        loader_enhance: list = ZH_TITLE_ENHANCE,
 ) -> Generator:
     '''
     利用多线程批量将磁盘文件转化成langchain Document.
@@ -374,8 +418,7 @@ def files2docs_in_thread(
             return True, (file.kb_name, file.filename, file.file2text(**kwargs))
         except Exception as e:
             msg = f"从文件 {file.kb_name}/{file.filename} 加载文档时出错：{e}"
-            logger.error(f'{e.__class__.__name__}: {msg}',
-                         exc_info=e if log_verbose else None)
+            logger.error(f'{e.__class__.__name__}: {msg}')
             return False, (file.kb_name, file.filename, msg)
 
     kwargs_list = []
@@ -394,7 +437,7 @@ def files2docs_in_thread(
             kwargs["file"] = file
             kwargs["chunk_size"] = chunk_size
             kwargs["chunk_overlap"] = chunk_overlap
-            kwargs["zh_title_enhance"] = zh_title_enhance
+            kwargs["loader_enhance"] = loader_enhance
             kwargs_list.append(kwargs)
         except Exception as e:
             yield False, (kb_name, filename, str(e))
@@ -405,10 +448,4 @@ def files2docs_in_thread(
 
 if __name__ == "__main__":
     from pprint import pprint
-
-    kb_file = KnowledgeFile(
-        filename="/home/congyin/Code/Project_Langchain_0814/Langchain-Chatchat/knowledge_base/csv1/content/gm.csv",
-        knowledge_base_name="samples")
-    # kb_file.text_splitter_name = "RecursiveCharacterTextSplitter"
-    docs = kb_file.file2docs()
-    # pprint(docs[-1])
+    from common.toolbox import ProxyNetworkActivate

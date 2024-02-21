@@ -333,7 +333,7 @@ code.language-folded {
     max-width: 20% !important;
 }
 .kb-info-fragment {
-    max-height: 222px !important;
+    /*max-height: 222px !important;*/
     overflow: auto !important;
 }
 /*无用不管了*/
@@ -345,6 +345,9 @@ code.language-folded {
 /*}*/
 .kb-info-fragment .controls-wrap {
    display: none !important;
+}
+.kb-info-fragment td {
+    overflow: auto !important;
 }
 /* 把radio做成列表 */
 #knowledge-base-select {
@@ -370,7 +373,6 @@ fieldset#knowledge-base-select .wrap label:active {
 fieldset#knowledge-base-select .wrap label.selected {
     color: var(--checkbox-label-text-color);
     background: var(--chatbot-blur-background-color);
-    padding: 10px 64px 10px 16px;
 }
 fieldset#knowledge-base-select .wrap label:not(.selected) .chat-selected-btns{
     display: none;

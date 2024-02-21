@@ -53,7 +53,9 @@ SENIVERSE_API_KEY = ""
 # 是否开启中文标题加强，以及标题增强的相关配置
 # 通过增加标题判断，判断哪些文本为标题，并在metadata中进行标记；
 # 然后将文本与往上一级的标题进行拼合，实现文本信息的增强。
-ZH_TITLE_ENHANCE = False
+# 任何文件转Markdown
+LOADER_ENHANCE = ['ReaderMarkdown',  'RapidOCRTitleUP']
+ZH_TITLE_ENHANCE = 'ReaderMarkdown'
 
 # PDF OCR 控制：只对宽高超过页面一定比例（图片宽/页面宽，图片高/页面高）的图片进行 OCR。
 # 这样可以避免 PDF 中一些小图片的干扰，提高非扫描版 PDF 处理速度

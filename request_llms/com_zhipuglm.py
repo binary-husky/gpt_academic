@@ -111,6 +111,11 @@ class ZhipuChatInit:
             chunk_index = chunk.find('{')
             if chunk_index != -1:
                 bro_loads = json.loads(chunk[chunk_index:])
+                if bro_loads.get('error'):
+                    bro_chunk = json.dumps(bro_loads, indent=4, ensure_ascii=False)
+                    bro_results += f"\n```json\n{bro_chunk}\n"
+                    yield bro_chunk, bro_results
+                    continue
                 bro_chunk = bro_loads['choices'][0]['delta']['content']
                 bro_results += bro_chunk
                 yield bro_chunk, bro_results

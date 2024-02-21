@@ -1,7 +1,7 @@
 from common.api_configs import (
     EMBEDDING_MODEL, DEFAULT_VS_TYPE, ZH_TITLE_ENHANCE,
     CHUNK_SIZE, OVERLAP_SIZE,
-    logger, log_verbose
+    logger, log_verbose, TEXT_SPLITTER_NAME
 )
 from common.knowledge_base.utils import (
     get_file_path, list_kbs_from_folder,
@@ -65,11 +65,12 @@ def import_from_db(
         return False
 
 
-def file_to_kbfile(kb_name: str, files: List[str]) -> List[KnowledgeFile]:
+def file_to_kbfile(kb_name: str, files: List[str], text_splitter_name) -> List[KnowledgeFile]:
     kb_files = []
     for file in files:
         try:
-            kb_file = KnowledgeFile(filename=file, knowledge_base_name=kb_name)
+            kb_file = KnowledgeFile(filename=file, knowledge_base_name=kb_name,
+                                    text_splitter_name=text_splitter_name)
             kb_files.append(kb_file)
         except Exception as e:
             msg = f"{e}，已跳过"
@@ -85,7 +86,8 @@ def folder2db(
         embed_model: str = EMBEDDING_MODEL,
         chunk_size: int = CHUNK_SIZE,
         chunk_overlap: int = OVERLAP_SIZE,
-        zh_title_enhance: bool = ZH_TITLE_ENHANCE,
+        loader_enhance: list = ZH_TITLE_ENHANCE,
+        text_splitter_name: str = TEXT_SPLITTER_NAME
 ):
     """
     use existed files in local folder to populate database and/or vector store.
@@ -100,11 +102,12 @@ def folder2db(
         for success, result in files2docs_in_thread(kb_files,
                                                     chunk_size=chunk_size,
                                                     chunk_overlap=chunk_overlap,
-                                                    zh_title_enhance=zh_title_enhance):
+                                                    loader_enhance=loader_enhance):
             if success:
                 _, filename, docs = result
                 print(f"正在将 {kb_name}/{filename} 添加到向量库，共包含{len(docs)}条文档")
-                kb_file = KnowledgeFile(filename=filename, knowledge_base_name=kb_name)
+                kb_file = KnowledgeFile(filename=filename, knowledge_base_name=kb_name,
+                                        text_splitter_name=text_splitter_name, loader_enhance=loader_enhance)
                 kb_file.splited_docs = docs
                 kb.add_doc(kb_file=kb_file, not_refresh_vs_cache=True)
             else:
@@ -120,7 +123,7 @@ def folder2db(
         if mode == "recreate_vs":
             kb.clear_vs()
             kb.create_kb()
-            kb_files = file_to_kbfile(kb_name, list_files_from_folder(kb_name))
+            kb_files = file_to_kbfile(kb_name, list_files_from_folder(kb_name), text_splitter_name)
             files2vs(kb_name, kb_files)
             kb.save_vector_store()
         # # 不做文件内容的向量化，仅将文件元信息存到数据库
@@ -134,7 +137,7 @@ def folder2db(
         # 以数据库中文件列表为基准，利用本地文件更新向量库
         elif mode == "update_in_db":
             files = kb.list_files()
-            kb_files = file_to_kbfile(kb_name, files)
+            kb_files = file_to_kbfile(kb_name, files, text_splitter_name)
             files2vs(kb_name, kb_files)
             kb.save_vector_store()
         # 对比本地目录与数据库中的文件列表，进行增量向量化
@@ -142,7 +145,7 @@ def folder2db(
             db_files = kb.list_files()
             folder_files = list_files_from_folder(kb_name)
             files = list(set(folder_files) - set(db_files))
-            kb_files = file_to_kbfile(kb_name, files)
+            kb_files = file_to_kbfile(kb_name, files, text_splitter_name)
             files2vs(kb_name, kb_files)
             kb.save_vector_store()
         else:

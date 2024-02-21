@@ -232,10 +232,16 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         )
 
     def signals_knowledge_base(self):
-        show_hide_combo = [self.new_knowledge_base, self.edit_knowledge_base]
+        self.show_hide_combo = [self.new_knowledge_base, self.edit_knowledge_base]
+        self.file_details_combo = [self.knowledge_base_select, self.edit_kb_introduce,
+                                   self.edit_kb_file_list, self.edit_kb_file_details, self.edit_kb_file_fragment]
 
         self.knowledge_base_select.select(fn=func_signals.kb_select_show, inputs=[self.knowledge_base_select],
-                                          outputs=show_hide_combo)
+                                          outputs=self.show_hide_combo).then(
+            fn=func_signals.kb_name_select_then, inputs=[self.knowledge_base_select, gr.State(None)],
+            outputs=self.file_details_combo
+        )
+
         self.new_kb_name.change(fn=func_signals.kb_name_change_btn, inputs=[self.new_kb_name],
                                 outputs=[self.new_kb_confirm_btn])
 
@@ -250,9 +256,24 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         self.new_kb_confirm_btn.click(fn=func_signals.kb_new_confirm,
                                       inputs=[self.new_kb_name, self.new_kb_vector_types,
                                               self.new_kb_embedding_model, self.new_kb_introduce],
-                                      outputs=show_hide_combo + [self.knowledge_base_state_dict]
-                                      + [self.knowledge_base_select, self.edit_kb_introduce,
-                                         self.edit_kb_file_list, self.edit_kb_file_details, self.edit_kb_file_fragment])
+                                      outputs=self.show_hide_combo + self.file_details_combo)
+
+        self.edit_kb_confirm_btn.click(func_signals.kb_file_update_confirm,
+                                       inputs=[self.edit_kb_upload, self.knowledge_base_select, self.edit_kb_introduce,
+                                               self.edit_kb_max_paragraph, self.edit_kb_similarity_paragraph,
+                                               self.edit_kb_tokenizer_select, self.edit_kb_loader_select],
+                                       outputs=self.file_details_combo)
+        self.edit_kb_file_list.input(
+            fn=func_signals.kb_select_file, inputs=[self.knowledge_base_select, self.edit_kb_file_list],
+            outputs=[self.edit_kb_file_details, self.edit_kb_file_fragment]
+        )
+        self.edit_knowledge_base_del.click(fn=func_signals.kb_base_del,
+                                           inputs=[self.knowledge_base_select,
+                                                   self.knowledge_base_select,
+                                                   gr.HTML('删除',
+                                                           visible=False)],
+                                           outputs=self.show_hide_combo + [self.knowledge_base_select],
+                                           _js="(a,b,c)=>{return showConfirmationDialog(a,b,c);}")
 
     def signals_history(self):
         self.llms_cookies_combo = [self.chatbot, self.history, self.cookies,
@@ -410,7 +431,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                            inputs=[self.pro_fp_state],
                            outputs=[self.pro_func_prompt, self.pro_fp_state, self.copyright_display,
                                     self.pro_private_check, self.prompt_cls_select, self.mask_cls_select,
-                                    gr.State(''), gr.State(''), self.langchain_dropdown])
+                                    self.knowledge_base_select, self.langchain_dropdown])
             self.demo.load(fn=func_signals.refresh_user_data,
                            inputs=[self.cookies, gr.State(proxy_info)],
                            outputs=[self.historySelectList, *self.llms_cookies_combo,

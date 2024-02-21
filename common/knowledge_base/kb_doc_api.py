@@ -1,9 +1,10 @@
 import os
+import shutil
 import urllib
 from fastapi import File, Form, Body, Query, UploadFile
 from common.api_configs import (DEFAULT_VS_TYPE, EMBEDDING_MODEL,
                                 VECTOR_SEARCH_TOP_K, SCORE_THRESHOLD,
-                                CHUNK_SIZE, OVERLAP_SIZE, ZH_TITLE_ENHANCE)
+                                CHUNK_SIZE, OVERLAP_SIZE, ZH_TITLE_ENHANCE, TEXT_SPLITTER_NAME)
 from common.utils import BaseResponse, ListResponse, run_in_thread_pool
 from common.knowledge_base.utils import (validate_kb_name, list_files_from_folder, get_file_path,
                                          files2docs_in_thread, KnowledgeFile)
@@ -73,6 +74,34 @@ def list_files(
         return ListResponse(data=all_doc_names)
 
 
+def __fast_file_proc(file, knowledge_base_name, override):
+    filename = file.filename
+    file_path = get_file_path(knowledge_base_name=knowledge_base_name, doc_name=filename)
+    data = {"knowledge_base_name": knowledge_base_name, "file_name": filename}
+    file_content = file.file.read()  # 读取上传文件的内容
+    if (os.path.isfile(file_path)
+            and not override
+            and os.path.getsize(file_path) == len(file_content)
+    ):
+        file_status = f"文件 {filename} 已存在。"
+        logger.warning(file_status)
+        return dict(code=404, msg=file_status, data=data)
+
+    if not os.path.isdir(os.path.dirname(file_path)):
+        os.makedirs(os.path.dirname(file_path))
+    with open(file_path, "wb") as f:
+        f.write(file_content)
+    return dict(code=200, msg=f"成功上传文件 {filename}", data=data)
+
+
+def __gradio_file_proc(file, knowledge_base_name, override):
+    filename = os.path.basename(file.name)
+    file_path = get_file_path(knowledge_base_name=knowledge_base_name, doc_name=filename)
+    data = {"knowledge_base_name": knowledge_base_name, "file_name": filename}
+    shutil.copy(file.name, file_path)
+    return dict(code=200, msg=f"成功上传文件 {filename}", data=data)
+
+
 def _save_files_in_thread(files: List[UploadFile],
                           knowledge_base_name: str,
                           override: bool):
@@ -85,29 +114,15 @@ def _save_files_in_thread(files: List[UploadFile],
         '''
         保存单个文件。
         '''
+        data = {}
         try:
-            filename = file.filename
-            file_path = get_file_path(knowledge_base_name=knowledge_base_name, doc_name=filename)
-            data = {"knowledge_base_name": knowledge_base_name, "file_name": filename}
-
-            file_content = file.file.read()  # 读取上传文件的内容
-            if (os.path.isfile(file_path)
-                    and not override
-                    and os.path.getsize(file_path) == len(file_content)
-            ):
-                file_status = f"文件 {filename} 已存在。"
-                logger.warn(file_status)
-                return dict(code=404, msg=file_status, data=data)
-
-            if not os.path.isdir(os.path.dirname(file_path)):
-                os.makedirs(os.path.dirname(file_path))
-            with open(file_path, "wb") as f:
-                f.write(file_content)
-            return dict(code=200, msg=f"成功上传文件 {filename}", data=data)
+            if isinstance(file, UploadFile):
+                return __fast_file_proc(file, knowledge_base_name, override)
+            else:
+                return __gradio_file_proc(file, knowledge_base_name, override)
         except Exception as e:
-            msg = f"{filename} 文件上传失败，报错信息为: {e}"
-            logger.error(f'{e.__class__.__name__}: {msg}',
-                         exc_info=e if log_verbose else None)
+            msg = f"文件上传失败，报错信息为: {e}"
+            logger.error(f'{e.__class__.__name__}: {msg}')
             return dict(code=500, msg=msg, data=data)
 
     params = [{"file": file, "knowledge_base_name": knowledge_base_name, "override": override} for file in files]
@@ -135,10 +150,11 @@ def upload_docs(
         to_vector_store: bool = Form(True, description="上传文件后是否进行向量化"),
         chunk_size: int = Form(CHUNK_SIZE, description="知识库中单段文本最大长度"),
         chunk_overlap: int = Form(OVERLAP_SIZE, description="知识库中相邻文本重合长度"),
-        zh_title_enhance: bool = Form(ZH_TITLE_ENHANCE, description="是否开启中文标题加强"),
+        loader_enhance: list = Form(ZH_TITLE_ENHANCE, description="是否开启中文标题加强"),
         docs: Json = Form({}, description="自定义的docs，需要转为json字符串",
                           examples=[{"test.txt": [Document(page_content="custom doc")]}]),
         not_refresh_vs_cache: bool = Form(False, description="暂不保存向量库（用于FAISS）"),
+        text_splitter_name: str = Form(TEXT_SPLITTER_NAME, description='分词器选择')
 ) -> BaseResponse:
     """
     API接口：上传文件，并/或向量化
@@ -170,9 +186,10 @@ def upload_docs(
             override_custom_docs=True,
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,
-            zh_title_enhance=zh_title_enhance,
+            loader_enhance=loader_enhance,
             docs=docs,
             not_refresh_vs_cache=True,
+            text_splitter_name=text_splitter_name
         )
         failed_files.update(result.data["failed_files"])
         if not not_refresh_vs_cache:
@@ -206,8 +223,7 @@ def delete_docs(
             kb.delete_doc(kb_file, delete_content, not_refresh_vs_cache=True)
         except Exception as e:
             msg = f"{file_name} 文件删除失败，错误信息：{e}"
-            logger.error(f'{e.__class__.__name__}: {msg}',
-                         exc_info=e if log_verbose else None)
+            logger.error(f'{e.__class__.__name__}: {msg}')
             failed_files[file_name] = msg
 
     if not not_refresh_vs_cache:
@@ -236,11 +252,12 @@ def update_docs(
         file_names: List[str] = Body(..., description="文件名称，支持多文件", examples=[["file_name1", "text.txt"]]),
         chunk_size: int = Body(CHUNK_SIZE, description="知识库中单段文本最大长度"),
         chunk_overlap: int = Body(OVERLAP_SIZE, description="知识库中相邻文本重合长度"),
-        zh_title_enhance: bool = Body(ZH_TITLE_ENHANCE, description="是否开启中文标题加强"),
+        loader_enhance: list = Body(ZH_TITLE_ENHANCE, description="是否开启中文标题加强"),
         override_custom_docs: bool = Body(False, description="是否覆盖之前自定义的docs"),
         docs: Json = Body({}, description="自定义的docs，需要转为json字符串",
                           examples=[{"test.txt": [Document(page_content="custom doc")]}]),
         not_refresh_vs_cache: bool = Body(False, description="暂不保存向量库（用于FAISS）"),
+        text_splitter_name: str = Body(TEXT_SPLITTER_NAME, description='分词器选择')
 ) -> BaseResponse:
     """
     更新知识库文档
@@ -263,11 +280,11 @@ def update_docs(
             continue
         if file_name not in docs:
             try:
-                kb_files.append(KnowledgeFile(filename=file_name, knowledge_base_name=knowledge_base_name))
+                kb_files.append(KnowledgeFile(filename=file_name, knowledge_base_name=knowledge_base_name,
+                                              text_splitter_name=text_splitter_name, loader_enhance=loader_enhance))
             except Exception as e:
                 msg = f"加载文档 {file_name} 时出错：{e}"
-                logger.error(f'{e.__class__.__name__}: {msg}',
-                             exc_info=e if log_verbose else None)
+                logger.error(f'{e.__class__.__name__}: {msg}')
                 failed_files[file_name] = msg
 
     # 从文件生成docs，并进行向量化。
@@ -275,11 +292,11 @@ def update_docs(
     for status, result in files2docs_in_thread(kb_files,
                                                chunk_size=chunk_size,
                                                chunk_overlap=chunk_overlap,
-                                               zh_title_enhance=zh_title_enhance):
+                                               loader_enhance=loader_enhance):
         if status:
             kb_name, file_name, new_docs = result
-            kb_file = KnowledgeFile(filename=file_name,
-                                    knowledge_base_name=knowledge_base_name)
+            kb_file = KnowledgeFile(filename=file_name, text_splitter_name=text_splitter_name,
+                                    knowledge_base_name=knowledge_base_name, loader_enhance=loader_enhance)
             kb_file.splited_docs = new_docs
             kb.update_doc(kb_file, not_refresh_vs_cache=True)
         else:
@@ -290,12 +307,12 @@ def update_docs(
     for file_name, v in docs.items():
         try:
             v = [x if isinstance(x, Document) else Document(**x) for x in v]
-            kb_file = KnowledgeFile(filename=file_name, knowledge_base_name=knowledge_base_name)
+            kb_file = KnowledgeFile(filename=file_name, knowledge_base_name=knowledge_base_name,
+                                    text_splitter_name=text_splitter_name, loader_enhance=loader_enhance)
             kb.update_doc(kb_file, docs=v, not_refresh_vs_cache=True)
         except Exception as e:
             msg = f"为 {file_name} 添加自定义docs时出错：{e}"
-            logger.error(f'{e.__class__.__name__}: {msg}',
-                         exc_info=e if log_verbose else None)
+            logger.error(f'{e.__class__.__name__}: {msg}')
             failed_files[file_name] = msg
 
     if not not_refresh_vs_cache:
@@ -350,7 +367,7 @@ def recreate_vector_store(
         embed_model: str = Body(EMBEDDING_MODEL),
         chunk_size: int = Body(CHUNK_SIZE, description="知识库中单段文本最大长度"),
         chunk_overlap: int = Body(OVERLAP_SIZE, description="知识库中相邻文本重合长度"),
-        zh_title_enhance: bool = Body(ZH_TITLE_ENHANCE, description="是否开启中文标题加强"),
+        loader_enhance: list = Body(ZH_TITLE_ENHANCE, description="是否开启中文标题加强"),
         not_refresh_vs_cache: bool = Body(False, description="暂不保存向量库（用于FAISS）"),
 ):
     """
@@ -374,10 +391,11 @@ def recreate_vector_store(
             for status, result in files2docs_in_thread(kb_files,
                                                        chunk_size=chunk_size,
                                                        chunk_overlap=chunk_overlap,
-                                                       zh_title_enhance=zh_title_enhance):
+                                                       loader_enhance=loader_enhance):
                 if status:
                     kb_name, file_name, docs = result
-                    kb_file = KnowledgeFile(filename=file_name, knowledge_base_name=kb_name)
+                    kb_file = KnowledgeFile(filename=file_name, knowledge_base_name=kb_name,
+                                            loader_enhance=loader_enhance)
                     kb_file.splited_docs = docs
                     yield json.dumps({
                         "code": 200,

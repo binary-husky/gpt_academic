@@ -52,7 +52,7 @@ class GoogleChatInit:
 
     def generate_chat(self, inputs, llm_kwargs, history, system_prompt):
         headers, payload = self.generate_message_payload(inputs, llm_kwargs, history, system_prompt)
-        response = requests.post(url=self.url_gemini, headers=headers, data=json.dumps(payload),
+        response = requests.post(url=self.url_gemini, headers=headers, data=json.dumps(payload).encode('utf-8'),
                                  stream=True, proxies=proxies, timeout=TIMEOUT_SECONDS)
         bro_results = ''
         for resp in response.iter_lines():

@@ -164,6 +164,7 @@ def find_index_inlist(data_list: list, search_terms: list) -> int:
 
 def file_reader_content(file_path, save_path, plugin_kwargs):
     reader_statsu = ''
+    file_content = ''
     if file_path.endswith('pdf'):
         _content, _ = crazy_utils.read_and_clean_pdf_text(file_path, save_path)
         file_content = "".join(_content)

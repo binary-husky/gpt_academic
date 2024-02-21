@@ -58,8 +58,7 @@ def delete_kb(
             return BaseResponse(code=200, msg=f"成功删除知识库 {knowledge_base_name}")
     except Exception as e:
         msg = f"删除知识库时出现意外： {e}"
-        logger.error(f'{e.__class__.__name__}: {msg}',
-                     exc_info=e if log_verbose else None)
+        logger.error(f'{e.__class__.__name__}: {msg}')
         return BaseResponse(code=500, msg=msg)
 
     return BaseResponse(code=500, msg=f"删除知识库失败 {knowledge_base_name}")

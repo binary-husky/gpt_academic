@@ -2,6 +2,7 @@
 # @Time   : 2023/9/2
 # @Author : Spike
 # @Descr   :
+import json
 import os, random
 import copy
 import re
@@ -673,18 +674,18 @@ def refresh_load_data(prompt, request: gr.Request):
     is_all = preset_prompt['value']
     data = prompt_retrieval(prompt_cls=is_all, hosts=user_addr)
     prompt['samples'] = data
-    know_list = os.listdir(init_path.private_knowledge_path)
-    load_list, user_list = func_box.get_directory_list(os.path.join(init_path.private_knowledge_path, '知识库'),
-                                                       user_addr)
-    know_cls = gr.update(choices=know_list, value='知识库', show_label=True)
-    know_load = gr.update(choices=load_list, label='知识库', show_label=True)
-    know_user = gr.update(choices=user_list, show_label=True)
+
+    kb_details_tm = base.kb_details_to_dict()
+    kb_list = base.kb_dict_to_list(kb_details_tm)
+    know_list = gr.update(choices=kb_list + ['新建知识库'], show_label=True)
+    know_load = gr.update(choices=know_list, label='知识库', show_label=True)
+
     select_list = filter_database_tables()
     favicon_appname = func_box.favicon_ascii()
     outputs = [gr.update(samples=data, visible=True), prompt, favicon_appname,
                gr.update(choices=all + select_list), gr.update(choices=[all[1]] + select_list),
                gr.update(choices=[all[1]] + select_list),
-               know_cls, know_user, know_load]
+               know_list, know_load]
     return outputs
 
 
@@ -714,14 +715,34 @@ def user_login(user, password):
 
 # TODO < -------------------------------- 知识库函数注册区 -------------------------------------->
 from common.knowledge_base.kb_service import base
+from common.knowledge_base import kb_doc_api, kb_api
 from common.api_configs import kb_config
 
 
 def kb_select_show(select: gr.Dropdown):
     if select == '新建知识库':
-        return gr.update(visible=True), gr.update(visible=True)
+        return gr.update(visible=True), gr.update(visible=False)
     else:
         return gr.update(visible=False), gr.update(visible=True)
+
+
+def kb_name_select_then(kb_name, kb_info):
+    kb_name = list(base.kb_list_to_dict([kb_name]).keys())[0]
+    file_details = pd.DataFrame(base.get_kb_file_details(kb_name))
+    db_file_list = file_details['file_name'].to_list()
+    file_name = db_file_list[0]
+    last_details = __get_kb_details(file_details, file_details["No"] == 1)
+    last_fragment = __get_kb_fragment(kb_name, file_name)
+
+    kb_name_tm = base.kb_details_to_dict()
+    update_output = {
+        'kb_name_list': gr.update(choices=base.kb_dict_to_list(kb_name_tm)),
+        'kb_info_txt': kb_info,
+        'kb_file_list': gr.update(choices=db_file_list, value=file_name),
+        'kb_file_details': gr.update(value=last_details, label=f'{file_name}-文件详情'),
+        'kb_file_fragment': gr.update(value=last_fragment, label=f'{file_name}-文件片段编辑')
+    }
+    return list(update_output.values())
 
 
 def kb_name_change_btn(name):
@@ -776,15 +797,84 @@ def kb_new_confirm(kb_name, kb_type, kb_model, kb_info):
     new_output = {
         'new_clo': gr.update(visible=False),
         'edit_clo': gr.update(visible=True),
-        'kb_dict': {'kb_name': kb_name, 'kb_info': kb_info, 'kb_obj': kb},
     }
 
     edit_output = {
-        'kb__name_list': gr.update(choices=[select_name] + base.kb_dict_to_list(kb_name_tm),
-                                   value=select_name),
-        'kb_info_txt': kb.kb_info,
+        'kb_name_list': gr.update(choices=[select_name] + base.kb_dict_to_list(kb_name_tm) + ['新建知识库'],
+                                  value=select_name),
+        'kb_info_txt': kb_info,
         'kb_file_list': gr.Radio.update(choices=[], value=''),
-        'kb_file_details': gr.Dataframe.update(value=pd.DataFrame(data=kb_config.file_details_template)),
-        'kb_file_fragment': gr.Dataframe.update(value=pd.DataFrame(data=kb_config.file_fragment_template))
+        'kb_file_details': gr.Dataframe.update(value=pd.DataFrame(data=copy.deepcopy(kb_config.file_details_template))
+                                               ),
+        'kb_file_fragment': gr.Dataframe.update(
+            value=pd.DataFrame(data=copy.deepcopy(kb_config.file_fragment_template)))
     }
     return list(new_output.values()) + list(edit_output.values())
+
+
+def __get_kb_details(file_details: pd.DataFrame, condition: pd.Series):
+    select_document = file_details[condition]
+
+    select_kb_details = copy.deepcopy(kb_config.file_details_template)
+
+    select_kb_details.update({
+        '文档加载器': select_document['document_loader'].to_list(),
+        '分词器': select_document['text_splitter'].to_list(),
+        '文档片段数量': select_document['docs_count'].to_list(),
+        '向量库': select_document['in_db'].to_list(),
+        '源文件': select_document['in_folder'].to_list()
+    })
+    return pd.DataFrame(data=select_kb_details)
+
+
+def __get_kb_fragment(kb_name, file_name):
+    kb_fragment = copy.deepcopy(kb_config.file_fragment_template)
+
+    info_fragment = kb_doc_api.search_docs(query='', knowledge_base_name=kb_name,
+                                           top_k=1, score_threshold=1,
+                                           file_name=file_name, metadata={})
+
+    for i, v in enumerate(info_fragment):
+        kb_fragment['N'].append(i + 1)
+        kb_fragment['内容'].append(info_fragment[i].page_content)
+        kb_fragment['删除'].append('')
+    return pd.DataFrame(data=kb_fragment)
+
+
+
+def kb_file_update_confirm(files, kb_name, kb_info, kb_max, kb_similarity, kb_tokenizer, kb_loader):
+    kb_name = list(base.kb_list_to_dict([kb_name]).keys())[0]
+    response = kb_doc_api.upload_docs(files=files, knowledge_base_name=kb_name, override=True,
+                                      to_vector_store=True, chunk_size=kb_max, chunk_overlap=kb_similarity,
+                                      loader_enhance=kb_loader, docs={}, not_refresh_vs_cache=False,
+                                      text_splitter_name=kb_tokenizer)
+    if response.code != 200:
+        raise gr.Error(json.dumps(response.__dict__, indent=4, ensure_ascii=False))
+    if response.data.get('failed_files'):
+        raise gr.Error(json.dumps(response.data, indent=4, ensure_ascii=False))
+    return kb_name_select_then(kb_name, kb_info)
+
+
+def kb_select_file(kb_name, kb_file: str):
+    kb_name = list(base.kb_list_to_dict([kb_name]).keys())[0]
+    file_details = pd.DataFrame(base.get_kb_file_details(kb_name))
+
+    last_details = __get_kb_details(file_details, file_details["file_name"] == kb_file)
+    last_fragment = __get_kb_fragment(kb_name, kb_file)
+
+    return (gr.update(value=last_details, label=f'{kb_file}-文件详情'),
+            gr.update(value=last_fragment, label=f'{kb_file}-文档片段编辑'))
+
+
+def kb_base_del(kb_name, del_confirm, _):
+    if del_confirm == 'CANCELED':
+        return gr.update(visible=False), gr.update(visible=True), gr.update()
+    else:
+        kb_name = list(base.kb_list_to_dict([kb_name]).keys())[0]
+        response = kb_api.delete_kb(kb_name)
+        if response.code != 200:
+            raise gr.Error(json.dumps(response.__dict__, indent=4, ensure_ascii=False))
+        kb_name_list = base.kb_dict_to_list(base.kb_details_to_dict()) + ['新建知识库']
+
+        return gr.update(visible=True), gr.update(visible=False), gr.update(choices=kb_name_list,
+                                                                            value='新建知识库')

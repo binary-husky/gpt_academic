@@ -683,3 +683,7 @@ def get_temp_dir(id: str = None) -> Tuple[str, str]:
 
     path = tempfile.mkdtemp(dir=BASE_TEMP_DIR)
     return path, os.path.basename(path)
+
+
+if __name__ == '__main__':
+    pass

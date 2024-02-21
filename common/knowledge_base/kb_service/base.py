@@ -460,7 +460,7 @@ def get_kb_file_details(kb_name: str) -> List[Dict]:
 def kb_list_to_dict(kb_list) -> dict:
     kb_name_tm = {}
     # 正则表达式匹配 name 和括号内的 type 和 model
-    pattern = re.compile(r'^(?P<name>.+)\((?P<type>.+) @ (?P<model>.+)\)$')
+    pattern = re.compile(r'^(?P<name>.+) \((?P<type>.+) @ (?P<model>.+)\)$')
 
     for kb in kb_list:
         # 使用正则表达式匹配字符串
@@ -472,6 +472,8 @@ def kb_list_to_dict(kb_list) -> dict:
             model = match.group('model').strip()
             # 创建字典并添加到结果字典中
             kb_name_tm[name] = {"type": types, "model": model}
+        else:
+            kb_name_tm[kb] = {"type": '', "model": ''}
     return kb_name_tm
 
 
