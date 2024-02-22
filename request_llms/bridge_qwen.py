@@ -1,67 +1,63 @@
-model_name = "Qwen"
-cmd_to_install = "`pip install -r request_llms/requirements_qwen.txt`"
-
-
-from transformers import AutoModel, AutoTokenizer
 import time
-import threading
-import importlib
-from toolbox import update_ui, get_conf, ProxyNetworkActivate
-from multiprocessing import Process, Pipe
-from .local_llm_class import LocalLLMHandle, get_local_llm_predict_fns
+import os
+from toolbox import update_ui, get_conf, update_ui_lastest_msg
+from toolbox import check_packages, report_exception
 
+model_name = 'Qwen'
 
+def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=[], console_slience=False):
+    """
+        ⭐多线程方法
+        函数的说明请见 request_llms/bridge_all.py
+    """
+    watch_dog_patience = 5
+    response = ""
 
-# ------------------------------------------------------------------------------------------------------------------------
-# 🔌💻 Local Model
-# ------------------------------------------------------------------------------------------------------------------------
-class GetONNXGLMHandle(LocalLLMHandle):
+    from .com_qwenapi import QwenRequestInstance
+    sri = QwenRequestInstance()
+    for response in sri.generate(inputs, llm_kwargs, history, sys_prompt):
+        if len(observe_window) >= 1:
+            observe_window[0] = response
+        if len(observe_window) >= 2:
+            if (time.time()-observe_window[1]) > watch_dog_patience: raise RuntimeError("程序终止。")
+    return response
 
-    def load_model_info(self):
-        # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行
-        self.model_name = model_name
-        self.cmd_to_install = cmd_to_install
+def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream = True, additional_fn=None):
+    """
+        ⭐单线程方法
+        函数的说明请见 request_llms/bridge_all.py
+    """
+    chatbot.append((inputs, ""))
+    yield from update_ui(chatbot=chatbot, history=history)
 
-    def load_model_and_tokenizer(self):
-        # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行
-        import os, glob
-        import os
-        import platform
-        from modelscope import AutoModelForCausalLM, AutoTokenizer, GenerationConfig
+    # 尝试导入依赖，如果缺少依赖，则给出安装建议
+    try:
+        check_packages(["dashscope"])
+    except:
+        yield from update_ui_lastest_msg(f"导入软件依赖失败。使用该模型需要额外依赖，安装方法```pip install --upgrade dashscope```。",
+                                         chatbot=chatbot, history=history, delay=0)
+        return
 
-        with ProxyNetworkActivate('Download_LLM'):
-            model_id = 'qwen/Qwen-7B-Chat'
-            self._tokenizer = AutoTokenizer.from_pretrained('Qwen/Qwen-7B-Chat', trust_remote_code=True, resume_download=True)
-            # use fp16
-            model = AutoModelForCausalLM.from_pretrained(model_id, device_map="auto", trust_remote_code=True, fp16=True).eval()
-            model.generation_config = GenerationConfig.from_pretrained(model_id, trust_remote_code=True)  # 可指定不同的生成长度、top_p等相关超参
-            self._model = model
+    # 检查DASHSCOPE_API_KEY
+    if get_conf("DASHSCOPE_API_KEY") == "":
+        yield from update_ui_lastest_msg(f"请配置 DASHSCOPE_API_KEY。",
+                                         chatbot=chatbot, history=history, delay=0)
+        return
 
-        return self._model, self._tokenizer
+    if additional_fn is not None:
+        from core_functional import handle_core_functionality
+        inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
-    def llm_stream_generator(self, **kwargs):
-        # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行
-        def adaptor(kwargs):
-            query = kwargs['query']
-            max_length = kwargs['max_length']
-            top_p = kwargs['top_p']
-            temperature = kwargs['temperature']
-            history = kwargs['history']
-            return query, max_length, top_p, temperature, history
+    # 开始接收回复
+    from .com_qwenapi import QwenRequestInstance
+    sri = QwenRequestInstance()
+    response = f"[Local Message] 等待{model_name}响应中 ..."
+    for response in sri.generate(inputs, llm_kwargs, history, system_prompt):
+        chatbot[-1] = (inputs, response)
+        yield from update_ui(chatbot=chatbot, history=history)
 
-        query, max_length, top_p, temperature, history = adaptor(kwargs)
-
-        for response in self._model.chat(self._tokenizer, query, history=history, stream=True):
-            yield response
-        
-    def try_to_import_special_deps(self, **kwargs):
-        # import something that will raise error if the user does not install requirement_*.txt
-        # 🏃‍♂️🏃‍♂️🏃‍♂️ 主进程执行
-        import importlib
-        importlib.import_module('modelscope')
-
-
-# ------------------------------------------------------------------------------------------------------------------------
-# 🔌💻 GPT-Academic Interface
-# ------------------------------------------------------------------------------------------------------------------------
-predict_no_ui_long_connection, predict = get_local_llm_predict_fns(GetONNXGLMHandle, model_name)
+    # 总结输出
+    if response == f"[Local Message] 等待{model_name}响应中 ...":
+        response = f"[Local Message] {model_name}响应异常 ..."
+    history.extend([inputs, response])
+    yield from update_ui(chatbot=chatbot, history=history)

@@ -183,11 +183,11 @@ class LocalLLMHandle(Process):
     def stream_chat(self, **kwargs):
         # ⭐run in main process
         if self.get_state() == "`准备就绪`":
-            yield "`正在等待线程锁，排队中请稍后 ...`"
+            yield "`正在等待线程锁，排队中请稍候 ...`"
 
         with self.threadLock:
             if self.parent.poll():
-                yield "`排队中请稍后 ...`"
+                yield "`排队中请稍候 ...`"
                 self.clear_pending_messages()
             self.parent.send(kwargs)
             std_out = ""
@@ -198,7 +198,7 @@ class LocalLLMHandle(Process):
                 if res.startswith(self.std_tag):
                     new_output = res[len(self.std_tag):]
                     std_out = std_out[:std_out_clip_len]
-                    # print(new_output, end='')
+                    print(new_output, end='')
                     std_out = new_output + std_out
                     yield self.std_tag + '\n```\n' + std_out + '\n```\n'
                 elif res == '[Finish]':

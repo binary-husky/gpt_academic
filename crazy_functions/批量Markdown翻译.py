@@ -28,8 +28,8 @@ class PaperFileGroup():
                 self.sp_file_index.append(index)
                 self.sp_file_tag.append(self.file_paths[index])
             else:
-                from .crazy_utils import breakdown_txt_to_satisfy_token_limit_for_pdf
-                segments = breakdown_txt_to_satisfy_token_limit_for_pdf(file_content, self.get_token_num, max_token_limit)
+                from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit
+                segments = breakdown_text_to_satisfy_token_limit(file_content, max_token_limit)
                 for j, segment in enumerate(segments):
                     self.sp_file_contents.append(segment)
                     self.sp_file_index.append(index)
@@ -153,7 +153,7 @@ def get_files_from_everything(txt, preference=''):
 
 
 @CatchException
-def Markdown英译中(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def Markdown英译中(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
@@ -193,7 +193,7 @@ def Markdown英译中(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
 
 
 @CatchException
-def Markdown中译英(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def Markdown中译英(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
@@ -226,7 +226,7 @@ def Markdown中译英(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
 
 
 @CatchException
-def Markdown翻译指定语言(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def Markdown翻译指定语言(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",

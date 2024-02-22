@@ -9,7 +9,7 @@ model_name = '星火认知大模型'
 
 def validate_key():
     XFYUN_APPID = get_conf('XFYUN_APPID')
-    if XFYUN_APPID == '00000000' or XFYUN_APPID == '': 
+    if XFYUN_APPID == '00000000' or XFYUN_APPID == '':
         return False
     return True
 
@@ -26,7 +26,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
 
     from .com_sparkapi import SparkRequestInstance
     sri = SparkRequestInstance()
-    for response in sri.generate(inputs, llm_kwargs, history, sys_prompt):
+    for response in sri.generate(inputs, llm_kwargs, history, sys_prompt, use_image_api=False):
         if len(observe_window) >= 1:
             observe_window[0] = response
         if len(observe_window) >= 2:
@@ -49,10 +49,11 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         from core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
-    # 开始接收回复    
+    # 开始接收回复
     from .com_sparkapi import SparkRequestInstance
     sri = SparkRequestInstance()
-    for response in sri.generate(inputs, llm_kwargs, history, system_prompt):
+    response = f"[Local Message] 等待{model_name}响应中 ..."
+    for response in sri.generate(inputs, llm_kwargs, history, system_prompt, use_image_api=True):
         chatbot[-1] = (inputs, response)
         yield from update_ui(chatbot=chatbot, history=history)
 

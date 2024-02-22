@@ -15,8 +15,7 @@ class PaperFileGroup():
         # count_token
         from request_llms.bridge_all import model_info
         enc = model_info["gpt-3.5-turbo"]['tokenizer']
-        def get_token_num(txt): return len(
-            enc.encode(txt, disallowed_special=()))
+        def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))
         self.get_token_num = get_token_num
 
     def run_file_split(self, max_token_limit=1900):
@@ -29,9 +28,8 @@ class PaperFileGroup():
                 self.sp_file_index.append(index)
                 self.sp_file_tag.append(self.file_paths[index])
             else:
-                from .crazy_utils import breakdown_txt_to_satisfy_token_limit_for_pdf
-                segments = breakdown_txt_to_satisfy_token_limit_for_pdf(
-                    file_content, self.get_token_num, max_token_limit)
+                from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit
+                segments = breakdown_text_to_satisfy_token_limit(file_content, max_token_limit)
                 for j, segment in enumerate(segments):
                     self.sp_file_contents.append(segment)
                     self.sp_file_index.append(index)
@@ -62,7 +60,7 @@ def parseNotebook(filename, enable_markdown=1):
         Code += f"This is {idx+1}th code block: \n"
         Code += code+"\n"
 
-    return Code 
+    return Code
 
 
 def ipynb解释(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
@@ -117,7 +115,7 @@ def ipynb解释(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbo
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
 @CatchException
-def 解析ipynb文件(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 解析ipynb文件(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     chatbot.append([
         "函数插件功能？",
         "对IPynb文件进行解析。Contributor: codycjy."])

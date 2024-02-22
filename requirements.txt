@@ -1,11 +1,15 @@
-./docs/gradio-3.32.6-py3-none-any.whl
+https://public.gpt-academic.top/publish/gradio-3.32.8-py3-none-any.whl
+gradio-client==0.8
 pypdf2==2.12.1
+zhipuai>=2
 tiktoken>=0.3.3
 requests[socks]
-pydantic==1.10.11
+pydantic==2.5.2
+protobuf==3.18
 transformers>=4.27.1
 scipdf_parser>=0.52
 python-markdown-math
+pymdown-extensions
 websocket-client
 beautifulsoup4
 prompt_toolkit

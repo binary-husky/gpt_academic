@@ -2,7 +2,7 @@ from toolbox import CatchException, update_ui, get_conf
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 import datetime
 @CatchException
-def 同时问询(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 同时问询(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     """
     txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数，如温度和top_p等，一般原样传递下去就行
@@ -10,7 +10,7 @@ def 同时问询(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     chatbot         聊天显示框的句柄，用于显示给用户
     history         聊天历史，前情提要
     system_prompt   给gpt的静默提醒
-    web_port        当前软件运行的端口号
+    user_request    当前用户的请求信息（IP地址等）
     """
     history = []    # 清空历史，以免输入溢出
     MULTI_QUERY_LLM_MODELS = get_conf('MULTI_QUERY_LLM_MODELS')
@@ -32,7 +32,7 @@ def 同时问询(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
 
 
 @CatchException
-def 同时问询_指定模型(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 同时问询_指定模型(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     """
     txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数，如温度和top_p等，一般原样传递下去就行
@@ -40,7 +40,7 @@ def 同时问询_指定模型(txt, llm_kwargs, plugin_kwargs, chatbot, history, 
     chatbot         聊天显示框的句柄，用于显示给用户
     history         聊天历史，前情提要
     system_prompt   给gpt的静默提醒
-    web_port        当前软件运行的端口号
+    user_request    当前用户的请求信息（IP地址等）
     """
     history = []    # 清空历史，以免输入溢出
 

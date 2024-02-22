@@ -18,11 +18,11 @@ To translate this project to arbitrary language with GPT, read and run [`multi_l
 > 1.Please note that only plugins (buttons) highlighted in **bold** support reading files, and some plugins are located in the **dropdown menu** in the plugin area. Additionally, we welcome and process any new plugins with the **highest priority** through PRs.
 >
 > 2.The functionalities of each file in this project are described in detail in the [self-analysis report `self_analysis.md`](https://github.com/binary-husky/gpt_academic/wiki/GPT‐Academic项目自译解报告). As the version iterates, you can also click on the relevant function plugin at any time to call GPT to regenerate the project's self-analysis report. Common questions are in the [`wiki`](https://github.com/binary-husky/gpt_academic/wiki). [Regular installation method](#installation) | [One-click installation script](https://github.com/binary-husky/gpt_academic/releases) | [Configuration instructions](https://github.com/binary-husky/gpt_academic/wiki/项目配置说明).
-> 
+>
 > 3.This project is compatible with and encourages the use of domestic large-scale language models such as ChatGLM. Multiple api-keys can be used together. You can fill in the configuration file with `API_KEY="openai-key1,openai-key2,azure-key3,api2d-key4"` to temporarily switch `API_KEY` during input, enter the temporary `API_KEY`, and then press enter to apply it.
 
 
- 
+
 
 <div align="center">
 
@@ -126,7 +126,7 @@ python -m pip install -r requirements.txt # This step is the same as the pip ins
 【Optional Step】If you need to support THU ChatGLM2 or Fudan MOSS as backends, you need to install additional dependencies (Prerequisites: Familiar with Python + Familiar with Pytorch + Sufficient computer configuration):
 ```sh
 # 【Optional Step I】Support THU ChatGLM2. Note: If you encounter the "Call ChatGLM fail unable to load ChatGLM parameters" error, refer to the following: 1. The default installation above is for torch+cpu version. To use cuda, uninstall torch and reinstall torch+cuda; 2. If the model cannot be loaded due to insufficient local configuration, you can modify the model accuracy in request_llm/bridge_chatglm.py. Change AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True) to AutoTokenizer.from_pretrained("THUDM/chatglm-6b-int4", trust_remote_code=True)
-python -m pip install -r request_llms/requirements_chatglm.txt  
+python -m pip install -r request_llms/requirements_chatglm.txt
 
 # 【Optional Step II】Support Fudan MOSS
 python -m pip install -r request_llms/requirements_moss.txt
@@ -204,8 +204,8 @@ For example:
 ```
 "Super Translation": {
     # Prefix: will be added before your input. For example, used to describe your request, such as translation, code explanation, proofreading, etc.
-    "Prefix": "Please translate the following paragraph into Chinese and then explain each proprietary term in the text using a markdown table:\n\n", 
-    
+    "Prefix": "Please translate the following paragraph into Chinese and then explain each proprietary term in the text using a markdown table:\n\n",
+
     # Suffix: will be added after your input. For example, used to wrap your input in quotation marks along with the prefix.
     "Suffix": "",
 },
@@ -326,25 +326,26 @@ You can change the theme by modifying the `THEME` option (config.py).
 1. `master` branch: Main branch, stable version
 2. `frontier` branch: Development branch, test version
 
+***
+
 ### V: References and Learning
 
-```
+
 The code references the designs of many other excellent projects, in no particular order:
 
-# THU ChatGLM2-6B:
-https://github.com/THUDM/ChatGLM2-6B
+[THU ChatGLM2-6B](https://github.com/THUDM/ChatGLM2-6B)
 
-# THU JittorLLMs:
-https://github.com/Jittor/JittorLLMs
 
-# ChatPaper:
-https://github.com/kaixindelele/ChatPaper
+[THU JittorLLMs](https://github.com/Jittor/JittorLLMs)
 
-# Edge-GPT:
-https://github.com/acheong08/EdgeGPT
 
-# ChuanhuChatGPT:
-https://github.com/GaiZhenbiao/ChuanhuChatGPT
+[ChatPaper](https://github.com/kaixindelele/ChatPaper)
+
+
+[Edge-GPT](https://github.com/acheong08/EdgeGPT)
+
+
+[ChuanhuChatGPT](https://github.com/GaiZhenbiao/ChuanhuChatGPT)
 
 
 
@@ -354,4 +355,3 @@ https://github.com/oobabooga/one-click-installers
 # More:
 https://github.com/gradio-app/gradio
 https://github.com/fghrsh/live2d_demo
-

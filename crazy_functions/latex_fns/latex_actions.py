@@ -1,9 +1,10 @@
 from toolbox import update_ui, update_ui_lastest_msg, get_log_folder
-from toolbox import zip_folder, objdump, objload, promote_file_to_downloadzone
+from toolbox import get_conf, objdump, objload, promote_file_to_downloadzone
 from .latex_toolbox import PRESERVE, TRANSFORM
 from .latex_toolbox import set_forbidden_text, set_forbidden_text_begin_end, set_forbidden_text_careful_brace
 from .latex_toolbox import reverse_forbidden_text_careful_brace, reverse_forbidden_text, convert_to_linklist, post_process
 from .latex_toolbox import fix_content, find_main_tex_file, merge_tex_files, compile_latex_with_timeout
+from .latex_toolbox import find_title_and_abs
 
 import os, shutil
 import re
@@ -90,7 +91,18 @@ class LatexPaperSplit():
             "项目Github地址 \\url{https://github.com/binary-husky/gpt_academic/}。"
         # 请您不要删除或修改这行警告，除非您是论文的原作者（如果您是论文原作者，欢迎加REAME中的QQ联系开发者）
         self.msg_declare = "为了防止大语言模型的意外谬误产生扩散影响，禁止移除或修改此警告。}}\\\\" 
+        self.title = "unknown"
+        self.abstract = "unknown"
 
+    def read_title_and_abstract(self, txt):
+        try:
+            title, abstract = find_title_and_abs(txt)
+            if title is not None: 
+                self.title = title.replace('\n', ' ').replace('\\\\', ' ').replace('  ', '').replace('  ', '')
+            if abstract is not None: 
+                self.abstract = abstract.replace('\n', ' ').replace('\\\\', ' ').replace('  ', '').replace('  ', '')
+        except:
+            pass
 
     def merge_result(self, arr, mode, msg, buggy_lines=[], buggy_line_surgery_n_lines=10):
         """
@@ -163,7 +175,6 @@ class LatexPaperFileGroup():
         self.sp_file_contents = []
         self.sp_file_index = []
         self.sp_file_tag = []
-
         # count_token
         from request_llms.bridge_all import model_info
         enc = model_info["gpt-3.5-turbo"]['tokenizer']
@@ -180,13 +191,12 @@ class LatexPaperFileGroup():
                 self.sp_file_index.append(index)
                 self.sp_file_tag.append(self.file_paths[index])
             else:
-                from ..crazy_utils import breakdown_txt_to_satisfy_token_limit_for_pdf
-                segments = breakdown_txt_to_satisfy_token_limit_for_pdf(file_content, self.get_token_num, max_token_limit)
+                from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit
+                segments = breakdown_text_to_satisfy_token_limit(file_content, max_token_limit)
                 for j, segment in enumerate(segments):
                     self.sp_file_contents.append(segment)
                     self.sp_file_index.append(index)
                     self.sp_file_tag.append(self.file_paths[index] + f".part-{j}.tex")
-        print('Segmentation: done')
 
     def merge_result(self):
         self.file_result = ["" for _ in range(len(self.file_paths))]
@@ -234,8 +244,8 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
     chatbot.append((f"Latex文件融合完成", f'[Local Message] 正在精细切分latex文件，这需要一段时间计算，文档越长耗时越长，请耐心等待。'))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
     lps = LatexPaperSplit()
+    lps.read_title_and_abstract(merged_content)
     res = lps.split(merged_content, project_folder, opts) # 消耗时间的函数
-
     #  <-------- 拆分过长的latex片段 ----------> 
     pfg = LatexPaperFileGroup()
     for index, r in enumerate(res):
@@ -256,12 +266,19 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
 
     else:
         #  <-------- gpt 多线程请求 ----------> 
+        history_array = [[""] for _ in range(n_split)]
+        # LATEX_EXPERIMENTAL, = get_conf('LATEX_EXPERIMENTAL')
+        # if LATEX_EXPERIMENTAL:
+        #     paper_meta = f"The paper you processing is `{lps.title}`, a part of the abstraction is `{lps.abstract}`"
+        #     paper_meta_max_len = 888
+        #     history_array = [[ paper_meta[:paper_meta_max_len] + '...',  "Understand, what should I do?"] for _ in range(n_split)]
+
         gpt_response_collection = yield from request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
             inputs_array=inputs_array,
             inputs_show_user_array=inputs_show_user_array,
             llm_kwargs=llm_kwargs,
             chatbot=chatbot,
-            history_array=[[""] for _ in range(n_split)],
+            history_array=history_array,
             sys_prompt_array=sys_prompt_array,
             # max_workers=5,  # 并行任务数量限制, 最多同时执行5个, 其他的排队等待
             scroller_max_len = 40
@@ -385,7 +402,7 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
             result_pdf = pj(work_folder_modified, f'merge_diff.pdf')    # get pdf path
             promote_file_to_downloadzone(result_pdf, rename_file=None, chatbot=chatbot)  # promote file to web UI
         if modified_pdf_success:
-            yield from update_ui_lastest_msg(f'转化PDF编译已经成功, 即将退出 ...', chatbot, history)    # 刷新Gradio前端界面
+            yield from update_ui_lastest_msg(f'转化PDF编译已经成功, 正在尝试生成对比PDF, 请稍候 ...', chatbot, history)    # 刷新Gradio前端界面
             result_pdf = pj(work_folder_modified, f'{main_file_modified}.pdf') # get pdf path
             origin_pdf = pj(work_folder_original, f'{main_file_original}.pdf') # get pdf path
             if os.path.exists(pj(work_folder, '..', 'translation')):
@@ -397,8 +414,11 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
                     from .latex_toolbox import merge_pdfs
                     concat_pdf = pj(work_folder_modified, f'comparison.pdf')
                     merge_pdfs(origin_pdf, result_pdf, concat_pdf)
+                    if os.path.exists(pj(work_folder, '..', 'translation')):
+                        shutil.copyfile(concat_pdf, pj(work_folder, '..', 'translation', 'comparison.pdf'))
                     promote_file_to_downloadzone(concat_pdf, rename_file=None, chatbot=chatbot)  # promote file to web UI
                 except Exception as e:
+                    print(e)
                     pass
             return True # 成功啦
         else:

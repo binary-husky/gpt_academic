@@ -5,5 +5,3 @@ accelerate
 matplotlib
 huggingface_hub
 triton
-streamlit
-

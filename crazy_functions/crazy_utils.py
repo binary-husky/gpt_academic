@@ -1,4 +1,4 @@
-from toolbox import update_ui, get_conf, trimmed_format_exc, get_log_folder
+from toolbox import update_ui, get_conf, trimmed_format_exc, get_max_token, Singleton
 import threading
 import os
 import logging
@@ -12,7 +12,7 @@ def input_clipping(inputs, history, max_token_limit):
     mode = 'input-and-history'
     # 当 输入部分的token占比 小于 全文的一半时，只裁剪历史
     input_token_num = get_token_num(inputs)
-    if input_token_num < max_token_limit//2: 
+    if input_token_num < max_token_limit//2:
         mode = 'only-history'
         max_token_limit = max_token_limit - input_token_num
 
@@ -21,7 +21,7 @@ def input_clipping(inputs, history, max_token_limit):
     n_token = get_token_num('\n'.join(everything))
     everything_token = [get_token_num(e) for e in everything]
     delta = max(everything_token) // 16 # 截断时的颗粒度
-        
+
     while n_token > max_token_limit:
         where = np.argmax(everything_token)
         encoded = enc.encode(everything[where], disallowed_special=())
@@ -38,9 +38,9 @@ def input_clipping(inputs, history, max_token_limit):
     return inputs, history
 
 def request_gpt_model_in_new_thread_with_ui_alive(
-        inputs, inputs_show_user, llm_kwargs, 
+        inputs, inputs_show_user, llm_kwargs,
         chatbot, history, sys_prompt, refresh_interval=0.2,
-        handle_token_exceed=True, 
+        handle_token_exceed=True,
         retry_times_at_unknown_error=2,
         ):
     """
@@ -77,7 +77,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
         exceeded_cnt = 0
         while True:
             # watchdog error
-            if len(mutable) >= 2 and (time.time()-mutable[1]) > watch_dog_patience: 
+            if len(mutable) >= 2 and (time.time()-mutable[1]) > watch_dog_patience:
                 raise RuntimeError("检测到程序终止。")
             try:
                 # 【第一种情况】：顺利完成
@@ -92,7 +92,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
                     # 【选择处理】 尝试计算比例，尽可能多地保留文本
                     from toolbox import get_reduce_token_percent
                     p_ratio, n_exceed = get_reduce_token_percent(str(token_exceeded_error))
-                    MAX_TOKEN = 4096
+                    MAX_TOKEN = get_max_token(llm_kwargs)
                     EXCEED_ALLO = 512 + 512 * exceeded_cnt
                     inputs, history = input_clipping(inputs, history, max_token_limit=MAX_TOKEN-EXCEED_ALLO)
                     mutable[0] += f'[Local Message] 警告，文本过长将进行截断，Token溢出数：{n_exceed}。\n\n'
@@ -139,11 +139,13 @@ def can_multi_process(llm):
     if llm.startswith('gpt-'): return True
     if llm.startswith('api2d-'): return True
     if llm.startswith('azure-'): return True
+    if llm.startswith('spark'): return True
+    if llm.startswith('zhipuai') or llm.startswith('glm-'): return True
     return False
 
 def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
-        inputs_array, inputs_show_user_array, llm_kwargs, 
-        chatbot, history_array, sys_prompt_array, 
+        inputs_array, inputs_show_user_array, llm_kwargs,
+        chatbot, history_array, sys_prompt_array,
         refresh_interval=0.2, max_workers=-1, scroller_max_len=30,
         handle_token_exceed=True, show_user_at_complete=False,
         retry_times_at_unknown_error=2,
@@ -187,7 +189,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     # 屏蔽掉 chatglm的多线程，可能会导致严重卡顿
     if not can_multi_process(llm_kwargs['llm_model']):
         max_workers = 1
-        
+
     executor = ThreadPoolExecutor(max_workers=max_workers)
     n_frag = len(inputs_array)
     # 用户反馈
@@ -205,27 +207,26 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         retry_op = retry_times_at_unknown_error
         exceeded_cnt = 0
         mutable[index][2] = "执行中"
+        detect_timeout = lambda: len(mutable[index]) >= 2 and (time.time()-mutable[index][1]) > watch_dog_patience
         while True:
             # watchdog error
-            if len(mutable[index]) >= 2 and (time.time()-mutable[index][1]) > watch_dog_patience: 
-                raise RuntimeError("检测到程序终止。")
+            if detect_timeout(): raise RuntimeError("检测到程序终止。")
             try:
                 # 【第一种情况】：顺利完成
-                # time.sleep(10); raise RuntimeError("测试")
                 gpt_say = predict_no_ui_long_connection(
-                    inputs=inputs, llm_kwargs=llm_kwargs, history=history, 
+                    inputs=inputs, llm_kwargs=llm_kwargs, history=history,
                     sys_prompt=sys_prompt, observe_window=mutable[index], console_slience=True
                 )
                 mutable[index][2] = "已成功"
                 return gpt_say
             except ConnectionAbortedError as token_exceeded_error:
-                # 【第二种情况】：Token溢出，
+                # 【第二种情况】：Token溢出
                 if handle_token_exceed:
                     exceeded_cnt += 1
                     # 【选择处理】 尝试计算比例，尽可能多地保留文本
                     from toolbox import get_reduce_token_percent
                     p_ratio, n_exceed = get_reduce_token_percent(str(token_exceeded_error))
-                    MAX_TOKEN = 4096
+                    MAX_TOKEN = get_max_token(llm_kwargs)
                     EXCEED_ALLO = 512 + 512 * exceeded_cnt
                     inputs, history = input_clipping(inputs, history, max_token_limit=MAX_TOKEN-EXCEED_ALLO)
                     gpt_say += f'[Local Message] 警告，文本过长将进行截断，Token溢出数：{n_exceed}。\n\n'
@@ -240,11 +241,12 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     return gpt_say # 放弃
             except:
                 # 【第三种情况】：其他错误
+                if detect_timeout(): raise RuntimeError("检测到程序终止。")
                 tb_str = '```\n' + trimmed_format_exc() + '```'
                 print(tb_str)
                 gpt_say += f"[Local Message] 警告，线程{index}在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                 if len(mutable[index][0]) > 0: gpt_say += "此线程失败前收到的回答：\n\n" + mutable[index][0]
-                if retry_op > 0: 
+                if retry_op > 0:
                     retry_op -= 1
                     wait = random.randint(5, 20)
                     if ("Rate limit reached" in tb_str) or ("Too Many Requests" in tb_str):
@@ -256,6 +258,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     for i in range(wait):
                         mutable[index][2] = f"{fail_info}等待重试 {wait-i}"; time.sleep(1)
                     # 开始重试
+                    if detect_timeout(): raise RuntimeError("检测到程序终止。")
                     mutable[index][2] = f"重试中 {retry_times_at_unknown_error-retry_op}/{retry_times_at_unknown_error}"
                     continue # 返回重试
                 else:
@@ -281,12 +284,11 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         # 在前端打印些好玩的东西
         for thread_index, _ in enumerate(worker_done):
             print_something_really_funny = "[ ...`"+mutable[thread_index][0][-scroller_max_len:].\
-                replace('\n', '').replace('`', '.').replace(
-                    ' ', '.').replace('<br/>', '.....').replace('$', '.')+"`... ]"
+                replace('\n', '').replace('`', '.').replace(' ', '.').replace('<br/>', '.....').replace('$', '.')+"`... ]"
             observe_win.append(print_something_really_funny)
         # 在前端打印些好玩的东西
-        stat_str = ''.join([f'`{mutable[thread_index][2]}`: {obs}\n\n' 
-                            if not done else f'`{mutable[thread_index][2]}`\n\n' 
+        stat_str = ''.join([f'`{mutable[thread_index][2]}`: {obs}\n\n'
+                            if not done else f'`{mutable[thread_index][2]}`\n\n'
                             for thread_index, done, obs in zip(range(len(worker_done)), worker_done, observe_win)])
         # 在前端打印些好玩的东西
         chatbot[-1] = [chatbot[-1][0], f'多线程操作已经开始，完成情况: \n\n{stat_str}' + ''.join(['.']*(cnt % 10+1))]
@@ -300,7 +302,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     for inputs_show_user, f in zip(inputs_show_user_array, futures):
         gpt_res = f.result()
         gpt_response_collection.extend([inputs_show_user, gpt_res])
-    
+
     # 是否在结束时，在界面上显示结果
     if show_user_at_complete:
         for inputs_show_user, f in zip(inputs_show_user_array, futures):
@@ -309,95 +311,6 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
             yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
             time.sleep(0.5)
     return gpt_response_collection
-
-
-def breakdown_txt_to_satisfy_token_limit(txt, get_token_fn, limit):
-    def cut(txt_tocut, must_break_at_empty_line):  # 递归
-        if get_token_fn(txt_tocut) <= limit:
-            return [txt_tocut]
-        else:
-            lines = txt_tocut.split('\n')
-            estimated_line_cut = limit / get_token_fn(txt_tocut) * len(lines)
-            estimated_line_cut = int(estimated_line_cut)
-            for cnt in reversed(range(estimated_line_cut)):
-                if must_break_at_empty_line:
-                    if lines[cnt] != "":
-                        continue
-                print(cnt)
-                prev = "\n".join(lines[:cnt])
-                post = "\n".join(lines[cnt:])
-                if get_token_fn(prev) < limit:
-                    break
-            if cnt == 0:
-                raise RuntimeError("存在一行极长的文本！")
-            # print(len(post))
-            # 列表递归接龙
-            result = [prev]
-            result.extend(cut(post, must_break_at_empty_line))
-            return result
-    try:
-        return cut(txt, must_break_at_empty_line=True)
-    except RuntimeError:
-        return cut(txt, must_break_at_empty_line=False)
-
-
-def force_breakdown(txt, limit, get_token_fn):
-    """
-    当无法用标点、空行分割时，我们用最暴力的方法切割
-    """
-    for i in reversed(range(len(txt))):
-        if get_token_fn(txt[:i]) < limit:
-            return txt[:i], txt[i:]
-    return "Tiktoken未知错误", "Tiktoken未知错误"
-
-def breakdown_txt_to_satisfy_token_limit_for_pdf(txt, get_token_fn, limit):
-    # 递归
-    def cut(txt_tocut, must_break_at_empty_line, break_anyway=False):  
-        if get_token_fn(txt_tocut) <= limit:
-            return [txt_tocut]
-        else:
-            lines = txt_tocut.split('\n')
-            estimated_line_cut = limit / get_token_fn(txt_tocut) * len(lines)
-            estimated_line_cut = int(estimated_line_cut)
-            cnt = 0
-            for cnt in reversed(range(estimated_line_cut)):
-                if must_break_at_empty_line:
-                    if lines[cnt] != "":
-                        continue
-                prev = "\n".join(lines[:cnt])
-                post = "\n".join(lines[cnt:])
-                if get_token_fn(prev) < limit:
-                    break
-            if cnt == 0:
-                if break_anyway:
-                    prev, post = force_breakdown(txt_tocut, limit, get_token_fn)
-                else:
-                    raise RuntimeError(f"存在一行极长的文本！{txt_tocut}")
-            # print(len(post))
-            # 列表递归接龙
-            result = [prev]
-            result.extend(cut(post, must_break_at_empty_line, break_anyway=break_anyway))
-            return result
-    try:
-        # 第1次尝试，将双空行（\n\n）作为切分点
-        return cut(txt, must_break_at_empty_line=True)
-    except RuntimeError:
-        try:
-            # 第2次尝试，将单空行（\n）作为切分点
-            return cut(txt, must_break_at_empty_line=False)
-        except RuntimeError:
-            try:
-                # 第3次尝试，将英文句号（.）作为切分点
-                res = cut(txt.replace('.', '。\n'), must_break_at_empty_line=False) # 这个中文的句号是故意的，作为一个标识而存在
-                return [r.replace('。\n', '.') for r in res]
-            except RuntimeError as e:
-                try:
-                    # 第4次尝试，将中文句号（。）作为切分点
-                    res = cut(txt.replace('。', '。。\n'), must_break_at_empty_line=False)
-                    return [r.replace('。。\n', '。') for r in res]
-                except RuntimeError as e:
-                    # 第5次尝试，没办法了，随便切一下敷衍吧
-                    return cut(txt, must_break_at_empty_line=False, break_anyway=True)
 
 
 
@@ -439,7 +352,7 @@ def read_and_clean_pdf_text(fp):
             if wtf['size'] not in fsize_statiscs: fsize_statiscs[wtf['size']] = 0
             fsize_statiscs[wtf['size']] += len(wtf['text'])
         return max(fsize_statiscs, key=fsize_statiscs.get)
-        
+
     def ffsize_same(a,b):
         """
         提取字体大小是否近似相等
@@ -475,7 +388,7 @@ def read_and_clean_pdf_text(fp):
             if index == 0:
                 page_one_meta = [" ".join(["".join([wtf['text'] for wtf in l['spans']]) for l in t['lines']]).replace(
                     '- ', '') for t in text_areas['blocks'] if 'lines' in t]
-                
+
         ############################## <第 2 步，获取正文主字体> ##################################
         try:
             fsize_statiscs = {}
@@ -491,7 +404,7 @@ def read_and_clean_pdf_text(fp):
         mega_sec = []
         sec = []
         for index, line in enumerate(meta_line):
-            if index == 0: 
+            if index == 0:
                 sec.append(line[fc])
                 continue
             if REMOVE_FOOT_NOTE:
@@ -552,6 +465,9 @@ def read_and_clean_pdf_text(fp):
                     return True
                 else:
                     return False
+            # 对于某些PDF会有第一个段落就以小写字母开头,为了避免索引错误将其更改为大写
+            if starts_with_lowercase_word(meta_txt[0]):
+                meta_txt[0] = meta_txt[0].capitalize()
             for _ in range(100):
                 for index, block_txt in enumerate(meta_txt):
                     if starts_with_lowercase_word(block_txt):
@@ -585,12 +501,12 @@ def get_files_from_everything(txt, type): # type='.md'
     """
     这个函数是用来获取指定目录下所有指定类型（如.md）的文件，并且对于网络上的文件，也可以获取它。
     下面是对每个参数和返回值的说明：
-    参数 
-    - txt: 路径或网址，表示要搜索的文件或者文件夹路径或网络上的文件。 
+    参数
+    - txt: 路径或网址，表示要搜索的文件或者文件夹路径或网络上的文件。
     - type: 字符串，表示要搜索的文件类型。默认是.md。
-    返回值 
-    - success: 布尔值，表示函数是否成功执行。 
-    - file_manifest: 文件路径列表，里面包含以指定类型为后缀名的所有文件的绝对路径。 
+    返回值
+    - success: 布尔值，表示函数是否成功执行。
+    - file_manifest: 文件路径列表，里面包含以指定类型为后缀名的所有文件的绝对路径。
     - project_folder: 字符串，表示文件所在的文件夹路径。如果是网络上的文件，就是临时文件夹的路径。
     该函数详细注释已添加，请确认是否满足您的需要。
     """
@@ -630,90 +546,6 @@ def get_files_from_everything(txt, type): # type='.md'
 
 
 
-
-def Singleton(cls):
-    _instance = {}
- 
-    def _singleton(*args, **kargs):
-        if cls not in _instance:
-            _instance[cls] = cls(*args, **kargs)
-        return _instance[cls]
- 
-    return _singleton
-
-
-@Singleton
-class knowledge_archive_interface():
-    def __init__(self) -> None:
-        self.threadLock = threading.Lock()
-        self.current_id = ""
-        self.kai_path = None
-        self.qa_handle = None
-        self.text2vec_large_chinese = None
-
-    def get_chinese_text2vec(self):
-        if self.text2vec_large_chinese is None:
-            # < -------------------预热文本向量化模组--------------- >
-            from toolbox import ProxyNetworkActivate
-            print('Checking Text2vec ...')
-            from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-            with ProxyNetworkActivate('Download_LLM'):    # 临时地激活代理网络
-                self.text2vec_large_chinese = HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
-
-        return self.text2vec_large_chinese
-
-
-    def feed_archive(self, file_manifest, id="default"):
-        self.threadLock.acquire()
-        # import uuid
-        self.current_id = id
-        from zh_langchain import construct_vector_store
-        self.qa_handle, self.kai_path = construct_vector_store(   
-            vs_id=self.current_id, 
-            files=file_manifest, 
-            sentence_size=100,
-            history=[],
-            one_conent="",
-            one_content_segmentation="",
-            text2vec = self.get_chinese_text2vec(),
-        )
-        self.threadLock.release()
-
-    def get_current_archive_id(self):
-        return self.current_id
-    
-    def get_loaded_file(self):
-        return self.qa_handle.get_loaded_file()
-
-    def answer_with_archive_by_id(self, txt, id):
-        self.threadLock.acquire()
-        if not self.current_id == id:
-            self.current_id = id
-            from zh_langchain import construct_vector_store
-            self.qa_handle, self.kai_path = construct_vector_store(   
-                vs_id=self.current_id, 
-                files=[], 
-                sentence_size=100,
-                history=[],
-                one_conent="",
-                one_content_segmentation="",
-                text2vec = self.get_chinese_text2vec(),
-            )
-        VECTOR_SEARCH_SCORE_THRESHOLD = 0
-        VECTOR_SEARCH_TOP_K = 4
-        CHUNK_SIZE = 512
-        resp, prompt = self.qa_handle.get_knowledge_based_conent_test(
-            query = txt,
-            vs_path = self.kai_path,
-            score_threshold=VECTOR_SEARCH_SCORE_THRESHOLD,
-            vector_search_top_k=VECTOR_SEARCH_TOP_K, 
-            chunk_conent=True,
-            chunk_size=CHUNK_SIZE,
-            text2vec = self.get_chinese_text2vec(),
-        )
-        self.threadLock.release()
-        return resp, prompt
-    
 @Singleton
 class nougat_interface():
     def __init__(self):
@@ -738,7 +570,7 @@ class nougat_interface():
     def NOUGAT_parse_pdf(self, fp, chatbot, history):
         from toolbox import update_ui_lastest_msg
 
-        yield from update_ui_lastest_msg("正在解析论文, 请稍候。进度：正在排队, 等待线程锁...", 
+        yield from update_ui_lastest_msg("正在解析论文, 请稍候。进度：正在排队, 等待线程锁...",
                                          chatbot=chatbot, history=history, delay=0)
         self.threadLock.acquire()
         import glob, threading, os
@@ -746,7 +578,7 @@ class nougat_interface():
         dst = os.path.join(get_log_folder(plugin_name='nougat'), gen_time_str())
         os.makedirs(dst)
 
-        yield from update_ui_lastest_msg("正在解析论文, 请稍候。进度：正在加载NOUGAT... （提示：首次运行需要花费较长时间下载NOUGAT参数）", 
+        yield from update_ui_lastest_msg("正在解析论文, 请稍候。进度：正在加载NOUGAT... （提示：首次运行需要花费较长时间下载NOUGAT参数）",
                                          chatbot=chatbot, history=history, delay=0)
         self.nougat_with_timeout(f'nougat --out "{os.path.abspath(dst)}" "{os.path.abspath(fp)}"', os.getcwd(), timeout=3600)
         res = glob.glob(os.path.join(dst,'*.mmd'))

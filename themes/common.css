@@ -59,6 +59,7 @@
 
 /* Scrollbar Width */
 ::-webkit-scrollbar {
+    height: 12px;
     width: 12px;
 }
 
@@ -91,6 +92,10 @@
 
 
 #cbs {
+    background-color: var(--block-background-fill) !important;
+}
+
+#cbsc {
     background-color: var(--block-background-fill) !important;
 }
 
