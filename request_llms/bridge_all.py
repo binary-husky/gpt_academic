@@ -543,6 +543,22 @@ if "zhipuai" in AVAIL_LLM_MODELS:   # zhipuai
         })
     except:
         print(trimmed_format_exc())
+if "yshs 35" in AVAIL_LLM_MODELS:   # yssh 35
+    try:
+        from .bridge_yshs_35 import predict_no_ui_long_connection as yshs_noui
+        from .bridge_yshs_35 import predict as yshs_ui
+        model_info.update({
+            "yshs 35": {
+                "fn_with_ui": yshs_ui,
+                "fn_without_ui": yshs_noui,
+                "endpoint": None,
+                "max_token": 4096,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            }
+        })
+    except:
+        print(trimmed_format_exc())
 
 # <-- 用于定义和切换多个azure模型 -->
 AZURE_CFG_ARRAY = get_conf("AZURE_CFG_ARRAY")
