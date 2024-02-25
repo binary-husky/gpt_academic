@@ -234,7 +234,7 @@ let timeoutID = null;
 let lastInvocationTime = 0;
 let lastArgs = null;
 function do_something_but_not_too_frequently(min_interval, func) {
-    return function(...args) {
+    return function (...args) {
         lastArgs = args;
         const now = Date.now();
         if (!lastInvocationTime || (now - lastInvocationTime) >= min_interval) {
@@ -242,14 +242,14 @@ function do_something_but_not_too_frequently(min_interval, func) {
             // 现在就执行
             setTimeout(() => {
                 func.apply(this, lastArgs);
-            }, 0);   
+            }, 0);
         } else if (!timeoutID) {
             // 等一会执行
             timeoutID = setTimeout(() => {
                 timeoutID = null;
                 lastInvocationTime = Date.now();
                 func.apply(this, lastArgs);
-            }, min_interval - (now - lastInvocationTime));      
+            }, min_interval - (now - lastInvocationTime));
         } else {
             // 压根不执行
         }
@@ -263,13 +263,8 @@ function chatbotContentChanged(attempt = 1, force = false) {
             gradioApp().querySelectorAll('#gpt-chatbot .message-wrap .message.bot').forEach(addCopyButton);
         }, i === 0 ? 0 : 200);
     }
+    // we have moved mermaid-related code to gradio-fix repository: binary-husky/gradio-fix@32150d0
 
-    const run_mermaid_render = do_something_but_not_too_frequently(1000, function () {
-        const blocks = document.querySelectorAll(`pre.mermaid, diagram-div`);
-        if (blocks.length == 0) { return; }
-        uml("mermaid");
-    });
-    run_mermaid_render();
 }
 
 
@@ -349,7 +344,7 @@ function get_elements(consider_state_panel = false) {
     var chatbot_height = chatbot.style.height;
     // 交换输入区位置，使得输入区始终可用
     if (!swapped) {
-        if (panel1.top != 0 && (panel1.bottom + panel1.top) / 2 < 0) { swap_input_area(); }
+        if (panel1.top != 0 && (0.9 * panel1.bottom + 0.1 * panel1.top) < 0) { swap_input_area(); }
     }
     else if (swapped) {
         if (panel2.top != 0 && panel2.top > 0) { swap_input_area(); }
@@ -672,9 +667,9 @@ function limit_scroll_position() {
     let scrollableDiv = document.querySelector('#gpt-chatbot > div.wrap');
     scrollableDiv.addEventListener('wheel', function (e) {
         let preventScroll = false;
-        if (e.deltaX != 0) { prevented_offset = 0; return;}
-        if (this.scrollHeight == this.clientHeight) { prevented_offset = 0; return;}
-        if (e.deltaY < 0) { prevented_offset = 0; return;}
+        if (e.deltaX != 0) { prevented_offset = 0; return; }
+        if (this.scrollHeight == this.clientHeight) { prevented_offset = 0; return; }
+        if (e.deltaY < 0) { prevented_offset = 0; return; }
         if (e.deltaY > 0 && this.scrollHeight - this.clientHeight - this.scrollTop <= 1) { preventScroll = true; }
 
         if (preventScroll) {
@@ -711,5 +706,163 @@ function GptAcademicJavaScriptInit(LAYOUT = "LEFT-RIGHT") {
     if (LAYOUT === "LEFT-RIGHT") { chatbotAutoHeight(); }
     if (LAYOUT === "LEFT-RIGHT") { limit_scroll_position(); }
     // setInterval(function () { uml("mermaid") }, 5000); // 每50毫秒执行一次
+
+}
+
+
+function loadLive2D() {
+    try {
+        $("<link>").attr({ href: "file=themes/waifu_plugin/waifu.css", rel: "stylesheet", type: "text/css" }).appendTo('head');
+        $('body').append('<div class="waifu"><div class="waifu-tips"></div><canvas id="live2d" class="live2d"></canvas><div class="waifu-tool"><span class="fui-home"></span> <span class="fui-chat"></span> <span class="fui-eye"></span> <span class="fui-user"></span> <span class="fui-photo"></span> <span class="fui-info-circle"></span> <span class="fui-cross"></span></div></div>');
+        $.ajax({
+            url: "file=themes/waifu_plugin/waifu-tips.js", dataType: "script", cache: true, success: function () {
+                $.ajax({
+                    url: "file=themes/waifu_plugin/live2d.js", dataType: "script", cache: true, success: function () {
+                        /* 可直接修改部分参数 */
+                        live2d_settings['hitokotoAPI'] = "hitokoto.cn";  // 一言 API
+                        live2d_settings['modelId'] = 3;                  // 默认模型 ID
+                        live2d_settings['modelTexturesId'] = 44;          // 默认材质 ID
+                        live2d_settings['modelStorage'] = false;         // 不储存模型 ID
+                        live2d_settings['waifuSize'] = '210x187';
+                        live2d_settings['waifuTipsSize'] = '187x52';
+                        live2d_settings['canSwitchModel'] = true;
+                        live2d_settings['canSwitchTextures'] = true;
+                        live2d_settings['canSwitchHitokoto'] = false;
+                        live2d_settings['canTakeScreenshot'] = false;
+                        live2d_settings['canTurnToHomePage'] = false;
+                        live2d_settings['canTurnToAboutPage'] = false;
+                        live2d_settings['showHitokoto'] = false;         // 显示一言
+                        live2d_settings['showF12Status'] = false;         // 显示加载状态
+                        live2d_settings['showF12Message'] = false;        // 显示看板娘消息
+                        live2d_settings['showF12OpenMsg'] = false;         // 显示控制台打开提示
+                        live2d_settings['showCopyMessage'] = false;         // 显示 复制内容 提示
+                        live2d_settings['showWelcomeMessage'] = true;         // 显示进入面页欢迎词
+                        /* 在 initModel 前添加 */
+                        initModel("file=themes/waifu_plugin/waifu-tips.json");
+                    }
+                });
+            }
+        });
+    } catch (err) { console.log("[Error] JQuery is not defined.") }
+}
+
+function get_checkbox_selected_items(elem_id){
+    display_panel_arr = [];
+    document.getElementById(elem_id).querySelector('[data-testid="checkbox-group"]').querySelectorAll('label').forEach(label => {
+        // Get the span text
+        const spanText = label.querySelector('span').textContent;
+        // Get the input value
+        const checked = label.querySelector('input').checked;
+        if (checked) {
+            display_panel_arr.push(spanText)
+        }
+    });
+    return display_panel_arr;
+}
+
+function set_checkbox(key, bool, set_twice=false) {
+    set_success = false;
+    elem_ids = ["cbsc", "cbs"]
+    elem_ids.forEach(id => {
+        document.getElementById(id).querySelector('[data-testid="checkbox-group"]').querySelectorAll('label').forEach(label => {
+            // Get the span text
+            const spanText = label.querySelector('span').textContent;
+            if (spanText === key) {
+                if (bool){
+                    label.classList.add('selected');
+                } else {
+                    if (label.classList.contains('selected')) {
+                        label.classList.remove('selected');
+                    }
+                }
+                if (set_twice){
+                    setTimeout(() => {
+                        if (bool){
+                            label.classList.add('selected');
+                        } else {
+                            if (label.classList.contains('selected')) {
+                                label.classList.remove('selected');
+                            }
+                        }
+                    }, 5000);
+                }
+
+                label.querySelector('input').checked = bool;
+                set_success = true;
+                return
+            }
+        });
+    });
+
+    if (!set_success){
+        console.log("设置checkbox失败，没有找到对应的key")
+    }
+}
+
+function apply_cookie_for_checkbox(dark) {
+    // console.log("apply_cookie_for_checkboxes")
+    let searchString = "输入清除键";
+    let bool_value = "False";
+
+    //////////////////  darkmode  ///////////////////
+    if (getCookie("js_darkmode_cookie")) {
+        dark = getCookie("js_darkmode_cookie")
+    }
+    dark = dark == "True";
+    if (document.querySelectorAll('.dark').length) {
+        if (!dark) {
+            document.querySelectorAll('.dark').forEach(el => el.classList.remove('dark'));
+        }
+    } else {
+        if (dark) {
+            document.querySelector('body').classList.add('dark');
+        }
+    }
+
+    ////////////////////// clearButton ///////////////////////////
+    if (getCookie("js_clearbtn_show_cookie")) {
+        // have cookie
+        bool_value = getCookie("js_clearbtn_show_cookie")
+        bool_value = bool_value == "True";
+        searchString = "输入清除键";
+        if (bool_value) {
+            let clearButton = document.getElementById("elem_clear");
+            let clearButton2 = document.getElementById("elem_clear2");
+            clearButton.style.display = "block";
+            clearButton2.style.display = "block";
+            set_checkbox(searchString, true);
+        } else {
+            let clearButton = document.getElementById("elem_clear");
+            let clearButton2 = document.getElementById("elem_clear2");
+            clearButton.style.display = "none";
+            clearButton2.style.display = "none";
+            set_checkbox(searchString, false);
+        }
+    }
+
+    ////////////////////// live2d ///////////////////////////
+
+    if (getCookie("js_live2d_show_cookie")) {
+        // have cookie
+        searchString = "添加Live2D形象";
+        bool_value = getCookie("js_live2d_show_cookie");
+        bool_value = bool_value == "True";
+        if (bool_value) {
+            loadLive2D();
+            set_checkbox(searchString, true);
+        } else {
+            $('.waifu').hide();
+            set_checkbox(searchString, false);
+        }
+    } else {
+        // do not have cookie
+        // get conf
+        display_panel_arr = get_checkbox_selected_items("cbsc");
+        searchString = "添加Live2D形象";
+        if (display_panel_arr.includes(searchString)) {
+            loadLive2D();
+        } else {
+        }
+    }
 
 }

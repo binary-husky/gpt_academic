@@ -12,7 +12,7 @@ def input_clipping(inputs, history, max_token_limit):
     mode = 'input-and-history'
     # 当 输入部分的token占比 小于 全文的一半时，只裁剪历史
     input_token_num = get_token_num(inputs)
-    if input_token_num < max_token_limit//2: 
+    if input_token_num < max_token_limit//2:
         mode = 'only-history'
         max_token_limit = max_token_limit - input_token_num
 
@@ -21,7 +21,7 @@ def input_clipping(inputs, history, max_token_limit):
     n_token = get_token_num('\n'.join(everything))
     everything_token = [get_token_num(e) for e in everything]
     delta = max(everything_token) // 16 # 截断时的颗粒度
-        
+
     while n_token > max_token_limit:
         where = np.argmax(everything_token)
         encoded = enc.encode(everything[where], disallowed_special=())
@@ -38,9 +38,9 @@ def input_clipping(inputs, history, max_token_limit):
     return inputs, history
 
 def request_gpt_model_in_new_thread_with_ui_alive(
-        inputs, inputs_show_user, llm_kwargs, 
+        inputs, inputs_show_user, llm_kwargs,
         chatbot, history, sys_prompt, refresh_interval=0.2,
-        handle_token_exceed=True, 
+        handle_token_exceed=True,
         retry_times_at_unknown_error=2,
         ):
     """
@@ -77,7 +77,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
         exceeded_cnt = 0
         while True:
             # watchdog error
-            if len(mutable) >= 2 and (time.time()-mutable[1]) > watch_dog_patience: 
+            if len(mutable) >= 2 and (time.time()-mutable[1]) > watch_dog_patience:
                 raise RuntimeError("检测到程序终止。")
             try:
                 # 【第一种情况】：顺利完成
@@ -140,12 +140,12 @@ def can_multi_process(llm):
     if llm.startswith('api2d-'): return True
     if llm.startswith('azure-'): return True
     if llm.startswith('spark'): return True
-    if llm.startswith('zhipuai'): return True
+    if llm.startswith('zhipuai') or llm.startswith('glm-'): return True
     return False
 
 def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
-        inputs_array, inputs_show_user_array, llm_kwargs, 
-        chatbot, history_array, sys_prompt_array, 
+        inputs_array, inputs_show_user_array, llm_kwargs,
+        chatbot, history_array, sys_prompt_array,
         refresh_interval=0.2, max_workers=-1, scroller_max_len=30,
         handle_token_exceed=True, show_user_at_complete=False,
         retry_times_at_unknown_error=2,
@@ -189,7 +189,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     # 屏蔽掉 chatglm的多线程，可能会导致严重卡顿
     if not can_multi_process(llm_kwargs['llm_model']):
         max_workers = 1
-        
+
     executor = ThreadPoolExecutor(max_workers=max_workers)
     n_frag = len(inputs_array)
     # 用户反馈
@@ -214,7 +214,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
             try:
                 # 【第一种情况】：顺利完成
                 gpt_say = predict_no_ui_long_connection(
-                    inputs=inputs, llm_kwargs=llm_kwargs, history=history, 
+                    inputs=inputs, llm_kwargs=llm_kwargs, history=history,
                     sys_prompt=sys_prompt, observe_window=mutable[index], console_slience=True
                 )
                 mutable[index][2] = "已成功"
@@ -246,7 +246,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                 print(tb_str)
                 gpt_say += f"[Local Message] 警告，线程{index}在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                 if len(mutable[index][0]) > 0: gpt_say += "此线程失败前收到的回答：\n\n" + mutable[index][0]
-                if retry_op > 0: 
+                if retry_op > 0:
                     retry_op -= 1
                     wait = random.randint(5, 20)
                     if ("Rate limit reached" in tb_str) or ("Too Many Requests" in tb_str):
@@ -284,12 +284,11 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         # 在前端打印些好玩的东西
         for thread_index, _ in enumerate(worker_done):
             print_something_really_funny = "[ ...`"+mutable[thread_index][0][-scroller_max_len:].\
-                replace('\n', '').replace('`', '.').replace(
-                    ' ', '.').replace('<br/>', '.....').replace('$', '.')+"`... ]"
+                replace('\n', '').replace('`', '.').replace(' ', '.').replace('<br/>', '.....').replace('$', '.')+"`... ]"
             observe_win.append(print_something_really_funny)
         # 在前端打印些好玩的东西
-        stat_str = ''.join([f'`{mutable[thread_index][2]}`: {obs}\n\n' 
-                            if not done else f'`{mutable[thread_index][2]}`\n\n' 
+        stat_str = ''.join([f'`{mutable[thread_index][2]}`: {obs}\n\n'
+                            if not done else f'`{mutable[thread_index][2]}`\n\n'
                             for thread_index, done, obs in zip(range(len(worker_done)), worker_done, observe_win)])
         # 在前端打印些好玩的东西
         chatbot[-1] = [chatbot[-1][0], f'多线程操作已经开始，完成情况: \n\n{stat_str}' + ''.join(['.']*(cnt % 10+1))]
@@ -303,7 +302,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     for inputs_show_user, f in zip(inputs_show_user_array, futures):
         gpt_res = f.result()
         gpt_response_collection.extend([inputs_show_user, gpt_res])
-    
+
     # 是否在结束时，在界面上显示结果
     if show_user_at_complete:
         for inputs_show_user, f in zip(inputs_show_user_array, futures):
@@ -353,7 +352,7 @@ def read_and_clean_pdf_text(fp):
             if wtf['size'] not in fsize_statiscs: fsize_statiscs[wtf['size']] = 0
             fsize_statiscs[wtf['size']] += len(wtf['text'])
         return max(fsize_statiscs, key=fsize_statiscs.get)
-        
+
     def ffsize_same(a,b):
         """
         提取字体大小是否近似相等
@@ -389,7 +388,7 @@ def read_and_clean_pdf_text(fp):
             if index == 0:
                 page_one_meta = [" ".join(["".join([wtf['text'] for wtf in l['spans']]) for l in t['lines']]).replace(
                     '- ', '') for t in text_areas['blocks'] if 'lines' in t]
-                
+
         ############################## <第 2 步，获取正文主字体> ##################################
         try:
             fsize_statiscs = {}
@@ -405,7 +404,7 @@ def read_and_clean_pdf_text(fp):
         mega_sec = []
         sec = []
         for index, line in enumerate(meta_line):
-            if index == 0: 
+            if index == 0:
                 sec.append(line[fc])
                 continue
             if REMOVE_FOOT_NOTE:
@@ -502,12 +501,12 @@ def get_files_from_everything(txt, type): # type='.md'
     """
     这个函数是用来获取指定目录下所有指定类型（如.md）的文件，并且对于网络上的文件，也可以获取它。
     下面是对每个参数和返回值的说明：
-    参数 
-    - txt: 路径或网址，表示要搜索的文件或者文件夹路径或网络上的文件。 
+    参数
+    - txt: 路径或网址，表示要搜索的文件或者文件夹路径或网络上的文件。
     - type: 字符串，表示要搜索的文件类型。默认是.md。
-    返回值 
-    - success: 布尔值，表示函数是否成功执行。 
-    - file_manifest: 文件路径列表，里面包含以指定类型为后缀名的所有文件的绝对路径。 
+    返回值
+    - success: 布尔值，表示函数是否成功执行。
+    - file_manifest: 文件路径列表，里面包含以指定类型为后缀名的所有文件的绝对路径。
     - project_folder: 字符串，表示文件所在的文件夹路径。如果是网络上的文件，就是临时文件夹的路径。
     该函数详细注释已添加，请确认是否满足您的需要。
     """
@@ -571,7 +570,7 @@ class nougat_interface():
     def NOUGAT_parse_pdf(self, fp, chatbot, history):
         from toolbox import update_ui_lastest_msg
 
-        yield from update_ui_lastest_msg("正在解析论文, 请稍候。进度：正在排队, 等待线程锁...", 
+        yield from update_ui_lastest_msg("正在解析论文, 请稍候。进度：正在排队, 等待线程锁...",
                                          chatbot=chatbot, history=history, delay=0)
         self.threadLock.acquire()
         import glob, threading, os
@@ -579,7 +578,7 @@ class nougat_interface():
         dst = os.path.join(get_log_folder(plugin_name='nougat'), gen_time_str())
         os.makedirs(dst)
 
-        yield from update_ui_lastest_msg("正在解析论文, 请稍候。进度：正在加载NOUGAT... （提示：首次运行需要花费较长时间下载NOUGAT参数）", 
+        yield from update_ui_lastest_msg("正在解析论文, 请稍候。进度：正在加载NOUGAT... （提示：首次运行需要花费较长时间下载NOUGAT参数）",
                                          chatbot=chatbot, history=history, delay=0)
         self.nougat_with_timeout(f'nougat --out "{os.path.abspath(dst)}" "{os.path.abspath(fp)}"', os.getcwd(), timeout=3600)
         res = glob.glob(os.path.join(dst,'*.mmd'))

@@ -16,7 +16,7 @@
     "批量Markdown翻译": "BatchTranslateMarkdown",
     "连接bing搜索回答问题": "ConnectBingSearchAnswerQuestion",
     "Langchain知识库": "LangchainKnowledgeBase",
-    "Latex输出PDF结果": "OutputPDFFromLatex",
+    "Latex输出PDF": "OutputPDFFromLatex",
     "把字符太少的块清除为回车": "ClearBlocksWithTooFewCharactersToNewline",
     "Latex精细分解与转化": "DecomposeAndConvertLatex",
     "解析一个C项目的头文件": "ParseCProjectHeaderFiles",
@@ -97,5 +97,12 @@
     "多智能体": "MultiAgent",
     "图片生成_DALLE2": "ImageGeneration_DALLE2",
     "图片生成_DALLE3": "ImageGeneration_DALLE3",
-    "图片修改_DALLE2": "ImageModification_DALLE2"
+    "图片修改_DALLE2": "ImageModification_DALLE2",
+    "生成多种Mermaid图表": "GenerateMultipleMermaidCharts",
+    "知识库文件注入": "InjectKnowledgeBaseFiles",
+    "PDF翻译中文并重新编译PDF": "TranslatePDFToChineseAndRecompilePDF",
+    "随机小游戏": "RandomMiniGame",
+    "互动小游戏": "InteractiveMiniGame",
+    "解析历史输入": "ParseHistoricalInput",
+    "高阶功能模板函数示意图": "HighOrderFunctionTemplateDiagram"
 }

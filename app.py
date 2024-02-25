@@ -1,9 +1,9 @@
 import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 
 help_menu_description = \
-"""Github源代码开源和更新[地址🚀](https://github.com/binary-husky/gpt_academic), 
+"""Github源代码开源和更新[地址🚀](https://github.com/binary-husky/gpt_academic),
 感谢热情的[开发者们❤️](https://github.com/binary-husky/gpt_academic/graphs/contributors).
-</br></br>常见问题请查阅[项目Wiki](https://github.com/binary-husky/gpt_academic/wiki), 
+</br></br>常见问题请查阅[项目Wiki](https://github.com/binary-husky/gpt_academic/wiki),
 如遇到Bug请前往[Bug反馈](https://github.com/binary-husky/gpt_academic/issues).
 </br></br>普通对话使用说明: 1. 输入问题; 2. 点击提交
 </br></br>基础功能区使用说明: 1. 输入文本; 2. 点击任意基础功能区按钮
@@ -15,27 +15,27 @@ help_menu_description = \
 
 def main():
     import subprocess, sys
-    subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'https://fastly.jsdelivr.net/gh/binary-husky/gradio-fix@gpt-academic/release/gradio-3.32.7-py3-none-any.whl'])
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'https://public.agent-matrix.com/publish/gradio-3.32.8-py3-none-any.whl'])
     import gradio as gr
-    if gr.__version__ not in ['3.32.6', '3.32.7']: 
+    if gr.__version__ not in ['3.32.8']:
         raise ModuleNotFoundError("使用项目内置Gradio获取最优体验! 请运行 `pip install -r requirements.txt` 指令安装内置Gradio及其他依赖, 详情信息见requirements.txt.")
     from request_llms.bridge_all import predict
     from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, load_chat_cookies, DummyWith
     # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址
     proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION = get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION')
     CHATBOT_HEIGHT, LAYOUT, AVAIL_LLM_MODELS, AUTO_CLEAR_TXT = get_conf('CHATBOT_HEIGHT', 'LAYOUT', 'AVAIL_LLM_MODELS', 'AUTO_CLEAR_TXT')
-    ENABLE_AUDIO, AUTO_CLEAR_TXT, PATH_LOGGING, AVAIL_THEMES, THEME = get_conf('ENABLE_AUDIO', 'AUTO_CLEAR_TXT', 'PATH_LOGGING', 'AVAIL_THEMES', 'THEME')
+    ENABLE_AUDIO, AUTO_CLEAR_TXT, PATH_LOGGING, AVAIL_THEMES, THEME, ADD_WAIFU = get_conf('ENABLE_AUDIO', 'AUTO_CLEAR_TXT', 'PATH_LOGGING', 'AVAIL_THEMES', 'THEME', 'ADD_WAIFU')
     DARK_MODE, NUM_CUSTOM_BASIC_BTN, SSL_KEYFILE, SSL_CERTFILE = get_conf('DARK_MODE', 'NUM_CUSTOM_BASIC_BTN', 'SSL_KEYFILE', 'SSL_CERTFILE')
     INIT_SYS_PROMPT = get_conf('INIT_SYS_PROMPT')
 
     # 如果WEB_PORT是-1, 则随机选取WEB端口
     PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
     from check_proxy import get_current_version
-    from themes.theme import adjust_theme, advanced_css, theme_declaration
-    from themes.theme import js_code_for_css_changing, js_code_for_darkmode_init, js_code_for_toggle_darkmode, js_code_for_persistent_cookie_init
+    from themes.theme import adjust_theme, advanced_css, theme_declaration, js_code_clear, js_code_reset, js_code_show_or_hide, js_code_show_or_hide_group2
+    from themes.theme import js_code_for_css_changing, js_code_for_toggle_darkmode, js_code_for_persistent_cookie_init
     from themes.theme import load_dynamic_theme, to_cookie_str, from_cookie_str, init_cookie
     title_html = f"<h1 align=\"center\">GPT 学术优化 {get_current_version()}</h1>{theme_declaration}"
-    
+
     # 问询记录, python 版本建议3.9+（越新越好）
     import logging, uuid
     os.makedirs(PATH_LOGGING, exist_ok=True)
@@ -67,7 +67,7 @@ def main():
     proxy_info = check_proxy(proxies)
 
     gr_L1 = lambda: gr.Row().style()
-    gr_L2 = lambda scale, elem_id: gr.Column(scale=scale, elem_id=elem_id)
+    gr_L2 = lambda scale, elem_id: gr.Column(scale=scale, elem_id=elem_id, min_width=400)
     if LAYOUT == "TOP-DOWN":
         gr_L1 = lambda: DummyWith()
         gr_L2 = lambda scale, elem_id: gr.Row()
@@ -79,7 +79,7 @@ def main():
     with gr.Blocks(title="GPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
         gr.HTML(title_html)
         gr.HTML('''<center><a href="https://huggingface.co/spaces/qingxu98/gpt-academic?duplicate=true"><img src="https://bit.ly/3gLdBN6" alt="Duplicate Space"></a>请您打开此页面后务必点击上方的“复制空间”（Duplicate Space）按钮！<font color="#FF00FF">使用时，先在输入框填入API-KEY然后回车。</font><br/>切忌在“复制空间”（Duplicate Space）之前填入API_KEY或进行提问，否则您的API_KEY将极可能被空间所有者攫取！<br/>支持任意数量的OpenAI的密钥和API2D的密钥共存，例如输入"OpenAI密钥1,API2D密钥2"，然后提交，即可同时使用两种模型接口。</center>''')
-        secret_css, dark_mode, persistent_cookie = gr.Textbox(visible=False), gr.Textbox(DARK_MODE, visible=False), gr.Textbox(visible=False)
+        secret_css, dark_mode, py_pickle_cookie = gr.Textbox(visible=False), gr.Textbox(DARK_MODE, visible=False), gr.Textbox(visible=False)
         cookies = gr.State(load_chat_cookies())
         with gr_L1():
             with gr_L2(scale=2, elem_id="gpt-chat"):
@@ -96,11 +96,12 @@ def main():
                         resetBtn = gr.Button("重置", elem_id="elem_reset", variant="secondary"); resetBtn.style(size="sm")
                         stopBtn = gr.Button("停止", elem_id="elem_stop", variant="secondary"); stopBtn.style(size="sm")
                         clearBtn = gr.Button("清除", elem_id="elem_clear", variant="secondary", visible=False); clearBtn.style(size="sm")
-                    if ENABLE_AUDIO: 
+                    if ENABLE_AUDIO:
                         with gr.Row():
                             audio_mic = gr.Audio(source="microphone", type="numpy", elem_id="elem_audio", streaming=True, show_label=False).style(container=False)
                     with gr.Row():
                         status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {proxy_info}", elem_id="state-panel")
+
                 with gr.Accordion("基础功能区", open=True, elem_id="basic-panel") as area_basic_fn:
                     with gr.Row():
                         for k in range(NUM_CUSTOM_BASIC_BTN):
@@ -117,7 +118,7 @@ def main():
                     with gr.Row():
                         gr.Markdown("插件可读取“输入区”文本/路径作为参数（上传文件自动修正路径）")
                     with gr.Row(elem_id="input-plugin-group"):
-                        plugin_group_sel = gr.Dropdown(choices=all_plugin_groups, label='', show_label=False, value=DEFAULT_FN_GROUPS, 
+                        plugin_group_sel = gr.Dropdown(choices=all_plugin_groups, label='', show_label=False, value=DEFAULT_FN_GROUPS,
                                                       multiselect=True, interactive=True, elem_classes='normal_mut_select').style(container=False)
                     with gr.Row():
                         for k, plugin in plugins.items():
@@ -125,7 +126,7 @@ def main():
                             visible = True if match_group(plugin['Group'], DEFAULT_FN_GROUPS) else False
                             variant = plugins[k]["Color"] if "Color" in plugin else "secondary"
                             info = plugins[k].get("Info", k)
-                            plugin['Button'] = plugins[k]['Button'] = gr.Button(k, variant=variant, 
+                            plugin['Button'] = plugins[k]['Button'] = gr.Button(k, variant=variant,
                                 visible=visible, info_str=f'函数插件区: {info}').style(size="sm")
                     with gr.Row():
                         with gr.Accordion("更多函数插件", open=True):
@@ -137,7 +138,7 @@ def main():
                             with gr.Row():
                                 dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="", show_label=False).style(container=False)
                             with gr.Row():
-                                plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False, 
+                                plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False,
                                                                  placeholder="这里是特殊函数插件的高级参数输入区").style(container=False)
                             with gr.Row():
                                 switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary").style(size="sm")
@@ -145,13 +146,12 @@ def main():
                         with gr.Accordion("点击展开“文件下载区”。", open=False) as area_file_up:
                             file_upload = gr.Files(label="任何文件, 推荐上传压缩文件(zip, tar)", file_count="multiple", elem_id="elem_upload")
 
-
         with gr.Floating(init_x="0%", init_y="0%", visible=True, width=None, drag="forbidden", elem_id="tooltip"):
             with gr.Row():
                 with gr.Tab("上传文件", elem_id="interact-panel"):
                     gr.Markdown("请上传本地文件/压缩包供“函数插件区”功能调用。请注意: 上传文件后会自动把输入区修改为相应路径。")
                     file_upload_2 = gr.Files(label="任何文件, 推荐上传压缩文件(zip, tar)", file_count="multiple", elem_id="elem_upload_float")
-    
+
                 with gr.Tab("更换模型", elem_id="interact-panel"):
                     md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(container=False)
                     top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01,interactive=True, label="Top-p (nucleus sampling)",)
@@ -161,10 +161,11 @@ def main():
 
                 with gr.Tab("界面外观", elem_id="interact-panel"):
                     theme_dropdown = gr.Dropdown(AVAIL_THEMES, value=THEME, label="更换UI主题").style(container=False)
-                    checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区", "浮动输入区", "输入清除键", "插件参数区"], 
-                                                  value=["基础功能区", "函数插件区"], label="显示/隐藏功能区", elem_id='cbs').style(container=False)
-                    checkboxes_2 = gr.CheckboxGroup(["自定义菜单"], 
-                                                  value=[], label="显示/隐藏自定义菜单", elem_id='cbsc').style(container=False)
+                    checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区", "浮动输入区", "输入清除键", "插件参数区"], value=["基础功能区", "函数插件区"], label="显示/隐藏功能区", elem_id='cbs').style(container=False)
+                    opt = ["自定义菜单"]
+                    value=[]
+                    if ADD_WAIFU: opt += ["添加Live2D形象"]; value += ["添加Live2D形象"]
+                    checkboxes_2 = gr.CheckboxGroup(opt, value=value, label="显示/隐藏自定义菜单", elem_id='cbsc').style(container=False)
                     dark_mode_btn = gr.Button("切换界面明暗 ☀", variant="secondary").style(size="sm")
                     dark_mode_btn.click(None, None, None, _js=js_code_for_toggle_darkmode)
                 with gr.Tab("帮助", elem_id="interact-panel"):
@@ -181,7 +182,7 @@ def main():
                         submitBtn2 = gr.Button("提交", variant="primary"); submitBtn2.style(size="sm")
                         resetBtn2 = gr.Button("重置", variant="secondary"); resetBtn2.style(size="sm")
                         stopBtn2 = gr.Button("停止", variant="secondary"); stopBtn2.style(size="sm")
-                        clearBtn2 = gr.Button("清除", variant="secondary", visible=False); clearBtn2.style(size="sm")
+                        clearBtn2 = gr.Button("清除", elem_id="elem_clear2", variant="secondary", visible=False); clearBtn2.style(size="sm")
 
 
         with gr.Floating(init_x="20%", init_y="50%", visible=False, width="40%", drag="top") as area_customize:
@@ -195,10 +196,12 @@ def main():
                         basic_fn_suffix = gr.Textbox(show_label=False, placeholder="输入新提示后缀", lines=4).style(container=False)
                     with gr.Column(scale=1, min_width=70):
                         basic_fn_confirm = gr.Button("确认并保存", variant="primary"); basic_fn_confirm.style(size="sm")
-                        basic_fn_load    = gr.Button("加载已保存", variant="primary"); basic_fn_load.style(size="sm")
-                        def assign_btn(persistent_cookie_, cookies_, basic_btn_dropdown_, basic_fn_title, basic_fn_prefix, basic_fn_suffix):
+                        basic_fn_clean   = gr.Button("恢复默认", variant="primary"); basic_fn_clean.style(size="sm")
+                        def assign_btn(persistent_cookie_, cookies_, basic_btn_dropdown_, basic_fn_title, basic_fn_prefix, basic_fn_suffix, clean_up=False):
                             ret = {}
+                            # 读取之前的自定义按钮
                             customize_fn_overwrite_ = cookies_['customize_fn_overwrite']
+                            # 更新新的自定义按钮
                             customize_fn_overwrite_.update({
                                 basic_btn_dropdown_:
                                     {
@@ -208,27 +211,41 @@ def main():
                                     }
                                 }
                             )
-                            cookies_.update(customize_fn_overwrite_)
+                            if clean_up:
+                                customize_fn_overwrite_ = {}
+                            cookies_.update(customize_fn_overwrite_)    # 更新cookie
+                            visible = (not clean_up) and (basic_fn_title != "")
                             if basic_btn_dropdown_ in customize_btns:
-                                ret.update({customize_btns[basic_btn_dropdown_]: gr.update(visible=True, value=basic_fn_title)})
+                                # 是自定义按钮，不是预定义按钮
+                                ret.update({customize_btns[basic_btn_dropdown_]: gr.update(visible=visible, value=basic_fn_title)})
                             else:
-                                ret.update({predefined_btns[basic_btn_dropdown_]: gr.update(visible=True, value=basic_fn_title)})
+                                # 是预定义按钮
+                                ret.update({predefined_btns[basic_btn_dropdown_]: gr.update(visible=visible, value=basic_fn_title)})
                             ret.update({cookies: cookies_})
                             try: persistent_cookie_ = from_cookie_str(persistent_cookie_)   # persistent cookie to dict
                             except: persistent_cookie_ = {}
                             persistent_cookie_["custom_bnt"] = customize_fn_overwrite_      # dict update new value
                             persistent_cookie_ = to_cookie_str(persistent_cookie_)          # persistent cookie to dict
-                            ret.update({persistent_cookie: persistent_cookie_})             # write persistent cookie
+                            ret.update({py_pickle_cookie: persistent_cookie_})             # write persistent cookie
                             return ret
-                        
-                        def reflesh_btn(persistent_cookie_, cookies_):
+
+                        # update btn
+                        h = basic_fn_confirm.click(assign_btn, [py_pickle_cookie, cookies, basic_btn_dropdown, basic_fn_title, basic_fn_prefix, basic_fn_suffix],
+                                                   [py_pickle_cookie, cookies, *customize_btns.values(), *predefined_btns.values()])
+                        h.then(None, [py_pickle_cookie], None, _js="""(py_pickle_cookie)=>{setCookie("py_pickle_cookie", py_pickle_cookie, 365);}""")
+                        # clean up btn
+                        h2 = basic_fn_clean.click(assign_btn, [py_pickle_cookie, cookies, basic_btn_dropdown, basic_fn_title, basic_fn_prefix, basic_fn_suffix, gr.State(True)],
+                                                   [py_pickle_cookie, cookies, *customize_btns.values(), *predefined_btns.values()])
+                        h2.then(None, [py_pickle_cookie], None, _js="""(py_pickle_cookie)=>{setCookie("py_pickle_cookie", py_pickle_cookie, 365);}""")
+
+                        def persistent_cookie_reload(persistent_cookie_, cookies_):
                             ret = {}
                             for k in customize_btns:
                                 ret.update({customize_btns[k]: gr.update(visible=False, value="")})
 
                             try: persistent_cookie_ = from_cookie_str(persistent_cookie_)    # persistent cookie to dict
                             except: return ret
-                            
+
                             customize_fn_overwrite_ = persistent_cookie_.get("custom_bnt", {})
                             cookies_['customize_fn_overwrite'] = customize_fn_overwrite_
                             ret.update({cookies: cookies_})
@@ -238,26 +255,17 @@ def main():
                                 if k in customize_btns: ret.update({customize_btns[k]: gr.update(visible=True, value=v['Title'])})
                                 else: ret.update({predefined_btns[k]: gr.update(visible=True, value=v['Title'])})
                             return ret
-                        
-                        basic_fn_load.click(reflesh_btn, [persistent_cookie, cookies], [cookies, *customize_btns.values(), *predefined_btns.values()])
-                        h = basic_fn_confirm.click(assign_btn, [persistent_cookie, cookies, basic_btn_dropdown, basic_fn_title, basic_fn_prefix, basic_fn_suffix], 
-                                                   [persistent_cookie, cookies, *customize_btns.values(), *predefined_btns.values()])
-                        # save persistent cookie
-                        h.then(None, [persistent_cookie], None, _js="""(persistent_cookie)=>{setCookie("persistent_cookie", persistent_cookie, 5);}""")
 
         # 功能区显示开关与功能区的互动
         def fn_area_visibility(a):
             ret = {}
-            ret.update({area_basic_fn: gr.update(visible=("基础功能区" in a))})
-            ret.update({area_crazy_fn: gr.update(visible=("函数插件区" in a))})
             ret.update({area_input_primary: gr.update(visible=("浮动输入区" not in a))})
             ret.update({area_input_secondary: gr.update(visible=("浮动输入区" in a))})
-            ret.update({clearBtn: gr.update(visible=("输入清除键" in a))})
-            ret.update({clearBtn2: gr.update(visible=("输入清除键" in a))})
             ret.update({plugin_advanced_arg: gr.update(visible=("插件参数区" in a))})
             if "浮动输入区" in a: ret.update({txt: gr.update(value="")})
             return ret
-        checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn, area_input_primary, area_input_secondary, txt, txt2, clearBtn, clearBtn2, plugin_advanced_arg] )
+        checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn, area_input_primary, area_input_secondary, txt, txt2, plugin_advanced_arg] )
+        checkboxes.select(None, [checkboxes], None, _js=js_code_show_or_hide)
 
         # 功能区显示开关与功能区的互动
         def fn_area_visibility_2(a):
@@ -265,6 +273,7 @@ def main():
             ret.update({area_customize: gr.update(visible=("自定义菜单" in a))})
             return ret
         checkboxes_2.select(fn_area_visibility_2, [checkboxes_2], [area_customize] )
+        checkboxes_2.select(None, [checkboxes_2], None, _js=js_code_show_or_hide_group2)
 
         # 整理反复出现的控件句柄组合
         input_combo = [cookies, max_length_sl, md_dropdown, txt, txt2, top_p, temperature, chatbot, history, system_prompt, plugin_advanced_arg]
@@ -275,15 +284,17 @@ def main():
         cancel_handles.append(txt2.submit(**predict_args))
         cancel_handles.append(submitBtn.click(**predict_args))
         cancel_handles.append(submitBtn2.click(**predict_args))
-        resetBtn.click(lambda: ([], [], "已重置"), None, [chatbot, history, status])
-        resetBtn2.click(lambda: ([], [], "已重置"), None, [chatbot, history, status])
-        clearBtn.click(lambda: ("",""), None, [txt, txt2])
-        clearBtn2.click(lambda: ("",""), None, [txt, txt2])
+        resetBtn.click(None, None, [chatbot, history, status], _js=js_code_reset)   # 先在前端快速清除chatbot&status
+        resetBtn2.click(None, None, [chatbot, history, status], _js=js_code_reset)  # 先在前端快速清除chatbot&status
+        resetBtn.click(lambda: ([], [], "已重置"), None, [chatbot, history, status])    # 再在后端清除history
+        resetBtn2.click(lambda: ([], [], "已重置"), None, [chatbot, history, status])   # 再在后端清除history
+        clearBtn.click(None, None, [txt, txt2], _js=js_code_clear)
+        clearBtn2.click(None, None, [txt, txt2], _js=js_code_clear)
         if AUTO_CLEAR_TXT:
-            submitBtn.click(lambda: ("",""), None, [txt, txt2])
-            submitBtn2.click(lambda: ("",""), None, [txt, txt2])
-            txt.submit(lambda: ("",""), None, [txt, txt2])
-            txt2.submit(lambda: ("",""), None, [txt, txt2])
+            submitBtn.click(None, None, [txt, txt2], _js=js_code_clear)
+            submitBtn2.click(None, None, [txt, txt2], _js=js_code_clear)
+            txt.submit(None, None, [txt, txt2], _js=js_code_clear)
+            txt2.submit(None, None, [txt, txt2], _js=js_code_clear)
         # 基础功能区的回调函数注册
         for k in functional:
             if ("Visible" in functional[k]) and (not functional[k]["Visible"]): continue
@@ -324,7 +335,7 @@ def main():
             else:
                 css_part2 = adjust_theme()._get_theme_css()
             return css_part2 + css_part1
-        
+
         theme_handle = theme_dropdown.select(on_theme_dropdown_changed, [theme_dropdown, secret_css], [secret_css])
         theme_handle.then(
             None,
@@ -349,13 +360,13 @@ def main():
             if not group_list: # 处理特殊情况：没有选择任何插件组
                 return [*[plugin['Button'].update(visible=False) for _, plugin in plugins_as_btn.items()], gr.Dropdown.update(choices=[])]
             for k, plugin in plugins.items():
-                if plugin.get("AsButton", True): 
+                if plugin.get("AsButton", True):
                     btn_list.append(plugin['Button'].update(visible=match_group(plugin['Group'], group_list))) # 刷新按钮
                     if plugin.get('AdvancedArgs', False): dropdown_fn_list.append(k) # 对于需要高级参数的插件，亦在下拉菜单中显示
                 elif match_group(plugin['Group'], group_list): fns_list.append(k) # 刷新下拉列表
             return [*btn_list, gr.Dropdown.update(choices=fns_list)]
         plugin_group_sel.select(fn=on_group_change, inputs=[plugin_group_sel], outputs=[*[plugin['Button'] for name, plugin in plugins_as_btn.items()], dropdown])
-        if ENABLE_AUDIO: 
+        if ENABLE_AUDIO:
             from crazy_functions.live_audio.audio_io import RealtimeAudioDistribution
             rad = RealtimeAudioDistribution()
             def deal_audio(audio, cookies):
@@ -363,12 +374,12 @@ def main():
             audio_mic.stream(deal_audio, inputs=[audio_mic, cookies])
 
 
-        demo.load(init_cookie, inputs=[cookies, chatbot], outputs=[cookies])
-        darkmode_js = js_code_for_darkmode_init
-        demo.load(None, inputs=None, outputs=[persistent_cookie], _js=js_code_for_persistent_cookie_init)
-        demo.load(None, inputs=[dark_mode], outputs=None, _js=darkmode_js)    # 配置暗色主题或亮色主题
+        demo.load(init_cookie, inputs=[cookies], outputs=[cookies])
+        demo.load(persistent_cookie_reload, inputs = [py_pickle_cookie, cookies],
+            outputs = [py_pickle_cookie, cookies, *customize_btns.values(), *predefined_btns.values()], _js=js_code_for_persistent_cookie_init)
+        demo.load(None, inputs=[dark_mode], outputs=None, _js="""(dark_mode)=>{apply_cookie_for_checkbox(dark_mode);}""")    # 配置暗色主题或亮色主题
         demo.load(None, inputs=[gr.Textbox(LAYOUT, visible=False)], outputs=None, _js='(LAYOUT)=>{GptAcademicJavaScriptInit(LAYOUT);}')
-        
+
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def run_delayed_tasks():
         import threading, webbrowser, time
@@ -379,7 +390,7 @@ def main():
         def auto_updates(): time.sleep(0); auto_update()
         def open_browser(): time.sleep(2); webbrowser.open_new_tab(f"http://localhost:{PORT}")
         def warm_up_mods(): time.sleep(6); warm_up_modules()
-        
+
         threading.Thread(target=auto_updates, name="self-upgrade", daemon=True).start() # 查看自动更新
         threading.Thread(target=open_browser, name="open-browser", daemon=True).start() # 打开浏览器页面
         threading.Thread(target=warm_up_mods, name="warm-up", daemon=True).start()      # 预热tiktoken模块
@@ -390,10 +401,10 @@ def main():
 
     # 如果需要在二级路径下运行
     # CUSTOM_PATH = get_conf('CUSTOM_PATH')
-    # if CUSTOM_PATH != "/": 
+    # if CUSTOM_PATH != "/":
     #     from toolbox import run_gradio_in_subpath
     #     run_gradio_in_subpath(demo, auth=AUTHENTICATION, port=PORT, custom_path=CUSTOM_PATH)
-    # else: 
+    # else:
     #     demo.launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, favicon_path="docs/logo.png",
     #                 blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile",f"{PATH_LOGGING}/admin"])
 

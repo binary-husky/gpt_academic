@@ -21,6 +21,14 @@ from shared_utils.connect_void_terminal import get_chat_handle
 from shared_utils.connect_void_terminal import get_plugin_handle
 from shared_utils.connect_void_terminal import get_plugin_default_kwargs
 from shared_utils.connect_void_terminal import get_chat_default_kwargs
+from shared_utils.text_mask import apply_gpt_academic_string_mask
+from shared_utils.text_mask import build_gpt_academic_masked_string
+from shared_utils.text_mask import apply_gpt_academic_string_mask_langbased
+from shared_utils.text_mask import build_gpt_academic_masked_string_langbased
+from shared_utils.handle_upload import html_local_file
+from shared_utils.handle_upload import html_local_img
+from shared_utils.handle_upload import file_manifest_filter_type
+from shared_utils.handle_upload import extract_archive
 
 pj = os.path.join
 default_user_name = "default_user"
@@ -69,7 +77,9 @@ class ChatBotWithCookies(list):
 
 def ArgsGeneralWrapper(f):
     """
-    装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
+    装饰器函数ArgsGeneralWrapper，用于重组输入参数，改变输入参数的顺序与结构。
+    该装饰器是大多数功能调用的入口。
+    函数示意图：https://mermaid.live/edit#pako:eNqNVFtPGkEY_StkntoEDQtLoTw0sWqapjQxVWPabmOm7AiEZZcsQ9QiiW012qixqdeqqIn10geBh6ZR8PJnmAWe-hc6l3VhrWnLEzNzzvnO953ZyYOYoSIQAWOaMR5LQBN7hvoU3UN_g5iu7imAXEyT4wUF3Pd0dT3y9KGYYUJsmK8V0GPGs0-QjkyojZgwk0Fm82C2dVghX08U8EaoOHjOfoEMU0XmADRhOksVWnNLjdpM82qFzB6S5Q_WWsUhuqCc3JtAsVR_OoMnhyZwXgHWwbS1d4gnsLVZJp-P6mfVxveqAgqC70Jz_pQCOGDKM5xFdNNPDdilF6uSU_hOYqu4a3MHYDZLDzq5fodrC3PWcEaFGPUaRiqJWK_W9g9rvRITa4dhy_0nw67SiePMp3oSR6PPn41DGgllkvkizYwsrmtaejTFd8V4yekGmT1zqrt4XGlAy8WTuiPULF01LksZvukSajfQQRAxmYi5S0D81sDcyzapVdn6sYFHkjhhGyel3frVQnvsnbR23lEjlhIlaOJiFPWzU5G4tfNJo8ejwp47-TbvJkKKZvmxA6SKo16oaazJysfG6klr9T0pbTW2ZqzlL_XaT8fYbQLXe4mSmvoCZXMaa7FePW6s7jVqK9bujvse3WFjY5_Z4KfsA4oiPY4T7Drvn1tLJTbG1to1qR79ulgk89-oJbvZzbIwJty6u20LOReWa9BvwserUd9s9MIKc3x5TUWEoAhUyJK5y85w_yG-dFu_R9waoU7K581y8W_qLle35-rG9Nxcrz8QHRsc0K-r9NViYRT36KsFvCCNzDRMqvSVyzOKAnACpZECIvSvCs2UAhS9QHEwh43BST0GItjMIS_I8e-sLwnj9A262cxA_ZVh0OUY1LJiDSJ5MAEiUijYLUtBORR6KElyQPaCSRDpksNSd8AfluSgHPaFC17wjrOlbgbzyyFf4IFPDvoD_sJvnkdK-g
     """
     def decorated(request: gradio.Request, cookies, max_length, llm_model, txt, txt2, top_p, temperature, chatbot, history, system_prompt, plugin_advanced_arg, *args):
         txt_passon = txt
@@ -323,54 +333,6 @@ def find_free_port():
         return s.getsockname()[1]
 
 
-def extract_archive(file_path, dest_dir):
-    import zipfile
-    import tarfile
-    import os
-
-    # Get the file extension of the input file
-    file_extension = os.path.splitext(file_path)[1]
-
-    # Extract the archive based on its extension
-    if file_extension == ".zip":
-        with zipfile.ZipFile(file_path, "r") as zipobj:
-            zipobj.extractall(path=dest_dir)
-            print("Successfully extracted zip archive to {}".format(dest_dir))
-
-    elif file_extension in [".tar", ".gz", ".bz2"]:
-        with tarfile.open(file_path, "r:*") as tarobj:
-            tarobj.extractall(path=dest_dir)
-            print("Successfully extracted tar archive to {}".format(dest_dir))
-
-    # 第三方库，需要预先pip install rarfile
-    # 此外，Windows上还需要安装winrar软件，配置其Path环境变量，如"C:\Program Files\WinRAR"才可以
-    elif file_extension == ".rar":
-        try:
-            import rarfile
-
-            with rarfile.RarFile(file_path) as rf:
-                rf.extractall(path=dest_dir)
-                print("Successfully extracted rar archive to {}".format(dest_dir))
-        except:
-            print("Rar format requires additional dependencies to install")
-            return "\n\n解压失败! 需要安装pip install rarfile来解压rar文件。建议：使用zip压缩格式。"
-
-    # 第三方库，需要预先pip install py7zr
-    elif file_extension == ".7z":
-        try:
-            import py7zr
-
-            with py7zr.SevenZipFile(file_path, mode="r") as f:
-                f.extractall(path=dest_dir)
-                print("Successfully extracted 7z archive to {}".format(dest_dir))
-        except:
-            print("7z format requires additional dependencies to install")
-            return "\n\n解压失败! 需要安装pip install py7zr来解压7z文件"
-    else:
-        return ""
-    return ""
-
-
 def find_recent_files(directory):
     """
     me: find files that is created with in one minutes under a directory with python, write a function
@@ -468,39 +430,8 @@ def del_outdated_uploads(outdate_time_seconds, target_path_base=None):
     return
 
 
-def html_local_file(file):
-    base_path = os.path.dirname(__file__)  # 项目目录
-    if os.path.exists(str(file)):
-        file = f'file={file.replace(base_path, ".")}'
-    return file
 
-
-def html_local_img(__file, layout="left", max_width=None, max_height=None, md=True):
-    style = ""
-    if max_width is not None:
-        style += f"max-width: {max_width};"
-    if max_height is not None:
-        style += f"max-height: {max_height};"
-    __file = html_local_file(__file)
-    a = f'<div align="{layout}"><img src="{__file}" style="{style}"></div>'
-    if md:
-        a = f"![{__file}]({__file})"
-    return a
-
-
-def file_manifest_filter_type(file_list, filter_: list = None):
-    new_list = []
-    if not filter_:
-        filter_ = ["png", "jpg", "jpeg"]
-    for file in file_list:
-        if str(os.path.basename(file)).split(".")[-1] in filter_:
-            new_list.append(html_local_img(file, md=False))
-        else:
-            new_list.append(file)
-    return new_list
-
-
-def to_markdown_tabs(head: list, tabs: list, alignment=":---:", column=False):
+def to_markdown_tabs(head: list, tabs: list, alignment=":---:", column=False, omit_path=None):
     """
     Args:
         head: 表头：[]
@@ -524,6 +455,9 @@ def to_markdown_tabs(head: list, tabs: list, alignment=":---:", column=False):
     for i in range(max_len):
         row_data = [tab[i] if i < len(tab) else "" for tab in transposed_tabs]
         row_data = file_manifest_filter_type(row_data, filter_=None)
+        # for dat in row_data:
+        #     if (omit_path is not None) and os.path.exists(dat):
+        #         dat = os.path.relpath(dat, omit_path)
         tabs_list += "".join([tab_format % i for i in row_data]) + "|\n"
 
     return tabs_list
@@ -559,15 +493,21 @@ def on_file_uploaded(
         )
 
     # 整理文件集合 输出消息
-    moved_files = [fp for fp in glob.glob(f"{target_path_base}/**/*", recursive=True)]
-    moved_files_str = to_markdown_tabs(head=["文件"], tabs=[moved_files])
+    files = glob.glob(f"{target_path_base}/**/*", recursive=True)
+    moved_files = [fp for fp in files]
+    max_file_to_show = 10
+    if len(moved_files) > max_file_to_show:
+        moved_files = moved_files[:max_file_to_show//2] + [f'... ( 📌省略{len(moved_files) - max_file_to_show}个文件的显示 ) ...'] + \
+                      moved_files[-max_file_to_show//2:]
+    moved_files_str = to_markdown_tabs(head=["文件"], tabs=[moved_files], omit_path=target_path_base)
     chatbot.append(
         [
             "我上传了文件，请查收",
-            f"[Local Message] 收到以下文件: \n\n{moved_files_str}"
-            + f"\n\n调用路径参数已自动修正到: \n\n{txt}"
-            + f"\n\n现在您点击任意函数插件时，以上文件将被作为输入参数"
-            + upload_msg,
+            f"[Local Message] 收到以下文件 （上传到路径：{target_path_base}）: " +
+            f"\n\n{moved_files_str}" +
+            f"\n\n调用路径参数已自动修正到: \n\n{txt}" +
+            f"\n\n现在您点击任意函数插件时，以上文件将被作为输入参数" +
+            upload_msg,
         ]
     )
 
