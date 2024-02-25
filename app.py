@@ -15,7 +15,7 @@ help_menu_description = \
 
 def main():
     import subprocess, sys
-    subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'https://fastly.jsdelivr.net/gh/binary-husky/gradio-fix@gpt-academic/release/gradio-3.32.7-py3-none-any.whl'])
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'https://public.agent-matrix.com/publish/gradio-3.32.8-py3-none-any.whl'])
     import gradio as gr
     if gr.__version__ not in ['3.32.8']:
         raise ModuleNotFoundError("使用项目内置Gradio获取最优体验! 请运行 `pip install -r requirements.txt` 指令安装内置Gradio及其他依赖, 详情信息见requirements.txt.")
