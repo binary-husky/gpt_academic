@@ -9,7 +9,7 @@ class PipeCom:
 
 
 class PluginMultiprocessManager:
-    def __init__(self, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+    def __init__(self, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
         # ⭐ run in main process
         self.autogen_work_dir = os.path.join(get_log_folder("autogen"), gen_time_str())
         self.previous_work_dir_files = {}
@@ -18,7 +18,7 @@ class PluginMultiprocessManager:
         self.chatbot = chatbot
         self.history = history
         self.system_prompt = system_prompt
-        # self.web_port = web_port
+        # self.user_request = user_request
         self.alive = True
         self.use_docker = get_conf("AUTOGEN_USE_DOCKER")
         self.last_user_input = ""
