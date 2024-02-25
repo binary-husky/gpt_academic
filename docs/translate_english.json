@@ -3004,5 +3004,7 @@
     "1. 上传图片": "TranslatedText",
     "保存状态": "TranslatedText",
     "GPT-Academic对话存档": "TranslatedText",
-    "Arxiv论文精细翻译": "TranslatedText"
+    "Arxiv论文精细翻译": "TranslatedText",
+    "from crazy_functions.AdvancedFunctionTemplate import 测试图表渲染": "from crazy_functions.AdvancedFunctionTemplate import test_chart_rendering",
+    "测试图表渲染": "test_chart_rendering"
 }
