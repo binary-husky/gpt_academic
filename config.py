@@ -229,7 +229,7 @@ GEMINI_API_KEY = ''
 
 
 # HUGGINGFACE的TOKEN，下载LLAMA时起作用 https://huggingface.co/docs/hub/security-tokens
-HUGGINGFACE_ACCESS_TOKEN = "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"
+HUGGINGFACE_ACCESS_TOKEN = ""
 
 
 # GROBID服务器地址（填写多个可以均衡负载），用于高质量地读取PDF文档
