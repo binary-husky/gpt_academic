@@ -276,6 +276,8 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                 elif 'data: [DONE]' in chunk_decoded:
                     break
                 continue
+            elif isinstance(chunkjson, type(None)):
+                continue
             if chunk:
                 try:
                     if not chunkjson.get('choices'):

@@ -114,11 +114,12 @@ kbs_config = {
     },
     "chromadb": {}
 }
+# 下面的模版不要改，也不能改
 file_details_template = {
     '文档加载器': [], '分词器': [], '文档片段数量': [], '向量库': [], '源文件': []
 }
 file_fragment_template = {
-    'N': [], '内容': [], '删除': []
+    "id": [], 'N': [], '内容': [], '删除': []
 }
 # TextSplitter配置项，如果你不明白其中的含义，就不要修改。
 text_splitter_dict = {

@@ -6,7 +6,10 @@ import json
 import os, random
 import copy
 import re
+import tempfile
 import time
+import uuid
+from typing import List
 
 import gradio as gr
 import pandas as pd
@@ -678,7 +681,7 @@ def refresh_load_data(prompt, request: gr.Request):
     kb_details_tm = base.kb_details_to_dict()
     kb_list = base.kb_dict_to_list(kb_details_tm)
     know_list = gr.update(choices=kb_list + ['新建知识库'], show_label=True)
-    know_load = gr.update(choices=know_list, label='知识库', show_label=True)
+    know_load = gr.update(choices=list(kb_details_tm.keys()), label='知识库', show_label=True)
 
     select_list = filter_database_tables()
     favicon_appname = func_box.favicon_ascii()
@@ -717,6 +720,7 @@ def user_login(user, password):
 from common.knowledge_base.kb_service import base
 from common.knowledge_base import kb_doc_api, kb_api
 from common.api_configs import kb_config
+from crazy_functions.reader_fns.crazy_box import detach_cloud_links
 
 
 def kb_select_show(select: gr.Dropdown):
@@ -726,21 +730,31 @@ def kb_select_show(select: gr.Dropdown):
         return gr.update(visible=False), gr.update(visible=True)
 
 
-def kb_name_select_then(kb_name, kb_info):
-    kb_name = list(base.kb_list_to_dict([kb_name]).keys())[0]
+def kb_name_select_then(kb_name):
+    kb_dict = base.kb_list_to_dict([kb_name])
+    kb_name = list(kb_dict.keys())[0]
     file_details = pd.DataFrame(base.get_kb_file_details(kb_name))
-    db_file_list = file_details['file_name'].to_list()
-    file_name = db_file_list[0]
-    last_details = __get_kb_details(file_details, file_details["No"] == 1)
-    last_fragment = __get_kb_fragment(kb_name, file_name)
+    if 'file_name' in file_details:
+        db_file_list = file_details['file_name'].to_list()
+        file_name = db_file_list[0]
+        last_details = __get_kb_details_df(file_details, file_details["No"] == 1)
+        last_fragment = __get_kb_fragment_df(kb_name, file_name)
+        kb_file_list = gr.update(choices=db_file_list, value=file_name)
+        kb_file_details = gr.DataFrame.update(value=last_details, label=f'{file_name}-文件详情')
+        kb_file_fragment = gr.DataFrame.update(value=last_fragment, label=f'{file_name}-文件片段编辑')
+    else:
+        kb_file_list = gr.update(choices=[], value='')
+        kb_file_details = gr.DataFrame.update(value=pd.DataFrame(data=copy.deepcopy(kb_config.file_details_template)))
+        kb_file_fragment = gr.DataFrame.update(value=pd.DataFrame(data=copy.deepcopy(kb_config.file_fragment_template)))
 
     kb_name_tm = base.kb_details_to_dict()
+    kb_info = base.get_kb_details_by_name(kb_name).get('kb_info', '')
     update_output = {
-        'kb_name_list': gr.update(choices=base.kb_dict_to_list(kb_name_tm)),
+        'kb_name_list': gr.update(choices=base.kb_dict_to_list(kb_name_tm) + ['新建知识库']),
         'kb_info_txt': kb_info,
-        'kb_file_list': gr.update(choices=db_file_list, value=file_name),
-        'kb_file_details': gr.update(value=last_details, label=f'{file_name}-文件详情'),
-        'kb_file_fragment': gr.update(value=last_fragment, label=f'{file_name}-文件片段编辑')
+        'kb_file_list': kb_file_list,
+        'kb_file_details': kb_file_details,
+        'kb_file_fragment': kb_file_fragment
     }
     return list(update_output.values())
 
@@ -759,15 +773,29 @@ def kb_upload_btn(upload: gr.Files, cloud: str):
         return gr.Button.update(variant='secondary')
 
 
+def kb_introduce_change_btn(kb_name, kb_info):
+    kb_dict = base.kb_list_to_dict([kb_name])
+    kb_name = list(kb_dict.keys())[0]
+    resp = kb_doc_api.update_info(kb_name, kb_info)
+
+    if not resp.data != 200:
+        raise gr.Error(json.dumps(resp.__dict__, indent=4, ensure_ascii=False))
+    else:
+        return gr.update()
+        # yield gr.update(value=func_box.spike_toast('更新知识库简介成功'), visible=True)
+        # time.sleep(1)
+        # yield gr.update(visible=False)
+
+
 def kb_date_add_row(source_data: pd.DataFrame):
     # 添加一行数据
-    last_index = source_data.iloc[-1].iloc[0]
+    last_index = source_data.iloc[-1].iloc[1]
     # 检查最后一行的第一个元素是否为整数类型
     if last_index.dtype == 'int64':
         new_index = last_index + 1
     else:
         new_index = 'ErrorType'
-    new_row_data = [new_index, '', '']
+    new_row_data = [uuid.uuid4(), new_index, '', '']
     source_data.loc[len(source_data)] = new_row_data
 
     return gr.update(value=source_data)
@@ -803,16 +831,14 @@ def kb_new_confirm(kb_name, kb_type, kb_model, kb_info):
         'kb_name_list': gr.update(choices=[select_name] + base.kb_dict_to_list(kb_name_tm) + ['新建知识库'],
                                   value=select_name),
         'kb_info_txt': kb_info,
-        'kb_file_list': gr.Radio.update(choices=[], value=''),
-        'kb_file_details': gr.Dataframe.update(value=pd.DataFrame(data=copy.deepcopy(kb_config.file_details_template))
-                                               ),
-        'kb_file_fragment': gr.Dataframe.update(
-            value=pd.DataFrame(data=copy.deepcopy(kb_config.file_fragment_template)))
+        'kb_file_list': gr.update(choices=[], value=''),
+        'kb_file_details': gr.DataFrame.update(value=pd.DataFrame(data=copy.deepcopy(kb_config.file_details_template))),
+        'kb_file_fragment': gr.DataFrame.update(value=pd.DataFrame(data=copy.deepcopy(kb_config.file_fragment_template)))
     }
     return list(new_output.values()) + list(edit_output.values())
 
 
-def __get_kb_details(file_details: pd.DataFrame, condition: pd.Series):
+def __get_kb_details_df(file_details: pd.DataFrame, condition: pd.Series):
     select_document = file_details[condition]
 
     select_kb_details = copy.deepcopy(kb_config.file_details_template)
@@ -827,7 +853,7 @@ def __get_kb_details(file_details: pd.DataFrame, condition: pd.Series):
     return pd.DataFrame(data=select_kb_details)
 
 
-def __get_kb_fragment(kb_name, file_name):
+def __get_kb_fragment_df(kb_name, file_name):
     kb_fragment = copy.deepcopy(kb_config.file_fragment_template)
 
     info_fragment = kb_doc_api.search_docs(query='', knowledge_base_name=kb_name,
@@ -835,15 +861,22 @@ def __get_kb_fragment(kb_name, file_name):
                                            file_name=file_name, metadata={})
 
     for i, v in enumerate(info_fragment):
+        kb_fragment['id'].append(info_fragment[i].id)
         kb_fragment['N'].append(i + 1)
         kb_fragment['内容'].append(info_fragment[i].page_content)
         kb_fragment['删除'].append('')
     return pd.DataFrame(data=kb_fragment)
 
 
-
-def kb_file_update_confirm(files, kb_name, kb_info, kb_max, kb_similarity, kb_tokenizer, kb_loader):
+def kb_file_update_confirm(upload_files: List, kb_name, kb_info, kb_max, kb_similarity, kb_tokenizer, kb_loader,
+                           cloud_link, ipaddr: gr.Request):
     kb_name = list(base.kb_list_to_dict([kb_name]).keys())[0]
+    user = func_box.user_client_mark(ipaddr)
+    cloud_map, status = detach_cloud_links(cloud_link, {'ipaddr': user}, ['*'])
+    if status:
+        raise gr.Error(f'文件下载失败，{cloud_map}')
+
+    files = [f.name for f in upload_files] + list(cloud_map.keys())
     response = kb_doc_api.upload_docs(files=files, knowledge_base_name=kb_name, override=True,
                                       to_vector_store=True, chunk_size=kb_max, chunk_overlap=kb_similarity,
                                       loader_enhance=kb_loader, docs={}, not_refresh_vs_cache=False,
@@ -852,18 +885,18 @@ def kb_file_update_confirm(files, kb_name, kb_info, kb_max, kb_similarity, kb_to
         raise gr.Error(json.dumps(response.__dict__, indent=4, ensure_ascii=False))
     if response.data.get('failed_files'):
         raise gr.Error(json.dumps(response.data, indent=4, ensure_ascii=False))
-    return kb_name_select_then(kb_name, kb_info)
+    return kb_name_select_then(kb_name)
 
 
 def kb_select_file(kb_name, kb_file: str):
     kb_name = list(base.kb_list_to_dict([kb_name]).keys())[0]
     file_details = pd.DataFrame(base.get_kb_file_details(kb_name))
 
-    last_details = __get_kb_details(file_details, file_details["file_name"] == kb_file)
-    last_fragment = __get_kb_fragment(kb_name, kb_file)
+    last_details = __get_kb_details_df(file_details, file_details["file_name"] == kb_file)
+    last_fragment = __get_kb_fragment_df(kb_name, kb_file)
 
-    return (gr.update(value=last_details, label=f'{kb_file}-文件详情'),
-            gr.update(value=last_fragment, label=f'{kb_file}-文档片段编辑'))
+    return gr.update(value=last_details, label=f'{kb_file}-文件详情'), gr.update(value=last_fragment,
+                                                                                 label=f'{kb_file}-文档片段编辑')
 
 
 def kb_base_del(kb_name, del_confirm, _):
@@ -878,3 +911,97 @@ def kb_base_del(kb_name, del_confirm, _):
 
         return gr.update(visible=True), gr.update(visible=False), gr.update(choices=kb_name_list,
                                                                             value='新建知识库')
+
+
+def kb_docs_file_source_del(kb_name, kb_file, _):
+    if kb_file == 'CANCELED':
+        return gr.update(), gr.update(), gr.update(), gr.update()
+    kb_name_d = list(base.kb_list_to_dict([kb_name]).keys())[0]
+    resp = kb_doc_api.delete_docs(knowledge_base_name=kb_name_d, file_names=[kb_file],
+                                  delete_content=True, not_refresh_vs_cache=False)
+    if resp.code == 200 and not resp.data.get('failed_files'):
+        toast = gr.update(
+            value=func_box.spike_toast('彻底删除成功 🏴‍☠️'),
+            visible=True)
+        file_list, _, _, details, fragment = kb_name_select_then(kb_name)
+        yield toast, file_list, details, fragment
+        time.sleep(1)
+        yield gr.update(visible=False), file_list, details, fragment
+    else:
+        yield gr.Error(f'删除失败, {resp.__dict__}')
+
+
+def kb_vector_del(kb_name, kb_file):
+    kb_name_d = list(base.kb_list_to_dict([kb_name]).keys())[0]
+    resp = kb_doc_api.delete_docs(knowledge_base_name=kb_name_d, file_names=[kb_file],
+                                  delete_content=False, not_refresh_vs_cache=False)
+    if resp.code == 200 and not resp.data.get('failed_files'):
+        toast = gr.update(
+            value=func_box.spike_toast('仅从向量库中删除，后续该文档不会被向量召回，如需重新引用，重载向量数据即可'),
+            visible=True)
+        yield toast, *kb_select_file(kb_name, kb_file)
+        time.sleep(1)
+        yield gr.update(visible=False), gr.update(), gr.update()
+    else:
+        yield gr.Error(f'删除失败, {resp.__dict__}')
+
+
+def kb_vector_reload(_, kb_name, kb_info, kb_max, kb_similarity, kb_tokenizer, kb_loader, kb_file):
+    kb_name_k = list(base.kb_list_to_dict([kb_name]).keys())[0]
+    resp = kb_doc_api.update_docs(
+        knowledge_base_name=kb_name_k, file_names=[kb_file], docs={},
+        chunk_size=kb_max, chunk_overlap=kb_similarity, override_custom_docs=True,
+        loader_enhance=kb_loader, not_refresh_vs_cache=False,
+        text_splitter_name=kb_tokenizer
+    )
+    if resp.code == 200 and not resp.data.get('failed_files'):
+        yield gr.update(value=func_box.spike_toast('重载向量数据成功'), visible=True), *kb_select_file(kb_name, kb_file)
+        time.sleep(1)
+        yield gr.update(visible=False), gr.update(), gr.update()
+    else:
+        yield gr.Error(f'重载向量数据失败, {resp.__dict__}'), gr.update(), gr.update()
+
+
+def kb_base_changed_save(_, kb_name, kb_info, kb_max, kb_similarity, kb_tokenizer, kb_loader,
+                         kb_file, kb_dataFrame: pd.DataFrame):
+    kb_name = list(base.kb_list_to_dict([kb_name]).keys())[0]
+    info_fragment = kb_doc_api.search_docs(query='', knowledge_base_name=kb_name,
+                                           top_k=1, score_threshold=1,
+                                           file_name=kb_file, metadata={})
+
+    origin_docs = {}
+    for x in info_fragment:
+        origin_docs[x.id] = {"page_content": x.page_content,
+                             "type": x.type,
+                             "metadata": x.metadata}
+    changed_docs = []
+    for index, row in kb_dataFrame.iterrows():
+        origin_doc = origin_docs.get(row['id'])
+        if origin_doc:
+            if row["删除"] not in ["Y", "y", 1, '1']:
+                changed_docs.append({
+                    "page_content": row["内容"],
+                    "type": origin_doc['type'],
+                    "metadata": origin_doc["metadata"],
+                })
+            else:
+                logger.warning(f'删除{row.get("id")}片段：{origin_doc.get("page_content")}')
+        else:
+            changed_docs.append({
+                "page_content": row["内容"],
+                "type": 'Document',
+                "metadata": {"metadata": kb_file},
+            })
+    if changed_docs:
+        resp = kb_doc_api.update_docs(
+            knowledge_base_name=kb_name, file_names=[kb_file], docs={kb_file: changed_docs},
+            chunk_size=kb_max, chunk_overlap=kb_similarity, override_custom_docs=False,
+            loader_enhance=kb_loader, not_refresh_vs_cache=False,
+            text_splitter_name=kb_tokenizer
+        )
+        if resp.code == 200 and not resp.data.get('failed_files'):
+            yield gr.update(value=func_box.spike_toast('更新成功'), visible=True), gr.update()
+            time.sleep(1)
+            yield gr.update(value=func_box.spike_toast('更新成功'), visible=False), gr.update()
+        else:
+            yield gr.Error(f'更新失败, {resp.__dict__}')

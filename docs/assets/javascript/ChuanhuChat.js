@@ -304,6 +304,9 @@ function btnToggleDarkMode() {
     apSwitch.checked = !apSwitch.checked;
     toggleDarkMode(apSwitch.checked);
     localStorage.setItem('darkMode', apSwitch.checked);
+    if (chatbotMsg) {
+        chatbotMsg.querySelectorAll('.bot .language-mermaid').forEach(mermaidCodeAdd)
+    }
 }
 
 function setScrollShadow() {

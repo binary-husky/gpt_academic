@@ -636,10 +636,8 @@ def result_written_to_markdown(gpt_response_collection, llm_kwargs, plugin_kwarg
     return file_limit
 
 
-def detach_cloud_links(link_limit, chatbot, history, llm_kwargs, valid_types):
+def detach_cloud_links(link_limit, llm_kwargs, valid_types):
     fp_mapping = {}
-    if isinstance(chatbot, list) and isinstance(history, list):
-        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='正在解析云文件链接...')
     save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'])
     wps_status, qq_status, feishu_status = '', '', ''
     try:
@@ -650,7 +648,7 @@ def detach_cloud_links(link_limit, chatbot, history, llm_kwargs, valid_types):
     except Exception as e:
         error = toolbox.trimmed_format_exc()
         wps_status += f'# 下载WPS文档出错了 \n ERROR: {error} \n'
-        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='下载WPS文档出错了')
+
     try:
         # qq云文档下载
         qq_link = func_box.split_domain_url(link_limit, domain_name=['docs.qq'])
@@ -659,7 +657,7 @@ def detach_cloud_links(link_limit, chatbot, history, llm_kwargs, valid_types):
     except Exception as e:
         error = toolbox.trimmed_format_exc()
         wps_status += f'# 下载QQ文档出错了 \n ERROR: {error}'
-        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='下载QQ文档出错了')
+
     try:
         # 飞书云文档下载
         feishu_link = func_box.split_domain_url(link_limit, domain_name=['lg0v2tirko'])
@@ -669,7 +667,7 @@ def detach_cloud_links(link_limit, chatbot, history, llm_kwargs, valid_types):
     except Exception as e:
         error = toolbox.trimmed_format_exc()
         wps_status += f'# 下载飞书文档出错了 \n ERROR: {error}'
-        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='下载飞书文档出错了')
+
     download_status = ''
     if wps_status or qq_status or feishu_status:
         download_status = "\n".join([wps_status, qq_status, feishu_status]).strip('\n')
@@ -729,7 +727,8 @@ def content_clear_links(user_input, clear_fp_map, clear_link_map):
 
 def input_retrieval_file(user_input, chatbot, history, llm_kwargs, valid_types):
     # 云文件
-    fp_mapping, download_status = yield from detach_cloud_links(user_input, chatbot, history, llm_kwargs, valid_types)
+    yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='正在解析云文件链接...')
+    fp_mapping, download_status = detach_cloud_links(user_input, llm_kwargs, valid_types)
     if download_status:
         chatbot[-1][1] += f'\n\n下载云文档似乎出了点问题？\n\n```python\n{download_status}\n```\n\n'
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='🕵🏻 ‍出师未捷身先死🏴‍☠️')

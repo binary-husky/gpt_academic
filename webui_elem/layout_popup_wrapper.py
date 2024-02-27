@@ -274,20 +274,20 @@ class Prompt:
                                                       choices=[], value='',
                                                       elem_id='knowledge-base-select')
                     with gr.Row():
-                        self.edit_kb_info_reload_vector = gr.Button(value='关于本项目', size='sm',
-                                                                    variant='primary')
+                        self.edit_kb_the_job = gr.Button(value='关于本项目', size='sm', visible=False,
+                                                         variant='primary')
                         self.edit_knowledge_base_del = gr.Button(value='删除知识库', size='sm',
                                                                  elem_classes='danger_btn')
                 with gr.Column(scale=4):
                     with gr.Column(elem_classes='elem-box-solid'):
                         with gr.Row():
                             self.edit_kb_file_details = gr.Dataframe(label='文件详情', value=[], type='pandas',
-                                                                     interactive=False, )
+                                                                     interactive=False)
                         with gr.Row():
                             self.edit_kb_info_reload_vector = gr.Button(value='重载向量数据', size='sm',
                                                                         variant='primary')
                             self.edit_kb_info_vector_del = gr.Button(value='删除向量数据', size='sm')
-                            self.edit_kb_info_know_del = gr.Button(value='删除数据源', size='sm')
+                            self.edit_kb_info_docs_del = gr.Button(value='删除数据源', size='sm')
 
                     with gr.Column(elem_classes='elem-box-solid'):
                         with gr.Row():
@@ -295,8 +295,9 @@ class Prompt:
                                                                       interactive=True, type='pandas',
                                                                       overflow_row_behaviour='paginate',
                                                                       elem_classes='kb-info-fragment',
-                                                                      col_count=(3, 'fixed'),
-                                                                      row_count=(1, 'dynamic'), datatype='markdown')
+                                                                      col_count=(4, 'fixed'),
+                                                                      row_count=(1, 'dynamic'),
+                                                                      datatype=['str', 'number', 'str', 'bool'])
                         with gr.Row():
                             self.edit_kb_info_fragment_save = gr.Button(value='保存更改', size='sm',
                                                                         variant='primary')

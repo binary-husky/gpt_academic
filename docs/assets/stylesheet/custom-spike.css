@@ -4,17 +4,21 @@
     width: auto;
     line-height: 220% !important;
 }
+
 .normal_mut_select {
-   padding: var(--block-padding);
+    padding: var(--block-padding);
 }
+
 .normal_mut_select .svelte-1gfkn6j {
     float: left;
     width: auto;
     line-height: 260% !important;
 }
+
 .normal_mut_select .token[class*="svelte-"] {
     padding: 5px
 }
+
 span.svelte-1gfkn6j:not(.has-info) {
     margin-bottom: unset;
 }
@@ -24,26 +28,31 @@ span.svelte-1gfkn6j:not(.has-info) {
     position: relative !important;
     z-index: 5 !important;
     /*bottom: 5px;*/
-    min-width: min(20%,100%) !important;
+    min-width: min(20%, 100%) !important;
     /*border-radius: 20px!important;*/
 }
+
 .sm_select .style {
     max-height: 28px;
 }
+
 /*更新注意这里*/
 .sm_select .svelte-1gfkn6j {
     float: left;
     width: auto;
     line-height: 151% !important;
 }
+
 .sm_select .wrap[class*="svelte-"] {
     border-radius: var(--block-title-radius);;
     width: auto;
     background-color: #f6f6f6 !important;
 }
+
 .dark .sm_select .wrap[class*="svelte-"] {
     background-color: #515151 !important;
 }
+
 .sm_checkbox {
     position: relative !important;
     z-index: 5 !important;
@@ -56,36 +65,43 @@ span.svelte-1gfkn6j:not(.has-info) {
     max-height: 20px !important;
 
 }
+
 .sm_select .wrap-inner[class*="svelte-"] {
     padding: 0 !important;
     flex-wrap: unset !important;
     overflow: hidden !important;
 }
+
 .sm_select .block.svelte-mppz8v {
     width: 10% !important;
 }
 
 
 /* 行内按钮 */
-div.svelte-15lo0d8>*, div.svelte-15lo0d8>.form>* {
-    min-width: min(140px,100%);
+div.svelte-15lo0d8 > *, div.svelte-15lo0d8 > .form > * {
+    min-width: min(140px, 100%);
 }
+
 /* 输入框 */
 .no_padding_input {
     padding: unset !important;
 }
+
 /* 提示词列表 */
-#prompt_list{
-   margin-left: 10px;
+#prompt_list {
+    margin-left: 10px;
 }
+
 #gr-more-sm-row {
     gap: unset;
     min-width: min(0px, 100%);
 }
+
 #gr-more-sm-column {
     min-width: min(30%, 100%) !important;
     margin-left: -0.5%;
 }
+
 /* 小按钮 */
 #gr-chat-sm-column {
     min-width: min(100%, 100%) !important;
@@ -97,6 +113,7 @@ div.svelte-15lo0d8>*, div.svelte-15lo0d8>.form>* {
     margin-top: 2px;
     margin-right: 10px;
 }
+
 #gr-chat-sm-column button {
     margin-left: 5px !important;
     box-shadow: none;
@@ -106,17 +123,21 @@ div.svelte-15lo0d8>*, div.svelte-15lo0d8>.form>* {
     width: 24px;
     display: flex;
 }
+
 .chatbot-full-width #gr-chat-sm-column {
     min-width: min(12%, 100%) !important;
     gap: 22%;
     margin-right: 15px;
 }
+
 .chatbot-full-width #gr-chat-sm-column button {
     margin-left: unset;
 }
+
 .chatbot-full-width #sm_history_btn {
     display: none;
 }
+
 /*  */
 #gr-know-sm-column {
     min-width: min(30%, 100%) !important;
@@ -125,6 +146,7 @@ div.svelte-15lo0d8>*, div.svelte-15lo0d8>.form>* {
     justify-content: center;
     align-items: center;
 }
+
 /*!* 强制隐藏 *!*/
 /*.hide.svelte-vt1mxs {*/
 /*    display: none !important;*/
@@ -133,26 +155,32 @@ div.svelte-15lo0d8>*, div.svelte-15lo0d8>.form>* {
     display: grid !important;
     place-items: center !important;
 }
+
 .elem-box-solid {
     border: 1px solid var(--message-user-background-color-light);
     border-radius: 5px;
     padding: 10px;
 }
+
 .dark .elem-box-solid {
     border: 1px solid var(--message-user-background-color-dark);
 }
+
 code.language-folded {
     display: -webkit-box;
-    -webkit-line-clamp: 10;   /*展示一点点*/
+    -webkit-line-clamp: 10; /*展示一点点*/
     -webkit-box-orient: vertical;
     overflow: auto;
 }
+
 .clamp_2 {
     -webkit-line-clamp: 2 !important;
 }
+
 .unclamp {
     -webkit-line-clamp: unset !important;
 }
+
 .toggle-button-hide {
     opacity: 0;
 }
@@ -166,19 +194,24 @@ code.language-folded {
     align-content: end;
     gap: 2px;
 }
+
 .message-btn-column .chuanhu-btn {
     position: absolute;
     bottom: 0;
 }
+
 .user .message-btn-column .chuanhu-btn {
 
 }
+
 .bot .message-btn-column .chuanhu-btn {
     left: -15px;
 }
+
 .message-btn-column .toggle-md-btn {
     margin-bottom: 20px;
 }
+
 /*.user .message-btn-column:hover {*/
 /*    background-color: unset !important;*/
 /*    !*display: block !important;*!*/
@@ -187,9 +220,10 @@ code.language-folded {
 .search_txt {
     min-width: min(60%, 100%) !important;
 }
+
 .short_btn {
     position: relative;
-    min-width: min(10%,100%) !important;
+    min-width: min(10%, 100%) !important;
     overflow: hidden;
 }
 
@@ -197,18 +231,20 @@ code.language-folded {
     min-height: 64%;
     max-height: 64%;
 }
+
 .search-example {
     min-height: 30%;
     max-height: 30%;
     overflow: auto;
 }
+
 .input-search {
     min-width: 10%;
 }
 
 #pm_check {
     left: 20px;
-    min-width: min(20px, 100%)!important;
+    min-width: min(20px, 100%) !important;
     width: 40px;
     margin-bottom: 2px;
 }
@@ -216,6 +252,7 @@ code.language-folded {
 #prompt_list .label {
     display: -webkit-box !important;
 }
+
 #prompt_list .label svg {
     margin-top: 2px !important;;
 }
@@ -223,12 +260,15 @@ code.language-folded {
 .column_left {
     min-width: 40% !important;
 }
+
 #mask_tabs .sort-button {
     display: none;
 }
+
 .controls-wrap {
     gap: 10px;
 }
+
 .red-dot {
     position: absolute;
     top: -1px;
@@ -238,12 +278,14 @@ code.language-folded {
     background-color: red;
     border-radius: 50%;
 }
+
 /* 这个没有必要存在，阻碍用户继续编写 */
 /* 2.0 还是有必要的。。 在很卡的机器上卡顿明显，增加loading 并针对一些区域做注释*/
 #chuanhu-history .wrap.default.full[class*="svelte-"] {
     background: unset !important;
     display: none;
 }
+
 #spike-prompt .wrap.default.full[class*="svelte-"] {
     background: unset !important;
 }
@@ -251,6 +293,7 @@ code.language-folded {
 #mask_tabs .table[class*="svelte-"] {
     overflow: auto;
 }
+
 #show-all-btn {
     top: 30px;
     right: 10px;
@@ -265,22 +308,28 @@ code.language-folded {
     opacity: 0.90;
     backdrop-filter: blur(24px);
 }
+
 #spike-toast-info {
     z-index: 99999999999999;
 }
+
 #spike-toast-info .wrap.center {
     display: none !important;
 }
+
 .td-a-preview {
     max-width: 200px !important;
     max-height: 150px !important;
 }
+
 .danger_btn {
     background: #940909 !important;
 }
+
 .danger_btn:hover {
     background: #cd0c0c !important;
 }
+
 /*[id^="d_diagram"] {*/
 /*    display: none;*/
 /*}*/
@@ -288,35 +337,39 @@ code.language-folded {
 .gradio-tabs {
     border-top: 1px solid var(--border-color-primary);
 }
+
 #history-toggle-button {
     opacity: 0.5 !important;
 }
+
 #history-toggle-button:hover {
     opacity: 1 !important;
 }
+
 #foreign-edit {
     opacity: 0.9 !important;
 }
+
 #foreign-edit:hover {
     opacity: 1 !important;
     box-shadow: rgba(0, 0, 0, 0.19) 0 10px 20px, rgba(0, 0, 0, 0.23) 0 5px 5px
 }
 
 #svg-overlay {
-  display: none;
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: rgba(0, 0, 0, 0.8);
+    display: none;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.8);
 }
 
 .closeButton {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
 }
 
 .status_row {
@@ -325,17 +378,22 @@ code.language-folded {
     overflow: auto;
 
 }
-#reader-file{
+
+#reader-file {
     max-height: 87px !important;
+    overflow: auto !important;
 }
+
 .kb-select-list {
     min-width: min(20%, 100%) !important;
     max-width: 20% !important;
 }
+
 .kb-info-fragment {
     /*max-height: 222px !important;*/
     overflow: auto !important;
 }
+
 /*无用不管了*/
 /*.kb-info-fragment thead {   */
 /*    position: sticky; !* 使用粘性定位 *!*/
@@ -343,20 +401,31 @@ code.language-folded {
 /*    !*background-color: #fff; !* 设置头部背景颜色，以防被滚动内容覆盖 *!*!*/
 /*    z-index: 10; !* 确保头部在其他内容之上 *!*/
 /*}*/
-.kb-info-fragment .controls-wrap {
-   display: none !important;
+.kb-info-fragment tr > td:first-child {
+    display: none !important;
 }
+.kb-info-fragment tr > th:first-child {
+    display: none !important;
+}
+
+.kb-info-fragment .controls-wrap {
+    display: none !important;
+}
+
 .kb-info-fragment td {
     overflow: auto !important;
 }
+
 /* 把radio做成列表 */
 #knowledge-base-select {
     height: calc(100% - 90px);
     overflow: auto;
 }
+
 fieldset#knowledge-base-select .wrap {
     gap: 0;
 }
+
 fieldset#knowledge-base-select .wrap label {
     width: 100%;
     background: none;
@@ -364,19 +433,24 @@ fieldset#knowledge-base-select .wrap label {
     box-shadow: none;
     justify-content: space-between;
 }
+
 fieldset#knowledge-base-select .wrap label:hover {
     background: var(--message-list-background-hover);
 }
+
 fieldset#knowledge-base-select .wrap label:active {
     background: var(--message-list-background-selected);
 }
+
 fieldset#knowledge-base-select .wrap label.selected {
     color: var(--checkbox-label-text-color);
     background: var(--chatbot-blur-background-color);
 }
-fieldset#knowledge-base-select .wrap label:not(.selected) .chat-selected-btns{
+
+fieldset#knowledge-base-select .wrap label:not(.selected) .chat-selected-btns {
     display: none;
 }
+
 fieldset#knowledge-base-select .wrap label > span {
     /* font-size: small; */
     margin-left: 0;
@@ -385,6 +459,7 @@ fieldset#knowledge-base-select .wrap label > span {
     word-break: break-all;
     overflow: auto;
 }
+
 fieldset#knowledge-base-select .wrap label > input {
     display: none;
 }
@@ -393,22 +468,27 @@ fieldset#knowledge-base-select .wrap label > input {
     font-weight: 700 !important;
     font-size: 28px !important;
 }
+
 [class*="gradio-container-"] h2 {
     font-weight: 600 !important;
     font-size: 24px !important;
 }
+
 [class*="gradio-container-"] h3 {
     font-weight: 500 !important;
     font-size: 20px !important;
 }
+
 [class*="gradio-container-"] h4 {
     font-weight: 400 !important;
     font-size: 16px !important;
 }
+
 [class*="gradio-container-"] h5 {
     font-weight: 300 !important;
     font-size: 14px !important;
 }
+
 [class*="gradio-container-"] h6 {
     font-weight: 200 !important;
     font-size: 12px !important;

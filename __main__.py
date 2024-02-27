@@ -236,11 +236,14 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         self.file_details_combo = [self.knowledge_base_select, self.edit_kb_introduce,
                                    self.edit_kb_file_list, self.edit_kb_file_details, self.edit_kb_file_fragment]
 
+        self.kb_edit_confirm_combo = [self.edit_kb_upload, self.knowledge_base_select, self.edit_kb_introduce,
+                                      self.edit_kb_max_paragraph, self.edit_kb_similarity_paragraph,
+                                      self.edit_kb_tokenizer_select, self.edit_kb_loader_select]
+
         self.knowledge_base_select.select(fn=func_signals.kb_select_show, inputs=[self.knowledge_base_select],
                                           outputs=self.show_hide_combo).then(
-            fn=func_signals.kb_name_select_then, inputs=[self.knowledge_base_select, gr.State(None)],
-            outputs=self.file_details_combo
-        )
+            fn=func_signals.kb_name_select_then, inputs=[self.knowledge_base_select],
+            outputs=self.file_details_combo)
 
         self.new_kb_name.change(fn=func_signals.kb_name_change_btn, inputs=[self.new_kb_name],
                                 outputs=[self.new_kb_confirm_btn])
@@ -249,6 +252,10 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                                    outputs=[self.edit_kb_confirm_btn])
         self.edit_kb_cloud.change(fn=func_signals.kb_upload_btn, inputs=[self.edit_kb_upload, self.edit_kb_cloud],
                                   outputs=[self.edit_kb_confirm_btn])
+
+        self.edit_kb_introduce.input(fn=func_signals.kb_introduce_change_btn,
+                                     inputs=[self.knowledge_base_select, self.edit_kb_introduce],
+                                     outputs=[self.spike_toast])
 
         self.edit_kb_file_fragment_add.click(func_signals.kb_date_add_row, inputs=[self.edit_kb_file_fragment],
                                              outputs=[self.edit_kb_file_fragment])
@@ -259,21 +266,42 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                                       outputs=self.show_hide_combo + self.file_details_combo)
 
         self.edit_kb_confirm_btn.click(func_signals.kb_file_update_confirm,
-                                       inputs=[self.edit_kb_upload, self.knowledge_base_select, self.edit_kb_introduce,
-                                               self.edit_kb_max_paragraph, self.edit_kb_similarity_paragraph,
-                                               self.edit_kb_tokenizer_select, self.edit_kb_loader_select],
+                                       inputs=self.kb_edit_confirm_combo + [self.edit_kb_cloud],
                                        outputs=self.file_details_combo)
         self.edit_kb_file_list.input(
             fn=func_signals.kb_select_file, inputs=[self.knowledge_base_select, self.edit_kb_file_list],
             outputs=[self.edit_kb_file_details, self.edit_kb_file_fragment]
         )
+
         self.edit_knowledge_base_del.click(fn=func_signals.kb_base_del,
                                            inputs=[self.knowledge_base_select,
                                                    self.knowledge_base_select,
-                                                   gr.HTML('删除',
+                                                   gr.HTML('删除知识库',
                                                            visible=False)],
                                            outputs=self.show_hide_combo + [self.knowledge_base_select],
                                            _js="(a,b,c)=>{return showConfirmationDialog(a,b,c);}")
+        self.edit_kb_info_docs_del.click(func_signals.kb_docs_file_source_del,
+                                         inputs=[self.knowledge_base_select, self.edit_kb_file_list,
+                                                 gr.HTML('删除数据源', visible=False)],
+                                         outputs=[self.spike_toast, self.edit_kb_file_details,
+                                                  self.edit_kb_file_fragment],
+                                         _js="(a,b,c)=>{return showConfirmationDialog(a,b,c);}")
+
+        self.edit_kb_info_vector_del.click(func_signals.kb_vector_del,
+                                           inputs=[self.knowledge_base_select, self.edit_kb_file_list,
+                                                   self.edit_kb_file_details],
+                                           outputs=[self.spike_toast, self.edit_kb_file_details,
+                                                    self.edit_kb_file_fragment])
+
+        self.edit_kb_info_reload_vector.click(func_signals.kb_vector_reload,
+                                              inputs=self.kb_edit_confirm_combo + [self.edit_kb_file_list],
+                                              outputs=[self.spike_toast, self.edit_kb_file_details,
+                                                       self.edit_kb_file_fragment])
+
+        self.edit_kb_info_fragment_save.click(fn=func_signals.kb_base_changed_save,
+                                              inputs=self.kb_edit_confirm_combo + [self.edit_kb_file_list,
+                                                                                   self.edit_kb_file_fragment],
+                                              outputs=[self.spike_toast, self.edit_kb_file_fragment])
 
     def signals_history(self):
         self.llms_cookies_combo = [self.chatbot, self.history, self.cookies,
@@ -322,7 +350,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                             self.chatbot, self.history, self.system_prompt, self.plugin_advanced_arg,
                             self.single_turn_checkbox, self.use_websearch_checkbox]
         # 知识库
-        self.know_combo = [self.langchain_dropdown, gr.State(''), gr.State(''),
+        self.know_combo = [self.kb_input_select, gr.State(''), gr.State(''),
                            self.vector_search_score, self.vector_search_top_k, self.vector_chunk_size]
         self.input_combo.extend(self.know_combo)
         # 高级设置
@@ -431,7 +459,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                            inputs=[self.pro_fp_state],
                            outputs=[self.pro_func_prompt, self.pro_fp_state, self.copyright_display,
                                     self.pro_private_check, self.prompt_cls_select, self.mask_cls_select,
-                                    self.knowledge_base_select, self.langchain_dropdown])
+                                    self.knowledge_base_select, self.kb_input_select])
             self.demo.load(fn=func_signals.refresh_user_data,
                            inputs=[self.cookies, gr.State(proxy_info)],
                            outputs=[self.historySelectList, *self.llms_cookies_combo,

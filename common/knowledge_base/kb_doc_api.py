@@ -94,12 +94,15 @@ def __fast_file_proc(file, knowledge_base_name, override):
     return dict(code=200, msg=f"成功上传文件 {filename}", data=data)
 
 
-def __gradio_file_proc(file, knowledge_base_name, override):
-    filename = os.path.basename(file.name)
-    file_path = get_file_path(knowledge_base_name=knowledge_base_name, doc_name=filename)
-    data = {"knowledge_base_name": knowledge_base_name, "file_name": filename}
-    shutil.copy(file.name, file_path)
-    return dict(code=200, msg=f"成功上传文件 {filename}", data=data)
+def __spike_file_proc(file, knowledge_base_name, override):
+    if os.path.exists(file):
+        filename = os.path.basename(file)
+        data = {"knowledge_base_name": knowledge_base_name, "file_name": filename}
+        file_path = get_file_path(knowledge_base_name=knowledge_base_name, doc_name=filename)
+        shutil.copy(file, file_path)
+        return dict(code=200, msg=f"成功上传文件 {filename}", data=data)
+    else:
+        return dict(code=404, msg=f"文件不存在", data={"knowledge_base_name": knowledge_base_name, "file_name": 'Filed'})
 
 
 def _save_files_in_thread(files: List[UploadFile],
@@ -110,7 +113,7 @@ def _save_files_in_thread(files: List[UploadFile],
     生成器返回保存结果：{"code":200, "msg": "xxx", "data": {"knowledge_base_name":"xxx", "file_name": "xxx"}}
     """
 
-    def save_file(file: UploadFile, knowledge_base_name: str, override: bool) -> dict:
+    def save_file(file: UploadFile | str, knowledge_base_name: str, override: bool) -> dict:
         '''
         保存单个文件。
         '''
@@ -119,7 +122,7 @@ def _save_files_in_thread(files: List[UploadFile],
             if isinstance(file, UploadFile):
                 return __fast_file_proc(file, knowledge_base_name, override)
             else:
-                return __gradio_file_proc(file, knowledge_base_name, override)
+                return __spike_file_proc(file, knowledge_base_name, override)
         except Exception as e:
             msg = f"文件上传失败，报错信息为: {e}"
             logger.error(f'{e.__class__.__name__}: {msg}')
@@ -144,13 +147,13 @@ def _save_files_in_thread(files: List[UploadFile],
 
 
 def upload_docs(
-        files: List[UploadFile] = File(..., description="上传文件，支持多文件"),
+        files: List[UploadFile] | List[list] = File(..., description="上传文件，支持多文件"),
         knowledge_base_name: str = Form(..., description="知识库名称", examples=["samples"]),
         override: bool = Form(False, description="覆盖已有文件"),
         to_vector_store: bool = Form(True, description="上传文件后是否进行向量化"),
         chunk_size: int = Form(CHUNK_SIZE, description="知识库中单段文本最大长度"),
         chunk_overlap: int = Form(OVERLAP_SIZE, description="知识库中相邻文本重合长度"),
-        loader_enhance: list = Form(ZH_TITLE_ENHANCE, description="是否开启中文标题加强"),
+        loader_enhance: str = Form(ZH_TITLE_ENHANCE, description="是否开启中文标题加强"),
         docs: Json = Form({}, description="自定义的docs，需要转为json字符串",
                           examples=[{"test.txt": [Document(page_content="custom doc")]}]),
         not_refresh_vs_cache: bool = Form(False, description="暂不保存向量库（用于FAISS）"),
@@ -252,7 +255,7 @@ def update_docs(
         file_names: List[str] = Body(..., description="文件名称，支持多文件", examples=[["file_name1", "text.txt"]]),
         chunk_size: int = Body(CHUNK_SIZE, description="知识库中单段文本最大长度"),
         chunk_overlap: int = Body(OVERLAP_SIZE, description="知识库中相邻文本重合长度"),
-        loader_enhance: list = Body(ZH_TITLE_ENHANCE, description="是否开启中文标题加强"),
+        loader_enhance: str = Body(ZH_TITLE_ENHANCE, description="是否开启中文标题加强"),
         override_custom_docs: bool = Body(False, description="是否覆盖之前自定义的docs"),
         docs: Json = Body({}, description="自定义的docs，需要转为json字符串",
                           examples=[{"test.txt": [Document(page_content="custom doc")]}]),
@@ -367,7 +370,7 @@ def recreate_vector_store(
         embed_model: str = Body(EMBEDDING_MODEL),
         chunk_size: int = Body(CHUNK_SIZE, description="知识库中单段文本最大长度"),
         chunk_overlap: int = Body(OVERLAP_SIZE, description="知识库中相邻文本重合长度"),
-        loader_enhance: list = Body(ZH_TITLE_ENHANCE, description="是否开启中文标题加强"),
+        loader_enhance: str = Body(ZH_TITLE_ENHANCE, description="是否开启中文标题加强"),
         not_refresh_vs_cache: bool = Body(False, description="暂不保存向量库（用于FAISS）"),
 ):
     """

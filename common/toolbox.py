@@ -112,7 +112,8 @@ def ArgsGeneralWrapper(f):
         # 引入一个有cookie的chatbot
         chatbot_with_cookie.write_list(chatbot)
         # 根据提交处理器判断需要对提交做什么处理
-        txt_proc = yield from model_selection(txt, models, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history)
+        txt_proc = yield from model_selection(txt, models, llm_kwargs, plugin_kwargs, cookies,
+                                              chatbot_with_cookie, history, args)
         # 根据args判断需要对提交和历史对话做什么处理
         txt_proc, history = yield from plugins_selection(txt_proc, history, plugin_kwargs,
                                                          args, cookies, chatbot_with_cookie, llm_kwargs)
@@ -128,36 +129,38 @@ def ArgsGeneralWrapper(f):
     return decorated
 
 
-def model_selection(txt, models, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history):
+def model_selection(txt, models, llm_kwargs, plugin_kwargs, cookies, chatbot_with_cookie, history, args):
     txt_proc = txt
     if 'input加密' in models: txt_proc = func_box.encryption_str(txt_proc)
     if 'OCR缓存' in models: llm_kwargs.update({'ocr_cache': True})
-    if '文档RAG' in models:
-        from crazy_functions.reader_fns.crazy_box import user_input_embedding_content, input_retrieval_file
-        fp_file = yield from input_retrieval_file(txt_proc, chatbot_with_cookie, history, llm_kwargs,
-                                                  ['pdf', 'md', 'xlsx', 'docx'])
-        if fp_file:  # 提前检测，有文件才进入下一步
-            input_embedding_content = yield from user_input_embedding_content(txt_proc, chatbot_with_cookie, history,
-                                                                              llm_kwargs, plugin_kwargs, ['*'],
-                                                                              fp_file)
-            txt_proc = "\n\n---\n\n".join([v for i, v in enumerate(input_embedding_content) if i % 2 == 1])
-        else:
-            yield from update_ui(chatbot_with_cookie, history, msg='Switching to normal dialog...')
-    img_info = func_box.extract_link_pf(txt, func_box.valid_img_extensions)
-    if 'vision' not in llm_kwargs['llm_model'] and img_info:
-        if llm_kwargs['llm_model'].find('gpt') != -1:
-            if "gpt4-v自动识图" in models:
-                llm_kwargs['llm_model'] = 'gpt-4-vision-preview'
-        elif llm_kwargs['llm_model'].find('gemini') != -1:
-            if "gemini-v自动识图" in models:
-                llm_kwargs['llm_model'] = 'gemini-pro-vision'
-        elif llm_kwargs['llm_model'].find('glm') != -1:
-            if "glm-v自动识图" in models:
-                llm_kwargs['llm_model'] = 'glm-4v'
-        else:
-            if "gpt4-v自动识图" in models:  # 兜底
-                llm_kwargs['llm_model'] = 'gpt-4-vision-preview'
-        yield from update_ui(chatbot_with_cookie, history, msg=f'Switching to `{llm_kwargs["llm_model"]}` dialog...')
+    if len(args) == 0 or 'RetryChat' in args and not cookies.get('is_plugin'):
+        if '文档RAG' in models:
+            from crazy_functions.reader_fns.crazy_box import user_input_embedding_content, input_retrieval_file
+            fp_file = yield from input_retrieval_file(txt_proc, chatbot_with_cookie, history, llm_kwargs,
+                                                      ['pdf', 'md', 'xlsx', 'docx'])
+            if fp_file:  # 提前检测，有文件才进入下一步
+                input_embedding_content = yield from user_input_embedding_content(txt_proc, chatbot_with_cookie,
+                                                                                  history, llm_kwargs, plugin_kwargs,
+                                                                                  ['*'], fp_file)
+                txt_proc = "\n\n---\n\n".join([v for i, v in enumerate(input_embedding_content) if i % 2 == 1])
+            else:
+                yield from update_ui(chatbot_with_cookie, history, msg='Switching to normal dialog...')
+        img_info = func_box.extract_link_pf(txt, func_box.valid_img_extensions)
+        if 'vision' not in llm_kwargs['llm_model'] and img_info:
+            if llm_kwargs['llm_model'].find('gpt') != -1:
+                if "gpt4-v自动识图" in models:
+                    llm_kwargs['llm_model'] = 'gpt-4-vision-preview'
+            elif llm_kwargs['llm_model'].find('gemini') != -1:
+                if "gemini-v自动识图" in models:
+                    llm_kwargs['llm_model'] = 'gemini-pro-vision'
+            elif llm_kwargs['llm_model'].find('glm') != -1:
+                if "glm-v自动识图" in models:
+                    llm_kwargs['llm_model'] = 'glm-4v'
+            else:
+                if "gpt4-v自动识图" in models:  # 兜底
+                    llm_kwargs['llm_model'] = 'gpt-4-vision-preview'
+            yield from update_ui(chatbot_with_cookie, history,
+                                 msg=f'Switching to `{llm_kwargs["llm_model"]}` dialog...')
     return txt_proc
 
 
@@ -1599,5 +1602,6 @@ def check_packages(packages=[]):
 
 if __name__ == '__main__':
     import nltk
+
     with ProxyNetworkActivate('nltk'):
         nltk.download('averaged_perceptron_tagger')

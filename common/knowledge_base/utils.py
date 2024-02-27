@@ -308,7 +308,7 @@ class KnowledgeFile:
             knowledge_base_name: str,
             loader_kwargs: Dict = {},
             text_splitter_name: str = TEXT_SPLITTER_NAME,
-            loader_enhance: list = []
+            loader_enhance: str = ZH_TITLE_ENHANCE
     ):
         '''
         对应知识库目录中的文件，必须是磁盘上存在的才能进行向量化等操作。
@@ -320,11 +320,11 @@ class KnowledgeFile:
         self.filepath = get_file_path(knowledge_base_name, filename)
         self.docs = None
         self.splited_docs = None
-        if 'RapidOCRTitleUP' in loader_enhance:
+        if 'RapidOCRTitleUP' == loader_enhance:
             if self.ext not in RapidFile_EXTS:
                 raise ValueError(f"暂未支持的文件格式 {self.filename}")
             self.document_loader_name = get_RapidClass(self.ext)
-        elif 'ReaderMarkdown' in loader_enhance:
+        elif 'ReaderMarkdown' == loader_enhance:
             if self.ext not in ReaderFile_EXTS:
                 raise ValueError(f"暂未支持的文件格式 {self.filename}")
             self.document_loader_name = get_ReaderClass(self.ext)
@@ -405,7 +405,7 @@ def files2docs_in_thread(
         files: List[Union[KnowledgeFile, Tuple[str, str], Dict]],
         chunk_size: int = CHUNK_SIZE,
         chunk_overlap: int = OVERLAP_SIZE,
-        loader_enhance: list = ZH_TITLE_ENHANCE,
+        loader_enhance: str = ZH_TITLE_ENHANCE,
 ) -> Generator:
     '''
     利用多线程批量将磁盘文件转化成langchain Document.

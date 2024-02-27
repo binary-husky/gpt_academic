@@ -86,7 +86,7 @@ def folder2db(
         embed_model: str = EMBEDDING_MODEL,
         chunk_size: int = CHUNK_SIZE,
         chunk_overlap: int = OVERLAP_SIZE,
-        loader_enhance: list = ZH_TITLE_ENHANCE,
+        loader_enhance: str = ZH_TITLE_ENHANCE,
         text_splitter_name: str = TEXT_SPLITTER_NAME
 ):
     """

@@ -70,10 +70,10 @@ class ChatbotElem:
                             self.sm_history = gr.Button("📜 历史记录", elem_id='sm_history_btn')
 
                         with gr.Column(scale=1, elem_id='gr-know-sm-column') as self.sm_know_select:
-                            self.langchain_dropdown = gr.Dropdown(choices=[], value=[],
-                                                                  show_label=True, interactive=True, label='知识库',
-                                                                  multiselect=True, container=False,
-                                                                  elem_classes=['sm_select', 'remove-sr-hide'])
+                            self.kb_input_select = gr.Dropdown(choices=[], value=[],
+                                                               show_label=True, interactive=True, label='知识库',
+                                                               multiselect=True, container=False,
+                                                               elem_classes=['sm_select', 'remove-sr-hide'])
 
                     with gr.Row(elem_id="chatbot-input-tb-row"):
                         with gr.Column(min_width=225, scale=12):
@@ -86,7 +86,8 @@ class ChatbotElem:
                         with gr.Column(min_width=42, scale=1, elem_id="chatbot-ctrl-btns"):
                             self.submitBtn = gr.Button(value="", variant="primary", elem_id="submit-btn")
                             self.input_copy = gr.State('')
-                            self.cancelBtn = gr.Button(value="", variant="secondary", visible=False, elem_id="cancel-btn")
+                            self.cancelBtn = gr.Button(value="", variant="secondary", visible=False,
+                                                       elem_id="cancel-btn")
                 # Note: Buttons below are set invisible in UI. But they are used in JS.
                 with gr.Row(elem_id="chatbot-buttons", visible=False):
                     with gr.Column(min_width=120, scale=1):
@@ -109,4 +110,3 @@ class ChatbotElem:
                 self._draw_chatbot_head()
                 self._draw_chatbot_body()
                 self._draw_chatbot_input()
-

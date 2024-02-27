@@ -19,7 +19,7 @@ from common.db.repository.knowledge_file_repository import (
 )
 
 from common.api_configs import (kbs_config, VECTOR_SEARCH_TOP_K, SCORE_THRESHOLD,
-                     EMBEDDING_MODEL, KB_INFO)
+                                EMBEDDING_MODEL, KB_INFO)
 from common.knowledge_base.utils import (
     get_kb_path, get_doc_path, KnowledgeFile,
     list_kbs_from_folder, list_files_from_folder,
@@ -179,7 +179,7 @@ class KBService(ABC):
                     query: str,
                     top_k: int = VECTOR_SEARCH_TOP_K,
                     score_threshold: float = SCORE_THRESHOLD,
-                    ) ->List[Document]:
+                    ) -> List[Document]:
         docs = self.do_search(query, top_k, score_threshold)
         return docs
 
@@ -311,7 +311,7 @@ class KBServiceFactory:
             return PGKBService(kb_name, embed_model=embed_model)
         elif SupportedVSType.MILVUS == vector_store_type:
             from common.knowledge_base.kb_service.milvus_kb_service import MilvusKBService
-            return MilvusKBService(kb_name,embed_model=embed_model)
+            return MilvusKBService(kb_name, embed_model=embed_model)
         elif SupportedVSType.ZILLIZ == vector_store_type:
             from common.knowledge_base.kb_service.zilliz_kb_service import ZillizKBService
             return ZillizKBService(kb_name, embed_model=embed_model)
@@ -381,6 +381,23 @@ def score_threshold_process(score_threshold, k, docs):
     return docs[:k]
 
 
+def __update_details(kb: str, result: dict):
+    kb_detail = get_kb_detail(kb)
+    if kb_detail:
+        kb_detail["in_db"] = True
+        if kb in result:
+            result[kb].update(kb_detail)
+        else:
+            kb_detail["in_folder"] = False
+            result[kb] = kb_detail
+
+
+def get_kb_details_by_name(knowledge_base_name: str) -> Dict:
+    result = {}
+    __update_details(knowledge_base_name, result)
+    return result.get(knowledge_base_name, {})
+
+
 def get_kb_details() -> List[Dict]:
     kbs_in_folder = list_kbs_from_folder()
     kbs_in_db = KBService.list_kbs()
@@ -399,20 +416,11 @@ def get_kb_details() -> List[Dict]:
         }
 
     for kb in kbs_in_db:
-        kb_detail = get_kb_detail(kb)
-        if kb_detail:
-            kb_detail["in_db"] = True
-            if kb in result:
-                result[kb].update(kb_detail)
-            else:
-                kb_detail["in_folder"] = False
-                result[kb] = kb_detail
-
+        __update_details(kb, result)
     data = []
     for i, v in enumerate(result.values()):
         v['No'] = i + 1
         data.append(v)
-
     return data
 
 
@@ -437,6 +445,7 @@ def get_kb_file_details(kb_name: str) -> List[Dict]:
             "create_time": None,
             "in_folder": True,
             "in_db": False,
+            'kb_info': ''
         }
     lower_names = {x.lower(): x for x in result}
     for doc in files_in_db:
@@ -497,5 +506,3 @@ def kb_dict_to_list(kb_tm) -> list:
 
 def kb_name_tm_merge(kb_name, kb_type, kb_model):
     return f"{kb_name} ({kb_type} @ {kb_model})"
-
-
