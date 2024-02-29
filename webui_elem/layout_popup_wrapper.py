@@ -29,7 +29,7 @@ class Settings:
         with gr.Tab(label=i18n("高级")):
             self.models_box = gr.CheckboxGroup(choices=['input加密', '预加载知识库', 'OCR缓存', '文档RAG',
                                                         'gpt4-v自动识图', 'gemini-v自动识图', 'glm-v自动识图'],
-                                               value=['input加密', '文档RAG', 'gpt4-v自动识图',
+                                               value=['input加密', 'OCR缓存', '文档RAG', 'gpt4-v自动识图',
                                                       'gemini-v自动识图', 'glm-v自动识图'],
                                                label="提交开关", container=False)
             worker_num = toolbox.get_conf('DEFAULT_WORKER_NUM')

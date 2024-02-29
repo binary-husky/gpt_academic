@@ -46,7 +46,8 @@ class ZhipuChatInit:
         else:
             img_mapping = func_box.extract_link_pf(user_input, func_box.valid_img_extensions)
             encode_img_map = func_box.batch_encode_image(img_mapping)
-            for i in encode_img_map:  # 替换图片链接
+            for i in encode_img_map:  # 替换图片链接    st.dataframe(online_handler.set_date_style(df))
+
                 user_input = user_input.replace(img_mapping[i], '')
             what_i_have_asked = {"role": "user", "content": []}
             what_i_have_asked['content'].append({"type": 'text', "text": user_input})

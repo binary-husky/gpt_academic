@@ -188,11 +188,11 @@ def extract_link_pf(text, valid_types: list):
         matches_local = re.findall(pattern_local, md_link)
         if matches_path:
             if matches_path[0].split('.')[-1] in valid_types or valid_types == ['*']:
-                file_mapping_links.update({local_relative_path(matches_path[0]): md_link})
+                file_mapping_links.update({matches_path[0]: md_link})
         elif matches_local:
             if os.path.exists(matches_local[0]):
                 if matches_local[0].split('.')[-1] in valid_types or valid_types == ['*']:
-                    file_mapping_links.update({local_relative_path(matches_local[0]): md_link})
+                    file_mapping_links.update({matches_local[0]: md_link})
     return file_mapping_links
 
 

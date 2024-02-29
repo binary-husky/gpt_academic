@@ -13,8 +13,8 @@ from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor
 from common.toolbox import get_conf, trimmed_format_exc
 
-from .bridge_chatgpt import predict_no_ui_long_connection as chatgpt_noui
-from .bridge_chatgpt import predict as chatgpt_ui
+from .bridge_chatgpt_cls import predict_no_ui_long_connection as chatgpt_noui
+from .bridge_chatgpt_cls import predict as chatgpt_ui
 
 from .bridge_chatglm import predict_no_ui_long_connection as chatglm_noui
 from .bridge_chatglm import predict as chatglm_ui
@@ -103,7 +103,7 @@ model_info = {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
         "endpoint": openai_endpoint,
-        "max_token": 4096,
+        "max_token": 1024*16,
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },

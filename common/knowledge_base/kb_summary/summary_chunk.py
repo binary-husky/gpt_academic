@@ -131,19 +131,6 @@ class SummaryAdapter:
         print(summary_combine)
         print(summary_intermediate_steps)
 
-        # if len(summary_combine) == 0:
-        #     # 为空重新生成，数量减半
-        #     result_docs = [
-        #         Document(page_content=question_result_key, metadata=docs[i].metadata)
-        #         # This uses metadata from the docs, and the textual results from `results`
-        #         for i, question_result_key in enumerate(
-        #             summary_intermediate_steps["intermediate_steps"][
-        #             :len(summary_intermediate_steps["intermediate_steps"]) // 2
-        #             ])
-        #     ]
-        #     summary_combine, summary_intermediate_steps = self.chain.reduce_documents_chain.combine_docs(
-        #         result_docs, token_max=self.token_max
-        #     )
         logger.info("end summary")
         doc_ids = ",".join([doc.id for doc in docs])
         _metadata = {

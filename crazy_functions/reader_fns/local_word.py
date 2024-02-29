@@ -28,7 +28,6 @@ class DocxHandler:
             raise ValueError(f"Error reading document: {e}")
         self.file_name = os.path.basename(docx_path).split('.')[0]
 
-
     def __extract_attribute_from_xml(self, xml_data, e_tag='blip', e_attr='embed') -> str:
         """从XML数据中提取属性"""
         root = ET.fromstring(xml_data)
@@ -66,6 +65,7 @@ class DocxHandler:
         image_save = os.path.join(image_path, f'{name}.png')
         with open(image_save, 'wb') as f:
             f.write(blob)
+        return image_save
 
     def __extract_and_save_image(self, inline, doc):
         """提取并保存内嵌图片"""
@@ -78,12 +78,12 @@ class DocxHandler:
                 blip = graphic.graphicData.pic.blipFill.blip
                 if blip and hasattr(blip, "embed"):
                     image_part = doc.part.related_parts[blip.embed]
-                    self.__save_img(image_part.blob, blip.embed)
+                    image_path = self.__save_img(image_part.blob, blip.embed)
         else:
             # 对话内嵌表格的图片
             embed = self.__extract_attribute_from_xml(inline.xml)
             image_part = doc.part.related_parts[embed]
-            self.__save_img(image_part.blob, embed)
+            image_path = self.__save_img(image_part.blob, embed)
 
         # 返回Markdown图片链接，如果没有找到图片则返回空字符串
         return f"![{os.path.basename(image_path)}]({image_path})\n" if image_path else ""
@@ -165,4 +165,5 @@ class DocxHandler:
 
 
 if __name__ == '__main__':
-    pass
+    print(DocxHandler('../../users_private/files/127.0.0.1/feishu/【用户增长】新增Whatsapp优先发送策略【跟包】.docx',
+                      './').get_markdown())

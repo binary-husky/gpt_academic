@@ -12,7 +12,7 @@ from request_llms import bridge_all
 from moviepy.editor import AudioFileClip
 from common.path_handler import init_path
 from crazy_functions import reader_fns
-
+from common.logger_handler import logger
 
 class Utils:
 
@@ -211,7 +211,10 @@ def file_extraction_intype(file_mapping, chatbot, history, llm_kwargs, plugin_kw
         yield from toolbox.update_ui(chatbot, history)
         save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'])
         content, status = file_reader_content(file_path, save_path, plugin_kwargs)
-        file_limit[file_path] = content
+        if isinstance(content, str):
+            file_limit[file_path] = content.replace(init_path.base_path, 'file=.')
+        else:
+            file_limit[file_path] = content
         chatbot[-1][1] += status
         yield from toolbox.update_ui(chatbot, history)
     return file_limit
@@ -385,7 +388,7 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
     if apply_history:
         history_array = [[history] for _ in range(len(inputs_array))]
     else:
-        history_array = [[""] for _ in range(len(inputs_array))]
+        history_array = [[] for _ in range(len(inputs_array))]
     # 是否要多线程处理
     if len(inputs_array) == 1:
         inputs_show_user = None  # 不重复展示
@@ -412,8 +415,10 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
     return gpt_response_collection
 
 
-def func_拆分与提问(file_limit, llm_kwargs, plugin_kwargs, chatbot, history, plugin_prompt, knowledge_base,
-                    task_tag: str = ''):
+def func_拆分与提问(file_limit, llm_kwargs, plugin_kwargs, chatbot, history, plugin_prompt, knowledge_base):
+    many_llm = json_args_return(plugin_kwargs, ['多模型并行'], )
+    if many_llm[0]:
+        llm_kwargs['llm_model'] = "&".join([i for i in many_llm[0].split('&') if i])
     split_content_limit = yield from input_output_processing(file_limit, llm_kwargs, plugin_kwargs,
                                                              chatbot, history, kwargs_prompt=plugin_prompt,
                                                              knowledge_base=knowledge_base)
@@ -558,8 +563,8 @@ def result_supplementary_to_test_case(gpt_response_collection, llm_kwargs, plugi
     files_limit = {}
     for file_name in file_classification:
         old_file = plugin_kwargs['上阶段文件']
-        old_case = plugin_kwargs[old_file]['原测试用例数据']
-        header = plugin_kwargs[old_file]['原测试用例表头']
+        old_case = plugin_kwargs[old_file].get('原测试用例数据', [])
+        header = plugin_kwargs[old_file].get('原测试用例表头', [])
         test_case, desc = parsing_json_in_text(file_classification[file_name], old_case, filter_list=header,
                                                sort_index=sort_index)
         save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'], 'test_case')
@@ -681,7 +686,7 @@ def detach_cloud_links(link_limit, llm_kwargs, valid_types):
 
 def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugin_kwargs):
     ocr_switch, = json_args_return(plugin_kwargs, ['开启OCR'])
-    cor_cache = llm_kwargs.get('cor_cache', False)
+    cor_cache = llm_kwargs.get('ocr_cache', False)
     img_mapping = func_box.extract_link_pf(content, func_box.valid_img_extensions)
     # 如果开启了OCR，并且文中存在图片链接，处理图片
     gpt_bro_say = chatbot[-1][
@@ -691,6 +696,7 @@ def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugi
         vision_bro = func_box.html_folded_code(json.dumps(vision_loading_statsu, indent=4, ensure_ascii=False))
         yield from toolbox.update_ui_lastest_msg(lastmsg=gpt_bro_say + vision_bro, chatbot=chatbot,
                                                  history=history, delay=0.1)
+        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='正在识别图片中的文字...')
         # 识别图片中的文字
         save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'])
         if isinstance(ocr_switch, dict):  # 如果是字典，那么就是自定义OCR参数
@@ -705,14 +711,17 @@ def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugi
                 vision_end = func_box.html_folded_code(json.dumps(vision_loading_statsu, indent=4, ensure_ascii=False))
                 yield from toolbox.update_ui_lastest_msg(lastmsg=gpt_bro_say + vision_end, chatbot=chatbot,
                                                          history=history, delay=0.1)
-                if not status or status != '本次识别结果读取数据库缓存':  # 出现异常，不替换文本
-                    content = content.replace(img_mapping[t], f'{img_mapping[t]}\n{img_content}')
+                if not status or status == '本次识别结果读取数据库缓存':  # 出现异常，不替换文本
+                    content = content.replace(img_mapping[t], f'{img_content}')
+                else:
+                    logger.warning(f'{img_mapping[t]} 识别失败，跳过，error: {status}')
             except Exception as e:
                 status = f'`{t}` `{toolbox.trimmed_format_exc()}` 识别失败，过滤这个图片\n\n'
                 vision_loading_statsu.update({t: status})  # 错误展示完整路径
                 vision_end = func_box.html_folded_code(json.dumps(vision_loading_statsu, indent=4, ensure_ascii=False))
                 yield from toolbox.update_ui_lastest_msg(lastmsg=gpt_bro_say + vision_end, chatbot=chatbot,
                                                          history=history, delay=0.1)
+        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='Done')
     return content.replace(init_path.base_path, 'file=.')  # 增加保障，防止路径泄露
 
 
@@ -748,9 +757,7 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
         fp_mapping = yield from input_retrieval_file(user_input, chatbot, history, llm_kwargs, valid_types)
     content_mapping = yield from file_extraction_intype(fp_mapping, chatbot, history, llm_kwargs, plugin_kwargs)
     if content_mapping:
-        mapping_data = "\n\n".join(
-            [f"{func_box.html_folded_code(content_mapping[fp].replace(init_path.base_path, '.'))}"
-             for fp in content_mapping])
+        mapping_data = "\n\n".join([f"{func_box.html_folded_code(content_mapping[fp])}" for fp in content_mapping])
         # mapping_data = func_box.html_folded_code(json.dumps(content_mapping, indent=4, ensure_ascii=False))
         map_bro_say = f'数据解析完成，提取文档信息如下：\n\n{mapping_data}'
         chatbot[-1][1] += map_bro_say
@@ -758,7 +765,7 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
         for content_fp in content_mapping:  # 一个文件一个对话
             file_content = content_mapping[content_fp]
             # 将解析的数据提交到正文
-            input_handle = user_input.replace(fp_mapping[content_fp], file_content)
+            input_handle = user_input.replace(fp_mapping[content_fp], str(file_content))
             # 将其他文件链接清除
             user_clear = content_clear_links(input_handle, fp_mapping, content_mapping)
             # 识别图片链接内容

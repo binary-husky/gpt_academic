@@ -171,6 +171,7 @@ code.language-folded {
     -webkit-line-clamp: 10; /*展示一点点*/
     -webkit-box-orient: vertical;
     overflow: auto;
+    min-height: 40px;
 }
 
 .clamp_2 {

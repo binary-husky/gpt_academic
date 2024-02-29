@@ -35,6 +35,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
             observe_window[0] = gpt_replying_buffer
         if len(observe_window) >= 2:
             if (time.time() - observe_window[1]) > watch_dog_patience:
+                observe_window[2] = "请求超时，程序终止。"
                 raise RuntimeError("程序终止。")
 
     return gpt_replying_buffer
@@ -61,24 +62,20 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             yield from update_ui(chatbot=chatbot, history=history, msg="请求超时" + retry_msg)  # 刷新界面
             if retry > MAX_RETRY:
                 return Exception('对话错误')
-    gpt_replying_buffer = ""
-    gpt_replying_result = ""
+    results = ''
     history.extend([inputs, ''])
     for text_match, error_match, results in stream_response:
-        gpt_replying_result += results
-        if text_match:
-            gpt_replying_buffer += text_match
-            chatbot[-1] = [inputs, gpt_replying_buffer]
-            history[-1] = gpt_replying_buffer
-            yield from update_ui(chatbot=chatbot, history=history)
+        chatbot[-1] = [inputs, results]
+        history[-1] = results
+        yield from update_ui(chatbot=chatbot, history=history)
         if error_match:
             history = history[-2]  # 错误的不纳入对话
-            chatbot[-1] = [inputs, gpt_replying_buffer + f"对话错误，请查看message\n\n```\n{error_match}\n```"]
+            chatbot[-1] = [inputs, results + f"对话错误，请查看message\n\n```\n{error_match}\n```"]
             yield from update_ui(chatbot=chatbot, history=history)
             return RuntimeError('对话错误')
-    if not gpt_replying_buffer:
+    if not results:
         history = history[-2]  # 错误的不纳入对话
-        chatbot[-1] = [inputs, gpt_replying_buffer + f"详细返回\n\n```\n{json.loads(gpt_replying_result)}\n```"]
+        chatbot[-1] = [inputs, results + f"详细返回\n\n```\n{json.loads(results)}\n```"]
         yield from update_ui(chatbot=chatbot, history=history)
         return Exception('对话错误')
 

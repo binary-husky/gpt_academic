@@ -33,27 +33,28 @@ def Kdocs_多阶段生成回答(user_input, llm_kwargs, plugin_kwargs, chatbot, 
         chatbot.append([None, f'开始解析`{stage}`动作，使用`{prompt}`提问后，调用`{func}`保存回答'])
         yield from update_ui(chatbot=chatbot, history=history)
         embedding_limit = yield from crazy_box.func_拆分与提问(embedding_limit, llm_kwargs, plugin_kwargs, chatbot,
-                                                               history,
-                                                               plugin_prompt=prompt, knowledge_base=knowledge)
+                                                             history, plugin_prompt=prompt, knowledge_base=knowledge)
         if func and func_kwargs.get(func, False):
             gpt_results_count[prompt] = yield from func_kwargs[func](embedding_limit, llm_kwargs, plugin_kwargs,
                                                                      chatbot, history)
             embedding_limit = []
         else:
             if stage != [i for i in multi_stage_config][-1]:
-                chatbot.append(['为什么跳过？', '你没有指定调用方法 or 方法错误，跳过生成结果，直接将上次的结果提交给下阶段'])
+                chatbot.append(
+                    ['为什么跳过？', '你没有指定调用方法 or 方法错误，跳过生成结果，直接将上次的结果提交给下阶段'])
                 content_limit = crazy_box.file_classification_to_dict(embedding_limit)
                 embedding_limit = [[limit, "".join(content_limit[limit])] for limit in content_limit]
                 yield from update_ui(chatbot=chatbot, history=history)
         if stage != [i for i in multi_stage_config][-1]:
             chatbot.append(['进入下一步', ''])
-            embedding_mapping = yield from crazy_box.file_extraction_intype(gpt_results_count[prompt], chatbot, history, llm_kwargs,
-                                                        plugin_kwargs)
+            embedding_mapping = yield from crazy_box.file_extraction_intype(gpt_results_count[prompt], chatbot, history,
+                                                                            llm_kwargs,
+                                                                            plugin_kwargs)
             for i in embedding_mapping:
                 embedding_limit.extend([os.path.basename(i), embedding_mapping[i]])
     apply_history = crazy_box.json_args_return(plugin_kwargs, ['上下文处理'])
     if apply_history:
         chatbot[-1][1] = chatbot[-1][1] + '插件配置参数已开启`上下文处理`，请注意使用插件时注意上下文token限制。'
     if not multi_stage_config:
-        chatbot[-1][1] = chatbot[-1][1] + f'!!!!! 自定义参数中的Json存在问题，请仔细检查以下配置是否符合JSON编码格式\n\n```\n{plugin_kwargs["advanced_arg"]}```'
-
+        chatbot[-1][1] = chatbot[-1][
+                             1] + f'!!!!! 自定义参数中的Json存在问题，请仔细检查以下配置是否符合JSON编码格式\n\n```\n{plugin_kwargs["advanced_arg"]}```'

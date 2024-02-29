@@ -907,7 +907,7 @@ input:checked + .chatbot-input-more-span {
     }
     #toolbox-area > .gradio-box > .gradio-tabs > div.tabitem {
         height: calc(100% - 35px);
-        overflow-y: auto;
+        /*overflow-y: auto;*/
         overflow-x: clip;
         border-style: none;
         padding: 0;

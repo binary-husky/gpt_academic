@@ -13,7 +13,6 @@
 import json
 import time
 import gradio as gr
-import logging
 import traceback
 import requests
 import importlib
@@ -130,12 +129,14 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
                                                  console_slience)
         chunk_decoded, chunkjson, has_choices, choice_valid, has_content, has_role = decode_chunk(chunk)
         if len(chunk_decoded) == 0: continue
-        if not chunk_decoded.startswith('data:'):
-            error_msg = get_full_error(chunk, stream_response).decode()
-            if "reduce the length" in error_msg:
-                raise ConnectionAbortedError("OpenAI拒绝了请求:" + error_msg)
-            else:
-                raise RuntimeError("OpenAI拒绝了请求：" + error_msg)
+        if (r'"object":"error"' not in chunk_decoded) and (r"content" not in chunk_decoded):
+            if '500' in chunk_decoded and "Error" in chunk_decoded:
+                return
+            elif 'data: [DONE]' in chunk_decoded:
+                break
+            continue
+        elif isinstance(chunkjson, type(None)):
+            continue
         if ('data: [DONE]' in chunk_decoded): break  # api2d 正常完成
         # 提前读取一些信息 （用于判断异常）
         if has_choices and not choice_valid:
@@ -187,22 +188,12 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         yield from update_ui(chatbot=chatbot, history=history, msg="缺少api_key")  # 刷新界面
         return
 
-    user_input = inputs
     if additional_fn is not None:
         from common.core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
-    raw_input = inputs
-    logging.info(f'[raw_input] {raw_input}')
     chatbot.append([inputs, ""])
     yield from update_ui(chatbot=chatbot, history=history, msg="等待响应")  # 刷新界面
-
-    # check mis-behavior
-    if is_the_upload_folder(user_input):
-        chatbot[-1] = (inputs,
-                       f"[Local Message] 检测到操作错误！当您上传文档之后，需点击“**函数插件区**”按钮进行处理，请勿点击“提交”按钮或者“基础功能区”按钮。")
-        yield from update_ui(chatbot=chatbot, history=history, msg="正常")  # 刷新界面
-        time.sleep(2)
 
     try:
         headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt, stream)
@@ -221,7 +212,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         chatbot[-1] = [inputs, tb_str]
         yield from update_ui(chatbot=chatbot, history=history, msg="Endpoint不满足要求")  # 刷新界面
         return
-    history.append(inputs);
+    history.append(inputs)
     history.append("")
 
     retry = 0
@@ -264,7 +255,8 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             # 提前读取一些信息 （用于判断异常）
             chunk_decoded, chunkjson, has_choices, choice_valid, has_content, has_role = decode_chunk(chunk)
 
-            if is_head_of_the_stream and (r'"object":"error"' not in chunk_decoded) and (r"content" not in chunk_decoded):
+            if is_head_of_the_stream and (r'"object":"error"' not in chunk_decoded) and (
+                    r"content" not in chunk_decoded):
                 # 数据流的第一帧不携带content
                 is_head_of_the_stream = False
                 if '500' in chunk_decoded and "Error" in chunk_decoded:
@@ -283,22 +275,21 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     if not chunkjson.get('choices'):
                         chunkjson = chunkjson['data']
                     # 前者是API2D的结束条件，后者是OPENAI的结束条件
-                    if ('data: [DONE]' in chunk_decoded) or (len(chunkjson['choices'][0]["delta"]) == 0):
+                    if ('data: [DONE]' in chunk_decoded):
                         # 判定为数据流的结束，gpt_replying_buffer也写完了
-                        logging.info(f'[response] {gpt_replying_buffer}')
                         break
                     # 处理数据流的主体
                     status_text = f"finish_reason: {chunkjson['choices'][0].get('finish_reason', 'null')}"
                     # 如果这里抛出异常，一般是文本过长，详情见get_full_error的输出
                     if has_content:
                         # 正常情况
-                        gpt_replying_buffer = gpt_replying_buffer + chunkjson['choices'][0]["delta"]["content"]
+                        gpt_replying_buffer = gpt_replying_buffer + chunkjson['choices'][0]["delta"].get('content', '')
                     elif has_role:
                         # 一些第三方接口的出现这样的错误，兼容一下吧
                         continue
                     else:
                         # 一些垃圾第三方接口的出现这样的错误
-                        gpt_replying_buffer = gpt_replying_buffer + chunkjson['choices'][0]["delta"]["content"]
+                        gpt_replying_buffer = gpt_replying_buffer + chunkjson['choices'][0]["delta"].get('content', '')
 
                     history[-1] = gpt_replying_buffer
                     chatbot[-1] = [history[-2], history[-1]]
@@ -319,6 +310,7 @@ def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
     use_ket = llm_kwargs.get('use-key', '')
     api_key_encryption = use_ket[:8] + '****' + use_ket[-5:]
     openai_website = f' 请登录OpenAI查看详情 https://platform.openai.com/signup  api-key: `{api_key_encryption}`'
+    error_msg = ''
     if "reduce the length" in error_msg:
         if len(history) >= 2: history[-1] = ""; history[-2] = ""  # 清除当前溢出的输入：history[-2] 是本次输入, history[-1] 是本次输出
         history = clip_history(inputs=inputs, history=history,
@@ -441,7 +433,6 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
             "gpt-3.5-turbo-16k-0613",
             "gpt-3.5-turbo-0301",
         ])
-        logging.info("Random select model:" + model)
 
     payload = {
         "model": model,

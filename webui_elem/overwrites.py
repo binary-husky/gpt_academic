@@ -80,14 +80,16 @@ def convert_bot_before_marked(chat_message):
     else:
         raw = f'<div class="raw-message hideM"><pre>{clip_rawtext(chat_message)}</pre></div>'
         # really_raw = f'{START_OF_OUTPUT_MARK}<div class="really-raw hideM">{clip_rawtext(chat_message, need_escape=False)}\n</div>{END_OF_OUTPUT_MARK}'
-
+        # if '```folded' in chat_message:
+        #     code_block_pattern = re.compile(r"```folded(.*?)(?:```folded)", re.DOTALL)
+        # else:
         code_block_pattern = re.compile(r"```(.*?)(?:```|$)", re.DOTALL)
         code_blocks = code_block_pattern.findall(chat_message)
         non_code_parts = code_block_pattern.split(chat_message)[::2]
         result = []
         for non_code, code in zip(non_code_parts, code_blocks + [""]):
             if non_code.strip():
-                result.append(non_code)
+                result.append(non_code.replace('```', ''))
             if code.strip():
                 code = f"\n```{code}\n```"
                 result.append(code)
@@ -212,6 +214,7 @@ def reload_javascript():
         <meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover'>
         <meta name="theme-color" content="#ffffff">
     """
+
     def template_response(*args, **kwargs):
         res = GradioTemplateResponseOriginal(*args, **kwargs)
         res.body = res.body.replace(b'</head>', f'{meta}{spike_js}{plugins_js}</head>'.encode("utf8"))
@@ -238,7 +241,7 @@ def add_classes_to_gradio_component(comp, is_show=False):
     if getattr(comp, 'multiselect', False):
         comp.elem_classes.append('multiselect')
 
-    if is_show:    # defy GradioDeprecationWarning 𝙄 𝙘𝙖𝙣 𝙙𝙤 𝙬𝙝𝙖𝙩𝙚𝙫𝙚𝙧 𝙩𝙝𝙚 𝙛**𝙠 𝙄 𝙬𝙖𝙣𝙩 ！！！
+    if is_show:  # defy GradioDeprecationWarning 𝙄 𝙘𝙖𝙣 𝙙𝙤 𝙬𝙝𝙖𝙩𝙚𝙫𝙚𝙧 𝙩𝙝𝙚 𝙛**𝙠 𝙄 𝙬𝙖𝙣𝙩 ！！！
         comp.show_label = True
 
 
@@ -267,5 +270,4 @@ def BlockContext_init(self, *args, **kwargs):
 original_BlockContext_init = gr.blocks.BlockContext.__init__
 gr.blocks.BlockContext.__init__ = BlockContext_init
 
-if __name__ == '__main__':
-    pass
+

@@ -80,7 +80,10 @@ class ImgHandler:
 
     def identify_cache(self, cache_tag, cor_switch, kwargs):
         cache_sql = db_handler.OcrCacheDb()
-        cache_tag = str(cache_tag)
+        if isinstance(kwargs, bool):
+            ocr_func = self.get_paddle_ocr
+        else:
+            ocr_func = self.get_llm_vision
         if cor_switch:
             cache_cont = cache_sql.get_cashed(tag=cache_tag)
             if cache_cont:
@@ -90,12 +93,8 @@ class ImgHandler:
             else:
                 return self.identify_cache(cache_tag, False, kwargs)
         else:
-            if isinstance(kwargs, bool):
-                content, file_path, status = self.get_paddle_ocr(kwargs)
-            else:
-                content, file_path, status = self.get_llm_vision(kwargs)
-                cache_tag += kwargs.get('llm_model', '')
-            if not status:  # 没有错误才落库
+            content, file_path, status = ocr_func(kwargs)
+            if not status and content:  # 没有错误才落库
                 cache_sql.update_cashed(cache_tag, content)
         return content, file_path, status
 

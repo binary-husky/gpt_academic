@@ -17,6 +17,7 @@ class GoogleChatInit:
 
     def __init__(self):
         self.url_gemini = 'https://generativelanguage.googleapis.com/v1beta/models/%m:streamGenerateContent?key=%k'
+        self.retry = 0
 
     def __conversation_user(self, user_input: str):
         what_i_have_asked = {"role": "user", "parts": []}
@@ -52,8 +53,15 @@ class GoogleChatInit:
 
     def generate_chat(self, inputs, llm_kwargs, history, system_prompt):
         headers, payload = self.generate_message_payload(inputs, llm_kwargs, history, system_prompt)
-        response = requests.post(url=self.url_gemini, headers=headers, data=json.dumps(payload).encode('utf-8'),
-                                 stream=True, proxies=proxies, timeout=TIMEOUT_SECONDS)
+        try:
+            response = requests.post(url=self.url_gemini, headers=headers, data=json.dumps(payload).encode('utf-8'),
+                                     stream=True, proxies=proxies, timeout=TIMEOUT_SECONDS)
+        except Exception as e:
+            self.retry += 1
+            if self.retry > 3:
+                error = toolbox.trimmed_format_exc()
+                return error, error, error
+            return self.generate_chat(inputs, llm_kwargs, history, system_prompt)
         bro_results = ''
         for resp in response.iter_lines():
             results = resp.decode("utf-8")

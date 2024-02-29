@@ -204,7 +204,9 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     executor = ThreadPoolExecutor(max_workers=max_workers)
     n_frag = len(inputs_array)
     # 用户反馈
-    you_say = "\n\n".join([f"```folded\n{i}\n```" for i in inputs_array])
+    you_say = ""
+    for i in inputs_array:
+        you_say += f"```folded\n{str(i).replace('```', '')}\n```\n\n"
     chatbot.append([you_say, ""])
     yield from update_ui(chatbot=chatbot, history=[])  # 刷新界面
     # 跨线程传递
@@ -479,13 +481,15 @@ def read_and_clean_pdf_text(fp, save_path=''):
                     meta_span.append([f"\n![{index}-img]({save_file_name})\n\n", 11, len(save_file_name)])
                     # meta_line.append(["NEW_BLOCK", pf])
             # 块元提取                           for each word segment with in line                       for each line         cross-line words                          for each block
-            meta_txt.extend([" ".join(["".join([clear_soh(wtf['text']) for wtf in l['spans']]) for l in t['lines']]).replace(
-                '- ', '') for t in text_areas['blocks'] if 'lines' in t])
+            meta_txt.extend(
+                [" ".join(["".join([clear_soh(wtf['text']) for wtf in l['spans']]) for l in t['lines']]).replace(
+                    '- ', '') for t in text_areas['blocks'] if 'lines' in t])
             meta_font.extend([np.mean([np.mean([wtf['size'] for wtf in l['spans']])
                                        for l in t['lines']]) for t in text_areas['blocks'] if 'lines' in t])
             if index == 0:
-                page_one_meta = [" ".join(["".join([clear_soh(wtf['text']) for wtf in l['spans']]) for l in t['lines']]).replace(
-                    '- ', '') for t in text_areas['blocks'] if 'lines' in t]
+                page_one_meta = [
+                    " ".join(["".join([clear_soh(wtf['text']) for wtf in l['spans']]) for l in t['lines']]).replace(
+                        '- ', '') for t in text_areas['blocks'] if 'lines' in t]
 
         ############################## <第 2 步，获取正文主字体> ##################################
         try:
@@ -567,6 +571,7 @@ def read_and_clean_pdf_text(fp, save_path=''):
                     return True
                 else:
                     return False
+
             # 对于某些PDF会有第一个段落就以小写字母开头,为了避免索引错误将其更改为大写
             if starts_with_lowercase_word(meta_txt[0]):
                 meta_txt[0] = meta_txt[0].capitalize()
