@@ -277,7 +277,7 @@ class Prompt:
                         self.edit_kb_the_job = gr.Button(value='关于本项目', size='sm', visible=False,
                                                          variant='primary')
                         self.edit_knowledge_base_del = gr.Button(value='删除知识库', size='sm',
-                                                                 elem_classes='danger_btn')
+                                                                 elem_classes=['danger_btn', 'kb-file-btn'])
                 with gr.Column(scale=4):
                     with gr.Column(elem_classes='elem-box-solid'):
                         with gr.Row():

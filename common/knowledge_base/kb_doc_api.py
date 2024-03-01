@@ -43,6 +43,14 @@ def search_docs(
     return data
 
 
+def search_docs_by_names(query, kb_names, top_k, score_threshold, file_name='', metadata={}):
+    data = []
+    for kb_name in kb_names:
+        kb_data = search_docs(query, kb_name, top_k, score_threshold, file_name, metadata)
+        data.extend(kb_data)
+    return data
+
+
 def update_docs_by_id(
         knowledge_base_name: str = Body(..., description="知识库名称", examples=["samples"]),
         docs: Dict[str, Document] = Body(..., description="要更新的文档内容，形如：{id: Document, ...}")
@@ -102,7 +110,8 @@ def __spike_file_proc(file, knowledge_base_name, override):
         shutil.copy(file, file_path)
         return dict(code=200, msg=f"成功上传文件 {filename}", data=data)
     else:
-        return dict(code=404, msg=f"文件不存在", data={"knowledge_base_name": knowledge_base_name, "file_name": 'Filed'})
+        return dict(code=404, msg=f"文件不存在",
+                    data={"knowledge_base_name": knowledge_base_name, "file_name": 'Filed'})
 
 
 def _save_files_in_thread(files: List[UploadFile],

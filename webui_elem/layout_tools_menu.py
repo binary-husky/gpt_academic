@@ -90,22 +90,20 @@ class RightElem:
         with gr.TabItem('调优', id='sett_tab', elem_id='chuanhu-toolbox-tabs'):
             with gr.Box():
                 # gr.Markdown(func_box.get_html('what_news.html').replace('{%v}', 'LLMs调优参数'))
-                with gr.Accordion(label='Langchain调优参数'):
+                with gr.Accordion(label='知识库调优参数'):
                     self.vector_search_score = gr.Slider(minimum=0, maximum=1100, value=500, step=1, interactive=True,
                                                          label="SCORE-THRESHOLD", show_label=True,
                                                          container=False)
                     self.vector_search_top_k = gr.Slider(minimum=1, maximum=10, value=4, step=1, interactive=True,
                                                          label="TOP-K", show_label=True, container=False)
-                    self.vector_chunk_size = gr.Slider(minimum=100, maximum=1000, value=521, step=1, interactive=True,
-                                                       label="CHUNK-SIZE", show_label=True, container=False)
                 func_box.md_division_line()
                 with gr.Accordion(label='LLMs调优参数', open=True):
-                    default_params = toolbox.get_conf('LLM_DEFAULT_PARAMETER')
+                    default_params, response_format = toolbox.get_conf('LLM_DEFAULT_PARAMETER', 'RESPONSE_FORMAT')
                     self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=default_params['top_p'], step=0.01,
                                            interactive=True, show_label=True,
                                            label="Top-p", container=False)
                     self.temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True,
-                                                 label="Temperature", container=False)
+                                                 label="Temperature", container=False, show_label=True)
                     self.n_choices_slider = gr.Slider(minimum=1, maximum=10, value=default_params['n_choices'],
                                                       step=1, show_label=True,
                                                       interactive=True, label="n choices", container=False,
@@ -126,12 +124,16 @@ class RightElem:
                     self.user_identifier_txt = gr.Textbox(show_label=True, placeholder=i18n("用于定位滥用行为"),
                                                           label=i18n("用户名"), value=default_params['user_identifier'],
                                                           lines=1, container=False)
+                    self.response_format_select = gr.Dropdown(choices=response_format,
+                                                              label=i18n('返回数据类型'),
+                                                              value=default_params['response_format'],
+                                                              interactive=True, container=False, show_label=True)
                     func_box.md_division_line()
-                    self.max_context_length_slider = gr.Slider(minimum=1, maximum=32768,
+                    self.max_context_length_slider = gr.Slider(minimum=1, maximum=32768, show_label=True,
                                                                value=default_params['max_context'],
                                                                step=1, interactive=True, label="max context",
                                                                container=False)
-                    self.max_generation_slider = gr.Slider(minimum=1, maximum=32768,
+                    self.max_generation_slider = gr.Slider(minimum=1, maximum=32768, show_label=True,
                                                            value=default_params['max_generation'],
                                                            step=1, interactive=True, label="max generations",
                                                            container=False)

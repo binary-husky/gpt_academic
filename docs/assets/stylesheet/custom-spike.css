@@ -36,13 +36,14 @@ span.svelte-1gfkn6j:not(.has-info) {
     max-height: 28px;
 }
 
-/*更新注意这里*/
-.sm_select .svelte-1gfkn6j {
-    float: left;
-    width: auto;
+.chatbot-full-width .sm_select span {
     line-height: 151% !important;
 }
-
+.sm_select span {
+    float: left;
+    width: auto;
+    line-height: 130% !important;
+}
 .sm_select .wrap[class*="svelte-"] {
     border-radius: var(--block-title-radius);;
     width: auto;
@@ -387,9 +388,8 @@ code.language-folded {
 
 .kb-select-list {
     min-width: min(20%, 100%) !important;
-    max-width: 20% !important;
+    max-width: 30%;
 }
-
 .kb-info-fragment {
     /*max-height: 222px !important;*/
     overflow: auto !important;
@@ -419,7 +419,7 @@ code.language-folded {
 
 /* 把radio做成列表 */
 #knowledge-base-select {
-    height: calc(100% - 90px);
+    height: calc(100% - 70px);
     overflow: auto;
 }
 

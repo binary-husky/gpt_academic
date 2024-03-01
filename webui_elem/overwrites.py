@@ -80,16 +80,13 @@ def convert_bot_before_marked(chat_message):
     else:
         raw = f'<div class="raw-message hideM"><pre>{clip_rawtext(chat_message)}</pre></div>'
         # really_raw = f'{START_OF_OUTPUT_MARK}<div class="really-raw hideM">{clip_rawtext(chat_message, need_escape=False)}\n</div>{END_OF_OUTPUT_MARK}'
-        # if '```folded' in chat_message:
-        #     code_block_pattern = re.compile(r"```folded(.*?)(?:```folded)", re.DOTALL)
-        # else:
         code_block_pattern = re.compile(r"```(.*?)(?:```|$)", re.DOTALL)
         code_blocks = code_block_pattern.findall(chat_message)
         non_code_parts = code_block_pattern.split(chat_message)[::2]
         result = []
         for non_code, code in zip(non_code_parts, code_blocks + [""]):
             if non_code.strip():
-                result.append(non_code.replace('```', ''))
+                result.append(non_code)
             if code.strip():
                 code = f"\n```{code}\n```"
                 result.append(code)

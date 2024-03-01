@@ -486,6 +486,7 @@ def html_checkoutBox():
     html = '<input type="checkbox" name="test" data-testid="checkbox" class="svelte-1ojmf70">'
     return html
 
+
 def git_log_list():
     ll = Shell("git log --pretty=format:'%s | %h' -n 10").start().splitlines()
     return [i.split('|') for i in ll if 'branch' not in i][:5]
@@ -645,6 +646,7 @@ def get_avatar_img(llm_s):
 
 valid_img_extensions = ['png', 'jpg', 'jpeg', 'bmp', 'svg', 'webp', 'ico', 'tif', 'tiff', 'raw', 'eps', 'gif']
 vain_open_extensions = ['exe', 'dll', 'so', 'bin', 'dat', 'img', 'ISO']
+
 
 def split_parse_url(url, tag: list | None, index=1) -> str:
     if url:  # 有url 才往下走

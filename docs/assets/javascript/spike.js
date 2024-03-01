@@ -378,8 +378,8 @@ function addInputListeners() {
     for (const key in input_storage_mapping) {
         if (input_storage_mapping.hasOwnProperty(key)) {
             const inputElement = input_storage_mapping[key];
-            inputElement.addEventListener('input', (function(key) {
-                return function() {
+            inputElement.addEventListener('input', (function (key) {
+                return function () {
                     localStorage.setItem(key, this.value);
                 };
             })(key));
@@ -399,3 +399,35 @@ function fillInputsFromCache() {
     }
 }
 
+function monitorSwipeEvent() {
+  var startX, endX;
+  var swipePerformed = false;
+
+  if (!chatbot.hasTouchEvent) {
+
+    chatbot.addEventListener('touchstart', function(event) {
+      startX = event.touches[0].clientX;
+      swipePerformed = false; // 重置滑动标志
+    });
+
+    chatbot.addEventListener('touchmove', function(event) {
+      swipePerformed = true; // 如果有移动操作，则设置滑动标志为true
+    });
+
+    chatbot.addEventListener('touchend', function(event) {
+      endX = event.changedTouches[0].clientX;
+
+      var diff = endX - startX;
+      if (diff > 100) {
+        menuClick();
+        console.log('触发向右滑动展示历史记录');
+        swipePerformed = true; // 设置滑动标志为true
+      } else if (diff < -100) {
+        toolboxClick();
+        console.log('触发向左滑动展示工具箱');
+        swipePerformed = true; // 设置滑动标志为true
+      }
+    });
+    chatbot.hasTouchEvent = true; // 标记为已添加事件
+  }
+}

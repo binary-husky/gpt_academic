@@ -95,7 +95,9 @@ function closeBox() {
 
 function closeSide(sideArea) {
     document.body.classList.remove('popup-open');
-    sideArea.classList.remove('showSide');
+    if (sideArea) {
+        sideArea.classList.remove('showSide');
+    }
     if (sideArea === toolbox) {
         chuanhuHeader.classList.remove('under-box');
         chatbotArea.classList.remove('toolbox-open')
@@ -308,6 +310,7 @@ function checkChatbotWidth() {
         if (tog_history_btn) { tog_history_btn.style.display = 'flex' } else {historyToggleButtonStyle.display = 'flex'}
     } else {
         chatbotArea.classList.remove('chatbot-full-width');
+        if (chatbot) { monitorSwipeEvent() }
         if (tog_history_btn) { tog_history_btn.style.display = 'none' } else {historyToggleButtonStyle.display = 'none'}
     }
 

@@ -103,7 +103,9 @@ body.popup-open {
     font-size: 85%;
     opacity: 0.60;
 }
-
+#chuanhu-toolbox {
+    overflow: auto !important;
+}
 
 #float-display {
     position: absolute;
@@ -693,7 +695,7 @@ input:checked + .chatbot-input-more-span {
     #toolbox-area.showSide {
         width: 100vw;
         right: 0;
-        top: calc( 10*var(--vh) + 48px );
+        top: calc( 10*var(--vh));
         margin: 0;
         border-radius: 6px;
         box-shadow: 0 2px 64px 4px rgba(0, 0, 0, 0.2);
@@ -788,7 +790,7 @@ input:checked + .chatbot-input-more-span {
     }
     #chuanhu-popup {
         width: 100vw;
-        height: calc( 90*var(--vh) - 48px );
+        height: calc( 90*var(--vh));
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
     }
@@ -809,33 +811,12 @@ input:checked + .chatbot-input-more-span {
         overflow-x: auto;
         border: none;
     }
-    /* 下面是弃用方案：横条按钮tab */
-    /* 
-    #chuanhu-popup > .gradio-box > .gradio-tabs > div.tab-nav {
-        display: flex;
-        margin: 0;
-        padding: 12px 16px 8px;
-        overflow-x: auto;
-        overflow-y: hidden;
-        flex-direction: row;
-        flex-wrap: nowrap;
-        border-radius: 8px;
-        gap: 12px;
-        width: 100%;
-        height: auto;
-        background: none;
+    .kb-select-list {
+        max-width: 100% !important;
     }
-    #chuanhu-popup > .gradio-box > .gradio-tabs > div.tab-nav > button {
-        display: inline-block;
-        border-style: none;
-        border-radius: 6px;
-        white-space: nowrap;
-        width: auto;
-        padding: 7px 32px;
-        text-align: center;
-        background: var(--background-fill-secondary);
+    #knowledge-base-select {
+        height: calc(100% - 50px) !important;
     }
-    */
     #toolbox-area > .gradio-box > .gradio-tabs > div.tab-nav,
     #chuanhu-popup > .gradio-box > .gradio-tabs > div.tab-nav {
         display: flex;
@@ -907,7 +888,7 @@ input:checked + .chatbot-input-more-span {
     }
     #toolbox-area > .gradio-box > .gradio-tabs > div.tabitem {
         height: calc(100% - 35px);
-        /*overflow-y: auto;*/
+        overflow-y: auto;
         overflow-x: clip;
         border-style: none;
         padding: 0;

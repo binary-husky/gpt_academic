@@ -121,6 +121,8 @@ class GPTChatInit:
             "user": llm_kwargs.get('user_identifier', ''),
             "stream": stream,
         }
+        if '1106' in self.llm_model:
+            payload.update({"response_format": {"type": llm_kwargs.get('response_format', "text")}})
         return headers, payload
 
     @staticmethod

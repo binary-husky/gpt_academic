@@ -307,7 +307,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         self.llms_cookies_combo = [self.chatbot, self.history, self.cookies,
                                    self.top_p, self.temperature, self.n_choices_slider, self.stop_sequence_txt,
                                    self.presence_penalty_slider, self.frequency_penalty_slider,
-                                   self.user_identifier_txt,
+                                   self.user_identifier_txt, self.response_format_select,
                                    self.max_context_length_slider, self.max_generation_slider, self.logit_bias_txt,
                                    self.system_prompt, self.model_select_dropdown]
         self.historySelectList.input(fn=func_signals.select_history,
@@ -346,12 +346,12 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         self.input_combo = [self.cookies, self.max_length_sl, self.model_select_dropdown, self.input_copy,
                             self.top_p, self.temperature, self.n_choices_slider, self.stop_sequence_txt,
                             self.max_context_length_slider, self.max_generation_slider, self.presence_penalty_slider,
-                            self.frequency_penalty_slider, self.logit_bias_txt, self.user_identifier_txt,
+                            self.frequency_penalty_slider, self.logit_bias_txt,
+                            self.user_identifier_txt, self.response_format_select,
                             self.chatbot, self.history, self.system_prompt, self.plugin_advanced_arg,
                             self.single_turn_checkbox, self.use_websearch_checkbox]
         # 知识库
-        self.know_combo = [self.kb_input_select, gr.State(''), gr.State(''),
-                           self.vector_search_score, self.vector_search_top_k, self.vector_chunk_size]
+        self.know_combo = [self.kb_input_select, self.vector_search_score, self.vector_search_top_k]
         self.input_combo.extend(self.know_combo)
         # 高级设置
         self.setting_combo = [self.models_box, self.default_worker_num, self.ocr_identifying_trust]

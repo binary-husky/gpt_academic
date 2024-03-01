@@ -66,13 +66,12 @@ def ArgsGeneralWrapper(f):
     def decorated(cookies, max_length, llm_model, txt,  # 调优参数
                   top_p, temperature, n_choices, stop_sequence,
                   max_context, max_generation, presence_penalty,
-                  frequency_penalty, logit_bias, user_identifier,
+                  frequency_penalty, logit_bias, user_identifier, response_format,
                   chatbot, history, system_prompt, plugin_advanced_arg,
                   # 输入栏模式
                   single_mode, agent_mode,
                   # 知识库
-                  langchain, know_dict, know_cls,
-                  vector_score, vector_top_k, vector_size,
+                  kb_selects, vector_score, vector_top_k,
                   # 高级设置
                   models, worker_num, ocr_trust,
                   # 个人信息配置
@@ -85,17 +84,14 @@ def ArgsGeneralWrapper(f):
             'top_p': top_p, 'temperature': temperature, 'n_choices': n_choices, 'stop': stop_sequence,
             'max_context': max_context, 'max_generation': max_generation, 'presence_penalty': presence_penalty,
             'frequency_penalty': frequency_penalty, 'logit_bias': logit_bias, 'user_identifier': user_identifier,
+            'response_format': response_format,
             'system_prompt': system_prompt, 'ipaddr': func_box.user_client_mark(ipaddr),
         }
         llm_kwargs = {  # 这些不会写入对话记录哦
             **real_llm, 'api_key': cookies.get('api_key') + f",{openai_key}",
             'worker_num': worker_num, 'start_time': start_time, 'ocr': ocr_trust,
-            'know_dict': know_dict, 'know_cls': know_cls, 'know_id': langchain,
-            'vector': {
-                'score': vector_score,
-                'top-k': vector_top_k,
-                'size': vector_size
-            }, 'max_length': max_length,
+            'kb_config': {"names": kb_selects, 'score': vector_score, 'top-k': vector_top_k},
+            'max_length': max_length,
             'wps_cookies': wps_cookies, 'qq_cookies': qq_cookies, 'feishu_header': feishu_header,
         }
         # 对话参数
@@ -166,7 +162,6 @@ def model_selection(txt, models, llm_kwargs, plugin_kwargs, cookies, chatbot_wit
 
 def plugins_selection(txt_proc, history, plugin_kwargs, args, cookies, chatbot_with_cookie, llm_kwargs):
     # 插件会传多参数，如果是插件，那么更新知识库 和 默认高级参数
-
     if len(args) > 1:
         plugin_kwargs['advanced_arg'] = ''
         plugin_kwargs.update({'parameters_def': args[1]})
@@ -174,13 +169,10 @@ def plugins_selection(txt_proc, history, plugin_kwargs, args, cookies, chatbot_w
     elif len(args) == 1 and 'RetryChat' not in args:
         history = history[:-2]  # 不采取重试的对话历史
         cookies['is_plugin'] = {'func_name': args[0], 'input': txt_proc, 'kwargs': plugin_kwargs}
-    elif len(args) == 0 or 'RetryChat' in args:
-        from common import Langchain_cn
+    elif len(args) == 0 or 'RetryChat' in args and not cookies.get('is_plugin'):
         cookies['is_plugin'] = False
         plugin_kwargs['advanced_arg'] = ''
-        txt_proc = yield from Langchain_cn.knowledge_base_query(txt_proc,
-                                                                chatbot_with_cookie, history, llm_kwargs,
-                                                                plugin_kwargs)
+        yield from update_ui(chatbot_with_cookie, history, msg='Switching to intent recognition dialog...')
     return txt_proc, history
 
 
