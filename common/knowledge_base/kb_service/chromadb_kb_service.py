@@ -5,7 +5,7 @@ import chromadb
 from chromadb.api.types import (GetResult, QueryResult)
 from langchain.docstore.document import Document
 
-from common.api_configs import SCORE_THRESHOLD
+from common.configs import SCORE_THRESHOLD
 from common.knowledge_base.kb_service.base import (EmbeddingsFunAdapter,
                                                    KBService, SupportedVSType)
 from common.knowledge_base.utils import KnowledgeFile, get_kb_path, get_vs_path

@@ -1,12 +1,12 @@
 from langchain.embeddings.base import Embeddings
 from langchain.vectorstores.faiss import FAISS
 import threading
-from common.api_configs import (EMBEDDING_MODEL, CHUNK_SIZE,
-                     logger, log_verbose)
-from common.utils import embedding_device, get_model_path, list_online_embed_models
+from common.configs import (EMBEDDING_MODEL, CHUNK_SIZE)
+from common.utils import embedding_device, get_model_path
 from contextlib import contextmanager
 from collections import OrderedDict
 from typing import List, Any, Union, Tuple
+from common.logger_handler import logger
 
 
 class ThreadSafeObject:
@@ -32,13 +32,11 @@ class ThreadSafeObject:
             self._lock.acquire()
             if self._pool is not None:
                 self._pool._cache.move_to_end(self.key)
-            if log_verbose:
                 logger.info(f"{owner} 开始操作：{self.key}。{msg}")
             yield self._obj
         finally:
-            if log_verbose:
-                logger.info(f"{owner} 结束操作：{self.key}。{msg}")
-            self._lock.release()
+            logger.info(f"{owner} 结束操作：{self.key}。{msg}")
+        self._lock.release()
 
     def start_loading(self):
         self._loaded.clear()
@@ -110,10 +108,10 @@ class CachePool:
         kb_detail = get_kb_detail(kb_name)
         embed_model = kb_detail.get("embed_model", default_embed_model)
 
-        if embed_model in list_online_embed_models():
-            return EmbeddingsFunAdapter(embed_model)
-        else:
-            return embeddings_pool.load_embeddings(model=embed_model, device=embed_device)
+        # if embed_model in list_online_embed_models():
+        #     return EmbeddingsFunAdapter(embed_model)
+        # else:
+        return embeddings_pool.load_embeddings(model=embed_model, device=embed_device)
 
 
 class EmbeddingsPool(CachePool):

@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base, DeclarativeMeta
 from sqlalchemy.orm import sessionmaker
 
-from common.api_configs import SQLALCHEMY_DATABASE_URI
+from common.configs import SQLALCHEMY_DATABASE_URI
 import json
 
 

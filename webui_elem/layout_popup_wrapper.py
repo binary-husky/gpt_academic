@@ -6,7 +6,7 @@ import gradio as gr
 import pandas as pd
 
 from common import func_box, toolbox
-from common.api_configs import LOADER_ENHANCE, ZH_TITLE_ENHANCE
+from common.configs import LOADER_ENHANCE, ZH_TITLE_ENHANCE
 from webui_elem import webui_local
 
 i18n = webui_local.I18nAuto()
@@ -217,7 +217,7 @@ class Prompt:
                                                     show_label=True, container=False,
                                                     lines=3, max_lines=4)
             with gr.Row():
-                from common.api_configs import kbs_config, EMBEDDING_MODEL
+                from common.configs import kbs_config, EMBEDDING_MODEL
                 from common.utils import list_embed_models
                 kbs_config_list = list(kbs_config.keys())
                 with gr.Column(elem_classes='column_left'):
@@ -237,7 +237,7 @@ class Prompt:
 
     def __draw_edit_knowledge_base(self):
         spl = toolbox.get_conf('spl')
-        from common.api_configs import TEXT_SPLITTER_NAME, text_splitter_dict
+        from common.configs import TEXT_SPLITTER_NAME, text_splitter_dict
         with gr.Column(visible=False) as self.edit_knowledge_base:
             with gr.Row():
                 self.edit_kb_upload = gr.Files(label='上传知识文件', elem_id='reader-file',

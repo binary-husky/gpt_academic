@@ -1,7 +1,7 @@
 import os
 import shutil
 
-from common.api_configs import SCORE_THRESHOLD
+from common.configs import SCORE_THRESHOLD
 from common.knowledge_base.kb_service.base import KBService, SupportedVSType, EmbeddingsFunAdapter
 from common.knowledge_base.kb_cache.faiss_cache import kb_faiss_pool, ThreadSafeFaiss
 from common.knowledge_base.utils import KnowledgeFile, get_kb_path, get_vs_path

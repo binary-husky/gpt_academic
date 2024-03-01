@@ -1,6 +1,6 @@
 from typing import List
 
-from common.api_configs import (
+from common.configs import (
     EMBEDDING_MODEL,
     KB_ROOT_PATH)
 

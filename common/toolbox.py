@@ -86,11 +86,11 @@ def ArgsGeneralWrapper(f):
             'frequency_penalty': frequency_penalty, 'logit_bias': logit_bias, 'user_identifier': user_identifier,
             'response_format': response_format,
             'system_prompt': system_prompt, 'ipaddr': func_box.user_client_mark(ipaddr),
+            'kb_config': {"names": kb_selects, 'score': vector_score, 'top-k': vector_top_k},
         }
         llm_kwargs = {  # 这些不会写入对话记录哦
             **real_llm, 'api_key': cookies.get('api_key') + f",{openai_key}",
             'worker_num': worker_num, 'start_time': start_time, 'ocr': ocr_trust,
-            'kb_config': {"names": kb_selects, 'score': vector_score, 'top-k': vector_top_k},
             'max_length': max_length,
             'wps_cookies': wps_cookies, 'qq_cookies': qq_cookies, 'feishu_header': feishu_header,
         }

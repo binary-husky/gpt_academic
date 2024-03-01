@@ -283,7 +283,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         self.edit_kb_info_docs_del.click(func_signals.kb_docs_file_source_del,
                                          inputs=[self.knowledge_base_select, self.edit_kb_file_list,
                                                  gr.HTML('删除数据源', visible=False)],
-                                         outputs=[self.spike_toast, self.edit_kb_file_details,
+                                         outputs=[self.spike_toast, self.edit_kb_file_list, self.edit_kb_file_details,
                                                   self.edit_kb_file_fragment],
                                          _js="(a,b,c)=>{return showConfirmationDialog(a,b,c);}")
 

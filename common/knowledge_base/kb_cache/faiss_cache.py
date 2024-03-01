@@ -1,11 +1,10 @@
-from common.api_configs import CACHED_VS_NUM, CACHED_MEMO_VS_NUM
+from common.configs import CACHED_VS_NUM, CACHED_MEMO_VS_NUM
 from common.knowledge_base.kb_cache.base import *
 from common.knowledge_base.kb_service.base import EmbeddingsFunAdapter
 from common.utils import load_local_embeddings
 from common.knowledge_base.utils import get_vs_path
 from langchain.vectorstores.faiss import FAISS
 from langchain.docstore.in_memory import InMemoryDocstore
-from langchain.schema import Document
 import os
 from langchain.schema import Document
 

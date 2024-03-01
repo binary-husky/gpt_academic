@@ -419,7 +419,7 @@ code.language-folded {
 
 /* 把radio做成列表 */
 #knowledge-base-select {
-    height: calc(100% - 70px);
+    height: calc(100% - 50px);
     overflow: auto;
 }
 

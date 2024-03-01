@@ -2,9 +2,9 @@ import os
 import shutil
 import urllib
 from fastapi import File, Form, Body, Query, UploadFile
-from common.api_configs import (DEFAULT_VS_TYPE, EMBEDDING_MODEL,
-                                VECTOR_SEARCH_TOP_K, SCORE_THRESHOLD,
-                                CHUNK_SIZE, OVERLAP_SIZE, ZH_TITLE_ENHANCE, TEXT_SPLITTER_NAME)
+from common.configs import (DEFAULT_VS_TYPE, EMBEDDING_MODEL,
+                            VECTOR_SEARCH_TOP_K, SCORE_THRESHOLD,
+                            CHUNK_SIZE, OVERLAP_SIZE, ZH_TITLE_ENHANCE, TEXT_SPLITTER_NAME)
 from common.utils import BaseResponse, ListResponse, run_in_thread_pool
 from common.knowledge_base.utils import (validate_kb_name, list_files_from_folder, get_file_path,
                                          files2docs_in_thread, KnowledgeFile)
@@ -15,7 +15,7 @@ import json
 from common.knowledge_base.kb_service.base import KBServiceFactory
 from common.db.repository.knowledge_file_repository import get_file_detail
 from langchain.docstore.document import Document
-from common.knowledge_base.model.kb_document_model import DocumentWithVSId
+from common.knowledge_base.kb_document_model import DocumentWithVSId
 from typing import List, Dict
 from common.logger_handler import logger
 

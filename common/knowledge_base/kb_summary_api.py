@@ -1,6 +1,6 @@
 from fastapi import Body
-from common.api_configs import (DEFAULT_VS_TYPE, EMBEDDING_MODEL,
-                                OVERLAP_SIZE)
+from common.configs import (DEFAULT_VS_TYPE, EMBEDDING_MODEL,
+                            OVERLAP_SIZE)
 from common.logger_handler import logger
 from common.knowledge_base.utils import (list_files_from_folder)
 from sse_starlette import EventSourceResponse
@@ -9,9 +9,12 @@ from common.knowledge_base.kb_service.base import KBServiceFactory
 from typing import List, Optional
 from common.knowledge_base.kb_summary.base import KBSummaryService
 from common.knowledge_base.kb_summary.summary_chunk import SummaryAdapter
-from common.utils import wrap_done, get_ChatOpenAI, BaseResponse
-from common.api_configs import LLM_MODELS, TEMPERATURE
-from common.knowledge_base.model.kb_document_model import DocumentWithVSId
+from common.utils import BaseResponse
+from common.configs import LLM_MODELS
+from common.knowledge_base.kb_document_model import DocumentWithVSId
+
+
+get_ChatOpenAI = ...
 
 
 def recreate_summary_vector_store(
@@ -21,7 +24,7 @@ def recreate_summary_vector_store(
         embed_model: str = Body(EMBEDDING_MODEL),
         file_description: str = Body(''),
         model_name: str = Body(LLM_MODELS[0], description="LLM 模型名称。"),
-        temperature: float = Body(TEMPERATURE, description="LLM 采样温度", ge=0.0, le=1.0),
+        temperature: float = Body(1, description="LLM 采样温度", ge=0.0, le=1.0),
         max_tokens: Optional[int] = Body(None, description="限制LLM生成Token数量，默认None代表模型最大值"),
 ):
     """
@@ -102,7 +105,7 @@ def summary_file_to_vector_store(
         embed_model: str = Body(EMBEDDING_MODEL),
         file_description: str = Body(''),
         model_name: str = Body(LLM_MODELS[0], description="LLM 模型名称。"),
-        temperature: float = Body(TEMPERATURE, description="LLM 采样温度", ge=0.0, le=1.0),
+        temperature: float = Body(1, description="LLM 采样温度", ge=0.0, le=1.0),
         max_tokens: Optional[int] = Body(None, description="限制LLM生成Token数量，默认None代表模型最大值"),
 ):
     """
@@ -174,7 +177,7 @@ def summary_doc_ids_to_vector_store(
         embed_model: str = Body(EMBEDDING_MODEL),
         file_description: str = Body(''),
         model_name: str = Body(LLM_MODELS[0], description="LLM 模型名称。"),
-        temperature: float = Body(TEMPERATURE, description="LLM 采样温度", ge=0.0, le=1.0),
+        temperature: float = Body(1, description="LLM 采样温度", ge=0.0, le=1.0),
         max_tokens: Optional[int] = Body(None, description="限制LLM生成Token数量，默认None代表模型最大值"),
 ) -> BaseResponse:
     """

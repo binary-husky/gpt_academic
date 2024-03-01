@@ -1,11 +1,9 @@
 import os
-from common.api_configs import (
+from common.configs import (
     KB_ROOT_PATH,
     CHUNK_SIZE,
     OVERLAP_SIZE,
     ZH_TITLE_ENHANCE,
-    logger,
-    log_verbose,
     text_splitter_dict,
     LLM_MODELS,
     TEXT_SPLITTER_NAME,
@@ -17,6 +15,7 @@ from langchain.docstore.document import Document
 from langchain.text_splitter import TextSplitter
 from pathlib import Path
 from common.utils import run_in_thread_pool, get_model_worker_config
+from common.logger_handler import logger
 import json
 from typing import List, Union, Dict, Tuple, Generator
 import chardet
@@ -260,8 +259,7 @@ def make_text_splitter(
             elif text_splitter_dict[splitter_name]["source"] == "huggingface":  ## 从huggingface加载
                 if text_splitter_dict[splitter_name]["tokenizer_name_or_path"] == "":
                     config = get_model_worker_config(llm_model)
-                    text_splitter_dict[splitter_name]["tokenizer_name_or_path"] = \
-                        config.get("model_path")
+                    text_splitter_dict[splitter_name]["tokenizer_name_or_path"] = config.get("model_path")
 
                 if text_splitter_dict[splitter_name]["tokenizer_name_or_path"] == "gpt2":
                     from transformers import GPT2TokenizerFast

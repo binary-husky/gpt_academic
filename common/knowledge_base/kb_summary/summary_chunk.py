@@ -2,13 +2,12 @@ from typing import List, Optional
 
 from langchain.schema.language_model import BaseLanguageModel
 
-from common.knowledge_base.model.kb_document_model import DocumentWithVSId
-from common.api_configs import (logger)
+from common.knowledge_base.kb_document_model import DocumentWithVSId
+from common.logger_handler import logger
 from langchain.chains import StuffDocumentsChain, LLMChain
 from langchain.prompts import PromptTemplate
 
 from langchain.docstore.document import Document
-from langchain.output_parsers.regex import RegexParser
 from langchain.chains.combine_documents.map_reduce import ReduceDocumentsChain, MapReduceDocumentsChain
 
 import sys

@@ -2,7 +2,7 @@ from typing import List, Dict, Optional
 from langchain.embeddings.base import Embeddings
 from langchain.schema import Document
 from langchain.vectorstores import Zilliz
-from common.api_configs import kbs_config
+from common.configs import kbs_config
 from common.knowledge_base.kb_service.base import KBService, SupportedVSType, EmbeddingsFunAdapter, \
     score_threshold_process
 from common.knowledge_base.utils import KnowledgeFile

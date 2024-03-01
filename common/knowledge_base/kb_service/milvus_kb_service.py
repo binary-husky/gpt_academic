@@ -4,7 +4,7 @@ from langchain.schema import Document
 from langchain.vectorstores.milvus import Milvus
 import os
 
-from common.api_configs import kbs_config
+from common.configs import kbs_config
 from common.db.repository import list_file_num_docs_id_by_kb_name_and_file_name
 
 from common.knowledge_base.kb_service.base import KBService, SupportedVSType, EmbeddingsFunAdapter, \

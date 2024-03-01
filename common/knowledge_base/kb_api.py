@@ -3,7 +3,8 @@ from common.utils import BaseResponse, ListResponse
 from common.knowledge_base.utils import validate_kb_name
 from common.knowledge_base.kb_service.base import KBServiceFactory
 from common.db.repository.knowledge_base_repository import list_kbs_from_db
-from common.api_configs import EMBEDDING_MODEL, logger, log_verbose
+from common.configs import EMBEDDING_MODEL
+from common.logger_handler import logger
 from fastapi import Body
 
 
@@ -31,8 +32,7 @@ def create_kb(knowledge_base_name: str = Body(..., examples=["samples"]),
         kb.create_kb()
     except Exception as e:
         msg = f"创建知识库出错： {e}"
-        logger.error(f'{e.__class__.__name__}: {msg}',
-                     exc_info=e if log_verbose else None)
+        logger.error(f'{e.__class__.__name__}: {msg}')
         return BaseResponse(code=500, msg=msg)
 
     return BaseResponse(code=200, msg=f"已新增知识库 {knowledge_base_name}")

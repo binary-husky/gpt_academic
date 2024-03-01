@@ -13,6 +13,7 @@ class InitPath:
         self.assets_path = os.path.join(self.docs_path, 'assets')
         self.prompt_export_path = os.path.join(self.docs_path, 'prompt_export')
         self.logs_path = os.path.join(self.base_path, 'gpt_log')
+        self.nltk_data_path = os.path.join(self.logs_path, 'nltk_data')
         self.users_private_path = os.path.join(self.base_path, 'users_private')
         self.private_knowledge_path = os.path.join(self.users_private_path, 'knowledge')
         self.private_files_path = os.path.join(self.users_private_path, 'files')

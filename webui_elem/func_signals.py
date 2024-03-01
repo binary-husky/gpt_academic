@@ -719,7 +719,7 @@ def user_login(user, password):
 # TODO < -------------------------------- 知识库函数注册区 -------------------------------------->
 from common.knowledge_base.kb_service import base
 from common.knowledge_base import kb_doc_api, kb_api
-from common.api_configs import kb_config
+from common.configs import kb_config
 from crazy_functions.reader_fns.crazy_box import detach_cloud_links
 
 
@@ -923,7 +923,7 @@ def kb_docs_file_source_del(kb_name, kb_file, _):
         toast = gr.update(
             value=func_box.spike_toast('彻底删除成功 🏴‍☠️'),
             visible=True)
-        file_list, _, _, details, fragment = kb_name_select_then(kb_name)
+        _, _, file_list, details, fragment = kb_name_select_then(kb_name)
         yield toast, file_list, details, fragment
         time.sleep(1)
         yield gr.update(visible=False), file_list, details, fragment

@@ -5,7 +5,7 @@ from langchain.schema import Document
 from langchain.vectorstores.pgvector import PGVector, DistanceStrategy
 from sqlalchemy import text
 
-from common.api_configs import kbs_config
+from common.configs import kbs_config
 
 from common.knowledge_base.kb_service.base import SupportedVSType, KBService, EmbeddingsFunAdapter, \
     score_threshold_process

@@ -1,6 +1,7 @@
 from langchain.docstore.document import Document
-from common.api_configs import EMBEDDING_MODEL, logger
-from common.utils import BaseResponse, get_model_worker_config, list_embed_models, list_online_embed_models
+from common.configs import EMBEDDING_MODEL
+from common.logger_handler import logger
+from common.utils import BaseResponse, get_model_worker_config, list_embed_models
 from fastapi import Body
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, root_validator
@@ -50,7 +51,7 @@ class ApiEmbeddingsParams(ApiConfigParams):
     to_query: bool = False  # for minimax
 
 
-online_embed_models = list_online_embed_models()
+online_embed_models = ...
 
 
 def embed_texts(
@@ -68,7 +69,7 @@ def embed_texts(
             embeddings = load_local_embeddings(model=embed_model)
             return BaseResponse(data=embeddings.embed_documents(texts))
 
-        if embed_model in list_online_embed_models():  # 使用在线API
+        if embed_model in []:  # 使用在线API
             config = get_model_worker_config(embed_model)
             worker_class = config.get("worker_class")
             embed_model = config.get("embed_model")
@@ -99,7 +100,7 @@ async def aembed_texts(
             embeddings = load_local_embeddings(model=embed_model)
             return BaseResponse(data=await embeddings.aembed_documents(texts))
 
-        if embed_model in list_online_embed_models():  # 使用在线API
+        if embed_model in []:  # 使用在线API
             return await run_in_threadpool(embed_texts,
                                            texts=texts,
                                            embed_model=embed_model,

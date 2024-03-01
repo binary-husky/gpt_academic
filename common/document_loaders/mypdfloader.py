@@ -3,7 +3,7 @@ from langchain.document_loaders.unstructured import UnstructuredFileLoader
 import cv2
 from PIL import Image
 import numpy as np
-from common.api_configs import PDF_OCR_THRESHOLD
+from common.configs import PDF_OCR_THRESHOLD
 from common.document_loaders.ocr import get_ocr
 import tqdm
 
@@ -82,6 +82,6 @@ class RapidOCRPDFLoader(UnstructuredFileLoader):
 
 
 if __name__ == "__main__":
-    loader = RapidOCRPDFLoader(file_path="/Users/kilig/Job/Python-project/kso_gpt/users_private/knowledge/532532523523/content/喜行约车-23.65元-1个行程高德打车电子行程单.pdf")
+    loader = RapidOCRPDFLoader(file_path="")
     docs = loader.load()
     print(docs)

@@ -1,7 +1,6 @@
-from common.api_configs import (
+from common.configs import (
     EMBEDDING_MODEL, DEFAULT_VS_TYPE, ZH_TITLE_ENHANCE,
-    CHUNK_SIZE, OVERLAP_SIZE,
-    logger, log_verbose, TEXT_SPLITTER_NAME
+    CHUNK_SIZE, OVERLAP_SIZE, TEXT_SPLITTER_NAME
 )
 from common.knowledge_base.utils import (
     get_file_path, list_kbs_from_folder,
@@ -15,7 +14,7 @@ from common.db.session import session_scope
 import os
 from dateutil.parser import parse
 from typing import Literal, List
-
+from common.logger_handler import logger
 
 def create_tables():
     Base.metadata.create_all(bind=engine)
@@ -74,8 +73,7 @@ def file_to_kbfile(kb_name: str, files: List[str], text_splitter_name) -> List[K
             kb_files.append(kb_file)
         except Exception as e:
             msg = f"{e}，已跳过"
-            logger.error(f'{e.__class__.__name__}: {msg}',
-                         exc_info=e if log_verbose else None)
+            logger.error(f'{e.__class__.__name__}: {msg}')
     return kb_files
 
 

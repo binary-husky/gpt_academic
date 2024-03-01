@@ -814,9 +814,9 @@ input:checked + .chatbot-input-more-span {
     .kb-select-list {
         max-width: 100% !important;
     }
-    #knowledge-base-select {
-        height: calc(100% - 50px) !important;
-    }
+    /*#knowledge-base-select {*/
+    /*    height: calc(100% - 50px) !important;*/
+    /*}*/
     #toolbox-area > .gradio-box > .gradio-tabs > div.tab-nav,
     #chuanhu-popup > .gradio-box > .gradio-tabs > div.tab-nav {
         display: flex;

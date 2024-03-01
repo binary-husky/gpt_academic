@@ -13,22 +13,22 @@ from common.db.repository.knowledge_base_repository import (
     load_kb_from_db, get_kb_detail,
 )
 from common.db.repository.knowledge_file_repository import (
-    add_file_to_db, delete_file_from_db, delete_files_from_db, file_exists_in_db,
+    add_file_to_db, delete_files_from_db, file_exists_in_db,
     count_files_from_db, list_files_from_db, get_file_detail, delete_file_from_db,
     list_docs_from_db,
 )
 
-from common.api_configs import (kbs_config, VECTOR_SEARCH_TOP_K, SCORE_THRESHOLD,
-                                EMBEDDING_MODEL, KB_INFO)
+from common.configs import (kbs_config, VECTOR_SEARCH_TOP_K, SCORE_THRESHOLD,
+                            EMBEDDING_MODEL, KB_INFO)
 from common.knowledge_base.utils import (
     get_kb_path, get_doc_path, KnowledgeFile,
     list_kbs_from_folder, list_files_from_folder,
 )
 
-from typing import List, Union, Dict, Optional, Tuple
+from typing import List, Union, Dict, Tuple
 
 from common.embeddings_api import embed_texts, aembed_texts, embed_documents
-from common.knowledge_base.model.kb_document_model import DocumentWithVSId
+from common.knowledge_base.kb_document_model import DocumentWithVSId
 
 
 def normalize(embeddings: List[List[float]]) -> np.ndarray:
