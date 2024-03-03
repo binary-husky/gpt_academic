@@ -296,7 +296,7 @@ model_info = {
         "token_cnt": get_token_num_gpt35,
     },
 }
-# -=-=-=-=-=-=- api2d 对齐支持 -=-=-=-=-=-=-
+# -=-=-=-=-=-=- 月之暗面 -=-=-=-=-=-=-
 from request_llms.bridge_moonshot import predict as moonshot_ui
 from request_llms.bridge_moonshot import predict_no_ui_long_connection as moonshot_no_ui
 model_info.update({
