@@ -94,7 +94,7 @@ model_info = {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
         "endpoint": openai_endpoint,
-        "max_token": 4096,
+        "max_token": 16385,
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
@@ -126,7 +126,16 @@ model_info = {
         "token_cnt": get_token_num_gpt35,
     },
 
-    "gpt-3.5-turbo-1106": {#16k
+    "gpt-3.5-turbo-1106": { #16k
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": openai_endpoint,
+        "max_token": 16385,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+
+    "gpt-3.5-turbo-0125": { #16k
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
         "endpoint": openai_endpoint,
@@ -516,6 +525,7 @@ if "qwen-local" in AVAIL_LLM_MODELS:
             "qwen-local": {
                 "fn_with_ui": qwen_local_ui,
                 "fn_without_ui": qwen_local_noui,
+                "can_multi_thread": False,
                 "endpoint": None,
                 "max_token": 4096,
                 "tokenizer": tokenizer_gpt35,
@@ -532,6 +542,7 @@ if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-
             "qwen-turbo": {
                 "fn_with_ui": qwen_ui,
                 "fn_without_ui": qwen_noui,
+                "can_multi_thread": True,
                 "endpoint": None,
                 "max_token": 6144,
                 "tokenizer": tokenizer_gpt35,
@@ -540,6 +551,7 @@ if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-
             "qwen-plus": {
                 "fn_with_ui": qwen_ui,
                 "fn_without_ui": qwen_noui,
+                "can_multi_thread": True,
                 "endpoint": None,
                 "max_token": 30720,
                 "tokenizer": tokenizer_gpt35,
@@ -548,6 +560,7 @@ if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-
             "qwen-max": {
                 "fn_with_ui": qwen_ui,
                 "fn_without_ui": qwen_noui,
+                "can_multi_thread": True,
                 "endpoint": None,
                 "max_token": 28672,
                 "tokenizer": tokenizer_gpt35,
@@ -564,6 +577,7 @@ if "spark" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
             "spark": {
                 "fn_with_ui": spark_ui,
                 "fn_without_ui": spark_noui,
+                "can_multi_thread": True,
                 "endpoint": None,
                 "max_token": 4096,
                 "tokenizer": tokenizer_gpt35,
@@ -580,6 +594,7 @@ if "sparkv2" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
             "sparkv2": {
                 "fn_with_ui": spark_ui,
                 "fn_without_ui": spark_noui,
+                "can_multi_thread": True,
                 "endpoint": None,
                 "max_token": 4096,
                 "tokenizer": tokenizer_gpt35,
@@ -596,6 +611,7 @@ if "sparkv3" in AVAIL_LLM_MODELS or "sparkv3.5" in AVAIL_LLM_MODELS:   # 讯飞�
             "sparkv3": {
                 "fn_with_ui": spark_ui,
                 "fn_without_ui": spark_noui,
+                "can_multi_thread": True,
                 "endpoint": None,
                 "max_token": 4096,
                 "tokenizer": tokenizer_gpt35,
@@ -604,6 +620,7 @@ if "sparkv3" in AVAIL_LLM_MODELS or "sparkv3.5" in AVAIL_LLM_MODELS:   # 讯飞�
             "sparkv3.5": {
                 "fn_with_ui": spark_ui,
                 "fn_without_ui": spark_noui,
+                "can_multi_thread": True,
                 "endpoint": None,
                 "max_token": 4096,
                 "tokenizer": tokenizer_gpt35,
