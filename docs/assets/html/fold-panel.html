@@ -1,0 +1,26 @@
+<div class="fold-panel">
+    <button class="collapsible" type="button" id="{id}">
+        <div><span class="icon-fold">▼</span>
+            <span style="margin-left: 10px">{title}</span></div>
+        <div class="loading-circle">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </button>
+    <div class="code_wrap collapsible-content" style="display: none;">
+        <button title="copy" class="copy_code_button">
+            <span class="copy-text"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"
+                                         viewBox="0 0 32 32"><path fill="currentColor"
+                                                                   d="M28 10v18H10V10h18m0-2H10a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2Z"></path><path
+                    fill="currentColor" d="M4 18H2V4a2 2 0 0 1 2-2h14v2H4Z"></path></svg></span>
+            <span style="opacity: 0;" class="check"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"
+                                                         viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                         stroke-width="3" stroke-linecap="round"
+                                                         stroke-linejoin="round"><polyline
+                    points="20 6 9 17 4 12"></polyline></svg></span>
+        </button>
+        <pre><code>{content}</code></pre>
+    </div>
+</div>

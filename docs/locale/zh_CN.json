@@ -96,5 +96,8 @@
     "百宝袋": "百宝袋",
     "Hello GPT": "Hello GPT",
     "Read everything.": "Read everything.",
-    "返回数据类型": "返回数据类型"
+    "返回数据类型": "返回数据类型",
+    "导出为 JSON": "导出为 JSON",
+    "导出为 图片": "导出为 图片",
+    "导出为 jpeg": "导出为 jpeg"
 }

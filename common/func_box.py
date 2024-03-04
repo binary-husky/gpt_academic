@@ -8,6 +8,8 @@ import json
 import os.path
 import subprocess
 import time
+import uuid
+
 import psutil
 import re
 import tempfile
@@ -665,6 +667,12 @@ def split_domain_url(link_limit, start='http', domain_name: list = ['']) -> list
         if i.startswith(start) and any(name in i for name in domain_name):
             links.append(i)
     return links
+
+
+def get_fold_panel(btn_id=None):
+    if not btn_id:
+        btn_id = uuid.uuid4().hex
+    return get_html('fold-panel.html').replace('{id}', btn_id)
 
 
 if __name__ == '__main__':

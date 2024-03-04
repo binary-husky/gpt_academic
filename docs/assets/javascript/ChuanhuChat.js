@@ -71,6 +71,7 @@ function addInit() {
     chatbotObserver.observe(chatbotIndicator, { attributes: true, childList: true, subtree: true });
     chatListObserver.observe(chatListIndicator, { attributes: true });
     chatbotObserverMsg.observe(chatbotWrap, { attributes: true, childList: true, subtree: true });
+    chatbotObserverMsgBot.observe(chatbotWrap, { attributes: true, childList: true, subtree: true });
     setDragUploader();
     return true;
 }
@@ -397,6 +398,7 @@ function chatbotContentChanged(attempt = 1, force = false) {
             addShowAllButton();
             gradioApp().querySelectorAll('#chuanhu-chatbot .message-wrap .message.bot, #chuanhu-chatbot .message-wrap .message.user').forEach(addChuanhuButton);
             gradioApp().querySelectorAll('#chuanhu-chatbot .message-wrap .message.bot .language-mermaid').forEach(mermaidEditAdd)
+            gradioApp().querySelectorAll('#chuanhu-chatbot .message-wrap .message.bot .md-message .fold-panel').forEach(foldPanelAdd)
             if (chatbotIndicator.classList.contains('hide')) { // generation finished
                 setLatestMessage();
                 setChatList();

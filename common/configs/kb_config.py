@@ -1,4 +1,5 @@
 import os
+from common.path_handler import init_path
 
 # 默认使用的知识库
 DEFAULT_KNOWLEDGE_BASE = "samples"
@@ -68,12 +69,9 @@ KB_INFO = {
 }
 
 # 通常情况下不需要更改以下内容
-from common.path_handler import init_path
 
 # 知识库默认存储路径
 KB_ROOT_PATH = init_path.private_knowledge_path
-if not os.path.exists(KB_ROOT_PATH):
-    os.mkdir(KB_ROOT_PATH)
 # 数据库默认存储路径。
 # 如果使用sqlite，可以直接修改DB_ROOT_PATH；如果使用其它数据库，请直接修改SQLALCHEMY_DATABASE_URI。
 DB_ROOT_PATH = os.path.join(KB_ROOT_PATH, "info.db")
@@ -81,8 +79,7 @@ SQLALCHEMY_DATABASE_URI = f"sqlite:///{DB_ROOT_PATH}"
 
 # 可选向量库类型及对应配置
 kbs_config = {
-    "faiss": {
-    },
+    "faiss": {},
     "milvus": {
         "host": "127.0.0.1",
         "port": "19530",

@@ -130,10 +130,9 @@ def model_selection(txt, models, llm_kwargs, plugin_kwargs, cookies, chatbot_wit
     if 'input加密' in models: txt_proc = func_box.encryption_str(txt_proc)
     if 'OCR缓存' in models: llm_kwargs.update({'ocr_cache': True})
     if len(args) == 0 or 'RetryChat' in args and not cookies.get('is_plugin'):
-        if '文档RAG' in models:
+        if '文档RAG' in models and 'moonshot' not in llm_kwargs.get('llm_model', ''):
             from crazy_functions.reader_fns.crazy_box import user_input_embedding_content, input_retrieval_file
-            fp_file = yield from input_retrieval_file(txt_proc, chatbot_with_cookie, history, llm_kwargs,
-                                                      ['pdf', 'md', 'xlsx', 'docx'])
+            fp_file, download_status = input_retrieval_file(txt_proc, llm_kwargs,['pdf', 'md', 'xlsx', 'docx'])
             if fp_file:  # 提前检测，有文件才进入下一步
                 input_embedding_content = yield from user_input_embedding_content(txt_proc, chatbot_with_cookie,
                                                                                   history, llm_kwargs, plugin_kwargs,

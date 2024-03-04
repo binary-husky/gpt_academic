@@ -239,6 +239,35 @@ model_info = {
         "token_cnt": get_token_num_gpt35,
     },
 }
+# -=-=-=-=-=-=- 月之暗面 -=-=-=-=-=-=-
+from request_llms.bridge_moonshot import predict as moonshot_ui
+from request_llms.bridge_moonshot import predict_no_ui_long_connection as moonshot_no_ui
+model_info.update({
+    "moonshot-v1-8k": {
+        "fn_with_ui": moonshot_ui,
+        "fn_without_ui": moonshot_no_ui,
+        "endpoint": None,
+        "max_token": 1024 * 8,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+    "moonshot-v1-32k": {
+        "fn_with_ui": moonshot_ui,
+        "fn_without_ui": moonshot_no_ui,
+        "endpoint": None,
+        "max_token": 1024 * 32,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+    "moonshot-v1-128k": {
+        "fn_with_ui": moonshot_ui,
+        "fn_without_ui": moonshot_no_ui,
+        "endpoint": None,
+        "max_token": 1024 * 128,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    }
+})
 # Azure
 AZURE_ENDPOINT, AZURE_ENGINE_DICT, AZURE_URL_VERSION = get_conf('AZURE_ENDPOINT', 'AZURE_ENGINE_DICT', 'AZURE_URL_VERSION')
 for azure in AZURE_ENGINE_DICT:

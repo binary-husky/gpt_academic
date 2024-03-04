@@ -807,7 +807,7 @@ def kb_new_confirm(kb_name, kb_type, kb_model, kb_info):
     if not kb_name or not kb_type or not kb_model:
         keywords = {"知识库名称": kb_name, "向量类型": kb_type, "Embedding 模型": kb_model}
         error_keyword = " - ".join([f"【{i}】" for i in keywords if not keywords[i]])
-        raise gr.Error(f'字段错误、无法创建, 缺失字段如下：{error_keyword}')
+        raise gr.Error(f'缺失 {error_keyword} 字段,无法创建, ')
 
     kb_server_list = base.KBServiceFactory.get_service_by_name(kb_name)
     if kb_name in kb_name_tm or kb_server_list is not None:

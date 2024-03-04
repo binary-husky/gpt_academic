@@ -166,8 +166,8 @@ def file_reader_content(file_path, save_path, plugin_kwargs):
     reader_statsu = ''
     file_content = ''
     if file_path.endswith('pdf'):
-        _content, _ = crazy_utils.read_and_clean_pdf_text(file_path, save_path)
-        file_content = "".join(_content)
+        content = reader_fns.PDFHandler(file_path, save_path).get_markdown()
+        file_content = "".join(content)
     elif file_path.endswith('docx') or file_path.endswith('doc'):
         file_content = reader_fns.DocxHandler(file_path, save_path).get_markdown()
     elif file_path.endswith('xmind'):
@@ -734,27 +734,27 @@ def content_clear_links(user_input, clear_fp_map, clear_link_map):
     return user_input
 
 
-def input_retrieval_file(user_input, chatbot, history, llm_kwargs, valid_types):
+def input_retrieval_file(user_input, llm_kwargs, valid_types):
     # 云文件
-    yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='正在解析云文件链接...')
     fp_mapping, download_status = detach_cloud_links(user_input, llm_kwargs, valid_types)
-    if download_status:
-        chatbot[-1][1] += f'\n\n下载云文档似乎出了点问题？\n\n```python\n{download_status}\n```\n\n'
-        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='🕵🏻 ‍出师未捷身先死🏴‍☠️')
     # 本地文件
     fp_mapping.update(func_box.extract_link_pf(user_input, valid_types))
-    return fp_mapping
+    return fp_mapping, download_status
 
 
 def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugin_kwargs, valid_types, fp_prepro=False):
     embedding_content = []  # 对话内容
-    chatbot.append([user_input, '🕵🏻‍超级侦探，正在办案～'])
+    chatbot.append([user_input, ''])
     yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='🕵🏻‍超级侦探，正在办案～')
     # 文件处理
     if fp_prepro:
         fp_mapping = fp_prepro
     else:
-        fp_mapping = yield from input_retrieval_file(user_input, chatbot, history, llm_kwargs, valid_types)
+        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='正在解析云文件链接...')
+        fp_mapping, download_status = input_retrieval_file(user_input, llm_kwargs, valid_types)
+        if download_status:
+            chatbot[-1][1] += f'\n\n下载云文档似乎出了点问题？\n\n```python\n{download_status}\n```\n\n'
+            yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='🕵🏻 ‍出师未捷身先死🏴‍☠️')
     content_mapping = yield from file_extraction_intype(fp_mapping, chatbot, history, llm_kwargs, plugin_kwargs)
     if content_mapping:
         mapping_data = "\n\n".join([f"{func_box.html_folded_code(content_mapping[fp])}" for fp in content_mapping])

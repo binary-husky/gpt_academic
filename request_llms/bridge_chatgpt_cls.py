@@ -260,7 +260,8 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
 
 if __name__ == '__main__':
     test = GPTChatInit()
-    geng = test.generate_messages('', {'llm_model': 'gpt-4-vision-preview'}, [], '', True)
+    geng = test.generate_messages('', {'llm_model': 'gpt-4-vision-preview'},
+                                  [], '', True)
 
     for g in geng:
         print(g)

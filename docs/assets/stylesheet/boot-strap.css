@@ -1,0 +1,138 @@
+.collapsible {
+    background-color: var(--button-primary-background-fill) !important;  /* 背景色 */
+    color: #444;               /* 文本色 */
+    cursor: pointer !important;
+    padding: 10px !important;
+    width: 100%;               /* 按钮宽度 */
+    border: none;              /* 边框 */
+    text-align: left;          /* 文字左对齐 */
+    outline: none;             /* 去掉轮廓线 */
+    font-size: 16px;           /* 字号大小 */
+    display: flex;             /* 弹性盒模型显示 */
+    justify-content: space-between;   /* 分开文字和加载图标 */
+    align-items: center;       /* 垂直居中内容 */
+    border-radius: var(--block-title-radius);
+    font-weight: bold !important;
+}
+.collapsible-content {
+    display: none;  /* 默认隐藏内容 */
+    overflow: hidden;
+}
+.fold-panel .code_wrap  {
+    margin: unset !important;
+}
+.icon-fold {
+    display: inline-block !important;
+    transition: transform 0.3s ease !important; /* 添加动画效果 */
+    transform: rotate(-90deg) !important;
+}
+.icon-fold.rotate-down {
+    transform: rotate(0deg) !important;
+}
+
+.loading-circle,
+.loading-circle > div {
+  position: relative;
+  box-sizing: border-box;
+}
+
+.loading-circle {
+  display: block;
+  font-size: 0;
+  color: #000;
+}
+
+.loading-circle.la-dark {
+  color: #333;
+}
+
+.loading-circle > div {
+  display: inline-block;
+  float: none;
+  background-color: currentColor;
+  border: 0 solid currentColor;
+}
+
+.loading-circle {
+  width: 15px;
+  height: 15px;
+}
+
+.loading-circle > div:nth-child(1) {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  width: 60%;
+  height: 60%;
+  background: #aaa;
+  border-radius: 100%;
+  transform: translate(-50%, -50%);
+  animation: ball-atom-shrink 4.5s infinite linear;
+}
+
+.loading-circle > div:not(:nth-child(1)) {
+  position: absolute;
+  left: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  background: none;
+  animation: ball-atom-zindex 1.5s 0s infinite steps(2, end);
+}
+
+.loading-circle > div:not(:nth-child(1)):before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  margin-left: -5px;
+  content: "";
+  background: currentColor;
+  border-radius: 50%;
+  opacity: 0.75;
+  animation: ball-atom-position 1.5s 0s infinite ease,
+  ball-atom-size 1.5s 0s infinite ease;
+}
+.loading-circle .complete {
+  animation: unset;
+}
+.loading-circle > div:nth-child(2) {
+  transform: rotate(60deg);
+  animation-delay: 0.125s;
+}
+
+.loading-circle > div:nth-child(2) {
+  animation-delay: 0.75s;
+}
+
+.loading-circle > div:nth-child(2):before {
+  animation-delay: 0s, -1.125s;
+}
+
+.loading-circle > div:nth-child(3) {
+  transform: rotate(120deg);
+  animation-delay: -0.25s;
+}
+
+.loading-circle > div:nth-child(3):before {
+  animation-delay: -1s, -0.75s;
+}
+
+.loading-circle> div:nth-child(4) {
+  transform: rotate(240deg);
+  animation-delay: 0.25s;
+}
+
+.loading-circle > div:nth-child(4):before {
+  animation-delay: -0.5s, -0.125s;
+}
+
+@keyframes ball-atom-position {
+  50% {
+    top: 100%;
+    left: 100%;
+  }
+}

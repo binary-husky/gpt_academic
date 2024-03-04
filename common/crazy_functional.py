@@ -535,6 +535,11 @@ def get_functions_云文档处理():
             "AsButton": True,
             "Function": HotReload(KDOCS_流程图_图片分析.批量分析流程图或图片),
         },
+        "test": {
+            "Color": "primary",
+            "AsButton": True,
+            "Function": HotReload(KDOCS_云文档分析.Kdocs_test),
+        },
         "需求文档转测试用例(全配置)": {
             "Color": "primary",
             "AsButton": True,

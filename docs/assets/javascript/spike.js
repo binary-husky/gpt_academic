@@ -400,34 +400,83 @@ function fillInputsFromCache() {
 }
 
 function monitorSwipeEvent() {
-  var startX, endX;
-  var swipePerformed = false;
+    var startX, endX;
+    var swipePerformed = false;
 
-  if (!chatbot.hasTouchEvent) {
+    if (!chatbot.hasTouchEvent) {
 
-    chatbot.addEventListener('touchstart', function(event) {
-      startX = event.touches[0].clientX;
-      swipePerformed = false; // 重置滑动标志
-    });
+        chatbot.addEventListener('touchstart', function (event) {
+            startX = event.touches[0].clientX;
+            swipePerformed = false; // 重置滑动标志
+        });
 
-    chatbot.addEventListener('touchmove', function(event) {
-      swipePerformed = true; // 如果有移动操作，则设置滑动标志为true
-    });
+        chatbot.addEventListener('touchmove', function (event) {
+            swipePerformed = true; // 如果有移动操作，则设置滑动标志为true
+        });
 
-    chatbot.addEventListener('touchend', function(event) {
-      endX = event.changedTouches[0].clientX;
+        chatbot.addEventListener('touchend', function (event) {
+            endX = event.changedTouches[0].clientX;
 
-      var diff = endX - startX;
-      if (diff > 100) {
-        menuClick();
-        console.log('触发向右滑动展示历史记录');
-        swipePerformed = true; // 设置滑动标志为true
-      } else if (diff < -100) {
-        toolboxClick();
-        console.log('触发向左滑动展示工具箱');
-        swipePerformed = true; // 设置滑动标志为true
-      }
-    });
-    chatbot.hasTouchEvent = true; // 标记为已添加事件
-  }
+            var diff = endX - startX;
+            if (diff > 100) {
+                menuClick();
+                console.log('触发向右滑动展示历史记录');
+                swipePerformed = true; // 设置滑动标志为true
+            } else if (diff < -100) {
+                toolboxClick();
+                console.log('触发向左滑动展示工具箱');
+                swipePerformed = true; // 设置滑动标志为true
+            }
+        });
+        chatbot.hasTouchEvent = true; // 标记为已添加事件
+    }
 }
+
+function foldPanelAdd(element) {
+    if (element) {
+        let collapsible = element.querySelector('.collapsible');
+        let contents = element.querySelector('.collapsible-content');
+        // 假设 .icon-arrow 是跟您的 collapsible button 相关联的箭头
+        let arrow = collapsible.querySelector('.icon-fold');
+
+        if (!collapsible.classList.contains('event-listener-added')) {
+            // 读取并应用存储的状态
+            const storedState = sessionStorage.getItem(collapsible.id);
+
+            if (storedState) {
+                contents.style.display = storedState;
+                // 更新箭头的方向基于存储的状态
+                if (storedState === "none") {
+                    arrow.classList.remove('rotate-down');
+                } else { // 存储的状态为 "block"
+                    arrow.classList.add('rotate-down');
+                }
+            }
+            // 添加事件监听器
+            collapsible.addEventListener('click', function () {
+                if (contents.style.display === "block") {
+                    contents.style.display = "none";
+                    arrow.classList.remove('rotate-down'); // 箭头旋转回默认位置 (0 度)
+
+                    // 记录状态为 'none'
+                    sessionStorage.setItem(collapsible.id, "none");
+                } else {
+                    contents.style.display = "block";
+                    arrow.classList.add('rotate-down'); // 箭头旋转 -90 度
+
+                    // 记录状态为 'block'
+                    sessionStorage.setItem(collapsible.id, "block");
+                }
+            });
+
+            // 标记为 event listener 已经被添加
+            collapsible.classList.add('event-listener-added');
+        }
+    }
+}
+
+const chatbotObserverMsgBot = new MutationObserver(function (mutationsList, observer) {
+    if (chatbotMsg) {
+        chatbotMsg.querySelectorAll('.bot-row .message.bot .md-message .fold-panel').forEach(foldPanelAdd)
+    }
+})

@@ -52,12 +52,13 @@ class DocxHandler:
     def __get_markdown_heading_level(self, para_size):
         """根据字体大小确定Markdown标题的级别"""
         para_size = int(para_size)
+        heading_level = 0
         if para_size > 40:
-            return 1
+            heading_level = 1
         elif para_size > 22:
-            return 2
-        else:
-            return 0
+            heading_level = 2
+        heading_level = '#' * heading_level + ' ' if heading_level > 0 else ""
+        return heading_level
 
     def __save_img(self, blob, name):
         image_path = os.path.join(self.output_dir, f'{self.file_name}-image')
@@ -95,7 +96,6 @@ class DocxHandler:
         if para_text:
             para_size = self.__extract_attribute_from_xml(element.xml, e_tag='sz', e_attr='val')
             heading_level = self.__get_markdown_heading_level(para_size)
-            heading_level = '#' * heading_level + ' ' if heading_level > 0 else ""
             markdown_paragraph += heading_level + para_text
         # 处理段落中的图片
         for inline in element.iter():
