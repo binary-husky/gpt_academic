@@ -434,7 +434,7 @@ def PDF翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot, h
         return
     app_id, app_key = get_conf('MATHPIX_APPID', 'MATHPIX_APPKEY')
     if len(app_id) == 0 or len(app_key) == 0:
-        report_exception(chatbot, history, a=f"请配置 MATHPIX_APPID 和 MATHPIX_APPKEY")
+        report_exception(chatbot, history, a="缺失 MATHPIX_APPID 和 MATHPIX_APPKEY。", b=f"请配置 MATHPIX_APPID 和 MATHPIX_APPKEY")
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
         return
 
