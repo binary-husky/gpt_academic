@@ -835,7 +835,7 @@ def kb_new_confirm(kb_name, kb_type, kb_model, kb_info):
         'kb_file_details': gr.DataFrame.update(value=pd.DataFrame(data=copy.deepcopy(kb_config.file_details_template))),
         'kb_file_fragment': gr.DataFrame.update(value=pd.DataFrame(data=copy.deepcopy(kb_config.file_fragment_template)))
     }
-    return list(new_output.values()) + list(edit_output.values())
+    return list(new_output.values()) + list(edit_output.values()) + [base.kb_dict_to_list(kb_name_tm)]
 
 
 def __get_kb_details_df(file_details: pd.DataFrame, condition: pd.Series):
@@ -875,8 +875,10 @@ def kb_file_update_confirm(upload_files: List, kb_name, kb_info, kb_max, kb_simi
     cloud_map, status = detach_cloud_links(cloud_link, {'ipaddr': user}, ['*'])
     if status:
         raise gr.Error(f'文件下载失败，{cloud_map}')
-
-    files = [f.name for f in upload_files] + list(cloud_map.keys())
+    files = []
+    if upload_files:
+        files.extend([f.name for f in upload_files])
+    files += list(cloud_map.keys())
     response = kb_doc_api.upload_docs(files=files, knowledge_base_name=kb_name, override=True,
                                       to_vector_store=True, chunk_size=kb_max, chunk_overlap=kb_similarity,
                                       loader_enhance=kb_loader, docs={}, not_refresh_vs_cache=False,
@@ -909,8 +911,7 @@ def kb_base_del(kb_name, del_confirm, _):
             raise gr.Error(json.dumps(response.__dict__, indent=4, ensure_ascii=False))
         kb_name_list = base.kb_dict_to_list(base.kb_details_to_dict()) + ['新建知识库']
 
-        return gr.update(visible=True), gr.update(visible=False), gr.update(choices=kb_name_list,
-                                                                            value='新建知识库')
+        return gr.update(visible=True), gr.update(visible=False), gr.update(choices=kb_name_list, value='新建知识库'), kb_name_list
 
 
 def kb_docs_file_source_del(kb_name, kb_file, _):

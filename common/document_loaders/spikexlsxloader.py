@@ -15,7 +15,7 @@ class ReaderExcelEve(UnstructuredFileLoader):
         def xl2md(file_path):
             ex_handle = XlsxHandler(file_path)
             ex_dict = ex_handle.read_as_dict(only_sheet=False)
-            ex_content = "\n\n---\n\n".join(f"# {i}\n\n```\n{ex_dict[i]}\n```" for i in ex_dict)
+            ex_content = "\n\n---\n\n".join(f"# {i}\n\n{ex_dict[i]}\n" for i in ex_dict)
             return ex_content.replace(init_path.base_path, './')
 
         markdown = xl2md(file_path=self.file_path)

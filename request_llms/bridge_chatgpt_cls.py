@@ -243,7 +243,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     stream_response = gpt_bro_init.generate_messages(inputs, llm_kwargs, history, sys_prompt, True)
     gpt_bro_result = ''
     for content, gpt_bro_result, error_bro_meg in stream_response:
-        gpt_bro_result += content
+        gpt_bro_result = gpt_bro_result
         if error_bro_meg:
             if len(observe_window) >= 3:
                 observe_window[2] = error_bro_meg

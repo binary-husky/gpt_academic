@@ -1,6 +1,8 @@
-.collapsible {
+.drak .collapsible {
     background-color: var(--button-primary-background-fill) !important;  /* 背景色 */
-    color: #444;               /* 文本色 */
+}
+.collapsible {
+    background-color: var(--block-title-background-fill) !important;  /* 背景色 */
     cursor: pointer !important;
     padding: 10px !important;
     width: 100%;               /* 按钮宽度 */

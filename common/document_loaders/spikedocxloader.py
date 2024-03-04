@@ -9,7 +9,7 @@ from crazy_functions.reader_fns.local_word import DocxHandler
 from common.path_handler import init_path
 
 
-class ReaderMarkdownEve(UnstructuredFileLoader):
+class ReaderDocxEve(UnstructuredFileLoader):
 
     def _get_elements(self) -> List:
         def docx2md(file_path):
@@ -19,3 +19,4 @@ class ReaderMarkdownEve(UnstructuredFileLoader):
         markdown = docx2md(file_path=self.file_path)
         from unstructured.partition.text import partition_text
         return partition_text(text=markdown, **self.unstructured_kwargs)
+

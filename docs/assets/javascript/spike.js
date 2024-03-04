@@ -436,6 +436,11 @@ function foldPanelAdd(element) {
     if (element) {
         let collapsible = element.querySelector('.collapsible');
         let contents = element.querySelector('.collapsible-content');
+        let loading_circle = element.querySelector('.loading-circle');
+        let loading_status = loading_circle.getAttribute('data-percentage')
+        if (loading_status === 'Done') {
+            loading_circle.style.display = 'none';
+        }
         // 假设 .icon-arrow 是跟您的 collapsible button 相关联的箭头
         let arrow = collapsible.querySelector('.icon-fold');
 

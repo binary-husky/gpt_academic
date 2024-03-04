@@ -9,7 +9,7 @@ from crazy_functions.reader_fns.local_markdown import MdHandler
 from common.path_handler import init_path
 
 
-class ReaderDocxEve(UnstructuredFileLoader):
+class ReaderMarkdownEve(UnstructuredFileLoader):
 
     def _get_elements(self) -> List:
         def md2md(file_path):

@@ -301,7 +301,9 @@ code.language-folded {
     right: 10px;
     margin: -2px;
 }
-
+#show-all-btn svg{
+    color: #ffffff;
+}
 #upload-index-file {
     width: auto;
     display: none;

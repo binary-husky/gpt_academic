@@ -263,7 +263,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         self.new_kb_confirm_btn.click(fn=func_signals.kb_new_confirm,
                                       inputs=[self.new_kb_name, self.new_kb_vector_types,
                                               self.new_kb_embedding_model, self.new_kb_introduce],
-                                      outputs=self.show_hide_combo + self.file_details_combo)
+                                      outputs=self.show_hide_combo + self.file_details_combo + [self.kb_input_select])
 
         self.edit_kb_confirm_btn.click(func_signals.kb_file_update_confirm,
                                        inputs=self.kb_edit_confirm_combo + [self.edit_kb_cloud],
@@ -278,7 +278,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                                                    self.knowledge_base_select,
                                                    gr.HTML('删除知识库',
                                                            visible=False)],
-                                           outputs=self.show_hide_combo + [self.knowledge_base_select],
+                                           outputs=self.show_hide_combo + [self.knowledge_base_select, self.kb_input_select],
                                            _js="(a,b,c)=>{return showConfirmationDialog(a,b,c);}")
         self.edit_kb_info_docs_del.click(func_signals.kb_docs_file_source_del,
                                          inputs=[self.knowledge_base_select, self.edit_kb_file_list,

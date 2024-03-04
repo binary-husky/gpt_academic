@@ -171,7 +171,11 @@ def plugins_selection(txt_proc, history, plugin_kwargs, args, cookies, chatbot_w
     elif len(args) == 0 or 'RetryChat' in args and not cookies.get('is_plugin'):
         cookies['is_plugin'] = False
         plugin_kwargs['advanced_arg'] = ''
-        yield from update_ui(chatbot_with_cookie, history, msg='Switching to intent recognition dialog...')
+        from common.knowledge_base.kb_func import vector_recall_by_input
+        if llm_kwargs['kb_config']['names']:
+            txt_proc = yield from vector_recall_by_input(txt_proc, chatbot_with_cookie, history,
+                                                         llm_kwargs, '知识库提示词_sys',
+                                                         '引用知识库回答')
     return txt_proc, history
 
 

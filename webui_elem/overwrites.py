@@ -268,3 +268,10 @@ original_BlockContext_init = gr.blocks.BlockContext.__init__
 gr.blocks.BlockContext.__init__ = BlockContext_init
 
 
+
+if __name__ == '__main__':
+    test = """
+    {'func': 'RAG', 'kb': ['各国数据']}
+{'各国测试环境.docx': '菲律宾                http://54.251.149.228/download/phil-test-package       http://pesogo-phil.gccloud.xyz                PesoGo       pesogoapp.test.ph               H5分支:origin/test-philippines        e3382d6f-8777-4218-9d65-4c24297d8c06\n编号  国家    测试地址                        包名     package_name               channel_name\n   001  尼日    https://test_cashrun.gcxyz.com  cashrun  cash.run.credit.easy.loan  c456b96d-e767-43c1-bfa8-b93db77d2c84\n\n一包多国\n支付\n\n国家                                                     数据库\n新支付  域名url:                                         通过飞书申请数据库SQLE访问权限\n        cashier.dragon-pay-test.gccloud.xyz\n\n        收银台：\n        xxljob.dragon-pay-test.gccloud.xyz\nUser:\n'}
+    """
+    print(escape_markdown(test))

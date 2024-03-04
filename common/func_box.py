@@ -625,11 +625,10 @@ def replace_expected_text(prompt: str, content: str, expect='{{{v}}}'):
         expect: 预期替换的文本
     Returns:
     """
-    if content:
-        if prompt.find(expect) != -1:
-            content = prompt.replace(expect, content)
-        else:
-            content = content + prompt
+    if prompt.find(expect) != -1:
+        content = prompt.replace(expect, content)
+    else:
+        content = content + prompt
     return content
 
 

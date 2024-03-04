@@ -165,5 +165,5 @@ class DocxHandler:
 
 
 if __name__ == '__main__':
-    print(DocxHandler('../../users_private/files/127.0.0.1/feishu/【用户增长】新增Whatsapp优先发送策略【跟包】.docx',
+    print(DocxHandler('../../users_private/files/127.0.0.1/feishu/',
                       './').get_markdown())

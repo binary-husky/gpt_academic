@@ -60,13 +60,3 @@ def Kdocs_多阶段生成回答(user_input, llm_kwargs, plugin_kwargs, chatbot, 
     if not multi_stage_config:
         chatbot[-1][1] = chatbot[-1][
                              1] + f'!!!!! 自定义参数中的Json存在问题，请仔细检查以下配置是否符合JSON编码格式\n\n```\n{plugin_kwargs["advanced_arg"]}```'
-
-
-@CatchException
-def Kdocs_test(user_input, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-    fold_panel = func_box.get_fold_panel()
-    chatbot.append([user_input, fold_panel.format(title='title', content='测试中')])
-    for i in range(10):
-        chatbot[-1][1] = fold_panel.format(title='title', content='测试中......' + str(i))
-        yield from update_ui(chatbot=chatbot, history=history)
-        time.sleep(2)
