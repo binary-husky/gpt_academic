@@ -79,6 +79,8 @@ class MoonShotInit:
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
         messages.extend(self.__converter_file(inputs))
+        for i in history[0::2]:    # 历史文件继续上传
+            messages.extend(self.__converter_file(i))
         messages.extend(self.__conversation_history(history))
         messages.append(self.__converter_user(inputs))
         header = {
@@ -169,21 +171,21 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     gpt_bro_init = MoonShotInit()
     watch_dog_patience = 60  # 看门狗的耐心, 设置10秒即可
     stream_response = gpt_bro_init.generate_messages(inputs, llm_kwargs, history, sys_prompt, True)
-    gpt_bro_result = ''
-    for content, gpt_bro_result, error_bro_meg in stream_response:
-        gpt_bro_result += content
+    moonshot_bro_result = ''
+    for content, moonshot_bro_result, error_bro_meg in stream_response:
+        moonshot_bro_result += moonshot_bro_result
         if error_bro_meg:
             if len(observe_window) >= 3:
                 observe_window[2] = error_bro_meg
-            return f'{gpt_bro_result} 对话错误'
+            return f'{moonshot_bro_result} 对话错误'
             # 观测窗
         if len(observe_window) >= 1:
-            observe_window[0] = gpt_bro_result
+            observe_window[0] = moonshot_bro_result
         if len(observe_window) >= 2:
             if (time.time() - observe_window[1]) > watch_dog_patience:
                 observe_window[2] = "请求超时，程序终止。"
-                raise RuntimeError(f"{gpt_bro_result} 程序终止。")
-    return gpt_bro_result
+                raise RuntimeError(f"{moonshot_bro_result} 程序终止。")
+    return moonshot_bro_result
 
 if __name__ == '__main__':
     moon_ai = MoonShotInit()
