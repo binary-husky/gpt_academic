@@ -207,6 +207,8 @@ ZHIPUAI_MODEL = "" # 此选项已废弃，不再需要填写
 # Claude API KEY
 ANTHROPIC_API_KEY = ""
 
+# 月之暗面 API KEY
+MOONSHOT_API_KEY = ""
 
 # Mathpix 拥有执行PDF的OCR功能，但是需要注册账号
 MATHPIX_APPID = ""
