@@ -61,6 +61,7 @@ API_URL_REDIRECT, AZURE_ENDPOINT, AZURE_ENGINE = get_conf("API_URL_REDIRECT", "A
 openai_endpoint = "https://api.openai.com/v1/chat/completions"
 api2d_endpoint = "https://openai.api2d.net/v1/chat/completions"
 newbing_endpoint = "wss://sydney.bing.com/sydney/ChatHub"
+gemini_endpoint = "https://generativelanguage.googleapis.com/v1beta/models"
 if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
 azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
 # 兼容旧版的配置
@@ -75,6 +76,7 @@ except:
 if openai_endpoint in API_URL_REDIRECT: openai_endpoint = API_URL_REDIRECT[openai_endpoint]
 if api2d_endpoint in API_URL_REDIRECT: api2d_endpoint = API_URL_REDIRECT[api2d_endpoint]
 if newbing_endpoint in API_URL_REDIRECT: newbing_endpoint = API_URL_REDIRECT[newbing_endpoint]
+if gemini_endpoint in API_URL_REDIRECT: gemini_endpoint = API_URL_REDIRECT[gemini_endpoint]
 
 
 # 获取tokenizer
@@ -291,7 +293,7 @@ model_info = {
     "gemini-pro": {
         "fn_with_ui": genai_ui,
         "fn_without_ui": genai_noui,
-        "endpoint": None,
+        "endpoint": gemini_endpoint,
         "max_token": 1024 * 32,
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
@@ -299,7 +301,7 @@ model_info = {
     "gemini-pro-vision": {
         "fn_with_ui": genai_ui,
         "fn_without_ui": genai_noui,
-        "endpoint": None,
+        "endpoint": gemini_endpoint,
         "max_token": 1024 * 32,
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,

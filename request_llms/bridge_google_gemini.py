@@ -20,7 +20,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     if get_conf("GEMINI_API_KEY") == "":
         raise ValueError(f"请配置 GEMINI_API_KEY。")
 
-    genai = GoogleChatInit()
+    genai = GoogleChatInit(llm_kwargs)
     watch_dog_patience = 5  # 看门狗的耐心, 设置5秒即可
     gpt_replying_buffer = ''
     stream_response = genai.generate_chat(inputs, llm_kwargs, history, sys_prompt)
@@ -70,7 +70,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
 
     chatbot.append((inputs, ""))
     yield from update_ui(chatbot=chatbot, history=history)
-    genai = GoogleChatInit()
+    genai = GoogleChatInit(llm_kwargs)
     retry = 0
     while True:
         try:
