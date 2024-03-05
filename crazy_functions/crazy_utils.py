@@ -135,13 +135,25 @@ def request_gpt_model_in_new_thread_with_ui_alive(
     yield from update_ui(chatbot=chatbot, history=[]) # 如果最后成功了，则删除报错信息
     return final_result
 
-def can_multi_process(llm):
-    if llm.startswith('gpt-'): return True
-    if llm.startswith('api2d-'): return True
-    if llm.startswith('azure-'): return True
-    if llm.startswith('spark'): return True
-    if llm.startswith('zhipuai') or llm.startswith('glm-'): return True
-    return False
+def can_multi_process(llm) -> bool:
+    from request_llms.bridge_all import model_info
+
+    def default_condition(llm) -> bool:
+        # legacy condition
+        if llm.startswith('gpt-'): return True
+        if llm.startswith('api2d-'): return True
+        if llm.startswith('azure-'): return True
+        if llm.startswith('spark'): return True
+        if llm.startswith('zhipuai') or llm.startswith('glm-'): return True
+        return False
+
+    if llm in model_info:
+        if 'can_multi_thread' in model_info[llm]:
+            return model_info[llm]['can_multi_thread']
+        else:
+            return default_condition(llm)
+    else:
+        return default_condition(llm)
 
 def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         inputs_array, inputs_show_user_array, llm_kwargs,
