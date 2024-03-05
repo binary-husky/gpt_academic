@@ -160,3 +160,8 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         chatbot[-1] = (chatbot[-1][0], "[Local Message] Reduce the length. 本次输入过长, 或历史数据过长. 历史缓存数据已部分释放, 您可以请再次尝试. (若再次失败则更可能是因为输入过长.)")
         yield from update_ui(chatbot=chatbot, history=history, msg="异常") # 刷新界面
         return
+    except RuntimeError as e:
+        tb_str = '```\n' + trimmed_format_exc() + '```'
+        chatbot[-1] = (chatbot[-1][0], tb_str)
+        yield from update_ui(chatbot=chatbot, history=history, msg="异常") # 刷新界面
+        return
