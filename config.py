@@ -92,10 +92,12 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-3-turbo",
                     "gemini-pro", "chatglm3", "claude-2"]
 # P.S. 其他可用的模型还包括 [
-# "moss", "qwen-turbo", "qwen-plus", "qwen-max"
-# "zhipuai", "qianfan", "deepseekcoder", "llama2", "qwen-local", "gpt-3.5-turbo-0613",
-# "gpt-3.5-turbo-16k-0613",  "gpt-3.5-random", "api2d-gpt-3.5-turbo", 'api2d-gpt-3.5-turbo-16k',
-# "spark", "sparkv2", "sparkv3", "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"
+# "moonshot-v1-128k", "moonshot-v1-32k", "moonshot-v1-8k",
+# "qwen-turbo", "qwen-plus", "qwen-max",
+# "zhipuai", "qianfan", "deepseekcoder", "llama2", "qwen-local", "gpt-3.5-turbo-0613", "moss",
+# "gpt-3.5-turbo-16k-0613", "gpt-3.5-random", "api2d-gpt-3.5-turbo", 'api2d-gpt-3.5-turbo-16k',
+# "spark", "sparkv2", "sparkv3", "sparkv3.5",
+# "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"
 # ]
 
 
