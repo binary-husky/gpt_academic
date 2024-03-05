@@ -56,7 +56,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     """
     from anthropic import Anthropic
     watch_dog_patience = 5 # 看门狗的耐心, 设置5秒即可
-    prompt = generate_payload(inputs, llm_kwargs, history, system_prompt=sys_prompt, stream=True)
+    message = generate_payload(inputs, llm_kwargs, history, system_prompt=sys_prompt, stream=True)
     retry = 0
     if len(ANTHROPIC_API_KEY) == 0:
         raise RuntimeError("没有设置ANTHROPIC_API_KEY选项")
@@ -68,12 +68,13 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
             anthropic = Anthropic(api_key=ANTHROPIC_API_KEY)
             # endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
             # with ProxyNetworkActivate()
-            stream = anthropic.completions.create(
-                prompt=prompt,
-                max_tokens_to_sample=4096,       # The maximum number of tokens to generate before stopping.
+            stream = anthropic.messages.create(
+                messages=message,
+                max_tokens=4096,       # The maximum number of tokens to generate before stopping.
                 model=llm_kwargs['llm_model'],
                 stream=True,
-                temperature = llm_kwargs['temperature']
+                temperature = llm_kwargs['temperature'],
+                system=sys_prompt
             )
             break
         except Exception as e:
@@ -84,11 +85,15 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     result = ''
     try:
         for completion in stream:
-            result += completion.completion
-            if not console_slience: print(completion.completion, end='')
+            if completion.type == "message_start" or completion.type == "content_block_start":
+                continue
+            elif completion.type == "message_stop" or completion.type == "content_block_stop" or completion.type == "message_delta":
+                break
+            result += completion.delta.text
+            if not console_slience: print(completion.delta.text, end='')
             if observe_window is not None:
                 # 观测窗，把已经获取的数据显示出去
-                if len(observe_window) >= 1: observe_window[0] += completion.completion
+                if len(observe_window) >= 1: observe_window[0] += completion.delta.text
                 # 看门狗，如果超过期限没有喂狗，则终止
                 if len(observe_window) >= 2:
                     if (time.time()-observe_window[1]) > watch_dog_patience:
@@ -125,7 +130,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
 
     try:
-        prompt = generate_payload(inputs, llm_kwargs, history, system_prompt, stream)
+        message = generate_payload(inputs, llm_kwargs, history, system_prompt, stream)
     except RuntimeError as e:
         chatbot[-1] = (inputs, f"您提供的api-key不满足要求，不包含任何可用于{llm_kwargs['llm_model']}的api-key。您可能选择了错误的模型或请求源。")
         yield from update_ui(chatbot=chatbot, history=history, msg="api-key不满足要求") # 刷新界面
@@ -141,14 +146,14 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             anthropic = Anthropic(api_key=ANTHROPIC_API_KEY)
             # endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
             # with ProxyNetworkActivate()
-            stream = anthropic.completions.create(
-                prompt=prompt,
-                max_tokens_to_sample=4096,       # The maximum number of tokens to generate before stopping.
+            stream = anthropic.messages.create(
+                messages=message,
+                max_tokens=4096,       # The maximum number of tokens to generate before stopping.
                 model=llm_kwargs['llm_model'],
                 stream=True,
-                temperature = llm_kwargs['temperature']
+                temperature = llm_kwargs['temperature'],
+                system=system_prompt
             )
-
             break
         except:
             retry += 1
@@ -160,8 +165,12 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     gpt_replying_buffer = ""
 
     for completion in stream:
+        if completion.type == "message_start" or completion.type == "content_block_start":
+            continue
+        elif completion.type == "message_stop" or completion.type == "content_block_stop" or completion.type == "message_delta":
+            break
         try:
-            gpt_replying_buffer = gpt_replying_buffer + completion.completion
+            gpt_replying_buffer = gpt_replying_buffer + completion.delta.text
             history[-1] = gpt_replying_buffer
             chatbot[-1] = (history[-2], history[-1])
             yield from update_ui(chatbot=chatbot, history=history, msg='正常') # 刷新界面
@@ -173,25 +182,6 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             yield from update_ui(chatbot=chatbot, history=history, msg="Json异常" + tb_str) # 刷新界面
             return
 
-
-
-
-# https://github.com/jtsang4/claude-to-chatgpt/blob/main/claude_to_chatgpt/adapter.py
-def convert_messages_to_prompt(messages):
-    prompt = ""
-    role_map = {
-        "system": "Human",
-        "user": "Human",
-        "assistant": "Assistant",
-    }
-    for message in messages:
-        role = message["role"]
-        content = message["content"]
-        transformed_role = role_map[role]
-        prompt += f"\n\n{transformed_role.capitalize()}: {content}"
-    prompt += "\n\nAssistant: "
-    return prompt
-
 def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     """
     整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
@@ -200,7 +190,7 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
 
     conversation_cnt = len(history) // 2
 
-    messages = [{"role": "system", "content": system_prompt}]
+    messages = []
     if conversation_cnt:
         for index in range(0, 2*conversation_cnt, 2):
             what_i_have_asked = {}
@@ -219,10 +209,8 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
 
     what_i_ask_now = {}
     what_i_ask_now["role"] = "user"
-    what_i_ask_now["content"] = inputs
+    what_i_ask_now["content"] = str(inputs)
     messages.append(what_i_ask_now)
-    prompt = convert_messages_to_prompt(messages)
-
-    return prompt
-
-
+    print(messages)
+    print(system_prompt)
+    return messages
