@@ -1,7 +1,7 @@
 # encoding: utf-8
 # @Time   : 2024/3/3
 # @Author : Spike
-# @Descr   :
+
 from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 from typing import List, Literal
@@ -70,7 +70,5 @@ def create_app():
     app = FastAPI()
     app.add_middleware(SessionMiddleware, secret_key="!secret")
     app.middleware('https')(authentication)
-
     mount_app_routes(app)
-
     return app
