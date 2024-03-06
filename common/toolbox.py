@@ -151,9 +151,6 @@ def model_selection(txt, models, llm_kwargs, plugin_kwargs, cookies, chatbot_wit
             elif llm_kwargs['llm_model'].find('glm') != -1:
                 if "glm-v自动识图" in models:
                     llm_kwargs['llm_model'] = 'glm-4v'
-            else:
-                if "gpt4-v自动识图" in models:  # 兜底
-                    llm_kwargs['llm_model'] = 'gpt-4-vision-preview'
             yield from update_ui(chatbot_with_cookie, history,
                                  msg=f'Switching to `{llm_kwargs["llm_model"]}` dialog...')
     return txt_proc

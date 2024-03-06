@@ -1,4 +1,3 @@
-
 """
     该文件中主要包含2个函数，是所有LLM的通用接口，它们会继续向下调用更底层的LLM模型，处理多模型并行等细节
 
@@ -25,11 +24,11 @@ from .bridge_chatglm3 import predict as chatglm3_ui
 from .bridge_qianfan import predict_no_ui_long_connection as qianfan_noui
 from .bridge_qianfan import predict as qianfan_ui
 
-
 from .bridge_google_gemini import predict as genai_ui
-from .bridge_google_gemini import predict_no_ui_long_connection  as genai_noui
+from .bridge_google_gemini import predict_no_ui_long_connection as genai_noui
 
 colors = ['#FF00FF', '#00FFFF', '#FF0000', '#990099', '#009999', '#990044']
+
 
 class LazyloadTiktoken(object):
     def __init__(self, model):
@@ -42,14 +41,15 @@ class LazyloadTiktoken(object):
         tmp = tiktoken.encoding_for_model(model)
         print('加载tokenizer完毕')
         return tmp
-    
+
     def encode(self, *args, **kwargs):
-        encoder = self.get_encoder(self.model) 
+        encoder = self.get_encoder(self.model)
         return encoder.encode(*args, **kwargs)
-    
+
     def decode(self, *args, **kwargs):
-        encoder = self.get_encoder(self.model) 
+        encoder = self.get_encoder(self.model)
         return encoder.decode(*args, **kwargs)
+
 
 # Endpoint 重定向
 API_URL_REDIRECT = get_conf("API_URL_REDIRECT")
@@ -59,7 +59,7 @@ newbing_endpoint = "wss://sydney.bing.com/sydney/ChatHub"
 # 兼容旧版的配置
 try:
     API_URL = get_conf("API_URL")
-    if API_URL != "https://api.openai.com/v1/chat/completions": 
+    if API_URL != "https://api.openai.com/v1/chat/completions":
         openai_endpoint = API_URL
         print("警告！API_URL配置选项将被弃用，请更换为API_URL_REDIRECT配置")
 except:
@@ -69,13 +69,11 @@ if openai_endpoint in API_URL_REDIRECT: openai_endpoint = API_URL_REDIRECT[opena
 if api2d_endpoint in API_URL_REDIRECT: api2d_endpoint = API_URL_REDIRECT[api2d_endpoint]
 if newbing_endpoint in API_URL_REDIRECT: newbing_endpoint = API_URL_REDIRECT[newbing_endpoint]
 
-
 # 获取tokenizer
 tokenizer_gpt35 = LazyloadTiktoken("gpt-3.5-turbo")
 tokenizer_gpt4 = LazyloadTiktoken("gpt-4")
 get_token_num_gpt35 = lambda txt: len(tokenizer_gpt35.encode(txt, disallowed_special=()))
 get_token_num_gpt4 = lambda txt: len(tokenizer_gpt4.encode(txt, disallowed_special=()))
-
 
 # 开始初始化模型
 AVAIL_LLM_MODELS, LLM_MODEL = get_conf("AVAIL_LLM_MODELS", "LLM_MODEL")
@@ -103,7 +101,7 @@ model_info = {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
         "endpoint": openai_endpoint,
-        "max_token": 1024*16,
+        "max_token": 1024 * 16,
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
@@ -116,7 +114,7 @@ model_info = {
         "token_cnt": get_token_num_gpt35,
     },
 
-    "gpt-3.5-turbo-1106": {#16k
+    "gpt-3.5-turbo-1106": {  # 16k
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
         "endpoint": openai_endpoint,
@@ -242,6 +240,7 @@ model_info = {
 # -=-=-=-=-=-=- 月之暗面 -=-=-=-=-=-=-
 from request_llms.bridge_moonshot import predict as moonshot_ui
 from request_llms.bridge_moonshot import predict_no_ui_long_connection as moonshot_no_ui
+
 model_info.update({
     "moonshot-v1-8k": {
         "fn_with_ui": moonshot_ui,
@@ -269,7 +268,8 @@ model_info.update({
     }
 })
 # Azure
-AZURE_ENDPOINT, AZURE_ENGINE_DICT, AZURE_URL_VERSION = get_conf('AZURE_ENDPOINT', 'AZURE_ENGINE_DICT', 'AZURE_URL_VERSION')
+AZURE_ENDPOINT, AZURE_ENGINE_DICT, AZURE_URL_VERSION = get_conf('AZURE_ENDPOINT', 'AZURE_ENGINE_DICT',
+                                                                'AZURE_URL_VERSION')
 for azure in AZURE_ENGINE_DICT:
     if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
     azure_endpoint = AZURE_ENDPOINT + str(AZURE_URL_VERSION).replace('{v}', azure)
@@ -286,15 +286,15 @@ for azure in AZURE_ENGINE_DICT:
 
 # -=-=-=-=-=-=- api2d 对齐支持 -=-=-=-=-=-=-
 for model in AVAIL_LLM_MODELS:
-    if model.startswith('api2d-') and (model.replace('api2d-','') in model_info.keys()):
-        mi = copy.deepcopy(model_info[model.replace('api2d-','')])
+    if model.startswith('api2d-') and (model.replace('api2d-', '') in model_info.keys()):
+        mi = copy.deepcopy(model_info[model.replace('api2d-', '')])
         mi.update({"endpoint": api2d_endpoint})
         model_info.update({model: mi})
 
 # -=-=-=-=-=-=- azure 对齐支持 -=-=-=-=-=-=-
 for model in AVAIL_LLM_MODELS:
-    if model.startswith('azure-') and (model.replace('azure-','') in model_info.keys()):
-        mi = copy.deepcopy(model_info[model.replace('azure-','')])
+    if model.startswith('azure-') and (model.replace('azure-', '') in model_info.keys()):
+        mi = copy.deepcopy(model_info[model.replace('azure-', '')])
         mi.update({"endpoint": azure_endpoint})
         model_info.update({model: mi})
 
@@ -302,6 +302,7 @@ for model in AVAIL_LLM_MODELS:
 if "claude-1-100k" in AVAIL_LLM_MODELS or "claude-2" in AVAIL_LLM_MODELS:
     from .bridge_claude import predict_no_ui_long_connection as claude_noui
     from .bridge_claude import predict as claude_ui
+
     model_info.update({
         "claude-1-100k": {
             "fn_with_ui": claude_ui,
@@ -322,9 +323,30 @@ if "claude-1-100k" in AVAIL_LLM_MODELS or "claude-2" in AVAIL_LLM_MODELS:
             "token_cnt": get_token_num_gpt35,
         },
     })
+from .bridge_claude_cls import predict_no_ui_long_connection as claude_noui_cls
+from .bridge_claude_cls import predict as claude_ui_cls
+model_info.update({
+    "claude-3-opus-20240229": {
+        "fn_with_ui": claude_ui_cls,
+        "fn_without_ui": claude_noui_cls,
+        "endpoint": None,
+        "max_token": 1024*200,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+    "claude-3-sonnet-20240229": {
+        "fn_with_ui": claude_ui_cls,
+        "fn_without_ui": claude_noui_cls,
+        "endpoint": None,
+        "max_token": 1024*200,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+})
 if "jittorllms_rwkv" in AVAIL_LLM_MODELS:
     from .bridge_jittorllms_rwkv import predict_no_ui_long_connection as rwkv_noui
     from .bridge_jittorllms_rwkv import predict as rwkv_ui
+
     model_info.update({
         "jittorllms_rwkv": {
             "fn_with_ui": rwkv_ui,
@@ -338,6 +360,7 @@ if "jittorllms_rwkv" in AVAIL_LLM_MODELS:
 if "jittorllms_llama" in AVAIL_LLM_MODELS:
     from .bridge_jittorllms_llama import predict_no_ui_long_connection as llama_noui
     from .bridge_jittorllms_llama import predict as llama_ui
+
     model_info.update({
         "jittorllms_llama": {
             "fn_with_ui": llama_ui,
@@ -351,6 +374,7 @@ if "jittorllms_llama" in AVAIL_LLM_MODELS:
 if "jittorllms_pangualpha" in AVAIL_LLM_MODELS:
     from .bridge_jittorllms_pangualpha import predict_no_ui_long_connection as pangualpha_noui
     from .bridge_jittorllms_pangualpha import predict as pangualpha_ui
+
     model_info.update({
         "jittorllms_pangualpha": {
             "fn_with_ui": pangualpha_ui,
@@ -364,6 +388,7 @@ if "jittorllms_pangualpha" in AVAIL_LLM_MODELS:
 if "moss" in AVAIL_LLM_MODELS:
     from .bridge_moss import predict_no_ui_long_connection as moss_noui
     from .bridge_moss import predict as moss_ui
+
     model_info.update({
         "moss": {
             "fn_with_ui": moss_ui,
@@ -377,6 +402,7 @@ if "moss" in AVAIL_LLM_MODELS:
 if "stack-claude" in AVAIL_LLM_MODELS:
     from .bridge_stackclaude import predict_no_ui_long_connection as claude_noui
     from .bridge_stackclaude import predict as claude_ui
+
     model_info.update({
         "stack-claude": {
             "fn_with_ui": claude_ui,
@@ -391,6 +417,7 @@ if "newbing-free" in AVAIL_LLM_MODELS:
     try:
         from .bridge_newbingfree import predict_no_ui_long_connection as newbingfree_noui
         from .bridge_newbingfree import predict as newbingfree_ui
+
         model_info.update({
             "newbing-free": {
                 "fn_with_ui": newbingfree_ui,
@@ -403,10 +430,11 @@ if "newbing-free" in AVAIL_LLM_MODELS:
         })
     except:
         print(trimmed_format_exc())
-if "newbing" in AVAIL_LLM_MODELS:   # same with newbing-free
+if "newbing" in AVAIL_LLM_MODELS:  # same with newbing-free
     try:
         from .bridge_newbingfree import predict_no_ui_long_connection as newbingfree_noui
         from .bridge_newbingfree import predict as newbingfree_ui
+
         model_info.update({
             "newbing": {
                 "fn_with_ui": newbingfree_ui,
@@ -419,10 +447,11 @@ if "newbing" in AVAIL_LLM_MODELS:   # same with newbing-free
         })
     except:
         print(trimmed_format_exc())
-if "chatglmft" in AVAIL_LLM_MODELS:   # same with newbing-free
+if "chatglmft" in AVAIL_LLM_MODELS:  # same with newbing-free
     try:
         from .bridge_chatglmft import predict_no_ui_long_connection as chatglmft_noui
         from .bridge_chatglmft import predict as chatglmft_ui
+
         model_info.update({
             "chatglmft": {
                 "fn_with_ui": chatglmft_ui,
@@ -439,6 +468,7 @@ if "internlm" in AVAIL_LLM_MODELS:
     try:
         from .bridge_internlm import predict_no_ui_long_connection as internlm_noui
         from .bridge_internlm import predict as internlm_ui
+
         model_info.update({
             "internlm": {
                 "fn_with_ui": internlm_ui,
@@ -455,6 +485,7 @@ if "chatglm_onnx" in AVAIL_LLM_MODELS:
     try:
         from .bridge_chatglmonnx import predict_no_ui_long_connection as chatglm_onnx_noui
         from .bridge_chatglmonnx import predict as chatglm_onnx_ui
+
         model_info.update({
             "chatglm_onnx": {
                 "fn_with_ui": chatglm_onnx_ui,
@@ -471,6 +502,7 @@ if "qwen-local" in AVAIL_LLM_MODELS:
     try:
         from .bridge_qwen_local import predict_no_ui_long_connection as qwen_local_noui
         from .bridge_qwen_local import predict as qwen_local_ui
+
         model_info.update({
             "qwen-local": {
                 "fn_with_ui": qwen_local_ui,
@@ -483,10 +515,11 @@ if "qwen-local" in AVAIL_LLM_MODELS:
         })
     except:
         print(trimmed_format_exc())
-if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-max" in AVAIL_LLM_MODELS:   # zhipuai
+if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-max" in AVAIL_LLM_MODELS:  # zhipuai
     try:
         from .bridge_qwen import predict_no_ui_long_connection as qwen_noui
         from .bridge_qwen import predict as qwen_ui
+
         model_info.update({
             "qwen-turbo": {
                 "fn_with_ui": qwen_ui,
@@ -515,10 +548,11 @@ if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-
         })
     except:
         print(trimmed_format_exc())
-if "spark" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
+if "spark" in AVAIL_LLM_MODELS:  # 讯飞星火认知大模型
     try:
         from .bridge_spark import predict_no_ui_long_connection as spark_noui
         from .bridge_spark import predict as spark_ui
+
         model_info.update({
             "spark": {
                 "fn_with_ui": spark_ui,
@@ -531,10 +565,11 @@ if "spark" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
         })
     except:
         print(trimmed_format_exc())
-if "sparkv2" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
+if "sparkv2" in AVAIL_LLM_MODELS:  # 讯飞星火认知大模型
     try:
         from .bridge_spark import predict_no_ui_long_connection as spark_noui
         from .bridge_spark import predict as spark_ui
+
         model_info.update({
             "sparkv2": {
                 "fn_with_ui": spark_ui,
@@ -547,10 +582,11 @@ if "sparkv2" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
         })
     except:
         print(trimmed_format_exc())
-if "sparkv3" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
+if "sparkv3" in AVAIL_LLM_MODELS:  # 讯飞星火认知大模型
     try:
         from .bridge_spark import predict_no_ui_long_connection as spark_noui
         from .bridge_spark import predict as spark_ui
+
         model_info.update({
             "sparkv3": {
                 "fn_with_ui": spark_ui,
@@ -563,10 +599,11 @@ if "sparkv3" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
         })
     except:
         print(trimmed_format_exc())
-if "llama2" in AVAIL_LLM_MODELS:   # llama2
+if "llama2" in AVAIL_LLM_MODELS:  # llama2
     try:
         from .bridge_llama2 import predict_no_ui_long_connection as llama2_noui
         from .bridge_llama2 import predict as llama2_ui
+
         model_info.update({
             "llama2": {
                 "fn_with_ui": llama2_ui,
@@ -579,10 +616,11 @@ if "llama2" in AVAIL_LLM_MODELS:   # llama2
         })
     except:
         print(trimmed_format_exc())
-if "glm-4" in AVAIL_LLM_MODELS:   # zhipuai
+if "glm-4" in AVAIL_LLM_MODELS:  # zhipuai
     try:
         from .bridge_zhipu import predict_no_ui_long_connection as zhipu_noui
         from .bridge_zhipu import predict as zhipu_ui
+
         model_info.update({
             "glm-4": {
                 "fn_with_ui": zhipu_ui,
@@ -603,10 +641,11 @@ if "glm-4" in AVAIL_LLM_MODELS:   # zhipuai
         })
     except:
         print(trimmed_format_exc())
-if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
+if "deepseekcoder" in AVAIL_LLM_MODELS:  # deepseekcoder
     try:
         from .bridge_deepseekcoder import predict_no_ui_long_connection as deepseekcoder_noui
         from .bridge_deepseekcoder import predict as deepseekcoder_ui
+
         model_info.update({
             "deepseekcoder": {
                 "fn_with_ui": deepseekcoder_ui,
@@ -625,10 +664,10 @@ AZURE_CFG_ARRAY = get_conf("AZURE_CFG_ARRAY")
 if len(AZURE_CFG_ARRAY) > 0:
     for azure_model_name, azure_cfg_dict in AZURE_CFG_ARRAY.items():
         # 可能会覆盖之前的配置，但这是意料之中的
-        if not azure_model_name.startswith('azure'): 
+        if not azure_model_name.startswith('azure'):
             raise ValueError("AZURE_CFG_ARRAY中配置的模型必须以azure开头")
         endpoint_ = azure_cfg_dict["AZURE_ENDPOINT"] + \
-            f'openai/deployments/{azure_cfg_dict["AZURE_ENGINE"]}/chat/completions?api-version=2023-05-15'
+                    f'openai/deployments/{azure_cfg_dict["AZURE_ENGINE"]}/chat/completions?api-version=2023-05-15'
         model_info.update({
             azure_model_name: {
                 "fn_with_ui": chatgpt_ui,
@@ -636,7 +675,7 @@ if len(AZURE_CFG_ARRAY) > 0:
                 "endpoint": endpoint_,
                 "azure_api_key": azure_cfg_dict["AZURE_API_KEY"],
                 "max_token": azure_cfg_dict["AZURE_MODEL_MAX_TOKEN"],
-                "tokenizer": tokenizer_gpt35,   # tokenizer只用于粗估token数量
+                "tokenizer": tokenizer_gpt35,  # tokenizer只用于粗估token数量
                 "token_cnt": get_token_num_gpt35,
             }
         })
@@ -644,11 +683,11 @@ if len(AZURE_CFG_ARRAY) > 0:
             AVAIL_LLM_MODELS += [azure_model_name]
 
 
-
 def LLM_CATCH_EXCEPTION(f):
     """
     装饰器函数，将错误显示出来
     """
+
     def decorated(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience):
         try:
             return f(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience)
@@ -656,6 +695,7 @@ def LLM_CATCH_EXCEPTION(f):
             tb_str = '\n' + trimmed_format_exc() + '\\n'
             observe_window[0] = tb_str
             return tb_str
+
     return decorated
 
 
@@ -689,9 +729,9 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
         executor = ThreadPoolExecutor(max_workers=4)
         models = model.split('&')
         n_model = len(models)
-        
+
         window_len = len(observe_window)
-        assert window_len==3
+        assert window_len == 3
         window_mutex = [["", time.time(), ""] for _ in range(n_model)] + [True]
 
         futures = []
@@ -700,7 +740,8 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
             method = model_info[model]["fn_without_ui"]
             llm_kwargs_feedin = copy.deepcopy(llm_kwargs)
             llm_kwargs_feedin['llm_model'] = model
-            future = executor.submit(LLM_CATCH_EXCEPTION(method), inputs, llm_kwargs_feedin, history, sys_prompt, window_mutex[i], console_slience)
+            future = executor.submit(LLM_CATCH_EXCEPTION(method), inputs, llm_kwargs_feedin, history, sys_prompt,
+                                     window_mutex[i], console_slience)
             futures.append(future)
 
         def mutex_manager(window_mutex, observe_window):
@@ -708,7 +749,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
                 time.sleep(0.25)
                 if not window_mutex[-1]: break
                 # 看门狗（watchdog）
-                for i in range(n_model): 
+                for i in range(n_model):
                     window_mutex[i][1] = observe_window[1]
                 # 观察窗（window）
                 chat_string = []

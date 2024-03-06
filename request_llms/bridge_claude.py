@@ -81,7 +81,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
             traceback.print_exc()
             if retry > MAX_RETRY: raise TimeoutError
             if MAX_RETRY!=0:
-                logg(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
+                logger(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
     result = ''
     try: 
         for completion in stream:

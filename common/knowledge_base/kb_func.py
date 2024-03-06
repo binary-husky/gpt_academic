@@ -72,14 +72,14 @@ def get_vector_to_dict(vector_list):
 
 
 def vector_recall_by_input(user_input, chatbot, history, llm_kwargs, kb_prompt_cls, kb_prompt_name):
-    vector_fold = func_box.get_fold_panel()
+    vector_fold_format = func_box.get_fold_panel()
     vector_content = ''
-    chatbot.append([user_input, vector_fold.format(title='意图识别中', content='...', status='')])
+    chatbot.append([user_input, vector_fold_format(title='意图识别中', content='...', status='')])
     yield from update_ui(chatbot, history)
     user_intent, prompt = user_intent_recognition(user_input, history, llm_kwargs)
     if user_intent.get('kb', {}):
-        vector_content += f"意图识别：{user_intent}\n"
-        chatbot[-1][1] = vector_fold.format(title='意图识别成功，准备进行对向量数据库进行召回', content=vector_content,
+        vector_content += f"意图识别：{user_intent}"
+        chatbot[-1][1] = vector_fold_format(title='意图识别成功，准备进行对向量数据库进行召回', content=vector_content,
                                             status='')
         yield from update_ui(chatbot, history)
         source_data = {}
@@ -89,20 +89,20 @@ def vector_recall_by_input(user_input, chatbot, history, llm_kwargs, kb_prompt_c
                                                  score_threshold=llm_kwargs['kb_config']['score'])
             data = get_vector_to_dict(vector_list)
             source_data.update(data)
-            vector_content += f"向量召回：{data}\n"
-            chatbot[-1][1] = vector_fold.format(title='向量召回中', content=vector_content, status='')
+            vector_content += f"\n向量召回：{json.dumps(data, indent=4, ensure_ascii=False)}"
+            chatbot[-1][1] = vector_fold_format(title='向量召回中', content=vector_content, status='')
             yield from update_ui(chatbot, history)
         if not source_data:
             vector_content += '无数据，转发到普通对话'
             return user_input
-        chatbot[-1][1] = vector_fold.format(title='向量召回完成', content=vector_content, status='Done')
+        chatbot[-1][1] = vector_fold_format(title='向量召回完成', content=vector_content, status='Done')
         yield from update_ui(chatbot, history)
         prompt = db_handler.PromptDb(table=kb_prompt_cls).find_prompt_result(kb_prompt_name)
         source_text = "\n".join([f"## {i}\n{source_data[i]}" for i in source_data])
         kb_prompt = func_box.replace_expected_text(prompt, source_text, '{{{v}}}')
         user_input = func_box.replace_expected_text(kb_prompt, user_input, '{{{q}}}')
         return user_input
-    chatbot[-1][1] = vector_fold.format(title='无法找到可用知识库, 转发到普通对话',
+    chatbot[-1][1] = vector_fold_format(title='无法找到可用知识库, 转发到普通对话',
                                         content=str(user_intent) + f"prompt: \n{prompt}",
                                         status='Done')
     yield from update_ui(chatbot, history)

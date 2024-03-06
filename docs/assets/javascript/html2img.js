@@ -1,5 +1,4 @@
-
-function convert2canvas(shareContent=null) {
+async function convert2canvas(shareContent = null) {
     let pElement = statusDisplay.querySelector('p');
     pElement.innerHTML = '🏃🏻‍ 正在将对话记录转换为图片，请稍等'
     if (shareContent == null) {
@@ -15,7 +14,7 @@ function convert2canvas(shareContent=null) {
     canvas.height = height * scale; //定义canvas高度 * 倍数，默认高度为150px
     canvas.getContext("2d").scale(scale, scale); //创建canvas的context对象，设置scale，相当于画布的“画笔”拥有多种绘制路径、矩形、圆形、字符以及添加图像的方法
 
-    let backgroundColor  = window.getComputedStyle(chatbot).backgroundColor;
+    let backgroundColor = window.getComputedStyle(chatbot).backgroundColor;
 
     let opts = { //初始化对象
         backgroundColor: backgroundColor,//设置canvas背景为透明
@@ -45,21 +44,44 @@ function convert2canvas(shareContent=null) {
             "height": canvas.height / 2 + "px",
         })
         $(img).attr("id", "img1"); //为图片元素添加id属性
-
-        // 生成一个a超链接元素
-        let linkElement = document.createElement('a');
-
-        // 将a的download属性设置为我们想要下载的图片名称，若name不存在则使用‘下载图片名称’作为默认名称
-        let history_select = historySelector.querySelector('.chat-selected-btns').parentElement
-        let history_value = history_select.querySelector('input').value.replace(/\s/g, '');
-        linkElement.download = history_value + '.png';
-        linkElement.innerHTML = history_value + '.png'
-        linkElement.href = img.src;//将img的src值设置为a.href属性，img.src为base64编码值
         // 将已有<p>标签中原来的内容清空，并插入我们新创建的<a>元素
+        copyToClipboard(img);  // 将图片复制到剪切板
+        toast_push('📸 已将图片写入粘贴板', 2000)
         pElement.innerHTML = '';         // 先清空<p>标签内的所有内容
-        pElement.appendChild(linkElement);  // 然后将<a>标签添加进去
+        pElement.appendChild(createALink(img));  // 然后将<a>标签添加进去
         // 触发a的单击事件
-        toast_push('📸 转换图片成功，可在右侧工具栏消息中下载', 3000)
+        toast_push('📸 或可在右侧工具栏消息中下载', 2000)
+
     });
     return canvas;
+}
+
+async function copyToClipboard(image) {
+    // 尝试使用 Clipboard API 写入剪切板
+    if (navigator.clipboard && window.isSecureContext) {
+        // 将image转换成Blob对象
+        fetch(image.src)
+            .then(res => res.blob())
+            .then(blob => {
+                // Write the blob image to clipboard
+                navigator.clipboard.write([new ClipboardItem({'image/png': blob})])
+                    .then(() => console.log('Image copied!'))
+                    .catch(err => console.error('Could not copy image: ', err));
+            });
+    } else {
+        console.error('The Clipboard API is not available.');
+    }
+}
+
+
+function createALink(img) {
+    // 生成一个a超链接元素
+    let linkElement = document.createElement('a');
+    // 将a的download属性设置为我们想要下载的图片名称，若name不存在则使用‘下载图片名称’作为默认名称
+    let history_select = historySelector.querySelector('.chat-selected-btns').parentElement
+    let history_value = history_select.querySelector('input').value.replace(/\s/g, '');
+    linkElement.download = history_value + '.png';
+    linkElement.innerHTML = history_value + '.png'
+    linkElement.href = img.src;//将img的src值设置为a.href属性，img.src为base64编码值
+    return linkElement
 }

@@ -706,9 +706,14 @@ def split_domain_url(link_limit, start='http', domain_name: list = ['']) -> list
 def get_fold_panel(btn_id=None):
     if not btn_id:
         btn_id = uuid.uuid4().hex
-    return get_html('fold-panel.html').replace('{id}', btn_id)
+
+    def _format(title, content: str, status):
+        fold_html = get_html('fold-panel.html').replace('{id}', btn_id)
+        content = f'\n```\n{content.replace("```", "")}\n```\n'
+        return fold_html.format(title=title, content=content, status=status)
+
+    return _format
 
 
 if __name__ == '__main__':
-    # print(get_files_list('', ['.json']))
-    pass
+    print(get_fold_panel('test')(title='test', content='test', status='test'))
