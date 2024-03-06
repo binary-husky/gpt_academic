@@ -14,7 +14,7 @@ class ReaderDocxEve(UnstructuredFileLoader):
     def _get_elements(self) -> List:
         def docx2md(file_path):
             save_path = os.path.dirname(file_path)
-            return DocxHandler(file_path, save_path).get_markdown().replace(init_path.base_path, './')
+            return DocxHandler(file_path, save_path).get_markdown().replace(init_path.base_path, '.')
 
         markdown = docx2md(file_path=self.file_path)
         from unstructured.partition.text import partition_text

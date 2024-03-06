@@ -93,7 +93,7 @@ class MdHandler:
             output_dir: 保存路径，如果没有另存为操作，可以为空
         """
         if output_dir:
-            self.output_dir = os.path.join(output_dir, 'markdown')
+            self.output_dir = os.path.join(output_dir, '.markdown')
             os.makedirs(self.output_dir, exist_ok=True)
         self.md_path = md_path
         self.file_name = os.path.basename(md_path).split('.')[0]

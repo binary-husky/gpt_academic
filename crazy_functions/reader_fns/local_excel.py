@@ -28,7 +28,7 @@ class XlsxHandler:
             sheet:
         """
         if output_dir:
-            self.output_dir = os.path.join(output_dir, 'excel')
+            self.output_dir = os.path.join(output_dir, '.excel')
             os.makedirs(self.output_dir, exist_ok=True)
         self.template_excel = xlsx_path
         self.sheet = sheet

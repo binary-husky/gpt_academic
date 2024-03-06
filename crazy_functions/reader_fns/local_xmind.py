@@ -20,7 +20,7 @@ class XmindHandle:
             output_dir: 保存路径，如果没有另存为操作，可以为空
         """
         if output_dir:
-            self.output_dir = os.path.join(output_dir, 'xmind')
+            self.output_dir = os.path.join(output_dir, '.xmind')
             os.makedirs(self.output_dir, exist_ok=True)
         self.xmind_path = xmind_path
         try:  # xmindparser

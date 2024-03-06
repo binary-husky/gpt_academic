@@ -17,7 +17,7 @@ class ReaderIMGEve(UnstructuredFileLoader):
             result, _, error = ImgHandler(file_path, save_path).get_paddle_ocr()
             if error:
                 raise f"识别图片出错, 返回错误: {error}"
-            return result.replace(init_path.base_path, './')
+            return result.replace(init_path.base_path, '.')
 
         text = img2text(file_path=self.file_path)
         from unstructured.partition.text import partition_text

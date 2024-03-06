@@ -840,7 +840,8 @@ def kb_new_confirm(kb_name, kb_type, kb_model, kb_info):
         'kb_file_details': gr.DataFrame.update(value=pd.DataFrame(data=copy.deepcopy(kb_config.file_details_template))),
         'kb_file_fragment': gr.DataFrame.update(value=pd.DataFrame(data=copy.deepcopy(kb_config.file_fragment_template)))
     }
-    return list(new_output.values()) + list(edit_output.values()) + [base.kb_dict_to_list(kb_name_tm)]
+
+    return list(new_output.values()) + list(edit_output.values()) + [gr.update(choices=list(kb_name_tm.keys())+[kb_name])]
 
 
 def kb_download_embedding_model(model_name):
@@ -927,8 +928,9 @@ def kb_base_del(kb_name, del_confirm, _):
         if response.code != 200:
             raise gr.Error(json.dumps(response.__dict__, indent=4, ensure_ascii=False))
         kb_name_list = base.kb_dict_to_list(base.kb_details_to_dict()) + ['新建知识库']
-
-        return gr.update(visible=True), gr.update(visible=False), gr.update(choices=kb_name_list, value='新建知识库'), kb_name_list
+        kb_name_tm = base.kb_details_to_dict()
+        return (gr.update(visible=True), gr.update(visible=False), gr.update(choices=kb_name_list, value='新建知识库'),
+                list(kb_name_tm.keys()))
 
 
 def kb_docs_file_source_del(kb_name, kb_file, _):
@@ -1018,8 +1020,9 @@ def kb_base_changed_save(_, kb_name, kb_info, kb_max, kb_similarity, kb_tokenize
             text_splitter_name=kb_tokenizer
         )
         if resp.code == 200 and not resp.data.get('failed_files'):
-            yield gr.update(value=func_box.spike_toast('更新成功'), visible=True), gr.update()
+            last_fragment = __get_kb_fragment_df(kb_name, kb_file)
+            yield gr.update(value=func_box.spike_toast('更新成功'), visible=True), gr.update(value=last_fragment)
             time.sleep(1)
-            yield gr.update(value=func_box.spike_toast('更新成功'), visible=False), gr.update()
+            yield gr.update(value=func_box.spike_toast('更新成功'), visible=False), gr.update(value=last_fragment)
         else:
             yield gr.Error(f'更新失败, {resp.__dict__}')

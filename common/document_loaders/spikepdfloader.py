@@ -15,7 +15,7 @@ class ReaderPDFEve(UnstructuredFileLoader):
         def pdf2md(file_path):
             save_path = os.path.dirname(file_path)
             content = PDFHandler(file_path, save_path).get_markdown()
-            return content.replace(init_path.base_path, './')
+            return content.replace(init_path.base_path, '.')
 
         markdown = pdf2md(file_path=self.file_path)
         from unstructured.partition.text import partition_text

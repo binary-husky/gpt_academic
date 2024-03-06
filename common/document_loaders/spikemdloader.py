@@ -14,7 +14,7 @@ class ReaderMarkdownEve(UnstructuredFileLoader):
     def _get_elements(self) -> List:
         def md2md(file_path):
             save_path = os.path.dirname(file_path)
-            return MdHandler(file_path, save_path).get_content().replace(init_path.base_path, './')
+            return MdHandler(file_path, save_path).get_content().replace(init_path.base_path, '.')
 
         markdown = md2md(file_path=self.file_path)
         from unstructured.partition.text import partition_text
