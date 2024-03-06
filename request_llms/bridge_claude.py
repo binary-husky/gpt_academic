@@ -18,6 +18,9 @@ import logging
 import traceback
 import requests
 import importlib
+from toolbox import get_conf, update_ui, trimmed_format_exc, encode_image, every_image_file_in_path
+
+picture_system_prompt = "\n当回复图像时,必须说明正在回复哪张图像。所有图像仅在最后一个问题中提供,即使它们在历史记录中被提及。请使用'这是第X张图像:'的格式来指明您正在描述的是哪张图像。"
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
@@ -56,7 +59,8 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     """
     from anthropic import Anthropic
     watch_dog_patience = 5 # 看门狗的耐心, 设置5秒即可
-    message = generate_payload(inputs, llm_kwargs, history, system_prompt=sys_prompt, stream=True)
+    if inputs == "":     inputs = "空空如也的输入栏"
+    message = generate_payload(inputs, llm_kwargs, history, stream=True, image_paths=None)
     retry = 0
     if len(ANTHROPIC_API_KEY) == 0:
         raise RuntimeError("没有设置ANTHROPIC_API_KEY选项")
@@ -103,6 +107,10 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
 
     return result
 
+def make_media_input(history,inputs,image_paths):
+    for image_path in image_paths:
+        inputs = inputs + f'<br/><br/><div align="center"><img src="file={os.path.abspath(image_path)}"></div>'
+    return inputs
 
 def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream = True, additional_fn=None):
     """
@@ -114,6 +122,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     chatbot 为WebUI中显示的对话列表，修改它，然后yeild出去，可以直接修改对话界面内容
     additional_fn代表点击的哪个按钮，按钮见functional.py
     """
+    if inputs == "":     inputs = "空空如也的输入栏"
     from anthropic import Anthropic
     if len(ANTHROPIC_API_KEY) == 0:
         chatbot.append((inputs, "没有设置ANTHROPIC_API_KEY"))
@@ -124,13 +133,19 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         from core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
-    raw_input = inputs
-    logging.info(f'[raw_input] {raw_input}')
-    chatbot.append((inputs, ""))
-    yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
+    have_recent_file, image_paths = every_image_file_in_path(chatbot)
+
+    if (llm_kwargs['llm_model'] == "claude-3-sonnet-20240229" or llm_kwargs['llm_model'] == "claude-3-opus-20240229") and have_recent_file:
+        if inputs == "" or inputs == "空空如也的输入栏":     inputs = "请描述给出的图片"
+        system_prompt += picture_system_prompt  # 由于没有单独的参数保存包含图片的历史，所以只能通过提示词对第几张图片进行定位
+        chatbot.append((make_media_input(history,inputs, image_paths), ""))
+        yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
+    else:
+        chatbot.append((inputs, ""))
+        yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
 
     try:
-        message = generate_payload(inputs, llm_kwargs, history, system_prompt, stream)
+        message = generate_payload(inputs, llm_kwargs, history, stream, image_paths)
     except RuntimeError as e:
         chatbot[-1] = (inputs, f"您提供的api-key不满足要求，不包含任何可用于{llm_kwargs['llm_model']}的api-key。您可能选择了错误的模型或请求源。")
         yield from update_ui(chatbot=chatbot, history=history, msg="api-key不满足要求") # 刷新界面
@@ -182,7 +197,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             yield from update_ui(chatbot=chatbot, history=history, msg="Json异常" + tb_str) # 刷新界面
             return
 
-def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
+def generate_payload(inputs, llm_kwargs, history, stream, image_paths):
     """
     整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
     """
@@ -191,26 +206,43 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     conversation_cnt = len(history) // 2
 
     messages = []
+    
     if conversation_cnt:
         for index in range(0, 2*conversation_cnt, 2):
             what_i_have_asked = {}
             what_i_have_asked["role"] = "user"
-            what_i_have_asked["content"] = history[index]
+            what_i_have_asked["content"] = [{"type": "text", "text": history[index]}]
             what_gpt_answer = {}
             what_gpt_answer["role"] = "assistant"
-            what_gpt_answer["content"] = history[index+1]
-            if what_i_have_asked["content"] != "":
-                if what_gpt_answer["content"] == "": continue
-                if what_gpt_answer["content"] == timeout_bot_msg: continue
+            what_gpt_answer["content"] = [{"type": "text", "text": history[index+1]}]
+            if what_i_have_asked["content"][0]["text"] != "":
+                if what_i_have_asked["content"][0]["text"] == "": continue
+                if what_i_have_asked["content"][0]["text"] == timeout_bot_msg: continue
                 messages.append(what_i_have_asked)
                 messages.append(what_gpt_answer)
             else:
-                messages[-1]['content'] = what_gpt_answer['content']
+                messages[-1]['content'][0]['text'] = what_gpt_answer['content'][0]['text']
 
-    what_i_ask_now = {}
-    what_i_ask_now["role"] = "user"
-    what_i_ask_now["content"] = str(inputs)
+    if (llm_kwargs['llm_model'] == "claude-3-sonnet-20240229" or llm_kwargs['llm_model'] == "claude-3-opus-20240229") and image_paths:
+        base64_images = []
+        for image_path in image_paths:
+            base64_images.append(encode_image(image_path))
+        what_i_ask_now = {}
+        what_i_ask_now["role"] = "user"
+        what_i_ask_now["content"] = []
+        for base64_image in base64_images:
+            what_i_ask_now["content"].append({
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": "image/jpeg",
+                    "data": base64_image,
+                }
+            })
+        what_i_ask_now["content"].append({"type": "text", "text": inputs})
+    else:
+        what_i_ask_now = {}
+        what_i_ask_now["role"] = "user"
+        what_i_ask_now["content"] = [{"type": "text", "text": inputs}]
     messages.append(what_i_ask_now)
-    print(messages)
-    print(system_prompt)
     return messages

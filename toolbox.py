@@ -919,6 +919,18 @@ def have_any_recent_upload_image_files(chatbot):
     else:
         return False, None  # most_recent_uploaded is too old
 
+# Claude3 model supports graphic context dialogue, reads all images
+def every_image_file_in_path(chatbot):
+    if chatbot is None:
+        return False, None  # chatbot is None
+    most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
+    if not most_recent_uploaded:
+        return False, None  # most_recent_uploaded is None
+    path = most_recent_uploaded["path"]
+    file_manifest = get_pictures_list(path)
+    if len(file_manifest) == 0:
+        return False, None
+    return True, file_manifest
 
 # Function to encode the image
 def encode_image(image_path):
