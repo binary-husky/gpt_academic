@@ -1,3 +1,5 @@
+import os
+
 from langchain.docstore.document import Document
 from common.configs import EMBEDDING_MODEL
 from common.logger_handler import logger
@@ -139,3 +141,35 @@ def embed_documents(
             "embeddings": embeddings,
             "metadatas": metadatas,
         }
+
+
+def embed_download(model_name='BAAI/bge-large-zh-v1.5'):
+    # 模型下载
+    from common.func_box import Shell
+    from common.toolbox import get_env_proxy_network
+    cmd_args = ['python3', '-c',
+                f"from langchain.embeddings import HuggingFaceBgeEmbeddings; "
+                f"print(HuggingFaceBgeEmbeddings(model_name='{model_name}'))"]
+    env = os.environ.copy()
+    proxy_env = get_env_proxy_network()
+    if proxy_env and 'no_proxy' in env:
+        env.pop('no_proxy')
+    env.update(proxy_env)
+    shell = Shell(cmd_args, env=env)
+    return shell, shell.stream_start()
+
+
+def embed_download2py(model_name='BAAI/bge-m3'):
+    from langchain.embeddings import HuggingFaceBgeEmbeddings
+    from common.utils import embedding_device
+    device = embedding_device()
+    embeddings = HuggingFaceBgeEmbeddings(model_name=model_name,
+                                          model_kwargs={'device': device},
+                                          query_instruction='Represent this sentence for searching relevant passages:')
+    print(embeddings)
+
+
+if __name__ == '__main__':
+    from common.toolbox import get_env_proxy_network
+
+    print(get_env_proxy_network())

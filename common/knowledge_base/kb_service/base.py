@@ -62,6 +62,7 @@ class KBService(ABC):
         self.embed_model = embed_model
         self.kb_path = get_kb_path(self.kb_name)
         self.doc_path = get_doc_path(self.kb_name)
+        self.private = ''
         self.do_init()
 
     def __repr__(self) -> str:

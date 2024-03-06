@@ -12,8 +12,9 @@ from common.func_box import extract_link_pf, valid_img_extensions, batch_encode_
 from common.toolbox import get_conf, select_api_key, is_any_api_key, trimmed_format_exc, update_ui, clip_history
 from request_llms.bridge_chatgpt import verify_endpoint
 
-proxies, TIMEOUT_SECONDS, MAX_RETRY, API_ORG, AZURE_CFG_ARRAY = \
-    get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'API_ORG', 'AZURE_CFG_ARRAY')
+proxies, TIMEOUT_SECONDS, MAX_RETRY, API_ORG, AZURE_CFG_ARRAY, API_URL_REDIRECT = \
+    get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'API_ORG', 'AZURE_CFG_ARRAY',
+             'API_URL_REDIRECT')
 
 
 class GPTChatInit:
@@ -151,6 +152,8 @@ class GPTChatInit:
             raise RuntimeError("你提供了错误的API_ENDPOINT。")
         headers, payload = self.generate_payload(inputs, llm_kwargs, history, system_prompt, stream)
         try:
+            if API_URL_REDIRECT:
+                proxies = None
             response = requests.post(endpoint, headers=headers, proxies=proxies,
                                      json=payload, stream=stream, timeout=TIMEOUT_SECONDS)
         except Exception as e:

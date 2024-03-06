@@ -6,6 +6,7 @@ import json
 import os, random
 import copy
 import re
+import shutil
 import tempfile
 import time
 import uuid
@@ -718,7 +719,7 @@ def user_login(user, password):
 
 # TODO < -------------------------------- 知识库函数注册区 -------------------------------------->
 from common.knowledge_base.kb_service import base
-from common.knowledge_base import kb_doc_api, kb_api
+from common.knowledge_base import kb_doc_api, kb_api, utils
 from common.configs import kb_config
 from crazy_functions.reader_fns.crazy_box import detach_cloud_links
 
@@ -811,7 +812,8 @@ def kb_new_confirm(kb_name, kb_type, kb_model, kb_info):
 
     kb_server_list = base.KBServiceFactory.get_service_by_name(kb_name)
     if kb_name in kb_name_tm or kb_server_list is not None:
-        raise gr.Error(f'{kb_name} 已存在同名知识库，请重新命名')
+        if kb_name_tm.get(kb_name, {}).get('model') == kb_model:
+            raise gr.Error(f'{kb_name} @ {kb_model} 已存在同名知识库，请重新命名')
 
     kb = base.KBServiceFactory.get_service(kb_name, kb_type, kb_model)
     kb.kb_info = kb_info
@@ -820,6 +822,9 @@ def kb_new_confirm(kb_name, kb_type, kb_model, kb_info):
     except Exception as e:
         msg = f"创建知识库出错： {e}"
         logger.error(f'{e.__class__.__name__}: {msg}')
+        if not utils.validate_kb_name(kb_name):
+            raise gr.Error("Don't attack me")
+        shutil.rmtree(os.path.join(init_path.private_knowledge_path, kb_name))
         raise gr.Error(msg)
     select_name = base.kb_name_tm_merge(kb_name, kb_type, kb_model)
     new_output = {
@@ -836,6 +841,18 @@ def kb_new_confirm(kb_name, kb_type, kb_model, kb_info):
         'kb_file_fragment': gr.DataFrame.update(value=pd.DataFrame(data=copy.deepcopy(kb_config.file_fragment_template)))
     }
     return list(new_output.values()) + list(edit_output.values()) + [base.kb_dict_to_list(kb_name_tm)]
+
+
+def kb_download_embedding_model(model_name):
+    if not model_name:
+        raise gr.Error('必须要选一个')
+    from common.embeddings_api import embed_download
+    obj, stream = embed_download(model_name)
+    download_result = "```\n"
+    for tag, chuck in stream:
+        download_result += chuck
+        yield gr.update(value=download_result)
+    yield gr.update(value=download_result + '\n```\n`Done`')
 
 
 def __get_kb_details_df(file_details: pd.DataFrame, condition: pd.Series):

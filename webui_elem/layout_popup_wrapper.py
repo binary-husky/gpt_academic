@@ -218,7 +218,7 @@ class Prompt:
                                                     lines=3, max_lines=4)
             with gr.Row():
                 from common.configs import kbs_config, EMBEDDING_MODEL
-                from common.utils import list_embed_models
+                from common.utils import list_local_embed_models, list_embed_paths
                 kbs_config_list = list(kbs_config.keys())
                 with gr.Column(elem_classes='column_left'):
                     self.new_kb_vector_types = gr.Dropdown(choices=kbs_config, value=kbs_config_list[0],
@@ -226,14 +226,29 @@ class Prompt:
                                                            label="向量库类型", allow_custom_value=True,
                                                            container=False, show_label=True,
                                                            elem_classes='normal_select')
-                embed_list = list_embed_models()
+                embed_list = list_local_embed_models()
                 with gr.Column(elem_classes='column_right'):
-                    self.new_kb_embedding_model = gr.Dropdown(choices=embed_list, value=EMBEDDING_MODEL,
-                                                              label="Embedding模型", allow_custom_value=True,
+                    self.new_kb_embedding_model = gr.Dropdown(choices=embed_list, value=embed_list[0],
+                                                              label="本地Embedding模型", allow_custom_value=True,
                                                               container=False, show_label=True,
-                                                              elem_classes='normal_select', interactive=True, )
+                                                              elem_classes='normal_select', interactive=True)
             with gr.Row():
-                self.new_kb_confirm_btn = gr.Button(value='新建', size='lg')
+                with gr.Column(scale=20, elem_classes='column-unset-min-width'):
+                    self.new_kb_private_checkbox = gr.Checkbox(label='私有知识库',
+                                                               value=False, show_label=True,)
+                with gr.Column(scale=90):
+                    self.new_kb_confirm_btn = gr.Button(value='新建', size='lg')
+
+            with gr.Column(elem_classes='elem-box-solid') as self.embedding_download_clo:
+                with gr.Row():
+                    self.select_embedding_model = gr.Dropdown(label='Embedding模型名称',
+                                                              info='允许手动输入模型名称',
+                                                              choices=list_embed_paths(),
+                                                              interactive=True, allow_custom_value=True)
+                with gr.Row():
+                    self.download_embedding_model = gr.Button(value='下载/更新所选模型', size='lg')
+                with gr.Row():
+                    self.embedding_download_status = gr.Markdown()
 
     def __draw_edit_knowledge_base(self):
         spl = toolbox.get_conf('spl')

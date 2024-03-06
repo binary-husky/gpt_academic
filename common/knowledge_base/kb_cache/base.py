@@ -158,3 +158,10 @@ class EmbeddingsPool(CachePool):
 
 
 embeddings_pool = EmbeddingsPool(cache_num=1)
+
+if __name__ == '__main__':
+    from langchain.embeddings import ModelScopeEmbeddings
+    device = embedding_device()
+    embeddings = ModelScopeEmbeddings(model_id='Xorbits/bge-large-zh-v1.5')
+
+    print(embeddings)

@@ -132,7 +132,7 @@ def model_selection(txt, models, llm_kwargs, plugin_kwargs, cookies, chatbot_wit
     if len(args) == 0 or 'RetryChat' in args and not cookies.get('is_plugin'):
         if '文档RAG' in models and 'moonshot' not in llm_kwargs.get('llm_model', ''):
             from crazy_functions.reader_fns.crazy_box import user_input_embedding_content, input_retrieval_file
-            fp_file, download_status = input_retrieval_file(txt_proc, llm_kwargs,['pdf', 'md', 'xlsx', 'docx'])
+            fp_file, download_status = input_retrieval_file(txt_proc, llm_kwargs, ['pdf', 'md', 'xlsx', 'docx'])
             if fp_file:  # 提前检测，有文件才进入下一步
                 input_embedding_content = yield from user_input_embedding_content(txt_proc, chatbot_with_cookie,
                                                                                   history, llm_kwargs, plugin_kwargs,
@@ -1414,7 +1414,8 @@ class ProxyNetworkActivate():
     def __enter__(self):
         if not self.valid: return self
         proxies = get_conf('proxies')
-        if 'no_proxy' in os.environ: os.environ.pop('no_proxy')
+        if 'no_proxy' in os.environ:
+            os.environ.pop('no_proxy')
         if proxies is not None:
             if 'http' in proxies:
                 os.environ['HTTP_PROXY'] = proxies['http']
@@ -1430,6 +1431,16 @@ class ProxyNetworkActivate():
             os.environ.pop('HTTPS_PROXY')
         return None  # 返回 None，表示没有处理异常
 
+
+def get_env_proxy_network():
+    proxies = get_conf('proxies')
+    proxy_dict = {}
+    if proxies is not None:
+        if 'http' in proxies:
+            proxy_dict['HTTP_PROXY'] = proxies['http']
+        if 'https' in proxies:
+            proxy_dict['HTTPS_PROXY'] = proxies['https']
+    return proxy_dict
 
 def objdump(obj, file='objdump.tmp'):
     import pickle

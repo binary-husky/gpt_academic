@@ -1,3 +1,5 @@
+import pathlib
+
 import pydantic
 from pydantic import BaseModel
 from typing import List
@@ -237,12 +239,35 @@ def MakeFastAPIOffline(
 
 
 # 从model_config中获取模型信息
-
 def list_embed_models() -> List[str]:
     '''
     get names of configured embedding models
     '''
-    return list(MODEL_PATH["embed_model"])
+    config = [i for i in MODEL_PATH["embed_model"] if MODEL_PATH["embed_model"][i]]
+    local = get_local_embed_paths()
+    return list(set(config + list(local)))
+
+
+def list_embed_paths() -> List[str]:
+    return list(set((MODEL_PATH["embed_model"].values())))
+
+
+def get_local_embed_paths() -> Dict:
+    model_path = os.path.join(pathlib.Path.home(), '.cache', 'torch', 'sentence_transformers')
+    model_list = os.listdir(model_path)
+    model_dict = {}
+    for i in model_list:
+        key = "_".join(i.split('_')[1:])
+        by = i.split('_')[0]
+        model_dict[key] = f"{by}/{key}"
+    return model_dict
+
+
+def list_local_embed_models() -> List[str]:
+    model_path = os.path.join(pathlib.Path.home(), '.cache', 'torch', 'sentence_transformers')
+    model_list = os.listdir(model_path)
+    model_list = ["_".join(i.split('_')[1:]) for i in model_list]
+    return model_list
 
 
 def get_model_worker_config(model_name: str = None) -> dict:
@@ -290,6 +315,8 @@ def get_model_path(model_name: str, type: str = None) -> Optional[str]:
             if path.is_dir():  # use value split by "/", {MODEL_ROOT_PATH}/chatglm-6b-new
                 return str(path)
         return path_str  # THUDM/chatglm06b
+    else:
+        return get_local_embed_paths().get(model_name)
 
 
 def get_prompt_template(type: str, name: str) -> Optional[str]:

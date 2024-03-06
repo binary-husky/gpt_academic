@@ -1,6 +1,7 @@
 import os
 import gradio as gr
 
+from common.utils import list_local_embed_models
 from request_llms.bridge_all import predict
 from common.toolbox import find_free_port, on_file_uploaded, \
     get_conf, ArgsGeneralWrapper
@@ -264,6 +265,13 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                                       inputs=[self.new_kb_name, self.new_kb_vector_types,
                                               self.new_kb_embedding_model, self.new_kb_introduce],
                                       outputs=self.show_hide_combo + self.file_details_combo + [self.kb_input_select])
+
+        self.download_embedding_model.click(func_signals.kb_download_embedding_model,
+                                            inputs=[self.select_embedding_model],
+                                            outputs=[self.embedding_download_status]
+                                            ).then(fn=lambda: gr.update(choices=list_local_embed_models()),
+                                                   inputs=[],
+                                                   outputs=[self.new_kb_embedding_model])
 
         self.edit_kb_confirm_btn.click(func_signals.kb_file_update_confirm,
                                        inputs=self.kb_edit_confirm_combo + [self.edit_kb_cloud],

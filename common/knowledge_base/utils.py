@@ -41,6 +41,10 @@ def get_vs_path(knowledge_base_name: str, vector_name: str):
     return os.path.join(get_kb_path(knowledge_base_name), "vector_store", vector_name)
 
 
+def get_vs_private(knowledge_base_name: str, vector_name: str, user):
+    return os.path.join(get_kb_path(knowledge_base_name), "vector_store", vector_name, user)
+
+
 def get_file_path(knowledge_base_name: str, doc_name: str):
     return os.path.join(get_doc_path(knowledge_base_name), doc_name)
 

@@ -38,13 +38,13 @@ ONLINE_EMBEDDING_MAPPINGS = {
 
 MODEL_PATH = {
     "embed_model": {
-        "ernie-tiny": "nghuyong/ernie-3.0-nano-zh",
-        "ernie-base": "nghuyong/ernie-3.0-base-zh",
-        "text2vec-base": "shibing624/text2vec-base-chinese",
-        "text2vec": "GanymedeNil/text2vec-large-chinese",
-        "text2vec-paraphrase": "shibing624/text2vec-base-chinese-paraphrase",
-        "text2vec-sentence": "shibing624/text2vec-base-chinese-sentence",
-        "text2vec-multilingual": "shibing624/text2vec-base-multilingual",
+        "ernie-3.0-nano-zh": "nghuyong/ernie-3.0-nano-zh",
+        "ernie-3.0-base-zh": "nghuyong/ernie-3.0-base-zh",
+        "text2vec-base-chinese": "shibing624/text2vec-base-chinese",
+        "text2vec-large-chinese": "GanymedeNil/text2vec-large-chinese",
+        "text2vec-base-chinese-paraphrase": "shibing624/text2vec-base-chinese-paraphrase",
+        "text2vec-base-chinese-sentence": "shibing624/text2vec-base-chinese-sentence",
+        "text2vec-base-multilingual": "shibing624/text2vec-base-multilingual",
         "text2vec-bge-large-chinese": "shibing624/text2vec-bge-large-chinese",
         "m3e-small": "moka-ai/m3e-small",
         "m3e-base": "moka-ai/m3e-base",
@@ -59,7 +59,6 @@ MODEL_PATH = {
         "piccolo-base-zh": "sensenova/piccolo-base-zh",
         "piccolo-large-zh": "sensenova/piccolo-large-zh",
         "nlp_gte_sentence-embedding_chinese-large": "damo/nlp_gte_sentence-embedding_chinese-large",
-        "text-embedding-ada-002": "your OPENAI_API_KEY",
     },
     "reranker": {
         "bge-reranker-large": "BAAI/bge-reranker-large",

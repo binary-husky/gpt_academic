@@ -466,6 +466,9 @@ fieldset#knowledge-base-select .wrap label > span {
 fieldset#knowledge-base-select .wrap label > input {
     display: none;
 }
+.column-unset-min-width {
+    min-width: unset !important;
+}
 
 [class*="gradio-container-"] h1 {
     font-weight: 700 !important;

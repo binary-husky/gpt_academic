@@ -9,7 +9,6 @@ import os.path
 import subprocess
 import time
 import uuid
-
 import psutil
 import re
 import tempfile
@@ -22,7 +21,8 @@ import gradio as gr
 import csv
 import datetime
 import qrcode
-
+from threading import Thread
+from queue import Queue, Empty
 from PIL import Image, ImageOps
 from bs4 import BeautifulSoup
 from common import toolbox
@@ -32,30 +32,65 @@ from webui_elem.overwrites import escape_markdown
 
 
 class Shell:
-    def __init__(self, args):
+    def __init__(self, args, env=None):
+        shell = isinstance(args, str)
         self.__args = args
-        self.subp = subprocess.Popen(self.__args, shell=True,
+        self.subp = subprocess.Popen(self.__args, shell=shell, env=env,
                                      stdin=subprocess.PIPE, stderr=subprocess.PIPE,
                                      stdout=subprocess.PIPE, encoding='utf-8',
                                      errors='ignore', close_fds=True)
         self._thread = None
-        self.__result = ''
-        self.__error_msg = ''
+        self._result = ''
+        self._error_msg = ''
+        self.queue = Queue()
 
-    def start(self):
+    def reader_thread(self, stream, tag):
+        """
+        Read lines from a streaming source and put them on the queue.
+        """
+        for line in iter(stream.readline, ''):
+            self.queue.put((tag, line))
+        stream.close()
+
+    def stream_start(self):
+        # Create two threads to read from stdout and stderr respectively.
+        stdout_thread = Thread(target=self.reader_thread, args=(self.subp.stdout, 'stdout'), daemon=True)
+        stderr_thread = Thread(target=self.reader_thread, args=(self.subp.stderr, 'stderr'), daemon=True)
+
+        # Start both threads.
+        stdout_thread.start()
+        stderr_thread.start()
+
+        # Keep yielding lines from the queue until neither thread is alive.
+        while True:
+            try:
+                # Try to get output from the queue; 1 second timeout used just as an example.
+                tag, line = self.queue.get(timeout=1)
+                logger.debug(f'{tag}: {str(line).rstrip()}')
+                yield tag, line
+            except Empty:
+                # If no new outputs and both threads are dead, break out of the loop.
+                if not stdout_thread.is_alive() and not stderr_thread.is_alive():
+                    break
+        # Ensure that all remaining messages from streams are yielded.
+        while not self.queue.empty():
+            tag, line = self.queue.get_nowait()
+            yield tag, line
+
+    def start(self) -> str:
         sys_out = self.subp.stdout
         logger.debug(f'Start running commands: {self.__args}')
         try:
             for i in sys_out:
                 logger.info(i.rstrip())
-                self.__result += i
+                self._result += i
         except KeyboardInterrupt as p:
-            return self.__result
+            return self._result
         except Exception as p:
-            return self.__result
+            return self._result
         finally:
-            self.__error_msg = self.subp.stderr.read()
-            return self.__result
+            self._error_msg = self.subp.stderr.read()
+            return self._result
 
 
 def timeStatistics(func):
