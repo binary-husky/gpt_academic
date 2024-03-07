@@ -351,29 +351,62 @@ for model in AVAIL_LLM_MODELS:
         model_info.update({model: mi})
 
 # -=-=-=-=-=-=- 以下部分是新加入的模型，可能附带额外依赖 -=-=-=-=-=-=-
-if "claude-1-100k" in AVAIL_LLM_MODELS or "claude-2" in AVAIL_LLM_MODELS:
-    from .bridge_claude import predict_no_ui_long_connection as claude_noui
-    from .bridge_claude import predict as claude_ui
-    model_info.update({
-        "claude-1-100k": {
-            "fn_with_ui": claude_ui,
-            "fn_without_ui": claude_noui,
-            "endpoint": None,
-            "max_token": 8196,
-            "tokenizer": tokenizer_gpt35,
-            "token_cnt": get_token_num_gpt35,
-        },
-    })
-    model_info.update({
-        "claude-2": {
-            "fn_with_ui": claude_ui,
-            "fn_without_ui": claude_noui,
-            "endpoint": None,
-            "max_token": 8196,
-            "tokenizer": tokenizer_gpt35,
-            "token_cnt": get_token_num_gpt35,
-        },
-    })
+# claude家族
+CLAUDE_MODELS = ["claude-instant-1.2","claude-2.0","claude-2.1","claude-3-sonnet-20240229","claude-3-opus-20240229"]
+for model in CLAUDE_MODELS:
+    if model in AVAIL_LLM_MODELS:
+        from .bridge_claude import predict_no_ui_long_connection as claude_noui
+        from .bridge_claude import predict as claude_ui
+        model_info.update({
+            "claude-instant-1.2": {
+                "fn_with_ui": claude_ui,
+                "fn_without_ui": claude_noui,
+                "endpoint": None,
+                "max_token": 100000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+        })
+        model_info.update({
+            "claude-2.0": {
+                "fn_with_ui": claude_ui,
+                "fn_without_ui": claude_noui,
+                "endpoint": None,
+                "max_token": 100000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+        })
+        model_info.update({
+            "claude-2.1": {
+                "fn_with_ui": claude_ui,
+                "fn_without_ui": claude_noui,
+                "endpoint": None,
+                "max_token": 200000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+        })
+        model_info.update({
+            "claude-3-sonnet-20240229": {
+                "fn_with_ui": claude_ui,
+                "fn_without_ui": claude_noui,
+                "endpoint": None,
+                "max_token": 200000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+        })
+        model_info.update({
+            "claude-3-opus-20240229": {
+                "fn_with_ui": claude_ui,
+                "fn_without_ui": claude_noui,
+                "endpoint": None,
+                "max_token": 200000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+        })
 if "jittorllms_rwkv" in AVAIL_LLM_MODELS:
     from .bridge_jittorllms_rwkv import predict_no_ui_long_connection as rwkv_noui
     from .bridge_jittorllms_rwkv import predict as rwkv_ui
