@@ -49,14 +49,7 @@ latex_delimiters_dict = {
         {"left": "\\begin{gather}", "right": "\\end{gather}", "display": True},
         {"left": "\\begin{CD}", "right": "\\end{CD}", "display": True},
     ],
-    'disabled': [],
-    'else': [
-        {"left": "$$", "right": "$$", "display": True},
-        {"left": "$", "right": "$", "display": False},
-        {"left": "\\(", "right": "\\)", "display": False},
-        {"left": "\\[", "right": "\\]", "display": True},
-    ]
-
+    'disabled': []
 }
 
 

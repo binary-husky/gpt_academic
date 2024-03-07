@@ -46,14 +46,13 @@ async function convert2canvas(shareContent = null) {
         $(img).attr("id", "img1"); //为图片元素添加id属性
         // 将已有<p>标签中原来的内容清空，并插入我们新创建的<a>元素
         copyToClipboard(img);  // 将图片复制到剪切板
-        toast_push('📸 已将图片写入粘贴板', 2000)
         pElement.innerHTML = '';         // 先清空<p>标签内的所有内容
         pElement.appendChild(createALink(img));  // 然后将<a>标签添加进去
         // 触发a的单击事件
-        toast_push('📸 或可在右侧工具栏消息中下载', 2000)
+        toast_push('📸 已将图片写入粘贴板，或可在右侧工具栏消息中下载', 2000)
 
     });
-    return canvas;
+    await canvas;
 }
 
 async function copyToClipboard(image) {
