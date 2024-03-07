@@ -11,13 +11,8 @@
 """
 
 import os
-import json
 import time
-import gradio as gr
-import logging
 import traceback
-import requests
-import importlib
 from toolbox import get_conf, update_ui, trimmed_format_exc, encode_image, every_image_file_in_path
 
 picture_system_prompt = "\n当回复图像时,必须说明正在回复哪张图像。所有图像仅在最后一个问题中提供,即使它们在历史记录中被提及。请使用'这是第X张图像:'的格式来指明您正在描述的是哪张图像。"
@@ -70,7 +65,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
         try:
             # make a POST request to the API endpoint, stream=False
             from .bridge_all import model_info
-            anthropic = Anthropic(api_key=ANTHROPIC_API_KEY)
+            anthropic = Anthropic(api_key=ANTHROPIC_API_KEY, base_url=model_info[llm_kwargs['llm_model']]['endpoint'])
             # endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
             # with ProxyNetworkActivate()
             stream = anthropic.messages.create(
@@ -163,7 +158,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         try:
             # make a POST request to the API endpoint, stream=True
             from .bridge_all import model_info
-            anthropic = Anthropic(api_key=ANTHROPIC_API_KEY)
+            anthropic = Anthropic(api_key=ANTHROPIC_API_KEY, base_url=model_info[llm_kwargs['llm_model']]['endpoint'])
             # endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
             # with ProxyNetworkActivate()
             stream = anthropic.messages.create(
@@ -206,12 +201,11 @@ def generate_payload(inputs, llm_kwargs, history, stream, image_paths):
     """
     整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
     """
-    from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
 
     conversation_cnt = len(history) // 2
 
     messages = []
-    
+
     if conversation_cnt:
         for index in range(0, 2*conversation_cnt, 2):
             what_i_have_asked = {}

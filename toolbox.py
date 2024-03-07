@@ -922,14 +922,14 @@ def have_any_recent_upload_image_files(chatbot):
 # Claude3 model supports graphic context dialogue, reads all images
 def every_image_file_in_path(chatbot):
     if chatbot is None:
-        return False, None  # chatbot is None
+        return False, []  # chatbot is None
     most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
     if not most_recent_uploaded:
-        return False, None  # most_recent_uploaded is None
+        return False, []  # most_recent_uploaded is None
     path = most_recent_uploaded["path"]
     file_manifest = get_pictures_list(path)
     if len(file_manifest) == 0:
-        return False, None
+        return False, []
     return True, file_manifest
 
 # Function to encode the image
@@ -958,10 +958,10 @@ def map_file_to_sha256(file_path):
 
     with open(file_path, 'rb') as file:
         content = file.read()
-    
+
     # Calculate the SHA-256 hash of the file contents
     sha_hash = hashlib.sha256(content).hexdigest()
-    
+
     return sha_hash
 
 
@@ -998,6 +998,6 @@ def check_repeat_upload(new_pdf_path, pdf_hash):
 
         if len(maybe_project_dir) > 0:
             return True, os.path.dirname(maybe_project_dir[0])
-        
+
     # 如果所有页的内容都相同，返回 True
     return False, None

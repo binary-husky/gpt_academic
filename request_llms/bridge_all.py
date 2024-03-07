@@ -62,6 +62,8 @@ openai_endpoint = "https://api.openai.com/v1/chat/completions"
 api2d_endpoint = "https://openai.api2d.net/v1/chat/completions"
 newbing_endpoint = "wss://sydney.bing.com/sydney/ChatHub"
 gemini_endpoint = "https://generativelanguage.googleapis.com/v1beta/models"
+claude_endpoint = "https://api.anthropic.com"
+
 if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
 azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
 # 兼容旧版的配置
@@ -77,7 +79,7 @@ if openai_endpoint in API_URL_REDIRECT: openai_endpoint = API_URL_REDIRECT[opena
 if api2d_endpoint in API_URL_REDIRECT: api2d_endpoint = API_URL_REDIRECT[api2d_endpoint]
 if newbing_endpoint in API_URL_REDIRECT: newbing_endpoint = API_URL_REDIRECT[newbing_endpoint]
 if gemini_endpoint in API_URL_REDIRECT: gemini_endpoint = API_URL_REDIRECT[gemini_endpoint]
-
+if claude_endpoint in API_URL_REDIRECT: claude_endpoint = API_URL_REDIRECT[claude_endpoint]
 
 # 获取tokenizer
 tokenizer_gpt35 = LazyloadTiktoken("gpt-3.5-turbo")
@@ -360,7 +362,7 @@ if any(item in claude_models for item in AVAIL_LLM_MODELS):
         "claude-instant-1.2": {
             "fn_with_ui": claude_ui,
             "fn_without_ui": claude_noui,
-            "endpoint": None,
+            "endpoint": claude_endpoint,
             "max_token": 100000,
             "tokenizer": tokenizer_gpt35,
             "token_cnt": get_token_num_gpt35,
@@ -370,7 +372,7 @@ if any(item in claude_models for item in AVAIL_LLM_MODELS):
         "claude-2.0": {
             "fn_with_ui": claude_ui,
             "fn_without_ui": claude_noui,
-            "endpoint": None,
+            "endpoint": claude_endpoint,
             "max_token": 100000,
             "tokenizer": tokenizer_gpt35,
             "token_cnt": get_token_num_gpt35,
@@ -380,7 +382,7 @@ if any(item in claude_models for item in AVAIL_LLM_MODELS):
         "claude-2.1": {
             "fn_with_ui": claude_ui,
             "fn_without_ui": claude_noui,
-            "endpoint": None,
+            "endpoint": claude_endpoint,
             "max_token": 200000,
             "tokenizer": tokenizer_gpt35,
             "token_cnt": get_token_num_gpt35,
@@ -390,7 +392,7 @@ if any(item in claude_models for item in AVAIL_LLM_MODELS):
         "claude-3-sonnet-20240229": {
             "fn_with_ui": claude_ui,
             "fn_without_ui": claude_noui,
-            "endpoint": None,
+            "endpoint": claude_endpoint,
             "max_token": 200000,
             "tokenizer": tokenizer_gpt35,
             "token_cnt": get_token_num_gpt35,
@@ -400,7 +402,7 @@ if any(item in claude_models for item in AVAIL_LLM_MODELS):
         "claude-3-opus-20240229": {
             "fn_with_ui": claude_ui,
             "fn_without_ui": claude_noui,
-            "endpoint": None,
+            "endpoint": claude_endpoint,
             "max_token": 200000,
             "tokenizer": tokenizer_gpt35,
             "token_cnt": get_token_num_gpt35,
