@@ -8,7 +8,7 @@
     具备多线程调用能力的函数：在函数插件中被调用，灵活而简洁
     2. predict_no_ui_long_connection(...)
 """
-import tiktoken, copy
+import tiktoken, copy, re
 from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor
 from toolbox import get_conf, trimmed_format_exc, apply_gpt_academic_string_mask
@@ -711,6 +711,25 @@ if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
         })
     except:
         print(trimmed_format_exc())
+# -=-=-=-=-=-=- one-api 对齐支持 -=-=-=-=-=-=-
+for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
+    max_token_pattern = r"\(max_token=(\d+)\)"
+    match = re.search(max_token_pattern, model)
+    if match:
+        max_token_tmp = match.group(1)  # 获取 max_token 的值
+        model = re.sub(max_token_pattern, "", model)  # 从原字符串中删除 "(max_token=...)"
+    else:
+        max_token_tmp = 4096
+    model_info.update({
+        model: {
+            "fn_with_ui": chatgpt_ui,
+            "fn_without_ui": chatgpt_noui,
+            "endpoint": openai_endpoint,
+            "max_token": max_token_tmp,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
 # if "skylark" in AVAIL_LLM_MODELS:
 #     try:
 #         from .bridge_skylark2 import predict_no_ui_long_connection as skylark_noui

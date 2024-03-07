@@ -92,14 +92,20 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-3-turbo",
                     "gemini-pro", "chatglm3", "claude-instant-1.2","claude-2.1",
                     "claude-3-sonnet-20240229","claude-3-opus-20240229"]
-# P.S. 其他可用的模型还包括 [
-# "moonshot-v1-128k", "moonshot-v1-32k", "moonshot-v1-8k",
-# "qwen-turbo", "qwen-plus", "qwen-max",
-# "zhipuai", "qianfan", "deepseekcoder", "llama2", "qwen-local", "gpt-3.5-turbo-0613", "moss",
-# "gpt-3.5-turbo-16k-0613", "gpt-3.5-random", "api2d-gpt-3.5-turbo", 'api2d-gpt-3.5-turbo-16k',
-# "spark", "sparkv2", "sparkv3", "sparkv3.5",
-# "chatglm_onnx", "internlm", "jittorllms_pangualpha", "jittorllms_llama", "claude-2.0"
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# P.S. 其他可用的模型还包括
+# AVAIL_LLM_MODELS = [
+#   "moonshot-v1-128k", "moonshot-v1-32k", "moonshot-v1-8k",
+#   "qwen-turbo", "qwen-plus", "qwen-max",
+#   "zhipuai", "qianfan", "deepseekcoder", "llama2", "qwen-local", "gpt-3.5-turbo-0613", "moss",
+#   "gpt-3.5-turbo-16k-0613", "gpt-3.5-random", "api2d-gpt-3.5-turbo", 'api2d-gpt-3.5-turbo-16k',
+#   "spark", "sparkv2", "sparkv3", "sparkv3.5",
+#   "chatglm_onnx", "internlm", "jittorllms_pangualpha", "jittorllms_llama", "claude-2.0"
 # ]
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# 此外，您还可以在接入one-api时，使用"one-api-*"前缀直接使用非标准方式接入的模型，详情见本项目wiki
+# AVAIL_LLM_MODELS = ["one-api-claude-3-sonnet-20240229(max_token=100000)", "one-api-mixtral-8x7b"]
+# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 
 # 定义界面上“询问多个GPT模型”插件应该使用哪些模型，请从AVAIL_LLM_MODELS中选择，并在不同模型之间用`&`间隔，例如"gpt-3.5-turbo&chatglm3&azure-gpt-4"
