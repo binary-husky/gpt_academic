@@ -21,6 +21,7 @@ import importlib
 from toolbox import get_conf, update_ui, trimmed_format_exc, encode_image, every_image_file_in_path
 
 picture_system_prompt = "\n当回复图像时,必须说明正在回复哪张图像。所有图像仅在最后一个问题中提供,即使它们在历史记录中被提及。请使用'这是第X张图像:'的格式来指明您正在描述的是哪张图像。"
+Claude_3_Models = ["claude-3-sonnet-20240229", "claude-3-opus-20240229"]
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
@@ -134,8 +135,12 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
     have_recent_file, image_paths = every_image_file_in_path(chatbot)
+    if len(image_paths) > 20:
+        chatbot.append((inputs, "图片数量超过api上限(20张)"))
+        yield from update_ui(chatbot=chatbot, history=history, msg="等待响应")
+        return
 
-    if (llm_kwargs['llm_model'] == "claude-3-sonnet-20240229" or llm_kwargs['llm_model'] == "claude-3-opus-20240229") and have_recent_file:
+    if any([llm_kwargs['llm_model'] == model for model in Claude_3_Models]) and have_recent_file:
         if inputs == "" or inputs == "空空如也的输入栏":     inputs = "请描述给出的图片"
         system_prompt += picture_system_prompt  # 由于没有单独的参数保存包含图片的历史，所以只能通过提示词对第几张图片进行定位
         chatbot.append((make_media_input(history,inputs, image_paths), ""))
@@ -223,7 +228,7 @@ def generate_payload(inputs, llm_kwargs, history, stream, image_paths):
             else:
                 messages[-1]['content'][0]['text'] = what_gpt_answer['content'][0]['text']
 
-    if (llm_kwargs['llm_model'] == "claude-3-sonnet-20240229" or llm_kwargs['llm_model'] == "claude-3-opus-20240229") and image_paths:
+    if any([llm_kwargs['llm_model'] == model for model in Claude_3_Models]) and image_paths:
         base64_images = []
         for image_path in image_paths:
             base64_images.append(encode_image(image_path))
