@@ -501,7 +501,11 @@ gradio_app = gr.mount_gradio_app(app, chatbot_main.demo, '/spike', )
 if __name__ == '__main__':
     import uvicorn
     from common.logger_handler import init_config, logger
-
+    info_path = os.path.join(init_path.private_knowledge_path, 'info.db')
+    if not os.path.exists(info_path):
+        from common.knowledge_base.migrate import create_tables
+        create_tables()
+        logger.info('create kb tables')
     logger.info('start...')
     app_reload = get_conf('app_reload')
     config = uvicorn.Config("__main__:app", host="0.0.0.0", port=PORT, reload=app_reload)
