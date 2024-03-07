@@ -713,10 +713,20 @@ if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
         print(trimmed_format_exc())
 # -=-=-=-=-=-=- one-api 对齐支持 -=-=-=-=-=-=-
 for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
+    # 为了更灵活地接入one-api多模型管理界面，设计了此接口，例子：AVAIL_LLM_MODELS = ["one-api-mixtral-8x7b(max_token=6666)"]
+    # 其中
+    #   "one-api-"          是前缀（必要）
+    #   "mixtral-8x7b"      是模型名（必要）
+    #   "(max_token=6666)"  是配置（非必要）
     max_token_pattern = r"\(max_token=(\d+)\)"
     match = re.search(max_token_pattern, model)
     if match:
         max_token_tmp = match.group(1)  # 获取 max_token 的值
+        try:
+            max_token_tmp = int(max_token_tmp)
+        except:
+            print(f"one-api模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
+            continue
         model = re.sub(max_token_pattern, "", model)  # 从原字符串中删除 "(max_token=...)"
     else:
         max_token_tmp = 4096
