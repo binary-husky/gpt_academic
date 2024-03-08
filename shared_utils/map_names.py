@@ -21,7 +21,7 @@ def map_friendly_names_to_model(m):
     return m
 
 def read_one_api_model_name(model: str):
-    """return real model name and max_token
+    """return real model name and max_token.
     """
     max_token_pattern = r"\(max_token=(\d+)\)"
     match = re.search(max_token_pattern, model)
