@@ -25,6 +25,9 @@ from shared_utils.text_mask import apply_gpt_academic_string_mask
 from shared_utils.text_mask import build_gpt_academic_masked_string
 from shared_utils.text_mask import apply_gpt_academic_string_mask_langbased
 from shared_utils.text_mask import build_gpt_academic_masked_string_langbased
+from shared_utils.map_names import map_friendly_names_to_model
+from shared_utils.map_names import map_model_to_friendly_names
+from shared_utils.map_names import read_one_api_model_name
 from shared_utils.handle_upload import html_local_file
 from shared_utils.handle_upload import html_local_img
 from shared_utils.handle_upload import file_manifest_filter_type

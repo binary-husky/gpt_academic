@@ -11,7 +11,7 @@
 import tiktoken, copy, re
 from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor
-from toolbox import get_conf, trimmed_format_exc, apply_gpt_academic_string_mask
+from toolbox import get_conf, trimmed_format_exc, apply_gpt_academic_string_mask, read_one_api_model_name
 
 from .bridge_chatgpt import predict_no_ui_long_connection as chatgpt_noui
 from .bridge_chatgpt import predict as chatgpt_ui
@@ -718,18 +718,11 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
     #   "one-api-"          是前缀（必要）
     #   "mixtral-8x7b"      是模型名（必要）
     #   "(max_token=6666)"  是配置（非必要）
-    max_token_pattern = r"\(max_token=(\d+)\)"
-    match = re.search(max_token_pattern, model)
-    if match:
-        max_token_tmp = match.group(1)  # 获取 max_token 的值
-        try:
-            max_token_tmp = int(max_token_tmp)
-        except:
-            print(f"one-api模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
-            continue
-        model = re.sub(max_token_pattern, "", model)  # 从原字符串中删除 "(max_token=...)"
-    else:
-        max_token_tmp = 4096
+    try:
+        _, max_token_tmp = read_one_api_model_name(model)
+    except:
+        print(f"one-api模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
+        continue
     model_info.update({
         model: {
             "fn_with_ui": chatgpt_ui,
@@ -740,22 +733,6 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
             "token_cnt": get_token_num_gpt35,
         },
     })
-# if "skylark" in AVAIL_LLM_MODELS:
-#     try:
-#         from .bridge_skylark2 import predict_no_ui_long_connection as skylark_noui
-#         from .bridge_skylark2 import predict as skylark_ui
-#         model_info.update({
-#             "skylark": {
-#                 "fn_with_ui": skylark_ui,
-#                 "fn_without_ui": skylark_noui,
-#                 "endpoint": None,
-#                 "max_token": 4096,
-#                 "tokenizer": tokenizer_gpt35,
-#                 "token_cnt": get_token_num_gpt35,
-#             }
-#         })
-#     except:
-#         print(trimmed_format_exc())
 
 
 # <-- 用于定义和切换多个azure模型 -->
