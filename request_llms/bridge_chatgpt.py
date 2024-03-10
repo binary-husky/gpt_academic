@@ -264,7 +264,8 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                         # 一些第三方接口的出现这样的错误，兼容一下吧
                         continue
                     else:
-                        # 一些垃圾第三方接口的出现这样的错误
+                        # 至此已经超出了正常接口应该进入的范围，一些垃圾第三方接口会出现这样的错误
+                        if chunkjson['choices'][0]["delta"]["content"] is None: continue # 一些垃圾第三方接口出现这样的错误，兼容一下吧
                         gpt_replying_buffer = gpt_replying_buffer + chunkjson['choices'][0]["delta"]["content"]
 
                     history[-1] = gpt_replying_buffer
