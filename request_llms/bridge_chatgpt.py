@@ -127,6 +127,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
         if len(delta) == 0: break
         if "role" in delta: continue
         if "content" in delta:
+            if delta["content"] is None: continue
             result += delta["content"]
             if not console_slience: print(delta["content"], end='')
             if observe_window is not None:
@@ -264,7 +265,8 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                         # 一些第三方接口的出现这样的错误，兼容一下吧
                         continue
                     else:
-                        # 一些垃圾第三方接口的出现这样的错误
+                        # 至此已经超出了正常接口应该进入的范围，一些垃圾第三方接口会出现这样的错误
+                        if chunkjson['choices'][0]["delta"]["content"] is None: continue # 一些垃圾第三方接口出现这样的错误，兼容一下吧
                         gpt_replying_buffer = gpt_replying_buffer + chunkjson['choices'][0]["delta"]["content"]
 
                     history[-1] = gpt_replying_buffer
