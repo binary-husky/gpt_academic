@@ -52,7 +52,7 @@ def 按图片拆分文档(input_pdf_path):
     """
     import fitz
     import json
-    doc = fitz.open(input_pdf_path)  # 打开PDF文件
+    doc = fitz.open(input_pdf_path)
     page_ranges = []  # 用于存储拆分后的页面范围
     current_range_start = 0  # 当前页面范围的起始页
     has_images = False  # 标记当前处理的页面是否含有图片
