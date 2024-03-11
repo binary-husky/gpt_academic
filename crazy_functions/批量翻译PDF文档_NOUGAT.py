@@ -50,6 +50,8 @@ def 按图片拆分文档(input_pdf_path):
     """
     将会按照图片拆分上下文，将图片单独储存的同时会储存附近的上下文以便后续进行模糊匹配位置。
     """
+    import fitz
+    import json
     doc = fitz.open(input_pdf_path)  # 打开PDF文件
     page_ranges = []  # 用于存储拆分后的页面范围
     current_range_start = 0  # 当前页面范围的起始页
@@ -126,6 +128,9 @@ def 按图片拆分文档(input_pdf_path):
     return files_splited
 
 def 模糊匹配添加图片(markdown_file_path, pdf_file_path):
+    import json
+    from fuzzywuzzy import process
+    import fuzzywuzzy.fuzz as fuzz
     # 从PDF文件路径获取基础路径和图片文件夹路径
     base_path = pdf_file_path.split('.')[0]
     image_folder = f"{base_path}_images"
@@ -218,9 +223,10 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
                          a=f"解析项目: {txt}", b=f"找不到任何.pdf拓展名的文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
-
+    if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
+    split = plugin_kwargs.get("advanced_arg", "")
     # 开始正式执行任务
-    yield from 解析PDF_基于NOUGAT(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt)
+    yield from 解析PDF_基于NOUGAT(file_manifest, project_folder, llm_kwargs, split, chatbot, history, system_prompt)
 
 
 
@@ -237,11 +243,7 @@ def 解析PDF_基于NOUGAT(file_manifest, project_folder, llm_kwargs, plugin_kwa
     nougat_handle = nougat_interface()
     for index, fp in enumerate(file_manifest):
         if fp.endswith('pdf'):
-            if plugin_kwargs == 1:
-                import fitz
-                import json
-                from fuzzywuzzy import process
-                import fuzzywuzzy.fuzz as fuzz
+            if plugin_kwargs == "1":
                 split_result = 按图片拆分文档(fp)
                 files_nougat = []
                 chatbot.append(["当前进度：", f"正在解析论文，请稍候，您启用了匹配图片到结果的参数，这会使解析的时间稍微增加。（第一次运行时，需要花费较长时间下载NOUGAT参数）"]); yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
@@ -255,14 +257,14 @@ def 解析PDF_基于NOUGAT(file_manifest, project_folder, llm_kwargs, plugin_kwa
                         temp_onougat = yield from nougat_handle.NOUGAT_parse_pdf(file["path"], chatbot, history)
                         files_nougat.append(temp_onougat)
                 fpp = f"{fp.split('.')[0]}.mmd"
-                with open(fpp) as result_file:
+                with open(fpp, "w", encoding="utf-8") as result_file:
                     for file in files_nougat:
                         with open(file, "r", encoding="utf-8") as temp_file:
                             result_file.write(temp_file.read())
                             result_file.write("\n")
                         os.remove(file)
                         # 顺便把拆分的pdf也删除了
-                        os.remove(file.split('.')[0] + ".pdf")
+                        #os.remove(file.split('.')[0] + ".pdf")
                 promote_file_to_downloadzone(fpp, rename_file=os.path.basename(fpp)+'.nougat.mmd', chatbot=chatbot)
             else:
                 chatbot.append(["当前进度：", f"正在解析论文，请稍候。（第一次运行时，需要花费较长时间下载NOUGAT参数）"]); yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
