@@ -47,7 +47,7 @@ def backup_and_download(current_version, remote_version):
     shutil.copytree('./', backup_dir, ignore=lambda x, y: ['history'])
     proxies = get_conf('proxies')
     try:    r = requests.get('https://github.com/binary-husky/chatgpt_academic/archive/refs/heads/master.zip', proxies=proxies, stream=True)
-    except: r = requests.get('https://public.gpt-academic.top/publish/master.zip', proxies=proxies, stream=True)
+    except: r = requests.get('https://public.agent-matrix.com/publish/master.zip', proxies=proxies, stream=True)
     zip_file_path = backup_dir+'/master.zip'
     with open(zip_file_path, 'wb+') as f:
         f.write(r.content)
@@ -113,7 +113,7 @@ def auto_update(raise_error=False):
         import json
         proxies = get_conf('proxies')
         try:    response = requests.get("https://raw.githubusercontent.com/binary-husky/chatgpt_academic/master/version", proxies=proxies, timeout=5)
-        except: response = requests.get("https://public.gpt-academic.top/publish/version", proxies=proxies, timeout=5)
+        except: response = requests.get("https://public.agent-matrix.com/publish/version", proxies=proxies, timeout=5)
         remote_json_data = json.loads(response.text)
         remote_version = remote_json_data['version']
         if remote_json_data["show_feature"]:
