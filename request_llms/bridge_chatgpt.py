@@ -127,6 +127,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
         if len(delta) == 0: break
         if "role" in delta: continue
         if "content" in delta:
+            if delta["content"] is None: continue
             result += delta["content"]
             if not console_slience: print(delta["content"], end='')
             if observe_window is not None:
