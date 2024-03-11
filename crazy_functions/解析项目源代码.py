@@ -345,9 +345,12 @@ def 解析任意code项目(txt, llm_kwargs, plugin_kwargs, chatbot, history, sys
     pattern_except_suffix = [_.lstrip(" ^*.,").rstrip(" ,") for _ in txt_pattern.split(" ") if _ != "" and _.strip().startswith("^*.")]
     pattern_except_suffix += ['zip', 'rar', '7z', 'tar', 'gz'] # 避免解析压缩文件
     # 将要忽略匹配的文件名(例如: ^README.md)
-    pattern_except_name = [_.lstrip(" ^*,").rstrip(" ,").replace(".", "\.") for _ in txt_pattern.split(" ") if _ != "" and _.strip().startswith("^") and not _.strip().startswith("^*.")]
+    pattern_except_name = [_.lstrip(" ^*,").rstrip(" ,").replace(".", r"\.") # 移除左边通配符，移除右侧逗号，转义点号
+                           for _ in txt_pattern.split(" ") # 以空格分割
+                           if (_ != "" and _.strip().startswith("^") and not _.strip().startswith("^*."))   # ^开始，但不是^*.开始
+                           ]
     # 生成正则表达式
-    pattern_except = '/[^/]+\.(' + "|".join(pattern_except_suffix) + ')$'
+    pattern_except = r'/[^/]+\.(' + "|".join(pattern_except_suffix) + ')$'
     pattern_except += '|/(' + "|".join(pattern_except_name) + ')$' if pattern_except_name != [] else ''
 
     history.clear()

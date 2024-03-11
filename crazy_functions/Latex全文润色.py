@@ -81,8 +81,8 @@ def 多文件润色(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
     #  <-------- 多线程润色开始 ---------->
     if language == 'en':
         if mode == 'polish':
-            inputs_array = ["Below is a section from an academic paper, polish this section to meet the academic standard, " +
-                            "improve the grammar, clarity and overall readability, do not modify any latex command such as \section, \cite and equations:" +
+            inputs_array = [r"Below is a section from an academic paper, polish this section to meet the academic standard, " +
+                            r"improve the grammar, clarity and overall readability, do not modify any latex command such as \section, \cite and equations:" +
                             f"\n\n{frag}" for frag in pfg.sp_file_contents]
         else:
             inputs_array = [r"Below is a section from an academic paper, proofread this section." +
@@ -93,10 +93,10 @@ def 多文件润色(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
         sys_prompt_array = ["You are a professional academic paper writer." for _ in range(n_split)]
     elif language == 'zh':
         if mode == 'polish':
-            inputs_array = [f"以下是一篇学术论文中的一段内容，请将此部分润色以满足学术标准，提高语法、清晰度和整体可读性，不要修改任何LaTeX命令，例如\section，\cite和方程式：" +
+            inputs_array = [r"以下是一篇学术论文中的一段内容，请将此部分润色以满足学术标准，提高语法、清晰度和整体可读性，不要修改任何LaTeX命令，例如\section，\cite和方程式：" +
                             f"\n\n{frag}" for frag in pfg.sp_file_contents]
         else:
-            inputs_array = [f"以下是一篇学术论文中的一段内容，请对这部分内容进行语法矫正。不要修改任何LaTeX命令，例如\section，\cite和方程式：" +
+            inputs_array = [r"以下是一篇学术论文中的一段内容，请对这部分内容进行语法矫正。不要修改任何LaTeX命令，例如\section，\cite和方程式：" +
                             f"\n\n{frag}" for frag in pfg.sp_file_contents]
         inputs_show_user_array = [f"润色 {f}" for f in pfg.sp_file_tag]
         sys_prompt_array=["你是一位专业的中文学术论文作家。" for _ in range(n_split)]
