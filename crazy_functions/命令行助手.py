@@ -21,8 +21,8 @@ def 命令行助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     i_say = "请写bash命令实现以下功能：" + txt
     # 开始
     gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
-        inputs=i_say, inputs_show_user=txt, 
-        llm_kwargs=llm_kwargs, chatbot=chatbot, history=[], 
+        inputs=i_say, inputs_show_user=txt,
+        llm_kwargs=llm_kwargs, chatbot=chatbot, history=[],
         sys_prompt="你是一个Linux大师级用户。注意，当我要求你写bash命令时，尽可能地仅用一行命令解决我的要求。"
     )
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新

@@ -64,8 +64,8 @@ def produce_report_markdown(gpt_response_collection, meta, paper_meta_info, chat
             # 再做一个小修改：重新修改当前part的标题，默认用英文的
             cur_value += value
             translated_res_array.append(cur_value)
-    res_path = write_history_to_file(meta +  ["# Meta Translation" , paper_meta_info] + translated_res_array, 
-                                     file_basename = f"{gen_time_str()}-translated_only.md", 
+    res_path = write_history_to_file(meta +  ["# Meta Translation" , paper_meta_info] + translated_res_array,
+                                     file_basename = f"{gen_time_str()}-translated_only.md",
                                      file_fullname = None,
                                      auto_caption = False)
     promote_file_to_downloadzone(res_path, rename_file=os.path.basename(res_path)+'.md', chatbot=chatbot)
@@ -144,11 +144,11 @@ def translate_pdf(article_dict, llm_kwargs, chatbot, fp, generated_conclusion_fi
     produce_report_markdown(gpt_response_collection, meta, paper_meta_info, chatbot, fp, generated_conclusion_files)
 
     # -=-=-=-=-=-=-=-= 写出HTML文件 -=-=-=-=-=-=-=-=
-    ch = construct_html() 
+    ch = construct_html()
     orig = ""
     trans = ""
     gpt_response_collection_html = copy.deepcopy(gpt_response_collection)
-    for i,k in enumerate(gpt_response_collection_html): 
+    for i,k in enumerate(gpt_response_collection_html):
         if i%2==0:
             gpt_response_collection_html[i] = inputs_show_user_array[i//2]
         else:
@@ -159,7 +159,7 @@ def translate_pdf(article_dict, llm_kwargs, chatbot, fp, generated_conclusion_fi
 
     final = ["", "", "一、论文概况",  "", "Abstract", paper_meta_info,  "二、论文翻译",  ""]
     final.extend(gpt_response_collection_html)
-    for i, k in enumerate(final): 
+    for i, k in enumerate(final):
         if i%2==0:
             orig = k
         if i%2==1:

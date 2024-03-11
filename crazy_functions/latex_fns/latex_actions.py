@@ -90,16 +90,16 @@ class LatexPaperSplit():
             "版权归原文作者所有。翻译内容可靠性无保障，请仔细鉴别并以原文为准。" + \
             "项目Github地址 \\url{https://github.com/binary-husky/gpt_academic/}。"
         # 请您不要删除或修改这行警告，除非您是论文的原作者（如果您是论文原作者，欢迎加REAME中的QQ联系开发者）
-        self.msg_declare = "为了防止大语言模型的意外谬误产生扩散影响，禁止移除或修改此警告。}}\\\\" 
+        self.msg_declare = "为了防止大语言模型的意外谬误产生扩散影响，禁止移除或修改此警告。}}\\\\"
         self.title = "unknown"
         self.abstract = "unknown"
 
     def read_title_and_abstract(self, txt):
         try:
             title, abstract = find_title_and_abs(txt)
-            if title is not None: 
+            if title is not None:
                 self.title = title.replace('\n', ' ').replace('\\\\', ' ').replace('  ', '').replace('  ', '')
-            if abstract is not None: 
+            if abstract is not None:
                 self.abstract = abstract.replace('\n', ' ').replace('\\\\', ' ').replace('  ', '').replace('  ', '')
         except:
             pass
@@ -111,7 +111,7 @@ class LatexPaperSplit():
         result_string = ""
         node_cnt = 0
         line_cnt = 0
-        
+
         for node in self.nodes:
             if node.preserve:
                 line_cnt += node.string.count('\n')
@@ -144,7 +144,7 @@ class LatexPaperSplit():
         return result_string
 
 
-    def split(self, txt, project_folder, opts): 
+    def split(self, txt, project_folder, opts):
         """
         break down latex file to a linked list,
         each node use a preserve flag to indicate whether it should
@@ -155,7 +155,7 @@ class LatexPaperSplit():
         manager = multiprocessing.Manager()
         return_dict = manager.dict()
         p = multiprocessing.Process(
-            target=split_subprocess, 
+            target=split_subprocess,
             args=(txt, project_folder, return_dict, opts))
         p.start()
         p.join()
@@ -217,13 +217,13 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
     from ..crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
     from .latex_actions import LatexPaperFileGroup, LatexPaperSplit
 
-    #  <-------- 寻找主tex文件 ----------> 
+    #  <-------- 寻找主tex文件 ---------->
     maintex = find_main_tex_file(file_manifest, mode)
     chatbot.append((f"定位主Latex文件", f'[Local Message] 分析结果：该项目的Latex主文件是{maintex}, 如果分析错误, 请立即终止程序, 删除或修改歧义文件, 然后重试。主程序即将开始, 请稍候。'))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
     time.sleep(3)
 
-    #  <-------- 读取Latex文件, 将多文件tex工程融合为一个巨型tex ----------> 
+    #  <-------- 读取Latex文件, 将多文件tex工程融合为一个巨型tex ---------->
     main_tex_basename = os.path.basename(maintex)
     assert main_tex_basename.endswith('.tex')
     main_tex_basename_bare = main_tex_basename[:-4]
@@ -240,13 +240,13 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
     with open(project_folder + '/merge.tex', 'w', encoding='utf-8', errors='replace') as f:
         f.write(merged_content)
 
-    #  <-------- 精细切分latex文件 ----------> 
+    #  <-------- 精细切分latex文件 ---------->
     chatbot.append((f"Latex文件融合完成", f'[Local Message] 正在精细切分latex文件，这需要一段时间计算，文档越长耗时越长，请耐心等待。'))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
     lps = LatexPaperSplit()
     lps.read_title_and_abstract(merged_content)
     res = lps.split(merged_content, project_folder, opts) # 消耗时间的函数
-    #  <-------- 拆分过长的latex片段 ----------> 
+    #  <-------- 拆分过长的latex片段 ---------->
     pfg = LatexPaperFileGroup()
     for index, r in enumerate(res):
         pfg.file_paths.append('segment-' + str(index))
@@ -255,17 +255,17 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
     pfg.run_file_split(max_token_limit=1024)
     n_split = len(pfg.sp_file_contents)
 
-    #  <-------- 根据需要切换prompt ----------> 
+    #  <-------- 根据需要切换prompt ---------->
     inputs_array, sys_prompt_array = switch_prompt(pfg, mode)
     inputs_show_user_array = [f"{mode} {f}" for f in pfg.sp_file_tag]
 
     if os.path.exists(pj(project_folder,'temp.pkl')):
 
-        #  <-------- 【仅调试】如果存在调试缓存文件，则跳过GPT请求环节 ----------> 
+        #  <-------- 【仅调试】如果存在调试缓存文件，则跳过GPT请求环节 ---------->
         pfg = objload(file=pj(project_folder,'temp.pkl'))
 
     else:
-        #  <-------- gpt 多线程请求 ----------> 
+        #  <-------- gpt 多线程请求 ---------->
         history_array = [[""] for _ in range(n_split)]
         # LATEX_EXPERIMENTAL, = get_conf('LATEX_EXPERIMENTAL')
         # if LATEX_EXPERIMENTAL:
@@ -284,32 +284,32 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
             scroller_max_len = 40
         )
 
-        #  <-------- 文本碎片重组为完整的tex片段 ----------> 
+        #  <-------- 文本碎片重组为完整的tex片段 ---------->
         pfg.sp_file_result = []
         for i_say, gpt_say, orig_content in zip(gpt_response_collection[0::2], gpt_response_collection[1::2], pfg.sp_file_contents):
             pfg.sp_file_result.append(gpt_say)
         pfg.merge_result()
 
-        # <-------- 临时存储用于调试 ----------> 
+        # <-------- 临时存储用于调试 ---------->
         pfg.get_token_num = None
         objdump(pfg, file=pj(project_folder,'temp.pkl'))
 
     write_html(pfg.sp_file_contents, pfg.sp_file_result, chatbot=chatbot, project_folder=project_folder)
 
-    #  <-------- 写出文件 ----------> 
+    #  <-------- 写出文件 ---------->
     msg = f"当前大语言模型: {llm_kwargs['llm_model']}，当前语言模型温度设定: {llm_kwargs['temperature']}。"
     final_tex = lps.merge_result(pfg.file_result, mode, msg)
     objdump((lps, pfg.file_result, mode, msg), file=pj(project_folder,'merge_result.pkl'))
 
     with open(project_folder + f'/merge_{mode}.tex', 'w', encoding='utf-8', errors='replace') as f:
         if mode != 'translate_zh' or "binary" in final_tex: f.write(final_tex)
-        
 
-    #  <-------- 整理结果, 退出 ----------> 
+
+    #  <-------- 整理结果, 退出 ---------->
     chatbot.append((f"完成了吗？", 'GPT结果已输出, 即将编译PDF'))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
-    #  <-------- 返回 ----------> 
+    #  <-------- 返回 ---------->
     return project_folder + f'/merge_{mode}.tex'
 
 
@@ -362,7 +362,7 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
 
         yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 编译转化后的PDF ...', chatbot, history)   # 刷新Gradio前端界面
         ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex', work_folder_modified)
-        
+
         if ok and os.path.exists(pj(work_folder_modified, f'{main_file_modified}.pdf')):
             # 只有第二步成功，才能继续下面的步骤
             yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 编译BibTex ...', chatbot, history)    # 刷新Gradio前端界面
@@ -393,9 +393,9 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
         original_pdf_success = os.path.exists(pj(work_folder_original, f'{main_file_original}.pdf'))
         modified_pdf_success = os.path.exists(pj(work_folder_modified, f'{main_file_modified}.pdf'))
         diff_pdf_success     = os.path.exists(pj(work_folder, f'merge_diff.pdf'))
-        results_ += f"原始PDF编译是否成功: {original_pdf_success};" 
-        results_ += f"转化PDF编译是否成功: {modified_pdf_success};" 
-        results_ += f"对比PDF编译是否成功: {diff_pdf_success};" 
+        results_ += f"原始PDF编译是否成功: {original_pdf_success};"
+        results_ += f"转化PDF编译是否成功: {modified_pdf_success};"
+        results_ += f"对比PDF编译是否成功: {diff_pdf_success};"
         yield from update_ui_lastest_msg(f'第{n_fix}编译结束:<br/>{results_}...', chatbot, history) # 刷新Gradio前端界面
 
         if diff_pdf_success:
@@ -409,7 +409,7 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
                 shutil.copyfile(result_pdf, pj(work_folder, '..', 'translation', 'translate_zh.pdf'))
             promote_file_to_downloadzone(result_pdf, rename_file=None, chatbot=chatbot)  # promote file to web UI
             # 将两个PDF拼接
-            if original_pdf_success: 
+            if original_pdf_success:
                 try:
                     from .latex_toolbox import merge_pdfs
                     concat_pdf = pj(work_folder_modified, f'comparison.pdf')
@@ -425,7 +425,7 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
             if n_fix>=max_try: break
             n_fix += 1
             can_retry, main_file_modified, buggy_lines = remove_buggy_lines(
-                file_path=pj(work_folder_modified, f'{main_file_modified}.tex'), 
+                file_path=pj(work_folder_modified, f'{main_file_modified}.tex'),
                 log_path=pj(work_folder_modified, f'{main_file_modified}.log'),
                 tex_name=f'{main_file_modified}.tex',
                 tex_name_pure=f'{main_file_modified}',
@@ -445,14 +445,14 @@ def write_html(sp_file_contents, sp_file_result, chatbot, project_folder):
         import shutil
         from crazy_functions.pdf_fns.report_gen_html import construct_html
         from toolbox import gen_time_str
-        ch = construct_html() 
+        ch = construct_html()
         orig = ""
         trans = ""
         final = []
-        for c,r in zip(sp_file_contents, sp_file_result): 
+        for c,r in zip(sp_file_contents, sp_file_result):
             final.append(c)
             final.append(r)
-        for i, k in enumerate(final): 
+        for i, k in enumerate(final):
             if i%2==0:
                 orig = k
             if i%2==1:

@@ -144,8 +144,8 @@ def 下载arxiv论文并翻译摘要(txt, llm_kwargs, plugin_kwargs, chatbot, hi
     try:
         import bs4
     except:
-        report_exception(chatbot, history, 
-            a = f"解析项目: {txt}", 
+        report_exception(chatbot, history,
+            a = f"解析项目: {txt}",
             b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade beautifulsoup4```。")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
@@ -157,12 +157,12 @@ def 下载arxiv论文并翻译摘要(txt, llm_kwargs, plugin_kwargs, chatbot, hi
     try:
         pdf_path, info = download_arxiv_(txt)
     except:
-        report_exception(chatbot, history, 
-            a = f"解析项目: {txt}", 
+        report_exception(chatbot, history,
+            a = f"解析项目: {txt}",
             b = f"下载pdf文件未成功")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
-    
+
     # 翻译摘要等
     i_say =            f"请你阅读以下学术论文相关的材料，提取摘要，翻译为中文。材料如下：{str(info)}"
     i_say_show_user =  f'请你阅读以下学术论文相关的材料，提取摘要，翻译为中文。论文：{pdf_path}'

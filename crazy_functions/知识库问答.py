@@ -9,7 +9,7 @@ install_msg ="""
 
 3. python -m pip install unstructured[all-docs] --upgrade
 
-4. python -c 'import nltk; nltk.download("punkt")' 
+4. python -c 'import nltk; nltk.download("punkt")'
 """
 
 @CatchException
@@ -56,7 +56,7 @@ def 知识库文件注入(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
         chatbot.append(["没有找到任何可读取文件", "当前支持的格式包括: txt, md, docx, pptx, pdf, json等"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
-    
+
     # < -------------------预热文本向量化模组--------------- >
     chatbot.append(['<br/>'.join(file_manifest), "正在预热文本向量化模组, 如果是第一次运行, 将消耗较长时间下载中文向量化模型..."])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
@@ -109,8 +109,8 @@ def 读取知识库作答(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     chatbot.append((txt, f'[知识库 {kai_id}] ' + prompt))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
     gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
-        inputs=prompt, inputs_show_user=txt, 
-        llm_kwargs=llm_kwargs, chatbot=chatbot, history=[], 
+        inputs=prompt, inputs_show_user=txt,
+        llm_kwargs=llm_kwargs, chatbot=chatbot, history=[],
         sys_prompt=system_prompt
     )
     history.extend((prompt, gpt_say))

@@ -8,7 +8,7 @@ from toolbox import get_conf, encode_image, get_pictures_list
 import logging, os
 
 
-def input_encode_handler(inputs, llm_kwargs):        
+def input_encode_handler(inputs, llm_kwargs):
     if llm_kwargs["most_recent_uploaded"].get("path"):
         image_paths = get_pictures_list(llm_kwargs["most_recent_uploaded"]["path"])
     md_encode = []

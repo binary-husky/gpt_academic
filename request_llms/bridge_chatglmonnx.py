@@ -59,7 +59,7 @@ class GetONNXGLMHandle(LocalLLMHandle):
             temperature=temperature,
         ):
             yield answer
-        
+
     def try_to_import_special_deps(self, **kwargs):
         # import something that will raise error if the user does not install requirement_*.txt
         # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行

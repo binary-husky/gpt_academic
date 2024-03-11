@@ -39,7 +39,7 @@ class AsyncGptTask():
         try:
             MAX_TOKEN_ALLO = 2560
             i_say, history = input_clipping(i_say, history, max_token_limit=MAX_TOKEN_ALLO)
-            gpt_say_partial = predict_no_ui_long_connection(inputs=i_say, llm_kwargs=llm_kwargs, history=history, sys_prompt=sys_prompt, 
+            gpt_say_partial = predict_no_ui_long_connection(inputs=i_say, llm_kwargs=llm_kwargs, history=history, sys_prompt=sys_prompt,
                                                             observe_window=observe_window[index], console_slience=True)
         except ConnectionAbortedError as token_exceed_err:
             print('至少一个线程任务Token溢出而失败', e)
@@ -120,7 +120,7 @@ class InterviewAssistant(AliyunASR):
             yield from update_ui(chatbot=chatbot, history=history)      # 刷新界面
             self.plugin_wd.feed()
 
-            if self.event_on_result_chg.is_set(): 
+            if self.event_on_result_chg.is_set():
                 # called when some words have finished
                 self.event_on_result_chg.clear()
                 chatbot[-1] = list(chatbot[-1])
@@ -151,7 +151,7 @@ class InterviewAssistant(AliyunASR):
                 # add gpt task 创建子线程请求gpt，避免线程阻塞
                 history = chatbot2history(chatbot)
                 self.agt.add_async_gpt_task(self.buffered_sentence, len(chatbot)-1, llm_kwargs, history, system_prompt)
-                
+
                 self.buffered_sentence = ""
                 chatbot.append(["[ 请讲话 ]", "[ 正在等您说完问题 ]"])
                 yield from update_ui(chatbot=chatbot, history=history) # 刷新界面

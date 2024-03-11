@@ -3,7 +3,7 @@ from sys import stdout
 
 if platform.system()=="Linux":
     pass
-else: 
+else:
     from colorama import init
     init()
 

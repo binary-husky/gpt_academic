@@ -21,7 +21,7 @@ import random
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
-from toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history, trimmed_format_exc, is_the_upload_folder
+from toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history, trimmed_format_exc, is_the_upload_folder, read_one_api_model_name
 proxies, TIMEOUT_SECONDS, MAX_RETRY, API_ORG, AZURE_CFG_ARRAY = \
     get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'API_ORG', 'AZURE_CFG_ARRAY')
 
@@ -358,6 +358,9 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     model = llm_kwargs['llm_model']
     if llm_kwargs['llm_model'].startswith('api2d-'):
         model = llm_kwargs['llm_model'][len('api2d-'):]
+    if llm_kwargs['llm_model'].startswith('one-api-'):
+        model = llm_kwargs['llm_model'][len('one-api-'):]
+        model, _ = read_one_api_model_name(model)
 
     if model == "gpt-3.5-random": # 随机选择, 绕过openai访问频率限制
         model = random.choice([

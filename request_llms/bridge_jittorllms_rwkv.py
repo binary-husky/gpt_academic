@@ -20,7 +20,7 @@ class GetGLMHandle(Process):
         self.check_dependency()
         self.start()
         self.threadLock = threading.Lock()
-        
+
     def check_dependency(self):
         try:
             import pandas
@@ -102,7 +102,7 @@ class GetGLMHandle(Process):
             else:
                 break
         self.threadLock.release()
-    
+
 global rwkv_glm_handle
 rwkv_glm_handle = None
 #################################################################################
@@ -115,7 +115,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     if rwkv_glm_handle is None:
         rwkv_glm_handle = GetGLMHandle()
         if len(observe_window) >= 1: observe_window[0] = load_message + "\n\n" + rwkv_glm_handle.info
-        if not rwkv_glm_handle.success: 
+        if not rwkv_glm_handle.success:
             error = rwkv_glm_handle.info
             rwkv_glm_handle = None
             raise RuntimeError(error)
@@ -130,7 +130,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     for response in rwkv_glm_handle.stream_chat(query=inputs, history=history_feedin, system_prompt=sys_prompt, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
         print(response)
         if len(observe_window) >= 1:  observe_window[0] = response
-        if len(observe_window) >= 2:  
+        if len(observe_window) >= 2:
             if (time.time()-observe_window[1]) > watch_dog_patience:
                 raise RuntimeError("程序终止。")
     return response
@@ -149,7 +149,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         rwkv_glm_handle = GetGLMHandle()
         chatbot[-1] = (inputs, load_message + "\n\n" + rwkv_glm_handle.info)
         yield from update_ui(chatbot=chatbot, history=[])
-        if not rwkv_glm_handle.success: 
+        if not rwkv_glm_handle.success:
             rwkv_glm_handle = None
             return
 
