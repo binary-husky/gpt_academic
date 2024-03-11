@@ -616,6 +616,8 @@ def get_crazy_functions():
                     "Group": "学术",
                     "Color": "stop",
                     "AsButton": False,
+                    "AdvancedArgs": True,
+                    "ArgsReminder": "输入1将会尝试将原文图片匹配到译文中，这需要原文是非纯图片PDF，这会导致处理时间变长，默认不会尝试匹配。",
                     "Function": HotReload(批量翻译PDF文档),
                 }
             }

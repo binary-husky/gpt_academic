@@ -46,6 +46,126 @@ def markdown_to_dict(article_content):
     results_final['sections'] = results_final_sections
     return results_final
 
+def 按图片拆分文档(input_pdf_path):
+    """
+    将会按照图片拆分上下文，将图片单独储存的同时会储存附近的上下文以便后续进行模糊匹配位置。
+    """
+    doc = fitz.open(input_pdf_path)  # 打开PDF文件
+    page_ranges = []  # 用于存储拆分后的页面范围
+    current_range_start = 0  # 当前页面范围的起始页
+    has_images = False  # 标记当前处理的页面是否含有图片
+    
+    for page_number in range(len(doc)):
+        page = doc.load_page(page_number)
+        img_list = page.get_images(full=True)
+        text_blocks = page.get_text("blocks")
+        
+        if img_list:
+            if not has_images and current_range_start < page_number:
+                page_ranges.append((current_range_start, page_number - 1))
+            page_ranges.append((page_number, page_number))
+            has_images = True
+        else:
+            if has_images:
+                current_range_start = page_number
+            has_images = False
+
+    if not has_images:
+        page_ranges.append((current_range_start, len(doc) - 1))
+
+    files_splited = []
+
+    for start, end in page_ranges:
+        output_doc = fitz.open()
+        for page_number in range(start, end + 1):
+            output_doc.insert_pdf(doc, from_page=page_number, to_page=page_number)
+        
+        output_pdf_path = f"{input_pdf_path.split('.')[0]}_{start + 1}_to_{end + 1}.pdf"
+        output_doc.save(output_pdf_path)
+        
+        # 对于每个页面范围，检查并保存图片及相关文本
+        for page_number in range(start, end + 1):
+            page = doc.load_page(page_number)
+            images = page.get_images(full=True)
+            text_blocks = page.get_text("blocks")
+            if images:
+                image_folder = f"{input_pdf_path.split('.')[0]}_{start + 1}_to_{end + 1}_images"
+                if not os.path.exists(image_folder):
+                    os.makedirs(image_folder)
+                for img_index, img in enumerate(images):
+                    xref = img[0]
+                    base_image = doc.extract_image(xref)
+                    image_bytes = base_image["image"]
+                    image_file_path = f"{image_folder}/{page_number + 1}_{img_index + 1}.png"
+                    with open(image_file_path, "wb") as image_file:
+                        image_file.write(image_bytes)
+                    
+                    # 查找与图片相关的文本块
+                    img_rect = page.get_image_bbox(img)
+                    above_texts, below_texts = [], []
+                    for block in text_blocks:
+                        block_rect = fitz.Rect(block[:4])
+                        if block_rect.y0 < img_rect.y0:
+                            above_texts.append(block[4])
+                        elif block_rect.y0 > img_rect.y0:
+                            below_texts.append(block[4])
+                    
+                    related_texts = {
+                        "above": above_texts[:2],
+                        "below": below_texts[:3]
+                    }
+                    
+                    # 保存相关文本到.find文件
+                    find_file_path = f"{image_file_path}.find"
+                    with open(find_file_path, "w") as find_file:
+                        json.dump(related_texts, find_file, ensure_ascii=False, indent=4)
+        
+        files_splited.append({"path": output_pdf_path, "picture": True if images else False})
+
+    doc.close()
+    return files_splited
+
+def 模糊匹配添加图片(markdown_file_path, pdf_file_path):
+    # 从PDF文件路径获取基础路径和图片文件夹路径
+    base_path = pdf_file_path.split('.')[0]
+    image_folder = f"{base_path}_images"
+    
+    # 读取Markdown文档内容
+    with open(markdown_file_path, 'r', encoding='utf-8') as md_file:
+        markdown_content = md_file.readlines()
+        markdown_content_stripped = [line.strip() for line in markdown_content]
+    
+    for find_file_name in os.listdir(image_folder):
+        if find_file_name.endswith('.find'):
+            image_file_path = f"{image_folder}/{find_file_name[:-5]}"
+            with open(f"{image_folder}/{find_file_name}", 'r', encoding='utf-8') as find_file:
+                find_data = json.load(find_file)
+            # 根据.find文件中的文本信息查找插入位置
+            insert_index = None
+            search_texts = find_data['below'] + find_data['above']
+            for text in search_texts:
+                text = text.replace('\n', '').strip()
+                # 使用fuzzywuzzy进行模糊匹配
+                best_match, similarity = process.extractOne(text, markdown_content_stripped, scorer=fuzz.partial_ratio)
+                if similarity > 90:
+                    line_index = markdown_content_stripped.index(best_match)
+                    insert_index = line_index - 1 if text in find_data['above'] else line_index + 1
+                    if insert_index < 0:
+                        insert_index = 1
+                    break
+            
+            if insert_index is not None:
+                image_markdown = f"\n![Image]({image_file_path})\n"
+                markdown_content.insert(insert_index, image_markdown)
+            else:
+                # 如果实在没找到，没办法了只能放在最后
+                image_markdown = f"\n![Image]({image_file_path})\n"
+                markdown_content.append(image_markdown)
+                print("Not find!")
+    
+    # 保存更新后的Markdown文档
+    with open(markdown_file_path, 'w', encoding='utf-8') as md_file:
+        md_file.writelines(markdown_content)
 
 @CatchException
 def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
@@ -72,6 +192,16 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
                              a=f"解析项目: {txt}",
                              b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade nougat-ocr tiktoken```。")
             yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+            return
+    if plugin_kwargs == 1:
+        try:
+            import fitz
+            import fuzzywuzzy
+        except:
+            report_exception(chatbot, history,
+                             a=f"解析项目: {txt}",
+                             b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade PyMuPDF fuzzywuzzy```。")
+            yield from update_ui(chatbot=chatbot, history=history)
             return
     success_mmd, file_manifest_mmd, _ = get_files_from_everything(txt, type='.mmd')
     success = success or success_mmd
@@ -107,9 +237,37 @@ def 解析PDF_基于NOUGAT(file_manifest, project_folder, llm_kwargs, plugin_kwa
     nougat_handle = nougat_interface()
     for index, fp in enumerate(file_manifest):
         if fp.endswith('pdf'):
-            chatbot.append(["当前进度：", f"正在解析论文，请稍候。（第一次运行时，需要花费较长时间下载NOUGAT参数）"]); yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-            fpp = yield from nougat_handle.NOUGAT_parse_pdf(fp, chatbot, history)
-            promote_file_to_downloadzone(fpp, rename_file=os.path.basename(fpp)+'.nougat.mmd', chatbot=chatbot)
+            if plugin_kwargs == 1:
+                import fitz
+                import json
+                from fuzzywuzzy import process
+                import fuzzywuzzy.fuzz as fuzz
+                split_result = 按图片拆分文档(fp)
+                files_nougat = []
+                chatbot.append(["当前进度：", f"正在解析论文，请稍候，您启用了匹配图片到结果的参数，这会使解析的时间稍微增加。（第一次运行时，需要花费较长时间下载NOUGAT参数）"]); yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+
+                for file in split_result:
+                    if file["picture"]:
+                        temp_onougat = yield from nougat_handle.NOUGAT_parse_pdf(file["path"], chatbot, history)
+                        files_nougat.append(temp_onougat)
+                        模糊匹配添加图片(temp_onougat, file["path"])
+                    else:
+                        temp_onougat = yield from nougat_handle.NOUGAT_parse_pdf(file["path"], chatbot, history)
+                        files_nougat.append(temp_onougat)
+                fpp = f"{fp.split('.')[0]}.mmd"
+                with open(fpp) as result_file:
+                    for file in files_nougat:
+                        with open(file, "r", encoding="utf-8") as temp_file:
+                            result_file.write(temp_file.read())
+                            result_file.write("\n")
+                        os.remove(file)
+                        # 顺便把拆分的pdf也删除了
+                        os.remove(file.split('.')[0] + ".pdf")
+                promote_file_to_downloadzone(fpp, rename_file=os.path.basename(fpp)+'.nougat.mmd', chatbot=chatbot)
+            else:
+                chatbot.append(["当前进度：", f"正在解析论文，请稍候。（第一次运行时，需要花费较长时间下载NOUGAT参数）"]); yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+                fpp = yield from nougat_handle.NOUGAT_parse_pdf(fp, chatbot, history)
+                promote_file_to_downloadzone(fpp, rename_file=os.path.basename(fpp)+'.nougat.mmd', chatbot=chatbot)
         else:
             chatbot.append(["当前论文无需解析：", fp]); yield from update_ui(      chatbot=chatbot, history=history)
             fpp = fp
