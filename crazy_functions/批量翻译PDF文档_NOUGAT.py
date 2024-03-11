@@ -152,7 +152,10 @@ def 模糊匹配添加图片(markdown_file_path, pdf_file_path):
             for text in search_texts:
                 text = text.replace('\n', '').strip()
                 # 使用fuzzywuzzy进行模糊匹配
-                best_match, similarity = process.extractOne(text, markdown_content_stripped, scorer=fuzz.partial_ratio)
+                try:
+                    best_match, similarity = process.extractOne(text, markdown_content_stripped, scorer=fuzz.partial_ratio)
+                except:
+                    continue
                 if similarity > 90:
                     line_index = markdown_content_stripped.index(best_match)
                     insert_index = line_index - 1 if text in find_data['above'] else line_index + 1
@@ -187,7 +190,9 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
-        "批量翻译PDF文档。函数插件贡献者: Binary-Husky"])
+        "使用NOUGAT-OCR处理并批量翻译PDF文档。注意,由于NOUGAT使用学术论文进行的训练,在处理非学术文件时可能效果不佳。\n \
+        NOUGAT默认情况下会跳过图片部分，您可以在高级参数处输入数字'1'，程序将会尝试将原文图片匹配到译文中(实验性)，这需要原文是\
+        非纯图片PDF，并且会导致处理时间变长，默认不会尝试匹配。函数插件贡献者: Binary-Husky, Menghuan1918"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # 清空历史，以免输入溢出

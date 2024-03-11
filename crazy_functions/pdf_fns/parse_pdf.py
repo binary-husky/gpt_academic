@@ -138,7 +138,7 @@ def translate_pdf(article_dict, llm_kwargs, chatbot, fp, generated_conclusion_fi
         chatbot=chatbot,
         history_array=[meta for _ in inputs_array],
         sys_prompt_array=[
-            "请你作为一个学术翻译，负责把学术论文准确翻译成中文。注意文章中的每一句话都要翻译。请以markdown形式输出。" for _ in inputs_array],
+            "请你作为一个学术翻译，负责把学术论文准确翻译成中文。注意文章中的每一句话都要翻译。请以Markdown形式输出。" for _ in inputs_array],
     )
     # -=-=-=-=-=-=-=-= 写出Markdown文件 -=-=-=-=-=-=-=-=
     produce_report_markdown(gpt_response_collection, meta, paper_meta_info, chatbot, fp, generated_conclusion_files)
