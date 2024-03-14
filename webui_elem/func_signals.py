@@ -113,13 +113,20 @@ def sm_upload_clear(cookie: dict):
     return gr.update(value=None), cookie
 
 
+def generate_random_string(string):
+    if len(string) > 20:
+        index = random.randint(10, len(string)-10)
+        string = string[index:]
+    return string[:25]
+
+
 def clear_input(inputs, cookies, ipaddr: gr.Request):
     user_addr = func_box.user_client_mark(ipaddr)
     user_path = os.path.join(init_path.private_history_path, user_addr)
     file_list, only_name, new_path, new_name = func_box.get_files_list(user_path, filter_format=['.json'])
     index = 2
     if not cookies.get('first_chat'):
-        cookies['first_chat'] = func_box.replace_special_chars(str(inputs)[:25])
+        cookies['first_chat'] = func_box.replace_special_chars(generate_random_string(inputs))
         select_file = cookies.get('first_chat')
         while select_file in only_name:  # 重名处理
             select_file = f"{index}_{cookies['first_chat']}"
@@ -831,10 +838,12 @@ def kb_new_confirm(kb_name, kb_type, kb_model, kb_info):
         'kb_info_txt': kb_info,
         'kb_file_list': gr.update(choices=[], value=''),
         'kb_file_details': gr.DataFrame.update(value=pd.DataFrame(data=copy.deepcopy(kb_config.file_details_template))),
-        'kb_file_fragment': gr.DataFrame.update(value=pd.DataFrame(data=copy.deepcopy(kb_config.file_fragment_template)))
+        'kb_file_fragment': gr.DataFrame.update(
+            value=pd.DataFrame(data=copy.deepcopy(kb_config.file_fragment_template)))
     }
 
-    return list(new_output.values()) + list(edit_output.values()) + [gr.update(choices=list(kb_name_tm.keys())+[kb_name])]
+    return list(new_output.values()) + list(edit_output.values()) + [
+        gr.update(choices=list(kb_name_tm.keys()) + [kb_name])]
 
 
 def kb_download_embedding_model(model_name):

@@ -14,7 +14,9 @@
     width: auto;
     line-height: 260% !important;
 }
-
+.fold-panel {
+    margin-bottom: 5px !important;
+}
 .normal_mut_select .token[class*="svelte-"] {
     padding: 5px
 }

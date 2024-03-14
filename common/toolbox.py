@@ -96,8 +96,7 @@ def ArgsGeneralWrapper(f):
         }
         # 对话参数
         if not cookies.get('first_chat') and args:
-            cookies['first_chat'] = args[0]
-            cookies['first_chat'] += "_" + func_box.created_atime()
+            cookies['first_chat'] = args[0] + "_" + func_box.created_atime()
         plugin_kwargs = {
             "advanced_arg": plugin_advanced_arg,
             "parameters_def": ''
@@ -131,28 +130,30 @@ def model_selection(txt, models, llm_kwargs, plugin_kwargs, cookies, chatbot_wit
     if 'OCR缓存' in models: llm_kwargs.update({'ocr_cache': True})
     if len(args) == 0 or 'RetryChat' in args and not cookies.get('is_plugin'):
         if '文档RAG' in models and 'moonshot' not in llm_kwargs.get('llm_model', ''):
-            from crazy_functions.reader_fns.crazy_box import user_input_embedding_content, input_retrieval_file
-            fp_file, download_status = input_retrieval_file(txt_proc, llm_kwargs, ['pdf', 'md', 'xlsx', 'docx'])
-            if fp_file:  # 提前检测，有文件才进入下一步
+            from crazy_functions.reader_fns.crazy_box import user_input_embedding_content, check_url_domain_cloud
+            valid_types = ['pdf', 'md', 'xlsx', 'docx']
+            wps_links, qq_link, feishu_link = check_url_domain_cloud(txt_proc)
+            local_file = func_box.extract_link_pf(txt_proc, valid_types)
+            if wps_links or qq_link or feishu_link or local_file:  # 提前检测，有文件才进入下一步文件处理
+                yield from update_ui(chatbot_with_cookie, history, msg='检测到提交存在文档链接，正在跳转Reader...')
                 input_embedding_content = yield from user_input_embedding_content(txt_proc, chatbot_with_cookie,
                                                                                   history, llm_kwargs, plugin_kwargs,
-                                                                                  ['*'], fp_file)
+                                                                                  valid_types)
                 txt_proc = "\n\n---\n\n".join([v for i, v in enumerate(input_embedding_content) if i % 2 == 1])
             else:
                 yield from update_ui(chatbot_with_cookie, history, msg='Switching to normal dialog...')
         img_info = func_box.extract_link_pf(txt, func_box.valid_img_extensions)
         if 'vision' not in llm_kwargs['llm_model'] and img_info:
-            if llm_kwargs['llm_model'].find('gpt') != -1:
+            if llm_kwargs['llm_model'].startswith('gpt'):
                 if "gpt4-v自动识图" in models:
                     llm_kwargs['llm_model'] = 'gpt-4-vision-preview'
-            elif llm_kwargs['llm_model'].find('gemini') != -1:
+            elif llm_kwargs['llm_model'].startswith('gemini'):
                 if "gemini-v自动识图" in models:
                     llm_kwargs['llm_model'] = 'gemini-pro-vision'
-            elif llm_kwargs['llm_model'].find('glm') != -1:
+            elif llm_kwargs['llm_model'].startswith('glm'):
                 if "glm-v自动识图" in models:
                     llm_kwargs['llm_model'] = 'glm-4v'
-            yield from update_ui(chatbot_with_cookie, history,
-                                 msg=f'Switching to `{llm_kwargs["llm_model"]}` dialog...')
+            yield from update_ui(chatbot_with_cookie, history, msg=f'Switching to `{llm_kwargs["llm_model"]}` dialog...')
     return txt_proc
 
 

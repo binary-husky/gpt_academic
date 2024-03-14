@@ -15,7 +15,7 @@ class PDFHandler:
         """
         self.output_dir = None
         if output_dir:
-            self.output_dir = os.path.join(output_dir, '.pdf')
+            self.output_dir = os.path.join(output_dir, 'pdf')
             os.makedirs(self.output_dir, exist_ok=True)
         self.markdown_content = ''
         self.pdf_path = pdf_path

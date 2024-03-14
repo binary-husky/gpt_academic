@@ -19,7 +19,7 @@ class ImgHandler:
         self.font_path = os.path.join(init_path.base_path, 'docs/OCR/fonts/simfang.ttf')
         self.trust_value = trust_value
         if output_dir:
-            self.output_dir = os.path.join(output_dir, '.img_vision')
+            self.output_dir = os.path.join(output_dir, 'img_vision')
             os.makedirs(self.output_dir, exist_ok=True)
         self.img_path = img_path
         if self.img_path.startswith('http'):

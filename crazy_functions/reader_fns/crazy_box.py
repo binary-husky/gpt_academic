@@ -14,6 +14,7 @@ from common.path_handler import init_path
 from crazy_functions import reader_fns
 from common.logger_handler import logger
 
+
 class Utils:
 
     def __init__(self):
@@ -206,8 +207,10 @@ def file_reader_content(file_path, save_path, plugin_kwargs):
 def file_extraction_intype(file_mapping, chatbot, history, llm_kwargs, plugin_kwargs):
     # 文件读取
     file_limit = {}
+    file_format = func_box.get_fold_panel()
+    old_say = chatbot[-1][1] + '\n\n'
     for file_path in file_mapping:
-        chatbot[-1][1] = chatbot[-1][1] + f'\n\n`{file_path.replace(init_path.base_path, ".")}`\t 正在解析本地文件\n\n'
+        chatbot[-1][1] = old_say + file_format(title=f'正在解析本地文件:【{file_path.replace(init_path.base_path, ".")}】')
         yield from toolbox.update_ui(chatbot, history)
         save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'])
         content, status = file_reader_content(file_path, save_path, plugin_kwargs)
@@ -215,8 +218,9 @@ def file_extraction_intype(file_mapping, chatbot, history, llm_kwargs, plugin_kw
             file_limit[file_path] = content.replace(init_path.base_path, 'file=.')
         else:
             file_limit[file_path] = content
-        chatbot[-1][1] += status
-        yield from toolbox.update_ui(chatbot, history)
+        mapping_data = "\n\n--\n\n".join([f"{file_limit[fp]}" for fp in file_limit])
+        chatbot[-1][1] = old_say + file_format(title=f'文件解析完成', content=mapping_data, status='Done')
+        yield from toolbox.update_ui(chatbot, history, msg=status)
     return file_limit
 
 
@@ -641,13 +645,20 @@ def result_written_to_markdown(gpt_response_collection, llm_kwargs, plugin_kwarg
     return file_limit
 
 
+def check_url_domain_cloud(link_limit):
+    wps_links = func_box.split_domain_url(link_limit, domain_name=['kdocs', 'wps'])
+    qq_link = func_box.split_domain_url(link_limit, domain_name=['docs.qq'])
+    feishu_link = func_box.split_domain_url(link_limit, domain_name=['lg0v2tirko'])
+    return wps_links, qq_link, feishu_link
+
+
 def detach_cloud_links(link_limit, llm_kwargs, valid_types):
     fp_mapping = {}
     save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'])
+    wps_links, qq_link, feishu_link = check_url_domain_cloud(link_limit)
     wps_status, qq_status, feishu_status = '', '', ''
     try:
         # wps云文档下载
-        wps_links = func_box.split_domain_url(link_limit, domain_name=['kdocs', 'wps'])
         wps_status, wps_mapping = reader_fns.get_kdocs_from_limit(wps_links, save_path, llm_kwargs.get('wps_cookies'))
         fp_mapping.update(wps_mapping)
     except Exception as e:
@@ -656,7 +667,6 @@ def detach_cloud_links(link_limit, llm_kwargs, valid_types):
 
     try:
         # qq云文档下载
-        qq_link = func_box.split_domain_url(link_limit, domain_name=['docs.qq'])
         qq_status, qq_mapping = reader_fns.get_qqdocs_from_limit(qq_link, save_path, llm_kwargs.get('qq_cookies'))
         fp_mapping.update(qq_mapping)
     except Exception as e:
@@ -665,7 +675,6 @@ def detach_cloud_links(link_limit, llm_kwargs, valid_types):
 
     try:
         # 飞书云文档下载
-        feishu_link = func_box.split_domain_url(link_limit, domain_name=['lg0v2tirko'])
         feishu_status, feishu_mapping = reader_fns.get_feishu_from_limit(feishu_link, save_path,
                                                                          llm_kwargs.get('feishu_header'))
         fp_mapping.update(feishu_mapping)
@@ -681,22 +690,21 @@ def detach_cloud_links(link_limit, llm_kwargs, valid_types):
         if fp.split('.')[-1] not in valid_types and valid_types != ['*']:
             download_status += '\n\n' + f'过滤掉了`{fp_mapping[fp]}`，因为不是插件能够接收处理的文件类型`{valid_types}`'
             fp_mapping.pop(fp)  # 过滤不能处理的文件
-    return fp_mapping, download_status
+
+    return fp_mapping, {'status': download_status}
 
 
 def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugin_kwargs):
     ocr_switch, = json_args_return(plugin_kwargs, ['开启OCR'])
     cor_cache = llm_kwargs.get('ocr_cache', False)
     img_mapping = func_box.extract_link_pf(content, func_box.valid_img_extensions)
+    gpt_old_say = chatbot[-1][1]
+    vision_format = func_box.get_fold_panel()
     # 如果开启了OCR，并且文中存在图片链接，处理图片
-    gpt_bro_say = chatbot[-1][
-                      1] + f"\n\n检测到识图开关为`{ocr_switch}`，并且文中存在图片链接，正在识别图片中的文字，解析进度如下：\n\n"
     if ocr_switch and img_mapping:
         vision_loading_statsu = {os.path.basename(i): "Loading..." for i in img_mapping}
-        vision_bro = func_box.html_folded_code(json.dumps(vision_loading_statsu, indent=4, ensure_ascii=False))
-        yield from toolbox.update_ui_lastest_msg(lastmsg=gpt_bro_say + vision_bro, chatbot=chatbot,
-                                                 history=history, delay=0.1)
-        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='正在识别图片中的文字...')
+        chatbot[-1][1] = gpt_old_say + vision_format(f'检测到识图开关为`{ocr_switch}`，正在识别图片中的文字...', vision_loading_statsu)
+        yield from toolbox.update_ui(chatbot=chatbot, history=history)
         # 识别图片中的文字
         save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'])
         if isinstance(ocr_switch, dict):  # 如果是字典，那么就是自定义OCR参数
@@ -708,9 +716,9 @@ def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugi
             try:
                 img_content, img_path, status = vision_submission[t].result()
                 vision_loading_statsu.update({os.path.basename(t): img_content})
-                vision_end = func_box.html_folded_code(json.dumps(vision_loading_statsu, indent=4, ensure_ascii=False))
-                yield from toolbox.update_ui_lastest_msg(lastmsg=gpt_bro_say + vision_end, chatbot=chatbot,
-                                                         history=history, delay=0.1)
+                chatbot[-1][1] = gpt_old_say + vision_format(f'检测到识图开关为`{ocr_switch}`，正在识别图片中的文字...',
+                                                             vision_loading_statsu)
+                yield from toolbox.update_ui(chatbot=chatbot, history=history)
                 if not status or status == '本次识别结果读取数据库缓存':  # 出现异常，不替换文本
                     content = content.replace(img_mapping[t], f'{img_content}')
                 else:
@@ -718,9 +726,9 @@ def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugi
             except Exception as e:
                 status = f'`{t}` `{toolbox.trimmed_format_exc()}` 识别失败，过滤这个图片\n\n'
                 vision_loading_statsu.update({t: status})  # 错误展示完整路径
-                vision_end = func_box.html_folded_code(json.dumps(vision_loading_statsu, indent=4, ensure_ascii=False))
-                yield from toolbox.update_ui_lastest_msg(lastmsg=gpt_bro_say + vision_end, chatbot=chatbot,
-                                                         history=history, delay=0.1)
+                chatbot[-1][1] = gpt_old_say + vision_format(f'啊哦，有文件失败了哦', vision_loading_statsu)
+                yield from toolbox.update_ui(chatbot=chatbot, history=history)
+        chatbot[-1][1] = gpt_old_say + vision_format(f'识别完成', vision_loading_statsu, 'Done')
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='Done')
     return content.replace(init_path.base_path, 'file=.')  # 增加保障，防止路径泄露
 
@@ -750,47 +758,42 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
     if fp_prepro:
         fp_mapping = fp_prepro
     else:
-        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='正在解析云文件链接...')
+        download_format = func_box.get_fold_panel()
+        chatbot[-1][1] = download_format(title='正在解析云文件链接...', content='')
+        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='Reader loading...')
         fp_mapping, download_status = input_retrieval_file(user_input, llm_kwargs, valid_types)
-        if download_status:
-            chatbot[-1][1] += f'\n\n下载云文档似乎出了点问题？\n\n```python\n{download_status}\n```\n\n'
-            yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='🕵🏻 ‍出师未捷身先死🏴‍☠️')
+        download_status.update(fp_mapping)
+        chatbot[-1][1] = download_format(title='链接解析完成', content=download_status, status='Done')
     content_mapping = yield from file_extraction_intype(fp_mapping, chatbot, history, llm_kwargs, plugin_kwargs)
-    if content_mapping:
-        mapping_data = "\n\n".join([f"{func_box.html_folded_code(content_mapping[fp])}" for fp in content_mapping])
-        # mapping_data = func_box.html_folded_code(json.dumps(content_mapping, indent=4, ensure_ascii=False))
-        map_bro_say = f'数据解析完成，提取文档信息如下：\n\n{mapping_data}'
-        chatbot[-1][1] += map_bro_say
-        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='数据解析完成！')
-        for content_fp in content_mapping:  # 一个文件一个对话
-            file_content = content_mapping[content_fp]
-            # 将解析的数据提交到正文
-            input_handle = user_input.replace(fp_mapping[content_fp], str(file_content))
-            # 将其他文件链接清除
-            user_clear = content_clear_links(input_handle, fp_mapping, content_mapping)
-            # 识别图片链接内容
-            complete_input = yield from content_img_vision_analyze(user_clear, chatbot, history,
-                                                                   llm_kwargs, plugin_kwargs)
-            embedding_content.extend([os.path.basename(content_fp), complete_input])
-
-    elif len(user_input) > 100:  # 没有探测到任何文件，并且提交大于50个字符，那么运行往下走
-        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='没有探测到文件')
+    for content_fp in content_mapping:  # 一个文件一个对话
+        file_content = content_mapping[content_fp]
+        # 将解析的数据提交到正文
+        input_handle = user_input.replace(fp_mapping[content_fp], str(file_content))
+        # 将其他文件链接清除
+        user_clear = content_clear_links(input_handle, fp_mapping, content_mapping)
         # 识别图片链接内容
-        complete_input = yield from content_img_vision_analyze(user_input, chatbot, history,
+        complete_input = yield from content_img_vision_analyze(user_clear, chatbot, history,
                                                                llm_kwargs, plugin_kwargs)
-        embedding_content.extend([long_name_processing(user_input), complete_input])
-    elif not fp_prepro:
-        devs_document = toolbox.get_conf('devs_document')
-        status = '\n\n没有探测到任何文件，并且提交字符少于50，无法完成后续任务' \
-                 f'请在输入框中输入需要解析的云文档链接或本地文件地址，如果有多个文档则用换行或空格隔开，然后再点击对应的插件\n\n' \
-                 f'插件支持解析文档类型`{valid_types}`' \
-                 f"有问题？请联系`@spike` or 查看开发文档{devs_document}"
-        if chatbot[-1][1] is None:
-            chatbot[-1][1] = status
-        chatbot[-1][1] += status
-        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='没有探测到数据')
-    elif fp_prepro:
-        embedding_content.extend([long_name_processing(user_input), user_input])
+        embedding_content.extend([os.path.basename(content_fp), complete_input])
+    if not content_mapping:
+        if len(user_input) > 100:  # 没有探测到任何文件，并且提交大于50个字符，那么运行往下走
+            yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='没有探测到文件')
+            # 识别图片链接内容
+            complete_input = yield from content_img_vision_analyze(user_input, chatbot, history,
+                                                                   llm_kwargs, plugin_kwargs)
+            embedding_content.extend([long_name_processing(user_input), complete_input])
+        elif not fp_prepro:
+            devs_document = toolbox.get_conf('devs_document')
+            status = '\n\n没有探测到任何文件，并且提交字符少于50，无法完成后续任务' \
+                     f'请在输入框中输入需要解析的云文档链接或本地文件地址，如果有多个文档则用换行或空格隔开，然后再点击对应的插件\n\n' \
+                     f'插件支持解析文档类型`{valid_types}`' \
+                     f"有问题？请联系`@spike` or 查看开发文档{devs_document}"
+            if chatbot[-1][1] is None:
+                chatbot[-1][1] = status
+            chatbot[-1][1] += status
+            yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='没有探测到数据')
+        elif fp_prepro:
+            embedding_content.extend([long_name_processing(user_input), user_input])
     # 提交知识库 ... 未适配
     return embedding_content
 

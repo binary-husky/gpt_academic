@@ -280,7 +280,7 @@ def encryption_str(txt: str) -> object:
     """(关键字)(加密间隔)匹配机制（关键字间隔）"""
     txt = str(txt)
     pattern = re.compile(r"(Authorization|WPS-Sid|Cookie)(:|\s+)\s*([\w-]+?)(,|$|\s)", re.IGNORECASE)
-    result = pattern.sub(lambda x: x.group(1) + "XXXX加密封条XXXX" + x.group(4), txt)
+    result = pattern.sub(lambda x: x.group(1).lower() + x.group(2) + "XXXX-XXXX" + x.group(4), txt)
     return result
 
 
@@ -533,6 +533,7 @@ def replace_special_chars(file_name):
     if '-' in file_name:  # 避免文件名太长
         file_name = file_name.rsplit('-', 1)[0]
     # 该正则表达式匹配除了数字、字母、下划线、点、空格、中文字符、【和】以外的所有字符
+
     new_name = re.sub(r'[^\d\w\s\.\_\u4e00-\u9fff【】]', '', file_name).rstrip().replace(' ', '_')
     if not new_name:
         new_name = created_atime()
@@ -707,8 +708,10 @@ def get_fold_panel(btn_id=None):
     if not btn_id:
         btn_id = uuid.uuid4().hex
 
-    def _format(title, content: str, status):
+    def _format(title, content: str = '', status=''):
         fold_html = get_html('fold-panel.html').replace('{id}', btn_id)
+        if isinstance(content, dict):
+            content = json.dumps(content, indent=4, ensure_ascii=False)
         content = f'\n```\n{content.replace("```", "")}\n```\n'
         return fold_html.format(title=title, content=content, status=status)
 
@@ -716,4 +719,5 @@ def get_fold_panel(btn_id=None):
 
 
 if __name__ == '__main__':
-    print(get_fold_panel('test')(title='test', content='test', status='test'))
+    txt = "authorization: abc123, WPS-Sid: xyz456, Cookie: 789xyz"
+    print(encryption_str(txt))

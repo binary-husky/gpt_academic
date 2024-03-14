@@ -77,10 +77,10 @@ def list_files_from_folder(kb_name: str):
         elif entry.is_file():
             file_path = (Path(os.path.relpath(entry.path, doc_path)).as_posix())  # 路径统一为 posix 格式
             result.append(file_path)
-        elif entry.is_dir():
-            with os.scandir(entry.path) as it:
-                for sub_entry in it:
-                    process_entry(sub_entry)
+        # elif entry.is_dir(): # 文件夹不处理
+        #     with os.scandir(entry.path) as it:
+        #         for sub_entry in it:
+        #             process_entry(sub_entry)
 
     with os.scandir(doc_path) as it:
         for entry in it:
