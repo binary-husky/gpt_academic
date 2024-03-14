@@ -45,7 +45,7 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
 #   "qwen-turbo", "qwen-plus", "qwen-max", "qwen-local",
 #   "moonshot-v1-128k", "moonshot-v1-32k", "moonshot-v1-8k",
 #   "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo-0125"
-#   "claude-3-sonnet-20240229","claude-3-opus-20240229", "claude-2.1", "claude-instant-1.2",
+#   "claude-3-haiku-20240307","claude-3-sonnet-20240229","claude-3-opus-20240229", "claude-2.1", "claude-instant-1.2",
 #   "moss", "llama2", "chatglm_onnx", "internlm", "jittorllms_pangualpha", "jittorllms_llama",
 # ]
 # --- --- --- ---
@@ -60,6 +60,10 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
 # 重新URL重新定向，实现更换API_URL的作用（高危设置! 常规情况下不要修改! 通过修改此设置，您将把您的API-KEY和对话隐私完全暴露给您设定的中间人！）
 # 格式: API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "在这里填写重定向的api.openai.com的URL"}
 # 举例: API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "https://reverse-proxy-url/v1/chat/completions"}
+# 默认baseURL(部分)：
+# openai_endpoint = "https://api.openai.com/v1/chat/completions"
+# gemini_endpoint = "https://generativelanguage.googleapis.com/v1beta/models"
+# claude_endpoint = "https://api.anthropic.com"
 API_URL_REDIRECT = {}
 
 
