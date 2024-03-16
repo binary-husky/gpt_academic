@@ -7,7 +7,7 @@ def gen_image(llm_kwargs, prompt, resolution="1024x1024", model="dall-e-2", qual
     from request_llms.bridge_all import model_info
 
     proxies = get_conf('proxies')
-    # Set up OpenAI API key and model 
+    # Set up OpenAI API key and model
     api_key = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
     chat_endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
     # 'https://api.openai.com/v1/chat/completions'
@@ -113,7 +113,7 @@ def 图片生成_DALLE2(prompt, llm_kwargs, plugin_kwargs, chatbot, history, sys
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     resolution = plugin_kwargs.get("advanced_arg", '1024x1024')
     image_url, image_path = gen_image(llm_kwargs, prompt, resolution)
-    chatbot.append([prompt,  
+    chatbot.append([prompt,
         f'图像中转网址: <br/>`{image_url}`<br/>'+
         f'中转网址预览: <br/><div align="center"><img src="{image_url}"></div>'
         f'本地文件地址: <br/>`{image_path}`<br/>'+
@@ -144,7 +144,7 @@ def 图片生成_DALLE3(prompt, llm_kwargs, plugin_kwargs, chatbot, history, sys
         elif part in ['vivid', 'natural']:
             style = part
     image_url, image_path = gen_image(llm_kwargs, prompt, resolution, model="dall-e-3", quality=quality, style=style)
-    chatbot.append([prompt,  
+    chatbot.append([prompt,
         f'图像中转网址: <br/>`{image_url}`<br/>'+
         f'中转网址预览: <br/><div align="center"><img src="{image_url}"></div>'
         f'本地文件地址: <br/>`{image_path}`<br/>'+
@@ -164,7 +164,7 @@ class ImageEditState(GptAcademicState):
         confirm = (len(file_manifest) >= 1 and file_manifest[0].endswith('.png') and os.path.exists(file_manifest[0]))
         file = None if not confirm else file_manifest[0]
         return confirm, file
-    
+
     def lock_plugin(self, chatbot):
         chatbot._cookies['lock_plugin'] = 'crazy_functions.图片生成->图片修改_DALLE2'
         self.dump_state(chatbot)

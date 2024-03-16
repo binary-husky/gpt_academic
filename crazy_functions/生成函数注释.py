@@ -16,7 +16,7 @@ def 生成函数注释(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
         chatbot.append((i_say_show_user, "[Local Message] waiting gpt response."))
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
-        if not fast_debug: 
+        if not fast_debug:
             msg = '正常'
             # ** gpt request **
             gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
@@ -27,7 +27,7 @@ def 生成函数注释(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
             yield from update_ui(chatbot=chatbot, history=history, msg=msg) # 刷新界面
             if not fast_debug: time.sleep(2)
 
-    if not fast_debug: 
+    if not fast_debug:
         res = write_history_to_file(history)
         promote_file_to_downloadzone(res, chatbot=chatbot)
         chatbot.append(("完成了吗？", res))

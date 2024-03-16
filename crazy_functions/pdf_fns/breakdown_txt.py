@@ -35,7 +35,7 @@ def cut(limit, get_token_fn, txt_tocut, must_break_at_empty_line, break_anyway=F
     remain_txt_to_cut_storage = ""
     # 为了加速计算，我们采样一个特殊的手段。当 remain_txt_to_cut > `_max` 时， 我们把 _max 后的文字转存至 remain_txt_to_cut_storage
     remain_txt_to_cut, remain_txt_to_cut_storage = maintain_storage(remain_txt_to_cut, remain_txt_to_cut_storage)
-    
+
     while True:
         if get_token_fn(remain_txt_to_cut) <= limit:
             # 如果剩余文本的token数小于限制，那么就不用切了

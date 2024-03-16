@@ -21,7 +21,7 @@ import random
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
-from toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history, trimmed_format_exc, is_the_upload_folder
+from toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history, trimmed_format_exc, is_the_upload_folder, read_one_api_model_name
 proxies, TIMEOUT_SECONDS, MAX_RETRY, API_ORG, AZURE_CFG_ARRAY = \
     get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'API_ORG', 'AZURE_CFG_ARRAY')
 
@@ -47,14 +47,14 @@ def decode_chunk(chunk):
     choice_valid = False
     has_content = False
     has_role = False
-    try: 
+    try:
         chunkjson = json.loads(chunk_decoded[6:])
         has_choices = 'choices' in chunkjson
         if has_choices: choice_valid = (len(chunkjson['choices']) > 0)
         if has_choices and choice_valid: has_content = ("content" in chunkjson['choices'][0]["delta"])
         if has_content: has_content = (chunkjson['choices'][0]["delta"]["content"] is not None)
         if has_choices and choice_valid: has_role = "role" in chunkjson['choices'][0]["delta"]
-    except: 
+    except:
         pass
     return chunk_decoded, chunkjson, has_choices, choice_valid, has_content, has_role
 
@@ -103,13 +103,13 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     json_data = None
     while True:
         try: chunk = next(stream_response)
-        except StopIteration: 
+        except StopIteration:
             break
         except requests.exceptions.ConnectionError:
             chunk = next(stream_response) # 失败了，重试一次？再失败就没办法了。
         chunk_decoded, chunkjson, has_choices, choice_valid, has_content, has_role = decode_chunk(chunk)
         if len(chunk_decoded)==0: continue
-        if not chunk_decoded.startswith('data:'): 
+        if not chunk_decoded.startswith('data:'):
             error_msg = get_full_error(chunk, stream_response).decode()
             if "reduce the length" in error_msg:
                 raise ConnectionAbortedError("OpenAI拒绝了请求:" + error_msg)
@@ -127,9 +127,10 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
         if len(delta) == 0: break
         if "role" in delta: continue
         if "content" in delta:
+            if delta["content"] is None: continue
             result += delta["content"]
             if not console_slience: print(delta["content"], end='')
-            if observe_window is not None: 
+            if observe_window is not None:
                 # 观测窗，把已经获取的数据显示出去
                 if len(observe_window) >= 1:
                     observe_window[0] += delta["content"]
@@ -187,7 +188,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         chatbot[-1] = (inputs, f"您提供的api-key不满足要求，不包含任何可用于{llm_kwargs['llm_model']}的api-key。您可能选择了错误的模型或请求源。")
         yield from update_ui(chatbot=chatbot, history=history, msg="api-key不满足要求") # 刷新界面
         return
-        
+
     # 检查endpoint是否合法
     try:
         from .bridge_all import model_info
@@ -197,7 +198,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         chatbot[-1] = (inputs, tb_str)
         yield from update_ui(chatbot=chatbot, history=history, msg="Endpoint不满足要求") # 刷新界面
         return
-    
+
     history.append(inputs); history.append("")
 
     retry = 0
@@ -214,7 +215,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             if retry > MAX_RETRY: raise TimeoutError
 
     gpt_replying_buffer = ""
-    
+
     is_head_of_the_stream = True
     if stream:
         stream_response =  response.iter_lines()
@@ -226,21 +227,21 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                 chunk_decoded = chunk.decode()
                 error_msg = chunk_decoded
                 # 首先排除一个one-api没有done数据包的第三方Bug情形
-                if len(gpt_replying_buffer.strip()) > 0 and len(error_msg) == 0: 
+                if len(gpt_replying_buffer.strip()) > 0 and len(error_msg) == 0:
                     yield from update_ui(chatbot=chatbot, history=history, msg="检测到有缺陷的非OpenAI官方接口，建议选择更稳定的接口。")
                     break
                 # 其他情况，直接返回报错
                 chatbot, history = handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
                 yield from update_ui(chatbot=chatbot, history=history, msg="非OpenAI官方接口返回了错误:" + chunk.decode()) # 刷新界面
                 return
-            
+
             # 提前读取一些信息 （用于判断异常）
             chunk_decoded, chunkjson, has_choices, choice_valid, has_content, has_role = decode_chunk(chunk)
 
             if is_head_of_the_stream and (r'"object":"error"' not in chunk_decoded) and (r"content" not in chunk_decoded):
                 # 数据流的第一帧不携带content
                 is_head_of_the_stream = False; continue
-            
+
             if chunk:
                 try:
                     if has_choices and not choice_valid:
@@ -264,7 +265,8 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                         # 一些第三方接口的出现这样的错误，兼容一下吧
                         continue
                     else:
-                        # 一些垃圾第三方接口的出现这样的错误
+                        # 至此已经超出了正常接口应该进入的范围，一些垃圾第三方接口会出现这样的错误
+                        if chunkjson['choices'][0]["delta"]["content"] is None: continue # 一些垃圾第三方接口出现这样的错误，兼容一下吧
                         gpt_replying_buffer = gpt_replying_buffer + chunkjson['choices'][0]["delta"]["content"]
 
                     history[-1] = gpt_replying_buffer
@@ -285,7 +287,7 @@ def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
     openai_website = ' 请登录OpenAI查看详情 https://platform.openai.com/signup'
     if "reduce the length" in error_msg:
         if len(history) >= 2: history[-1] = ""; history[-2] = "" # 清除当前溢出的输入：history[-2] 是本次输入, history[-1] 是本次输出
-        history = clip_history(inputs=inputs, history=history, tokenizer=model_info[llm_kwargs['llm_model']]['tokenizer'], 
+        history = clip_history(inputs=inputs, history=history, tokenizer=model_info[llm_kwargs['llm_model']]['tokenizer'],
                                                max_token_limit=(model_info[llm_kwargs['llm_model']]['max_token'])) # history至少释放二分之一
         chatbot[-1] = (chatbot[-1][0], "[Local Message] Reduce the length. 本次输入过长, 或历史数据过长. 历史缓存数据已部分释放, 您可以请再次尝试. (若再次失败则更可能是因为输入过长.)")
     elif "does not exist" in error_msg:
@@ -324,7 +326,7 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         "Authorization": f"Bearer {api_key}"
     }
     if API_ORG.startswith('org-'): headers.update({"OpenAI-Organization": API_ORG})
-    if llm_kwargs['llm_model'].startswith('azure-'): 
+    if llm_kwargs['llm_model'].startswith('azure-'):
         headers.update({"api-key": api_key})
         if llm_kwargs['llm_model'] in AZURE_CFG_ARRAY.keys():
             azure_api_key_unshared = AZURE_CFG_ARRAY[llm_kwargs['llm_model']]["AZURE_API_KEY"]
@@ -356,10 +358,13 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     model = llm_kwargs['llm_model']
     if llm_kwargs['llm_model'].startswith('api2d-'):
         model = llm_kwargs['llm_model'][len('api2d-'):]
+    if llm_kwargs['llm_model'].startswith('one-api-'):
+        model = llm_kwargs['llm_model'][len('one-api-'):]
+        model, _ = read_one_api_model_name(model)
 
     if model == "gpt-3.5-random": # 随机选择, 绕过openai访问频率限制
         model = random.choice([
-            "gpt-3.5-turbo", 
+            "gpt-3.5-turbo",
             "gpt-3.5-turbo-16k",
             "gpt-3.5-turbo-1106",
             "gpt-3.5-turbo-0613",
@@ -370,7 +375,7 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
 
     payload = {
         "model": model,
-        "messages": messages, 
+        "messages": messages,
         "temperature": llm_kwargs['temperature'],  # 1.0,
         "top_p": llm_kwargs['top_p'],  # 1.0,
         "n": 1,

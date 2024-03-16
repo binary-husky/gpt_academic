@@ -8,10 +8,10 @@
     具备多线程调用能力的函数：在函数插件中被调用，灵活而简洁
     2. predict_no_ui_long_connection(...)
 """
-import tiktoken, copy
+import tiktoken, copy, re
 from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor
-from toolbox import get_conf, trimmed_format_exc, apply_gpt_academic_string_mask
+from toolbox import get_conf, trimmed_format_exc, apply_gpt_academic_string_mask, read_one_api_model_name
 
 from .bridge_chatgpt import predict_no_ui_long_connection as chatgpt_noui
 from .bridge_chatgpt import predict as chatgpt_ui
@@ -61,6 +61,9 @@ API_URL_REDIRECT, AZURE_ENDPOINT, AZURE_ENGINE = get_conf("API_URL_REDIRECT", "A
 openai_endpoint = "https://api.openai.com/v1/chat/completions"
 api2d_endpoint = "https://openai.api2d.net/v1/chat/completions"
 newbing_endpoint = "wss://sydney.bing.com/sydney/ChatHub"
+gemini_endpoint = "https://generativelanguage.googleapis.com/v1beta/models"
+claude_endpoint = "https://api.anthropic.com"
+
 if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
 azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
 # 兼容旧版的配置
@@ -75,7 +78,8 @@ except:
 if openai_endpoint in API_URL_REDIRECT: openai_endpoint = API_URL_REDIRECT[openai_endpoint]
 if api2d_endpoint in API_URL_REDIRECT: api2d_endpoint = API_URL_REDIRECT[api2d_endpoint]
 if newbing_endpoint in API_URL_REDIRECT: newbing_endpoint = API_URL_REDIRECT[newbing_endpoint]
-
+if gemini_endpoint in API_URL_REDIRECT: gemini_endpoint = API_URL_REDIRECT[gemini_endpoint]
+if claude_endpoint in API_URL_REDIRECT: claude_endpoint = API_URL_REDIRECT[claude_endpoint]
 
 # 获取tokenizer
 tokenizer_gpt35 = LazyloadTiktoken("gpt-3.5-turbo")
@@ -291,7 +295,7 @@ model_info = {
     "gemini-pro": {
         "fn_with_ui": genai_ui,
         "fn_without_ui": genai_noui,
-        "endpoint": None,
+        "endpoint": gemini_endpoint,
         "max_token": 1024 * 32,
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
@@ -299,7 +303,7 @@ model_info = {
     "gemini-pro-vision": {
         "fn_with_ui": genai_ui,
         "fn_without_ui": genai_noui,
-        "endpoint": None,
+        "endpoint": gemini_endpoint,
         "max_token": 1024 * 32,
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
@@ -349,25 +353,57 @@ for model in AVAIL_LLM_MODELS:
         model_info.update({model: mi})
 
 # -=-=-=-=-=-=- 以下部分是新加入的模型，可能附带额外依赖 -=-=-=-=-=-=-
-if "claude-1-100k" in AVAIL_LLM_MODELS or "claude-2" in AVAIL_LLM_MODELS:
+# claude家族
+claude_models = ["claude-instant-1.2","claude-2.0","claude-2.1","claude-3-sonnet-20240229","claude-3-opus-20240229"]
+if any(item in claude_models for item in AVAIL_LLM_MODELS):
     from .bridge_claude import predict_no_ui_long_connection as claude_noui
     from .bridge_claude import predict as claude_ui
     model_info.update({
-        "claude-1-100k": {
+        "claude-instant-1.2": {
             "fn_with_ui": claude_ui,
             "fn_without_ui": claude_noui,
-            "endpoint": None,
-            "max_token": 8196,
+            "endpoint": claude_endpoint,
+            "max_token": 100000,
             "tokenizer": tokenizer_gpt35,
             "token_cnt": get_token_num_gpt35,
         },
     })
     model_info.update({
-        "claude-2": {
+        "claude-2.0": {
             "fn_with_ui": claude_ui,
             "fn_without_ui": claude_noui,
-            "endpoint": None,
-            "max_token": 8196,
+            "endpoint": claude_endpoint,
+            "max_token": 100000,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
+    model_info.update({
+        "claude-2.1": {
+            "fn_with_ui": claude_ui,
+            "fn_without_ui": claude_noui,
+            "endpoint": claude_endpoint,
+            "max_token": 200000,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
+    model_info.update({
+        "claude-3-sonnet-20240229": {
+            "fn_with_ui": claude_ui,
+            "fn_without_ui": claude_noui,
+            "endpoint": claude_endpoint,
+            "max_token": 200000,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
+    model_info.update({
+        "claude-3-opus-20240229": {
+            "fn_with_ui": claude_ui,
+            "fn_without_ui": claude_noui,
+            "endpoint": claude_endpoint,
+            "max_token": 200000,
             "tokenizer": tokenizer_gpt35,
             "token_cnt": get_token_num_gpt35,
         },
@@ -675,22 +711,28 @@ if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
         })
     except:
         print(trimmed_format_exc())
-# if "skylark" in AVAIL_LLM_MODELS:
-#     try:
-#         from .bridge_skylark2 import predict_no_ui_long_connection as skylark_noui
-#         from .bridge_skylark2 import predict as skylark_ui
-#         model_info.update({
-#             "skylark": {
-#                 "fn_with_ui": skylark_ui,
-#                 "fn_without_ui": skylark_noui,
-#                 "endpoint": None,
-#                 "max_token": 4096,
-#                 "tokenizer": tokenizer_gpt35,
-#                 "token_cnt": get_token_num_gpt35,
-#             }
-#         })
-#     except:
-#         print(trimmed_format_exc())
+# -=-=-=-=-=-=- one-api 对齐支持 -=-=-=-=-=-=-
+for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
+    # 为了更灵活地接入one-api多模型管理界面，设计了此接口，例子：AVAIL_LLM_MODELS = ["one-api-mixtral-8x7b(max_token=6666)"]
+    # 其中
+    #   "one-api-"          是前缀（必要）
+    #   "mixtral-8x7b"      是模型名（必要）
+    #   "(max_token=6666)"  是配置（非必要）
+    try:
+        _, max_token_tmp = read_one_api_model_name(model)
+    except:
+        print(f"one-api模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
+        continue
+    model_info.update({
+        model: {
+            "fn_with_ui": chatgpt_ui,
+            "fn_without_ui": chatgpt_noui,
+            "endpoint": openai_endpoint,
+            "max_token": max_token_tmp,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
 
 
 # <-- 用于定义和切换多个azure模型 -->

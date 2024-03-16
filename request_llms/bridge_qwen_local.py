@@ -45,7 +45,7 @@ class GetQwenLMHandle(LocalLLMHandle):
 
         for response in self._model.chat_stream(self._tokenizer, query, history=history):
             yield response
-        
+
     def try_to_import_special_deps(self, **kwargs):
         # import something that will raise error if the user does not install requirement_*.txt
         # 🏃‍♂️🏃‍♂️🏃‍♂️ 主进程执行

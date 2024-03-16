@@ -76,8 +76,8 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     success_mmd, file_manifest_mmd, _ = get_files_from_everything(txt, type='.mmd')
     success = success or success_mmd
     file_manifest += file_manifest_mmd
-    chatbot.append(["文件列表：", ", ".join([e.split('/')[-1] for e in file_manifest])]); 
-    yield from update_ui(      chatbot=chatbot, history=history) 
+    chatbot.append(["文件列表：", ", ".join([e.split('/')[-1] for e in file_manifest])]);
+    yield from update_ui(      chatbot=chatbot, history=history)
     # 检测输入参数，如没有给定输入参数，直接退出
     if not success:
         if txt == "": txt = '空空如也的输入栏'

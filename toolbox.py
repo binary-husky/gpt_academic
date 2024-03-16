@@ -25,6 +25,9 @@ from shared_utils.text_mask import apply_gpt_academic_string_mask
 from shared_utils.text_mask import build_gpt_academic_masked_string
 from shared_utils.text_mask import apply_gpt_academic_string_mask_langbased
 from shared_utils.text_mask import build_gpt_academic_masked_string_langbased
+from shared_utils.map_names import map_friendly_names_to_model
+from shared_utils.map_names import map_model_to_friendly_names
+from shared_utils.map_names import read_one_api_model_name
 from shared_utils.handle_upload import html_local_file
 from shared_utils.handle_upload import html_local_img
 from shared_utils.handle_upload import file_manifest_filter_type
@@ -919,6 +922,18 @@ def have_any_recent_upload_image_files(chatbot):
     else:
         return False, None  # most_recent_uploaded is too old
 
+# Claude3 model supports graphic context dialogue, reads all images
+def every_image_file_in_path(chatbot):
+    if chatbot is None:
+        return False, []  # chatbot is None
+    most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
+    if not most_recent_uploaded:
+        return False, []  # most_recent_uploaded is None
+    path = most_recent_uploaded["path"]
+    file_manifest = get_pictures_list(path)
+    if len(file_manifest) == 0:
+        return False, []
+    return True, file_manifest
 
 # Function to encode the image
 def encode_image(image_path):
@@ -939,3 +954,53 @@ def check_packages(packages=[]):
         spam_spec = importlib.util.find_spec(p)
         if spam_spec is None:
             raise ModuleNotFoundError
+
+
+def map_file_to_sha256(file_path):
+    import hashlib
+
+    with open(file_path, 'rb') as file:
+        content = file.read()
+
+    # Calculate the SHA-256 hash of the file contents
+    sha_hash = hashlib.sha256(content).hexdigest()
+
+    return sha_hash
+
+
+def check_repeat_upload(new_pdf_path, pdf_hash):
+    '''
+    检查历史上传的文件是否与新上传的文件相同，如果相同则返回(True, 重复文件路径)，否则返回(False，None)
+    '''
+    from toolbox import get_conf
+    import PyPDF2
+
+    user_upload_dir = os.path.dirname(os.path.dirname(new_pdf_path))
+    file_name = os.path.basename(new_pdf_path)
+
+    file_manifest = [f for f in glob.glob(f'{user_upload_dir}/**/{file_name}', recursive=True)]
+
+    for saved_file in file_manifest:
+        with open(new_pdf_path, 'rb') as file1, open(saved_file, 'rb') as file2:
+            reader1 = PyPDF2.PdfFileReader(file1)
+            reader2 = PyPDF2.PdfFileReader(file2)
+
+            # 比较页数是否相同
+            if reader1.getNumPages() != reader2.getNumPages():
+                continue
+
+            # 比较每一页的内容是否相同
+            for page_num in range(reader1.getNumPages()):
+                page1 = reader1.getPage(page_num).extractText()
+                page2 = reader2.getPage(page_num).extractText()
+                if page1 != page2:
+                    continue
+
+        maybe_project_dir = glob.glob('{}/**/{}'.format(get_log_folder(), pdf_hash + ".tag"), recursive=True)
+
+
+        if len(maybe_project_dir) > 0:
+            return True, os.path.dirname(maybe_project_dir[0])
+
+    # 如果所有页的内容都相同，返回 True
+    return False, None

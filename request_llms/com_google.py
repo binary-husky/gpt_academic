@@ -114,8 +114,10 @@ def html_local_img(__file, layout="left", max_width=None, max_height=None, md=Tr
 
 
 class GoogleChatInit:
-    def __init__(self):
-        self.url_gemini = "https://generativelanguage.googleapis.com/v1beta/models/%m:streamGenerateContent?key=%k"
+    def __init__(self, llm_kwargs):
+        from .bridge_all import model_info
+        endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
+        self.url_gemini = endpoint + "/%m:streamGenerateContent?key=%k"
 
     def generate_chat(self, inputs, llm_kwargs, history, system_prompt):
         headers, payload = self.generate_message_payload(

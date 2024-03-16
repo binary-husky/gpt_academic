@@ -3,12 +3,12 @@ from scipy import interpolate
 
 def Singleton(cls):
     _instance = {}
- 
+
     def _singleton(*args, **kargs):
         if cls not in _instance:
             _instance[cls] = cls(*args, **kargs)
         return _instance[cls]
- 
+
     return _singleton
 
 
@@ -39,7 +39,7 @@ class RealtimeAudioDistribution():
         else:
             res = None
         return res
-    
+
 def change_sample_rate(audio, old_sr, new_sr):
     duration = audio.shape[0] / old_sr
 

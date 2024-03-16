@@ -8,7 +8,7 @@ class WatchDog():
         self.interval = interval
         self.msg = msg
         self.kill_dog = False
-    
+
     def watch(self):
         while True:
             if self.kill_dog: break

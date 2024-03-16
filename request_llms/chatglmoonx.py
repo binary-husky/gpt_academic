@@ -119,7 +119,7 @@ class ChatGLMModel():
             past_key_values = { k: v for k, v in zip(past_names, past_key_values) }
 
             next_token = self.sample_next_token(logits[0, -1], top_k=top_k, top_p=top_p, temperature=temperature)
-            
+
             output_tokens += [next_token]
 
             if next_token == self.eop_token_id or len(output_tokens) > max_generated_tokens:

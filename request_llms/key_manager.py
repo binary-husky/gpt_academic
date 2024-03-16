@@ -2,12 +2,12 @@ import random
 
 def Singleton(cls):
     _instance = {}
- 
+
     def _singleton(*args, **kargs):
         if cls not in _instance:
             _instance[cls] = cls(*args, **kargs)
         return _instance[cls]
- 
+
     return _singleton
 
 
@@ -16,7 +16,7 @@ class OpenAI_ApiKeyManager():
     def __init__(self, mode='blacklist') -> None:
         # self.key_avail_list = []
         self.key_black_list = []
-    
+
     def add_key_to_blacklist(self, key):
         self.key_black_list.append(key)
 

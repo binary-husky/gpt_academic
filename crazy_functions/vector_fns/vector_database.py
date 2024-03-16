@@ -28,7 +28,7 @@ EMBEDDING_DEVICE = "cpu"
 
 # 基于上下文的prompt模版，请务必保留"{question}"和"{context}"
 PROMPT_TEMPLATE = """已知信息：
-{context} 
+{context}
 
 根据上述已知信息，简洁和专业的来回答用户的问题。如果无法从中得到答案，请说 “根据已知信息无法回答该问题” 或 “没有提供足够的相关信息”，不允许在答案中添加编造成分，答案请使用中文。 问题是：{question}"""
 
@@ -58,7 +58,7 @@ OPEN_CROSS_DOMAIN = False
 def similarity_search_with_score_by_vector(
         self, embedding: List[float], k: int = 4
 ) -> List[Tuple[Document, float]]:
-    
+
     def seperate_list(ls: List[int]) -> List[List[int]]:
         lists = []
         ls1 = [ls[0]]
@@ -200,7 +200,7 @@ class LocalDocQA:
             return vs_path, loaded_files
         else:
             raise RuntimeError("文件加载失败，请检查文件格式是否正确")
-        
+
     def get_loaded_file(self, vs_path):
         ds = self.vector_store.docstore
         return set([ds._dict[k].metadata['source'].split(vs_path)[-1] for k in ds._dict])
@@ -290,10 +290,10 @@ class knowledge_archive_interface():
         self.threadLock.acquire()
         # import uuid
         self.current_id = id
-        self.qa_handle, self.kai_path = construct_vector_store(   
-            vs_id=self.current_id, 
+        self.qa_handle, self.kai_path = construct_vector_store(
+            vs_id=self.current_id,
             vs_path=vs_path,
-            files=file_manifest, 
+            files=file_manifest,
             sentence_size=100,
             history=[],
             one_conent="",
@@ -304,7 +304,7 @@ class knowledge_archive_interface():
 
     def get_current_archive_id(self):
         return self.current_id
-    
+
     def get_loaded_file(self, vs_path):
         return self.qa_handle.get_loaded_file(vs_path)
 
@@ -312,10 +312,10 @@ class knowledge_archive_interface():
         self.threadLock.acquire()
         if not self.current_id == id:
             self.current_id = id
-            self.qa_handle, self.kai_path = construct_vector_store(   
-                vs_id=self.current_id, 
+            self.qa_handle, self.kai_path = construct_vector_store(
+                vs_id=self.current_id,
                 vs_path=vs_path,
-                files=[], 
+                files=[],
                 sentence_size=100,
                 history=[],
                 one_conent="",
@@ -329,7 +329,7 @@ class knowledge_archive_interface():
             query = txt,
             vs_path = self.kai_path,
             score_threshold=VECTOR_SEARCH_SCORE_THRESHOLD,
-            vector_search_top_k=VECTOR_SEARCH_TOP_K, 
+            vector_search_top_k=VECTOR_SEARCH_TOP_K,
             chunk_conent=True,
             chunk_size=CHUNK_SIZE,
             text2vec = self.get_chinese_text2vec(),

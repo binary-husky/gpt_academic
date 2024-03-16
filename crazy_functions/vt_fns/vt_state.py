@@ -6,7 +6,7 @@ class VoidTerminalState():
 
     def reset_state(self):
         self.has_provided_explaination = False
- 
+
     def lock_plugin(self, chatbot):
         chatbot._cookies['lock_plugin'] = 'crazy_functions.虚空终端->虚空终端'
         chatbot._cookies['plugin_state'] = pickle.dumps(self)

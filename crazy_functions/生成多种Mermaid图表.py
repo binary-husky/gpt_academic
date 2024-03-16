@@ -179,15 +179,15 @@ def 解析历史输入(history,llm_kwargs,file_manifest,chatbot,plugin_kwargs):
         i_say = f"Read this section, recapitulate the content of this section with less than {NUM_OF_WORD} words in Chinese: {txt[i]}"
         i_say_show_user = f"[{i+1}/{n_txt}] Read this section, recapitulate the content of this section with less than {NUM_OF_WORD} words: {txt[i][:200]} ...."
         gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(i_say, i_say_show_user,  # i_say=真正给chatgpt的提问， i_say_show_user=给用户看的提问
-                                                                           llm_kwargs, chatbot, 
+                                                                           llm_kwargs, chatbot,
                                                                            history=["The main content of the previous section is?", last_iteration_result], # 迭代上一次的结果
                                                                            sys_prompt="Extracts the main content from the text section where it is located for graphing purposes, answer me with Chinese."  # 提示
-                                                                        ) 
+                                                                        )
         results.append(gpt_say)
         last_iteration_result = gpt_say
     ############################## <第 2 步，根据整理的摘要选择图表类型> ##################################
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
-    gpt_say = plugin_kwargs.get("advanced_arg", "")     #将图表类型参数赋值为插件参数  
+    gpt_say = plugin_kwargs.get("advanced_arg", "")     #将图表类型参数赋值为插件参数
     results_txt = '\n'.join(results)    #合并摘要
     if gpt_say not in ['1','2','3','4','5','6','7','8','9']:    #如插件参数不正确则使用对话模型判断
         i_say_show_user = f'接下来将判断适合的图表类型,如连续3次判断失败将会使用流程图进行绘制'; gpt_say = "[Local Message] 收到。"   # 用户提示
@@ -198,7 +198,7 @@ def 解析历史输入(history,llm_kwargs,file_manifest,chatbot,plugin_kwargs):
             gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
                 inputs=i_say,
                 inputs_show_user=i_say_show_user,
-                llm_kwargs=llm_kwargs, chatbot=chatbot, history=[], 
+                llm_kwargs=llm_kwargs, chatbot=chatbot, history=[],
                 sys_prompt=""
             )
             if gpt_say in ['1','2','3','4','5','6','7','8','9']:     #判断返回是否正确
@@ -228,12 +228,12 @@ def 解析历史输入(history,llm_kwargs,file_manifest,chatbot,plugin_kwargs):
     gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
         inputs=i_say,
         inputs_show_user=i_say_show_user,
-        llm_kwargs=llm_kwargs, chatbot=chatbot, history=[], 
+        llm_kwargs=llm_kwargs, chatbot=chatbot, history=[],
         sys_prompt=""
     )
     history.append(gpt_say)
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
-    
+
 @CatchException
 def 生成多种Mermaid图表(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     """
@@ -249,11 +249,11 @@ def 生成多种Mermaid图表(txt, llm_kwargs, plugin_kwargs, chatbot, history, 
 
     # 基本信息：功能、贡献者
     chatbot.append([
-        "函数插件功能？", 
+        "函数插件功能？",
         "根据当前聊天历史或指定的路径文件(文件内容优先)绘制多种mermaid图表，将会由对话模型首先判断适合的图表类型，随后绘制图表。\
         \n您也可以使用插件参数指定绘制的图表类型,函数插件贡献者: Menghuan1918"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-    
+
     if os.path.exists(txt):     #如输入区无内容则直接解析历史记录
         from crazy_functions.pdf_fns.parse_word import extract_text_from_files
         file_exist, final_result, page_one, file_manifest, excption = extract_text_from_files(txt, chatbot, history)
@@ -264,15 +264,15 @@ def 生成多种Mermaid图表(txt, llm_kwargs, plugin_kwargs, chatbot, history, 
 
     if excption != "":
         if excption == "word":
-            report_exception(chatbot, history, 
-                a = f"解析项目: {txt}", 
+            report_exception(chatbot, history,
+                a = f"解析项目: {txt}",
                 b = f"找到了.doc文件，但是该文件格式不被支持，请先转化为.docx格式。")
-            
+
         elif excption == "pdf":
-            report_exception(chatbot, history, 
-                a = f"解析项目: {txt}", 
+            report_exception(chatbot, history,
+                a = f"解析项目: {txt}",
                 b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pymupdf```。")
-        
+
         elif excption == "word_pip":
                 report_exception(chatbot, history,
                     a=f"解析项目: {txt}",

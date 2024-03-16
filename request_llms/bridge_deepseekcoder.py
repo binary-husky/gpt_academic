@@ -88,7 +88,7 @@ class GetCoderLMHandle(LocalLLMHandle):
             temperature = kwargs['temperature']
             history = kwargs['history']
             return query, max_length, top_p, temperature, history
-        
+
         query, max_length, top_p, temperature, history = adaptor(kwargs)
         history.append({ 'role': 'user', 'content': query})
         messages = history
@@ -97,14 +97,14 @@ class GetCoderLMHandle(LocalLLMHandle):
             inputs = inputs[:, -max_length:]
         inputs = inputs.to(self._model.device)
         generation_kwargs = dict(
-                                    inputs=inputs, 
+                                    inputs=inputs,
                                     max_new_tokens=max_length,
                                     do_sample=False,
                                     top_p=top_p,
                                     streamer = self._streamer,
                                     top_k=50,
                                     temperature=temperature,
-                                    num_return_sequences=1, 
+                                    num_return_sequences=1,
                                     eos_token_id=32021,
                                 )
         thread = Thread(target=self._model.generate, kwargs=generation_kwargs, daemon=True)

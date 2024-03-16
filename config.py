@@ -30,7 +30,32 @@ if USE_PROXY:
 else:
     proxies = None
 
-# ------------------------------------ 以下配置可以优化体验, 但大部分场合下并不需要修改 ------------------------------------
+# [step 3]>> 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
+LLM_MODEL = "gpt-3.5-turbo-16k" # 可选 ↓↓↓
+AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-preview",
+                    "gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
+                    "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-3-turbo",
+                    "gemini-pro", "chatglm3"
+                    ]
+# --- --- --- ---
+# P.S. 其他可用的模型还包括
+# AVAIL_LLM_MODELS = [
+#   "qianfan", "deepseekcoder",
+#   "spark", "sparkv2", "sparkv3", "sparkv3.5",
+#   "qwen-turbo", "qwen-plus", "qwen-max", "qwen-local",
+#   "moonshot-v1-128k", "moonshot-v1-32k", "moonshot-v1-8k",
+#   "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo-0125"
+#   "claude-3-sonnet-20240229","claude-3-opus-20240229", "claude-2.1", "claude-instant-1.2",
+#   "moss", "llama2", "chatglm_onnx", "internlm", "jittorllms_pangualpha", "jittorllms_llama",
+# ]
+# --- --- --- ---
+# 此外，为了更灵活地接入one-api多模型管理界面，您还可以在接入one-api时，
+# 使用"one-api-*"前缀直接使用非标准方式接入的模型，例如
+# AVAIL_LLM_MODELS = ["one-api-claude-3-sonnet-20240229(max_token=100000)"]
+# --- --- --- ---
+
+
+# --------------- 以下配置可以优化体验 ---------------
 
 # 重新URL重新定向，实现更换API_URL的作用（高危设置! 常规情况下不要修改! 通过修改此设置，您将把您的API-KEY和对话隐私完全暴露给您设定的中间人！）
 # 格式: API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "在这里填写重定向的api.openai.com的URL"}
@@ -85,22 +110,6 @@ MAX_RETRY = 2
 DEFAULT_FN_GROUPS = ['对话', '编程', '学术', '智能体']
 
 
-# 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
-LLM_MODEL = "gpt-3.5-turbo-16k" # 可选 ↓↓↓
-AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-preview",
-                    "gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
-                    "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-3-turbo",
-                    "gemini-pro", "chatglm3", "claude-2"]
-# P.S. 其他可用的模型还包括 [
-# "moonshot-v1-128k", "moonshot-v1-32k", "moonshot-v1-8k",
-# "qwen-turbo", "qwen-plus", "qwen-max",
-# "zhipuai", "qianfan", "deepseekcoder", "llama2", "qwen-local", "gpt-3.5-turbo-0613", "moss",
-# "gpt-3.5-turbo-16k-0613", "gpt-3.5-random", "api2d-gpt-3.5-turbo", 'api2d-gpt-3.5-turbo-16k',
-# "spark", "sparkv2", "sparkv3", "sparkv3.5",
-# "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"
-# ]
-
-
 # 定义界面上“询问多个GPT模型”插件应该使用哪些模型，请从AVAIL_LLM_MODELS中选择，并在不同模型之间用`&`间隔，例如"gpt-3.5-turbo&chatglm3&azure-gpt-4"
 MULTI_QUERY_LLM_MODELS = "gpt-3.5-turbo&chatglm3"
 
@@ -128,6 +137,7 @@ CHATGLM_PTUNING_CHECKPOINT = "" # 例如"/home/hmp/ChatGLM2-6B/ptuning/output/6b
 # 本地LLM模型如ChatGLM的执行方式 CPU/GPU
 LOCAL_MODEL_DEVICE = "cpu" # 可选 "cuda"
 LOCAL_MODEL_QUANT = "FP16" # 默认 "FP16" "INT4" 启用量化INT4版本 "INT8" 启用量化INT8版本
+
 
 # 设置gradio的并行线程数（不需要修改）
 CONCURRENT_COUNT = 100
@@ -174,14 +184,8 @@ AZURE_ENGINE = "填入你亲手写的部署名"            # 读 docs\use_azure.
 AZURE_CFG_ARRAY = {}
 
 
-# 使用Newbing (不推荐使用，未来将删除)
-NEWBING_STYLE = "creative"  # ["creative", "balanced", "precise"]
-NEWBING_COOKIES = """
-put your new bing cookies here
-"""
-
-
-# 阿里云实时语音识别 配置难度较高 仅建议高手用户使用 参考 https://github.com/binary-husky/gpt_academic/blob/master/docs/use_audio.md
+# 阿里云实时语音识别 配置难度较高
+# 参考 https://github.com/binary-husky/gpt_academic/blob/master/docs/use_audio.md
 ENABLE_AUDIO = False
 ALIYUN_TOKEN=""     # 例如 f37f30e0f9934c34a992f6f64f7eba4f
 ALIYUN_APPKEY=""    # 例如 RoPlZrM88DnAFkZK
@@ -200,17 +204,13 @@ ZHIPUAI_API_KEY = ""
 ZHIPUAI_MODEL = "" # 此选项已废弃，不再需要填写
 
 
-# # 火山引擎YUNQUE大模型
-# YUNQUE_SECRET_KEY = ""
-# YUNQUE_ACCESS_KEY = ""
-# YUNQUE_MODEL = ""
-
-
 # Claude API KEY
 ANTHROPIC_API_KEY = ""
 
+
 # 月之暗面 API KEY
 MOONSHOT_API_KEY = ""
+
 
 # Mathpix 拥有执行PDF的OCR功能，但是需要注册账号
 MATHPIX_APPID = ""
@@ -270,7 +270,11 @@ PLUGIN_HOT_RELOAD = False
 # 自定义按钮的最大数量限制
 NUM_CUSTOM_BASIC_BTN = 4
 
+
+
 """
+--------------- 配置关联关系说明 ---------------
+
 在线大模型配置关联关系示意图
 │
 ├── "gpt-3.5-turbo" 等openai模型
@@ -294,7 +298,7 @@ NUM_CUSTOM_BASIC_BTN = 4
 │   ├── XFYUN_API_SECRET
 │   └── XFYUN_API_KEY
 │
-├── "claude-1-100k" 等claude模型
+├── "claude-3-opus-20240229" 等claude模型
 │   └── ANTHROPIC_API_KEY
 │
 ├── "stack-claude"
@@ -315,9 +319,10 @@ NUM_CUSTOM_BASIC_BTN = 4
 ├── "Gemini"
 │   └──  GEMINI_API_KEY
 │
-└── "newbing" Newbing接口不再稳定，不推荐使用
-    ├── NEWBING_STYLE
-    └── NEWBING_COOKIES
+└── "one-api-...(max_token=...)" 用一种更方便的方式接入one-api多模型管理界面
+    ├── AVAIL_LLM_MODELS
+    ├── API_KEY
+    └── API_URL_REDIRECT
 
 
 本地大模型示意图
