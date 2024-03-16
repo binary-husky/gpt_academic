@@ -34,14 +34,15 @@ def main():
     from themes.theme import load_dynamic_theme, to_cookie_str, from_cookie_str, init_cookie
     title_html = f"<h1 align=\"center\">GPT 学术优化 {get_current_version()}</h1>{theme_declaration}"
 
-    # 问询记录, python 版本建议3.9+（越新越好）
+    # 对话记录, python 版本建议3.9+（越新越好）
     import logging, uuid
     os.makedirs(PATH_LOGGING, exist_ok=True)
-    try:logging.basicConfig(filename=f"{PATH_LOGGING}/chat_secrets.log", level=logging.INFO, encoding="utf-8", format="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-    except:logging.basicConfig(filename=f"{PATH_LOGGING}/chat_secrets.log", level=logging.INFO,  format="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+    chat_secrets_log = os.path.join(PATH_LOGGING, "chat_secrets.log")
+    try:logging.basicConfig(filename=chat_secrets_log, level=logging.INFO, encoding="utf-8", format="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+    except:logging.basicConfig(filename=chat_secrets_log, level=logging.INFO,  format="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
     # Disable logging output from the 'httpx' logger
     logging.getLogger("httpx").setLevel(logging.WARNING)
-    print(f"所有问询记录将自动保存在本地目录./{PATH_LOGGING}/chat_secrets.log, 请注意自我隐私保护哦！")
+    print(f"所有对话记录将自动保存在本地目录 {chat_secrets_log}, 请注意自我隐私保护哦！")
 
     # 一些普通功能模块
     from core_functional import get_core_functions
@@ -402,7 +403,7 @@ def main():
         server_port=PORT,
         favicon_path=os.path.join(os.path.dirname(__file__), "docs/logo.png"),
         auth=AUTHENTICATION if len(AUTHENTICATION) != 0 else None,
-        blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile",f"{PATH_LOGGING}/admin"])
+        blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile",f"{PATH_LOGGING}/admin", chat_secrets_log])
 
     # 如果需要在二级路径下运行
     # CUSTOM_PATH = get_conf('CUSTOM_PATH')
