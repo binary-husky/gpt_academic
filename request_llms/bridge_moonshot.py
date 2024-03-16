@@ -5,8 +5,9 @@
 import json
 import os
 import time
+import logging
 
-from toolbox import get_conf, update_ui
+from toolbox import get_conf, update_ui, log_chat
 
 import requests
 
@@ -164,7 +165,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             history = history[:-2]
             yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
             break
-
+    log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_bro_result)
 
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=None,
                                   console_slience=False):

@@ -7,6 +7,8 @@ import base64
 import gradio
 import shutil
 import glob
+import logging
+import uuid
 from functools import wraps
 from shared_utils.config_loader import get_conf
 from shared_utils.config_loader import set_conf
@@ -32,7 +34,7 @@ from shared_utils.handle_upload import html_local_file
 from shared_utils.handle_upload import html_local_img
 from shared_utils.handle_upload import file_manifest_filter_type
 from shared_utils.handle_upload import extract_archive
-
+from typing import List
 pj = os.path.join
 default_user_name = "default_user"
 
@@ -84,7 +86,9 @@ def ArgsGeneralWrapper(f):
     该装饰器是大多数功能调用的入口。
     函数示意图：https://mermaid.live/edit#pako:eNqNVFtPGkEY_StkntoEDQtLoTw0sWqapjQxVWPabmOm7AiEZZcsQ9QiiW012qixqdeqqIn10geBh6ZR8PJnmAWe-hc6l3VhrWnLEzNzzvnO953ZyYOYoSIQAWOaMR5LQBN7hvoU3UN_g5iu7imAXEyT4wUF3Pd0dT3y9KGYYUJsmK8V0GPGs0-QjkyojZgwk0Fm82C2dVghX08U8EaoOHjOfoEMU0XmADRhOksVWnNLjdpM82qFzB6S5Q_WWsUhuqCc3JtAsVR_OoMnhyZwXgHWwbS1d4gnsLVZJp-P6mfVxveqAgqC70Jz_pQCOGDKM5xFdNNPDdilF6uSU_hOYqu4a3MHYDZLDzq5fodrC3PWcEaFGPUaRiqJWK_W9g9rvRITa4dhy_0nw67SiePMp3oSR6PPn41DGgllkvkizYwsrmtaejTFd8V4yekGmT1zqrt4XGlAy8WTuiPULF01LksZvukSajfQQRAxmYi5S0D81sDcyzapVdn6sYFHkjhhGyel3frVQnvsnbR23lEjlhIlaOJiFPWzU5G4tfNJo8ejwp47-TbvJkKKZvmxA6SKo16oaazJysfG6klr9T0pbTW2ZqzlL_XaT8fYbQLXe4mSmvoCZXMaa7FePW6s7jVqK9bujvse3WFjY5_Z4KfsA4oiPY4T7Drvn1tLJTbG1to1qR79ulgk89-oJbvZzbIwJty6u20LOReWa9BvwserUd9s9MIKc3x5TUWEoAhUyJK5y85w_yG-dFu_R9waoU7K581y8W_qLle35-rG9Nxcrz8QHRsc0K-r9NViYRT36KsFvCCNzDRMqvSVyzOKAnACpZECIvSvCs2UAhS9QHEwh43BST0GItjMIS_I8e-sLwnj9A262cxA_ZVh0OUY1LJiDSJ5MAEiUijYLUtBORR6KElyQPaCSRDpksNSd8AfluSgHPaFC17wjrOlbgbzyyFf4IFPDvoD_sJvnkdK-g
     """
-    def decorated(request: gradio.Request, cookies, max_length, llm_model, txt, txt2, top_p, temperature, chatbot, history, system_prompt, plugin_advanced_arg, *args):
+    def decorated(request: gradio.Request, cookies:dict, max_length:int, llm_model:str,
+                  txt:str, txt2:str, top_p:float, temperature:float, chatbot:list,
+                  history:list, system_prompt:str, plugin_advanced_arg:str, *args):
         txt_passon = txt
         if txt == "" and txt2 != "": txt_passon = txt2
         # 引入一个有cookie的chatbot
@@ -136,7 +140,7 @@ def ArgsGeneralWrapper(f):
     return decorated
 
 
-def update_ui(chatbot, history, msg="正常", **kwargs):  # 刷新界面
+def update_ui(chatbot:ChatBotWithCookies, history, msg="正常", **kwargs):  # 刷新界面
     """
     刷新用户界面
     """
@@ -166,7 +170,7 @@ def update_ui(chatbot, history, msg="正常", **kwargs):  # 刷新界面
     yield cookies, chatbot_gr, history, msg
 
 
-def update_ui_lastest_msg(lastmsg, chatbot, history, delay=1):  # 刷新界面
+def update_ui_lastest_msg(lastmsg:str, chatbot:ChatBotWithCookies, history:list, delay=1):  # 刷新界面
     """
     刷新用户界面
     """
@@ -193,13 +197,12 @@ def CatchException(f):
     """
 
     @wraps(f)
-    def decorated(main_input, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, *args, **kwargs):
+    def decorated(main_input:str, llm_kwargs:dict, plugin_kwargs:dict,
+                  chatbot_with_cookie:ChatBotWithCookies, history:list, *args, **kwargs):
         try:
             yield from f(main_input, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, *args, **kwargs)
         except Exception as e:
-            from check_proxy import check_proxy
             from toolbox import get_conf
-            proxies = get_conf('proxies')
             tb_str = '```\n' + trimmed_format_exc() + '```'
             if len(chatbot_with_cookie) == 0:
                 chatbot_with_cookie.clear()
@@ -252,7 +255,7 @@ def HotReload(f):
 """
 
 
-def get_reduce_token_percent(text):
+def get_reduce_token_percent(text:str):
     """
     * 此函数未来将被弃用
     """
@@ -271,7 +274,7 @@ def get_reduce_token_percent(text):
 
 
 def write_history_to_file(
-    history, file_basename=None, file_fullname=None, auto_caption=True
+    history:list, file_basename:str=None, file_fullname:str=None, auto_caption:bool=True
 ):
     """
     将对话记录history以Markdown格式写入文件中。如果没有指定文件名，则使用当前时间生成文件名。
@@ -305,7 +308,7 @@ def write_history_to_file(
     return res
 
 
-def regular_txt_to_markdown(text):
+def regular_txt_to_markdown(text:str):
     """
     将普通文本转换为Markdown格式的文本。
     """
@@ -315,7 +318,7 @@ def regular_txt_to_markdown(text):
     return text
 
 
-def report_exception(chatbot, history, a, b):
+def report_exception(chatbot:ChatBotWithCookies, history:list, a:str, b:str):
     """
     向chatbot中添加错误信息
     """
@@ -323,7 +326,7 @@ def report_exception(chatbot, history, a, b):
     history.extend([a, b])
 
 
-def find_free_port():
+def find_free_port()->int:
     """
     返回当前系统中可用的未使用端口。
     """
@@ -336,10 +339,9 @@ def find_free_port():
         return s.getsockname()[1]
 
 
-def find_recent_files(directory):
+def find_recent_files(directory:str)->List[str]:
     """
-    me: find files that is created with in one minutes under a directory with python, write a function
-    gpt: here it is!
+    Find files that is created with in one minutes under a directory with python, write a function
     """
     import os
     import time
@@ -362,7 +364,7 @@ def find_recent_files(directory):
     return recent_files
 
 
-def file_already_in_downloadzone(file, user_path):
+def file_already_in_downloadzone(file:str, user_path:str):
     try:
         parent_path = os.path.abspath(user_path)
         child_path = os.path.abspath(file)
@@ -374,7 +376,7 @@ def file_already_in_downloadzone(file, user_path):
         return False
 
 
-def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
+def promote_file_to_downloadzone(file:str, rename_file:str=None, chatbot:ChatBotWithCookies=None):
     # 将文件复制一份到下载区
     import shutil
 
@@ -409,12 +411,12 @@ def promote_file_to_downloadzone(file, rename_file=None, chatbot=None):
     return new_path
 
 
-def disable_auto_promotion(chatbot):
+def disable_auto_promotion(chatbot:ChatBotWithCookies):
     chatbot._cookies.update({"files_to_promote": []})
     return
 
 
-def del_outdated_uploads(outdate_time_seconds, target_path_base=None):
+def del_outdated_uploads(outdate_time_seconds:float, target_path_base:str=None):
     if target_path_base is None:
         user_upload_dir = get_conf("PATH_PRIVATE_UPLOAD")
     else:
@@ -467,7 +469,8 @@ def to_markdown_tabs(head: list, tabs: list, alignment=":---:", column=False, om
 
 
 def on_file_uploaded(
-    request: gradio.Request, files, chatbot, txt, txt2, checkboxes, cookies
+    request: gradio.Request, files:List[str], chatbot:ChatBotWithCookies,
+    txt:str, txt2:str, checkboxes:List[str], cookies:dict
 ):
     """
     当文件被上传时的回调函数
@@ -531,7 +534,7 @@ def on_file_uploaded(
     return chatbot, txt, txt2, cookies
 
 
-def on_report_generated(cookies, files, chatbot):
+def on_report_generated(cookies:dict, files:List[str], chatbot:ChatBotWithCookies):
     # from toolbox import find_recent_files
     # PATH_LOGGING = get_conf('PATH_LOGGING')
     if "files_to_promote" in cookies:
@@ -822,7 +825,7 @@ def is_the_upload_folder(string):
         return False
 
 
-def get_user(chatbotwithcookies):
+def get_user(chatbotwithcookies:ChatBotWithCookies):
     return chatbotwithcookies._cookies.get("user_name", default_user_name)
 
 
@@ -905,7 +908,7 @@ def get_pictures_list(path):
     return file_manifest
 
 
-def have_any_recent_upload_image_files(chatbot):
+def have_any_recent_upload_image_files(chatbot:ChatBotWithCookies):
     _5min = 5 * 60
     if chatbot is None:
         return False, None  # chatbot is None
@@ -923,7 +926,7 @@ def have_any_recent_upload_image_files(chatbot):
         return False, None  # most_recent_uploaded is too old
 
 # Claude3 model supports graphic context dialogue, reads all images
-def every_image_file_in_path(chatbot):
+def every_image_file_in_path(chatbot:ChatBotWithCookies):
     if chatbot is None:
         return False, []  # chatbot is None
     most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
@@ -1004,3 +1007,12 @@ def check_repeat_upload(new_pdf_path, pdf_hash):
 
     # 如果所有页的内容都相同，返回 True
     return False, None
+
+def log_chat(llm_model: str, input_str: str, output_str: str):
+    if output_str and input_str and llm_model:
+        uid = str(uuid.uuid4().hex)
+        logging.info(f"[Model({uid})] {llm_model}")
+        input_str = input_str.rstrip('\n')
+        logging.info(f"[Query({uid})]\n{input_str}")
+        output_str = output_str.rstrip('\n')
+        logging.info(f"[Response({uid})]\n{output_str}\n\n")

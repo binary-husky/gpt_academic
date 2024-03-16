@@ -21,7 +21,8 @@ import random
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
-from toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history, trimmed_format_exc, is_the_upload_folder, read_one_api_model_name
+from toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history
+from toolbox import trimmed_format_exc, is_the_upload_folder, read_one_api_model_name, log_chat
 proxies, TIMEOUT_SECONDS, MAX_RETRY, API_ORG, AZURE_CFG_ARRAY = \
     get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'API_ORG', 'AZURE_CFG_ARRAY')
 
@@ -172,7 +173,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
     raw_input = inputs
-    logging.info(f'[raw_input] {raw_input}')
+    # logging.info(f'[raw_input] {raw_input}')
     chatbot.append((inputs, ""))
     yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
 
@@ -253,7 +254,8 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     # 前者是API2D的结束条件，后者是OPENAI的结束条件
                     if ('data: [DONE]' in chunk_decoded) or (len(chunkjson['choices'][0]["delta"]) == 0):
                         # 判定为数据流的结束，gpt_replying_buffer也写完了
-                        logging.info(f'[response] {gpt_replying_buffer}')
+                        # logging.info(f'[response] {gpt_replying_buffer}')
+                        log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
                         break
                     # 处理数据流的主体
                     status_text = f"finish_reason: {chunkjson['choices'][0].get('finish_reason', 'null')}"
