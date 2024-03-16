@@ -63,6 +63,7 @@ api2d_endpoint = "https://openai.api2d.net/v1/chat/completions"
 newbing_endpoint = "wss://sydney.bing.com/sydney/ChatHub"
 gemini_endpoint = "https://generativelanguage.googleapis.com/v1beta/models"
 claude_endpoint = "https://api.anthropic.com"
+yimodel_endpoint = "https://api.lingyiwanwu.com/v1/chat/completions"
 
 if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
 azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
@@ -338,6 +339,29 @@ model_info.update({
         "token_cnt": get_token_num_gpt35,
     }
 })
+
+# -=-=-=-=-=-=- 零一万物 -=-=-=-=-=-=-
+from .bridge_yimodel import predict_no_ui_long_connection as yimodel_noui
+from .bridge_yimodel import predict as yimodel_ui
+model_info.update({
+        "yi-34b-chat-0205": {
+        "fn_with_ui": yimodel_ui,
+        "fn_without_ui": yimodel_noui,
+        "endpoint": yimodel_endpoint,
+        "max_token": 4000,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+        "yi-34b-chat-200k": {
+        "fn_with_ui": yimodel_ui,
+        "fn_without_ui": yimodel_noui,
+        "endpoint": yimodel_endpoint,
+        "max_token": 200000,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+})
+
 # -=-=-=-=-=-=- api2d 对齐支持 -=-=-=-=-=-=-
 for model in AVAIL_LLM_MODELS:
     if model.startswith('api2d-') and (model.replace('api2d-','') in model_info.keys()):
