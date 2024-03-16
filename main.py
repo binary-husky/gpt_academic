@@ -74,7 +74,7 @@ def main():
     cancel_handles = []
     customize_btns = {}
     predefined_btns = {}
-    with gr.Blocks(title="GPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
+    with gr.Blocks(title="GPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as app_block:
         gr.HTML(title_html)
         secret_css, dark_mode, py_pickle_cookie = gr.Textbox(visible=False), gr.Textbox(DARK_MODE, visible=False), gr.Textbox(visible=False)
         cookies = gr.State(load_chat_cookies())
@@ -371,11 +371,11 @@ def main():
             audio_mic.stream(deal_audio, inputs=[audio_mic, cookies])
 
 
-        demo.load(init_cookie, inputs=[cookies], outputs=[cookies])
-        demo.load(persistent_cookie_reload, inputs = [py_pickle_cookie, cookies],
+        app_block.load(init_cookie, inputs=[cookies], outputs=[cookies])
+        app_block.load(persistent_cookie_reload, inputs = [py_pickle_cookie, cookies],
             outputs = [py_pickle_cookie, cookies, *customize_btns.values(), *predefined_btns.values()], _js=js_code_for_persistent_cookie_init)
-        demo.load(None, inputs=[dark_mode], outputs=None, _js="""(dark_mode)=>{apply_cookie_for_checkbox(dark_mode);}""")    # 配置暗色主题或亮色主题
-        demo.load(None, inputs=[gr.Textbox(LAYOUT, visible=False)], outputs=None, _js='(LAYOUT)=>{GptAcademicJavaScriptInit(LAYOUT);}')
+        app_block.load(None, inputs=[dark_mode], outputs=None, _js="""(dark_mode)=>{apply_cookie_for_checkbox(dark_mode);}""")    # 配置暗色主题或亮色主题
+        app_block.load(None, inputs=[gr.Textbox(LAYOUT, visible=False)], outputs=None, _js='(LAYOUT)=>{GptAcademicJavaScriptInit(LAYOUT);}')
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def run_delayed_tasks():
@@ -390,28 +390,42 @@ def main():
 
         threading.Thread(target=auto_updates, name="self-upgrade", daemon=True).start() # 查看自动更新
         threading.Thread(target=open_browser, name="open-browser", daemon=True).start() # 打开浏览器页面
-        threading.Thread(target=warm_up_mods, name="warm-up", daemon=True).start()      # 预热tiktoken模块
+        threading.Thread(target=warm_up_mods, name="warm-up",      daemon=True).start() # 预热tiktoken模块
 
+    # 运行一些异步任务：自动更新、打开浏览器页面、预热tiktoken模块
     run_delayed_tasks()
-    demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
-        quiet=True,
-        server_name="0.0.0.0",
+
+    # 正式开始服务
+    start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SSL_CERTFILE)
+
+
+
+def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SSL_CERTFILE):
+    import uvicorn
+    import gradio as gr
+    from shared_utils.fastapi_server import create_app
+    from toolbox import get_conf
+    app_block:gr.Blocks
+    app_block.queue(concurrency_count=CONCURRENT_COUNT)
+    app_block.ssl_verify = False
+    app_block.favicon_path=os.path.join(os.path.dirname(__file__), "docs/logo.png")
+    app_block.auth = AUTHENTICATION if len(AUTHENTICATION) != 0 else None
+    app_block.blocked_paths = ["config.py", "config_private.py",
+                          "docker-compose.yml", "Dockerfile", "{PATH_LOGGING}/admin"]
+    app = create_app()
+    CUSTOM_PATH = get_conf('CUSTOM_PATH')
+    gr.mount_gradio_app(app, app_block, CUSTOM_PATH)
+    config = uvicorn.Config(
+        app,
+        host="0.0.0.0",
+        port=PORT,
+        reload=False,
+        log_level="warning",
         ssl_keyfile=None if SSL_KEYFILE == "" else SSL_KEYFILE,
         ssl_certfile=None if SSL_CERTFILE == "" else SSL_CERTFILE,
-        ssl_verify=False,
-        server_port=PORT,
-        favicon_path=os.path.join(os.path.dirname(__file__), "docs/logo.png"),
-        auth=AUTHENTICATION if len(AUTHENTICATION) != 0 else None,
-        blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile",f"{PATH_LOGGING}/admin"])
-
-    # 如果需要在二级路径下运行
-    # CUSTOM_PATH = get_conf('CUSTOM_PATH')
-    # if CUSTOM_PATH != "/":
-    #     from toolbox import run_gradio_in_subpath
-    #     run_gradio_in_subpath(demo, auth=AUTHENTICATION, port=PORT, custom_path=CUSTOM_PATH)
-    # else:
-    #     demo.launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, favicon_path="docs/logo.png",
-    #                 blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile",f"{PATH_LOGGING}/admin"])
+    )
+    server = uvicorn.Server(config)
+    server.run()
 
 if __name__ == "__main__":
     main()
