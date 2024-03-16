@@ -81,6 +81,7 @@ if api2d_endpoint in API_URL_REDIRECT: api2d_endpoint = API_URL_REDIRECT[api2d_e
 if newbing_endpoint in API_URL_REDIRECT: newbing_endpoint = API_URL_REDIRECT[newbing_endpoint]
 if gemini_endpoint in API_URL_REDIRECT: gemini_endpoint = API_URL_REDIRECT[gemini_endpoint]
 if claude_endpoint in API_URL_REDIRECT: claude_endpoint = API_URL_REDIRECT[claude_endpoint]
+if yimodel_endpoint in API_URL_REDIRECT: yimodel_endpoint = API_URL_REDIRECT[yimodel_endpoint]
 
 # 获取tokenizer
 tokenizer_gpt35 = LazyloadTiktoken("gpt-3.5-turbo")
@@ -317,6 +318,7 @@ model_info.update({
     "moonshot-v1-8k": {
         "fn_with_ui": moonshot_ui,
         "fn_without_ui": moonshot_no_ui,
+        "can_multi_thread": True,
         "endpoint": None,
         "max_token": 1024 * 8,
         "tokenizer": tokenizer_gpt35,
@@ -325,6 +327,7 @@ model_info.update({
     "moonshot-v1-32k": {
         "fn_with_ui": moonshot_ui,
         "fn_without_ui": moonshot_no_ui,
+        "can_multi_thread": True,
         "endpoint": None,
         "max_token": 1024 * 32,
         "tokenizer": tokenizer_gpt35,
@@ -333,35 +336,13 @@ model_info.update({
     "moonshot-v1-128k": {
         "fn_with_ui": moonshot_ui,
         "fn_without_ui": moonshot_no_ui,
+        "can_multi_thread": True,
         "endpoint": None,
         "max_token": 1024 * 128,
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     }
 })
-
-# -=-=-=-=-=-=- 零一万物 -=-=-=-=-=-=-
-from .bridge_yimodel import predict_no_ui_long_connection as yimodel_noui
-from .bridge_yimodel import predict as yimodel_ui
-model_info.update({
-        "yi-34b-chat-0205": {
-        "fn_with_ui": yimodel_ui,
-        "fn_without_ui": yimodel_noui,
-        "endpoint": yimodel_endpoint,
-        "max_token": 4000,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-        "yi-34b-chat-200k": {
-        "fn_with_ui": yimodel_ui,
-        "fn_without_ui": yimodel_noui,
-        "endpoint": yimodel_endpoint,
-        "max_token": 200000,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-})
-
 # -=-=-=-=-=-=- api2d 对齐支持 -=-=-=-=-=-=-
 for model in AVAIL_LLM_MODELS:
     if model.startswith('api2d-') and (model.replace('api2d-','') in model_info.keys()):
@@ -497,22 +478,6 @@ if "stack-claude" in AVAIL_LLM_MODELS:
             "token_cnt": get_token_num_gpt35,
         }
     })
-if "newbing-free" in AVAIL_LLM_MODELS:
-    try:
-        from .bridge_newbingfree import predict_no_ui_long_connection as newbingfree_noui
-        from .bridge_newbingfree import predict as newbingfree_ui
-        model_info.update({
-            "newbing-free": {
-                "fn_with_ui": newbingfree_ui,
-                "fn_without_ui": newbingfree_noui,
-                "endpoint": newbing_endpoint,
-                "max_token": 4096,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            }
-        })
-    except:
-        print(trimmed_format_exc())
 if "newbing" in AVAIL_LLM_MODELS:   # same with newbing-free
     try:
         from .bridge_newbingfree import predict_no_ui_long_connection as newbingfree_noui
@@ -545,6 +510,7 @@ if "chatglmft" in AVAIL_LLM_MODELS:   # same with newbing-free
         })
     except:
         print(trimmed_format_exc())
+# -=-=-=-=-=-=- 上海AI-LAB书生大模型 -=-=-=-=-=-=-
 if "internlm" in AVAIL_LLM_MODELS:
     try:
         from .bridge_internlm import predict_no_ui_long_connection as internlm_noui
@@ -577,6 +543,7 @@ if "chatglm_onnx" in AVAIL_LLM_MODELS:
         })
     except:
         print(trimmed_format_exc())
+# -=-=-=-=-=-=- 通义-本地模型 -=-=-=-=-=-=-
 if "qwen-local" in AVAIL_LLM_MODELS:
     try:
         from .bridge_qwen_local import predict_no_ui_long_connection as qwen_local_noui
@@ -594,6 +561,7 @@ if "qwen-local" in AVAIL_LLM_MODELS:
         })
     except:
         print(trimmed_format_exc())
+# -=-=-=-=-=-=- 通义-在线模型 -=-=-=-=-=-=-
 if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-max" in AVAIL_LLM_MODELS:   # zhipuai
     try:
         from .bridge_qwen import predict_no_ui_long_connection as qwen_noui
@@ -629,7 +597,35 @@ if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-
         })
     except:
         print(trimmed_format_exc())
-if "spark" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
+# -=-=-=-=-=-=- 零一万物模型 -=-=-=-=-=-=-
+if "yi-34b-chat-0205" in AVAIL_LLM_MODELS or "yi-34b-chat-200k" in AVAIL_LLM_MODELS:   # zhipuai
+    try:
+        from .bridge_yimodel import predict_no_ui_long_connection as yimodel_noui
+        from .bridge_yimodel import predict as yimodel_ui
+        model_info.update({
+            "yi-34b-chat-0205": {
+                "fn_with_ui": yimodel_ui,
+                "fn_without_ui": yimodel_noui,
+                "can_multi_thread": False,  # 目前来说，默认情况下并发量极低，因此禁用
+                "endpoint": yimodel_endpoint,
+                "max_token": 4000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "yi-34b-chat-200k": {
+                "fn_with_ui": yimodel_ui,
+                "fn_without_ui": yimodel_noui,
+                "can_multi_thread": False,  # 目前来说，默认情况下并发量极低，因此禁用
+                "endpoint": yimodel_endpoint,
+                "max_token": 200000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+        })
+    except:
+        print(trimmed_format_exc())
+# -=-=-=-=-=-=- 讯飞星火认知大模型 -=-=-=-=-=-=-
+if "spark" in AVAIL_LLM_MODELS:
     try:
         from .bridge_spark import predict_no_ui_long_connection as spark_noui
         from .bridge_spark import predict as spark_ui
@@ -705,6 +701,7 @@ if "llama2" in AVAIL_LLM_MODELS:   # llama2
         })
     except:
         print(trimmed_format_exc())
+# -=-=-=-=-=-=- 智谱 -=-=-=-=-=-=-
 if "zhipuai" in AVAIL_LLM_MODELS:   # zhipuai 是glm-4的别名，向后兼容配置
     try:
         model_info.update({
@@ -719,6 +716,7 @@ if "zhipuai" in AVAIL_LLM_MODELS:   # zhipuai 是glm-4的别名，向后兼容�
         })
     except:
         print(trimmed_format_exc())
+# -=-=-=-=-=-=- 幻方-深度求索大模型 -=-=-=-=-=-=-
 if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
     try:
         from .bridge_deepseekcoder import predict_no_ui_long_connection as deepseekcoder_noui
@@ -735,6 +733,8 @@ if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
         })
     except:
         print(trimmed_format_exc())
+
+
 # -=-=-=-=-=-=- one-api 对齐支持 -=-=-=-=-=-=-
 for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
     # 为了更灵活地接入one-api多模型管理界面，设计了此接口，例子：AVAIL_LLM_MODELS = ["one-api-mixtral-8x7b(max_token=6666)"]
@@ -759,8 +759,8 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
     })
 
 
-# <-- 用于定义和切换多个azure模型 -->
-AZURE_CFG_ARRAY = get_conf("AZURE_CFG_ARRAY")
+# -=-=-=-=-=-=- azure模型对齐支持 -=-=-=-=-=-=-
+AZURE_CFG_ARRAY = get_conf("AZURE_CFG_ARRAY") # <-- 用于定义和切换多个azure模型 -->
 if len(AZURE_CFG_ARRAY) > 0:
     for azure_model_name, azure_cfg_dict in AZURE_CFG_ARRAY.items():
         # 可能会覆盖之前的配置，但这是意料之中的
