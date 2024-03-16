@@ -11,7 +11,7 @@ from toolbox import get_conf
 from yarl import URL
 import httpx
 
-CUSTOM_PATH, AUTHENTICATION = get_conf('CUSTOM_PATH', 'AUTHENTICATION')
+CUSTOM_PATH, AUTHENTICATION, PATH_PRIVATE_UPLOAD = get_conf('CUSTOM_PATH', 'AUTHENTICATION', 'PATH_PRIVATE_UPLOAD')
 
 
 async def homepage(request: Request):
@@ -29,28 +29,24 @@ async def get_favicon():
     favicon_path = './docs/logo.png'
     return RedirectResponse(url=f'{CUSTOM_PATH}file={favicon_path}')
 
+async def get_user(request: Request):
+    async with httpx.AsyncClient() as client:
+        res = await client.get(
+            str(request.base_url) + f'{CUSTOM_PATH}user', cookies=request.cookies
+        )
+        res_user = res.text[1:-1]
+    return res_user
 
 async def authentication(request: Request, call_next):
     """
     https 中间件，用于检查用户登陆状态、文件鉴权等
     """
-    if AUTHENTICATION:
+    if len(AUTHENTICATION) > 0:
         url = URL(request.url.path)
-        try:
-            index = url.raw_parts.index('private_upload')
-        except ValueError:
-            index = False
-        if isinstance(index, int):
-            async with httpx.AsyncClient() as client:
-                res = await client.get(str(request.base_url) + f'{CUSTOM_PATH}user',
-                                       cookies=request.cookies)
-                res_user = res.text[1:-1]
-                if url.raw_parts[index + 1] != res_user:
+        if len(url.raw_parts) >=2 and url.raw_parts[1].startswith(f'file={PATH_PRIVATE_UPLOAD}'):
+            if len(url.raw_parts) >=3:
+                if url.raw_parts[2] != await get_user(request):
                     return JSONResponse({'Error': "You can't download other people's files."})
-    # 这里可以实现单点登陆鉴权
-    # login_status = check_cookie(cookie)
-    # if not login_status:
-    #     new_website_url = ''  # 鉴权网站的URL
     return await call_next(request)
 
 

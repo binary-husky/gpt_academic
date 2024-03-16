@@ -13,6 +13,17 @@ help_menu_description = \
 </br></br>如何语音对话: 请阅读Wiki
 </br></br>如何临时更换API_KEY: 在输入区输入临时API_KEY后提交（网页刷新后失效）"""
 
+def enable_log(PATH_LOGGING):
+    import logging, uuid
+    admin_log_path = os.path.join(PATH_LOGGING, "admin")
+    os.makedirs(admin_log_path, exist_ok=True)
+    log_dir = os.path.join(admin_log_path, "chat_secrets.log")
+    try:logging.basicConfig(filename=log_dir, level=logging.INFO, encoding="utf-8", format="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+    except:logging.basicConfig(filename=log_dir, level=logging.INFO,  format="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+    # Disable logging output from the 'httpx' logger
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    print(f"所有对话记录将自动保存在本地目录{log_dir}, 请注意自我隐私保护哦！")
+
 def main():
     import gradio as gr
     if gr.__version__ not in ['3.32.8']:
@@ -34,14 +45,8 @@ def main():
     from themes.theme import load_dynamic_theme, to_cookie_str, from_cookie_str, init_cookie
     title_html = f"<h1 align=\"center\">GPT 学术优化 {get_current_version()}</h1>{theme_declaration}"
 
-    # 问询记录, python 版本建议3.9+（越新越好）
-    import logging, uuid
-    os.makedirs(PATH_LOGGING, exist_ok=True)
-    try:logging.basicConfig(filename=f"{PATH_LOGGING}/chat_secrets.log", level=logging.INFO, encoding="utf-8", format="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-    except:logging.basicConfig(filename=f"{PATH_LOGGING}/chat_secrets.log", level=logging.INFO,  format="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-    # Disable logging output from the 'httpx' logger
-    logging.getLogger("httpx").setLevel(logging.WARNING)
-    print(f"所有问询记录将自动保存在本地目录./{PATH_LOGGING}/chat_secrets.log, 请注意自我隐私保护哦！")
+    # 对话、日志记录
+    enable_log(PATH_LOGGING)
 
     # 一些普通功能模块
     from core_functional import get_core_functions
@@ -408,6 +413,7 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
     app_block:gr.Blocks
     app_block.queue(concurrency_count=CONCURRENT_COUNT)
     app_block.ssl_verify = False
+    app_block.auth_message = '请登录'
     app_block.favicon_path=os.path.join(os.path.dirname(__file__), "docs/logo.png")
     app_block.auth = AUTHENTICATION if len(AUTHENTICATION) != 0 else None
     app_block.blocked_paths = ["config.py", "config_private.py",
