@@ -212,9 +212,10 @@ ANTHROPIC_API_KEY = ""
 # 月之暗面 API KEY
 MOONSHOT_API_KEY = ""
 
+
 # 零一万物(Yi Model) API KEY
-# 默认情况下并发量极低，建议调整DEFAULT_WORKER_NUM为1
 YIMODEL_API_KEY = ""
+
 
 # Mathpix 拥有执行PDF的OCR功能，但是需要注册账号
 MATHPIX_APPID = ""
@@ -316,6 +317,9 @@ NUM_CUSTOM_BASIC_BTN = 4
 │
 ├── "glm-4", "glm-3-turbo", "zhipuai" 智谱AI大模型
 │   └── ZHIPUAI_API_KEY
+│
+├── "yi-34b-chat-0205", "yi-34b-chat-200k" 等零一万物(Yi Model)大模型
+│   └── YIMODEL_API_KEY
 │
 ├── "qwen-turbo" 等通义千问大模型
 │   └──  DASHSCOPE_API_KEY
