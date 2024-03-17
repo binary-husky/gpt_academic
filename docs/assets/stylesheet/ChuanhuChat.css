@@ -342,7 +342,9 @@ body.popup-open {
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
 }
-
+.chatbot-full-width #chatbot-header .gradio-dropdown {
+    max-width: unset;
+}
 #chatbot-header .gradio-dropdown {
     max-width: 14em;
     background: none;

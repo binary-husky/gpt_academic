@@ -342,6 +342,14 @@ model_info.update({
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
+    "claude-3-haiku-20240307": {
+        "fn_with_ui": claude_ui_cls,
+        "fn_without_ui": claude_noui_cls,
+        "endpoint": None,
+        "max_token": 1024 * 32,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
 })
 if "jittorllms_rwkv" in AVAIL_LLM_MODELS:
     from .bridge_jittorllms_rwkv import predict_no_ui_long_connection as rwkv_noui

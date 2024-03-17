@@ -166,6 +166,7 @@ def find_index_inlist(data_list: list, search_terms: list) -> int:
 def file_reader_content(file_path, save_path, plugin_kwargs):
     reader_statsu = ''
     file_content = ''
+
     if file_path.endswith('pdf'):
         content = reader_fns.PDFHandler(file_path, save_path).get_markdown()
         file_content = "".join(content)

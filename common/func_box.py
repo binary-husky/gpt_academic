@@ -9,6 +9,8 @@ import os.path
 import subprocess
 import time
 import uuid
+from typing import Literal
+
 import psutil
 import re
 import tempfile
@@ -280,7 +282,7 @@ def encryption_str(txt: str) -> object:
     """(关键字)(加密间隔)匹配机制（关键字间隔）"""
     txt = str(txt)
     pattern = re.compile(r"(Authorization|WPS-Sid|Cookie)(:|\s+)\s*([\w-]+?)(,|$|\s)", re.IGNORECASE)
-    result = pattern.sub(lambda x: x.group(1).lower() + x.group(2) + "XXXX-XXXX" + x.group(4), txt)
+    result = pattern.sub(lambda x: x.group(1) + x.group(2) + "XXXX-XXXX" + x.group(4), txt)
     return result
 
 
@@ -554,6 +556,8 @@ def to_markdown_tabs(head: list, tabs: list, alignment=':---:', column=False):
         transposed_tabs = list(map(list, zip(*tabs)))
     else:
         transposed_tabs = tabs
+    if len(head) != len(transposed_tabs) or transposed_tabs == []:
+        return None
     # Find the maximum length among the columns
     max_len = max(len(column) for column in transposed_tabs)
 
@@ -712,12 +716,70 @@ def get_fold_panel(btn_id=None):
         fold_html = get_html('fold-panel.html').replace('{id}', btn_id)
         if isinstance(content, dict):
             content = json.dumps(content, indent=4, ensure_ascii=False)
-        content = f'\n```\n{content.replace("```", "")}\n```\n'
+        content = f'\n```\n{content.replace("```", "").strip()}\n```\n'
         return fold_html.format(title=title, content=content, status=status)
 
     return _format
 
 
+def handle_timestamp(timestamp, end_unit: Literal['d', 's'] = 'd'):
+    """
+    将时间戳转换为格式化的时间字符串,如果不是时间戳则返回原数据。
+    Args:
+        end_unit: 指定结尾的单位
+        timestamp: 可能是时间戳的数据
+    Returns:
+        Union: 如果是时间戳,返回格式化的时间字符串;否则返回原数据
+    """
+
+    try:
+        # 尝试将输入转换为浮点数时间戳
+        timestamp_float = float(timestamp)
+        # 判断时间戳是否为毫秒级
+        if timestamp_float >= 1000000000000:
+            # 毫秒级时间戳需要除以1000
+            timestamp_float /= 1000
+        elif timestamp_float < 1000000000:
+            return timestamp
+        # 将时间戳转换为datetime对象
+        time_obj = datetime.datetime.fromtimestamp(timestamp_float)
+        if end_unit == 'd':
+            format_time = '%Y-%m-%d'
+        elif end_unit == 's':
+            format_time = '%Y-%m-%d %H:%M:%S'
+        else:
+            format_time = '%Y-%m-%d'
+        # 格式化输出时间字符串
+        return time_obj.strftime(format_time)
+    except (ValueError, OSError):
+        # 如果转换失败,则返回原数据
+        return timestamp
+
+
+def is_within_days(input_date, difference=7):
+    # 获取当前日期
+    today = datetime.date.today()
+
+    # 将输入的日期字符串转换为日期对象
+    if isinstance(input_date, str):
+        try:
+            date_times = datetime.date.fromisoformat(input_date)
+        except ValueError:
+            return input_date
+    elif isinstance(input_date, int):
+        if input_date >= 1000000000000:
+            # 毫秒级时间戳需要除以1000
+            input_date /= 1000
+        date_times = datetime.date.fromtimestamp(float(input_date))  # 将时间戳转换为浮点数后再转换为日期对象
+    else:
+        return False
+    # 计算日期差值（绝对值）
+    delta = abs((date_times - today).days)
+
+    # 检查日期差值是否小于等于7天
+    return delta <= difference
+
+
 if __name__ == '__main__':
-    txt = "authorization: abc123, WPS-Sid: xyz456, Cookie: 789xyz"
+    txt = "authorization abc123, WPS-Sid: xyz456, Cookie: 789xyz 12312312421423他475675213123456776"
     print(encryption_str(txt))
