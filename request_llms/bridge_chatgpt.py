@@ -126,9 +126,9 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
         json_data = chunkjson['choices'][0]
         delta = json_data["delta"]
         if len(delta) == 0: break
-        if "role" in delta: continue
-        if "content" in delta:
-            if delta["content"] is None: continue
+        if (not has_content) and has_role: continue
+        if (not has_content) and (not has_role): continue # raise RuntimeError("发现不标准的第三方接口："+delta)
+        if has_content: # has_role = True/False
             result += delta["content"]
             if not console_slience: print(delta["content"], end='')
             if observe_window is not None:
