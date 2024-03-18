@@ -5,8 +5,7 @@
 import copy
 import os
 import json
-import re
-from common import func_box, toolbox, db_handler, Langchain_cn
+from common import func_box, toolbox, db_handler
 from crazy_functions import crazy_utils
 from request_llms import bridge_all
 from moviepy.editor import AudioFileClip
@@ -211,7 +210,8 @@ def file_extraction_intype(file_mapping, chatbot, history, llm_kwargs, plugin_kw
     file_format = func_box.get_fold_panel()
     old_say = chatbot[-1][1] + '\n\n'
     for file_path in file_mapping:
-        chatbot[-1][1] = old_say + file_format(title=f'正在解析本地文件:【{file_path.replace(init_path.base_path, ".")}】')
+        chatbot[-1][1] = old_say + file_format(
+            title=f'正在解析本地文件:【{file_path.replace(init_path.base_path, ".")}】')
         yield from toolbox.update_ui(chatbot, history)
         save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'])
         content, status = file_reader_content(file_path, save_path, plugin_kwargs)
@@ -225,7 +225,7 @@ def file_extraction_intype(file_mapping, chatbot, history, llm_kwargs, plugin_kw
     return file_limit
 
 
-def json_args_return(kwargs, keys: list, default=None) -> list:
+def json_args_return(kwargs: dict, keys: list, default=None) -> list:
     """
     Args: 提取插件的调优参数，如果有，则返回取到的值，如果无，则返回False
         kwargs: 一般是plugin_kwargs
@@ -364,12 +364,6 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
         except Exception as f:
             print(f'读取原测试用例报错 {f}')
         for limit in content_limit:
-            if knowledge_base:
-                try:
-                    limit = yield from Langchain_cn.knowledge_base_query(limit, chatbot, history, llm_kwargs,
-                                                                         plugin_kwargs)
-                except Exception as f:
-                    func_box.通知机器人(f'读取知识库失败，请检查{f}')
             # 拼接内容与提示词
             plugin_prompt = func_box.replace_expected_text(prompt, content=limit, expect='{{{v}}}')
             inputs_array.append(plugin_prompt)
@@ -389,7 +383,7 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
         plugin_kwargs: 插件调优参数
     Returns:  将对话结果返回[输入, 输出]
     """
-    apply_history, = json_args_return(plugin_kwargs, ['上下文处理'])
+    apply_history, = json_args_return(plugin_kwargs, ['上下文关联'])
     if apply_history:
         history_array = [[history] for _ in range(len(inputs_array))]
     else:
@@ -650,13 +644,14 @@ def check_url_domain_cloud(link_limit):
     wps_links = func_box.split_domain_url(link_limit, domain_name=['kdocs', 'wps'])
     qq_link = func_box.split_domain_url(link_limit, domain_name=['docs.qq'])
     feishu_link = func_box.split_domain_url(link_limit, domain_name=['lg0v2tirko'])
-    return wps_links, qq_link, feishu_link
+    project_link = func_box.split_domain_url(link_limit, domain_name=[toolbox.get_conf('PROJECT_BASE_HOST')])
+    return wps_links, qq_link, feishu_link, project_link
 
 
 def detach_cloud_links(link_limit, llm_kwargs, valid_types):
     fp_mapping = {}
     save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'])
-    wps_links, qq_link, feishu_link = check_url_domain_cloud(link_limit)
+    wps_links, qq_link, feishu_link, project_link = check_url_domain_cloud(link_limit)
     wps_status, qq_status, feishu_status = '', '', ''
     try:
         # wps云文档下载
@@ -683,6 +678,15 @@ def detach_cloud_links(link_limit, llm_kwargs, valid_types):
         error = toolbox.trimmed_format_exc()
         wps_status += f'# 下载飞书文档出错了 \n ERROR: {error}'
 
+    try:
+        # 飞书项目转换
+        feishu_status, feishu_mapping = reader_fns.get_project_from_limit(project_link, save_path,
+                                                                          llm_kwargs.get('project_config'))
+        fp_mapping.update(feishu_mapping)
+    except Exception as e:
+        error = toolbox.trimmed_format_exc()
+        wps_status += f'# 解析飞书项目出错了 \n ERROR: {error}'
+
     download_status = ''
     if wps_status or qq_status or feishu_status:
         download_status = "\n".join([wps_status, qq_status, feishu_status]).strip('\n')
@@ -704,15 +708,15 @@ def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugi
     # 如果开启了OCR，并且文中存在图片链接，处理图片
     if ocr_switch and img_mapping:
         vision_loading_statsu = {os.path.basename(i): "Loading..." for i in img_mapping}
-        chatbot[-1][1] = gpt_old_say + vision_format(f'检测到识图开关为`{ocr_switch}`，正在识别图片中的文字...', vision_loading_statsu)
+        chatbot[-1][1] = gpt_old_say + vision_format(f'检测到识图开关为`{ocr_switch}`，正在识别图片中的文字...',
+                                                     vision_loading_statsu)
         yield from toolbox.update_ui(chatbot=chatbot, history=history)
         # 识别图片中的文字
         save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'])
         if isinstance(ocr_switch, dict):  # 如果是字典，那么就是自定义OCR参数
             ocr_switch_copy = copy.deepcopy(llm_kwargs)
             ocr_switch_copy.update(ocr_switch)
-            ocr_switch = ocr_switch_copy
-        vision_submission = reader_fns.submit_threads_img_handle(img_mapping, save_path, cor_cache, ocr_switch)
+        vision_submission = reader_fns.submit_threads_img_handle(img_mapping, save_path, cor_cache, ocr_switch_copy)
         for t in vision_submission:
             try:
                 img_content, img_path, status = vision_submission[t].result()
@@ -744,57 +748,55 @@ def content_clear_links(user_input, clear_fp_map, clear_link_map):
 
 
 def input_retrieval_file(user_input, llm_kwargs, valid_types):
-    # 云文件
+    # 网络链接
     fp_mapping, download_status = detach_cloud_links(user_input, llm_kwargs, valid_types)
     # 本地文件
     fp_mapping.update(func_box.extract_link_pf(user_input, valid_types))
     return fp_mapping, download_status
 
 
-def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugin_kwargs, valid_types, fp_prepro=False):
+def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugin_kwargs, valid_types):
     embedding_content = []  # 对话内容
-    chatbot.append([user_input, ''])
     yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='🕵🏻‍超级侦探，正在办案～')
-    # 文件处理
-    if fp_prepro:
-        fp_mapping = fp_prepro
+    if plugin_kwargs.get('embedding_content'):
+        embedding_content = plugin_kwargs['embedding_content']
+        plugin_kwargs['embedding_content'] = ''   # 用了即刻丢弃
     else:
+        chatbot.append([user_input, ''])
         download_format = func_box.get_fold_panel()
-        chatbot[-1][1] = download_format(title='正在解析云文件链接...', content='')
+        chatbot[-1][1] = download_format(title='正在解析网络链接...', content='')
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='Reader loading...')
         fp_mapping, download_status = input_retrieval_file(user_input, llm_kwargs, valid_types)
         download_status.update(fp_mapping)
         chatbot[-1][1] = download_format(title='链接解析完成', content=download_status, status='Done')
-    content_mapping = yield from file_extraction_intype(fp_mapping, chatbot, history, llm_kwargs, plugin_kwargs)
-    for content_fp in content_mapping:  # 一个文件一个对话
-        file_content = content_mapping[content_fp]
-        # 将解析的数据提交到正文
-        input_handle = user_input.replace(fp_mapping[content_fp], str(file_content))
-        # 将其他文件链接清除
-        user_clear = content_clear_links(input_handle, fp_mapping, content_mapping)
-        # 识别图片链接内容
-        complete_input = yield from content_img_vision_analyze(user_clear, chatbot, history,
-                                                               llm_kwargs, plugin_kwargs)
-        embedding_content.extend([os.path.basename(content_fp), complete_input])
-    if not content_mapping:
-        if len(user_input) > 100:  # 没有探测到任何文件，并且提交大于50个字符，那么运行往下走
-            yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='没有探测到文件')
+        content_mapping = yield from file_extraction_intype(fp_mapping, chatbot, history, llm_kwargs, plugin_kwargs)
+        for content_fp in content_mapping:  # 一个文件一个对话
+            file_content = content_mapping[content_fp]
+            # 将解析的数据提交到正文
+            input_handle = user_input.replace(fp_mapping[content_fp], str(file_content))
+            # 将其他文件链接清除
+            user_clear = content_clear_links(input_handle, fp_mapping, content_mapping)
             # 识别图片链接内容
-            complete_input = yield from content_img_vision_analyze(user_input, chatbot, history,
+            complete_input = yield from content_img_vision_analyze(user_clear, chatbot, history,
                                                                    llm_kwargs, plugin_kwargs)
-            embedding_content.extend([long_name_processing(user_input), complete_input])
-        elif not fp_prepro:
-            devs_document = toolbox.get_conf('devs_document')
-            status = '\n\n没有探测到任何文件，并且提交字符少于50，无法完成后续任务' \
-                     f'请在输入框中输入需要解析的云文档链接或本地文件地址，如果有多个文档则用换行或空格隔开，然后再点击对应的插件\n\n' \
-                     f'插件支持解析文档类型`{valid_types}`' \
-                     f"有问题？请联系`@spike` or 查看开发文档{devs_document}"
-            if chatbot[-1][1] is None:
-                chatbot[-1][1] = status
-            chatbot[-1][1] += status
-            yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='没有探测到数据')
-        elif fp_prepro:
-            embedding_content.extend([long_name_processing(user_input), user_input])
+            embedding_content.extend([os.path.basename(content_fp), complete_input])
+        if not content_mapping:
+            if len(user_input) > 100:  # 没有探测到任何文件，并且提交大于50个字符，那么运行往下走
+                yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='没有探测到文件')
+                # 识别图片链接内容
+                complete_input = yield from content_img_vision_analyze(user_input, chatbot, history,
+                                                                       llm_kwargs, plugin_kwargs)
+                embedding_content.extend([long_name_processing(user_input), complete_input])
+            else:
+                devs_document = toolbox.get_conf('devs_document')
+                status = '\n\n没有探测到任何文件，并且提交字符少于50，无法完成后续任务' \
+                         f'请在输入框中输入需要解析的云文档链接或本地文件地址，如果有多个文档则用换行或空格隔开，然后再点击对应的插件\n\n' \
+                         f'插件支持解析文档类型`{valid_types}`' \
+                         f"有问题？请联系`@spike` or 查看开发文档{devs_document}"
+                if chatbot[-1][1] is None:
+                    chatbot[-1][1] = status
+                chatbot[-1][1] += status
+                yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='没有探测到数据')
     # 提交知识库 ... 未适配
     return embedding_content
 
@@ -838,4 +840,4 @@ previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传�
 
 if __name__ == '__main__':
     test = [1, 2, 3, 4, [12], 33, 1]
-    print(long_name_processing(''))
+    print(json_args_return({'开启OCR': '123'}, ['开启OCR'], ))

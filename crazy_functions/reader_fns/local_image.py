@@ -99,7 +99,7 @@ class ImgHandler:
         return content, file_path, status
 
 
-def submit_threads_img_handle(ocr_mapping, output_dir, cor_cache: bool = False, model_kwargs=True, max_threads=10):
+def submit_threads_img_handle(ocr_mapping, output_dir, cor_cache: bool | dict = False, model_kwargs=True, max_threads=10):
     threads = {}
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=max_threads)
     # 提交任务，并将线程对象作为键，字典的键作为值存储

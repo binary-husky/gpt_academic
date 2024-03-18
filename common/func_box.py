@@ -556,7 +556,7 @@ def to_markdown_tabs(head: list, tabs: list, alignment=':---:', column=False):
         transposed_tabs = list(map(list, zip(*tabs)))
     else:
         transposed_tabs = tabs
-    if len(head) != len(transposed_tabs) or transposed_tabs == []:
+    if not head or not tabs:
         return None
     # Find the maximum length among the columns
     max_len = max(len(column) for column in transposed_tabs)
@@ -751,7 +751,7 @@ def handle_timestamp(timestamp, end_unit: Literal['d', 's'] = 'd'):
             format_time = '%Y-%m-%d'
         # 格式化输出时间字符串
         return time_obj.strftime(format_time)
-    except (ValueError, OSError):
+    except (ValueError, OSError, TypeError):
         # 如果转换失败,则返回原数据
         return timestamp
 
@@ -766,13 +766,15 @@ def is_within_days(input_date, difference=7):
             date_times = datetime.date.fromisoformat(input_date)
         except ValueError:
             return input_date
+    elif isinstance(input_date, bool):
+        return input_date
     elif isinstance(input_date, int):
         if input_date >= 1000000000000:
             # 毫秒级时间戳需要除以1000
             input_date /= 1000
         date_times = datetime.date.fromtimestamp(float(input_date))  # 将时间戳转换为浮点数后再转换为日期对象
     else:
-        return False
+        return input_date
     # 计算日期差值（绝对值）
     delta = abs((date_times - today).days)
 

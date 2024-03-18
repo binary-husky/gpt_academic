@@ -112,10 +112,12 @@ function initialize() {
     uploadIndexLinkElement = uploadedFilesCountElement.querySelector('a');
     uploadIndexFileHeight = uploadIndexFileElement.offsetHeight;
     input_storage_mapping = {
-    "apiKeys": gradioApp().querySelector('#api-keys-input input'),
-    "wpsCookies": gradioApp().querySelector('#wps-cookies-input textarea'),
-    "qqCookies": gradioApp().querySelector('#qq-cookies-input textarea'),
-    "feishuCookies": gradioApp().querySelector('#feishu-cookies-input textarea')
+        "apiKeys": gradioApp().querySelector('#api-keys-input input'),
+        "wpsCookies": gradioApp().querySelector('#wps-cookies-input input'),
+        "qqCookies": gradioApp().querySelector('#qq-cookies-input input'),
+        "feishuCookies": gradioApp().querySelector('#feishu-cookies-input input'),
+        "projectUserKey": gradioApp().querySelector('#project-user-key-input input'),
+        "projectCookies": gradioApp().querySelector('#project-cookies-input input'),
     }
     // trainBody = gradioApp().querySelector('#train-body');
 

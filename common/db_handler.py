@@ -124,12 +124,16 @@ class PromptDb(SqliteHandler):
                 result = self.execute_query(query)
             except:
                 pass
-        if not result:
-            query = f"SELECT result FROM `{self.table}` WHERE prompt = '{name}'"
-            result = self.execute_query(query)
-            return result[0][0]
-        else:
-            return result[0][0]
+        try:
+            if not result:
+                query = f"SELECT result FROM `{self.table}` WHERE prompt = '{name}'"
+                result = self.execute_query(query)
+                return result[0][0]
+            else:
+                return result[0][0]
+        except Exception as e:
+            logger.error(f'【{name}】提示词不存在')
+            raise IndexError(f'【{name}】提示词不存在')
 
     def inset_prompt(self, prompt: dict, source=''):
         error_status = ''

@@ -21,11 +21,13 @@ work_items = WorkItems()
 
 class ProjectFeishu:
 
-    def __init__(self, url, header=None):
+    def __init__(self, url, header=None, user_key=None):
         self.url = url
         self.base_url = f'https://{PROJECT_BASE_HOST}'
         self.headers = PROJECT_FEISHU_HEADER
         self.user_key = PROJECT_USER_KEY
+        if user_key:
+            self.user_key = user_key
         if header:
             self.headers = header
         self.project_id_map = self._get_project_dict()
@@ -124,11 +126,14 @@ class ProjectFeishu:
         response = requests.post(url, headers=self.headers, data=json.dumps(body), verify=False)
         return response.json()
 
-    def get_home_story_list(self, filter_time: int | bool = False, unscheduled=''):
+    def get_home_story_list(self, filter_time: int | bool = False, unscheduled='', un_issue=False, api_name: list = False):
         """获取所有项目首页需求列表"""
         story_list = []
-        for api_name in self.project_id_map:
-            self.__name_key_type_init(self.project_id_map[api_name])
+        name_id_map = api_name if api_name else self.project_id_map
+        for api_name in name_id_map:
+            self.project_id = self.project_id_map[api_name]
+            self.__name_key_type_init(self.project_id)
+            yield api_name, story_list
             if self.__dict__.get('issue_type_key'):
                 story_mapping = self._get_key_reverse_mapping(self.story_type_key,
                                                               STORY_LIST_REVERSE_MAPPING, self.project_id_map[api_name])
@@ -136,6 +141,7 @@ class ProjectFeishu:
                 time_ids = [i for i in story_mapping if story_mapping[i]['name'] in STORY_LIST_FILTER_TIME]
                 if home_data and story_mapping:
                     for item in home_data['homepage_work_items']['data']['work_items']:
+                        self.story_id = item['story_id']
                         node_info = self._owner_times_extraction(item, time_ids, unscheduled)
                         node_in_times = any(
                             [is_within_days(i['times'][t], filter_time) for i in node_info for t in i['times']])
@@ -143,9 +149,18 @@ class ProjectFeishu:
                             work_item = {'项目链接': f"{self.base_url}/{api_name}/"
                                                      f"{self.story_api_name}/detail/{item['story_id']}"}
                             work_item.update(self._data_mapping_extraction(item, story_mapping))
-                            work_item.update({'我负责的需求节点': "-".join(i['state_name'] for i in node_info)})
+                            head = [i['state_name'] for i in node_info]
+                            tables = [[
+                                f"{handle_timestamp(i['times']['start_time'])}~{handle_timestamp(i['times']['end_time'])}"
+                                for i in node_info]]
+                            work_item.update({'我负责的需求节点': to_markdown_tabs(head, tables, column=True)})
+                            if un_issue:
+                                issue_list = self.get_issue_items_list()
+                                if issue_list:
+                                    work_item.update({'当前缺陷总数以及分布情况': f"{len(issue_list)}\n" + _get_item_list(issue_list)})
                             story_list.append(work_item)
-        return story_list
+            yield api_name, story_list
+        yield 'done', story_list
 
     def _get_key_reverse_mapping(self, key, mapping, project_id=None):
         """获取字段映射key-value"""
@@ -208,16 +223,23 @@ class ProjectFeishu:
         for key in fields_map_dict:  # 自定义详情
             if type_items.get(key):
                 map_key = fields_map_dict[key]['name']
-                data_dict[map_key] = ''
+                if data_dict.get(map_key):
+                    data_dict[map_key] = data_dict[map_key]
+                else:
+                    data_dict[map_key] = ''
+                extraction_txt = ''
                 if isinstance(type_items.get(key), dict):
+                    extraction_txt += type_items[key].get('doc_text', '')
                     if type_items[key].get('doc_img', []):
-                        data_dict[map_key] = "\n".join(
+                        extraction_txt = extraction_txt.replace('[图片]', '')
+                        extraction_txt += "\n".join(
                             [f"![{i.split('?')[-1]}]({i})" for i in type_items[key].get('doc_img', [])]) + '\n'
-                    data_dict[map_key] += type_items[key].get('doc_text', '')
+                elif isinstance(type_items[key], str) and fields_map_dict[key].get('enum_map'):
+                    extraction_txt = fields_map_dict[key]['enum_map'][type_items[key]]
                 elif isinstance(type_items[key], list) and fields_map_dict[key].get('enum_map'):
-                    data_dict[map_key] = "".join([fields_map_dict[key]['enum_map'][i] for i in type_items[key]])
+                    extraction_txt = "".join([fields_map_dict[key]['enum_map'][i] for i in type_items[key]])
                 elif isinstance(type_items[key], list):
-                    data_dict[map_key] = "".join([str(i) for i in type_items[key]])  # 确保是字符串
+                    extraction_txt = "".join([str(i) for i in type_items[key]])  # 确保是字符串
                 elif fields_map_dict[key].get('compound_map'):  # 复合字段处理
                     for i, v in enumerate(type_items[key]):
                         content = ''
@@ -227,12 +249,17 @@ class ProjectFeishu:
                         index = "-" + str(i) if i > 0 else ''
                         data_dict[fields_map_dict[key]['name'] + index] = content
                 else:
-                    data_dict[map_key] = type_items[key]
+                    extraction_txt = type_items[key]
+                if data_dict[map_key] and extraction_txt:
+                    data_dict[map_key] = data_dict[map_key] + "-" + extraction_txt
+                elif not data_dict[map_key] and extraction_txt:
+                    data_dict[map_key] = extraction_txt
                 if isinstance(data_dict.get(map_key, ''), str):  # 如果是字符串，那么去掉前后空格
-                    data_dict[map_key] = data_dict[map_key].strip()
+                    data_dict[map_key] = data_dict.get(map_key).strip()
                 elif isinstance(data_dict[map_key], int):  # 如果是数字，那么那么尝试转换为时间字符串
                     data_dict[map_key] = handle_timestamp(data_dict[map_key])
-        return data_dict
+        filter_empty_dict = {i: data_dict[i] for i in data_dict if data_dict[i]}
+        return filter_empty_dict
 
     def _owner_times_extraction(self, story_items, filter_time_ids: list, unscheduled=''):
         node_owner_info = []
@@ -252,13 +279,12 @@ class ProjectFeishu:
 
     @staticmethod
     def _node_schedules_extraction(story_items):
-        node_dict = {'当前需求节点': "-".join([i['name'] for i in story_items['state_times'] if not i['end']])}
+        node_dict = {}
         all_state_status = ''
         sum_actual_times = 0
         sum_points_times = 0
         for i in story_items['node_schedules']:  # 节点详情
             state_name = i['state_name'] + ':'
-            #  state_name += '' if i['state_id'] == 'started' else '' 拿不准这个状态，暂时不做
             subtasks = " -> ".join(
                 [f"【{t['name']}】-{t['schedules'][0]['points']}/人天" for t in i['subtasks'] if t['schedules']])
             if i['points']:
@@ -278,13 +304,14 @@ class ProjectFeishu:
         node_dict.update({'当前所耗总工时': str(sum_actual_times) + '/人天'})
         return node_dict
 
-    def get_story_items_dict(self):
+    def get_story_items_dict(self, schedules=True):
         """获取需求详情"""
         fields_map_dict = self._get_key_reverse_mapping(self.story_type_key, STORY_REVERSE_MAPPING)
         story_items = self.post_story_items().get('data', {})
         story_dict = self._data_mapping_extraction(story_items, fields_map_dict)
-        node_dict = self._node_schedules_extraction(story_items)
-        story_dict.update(node_dict)
+        if schedules:
+            node_dict = self._node_schedules_extraction(story_items)
+            story_dict.update(node_dict)
         return story_dict
 
     def post_work_items(self, key, item_name, ids: list = None):
@@ -328,14 +355,14 @@ class ProjectFeishu:
         return case_list
 
 
-def __get_story(story_result):
+def _get_story(story_result):
     markdown_project = '## 需求详情\n'
     for i in story_result:
         markdown_project += f'{i}: {story_result[i]}\n\n'
     return markdown_project
 
 
-def __get_item_list(issue_result):
+def _get_item_list(issue_result):
     head = []
     tab_list = []
     for i in issue_result:
@@ -345,24 +372,26 @@ def __get_item_list(issue_result):
     return markdown_project
 
 
-def converter_project_md(link, project_folder, header=None):
-    feishu_project = ProjectFeishu(link, header)
+def converter_project_md(link, project_folder, config):
+    feishu_project = ProjectFeishu(link, config.get('project_header'), config.get('project_user_key'))
     markdown_project = ''
     if feishu_project.story_id:
-        markdown_project += __get_story(feishu_project.get_story_items_dict()) + '\n'
+        markdown_project += _get_story(feishu_project.get_story_items_dict(config.get('关联任务'))) + '\n'
 
-        issue_content = __get_item_list(feishu_project.get_issue_items_list())
-        markdown_project += '### 缺陷详情\n' + issue_content if issue_content else '' + '\n'
+        if config.get('关联缺陷'):
+            issue_content = _get_item_list(feishu_project.get_issue_items_list())
+            markdown_project += '### 缺陷详情\n' + issue_content if issue_content else '' + '\n'
 
-        issue_content = __get_item_list(feishu_project.get_case_items_list())
-        markdown_project += '### 用例详情\n' + issue_content if issue_content else '' + '\n'
+        if config.get('关联用例'):
+            issue_content = _get_item_list(feishu_project.get_case_items_list())
+            markdown_project += '### 用例详情\n' + issue_content if issue_content else '' + '\n'
 
     elif feishu_project.issue_id:
-        issue_content = __get_item_list(feishu_project.get_issue_items_list([feishu_project.issue_id]))
+        issue_content = _get_item_list(feishu_project.get_issue_items_list([feishu_project.issue_id]))
         markdown_project += '### 缺陷详情\n' + issue_content if issue_content else '' + '\n'
 
     elif feishu_project.case_id:
-        issue_content = __get_item_list(feishu_project.get_issue_items_list([feishu_project.case_id]))
+        issue_content = _get_item_list(feishu_project.get_case_items_list([feishu_project.case_id]))
         markdown_project += '### 用例详情\n' + issue_content if issue_content else '' + '\n'
 
     file_name = feishu_project.story_id if feishu_project.story_id else feishu_project.issue_id
@@ -371,19 +400,20 @@ def converter_project_md(link, project_folder, header=None):
     return {os.path.join(project_folder, f'{file_name}.md'): link}
 
 
-def get_project_from_limit(link_limit, project_folder, header=None):
+def get_project_from_limit(link_limit: list, project_folder, config: dict = {}):
     success = ''
     file_mapping = {}
     project_folder = os.path.join(project_folder, 'project_feishu')
     os.makedirs(project_folder, exist_ok=True)
     for limit in link_limit:
-        file_mapping.update(converter_project_md(limit, project_folder, header))
+        file_mapping.update(converter_project_md(limit, project_folder, config))
     return success, file_mapping
 
 
 if __name__ == '__main__':
-    # converter_project_md('https://project.feishu.cn/middleoffice/story/detail/3014376768#issue_management_new', './')
+    # converter_project_md('', './')
     feishu = ProjectFeishu('')
-    # print(feishu._get_work_list(feishu.items_mapping[work_items.case_name]['type_key']))
-    # print(feishu.get_story_items_dict())
-    feishu.get_home_story_list(7)
+    # # print(feishu._get_work_list(feishu.items_mapping[work_items.case_name]['type_key']))
+    print(feishu.get_story_items_dict())
+    for i in feishu.get_home_story_list(7, '未排期', api_name=['middleoffice']):
+        print(i)

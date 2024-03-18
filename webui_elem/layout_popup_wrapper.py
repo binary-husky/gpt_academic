@@ -27,11 +27,6 @@ class Settings:
 
     def _draw_setting_senior(self):
         with gr.Tab(label=i18n("高级")):
-            self.models_box = gr.CheckboxGroup(choices=['input加密', '预加载知识库', 'OCR缓存', '文档RAG',
-                                                        'gpt4-v自动识图', 'gemini-v自动识图', 'glm-v自动识图'],
-                                               value=['input加密', 'OCR缓存', '文档RAG', 'gpt4-v自动识图',
-                                                      'gemini-v自动识图', 'glm-v自动识图'],
-                                               label="提交开关", container=False)
             worker_num = toolbox.get_conf('DEFAULT_WORKER_NUM')
             self.default_worker_num = gr.Slider(minimum=1, maximum=30, value=worker_num, step=1,
                                                 show_label=True, interactive=True, label="插件多线程最大并行",
@@ -60,8 +55,7 @@ class Settings:
         with gr.TabItem('个人中心', id='private'):
             with gr.Row(elem_classes='tab-center'):
                 gr.Markdown('#### 粉身碎骨浑不怕 要留清白在人间\n\n'
-                            '`这里的东西只有你自己能看，不要告诉别人哦`\n\n' \
-                            + func_box.html_tag_color('我们不会保存你的个人信息，清除浏览器缓存后这里的信息就会被丢弃',
+                            + func_box.html_tag_color('我不会保存你的个人信息，清除浏览器缓存后这里的信息就会被丢弃',
                                                       color='rgb(227 179 51)'))
             self.usageTxt = gr.Markdown(i18n(
                 "**发送消息** 或 **提交key** 以显示额度"), elem_id="usage-display",
@@ -71,15 +65,21 @@ class Settings:
                 # value=hide_middle_chars(user_api_key.value),
                 type="password",  # visible=not HIDE_MY_KEY,
                 label="API-Key", container=False, elem_id='api-keys-input')
-            self.wps_cookie = gr.Textbox(lines=3, label='WPS Cookies', type='password', show_label=True,
+            self.wps_cookie = gr.Textbox(label='WPS Cookies', type='password', show_label=True,
                                          placeholder=f"Your WPS cookies dict...", container=False,
                                          elem_id='wps-cookies-input')
-            self.qq_cookie = gr.Textbox(lines=3, label='QQ Cookies', type='password', show_label=True,
+            self.qq_cookie = gr.Textbox(label='QQ Cookies', type='password', show_label=True,
                                         placeholder=f"Your QQ cookies dict...", container=False,
                                         elem_id='qq-cookies-input')
-            self.feishu_cookie = gr.Textbox(lines=3, label='Feishu Header', type='password', show_label=True,
+            self.feishu_cookie = gr.Textbox(label='Feishu Header', type='password', show_label=True,
                                             placeholder=f"Your Feishu header dict...", container=False,
                                             elem_id='feishu-cookies-input')
+            self.feishu_project_use_key = gr.Textbox(label='Feishu Project user-key', type='password', show_label=True,
+                                                     placeholder=f"Your Project user-key.", container=False,
+                                                     elem_id='project-user-key-input')
+            self.feishu_project_cookie = gr.Textbox(label='Feishu Project Header', type='password', show_label=True,
+                                                    placeholder=f"Your Project header", container=False,
+                                                    elem_id='project-cookies-input')
             with gr.Row():
                 self.info_perish_btn = gr.Button('清除我来过的痕迹', variant='stop', elem_classes='danger_btn')
                 self.exit_login_btn = gr.LogoutButton(icon='', link='/logout')
@@ -235,7 +235,7 @@ class Prompt:
             with gr.Row():
                 with gr.Column(scale=20, elem_classes='column-unset-min-width'):
                     self.new_kb_private_checkbox = gr.Checkbox(label='私有知识库',
-                                                               value=False, show_label=True,)
+                                                               value=False, show_label=True, )
                 with gr.Column(scale=90):
                     self.new_kb_confirm_btn = gr.Button(value='新建', size='lg')
 

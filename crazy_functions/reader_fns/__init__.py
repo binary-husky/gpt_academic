@@ -6,6 +6,7 @@
 from .docs_feishu import *
 from .docs_kingsoft import *
 from .docs_qqdocs import *
+from .project_feishu import *
 
 # 本地文件处理方法
 from .local_word import DocxHandler

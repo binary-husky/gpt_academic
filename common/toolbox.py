@@ -76,6 +76,7 @@ def ArgsGeneralWrapper(f):
                   models, worker_num, ocr_trust,
                   # 个人信息配置
                   openai_key, wps_cookies, qq_cookies, feishu_header,
+                  project_user_key, project_header,
                   ipaddr: gr.Request, *args):  # 参数来源__main__.py self.input_combo
         """"""
         start_time = time.time()
@@ -93,6 +94,9 @@ def ArgsGeneralWrapper(f):
             'worker_num': worker_num, 'start_time': start_time, 'ocr': ocr_trust,
             'max_length': max_length,
             'wps_cookies': wps_cookies, 'qq_cookies': qq_cookies, 'feishu_header': feishu_header,
+            'project_config': {
+                'project_user_key': project_user_key, 'project_header': project_header
+            }
         }
         # 对话参数
         if not cookies.get('first_chat') and args:
@@ -126,15 +130,21 @@ def ArgsGeneralWrapper(f):
 
 def model_selection(txt, models, llm_kwargs, plugin_kwargs, cookies, chatbot_with_cookie, history, args):
     txt_proc = txt
-    if 'input加密' in models: txt_proc = func_box.encryption_str(txt_proc)
+    # 开关调整
     if 'OCR缓存' in models: llm_kwargs.update({'ocr_cache': True})
+    if '关联缺陷' in models: llm_kwargs['project_config'].update({'关联缺陷': True})
+    if '关联用例' in models: llm_kwargs['project_config'].update({'关联用例': True})
+    if '关联任务' in models: llm_kwargs['project_config'].update({'关联任务': True})
+    if 'Vision-Img' in models: plugin_kwargs.update({'开启OCR': _vision_select_model(llm_kwargs, models)})
+    # 实实在在会改变输入的
+    if 'input加密' in models: txt_proc = func_box.encryption_str(txt_proc)
     if len(args) == 0 or 'RetryChat' in args and not cookies.get('is_plugin'):
-        if '文档RAG' in models and 'moonshot' not in llm_kwargs.get('llm_model', ''):
+        if '网络链接RAG' in models and 'moonshot' not in llm_kwargs.get('llm_model', ''):
             from crazy_functions.reader_fns.crazy_box import user_input_embedding_content, check_url_domain_cloud
             valid_types = ['pdf', 'md', 'xlsx', 'docx']
-            wps_links, qq_link, feishu_link = check_url_domain_cloud(txt_proc)
+            wps_links, qq_link, feishu_link, project_link = check_url_domain_cloud(txt_proc)
             local_file = func_box.extract_link_pf(txt_proc, valid_types)
-            if wps_links or qq_link or feishu_link or local_file:  # 提前检测，有文件才进入下一步文件处理
+            if wps_links or qq_link or feishu_link or local_file or project_link:  # 提前检测，有文件才进入下一步文件处理
                 yield from update_ui(chatbot_with_cookie, history, msg='检测到提交存在文档链接，正在跳转Reader...')
                 input_embedding_content = yield from user_input_embedding_content(txt_proc, chatbot_with_cookie,
                                                                                   history, llm_kwargs, plugin_kwargs,
@@ -144,17 +154,28 @@ def model_selection(txt, models, llm_kwargs, plugin_kwargs, cookies, chatbot_wit
                 yield from update_ui(chatbot_with_cookie, history, msg='Switching to normal dialog...')
         img_info = func_box.extract_link_pf(txt, func_box.valid_img_extensions)
         if 'vision' not in llm_kwargs['llm_model'] and img_info:
-            if llm_kwargs['llm_model'].startswith('gpt'):
-                if "gpt4-v自动识图" in models:
-                    llm_kwargs['llm_model'] = 'gpt-4-vision-preview'
-            elif llm_kwargs['llm_model'].startswith('gemini'):
-                if "gemini-v自动识图" in models:
-                    llm_kwargs['llm_model'] = 'gemini-pro-vision'
-            elif llm_kwargs['llm_model'].startswith('glm'):
-                if "glm-v自动识图" in models:
-                    llm_kwargs['llm_model'] = 'glm-4v'
-            yield from update_ui(chatbot_with_cookie, history, msg=f'Switching to `{llm_kwargs["llm_model"]}` dialog...')
+            vision_llm = _vision_select_model(llm_kwargs, models)
+            if vision_llm:
+                llm_kwargs.update(vision_llm)
+            yield from update_ui(chatbot_with_cookie, history,
+                                 msg=f'Switching to `{llm_kwargs["llm_model"]}` dialog...')
     return txt_proc
+
+
+def _vision_select_model(llm_kwargs, models):
+    vision_llm = {}
+    if llm_kwargs['llm_model'].startswith('gpt'):
+        if "gpt4-v自动识图" in models:
+            vision_llm['llm_model'] = 'gpt-4-vision-preview'
+    elif llm_kwargs['llm_model'].startswith('gemini'):
+        if "gemini-v自动识图" in models:
+            vision_llm['llm_model'] = 'gemini-pro-vision'
+    elif llm_kwargs['llm_model'].startswith('glm'):
+        if "glm-v自动识图" in models:
+            vision_llm['llm_model'] = 'glm-4v'
+    else:
+        return False
+    return vision_llm
 
 
 def plugins_selection(txt_proc, history, plugin_kwargs, args, cookies, chatbot_with_cookie, llm_kwargs):
@@ -1439,6 +1460,7 @@ def get_env_proxy_network():
         if 'https' in proxies:
             proxy_dict['HTTPS_PROXY'] = proxies['https']
     return proxy_dict
+
 
 def objdump(obj, file='objdump.tmp'):
     import pickle

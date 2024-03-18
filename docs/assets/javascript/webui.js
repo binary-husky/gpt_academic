@@ -113,16 +113,18 @@ function closeSide(sideArea) {
 }
 
 function openSide(sideArea) {
-    sideArea.classList.add('showSide');
-    if (sideArea == toolbox) {
-        chuanhuHeader.classList.add('under-box');
-        chatbotArea.classList.add('toolbox-open')
-        toolboxOpening = true;
-    } else if (sideArea == menu) {
-        chatbotArea.classList.add('menu-open')
-        menuOpening = true;
-        if (waifuStatus) {
-            waifuStatus.style.display = 'flex'
+    if (sideArea) {
+        sideArea.classList.add('showSide');
+        if (sideArea === toolbox) {
+            chuanhuHeader.classList.add('under-box');
+            chatbotArea.classList.add('toolbox-open')
+            toolboxOpening = true;
+        } else if (sideArea === menu) {
+            chatbotArea.classList.add('menu-open')
+            menuOpening = true;
+            if (waifuStatus) {
+                waifuStatus.style.display = 'flex'
+            }
         }
     }
     // document.body.classList.add('popup-open');
@@ -249,6 +251,7 @@ var historyToggleButtonStyle = {
     borderRadius: '7px',
     boxShadow: 'rgba(0, 0, 0, 0.19) 0 10px 20px, rgba(0, 0, 0, 0.23) 0 5px 5px'
 };
+
 function addHistoryBtn() {
     tog_history_btn = chuanhuBody.querySelector('#history-toggle-button');
     if (!tog_history_btn) {
@@ -307,11 +310,21 @@ function checkChatbotWidth() {
     // if (chatbotWidth > 488) {
     if (windowWidth > 768) {
         chatbotArea.classList.add('chatbot-full-width');
-        if (tog_history_btn) { tog_history_btn.style.display = 'flex' } else {historyToggleButtonStyle.display = 'flex'}
+        if (tog_history_btn) {
+            tog_history_btn.style.display = 'flex'
+        } else {
+            historyToggleButtonStyle.display = 'flex'
+        }
     } else {
         chatbotArea.classList.remove('chatbot-full-width');
-        if (chatbot) { monitorSwipeEvent() }
-        if (tog_history_btn) { tog_history_btn.style.display = 'none' } else {historyToggleButtonStyle.display = 'none'}
+        if (chatbot) {
+            monitorSwipeEvent()
+        }
+        if (tog_history_btn) {
+            tog_history_btn.style.display = 'none'
+        } else {
+            historyToggleButtonStyle.display = 'none'
+        }
     }
 
     if (windowWidth > 768) {

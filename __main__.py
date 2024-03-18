@@ -286,7 +286,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                                                    self.knowledge_base_select,
                                                    gr.HTML('删除知识库',
                                                            visible=False)],
-                                           outputs=self.show_hide_combo + [self.knowledge_base_select, self.kb_input_select],
+                                           outputs=self.show_hide_combo + [self.knowledge_base_select,
+                                                                           self.kb_input_select],
                                            _js="(a,b,c)=>{return showConfirmationDialog(a,b,c);}")
         self.edit_kb_info_docs_del.click(func_signals.kb_docs_file_source_del,
                                          inputs=[self.knowledge_base_select, self.edit_kb_file_list,
@@ -362,10 +363,20 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         self.know_combo = [self.kb_input_select, self.vector_search_score, self.vector_search_top_k]
         self.input_combo.extend(self.know_combo)
         # 高级设置
+        self.input_models.input(func_signals.update_models,
+                                inputs=[self.input_models, self.vision_models, self.project_models],
+                                outputs=[self.models_box])
+        self.vision_models.input(func_signals.update_models,
+                                 inputs=[self.input_models, self.vision_models, self.project_models],
+                                 outputs=[self.models_box])
+        self.project_models.input(func_signals.update_models,
+                                  inputs=[self.input_models, self.vision_models, self.project_models],
+                                  outputs=[self.models_box])
         self.setting_combo = [self.models_box, self.default_worker_num, self.ocr_identifying_trust]
         self.input_combo.extend(self.setting_combo)
         # 个人信息
-        self.user_combo = [self.openai_keys, self.wps_cookie, self.qq_cookie, self.feishu_cookie]
+        self.user_combo = [self.openai_keys, self.wps_cookie, self.qq_cookie, self.feishu_cookie,
+                           self.feishu_project_use_key, self.feishu_project_cookie]
         self.input_combo.extend(self.user_combo)
 
         self.output_combo = [self.cookies, self.chatbot, self.history, self.status_display, self.cancelBtn,
@@ -501,9 +512,11 @@ gradio_app = gr.mount_gradio_app(app, chatbot_main.demo, '/spike', )
 if __name__ == '__main__':
     import uvicorn
     from common.logger_handler import init_config, logger
+
     info_path = os.path.join(init_path.private_knowledge_path, 'info.db')
     if not os.path.exists(info_path):
         from common.knowledge_base.migrate import create_tables
+
         create_tables()
         logger.info('create kb tables')
     logger.info('start...')

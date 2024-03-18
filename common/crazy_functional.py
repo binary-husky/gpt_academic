@@ -10,7 +10,8 @@ def get_crazy_functions():
     get_functions_文档读取()
     get_functions_代码解析()
     get_functions_多功能插件()
-    get_functions_云文档处理()
+    get_functions_云文档()
+    get_functions_飞书项目()
     return function_plugins
 
 
@@ -388,24 +389,48 @@ def get_functions_多功能插件():
     }
 
 
-def get_functions_云文档处理():
+reader_files = ['md', 'txt', 'pdf', 'docx', 'xmind', '智能文档']
+desc = '高级参数详细说明请查看项目自述文档， 提交前请使用Json检查器检查是否符合要求'
+
+
+def get_functions_飞书项目():
+    from crazy_functions import Project_飞书项目
+    function_plugins['飞书项目'] = {
+        "获取前后一周的需求": {
+            "Color": "secondary",
+            "AsButton": True,
+            "Function": HotReload(Project_飞书项目.Project_获取项目数据),
+            "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
+            "ArgsReminder": desc,  # 高级参数输入区的显示提示
+            "Parameters": {
+                "开启OCR": {"llm_model": 'gemini-pro-vision'},
+                "筛选时间范围": 7,
+                "筛选未排期需求": '未排期',
+                "提示词分类": "插件定制",
+                "定制化流程": [{
+                    "提示词": "总结项目数据"
+                },],
+                "处理文件类型": ['*']
+            }
+        }
+    }
+
+
+def get_functions_云文档():
     # < -------------------云文档专用--------------- >
-    from crazy_functions import KDOCS_云文档分析
-    from crazy_functions import KDOCS_流程图_图片分析
-    desc = '高级参数详细说明请查看项目自述文档, 若有更改，提交前请使用Json检查器检查是否符合要求'
-    reader_files = ['md', 'txt', 'pdf', 'docx', 'xmind', '智能文档']
+    from crazy_functions import Reader_自定义插件流程
     function_plugins['云文档'] = {
         "文档提取测试点": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_云文档分析.Kdocs_多阶段生成回答),
+            "Function": HotReload(Reader_自定义插件流程.Reader_多阶段生成回答),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
                 "开启OCR": {"llm_model": 'gemini-pro-vision'},
                 "提示词分类": "插件定制",
                 '用例下标排序': None,
-                "阶段性产出": [{
+                "定制化流程": [{
                     "提示词": "提取文档测试点"
                 },
                 ],
@@ -415,16 +440,16 @@ def get_functions_云文档处理():
         "需求文档转测试用例": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_云文档分析.Kdocs_多阶段生成回答),
+            "Function": HotReload(Reader_自定义插件流程.Reader_多阶段生成回答),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
                 "开启OCR": {"llm_model": 'gemini-pro-vision'},
                 "提示词分类": "插件定制",
                 '用例下标排序': None,
-                "阶段性产出": [{
+                "定制化流程": [{
                     "提示词": "文档转测试用例",
-                    "调用方法": "写入测试用例",
+                    "保存结果": "写入测试用例",
                 }],
                 "写入指定模版": "./docs/template/测试用例模版.xlsx",
                 "写入指定Sheet": "测试要点",
@@ -434,19 +459,19 @@ def get_functions_云文档处理():
         "接口文档转测试用例": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_云文档分析.Kdocs_多阶段生成回答),
+            "Function": HotReload(Reader_自定义插件流程.Reader_多阶段生成回答),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
                 "开启OCR": {"llm_model": 'gemini-pro-vision'},
                 "提示词分类": "插件定制",
                 '用例下标排序': None,
-                "阶段性产出": [{
+                "定制化流程": [{
                     "提示词": "文档转Markdown_分割",
-                    "调用方法": "结果写入Markdown"
+                    "保存结果": "结果写入Markdown"
                 }, {
                     "提示词": "接口文档转测试用例",
-                    "调用方法": "写入测试用例",
+                    "保存结果": "写入测试用例",
                 }
                 ],
                 "写入指定模版": "./docs/template/接口测试用例模板.xlsx",
@@ -457,16 +482,16 @@ def get_functions_云文档处理():
         "测试用例检查优化": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_云文档分析.Kdocs_多阶段生成回答),
+            "Function": HotReload(Reader_自定义插件流程.Reader_多阶段生成回答),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
                 "开启OCR": {"llm_model": 'gemini-pro-vision'},
                 "提示词分类": "插件定制",
                 '用例下标排序': None,
-                "阶段性产出": [{
+                "定制化流程": [{
                     "提示词": "三方评审补充用例场景",
-                    "调用方法": "补充测试用例",
+                    "保存结果": "补充测试用例",
                 }
                 ],
                 "写入指定模版": "./docs/template/接口测试用例模板.xlsx",
@@ -478,15 +503,15 @@ def get_functions_云文档处理():
         "文档需求分析问答": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_云文档分析.Kdocs_多阶段生成回答),
+            "Function": HotReload(Reader_自定义插件流程.Reader_多阶段生成回答),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
                 "开启OCR": {"llm_model": 'gemini-pro-vision'},
                 "提示词分类": "插件定制",
                 '用例下标排序': None,
-                "上下文处理": True,
-                "阶段性产出": [{
+                "上下文关联": True,
+                "定制化流程": [{
                     "提示词": "需求分析对话"}
                 ],
                 "处理文件类型": reader_files
@@ -495,16 +520,16 @@ def get_functions_云文档处理():
         "文档转流程图": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_云文档分析.Kdocs_多阶段生成回答),
+            "Function": HotReload(Reader_自定义插件流程.Reader_多阶段生成回答),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
                 "开启OCR": {"llm_model": 'gemini-pro-vision'},
                 "提示词分类": "插件定制",
                 '用例下标排序': None,
-                "阶段性产出": [{
+                "定制化流程": [{
                     "提示词": "文档转Markdown",
-                    "调用方法": "Markdown转换为流程图",
+                    "保存结果": "Markdown转换为流程图",
                 }
                 ],
                 "处理文件类型": reader_files
@@ -514,31 +539,26 @@ def get_functions_云文档处理():
             "Color": "primary",
             "AsButton": True,
             "AdvancedArgs": True,
-            "Function": HotReload(KDOCS_云文档分析.Kdocs_多阶段生成回答),
+            "Function": HotReload(Reader_自定义插件流程.Reader_多阶段生成回答),
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Info": "批量总结音频或视频 | 输入参数为路径",
             "Parameters": {
                 "开启OCR": {"llm_model": 'gemini-pro-vision'},
                 "提示词分类": "插件定制",
                 '用例下标排序': None,
-                "上下文处理": True,
-                "阶段性产出": [{
+                "上下文关联": True,
+                "定制化流程": [{
                     "提示词": "总结摘要提取",
-                    "调用方法": "Markdown转换为流程图",
+                    "保存结果": "Markdown转换为流程图",
                 }
                 ],
                 "处理文件类型": ['.mp4', '.m4a', '.wav', '.mpga', '.mpeg', '.mp3', '.avi', '.mkv', '.flac', '.aac'],
             }
         },
-        "批量理解流程图、图片": {
-            "Color": "primary",
-            "AsButton": True,
-            "Function": HotReload(KDOCS_流程图_图片分析.批量分析流程图或图片),
-        },
         "需求文档转测试用例(全配置)": {
             "Color": "primary",
             "AsButton": True,
-            "Function": HotReload(KDOCS_云文档分析.Kdocs_多阶段生成回答),
+            "Function": HotReload(Reader_自定义插件流程.Reader_多阶段生成回答),
             "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
             "ArgsReminder": desc,  # 高级参数输入区的显示提示
             "Parameters": {
@@ -547,17 +567,17 @@ def get_functions_云文档处理():
                 "多模型并行": "gpt-3.5-turbo-16k-0613&",
                 "自动录入知识库": {'个人知识库': '需求文稿'},
                 '用例下标排序': None,
-                "阶段性产出": [{
+                "定制化流程": [{
                     "提示词": "文档转测试用例",
-                    "调用方法": "写入测试用例"
+                    "保存结果": "写入测试用例"
                 }, {
                     "提示词": "三方评审补充用例场景",
-                    "调用方法": "补充测试用例",
+                    "保存结果": "补充测试用例",
                     "关联知识库": {
                         '业务知识库': {"查询列表": ["需求文稿"], "知识库提示词": "补充需求文档内容"},
                     }}
                 ],
-                "上下文处理": False,
+                "上下文关联": False,
                 "写入指定模版": "./docs/template/测试用例模版.xlsx",
                 "写入指定Sheet": "测试要点",
                 "处理文件类型": reader_files

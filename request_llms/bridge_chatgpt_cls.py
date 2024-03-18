@@ -178,6 +178,8 @@ class GPTChatInit:
                         return self.generate_messages(inputs, llm_kwargs, history, system_prompt, stream)
                     yield error_meg, error_meg, error_meg
                     break
+        if not gpt_bro_result:
+            print(chunk_content)
 
 
 def msg_handler_history(inputs, history, llm_kwargs, chunk_decoded):

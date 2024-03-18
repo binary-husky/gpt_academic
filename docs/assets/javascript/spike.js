@@ -393,7 +393,9 @@ function fillInputsFromCache() {
             const inputElement = input_storage_mapping[key];
             const cachedValue = localStorage.getItem(key);
             if (cachedValue && cachedValue !== 'undefined') {
-                inputElement.value = cachedValue;
+                inputElement.value = cachedValue;                // 触发输入事件
+                const event = new Event('input', { bubbles: true });
+                inputElement.dispatchEvent(event);
             }
         }
     }

@@ -102,6 +102,12 @@ def switch_latex_output(select):
 
 
 # TODO < -------------------------------- 对话函数注册区 ----------------------------------->
+def update_models(inputs: list, visions: list, projects: list):
+    inputs.extend(visions)
+    inputs.extend(projects)
+    return inputs
+
+
 def update_chat(llm_s):
     return gr.update(avatar_images=func_box.get_avatar_img(llm_s))
 
@@ -115,7 +121,7 @@ def sm_upload_clear(cookie: dict):
 
 def generate_random_string(string):
     if len(string) > 20:
-        index = random.randint(10, len(string)-10)
+        index = random.randint(10, len(string) - 10)
         string = string[index:]
     return string[:25]
 
