@@ -1,231 +1,26 @@
-## ===================================================
-# docker-compose.yml
-## ===================================================
-# 1. 请在以下方案中选择任意一种，然后删除其他的方案
-# 2. 修改你选择的方案中的environment环境变量，详情请见github wiki或者config.py
-# 3. 选择一种暴露服务端口的方法，并对相应的配置做出修改：
-    # 【方法1: 适用于Linux，很方便，可惜windows不支持】与宿主的网络融合为一体，这个是默认配置
-    # network_mode: "host"
-    # 【方法2: 适用于所有系统包括Windows和MacOS】端口映射，把容器的端口映射到宿主的端口（注意您需要先删除network_mode: "host"，再追加以下内容）
-    # ports:
-    #   - "12345:12345"  # 注意！12345必须与WEB_PORT环境变量相互对应
-# 4. 最后`docker-compose up`运行
-# 5. 如果希望使用显卡，请关注 LOCAL_MODEL_DEVICE 和 英伟达显卡运行时 选项
-## ===================================================
-# 1. Please choose one of the following options and delete the others.
-# 2. Modify the environment variables in the selected option, see GitHub wiki or config.py for more details.
-# 3. Choose a method to expose the server port and make the corresponding configuration changes:
-    # [Method 1: Suitable for Linux, convenient, but not supported for Windows] Fusion with the host network, this is the default configuration
-    # network_mode: "host"
-    # [Method 2: Suitable for all systems including Windows and MacOS] Port mapping, mapping the container port to the host port (note that you need to delete network_mode: "host" first, and then add the following content)
-    # ports:
-    # - "12345: 12345" # Note! 12345 must correspond to the WEB_PORT environment variable.
-# 4. Finally, run `docker-compose up`.
-# 5. If you want to use a graphics card, pay attention to the LOCAL_MODEL_DEVICE and Nvidia GPU runtime options.
-## ===================================================
-
-## ===================================================
-## 【方案零】 部署项目的全部能力（这个是包含cuda和latex的大型镜像。如果您网速慢、硬盘小或没有显卡，则不推荐使用这个）
-## ===================================================
 version: '3'
 services:
   gpt_academic_full_capability:
-    image: ghcr.io/binary-husky/gpt_academic_with_all_capacity:master
+    image: "ghcr.io/binary-husky/gpt_academic_with_all_capacity:master"
     environment:
-      # 请查阅 `config.py`或者 github wiki 以查看所有的配置信息
-      API_KEY:                  '  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                        '
-      # USE_PROXY:                '  True                                                                       '
-      # proxies:                  '  { "http": "http://localhost:10881", "https": "http://localhost:10881", }   '
-      LLM_MODEL:                '  gpt-3.5-turbo                                                              '
-      AVAIL_LLM_MODELS:         '  ["gpt-3.5-turbo", "gpt-4", "qianfan", "sparkv2", "spark", "chatglm"]       '
-      BAIDU_CLOUD_API_KEY :     '  bTUtwEAveBrQipEowUvDwYWq                                                   '
-      BAIDU_CLOUD_SECRET_KEY :  '  jqXtLvXiVw6UNdjliATTS61rllG8Iuni                                           '
-      XFYUN_APPID:              '  53a8d816                                                                   '
-      XFYUN_API_SECRET:         '  MjMxNDQ4NDE4MzM0OSNlNjQ2NTlhMTkx                                           '
-      XFYUN_API_KEY:            '  95ccdec285364869d17b33e75ee96447                                           '
-      ENABLE_AUDIO:             '  False                                                                      '
-      DEFAULT_WORKER_NUM:       '  20                                                                         '
-      WEB_PORT:                 '  12345                                                                      '
-      ADD_WAIFU:                '  False                                                                      '
-      ALIYUN_APPKEY:            '  RxPlZrM88DnAFkZK                                                           '
-      THEME:                    '  Chuanhu-Small-and-Beautiful                                                '
-      ALIYUN_ACCESSKEY:         '  LTAI5t6BrFUzxRXVGUWnekh1                                                   '
-      ALIYUN_SECRET:            '  eHmI20SVWIwQZxCiTD2bGQVspP9i68                                             '
-      # LOCAL_MODEL_DEVICE:       '  cuda                                                                       '
-
-    # 加载英伟达显卡运行时
-    # runtime: nvidia
-    # deploy:
-    #     resources:
-    #       reservations:
-    #         devices:
-    #           - driver: nvidia
-    #             count: 1
-    #             capabilities: [gpu]
-
-    # 【WEB_PORT暴露方法1: 适用于Linux】与宿主的网络融合
-    network_mode: "host"
-
-    # 【WEB_PORT暴露方法2: 适用于所有系统】端口映射
-    # ports:
-    #   - "12345:12345"  # 12345必须与WEB_PORT相互对应
-
-    # 启动容器后，运行main.py主程序
-    command: >
-      bash -c "python3 -u main.py"
-
-
-
-
-## ===================================================
-## 【方案一】 如果不需要运行本地模型（仅 chatgpt, azure, 星火, 千帆, claude 等在线大模型服务）
-## ===================================================
-version: '3'
-services:
-  gpt_academic_nolocalllms:
-    image: ghcr.io/binary-husky/gpt_academic_nolocal:master # (Auto Built by Dockerfile: docs/GithubAction+NoLocal)
-    environment:
-      # 请查阅 `config.py` 以查看所有的配置信息
-      API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                                            '
-      USE_PROXY:                '    True                                                                                           '
-      proxies:                  '    { "http": "socks5h://localhost:10880", "https": "socks5h://localhost:10880", }                 '
-      LLM_MODEL:                '    gpt-3.5-turbo                                                                                  '
-      AVAIL_LLM_MODELS:         '    ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "sparkv2", "qianfan"]         '
-      WEB_PORT:                 '    22303                                                                                          '
-      ADD_WAIFU:                '    True                                                                                           '
-      # THEME:                    '    Chuanhu-Small-and-Beautiful                                                                    '
-      # DEFAULT_WORKER_NUM:       '    10                                                                                             '
-      # AUTHENTICATION:           '    [("username", "passwd"), ("username2", "passwd2")]                                             '
-
-    # 与宿主的网络融合
-    network_mode: "host"
-
-    # 不使用代理网络拉取最新代码
-    command: >
-      bash -c "python3 -u main.py"
-
-
-### ===================================================
-### 【方案二】 如果需要运行ChatGLM + Qwen + MOSS等本地模型
-### ===================================================
-version: '3'
-services:
-  gpt_academic_with_chatglm:
-    image: ghcr.io/binary-husky/gpt_academic_chatglm_moss:master  # (Auto Built by Dockerfile: docs/Dockerfile+ChatGLM)
-    environment:
-      # 请查阅 `config.py` 以查看所有的配置信息
-      API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                                            '
-      USE_PROXY:                '    True                                                                                           '
-      proxies:                  '    { "http": "socks5h://localhost:10880", "https": "socks5h://localhost:10880", }                 '
-      LLM_MODEL:                '    gpt-3.5-turbo                                                                                  '
-      AVAIL_LLM_MODELS:         '    ["chatglm", "qwen", "moss", "gpt-3.5-turbo", "gpt-4", "newbing"]                               '
-      LOCAL_MODEL_DEVICE:       '    cuda                                                                                           '
-      DEFAULT_WORKER_NUM:       '    10                                                                                             '
-      WEB_PORT:                 '    12303                                                                                          '
-      ADD_WAIFU:                '    True                                                                                           '
-      # AUTHENTICATION:           '    [("username", "passwd"), ("username2", "passwd2")]                                             '
-
-    # 显卡的使用，nvidia0指第0个GPU
-    runtime: nvidia
-    devices:
-      - /dev/nvidia0:/dev/nvidia0
-
-    # 与宿主的网络融合
-    network_mode: "host"
-    command: >
-      bash -c "python3 -u main.py"
-
-    # P.S. 通过对 command 进行微调，可以便捷地安装额外的依赖
-    # command: >
-    #   bash -c "pip install -r request_llms/requirements_qwen.txt && python3 -u main.py"
-
-### ===================================================
-### 【方案三】 如果需要运行ChatGPT + LLAMA + 盘古 + RWKV本地模型
-### ===================================================
-version: '3'
-services:
-  gpt_academic_with_rwkv:
-    image: ghcr.io/binary-husky/gpt_academic_jittorllms:master
-    environment:
-      # 请查阅 `config.py` 以查看所有的配置信息
-      API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx,fkxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  '
-      USE_PROXY:                '    True                                                                                           '
-      proxies:                  '    { "http": "socks5h://localhost:10880", "https": "socks5h://localhost:10880", }                 '
-      LLM_MODEL:                '    gpt-3.5-turbo                                                                                  '
-      AVAIL_LLM_MODELS:         '    ["gpt-3.5-turbo", "newbing", "jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]   '
-      LOCAL_MODEL_DEVICE:       '    cuda                                                                                           '
-      DEFAULT_WORKER_NUM:       '    10                                                                                             '
-      WEB_PORT:                 '    12305                                                                                          '
-      ADD_WAIFU:                '    True                                                                                           '
-      # AUTHENTICATION:           '    [("username", "passwd"), ("username2", "passwd2")]                                             '
-
-    # 显卡的使用，nvidia0指第0个GPU
-    runtime: nvidia
-    devices:
-      - /dev/nvidia0:/dev/nvidia0
-
-    # 与宿主的网络融合
-    network_mode: "host"
-
-    # 不使用代理网络拉取最新代码
-    command: >
-      python3 -u main.py
-
-
-## ===================================================
-## 【方案四】 ChatGPT + Latex
-## ===================================================
-version: '3'
-services:
-  gpt_academic_with_latex:
-    image: ghcr.io/binary-husky/gpt_academic_with_latex:master  # (Auto Built by Dockerfile: docs/GithubAction+NoLocal+Latex)
-    environment:
-      # 请查阅 `config.py` 以查看所有的配置信息
-      API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                              '
-      USE_PROXY:                '    True                                                                             '
-      proxies:                  '    { "http": "socks5h://localhost:10880", "https": "socks5h://localhost:10880", }   '
-      LLM_MODEL:                '    gpt-3.5-turbo                                                                    '
-      AVAIL_LLM_MODELS:         '    ["gpt-3.5-turbo", "gpt-4"]                                                       '
-      LOCAL_MODEL_DEVICE:       '    cuda                                                                             '
-      DEFAULT_WORKER_NUM:       '    10                                                                               '
-      WEB_PORT:                 '    12303                                                                            '
-
-    # 与宿主的网络融合
-    network_mode: "host"
-
-    # 不使用代理网络拉取最新代码
-    command: >
-      bash -c "python3 -u main.py"
-
-
-## ===================================================
-## 【方案五】 ChatGPT + 语音助手 （请先阅读 docs/use_audio.md）
-## ===================================================
-version: '3'
-services:
-  gpt_academic_with_audio:
-    image: ghcr.io/binary-husky/gpt_academic_audio_assistant:master
-    environment:
-      # 请查阅 `config.py` 以查看所有的配置信息
-      API_KEY:                  '    fk195831-IdP0Pb3W6DCMUIbQwVX6MsSiyxwqybyS                        '
-      USE_PROXY:                '    False                                                            '
-      proxies:                  '    None                                                             '
-      LLM_MODEL:                '    gpt-3.5-turbo                                                    '
-      AVAIL_LLM_MODELS:         '    ["gpt-3.5-turbo", "gpt-4"]                                       '
-      ENABLE_AUDIO:             '    True                                                             '
-      LOCAL_MODEL_DEVICE:       '    cuda                                                             '
-      DEFAULT_WORKER_NUM:       '    20                                                               '
-      WEB_PORT:                 '    12343                                                            '
-      ADD_WAIFU:                '    True                                                             '
-      THEME:                    '    Chuanhu-Small-and-Beautiful                                      '
-      ALIYUN_APPKEY:            '    RoP1ZrM84DnAFkZK                                                 '
-      ALIYUN_TOKEN:             '    f37f30e0f9934c34a992f6f64f7eba4f                                 '
-      # (无需填写) ALIYUN_ACCESSKEY:         '    LTAI5q6BrFUzoRXVGUWnekh1                                         '
-      # (无需填写) ALIYUN_SECRET:            '    eHmI20AVWIaQZ0CiTD2bGQVsaP9i68                                   '
-
-    # 与宿主的网络融合
-    network_mode: "host"
-
-    # 不使用代理网络拉取最新代码
-    command: >
-      bash -c "python3 -u main.py"
+      API_KEY: 'sk-v4GyjBUplKxHqReW911540407626441bB916D2Ed85Fa3650'
+      USE_PROXY: 'False'
+      proxies: '{"http": "https://zmgpt.cc/v1", }'
+      LLM_MODEL: 'gpt-3.5-turbo'
+      AVAIL_LLM_MODELS: '["gpt-3.5-turbo", "gpt-4", "qianfan", "sparkv2", "spark", "chatglm"]'
+      BAIDU_CLOUD_API_KEY: 'bTUtwEAveBrQipEowUvDwYWq'
+      BAIDU_CLOUD_SECRET_KEY: 'jqXtLvXiVw6UNdjliATTS61rllG8Iuni'
+      XFYUN_APPID: '53a8d816'
+      XFYUN_API_SECRET: 'MjMxNDQ4NDE4MzM0OSNlNjQ2NTlhMTkx'
+      XFYUN_API_KEY: '95ccdec285364869d17b33e75ee96447'
+      ENABLE_AUDIO: 'False'
+      API_URL_REDIRECT: '{"https://api.openai.com/v1/chat/completions": "https://zmgpt.cc/v1/chat/completions" }'
+      DEFAULT_WORKER_NUM: '20'
+      WEB_PORT: '12345'
+      ADD_WAIFU: 'Ture'
+      ALIYUN_APPKEY: 'RxPlZrM88DnAFkZK'
+      THEME: 'Chuanhu-Small-and-Beautiful'
+      ALIYUN_ACCESSKEY: 'LTAI5t6BrFUzxRXVGUWnekh1'
+      ALIYUN_SECRET: 'eHmI20SVWIwQZxCiTD2bGQVspP9i68'
+  
+      # LOCAL_MODEL_DEVICE: 'cuda' # This line is a comment and should be adjusted or removed based on your needs.
