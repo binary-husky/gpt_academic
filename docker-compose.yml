@@ -3,7 +3,7 @@ services:
   gpt_academic_full_capability:
     image: "ghcr.io/binary-husky/gpt_academic_with_all_capacity:master"
     environment:
-      API_KEY: 'sk-v4GyjBUplKxHqReW911540407626441bB916D2Ed85Fa3650'
+      API_KEY: 'sk-v4GyjBUplKxHqReW911540407626441bB916d85Fa3650'
       USE_PROXY: 'False'
       proxies: '{"http": "https://zmgpt.cc/v1", }'
       LLM_MODEL: 'gpt-3.5-turbo'
