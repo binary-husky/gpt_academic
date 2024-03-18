@@ -14,17 +14,19 @@ from crazy_functions.reader_fns.project_feishu import _get_story, ProjectFeishu
 def Project_获取项目数据(user_input, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     if llm_kwargs['project_config'].get('project_user_key'):
         filter_time, unscheduled, un_issue = json_args_return(plugin_kwargs, ['筛选时间范围',
-                                                                    '筛选未排期需求', '筛选用例详情'], 7)
+                                                                    '筛选未排期需求', '筛选用例详情'], None)
         un_issue = un_issue or llm_kwargs.get('关联缺陷')
-        user_input = f"获取前后{filter_time}天的需求列表" + f"\n{user_input}" if user_input else ''
+        user_input = user_input if not user_input else f"获取前后{filter_time}天的需求列表" + f"\n{user_input}"
 
         project_status = get_fold_panel()
         user_key = llm_kwargs["project_config"].get("project_user_key")
-        gpt_result = project_status(f'正在努力爬取`{user_key[:5]}***{user_key[:-5]}`用户数据...')
+        header = llm_kwargs["project_config"].get("project_header")
+        gpt_result = project_status(f'正在努力爬取`{user_key[:5]}***{user_key[-5:]}`用户数据...')
         chatbot.append([user_input, gpt_result])
         yield from update_ui(chatbot, history)
 
-        story_list = ProjectFeishu('').get_home_story_list(filter_time, unscheduled, un_issue)
+        story_list = ProjectFeishu('', header=header, user_key=user_key
+                                   ).get_home_story_list(filter_time, unscheduled, un_issue)
         project_content = ''
         for api_name, story in story_list:
             chatbot[-1][1] = project_status(f'当前正在爬取`{api_name}`项目', project_content)

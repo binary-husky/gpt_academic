@@ -267,6 +267,8 @@ model_info.update({
         "token_cnt": get_token_num_gpt35,
     }
 })
+# 逆向支持
+model_info.update({f"nx-{i}": model_info[i] for i in model_info if i.startswith('gpt')})
 # Azure
 AZURE_ENDPOINT, AZURE_ENGINE_DICT, AZURE_URL_VERSION = get_conf('AZURE_ENDPOINT', 'AZURE_ENGINE_DICT',
                                                                 'AZURE_URL_VERSION')

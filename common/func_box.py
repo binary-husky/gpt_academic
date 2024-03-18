@@ -782,6 +782,18 @@ def is_within_days(input_date, difference=7):
     return delta <= difference
 
 
+def is_delayed_time(input_date, compare_time=None):
+    if input_date < 1000000000:
+        return True
+    if not compare_time:
+        compare_time = int(time.time() * 1000)
+    remaining_days = (input_date - compare_time) // (1000 * 60 * 60 * 24)
+    if remaining_days >= 0:
+        return remaining_days
+    else:
+        return False
+
+
 if __name__ == '__main__':
     txt = "authorization abc123, WPS-Sid: xyz456, Cookie: 789xyz 12312312421423他475675213123456776"
     print(encryption_str(txt))

@@ -6,7 +6,7 @@ import json
 import os
 
 import requests
-from common.func_box import split_parse_url, to_markdown_tabs, handle_timestamp, is_within_days
+from common.func_box import split_parse_url, to_markdown_tabs, handle_timestamp, is_within_days, is_delayed_time
 from common.toolbox import get_conf
 from pydantic import BaseModel
 from typing import AnyStr, Literal
@@ -126,7 +126,8 @@ class ProjectFeishu:
         response = requests.post(url, headers=self.headers, data=json.dumps(body), verify=False)
         return response.json()
 
-    def get_home_story_list(self, filter_time: int | bool = False, unscheduled='', un_issue=False, api_name: list = False):
+    def get_home_story_list(self, filter_time: int | bool = False, unscheduled='', un_issue=False,
+                            api_name: list = False):
         """获取所有项目首页需求列表"""
         story_list = []
         name_id_map = api_name if api_name else self.project_id_map
@@ -157,7 +158,9 @@ class ProjectFeishu:
                             if un_issue:
                                 issue_list = self.get_issue_items_list()
                                 if issue_list:
-                                    work_item.update({'当前缺陷总数以及分布情况': f"{len(issue_list)}\n" + _get_item_list(issue_list)})
+                                    work_item.update({
+                                        '当前缺陷总数以及分布情况': f"{len(issue_list)}\n" + _get_item_list(
+                                            issue_list)})
                             story_list.append(work_item)
             yield api_name, story_list
         yield 'done', story_list
@@ -211,9 +214,10 @@ class ProjectFeishu:
                     items_id_list.extend([i['work_item_id'] for i in i['work_items']])
         return items_id_list
 
-    def post_story_items(self):
+    def post_story_items(self, work_flow=False):
         """获取项目下的需求详情"""
         url = f'{self.base_url}/goapi/v2/projects/{self.project_id}/work_item/story/{self.story_id}'
+        url = url + f'/workflow' if work_flow else url
         response = requests.get(url, headers=self.headers, verify=False)
         return response.json()
 
@@ -278,31 +282,52 @@ class ProjectFeishu:
         return node_owner_info
 
     @staticmethod
-    def _node_schedules_extraction(story_items):
-        node_dict = {}
-        all_state_status = ''
-        sum_actual_times = 0
-        sum_points_times = 0
-        for i in story_items['node_schedules']:  # 节点详情
-            state_name = i['state_name'] + ':'
+    def _node_schedules_extraction(items_data):
+        task_status = {}
+        for i in items_data['node_schedules']:  # 节点详情
             subtasks = " -> ".join(
                 [f"【{t['name']}】-{t['schedules'][0]['points']}/人天" for t in i['subtasks'] if t['schedules']])
-            if i['points']:
-                node_points_time = i['points'] if i['points'] else 0
-                sum_points_times += node_points_time
-                node_actual_time = i['actual_work_time'] if i['actual_work_time'] else 0
-                sum_actual_times += node_actual_time
-                schedules_times = '\n节点预估工时: ' + str(node_points_time) + '/人天' if node_points_time else ''
-                schedules_times += '\t节点实消工时: ' + str(node_actual_time) + "/人天" if node_actual_time else ''
+            task_status[i['state_name']] = subtasks
+        return task_status
+
+    @staticmethod
+    def _node_work_flow_extraction(work_data, task_data):
+        node_flow_list = []
+        sum_actual_times = 0
+        sum_points_times = 0
+        for i in work_data['workflow']['states']:
+            flow_dict = {"节点名称": i['name']}
+            start_time = i['start_time']
+            if i.get('schedule'):
+                if i['schedule']['estimate_start_time']: start_time = i['schedule']['estimate_start_time']
+            end_time = i['finish_time']
+            if i.get('schedule'):
+                if i['schedule']['estimate_finish_time']: end_time = i['schedule']['estimate_finish_time']
+            flow_dict['预期完成时间'] = handle_timestamp(end_time) if end_time else '未排期'
+            if i['passed']:
+                flow_dict['节点状态'] = '已完成'
+                times = is_delayed_time(end_time, start_time)
+                if not isinstance(times, bool) and times != 0:
+                    flow_dict['节点状态'] += f'\t延期{times}天'
             else:
-                schedules_times = f"\n节点截止时间: {handle_timestamp(i['estimate_end_time'])}" if i[
-                    'estimate_end_time'] else ''
-            subtasks = "\n节点任务详情: " + subtasks if subtasks else ''
-            all_state_status += f"{state_name} {subtasks}{schedules_times}\n"
-        node_dict.update({'所有需求节点任务及耗时': all_state_status})
-        node_dict.update({'需求预计总工时': str(sum_points_times) + '/人天'})
-        node_dict.update({'当前所耗总工时': str(sum_actual_times) + '/人天'})
-        return node_dict
+                flow_dict['节点状态'] = ''
+                st, et = is_delayed_time(start_time), is_delayed_time(end_time)
+                if st:
+                    flow_dict['节点状态'] = f'未开始\n距离开始{st}天' if not isinstance(st, bool) else '未开始'
+                elif et:
+                    flow_dict['节点状态'] = f'未完成\n延期{et}天' if not isinstance(st, bool) else '未完成'
+            flow_dict['节点任务详情'] = task_data.get(i['name'], '')
+            points_times = sum([t['points'] for t in i['schedules'] if t.get('points')])
+            sum_points_times += points_times
+            actual_times = sum([t['actual_work_time'] for t in i['schedules'] if t.get('actual_work_time')])
+            sum_actual_times += actual_times
+            flow_dict['节点预估工时'] = f"{points_times} /人天"
+            flow_dict['节点实耗工时'] = f"{actual_times} /人天"
+            node_flow_list.append(flow_dict)
+        node_flow_dict = {'需求节点及状态': '\n' + _get_item_list(node_flow_list)}
+        node_flow_dict.update({'需求预计总工时': str(sum_points_times) + '/人天'})
+        node_flow_dict.update({'当前所耗总工时': str(sum_actual_times) + '/人天'})
+        return node_flow_dict
 
     def get_story_items_dict(self, schedules=True):
         """获取需求详情"""
@@ -310,8 +335,10 @@ class ProjectFeishu:
         story_items = self.post_story_items().get('data', {})
         story_dict = self._data_mapping_extraction(story_items, fields_map_dict)
         if schedules:
-            node_dict = self._node_schedules_extraction(story_items)
-            story_dict.update(node_dict)
+            task_dict = self._node_schedules_extraction(story_items)
+            work_flow = self.post_story_items(True).get('data', {})
+            node_work_task = self._node_work_flow_extraction(work_flow, task_dict)
+            story_dict.update(node_work_task)
         return story_dict
 
     def post_work_items(self, key, item_name, ids: list = None):
@@ -412,8 +439,8 @@ def get_project_from_limit(link_limit: list, project_folder, config: dict = {}):
 
 if __name__ == '__main__':
     # converter_project_md('', './')
-    feishu = ProjectFeishu('')
+    feishu = ProjectFeishu('https://project.feishu.cn/middleoffice/story/detail/3018218753?super_app=1&open_type=open_in_page&target_width=700&min_width=550&is_nearest_order=1&hyperlink_open_type=lark.open_in_browser')
     # # print(feishu._get_work_list(feishu.items_mapping[work_items.case_name]['type_key']))
     print(feishu.get_story_items_dict())
-    for i in feishu.get_home_story_list(7, '未排期', api_name=['middleoffice']):
-        print(i)
+    # for i in feishu.get_home_story_list(7, '未排期', api_name=['middleoffice']):
+    #     print(i)
