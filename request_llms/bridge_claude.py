@@ -232,6 +232,21 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                 print(error_msg)
                 raise RuntimeError("Json解析不合常规")
 
+def multiple_picture_types(image_paths):
+    """
+    根据图片类型返回image/jpeg, image/png, image/gif, image/webp，无法判断则返回image/jpeg
+    """
+    for image_path in image_paths:
+        if image_path.endswith('.jpeg') or image_path.endswith('.jpg'):
+            return 'image/jpeg'
+        elif image_path.endswith('.png'):
+            return 'image/png'
+        elif image_path.endswith('.gif'):
+            return 'image/gif'
+        elif image_path.endswith('.webp'):
+            return 'image/webp'
+    return 'image/jpeg'
+
 def generate_payload(inputs, llm_kwargs, history, system_prompt, image_paths):
     """
     整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
@@ -258,19 +273,16 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, image_paths):
                 messages[-1]['content'][0]['text'] = what_gpt_answer['content'][0]['text']
 
     if any([llm_kwargs['llm_model'] == model for model in Claude_3_Models]) and image_paths:
-        base64_images = []
-        for image_path in image_paths:
-            base64_images.append(encode_image(image_path))
         what_i_ask_now = {}
         what_i_ask_now["role"] = "user"
         what_i_ask_now["content"] = []
-        for base64_image in base64_images:
+        for image_path in image_paths:
             what_i_ask_now["content"].append({
                 "type": "image",
                 "source": {
                     "type": "base64",
-                    "media_type": "image/jpeg",
-                    "data": base64_image,
+                    "media_type": multiple_picture_types(image_paths),
+                    "data": encode_image(image_path),
                 }
             })
         what_i_ask_now["content"].append({"type": "text", "text": inputs})
