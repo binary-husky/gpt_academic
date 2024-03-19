@@ -121,15 +121,15 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
                 else:
                     if chunkjson and chunkjson['type'] == 'content_block_delta':
                         result += chunkjson['delta']['text']
-                    if not console_slience: print(chunkjson['delta']['text'], end='')
-                    if observe_window is not None:
-                        # 观测窗，把已经获取的数据显示出去
-                        if len(observe_window) >= 1:
-                            observe_window[0] += chunkjson['delta']['text']
-                        # 看门狗，如果超过期限没有喂狗，则终止
-                        if len(observe_window) >= 2:
-                            if (time.time()-observe_window[1]) > watch_dog_patience:
-                                raise RuntimeError("用户取消了程序。")
+                        print(chunkjson['delta']['text'], end='')
+                        if observe_window is not None:
+                            # 观测窗，把已经获取的数据显示出去
+                            if len(observe_window) >= 1:
+                                observe_window[0] += chunkjson['delta']['text']
+                            # 看门狗，如果超过期限没有喂狗，则终止
+                            if len(observe_window) >= 2:
+                                if (time.time()-observe_window[1]) > watch_dog_patience:
+                                    raise RuntimeError("用户取消了程序。")
             except Exception as e:
                 chunk = get_full_error(chunk, stream_response)
                 chunk_decoded = chunk.decode()
