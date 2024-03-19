@@ -8,7 +8,6 @@ pydantic==2.5.2
 protobuf==3.18
 transformers>=4.27.1
 scipdf_parser>=0.52
-anthropic>=0.18.1
 python-markdown-math
 pymdown-extensions
 websocket-client
