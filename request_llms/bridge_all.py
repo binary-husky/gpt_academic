@@ -62,7 +62,7 @@ openai_endpoint = "https://api.openai.com/v1/chat/completions"
 api2d_endpoint = "https://openai.api2d.net/v1/chat/completions"
 newbing_endpoint = "wss://sydney.bing.com/sydney/ChatHub"
 gemini_endpoint = "https://generativelanguage.googleapis.com/v1beta/models"
-claude_endpoint = "https://api.anthropic.com"
+claude_endpoint = "https://api.anthropic.com/v1/messages"
 yimodel_endpoint = "https://api.lingyiwanwu.com/v1/chat/completions"
 
 if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
