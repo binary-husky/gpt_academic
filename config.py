@@ -47,6 +47,7 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
 #   "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo-0125"
 #   "claude-3-sonnet-20240229","claude-3-opus-20240229", "claude-2.1", "claude-instant-1.2",
 #   "moss", "llama2", "chatglm_onnx", "internlm", "jittorllms_pangualpha", "jittorllms_llama",
+#   "yi-34b-chat-0205", "yi-34b-chat-200k"
 # ]
 # --- --- --- ---
 # 此外，为了更灵活地接入one-api多模型管理界面，您还可以在接入one-api时，
@@ -212,6 +213,10 @@ ANTHROPIC_API_KEY = ""
 MOONSHOT_API_KEY = ""
 
 
+# 零一万物(Yi Model) API KEY
+YIMODEL_API_KEY = ""
+
+
 # Mathpix 拥有执行PDF的OCR功能，但是需要注册账号
 MATHPIX_APPID = ""
 MATHPIX_APPKEY = ""
@@ -312,6 +317,9 @@ NUM_CUSTOM_BASIC_BTN = 4
 │
 ├── "glm-4", "glm-3-turbo", "zhipuai" 智谱AI大模型
 │   └── ZHIPUAI_API_KEY
+│
+├── "yi-34b-chat-0205", "yi-34b-chat-200k" 等零一万物(Yi Model)大模型
+│   └── YIMODEL_API_KEY
 │
 ├── "qwen-turbo" 等通义千问大模型
 │   └──  DASHSCOPE_API_KEY
