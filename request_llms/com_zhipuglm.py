@@ -8,7 +8,7 @@ from toolbox import get_conf, encode_image, get_pictures_list
 import logging, os
 
 
-def input_encode_handler(inputs, llm_kwargs):
+def input_encode_handler(inputs:str, llm_kwargs:dict):
     if llm_kwargs["most_recent_uploaded"].get("path"):
         image_paths = get_pictures_list(llm_kwargs["most_recent_uploaded"]["path"])
     md_encode = []
@@ -28,7 +28,7 @@ class ZhipuChatInit:
         self.zhipu_bro = ZhipuAI(api_key=ZHIPUAI_API_KEY)
         self.model = ''
 
-    def __conversation_user(self, user_input: str, llm_kwargs):
+    def __conversation_user(self, user_input: str, llm_kwargs:dict):
         if self.model not in ["glm-4v"]:
             return {"role": "user", "content": user_input}
         else:
@@ -41,7 +41,7 @@ class ZhipuChatInit:
                 what_i_have_asked['content'].append(img_d)
             return what_i_have_asked
 
-    def __conversation_history(self, history, llm_kwargs):
+    def __conversation_history(self, history:list, llm_kwargs:dict):
         messages = []
         conversation_cnt = len(history) // 2
         if conversation_cnt:
@@ -55,12 +55,14 @@ class ZhipuChatInit:
                 messages.append(what_gpt_answer)
         return messages
 
-    def __conversation_message_payload(self, inputs, llm_kwargs, history, system_prompt):
+    def __conversation_message_payload(self, inputs:str, llm_kwargs:dict, history:list, system_prompt:str):
         messages = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
         self.model = llm_kwargs['llm_model']
         messages.extend(self.__conversation_history(history, llm_kwargs))  # 处理 history
+        if inputs.strip() == "": # 处理空输入导致报错的问题 https://github.com/binary-husky/gpt_academic/issues/1640 提示 {"error":{"code":"1214","message":"messages[1]:content和tool_calls 字段不能同时为空"}
+            inputs = "."    # 空格、换行、空字符串都会报错，所以用最没有意义的一个点代替
         messages.append(self.__conversation_user(inputs, llm_kwargs))  # 处理用户对话
         response = self.zhipu_bro.chat.completions.create(
             model=self.model, messages=messages, stream=True,
@@ -70,7 +72,7 @@ class ZhipuChatInit:
         )
         return response
 
-    def generate_chat(self, inputs, llm_kwargs, history, system_prompt):
+    def generate_chat(self, inputs:str, llm_kwargs:dict, history:list, system_prompt:str):
         self.model = llm_kwargs['llm_model']
         response = self.__conversation_message_payload(inputs, llm_kwargs, history, system_prompt)
         bro_results = ''
