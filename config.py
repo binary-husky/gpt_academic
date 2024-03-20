@@ -63,7 +63,7 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
 # 默认baseURL(部分)：
 # openai_endpoint = "https://api.openai.com/v1/chat/completions"
 # gemini_endpoint = "https://generativelanguage.googleapis.com/v1beta/models"
-# claude_endpoint = "https://api.anthropic.com"
+# claude_endpoint = "https://api.anthropic.com/v1/messages"
 API_URL_REDIRECT = {}
 
 
