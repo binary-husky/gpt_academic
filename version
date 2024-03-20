@@ -1,5 +1,5 @@
 {
-  "version": 3.74,
+  "version": 3.73,
   "show_feature": true,
   "new_feature": "优化oneapi接入方法 <-> 接入月之暗面模型 <-> 支持切换多个智谱ai模型 <-> 用绘图功能增强部分插件 <-> 基础功能区支持自动切换中英提示词 <-> 支持Mermaid绘图库（让大模型绘制脑图）"
 }
