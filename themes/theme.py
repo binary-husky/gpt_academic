@@ -2,6 +2,8 @@ import pickle
 import base64
 import uuid
 from toolbox import get_conf
+import json
+
 
 """
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -54,15 +56,16 @@ def init_cookie(cookies):
 
 def to_cookie_str(d):
     # Pickle the dictionary and encode it as a string
-    pickled_dict = pickle.dumps(d)
-    cookie_value = base64.b64encode(pickled_dict).decode("utf-8")
+    pickled_dict = json.dumps(d)
+    cookie_value = base64.b64encode(pickled_dict.encode('utf8')).decode("utf-8")
     return cookie_value
 
 
 def from_cookie_str(c):
     # Decode the base64-encoded string and unpickle it into a dictionary
     pickled_dict = base64.b64decode(c.encode("utf-8"))
-    return pickle.loads(pickled_dict)
+    pickled_dict.decode('utf-8')
+    return json.loads(buffered_reader)
 
 
 """
