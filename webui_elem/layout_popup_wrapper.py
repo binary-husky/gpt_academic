@@ -414,7 +414,7 @@ class GptsStore:
                 gpts_tags = toolbox.get_conf('GPTS_DEFAULT_CLASSIFICATION')
                 gpts_tags = gpts_tags if gpts_tags else gpts['tag']
                 for tag in set(gpts_tags):
-                    self._tag_category_tab(tag, 'tag', [], False)
+                    self._tag_category_tab(tag, tag, [], False)
 
 
 class FakeComponents:
