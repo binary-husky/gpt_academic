@@ -69,16 +69,16 @@ function addInit() {
             return false;
         }
     }
-    chatbotObserver.observe(chatbotIndicator, { attributes: true, childList: true, subtree: true });
-    chatListObserver.observe(chatListIndicator, { attributes: true });
-    chatbotObserverMsg.observe(chatbotWrap, { attributes: true, childList: true, subtree: true });
-    chatbotObserverMsgBot.observe(chatbotWrap, { attributes: true, childList: true, subtree: true });
+    chatbotObserver.observe(chatbotIndicator, {attributes: true, childList: true, subtree: true});
+    chatListObserver.observe(chatListIndicator, {attributes: true});
+    chatbotObserverMsg.observe(chatbotWrap, {attributes: true, childList: true, subtree: true});
+    chatbotObserverMsgBot.observe(chatbotWrap, {attributes: true, childList: true, subtree: true});
     setDragUploader();
     return true;
 }
 
 function initialize() {
-    gradioObserver.observe(gradioApp(), { childList: true, subtree: true });
+    gradioObserver.observe(gradioApp(), {childList: true, subtree: true});
 
     loginUserForm = gradioApp().querySelector(".gradio-container > .main > .wrap > .panel > .form")
     gradioContainer = gradioApp().querySelector(".gradio-container");
@@ -170,7 +170,7 @@ function gradioApp() {
     const elem = elems.length == 0 ? document : elems[0];
 
     if (elem !== document) {
-        elem.getElementById = function(id) {
+        elem.getElementById = function (id) {
             return document.getElementById(id);
         };
     }
@@ -190,6 +190,7 @@ function showConfirmationDialog(a, file, c) {
 
 function selectHistory() {
     user_input_ta = user_input_tb.querySelector("textarea");
+    add_func_keydown(user_input_ta)
     add_func_paste(user_input_ta)
     if (user_input_ta) {
         disableSendBtn();
@@ -220,7 +221,7 @@ function selectHistory() {
                 }
                 user_input_ta.selectionStart = user_input_ta.value.length;
                 user_input_ta.selectionEnd = user_input_ta.value.length;
-                const input_event = new InputEvent("input", { bubbles: true, cancelable: true });
+                const input_event = new InputEvent("input", {bubbles: true, cancelable: true});
                 user_input_ta.dispatchEvent(input_event);
             } else if (event.code === "Enter") {
                 if (value) {
@@ -249,6 +250,7 @@ function checkModel() {
     var modelValue = model.value;
     checkGPT();
     checkXMChat();
+
     function checkGPT() {
         modelValue = model.value;
         if (modelValue.includes('gpt')) {
@@ -258,6 +260,7 @@ function checkModel() {
         }
         // console.log('gpt model checked')
     }
+
     function checkXMChat() {
         modelValue = model.value;
         if (modelValue.includes('xmchat')) {
@@ -267,8 +270,8 @@ function checkModel() {
         }
     }
 
-    model.addEventListener('blur', ()=>{
-        setTimeout(()=>{
+    model.addEventListener('blur', () => {
+        setTimeout(() => {
             checkGPT();
             checkXMChat();
         }, 100);
@@ -288,6 +291,7 @@ function toggleDarkMode(isEnabled) {
         document.body.style.backgroundColor = "";
     }
 }
+
 function adjustDarkMode() {
     const savedPreference = localStorage.getItem('darkMode');
     const darkModeQuery = window.matchMedia("(prefers-color-scheme: dark)");
@@ -305,6 +309,7 @@ function adjustDarkMode() {
         toggleDarkMode(e.target.checked);
     });
 }
+
 function btnToggleDarkMode() {
     apSwitch.checked = !apSwitch.checked;
     toggleDarkMode(apSwitch.checked);
@@ -321,6 +326,7 @@ function setScrollShadow() {
     toolboxTabs.forEach((tab) => {
         toolboxScrollWidth += tab.offsetWidth; // 获取按钮宽度并累加
     });
+
     function adjustScrollShadow() {
         if (toolboxScroll.scrollLeft > 0) {
             toolboxScroll.classList.add('scroll-shadow-left');
@@ -334,6 +340,7 @@ function setScrollShadow() {
             toolboxScroll.classList.remove('scroll-shadow-right');
         }
     }
+
     toolboxScroll.addEventListener('scroll', () => {
         adjustScrollShadow();
     });
@@ -381,9 +388,10 @@ function setChatbotHeight() {
         }
     }
 }
+
 function setChatbotScroll() {
     var scrollHeight = chatbotWrap.scrollHeight;
-    chatbotWrap.scrollTo(0,scrollHeight)
+    chatbotWrap.scrollTo(0, scrollHeight)
 }
 
 function clearChatbot() {
@@ -422,6 +430,7 @@ function chatbotContentChanged(attempt = 1, force = false) {
     }
     // 理论上是不需要多次尝试执行的，可惜gradio的bug导致message可能没有渲染完毕，所以尝试500ms后再次执行
 }
+
 var chatbotObserver = new MutationObserver(() => {
     chatbotContentChanged(1);
     if (chatbotIndicator.classList.contains('hide')) {
@@ -460,12 +469,12 @@ window.addEventListener("DOMContentLoaded", function () {
     historyLoaded = false;
 });
 
-window.addEventListener('resize', ()=>{
+window.addEventListener('resize', () => {
     // setChatbotHeight();
     updateVH();
     windowWidth = window.innerWidth;
     setPopupBoxPosition();
-    adjustSide(); 
+    adjustSide();
 });
 window.addEventListener('orientationchange', (event) => {
     updateVH();
@@ -473,7 +482,9 @@ window.addEventListener('orientationchange', (event) => {
     setPopupBoxPosition();
     adjustSide();
 });
-window.addEventListener('scroll', ()=>{setPopupBoxPosition();});
+window.addEventListener('scroll', () => {
+    setPopupBoxPosition();
+});
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", adjustDarkMode);
 
 // console suprise
@@ -486,11 +497,13 @@ var styleDesc1 = `
 font-size: 12px;
 font-family: ui-monospace, monospace;
 `
+
 function makeML(str) {
     let l = new String(str)
     l = l.substring(l.indexOf("/*") + 3, l.lastIndexOf("*/"))
     return l
 }
+
 let ChuanhuInfo = function () {
     /* 
    ________                      __             ________          __ 
@@ -507,5 +520,5 @@ let description = `
 GitHub repository: [https://github.com/GaiZhenbiao/ChuanhuChatGPT]\n
 Enjoy our project!\n
 `
-console.log(`%c${makeML(ChuanhuInfo)}`,styleTitle1);
+console.log(`%c${makeML(ChuanhuInfo)}`, styleTitle1);
 console.log(`%c${description}`, styleDesc1);

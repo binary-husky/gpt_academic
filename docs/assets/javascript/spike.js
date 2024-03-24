@@ -175,7 +175,22 @@ function add_func_paste(input) {
         });
     }
 }
-
+function add_func_keydown(event) {
+    user_input_ta.addEventListener('keydown', (event) => {
+        if (!chuanhuBody.querySelector('.chatbot-full-width')) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                // 在光标位置插入换行符
+                const start = user_input_ta.selectionStart;
+                const end = user_input_ta.selectionEnd;
+                user_input_ta.value = user_input_ta.value.substring(0, start) + '\n' + user_input_ta.value.substring(end);
+                user_input_ta.selectionStart = user_input_ta.selectionEnd = start + 1;
+                // 触发 input 事件,更新 UI
+                user_input_ta.dispatchEvent(new Event('input'));
+            }
+        }
+    })
+}
 async function paste_upload_files(files) {
     uploadInputElement = uploadIndexFileElement.querySelector("input[type=file]");
     let totalSizeMb = 0
