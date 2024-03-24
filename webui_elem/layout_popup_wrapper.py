@@ -16,8 +16,7 @@ get_html = func_box.get_html
 def popup_title(txt):
     with gr.Row():
         gr.Markdown(txt)
-        gr.HTML(get_html("close_btn.html").format(
-            obj="box"), elem_classes="close-btn")
+        gr.HTML(get_html("close_btn.html").format(obj="box"), elem_classes="close-btn")
 
 
 class Settings:
@@ -182,7 +181,7 @@ class Prompt:
                         self.pro_new_btn = gr.Button("保存提示词", variant="primary", size='sm')
 
     def _draw_tabs_masks(self):
-        with gr.TabItem('Prompt Masks 🎭', id='masks'):
+        with gr.TabItem('自定义对话 🎭', id='masks'):
             def_sys = i18n('你是一个xxx角色，你会xxx技能，你将按照xxx要求，回答我的问题')
             self.masks_dataset = gr.Dataframe(value=[['system', def_sys]], datatype='str',
                                               headers=['role', 'content'], col_count=(2, 'fixed'),
@@ -192,6 +191,7 @@ class Prompt:
             self.masks_clear_btn = gr.Button(value='Clear All', size='sm', elem_id='mk_clear')
             with gr.Row():
                 with gr.Column(elem_classes='column_left'):
+                    gr.Markdown('> user or assistant 为空时，不会加入对话记录')
                     with gr.Accordion('Chatbot Preview', open=False):
                         self.mask_preview_chat = gr.Chatbot(label='', show_label=False)
                     self.mask_status = gr.Markdown(value='')
@@ -384,12 +384,43 @@ class Prompt:
                 self._draw_popup_training()
 
 
+class GptsStore:
+
+    def _tag_category_tab(self, tab_title, key, gpts_samples, if_search):
+        with gr.TabItem(tab_title, id=key) as tab_select:
+            if if_search:
+                self.gpts_search_input = gr.Textbox('', placeholder='GPTs名称、介绍', show_label=False)
+            else:
+                self.gpts_search_input = gr.State()
+            self.gpts_tags_mapping[key] = {
+                'data_set': gr.Dataset(components=[gr.HTML(visible=False)], visible=True,
+                                       elem_id='gpts-data-set', samples_per_page=10,
+                                       samples=gpts_samples, type='index', container=False),
+                "tab": tab_select,
+                "search": self.gpts_search_input}
+            self.gpts_samples_mapping[key] = gr.State(gpts_samples)
+
+    def draw_popup_gpts(self):
+        from common.api_server.gpts_store import get_gpts, gpts_groups_samples
+        gpts = get_gpts()
+        gpts_samples = gpts_groups_samples(gpts['gpts'])
+        with gr.Box(elem_id="gpts-store-select"):
+            popup_title("### " + i18n(f"GPTs Store"))
+            self.gpts_tags_mapping = {}
+            self.gpts_samples_mapping = {}
+            with gr.Tabs(elem_id='store-tabs') as self.gpts_store_tabs:
+                self._tag_category_tab('🔥热门应用', '热门应用', gpts_samples, False)
+                self._tag_category_tab('🔍关键词搜索', '关键词搜索', [], True)
+                for tag in set(gpts['tag']):
+                    self._tag_category_tab(tag, 'tag', [], False)
+
+
 class FakeComponents:
 
     def __init__(self):
         pass
 
-    def draw_popup_fakec(self):
+    def draw_popup_fake(self):
         with gr.Box(elem_id="fake-gradio-components", visible=False):
             self.updateChuanhuBtn = gr.Button(
                 visible=False, elem_classes="invisible-btn", elem_id="update-chuanhu-btn")

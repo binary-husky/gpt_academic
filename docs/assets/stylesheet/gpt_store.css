@@ -1,0 +1,91 @@
+#gpts-data-set {
+    overflow: unset !important;
+}
+#gpts-data-set .gallery-item {
+    overflow: unset !important;
+}
+#gpts-data-set .label {
+    display: none;
+}
+#gpts-store-btn {
+    max-width: 50px !important;
+    max-height: 50px !important;
+    display: ruby !important;
+    border-radius: 20%;
+    margin-top: 5px;
+    margin-right: 20px;
+}
+#gpts-store-btn:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* 悬浮时增加阴影效果 */
+}
+.gpts-container {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 5px;
+    box-sizing: border-box;
+    max-width: 315px;
+    max-height: 100px;
+}
+
+.gpts-logo {
+    flex: 0 0 30%;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.gpts-logo:hover {
+    transform: scale(1.2);
+}
+
+.gpts-logo img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 50%;
+}
+.gpts-logo-image {
+    min-width: 90px;
+    min-height: 90px;
+}
+.gpts-content {
+  flex: 0 0 70%;
+  padding-left: 20px;
+  text-align: left; /* 添加此行 */
+}
+.gpts-title {
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-size: 18px;
+    font-weight: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.gpts-description {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #666;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.gpts-meta {
+    font-size: 12px;
+}
+
+.gpts-meta span {
+    margin-right: 10px;
+}
+.gpts-popularity {
+    color: #00ab46 !important;
+}
+
+.gpts-comments {
+    color: #cbb22f !important;
+}

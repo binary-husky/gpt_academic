@@ -9,7 +9,7 @@ import time
 import requests
 
 from common.func_box import extract_link_pf, valid_img_extensions, batch_encode_image
-from common.toolbox import get_conf, select_api_key, is_any_api_key, trimmed_format_exc, update_ui, clip_history
+from common.toolbox import get_conf, select_api_key, is_any_api_key, trimmed_format_exc, update_ui, clip_history, gpt_model_select
 from request_llms.bridge_chatgpt import verify_endpoint
 
 proxies, TIMEOUT_SECONDS, MAX_RETRY, API_ORG, AZURE_CFG_ARRAY, API_URL_REDIRECT = \
@@ -71,7 +71,9 @@ class GPTChatInit:
         """
         整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
         """
-        self.llm_model = llm_kwargs['llm_model']
+        from request_llms.bridge_all import model_info
+        llm_kwargs['llm_model'], self.llm_model = gpt_model_select(llm_kwargs['llm_model'], model_info)
+
         if not is_any_api_key(llm_kwargs['api_key']):
             raise AssertionError(
                 "你提供了错误的API_KEY。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。")
@@ -106,7 +108,6 @@ class GPTChatInit:
                 "gpt-3.5-turbo-16k-0613",
                 "gpt-3.5-turbo-0301",
             ])
-
         payload = {
             "model": self.llm_model,
             "messages": messages,
@@ -130,7 +131,8 @@ class GPTChatInit:
     def _check_endpoint(llm_kwargs):
         # 检查endpoint是否合法
         from request_llms.bridge_all import model_info
-        return verify_endpoint(model_info[llm_kwargs['llm_model']]['endpoint'])
+        model, _ = gpt_model_select(llm_kwargs['llm_model'], model_info)
+        return verify_endpoint(model_info[model]['endpoint'])
 
     def _analysis_content(self, chuck):
         chunk_decoded = chuck.decode("utf-8")
@@ -265,8 +267,3 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
 
 if __name__ == '__main__':
     test = GPTChatInit()
-    geng = test.generate_messages('', {'llm_model': 'gpt-4-vision-preview'},
-                                  [], '', True)
-
-    for g in geng:
-        print(g)

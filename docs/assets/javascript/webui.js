@@ -1,7 +1,7 @@
 function addHideBoxClassExcept(element) {
     chuanhuPopup.classList.add('showBox');
     popupWrapper.classList.add('showBox');
-    let boxes = [settingBox, searchBox, promptBox]
+    let boxes = [settingBox, searchBox, promptBox, gptsStoreBox]
     for (let box of boxes) {
         if (box !== element) {
             box.classList.add('hideBox');
@@ -21,6 +21,9 @@ function openSettingBox() {
 
 function openSearch() {
     addHideBoxClassExcept(searchBox)
+}
+function openGptsStore() {
+    addHideBoxClassExcept(gptsStoreBox)
 }
 
 function open_treasure_chest() {

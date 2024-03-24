@@ -42,10 +42,10 @@ get_html = func_box.get_html
 from webui_elem.layout_history_menu import LeftElem
 from webui_elem.layout_chatbot_area import ChatbotElem
 from webui_elem.layout_tools_menu import RightElem
-from webui_elem.layout_popup_wrapper import Settings, Config, FakeComponents, AdvancedSearch, Prompt
+from webui_elem.layout_popup_wrapper import Settings, Config, FakeComponents, AdvancedSearch, Prompt, GptsStore
 
 
-class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents, AdvancedSearch, Prompt):
+class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents, AdvancedSearch, Prompt, GptsStore):
 
     def __init__(self):
         super().__init__()
@@ -56,8 +56,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         # self.__gr_url = gr.State(self.__url)
 
     def signals_sm_btn(self):
-        self.model_select_dropdown.select(func_signals.update_chat, inputs=[self.model_select_dropdown],
-                                          outputs=[self.chatbot])
+        self.model_select_dropdown.select(func_signals.update_chat, inputs=[self.model_select_dropdown, self.cookies],
+                                          outputs=[self.chatbot, self.cookies])
         self.sm_upload.upload(on_file_uploaded, [self.sm_upload, self.chatbot, self.user_input, self.cookies],
                               [self.chatbot, self.user_input])
         self.sm_upload.clear(fn=func_signals.sm_upload_clear,
@@ -116,6 +116,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         self.pro_del_btn.click(func_signals.prompt_delete,
                                inputs=[self.pro_name_txt, self.pro_fp_state, self.prompt_cls_select],
                                outputs=[self.pro_func_prompt, self.pro_fp_state, self.spike_toast])
+        self.pro_new_btn.click(None, None, None, _js='()=>{closeBtnClick();}')
         self.pro_new_btn.click(fn=func_signals.prompt_save,
                                inputs=[self.pro_edit_txt, self.pro_name_txt, self.pro_fp_state, self.prompt_cls_select],
                                outputs=[self.pro_func_prompt, self.pro_fp_state, self.spike_toast])
@@ -134,6 +135,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         self.masks_del_btn.click(func_signals.prompt_delete,
                                  inputs=[self.masks_name_txt, self.pro_fp_state, self.mask_cls_select],
                                  outputs=[self.pro_func_prompt, self.pro_fp_state, self.spike_toast])
+        self.masks_new_btn.click(None, None, None, _js='()=>{closeBtnClick();}')
         self.masks_new_btn.click(fn=func_signals.prompt_save,
                                  inputs=[self.masks_dataset, self.masks_name_txt,
                                          self.pro_fp_state, self.mask_cls_select],
@@ -143,6 +145,26 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         self.reader_upload.upload(fn=func_signals.reader_analysis_output,
                                   inputs=[self.reader_upload, self.reader_choice],
                                   outputs=[self.reader_show, self.reader_copy, self.spike_toast])
+
+    def signals_gpts_store(self):
+        for tag in self.gpts_tags_mapping:
+            self.gpts_tags_mapping[tag]['tab'].select(
+                fn=func_signals.gpts_tag_select,
+                inputs=[gr.HTML(value='', visible=False), self.gpts_samples_mapping[tag]],
+                outputs=[self.gpts_tags_mapping[tag]['data_set'], self.gpts_samples_mapping[tag]],
+                _js="(a, b)=>{return gpts_tabs_select(a, b);}")
+
+            self.gpts_tags_mapping[tag]['data_set'].click(None, None, None, _js='()=>{closeBtnClick();}')
+            self.gpts_tags_mapping[tag]['data_set'].click(
+                fn=func_signals.gpts_select_model,
+                inputs=[self.gpts_tags_mapping[tag]['data_set'], self.gpts_samples_mapping[tag], self.cookies],
+                outputs=[self.model_select_dropdown, self.chatbot, self.cookies, self.spike_toast],
+            )
+        self.gpts_tags_mapping['关键词搜索']['search'].submit(
+            fn=func_signals.gpts_tag_select,
+            inputs=[self.gpts_tags_mapping['关键词搜索']['search'], self.gpts_samples_mapping['关键词搜索']],
+            outputs=[self.gpts_tags_mapping['关键词搜索']['data_set'], self.gpts_samples_mapping['关键词搜索']]
+        )
 
     def signals_plugin(self):
         from common.crazy_functional import crazy_fns_role, crazy_fns
@@ -340,7 +362,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                                               outputs=[self.status_display])
         self.historyMasksConverterBtn.click(func_signals.converter_history_masks,
                                             inputs=[self.chatbot, self.system_prompt], outputs=[self.masks_dataset]
-                                            ).then(lambda: gr.update('masks'),
+                                            ).then(lambda: gr.Tabs.update('masks'),
                                                    inputs=None, outputs=[self.treasure_bag_tab],
                                                    _js='()=>{open_treasure_chest();}')
         self.historySearchTextbox.submit(fn=func_signals.draw_results,
@@ -349,6 +371,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                                          ).then(fn=lambda x: x, inputs=[self.historySearchTextbox],
                                                 outputs=[self.history_search_txt]).then(None, None, None,
                                                                                         _js='()=>{openSearch();}')
+
+        self.gptsStoreBtn.click(None, None, None, _js='()=>{openGptsStore();}')
 
     def signals_input_setting(self):
         # 注册input
@@ -458,9 +482,10 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                 with gr.Box(elem_id="chuanhu-popup"):
                     self.draw_popup_settings()
                     self.draw_popup_config()
-                    self.draw_popup_fakec()
+                    self.draw_popup_fake()
                     self.draw_popup_search()
                     self.draw_popup_prompt()
+                    self.draw_popup_gpts()
             # 函数注册，需要在Blocks下进行
             self.signals_history()
             self.signals_input_setting()
@@ -472,6 +497,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
             self.signals_reader()
             self.signals_settings_popup()
             self.signals_masks()
+            self.signals_gpts_store()
             # self.demo.load(fn=func_signals.mobile_access, inputs=[],
             #                outputs=[self.sm_btn_column, self.langchain_dropdown])
             self.demo.load(fn=func_signals.refresh_load_data,

@@ -10,7 +10,7 @@
 import tiktoken, copy
 from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor
-from common.toolbox import get_conf, trimmed_format_exc
+from common.toolbox import get_conf, trimmed_format_exc, gpt_model_select
 
 from .bridge_chatgpt_cls import predict_no_ui_long_connection as chatgpt_noui
 from .bridge_chatgpt_cls import predict as chatgpt_ui
@@ -167,6 +167,14 @@ model_info = {
         "fn_without_ui": chatgpt_noui,
         "endpoint": openai_endpoint,
         "max_token": 4096,
+        "tokenizer": tokenizer_gpt4,
+        "token_cnt": get_token_num_gpt4,
+    },
+    "gpt-4-gizmo": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": openai_endpoint,
+        "max_token": 32000,
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
     },
@@ -327,12 +335,13 @@ if "claude-1-100k" in AVAIL_LLM_MODELS or "claude-2" in AVAIL_LLM_MODELS:
     })
 from .bridge_claude_cls import predict_no_ui_long_connection as claude_noui_cls
 from .bridge_claude_cls import predict as claude_ui_cls
+
 model_info.update({
     "claude-3-opus-20240229": {
         "fn_with_ui": claude_ui_cls,
         "fn_without_ui": claude_noui_cls,
         "endpoint": None,
-        "max_token": 1024*200,
+        "max_token": 1024 * 200,
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
@@ -340,7 +349,7 @@ model_info.update({
         "fn_with_ui": claude_ui_cls,
         "fn_without_ui": claude_noui_cls,
         "endpoint": None,
-        "max_token": 1024*200,
+        "max_token": 1024 * 200,
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
@@ -724,7 +733,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
         用于负责跨越线程传递已经输出的部分，大部分时候仅仅为了fancy的视觉效果，留空即可。observe_window[0]：观测窗。observe_window[1]：看门狗
     """
     import threading, time, copy
-    model = llm_kwargs['llm_model']
+    model, use_model = gpt_model_select(llm_kwargs['llm_model'], model_info)
     n_model = 1
     if '&' not in model:
         assert not model.startswith("tgui"), "TGUI不支持函数插件的实现"
@@ -799,5 +808,6 @@ def predict(inputs, llm_kwargs, *args, **kwargs):
     chatbot 为WebUI中显示的对话列表，修改它，然后yeild出去，可以直接修改对话界面内容
     additional_fn代表点击的哪个按钮，按钮见functional.py
     """
-    method = model_info[llm_kwargs['llm_model']]["fn_with_ui"]  # 如果这里报错，检查config中的AVAIL_LLM_MODELS选项
+    model, _ = gpt_model_select(llm_kwargs['llm_model'], model_info)
+    method = model_info[model]["fn_with_ui"]  # 如果这里报错，检查config中的AVAIL_LLM_MODELS选项
     yield from method(inputs, llm_kwargs, *args, **kwargs)

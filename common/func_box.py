@@ -672,13 +672,15 @@ def replace_expected_text(prompt: str, content: str, expect='{{{v}}}'):
     return content
 
 
-def get_avatar_img(llm_s):
+def get_avatar_img(llm_s, bot_avatar):
     chat_bot_path = os.path.join(init_path.assets_path, 'chatbot_avatar')
     file_list, only_name, new_path, new_name = get_files_list(chat_bot_path, filter_format=['.png'])
     chat_img = ''
     for i in range(len(only_name)):
         if only_name[i] in llm_s:
             chat_img = file_list[i]
+    if bot_avatar:
+        chat_img = bot_avatar
     if chat_img:
         return ['./docs/assets/chatbot_avatar/tester.png', chat_img.replace(init_path.base_path, '.')]
     else:
@@ -700,7 +702,7 @@ def split_parse_url(url, tag: list | None, index=1) -> str:
 
 
 def split_domain_url(link_limit, start='http', domain_name: list = ['']) -> list:
-    link = str(link_limit).split()
+    link = re.split(r'[ ,;()\n]', str(link_limit))
     links = []
     for i in link:
         if i.startswith(start) and any(name in i for name in domain_name):

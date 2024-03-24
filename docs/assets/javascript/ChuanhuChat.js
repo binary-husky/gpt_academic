@@ -30,6 +30,7 @@ var historySelector = null;
 var chuanhuPopup = null;
 var waifuStatus = null;
 var searchBox = null;
+var gptsStoreBox = null;
 var settingBox = null;
 var promptBox = null;
 var popupWrapper = null;
@@ -102,6 +103,7 @@ function initialize() {
     chuanhuPopup = gradioApp().querySelector('#chuanhu-popup');
     settingBox = gradioApp().querySelector('#chuanhu-setting');
     searchBox = gradioApp().querySelector('#spike-search');
+    gptsStoreBox = gradioApp().querySelector('#gpts-store-select');
     promptBox = gradioApp().querySelector('#spike-prompt');
     popupWrapper = gradioApp().querySelector('#popup-wrapper');
     chuanhuHeader = gradioApp().querySelector('#chuanhu-header');

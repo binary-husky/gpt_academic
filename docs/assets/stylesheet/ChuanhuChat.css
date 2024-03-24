@@ -962,7 +962,7 @@ input:checked + .chatbot-input-more-span {
 
 #chuanhu-history {
     max-height: calc(100*var(--vh) - 65px - 61px);
-    max-height: calc(100*var(--vh) - 65px - calc(36px + 12px + max(12px, env(safe-area-inset-bottom)) + 1px ));
+    max-height: calc(100*var(--vh) - calc(36px + 12px + max(12px, env(safe-area-inset-bottom)) + 1px ));
     /* overflow-y: auto; */
 }
 #chuanhu-history > div {

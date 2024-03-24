@@ -28,13 +28,14 @@ class LeftElem:
                         elem_id="gr-history-upload-btn")
                     self.historyRefreshBtn = gr.Button("", elem_id="gr-history-refresh-btn")
 
+
     def _draw_history_body(self):
         with gr.Row(elem_id="chuanhu-history-body"):
             with gr.Column(scale=6, elem_id="history-select-wrap"):
                 self.historySelectList = gr.Radio(
-                    label=i18n("从列表中加载对话"),
+                    label=i18n("历史对话记录"),
                     choices=['123', '213'],
-                    value='123',
+                    value='123', show_label=False,
                     # multiselect=False,
                     container=False,
                     elem_id="history-select-dropdown"

@@ -5,6 +5,8 @@
 
 import os
 import copy
+import re
+
 # docx
 from docx import Document
 import xml.etree.ElementTree as ET
@@ -89,6 +91,22 @@ class DocxHandler:
         # 返回Markdown图片链接，如果没有找到图片则返回空字符串
         return f"![{os.path.basename(image_path)}]({image_path})\n" if image_path else ""
 
+    @staticmethod
+    def replace_hyperlinks(text):
+        # 正则表达式匹配 'HYPERLINK "url"' 和随后的文字
+        pattern = r'HYPERLINK "(http[^"]+)"\s+(.*?)\s*(?=HYPERLINK|$)'
+
+        def hyperlink_repl(match):
+            # URL位于分组1，紧跟它的描述性文本位于分组2
+            url, desc = match.group(1), match.group(2)
+            # 使用Markdown链接格式进行替换
+            return f'[{desc}]({url})'
+
+        # 对输入文本中所有符合模式的字符串进行替换
+        result_text = re.sub(pattern, hyperlink_repl, text)
+
+        return result_text
+
     def _process_paragraph(self, element, doc):
         """处理段落中的文本和图片"""
         markdown_paragraph = ''
@@ -96,6 +114,7 @@ class DocxHandler:
         if para_text:
             para_size = self.__extract_attribute_from_xml(element.xml, e_tag='sz', e_attr='val')
             heading_level = self.__get_markdown_heading_level(para_size)
+            para_text = self.replace_hyperlinks(para_text)
             markdown_paragraph += heading_level + para_text
         # 处理段落中的图片
         for inline in element.iter():
@@ -119,6 +138,11 @@ class DocxHandler:
                 cell_text = ''
                 # 检查单元格中的文本和图片
                 for paragraph in cell.paragraphs:
+                    for links in paragraph.hyperlinks:
+                        if str(links.url).startswith('http'):
+                            cell_text += f"[{links.text}]({links.url})"
+                        else:
+                            cell_text += f"[{links.text}]({doc.part.rels[links._element.rId].target_ref})"
                     for run in paragraph.runs:
                         if run.text:
                             cell_text += run.text.replace('\n', '<br>')  # 替换换行符
@@ -165,5 +189,5 @@ class DocxHandler:
 
 
 if __name__ == '__main__':
-    print(DocxHandler('../../users_private/files/127.0.0.1/feishu/',
+    print(DocxHandler('../../users_private/files/127.0.0.1/feishu/运营活动-砸蛋.docx',
                       './').get_markdown())

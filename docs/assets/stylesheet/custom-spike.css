@@ -268,7 +268,9 @@ code.language-folded {
 #mask_tabs .sort-button {
     display: none;
 }
-
+#mask_tabs .table-wrap {
+    overflow: auto !important;
+}
 .controls-wrap {
     gap: 10px;
 }
@@ -420,7 +422,9 @@ code.language-folded {
 .kb-info-fragment td {
     overflow: auto !important;
 }
-
+.gpts_select {
+    margin-bottom: 10px;
+}
 /* 把radio做成列表 */
 #knowledge-base-select {
     height: calc(100% - 50px);

@@ -113,7 +113,7 @@ class ClaudeBroInit:
             else:
                 error_meg = msg_handle_error(llm_kwargs, chunk_decoded)
                 yield content, claude_bro_result, error_meg
-        if claude_bro_result:
+        if not claude_bro_result:
             logger.error("对话错误\n"+chunk_content)
 
 

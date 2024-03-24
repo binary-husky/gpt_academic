@@ -53,9 +53,6 @@ def Reader_多阶段生成回答(user_input, llm_kwargs, plugin_kwargs, chatbot,
                                                                             plugin_kwargs)
             for i in embedding_mapping:
                 embedding_limit.extend([os.path.basename(i), embedding_mapping[i]])
-    apply_history = crazy_box.json_args_return(plugin_kwargs, ['上下文关联'])
-    if apply_history:
-        chatbot[-1][1] = chatbot[-1][1] + '插件配置参数已开启`上下文关联`，请注意使用插件时注意上下文token限制。'
     if not multi_stage_config:
         chatbot[-1][1] = chatbot[-1][
                              1] + f'!!!!! 自定义参数中的Json存在问题，请仔细检查以下配置是否符合JSON编码格式\n\n```\n{plugin_kwargs["advanced_arg"]}```'

@@ -439,7 +439,7 @@ def get_project_from_limit(link_limit: list, project_folder, config: dict = {}):
 
 if __name__ == '__main__':
     # converter_project_md('', './')
-    feishu = ProjectFeishu('https://project.feishu.cn/middleoffice/story/detail/3018218753?super_app=1&open_type=open_in_page&target_width=700&min_width=550&is_nearest_order=1&hyperlink_open_type=lark.open_in_browser')
+    feishu = ProjectFeishu('')
     # # print(feishu._get_work_list(feishu.items_mapping[work_items.case_name]['type_key']))
     print(feishu.get_story_items_dict())
     # for i in feishu.get_home_story_list(7, '未排期', api_name=['middleoffice']):

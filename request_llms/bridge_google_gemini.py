@@ -84,7 +84,8 @@ class GoogleChatInit:
             if error_match:
                 error_match = json.loads('{"message": "%s"}' % error_match.group(1))['message']
             yield text_match, bro_results, error_match
-        logger.debug(chunk_all)
+        if not chunk_all:
+            logger.warning('对话错误', chunk_all)
 
     def generate_message_payload(self, inputs, llm_kwargs, history, system_prompt) -> Tuple[Dict, Dict]:
         messages = [

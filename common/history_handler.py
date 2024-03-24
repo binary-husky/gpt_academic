@@ -78,7 +78,9 @@ class HistoryJsonHandle:
         llm_select = str(self.base_data_format['chat_llms'].get('llm_model', LLM_MODEL)).split('&')[0]
         llms_combo.append(gr.update(value=llm_select))
         chat_list = [i['on_chat'] for i in self.base_data_format['chat']]
-        chatbot = gr.update(value=chat_list, avatar_images=func_box.get_avatar_img(llm_select))
+        chatbot = gr.update(value=chat_list,
+                            avatar_images=func_box.get_avatar_img(llm_select,
+                                                                  self.base_data_format['chat_llms'].get('bot_avatar')))
         history = self.base_data_format['chat_llms'].get('history', [])
         try:
             cookies['first_chat'] = select

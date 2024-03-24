@@ -1198,6 +1198,13 @@ def read_single_conf_with_lru_cache(arg):
     return r
 
 
+def gpt_model_select(llm_model: str, model_info):
+    """允许自定义模型名称"""
+    if llm_model not in model_info:
+        return 'gpt-4-gizmo', llm_model
+    return llm_model, llm_model
+
+
 @lru_cache(maxsize=128)
 def get_conf(*args):
     """

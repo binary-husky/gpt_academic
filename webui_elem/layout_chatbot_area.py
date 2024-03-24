@@ -21,15 +21,12 @@ class ChatbotElem:
         with gr.Row(elem_id="chatbot-header"):
             self.model_select_dropdown = gr.Dropdown(
                 label=i18n("选择模型"), choices=AVAIL_LLM_MODELS, multiselect=False, value=LLM_MODEL, interactive=True,
-                show_label=False, container=False, elem_id="model-select-dropdown"
+                show_label=False, container=False, elem_id="model-select-dropdown", allow_custom_value=True,
             )
-            self.lora_select_dropdown = gr.Dropdown(
-                label=i18n("选择LoRA模型"), choices=[], multiselect=False, interactive=True,
-                visible=False, container=False
-            )
+            self.gptsStoreBtn = gr.Button(value=i18n("GPTs Store"), min_width=36, elem_id='gpts-store-btn')
             gr.HTML(get_html("chatbot_header_btn.html").format(
                 json_label=i18n("导出为 JSON"), md_label=i18n("导出为 Markdown"),
-                masks_label=i18n('转换为 Masks'), img_label=i18n('导出为 jpeg')),
+                masks_label=i18n('自定义对话'), img_label=i18n('导出为 jpeg')),
                 elem_id="chatbot-header-btn-bar")
 
     def _draw_chatbot_body(self):

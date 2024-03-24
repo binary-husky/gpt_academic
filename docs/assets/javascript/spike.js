@@ -487,3 +487,9 @@ const chatbotObserverMsgBot = new MutationObserver(function (mutationsList, obse
         chatbotMsg.querySelectorAll('.bot-row .message.bot .md-message .fold-panel').forEach(foldPanelAdd)
     }
 })
+
+function gpts_tabs_select(a, b) {
+    let selected = gradioApp().querySelector('#store-tabs').querySelector('.selected')
+    a = selected.innerHTML.trim()
+    return [a, b]
+}
