@@ -8,9 +8,9 @@ from common.api_server.gpts_store import get_gpts, search_gpts, gpts_groups_samp
 
 
 def gpts_tag_select(select_tab, samples):
-    if select_tab == '热门应用':
+    if select_tab == '🔥 热门应用':
         samples = gpts_groups_samples(get_gpts()['gpts'])
-    elif select_tab == '关键词搜索':
+    elif select_tab == '🔍 关键词搜索':
         pass
     else:
         samples = gpts_groups_samples(search_gpts(select_tab)['data']['list'])

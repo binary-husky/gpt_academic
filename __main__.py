@@ -160,10 +160,11 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                 inputs=[self.gpts_tags_mapping[tag]['data_set'], self.gpts_samples_mapping[tag], self.cookies],
                 outputs=[self.model_select_dropdown, self.chatbot, self.cookies, self.spike_toast],
             )
-        self.gpts_tags_mapping['关键词搜索']['search'].submit(
+        key_search = '🔍 关键词搜索'
+        self.gpts_tags_mapping[key_search]['search'].submit(
             fn=func_signals.gpts_tag_select,
-            inputs=[self.gpts_tags_mapping['关键词搜索']['search'], self.gpts_samples_mapping['关键词搜索']],
-            outputs=[self.gpts_tags_mapping['关键词搜索']['data_set'], self.gpts_samples_mapping['关键词搜索']]
+            inputs=[self.gpts_tags_mapping[key_search]['search'], self.gpts_samples_mapping[key_search]],
+            outputs=[self.gpts_tags_mapping[key_search]['data_set'], self.gpts_samples_mapping[key_search]]
         )
 
     def signals_plugin(self):

@@ -386,19 +386,19 @@ class Prompt:
 
 class GptsStore:
 
-    def _tag_category_tab(self, tab_title, key, gpts_samples, if_search):
-        with gr.TabItem(tab_title, id=key) as tab_select:
+    def _tag_category_tab(self, tab_title, gpts_samples, if_search):
+        with gr.TabItem(tab_title, id=tab_title) as tab_select:
             if if_search:
                 self.gpts_search_input = gr.Textbox('', placeholder='GPTs名称、介绍', show_label=False)
             else:
                 self.gpts_search_input = gr.State()
-            self.gpts_tags_mapping[key] = {
+            self.gpts_tags_mapping[tab_title] = {
                 'data_set': gr.Dataset(components=[gr.HTML(visible=False)], visible=True,
                                        elem_id='gpts-data-set', samples_per_page=10,
                                        samples=gpts_samples, type='index', container=False),
                 "tab": tab_select,
                 "search": self.gpts_search_input}
-            self.gpts_samples_mapping[key] = gr.State(gpts_samples)
+            self.gpts_samples_mapping[tab_title] = gr.State(gpts_samples)
 
     def draw_popup_gpts(self):
         from common.api_server.gpts_store import get_gpts, gpts_groups_samples
@@ -409,12 +409,12 @@ class GptsStore:
             self.gpts_tags_mapping = {}
             self.gpts_samples_mapping = {}
             with gr.Tabs(elem_id='store-tabs') as self.gpts_store_tabs:
-                self._tag_category_tab('🔥 热门应用', '热门应用', gpts_samples, False)
-                self._tag_category_tab('🔍 关键词搜索', '关键词搜索', [], True)
+                self._tag_category_tab('🔥 热门应用', gpts_samples, False)
+                self._tag_category_tab('🔍 关键词搜索',  [], True)
                 gpts_tags = toolbox.get_conf('GPTS_DEFAULT_CLASSIFICATION')
                 gpts_tags = gpts_tags if gpts_tags else gpts['tag']
                 for tag in set(gpts_tags):
-                    self._tag_category_tab(tag, tag, [], False)
+                    self._tag_category_tab(tag, [], False)
 
 
 class FakeComponents:
