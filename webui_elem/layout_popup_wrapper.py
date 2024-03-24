@@ -409,8 +409,8 @@ class GptsStore:
             self.gpts_tags_mapping = {}
             self.gpts_samples_mapping = {}
             with gr.Tabs(elem_id='store-tabs') as self.gpts_store_tabs:
-                self._tag_category_tab('🔥热门应用', '热门应用', gpts_samples, False)
-                self._tag_category_tab('🔍关键词搜索', '关键词搜索', [], True)
+                self._tag_category_tab('🔥 热门应用', '热门应用', gpts_samples, False)
+                self._tag_category_tab('🔍 关键词搜索', '关键词搜索', [], True)
                 gpts_tags = toolbox.get_conf('GPTS_DEFAULT_CLASSIFICATION')
                 gpts_tags = gpts_tags if gpts_tags else gpts['tag']
                 for tag in set(gpts_tags):
