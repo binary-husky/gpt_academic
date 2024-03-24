@@ -182,6 +182,7 @@ async function paste_upload_files(files) {
     if (files && files.length > 0) {
         // 执行具体的上传逻辑
         if (uploadInputElement) {
+            toast_push('正在上传文件', 1000)
             for (let i = 0; i < files.length; i++) {
                 // 将从文件数组中获取的文件大小(单位为字节)转换为MB，
                 totalSizeMb += files[i].size / 1024 / 1024;
