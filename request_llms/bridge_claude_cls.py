@@ -10,14 +10,14 @@ from common.logger_handler import logger
 from common.toolbox import get_conf, update_ui
 from common.func_box import extract_link_pf, valid_img_extensions, batch_encode_image
 
-proxies, TIMEOUT_SECONDS, MAX_RETRY, ANTHROPIC_API_KEY = get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY',
-                                                                  "ANTHROPIC_API_KEY")
+proxies, TIMEOUT_SECONDS, MAX_RETRY, ANTHROPIC_API_KEY, ANTHROPIC_ENDPOINT_API = get_conf(
+    'proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY', "ANTHROPIC_API_KEY", 'ANTHROPIC_ENDPOINT_API')
 
 
 class ClaudeBroInit:
 
     def __init__(self):
-        self.url = 'https://api.anthropic.com/v1/messages'
+        self.url = ANTHROPIC_ENDPOINT_API
         self.x_api_key = ANTHROPIC_API_KEY
         self.llm_model = ''
         self.retry = 0
@@ -114,6 +114,7 @@ class ClaudeBroInit:
                 error_meg = msg_handle_error(llm_kwargs, chunk_decoded)
                 yield content, claude_bro_result, error_meg
         if not claude_bro_result:
+            yield '', claude_bro_result, chunk_content
             logger.error("对话错误\n"+chunk_content)
 
 

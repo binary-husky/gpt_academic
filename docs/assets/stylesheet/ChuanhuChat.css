@@ -251,8 +251,8 @@ body.popup-open {
 #chuanhu-popup {
     display: none;
     z-index: 99999;
-    width: 60%;
-    height: 90%;
+    width: 902px;
+    height: 750px;
     padding: 0;
     max-height: 800px !important;
     overflow: auto !important;

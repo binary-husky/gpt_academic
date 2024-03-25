@@ -139,8 +139,12 @@ class DocxHandler:
                 # 检查单元格中的文本和图片
                 for paragraph in cell.paragraphs:
                     for links in paragraph.hyperlinks:
-                        if str(links.url).startswith('http'):
-                            cell_text += f"[{links.text}]({links.url})"
+                        try:
+                            extract_url = links.url
+                        except KeyError as f:
+                            extract_url = 'KeyError'
+                        if str(extract_url).startswith('http'):
+                            cell_text += f"[{links.text}]({extract_url})"
                         else:
                             cell_text += f"[{links.text}]({doc.part.rels[links._element.rId].target_ref})"
                     for run in paragraph.runs:
@@ -189,5 +193,5 @@ class DocxHandler:
 
 
 if __name__ == '__main__':
-    print(DocxHandler('../../users_private/files/127.0.0.1/feishu/运营活动-砸蛋.docx',
+    print(DocxHandler('../../',
                       './').get_markdown())

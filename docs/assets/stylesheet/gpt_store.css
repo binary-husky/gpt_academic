@@ -1,10 +1,10 @@
-#gpts-data-set {
+.gpts-data-set {
     overflow: unset !important;
 }
-#gpts-data-set .gallery-item {
+.gpts-data-set .gallery-item {
     overflow: unset !important;
 }
-#gpts-data-set .label {
+.gpts-data-set .label {
     display: none;
 }
 #gpts-store-btn {

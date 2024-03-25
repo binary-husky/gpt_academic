@@ -38,7 +38,8 @@ def clear_input(inputs, cookies, ipaddr: gr.Request):
     file_list, only_name, new_path, new_name = get_files_list(user_path, filter_format=['.json'])
     index = 2
     if not cookies.get('first_chat'):
-        cookies['first_chat'] = replace_special_chars(generate_random_string(inputs))
+        cookies['first_chat'] = "_".join([cookies.get('pre_gpts', ''),
+                                          replace_special_chars(generate_random_string(inputs))])
         select_file = cookies.get('first_chat')
         while select_file in only_name:  # 重名处理
             select_file = f"{index}_{cookies['first_chat']}"
@@ -71,8 +72,7 @@ def clear_chat_cookie(llm_model, ipaddr: gr.Request):
     user_path = os.path.join(init_path.private_history_path, user_client_mark(ipaddr))
     file_list, only_name, new_path, new_name = get_files_list(user_path, filter_format=['.json'])
     default_params = get_conf('LLM_DEFAULT_PARAMETER')
-    llms_combo = [cookie.get(key, default_params[key]) for key in default_params] + [
-        gr.update(value=llm_model)]
+    llms_combo = [cookie.get(key, default_params[key]) for key in default_params] + [gr.update(value=llm_model)]
     output = [[], [], cookie, *llms_combo, '已重置对话记录和对话Cookies',
               gr.update(choices=['新对话'] + only_name, value='新对话'), "新对话"]
     return output

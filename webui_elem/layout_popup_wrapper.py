@@ -394,7 +394,7 @@ class GptsStore:
                 self.gpts_search_input = gr.State()
             self.gpts_tags_mapping[tab_title] = {
                 'data_set': gr.Dataset(components=[gr.HTML(visible=False)], visible=True,
-                                       elem_id='gpts-data-set', samples_per_page=10,
+                                       elem_classes='gpts-data-set', samples_per_page=10,
                                        samples=gpts_samples, type='index', container=False),
                 "tab": tab_select,
                 "search": self.gpts_search_input}
@@ -414,7 +414,7 @@ class GptsStore:
                 gpts_tags = toolbox.get_conf('GPTS_DEFAULT_CLASSIFICATION')
                 gpts_tags = gpts_tags if gpts_tags else gpts['tag']
                 for tag in set(gpts_tags):
-                    self._tag_category_tab(tag, [], False)
+                    self._tag_category_tab(tag, [['loading...'] for i in range(11)], False)
 
 
 class FakeComponents:

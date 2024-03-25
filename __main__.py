@@ -157,9 +157,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
             self.gpts_tags_mapping[tag]['data_set'].click(None, None, None, _js='()=>{closeBtnClick();}')
             self.gpts_tags_mapping[tag]['data_set'].click(
                 fn=func_signals.gpts_select_model,
-                inputs=[self.gpts_tags_mapping[tag]['data_set'], self.gpts_samples_mapping[tag], self.cookies],
-                outputs=[self.model_select_dropdown, self.chatbot, self.cookies, self.spike_toast],
-            )
+                inputs=[self.gpts_tags_mapping[tag]['data_set'], self.gpts_samples_mapping[tag]],
+                outputs=[self.historySelectList, self.model_select_dropdown, *self.llms_cookies_combo])
         key_search = '🔍 关键词搜索'
         self.gpts_tags_mapping[key_search]['search'].submit(
             fn=func_signals.gpts_tag_select,

@@ -383,7 +383,7 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
         plugin_kwargs: 插件调优参数
     Returns:  将对话结果返回[输入, 输出]
     """
-    apply_history, = json_args_return(plugin_kwargs, ['上下文关联'])
+    apply_history, = json_args_return(plugin_kwargs, ['上下文关联'], True)
     if apply_history:
         history_array = [[history] for _ in range(len(inputs_array))]
     else:
