@@ -5,7 +5,7 @@
     overflow: unset !important;
 }
 .gpts-data-set .label {
-    display: none;
+    display: none !important;
 }
 #gpts-store-btn {
     max-width: 50px !important;
