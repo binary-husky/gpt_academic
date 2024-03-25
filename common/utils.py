@@ -27,6 +27,7 @@ from typing import (
     Tuple
 )
 import logging
+from common.toolbox import get_conf, select_api_key
 
 
 async def wrap_done(fn: Awaitable, event: asyncio.Event):
@@ -40,6 +41,40 @@ async def wrap_done(fn: Awaitable, event: asyncio.Event):
     finally:
         # Signal the aiter to stop.
         event.set()
+
+
+def get_ChatOpenAI(
+        model_name: str,
+        temperature: float,
+        max_tokens: int = None,
+        streaming: bool = True,
+        callbacks: List[Callable] = [],
+        verbose: bool = True,
+        **kwargs: Any,
+) -> ChatOpenAI:
+    API_URL_REDIRECT, API_KEY = get_conf('API_URL_REDIRECT', 'API_KEY')
+    model = ChatOpenAI(
+        streaming=streaming,
+        verbose=verbose,
+        callbacks=callbacks,
+        openai_api_key=select_api_key(API_KEY, model_name),
+        openai_api_base='https://api.yunai.link/v1',
+        model_name=model_name,
+        temperature=temperature,
+        max_tokens=max_tokens,
+        openai_proxy=None,
+        **kwargs
+    )
+    return model
+
+
+def fschat_openai_api_address() -> str:
+    FSCHAT_OPENAI_API = get_conf('FSCHAT_OPENAI_API')
+    host = FSCHAT_OPENAI_API["host"]
+    if host == "0.0.0.0":
+        host = "127.0.0.1"
+    port = FSCHAT_OPENAI_API["port"]
+    return f"http://{host}:{port}/v1"
 
 
 class BaseResponse(BaseModel):

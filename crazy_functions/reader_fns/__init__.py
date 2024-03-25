@@ -14,4 +14,4 @@ from .local_excel import XlsxHandler
 from .local_xmind import XmindHandle
 from .local_markdown import MdHandler, MdProcessor
 from .local_pdf import PDFHandler
-from .local_image import *
+from .local_image import ImgHandler

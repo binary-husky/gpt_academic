@@ -11,6 +11,8 @@ scipdf_parser>=0.52
 scipdf_parser>=0.3
 langchain==0.0.354
 langchain-experimental==0.0.47
+SQLAlchemy==2.0.25
+
 
 # Dependencies
 requests[socks]

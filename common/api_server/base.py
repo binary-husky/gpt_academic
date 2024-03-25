@@ -8,14 +8,17 @@ from starlette.middleware.sessions import SessionMiddleware
 from common.utils import BaseResponse, ListResponse
 from typing import List, Literal
 
+from common.knowledge_base.kb_api import list_kbs, create_kb, delete_kb
+from common.knowledge_base.kb_doc_api import (list_files, upload_docs, delete_docs,
+                                              update_docs, download_doc, recreate_vector_store,
+                                              search_docs, DocumentWithVSId, update_info,
+                                              update_docs_by_id)
+
+from common.knowledge_base.kb_summary_api import (summary_file_to_vector_store, recreate_summary_vector_store,
+                                                  summary_doc_ids_to_vector_store)
+
 
 def mount_knowledge_routes(app: FastAPI):
-    from common.knowledge_base.kb_api import list_kbs, create_kb, delete_kb
-    from common.knowledge_base.kb_doc_api import (list_files, upload_docs, delete_docs,
-                                                  update_docs, download_doc, recreate_vector_store,
-                                                  search_docs, DocumentWithVSId, update_info,
-                                                  update_docs_by_id, )
-
     # app.post("/chat/knowledge_base_chat",
     #          tags=["Chat"],
     #          summary="与知识库对话")(knowledge_base_chat)
@@ -99,9 +102,6 @@ def mount_knowledge_routes(app: FastAPI):
 
 
 def mount_filename_summary_routes(app: FastAPI):
-    from common.knowledge_base.kb_summary_api import (summary_file_to_vector_store, recreate_summary_vector_store,
-                                                      summary_doc_ids_to_vector_store)
-
     app.post("/knowledge_base/kb_summary_api/summary_file_to_vector_store",
              tags=["Knowledge kb_summary_api Management"],
              summary="单个知识库根据文件名称摘要"

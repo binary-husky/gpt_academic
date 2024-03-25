@@ -9,12 +9,9 @@ from common.knowledge_base.kb_service.base import KBServiceFactory
 from typing import List, Optional
 from common.knowledge_base.kb_summary.base import KBSummaryService
 from common.knowledge_base.kb_summary.summary_chunk import SummaryAdapter
-from common.utils import BaseResponse
+from common.utils import BaseResponse, get_ChatOpenAI
 from common.configs import LLM_MODELS
 from common.knowledge_base.kb_document_model import DocumentWithVSId
-
-
-get_ChatOpenAI = ...
 
 
 def recreate_summary_vector_store(
@@ -167,7 +164,7 @@ def summary_file_to_vector_store(
                     "msg": msg,
                 })
 
-    return EventSourceResponse(output())
+    return output()
 
 
 def summary_doc_ids_to_vector_store(
@@ -222,3 +219,14 @@ def summary_doc_ids_to_vector_store(
         resp_summarize = [{**doc.dict()} for doc in docs]
 
         return BaseResponse(code=200, msg="总结完成", data={"summarize": resp_summarize})
+
+
+
+if __name__ == '__main__':
+    summary = summary_file_to_vector_store('增长需求文档',
+                                           '【用户增长】新增Whatsapp优先发送策略【跟包】.docx',
+                                           True, 'faiss', 'bge-large-zh-v1.5',
+                                           '', LLM_MODELS[0], temperature=1, max_tokens=None)
+
+    for s in summary:
+        print(s)

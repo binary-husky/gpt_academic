@@ -8,7 +8,6 @@ import time
 import requests
 from common.path_handler import init_path
 from common.toolbox import get_conf, update_ui
-from crazy_functions.reader_fns.crazy_box import input_retrieval_file, file_reader_content
 
 
 class MoonShotInit:
@@ -19,6 +18,7 @@ class MoonShotInit:
         self.api_key = get_conf('MOONSHOT_API_KEY')
 
     def __converter_file(self, user_input: str, llm_kwargs):
+        from crazy_functions.reader_fns.crazy_box import input_retrieval_file, file_reader_content
         what_ask = []
         fp_map, status = input_retrieval_file(user_input, llm_kwargs=llm_kwargs, valid_types=['*'])
         save_file = os.path.join(init_path.private_files_path, llm_kwargs.get('ipaddr'))

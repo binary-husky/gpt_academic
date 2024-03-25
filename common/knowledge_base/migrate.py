@@ -8,13 +8,14 @@ from common.knowledge_base.utils import (
     KnowledgeFile
 )
 from common.knowledge_base.kb_service.base import KBServiceFactory
-
+from common.knowledge_base.kb_summary.base import KBSummaryService
 from common.db.base import Base, engine
 from common.db.session import session_scope
 import os
 from dateutil.parser import parse
 from typing import Literal, List
 from common.logger_handler import logger
+
 
 def create_tables():
     Base.metadata.create_all(bind=engine)

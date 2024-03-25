@@ -335,33 +335,33 @@ if "claude-1-100k" in AVAIL_LLM_MODELS or "claude-2" in AVAIL_LLM_MODELS:
     })
 from .bridge_claude_cls import predict_no_ui_long_connection as claude_noui_cls
 from .bridge_claude_cls import predict as claude_ui_cls
-
-model_info.update({
-    "claude-3-opus-20240229": {
-        "fn_with_ui": claude_ui_cls,
-        "fn_without_ui": claude_noui_cls,
-        "endpoint": None,
-        "max_token": 1024 * 200,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-    "claude-3-sonnet-20240229": {
-        "fn_with_ui": claude_ui_cls,
-        "fn_without_ui": claude_noui_cls,
-        "endpoint": None,
-        "max_token": 1024 * 200,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-    "claude-3-haiku-20240307": {
-        "fn_with_ui": claude_ui_cls,
-        "fn_without_ui": claude_noui_cls,
-        "endpoint": None,
-        "max_token": 1024 * 32,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-})
+if not get_conf('ANTHROPIC_API_URL_REDIRECT'):
+    model_info.update({
+        "claude-3-opus-20240229": {
+            "fn_with_ui": claude_ui_cls,
+            "fn_without_ui": claude_noui_cls,
+            "endpoint": None,
+            "max_token": 1024 * 200,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+        "claude-3-sonnet-20240229": {
+            "fn_with_ui": claude_ui_cls,
+            "fn_without_ui": claude_noui_cls,
+            "endpoint": None,
+            "max_token": 1024 * 200,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+        "claude-3-haiku-20240307": {
+            "fn_with_ui": claude_ui_cls,
+            "fn_without_ui": claude_noui_cls,
+            "endpoint": None,
+            "max_token": 1024 * 32,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
 if "jittorllms_rwkv" in AVAIL_LLM_MODELS:
     from .bridge_jittorllms_rwkv import predict_no_ui_long_connection as rwkv_noui
     from .bridge_jittorllms_rwkv import predict as rwkv_ui

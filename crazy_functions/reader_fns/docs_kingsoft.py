@@ -11,7 +11,7 @@ import urllib.parse
 
 from bs4 import BeautifulSoup
 from common import toolbox, func_box
-from crazy_functions.reader_fns import crazy_box
+from crazy_functions.reader_fns.crazy_box import Utils
 from crazy_functions import crazy_utils
 
 
@@ -311,7 +311,7 @@ def get_docs_content(url, image_processing=False):
     Returns:
     """
     kdocs = Kdocs(url)
-    utils = crazy_box.Utils()
+    utils = Utils()
     json_data, json_dict = kdocs.get_file_content()
     text_values = utils.find_all_text_keys(json_data, filter_type='')
 

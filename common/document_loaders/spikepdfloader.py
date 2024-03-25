@@ -5,7 +5,7 @@
 import os
 from typing import List
 from langchain.document_loaders.unstructured import UnstructuredFileLoader
-from crazy_functions.reader_fns import PDFHandler
+from crazy_functions.reader_fns.local_pdf import PDFHandler
 from common.path_handler import init_path
 
 

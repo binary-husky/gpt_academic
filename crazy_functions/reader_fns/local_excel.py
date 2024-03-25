@@ -11,9 +11,9 @@ from openpyxl.styles import PatternFill
 from openpyxl.styles import Alignment
 from openpyxl.styles import Font
 
-from crazy_functions.reader_fns import crazy_box
-from common import func_box
-from common import toolbox
+from crazy_functions.reader_fns.crazy_box import find_index_inlist
+from common.func_box import created_atime, 通知机器人
+from common.toolbox import get_conf, trimmed_format_exc
 
 import xmind
 
@@ -51,7 +51,7 @@ class XlsxHandler:
         else:
             worksheet = self.workbook.create_sheet(self.sheet)
         # 定义起始行号
-        start_row = crazy_box.find_index_inlist(self.read_as_dict()[self.sheet],
+        start_row = find_index_inlist(self.read_as_dict()[self.sheet],
                                                 ['前置条件', '操作步骤', '预期结果']) + 2
         # 遍历数据列表
         for row_data in data_list:
@@ -70,15 +70,15 @@ class XlsxHandler:
                     cell.font = font
                 except Exception:
                     print(row_data, value)
-                    func_box.通知机器人(error=f'写入excel错误啦\n\n```\n\n{row_data}\n\n{value}\n\n```'
-                                              f'\n\n```\n\n{toolbox.trimmed_format_exc()}```\n\n')
+                    通知机器人(error=f'写入excel错误啦\n\n```\n\n{row_data}\n\n{value}\n\n```'
+                                              f'\n\n```\n\n{trimmed_format_exc()}```\n\n')
             # 增加起始行号
             start_row += 1
-        merge_cell = toolbox.get_conf('merge_cell')
+        merge_cell = get_conf('merge_cell')
         if merge_cell:
             self.merge_same_cells()  # 还原被拆分的合并单元格
         if save_as_name:
-            save_as_name = f'{save_as_name}-{func_box.created_atime()}'
+            save_as_name = f'{save_as_name}-{created_atime()}'
         test_case_path = os.path.join(self.output_dir, f'{save_as_name}.xlsx')
         # 遇到文件无法保存时，再拆开图片
         try:
