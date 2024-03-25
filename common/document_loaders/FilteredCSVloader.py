@@ -59,23 +59,26 @@ class FilteredCSVLoader(CSVLoader):
         docs = []
         csv_reader = csv.DictReader(csvfile, **self.csv_args)  # type: ignore
         for i, row in enumerate(csv_reader):
-            if self.columns_to_read[0] in row:
-                content = row[self.columns_to_read[0]]
-                # Extract the source if available
-                source = (
-                    row.get(self.source_column, None)
-                    if self.source_column is not None
-                    else self.file_path
-                )
-                metadata = {"source": source, "row": i}
+            content = []
+            for col in self.columns_to_read:
+                if col in row:
+                    content.append(f'{col}:{str(row[col])}')
+                else:
+                    raise ValueError(f"Column '{self.columns_to_read[0]}' not found in CSV file.")
+            content = '\n'.join(content)
+            # Extract the source if available
+            source = (
+                row.get(self.source_column, None)
+                if self.source_column is not None
+                else self.file_path
+            )
+            metadata = {"source": source, "row": i}
 
-                for col in self.metadata_columns:
-                    if col in row:
-                        metadata[col] = row[col]
+            for col in self.metadata_columns:
+                if col in row:
+                    metadata[col] = row[col]
 
-                doc = Document(page_content=content, metadata=metadata)
-                docs.append(doc)
-            else:
-                raise ValueError(f"Column '{self.columns_to_read[0]}' not found in CSV file.")
+            doc = Document(page_content=content, metadata=metadata)
+            docs.append(doc)
 
         return docs

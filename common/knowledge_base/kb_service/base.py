@@ -231,6 +231,20 @@ class KBService(ABC):
         """
         pass
 
+    def get_relative_source_path(self, filepath: str):
+        '''
+        将文件路径转化为相对路径，保证查询时一致
+        '''
+        relative_path = filepath
+        if os.path.isabs(relative_path):
+            try:
+                relative_path = Path(filepath).relative_to(self.doc_path)
+            except Exception as e:
+                print(f"cannot convert absolute path ({relative_path}) to relative path. error is : {e}")
+
+        relative_path = str(relative_path.as_posix().strip("/"))
+        return relative_path
+
     @staticmethod
     def list_kbs_type():
         return list(kbs_config.keys())

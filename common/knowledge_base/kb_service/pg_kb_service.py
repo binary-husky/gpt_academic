@@ -28,10 +28,11 @@ class PGKBService(KBService):
 
     def get_doc_by_ids(self, ids: List[str]) -> List[Document]:
         with Session(PGKBService.engine) as session:
-            stmt = text("SELECT document, cmetadata FROM langchain_pg_embedding WHERE collection_id in :ids")
+            stmt = text("SELECT document, cmetadata FROM langchain_pg_embedding WHERE custom_id = ANY(:ids)")
             results = [Document(page_content=row[0], metadata=row[1]) for row in
                        session.execute(stmt, {'ids': ids}).fetchall()]
             return results
+
     def del_doc_by_ids(self, ids: List[str]) -> bool:
         return super().del_doc_by_ids(ids)
 

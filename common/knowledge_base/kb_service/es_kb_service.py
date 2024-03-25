@@ -181,7 +181,7 @@ class ESKBService(KBService):
             query = {
                 "query": {
                     "term": {
-                        "metadata.source.keyword": kb_file.filepath
+                        "metadata.source.keyword": self.get_relative_source_path(kb_file.filepath)
                     }
                 }
             }
