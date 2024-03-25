@@ -111,7 +111,7 @@ class XlsxHandler:
             data_dict[sheet_name] = sheet_data
         return data_dict
 
-    def split_merged_cells(self):
+    def split_merged_cells(self, save_work=False):
         # 加载Excel文件
         ws = self.workbook[self.sheet]
         # 获取合并单元格的范围
@@ -131,8 +131,9 @@ class XlsxHandler:
                 for col in range(start_col, end_col + 1):
                     cell = ws.cell(row, col)
                     cell.value = value
-        # 保存结果
-        self.workbook.save(self.template_excel)
+        if save_work:
+            # 保存结果
+            self.workbook.save(self.template_excel)
 
     def merge_same_cells(self, truncation=10):
         # 加载xlsx文件

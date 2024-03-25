@@ -180,13 +180,13 @@ def file_reader_content(file_path, save_path, plugin_kwargs):
         # 创建文件对象
         ex_handle = reader_fns.XlsxHandler(file_path, save_path, sheet=sheet)
         if sheet in ex_handle.workbook.sheetnames:
-            ex_handle.split_merged_cells()
+            ex_handle.split_merged_cells(save_work=False)  # 避免更改到原文件
             xlsx_dict = ex_handle.read_as_dict()
             file_content = xlsx_dict.get(sheet)
         else:
             active_sheet = ex_handle.workbook.active.title
             ex_handle.sheet = active_sheet
-            ex_handle.split_merged_cells()
+            ex_handle.split_merged_cells(save_work=False)
             xlsx_dict = ex_handle.read_as_dict()
             file_content = xlsx_dict.get(active_sheet)
             reader_statsu += f'\n\n无法在`{os.path.basename(file_path)}`找到`{sheet}`工作表，' \
