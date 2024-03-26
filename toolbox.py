@@ -1009,10 +1009,13 @@ def check_repeat_upload(new_pdf_path, pdf_hash):
     return False, None
 
 def log_chat(llm_model: str, input_str: str, output_str: str):
-    if output_str and input_str and llm_model:
-        uid = str(uuid.uuid4().hex)
-        logging.info(f"[Model({uid})] {llm_model}")
-        input_str = input_str.rstrip('\n')
-        logging.info(f"[Query({uid})]\n{input_str}")
-        output_str = output_str.rstrip('\n')
-        logging.info(f"[Response({uid})]\n{output_str}\n\n")
+    try:
+        if output_str and input_str and llm_model:
+            uid = str(uuid.uuid4().hex)
+            logging.info(f"[Model({uid})] {llm_model}")
+            input_str = input_str.rstrip('\n')
+            logging.info(f"[Query({uid})]\n{input_str}")
+            output_str = output_str.rstrip('\n')
+            logging.info(f"[Response({uid})]\n{output_str}\n\n")
+    except:
+        print(trimmed_format_exc())

@@ -8,6 +8,7 @@ import time
 import logging
 
 from toolbox import get_conf, update_ui, log_chat
+from toolbox import ChatBotWithCookies
 
 import requests
 
@@ -146,7 +147,8 @@ def msg_handle_error(llm_kwargs, chunk_decoded):
     return error_msg
 
 
-def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream=True, additional_fn=None):
+def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWithCookies,
+            history:list=[], system_prompt:str='', stream:bool=True, additional_fn:str=None):
     chatbot.append([inputs, ""])
 
     if additional_fn is not None:
