@@ -27,6 +27,9 @@ class Settings:
     def _draw_setting_senior(self):
         with gr.Tab(label=i18n("高级")):
             worker_num = toolbox.get_conf('DEFAULT_WORKER_NUM')
+            self.history_round_num = gr.Slider(minimum=0, maximum=100, value=20, step=2,
+                                               show_label=True, interactive=True, label="上下文历史记录轮数",
+                                               container=False)
             self.default_worker_num = gr.Slider(minimum=1, maximum=30, value=worker_num, step=1,
                                                 show_label=True, interactive=True, label="插件多线程最大并行",
                                                 container=False)
@@ -410,7 +413,7 @@ class GptsStore:
             self.gpts_samples_mapping = {}
             with gr.Tabs(elem_id='store-tabs') as self.gpts_store_tabs:
                 self._tag_category_tab('🔥 热门应用', gpts_samples, False)
-                self._tag_category_tab('🔍 关键词搜索',  [], True)
+                self._tag_category_tab('🔍 关键词搜索', [], True)
                 gpts_tags = toolbox.get_conf('GPTS_DEFAULT_CLASSIFICATION')
                 gpts_tags = gpts_tags if gpts_tags else gpts['tag']
                 for tag in set(gpts_tags):

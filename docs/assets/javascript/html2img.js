@@ -1,4 +1,9 @@
-async function convert2canvas(shareContent = null) {
+function toastConvert2Img() {
+    toast_push('🏃🏻‍ 正在将对话记录转换为图片', 2000);
+    convert2canvas();
+}
+
+function convert2canvas(shareContent = null) {
     let pElement = statusDisplay.querySelector('p');
     pElement.innerHTML = '🏃🏻‍ 正在将对话记录转换为图片，请稍等'
     if (shareContent == null) {
@@ -52,10 +57,10 @@ async function convert2canvas(shareContent = null) {
         toast_push('📸 已将图片写入粘贴板，或可在右侧工具栏消息中下载', 2000)
 
     });
-    await canvas;
+    return canvas;
 }
 
-async function copyToClipboard(image) {
+function copyToClipboard(image) {
     // 尝试使用 Clipboard API 写入剪切板
     if (navigator.clipboard && window.isSecureContext) {
         // 将image转换成Blob对象

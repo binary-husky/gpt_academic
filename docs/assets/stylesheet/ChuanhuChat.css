@@ -440,7 +440,7 @@ body.popup-open {
 }
 
 #chatbot-input-box {
-    max-width: 999px;
+    max-width: 1056px;
     /* margin: 0 auto; */
     gap: 20px;
     padding: 6px 16px 24px;

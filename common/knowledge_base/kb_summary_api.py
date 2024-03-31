@@ -2,7 +2,7 @@ from fastapi import Body
 from common.configs import (DEFAULT_VS_TYPE, EMBEDDING_MODEL,
                             OVERLAP_SIZE)
 from common.logger_handler import logger
-from common.knowledge_base.utils import (list_files_from_folder)
+from common.knowledge_base.utils import list_files_from_folder
 from sse_starlette import EventSourceResponse
 import json
 from common.knowledge_base.kb_service.base import KBServiceFactory
@@ -226,7 +226,7 @@ if __name__ == '__main__':
     summary = summary_file_to_vector_store('增长需求文档',
                                            '【用户增长】新增Whatsapp优先发送策略【跟包】.docx',
                                            True, 'faiss', 'bge-large-zh-v1.5',
-                                           '', LLM_MODELS[0], temperature=1, max_tokens=None)
+                                           '', LLM_MODELS[0], temperature=1, max_tokens=4096)
 
     for s in summary:
         print(s)

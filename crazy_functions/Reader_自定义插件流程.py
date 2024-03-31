@@ -32,7 +32,7 @@ def Reader_多阶段生成回答(user_input, llm_kwargs, plugin_kwargs, chatbot,
         prompt = stage.get('提示词', False)
         func = stage.get('保存结果', False)
         knowledge = stage.get('关联知识库', False)
-        chatbot.append([None, f'开始解析`{stage}`动作，使用`{prompt}`提问后，调用`{func}`保存回答'])
+        chatbot[-1][1] += f'\n\n---\n\n开始解析`{stage}`动作，使用`{prompt}`提问后，调用`{func}`保存回答'
         yield from update_ui(chatbot=chatbot, history=history)
         embedding_limit = yield from crazy_box.func_拆分与提问(embedding_limit, llm_kwargs, plugin_kwargs, chatbot,
                                                                history, plugin_prompt=prompt, knowledge_base=knowledge)

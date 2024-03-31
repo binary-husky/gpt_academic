@@ -10,7 +10,7 @@
 import tiktoken, copy
 from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor
-from common.toolbox import get_conf, trimmed_format_exc, gpt_model_select
+from common.toolbox import get_conf, trimmed_format_exc
 
 from .bridge_chatgpt_cls import predict_no_ui_long_connection as chatgpt_noui
 from .bridge_chatgpt_cls import predict as chatgpt_ui
@@ -51,6 +51,21 @@ class LazyloadTiktoken(object):
         return encoder.decode(*args, **kwargs)
 
 
+class ModelFinder(dict):
+    def __getitem__(self, key):
+        try:
+            return super().__getitem__(key)
+        except KeyError:
+            return {
+                "fn_with_ui": chatgpt_ui,
+                "fn_without_ui": chatgpt_noui,
+                "endpoint": openai_endpoint,
+                "max_token": 32000,
+                "tokenizer": tokenizer_gpt4,
+                "token_cnt": get_token_num_gpt4,
+            }
+
+
 # Endpoint 重定向
 API_URL_REDIRECT = get_conf("API_URL_REDIRECT")
 openai_endpoint = "https://api.openai.com/v1/chat/completions"
@@ -78,8 +93,11 @@ get_token_num_gpt4 = lambda txt: len(tokenizer_gpt4.encode(txt, disallowed_speci
 # 开始初始化模型
 AVAIL_LLM_MODELS, LLM_MODEL = get_conf("AVAIL_LLM_MODELS", "LLM_MODEL")
 AVAIL_LLM_MODELS = AVAIL_LLM_MODELS + [LLM_MODEL]
+
+# 开启万能模型
+model_info = ModelFinder()
 # -=-=-=-=-=-=- 以下这部分是最早加入的最稳定的模型 -=-=-=-=-=-=-
-model_info = {
+model_info.update({
     # openai
     "gpt-3.5-turbo": {
         "fn_with_ui": chatgpt_ui,
@@ -170,14 +188,6 @@ model_info = {
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
     },
-    "gpt-4-gizmo": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": openai_endpoint,
-        "max_token": 32000,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
-    },
     # api_2d (此后不需要在此处添加api2d的接口了，因为下面的代码会自动添加)
     "api2d-gpt-3.5-turbo": {
         "fn_with_ui": chatgpt_ui,
@@ -244,7 +254,7 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
-}
+})
 # -=-=-=-=-=-=- 月之暗面 -=-=-=-=-=-=-
 from request_llms.bridge_moonshot import predict as moonshot_ui
 from request_llms.bridge_moonshot import predict_no_ui_long_connection as moonshot_no_ui
@@ -335,6 +345,7 @@ if "claude-1-100k" in AVAIL_LLM_MODELS or "claude-2" in AVAIL_LLM_MODELS:
     })
 from .bridge_claude_cls import predict_no_ui_long_connection as claude_noui_cls
 from .bridge_claude_cls import predict as claude_ui_cls
+
 if not get_conf('ANTHROPIC_API_URL_REDIRECT'):
     model_info.update({
         "claude-3-opus-20240229": {
@@ -733,7 +744,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
         用于负责跨越线程传递已经输出的部分，大部分时候仅仅为了fancy的视觉效果，留空即可。observe_window[0]：观测窗。observe_window[1]：看门狗
     """
     import threading, time, copy
-    model, use_model = gpt_model_select(llm_kwargs['llm_model'], model_info)
+    model = llm_kwargs['llm_model']
     n_model = 1
     if '&' not in model:
         assert not model.startswith("tgui"), "TGUI不支持函数插件的实现"
@@ -808,6 +819,5 @@ def predict(inputs, llm_kwargs, *args, **kwargs):
     chatbot 为WebUI中显示的对话列表，修改它，然后yeild出去，可以直接修改对话界面内容
     additional_fn代表点击的哪个按钮，按钮见functional.py
     """
-    model, _ = gpt_model_select(llm_kwargs['llm_model'], model_info)
-    method = model_info[model]["fn_with_ui"]  # 如果这里报错，检查config中的AVAIL_LLM_MODELS选项
+    method = model_info[llm_kwargs['llm_model']]["fn_with_ui"]  # 如果这里报错，检查config中的AVAIL_LLM_MODELS选项
     yield from method(inputs, llm_kwargs, *args, **kwargs)

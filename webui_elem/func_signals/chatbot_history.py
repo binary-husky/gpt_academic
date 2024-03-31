@@ -38,8 +38,8 @@ def clear_input(inputs, cookies, ipaddr: gr.Request):
     file_list, only_name, new_path, new_name = get_files_list(user_path, filter_format=['.json'])
     index = 2
     if not cookies.get('first_chat'):
-        cookies['first_chat'] = "_".join([cookies.get('pre_gpts', ''),
-                                          replace_special_chars(generate_random_string(inputs))])
+        pre_gpts = cookies.get('pre_gpts', '') + '_' if cookies.get('pre_gpts', '') else ''
+        cookies['first_chat'] = pre_gpts + replace_special_chars(generate_random_string(inputs))
         select_file = cookies.get('first_chat')
         while select_file in only_name:  # 重名处理
             select_file = f"{index}_{cookies['first_chat']}"
@@ -66,14 +66,15 @@ def stop_chat_refresh(chatbot, cookies, ipaddr: gr.Request):
     thread_write_chat_json(chatbot_with_cookie, user)
 
 
-def clear_chat_cookie(llm_model, ipaddr: gr.Request):
+def clear_chat_cookie(llm_model, cookie, ipaddr: gr.Request):
     API_KEY = get_conf('API_KEY')
-    cookie = {'api_key': API_KEY, 'llm_model': llm_model}
+    new_cookie = {'api_key': API_KEY, 'llm_model': llm_model,
+                  'bot_avatar': cookie.get('bot_avatar')}
     user_path = os.path.join(init_path.private_history_path, user_client_mark(ipaddr))
     file_list, only_name, new_path, new_name = get_files_list(user_path, filter_format=['.json'])
     default_params = get_conf('LLM_DEFAULT_PARAMETER')
-    llms_combo = [cookie.get(key, default_params[key]) for key in default_params] + [gr.update(value=llm_model)]
-    output = [[], [], cookie, *llms_combo, '已重置对话记录和对话Cookies',
+    llms_combo = [new_cookie.get(key, default_params[key]) for key in default_params] + [gr.update(value=llm_model)]
+    output = [[], [], new_cookie, *llms_combo, '已重置对话记录和对话Cookies',
               gr.update(choices=['新对话'] + only_name, value='新对话'), "新对话"]
     return output
 

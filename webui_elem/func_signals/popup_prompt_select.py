@@ -153,7 +153,7 @@ def prompt_save(txt, name, prompt: gr.Dataset, pro_select, ipaddr: gr.Request):
         raise gr.Error('!!!!编辑区域 or 名称不能为空!!!!')
 
 
-def prompt_input(edit_check, input_txt: str, llm_select, index, data, ipaddr: gr.Request):
+def prompt_input(edit_check, input_txt: str, cookies, llm_select, index, data, ipaddr: gr.Request):
     """
     点击dataset的值使用Prompt
     Args:
@@ -169,7 +169,7 @@ def prompt_input(edit_check, input_txt: str, llm_select, index, data, ipaddr: gr
     data_str = str(data['samples'][index][2])
     data_cls = str(data['samples'][index][3])
     mask_ = check_list_format(data_str)
-    chatbot_cookie = clear_chat_cookie(llm_model=llm_select, ipaddr=ipaddr)
+    chatbot_cookie = clear_chat_cookie(llm_model=llm_select, cookie=cookies, ipaddr=ipaddr)
     mask_comb = [gr.update() for i in range(3)]
     prompt_comb = [gr.update() for i in range(3)]
     tab_select = gr.update()

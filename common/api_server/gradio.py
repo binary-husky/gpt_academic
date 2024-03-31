@@ -35,8 +35,6 @@ async def get_favicon():
 
 
 async def check_authentication(request: Request, call_next):
-    if request.url.path == '/spike/api/predict' or request.url.path == '/spike/reset':
-        return await call_next(request)
     pattern = re.compile(r".*\/users_private\/.*")
     if pattern.match(request.url.path):
         if toolbox.get_conf('AUTHENTICATION') != 'SQL':  # 暂时没办法拿到用户信息，所以不禁止用户访问

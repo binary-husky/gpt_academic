@@ -71,13 +71,12 @@ class GPTChatInit:
         """
         整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
         """
-        from request_llms.bridge_all import model_info
-        llm_kwargs['llm_model'], self.llm_model = gpt_model_select(llm_kwargs['llm_model'], model_info)
 
         if not is_any_api_key(llm_kwargs['api_key']):
             raise AssertionError(
                 "你提供了错误的API_KEY。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。")
 
+        self.llm_model = llm_kwargs['llm_model']
         api_key = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
         llm_kwargs.update({'use-key': api_key})
         headers = {
@@ -131,8 +130,7 @@ class GPTChatInit:
     def _check_endpoint(llm_kwargs):
         # 检查endpoint是否合法
         from request_llms.bridge_all import model_info
-        model, _ = gpt_model_select(llm_kwargs['llm_model'], model_info)
-        return verify_endpoint(model_info[model]['endpoint'])
+        return verify_endpoint(model_info[llm_kwargs['llm_model']]['endpoint'])
 
     def _analysis_content(self, chuck):
         chunk_decoded = chuck.decode("utf-8")

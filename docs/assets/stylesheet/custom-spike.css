@@ -17,6 +17,10 @@
 .fold-panel {
     margin-bottom: 5px !important;
 }
+.fold-panel .fold-title {
+    align-items: self-start !important;
+    display: flex !important;
+}
 .normal_mut_select .token[class*="svelte-"] {
     padding: 5px
 }

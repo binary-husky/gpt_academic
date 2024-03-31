@@ -73,7 +73,7 @@ def ArgsGeneralWrapper(f):
                   # 知识库
                   kb_selects, vector_score, vector_top_k,
                   # 高级设置
-                  models, worker_num, ocr_trust,
+                  models, history_num, worker_num, ocr_trust,
                   # 个人信息配置
                   openai_key, wps_cookies, qq_cookies, feishu_header,
                   project_user_key, project_header,
@@ -98,6 +98,8 @@ def ArgsGeneralWrapper(f):
                 'project_user_key': project_user_key, 'project_header': project_header
             }
         }
+        # 历史对话轮次
+        history = history[:history_num]
         # 对话参数
         if not cookies.get('first_chat') and args:
             cookies['first_chat'] = args[0] + "_" + func_box.created_atime()
@@ -1069,8 +1071,8 @@ def select_api_key(keys, llm_model):
     import random
     avail_key_list = []
     key_list = keys.split(',')
-
-    if llm_model.startswith('gpt-') or llm_model.startswith('nx-gpt-'):
+    from request_llms.bridge_all import model_info, ModelFinder
+    if llm_model.startswith('gpt-') or llm_model.startswith('nx-gpt-') or isinstance(model_info, ModelFinder):
         for k in key_list:
             if is_openai_api_key(k):
                 avail_key_list.append(k)

@@ -242,18 +242,19 @@ class ProjectFeishu:
                     extraction_txt = fields_map_dict[key]['enum_map'][type_items[key]]
                 elif isinstance(type_items[key], list) and fields_map_dict[key].get('enum_map'):
                     extraction_txt = "".join([fields_map_dict[key]['enum_map'][i] for i in type_items[key]])
-                elif isinstance(type_items[key], list):
-                    extraction_txt = "".join([str(i) for i in type_items[key]])  # 确保是字符串
                 elif fields_map_dict[key].get('compound_map'):  # 复合字段处理
                     for i, v in enumerate(type_items[key]):
                         content = ''
                         for t in v:
                             content += fields_map_dict[key]['compound_map'][t['field_key']] + f': ' + \
-                                       t["value"]["doc_text"] + '\n'
+                                       t["value"]["doc_text"]
                         index = "-" + str(i) if i > 0 else ''
                         data_dict[fields_map_dict[key]['name'] + index] = content
+                elif isinstance(type_items[key], list):
+                    extraction_txt = "".join([str(i) for i in type_items[key]])  # 确保是字符串
                 else:
                     extraction_txt = type_items[key]
+                # 二次处理
                 if data_dict[map_key] and extraction_txt:
                     data_dict[map_key] = data_dict[map_key] + "-" + extraction_txt
                 elif not data_dict[map_key] and extraction_txt:
@@ -376,9 +377,9 @@ class ProjectFeishu:
 
     def get_case_items_list(self, ids: list = None):
         """获取用例列表"""
-        issue_items = self.post_work_items(key=self.issue_type_key, item_name=work_items.case_item_name, ids=ids)
+        case_items = self.post_work_items(key=self.case_type_key, item_name=work_items.case_item_name, ids=ids)
         fields_map_dict = self._get_key_reverse_mapping(self.case_type_key, CASE_REVERSE_MAPPING)
-        case_list = self._mapping_extraction(issue_items, fields_map_dict)
+        case_list = self._mapping_extraction(case_items, fields_map_dict)
         return case_list
 
 
@@ -441,6 +442,6 @@ if __name__ == '__main__':
     # converter_project_md('', './')
     feishu = ProjectFeishu('')
     # # print(feishu._get_work_list(feishu.items_mapping[work_items.case_name]['type_key']))
-    print(feishu.get_story_items_dict())
+    print(feishu.get_case_items_list())
     # for i in feishu.get_home_story_list(7, '未排期', api_name=['middleoffice']):
     #     print(i)

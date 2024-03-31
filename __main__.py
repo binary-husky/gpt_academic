@@ -88,8 +88,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
                                       outputs=[self.pro_func_prompt, self.pro_fp_state, self.pro_private_check]
                                       )
         self.pro_func_prompt.select(fn=func_signals.prompt_input,
-                                    inputs=[self.multiplexing_edit_check, self.user_input, self.model_select_dropdown,
-                                            self.pro_func_prompt, self.pro_fp_state],
+                                    inputs=[self.multiplexing_edit_check, self.user_input, self.cookies,
+                                            self.model_select_dropdown, self.pro_func_prompt, self.pro_fp_state],
                                     outputs=[self.treasure_bag_tab,
                                              self.prompt_cls_select, self.pro_edit_txt, self.pro_name_txt,
                                              self.mask_cls_select, self.masks_dataset, self.masks_name_txt,
@@ -396,7 +396,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         self.project_models.input(func_signals.update_models,
                                   inputs=[self.input_models, self.vision_models, self.project_models],
                                   outputs=[self.models_box])
-        self.setting_combo = [self.models_box, self.default_worker_num, self.ocr_identifying_trust]
+        self.setting_combo = [self.models_box, self.history_round_num, self.default_worker_num, self.ocr_identifying_trust]
         self.input_combo.extend(self.setting_combo)
         # 个人信息
         self.user_combo = [self.openai_keys, self.wps_cookie, self.qq_cookie, self.feishu_cookie,
@@ -416,7 +416,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         click_handle = self.submitBtn.click(**self.clear_agrs).then(**self.predict_args)
         self.cancel_handles.append(submit_handle)
         self.cancel_handles.append(click_handle)
-        self.emptyBtn.click(func_signals.clear_chat_cookie, [self.model_select_dropdown],
+        self.emptyBtn.click(func_signals.clear_chat_cookie, [self.model_select_dropdown, self.cookies],
                             [*self.llms_cookies_combo, self.status_display,
                              self.historySelectList, self.saveFileName])
         self.changeSingleSessionBtn.click(

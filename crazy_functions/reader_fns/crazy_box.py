@@ -311,8 +311,8 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
     gpt_latest_msg = chatbot[-1][1]
     if type(inputs) is list:
         if get_token_num(str(inputs)) > max_token:
-            bro_say = gpt_latest_msg + f'\n\n{func_box.html_tag_color(inputs[0][:20])} 对话数据预计会超出`{all_tokens}' \
-                                       f'token`限制, 将按照模型最大可接收token拆分为多线程运行'
+            bro_say = gpt_latest_msg + f'\n\n提交数据预计会超出`{all_tokens}' \
+                                       f'token`限制, 将按照模型最大可接收token拆分为多线程运行\n\n---\n\n'
             yield from toolbox.update_ui_lastest_msg(bro_say, chatbot, history)
             segments.extend(split_list_token_limit(data=inputs, get_num=get_token_num, max_num=max_token))
         else:
@@ -407,7 +407,6 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
             history_array=history_array,
             sys_prompt_array=["" for _ in range(len(inputs_array))],
             # max_workers=5,  # OpenAI所允许的最大并行过载
-            scroller_max_len=80,
         )
     if apply_history:
         history.extend(gpt_response_collection)

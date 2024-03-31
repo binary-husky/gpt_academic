@@ -41,12 +41,11 @@ class Shell:
                                      stdin=subprocess.PIPE, stderr=subprocess.PIPE,
                                      stdout=subprocess.PIPE, encoding='utf-8',
                                      errors='ignore', close_fds=True)
-        self._thread = None
         self._result = ''
         self._error_msg = ''
         self.queue = Queue()
 
-    def reader_thread(self, stream, tag):
+    def __reader_thread(self, stream, tag):
         """
         Read lines from a streaming source and put them on the queue.
         """
@@ -54,10 +53,15 @@ class Shell:
             self.queue.put((tag, line))
         stream.close()
 
+    def stop_thread(self):
+        self.subp.terminate()
+        return self._result
+
     def stream_start(self):
+        logger.debug(f'Start running commands: {self.__args}')
         # Create two threads to read from stdout and stderr respectively.
-        stdout_thread = Thread(target=self.reader_thread, args=(self.subp.stdout, 'stdout'), daemon=True)
-        stderr_thread = Thread(target=self.reader_thread, args=(self.subp.stderr, 'stderr'), daemon=True)
+        stdout_thread = Thread(target=self.__reader_thread, args=(self.subp.stdout, 'stdout'), daemon=True)
+        stderr_thread = Thread(target=self.__reader_thread, args=(self.subp.stderr, 'stderr'), daemon=True)
 
         # Start both threads.
         stdout_thread.start()
@@ -80,8 +84,8 @@ class Shell:
             yield tag, line
 
     def start(self) -> str:
-        sys_out = self.subp.stdout
         logger.debug(f'Start running commands: {self.__args}')
+        sys_out = self.subp.stdout
         try:
             for i in sys_out:
                 logger.info(i.rstrip())
@@ -682,9 +686,9 @@ def get_avatar_img(llm_s, bot_avatar):
     if bot_avatar:
         chat_img = bot_avatar
     if chat_img:
-        return ['./docs/assets/chatbot_avatar/tester.png', chat_img.replace(init_path.base_path, '.')]
+        return ['./docs/assets/chatbot_avatar/logo.png', chat_img.replace(init_path.base_path, '.')]
     else:
-        return ['./docs/assets/chatbot_avatar/tester.png', './docs/chatbot_avatar/avatar/user.png']
+        return ['./docs/assets/chatbot_avatar/logo.png', './docs/chatbot_avatar/avatar/user.png']
 
 
 valid_img_extensions = ['png', 'jpg', 'jpeg', 'bmp', 'svg', 'webp', 'ico', 'tif', 'tiff', 'raw', 'eps', 'gif']
@@ -715,11 +719,13 @@ def get_fold_panel(btn_id=None):
         btn_id = uuid.uuid4().hex
 
     def _format(title, content: str = '', status=''):
+        if isinstance(status, bool) and status:
+            status = 'Done'
         fold_html = get_html('fold-panel.html').replace('{id}', btn_id)
         if isinstance(content, dict):
             content = json.dumps(content, indent=4, ensure_ascii=False)
         content = f'\n```\n{content.replace("```", "").strip()}\n```\n'
-        return fold_html.format(title=title, content=content, status=status)
+        return fold_html.format(title=f"<p>{title}</p>", content=content, status=status)
 
     return _format
 

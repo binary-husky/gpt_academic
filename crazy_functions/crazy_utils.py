@@ -72,7 +72,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
     from concurrent.futures import ThreadPoolExecutor
     from request_llms.bridge_all import predict_no_ui_long_connection
     # 用户反馈
-    chatbot.append([inputs_show_user, ""])
+    chatbot.append([None, ''])
     yield from update_ui(chatbot=chatbot, history=[])  # 刷新界面
     executor = ThreadPoolExecutor(max_workers=16)
     mutable = ["", time.time(), ""]
@@ -129,6 +129,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
 
     # 提交任务
     future = executor.submit(_req_gpt, inputs, history, sys_prompt)
+    old_gpt_say = chatbot[-1][1]
     while True:
         # yield一次以刷新前端页面
         time.sleep(refresh_interval)
@@ -136,11 +137,11 @@ def request_gpt_model_in_new_thread_with_ui_alive(
         mutable[1] = time.time()
         if future.done():
             break
-        chatbot[-1] = [chatbot[-1][0], mutable[0]]
+        chatbot[-1][1] = old_gpt_say + mutable[0]
         yield from update_ui(chatbot=chatbot, history=[])  # 刷新界面
 
     final_result = future.result()
-    chatbot[-1] = [chatbot[-1][0], final_result]
+    chatbot[-1][1] = old_gpt_say + mutable[0]
     yield from update_ui(chatbot=chatbot, history=[])  # 如果最后成功了，则删除报错信息
     return final_result
 
@@ -198,16 +199,13 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         except:
             max_workers = 8
         if max_workers <= 0: max_workers = 3
-    # 屏蔽掉 chatglm的多线程，可能会导致严重卡顿
-    if not can_multi_process(llm_kwargs['llm_model']):
-        max_workers = 1
+    # # 屏蔽掉 chatglm的多线程，可能会导致严重卡顿
+    # if not can_multi_process(llm_kwargs['llm_model']):
+    #     max_workers = 1
     executor = ThreadPoolExecutor(max_workers=max_workers)
     n_frag = len(inputs_array)
     # 用户反馈
-    you_say = ""
-    for i in inputs_array:
-        you_say += f"```folded\n{str(i).replace('```', '')}\n```\n\n"
-    chatbot.append([you_say, ""])
+    chatbot.append([None, ''])
     yield from update_ui(chatbot=chatbot, history=[])  # 刷新界面
     # 跨线程传递
     mutable = [[f"", time.time(), "等待中"] for _ in range(n_frag)]
@@ -231,7 +229,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     inputs=inputs, llm_kwargs=llm_kwargs, history=history,
                     sys_prompt=sys_prompt, observe_window=mutable[index], console_slience=True
                 )
-                mutable[index][2] = f"``folded\n{gpt_say}\n``"  # 已完成
+                mutable[index][2] = f"{gpt_say}"  # 已完成
                 if 'raise ConnectionAbortedError' in gpt_say:  # 超出Tokens限制错误标记位
                     mutable[index][2] = "!!超出Tokens限制，捕获了已生成的回答，但回答结尾会损失部分数据!!"
                 return gpt_say
@@ -291,6 +289,8 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                zip(
                    range(len(inputs_array)), inputs_array, history_array, sys_prompt_array)]
     cnt = 0
+    folder_block = [func_box.get_fold_panel() for i in range(len(inputs_array))]
+    gpt_old_say = chatbot[-1][1]
     while True:
         # yield一次以刷新前端页面
         time.sleep(refresh_interval)
@@ -307,14 +307,20 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                 replace('\n', '').replace('```', '...').replace('<br/>',
                                                                 '.....').replace('$', '.') + "`... ]"
             observe_win.append(print_something_really_funny)
+        stat_str = ""
+        for thread_index, done, obs, folder in zip(range(len(worker_done)), worker_done, observe_win, folder_block):
+            status_input = f'Thread_{thread_index}\t'
+            content = mutable[thread_index][0]
+            if not done:
+                status_content = f'`{mutable[thread_index][2]}`: {obs}'
+            else:
+                status_content = f'`已完成`'
+            status_output = f'{status_content}'
+
+            stat_str += folder(status_input+status_output, content, done) + '\n\n'
+
         # 在前端打印些好玩的东西
-        stat_str = ''.join([
-            f'`{inputs_show_user_array[thread_index][0:5]}...{inputs_show_user_array[thread_index][-5:]}_{thread_index}`\t'
-            f'`{mutable[thread_index][2]}`: {obs}\n\n'
-            if not done else f'`{mutable[thread_index][2]}`\n\n'
-            for thread_index, done, obs in zip(range(len(worker_done)), worker_done, observe_win)])
-        # 在前端打印些好玩的东西
-        chatbot[-1] = [chatbot[-1][0], f'多线程操作已经开始，完成情况: \n\n{stat_str}' + ''.join(['.'] * (cnt % 10 + 1))]
+        chatbot[-1][1] = gpt_old_say + f'多线程提问已经开始，进度如下: \n\n{stat_str}'
         yield from update_ui(chatbot=chatbot, history=[])  # 刷新界面
         if all(worker_done):
             executor.shutdown()
