@@ -1,7 +1,10 @@
 import pickle
 import base64
 import uuid
+import json
 from toolbox import get_conf
+import json
+
 
 """
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -45,7 +48,6 @@ adjust_theme, advanced_css, theme_declaration, _ = load_dynamic_theme(get_conf("
 cookie相关工具函数
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 """
-
 def init_cookie(cookies):
     # 为每一位访问的用户赋予一个独一无二的uuid编码
     cookies.update({"uuid": uuid.uuid4()})
@@ -53,16 +55,17 @@ def init_cookie(cookies):
 
 
 def to_cookie_str(d):
-    # Pickle the dictionary and encode it as a string
-    pickled_dict = pickle.dumps(d)
-    cookie_value = base64.b64encode(pickled_dict).decode("utf-8")
+    # serialize the dictionary and encode it as a string
+    serialized_dict = json.dumps(d)
+    cookie_value = base64.b64encode(serialized_dict.encode('utf8')).decode("utf-8")
     return cookie_value
 
 
 def from_cookie_str(c):
-    # Decode the base64-encoded string and unpickle it into a dictionary
-    pickled_dict = base64.b64decode(c.encode("utf-8"))
-    return pickle.loads(pickled_dict)
+    # Decode the base64-encoded string and unserialize it into a dictionary
+    serialized_dict = base64.b64decode(c.encode("utf-8"))
+    serialized_dict.decode("utf-8")
+    return json.loads(serialized_dict)
 
 
 """

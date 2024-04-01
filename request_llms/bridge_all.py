@@ -853,7 +853,8 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list, sys
                 # 观察窗（window）
                 chat_string = []
                 for i in range(n_model):
-                    chat_string.append( f"【{str(models[i])} 说】: <font color=\"{colors[i]}\"> {window_mutex[i][0]} </font>" )
+                    color = colors[i%len(colors)]
+                    chat_string.append( f"【{str(models[i])} 说】: <font color=\"{color}\"> {window_mutex[i][0]} </font>" )
                 res = '<br/><br/>\n\n---\n\n'.join(chat_string)
                 # # # # # # # # # # #
                 observe_window[0] = res
@@ -870,7 +871,8 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list, sys
             time.sleep(1)
 
         for i, future in enumerate(futures):  # wait and get
-            return_string_collect.append( f"【{str(models[i])} 说】: <font color=\"{colors[i]}\"> {future.result()} </font>" )
+            color = colors[i%len(colors)]
+            return_string_collect.append( f"【{str(models[i])} 说】: <font color=\"{color}\"> {future.result()} </font>" )
 
         window_mutex[-1] = False # stop mutex thread
         res = '<br/><br/>\n\n---\n\n'.join(return_string_collect)

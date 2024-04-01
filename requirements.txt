@@ -1,4 +1,4 @@
-https://public.agent-matrix.com/publish/gradio-3.32.8-py3-none-any.whl
+https://public.gpt-academic.top/publish/gradio-3.32.8-py3-none-any.whl
 gradio-client==0.8
 pypdf2==2.12.1
 zhipuai>=2
