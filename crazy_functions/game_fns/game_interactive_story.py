@@ -88,8 +88,8 @@ class MiniGame_ResumeStory(GptAcademicGameBaseState):
         self.story = []
         chatbot.append(["互动写故事", f"这次的故事开头是：{self.headstart}"])
         self.sys_prompt_ = '你是一个想象力丰富的杰出作家。正在与你的朋友互动，一起写故事，因此你每次写的故事段落应少于300字（结局除外）。'
-        
-        
+
+
     def generate_story_image(self, story_paragraph):
         try:
             from crazy_functions.图片生成 import gen_image
@@ -98,13 +98,13 @@ class MiniGame_ResumeStory(GptAcademicGameBaseState):
             return f'<br/><div align="center"><img src="file={image_path}"></div>'
         except:
             return ''
-        
+
     def step(self, prompt, chatbot, history):
-        
+
         """
         首先，处理游戏初始化等特殊情况
         """
-        if self.step_cnt == 0:  
+        if self.step_cnt == 0:
             self.begin_game_step_0(prompt, chatbot, history)
             self.lock_plugin(chatbot)
             self.cur_task = 'head_start'
@@ -132,7 +132,7 @@ class MiniGame_ResumeStory(GptAcademicGameBaseState):
             inputs_ = prompts_hs.format(headstart=self.headstart)
             history_ = []
             story_paragraph = yield from request_gpt_model_in_new_thread_with_ui_alive(
-                inputs_, '故事开头', self.llm_kwargs, 
+                inputs_, '故事开头', self.llm_kwargs,
                 chatbot, history_, self.sys_prompt_
             )
             self.story.append(story_paragraph)
@@ -147,7 +147,7 @@ class MiniGame_ResumeStory(GptAcademicGameBaseState):
             inputs_ = prompts_interact.format(previously_on_story=previously_on_story)
             history_ = []
             self.next_choices = yield from request_gpt_model_in_new_thread_with_ui_alive(
-                inputs_, '请在以下几种故事走向中，选择一种（当然，您也可以选择给出其他故事走向）：', self.llm_kwargs, 
+                inputs_, '请在以下几种故事走向中，选择一种（当然，您也可以选择给出其他故事走向）：', self.llm_kwargs,
                 chatbot,
                 history_,
                 self.sys_prompt_
@@ -166,7 +166,7 @@ class MiniGame_ResumeStory(GptAcademicGameBaseState):
             inputs_ = prompts_resume.format(previously_on_story=previously_on_story, choice=self.next_choices, user_choice=prompt)
             history_ = []
             story_paragraph = yield from request_gpt_model_in_new_thread_with_ui_alive(
-                inputs_, f'下一段故事（您的选择是：{prompt}）。', self.llm_kwargs, 
+                inputs_, f'下一段故事（您的选择是：{prompt}）。', self.llm_kwargs,
                 chatbot, history_, self.sys_prompt_
             )
             self.story.append(story_paragraph)
@@ -181,10 +181,10 @@ class MiniGame_ResumeStory(GptAcademicGameBaseState):
             inputs_ = prompts_interact.format(previously_on_story=previously_on_story)
             history_ = []
             self.next_choices = yield from request_gpt_model_in_new_thread_with_ui_alive(
-                inputs_, 
-                '请在以下几种故事走向中，选择一种。当然，您也可以给出您心中的其他故事走向。另外，如果您希望剧情立即收尾，请输入剧情走向，并以“剧情收尾”四个字提示程序。', self.llm_kwargs, 
-                chatbot, 
-                history_, 
+                inputs_,
+                '请在以下几种故事走向中，选择一种。当然，您也可以给出您心中的其他故事走向。另外，如果您希望剧情立即收尾，请输入剧情走向，并以“剧情收尾”四个字提示程序。', self.llm_kwargs,
+                chatbot,
+                history_,
                 self.sys_prompt_
             )
             self.cur_task = 'user_choice'
@@ -200,7 +200,7 @@ class MiniGame_ResumeStory(GptAcademicGameBaseState):
             inputs_ = prompts_terminate.format(previously_on_story=previously_on_story, user_choice=prompt)
             history_ = []
             story_paragraph = yield from request_gpt_model_in_new_thread_with_ui_alive(
-                inputs_, f'故事收尾（您的选择是：{prompt}）。', self.llm_kwargs, 
+                inputs_, f'故事收尾（您的选择是：{prompt}）。', self.llm_kwargs,
                 chatbot, history_, self.sys_prompt_
             )
             # # 配图

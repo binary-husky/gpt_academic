@@ -42,16 +42,12 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
         for i in range(n_fragment):
             NUM_OF_WORD = MAX_WORD_TOTAL // n_fragment
             i_say = f"Read this section, recapitulate the content of this section with less than {NUM_OF_WORD} Chinese characters: {paper_fragments[i]}"
-            i_say_show_user = f"[{i + 1}/{n_fragment}] Read this section, recapitulate the content of this section with less than {NUM_OF_WORD} Chinese characters: {paper_fragments[i][:200]}"
-            gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(i_say, i_say_show_user,
-                                                                               # i_say=真正给chatgpt的提问， i_say_show_user=给用户看的提问
-                                                                               llm_kwargs, chatbot,
-                                                                               history=[
-                                                                                   "The main idea of the previous section is?",
-                                                                                   last_iteration_result],  # 迭代上一次的结果
-                                                                               sys_prompt="Extract the main idea of this section with Chinese."
-                                                                               # 提示
-                                                                               )
+            i_say_show_user = f"[{i+1}/{n_fragment}] Read this section, recapitulate the content of this section with less than {NUM_OF_WORD} Chinese characters: {paper_fragments[i][:200]}"
+            gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(i_say, i_say_show_user,  # i_say=真正给chatgpt的提问， i_say_show_user=给用户看的提问
+                                                                                llm_kwargs, chatbot,
+                                                                                history=["The main idea of the previous section is?", last_iteration_result], # 迭代上一次的结果
+                                                                                sys_prompt="Extract the main idea of this section with Chinese."  # 提示
+                                                                                )
             iteration_results.append(gpt_say)
             last_iteration_result = gpt_say
 
@@ -71,15 +67,15 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
     - (2):What are the past methods? What are the problems with them? Is the approach well motivated?
     - (3):What is the research methodology proposed in this paper?
     - (4):On what task and what performance is achieved by the methods in this paper? Can the performance support their goals?
-Follow the format of the output that follows:                  
+Follow the format of the output that follows:
 1. Title: xxx\n\n
 2. Authors: xxx\n\n
 3. Affiliation: xxx\n\n
 4. Keywords: xxx\n\n
 5. Urls: xxx or xxx , xxx \n\n
 6. Summary: \n\n
-    - (1):xxx;\n 
-    - (2):xxx;\n 
+    - (1):xxx;\n
+    - (2):xxx;\n
     - (3):xxx;\n
     - (4):xxx.\n\n
 Be sure to use Chinese answers (proper nouns need to be marked in English), statements as concise and academic as possible,
@@ -91,7 +87,7 @@ do not have too much repetitive information, numerical values using the original
         gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
             inputs=i_say, inputs_show_user='开始最终总结',
             llm_kwargs=llm_kwargs, chatbot=chatbot, history=final_results,
-            sys_prompt=f"Extract the main idea of this paper with less than {NUM_OF_WORD} Chinese characters"
+            sys_prompt= f"Extract the main idea of this paper with less than {NUM_OF_WORD} Chinese characters"
         )
         final_results.append(gpt_say)
         file_write_buffer.extend([i_say, gpt_say])
@@ -105,7 +101,7 @@ do not have too much repetitive information, numerical values using the original
 
 
 @CatchException
-def 批量总结PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 批量总结PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     import glob, os
 
     # 基本信息：功能、贡献者
@@ -119,9 +115,9 @@ def 批量总结PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
         import fitz
     except:
         report_exception(chatbot, history,
-                         a=f"解析项目: {txt}",
-                         b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pymupdf```。")
-        yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
+            a = f"解析项目: {txt}",
+            b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pymupdf```。")
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
 
     # 清空历史，以免输入溢出

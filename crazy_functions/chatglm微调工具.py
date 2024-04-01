@@ -32,7 +32,7 @@ def string_to_options(arguments):
     return args
 
 @CatchException
-def 微调数据集生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 微调数据集生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     """
     txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数，如温度和top_p等，一般原样传递下去就行
@@ -40,14 +40,14 @@ def 微调数据集生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     chatbot         聊天显示框的句柄，用于显示给用户
     history         聊天历史，前情提要
     system_prompt   给gpt的静默提醒
-    web_port        当前软件运行的端口号
+    user_request    当前用户的请求信息（IP地址等）
     """
     history = []    # 清空历史，以免输入溢出
     chatbot.append(["这是什么功能？", "[Local Message] 微调数据集生成"])
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     args = plugin_kwargs.get("advanced_arg", None)
-    if args is None: 
-        chatbot.append(["没给定指令", "退出"])
+    if args is None:
+        chatbot.append(("没给定指令", "退出"))
         yield from update_ui(chatbot=chatbot, history=history); return
     else:
         arguments = string_to_options(arguments=args)
@@ -69,7 +69,7 @@ def 微调数据集生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
             sys_prompt_array=[arguments.system_prompt for _ in (batch)],
             max_workers=10  # OpenAI所允许的最大并行过载
         )
-    
+
         with open(txt+'.generated.json', 'a+', encoding='utf8') as f:
             for b, r in zip(batch, res[1::2]):
                 f.write(json.dumps({"content":b, "summary":r}, ensure_ascii=False)+'\n')
@@ -80,7 +80,7 @@ def 微调数据集生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
 
 
 @CatchException
-def 启动微调(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 启动微调(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     """
     txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数，如温度和top_p等，一般原样传递下去就行
@@ -88,19 +88,19 @@ def 启动微调(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     chatbot         聊天显示框的句柄，用于显示给用户
     history         聊天历史，前情提要
     system_prompt   给gpt的静默提醒
-    web_port        当前软件运行的端口号
+    user_request    当前用户的请求信息（IP地址等）
     """
     import subprocess
     history = []    # 清空历史，以免输入溢出
     chatbot.append(["这是什么功能？", "[Local Message] 微调数据集生成"])
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     args = plugin_kwargs.get("advanced_arg", None)
-    if args is None: 
-        chatbot.append(["没给定指令", "退出"])
+    if args is None:
+        chatbot.append(("没给定指令", "退出"))
         yield from update_ui(chatbot=chatbot, history=history); return
     else:
         arguments = string_to_options(arguments=args)
-      
+
 
 
     pre_seq_len = arguments.pre_seq_len             # 128

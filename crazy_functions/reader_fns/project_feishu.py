@@ -342,8 +342,16 @@ class ProjectFeishu:
             story_dict.update(node_work_task)
         return story_dict
 
+    @staticmethod
+    def __is_convertible_to_number(s):
+        try:
+            return int(s)
+        except ValueError:
+            return s
+
     def post_work_items(self, key, item_name, ids: list = None):
         """获取项目下的缺陷详情"""
+        ids = [self.__is_convertible_to_number(i) for i in ids]
         url = f'{self.base_url}/goapi/v4/search/work_items_by_id'
         body = {
             "data_source": [
@@ -352,9 +360,9 @@ class ProjectFeishu:
                     "work_item_type_key": key
                 }
             ],
-            "ids": ids if ids else [self.issue_id]
+            "ids": ids
         }
-        if not ids or not self.issue_id:
+        if not body['ids']:
             body['ids'] = self._get_work_list(key, item_name)
         response = requests.post(url, headers=self.headers, data=json.dumps(body), verify=False)
         return response.json()
@@ -440,8 +448,8 @@ def get_project_from_limit(link_limit: list, project_folder, config: dict = {}):
 
 if __name__ == '__main__':
     # converter_project_md('', './')
-    feishu = ProjectFeishu('')
-    # # print(feishu._get_work_list(feishu.items_mapping[work_items.case_name]['type_key']))
-    print(feishu.get_case_items_list())
-    # for i in feishu.get_home_story_list(7, '未排期', api_name=['middleoffice']):
-    #     print(i)
+    # feishu = ProjectFeishu('')
+    # # # # print(feishu._get_work_list(feishu.items_mapping[work_items.case_name]['type_key']))
+    # print(feishu.get_issue_items_list())
+    print(converter_project_md('',
+                               './', {}))

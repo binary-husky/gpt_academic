@@ -48,7 +48,7 @@ class GetLlamaHandle(LocalLLMHandle):
             history = kwargs['history']
             console_slience = kwargs.get('console_slience', True)
             return query, max_length, top_p, temperature, history, console_slience
-        
+
         def convert_messages_to_prompt(query, history):
             prompt = ""
             for a, b in history:
@@ -56,7 +56,7 @@ class GetLlamaHandle(LocalLLMHandle):
                 prompt += "\n{b}" + b
             prompt += f"\n[INST]{query}[/INST]"
             return prompt
-        
+
         query, max_length, top_p, temperature, history, console_slience = adaptor(kwargs)
         prompt = convert_messages_to_prompt(query, history)
         # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=-
@@ -70,13 +70,13 @@ class GetLlamaHandle(LocalLLMHandle):
         thread = Thread(target=self._model.generate, kwargs=generation_kwargs)
         thread.start()
         generated_text = ""
-        for new_text in streamer: 
+        for new_text in streamer:
             generated_text += new_text
             if not console_slience: print(new_text, end='')
             yield generated_text.lstrip(prompt_tk_back).rstrip("</s>")
         if not console_slience: print()
         # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=-
-        
+
     def try_to_import_special_deps(self, **kwargs):
         # import something that will raise error if the user does not install requirement_*.txt
         # 🏃‍♂️🏃‍♂️🏃‍♂️ 主进程执行

@@ -90,7 +90,7 @@ class LocalLLMHandle(Process):
         return self.state
 
     def set_state(self, new_state):
-        # ⭐run in main process or 🏃‍♂️🏃‍♂️🏃‍♂️ run in child process 
+        # ⭐run in main process or 🏃‍♂️🏃‍♂️🏃‍♂️ run in child process
         if self.is_main_process:
             self.state = new_state
         else:
@@ -176,8 +176,8 @@ class LocalLLMHandle(Process):
                     r = self.parent.recv()
                     continue
             break
-        return 
-    
+        return
+
     def stream_chat(self, **kwargs):
         # ⭐run in main process
         if self.get_state() == "`准备就绪`":

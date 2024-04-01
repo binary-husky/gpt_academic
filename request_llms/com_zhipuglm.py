@@ -127,7 +127,4 @@ class ZhipuChatInit:
 
 if __name__ == '__main__':
     zhipu = ZhipuChatInit()
-    test = zhipu.generate_chat('你好', {'llm_model': 'glm-4'}, [], '你是WPSAi')
-
-    for chunk, results in test:
-        print(chunk)
+    zhipu.generate_chat('你好', {'llm_model': 'glm-4'}, [], '你是WPSAi')

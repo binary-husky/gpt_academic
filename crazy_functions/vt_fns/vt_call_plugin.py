@@ -40,8 +40,8 @@ def have_any_recent_upload_files(chatbot):
 def get_recent_file_prompt_support(chatbot):
     most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
     path = most_recent_uploaded['path']
-    prompt = "\nAdditional Information:\n"
-    prompt = "In case that this plugin requires a path or a file as argument,"
+    prompt =   "\nAdditional Information:\n"
+    prompt =   "In case that this plugin requires a path or a file as argument,"
     prompt += f"it is important for you to know that the user has recently uploaded a file, located at: `{path}`"
     prompt += f"Only use it when necessary, otherwise, you can ignore this file."
     return prompt
@@ -114,7 +114,7 @@ def execute_plugin(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prom
     gpt_json_io.format_instructions += "The information about this plugin is:" + plugin["Info"]
     inputs = f"A plugin named {plugin_sel.plugin_selection} is selected, " + \
              "you should extract plugin_arg from the user requirement, the user requirement is: \n\n" + \
-             ">> " + (txt + appendix_info).rstrip('\n').replace('\n', '\n>> ') + '\n\n' + \
+             ">> " + (txt + appendix_info).rstrip('\n').replace('\n','\n>> ') + '\n\n' + \
              gpt_json_io.format_instructions
     run_gpt_fn = lambda inputs, sys_prompt: predict_no_ui_long_connection(
         inputs=inputs, llm_kwargs=llm_kwargs, history=[], sys_prompt=sys_prompt, observe_window=[])

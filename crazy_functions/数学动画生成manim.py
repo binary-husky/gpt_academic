@@ -1,6 +1,8 @@
-from common.toolbox import CatchException, update_ui, gen_time_str
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-from .crazy_utils import input_clipping
+import os
+from common.toolbox import CatchException, update_ui, gen_time_str, promote_file_to_downloadzone
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from crazy_functions.crazy_utils import input_clipping
+
 
 def inspect_dependency(chatbot, history):
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
@@ -25,15 +27,16 @@ def eval_manim(code):
 
     class_name = get_class_name(code)
 
-    try: 
+    try:
+        time_str = gen_time_str()
         subprocess.check_output([sys.executable, '-c', f"from gpt_log.MyAnimation import {class_name}; {class_name}().render()"])
-        shutil.move('media/videos/1080p60/{class_name}.mp4', f'gpt_log/{class_name}-{gen_time_str()}.mp4')
-        return f'gpt_log/{gen_time_str()}.mp4'
+        shutil.move(f'media/videos/1080p60/{class_name}.mp4', f'gpt_log/{class_name}-{time_str}.mp4')
+        return f'gpt_log/{time_str}.mp4'
     except subprocess.CalledProcessError as e:
         output = e.output.decode()
         print(f"Command returned non-zero exit status {e.returncode}: {output}.")
         return f"Evaluating python script failed: {e.output}."
-    except: 
+    except:
         print('generating mp4 failed')
         return "Generating mp4 failed."
 
@@ -42,12 +45,12 @@ def get_code_block(reply):
     import re
     pattern = r"```([\s\S]*?)```" # regex pattern to match code blocks
     matches = re.findall(pattern, reply) # find all code blocks in text
-    if len(matches) != 1: 
+    if len(matches) != 1:
         raise RuntimeError("GPT is not generating proper code.")
     return matches[0].strip('python') #  code block
 
 @CatchException
-def 动画生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 动画生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     """
     txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数，如温度和top_p等，一般原样传递下去就行
@@ -55,10 +58,10 @@ def 动画生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     chatbot         聊天显示框的句柄，用于显示给用户
     history         聊天历史，前情提要
     system_prompt   给gpt的静默提醒
-    web_port        当前软件运行的端口号
+    user_request    当前用户的请求信息（IP地址等）
     """
     # 清空历史，以免输入溢出
-    history = []    
+    history = []
 
     # 基本信息：功能、贡献者
     chatbot.append([
@@ -70,29 +73,31 @@ def 动画生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     # 尝试导入依赖, 如果缺少依赖, 则给出安装建议
     dep_ok = yield from inspect_dependency(chatbot=chatbot, history=history) # 刷新界面
     if not dep_ok: return
-    
+
     # 输入
     i_say = f'Generate a animation to show: ' + txt
     demo = ["Here is some examples of manim", examples_of_manim()]
     _, demo = input_clipping(inputs="", history=demo, max_token_limit=2560)
     # 开始
     gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
-        inputs=i_say, inputs_show_user=i_say, 
-        llm_kwargs=llm_kwargs, chatbot=chatbot, history=demo, 
+        inputs=i_say, inputs_show_user=i_say,
+        llm_kwargs=llm_kwargs, chatbot=chatbot, history=demo,
         sys_prompt=
         r"Write a animation script with 3blue1brown's manim. "+
-        r"Please begin with `from manim import *`. " + 
+        r"Please begin with `from manim import *`. " +
         r"Answer me with a code block wrapped by ```."
     )
     chatbot.append(["开始生成动画", "..."])
     history.extend([i_say, gpt_say])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
-    
+
     # 将代码转为动画
     code = get_code_block(gpt_say)
     res = eval_manim(code)
 
-    chatbot.append(["生成的视频文件路径", res])
+    chatbot.append(("生成的视频文件路径", res))
+    if os.path.exists(res):
+        promote_file_to_downloadzone(res, chatbot=chatbot)
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
 
 # 在这里放一些网上搜集的demo，辅助gpt生成代码

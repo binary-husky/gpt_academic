@@ -40,7 +40,7 @@ class GptAcademicState():
 
 class GptAcademicGameBaseState():
     """
-    1. first init: __init__ -> 
+    1. first init: __init__ ->
     """
     def init_game(self, chatbot, lock_plugin):
         self.plugin_name = None
@@ -53,7 +53,7 @@ class GptAcademicGameBaseState():
             raise ValueError("callback_fn is None")
         chatbot._cookies['lock_plugin'] = self.callback_fn
         self.dump_state(chatbot)
-        
+
     def get_plugin_name(self):
         if self.plugin_name is None:
             raise ValueError("plugin_name is None")
@@ -71,7 +71,7 @@ class GptAcademicGameBaseState():
         state = chatbot._cookies.get(f'plugin_state/{plugin_name}', None)
         if state is not None:
             state = pickle.loads(state)
-        else: 
+        else:
             state = cls()
             state.init_game(chatbot, lock_plugin)
         state.plugin_name = plugin_name
@@ -79,7 +79,7 @@ class GptAcademicGameBaseState():
         state.chatbot = chatbot
         state.callback_fn = callback_fn
         return state
-    
+
     def continue_game(self, prompt, chatbot, history):
         # 游戏主体
         yield from self.step(prompt, chatbot, history)

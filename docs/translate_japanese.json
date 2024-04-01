@@ -1492,7 +1492,7 @@
     "交互功能模板函数": "InteractiveFunctionTemplateFunction",
     "交互功能函数模板": "InteractiveFunctionFunctionTemplate",
     "Latex英文纠错加PDF对比": "LatexEnglishErrorCorrectionWithPDFComparison",
-    "Latex输出PDF结果": "LatexOutputPDFResult",
+    "Latex输出PDF": "LatexOutputPDFResult",
     "Latex翻译中文并重新编译PDF": "TranslateChineseAndRecompilePDF",
     "语音助手": "VoiceAssistant",
     "微调数据集生成": "FineTuneDatasetGeneration",

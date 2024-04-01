@@ -13,7 +13,8 @@ import os
 
 
 @CatchException
-def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
+
     disable_auto_promotion(chatbot)
     # 基本信息：功能、贡献者
     chatbot.append([
@@ -132,10 +133,9 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
         )
         gpt_response_collection_md = copy.deepcopy(gpt_response_collection)
         # 整理报告的格式
-        for i, k in enumerate(gpt_response_collection_md):
-            if i % 2 == 0:
-                gpt_response_collection_md[
-                    i] = f"\n\n---\n\n ## 原文[{i // 2}/{len(gpt_response_collection_md) // 2}]： \n\n {paper_fragments[i // 2].replace('#', '')}  \n\n---\n\n ## 翻译[{i // 2}/{len(gpt_response_collection_md) // 2}]：\n "
+        for i,k in enumerate(gpt_response_collection_md):
+            if i%2==0:
+                gpt_response_collection_md[i] = f"\n\n---\n\n ## 原文[{i//2}/{len(gpt_response_collection_md)//2}]： \n\n {paper_fragments[i//2].replace('#', '')}  \n\n---\n\n ## 翻译[{i//2}/{len(gpt_response_collection_md)//2}]：\n "
             else:
                 gpt_response_collection_md[i] = gpt_response_collection_md[i]
         final = ["一、论文概况\n\n---\n\n", paper_meta_info.replace('# ', '### ') + '\n\n---\n\n', "二、论文翻译", ""]
@@ -155,15 +155,15 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
             orig = ""
             trans = ""
             gpt_response_collection_html = copy.deepcopy(gpt_response_collection)
-            for i, k in enumerate(gpt_response_collection_html):
-                if i % 2 == 0:
-                    gpt_response_collection_html[i] = paper_fragments[i // 2].replace('#', '')
+            for i,k in enumerate(gpt_response_collection_html):
+                if i%2==0:
+                    gpt_response_collection_html[i] = paper_fragments[i//2].replace('#', '')
                 else:
                     gpt_response_collection_html[i] = gpt_response_collection_html[i]
             final = ["论文概况", paper_meta_info.replace('# ', '### '), "二、论文翻译", ""]
             final.extend(gpt_response_collection_html)
             for i, k in enumerate(final):
-                if i % 2 == 0:
+                if i%2==0:
                     orig = k
                 if i % 2 == 1:
                     trans = k

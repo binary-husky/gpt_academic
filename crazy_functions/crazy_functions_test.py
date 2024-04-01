@@ -159,25 +159,6 @@ def test_Markdown多语言():
         for cookies, cb, hist, msg in Markdown翻译指定语言(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
             print(cb)
 
-def test_Langchain知识库():
-    from common.Langchain知识库 import 知识库问答
-    txt = "./"
-    chatbot = ChatBotWithCookies(llm_kwargs)
-    for cookies, cb, hist, msg in silence_stdout(知识库问答)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-        cli_printer.print(cb)   #  print(cb)
-    
-    chatbot = ChatBotWithCookies(cookies)
-    from common.Langchain知识库 import 读取知识库作答
-    txt = "What is the installation method？"
-    for cookies, cb, hist, msg in silence_stdout(读取知识库作答)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-        cli_printer.print(cb)   #  print(cb)
-
-def test_Langchain知识库读取():
-    from common.Langchain知识库 import 读取知识库作答
-    txt = "远程云服务器部署？"
-    for cookies, cb, hist, msg in silence_stdout(读取知识库作答)(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
-        cli_printer.print(cb)   #  print(cb)
-
 def test_Latex():
     from crazy_functions.Latex输出PDF结果 import Latex翻译中文并重新编译PDF
 

@@ -66,10 +66,10 @@ def read_file_to_chat(chatbot, history, file_name):
         i_say, gpt_say = h.split('<hr style="border-top: dotted 3px #ccc;">')
         chatbot.append([i_say, gpt_say])
     chatbot.append([f"存档文件详情？", f"[Local Message] 载入对话{len(html)}条，上下文{len(history)}条。"])
-    return chatbot, history    
+    return chatbot, history
 
 @CatchException
-def 对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     """
     txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数，如温度和top_p等，一般原样传递下去就行
@@ -77,10 +77,10 @@ def 对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
     chatbot         聊天显示框的句柄，用于显示给用户
     history         聊天历史，前情提要
     system_prompt   给gpt的静默提醒
-    web_port        当前软件运行的端口号
+    user_request    当前用户的请求信息（IP地址等）
     """
 
-    chatbot.append(("保存当前对话", 
+    chatbot.append(("保存当前对话",
         f"[Local Message] {write_chat_to_file(chatbot, history)}，您可以调用下拉菜单中的“载入对话历史存档”还原当下的对话。"))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
 
@@ -91,7 +91,7 @@ def hide_cwd(str):
     return str.replace(current_path, replace_path)
 
 @CatchException
-def 载入对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 载入对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     """
     txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数，如温度和top_p等，一般原样传递下去就行
@@ -99,7 +99,7 @@ def 载入对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     chatbot         聊天显示框的句柄，用于显示给用户
     history         聊天历史，前情提要
     system_prompt   给gpt的静默提醒
-    web_port        当前软件运行的端口号
+    user_request    当前用户的请求信息（IP地址等）
     """
     from .crazy_utils import get_files_from_everything
     success, file_manifest, _ = get_files_from_everything(txt, type='.html')
@@ -108,9 +108,9 @@ def 载入对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         if txt == "": txt = '空空如也的输入栏'
         import glob
         local_history = "<br/>".join([
-            "`"+hide_cwd(f)+f" ({gen_file_preview(f)})"+"`" 
+            "`"+hide_cwd(f)+f" ({gen_file_preview(f)})"+"`"
             for f in glob.glob(
-                f'{get_log_folder(get_user(chatbot), plugin_name="chat_history")}/**/{f_prefix}*.html', 
+                f'{get_log_folder(get_user(chatbot), plugin_name="chat_history")}/**/{f_prefix}*.html',
                 recursive=True
             )])
         chatbot.append([f"正在查找对话历史文件（html格式）: {txt}", f"找不到任何html文件: {txt}。但本地存储了以下历史文件，您可以将任意一个文件路径粘贴到输入区，然后重试：<br/>{local_history}"])
@@ -126,7 +126,7 @@ def 载入对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         return
 
 @CatchException
-def 删除所有本地对话历史记录(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 删除所有本地对话历史记录(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     """
     txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数，如温度和top_p等，一般原样传递下去就行
@@ -134,12 +134,12 @@ def 删除所有本地对话历史记录(txt, llm_kwargs, plugin_kwargs, chatbot
     chatbot         聊天显示框的句柄，用于显示给用户
     history         聊天历史，前情提要
     system_prompt   给gpt的静默提醒
-    web_port        当前软件运行的端口号
+    user_request    当前用户的请求信息（IP地址等）
     """
 
     import glob, os
     local_history = "<br/>".join([
-        "`"+hide_cwd(f)+"`" 
+        "`"+hide_cwd(f)+"`"
         for f in glob.glob(
             f'{get_log_folder(get_user(chatbot), plugin_name="chat_history")}/**/{f_prefix}*.html', recursive=True
         )])

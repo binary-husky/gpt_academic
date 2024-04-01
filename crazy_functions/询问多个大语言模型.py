@@ -4,7 +4,7 @@ import datetime
 
 
 @CatchException
-def 同时问询(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 同时问询(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     """
     txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数，如温度和top_p等，一般原样传递下去就行
@@ -12,7 +12,7 @@ def 同时问询(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     chatbot         聊天显示框的句柄，用于显示给用户
     history         聊天历史，前情提要
     system_prompt   给gpt的静默提醒
-    web_port        当前软件运行的端口号
+    user_request    当前用户的请求信息（IP地址等）
     """
     history = []    # 清空历史，以免输入溢出
     MULTI_QUERY_LLM_MODELS = get_conf('MULTI_QUERY_LLM_MODELS')
@@ -22,8 +22,8 @@ def 同时问询(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     # llm_kwargs['llm_model'] = 'chatglm&gpt-3.5-turbo&api2d-gpt-3.5-turbo' # 支持任意数量的llm接口，用&符号分隔
     llm_kwargs['llm_model'] = MULTI_QUERY_LLM_MODELS # 支持任意数量的llm接口，用&符号分隔
     gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
-        inputs=txt, inputs_show_user=txt, 
-        llm_kwargs=llm_kwargs, chatbot=chatbot, history=history, 
+        inputs=txt, inputs_show_user=txt,
+        llm_kwargs=llm_kwargs, chatbot=chatbot, history=history,
         sys_prompt=system_prompt,
         retry_times_at_unknown_error=0
     )
@@ -34,7 +34,7 @@ def 同时问询(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
 
 
 @CatchException
-def 同时问询_指定模型(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 同时问询_指定模型(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     """
     txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数，如温度和top_p等，一般原样传递下去就行
@@ -42,7 +42,7 @@ def 同时问询_指定模型(txt, llm_kwargs, plugin_kwargs, chatbot, history, 
     chatbot         聊天显示框的句柄，用于显示给用户
     history         聊天历史，前情提要
     system_prompt   给gpt的静默提醒
-    web_port        当前软件运行的端口号
+    user_request    当前用户的请求信息（IP地址等）
     """
     history = []    # 清空历史，以免输入溢出
 
@@ -54,8 +54,8 @@ def 同时问询_指定模型(txt, llm_kwargs, plugin_kwargs, chatbot, history, 
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
 
     gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
-        inputs=txt, inputs_show_user=txt, 
-        llm_kwargs=llm_kwargs, chatbot=chatbot, history=history, 
+        inputs=txt, inputs_show_user=txt,
+        llm_kwargs=llm_kwargs, chatbot=chatbot, history=history,
         sys_prompt=system_prompt,
         retry_times_at_unknown_error=0
     )

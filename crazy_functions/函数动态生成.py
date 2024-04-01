@@ -6,10 +6,10 @@
     - 将图像转为灰度图像
     - 将csv文件转excel表格
 
-Testing: 
-    - Crop the image, keeping the bottom half. 
-    - Swap the blue channel and red channel of the image. 
-    - Convert the image to grayscale. 
+Testing:
+    - Crop the image, keeping the bottom half.
+    - Swap the blue channel and red channel of the image.
+    - Convert the image to grayscale.
     - Convert the CSV file to an Excel spreadsheet.
 """
 
@@ -29,12 +29,12 @@ import multiprocessing
 
 templete = """
 ```python
-import ...  # Put dependencies here, e.g. import numpy as np. 
+import ...  # Put dependencies here, e.g. import numpy as np.
 
 class TerminalFunction(object): # Do not change the name of the class, The name of the class must be `TerminalFunction`
 
     def run(self, path):    # The name of the function must be `run`, it takes only a positional argument.
-        # rewrite the function you have just written here 
+        # rewrite the function you have just written here
         ...
         return generated_file_path
 ```
@@ -48,7 +48,7 @@ def get_code_block(reply):
     import re
     pattern = r"```([\s\S]*?)```" # regex pattern to match code blocks
     matches = re.findall(pattern, reply) # find all code blocks in text
-    if len(matches) == 1: 
+    if len(matches) == 1:
         return matches[0].strip('python') #  code block
     for match in matches:
         if 'class TerminalFunction' in match:
@@ -68,8 +68,8 @@ def gpt_interact_multi_step(txt, file_type, llm_kwargs, chatbot, history):
 
     # 第一步
     gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
-        inputs=i_say, inputs_show_user=i_say, 
-        llm_kwargs=llm_kwargs, chatbot=chatbot, history=demo, 
+        inputs=i_say, inputs_show_user=i_say,
+        llm_kwargs=llm_kwargs, chatbot=chatbot, history=demo,
         sys_prompt= r"You are a world-class programmer."
     )
     history.extend([i_say, gpt_say])
@@ -82,33 +82,33 @@ def gpt_interact_multi_step(txt, file_type, llm_kwargs, chatbot, history):
     ]
     i_say = "".join(prompt_compose); inputs_show_user = "If previous stage is successful, rewrite the function you have just written to satisfy executable templete. "
     gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
-        inputs=i_say, inputs_show_user=inputs_show_user, 
-        llm_kwargs=llm_kwargs, chatbot=chatbot, history=history, 
+        inputs=i_say, inputs_show_user=inputs_show_user,
+        llm_kwargs=llm_kwargs, chatbot=chatbot, history=history,
         sys_prompt= r"You are a programmer. You need to replace `...` with valid packages, do not give `...` in your answer!"
     )
     code_to_return = gpt_say
     history.extend([i_say, gpt_say])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
-    
+
     # # 第三步
     # i_say = "Please list to packages to install to run the code above. Then show me how to use `try_install_deps` function to install them."
     # i_say += 'For instance. `try_install_deps(["opencv-python", "scipy", "numpy"])`'
     # installation_advance = yield from request_gpt_model_in_new_thread_with_ui_alive(
-    #     inputs=i_say, inputs_show_user=inputs_show_user, 
-    #     llm_kwargs=llm_kwargs, chatbot=chatbot, history=history, 
+    #     inputs=i_say, inputs_show_user=inputs_show_user,
+    #     llm_kwargs=llm_kwargs, chatbot=chatbot, history=history,
     #     sys_prompt= r"You are a programmer."
     # )
 
-    # # # 第三步  
+    # # # 第三步
     # i_say = "Show me how to use `pip` to install packages to run the code above. "
     # i_say += 'For instance. `pip install -r opencv-python scipy numpy`'
     # installation_advance = yield from request_gpt_model_in_new_thread_with_ui_alive(
-    #     inputs=i_say, inputs_show_user=i_say, 
-    #     llm_kwargs=llm_kwargs, chatbot=chatbot, history=history, 
+    #     inputs=i_say, inputs_show_user=i_say,
+    #     llm_kwargs=llm_kwargs, chatbot=chatbot, history=history,
     #     sys_prompt= r"You are a programmer."
     # )
     installation_advance = ""
-    
+
     return code_to_return, installation_advance, txt, file_type, llm_kwargs, chatbot, history
 
 
@@ -117,7 +117,7 @@ def gpt_interact_multi_step(txt, file_type, llm_kwargs, chatbot, history):
 def for_immediate_show_off_when_possible(file_type, fp, chatbot):
     if file_type in ['png', 'jpg']:
         image_path = os.path.abspath(fp)
-        chatbot.append(['这是一张图片, 展示如下:',  
+        chatbot.append(['这是一张图片, 展示如下:',
             f'本地文件地址: <br/>`{image_path}`<br/>'+
             f'本地文件预览: <br/><div align="center"><img src="file={image_path}"></div>'
         ])
@@ -139,7 +139,7 @@ def get_recent_file_prompt_support(chatbot):
     return path
 
 @CatchException
-def 函数动态生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 函数动态生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     """
     txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数，如温度和top_p等，一般原样传递下去就行
@@ -147,7 +147,7 @@ def 函数动态生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
     chatbot         聊天显示框的句柄，用于显示给用户
     history         聊天历史，前情提要
     system_prompt   给gpt的静默提醒
-    web_port        当前软件运行的端口号
+    user_request    当前用户的请求信息（IP地址等）
     """
 
     # 清空历史
@@ -177,7 +177,7 @@ def 函数动态生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
         chatbot.append(["文件检索", "没有发现任何近期上传的文件。"])
         yield from update_ui_lastest_msg("没有发现任何近期上传的文件。", chatbot, history, 1)
         return  # 2. 如果没有文件
-    
+
     # 读取文件
     file_type = file_list[0].split('.')[-1]
 
@@ -185,7 +185,7 @@ def 函数动态生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
     if is_the_upload_folder(txt):
         yield from update_ui_lastest_msg(f"请在输入框内填写需求, 然后再次点击该插件! 至于您的文件，不用担心, 文件路径 {txt} 已经被记忆. ", chatbot, history, 1)
         return
-    
+
     # 开始干正事
     MAX_TRY = 3
     for j in range(MAX_TRY):  # 最多重试5次
@@ -238,7 +238,7 @@ def 函数动态生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
             # chatbot.append(["如果是缺乏依赖，请参考以下建议", installation_advance])
             yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
             return
-        
+
         # 顺利完成，收尾
         res = str(res)
         if os.path.exists(res):
@@ -248,5 +248,5 @@ def 函数动态生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
             yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
         else:
             chatbot.append(["执行成功了，结果是一个字符串", "结果：" + res])
-            yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新   
+            yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
 

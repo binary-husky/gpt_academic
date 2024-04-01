@@ -22,7 +22,7 @@ class GetGLMHandle(Process):
         self.check_dependency()
         self.start()
         self.threadLock = threading.Lock()
-        
+
     def check_dependency(self):
         try:
             import pandas
@@ -104,7 +104,7 @@ class GetGLMHandle(Process):
             else:
                 break
         self.threadLock.release()
-    
+
 global llama_glm_handle
 llama_glm_handle = None
 #################################################################################
@@ -117,7 +117,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     if llama_glm_handle is None:
         llama_glm_handle = GetGLMHandle()
         if len(observe_window) >= 1: observe_window[0] = load_message + "\n\n" + llama_glm_handle.info
-        if not llama_glm_handle.success: 
+        if not llama_glm_handle.success:
             error = llama_glm_handle.info
             llama_glm_handle = None
             raise RuntimeError(error)
@@ -132,7 +132,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     for response in llama_glm_handle.stream_chat(query=inputs, history=history_feedin, system_prompt=sys_prompt, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
         print(response)
         if len(observe_window) >= 1:  observe_window[0] = response
-        if len(observe_window) >= 2:  
+        if len(observe_window) >= 2:
             if (time.time()-observe_window[1]) > watch_dog_patience:
                 raise RuntimeError("程序终止。")
     return response
@@ -151,7 +151,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         llama_glm_handle = GetGLMHandle()
         chatbot[-1] = [inputs, load_message + "\n\n" + llama_glm_handle.info]
         yield from update_ui(chatbot=chatbot, history=[])
-        if not llama_glm_handle.success: 
+        if not llama_glm_handle.success:
             llama_glm_handle = None
             return
 

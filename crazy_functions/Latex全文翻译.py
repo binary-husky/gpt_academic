@@ -39,7 +39,7 @@ def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
     import time, re
     from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 
-    #  <-------- 读取Latex文件，删除其中的所有注释 ----------> 
+    #  <-------- 读取Latex文件，删除其中的所有注释 ---------->
     pfg = PaperFileGroup()
 
     for index, fp in enumerate(file_manifest):
@@ -53,11 +53,11 @@ def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
             pfg.file_paths.append(fp)
             pfg.file_contents.append(clean_tex_content)
 
-    #  <-------- 拆分过长的latex文件 ----------> 
+    #  <-------- 拆分过长的latex文件 ---------->
     pfg.run_file_split(max_token_limit=1024)
     n_split = len(pfg.sp_file_contents)
 
-    #  <-------- 抽取摘要 ----------> 
+    #  <-------- 抽取摘要 ---------->
     # if language == 'en':
     #     abs_extract_inputs = f"Please write an abstract for this paper"
 
@@ -70,14 +70,14 @@ def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
     #     sys_prompt="Your job is to collect information from materials。",
     # )
 
-    #  <-------- 多线程润色开始 ----------> 
+    #  <-------- 多线程润色开始 ---------->
     if language == 'en->zh':
-        inputs_array = ["Below is a section from an English academic paper, translate it into Chinese, do not modify any latex command such as \section, \cite and equations:" + 
+        inputs_array = ["Below is a section from an English academic paper, translate it into Chinese, do not modify any latex command such as \section, \cite and equations:" +
                         f"\n\n{frag}" for frag in pfg.sp_file_contents]
         inputs_show_user_array = [f"翻译 {f}" for f in pfg.sp_file_tag]
         sys_prompt_array = ["You are a professional academic paper translator." for _ in range(n_split)]
     elif language == 'zh->en':
-        inputs_array = [f"Below is a section from a Chinese academic paper, translate it into English, do not modify any latex command such as \section, \cite and equations:" + 
+        inputs_array = [f"Below is a section from a Chinese academic paper, translate it into English, do not modify any latex command such as \section, \cite and equations:" +
                         f"\n\n{frag}" for frag in pfg.sp_file_contents]
         inputs_show_user_array = [f"翻译 {f}" for f in pfg.sp_file_tag]
         sys_prompt_array = ["You are a professional academic paper translator." for _ in range(n_split)]
@@ -93,7 +93,7 @@ def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
         scroller_max_len = 80
     )
 
-    #  <-------- 整理结果，退出 ----------> 
+    #  <-------- 整理结果，退出 ---------->
     create_report_file_name = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + f"-chatgpt.polish.md"
     res = write_history_to_file(gpt_response_collection, create_report_file_name)
     promote_file_to_downloadzone(res, chatbot=chatbot)
@@ -106,7 +106,7 @@ def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
 
 
 @CatchException
-def Latex英译中(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def Latex英译中(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
@@ -143,7 +143,7 @@ def Latex英译中(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prom
 
 
 @CatchException
-def Latex中译英(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def Latex中译英(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",

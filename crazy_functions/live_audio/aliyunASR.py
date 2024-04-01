@@ -85,8 +85,8 @@ def write_numpy_to_wave(filename, rate, data, add_header=False):
 
 def is_speaker_speaking(vad, data, sample_rate):
     # Function to detect if the speaker is speaking
-    # The WebRTC VAD only accepts 16-bit mono PCM audio, 
-    # sampled at 8000, 16000, 32000 or 48000 Hz. 
+    # The WebRTC VAD only accepts 16-bit mono PCM audio,
+    # sampled at 8000, 16000, 32000 or 48000 Hz.
     # A frame must be either 10, 20, or 30 ms in duration:
     frame_duration = 30
     n_bit_each = int(sample_rate * frame_duration / 1000)*2 # x2 because audio is 16 bit (2 bytes)
@@ -94,7 +94,7 @@ def is_speaker_speaking(vad, data, sample_rate):
     for t in range(len(data)):
         if t!=0 and t % n_bit_each == 0:
             res_list.append(vad.is_speech(data[t-n_bit_each:t], sample_rate))
-    
+
     info = ''.join(['^' if r else '.' for r in res_list])
     info = info[:10]
     if any(res_list):
@@ -186,10 +186,10 @@ class AliyunASR():
         keep_alive_last_send_time = time.time()
         while not self.stop:
             # time.sleep(self.capture_interval)
-            audio = rad.read(uuid.hex) 
+            audio = rad.read(uuid.hex)
             if audio is not None:
                 # convert to pcm file
-                temp_file = f'{temp_folder}/{uuid.hex}.pcm' # 
+                temp_file = f'{temp_folder}/{uuid.hex}.pcm' #
                 dsdata = change_sample_rate(audio, rad.rate, NEW_SAMPLERATE) # 48000 --> 16000
                 write_numpy_to_wave(temp_file, NEW_SAMPLERATE, dsdata)
                 # read pcm binary

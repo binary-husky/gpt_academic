@@ -1,7 +1,5 @@
 from common import func_box
-from common.toolbox import update_ui, get_conf, trimmed_format_exc, get_max_token, Singleton, get_log_folder, \
-    gen_time_str
-from common.path_handler import init_path
+from common.toolbox import update_ui, get_conf, trimmed_format_exc, get_max_token, Singleton
 import threading
 import os
 import logging
@@ -45,7 +43,7 @@ def input_clipping(inputs, history, max_token_limit):
 
 
 def request_gpt_model_in_new_thread_with_ui_alive(
-        inputs, inputs_show_user, llm_kwargs: dict,
+        inputs, inputs_show_user, llm_kwargs,
         chatbot, history, sys_prompt, refresh_interval=0.2,
         handle_token_exceed=True,
         retry_times_at_unknown_error=2,
@@ -72,7 +70,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
     from concurrent.futures import ThreadPoolExecutor
     from request_llms.bridge_all import predict_no_ui_long_connection
     # 用户反馈
-    chatbot.append([None, ''])
+    chatbot.append([inputs_show_user, ""])
     yield from update_ui(chatbot=chatbot, history=[])  # 刷新界面
     executor = ThreadPoolExecutor(max_workers=16)
     mutable = ["", time.time(), ""]
@@ -129,7 +127,6 @@ def request_gpt_model_in_new_thread_with_ui_alive(
 
     # 提交任务
     future = executor.submit(_req_gpt, inputs, history, sys_prompt)
-    old_gpt_say = chatbot[-1][1]
     while True:
         # yield一次以刷新前端页面
         time.sleep(refresh_interval)
@@ -137,22 +134,34 @@ def request_gpt_model_in_new_thread_with_ui_alive(
         mutable[1] = time.time()
         if future.done():
             break
-        chatbot[-1][1] = old_gpt_say + mutable[0]
+        chatbot[-1] = [chatbot[-1][0], mutable[0]]
         yield from update_ui(chatbot=chatbot, history=[])  # 刷新界面
 
     final_result = future.result()
-    chatbot[-1][1] = old_gpt_say + mutable[0]
+    chatbot[-1] = [chatbot[-1][0], final_result]
     yield from update_ui(chatbot=chatbot, history=[])  # 如果最后成功了，则删除报错信息
     return final_result
 
 
-def can_multi_process(llm):
-    if llm.startswith('gpt-'): return True
-    if llm.startswith('api2d-'): return True
-    if llm.startswith('azure-'): return True
-    if llm.startswith('spark'): return True
-    if llm.startswith('zhipuai'): return True
-    return False
+def can_multi_process(llm) -> bool:
+    from request_llms.bridge_all import model_info
+
+    def default_condition(llm) -> bool:
+        # legacy condition
+        if llm.startswith('gpt-'): return True
+        if llm.startswith('api2d-'): return True
+        if llm.startswith('azure-'): return True
+        if llm.startswith('spark'): return True
+        if llm.startswith('zhipuai') or llm.startswith('glm-'): return True
+        return False
+
+    if llm in model_info:
+        if 'can_multi_thread' in model_info[llm]:
+            return model_info[llm]['can_multi_thread']
+        else:
+            return default_condition(llm)
+    else:
+        return default_condition(llm)
 
 
 def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
@@ -192,23 +201,25 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     import time, random
     from concurrent.futures import ThreadPoolExecutor
     from request_llms.bridge_all import predict_no_ui_long_connection
+    assert len(inputs_array) == len(history_array)
     assert len(inputs_array) == len(sys_prompt_array)
     if max_workers == -1:  # 读取配置文件
         try:
-            max_workers = llm_kwargs.get('worker_num', 3)
+            max_workers = get_conf('DEFAULT_WORKER_NUM')
         except:
             max_workers = 8
         if max_workers <= 0: max_workers = 3
-    # # 屏蔽掉 chatglm的多线程，可能会导致严重卡顿
-    # if not can_multi_process(llm_kwargs['llm_model']):
-    #     max_workers = 1
+    # 屏蔽掉 chatglm的多线程，可能会导致严重卡顿
+    if not can_multi_process(llm_kwargs['llm_model']):
+        max_workers = 1
+
     executor = ThreadPoolExecutor(max_workers=max_workers)
     n_frag = len(inputs_array)
     # 用户反馈
-    chatbot.append([None, ''])
+    chatbot.append(["请开始多线程操作。", ""])
     yield from update_ui(chatbot=chatbot, history=[])  # 刷新界面
     # 跨线程传递
-    mutable = [[f"", time.time(), "等待中"] for _ in range(n_frag)]
+    mutable = [["", time.time(), "等待中"] for _ in range(n_frag)]
 
     # 看门狗耐心
     watch_dog_patience = 5
@@ -248,16 +259,15 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     continue  # 返回重试
                 else:
                     # 【选择放弃】
-                    tb_str = trimmed_format_exc()
+                    tb_str = '```\n' + trimmed_format_exc() + '```'
                     gpt_say += f"[Local Message] 警告，线程{index}在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                     if len(mutable[index][0]) > 0: gpt_say += "此线程失败前收到的回答：\n\n" + mutable[index][0]
                     mutable[index][2] = "输入过长已放弃"
                     return gpt_say  # 放弃
             except:
                 # 【第三种情况】：其他错误
-
                 if detect_timeout(): raise RuntimeError("检测到程序终止。")
-                tb_str = trimmed_format_exc()
+                tb_str = '```\n' + trimmed_format_exc() + '```'
                 print(tb_str)
                 gpt_say += f"[Local Message] 警告，线程{index}在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                 if len(mutable[index][0]) > 0: gpt_say += "此线程失败前收到的回答：\n\n" + mutable[index][0]
@@ -317,7 +327,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                 status_content = f'`已完成`'
             status_output = f'{status_content}'
 
-            stat_str += folder(status_input+status_output, content, done) + '\n\n'
+            stat_str += folder(status_input + status_output, content, done) + '\n\n'
 
         # 在前端打印些好玩的东西
         chatbot[-1][1] = gpt_old_say + f'多线程提问已经开始，进度如下: \n\n{stat_str}'
@@ -340,67 +350,6 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
             yield from update_ui(chatbot=chatbot, history=[])  # 刷新界面
             time.sleep(0.5)
     return gpt_response_collection
-
-
-def force_breakdown(txt, limit, get_token_fn):
-    """
-    当无法用标点、空行分割时，我们用最暴力的方法切割
-    """
-    for i in reversed(range(len(txt))):
-        if get_token_fn(txt[:i]) < limit:
-            return txt[:i], txt[i:]
-    return "Tiktoken未知错误", "Tiktoken未知错误"
-
-
-def breakdown_txt_to_satisfy_token_limit_for_pdf(txt, get_token_fn, limit):
-    # 递归
-    def cut(txt_tocut, must_break_at_empty_line, break_anyway=False):
-        if get_token_fn(txt_tocut) <= limit:
-            return [txt_tocut]
-        else:
-            lines = txt_tocut.split('\n')
-            estimated_line_cut = limit / get_token_fn(txt_tocut) * len(lines)
-            estimated_line_cut = int(estimated_line_cut)
-            cnt = 0
-            for cnt in reversed(range(estimated_line_cut)):
-                if must_break_at_empty_line:
-                    if lines[cnt] != "":
-                        continue
-                prev = "\n".join(lines[:cnt])
-                post = "\n".join(lines[cnt:])
-                if get_token_fn(prev) < limit:
-                    break
-            if cnt == 0:
-                if break_anyway:
-                    prev, post = force_breakdown(txt_tocut, limit, get_token_fn)
-                else:
-                    raise RuntimeError(f"存在一行极长的文本！{txt_tocut}")
-            # print(len(post))
-            # 列表递归接龙
-            result = [prev]
-            result.extend(cut(post, must_break_at_empty_line, break_anyway=break_anyway))
-            return result
-
-    try:
-        # 第1次尝试，将双空行（\n\n）作为切分点
-        return cut(txt, must_break_at_empty_line=True)
-    except RuntimeError:
-        try:
-            # 第2次尝试，将单空行（\n）作为切分点
-            return cut(txt, must_break_at_empty_line=False)
-        except RuntimeError:
-            try:
-                # 第3次尝试，将英文句号（.）作为切分点
-                res = cut(txt.replace('.', '。\n'), must_break_at_empty_line=False)  # 这个中文的句号是故意的，作为一个标识而存在
-                return [r.replace('。\n', '.') for r in res]
-            except RuntimeError as e:
-                try:
-                    # 第4次尝试，将中文句号（。）作为切分点
-                    res = cut(txt.replace('。', '。。\n'), must_break_at_empty_line=False)
-                    return [r.replace('。。\n', '。') for r in res]
-                except RuntimeError as e:
-                    # 第5次尝试，没办法了，随便切一下敷衍吧
-                    return cut(txt, must_break_at_empty_line=False, break_anyway=True)
 
 
 def read_and_clean_pdf_text(fp):
@@ -426,6 +375,7 @@ def read_and_clean_pdf_text(fp):
     import fitz, copy
     import re
     import numpy as np
+    from common.colorful import print亮黄, print亮绿
     fc = 0  # Index 0 文本
     fs = 1  # Index 1 字体
     fb = 2  # Index 2 框框
@@ -591,34 +541,37 @@ def read_and_clean_pdf_text(fp):
     return meta_txt, page_one_meta
 
 
-def get_files_from_everything(txt, type, project_folder=''):  # type='.md'
+def get_files_from_everything(txt, type):  # type='.md'
     """
     这个函数是用来获取指定目录下所有指定类型（如.md）的文件，并且对于网络上的文件，也可以获取它。
     下面是对每个参数和返回值的说明：
-    参数 
-    - txt: 路径或网址，表示要搜索的文件或者文件夹路径或网络上的文件。 
+    参数
+    - txt: 路径或网址，表示要搜索的文件或者文件夹路径或网络上的文件。
     - type: 字符串，表示要搜索的文件类型。默认是.md。
-    返回值 
-    - success: 布尔值，表示函数是否成功执行。 
-    - file_manifest: 文件路径列表，里面包含以指定类型为后缀名的所有文件的绝对路径。 
+    返回值
+    - success: 布尔值，表示函数是否成功执行。
+    - file_manifest: 文件路径列表，里面包含以指定类型为后缀名的所有文件的绝对路径。
     - project_folder: 字符串，表示文件所在的文件夹路径。如果是网络上的文件，就是临时文件夹的路径。
     该函数详细注释已添加，请确认是否满足您的需要。
     """
-    import glob, os, time
+    import glob, os
+
     success = True
-    if txt.startswith('http') and txt.find('kdocs') == -1 and txt.find('wps') == -1:
+    if txt.startswith('http'):
         # 网络的远程文件
         import requests
+        from common.toolbox import get_conf
+        from common.toolbox import get_log_folder, gen_time_str
         proxies = get_conf('proxies')
-        r = requests.get(txt, proxies=proxies).content
-        name = r.splitlines()[0]
-        if not project_folder:
-            project_folder = os.path.join(init_path.private_files_path, 'temp_download')
-        os.makedirs(project_folder, exist_ok=True)
-        temp_file = f'{project_folder}/{name[:30]}_{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())}{type}'
-        with open(temp_file, 'wb') as f:
-            f.write(r)
-        file_manifest = [temp_file]
+        try:
+            r = requests.get(txt, proxies=proxies)
+        except:
+            raise ConnectionRefusedError(f"无法下载资源{txt}，请检查。")
+        path = os.path.join(get_log_folder(plugin_name='web_download'), gen_time_str() + type)
+        with open(path, 'wb+') as f:
+            f.write(r.content)
+        project_folder = get_log_folder(plugin_name='web_download')
+        file_manifest = [path]
     elif txt.endswith(type):
         # 直接给定文件
         file_manifest = [txt]
@@ -633,11 +586,8 @@ def get_files_from_everything(txt, type, project_folder=''):  # type='.md'
         project_folder = None
         file_manifest = []
         success = False
+
     return success, file_manifest, project_folder
-
-
-import os
-import shutil
 
 
 @Singleton
@@ -667,6 +617,7 @@ class nougat_interface():
                                          chatbot=chatbot, history=history, delay=0)
         self.threadLock.acquire()
         import glob, threading, os
+        from common.toolbox import get_log_folder, gen_time_str
         dst = os.path.join(get_log_folder(plugin_name='nougat'), gen_time_str())
         os.makedirs(dst)
 
@@ -698,7 +649,3 @@ def get_plugin_arg(plugin_kwargs, key, default):
     if (key in plugin_kwargs) and (plugin_kwargs[key] == ""): plugin_kwargs.pop(key)
     # 正常情况
     return plugin_kwargs.get(key, default)
-
-
-if __name__ == '__main__':
-    pass

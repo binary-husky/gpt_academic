@@ -9,7 +9,7 @@ import time
 import requests
 
 from common.func_box import extract_link_pf, valid_img_extensions, batch_encode_image
-from common.toolbox import get_conf, select_api_key, is_any_api_key, trimmed_format_exc, update_ui, clip_history, gpt_model_select
+from common.toolbox import get_conf, select_api_key, is_any_api_key, trimmed_format_exc, update_ui, clip_history
 from request_llms.bridge_chatgpt import verify_endpoint
 
 proxies, TIMEOUT_SECONDS, MAX_RETRY, API_ORG, AZURE_CFG_ARRAY, API_URL_REDIRECT = \

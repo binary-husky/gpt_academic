@@ -9,15 +9,15 @@
     具备多线程调用能力的函数
     2. predict_no_ui_long_connection：支持多线程
 """
-
-import os
-import json
-import time
-import gradio as gr
 import logging
+import os
+import time
 import traceback
+from common.toolbox import get_conf, update_ui, trimmed_format_exc, encode_image, every_image_file_in_path
+import json
 import requests
-import importlib
+picture_system_prompt = "\n当回复图像时,必须说明正在回复哪张图像。所有图像仅在最后一个问题中提供,即使它们在历史记录中被提及。请使用'这是第X张图像:'的格式来指明您正在描述的是哪张图像。"
+Claude_3_Models = ["claude-3-sonnet-20240229", "claude-3-opus-20240229"]
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
@@ -39,6 +39,34 @@ def get_full_error(chunk, stream_response):
             break
     return chunk
 
+def decode_chunk(chunk):
+    # 提前读取一些信息（用于判断异常）
+    chunk_decoded = chunk.decode()
+    chunkjson = None
+    is_last_chunk = False
+    need_to_pass = False
+    if chunk_decoded.startswith('data:'):
+        try:
+            chunkjson = json.loads(chunk_decoded[6:])
+        except:
+            need_to_pass = True
+            pass
+    elif chunk_decoded.startswith('event:'):
+        try:
+            event_type = chunk_decoded.split(':')[1].strip()
+            if event_type == 'content_block_stop' or event_type == 'message_stop':
+                is_last_chunk = True
+            elif event_type == 'content_block_start' or event_type == 'message_start':
+                need_to_pass = True
+                pass
+        except:
+            need_to_pass = True
+            pass
+    else:
+        need_to_pass = True
+        pass
+    return need_to_pass, chunkjson, is_last_chunk
+
 
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=None, console_slience=False):
     """
@@ -54,51 +82,67 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     observe_window = None：
         用于负责跨越线程传递已经输出的部分，大部分时候仅仅为了fancy的视觉效果，留空即可。observe_window[0]：观测窗。observe_window[1]：看门狗
     """
-    from anthropic import Anthropic
     watch_dog_patience = 5 # 看门狗的耐心, 设置5秒即可
-    prompt = generate_payload(inputs, llm_kwargs, history, system_prompt=sys_prompt, stream=True)
-    retry = 0
     if len(ANTHROPIC_API_KEY) == 0:
         raise RuntimeError("没有设置ANTHROPIC_API_KEY选项")
+    if inputs == "":     inputs = "空空如也的输入栏"
+    headers, message = generate_payload(inputs, llm_kwargs, history, sys_prompt, image_paths=None)
+    retry = 0
+
 
     while True:
         try:
             # make a POST request to the API endpoint, stream=False
             from .bridge_all import model_info
-            anthropic = Anthropic(api_key=ANTHROPIC_API_KEY)
-            # endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
-            # with ProxyNetworkActivate()
-            stream = anthropic.completions.create(
-                prompt=prompt,
-                max_tokens_to_sample=4096,       # The maximum number of tokens to generate before stopping.
-                model=llm_kwargs['llm_model'],
-                stream=True,
-                temperature = llm_kwargs['temperature']
-            )
-            break
-        except Exception as e:
+            endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
+            response = requests.post(endpoint, headers=headers, json=message, 
+                                     proxies=proxies, stream=True, timeout=TIMEOUT_SECONDS);break
+        except requests.exceptions.ReadTimeout as e:
             retry += 1
             traceback.print_exc()
             if retry > MAX_RETRY: raise TimeoutError
-            if MAX_RETRY!=0:
-                logger(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
+            if MAX_RETRY!=0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
+    stream_response = response.iter_lines()
     result = ''
-    try: 
-        for completion in stream:
-            result += completion.completion
-            if not console_slience: print(completion.completion, end='')
-            if observe_window is not None: 
-                # 观测窗，把已经获取的数据显示出去
-                if len(observe_window) >= 1: observe_window[0] += completion.completion
-                # 看门狗，如果超过期限没有喂狗，则终止
-                if len(observe_window) >= 2:  
-                    if (time.time()-observe_window[1]) > watch_dog_patience:
-                        raise RuntimeError("用户取消了程序。")
-    except Exception as e:
-        traceback.print_exc()
+    while True:
+        try: chunk = next(stream_response)
+        except StopIteration:
+            break
+        except requests.exceptions.ConnectionError:
+            chunk = next(stream_response) # 失败了，重试一次？再失败就没办法了。
+        need_to_pass, chunkjson, is_last_chunk = decode_chunk(chunk)
+        if chunk:
+            try:
+                if need_to_pass:
+                    pass
+                elif is_last_chunk:
+                    logging.info(f'[response] {result}')
+                    break
+                else:
+                    if chunkjson and chunkjson['type'] == 'content_block_delta':
+                        result += chunkjson['delta']['text']
+                        print(chunkjson['delta']['text'], end='')
+                        if observe_window is not None:
+                            # 观测窗，把已经获取的数据显示出去
+                            if len(observe_window) >= 1:
+                                observe_window[0] += chunkjson['delta']['text']
+                            # 看门狗，如果超过期限没有喂狗，则终止
+                            if len(observe_window) >= 2:
+                                if (time.time()-observe_window[1]) > watch_dog_patience:
+                                    raise RuntimeError("用户取消了程序。")
+            except Exception as e:
+                chunk = get_full_error(chunk, stream_response)
+                chunk_decoded = chunk.decode()
+                error_msg = chunk_decoded
+                print(error_msg)
+                raise RuntimeError("Json解析不合常规")
 
     return result
 
+def make_media_input(history,inputs,image_paths):
+    for image_path in image_paths:
+        inputs = inputs + f'<br/><br/><div align="center"><img src="file={os.path.abspath(image_path)}"></div>'
+    return inputs
 
 def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream = True, additional_fn=None):
     """
@@ -110,23 +154,33 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     chatbot 为WebUI中显示的对话列表，修改它，然后yeild出去，可以直接修改对话界面内容
     additional_fn代表点击的哪个按钮，按钮见functional.py
     """
-    from anthropic import Anthropic
+    if inputs == "":     inputs = "空空如也的输入栏"
     if len(ANTHROPIC_API_KEY) == 0:
         chatbot.append([inputs, "没有设置ANTHROPIC_API_KEY"])
         yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
         return
-    
+
     if additional_fn is not None:
         from common.core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
-    raw_input = inputs
-    logging.info(f'[raw_input] {raw_input}')
-    chatbot.append([inputs, ""])
-    yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
+    have_recent_file, image_paths = every_image_file_in_path(chatbot)
+    if len(image_paths) > 20:
+        chatbot.append((inputs, "图片数量超过api上限(20张)"))
+        yield from update_ui(chatbot=chatbot, history=history, msg="等待响应")
+        return
+
+    if any([llm_kwargs['llm_model'] == model for model in Claude_3_Models]) and have_recent_file:
+        if inputs == "" or inputs == "空空如也的输入栏":     inputs = "请描述给出的图片"
+        system_prompt += picture_system_prompt  # 由于没有单独的参数保存包含图片的历史，所以只能通过提示词对第几张图片进行定位
+        chatbot.append((make_media_input(history,inputs, image_paths), ""))
+        yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
+    else:
+        chatbot.append((inputs, ""))
+        yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
 
     try:
-        prompt = generate_payload(inputs, llm_kwargs, history, system_prompt, stream)
+        headers, message = generate_payload(inputs, llm_kwargs, history, system_prompt, image_paths)
     except RuntimeError as e:
         chatbot[-1] = [inputs, f"您提供的api-key不满足要求，不包含任何可用于{llm_kwargs['llm_model']}的api-key。您可能选择了错误的模型或请求源。"]
         yield from update_ui(chatbot=chatbot, history=history, msg="api-key不满足要求") # 刷新界面
@@ -139,91 +193,116 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         try:
             # make a POST request to the API endpoint, stream=True
             from .bridge_all import model_info
-            anthropic = Anthropic(api_key=ANTHROPIC_API_KEY)
-            # endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
-            # with ProxyNetworkActivate()
-            stream = anthropic.completions.create(
-                prompt=prompt,
-                max_tokens_to_sample=4096,       # The maximum number of tokens to generate before stopping.
-                model=llm_kwargs['llm_model'],
-                stream=True,
-                temperature = llm_kwargs['temperature']
-            )
-            
-            break
-        except:
+            endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
+            response = requests.post(endpoint, headers=headers, json=message, 
+                                     proxies=proxies, stream=True, timeout=TIMEOUT_SECONDS);break
+        except requests.exceptions.ReadTimeout as e:
             retry += 1
-            chatbot[-1] = [chatbot[-1][0], timeout_bot_msg]
-            retry_msg = f"，正在重试 ({retry}/{MAX_RETRY}) ……" if MAX_RETRY > 0 else ""
-            yield from update_ui(chatbot=chatbot, history=history, msg="请求超时"+retry_msg) # 刷新界面
+            traceback.print_exc()
             if retry > MAX_RETRY: raise TimeoutError
-
+            if MAX_RETRY!=0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
+    stream_response = response.iter_lines()
     gpt_replying_buffer = ""
-    
-    for completion in stream:
-        try:
-            gpt_replying_buffer = gpt_replying_buffer + completion.completion
-            history[-1] = gpt_replying_buffer
-            chatbot[-1] = [history[-2], history[-1]]
-            yield from update_ui(chatbot=chatbot, history=history, msg='正常') # 刷新界面
 
-        except Exception as e:
-            from common.toolbox import regular_txt_to_markdown
-            tb_str = '```\n' + trimmed_format_exc() + '```'
-            chatbot[-1] = [chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str}"]
-            yield from update_ui(chatbot=chatbot, history=history, msg="Json异常" + tb_str) # 刷新界面
-            return
-        
+    while True:
+        try: chunk = next(stream_response)
+        except StopIteration:
+            break
+        except requests.exceptions.ConnectionError:
+            chunk = next(stream_response) # 失败了，重试一次？再失败就没办法了。
+        need_to_pass, chunkjson, is_last_chunk = decode_chunk(chunk)
+        if chunk:
+            try:
+                if need_to_pass:
+                    pass
+                elif is_last_chunk:
+                    logging.info(f'[response] {gpt_replying_buffer}')
+                    break
+                else:
+                    if chunkjson and chunkjson['type'] == 'content_block_delta':
+                        gpt_replying_buffer += chunkjson['delta']['text']
+                        history[-1] = gpt_replying_buffer
+                        chatbot[-1] = (history[-2], history[-1])
+                        yield from update_ui(chatbot=chatbot, history=history, msg='正常') # 刷新界面
 
+            except Exception as e:
+                chunk = get_full_error(chunk, stream_response)
+                chunk_decoded = chunk.decode()
+                error_msg = chunk_decoded
+                print(error_msg)
+                raise RuntimeError("Json解析不合常规")
 
+def multiple_picture_types(image_paths):
+    """
+    根据图片类型返回image/jpeg, image/png, image/gif, image/webp，无法判断则返回image/jpeg
+    """
+    for image_path in image_paths:
+        if image_path.endswith('.jpeg') or image_path.endswith('.jpg'):
+            return 'image/jpeg'
+        elif image_path.endswith('.png'):
+            return 'image/png'
+        elif image_path.endswith('.gif'):
+            return 'image/gif'
+        elif image_path.endswith('.webp'):
+            return 'image/webp'
+    return 'image/jpeg'
 
-# https://github.com/jtsang4/claude-to-chatgpt/blob/main/claude_to_chatgpt/adapter.py
-def convert_messages_to_prompt(messages):
-    prompt = ""
-    role_map = {
-        "system": "Human",
-        "user": "Human",
-        "assistant": "Assistant",
-    }
-    for message in messages:
-        role = message["role"]
-        content = message["content"]
-        transformed_role = role_map[role]
-        prompt += f"\n\n{transformed_role.capitalize()}: {content}"
-    prompt += "\n\nAssistant: "
-    return prompt
-
-def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
+def generate_payload(inputs, llm_kwargs, history, system_prompt, image_paths):
     """
     整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
     """
-    from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
 
     conversation_cnt = len(history) // 2
 
-    messages = [{"role": "system", "content": system_prompt}]
+    messages = []
+
     if conversation_cnt:
         for index in range(0, 2*conversation_cnt, 2):
             what_i_have_asked = {}
             what_i_have_asked["role"] = "user"
-            what_i_have_asked["content"] = history[index]
+            what_i_have_asked["content"] = [{"type": "text", "text": history[index]}]
             what_gpt_answer = {}
             what_gpt_answer["role"] = "assistant"
-            what_gpt_answer["content"] = history[index+1]
-            if what_i_have_asked["content"] != "":
-                if what_gpt_answer["content"] == "": continue
-                if what_gpt_answer["content"] == timeout_bot_msg: continue
+            what_gpt_answer["content"] = [{"type": "text", "text": history[index+1]}]
+            if what_i_have_asked["content"][0]["text"] != "":
+                if what_i_have_asked["content"][0]["text"] == "": continue
+                if what_i_have_asked["content"][0]["text"] == timeout_bot_msg: continue
                 messages.append(what_i_have_asked)
                 messages.append(what_gpt_answer)
             else:
-                messages[-1]['content'] = what_gpt_answer['content']
+                messages[-1]['content'][0]['text'] = what_gpt_answer['content'][0]['text']
 
-    what_i_ask_now = {}
-    what_i_ask_now["role"] = "user"
-    what_i_ask_now["content"] = inputs
+    if any([llm_kwargs['llm_model'] == model for model in Claude_3_Models]) and image_paths:
+        what_i_ask_now = {}
+        what_i_ask_now["role"] = "user"
+        what_i_ask_now["content"] = []
+        for image_path in image_paths:
+            what_i_ask_now["content"].append({
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": multiple_picture_types(image_paths),
+                    "data": encode_image(image_path),
+                }
+            })
+        what_i_ask_now["content"].append({"type": "text", "text": inputs})
+    else:
+        what_i_ask_now = {}
+        what_i_ask_now["role"] = "user"
+        what_i_ask_now["content"] = [{"type": "text", "text": inputs}]
     messages.append(what_i_ask_now)
-    prompt = convert_messages_to_prompt(messages)
-
-    return prompt
-
-
+    # 开始整理headers与message
+    headers = {
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json'
+    }
+    payload = {
+        'model': llm_kwargs['llm_model'],
+        'max_tokens': 4096,
+        'messages': messages,
+        'temperature': llm_kwargs['temperature'],
+        'stream': True,
+        'system': system_prompt
+    }
+    return headers, payload

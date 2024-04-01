@@ -15,7 +15,7 @@ def 解析PDF(file_name, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     file_content, page_one = read_and_clean_pdf_text(file_name) # （尝试）按照章节切割PDF
     file_content = file_content.encode('utf-8', 'ignore').decode()   # avoid reading non-utf8 chars
     page_one = str(page_one).encode('utf-8', 'ignore').decode()  # avoid reading non-utf8 chars
-    
+
     TOKEN_LIMIT_PER_FRAGMENT = 2500
 
     from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit
@@ -23,7 +23,7 @@ def 解析PDF(file_name, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     page_one_fragments = breakdown_text_to_satisfy_token_limit(txt=str(page_one), limit=TOKEN_LIMIT_PER_FRAGMENT//4, llm_model=llm_kwargs['llm_model'])
     # 为了更好的效果，我们剥离Introduction之后的部分（如果有）
     paper_meta = page_one_fragments[0].split('introduction')[0].split('Introduction')[0].split('INTRODUCTION')[0]
-    
+
     ############################## <第 1 步，从摘要中提取高价值信息，放到history中> ##################################
     final_results = []
     final_results.append(paper_meta)
@@ -42,10 +42,10 @@ def 解析PDF(file_name, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
         i_say = f"Read this section, recapitulate the content of this section with less than {NUM_OF_WORD} words: {paper_fragments[i]}"
         i_say_show_user = f"[{i+1}/{n_fragment}] Read this section, recapitulate the content of this section with less than {NUM_OF_WORD} words: {paper_fragments[i][:200]} ...."
         gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(i_say, i_say_show_user,  # i_say=真正给chatgpt的提问， i_say_show_user=给用户看的提问
-                                                                           llm_kwargs, chatbot, 
+                                                                           llm_kwargs, chatbot,
                                                                            history=["The main idea of the previous section is?", last_iteration_result], # 迭代上一次的结果
                                                                            sys_prompt="Extract the main idea of this section, answer me with Chinese."  # 提示
-                                                                        ) 
+                                                                        )
         iteration_results.append(gpt_say)
         last_iteration_result = gpt_say
     ############################## <第 3 步，整理history> ##################################
@@ -64,7 +64,7 @@ def 解析PDF(file_name, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
 
 
 @CatchException
-def 理解PDF文档内容标准文件输入(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 理解PDF文档内容标准文件输入(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     import glob, os
 
     # 基本信息：功能、贡献者
@@ -77,8 +77,8 @@ def 理解PDF文档内容标准文件输入(txt, llm_kwargs, plugin_kwargs, chat
     try:
         import fitz
     except:
-        report_exception(chatbot, history, 
-            a = f"解析项目: {txt}", 
+        report_exception(chatbot, history,
+            a = f"解析项目: {txt}",
             b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pymupdf```。")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return

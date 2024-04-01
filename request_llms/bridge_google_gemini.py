@@ -20,9 +20,10 @@ timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check 
 
 
 class GoogleChatInit:
-
-    def __init__(self):
-        self.url_gemini = 'https://generativelanguage.googleapis.com/v1beta/models/%m:streamGenerateContent?key=%k'
+    def __init__(self, llm_kwargs):
+        from .bridge_all import model_info
+        endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
+        self.url_gemini = endpoint + "/%m:streamGenerateContent?key=%k"
         self.retry = 0
 
     def __conversation_user(self, user_input: str):
@@ -120,8 +121,8 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     if get_conf("GEMINI_API_KEY") == "":
         raise ValueError(f"请配置 GEMINI_API_KEY。")
 
-    genai = GoogleChatInit()
-    watch_dog_patience = 30  # 看门狗的耐心, 设置10秒即可
+    genai = GoogleChatInit(llm_kwargs)
+    watch_dog_patience = 5  # 看门狗的耐心, 设置5秒即可
     gpt_replying_buffer = ''
     stream_response = genai.generate_chat(inputs, llm_kwargs, history, sys_prompt)
     for text_match, results, error_match in stream_response:
@@ -147,9 +148,14 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         yield from update_ui_lastest_msg(f"请配置 GEMINI_API_KEY。", chatbot=chatbot, history=history, delay=0)
         return
 
-    chatbot.append([inputs, ""])
+    # 适配润色区域
+    if additional_fn is not None:
+        from common.core_functional import handle_core_functionality
+        inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
+
+    chatbot.append((inputs, ""))
     yield from update_ui(chatbot=chatbot, history=history)
-    genai = GoogleChatInit()
+    genai = GoogleChatInit(llm_kwargs)
     retry = 0
     while True:
         try:

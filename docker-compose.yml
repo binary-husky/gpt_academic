@@ -1,12 +1,12 @@
 ## ===================================================
-# docker-compose.yml
+#                docker-compose.yml
 ## ===================================================
 # 1. 请在以下方案中选择任意一种，然后删除其他的方案
 # 2. 修改你选择的方案中的environment环境变量，详情请见github wiki或者config.py
 # 3. 选择一种暴露服务端口的方法，并对相应的配置做出修改：
-    # 【方法1: 适用于Linux，很方便，可惜windows不支持】与宿主的网络融合为一体，这个是默认配置
+    # 「方法1: 适用于Linux，很方便，可惜windows不支持」与宿主的网络融合为一体，这个是默认配置
     # network_mode: "host"
-    # 【方法2: 适用于所有系统包括Windows和MacOS】端口映射，把容器的端口映射到宿主的端口（注意您需要先删除network_mode: "host"，再追加以下内容）
+    # 「方法2: 适用于所有系统包括Windows和MacOS」端口映射，把容器的端口映射到宿主的端口（注意您需要先删除network_mode: "host"，再追加以下内容）
     # ports:
     #   - "12345:12345"  # 注意！12345必须与WEB_PORT环境变量相互对应
 # 4. 最后`docker-compose up`运行
@@ -25,7 +25,7 @@
 ## ===================================================
 
 ## ===================================================
-## 【方案零】 部署项目的全部能力（这个是包含cuda和latex的大型镜像。如果您网速慢、硬盘小或没有显卡，则不推荐使用这个）
+## 「方案零」 部署项目的全部能力（这个是包含cuda和latex的大型镜像。如果您网速慢、硬盘小或没有显卡，则不推荐使用这个）
 ## ===================================================
 version: '3'
 services:
@@ -63,10 +63,10 @@ services:
     #             count: 1
     #             capabilities: [gpu]
 
-    # 【WEB_PORT暴露方法1: 适用于Linux】与宿主的网络融合
+    # 「WEB_PORT暴露方法1: 适用于Linux」与宿主的网络融合
     network_mode: "host"
 
-    # 【WEB_PORT暴露方法2: 适用于所有系统】端口映射
+    # 「WEB_PORT暴露方法2: 适用于所有系统」端口映射
     # ports:
     #   - "12345:12345"  # 12345必须与WEB_PORT相互对应
 
@@ -75,10 +75,8 @@ services:
       bash -c "python3 -u main.py"
 
 
-
-
 ## ===================================================
-## 【方案一】 如果不需要运行本地模型（仅 chatgpt, azure, 星火, 千帆, claude 等在线大模型服务）
+## 「方案一」 如果不需要运行本地模型（仅 chatgpt, azure, 星火, 千帆, claude 等在线大模型服务）
 ## ===================================================
 version: '3'
 services:
@@ -97,16 +95,16 @@ services:
       # DEFAULT_WORKER_NUM:       '    10                                                                                             '
       # AUTHENTICATION:           '    [("username", "passwd"), ("username2", "passwd2")]                                             '
 
-    # 与宿主的网络融合
+    # 「WEB_PORT暴露方法1: 适用于Linux」与宿主的网络融合
     network_mode: "host"
 
-    # 不使用代理网络拉取最新代码
+    # 启动命令
     command: >
       bash -c "python3 -u main.py"
 
 
 ### ===================================================
-### 【方案二】 如果需要运行ChatGLM + Qwen + MOSS等本地模型
+### 「方案二」 如果需要运行ChatGLM + Qwen + MOSS等本地模型
 ### ===================================================
 version: '3'
 services:
@@ -130,8 +128,10 @@ services:
     devices:
       - /dev/nvidia0:/dev/nvidia0
 
-    # 与宿主的网络融合
+    # 「WEB_PORT暴露方法1: 适用于Linux」与宿主的网络融合
     network_mode: "host"
+
+    # 启动命令
     command: >
       bash -c "python3 -u main.py"
 
@@ -139,8 +139,9 @@ services:
     # command: >
     #   bash -c "pip install -r request_llms/requirements_qwen.txt && python3 -u main.py"
 
+
 ### ===================================================
-### 【方案三】 如果需要运行ChatGPT + LLAMA + 盘古 + RWKV本地模型
+### 「方案三」 如果需要运行ChatGPT + LLAMA + 盘古 + RWKV本地模型
 ### ===================================================
 version: '3'
 services:
@@ -164,16 +165,16 @@ services:
     devices:
       - /dev/nvidia0:/dev/nvidia0
 
-    # 与宿主的网络融合
+    # 「WEB_PORT暴露方法1: 适用于Linux」与宿主的网络融合
     network_mode: "host"
 
-    # 不使用代理网络拉取最新代码
+    # 启动命令
     command: >
       python3 -u main.py
 
 
 ## ===================================================
-## 【方案四】 ChatGPT + Latex
+## 「方案四」 ChatGPT + Latex
 ## ===================================================
 version: '3'
 services:
@@ -190,16 +191,16 @@ services:
       DEFAULT_WORKER_NUM:       '    10                                                                               '
       WEB_PORT:                 '    12303                                                                            '
 
-    # 与宿主的网络融合
+    # 「WEB_PORT暴露方法1: 适用于Linux」与宿主的网络融合
     network_mode: "host"
 
-    # 不使用代理网络拉取最新代码
+    # 启动命令
     command: >
       bash -c "python3 -u main.py"
 
 
 ## ===================================================
-## 【方案五】 ChatGPT + 语音助手 （请先阅读 docs/use_audio.md）
+## 「方案五」 ChatGPT + 语音助手 （请先阅读 docs/use_audio.md）
 ## ===================================================
 version: '3'
 services:
@@ -223,9 +224,9 @@ services:
       # (无需填写) ALIYUN_ACCESSKEY:         '    LTAI5q6BrFUzoRXVGUWnekh1                                         '
       # (无需填写) ALIYUN_SECRET:            '    eHmI20AVWIaQZ0CiTD2bGQVsaP9i68                                   '
 
-    # 与宿主的网络融合
+    # 「WEB_PORT暴露方法1: 适用于Linux」与宿主的网络融合
     network_mode: "host"
 
-    # 不使用代理网络拉取最新代码
+    # 启动命令
     command: >
       bash -c "python3 -u main.py"

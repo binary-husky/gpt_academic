@@ -3,6 +3,7 @@ from common.toolbox import update_ui, get_conf, update_ui_lastest_msg
 from common.toolbox import check_packages, report_exception
 
 model_name = '智谱AI大模型'
+zhipuai_default_model = 'glm-4'
 
 
 def validate_key():
@@ -19,6 +20,9 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     """
     watch_dog_patience = 5
     response = ""
+
+    if llm_kwargs["llm_model"] == "zhipuai":
+        llm_kwargs["llm_model"] = zhipuai_default_model
 
     if validate_key() is False:
         raise RuntimeError('请配置ZHIPUAI_API_KEY')

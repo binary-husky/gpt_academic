@@ -23,7 +23,7 @@ def get_meta_information(url, chatbot, history):
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36',
         'Accept-Encoding': 'gzip, deflate, br',
         'Accept-Language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7',
-        'Cache-Control': 'max-age=0',
+        'Cache-Control':'max-age=0',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
         'Connection': 'keep-alive'
     }
@@ -96,10 +96,8 @@ def get_meta_information(url, chatbot, history):
             max_results=1,
             sort_by=arxiv.SortCriterion.Relevance,
         )
-        try:
-            paper = next(search.results())
-        except:
-            paper = None
+        try: paper = next(search.results())
+        except: paper = None
 
         is_match = paper is not None and string_similar(title, paper.title) > 0.90
 
@@ -140,7 +138,7 @@ def get_meta_information(url, chatbot, history):
 
 
 @CatchException
-def 谷歌检索小助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
+def 谷歌检索小助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     disable_auto_promotion(chatbot=chatbot)
     # 基本信息：功能、贡献者
     chatbot.append([
@@ -154,8 +152,8 @@ def 谷歌检索小助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
         import math
         from bs4 import BeautifulSoup
     except:
-        report_exception(chatbot, history, 
-            a = f"解析项目: {txt}", 
+        report_exception(chatbot, history,
+            a = f"解析项目: {txt}",
             b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade beautifulsoup4 arxiv```。")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
@@ -171,8 +169,8 @@ def 谷歌检索小助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     for batch in range(math.ceil(len(meta_paper_info_list) / batchsize)):
         if len(meta_paper_info_list[:batchsize]) > 0:
             i_say = "下面是一些学术文献的数据，提取出以下内容：" + \
-                    "1、英文题目；2、中文题目翻译；3、作者；4、arxiv公开（is_paper_in_arxiv）；4、引用数量（cite）；5、中文摘要翻译。" + \
-                    f"以下是信息源：{str(meta_paper_info_list[:batchsize])}"
+            "1、英文题目；2、中文题目翻译；3、作者；4、arxiv公开（is_paper_in_arxiv）；4、引用数量（cite）；5、中文摘要翻译。" + \
+            f"以下是信息源：{str(meta_paper_info_list[:batchsize])}"
 
             inputs_show_user = f"请分析此页面中出现的所有文章：{txt}，这是第{batch + 1}批"
             gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
@@ -185,10 +183,10 @@ def 谷歌检索小助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
             meta_paper_info_list = meta_paper_info_list[batchsize:]
 
     chatbot.append(["状态？",
-                    "已经全部完成，您可以试试让AI写一个Related Works，例如您可以继续输入Write a \"Related Works\" section about \"你搜索的研究领域\" for me."])
+        "已经全部完成，您可以试试让AI写一个Related Works，例如您可以继续输入Write a \"Related Works\" section about \"你搜索的研究领域\" for me."])
     msg = '正常'
     yield from update_ui(chatbot=chatbot, history=history, msg=msg)  # 刷新界面
     path = write_history_to_file(history)
     promote_file_to_downloadzone(path, chatbot=chatbot)
-    chatbot.append(["完成了吗？", path]);
-    yield from update_ui(chatbot=chatbot, history=history, msg=msg)  # 刷新界面
+    chatbot.append(("完成了吗？", path));
+    yield from update_ui(chatbot=chatbot, history=history, msg=msg) # 刷新界面

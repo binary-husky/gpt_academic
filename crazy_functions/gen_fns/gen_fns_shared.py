@@ -41,11 +41,11 @@ def is_function_successfully_generated(fn_path, class_name, return_dict):
         # Now you can create an instance of the class
         instance = some_class()
         return_dict['success'] = True
-        return 
+        return
     except:
         return_dict['traceback'] = trimmed_format_exc()
         return
-    
+
 def subprocess_worker(code, file_path, return_dict):
     return_dict['result'] = None
     return_dict['success'] = False

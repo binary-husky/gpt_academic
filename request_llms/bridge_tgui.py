@@ -75,7 +75,7 @@ async def run(context, max_token, temperature, top_p, addr, port):
                 pass
             elif content["msg"] in ["process_generating", "process_completed"]:
                 yield content["output"]["data"][0]
-                # You can search for your desired end indicator and 
+                # You can search for your desired end indicator and
                 #  stop generation by closing the websocket here
                 if (content["msg"] == "process_completed"):
                     break
@@ -116,12 +116,12 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         async def get_result(mutable):
             # "tgui:galactica-1.3b@localhost:7860"
 
-            async for response in run(context=prompt, max_token=llm_kwargs['max_length'], 
-                                      temperature=llm_kwargs['temperature'], 
+            async for response in run(context=prompt, max_token=llm_kwargs['max_length'],
+                                      temperature=llm_kwargs['temperature'],
                                       top_p=llm_kwargs['top_p'], addr=addr, port=port):
                 print(response[len(mutable[0]):])
                 mutable[0] = response
-                if (time.time() - mutable[1]) > 3: 
+                if (time.time() - mutable[1]) > 3:
                     print('exit when no listener')
                     break
         asyncio.run(get_result(mutable))
@@ -151,12 +151,12 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
 
     def run_coorotine(observe_window):
         async def get_result(observe_window):
-            async for response in run(context=prompt, max_token=llm_kwargs['max_length'], 
-                                      temperature=llm_kwargs['temperature'], 
+            async for response in run(context=prompt, max_token=llm_kwargs['max_length'],
+                                      temperature=llm_kwargs['temperature'],
                                       top_p=llm_kwargs['top_p'], addr=addr, port=port):
                 print(response[len(observe_window[0]):])
                 observe_window[0] = response
-                if (time.time() - observe_window[1]) > 5: 
+                if (time.time() - observe_window[1]) > 5:
                     print('exit when no listener')
                     break
         asyncio.run(get_result(observe_window))

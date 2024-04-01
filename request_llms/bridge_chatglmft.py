@@ -37,7 +37,7 @@ class GetGLMFTHandle(Process):
         self.check_dependency()
         self.start()
         self.threadLock = threading.Lock()
-        
+
     def check_dependency(self):
         try:
             import sentencepiece
@@ -100,7 +100,7 @@ class GetGLMFTHandle(Process):
                     break
             except Exception as e:
                 retry += 1
-                if retry > 3: 
+                if retry > 3:
                     self.child.send('[Local Message] Call ChatGLMFT fail 不能正常加载ChatGLMFT的参数。')
                     raise RuntimeError("不能正常加载ChatGLMFT的参数！")
 
@@ -112,7 +112,7 @@ class GetGLMFTHandle(Process):
                 for response, history in self.chatglmft_model.stream_chat(self.chatglmft_tokenizer, **kwargs):
                     self.child.send(response)
                     # # 中途接收可能的终止指令（如果有的话）
-                    # if self.child.poll(): 
+                    # if self.child.poll():
                     #     command = self.child.recv()
                     #     if command == '[Terminate]': break
             except:
@@ -132,7 +132,7 @@ class GetGLMFTHandle(Process):
             else:
                 break
         self.threadLock.release()
-    
+
 global glmft_handle
 glmft_handle = None
 #################################################################################
@@ -145,7 +145,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     if glmft_handle is None:
         glmft_handle = GetGLMFTHandle()
         if len(observe_window) >= 1: observe_window[0] = load_message + "\n\n" + glmft_handle.info
-        if not glmft_handle.success: 
+        if not glmft_handle.success:
             error = glmft_handle.info
             glmft_handle = None
             raise RuntimeError(error)
@@ -160,7 +160,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     response = ""
     for response in glmft_handle.stream_chat(query=inputs, history=history_feedin, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
         if len(observe_window) >= 1:  observe_window[0] = response
-        if len(observe_window) >= 2:  
+        if len(observe_window) >= 2:
             if (time.time()-observe_window[1]) > watch_dog_patience:
                 raise RuntimeError("程序终止。")
     return response
@@ -179,7 +179,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         glmft_handle = GetGLMFTHandle()
         chatbot[-1] = [inputs, load_message + "\n\n" + glmft_handle.info]
         yield from update_ui(chatbot=chatbot, history=[])
-        if not glmft_handle.success: 
+        if not glmft_handle.success:
             glmft_handle = None
             return
 

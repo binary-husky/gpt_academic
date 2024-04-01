@@ -82,7 +82,7 @@ class GetInternlmHandle(LocalLLMHandle):
             history = kwargs['history']
             real_prompt = combine_history(prompt, history)
             return model, tokenizer, real_prompt, max_length, top_p, temperature
-        
+
         model, tokenizer, prompt, max_length, top_p, temperature = adaptor()
         prefix_allowed_tokens_fn = None
         logits_processor = None
@@ -183,7 +183,7 @@ class GetInternlmHandle(LocalLLMHandle):
                 outputs, model_kwargs, is_encoder_decoder=False
             )
             unfinished_sequences = unfinished_sequences.mul((min(next_tokens != i for i in eos_token_id)).long())
-            
+
             output_token_ids = input_ids[0].cpu().tolist()
             output_token_ids = output_token_ids[input_length:]
             for each_eos_token_id in eos_token_id:
@@ -196,7 +196,7 @@ class GetInternlmHandle(LocalLLMHandle):
             if unfinished_sequences.max() == 0 or stopping_criteria(input_ids, scores):
                 return
 
-    
+
 # ------------------------------------------------------------------------------------------------------------------------
 # 🔌💻 GPT-Academic Interface
 # ------------------------------------------------------------------------------------------------------------------------
