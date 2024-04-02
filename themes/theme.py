@@ -178,11 +178,8 @@ setTimeout(() => {
 js_code_show_or_hide_group2 = """
 (display_panel_arr)=>{
 setTimeout(() => {
-    // console.log("display_panel_arr");
-    // get conf
     display_panel_arr = get_checkbox_selected_items("cbsc");
 
-    ////////////////////// 添加Live2D形象 ///////////////////////////
     let searchString = "添加Live2D形象";
     let ele = "none";
     if (display_panel_arr.includes(searchString)) {
@@ -192,7 +189,6 @@ setTimeout(() => {
         setCookie("js_live2d_show_cookie", "False", 365);
         $('.waifu').hide();
     }
-
 
 }, 50);
 }

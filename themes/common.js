@@ -2,6 +2,77 @@
 //  第 1 部分: 工具函数
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
+function push_data_to_gradio_component(DAT, ELEM_ID, TYPE){
+    // type,               // type==="str" / type==="float"
+    if (TYPE=="str"){
+        // convert dat to string: do nothing
+    }
+    else if (TYPE=="no_conversion"){
+        // no nothing
+    }
+    else if (TYPE=="float"){
+        // convert dat to float
+        DAT = parseFloat(DAT);
+    }
+    const myEvent = new CustomEvent('gpt_academic_update_gradio_component', {
+        detail: {
+            data: DAT,
+            elem_id: ELEM_ID,
+        }
+    });
+    window.dispatchEvent(myEvent);
+}
+
+
+async function get_gradio_component(ELEM_ID){
+    function waitFor(ELEM_ID) {
+        return new Promise((resolve) => {
+            const myEvent = new CustomEvent('gpt_academic_get_gradio_component_value', {
+                detail: {
+                    elem_id: ELEM_ID,
+                    resolve,
+                }
+            });
+            window.dispatchEvent(myEvent);
+        });
+    }
+    result = await waitFor(ELEM_ID);
+    return result;
+}
+
+
+async function get_data_from_gradio_component(ELEM_ID){
+    let comp = await get_gradio_component(ELEM_ID);
+    return comp.props.value;
+}
+
+function update_array(arr, item, mode) {
+    //   let p = ["基础功能区", "输入清除键", "函数插件区"];
+
+    //   // Remove "输入清除键"
+    //   p = updateArray(p, "输入清除键", "remove");
+    //   console.log(p); // Should log: ["基础功能区", "函数插件区"]
+
+    //   // Add "输入清除键"
+    //   p = updateArray(p, "输入清除键", "add");
+    //   console.log(p); // Should log: ["基础功能区", "函数插件区", "输入清除键"]
+
+    const index = arr.indexOf(item);
+    if (mode === "remove") {
+        if (index !== -1) {
+        // Item found, remove it
+        arr.splice(index, 1);
+        }
+    } else if (mode === "add") {
+        if (index === -1) {
+        // Item not found, add it
+        arr.push(item);
+        }
+    }
+    return arr;
+}
+
+
 function gradioApp() {
     // https://github.com/GaiZhenbiao/ChuanhuChatGPT/tree/main/web_assets/javascript
     const elems = document.getElementsByTagName('gradio-app');
@@ -799,8 +870,34 @@ function set_checkbox(key, bool, set_twice=false) {
     }
 }
 
-function apply_cookie_for_checkbox(dark) {
-    // console.log("apply_cookie_for_checkboxes")
+function gpt_academic_gradio_saveload(
+        save_or_load,       // save_or_load==="save" / save_or_load==="load"
+        elem_id,            // element id
+        cookie_key,         // cookie key
+        save_value="",      // save value
+        load_type = "str",  // type==="str" / type==="float"
+        load_default=false, // load default value
+        load_default_value=""
+    ) {
+    if (save_or_load === "load") {
+        let value = getCookie(cookie_key);
+        if (value) {
+            console.log('加载cookie', elem_id, value)
+            push_data_to_gradio_component(value, elem_id, load_type);
+        }
+        else{
+            if (load_default){
+                console.log('加载cookie的默认值', elem_id, load_default_value)
+                push_data_to_gradio_component(load_default_value, elem_id, load_type);
+            }
+        }
+    }
+    if (save_or_load === "save") {
+        setCookie(cookie_key, save_value, 365);
+    }
+}
+
+async function init_frontend_with_cookies(dark, prompt, live2d) {
     let searchString = "输入清除键";
     let bool_value = "False";
 
@@ -819,29 +916,40 @@ function apply_cookie_for_checkbox(dark) {
         }
     }
 
+    ////////////////////// SysPrompt ///////////////////////////
+    gpt_academic_gradio_saveload("load", "elem_prompt", "js_system_prompt_cookie", null, "str");
+    ////////////////////// Temperature ///////////////////////////
+    gpt_academic_gradio_saveload("load", "elem_temperature", "js_temperature_cookie", null, "float");
+
     ////////////////////// clearButton ///////////////////////////
     if (getCookie("js_clearbtn_show_cookie")) {
         // have cookie
         bool_value = getCookie("js_clearbtn_show_cookie")
         bool_value = bool_value == "True";
         searchString = "输入清除键";
+
         if (bool_value) {
-            let clearButton = document.getElementById("elem_clear");
-            let clearButton2 = document.getElementById("elem_clear2");
-            clearButton.style.display = "block";
-            clearButton2.style.display = "block";
-            set_checkbox(searchString, true);
+            // make btns appear
+            let clearButton = document.getElementById("elem_clear"); clearButton.style.display = "block";
+            let clearButton2 = document.getElementById("elem_clear2"); clearButton2.style.display = "block";
+            // deal with checkboxes
+            let arr_with_clear_btn = update_array(
+                await get_data_from_gradio_component('cbs'), "输入清除键", "add"
+            )
+            push_data_to_gradio_component(arr_with_clear_btn, "cbs", "no_conversion");
         } else {
-            let clearButton = document.getElementById("elem_clear");
-            let clearButton2 = document.getElementById("elem_clear2");
-            clearButton.style.display = "none";
-            clearButton2.style.display = "none";
-            set_checkbox(searchString, false);
+            // make btns disappear
+            let clearButton = document.getElementById("elem_clear"); clearButton.style.display = "none";
+            let clearButton2 = document.getElementById("elem_clear2"); clearButton2.style.display = "none";
+            // deal with checkboxes
+            let arr_without_clear_btn = update_array(
+                await get_data_from_gradio_component('cbs'), "输入清除键", "remove"
+            )
+            push_data_to_gradio_component(arr_without_clear_btn, "cbs", "no_conversion");
         }
     }
 
     ////////////////////// live2d ///////////////////////////
-
     if (getCookie("js_live2d_show_cookie")) {
         // have cookie
         searchString = "添加Live2D形象";
@@ -849,17 +957,23 @@ function apply_cookie_for_checkbox(dark) {
         bool_value = bool_value == "True";
         if (bool_value) {
             loadLive2D();
-            set_checkbox(searchString, true);
+            let arr_with_live2d = update_array(
+                await get_data_from_gradio_component('cbsc'), "添加Live2D形象", "add"
+            )
+            push_data_to_gradio_component(arr_with_live2d, "cbsc", "no_conversion");
         } else {
-            $('.waifu').hide();
-            set_checkbox(searchString, false);
+            try {
+                $('.waifu').hide();
+                let arr_without_live2d = update_array(
+                    await get_data_from_gradio_component('cbsc'), "添加Live2D形象", "remove"
+                )
+                push_data_to_gradio_component(arr_without_live2d, "cbsc", "no_conversion");
+            } catch (error) {
+            }
         }
     } else {
         // do not have cookie
-        // get conf
-        display_panel_arr = get_checkbox_selected_items("cbsc");
-        searchString = "添加Live2D形象";
-        if (display_panel_arr.includes(searchString)) {
+        if (live2d) {
             loadLive2D();
         } else {
         }
