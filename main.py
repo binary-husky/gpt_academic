@@ -24,7 +24,7 @@ def main():
     CHATBOT_HEIGHT, LAYOUT, AVAIL_LLM_MODELS, AUTO_CLEAR_TXT = get_conf('CHATBOT_HEIGHT', 'LAYOUT', 'AVAIL_LLM_MODELS', 'AUTO_CLEAR_TXT')
     ENABLE_AUDIO, AUTO_CLEAR_TXT, PATH_LOGGING, AVAIL_THEMES, THEME, ADD_WAIFU = get_conf('ENABLE_AUDIO', 'AUTO_CLEAR_TXT', 'PATH_LOGGING', 'AVAIL_THEMES', 'THEME', 'ADD_WAIFU')
     NUM_CUSTOM_BASIC_BTN, SSL_KEYFILE, SSL_CERTFILE = get_conf('NUM_CUSTOM_BASIC_BTN', 'SSL_KEYFILE', 'SSL_CERTFILE')
-    DARK_MODE, INIT_SYS_PROMPT = get_conf('DARK_MODE', 'INIT_SYS_PROMPT')
+    DARK_MODE, INIT_SYS_PROMPT, ADD_WAIFU = get_conf('DARK_MODE', 'INIT_SYS_PROMPT', 'ADD_WAIFU')
 
     # 如果WEB_PORT是-1, 则随机选取WEB端口
     PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
@@ -379,7 +379,7 @@ def main():
         demo.load(init_cookie, inputs=[cookies], outputs=[cookies])
         demo.load(persistent_cookie_reload, inputs = [py_pickle_cookie, cookies],
             outputs = [py_pickle_cookie, cookies, *customize_btns.values(), *predefined_btns.values()], _js=js_code_for_persistent_cookie_init)
-        demo.load(None, inputs=[], outputs=None, _js=f"""()=>init_frontend_with_cookies("{DARK_MODE}","{INIT_SYS_PROMPT}")""")    # 配置暗色主题或亮色主题
+        demo.load(None, inputs=[], outputs=None, _js=f"""()=>init_frontend_with_cookies("{DARK_MODE}","{INIT_SYS_PROMPT}","{ADD_WAIFU}")""")    # 配置暗色主题或亮色主题
         demo.load(None, inputs=[gr.Textbox(LAYOUT, visible=False)], outputs=None, _js='(LAYOUT)=>{GptAcademicJavaScriptInit(LAYOUT);}')
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
