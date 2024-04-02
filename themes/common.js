@@ -2,6 +2,24 @@
 //  第 1 部分: 工具函数
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
+function push_data_to_gradio_component(DAT, ELEM_ID, TYPE){
+    // type,               // type==="str" / type==="float"
+    if (TYPE=="str"){
+        // convert dat to string: do nothign
+    }
+    else if (TYPE=="float"){
+        // convert dat to float
+        DAT = parseFloat(DAT);
+    }
+    const myEvent = new CustomEvent('gpt_academic_update_gradio_component', {
+        detail: {
+            data: DAT,
+            elem_id: ELEM_ID,
+        }
+    });
+    window.dispatchEvent(myEvent);
+}
+
 function gradioApp() {
     // https://github.com/GaiZhenbiao/ChuanhuChatGPT/tree/main/web_assets/javascript
     const elems = document.getElementsByTagName('gradio-app');
@@ -799,8 +817,34 @@ function set_checkbox(key, bool, set_twice=false) {
     }
 }
 
-function apply_cookie_for_checkbox(dark) {
-    // console.log("apply_cookie_for_checkboxes")
+function gpt_academic_gradio_saveload(
+        save_or_load,       // save_or_load==="save" / save_or_load==="load"
+        elem_id,            // element id
+        cookie_key,         // cookie key
+        save_value="",      // save value
+        load_type = "str",  // type==="str" / type==="float"
+        load_default=false, // load default value
+        load_default_value=""
+    ) {
+    if (save_or_load === "load") {
+        let value = getCookie(cookie_key);
+        if (value) {
+            console.log('加载cookie', elem_id, value)
+            push_data_to_gradio_component(value, elem_id, load_type);
+        }
+        else{
+            if (load_default){
+                console.log('加载cookie的默认值', elem_id, load_default_value)
+                push_data_to_gradio_component(load_default_value, elem_id, load_type);
+            }
+        }
+    }
+    if (save_or_load === "save") {
+        setCookie(cookie_key, save_value, 365);
+    }
+}
+
+function init_frontend_with_cookies(dark, prompt) {
     let searchString = "输入清除键";
     let bool_value = "False";
 
@@ -818,6 +862,11 @@ function apply_cookie_for_checkbox(dark) {
             document.querySelector('body').classList.add('dark');
         }
     }
+
+    ////////////////////// SysPrompt ///////////////////////////
+    gpt_academic_gradio_saveload("load", "elem_prompt", "js_system_prompt_cookie", null, "str");
+    ////////////////////// Temperature ///////////////////////////
+    gpt_academic_gradio_saveload("load", "elem_temperature", "js_temperature_cookie", null, "float");
 
     ////////////////////// clearButton ///////////////////////////
     if (getCookie("js_clearbtn_show_cookie")) {
@@ -851,8 +900,11 @@ function apply_cookie_for_checkbox(dark) {
             loadLive2D();
             set_checkbox(searchString, true);
         } else {
-            $('.waifu').hide();
-            set_checkbox(searchString, false);
+            try {
+                $('.waifu').hide();
+                set_checkbox(searchString, false);
+            } catch (error) {
+            }
         }
     } else {
         // do not have cookie
