@@ -48,7 +48,7 @@ adjust_theme, advanced_css, theme_declaration, _ = load_dynamic_theme(get_conf("
 cookie相关工具函数
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 """
-def init_cookie(cookies):
+def assign_user_uuid(cookies):
     # 为每一位访问的用户赋予一个独一无二的uuid编码
     cookies.update({"uuid": uuid.uuid4()})
     return cookies

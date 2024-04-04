@@ -31,7 +31,7 @@ def main():
     from check_proxy import get_current_version
     from themes.theme import adjust_theme, advanced_css, theme_declaration, js_code_clear, js_code_reset, js_code_show_or_hide, js_code_show_or_hide_group2
     from themes.theme import js_code_for_css_changing, js_code_for_toggle_darkmode, js_code_for_persistent_cookie_init
-    from themes.theme import load_dynamic_theme, to_cookie_str, from_cookie_str, init_cookie
+    from themes.theme import load_dynamic_theme, to_cookie_str, from_cookie_str, assign_user_uuid
     title_html = f"<h1 align=\"center\">GPT 学术优化 {get_current_version()}</h1>{theme_declaration}"
 
     # 对话记录, python 版本建议3.9+（越新越好）
@@ -376,11 +376,10 @@ def main():
             audio_mic.stream(deal_audio, inputs=[audio_mic, cookies])
 
 
-        demo.load(init_cookie, inputs=[cookies], outputs=[cookies])
+        demo.load(assign_user_uuid, inputs=[cookies], outputs=[cookies])
         demo.load(persistent_cookie_reload, inputs = [py_pickle_cookie, cookies],
             outputs = [py_pickle_cookie, cookies, *customize_btns.values(), *predefined_btns.values()], _js=js_code_for_persistent_cookie_init)
-        demo.load(None, inputs=[], outputs=None, _js=f"""()=>init_frontend_with_cookies("{DARK_MODE}","{INIT_SYS_PROMPT}","{ADD_WAIFU}")""")    # 配置暗色主题或亮色主题
-        demo.load(None, inputs=[gr.Textbox(LAYOUT, visible=False)], outputs=None, _js='(LAYOUT)=>{GptAcademicJavaScriptInit(LAYOUT);}')
+        demo.load(None, inputs=[], outputs=None, _js=f"""()=>GptAcademicJavaScriptInit("{DARK_MODE}","{INIT_SYS_PROMPT}","{ADD_WAIFU}","{LAYOUT}")""")    # 配置暗色主题或亮色主题
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def run_delayed_tasks():
