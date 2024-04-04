@@ -26,4 +26,3 @@ openai
 arxiv
 numpy
 rich
-yarl
