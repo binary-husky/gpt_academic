@@ -48,6 +48,8 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     if additional_fn is not None:
         from core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
+        chatbot[-1] = (inputs, "")
+        yield from update_ui(chatbot=chatbot, history=history)
 
     # 开始接收回复
     from .com_qwenapi import QwenRequestInstance
