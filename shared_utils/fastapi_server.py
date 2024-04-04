@@ -57,7 +57,8 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
         @gradio_app.get("/file={path_or_url:path}", dependencies=dependencies)
         async def file(path_or_url: str, request: fastapi.Request):
             if len(AUTHENTICATION) > 0:
-                if not _authorize_user(path_or_url, request, gradio_app): "越权访问!"
+                if not _authorize_user(path_or_url, request, gradio_app):
+                    return "越权访问!"
             return await endpoint(path_or_url, request)
 
     # --- --- app_lifespan --- ---
