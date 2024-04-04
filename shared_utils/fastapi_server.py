@@ -32,7 +32,7 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
     app_block.queue(concurrency_count=CONCURRENT_COUNT)
     app_block.ssl_verify = False
     app_block.auth_message = '请登录'
-    app_block.favicon_path = os.path.join(os.path.dirname(__file__), "docs/logo.png")
+    app_block.favicon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "docs/logo.png")
     app_block.auth = AUTHENTICATION if len(AUTHENTICATION) != 0 else None
     app_block.blocked_paths = ["config.py", "config_private.py", "docker-compose.yml", "Dockerfile", "{PATH_LOGGING}/admin"]
     app_block.dev_mode = False
@@ -73,12 +73,19 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
         await shutdown_gradio_app() # cleanup/shutdown logic here
 
     # --- --- FastAPI --- ---
-    app = FastAPI(lifespan=app_lifespan)
-    app.mount(CUSTOM_PATH, gradio_app)
+    fastapi_app = FastAPI(lifespan=app_lifespan)
+    fastapi_app.mount(CUSTOM_PATH, gradio_app)
+
+    # --- --- favicon --- ---
+    if CUSTOM_PATH != '/':
+        from fastapi.responses import FileResponse
+        @fastapi_app.get("/favicon.ico")
+        async def favicon():
+            return FileResponse(app_block.favicon_path)
 
     # --- --- uvicorn.Config --- ---
     config = uvicorn.Config(
-        app,
+        fastapi_app,
         host="0.0.0.0",
         port=PORT,
         reload=False,
