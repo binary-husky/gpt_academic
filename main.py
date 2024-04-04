@@ -335,14 +335,14 @@ def main():
             audio_mic.stream(deal_audio, inputs=[audio_mic, cookies])
 
 
-        demo.load(assign_user_uuid, inputs=[cookies], outputs=[cookies])
+        app_block.load(assign_user_uuid, inputs=[cookies], outputs=[cookies])
 
         from shared_utils.cookie_manager import load_web_cookie_cache__fn_builder
         load_web_cookie_cache = load_web_cookie_cache__fn_builder(customize_btns, cookies, predefined_btns)
-        demo.load(load_web_cookie_cache, inputs = [web_cookie_cache, cookies],
+        app_block.load(load_web_cookie_cache, inputs = [web_cookie_cache, cookies],
             outputs = [web_cookie_cache, cookies, *customize_btns.values(), *predefined_btns.values()], _js=js_code_for_persistent_cookie_init)
 
-        demo.load(None, inputs=[], outputs=None, _js=f"""()=>GptAcademicJavaScriptInit("{DARK_MODE}","{INIT_SYS_PROMPT}","{ADD_WAIFU}","{LAYOUT}")""")    # 配置暗色主题或亮色主题
+        app_block.load(None, inputs=[], outputs=None, _js=f"""()=>GptAcademicJavaScriptInit("{DARK_MODE}","{INIT_SYS_PROMPT}","{ADD_WAIFU}","{LAYOUT}")""")    # 配置暗色主题或亮色主题
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def run_delayed_tasks():
@@ -376,13 +376,12 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
     app_block.queue(concurrency_count=CONCURRENT_COUNT)
     app_block.ssl_verify = False
     app_block.auth_message = '请登录'
-    app_block.favicon_path=os.path.join(os.path.dirname(__file__), "docs/logo.png")
+    app_block.favicon_path = os.path.join(os.path.dirname(__file__), "docs/logo.png")
     app_block.auth = AUTHENTICATION if len(AUTHENTICATION) != 0 else None
     app_block.blocked_paths = ["config.py", "config_private.py",
                           "docker-compose.yml", "Dockerfile", "{PATH_LOGGING}/admin"]
     app = create_app()
-    CUSTOM_PATH = get_conf('CUSTOM_PATH')
-    gr.mount_gradio_app(app, app_block, CUSTOM_PATH)
+    gr.mount_gradio_app(app, app_block, get_conf('CUSTOM_PATH'))
     config = uvicorn.Config(
         app,
         host="0.0.0.0",
