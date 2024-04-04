@@ -4,6 +4,7 @@ def _authorize_user(path_or_url, request, gradio_app):
     from toolbox import get_conf, default_user_name
     PATH_PRIVATE_UPLOAD, PATH_LOGGING = get_conf('PATH_PRIVATE_UPLOAD', 'PATH_LOGGING')
     sensitive_path = None
+    path_or_url = os.path.relpath(path_or_url)
     if path_or_url.startswith(PATH_LOGGING):
         sensitive_path = PATH_LOGGING
     if path_or_url.startswith(PATH_PRIVATE_UPLOAD):
