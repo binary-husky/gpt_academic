@@ -9,12 +9,13 @@
     具备多线程调用能力的函数
     2. predict_no_ui_long_connection：支持多线程
 """
-
+import logging
 import os
 import time
 import traceback
-from toolbox import get_conf, update_ui, trimmed_format_exc, encode_image, every_image_file_in_path
-
+import json
+import requests
+from toolbox import get_conf, update_ui, trimmed_format_exc, encode_image, every_image_file_in_path, log_chat
 picture_system_prompt = "\n当回复图像时,必须说明正在回复哪张图像。所有图像仅在最后一个问题中提供,即使它们在历史记录中被提及。请使用'这是第X张图像:'的格式来指明您正在描述的是哪张图像。"
 Claude_3_Models = ["claude-3-sonnet-20240229", "claude-3-opus-20240229"]
 
@@ -38,6 +39,34 @@ def get_full_error(chunk, stream_response):
             break
     return chunk
 
+def decode_chunk(chunk):
+    # 提前读取一些信息（用于判断异常）
+    chunk_decoded = chunk.decode()
+    chunkjson = None
+    is_last_chunk = False
+    need_to_pass = False
+    if chunk_decoded.startswith('data:'):
+        try:
+            chunkjson = json.loads(chunk_decoded[6:])
+        except:
+            need_to_pass = True
+            pass
+    elif chunk_decoded.startswith('event:'):
+        try:
+            event_type = chunk_decoded.split(':')[1].strip()
+            if event_type == 'content_block_stop' or event_type == 'message_stop':
+                is_last_chunk = True
+            elif event_type == 'content_block_start' or event_type == 'message_start':
+                need_to_pass = True
+                pass
+        except:
+            need_to_pass = True
+            pass
+    else:
+        need_to_pass = True
+        pass
+    return need_to_pass, chunkjson, is_last_chunk
+
 
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=None, console_slience=False):
     """
@@ -53,53 +82,60 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     observe_window = None：
         用于负责跨越线程传递已经输出的部分，大部分时候仅仅为了fancy的视觉效果，留空即可。observe_window[0]：观测窗。observe_window[1]：看门狗
     """
-    from anthropic import Anthropic
     watch_dog_patience = 5 # 看门狗的耐心, 设置5秒即可
-    if inputs == "":     inputs = "空空如也的输入栏"
-    message = generate_payload(inputs, llm_kwargs, history, stream=True, image_paths=None)
-    retry = 0
     if len(ANTHROPIC_API_KEY) == 0:
         raise RuntimeError("没有设置ANTHROPIC_API_KEY选项")
+    if inputs == "":     inputs = "空空如也的输入栏"
+    headers, message = generate_payload(inputs, llm_kwargs, history, sys_prompt, image_paths=None)
+    retry = 0
+
 
     while True:
         try:
             # make a POST request to the API endpoint, stream=False
             from .bridge_all import model_info
-            anthropic = Anthropic(api_key=ANTHROPIC_API_KEY, base_url=model_info[llm_kwargs['llm_model']]['endpoint'])
-            # endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
-            # with ProxyNetworkActivate()
-            stream = anthropic.messages.create(
-                messages=message,
-                max_tokens=4096,       # The maximum number of tokens to generate before stopping.
-                model=llm_kwargs['llm_model'],
-                stream=True,
-                temperature = llm_kwargs['temperature'],
-                system=sys_prompt
-            )
-            break
-        except Exception as e:
+            endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
+            response = requests.post(endpoint, headers=headers, json=message,
+                                     proxies=proxies, stream=True, timeout=TIMEOUT_SECONDS);break
+        except requests.exceptions.ReadTimeout as e:
             retry += 1
             traceback.print_exc()
             if retry > MAX_RETRY: raise TimeoutError
             if MAX_RETRY!=0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
+    stream_response = response.iter_lines()
     result = ''
-    try:
-        for completion in stream:
-            if completion.type == "message_start" or completion.type == "content_block_start":
-                continue
-            elif completion.type == "message_stop" or completion.type == "content_block_stop" or completion.type == "message_delta":
-                break
-            result += completion.delta.text
-            if not console_slience: print(completion.delta.text, end='')
-            if observe_window is not None:
-                # 观测窗，把已经获取的数据显示出去
-                if len(observe_window) >= 1: observe_window[0] += completion.delta.text
-                # 看门狗，如果超过期限没有喂狗，则终止
-                if len(observe_window) >= 2:
-                    if (time.time()-observe_window[1]) > watch_dog_patience:
-                        raise RuntimeError("用户取消了程序。")
-    except Exception as e:
-        traceback.print_exc()
+    while True:
+        try: chunk = next(stream_response)
+        except StopIteration:
+            break
+        except requests.exceptions.ConnectionError:
+            chunk = next(stream_response) # 失败了，重试一次？再失败就没办法了。
+        need_to_pass, chunkjson, is_last_chunk = decode_chunk(chunk)
+        if chunk:
+            try:
+                if need_to_pass:
+                    pass
+                elif is_last_chunk:
+                    # logging.info(f'[response] {result}')
+                    break
+                else:
+                    if chunkjson and chunkjson['type'] == 'content_block_delta':
+                        result += chunkjson['delta']['text']
+                        print(chunkjson['delta']['text'], end='')
+                        if observe_window is not None:
+                            # 观测窗，把已经获取的数据显示出去
+                            if len(observe_window) >= 1:
+                                observe_window[0] += chunkjson['delta']['text']
+                            # 看门狗，如果超过期限没有喂狗，则终止
+                            if len(observe_window) >= 2:
+                                if (time.time()-observe_window[1]) > watch_dog_patience:
+                                    raise RuntimeError("用户取消了程序。")
+            except Exception as e:
+                chunk = get_full_error(chunk, stream_response)
+                chunk_decoded = chunk.decode()
+                error_msg = chunk_decoded
+                print(error_msg)
+                raise RuntimeError("Json解析不合常规")
 
     return result
 
@@ -119,7 +155,6 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     additional_fn代表点击的哪个按钮，按钮见functional.py
     """
     if inputs == "":     inputs = "空空如也的输入栏"
-    from anthropic import Anthropic
     if len(ANTHROPIC_API_KEY) == 0:
         chatbot.append((inputs, "没有设置ANTHROPIC_API_KEY"))
         yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
@@ -145,7 +180,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
 
     try:
-        message = generate_payload(inputs, llm_kwargs, history, stream, image_paths)
+        headers, message = generate_payload(inputs, llm_kwargs, history, system_prompt, image_paths)
     except RuntimeError as e:
         chatbot[-1] = (inputs, f"您提供的api-key不满足要求，不包含任何可用于{llm_kwargs['llm_model']}的api-key。您可能选择了错误的模型或请求源。")
         yield from update_ui(chatbot=chatbot, history=history, msg="api-key不满足要求") # 刷新界面
@@ -158,46 +193,62 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         try:
             # make a POST request to the API endpoint, stream=True
             from .bridge_all import model_info
-            anthropic = Anthropic(api_key=ANTHROPIC_API_KEY, base_url=model_info[llm_kwargs['llm_model']]['endpoint'])
-            # endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
-            # with ProxyNetworkActivate()
-            stream = anthropic.messages.create(
-                messages=message,
-                max_tokens=4096,       # The maximum number of tokens to generate before stopping.
-                model=llm_kwargs['llm_model'],
-                stream=True,
-                temperature = llm_kwargs['temperature'],
-                system=system_prompt
-            )
-            break
-        except:
+            endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
+            response = requests.post(endpoint, headers=headers, json=message,
+                                     proxies=proxies, stream=True, timeout=TIMEOUT_SECONDS);break
+        except requests.exceptions.ReadTimeout as e:
             retry += 1
-            chatbot[-1] = ((chatbot[-1][0], timeout_bot_msg))
-            retry_msg = f"，正在重试 ({retry}/{MAX_RETRY}) ……" if MAX_RETRY > 0 else ""
-            yield from update_ui(chatbot=chatbot, history=history, msg="请求超时"+retry_msg) # 刷新界面
+            traceback.print_exc()
             if retry > MAX_RETRY: raise TimeoutError
-
+            if MAX_RETRY!=0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
+    stream_response = response.iter_lines()
     gpt_replying_buffer = ""
 
-    for completion in stream:
-        if completion.type == "message_start" or completion.type == "content_block_start":
-            continue
-        elif completion.type == "message_stop" or completion.type == "content_block_stop" or completion.type == "message_delta":
+    while True:
+        try: chunk = next(stream_response)
+        except StopIteration:
             break
-        try:
-            gpt_replying_buffer = gpt_replying_buffer + completion.delta.text
-            history[-1] = gpt_replying_buffer
-            chatbot[-1] = (history[-2], history[-1])
-            yield from update_ui(chatbot=chatbot, history=history, msg='正常') # 刷新界面
+        except requests.exceptions.ConnectionError:
+            chunk = next(stream_response) # 失败了，重试一次？再失败就没办法了。
+        need_to_pass, chunkjson, is_last_chunk = decode_chunk(chunk)
+        if chunk:
+            try:
+                if need_to_pass:
+                    pass
+                elif is_last_chunk:
+                    log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
+                    # logging.info(f'[response] {gpt_replying_buffer}')
+                    break
+                else:
+                    if chunkjson and chunkjson['type'] == 'content_block_delta':
+                        gpt_replying_buffer += chunkjson['delta']['text']
+                        history[-1] = gpt_replying_buffer
+                        chatbot[-1] = (history[-2], history[-1])
+                        yield from update_ui(chatbot=chatbot, history=history, msg='正常') # 刷新界面
 
-        except Exception as e:
-            from toolbox import regular_txt_to_markdown
-            tb_str = '```\n' + trimmed_format_exc() + '```'
-            chatbot[-1] = (chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str}")
-            yield from update_ui(chatbot=chatbot, history=history, msg="Json异常" + tb_str) # 刷新界面
-            return
+            except Exception as e:
+                chunk = get_full_error(chunk, stream_response)
+                chunk_decoded = chunk.decode()
+                error_msg = chunk_decoded
+                print(error_msg)
+                raise RuntimeError("Json解析不合常规")
 
-def generate_payload(inputs, llm_kwargs, history, stream, image_paths):
+def multiple_picture_types(image_paths):
+    """
+    根据图片类型返回image/jpeg, image/png, image/gif, image/webp，无法判断则返回image/jpeg
+    """
+    for image_path in image_paths:
+        if image_path.endswith('.jpeg') or image_path.endswith('.jpg'):
+            return 'image/jpeg'
+        elif image_path.endswith('.png'):
+            return 'image/png'
+        elif image_path.endswith('.gif'):
+            return 'image/gif'
+        elif image_path.endswith('.webp'):
+            return 'image/webp'
+    return 'image/jpeg'
+
+def generate_payload(inputs, llm_kwargs, history, system_prompt, image_paths):
     """
     整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
     """
@@ -223,19 +274,16 @@ def generate_payload(inputs, llm_kwargs, history, stream, image_paths):
                 messages[-1]['content'][0]['text'] = what_gpt_answer['content'][0]['text']
 
     if any([llm_kwargs['llm_model'] == model for model in Claude_3_Models]) and image_paths:
-        base64_images = []
-        for image_path in image_paths:
-            base64_images.append(encode_image(image_path))
         what_i_ask_now = {}
         what_i_ask_now["role"] = "user"
         what_i_ask_now["content"] = []
-        for base64_image in base64_images:
+        for image_path in image_paths:
             what_i_ask_now["content"].append({
                 "type": "image",
                 "source": {
                     "type": "base64",
-                    "media_type": "image/jpeg",
-                    "data": base64_image,
+                    "media_type": multiple_picture_types(image_paths),
+                    "data": encode_image(image_path),
                 }
             })
         what_i_ask_now["content"].append({"type": "text", "text": inputs})
@@ -244,4 +292,18 @@ def generate_payload(inputs, llm_kwargs, history, stream, image_paths):
         what_i_ask_now["role"] = "user"
         what_i_ask_now["content"] = [{"type": "text", "text": inputs}]
     messages.append(what_i_ask_now)
-    return messages
+    # 开始整理headers与message
+    headers = {
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json'
+    }
+    payload = {
+        'model': llm_kwargs['llm_model'],
+        'max_tokens': 4096,
+        'messages': messages,
+        'temperature': llm_kwargs['temperature'],
+        'stream': True,
+        'system': system_prompt
+    }
+    return headers, payload

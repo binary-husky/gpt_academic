@@ -62,7 +62,8 @@ openai_endpoint = "https://api.openai.com/v1/chat/completions"
 api2d_endpoint = "https://openai.api2d.net/v1/chat/completions"
 newbing_endpoint = "wss://sydney.bing.com/sydney/ChatHub"
 gemini_endpoint = "https://generativelanguage.googleapis.com/v1beta/models"
-claude_endpoint = "https://api.anthropic.com"
+claude_endpoint = "https://api.anthropic.com/v1/messages"
+yimodel_endpoint = "https://api.lingyiwanwu.com/v1/chat/completions"
 
 if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
 azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
@@ -80,6 +81,7 @@ if api2d_endpoint in API_URL_REDIRECT: api2d_endpoint = API_URL_REDIRECT[api2d_e
 if newbing_endpoint in API_URL_REDIRECT: newbing_endpoint = API_URL_REDIRECT[newbing_endpoint]
 if gemini_endpoint in API_URL_REDIRECT: gemini_endpoint = API_URL_REDIRECT[gemini_endpoint]
 if claude_endpoint in API_URL_REDIRECT: claude_endpoint = API_URL_REDIRECT[claude_endpoint]
+if yimodel_endpoint in API_URL_REDIRECT: yimodel_endpoint = API_URL_REDIRECT[yimodel_endpoint]
 
 # 获取tokenizer
 tokenizer_gpt35 = LazyloadTiktoken("gpt-3.5-turbo")
@@ -316,6 +318,7 @@ model_info.update({
     "moonshot-v1-8k": {
         "fn_with_ui": moonshot_ui,
         "fn_without_ui": moonshot_no_ui,
+        "can_multi_thread": True,
         "endpoint": None,
         "max_token": 1024 * 8,
         "tokenizer": tokenizer_gpt35,
@@ -324,6 +327,7 @@ model_info.update({
     "moonshot-v1-32k": {
         "fn_with_ui": moonshot_ui,
         "fn_without_ui": moonshot_no_ui,
+        "can_multi_thread": True,
         "endpoint": None,
         "max_token": 1024 * 32,
         "tokenizer": tokenizer_gpt35,
@@ -332,6 +336,7 @@ model_info.update({
     "moonshot-v1-128k": {
         "fn_with_ui": moonshot_ui,
         "fn_without_ui": moonshot_no_ui,
+        "can_multi_thread": True,
         "endpoint": None,
         "max_token": 1024 * 128,
         "tokenizer": tokenizer_gpt35,
@@ -473,22 +478,6 @@ if "stack-claude" in AVAIL_LLM_MODELS:
             "token_cnt": get_token_num_gpt35,
         }
     })
-if "newbing-free" in AVAIL_LLM_MODELS:
-    try:
-        from .bridge_newbingfree import predict_no_ui_long_connection as newbingfree_noui
-        from .bridge_newbingfree import predict as newbingfree_ui
-        model_info.update({
-            "newbing-free": {
-                "fn_with_ui": newbingfree_ui,
-                "fn_without_ui": newbingfree_noui,
-                "endpoint": newbing_endpoint,
-                "max_token": 4096,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            }
-        })
-    except:
-        print(trimmed_format_exc())
 if "newbing" in AVAIL_LLM_MODELS:   # same with newbing-free
     try:
         from .bridge_newbingfree import predict_no_ui_long_connection as newbingfree_noui
@@ -521,6 +510,7 @@ if "chatglmft" in AVAIL_LLM_MODELS:   # same with newbing-free
         })
     except:
         print(trimmed_format_exc())
+# -=-=-=-=-=-=- 上海AI-LAB书生大模型 -=-=-=-=-=-=-
 if "internlm" in AVAIL_LLM_MODELS:
     try:
         from .bridge_internlm import predict_no_ui_long_connection as internlm_noui
@@ -553,6 +543,7 @@ if "chatglm_onnx" in AVAIL_LLM_MODELS:
         })
     except:
         print(trimmed_format_exc())
+# -=-=-=-=-=-=- 通义-本地模型 -=-=-=-=-=-=-
 if "qwen-local" in AVAIL_LLM_MODELS:
     try:
         from .bridge_qwen_local import predict_no_ui_long_connection as qwen_local_noui
@@ -570,6 +561,7 @@ if "qwen-local" in AVAIL_LLM_MODELS:
         })
     except:
         print(trimmed_format_exc())
+# -=-=-=-=-=-=- 通义-在线模型 -=-=-=-=-=-=-
 if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-max" in AVAIL_LLM_MODELS:   # zhipuai
     try:
         from .bridge_qwen import predict_no_ui_long_connection as qwen_noui
@@ -605,7 +597,35 @@ if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-
         })
     except:
         print(trimmed_format_exc())
-if "spark" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
+# -=-=-=-=-=-=- 零一万物模型 -=-=-=-=-=-=-
+if "yi-34b-chat-0205" in AVAIL_LLM_MODELS or "yi-34b-chat-200k" in AVAIL_LLM_MODELS:   # zhipuai
+    try:
+        from .bridge_yimodel import predict_no_ui_long_connection as yimodel_noui
+        from .bridge_yimodel import predict as yimodel_ui
+        model_info.update({
+            "yi-34b-chat-0205": {
+                "fn_with_ui": yimodel_ui,
+                "fn_without_ui": yimodel_noui,
+                "can_multi_thread": False,  # 目前来说，默认情况下并发量极低，因此禁用
+                "endpoint": yimodel_endpoint,
+                "max_token": 4000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "yi-34b-chat-200k": {
+                "fn_with_ui": yimodel_ui,
+                "fn_without_ui": yimodel_noui,
+                "can_multi_thread": False,  # 目前来说，默认情况下并发量极低，因此禁用
+                "endpoint": yimodel_endpoint,
+                "max_token": 200000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+        })
+    except:
+        print(trimmed_format_exc())
+# -=-=-=-=-=-=- 讯飞星火认知大模型 -=-=-=-=-=-=-
+if "spark" in AVAIL_LLM_MODELS:
     try:
         from .bridge_spark import predict_no_ui_long_connection as spark_noui
         from .bridge_spark import predict as spark_ui
@@ -681,6 +701,7 @@ if "llama2" in AVAIL_LLM_MODELS:   # llama2
         })
     except:
         print(trimmed_format_exc())
+# -=-=-=-=-=-=- 智谱 -=-=-=-=-=-=-
 if "zhipuai" in AVAIL_LLM_MODELS:   # zhipuai 是glm-4的别名，向后兼容配置
     try:
         model_info.update({
@@ -695,6 +716,7 @@ if "zhipuai" in AVAIL_LLM_MODELS:   # zhipuai 是glm-4的别名，向后兼容�
         })
     except:
         print(trimmed_format_exc())
+# -=-=-=-=-=-=- 幻方-深度求索大模型 -=-=-=-=-=-=-
 if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
     try:
         from .bridge_deepseekcoder import predict_no_ui_long_connection as deepseekcoder_noui
@@ -711,6 +733,8 @@ if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
         })
     except:
         print(trimmed_format_exc())
+
+
 # -=-=-=-=-=-=- one-api 对齐支持 -=-=-=-=-=-=-
 for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
     # 为了更灵活地接入one-api多模型管理界面，设计了此接口，例子：AVAIL_LLM_MODELS = ["one-api-mixtral-8x7b(max_token=6666)"]
@@ -735,8 +759,8 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
     })
 
 
-# <-- 用于定义和切换多个azure模型 -->
-AZURE_CFG_ARRAY = get_conf("AZURE_CFG_ARRAY")
+# -=-=-=-=-=-=- azure模型对齐支持 -=-=-=-=-=-=-
+AZURE_CFG_ARRAY = get_conf("AZURE_CFG_ARRAY") # <-- 用于定义和切换多个azure模型 -->
 if len(AZURE_CFG_ARRAY) > 0:
     for azure_model_name, azure_cfg_dict in AZURE_CFG_ARRAY.items():
         # 可能会覆盖之前的配置，但这是意料之中的
@@ -765,7 +789,7 @@ def LLM_CATCH_EXCEPTION(f):
     """
     装饰器函数，将错误显示出来
     """
-    def decorated(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience):
+    def decorated(inputs:str, llm_kwargs:dict, history:list, sys_prompt:str, observe_window:list, console_slience:bool):
         try:
             return f(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience)
         except Exception as e:
@@ -775,9 +799,9 @@ def LLM_CATCH_EXCEPTION(f):
     return decorated
 
 
-def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, observe_window=[], console_slience=False):
+def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list, sys_prompt:str, observe_window:list=[], console_slience:bool=False):
     """
-    发送至LLM，等待回复，一次性完成，不显示中间过程。但内部用stream的方法避免中途网线被掐。
+    发送至LLM，等待回复，一次性完成，不显示中间过程。但内部（尽可能地）用stream的方法避免中途网线被掐。
     inputs：
         是本次问询的输入
     sys_prompt:
@@ -795,7 +819,6 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
     model = llm_kwargs['llm_model']
     n_model = 1
     if '&' not in model:
-        assert not model.startswith("tgui"), "TGUI不支持函数插件的实现"
 
         # 如果只询问1个大语言模型：
         method = model_info[model]["fn_without_ui"]
@@ -830,7 +853,8 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
                 # 观察窗（window）
                 chat_string = []
                 for i in range(n_model):
-                    chat_string.append( f"【{str(models[i])} 说】: <font color=\"{colors[i]}\"> {window_mutex[i][0]} </font>" )
+                    color = colors[i%len(colors)]
+                    chat_string.append( f"【{str(models[i])} 说】: <font color=\"{color}\"> {window_mutex[i][0]} </font>" )
                 res = '<br/><br/>\n\n---\n\n'.join(chat_string)
                 # # # # # # # # # # #
                 observe_window[0] = res
@@ -847,22 +871,30 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
             time.sleep(1)
 
         for i, future in enumerate(futures):  # wait and get
-            return_string_collect.append( f"【{str(models[i])} 说】: <font color=\"{colors[i]}\"> {future.result()} </font>" )
+            color = colors[i%len(colors)]
+            return_string_collect.append( f"【{str(models[i])} 说】: <font color=\"{color}\"> {future.result()} </font>" )
 
         window_mutex[-1] = False # stop mutex thread
         res = '<br/><br/>\n\n---\n\n'.join(return_string_collect)
         return res
 
 
-def predict(inputs, llm_kwargs, *args, **kwargs):
+def predict(inputs:str, llm_kwargs:dict, *args, **kwargs):
     """
     发送至LLM，流式获取输出。
     用于基础的对话功能。
-    inputs 是本次问询的输入
-    top_p, temperature是LLM的内部调优参数
-    history 是之前的对话列表（注意无论是inputs还是history，内容太长了都会触发token数量溢出的错误）
-    chatbot 为WebUI中显示的对话列表，修改它，然后yeild出去，可以直接修改对话界面内容
-    additional_fn代表点击的哪个按钮，按钮见functional.py
+
+    完整参数列表：
+        predict(
+            inputs:str,                     # 是本次问询的输入
+            llm_kwargs:dict,                # 是LLM的内部调优参数
+            plugin_kwargs:dict,             # 是插件的内部参数
+            chatbot:ChatBotWithCookies,     # 原样传递，负责向用户前端展示对话，兼顾前端状态的功能
+            history:list=[],                # 是之前的对话列表
+            system_prompt:str='',           # 系统静默prompt
+            stream:bool=True,               # 是否流式输出（已弃用）
+            additional_fn:str=None          # 基础功能区按钮的附加功能
+        ):
     """
 
     inputs = apply_gpt_academic_string_mask(inputs, mode="show_llm")

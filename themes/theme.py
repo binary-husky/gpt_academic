@@ -1,7 +1,10 @@
 import pickle
 import base64
 import uuid
+import json
 from toolbox import get_conf
+import json
+
 
 """
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -45,24 +48,24 @@ adjust_theme, advanced_css, theme_declaration, _ = load_dynamic_theme(get_conf("
 cookie相关工具函数
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 """
-
-def init_cookie(cookies):
+def assign_user_uuid(cookies):
     # 为每一位访问的用户赋予一个独一无二的uuid编码
     cookies.update({"uuid": uuid.uuid4()})
     return cookies
 
 
 def to_cookie_str(d):
-    # Pickle the dictionary and encode it as a string
-    pickled_dict = pickle.dumps(d)
-    cookie_value = base64.b64encode(pickled_dict).decode("utf-8")
+    # serialize the dictionary and encode it as a string
+    serialized_dict = json.dumps(d)
+    cookie_value = base64.b64encode(serialized_dict.encode('utf8')).decode("utf-8")
     return cookie_value
 
 
 def from_cookie_str(c):
-    # Decode the base64-encoded string and unpickle it into a dictionary
-    pickled_dict = base64.b64decode(c.encode("utf-8"))
-    return pickle.loads(pickled_dict)
+    # Decode the base64-encoded string and unserialize it into a dictionary
+    serialized_dict = base64.b64decode(c.encode("utf-8"))
+    serialized_dict.decode("utf-8")
+    return json.loads(serialized_dict)
 
 
 """
@@ -103,8 +106,8 @@ js_code_for_toggle_darkmode = """() => {
 }"""
 
 
-js_code_for_persistent_cookie_init = """(py_pickle_cookie, cookie) => {
-    return [getCookie("py_pickle_cookie"), cookie];
+js_code_for_persistent_cookie_init = """(web_cookie_cache, cookie) => {
+    return [getCookie("web_cookie_cache"), cookie];
 }
 """
 
@@ -175,11 +178,8 @@ setTimeout(() => {
 js_code_show_or_hide_group2 = """
 (display_panel_arr)=>{
 setTimeout(() => {
-    // console.log("display_panel_arr");
-    // get conf
     display_panel_arr = get_checkbox_selected_items("cbsc");
 
-    ////////////////////// 添加Live2D形象 ///////////////////////////
     let searchString = "添加Live2D形象";
     let ele = "none";
     if (display_panel_arr.includes(searchString)) {
@@ -189,7 +189,6 @@ setTimeout(() => {
         setCookie("js_live2d_show_cookie", "False", 365);
         $('.waifu').hide();
     }
-
 
 }, 50);
 }

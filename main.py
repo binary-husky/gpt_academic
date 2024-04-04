@@ -26,7 +26,7 @@ def enable_log(PATH_LOGGING):
 
 def main():
     import gradio as gr
-    if gr.__version__ not in ['3.32.8']:
+    if gr.__version__ not in ['3.32.9']:
         raise ModuleNotFoundError("使用项目内置Gradio获取最优体验! 请运行 `pip install -r requirements.txt` 指令安装内置Gradio及其他依赖, 详情信息见requirements.txt.")
     from request_llms.bridge_all import predict
     from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, load_chat_cookies, DummyWith
@@ -34,15 +34,15 @@ def main():
     proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION = get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION')
     CHATBOT_HEIGHT, LAYOUT, AVAIL_LLM_MODELS, AUTO_CLEAR_TXT = get_conf('CHATBOT_HEIGHT', 'LAYOUT', 'AVAIL_LLM_MODELS', 'AUTO_CLEAR_TXT')
     ENABLE_AUDIO, AUTO_CLEAR_TXT, PATH_LOGGING, AVAIL_THEMES, THEME, ADD_WAIFU = get_conf('ENABLE_AUDIO', 'AUTO_CLEAR_TXT', 'PATH_LOGGING', 'AVAIL_THEMES', 'THEME', 'ADD_WAIFU')
-    DARK_MODE, NUM_CUSTOM_BASIC_BTN, SSL_KEYFILE, SSL_CERTFILE = get_conf('DARK_MODE', 'NUM_CUSTOM_BASIC_BTN', 'SSL_KEYFILE', 'SSL_CERTFILE')
-    INIT_SYS_PROMPT = get_conf('INIT_SYS_PROMPT')
+    NUM_CUSTOM_BASIC_BTN, SSL_KEYFILE, SSL_CERTFILE = get_conf('NUM_CUSTOM_BASIC_BTN', 'SSL_KEYFILE', 'SSL_CERTFILE')
+    DARK_MODE, INIT_SYS_PROMPT, ADD_WAIFU = get_conf('DARK_MODE', 'INIT_SYS_PROMPT', 'ADD_WAIFU')
 
     # 如果WEB_PORT是-1, 则随机选取WEB端口
     PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
     from check_proxy import get_current_version
     from themes.theme import adjust_theme, advanced_css, theme_declaration, js_code_clear, js_code_reset, js_code_show_or_hide, js_code_show_or_hide_group2
     from themes.theme import js_code_for_css_changing, js_code_for_toggle_darkmode, js_code_for_persistent_cookie_init
-    from themes.theme import load_dynamic_theme, to_cookie_str, from_cookie_str, init_cookie
+    from themes.theme import load_dynamic_theme, to_cookie_str, from_cookie_str, assign_user_uuid
     title_html = f"<h1 align=\"center\">GPT 学术优化 {get_current_version()}</h1>{theme_declaration}"
 
     # 对话、日志记录
@@ -81,7 +81,7 @@ def main():
     predefined_btns = {}
     with gr.Blocks(title="GPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as app_block:
         gr.HTML(title_html)
-        secret_css, dark_mode, py_pickle_cookie = gr.Textbox(visible=False), gr.Textbox(DARK_MODE, visible=False), gr.Textbox(visible=False)
+        secret_css, web_cookie_cache = gr.Textbox(visible=False), gr.Textbox(visible=False)
         cookies = gr.State(load_chat_cookies())
         with gr_L1():
             with gr_L2(scale=2, elem_id="gpt-chat"):
@@ -157,9 +157,13 @@ def main():
                 with gr.Tab("更换模型", elem_id="interact-panel"):
                     md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, label="更换LLM模型/请求源").style(container=False)
                     top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01,interactive=True, label="Top-p (nucleus sampling)",)
-                    temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature",)
+                    temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature", elem_id="elem_temperature")
                     max_length_sl = gr.Slider(minimum=256, maximum=1024*32, value=4096, step=128, interactive=True, label="Local LLM MaxLength",)
-                    system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt", label="System prompt", value=INIT_SYS_PROMPT)
+                    system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt", label="System prompt", value=INIT_SYS_PROMPT, elem_id="elem_prompt")
+                    temperature.change(None, inputs=[temperature], outputs=None,
+                        _js="""(temperature)=>gpt_academic_gradio_saveload("save", "elem_prompt", "js_temperature_cookie", temperature)""")
+                    system_prompt.change(None, inputs=[system_prompt], outputs=None,
+                        _js="""(system_prompt)=>gpt_academic_gradio_saveload("save", "elem_prompt", "js_system_prompt_cookie", system_prompt)""")
 
                 with gr.Tab("界面外观", elem_id="interact-panel"):
                     theme_dropdown = gr.Dropdown(AVAIL_THEMES, value=THEME, label="更换UI主题").style(container=False)
@@ -199,64 +203,19 @@ def main():
                     with gr.Column(scale=1, min_width=70):
                         basic_fn_confirm = gr.Button("确认并保存", variant="primary"); basic_fn_confirm.style(size="sm")
                         basic_fn_clean   = gr.Button("恢复默认", variant="primary"); basic_fn_clean.style(size="sm")
-                        def assign_btn(persistent_cookie_, cookies_, basic_btn_dropdown_, basic_fn_title, basic_fn_prefix, basic_fn_suffix, clean_up=False):
-                            ret = {}
-                            # 读取之前的自定义按钮
-                            customize_fn_overwrite_ = cookies_['customize_fn_overwrite']
-                            # 更新新的自定义按钮
-                            customize_fn_overwrite_.update({
-                                basic_btn_dropdown_:
-                                    {
-                                        "Title":basic_fn_title,
-                                        "Prefix":basic_fn_prefix,
-                                        "Suffix":basic_fn_suffix,
-                                    }
-                                }
-                            )
-                            if clean_up:
-                                customize_fn_overwrite_ = {}
-                            cookies_.update(customize_fn_overwrite_)    # 更新cookie
-                            visible = (not clean_up) and (basic_fn_title != "")
-                            if basic_btn_dropdown_ in customize_btns:
-                                # 是自定义按钮，不是预定义按钮
-                                ret.update({customize_btns[basic_btn_dropdown_]: gr.update(visible=visible, value=basic_fn_title)})
-                            else:
-                                # 是预定义按钮
-                                ret.update({predefined_btns[basic_btn_dropdown_]: gr.update(visible=visible, value=basic_fn_title)})
-                            ret.update({cookies: cookies_})
-                            try: persistent_cookie_ = from_cookie_str(persistent_cookie_)   # persistent cookie to dict
-                            except: persistent_cookie_ = {}
-                            persistent_cookie_["custom_bnt"] = customize_fn_overwrite_      # dict update new value
-                            persistent_cookie_ = to_cookie_str(persistent_cookie_)          # persistent cookie to dict
-                            ret.update({py_pickle_cookie: persistent_cookie_})             # write persistent cookie
-                            return ret
 
+                        from shared_utils.cookie_manager import assign_btn__fn_builder
+                        assign_btn = assign_btn__fn_builder(customize_btns, predefined_btns, cookies, web_cookie_cache)
                         # update btn
-                        h = basic_fn_confirm.click(assign_btn, [py_pickle_cookie, cookies, basic_btn_dropdown, basic_fn_title, basic_fn_prefix, basic_fn_suffix],
-                                                   [py_pickle_cookie, cookies, *customize_btns.values(), *predefined_btns.values()])
-                        h.then(None, [py_pickle_cookie], None, _js="""(py_pickle_cookie)=>{setCookie("py_pickle_cookie", py_pickle_cookie, 365);}""")
+                        h = basic_fn_confirm.click(assign_btn, [web_cookie_cache, cookies, basic_btn_dropdown, basic_fn_title, basic_fn_prefix, basic_fn_suffix],
+                                                   [web_cookie_cache, cookies, *customize_btns.values(), *predefined_btns.values()])
+                        h.then(None, [web_cookie_cache], None, _js="""(web_cookie_cache)=>{setCookie("web_cookie_cache", web_cookie_cache, 365);}""")
                         # clean up btn
-                        h2 = basic_fn_clean.click(assign_btn, [py_pickle_cookie, cookies, basic_btn_dropdown, basic_fn_title, basic_fn_prefix, basic_fn_suffix, gr.State(True)],
-                                                   [py_pickle_cookie, cookies, *customize_btns.values(), *predefined_btns.values()])
-                        h2.then(None, [py_pickle_cookie], None, _js="""(py_pickle_cookie)=>{setCookie("py_pickle_cookie", py_pickle_cookie, 365);}""")
+                        h2 = basic_fn_clean.click(assign_btn, [web_cookie_cache, cookies, basic_btn_dropdown, basic_fn_title, basic_fn_prefix, basic_fn_suffix, gr.State(True)],
+                                                   [web_cookie_cache, cookies, *customize_btns.values(), *predefined_btns.values()])
+                        h2.then(None, [web_cookie_cache], None, _js="""(web_cookie_cache)=>{setCookie("web_cookie_cache", web_cookie_cache, 365);}""")
 
-                        def persistent_cookie_reload(persistent_cookie_, cookies_):
-                            ret = {}
-                            for k in customize_btns:
-                                ret.update({customize_btns[k]: gr.update(visible=False, value="")})
 
-                            try: persistent_cookie_ = from_cookie_str(persistent_cookie_)    # persistent cookie to dict
-                            except: return ret
-
-                            customize_fn_overwrite_ = persistent_cookie_.get("custom_bnt", {})
-                            cookies_['customize_fn_overwrite'] = customize_fn_overwrite_
-                            ret.update({cookies: cookies_})
-
-                            for k,v in persistent_cookie_["custom_bnt"].items():
-                                if v['Title'] == "": continue
-                                if k in customize_btns: ret.update({customize_btns[k]: gr.update(visible=True, value=v['Title'])})
-                                else: ret.update({predefined_btns[k]: gr.update(visible=True, value=v['Title'])})
-                            return ret
 
         # 功能区显示开关与功能区的互动
         def fn_area_visibility(a):
@@ -376,11 +335,14 @@ def main():
             audio_mic.stream(deal_audio, inputs=[audio_mic, cookies])
 
 
-        app_block.load(init_cookie, inputs=[cookies], outputs=[cookies])
-        app_block.load(persistent_cookie_reload, inputs = [py_pickle_cookie, cookies],
-            outputs = [py_pickle_cookie, cookies, *customize_btns.values(), *predefined_btns.values()], _js=js_code_for_persistent_cookie_init)
-        app_block.load(None, inputs=[dark_mode], outputs=None, _js="""(dark_mode)=>{apply_cookie_for_checkbox(dark_mode);}""")    # 配置暗色主题或亮色主题
-        app_block.load(None, inputs=[gr.Textbox(LAYOUT, visible=False)], outputs=None, _js='(LAYOUT)=>{GptAcademicJavaScriptInit(LAYOUT);}')
+        demo.load(assign_user_uuid, inputs=[cookies], outputs=[cookies])
+
+        from shared_utils.cookie_manager import load_web_cookie_cache__fn_builder
+        load_web_cookie_cache = load_web_cookie_cache__fn_builder(customize_btns, cookies, predefined_btns)
+        demo.load(load_web_cookie_cache, inputs = [web_cookie_cache, cookies],
+            outputs = [web_cookie_cache, cookies, *customize_btns.values(), *predefined_btns.values()], _js=js_code_for_persistent_cookie_init)
+
+        demo.load(None, inputs=[], outputs=None, _js=f"""()=>GptAcademicJavaScriptInit("{DARK_MODE}","{INIT_SYS_PROMPT}","{ADD_WAIFU}","{LAYOUT}")""")    # 配置暗色主题或亮色主题
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def run_delayed_tasks():
