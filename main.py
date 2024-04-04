@@ -362,37 +362,10 @@ def main():
     # 运行一些异步任务：自动更新、打开浏览器页面、预热tiktoken模块
     run_delayed_tasks()
 
-    # 正式开始服务
+    # 最后，正式开始服务
+    from shared_utils.fastapi_server import start_app
     start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SSL_CERTFILE)
 
-
-
-def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SSL_CERTFILE):
-    import uvicorn
-    import gradio as gr
-    from shared_utils.fastapi_server import create_app
-    from toolbox import get_conf
-    app_block:gr.Blocks
-    app_block.queue(concurrency_count=CONCURRENT_COUNT)
-    app_block.ssl_verify = False
-    app_block.auth_message = '请登录'
-    app_block.favicon_path = os.path.join(os.path.dirname(__file__), "docs/logo.png")
-    app_block.auth = AUTHENTICATION if len(AUTHENTICATION) != 0 else None
-    app_block.blocked_paths = ["config.py", "config_private.py",
-                          "docker-compose.yml", "Dockerfile", "{PATH_LOGGING}/admin"]
-    app = create_app()
-    gr.mount_gradio_app(app, app_block, get_conf('CUSTOM_PATH'))
-    config = uvicorn.Config(
-        app,
-        host="0.0.0.0",
-        port=PORT,
-        reload=False,
-        log_level="warning",
-        ssl_keyfile=None if SSL_KEYFILE == "" else SSL_KEYFILE,
-        ssl_certfile=None if SSL_CERTFILE == "" else SSL_CERTFILE,
-    )
-    server = uvicorn.Server(config)
-    server.run()
 
 if __name__ == "__main__":
     main()

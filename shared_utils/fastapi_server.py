@@ -1,75 +1,80 @@
-# encoding: utf-8
-# @Time   : 2024/3/3
-# @Author : Spike
+def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SSL_CERTFILE):
+    import uvicorn
+    import fastapi
+    import os
+    import gradio as gr
+    from fastapi import FastAPI
+    from gradio.routes import App
+    from toolbox import get_conf
+    CUSTOM_PATH, PATH_PRIVATE_UPLOAD, PATH_LOGGING = get_conf('CUSTOM_PATH', 'PATH_PRIVATE_UPLOAD', 'PATH_LOGGING')
 
-from fastapi import FastAPI
-from starlette.middleware.sessions import SessionMiddleware
-from starlette.middleware.authentication import AuthenticationMiddleware
-from typing import List, Literal
-from fastapi import Request, status
-from fastapi.responses import RedirectResponse, JSONResponse
-from toolbox import get_conf
-from yarl import URL
+    # --- --- configurate gradio app block --- ---
+    app_block:gr.Blocks
+    app_block.queue(concurrency_count=CONCURRENT_COUNT)
+    app_block.ssl_verify = False
+    app_block.auth_message = '请登录'
+    app_block.favicon_path = os.path.join(os.path.dirname(__file__), "docs/logo.png")
+    app_block.auth = AUTHENTICATION if len(AUTHENTICATION) != 0 else None
+    app_block.blocked_paths = ["config.py", "config_private.py", "docker-compose.yml", "Dockerfile", "{PATH_LOGGING}/admin"]
+    app_block.dev_mode = False
+    app_block.config = app_block.get_config_file()
+    app_block.validate_queue_settings()
+    gradio_app = App.create_app(app_block)
 
-CUSTOM_PATH, AUTHENTICATION, PATH_PRIVATE_UPLOAD = get_conf('CUSTOM_PATH', 'AUTHENTICATION', 'PATH_PRIVATE_UPLOAD')
-
-async def homepage(request: Request):
-    return RedirectResponse(url=CUSTOM_PATH)
-
-async def logout():
-    response = RedirectResponse(url='/', status_code=status.HTTP_302_FOUND)
-    response.delete_cookie('access-token')
-    response.delete_cookie('access-token-unsecure')
-    return response
-
-async def get_favicon():
-    favicon_path = './docs/logo.png'
-    return RedirectResponse(url=f'{CUSTOM_PATH}file={favicon_path}')
-
-async def get_user(request: Request):
-    import httpx
-    async with httpx.AsyncClient() as client:
-        res = await client.get(
-            str(request.base_url) + f'{CUSTOM_PATH}user', cookies=request.cookies
-        )
-        res_user = res.text[1:-1]
-    return res_user
-
-async def authentication(request: Request, call_next):
-    """
-    https 中间件，用于检查用户登陆状态、文件鉴权等
-    """
+    # --- --- replace gradio endpoint to forbid access to sensitive files --- ---
     if len(AUTHENTICATION) > 0:
-        url = URL(request.url.path)
-        print("/".join(url.raw_parts))
-        if len(url.raw_parts) >=2 and url.raw_parts[1].startswith(f'file={PATH_PRIVATE_UPLOAD}'):
-            if len(url.raw_parts) >=3:
-                if url.raw_parts[2] != await get_user(request):
-                    return JSONResponse({'Error': "You can't download other people's files."})
-    return await call_next(request)
+        dependencies = []
+        endpoint = None
+        for route in list(gradio_app.router.routes):
+            if route.path == "/file/{path:path}":
+                gradio_app.router.routes.remove(route)
+            if route.path == "/file={path_or_url:path}":
+                dependencies = route.dependencies
+                endpoint = route.endpoint
+                gradio_app.router.routes.remove(route)
+        @gradio_app.get("/file/{path:path}", dependencies=dependencies)
+        @gradio_app.head("/file={path_or_url:path}", dependencies=dependencies)
+        @gradio_app.get("/file={path_or_url:path}", dependencies=dependencies)
+        async def file(path_or_url: str, request: fastapi.Request):
+            if len(AUTHENTICATION) > 0:
+                sensitive_path = None
+                if path_or_url.startswith(PATH_LOGGING):
+                    sensitive_path = PATH_LOGGING
+                if path_or_url.startswith(PATH_PRIVATE_UPLOAD):
+                    sensitive_path = PATH_PRIVATE_UPLOAD
+                if sensitive_path:
+                    token = request.cookies.get("access-token") or request.cookies.get("access-token-unsecure")
+                    user = gradio_app.tokens.get(token) # get user
+                    if not path_or_url.startswith(os.path.join(sensitive_path, user)):
+                        return "越权访问!"
+            return await endpoint(path_or_url, request)
 
-def mount_app_routes(app: FastAPI):
-    """
-    挂载app的路由
-    """
-    if CUSTOM_PATH != '/':
-        app.get(path='/', tags=['Gradio Mount'], summary='重定向到Gradio二级目录')(homepage)
+    # --- --- app_lifespan --- ---
+    from contextlib import asynccontextmanager
+    @asynccontextmanager
+    async def app_lifespan(app: FastAPI):
+        async def startup_gradio_app():
+            if gradio_app.get_blocks().enable_queue:
+                gradio_app.get_blocks().startup_events()
+        async def shutdown_gradio_app():
+            pass
+        await startup_gradio_app() # startup logic here
+        yield  # The application will serve requests after this point
+        await shutdown_gradio_app() # cleanup/shutdown logic here
 
-    app.get(path='/favicon.ico', tags=['Gradio Mount'], summary='获取网站icon')(get_favicon)
+    # --- --- FastAPI --- ---
+    app = FastAPI(lifespan=app_lifespan)
+    app.mount(CUSTOM_PATH, gradio_app)
 
-    app.get(path='/logout', tags=['Gradio Mount'], summary='退出登陆')(logout)
-
-def create_app():
-    app = FastAPI()
-    app.add_middleware(SessionMiddleware, secret_key="!secret")
-    # app.add_middleware(AuthenticationMiddleware, backend=authentication)
-    app.middleware('https')(authentication)
-    mount_app_routes(app)
-    return app
-
-
-# 测试：ssl
-# 测试：auth
-# 测试：ip & port
-# 测试：文件上传
-# 测试：文件下载
+    # --- --- uvicorn.Config --- ---
+    config = uvicorn.Config(
+        app,
+        host="0.0.0.0",
+        port=PORT,
+        reload=False,
+        log_level="warning",
+        ssl_keyfile=None if SSL_KEYFILE == "" else SSL_KEYFILE,
+        ssl_certfile=None if SSL_CERTFILE == "" else SSL_CERTFILE,
+    )
+    server = uvicorn.Server(config)
+    server.run()
