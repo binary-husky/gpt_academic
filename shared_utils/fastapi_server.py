@@ -1,12 +1,31 @@
+import os
+
+def _authorize_user(path_or_url, request, gradio_app):
+    from toolbox import get_conf, default_user_name
+    PATH_PRIVATE_UPLOAD, PATH_LOGGING = get_conf('PATH_PRIVATE_UPLOAD', 'PATH_LOGGING')
+    sensitive_path = None
+    if path_or_url.startswith(PATH_LOGGING):
+        sensitive_path = PATH_LOGGING
+    if path_or_url.startswith(PATH_PRIVATE_UPLOAD):
+        sensitive_path = PATH_PRIVATE_UPLOAD
+    if sensitive_path:
+        token = request.cookies.get("access-token") or request.cookies.get("access-token-unsecure")
+        user = gradio_app.tokens.get(token) # get user
+        allowed_users = [user, 'autogen', default_user_name]  # three user path that can be accessed
+        for user_allowed in allowed_users:
+            if path_or_url.startswith(os.path.join(sensitive_path, user_allowed)):
+                return True
+        return False # "越权访问!"
+    return True
+
 def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SSL_CERTFILE):
     import uvicorn
     import fastapi
-    import os
     import gradio as gr
     from fastapi import FastAPI
     from gradio.routes import App
     from toolbox import get_conf
-    CUSTOM_PATH, PATH_PRIVATE_UPLOAD, PATH_LOGGING = get_conf('CUSTOM_PATH', 'PATH_PRIVATE_UPLOAD', 'PATH_LOGGING')
+    CUSTOM_PATH = get_conf('CUSTOM_PATH')
 
     # --- --- configurate gradio app block --- ---
     app_block:gr.Blocks
@@ -37,22 +56,13 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
         @gradio_app.get("/file={path_or_url:path}", dependencies=dependencies)
         async def file(path_or_url: str, request: fastapi.Request):
             if len(AUTHENTICATION) > 0:
-                sensitive_path = None
-                if path_or_url.startswith(PATH_LOGGING):
-                    sensitive_path = PATH_LOGGING
-                if path_or_url.startswith(PATH_PRIVATE_UPLOAD):
-                    sensitive_path = PATH_PRIVATE_UPLOAD
-                if sensitive_path:
-                    token = request.cookies.get("access-token") or request.cookies.get("access-token-unsecure")
-                    user = gradio_app.tokens.get(token) # get user
-                    if not path_or_url.startswith(os.path.join(sensitive_path, user)):
-                        return "越权访问!"
+                if not _authorize_user(path_or_url, request, gradio_app): "越权访问!"
             return await endpoint(path_or_url, request)
 
     # --- --- app_lifespan --- ---
     from contextlib import asynccontextmanager
     @asynccontextmanager
-    async def app_lifespan(app: FastAPI):
+    async def app_lifespan(app):
         async def startup_gradio_app():
             if gradio_app.get_blocks().enable_queue:
                 gradio_app.get_blocks().startup_events()
