@@ -13,6 +13,17 @@ help_menu_description = \
 </br></br>如何语音对话: 请阅读Wiki
 </br></br>如何临时更换API_KEY: 在输入区输入临时API_KEY后提交（网页刷新后失效）"""
 
+def enable_log(PATH_LOGGING):
+    import logging, uuid
+    admin_log_path = os.path.join(PATH_LOGGING, "admin")
+    os.makedirs(admin_log_path, exist_ok=True)
+    log_dir = os.path.join(admin_log_path, "chat_secrets.log")
+    try:logging.basicConfig(filename=log_dir, level=logging.INFO, encoding="utf-8", format="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+    except:logging.basicConfig(filename=log_dir, level=logging.INFO,  format="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+    # Disable logging output from the 'httpx' logger
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    print(f"所有对话记录将自动保存在本地目录{log_dir}, 请注意自我隐私保护哦！")
+
 def main():
     import gradio as gr
     if gr.__version__ not in ['3.32.9']:
@@ -34,15 +45,8 @@ def main():
     from themes.theme import load_dynamic_theme, to_cookie_str, from_cookie_str, assign_user_uuid
     title_html = f"<h1 align=\"center\">GPT 学术优化 {get_current_version()}</h1>{theme_declaration}"
 
-    # 对话记录, python 版本建议3.9+（越新越好）
-    import logging, uuid
-    os.makedirs(PATH_LOGGING, exist_ok=True)
-    chat_secrets_log = os.path.join(PATH_LOGGING, "chat_secrets.log")
-    try:logging.basicConfig(filename=chat_secrets_log, level=logging.INFO, encoding="utf-8", format="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-    except:logging.basicConfig(filename=chat_secrets_log, level=logging.INFO,  format="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-    # Disable logging output from the 'httpx' logger
-    logging.getLogger("httpx").setLevel(logging.WARNING)
-    print(f"所有对话记录将自动保存在本地目录 {chat_secrets_log}, 请注意自我隐私保护哦！")
+    # 对话、日志记录
+    enable_log(PATH_LOGGING)
 
     # 一些普通功能模块
     from core_functional import get_core_functions
@@ -75,7 +79,7 @@ def main():
     cancel_handles = []
     customize_btns = {}
     predefined_btns = {}
-    with gr.Blocks(title="GPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as demo:
+    with gr.Blocks(title="GPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as app_block:
         gr.HTML(title_html)
         secret_css, web_cookie_cache = gr.Textbox(visible=False), gr.Textbox(visible=False)
         cookies = gr.State(load_chat_cookies())
@@ -331,14 +335,14 @@ def main():
             audio_mic.stream(deal_audio, inputs=[audio_mic, cookies])
 
 
-        demo.load(assign_user_uuid, inputs=[cookies], outputs=[cookies])
+        app_block.load(assign_user_uuid, inputs=[cookies], outputs=[cookies])
 
         from shared_utils.cookie_manager import load_web_cookie_cache__fn_builder
         load_web_cookie_cache = load_web_cookie_cache__fn_builder(customize_btns, cookies, predefined_btns)
-        demo.load(load_web_cookie_cache, inputs = [web_cookie_cache, cookies],
+        app_block.load(load_web_cookie_cache, inputs = [web_cookie_cache, cookies],
             outputs = [web_cookie_cache, cookies, *customize_btns.values(), *predefined_btns.values()], _js=js_code_for_persistent_cookie_init)
 
-        demo.load(None, inputs=[], outputs=None, _js=f"""()=>GptAcademicJavaScriptInit("{DARK_MODE}","{INIT_SYS_PROMPT}","{ADD_WAIFU}","{LAYOUT}")""")    # 配置暗色主题或亮色主题
+        app_block.load(None, inputs=[], outputs=None, _js=f"""()=>GptAcademicJavaScriptInit("{DARK_MODE}","{INIT_SYS_PROMPT}","{ADD_WAIFU}","{LAYOUT}")""")    # 配置暗色主题或亮色主题
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def run_delayed_tasks():
@@ -353,28 +357,15 @@ def main():
 
         threading.Thread(target=auto_updates, name="self-upgrade", daemon=True).start() # 查看自动更新
         threading.Thread(target=open_browser, name="open-browser", daemon=True).start() # 打开浏览器页面
-        threading.Thread(target=warm_up_mods, name="warm-up", daemon=True).start()      # 预热tiktoken模块
+        threading.Thread(target=warm_up_mods, name="warm-up",      daemon=True).start() # 预热tiktoken模块
 
+    # 运行一些异步任务：自动更新、打开浏览器页面、预热tiktoken模块
     run_delayed_tasks()
-    demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
-        quiet=True,
-        server_name="0.0.0.0",
-        ssl_keyfile=None if SSL_KEYFILE == "" else SSL_KEYFILE,
-        ssl_certfile=None if SSL_CERTFILE == "" else SSL_CERTFILE,
-        ssl_verify=False,
-        server_port=PORT,
-        favicon_path=os.path.join(os.path.dirname(__file__), "docs/logo.png"),
-        auth=AUTHENTICATION if len(AUTHENTICATION) != 0 else None,
-        blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile",f"{PATH_LOGGING}/admin", chat_secrets_log])
 
-    # 如果需要在二级路径下运行
-    # CUSTOM_PATH = get_conf('CUSTOM_PATH')
-    # if CUSTOM_PATH != "/":
-    #     from toolbox import run_gradio_in_subpath
-    #     run_gradio_in_subpath(demo, auth=AUTHENTICATION, port=PORT, custom_path=CUSTOM_PATH)
-    # else:
-    #     demo.launch(server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, favicon_path="docs/logo.png",
-    #                 blocked_paths=["config.py","config_private.py","docker-compose.yml","Dockerfile",f"{PATH_LOGGING}/admin"])
+    # 最后，正式开始服务
+    from shared_utils.fastapi_server import start_app
+    start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SSL_CERTFILE)
+
 
 if __name__ == "__main__":
     main()

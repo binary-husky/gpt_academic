@@ -157,7 +157,8 @@ ADD_WAIFU = False
 AUTHENTICATION = []
 
 
-# 如果需要在二级路径下运行（常规情况下，不要修改!!）（需要配合修改main.py才能生效!）
+# 如果需要在二级路径下运行（常规情况下，不要修改!!）
+# （举例 CUSTOM_PATH = "/gpt_academic"，可以让软件运行在 http://ip:port/gpt_academic/ 下。）
 CUSTOM_PATH = "/"
 
 

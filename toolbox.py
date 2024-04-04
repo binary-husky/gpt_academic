@@ -535,17 +535,13 @@ def on_file_uploaded(
 
 
 def on_report_generated(cookies:dict, files:List[str], chatbot:ChatBotWithCookies):
-    # from toolbox import find_recent_files
-    # PATH_LOGGING = get_conf('PATH_LOGGING')
     if "files_to_promote" in cookies:
         report_files = cookies["files_to_promote"]
         cookies.pop("files_to_promote")
     else:
         report_files = []
-    #     report_files = find_recent_files(PATH_LOGGING)
     if len(report_files) == 0:
         return cookies, None, chatbot
-    # files.extend(report_files)
     file_links = ""
     for f in report_files:
         file_links += (
