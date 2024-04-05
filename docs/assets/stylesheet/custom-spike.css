@@ -480,32 +480,32 @@ fieldset#knowledge-base-select .wrap label > input {
     min-width: unset !important;
 }
 
-[class*="gradio-container-"] h1 {
+[class*="gradio-container-"]:not(ul) h1 {
     font-weight: 700 !important;
     font-size: 28px !important;
 }
 
-[class*="gradio-container-"] h2 {
+[class*="gradio-container-"]:not(ul) h2 {
     font-weight: 600 !important;
     font-size: 24px !important;
 }
 
-[class*="gradio-container-"] h3 {
+[class*="gradio-container-"]:not(ul) h3 {
     font-weight: 500 !important;
     font-size: 20px !important;
 }
 
-[class*="gradio-container-"] h4 {
+[class*="gradio-container-"]:not(ul) h4 {
     font-weight: 400 !important;
     font-size: 16px !important;
 }
 
-[class*="gradio-container-"] h5 {
+[class*="gradio-container-"]:not(ul) h5 {
     font-weight: 300 !important;
     font-size: 14px !important;
 }
 
-[class*="gradio-container-"] h6 {
+[class*="gradio-container-"]:not(ul) h6 {
     font-weight: 200 !important;
     font-size: 12px !important;
 }

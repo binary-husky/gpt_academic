@@ -104,7 +104,7 @@ body.popup-open {
     opacity: 0.60;
 }
 #chuanhu-toolbox {
-    overflow: auto !important;
+    overflow: hidden !important;
 }
 
 #float-display {

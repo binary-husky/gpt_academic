@@ -146,7 +146,6 @@ def embed_documents(
 def embed_download(model_name='BAAI/bge-large-zh-v1.5'):
     # 模型下载
     from common.func_box import Shell
-    from common.toolbox import get_env_proxy_network
     cmd_args = ['python3', '-c',
                 f"from langchain.embeddings import HuggingFaceBgeEmbeddings; "
                 f"print(HuggingFaceBgeEmbeddings(model_name='{model_name}'))"]

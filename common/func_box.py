@@ -802,6 +802,16 @@ def is_delayed_time(input_date, compare_time=None):
         return False
 
 
+def get_env_proxy_network():
+    proxies = toolbox.get_conf('proxies')
+    proxy_dict = {}
+    if proxies is not None:
+        if 'http' in proxies:
+            proxy_dict['HTTP_PROXY'] = proxies['http']
+        if 'https' in proxies:
+            proxy_dict['HTTPS_PROXY'] = proxies['https']
+    return proxy_dict
+
 if __name__ == '__main__':
     txt = "authorization abc123, WPS-Sid: xyz456, Cookie: 789xyz 12312312421423他475675213123456776"
     print(encryption_str(txt))

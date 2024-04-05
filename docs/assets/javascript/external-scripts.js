@@ -1,2 +1,0 @@
-
-// external javascript here

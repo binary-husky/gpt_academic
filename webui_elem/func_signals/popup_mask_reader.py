@@ -56,6 +56,7 @@ def mask_clear_all(data, state, info):
 
 
 def reader_analysis_output(file: gr.File, choice, ipaddr: gr.Request):
+    """"""
     from crazy_functions.reader_fns.crazy_box import file_reader_content
     user_mark = user_client_mark(ipaddr)
     save_path = os.path.join(init_path.private_files_path, user_mark, 'reader')

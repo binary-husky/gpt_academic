@@ -2,11 +2,18 @@
 # @Time   : 2024/3/24
 # @Author : Spike
 # @Descr   :
+import gradio
+
 from webui_elem.func_signals.__import__ import *
 
 
 # TODO < -------------------------------- 知识库函数注册区 -------------------------------------->
 def kb_select_show(select: gr.Dropdown):
+    """ 选择知识库选项后展示对应的页面
+    Args:
+        select:
+    Returns:
+    """
     if select == '新建知识库':
         return gr.update(visible=True), gr.update(visible=False)
     else:
@@ -14,6 +21,12 @@ def kb_select_show(select: gr.Dropdown):
 
 
 def kb_name_select_then(kb_name):
+    """  选择知识库后更新简介、列表、详情、片段
+    Args:
+        kb_name: 知识库名称
+    Returns:
+        [知识库列表，知识库简介，知识库文件列表，知识库详情，知识库文件片段]
+    """
     kb_dict = base.kb_list_to_dict([kb_name])
     kb_name = list(kb_dict.keys())[0]
     file_details = pd.DataFrame(base.get_kb_file_details(kb_name))
@@ -43,6 +56,12 @@ def kb_name_select_then(kb_name):
 
 
 def kb_name_change_btn(name):
+    """ 根据知识库名称状态切换不同颜色的按钮
+    Args:
+        name: 知识库名称
+    Returns:
+        [新建知识库按钮颜色]
+    """
     if name:
         return gr.Button.update(variant='primary')
     else:
@@ -50,6 +69,13 @@ def kb_name_change_btn(name):
 
 
 def kb_upload_btn(upload: gr.Files, cloud: str):
+    """ 根据上传、云文档链接状态切换不同颜色的按钮
+    Args:
+        upload: 上传文件
+        cloud: 文档链接
+    Returns:
+        [构建知识库按钮颜色]
+    """
     if upload or URL(cloud).host:
         return gr.Button.update(variant='primary')
     else:
@@ -57,6 +83,13 @@ def kb_upload_btn(upload: gr.Files, cloud: str):
 
 
 def kb_introduce_change_btn(kb_name, kb_info):
+    """ 更新知识库简介
+    Args:
+        kb_name: 知识库名称
+        kb_info: 知识库简介
+    Returns:
+        [Spike-Toast]
+    """
     kb_dict = base.kb_list_to_dict([kb_name])
     kb_name = list(kb_dict.keys())[0]
     resp = kb_doc_api.update_info(kb_name, kb_info)
@@ -71,6 +104,12 @@ def kb_introduce_change_btn(kb_name, kb_info):
 
 
 def kb_date_add_row(source_data: pd.DataFrame):
+    """ 针对向量文件新增一个空行
+    Args:
+        source_data: 原数据
+    Returns:
+        [知识库文件片段]
+    """
     # 添加一行数据
     last_index = source_data.iloc[-1].iloc[1]
     # 检查最后一行的第一个元素是否为整数类型
@@ -84,7 +123,16 @@ def kb_date_add_row(source_data: pd.DataFrame):
     return gr.update(value=source_data)
 
 
-def kb_new_confirm(kb_name, kb_type, kb_model, kb_info):
+def kb_new_confirm(kb_name: gr.Textbox, kb_type: gradio.Dropdown, kb_model: gr.Dropdown, kb_info: gr.DataFrame):
+    """ 根据选择的模型预创建一个空的知识库
+    Args:
+        kb_name: 知识库名称
+        kb_type: 向量库类型
+        kb_model: Embedding模型
+        kb_info: 知识库简介
+    Returns:
+        [新增列，编辑列， 知识库列表，知识库简介， 知识库内文件列表，知识库文件详情，知识库文件片段]
+    """
     kb_name_tm = base.kb_details_to_dict()
 
     if not kb_name or not kb_type or not kb_model:
@@ -124,11 +172,16 @@ def kb_new_confirm(kb_name, kb_type, kb_model, kb_info):
             value=pd.DataFrame(data=copy.deepcopy(kb_config.file_fragment_template)))
     }
 
-    return list(new_output.values()) + list(edit_output.values()) + [
-        gr.update(choices=list(kb_name_tm.keys()) + [kb_name])]
+    return list(new_output.values()) + list(edit_output.values()) + [gr.update(choices=list(kb_name_tm.keys()) + [kb_name])]
 
 
 def kb_download_embedding_model(model_name):
+    """ 下载embedding模型
+    Args:
+        model_name: 模型路径
+    Returns:
+        [下载状态]
+    """
     if not model_name:
         raise gr.Error('必须要选一个')
     from common.embeddings_api import embed_download
@@ -156,6 +209,13 @@ def __get_kb_details_df(file_details: pd.DataFrame, condition: pd.Series):
 
 
 def __get_kb_fragment_df(kb_name, file_name):
+    """
+    Args:
+        kb_name: 知识库名称
+        file_name: 文件名称
+    Returns:
+        [指定文件片段]
+    """
     kb_fragment = copy.deepcopy(kb_config.file_fragment_template)
 
     info_fragment = kb_doc_api.search_docs(query='', knowledge_base_name=kb_name,
@@ -170,8 +230,23 @@ def __get_kb_fragment_df(kb_name, file_name):
     return pd.DataFrame(data=kb_fragment)
 
 
-def kb_file_update_confirm(upload_files: List, kb_name, kb_info, kb_max, kb_similarity, kb_tokenizer, kb_loader,
-                           cloud_link, ipaddr: gr.Request):
+def kb_file_update_confirm(upload_files: gr.Files, kb_name: gr.Textbox, kb_info: gr.Textbox, kb_max: gr.Number | int,
+                           kb_similarity: gr.Number | int, kb_tokenizer: gradio.Dropdown | str,
+                           kb_loader: gr.Dropdown | str, cloud_link: gr.Textbox, ipaddr: gr.Request):
+    """ 根据提交文件，将文件添加到知识库
+    Args:
+        upload_files: 上传的文件
+        kb_name: 知识库名称
+        kb_info: 知识库简介
+        kb_max: 最长文本检测
+        kb_similarity: 相邻文本检测
+        kb_tokenizer: 分词器
+        kb_loader: 读取器
+        cloud_link: 网络链接
+        ipaddr: gradio 带过来的wss信息
+    Returns:
+        [知识库列表，知识库简介，知识库文件列表，知识库详情，知识库文件片段]
+    """
     kb_name = list(base.kb_list_to_dict([kb_name]).keys())[0]
     user = user_client_mark(ipaddr)
     cloud_map, status = detach_cloud_links(cloud_link, {'ipaddr': user}, ['*'])
@@ -193,6 +268,13 @@ def kb_file_update_confirm(upload_files: List, kb_name, kb_info, kb_max, kb_simi
 
 
 def kb_select_file(kb_name, kb_file: str):
+    """ 选择知识库内文件，更新详情和片段
+    Args:
+        kb_name: 知识库名称
+        kb_file: 知识库文档
+    Returns:
+        [文件详情，文件片段]
+    """
     kb_name = list(base.kb_list_to_dict([kb_name]).keys())[0]
     file_details = pd.DataFrame(base.get_kb_file_details(kb_name))
 
@@ -200,10 +282,18 @@ def kb_select_file(kb_name, kb_file: str):
     last_fragment = __get_kb_fragment_df(kb_name, kb_file)
 
     return gr.update(value=last_details, label=f'{kb_file}-文件详情'), gr.update(value=last_fragment,
-                                                                                 label=f'{kb_file}-文档片段编辑')
+                                                                                label=f'{kb_file}-文档片段编辑')
 
 
 def kb_base_del(kb_name, del_confirm, _):
+    """ 删除知识库
+    Args:
+        kb_name: 知识库名称
+        del_confirm: 知识库文件，由js传递过来的this值
+        _: 占位而已
+    Returns:
+        [新增列，编辑列，知识库列表，可用知识库列表]
+    """
     if del_confirm == 'CANCELED':
         return gr.update(visible=False), gr.update(visible=True), gr.update()
     else:
@@ -218,6 +308,14 @@ def kb_base_del(kb_name, del_confirm, _):
 
 
 def kb_docs_file_source_del(kb_name, kb_file, _):
+    """ 删除知识库内文件
+    Args:
+        kb_name: 知识库名称
+        kb_file: 知识库文件，由js传递过来的this值
+        _: 占位符
+    Returns:
+        [Spike-Toast，知识库文件列表，知识库详情，知识库片段]
+    """
     if kb_file == 'CANCELED':
         return gr.update(), gr.update(), gr.update(), gr.update()
     kb_name_d = list(base.kb_list_to_dict([kb_name]).keys())[0]
@@ -236,6 +334,13 @@ def kb_docs_file_source_del(kb_name, kb_file, _):
 
 
 def kb_vector_del(kb_name, kb_file):
+    """ 仅删除知识库内向量，不删除文件
+    Args:
+        kb_name:  知识库名称
+        kb_file: 知识库文件
+    Returns:
+        [Spike-Toast，文件详情，文件片段]
+    """
     kb_name_d = list(base.kb_list_to_dict([kb_name]).keys())[0]
     resp = kb_doc_api.delete_docs(knowledge_base_name=kb_name_d, file_names=[kb_file],
                                   delete_content=False, not_refresh_vs_cache=False)
@@ -251,6 +356,19 @@ def kb_vector_del(kb_name, kb_file):
 
 
 def kb_vector_reload(_, kb_name, kb_info, kb_max, kb_similarity, kb_tokenizer, kb_loader, kb_file):
+    """ 根据文件详情未删除文件的重载知识库
+    Args:
+        _: 上传文件，因为重载的是所选文件，所以不会提交
+        kb_name: 知识库名称
+        kb_info: 知识库简介
+        kb_max: 最长文本检测
+        kb_similarity: 相邻文本检测
+        kb_tokenizer: 分词器
+        kb_loader: 读取器
+        kb_file: 所选文件
+    Returns:
+        [Spike-Toast，文件详情，文件片段]
+    """
     kb_name_k = list(base.kb_list_to_dict([kb_name]).keys())[0]
     resp = kb_doc_api.update_docs(
         knowledge_base_name=kb_name_k, file_names=[kb_file], docs={},
@@ -268,6 +386,20 @@ def kb_vector_reload(_, kb_name, kb_info, kb_max, kb_similarity, kb_tokenizer, k
 
 def kb_base_changed_save(_, kb_name, kb_info, kb_max, kb_similarity, kb_tokenizer, kb_loader,
                          kb_file, kb_dataFrame: pd.DataFrame):
+    """ 更改片段后保存
+    Args:
+        _: 上传文件，因为重载的是所选文件，所以不会提交
+        kb_name: 知识库名称
+        kb_info: 知识库简介
+        kb_max: 最长文本检测
+        kb_similarity: 相邻文本检测
+        kb_tokenizer: 分词器
+        kb_loader: 读取器
+        kb_file: 所选文件
+        kb_dataFrame: 修改后的知识库文件
+    Returns:
+        [Spike-Toast，知识库片段]
+    """
     kb_name = list(base.kb_list_to_dict([kb_name]).keys())[0]
     info_fragment = kb_doc_api.search_docs(query='', knowledge_base_name=kb_name,
                                            top_k=1, score_threshold=1,

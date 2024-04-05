@@ -85,6 +85,7 @@ class Settings:
             with gr.Row():
                 self.info_perish_btn = gr.Button('清除我来过的痕迹', variant='stop', elem_classes='danger_btn')
                 self.exit_login_btn = gr.LogoutButton(icon='', link='/logout')
+                self.exit_login_btn = gr.Button(icon='', link='/logout')
 
     def _draw_setting_info(self):
         APPNAME = toolbox.get_conf('APPNAME')

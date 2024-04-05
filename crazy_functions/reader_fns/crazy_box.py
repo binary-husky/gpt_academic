@@ -796,6 +796,7 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
                     chatbot[-1][1] = status
                 chatbot[-1][1] += status
                 yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='没有探测到数据')
+                return None
 
     # 提交知识库 ... 未适配
     return embedding_content

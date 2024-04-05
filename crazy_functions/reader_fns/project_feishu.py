@@ -238,6 +238,8 @@ class ProjectFeishu:
                         extraction_txt = extraction_txt.replace('[图片]', '')
                         extraction_txt += "\n".join(
                             [f"![{i.split('?')[-1]}]({i})" for i in type_items[key].get('doc_img', [])]) + '\n'
+                    if not extraction_txt:
+                        extraction_txt += type_items[key].get('state_key', '')
                 elif isinstance(type_items[key], str) and fields_map_dict[key].get('enum_map'):
                     extraction_txt = fields_map_dict[key]['enum_map'][type_items[key]]
                 elif isinstance(type_items[key], list) and fields_map_dict[key].get('enum_map'):
@@ -451,5 +453,4 @@ if __name__ == '__main__':
     # feishu = ProjectFeishu('')
     # # # # print(feishu._get_work_list(feishu.items_mapping[work_items.case_name]['type_key']))
     # print(feishu.get_issue_items_list())
-    print(converter_project_md('',
-                               './', {}))
+    print(converter_project_md('','./', {}))

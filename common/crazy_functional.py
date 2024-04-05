@@ -429,7 +429,6 @@ def get_functions_云文档():
             "Parameters": {
                 "开启OCR": {"llm_model": 'gemini-pro-vision'},
                 "提示词分类": "插件定制",
-                '用例下标排序': None,
                 "定制化流程": [{
                     "提示词": "提取文档测试点"
                 },

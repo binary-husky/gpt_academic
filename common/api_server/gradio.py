@@ -37,7 +37,7 @@ async def get_favicon():
 async def check_authentication(request: Request, call_next):
     pattern = re.compile(r".*\/users_private\/.*")
     if pattern.match(request.url.path):
-        if toolbox.get_conf('AUTHENTICATION') != 'SQL':  # 暂时没办法拿到用户信息，所以不禁止用户访问
+        if toolbox.get_conf('AUTHENTICATION') != 'SQL':
             if request.client.host not in request.url.path:
                 return JSONResponse(content={'Error': "You can't download other people's files."})
         else:
