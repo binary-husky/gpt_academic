@@ -1,5 +1,6 @@
 import os
 
+
 def _authorize_user(path_or_url, request, gradio_app):
     from toolbox import get_conf, default_user_name
     PATH_PRIVATE_UPLOAD, PATH_LOGGING = get_conf('PATH_PRIVATE_UPLOAD', 'PATH_LOGGING')
@@ -11,13 +12,15 @@ def _authorize_user(path_or_url, request, gradio_app):
         sensitive_path = PATH_PRIVATE_UPLOAD
     if sensitive_path:
         token = request.cookies.get("access-token") or request.cookies.get("access-token-unsecure")
-        user = gradio_app.tokens.get(token) # get user
+        user = gradio_app.tokens.get(token)  # get user
         allowed_users = [user, 'autogen', default_user_name]  # three user path that can be accessed
         for user_allowed in allowed_users:
-            if path_or_url.startswith(os.path.join(sensitive_path, user_allowed)):
+            # exact match
+            if f"{os.sep}".join(path_or_url.split(os.sep)[:2]) == os.path.join(sensitive_path, user_allowed):
                 return True
-        return False # "越权访问!"
+        return False  # "越权访问!"
     return True
+
 
 def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SSL_CERTFILE):
     import uvicorn
