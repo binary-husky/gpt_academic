@@ -320,6 +320,7 @@ model_info = {
     "cohere-command-r-plus": {
         "fn_with_ui": cohere_ui,
         "fn_without_ui": cohere_noui,
+        "can_multi_thread": True,
         "endpoint": cohere_endpoint,
         "max_token": 1024 * 4,
         "tokenizer": tokenizer_gpt35,
