@@ -1,7 +1,8 @@
 import time
 import os
-from toolbox import update_ui, get_conf, update_ui_lastest_msg
+from toolbox import update_ui, get_conf, update_ui_lastest_msg, log_chat
 from toolbox import check_packages, report_exception, have_any_recent_upload_image_files
+from toolbox import ChatBotWithCookies
 
 model_name = '智谱AI大模型'
 zhipuai_default_model = 'glm-4'
@@ -16,7 +17,8 @@ def make_media_input(inputs, image_paths):
         inputs = inputs + f'<br/><br/><div align="center"><img src="file={os.path.abspath(image_path)}"></div>'
     return inputs
 
-def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=[], console_slience=False):
+def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], sys_prompt:str="",
+                                  observe_window:list=[], console_slience:bool=False):
     """
         ⭐多线程方法
         函数的说明请见 request_llms/bridge_all.py
@@ -42,7 +44,8 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     return response
 
 
-def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream=True, additional_fn=None):
+def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWithCookies,
+            history:list=[], system_prompt:str='', stream:bool=True, additional_fn:str=None):
     """
         ⭐单线程方法
         函数的说明请见 request_llms/bridge_all.py
@@ -90,4 +93,5 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         chatbot[-1] = [inputs, response]
         yield from update_ui(chatbot=chatbot, history=history)
     history.extend([inputs, response])
+    log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=response)
     yield from update_ui(chatbot=chatbot, history=history)

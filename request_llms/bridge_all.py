@@ -359,7 +359,7 @@ for model in AVAIL_LLM_MODELS:
 
 # -=-=-=-=-=-=- 以下部分是新加入的模型，可能附带额外依赖 -=-=-=-=-=-=-
 # claude家族
-claude_models = ["claude-instant-1.2","claude-2.0","claude-2.1","claude-3-sonnet-20240229","claude-3-opus-20240229"]
+claude_models = ["claude-instant-1.2","claude-2.0","claude-2.1","claude-3-haiku-20240307","claude-3-sonnet-20240229","claude-3-opus-20240229"]
 if any(item in claude_models for item in AVAIL_LLM_MODELS):
     from .bridge_claude import predict_no_ui_long_connection as claude_noui
     from .bridge_claude import predict as claude_ui
@@ -385,6 +385,16 @@ if any(item in claude_models for item in AVAIL_LLM_MODELS):
     })
     model_info.update({
         "claude-2.1": {
+            "fn_with_ui": claude_ui,
+            "fn_without_ui": claude_noui,
+            "endpoint": claude_endpoint,
+            "max_token": 200000,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
+    model_info.update({
+        "claude-3-haiku-20240307": {
             "fn_with_ui": claude_ui,
             "fn_without_ui": claude_noui,
             "endpoint": claude_endpoint,
@@ -789,7 +799,7 @@ def LLM_CATCH_EXCEPTION(f):
     """
     装饰器函数，将错误显示出来
     """
-    def decorated(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience):
+    def decorated(inputs:str, llm_kwargs:dict, history:list, sys_prompt:str, observe_window:list, console_slience:bool):
         try:
             return f(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience)
         except Exception as e:
@@ -799,9 +809,9 @@ def LLM_CATCH_EXCEPTION(f):
     return decorated
 
 
-def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, observe_window=[], console_slience=False):
+def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list, sys_prompt:str, observe_window:list=[], console_slience:bool=False):
     """
-    发送至LLM，等待回复，一次性完成，不显示中间过程。但内部用stream的方法避免中途网线被掐。
+    发送至LLM，等待回复，一次性完成，不显示中间过程。但内部（尽可能地）用stream的方法避免中途网线被掐。
     inputs：
         是本次问询的输入
     sys_prompt:
@@ -819,7 +829,6 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
     model = llm_kwargs['llm_model']
     n_model = 1
     if '&' not in model:
-        assert not model.startswith("tgui"), "TGUI不支持函数插件的实现"
 
         # 如果只询问1个大语言模型：
         method = model_info[model]["fn_without_ui"]
@@ -880,15 +889,22 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
         return res
 
 
-def predict(inputs, llm_kwargs, *args, **kwargs):
+def predict(inputs:str, llm_kwargs:dict, *args, **kwargs):
     """
     发送至LLM，流式获取输出。
     用于基础的对话功能。
-    inputs 是本次问询的输入
-    top_p, temperature是LLM的内部调优参数
-    history 是之前的对话列表（注意无论是inputs还是history，内容太长了都会触发token数量溢出的错误）
-    chatbot 为WebUI中显示的对话列表，修改它，然后yeild出去，可以直接修改对话界面内容
-    additional_fn代表点击的哪个按钮，按钮见functional.py
+
+    完整参数列表：
+        predict(
+            inputs:str,                     # 是本次问询的输入
+            llm_kwargs:dict,                # 是LLM的内部调优参数
+            plugin_kwargs:dict,             # 是插件的内部参数
+            chatbot:ChatBotWithCookies,     # 原样传递，负责向用户前端展示对话，兼顾前端状态的功能
+            history:list=[],                # 是之前的对话列表
+            system_prompt:str='',           # 系统静默prompt
+            stream:bool=True,               # 是否流式输出（已弃用）
+            additional_fn:str=None          # 基础功能区按钮的附加功能
+        ):
     """
 
     inputs = apply_gpt_academic_string_mask(inputs, mode="show_llm")
