@@ -15,7 +15,7 @@ def delete_latest_chat(chatbot, history, cookies: dict, ipaddr: gr.Request):
     return history_update_combo
 
 
-def get_user_upload(chatbot, txt, ipaddr: gr.Request):
+def get_user_upload(chatbot, txt: str, ipaddr: gr.Request):
     """
     获取用户上传过的文件
     """

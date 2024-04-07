@@ -3,7 +3,7 @@
 # @Author : Spike
 # @Descr   :
 from fastapi import FastAPI
-from common.api_server import gradio
+from common.api_server import gradio_app
 from starlette.middleware.sessions import SessionMiddleware
 from common.utils import BaseResponse, ListResponse
 from typing import List, Literal
@@ -118,11 +118,11 @@ def mount_filename_summary_routes(app: FastAPI):
 
 
 def mount_app_routes(app: FastAPI):
-    app.get(path='/', tags=['Gradio Mount'], summary='重定向到Gradio二级目录')(gradio.homepage)
+    app.get(path='/', tags=['Gradio Mount'], summary='重定向到Gradio二级目录')(gradio_app.homepage)
 
-    app.get(path='/favicon.icon', tags=['Gradio Mount'], summary='获取网站icon')(gradio.get_favicon)
+    app.get(path='/favicon.icon', tags=['Gradio Mount'], summary='获取网站icon')(gradio_app.get_favicon)
 
-    app.get(path='/logout', tags=['Gradio Mount'], summary='退出登陆')(gradio.logout)
+    app.get(path='/logout', tags=['Gradio Mount'], summary='退出登陆')(gradio_app.logout)
 
     mount_knowledge_routes(app)
 
@@ -132,7 +132,7 @@ def mount_app_routes(app: FastAPI):
 def create_app():
     app = FastAPI()
     app.add_middleware(SessionMiddleware, secret_key="!secret")
-    app.middleware('https')(gradio.check_authentication)
+    app.middleware('https')(gradio_app.check_authentication)
 
     mount_app_routes(app)
 

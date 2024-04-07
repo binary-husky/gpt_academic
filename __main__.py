@@ -1,5 +1,7 @@
 import os
 import gradio as gr
+from chromadb.api import fastapi
+import fastapi
 
 from common.utils import list_local_embed_models
 from request_llms.bridge_all import predict
@@ -34,7 +36,6 @@ proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, LAYOUT, API_KEY,
 proxy_info = check_proxy(proxies)
 # 如果WEB_PORT是-1, 则随机选取WEB端口
 PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
-if not AUTHENTICATION: AUTHENTICATION = None
 os.environ['no_proxy'] = '*'  # 避免代理网络产生意外污染
 i18n = webui_local.I18nAuto()
 get_html = func_box.get_html
@@ -517,37 +518,78 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         self.demo.blocked_paths = func_box.get_files_and_dirs(
             path=init_path.base_path, filter_allow=['users_private', 'gpt_log', 'docs'])
         login_html = '登陆即注册，请记住你自己的账号和密码'
+        self.demo.auth_message = login_html
         if AUTHENTICATION == 'SQL':
             self.demo.auth = func_signals.user_login
-        self.demo.auth_message = login_html
-        # self.demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
-        #     server_name="0.0.0.0", server_port=PORT, auth=AUTHENTICATION, auth_message=login_html,
-        #     allowed_paths=['private_upload'], ssl_verify=False, share=True,
-        #     favicon_path='./docs/wps_logo.png')
+        # gr.mount_gradio_app     # rewriting
+        self.demo.dev_mode = False
+        self.demo.config = self.demo.get_config_file()
+        self.demo.validate_queue_settings()
+        from gradio.routes import App
+        gradio_app = App.create_app(self.demo)
+        return gradio_app
 
 
-from common.api_server import base
+def init_gradio_app():
+    from common.api_server.gradio_app import file_authorize_user
+    from common.api_server.base import create_app
 
-app = base.create_app()
-PORT = WEB_PORT if WEB_PORT <= 0 else WEB_PORT
-reload_javascript()
-chatbot_main = ChatBot()
-chatbot_main.main()
-gradio_app = gr.mount_gradio_app(app, chatbot_main.demo, '/spike', )
+    gradio_app = ChatBot().main()
+    # --- --- replace gradio endpoint to forbid access to sensitive files --- ---
+    dependencies = []
+    endpoint = None
+    gradio_app: fastapi   # 增加类型提示，避免警告
+    for route in list(gradio_app.router.routes):
+        if route.path == "/file/{path:path}":
+            gradio_app.router.routes.remove(route)
+        if route.path == "/file={path_or_url:path}":
+            dependencies = route.dependencies
+            endpoint = route.endpoint
+            gradio_app.router.routes.remove(route)
 
-if __name__ == '__main__':
+    @gradio_app.get("/file/{path:path}", dependencies=dependencies)
+    @gradio_app.head("/file={path_or_url:path}", dependencies=dependencies)
+    @gradio_app.get("/file={path_or_url:path}", dependencies=dependencies)
+    async def file(path_or_url: str, request: fastapi.Request):
+        if not file_authorize_user(path_or_url, request, gradio_app):
+            return {"detail": "Hack me? How dare you?"}
+        return await endpoint(path_or_url, request)
+    server_app = create_app()
+
+    server_app.mount('/spike/', gradio_app)
+
+    # 启用Gradio原生事件，不然会卡Loading哟
+    @server_app.on_event("startup")
+    async def start_queue():
+        if gradio_app.get_blocks().enable_queue:
+            gradio_app.get_blocks().startup_events()
+
+    return server_app
+
+
+def init_start():
     import uvicorn
     from common.logger_handler import init_config, logger
-
+    # 初始化外部java script
+    reload_javascript()
+    # 初始化gradio fastapi
+    gradio_app = init_gradio_app()
+    # 检查/初始化数据库
     info_path = os.path.join(init_path.private_knowledge_path, 'info.db')
     if not os.path.exists(info_path):
         from common.knowledge_base.migrate import create_tables
-
         create_tables()
         logger.info('create kb tables')
+    # 正式开启启动
     logger.info('start...')
     app_reload = get_conf('app_reload')
-    config = uvicorn.Config("__main__:app", host="0.0.0.0", port=PORT, reload=app_reload)
+    config = uvicorn.Config(gradio_app, host="0.0.0.0", port=PORT, reload=app_reload)
     server = uvicorn.Server(config)
     init_config()
     server.run()
+
+
+if __name__ == '__main__':
+    init_start()
+
+

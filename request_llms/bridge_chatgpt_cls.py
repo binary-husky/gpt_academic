@@ -179,6 +179,7 @@ class GPTChatInit:
                     yield error_meg, error_meg, error_meg
                     break
         if not gpt_bro_result:
+            yield '', chunk_content, chunk_content
             print(chunk_content)
 
 
