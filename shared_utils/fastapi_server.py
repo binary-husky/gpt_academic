@@ -1,15 +1,47 @@
 """
 Tests:
-- custom_path false:
+
+- custom_path false / no user auth:
     -- upload file(yes)
     -- download file(yes)
     -- websocket(yes)
     -- block __pycache__ access(yes)
         -- rel (yes)
         -- abs (yes)
-
     -- block user access(fail) http://localhost:45013/file=gpt_log/admin/chat_secrets.log
+        -- fix(commit f6bf05048c08f5cd84593f7fdc01e64dec1f584a)-> block successful
 
+- custom_path yes("/cc/gptac") / no user auth:
+    -- upload file(yes)
+    -- download file(yes)
+    -- websocket(yes)
+    -- block __pycache__ access(yes)
+    -- block user access(yes)
+
+- custom_path yes("/cc/gptac/") / no user auth:
+    -- upload file(yes)
+    -- download file(yes)
+    -- websocket(yes)
+    -- block user access(yes)
+
+- custom_path yes("/cc/gptac/") / + user auth:
+    -- upload file(yes)
+    -- download file(yes)
+    -- websocket(yes)
+    -- block user access(yes)
+    -- block user-wise access (yes)
+
+- custom_path no + user auth:
+    -- upload file(yes)
+    -- download file(yes)
+    -- websocket(yes)
+    -- block user access(yes)
+    -- block user-wise access (yes)
+
+queue cocurrent effectiveness
+    -- upload file(yes)
+    -- download file(yes)
+    -- websocket(yes)
 """
 
 import os, requests, threading, time
@@ -158,6 +190,7 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
     server.run_in_thread()
 
     # --- --- after server launch --- ---
+    app_block.server = server
     app_block.server_name = server_name
     app_block.local_url = path_to_local_server
     app_block.protocol = (
