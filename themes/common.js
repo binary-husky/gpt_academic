@@ -7,6 +7,9 @@ function push_data_to_gradio_component(DAT, ELEM_ID, TYPE) {
     if (TYPE == "str") {
         // convert dat to string: do nothing
     }
+    else if (TYPE == "obj") {
+        // convert dat to string: do nothing
+    }
     else if (TYPE == "no_conversion") {
         // no nothing
     }
@@ -894,6 +897,15 @@ async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout) {
 
     // Temperature 大模型温度参数
     gpt_academic_gradio_saveload("load", "elem_temperature", "js_temperature_cookie", null, "float");
+
+    // md_dropdown 大模型类型选择
+    gpt_academic_gradio_saveload("load", "elem_model_sel", "js_md_dropdown_cookie", null, "str");
+    // 连锁修改chatbot的label
+    push_data_to_gradio_component({
+        label: '当前模型：' + getCookie("js_md_dropdown_cookie"),
+        __type__: 'update'
+    }, "gpt-chatbot", "obj")
+
 
     // clearButton 自动清除按钮
     if (getCookie("js_clearbtn_show_cookie")) {
