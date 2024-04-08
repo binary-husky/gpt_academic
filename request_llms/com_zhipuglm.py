@@ -63,13 +63,13 @@ class ZhipuChatInit:
         except ValueError:
             return default
 
-        if param <= 0:
+        if param <= min_val:
             return min_val
-        elif param >= 1:
+        elif param >= max_val:
             return max_val
         else:
             return round(param, 2)  # 可挑选精度，目前是两位小数
-            
+
     def __conversation_message_payload(self, inputs:str, llm_kwargs:dict, history:list, system_prompt:str):
         messages = []
         if system_prompt:
@@ -79,8 +79,34 @@ class ZhipuChatInit:
         if inputs.strip() == "": # 处理空输入导致报错的问题 https://github.com/binary-husky/gpt_academic/issues/1640 提示 {"error":{"code":"1214","message":"messages[1]:content和tool_calls 字段不能同时为空"}
             inputs = "."    # 空格、换行、空字符串都会报错，所以用最没有意义的一个点代替
         messages.append(self.__conversation_user(inputs, llm_kwargs))  # 处理用户对话
-        temperature = self.preprocess_param(llm_kwargs.get('temperature', 0.95))
-        top_p = self.preprocess_param(llm_kwargs.get('top_p', 0.7))
+        """
+        采样温度，控制输出的随机性，必须为正数
+        取值范围是：(0.0, 1.0)，不能等于 0，默认值为 0.95，
+        值越大，会使输出更随机，更具创造性；
+        值越小，输出会更加稳定或确定
+        建议您根据应用场景调整 top_p 或 temperature 参数，但不要同时调整两个参数
+        """
+        temperature = self.preprocess_param(
+            param=llm_kwargs.get('temperature', 0.95),
+            default=0.95,
+            min_val=0.01,
+            max_val=0.99
+        )
+        """
+        用温度取样的另一种方法，称为核取样
+        取值范围是：(0.0, 1.0) 开区间，
+        不能等于 0 或 1，默认值为 0.7
+        模型考虑具有 top_p 概率质量 tokens 的结果
+        例如：0.1 意味着模型解码器只考虑从前 10% 的概率的候选集中取 tokens
+        建议您根据应用场景调整 top_p 或 temperature 参数，
+        但不要同时调整两个参数
+        """
+        top_p = self.preprocess_param(
+            param=llm_kwargs.get('top_p', 0.70),
+            default=0.70,
+            min_val=0.01,
+            max_val=0.99
+        )
         response = self.zhipu_bro.chat.completions.create(
             model=self.model, messages=messages, stream=True,
             temperature=temperature,
