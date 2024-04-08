@@ -32,7 +32,7 @@ timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check 
 
 def get_full_error(chunk, stream_response):
     """
-        获取完整的从Openai返回的报错
+        获取完整的从Cohere返回的报错
     """
     while True:
         try:
@@ -50,7 +50,7 @@ def decode_chunk(chunk):
     has_content = False
     has_role = False
     try:
-        chunkjson = json.loads(chunk_decoded[6:])
+        chunkjson = json.loads(chunk_decoded)
         has_choices = 'choices' in chunkjson
         if has_choices: choice_valid = (len(chunkjson['choices']) > 0)
         if has_choices and choice_valid: has_content = ("content" in chunkjson['choices'][0]["delta"])
@@ -72,13 +72,13 @@ def verify_endpoint(endpoint):
 
 def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], sys_prompt:str="", observe_window:list=None, console_slience:bool=False):
     """
-    发送至chatGPT，等待回复，一次性完成，不显示中间过程。但内部用stream的方法避免中途网线被掐。
+    发送，等待回复，一次性完成，不显示中间过程。但内部用stream的方法避免中途网线被掐。
     inputs：
         是本次问询的输入
     sys_prompt:
         系统静默prompt
     llm_kwargs：
-        chatGPT的内部调优参数
+        内部调优参数
     history：
         是之前的对话列表
     observe_window = None：
@@ -110,41 +110,19 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], 
         except requests.exceptions.ConnectionError:
             chunk = next(stream_response) # 失败了，重试一次？再失败就没办法了。
         chunk_decoded, chunkjson, has_choices, choice_valid, has_content, has_role = decode_chunk(chunk)
-        if len(chunk_decoded)==0: continue
-        if not chunk_decoded.startswith('data:'):
-            error_msg = get_full_error(chunk, stream_response).decode()
-            if "reduce the length" in error_msg:
-                raise ConnectionAbortedError("OpenAI拒绝了请求:" + error_msg)
-            elif """type":"upstream_error","param":"307""" in error_msg:
-                raise ConnectionAbortedError("正常结束，但显示Token不足，导致输出不完整，请削减单次输入的文本量。")
-            else:
-                raise RuntimeError("OpenAI拒绝了请求：" + error_msg)
-        if ('data: [DONE]' in chunk_decoded): break # api2d 正常完成
-        # 提前读取一些信息 （用于判断异常）
-        if has_choices and not choice_valid:
-            # 一些垃圾第三方接口的出现这样的错误
-            continue
-        json_data = chunkjson['choices'][0]
-        delta = json_data["delta"]
-        if len(delta) == 0: break
-        if (not has_content) and has_role: continue
-        if (not has_content) and (not has_role): continue # raise RuntimeError("发现不标准的第三方接口："+delta)
-        if has_content: # has_role = True/False
-            result += delta["content"]
-            if not console_slience: print(delta["content"], end='')
+        if chunkjson['event_type'] == 'stream-start': continue
+        if chunkjson['event_type'] == 'text-generation':
+            result += chunkjson["text"]
+            if not console_slience: print(chunkjson["text"], end='')
             if observe_window is not None:
                 # 观测窗，把已经获取的数据显示出去
                 if len(observe_window) >= 1:
-                    observe_window[0] += delta["content"]
+                    observe_window[0] += chunkjson["text"]
                 # 看门狗，如果超过期限没有喂狗，则终止
                 if len(observe_window) >= 2:
                     if (time.time()-observe_window[1]) > watch_dog_patience:
                         raise RuntimeError("用户取消了程序。")
-        else: raise RuntimeError("意外Json结构："+delta)
-    if json_data and json_data['finish_reason'] == 'content_filter':
-        raise RuntimeError("由于提问含不合规内容被Azure过滤。")
-    if json_data and json_data['finish_reason'] == 'length':
-        raise ConnectionAbortedError("正常结束，但显示Token不足，导致输出不完整，请削减单次输入的文本量。")
+        if chunkjson['event_type'] == 'stream-end': break
     return result
 
 
@@ -159,15 +137,15 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
     chatbot 为WebUI中显示的对话列表，修改它，然后yeild出去，可以直接修改对话界面内容
     additional_fn代表点击的哪个按钮，按钮见functional.py
     """
-    if is_any_api_key(inputs):
-        chatbot._cookies['api_key'] = inputs
-        chatbot.append(("输入已识别为openai的api_key", what_keys(inputs)))
-        yield from update_ui(chatbot=chatbot, history=history, msg="api_key已导入") # 刷新界面
-        return
-    elif not is_any_api_key(chatbot._cookies['api_key']):
-        chatbot.append((inputs, "缺少api_key。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。"))
-        yield from update_ui(chatbot=chatbot, history=history, msg="缺少api_key") # 刷新界面
-        return
+    # if is_any_api_key(inputs):
+    #     chatbot._cookies['api_key'] = inputs
+    #     chatbot.append(("输入已识别为Cohere的api_key", what_keys(inputs)))
+    #     yield from update_ui(chatbot=chatbot, history=history, msg="api_key已导入") # 刷新界面
+    #     return
+    # elif not is_any_api_key(chatbot._cookies['api_key']):
+    #     chatbot.append((inputs, "缺少api_key。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。"))
+    #     yield from update_ui(chatbot=chatbot, history=history, msg="缺少api_key") # 刷新界面
+    #     return
 
     user_input = inputs
     if additional_fn is not None:
@@ -226,56 +204,32 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
             try:
                 chunk = next(stream_response)
             except StopIteration:
-                # 非OpenAI官方接口的出现这样的报错，OpenAI和API2D不会走这里
+                # 非Cohere官方接口的出现这样的报错，Cohere和API2D不会走这里
                 chunk_decoded = chunk.decode()
                 error_msg = chunk_decoded
-                # 首先排除一个one-api没有done数据包的第三方Bug情形
-                if len(gpt_replying_buffer.strip()) > 0 and len(error_msg) == 0:
-                    yield from update_ui(chatbot=chatbot, history=history, msg="检测到有缺陷的非OpenAI官方接口，建议选择更稳定的接口。")
-                    break
                 # 其他情况，直接返回报错
                 chatbot, history = handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
-                yield from update_ui(chatbot=chatbot, history=history, msg="非OpenAI官方接口返回了错误:" + chunk.decode()) # 刷新界面
+                yield from update_ui(chatbot=chatbot, history=history, msg="非Cohere官方接口返回了错误:" + chunk.decode()) # 刷新界面
                 return
 
             # 提前读取一些信息 （用于判断异常）
             chunk_decoded, chunkjson, has_choices, choice_valid, has_content, has_role = decode_chunk(chunk)
 
-            if is_head_of_the_stream and (r'"object":"error"' not in chunk_decoded) and (r"content" not in chunk_decoded):
-                # 数据流的第一帧不携带content
-                is_head_of_the_stream = False; continue
-
-            if chunk:
+            if chunkjson:
                 try:
-                    if has_choices and not choice_valid:
-                        # 一些垃圾第三方接口的出现这样的错误
+                    if chunkjson['event_type'] == 'stream-start':
                         continue
-                    if ('data: [DONE]' not in chunk_decoded) and len(chunk_decoded) > 0 and (chunkjson is None):
-                        # 传递进来一些奇怪的东西
-                        raise ValueError(f'无法读取以下数据，请检查配置。\n\n{chunk_decoded}')
-                    # 前者是API2D的结束条件，后者是OPENAI的结束条件
-                    if ('data: [DONE]' in chunk_decoded) or (len(chunkjson['choices'][0]["delta"]) == 0):
-                        # 判定为数据流的结束，gpt_replying_buffer也写完了
-                        # logging.info(f'[response] {gpt_replying_buffer}')
+                    if chunkjson['event_type'] == 'text-generation':
+                        gpt_replying_buffer = gpt_replying_buffer + chunkjson["text"]
+                        history[-1] = gpt_replying_buffer
+                        chatbot[-1] = (history[-2], history[-1])
+                        yield from update_ui(chatbot=chatbot, history=history, msg="正常") # 刷新界面
+                    if chunkjson['event_type'] == 'stream-end':
                         log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
+                        history[-1] = gpt_replying_buffer
+                        chatbot[-1] = (history[-2], history[-1])
+                        yield from update_ui(chatbot=chatbot, history=history, msg="正常") # 刷新界面
                         break
-                    # 处理数据流的主体
-                    status_text = f"finish_reason: {chunkjson['choices'][0].get('finish_reason', 'null')}"
-                    # 如果这里抛出异常，一般是文本过长，详情见get_full_error的输出
-                    if has_content:
-                        # 正常情况
-                        gpt_replying_buffer = gpt_replying_buffer + chunkjson['choices'][0]["delta"]["content"]
-                    elif has_role:
-                        # 一些第三方接口的出现这样的错误，兼容一下吧
-                        continue
-                    else:
-                        # 至此已经超出了正常接口应该进入的范围，一些垃圾第三方接口会出现这样的错误
-                        if chunkjson['choices'][0]["delta"]["content"] is None: continue # 一些垃圾第三方接口出现这样的错误，兼容一下吧
-                        gpt_replying_buffer = gpt_replying_buffer + chunkjson['choices'][0]["delta"]["content"]
-
-                    history[-1] = gpt_replying_buffer
-                    chatbot[-1] = (history[-2], history[-1])
-                    yield from update_ui(chatbot=chatbot, history=history, msg=status_text) # 刷新界面
                 except Exception as e:
                     yield from update_ui(chatbot=chatbot, history=history, msg="Json解析不合常规") # 刷新界面
                     chunk = get_full_error(chunk, stream_response)
@@ -288,7 +242,7 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
 
 def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg):
     from .bridge_all import model_info
-    openai_website = ' 请登录OpenAI查看详情 https://platform.openai.com/signup'
+    Cohere_website = ' 请登录Cohere查看详情 https://platform.Cohere.com/signup'
     if "reduce the length" in error_msg:
         if len(history) >= 2: history[-1] = ""; history[-2] = "" # 清除当前溢出的输入：history[-2] 是本次输入, history[-1] 是本次输出
         history = clip_history(inputs=inputs, history=history, tokenizer=model_info[llm_kwargs['llm_model']]['tokenizer'],
@@ -297,15 +251,15 @@ def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
     elif "does not exist" in error_msg:
         chatbot[-1] = (chatbot[-1][0], f"[Local Message] Model {llm_kwargs['llm_model']} does not exist. 模型不存在, 或者您没有获得体验资格.")
     elif "Incorrect API key" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] Incorrect API key. OpenAI以提供了不正确的API_KEY为由, 拒绝服务. " + openai_website)
+        chatbot[-1] = (chatbot[-1][0], "[Local Message] Incorrect API key. Cohere以提供了不正确的API_KEY为由, 拒绝服务. " + Cohere_website)
     elif "exceeded your current quota" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] You exceeded your current quota. OpenAI以账户额度不足为由, 拒绝服务." + openai_website)
+        chatbot[-1] = (chatbot[-1][0], "[Local Message] You exceeded your current quota. Cohere以账户额度不足为由, 拒绝服务." + Cohere_website)
     elif "account is not active" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] Your account is not active. OpenAI以账户失效为由, 拒绝服务." + openai_website)
+        chatbot[-1] = (chatbot[-1][0], "[Local Message] Your account is not active. Cohere以账户失效为由, 拒绝服务." + Cohere_website)
     elif "associated with a deactivated account" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] You are associated with a deactivated account. OpenAI以账户失效为由, 拒绝服务." + openai_website)
+        chatbot[-1] = (chatbot[-1][0], "[Local Message] You are associated with a deactivated account. Cohere以账户失效为由, 拒绝服务." + Cohere_website)
     elif "API key has been deactivated" in error_msg:
-        chatbot[-1] = (chatbot[-1][0], "[Local Message] API key has been deactivated. OpenAI以账户失效为由, 拒绝服务." + openai_website)
+        chatbot[-1] = (chatbot[-1][0], "[Local Message] API key has been deactivated. Cohere以账户失效为由, 拒绝服务." + Cohere_website)
     elif "bad forward key" in error_msg:
         chatbot[-1] = (chatbot[-1][0], "[Local Message] Bad forward key. API2D账户额度不足.")
     elif "Not enough point" in error_msg:
@@ -320,8 +274,8 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     """
     整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
     """
-    if not is_any_api_key(llm_kwargs['api_key']):
-        raise AssertionError("你提供了错误的API_KEY。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。")
+    # if not is_any_api_key(llm_kwargs['api_key']):
+    #     raise AssertionError("你提供了错误的API_KEY。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。")
 
     api_key = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
 
@@ -329,7 +283,7 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         "Content-Type": "application/json",
         "Authorization": f"Bearer {api_key}"
     }
-    if API_ORG.startswith('org-'): headers.update({"OpenAI-Organization": API_ORG})
+    if API_ORG.startswith('org-'): headers.update({"Cohere-Organization": API_ORG})
     if llm_kwargs['llm_model'].startswith('azure-'):
         headers.update({"api-key": api_key})
         if llm_kwargs['llm_model'] in AZURE_CFG_ARRAY.keys():
@@ -338,48 +292,29 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
 
     conversation_cnt = len(history) // 2
 
-    messages = [{"role": "system", "content": system_prompt}]
+    messages = [{"role": "SYSTEM", "message": system_prompt}]
     if conversation_cnt:
         for index in range(0, 2*conversation_cnt, 2):
             what_i_have_asked = {}
-            what_i_have_asked["role"] = "user"
-            what_i_have_asked["content"] = history[index]
+            what_i_have_asked["role"] = "USER"
+            what_i_have_asked["message"] = history[index]
             what_gpt_answer = {}
-            what_gpt_answer["role"] = "assistant"
-            what_gpt_answer["content"] = history[index+1]
-            if what_i_have_asked["content"] != "":
-                if what_gpt_answer["content"] == "": continue
-                if what_gpt_answer["content"] == timeout_bot_msg: continue
+            what_gpt_answer["role"] = "CHATBOT"
+            what_gpt_answer["message"] = history[index+1]
+            if what_i_have_asked["message"] != "":
+                if what_gpt_answer["message"] == "": continue
+                if what_gpt_answer["message"] == timeout_bot_msg: continue
                 messages.append(what_i_have_asked)
                 messages.append(what_gpt_answer)
             else:
-                messages[-1]['content'] = what_gpt_answer['content']
+                messages[-1]['message'] = what_gpt_answer['message']
 
-    what_i_ask_now = {}
-    what_i_ask_now["role"] = "user"
-    what_i_ask_now["content"] = inputs
-    messages.append(what_i_ask_now)
     model = llm_kwargs['llm_model']
-    if llm_kwargs['llm_model'].startswith('api2d-'):
-        model = llm_kwargs['llm_model'][len('api2d-'):]
-    if llm_kwargs['llm_model'].startswith('one-api-'):
-        model = llm_kwargs['llm_model'][len('one-api-'):]
-        model, _ = read_one_api_model_name(model)
-
-    if model == "gpt-3.5-random": # 随机选择, 绕过openai访问频率限制
-        model = random.choice([
-            "gpt-3.5-turbo",
-            "gpt-3.5-turbo-16k",
-            "gpt-3.5-turbo-1106",
-            "gpt-3.5-turbo-0613",
-            "gpt-3.5-turbo-16k-0613",
-            "gpt-3.5-turbo-0301",
-        ])
-        logging.info("Random select model:" + model)
-
+    if model.startswith('cohere-'): model = model[len('cohere-'):]
     payload = {
         "model": model,
-        "messages": messages,
+        "message": inputs,
+        "chat_history": messages,
         "temperature": llm_kwargs['temperature'],  # 1.0,
         "top_p": llm_kwargs['top_p'],  # 1.0,
         "n": 1,
@@ -387,10 +322,7 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         "presence_penalty": 0,
         "frequency_penalty": 0,
     }
-    try:
-        print(f" {llm_kwargs['llm_model']} : {conversation_cnt} : {inputs[:100]} ..........")
-    except:
-        print('输入中可能存在乱码。')
+
     return headers,payload
 
 

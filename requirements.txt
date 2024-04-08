@@ -17,6 +17,7 @@ prompt_toolkit
 latex2mathml
 python-docx
 mdtex2html
+dashscope
 pyautogen
 colorama
 Markdown

@@ -48,7 +48,7 @@ adjust_theme, advanced_css, theme_declaration, _ = load_dynamic_theme(get_conf("
 cookie相关工具函数
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 """
-def init_cookie(cookies):
+def assign_user_uuid(cookies):
     # 为每一位访问的用户赋予一个独一无二的uuid编码
     cookies.update({"uuid": uuid.uuid4()})
     return cookies
@@ -106,8 +106,8 @@ js_code_for_toggle_darkmode = """() => {
 }"""
 
 
-js_code_for_persistent_cookie_init = """(py_pickle_cookie, cookie) => {
-    return [getCookie("py_pickle_cookie"), cookie];
+js_code_for_persistent_cookie_init = """(web_cookie_cache, cookie) => {
+    return [getCookie("web_cookie_cache"), cookie];
 }
 """
 
