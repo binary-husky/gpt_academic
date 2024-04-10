@@ -1,4 +1,6 @@
+import json
 from typing import Callable
+
 def load_web_cookie_cache__fn_builder(customize_btns, cookies, predefined_btns)->Callable:
     def load_web_cookie_cache(persistent_cookie_, cookies_):
         import gradio as gr
@@ -80,10 +82,7 @@ def make_history_cache():
     history_cache = gr.Textbox(visible=False, elem_id="history_cache")
     # 定义history_cache->history的更新方法（隐藏）。在触发这个按钮时，会先执行js代码更新history_cache，然后再执行python代码更新history
     def process_history_cache(history_cache):
-        import json
         return json.loads(history_cache)
-    # history_cache_update = gr.Button("", elem_id="elem_update_history", visible=False).click(
-    #     lambda x:x, inputs=[history_cache], outputs=[history], _js="""(h) => set_history_gr_state(h)""")
     # 另一种更简单的setter方法
     history_cache_update = gr.Button("", elem_id="elem_update_history", visible=False).click(
         process_history_cache, inputs=[history_cache], outputs=[history])

@@ -967,33 +967,22 @@ async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout) {
 
 }
 
+
 function reset_conversation(a, b) {
     console.log("js_code_reset");
     a = btoa(unescape(encodeURIComponent(JSON.stringify(a))));
-    b = btoa(unescape(encodeURIComponent(JSON.stringify(b))));
     setCookie("js_previous_chat_cookie", a, 1);
-    setCookie("js_previous_chat_history_cookie", b, 1);
     gen_restore_btn();
     return [[], [], "已重置"];
 }
 
-// clear -> 将 history 缓存至 history_cache -> 点击复原 ->
-// -> restore_previous_chat() -> 读取 history_cache
+// clear -> 将 history 缓存至 history_cache -> 点击复原 -> restore_previous_chat() -> 触发elem_update_history -> 读取 history_cache
 function restore_previous_chat(){
     console.log("restore_previous_chat");
     let chat = getCookie("js_previous_chat_cookie");
     chat = JSON.parse(decodeURIComponent(escape(atob(chat))));
     push_data_to_gradio_component(chat, "gpt-chatbot", "obj");
     document.querySelector("#elem_update_history").click(); // in order to call set_history_gr_state, and send history state to server
-}
-
-async function set_history_gr_state(cur_history){
-    // 这个函数必须由Gradio触发
-    console.log("set history");
-    history_cache = await get_data_from_gradio_component('history_cache');
-    history_cache = JSON.parse(history_cache);
-    // history_cache.push("additional")
-    return [history_cache]
 }
 
 function gen_restore_btn(){
