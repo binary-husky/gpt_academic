@@ -1,4 +1,4 @@
-import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
+import os, json; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 
 help_menu_description = \
 """Github源代码开源和更新[地址🚀](https://github.com/binary-husky/gpt_academic),
@@ -14,7 +14,7 @@ help_menu_description = \
 </br></br>如何临时更换API_KEY: 在输入区输入临时API_KEY后提交（网页刷新后失效）"""
 
 def enable_log(PATH_LOGGING):
-    import logging, uuid
+    import logging
     admin_log_path = os.path.join(PATH_LOGGING, "admin")
     os.makedirs(admin_log_path, exist_ok=True)
     log_dir = os.path.join(admin_log_path, "chat_secrets.log")
@@ -29,7 +29,7 @@ def main():
     if gr.__version__ not in ['3.32.9']:
         raise ModuleNotFoundError("使用项目内置Gradio获取最优体验! 请运行 `pip install -r requirements.txt` 指令安装内置Gradio及其他依赖, 详情信息见requirements.txt.")
     from request_llms.bridge_all import predict
-    from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, load_chat_cookies, DummyWith
+    from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, DummyWith
     # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址
     proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION = get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION')
     CHATBOT_HEIGHT, LAYOUT, AVAIL_LLM_MODELS, AUTO_CLEAR_TXT = get_conf('CHATBOT_HEIGHT', 'LAYOUT', 'AVAIL_LLM_MODELS', 'AUTO_CLEAR_TXT')
@@ -79,15 +79,16 @@ def main():
     cancel_handles = []
     customize_btns = {}
     predefined_btns = {}
+    from shared_utils.cookie_manager import make_cookie_cache, make_history_cache
     with gr.Blocks(title="GPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as app_block:
         gr.HTML(title_html)
-        secret_css, web_cookie_cache = gr.Textbox(visible=False), gr.Textbox(visible=False)
-        cookies = gr.State(load_chat_cookies())
+        secret_css = gr.Textbox(visible=False, elem_id="secret_css")
+        cookies, web_cookie_cache = make_cookie_cache() # 定义 后端state（cookies）、前端（web_cookie_cache）两兄弟
         with gr_L1():
             with gr_L2(scale=2, elem_id="gpt-chat"):
                 chatbot = gr.Chatbot(label=f"当前模型：{LLM_MODEL}", elem_id="gpt-chatbot")
                 if LAYOUT == "TOP-DOWN":  chatbot.style(height=CHATBOT_HEIGHT)
-                history = gr.State([])
+                history, history_cache, history_cache_update = make_history_cache() # 定义 后端state（history）、前端（history_cache）、后端setter（history_cache_update）三兄弟
             with gr_L2(scale=1, elem_id="gpt-panel"):
                 with gr.Accordion("输入区", open=True, elem_id="input-panel") as area_input_primary:
                     with gr.Row():
@@ -249,8 +250,10 @@ def main():
         cancel_handles.append(submitBtn2.click(**predict_args))
         resetBtn.click(None, None, [chatbot, history, status], _js=js_code_reset)   # 先在前端快速清除chatbot&status
         resetBtn2.click(None, None, [chatbot, history, status], _js=js_code_reset)  # 先在前端快速清除chatbot&status
-        resetBtn.click(lambda: ([], [], "已重置"), None, [chatbot, history, status])    # 再在后端清除history
-        resetBtn2.click(lambda: ([], [], "已重置"), None, [chatbot, history, status])   # 再在后端清除history
+        reset_server_side_args = (lambda history: ([], [], "已重置", json.dumps(history)),
+                                  [history], [chatbot, history, status, history_cache])
+        resetBtn.click(*reset_server_side_args)    # 再在后端清除history，把history转存history_cache备用
+        resetBtn2.click(*reset_server_side_args)   # 再在后端清除history，把history转存history_cache备用
         clearBtn.click(None, None, [txt, txt2], _js=js_code_clear)
         clearBtn2.click(None, None, [txt, txt2], _js=js_code_clear)
         if AUTO_CLEAR_TXT:
@@ -343,6 +346,7 @@ def main():
         load_web_cookie_cache = load_web_cookie_cache__fn_builder(customize_btns, cookies, predefined_btns)
         app_block.load(load_web_cookie_cache, inputs = [web_cookie_cache, cookies],
             outputs = [web_cookie_cache, cookies, *customize_btns.values(), *predefined_btns.values()], _js=js_code_for_persistent_cookie_init)
+
 
         app_block.load(None, inputs=[], outputs=None, _js=f"""()=>GptAcademicJavaScriptInit("{DARK_MODE}","{INIT_SYS_PROMPT}","{ADD_WAIFU}","{LAYOUT}")""")    # 配置暗色主题或亮色主题
 

@@ -966,3 +966,104 @@ async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout) {
     }
 
 }
+
+function reset_conversation(a, b) {
+    console.log("js_code_reset");
+    a = btoa(unescape(encodeURIComponent(JSON.stringify(a))));
+    b = btoa(unescape(encodeURIComponent(JSON.stringify(b))));
+    setCookie("js_previous_chat_cookie", a, 1);
+    setCookie("js_previous_chat_history_cookie", b, 1);
+    gen_restore_btn();
+    return [[], [], "已重置"];
+}
+
+// clear -> 将 history 缓存至 history_cache -> 点击复原 ->
+// -> restore_previous_chat() -> 读取 history_cache
+function restore_previous_chat(){
+    console.log("restore_previous_chat");
+    let chat = getCookie("js_previous_chat_cookie");
+    chat = JSON.parse(decodeURIComponent(escape(atob(chat))));
+    push_data_to_gradio_component(chat, "gpt-chatbot", "obj");
+    document.querySelector("#elem_update_history").click(); // in order to call set_history_gr_state, and send history state to server
+}
+
+async function set_history_gr_state(cur_history){
+    // 这个函数必须由Gradio触发
+    console.log("set history");
+    history_cache = await get_data_from_gradio_component('history_cache');
+    history_cache = JSON.parse(history_cache);
+    // history_cache.push("additional")
+    return [history_cache]
+}
+
+function gen_restore_btn(){
+    // 创建按钮元素
+    const button = document.createElement('div');
+
+    let initial_text = '+';
+
+    // 设置按钮的样式和属性
+    button.id = 'floatingButton';
+    button.className = 'glow';
+    button.style.position = 'fixed';
+    button.style.bottom = '10px';
+    button.style.left = '10px';
+    button.style.width = '50px';
+    button.style.height = '50px';
+    button.style.borderRadius = '50%';
+    button.style.backgroundColor = '#007bff';
+    button.style.color = 'white';
+    button.style.display = 'flex';
+    button.style.alignItems = 'center';
+    button.style.justifyContent = 'center';
+    button.style.cursor = 'pointer';
+    button.style.transition = 'all 0.3s ease';
+    button.style.boxShadow = '0 0 10px rgba(0,0,0,0.2)';
+    button.textContent = initial_text;
+
+    // 添加发光动画的关键帧
+    const styleSheet = document.createElement('style');
+    styleSheet.type = 'text/css';
+    styleSheet.innerText = `
+    @keyframes glow {
+        from {
+        box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+        to {
+        box-shadow: 0 0 20px rgba(0,0,0,0.4);
+        }
+    }
+    #floatingButton.glow {
+        animation: glow 1s infinite alternate;
+    }
+    #floatingButton:hover {
+        transform: scale(1.2);
+        box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+    #floatingButton.disappearing {
+        animation: shrinkAndDisappear 0.5s forwards;
+    }
+    `;
+    document.head.appendChild(styleSheet);
+
+    // 鼠标悬停和移开的事件监听器
+    button.addEventListener('mouseover', function() {
+        this.textContent = "还原对话";
+    });
+
+    button.addEventListener('mouseout', function() {
+        this.textContent = initial_text;
+    });
+
+    // 点击事件监听器
+    button.addEventListener('click', function() {
+        // 添加一个类来触发缩小和消失的动画
+        restore_previous_chat();
+        this.classList.add('disappearing');
+        // 在动画结束后移除按钮
+        document.body.removeChild(this);
+    });
+
+    // 将按钮添加到页面中
+    document.body.appendChild(button);
+}

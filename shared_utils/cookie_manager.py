@@ -59,3 +59,32 @@ def assign_btn__fn_builder(customize_btns, predefined_btns, cookies, web_cookie_
         return ret
     return assign_btn
 
+# cookies, web_cookie_cache = make_cookie_cache()
+def make_cookie_cache():
+    # 定义 后端state（cookies）、前端（web_cookie_cache）两兄弟
+    import gradio as gr
+    from toolbox import load_chat_cookies
+    # 定义cookies的后端state
+    cookies = gr.State(load_chat_cookies())
+    # 定义cookies的一个孪生的前端存储区（隐藏）
+    web_cookie_cache = gr.Textbox(visible=False, elem_id="web_cookie_cache")
+    return cookies, web_cookie_cache
+
+# history, history_cache, history_cache_update = make_history_cache()
+def make_history_cache():
+    # 定义 后端state（history）、前端（history_cache）、后端setter（history_cache_update）三兄弟
+    import gradio as gr
+    # 定义history的后端state
+    history = gr.State([])
+    # 定义history的一个孪生的前端存储区（隐藏）
+    history_cache = gr.Textbox(visible=False, elem_id="history_cache")
+    # 定义history_cache->history的更新方法（隐藏）。在触发这个按钮时，会先执行js代码更新history_cache，然后再执行python代码更新history
+    def process_history_cache(history_cache):
+        import json
+        return json.loads(history_cache)
+    # history_cache_update = gr.Button("", elem_id="elem_update_history", visible=False).click(
+    #     lambda x:x, inputs=[history_cache], outputs=[history], _js="""(h) => set_history_gr_state(h)""")
+    # 另一种更简单的setter方法
+    history_cache_update = gr.Button("", elem_id="elem_update_history", visible=False).click(
+        process_history_cache, inputs=[history_cache], outputs=[history])
+    return history, history_cache, history_cache_update
