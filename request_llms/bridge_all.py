@@ -247,6 +247,14 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
+    "glm-4v": {
+        "fn_with_ui": zhipu_ui,
+        "fn_without_ui": zhipu_noui,
+        "endpoint": None,
+        "max_token": 1000,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
     "glm-3-turbo": {
         "fn_with_ui": zhipu_ui,
         "fn_without_ui": zhipu_noui,
