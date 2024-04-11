@@ -201,8 +201,8 @@ model_info = {
     },
 
     "gpt-4-turbo": {
-        "fn_with_ui": chatgpt_vision_ui,
-        "fn_without_ui": chatgpt_vision_noui,
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
         "endpoint": openai_endpoint,
         "max_token": 128000,
         "tokenizer": tokenizer_gpt4,
@@ -210,8 +210,8 @@ model_info = {
     },
 
     "gpt-4-turbo-2024-04-09": {
-        "fn_with_ui": chatgpt_vision_ui,
-        "fn_without_ui": chatgpt_vision_noui,
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
         "endpoint": openai_endpoint,
         "max_token": 128000,
         "tokenizer": tokenizer_gpt4,
