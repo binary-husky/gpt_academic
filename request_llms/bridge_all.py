@@ -784,6 +784,29 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
             "token_cnt": get_token_num_gpt35,
         },
     })
+# -=-=-=-=-=-=- vllm 对齐支持 -=-=-=-=-=-=-
+for model in [m for m in AVAIL_LLM_MODELS if m.startswith("vllm-")]:
+    # 为了更灵活地接入vllm多模型管理界面，设计了此接口，例子：AVAIL_LLM_MODELS = ["vllm-/home/hmp/llm/cache/Qwen1___5-32B-Chat(max_token=6666)"]
+    # 其中
+    #   "vllm-"             是前缀（必要）
+    #   "mixtral-8x7b"      是模型名（必要）
+    #   "(max_token=6666)"  是配置（非必要）
+    try:
+        _, max_token_tmp = read_one_api_model_name(model)
+    except:
+        print(f"vllm模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
+        continue
+    model_info.update({
+        model: {
+            "fn_with_ui": chatgpt_ui,
+            "fn_without_ui": chatgpt_noui,
+            "can_multi_thread": True,
+            "endpoint": openai_endpoint,
+            "max_token": max_token_tmp,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
 
 
 # -=-=-=-=-=-=- azure模型对齐支持 -=-=-=-=-=-=-

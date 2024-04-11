@@ -323,7 +323,10 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     if not is_any_api_key(llm_kwargs['api_key']):
         raise AssertionError("你提供了错误的API_KEY。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。")
 
-    api_key = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
+    if llm_kwargs['llm_model'].startswith('vllm-'):
+        api_key = 'no-api-key'
+    else:
+        api_key = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
 
     headers = {
         "Content-Type": "application/json",
@@ -365,7 +368,9 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     if llm_kwargs['llm_model'].startswith('one-api-'):
         model = llm_kwargs['llm_model'][len('one-api-'):]
         model, _ = read_one_api_model_name(model)
-
+    if llm_kwargs['llm_model'].startswith('vllm-'):
+        model = llm_kwargs['llm_model'][len('vllm-'):]
+        model, _ = read_one_api_model_name(model)
     if model == "gpt-3.5-random": # 随机选择, 绕过openai访问频率限制
         model = random.choice([
             "gpt-3.5-turbo",
