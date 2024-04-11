@@ -347,7 +347,6 @@ def main():
         app_block.load(load_web_cookie_cache, inputs = [web_cookie_cache, cookies],
             outputs = [web_cookie_cache, cookies, *customize_btns.values(), *predefined_btns.values()], _js=js_code_for_persistent_cookie_init)
 
-
         app_block.load(None, inputs=[], outputs=None, _js=f"""()=>GptAcademicJavaScriptInit("{DARK_MODE}","{INIT_SYS_PROMPT}","{ADD_WAIFU}","{LAYOUT}")""")    # 配置暗色主题或亮色主题
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数

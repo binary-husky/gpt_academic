@@ -24,7 +24,6 @@ def load_web_cookie_cache__fn_builder(customize_btns, cookies, predefined_btns)-
         return ret
     return load_web_cookie_cache
 
-
 def assign_btn__fn_builder(customize_btns, predefined_btns, cookies, web_cookie_cache)->Callable:
     def assign_btn(persistent_cookie_, cookies_, basic_btn_dropdown_, basic_fn_title, basic_fn_prefix, basic_fn_suffix, clean_up=False):
         import gradio as gr
