@@ -116,10 +116,9 @@ if __name__ == '__main__':
     file_content, page_one = read_and_clean_pdf_text("build/assets/at.pdf")
 
     from request_llms.bridge_all import model_info
-    for i in range(5):
-        file_content += file_content
 
     print(len(file_content))
     TOKEN_LIMIT_PER_FRAGMENT = 2500
     res = breakdown_text_to_satisfy_token_limit(file_content, TOKEN_LIMIT_PER_FRAGMENT)
+    print(len(res))
 

@@ -15,3 +15,4 @@ from .local_xmind import XmindHandle
 from .local_markdown import MdHandler, MdProcessor
 from .local_pdf import PDFHandler
 from .local_image import ImgHandler, submit_threads_img_handle
+from .local_audio import AudioHandler

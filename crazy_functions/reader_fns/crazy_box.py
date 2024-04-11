@@ -7,6 +7,7 @@ import os
 import json
 from common import func_box, toolbox, db_handler
 from crazy_functions import crazy_utils
+from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit_
 from request_llms import bridge_all
 from moviepy.editor import AudioFileClip
 from common.path_handler import init_path
@@ -174,7 +175,7 @@ def file_reader_content(file_path, save_path, plugin_kwargs):
     elif file_path.endswith('xmind'):
         file_content = reader_fns.XmindHandle(file_path, save_path).get_markdown()
     elif file_path.endswith('mp4'):
-        file_content = video_converters(file_path)
+        file_content = reader_fns.AudioHandler(file_path).video_converters()
     elif file_path.endswith('xlsx') or file_path.endswith('xls'):
         sheet, = json_args_return(plugin_kwargs, keys=['读取指定Sheet'], default='测试要点')
         # 创建文件对象
@@ -325,7 +326,7 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
                                            f'token`限制, 将按照模型最大可接收token拆分为多线程运行'
                 yield from toolbox.update_ui_lastest_msg(bro_say, chatbot, history)
                 segments.extend(
-                    crazy_utils.breakdown_txt_to_satisfy_token_limit_for_pdf(input_, get_token_num, max_token))
+                    breakdown_text_to_satisfy_token_limit_(input_, get_token_num, max_token))
             else:
                 segments.append(input_)
     yield from toolbox.update_ui(chatbot, history)
@@ -800,38 +801,6 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
 
     # 提交知识库 ... 未适配
     return embedding_content
-
-
-def audio_extraction_text(file):
-    import speech_recognition as sr
-    # 打开音频文件
-    r = sr.Recognizer()
-    with sr.AudioFile(file) as source:
-        # 读取音频文件的内容
-        audio_content = r.record(source)
-        # 使用Google的文字转话服务将音频转换为文字
-        text = r.recognize_google(audio_content, language='zh-CN')
-    return text
-
-
-def video_converters(file):
-    temp_path = os.path.join(os.path.dirname(file), f"{os.path.basename(file)}.wav")
-    videoclip = AudioFileClip(file)
-    videoclip.write_audiofile(temp_path)
-    return audio_extraction_text(temp_path)
-
-
-def audio_comparison_of_video_converters(files, chatbot, history):
-    temp_chat = ''
-    chatbot.append(['可以开始了么', temp_chat])
-    temp_list = []
-    for file in files:
-        temp_chat += f'正在将{func_box.html_view_blank(file)}文件转换为可提取的音频文件.\n\n'
-        chatbot[-1] = ['可以开始了么', temp_chat]
-        yield from toolbox.update_ui(chatbot=chatbot, history=history)
-        converter_results = video_converters(file)
-        temp_list.extend((file, converter_results))
-    return temp_list
 
 
 # <---------------------------------------一些Tips----------------------------------------->

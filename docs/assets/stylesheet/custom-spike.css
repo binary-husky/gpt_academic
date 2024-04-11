@@ -21,6 +21,12 @@
     align-items: self-start !important;
     display: flex !important;
 }
+.fold-panel pre {
+    -webkit-line-clamp: 30;
+    display: -webkit-box !important;
+    overflow: auto !important;
+    -webkit-box-orient: vertical;
+}
 .normal_mut_select .token[class*="svelte-"] {
     padding: 5px
 }
