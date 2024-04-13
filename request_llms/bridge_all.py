@@ -968,5 +968,17 @@ def predict(inputs:str, llm_kwargs:dict, *args, **kwargs):
 
     inputs = apply_gpt_academic_string_mask(inputs, mode="show_llm")
     method = model_info[llm_kwargs['llm_model']]["fn_with_ui"]  # 如果这里报错，检查config中的AVAIL_LLM_MODELS选项
+    
+    if len(args) > 5 and isinstance(args[5], str):
+        additional_fn = args[5]
+        import core_functional
+        import importlib
+        importlib.reload(core_functional)    # 热更新prompt
+        core_functional = core_functional.get_core_functions()
+        if 'Model' in core_functional[additional_fn]:
+            method = model_info[core_functional[additional_fn]
+                                ['Model']]["fn_with_ui"]
+            llm_kwargs['llm_model'] = core_functional[additional_fn]['Model']
+
     yield from method(inputs, llm_kwargs, *args, **kwargs)
 
