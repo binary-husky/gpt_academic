@@ -170,5 +170,7 @@ def handle_core_functionality(additional_fn, inputs, history, chatbot):
         return inputs, history
 
 if __name__ == "__main__":
-    t = get_core_functions()["总结绘制脑图"]
-    print(t["Prefix"] + t["Suffix"])
+    t_f = get_core_functions()
+    for core in get_core_functions():
+        t = t_f[core]
+        print(core + '\n', t["Prefix"] + "\n" + t["Suffix"])

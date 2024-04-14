@@ -25,7 +25,7 @@ from common.configs import kb_config
 from common.path_handler import init_path
 from crazy_functions.reader_fns.crazy_box import detach_cloud_links
 from common.logger_handler import logger
-from common.db_handler import UserDb, PromptDb
+from common.db.repository import prompt_repository, cache_repository, user_info_repository
 from common.history_handler import HistoryJsonHandle, thread_write_chat_json
 
 

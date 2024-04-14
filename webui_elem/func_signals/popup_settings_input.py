@@ -44,16 +44,6 @@ def spinner_chatbot_loading(chatbot):
     return loading_msg
 
 
-def filter_database_tables():
-    tables = PromptDb(None).get_tables()
-    split_tab = []
-    for t in tables:
-        if str(t).endswith('_sys'):
-            split_tab.append(get_database_cls(t))
-    split_tab_new = split_tab
-    return split_tab_new
-
-
 def on_theme_dropdown_changed(theme, ):
     from webui_elem.theme import load_dynamic_theme
     adjust_theme, adjust_dynamic_theme = load_dynamic_theme(theme)

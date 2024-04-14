@@ -10,7 +10,7 @@ def session_scope() -> Session:
     session = SessionLocal()
     try:
         yield session
-        session.commit()
+        session.commit()  # 退出上下文自动提交事务
     except:
         session.rollback()
         raise
@@ -24,12 +24,11 @@ def with_session(f):
         with session_scope() as session:
             try:
                 result = f(session, *args, **kwargs)
-                session.commit()
+                # session.commit() 没有必要的事务提交
                 return result
             except:
                 session.rollback()
                 raise
-
     return wrapper
 
 

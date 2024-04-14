@@ -37,4 +37,6 @@ class FileDocModel(Base):
     meta_data = Column(JSON, default={})
 
     def __repr__(self):
-        return f"<FileDoc(id='{self.id}', kb_name='{self.kb_name}', file_name='{self.file_name}', doc_id='{self.doc_id}', metadata='{self.meta_data}')>"
+        return (f"<FileDoc(id='{self.id}', kb_name='{self.kb_name}', "
+                f"file_name='{self.file_name}', doc_id='{self.doc_id}', "
+                f"metadata='{self.meta_data}')>")

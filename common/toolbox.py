@@ -92,7 +92,7 @@ def end_predict(chatbot, history, llm_kwargs):
     yield from update_ui(chatbot=chatbot, history=history, msg=status, end_code=1)  # 刷新界面
 
 
-def ArgsGeneralWrapper(f):
+def ArgsGeneralWrapper(func):
     """
     装饰器函数ArgsGeneralWrapper，用于重组输入参数，改变输入参数的顺序与结构。
     该装饰器是大多数功能调用的入口。
@@ -149,13 +149,13 @@ def ArgsGeneralWrapper(f):
         # 引入一个有cookie的chatbot
         chatbot_with_cookie.write_list(chatbot)
         # 根据提交处理器判断需要对提交做什么处理
-        txt_proc = yield from model_selection(txt, models, llm_kwargs, plugin_kwargs, cookies,
-                                              chatbot_with_cookie, history, args)
+        txt_proc, func_redirect = yield from model_selection(txt, models, llm_kwargs, plugin_kwargs, cookies,
+                                                             chatbot_with_cookie, history, args, func)
         # 根据args判断需要对提交和历史对话做什么处理
         txt_proc, history = yield from plugins_selection(txt_proc, history, plugin_kwargs,
                                                          args, cookies, chatbot_with_cookie, llm_kwargs)
         # 根据cookie 或 对话配置决定到底走哪一步
-        yield from func_decision_tree(f, cookies, single_mode, agent_mode,
+        yield from func_decision_tree(func_redirect, cookies, single_mode, agent_mode,
                                       txt_proc, llm_kwargs, plugin_kwargs, chatbot_with_cookie,
                                       history, system_prompt, args)
         # 将对话记录写入文件
@@ -166,7 +166,7 @@ def ArgsGeneralWrapper(f):
     return decorated
 
 
-def model_selection(txt, models, llm_kwargs, plugin_kwargs, cookies, chatbot_with_cookie, history, args):
+def model_selection(txt, models, llm_kwargs, plugin_kwargs, cookies, chatbot_with_cookie, history, args, func):
     txt_proc = txt
     # 开关调整
     if 'OCR缓存' in models: llm_kwargs.update({'ocr_cache': True})
@@ -178,7 +178,8 @@ def model_selection(txt, models, llm_kwargs, plugin_kwargs, cookies, chatbot_wit
     if 'input加密' in models: txt_proc = func_box.encryption_str(txt_proc)
     if len(args) == 0 or 'RetryChat' in args and not cookies.get('is_plugin'):
         if '网络链接RAG' in models and 'moonshot' not in llm_kwargs.get('llm_model', ''):
-            from crazy_functions.reader_fns.crazy_box import user_input_embedding_content, check_url_domain_cloud
+            from crazy_functions.reader_fns.crazy_box import user_input_embedding_content, check_url_domain_cloud, \
+                submit_no_use_ui_task
             valid_types = ['pdf', 'md', 'xlsx', 'docx']
             wps_links, qq_link, feishu_link, project_link = check_url_domain_cloud(txt_proc)
             local_file = func_box.extract_link_pf(txt_proc, valid_types)
@@ -188,6 +189,8 @@ def model_selection(txt, models, llm_kwargs, plugin_kwargs, cookies, chatbot_wit
                                                                                   history, llm_kwargs, plugin_kwargs,
                                                                                   valid_types)
                 txt_proc = "\n\n---\n\n".join([v for i, v in enumerate(input_embedding_content) if i % 2 == 1])
+                if txt_proc:
+                    func = submit_no_use_ui_task
             else:
                 yield from update_ui(chatbot_with_cookie, history, msg='Switching to normal dialog...')
         img_info = func_box.extract_link_pf(txt, func_box.valid_img_extensions)
@@ -197,7 +200,7 @@ def model_selection(txt, models, llm_kwargs, plugin_kwargs, cookies, chatbot_wit
                 llm_kwargs.update(vision_llm)
             yield from update_ui(chatbot_with_cookie, history,
                                  msg=f'Switching to `{llm_kwargs["llm_model"]}` dialog...')
-    return txt_proc
+    return txt_proc, func
 
 
 def _vision_select_model(llm_kwargs, models):
@@ -915,6 +918,7 @@ def clip_history(inputs, history, tokenizer, max_token_limit):
 
     history = everything[1:]
     return history
+
 
 """
 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-

@@ -353,7 +353,8 @@ class ProjectFeishu:
 
     def post_work_items(self, key, item_name, ids: list = None):
         """获取项目下的缺陷详情"""
-        ids = [self.__is_convertible_to_number(i) for i in ids]
+        if ids:
+            ids = [self.__is_convertible_to_number(i) for i in ids]
         url = f'{self.base_url}/goapi/v4/search/work_items_by_id'
         body = {
             "data_source": [
@@ -453,4 +454,4 @@ if __name__ == '__main__':
     # feishu = ProjectFeishu('')
     # # # # print(feishu._get_work_list(feishu.items_mapping[work_items.case_name]['type_key']))
     # print(feishu.get_issue_items_list())
-    print(converter_project_md('','./', {}))
+    pass

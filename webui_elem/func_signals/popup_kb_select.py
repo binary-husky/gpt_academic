@@ -250,7 +250,7 @@ def kb_file_update_confirm(upload_files: gr.Files, kb_name: gr.Textbox, kb_info:
     kb_name = list(base.kb_list_to_dict([kb_name]).keys())[0]
     user = user_client_mark(ipaddr)
     cloud_map, status = detach_cloud_links(cloud_link, {'ipaddr': user}, ['*'])
-    if status:
+    if status.get('status'):
         raise gr.Error(f'文件下载失败，{cloud_map}')
     files = []
     if upload_files:

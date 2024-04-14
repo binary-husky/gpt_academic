@@ -298,5 +298,5 @@ def main_argument():
 
 if __name__ == '__main__':
     # main_argument()
-    __batch_inset_prompt()
+    __batch_export_prompt()
 

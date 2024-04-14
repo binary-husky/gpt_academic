@@ -11,7 +11,7 @@ from common import func_box
 from common.toolbox import update_ui, get_conf
 from common.knowledge_base import kb_doc_api
 from common.knowledge_base.kb_service import base
-from common import db_handler
+from common.db.repository import prompt_repository
 from request_llms.bridge_all import model_info
 
 
@@ -39,7 +39,12 @@ def get_kb_key_value(kb_names: list):
 def user_intent_recognition(user_input, history, llm_kwargs) -> tuple[bool, Any] | bool | Any:
     kb_names = llm_kwargs['kb_config']['names']
     llm, response_format = llm_accelerate_init(llm_kwargs)
-    prompt = db_handler.PromptDb(table='知识库提示词_sys').find_prompt_result('意图识别')
+    ipaddr = func_box.user_client_mark(llm_kwargs['ipaddr'])
+    prompt = prompt_repository.query_prompt('意图识别', '知识库提示词', ipaddr, quote_num=True)
+    if prompt:
+        prompt = prompt.value
+    else:
+        raise ValueError('没有找到提示词')
     spilt_text = user_input
     if len(user_input) > 200:
         spilt_text = user_input[:100] + user_input[-100:]
@@ -97,7 +102,10 @@ def vector_recall_by_input(user_input, chatbot, history, llm_kwargs, kb_prompt_c
             return user_input
         chatbot[-1][1] = vector_fold_format(title='向量召回完成', content=vector_content, status='Done')
         yield from update_ui(chatbot, history)
-        prompt = db_handler.PromptDb(table=kb_prompt_cls).find_prompt_result(kb_prompt_name)
+        ipaddr = func_box.user_client_mark(llm_kwargs['ipaddr'])
+        prompt = prompt_repository.query_prompt(kb_prompt_name, kb_prompt_cls, ipaddr, quote_num=True)
+        if prompt:
+            prompt = prompt.value
         source_text = "\n".join([f"## {i}\n{source_data[i]}" for i in source_data])
         kb_prompt = func_box.replace_expected_text(prompt, source_text, '{{{v}}}')
         user_input = func_box.replace_expected_text(kb_prompt, user_input, '{{{q}}}')

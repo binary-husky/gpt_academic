@@ -5,7 +5,8 @@
 import copy
 import os
 import json
-from common import func_box, toolbox, db_handler
+from common import func_box, toolbox
+from common.db.repository import prompt_repository
 from crazy_functions import crazy_utils
 from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit_
 from request_llms import bridge_all
@@ -350,11 +351,15 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     inputs_array = []
     inputs_show_user_array = []
     prompt_cls, = json_args_return(plugin_kwargs, ['提示词分类'])
-    prompt_cls_tab = func_box.prompt_personal_tag(prompt_cls, ipaddr=llm_kwargs["ipaddr"])
+    ipaddr = func_box.user_client_mark(llm_kwargs['ipaddr'])
     if kwargs_prompt:
-        prompt = db_handler.PromptDb(table=prompt_cls_tab).find_prompt_result(kwargs_prompt)
+        prompt = prompt_repository.query_prompt(kwargs_prompt, prompt_cls, ipaddr, quote_num=True)
+        if prompt:
+            prompt = prompt.value
+        else:
+            raise ValueError('指定的提示词不存在')
     else:
-        prompt = ''
+        prompt = '{{{v}}}'
     for inputs, you_say in zip(gpt_response_collection[1::2], gpt_response_collection[0::2]):
         content_limit = yield from split_content_limit(inputs, llm_kwargs, chatbot, history)
         try:
@@ -371,6 +376,17 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
             inputs_show_user_array.append(you_say)
     yield from toolbox.update_ui(chatbot, history)
     return inputs_array, inputs_show_user_array
+
+
+def submit_no_use_ui_task(txt_proc, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, *args):
+    inputs_show_user = None  # 不重复展示
+    gpt_say = yield from crazy_utils.request_gpt_model_in_new_thread_with_ui_alive(
+        inputs=txt_proc, inputs_show_user=inputs_show_user,
+        llm_kwargs=llm_kwargs, chatbot=chatbot, history=history,
+        sys_prompt="", refresh_interval=0.1
+    )
+    gpt_response_collection = [txt_proc, gpt_say]
+    history.extend(gpt_response_collection)
 
 
 def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs, chatbot, history, plugin_kwargs):
@@ -760,7 +776,7 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
     yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='🕵🏻‍超级侦探，正在办案～')
     if plugin_kwargs.get('embedding_content'):
         embedding_content = plugin_kwargs['embedding_content']
-        plugin_kwargs['embedding_content'] = ''   # 用了即刻丢弃
+        plugin_kwargs['embedding_content'] = ''  # 用了即刻丢弃
     else:
         chatbot.append([user_input, ''])
         download_format = func_box.get_fold_panel()

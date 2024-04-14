@@ -22,13 +22,13 @@ def refresh_load_data(prompt, request: gr.Request):
         预期是每次刷新页面，加载最新数据
     """
     from webui_elem.func_signals.popup_prompt_select import prompt_retrieval
-    from webui_elem.func_signals.popup_settings_input import filter_database_tables
+    from common.db.repository.prompt_repository import get_all_class
 
     user_addr = user_client_mark(request)
     preset_prompt = get_conf('preset_prompt')
     all = preset_prompt['key']
     is_all = preset_prompt['value']
-    data = prompt_retrieval(prompt_cls=is_all, hosts=user_addr)
+    data = prompt_retrieval(prompt_cls=is_all, ipaddr=user_addr)
     prompt['samples'] = data
 
     kb_details_tm = base.kb_details_to_dict()
@@ -36,7 +36,7 @@ def refresh_load_data(prompt, request: gr.Request):
     know_list = gr.update(choices=kb_list + ['新建知识库'], show_label=True)
     know_load = gr.update(choices=list(kb_details_tm.keys()), label='知识库', show_label=True)
 
-    select_list = filter_database_tables()
+    select_list = get_all_class()
     favicon_appname = favicon_ascii()
     outputs = [gr.update(samples=data, visible=True), prompt, favicon_appname,
                gr.update(choices=all + select_list), gr.update(choices=[all[1]] + select_list),
@@ -57,13 +57,13 @@ def refresh_user_data(cookies, proxy_info, ipaddr: gr.Request):
 
 # TODO < -------------------------------- 页面登陆函数注册区 -------------------------------->
 def user_login(user, password):
-    sql_handle = UserDb()
-    user_account = sql_handle.get_user_account(user)
-    if user_account.get('user'):
-        if user == user_account['user'] and password == user_account['password']:
+    from common.db.repository import user_info_repository
+    user_account = user_info_repository.get_user_info(user)
+    if user_account:
+        if user == user_account.user_name and password == user_account.pass_word:
             return True
         else:
             return False
     else:
-        sql_handle.update_user(user, password)
+        user_info_repository.add_user_info(user, password)
         return True

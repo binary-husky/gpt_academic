@@ -6,7 +6,7 @@ import time
 import os.path
 import requests
 import concurrent.futures
-from common import db_handler
+from common.db.repository import cache_repository, prompt_repository
 from common.path_handler import init_path
 
 
@@ -69,8 +69,10 @@ class ImgHandler:
     def get_llm_vision(self, llm_kwargs):
         from request_llms.bridge_all import predict_no_ui_long_connection
         from common import func_box
-        sql_handler = db_handler.PromptDb('图片理解_sys')
-        prompt = sql_handler.find_prompt_result('llm-vision')
+        ipaddr = func_box.user_client_mark(llm_kwargs.get('ipaddr', 'spike'))
+        prompt = prompt_repository.query_prompt('llm-vision', '图片理解', source=ipaddr, quote_num=True)
+        if prompt:
+            prompt = prompt.value
         input_ = func_box.replace_expected_text(prompt, content=func_box.html_local_img(self.img_path),
                                                 expect='{{{v}}}')
         watchdog = ["", time.time(), ""]
@@ -79,13 +81,12 @@ class ImgHandler:
         return vision_result, self.img_path, watchdog[2]
 
     def identify_cache(self, cache_tag, cor_switch, kwargs):
-        cache_sql = db_handler.OcrCacheDb()
         if isinstance(kwargs, bool):
             ocr_func = self.get_paddle_ocr
         else:
             ocr_func = self.get_llm_vision
         if cor_switch:
-            cache_cont = cache_sql.get_cashed(tag=cache_tag)
+            cache_cont = cache_repository.get_cache(key=cache_tag)
             if cache_cont:
                 content = cache_cont
                 file_path = cache_tag
@@ -95,7 +96,7 @@ class ImgHandler:
         else:
             content, file_path, status = ocr_func(kwargs)
             if not status and content:  # 没有错误才落库
-                cache_sql.update_cashed(cache_tag, content)
+                cache_repository.add_cache(cache_tag, content, 'img-cache')
         return content, file_path, status
 
 
@@ -111,6 +112,5 @@ def submit_threads_img_handle(ocr_mapping, output_dir, cor_cache: bool | dict = 
 
 
 if __name__ == '__main__':
-    sql_handler = db_handler.PromptDb('图片理解_sys')
-    prompt = sql_handler.find_prompt_result('llm-vision')
+
     print(prompt)

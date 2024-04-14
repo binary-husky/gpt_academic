@@ -2,37 +2,32 @@
 # @Time   : 2024/3/24
 # @Author : Spike
 # @Descr   :
+import json
+
 from webui_elem.func_signals.__import__ import *
 
 # TODO < -------------------------------- 基础功能函数注册区 -------------------------------->
-def prompt_retrieval(prompt_cls, hosts, search=False):
+def prompt_retrieval(prompt_cls, ipaddr, search=False):
     """
     上传文件，将文件转换为字典，然后存储到数据库，并刷新Prompt区域
     Args:
         is_all： prompt类型
-        hosts： 查询的用户ip
+        ipaddr： 查询的用户ip
     Returns:
         返回一个列表
     """
     all_, personal = get_conf('preset_prompt')['key']
-    if not prompt_cls: prompt_cls = all_  # 保底
+    if not prompt_cls:
+        prompt_cls = all_  # 保底
     count_dict = {}
-    hosts_tabs = prompt_personal_tag(prompt_cls, hosts)
     if all_ == prompt_cls:
-        for tab in PromptDb(None).get_tables():
-            if str(tab).endswith('sys'):
-                data, source = PromptDb(tab).get_prompt_value(None)
-                if data: count_dict.update({get_database_cls(tab): data})
-        data, source = PromptDb(f'{hosts_tabs}').get_prompt_value(None)
-        if data: count_dict.update({personal: data})
+        count_dict.update(prompt_repository.get_all_prompt_dict())
     elif personal == prompt_cls:
-        data, source = PromptDb(f'{hosts_tabs}').get_prompt_value(None)
-        if data: count_dict.update({personal: data})
-    elif hosts_tabs and prompt_cls:
-        data, source = PromptDb(f'{hosts_tabs}').get_prompt_value(None)
-        if data: count_dict.update({prompt_cls: data})
+        count_dict.update(prompt_repository.get_user_prompt_dict(ipaddr))
+    else:
+        count_dict.update(prompt_repository.get_class_prompt_dict(prompt_cls))
     retrieval = []
-    if count_dict != {}:  # 上面是一段屎山， 不知道自己为什么要这样写，反正能用
+    if count_dict != {}:  # 判断是Prompt还是
         for cls in count_dict:
             for key in count_dict[cls]:
                 content = count_dict[cls][key]
@@ -64,7 +59,7 @@ def prompt_reduce(is_all, prompt: gr.Dataset, ipaddr: gr.Request):  # is_all, ip
     Returns:
         返回注册函数所需的对象
     """
-    data = prompt_retrieval(prompt_cls=is_all, hosts=user_client_mark(ipaddr))
+    data = prompt_retrieval(prompt_cls=is_all, ipaddr=user_client_mark(ipaddr))
     prompt['samples'] = data
     return gr.update(samples=data, visible=True), prompt, is_all
 
@@ -80,40 +75,38 @@ def prompt_upload_refresh(file, prompt, pro_select, ipaddr: gr.Request):
         注册函数所需的元祖对象
     """
     user_info = user_client_mark(ipaddr)
-    tab_cls = prompt_personal_tag(pro_select, user_client_mark(ipaddr))
     if file.name.endswith('json'):
-        upload_data = check_json_format(file.name)
+        with open(file.name) as f:
+            upload_data = json.loads(f.read())
     elif file.name.endswith('yaml'):
         upload_data = yaml.safe_load(file.file)
     else:
-        upload_data = {}
-    if upload_data != {}:
-        status = PromptDb(f'{tab_cls}').inset_prompt(upload_data, user_info)
-        ret_data = prompt_retrieval(prompt_cls=tab_cls, hosts=user_client_mark(ipaddr))
-        return gr.update(samples=ret_data, visible=True), prompt, tab_cls
+        upload_data = []
+    if upload_data:
+        prompt_repository.batch_import_prompt_list(pro_select, pro_select, user_info)
+        ret_data = prompt_retrieval(prompt_cls=pro_select, ipaddr=user_info)
+        return gr.update(samples=ret_data, visible=True), prompt, pro_select
     else:
         prompt['samples'] = [
-            [f'{html_tag_color("数据解析失败，请检查文件是否符合规范", color="red")}', tab_cls]]
+            [f'{html_tag_color("数据解析失败，请检查文件是否符合规范", color="red")}', pro_select]]
         return prompt['samples'], prompt, []
 
 
-def prompt_delete(pro_name, prompt_dict, select_check, ipaddr: gr.Request):
+def prompt_delete(pro_name, prompt_dict, pro_class, ipaddr: gr.Request):
     user_addr = user_client_mark(ipaddr)
     if not pro_name:
         raise gr.Error('删除名称不能为空')
     find_prompt = [i for i in prompt_dict['samples'] if i[1] == pro_name]
     if not any(find_prompt):
         raise gr.Error(f'无法找到 {pro_name}')
-    tab_cls = prompt_personal_tag(select_check, user_addr)
-    sqlite_handle = PromptDb(table=f'{tab_cls}')
-    _, source = sqlite_handle.get_prompt_value(find=pro_name)
-    if not _:
+    prompt = prompt_repository.query_prompt(pro_name, pro_class, user_addr)
+    if not prompt:
         raise gr.Error(f'无法找到 {pro_name}，或请不要在所有人分类下删除')
-    if str(source) in user_addr or '127.0.0.1' == user_addr or 'spike' == user_addr:
-        sqlite_handle.delete_prompt(pro_name)
     else:
-        raise gr.Error(f'无法删除不属于你创建的 {pro_name}，如有紧急需求，请联系管理员')
-    data = prompt_retrieval(prompt_cls=None, hosts=user_addr)
+        status, msg = prompt_repository.deleted_prompt(pro_name, pro_class, user_addr)
+        if not status:
+            raise gr.Error(msg)
+    data = prompt_retrieval(prompt_cls=None, ipaddr=user_addr)
     prompt_dict['samples'] = data
     toast = gr.update(value=spike_toast(f'`{pro_name}` 删除成功'), visible=True)
     yield gr.update(samples=data, visible=True), prompt_dict, toast
@@ -121,31 +114,29 @@ def prompt_delete(pro_name, prompt_dict, select_check, ipaddr: gr.Request):
     yield gr.update(samples=data, visible=True), prompt_dict, gr.update(visible=False)
 
 
-def prompt_save(txt, name, prompt: gr.Dataset, pro_select, ipaddr: gr.Request):
+def prompt_save(txt, name, prompt: gr.Dataset, prompt_class, ipaddr: gr.Request):
     """
     编辑和保存Prompt
     Args:
         txt： Prompt正文
         name： Prompt的名字
         prompt： dataset原始对象
+        prompt_class: 提示词分类
         ipaddr：请求用户信息
     Returns:
         返回注册函数所需的对象
     """
-    if not pro_select:
+    if not prompt_class:
         raise gr.Error('保存分类不能为空 ！')
     user_info = user_client_mark(ipaddr)
-    tab_cls = prompt_personal_tag(pro_select, user_client_mark(ipaddr))
     if txt and name:
-        sql_obj = PromptDb(f'{tab_cls}')
-        _, source = sql_obj.get_prompt_value(name)
-        status = sql_obj.inset_prompt({name: str(txt)}, user_info)
-        if status:
-            raise gr.Error('!!!!已有其他人保存同名的配置，请修改名   称后再保存')
+        status, msg = prompt_repository.add_prompt(prompt_class, name, txt, user_info)
+        if not status:
+            raise gr.Error(msg)
         else:
-            result = prompt_retrieval(prompt_cls=pro_select, hosts=user_client_mark(ipaddr))
+            result = prompt_retrieval(prompt_cls=prompt_class, ipaddr=user_info)
             prompt['samples'] = result
-            toast = gr.update(value=spike_toast(f'`{name}` 保存成功'), visible=True)
+            toast = gr.update(value=spike_toast(msg), visible=True)
             yield gr.update(samples=result, visible=True), prompt, toast
             time.sleep(1)
             yield gr.update(samples=result, visible=True), prompt, gr.update(visible=False)
@@ -199,7 +190,7 @@ def prompt_input(edit_check, input_txt: str, cookies, llm_select, index, data, i
 
 def prompt_search(tab_cls, sear_txt, sp, data_base, ipaddr: gr.Request):
     from webui_elem.func_signals.popup_history_seach import search_highlight
-    sorted_dict = prompt_retrieval(prompt_cls=tab_cls, hosts=user_client_mark(ipaddr))
+    sorted_dict = prompt_retrieval(prompt_cls=tab_cls, ipaddr=user_client_mark(ipaddr))
     search_result = search_highlight(sorted_dict, sear_txt, False, [0, 2, 3], sp)
     data_base['samples'] = search_result
     return gr.update(samples=search_result, visible=True), data_base
