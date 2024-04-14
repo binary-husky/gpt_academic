@@ -104,15 +104,15 @@ def extract_archive(file_path, dest_dir):
 
     elif file_extension in [".tar", ".gz", ".bz2"]:
         with tarfile.open(file_path, "r:*") as tarobj:
-            for member in tarobj.getmembers():
             # 清理提取路径，移除任何不安全的元素
+            for member in tarobj.getmembers():
                 member_path = os.path.normpath(member.name)
                 full_path = os.path.join(dest_dir, member_path)
                 full_path = os.path.abspath(full_path)
                 if not full_path.startswith(os.path.abspath(dest_dir) + os.sep):
                     raise Exception(f"Attempted Path Traversal in {member.name}")
 
-                tarobj.extract(member, path=dest_dir)
+            tarobj.extractall(path=dest_dir)
             print("Successfully extracted tar archive to {}".format(dest_dir))
 
     # 第三方库，需要预先pip install rarfile
