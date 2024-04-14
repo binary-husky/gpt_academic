@@ -8,7 +8,7 @@ import json
 from common import func_box, toolbox
 from common.db.repository import prompt_repository
 from crazy_functions import crazy_utils
-from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit_
+from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit
 from request_llms import bridge_all
 from moviepy.editor import AudioFileClip
 from common.path_handler import init_path
@@ -327,7 +327,7 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
                                            f'token`限制, 将按照模型最大可接收token拆分为多线程运行'
                 yield from toolbox.update_ui_lastest_msg(bro_say, chatbot, history)
                 segments.extend(
-                    breakdown_text_to_satisfy_token_limit_(input_, get_token_num, max_token))
+                    breakdown_text_to_satisfy_token_limit(input_, max_token, llm_kwargs['llm_model']))
             else:
                 segments.append(input_)
     yield from toolbox.update_ui(chatbot, history)

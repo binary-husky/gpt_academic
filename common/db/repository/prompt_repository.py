@@ -9,7 +9,7 @@ from sqlalchemy import desc, and_, or_
 from common.db.models.prompt_model import PromptModel, func
 
 # 管理员账户，无条件的开放和访问PromptModel
-_sys = ['spike', '127.0.0.1']
+_sys = ['spike', '127.0.0.1', None]
 
 
 def _read_user_auth(source):
@@ -76,7 +76,7 @@ def batch_export_path():
             print(f'{source}已导出', os.path.join(init_path.prompt_export_path, f"{source}.json"))
 
 
-def query_prompt(name, in_class, source, quote_num: bool = None) -> PromptModel | None:
+def query_prompt(name, in_class, source=None, quote_num: bool = None) -> PromptModel | None:
     with session_scope() as session:
         prompt_query: Query = session.query(PromptModel).filter(
             and_(

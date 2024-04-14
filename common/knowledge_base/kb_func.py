@@ -89,14 +89,14 @@ def vector_recall_by_input(user_input, chatbot, history, llm_kwargs, kb_prompt_c
         yield from update_ui(chatbot, history)
         source_data = {}
         for intent_kb in user_intent.get('kb', {}):
+            chatbot[-1][1] = vector_fold_format(title='向量召回中', content=vector_content, status='')
+            yield from update_ui(chatbot, history)
             vector_list = kb_doc_api.search_docs(user_input, knowledge_base_name=intent_kb,
                                                  top_k=llm_kwargs['kb_config']['top-k'],
                                                  score_threshold=llm_kwargs['kb_config']['score'])
             data = get_vector_to_dict(vector_list)
             source_data.update(data)
             vector_content += f"\n向量召回：{json.dumps(data, indent=4, ensure_ascii=False)}"
-            chatbot[-1][1] = vector_fold_format(title='向量召回中', content=vector_content, status='')
-            yield from update_ui(chatbot, history)
         if not source_data:
             vector_content += '无数据，转发到普通对话'
             return user_input

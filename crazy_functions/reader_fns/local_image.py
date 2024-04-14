@@ -113,4 +113,4 @@ def submit_threads_img_handle(ocr_mapping, output_dir, cor_cache: bool | dict = 
 
 if __name__ == '__main__':
 
-    print(prompt)
+    print('')

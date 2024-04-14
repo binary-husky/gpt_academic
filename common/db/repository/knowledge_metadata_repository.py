@@ -42,16 +42,16 @@ def delete_summary_from_db(session,
 @with_session
 def add_summary_to_db(session,
                       kb_name: str,
-                      summary_infos: List[Dict]):
+                      summary_infos: Dict):
     '''
     将总结信息添加到数据库。
     summary_infos形式：[{"summary_context": str, "doc_ids": str}, ...]
     '''
-    for summary in summary_infos:
+    for summary in summary_infos.get('data'):
         obj = SummaryChunkModel(
             kb_name=kb_name,
-            summary_context=summary["summary_context"],
-            summary_id=summary["summary_id"],
+            summary_context=summary_infos['data'][summary],
+            fragment_name=summary,
             doc_ids=summary["doc_ids"],
             meta_data=summary["metadata"],
         )
