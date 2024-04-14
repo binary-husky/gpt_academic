@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     # plugin_test(plugin='crazy_functions.批量Markdown翻译->Markdown中译英', main_input="README.md")
 
-    # plugin_test(plugin='crazy_functions.批量翻译PDF文档_多线程->批量翻译PDF文档', main_input='crazy_functions/test_project/pdf_and_word/aaai.pdf')
+    # plugin_test(plugin='crazy_functions.PDF批量翻译->批量翻译PDF文档', main_input='crazy_functions/test_project/pdf_and_word/aaai.pdf')
 
     # plugin_test(plugin='crazy_functions.谷歌检索小助手->谷歌检索小助手', main_input="https://scholar.google.com/scholar?hl=en&as_sdt=0%2C5&q=auto+reinforcement+learning&btnG=")
 
