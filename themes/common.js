@@ -1056,3 +1056,32 @@ function gen_restore_btn(){
     // 将按钮添加到页面中
     document.body.appendChild(button);
 }
+
+async function on_plugin_exe_complete(fn_name)
+{
+    console.log(fn_name);
+    if (fn_name === "保存当前的对话")
+    {
+        // get chat profile path
+        let chatbot = await get_data_from_gradio_component('gpt-chatbot');
+        let may_have_chat_profile_info = chatbot[chatbot.length-1][1];
+
+        function get_href(htmlString){
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlString, 'text/html');
+            const anchor = doc.querySelector('a');
+
+            if (anchor) {
+                return anchor.getAttribute('href');
+            } else {
+                return null;
+            }
+        }
+        let href = get_href(may_have_chat_profile_info);
+        if (href){
+            const cleanedHref = href.replace('file=', ''); // /home/fuqingxu/chatgpt_academic/gpt_log/default_user/chat_history/GPT-Academic对话存档2024-04-12-00-35-06.html
+            console.log(cleanedHref);
+        }
+
+    }
+}
