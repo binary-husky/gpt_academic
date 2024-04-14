@@ -1,6 +1,7 @@
 from toolbox import CatchException, report_exception, get_log_folder, gen_time_str, check_packages
 from toolbox import update_ui, promote_file_to_downloadzone, update_ui_lastest_msg, disable_auto_promotion
-from toolbox import write_history_to_file, promote_file_to_downloadzone
+from toolbox import write_history_to_file, promote_file_to_downloadzone, get_conf, extract_archive
+from toolbox import get_upload_folder, zip_folder
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 from .crazy_utils import read_and_clean_pdf_text
@@ -46,13 +47,122 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
         return
 
     # 开始正式执行任务
+    DOC2X_API_KEY = get_conf("DOC2X_API_KEY")
+    if len(DOC2X_API_KEY) != 0:
+        yield from 解析PDF_DOC2X(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, DOC2X_API_KEY, user_request)
+        return
     grobid_url = get_avail_grobid_url()
     if grobid_url is not None:
         yield from 解析PDF_基于GROBID(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, grobid_url)
+        return
     else:
         yield from update_ui_lastest_msg("GROBID服务不可用，请检查config中的GROBID_URL。作为替代，现在将执行效果稍差的旧版代码。", chatbot, history, delay=3)
         yield from 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt)
+        return
 
+
+
+def 解析PDF_DOC2X_单文件(fp, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, DOC2X_API_KEY, user_request):
+
+    def pdf2markdown(filepath):
+        import requests, json, os
+        markdown_dir = get_log_folder(plugin_name="pdf_ocr")
+        doc2x_api_key = DOC2X_API_KEY
+        url = "https://api.doc2x.noedgeai.com/api/v1/pdf"
+
+        chatbot.append((None, "加载PDF文件，发送至DOC2X解析..."))
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+
+        res = requests.post(
+            url,
+            files={"file": open(filepath, "rb")},
+            data={"ocr": "1"},
+            headers={"Authorization": "Bearer " + doc2x_api_key}
+        )
+        res_json = []
+        if res.status_code == 200:
+            decoded = res.content.decode("utf-8")
+            for z_decoded in decoded.split('\n'):
+                if len(z_decoded) == 0: continue
+                assert z_decoded.startswith("data: ")
+                z_decoded = z_decoded[len("data: "):]
+                decoded_json = json.loads(z_decoded)
+                res_json.append(decoded_json)
+        else:
+            raise RuntimeError(format("[ERROR] status code: %d, body: %s" % (res.status_code, res.text)))
+        uuid = res_json[0]['uuid']
+        to = "md" # latex, md, docx
+        url = "https://api.doc2x.noedgeai.com/api/export"+"?request_id="+uuid+"&to="+to
+
+        chatbot.append((None, f"读取解析: {url} ..."))
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+
+        res = requests.get(url, headers={"Authorization": "Bearer " + doc2x_api_key})
+        md_zip_path = os.path.join(markdown_dir, gen_time_str() + '.zip')
+        if res.status_code == 200:
+            with open(md_zip_path, "wb") as f: f.write(res.content)
+        else:
+            raise RuntimeError(format("[ERROR] status code: %d, body: %s" % (res.status_code, res.text)))
+        promote_file_to_downloadzone(md_zip_path, chatbot=chatbot)
+        chatbot.append((None, f"完成解析 {md_zip_path} ..."))
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+        return md_zip_path
+
+    def deliver_to_markdown_plugin(md_zip_path, user_request):
+        from crazy_functions.批量Markdown翻译 import Markdown英译中
+        import shutil
+
+        time_tag = gen_time_str()
+        target_path_base = get_log_folder(chatbot.get_user())
+        file_origin_name = os.path.basename(md_zip_path)
+        this_file_path = os.path.join(target_path_base, file_origin_name)
+        os.makedirs(target_path_base, exist_ok=True)
+        shutil.copyfile(md_zip_path, this_file_path)
+        ex_folder = this_file_path + ".extract"
+        extract_archive(
+            file_path=this_file_path, dest_dir=ex_folder
+        )
+        chatbot.append((None, f"调用Markdown插件 {ex_folder} ..."))
+        plugin_kwargs['markdown_expected_output_dir'] = ex_folder
+
+        translated_f_name = 'translated_markdown.md'
+        generated_fp = plugin_kwargs['markdown_expected_output_path'] = os.path.join(ex_folder, translated_f_name)
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+        yield from Markdown英译中(ex_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request)
+        if os.path.exists(generated_fp):
+            # 修正一些公式问题
+            with open(generated_fp, 'r', encoding='utf8') as f:
+                content = f.read()
+            # 将公式中的\[ \]替换成$$
+            content = content.replace(r'\[', r'$$').replace(r'\]', r'$$')
+            # 将公式中的\( \)替换成$
+            content = content.replace(r'\(', r'$').replace(r'\)', r'$')
+            content = content.replace('```', '\n').replace('```markdown', '\n')
+            with open(generated_fp, 'w', encoding='utf8') as f:
+                f.write(content)
+            # 生成包含图片的压缩包
+            dest_folder = get_log_folder(chatbot.get_user())
+            zip_name = '翻译后的带图文档.zip'
+            zip_folder(source_folder=ex_folder, dest_folder=dest_folder, zip_name=zip_name)
+            zip_fp = os.path.join(dest_folder, zip_name)
+            # 生成在线预览html
+            file_name = '在线预览翻译' + gen_time_str() + '.html'
+            with open('crazy_functions/pdf_fns/report_template_v2.html', 'r', encoding='utf8') as f:
+                html_template = f.read()
+            html_template = html_template.replace("{MARKDOWN_FILE_PATH}", translated_f_name)
+            preview_fp = os.path.join(ex_folder, file_name)
+            with open(preview_fp, 'w', encoding='utf8') as f:
+                f.write(html_template)
+            promote_file_to_downloadzone(preview_fp, chatbot=chatbot)
+            promote_file_to_downloadzone(zip_fp, chatbot=chatbot)
+            yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+    md_zip_path = yield from pdf2markdown(fp)
+    yield from deliver_to_markdown_plugin(md_zip_path, user_request)
+
+def 解析PDF_DOC2X(file_manifest, *args):
+    for index, fp in enumerate(file_manifest):
+        yield from 解析PDF_DOC2X_单文件(fp, *args)
+    return
 
 def 解析PDF_基于GROBID(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, grobid_url):
     import copy, json
