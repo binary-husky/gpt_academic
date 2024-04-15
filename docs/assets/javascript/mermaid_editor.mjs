@@ -1,5 +1,6 @@
-import { deflate, inflate } from '/spike/file=docs/assets/library/pako.esm.mjs';
-import { toUint8Array, fromUint8Array, toBase64, fromBase64 } from '/spike/file=docs/assets/library/base64.mjs';
+// redirect_index 重定向，具体要看 config_private.py 是否配置二级路由
+import { deflate, inflate } from '/redirect_index/file=docs/assets/library/pako.esm.mjs';
+import { toUint8Array, fromUint8Array, toBase64, fromBase64 } from '/redirect_index/file=docs/assets/library/base64.mjs';
 
 const base64Serde = {
     serialize: (state) => {

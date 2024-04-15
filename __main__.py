@@ -29,9 +29,9 @@ os.makedirs("gpt_log", exist_ok=True)
 print("所有问询记录将自动保存在本地目录./gpt_log/chat_secrets.log, 请注意自我隐私保护哦！")
 
 # 建议您复制一个config_private.py放自己的秘密, 如API和代理网址, 避免不小心传github被别人看到
-proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, LAYOUT, API_KEY, AVAIL_LLM_MODELS = \
+proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION, LAYOUT, API_KEY, AVAIL_LLM_MODELS, CUSTOM_PATH = \
     get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION', 'LAYOUT',
-             'API_KEY', 'AVAIL_LLM_MODELS')
+             'API_KEY', 'AVAIL_LLM_MODELS', 'CUSTOM_PATH')
 
 proxy_info = check_proxy(proxies)
 # 如果WEB_PORT是-1, 则随机选取WEB端口
@@ -158,7 +158,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
             self.gpts_tags_mapping[tag]['data_set'].click(None, None, None, _js='()=>{closeBtnClick();}')
             self.gpts_tags_mapping[tag]['data_set'].click(
                 fn=func_signals.gpts_select_model,
-                inputs=[self.gpts_tags_mapping[tag]['data_set'], self.gpts_samples_mapping[tag]],
+                inputs=[self.gpts_tags_mapping[tag]['data_set'], self.gpts_samples_mapping[tag], self.cookies],
                 outputs=[self.historySelectList, self.model_select_dropdown, *self.llms_cookies_combo])
         key_search = '🔍 关键词搜索'
         self.gpts_tags_mapping[key_search]['search'].submit(
@@ -440,12 +440,12 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
     def auto_opentab_delay(self, is_open=False):
         import threading, webbrowser, time
         print(f"如果浏览器没有自动打开，请复制并转到以下URL：")
-        print(f"\t 本地访问: http://localhost:{PORT}/spike/")
-        print(f"\t 局域网访问: {self.__url}/spike/")
+        print(f"\t 本地访问: http://localhost:{PORT}{CUSTOM_PATH}")
+        print(f"\t 局域网访问: {self.__url}{CUSTOM_PATH}")
         if is_open:
             def open():
                 time.sleep(2)  # 打开浏览器
-                webbrowser.open_new_tab(f"http://localhost:{PORT}/?__theme=dark")
+                webbrowser.open_new_tab(f"http://localhost:{PORT}{CUSTOM_PATH}?__theme=dark")
 
             threading.Thread(target=open, name="open-browser", daemon=True).start()
             threading.Thread(target=auto_update, name="self-upgrade", daemon=True).start()
@@ -556,7 +556,7 @@ def init_gradio_app():
         return await endpoint(path_or_url, request)
     server_app = create_app()
 
-    server_app.mount('/spike/', gradio_app)
+    server_app.mount(CUSTOM_PATH, gradio_app)
 
     # 启用Gradio原生事件，不然会卡Loading哟
     @server_app.on_event("startup")

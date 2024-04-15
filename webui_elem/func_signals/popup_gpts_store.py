@@ -18,7 +18,7 @@ def gpts_tag_select(select_tab, samples):
     return gr.update(samples=samples), samples
 
 
-def gpts_select_model(index, samples, ipaddr: gr.Request):
+def gpts_select_model(index, samples, cookies, ipaddr: gr.Request):
     user_path = os.path.join(init_path.private_history_path, user_client_mark(ipaddr))
     file_list, only_name, new_path, new_name = get_files_list(user_path, filter_format=['.json'])
     gid = samples[index][1]['gid']
@@ -27,7 +27,7 @@ def gpts_select_model(index, samples, ipaddr: gr.Request):
     chatbot_avatar = get_avatar_img('', bot_avatar)
 
     chatbot = gr.update(avatar_images=chatbot_avatar, value=[[None, samples[index][1]['info']]])
-    cookie_comb = clear_chat_cookie(gid, ipaddr)[2:-3]
+    cookie_comb = clear_chat_cookie(gid, cookies, ipaddr)[2:-3]
     cookie = cookie_comb[0]
     cookie.update({
         "bot_avatar": bot_avatar,

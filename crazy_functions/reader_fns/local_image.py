@@ -69,7 +69,7 @@ class ImgHandler:
     def get_llm_vision(self, llm_kwargs):
         from request_llms.bridge_all import predict_no_ui_long_connection
         from common import func_box
-        ipaddr = func_box.user_client_mark(llm_kwargs.get('ipaddr', 'spike'))
+        ipaddr = llm_kwargs.get('ipaddr', 'spike')
         prompt = prompt_repository.query_prompt('llm-vision', '图片理解', source=ipaddr, quote_num=True)
         if prompt:
             prompt = prompt.value

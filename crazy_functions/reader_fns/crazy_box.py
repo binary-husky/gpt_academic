@@ -7,6 +7,7 @@ import os
 import json
 from common import func_box, toolbox
 from common.db.repository import prompt_repository
+from common.knowledge_base import kb_doc_api
 from crazy_functions import crazy_utils
 from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit
 from request_llms import bridge_all
@@ -733,23 +734,29 @@ def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugi
             ocr_switch_copy = copy.deepcopy(llm_kwargs)
             ocr_switch_copy.update(ocr_switch)
         vision_submission = reader_fns.submit_threads_img_handle(img_mapping, save_path, cor_cache, ocr_switch_copy)
+        filed_sum = 0
         for t in vision_submission:
+            base_name = os.path.basename(t)
             try:
                 img_content, img_path, status = vision_submission[t].result()
-                vision_loading_statsu.update({os.path.basename(t): img_content})
+
+                vision_loading_statsu.update({base_name: img_content})
                 chatbot[-1][1] = gpt_old_say + vision_format(f'检测到识图开关为`{ocr_switch}`，正在识别图片中的文字...',
                                                              vision_loading_statsu)
                 yield from toolbox.update_ui(chatbot=chatbot, history=history)
                 if not status or status == '本次识别结果读取数据库缓存':  # 出现异常，不替换文本
-                    content = content.replace(img_mapping[t], f'{img_content}')
+                    content = content.replace(img_mapping[t], f'[{img_mapping[t]}]\n{base_name}图片识别结果：\n{img_content}')
                 else:
+                    filed_sum += 1
                     logger.warning(f'{img_mapping[t]} 识别失败，跳过，error: {status}')
             except Exception as e:
+                filed_sum += 1
                 status = f'`{t}` `{toolbox.trimmed_format_exc()}` 识别失败，过滤这个图片\n\n'
-                vision_loading_statsu.update({t: status})  # 错误展示完整路径
+                vision_loading_statsu.update({base_name: status})  # 错误展示完整路径
                 chatbot[-1][1] = gpt_old_say + vision_format(f'啊哦，有文件失败了哦', vision_loading_statsu)
                 yield from toolbox.update_ui(chatbot=chatbot, history=history)
-        chatbot[-1][1] = gpt_old_say + vision_format(f'识别完成', vision_loading_statsu, 'Done')
+
+        chatbot[-1][1] = gpt_old_say + vision_format(f'图片识别完成, 共{len(vision_submission)}张图片，识别失败`{filed_sum}`', vision_loading_statsu, 'Done')
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='Done')
     return content.replace(init_path.base_path, 'file=.')  # 增加保障，防止路径泄露
 
@@ -814,8 +821,10 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
                 chatbot[-1][1] += status
                 yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='没有探测到数据')
                 return None
-
-    # 提交知识库 ... 未适配
+        kb_upload, = json_args_return(plugin_kwargs, ['自动录入知识库'])
+        files_list = [i for i in content_mapping if os.path.exists(i)]
+        if kb_upload and files_list:
+            kb_doc_api.upload_docs_simple(files=files_list, knowledge_base_name=kb_upload)
     return embedding_content
 
 

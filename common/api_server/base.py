@@ -113,7 +113,6 @@ def mount_filename_summary_routes(app: FastAPI):
 
 
 def mount_app_routes(app: FastAPI):
-    app.get(path='/', tags=['Gradio Mount'], summary='重定向到Gradio二级目录')(gradio_app.homepage)
 
     app.get(path='/favicon.icon', tags=['Gradio Mount'], summary='获取网站icon')(gradio_app.get_favicon)
 
@@ -127,7 +126,7 @@ def mount_app_routes(app: FastAPI):
 def create_app():
     app = FastAPI()
     app.add_middleware(SessionMiddleware, secret_key="!secret")
-    app.middleware('https')(gradio_app.check_authentication)
+    app.middleware('https')(gradio_app.redirect_authentication)
 
     mount_app_routes(app)
 

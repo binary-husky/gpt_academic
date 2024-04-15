@@ -227,10 +227,11 @@ def msg_handle_error(llm_kwargs, chunk_decoded):
 
 def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream=True, additional_fn=None):
     chatbot.append([inputs, ""])
-    yield from update_ui(chatbot=chatbot, history=history, msg="等待响应")  # 刷新界面
+    yield from update_ui(chatbot=chatbot, history=history, msg=f"初始化{llm_kwargs.get('llm_model')}模型")  # 刷新界面
     gpt_bro_init = GPTChatInit()
     history.extend([inputs, ''])
     stream_response = gpt_bro_init.generate_messages(inputs, llm_kwargs, history, system_prompt, stream)
+    yield from update_ui(chatbot=chatbot, history=history, msg=f"等待`{llm_kwargs.get('llm_model')}`模型响应")  # 刷新界面
     for content, gpt_bro_result, error_bro_meg in stream_response:
         chatbot[-1] = [inputs, gpt_bro_result]
         history[-1] = gpt_bro_result

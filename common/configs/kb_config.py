@@ -14,7 +14,7 @@ CACHED_VS_NUM = 1
 CACHED_MEMO_VS_NUM = 10
 
 # 知识库中单段文本长度(不适用MarkdownHeaderTextSplitter)
-CHUNK_SIZE = 250
+CHUNK_SIZE = 1024
 
 # 知识库中相邻文本重合长度(不适用MarkdownHeaderTextSplitter)
 OVERLAP_SIZE = 50

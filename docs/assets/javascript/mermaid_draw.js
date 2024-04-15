@@ -5,7 +5,8 @@ const mermaidConfig = {
         htmlLabels: false
     },
     er: {
-        useMaxWidth: false
+        useMaxWidth: false,
+        useMaxHeight: '630px'
     },
     sequence: {
         useMaxWidth: false,
@@ -122,7 +123,7 @@ async function svgInitPz(svgElement, content) {
     if (!svgElement.querySelector('foreignObject')) {
         let svg_width = '100%';
         let svg_height = svgElement.height.animVal.value;
-        svg_height = svg_height < 200 ? 200 : svg_height;  // 最低200
+        svg_height = Math.max(200, Math.min(svg_height, 600)); // 先限制上限，再限制下限
         svgElement.style = `width: ${svg_width}px; height: ${svg_height}px;`;
         let panZoomTiger = svgPanZoom(svgElement, svg_init_params);
         let pako_encode_link = await pako_encode(content)

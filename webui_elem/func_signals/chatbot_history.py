@@ -52,7 +52,7 @@ def clear_input(inputs, cookies, ipaddr: gr.Request):
     output = [gr.update(value=''), inputs, gr.update(visible=True), gr.update(), gr.update(visible=False),
               gr.update(choices=only_name, value=cookies['first_chat']), gr.update(value=None)]
     yield output
-    logger.info(f"{cookies['llm_model']}_{user_addr}: {inputs[:100]} {'.' * 10}")
+    logger.info(f"{cookies.get('llm_model')}_{user_addr}: {inputs[:100]} {'.' * 10}")
 
 
 def stop_chat_refresh(chatbot, cookies, ipaddr: gr.Request):

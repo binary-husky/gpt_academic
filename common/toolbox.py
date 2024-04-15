@@ -261,7 +261,8 @@ def func_decision_tree(func, cookies, single_mode, agent_mode,
                 if try_f: try_f = try_f['Function']
             else:
                 txt_proc = cookies.get('last_chat', '')
-                try_f = func
+                from crazy_functions.reader_fns.crazy_box import submit_no_use_ui_task
+                try_f = submit_no_use_ui_task
                 args = ()
             yield from try_f(txt_proc, llm_kwargs, plugin_kwargs, chatbot_with_cookie,
                              deci_history, system_prompt, *args)

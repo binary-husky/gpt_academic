@@ -142,21 +142,15 @@ def _save_files_in_thread(files: List[UploadFile],
         yield result
 
 
-# def files2docs(files: List[UploadFile] = File(..., description="上传文件，支持多文件"),
-#                 knowledge_base_name: str = Form(..., description="知识库名称", examples=["samples"]),
-#                 override: bool = Form(False, description="覆盖已有文件"),
-#                 save: bool = Form(True, description="是否将文件保存到知识库目录")):
-#     def save_files(files, knowledge_base_name, override):
-#         for result in _save_files_in_thread(files, knowledge_base_name=knowledge_base_name, override=override):
-#             yield json.dumps(result, ensure_ascii=False)
-
-#     def files_to_docs(files):
-#         for result in files2docs_in_thread(files):
-#             yield json.dumps(result, ensure_ascii=False)
+def upload_docs_simple(files, knowledge_base_name, chunk_size=CHUNK_SIZE, chunk_overlap=OVERLAP_SIZE):
+    return upload_docs(
+        files, knowledge_base_name, True, True, chunk_size, chunk_overlap,
+        ZH_TITLE_ENHANCE, {}, False, TEXT_SPLITTER_NAME
+    )
 
 
 def upload_docs(
-        files: List[UploadFile] | List[list] = File(..., description="上传文件，支持多文件"),
+        files: List[UploadFile] | List[str] = File(..., description="上传文件，支持多文件"),
         knowledge_base_name: str = Form(..., description="知识库名称", examples=["samples"]),
         override: bool = Form(False, description="覆盖已有文件"),
         to_vector_store: bool = Form(True, description="上传文件后是否进行向量化"),
@@ -169,7 +163,7 @@ def upload_docs(
         text_splitter_name: str = Form(TEXT_SPLITTER_NAME, description='分词器选择')
 ) -> BaseResponse:
     """
-    API接口：上传文件，并/或向量化
+
     """
     if not validate_kb_name(knowledge_base_name):
         return BaseResponse(code=403, msg="Don't attack me")

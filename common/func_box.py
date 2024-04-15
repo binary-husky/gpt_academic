@@ -196,8 +196,9 @@ def html_iframe_code(html_file):
 
 
 def html_download_blank(__href, dir_name=''):
+    CUSTOM_PATH = toolbox.get_conf('CUSTOM_PATH')
     if os.path.exists(__href):
-        __href = f'/spike/file={__href}'
+        __href = f'{CUSTOM_PATH}file={__href}'
     if not dir_name:
         dir_name = str(__href).split('/')[-1]
     a = f'<a href="{__href}" target="_blank" download="{dir_name}" class="svelte-xrr240">{dir_name}</a>'
@@ -676,19 +677,23 @@ def replace_expected_text(prompt: str, content: str, expect='{{{v}}}'):
     return content
 
 
-def get_avatar_img(llm_s, bot_avatar):
+def get_avatar_img(llm_s: str, bot_avatar):
     chat_bot_path = os.path.join(init_path.assets_path, 'chatbot_avatar')
     file_list, only_name, new_path, new_name = get_files_list(chat_bot_path, filter_format=['.png'])
     chat_img = ''
     for i in range(len(only_name)):
-        if only_name[i] in llm_s:
+        if llm_s.startswith(only_name[i]):
             chat_img = file_list[i]
+    if not chat_img:
+        for i in range(len(only_name)):
+            if only_name[i] in llm_s:
+                chat_img = file_list[i]
     if bot_avatar:
         chat_img = bot_avatar
     if chat_img:
         return ['./docs/assets/chatbot_avatar/logo.png', chat_img.replace(init_path.base_path, '.')]
     else:
-        return ['./docs/assets/chatbot_avatar/logo.png', './docs/chatbot_avatar/avatar/user.png']
+        return ['./docs/assets/chatbot_avatar/logo.png', './docs/chatbot_avatar/logo.png']
 
 
 valid_img_extensions = ['png', 'jpg', 'jpeg', 'bmp', 'svg', 'webp', 'ico', 'tif', 'tiff', 'raw', 'eps', 'gif']

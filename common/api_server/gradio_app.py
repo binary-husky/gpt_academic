@@ -11,9 +11,9 @@ from fastapi.responses import RedirectResponse, JSONResponse
 from common.path_handler import init_path
 from common.toolbox import get_conf, default_user_name
 
-cancel_verification, auth_url, auth_cookie_tag, auth_func_based, routing_address, favicon_path, redirect_address = (
-    get_conf('cancel_verification', 'auth_url', 'auth_cookie_tag',
-             'auth_func_based', 'routing_address', 'favicon_path', 'redirect_address'))
+(cancel_verification, auth_url, auth_cookie_tag, auth_func_based, routing_address, favicon_path, redirect_address,
+ CUSTOM_PATH) = (get_conf('cancel_verification', 'auth_url', 'auth_cookie_tag',
+             'auth_func_based', 'routing_address', 'favicon_path', 'redirect_address', 'CUSTOM_PATH'))
 
 
 def check_cookie(cookie):
@@ -33,15 +33,19 @@ def check_cookie(cookie):
 
 
 async def get_favicon():
-    return RedirectResponse(url=f'/spike/file={favicon_path}')
+    return RedirectResponse(url=f'{CUSTOM_PATH}file={favicon_path}')
 
 
-async def check_authentication(request: Request, call_next):
-    cookie = request.cookies.get(f'{auth_cookie_tag}', '')
-    user = check_cookie(cookie)
-    if not user:
-        new_website_url = redirect_address  # 重定向到鉴权网站
-        return RedirectResponse(new_website_url)
+async def redirect_authentication(request: Request, call_next):
+    if cancel_verification:
+        cookie = request.cookies.get(f'{auth_cookie_tag}', '')
+        user = check_cookie(cookie)
+        if not user:
+            return RedirectResponse(redirect_address)  # 重定向到鉴权网站
+    if request.url.path.startswith("/redirect_index/"):
+        # 转发到对应的域名
+        new_path = request.url.path.replace("/redirect_index/", CUSTOM_PATH, 1)
+        return RedirectResponse(url=new_path)
     return await call_next(request)
 
 
@@ -49,14 +53,14 @@ async def homepage(request: Request):
     cookie = request.cookies.get(f'{auth_cookie_tag}', '')
     user = check_cookie(cookie)
     if user:
-        return RedirectResponse(url='/spike/')
+        return RedirectResponse(url=CUSTOM_PATH)
     else:
         new_website_url = redirect_address  # 新网站的URL
         return RedirectResponse(new_website_url)
 
 
 async def logout():
-    response = RedirectResponse(url='/', status_code=status.HTTP_302_FOUND)
+    response = RedirectResponse(url=CUSTOM_PATH, status_code=status.HTTP_302_FOUND)
     response.delete_cookie('access-token')
     response.delete_cookie('access-token-unsecure')
     return response
