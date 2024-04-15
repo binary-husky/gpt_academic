@@ -947,8 +947,9 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list, sys
         res = '<br/><br/>\n\n---\n\n'.join(return_string_collect)
         return res
 
-from core_functional import get_core_functions
-functional = get_core_functions()
+import core_functional
+import importlib
+
 def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot,
             history:list=[], system_prompt:str='', stream:bool=True, additional_fn:str=None):
     """
@@ -971,10 +972,14 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot,
     inputs = apply_gpt_academic_string_mask(inputs, mode="show_llm")
     method = model_info[llm_kwargs['llm_model']]["fn_with_ui"]  # 如果这里报错，检查config中的AVAIL_LLM_MODELS选项
 
+    importlib.reload(core_functional)    # 热更新prompt
+    functional = core_functional.get_core_functions()
     if 'ModelOverride' in functional[additional_fn]:
         model_override = functional[additional_fn]['ModelOverride']
+        if model_override not in model_info:
+            raise ValueError(f"模型覆盖参数 '{model_override}' 指向一个暂不支持的模型，请检查配置文件。")
         method = model_info[model_override]["fn_with_ui"]
-        llm_kwargs['llm_model'] = functional[additional_fn]['ModelOverride']
+        llm_kwargs['llm_model'] = model_override
 
     yield from method(inputs, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, stream, additional_fn)
 
