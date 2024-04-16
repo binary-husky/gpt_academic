@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>GPT-Academic 翻译报告书</title>
+    <style>
+        .centered-a {
+            color: red;
+            text-align: center;
+            margin-bottom: 2%;
+            font-size: 1.5em;
+        }
+        .centered-b {
+            color: red;
+            text-align: center;
+            margin-top: 10%;
+            margin-bottom: 20%;
+            font-size: 1.5em;
+        }
+        .centered-c {
+            color: rgba(255, 0, 0, 0);
+            text-align: center;
+            margin-top: 2%;
+            margin-bottom: 20%;
+            font-size: 7em;
+        }
+    </style>
+<script>
+        // Configure MathJax settings
+        MathJax = {
+            tex: {
+                inlineMath: [
+                    ['$', '$'],
+                    ['\(', '\)']
+                ]
+            }
+        }
+        addEventListener('zero-md-rendered', () => {MathJax.typeset(); console.log('MathJax typeset!');})
+    </script>
+    <!-- Load MathJax library -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <script
+        type="module"
+        src="https://cdn.jsdelivr.net/gh/zerodevx/zero-md@2/dist/zero-md.min.js"
+    ></script>
+
+</head>
+
+<body>
+    <div class="test_temp1" style="width:10%; height: 500px; float:left;">
+
+    </div>
+    <div class="test_temp2" style="width:80%; height: 500px; float:left;">
+        <!-- Simply set the `src` attribute to your MD file and win -->
+        <div class="centered-a">
+            请按Ctrl+S保存此页面，否则该页面可能在几分钟后失效。
+        </div>
+        <zero-md src="translated_markdown.md" no-shadow>
+        </zero-md>
+        <div class="centered-b">
+            本报告由GPT-Academic开源项目生成，地址：https://github.com/binary-husky/gpt_academic。
+        </div>
+        <div class="centered-c">
+            本报告由GPT-Academic开源项目生成，地址：https://github.com/binary-husky/gpt_academic。
+        </div>
+    </div>
+    <div class="test_temp3" style="width:10%; height: 500px; float:left;">
+    </div>
+
+    </body>
+
+</html>

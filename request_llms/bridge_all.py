@@ -34,6 +34,9 @@ from .bridge_google_gemini import predict_no_ui_long_connection  as genai_noui
 from .bridge_zhipu import predict_no_ui_long_connection as zhipu_noui
 from .bridge_zhipu import predict as zhipu_ui
 
+from .bridge_cohere import predict as cohere_ui
+from .bridge_cohere import predict_no_ui_long_connection as cohere_noui
+
 colors = ['#FF00FF', '#00FFFF', '#FF0000', '#990099', '#009999', '#990044']
 
 class LazyloadTiktoken(object):
@@ -64,6 +67,7 @@ newbing_endpoint = "wss://sydney.bing.com/sydney/ChatHub"
 gemini_endpoint = "https://generativelanguage.googleapis.com/v1beta/models"
 claude_endpoint = "https://api.anthropic.com/v1/messages"
 yimodel_endpoint = "https://api.lingyiwanwu.com/v1/chat/completions"
+cohere_endpoint = 'https://api.cohere.ai/v1/chat'
 
 if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
 azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
@@ -82,6 +86,7 @@ if newbing_endpoint in API_URL_REDIRECT: newbing_endpoint = API_URL_REDIRECT[new
 if gemini_endpoint in API_URL_REDIRECT: gemini_endpoint = API_URL_REDIRECT[gemini_endpoint]
 if claude_endpoint in API_URL_REDIRECT: claude_endpoint = API_URL_REDIRECT[claude_endpoint]
 if yimodel_endpoint in API_URL_REDIRECT: yimodel_endpoint = API_URL_REDIRECT[yimodel_endpoint]
+if cohere_endpoint in API_URL_REDIRECT: cohere_endpoint = API_URL_REDIRECT[cohere_endpoint]
 
 # 获取tokenizer
 tokenizer_gpt35 = LazyloadTiktoken("gpt-3.5-turbo")
@@ -194,6 +199,25 @@ model_info = {
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
     },
+
+    "gpt-4-turbo": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": openai_endpoint,
+        "max_token": 128000,
+        "tokenizer": tokenizer_gpt4,
+        "token_cnt": get_token_num_gpt4,
+    },
+
+    "gpt-4-turbo-2024-04-09": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": openai_endpoint,
+        "max_token": 128000,
+        "tokenizer": tokenizer_gpt4,
+        "token_cnt": get_token_num_gpt4,
+    },
+
 
     "gpt-3.5-random": {
         "fn_with_ui": chatgpt_ui,
@@ -310,6 +334,18 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
+
+    # cohere
+    "cohere-command-r-plus": {
+        "fn_with_ui": cohere_ui,
+        "fn_without_ui": cohere_noui,
+        "can_multi_thread": True,
+        "endpoint": cohere_endpoint,
+        "max_token": 1024 * 4,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+
 }
 # -=-=-=-=-=-=- 月之暗面 -=-=-=-=-=-=-
 from request_llms.bridge_moonshot import predict as moonshot_ui
@@ -761,6 +797,29 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
         model: {
             "fn_with_ui": chatgpt_ui,
             "fn_without_ui": chatgpt_noui,
+            "endpoint": openai_endpoint,
+            "max_token": max_token_tmp,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
+# -=-=-=-=-=-=- vllm 对齐支持 -=-=-=-=-=-=-
+for model in [m for m in AVAIL_LLM_MODELS if m.startswith("vllm-")]:
+    # 为了更灵活地接入vllm多模型管理界面，设计了此接口，例子：AVAIL_LLM_MODELS = ["vllm-/home/hmp/llm/cache/Qwen1___5-32B-Chat(max_token=6666)"]
+    # 其中
+    #   "vllm-"             是前缀（必要）
+    #   "mixtral-8x7b"      是模型名（必要）
+    #   "(max_token=6666)"  是配置（非必要）
+    try:
+        _, max_token_tmp = read_one_api_model_name(model)
+    except:
+        print(f"vllm模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
+        continue
+    model_info.update({
+        model: {
+            "fn_with_ui": chatgpt_ui,
+            "fn_without_ui": chatgpt_noui,
+            "can_multi_thread": True,
             "endpoint": openai_endpoint,
             "max_token": max_token_tmp,
             "tokenizer": tokenizer_gpt35,

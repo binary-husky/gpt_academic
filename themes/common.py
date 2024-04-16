@@ -15,4 +15,6 @@ def get_common_html_javascript_code():
             "file=themes/waifu_plugin/jquery-ui.min.js",
         ]:
             js += f"""<script src="{jsf}"></script>\n"""
+    else:
+        js += """<script>window.loadLive2D = function(){};</script>\n"""
     return js
