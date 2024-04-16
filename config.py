@@ -223,6 +223,10 @@ MATHPIX_APPID = ""
 MATHPIX_APPKEY = ""
 
 
+# Mathpix 拥有执行PDF的OCR功能，但是需要注册账号
+DOC2X_API_KEY = ""
+
+
 # 自定义API KEY格式
 CUSTOM_API_KEY_PATTERN = ""
 

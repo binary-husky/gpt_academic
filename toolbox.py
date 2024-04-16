@@ -79,6 +79,8 @@ class ChatBotWithCookies(list):
     def get_cookies(self):
         return self._cookies
 
+    def get_user(self):
+        return self._cookies.get("user_name", default_user_name)
 
 def ArgsGeneralWrapper(f):
     """
