@@ -621,12 +621,11 @@ class nougat_interface():
         dst = os.path.join(get_log_folder(plugin_name='nougat'), gen_time_str())
         os.makedirs(dst)
 
-        yield from update_ui_lastest_msg(
-            "正在解析论文, 请稍候。进度：正在加载NOUGAT... （提示：首次运行需要花费较长时间下载NOUGAT参数）",
-            chatbot=chatbot, history=history, delay=0)
-        self.nougat_with_timeout(f'nougat --out "{os.path.abspath(dst)}" "{os.path.abspath(fp)}"', os.getcwd(),
-                                 timeout=3600)
-        res = glob.glob(os.path.join(dst, '*.mmd'))
+        yield from update_ui_lastest_msg("正在解析论文, 请稍候。进度：正在加载NOUGAT... （提示：首次运行需要花费较长时间下载NOUGAT参数）",
+                                         chatbot=chatbot, history=history, delay=0)
+        command = ['nougat', '--out', os.path.abspath(dst), os.path.abspath(fp)]
+        self.nougat_with_timeout(command, cwd=os.getcwd(), timeout=3600)
+        res = glob.glob(os.path.join(dst,'*.mmd'))
         if len(res) == 0:
             self.threadLock.release()
             raise RuntimeError("Nougat解析论文失败。")

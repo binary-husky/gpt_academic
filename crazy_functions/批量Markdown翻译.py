@@ -1,8 +1,7 @@
-import glob, time, os, re, logging
+import glob, shutil, os, re, logging
 from common.toolbox import update_ui, trimmed_format_exc, gen_time_str, disable_auto_promotion
 from common.toolbox import CatchException, report_exception, get_log_folder
 from common.toolbox import write_history_to_file, promote_file_to_downloadzone
-
 fast_debug = False
 
 class PaperFileGroup():
@@ -70,17 +69,17 @@ def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
 
     #  <-------- 多线程翻译开始 ---------->
     if language == 'en->zh':
-        inputs_array = ["This is a Markdown file, translate it into Chinese, do not modify any existing Markdown commands:" +
+        inputs_array = ["This is a Markdown file, translate it into Chinese, do NOT modify any existing Markdown commands:" +
                         f"\n\n{frag}" for frag in pfg.sp_file_contents]
         inputs_show_user_array = [f"翻译 {f}" for f in pfg.sp_file_tag]
         sys_prompt_array = ["You are a professional academic paper translator." for _ in range(n_split)]
     elif language == 'zh->en':
-        inputs_array = [f"This is a Markdown file, translate it into English, do not modify any existing Markdown commands:" +
+        inputs_array = [f"This is a Markdown file, translate it into English, do NOT modify any existing Markdown commands:" +
                         f"\n\n{frag}" for frag in pfg.sp_file_contents]
         inputs_show_user_array = [f"翻译 {f}" for f in pfg.sp_file_tag]
         sys_prompt_array = ["You are a professional academic paper translator." for _ in range(n_split)]
     else:
-        inputs_array = [f"This is a Markdown file, translate it into {language}, do not modify any existing Markdown commands, only answer me with translated results:" +
+        inputs_array = [f"This is a Markdown file, translate it into {language}, do NOT modify any existing Markdown commands, do NOT use code wrapper (```), ONLY answer me with translated results:" +
                         f"\n\n{frag}" for frag in pfg.sp_file_contents]
         inputs_show_user_array = [f"翻译 {f}" for f in pfg.sp_file_tag]
         sys_prompt_array = ["You are a professional academic paper translator." for _ in range(n_split)]
@@ -100,7 +99,12 @@ def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
         for i_say, gpt_say in zip(gpt_response_collection[0::2], gpt_response_collection[1::2]):
             pfg.sp_file_result.append(gpt_say)
         pfg.merge_result()
-        pfg.write_result(language)
+        output_file_arr = pfg.write_result(language)
+        for output_file in output_file_arr:
+            promote_file_to_downloadzone(output_file, chatbot=chatbot)
+            if 'markdown_expected_output_path' in plugin_kwargs:
+                expected_f_name = plugin_kwargs['markdown_expected_output_path']
+                shutil.copyfile(output_file, expected_f_name)
     except:
         logging.error(trimmed_format_exc())
 

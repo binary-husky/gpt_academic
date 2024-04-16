@@ -114,7 +114,7 @@ def get_functions_文档读取():
     # < -------------------文档处理--------------- >
     from crazy_functions.总结word文档 import 总结word文档
     from crazy_functions import 批量总结PDF文档
-    from crazy_functions import 批量翻译PDF文档_多线程
+    from crazy_functions import 批量翻译PDF文档_NOUGAT
     from crazy_functions import 理解PDF文档内容
     from crazy_functions import 批量Markdown翻译
     function_plugins['文档处理'] = {
@@ -142,7 +142,7 @@ def get_functions_文档读取():
             "Color": "primary",
             "AsButton": True,  # 加入下拉菜单中
             "Info": "精准翻译PDF论文为中文 | 输入参数为路径",
-            "Function": HotReload(批量翻译PDF文档_多线程.批量翻译PDF文档)
+            "Function": HotReload(批量翻译PDF文档_NOUGAT.批量翻译PDF文档)
         },
         "批量总结PDF文档": {
             "Color": "primary",

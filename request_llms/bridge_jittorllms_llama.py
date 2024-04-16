@@ -7,6 +7,7 @@ from transformers import AutoModel, AutoTokenizer
 import time
 import threading
 from multiprocessing import Process, Pipe
+from transformers import AutoModel, AutoTokenizer
 
 load_message = "jittorllms尚未加载，加载需要一段时间。注意，请避免混用多种jittor模型，否则可能导致显存溢出而造成卡顿，取决于`config.py`的配置，jittorllms消耗大量的内存（CPU）或显存（GPU），也许会导致低配计算机卡死 ……"
 
@@ -108,7 +109,8 @@ class GetGLMHandle(Process):
 global llama_glm_handle
 llama_glm_handle = None
 #################################################################################
-def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=[], console_slience=False):
+def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], sys_prompt:str="",
+                                  observe_window:list=[], console_slience:bool=False):
     """
         多线程方法
         函数的说明请见 request_llms/bridge_all.py

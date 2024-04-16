@@ -7,7 +7,7 @@ import os
 import re
 import requests
 from typing import List, Dict, Tuple
-from toolbox import get_conf, encode_image, get_pictures_list, to_markdown_tabs
+from common.toolbox import get_conf, encode_image, get_pictures_list, to_markdown_tabs
 
 proxies, TIMEOUT_SECONDS = get_conf("proxies", "TIMEOUT_SECONDS")
 

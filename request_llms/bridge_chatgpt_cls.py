@@ -9,7 +9,7 @@ from common.logger_handler import logger
 import requests
 
 from common.func_box import extract_link_pf, valid_img_extensions, batch_encode_image
-from common.toolbox import get_conf, select_api_key, is_any_api_key, trimmed_format_exc, update_ui, clip_history
+from common.toolbox import get_conf, select_api_key, is_any_api_key, trimmed_format_exc, update_ui, clip_history, read_one_api_model_name
 from request_llms.bridge_chatgpt import verify_endpoint
 
 proxies, TIMEOUT_SECONDS, MAX_RETRY, API_ORG, AZURE_CFG_ARRAY, API_URL_REDIRECT = \
@@ -107,6 +107,12 @@ class GPTChatInit:
                 "gpt-3.5-turbo-16k-0613",
                 "gpt-3.5-turbo-0301",
             ])
+        if llm_kwargs['llm_model'].startswith('one-api-'):
+            model = llm_kwargs['llm_model'][len('one-api-'):]
+            model, _ = read_one_api_model_name(model)
+        if llm_kwargs['llm_model'].startswith('vllm-'):
+            model = llm_kwargs['llm_model'][len('vllm-'):]
+            model, _ = read_one_api_model_name(model)
         payload = {
             "model": self.llm_model,
             "messages": messages,

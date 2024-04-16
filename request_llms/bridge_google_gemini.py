@@ -13,6 +13,7 @@ from common.logger_handler import logger
 from typing import Dict, Tuple
 from common import func_box
 from common import toolbox
+from request_llms.com_google import GoogleChatInit
 
 proxies, TIMEOUT_SECONDS, MAX_RETRY = get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY')
 timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check proxy settings in config.py.' + \
@@ -142,7 +143,8 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     return gpt_replying_buffer
 
 
-def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream=True, additional_fn=None):
+def predict(inputs: str, llm_kwargs: dict, plugin_kwargs: dict, chatbot,
+            history: list = [], system_prompt: str = '', stream: bool = True, additional_fn: str = None):
     # 检查API_KEY
     if get_conf("GEMINI_API_KEY") == "":
         yield from update_ui_lastest_msg(f"请配置 GEMINI_API_KEY。", chatbot=chatbot, history=history, delay=0)

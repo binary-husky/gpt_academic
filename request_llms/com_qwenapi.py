@@ -48,6 +48,10 @@ class QwenRequestInstance():
         for response in responses:
             if response.status_code == HTTPStatus.OK:
                 if response.output.choices[0].finish_reason == 'stop':
+                    try:
+                        self.result_buf += response.output.choices[0].message.content
+                    except:
+                        pass
                     yield self.result_buf
                     break
                 elif response.output.choices[0].finish_reason == 'length':

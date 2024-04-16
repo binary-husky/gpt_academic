@@ -9,7 +9,7 @@ import requests
 from common.toolbox import get_conf, update_ui
 import logging
 from common.path_handler import init_path
-from common.toolbox import get_conf, update_ui, log_chat
+from common.toolbox import get_conf, update_ui, log_chat, ChatBotWithCookies
 
 import requests
 
@@ -140,7 +140,8 @@ def msg_handle_error(llm_kwargs, chunk_decoded):
     return error_msg
 
 
-def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream=True, additional_fn=None):
+def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWithCookies,
+            history:list=[], system_prompt:str='', stream:bool=True, additional_fn:str=None):
     chatbot.append([inputs, ""])
     yield from update_ui(chatbot=chatbot, history=history, msg="等待响应")  # 刷新界面
     moon_bro_init = MoonShotInit()

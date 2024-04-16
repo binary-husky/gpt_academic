@@ -84,6 +84,8 @@ class ChatBotWithCookies(list):
     def get_cookies(self):
         return self._cookies
 
+    def get_user(self):
+        return self._cookies.get("user_name", default_user_name)
 
 def end_predict(chatbot, history, llm_kwargs):
     count_time = round(time.time() - llm_kwargs['start_time'], 3)
@@ -724,18 +726,14 @@ def on_report_generated2(request: gradio.Request, files: List[str], chatbot: Cha
     return chatbot, txt, txt2, cookies
 
 
-def on_report_generated(cookies: dict, files: List[str], chatbot: ChatBotWithCookies):
-    # from toolbox import find_recent_files
-    # PATH_LOGGING = get_conf('PATH_LOGGING')
+def on_report_generated(cookies:dict, files:List[str], chatbot:ChatBotWithCookies):
     if "files_to_promote" in cookies:
         report_files = cookies["files_to_promote"]
         cookies.pop("files_to_promote")
     else:
         report_files = []
-    #     report_files = find_recent_files(PATH_LOGGING)
     if len(report_files) == 0:
         return cookies, None, chatbot
-    # files.extend(report_files)
     file_links = ""
     for f in report_files:
         file_links += (
@@ -1197,10 +1195,13 @@ def check_repeat_upload(new_pdf_path, pdf_hash):
 
 
 def log_chat(llm_model: str, input_str: str, output_str: str):
-    if output_str and input_str and llm_model:
-        uid = str(uuid.uuid4().hex)
-        logging.info(f"[Model({uid})] {llm_model}")
-        input_str = input_str.rstrip('\n')
-        logging.info(f"[Query({uid})]\n{input_str}")
-        output_str = output_str.rstrip('\n')
-        logging.info(f"[Response({uid})]\n{output_str}\n\n")
+    try:
+        if output_str and input_str and llm_model:
+            uid = str(uuid.uuid4().hex)
+            logging.info(f"[Model({uid})] {llm_model}")
+            input_str = input_str.rstrip('\n')
+            logging.info(f"[Query({uid})]\n{input_str}")
+            output_str = output_str.rstrip('\n')
+            logging.info(f"[Response({uid})]\n{output_str}\n\n")
+    except:
+        print(trimmed_format_exc())

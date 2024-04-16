@@ -136,7 +136,8 @@ class GetGLMFTHandle(Process):
 global glmft_handle
 glmft_handle = None
 #################################################################################
-def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=[], console_slience=False):
+def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], sys_prompt:str="",
+                                  observe_window:list=[], console_slience:bool=False):
     """
         多线程方法
         函数的说明请见 request_llms/bridge_all.py

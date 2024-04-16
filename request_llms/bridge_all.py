@@ -30,6 +30,9 @@ from .bridge_google_gemini import predict_no_ui_long_connection as genai_noui
 from .bridge_zhipu import predict_no_ui_long_connection as zhipu_noui
 from .bridge_zhipu import predict as zhipu_ui
 
+from .bridge_cohere import predict as cohere_ui
+from .bridge_cohere import predict_no_ui_long_connection as cohere_noui
+
 colors = ['#FF00FF', '#00FFFF', '#FF0000', '#990099', '#009999', '#990044']
 
 
@@ -62,6 +65,7 @@ newbing_endpoint = "wss://sydney.bing.com/sydney/ChatHub"
 gemini_endpoint = "https://generativelanguage.googleapis.com/v1beta/models"
 claude_endpoint = "https://api.anthropic.com/v1/messages"
 yimodel_endpoint = "https://api.lingyiwanwu.com/v1/chat/completions"
+cohere_endpoint = 'https://api.cohere.ai/v1/chat'
 
 AZURE_ENDPOINT, AZURE_ENGINE = get_conf('AZURE_ENDPOINT', 'AZURE_ENGINE')
 if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
@@ -83,6 +87,7 @@ if newbing_endpoint in API_URL_REDIRECT: newbing_endpoint = API_URL_REDIRECT[new
 if gemini_endpoint in API_URL_REDIRECT: gemini_endpoint = API_URL_REDIRECT[gemini_endpoint]
 if claude_endpoint in API_URL_REDIRECT: claude_endpoint = API_URL_REDIRECT[claude_endpoint]
 if yimodel_endpoint in API_URL_REDIRECT: yimodel_endpoint = API_URL_REDIRECT[yimodel_endpoint]
+if cohere_endpoint in API_URL_REDIRECT: cohere_endpoint = API_URL_REDIRECT[cohere_endpoint]
 
 
 class ModelFinder(dict):
@@ -155,7 +160,6 @@ model_info.update({
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
-
     "gpt-3.5-turbo-0125": {  # 16k
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
@@ -197,6 +201,23 @@ model_info.update({
         "token_cnt": get_token_num_gpt4,
     },
     "gpt-4-0125-preview": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": openai_endpoint,
+        "max_token": 128000,
+        "tokenizer": tokenizer_gpt4,
+        "token_cnt": get_token_num_gpt4,
+    },
+    "gpt-4-turbo": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": openai_endpoint,
+        "max_token": 128000,
+        "tokenizer": tokenizer_gpt4,
+        "token_cnt": get_token_num_gpt4,
+    },
+
+    "gpt-4-turbo-2024-04-09": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
         "endpoint": openai_endpoint,
@@ -314,6 +335,16 @@ model_info.update({
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
+    # cohere
+    "cohere-command-r-plus": {
+        "fn_with_ui": cohere_ui,
+        "fn_without_ui": cohere_noui,
+        "can_multi_thread": True,
+        "endpoint": cohere_endpoint,
+        "max_token": 1024 * 4,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
 })
 
 # -=-=-=-=-=-=- 月之暗面 -=-=-=-=-=-=-
@@ -384,7 +415,7 @@ for model in AVAIL_LLM_MODELS:
 
 # -=-=-=-=-=-=- 以下部分是新加入的模型，可能附带额外依赖 -=-=-=-=-=-=-
 # claude家族
-claude_models = ["claude-instant-1.2", "claude-2.0", "claude-2.1", "claude-3-sonnet-20240229", "claude-3-opus-20240229"]
+claude_models = ["claude-instant-1.2","claude-2.0","claude-2.1","claude-3-haiku-20240307","claude-3-sonnet-20240229","claude-3-opus-20240229"]
 if any(item in claude_models for item in AVAIL_LLM_MODELS):
     from .bridge_claude import predict_no_ui_long_connection as claude_noui
     from .bridge_claude import predict as claude_ui
@@ -411,6 +442,16 @@ if any(item in claude_models for item in AVAIL_LLM_MODELS):
     })
     model_info.update({
         "claude-2.1": {
+            "fn_with_ui": claude_ui,
+            "fn_without_ui": claude_noui,
+            "endpoint": claude_endpoint,
+            "max_token": 200000,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
+    model_info.update({
+        "claude-3-haiku-20240307": {
             "fn_with_ui": claude_ui,
             "fn_without_ui": claude_noui,
             "endpoint": claude_endpoint,
@@ -829,6 +870,29 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
             "token_cnt": get_token_num_gpt35,
         },
     })
+# -=-=-=-=-=-=- vllm 对齐支持 -=-=-=-=-=-=-
+for model in [m for m in AVAIL_LLM_MODELS if m.startswith("vllm-")]:
+    # 为了更灵活地接入vllm多模型管理界面，设计了此接口，例子：AVAIL_LLM_MODELS = ["vllm-/home/hmp/llm/cache/Qwen1___5-32B-Chat(max_token=6666)"]
+    # 其中
+    #   "vllm-"             是前缀（必要）
+    #   "mixtral-8x7b"      是模型名（必要）
+    #   "(max_token=6666)"  是配置（非必要）
+    try:
+        _, max_token_tmp = read_one_api_model_name(model)
+    except:
+        print(f"vllm模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
+        continue
+    model_info.update({
+        model: {
+            "fn_with_ui": chatgpt_ui,
+            "fn_without_ui": chatgpt_noui,
+            "can_multi_thread": True,
+            "endpoint": openai_endpoint,
+            "max_token": max_token_tmp,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
 
 # -=-=-=-=-=-=- azure模型对齐支持 -=-=-=-=-=-=-
 AZURE_CFG_ARRAY = get_conf("AZURE_CFG_ARRAY")  # <-- 用于定义和切换多个azure模型 -->
@@ -858,8 +922,7 @@ def LLM_CATCH_EXCEPTION(f):
     """
     装饰器函数，将错误显示出来
     """
-
-    def decorated(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience):
+    def decorated(inputs:str, llm_kwargs:dict, history:list, sys_prompt:str, observe_window:list, console_slience:bool):
         try:
             return f(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience)
         except Exception as e:
@@ -870,9 +933,9 @@ def LLM_CATCH_EXCEPTION(f):
     return decorated
 
 
-def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, observe_window=[], console_slience=False):
+def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list, sys_prompt:str, observe_window:list=[], console_slience:bool=False):
     """
-    发送至LLM，等待回复，一次性完成，不显示中间过程。但内部用stream的方法避免中途网线被掐。
+    发送至LLM，等待回复，一次性完成，不显示中间过程。但内部（尽可能地）用stream的方法避免中途网线被掐。
     inputs：
         是本次问询的输入
     sys_prompt:
@@ -889,7 +952,6 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
     model = llm_kwargs['llm_model']
     n_model = 1
     if '&' not in model:
-        assert not model.startswith("tgui"), "TGUI不支持函数插件的实现"
         # 如果只询问1个大语言模型：
         method = model_info[model]["fn_without_ui"]
         return LLM_CATCH_EXCEPTION(method)(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience)
@@ -952,15 +1014,22 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
         return res
 
 
-def predict(inputs, llm_kwargs, *args, **kwargs):
+def predict(inputs:str, llm_kwargs:dict, *args, **kwargs):
     """
     发送至LLM，流式获取输出。
     用于基础的对话功能。
-    inputs 是本次问询的输入
-    top_p, temperature是LLM的内部调优参数
-    history 是之前的对话列表（注意无论是inputs还是history，内容太长了都会触发token数量溢出的错误）
-    chatbot 为WebUI中显示的对话列表，修改它，然后yeild出去，可以直接修改对话界面内容
-    additional_fn代表点击的哪个按钮，按钮见functional.py
+
+    完整参数列表：
+        predict(
+            inputs:str,                     # 是本次问询的输入
+            llm_kwargs:dict,                # 是LLM的内部调优参数
+            plugin_kwargs:dict,             # 是插件的内部参数
+            chatbot:ChatBotWithCookies,     # 原样传递，负责向用户前端展示对话，兼顾前端状态的功能
+            history:list=[],                # 是之前的对话列表
+            system_prompt:str='',           # 系统静默prompt
+            stream:bool=True,               # 是否流式输出（已弃用）
+            additional_fn:str=None          # 基础功能区按钮的附加功能
+        ):
     """
 
     inputs = apply_gpt_academic_string_mask(inputs, mode="show_llm")

@@ -13,11 +13,11 @@ import logging
 import os
 import time
 import traceback
-from common.toolbox import get_conf, update_ui, trimmed_format_exc, encode_image, every_image_file_in_path
 import json
 import requests
+from common.toolbox import get_conf, update_ui, trimmed_format_exc, encode_image, every_image_file_in_path, log_chat
 picture_system_prompt = "\n当回复图像时,必须说明正在回复哪张图像。所有图像仅在最后一个问题中提供,即使它们在历史记录中被提及。请使用'这是第X张图像:'的格式来指明您正在描述的是哪张图像。"
-Claude_3_Models = ["claude-3-sonnet-20240229", "claude-3-opus-20240229"]
+Claude_3_Models = ["claude-3-haiku-20240307", "claude-3-sonnet-20240229", "claude-3-opus-20240229"]
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
@@ -95,7 +95,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
             # make a POST request to the API endpoint, stream=False
             from .bridge_all import model_info
             endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
-            response = requests.post(endpoint, headers=headers, json=message, 
+            response = requests.post(endpoint, headers=headers, json=message,
                                      proxies=proxies, stream=True, timeout=TIMEOUT_SECONDS);break
         except requests.exceptions.ReadTimeout as e:
             retry += 1
@@ -116,7 +116,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
                 if need_to_pass:
                     pass
                 elif is_last_chunk:
-                    logging.info(f'[response] {result}')
+                    # logging.info(f'[response] {result}')
                     break
                 else:
                     if chunkjson and chunkjson['type'] == 'content_block_delta':
@@ -156,7 +156,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     """
     if inputs == "":     inputs = "空空如也的输入栏"
     if len(ANTHROPIC_API_KEY) == 0:
-        chatbot.append([inputs, "没有设置ANTHROPIC_API_KEY"])
+        chatbot.append((inputs, "没有设置ANTHROPIC_API_KEY"))
         yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
         return
 
@@ -182,7 +182,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     try:
         headers, message = generate_payload(inputs, llm_kwargs, history, system_prompt, image_paths)
     except RuntimeError as e:
-        chatbot[-1] = [inputs, f"您提供的api-key不满足要求，不包含任何可用于{llm_kwargs['llm_model']}的api-key。您可能选择了错误的模型或请求源。"]
+        chatbot[-1] = (inputs, f"您提供的api-key不满足要求，不包含任何可用于{llm_kwargs['llm_model']}的api-key。您可能选择了错误的模型或请求源。")
         yield from update_ui(chatbot=chatbot, history=history, msg="api-key不满足要求") # 刷新界面
         return
 
@@ -194,7 +194,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             # make a POST request to the API endpoint, stream=True
             from .bridge_all import model_info
             endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
-            response = requests.post(endpoint, headers=headers, json=message, 
+            response = requests.post(endpoint, headers=headers, json=message,
                                      proxies=proxies, stream=True, timeout=TIMEOUT_SECONDS);break
         except requests.exceptions.ReadTimeout as e:
             retry += 1
@@ -216,7 +216,8 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                 if need_to_pass:
                     pass
                 elif is_last_chunk:
-                    logging.info(f'[response] {gpt_replying_buffer}')
+                    log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
+                    # logging.info(f'[response] {gpt_replying_buffer}')
                     break
                 else:
                     if chunkjson and chunkjson['type'] == 'content_block_delta':
