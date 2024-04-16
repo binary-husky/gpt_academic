@@ -39,7 +39,7 @@ def get_kb_key_value(kb_names: list):
 def user_intent_recognition(user_input, history, llm_kwargs) -> tuple[bool, Any] | bool | Any:
     kb_names = llm_kwargs['kb_config']['names']
     llm, response_format = llm_accelerate_init(llm_kwargs)
-    ipaddr = func_box.user_client_mark(llm_kwargs['ipaddr'])
+    ipaddr = llm_kwargs['ipaddr']
     prompt = prompt_repository.query_prompt('意图识别', '知识库提示词', ipaddr, quote_num=True)
     if prompt:
         prompt = prompt.value
@@ -67,10 +67,11 @@ def user_intent_recognition(user_input, history, llm_kwargs) -> tuple[bool, Any]
 def get_vector_to_dict(vector_list):
     data = {}
     for i in vector_list:
-        if not data.get(i.metadata['source'], False):
-            data[i.metadata['source']] = ''
+        key_work = str(i.score)[:4]+i.metadata['source']
+        if not data.get(key_work, False):
+            data[key_work] = ''
         try:
-            data[i.metadata['source']] += f"{i.page_content}\n"
+            data[key_work] += f"{i.page_content}\n"
         except TypeError:
             pass
     return data
@@ -99,22 +100,42 @@ def vector_recall_by_input(user_input, chatbot, history, llm_kwargs, kb_prompt_c
             vector_content += f"\n向量召回：{json.dumps(data, indent=4, ensure_ascii=False)}"
         if not source_data:
             vector_content += '无数据，转发到普通对话'
-            return user_input
+            return user_input, history
         chatbot[-1][1] = vector_fold_format(title='向量召回完成', content=vector_content, status='Done')
         yield from update_ui(chatbot, history)
-        ipaddr = func_box.user_client_mark(llm_kwargs['ipaddr'])
-        prompt = prompt_repository.query_prompt(kb_prompt_name, kb_prompt_cls, ipaddr, quote_num=True)
-        if prompt:
-            prompt = prompt.value
-        source_text = "\n".join([f"## {i}\n{source_data[i]}" for i in source_data])
-        kb_prompt = func_box.replace_expected_text(prompt, source_text, '{{{v}}}')
-        user_input = func_box.replace_expected_text(kb_prompt, user_input, '{{{q}}}')
-        return user_input
+        repeat_recall = ''
+        source_text = ''
+        for data in source_data:
+            if any([i for i in history if data in i]):
+                repeat_recall += f'过滤重复召回片段: {data}\n'
+            else:
+                source_text += f"## {data}\n{source_data[data]}"
+        if '专注力转移' in llm_kwargs['input_models'] and source_text:
+            title = '向量召回完成, 当前模式为专注力转移，不采用提示词'
+            user_show = user_input[:20] + "..." + user_input[-20:] + '\n找到以上文本相关文档片段'
+            history = history + [f'{user_show}', source_text]
+        elif source_text:
+            title = f'向量召回完成, 当前模式专注模式，使用`{kb_prompt_name}`提示词进行对话'
+            prompt = prompt_repository.query_prompt(kb_prompt_name, kb_prompt_cls, llm_kwargs['ipaddr'], quote_num=True)
+            if prompt:
+                prompt = prompt.value
+            kb_prompt = func_box.replace_expected_text(prompt, source_text, '{{{v}}}')
+            user_input = func_box.replace_expected_text(kb_prompt, user_input, '{{{q}}}')
+        else:
+            chatbot[-1][1] = vector_fold_format(title='检测召回完全相同文档，转发到普通对话',
+                                                content=repeat_recall,
+                                                status='Done')
+            return user_input, history
+        chatbot[-1][1] = vector_fold_format(title=title,
+                                            content=f"# 可用文档片段\n{source_text}\n"
+                                                    f"# 重复文档片段\n{repeat_recall}",
+                                            status='Done')
+        return user_input, history
     chatbot[-1][1] = vector_fold_format(title='无法找到可用知识库, 转发到普通对话',
-                                        content=str(user_intent) + f"prompt: \n{prompt}",
+                                        content=str(user_intent) + f"\nprompt: \n{prompt}",
                                         status='Done')
     yield from update_ui(chatbot, history)
-    return user_input
+    return user_input, history
 
 
 if __name__ == '__main__':

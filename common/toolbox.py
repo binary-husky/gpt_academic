@@ -121,7 +121,7 @@ def ArgsGeneralWrapper(func):
             'top_p': top_p, 'temperature': temperature, 'n_choices': n_choices, 'stop': stop_sequence,
             'max_context': max_context, 'max_generation': max_generation, 'presence_penalty': presence_penalty,
             'frequency_penalty': frequency_penalty, 'logit_bias': logit_bias, 'user_identifier': user_identifier,
-            'response_format': response_format,
+            'response_format': response_format, 'input_models': models,
             'system_prompt': system_prompt, 'ipaddr': func_box.user_client_mark(ipaddr),
             'kb_config': {"names": kb_selects, 'score': vector_score, 'top-k': vector_top_k},
         }
@@ -152,8 +152,8 @@ def ArgsGeneralWrapper(func):
         txt_proc, func_redirect = yield from model_selection(txt, models, llm_kwargs, plugin_kwargs, cookies,
                                                              chatbot_with_cookie, history, args, func)
         # 根据args判断需要对提交和历史对话做什么处理
-        txt_proc, history = yield from plugins_selection(txt_proc, history, plugin_kwargs,
-                                                         args, cookies, chatbot_with_cookie, llm_kwargs)
+        txt_proc, history, func_redirect = yield from plugins_selection(txt_proc, history, plugin_kwargs,
+                                                    args, cookies, chatbot_with_cookie, llm_kwargs, func)
         # 根据cookie 或 对话配置决定到底走哪一步
         yield from func_decision_tree(func_redirect, cookies, single_mode, agent_mode,
                                       txt_proc, llm_kwargs, plugin_kwargs, chatbot_with_cookie,
@@ -219,7 +219,7 @@ def _vision_select_model(llm_kwargs, models):
     return vision_llm
 
 
-def plugins_selection(txt_proc, history, plugin_kwargs, args, cookies, chatbot_with_cookie, llm_kwargs):
+def plugins_selection(txt_proc, history, plugin_kwargs, args, cookies, chatbot_with_cookie, llm_kwargs, func):
     # 插件会传多参数，如果是插件，那么更新知识库 和 默认高级参数
     if len(args) > 1:
         plugin_kwargs['advanced_arg'] = ''
@@ -233,10 +233,13 @@ def plugins_selection(txt_proc, history, plugin_kwargs, args, cookies, chatbot_w
         plugin_kwargs['advanced_arg'] = ''
         from common.knowledge_base.kb_func import vector_recall_by_input
         if llm_kwargs['kb_config']['names']:
-            txt_proc = yield from vector_recall_by_input(txt_proc, chatbot_with_cookie, history,
-                                                         llm_kwargs, '知识库提示词_sys',
-                                                         '引用知识库回答')
-    return txt_proc, history
+            from crazy_functions.reader_fns.crazy_box import submit_no_use_ui_task
+            unpacking_input = yield from vector_recall_by_input(txt_proc, chatbot_with_cookie, history,
+                                                                llm_kwargs, '知识库提示词',
+                                                                '引用知识库回答')
+            txt_proc, history = unpacking_input
+            func = submit_no_use_ui_task
+    return txt_proc, history, func
 
 
 def func_decision_tree(func, cookies, single_mode, agent_mode,
@@ -358,7 +361,7 @@ def CatchException(f):
             if len(chatbot_with_cookie) == 0:
                 chatbot_with_cookie.clear()
                 chatbot_with_cookie.append(["插件调度异常", "异常原因"])
-            chatbot_with_cookie[-1] = (chatbot_with_cookie[-1][0], f"[Local Message] 插件调用出错: \n\n{tb_str} \n")
+            chatbot_with_cookie[-1][1] += f"\n\n[Local Message] 插件调用出错: \n\n{tb_str} \n"
             yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=f'异常 {e}')  # 刷新界面
 
     return decorated

@@ -388,16 +388,21 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         self.know_combo = [self.kb_input_select, self.vector_search_score, self.vector_search_top_k]
         self.input_combo.extend(self.know_combo)
         # 高级设置
+        self.models_combo = [self.input_models, self.vision_models, self.project_models, self.vector_search_to_history]
         self.input_models.input(func_signals.update_models,
-                                inputs=[self.input_models, self.vision_models, self.project_models],
+                                inputs=self.models_combo,
                                 outputs=[self.models_box])
         self.vision_models.input(func_signals.update_models,
-                                 inputs=[self.input_models, self.vision_models, self.project_models],
+                                 inputs=self.models_combo,
                                  outputs=[self.models_box])
         self.project_models.input(func_signals.update_models,
-                                  inputs=[self.input_models, self.vision_models, self.project_models],
+                                  inputs=self.models_combo,
                                   outputs=[self.models_box])
-        self.setting_combo = [self.models_box, self.history_round_num, self.default_worker_num, self.ocr_identifying_trust]
+        self.vector_search_to_history.input(func_signals.update_models,
+                                            inputs=self.models_combo,
+                                            outputs=[self.models_box])
+        self.setting_combo = [self.models_box, self.history_round_num, self.default_worker_num,
+                              self.ocr_identifying_trust]
         self.input_combo.extend(self.setting_combo)
         # 个人信息
         self.user_combo = [self.openai_keys, self.wps_cookie, self.qq_cookie, self.feishu_cookie,
@@ -538,7 +543,7 @@ def init_gradio_app():
     # --- --- replace gradio endpoint to forbid access to sensitive files --- ---
     dependencies = []
     endpoint = None
-    gradio_app: fastapi   # 增加类型提示，避免警告
+    gradio_app: fastapi  # 增加类型提示，避免警告
     for route in list(gradio_app.router.routes):
         if route.path == "/file/{path:path}":
             gradio_app.router.routes.remove(route)
@@ -554,6 +559,7 @@ def init_gradio_app():
         if not file_authorize_user(path_or_url, request, gradio_app):
             return {"detail": "Hack me? How dare you?"}
         return await endpoint(path_or_url, request)
+
     server_app = create_app()
 
     server_app.mount(CUSTOM_PATH, gradio_app)
@@ -591,5 +597,3 @@ def init_start():
 
 if __name__ == '__main__':
     init_start()
-
-

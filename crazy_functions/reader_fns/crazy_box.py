@@ -5,6 +5,8 @@
 import copy
 import os
 import json
+import re
+
 from common import func_box, toolbox
 from common.db.repository import prompt_repository
 from common.knowledge_base import kb_doc_api
@@ -261,6 +263,7 @@ def long_name_processing(file_name):
         file_name = file_name[0]
     if len(file_name) > 20:
         for i in file_name.splitlines():
+            i = re.sub(r"\s+", " ", i)
             if i:
                 file_name = func_box.replace_special_chars(i[:20])  # 限制文件名最长20个字符
                 break
@@ -352,7 +355,7 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
     inputs_array = []
     inputs_show_user_array = []
     prompt_cls, = json_args_return(plugin_kwargs, ['提示词分类'])
-    ipaddr = func_box.user_client_mark(llm_kwargs['ipaddr'])
+    ipaddr = llm_kwargs['ipaddr']
     if kwargs_prompt:
         prompt = prompt_repository.query_prompt(kwargs_prompt, prompt_cls, ipaddr, quote_num=True)
         if prompt:
@@ -787,11 +790,14 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
     else:
         chatbot.append([user_input, ''])
         download_format = func_box.get_fold_panel()
-        chatbot[-1][1] = download_format(title='正在解析网络链接...', content='')
+        chatbot[-1][1] = download_format(title='检测提交是否存在需要解析的文件或链接...', content='')
         yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='Reader loading...')
         fp_mapping, download_status = input_retrieval_file(user_input, llm_kwargs, valid_types)
         download_status.update(fp_mapping)
-        chatbot[-1][1] = download_format(title='链接解析完成', content=download_status, status='Done')
+        if not fp_mapping:
+            chatbot[-1][1] = ''
+        else:
+            chatbot[-1][1] = download_format(title='链接解析完成', content=download_status, status='Done')
         content_mapping = yield from file_extraction_intype(fp_mapping, chatbot, history, llm_kwargs, plugin_kwargs)
         for content_fp in content_mapping:  # 一个文件一个对话
             file_content = content_mapping[content_fp]

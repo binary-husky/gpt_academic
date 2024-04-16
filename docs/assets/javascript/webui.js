@@ -355,15 +355,20 @@ function checkChatMoreMask() {
 }
 
 function setThemeClass(css) {
-    var existingStyles = document.querySelectorAll("style[data-loaded-css]");
-    for (var i = 0; i < existingStyles.length; i++) {
-        var style = existingStyles[i];
+    let existingStyles = document.querySelectorAll("body > gradio-app > div > style")
+    for (i = 0; i < existingStyles.length; i++) {
+        let style = existingStyles[i];
         style.parentNode.removeChild(style);
     }
-    var styleElement = document.createElement('style');
-    styleElement.setAttribute('data-loaded-css', css);
+    existingStyles = document.querySelectorAll("style[data-loaded-css]");
+    for (c = 0; i < existingStyles.length; i++) {
+        let c_style = existingStyles[i];
+        style.parentNode.removeChild(style);
+    }
+    let styleElement = document.createElement('style');
+    styleElement.setAttribute('data-loaded-css', 'placeholder');
     styleElement.innerHTML = css;
-    document.head.appendChild(styleElement);
+    document.body.appendChild(styleElement);
 }
 
 /*

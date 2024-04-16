@@ -3,6 +3,7 @@ import sys
 sys.path.append(".")
 from common.knowledge_base.migrate import (create_tables, reset_tables, import_from_db,
                                            folder2db, prune_db_docs, prune_folder_files)
+from common.db.repository import prompt_repository
 from common.configs.model_config import NLTK_DATA_PATH, EMBEDDING_MODEL
 import nltk
 
@@ -37,6 +38,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--import-db",
         help="import tables from specified sqlite database"
+    )
+    parser.add_argument(
+        "--import-pdb",
+        help="初始化提示词"
+    )
+    parser.add_argument(
+        "--export-pdb",
+        help="导出提示词"
     )
     parser.add_argument(
         "-u",
@@ -106,6 +115,11 @@ if __name__ == "__main__":
         create_tables()
         print("recreating all vector stores")
         folder2db(kb_names=args.kb_name, mode="recreate_vs", embed_model=args.embed_model)
+    elif args.import_pdb:
+        create_tables()
+        prompt_repository.batch_import_prompt_dir()
+    elif args.export_pdb:
+        prompt_repository.batch_export_path()
     elif args.import_db:
         import_from_db(args.import_db)
     elif args.update_in_db:

@@ -5,7 +5,7 @@
 import json
 import random
 import time
-
+from common.logger_handler import logger
 import requests
 
 from common.func_box import extract_link_pf, valid_img_extensions, batch_encode_image
@@ -158,9 +158,11 @@ class GPTChatInit:
                                      json=payload, stream=stream, timeout=TIMEOUT_SECONDS)
         except Exception as e:
             self.retry_sum += 1
+            error = trimmed_format_exc()
             if self.retry_sum > 3:
-                error = trimmed_format_exc()
+                logger.error(f'请求失败， {error}')
                 return error, error, error
+            logger.warning(f'请求失败， {error}')
             return self.generate_messages(inputs, llm_kwargs, history, system_prompt, stream)
         for chuck in response.iter_lines():
             chunk_decoded, check_json, content = self._analysis_content(chuck)

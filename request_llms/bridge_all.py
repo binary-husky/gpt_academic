@@ -54,21 +54,6 @@ class LazyloadTiktoken(object):
         return encoder.decode(*args, **kwargs)
 
 
-class ModelFinder(dict):
-    def __getitem__(self, key):
-        try:
-            return super().__getitem__(key)
-        except KeyError:
-            return {
-                "fn_with_ui": chatgpt_ui,
-                "fn_without_ui": chatgpt_noui,
-                "endpoint": openai_endpoint,
-                "max_token": 32000,
-                "tokenizer": tokenizer_gpt4,
-                "token_cnt": get_token_num_gpt4,
-            }
-
-
 # Endpoint 重定向
 API_URL_REDIRECT = get_conf("API_URL_REDIRECT")
 openai_endpoint = "https://api.openai.com/v1/chat/completions"
@@ -98,6 +83,21 @@ if newbing_endpoint in API_URL_REDIRECT: newbing_endpoint = API_URL_REDIRECT[new
 if gemini_endpoint in API_URL_REDIRECT: gemini_endpoint = API_URL_REDIRECT[gemini_endpoint]
 if claude_endpoint in API_URL_REDIRECT: claude_endpoint = API_URL_REDIRECT[claude_endpoint]
 if yimodel_endpoint in API_URL_REDIRECT: yimodel_endpoint = API_URL_REDIRECT[yimodel_endpoint]
+
+
+class ModelFinder(dict):
+    def __getitem__(self, key: str):
+        try:
+            return super().__getitem__(key)
+        except KeyError:
+            return {
+                "fn_with_ui": chatgpt_ui,
+                "fn_without_ui": chatgpt_noui,
+                "endpoint": openai_endpoint,
+                "max_token": 32000,
+                "tokenizer": tokenizer_gpt4,
+                "token_cnt": get_token_num_gpt4,
+            }
 
 
 # 获取tokenizer
@@ -147,7 +147,7 @@ model_info.update({
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
-    "gpt-3.5-turbo-1106": { #16k
+    "gpt-3.5-turbo-1106": {  # 16k
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
         "endpoint": openai_endpoint,
@@ -156,7 +156,7 @@ model_info.update({
         "token_cnt": get_token_num_gpt35,
     },
 
-    "gpt-3.5-turbo-0125": { #16k
+    "gpt-3.5-turbo-0125": {  # 16k
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
         "endpoint": openai_endpoint,
@@ -221,7 +221,7 @@ model_info.update({
         "token_cnt": get_token_num_gpt4,
     },
     # azure openai
-    "azure-gpt-3.5":{
+    "azure-gpt-3.5": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
         "endpoint": azure_endpoint,
@@ -230,7 +230,7 @@ model_info.update({
         "token_cnt": get_token_num_gpt35,
     },
 
-    "azure-gpt-4":{
+    "azure-gpt-4": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
         "endpoint": azure_endpoint,
@@ -319,6 +319,7 @@ model_info.update({
 # -=-=-=-=-=-=- 月之暗面 -=-=-=-=-=-=-
 from request_llms.bridge_moonshot import predict as moonshot_ui
 from request_llms.bridge_moonshot import predict_no_ui_long_connection as moonshot_no_ui
+
 model_info.update({
     "moonshot-v1-8k": {
         "fn_with_ui": moonshot_ui,
@@ -383,7 +384,7 @@ for model in AVAIL_LLM_MODELS:
 
 # -=-=-=-=-=-=- 以下部分是新加入的模型，可能附带额外依赖 -=-=-=-=-=-=-
 # claude家族
-claude_models = ["claude-instant-1.2","claude-2.0","claude-2.1","claude-3-sonnet-20240229","claude-3-opus-20240229"]
+claude_models = ["claude-instant-1.2", "claude-2.0", "claude-2.1", "claude-3-sonnet-20240229", "claude-3-opus-20240229"]
 if any(item in claude_models for item in AVAIL_LLM_MODELS):
     from .bridge_claude import predict_no_ui_long_connection as claude_noui
     from .bridge_claude import predict as claude_ui
@@ -538,7 +539,7 @@ if "stack-claude" in AVAIL_LLM_MODELS:
             "token_cnt": get_token_num_gpt35,
         }
     })
-if "newbing" in AVAIL_LLM_MODELS:   # same with newbing-free
+if "newbing" in AVAIL_LLM_MODELS:  # same with newbing-free
     try:
         from .bridge_newbingfree import predict_no_ui_long_connection as newbingfree_noui
         from .bridge_newbingfree import predict as newbingfree_ui
@@ -627,7 +628,7 @@ if "qwen-local" in AVAIL_LLM_MODELS:
     except:
         print(trimmed_format_exc())
 # -=-=-=-=-=-=- 通义-在线模型 -=-=-=-=-=-=-
-if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-max" in AVAIL_LLM_MODELS:   # zhipuai
+if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-max" in AVAIL_LLM_MODELS:  # zhipuai
     try:
         from .bridge_qwen import predict_no_ui_long_connection as qwen_noui
         from .bridge_qwen import predict as qwen_ui
@@ -664,10 +665,11 @@ if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-
     except:
         print(trimmed_format_exc())
 # -=-=-=-=-=-=- 零一万物模型 -=-=-=-=-=-=-
-if "yi-34b-chat-0205" in AVAIL_LLM_MODELS or "yi-34b-chat-200k" in AVAIL_LLM_MODELS:   # zhipuai
+if "yi-34b-chat-0205" in AVAIL_LLM_MODELS or "yi-34b-chat-200k" in AVAIL_LLM_MODELS:  # zhipuai
     try:
         from .bridge_yimodel import predict_no_ui_long_connection as yimodel_noui
         from .bridge_yimodel import predict as yimodel_ui
+
         model_info.update({
             "yi-34b-chat-0205": {
                 "fn_with_ui": yimodel_ui,
@@ -727,7 +729,7 @@ if "sparkv2" in AVAIL_LLM_MODELS:  # 讯飞星火认知大模型
         })
     except:
         print(trimmed_format_exc())
-if "sparkv3" in AVAIL_LLM_MODELS or "sparkv3.5" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
+if "sparkv3" in AVAIL_LLM_MODELS or "sparkv3.5" in AVAIL_LLM_MODELS:  # 讯飞星火认知大模型
     try:
         from .bridge_spark import predict_no_ui_long_connection as spark_noui
         from .bridge_spark import predict as spark_ui
@@ -772,7 +774,7 @@ if "llama2" in AVAIL_LLM_MODELS:  # llama2
     except:
         print(trimmed_format_exc())
 # -=-=-=-=-=-=- 智谱 -=-=-=-=-=-=-
-if "zhipuai" in AVAIL_LLM_MODELS:   # zhipuai 是glm-4的别名，向后兼容配置
+if "zhipuai" in AVAIL_LLM_MODELS:  # zhipuai 是glm-4的别名，向后兼容配置
     try:
         model_info.update({
             "glm-4": {
@@ -787,7 +789,7 @@ if "zhipuai" in AVAIL_LLM_MODELS:   # zhipuai 是glm-4的别名，向后兼容�
     except:
         print(trimmed_format_exc())
 # -=-=-=-=-=-=- 幻方-深度求索大模型 -=-=-=-=-=-=-
-if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
+if "deepseekcoder" in AVAIL_LLM_MODELS:  # deepseekcoder
     try:
         from .bridge_deepseekcoder import predict_no_ui_long_connection as deepseekcoder_noui
         from .bridge_deepseekcoder import predict as deepseekcoder_ui
@@ -804,7 +806,6 @@ if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
         })
     except:
         print(trimmed_format_exc())
-
 
 # -=-=-=-=-=-=- one-api 对齐支持 -=-=-=-=-=-=-
 for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
@@ -829,9 +830,8 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
         },
     })
 
-
 # -=-=-=-=-=-=- azure模型对齐支持 -=-=-=-=-=-=-
-AZURE_CFG_ARRAY = get_conf("AZURE_CFG_ARRAY") # <-- 用于定义和切换多个azure模型 -->
+AZURE_CFG_ARRAY = get_conf("AZURE_CFG_ARRAY")  # <-- 用于定义和切换多个azure模型 -->
 if len(AZURE_CFG_ARRAY) > 0:
     for azure_model_name, azure_cfg_dict in AZURE_CFG_ARRAY.items():
         # 可能会覆盖之前的配置，但这是意料之中的
@@ -926,8 +926,8 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
                 # 观察窗（window）
                 chat_string = []
                 for i in range(n_model):
-                    color = colors[i%len(colors)]
-                    chat_string.append( f"【{str(models[i])} 说】: <font color=\"{color}\"> {window_mutex[i][0]} </font>" )
+                    color = colors[i % len(colors)]
+                    chat_string.append(f"【{str(models[i])} 说】: <font color=\"{color}\"> {window_mutex[i][0]} </font>")
                 res = '<br/><br/>\n\n---\n\n'.join(chat_string)
                 # # # # # # # # # # #
                 observe_window[0] = res
@@ -944,10 +944,10 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, obser
             time.sleep(1)
 
         for i, future in enumerate(futures):  # wait and get
-            color = colors[i%len(colors)]
-            return_string_collect.append( f"【{str(models[i])} 说】: <font color=\"{color}\"> {future.result()} </font>" )
+            color = colors[i % len(colors)]
+            return_string_collect.append(f"【{str(models[i])} 说】: <font color=\"{color}\"> {future.result()} </font>")
 
-        window_mutex[-1] = False # stop mutex thread
+        window_mutex[-1] = False  # stop mutex thread
         res = '<br/><br/>\n\n---\n\n'.join(return_string_collect)
         return res
 

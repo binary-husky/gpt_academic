@@ -6,10 +6,11 @@ from webui_elem.func_signals.__import__ import *
 
 
 # TODO < -------------------------------- 对话函数注册区 ----------------------------------->
-def update_models(inputs: list, visions: list, projects: list):
-    inputs.extend(visions)
-    inputs.extend(projects)
-    return inputs
+def update_models(*args):
+    inputs_model = []
+    for i in args:
+        inputs_model.extend(i)
+    return inputs_model
 
 
 def update_chat(llm_s, cookie):

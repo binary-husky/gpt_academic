@@ -295,7 +295,7 @@ def kb_base_del(kb_name, del_confirm, _):
         [新增列，编辑列，知识库列表，可用知识库列表]
     """
     if del_confirm == 'CANCELED':
-        return gr.update(visible=False), gr.update(visible=True), gr.update()
+        return gr.update(visible=False), gr.update(visible=True), gr.update(), gr.update()
     else:
         kb_name = list(base.kb_list_to_dict([kb_name]).keys())[0]
         response = kb_api.delete_kb(kb_name)
@@ -304,7 +304,7 @@ def kb_base_del(kb_name, del_confirm, _):
         kb_name_list = base.kb_dict_to_list(base.kb_details_to_dict()) + ['新建知识库']
         kb_name_tm = base.kb_details_to_dict()
         return (gr.update(visible=True), gr.update(visible=False), gr.update(choices=kb_name_list, value='新建知识库'),
-                list(kb_name_tm.keys()))
+                gr.update(choices=list(kb_name_tm.keys())))
 
 
 def kb_docs_file_source_del(kb_name, kb_file, _):

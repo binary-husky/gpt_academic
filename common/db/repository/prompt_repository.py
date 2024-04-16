@@ -13,7 +13,7 @@ _sys = ['spike', '127.0.0.1', None]
 
 
 def _read_user_auth(source):
-    return or_(PromptModel.source == source, source in _sys)
+    return or_(PromptModel.source == source, source in _sys, PromptModel.source.in_(_sys))
 
 
 def add_prompt(in_class, name, value, source):

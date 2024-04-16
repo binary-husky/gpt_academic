@@ -91,9 +91,10 @@ class RightElem:
             with gr.Box():
                 # gr.Markdown(func_box.get_html('what_news.html').replace('{%v}', 'LLMs调优参数'))
                 with gr.Accordion('提交文本预处理'):
-                    self.input_models = gr.CheckboxGroup(choices=['input加密', '网络链接RAG', '提取知识库摘要', 'Vision-Img'],
-                                                         value=['input加密', '网络链接RAG', 'Vision-Img'],
-                                                         container=False)
+                    self.input_models = gr.CheckboxGroup(
+                        choices=['input加密', '网络链接RAG', '提取知识库摘要', 'Vision-Img'],
+                        value=['input加密', '网络链接RAG', 'Vision-Img'],
+                        container=False)
                 with gr.Accordion('提交图片预处理', open=False):
                     self.vision_models = gr.CheckboxGroup(choices=['OCR缓存', 'gpt4-v自动识图', 'gemini-v自动识图',
                                                                    'glm-v自动识图'],
@@ -104,16 +105,20 @@ class RightElem:
                     self.project_models = gr.CheckboxGroup(choices=['关联缺陷', '关联用例', '关联任务'],
                                                            value=['关联任务'],
                                                            container=False)
-                    default_model = self.input_models.value+self.vision_models.value+self.project_models.value
-                    self.models_box = gr.State(default_model)
 
                 func_box.md_division_line()
                 with gr.Accordion(label='知识库调优参数'):
+                    self.vector_search_to_history = gr.CheckboxGroup(choices=['专注力转移'],
+                                                                     value=['专注力转移'],
+                                                                     container=False)
                     self.vector_search_score = gr.Slider(minimum=0, maximum=1100, value=500, step=1, interactive=True,
                                                          label="SCORE-THRESHOLD", show_label=True,
                                                          container=False)
                     self.vector_search_top_k = gr.Slider(minimum=1, maximum=10, value=4, step=1, interactive=True,
                                                          label="TOP-K", show_label=True, container=False)
+
+                default_model = self.input_models.value + self.vision_models.value + self.project_models.value + self.vector_search_to_history.value
+                self.models_box = gr.State(default_model)
                 func_box.md_division_line()
                 with gr.Accordion(label='LLMs调优参数', open=True):
                     default_params, response_format = toolbox.get_conf('LLM_DEFAULT_PARAMETER', 'RESPONSE_FORMAT')

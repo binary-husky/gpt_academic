@@ -239,7 +239,7 @@ class Prompt:
                 with gr.Column(scale=20, elem_classes='column-unset-min-width'):
                     self.new_kb_private_checkbox = gr.Checkbox(label='私有知识库',
                                                                value=False, show_label=True, )
-                with gr.Column(scale=90):
+                with gr.Column(scale=80):
                     self.new_kb_confirm_btn = gr.Button(value='新建', size='lg')
 
             with gr.Column(elem_classes='elem-box-solid') as self.embedding_download_clo:

@@ -18,7 +18,6 @@ class InitPath:
         self.private_knowledge_path = os.path.join(self.users_private_path, 'knowledge')
         self.private_files_path = os.path.join(self.users_private_path, 'files')
         self.private_history_path = os.path.join(self.users_private_path, 'history')
-        self.private_db_path = os.path.join(self.users_private_path, 'db')
 
     def __getattribute__(self, name):
         """

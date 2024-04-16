@@ -1,3 +1,5 @@
+from typing import List
+from pydantic import BaseModel
 
 """
     以下所有配置也都支持利用环境变量覆写，环境变量配置格式见docker-compose.yml。
@@ -9,8 +11,7 @@
 """
 
 # [step 1]>> API_KEY = "sk-123456789xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx123456789"。极少数情况下，还需要填写组织（格式如org-123456789abcdefghijklmno的），请向下翻，找 API_ORG 设置项
-API_KEY = "此处填API密钥"    # 可同时填写多个API-KEY，用英文逗号分割，例如API_KEY = "sk-openaikey1,sk-openaikey2,fkxxxx-api2dkey3,azure-apikey4"
-
+API_KEY = "此处填API密钥"  # 可同时填写多个API-KEY，用英文逗号分割，例如API_KEY = "sk-openaikey1,sk-openaikey2,fkxxxx-api2dkey3,azure-apikey4"
 
 # [step 2]>> 改为True应用代理，如果直接在海外服务器部署，此处不修改；如果使用本地或无地域限制的大模型时，此处也不需要修改
 USE_PROXY = False
@@ -25,14 +26,14 @@ if USE_PROXY:
     """
     proxies = {
         #          [协议]://  [地址]  :[端口]
-        "http":  "socks5h://localhost:11284",  # 再例如  "http":  "http://127.0.0.1:7890",
+        "http": "socks5h://localhost:11284",  # 再例如  "http":  "http://127.0.0.1:7890",
         "https": "socks5h://localhost:11284",  # 再例如  "https": "http://127.0.0.1:7890",
     }
 else:
     proxies = None
 
 # [step 3]>> 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
-LLM_MODEL = "gpt-3.5-turbo-16k" # 可选 ↓↓↓
+LLM_MODEL = "gpt-3.5-turbo-16k"  # 可选 ↓↓↓
 AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-preview",
                     "gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-3-turbo",
@@ -64,219 +65,219 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
 # 举例: API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "https://reverse-proxy-url/v1/chat/completions"}
 API_URL_REDIRECT = {}
 
-
 # 多线程函数插件中，默认允许多少路线程同时访问OpenAI。Free trial users的限制是每分钟3次，Pay-as-you-go users的限制是每分钟3500次
 # 一言以蔽之：免费（5刀）用户填3，OpenAI绑了信用卡的用户可以填 16 或者更高。提高限制请查询：https://platform.openai.com/docs/guides/rate-limits/overview
 DEFAULT_WORKER_NUM = 3
-
 
 # 色彩主题, 可选 ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast"]
 # 更多主题, 请查阅Gradio主题商店: https://huggingface.co/spaces/gradio/theme-gallery 可选 ["Gstaff/Xkcd", "NoCrypt/Miku", ...]
 THEME = "Default"
 AVAIL_THEMES = ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast", "Gstaff/Xkcd", "NoCrypt/Miku"]
 
-
 # 默认的系统提示词（system prompt）
 INIT_SYS_PROMPT = "Serve me as a writing and programming assistant."
-
 
 # 对话窗的高度 （仅在LAYOUT="TOP-DOWN"时生效）
 CHATBOT_HEIGHT = 1115
 
-
 # 代码高亮
 CODE_HIGHLIGHT = True
 
-
 # 窗口布局
-LAYOUT = "LEFT-RIGHT"   # "LEFT-RIGHT"（左右布局） # "TOP-DOWN"（上下布局）
-
+LAYOUT = "LEFT-RIGHT"  # "LEFT-RIGHT"（左右布局） # "TOP-DOWN"（上下布局）
 
 # 暗色模式 / 亮色模式
 DARK_MODE = True
 
-
 # 发送请求到OpenAI后，等待多久判定为超时
 TIMEOUT_SECONDS = 30
-
 
 # 网页的端口, -1代表随机端口
 WEB_PORT = -1
 
-
 # 如果OpenAI不响应（网络卡顿、代理失败、KEY失效），重试的次数限制
 MAX_RETRY = 2
 
-
 # 插件分类默认选项
-DEFAULT_FN_GROUPS = ['对话', '编程', '学术', '智能体']
+DEFAULT_FN_GROUPS = ['云文档', '飞书项目']
 
+# 写入Excel文件是否合并单元格
+merge_cell = False
 
 # 定义界面上“询问多个GPT模型”插件应该使用哪些模型，请从AVAIL_LLM_MODELS中选择，并在不同模型之间用`&`间隔，例如"gpt-3.5-turbo&chatglm3&azure-gpt-4"
 MULTI_QUERY_LLM_MODELS = "gpt-3.5-turbo&chatglm3"
-
 
 # 选择本地模型变体（只有当AVAIL_LLM_MODELS包含了对应本地模型时，才会起作用）
 # 如果你选择Qwen系列的模型，那么请在下面的QWEN_MODEL_SELECTION中指定具体的模型
 # 也可以是具体的模型路径
 QWEN_LOCAL_MODEL_SELECTION = "Qwen/Qwen-1_8B-Chat-Int8"
 
-
 # 接入通义千问在线大模型 https://dashscope.console.aliyun.com/
-DASHSCOPE_API_KEY = "" # 阿里灵积云API_KEY
-
+DASHSCOPE_API_KEY = ""  # 阿里灵积云API_KEY
 
 # 百度千帆（LLM_MODEL="qianfan"）
 BAIDU_CLOUD_API_KEY = ''
 BAIDU_CLOUD_SECRET_KEY = ''
-BAIDU_CLOUD_QIANFAN_MODEL = 'ERNIE-Bot'    # 可选 "ERNIE-Bot-4"(文心大模型4.0), "ERNIE-Bot"(文心一言), "ERNIE-Bot-turbo", "BLOOMZ-7B", "Llama-2-70B-Chat", "Llama-2-13B-Chat", "Llama-2-7B-Chat"
-
+BAIDU_CLOUD_QIANFAN_MODEL = 'ERNIE-Bot'  # 可选 "ERNIE-Bot-4"(文心大模型4.0), "ERNIE-Bot"(文心一言), "ERNIE-Bot-turbo", "BLOOMZ-7B", "Llama-2-70B-Chat", "Llama-2-13B-Chat", "Llama-2-7B-Chat"
 
 # 如果使用ChatGLM2微调模型，请把 LLM_MODEL="chatglmft"，并在此处指定模型路径
-CHATGLM_PTUNING_CHECKPOINT = "" # 例如"/home/hmp/ChatGLM2-6B/ptuning/output/6b-pt-128-1e-2/checkpoint-100"
-
+CHATGLM_PTUNING_CHECKPOINT = ""  # 例如"/home/hmp/ChatGLM2-6B/ptuning/output/6b-pt-128-1e-2/checkpoint-100"
 
 # 本地LLM模型如ChatGLM的执行方式 CPU/GPU
-LOCAL_MODEL_DEVICE = "cpu" # 可选 "cuda"
-LOCAL_MODEL_QUANT = "FP16" # 默认 "FP16" "INT4" 启用量化INT4版本 "INT8" 启用量化INT8版本
-
+LOCAL_MODEL_DEVICE = "cpu"  # 可选 "cuda"
+LOCAL_MODEL_QUANT = "FP16"  # 默认 "FP16" "INT4" 启用量化INT4版本 "INT8" 启用量化INT8版本
 
 # 设置gradio的并行线程数（不需要修改）
 CONCURRENT_COUNT = 100
 
-
 # 是否在提交时自动清空输入框
 AUTO_CLEAR_TXT = False
 
-
 # 加一个live2d装饰
 ADD_WAIFU = False
-
 
 # 设置用户名和密码（不需要修改）（相关功能不稳定，与gradio版本和网络都相关，如果本地使用不建议加这个）
 # [("username", "password"), ("username2", "password2"), ...]
 AUTHENTICATION = []
 
-
 # 如果需要在二级路径下运行（常规情况下，不要修改!!）（需要配合修改main.py才能生效!）
 CUSTOM_PATH = "/"
-
 
 # HTTPS 秘钥和证书（不需要修改）
 SSL_KEYFILE = ""
 SSL_CERTFILE = ""
 
-
 # 极少数情况下，openai的官方KEY需要伴随组织编码（格式如org-xxxxxxxxxxxxxxxxxxxxxxxx）使用
 API_ORG = ""
-
 
 # 如果需要使用Slack Claude，使用教程详情见 request_llms/README.md
 SLACK_CLAUDE_BOT_ID = ''
 SLACK_CLAUDE_USER_TOKEN = ''
 
-
 # 如果需要使用AZURE（方法一：单个azure模型部署）详情请见额外文档 docs\use_azure.md
 AZURE_ENDPOINT = "https://你亲手写的api名称.openai.azure.com/"
-AZURE_API_KEY = "填入azure openai api的密钥"    # 建议直接在API_KEY处填写，该选项即将被弃用
-AZURE_ENGINE = "填入你亲手写的部署名"            # 读 docs\use_azure.md
-
+AZURE_API_KEY = "填入azure openai api的密钥"  # 建议直接在API_KEY处填写，该选项即将被弃用
+AZURE_ENGINE = "填入你亲手写的部署名"  # 读 docs\use_azure.md
 
 # 如果需要使用AZURE（方法二：多个azure模型部署+动态切换）详情请见额外文档 docs\use_azure.md
 AZURE_CFG_ARRAY = {}
 
-
 # 阿里云实时语音识别 配置难度较高
 # 参考 https://github.com/binary-husky/gpt_academic/blob/master/docs/use_audio.md
 ENABLE_AUDIO = False
-ALIYUN_TOKEN=""     # 例如 f37f30e0f9934c34a992f6f64f7eba4f
-ALIYUN_APPKEY=""    # 例如 RoPlZrM88DnAFkZK
-ALIYUN_ACCESSKEY="" # （无需填写）
-ALIYUN_SECRET=""    # （无需填写）
-
+ALIYUN_TOKEN = ""  # 例如 f37f30e0f9934c34a992f6f64f7eba4f
+ALIYUN_APPKEY = ""  # 例如 RoPlZrM88DnAFkZK
+ALIYUN_ACCESSKEY = ""  # （无需填写）
+ALIYUN_SECRET = ""  # （无需填写）
 
 # 接入讯飞星火大模型 https://console.xfyun.cn/services/iat
 XFYUN_APPID = "00000000"
 XFYUN_API_SECRET = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
 XFYUN_API_KEY = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
-
 # 接入智谱大模型
 ZHIPUAI_API_KEY = ""
-ZHIPUAI_MODEL = "" # 此选项已废弃，不再需要填写
-
+ZHIPUAI_MODEL = ""  # 此选项已废弃，不再需要填写
 
 # Claude API KEY
 ANTHROPIC_API_KEY = ""
 
-
 # 月之暗面 API KEY
 MOONSHOT_API_KEY = ""
 
-
 # 零一万物(Yi Model) API KEY
 YIMODEL_API_KEY = ""
-
 
 # Mathpix 拥有执行PDF的OCR功能，但是需要注册账号
 MATHPIX_APPID = ""
 MATHPIX_APPKEY = ""
 
-
 # 自定义API KEY格式
 CUSTOM_API_KEY_PATTERN = ""
-
 
 # Google Gemini API-Key
 GEMINI_API_KEY = ''
 
-
 # HUGGINGFACE的TOKEN，下载LLAMA时起作用 https://huggingface.co/docs/hub/security-tokens
 HUGGINGFACE_ACCESS_TOKEN = "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"
-
 
 # GROBID服务器地址（填写多个可以均衡负载），用于高质量地读取PDF文档
 # 获取方法：复制以下空间https://huggingface.co/spaces/qingxu98/grobid，设为public，然后GROBID_URL = "https://(你的hf用户名如qingxu98)-(你的填写的空间名如grobid).hf.space"
 GROBID_URLS = [
-    "https://qingxu98-grobid.hf.space","https://qingxu98-grobid2.hf.space","https://qingxu98-grobid3.hf.space",
-    "https://qingxu98-grobid4.hf.space","https://qingxu98-grobid5.hf.space", "https://qingxu98-grobid6.hf.space",
+    "https://qingxu98-grobid.hf.space", "https://qingxu98-grobid2.hf.space", "https://qingxu98-grobid3.hf.space",
+    "https://qingxu98-grobid4.hf.space", "https://qingxu98-grobid5.hf.space", "https://qingxu98-grobid6.hf.space",
     "https://qingxu98-grobid7.hf.space", "https://qingxu98-grobid8.hf.space",
 ]
-
 
 # 是否允许通过自然语言描述修改本页的配置，该功能具有一定的危险性，默认关闭
 ALLOW_RESET_CONFIG = False
 
-
 # 在使用AutoGen插件时，是否使用Docker容器运行代码
 AUTOGEN_USE_DOCKER = False
-
 
 # 临时的上传文件夹位置，请勿修改
 PATH_PRIVATE_UPLOAD = "private_upload"
 
-
 # 日志文件夹的位置，请勿修改
 PATH_LOGGING = "gpt_log"
-
 
 # 除了连接OpenAI之外，还有哪些场合允许使用代理，请勿修改
 WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid",
                      "Warmup_Modules", "Nougat_Download", "AutoGen"]
 
+# 用以支持金山云文档的cookies
+WPS_COOKIES = {}
+
+# 用以支持QQ云文档的cookies
+QQ_COOKIES = {}
+
+# 用以支持飞书云文档的请求头+cookies，飞书需要保持cookies与请求头的CORS一致，所以请求头需要带上Cookie一起
+FEISHU_HEADER_COOKIE = {}
+
+# TODO 飞书项目的各种配置
+# 飞书项目的请求头，带Cookie那种
+PROJECT_FEISHU_HEADER = {}
+# 飞书项目 host
+PROJECT_BASE_HOST = 'project.feishu.cn'
+# 飞书项目 user-key
+PROJECT_USER_KEY = ''
+
+
+class WorkItems(BaseModel):
+    """
+    目前飞书项目支持的工作项类型
+    属性名称不能更改，属性value按照项目中的名称填写
+    """
+    # 工作项名称，不同项目可能存在不同的工作项名称，以下是枚举值，获取的到才会显示
+    story_name: List = ['需求', 'APP研发需求']
+    issue_name: List = ['缺陷BUG']
+    case_name: List = ['测试用例']
+
+    # 关联对象名称，用于查找需求相关的所有关联项
+    issue_item_name: List = ['缺陷相关需求']
+    case_item_name: List = ['归属需求']
+
+
+# 飞书项目【需求】展示信息的反向映射列表，填入中文名称，自动查找对应的id
+STORY_REVERSE_MAPPING = ['需求名称', '需求文档', '需求描述', '需求状态', '需求描述', '期望上线日期', '技术方案说明',
+                         '冒烟次数', '测试计划', '测试报告']
+# 飞书项目【获取首页/个人需求】展示信息的反向映射列表，填入中文名称，自动查找对应的id
+STORY_LIST_REVERSE_MAPPING = ['需求名称', '需求文档', '需求描述', '需求状态', '期望上线日期', '技术方案说明']
+# 飞书项目【获取首页/个人需求】除了开始时间与结束时间，增加时间筛选选项
+STORY_LIST_FILTER_TIME = ['期望上线日期']
+# 飞书项目【缺陷】展示信息的反向映射列表，填入中文名称，自动查找对应的id
+ISSUE_REVERSE_MAPPING = ['缺陷名称', '缺陷描述', 'Bug类型', '严重程度', '发现阶段', '缺陷状态', '原因分析']
+# 飞书项目【测试用例】展示信息的反向映射列表，填入中文名称，自动查找对应的id
+CASE_REVERSE_MAPPING = ['测试点', '测试用例详情', '归属需求', '标签', '用例分级']
 
 # *实验性功能*: 自动检测并屏蔽失效的KEY，请勿使用
 BLOCK_INVALID_APIKEY = False
 
-
 # 启用插件热加载
 PLUGIN_HOT_RELOAD = False
 
-
 # 自定义按钮的最大数量限制
 NUM_CUSTOM_BASIC_BTN = 4
-
-
 
 """
 --------------- 配置关联关系说明 ---------------

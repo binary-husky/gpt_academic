@@ -730,6 +730,7 @@ def get_fold_panel(btn_id=None):
         if isinstance(content, dict):
             content = json.dumps(content, indent=4, ensure_ascii=False)
         content = f'\n```\n{content.replace("```", "").strip()}\n```\n'
+        title = title.replace('\n', '').strip()
         return fold_html.format(title=f"<p>{title}</p>", content=content, status=status)
 
     return _format
