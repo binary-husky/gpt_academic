@@ -57,7 +57,8 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
 # 使用"one-api-*"前缀直接使用非标准方式接入的模型，例如
 # AVAIL_LLM_MODELS = ["one-api-claude-3-sonnet-20240229(max_token=100000)"]
 # --- --- --- ---
-
+# GPTS默认分类，为空则默认使用系统推荐
+GPTS_DEFAULT_CLASSIFICATION = []
 
 # --------------- 以下配置可以优化体验 ---------------
 

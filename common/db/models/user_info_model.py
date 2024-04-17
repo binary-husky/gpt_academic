@@ -7,7 +7,7 @@ class UserInfoModel(Base):
     用户信息模型
     """
     __tablename__ = 'user_info'
-    id = Column(String(32), primary_key=True, autoincrement=True, comment='用户ID')
+    id = Column(Integer, primary_key=True, autoincrement=True, comment='用户ID')
     user_name = Column(String(50), comment='用户名称')
     pass_word = Column(String(50), comment='用户密码')
     email = Column(String(50), comment='绑定邮箱地址')
