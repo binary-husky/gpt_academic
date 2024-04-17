@@ -258,7 +258,6 @@ class Prompt:
                     self.embedding_download_status = gr.Markdown()
 
     def __draw_edit_knowledge_base(self):
-        spl = toolbox.get_conf('spl')
         from common.configs import TEXT_SPLITTER_NAME, text_splitter_dict
         with gr.Column(visible=False) as self.edit_knowledge_base:
             with gr.Row():
