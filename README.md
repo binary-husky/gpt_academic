@@ -77,6 +77,10 @@ flowchart TD
    conda create -n gptac_venv python=3.11    # 创建anaconda环境
    conda activate gptac_venv                 # 激活anaconda环境
    python -m pip install -r requirements.txt # 这个步骤和pip安装一样的步骤
+   # 初始化知识库
+   python common/init_database.py --recreate-vs  
+   # 初始化提示词
+   python common/init_database.py --import-pdb
    ```
 
 

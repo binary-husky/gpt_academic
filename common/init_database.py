@@ -36,15 +36,20 @@ if __name__ == "__main__":
         help=("create empty tables, or drop the database tables before recreate vector stores")
     )
     parser.add_argument(
+        '-sr',
         "--import-db",
         help="import tables from specified sqlite database"
     )
     parser.add_argument(
+        '-d',
         "--import-pdb",
+        action="store_true",  # Add this line
         help="初始化提示词"
     )
     parser.add_argument(
+        '-ex',
         "--export-pdb",
+        action="store_true",  # Add this line
         help="导出提示词"
     )
     parser.add_argument(

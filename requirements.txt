@@ -53,6 +53,7 @@ rich
 chromadb
 chardet
 commentjson
+nltk
 
 # FastAPi
 sse_starlette
