@@ -72,7 +72,7 @@ def batch_export_path():
         )
     for source in file_dict:
         with open(os.path.join(init_path.prompt_export_path, f"{source}.json"), mode='w', encoding='utf-8') as f:
-            f.write(json.dumps(file_dict, indent=4, ensure_ascii=False))
+            f.write(json.dumps(file_dict[source], indent=4, ensure_ascii=False))
             print(f'{source}已导出', os.path.join(init_path.prompt_export_path, f"{source}.json"))
 
 
@@ -165,5 +165,5 @@ def get_all_class():
 if __name__ == '__main__':
     from common.db.base import Base, engine
     Base.metadata.create_all(bind=engine)
-    batch_export_path()
+    batch_import_prompt_dir()
 
