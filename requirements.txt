@@ -1,12 +1,7 @@
-<<<<<<< HEAD
 # Core
 gradio==3.43.2
 
 # Release requirement
-=======
-https://public.agent-matrix.com/publish/gradio-3.32.9-py3-none-any.whl
-gradio-client==0.8
->>>>>>> master
 pypdf2==2.12.1
 tiktoken>=0.3.3
 pydantic==1.10.11
@@ -15,7 +10,7 @@ scipdf_parser>=0.52
 langchain==0.0.354
 langchain-experimental==0.0.47
 SQLAlchemy==2.0.25
-
+langchain==0.0.354
 
 # Dependencies
 requests[socks]
@@ -48,7 +43,6 @@ pymupdf
 openai
 arxiv
 numpy
-<<<<<<< HEAD
 rich
 loguru
 pymdown-extensions
@@ -56,6 +50,6 @@ latex2mathml
 pyfiglet
 starlette
 yarl
-=======
 rich
->>>>>>> master
+chromadb
+logru

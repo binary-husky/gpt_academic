@@ -137,7 +137,7 @@ def ArgsGeneralWrapper(func):
             }
         }
         # 历史对话轮次
-        history = history[:history_num]
+        history = history[:history_num*2]  # 为了保证历史记录永远是偶数
         # 对话参数
         if not cookies.get('first_chat') and args:
             cookies['first_chat'] = args[0] + "_" + func_box.created_atime()

@@ -27,7 +27,7 @@ class Settings:
     def _draw_setting_senior(self):
         with gr.Tab(label=i18n("高级")):
             worker_num = toolbox.get_conf('DEFAULT_WORKER_NUM')
-            self.history_round_num = gr.Slider(minimum=0, maximum=100, value=20, step=2,
+            self.history_round_num = gr.Slider(minimum=0, maximum=100, value=15, step=2,
                                                show_label=True, interactive=True, label="上下文历史记录轮数",
                                                container=False)
             self.default_worker_num = gr.Slider(minimum=1, maximum=30, value=worker_num, step=1,
