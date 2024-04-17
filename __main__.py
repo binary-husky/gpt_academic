@@ -529,6 +529,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         # gr.mount_gradio_app     # rewriting
         self.demo.dev_mode = False
         self.demo.config = self.demo.get_config_file()
+        self.demo.favicon_path = get_conf('favicon_path')
         self.demo.validate_queue_settings()
         from gradio.routes import App
         gradio_app = App.create_app(self.demo)
@@ -583,10 +584,11 @@ def init_start():
     # 检查/初始化数据库
     info_path = os.path.join(init_path.private_knowledge_path, 'info.db')
     if not os.path.exists(info_path):
-        from common.knowledge_base.migrate import create_tables
+        from common.knowledge_base.migrate import create_tables, folder2db
         from common.db.repository.prompt_repository import batch_import_prompt_dir
         create_tables()
         batch_import_prompt_dir()
+        folder2db([], mode="recreate_vs")
         logger.info('create kb tables, initialization Prompt')
     # 正式开启启动
     logger.info('start...')
