@@ -16,6 +16,10 @@ def _read_user_auth(source):
     return or_(PromptModel.source == source, source in _sys, PromptModel.source.in_(_sys))
 
 
+def _edit_user_auth(source):
+    return or_(PromptModel.source == source, source in _sys)
+
+
 def add_prompt(in_class, name, value, source):
     old_prompt = query_prompt(name, in_class, source)
     if old_prompt:
@@ -164,6 +168,6 @@ def get_all_class():
 
 if __name__ == '__main__':
     from common.db.base import Base, engine
+
     Base.metadata.create_all(bind=engine)
     batch_import_prompt_dir()
-

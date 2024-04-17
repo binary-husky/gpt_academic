@@ -70,10 +70,21 @@ API_URL_REDIRECT = {}
 # 一言以蔽之：免费（5刀）用户填3，OpenAI绑了信用卡的用户可以填 16 或者更高。提高限制请查询：https://platform.openai.com/docs/guides/rate-limits/overview
 DEFAULT_WORKER_NUM = 3
 
+# prompt 的开放选项,
+preset_prompt = {'key': ['所有', '个人'], 'value': '所有'}
+# 默认llms调优参数，尽量不要改变顺序, 顺序要和llms_cookies_combo一致
+LLM_DEFAULT_PARAMETER = {
+    'top_p': 1.0, 'temperature': 1.0, 'n_choices': 1, 'stop': '',
+    'presence_penalty': 2.0, 'frequency_penalty': 0, 'user_identifier': "",
+    "response_format": 'text',
+    'max_context': 2000, 'max_generation': 1000, 'logit_bias': "",
+    'system_prompt': '',
+}
+
 # 色彩主题, 可选 ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast"]
 # 更多主题, 请查阅Gradio主题商店: https://huggingface.co/spaces/gradio/theme-gallery 可选 ["Gstaff/Xkcd", "NoCrypt/Miku", ...]
 THEME = "Default"
-AVAIL_THEMES = ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast", "Gstaff/Xkcd", "NoCrypt/Miku"]
+AVAIL_THEMES = ["Chuanhu-Plus", "High-Contrast", "Gstaff/Xkcd", "NoCrypt/Miku"]
 
 # 默认的系统提示词（system prompt）
 INIT_SYS_PROMPT = "Serve me as a writing and programming assistant."
