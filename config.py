@@ -80,6 +80,9 @@ LLM_DEFAULT_PARAMETER = {
     'max_context': 2000, 'max_generation': 1000, 'logit_bias': "",
     'system_prompt': '',
 }
+# 支持的response_format类型
+# https://platform.openai.com/docs/api-reference/audio/createTranscription#audio-createtranscription-response_format
+RESPONSE_FORMAT = ['text', 'json_object']
 
 # LaTeX 公式渲染策略，可选"default", "strict", "all"或者"disabled"
 latex_option = ['all', 'strict', 'default', 'disabled']
