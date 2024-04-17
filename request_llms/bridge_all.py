@@ -67,10 +67,6 @@ claude_endpoint = "https://api.anthropic.com/v1/messages"
 yimodel_endpoint = "https://api.lingyiwanwu.com/v1/chat/completions"
 cohere_endpoint = 'https://api.cohere.ai/v1/chat'
 
-AZURE_ENDPOINT, AZURE_ENGINE = get_conf('AZURE_ENDPOINT', 'AZURE_ENGINE')
-if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
-azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
-
 # 兼容旧版的配置
 try:
     API_URL = get_conf("API_URL")
@@ -241,25 +237,6 @@ model_info.update({
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
     },
-    # azure openai
-    "azure-gpt-3.5": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": azure_endpoint,
-        "max_token": 4096,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-
-    "azure-gpt-4": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": azure_endpoint,
-        "max_token": 8192,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
-    },
-
     # 智谱AI
     "glm-4": {
         "fn_with_ui": zhipu_ui,
