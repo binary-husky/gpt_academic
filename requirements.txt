@@ -51,3 +51,8 @@ starlette
 yarl
 rich
 chromadb
+chardet
+commentjson
+
+# FastAPi
+sse_starlette

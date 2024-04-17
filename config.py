@@ -81,6 +81,8 @@ LLM_DEFAULT_PARAMETER = {
     'system_prompt': '',
 }
 
+# LaTeX 公式渲染策略，可选"default", "strict", "all"或者"disabled"
+latex_option = ['all', 'strict', 'default', 'disabled']
 # 色彩主题, 可选 ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast"]
 # 更多主题, 请查阅Gradio主题商店: https://huggingface.co/spaces/gradio/theme-gallery 可选 ["Gstaff/Xkcd", "NoCrypt/Miku", ...]
 THEME = "Default"
