@@ -8,6 +8,7 @@ from fastapi import Body
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, root_validator
 from typing import Dict, List, Optional
+from common.func_box import get_env_proxy_network
 
 
 class ApiConfigParams(BaseModel):
@@ -169,6 +170,4 @@ def embed_download2py(model_name='BAAI/bge-m3'):
 
 
 if __name__ == '__main__':
-    from common.toolbox import get_env_proxy_network
-
-    print(get_env_proxy_network())
+    pass
