@@ -300,9 +300,12 @@ def get_local_embed_paths() -> Dict:
 
 def list_local_embed_models() -> List[str]:
     model_path = os.path.join(pathlib.Path.home(), '.cache', 'torch', 'sentence_transformers')
-    model_list = os.listdir(model_path)
-    model_list = ["_".join(i.split('_')[1:]) for i in model_list]
-    return model_list
+    if os.path.exists(model_path):
+        model_list = os.listdir(model_path)
+        model_list = ["_".join(i.split('_')[1:]) for i in model_list]
+        return model_list
+    else:
+        return []
 
 
 def get_model_worker_config(model_name: str = None) -> dict:
