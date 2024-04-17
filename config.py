@@ -1,3 +1,4 @@
+import os
 from typing import List
 from pydantic import BaseModel
 
@@ -283,6 +284,25 @@ PLUGIN_HOT_RELOAD = False
 
 # 自定义按钮的最大数量限制
 NUM_CUSTOM_BASIC_BTN = 4
+
+
+# TODO: App Setup
+APPNAME = "Hello GPT"
+avatar_images = (os.path.join('docs/assets/chatbot_avatar/logo.png'), os.path.join(
+    'docs/assets/chatbot_avatar/user.png'))  # 对话头像
+favicon_path = os.path.join('docs/assets/chatbot_avatar/favicon.png')  # 浏览器标签icon
+qc_icon_path = os.path.join('docs/assets/chatbot_avatar/logo.png')  # 访问二维码
+devs_document = 'https://github.com/Kilig947/Hello-GPT/blob/hello-gpt/README.md'  # 个人开发文档
+robot_hook = ''  # 机器人报错通知地址
+
+# TODO: FASTAPI配置
+cancel_verification = True  # 是否接入单点登陆验证，True为不进行单点登陆
+auth_url = ''  # 鉴权地址
+auth_cookie_tag = ''  # cookies关键字
+auth_func_based = lambda x: x.get('data').get('username')  # 登陆成功判断依据
+routing_address = ''  # APP域名
+app_reload = False  # 拉取代码后应用是否自动重启
+redirect_address = 'https://xxxx/login'
 
 """
 --------------- 配置关联关系说明 ---------------
