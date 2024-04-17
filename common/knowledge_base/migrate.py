@@ -9,6 +9,7 @@ from common.knowledge_base.utils import (
 )
 from common.knowledge_base.kb_service.base import KBServiceFactory
 from common.knowledge_base.kb_summary.base import KBSummaryService
+from common.db.repository import CacheModel, PromptModel, UserInfoModel
 from common.db.base import Base, engine
 from common.db.session import session_scope
 import os

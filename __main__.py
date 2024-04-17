@@ -584,8 +584,10 @@ def init_start():
     info_path = os.path.join(init_path.private_knowledge_path, 'info.db')
     if not os.path.exists(info_path):
         from common.knowledge_base.migrate import create_tables
+        from common.db.repository.prompt_repository import batch_import_prompt_dir
         create_tables()
-        logger.info('create kb tables')
+        batch_import_prompt_dir()
+        logger.info('create kb tables, initialization Prompt')
     # 正式开启启动
     logger.info('start...')
     app_reload = get_conf('app_reload')
