@@ -10,7 +10,6 @@ scipdf_parser>=0.52
 langchain==0.0.354
 langchain-experimental==0.0.47
 SQLAlchemy==2.0.25
-langchain==0.0.354
 
 # Dependencies
 requests[socks]
@@ -52,4 +51,3 @@ starlette
 yarl
 rich
 chromadb
-logru
