@@ -231,7 +231,11 @@ class Prompt:
                                                            elem_classes='normal_select')
                 embed_list = list_local_embed_models()
                 with gr.Column(elem_classes='column_right'):
-                    self.new_kb_embedding_model = gr.Dropdown(choices=embed_list, value=embed_list[0],
+                    if embed_list:
+                        embed_value = embed_list[0]
+                    else:
+                        embed_value = None
+                    self.new_kb_embedding_model = gr.Dropdown(choices=embed_list, value=embed_value,
                                                               label="本地Embedding模型", allow_custom_value=True,
                                                               container=False, show_label=True,
                                                               elem_classes='normal_select', interactive=True)
