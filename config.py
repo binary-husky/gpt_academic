@@ -198,8 +198,12 @@ XFYUN_API_KEY = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 ZHIPUAI_API_KEY = ""
 ZHIPUAI_MODEL = ""  # 此选项已废弃，不再需要填写
 
+# Claude API 请求地址
+ANTHROPIC_ENDPOINT_API = 'https://api.anthropic.com/v1/messages'
 # Claude API KEY
 ANTHROPIC_API_KEY = ""
+# Claude API 重定向 OPENAI OR ONE API
+ANTHROPIC_API_URL_REDIRECT = True
 
 # 月之暗面 API KEY
 MOONSHOT_API_KEY = ""
