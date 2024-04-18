@@ -62,8 +62,8 @@ class GptJsonIO():
         if "type" in reduced_schema:
             del reduced_schema["type"]
         # Ensure json in context is well-formed with double quotes.
+        schema_str = json.dumps(reduced_schema)
         if self.example_instruction:
-            schema_str = json.dumps(reduced_schema)
             return PYDANTIC_FORMAT_INSTRUCTIONS.format(schema=schema_str)
         else:
             return PYDANTIC_FORMAT_INSTRUCTIONS_SIMPLE.format(schema=schema_str)
