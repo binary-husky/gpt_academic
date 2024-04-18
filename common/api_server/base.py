@@ -114,7 +114,7 @@ def mount_filename_summary_routes(app: FastAPI):
 
 def mount_app_routes(app: FastAPI):
 
-    app.get(path='/favicon.icon', tags=['Gradio Mount'], summary='获取网站icon')(gradio_app.get_favicon)
+    app.get(path='/favicon.ico', tags=['Gradio Mount'], summary='获取网站icon')(gradio_app.get_favicon)
 
     app.get(path='/logout', tags=['Gradio Mount'], summary='退出登陆')(gradio_app.logout)
 

@@ -529,8 +529,8 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         # gr.mount_gradio_app     # rewriting
         self.demo.dev_mode = False
         self.demo.config = self.demo.get_config_file()
-        self.demo.favicon_path = get_conf('favicon_path')
         self.demo.validate_queue_settings()
+        self.demo.favicon_path = get_conf('favicon_path')
         from gradio.routes import App
         gradio_app = App.create_app(self.demo)
         return gradio_app

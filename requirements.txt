@@ -19,33 +19,21 @@ psutil
 distro
 python-dotenv
 Levenshtein
-paddleocr
 qrcode
 pypinyin
-moviepy
 SpeechRecognition
 pyDes
-PaddlePaddle
-xmindparser
-xmind
 beautifulsoup4
 prompt_toolkit
-latex2mathml
-python-docx
-mdtex2html
 dashscope
 pyautogen
 colorama
-Markdown
 pygments
-pymupdf
 openai
-arxiv
 numpy
 rich
 loguru
 pymdown-extensions
-latex2mathml
 pyfiglet
 starlette
 yarl
@@ -54,6 +42,19 @@ chromadb
 chardet
 commentjson
 nltk
+
+# Docs
+latex2mathml
+Markdown
+pymupdf
+mdtex2html
+python-docx
+paddleocr
+xmindparser
+xmind
+PaddlePaddle
+moviepy
+arxiv
 
 # FastAPi
 sse_starlette

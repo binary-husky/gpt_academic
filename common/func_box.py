@@ -693,7 +693,7 @@ def get_avatar_img(llm_s: str, bot_avatar):
     if chat_img:
         return ['./docs/assets/chatbot_avatar/logo.png', chat_img.replace(init_path.base_path, '.')]
     else:
-        return ['./docs/assets/chatbot_avatar/logo.png', './docs/chatbot_avatar/logo.png']
+        return ['./docs/assets/chatbot_avatar/logo.png', './docs/assets/chatbot_avatar/logo.png']
 
 
 valid_img_extensions = ['png', 'jpg', 'jpeg', 'bmp', 'svg', 'webp', 'ico', 'tif', 'tiff', 'raw', 'eps', 'gif']
