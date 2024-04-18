@@ -466,7 +466,7 @@ def PDF翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot, h
             return True
         
         except:
-            report_exception(chatbot, history, b=f"发现重复上传，但是无法找到相关文件")
+            report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"发现重复上传，但是无法找到相关文件")
             yield from update_ui(chatbot=chatbot, history=history)
             
             chatbot.append([f"没有相关文件", '尝试重新翻译PDF...'])
