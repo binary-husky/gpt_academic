@@ -8,11 +8,10 @@ import json
 import random
 import string
 import websockets
-import logging
 import time
 import threading
 import importlib
-from toolbox import get_conf, update_ui
+from common.toolbox import update_ui
 
 
 def random_hash():
@@ -96,7 +95,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         additional_fn代表点击的哪个按钮，按钮见functional.py
     """
     if additional_fn is not None:
-        from core_functional import handle_core_functionality
+        from common.core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
     raw_input = "What I would like to say is the following: " + inputs
@@ -137,10 +136,8 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         if tgui_say != mutable[0]:
             tgui_say = mutable[0]
             history[-1] = tgui_say
-            chatbot[-1] = (history[-2], history[-1])
+            chatbot[-1] = [history[-2], history[-1]]
             yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-
-
 
 
 def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience=False):

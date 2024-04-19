@@ -1,10 +1,9 @@
-from toolbox import update_ui, promote_file_to_downloadzone, gen_time_str
-from toolbox import CatchException, report_exception
-from toolbox import write_history_to_file, promote_file_to_downloadzone
+from common.toolbox import update_ui, promote_file_to_downloadzone, gen_time_str
+from common.toolbox import CatchException, report_exception
+from common.toolbox import write_history_to_file, promote_file_to_downloadzone
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import read_and_clean_pdf_text
 from .crazy_utils import input_clipping
-
 
 
 def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
@@ -14,12 +13,11 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
         ############################## <第 0 步，切割PDF> ##################################
         # 递归地切割PDF文件，每一块（尽量是完整的一个section，比如introduction，experiment等，必要时再进行切割）
         # 的长度必须小于 2500 个 Token
-        file_content, page_one = read_and_clean_pdf_text(file_name) # （尝试）按照章节切割PDF
-        file_content = file_content.encode('utf-8', 'ignore').decode()   # avoid reading non-utf8 chars
+        file_content, page_one = read_and_clean_pdf_text(file_name)  # （尝试）按照章节切割PDF
+        file_content = file_content.encode('utf-8', 'ignore').decode()  # avoid reading non-utf8 chars
         page_one = str(page_one).encode('utf-8', 'ignore').decode()  # avoid reading non-utf8 chars
 
         TOKEN_LIMIT_PER_FRAGMENT = 2500
-
         from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit
         paper_fragments = breakdown_text_to_satisfy_token_limit(txt=file_content,  limit=TOKEN_LIMIT_PER_FRAGMENT, llm_model=llm_kwargs['llm_model'])
         page_one_fragments = breakdown_text_to_satisfy_token_limit(txt=str(page_one), limit=TOKEN_LIMIT_PER_FRAGMENT//4, llm_model=llm_kwargs['llm_model'])
@@ -31,8 +29,10 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
         final_results.append(paper_meta)
 
         ############################## <第 2 步，迭代地历遍整个文章，提取精炼信息> ##################################
-        i_say_show_user = f'首先你在中文语境下通读整篇论文。'; gpt_say = "[Local Message] 收到。"           # 用户提示
-        chatbot.append([i_say_show_user, gpt_say]); yield from update_ui(chatbot=chatbot, history=[])    # 更新UI
+        i_say_show_user = f'首先你在中文语境下通读整篇论文。';
+        gpt_say = "[Local Message] 收到。"  # 用户提示
+        chatbot.append([i_say_show_user, gpt_say]);
+        yield from update_ui(chatbot=chatbot, history=[])  # 更新UI
 
         iteration_results = []
         last_iteration_result = paper_meta  # 初始值是摘要
@@ -93,11 +93,11 @@ do not have too much repetitive information, numerical values using the original
         file_write_buffer.extend([i_say, gpt_say])
         ############################## <第 4 步，设置一个token上限> ##################################
         _, final_results = input_clipping("", final_results, max_token_limit=3200)
-        yield from update_ui(chatbot=chatbot, history=final_results) # 注意这里的历史记录被替代了
+        yield from update_ui(chatbot=chatbot, history=final_results)  # 注意这里的历史记录被替代了
 
     res = write_history_to_file(file_write_buffer)
     promote_file_to_downloadzone(res, chatbot=chatbot)
-    yield from update_ui(chatbot=chatbot, history=final_results) # 刷新界面
+    yield from update_ui(chatbot=chatbot, history=final_results)  # 刷新界面
 
 
 @CatchException
@@ -108,7 +108,7 @@ def 批量总结PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     chatbot.append([
         "函数插件功能？",
         "批量总结PDF文档。函数插件贡献者: ValeriaWong，Eralien"])
-    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+    yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
@@ -128,8 +128,8 @@ def 批量总结PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
         project_folder = txt
     else:
         if txt == "": txt = '空空如也的输入栏'
-        report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
-        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+        report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"找不到本地项目或无权访问: {txt}")
+        yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
         return
 
     # 搜索需要处理的文件清单
@@ -137,8 +137,8 @@ def 批量总结PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
 
     # 如果没找到任何文件
     if len(file_manifest) == 0:
-        report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何.tex或.pdf文件: {txt}")
-        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+        report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"找不到任何.tex或.pdf文件: {txt}")
+        yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
         return
 
     # 开始正式执行任务

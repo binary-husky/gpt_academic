@@ -1,0 +1,2 @@
+# Hugging face
+sentence_transformers

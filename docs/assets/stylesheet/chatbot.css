@@ -1,0 +1,371 @@
+
+hr.append-display {
+    margin: 8px 0;
+    border: none;
+    height: 1px;
+    border-top-width: 0;
+    background-image: linear-gradient(to right, rgba(50,50,50, 0.1), rgba(150, 150, 150, 0.8), rgba(50,50,50, 0.1));
+}
+.source-a {
+    font-size: 0.8em;
+    max-width: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    /* background-color: #dddddd88; */
+    border-radius: 1.5rem;
+    padding: 0.2em;
+}
+.source-a a {
+    display: inline-block;
+    background-color: #aaaaaa50;
+    border-radius: 1rem;
+    padding: 0.5em;
+    text-align: center;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    min-width: 20%;
+    white-space: nowrap;
+    margin: 0.2rem 0.1rem;
+    text-decoration: none !important;
+    flex: 1;
+    transition: flex 0.5s;
+}
+.source-a a:hover {
+    background-color: #aaaaaa20;
+    flex: 2;
+}
+
+/* 川虎助理 */
+.agent-prefix {
+    font-size: smaller; 
+    opacity: 0.6;
+    padding: 6px 0 4px;
+}
+.agent-prefix::before {
+    content: '🐯';
+    filter: grayscale();
+    padding: 0 4px;
+}
+
+/* 阻止generating时的border */
+#chuanhu-chatbot > .wrap {
+    border: none !important;
+}
+
+#chatbot-input-row {
+    align-items: end;
+    gap: 6px;
+}
+#chatbot-input-row .gradio-html {
+    min-width: 0;
+    max-width: 42px;
+    width: 42px;
+}
+#chatbot-input-tb-row {
+    min-width: min(87%,100%) !important;
+    gap: 0;
+    justify-content: end;
+    border-radius: 21px;
+    background: var(--chatbot-input-background-color);
+    box-shadow: var(--shadow-md);
+}
+#user-input-tb {
+    padding: 0 !important;
+    /* border: 1px solid rgba(167, 167, 167, 0.5) !important; */
+    /* border-radius: 21px !important; */
+}
+#user-input-tb textarea {
+    /* max-height: 110px; */
+    background: transparent;
+}
+#user-input-tb .wrap {
+    background: none !important;
+    border-radius: 21px !important;
+}
+
+/* 亮色（默认） */
+#chuanhu-chatbot {
+    background-color: var(--chatbot-background-color-light) !important;
+    color: var(--chatbot-color-light) !important;
+}
+[data-testid = "bot"] {
+    background-color: var(--message-bot-background-color-light) !important;
+}
+[data-testid = "user"] {
+    background-color: var(--message-user-background-color-light) !important;
+}
+/* 暗色 */
+.dark #chuanhu-chatbot {
+    background-color: var(--chatbot-background-color-dark) !important;
+    color: var(--chatbot-color-dark) !important;
+}
+.dark [data-testid = "bot"] {
+    background-color: var(--message-bot-background-color-dark) !important;
+}
+.dark [data-testid = "user"] {
+    background-color: var(--message-user-background-color-dark) !important;
+}
+/* 对话气泡 */
+.message {
+    border-radius: var(--radius-xl) !important;
+    border: none;
+    padding: var(--spacing-xl) !important;
+    font-size: var(--text-md) !important;
+    line-height: var(--line-md) !important;
+    min-height: calc(var(--text-md)*var(--line-md) + 2*var(--spacing-xl));
+    min-width: calc(var(--text-md)*var(--line-md) + 2*var(--spacing-xl));
+}
+[data-testid = "bot"] {
+    max-width: calc(90% - 40px);
+    border-bottom-left-radius: 0 !important;
+}
+[data-testid = "user"] {
+    max-width: calc(90% - 40px);
+    width: auto !important;
+    border-bottom-right-radius: 0 !important;
+}
+.message-row {
+    align-self: unset !important;
+}
+.message-row.user-row {
+    justify-content: flex-end;
+}
+
+/* .message-row.has-message-btn-row{
+    padding-bottom: 19px !important;
+} */
+
+/* 屏幕宽度大于等于500px的设备 */
+/* update on 2023.4.8: 高度的细致调整已写入JavaScript */
+@media screen and (min-width: 500px) {
+    /* #chuanhu-chatbot {
+        height: calc(100*var(--vh) - 200px);
+    }
+    #chuanhu-chatbot>.wrapper>.wrap {
+        max-height: calc(100*var(--vh) - 200px - var(--line-sm)*1rem - 2*var(--block-label-margin) );
+    } */
+}
+/* 屏幕宽度小于500px的设备 */
+@media screen and (max-width: 499px) {
+    /* #chuanhu-chatbot {
+        height: calc(100*var(--vh) - 140px);
+    }
+    #chuanhu-chatbot>.wrapper>.wrap {
+        max-height: calc(100*var(--vh) - 140px - var(--line-sm)*1rem - 2*var(--block-label-margin) );
+    } */
+    [data-testid = "bot"] {
+        max-width: calc(100% - 19px) !important;
+    }
+    [data-testid = "user"] {
+        max-width: calc(100% - 19px) !important;
+    }
+
+    #app-title {
+        transform: scale(0.95);
+        transform-origin: left center;
+    }
+    #app-title h1{
+        letter-spacing: -1px; font-size: 22px;
+    }
+}
+
+#chuanhu-chatbot {
+    height: calc(100*var(--vh)) !important;
+    border-radius: 0;
+}
+#chuanhu-chatbot>.wrapper>.wrap {
+    overflow-x: hidden;
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    padding-inline: 20px;
+    padding-top: 72px;
+    padding-bottom: 180px;
+}
+#chuanhu-chatbot>.wrapper>.wrap .message-wrap {
+    align-self: center;
+    width: 100%;
+    max-width: 1024px;
+}
+
+.message.user p {
+    white-space: pre-wrap;
+}
+.message .user-message {
+    display: block;
+    padding: 0 !important;
+    white-space: pre-wrap;
+}
+
+.message .md-message p {
+    margin-top: 0.6em !important;
+    margin-bottom: 0.6em !important;
+}
+.message .md-message p:first-child { margin-top: 0 !important; }
+.message .md-message p:last-of-type { margin-bottom: 0 !important; }
+
+.message .md-message {
+    display: block;
+    padding: 0 !important;
+    overflow-x: auto;
+}
+.message .raw-message p {
+    margin:0 !important;
+}
+.message .raw-message {
+    display: block;
+    padding: 0 !important;
+    white-space: pre-wrap;
+}
+.message .hideM {
+    display: none;
+}
+
+/* custom buttons */
+.chuanhu-btn {
+    border-radius: 5px;
+    /* background-color: #E6E6E6 !important; */
+    color: rgba(120, 120, 120, 0.64) !important;
+    padding: 4px !important;
+    cursor: pointer !important;
+    transition: color .2s ease, background-color .2s ease;
+}
+.chuanhu-btn:hover {
+    background-color: rgba(167, 167, 167, 0.25) !important;
+    color: unset !important;
+}
+.chuanhu-btn:active {
+    background-color: rgba(167, 167, 167, 0.5) !important;
+}
+.chuanhu-btn:focus {
+    outline: none;
+}
+
+.message-btn-column {
+    position: absolute;
+    right: -23px;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-content: end;
+    gap: 2px;
+}
+
+.message-btn-row {
+    /* background: red; */
+    width: 100%;
+    height: 19px;
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    display: flex;
+    justify-content: space-between;
+}
+.message-btn-row-leading, .message-btn-row-trailing {
+    display: inline-flex;
+    gap: 4px;
+}
+.message-btn-row button {
+    font-size: 10px;
+    align-self: center;
+    align-items: center;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    display: inline-flex;
+    flex-direction: row;
+    gap: 4px;
+    padding-block: 2px !important;
+}
+
+.like-latest-btn, .dislike-latest-btn {
+    display: none !important;
+    /* filter: grayscale(); */
+}
+.is-xmchat .like-latest-btn, .is-xmchat .dislike-latest-btn {
+    display: inline-flex !important;
+}
+
+/* .copy-bot-btn {
+    top: 18px; */
+    /* bottom: 0;
+}
+.toggle-md-btn {
+    top: 0; */
+    /* bottom: 20px;
+} */
+
+/* note: this is deprecated */
+.copy-code-btn {
+    position: relative;
+    float: right;
+    font-size: 1em;
+    cursor: pointer;
+}
+/* note: the button below disabled in chatbot.py */
+.message div.icon-button > button[title="copy"] {
+    display: none;
+}
+/* disable share button and other buttons in hugging face spaces */
+#chuanhu-chatbot > .wrapper > .icon-button {
+    display: none !important;
+}
+
+
+/* history message */
+.wrapper>.wrap>.history-message {
+    padding-bottom: 10px !important;
+}
+.history-message {
+    /* padding: 0 !important; */
+    opacity: 80%;
+    display: flex;
+    flex-direction: column;
+}
+.history-message>.history-message {
+    padding: 0 !important;
+}
+.history-message>.message-wrap {
+    padding: 0 !important;
+    margin-bottom: 16px;
+}
+.history-message>.message {
+    margin-bottom: 16px;
+}
+.wrapper>.wrap>.history-message::after {
+    content: "";
+    display: block;
+    height: 2px;
+    background-color: var(--body-text-color-subdued);
+    margin-bottom: 10px;
+    margin-top: -10px;
+    clear: both;
+}
+.wrapper>.wrap>.history-message>:last-child::after {
+    content: "仅供查看";
+    display: block;
+    text-align: center;
+    color: var(--body-text-color-subdued);
+    font-size: 0.8em;
+}
+
+/* #chuanhu-chatbot {
+    transition: height 0.3s ease;
+    note: find it better without transition animation...;
+} */
+
+img.avatar-image {
+    border-radius: 50% !important;
+}
+.avatar-container {
+    display: none;
+    width: 32px !important;
+    height: 32px !important;
+    background-color: transparent;
+    background-size: cover;
+}
+.chatbot-full-width .avatar-container {
+    display: flex;
+}

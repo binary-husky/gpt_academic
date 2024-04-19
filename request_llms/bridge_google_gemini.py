@@ -4,15 +4,116 @@
 # @Descr   :
 import json
 import re
-import os
 import time
+from common.toolbox import get_conf, update_ui, update_ui_lastest_msg
+import re
+import json
+import requests
+from common.logger_handler import logger
+from typing import Dict, Tuple
+from common import func_box
+from common import toolbox
 from request_llms.com_google import GoogleChatInit
-from toolbox import ChatBotWithCookies
-from toolbox import get_conf, update_ui, update_ui_lastest_msg, have_any_recent_upload_image_files, trimmed_format_exc
 
 proxies, TIMEOUT_SECONDS, MAX_RETRY = get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY')
 timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check proxy settings in config.py.' + \
                   '网络错误，检查代理服务器是否可用，以及代理设置的格式是否正确，格式须是[协议]://[地址]:[端口]，缺一不可。'
+
+
+class GoogleChatInit:
+    def __init__(self, llm_kwargs):
+        from .bridge_all import model_info
+        endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
+        self.url_gemini = endpoint + "/%m:streamGenerateContent?key=%k"
+        self.retry = 0
+
+    def __conversation_user(self, user_input: str):
+        what_i_have_asked = {"role": "user", "parts": []}
+        if 'vision' not in self.url_gemini:
+            encode_img_map = {}
+        else:
+            img_mapping = func_box.extract_link_pf(user_input, func_box.valid_img_extensions)
+            encode_img_map = func_box.batch_encode_image(img_mapping)
+            for i in encode_img_map:  # 替换图片链接
+                user_input = user_input.replace(img_mapping[i], '')
+        what_i_have_asked['parts'].append({'text': user_input})
+        for fp in encode_img_map:
+            what_i_have_asked['parts'].append(
+                {'inline_data': {
+                    "mime_type": f"image/{encode_img_map[fp]['type']}",
+                    "data": encode_img_map[fp]['data']
+                }})
+        return what_i_have_asked
+
+    def __conversation_history(self, history):
+        messages = []
+        conversation_cnt = len(history) // 2
+        if conversation_cnt:
+            for index in range(0, 2 * conversation_cnt, 2):
+                what_i_have_asked = self.__conversation_user(history[index])
+                what_gpt_answer = {
+                    "role": "model",
+                    "parts": [{"text": history[index + 1]}]
+                }
+                messages.append(what_i_have_asked)
+                messages.append(what_gpt_answer)
+        return messages
+
+    def generate_chat(self, inputs, llm_kwargs, history, system_prompt):
+        headers, payload = self.generate_message_payload(inputs, llm_kwargs, history, system_prompt)
+        try:
+            response = requests.post(url=self.url_gemini, headers=headers, data=json.dumps(payload).encode('utf-8'),
+                                     stream=True, proxies=proxies, timeout=TIMEOUT_SECONDS)
+        except Exception as e:
+            self.retry += 1
+            if self.retry > 3:
+                error = toolbox.trimmed_format_exc()
+                return error, error, error
+            return self.generate_chat(inputs, llm_kwargs, history, system_prompt)
+        bro_results = ''
+        chunk_all = ''
+        for resp in response.iter_lines():
+            results = resp.decode("utf-8")
+            chunk_all += results
+            text_pattern = re.compile(r'"text":\s?"(.*)"', flags=re.DOTALL)
+            error_pattern = re.compile(r'"message":\s*"((?:[^"\\]|\\.)*)"', flags=re.DOTALL)
+            text_match = re.search(text_pattern, results)
+            error_match = re.search(error_pattern, results)
+            # 预处理
+            if text_match:
+                text_match = json.loads('{"text": "%s"}' % text_match.group(1))['text']
+                bro_results += text_match
+            if error_match:
+                error_match = json.loads('{"message": "%s"}' % error_match.group(1))['message']
+            yield text_match, bro_results, error_match
+        if not chunk_all:
+            logger.warning('对话错误', chunk_all)
+
+    def generate_message_payload(self, inputs, llm_kwargs, history, system_prompt) -> Tuple[Dict, Dict]:
+        messages = [
+            # {"role": "system", "parts": [{"text": system_prompt}]},  # gemini 不允许对话轮次为偶数，所以这个没有用，看后续支持吧。。。
+            # {"role": "user", "parts": [{"text": ""}]},
+            # {"role": "model", "parts": [{"text": ""}]}
+        ]
+        self.url_gemini = self.url_gemini.replace(
+            '%m', llm_kwargs['llm_model']).replace(
+            '%k', toolbox.get_conf('GEMINI_API_KEY')
+        )
+        header = {'Content-Type': 'application/json'}
+        if 'vision' not in self.url_gemini:  # 不是vision 才处理history
+            messages.extend(self.__conversation_history(history))  # 处理 history
+        messages.append(self.__conversation_user(inputs))  # 处理用户对话
+        payload = {
+            "contents": messages,
+            "generationConfig": {
+                "stopSequences": str(llm_kwargs.get('stop', '')).split(' '),
+                "temperature": llm_kwargs.get('temperature', 1),
+                # "maxOutputTokens": 800,
+                "topP": llm_kwargs.get('top_p', 0.8),
+                "topK": 10
+            }
+        }
+        return header, payload
 
 
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=None,
@@ -25,28 +126,25 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
     watch_dog_patience = 5  # 看门狗的耐心, 设置5秒即可
     gpt_replying_buffer = ''
     stream_response = genai.generate_chat(inputs, llm_kwargs, history, sys_prompt)
-    for response in stream_response:
-        results = response.decode()
-        match = re.search(r'"text":\s*"((?:[^"\\]|\\.)*)"', results, flags=re.DOTALL)
-        error_match = re.search(r'\"message\":\s*\"(.*?)\"', results, flags=re.DOTALL)
-        if match:
-            try:
-                paraphrase = json.loads('{"text": "%s"}' % match.group(1))
-            except:
-                raise ValueError(f"解析GEMINI消息出错。")
-            buffer = paraphrase['text']
-            gpt_replying_buffer += buffer
-            if len(observe_window) >= 1:
-                observe_window[0] = gpt_replying_buffer
-            if len(observe_window) >= 2:
-                if (time.time() - observe_window[1]) > watch_dog_patience: raise RuntimeError("程序终止。")
+    for text_match, results, error_match in stream_response:
+        gpt_replying_buffer = results
         if error_match:
-            raise RuntimeError(f'{gpt_replying_buffer} 对话错误')
+            if len(observe_window) >= 3:
+                observe_window[2] = error_match
+            return f'{results} 对话错误'
+        # 观测窗
+        if len(observe_window) >= 1:
+            observe_window[0] = gpt_replying_buffer
+        if len(observe_window) >= 2:
+            if (time.time() - observe_window[1]) > watch_dog_patience:
+                observe_window[2] = "请求超时，程序终止。"
+                raise RuntimeError("程序终止。")
+
     return gpt_replying_buffer
 
 
-def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWithCookies,
-            history:list=[], system_prompt:str='', stream:bool=True, additional_fn:str=None):
+def predict(inputs: str, llm_kwargs: dict, plugin_kwargs: dict, chatbot,
+            history: list = [], system_prompt: str = '', stream: bool = True, additional_fn: str = None):
     # 检查API_KEY
     if get_conf("GEMINI_API_KEY") == "":
         yield from update_ui_lastest_msg(f"请配置 GEMINI_API_KEY。", chatbot=chatbot, history=history, delay=0)
@@ -54,21 +152,8 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
 
     # 适配润色区域
     if additional_fn is not None:
-        from core_functional import handle_core_functionality
+        from common.core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
-
-    if "vision" in llm_kwargs["llm_model"]:
-        have_recent_file, image_paths = have_any_recent_upload_image_files(chatbot)
-        if not have_recent_file:
-            chatbot.append((inputs, "没有检测到任何近期上传的图像文件，请上传jpg格式的图片，此外，请注意拓展名需要小写"))
-            yield from update_ui(chatbot=chatbot, history=history, msg="等待图片") # 刷新界面
-            return
-        def make_media_input(inputs, image_paths):
-            for image_path in image_paths:
-                inputs = inputs + f'<br/><br/><div align="center"><img src="file={os.path.abspath(image_path)}"></div>'
-            return inputs
-        if have_recent_file:
-            inputs = make_media_input(inputs, image_paths)
 
     chatbot.append((inputs, ""))
     yield from update_ui(chatbot=chatbot, history=history)
@@ -80,40 +165,26 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
             break
         except Exception as e:
             retry += 1
-            chatbot[-1] = ((chatbot[-1][0], trimmed_format_exc()))
-            yield from update_ui(chatbot=chatbot, history=history, msg="请求失败")  # 刷新界面
-            return
-    gpt_replying_buffer = ""
-    gpt_security_policy = ""
+            chatbot[-1] = [chatbot[-1][0], timeout_bot_msg]
+            retry_msg = f"，正在重试 ({retry}/{MAX_RETRY}) ……" if MAX_RETRY > 0 else ""
+            yield from update_ui(chatbot=chatbot, history=history, msg="请求超时" + retry_msg)  # 刷新界面
+            if retry > MAX_RETRY:
+                return Exception('对话错误')
     history.extend([inputs, ''])
-    for response in stream_response:
-        results = response.decode("utf-8")    # 被这个解码给耍了。。
-        gpt_security_policy += results
-        match = re.search(r'"text":\s*"((?:[^"\\]|\\.)*)"', results, flags=re.DOTALL)
-        error_match = re.search(r'\"message\":\s*\"(.*)\"', results, flags=re.DOTALL)
-        if match:
-            try:
-                paraphrase = json.loads('{"text": "%s"}' % match.group(1))
-            except:
-                raise ValueError(f"解析GEMINI消息出错。")
-            gpt_replying_buffer += paraphrase['text']    # 使用 json 解析库进行处理
-            chatbot[-1] = (inputs, gpt_replying_buffer)
-            history[-1] = gpt_replying_buffer
-            yield from update_ui(chatbot=chatbot, history=history)
+    for text_match, results, error_match in stream_response:
+        chatbot[-1] = [inputs, results]
+        history[-1] = results
+        yield from update_ui(chatbot=chatbot, history=history)
         if error_match:
             history = history[-2]  # 错误的不纳入对话
-            chatbot[-1] = (inputs, gpt_replying_buffer + f"对话错误，请查看message\n\n```\n{error_match.group(1)}\n```")
+            chatbot[-1] = [inputs, results + f"对话错误，请查看message\n\n```\n{error_match}\n```"]
             yield from update_ui(chatbot=chatbot, history=history)
-            raise RuntimeError('对话错误')
-    if not gpt_replying_buffer:
-        history = history[-2]  # 错误的不纳入对话
-        chatbot[-1] = (inputs, gpt_replying_buffer + f"触发了Google的安全访问策略，没有回答\n\n```\n{gpt_security_policy}\n```")
-        yield from update_ui(chatbot=chatbot, history=history)
-
+            return RuntimeError('对话错误')
 
 
 if __name__ == '__main__':
     import sys
+
     llm_kwargs = {'llm_model': 'gemini-pro'}
     result = predict('Write long a story about a magic backpack.', llm_kwargs, llm_kwargs, [])
     for i in result:

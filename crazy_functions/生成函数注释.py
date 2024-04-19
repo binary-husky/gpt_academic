@@ -1,6 +1,6 @@
-from toolbox import update_ui
-from toolbox import CatchException, report_exception
-from toolbox import write_history_to_file, promote_file_to_downloadzone
+from common.toolbox import update_ui
+from common.toolbox import CatchException, report_exception
+from common.toolbox import write_history_to_file, promote_file_to_downloadzone
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 fast_debug = False
 
@@ -13,7 +13,7 @@ def 生成函数注释(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
 
         i_say = f'请对下面的程序文件做一个概述，并对文件中的所有函数生成注释，使用markdown表格输出结果，文件名是{os.path.relpath(fp, project_folder)}，文件内容是 ```{file_content}```'
         i_say_show_user = f'[{index}/{len(file_manifest)}] 请对下面的程序文件做一个概述，并对文件中的所有函数生成注释: {os.path.abspath(fp)}'
-        chatbot.append((i_say_show_user, "[Local Message] waiting gpt response."))
+        chatbot.append([i_say_show_user, "[Local Message] waiting gpt response."])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
         if not fast_debug:
@@ -22,7 +22,7 @@ def 生成函数注释(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
             gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
                 i_say, i_say_show_user, llm_kwargs, chatbot, history=[], sys_prompt=system_prompt)   # 带超时倒计时
 
-            chatbot[-1] = (i_say_show_user, gpt_say)
+            chatbot[-1] = [i_say_show_user, gpt_say]
             history.append(i_say_show_user); history.append(gpt_say)
             yield from update_ui(chatbot=chatbot, history=history, msg=msg) # 刷新界面
             if not fast_debug: time.sleep(2)
@@ -30,7 +30,7 @@ def 生成函数注释(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
     if not fast_debug:
         res = write_history_to_file(history)
         promote_file_to_downloadzone(res, chatbot=chatbot)
-        chatbot.append(("完成了吗？", res))
+        chatbot.append(["完成了吗？", res])
         yield from update_ui(chatbot=chatbot, history=history, msg=msg) # 刷新界面
 
 

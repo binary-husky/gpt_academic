@@ -20,7 +20,7 @@ import logging
 import asyncio
 import importlib
 import threading
-from toolbox import update_ui, get_conf, trimmed_format_exc
+from common.toolbox import update_ui, get_conf, trimmed_format_exc
 from multiprocessing import Process, Pipe
 
 
@@ -264,19 +264,19 @@ def predict(
     单线程方法
     函数的说明请见 request_llms/bridge_all.py
     """
-    chatbot.append((inputs, "[Local Message] 等待NewBing响应中 ..."))
+    chatbot.append([inputs, "[Local Message] 等待NewBing响应中 ..."])
 
     global newbingfree_handle
     if (newbingfree_handle is None) or (not newbingfree_handle.success):
         newbingfree_handle = NewBingHandle()
-        chatbot[-1] = (inputs, load_message + "\n\n" + newbingfree_handle.info)
+        chatbot[-1] = [inputs, load_message + "\n\n" + newbingfree_handle.info]
         yield from update_ui(chatbot=chatbot, history=[])
         if not newbingfree_handle.success:
             newbingfree_handle = None
             return
 
     if additional_fn is not None:
-        from core_functional import handle_core_functionality
+        from common.core_functional import handle_core_functionality
 
         inputs, history = handle_core_functionality(
             additional_fn, inputs, history, chatbot
@@ -286,7 +286,7 @@ def predict(
     for i in range(len(history) // 2):
         history_feedin.append([history[2 * i], history[2 * i + 1]])
 
-    chatbot[-1] = (inputs, "[Local Message] 等待NewBing响应中 ...")
+    chatbot[-1] = [inputs, "[Local Message] 等待NewBing响应中 ..."]
     response = "[Local Message] 等待NewBing响应中 ..."
     yield from update_ui(
         chatbot=chatbot, history=history, msg="NewBing响应缓慢，尚未完成全部响应，请耐心完成后再提交新问题。"

@@ -1,6 +1,6 @@
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-from toolbox import CatchException, report_exception, promote_file_to_downloadzone
-from toolbox import update_ui, update_ui_lastest_msg, disable_auto_promotion, write_history_to_file
+from common.toolbox import CatchException, report_exception, promote_file_to_downloadzone
+from common.toolbox import update_ui, update_ui_lastest_msg, disable_auto_promotion, write_history_to_file
 import logging
 import requests
 import time
@@ -8,12 +8,13 @@ import random
 
 ENABLE_ALL_VERSION_SEARCH = True
 
+
 def get_meta_information(url, chatbot, history):
     import arxiv
     import difflib
     import re
     from bs4 import BeautifulSoup
-    from toolbox import get_conf
+    from common.toolbox import get_conf
     from urllib.parse import urlparse
     session = requests.session()
 
@@ -44,7 +45,7 @@ def get_meta_information(url, chatbot, history):
 
     if ENABLE_ALL_VERSION_SEARCH:
         def search_all_version(url):
-            time.sleep(random.randint(1,5)) # 睡一会防止触发google反爬虫
+            time.sleep(random.randint(1, 5))  # 睡一会防止触发google反爬虫
             response = session.get(url)
             soup = BeautifulSoup(response.text, "html.parser")
 
@@ -61,8 +62,10 @@ def get_meta_information(url, chatbot, history):
                     max_results=1,
                     sort_by=arxiv.SortCriterion.Relevance,
                 )
-                try: paper = next(search.results())
-                except: paper = None
+                try:
+                    paper = next(search.results())
+                except:
+                    paper = None
                 return paper
 
             return None
@@ -89,9 +92,9 @@ def get_meta_information(url, chatbot, history):
 
         # 首先在arxiv上搜索，获取文章摘要
         search = arxiv.Search(
-            query = title,
-            max_results = 1,
-            sort_by = arxiv.SortCriterion.Relevance,
+            query=title,
+            max_results=1,
+            sort_by=arxiv.SortCriterion.Relevance,
         )
         try: paper = next(search.results())
         except: paper = None
@@ -100,7 +103,8 @@ def get_meta_information(url, chatbot, history):
 
         # 如果在Arxiv上匹配失败，检索文章的历史版本的题目
         if not is_match and ENABLE_ALL_VERSION_SEARCH:
-            other_versions_page_url = [tag['href'] for tag in result.select_one('.gs_flb').select('.gs_nph') if 'cluster' in tag['href']]
+            other_versions_page_url = [tag['href'] for tag in result.select_one('.gs_flb').select('.gs_nph') if
+                                       'cluster' in tag['href']]
             if len(other_versions_page_url) > 0:
                 other_versions_page_url = other_versions_page_url[0]
                 paper = search_all_version('http://' + urlparse(url).netloc + other_versions_page_url)
@@ -127,9 +131,11 @@ def get_meta_information(url, chatbot, history):
             'is_paper_in_arxiv': is_paper_in_arxiv,
         })
 
-        chatbot[-1] = [chatbot[-1][0], title + f'\n\n是否在arxiv中（不在arxiv中无法获取完整摘要）:{is_paper_in_arxiv}\n\n' + abstract]
-        yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
+        chatbot[-1] = [chatbot[-1][0],
+                       title + f'\n\n是否在arxiv中（不在arxiv中无法获取完整摘要）:{is_paper_in_arxiv}\n\n' + abstract]
+        yield from update_ui(chatbot=chatbot, history=[])  # 刷新界面
     return profile
+
 
 @CatchException
 def 谷歌检索小助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
@@ -138,7 +144,7 @@ def 谷歌检索小助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     chatbot.append([
         "函数插件功能？",
         "分析用户提供的谷歌学术（google scholar）搜索页面中，出现的所有文章: binary-husky，插件初始化中..."])
-    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+    yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
@@ -156,29 +162,30 @@ def 谷歌检索小助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     history = []
     meta_paper_info_list = yield from get_meta_information(txt, chatbot, history)
     if len(meta_paper_info_list) == 0:
-        yield from update_ui_lastest_msg(lastmsg='获取文献失败，可能触发了google反爬虫机制。',chatbot=chatbot, history=history, delay=0)
+        yield from update_ui_lastest_msg(lastmsg='获取文献失败，可能触发了google反爬虫机制。', chatbot=chatbot,
+                                         history=history, delay=0)
         return
     batchsize = 5
-    for batch in range(math.ceil(len(meta_paper_info_list)/batchsize)):
+    for batch in range(math.ceil(len(meta_paper_info_list) / batchsize)):
         if len(meta_paper_info_list[:batchsize]) > 0:
             i_say = "下面是一些学术文献的数据，提取出以下内容：" + \
             "1、英文题目；2、中文题目翻译；3、作者；4、arxiv公开（is_paper_in_arxiv）；4、引用数量（cite）；5、中文摘要翻译。" + \
             f"以下是信息源：{str(meta_paper_info_list[:batchsize])}"
 
-            inputs_show_user = f"请分析此页面中出现的所有文章：{txt}，这是第{batch+1}批"
+            inputs_show_user = f"请分析此页面中出现的所有文章：{txt}，这是第{batch + 1}批"
             gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
                 inputs=i_say, inputs_show_user=inputs_show_user,
                 llm_kwargs=llm_kwargs, chatbot=chatbot, history=[],
                 sys_prompt="你是一个学术翻译，请从数据中提取信息。你必须使用Markdown表格。你必须逐个文献进行处理。"
             )
 
-            history.extend([ f"第{batch+1}批", gpt_say ])
+            history.extend([f"第{batch + 1}批", gpt_say])
             meta_paper_info_list = meta_paper_info_list[batchsize:]
 
     chatbot.append(["状态？",
         "已经全部完成，您可以试试让AI写一个Related Works，例如您可以继续输入Write a \"Related Works\" section about \"你搜索的研究领域\" for me."])
     msg = '正常'
-    yield from update_ui(chatbot=chatbot, history=history, msg=msg) # 刷新界面
+    yield from update_ui(chatbot=chatbot, history=history, msg=msg)  # 刷新界面
     path = write_history_to_file(history)
     promote_file_to_downloadzone(path, chatbot=chatbot)
     chatbot.append(("完成了吗？", path));

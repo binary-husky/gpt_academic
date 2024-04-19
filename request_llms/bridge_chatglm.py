@@ -2,8 +2,9 @@ model_name = "ChatGLM"
 cmd_to_install = "`pip install -r request_llms/requirements_chatglm.txt`"
 
 
-from toolbox import get_conf, ProxyNetworkActivate
+from common.toolbox import get_conf, ProxyNetworkActivate
 from .local_llm_class import LocalLLMHandle, get_local_llm_predict_fns
+
 
 
 

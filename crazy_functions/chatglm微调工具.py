@@ -1,4 +1,4 @@
-from toolbox import CatchException, update_ui, promote_file_to_downloadzone
+from common.toolbox import CatchException, update_ui, promote_file_to_downloadzone
 from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 import datetime, json
 
@@ -43,7 +43,7 @@ def 微调数据集生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     user_request    当前用户的请求信息（IP地址等）
     """
     history = []    # 清空历史，以免输入溢出
-    chatbot.append(("这是什么功能？", "[Local Message] 微调数据集生成"))
+    chatbot.append(["这是什么功能？", "[Local Message] 微调数据集生成"])
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     args = plugin_kwargs.get("advanced_arg", None)
     if args is None:
@@ -92,7 +92,7 @@ def 启动微调(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     """
     import subprocess
     history = []    # 清空历史，以免输入溢出
-    chatbot.append(("这是什么功能？", "[Local Message] 微调数据集生成"))
+    chatbot.append(["这是什么功能？", "[Local Message] 微调数据集生成"])
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     args = plugin_kwargs.get("advanced_arg", None)
     if args is None:

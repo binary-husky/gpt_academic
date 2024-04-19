@@ -1,0 +1,32 @@
+[
+    {
+        "act": "学术语料润色",
+        "prompt": "作为一名中文学术论文写作改进助理，你的任务是改进所提供文本的拼写、语法、清晰、简洁和整体可读性，同时分解长句，减少重复，并提供改进建议。请先提供文本的更正版本，然后在markdown表格中列出修改的内容，并给出修改的理由，以下是我提供的文本:\n{{{v}}}",
+        "source": "127.0.0.1"
+    },
+    {
+        "act": "参考文献转Bib",
+        "prompt": " Here are some bibliography items, please transform them into bibtex style.Note that, reference styles maybe more than one kind, you should transform each item correctly.Items need to be transformed:\n{{{v}}}",
+        "source": "127.0.0.1"
+    },
+    {
+        "act": "英译中",
+        "prompt": "翻译成地道的中文：\n{{{v}}}",
+        "source": "127.0.0.1"
+    },
+    {
+        "act": "学术英中互译",
+        "prompt": "```\n{{{v}}}\n```\n <gpt_academic_string_mask><lang_english>你是经验丰富的翻译，请把以上markdown代码块内学术文章段落翻译成中文，并同时充分考虑中文的语法、清晰、简洁和整体可读性，必要时，你可以修改整个句子的顺序以确保翻译后的段落符合中文的语言习惯。你需要翻译的文本如下：\n</lang_english><lang_chinese>I want you to act as a scientific English-Chinese translator, I will provide you with some paragraphs in one language and your task is to accurately and academically translate the paragraphs only into the other language. Do not repeat the original provided paragraphs after translation. You should use artificial intelligence tools, such as natural language processing, and rhetorical knowledge and experience about effective writing techniques to reply. I'll give you my paragraphs as follows, tell me what language it is written in, and then translate:</lang_chinese></gpt_academic_string_mask>\n",
+        "source": "127.0.0.1"
+    },
+    {
+        "act": "中译英",
+        "prompt": "Please translate following sentence to English:\n{{{v}}}",
+        "source": "127.0.0.1"
+    },
+    {
+        "act": "查找语法错误",
+        "prompt": " Help me ensure that the grammar and the spelling is correct. Do not try to polish the text, if no mistake is found, tell me that this paragraph is good. If you find grammar or spelling mistakes, please list mistakes you find in a two-column markdown table, put the original text the first column, put the corrected text in the second column and highlight the key words you fixed. Finally, please provide the proofreaded text.\n\n```\n{{{v}}}\n```\n\nExample:\nParagraph: How is you? Do you knows what is it?\n| Original sentence | Corrected sentence |\n| :--- | :--- |\n| How **is** you? | How **are** you? |\n| Do you **knows** what **is** **it**? | Do you **know** what **it** **is** ? |\n\nBelow is a paragraph from an academic paper. You need to report all grammar and spelling mistakes as the example before.\n\n",
+        "source": "127.0.0.1"
+    }
+]

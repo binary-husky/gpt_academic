@@ -1,4 +1,4 @@
-from toolbox import update_ui, get_conf, trimmed_format_exc, get_log_folder
+from common.toolbox import update_ui, get_conf, trimmed_format_exc, get_log_folder
 import os
 
 
@@ -9,7 +9,7 @@ class construct_html():
         self.html_string = ""
 
     def add_row(self, a, b):
-        from toolbox import markdown_convertion
+        from common.toolbox import markdown_convertion
         template = """
             {
                 primary_col: {
@@ -49,7 +49,7 @@ class construct_html():
         self.html_string += template_
 
     def save_file(self, file_name):
-        from toolbox import get_log_folder
+        from common.toolbox import get_log_folder
         with open('crazy_functions/pdf_fns/report_template.html', 'r', encoding='utf8') as f:
             html_template = f.read()
         html_template = html_template.replace("__TF_ARR__", self.html_string)

@@ -1,5 +1,5 @@
-from toolbox import update_ui, promote_file_to_downloadzone
-from toolbox import CatchException, report_exception, write_history_to_file
+from common.toolbox import update_ui, promote_file_to_downloadzone
+from common.toolbox import CatchException, report_exception, write_history_to_file
 fast_debug = False
 
 class PaperFileGroup():
@@ -36,7 +36,7 @@ class PaperFileGroup():
         print('Segmentation: done')
 
 def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, language='en'):
-    import time, os, re
+    import time, re
     from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 
     #  <-------- 读取Latex文件，删除其中的所有注释 ---------->
@@ -98,7 +98,7 @@ def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
     res = write_history_to_file(gpt_response_collection, create_report_file_name)
     promote_file_to_downloadzone(res, chatbot=chatbot)
     history = gpt_response_collection
-    chatbot.append((f"{fp}完成了吗？", res))
+    chatbot.append([f"{fp}完成了吗？", res])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
 

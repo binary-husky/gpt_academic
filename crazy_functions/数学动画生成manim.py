@@ -1,7 +1,8 @@
 import os
-from toolbox import CatchException, update_ui, gen_time_str, promote_file_to_downloadzone
+from common.toolbox import CatchException, update_ui, gen_time_str, promote_file_to_downloadzone
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from crazy_functions.crazy_utils import input_clipping
+
 
 def inspect_dependency(chatbot, history):
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
@@ -15,7 +16,6 @@ def inspect_dependency(chatbot, history):
 
 def eval_manim(code):
     import subprocess, sys, os, shutil
-
     with open('gpt_log/MyAnimation.py', 'w', encoding='utf8') as f:
         f.write(code)
 

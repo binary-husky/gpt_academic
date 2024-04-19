@@ -1,4 +1,4 @@
-from toolbox import CatchException, update_ui
+from common.toolbox import CatchException, update_ui
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, input_clipping
 import requests
 from bs4 import BeautifulSoup
@@ -71,7 +71,7 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
 
     # ------------- < 第1步：爬取搜索引擎的结果 > -------------
-    from toolbox import get_conf
+    from common.toolbox import get_conf
     proxies = get_conf('proxies')
     urls = google(txt, proxies)
     history = []
@@ -82,12 +82,17 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         return
     # ------------- < 第2步：依次访问网页 > -------------
     max_search_result = 5   # 最多收纳多少个网页的结果
+    i_say_1 = f"请结合互联网信息回答以下问题：{txt}"
+    gpt_say_1 = ''
+    from common import func_box
+    chatbot.append([i_say_1, gpt_say_1])
     for index, url in enumerate(urls[:max_search_result]):
         res = scrape_text(url['link'], proxies)
         history.extend([f"第{index}份搜索结果：", res])
-        chatbot.append([f"第{index}份搜索结果：", res[:500]+"......"])
+        tag = func_box.html_tag_color(f"第{index}份搜索结果：")
+        gpt_say_1 += f'{tag}：\n\n```folded\n{res}\n```\n\n'
+        chatbot[-1] = [i_say_1, gpt_say_1]
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
-
     # ------------- < 第3步：ChatGPT综合 > -------------
     i_say = f"从以上搜索结果中抽取信息，然后回答问题：{txt}"
     i_say, history = input_clipping(    # 裁剪输入，从最长的条目开始裁剪，防止爆token
@@ -100,7 +105,7 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         llm_kwargs=llm_kwargs, chatbot=chatbot, history=history,
         sys_prompt="请从给定的若干条搜索结果中抽取信息，对最相关的两个搜索结果进行总结，然后回答问题。"
     )
-    chatbot[-1] = (i_say, gpt_say)
+    chatbot[-1] = [i_say, gpt_say]
     history.append(i_say);history.append(gpt_say)
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
 

@@ -1,12 +1,12 @@
-from toolbox import update_ui
-from toolbox import CatchException, report_exception
+from common.toolbox import update_ui
+from common.toolbox import CatchException, report_exception
+
 from .crazy_utils import read_and_clean_pdf_text
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 fast_debug = False
 
 
 def 解析PDF(file_name, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
-    import tiktoken
     print('begin analysis on:', file_name)
 
     ############################## <第 0 步，切割PDF> ##################################
@@ -48,9 +48,10 @@ def 解析PDF(file_name, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
                                                                         )
         iteration_results.append(gpt_say)
         last_iteration_result = gpt_say
-
     ############################## <第 3 步，整理history> ##################################
     final_results.extend(iteration_results)
+    # 将摘要添加到历史中，方便"猜你想问"使用
+    history.extend([last_iteration_result])
     final_results.append(f'接下来，你是一名专业的学术教授，利用以上信息，使用中文回答我的问题。')
     # 接下来两句话只显示在界面上，不起实际作用
     i_say_show_user = f'接下来，你是一名专业的学术教授，利用以上信息，使用中文回答我的问题。'; gpt_say = "[Local Message] 收到。"
@@ -107,3 +108,4 @@ def 理解PDF文档内容标准文件输入(txt, llm_kwargs, plugin_kwargs, chat
     txt = file_manifest[0]
     # 开始正式执行任务
     yield from 解析PDF(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt)
+

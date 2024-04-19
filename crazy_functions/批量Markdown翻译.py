@@ -1,7 +1,7 @@
 import glob, shutil, os, re, logging
-from toolbox import update_ui, trimmed_format_exc, gen_time_str, disable_auto_promotion
-from toolbox import CatchException, report_exception, get_log_folder
-from toolbox import write_history_to_file, promote_file_to_downloadzone
+from common.toolbox import update_ui, trimmed_format_exc, gen_time_str, disable_auto_promotion
+from common.toolbox import CatchException, report_exception, get_log_folder
+from common.toolbox import write_history_to_file, promote_file_to_downloadzone
 fast_debug = False
 
 class PaperFileGroup():
@@ -113,7 +113,7 @@ def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
     res = write_history_to_file(gpt_response_collection, file_basename=create_report_file_name)
     promote_file_to_downloadzone(res, chatbot=chatbot)
     history = gpt_response_collection
-    chatbot.append((f"{fp}完成了吗？", res))
+    chatbot.append([f"{fp}完成了吗？", res])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
 
@@ -122,7 +122,7 @@ def get_files_from_everything(txt, preference=''):
     success = True
     if txt.startswith('http'):
         import requests
-        from toolbox import get_conf
+        from common.toolbox import get_conf
         proxies = get_conf('proxies')
         # 网络的远程文件
         if preference == 'Github':
@@ -153,7 +153,8 @@ def get_files_from_everything(txt, preference=''):
         project_folder = None
         file_manifest = []
         success = False
-
+        project_folder = []
+        file_manifest = []
     return success, file_manifest, project_folder
 
 

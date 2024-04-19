@@ -1,3 +1,7 @@
+.DS_Store
+/*.DS_Store
+
+/users_data/*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -137,6 +141,8 @@ dmypy.json
 history
 ssr_conf
 config_private.py
+users_data/config_private.py
+users_private/
 gpt_log
 private.md
 private_upload

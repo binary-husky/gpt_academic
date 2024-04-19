@@ -1,6 +1,11 @@
-from toolbox import CatchException, report_exception, select_api_key, update_ui, get_conf
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-from toolbox import write_history_to_file, promote_file_to_downloadzone, get_log_folder
+import glob, os
+from common import func_box
+from moviepy.editor import AudioFileClip
+from crazy_functions.reader_fns import crazy_box, docs_kingsoft
+from common.toolbox import CatchException, select_api_key, update_ui, get_conf
+from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, get_files_from_everything
+from common.toolbox import write_history_to_file, promote_file_to_downloadzone, get_log_folder, report_exception
+
 
 def split_audio_file(filename, split_duration=1000):
     """
@@ -97,7 +102,7 @@ def AnalyAudio(parse_prompt, file_manifest, llm_kwargs, chatbot, history):
                 sys_prompt=f"总结音频。音频文件名{fp}"
             )
 
-            chatbot[-1] = (i_say_show_user, gpt_say)
+            chatbot[-1] = [i_say_show_user, gpt_say]
             history.extend([i_say_show_user, gpt_say])
             audio_history.extend([i_say_show_user, gpt_say])
 
@@ -119,7 +124,7 @@ def AnalyAudio(parse_prompt, file_manifest, llm_kwargs, chatbot, history):
 
         res = write_history_to_file(history)
         promote_file_to_downloadzone(res, chatbot=chatbot)
-        chatbot.append((f"第{index + 1}段音频完成了吗？", res))
+        chatbot.append([f"第{index + 1}段音频完成了吗？", res])
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
     # 删除中间文件夹
@@ -127,14 +132,13 @@ def AnalyAudio(parse_prompt, file_manifest, llm_kwargs, chatbot, history):
     shutil.rmtree(f"{get_log_folder(plugin_name='audio')}/mp3")
     res = write_history_to_file(history)
     promote_file_to_downloadzone(res, chatbot=chatbot)
-    chatbot.append(("所有音频都总结完成了吗？", res))
+    chatbot.append(["所有音频都总结完成了吗？", res])
     yield from update_ui(chatbot=chatbot, history=history)
 
 
 @CatchException
 def 总结音视频(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, WEB_PORT):
     import glob, os
-
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
@@ -164,7 +168,6 @@ def 总结音视频(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
 
     # 搜索需要处理的文件清单
     extensions = ['.mp4', '.m4a', '.wav', '.mpga', '.mpeg', '.mp3', '.avi', '.mkv', '.flac', '.aac']
-
     if txt.endswith(tuple(extensions)):
         file_manifest = [txt]
     else:
@@ -182,5 +185,4 @@ def 总结音视频(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     parse_prompt = plugin_kwargs.get("advanced_arg", '将音频解析为简体中文')
     yield from AnalyAudio(parse_prompt, file_manifest, llm_kwargs, chatbot, history)
-
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面

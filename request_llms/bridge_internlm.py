@@ -5,7 +5,7 @@ from transformers import AutoModel, AutoTokenizer
 import time
 import threading
 import importlib
-from toolbox import update_ui, get_conf, ProxyNetworkActivate
+from common.toolbox import update_ui, get_conf, ProxyNetworkActivate
 from multiprocessing import Process, Pipe
 from .local_llm_class import LocalLLMHandle, get_local_llm_predict_fns
 

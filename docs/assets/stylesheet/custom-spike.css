@@ -1,0 +1,517 @@
+/*更新注意这里， 这是左侧边栏选择 */
+.normal_select .svelte-1gfkn6j {
+    float: left;
+    width: auto;
+    line-height: 220% !important;
+}
+
+.normal_mut_select {
+    padding: var(--block-padding);
+}
+
+.normal_mut_select .svelte-1gfkn6j {
+    float: left;
+    width: auto;
+    line-height: 260% !important;
+}
+.fold-panel {
+    margin-bottom: 5px !important;
+}
+.fold-panel .fold-title {
+    align-items: self-start !important;
+    display: flex !important;
+}
+.fold-panel pre {
+    -webkit-line-clamp: 30;
+    display: -webkit-box !important;
+    overflow: auto !important;
+    -webkit-box-orient: vertical;
+}
+.normal_mut_select .token[class*="svelte-"] {
+    padding: 5px
+}
+
+span.svelte-1gfkn6j:not(.has-info) {
+    margin-bottom: unset;
+}
+
+/*更新注意这里*/
+.sm_select {
+    position: relative !important;
+    z-index: 5 !important;
+    /*bottom: 5px;*/
+    min-width: min(20%, 100%) !important;
+    /*border-radius: 20px!important;*/
+}
+
+.sm_select .style {
+    max-height: 28px;
+}
+
+.chatbot-full-width .sm_select span {
+    line-height: 151% !important;
+}
+.sm_select span {
+    float: left;
+    width: auto;
+    line-height: 130% !important;
+}
+.sm_select .wrap[class*="svelte-"] {
+    border-radius: var(--block-title-radius);;
+    width: auto;
+    background-color: #f6f6f6 !important;
+}
+
+.dark .sm_select .wrap[class*="svelte-"] {
+    background-color: #515151 !important;
+}
+
+.sm_checkbox {
+    position: relative !important;
+    z-index: 5 !important;
+    bottom: 5px;
+    padding: 0 !important;
+}
+
+.sm_select .token[class*="svelte-"] {
+    padding: 1.5% !important;
+    max-height: 20px !important;
+
+}
+
+.sm_select .wrap-inner[class*="svelte-"] {
+    padding: 0 !important;
+    flex-wrap: unset !important;
+    overflow: hidden !important;
+}
+
+.sm_select .block.svelte-mppz8v {
+    width: 10% !important;
+}
+
+
+/* 行内按钮 */
+div.svelte-15lo0d8 > *, div.svelte-15lo0d8 > .form > * {
+    min-width: min(140px, 100%);
+}
+
+/* 输入框 */
+.no_padding_input {
+    padding: unset !important;
+}
+
+/* 提示词列表 */
+#prompt_list {
+    margin-left: 10px;
+}
+
+#gr-more-sm-row {
+    gap: unset;
+    min-width: min(0px, 100%);
+}
+
+#gr-more-sm-column {
+    min-width: min(30%, 100%) !important;
+    margin-left: -0.5%;
+}
+
+/* 小按钮 */
+#gr-chat-sm-column {
+    min-width: min(100%, 100%) !important;
+    gap: 10%;
+    max-width: 70px !important;
+    display: flex;
+    align-content: center;
+    flex-direction: row;
+    margin-top: 2px;
+    margin-right: 10px;
+}
+
+#gr-chat-sm-column button {
+    margin-left: 5px !important;
+    box-shadow: none;
+    justify-content: center;
+    align-items: center;
+    height: 24px;
+    width: 24px;
+    display: flex;
+}
+
+.chatbot-full-width #gr-chat-sm-column {
+    min-width: min(12%, 100%) !important;
+    gap: 22%;
+    margin-right: 15px;
+}
+
+.chatbot-full-width #gr-chat-sm-column button {
+    margin-left: unset;
+}
+
+.chatbot-full-width #sm_history_btn {
+    display: none;
+}
+
+/*  */
+#gr-know-sm-column {
+    min-width: min(30%, 100%) !important;
+    max-width: 220px !important;
+    margin-right: 7px;
+    justify-content: center;
+    align-items: center;
+}
+
+/*!* 强制隐藏 *!*/
+/*.hide.svelte-vt1mxs {*/
+/*    display: none !important;*/
+/*}*/
+.elem-center {
+    display: grid !important;
+    place-items: center !important;
+}
+
+.elem-box-solid {
+    border: 1px solid var(--message-user-background-color-light);
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.dark .elem-box-solid {
+    border: 1px solid var(--message-user-background-color-dark);
+}
+
+code.language-folded {
+    display: -webkit-box;
+    -webkit-line-clamp: 10; /*展示一点点*/
+    -webkit-box-orient: vertical;
+    overflow: auto;
+    min-height: 40px;
+}
+
+.clamp_2 {
+    -webkit-line-clamp: 2 !important;
+}
+
+.unclamp {
+    -webkit-line-clamp: unset !important;
+}
+
+.toggle-button-hide {
+    opacity: 0;
+}
+
+.user .message-btn-column {
+    position: absolute;
+    left: -23px !important;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-content: end;
+    gap: 2px;
+}
+
+.message-btn-column .chuanhu-btn {
+    position: absolute;
+    bottom: 0;
+}
+
+.user .message-btn-column .chuanhu-btn {
+
+}
+
+.bot .message-btn-column .chuanhu-btn {
+    left: -15px;
+}
+
+.message-btn-column .toggle-md-btn {
+    margin-bottom: 20px;
+}
+
+/*.user .message-btn-column:hover {*/
+/*    background-color: unset !important;*/
+/*    !*display: block !important;*!*/
+/*    color: unset !important;*/
+/*}*/
+.search_txt {
+    min-width: min(60%, 100%) !important;
+}
+
+.short_btn {
+    position: relative;
+    min-width: min(10%, 100%) !important;
+    overflow: hidden;
+}
+
+.search-show {
+    min-height: 64%;
+    max-height: 64%;
+}
+
+.search-example {
+    min-height: 30%;
+    max-height: 30%;
+    overflow: auto;
+}
+
+.input-search {
+    min-width: 10%;
+}
+
+#pm_check {
+    left: 20px;
+    min-width: min(20px, 100%) !important;
+    width: 40px;
+    margin-bottom: 2px;
+}
+
+#prompt_list .label {
+    display: -webkit-box !important;
+}
+
+#prompt_list .label svg {
+    margin-top: 2px !important;;
+}
+
+.column_left {
+    min-width: 40% !important;
+}
+
+#mask_tabs .sort-button {
+    display: none;
+}
+#mask_tabs .table-wrap {
+    overflow: auto !important;
+}
+.controls-wrap {
+    gap: 10px;
+}
+
+.red-dot {
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+}
+
+/* 这个没有必要存在，阻碍用户继续编写 */
+/* 2.0 还是有必要的。。 在很卡的机器上卡顿明显，增加loading 并针对一些区域做注释*/
+#chuanhu-history .wrap.default.full[class*="svelte-"] {
+    background: unset !important;
+    display: none;
+}
+
+#spike-prompt .wrap.default.full[class*="svelte-"] {
+    background: unset !important;
+}
+
+#mask_tabs .table[class*="svelte-"] {
+    overflow: auto;
+}
+
+#show-all-btn {
+    top: 30px;
+    right: 10px;
+    margin: -2px;
+}
+#show-all-btn svg{
+    color: #ffffff;
+}
+#upload-index-file {
+    width: auto;
+    display: none;
+    position: fixed;
+    bottom: 110px;
+    opacity: 0.90;
+    backdrop-filter: blur(24px);
+}
+
+#spike-toast-info {
+    z-index: 99999999999999;
+}
+
+#spike-toast-info .wrap.center {
+    display: none !important;
+}
+
+.td-a-preview {
+    max-width: 200px !important;
+    max-height: 150px !important;
+}
+
+.danger_btn {
+    background: #e92b2b !important;
+}
+
+.danger_btn:hover {
+    background: #cd0c0c !important;
+}
+
+/*[id^="d_diagram"] {*/
+/*    display: none;*/
+/*}*/
+
+.gradio-tabs {
+    border-top: 1px solid var(--border-color-primary);
+}
+
+#history-toggle-button {
+    opacity: 0.5 !important;
+}
+
+#history-toggle-button:hover {
+    opacity: 1 !important;
+}
+
+#foreign-edit {
+    opacity: 0.9 !important;
+}
+
+#foreign-edit:hover {
+    opacity: 1 !important;
+    box-shadow: rgba(0, 0, 0, 0.19) 0 10px 20px, rgba(0, 0, 0, 0.23) 0 5px 5px
+}
+
+#svg-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.closeButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}
+
+.status_row {
+    max-height: 45px;
+    height: 45px;
+    overflow: auto;
+
+}
+
+#reader-file {
+    max-height: 87px !important;
+    overflow: auto !important;
+}
+
+.kb-select-list {
+    min-width: min(20%, 100%) !important;
+    max-width: 30%;
+}
+.kb-info-fragment {
+    /*max-height: 222px !important;*/
+    overflow: auto !important;
+}
+
+/*无用不管了*/
+/*.kb-info-fragment thead {   */
+/*    position: sticky; !* 使用粘性定位 *!*/
+/*    top: 0; !* 设置头部固定在顶部的位置 *!*/
+/*    !*background-color: #fff; !* 设置头部背景颜色，以防被滚动内容覆盖 *!*!*/
+/*    z-index: 10; !* 确保头部在其他内容之上 *!*/
+/*}*/
+.kb-info-fragment tr > td:first-child {
+    display: none !important;
+}
+.kb-info-fragment tr > th:first-child {
+    display: none !important;
+}
+
+.kb-info-fragment .controls-wrap {
+    display: none !important;
+}
+
+.kb-info-fragment td {
+    overflow: auto !important;
+}
+.gpts_select {
+    margin-bottom: 10px;
+}
+/* 把radio做成列表 */
+#knowledge-base-select {
+    height: calc(100% - 50px);
+    overflow: auto;
+}
+
+fieldset#knowledge-base-select .wrap {
+    gap: 0;
+}
+
+fieldset#knowledge-base-select .wrap label {
+    width: 100%;
+    background: none;
+    padding: 10px 16px 10px;
+    box-shadow: none;
+    justify-content: space-between;
+}
+
+fieldset#knowledge-base-select .wrap label:hover {
+    background: var(--message-list-background-hover);
+}
+
+fieldset#knowledge-base-select .wrap label:active {
+    background: var(--message-list-background-selected);
+}
+
+fieldset#knowledge-base-select .wrap label.selected {
+    color: var(--checkbox-label-text-color);
+    background: var(--chatbot-blur-background-color);
+}
+
+fieldset#knowledge-base-select .wrap label:not(.selected) .chat-selected-btns {
+    display: none;
+}
+
+fieldset#knowledge-base-select .wrap label > span {
+    /* font-size: small; */
+    margin-left: 0;
+    /* text-overflow: ellipsis; */
+    white-space: nowrap;
+    word-break: break-all;
+    overflow: auto;
+}
+
+fieldset#knowledge-base-select .wrap label > input {
+    display: none;
+}
+.column-unset-min-width {
+    min-width: unset !important;
+}
+
+[class*="gradio-container-"]:not(ul) h1 {
+    font-weight: 700 !important;
+    font-size: 28px !important;
+}
+
+[class*="gradio-container-"]:not(ul) h2 {
+    font-weight: 600 !important;
+    font-size: 24px !important;
+}
+
+[class*="gradio-container-"]:not(ul) h3 {
+    font-weight: 500 !important;
+    font-size: 20px !important;
+}
+
+[class*="gradio-container-"]:not(ul) h4 {
+    font-weight: 400 !important;
+    font-size: 16px !important;
+}
+
+[class*="gradio-container-"]:not(ul) h5 {
+    font-weight: 300 !important;
+    font-size: 14px !important;
+}
+
+[class*="gradio-container-"]:not(ul) h6 {
+    font-weight: 200 !important;
+    font-size: 12px !important;
+}

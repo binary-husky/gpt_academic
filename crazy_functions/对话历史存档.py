@@ -1,7 +1,8 @@
-from toolbox import CatchException, update_ui, promote_file_to_downloadzone, get_log_folder, get_user
+from common.toolbox import CatchException, update_ui, promote_file_to_downloadzone, get_log_folder, get_user
 import re
 
 f_prefix = 'GPT-Academic对话存档'
+
 
 def write_chat_to_file(chatbot, history=None, file_name=None):
     """
@@ -13,8 +14,7 @@ def write_chat_to_file(chatbot, history=None, file_name=None):
         file_name = f_prefix + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + '.html'
     fp = os.path.join(get_log_folder(get_user(chatbot), plugin_name='chat_history'), file_name)
     with open(fp, 'w', encoding='utf8') as f:
-        from themes.theme import advanced_css
-        f.write(f'<!DOCTYPE html><head><meta charset="utf-8"><title>对话历史</title><style>{advanced_css}</style></head>')
+        f.write(f'<!DOCTYPE html><head><meta charset="utf-8"><title>对话历史</title><style></style></head>')
         for i, contents in enumerate(chatbot):
             for j, content in enumerate(contents):
                 try:    # 这个bug没找到触发条件，暂时先这样顶一下

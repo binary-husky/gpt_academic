@@ -1,0 +1,157 @@
+.gradio-container {
+    max-width: unset !important;
+    padding: 0 !important;
+}
+
+/* 解决container=False时的错误填充 */
+div.form {
+    background: none !important;
+}
+div.no-container {
+    padding: 10px 0 0 0 !important;
+    background: none !important;
+}
+
+/* gradio的页脚信息 */
+footer {
+    display: none !important;
+    margin-top: .2em !important;
+    font-size: 85%;
+}
+
+.api-docs-wrap {
+    margin-top: 64px;
+}
+
+
+/* 把radio做成列表 */
+fieldset#history-select-dropdown .wrap {
+    gap: 0;
+}
+fieldset#history-select-dropdown .wrap label {
+    width: 100%;
+    background: none;
+    padding: 10px 16px 10px;
+    box-shadow: none;
+    justify-content: space-between;
+}
+fieldset#history-select-dropdown .wrap label:hover {
+    background: var(--message-list-background-hover);
+}
+fieldset#history-select-dropdown .wrap label:active {
+    background: var(--message-list-background-selected);
+}
+fieldset#history-select-dropdown .wrap label.selected {
+    color: var(--checkbox-label-text-color);
+    background: var(--message-list-background-selected);
+    padding: 10px 64px 10px 16px;
+}
+fieldset#history-select-dropdown .wrap label:not(.selected) .chat-selected-btns{
+    display: none;
+}
+fieldset#history-select-dropdown .wrap label > span {
+    /* font-size: small; */
+    margin-left: 0;
+    /* text-overflow: ellipsis; */
+    white-space: nowrap;
+    word-break: break-all;
+    overflow: hidden;
+}
+fieldset#history-select-dropdown .wrap label > span::before {
+    content: url("data:image/svg+xml,%3Csvg stroke='%23000000' fill='none' stroke-opacity='0.85' stroke-width='2' viewBox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' height='1em' width='1em' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'%3E%3C/path%3E%3C/svg%3E");
+    padding-right: .8em;
+    position: relative;
+    top: 4px;
+}
+.dark fieldset#history-select-dropdown .wrap label > span::before {
+    content: url("data:image/svg+xml,%3Csvg stroke='%23FFFFFF' fill='none' stroke-opacity='0.85' stroke-width='2' viewBox='0 0 24 24' stroke-linecap='round' stroke-linejoin='round' height='1em' width='1em' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'%3E%3C/path%3E%3C/svg%3E");
+}
+fieldset#history-select-dropdown .wrap label > input {
+    display: none;
+}
+
+
+/* 覆盖 gradio 丑陋的复制按钮样式 */
+.message .code_wrap button[title="copy"] {
+    border-radius: 5px !important;
+    transition: background-color .2s ease;
+    color: white;
+}
+.message .code_wrap button[title="copy"]:hover {
+    background-color: #333232;
+}
+.message .code_wrap button .check {
+    color: #fff !important;
+    background: var(--neutral-950) !important;
+}
+
+
+
+
+/* Override Slider Styles (for webkit browsers like Safari and Chrome)
+ * 好希望这份提案能早日实现 https://github.com/w3c/csswg-drafts/issues/4410
+ * 进度滑块在各个平台还是太不统一了
+**/
+
+input[type="range"] {
+    /* -webkit-appearance: none; */
+    appearance: none;
+    height: 4px;
+    background: var(--input-background-fill);
+    border-radius: 5px;
+    background-image: linear-gradient(var(--primary-500),var(--primary-500));
+    background-size: 0% 100%;
+    background-repeat: no-repeat;
+}
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    border: solid 0.5px #ddd;
+    background-color: white;
+    cursor: ew-resize;
+    box-shadow: var(--input-shadow);
+    transition: background-color .1s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: var(--neutral-50);
+}
+input[type=range]::-webkit-slider-runnable-track {
+    -webkit-appearance: none;
+    box-shadow: none;
+    border: none;
+    background: transparent;
+}
+
+
+#chuanhu-chatbot>.wrapper>.wrap::-webkit-scrollbar {
+    height: 1rem;
+    width: 4px;
+}
+
+#chuanhu-chatbot>.wrapper>.wrap::-webkit-scrollbar-track {
+    background-color: transparent;
+    border-radius:9999px
+}
+
+#chuanhu-chatbot>.wrapper>.wrap::-webkit-scrollbar-thumb {
+    background-color: rgba(231, 231, 231, 0.8);
+    /* border-color: rgba(255, 255, 255, var(--tw-border-opacity)); */
+    border: none;
+    border-radius: 9999px;
+    /* border-width:1px */
+}
+
+#chuanhu-chatbot>.wrapper>.wrap::-webkit-scrollbar-thumb:hover {
+    --tw-bg-opacity: 1;
+    background-color:rgb(195, 195, 195);
+}
+
+.dark #chuanhu-chatbot>.wrapper>.wrap::-webkit-scrollbar-thumb {
+    background-color: rgba(56, 56, 56, 0.5);
+}
+
+.dark #chuanhu-chatbot>.wrapper>.wrap::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(56, 56, 56, 0.8);
+}

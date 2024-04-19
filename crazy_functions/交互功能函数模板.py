@@ -1,4 +1,4 @@
-from toolbox import CatchException, update_ui
+from common.toolbox import CatchException, update_ui
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 
 
@@ -14,7 +14,7 @@ def 交互功能模板函数(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     user_request    当前用户的请求信息（IP地址等）
     """
     history = []    # 清空历史，以免输入溢出
-    chatbot.append(("这是什么功能？", "交互功能函数模板。在执行完成之后, 可以将自身的状态存储到cookie中, 等待用户的再次调用。"))
+    chatbot.append(["这是什么功能？", "交互功能函数模板。在执行完成之后, 可以将自身的状态存储到cookie中, 等待用户的再次调用。"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     state = chatbot._cookies.get('plugin_state_0001', None) # 初始化插件状态
@@ -23,7 +23,7 @@ def 交互功能模板函数(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         chatbot._cookies['lock_plugin'] = 'crazy_functions.交互功能函数模板->交互功能模板函数'      # 赋予插件锁定 锁定插件回调路径，当下一次用户提交时，会直接转到该函数
         chatbot._cookies['plugin_state_0001'] = 'wait_user_keyword'                              # 赋予插件状态
 
-        chatbot.append(("第一次调用：", "请输入关键词, 我将为您查找相关壁纸, 建议使用英文单词, 插件锁定中，请直接提交即可。"))
+        chatbot.append(["第一次调用：", "请输入关键词, 我将为您查找相关壁纸, 建议使用英文单词, 插件锁定中，请直接提交即可。"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
 
@@ -32,7 +32,7 @@ def 交互功能模板函数(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         chatbot._cookies['plugin_state_0001'] = None    # 解除插件状态，避免遗忘导致死锁
 
         # 解除插件锁定
-        chatbot.append((f"获取关键词：{txt}", ""))
+        chatbot.append([f"获取关键词：{txt}", ""])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         page_return = get_image_page_by_keyword(txt)
         inputs=inputs_show_user=f"Extract all image urls in this html page, pick the first 5 images and show them with markdown format: \n\n {page_return}"

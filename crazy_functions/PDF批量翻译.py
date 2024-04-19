@@ -1,12 +1,12 @@
-from toolbox import CatchException, report_exception, get_log_folder, gen_time_str, check_packages
-from toolbox import update_ui, promote_file_to_downloadzone, update_ui_lastest_msg, disable_auto_promotion
-from toolbox import write_history_to_file, promote_file_to_downloadzone, get_conf, extract_archive
-from toolbox import get_upload_folder, zip_folder
+from common.toolbox import CatchException, report_exception, get_log_folder, gen_time_str, check_packages
+from common.toolbox import update_ui, promote_file_to_downloadzone, update_ui_lastest_msg, disable_auto_promotion
+from common.toolbox import write_history_to_file, promote_file_to_downloadzone, get_conf, extract_archive
+from common.toolbox import get_upload_folder, zip_folder
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 from .crazy_utils import read_and_clean_pdf_text
 from .pdf_fns.parse_pdf import parse_pdf, get_avail_grobid_url, translate_pdf
-from colorful import *
+from common.colorful import *
 import os
 
 
@@ -269,7 +269,7 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
             create_report_file_name = f"{os.path.basename(fp)}.trans.html"
             generated_html_files.append(ch.save_file(create_report_file_name))
         except:
-            from toolbox import trimmed_format_exc
+            from common.toolbox import trimmed_format_exc
             print('writing html result failed:', trimmed_format_exc())
 
     # 准备文件的下载

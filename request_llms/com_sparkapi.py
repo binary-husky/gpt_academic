@@ -1,4 +1,4 @@
-from toolbox import get_conf, get_pictures_list, encode_image
+from common.toolbox import get_conf, get_pictures_list, encode_image
 import base64
 import datetime
 import hashlib

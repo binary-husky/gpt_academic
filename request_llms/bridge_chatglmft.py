@@ -5,7 +5,7 @@ import os
 import json
 import threading
 import importlib
-from toolbox import update_ui, get_conf
+from common.toolbox import update_ui, get_conf
 from multiprocessing import Process, Pipe
 
 load_message = "ChatGLMFT尚未加载，加载需要一段时间。注意，取决于`config.py`的配置，ChatGLMFT消耗大量的内存（CPU）或显存（GPU），也许会导致低配计算机卡死 ……"
@@ -77,7 +77,6 @@ class GetGLMFTHandle(Process):
 
                     config.pre_seq_len = model_args['pre_seq_len']
                     config.prefix_projection = model_args['prefix_projection']
-
                     print(f"Loading prefix_encoder weight from {CHATGLM_PTUNING_CHECKPOINT}")
                     model = AutoModel.from_pretrained(model_args['model_name_or_path'], config=config, trust_remote_code=True)
                     prefix_state_dict = torch.load(os.path.join(CHATGLM_PTUNING_CHECKPOINT, "pytorch_model.bin"))
@@ -117,7 +116,7 @@ class GetGLMFTHandle(Process):
                     #     command = self.child.recv()
                     #     if command == '[Terminate]': break
             except:
-                from toolbox import trimmed_format_exc
+                from common.toolbox import trimmed_format_exc
                 self.child.send('[Local Message] Call ChatGLMFT fail.' + '\n```\n' + trimmed_format_exc() + '\n```\n')
             # 请求处理结束，开始下一个循环
             self.child.send('[Finish]')
@@ -174,19 +173,19 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         单线程方法
         函数的说明请见 request_llms/bridge_all.py
     """
-    chatbot.append((inputs, ""))
+    chatbot.append([inputs, ""])
 
     global glmft_handle
     if glmft_handle is None:
         glmft_handle = GetGLMFTHandle()
-        chatbot[-1] = (inputs, load_message + "\n\n" + glmft_handle.info)
+        chatbot[-1] = [inputs, load_message + "\n\n" + glmft_handle.info]
         yield from update_ui(chatbot=chatbot, history=[])
         if not glmft_handle.success:
             glmft_handle = None
             return
 
     if additional_fn is not None:
-        from core_functional import handle_core_functionality
+        from common.core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
     # 处理历史信息
@@ -198,7 +197,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     # 开始接收chatglmft的回复
     response = "[Local Message] 等待ChatGLMFT响应中 ..."
     for response in glmft_handle.stream_chat(query=inputs, history=history_feedin, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
-        chatbot[-1] = (inputs, response)
+        chatbot[-1] = [inputs, response]
         yield from update_ui(chatbot=chatbot, history=history)
 
     # 总结输出

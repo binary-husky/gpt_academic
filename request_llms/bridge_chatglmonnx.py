@@ -1,12 +1,11 @@
 model_name = "ChatGLM-ONNX"
 cmd_to_install = "`pip install -r request_llms/requirements_chatglm_onnx.txt`"
 
-
 from transformers import AutoModel, AutoTokenizer
 import time
 import threading
 import importlib
-from toolbox import update_ui, get_conf
+from common.toolbox import update_ui, get_conf
 from multiprocessing import Process, Pipe
 from .local_llm_class import LocalLLMHandle, get_local_llm_predict_fns
 

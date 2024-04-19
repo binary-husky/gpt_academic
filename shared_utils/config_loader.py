@@ -2,7 +2,7 @@ import importlib
 import time
 import os
 from functools import lru_cache
-from colorful import print亮红, print亮绿, print亮蓝
+from common.colorful import print亮红, print亮绿, print亮蓝
 
 pj = os.path.join
 default_user_name = 'default_user'
@@ -118,7 +118,7 @@ def get_conf(*args):
 
 
 def set_conf(key, value):
-    from toolbox import read_single_conf_with_lru_cache
+    from common.toolbox import read_single_conf_with_lru_cache
     read_single_conf_with_lru_cache.cache_clear()
     get_conf.cache_clear()
     os.environ[key] = str(value)

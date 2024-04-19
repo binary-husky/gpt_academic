@@ -1,5 +1,5 @@
-from toolbox import update_ui
-from toolbox import CatchException, get_conf, markdown_convertion
+from common.toolbox import update_ui
+from common.toolbox import CatchException, get_conf, markdown_convertion
 from crazy_functions.crazy_utils import input_clipping
 from crazy_functions.agent_fns.watchdog import WatchDog
 from request_llms.bridge_all import predict_no_ui_long_connection
@@ -42,7 +42,7 @@ class AsyncGptTask():
             gpt_say_partial = predict_no_ui_long_connection(inputs=i_say, llm_kwargs=llm_kwargs, history=history, sys_prompt=sys_prompt,
                                                             observe_window=observe_window[index], console_slience=True)
         except ConnectionAbortedError as token_exceed_err:
-            print('至少一个线程任务Token溢出而失败', e)
+            print('至少一个线程任务Token溢出而失败', token_exceed_err)
         except Exception as e:
             print('至少一个线程任务意外失败', e)
 

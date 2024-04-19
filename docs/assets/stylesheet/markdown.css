@@ -1,0 +1,72 @@
+
+.md-message img{
+    border-radius: 10px !important;
+}
+
+/* 表格 */
+.md-message table {
+    margin: 1em 0;
+    border-collapse: collapse;
+    empty-cells: show;
+}
+.md-message td, .message th {
+    border: 1.2px solid var(--border-color-primary) !important;
+    padding: 0.2em;
+}
+.md-message thead {
+    background-color: rgba(175,184,193,0.2);
+}
+.md-message thead th {
+    padding: .5em .2em;
+}
+
+/* 行内代码 */
+.md-message :not(pre) > code {
+    display: inline;
+    white-space: break-spaces;
+    font-family: var(--font-mono) !important;
+    border-radius: 6px !important;
+    /*margin: 0 2px 0 2px;*/
+    /*padding: .1em .4em .08em .4em !important;*/
+    background-color: rgb(19 18 18) !important;
+    color: #ff6e67;
+    border: none !important;
+    /*font-size: var(--text-md) !important;*/
+}
+/* 代码块 */
+.md-message pre,
+.md-message pre[class*=language-] {
+    color: #e7e7e2;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: var(--spacing-xl) 1.2em !important;
+    border-radius: var(--radius-lg) !important;
+    background: #282c34 !important
+}
+.dark .md-message pre,
+.md-message pre[class*=language-] {
+    background: var(--neutral-950) !important;
+}
+.md-message pre code,
+.md-message pre code[class*=language-] {
+    color: #e7e7e2;
+    padding: 0;
+    margin: 0;
+    margin-right: 20px;
+    background-color: unset;
+    text-shadow: none;
+    font-family: var(--font-mono);
+    font-size: var(--text-md);
+}
+.md-message .code_wrap {
+    margin: .8em 1em 1em 0em;
+}
+
+/* 覆盖prism.css */
+.language-css .token.string,
+.style .token.string,
+.token.entity,
+.token.operator,
+.token.url {
+    background: none !important;
+}

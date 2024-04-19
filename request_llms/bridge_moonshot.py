@@ -5,10 +5,11 @@
 import json
 import os
 import time
+import requests
+from common.toolbox import get_conf, update_ui
 import logging
-
-from toolbox import get_conf, update_ui, log_chat
-from toolbox import ChatBotWithCookies
+from common.path_handler import init_path
+from common.toolbox import get_conf, update_ui, log_chat, ChatBotWithCookies
 
 import requests
 
@@ -20,22 +21,14 @@ class MoonShotInit:
         self.url = 'https://api.moonshot.cn/v1/chat/completions'
         self.api_key = get_conf('MOONSHOT_API_KEY')
 
-    def __converter_file(self, user_input: str):
+    def __converter_file(self, user_input: str, llm_kwargs):
+        from crazy_functions.reader_fns.crazy_box import input_retrieval_file, file_reader_content
         what_ask = []
-        for f in user_input.splitlines():
-            if os.path.exists(f):
-                files = []
-                if os.path.isdir(f):
-                    file_list = os.listdir(f)
-                    files.extend([os.path.join(f, file) for file in file_list])
-                else:
-                    files.append(f)
-                for file in files:
-                    if file.split('.')[-1] in ['pdf']:
-                        with open(file, 'r') as fp:
-                            from crazy_functions.crazy_utils import read_and_clean_pdf_text
-                            file_content, _ = read_and_clean_pdf_text(fp)
-                        what_ask.append({"role": "system", "content": file_content})
+        fp_map, status = input_retrieval_file(user_input, llm_kwargs=llm_kwargs, valid_types=['*'])
+        save_file = os.path.join(init_path.private_files_path, llm_kwargs.get('ipaddr'))
+        for fp in fp_map:
+            content, status = file_reader_content(fp, save_file, {})
+            what_ask.append({"role": "system", "content": content})
         return what_ask
 
     def __converter_user(self, user_input: str):
@@ -80,9 +73,9 @@ class MoonShotInit:
         messages = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
-        messages.extend(self.__converter_file(inputs))
-        for i in history[0::2]:    # 历史文件继续上传
-            messages.extend(self.__converter_file(i))
+        messages.extend(self.__converter_file(inputs, llm_kwargs))
+        for i in history[0::2]:  # 历史文件继续上传
+            messages.extend(self.__converter_file(i, llm_kwargs))
         messages.extend(self.__conversation_history(history))
         messages.append(self.__converter_user(inputs))
         header = {
@@ -150,14 +143,10 @@ def msg_handle_error(llm_kwargs, chunk_decoded):
 def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWithCookies,
             history:list=[], system_prompt:str='', stream:bool=True, additional_fn:str=None):
     chatbot.append([inputs, ""])
-
-    if additional_fn is not None:
-        from core_functional import handle_core_functionality
-        inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
     yield from update_ui(chatbot=chatbot, history=history, msg="等待响应")  # 刷新界面
-    gpt_bro_init = MoonShotInit()
+    moon_bro_init = MoonShotInit()
     history.extend([inputs, ''])
-    stream_response = gpt_bro_init.generate_messages(inputs, llm_kwargs, history, system_prompt, stream)
+    stream_response = moon_bro_init.generate_messages(inputs, llm_kwargs, history, system_prompt, stream)
     for content, gpt_bro_result, error_bro_meg in stream_response:
         chatbot[-1] = [inputs, gpt_bro_result]
         history[-1] = gpt_bro_result
@@ -167,7 +156,29 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
             history = history[:-2]
             yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
             break
-    log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_bro_result)
+
+
+def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=None,
+                                  console_slience=False):
+    moon_bro_init = MoonShotInit()
+    watch_dog_patience = 60  # 看门狗的耐心, 设置10秒即可
+    stream_response = moon_bro_init.generate_messages(inputs, llm_kwargs, history, sys_prompt, True)
+    gpt_bro_result = ''
+    for content, gpt_bro_result, error_bro_meg in stream_response:
+        gpt_bro_result = gpt_bro_result
+        if error_bro_meg:
+            if len(observe_window) >= 3:
+                observe_window[2] = error_bro_meg
+            return f'{gpt_bro_result} 对话错误'
+            # 观测窗
+        if len(observe_window) >= 1:
+            observe_window[0] = gpt_bro_result
+        if len(observe_window) >= 2:
+            if (time.time() - observe_window[1]) > watch_dog_patience:
+                observe_window[2] = "请求超时，程序终止。"
+                raise RuntimeError(f"{gpt_bro_result} 程序终止。")
+    return gpt_bro_result
+
 
 def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=None,
                                   console_slience=False):
@@ -189,6 +200,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
                 observe_window[2] = "请求超时，程序终止。"
                 raise RuntimeError(f"{moonshot_bro_result} 程序终止。")
     return moonshot_bro_result
+
 
 if __name__ == '__main__':
     moon_ai = MoonShotInit()

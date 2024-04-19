@@ -1,12 +1,13 @@
-from toolbox import update_ui
-from toolbox import CatchException, report_exception
-from toolbox import write_history_to_file, promote_file_to_downloadzone
+from common.toolbox import update_ui
+from common.toolbox import CatchException, report_exception
+from common.toolbox import write_history_to_file, promote_file_to_downloadzone
+
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 fast_debug = False
 
 
 def 解析docx(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
-    import time, os
+    import os
     # pip install python-docx 用于docx格式，跨平台
     # pip install pywin32 用于doc格式，仅支持Win平台
     for index, fp in enumerate(file_manifest):
@@ -48,7 +49,7 @@ def 解析docx(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot
                 sys_prompt="总结文章。"
             )
 
-            chatbot[-1] = (i_say_show_user, gpt_say)
+            chatbot[-1] = [i_say_show_user, gpt_say]
             history.extend([i_say_show_user,gpt_say])
             this_paper_history.extend([i_say_show_user,gpt_say])
 
@@ -69,12 +70,12 @@ def 解析docx(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot
 
         res = write_history_to_file(history)
         promote_file_to_downloadzone(res, chatbot=chatbot)
-        chatbot.append(("完成了吗？", res))
+        chatbot.append(["完成了吗？", res])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     res = write_history_to_file(history)
     promote_file_to_downloadzone(res, chatbot=chatbot)
-    chatbot.append(("所有文件都总结完成了吗？", res))
+    chatbot.append(["所有文件都总结完成了吗？", res])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
 

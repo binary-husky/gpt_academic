@@ -21,9 +21,9 @@ import random
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
-from toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history
-from toolbox import trimmed_format_exc, is_the_upload_folder, read_one_api_model_name, log_chat
-from toolbox import ChatBotWithCookies
+from common.toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history
+from common.toolbox import trimmed_format_exc, is_the_upload_folder, read_one_api_model_name, log_chat
+from common.toolbox import ChatBotWithCookies
 proxies, TIMEOUT_SECONDS, MAX_RETRY, API_ORG, AZURE_CFG_ARRAY = \
     get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'API_ORG', 'AZURE_CFG_ARRAY')
 
@@ -311,7 +311,7 @@ def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
     elif "Not enough point" in error_msg:
         chatbot[-1] = (chatbot[-1][0], "[Local Message] Not enough point. API2D账户点数不足.")
     else:
-        from toolbox import regular_txt_to_markdown
+        from common.toolbox import regular_txt_to_markdown
         tb_str = '```\n' + trimmed_format_exc() + '```'
         chatbot[-1] = (chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str} \n\n{regular_txt_to_markdown(chunk_decoded)}")
     return chatbot, history

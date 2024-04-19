@@ -1,8 +1,11 @@
-from toolbox import update_ui, get_log_folder
-from toolbox import write_history_to_file, promote_file_to_downloadzone
-from toolbox import CatchException, report_exception, get_conf
+from common.toolbox import update_ui, get_log_folder
+from common.toolbox import write_history_to_file, promote_file_to_downloadzone
+from common.toolbox import CatchException, report_exception, get_conf
+
 import re, requests, unicodedata, os
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+
+
 def download_arxiv_(url_pdf):
     if 'arxiv.org' not in url_pdf:
         if ('.' in url_pdf) and ('/' not in url_pdf):
@@ -63,7 +66,6 @@ def download_arxiv_(url_pdf):
 
 
 def get_name(_url_):
-    import os
     from bs4 import BeautifulSoup
     print('正在获取文献名！')
     print(_url_)
@@ -133,7 +135,6 @@ def get_name(_url_):
 def 下载arxiv论文并翻译摘要(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
 
     CRAZY_FUNCTION_INFO = "下载arxiv论文并翻译摘要，函数插件作者[binary-husky]。正在提取摘要并下载PDF文档……"
-    import glob
     import os
 
     # 基本信息：功能、贡献者
@@ -166,7 +167,7 @@ def 下载arxiv论文并翻译摘要(txt, llm_kwargs, plugin_kwargs, chatbot, hi
     # 翻译摘要等
     i_say =            f"请你阅读以下学术论文相关的材料，提取摘要，翻译为中文。材料如下：{str(info)}"
     i_say_show_user =  f'请你阅读以下学术论文相关的材料，提取摘要，翻译为中文。论文：{pdf_path}'
-    chatbot.append((i_say_show_user, "[Local Message] waiting gpt response."))
+    chatbot.append([i_say_show_user, "[Local Message] waiting gpt response."])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
     msg = '正常'
     # ** gpt request **
@@ -179,13 +180,13 @@ def 下载arxiv论文并翻译摘要(txt, llm_kwargs, plugin_kwargs, chatbot, hi
         sys_prompt="Your job is to collect information from materials and translate to Chinese。",
     )
 
-    chatbot[-1] = (i_say_show_user, gpt_say)
+    chatbot[-1] = [i_say_show_user, gpt_say]
     history.append(i_say_show_user); history.append(gpt_say)
     yield from update_ui(chatbot=chatbot, history=history, msg=msg) # 刷新界面
     res = write_history_to_file(history)
     promote_file_to_downloadzone(res, chatbot=chatbot)
     promote_file_to_downloadzone(pdf_path, chatbot=chatbot)
 
-    chatbot.append(("完成了吗？", res + "\n\nPDF文件也已经下载"))
+    chatbot.append(["完成了吗？", res + "\n\nPDF文件也已经下载"])
     yield from update_ui(chatbot=chatbot, history=history, msg=msg) # 刷新界面
 

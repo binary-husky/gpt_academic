@@ -20,8 +20,10 @@ Please describe in natural language what you want to do.
 
 5. If you don't need to upload a file, you can simply repeat your command again.
 """
-explain_msg = """
-## 虚空终端插件说明:
+explain_msg = f"""
+> 无法识别意图，询问方法请参考以下说明，准备为您转发到常规对话中...
+
+## 插件代理说明:
 
 1. 请用**自然语言**描述您需要做什么。例如：
     - 「请调用插件，为我翻译PDF论文，论文我刚刚放到上传区了」
@@ -46,8 +48,8 @@ explain_msg = """
 
 from pydantic import BaseModel, Field
 from typing import List
-from toolbox import CatchException, update_ui, is_the_upload_folder
-from toolbox import update_ui_lastest_msg, disable_auto_promotion
+from common.toolbox import CatchException, update_ui, is_the_upload_folder
+from common.toolbox import update_ui_lastest_msg, disable_auto_promotion
 from request_llms.bridge_all import predict_no_ui_long_connection
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from crazy_functions.crazy_utils import input_clipping
@@ -109,7 +111,7 @@ def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     # 获取当前虚空终端状态
     state = VoidTerminalState.get_state(chatbot)
     appendix_msg = ""
-
+    chatbot.append([txt, f'由`{llm_kwargs["llm_model"]}`作为插件代理人，正在识别您的意图，请稍等...'])
     # 用简单的关键词检测用户意图
     is_certain, _ = analyze_intention_with_simple_rules(txt)
     if is_the_upload_folder(txt):
@@ -124,19 +126,21 @@ def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
         yield from 虚空终端主路由(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request)
         return
     else:
-        # 如果意图模糊，提示
+        # 如果意图模糊，提示，并转发到普通对话
         state.set_state(chatbot=chatbot, key='has_provided_explaination', value=True)
         state.lock_plugin(chatbot=chatbot)
-        chatbot.append(("虚空终端状态:", explain_msg+appendix_msg))
+        chatbot.append([None, explain_msg+appendix_msg])
         yield from update_ui(chatbot=chatbot, history=history)
+        from crazy_functions.reader_fns import crazy_box
+        yield from crazy_box.submit_multithreaded_tasks([txt],  [txt], llm_kwargs, chatbot, history, plugin_kwargs)
         return
 
 
 
 def 虚空终端主路由(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     history = []
-    chatbot.append(("虚空终端状态: ", f"正在执行任务: {txt}"))
-    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+    chatbot.append([None, f"正在执行任务: {txt}"])
+    yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
     # ⭐ ⭐ ⭐ 分析用户意图
     is_certain, user_intention = analyze_intention_with_simple_rules(txt)

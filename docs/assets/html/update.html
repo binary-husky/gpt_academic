@@ -1,0 +1,29 @@
+<div id="toast-update">
+    <div id="check-chuanhu-update">
+        <p style="display:none">
+            <span id="current-version">{current_version}</span>
+            <span id="version-time">{version_time}</span>
+        </p>
+        <p id="version-info-title">
+            Latest Version: <a href="https://github.com/gaizhenbiao/chuanhuchatgpt/releases/latest" target="_blank"
+                id="latest-version-title" style="text-decoration: none;">getting latest version...</a>
+        </p>
+        <p id="updating-info" class="hideK">
+            Getting update...
+        </p>
+        <div id="updating-spinner"></div>
+        <div id="release-note-wrap">
+            <div class="release-note-content" id="release-note-content">
+                Getting Release Note...
+            </div>
+        </div>
+        <div id="goto-update-btn" class="btn-update-group">
+            <button class="btn-update lg secondary svelte-cmf5ev" id="cancel-button" onclick="cancelUpdate()">{cancel_btn}</button>
+            <button class="btn-update lg primary svelte-cmf5ev" id="update-button" onclick="bgUpdateChuanhu()">{update_btn}</button>
+        </div>
+        <div id="close-update-btn" class="btn-update-group hideK">
+            <button class="btn-update lg secondary svelte-cmf5ev" id="seenew-button" onclick="getUpdateInfo()">{seenew_btn}</button>
+            <button class="btn-update lg primary svelte-cmf5ev" id="ok-button" onclick="cancelUpdate()">{ok_btn}</button>
+        </div>
+    </div>
+</div>

@@ -1,8 +1,11 @@
-
 import time
 import threading
 import importlib
-from toolbox import update_ui, get_conf
+from common.toolbox import update_ui, get_conf
+from transformers import AutoModel, AutoTokenizer
+import time
+import threading
+import importlib
 from multiprocessing import Process, Pipe
 from transformers import AutoModel, AutoTokenizer
 
@@ -27,7 +30,7 @@ class GetGLMHandle(Process):
             self.info = "依赖检测通过"
             self.success = True
         except:
-            from toolbox import trimmed_format_exc
+            from common.toolbox import trimmed_format_exc
             self.info = r"缺少jittorllms的依赖，如果要使用jittorllms，除了基础的pip依赖以外，您还需要运行`pip install -r request_llms/requirements_jittorllms.txt -i https://pypi.jittor.org/simple -I`"+\
                         r"和`git clone https://gitlink.org.cn/jittor/JittorLLMs.git --depth 1 request_llms/jittorllms`两个指令来安装jittorllms的依赖（在项目根目录运行这两个指令）。" +\
                         r"警告：安装jittorllms依赖后将完全破坏现有的pytorch环境，建议使用docker环境！" + trimmed_format_exc()
@@ -85,7 +88,7 @@ class GetGLMHandle(Process):
                     print(response)
                     self.child.send(response)
             except:
-                from toolbox import trimmed_format_exc
+                from common.toolbox import trimmed_format_exc
                 print(trimmed_format_exc())
                 self.child.send('[Local Message] Call jittorllms fail.')
             # 请求处理结束，开始下一个循环
@@ -143,19 +146,19 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         单线程方法
         函数的说明请见 request_llms/bridge_all.py
     """
-    chatbot.append((inputs, ""))
+    chatbot.append([inputs, ""])
 
     global pangu_glm_handle
     if pangu_glm_handle is None:
         pangu_glm_handle = GetGLMHandle()
-        chatbot[-1] = (inputs, load_message + "\n\n" + pangu_glm_handle.info)
+        chatbot[-1] = [inputs, load_message + "\n\n" + pangu_glm_handle.info]
         yield from update_ui(chatbot=chatbot, history=[])
         if not pangu_glm_handle.success:
             pangu_glm_handle = None
             return
 
     if additional_fn is not None:
-        from core_functional import handle_core_functionality
+        from common.core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
     # 处理历史信息
@@ -166,7 +169,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
     # 开始接收jittorllms的回复
     response = "[Local Message] 等待jittorllms响应中 ..."
     for response in pangu_glm_handle.stream_chat(query=inputs, history=history_feedin, system_prompt=system_prompt, max_length=llm_kwargs['max_length'], top_p=llm_kwargs['top_p'], temperature=llm_kwargs['temperature']):
-        chatbot[-1] = (inputs, response)
+        chatbot[-1] = [inputs, response]
         yield from update_ui(chatbot=chatbot, history=history)
 
     # 总结输出
