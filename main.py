@@ -83,6 +83,8 @@ def main():
     with gr.Blocks(title="GPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as app_block:
         gr.HTML(title_html)
         secret_css = gr.Textbox(visible=False, elem_id="secret_css")
+
+
         cookies, web_cookie_cache = make_cookie_cache() # 定义 后端state（cookies）、前端（web_cookie_cache）两兄弟
         with gr_L1():
             with gr_L2(scale=2, elem_id="gpt-chat"):
@@ -338,6 +340,27 @@ def main():
             def deal_audio(audio, cookies):
                 rad.feed(cookies['uuid'].hex, audio)
             audio_mic.stream(deal_audio, inputs=[audio_mic, cookies])
+
+        audio_buf_text = gr.Textbox(visible=False, elem_id="audio_buf_text")
+        audio_buf_wave = gr.Textbox(visible=False, elem_id="audio_buf")
+        audio_gen_trigger = gr.Button(visible=False, elem_id="audio_gen_trigger")
+        def generate_audio(audio_buf_text, txt):
+            import requests, base64
+            url = 'http://127.0.0.1:19880'
+            payload = {
+                "text": audio_buf_text,
+                "text_language": "zh"
+            }
+            response = requests.post(url, json=payload, stream=False)
+            if response.status_code == 200:
+                encoded_audio = base64.b64encode(response.content).decode('ascii')
+                return encoded_audio
+            else:
+                print("Sovits audio generation Error:", response.status_code, response.text)
+                return ""
+        audio_gen_trigger.click(generate_audio, [audio_buf_text, txt], [audio_buf_wave]).then(None,
+            [audio_buf_wave], None, _js=r"""(audio_buf_wave)=>{UpdatePlayQueue(audio_buf_wave);}""")
+
 
 
         app_block.load(assign_user_uuid, inputs=[cookies], outputs=[cookies])

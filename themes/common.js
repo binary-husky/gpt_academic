@@ -257,6 +257,13 @@ function cancel_loading_status() {
 //  第 2 部分: 复制按钮
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
+function push_text_to_audio(text)
+{
+    push_data_to_gradio_component(text, 'audio_buf_text', 'str');
+    document.querySelector("#audio_gen_trigger").click();
+}
+
+
 function addCopyButton(botElement) {
     // https://github.com/GaiZhenbiao/ChuanhuChatGPT/tree/main/web_assets/javascript
     // Copy bot button
@@ -276,6 +283,7 @@ function addCopyButton(botElement) {
     copyButton.addEventListener('click', async () => {
         const textToCopy = botElement.innerText;
         try {
+            push_text_to_audio(textToCopy);
             if ("clipboard" in navigator) {
                 await navigator.clipboard.writeText(textToCopy);
                 copyButton.innerHTML = copiedIcon;
@@ -860,6 +868,40 @@ function gpt_academic_gradio_saveload(
     }
 }
 
+async function UpdatePlayQueue(audio_buf_wave){
+    console.log(audio_buf_wave);
+    const encodedAudio = audio_buf_wave;
+
+    // 将Base64字符串转换成 ArrayBuffer
+    function base64ToArrayBuffer(base64) {
+        const binaryString = window.atob(base64);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        return bytes.buffer;
+    }
+    // 创建一个AudioContext
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // 转换我们的Base64字符串为一个ArrayBuffer
+    const audioData = base64ToArrayBuffer(encodedAudio);
+
+    // 解码ArrayBuffer为audio buffer
+    audioCtx.decodeAudioData(audioData, (buffer) => {
+        // 创建一个音频源
+        const source = audioCtx.createBufferSource();
+        // 设置音频源的buffer
+        source.buffer = buffer;
+        // 连接到output
+        source.connect(audioCtx.destination);
+        // 播放音频
+        source.start();
+    }, (e) => {
+        console.log("Audio error!", e);
+    });
+
+}
 
 async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout) {
     // 第一部分，布局初始化
