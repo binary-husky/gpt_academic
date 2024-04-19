@@ -256,13 +256,21 @@ function cancel_loading_status() {
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //  第 2 部分: 复制按钮
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-function push_text_to_audio(text)
-{
-    push_data_to_gradio_component(text, 'audio_buf_text', 'str');
-    document.querySelector("#audio_gen_trigger").click();
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+async function push_text_to_audio(text) {
+    var lines = text.split("\n");
+    for(const line of lines){
+        if (line){
+            console.log(line);
+            push_data_to_gradio_component(line, 'audio_buf_text', 'str');
+            document.querySelector("#audio_gen_trigger").click();
+            await delay(3000);  // Wait for 3 seconds before proceeding to the next line
+        }
+    }
+}
 
 function addCopyButton(botElement) {
     // https://github.com/GaiZhenbiao/ChuanhuChatGPT/tree/main/web_assets/javascript
@@ -283,7 +291,7 @@ function addCopyButton(botElement) {
     copyButton.addEventListener('click', async () => {
         const textToCopy = botElement.innerText;
         try {
-            push_text_to_audio(textToCopy);
+            push_text_to_audio(textToCopy).catch(console.error);;
             if ("clipboard" in navigator) {
                 await navigator.clipboard.writeText(textToCopy);
                 copyButton.innerHTML = copiedIcon;
@@ -868,12 +876,15 @@ function gpt_academic_gradio_saveload(
     }
 }
 
-async function UpdatePlayQueue(audio_buf_wave){
-    console.log(audio_buf_wave);
-    const encodedAudio = audio_buf_wave;
+class AudioPlayer {
+    constructor() {
+        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        this.queue = [];
+        this.isPlaying = false;
+    }
 
-    // 将Base64字符串转换成 ArrayBuffer
-    function base64ToArrayBuffer(base64) {
+    // Base64 编码的字符串转换为 ArrayBuffer
+    base64ToArrayBuffer(base64) {
         const binaryString = window.atob(base64);
         const len = binaryString.length;
         const bytes = new Uint8Array(len);
@@ -882,25 +893,47 @@ async function UpdatePlayQueue(audio_buf_wave){
         }
         return bytes.buffer;
     }
-    // 创建一个AudioContext
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    // 转换我们的Base64字符串为一个ArrayBuffer
-    const audioData = base64ToArrayBuffer(encodedAudio);
 
-    // 解码ArrayBuffer为audio buffer
-    audioCtx.decodeAudioData(audioData, (buffer) => {
-        // 创建一个音频源
-        const source = audioCtx.createBufferSource();
-        // 设置音频源的buffer
-        source.buffer = buffer;
-        // 连接到output
-        source.connect(audioCtx.destination);
-        // 播放音频
-        source.start();
-    }, (e) => {
-        console.log("Audio error!", e);
-    });
+    // 检查音频播放队列并播放音频
+    checkQueue() {
+        if (!this.isPlaying && this.queue.length > 0) {
+            this.isPlaying = true;
+            const nextAudio = this.queue.shift();
+            this.play_wave(nextAudio);
+        }
+    }
 
+    // 将音频添加到播放队列
+    enqueueAudio(audio_buf_wave) {
+        this.queue.push(audio_buf_wave);
+        this.checkQueue();
+    }
+
+    // 播放音频
+    async play_wave(encodedAudio) {
+        const audioData = this.base64ToArrayBuffer(encodedAudio);
+        try {
+            const buffer = await this.audioCtx.decodeAudioData(audioData);
+            const source = this.audioCtx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(this.audioCtx.destination);
+            source.onended = () => {
+                this.isPlaying = false;
+                this.checkQueue();
+            };
+            source.start();
+        } catch (e) {
+            console.log("Audio error!", e);
+            this.isPlaying = false;
+            this.checkQueue();
+        }
+    }
+}
+
+const audioPlayer = new AudioPlayer();
+
+async function UpdatePlayQueue(audio_buf_wave){
+    audioPlayer.enqueueAudio(audio_buf_wave);
 }
 
 async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout) {

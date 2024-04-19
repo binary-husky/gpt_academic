@@ -195,6 +195,12 @@ ALIYUN_ACCESSKEY="" # （无需填写）
 ALIYUN_SECRET=""    # （无需填写）
 
 
+# GPT-SOVITS 文本转语音服务的运行地址（将语言模型的生成文本朗读出来）
+GPT_SOVITS_URL = ""
+GPT_SOVITS_ENABLE = False
+
+
+
 # 接入讯飞星火大模型 https://console.xfyun.cn/services/iat
 XFYUN_APPID = "00000000"
 XFYUN_API_SECRET = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
