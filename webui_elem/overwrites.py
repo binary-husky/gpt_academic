@@ -11,6 +11,7 @@ from gradio import utils
 from collections import namedtuple
 from common import toolbox
 from common.path_handler import init_path
+from shared_utils.config_loader import get_conf
 
 
 def escape_markdown(text, reverse=False):
@@ -194,7 +195,7 @@ def list_scripts(scriptdirname, extension):
 def reload_javascript():
     spike_js = javascript_html()
     waifu_js = ''
-    ADD_WAIFU = toolbox.get_conf('ADD_WAIFU')
+    ADD_WAIFU = get_conf('ADD_WAIFU')
     if ADD_WAIFU:
         waifu_js += f"""
             <script src="{webpath('docs/assets/plugins/waifu_plugin/jquery.min.js')}"></script>

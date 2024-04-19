@@ -7,9 +7,9 @@ import time
 import jwt
 import json
 from common.toolbox import get_conf
-from common import func_box, toolbox
+from common.func_box import extract_link_pf, valid_img_extensions, batch_encode_image
 
-proxies, TIMEOUT_SECONDS = toolbox.get_conf('proxies', 'TIMEOUT_SECONDS')
+proxies, TIMEOUT_SECONDS = get_conf('proxies', 'TIMEOUT_SECONDS')
 
 
 def generate_token(apikey: str, exp_seconds: int):
@@ -44,8 +44,8 @@ class ZhipuChatInit:
         if '4v' not in self.model:
             return {"role": "user", "content": user_input}
         else:
-            img_mapping = func_box.extract_link_pf(user_input, func_box.valid_img_extensions)
-            encode_img_map = func_box.batch_encode_image(img_mapping)
+            img_mapping = extract_link_pf(user_input, valid_img_extensions)
+            encode_img_map = batch_encode_image(img_mapping)
             for i in encode_img_map:  # 替换图片链接    st.dataframe(online_handler.set_date_style(df))
 
                 user_input = user_input.replace(img_mapping[i], '')

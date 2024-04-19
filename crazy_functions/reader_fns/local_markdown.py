@@ -6,6 +6,8 @@ import os
 import re
 import json
 
+from common.func_box import Shell
+
 
 class MdProcessor:
 
@@ -36,7 +38,7 @@ class MdProcessor:
 
     def json_to_list(self):
         supplementary_data = []
-        if 'raise ConnectionAbortedError' in self.content_text:
+        if 'raise' in self.content_text:
             # 尝试GPT返回错误超出Token限制导致的Json数据结构错误
             content_data = "\n".join([item for item in str(self.content_text).splitlines() if item != ''][:-1])
             if re.search(r'[^\w\s\]]', content_data[-1]):  # 判断是不是有,号之类的特殊字符
@@ -55,33 +57,6 @@ class MdProcessor:
             except:
                 print(f'{sp} 测试用例转dict失败了来看看')
         return supplementary_data
-
-    def to_markdown_tabs(self, head: list, tabs: list, alignment=':---:', column=False):
-        """
-        Args:
-            head: 表头：[]
-            tabs: 表值：[[列1], [列2], [列3], [列4]]
-            alignment: :--- 左对齐， :---: 居中对齐， ---: 右对齐
-            column: True to keep data in columns, False to keep data in rows (default).
-        Returns:
-            A string representation of the markdown table.
-        """
-        if column:
-            transposed_tabs = list(map(list, zip(*tabs)))
-        else:
-            transposed_tabs = tabs
-        # Find the maximum length among the columns
-        max_len = max(len(column) for column in transposed_tabs)
-
-        tab_format = "| %s "
-        tabs_list = "".join([tab_format % i for i in head]) + '|\n'
-        tabs_list += "".join([tab_format % alignment for i in head]) + '|\n'
-
-        for i in range(max_len):
-            row_data = [tab[i] if i < len(tab) else '' for tab in transposed_tabs]
-            row_data = file_manifest_filter_type(row_data, filter_=None)
-            tabs_list += "".join([tab_format % i for i in row_data]) + '|\n'
-        return tabs_list
 
 
 class MdHandler:
@@ -117,7 +92,7 @@ class MdHandler:
         user_path = os.path.join(self.output_dir, 'mark_map')
         os.makedirs(user_path, exist_ok=True)
         html_file = os.path.join(user_path, f"{self.file_name}.html")
-        func_box.Shell(f'npx markmap-cli --no-open "{self.md_path}" -o "{html_file}"').start()
+        Shell(f'npx markmap-cli --no-open "{self.md_path}" -o "{html_file}"').start()
         return html_file
 
     def save_excel(self):
@@ -134,3 +109,34 @@ class MdHandler:
 
     def save_powerpoint(self):
         ...
+
+
+def to_markdown_tabs(head: list, tabs: list, alignment=':---:', column=False):
+    """
+    Args:
+        head: 表头：[]
+        tabs: 表值：[[列1], [列2], [列3], [列4]]
+        alignment: :--- 左对齐， :---: 居中对齐， ---: 右对齐
+        column: True to keep data in columns, False to keep data in rows (default).
+    Returns:
+        A string representation of the markdown table.
+    """
+    from common.gr_converter_html import file_manifest_filter_type
+    if column:
+        transposed_tabs = list(map(list, zip(*tabs)))
+    else:
+        transposed_tabs = tabs
+    if not head or not tabs:
+        return None
+    # Find the maximum length among the columns
+    max_len = max(len(column) for column in transposed_tabs)
+
+    tab_format = "| %s "
+    tabs_list = "".join([tab_format % i for i in head]) + '|\n'
+    tabs_list += "".join([tab_format % alignment for i in head]) + '|\n'
+
+    for i in range(max_len):
+        row_data = [str(tab[i]).replace('\n', '<b>') if i < len(tab) else '' for tab in transposed_tabs]
+        row_data = file_manifest_filter_type(row_data, filter_=None)
+        tabs_list += "".join([tab_format % i for i in row_data]) + '|\n'
+    return tabs_list

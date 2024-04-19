@@ -1,3 +1,4 @@
+from common.gr_converter_html import html_tag_color
 from common.toolbox import CatchException, update_ui
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, input_clipping
 import requests
@@ -84,12 +85,11 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     max_search_result = 5   # 最多收纳多少个网页的结果
     i_say_1 = f"请结合互联网信息回答以下问题：{txt}"
     gpt_say_1 = ''
-    from common import func_box
     chatbot.append([i_say_1, gpt_say_1])
     for index, url in enumerate(urls[:max_search_result]):
         res = scrape_text(url['link'], proxies)
         history.extend([f"第{index}份搜索结果：", res])
-        tag = func_box.html_tag_color(f"第{index}份搜索结果：")
+        tag = html_tag_color(f"第{index}份搜索结果：")
         gpt_say_1 += f'{tag}：\n\n```folded\n{res}\n```\n\n'
         chatbot[-1] = [i_say_1, gpt_say_1]
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新

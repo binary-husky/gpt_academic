@@ -1,4 +1,5 @@
-from common import func_box
+
+from common import gr_converter_html
 from common.toolbox import update_ui, get_conf, trimmed_format_exc, get_max_token, Singleton
 import threading
 import os
@@ -299,7 +300,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                zip(
                    range(len(inputs_array)), inputs_array, history_array, sys_prompt_array)]
     cnt = 0
-    folder_block = [func_box.get_fold_panel() for i in range(len(inputs_array))]
+    folder_block = [gr_converter_html.get_fold_panel() for i in range(len(inputs_array))]
     gpt_old_say = chatbot[-1][1]
     while True:
         # yield一次以刷新前端页面

@@ -22,8 +22,9 @@ gr.Chatbot.postprocess = postprocess
 
 # 代理与自动更新
 from common.check_proxy import check_proxy, auto_update
-from common import func_box
+from common.func_box import ipaddr, txt_converter_json, get_files_and_dirs
 from webui_elem import func_signals, webui_local
+from common.gr_converter_html import get_html
 
 os.makedirs("gpt_log", exist_ok=True)
 print("所有问询记录将自动保存在本地目录./gpt_log/chat_secrets.log, 请注意自我隐私保护哦！")
@@ -38,7 +39,6 @@ proxy_info = check_proxy(proxies)
 PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
 os.environ['no_proxy'] = '*'  # 避免代理网络产生意外污染
 i18n = webui_local.I18nAuto()
-get_html = func_box.get_html
 
 from webui_elem.layout_history_menu import LeftElem
 from webui_elem.layout_chatbot_area import ChatbotElem
@@ -53,7 +53,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         self.initial_prompt = ""
         self.cancel_handles = []
         self.app_name = get_conf('APPNAME')
-        self.__url = f'http://{func_box.ipaddr()}:{PORT}'
+        self.__url = f'http://{ipaddr()}:{PORT}'
         # self.__gr_url = gr.State(self.__url)
 
     def signals_sm_btn(self):
@@ -218,7 +218,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
             ret = {self.switchy_bt: self.switchy_bt.update(value=k, variant=variant, visible=True),
                    self.area_crazy_fn: gr.update()}
             # 参数取随变
-            fns_value = func_box.txt_converter_json(str(crazy_fns[k].get('Parameters', '')))
+            fns_value = txt_converter_json(str(crazy_fns[k].get('Parameters', '')))
             fns_lable = f"插件[{k}]的高级参数说明：\n" + crazy_fns[k].get("ArgsReminder", f"没有提供高级参数功能说明")
             temp_dict = dict(visible=True, interactive=True, value=str(fns_value), label=fns_lable)
             #  是否唤起高级插件参数区
@@ -236,7 +236,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         def route(k, ipaddr: gr.Request, *args, **kwargs):
             if k in [r"打开插件列表", r"请先从插件列表中选择"]: return
             append = list(args)
-            append[-1] = func_box.txt_converter_json(append[-1])
+            append[-1] = txt_converter_json(append[-1])
             append.append(ipaddr)
             append.append(k)
             args = tuple(append)
@@ -520,7 +520,7 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
         self.auto_opentab_delay()
         self.demo.queue(concurrency_count=CONCURRENT_COUNT)
         # 过滤掉不允许用户访问的路径
-        self.demo.blocked_paths = func_box.get_files_and_dirs(
+        self.demo.blocked_paths = get_files_and_dirs(
             path=init_path.base_path, filter_allow=['users_private', 'gpt_log', 'docs'])
         login_html = '登陆即注册，请记住你自己的账号和密码'
         self.demo.auth_message = login_html

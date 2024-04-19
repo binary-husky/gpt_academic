@@ -1,6 +1,7 @@
+from common.gr_converter_html import html_local_img
 from common.toolbox import CatchException, update_ui, get_conf, select_api_key, get_log_folder
 from crazy_functions.multi_stage.multi_stage_utils import GptAcademicState
-from common import func_box
+from crazy_functions.reader_fns.local_markdown import to_markdown_tabs
 
 
 def gen_image(llm_kwargs, prompt, resolution="1024x1024", model="dall-e-2", quality=None, style=None):
@@ -113,8 +114,8 @@ def 图片生成_DALLE2(prompt, llm_kwargs, plugin_kwargs, chatbot, history, sys
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     resolution = plugin_kwargs.get("advanced_arg", '1024x1024')
     image_url, image_path = gen_image(llm_kwargs, prompt, resolution)
-    markd_show = func_box.to_markdown_tabs(head=['图像预览'],
-                                           tabs=[[func_box.html_local_img(image_path),
+    markd_show = to_markdown_tabs(head=['图像预览'],
+                                           tabs=[[html_local_img(image_path),
                                                   f'[Full Screen Preview](file={image_path})']])
     chatbot.append([prompt, markd_show])
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面 界面更新
@@ -142,8 +143,8 @@ def 图片生成_DALLE3(prompt, llm_kwargs, plugin_kwargs, chatbot, history, sys
         elif part in ['vivid', 'natural']:
             style = part
     image_url, image_path = gen_image(llm_kwargs, prompt, resolution, model="dall-e-3", quality=quality, style=style)
-    markd_show = func_box.to_markdown_tabs(head=['图像预览'],
-                                           tabs=[[func_box.html_local_img(image_path),
+    markd_show = to_markdown_tabs(head=['图像预览'],
+                                           tabs=[[html_local_img(image_path),
                                                   f'[Full Screen Preview](file={image_path})']])
     chatbot.append([prompt, markd_show])
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面 界面更新
@@ -228,8 +229,8 @@ def 图片修改_DALLE2(prompt, llm_kwargs, plugin_kwargs, chatbot, history, sys
     chatbot.append(["图片修改, 执行中", f"图片:`{image_path}`<br/>分辨率:`{resolution}`<br/>修改需求:`{prompt}`"])
     yield from update_ui(chatbot=chatbot, history=history)
     image_url, image_path = edit_image(llm_kwargs, prompt, image_path, resolution)
-    markd_show = func_box.to_markdown_tabs(head=['图像预览'],
-                                           tabs=[[func_box.html_local_img(image_path),
+    markd_show = to_markdown_tabs(head=['图像预览'],
+                                           tabs=[[html_local_img(image_path),
                                                   f'[Full Screen Preview](file={image_path})']])
     chatbot.append([prompt, markd_show])
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面 界面更新

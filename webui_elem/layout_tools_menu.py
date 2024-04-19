@@ -4,13 +4,14 @@
 # @Descr   :
 
 import gradio as gr
-from common import func_box, toolbox
+from common.func_box import md_division_line
+from common.gr_converter_html import get_html
+from shared_utils.config_loader import get_conf
 from webui_elem import webui_local
 from common.crazy_functional import crazy_fns_role, crazy_classification, crazy_fns
 
-default_plugin = toolbox.get_conf('DEFAULT_FN_GROUPS')
+default_plugin = get_conf('DEFAULT_FN_GROUPS')
 i18n = webui_local.I18nAuto()
-get_html = func_box.get_html
 
 
 class RightElem:
@@ -25,10 +26,10 @@ class RightElem:
                 obj="toolbox"), elem_classes="close-btn")
 
     def _draw_function_chat(self):
-        preset_prompt = toolbox.get_conf('preset_prompt')
+        preset_prompt = get_conf('preset_prompt')
         with gr.TabItem('基础', id='func_tab', elem_id='chuanhu-toolbox-tabs'):
             with gr.Row():
-                self.preset_prompt = toolbox.get_conf('preset_prompt')
+                self.preset_prompt = get_conf('preset_prompt')
                 self.pro_private_check = gr.Dropdown(choices=[], value=self.preset_prompt['value'],
                                                      label='提示词分类', elem_classes='normal_select',
                                                      allow_custom_value=True)
@@ -42,7 +43,7 @@ class RightElem:
                                               samples=[['...', ""] for i in range(20)], type='index',
                                               elem_id='prompt_list', samples_per_page=10, )
             self.pro_fp_state = gr.State({'samples': None})
-            func_box.md_division_line()
+            md_division_line()
             self.system_prompt = gr.Textbox(show_label=True, lines=2, placeholder=f"System Prompt",
                                             label="System prompt", value=self.initial_prompt)
 
@@ -69,7 +70,7 @@ class RightElem:
                                 variant = crazy_fns[k]["Color"] if "Color" in crazy_fns_role[role][k] else "secondary"
                                 crazy_fns_role[role][k]['Button'] = gr.Button(k, variant=variant,
                                                                               visible=True, size="sm")
-            func_box.md_division_line()
+            md_division_line()
             with gr.Accordion("更多函数插件/自定义插件参数", open=True, ):
                 dropdown_fn_list = []
                 for role in crazy_fns_role:
@@ -89,7 +90,7 @@ class RightElem:
     def _draw_setting_chat(self):
         with gr.TabItem('调优', id='sett_tab', elem_id='chuanhu-toolbox-tabs'):
             with gr.Box():
-                # gr.Markdown(func_box.get_html('what_news.html').replace('{%v}', 'LLMs调优参数'))
+                # gr.Markdown(get_html('what_news.html').replace('{%v}', 'LLMs调优参数'))
                 with gr.Accordion('提交文本预处理'):
                     self.input_models = gr.CheckboxGroup(
                         choices=['input加密', '网络链接RAG', '提取知识库摘要', 'Vision-Img'],
@@ -106,7 +107,7 @@ class RightElem:
                                                            value=['关联任务'],
                                                            container=False)
 
-                func_box.md_division_line()
+                md_division_line()
                 with gr.Accordion(label='知识库调优参数'):
                     self.vector_search_to_history = gr.CheckboxGroup(choices=['专注力转移'],
                                                                      value=['专注力转移'],
@@ -119,9 +120,9 @@ class RightElem:
 
                 default_model = self.input_models.value + self.vision_models.value + self.project_models.value + self.vector_search_to_history.value
                 self.models_box = gr.State(default_model)
-                func_box.md_division_line()
+                md_division_line()
                 with gr.Accordion(label='LLMs调优参数', open=True):
-                    default_params, response_format = toolbox.get_conf('LLM_DEFAULT_PARAMETER', 'RESPONSE_FORMAT')
+                    default_params, response_format = get_conf('LLM_DEFAULT_PARAMETER', 'RESPONSE_FORMAT')
                     self.top_p = gr.Slider(minimum=-0, maximum=1.0, value=default_params['top_p'], step=0.01,
                                            interactive=True, show_label=True,
                                            label="Top-p", container=False)
@@ -155,7 +156,7 @@ class RightElem:
                                                            value=default_params['max_generation'],
                                                            step=1, interactive=True, label="max generations",
                                                            container=False)
-                    func_box.md_division_line()
+                    md_division_line()
                     self.max_context_length_slider = gr.Slider(minimum=1, maximum=32768, show_label=True,
                                                                value=default_params['max_context'],
                                                                step=1, interactive=True, label="max context",

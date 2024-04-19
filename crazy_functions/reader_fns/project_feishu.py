@@ -6,8 +6,9 @@ import json
 import os
 
 import requests
-from common.func_box import split_parse_url, to_markdown_tabs, handle_timestamp, is_within_days, is_delayed_time
+from common.func_box import split_parse_url, handle_timestamp, is_within_days, is_delayed_time
 from common.toolbox import get_conf
+from crazy_functions.reader_fns.local_markdown import to_markdown_tabs
 from pydantic import BaseModel
 from typing import AnyStr, Literal
 

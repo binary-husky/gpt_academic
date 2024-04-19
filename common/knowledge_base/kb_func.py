@@ -7,7 +7,8 @@ import json
 import re
 from typing import Tuple, Any
 
-from common import func_box
+from common.func_box import replace_expected_text
+from common import gr_converter_html
 from common.toolbox import update_ui, get_conf
 from common.knowledge_base import kb_doc_api
 from common.knowledge_base.kb_service import base
@@ -48,9 +49,9 @@ def user_intent_recognition(user_input, history, llm_kwargs) -> tuple[bool, Any]
     spilt_text = user_input
     if len(user_input) > 200:
         spilt_text = user_input[:100] + user_input[-100:]
-    intent_user = func_box.replace_expected_text(prompt, spilt_text, '{{{v}}}')
+    intent_user = replace_expected_text(prompt, spilt_text, '{{{v}}}')
     kb_files = str(get_kb_key_value(kb_names))
-    intent_user = func_box.replace_expected_text(intent_user, kb_files, '{{{kb}}}')
+    intent_user = replace_expected_text(intent_user, kb_files, '{{{kb}}}')
     cp_llm = copy.deepcopy(llm_kwargs)
     cp_llm.update({'llm_model': llm, 'response_format': response_format})
     response = model_info[llm]['fn_without_ui'](intent_user, cp_llm, history, '', [])
@@ -78,7 +79,7 @@ def get_vector_to_dict(vector_list):
 
 
 def vector_recall_by_input(user_input, chatbot, history, llm_kwargs, kb_prompt_cls, kb_prompt_name):
-    vector_fold_format = func_box.get_fold_panel()
+    vector_fold_format = gr_converter_html.get_fold_panel()
     vector_content = ''
     chatbot.append([user_input, vector_fold_format(title='意图识别中', content='...', status='')])
     yield from update_ui(chatbot, history)
@@ -119,8 +120,8 @@ def vector_recall_by_input(user_input, chatbot, history, llm_kwargs, kb_prompt_c
             prompt = prompt_repository.query_prompt(kb_prompt_name, kb_prompt_cls, llm_kwargs['ipaddr'], quote_num=True)
             if prompt:
                 prompt = prompt.value
-            kb_prompt = func_box.replace_expected_text(prompt, source_text, '{{{v}}}')
-            user_input = func_box.replace_expected_text(kb_prompt, user_input, '{{{q}}}')
+            kb_prompt = replace_expected_text(prompt, source_text, '{{{v}}}')
+            user_input = replace_expected_text(kb_prompt, user_input, '{{{q}}}')
         else:
             chatbot[-1][1] = vector_fold_format(title='检测召回完全相同文档，转发到普通对话',
                                                 content=repeat_recall,

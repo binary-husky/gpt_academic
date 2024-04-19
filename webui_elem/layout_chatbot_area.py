@@ -3,12 +3,12 @@
 # @Author : Spike
 # @Descr   :
 import gradio as gr
-from common import func_box, toolbox
+from common.toolbox import get_conf
 from webui_elem import func_signals, webui_local
+from common.gr_converter_html import spike_toast, get_html
 
 i18n = webui_local.I18nAuto()
-get_html = func_box.get_html
-LLM_MODEL, AVAIL_LLM_MODELS = toolbox.get_conf('LLM_MODEL', 'AVAIL_LLM_MODELS')
+LLM_MODEL, AVAIL_LLM_MODELS = get_conf('LLM_MODEL', 'AVAIL_LLM_MODELS')
 
 
 class ChatbotElem:
@@ -17,7 +17,7 @@ class ChatbotElem:
         pass
 
     def _draw_chatbot_head(self):
-        self.spike_toast = gr.HTML(func_box.spike_toast(''), visible=False, elem_id='spike-toast-info')
+        self.spike_toast = gr.HTML(spike_toast(''), visible=False, elem_id='spike-toast-info')
         with gr.Row(elem_id="chatbot-header"):
             self.model_select_dropdown = gr.Dropdown(
                 label=i18n("选择模型"), choices=AVAIL_LLM_MODELS, multiselect=False, value=LLM_MODEL, interactive=True,
@@ -30,7 +30,7 @@ class ChatbotElem:
                 elem_id="chatbot-header-btn-bar")
 
     def _draw_chatbot_body(self):
-        avatar_images, latex_option = toolbox.get_conf('avatar_images', 'latex_option')
+        avatar_images, latex_option = get_conf('avatar_images', 'latex_option')
         with gr.Row():
             latex_format = func_signals.latex_delimiters_dict[latex_option[0]]
             self.chatbot = gr.Chatbot(

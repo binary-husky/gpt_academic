@@ -4,8 +4,7 @@ import inspect
 import re
 import importlib
 import inspect
-from common import func_box
-from common import history_handler
+from common.history_handler import thread_write_chat_json, get_user_basedata
 import base64
 import gradio as gr
 import math
@@ -17,6 +16,9 @@ import time
 import glob
 import sys
 import threading
+
+from common.func_box import (num_tokens_from_string, user_client_mark,
+                             created_atime, encryption_str, extract_link_pf, valid_img_extensions)
 from common.path_handler import init_path
 
 ############################### 插件输入输出接驳区 #######################################
@@ -89,7 +91,7 @@ class ChatBotWithCookies(list):
 
 def end_predict(chatbot, history, llm_kwargs):
     count_time = round(time.time() - llm_kwargs['start_time'], 3)
-    count_tokens = func_box.num_tokens_from_string(listing=history)
+    count_tokens = num_tokens_from_string(listing=history)
     status = f"本次对话耗时: `{count_time}s` \t 本次对话使用tokens: `{count_tokens}`"
     yield from update_ui(chatbot=chatbot, history=history, msg=status, end_code=1)  # 刷新界面
 
@@ -124,7 +126,7 @@ def ArgsGeneralWrapper(func):
             'max_context': max_context, 'max_generation': max_generation, 'presence_penalty': presence_penalty,
             'frequency_penalty': frequency_penalty, 'logit_bias': logit_bias, 'user_identifier': user_identifier,
             'response_format': response_format, 'input_models': models,
-            'system_prompt': system_prompt, 'ipaddr': func_box.user_client_mark(ipaddr),
+            'system_prompt': system_prompt, 'ipaddr': user_client_mark(ipaddr),
             'kb_config': {"names": kb_selects, 'score': vector_score, 'top-k': vector_top_k},
         }
         llm_kwargs = {  # 这些不会写入对话记录哦
@@ -140,7 +142,7 @@ def ArgsGeneralWrapper(func):
         history = history[:history_num*2]  # 为了保证历史记录永远是偶数
         # 对话参数
         if not cookies.get('first_chat') and args:
-            cookies['first_chat'] = args[0] + "_" + func_box.created_atime()
+            cookies['first_chat'] = args[0] + "_" + created_atime()
         plugin_kwargs = {
             "advanced_arg": plugin_advanced_arg,
             "parameters_def": ''
@@ -162,8 +164,8 @@ def ArgsGeneralWrapper(func):
                                       history, system_prompt, args)
         # 将对话记录写入文件
         yield from end_predict(chatbot_with_cookie, history, llm_kwargs)
-        threading.Thread(target=history_handler.thread_write_chat_json,
-                         args=(chatbot_with_cookie, func_box.user_client_mark(ipaddr))).start()
+        threading.Thread(target=thread_write_chat_json,
+                         args=(chatbot_with_cookie, user_client_mark(ipaddr))).start()
 
     return decorated
 
@@ -177,14 +179,14 @@ def model_selection(txt, models, llm_kwargs, plugin_kwargs, cookies, chatbot_wit
     if '关联任务' in models: llm_kwargs['project_config'].update({'关联任务': True})
     if 'Vision-Img' in models: plugin_kwargs.update({'开启OCR': _vision_select_model(llm_kwargs, models)})
     # 实实在在会改变输入的
-    if 'input加密' in models: txt_proc = func_box.encryption_str(txt_proc)
+    if 'input加密' in models: txt_proc = encryption_str(txt_proc)
     if len(args) == 0 or 'RetryChat' in args and not cookies.get('is_plugin'):
         if '网络链接RAG' in models and 'moonshot' not in llm_kwargs.get('llm_model', ''):
             from crazy_functions.reader_fns.crazy_box import user_input_embedding_content, check_url_domain_cloud, \
                 submit_no_use_ui_task
             valid_types = ['pdf', 'md', 'xlsx', 'docx']
             wps_links, qq_link, feishu_link, project_link = check_url_domain_cloud(txt_proc)
-            local_file = func_box.extract_link_pf(txt_proc, valid_types)
+            local_file = extract_link_pf(txt_proc, valid_types)
             if wps_links or qq_link or feishu_link or local_file or project_link:  # 提前检测，有文件才进入下一步文件处理
                 yield from update_ui(chatbot_with_cookie, history, msg='检测到提交存在文档链接，正在跳转Reader...')
                 input_embedding_content = yield from user_input_embedding_content(txt_proc, chatbot_with_cookie,
@@ -196,7 +198,7 @@ def model_selection(txt, models, llm_kwargs, plugin_kwargs, cookies, chatbot_wit
                     func = submit_no_use_ui_task
             else:
                 yield from update_ui(chatbot_with_cookie, history, msg='Switching to normal dialog...')
-        img_info = func_box.extract_link_pf(txt, func_box.valid_img_extensions)
+        img_info = extract_link_pf(txt, valid_img_extensions)
         if 'vision' not in llm_kwargs['llm_model'] and img_info:
             vision_llm = _vision_select_model(llm_kwargs, models)
             if vision_llm:
@@ -255,7 +257,7 @@ def func_decision_tree(func, cookies, single_mode, agent_mode,
     if cookies.get('lock_plugin', None) is None:
         is_try = args[0] if 'RetryChat' in args else None
         if is_try:
-            user_data = history_handler.get_user_basedata(chatbot_with_cookie, llm_kwargs['ipaddr'])
+            user_data = get_user_basedata(chatbot_with_cookie, llm_kwargs['ipaddr'])
             plugin = user_data['chat'][-1].get('plugin')
             if plugin:
                 txt_proc = plugin['input']
@@ -631,8 +633,8 @@ def on_file_uploaded(files, chatbot, txt, cookies, ipaddr: gr.Request):
     if type(ipaddr) is str:
         ipaddr = ipaddr
     else:
-        ipaddr = func_box.user_client_mark(ipaddr)
-    time_tag = func_box.created_atime()
+        ipaddr = user_client_mark(ipaddr)
+    time_tag = created_atime()
     time_tag_path = os.path.join(private_upload, ipaddr, 'temp', time_tag)
     os.makedirs(f'{time_tag_path}', exist_ok=True)
     err_msg = ''
@@ -644,13 +646,13 @@ def on_file_uploaded(files, chatbot, txt, cookies, ipaddr: gr.Request):
                                    dest_dir=f'{time_tag_path}/{file_origin_name}.extract')
     moved_files = [fp for fp in glob.glob(f'{time_tag_path}/**/*', recursive=True)]
     moved_view = [[i] for i in moved_files]
-    moved_files_str = func_box.to_markdown_tabs(head=['Preview' for i in moved_files], tabs=moved_view)
+    moved_files_str = to_markdown_tabs(head=['Preview' for i in moved_files], tabs=moved_view)
     if type(chatbot) is str:
         if not txt:
             txt = {'file_path': '', 'know_name': '', 'know_obj': {}, 'file_list': []}
         txt.update({'file_path': time_tag_path})
     else:
-        txt += "\n".join(func_box.file_manifest_filter_type(moved_files, md_type=True))
+        txt += "\n".join(file_manifest_filter_type(moved_files, md_type=True))
         cookies.update({
             'most_recent_uploaded': {
                 'path': f'{time_tag_path}',
@@ -669,7 +671,7 @@ def on_report_generated2(request: gradio.Request, files: List[str], chatbot: Cha
     # 移除过时的旧文件从而节省空间&保护隐私
     outdate_time_seconds = 60
     del_outdated_uploads(outdate_time_seconds)
-    user = func_box.user_client_mark(request)
+    user = user_client_mark(request)
     # 创建工作路径
     user_name = "default" if not user else 'default'
     time_tag = gen_time_str()

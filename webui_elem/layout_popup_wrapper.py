@@ -5,12 +5,13 @@
 import gradio as gr
 import pandas as pd
 
-from common import func_box, toolbox
 from common.configs import LOADER_ENHANCE, ZH_TITLE_ENHANCE
+from common.func_box import md_division_line
+from common.gr_converter_html import get_html, html_tag_color
+from shared_utils.config_loader import get_conf
 from webui_elem import webui_local
 
 i18n = webui_local.I18nAuto()
-get_html = func_box.get_html
 
 
 def popup_title(txt):
@@ -26,7 +27,7 @@ class Settings:
 
     def _draw_setting_senior(self):
         with gr.Tab(label=i18n("高级")):
-            worker_num = toolbox.get_conf('DEFAULT_WORKER_NUM')
+            worker_num = get_conf('DEFAULT_WORKER_NUM')
             self.history_round_num = gr.Slider(minimum=0, maximum=100, value=15, step=2,
                                                show_label=True, interactive=True, label="上下文历史记录轮数",
                                                container=False)
@@ -39,7 +40,7 @@ class Settings:
                                                    interactive=True, show_label=True, container=False,
                                                    label="Paddleocr OCR 识别信任指数")
             self.secret_css, self.secret_font = gr.Textbox(visible=False), gr.Textbox(visible=False)
-            AVAIL_THEMES, latex_option = toolbox.get_conf('AVAIL_THEMES', 'latex_option')
+            AVAIL_THEMES, latex_option = get_conf('AVAIL_THEMES', 'latex_option')
             self.theme_dropdown = gr.Dropdown(AVAIL_THEMES, value=AVAIL_THEMES[0], label=i18n("更换UI主题"),
                                               interactive=True, allow_custom_value=True, show_label=True,
                                               info='更多主题, 请查阅Gradio主题商店: '
@@ -57,7 +58,7 @@ class Settings:
         with gr.TabItem('个人中心', id='private'):
             with gr.Row(elem_classes='tab-center'):
                 gr.Markdown('#### 粉身碎骨浑不怕 要留清白在人间\n\n'
-                            + func_box.html_tag_color('我不会保存你的个人信息，清除浏览器缓存后这里的信息就会被丢弃',
+                            + html_tag_color('我不会保存你的个人信息，清除浏览器缓存后这里的信息就会被丢弃',
                                                       color='rgb(227 179 51)'))
             self.usageTxt = gr.Markdown(i18n(
                 "**发送消息** 或 **提交key** 以显示额度"), elem_id="usage-display",
@@ -87,7 +88,7 @@ class Settings:
                 self.exit_login_btn = gr.LogoutButton(icon='', link='/logout')
 
     def _draw_setting_info(self):
-        APPNAME = toolbox.get_conf('APPNAME')
+        APPNAME = get_conf('APPNAME')
         with gr.Tab(label=i18n("关于"), elem_id="tab-center"):
             gr.Markdown("# " + i18n(APPNAME))
             gr.HTML(get_html("footer.html").format(versions=''), elem_id="footer")
@@ -152,7 +153,7 @@ class Prompt:
         pass
 
     def _draw_tabs_prompt(self):
-        self.devs_document = toolbox.get_conf('devs_document')
+        self.devs_document = get_conf('devs_document')
         with gr.TabItem('提示词', id='prompt'):
             Tips = "用 BORF 分析法设计GPT 提示词:\n" \
                    "1、阐述背景 B(Background): 说明背景，为chatGPT提供充足的信息\n" \
@@ -286,7 +287,7 @@ class Prompt:
                                                              show_label=True)
                 self.edit_kb_confirm_btn = gr.Button(value='添加文件到知识库', size='lg')
 
-            func_box.md_division_line()
+            md_division_line()
             with gr.Row():
                 self.edit_kb_file_desc = gr.Markdown('### 选择文件后可对向量库及片段内容进行调整')
             with gr.Row():
@@ -417,7 +418,7 @@ class GptsStore:
             with gr.Tabs(elem_id='store-tabs') as self.gpts_store_tabs:
                 self._tag_category_tab('🔥 热门应用', gpts_samples, False)
                 self._tag_category_tab('🔍 关键词搜索', [], True)
-                gpts_tags = toolbox.get_conf('GPTS_DEFAULT_CLASSIFICATION')
+                gpts_tags = get_conf('GPTS_DEFAULT_CLASSIFICATION')
                 gpts_tags = gpts_tags if gpts_tags else gpts['tag']
                 for tag in set(gpts_tags):
                     self._tag_category_tab(tag, [['loading...'] for i in range(11)], False)

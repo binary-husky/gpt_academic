@@ -4,7 +4,7 @@
 # @Descr   :
 
 from common.toolbox import update_ui, CatchException
-from common.func_box import get_fold_panel
+from common import gr_converter_html
 from crazy_functions.reader_fns.crazy_box import json_args_return
 from crazy_functions.Reader_自定义插件流程 import Reader_多阶段生成回答
 from crazy_functions.reader_fns.project_feishu import _get_story, ProjectFeishu
@@ -18,7 +18,7 @@ def Project_获取项目数据(user_input, llm_kwargs, plugin_kwargs, chatbot, h
         un_issue = un_issue or llm_kwargs.get('关联缺陷')
         user_input = user_input if not user_input else f"获取前后{filter_time}天的需求列表" + f"\n{user_input}"
 
-        project_status = get_fold_panel()
+        project_status = gr_converter_html.get_fold_panel()
         user_key = llm_kwargs["project_config"].get("project_user_key")
         header = llm_kwargs["project_config"].get("project_header")
         gpt_result = project_status(f'正在努力爬取`{user_key[:5]}***{user_key[-5:]}`用户数据...')

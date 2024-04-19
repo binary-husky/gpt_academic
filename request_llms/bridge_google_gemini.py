@@ -5,15 +5,13 @@
 import json
 import re
 import time
-from common.toolbox import get_conf, update_ui, update_ui_lastest_msg
+from common.toolbox import get_conf, update_ui, update_ui_lastest_msg, trimmed_format_exc
 import re
 import json
 import requests
 from common.logger_handler import logger
 from typing import Dict, Tuple
-from common import func_box
-from common import toolbox
-from request_llms.com_google import GoogleChatInit
+from common.func_box import extract_link_pf, valid_img_extensions, batch_encode_image
 
 proxies, TIMEOUT_SECONDS, MAX_RETRY = get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY')
 timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check proxy settings in config.py.' + \
@@ -32,8 +30,8 @@ class GoogleChatInit:
         if 'vision' not in self.url_gemini:
             encode_img_map = {}
         else:
-            img_mapping = func_box.extract_link_pf(user_input, func_box.valid_img_extensions)
-            encode_img_map = func_box.batch_encode_image(img_mapping)
+            img_mapping = extract_link_pf(user_input, valid_img_extensions)
+            encode_img_map = batch_encode_image(img_mapping)
             for i in encode_img_map:  # 替换图片链接
                 user_input = user_input.replace(img_mapping[i], '')
         what_i_have_asked['parts'].append({'text': user_input})
@@ -67,7 +65,7 @@ class GoogleChatInit:
         except Exception as e:
             self.retry += 1
             if self.retry > 3:
-                error = toolbox.trimmed_format_exc()
+                error = trimmed_format_exc()
                 return error, error, error
             return self.generate_chat(inputs, llm_kwargs, history, system_prompt)
         bro_results = ''
@@ -97,7 +95,7 @@ class GoogleChatInit:
         ]
         self.url_gemini = self.url_gemini.replace(
             '%m', llm_kwargs['llm_model']).replace(
-            '%k', toolbox.get_conf('GEMINI_API_KEY')
+            '%k', get_conf('GEMINI_API_KEY')
         )
         header = {'Content-Type': 'application/json'}
         if 'vision' not in self.url_gemini:  # 不是vision 才处理history

@@ -7,6 +7,8 @@ import os.path
 import requests
 import concurrent.futures
 from common.db.repository import cache_repository, prompt_repository
+from common.func_box import replace_expected_text
+from common import gr_converter_html
 from common.path_handler import init_path
 
 
@@ -68,13 +70,12 @@ class ImgHandler:
 
     def get_llm_vision(self, llm_kwargs):
         from request_llms.bridge_all import predict_no_ui_long_connection
-        from common import func_box
         ipaddr = llm_kwargs.get('ipaddr', 'spike')
         prompt = prompt_repository.query_prompt('llm-vision', '图片理解', source=ipaddr, quote_num=True)
         if prompt:
             prompt = prompt.value
-        input_ = func_box.replace_expected_text(prompt, content=func_box.html_local_img(self.img_path),
-                                                expect='{{{v}}}')
+        input_ = replace_expected_text(prompt, content=gr_converter_html.html_local_img(self.img_path),
+                                       expect='{{{v}}}')
         watchdog = ["", time.time(), ""]
         vision_result = predict_no_ui_long_connection(input_, llm_kwargs, [],
                                                       '', observe_window=watchdog)
@@ -100,7 +101,8 @@ class ImgHandler:
         return content, file_path, status
 
 
-def submit_threads_img_handle(ocr_mapping, output_dir, cor_cache: bool | dict = False, model_kwargs=True, max_threads=10):
+def submit_threads_img_handle(ocr_mapping, output_dir, cor_cache: bool | dict = False, model_kwargs=True,
+                              max_threads=10):
     threads = {}
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=max_threads)
     # 提交任务，并将线程对象作为键，字典的键作为值存储
@@ -112,5 +114,4 @@ def submit_threads_img_handle(ocr_mapping, output_dir, cor_cache: bool | dict = 
 
 
 if __name__ == '__main__':
-
     print('')

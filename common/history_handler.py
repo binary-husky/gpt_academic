@@ -6,10 +6,11 @@ import json
 import os
 import copy
 import gradio as gr
-from common import toolbox
-from common import func_box
 from bs4 import BeautifulSoup
+
+from common.func_box import get_avatar_img
 from common.path_handler import init_path
+from shared_utils.config_loader import get_conf
 
 
 class HistoryJsonHandle:
@@ -72,14 +73,14 @@ class HistoryJsonHandle:
     def update_for_history(self, cookies: dict, select):
         cookies.update(self.base_data_format['chat_llms'])
         llms = self.base_data_format['chat_llms']
-        default_params, LLM_MODEL, = toolbox.get_conf('LLM_DEFAULT_PARAMETER', 'LLM_MODEL')
+        default_params, LLM_MODEL, = get_conf('LLM_DEFAULT_PARAMETER', 'LLM_MODEL')
         llms_combo = [llms.get(key, default_params[key]) for key in default_params]
         llms_combo[-1] = self.base_data_format['chat_llms'].get('system_prompt', '')
         llm_select = str(self.base_data_format['chat_llms'].get('llm_model', LLM_MODEL)).split('&')[0]
         llms_combo.append(gr.update(value=llm_select))
         chat_list = [i['on_chat'] for i in self.base_data_format['chat']]
         chatbot = gr.update(value=chat_list,
-                            avatar_images=func_box.get_avatar_img(llm_select,
+                            avatar_images=get_avatar_img(llm_select,
                                                                   self.base_data_format['chat_llms'].get('bot_avatar')))
         history = self.base_data_format['chat_llms'].get('history', [])
         try:

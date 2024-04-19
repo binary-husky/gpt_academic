@@ -7,9 +7,9 @@ import os
 import json
 import re
 
-from common.func_box import Shell, get_fold_panel,  replace_expected_text, replace_special_chars
+from common.func_box import Shell, replace_expected_text, replace_special_chars
 from common.func_box import valid_img_extensions, vain_open_extensions
-from common.func_box import html_tag_color, html_view_blank
+from common import gr_converter_html
 from common.func_box import split_domain_url, extract_link_pf
 from common.toolbox import update_ui, update_ui_lastest_msg, get_conf, trimmed_format_exc
 from common.db.repository import prompt_repository
@@ -17,144 +17,28 @@ from common.knowledge_base import kb_doc_api
 from crazy_functions import crazy_utils
 from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit
 from request_llms import bridge_all
-from moviepy.editor import AudioFileClip
 from common.path_handler import init_path
 from crazy_functions import reader_fns
 from common.logger_handler import logger
 
 
-class Utils:
-
-    def __init__(self):
-        self.find_keys_type = 'type'
-        self.find_picture_source = ['caption', 'imgID', 'sourceKey']
-        self.find_document_source = ['wpsDocumentLink', 'wpsDocumentName', 'wpsDocumentType']
-        self.find_document_tags = ['WPSDocument']
-        self.find_picture_tags = ['picture', 'processon']
-        self.picture_format = valid_img_extensions
-        self.comments = []
-
-    def find_all_text_keys(self, dictionary, parent_type=None, text_values=None, filter_type=''):
-        """
-        Args:
-            dictionary: 字典或列表
-            parent_type: 匹配的type，作为新列表的key，用于分类
-            text_values: 存储列表
-            filter_type: 当前层级find_keys_type==filter_type时，不继续往下嵌套
-        Returns:
-            text_values和排序后的context_
-        """
-        # 初始化 text_values 为空列表，用于存储找到的所有text值
-        if text_values is None:
-            text_values = []
-        # 如果输入的dictionary不是字典类型，返回已收集到的text值
-        if not isinstance(dictionary, dict):
-            return text_values
-        # 获取当前层级的 type 值
-        current_type = dictionary.get(self.find_keys_type, parent_type)
-        # 如果字典中包含 'text' 或 'caption' 键，将对应的值添加到 text_values 列表中
-        if 'comments' in dictionary:
-            temp = dictionary.get('comments', [])
-            for t in temp:
-                if type(t) is dict:
-                    self.comments.append(t.get('key'))
-        if 'text' in dictionary:
-            content_value = dictionary.get('text', None)
-            text_values.append({current_type: content_value})
-        if 'caption' in dictionary:
-            temp = {}
-            for key in self.find_picture_source:
-                temp[key] = dictionary.get(key, None)
-            text_values.append({current_type: temp})
-        if 'wpsDocumentId' in dictionary:
-            temp = {}
-            for key in self.find_document_source:
-                temp[key] = dictionary.get(key, None)
-            text_values.append({current_type: temp})
-        # 如果当前类型不等于 filter_type，则继续遍历子级属性
-        if current_type != filter_type:
-            for key, value in dictionary.items():
-                if isinstance(value, dict):
-                    self.find_all_text_keys(value, current_type, text_values, filter_type)
-                elif isinstance(value, list):
-                    for item in value:
-                        if isinstance(item, dict):
-                            self.find_all_text_keys(item, current_type, text_values, filter_type)
-        return text_values
-
-    def statistical_results(self, text_values, img_proce=False):
-        """
-        Args: 提取爬虫内嵌图片、文件等等信息
-            text_values: dict
-            img_proce: 图片标识
-        Returns: （元数据， 组合数据， 图片dict， 文件dict）
-        """
-        context_ = []
-        pic_dict = {}
-        file_dict = {}
-        for i in text_values:
-            for key, value in i.items():
-                if key in self.find_picture_tags:
-                    if img_proce:
-                        mark = f'{key}"""\n{value["sourceKey"]}\n"""\n'
-                        if value["caption"]: mark += f'\n{key}:{value["caption"]}\n\n'
-                        context_.append(mark)
-                        pic_dict[value['sourceKey']] = value['imgID']
-                    else:
-                        if value["caption"]: context_.append(f'{key}描述: {value["caption"]}\n')
-                        pic_dict[value['sourceKey']] = value['imgID']
-                elif key in self.find_document_tags:
-                    mark = f'{value["wpsDocumentName"]}: {value["wpsDocumentLink"]}'
-                    file_dict.update({value["wpsDocumentName"]: value["wpsDocumentLink"]})
-                    context_.append(mark)
-                else:
-                    context_.append(value)
-        context_ = '\n'.join(context_)
-        return text_values, context_, pic_dict, file_dict
-
-    def write_markdown(self, data, hosts, file_name):
-        """
-        Args: 将data写入md文件
-            data: 数据
-            hosts: 用户标识
-            file_name: 另取文件名
-        Returns: 写入的文件地址
-        """
-        user_path = os.path.join(init_path.private_files_path, hosts, 'markdown')
-        os.makedirs(user_path, exist_ok=True)
-        md_file = os.path.join(user_path, f"{file_name}.md")
-        with open(file=md_file, mode='w', encoding='utf-8') as f:
-            f.write(data)
-        return md_file
-
-    def markdown_to_flow_chart(self, data, hosts, file_name):
-        """
-        Args: 调用markmap-cli
-            data: 要写入md的数据
-            hosts: 用户标识
-            file_name: 要写入的文件名
-        Returns: [md, 流程图] 文件
-        """
-        user_path = os.path.join(init_path.private_files_path, hosts, 'mark_map')
-        os.makedirs(user_path, exist_ok=True)
-        md_file = self.write_markdown(data, hosts, file_name)
-        html_file = os.path.join(user_path, f"{file_name}.html")
-        Shell(f'npx markmap-cli --no-open "{md_file}" -o "{html_file}"').start()
-        return md_file, html_file
-
-    def global_search_for_files(self, file_path, matching: list):
-        file_list = []
-        if os.path.isfile(file_path):
-            file_list.append(file_path)
-        for root, dirs, files in os.walk(file_path):
-            for file in files:
-                for math in matching:
-                    if str(math).lower() in str(file).lower():
-                        file_list.append(os.path.join(root, file))
-        return file_list
-
-
 # <---------------------------------------乱七八糟的方法，有点用，很好用----------------------------------------->
+def write_markdown(data, hosts, file_name):
+    """
+    Args: 将data写入md文件
+        data: 数据
+        hosts: 用户标识
+        file_name: 另取文件名
+    Returns: 写入的文件地址
+    """
+    user_path = os.path.join(init_path.private_files_path, hosts, 'markdown')
+    os.makedirs(user_path, exist_ok=True)
+    md_file = os.path.join(user_path, f"{file_name}.md")
+    with open(file=md_file, mode='w', encoding='utf-8') as f:
+        f.write(data)
+    return md_file
+
+
 def find_index_inlist(data_list: list, search_terms: list) -> int:
     """ 在data_list找到符合search_terms字符串，找到后直接返回下标
     Args:
@@ -201,7 +85,7 @@ def file_reader_content(file_path, save_path, plugin_kwargs):
             reader_statsu += f'\n\n无法在`{os.path.basename(file_path)}`找到`{sheet}`工作表，' \
                              f'将读取上次预览的活动工作表`{active_sheet}`，' \
                              f'若你的用例工作表是其他名称, 请及时暂停插件运行，并在自定义插件配置中更改' \
-                             f'{html_tag_color("读取指定Sheet")}。'
+                             f'{gr_converter_html.html_tag_color("读取指定Sheet")}。'
         plugin_kwargs['写入指定模版'] = file_path
         plugin_kwargs['写入指定Sheet'] = ex_handle.sheet
     elif file_path.split('.')[-1] not in vain_open_extensions:
@@ -216,7 +100,7 @@ def file_reader_content(file_path, save_path, plugin_kwargs):
 def file_extraction_intype(file_mapping, chatbot, history, llm_kwargs, plugin_kwargs):
     # 文件读取
     file_limit = {}
-    file_format = get_fold_panel()
+    file_format = gr_converter_html.get_fold_panel()
     old_say = chatbot[-1][1] + '\n\n'
     for file_path in file_mapping:
         chatbot[-1][1] = old_say + file_format(
@@ -331,7 +215,7 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
         inputs = inputs.split('\n---\n')
         for input_ in inputs:
             if get_token_num(input_) > max_token:
-                bro_say = gpt_latest_msg + f'\n\n{html_tag_color(input_[0][:20])} 对话数据预计会超出`{all_tokens}' \
+                bro_say = gpt_latest_msg + f'\n\n{gr_converter_html.html_tag_color(input_[0][:20])} 对话数据预计会超出`{all_tokens}' \
                                            f'token`限制, 将按照模型最大可接收token拆分为多线程运行'
                 yield from update_ui_lastest_msg(bro_say, chatbot, history)
                 segments.extend(
@@ -483,7 +367,7 @@ def batch_recognition_images_to_md(img_list, ipaddr):
             temp_file = os.path.join(save_path,
                                      img_content.splitlines()[0][:20] + '.md')
             with open(temp_file, mode='w', encoding='utf-8') as f:
-                f.write(f"{html_view_blank(temp_file)}\n\n" + img_content)
+                f.write(f"{gr_converter_html.html_view_blank(temp_file)}\n\n" + img_content)
             temp_list.append(temp_list)
         else:
             print(img, '文件路径不存在')
@@ -566,7 +450,7 @@ def result_extract_to_test_cases(gpt_response_collection, llm_kwargs, plugin_kwa
         xlsx_handler = reader_fns.XlsxHandler(template_file, output_dir=save_path, sheet=sheet)
         xlsx_handler.split_merged_cells()  # 先把合并的单元格拆分，避免写入失败
         file_path = xlsx_handler.list_write_to_excel(sort_test_case, save_as_name=long_name_processing(file_name))
-        chat_file_list += f'{file_name}生成结果如下:\t {html_view_blank(__href=file_path, to_tabs=True)}\n\n'
+        chat_file_list += f'{file_name}生成结果如下:\t {gr_converter_html.html_view_blank(__href=file_path, to_tabs=True)}\n\n'
         chatbot[-1] = [you_say, chat_file_list]
         yield from update_ui(chatbot, history)
         files_limit.update({file_path: file_name})
@@ -597,8 +481,8 @@ def result_supplementary_to_test_case(gpt_response_collection, llm_kwargs, plugi
         # 写入 markdown
         md_path = os.path.join(save_path, f"{long_name_processing(file_name)}.md")
         reader_fns.MdHandler(md_path).save_markdown(desc)
-        chat_file_list += f'{file_name}生成结果如下:\t {html_view_blank(__href=file_path, to_tabs=True)}\n\n' \
-                          f'{file_name}补充思路如下：\t{html_view_blank(__href=md_path, to_tabs=True)}\n\n---\n\n'
+        chat_file_list += f'{file_name}生成结果如下:\t {gr_converter_html.html_view_blank(__href=file_path, to_tabs=True)}\n\n' \
+                          f'{file_name}补充思路如下：\t{gr_converter_html.html_view_blank(__href=md_path, to_tabs=True)}\n\n---\n\n'
         chatbot[-1] = [you_say, chat_file_list]
         yield from update_ui(chatbot, history)
         files_limit.update({file_path: file_name})
@@ -627,8 +511,8 @@ def result_converter_to_flow_chart(gpt_response_collection, llm_kwargs, plugin_k
         save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'])
         md_file = os.path.join(save_path, f"{long_name_processing(file_name)}.md")
         html_file = reader_fns.MdHandler(md_path=md_file, output_dir=save_path).save_mark_map()
-        chat_file_list += "View: " + html_view_blank(md_file, to_tabs=True) + \
-                          '\n\n--- \n\n View: ' + html_view_blank(html_file)
+        chat_file_list += "View: " + gr_converter_html.html_view_blank(md_file, to_tabs=True) + \
+                          '\n\n--- \n\n View: ' + gr_converter_html.html_view_blank(html_file)
         chatbot.append([you_say, chat_file_list])
         yield from update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
         file_limit.update({md_file: file_name})
@@ -655,9 +539,9 @@ def result_written_to_markdown(gpt_response_collection, llm_kwargs, plugin_kwarg
         inputs_all = ''
         for value in file_classification[file_name]:
             inputs_all += value
-        md = Utils().write_markdown(data=inputs_all, hosts=llm_kwargs['ipaddr'],
-                                    file_name=long_name_processing(file_name) + stage)
-        chat_file_list = f'markdown已写入文件，下次使用插件可以直接提交markdown文件啦 {html_view_blank(md, to_tabs=True)}'
+        md = write_markdown(data=inputs_all, hosts=llm_kwargs['ipaddr'],
+                            file_name=long_name_processing(file_name) + stage)
+        chat_file_list = f'markdown已写入文件，下次使用插件可以直接提交markdown文件啦 {gr_converter_html.html_view_blank(md, to_tabs=True)}'
         chatbot[-1] = [you_say, chat_file_list]
         yield from update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
         file_limit.append(md)
@@ -728,7 +612,7 @@ def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugi
     cor_cache = llm_kwargs.get('ocr_cache', False)
     img_mapping = extract_link_pf(content, valid_img_extensions)
     gpt_old_say = chatbot[-1][1]
-    vision_format = get_fold_panel()
+    vision_format = gr_converter_html.get_fold_panel()
     # 如果开启了OCR，并且文中存在图片链接，处理图片
     if ocr_switch and img_mapping:
         vision_loading_statsu = {os.path.basename(i): "Loading..." for i in img_mapping}
@@ -752,7 +636,8 @@ def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugi
                                                              vision_loading_statsu)
                 yield from update_ui(chatbot=chatbot, history=history)
                 if not status or status == '本次识别结果读取数据库缓存':  # 出现异常，不替换文本
-                    content = content.replace(img_mapping[t], f'[{img_mapping[t]}]\n{base_name}图片识别结果：\n{img_content}')
+                    content = content.replace(img_mapping[t],
+                                              f'[{img_mapping[t]}]\n{base_name}图片识别结果：\n{img_content}')
                 else:
                     filed_sum += 1
                     logger.warning(f'{img_mapping[t]} 识别失败，跳过，error: {status}')
@@ -763,7 +648,8 @@ def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugi
                 chatbot[-1][1] = gpt_old_say + vision_format(f'啊哦，有文件失败了哦', vision_loading_statsu)
                 yield from update_ui(chatbot=chatbot, history=history)
 
-        chatbot[-1][1] = gpt_old_say + vision_format(f'图片识别完成, 共{len(vision_submission)}张图片，识别失败`{filed_sum}`', vision_loading_statsu, 'Done')
+        chatbot[-1][1] = gpt_old_say + vision_format(
+            f'图片识别完成, 共{len(vision_submission)}张图片，识别失败`{filed_sum}`', vision_loading_statsu, 'Done')
         yield from update_ui(chatbot=chatbot, history=history, msg='Done')
     return content.replace(init_path.base_path, 'file=.')  # 增加保障，防止路径泄露
 
@@ -793,7 +679,7 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
         plugin_kwargs['embedding_content'] = ''  # 用了即刻丢弃
     else:
         chatbot.append([user_input, ''])
-        download_format = get_fold_panel()
+        download_format = gr_converter_html.get_fold_panel()
         chatbot[-1][1] = download_format(title='检测提交是否存在需要解析的文件或链接...', content='')
         yield from update_ui(chatbot=chatbot, history=history, msg='Reader loading...')
         fp_mapping, download_status = input_retrieval_file(user_input, llm_kwargs, valid_types)
@@ -836,11 +722,6 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
             kb_doc_api.upload_docs_simple(files=files_list, knowledge_base_name=kb_upload)
     return embedding_content
 
-
-# <---------------------------------------一些Tips----------------------------------------->
-previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传，多个文件请上传压缩包，' \
-                        f'{html_tag_color("如果是网络文件或金山文档链接，请粘贴到输入框")}, 然后再次点击该插件' \
-                        f'多个文件{html_tag_color("请使用换行或空格区分")}'
 
 if __name__ == '__main__':
     test = [1, 2, 3, 4, [12], 33, 1]

@@ -10,14 +10,12 @@ import subprocess
 import time
 import uuid
 from typing import Literal
-
 import psutil
 import re
 import tempfile
 import shutil
 import requests
 import tiktoken
-import copy
 import random
 import gradio as gr
 import csv
@@ -27,10 +25,10 @@ from threading import Thread
 from queue import Queue, Empty
 from PIL import Image, ImageOps
 from bs4 import BeautifulSoup
-from common import toolbox
 from common.logger_handler import logger
 from common.path_handler import init_path
 from webui_elem.overwrites import escape_markdown
+from shared_utils.config_loader import get_conf
 
 
 class Shell:
@@ -134,89 +132,9 @@ def md5_str(st):
     return result
 
 
-def html_tag_color(tag, color=None, font='black'):
-    """
-    将文本转换为带有高亮提示的html代码
-    """
-    if not color:
-        rgb = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-        color = f"rgb{rgb}"
-    tag = f'<span style="background-color: {color}; font-weight: bold; color: {font}">&nbsp;{tag}&ensp;</span>'
-    return tag
-
-
-def html_folded_code(txt):
-    # 使用markdown的代码块折叠多余的信息，最多显示三行，详情可以全局搜索language-folded
-    mark_txt = f'```folded\n{txt}\n```'
-    return mark_txt
-
-
-def html_a_blank(__href, name=''):
-    if not name:
-        name = __href
-    a = f'<a href="{__href}" target="_blank" class="svelte-xrr240">{name}</a>'
-    a = f"[{__href}]({name})"
-    return a
-
-
 # 绝对路径转相对路径
 def local_relative_path(file):
     return file.replace(init_path.base_path, ".")
-
-
-def html_local_file(file):
-    if os.path.exists(str(file)):
-        file = f'file={local_relative_path(file)}'
-    return file
-
-
-def link_mtime_to_md(file, time_stamp=True):
-    link_local = html_local_file(file)
-    link_name = os.path.basename(file)
-    a = f"[{link_name}]({link_local})"
-    if time_stamp:
-        a = a[:-1] + f"?{os.path.getmtime(file)})"
-    return a
-
-
-def html_view_blank(__href: str, to_tabs=False):
-    __file = __href.replace(init_path.base_path, ".")
-    __href = html_local_file(__href)
-    a = link_mtime_to_md(__file)
-    if to_tabs:
-        a = f' {__file}'
-        a = "\n\n" + to_markdown_tabs(head=['下载地址', '插件复用地址'], tabs=[[__file], [a]]) + "\n\n"
-    return a
-
-
-def html_iframe_code(html_file):
-    html_file = html_local_file(html_file)
-    ifr = f'<iframe width="100%" height="500px" frameborder="0" src="{html_file}"></iframe>'
-    return ifr
-
-
-def html_download_blank(__href, dir_name=''):
-    CUSTOM_PATH = toolbox.get_conf('CUSTOM_PATH')
-    if os.path.exists(__href):
-        __href = f'{CUSTOM_PATH}file={__href}'
-    if not dir_name:
-        dir_name = str(__href).split('/')[-1]
-    a = f'<a href="{__href}" target="_blank" download="{dir_name}" class="svelte-xrr240">{dir_name}</a>'
-    return a
-
-
-def html_local_img(__file, layout='left', max_width=None, max_height=None, md=True):
-    style = ''
-    if max_width is not None:
-        style += f"max-width: {max_width};"
-    if max_height is not None:
-        style += f"max-height: {max_height};"
-    file_name = os.path.basename(__file)
-    __file = html_local_file(__file)
-    a = f'<div align="{layout}"><img src="{__file}" style="{style}"></div>'
-    if md:
-        a = f'![{file_name}]({__file})'
-    return a
 
 
 # 提取markdown链接
@@ -242,28 +160,15 @@ def extract_link_pf(text, valid_types: list):
 
 # 批量转换图片为base64
 def batch_encode_image(files: dict):
+    from common.toolbox import encode_image
     encode_map = {}
     for fp in files:
         file_type = os.path.basename(fp).split('.')[-1]
         encode_map[fp] = {
-            "data": toolbox.encode_image(fp),
+            "data": encode_image(fp),
             "type": file_type.replace('jpg', 'jpeg')  # google 识别不了jpg图片格式，狗日的
         }
     return encode_map
-
-
-def file_manifest_filter_type(file_list, filter_: list = None, md_type=False):
-    new_list = []
-    if not filter_:
-        filter_ = valid_img_extensions
-    for file in file_list:
-        if str(os.path.basename(file)).split('.')[-1] in filter_:
-            new_list.append(html_local_img(file, md=md_type))
-        elif os.path.exists(file):
-            new_list.append(link_mtime_to_md(file, time_stamp=False))
-        else:
-            new_list.append(file)
-    return new_list
 
 
 def ipaddr():
@@ -353,7 +258,7 @@ def json_convert_dict(file):
 
 
 def prompt_personal_tag(select, ipaddr):
-    all_, personal = toolbox.get_conf('preset_prompt')['key']
+    all_, personal = get_conf('preset_prompt')['key']
     if select and personal != select and all_ != select:
         tab_cls = select + '_sys'
     else:
@@ -377,7 +282,7 @@ def check_expected_time():
 def get_directory_list(folder_path, user_info='temp'):
     allow_list = []
     build_list = []
-    know_user_build, know_user_allow = toolbox.get_conf('know_user_build', 'know_user_allow')
+    know_user_build, know_user_allow = get_conf('know_user_build', 'know_user_allow')
     for root, dirs, files in os.walk(folder_path):
         for dir_name in dirs:
             if know_user_allow:
@@ -510,25 +415,8 @@ def txt_converter_json(input_string):
         return input_string
 
 
-def get_html(filename):
-    path = os.path.join(init_path.base_path, "docs/assets/html", filename)
-    if os.path.exists(path):
-        with open(path, encoding="utf8") as file:
-            return file.read()
-    return ""
-
-
-def spike_toast(content='保存成功', title='Success'):
-    return get_html('gradio_toast.html').format(title=title, content=content)
-
-
 def md_division_line():
     gr.Markdown("---", elem_classes="hr-line")
-
-
-def html_checkoutBox():
-    html = '<input type="checkbox" name="test" data-testid="checkbox" class="svelte-1ojmf70">'
-    return html
 
 
 def git_log_list():
@@ -547,36 +435,6 @@ def replace_special_chars(file_name):
     return new_name
 
 
-def to_markdown_tabs(head: list, tabs: list, alignment=':---:', column=False):
-    """
-    Args:
-        head: 表头：[]
-        tabs: 表值：[[列1], [列2], [列3], [列4]]
-        alignment: :--- 左对齐， :---: 居中对齐， ---: 右对齐
-        column: True to keep data in columns, False to keep data in rows (default).
-    Returns:
-        A string representation of the markdown table.
-    """
-    if column:
-        transposed_tabs = list(map(list, zip(*tabs)))
-    else:
-        transposed_tabs = tabs
-    if not head or not tabs:
-        return None
-    # Find the maximum length among the columns
-    max_len = max(len(column) for column in transposed_tabs)
-
-    tab_format = "| %s "
-    tabs_list = "".join([tab_format % i for i in head]) + '|\n'
-    tabs_list += "".join([tab_format % alignment for i in head]) + '|\n'
-
-    for i in range(max_len):
-        row_data = [str(tab[i]).replace('\n', '<b>') if i < len(tab) else '' for tab in transposed_tabs]
-        row_data = file_manifest_filter_type(row_data, filter_=None)
-        tabs_list += "".join([tab_format % i for i in row_data]) + '|\n'
-    return tabs_list
-
-
 def qr_code_generation(data, icon_path=None, file_name='qc_icon.png'):
     # 创建qrcode对象
     qr = qrcode.QRCode(version=2, error_correction=qrcode.constants.ERROR_CORRECT_Q, box_size=10, border=2, )
@@ -589,7 +447,7 @@ def qr_code_generation(data, icon_path=None, file_name='qc_icon.png'):
     img_w, img_h = img.size
     # 打开logo
     if not icon_path:
-        icon_path = toolbox.get_conf('qc_icon_path')
+        icon_path = get_conf('qc_icon_path')
     logo = Image.open(icon_path)
     # logo大小为二维码的四分之一
     logo_w = img_w // 4
@@ -614,7 +472,7 @@ def favicon_ascii():
     # 'doh', 'slant_relief', 'alpha', 'ogre',  'isometric1', 这些效果不好
     font = random.choice(fonts)
     fig = Figlet(font=font, width=300)
-    appname = toolbox.get_conf('APPNAME')
+    appname = get_conf('APPNAME')
     return f"<pre class='{font}'>{fig.renderText(appname)}</pre>"
 
 
@@ -624,7 +482,7 @@ def created_atime():
 
 
 def 通知机器人(error):
-    robot_hook = toolbox.get_conf('robot_hook')
+    robot_hook = get_conf('robot_hook')
     if not robot_hook: return
     title = '## 警告警告\n'
     results = "> <font color='red'>{}</font>".format('哈喽小主，chatbot 遇到意料之外的状况了呢，详情请查看以下报错信息')
@@ -719,23 +577,6 @@ def split_domain_url(link_limit, start='http', domain_name: list = ['']) -> list
     return links
 
 
-def get_fold_panel(btn_id=None):
-    if not btn_id:
-        btn_id = uuid.uuid4().hex
-
-    def _format(title, content: str = '', status=''):
-        if isinstance(status, bool) and status:
-            status = 'Done'
-        fold_html = get_html('fold-panel.html').replace('{id}', btn_id)
-        if isinstance(content, dict):
-            content = json.dumps(content, indent=4, ensure_ascii=False)
-        content = f'\n```\n{content.replace("```", "").strip()}\n```\n'
-        title = title.replace('\n', '').strip()
-        return fold_html.format(title=f"<p>{title}</p>", content=content, status=status)
-
-    return _format
-
-
 def handle_timestamp(timestamp, end_unit: Literal['d', 's'] = 'd'):
     """
     将时间戳转换为格式化的时间字符串,如果不是时间戳则返回原数据。
@@ -809,7 +650,7 @@ def is_delayed_time(input_date, compare_time=None):
 
 
 def get_env_proxy_network():
-    proxies = toolbox.get_conf('proxies')
+    proxies = get_conf('proxies')
     proxy_dict = {}
     if proxies is not None:
         if 'http' in proxies:
@@ -817,6 +658,7 @@ def get_env_proxy_network():
         if 'https' in proxies:
             proxy_dict['HTTPS_PROXY'] = proxies['https']
     return proxy_dict
+
 
 if __name__ == '__main__':
     txt = """

@@ -3,11 +3,10 @@
 # @Author : Spike
 # @Descr   :
 import gradio as gr
-from common import func_box
+from common.gr_converter_html import get_html
 from webui_elem import webui_local
 
 i18n = webui_local.I18nAuto()
-get_html = func_box.get_html
 
 
 class LeftElem:

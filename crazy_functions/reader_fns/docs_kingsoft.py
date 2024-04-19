@@ -11,10 +11,8 @@ import urllib.parse
 
 from bs4 import BeautifulSoup
 from common.toolbox import get_conf, extract_archive
-from common.func_box import split_parse_url, local_relative_path
-from crazy_functions.reader_fns.crazy_box import Utils
-from crazy_functions import crazy_utils
-
+from common.func_box import split_parse_url, local_relative_path, valid_img_extensions
+from crazy_functions.crazy_utils import get_files_from_everything
 
 
 class Kdocs:
@@ -299,6 +297,96 @@ class Kdocs:
             return None
 
 
+class KingsoftSmart:
+
+    def __init__(self):
+        self.find_keys_type = 'type'
+        self.find_picture_source = ['caption', 'imgID', 'sourceKey']
+        self.find_document_source = ['wpsDocumentLink', 'wpsDocumentName', 'wpsDocumentType']
+        self.find_document_tags = ['WPSDocument']
+        self.find_picture_tags = ['picture', 'processon']
+        self.picture_format = valid_img_extensions
+        self.comments = []
+
+    def find_all_text_keys(self, dictionary, parent_type=None, text_values=None, filter_type=''):
+        """
+        Args:
+            dictionary: 字典或列表
+            parent_type: 匹配的type，作为新列表的key，用于分类
+            text_values: 存储列表
+            filter_type: 当前层级find_keys_type==filter_type时，不继续往下嵌套
+        Returns:
+            text_values和排序后的context_
+        """
+        # 初始化 text_values 为空列表，用于存储找到的所有text值
+        if text_values is None:
+            text_values = []
+        # 如果输入的dictionary不是字典类型，返回已收集到的text值
+        if not isinstance(dictionary, dict):
+            return text_values
+        # 获取当前层级的 type 值
+        current_type = dictionary.get(self.find_keys_type, parent_type)
+        # 如果字典中包含 'text' 或 'caption' 键，将对应的值添加到 text_values 列表中
+        if 'comments' in dictionary:
+            temp = dictionary.get('comments', [])
+            for t in temp:
+                if type(t) is dict:
+                    self.comments.append(t.get('key'))
+        if 'text' in dictionary:
+            content_value = dictionary.get('text', None)
+            text_values.append({current_type: content_value})
+        if 'caption' in dictionary:
+            temp = {}
+            for key in self.find_picture_source:
+                temp[key] = dictionary.get(key, None)
+            text_values.append({current_type: temp})
+        if 'wpsDocumentId' in dictionary:
+            temp = {}
+            for key in self.find_document_source:
+                temp[key] = dictionary.get(key, None)
+            text_values.append({current_type: temp})
+        # 如果当前类型不等于 filter_type，则继续遍历子级属性
+        if current_type != filter_type:
+            for key, value in dictionary.items():
+                if isinstance(value, dict):
+                    self.find_all_text_keys(value, current_type, text_values, filter_type)
+                elif isinstance(value, list):
+                    for item in value:
+                        if isinstance(item, dict):
+                            self.find_all_text_keys(item, current_type, text_values, filter_type)
+        return text_values
+
+    def statistical_results(self, text_values, img_proce=False):
+        """
+        Args: 提取爬虫内嵌图片、文件等等信息
+            text_values: dict
+            img_proce: 图片标识
+        Returns: （元数据， 组合数据， 图片dict， 文件dict）
+        """
+        context_ = []
+        pic_dict = {}
+        file_dict = {}
+        for i in text_values:
+            for key, value in i.items():
+                if key in self.find_picture_tags:
+                    if img_proce:
+                        mark = f'{key}"""\n{value["sourceKey"]}\n"""\n'
+                        if value["caption"]: mark += f'\n{key}:{value["caption"]}\n\n'
+                        context_.append(mark)
+                        pic_dict[value['sourceKey']] = value['imgID']
+                    else:
+                        if value["caption"]: context_.append(f'{key}描述: {value["caption"]}\n')
+                        pic_dict[value['sourceKey']] = value['imgID']
+                elif key in self.find_document_tags:
+                    mark = f'{value["wpsDocumentName"]}: {value["wpsDocumentLink"]}'
+                    file_dict.update({value["wpsDocumentName"]: value["wpsDocumentLink"]})
+                    context_.append(mark)
+                else:
+                    context_.append(value)
+        context_ = '\n'.join(context_)
+        return text_values, context_, pic_dict, file_dict
+
+
 def if_kdocs_url_isap(url):
     kdocs = Kdocs(url)
     if 'otl' in kdocs.file_info_parm['fname']:
@@ -314,7 +402,7 @@ def get_docs_content(url, image_processing=False):
     Returns:
     """
     kdocs = Kdocs(url)
-    utils = Utils()
+    utils = KingsoftSmart()
     json_data, json_dict = kdocs.get_file_content()
     text_values = utils.find_all_text_keys(json_data, filter_type='')
 
@@ -350,7 +438,7 @@ def get_kdocs_dir(limit, project_folder, cookies=None):
     extract_archive(temp_file, decompress_directory)
     file_list = []
     file_mapping = {}
-    success, file_manifest = crazy_utils.get_files_from_everything(decompress_directory, '', project_folder)
+    success, file_manifest = get_files_from_everything(decompress_directory, '', project_folder)
     file_list.extend(file_manifest)
     for fp in file_list:
         file_mapping[local_relative_path(fp)] = limit
