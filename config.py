@@ -257,12 +257,18 @@ PATH_LOGGING = "gpt_log"
 WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid",
                      "Warmup_Modules", "Nougat_Download", "AutoGen"]
 
+# 金山云文档HOST
+WPS_BASE_HOST = 'www.kdocs.cn'
 # 用以支持金山云文档的cookies
 WPS_COOKIES = {}
 
+# qq云文档host
+QQ_BASE_HOST = 'docs.qq.com'
 # 用以支持QQ云文档的cookies
 QQ_COOKIES = {}
 
+# 飞书云文档host
+FEISHU_BASE_HOST = 'xxx.feishu.cn'
 # 用以支持飞书云文档的请求头+cookies，飞书需要保持cookies与请求头的CORS一致，所以请求头需要带上Cookie一起
 FEISHU_HEADER_COOKIE = {}
 

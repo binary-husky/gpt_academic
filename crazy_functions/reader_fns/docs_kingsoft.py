@@ -10,9 +10,11 @@ import requests
 import urllib.parse
 
 from bs4 import BeautifulSoup
-from common import toolbox, func_box
+from common.toolbox import get_conf, extract_archive
+from common.func_box import split_parse_url, local_relative_path
 from crazy_functions.reader_fns.crazy_box import Utils
 from crazy_functions import crazy_utils
+
 
 
 class Kdocs:
@@ -23,19 +25,20 @@ class Kdocs:
             if isinstance(cookies, str):
                 self.cookies = json.loads(cookies)
         else:
-            self.cookies = toolbox.get_conf('WPS_COOKIES')
+            self.cookies = get_conf('WPS_COOKIES')
         self.url = url
+        self.base_host = get_conf('WPS_BASE_HOST')
         self.headers = {
             'accept-language': 'en-US,en;q=0.9,ja;q=0.8',
             'content-type': 'text/plain;charset=UTF-8',
             'x-csrf-rand': '',
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7'}
         self.ex_headers = {
-            'Host': 'www.kdocs.cn',
+            'Host': self.base_host,
             'accept': 'application/json, text/plain, */*',
             'content-type': 'application/json',
             'sec-ch-ua-platform': '"macOS"',
-            'origin': 'https://www.kdocs.cn',
+            'origin': f'https://{self.base_host}',
         }
         self.dzip_header = {
             'Host': 'kdzip-download.kdocs.cn',
@@ -49,19 +52,19 @@ class Kdocs:
                               "ex_args": {"queryInitArgs": {"enableCopyComments": False, "checkAuditRule": False}},
                               "group": "", "front_ver": ""}
 
-        self.tol_url = 'https://www.kdocs.cn/api/v3/office/file/%v/open/otl'
-        self.shapes_url = 'https://www.kdocs.cn/api/v3/office/file/%v/attachment/shapes'
+        self.tol_url = f'https://{self.base_host}/api/v3/office/file/%v/open/otl'
+        self.shapes_url = f'https://{self.base_host}/api/v3/office/file/%v/attachment/shapes'
         self.kdocs_download_url = 'https://drive.kdocs.cn/api/v5/groups/%g/files/%f/download?isblocks=false&support_checksums=md5,sha1,sha224,sha256,sha384,sha512'
         self.drive_download_url = 'https://drive.wps.cn/api/v3/groups/%g/files/%f/download?isblocks=false'
         self.group_url = 'https://drive.wps.cn/api/v5/links/%v?review=true'
-        self.export_url = 'https://www.kdocs.cn/api/v3/office/file/%f/export/%t/result'
-        self.preload_url = 'https://www.kdocs.cn/api/v3/office/file/%f/export/%t/preload'
-        self.bulk_download_url = 'https://www.kdocs.cn/kfc/batch/v2/files/download'
-        self.bulk_continue_url = 'https://www.kdocs.cn/kfc/batch/v2/files/download/continue'
-        self.task_result_url = 'https://www.kdocs.cn/kfc/batch/v2/files/download/progress'
-        self.file_comments_ulr = 'https://www.kdocs.cn/api/v3/office/outline/file/%f/comment'
-        self.url_share_tag = func_box.split_parse_url(url, ['l'])
-        self.url_dirs_tag = func_box.split_parse_url(url, ['ent'])
+        self.export_url = f'https://{self.base_host}/api/v3/office/file/%f/export/%t/result'
+        self.preload_url = f'https://{self.base_host}/api/v3/office/file/%f/export/%t/preload'
+        self.bulk_download_url = f'https://{self.base_host}/kfc/batch/v2/files/download'
+        self.bulk_continue_url = f'https://{self.base_host}/kfc/batch/v2/files/download/continue'
+        self.task_result_url = f'https://{self.base_host}/kfc/batch/v2/files/download/progress'
+        self.file_comments_ulr = f'https://{self.base_host}/api/v3/office/outline/file/%f/comment'
+        self.url_share_tag = split_parse_url(url, ['l'])
+        self.url_dirs_tag = split_parse_url(url, ['ent'])
         if self.url_share_tag:
             self.file_info_parm = self.get_file_info_parm()
         self.docs_old_type = ['.docs', '.doc', '.pptx', '.ppt', '.xls', '.xlsx', '.pdf', '.csv', '.txt', '.pom', '.pof',
@@ -344,13 +347,13 @@ def get_kdocs_dir(limit, project_folder, cookies=None):
     with open(temp_file, 'wb') as f:
         f.write(content)
     decompress_directory = os.path.join(project_folder, 'extract', kdocs.url_dirs_tag)
-    toolbox.extract_archive(temp_file, decompress_directory)
+    extract_archive(temp_file, decompress_directory)
     file_list = []
     file_mapping = {}
     success, file_manifest = crazy_utils.get_files_from_everything(decompress_directory, '', project_folder)
     file_list.extend(file_manifest)
     for fp in file_list:
-        file_mapping[func_box.local_relative_path(fp)] = limit
+        file_mapping[local_relative_path(fp)] = limit
     return file_mapping, task_info, task_faillist
 
 
@@ -376,7 +379,7 @@ def get_kdocs_files(limit, project_folder, cookies=None):
         os.makedirs(tag_path, exist_ok=True)
         with open(temp_file, 'wb') as f:
             f.write(content)
-        return {func_box.local_relative_path(temp_file): limit}
+        return {local_relative_path(temp_file): limit}
 
 
 def get_kdocs_from_limit(link_limit, project_folder, cookies=None):

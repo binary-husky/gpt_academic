@@ -3,8 +3,8 @@
 # @Author : Spike
 # @Descr   : 飞书云文档
 import requests
-from common import func_box
-from common import toolbox
+from common.func_box import split_parse_url, local_relative_path
+from common.toolbox import get_conf
 from common.path_handler import init_path
 import os
 import json
@@ -19,10 +19,10 @@ class Feishu:
             if isinstance(headers, str):
                 self.header_cookies = json.loads(headers)
         else:
-            self.header_cookies = toolbox.get_conf('FEISHU_HEADER_COOKIE')
-        self.base_host = 'https://lg0v2tirko.feishu.cn'
-        self.share_tag = func_box.split_parse_url(url, None, 3)
-        self.share_file_type = func_box.split_parse_url(url, None, 2)
+            self.header_cookies = get_conf('FEISHU_HEADER_COOKIE')
+        self.base_host = f'https://{get_conf("FEISHU_BASE_HOST")}'
+        self.share_tag = split_parse_url(url, None, 3)
+        self.share_file_type = split_parse_url(url, None, 2)
         self.header_cookies.update({'referer': f'{self.base_host}/{self.share_file_type}/{self.share_tag}'})
         self.file_download_url = 'https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/all/%t/'
         self.file_mapping = {
@@ -114,7 +114,7 @@ def get_feishu_file(link, project_folder, header=None):
         resp = requests.get(url=file_download_url, headers=feishu_docs.header_cookies, verify=False)
         with open(file_path, mode='wb') as f:
             f.write(resp.content)
-        return {func_box.local_relative_path(file_path): link}
+        return {local_relative_path(file_path): link}
     else:
         return {}
 

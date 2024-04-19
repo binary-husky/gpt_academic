@@ -6,8 +6,8 @@ import re
 import json
 import os
 import requests
-from common import func_box
-from common import toolbox
+from common.func_box import local_relative_path, split_parse_url
+from common.toolbox import get_conf
 
 
 class QQDocs:
@@ -18,21 +18,22 @@ class QQDocs:
                 self.cookies = json.loads(cookies)
             self.cookies = cookies
         else:
-            self.cookies = toolbox.get_conf('QQ_COOKIES')
+            self.cookies = get_conf('QQ_COOKIES')
         self._hosts = 'docs.qq.com'
         self.link = link
-        self.link_id = func_box.split_parse_url(link, None, index=3)
+        self.link_id = split_parse_url(link, None, index=3)
         self.file_info_dict = {'tag': '',}
+        self.base_host = get_conf('QQ_BASE_HOST')
         self.file_info_header = {
             'Host': self._hosts,
             'sec-ch-ua': '"Chromium";v="116", "Not)A;Brand";v="24", "Microsoft Edge";v="116"',
             'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.62',
-            'referer': 'https://docs.qq.com/',
+            'referer': f'https://{ self.base_host}/',
             'accept-language': 'en-US,en;q=0.9,ja;q=0.8',
         }
-        self.file_info_url = 'https://docs.qq.com/dop-api/opendoc'
-        self.blind_task_url = 'https://docs.qq.com/v1/export/export_office'
-        self.obtain_d_link_url = 'https://docs.qq.com/v1/export/query_progress'
+        self.file_info_url = f'https://{self.base_host}/dop-api/opendoc'
+        self.blind_task_url = f'https://{self.base_host}/v1/export/export_office'
+        self.obtain_d_link_url = f'https://{self.base_host}/v1/export/query_progress'
         self.get_file_info()
 
     def get_file_info(self):
@@ -101,7 +102,7 @@ def get_qqdocs_files(limit, project_folder, cookies=None):
     file_path = os.path.join(project_folder, f_name)
     with open(file_path, mode='wb') as f:
         f.write(resp.content)
-    return {func_box.local_relative_path(file_path): limit}
+    return {local_relative_path(file_path): limit}
 
 
 def get_qqdocs_from_limit(link_limit, project_folder, cookies=None):

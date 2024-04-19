@@ -711,7 +711,7 @@ def split_parse_url(url, tag: list | None, index=1) -> str:
 
 
 def split_domain_url(link_limit, start='http', domain_name: list = ['']) -> list:
-    link = re.split(r'[ ,;()\n]', str(link_limit))
+    link = re.split(r'[ \t,;()\n]', re.sub(r'\s+', ' ', str(link_limit).strip()))
     links = []
     for i in link:
         if i.startswith(start) and any(name in i for name in domain_name):
@@ -819,5 +819,6 @@ def get_env_proxy_network():
     return proxy_dict
 
 if __name__ == '__main__':
-    txt = "authorization abc123, WPS-Sid: xyz456, Cookie: 789xyz 12312312421423他475675213123456776"
-    print(encryption_str(txt))
+    txt = """
+    """
+    print(split_domain_url(txt, domain_name=['lg0v2tirko']))

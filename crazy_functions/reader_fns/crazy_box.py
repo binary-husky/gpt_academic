@@ -7,7 +7,11 @@ import os
 import json
 import re
 
-from common import func_box, toolbox
+from common.func_box import Shell, get_fold_panel,  replace_expected_text, replace_special_chars
+from common.func_box import valid_img_extensions, vain_open_extensions
+from common.func_box import html_tag_color, html_view_blank
+from common.func_box import split_domain_url, extract_link_pf
+from common.toolbox import update_ui, update_ui_lastest_msg, get_conf, trimmed_format_exc
 from common.db.repository import prompt_repository
 from common.knowledge_base import kb_doc_api
 from crazy_functions import crazy_utils
@@ -27,7 +31,7 @@ class Utils:
         self.find_document_source = ['wpsDocumentLink', 'wpsDocumentName', 'wpsDocumentType']
         self.find_document_tags = ['WPSDocument']
         self.find_picture_tags = ['picture', 'processon']
-        self.picture_format = func_box.valid_img_extensions
+        self.picture_format = valid_img_extensions
         self.comments = []
 
     def find_all_text_keys(self, dictionary, parent_type=None, text_values=None, filter_type=''):
@@ -135,7 +139,7 @@ class Utils:
         os.makedirs(user_path, exist_ok=True)
         md_file = self.write_markdown(data, hosts, file_name)
         html_file = os.path.join(user_path, f"{file_name}.html")
-        func_box.Shell(f'npx markmap-cli --no-open "{md_file}" -o "{html_file}"').start()
+        Shell(f'npx markmap-cli --no-open "{md_file}" -o "{html_file}"').start()
         return md_file, html_file
 
     def global_search_for_files(self, file_path, matching: list):
@@ -197,10 +201,10 @@ def file_reader_content(file_path, save_path, plugin_kwargs):
             reader_statsu += f'\n\n无法在`{os.path.basename(file_path)}`找到`{sheet}`工作表，' \
                              f'将读取上次预览的活动工作表`{active_sheet}`，' \
                              f'若你的用例工作表是其他名称, 请及时暂停插件运行，并在自定义插件配置中更改' \
-                             f'{func_box.html_tag_color("读取指定Sheet")}。'
+                             f'{html_tag_color("读取指定Sheet")}。'
         plugin_kwargs['写入指定模版'] = file_path
         plugin_kwargs['写入指定Sheet'] = ex_handle.sheet
-    elif file_path.split('.')[-1] not in func_box.vain_open_extensions:
+    elif file_path.split('.')[-1] not in vain_open_extensions:
         try:
             with open(file_path, mode='r', encoding='utf-8') as f:
                 file_content = f.read()
@@ -212,12 +216,12 @@ def file_reader_content(file_path, save_path, plugin_kwargs):
 def file_extraction_intype(file_mapping, chatbot, history, llm_kwargs, plugin_kwargs):
     # 文件读取
     file_limit = {}
-    file_format = func_box.get_fold_panel()
+    file_format = get_fold_panel()
     old_say = chatbot[-1][1] + '\n\n'
     for file_path in file_mapping:
         chatbot[-1][1] = old_say + file_format(
             title=f'正在解析本地文件:【{file_path.replace(init_path.base_path, ".")}】')
-        yield from toolbox.update_ui(chatbot, history)
+        yield from update_ui(chatbot, history)
         save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'])
         content, status = file_reader_content(file_path, save_path, plugin_kwargs)
         if isinstance(content, str):
@@ -226,7 +230,7 @@ def file_extraction_intype(file_mapping, chatbot, history, llm_kwargs, plugin_kw
             file_limit[file_path] = content
         mapping_data = "\n\n--\n\n".join([f"{file_limit[fp]}" for fp in file_limit])
         chatbot[-1][1] = old_say + file_format(title=f'文件解析完成', content=mapping_data, status='Done')
-        yield from toolbox.update_ui(chatbot, history, msg=status)
+        yield from update_ui(chatbot, history, msg=status)
     return file_limit
 
 
@@ -265,7 +269,7 @@ def long_name_processing(file_name):
         for i in file_name.splitlines():
             i = re.sub(r"\s+", " ", i)
             if i:
-                file_name = func_box.replace_special_chars(i[:20])  # 限制文件名最长20个字符
+                file_name = replace_special_chars(i[:20])  # 限制文件名最长20个字符
                 break
     if file_name.find('.') != -1:
         file_name = "".join(file_name.split('.')[:-1])
@@ -319,7 +323,7 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
         if get_token_num(str(inputs)) > max_token:
             bro_say = gpt_latest_msg + f'\n\n提交数据预计会超出`{all_tokens}' \
                                        f'token`限制, 将按照模型最大可接收token拆分为多线程运行\n\n---\n\n'
-            yield from toolbox.update_ui_lastest_msg(bro_say, chatbot, history)
+            yield from update_ui_lastest_msg(bro_say, chatbot, history)
             segments.extend(split_list_token_limit(data=inputs, get_num=get_token_num, max_num=max_token))
         else:
             segments.append(json.dumps(inputs, ensure_ascii=False))
@@ -327,14 +331,14 @@ def split_content_limit(inputs: str, llm_kwargs, chatbot, history) -> list:
         inputs = inputs.split('\n---\n')
         for input_ in inputs:
             if get_token_num(input_) > max_token:
-                bro_say = gpt_latest_msg + f'\n\n{func_box.html_tag_color(input_[0][:20])} 对话数据预计会超出`{all_tokens}' \
+                bro_say = gpt_latest_msg + f'\n\n{html_tag_color(input_[0][:20])} 对话数据预计会超出`{all_tokens}' \
                                            f'token`限制, 将按照模型最大可接收token拆分为多线程运行'
-                yield from toolbox.update_ui_lastest_msg(bro_say, chatbot, history)
+                yield from update_ui_lastest_msg(bro_say, chatbot, history)
                 segments.extend(
                     breakdown_text_to_satisfy_token_limit(input_, max_token, llm_kwargs['llm_model']))
             else:
                 segments.append(input_)
-    yield from toolbox.update_ui(chatbot, history)
+    yield from update_ui(chatbot, history)
     return segments
 
 
@@ -375,10 +379,10 @@ def input_output_processing(gpt_response_collection, llm_kwargs, plugin_kwargs, 
             print(f'读取原测试用例报错 {f}')
         for limit in content_limit:
             # 拼接内容与提示词
-            plugin_prompt = func_box.replace_expected_text(prompt, content=limit, expect='{{{v}}}')
+            plugin_prompt = replace_expected_text(prompt, content=limit, expect='{{{v}}}')
             inputs_array.append(plugin_prompt)
             inputs_show_user_array.append(you_say)
-    yield from toolbox.update_ui(chatbot, history)
+    yield from update_ui(chatbot, history)
     return inputs_array, inputs_show_user_array
 
 
@@ -479,7 +483,7 @@ def batch_recognition_images_to_md(img_list, ipaddr):
             temp_file = os.path.join(save_path,
                                      img_content.splitlines()[0][:20] + '.md')
             with open(temp_file, mode='w', encoding='utf-8') as f:
-                f.write(f"{func_box.html_view_blank(temp_file)}\n\n" + img_content)
+                f.write(f"{html_view_blank(temp_file)}\n\n" + img_content)
             temp_list.append(temp_list)
         else:
             print(img, '文件路径不存在')
@@ -551,7 +555,7 @@ def result_extract_to_test_cases(gpt_response_collection, llm_kwargs, plugin_kwa
     chat_file_list = ''
     you_say = '准备将测试用例写入Excel中...'
     chatbot.append([you_say, chat_file_list])
-    yield from toolbox.update_ui(chatbot, history)
+    yield from update_ui(chatbot, history)
     files_limit = {}
     for file_name in file_classification:
         # 处理md数据
@@ -562,9 +566,9 @@ def result_extract_to_test_cases(gpt_response_collection, llm_kwargs, plugin_kwa
         xlsx_handler = reader_fns.XlsxHandler(template_file, output_dir=save_path, sheet=sheet)
         xlsx_handler.split_merged_cells()  # 先把合并的单元格拆分，避免写入失败
         file_path = xlsx_handler.list_write_to_excel(sort_test_case, save_as_name=long_name_processing(file_name))
-        chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, to_tabs=True)}\n\n'
+        chat_file_list += f'{file_name}生成结果如下:\t {html_view_blank(__href=file_path, to_tabs=True)}\n\n'
         chatbot[-1] = [you_say, chat_file_list]
-        yield from toolbox.update_ui(chatbot, history)
+        yield from update_ui(chatbot, history)
         files_limit.update({file_path: file_name})
     return files_limit
 
@@ -578,7 +582,7 @@ def result_supplementary_to_test_case(gpt_response_collection, llm_kwargs, plugi
     chat_file_list = ''
     you_say = '准备将测试用例写入Excel中...'
     chatbot.append([you_say, chat_file_list])
-    yield from toolbox.update_ui(chatbot, history)
+    yield from update_ui(chatbot, history)
     files_limit = {}
     for file_name in file_classification:
         old_file = plugin_kwargs['上阶段文件']
@@ -593,10 +597,10 @@ def result_supplementary_to_test_case(gpt_response_collection, llm_kwargs, plugi
         # 写入 markdown
         md_path = os.path.join(save_path, f"{long_name_processing(file_name)}.md")
         reader_fns.MdHandler(md_path).save_markdown(desc)
-        chat_file_list += f'{file_name}生成结果如下:\t {func_box.html_view_blank(__href=file_path, to_tabs=True)}\n\n' \
-                          f'{file_name}补充思路如下：\t{func_box.html_view_blank(__href=md_path, to_tabs=True)}\n\n---\n\n'
+        chat_file_list += f'{file_name}生成结果如下:\t {html_view_blank(__href=file_path, to_tabs=True)}\n\n' \
+                          f'{file_name}补充思路如下：\t{html_view_blank(__href=md_path, to_tabs=True)}\n\n---\n\n'
         chatbot[-1] = [you_say, chat_file_list]
-        yield from toolbox.update_ui(chatbot, history)
+        yield from update_ui(chatbot, history)
         files_limit.update({file_path: file_name})
     return files_limit
 
@@ -623,12 +627,12 @@ def result_converter_to_flow_chart(gpt_response_collection, llm_kwargs, plugin_k
         save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'])
         md_file = os.path.join(save_path, f"{long_name_processing(file_name)}.md")
         html_file = reader_fns.MdHandler(md_path=md_file, output_dir=save_path).save_mark_map()
-        chat_file_list += "View: " + func_box.html_view_blank(md_file, to_tabs=True) + \
-                          '\n\n--- \n\n View: ' + func_box.html_view_blank(html_file)
+        chat_file_list += "View: " + html_view_blank(md_file, to_tabs=True) + \
+                          '\n\n--- \n\n View: ' + html_view_blank(html_file)
         chatbot.append([you_say, chat_file_list])
-        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
+        yield from update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
         file_limit.update({md_file: file_name})
-    # f'tips: 双击空白处可以放大～\n\n' f'{func_box.html_iframe_code(html_file=html)}'  无用，不允许内嵌网页了
+    # f'tips: 双击空白处可以放大～\n\n' f'{html_iframe_code(html_file=html)}'  无用，不允许内嵌网页了
     return file_limit
 
 
@@ -653,18 +657,18 @@ def result_written_to_markdown(gpt_response_collection, llm_kwargs, plugin_kwarg
             inputs_all += value
         md = Utils().write_markdown(data=inputs_all, hosts=llm_kwargs['ipaddr'],
                                     file_name=long_name_processing(file_name) + stage)
-        chat_file_list = f'markdown已写入文件，下次使用插件可以直接提交markdown文件啦 {func_box.html_view_blank(md, to_tabs=True)}'
+        chat_file_list = f'markdown已写入文件，下次使用插件可以直接提交markdown文件啦 {html_view_blank(md, to_tabs=True)}'
         chatbot[-1] = [you_say, chat_file_list]
-        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
+        yield from update_ui(chatbot=chatbot, history=history, msg='成功写入文件！')
         file_limit.append(md)
     return file_limit
 
 
 def check_url_domain_cloud(link_limit):
-    wps_links = func_box.split_domain_url(link_limit, domain_name=['kdocs', 'wps'])
-    qq_link = func_box.split_domain_url(link_limit, domain_name=['docs.qq'])
-    feishu_link = func_box.split_domain_url(link_limit, domain_name=['lg0v2tirko'])
-    project_link = func_box.split_domain_url(link_limit, domain_name=[toolbox.get_conf('PROJECT_BASE_HOST')])
+    wps_links = split_domain_url(link_limit, domain_name=[get_conf('WPS_BASE_HOST'), 'wps'])
+    qq_link = split_domain_url(link_limit, domain_name=[get_conf('QQ_BASE_HOST')])
+    feishu_link = split_domain_url(link_limit, domain_name=[get_conf('FEISHU_BASE_HOST')])
+    project_link = split_domain_url(link_limit, domain_name=[get_conf('PROJECT_BASE_HOST')])
     return wps_links, qq_link, feishu_link, project_link
 
 
@@ -678,7 +682,7 @@ def detach_cloud_links(link_limit, llm_kwargs, valid_types):
         wps_status, wps_mapping = reader_fns.get_kdocs_from_limit(wps_links, save_path, llm_kwargs.get('wps_cookies'))
         fp_mapping.update(wps_mapping)
     except Exception as e:
-        error = toolbox.trimmed_format_exc()
+        error = trimmed_format_exc()
         wps_status += f'# 下载WPS文档出错了 \n ERROR: {error} \n'
 
     try:
@@ -686,7 +690,7 @@ def detach_cloud_links(link_limit, llm_kwargs, valid_types):
         qq_status, qq_mapping = reader_fns.get_qqdocs_from_limit(qq_link, save_path, llm_kwargs.get('qq_cookies'))
         fp_mapping.update(qq_mapping)
     except Exception as e:
-        error = toolbox.trimmed_format_exc()
+        error = trimmed_format_exc()
         wps_status += f'# 下载QQ文档出错了 \n ERROR: {error}'
 
     try:
@@ -695,7 +699,7 @@ def detach_cloud_links(link_limit, llm_kwargs, valid_types):
                                                                          llm_kwargs.get('feishu_header'))
         fp_mapping.update(feishu_mapping)
     except Exception as e:
-        error = toolbox.trimmed_format_exc()
+        error = trimmed_format_exc()
         wps_status += f'# 下载飞书文档出错了 \n ERROR: {error}'
 
     try:
@@ -704,7 +708,7 @@ def detach_cloud_links(link_limit, llm_kwargs, valid_types):
                                                                           llm_kwargs.get('project_config'))
         fp_mapping.update(feishu_mapping)
     except Exception as e:
-        error = toolbox.trimmed_format_exc()
+        error = trimmed_format_exc()
         wps_status += f'# 解析飞书项目出错了 \n ERROR: {error}'
 
     download_status = ''
@@ -722,15 +726,15 @@ def detach_cloud_links(link_limit, llm_kwargs, valid_types):
 def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugin_kwargs):
     ocr_switch, = json_args_return(plugin_kwargs, ['开启OCR'])
     cor_cache = llm_kwargs.get('ocr_cache', False)
-    img_mapping = func_box.extract_link_pf(content, func_box.valid_img_extensions)
+    img_mapping = extract_link_pf(content, valid_img_extensions)
     gpt_old_say = chatbot[-1][1]
-    vision_format = func_box.get_fold_panel()
+    vision_format = get_fold_panel()
     # 如果开启了OCR，并且文中存在图片链接，处理图片
     if ocr_switch and img_mapping:
         vision_loading_statsu = {os.path.basename(i): "Loading..." for i in img_mapping}
         chatbot[-1][1] = gpt_old_say + vision_format(f'检测到识图开关为`{ocr_switch}`，正在识别图片中的文字...',
                                                      vision_loading_statsu)
-        yield from toolbox.update_ui(chatbot=chatbot, history=history)
+        yield from update_ui(chatbot=chatbot, history=history)
         # 识别图片中的文字
         save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'])
         if isinstance(ocr_switch, dict):  # 如果是字典，那么就是自定义OCR参数
@@ -746,7 +750,7 @@ def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugi
                 vision_loading_statsu.update({base_name: img_content})
                 chatbot[-1][1] = gpt_old_say + vision_format(f'检测到识图开关为`{ocr_switch}`，正在识别图片中的文字...',
                                                              vision_loading_statsu)
-                yield from toolbox.update_ui(chatbot=chatbot, history=history)
+                yield from update_ui(chatbot=chatbot, history=history)
                 if not status or status == '本次识别结果读取数据库缓存':  # 出现异常，不替换文本
                     content = content.replace(img_mapping[t], f'[{img_mapping[t]}]\n{base_name}图片识别结果：\n{img_content}')
                 else:
@@ -754,13 +758,13 @@ def content_img_vision_analyze(content: str, chatbot, history, llm_kwargs, plugi
                     logger.warning(f'{img_mapping[t]} 识别失败，跳过，error: {status}')
             except Exception as e:
                 filed_sum += 1
-                status = f'`{t}` `{toolbox.trimmed_format_exc()}` 识别失败，过滤这个图片\n\n'
+                status = f'`{t}` `{trimmed_format_exc()}` 识别失败，过滤这个图片\n\n'
                 vision_loading_statsu.update({base_name: status})  # 错误展示完整路径
                 chatbot[-1][1] = gpt_old_say + vision_format(f'啊哦，有文件失败了哦', vision_loading_statsu)
-                yield from toolbox.update_ui(chatbot=chatbot, history=history)
+                yield from update_ui(chatbot=chatbot, history=history)
 
         chatbot[-1][1] = gpt_old_say + vision_format(f'图片识别完成, 共{len(vision_submission)}张图片，识别失败`{filed_sum}`', vision_loading_statsu, 'Done')
-        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='Done')
+        yield from update_ui(chatbot=chatbot, history=history, msg='Done')
     return content.replace(init_path.base_path, 'file=.')  # 增加保障，防止路径泄露
 
 
@@ -777,21 +781,21 @@ def input_retrieval_file(user_input, llm_kwargs, valid_types):
     # 网络链接
     fp_mapping, download_status = detach_cloud_links(user_input, llm_kwargs, valid_types)
     # 本地文件
-    fp_mapping.update(func_box.extract_link_pf(user_input, valid_types))
+    fp_mapping.update(extract_link_pf(user_input, valid_types))
     return fp_mapping, download_status
 
 
 def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugin_kwargs, valid_types):
     embedding_content = []  # 对话内容
-    yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='🕵🏻‍超级侦探，正在办案～')
+    yield from update_ui(chatbot=chatbot, history=history, msg='🕵🏻‍超级侦探，正在办案～')
     if plugin_kwargs.get('embedding_content'):
         embedding_content = plugin_kwargs['embedding_content']
         plugin_kwargs['embedding_content'] = ''  # 用了即刻丢弃
     else:
         chatbot.append([user_input, ''])
-        download_format = func_box.get_fold_panel()
+        download_format = get_fold_panel()
         chatbot[-1][1] = download_format(title='检测提交是否存在需要解析的文件或链接...', content='')
-        yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='Reader loading...')
+        yield from update_ui(chatbot=chatbot, history=history, msg='Reader loading...')
         fp_mapping, download_status = input_retrieval_file(user_input, llm_kwargs, valid_types)
         download_status.update(fp_mapping)
         if fp_mapping:
@@ -809,13 +813,14 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
             embedding_content.extend([os.path.basename(content_fp), complete_input])
         if not content_mapping:
             if len(user_input) > 100:  # 没有探测到任何文件，并且提交大于50个字符，那么运行往下走
-                yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='没有探测到文件')
+                chatbot[-1][1] = download_format(title='没有检测到任何文件', content=download_status, status='Done')
+                yield from update_ui(chatbot=chatbot, history=history, msg='没有探测到文件')
                 # 识别图片链接内容
                 complete_input = yield from content_img_vision_analyze(user_input, chatbot, history,
                                                                        llm_kwargs, plugin_kwargs)
                 embedding_content.extend([long_name_processing(user_input), complete_input])
             else:
-                devs_document = toolbox.get_conf('devs_document')
+                devs_document = get_conf('devs_document')
                 status = '\n\n没有探测到任何文件，并且提交字符少于50，无法完成后续任务' \
                          f'请在输入框中输入需要解析的云文档链接或本地文件地址，如果有多个文档则用换行或空格隔开，然后再点击对应的插件\n\n' \
                          f'插件支持解析文档类型`{valid_types}`' \
@@ -823,7 +828,7 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
                 if chatbot[-1][1] is None:
                     chatbot[-1][1] = status
                 chatbot[-1][1] += status
-                yield from toolbox.update_ui(chatbot=chatbot, history=history, msg='没有探测到数据')
+                yield from update_ui(chatbot=chatbot, history=history, msg='没有探测到数据')
                 return []
         kb_upload, = json_args_return(plugin_kwargs, ['自动录入知识库'])
         files_list = [i for i in content_mapping if os.path.exists(i)]
@@ -834,8 +839,8 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
 
 # <---------------------------------------一些Tips----------------------------------------->
 previously_on_plugins = f'如果是本地文件，请点击【🔗】先上传，多个文件请上传压缩包，' \
-                        f'{func_box.html_tag_color("如果是网络文件或金山文档链接，请粘贴到输入框")}, 然后再次点击该插件' \
-                        f'多个文件{func_box.html_tag_color("请使用换行或空格区分")}'
+                        f'{html_tag_color("如果是网络文件或金山文档链接，请粘贴到输入框")}, 然后再次点击该插件' \
+                        f'多个文件{html_tag_color("请使用换行或空格区分")}'
 
 if __name__ == '__main__':
     test = [1, 2, 3, 4, [12], 33, 1]
