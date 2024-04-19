@@ -23,6 +23,9 @@ class Feishu:
         self.base_host = f'https://{get_conf("FEISHU_BASE_HOST")}'
         self.share_tag = split_parse_url(url, None, 3)
         self.share_file_type = split_parse_url(url, None, 2)
+        self.is_folder = True if 'folder' == self.share_tag else False
+        if self.is_folder:
+            self.share_tag = split_parse_url(url, None, 4)
         self.header_cookies.update({'referer': f'{self.base_host}/{self.share_file_type}/{self.share_tag}'})
         self.file_download_url = 'https://internal-api-drive-stream.feishu.cn/space/api/box/stream/download/all/%t/'
         self.file_mapping = {
@@ -35,11 +38,13 @@ class Feishu:
         self.type_need_mapping = {
             'wiki': 'docx',
         }
+        self.folder_obj_mapping = {}
 
     def __submit_download_task(self):
         """提交下载任务"""
         share_tag = self.share_tag if self.share_file_type != 'wiki' else self.query_wiki_docs_id()
-        share_file_type = self.type_need_mapping.get(self.share_file_type) if self.type_need_mapping.get(self.share_file_type) else self.share_file_type
+        share_file_type = self.type_need_mapping.get(self.share_file_type) if self.type_need_mapping.get(
+            self.share_file_type) else self.share_file_type
         json_data = {
             'token': share_tag,
             'type': share_file_type,
@@ -67,6 +72,27 @@ class Feishu:
             headers=self.header_cookies)
 
         return response.json()['data']['tree']['nodes'][self.share_tag]['obj_token']
+
+    def query_folder_list(self, token, deep_link=False):
+        """
+        Args:
+            token: 文件夹token
+            deep_link: 是否递归查询
+        Returns:
+        """
+        params = {"token": token}
+        response = requests.get(
+            f'{self.base_host}/space/api/explorer/v3/children/list/',
+            params=params, verify=False,
+            headers=self.header_cookies).json()
+        nodes = response['data']['entities']['nodes']
+        for i in nodes:
+            if Feishu(nodes[i]['url']).is_folder:
+                if deep_link:
+                    self.query_folder_list(nodes[i]['obj_token'], deep_link)
+            else:
+                self.folder_obj_mapping[nodes[i]['obj_token']] = nodes[i]['url']
+        return self.folder_obj_mapping
 
     def query_download_task(self):
         """查询下载任务状态"""
@@ -108,15 +134,24 @@ class Feishu:
 
 def get_feishu_file(link, project_folder, header=None):
     feishu_docs = Feishu(link, header)
-    file_download_url, file_name = feishu_docs.query_download_task()
-    if file_download_url:
-        file_path = os.path.join(project_folder, file_name)
-        resp = requests.get(url=file_download_url, headers=feishu_docs.header_cookies, verify=False)
-        with open(file_path, mode='wb') as f:
-            f.write(resp.content)
-        return {local_relative_path(file_path): link}
+    file_mapping = {}
+    file_download_mapping = {}
+    if feishu_docs.is_folder:
+        folder_obj_mapping = feishu_docs.query_folder_list(feishu_docs.share_tag)
+        for obj, link in folder_obj_mapping.items():
+            file_download_url, file_name = Feishu(link, header).query_download_task()
+            file_download_mapping[file_download_url] = file_name
     else:
-        return {}
+        file_download_url, file_name = feishu_docs.query_download_task()
+        file_download_mapping[file_download_url] = file_name
+    for url, name in file_download_mapping.items():
+        if url:
+            file_path = os.path.join(project_folder, name)
+            resp = requests.get(url=url, headers=feishu_docs.header_cookies, verify=False)
+            with open(file_path, mode='wb') as f:
+                f.write(resp.content)
+            file_mapping.update({local_relative_path(file_path): link})
+    return file_mapping
 
 
 def get_feishu_from_limit(link_limit, project_folder, header=None):
