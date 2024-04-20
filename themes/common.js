@@ -1166,6 +1166,42 @@ async function on_plugin_exe_complete(fn_name) {
 
 
 
+class FIFOLock {
+    constructor() {
+      this.queue = [];
+      this.currentTaskExecuting = false;
+    }
+
+    lock() {
+      let resolveLock;
+      const lock = new Promise(resolve => {
+        resolveLock = resolve;
+      });
+
+      this.queue.push(resolveLock);
+
+      if (!this.currentTaskExecuting) {
+        this._dequeueNext();
+      }
+
+      return lock;
+    }
+
+    _dequeueNext() {
+      if (this.queue.length === 0) {
+        this.currentTaskExecuting = false;
+        return;
+      }
+      this.currentTaskExecuting = true;
+      const resolveLock = this.queue.shift();
+      resolveLock();
+    }
+
+    unlock() {
+      this.currentTaskExecuting = false;
+      this._dequeueNext();
+    }
+  }
 
 
 
@@ -1273,7 +1309,10 @@ function process_latest_text_output(text, chatbot_index) {
     prev_text = text;
     prev_chatbot_index = chatbot_index;
 }
+
+const audio_push_lock = new FIFOLock();
 async function push_text_to_audio(text) {
+    await audio_push_lock.lock();
     var lines = text.split(/[\n。]/);
     for (const audio_buf_text of lines) {
         if (audio_buf_text) {
@@ -1288,9 +1327,10 @@ async function push_text_to_audio(text) {
             post_text(url, payload, send_index);
             send_index = send_index + 1;
             // sleep 2 seconds
-            await new Promise(r => setTimeout(r, 3000));
+            await delay(3000);
         }
     }
+    audio_push_lock.unlock();
 }
 
 
@@ -1341,7 +1381,6 @@ function post_text(url, payload, cnt) {
         });
 }
 
-
 notify_user_error = false
 // Create an async function to perform the POST request
 async function postData(url = '', data = {}) {
@@ -1354,22 +1393,22 @@ async function postData(url = '', data = {}) {
         // Check if the response is ok (status in the range 200-299)
         if (!response.ok) {
             // If not OK, throw an error
-            console.error('There was a problem during audio generation requests:', response.status);
-            if (!notify_user_error){
-                notify_user_error = true;
-                alert('There was a problem during audio generation requests:', response.status);
-            }
+            console.info('There was a problem during audio generation requests:', response.status);
+            // if (!notify_user_error){
+            //     notify_user_error = true;
+            //     alert('There was a problem during audio generation requests:', response.status);
+            // }
             return null;
         }
         // If OK, parse and return the JSON response
         return await response.arrayBuffer();
     } catch (error) {
         // Log any errors that occur during the fetch operation
-        console.error('There was a problem during audio generation requests:', error);
-        if (!notify_user_error){
-            notify_user_error = true;
-            alert('There was a problem during audio generation requests:', error);
-        }
+        console.info('There was a problem during audio generation requests:', error);
+        // if (!notify_user_error){
+        //     notify_user_error = true;
+        //     alert('There was a problem during audio generation requests:', error);
+        // }
         return null;
     }
 }
