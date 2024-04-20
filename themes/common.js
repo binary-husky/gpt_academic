@@ -256,70 +256,16 @@ function cancel_loading_status() {
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //  第 2 部分: 复制按钮
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// Define the trigger function with delay parameter T in milliseconds
-function trigger(T, fire) {
-    // Variable to keep track of the timer ID
-    let timeoutID = null;
-    // Variable to store the latest arguments
-    let lastArgs = null;
-
-    return function (...args) {
-        // Update lastArgs with the latest arguments
-        lastArgs = args;
-        // Clear the existing timer if the function is called again
-        if (timeoutID !== null) {
-            clearTimeout(timeoutID);
-        }
-        // Set a new timer that calls the `fire` function with the latest arguments after T milliseconds
-        timeoutID = setTimeout(() => {
-            fire(...lastArgs);
-        }, T);
-    };
-}
 
 
-prev_text = "";
-const delayed_push_text_to_audio = trigger(2000, push_text_to_audio);
-function is_continue_from_prev(text, prev_text) {
-    if (text.length < prev_text.length) {
-        return false;
-    }
-    if (text.length == prev_text.length) {
-        return text == prev_text;
-    }
-    return text.startsWith(prev_text);
-}
-function process_latest_text_output(text) {
-    if (text.length == 0) {
-        prev_text = text;
-        return;
-    }
-    if (text == prev_text) {
-        return;
-    }
-    if (is_continue_from_prev(text, prev_text)) {
-        // do something
-        prev_text = text;
-        delayed_push_text_to_audio(text)
-    } else {
-        prev_text = text;
-        delayed_push_text_to_audio(text)
-        // do something
-    }
-}
 
-
-function addCopyButton(botElement, is_last_in_arr) {
+function addCopyButton(botElement, index, is_last_in_arr) {
     // https://github.com/GaiZhenbiao/ChuanhuChatGPT/tree/main/web_assets/javascript
     // Copy bot button
     const copiedIcon = '<span><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height=".8em" width=".8em" xmlns="http://www.w3.org/2000/svg"><polyline points="20 6 9 17 4 12"></polyline></svg></span>';
     const copyIcon = '<span><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height=".8em" width=".8em" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></span>';
     if (is_last_in_arr) {
-        process_latest_text_output(botElement.innerText);
+        process_latest_text_output(botElement.innerText, index);
     }
 
     const messageBtnColumnElement = botElement.querySelector('.message-btn-row');
@@ -406,7 +352,7 @@ function chatbotContentChanged(attempt = 1, force = false) {
                 const is_last_in_arr = index === arr.length - 1;
 
                 // Now pass both the message element and the is_last_in_arr boolean to addCopyButton
-                addCopyButton(message, is_last_in_arr);
+                addCopyButton(message, index, is_last_in_arr);
             });
             // gradioApp().querySelectorAll('#gpt-chatbot .message-wrap .message.bot').forEach(addCopyButton);
         }, i === 0 ? 0 : 200);
@@ -1228,11 +1174,124 @@ async function on_plugin_exe_complete(fn_name) {
 
 
 
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Define the trigger function with delay parameter T in milliseconds
+function trigger(T, fire) {
+    // Variable to keep track of the timer ID
+    let timeoutID = null;
+    // Variable to store the latest arguments
+    let lastArgs = null;
+
+    return function (...args) {
+        // Update lastArgs with the latest arguments
+        lastArgs = args;
+        // Clear the existing timer if the function is called again
+        if (timeoutID !== null) {
+            clearTimeout(timeoutID);
+        }
+        // Set a new timer that calls the `fire` function with the latest arguments after T milliseconds
+        timeoutID = setTimeout(() => {
+            fire(...lastArgs);
+        }, T);
+    };
+}
 
 
+prev_text = "";
+prev_text_already_pushed = "";
+prev_chatbot_index = -1;
+const on_live_text_update = trigger(2000, on_live_stream_terminate);
 
-
-
+function on_live_stream_terminate(latest_text){
+    // remove `prev_text_already_pushed` from `latest_text`
+    remaining_text = latest_text.replace(prev_text_already_pushed, '');
+    push_text_to_audio(remaining_text);
+}
+function is_continue_from_prev(text, prev_text) {
+    abl = 5
+    if (text.length < prev_text.length - abl) {
+        return false;
+    }
+    if (prev_text.length > 10) {
+        return text.startsWith(prev_text.slice(0, Math.max(prev_text.length-abl, 200)));
+    }else{
+        return text.startsWith(prev_text);
+    }
+}
+function isEmptyOrWhitespaceOnly(remaining_text) {
+    // Replace \n and 。 with empty strings
+    let textWithoutSpecifiedCharacters = remaining_text.replace(/[\n。]/g, '');
+    // Check if the remaining string is empty
+    return textWithoutSpecifiedCharacters.trim().length === 0;
+}
+function process_increased_text(remaining_text) {
+    console.log('[is continue], remaining_text: ', remaining_text)
+    // remaining_text starts with \n or 。, then move these chars into prev_text_already_pushed
+    while (remaining_text.startsWith('\n') || remaining_text.startsWith('。')) {
+        prev_text_already_pushed = prev_text_already_pushed + remaining_text[0];
+        remaining_text = remaining_text.slice(1);
+    }
+    if (remaining_text.includes('\n') || remaining_text.includes('。')) { // determine remaining_text contain \n or 。
+        // new message begin!
+        index_of_last_sep = Math.max(remaining_text.lastIndexOf('\n'), remaining_text.lastIndexOf('。'));
+        // break the text into two parts
+        tobe_pushed = remaining_text.slice(0, index_of_last_sep + 1);
+        prev_text_already_pushed = prev_text_already_pushed + tobe_pushed;
+        console.log('[is continue], push: ', tobe_pushed)
+        console.log('[is continue], update prev_text_already_pushed: ', prev_text_already_pushed)
+        if (!isEmptyOrWhitespaceOnly(tobe_pushed)) {
+            console.log('[is continue], remaining_text is empty')
+            push_text_to_audio(tobe_pushed);
+        }
+    }
+}
+function process_latest_text_output(text, chatbot_index) {
+    console.log('---------------------')
+    if (text.length == 0) {
+        prev_text = text;
+        prev_text_mask = text;
+        console.log('empty text')
+        return;
+    }
+    if (text == prev_text) {
+        console.log('[nothing changed]')
+        return;
+    }
+    if (chatbot_index == prev_chatbot_index && is_continue_from_prev(text, prev_text_already_pushed)) {
+        // on_text_continue_grow
+        remaining_text = text.slice(prev_text_already_pushed.length);
+        process_increased_text(remaining_text);
+    } else {
+        // on_new_message_begin, we have to clear `prev_text_already_pushed`
+        console.log('[new message begin]')
+        prev_text_already_pushed = "";
+        process_increased_text(text);
+    }
+    prev_text = text;
+    prev_chatbot_index = chatbot_index;
+}
+async function push_text_to_audio(text) {
+    var lines = text.split(/[\n。]/);
+    for (const audio_buf_text of lines) {
+        if (audio_buf_text) {
+            // Append '/vits' to the current URL to form the target endpoint
+            const url = `${window.location.href}vits`;
+            // Define the payload to be sent in the POST request
+            const payload = {
+                text: audio_buf_text, // Ensure 'audio_buf_text' is defined with valid data
+                text_language: "zh"
+            };
+            // Call the async postData function and log the response
+            post_text(url, payload, send_index);
+            send_index = send_index + 1;
+            // sleep 2 seconds
+            await new Promise(r => setTimeout(r, 3000));
+        }
+    }
+}
 
 
 
@@ -1251,52 +1310,37 @@ async function UpdatePlayQueue(cnt, audio_buf_wave) {
         console.log('cache', cnt);
     }
     else {
-        recv_index = recv_index + 1;
         console.log('processing', cnt);
+        recv_index = recv_index + 1;
         if (audio_buf_wave){
             audioPlayer.enqueueAudio(audio_buf_wave);
         }
         // deal with other cached audio
-        for (i = to_be_processed.length - 1; i >= 0; i--) {
-            if (to_be_processed[i][0] == recv_index) {
-                console.log('processing cached', recv_index);
-                if (to_be_processed[i][1]) {
-                    audioPlayer.enqueueAudio(to_be_processed[i][1]);
+        while (true) {
+            find_any = false;
+            for (i = to_be_processed.length - 1; i >= 0; i--) {
+                if (to_be_processed[i][0] == recv_index) {
+                    console.log('processing cached', recv_index);
+                    if (to_be_processed[i][1]) {
+                        audioPlayer.enqueueAudio(to_be_processed[i][1]);
+                    }
+                    to_be_processed.pop(i);
+                    find_any = true;
+                    recv_index = recv_index + 1;
                 }
-                to_be_processed.pop(i);
-                recv_index = recv_index + 1;
             }
+            if (!find_any){break;}
         }
     }
 }
 
 function post_text(url, payload, cnt) {
-    console.log(cnt, payload.text);
     postData(url, payload, cnt)
         .then(data => {
             UpdatePlayQueue(cnt, data);
         });
 }
 
-async function push_text_to_audio(text) {
-    var lines = text.split(/[\n。]/);
-    for (const audio_buf_text of lines) {
-        if (audio_buf_text) {
-            // Append '/vits' to the current URL to form the target endpoint
-            const url = `${window.location.href}vits`; // This assumes window.location.href ends without a slash
-            // Define the payload to be sent in the POST request
-            const payload = {
-                text: audio_buf_text, // Ensure 'audio_buf_text' is defined with valid data
-                text_language: "zh"
-            };
-            // Call the async postData function and log the response
-            post_text(url, payload, send_index);
-            send_index = send_index + 1;
-            // sleep 2 seconds
-            await new Promise(r => setTimeout(r, 3000));
-        }
-    }
-}
 
 notify_user_error = false
 // Create an async function to perform the POST request
