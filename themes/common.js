@@ -1264,7 +1264,7 @@ function isEmptyOrWhitespaceOnly(remaining_text) {
     return textWithoutSpecifiedCharacters.trim().length === 0;
 }
 function process_increased_text(remaining_text) {
-    console.log('[is continue], remaining_text: ', remaining_text)
+    // console.log('[is continue], remaining_text: ', remaining_text)
     // remaining_text starts with \n or 。, then move these chars into prev_text_already_pushed
     while (remaining_text.startsWith('\n') || remaining_text.startsWith('。')) {
         prev_text_already_pushed = prev_text_already_pushed + remaining_text[0];
@@ -1276,24 +1276,23 @@ function process_increased_text(remaining_text) {
         // break the text into two parts
         tobe_pushed = remaining_text.slice(0, index_of_last_sep + 1);
         prev_text_already_pushed = prev_text_already_pushed + tobe_pushed;
-        console.log('[is continue], push: ', tobe_pushed)
-        console.log('[is continue], update prev_text_already_pushed: ', prev_text_already_pushed)
+        // console.log('[is continue], push: ', tobe_pushed)
+        // console.log('[is continue], update prev_text_already_pushed: ', prev_text_already_pushed)
         if (!isEmptyOrWhitespaceOnly(tobe_pushed)) {
-            console.log('[is continue], remaining_text is empty')
+            // console.log('[is continue], remaining_text is empty')
             push_text_to_audio(tobe_pushed);
         }
     }
 }
 function process_latest_text_output(text, chatbot_index) {
-    console.log('---------------------')
     if (text.length == 0) {
         prev_text = text;
         prev_text_mask = text;
-        console.log('empty text')
+        // console.log('empty text')
         return;
     }
     if (text == prev_text) {
-        console.log('[nothing changed]')
+        // console.log('[nothing changed]')
         return;
     }
     if (chatbot_index == prev_chatbot_index && is_continue_from_prev(text, prev_text_already_pushed)) {
@@ -1302,7 +1301,8 @@ function process_latest_text_output(text, chatbot_index) {
         process_increased_text(remaining_text);
     } else {
         // on_new_message_begin, we have to clear `prev_text_already_pushed`
-        console.log('[new message begin]')
+        console.log('---------------------')
+        console.log('[new message begin]', 'text', text, 'prev_text_already_pushed', prev_text_already_pushed)
         prev_text_already_pushed = "";
         process_increased_text(text);
     }
@@ -1347,11 +1347,11 @@ to_be_processed = [];
 async function UpdatePlayQueue(cnt, audio_buf_wave) {
     if (cnt != recv_index) {
         to_be_processed.push([cnt, audio_buf_wave]);
-        console.log('cache', cnt);
+        // console.log('cache', cnt);
     }
     else {
         console.log('processing', cnt);
-        recv_index = recv_index + 1;
+        // recv_index = recv_index + 1;
         if (audio_buf_wave){
             audioPlayer.enqueueAudio(audio_buf_wave);
         }
@@ -1360,7 +1360,7 @@ async function UpdatePlayQueue(cnt, audio_buf_wave) {
             find_any = false;
             for (i = to_be_processed.length - 1; i >= 0; i--) {
                 if (to_be_processed[i][0] == recv_index) {
-                    console.log('processing cached', recv_index);
+                    // console.log('processing cached', recv_index);
                     if (to_be_processed[i][1]) {
                         audioPlayer.enqueueAudio(to_be_processed[i][1]);
                     }
