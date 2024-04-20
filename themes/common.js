@@ -1326,6 +1326,7 @@ async function push_text_to_audio(text) {
             // Call the async postData function and log the response
             post_text(url, payload, send_index);
             send_index = send_index + 1;
+            console.log(send_index, audio_buf_text)
             // sleep 2 seconds
             await delay(3000);
         }
@@ -1347,11 +1348,11 @@ to_be_processed = [];
 async function UpdatePlayQueue(cnt, audio_buf_wave) {
     if (cnt != recv_index) {
         to_be_processed.push([cnt, audio_buf_wave]);
-        // console.log('cache', cnt);
+        console.log('cache', cnt);
     }
     else {
         console.log('processing', cnt);
-        // recv_index = recv_index + 1;
+        recv_index = recv_index + 1;
         if (audio_buf_wave){
             audioPlayer.enqueueAudio(audio_buf_wave);
         }
@@ -1360,7 +1361,7 @@ async function UpdatePlayQueue(cnt, audio_buf_wave) {
             find_any = false;
             for (i = to_be_processed.length - 1; i >= 0; i--) {
                 if (to_be_processed[i][0] == recv_index) {
-                    // console.log('processing cached', recv_index);
+                    console.log('processing cached', recv_index);
                     if (to_be_processed[i][1]) {
                         audioPlayer.enqueueAudio(to_be_processed[i][1]);
                     }
