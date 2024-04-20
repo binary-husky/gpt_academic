@@ -168,7 +168,7 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
                         # Forward the request to the target service
                         TARGET_URL = get_conf("GPT_SOVITS_URL")
                         body = await request.body()
-                        resp = await client.post(TARGET_URL, content=body, timeout=30)
+                        resp = await client.post(TARGET_URL, content=body, timeout=60)
                         # Return the response from the target service
                         return Response(content=resp.content, status_code=resp.status_code, headers=dict(resp.headers))
                 except httpx.RequestError as e:

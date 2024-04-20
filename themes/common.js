@@ -1256,7 +1256,7 @@ function is_continue_from_prev(text, prev_text) {
         return false;
     }
     if (prev_text.length > 10) {
-        return text.startsWith(prev_text.slice(0, Math.max(prev_text.length-abl, 200)));
+        return text.startsWith(prev_text.slice(0, Math.min(prev_text.length-abl, 100)));
     }else{
         return text.startsWith(prev_text);
     }
