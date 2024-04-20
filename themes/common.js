@@ -260,18 +260,6 @@ function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function push_text_to_audio(text) {
-    var lines = text.split("\n");
-    for(const line of lines){
-        if (line){
-            console.log(line);
-            push_data_to_gradio_component(line, 'audio_buf_text', 'str');
-            document.querySelector("#audio_gen_trigger").click();
-            await delay(3000);  // Wait for 3 seconds before proceeding to the next line
-        }
-    }
-}
-
 function addCopyButton(botElement) {
     // https://github.com/GaiZhenbiao/ChuanhuChatGPT/tree/main/web_assets/javascript
     // Copy bot button
@@ -911,7 +899,8 @@ class AudioPlayer {
 
     // 播放音频
     async play_wave(encodedAudio) {
-        const audioData = this.base64ToArrayBuffer(encodedAudio);
+        // const audioData = this.base64ToArrayBuffer(encodedAudio);
+        const audioData = encodedAudio;
         try {
             const buffer = await this.audioCtx.decodeAudioData(audioData);
             const source = this.audioCtx.createBufferSource();
@@ -931,10 +920,6 @@ class AudioPlayer {
 }
 
 const audioPlayer = new AudioPlayer();
-
-async function UpdatePlayQueue(audio_buf_wave){
-    audioPlayer.enqueueAudio(audio_buf_wave);
-}
 
 async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout) {
     // 第一部分，布局初始化
@@ -1163,3 +1148,125 @@ async function on_plugin_exe_complete(fn_name)
 
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+send_index = 0;
+recv_index = 0;
+to_be_processed = [];
+async function UpdatePlayQueue(cnt, audio_buf_wave){
+    if (cnt != recv_index){
+        to_be_processed.push([cnt, audio_buf_wave]);
+        console.log('cache', cnt);
+    }
+    else{
+        recv_index = recv_index + 1;
+        console.log('processing', cnt);
+        audioPlayer.enqueueAudio(audio_buf_wave);
+        // deal with other cached audio
+        for (i = to_be_processed.length-1; i >= 0; i--){
+            if (to_be_processed[i][0] == recv_index){
+                console.log('processing cached', recv_index);
+                if (to_be_processed[i][1]){
+                    audioPlayer.enqueueAudio(to_be_processed[i][1]);
+                }
+                to_be_processed.pop(i);
+                recv_index = recv_index + 1;
+            }
+        }
+    }
+}
+
+function post_text(url, payload, cnt) {
+    console.log(cnt, payload.text);
+    postData(url, payload, cnt)
+        .then(data => {
+            UpdatePlayQueue(cnt, data);
+        });
+}
+
+async function push_text_to_audio(text) {
+    var lines = text.split(/[\n。]/);
+    for(const audio_buf_text of lines){
+        if (audio_buf_text){
+            // Append '/vits' to the current URL to form the target endpoint
+            const url = `${window.location.href}vits`; // This assumes window.location.href ends without a slash
+            // Define the payload to be sent in the POST request
+            const payload = {
+                text: audio_buf_text, // Ensure 'audio_buf_text' is defined with valid data
+                text_language: "zh"
+            };
+            // Call the async postData function and log the response
+            post_text(url, payload, send_index);
+            send_index = send_index + 1;
+            // sleep 2 seconds
+            await new Promise(r => setTimeout(r, 3000));
+        }
+    }
+}
+
+// Create an async function to perform the POST request
+async function postData(url = '', data = {}) {
+    try {
+        // Use the Fetch API with await
+        const response = await fetch(url, {
+            method: 'POST', // Specify the request method
+            body: JSON.stringify(data), // Convert the JavaScript object to a JSON string
+        });
+        // Check if the response is ok (status in the range 200-299)
+        if (!response.ok) {
+            // If not OK, throw an error
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        // If OK, parse and return the JSON response
+        return await response.arrayBuffer();
+    } catch (error) {
+        // Log any errors that occur during the fetch operation
+        console.error('There was a problem during audio generation requests:', error);
+        return null;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

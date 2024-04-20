@@ -137,6 +137,26 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
                     return "越权访问!"
             return await endpoint(path_or_url, request)
 
+    if get_conf("GPT_SOVITS_ENABLE"):
+        # audio generation functionality
+        import httpx
+        from fastapi import FastAPI, Request, HTTPException
+        from starlette.responses import Response
+        TARGET_URL = get_conf("GPT_SOVITS_URL")
+        async def forward_request(request: Request, method: str) -> Response:
+            async with httpx.AsyncClient() as client:
+                try:
+                    # Forward the request to the target service
+                    body = await request.body()
+                    resp = await client.post(TARGET_URL, content=body, timeout=60)
+                    # Return the response from the target service
+                    return Response(content=resp.content, status_code=resp.status_code, headers=dict(resp.headers))
+                except httpx.RequestError as e:
+                    raise HTTPException(status_code=400, detail=f"Request to the target service failed: {str(e)}")
+        @gradio_app.post("/vits")
+        async def forward_post_request(request: Request):
+            return await forward_request(request, "POST")
+
     # --- --- app_lifespan --- ---
     from contextlib import asynccontextmanager
     @asynccontextmanager

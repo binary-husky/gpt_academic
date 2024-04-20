@@ -354,48 +354,48 @@ def main():
 
 
 
-        audio_buf_text = gr.Textbox(visible=False, elem_id="audio_buf_text")
-        audio_buf_wave = gr.Textbox(visible=False, elem_id="audio_buf")
-        audio_gen_trigger = gr.Button(visible=False, elem_id="audio_gen_trigger")
+        # audio_buf_text = gr.Textbox(visible=False, elem_id="audio_buf_text")
+        # audio_buf_wave = gr.Textbox(visible=False, elem_id="audio_buf")
+        # audio_gen_trigger = gr.Button(visible=False, elem_id="audio_gen_trigger")
 
-        class AudioGenerationQueue:
-            def __init__(self):
-                self.queue = []
-                self.cnt = 0
+        # class AudioGenerationQueue:
+        #     def __init__(self):
+        #         self.queue = []
+        #         self.cnt = 0
 
-            def req(self, audio_buf_text):
-                import requests, base64
-                url = get_conf("GPT_SOVITS_URL")
-                payload = {
-                    "text": audio_buf_text,
-                    "text_language": "zh"
-                }
-                response = requests.post(url, json=payload, stream=False)
-                if response.status_code == 200:
-                    encoded_audio = base64.b64encode(response.content).decode('ascii')
-                    return encoded_audio
-                else:
-                    print("Sovits audio generation Error:", response.status_code, response.text)
-                    return ""
+        #     def req(self, audio_buf_text):
+        #         import requests, base64
+        #         url = get_conf("GPT_SOVITS_URL")
+        #         payload = {
+        #             "text": audio_buf_text,
+        #             "text_language": "zh"
+        #         }
+        #         response = requests.post(url, json=payload, stream=False)
+        #         if response.status_code == 200:
+        #             encoded_audio = base64.b64encode(response.content).decode('ascii')
+        #             return encoded_audio
+        #         else:
+        #             print("Sovits audio generation Error:", response.status_code, response.text)
+        #             return ""
 
-            def req_blocking(self, audio_buf_text):
-                import time
-                gen_id = self.cnt; self.cnt += 1
-                self.queue.append(gen_id)
-                res = self.req(audio_buf_text)
-                # return with order
-                while self.queue[0] != gen_id:
-                    time.sleep(1.0)
-                self.queue.pop(0)
-                return res
+        #     def req_blocking(self, audio_buf_text):
+        #         import time
+        #         gen_id = self.cnt; self.cnt += 1
+        #         self.queue.append(gen_id)
+        #         res = self.req(audio_buf_text)
+        #         # return with order
+        #         while self.queue[0] != gen_id:
+        #             time.sleep(1.0)
+        #         self.queue.pop(0)
+        #         return res
 
-        agq = AudioGenerationQueue()
-        def generate_audio(audio_buf_text):
-            print("Audio generation request:", audio_buf_text)
-            return agq.req_blocking(audio_buf_text)
+        # agq = AudioGenerationQueue()
+        # def generate_audio(audio_buf_text):
+        #     print("Audio generation request:", audio_buf_text)
+        #     return agq.req_blocking(audio_buf_text)
 
-        audio_gen_trigger.click(generate_audio, [audio_buf_text], [audio_buf_wave]).then(None,
-            [audio_buf_wave], None, _js=r"""(audio_buf_wave)=>{UpdatePlayQueue(audio_buf_wave);}""")
+        # audio_gen_trigger.click(generate_audio, [audio_buf_text], [audio_buf_wave]).then(None,
+        #     [audio_buf_wave], None, _js=r"""(audio_buf_wave)=>{UpdatePlayQueue(audio_buf_wave);}""")
 
 
 
