@@ -260,11 +260,67 @@ function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function addCopyButton(botElement) {
+// Define the trigger function with delay parameter T in milliseconds
+function trigger(T, fire) {
+    // Variable to keep track of the timer ID
+    let timeoutID = null;
+    // Variable to store the latest arguments
+    let lastArgs = null;
+
+    return function (...args) {
+        // Update lastArgs with the latest arguments
+        lastArgs = args;
+        // Clear the existing timer if the function is called again
+        if (timeoutID !== null) {
+            clearTimeout(timeoutID);
+        }
+        // Set a new timer that calls the `fire` function with the latest arguments after T milliseconds
+        timeoutID = setTimeout(() => {
+            fire(...lastArgs);
+        }, T);
+    };
+}
+
+
+prev_text = "";
+const delayed_push_text_to_audio = trigger(2000, push_text_to_audio);
+function is_continue_from_prev(text, prev_text) {
+    if (text.length < prev_text.length) {
+        return false;
+    }
+    if (text.length == prev_text.length) {
+        return text == prev_text;
+    }
+    return text.startsWith(prev_text);
+}
+function process_latest_text_output(text) {
+    if (text.length == 0) {
+        prev_text = text;
+        return;
+    }
+    if (text == prev_text) {
+        return;
+    }
+    if (is_continue_from_prev(text, prev_text)) {
+        // do something
+        prev_text = text;
+        delayed_push_text_to_audio(text)
+    } else {
+        prev_text = text;
+        delayed_push_text_to_audio(text)
+        // do something
+    }
+}
+
+
+function addCopyButton(botElement, is_last_in_arr) {
     // https://github.com/GaiZhenbiao/ChuanhuChatGPT/tree/main/web_assets/javascript
     // Copy bot button
     const copiedIcon = '<span><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height=".8em" width=".8em" xmlns="http://www.w3.org/2000/svg"><polyline points="20 6 9 17 4 12"></polyline></svg></span>';
     const copyIcon = '<span><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height=".8em" width=".8em" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></span>';
+    if (is_last_in_arr) {
+        process_latest_text_output(botElement.innerText);
+    }
 
     const messageBtnColumnElement = botElement.querySelector('.message-btn-row');
     if (messageBtnColumnElement) {
@@ -279,7 +335,7 @@ function addCopyButton(botElement) {
     copyButton.addEventListener('click', async () => {
         const textToCopy = botElement.innerText;
         try {
-            push_text_to_audio(textToCopy).catch(console.error);;
+            // push_text_to_audio(textToCopy).catch(console.error);
             if ("clipboard" in navigator) {
                 await navigator.clipboard.writeText(textToCopy);
                 copyButton.innerHTML = copiedIcon;
@@ -344,7 +400,15 @@ function chatbotContentChanged(attempt = 1, force = false) {
     // https://github.com/GaiZhenbiao/ChuanhuChatGPT/tree/main/web_assets/javascript
     for (var i = 0; i < attempt; i++) {
         setTimeout(() => {
-            gradioApp().querySelectorAll('#gpt-chatbot .message-wrap .message.bot').forEach(addCopyButton);
+            const messages = gradioApp().querySelectorAll('#gpt-chatbot .message-wrap .message.bot');
+            messages.forEach((message, index, arr) => {
+                // Check if the current message is the last in the array
+                const is_last_in_arr = index === arr.length - 1;
+
+                // Now pass both the message element and the is_last_in_arr boolean to addCopyButton
+                addCopyButton(message, is_last_in_arr);
+            });
+            // gradioApp().querySelectorAll('#gpt-chatbot .message-wrap .message.bot').forEach(addCopyButton);
         }, i === 0 ? 0 : 200);
     }
     // we have moved mermaid-related code to gradio-fix repository: binary-husky/gradio-fix@32150d0
@@ -958,7 +1022,7 @@ async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout) {
     // Temperature 大模型温度参数
     gpt_academic_gradio_saveload("load", "elem_temperature", "js_temperature_cookie", null, "float");
 
-    if (getCookie("js_md_dropdown_cookie")){
+    if (getCookie("js_md_dropdown_cookie")) {
         // md_dropdown 大模型类型选择
         gpt_academic_gradio_saveload("load", "elem_model_sel", "js_md_dropdown_cookie", null, "str");
         // 连锁修改chatbot的label
@@ -1040,7 +1104,7 @@ function reset_conversation(a, b) {
 }
 
 // clear -> 将 history 缓存至 history_cache -> 点击复原 -> restore_previous_chat() -> 触发elem_update_history -> 读取 history_cache
-function restore_previous_chat(){
+function restore_previous_chat() {
     console.log("restore_previous_chat");
     let chat = getCookie("js_previous_chat_cookie");
     chat = JSON.parse(decodeURIComponent(escape(atob(chat))));
@@ -1048,7 +1112,7 @@ function restore_previous_chat(){
     document.querySelector("#elem_update_history").click(); // in order to call set_history_gr_state, and send history state to server
 }
 
-function gen_restore_btn(){
+function gen_restore_btn() {
     // 创建按钮元素
     const button = document.createElement('div');
 
@@ -1099,16 +1163,16 @@ function gen_restore_btn(){
     document.head.appendChild(styleSheet);
 
     // 鼠标悬停和移开的事件监听器
-    button.addEventListener('mouseover', function() {
+    button.addEventListener('mouseover', function () {
         this.textContent = "还原对话";
     });
 
-    button.addEventListener('mouseout', function() {
+    button.addEventListener('mouseout', function () {
         this.textContent = initial_text;
     });
 
     // 点击事件监听器
-    button.addEventListener('click', function() {
+    button.addEventListener('click', function () {
         // 添加一个类来触发缩小和消失的动画
         restore_previous_chat();
         this.classList.add('disappearing');
@@ -1120,16 +1184,14 @@ function gen_restore_btn(){
     document.body.appendChild(button);
 }
 
-async function on_plugin_exe_complete(fn_name)
-{
+async function on_plugin_exe_complete(fn_name) {
     console.log(fn_name);
-    if (fn_name === "保存当前的对话")
-    {
+    if (fn_name === "保存当前的对话") {
         // get chat profile path
         let chatbot = await get_data_from_gradio_component('gpt-chatbot');
-        let may_have_chat_profile_info = chatbot[chatbot.length-1][1];
+        let may_have_chat_profile_info = chatbot[chatbot.length - 1][1];
 
-        function get_href(htmlString){
+        function get_href(htmlString) {
             const parser = new DOMParser();
             const doc = parser.parseFromString(htmlString, 'text/html');
             const anchor = doc.querySelector('a');
@@ -1141,7 +1203,7 @@ async function on_plugin_exe_complete(fn_name)
             }
         }
         let href = get_href(may_have_chat_profile_info);
-        if (href){
+        if (href) {
             const cleanedHref = href.replace('file=', ''); // /home/fuqingxu/chatgpt_academic/gpt_log/default_user/chat_history/GPT-Academic对话存档2024-04-12-00-35-06.html
             console.log(cleanedHref);
         }
@@ -1183,20 +1245,22 @@ async function on_plugin_exe_complete(fn_name)
 send_index = 0;
 recv_index = 0;
 to_be_processed = [];
-async function UpdatePlayQueue(cnt, audio_buf_wave){
-    if (cnt != recv_index){
+async function UpdatePlayQueue(cnt, audio_buf_wave) {
+    if (cnt != recv_index) {
         to_be_processed.push([cnt, audio_buf_wave]);
         console.log('cache', cnt);
     }
-    else{
+    else {
         recv_index = recv_index + 1;
         console.log('processing', cnt);
-        audioPlayer.enqueueAudio(audio_buf_wave);
+        if (audio_buf_wave){
+            audioPlayer.enqueueAudio(audio_buf_wave);
+        }
         // deal with other cached audio
-        for (i = to_be_processed.length-1; i >= 0; i--){
-            if (to_be_processed[i][0] == recv_index){
+        for (i = to_be_processed.length - 1; i >= 0; i--) {
+            if (to_be_processed[i][0] == recv_index) {
                 console.log('processing cached', recv_index);
-                if (to_be_processed[i][1]){
+                if (to_be_processed[i][1]) {
                     audioPlayer.enqueueAudio(to_be_processed[i][1]);
                 }
                 to_be_processed.pop(i);
@@ -1216,8 +1280,8 @@ function post_text(url, payload, cnt) {
 
 async function push_text_to_audio(text) {
     var lines = text.split(/[\n。]/);
-    for(const audio_buf_text of lines){
-        if (audio_buf_text){
+    for (const audio_buf_text of lines) {
+        if (audio_buf_text) {
             // Append '/vits' to the current URL to form the target endpoint
             const url = `${window.location.href}vits`; // This assumes window.location.href ends without a slash
             // Define the payload to be sent in the POST request
@@ -1234,6 +1298,7 @@ async function push_text_to_audio(text) {
     }
 }
 
+notify_user_error = false
 // Create an async function to perform the POST request
 async function postData(url = '', data = {}) {
     try {
@@ -1245,13 +1310,22 @@ async function postData(url = '', data = {}) {
         // Check if the response is ok (status in the range 200-299)
         if (!response.ok) {
             // If not OK, throw an error
-            throw new Error(`HTTP error! status: ${response.status}`);
+            console.error('There was a problem during audio generation requests:', response.status);
+            if (!notify_user_error){
+                notify_user_error = true;
+                alert('There was a problem during audio generation requests:', response.status);
+            }
+            return null;
         }
         // If OK, parse and return the JSON response
         return await response.arrayBuffer();
     } catch (error) {
         // Log any errors that occur during the fetch operation
         console.error('There was a problem during audio generation requests:', error);
+        if (!notify_user_error){
+            notify_user_error = true;
+            alert('There was a problem during audio generation requests:', error);
+        }
         return null;
     }
 }
