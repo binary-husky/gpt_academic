@@ -1239,12 +1239,16 @@ function trigger(T, fire) {
 prev_text = "";
 prev_text_already_pushed = "";
 prev_chatbot_index = -1;
-const on_live_text_update = trigger(2000, on_live_stream_terminate);
+const delay_live_text_update = trigger(3000, on_live_stream_terminate);
 
 function on_live_stream_terminate(latest_text){
     // remove `prev_text_already_pushed` from `latest_text`
-    remaining_text = latest_text.replace(prev_text_already_pushed, '');
-    push_text_to_audio(remaining_text);
+    console.log("on_live_stream_terminate", latest_text)
+    remaining_text = latest_text.slice(prev_text_already_pushed.length);
+    if ((!isEmptyOrWhitespaceOnly(remaining_text)) && remaining_text.length != 0) {
+        prev_text_already_pushed = latest_text;
+        push_text_to_audio(remaining_text);
+    }
 }
 function is_continue_from_prev(text, prev_text) {
     abl = 5
@@ -1299,12 +1303,14 @@ function process_latest_text_output(text, chatbot_index) {
         // on_text_continue_grow
         remaining_text = text.slice(prev_text_already_pushed.length);
         process_increased_text(remaining_text);
+        delay_live_text_update(text); // in case of no \n or 。 in the text, this timer will finally commit
     } else {
         // on_new_message_begin, we have to clear `prev_text_already_pushed`
         console.log('---------------------')
         console.log('[new message begin]', 'text', text, 'prev_text_already_pushed', prev_text_already_pushed)
         prev_text_already_pushed = "";
         process_increased_text(text);
+        delay_live_text_update(text); // in case of no \n or 。 in the text, this timer will finally commit
     }
     prev_text = text;
     prev_chatbot_index = chatbot_index;
