@@ -258,13 +258,16 @@ function cancel_loading_status() {
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 
-
+var allow_auto_read_tts_flag = false;
 function addCopyButton(botElement, index, is_last_in_arr) {
     // https://github.com/GaiZhenbiao/ChuanhuChatGPT/tree/main/web_assets/javascript
     // Copy bot button
     const copiedIcon = '<span><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height=".8em" width=".8em" xmlns="http://www.w3.org/2000/svg"><polyline points="20 6 9 17 4 12"></polyline></svg></span>';
     const copyIcon = '<span><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height=".8em" width=".8em" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></span>';
-    if (is_last_in_arr) {
+    // const audioIcon = '<span><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height=".8em" width=".8em" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></span>';
+    const audioIcon = '<span><svg t="1713628577799" fill="currentColor" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4587" width=".9em" height=".9em"><path d="M113.7664 540.4672c0-219.9552 178.2784-398.2336 398.2336-398.2336S910.2336 320.512 910.2336 540.4672v284.4672c0 31.4368-25.4976 56.9344-56.9344 56.9344h-56.9344c-31.4368 0-56.9344-25.4976-56.9344-56.9344V597.2992c0-31.4368 25.4976-56.9344 56.9344-56.9344h56.9344c0-188.5184-152.7808-341.2992-341.2992-341.2992S170.7008 351.9488 170.7008 540.4672h56.9344c31.4368 0 56.9344 25.4976 56.9344 56.9344v227.5328c0 31.4368-25.4976 56.9344-56.9344 56.9344h-56.9344c-31.4368 0-56.9344-25.4976-56.9344-56.9344V540.4672z" p-id="4588"></path></svg></span>';
+    // const cancelAudioIcon = '<span><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height=".8em" width=".8em" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></span>';
+    if (is_last_in_arr && allow_auto_read_tts_flag) {
         process_latest_text_output(botElement.innerText, index);
     }
 
@@ -308,9 +311,30 @@ function addCopyButton(botElement, index, is_last_in_arr) {
             console.error("Copy failed: ", error);
         }
     });
+
+    var audioButton = document.createElement('button');
+    audioButton.classList.add('audio-toggle-btn');
+    audioButton.innerHTML = audioIcon;
+    audioButton.addEventListener('click', async () => {
+        if (audioPlayer.isPlaying) {
+            toast_push('自动朗读已禁用。', 3000);
+            audioPlayer.stop();
+            allow_auto_read_tts_flag = false;
+            setCookie("js_auto_read_cookie", "False", 365);
+
+        } else{
+            toast_push('正在合成语音 & 自动朗读已开启。', 3000);
+            const readText = botElement.innerText;
+            push_text_to_audio(readText);
+            allow_auto_read_tts_flag = true;
+            setCookie("js_auto_read_cookie", "True", 365);
+        }
+    });
+
     var messageBtnColumn = document.createElement('div');
     messageBtnColumn.classList.add('message-btn-row');
     messageBtnColumn.appendChild(copyButton);
+    messageBtnColumn.appendChild(audioButton);
     botElement.appendChild(messageBtnColumn);
 }
 
@@ -879,6 +903,7 @@ class AudioPlayer {
         this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         this.queue = [];
         this.isPlaying = false;
+        this.currentSource = null; // 添加属性来保存当前播放的源
     }
 
     // Base64 编码的字符串转换为 ArrayBuffer
@@ -903,13 +928,15 @@ class AudioPlayer {
 
     // 将音频添加到播放队列
     enqueueAudio(audio_buf_wave) {
-        this.queue.push(audio_buf_wave);
-        this.checkQueue();
+        if (allow_auto_read_tts_flag){
+            this.queue.push(audio_buf_wave);
+            this.checkQueue();
+        }
     }
 
     // 播放音频
     async play_wave(encodedAudio) {
-        // const audioData = this.base64ToArrayBuffer(encodedAudio);
+        //const audioData = this.base64ToArrayBuffer(encodedAudio);
         const audioData = encodedAudio;
         try {
             const buffer = await this.audioCtx.decodeAudioData(audioData);
@@ -917,14 +944,31 @@ class AudioPlayer {
             source.buffer = buffer;
             source.connect(this.audioCtx.destination);
             source.onended = () => {
-                this.isPlaying = false;
-                this.checkQueue();
+                if (allow_auto_read_tts_flag){
+                    this.isPlaying = false;
+                    this.currentSource = null; // 播放结束后清空当前源
+                    this.checkQueue();
+                }
             };
+            this.currentSource = source; // 保存当前播放的源
             source.start();
         } catch (e) {
             console.log("Audio error!", e);
             this.isPlaying = false;
+            this.currentSource = null; // 出错时也应清空当前源
             this.checkQueue();
+        }
+    }
+
+    // 新增：立即停止播放音频的方法
+    stop() {
+        if (this.currentSource) {
+            this.queue = []; // 清空队列
+            this.currentSource.stop(); // 停止当前源
+            this.currentSource = null; // 清空当前源
+            this.isPlaying = false; // 更新播放状态
+            // 关闭音频上下文可能会导致无法再次播放音频，因此仅停止当前源
+            // this.audioCtx.close(); // 可选：如果需要可以关闭音频上下文
         }
     }
 }
@@ -959,6 +1003,15 @@ async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout) {
     } else {
         if (dark) {
             document.querySelector('body').classList.add('dark');
+        }
+    }
+
+    //  自动朗读
+    if (getCookie("js_auto_read_cookie")) {
+        auto_read_tts = getCookie("js_auto_read_cookie")
+        auto_read_tts = auto_read_tts == "True";
+        if (auto_read_tts) {
+            allow_auto_read_tts_flag = true;
         }
     }
 
