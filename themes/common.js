@@ -267,9 +267,11 @@ function addCopyButton(botElement, index, is_last_in_arr) {
     // const audioIcon = '<span><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height=".8em" width=".8em" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></span>';
     const audioIcon = '<span><svg t="1713628577799" fill="currentColor" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4587" width=".9em" height=".9em"><path d="M113.7664 540.4672c0-219.9552 178.2784-398.2336 398.2336-398.2336S910.2336 320.512 910.2336 540.4672v284.4672c0 31.4368-25.4976 56.9344-56.9344 56.9344h-56.9344c-31.4368 0-56.9344-25.4976-56.9344-56.9344V597.2992c0-31.4368 25.4976-56.9344 56.9344-56.9344h56.9344c0-188.5184-152.7808-341.2992-341.2992-341.2992S170.7008 351.9488 170.7008 540.4672h56.9344c31.4368 0 56.9344 25.4976 56.9344 56.9344v227.5328c0 31.4368-25.4976 56.9344-56.9344 56.9344h-56.9344c-31.4368 0-56.9344-25.4976-56.9344-56.9344V540.4672z" p-id="4588"></path></svg></span>';
     // const cancelAudioIcon = '<span><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height=".8em" width=".8em" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></span>';
-    if (is_last_in_arr && allow_auto_read_tts_flag) {
-        process_latest_text_output(botElement.innerText, index);
-    }
+
+    // 此功能没准备好
+    // if (is_last_in_arr && allow_auto_read_tts_flag) {
+    //     process_latest_text_output(botElement.innerText, index);
+    // }
 
     const messageBtnColumnElement = botElement.querySelector('.message-btn-row');
     if (messageBtnColumnElement) {
@@ -323,7 +325,8 @@ function addCopyButton(botElement, index, is_last_in_arr) {
             setCookie("js_auto_read_cookie", "False", 365);
 
         } else{
-            toast_push('正在合成语音 & 自动朗读已开启。', 3000);
+            // toast_push('正在合成语音 & 自动朗读已开启。', 3000);
+            toast_push('正在合成语音', 3000);
             const readText = botElement.innerText;
             push_text_to_audio(readText);
             allow_auto_read_tts_flag = true;
@@ -1352,12 +1355,22 @@ function process_latest_text_output(text, chatbot_index) {
         // console.log('[nothing changed]')
         return;
     }
-    if (chatbot_index == prev_chatbot_index && is_continue_from_prev(text, prev_text_already_pushed)) {
+
+    var is_continue = is_continue_from_prev(text, prev_text_already_pushed);
+    if (chatbot_index == prev_chatbot_index && is_continue) {
         // on_text_continue_grow
         remaining_text = text.slice(prev_text_already_pushed.length);
         process_increased_text(remaining_text);
         delay_live_text_update(text); // in case of no \n or 。 in the text, this timer will finally commit
-    } else {
+    }
+    else if (chatbot_index == prev_chatbot_index && !is_continue)
+    {
+        console.log('---------------------')
+        console.log('text twisting!')
+        prev_text_already_pushed = "";
+        delay_live_text_update(text); // in case of no \n or 。 in the text, this timer will finally commit
+    }
+    else {
         // on_new_message_begin, we have to clear `prev_text_already_pushed`
         console.log('---------------------')
         console.log('[new message begin]', 'text', text, 'prev_text_already_pushed', prev_text_already_pushed)
