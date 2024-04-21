@@ -207,6 +207,40 @@ def fix_code_segment_indent(txt):
         return txt
 
 
+def markdown_convertion_for_file(txt):
+    """
+    将Markdown格式的文本转换为HTML格式。如果包含数学公式，则先将公式转换为HTML格式。
+    """
+    pre = '<div class="markdown-body">'
+    suf = "</div>"
+    if txt.startswith(pre) and txt.endswith(suf):
+        # print('警告，输入了已经经过转化的字符串，二次转化可能出问题')
+        return txt  # 已经被转化过，不需要再次转化
+
+    find_equation_pattern = r'<script type="math/tex(?:.*?)>(.*?)</script>'
+    txt = fix_markdown_indent(txt)
+    # convert everything to html format
+    split = markdown.markdown(text="---")
+    convert_stage_1 = markdown.markdown(
+        text=txt,
+        extensions=[
+            "sane_lists",
+            "tables",
+            "mdx_math",
+            "pymdownx.superfences",
+            "pymdownx.highlight",
+        ],
+        extension_configs={**markdown_extension_configs, **code_highlight_configs},
+    )
+    convert_stage_1 = markdown_bug_hunt(convert_stage_1)
+
+    # 2. convert to rendered equation
+    convert_stage_2_2, n = re.subn(
+        find_equation_pattern, replace_math_render, convert_stage_1, flags=re.DOTALL
+    )
+    # cat them together
+    return pre + convert_stage_2_2 + suf
+
 @lru_cache(maxsize=128)  # 使用 lru缓存 加快转换速度
 def markdown_convertion(txt):
     """
