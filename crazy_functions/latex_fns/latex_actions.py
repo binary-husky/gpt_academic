@@ -1,10 +1,11 @@
 from toolbox import update_ui, update_ui_lastest_msg, get_log_folder
-from toolbox import get_conf, objdump, objload, promote_file_to_downloadzone
+from toolbox import get_conf, promote_file_to_downloadzone
 from .latex_toolbox import PRESERVE, TRANSFORM
 from .latex_toolbox import set_forbidden_text, set_forbidden_text_begin_end, set_forbidden_text_careful_brace
 from .latex_toolbox import reverse_forbidden_text_careful_brace, reverse_forbidden_text, convert_to_linklist, post_process
 from .latex_toolbox import fix_content, find_main_tex_file, merge_tex_files, compile_latex_with_timeout
 from .latex_toolbox import find_title_and_abs
+from .latex_pickle_io import objdump, objload
 
 import os, shutil
 import re
@@ -259,25 +260,40 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
     inputs_array, sys_prompt_array = switch_prompt(pfg, mode)
     inputs_show_user_array = [f"{mode} {f}" for f in pfg.sp_file_tag]
 
-    #  <-------- gpt 多线程请求 ---------->
-    history_array = [[""] for _ in range(n_split)]
+    if os.path.exists(pj(project_folder,'temp.pkl')):
 
-    gpt_response_collection = yield from request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
-        inputs_array=inputs_array,
-        inputs_show_user_array=inputs_show_user_array,
-        llm_kwargs=llm_kwargs,
-        chatbot=chatbot,
-        history_array=history_array,
-        sys_prompt_array=sys_prompt_array,
-        # max_workers=5,  # 并行任务数量限制, 最多同时执行5个, 其他的排队等待
-        scroller_max_len = 40
-    )
+        #  <-------- 【仅调试】如果存在调试缓存文件，则跳过GPT请求环节 ---------->
+        pfg = objload(file=pj(project_folder,'temp.pkl'))
 
-    #  <-------- 文本碎片重组为完整的tex片段 ---------->
-    pfg.sp_file_result = []
-    for i_say, gpt_say, orig_content in zip(gpt_response_collection[0::2], gpt_response_collection[1::2], pfg.sp_file_contents):
-        pfg.sp_file_result.append(gpt_say)
-    pfg.merge_result()
+    else:
+        #  <-------- gpt 多线程请求 ---------->
+        history_array = [[""] for _ in range(n_split)]
+        # LATEX_EXPERIMENTAL, = get_conf('LATEX_EXPERIMENTAL')
+        # if LATEX_EXPERIMENTAL:
+        #     paper_meta = f"The paper you processing is `{lps.title}`, a part of the abstraction is `{lps.abstract}`"
+        #     paper_meta_max_len = 888
+        #     history_array = [[ paper_meta[:paper_meta_max_len] + '...',  "Understand, what should I do?"] for _ in range(n_split)]
+
+        gpt_response_collection = yield from request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
+            inputs_array=inputs_array,
+            inputs_show_user_array=inputs_show_user_array,
+            llm_kwargs=llm_kwargs,
+            chatbot=chatbot,
+            history_array=history_array,
+            sys_prompt_array=sys_prompt_array,
+            # max_workers=5,  # 并行任务数量限制, 最多同时执行5个, 其他的排队等待
+            scroller_max_len = 40
+        )
+
+        #  <-------- 文本碎片重组为完整的tex片段 ---------->
+        pfg.sp_file_result = []
+        for i_say, gpt_say, orig_content in zip(gpt_response_collection[0::2], gpt_response_collection[1::2], pfg.sp_file_contents):
+            pfg.sp_file_result.append(gpt_say)
+        pfg.merge_result()
+
+        # <-------- 临时存储用于调试 ---------->
+        pfg.get_token_num = None
+        objdump(pfg, file=pj(project_folder,'temp.pkl'))
 
     write_html(pfg.sp_file_contents, pfg.sp_file_result, chatbot=chatbot, project_folder=project_folder)
 
