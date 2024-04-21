@@ -163,6 +163,7 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
                         mp3_audio = AudioSegment.from_file(temp_file, format="mp3")
                         mp3_audio.export(temp_file, format="wav")
                         with open(temp_file, 'rb') as wav_file: t = wav_file.read()
+                        os.remove(temp_file)
                         return Response(content=t)
                     if TTS_TYPE == "LOCAL_SOVITS_API":
                         # Forward the request to the target service
