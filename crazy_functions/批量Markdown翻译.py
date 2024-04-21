@@ -1,5 +1,5 @@
 import glob, shutil, os, re, logging
-from toolbox import update_ui, trimmed_format_exc, gen_time_str, disable_auto_promotion
+from toolbox import update_ui, trimmed_format_exc, gen_time_str
 from toolbox import CatchException, report_exception, get_log_folder
 from toolbox import write_history_to_file, promote_file_to_downloadzone
 fast_debug = False
@@ -18,7 +18,7 @@ class PaperFileGroup():
         def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))
         self.get_token_num = get_token_num
 
-    def run_file_split(self, max_token_limit=1900):
+    def run_file_split(self, max_token_limit=2048):
         """
         将长文本分离开来
         """
@@ -64,17 +64,17 @@ def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
             pfg.file_contents.append(file_content)
 
     #  <-------- 拆分过长的Markdown文件 ---------->
-    pfg.run_file_split(max_token_limit=1500)
+    pfg.run_file_split(max_token_limit=2048)
     n_split = len(pfg.sp_file_contents)
 
     #  <-------- 多线程翻译开始 ---------->
     if language == 'en->zh':
-        inputs_array = ["This is a Markdown file, translate it into Chinese, do NOT modify any existing Markdown commands:" +
+        inputs_array = ["This is a Markdown file, translate it into Chinese, do NOT modify any existing Markdown commands, do NOT use code wrapper (```), ONLY answer me with translated results:" +
                         f"\n\n{frag}" for frag in pfg.sp_file_contents]
         inputs_show_user_array = [f"翻译 {f}" for f in pfg.sp_file_tag]
         sys_prompt_array = ["You are a professional academic paper translator." for _ in range(n_split)]
     elif language == 'zh->en':
-        inputs_array = [f"This is a Markdown file, translate it into English, do NOT modify any existing Markdown commands:" +
+        inputs_array = [f"This is a Markdown file, translate it into English, do NOT modify any existing Markdown commands, do NOT use code wrapper (```), ONLY answer me with translated results:" +
                         f"\n\n{frag}" for frag in pfg.sp_file_contents]
         inputs_show_user_array = [f"翻译 {f}" for f in pfg.sp_file_tag]
         sys_prompt_array = ["You are a professional academic paper translator." for _ in range(n_split)]
@@ -164,7 +164,6 @@ def Markdown英译中(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
         "函数插件功能？",
         "对整个Markdown项目进行翻译。函数插件贡献者: Binary-Husky"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-    disable_auto_promotion(chatbot)
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
@@ -204,7 +203,6 @@ def Markdown中译英(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
         "函数插件功能？",
         "对整个Markdown项目进行翻译。函数插件贡献者: Binary-Husky"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-    disable_auto_promotion(chatbot)
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
@@ -237,7 +235,6 @@ def Markdown翻译指定语言(txt, llm_kwargs, plugin_kwargs, chatbot, history,
         "函数插件功能？",
         "对整个Markdown项目进行翻译。函数插件贡献者: Binary-Husky"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-    disable_auto_promotion(chatbot)
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:

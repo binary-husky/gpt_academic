@@ -5,6 +5,7 @@ from toolbox import get_upload_folder, zip_folder
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 from .crazy_utils import read_and_clean_pdf_text
+from .crazy_utils import get_files_from_everything
 from .pdf_fns.parse_pdf import parse_pdf, get_avail_grobid_url, translate_pdf
 from colorful import *
 import os
@@ -15,9 +16,7 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
 
     disable_auto_promotion(chatbot)
     # 基本信息：功能、贡献者
-    chatbot.append([
-        "函数插件功能？",
-        "批量翻译PDF文档。函数插件贡献者: Binary-Husky"])
+    chatbot.append([None, "插件功能：批量翻译PDF文档。函数插件贡献者: Binary-Husky"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
@@ -33,7 +32,6 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     # 清空历史，以免输入溢出
     history = []
 
-    from .crazy_utils import get_files_from_everything
     success, file_manifest, project_folder = get_files_from_everything(txt, type='.pdf')
     # 检测输入参数，如没有给定输入参数，直接退出
     if not success:
@@ -48,17 +46,25 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
 
     # 开始正式执行任务
     DOC2X_API_KEY = get_conf("DOC2X_API_KEY")
+    # ------- 第一种方法，效果最好，但是需要DOC2X服务 -------
     if len(DOC2X_API_KEY) != 0:
-        yield from 解析PDF_DOC2X(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, DOC2X_API_KEY, user_request)
-        return
+        try:
+            yield from 解析PDF_DOC2X(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, DOC2X_API_KEY, user_request)
+            return
+        except:
+            chatbot.append([None, "DOC2X服务不可用，现在将执行效果稍差的旧版代码。"])
+            yield from update_ui(chatbot=chatbot, history=history)
+
+    # ------- 第二种方法，效果次优 -------
     grobid_url = get_avail_grobid_url()
     if grobid_url is not None:
         yield from 解析PDF_基于GROBID(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, grobid_url)
         return
-    else:
-        yield from update_ui_lastest_msg("GROBID服务不可用，请检查config中的GROBID_URL。作为替代，现在将执行效果稍差的旧版代码。", chatbot, history, delay=3)
-        yield from 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt)
-        return
+
+    # ------- 第三种方法，早期代码，效果不理想 -------
+    yield from update_ui_lastest_msg("GROBID服务不可用，请检查config中的GROBID_URL。作为替代，现在将执行效果稍差的旧版代码。", chatbot, history, delay=3)
+    yield from 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt)
+    return
 
 
 
@@ -110,7 +116,7 @@ def 解析PDF_DOC2X_单文件(fp, project_folder, llm_kwargs, plugin_kwargs, cha
 
     def deliver_to_markdown_plugin(md_zip_path, user_request):
         from crazy_functions.批量Markdown翻译 import Markdown英译中
-        import shutil
+        import shutil, re
 
         time_tag = gen_time_str()
         target_path_base = get_log_folder(chatbot.get_user())
@@ -122,6 +128,23 @@ def 解析PDF_DOC2X_单文件(fp, project_folder, llm_kwargs, plugin_kwargs, cha
         extract_archive(
             file_path=this_file_path, dest_dir=ex_folder
         )
+
+        # edit markdown files
+        success, file_manifest, project_folder = get_files_from_everything(ex_folder, type='.md')
+        for generated_fp in file_manifest:
+            # 修正一些公式问题
+            with open(generated_fp, 'r', encoding='utf8') as f:
+                content = f.read()
+            # 将公式中的\[ \]替换成$$
+            content = content.replace(r'\[', r'$$').replace(r'\]', r'$$')
+            # 将公式中的\( \)替换成$
+            content = content.replace(r'\(', r'$').replace(r'\)', r'$')
+            content = content.replace('```markdown', '\n').replace('```', '\n')
+            with open(generated_fp, 'w', encoding='utf8') as f:
+                f.write(content)
+            promote_file_to_downloadzone(generated_fp, chatbot=chatbot)
+            yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+
         chatbot.append((None, f"调用Markdown插件 {ex_folder} ..."))
         plugin_kwargs['markdown_expected_output_dir'] = ex_folder
 
@@ -131,29 +154,30 @@ def 解析PDF_DOC2X_单文件(fp, project_folder, llm_kwargs, plugin_kwargs, cha
         yield from Markdown英译中(ex_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request)
         if os.path.exists(generated_fp):
             # 修正一些公式问题
-            with open(generated_fp, 'r', encoding='utf8') as f:
-                content = f.read()
-            # 将公式中的\[ \]替换成$$
-            content = content.replace(r'\[', r'$$').replace(r'\]', r'$$')
-            # 将公式中的\( \)替换成$
-            content = content.replace(r'\(', r'$').replace(r'\)', r'$')
-            content = content.replace('```', '\n').replace('```markdown', '\n')
-            with open(generated_fp, 'w', encoding='utf8') as f:
-                f.write(content)
+            with open(generated_fp, 'r', encoding='utf8') as f: content = f.read()
+            content = content.replace('```markdown', '\n').replace('```', '\n')
+            with open(generated_fp, 'w', encoding='utf8') as f: f.write(content)
+            # 生成在线预览html
+            file_name = '在线预览翻译' + gen_time_str() + '.html'
+            # with open('crazy_functions/pdf_fns/report_template_v2.html', 'r', encoding='utf8') as f:
+            #     html_template = f.read()
+            # html_template = html_template.replace("{MARKDOWN_FILE_PATH}", translated_f_name)
+            preview_fp = os.path.join(ex_folder, file_name)
+            # with open(preview_fp, 'w', encoding='utf8') as f:
+            #     f.write(html_template)
+            # 生成在线预览html
+            from shared_utils.advanced_markdown_format import markdown_convertion_for_file
+            with open(generated_fp, "r", encoding="utf-8") as f:
+                md = f.read()
+            html = markdown_convertion_for_file(md)
+            # print(html)
+            with open(preview_fp, "w", encoding="utf-8") as f: f.write(html)
+            promote_file_to_downloadzone(preview_fp, chatbot=chatbot)
             # 生成包含图片的压缩包
             dest_folder = get_log_folder(chatbot.get_user())
             zip_name = '翻译后的带图文档.zip'
             zip_folder(source_folder=ex_folder, dest_folder=dest_folder, zip_name=zip_name)
             zip_fp = os.path.join(dest_folder, zip_name)
-            # 生成在线预览html
-            file_name = '在线预览翻译' + gen_time_str() + '.html'
-            with open('crazy_functions/pdf_fns/report_template_v2.html', 'r', encoding='utf8') as f:
-                html_template = f.read()
-            html_template = html_template.replace("{MARKDOWN_FILE_PATH}", translated_f_name)
-            preview_fp = os.path.join(ex_folder, file_name)
-            with open(preview_fp, 'w', encoding='utf8') as f:
-                f.write(html_template)
-            promote_file_to_downloadzone(preview_fp, chatbot=chatbot)
             promote_file_to_downloadzone(zip_fp, chatbot=chatbot)
             yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
     md_zip_path = yield from pdf2markdown(fp)
