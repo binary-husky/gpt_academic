@@ -107,6 +107,10 @@ def arxiv_download(chatbot, history, txt, allow_cache=True):
         except ValueError:
             return False
 
+    if txt.startswith('https://arxiv.org/pdf/'):
+        arxiv_id = txt.split('/')[-1]   # 2402.14207v2.pdf
+        txt = arxiv_id.split('v')[0]  # 2402.14207
+
     if ('.' in txt) and ('/' not in txt) and is_float(txt):  # is arxiv ID
         txt = 'https://arxiv.org/abs/' + txt.strip()
     if ('.' in txt) and ('/' not in txt) and is_float(txt[:10]):  # is arxiv ID
@@ -121,6 +125,7 @@ def arxiv_download(chatbot, history, txt, allow_cache=True):
     time.sleep(1)  # 刷新界面
 
     url_ = txt  # https://arxiv.org/abs/1707.06690
+
     if not txt.startswith('https://arxiv.org/abs/'):
         msg = f"解析arxiv网址失败, 期望格式例如: https://arxiv.org/abs/1707.06690。实际得到格式: {url_}。"
         yield from update_ui_lastest_msg(msg, chatbot=chatbot, history=history)  # 刷新界面
@@ -458,23 +463,23 @@ def PDF翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot, h
             promote_file_to_downloadzone(translate_pdf, rename_file=None, chatbot=chatbot)
 
             comparison_pdf = [f for f in glob.glob(f'{project_folder}/**/comparison.pdf', recursive=True)][0]
-            promote_file_to_downloadzone(comparison_pdf, rename_file=None, chatbot=chatbot)        
+            promote_file_to_downloadzone(comparison_pdf, rename_file=None, chatbot=chatbot)
 
             zip_res = zip_result(project_folder)
             promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
 
             return True
-        
+
         except:
             report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"发现重复上传，但是无法找到相关文件")
             yield from update_ui(chatbot=chatbot, history=history)
-            
+
             chatbot.append([f"没有相关文件", '尝试重新翻译PDF...'])
             yield from update_ui(chatbot=chatbot, history=history)
 
             except_flag = True
-            
-    
+
+
     elif not repeat or except_flag:
         yield from update_ui_lastest_msg(f"未发现重复上传", chatbot=chatbot, history=history)
 

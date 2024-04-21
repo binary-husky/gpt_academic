@@ -868,23 +868,6 @@ class ProxyNetworkActivate:
         return
 
 
-def objdump(obj, file="objdump.tmp"):
-    import pickle
-
-    with open(file, "wb+") as f:
-        pickle.dump(obj, f)
-    return
-
-
-def objload(file="objdump.tmp"):
-    import pickle, os
-
-    if not os.path.exists(file):
-        return
-    with open(file, "rb") as f:
-        return pickle.load(f)
-
-
 def Singleton(cls):
     """
     一个单实例装饰器
