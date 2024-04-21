@@ -1,10 +1,11 @@
 from toolbox import update_ui, update_ui_lastest_msg, get_log_folder
-from toolbox import get_conf, objdump, objload, promote_file_to_downloadzone
+from toolbox import get_conf, promote_file_to_downloadzone
 from .latex_toolbox import PRESERVE, TRANSFORM
 from .latex_toolbox import set_forbidden_text, set_forbidden_text_begin_end, set_forbidden_text_careful_brace
 from .latex_toolbox import reverse_forbidden_text_careful_brace, reverse_forbidden_text, convert_to_linklist, post_process
 from .latex_toolbox import fix_content, find_main_tex_file, merge_tex_files, compile_latex_with_timeout
 from .latex_toolbox import find_title_and_abs
+from .latex_pickle_io import objdump, objload
 
 import os, shutil
 import re
