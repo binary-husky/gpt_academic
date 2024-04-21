@@ -1384,6 +1384,9 @@ function process_latest_text_output(text, chatbot_index) {
 
 const audio_push_lock = new FIFOLock();
 async function push_text_to_audio(text) {
+    if (!allow_auto_read_tts_flag){
+        return;
+    }
     await audio_push_lock.lock();
     var lines = text.split(/[\n。]/);
     for (const audio_buf_text of lines) {
@@ -1450,7 +1453,9 @@ async function UpdatePlayQueue(cnt, audio_buf_wave) {
 function post_text(url, payload, cnt) {
     postData(url, payload, cnt)
         .then(data => {
+            if (!allow_auto_read_tts_flag){return;}
             UpdatePlayQueue(cnt, data);
+            return;
         });
 }
 
