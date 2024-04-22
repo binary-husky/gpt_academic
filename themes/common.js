@@ -665,16 +665,16 @@ function monitoring_input_box() {
 
     if (elem_input_main) {
         if (elem_input_main.querySelector("textarea")) {
-            register_func_paste(elem_input_main.querySelector("textarea"))
+            register_func_paste(elem_input_main.querySelector("textarea"));
         }
     }
     if (elem_input_float) {
         if (elem_input_float.querySelector("textarea")) {
-            register_func_paste(elem_input_float.querySelector("textarea"))
+            register_func_paste(elem_input_float.querySelector("textarea"));
         }
     }
     if (elem_chatbot) {
-        register_func_drag(elem_chatbot)
+        register_func_drag(elem_chatbot);
     }
 
 }
@@ -781,7 +781,7 @@ function minor_ui_adjustment() {
     }
 
     setInterval(function () {
-        auto_hide_toolbar()
+        auto_hide_toolbar();
     }, 200); // 每50毫秒执行一次
 }
 
