@@ -258,6 +258,7 @@ function cancel_loading_status() {
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 
+var allow_auto_read_continously = true;
 var allow_auto_read_tts_flag = false;
 function addCopyButton(botElement, index, is_last_in_arr) {
     // https://github.com/GaiZhenbiao/ChuanhuChatGPT/tree/main/web_assets/javascript
@@ -269,9 +270,9 @@ function addCopyButton(botElement, index, is_last_in_arr) {
     // const cancelAudioIcon = '<span><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height=".8em" width=".8em" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></span>';
 
     // 此功能没准备好
-    // if (is_last_in_arr && allow_auto_read_tts_flag) {
-    //     process_latest_text_output(botElement.innerText, index);
-    // }
+    if (allow_auto_read_continously && is_last_in_arr && allow_auto_read_tts_flag) {
+        process_latest_text_output(botElement.innerText, index);
+    }
 
     const messageBtnColumnElement = botElement.querySelector('.message-btn-row');
     if (messageBtnColumnElement) {
@@ -314,30 +315,34 @@ function addCopyButton(botElement, index, is_last_in_arr) {
         }
     });
 
-    var audioButton = document.createElement('button');
-    audioButton.classList.add('audio-toggle-btn');
-    audioButton.innerHTML = audioIcon;
-    audioButton.addEventListener('click', async () => {
-        if (audioPlayer.isPlaying) {
-            toast_push('自动朗读已禁用。', 3000);
-            audioPlayer.stop();
-            allow_auto_read_tts_flag = false;
-            setCookie("js_auto_read_cookie", "False", 365);
+    if (enable_tts){
+        var audioButton = document.createElement('button');
+        audioButton.classList.add('audio-toggle-btn');
+        audioButton.innerHTML = audioIcon;
+        audioButton.addEventListener('click', async () => {
+            if (audioPlayer.isPlaying) {
+                allow_auto_read_tts_flag = false;
+                toast_push('自动朗读已禁用。', 3000);
+                audioPlayer.stop();
+                setCookie("js_auto_read_cookie", "False", 365);
 
-        } else{
-            // toast_push('正在合成语音 & 自动朗读已开启。', 3000);
-            toast_push('正在合成语音', 3000);
-            const readText = botElement.innerText;
-            push_text_to_audio(readText);
-            allow_auto_read_tts_flag = true;
-            setCookie("js_auto_read_cookie", "True", 365);
-        }
-    });
+            } else {
+                allow_auto_read_tts_flag = true;
+                toast_push('正在合成语音 & 自动朗读已开启 (再次点击此按钮可禁用自动朗读)。', 3000);
+                // toast_push('正在合成语音', 3000);
+                const readText = botElement.innerText;
+                push_text_to_audio(readText);
+                setCookie("js_auto_read_cookie", "True", 365);
+            }
+        });
+    }
 
     var messageBtnColumn = document.createElement('div');
     messageBtnColumn.classList.add('message-btn-row');
     messageBtnColumn.appendChild(copyButton);
-    messageBtnColumn.appendChild(audioButton);
+    if (enable_tts){
+        messageBtnColumn.appendChild(audioButton);
+    }
     botElement.appendChild(messageBtnColumn);
 }
 
@@ -901,84 +906,8 @@ function gpt_academic_gradio_saveload(
     }
 }
 
-class AudioPlayer {
-    constructor() {
-        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        this.queue = [];
-        this.isPlaying = false;
-        this.currentSource = null; // 添加属性来保存当前播放的源
-    }
-
-    // Base64 编码的字符串转换为 ArrayBuffer
-    base64ToArrayBuffer(base64) {
-        const binaryString = window.atob(base64);
-        const len = binaryString.length;
-        const bytes = new Uint8Array(len);
-        for (let i = 0; i < len; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
-        }
-        return bytes.buffer;
-    }
-
-    // 检查音频播放队列并播放音频
-    checkQueue() {
-        if (!this.isPlaying && this.queue.length > 0) {
-            this.isPlaying = true;
-            const nextAudio = this.queue.shift();
-            this.play_wave(nextAudio);
-        }
-    }
-
-    // 将音频添加到播放队列
-    enqueueAudio(audio_buf_wave) {
-        if (allow_auto_read_tts_flag){
-            this.queue.push(audio_buf_wave);
-            this.checkQueue();
-        }
-    }
-
-    // 播放音频
-    async play_wave(encodedAudio) {
-        //const audioData = this.base64ToArrayBuffer(encodedAudio);
-        const audioData = encodedAudio;
-        try {
-            const buffer = await this.audioCtx.decodeAudioData(audioData);
-            const source = this.audioCtx.createBufferSource();
-            source.buffer = buffer;
-            source.connect(this.audioCtx.destination);
-            source.onended = () => {
-                if (allow_auto_read_tts_flag){
-                    this.isPlaying = false;
-                    this.currentSource = null; // 播放结束后清空当前源
-                    this.checkQueue();
-                }
-            };
-            this.currentSource = source; // 保存当前播放的源
-            source.start();
-        } catch (e) {
-            console.log("Audio error!", e);
-            this.isPlaying = false;
-            this.currentSource = null; // 出错时也应清空当前源
-            this.checkQueue();
-        }
-    }
-
-    // 新增：立即停止播放音频的方法
-    stop() {
-        if (this.currentSource) {
-            this.queue = []; // 清空队列
-            this.currentSource.stop(); // 停止当前源
-            this.currentSource = null; // 清空当前源
-            this.isPlaying = false; // 更新播放状态
-            // 关闭音频上下文可能会导致无法再次播放音频，因此仅停止当前源
-            // this.audioCtx.close(); // 可选：如果需要可以关闭音频上下文
-        }
-    }
-}
-
-const audioPlayer = new AudioPlayer();
-
-async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout) {
+enable_tts = false;
+async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout, tts) {
     // 第一部分，布局初始化
     audio_fn_init();
     minor_ui_adjustment();
@@ -993,7 +922,6 @@ async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout) {
     // 第二部分，读取Cookie，初始话界面
     let searchString = "";
     let bool_value = "";
-
     //  darkmode 深色模式
     if (getCookie("js_darkmode_cookie")) {
         dark = getCookie("js_darkmode_cookie")
@@ -1010,20 +938,21 @@ async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout) {
     }
 
     //  自动朗读
-    if (getCookie("js_auto_read_cookie")) {
-        auto_read_tts = getCookie("js_auto_read_cookie")
-        auto_read_tts = auto_read_tts == "True";
-        if (auto_read_tts) {
-            allow_auto_read_tts_flag = true;
+    if (tts != "DISABLE"){
+        enable_tts = true;
+        if (getCookie("js_auto_read_cookie")) {
+            auto_read_tts = getCookie("js_auto_read_cookie")
+            auto_read_tts = auto_read_tts == "True";
+            if (auto_read_tts) {
+                allow_auto_read_tts_flag = true;
+            }
         }
     }
 
     // SysPrompt 系统静默提示词
     gpt_academic_gradio_saveload("load", "elem_prompt", "js_system_prompt_cookie", null, "str");
-
     // Temperature 大模型温度参数
     gpt_academic_gradio_saveload("load", "elem_temperature", "js_temperature_cookie", null, "float");
-
     if (getCookie("js_md_dropdown_cookie")) {
         // md_dropdown 大模型类型选择
         gpt_academic_gradio_saveload("load", "elem_model_sel", "js_md_dropdown_cookie", null, "str");
@@ -1220,44 +1149,123 @@ async function on_plugin_exe_complete(fn_name) {
 
 
 
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+//  第 8 部分: TTS语音生成函数
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
+class AudioPlayer {
+    constructor() {
+        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        this.queue = [];
+        this.isPlaying = false;
+        this.currentSource = null; // 添加属性来保存当前播放的源
+    }
+
+    // Base64 编码的字符串转换为 ArrayBuffer
+    base64ToArrayBuffer(base64) {
+        const binaryString = window.atob(base64);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        return bytes.buffer;
+    }
+
+    // 检查音频播放队列并播放音频
+    checkQueue() {
+        if (!this.isPlaying && this.queue.length > 0) {
+            this.isPlaying = true;
+            const nextAudio = this.queue.shift();
+            this.play_wave(nextAudio);
+        }
+    }
+
+    // 将音频添加到播放队列
+    enqueueAudio(audio_buf_wave) {
+        if (allow_auto_read_tts_flag) {
+            this.queue.push(audio_buf_wave);
+            this.checkQueue();
+        }
+    }
+
+    // 播放音频
+    async play_wave(encodedAudio) {
+        //const audioData = this.base64ToArrayBuffer(encodedAudio);
+        const audioData = encodedAudio;
+        try {
+            const buffer = await this.audioCtx.decodeAudioData(audioData);
+            const source = this.audioCtx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(this.audioCtx.destination);
+            source.onended = () => {
+                if (allow_auto_read_tts_flag) {
+                    this.isPlaying = false;
+                    this.currentSource = null; // 播放结束后清空当前源
+                    this.checkQueue();
+                }
+            };
+            this.currentSource = source; // 保存当前播放的源
+            source.start();
+        } catch (e) {
+            console.log("Audio error!", e);
+            this.isPlaying = false;
+            this.currentSource = null; // 出错时也应清空当前源
+            this.checkQueue();
+        }
+    }
+
+    // 新增：立即停止播放音频的方法
+    stop() {
+        if (this.currentSource) {
+            this.queue = []; // 清空队列
+            this.currentSource.stop(); // 停止当前源
+            this.currentSource = null; // 清空当前源
+            this.isPlaying = false; // 更新播放状态
+            // 关闭音频上下文可能会导致无法再次播放音频，因此仅停止当前源
+            // this.audioCtx.close(); // 可选：如果需要可以关闭音频上下文
+        }
+    }
+}
+
+const audioPlayer = new AudioPlayer();
 
 class FIFOLock {
     constructor() {
-      this.queue = [];
-      this.currentTaskExecuting = false;
+        this.queue = [];
+        this.currentTaskExecuting = false;
     }
 
     lock() {
-      let resolveLock;
-      const lock = new Promise(resolve => {
-        resolveLock = resolve;
-      });
+        let resolveLock;
+        const lock = new Promise(resolve => {
+            resolveLock = resolve;
+        });
 
-      this.queue.push(resolveLock);
+        this.queue.push(resolveLock);
 
-      if (!this.currentTaskExecuting) {
-        this._dequeueNext();
-      }
+        if (!this.currentTaskExecuting) {
+            this._dequeueNext();
+        }
 
-      return lock;
+        return lock;
     }
 
     _dequeueNext() {
-      if (this.queue.length === 0) {
-        this.currentTaskExecuting = false;
-        return;
-      }
-      this.currentTaskExecuting = true;
-      const resolveLock = this.queue.shift();
-      resolveLock();
+        if (this.queue.length === 0) {
+            this.currentTaskExecuting = false;
+            return;
+        }
+        this.currentTaskExecuting = true;
+        const resolveLock = this.queue.shift();
+        resolveLock();
     }
 
     unlock() {
-      this.currentTaskExecuting = false;
-      this._dequeueNext();
+        this.currentTaskExecuting = false;
+        this._dequeueNext();
     }
-  }
+}
 
 
 
@@ -1297,7 +1305,7 @@ prev_text_already_pushed = "";
 prev_chatbot_index = -1;
 const delay_live_text_update = trigger(3000, on_live_stream_terminate);
 
-function on_live_stream_terminate(latest_text){
+function on_live_stream_terminate(latest_text) {
     // remove `prev_text_already_pushed` from `latest_text`
     console.log("on_live_stream_terminate", latest_text)
     remaining_text = latest_text.slice(prev_text_already_pushed.length);
@@ -1312,8 +1320,8 @@ function is_continue_from_prev(text, prev_text) {
         return false;
     }
     if (prev_text.length > 10) {
-        return text.startsWith(prev_text.slice(0, Math.min(prev_text.length-abl, 100)));
-    }else{
+        return text.startsWith(prev_text.slice(0, Math.min(prev_text.length - abl, 100)));
+    } else {
         return text.startsWith(prev_text);
     }
 }
@@ -1363,17 +1371,20 @@ function process_latest_text_output(text, chatbot_index) {
         process_increased_text(remaining_text);
         delay_live_text_update(text); // in case of no \n or 。 in the text, this timer will finally commit
     }
-    else if (chatbot_index == prev_chatbot_index && !is_continue)
-    {
+    else if (chatbot_index == prev_chatbot_index && !is_continue) {
         console.log('---------------------')
         console.log('text twisting!')
+        console.log('[new message begin]', 'text', text, 'prev_text_already_pushed', prev_text_already_pushed)
+        console.log('---------------------')
         prev_text_already_pushed = "";
         delay_live_text_update(text); // in case of no \n or 。 in the text, this timer will finally commit
     }
     else {
         // on_new_message_begin, we have to clear `prev_text_already_pushed`
         console.log('---------------------')
+        console.log('new message begin!')
         console.log('[new message begin]', 'text', text, 'prev_text_already_pushed', prev_text_already_pushed)
+        console.log('---------------------')
         prev_text_already_pushed = "";
         process_increased_text(text);
         delay_live_text_update(text); // in case of no \n or 。 in the text, this timer will finally commit
@@ -1384,7 +1395,7 @@ function process_latest_text_output(text, chatbot_index) {
 
 const audio_push_lock = new FIFOLock();
 async function push_text_to_audio(text) {
-    if (!allow_auto_read_tts_flag){
+    if (!allow_auto_read_tts_flag) {
         return;
     }
     await audio_push_lock.lock();
@@ -1403,18 +1414,13 @@ async function push_text_to_audio(text) {
             send_index = send_index + 1;
             console.log(send_index, audio_buf_text)
             // sleep 2 seconds
-            await delay(3000);
+            if (allow_auto_read_tts_flag) {
+                await delay(3000);
+            }
         }
     }
     audio_push_lock.unlock();
 }
-
-
-
-
-
-
-
 
 
 send_index = 0;
@@ -1428,7 +1434,7 @@ async function UpdatePlayQueue(cnt, audio_buf_wave) {
     else {
         console.log('processing', cnt);
         recv_index = recv_index + 1;
-        if (audio_buf_wave){
+        if (audio_buf_wave) {
             audioPlayer.enqueueAudio(audio_buf_wave);
         }
         // deal with other cached audio
@@ -1445,18 +1451,22 @@ async function UpdatePlayQueue(cnt, audio_buf_wave) {
                     recv_index = recv_index + 1;
                 }
             }
-            if (!find_any){break;}
+            if (!find_any) { break; }
         }
     }
 }
 
 function post_text(url, payload, cnt) {
-    postData(url, payload, cnt)
+    if (allow_auto_read_tts_flag) {
+        postData(url, payload, cnt)
         .then(data => {
-            if (!allow_auto_read_tts_flag){return;}
             UpdatePlayQueue(cnt, data);
             return;
         });
+    } else {
+        UpdatePlayQueue(cnt, null);
+        return;
+    }
 }
 
 notify_user_error = false
