@@ -31,11 +31,11 @@ else:
     proxies = None
 
 # [step 3]>> 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
-LLM_MODEL = "gpt-3.5-turbo-16k" # 可选 ↓↓↓
+LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
 AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-preview", "gpt-4-turbo", "gpt-4-turbo-2024-04-09",
                     "gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-3-turbo",
-                    "gemini-pro", "chatglm3"
+                    "gemini-pro", "chatglm3", "groq-llama3-8b-8192", "groq-llama3-70b-8192", "groq-llama2-70b-4096", "groq-mixtral-8x7b-32768", "groq-gemma-7b-it"
                     ]
 # --- --- --- ---
 # P.S. 其他可用的模型还包括
@@ -217,6 +217,9 @@ MOONSHOT_API_KEY = ""
 # 零一万物(Yi Model) API KEY
 YIMODEL_API_KEY = ""
 
+# GROQ API KEY
+GROQ_API_KEY = ""
+
 
 # Mathpix 拥有执行PDF的OCR功能，但是需要注册账号
 MATHPIX_APPID = ""
@@ -331,6 +334,9 @@ NUM_CUSTOM_BASIC_BTN = 4
 │
 ├── "Gemini"
 │   └──  GEMINI_API_KEY
+│ 
+├── "GROQ/*"等GROQ大模型
+│   └──  GROQ_API_KEY
 │
 └── "one-api-...(max_token=...)" 用一种更方便的方式接入one-api多模型管理界面
     ├── AVAIL_LLM_MODELS
