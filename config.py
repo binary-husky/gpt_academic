@@ -50,9 +50,9 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
 #   "yi-34b-chat-0205", "yi-34b-chat-200k"
 # ]
 # --- --- --- ---
-# 此外，为了更灵活地接入one-api多模型管理界面，您还可以在接入one-api时，
-# 使用"one-api-*"前缀直接使用非标准方式接入的模型，例如
-# AVAIL_LLM_MODELS = ["one-api-claude-3-sonnet-20240229(max_token=100000)"]
+# 此外，您还可以在接入one-api/vllm/ollama时，
+# 使用"one-api-*","vllm-*","ollama-*"前缀直接使用非标准方式接入的模型，例如
+# AVAIL_LLM_MODELS = ["one-api-claude-3-sonnet-20240229(max_token=100000)", "ollama-phi3(max_token=4096)"]
 # --- --- --- ---
 
 
@@ -60,7 +60,7 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
 
 # 重新URL重新定向，实现更换API_URL的作用（高危设置! 常规情况下不要修改! 通过修改此设置，您将把您的API-KEY和对话隐私完全暴露给您设定的中间人！）
 # 格式: API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "在这里填写重定向的api.openai.com的URL"}
-# 举例: API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "https://reverse-proxy-url/v1/chat/completions"}
+# 举例: API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "https://reverse-proxy-url/v1/chat/completions", "http://localhost:11434/api/chat": "在这里填写您ollama的URL"}
 API_URL_REDIRECT = {}
 
 
