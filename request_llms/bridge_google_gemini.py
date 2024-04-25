@@ -8,7 +8,7 @@ import os
 import time
 from request_llms.com_google import GoogleChatInit
 from toolbox import ChatBotWithCookies
-from toolbox import get_conf, update_ui, update_ui_lastest_msg, have_any_recent_upload_image_files, trimmed_format_exc
+from toolbox import get_conf, update_ui, update_ui_lastest_msg, have_any_recent_upload_image_files, trimmed_format_exc,log_chat
 
 proxies, TIMEOUT_SECONDS, MAX_RETRY = get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY')
 timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check proxy settings in config.py.' + \
@@ -99,6 +99,7 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
             gpt_replying_buffer += paraphrase['text']    # 使用 json 解析库进行处理
             chatbot[-1] = (inputs, gpt_replying_buffer)
             history[-1] = gpt_replying_buffer
+            log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
             yield from update_ui(chatbot=chatbot, history=history)
         if error_match:
             history = history[-2]  # 错误的不纳入对话
