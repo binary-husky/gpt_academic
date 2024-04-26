@@ -36,8 +36,14 @@ class ZhipuChatInit:
             what_i_have_asked = {"role": "user", "content": []}
             what_i_have_asked['content'].append({"type": 'text', "text": user_input})
             if encode_img:
+                if len(encode_img) > 1:
+                    logging.warning("glm-4v只支持一张图片,将只取第一张图片进行处理")
+                    print("glm-4v只支持一张图片,将只取第一张图片进行处理")
                 img_d = {"type": "image_url",
-                         "image_url": {'url': encode_img}}
+                            "image_url": {
+                                "url": encode_img[0]['data']
+                            }
+                        }
                 what_i_have_asked['content'].append(img_d)
             return what_i_have_asked
 

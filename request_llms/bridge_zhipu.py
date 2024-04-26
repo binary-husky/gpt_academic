@@ -75,6 +75,10 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
         llm_kwargs["llm_model"] = zhipuai_default_model
 
     if llm_kwargs["llm_model"] in ["glm-4v"]:
+        if (len(inputs) + sum(len(temp) for temp in history) + 1047) > 2000:
+            chatbot.append((inputs, "上下文长度超过glm-4v上限2000tokens，注意图片大约占用1,047个tokens"))
+            yield from update_ui(chatbot=chatbot, history=history)
+            return
         have_recent_file, image_paths = have_any_recent_upload_image_files(chatbot)
         if not have_recent_file:
             chatbot.append((inputs, "没有检测到任何近期上传的图像文件，请上传jpg格式的图片，此外，请注意拓展名需要小写"))

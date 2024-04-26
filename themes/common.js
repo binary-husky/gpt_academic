@@ -7,6 +7,9 @@ function push_data_to_gradio_component(DAT, ELEM_ID, TYPE) {
     if (TYPE == "str") {
         // convert dat to string: do nothing
     }
+    else if (TYPE == "obj") {
+        // convert dat to string: do nothing
+    }
     else if (TYPE == "no_conversion") {
         // no nothing
     }
@@ -254,11 +257,22 @@ function cancel_loading_status() {
 //  第 2 部分: 复制按钮
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-function addCopyButton(botElement) {
+
+var allow_auto_read_continously = true;
+var allow_auto_read_tts_flag = false;
+function addCopyButton(botElement, index, is_last_in_arr) {
     // https://github.com/GaiZhenbiao/ChuanhuChatGPT/tree/main/web_assets/javascript
     // Copy bot button
     const copiedIcon = '<span><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height=".8em" width=".8em" xmlns="http://www.w3.org/2000/svg"><polyline points="20 6 9 17 4 12"></polyline></svg></span>';
     const copyIcon = '<span><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height=".8em" width=".8em" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></span>';
+    // const audioIcon = '<span><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height=".8em" width=".8em" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></span>';
+    const audioIcon = '<span><svg t="1713628577799" fill="currentColor" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4587" width=".9em" height=".9em"><path d="M113.7664 540.4672c0-219.9552 178.2784-398.2336 398.2336-398.2336S910.2336 320.512 910.2336 540.4672v284.4672c0 31.4368-25.4976 56.9344-56.9344 56.9344h-56.9344c-31.4368 0-56.9344-25.4976-56.9344-56.9344V597.2992c0-31.4368 25.4976-56.9344 56.9344-56.9344h56.9344c0-188.5184-152.7808-341.2992-341.2992-341.2992S170.7008 351.9488 170.7008 540.4672h56.9344c31.4368 0 56.9344 25.4976 56.9344 56.9344v227.5328c0 31.4368-25.4976 56.9344-56.9344 56.9344h-56.9344c-31.4368 0-56.9344-25.4976-56.9344-56.9344V540.4672z" p-id="4588"></path></svg></span>';
+    // const cancelAudioIcon = '<span><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height=".8em" width=".8em" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></span>';
+
+    // 此功能没准备好
+    if (allow_auto_read_continously && is_last_in_arr && allow_auto_read_tts_flag) {
+        process_latest_text_output(botElement.innerText, index);
+    }
 
     const messageBtnColumnElement = botElement.querySelector('.message-btn-row');
     if (messageBtnColumnElement) {
@@ -273,6 +287,7 @@ function addCopyButton(botElement) {
     copyButton.addEventListener('click', async () => {
         const textToCopy = botElement.innerText;
         try {
+            // push_text_to_audio(textToCopy).catch(console.error);
             if ("clipboard" in navigator) {
                 await navigator.clipboard.writeText(textToCopy);
                 copyButton.innerHTML = copiedIcon;
@@ -299,9 +314,35 @@ function addCopyButton(botElement) {
             console.error("Copy failed: ", error);
         }
     });
+
+    if (enable_tts){
+        var audioButton = document.createElement('button');
+        audioButton.classList.add('audio-toggle-btn');
+        audioButton.innerHTML = audioIcon;
+        audioButton.addEventListener('click', async () => {
+            if (audioPlayer.isPlaying) {
+                allow_auto_read_tts_flag = false;
+                toast_push('自动朗读已禁用。', 3000);
+                audioPlayer.stop();
+                setCookie("js_auto_read_cookie", "False", 365);
+
+            } else {
+                allow_auto_read_tts_flag = true;
+                toast_push('正在合成语音 & 自动朗读已开启 (再次点击此按钮可禁用自动朗读)。', 3000);
+                // toast_push('正在合成语音', 3000);
+                const readText = botElement.innerText;
+                push_text_to_audio(readText);
+                setCookie("js_auto_read_cookie", "True", 365);
+            }
+        });
+    }
+
     var messageBtnColumn = document.createElement('div');
     messageBtnColumn.classList.add('message-btn-row');
     messageBtnColumn.appendChild(copyButton);
+    if (enable_tts){
+        messageBtnColumn.appendChild(audioButton);
+    }
     botElement.appendChild(messageBtnColumn);
 }
 
@@ -337,7 +378,15 @@ function chatbotContentChanged(attempt = 1, force = false) {
     // https://github.com/GaiZhenbiao/ChuanhuChatGPT/tree/main/web_assets/javascript
     for (var i = 0; i < attempt; i++) {
         setTimeout(() => {
-            gradioApp().querySelectorAll('#gpt-chatbot .message-wrap .message.bot').forEach(addCopyButton);
+            const messages = gradioApp().querySelectorAll('#gpt-chatbot .message-wrap .message.bot');
+            messages.forEach((message, index, arr) => {
+                // Check if the current message is the last in the array
+                const is_last_in_arr = index === arr.length - 1;
+
+                // Now pass both the message element and the is_last_in_arr boolean to addCopyButton
+                addCopyButton(message, index, is_last_in_arr);
+            });
+            // gradioApp().querySelectorAll('#gpt-chatbot .message-wrap .message.bot').forEach(addCopyButton);
         }, i === 0 ? 0 : 200);
     }
     // we have moved mermaid-related code to gradio-fix repository: binary-husky/gradio-fix@32150d0
@@ -621,16 +670,16 @@ function monitoring_input_box() {
 
     if (elem_input_main) {
         if (elem_input_main.querySelector("textarea")) {
-            register_func_paste(elem_input_main.querySelector("textarea"))
+            register_func_paste(elem_input_main.querySelector("textarea"));
         }
     }
     if (elem_input_float) {
         if (elem_input_float.querySelector("textarea")) {
-            register_func_paste(elem_input_float.querySelector("textarea"))
+            register_func_paste(elem_input_float.querySelector("textarea"));
         }
     }
     if (elem_chatbot) {
-        register_func_drag(elem_chatbot)
+        register_func_drag(elem_chatbot);
     }
 
 }
@@ -737,7 +786,7 @@ function minor_ui_adjustment() {
     }
 
     setInterval(function () {
-        auto_hide_toolbar()
+        auto_hide_toolbar();
     }, 200); // 每50毫秒执行一次
 }
 
@@ -857,8 +906,8 @@ function gpt_academic_gradio_saveload(
     }
 }
 
-
-async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout) {
+enable_tts = false;
+async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout, tts) {
     // 第一部分，布局初始化
     audio_fn_init();
     minor_ui_adjustment();
@@ -873,7 +922,6 @@ async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout) {
     // 第二部分，读取Cookie，初始话界面
     let searchString = "";
     let bool_value = "";
-
     //  darkmode 深色模式
     if (getCookie("js_darkmode_cookie")) {
         dark = getCookie("js_darkmode_cookie")
@@ -889,11 +937,39 @@ async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout) {
         }
     }
 
+    //  自动朗读
+    if (tts != "DISABLE"){
+        enable_tts = true;
+        if (getCookie("js_auto_read_cookie")) {
+            auto_read_tts = getCookie("js_auto_read_cookie")
+            auto_read_tts = auto_read_tts == "True";
+            if (auto_read_tts) {
+                allow_auto_read_tts_flag = true;
+            }
+        }
+    }
+
     // SysPrompt 系统静默提示词
     gpt_academic_gradio_saveload("load", "elem_prompt", "js_system_prompt_cookie", null, "str");
-
     // Temperature 大模型温度参数
     gpt_academic_gradio_saveload("load", "elem_temperature", "js_temperature_cookie", null, "float");
+    // md_dropdown 大模型类型选择
+    if (getCookie("js_md_dropdown_cookie")) {
+        const cached_model = getCookie("js_md_dropdown_cookie");
+        var model_sel = await get_gradio_component("elem_model_sel");
+        // deterine whether the cached model is in the choices
+        if (model_sel.props.choices.includes(cached_model)){
+            // change dropdown
+            gpt_academic_gradio_saveload("load", "elem_model_sel", "js_md_dropdown_cookie", null, "str");
+            // 连锁修改chatbot的label
+            push_data_to_gradio_component({
+                label: '当前模型：' + getCookie("js_md_dropdown_cookie"),
+                __type__: 'update'
+            }, "gpt-chatbot", "obj")
+        }
+    }
+
+
 
     // clearButton 自动清除按钮
     if (getCookie("js_clearbtn_show_cookie")) {
@@ -954,3 +1030,494 @@ async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout) {
     }
 
 }
+
+
+function reset_conversation(a, b) {
+    console.log("js_code_reset");
+    a = btoa(unescape(encodeURIComponent(JSON.stringify(a))));
+    setCookie("js_previous_chat_cookie", a, 1);
+    gen_restore_btn();
+    return [[], [], "已重置"];
+}
+
+// clear -> 将 history 缓存至 history_cache -> 点击复原 -> restore_previous_chat() -> 触发elem_update_history -> 读取 history_cache
+function restore_previous_chat() {
+    console.log("restore_previous_chat");
+    let chat = getCookie("js_previous_chat_cookie");
+    chat = JSON.parse(decodeURIComponent(escape(atob(chat))));
+    push_data_to_gradio_component(chat, "gpt-chatbot", "obj");
+    document.querySelector("#elem_update_history").click(); // in order to call set_history_gr_state, and send history state to server
+}
+
+function gen_restore_btn() {
+    // 创建按钮元素
+    const button = document.createElement('div');
+
+    let initial_text = '+';
+
+    // 设置按钮的样式和属性
+    button.id = 'floatingButton';
+    button.className = 'glow';
+    button.style.position = 'fixed';
+    button.style.bottom = '10px';
+    button.style.left = '10px';
+    button.style.width = '50px';
+    button.style.height = '50px';
+    button.style.borderRadius = '50%';
+    button.style.backgroundColor = '#007bff';
+    button.style.color = 'white';
+    button.style.display = 'flex';
+    button.style.alignItems = 'center';
+    button.style.justifyContent = 'center';
+    button.style.cursor = 'pointer';
+    button.style.transition = 'all 0.3s ease';
+    button.style.boxShadow = '0 0 10px rgba(0,0,0,0.2)';
+    button.textContent = initial_text;
+
+    // 添加发光动画的关键帧
+    const styleSheet = document.createElement('style');
+    styleSheet.type = 'text/css';
+    styleSheet.innerText = `
+    @keyframes glow {
+        from {
+        box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+        to {
+        box-shadow: 0 0 20px rgba(0,0,0,0.4);
+        }
+    }
+    #floatingButton.glow {
+        animation: glow 1s infinite alternate;
+    }
+    #floatingButton:hover {
+        transform: scale(1.2);
+        box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+    #floatingButton.disappearing {
+        animation: shrinkAndDisappear 0.5s forwards;
+    }
+    `;
+    document.head.appendChild(styleSheet);
+
+    // 鼠标悬停和移开的事件监听器
+    button.addEventListener('mouseover', function () {
+        this.textContent = "还原对话";
+    });
+
+    button.addEventListener('mouseout', function () {
+        this.textContent = initial_text;
+    });
+
+    // 点击事件监听器
+    button.addEventListener('click', function () {
+        // 添加一个类来触发缩小和消失的动画
+        restore_previous_chat();
+        this.classList.add('disappearing');
+        // 在动画结束后移除按钮
+        document.body.removeChild(this);
+    });
+
+    // 将按钮添加到页面中
+    document.body.appendChild(button);
+}
+
+async function on_plugin_exe_complete(fn_name) {
+    console.log(fn_name);
+    if (fn_name === "保存当前的对话") {
+        // get chat profile path
+        let chatbot = await get_data_from_gradio_component('gpt-chatbot');
+        let may_have_chat_profile_info = chatbot[chatbot.length - 1][1];
+
+        function get_href(htmlString) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlString, 'text/html');
+            const anchor = doc.querySelector('a');
+
+            if (anchor) {
+                return anchor.getAttribute('href');
+            } else {
+                return null;
+            }
+        }
+        let href = get_href(may_have_chat_profile_info);
+        if (href) {
+            const cleanedHref = href.replace('file=', ''); // /home/fuqingxu/chatgpt_academic/gpt_log/default_user/chat_history/GPT-Academic对话存档2024-04-12-00-35-06.html
+            console.log(cleanedHref);
+        }
+
+    }
+}
+
+
+
+
+
+
+
+
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+//  第 8 部分: TTS语音生成函数
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+class AudioPlayer {
+    constructor() {
+        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        this.queue = [];
+        this.isPlaying = false;
+        this.currentSource = null; // 添加属性来保存当前播放的源
+    }
+
+    // Base64 编码的字符串转换为 ArrayBuffer
+    base64ToArrayBuffer(base64) {
+        const binaryString = window.atob(base64);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+        }
+        return bytes.buffer;
+    }
+
+    // 检查音频播放队列并播放音频
+    checkQueue() {
+        if (!this.isPlaying && this.queue.length > 0) {
+            this.isPlaying = true;
+            const nextAudio = this.queue.shift();
+            this.play_wave(nextAudio);
+        }
+    }
+
+    // 将音频添加到播放队列
+    enqueueAudio(audio_buf_wave) {
+        if (allow_auto_read_tts_flag) {
+            this.queue.push(audio_buf_wave);
+            this.checkQueue();
+        }
+    }
+
+    // 播放音频
+    async play_wave(encodedAudio) {
+        //const audioData = this.base64ToArrayBuffer(encodedAudio);
+        const audioData = encodedAudio;
+        try {
+            const buffer = await this.audioCtx.decodeAudioData(audioData);
+            const source = this.audioCtx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(this.audioCtx.destination);
+            source.onended = () => {
+                if (allow_auto_read_tts_flag) {
+                    this.isPlaying = false;
+                    this.currentSource = null; // 播放结束后清空当前源
+                    this.checkQueue();
+                }
+            };
+            this.currentSource = source; // 保存当前播放的源
+            source.start();
+        } catch (e) {
+            console.log("Audio error!", e);
+            this.isPlaying = false;
+            this.currentSource = null; // 出错时也应清空当前源
+            this.checkQueue();
+        }
+    }
+
+    // 新增：立即停止播放音频的方法
+    stop() {
+        if (this.currentSource) {
+            this.queue = []; // 清空队列
+            this.currentSource.stop(); // 停止当前源
+            this.currentSource = null; // 清空当前源
+            this.isPlaying = false; // 更新播放状态
+            // 关闭音频上下文可能会导致无法再次播放音频，因此仅停止当前源
+            // this.audioCtx.close(); // 可选：如果需要可以关闭音频上下文
+        }
+    }
+}
+
+const audioPlayer = new AudioPlayer();
+
+class FIFOLock {
+    constructor() {
+        this.queue = [];
+        this.currentTaskExecuting = false;
+    }
+
+    lock() {
+        let resolveLock;
+        const lock = new Promise(resolve => {
+            resolveLock = resolve;
+        });
+
+        this.queue.push(resolveLock);
+
+        if (!this.currentTaskExecuting) {
+            this._dequeueNext();
+        }
+
+        return lock;
+    }
+
+    _dequeueNext() {
+        if (this.queue.length === 0) {
+            this.currentTaskExecuting = false;
+            return;
+        }
+        this.currentTaskExecuting = true;
+        const resolveLock = this.queue.shift();
+        resolveLock();
+    }
+
+    unlock() {
+        this.currentTaskExecuting = false;
+        this._dequeueNext();
+    }
+}
+
+
+
+
+
+
+
+
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Define the trigger function with delay parameter T in milliseconds
+function trigger(T, fire) {
+    // Variable to keep track of the timer ID
+    let timeoutID = null;
+    // Variable to store the latest arguments
+    let lastArgs = null;
+
+    return function (...args) {
+        // Update lastArgs with the latest arguments
+        lastArgs = args;
+        // Clear the existing timer if the function is called again
+        if (timeoutID !== null) {
+            clearTimeout(timeoutID);
+        }
+        // Set a new timer that calls the `fire` function with the latest arguments after T milliseconds
+        timeoutID = setTimeout(() => {
+            fire(...lastArgs);
+        }, T);
+    };
+}
+
+
+prev_text = "";
+prev_text_already_pushed = "";
+prev_chatbot_index = -1;
+const delay_live_text_update = trigger(3000, on_live_stream_terminate);
+
+function on_live_stream_terminate(latest_text) {
+    // remove `prev_text_already_pushed` from `latest_text`
+    console.log("on_live_stream_terminate", latest_text)
+    remaining_text = latest_text.slice(prev_text_already_pushed.length);
+    if ((!isEmptyOrWhitespaceOnly(remaining_text)) && remaining_text.length != 0) {
+        prev_text_already_pushed = latest_text;
+        push_text_to_audio(remaining_text);
+    }
+}
+function is_continue_from_prev(text, prev_text) {
+    abl = 5
+    if (text.length < prev_text.length - abl) {
+        return false;
+    }
+    if (prev_text.length > 10) {
+        return text.startsWith(prev_text.slice(0, Math.min(prev_text.length - abl, 100)));
+    } else {
+        return text.startsWith(prev_text);
+    }
+}
+function isEmptyOrWhitespaceOnly(remaining_text) {
+    // Replace \n and 。 with empty strings
+    let textWithoutSpecifiedCharacters = remaining_text.replace(/[\n。]/g, '');
+    // Check if the remaining string is empty
+    return textWithoutSpecifiedCharacters.trim().length === 0;
+}
+function process_increased_text(remaining_text) {
+    // console.log('[is continue], remaining_text: ', remaining_text)
+    // remaining_text starts with \n or 。, then move these chars into prev_text_already_pushed
+    while (remaining_text.startsWith('\n') || remaining_text.startsWith('。')) {
+        prev_text_already_pushed = prev_text_already_pushed + remaining_text[0];
+        remaining_text = remaining_text.slice(1);
+    }
+    if (remaining_text.includes('\n') || remaining_text.includes('。')) { // determine remaining_text contain \n or 。
+        // new message begin!
+        index_of_last_sep = Math.max(remaining_text.lastIndexOf('\n'), remaining_text.lastIndexOf('。'));
+        // break the text into two parts
+        tobe_pushed = remaining_text.slice(0, index_of_last_sep + 1);
+        prev_text_already_pushed = prev_text_already_pushed + tobe_pushed;
+        // console.log('[is continue], push: ', tobe_pushed)
+        // console.log('[is continue], update prev_text_already_pushed: ', prev_text_already_pushed)
+        if (!isEmptyOrWhitespaceOnly(tobe_pushed)) {
+            // console.log('[is continue], remaining_text is empty')
+            push_text_to_audio(tobe_pushed);
+        }
+    }
+}
+function process_latest_text_output(text, chatbot_index) {
+    if (text.length == 0) {
+        prev_text = text;
+        prev_text_mask = text;
+        // console.log('empty text')
+        return;
+    }
+    if (text == prev_text) {
+        // console.log('[nothing changed]')
+        return;
+    }
+
+    var is_continue = is_continue_from_prev(text, prev_text_already_pushed);
+    if (chatbot_index == prev_chatbot_index && is_continue) {
+        // on_text_continue_grow
+        remaining_text = text.slice(prev_text_already_pushed.length);
+        process_increased_text(remaining_text);
+        delay_live_text_update(text); // in case of no \n or 。 in the text, this timer will finally commit
+    }
+    else if (chatbot_index == prev_chatbot_index && !is_continue) {
+        console.log('---------------------')
+        console.log('text twisting!')
+        console.log('[new message begin]', 'text', text, 'prev_text_already_pushed', prev_text_already_pushed)
+        console.log('---------------------')
+        prev_text_already_pushed = "";
+        delay_live_text_update(text); // in case of no \n or 。 in the text, this timer will finally commit
+    }
+    else {
+        // on_new_message_begin, we have to clear `prev_text_already_pushed`
+        console.log('---------------------')
+        console.log('new message begin!')
+        console.log('[new message begin]', 'text', text, 'prev_text_already_pushed', prev_text_already_pushed)
+        console.log('---------------------')
+        prev_text_already_pushed = "";
+        process_increased_text(text);
+        delay_live_text_update(text); // in case of no \n or 。 in the text, this timer will finally commit
+    }
+    prev_text = text;
+    prev_chatbot_index = chatbot_index;
+}
+
+const audio_push_lock = new FIFOLock();
+async function push_text_to_audio(text) {
+    if (!allow_auto_read_tts_flag) {
+        return;
+    }
+    await audio_push_lock.lock();
+    var lines = text.split(/[\n。]/);
+    for (const audio_buf_text of lines) {
+        if (audio_buf_text) {
+            // Append '/vits' to the current URL to form the target endpoint
+            const url = `${window.location.href}vits`;
+            // Define the payload to be sent in the POST request
+            const payload = {
+                text: audio_buf_text, // Ensure 'audio_buf_text' is defined with valid data
+                text_language: "zh"
+            };
+            // Call the async postData function and log the response
+            post_text(url, payload, send_index);
+            send_index = send_index + 1;
+            console.log(send_index, audio_buf_text)
+            // sleep 2 seconds
+            if (allow_auto_read_tts_flag) {
+                await delay(3000);
+            }
+        }
+    }
+    audio_push_lock.unlock();
+}
+
+
+send_index = 0;
+recv_index = 0;
+to_be_processed = [];
+async function UpdatePlayQueue(cnt, audio_buf_wave) {
+    if (cnt != recv_index) {
+        to_be_processed.push([cnt, audio_buf_wave]);
+        console.log('cache', cnt);
+    }
+    else {
+        console.log('processing', cnt);
+        recv_index = recv_index + 1;
+        if (audio_buf_wave) {
+            audioPlayer.enqueueAudio(audio_buf_wave);
+        }
+        // deal with other cached audio
+        while (true) {
+            find_any = false;
+            for (i = to_be_processed.length - 1; i >= 0; i--) {
+                if (to_be_processed[i][0] == recv_index) {
+                    console.log('processing cached', recv_index);
+                    if (to_be_processed[i][1]) {
+                        audioPlayer.enqueueAudio(to_be_processed[i][1]);
+                    }
+                    to_be_processed.pop(i);
+                    find_any = true;
+                    recv_index = recv_index + 1;
+                }
+            }
+            if (!find_any) { break; }
+        }
+    }
+}
+
+function post_text(url, payload, cnt) {
+    if (allow_auto_read_tts_flag) {
+        postData(url, payload, cnt)
+        .then(data => {
+            UpdatePlayQueue(cnt, data);
+            return;
+        });
+    } else {
+        UpdatePlayQueue(cnt, null);
+        return;
+    }
+}
+
+notify_user_error = false
+// Create an async function to perform the POST request
+async function postData(url = '', data = {}) {
+    try {
+        // Use the Fetch API with await
+        const response = await fetch(url, {
+            method: 'POST', // Specify the request method
+            body: JSON.stringify(data), // Convert the JavaScript object to a JSON string
+        });
+        // Check if the response is ok (status in the range 200-299)
+        if (!response.ok) {
+            // If not OK, throw an error
+            console.info('There was a problem during audio generation requests:', response.status);
+            // if (!notify_user_error){
+            //     notify_user_error = true;
+            //     alert('There was a problem during audio generation requests:', response.status);
+            // }
+            return null;
+        }
+        // If OK, parse and return the JSON response
+        return await response.arrayBuffer();
+    } catch (error) {
+        // Log any errors that occur during the fetch operation
+        console.info('There was a problem during audio generation requests:', error);
+        // if (!notify_user_error){
+        //     notify_user_error = true;
+        //     alert('There was a problem during audio generation requests:', error);
+        // }
+        return null;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

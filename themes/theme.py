@@ -111,10 +111,10 @@ js_code_for_persistent_cookie_init = """(web_cookie_cache, cookie) => {
 }
 """
 
-
+# 详见 themes/common.js
 js_code_reset = """
 (a,b,c)=>{
-    return [[], [], "已重置"];
+    return reset_conversation(a,b);
 }
 """
 
