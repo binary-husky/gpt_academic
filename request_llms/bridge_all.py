@@ -68,6 +68,7 @@ gemini_endpoint = "https://generativelanguage.googleapis.com/v1beta/models"
 claude_endpoint = "https://api.anthropic.com/v1/messages"
 yimodel_endpoint = "https://api.lingyiwanwu.com/v1/chat/completions"
 cohere_endpoint = 'https://api.cohere.ai/v1/chat'
+ollama_endpoint = "http://localhost:11434/api/chat"
 
 if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
 azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
@@ -87,6 +88,7 @@ if gemini_endpoint in API_URL_REDIRECT: gemini_endpoint = API_URL_REDIRECT[gemin
 if claude_endpoint in API_URL_REDIRECT: claude_endpoint = API_URL_REDIRECT[claude_endpoint]
 if yimodel_endpoint in API_URL_REDIRECT: yimodel_endpoint = API_URL_REDIRECT[yimodel_endpoint]
 if cohere_endpoint in API_URL_REDIRECT: cohere_endpoint = API_URL_REDIRECT[cohere_endpoint]
+if ollama_endpoint in API_URL_REDIRECT: ollama_endpoint = API_URL_REDIRECT[ollama_endpoint]
 
 # 获取tokenizer
 tokenizer_gpt35 = LazyloadTiktoken("gpt-3.5-turbo")
@@ -834,7 +836,32 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("vllm-")]:
             "token_cnt": get_token_num_gpt35,
         },
     })
-
+# -=-=-=-=-=-=- ollama 对齐支持 -=-=-=-=-=-=-
+for model in [m for m in AVAIL_LLM_MODELS if m.startswith("ollama-")]:
+    from .bridge_ollama import predict_no_ui_long_connection as ollama_noui
+    from .bridge_ollama import predict as ollama_ui
+    break
+for model in [m for m in AVAIL_LLM_MODELS if m.startswith("ollama-")]:
+    # 为了更灵活地接入ollama多模型管理界面，设计了此接口，例子：AVAIL_LLM_MODELS = ["ollama-phi3(max_token=6666)"]
+    # 其中
+    #   "ollama-"           是前缀（必要）
+    #   "phi3"            是模型名（必要）
+    #   "(max_token=6666)"  是配置（非必要）
+    try:
+        _, max_token_tmp = read_one_api_model_name(model)
+    except:
+        print(f"ollama模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
+        continue
+    model_info.update({
+        model: {
+            "fn_with_ui": ollama_ui,
+            "fn_without_ui": ollama_noui,
+            "endpoint": ollama_endpoint,
+            "max_token": max_token_tmp,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
 
 # -=-=-=-=-=-=- azure模型对齐支持 -=-=-=-=-=-=-
 AZURE_CFG_ARRAY = get_conf("AZURE_CFG_ARRAY") # <-- 用于定义和切换多个azure模型 -->
