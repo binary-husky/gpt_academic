@@ -41,7 +41,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
         inputs, inputs_show_user, llm_kwargs,
         chatbot, history, sys_prompt, refresh_interval=0.2,
         handle_token_exceed=True,
-        retry_times_at_unknown_error=2,
+        retry_times_at_unknown_error=get_conf('RETRY_TIMES_AT_UNKNOWN_ERROR'),
         ):
     """
     Request GPT model，请求GPT模型同时维持用户界面活跃。
@@ -142,6 +142,9 @@ def can_multi_process(llm) -> bool:
         # legacy condition
         if llm.startswith('gpt-'): return True
         if llm.startswith('api2d-'): return True
+        if llm.startswith('qianfan'): return True
+        if llm.startswith('gemini-'): return True
+        if llm.startswith('moonshot-'): return True
         if llm.startswith('azure-'): return True
         if llm.startswith('spark'): return True
         if llm.startswith('zhipuai') or llm.startswith('glm-'): return True
@@ -160,7 +163,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         chatbot, history_array, sys_prompt_array,
         refresh_interval=0.2, max_workers=-1, scroller_max_len=30,
         handle_token_exceed=True, show_user_at_complete=False,
-        retry_times_at_unknown_error=2,
+        retry_times_at_unknown_error=get_conf('RETRY_TIMES_AT_UNKNOWN_ERROR'),
         ):
     """
     Request GPT model using multiple threads with UI and high efficiency
