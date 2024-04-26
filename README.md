@@ -87,6 +87,10 @@ Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼�
 <img src="https://user-images.githubusercontent.com/96192199/279702205-d81137c3-affd-4cd1-bb5e-b15610389762.gif" width="700" >
 </div>
 
+<div align="center">
+<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/70ff1ec5-e589-4561-a29e-b831079b37fb.gif" width="700" >
+</div>
+
 
 - 所有按钮都通过读取functional.py动态生成，可随意加自定义功能，解放剪贴板
 <div align="center">
