@@ -74,8 +74,10 @@ def 解析PDF_DOC2X_单文件(fp, project_folder, llm_kwargs, plugin_kwargs, cha
         import requests, json, os
         markdown_dir = get_log_folder(plugin_name="pdf_ocr")
         doc2x_api_key = DOC2X_API_KEY
-        # url = "https://api.doc2x.noedgeai.com/api/v1/pdf"
-        url = "https://api.doc2x.noedgeai.com/api/platform/pdf"
+        if doc2x_api_key.startswith('sk-'):
+            url = "https://api.doc2x.noedgeai.com/api/v1/pdf"
+        else:
+            url = "https://api.doc2x.noedgeai.com/api/platform/pdf"
 
         chatbot.append((None, "加载PDF文件，发送至DOC2X解析..."))
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
