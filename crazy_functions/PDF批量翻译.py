@@ -1,7 +1,7 @@
 from toolbox import CatchException, report_exception, get_log_folder, gen_time_str, check_packages
 from toolbox import update_ui, promote_file_to_downloadzone, update_ui_lastest_msg, disable_auto_promotion
 from toolbox import write_history_to_file, promote_file_to_downloadzone, get_conf, extract_archive
-from toolbox import get_upload_folder, zip_folder
+from toolbox import get_upload_folder, zip_folder, trimmed_format_exc
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 from .crazy_utils import read_and_clean_pdf_text
@@ -52,6 +52,7 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
             yield from 解析PDF_DOC2X(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, DOC2X_API_KEY, user_request)
             return
         except:
+            print(trimmed_format_exc())
             chatbot.append([None, "DOC2X服务不可用，现在将执行效果稍差的旧版代码。"])
             yield from update_ui(chatbot=chatbot, history=history)
 
