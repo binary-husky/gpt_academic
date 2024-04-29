@@ -797,6 +797,7 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
         model: {
             "fn_with_ui": chatgpt_ui,
             "fn_without_ui": chatgpt_noui,
+            "can_multi_thread": True,
             "endpoint": openai_endpoint,
             "max_token": max_token_tmp,
             "tokenizer": tokenizer_gpt35,
