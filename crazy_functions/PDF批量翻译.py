@@ -1,7 +1,7 @@
 from toolbox import CatchException, report_exception, get_log_folder, gen_time_str, check_packages
 from toolbox import update_ui, promote_file_to_downloadzone, update_ui_lastest_msg, disable_auto_promotion
 from toolbox import write_history_to_file, promote_file_to_downloadzone, get_conf, extract_archive
-from toolbox import get_upload_folder, zip_folder, trimmed_format_exc
+from toolbox import generate_file_link, zip_folder, trimmed_format_exc, trimmed_format_exc_markdown
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 from .crazy_utils import read_and_clean_pdf_text
@@ -52,8 +52,7 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
             yield from 解析PDF_DOC2X(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, DOC2X_API_KEY, user_request)
             return
         except:
-            print(trimmed_format_exc())
-            chatbot.append([None, "DOC2X服务不可用，现在将执行效果稍差的旧版代码。"])
+            chatbot.append([None, f"DOC2X服务不可用，现在将执行效果稍差的旧版代码。{trimmed_format_exc_markdown()}"])
             yield from update_ui(chatbot=chatbot, history=history)
 
     # ------- 第二种方法，效果次优 -------
@@ -75,7 +74,8 @@ def 解析PDF_DOC2X_单文件(fp, project_folder, llm_kwargs, plugin_kwargs, cha
         import requests, json, os
         markdown_dir = get_log_folder(plugin_name="pdf_ocr")
         doc2x_api_key = DOC2X_API_KEY
-        url = "https://api.doc2x.noedgeai.com/api/v1/pdf"
+        # url = "https://api.doc2x.noedgeai.com/api/v1/pdf"
+        url = "https://api.doc2x.noedgeai.com/api/platform/pdf"
 
         chatbot.append((None, "加载PDF文件，发送至DOC2X解析..."))
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
@@ -146,6 +146,21 @@ def 解析PDF_DOC2X_单文件(fp, project_folder, llm_kwargs, plugin_kwargs, cha
             promote_file_to_downloadzone(generated_fp, chatbot=chatbot)
             yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
+            # 生成在线预览html
+            file_name = '在线预览翻译（原文）' + gen_time_str() + '.html'
+            preview_fp = os.path.join(ex_folder, file_name)
+            from shared_utils.advanced_markdown_format import markdown_convertion_for_file
+            with open(generated_fp, "r", encoding="utf-8") as f:
+                md = f.read()
+                # Markdown中使用不标准的表格，需要在表格前加上一个emoji，以便公式渲染
+                md = re.sub(r'^<table>', r'😃<table>', md, flags=re.MULTILINE)
+            html = markdown_convertion_for_file(md)
+            with open(preview_fp, "w", encoding="utf-8") as f: f.write(html)
+            chatbot.append([None, f"生成在线预览：{generate_file_link([preview_fp])}"])
+            promote_file_to_downloadzone(preview_fp, chatbot=chatbot)
+
+
+
         chatbot.append((None, f"调用Markdown插件 {ex_folder} ..."))
         plugin_kwargs['markdown_expected_output_dir'] = ex_folder
 
@@ -157,21 +172,16 @@ def 解析PDF_DOC2X_单文件(fp, project_folder, llm_kwargs, plugin_kwargs, cha
             # 修正一些公式问题
             with open(generated_fp, 'r', encoding='utf8') as f: content = f.read()
             content = content.replace('```markdown', '\n').replace('```', '\n')
+            # Markdown中使用不标准的表格，需要在表格前加上一个emoji，以便公式渲染
+            content = re.sub(r'^<table>', r'😃<table>', content, flags=re.MULTILINE)
             with open(generated_fp, 'w', encoding='utf8') as f: f.write(content)
             # 生成在线预览html
             file_name = '在线预览翻译' + gen_time_str() + '.html'
-            # with open('crazy_functions/pdf_fns/report_template_v2.html', 'r', encoding='utf8') as f:
-            #     html_template = f.read()
-            # html_template = html_template.replace("{MARKDOWN_FILE_PATH}", translated_f_name)
             preview_fp = os.path.join(ex_folder, file_name)
-            # with open(preview_fp, 'w', encoding='utf8') as f:
-            #     f.write(html_template)
-            # 生成在线预览html
             from shared_utils.advanced_markdown_format import markdown_convertion_for_file
             with open(generated_fp, "r", encoding="utf-8") as f:
                 md = f.read()
             html = markdown_convertion_for_file(md)
-            # print(html)
             with open(preview_fp, "w", encoding="utf-8") as f: f.write(html)
             promote_file_to_downloadzone(preview_fp, chatbot=chatbot)
             # 生成包含图片的压缩包

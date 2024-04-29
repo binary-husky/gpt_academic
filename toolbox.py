@@ -192,6 +192,8 @@ def trimmed_format_exc():
     replace_path = "."
     return str.replace(current_path, replace_path)
 
+def trimmed_format_exc_markdown():
+    return '\n\n```\n' + trimmed_format_exc() + '```'
 
 def CatchException(f):
     """
@@ -534,6 +536,17 @@ def on_file_uploaded(
         }
     )
     return chatbot, txt, txt2, cookies
+
+
+def generate_file_link(report_files:List[str]):
+    file_links = ""
+    for f in report_files:
+        file_links += (
+            f'<br/><a href="file={os.path.abspath(f)}" target="_blank">{f}</a>'
+        )
+    return file_links
+
+
 
 
 def on_report_generated(cookies:dict, files:List[str], chatbot:ChatBotWithCookies):
