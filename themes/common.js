@@ -1050,14 +1050,18 @@ function restore_previous_chat() {
 }
 
 function gen_restore_btn() {
+
+
     // 创建按钮元素
     const button = document.createElement('div');
-
-    let initial_text = '+';
+    // const recvIcon = '<span><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height=".8em" width=".8em" xmlns="http://www.w3.org/2000/svg"><polyline points="20 6 9 17 4 12"></polyline></svg></span>';
+    const rec_svg = '<svg t="1714361184567" style="transform:translate(1px, 2.5px)" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4389" width="35" height="35"><path d="M320 512h384v64H320zM320 384h384v64H320zM320 640h192v64H320z" p-id="4390" fill="#ffffff"></path><path d="M863.7 544c-1.9 44-11.4 86.8-28.5 127.2-18.5 43.8-45.1 83.2-78.9 117-33.8 33.8-73.2 60.4-117 78.9C593.9 886.3 545.7 896 496 896s-97.9-9.7-143.2-28.9c-43.8-18.5-83.2-45.1-117-78.9-33.8-33.8-60.4-73.2-78.9-117C137.7 625.9 128 577.7 128 528s9.7-97.9 28.9-143.2c18.5-43.8 45.1-83.2 78.9-117s73.2-60.4 117-78.9C398.1 169.7 446.3 160 496 160s97.9 9.7 143.2 28.9c23.5 9.9 45.8 22.2 66.5 36.7l-119.7 20 9.9 59.4 161.6-27 59.4-9.9-9.9-59.4-27-161.5-59.4 9.9 19 114.2C670.3 123.8 586.4 96 496 96 257.4 96 64 289.4 64 528s193.4 432 432 432c233.2 0 423.3-184.8 431.7-416h-64z" p-id="4391" fill="#ffffff"></path></svg>'
+    const recvIcon = '<span>' + rec_svg + '</span>';
 
     // 设置按钮的样式和属性
     button.id = 'floatingButton';
     button.className = 'glow';
+    button.style.textAlign = 'center';
     button.style.position = 'fixed';
     button.style.bottom = '10px';
     button.style.left = '10px';
@@ -1072,18 +1076,19 @@ function gen_restore_btn() {
     button.style.cursor = 'pointer';
     button.style.transition = 'all 0.3s ease';
     button.style.boxShadow = '0 0 10px rgba(0,0,0,0.2)';
-    button.textContent = initial_text;
+
+    button.innerHTML = recvIcon;
 
     // 添加发光动画的关键帧
     const styleSheet = document.createElement('style');
-    styleSheet.type = 'text/css';
+    styleSheet.id = 'floatingButtonStyle';
     styleSheet.innerText = `
     @keyframes glow {
         from {
         box-shadow: 0 0 10px rgba(0,0,0,0.2);
         }
         to {
-        box-shadow: 0 0 20px rgba(0,0,0,0.4);
+        box-shadow: 0 0 13px rgba(0,0,0,0.5);
         }
     }
     #floatingButton.glow {
@@ -1097,15 +1102,20 @@ function gen_restore_btn() {
         animation: shrinkAndDisappear 0.5s forwards;
     }
     `;
-    document.head.appendChild(styleSheet);
+
+    // only add when not exist
+    if (!document.getElementById('recvButtonStyle'))
+    {
+        document.head.appendChild(styleSheet);
+    }
 
     // 鼠标悬停和移开的事件监听器
     button.addEventListener('mouseover', function () {
-        this.textContent = "还原对话";
+        this.textContent = "还原\n对话";
     });
 
     button.addEventListener('mouseout', function () {
-        this.textContent = initial_text;
+        this.innerHTML = recvIcon;
     });
 
     // 点击事件监听器
@@ -1116,9 +1126,14 @@ function gen_restore_btn() {
         // 在动画结束后移除按钮
         document.body.removeChild(this);
     });
+    // only add when not exist
+    if (!document.getElementById('recvButton'))
+    {
+        document.body.appendChild(button);
+    }
 
     // 将按钮添加到页面中
-    document.body.appendChild(button);
+
 }
 
 async function on_plugin_exe_complete(fn_name) {
