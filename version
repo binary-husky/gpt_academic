@@ -1,5 +1,5 @@
 {
   "version": 3.75,
   "show_feature": true,
-  "new_feature": "增加多用户文件鉴权验证提高安全性 <-> 优化oneapi接入方法 <-> 接入Cohere和月之暗面模型 <-> 简化挂载二级目录的步骤 <-> 支持Mermaid绘图库（让大模型绘制脑图）"
+  "new_feature": "添加TTS语音输出（EdgeTTS和SoVits语音克隆） <-> Doc2x PDF翻译 <-> 添加回溯对话按钮"
 }
