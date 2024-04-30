@@ -34,7 +34,7 @@ else:
 LLM_MODEL = "gpt-3.5-turbo-16k" # 可选 ↓↓↓
 AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-preview", "gpt-4-turbo", "gpt-4-turbo-2024-04-09",
                     "gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
-                    "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-3-turbo",
+                    "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-4v", "glm-3-turbo",
                     "gemini-pro", "chatglm3"
                     ]
 # --- --- --- ---
@@ -50,9 +50,9 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
 #   "yi-34b-chat-0205", "yi-34b-chat-200k"
 # ]
 # --- --- --- ---
-# 此外，为了更灵活地接入one-api多模型管理界面，您还可以在接入one-api时，
-# 使用"one-api-*"前缀直接使用非标准方式接入的模型，例如
-# AVAIL_LLM_MODELS = ["one-api-claude-3-sonnet-20240229(max_token=100000)"]
+# 此外，您还可以在接入one-api/vllm/ollama时，
+# 使用"one-api-*","vllm-*","ollama-*"前缀直接使用非标准方式接入的模型，例如
+# AVAIL_LLM_MODELS = ["one-api-claude-3-sonnet-20240229(max_token=100000)", "ollama-phi3(max_token=4096)"]
 # --- --- --- ---
 
 
@@ -60,7 +60,7 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
 
 # 重新URL重新定向，实现更换API_URL的作用（高危设置! 常规情况下不要修改! 通过修改此设置，您将把您的API-KEY和对话隐私完全暴露给您设定的中间人！）
 # 格式: API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "在这里填写重定向的api.openai.com的URL"}
-# 举例: API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "https://reverse-proxy-url/v1/chat/completions"}
+# 举例: API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "https://reverse-proxy-url/v1/chat/completions", "http://localhost:11434/api/chat": "在这里填写您ollama的URL"}
 API_URL_REDIRECT = {}
 
 
@@ -193,6 +193,12 @@ ALIYUN_TOKEN=""     # 例如 f37f30e0f9934c34a992f6f64f7eba4f
 ALIYUN_APPKEY=""    # 例如 RoPlZrM88DnAFkZK
 ALIYUN_ACCESSKEY="" # （无需填写）
 ALIYUN_SECRET=""    # （无需填写）
+
+
+# GPT-SOVITS 文本转语音服务的运行地址（将语言模型的生成文本朗读出来）
+TTS_TYPE = "DISABLE" # LOCAL / LOCAL_SOVITS_API / DISABLE
+GPT_SOVITS_URL = ""
+EDGE_TTS_VOICE = "zh-CN-XiaoxiaoNeural"
 
 
 # 接入讯飞星火大模型 https://console.xfyun.cn/services/iat

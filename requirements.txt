@@ -24,6 +24,7 @@ Markdown
 pygments
 pymupdf
 openai
+rjsmin
 arxiv
 numpy
 rich

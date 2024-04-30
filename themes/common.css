@@ -38,6 +38,7 @@
     left: calc(100% + 3px);
     top: 0;
     display: flex;
+    flex-direction: column;
     justify-content: space-between;
 }
 /* .message-btn-row-leading, .message-btn-row-trailing {
