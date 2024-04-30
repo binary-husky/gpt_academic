@@ -26,7 +26,7 @@ def enable_log(PATH_LOGGING):
 
 def main():
     import gradio as gr
-    if gr.__version__ not in ['3.32.9']:
+    if gr.__version__ not in ['3.32.9', '3.32.10']:
         raise ModuleNotFoundError("使用项目内置Gradio获取最优体验! 请运行 `pip install -r requirements.txt` 指令安装内置Gradio及其他依赖, 详情信息见requirements.txt.")
     from request_llms.bridge_all import predict
     from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, DummyWith
