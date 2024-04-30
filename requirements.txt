@@ -22,6 +22,7 @@ pyautogen
 colorama
 Markdown
 pygments
+edge-tts
 pymupdf
 openai
 rjsmin
