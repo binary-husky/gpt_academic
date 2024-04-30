@@ -343,7 +343,7 @@ class Prompt:
                     self.reader_upload = gr.File(label='上传文件', elem_id='reader-file',
                                                  show_label=False)
                 with gr.Column(elem_classes='column_left'):
-                    self.reader_choice = gr.Dropdown(label='Read Mode', choices=['Markdown', 'Developing...'],
+                    self.reader_choice = gr.Dropdown(label='Read Mode', choices=['Markdown', "md2excel", 'Developing...'],
                                                      value='Markdown', allow_custom_value=False, interactive=True, )
                 with gr.Column(elem_classes='column_left'):
                     missing_description = """
@@ -352,7 +352,8 @@ class Prompt:
                     """
                     self.reader_show = gr.Markdown(missing_description)
                 with gr.Column(elem_classes='column_right'):
-                    self.reader_copy = gr.Textbox(label='File Edit', lines=15, max_lines=30, show_copy_button=True)
+                    self.reader_copy = gr.Textbox(label='File Edit', lines=15, max_lines=30,
+                                                  show_copy_button=True, interactive=True)
 
     def _draw_popup_training(self):
         with gr.TabItem('OpenAi' + i18n('预训练'), id='training_tab', elem_id='training_tab'):

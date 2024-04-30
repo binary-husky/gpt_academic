@@ -96,18 +96,18 @@ def query_prompt(name, in_class, source=None, quote_num: bool = None) -> PromptM
 
 
 def update_prompt(in_class, name, value, source, old_prompt: PromptModel):
-    if old_prompt.source == source or source in _sys:
-        old_prompt.in_class = in_class
-        old_prompt.name = name
-        old_prompt.value = value
-        old_prompt.update_time = func.now()
-        with session_scope() as session:
-            session.add(old_prompt)
+    with session_scope() as session:
+        if old_prompt.source == source or source in _sys:
+            old_prompt.in_class = in_class
+            old_prompt.name = name
+            old_prompt.value = value
+            old_prompt.update_time = func.now()
             logger.info(f'`{source}`成功更新【{name}】提示词')
-        return True
-    else:
-        logger.info(f'`{source}`无法【{name}】提示词, 因为该提示词属于`{old_prompt.source}`')
-        return False
+            session.add(old_prompt)
+            return True
+        else:
+            logger.info(f'`{source}`无法【{name}】提示词, 因为该提示词属于`{old_prompt.source}`')
+            return False
 
 
 def deleted_prompt(name, in_class, source):

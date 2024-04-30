@@ -122,27 +122,33 @@ async function pako_encode(codeContent) {
 async function svgInitPz(svgElement, content) {
     if (!svgElement.querySelector('foreignObject')) {
         let svg_width = '100%';
-        let svg_height = svgElement.height.animVal.value;
-        svg_height = Math.max(200, Math.min(svg_height, 600)); // 先限制上限，再限制下限
-        svgElement.style = `width: ${svg_width}px; height: ${svg_height}px;`;
+        let svg_heightVal = svgElement.height.animVal.value;
+        let svg_height = Math.max(200, Math.min(svg_heightVal, 600)); // 设置限制
+        svgElement.style = `width: ${svg_width}; height: ${svg_height}px;`; // 应用原长宽设置
         let panZoomTiger = svgPanZoom(svgElement, svg_init_params);
-        let pako_encode_link = await pako_encode(content)
+
+        let pako_encode_link = await pako_encode(content);
+
         if (!svgElement.querySelector('#foreign-edit')) {
             // 增加编辑按钮
-            let fore_edit_btn = await createForeignObject()
-            fore_edit_btn.innerHTML = `<button id="foreign-edit" 
-                                        onclick="window.open('${pako_encode_link}', '_blank')">${svgEditIcon}</button>`
-            svgElement.appendChild(fore_edit_btn)
+            let fore_edit_obj = await createForeignObject();
+            let editButton = document.createElement('button');
+            editButton.id = "foreign-edit";
+            editButton.innerHTML = svgEditIcon;
+            editButton.addEventListener('click', () => window.open(pako_encode_link, '_blank'));
+            fore_edit_obj.appendChild(editButton);
+            svgElement.appendChild(fore_edit_obj);
         }
-        addClickEvent(svgElement, panZoomTiger)
+        addClickEvent(svgElement, panZoomTiger);
     }
 }
+
 
 function addClickEvent(svgElement, panZoomTiger) {
     // 支持双击选择SVG文本
     let svgTextEle = svgElement.querySelectorAll('text')
     for (let i = 0; i < svgTextEle.length; i++) {
-// 监听鼠标悬停事件
+    // 监听鼠标悬停事件
         svgTextEle[i].addEventListener('mouseover', function (e) {
             // 当鼠标悬停时禁用双击缩放功能
             panZoomTiger.disableDblClickZoom();

@@ -8,7 +8,6 @@ import copy
 import gradio as gr
 from bs4 import BeautifulSoup
 
-from common.func_box import get_avatar_img
 from common.path_handler import init_path
 from shared_utils.config_loader import get_conf
 
@@ -71,6 +70,7 @@ class HistoryJsonHandle:
         return self
 
     def update_for_history(self, cookies: dict, select):
+        from common.func_box import get_avatar_img
         cookies.update(self.base_data_format['chat_llms'])
         llms = self.base_data_format['chat_llms']
         default_params, LLM_MODEL, = get_conf('LLM_DEFAULT_PARAMETER', 'LLM_MODEL')

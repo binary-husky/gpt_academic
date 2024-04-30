@@ -9,37 +9,6 @@ import shutil
 import glob
 from shared_utils.config_loader import get_conf
 
-def html_local_file(file):
-    base_path = os.path.dirname(__file__)  # 项目目录
-    if os.path.exists(str(file)):
-        file = f'file={file.replace(base_path, ".")}'
-    return file
-
-
-def html_local_img(__file, layout="left", max_width=None, max_height=None, md=True):
-    style = ""
-    if max_width is not None:
-        style += f"max-width: {max_width};"
-    if max_height is not None:
-        style += f"max-height: {max_height};"
-    __file = html_local_file(__file)
-    a = f'<div align="{layout}"><img src="{__file}" style="{style}"></div>'
-    if md:
-        a = f"![{__file}]({__file})"
-    return a
-
-
-def file_manifest_filter_type(file_list, filter_: list = None):
-    new_list = []
-    if not filter_:
-        filter_ = ["png", "jpg", "jpeg"]
-    for file in file_list:
-        if str(os.path.basename(file)).split(".")[-1] in filter_:
-            new_list.append(html_local_img(file, md=False))
-        else:
-            new_list.append(file)
-    return new_list
-
 
 def zip_extract_member_new(self, member, targetpath, pwd):
     # 修复中文乱码的问题

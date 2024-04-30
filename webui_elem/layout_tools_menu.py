@@ -85,7 +85,7 @@ class RightElem:
                 self.plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False,
                                                       elem_classes='no_padding_input',
                                                       placeholder="这里是特殊函数插件的高级参数输入区")
-                self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary", visible=False)
+            self.switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary", visible=False)
 
     def _draw_setting_chat(self):
         with gr.TabItem('调优', id='sett_tab', elem_id='chuanhu-toolbox-tabs'):

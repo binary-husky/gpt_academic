@@ -48,9 +48,6 @@ from shared_utils.text_mask import build_gpt_academic_masked_string_langbased
 from shared_utils.map_names import map_friendly_names_to_model
 from shared_utils.map_names import map_model_to_friendly_names
 from shared_utils.map_names import read_one_api_model_name
-from shared_utils.handle_upload import html_local_file
-from shared_utils.handle_upload import html_local_img
-from shared_utils.handle_upload import file_manifest_filter_type
 from shared_utils.handle_upload import extract_archive
 from typing import List
 
@@ -88,6 +85,7 @@ class ChatBotWithCookies(list):
 
     def get_user(self):
         return self._cookies.get("user_name", default_user_name)
+
 
 def end_predict(chatbot, history, llm_kwargs):
     count_time = round(time.time() - llm_kwargs['start_time'], 3)
@@ -139,7 +137,7 @@ def ArgsGeneralWrapper(func):
             }
         }
         # 历史对话轮次
-        history = history[:history_num*2]  # 为了保证历史记录永远是偶数
+        history = history[0:history_num * 2]  # 为了保证历史记录永远是偶数
         # 对话参数
         if not cookies.get('first_chat') and args:
             cookies['first_chat'] = args[0] + "_" + created_atime()
@@ -157,7 +155,8 @@ def ArgsGeneralWrapper(func):
                                                              chatbot_with_cookie, history, args, func)
         # 根据args判断需要对提交和历史对话做什么处理
         txt_proc, history, func_redirect = yield from plugins_selection(txt_proc, history, plugin_kwargs,
-                                                    args, cookies, chatbot_with_cookie, llm_kwargs, func_redirect)
+                                                                        args, cookies, chatbot_with_cookie, llm_kwargs,
+                                                                        func_redirect)
         # 根据cookie 或 对话配置决定到底走哪一步
         yield from func_decision_tree(func_redirect, cookies, single_mode, agent_mode,
                                       txt_proc, llm_kwargs, plugin_kwargs, chatbot_with_cookie,
@@ -177,7 +176,9 @@ def model_selection(txt, models, llm_kwargs, plugin_kwargs, cookies, chatbot_wit
     if '关联缺陷' in models: llm_kwargs['project_config'].update({'关联缺陷': True})
     if '关联用例' in models: llm_kwargs['project_config'].update({'关联用例': True})
     if '关联任务' in models: llm_kwargs['project_config'].update({'关联任务': True})
-    if 'Vision-Img' in models: plugin_kwargs.update({'开启OCR': _vision_select_model(llm_kwargs, models)})
+    if 'Vision-Img' in models:
+        if not plugin_kwargs.get('开启OCR'):
+            plugin_kwargs.update({'开启OCR': _vision_select_model(llm_kwargs, models)})
     # 实实在在会改变输入的
     if 'input加密' in models: txt_proc = encryption_str(txt_proc)
     if len(args) == 0 or 'RetryChat' in args and not cookies.get('is_plugin'):
@@ -192,7 +193,8 @@ def model_selection(txt, models, llm_kwargs, plugin_kwargs, cookies, chatbot_wit
                 input_embedding_content = yield from user_input_embedding_content(txt_proc, chatbot_with_cookie,
                                                                                   history, llm_kwargs, plugin_kwargs,
                                                                                   valid_types)
-                txt_proc_embedding = "\n\n---\n\n".join([v for i, v in enumerate(input_embedding_content) if i % 2 == 1])
+                txt_proc_embedding = "\n\n---\n\n".join(
+                    [v for i, v in enumerate(input_embedding_content) if i % 2 == 1])
                 if txt_proc_embedding:
                     txt_proc = txt_proc_embedding
                     func = submit_no_use_ui_task
@@ -594,39 +596,9 @@ def del_outdated_uploads(outdate_time_seconds: float, target_path_base: str = No
     return
 
 
-def to_markdown_tabs(head: list, tabs: list, alignment=":---:", column=False, omit_path=None):
-    """
-    Args:
-        head: 表头：[]
-        tabs: 表值：[[列1], [列2], [列3], [列4]]
-        alignment: :--- 左对齐， :---: 居中对齐， ---: 右对齐
-        column: True to keep data in columns, False to keep data in rows (default).
-    Returns:
-        A string representation of the markdown table.
-    """
-    if column:
-        transposed_tabs = list(map(list, zip(*tabs)))
-    else:
-        transposed_tabs = tabs
-    # Find the maximum length among the columns
-    max_len = max(len(column) for column in transposed_tabs)
-
-    tab_format = "| %s "
-    tabs_list = "".join([tab_format % i for i in head]) + "|\n"
-    tabs_list += "".join([tab_format % alignment for i in head]) + "|\n"
-
-    for i in range(max_len):
-        row_data = [tab[i] if i < len(tab) else "" for tab in transposed_tabs]
-        row_data = file_manifest_filter_type(row_data, filter_=None)
-        # for dat in row_data:
-        #     if (omit_path is not None) and os.path.exists(dat):
-        #         dat = os.path.relpath(dat, omit_path)
-        tabs_list += "".join([tab_format % i for i in row_data]) + "|\n"
-
-    return tabs_list
-
-
 def on_file_uploaded(files, chatbot, txt, cookies, ipaddr: gr.Request):
+    from crazy_functions.reader_fns.local_markdown import to_markdown_tabs
+    from common.gr_converter_html import file_manifest_filter_type
     private_upload = init_path.private_files_path.replace(init_path.base_path, '.')
     #     shutil.rmtree('./private_upload/')  不需要删除文件
 
@@ -664,6 +636,7 @@ def on_file_uploaded(files, chatbot, txt, cookies, ipaddr: gr.Request):
 
 def on_report_generated2(request: gradio.Request, files: List[str], chatbot: ChatBotWithCookies,
                          txt: str, txt2: str, checkboxes: List[str], cookies: dict):
+    from crazy_functions.reader_fns.local_markdown import to_markdown_tabs
     if 'file_to_promote' in cookies:
         report_files = cookies['file_to_promote']
         cookies.pop('file_to_promote')
@@ -729,7 +702,7 @@ def on_report_generated2(request: gradio.Request, files: List[str], chatbot: Cha
     return chatbot, txt, txt2, cookies
 
 
-def on_report_generated(cookies:dict, files:List[str], chatbot:ChatBotWithCookies):
+def on_report_generated(cookies: dict, files: List[str], chatbot: ChatBotWithCookies):
     if "files_to_promote" in cookies:
         report_files = cookies["files_to_promote"]
         cookies.pop("files_to_promote")

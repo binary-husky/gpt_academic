@@ -305,7 +305,7 @@ def submit_multithreaded_tasks(inputs_array, inputs_show_user_array, llm_kwargs,
             llm_kwargs=llm_kwargs, chatbot=chatbot, history=history_array[0],
             sys_prompt="", refresh_interval=0.1
         )
-        gpt_response_collection = [inputs_show_user_array[0], gpt_say]
+        gpt_response_collection = [inputs_array[0], gpt_say]
         history.extend(gpt_response_collection)
     else:
         gpt_response_collection = yield from crazy_utils.request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
@@ -477,12 +477,13 @@ def result_supplementary_to_test_case(gpt_response_collection, llm_kwargs, plugi
         save_path = os.path.join(init_path.private_files_path, llm_kwargs['ipaddr'], 'test_case')
         # 写入excel
         xlsx_handler = reader_fns.XlsxHandler(template_file, output_dir=save_path, sheet=sheet)
-        file_path = xlsx_handler.list_write_to_excel(test_case, save_as_name=long_name_processing(file_name))
+        show_file_name = long_name_processing(file_name)
+        file_path = xlsx_handler.list_write_to_excel(test_case, save_as_name=show_file_name)
         # 写入 markdown
-        md_path = os.path.join(save_path, f"{long_name_processing(file_name)}.md")
+        md_path = os.path.join(save_path, f"{show_file_name}.md")
         reader_fns.MdHandler(md_path).save_markdown(desc)
-        chat_file_list += f'{file_name}生成结果如下:\t {gr_converter_html.html_view_blank(__href=file_path, to_tabs=True)}\n\n' \
-                          f'{file_name}补充思路如下：\t{gr_converter_html.html_view_blank(__href=md_path, to_tabs=True)}\n\n---\n\n'
+        chat_file_list += f'{show_file_name}生成结果如下:\t {gr_converter_html.html_view_blank(__href=file_path, to_tabs=True)}\n\n' \
+                          f'{show_file_name}补充思路如下：\t{gr_converter_html.html_view_blank(__href=md_path, to_tabs=True)}\n\n---\n\n'
         chatbot[-1] = [you_say, chat_file_list]
         yield from update_ui(chatbot, history)
         files_limit.update({file_path: file_name})

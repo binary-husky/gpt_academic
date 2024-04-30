@@ -18,10 +18,13 @@ class MdProcessor:
     def _clean_br_string(s):
         s = re.sub('<\s*br\s*/?>', '\n', s)  # 使用正则表达式同时匹配<br>、<br/>、<br />、< br>和< br/>
         s = s.replace(' ', '')  # 去除所有空格
+        s = s.replace('<b>', '\n')
         return s
 
     def tabs_to_list(self):
         test_case = []
+        if type(self.content_text) is str:
+            self.content_text = [self.content_text]
         for value in self.content_text:
             test_case_content = value.splitlines()
             for i in test_case_content:

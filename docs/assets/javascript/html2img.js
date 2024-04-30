@@ -1,11 +1,11 @@
-function toastConvert2Img() {
-    toast_push('🏃🏻‍ 正在将对话记录转换为图片', 2000);
-    convert2canvas();
+async function toastConvert2Img() {
+    let pElement = statusDisplay.querySelector('p');
+    pElement.innerHTML = '🏃🏻‍正在将对话记录转换为图片，请稍等';
+    toast_push('🏃🏻‍正正在将对话记录转换为图片', 2000);
+    await convert2canvas(null, pElement)
 }
 
-function convert2canvas(shareContent = null) {
-    let pElement = statusDisplay.querySelector('p');
-    pElement.innerHTML = '🏃🏻‍ 正在将对话记录转换为图片，请稍等'
+async function convert2canvas(shareContent = null, pElement) {
     if (shareContent == null) {
         shareContent = chatbot.querySelector('.message-wrap') //获取囊括所有元素的最大的div元素
     }
@@ -53,11 +53,8 @@ function convert2canvas(shareContent = null) {
         copyToClipboard(img);  // 将图片复制到剪切板
         pElement.innerHTML = '';         // 先清空<p>标签内的所有内容
         pElement.appendChild(createALink(img));  // 然后将<a>标签添加进去
-        // 触发a的单击事件
-        toast_push('📸 已将图片写入粘贴板，或可在右侧工具栏消息中下载', 2000)
-
     });
-    return canvas;
+    return pElement.outerHTML;
 }
 
 function copyToClipboard(image) {
@@ -77,13 +74,17 @@ function copyToClipboard(image) {
     }
 }
 
+function get_history_name(){
+    let history_select = historySelector.querySelector('.chat-selected-btns').parentElement
+    return history_select.querySelector('input').value.replace(/\s/g, '')
+}
+
 
 function createALink(img) {
     // 生成一个a超链接元素
     let linkElement = document.createElement('a');
     // 将a的download属性设置为我们想要下载的图片名称，若name不存在则使用‘下载图片名称’作为默认名称
-    let history_select = historySelector.querySelector('.chat-selected-btns').parentElement
-    let history_value = history_select.querySelector('input').value.replace(/\s/g, '');
+    history_value = get_history_name()
     linkElement.download = history_value + '.png';
     linkElement.innerHTML = history_value + '.png'
     linkElement.href = img.src;//将img的src值设置为a.href属性，img.src为base64编码值

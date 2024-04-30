@@ -66,7 +66,7 @@ def read_single_conf_with_lru_cache(arg):
     from shared_utils.key_pattern_manager import is_any_api_key
     try:
         # 优先级1. 获取环境变量作为配置
-        default_ref = getattr(importlib.import_module('config'), arg) # 读取默认值作为数据类型转换的参考
+        default_ref = getattr(importlib.import_module('config'), arg)  # 读取默认值作为数据类型转换的参考
         r = read_env_variable(arg, default_ref)
     except:
         try:

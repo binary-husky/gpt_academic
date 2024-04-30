@@ -144,7 +144,10 @@ class ChatBot(LeftElem, ChatbotElem, RightElem, Settings, Config, FakeComponents
 
     def signals_reader(self):
         self.reader_upload.upload(fn=func_signals.reader_analysis_output,
-                                  inputs=[self.reader_upload, self.reader_choice],
+                                  inputs=[self.reader_upload, self.reader_copy, self.reader_choice],
+                                  outputs=[self.reader_show, self.reader_copy, self.spike_toast])
+        self.reader_copy.input(fn=func_signals.reader_analysis_output,
+                                  inputs=[self.reader_upload, self.reader_copy, self.reader_choice],
                                   outputs=[self.reader_show, self.reader_copy, self.spike_toast])
 
     def signals_gpts_store(self):

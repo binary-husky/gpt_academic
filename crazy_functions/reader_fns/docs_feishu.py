@@ -4,7 +4,7 @@
 # @Descr   : 飞书云文档
 import requests
 from common.func_box import split_parse_url, local_relative_path
-from common.toolbox import get_conf
+from shared_utils.config_loader import get_conf
 from common.path_handler import init_path
 import os
 import json

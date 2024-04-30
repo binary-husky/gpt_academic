@@ -9,7 +9,6 @@ from typing import List, Tuple, Dict
 from gradio_client import utils as client_utils
 from gradio import utils
 from collections import namedtuple
-from common import toolbox
 from common.path_handler import init_path
 from shared_utils.config_loader import get_conf
 

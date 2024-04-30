@@ -31,6 +31,9 @@ class XlsxHandler:
             self.output_dir = os.path.join(output_dir, 'excel')
             os.makedirs(self.output_dir, exist_ok=True)
         self.template_excel = xlsx_path
+        if not self.template_excel:
+            from common.path_handler import init_path
+            self.template_excel = os.path.join(init_path.docs_path, 'template', '测试用例模版.xlsx')
         self.sheet = sheet
         self.workbook = load_workbook(self.template_excel)
         self.file_name = os.path.splitext(os.path.basename(self.template_excel))[0]

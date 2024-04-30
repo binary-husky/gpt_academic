@@ -130,7 +130,7 @@ def prompt_save(txt, name, prompt: gr.Dataset, prompt_class, ipaddr: gr.Request)
         raise gr.Error('保存分类不能为空 ！')
     user_info = user_client_mark(ipaddr)
     if txt and name:
-        status, msg = prompt_repository.add_prompt(prompt_class, name, txt, user_info)
+        status, msg = prompt_repository.add_prompt(prompt_class, name, str(txt), user_info)
         if not status:
             raise gr.Error(msg)
         else:
