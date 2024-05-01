@@ -1,7 +1,7 @@
 > [!IMPORTANT]
-> 2024.4.21: 开始测试3.75版本(`frontier`)分支，引入多种TTS(文本转语音)模块  
+> 2024.5.1: 加入Doc2x翻译PDF论文的功能，[查看详情](https://github.com/binary-husky/gpt_academic/wiki/Doc2x)  
+> 2024.4.30: 3.75版本引入Edge-TTS和SoVits语音克隆模块，[查看详情](https://www.bilibili.com/video/BV1Rp421S7tF/)  
 > 2024.3.11: 恭迎Claude3和Moonshot，全力支持Qwen、GLM、DeepseekCoder等中文大语言模型！  
-> 2024.1.18: 更新3.70版本，支持Mermaid绘图库（让大模型绘制脑图）  
 > 2024.1.17: 安装依赖时，请选择`requirements.txt`中**指定的版本**。 安装命令：`pip install -r requirements.txt`。本项目完全开源免费，您可通过订阅[在线服务](https://github.com/binary-husky/gpt_academic/wiki/online)的方式鼓励本项目的发展。
 
 <br>
