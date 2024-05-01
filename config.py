@@ -229,7 +229,7 @@ MATHPIX_APPID = ""
 MATHPIX_APPKEY = ""
 
 
-# Mathpix 拥有执行PDF的OCR功能，但是需要注册账号
+# DOC2X的PDF解析服务，注册账号并获取API KEY: https://doc2x.noedgeai.com/login
 DOC2X_API_KEY = ""
 
 
