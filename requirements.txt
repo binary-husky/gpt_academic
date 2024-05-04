@@ -1,4 +1,5 @@
 https://public.agent-matrix.com/publish/gradio-3.32.10-py3-none-any.whl
+fastapi==0.110
 gradio-client==0.8
 pypdf2==2.12.1
 zhipuai==2.0.1
@@ -22,6 +23,7 @@ pyautogen
 colorama
 Markdown
 pygments
+edge-tts
 pymupdf
 openai
 rjsmin
