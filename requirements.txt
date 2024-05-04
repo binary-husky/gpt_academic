@@ -1,4 +1,5 @@
 https://public.agent-matrix.com/publish/gradio-3.32.9-py3-none-any.whl
+fastapi==0.110
 gradio-client==0.8
 pypdf2==2.12.1
 zhipuai==2.0.1
