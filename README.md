@@ -11,15 +11,14 @@
 <div align=center>
 <h1 aligh="center">
 <img src="" width="40"> Hello GPT
-</h1>首先，感谢以下几位大佬的开源项目，如果没有xxx，就没有xxx（此处省略一万字）  
-
-<div align=center>如果你喜欢这个项目，麻烦一键（给我一个Satr）三连（下面的项目三连Star）！🙇🙇🙇🙇
-
-> 特别鸣谢（插件+代码基座）：[binary-husky/gpt_academic: 为GPT/GLM等LLM大语言模型提供实用化交互接口，特别优化论文阅读/润色/写作体验，模块化设计，支持自定义快捷按钮&函数插件，支持Python和C++等项目剖析&自译解功能，PDF/LaTex论文翻译&总结功能，支持并行问询多种LLM模型，支持chatglm3等本地模型。接入通义千问, deepseekcoder, 讯飞星火, 文心一言, llama2, rwkv, claude2, moss等。 (github.com)](https://github.com/binary-husky/gpt_academic)
+</h1>首先，感谢以下几位大佬的开源项目，如果没有xxx，就没有xxx（此处省略一万字）
+如果你喜欢这个项目，麻烦一键（给我一个Satr）三连（下面的项目三连Star）！🙇🙇🙇🙇
+</div
+> 特别鸣谢（插件+代码基座）：[binary-husky/gpt_academic](https://github.com/binary-husky/gpt_academic)
 >
-> 前端（Gradio+js）：[GaiZhenbiao/ChuanhuChatGPT: GUI for ChatGPT API and many LLMs. Supports agents, file-based QA, GPT finetuning and query with web search. All with a neat UI. (github.com)](https://github.com/GaiZhenbiao/ChuanhuChatGPT)
+> 前端（Gradio+js）：[GaiZhenbiao/ChuanhuChatGPT](https://github.com/GaiZhenbiao/ChuanhuChatGPT)
 >
-> 知识库功能（Knowledge Base+FastApi）：[chatchat-space/Langchain-Chatchat: Langchain-Chatchat（原Langchain-ChatGLM）基于 Langchain 与 ChatGLM 等语言模型的本地知识库问答 | Langchain-Chatchat (formerly langchain-ChatGLM), local knowledge based LLM (like ChatGLM) QA app with langchain (github.com)](https://github.com/chatchat-space/Langchain-Chatchat)
+> 知识库功能（Knowledge Base+FastApi）：[chatchat-space/Langchain-Chatchat](https://github.com/chatchat-space/Langchain-Chatchat)
 
 # 项目介绍
 

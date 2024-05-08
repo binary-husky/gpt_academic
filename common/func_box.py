@@ -537,7 +537,8 @@ def replace_expected_text(prompt: str, content: str, expect='{{{v}}}'):
 
 def get_avatar_img(llm_s: str, bot_avatar):
     chat_bot_path = os.path.join(init_path.assets_path, 'chatbot_avatar')
-    file_list, only_name, new_path, new_name = get_files_list(chat_bot_path, filter_format=['.png'])
+    file_list, only_name, new_path, new_name = get_files_list(chat_bot_path,
+                                                              filter_format=['.png', '.svg'])
     chat_img = ''
     for i in range(len(only_name)):
         if llm_s.startswith(only_name[i]):

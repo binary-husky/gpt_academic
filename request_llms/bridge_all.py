@@ -824,7 +824,25 @@ if "deepseekcoder" in AVAIL_LLM_MODELS:  # deepseekcoder
         })
     except:
         print(trimmed_format_exc())
-
+deepseek_endpoint = 'https://api.deepseek.com/v1/chat/completions'
+model_info.update({
+    "deepseek-chat": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": deepseek_endpoint,
+        "max_token": 1024*32,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+    "deepseek-coder": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": deepseek_endpoint,
+        "max_token": 1024 * 32,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    }
+})
 # -=-=-=-=-=-=- one-api 对齐支持 -=-=-=-=-=-=-
 for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
     # 为了更灵活地接入one-api多模型管理界面，设计了此接口，例子：AVAIL_LLM_MODELS = ["one-api-mixtral-8x7b(max_token=6666)"]

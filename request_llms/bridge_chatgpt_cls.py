@@ -119,7 +119,6 @@ class GPTChatInit:
             "temperature": llm_kwargs.get('temperature', 1.0),  # 1.0,
             "top_p": llm_kwargs.get('top_p', 1.0),  # 1.0,
             "n": llm_kwargs.get('n_choices', 1),
-            "stop": llm_kwargs.get('stop', ''),
             "presence_penalty": llm_kwargs.get('presence_penalty', 2.0),
             "frequency_penalty": llm_kwargs.get('frequency_penalty', 0),
             # "max_context": llm_kwargs['max_context'],  用了会报错，不知道咋回事
@@ -129,6 +128,8 @@ class GPTChatInit:
             "stream": stream,
             "max_tokens": llm_kwargs.get('max_generation', 4096)
         }
+        if 'gpt' in llm_kwargs['llm_model']:
+            payload.update({"stop": llm_kwargs.get('stop', '')})
         if '1106' in self.llm_model:
             payload.update({"response_format": {"type": llm_kwargs.get('response_format', "text")}})
         return headers, payload

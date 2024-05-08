@@ -687,6 +687,8 @@ def user_input_embedding_content(user_input, chatbot, history, llm_kwargs, plugi
         download_status.update(fp_mapping)
         if fp_mapping:
             chatbot[-1][1] = download_format(title='链接解析完成', content=download_status, status='Done')
+        elif download_status.get('status'):
+            chatbot[-1][1] = download_format(title='解析链接失败，请检查报错', content=download_status.get('status'), status='Done')
         content_mapping = yield from file_extraction_intype(fp_mapping, chatbot, history, llm_kwargs, plugin_kwargs)
         for content_fp in content_mapping:  # 一个文件一个对话
             file_content = content_mapping[content_fp]

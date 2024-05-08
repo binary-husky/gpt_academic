@@ -7,8 +7,9 @@ import os
 
 import requests
 from common.func_box import split_parse_url, handle_timestamp, is_within_days, is_delayed_time
-from common.toolbox import get_conf
+from shared_utils.config_loader import get_conf
 from crazy_functions.reader_fns.local_markdown import to_markdown_tabs
+from common.logger_handler import logger
 from pydantic import BaseModel
 from typing import AnyStr, Literal
 
@@ -233,30 +234,33 @@ class ProjectFeishu:
                 else:
                     data_dict[map_key] = ''
                 extraction_txt = ''
-                if isinstance(type_items.get(key), dict):
-                    extraction_txt += type_items[key].get('doc_text', '')
-                    if type_items[key].get('doc_img', []):
-                        extraction_txt = extraction_txt.replace('[图片]', '')
-                        extraction_txt += "\n".join(
-                            [f"![{i.split('?')[-1]}]({i})" for i in type_items[key].get('doc_img', [])]) + '\n'
-                    if not extraction_txt:
-                        extraction_txt += type_items[key].get('state_key', '')
-                elif isinstance(type_items[key], str) and fields_map_dict[key].get('enum_map'):
-                    extraction_txt = fields_map_dict[key]['enum_map'][type_items[key]]
-                elif isinstance(type_items[key], list) and fields_map_dict[key].get('enum_map'):
-                    extraction_txt = "".join([fields_map_dict[key]['enum_map'][i] for i in type_items[key]])
-                elif fields_map_dict[key].get('compound_map'):  # 复合字段处理
-                    for i, v in enumerate(type_items[key]):
-                        content = ''
-                        for t in v:
-                            content += fields_map_dict[key]['compound_map'][t['field_key']] + f': ' + \
-                                       t["value"]["doc_text"]
-                        index = "-" + str(i) if i > 0 else ''
-                        data_dict[fields_map_dict[key]['name'] + index] = content
-                elif isinstance(type_items[key], list):
-                    extraction_txt = "".join([str(i) for i in type_items[key]])  # 确保是字符串
-                else:
-                    extraction_txt = type_items[key]
+                try:
+                    if isinstance(type_items.get(key), dict):
+                        extraction_txt += type_items[key].get('doc_text', '')
+                        if type_items[key].get('doc_img', []):
+                            extraction_txt = extraction_txt.replace('[图片]', '')
+                            extraction_txt += "\n".join(
+                                [f"![{i.split('?')[-1]}]({i})" for i in type_items[key].get('doc_img', [])]) + '\n'
+                        if not extraction_txt:
+                            extraction_txt += type_items[key].get('state_key', '')
+                    elif isinstance(type_items[key], str) and fields_map_dict[key].get('enum_map'):
+                        extraction_txt = fields_map_dict[key]['enum_map'][type_items[key]]
+                    elif isinstance(type_items[key], list) and fields_map_dict[key].get('enum_map'):
+                        extraction_txt = "".join([fields_map_dict[key]['enum_map'][i] for i in type_items[key] if i])
+                    elif fields_map_dict[key].get('compound_map'):  # 复合字段处理
+                        for i, v in enumerate(type_items[key]):
+                            content = ''
+                            for t in v:
+                                content += fields_map_dict[key]['compound_map'][t['field_key']] + f': ' + \
+                                           t["value"]["doc_text"]
+                            index = "-" + str(i) if i > 0 else ''
+                            data_dict[fields_map_dict[key]['name'] + index] = content
+                    elif isinstance(type_items[key], list):
+                        extraction_txt = "".join([str(i) for i in type_items[key]])  # 确保是字符串
+                    else:
+                        extraction_txt = type_items[key]
+                except Exception as e:
+                    logger.error()
                 # 二次处理
                 if data_dict[map_key] and extraction_txt:
                     data_dict[map_key] = data_dict[map_key] + "-" + extraction_txt
