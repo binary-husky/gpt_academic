@@ -214,6 +214,9 @@ ANTHROPIC_API_URL_REDIRECT = True
 # 月之暗面 API KEY
 MOONSHOT_API_KEY = ""
 
+# DeepSeek 深度求索
+DEEPSEEK_API_KEY = ''
+
 # 零一万物(Yi Model) API KEY
 YIMODEL_API_KEY = ""
 
