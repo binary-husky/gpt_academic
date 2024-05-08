@@ -230,6 +230,7 @@ MATHPIX_APPKEY = ""
 
 
 # DOC2X的PDF解析服务，注册账号并获取API KEY: https://doc2x.noedgeai.com/login
+DOC2X_API_REFRESH_KEY = ""
 DOC2X_API_KEY = ""
 
 

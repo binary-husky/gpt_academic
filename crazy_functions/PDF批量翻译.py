@@ -1,6 +1,6 @@
 from toolbox import CatchException, report_exception, get_log_folder, gen_time_str, check_packages
 from toolbox import update_ui, promote_file_to_downloadzone, update_ui_lastest_msg, disable_auto_promotion
-from toolbox import write_history_to_file, promote_file_to_downloadzone, get_conf, extract_archive
+from toolbox import write_history_to_file, promote_file_to_downloadzone, get_conf, extract_archive, set_conf
 from toolbox import generate_file_link, zip_folder, trimmed_format_exc, trimmed_format_exc_markdown
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
@@ -46,6 +46,23 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
 
     # 开始正式执行任务
     DOC2X_API_KEY = get_conf("DOC2X_API_KEY")
+    DOC2X_API_REFRESH_KEY = get_conf("DOC2X_API_REFRESH_KEY")
+    if len(DOC2X_API_KEY) == 0 and len(DOC2X_API_REFRESH_KEY) != 0:
+        import requests, json
+        url = "https://api.doc2x.noedgeai.com/api/token/refresh"
+        res = requests.post(
+            url,
+            headers={"Authorization": "Bearer " + DOC2X_API_REFRESH_KEY}
+        )
+        res_json = []
+        if res.status_code == 200:
+            decoded = res.content.decode("utf-8")
+            res_json = json.loads(decoded)
+            DOC2X_API_KEY = res_json['data']['token']
+            set_conf("DOC2X_API_KEY", DOC2X_API_KEY)
+        else:
+            raise RuntimeError(format("[ERROR] status code: %d, body: %s" % (res.status_code, res.text)))
+            
     # ------- 第一种方法，效果最好，但是需要DOC2X服务 -------
     if len(DOC2X_API_KEY) != 0:
         try:
@@ -81,6 +98,29 @@ def 解析PDF_DOC2X_单文件(fp, project_folder, llm_kwargs, plugin_kwargs, cha
 
         chatbot.append((None, "加载PDF文件，发送至DOC2X解析..."))
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+
+        res = requests.post(
+            url,
+            files={"file": open(filepath, "rb")},
+            data={"ocr": "1"},
+            headers={"Authorization": "Bearer " + doc2x_api_key}
+        )
+        res_json = []
+        if res.status_code == 401 and not doc2x_api_key.startswith('sk-'):
+            chatbot.append((None, "API_KEY过期，尝试刷新API_KEY..."))
+            refresh_url = "https://api.doc2x.noedgeai.com/api/token/refresh"
+            res = requests.post(
+                url,
+                headers={"Authorization": "Bearer " + DOC2X_API_REFRESH_KEY}
+            )
+            res_json = []
+            if res.status_code == 200:
+                decoded = res.content.decode("utf-8")
+                res_json = json.loads(decoded)
+                doc2x_api_key = res_json['data']['token']
+                set_conf("DOC2X_API_KEY", doc2x_api_key)
+            else:
+                raise RuntimeError(format("[ERROR] status code: %d, body: %s" % (res.status_code, res.text)))
 
         res = requests.post(
             url,
