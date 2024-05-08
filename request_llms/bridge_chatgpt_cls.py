@@ -128,7 +128,7 @@ class GPTChatInit:
             "stream": stream,
             "max_tokens": llm_kwargs.get('max_generation', 4096)
         }
-        if 'gpt' in llm_kwargs['llm_model']:
+        if 'gpt' in llm_kwargs['llm_model'] or llm_kwargs.get('stop', ''):
             payload.update({"stop": llm_kwargs.get('stop', '')})
         if '1106' in self.llm_model:
             payload.update({"response_format": {"type": llm_kwargs.get('response_format', "text")}})
