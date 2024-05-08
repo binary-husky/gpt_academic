@@ -34,6 +34,9 @@ from .bridge_google_gemini import predict_no_ui_long_connection  as genai_noui
 from .bridge_zhipu import predict_no_ui_long_connection as zhipu_noui
 from .bridge_zhipu import predict as zhipu_ui
 
+from .bridge_deepseek import predict_no_ui_long_connection as deepseek_noui
+from .bridge_deepseek import predict as deepseek_ui
+
 from .bridge_cohere import predict as cohere_ui
 from .bridge_cohere import predict_no_ui_long_connection as cohere_noui
 
@@ -69,6 +72,7 @@ claude_endpoint = "https://api.anthropic.com/v1/messages"
 yimodel_endpoint = "https://api.lingyiwanwu.com/v1/chat/completions"
 cohere_endpoint = "https://api.cohere.ai/v1/chat"
 ollama_endpoint = "http://localhost:11434/api/chat"
+deepseek_endpoint = "https://api.deepseek.com/chat/completions"
 
 if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
 azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
@@ -89,6 +93,7 @@ if claude_endpoint in API_URL_REDIRECT: claude_endpoint = API_URL_REDIRECT[claud
 if yimodel_endpoint in API_URL_REDIRECT: yimodel_endpoint = API_URL_REDIRECT[yimodel_endpoint]
 if cohere_endpoint in API_URL_REDIRECT: cohere_endpoint = API_URL_REDIRECT[cohere_endpoint]
 if ollama_endpoint in API_URL_REDIRECT: ollama_endpoint = API_URL_REDIRECT[ollama_endpoint]
+if deepseek_endpoint in API_URL_REDIRECT: deepseek_endpoint = API_URL_REDIRECT[deepseek_endpoint]
 
 # 获取tokenizer
 tokenizer_gpt35 = LazyloadTiktoken("gpt-3.5-turbo")
@@ -783,6 +788,29 @@ if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
                 "fn_without_ui": deepseekcoder_noui,
                 "endpoint": None,
                 "max_token": 2048,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            }
+        })
+    except:
+        print(trimmed_format_exc())
+
+if "deepseek-chat" in AVAIL_LLM_MODELS or "deepseek-coder" in AVAIL_LLM_MODELS:   # deepseek oneline api
+    try:
+        model_info.update({
+            "deepseek-chat": {
+                "fn_with_ui": deepseek_ui,
+                "fn_without_ui": deepseek_noui,
+                "endpoint": deepseek_endpoint,
+                "max_token": 32000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "deepseek-coder": {
+                "fn_with_ui": deepseek_ui,
+                "fn_without_ui": deepseek_noui,
+                "endpoint": deepseek_endpoint,
+                "max_token": 16000,
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
             }

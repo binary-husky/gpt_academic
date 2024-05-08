@@ -35,7 +35,7 @@ LLM_MODEL = "gpt-3.5-turbo-16k" # 可选 ↓↓↓
 AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-preview", "gpt-4-turbo", "gpt-4-turbo-2024-04-09",
                     "gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-4v", "glm-3-turbo",
-                    "gemini-pro", "chatglm3"
+                    "gemini-pro", "chatglm3", "deepseek-chat", "deepseek-coder"
                     ]
 # --- --- --- ---
 # P.S. 其他可用的模型还包括
@@ -223,6 +223,8 @@ MOONSHOT_API_KEY = ""
 # 零一万物(Yi Model) API KEY
 YIMODEL_API_KEY = ""
 
+# DEEPSEEK API KEY
+DEEPSEEK_API_KEY = ""
 
 # Mathpix 拥有执行PDF的OCR功能，但是需要注册账号
 MATHPIX_APPID = ""
@@ -331,6 +333,9 @@ NUM_CUSTOM_BASIC_BTN = 4
 │
 ├── "yi-34b-chat-0205", "yi-34b-chat-200k" 等零一万物(Yi Model)大模型
 │   └── YIMODEL_API_KEY
+│
+├── "deepseek-chat", "deepseek-coder" 等DEEPSEEK大模型
+│   └── DEEPSEEK_API_KEY
 │
 ├── "qwen-turbo" 等通义千问大模型
 │   └──  DASHSCOPE_API_KEY
