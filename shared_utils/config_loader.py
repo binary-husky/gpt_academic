@@ -112,8 +112,13 @@ def get_conf(*args):
     res = []
     for arg in args:
         r = read_single_conf_with_lru_cache(arg)
+        # Check if it’s a path-like string, expand ~ and normalize the path
+        if isinstance(r, str) and ('~' in r or os.sep in r):
+            r = os.path.normpath(os.path.expanduser(r))
         res.append(r)
-    if len(res) == 1: return res[0]
+
+    if len(res) == 1:
+        return res[0]  # Return a single element directly instead of a list
     return res
 
 

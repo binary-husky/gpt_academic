@@ -352,20 +352,41 @@ def main():
 
         app_block.load(None, inputs=[], outputs=None, _js=f"""()=>GptAcademicJavaScriptInit("{DARK_MODE}","{INIT_SYS_PROMPT}","{ADD_WAIFU}","{LAYOUT}","{TTS_TYPE}")""")    # 配置暗色主题或亮色主题
 
-    # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
+
     def run_delayed_tasks():
-        import threading, webbrowser, time
+        import threading, subprocess, webbrowser, time
         print(f"如果浏览器没有自动打开，请复制并转到以下URL：")
-        if DARK_MODE:   print(f"\t「暗色主题已启用（支持动态切换主题）」: http://localhost:{PORT}")
-        else:           print(f"\t「亮色主题已启用（支持动态切换主题）」: http://localhost:{PORT}")
+        URL = f"http://localhost:{PORT}"
+
+        if DARK_MODE:   print(f"\t「暗色主题已启用（支持动态切换主题）」: {URL}")
+        else:           print(f"\t「亮色主题已启用（支持动态切换主题）」: {URL}")
 
         def auto_updates(): time.sleep(0); auto_update()
-        def open_browser(): time.sleep(2); webbrowser.open_new_tab(f"http://localhost:{PORT}")
         def warm_up_mods(): time.sleep(6); warm_up_modules()
 
         threading.Thread(target=auto_updates, name="self-upgrade", daemon=True).start() # 查看自动更新
-        if OPEN_BROWSER: threading.Thread(target=open_browser, name="open-browser", daemon=True).start() # 打开浏览器页面
         threading.Thread(target=warm_up_mods, name="warm-up",      daemon=True).start() # 预热tiktoken模块
+
+        # gradio的inbrowser触发不太稳定，采用下面的方法来增强浏览器的打开行为：可以不打开，也可以打开。在打开时，也可以设置不同的浏览器及传递相应的配置参数。
+        if OPEN_BROWSER:
+            BROWSER = get_conf('BROWSER')
+            BROWSER_ARGS = get_conf('BROWSER_ARGS').split(',')
+        
+            if BROWSER:
+                # 使用特定浏览器打开链接
+                threading.Thread(
+                    target=lambda: subprocess.Popen([BROWSER] + BROWSER_ARGS + [URL]),
+                    name="open-specified-browser",
+                    daemon=True
+                ).start()
+            else:
+                # 使用默认浏览器打开链接
+                threading.Thread(
+                    target=lambda: (time.sleep(2), webbrowser.open_new_tab(URL)),
+                    name="open-default-browser",
+                    daemon=True
+                ).start()
+
 
     # 运行一些异步任务：自动更新、打开浏览器页面、预热tiktoken模块
     run_delayed_tasks()
