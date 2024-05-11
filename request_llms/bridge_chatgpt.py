@@ -337,12 +337,14 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
 
     if llm_kwargs['llm_model'].startswith('vllm-'):
         api_key = 'no-api-key'
+    elif llm_kwargs['tmp_key']:
+        api_key = llm_kwargs['tmp_key']
     else:
         api_key = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
 
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {api_key if not llm_kwargs['tmp_key'] else llm_kwargs['tmp_key'] }"
+        "Authorization": f"Bearer {api_key}"
     }
     if API_ORG.startswith('org-'): headers.update({"OpenAI-Organization": API_ORG})
     if llm_kwargs['llm_model'].startswith('azure-'):
