@@ -332,8 +332,8 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
     """
     整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
     """
-    if not is_any_api_key(llm_kwargs['api_key']):
-        raise AssertionError("你提供了错误的API_KEY。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。")
+    if not is_any_api_key(llm_kwargs['api_key']) and not llm_kwargs['tmp_key']:
+        raise AssertionError('你提供了错误的API_KEY。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。\n\n3.接入临时模型：在输入区键入以下格式临时模型信息{"tmp_key":"xxx","tmp_endpoint":"https://xxxx.xxx","tmp_model":"gpt-3.5-turbo-16k"}，然后回车提交')
 
     if llm_kwargs['llm_model'].startswith('vllm-'):
         api_key = 'no-api-key'
