@@ -176,8 +176,8 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
         chatbot.append(("输入已识别为临时openai格式的模型，页面刷新后将失效", '临时模型：'+json.loads(inputs)['tmp_model']))
         yield from update_ui(chatbot=chatbot, history=history, msg="临时模型已导入") # 刷新界面
         return
-    elif not is_any_api_key(chatbot._cookies['api_key']):
-        chatbot.append((inputs, "缺少api_key。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。"))
+    elif not is_any_api_key(chatbot._cookies['api_key']) and not chatbot._cookies['tmp_key']:
+        chatbot.append((inputs, '缺少API_KEY。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。\n\n3.接入临时模型：在输入区键入以下格式临时模型信息{"tmp_key":"xxx","tmp_endpoint":"https://xxxx.xxx","tmp_model":"gpt-3.5-turbo-16k"}，然后回车提交'))
         yield from update_ui(chatbot=chatbot, history=history, msg="缺少api_key") # 刷新界面
         return
 
