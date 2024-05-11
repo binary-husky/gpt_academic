@@ -101,6 +101,7 @@ def ArgsGeneralWrapper(f):
         cookies.update({
             'top_p': top_p,
             'api_key': cookies['api_key'],
+            'tmp_key': cookies['tmp_key'],
             'tmp_model': cookies['tmp_model'],
             'tmp_endpoint': cookies['tmp_endpoint'],
             'llm_model': llm_model,
@@ -109,6 +110,7 @@ def ArgsGeneralWrapper(f):
         })
         llm_kwargs = {
             'api_key': cookies['api_key'],
+            'tmp_key': cookies['tmp_key'],
             'tmp_model': cookies['tmp_model'],
             'tmp_endpoint': cookies['tmp_endpoint'],
             'llm_model': llm_model,
@@ -611,6 +613,7 @@ def load_chat_cookies():
         "api_key": API_KEY,
         "llm_model": LLM_MODEL,
         "customize_fn_overwrite": customize_fn_overwrite_,
+        "tmp_key":'',
         "tmp_model":'',
         "tmp_endpoint":'',
     }

@@ -150,7 +150,7 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], 
 def is_any_tmp_model(inputs):
     try:
         tmp_model_info=json.loads(inputs).keys()
-        return "api_key" in tmp_model_info and "tmp_model" in tmp_model_info  and "tmp_model" in tmp_model_info
+        return "tmp_key" in tmp_model_info and "tmp_model" in tmp_model_info  and "tmp_endpoint" in tmp_model_info
     except:
         return False 
 def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWithCookies,
@@ -170,7 +170,7 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
         yield from update_ui(chatbot=chatbot, history=history, msg="api_key已导入") # 刷新界面
         return
     elif is_any_tmp_model(inputs):
-        chatbot._cookies['api_key'] = json.loads(inputs)['api_key']
+        chatbot._cookies['tmp_key'] = json.loads(inputs)['tmp_key']
         chatbot._cookies['tmp_model'] = json.loads(inputs)['tmp_model']
         chatbot._cookies['tmp_endpoint'] = json.loads(inputs)['tmp_endpoint']
         chatbot.append(("输入已识别为临时openai格式的模型，页面刷新后将失效", '临时模型：'+json.loads(inputs)['tmp_model']))
@@ -342,7 +342,7 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
 
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {api_key}"
+        "Authorization": f"Bearer {api_key if not llm_kwargs['tmp_key'] else llm_kwargs['tmp_key'] }"
     }
     if API_ORG.startswith('org-'): headers.update({"OpenAI-Organization": API_ORG})
     if llm_kwargs['llm_model'].startswith('azure-'):
