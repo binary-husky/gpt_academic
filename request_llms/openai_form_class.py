@@ -47,7 +47,7 @@ def decode_chunk(chunk):
     respose = ""
     finish_reason = "False"
     try:
-        chunk = json.loads(chunk)
+        chunk = json.loads(chunk[6:])
     except:
         pass
     try:
