@@ -1,20 +1,15 @@
 import json
 import time
-import gradio as gr
 import logging
 import traceback
 import requests
-import importlib
-import random
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
 from toolbox import (
     get_conf,
     update_ui,
-    trimmed_format_exc,
     is_the_upload_folder,
-    read_one_api_model_name,
 )
 
 proxies, TIMEOUT_SECONDS, MAX_RETRY = get_conf(
@@ -118,6 +113,13 @@ def generate_message(input, model, key, history, token, system_prompt, temperatu
 
 
 def get_predict_function(APIKEY, token, not_use_proxy):
+    """
+    为openai格式的API生成响应函数，其中传入参数：
+    APIKEY：Config.py中指定此模型的APIKEY的名字，例如"YIMODEL_API_KEY"
+    token：每次请求的最大token数量，例如对于01万物的yi-34b-chat-200k，其最大请求数为4096
+    ⚠️请不要与模型的最大token数量相混淆。
+    not_use_proxy：是否使用代理，True为不使用，False为使用。
+    """
     def predict_no_ui_long_connection(
         inputs,
         llm_kwargs,
