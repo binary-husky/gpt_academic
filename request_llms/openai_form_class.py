@@ -313,3 +313,6 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     yield from update_ui(chatbot=chatbot, history=history, msg="Json异常" + chunk_decoded) # 刷新界面
                     print(chunk_decoded)
                     return
+                    
+def get_predict_function():
+    return predict_no_ui_long_connection,predict

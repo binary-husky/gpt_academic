@@ -37,6 +37,8 @@ from .bridge_zhipu import predict as zhipu_ui
 from .bridge_cohere import predict as cohere_ui
 from .bridge_cohere import predict_no_ui_long_connection as cohere_noui
 
+from .openai_form_class import get_predict_function
+
 colors = ['#FF00FF', '#00FFFF', '#FF0000', '#990099', '#009999', '#990044']
 
 class LazyloadTiktoken(object):
@@ -66,7 +68,6 @@ api2d_endpoint = "https://openai.api2d.net/v1/chat/completions"
 newbing_endpoint = "wss://sydney.bing.com/sydney/ChatHub"
 gemini_endpoint = "https://generativelanguage.googleapis.com/v1beta/models"
 claude_endpoint = "https://api.anthropic.com/v1/messages"
-yimodel_endpoint = "https://api.lingyiwanwu.com/v1/chat/completions"
 cohere_endpoint = "https://api.cohere.ai/v1/chat"
 ollama_endpoint = "http://localhost:11434/api/chat"
 
@@ -86,7 +87,6 @@ if api2d_endpoint in API_URL_REDIRECT: api2d_endpoint = API_URL_REDIRECT[api2d_e
 if newbing_endpoint in API_URL_REDIRECT: newbing_endpoint = API_URL_REDIRECT[newbing_endpoint]
 if gemini_endpoint in API_URL_REDIRECT: gemini_endpoint = API_URL_REDIRECT[gemini_endpoint]
 if claude_endpoint in API_URL_REDIRECT: claude_endpoint = API_URL_REDIRECT[claude_endpoint]
-if yimodel_endpoint in API_URL_REDIRECT: yimodel_endpoint = API_URL_REDIRECT[yimodel_endpoint]
 if cohere_endpoint in API_URL_REDIRECT: cohere_endpoint = API_URL_REDIRECT[cohere_endpoint]
 if ollama_endpoint in API_URL_REDIRECT: ollama_endpoint = API_URL_REDIRECT[ollama_endpoint]
 
@@ -653,33 +653,7 @@ if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-
         })
     except:
         print(trimmed_format_exc())
-# -=-=-=-=-=-=- 零一万物模型 -=-=-=-=-=-=-
-if "yi-34b-chat-0205" in AVAIL_LLM_MODELS or "yi-34b-chat-200k" in AVAIL_LLM_MODELS:   # zhipuai
-    try:
-        from .bridge_yimodel import predict_no_ui_long_connection as yimodel_noui
-        from .bridge_yimodel import predict as yimodel_ui
-        model_info.update({
-            "yi-34b-chat-0205": {
-                "fn_with_ui": yimodel_ui,
-                "fn_without_ui": yimodel_noui,
-                "can_multi_thread": False,  # 目前来说，默认情况下并发量极低，因此禁用
-                "endpoint": yimodel_endpoint,
-                "max_token": 4000,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            },
-            "yi-34b-chat-200k": {
-                "fn_with_ui": yimodel_ui,
-                "fn_without_ui": yimodel_noui,
-                "can_multi_thread": False,  # 目前来说，默认情况下并发量极低，因此禁用
-                "endpoint": yimodel_endpoint,
-                "max_token": 200000,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            },
-        })
-    except:
-        print(trimmed_format_exc())
+
 # -=-=-=-=-=-=- 讯飞星火认知大模型 -=-=-=-=-=-=-
 if "spark" in AVAIL_LLM_MODELS:
     try:
