@@ -70,6 +70,7 @@ gemini_endpoint = "https://generativelanguage.googleapis.com/v1beta/models"
 claude_endpoint = "https://api.anthropic.com/v1/messages"
 cohere_endpoint = "https://api.cohere.ai/v1/chat"
 ollama_endpoint = "http://localhost:11434/api/chat"
+yimodel_endpoint = "https://api.lingyiwanwu.com/v1/chat/completions"
 
 if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
 azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
@@ -89,6 +90,7 @@ if gemini_endpoint in API_URL_REDIRECT: gemini_endpoint = API_URL_REDIRECT[gemin
 if claude_endpoint in API_URL_REDIRECT: claude_endpoint = API_URL_REDIRECT[claude_endpoint]
 if cohere_endpoint in API_URL_REDIRECT: cohere_endpoint = API_URL_REDIRECT[cohere_endpoint]
 if ollama_endpoint in API_URL_REDIRECT: ollama_endpoint = API_URL_REDIRECT[ollama_endpoint]
+if yimodel_endpoint in API_URL_REDIRECT: yimodel_endpoint = API_URL_REDIRECT[yimodel_endpoint]
 
 # 获取tokenizer
 tokenizer_gpt35 = LazyloadTiktoken("gpt-3.5-turbo")
@@ -653,7 +655,38 @@ if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-
         })
     except:
         print(trimmed_format_exc())
-
+# -=-=-=-=-=-=- 零一万物模型 -=-=-=-=-=-=-
+if "yi-34b-chat-0205" in AVAIL_LLM_MODELS or "yi-34b-chat-200k" in AVAIL_LLM_MODELS:   # zhipuai
+    try:
+        yimodel_noui, yimodel_ui = get_predict_function()
+        model_info.update({
+            "yi-34b-chat-0205": {
+                "fn_with_ui": yimodel_ui,
+                "fn_without_ui": yimodel_noui,
+                "can_multi_thread": False,  # 目前来说，默认情况下并发量极低，因此禁用
+                "endpoint": yimodel_endpoint,
+                "max_token": 4000,
+                "token": 600,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+                "APIKEY": "YIMODEL_API_KEY",
+                "not_use_proxy": True
+            },
+            "yi-34b-chat-200k": {
+                "fn_with_ui": yimodel_ui,
+                "fn_without_ui": yimodel_noui,
+                "can_multi_thread": False,  # 目前来说，默认情况下并发量极低，因此禁用
+                "endpoint": yimodel_endpoint,
+                "max_token": 200000,
+                "token": 4096,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+                "APIKEY": "YIMODEL_API_KEY",
+                "not_use_proxy": True
+            },
+        })
+    except:
+        print(trimmed_format_exc())
 # -=-=-=-=-=-=- 讯飞星火认知大模型 -=-=-=-=-=-=-
 if "spark" in AVAIL_LLM_MODELS:
     try:
