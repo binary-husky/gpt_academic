@@ -49,7 +49,17 @@ def decode_chunk(chunk):
     try:
         chunk = json.loads(chunk[6:])
     except:
-        pass
+        finish_reason = "JSON_ERROR"
+    # 错误处理部分
+    if "error" in chunk:
+        respose = "API_ERROR"
+        try:
+            chunk = json.loads(chunk)
+            finish_reason = chunk["error"]["code"]
+        except:
+            finish_reason = "API_ERROR"
+        return respose, finish_reason
+
     try:
         respose = chunk["choices"][0]["delta"]["content"]
     except:
@@ -188,6 +198,15 @@ def get_predict_function(APIKEY, token, not_use_proxy):
             # 返回的数据流第一次为空，继续等待
             if response_text == "" and finish_reason != "False":
                 continue
+            if response_text == "API_ERROR" and (
+                finish_reason != "False" or finish_reason != "stop"
+            ):
+                chunk = get_full_error(chunk, stream_response)
+                chunk_decoded = chunk.decode()
+                print(chunk_decoded)
+                raise RuntimeError(
+                    f"API异常,请检测终端输出。可能的原因是:{finish_reason}"
+                )
             if chunk:
                 try:
                     if finish_reason == "stop":
@@ -235,12 +254,12 @@ def get_predict_function(APIKEY, token, not_use_proxy):
             raise RuntimeError(f"APIKEY为空,请检查配置文件的{APIKEY}")
         if inputs == "":
             inputs = "你好👋"
-            if additional_fn is not None:
-                from core_functional import handle_core_functionality
+        if additional_fn is not None:
+            from core_functional import handle_core_functionality
 
-                inputs, history = handle_core_functionality(
-                    additional_fn, inputs, history, chatbot
-                )
+            inputs, history = handle_core_functionality(
+                additional_fn, inputs, history, chatbot
+            )
         logging.info(f"[raw_input] {inputs}")
         chatbot.append((inputs, ""))
         yield from update_ui(
@@ -322,6 +341,24 @@ def get_predict_function(APIKEY, token, not_use_proxy):
                 continue
             if chunk:
                 try:
+                    if response_text == "API_ERROR" and (
+                        finish_reason != "False" or finish_reason != "stop"
+                    ):
+                        chunk = get_full_error(chunk, stream_response)
+                        chunk_decoded = chunk.decode()
+                        chatbot[-1] = (
+                            chatbot[-1][0],
+                            "[Local Message] {finish_reason},获得以下报错信息：\n"
+                            + chunk_decoded,
+                        )
+                        yield from update_ui(
+                            chatbot=chatbot,
+                            history=history,
+                            msg="API异常:" + chunk_decoded,
+                        )  # 刷新界面
+                        print(chunk_decoded)
+                        return
+
                     if finish_reason == "stop":
                         logging.info(f"[response] {gpt_replying_buffer}")
                         break
@@ -341,7 +378,7 @@ def get_predict_function(APIKEY, token, not_use_proxy):
                     chunk_decoded = chunk.decode()
                     chatbot[-1] = (
                         chatbot[-1][0],
-                        "[Local Message] API异常,获得以下报错信息：\n" + chunk_decoded,
+                        "[Local Message] 解析错误,获得以下报错信息：\n" + chunk_decoded,
                     )
                     yield from update_ui(
                         chatbot=chatbot, history=history, msg="Json异常" + chunk_decoded
