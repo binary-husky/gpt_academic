@@ -142,14 +142,14 @@ def get_predict_function(APIKEY, token, not_use_proxy):
             用于负责跨越线程传递已经输出的部分，大部分时候仅仅为了fancy的视觉效果，留空即可。observe_window[0]：观测窗。observe_window[1]：看门狗
         """
         watch_dog_patience = 5  # 看门狗的耐心，设置5秒不准咬人(咬的也不是人
-        if len(get_conf(APIKEY)) == 0:
+        if len(APIKEY) == 0:
             raise RuntimeError(f"APIKEY为空,请检查配置文件的{APIKEY}")
         if inputs == "":
             inputs = "你好👋"
         headers, playload = generate_message(
             input=inputs,
             model=llm_kwargs["llm_model"],
-            key=get_conf(APIKEY),
+            key=APIKEY,
             history=history,
             token=token,
             system_prompt=sys_prompt,
@@ -252,7 +252,7 @@ def get_predict_function(APIKEY, token, not_use_proxy):
         chatbot 为WebUI中显示的对话列表，修改它，然后yeild出去，可以直接修改对话界面内容
         additional_fn代表点击的哪个按钮，按钮见functional.py
         """
-        if len(get_conf(APIKEY)) == 0:
+        if len(APIKEY) == 0:
             raise RuntimeError(f"APIKEY为空,请检查配置文件的{APIKEY}")
         if inputs == "":
             inputs = "你好👋"
@@ -282,7 +282,7 @@ def get_predict_function(APIKEY, token, not_use_proxy):
         headers, playload = generate_message(
             input=inputs,
             model=llm_kwargs["llm_model"],
-            key=get_conf(APIKEY),
+            key=APIKEY,
             history=history,
             token=token,
             system_prompt=system_prompt,

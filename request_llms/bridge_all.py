@@ -661,10 +661,10 @@ if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-
 if "yi-34b-chat-0205" in AVAIL_LLM_MODELS or "yi-34b-chat-200k" in AVAIL_LLM_MODELS:   # zhipuai
     try:
         yimodel_4k_noui, yimodel_4k_ui = get_predict_function(
-            APIKEY="YIMODEL_API_KEY",token=600,not_use_proxy=False
+            APIKEY=get_conf("YIMODEL_API_KEY"),token=600,not_use_proxy=False
             )
         yimodel_200k_noui, yimodel_200k_ui = get_predict_function(
-            APIKEY="YIMODEL_API_KEY",token=4096,not_use_proxy=False
+            APIKEY=get_conf("YIMODEL_API_KEY"),token=4096,not_use_proxy=False
             )
         model_info.update({
             "yi-34b-chat-0205": {
@@ -801,7 +801,7 @@ if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
 if "deepseek-chat" in AVAIL_LLM_MODELS or "deepseek-coder" in AVAIL_LLM_MODELS:
     try:
         deepseekapi_noui, deepseekapi_ui = get_predict_function(
-            APIKEY="DEEPSEEK_API_KEY",token=4096,not_use_proxy=False
+            APIKEY=get_conf("DEEPSEEK_API_KEY"),token=4096,not_use_proxy=False
             )
         model_info.update({
             "deepseek-chat":{
