@@ -37,7 +37,7 @@ from .bridge_zhipu import predict as zhipu_ui
 from .bridge_cohere import predict as cohere_ui
 from .bridge_cohere import predict_no_ui_long_connection as cohere_noui
 
-from .openai_form_class import get_predict_function
+from .oai_std_model_template import get_predict_function
 
 colors = ['#FF00FF', '#00FFFF', '#FF0000', '#990099', '#009999', '#990044']
 
@@ -662,13 +662,13 @@ yi_models = ["yi-34b-chat-0205","yi-34b-chat-200k","yi-large","yi-medium","yi-sp
 if any(item in yi_models for item in AVAIL_LLM_MODELS):
     try:
         yimodel_4k_noui, yimodel_4k_ui = get_predict_function(
-            APIKEY=get_conf("YIMODEL_API_KEY"),token=600,not_use_proxy=False
+            api_key_conf_name="YIMODEL_API_KEY", max_output_token=600, disable_proxy=False
             )
         yimodel_16k_noui, yimodel_16k_ui = get_predict_function(
-            APIKEY=get_conf("YIMODEL_API_KEY"),token=4000,not_use_proxy=False
+            api_key_conf_name="YIMODEL_API_KEY", max_output_token=4000, disable_proxy=False
             )
         yimodel_200k_noui, yimodel_200k_ui = get_predict_function(
-            APIKEY=get_conf("YIMODEL_API_KEY"),token=4096,not_use_proxy=False
+            api_key_conf_name="YIMODEL_API_KEY", max_output_token=4096, disable_proxy=False
             )
         model_info.update({
             "yi-34b-chat-0205": {
@@ -850,7 +850,7 @@ if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
 if "deepseek-chat" in AVAIL_LLM_MODELS or "deepseek-coder" in AVAIL_LLM_MODELS:
     try:
         deepseekapi_noui, deepseekapi_ui = get_predict_function(
-            APIKEY=get_conf("DEEPSEEK_API_KEY"),token=4096,not_use_proxy=False
+            APIKEY="DEEPSEEK_API_KEY", max_output_token=4096, disable_proxy=False
             )
         model_info.update({
             "deepseek-chat":{

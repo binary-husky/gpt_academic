@@ -66,7 +66,7 @@ def decode_chunk(chunk):
     return respose, finish_reason
 
 
-def generate_message(input, model, key, history, token, system_prompt, temperature):
+def generate_message(input, model, key, history, max_output_token, system_prompt, temperature):
     """
     整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
     """
@@ -103,7 +103,7 @@ def generate_message(input, model, key, history, token, system_prompt, temperatu
         "messages": messages,
         "temperature": temperature,
         "stream": True,
-        "max_tokens": token,
+        "max_tokens": max_output_token,
     }
     try:
         print(f" {model} : {conversation_cnt} : {input[:100]} ..........")
@@ -112,14 +112,24 @@ def generate_message(input, model, key, history, token, system_prompt, temperatu
     return headers, playload
 
 
-def get_predict_function(APIKEY, token, not_use_proxy):
+def get_predict_function(
+        api_key_conf_name,
+        max_output_token,
+        disable_proxy = False
+    ):
     """
     为openai格式的API生成响应函数，其中传入参数：
-    APIKEY：Config.py中指定此模型的APIKEY的名字，例如"YIMODEL_API_KEY"
-    token：每次请求的最大token数量，例如对于01万物的yi-34b-chat-200k，其最大请求数为4096
-    ⚠️请不要与模型的最大token数量相混淆。
-    not_use_proxy：是否使用代理，True为不使用，False为使用。
+    api_key_conf_name：
+        `config.py`中此模型的APIKEY的名字，例如"YIMODEL_API_KEY"
+    max_output_token：
+        每次请求的最大token数量，例如对于01万物的yi-34b-chat-200k，其最大请求数为4096
+        ⚠️请不要与模型的最大token数量相混淆。
+    disable_proxy：
+        是否使用代理，True为不使用，False为使用。
     """
+
+    APIKEY = get_conf(api_key_conf_name)
+
     def predict_no_ui_long_connection(
         inputs,
         llm_kwargs,
@@ -151,7 +161,7 @@ def get_predict_function(APIKEY, token, not_use_proxy):
             model=llm_kwargs["llm_model"],
             key=APIKEY,
             history=history,
-            token=token,
+            token=max_output_token,
             system_prompt=sys_prompt,
             temperature=llm_kwargs["temperature"],
         )
@@ -161,7 +171,7 @@ def get_predict_function(APIKEY, token, not_use_proxy):
                 from .bridge_all import model_info
 
                 endpoint = model_info[llm_kwargs["llm_model"]]["endpoint"]
-                if not not_use_proxy:
+                if not disable_proxy:
                     response = requests.post(
                         endpoint,
                         headers=headers,
@@ -284,7 +294,7 @@ def get_predict_function(APIKEY, token, not_use_proxy):
             model=llm_kwargs["llm_model"],
             key=APIKEY,
             history=history,
-            token=token,
+            token=max_output_token,
             system_prompt=system_prompt,
             temperature=llm_kwargs["temperature"],
         )
@@ -297,7 +307,7 @@ def get_predict_function(APIKEY, token, not_use_proxy):
                 from .bridge_all import model_info
 
                 endpoint = model_info[llm_kwargs["llm_model"]]["endpoint"]
-                if not not_use_proxy:
+                if not disable_proxy:
                     response = requests.post(
                         endpoint,
                         headers=headers,
