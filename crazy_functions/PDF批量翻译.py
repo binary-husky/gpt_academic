@@ -70,6 +70,22 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
 
 def 解析PDF_DOC2X_单文件(fp, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, DOC2X_API_KEY, user_request):
 
+    def refresh_key(doc2x_api_key):
+        import requests, json
+        url = "https://api.doc2x.noedgeai.com/api/token/refresh"
+        res = requests.post(
+            url,
+            headers={"Authorization": "Bearer " + doc2x_api_key}
+        )
+        res_json = []
+        if res.status_code == 200:
+            decoded = res.content.decode("utf-8")
+            res_json = json.loads(decoded)
+            doc2x_api_key = res_json['data']['token']
+        else:
+            raise RuntimeError(format("[ERROR] status code: %d, body: %s" % (res.status_code, res.text)))
+        return doc2x_api_key
+
     def pdf2markdown(filepath):
         import requests, json, os
         markdown_dir = get_log_folder(plugin_name="pdf_ocr")
@@ -77,6 +93,7 @@ def 解析PDF_DOC2X_单文件(fp, project_folder, llm_kwargs, plugin_kwargs, cha
         if doc2x_api_key.startswith('sk-'):
             url = "https://api.doc2x.noedgeai.com/api/v1/pdf"
         else:
+            doc2x_api_key = refresh_key(doc2x_api_key)
             url = "https://api.doc2x.noedgeai.com/api/platform/pdf"
 
         chatbot.append((None, "加载PDF文件，发送至DOC2X解析..."))
