@@ -161,7 +161,7 @@ def get_predict_function(
             model=llm_kwargs["llm_model"],
             key=APIKEY,
             history=history,
-            token=max_output_token,
+            max_output_token=max_output_token,
             system_prompt=sys_prompt,
             temperature=llm_kwargs["temperature"],
         )
@@ -294,7 +294,7 @@ def get_predict_function(
             model=llm_kwargs["llm_model"],
             key=APIKEY,
             history=history,
-            token=max_output_token,
+            max_output_token=max_output_token,
             system_prompt=system_prompt,
             temperature=llm_kwargs["temperature"],
         )
