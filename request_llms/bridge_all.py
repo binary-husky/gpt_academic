@@ -37,6 +37,8 @@ from .bridge_zhipu import predict as zhipu_ui
 from .bridge_cohere import predict as cohere_ui
 from .bridge_cohere import predict_no_ui_long_connection as cohere_noui
 
+from .oai_std_model_template import get_predict_function
+
 colors = ['#FF00FF', '#00FFFF', '#FF0000', '#990099', '#009999', '#990044']
 
 class LazyloadTiktoken(object):
@@ -66,9 +68,10 @@ api2d_endpoint = "https://openai.api2d.net/v1/chat/completions"
 newbing_endpoint = "wss://sydney.bing.com/sydney/ChatHub"
 gemini_endpoint = "https://generativelanguage.googleapis.com/v1beta/models"
 claude_endpoint = "https://api.anthropic.com/v1/messages"
-yimodel_endpoint = "https://api.lingyiwanwu.com/v1/chat/completions"
 cohere_endpoint = "https://api.cohere.ai/v1/chat"
 ollama_endpoint = "http://localhost:11434/api/chat"
+yimodel_endpoint = "https://api.lingyiwanwu.com/v1/chat/completions"
+deepseekapi_endpoint = "https://api.deepseek.com/v1/chat/completions"
 
 if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
 azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
@@ -86,9 +89,10 @@ if api2d_endpoint in API_URL_REDIRECT: api2d_endpoint = API_URL_REDIRECT[api2d_e
 if newbing_endpoint in API_URL_REDIRECT: newbing_endpoint = API_URL_REDIRECT[newbing_endpoint]
 if gemini_endpoint in API_URL_REDIRECT: gemini_endpoint = API_URL_REDIRECT[gemini_endpoint]
 if claude_endpoint in API_URL_REDIRECT: claude_endpoint = API_URL_REDIRECT[claude_endpoint]
-if yimodel_endpoint in API_URL_REDIRECT: yimodel_endpoint = API_URL_REDIRECT[yimodel_endpoint]
 if cohere_endpoint in API_URL_REDIRECT: cohere_endpoint = API_URL_REDIRECT[cohere_endpoint]
 if ollama_endpoint in API_URL_REDIRECT: ollama_endpoint = API_URL_REDIRECT[ollama_endpoint]
+if yimodel_endpoint in API_URL_REDIRECT: yimodel_endpoint = API_URL_REDIRECT[yimodel_endpoint]
+if deepseekapi_endpoint in API_URL_REDIRECT: deepseekapi_endpoint = API_URL_REDIRECT[deepseekapi_endpoint]
 
 # 获取tokenizer
 tokenizer_gpt35 = LazyloadTiktoken("gpt-3.5-turbo")
@@ -654,14 +658,22 @@ if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-
     except:
         print(trimmed_format_exc())
 # -=-=-=-=-=-=- 零一万物模型 -=-=-=-=-=-=-
-if "yi-34b-chat-0205" in AVAIL_LLM_MODELS or "yi-34b-chat-200k" in AVAIL_LLM_MODELS:   # zhipuai
+yi_models = ["yi-34b-chat-0205","yi-34b-chat-200k","yi-large","yi-medium","yi-spark","yi-large-turbo","yi-large-preview"]
+if any(item in yi_models for item in AVAIL_LLM_MODELS):
     try:
-        from .bridge_yimodel import predict_no_ui_long_connection as yimodel_noui
-        from .bridge_yimodel import predict as yimodel_ui
+        yimodel_4k_noui, yimodel_4k_ui = get_predict_function(
+            api_key_conf_name="YIMODEL_API_KEY", max_output_token=600, disable_proxy=False
+            )
+        yimodel_16k_noui, yimodel_16k_ui = get_predict_function(
+            api_key_conf_name="YIMODEL_API_KEY", max_output_token=4000, disable_proxy=False
+            )
+        yimodel_200k_noui, yimodel_200k_ui = get_predict_function(
+            api_key_conf_name="YIMODEL_API_KEY", max_output_token=4096, disable_proxy=False
+            )
         model_info.update({
             "yi-34b-chat-0205": {
-                "fn_with_ui": yimodel_ui,
-                "fn_without_ui": yimodel_noui,
+                "fn_with_ui": yimodel_4k_ui,
+                "fn_without_ui": yimodel_4k_noui,
                 "can_multi_thread": False,  # 目前来说，默认情况下并发量极低，因此禁用
                 "endpoint": yimodel_endpoint,
                 "max_token": 4000,
@@ -669,11 +681,56 @@ if "yi-34b-chat-0205" in AVAIL_LLM_MODELS or "yi-34b-chat-200k" in AVAIL_LLM_MOD
                 "token_cnt": get_token_num_gpt35,
             },
             "yi-34b-chat-200k": {
-                "fn_with_ui": yimodel_ui,
-                "fn_without_ui": yimodel_noui,
+                "fn_with_ui": yimodel_200k_ui,
+                "fn_without_ui": yimodel_200k_noui,
                 "can_multi_thread": False,  # 目前来说，默认情况下并发量极低，因此禁用
                 "endpoint": yimodel_endpoint,
                 "max_token": 200000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "yi-large": {
+                "fn_with_ui": yimodel_16k_ui,
+                "fn_without_ui": yimodel_16k_noui,
+                "can_multi_thread": False,  # 目前来说，默认情况下并发量极低，因此禁用
+                "endpoint": yimodel_endpoint,
+                "max_token": 16000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "yi-medium": {
+                "fn_with_ui": yimodel_16k_ui,
+                "fn_without_ui": yimodel_16k_noui,
+                "can_multi_thread": True,  # 这个并发量稍微大一点
+                "endpoint": yimodel_endpoint,
+                "max_token": 16000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "yi-spark": {
+                "fn_with_ui": yimodel_16k_ui,
+                "fn_without_ui": yimodel_16k_noui,
+                "can_multi_thread": True,  # 这个并发量稍微大一点
+                "endpoint": yimodel_endpoint,
+                "max_token": 16000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "yi-large-turbo": {
+                "fn_with_ui": yimodel_16k_ui,
+                "fn_without_ui": yimodel_16k_noui,
+                "can_multi_thread": False,  # 目前来说，默认情况下并发量极低，因此禁用
+                "endpoint": yimodel_endpoint,
+                "max_token": 16000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "yi-large-preview": {
+                "fn_with_ui": yimodel_16k_ui,
+                "fn_without_ui": yimodel_16k_noui,
+                "can_multi_thread": False,  # 目前来说，默认情况下并发量极低，因此禁用
+                "endpoint": yimodel_endpoint,
+                "max_token": 16000,
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
             },
@@ -789,8 +846,34 @@ if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
         })
     except:
         print(trimmed_format_exc())
-
-
+# -=-=-=-=-=-=- 幻方-深度求索大模型在线API -=-=-=-=-=-=-
+if "deepseek-chat" in AVAIL_LLM_MODELS or "deepseek-coder" in AVAIL_LLM_MODELS:
+    try:
+        deepseekapi_noui, deepseekapi_ui = get_predict_function(
+            APIKEY="DEEPSEEK_API_KEY", max_output_token=4096, disable_proxy=False
+            )
+        model_info.update({
+            "deepseek-chat":{
+                "fn_with_ui": deepseekapi_ui,
+                "fn_without_ui": deepseekapi_noui,
+                "endpoint": deepseekapi_endpoint,
+                "can_multi_thread": True,
+                "max_token": 32000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "deepseek-coder":{
+                "fn_with_ui": deepseekapi_ui,
+                "fn_without_ui": deepseekapi_noui,
+                "endpoint": deepseekapi_endpoint,
+                "can_multi_thread": True,
+                "max_token": 16000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+        })
+    except:
+        print(trimmed_format_exc())
 # -=-=-=-=-=-=- one-api 对齐支持 -=-=-=-=-=-=-
 for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
     # 为了更灵活地接入one-api多模型管理界面，设计了此接口，例子：AVAIL_LLM_MODELS = ["one-api-mixtral-8x7b(max_token=6666)"]
