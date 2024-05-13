@@ -1,5 +1,5 @@
 {
-  "version": 3.75,
+  "version": 3.76,
   "show_feature": true,
-  "new_feature": "添加TTS语音输出（EdgeTTS和SoVits语音克隆） <-> Doc2x PDF翻译 <-> 添加回溯对话按钮"
+  "new_feature": "上传文件时显示进度条 <-> 添加TTS语音输出（EdgeTTS和SoVits语音克隆） <-> Doc2x PDF翻译 <-> 添加回溯对话按钮"
 }
