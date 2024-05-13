@@ -850,7 +850,7 @@ if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
 if "deepseek-chat" in AVAIL_LLM_MODELS or "deepseek-coder" in AVAIL_LLM_MODELS:
     try:
         deepseekapi_noui, deepseekapi_ui = get_predict_function(
-            APIKEY="DEEPSEEK_API_KEY", max_output_token=4096, disable_proxy=False
+            api_key_conf_name="DEEPSEEK_API_KEY", max_output_token=4096, disable_proxy=False
             )
         model_info.update({
             "deepseek-chat":{
