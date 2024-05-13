@@ -658,10 +658,14 @@ if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-
     except:
         print(trimmed_format_exc())
 # -=-=-=-=-=-=- 零一万物模型 -=-=-=-=-=-=-
-if "yi-34b-chat-0205" in AVAIL_LLM_MODELS or "yi-34b-chat-200k" in AVAIL_LLM_MODELS:   # zhipuai
+yi_models = ["yi-34b-chat-0205","yi-34b-chat-200k","yi-large","yi-medium","yi-spark","yi-large-turbo","yi-large-preview"]
+if any(item in yi_models for item in AVAIL_LLM_MODELS):
     try:
         yimodel_4k_noui, yimodel_4k_ui = get_predict_function(
             APIKEY=get_conf("YIMODEL_API_KEY"),token=600,not_use_proxy=False
+            )
+        yimodel_16k_noui, yimodel_16k_ui = get_predict_function(
+            APIKEY=get_conf("YIMODEL_API_KEY"),token=4000,not_use_proxy=False
             )
         yimodel_200k_noui, yimodel_200k_ui = get_predict_function(
             APIKEY=get_conf("YIMODEL_API_KEY"),token=4096,not_use_proxy=False
@@ -682,6 +686,51 @@ if "yi-34b-chat-0205" in AVAIL_LLM_MODELS or "yi-34b-chat-200k" in AVAIL_LLM_MOD
                 "can_multi_thread": False,  # 目前来说，默认情况下并发量极低，因此禁用
                 "endpoint": yimodel_endpoint,
                 "max_token": 200000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "yi-large": {
+                "fn_with_ui": yimodel_16k_ui,
+                "fn_without_ui": yimodel_16k_noui,
+                "can_multi_thread": False,  # 目前来说，默认情况下并发量极低，因此禁用
+                "endpoint": yimodel_endpoint,
+                "max_token": 16000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "yi-medium": {
+                "fn_with_ui": yimodel_16k_ui,
+                "fn_without_ui": yimodel_16k_noui,
+                "can_multi_thread": True,  # 这个并发量稍微大一点
+                "endpoint": yimodel_endpoint,
+                "max_token": 16000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "yi-spark": {
+                "fn_with_ui": yimodel_16k_ui,
+                "fn_without_ui": yimodel_16k_noui,
+                "can_multi_thread": True,  # 这个并发量稍微大一点
+                "endpoint": yimodel_endpoint,
+                "max_token": 16000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "yi-large-turbo": {
+                "fn_with_ui": yimodel_16k_ui,
+                "fn_without_ui": yimodel_16k_noui,
+                "can_multi_thread": False,  # 目前来说，默认情况下并发量极低，因此禁用
+                "endpoint": yimodel_endpoint,
+                "max_token": 16000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "yi-large-preview": {
+                "fn_with_ui": yimodel_16k_ui,
+                "fn_without_ui": yimodel_16k_noui,
+                "can_multi_thread": False,  # 目前来说，默认情况下并发量极低，因此禁用
+                "endpoint": yimodel_endpoint,
+                "max_token": 16000,
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
             },
