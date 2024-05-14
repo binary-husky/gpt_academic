@@ -364,8 +364,9 @@ def main():
         def warm_up_mods(): time.sleep(6); warm_up_modules()
 
         threading.Thread(target=auto_updates, name="self-upgrade", daemon=True).start() # 查看自动更新
-        threading.Thread(target=open_browser, name="open-browser", daemon=True).start() # 打开浏览器页面
         threading.Thread(target=warm_up_mods, name="warm-up",      daemon=True).start() # 预热tiktoken模块
+        if get_conf('AUTO_OPEN_BROWSER'):
+            threading.Thread(target=open_browser, name="open-browser", daemon=True).start() # 打开浏览器页面
 
     # 运行一些异步任务：自动更新、打开浏览器页面、预热tiktoken模块
     run_delayed_tasks()
