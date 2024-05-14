@@ -46,9 +46,9 @@ class LazyloadTiktoken(object):
     @staticmethod
     @lru_cache(maxsize=128)
     def get_encoder(model):
-        print('正在加载tokenizer，如果是第一次运行，可能需要一点时间下载参数')
+        print(f'正在加载 {model} 模型的tokenizer，如果是第一次运行，可能需要一点时间下载参数')
         tmp = tiktoken.encoding_for_model(model)
-        print('加载tokenizer完毕')
+        print(f'加载 {model} 模型的tokenizer完毕')
         return tmp
 
     def encode(self, *args, **kwargs):
@@ -93,9 +93,10 @@ if ollama_endpoint in API_URL_REDIRECT: ollama_endpoint = API_URL_REDIRECT[ollam
 # 获取tokenizer
 tokenizer_gpt35 = LazyloadTiktoken("gpt-3.5-turbo")
 tokenizer_gpt4 = LazyloadTiktoken("gpt-4")
+tokenizer_gpt4o = LazyloadTiktoken("gpt-4o")
 get_token_num_gpt35 = lambda txt: len(tokenizer_gpt35.encode(txt, disallowed_special=()))
 get_token_num_gpt4 = lambda txt: len(tokenizer_gpt4.encode(txt, disallowed_special=()))
-
+get_token_num_gpt4o = lambda txt: len(tokenizer_gpt4o.encode(txt, disallowed_special=()))
 
 # 开始初始化模型
 AVAIL_LLM_MODELS, LLM_MODEL = get_conf("AVAIL_LLM_MODELS", "LLM_MODEL")
@@ -220,6 +221,23 @@ model_info = {
         "token_cnt": get_token_num_gpt4,
     },
 
+    "gpt-4o": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": openai_endpoint,
+        "max_token": 128000,
+        "tokenizer": tokenizer_gpt4o,
+        "token_cnt": get_token_num_gpt4o,
+    },
+    
+    "gpt-4o-2024-05-13": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": openai_endpoint,
+        "max_token": 128000,
+        "tokenizer": tokenizer_gpt4o,
+        "token_cnt": get_token_num_gpt4o,
+    },
 
     "gpt-3.5-random": {
         "fn_with_ui": chatgpt_ui,

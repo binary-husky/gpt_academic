@@ -3,7 +3,7 @@ fastapi==0.110
 gradio-client==0.8
 pypdf2==2.12.1
 zhipuai==2.0.1
-tiktoken>=0.3.3
+tiktoken>=0.7.0
 requests[socks]
 pydantic==2.5.2
 protobuf==3.18

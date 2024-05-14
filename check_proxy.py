@@ -159,6 +159,8 @@ def warm_up_modules():
         enc.encode("模块预热", disallowed_special=())
         enc = model_info["gpt-4"]['tokenizer']
         enc.encode("模块预热", disallowed_special=())
+        enc = model_info["gpt-4o"]['tokenizer']
+        enc.encode("模块预热", disallowed_special=())
 
 def warm_up_vectordb():
     print('正在执行一些模块的预热 ...')
