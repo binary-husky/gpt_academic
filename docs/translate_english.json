@@ -313,7 +313,7 @@
     "注意": "Attention",
     "以下“红颜色”标识的函数插件需从输入区读取路径作为参数": "The function plugins marked in 'red' below need to read the path from the input area as a parameter",
     "更多函数插件": "More function plugins",
-    "打开插件列表": "Open plugin list",
+    "点击这里搜索插件列表": "Click Here to Search the Plugin List",
     "高级参数输入区": "Advanced parameter input area",
     "这里是特殊函数插件的高级参数输入区": "Here is the advanced parameter input area for special function plugins",
     "请先从插件列表中选择": "Please select from the plugin list first",
