@@ -33,6 +33,8 @@ def get_core_functions():
             "AutoClearHistory": False,
             # [6] 文本预处理 （可选参数，默认 None，举例：写个函数移除所有的换行符）
             "PreProcess": None,
+            # [7] 模型选择 （可选参数。如不设置，则使用当前全局模型；如设置，则用指定模型覆盖全局模型。）
+            # "ModelOverride": "gpt-3.5-turbo", # 主要用途：强制点击此基础功能按钮时，使用指定的模型。
         },
 
 
