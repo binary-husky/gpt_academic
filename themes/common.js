@@ -331,6 +331,9 @@ function addCopyButton(botElement, index, is_last_in_arr) {
                 toast_push('正在合成语音 & 自动朗读已开启 (再次点击此按钮可禁用自动朗读)。', 3000);
                 // toast_push('正在合成语音', 3000);
                 const readText = botElement.innerText;
+                prev_chatbot_index = index;
+                prev_text = readText;
+                prev_text_already_pushed = readText;
                 push_text_to_audio(readText);
                 setCookie("js_auto_read_cookie", "True", 365);
             }
@@ -1033,7 +1036,7 @@ async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout, tts) {
 
 
 function reset_conversation(a, b) {
-    console.log("js_code_reset");
+    // console.log("js_code_reset");
     a = btoa(unescape(encodeURIComponent(JSON.stringify(a))));
     setCookie("js_previous_chat_cookie", a, 1);
     gen_restore_btn();
@@ -1173,7 +1176,7 @@ async function on_plugin_exe_complete(fn_name) {
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //  第 8 部分: TTS语音生成函数
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
+audio_debug = false;
 class AudioPlayer {
     constructor() {
         this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1321,14 +1324,14 @@ function trigger(T, fire) {
 }
 
 
-prev_text = "";
-prev_text_already_pushed = "";
+prev_text = ""; // previous text, this is used to check chat changes
+prev_text_already_pushed = ""; // previous text already pushed to audio, this is used to check where we should continue to play audio
 prev_chatbot_index = -1;
 const delay_live_text_update = trigger(3000, on_live_stream_terminate);
 
 function on_live_stream_terminate(latest_text) {
     // remove `prev_text_already_pushed` from `latest_text`
-    console.log("on_live_stream_terminate", latest_text)
+    if (audio_debug) console.log("on_live_stream_terminate", latest_text);
     remaining_text = latest_text.slice(prev_text_already_pushed.length);
     if ((!isEmptyOrWhitespaceOnly(remaining_text)) && remaining_text.length != 0) {
         prev_text_already_pushed = latest_text;
@@ -1393,19 +1396,19 @@ function process_latest_text_output(text, chatbot_index) {
         delay_live_text_update(text); // in case of no \n or 。 in the text, this timer will finally commit
     }
     else if (chatbot_index == prev_chatbot_index && !is_continue) {
-        console.log('---------------------')
-        console.log('text twisting!')
-        console.log('[new message begin]', 'text', text, 'prev_text_already_pushed', prev_text_already_pushed)
-        console.log('---------------------')
+        if (audio_debug) console.log('---------------------');
+        if (audio_debug) console.log('text twisting!');
+        if (audio_debug) console.log('[new message begin]', 'text', text, 'prev_text_already_pushed', prev_text_already_pushed);
+        if (audio_debug) console.log('---------------------');
         prev_text_already_pushed = "";
         delay_live_text_update(text); // in case of no \n or 。 in the text, this timer will finally commit
     }
     else {
         // on_new_message_begin, we have to clear `prev_text_already_pushed`
-        console.log('---------------------')
-        console.log('new message begin!')
-        console.log('[new message begin]', 'text', text, 'prev_text_already_pushed', prev_text_already_pushed)
-        console.log('---------------------')
+        if (audio_debug) console.log('---------------------');
+        if (audio_debug) console.log('new message begin!');
+        if (audio_debug) console.log('[new message begin]', 'text', text, 'prev_text_already_pushed', prev_text_already_pushed);
+        if (audio_debug) console.log('---------------------');
         prev_text_already_pushed = "";
         process_increased_text(text);
         delay_live_text_update(text); // in case of no \n or 。 in the text, this timer will finally commit
@@ -1433,7 +1436,7 @@ async function push_text_to_audio(text) {
             // Call the async postData function and log the response
             post_text(url, payload, send_index);
             send_index = send_index + 1;
-            console.log(send_index, audio_buf_text)
+            if (audio_debug) console.log(send_index, audio_buf_text);
             // sleep 2 seconds
             if (allow_auto_read_tts_flag) {
                 await delay(3000);
@@ -1450,10 +1453,10 @@ to_be_processed = [];
 async function UpdatePlayQueue(cnt, audio_buf_wave) {
     if (cnt != recv_index) {
         to_be_processed.push([cnt, audio_buf_wave]);
-        console.log('cache', cnt);
+        if (audio_debug) console.log('cache', cnt);
     }
     else {
-        console.log('processing', cnt);
+        if (audio_debug) console.log('processing', cnt);
         recv_index = recv_index + 1;
         if (audio_buf_wave) {
             audioPlayer.enqueueAudio(audio_buf_wave);
@@ -1463,7 +1466,7 @@ async function UpdatePlayQueue(cnt, audio_buf_wave) {
             find_any = false;
             for (i = to_be_processed.length - 1; i >= 0; i--) {
                 if (to_be_processed[i][0] == recv_index) {
-                    console.log('processing cached', recv_index);
+                    if (audio_debug) console.log('processing cached', recv_index);
                     if (to_be_processed[i][1]) {
                         audioPlayer.enqueueAudio(to_be_processed[i][1]);
                     }
