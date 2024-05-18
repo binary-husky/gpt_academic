@@ -18,8 +18,14 @@ def define_gui_advanced_plugin_class(plugins):
                         elem_id=f"invisible_current_pop_up_plugin_arg").style(container=False)
                 usr_confirmed_arg = gr.Textbox(show_label=False, placeholder="请输入", lines=1, visible=False,
                         elem_id=f"invisible_current_pop_up_plugin_arg_final").style(container=False)
-                arg_confirm_btn = gr.Button("确认参数并执行", variant="primary");
+
+                arg_confirm_btn = gr.Button("确认参数并执行", variant="stop")
                 arg_confirm_btn.style(size="sm")
+
+                arg_cancel_btn = gr.Button("取消", variant="stop")
+                arg_cancel_btn.click(None, None, None, _js="""()=>close_current_pop_up_plugin()""")
+                arg_cancel_btn.style(size="sm")
+
                 arg_confirm_btn.click(None, None, None, _js="""()=>execute_current_pop_up_plugin()""")
                 invisible_callback_btn_for_plugin_exe = gr.Button(r"未选定任何插件", variant="secondary", visible=False, elem_id="invisible_callback_btn_for_plugin_exe").style(size="sm")
                 # 随变按钮的回调函数注册

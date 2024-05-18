@@ -109,6 +109,7 @@
     border-width: thin;
     user-select: none;
     padding-left: 2%;
+    text-align: center;
 }
 
 .floating-component #input-panel2 {

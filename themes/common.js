@@ -1548,8 +1548,8 @@ async function generate_menu(guiBase64String, btnName){
         visible: true,
         __type__: 'update'
     }, "plugin_arg_menu", "obj");
-
-    // 根据 gui_args，使得对应参数项显现
+    hide_all_elem();
+    // 根据 gui_args, 使得对应参数项显现
     let text_cnt = 0;
     for (const key in gui_args) {
         if (gui_args.hasOwnProperty(key)) {
@@ -1558,6 +1558,8 @@ async function generate_menu(guiBase64String, btnName){
                 push_data_to_gradio_component({
                     visible: true,
                     label: gui_args[key].title + "(" + gui_args[key].description +  ")",
+                    // label: gui_args[key].title,
+                    placeholder: gui_args[key].description,
                     __type__: 'update'
                 }, component_name, "obj");
                 if (key === "main_input"){
@@ -1574,6 +1576,7 @@ async function generate_menu(guiBase64String, btnName){
                 else {
                     push_data_to_gradio_component(gui_args[key].default_value, component_name, "obj");
                 }
+                document.getElementById(component_name).parentNode.parentNode.style.display = '';
                 text_cnt += 1;
             }
         }
@@ -1609,13 +1612,7 @@ async function execute_current_pop_up_plugin(){
         visible: false,
         __type__: 'update'
     }, "plugin_arg_menu", "obj");
-    for (text_cnt = 0; text_cnt < 8; text_cnt++){
-        push_data_to_gradio_component({
-            visible: false,
-            label: "",
-            __type__: 'update'
-        }, "plugin_arg_txt_"+text_cnt, "obj");
-    }
+    hide_all_elem();
 
     // execute the plugin
     push_data_to_gradio_component(JSON.stringify(gui_args), "invisible_current_pop_up_plugin_arg_final", "string");
@@ -1623,9 +1620,24 @@ async function execute_current_pop_up_plugin(){
 
 }
 
+function hide_all_elem(){
+    for (text_cnt = 0; text_cnt < 8; text_cnt++){
+        push_data_to_gradio_component({
+            visible: false,
+            label: "",
+            __type__: 'update'
+        }, "plugin_arg_txt_"+text_cnt, "obj");
+        document.getElementById("plugin_arg_txt_"+text_cnt).parentNode.parentNode.style.display = 'none';
+    }
+}
 
-
-
+function close_current_pop_up_plugin(){
+    push_data_to_gradio_component({
+        visible: false,
+        __type__: 'update'
+    }, "plugin_arg_menu", "obj");
+    hide_all_elem();
+}
 
 
 
