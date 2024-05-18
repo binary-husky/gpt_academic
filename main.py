@@ -84,6 +84,7 @@ def main():
     with gr.Blocks(title="GPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as app_block:
         gr.HTML(title_html)
         secret_css = gr.Textbox(visible=False, elem_id="secret_css")
+        register_advanced_plugin_init_code_arr = ""
 
         cookies, web_cookie_cache = make_cookie_cache() # 定义 后端state（cookies）、前端（web_cookie_cache）两兄弟
         with gr_L1():
@@ -217,13 +218,16 @@ def main():
         file_upload_2.upload(on_file_uploaded, [file_upload_2, chatbot, txt, txt2, checkboxes, cookies], [chatbot, txt, txt2, cookies]).then(None, None, None, _js=r"()=>{toast_push('上传完毕 ...'); cancel_loading_status();}")
         # 函数插件-固定按钮区
         for k in plugins:
+            if plugins[k].get("Class", None):
+                plugins[k]["JsMenu"] = plugins[k]["Class"]().get_js_code_for_generating_menu(k)
+                register_advanced_plugin_init_code_arr += """register_advanced_plugin_init_code("{k}","{gui_js}");""".format(k=k, gui_js=plugins[k]["JsMenu"])
             if not plugins[k].get("AsButton", True): continue
             if plugins[k].get("Function", None):
                 click_handle = plugins[k]["Button"].click(ArgsGeneralWrapper(plugins[k]["Function"]), [*input_combo], output_combo)
                 click_handle.then(on_report_generated, [cookies, file_upload, chatbot], [cookies, file_upload, chatbot]).then(None, [plugins[k]["Button"]], None, _js=r"(fn)=>on_plugin_exe_complete(fn)")
                 cancel_handles.append(click_handle)
             elif "Class" in plugins[k]:
-                click_handle = plugins[k]["Button"].click(None, inputs=[], outputs=None, _js=plugins[k]["Class"]().get_js_code_for_generating_menu(k))
+                click_handle = plugins[k]["Button"].click(None, inputs=[], outputs=None, _js=f"""()=>run_advanced_plugin_launch_code("{k}")""")
 
         # 函数插件-下拉菜单与随变按钮的互动
         def on_dropdown_changed(k):
@@ -259,16 +263,22 @@ def main():
         # 随变按钮的回调函数注册
         def route(request: gr.Request, k, *args, **kwargs):
             if k in [r"点击这里搜索插件列表", r"请先从插件列表中选择"]: return
-            yield from ArgsGeneralWrapper(plugins[k]["Function"])(request, *args, **kwargs)
-        click_handle = switchy_bt.click(route,[switchy_bt, *input_combo], output_combo)
+            if plugins[k].get("Function", None):
+                yield from ArgsGeneralWrapper(plugins[k]["Function"])(request, *args, **kwargs)
+
+        click_handle = switchy_bt.click(route, [switchy_bt, *input_combo], output_combo)
+        switchy_bt.click(None, [switchy_bt], None, _js="(switchy_bt)=>on_flex_button_click(switchy_bt)")
+
         click_handle.then(on_report_generated, [cookies, file_upload, chatbot], [cookies, file_upload, chatbot]).then(None, [switchy_bt], None, _js=r"(fn)=>on_plugin_exe_complete(fn)")
         cancel_handles.append(click_handle)
 
         # 新一代插件的高级参数区确认按钮（隐藏）
-        click_handle = new_plugin_callback.click(route_switchy_bt_with_arg, [
+        click_handle_ng = new_plugin_callback.click(route_switchy_bt_with_arg, [
                 gr.State(["new_plugin_callback", "usr_confirmed_arg"] + input_combo_order),
                 new_plugin_callback, usr_confirmed_arg, *input_combo
             ], output_combo)
+        click_handle_ng.then(on_report_generated, [cookies, file_upload, chatbot], [cookies, file_upload, chatbot]).then(None, [switchy_bt], None, _js=r"(fn)=>on_plugin_exe_complete(fn)")
+        cancel_handles.append(click_handle_ng)
 
         # 终止按钮的回调函数注册
         stopBtn.click(fn=None, inputs=None, outputs=None, cancels=cancel_handles)
@@ -302,6 +312,7 @@ def main():
             outputs = [web_cookie_cache, cookies, *customize_btns.values(), *predefined_btns.values()], _js=js_code_for_persistent_cookie_init)
 
         app_block.load(None, inputs=[], outputs=None, _js=f"""()=>GptAcademicJavaScriptInit("{DARK_MODE}","{INIT_SYS_PROMPT}","{ADD_WAIFU}","{LAYOUT}","{TTS_TYPE}")""")    # 配置暗色主题或亮色主题
+        app_block.load(None, inputs=[], outputs=None, _js="""()=>{REP}""".replace("REP", register_advanced_plugin_init_code_arr))
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def run_delayed_tasks():

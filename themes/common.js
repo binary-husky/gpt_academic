@@ -1639,8 +1639,17 @@ function close_current_pop_up_plugin(){
     hide_all_elem();
 }
 
-
-
+advanced_plugin_init_code_lib = {}
+function register_advanced_plugin_init_code(key, code){
+    advanced_plugin_init_code_lib[key] = code;
+}
+function run_advanced_plugin_launch_code(key){
+    // convert js code string to function
+    generate_menu(advanced_plugin_init_code_lib[key], key);
+}
+function on_flex_button_click(key){
+    run_advanced_plugin_launch_code(key);
+}
 
 
 

@@ -209,7 +209,7 @@ def get_crazy_functions():
         "精准翻译PDF论文": {
             "Group": "学术",
             "Color": "stop",
-            "AsButton": True,
+            "AsButton": False,
             "Info": "精准翻译PDF论文为中文 | 输入参数为路径",
             "Function": None,
             "Class": PDF_Tran,  # 新一代插件都会写成 class
