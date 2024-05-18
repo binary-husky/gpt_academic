@@ -27,7 +27,7 @@ def get_crazy_functions():
     from crazy_functions.辅助功能 import 清除缓存
     from crazy_functions.批量Markdown翻译 import Markdown英译中
     from crazy_functions.批量总结PDF文档 import 批量总结PDF文档
-    from crazy_functions.PDF批量翻译 import 批量翻译PDF文档
+    from crazy_functions.PDF_Translate import 批量翻译PDF文档
     from crazy_functions.谷歌检索小助手 import 谷歌检索小助手
     from crazy_functions.理解PDF文档内容 import 理解PDF文档内容标准文件输入
     from crazy_functions.Latex全文润色 import Latex中文润色
@@ -35,6 +35,8 @@ def get_crazy_functions():
     from crazy_functions.批量Markdown翻译 import Markdown中译英
     from crazy_functions.虚空终端 import 虚空终端
     from crazy_functions.生成多种Mermaid图表 import 生成多种Mermaid图表
+
+    from crazy_functions.PDF_Translate_Wrap import PDF_Tran
 
     function_plugins = {
         "虚空终端": {
@@ -209,7 +211,8 @@ def get_crazy_functions():
             "Color": "stop",
             "AsButton": True,
             "Info": "精准翻译PDF论文为中文 | 输入参数为路径",
-            "Function": HotReload(批量翻译PDF文档),
+            "Function": None,
+            "Class": PDF_Tran,  # 新一代插件都会写成 class
         },
         "询问多个GPT模型": {
             "Group": "对话",

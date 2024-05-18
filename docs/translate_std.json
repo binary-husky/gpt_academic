@@ -6,7 +6,7 @@
     "Latex英文纠错加PDF对比": "CorrectEnglishInLatexWithPDFComparison",
     "下载arxiv论文并翻译摘要": "DownloadArxivPaperAndTranslateAbstract",
     "Markdown翻译指定语言": "TranslateMarkdownToSpecifiedLanguage",
-    "PDF批量翻译": "BatchTranslatePDFDocuments_MultiThreaded",
+    "PDF_Translate": "BatchTranslatePDFDocuments_MultiThreaded",
     "下载arxiv论文翻译摘要": "DownloadArxivPaperTranslateAbstract",
     "解析一个Python项目": "ParsePythonProject",
     "解析一个Golang项目": "ParseGolangProject",

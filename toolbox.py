@@ -90,7 +90,7 @@ def ArgsGeneralWrapper(f):
     """
     def decorated(request: gradio.Request, cookies:dict, max_length:int, llm_model:str,
                   txt:str, txt2:str, top_p:float, temperature:float, chatbot:list,
-                  history:list, system_prompt:str, plugin_advanced_arg:str, *args):
+                  history:list, system_prompt:str, plugin_advanced_arg:str|dict, *args):
         txt_passon = txt
         if txt == "" and txt2 != "": txt_passon = txt2
         # 引入一个有cookie的chatbot
@@ -114,9 +114,10 @@ def ArgsGeneralWrapper(f):
             'client_ip': request.client.host,
             'most_recent_uploaded': cookies.get('most_recent_uploaded')
         }
-        plugin_kwargs = {
-            "advanced_arg": plugin_advanced_arg,
-        }
+        if isinstance(plugin_advanced_arg, str):
+            plugin_kwargs = {"advanced_arg": plugin_advanced_arg}
+        else:
+            plugin_kwargs = plugin_advanced_arg
         chatbot_with_cookie = ChatBotWithCookies(cookies)
         chatbot_with_cookie.write_list(chatbot)
 

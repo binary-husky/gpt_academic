@@ -44,7 +44,7 @@
     "批量总结PDF文档": "BatchSummarizePDFDocuments",
     "批量总结PDF文档pdfminer": "BatchSummarizePDFDocumentsUsingPDFMiner",
     "批量翻译PDF文档": "BatchTranslatePDFDocuments",
-    "PDF批量翻译": "BatchTranslatePDFDocumentsUsingMultiThreading",
+    "PDF_Translate": "BatchTranslatePDFDocumentsUsingMultiThreading",
     "谷歌检索小助手": "GoogleSearchAssistant",
     "理解PDF文档内容标准文件输入": "StandardFileInputForUnderstandingPDFDocumentContent",
     "理解PDF文档内容": "UnderstandingPDFDocumentContent",
