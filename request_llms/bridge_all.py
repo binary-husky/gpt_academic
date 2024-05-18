@@ -1011,7 +1011,7 @@ import importlib
 import core_functional
 def execute_model_override(llm_kwargs, additional_fn, method):
     functional = core_functional.get_core_functions()
-    if 'ModelOverride' in functional[additional_fn]:
+    if (additional_fn in functional) and 'ModelOverride' in functional[additional_fn]:
         # 热更新Prompt & ModelOverride
         importlib.reload(core_functional)
         functional = core_functional.get_core_functions()
