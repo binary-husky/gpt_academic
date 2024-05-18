@@ -23,6 +23,9 @@ RUN python3 -m pip install -r request_llms/requirements_jittorllms.txt -i https:
 # 下载JittorLLMs
 RUN git clone https://github.com/binary-husky/JittorLLMs.git --depth 1 request_llms/jittorllms
 
+# edge-tts需要的依赖
+RUN apt update && apt install ffmpeg -y
+
 # 禁用缓存，确保更新代码
 ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
 RUN git pull

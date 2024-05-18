@@ -28,6 +28,7 @@ RUN python3 -m pip install -r request_llms/requirements_chatglm.txt
 RUN python3 -m pip install -r request_llms/requirements_newbing.txt
 RUN python3 -m pip install nougat-ocr
 
+# edge-tts需要的依赖
 RUN apt update && apt install ffmpeg -y
 
 # 预热Tiktoken模块
