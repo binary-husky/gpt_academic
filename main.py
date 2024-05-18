@@ -122,7 +122,7 @@ def main():
                             predefined_btns.update({k: functional[k]["Button"]})
                 with gr.Accordion("函数插件区", open=True, elem_id="plugin-panel") as area_crazy_fn:
                     with gr.Row():
-                        gr.Markdown("插件可读取“输入区”文本/路径作为参数（上传文件自动修正路径）")
+                        gr.Markdown("<small>插件可读取“输入区”文本/路径作为参数（上传文件自动修正路径）</small>")
                     with gr.Row(elem_id="input-plugin-group"):
                         plugin_group_sel = gr.Dropdown(choices=all_plugin_groups, label='', show_label=False, value=DEFAULT_FN_GROUPS,
                                                       multiselect=True, interactive=True, elem_classes='normal_mut_select').style(container=False)
@@ -142,7 +142,7 @@ def main():
                                 if not plugin.get("AsButton", True): dropdown_fn_list.append(k)     # 排除已经是按钮的插件
                                 elif plugin.get('AdvancedArgs', False): dropdown_fn_list.append(k)  # 对于需要高级参数的插件，亦在下拉菜单中显示
                             with gr.Row():
-                                dropdown = gr.Dropdown(dropdown_fn_list, value=r"打开插件列表", label="", show_label=False).style(container=False)
+                                dropdown = gr.Dropdown(dropdown_fn_list, value=r"点击这里搜索插件列表", label="", show_label=False).style(container=False)
                             with gr.Row():
                                 plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False,
                                                                  placeholder="这里是特殊函数插件的高级参数输入区").style(container=False)
@@ -314,7 +314,7 @@ def main():
         )
         # 随变按钮的回调函数注册
         def route(request: gr.Request, k, *args, **kwargs):
-            if k in [r"打开插件列表", r"请先从插件列表中选择"]: return
+            if k in [r"点击这里搜索插件列表", r"请先从插件列表中选择"]: return
             yield from ArgsGeneralWrapper(plugins[k]["Function"])(request, *args, **kwargs)
         click_handle = switchy_bt.click(route,[switchy_bt, *input_combo], output_combo)
         click_handle.then(on_report_generated, [cookies, file_upload, chatbot], [cookies, file_upload, chatbot]).then(None, [switchy_bt], None, _js=r"(fn)=>on_plugin_exe_complete(fn)")
@@ -364,8 +364,9 @@ def main():
         def warm_up_mods(): time.sleep(6); warm_up_modules()
 
         threading.Thread(target=auto_updates, name="self-upgrade", daemon=True).start() # 查看自动更新
-        threading.Thread(target=open_browser, name="open-browser", daemon=True).start() # 打开浏览器页面
         threading.Thread(target=warm_up_mods, name="warm-up",      daemon=True).start() # 预热tiktoken模块
+        if get_conf('AUTO_OPEN_BROWSER'):
+            threading.Thread(target=open_browser, name="open-browser", daemon=True).start() # 打开浏览器页面
 
     # 运行一些异步任务：自动更新、打开浏览器页面、预热tiktoken模块
     run_delayed_tasks()
