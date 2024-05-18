@@ -201,7 +201,7 @@ ALIYUN_SECRET=""    # （无需填写）
 
 
 # GPT-SOVITS 文本转语音服务的运行地址（将语言模型的生成文本朗读出来）
-TTS_TYPE = "DISABLE" # EDGE_TTS / LOCAL_SOVITS_API / DISABLE
+TTS_TYPE = "EDGE_TTS" # EDGE_TTS / LOCAL_SOVITS_API / DISABLE
 GPT_SOVITS_URL = ""
 EDGE_TTS_VOICE = "zh-CN-XiaoxiaoNeural"
 

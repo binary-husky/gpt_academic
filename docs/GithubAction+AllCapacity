@@ -28,6 +28,7 @@ RUN python3 -m pip install -r request_llms/requirements_chatglm.txt
 RUN python3 -m pip install -r request_llms/requirements_newbing.txt
 RUN python3 -m pip install nougat-ocr
 
+RUN apt update && apt install ffmpeg -y
 
 # 预热Tiktoken模块
 RUN python3  -c 'from check_proxy import warm_up_modules; warm_up_modules()'
