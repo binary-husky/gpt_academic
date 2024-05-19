@@ -1,4 +1,5 @@
 import json
+import base64
 from typing import Callable
 
 def load_web_cookie_cache__fn_builder(customize_btns, cookies, predefined_btns)->Callable:
@@ -86,3 +87,58 @@ def make_history_cache():
     history_cache_update = gr.Button("", elem_id="elem_update_history", visible=False).click(
         process_history_cache, inputs=[history_cache], outputs=[history])
     return history, history_cache, history_cache_update
+
+
+
+"""
+with gr.Row():
+    txt = gr.Textbox(show_label=False, placeholder="Input question here.", elem_id='user_input_main').style(container=False)
+    txtx = gr.Textbox(show_label=False, placeholder="Input question here.", elem_id='user_input_main').style(container=False)
+with gr.Row():
+    btn_value = "Test"
+    elem_id = "TestCase"
+    variant = "primary"
+    input_list = [txt, txtx]
+    output_list = [txt, txtx]
+    input_name_list = ["txt(input)", "txtx(input)"]
+    output_name_list = ["txt", "txtx"]
+    js_callback = """(txt, txtx)=>{console.log(txt); console.log(txtx);}"""
+    def function(txt, txtx):
+        return "booo", "goooo"
+    create_button_with_javascript_callback(btn_value, elem_id, variant, js_callback, input_list, output_list, function, input_name_list, output_name_list)
+"""
+def create_button_with_javascript_callback(btn_value, elem_id, variant, js_callback, input_list, output_list, function, input_name_list, output_name_list):
+    import gradio as gr
+    middle_ware_component = gr.Textbox(visible=False, elem_id=elem_id+'_buffer')
+    def get_fn_wrap():
+        def fn_wrap(*args):
+            summary_dict = {}
+            for name, value in zip(input_name_list, args):
+                summary_dict.update({name: value})
+
+            res = function(*args)
+
+            for name, value in zip(output_name_list, res):
+                summary_dict.update({name: value})
+
+            summary = base64.b64encode(json.dumps(summary_dict).encode('utf8')).decode("utf-8")
+            return (*res, summary)
+        return fn_wrap
+
+    btn = gr.Button(btn_value, elem_id=elem_id, variant=variant)
+    call_args = ""
+    for name in output_name_list:
+        call_args += f"""Data["{name}"],"""
+    call_args = call_args.rstrip(",")
+    _js_callback = """
+        (base64MiddleString)=>{
+            console.log('hello')
+            const stringData = atob(base64MiddleString);
+            let Data = JSON.parse(stringData);
+            call = JS_CALLBACK_GEN;
+            call(CALL_ARGS);
+        }
+    """.replace("JS_CALLBACK_GEN", js_callback).replace("CALL_ARGS", call_args)
+
+    btn.click(get_fn_wrap(), input_list, output_list+[middle_ware_component]).then(None, [middle_ware_component], None, _js=_js_callback)
+    return btn
