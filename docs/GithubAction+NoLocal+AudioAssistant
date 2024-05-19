@@ -15,6 +15,9 @@ RUN pip3 install -r requirements.txt
 # 安装语音插件的额外依赖
 RUN pip3 install aliyun-python-sdk-core==2.13.3 pyOpenSSL webrtcvad scipy git+https://github.com/aliyun/alibabacloud-nls-python-sdk.git
 
+# edge-tts需要的依赖
+RUN apt update && apt install ffmpeg -y
+
 # 可选步骤，用于预热模块
 RUN python3  -c 'from check_proxy import warm_up_modules; warm_up_modules()'
 
