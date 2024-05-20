@@ -295,6 +295,9 @@ PLUGIN_HOT_RELOAD = False
 NUM_CUSTOM_BASIC_BTN = 4
 
 
+#tesseract路径
+TESSERACT_PATH = "path/to/your/tesseract.exe"
+
 
 """
 --------------- 配置关联关系说明 ---------------

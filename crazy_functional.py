@@ -35,6 +35,7 @@ def get_crazy_functions():
     from crazy_functions.批量Markdown翻译 import Markdown中译英
     from crazy_functions.虚空终端 import 虚空终端
     from crazy_functions.生成多种Mermaid图表 import 生成多种Mermaid图表
+    from crazy_functions.批量总结图像PDF文档 import 批量总结图像PDF文档
 
     from crazy_functions.PDF_Translate_Wrap import PDF_Tran
 
@@ -227,6 +228,15 @@ def get_crazy_functions():
             "Info": "批量总结PDF文档的内容 | 输入参数为路径",
             "Function": HotReload(批量总结PDF文档),
         },
+        "批量总结PDF文档（图像PDF）": {
+            "Group": "学术",
+            "Color": "stop",
+            "AsButton": False,  # 加入下拉菜单中
+            "Info": "批量总结图像PDF文档的内容 | 输入参数为路径",
+            "Function": HotReload(批量总结图像PDF文档),
+            "AdvancedArgs": True,
+            "ArgsReminder": "请输入要识别语言的代码，支持的语言代码详见此网页：https://gitee.com/dalaomai/tessdata_fast。示例：①简体中文：chi_sim；②简体中文和英文：chi_sim+eng；③竖版繁体中文：chi_tra_vert",
+        },
         "谷歌学术检索助手（输入谷歌学术搜索页url）": {
             "Group": "学术",
             "Color": "stop",
@@ -333,6 +343,19 @@ def get_crazy_functions():
                     "Info": "连接网络回答问题（需要访问中文Bing）| 输入参数是一个问题",
                     "Function": HotReload(连接bing搜索回答问题),
                 }
+            }
+        )
+        from crazy_functions.联网的ChatGPT_百度版 import 连接百度搜索回答问题
+        
+        function_plugins.update(
+            {
+                "连接网络回答问题（百度版，输入问题后点击该插件）": {
+                    "Group": "对话",
+                    "Color": "stop",
+                    "AsButton": False,  # 加入下拉菜单中
+                    "Info": "连接网络回答问题| 输入参数是一个问题",
+                    "Function": HotReload(连接百度搜索回答问题),
+                },
             }
         )
     except:
