@@ -8,7 +8,7 @@ class ArgProperty(BaseModel): # PLUGIN_ARG_MENU
     description: str = Field(description="The description", default="")
     default_value: str|float = Field(description="The default value", default="")
     type: str = Field(description="The type", default="")   # currently we support ['string', 'dropdown']
-    options: List[str] = Field(default=[], description="List of options available for the argument")
+    options: List[str] = Field(default=[], description="List of options available for the argument") # only used when type is 'dropdown'
 
 class GptAcademicPluginTemplate():
     def __init__(self):
@@ -16,6 +16,7 @@ class GptAcademicPluginTemplate():
         # thus you should not store any state in the plugin instance,
         # which may be accessed by multiple threads
         pass
+
 
     def define_arg_selection_menu(self):
         """
@@ -41,17 +42,10 @@ class GptAcademicPluginTemplate():
 
         if len(define_arg_selection.keys()) > 8:
             raise ValueError("You can only have up to 8 arguments in the define_arg_selection")
-        if "main_input" not in define_arg_selection:
-            raise ValueError("You must have a 'main_input' in the define_arg_selection")
+        # if "main_input" not in define_arg_selection:
+        #     raise ValueError("You must have a 'main_input' in the define_arg_selection")
 
         DEFINE_ARG_INPUT_INTERFACE = json.dumps(define_arg_selection)
-        # return dedent("""
-        #     ()=>generate_menu("{GUI_JS}", "{BTN_NAME}")
-        # """.format(
-        #         GUI_JS=base64.b64encode(DEFINE_ARG_INPUT_INTERFACE.encode('utf-8')).decode('utf-8'),
-        #         BTN_NAME=btnName
-        #     )
-        # )
         return base64.b64encode(DEFINE_ARG_INPUT_INTERFACE.encode('utf-8')).decode('utf-8')
 
     def execute(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):

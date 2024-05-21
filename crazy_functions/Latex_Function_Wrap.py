@@ -5,6 +5,9 @@ from crazy_functions.plugin_template.plugin_class_template import GptAcademicPlu
 
 class Arxiv_Localize(GptAcademicPluginTemplate):
     def __init__(self):
+        """
+        请注意`execute`会执行在不同的线程中，因此您在定义和使用类变量时，应当慎之又慎！
+        """
         pass
 
     def define_arg_selection_menu(self):
@@ -26,7 +29,9 @@ class Arxiv_Localize(GptAcademicPluginTemplate):
         return gui_definition
 
     def execute(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
-
+        """
+        执行插件
+        """
         allow_cache = plugin_kwargs["allow_cache"]
         advanced_arg = plugin_kwargs["advanced_arg"]
 

@@ -4,6 +4,9 @@ from .PDF_Translate import 批量翻译PDF文档
 
 class PDF_Tran(GptAcademicPluginTemplate):
     def __init__(self):
+        """
+        请注意`execute`会执行在不同的线程中，因此您在定义和使用类变量时，应当慎之又慎！
+        """
         pass
 
     def define_arg_selection_menu(self):
@@ -21,6 +24,9 @@ class PDF_Tran(GptAcademicPluginTemplate):
         return gui_definition
 
     def execute(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
+        """
+        执行插件
+        """
         main_input = plugin_kwargs["main_input"]
         additional_prompt = plugin_kwargs["additional_prompt"]
         pdf_parse_method = plugin_kwargs["pdf_parse_method"]

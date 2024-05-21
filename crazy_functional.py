@@ -15,6 +15,7 @@ def get_crazy_functions():
     from crazy_functions.解析项目源代码 import 解析一个Java项目
     from crazy_functions.解析项目源代码 import 解析一个前端项目
     from crazy_functions.高级功能函数模板 import 高阶功能模板函数
+    from crazy_functions.高级功能函数模板 import Demo_Wrap
     from crazy_functions.Latex全文润色 import Latex英文润色
     from crazy_functions.询问多个大语言模型 import 同时问询
     from crazy_functions.解析项目源代码 import 解析一个Lua项目
@@ -208,7 +209,8 @@ def get_crazy_functions():
             "Group": "对话",
             "AsButton": True,
             "Info": "查看历史上的今天事件 (这是一个面向开发者的插件Demo) | 不需要输入参数",
-            "Function": HotReload(高阶功能模板函数),
+            "Function": None,
+            "Class": Demo_Wrap,
         },
         "精准翻译PDF论文": {
             "Group": "学术",
