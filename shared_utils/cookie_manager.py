@@ -102,7 +102,7 @@ with gr.Row():
     output_list = [txt, txtx]
     input_name_list = ["txt(input)", "txtx(input)"]
     output_name_list = ["txt", "txtx"]
-    js_callback = """(txt, txtx)=>{console.log(txt); console.log(txtx);}"""
+    js_callback = "(txt, txtx)=>{console.log(txt); console.log(txtx);}"
     def function(txt, txtx):
         return "booo", "goooo"
     create_button_with_javascript_callback(btn_value, elem_id, variant, js_callback, input_list, output_list, function, input_name_list, output_name_list)
