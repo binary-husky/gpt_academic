@@ -66,7 +66,7 @@ def decode_chunk(chunk):
     return respose, finish_reason
 
 
-def generate_message(input, model, key, history, max_output_token, system_prompt, temperature):
+def generate_message(chatbot, input, model, key, history, max_output_token, system_prompt, temperature):
     """
     整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
     """
@@ -115,7 +115,9 @@ def generate_message(input, model, key, history, max_output_token, system_prompt
 def get_predict_function(
         api_key_conf_name,
         max_output_token,
-        disable_proxy = False
+        disable_proxy = False,
+        encode_call = generate_message,
+        decode_call = decode_chunk
     ):
     """
     为openai格式的API生成响应函数，其中传入参数：
@@ -126,6 +128,10 @@ def get_predict_function(
         ⚠️请不要与模型的最大token数量相混淆。
     disable_proxy：
         是否使用代理，True为不使用，False为使用。
+    encode_call：
+        是否使用自定义的encode函数，如果不是，则使用默认的generate_message
+    decode_call：
+        是否使用自定义的decode函数，如果不是，则使用默认的decode_chunk
     """
 
     APIKEY = get_conf(api_key_conf_name)
@@ -156,7 +162,8 @@ def get_predict_function(
             raise RuntimeError(f"APIKEY为空,请检查配置文件的{APIKEY}")
         if inputs == "":
             inputs = "你好👋"
-        headers, playload = generate_message(
+        headers, playload = encode_call(
+            chatbot=None,
             input=inputs,
             model=llm_kwargs["llm_model"],
             key=APIKEY,
@@ -206,7 +213,7 @@ def get_predict_function(
                 break
             except requests.exceptions.ConnectionError:
                 chunk = next(stream_response)  # 失败了，重试一次？再失败就没办法了。
-            response_text, finish_reason = decode_chunk(chunk)
+            response_text, finish_reason = decode_call(chunk)
             # 返回的数据流第一次为空，继续等待
             if response_text == "" and finish_reason != "False":
                 continue
@@ -289,7 +296,8 @@ def get_predict_function(
             )  # 刷新界面
             time.sleep(2)
 
-        headers, playload = generate_message(
+        headers, playload = encode_call(
+            chatbot=chatbot,
             input=inputs,
             model=llm_kwargs["llm_model"],
             key=APIKEY,
@@ -347,7 +355,7 @@ def get_predict_function(
                 break
             except requests.exceptions.ConnectionError:
                 chunk = next(stream_response)  # 失败了，重试一次？再失败就没办法了。
-            response_text, finish_reason = decode_chunk(chunk)
+            response_text, finish_reason = decode_call(chunk)
             # 返回的数据流第一次为空，继续等待
             if response_text == "" and finish_reason != "False":
                 continue

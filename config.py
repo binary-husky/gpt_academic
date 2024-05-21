@@ -43,7 +43,7 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
 # AVAIL_LLM_MODELS = [
 #   "qianfan", "deepseekcoder",
 #   "spark", "sparkv2", "sparkv3", "sparkv3.5",
-#   "qwen-turbo", "qwen-plus", "qwen-max", "qwen-local",
+#   "qwen-turbo", "qwen-plus", "qwen-max", "qwen-max-longcontext", "qwen-long", "qwen-local",
 #   "moonshot-v1-128k", "moonshot-v1-32k", "moonshot-v1-8k",
 #   "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo-0125", "gpt-4o-2024-05-13"
 #   "claude-3-haiku-20240307","claude-3-sonnet-20240229","claude-3-opus-20240229", "claude-2.1", "claude-instant-1.2",
@@ -127,7 +127,7 @@ MULTI_QUERY_LLM_MODELS = "gpt-3.5-turbo&chatglm3"
 QWEN_LOCAL_MODEL_SELECTION = "Qwen/Qwen-1_8B-Chat-Int8"
 
 
-# 接入通义千问在线大模型 https://dashscope.console.aliyun.com/
+# 接入通义千问在线大模型 https://bailian.console.aliyun.com/
 DASHSCOPE_API_KEY = "" # 阿里灵积云API_KEY
 
 
