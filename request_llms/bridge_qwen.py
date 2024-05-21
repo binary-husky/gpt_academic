@@ -1,66 +1,87 @@
-import time
-import os
-from toolbox import update_ui, get_conf, update_ui_lastest_msg
-from toolbox import check_packages, report_exception
+import json
 
-model_name = 'Qwen'
+timeout_bot_msg = (
+    "[Local Message] Request timeout. Network error. Please check proxy settings in config.py."
+    + "网络错误，检查代理服务器是否可用，以及代理设置的格式是否正确，格式须是[协议]://[地址]:[端口]，缺一不可。"
+)
 
-def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], sys_prompt:str="",
-                                  observe_window:list=[], console_slience:bool=False):
+def decode_chunk(chunk):
     """
-        ⭐多线程方法
-        函数的说明请见 request_llms/bridge_all.py
+    用于解读"content"和"finish_reason"的内容
     """
-    watch_dog_patience = 5
-    response = ""
-
-    from .com_qwenapi import QwenRequestInstance
-    sri = QwenRequestInstance()
-    for response in sri.generate(inputs, llm_kwargs, history, sys_prompt):
-        if len(observe_window) >= 1:
-            observe_window[0] = response
-        if len(observe_window) >= 2:
-            if (time.time()-observe_window[1]) > watch_dog_patience: raise RuntimeError("程序终止。")
-    return response
-
-def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream = True, additional_fn=None):
-    """
-        ⭐单线程方法
-        函数的说明请见 request_llms/bridge_all.py
-    """
-    chatbot.append((inputs, ""))
-    yield from update_ui(chatbot=chatbot, history=history)
-
-    # 尝试导入依赖，如果缺少依赖，则给出安装建议
+    chunk = chunk.decode()
+    respose = ""
+    finish_reason = "False"
     try:
-        check_packages(["dashscope"])
+        chunk = json.loads(chunk[6:])
     except:
-        yield from update_ui_lastest_msg(f"导入软件依赖失败。使用该模型需要额外依赖，安装方法```pip install --upgrade dashscope```。",
-                                         chatbot=chatbot, history=history, delay=0)
-        return
+        finish_reason = "JSON_ERROR"
+    # 错误处理部分
+    if "error" in chunk:
+        respose = "API_ERROR"
+        try:
+            chunk = json.loads(chunk)
+            finish_reason = chunk["error"]["code"]
+        except:
+            finish_reason = "API_ERROR"
+        return respose, finish_reason
 
-    # 检查DASHSCOPE_API_KEY
-    if get_conf("DASHSCOPE_API_KEY") == "":
-        yield from update_ui_lastest_msg(f"请配置 DASHSCOPE_API_KEY。",
-                                         chatbot=chatbot, history=history, delay=0)
-        return
+    try:
+        respose = chunk["choices"][0]["delta"]["content"]
+    except:
+        pass
+    try:
+        finish_reason = chunk["choices"][0]["finish_reason"]
+    except:
+        pass
+    return respose, finish_reason
 
-    if additional_fn is not None:
-        from core_functional import handle_core_functionality
-        inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
-        chatbot[-1] = (inputs, "")
-        yield from update_ui(chatbot=chatbot, history=history)
 
-    # 开始接收回复
-    from .com_qwenapi import QwenRequestInstance
-    sri = QwenRequestInstance()
-    response = f"[Local Message] 等待{model_name}响应中 ..."
-    for response in sri.generate(inputs, llm_kwargs, history, system_prompt):
-        chatbot[-1] = (inputs, response)
-        yield from update_ui(chatbot=chatbot, history=history)
+def generate_message(chatbot, input, model, key, history, max_output_token, system_prompt, temperature):
+    """
+    整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
+    """
+    api_key = f"Bearer {key}"
 
-    # 总结输出
-    if response == f"[Local Message] 等待{model_name}响应中 ...":
-        response = f"[Local Message] {model_name}响应异常 ..."
-    history.extend([inputs, response])
-    yield from update_ui(chatbot=chatbot, history=history)
+    headers = {"Content-Type": "application/json", "Authorization": api_key}
+
+    conversation_cnt = len(history) // 2
+
+    messages = [{"role": "system", "content": system_prompt}]
+    if conversation_cnt:
+        for index in range(0, 2 * conversation_cnt, 2):
+            what_i_have_asked = {}
+            what_i_have_asked["role"] = "user"
+            what_i_have_asked["content"] = history[index]
+            what_gpt_answer = {}
+            what_gpt_answer["role"] = "assistant"
+            what_gpt_answer["content"] = history[index + 1]
+            if what_i_have_asked["content"] != "":
+                if what_gpt_answer["content"] == "":
+                    continue
+                if what_gpt_answer["content"] == timeout_bot_msg:
+                    continue
+                messages.append(what_i_have_asked)
+                messages.append(what_gpt_answer)
+            else:
+                messages[-1]["content"] = what_gpt_answer["content"]
+    what_i_ask_now = {}
+    what_i_ask_now["role"] = "user"
+    what_i_ask_now["content"] = input
+    messages.append(what_i_ask_now)
+    if temperature == 2: temperature -= 1e-5
+    playload = {
+        "model": model,
+        "input": messages,
+        "parameters":{
+            "result_format": "message",
+            "temperature": temperature,
+            "incremental_output": True,
+            "max_tokens": max_output_token,
+        }
+    }
+    try:
+        print(f" {model} : {conversation_cnt} : {input[:100]} ..........")
+    except:
+        print("输入中可能存在乱码。")
+    return headers, playload

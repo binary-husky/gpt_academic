@@ -72,6 +72,7 @@ cohere_endpoint = "https://api.cohere.ai/v1/chat"
 ollama_endpoint = "http://localhost:11434/api/chat"
 yimodel_endpoint = "https://api.lingyiwanwu.com/v1/chat/completions"
 deepseekapi_endpoint = "https://api.deepseek.com/v1/chat/completions"
+qwenapi_endpoint = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
 
 if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
 azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
@@ -93,6 +94,7 @@ if cohere_endpoint in API_URL_REDIRECT: cohere_endpoint = API_URL_REDIRECT[coher
 if ollama_endpoint in API_URL_REDIRECT: ollama_endpoint = API_URL_REDIRECT[ollama_endpoint]
 if yimodel_endpoint in API_URL_REDIRECT: yimodel_endpoint = API_URL_REDIRECT[yimodel_endpoint]
 if deepseekapi_endpoint in API_URL_REDIRECT: deepseekapi_endpoint = API_URL_REDIRECT[deepseekapi_endpoint]
+if qwenapi_endpoint in API_URL_REDIRECT: qwenapi_endpoint = API_URL_REDIRECT[qwenapi_endpoint]
 
 # 获取tokenizer
 tokenizer_gpt35 = LazyloadTiktoken("gpt-3.5-turbo")
@@ -640,38 +642,61 @@ if "qwen-local" in AVAIL_LLM_MODELS:
     except:
         print(trimmed_format_exc())
 # -=-=-=-=-=-=- 通义-在线模型 -=-=-=-=-=-=-
-if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-max" in AVAIL_LLM_MODELS:   # zhipuai
+qwen_models = ["qwen-turbo","qwen-plus","qwen-max","qwen-max-longcontext","qwen-long"]
+if any(item in qwen_models for item in AVAIL_LLM_MODELS):
     try:
-        from .bridge_qwen import predict_no_ui_long_connection as qwen_noui
-        from .bridge_qwen import predict as qwen_ui
+        qwen_1500_noui, qwen_1500_ui = get_predict_function(
+            api_key_conf_name="DASHSCOPE_API_KEY", max_output_token=1500, disable_proxy=False
+            )
+        qwen_2000_noui, qwen_2000_ui = get_predict_function(
+            api_key_conf_name="DASHSCOPE_API_KEY", max_output_token=2000, disable_proxy=False
+            )
         model_info.update({
             "qwen-turbo": {
-                "fn_with_ui": qwen_ui,
-                "fn_without_ui": qwen_noui,
+                "fn_with_ui": qwen_1500_ui,
+                "fn_without_ui": qwen_1500_noui,
                 "can_multi_thread": True,
-                "endpoint": None,
+                "endpoint": qwenapi_endpoint,
                 "max_token": 6144,
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
             },
             "qwen-plus": {
-                "fn_with_ui": qwen_ui,
-                "fn_without_ui": qwen_noui,
+                "fn_with_ui": qwen_2000_ui,
+                "fn_without_ui": qwen_2000_noui,
                 "can_multi_thread": True,
-                "endpoint": None,
+                "endpoint": qwenapi_endpoint,
                 "max_token": 30720,
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
             },
             "qwen-max": {
-                "fn_with_ui": qwen_ui,
-                "fn_without_ui": qwen_noui,
+                "fn_with_ui": qwen_2000_ui,
+                "fn_without_ui": qwen_2000_noui,
                 "can_multi_thread": True,
-                "endpoint": None,
+                "endpoint": qwenapi_endpoint,
+                "max_token": 6144,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "qwen-max-longcontext": {
+                "fn_with_ui": qwen_2000_ui,
+                "fn_without_ui": qwen_2000_noui,
+                "can_multi_thread": True,
+                "endpoint": qwenapi_endpoint,
                 "max_token": 28672,
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
-            }
+            },
+            "qwen-long": {
+                "fn_with_ui": qwen_2000_ui,
+                "fn_without_ui": qwen_2000_noui,
+                "can_multi_thread": True,
+                "endpoint": qwenapi_endpoint,
+                "max_token": 1000000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
         })
     except:
         print(trimmed_format_exc())
