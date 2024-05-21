@@ -15,7 +15,7 @@ class PDF_Tran(GptAcademicPluginTemplate):
         """
         gui_definition = {
             "main_input":
-                ArgProperty(title="PDF文件路径", description="请上传文件后，再点击该插件", default_value="", type="string").model_dump_json(), # 主输入，自动从输入框同步
+                ArgProperty(title="PDF文件路径", description="未指定路径，请上传文件后，再点击该插件", default_value="", type="string").model_dump_json(), # 主输入，自动从输入框同步
             "additional_prompt":
                 ArgProperty(title="额外提示词", description="例如：对专有名词、翻译语气等方面的要求", default_value="", type="string").model_dump_json(), # 高级参数输入区，自动同步
             "pdf_parse_method":

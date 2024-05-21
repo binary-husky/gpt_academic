@@ -158,65 +158,72 @@ def arxiv_download(chatbot, history, txt, allow_cache=True):
     return extract_dst, arxiv_id
 
 
-def pdf2tex_project(pdf_file_path):
-    # Mathpix API credentials
-    app_id, app_key = get_conf('MATHPIX_APPID', 'MATHPIX_APPKEY')
-    headers = {"app_id": app_id, "app_key": app_key}
+def pdf2tex_project(pdf_file_path, plugin_kwargs):
+    if plugin_kwargs["method"] == "MATHPIX":
+        # Mathpix API credentials
+        app_id, app_key = get_conf('MATHPIX_APPID', 'MATHPIX_APPKEY')
+        headers = {"app_id": app_id, "app_key": app_key}
 
-    # Step 1: Send PDF file for processing
-    options = {
-        "conversion_formats": {"tex.zip": True},
-        "math_inline_delimiters": ["$", "$"],
-        "rm_spaces": True
-    }
+        # Step 1: Send PDF file for processing
+        options = {
+            "conversion_formats": {"tex.zip": True},
+            "math_inline_delimiters": ["$", "$"],
+            "rm_spaces": True
+        }
 
-    response = requests.post(url="https://api.mathpix.com/v3/pdf",
-                             headers=headers,
-                             data={"options_json": json.dumps(options)},
-                             files={"file": open(pdf_file_path, "rb")})
+        response = requests.post(url="https://api.mathpix.com/v3/pdf",
+                                headers=headers,
+                                data={"options_json": json.dumps(options)},
+                                files={"file": open(pdf_file_path, "rb")})
 
-    if response.ok:
-        pdf_id = response.json()["pdf_id"]
-        print(f"PDF processing initiated. PDF ID: {pdf_id}")
+        if response.ok:
+            pdf_id = response.json()["pdf_id"]
+            print(f"PDF processing initiated. PDF ID: {pdf_id}")
 
-        # Step 2: Check processing status
-        while True:
-            conversion_response = requests.get(f"https://api.mathpix.com/v3/pdf/{pdf_id}", headers=headers)
-            conversion_data = conversion_response.json()
+            # Step 2: Check processing status
+            while True:
+                conversion_response = requests.get(f"https://api.mathpix.com/v3/pdf/{pdf_id}", headers=headers)
+                conversion_data = conversion_response.json()
 
-            if conversion_data["status"] == "completed":
-                print("PDF processing completed.")
-                break
-            elif conversion_data["status"] == "error":
-                print("Error occurred during processing.")
-            else:
-                print(f"Processing status: {conversion_data['status']}")
-                time.sleep(5)  # wait for a few seconds before checking again
+                if conversion_data["status"] == "completed":
+                    print("PDF processing completed.")
+                    break
+                elif conversion_data["status"] == "error":
+                    print("Error occurred during processing.")
+                else:
+                    print(f"Processing status: {conversion_data['status']}")
+                    time.sleep(5)  # wait for a few seconds before checking again
 
-        # Step 3: Save results to local files
-        output_dir = os.path.join(os.path.dirname(pdf_file_path), 'mathpix_output')
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+            # Step 3: Save results to local files
+            output_dir = os.path.join(os.path.dirname(pdf_file_path), 'mathpix_output')
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
 
-        url = f"https://api.mathpix.com/v3/pdf/{pdf_id}.tex"
-        response = requests.get(url, headers=headers)
-        file_name_wo_dot = '_'.join(os.path.basename(pdf_file_path).split('.')[:-1])
-        output_name = f"{file_name_wo_dot}.tex.zip"
-        output_path = os.path.join(output_dir, output_name)
-        with open(output_path, "wb") as output_file:
-            output_file.write(response.content)
-        print(f"tex.zip file saved at: {output_path}")
+            url = f"https://api.mathpix.com/v3/pdf/{pdf_id}.tex"
+            response = requests.get(url, headers=headers)
+            file_name_wo_dot = '_'.join(os.path.basename(pdf_file_path).split('.')[:-1])
+            output_name = f"{file_name_wo_dot}.tex.zip"
+            output_path = os.path.join(output_dir, output_name)
+            with open(output_path, "wb") as output_file:
+                output_file.write(response.content)
+            print(f"tex.zip file saved at: {output_path}")
 
-        import zipfile
-        unzip_dir = os.path.join(output_dir, file_name_wo_dot)
-        with zipfile.ZipFile(output_path, 'r') as zip_ref:
-            zip_ref.extractall(unzip_dir)
+            import zipfile
+            unzip_dir = os.path.join(output_dir, file_name_wo_dot)
+            with zipfile.ZipFile(output_path, 'r') as zip_ref:
+                zip_ref.extractall(unzip_dir)
 
+            return unzip_dir
+
+        else:
+            print(f"Error sending PDF for processing. Status code: {response.status_code}")
+            return None
+    else:
+        from crazy_functions.pdf_fns.parse_pdf_via_doc2x import 解析PDF_DOC2X_转Latex
+        unzip_dir = 解析PDF_DOC2X_转Latex(pdf_file_path)
         return unzip_dir
 
-    else:
-        print(f"Error sending PDF for processing. Status code: {response.status_code}")
-        return None
+
 
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= 插件主程序1 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -437,11 +444,20 @@ def PDF翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot, h
         report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"不支持同时处理多个pdf文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
         return
-    app_id, app_key = get_conf('MATHPIX_APPID', 'MATHPIX_APPKEY')
-    if len(app_id) == 0 or len(app_key) == 0:
-        report_exception(chatbot, history, a="缺失 MATHPIX_APPID 和 MATHPIX_APPKEY。", b=f"请配置 MATHPIX_APPID 和 MATHPIX_APPKEY")
-        yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
-        return
+
+    if plugin_kwargs.get("method", "") == 'MATHPIX':
+        app_id, app_key = get_conf('MATHPIX_APPID', 'MATHPIX_APPKEY')
+        if len(app_id) == 0 or len(app_key) == 0:
+            report_exception(chatbot, history, a="缺失 MATHPIX_APPID 和 MATHPIX_APPKEY。", b=f"请配置 MATHPIX_APPID 和 MATHPIX_APPKEY")
+            yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
+            return
+    if plugin_kwargs.get("method", "") == 'DOC2X':
+        app_id, app_key = "", ""
+        DOC2X_API_KEY = get_conf('DOC2X_API_KEY')
+        if len(DOC2X_API_KEY) == 0:
+            report_exception(chatbot, history, a="缺失 DOC2X_API_KEY。", b=f"请配置 DOC2X_API_KEY")
+            yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
+            return
 
     hash_tag = map_file_to_sha256(file_manifest[0])
 
@@ -486,7 +502,7 @@ def PDF翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot, h
         # <-------------- convert pdf into tex ------------->
         chatbot.append([f"解析项目: {txt}", "正在将PDF转换为tex项目，请耐心等待..."])
         yield from update_ui(chatbot=chatbot, history=history)
-        project_folder = pdf2tex_project(file_manifest[0])
+        project_folder = pdf2tex_project(file_manifest[0], plugin_kwargs)
         if project_folder is None:
             report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"PDF转换为tex项目失败")
             yield from update_ui(chatbot=chatbot, history=history)

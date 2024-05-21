@@ -1,4 +1,4 @@
-from toolbox import get_log_folder, gen_time_str
+from toolbox import get_log_folder, gen_time_str, get_conf
 from toolbox import update_ui, promote_file_to_downloadzone
 from toolbox import promote_file_to_downloadzone, extract_archive
 from toolbox import generate_file_link, zip_folder
@@ -6,24 +6,75 @@ from crazy_functions.crazy_utils import get_files_from_everything
 from shared_utils.colorful import *
 import os
 
+def refresh_key(doc2x_api_key):
+    import requests, json
+    url = "https://api.doc2x.noedgeai.com/api/token/refresh"
+    res = requests.post(
+        url,
+        headers={"Authorization": "Bearer " + doc2x_api_key}
+    )
+    res_json = []
+    if res.status_code == 200:
+        decoded = res.content.decode("utf-8")
+        res_json = json.loads(decoded)
+        doc2x_api_key = res_json['data']['token']
+    else:
+        raise RuntimeError(format("[ERROR] status code: %d, body: %s" % (res.status_code, res.text)))
+    return doc2x_api_key
+
+def 解析PDF_DOC2X_转Latex(pdf_file_path):
+    import requests, json, os
+    DOC2X_API_KEY = get_conf('DOC2X_API_KEY')
+    latex_dir = get_log_folder(plugin_name="pdf_ocr_latex")
+    doc2x_api_key = DOC2X_API_KEY
+    if doc2x_api_key.startswith('sk-'):
+        url = "https://api.doc2x.noedgeai.com/api/v1/pdf"
+    else:
+        doc2x_api_key = refresh_key(doc2x_api_key)
+        url = "https://api.doc2x.noedgeai.com/api/platform/pdf"
+
+    res = requests.post(
+        url,
+        files={"file": open(pdf_file_path, "rb")},
+        data={"ocr": "1"},
+        headers={"Authorization": "Bearer " + doc2x_api_key}
+    )
+    res_json = []
+    if res.status_code == 200:
+        decoded = res.content.decode("utf-8")
+        for z_decoded in decoded.split('\n'):
+            if len(z_decoded) == 0: continue
+            assert z_decoded.startswith("data: ")
+            z_decoded = z_decoded[len("data: "):]
+            decoded_json = json.loads(z_decoded)
+            res_json.append(decoded_json)
+    else:
+        raise RuntimeError(format("[ERROR] status code: %d, body: %s" % (res.status_code, res.text)))
+
+    uuid = res_json[0]['uuid']
+    to = "latex" # latex, md, docx
+    url = "https://api.doc2x.noedgeai.com/api/export"+"?request_id="+uuid+"&to="+to
+
+    res = requests.get(url, headers={"Authorization": "Bearer " + doc2x_api_key})
+    latex_zip_path = os.path.join(latex_dir, gen_time_str() + '.zip')
+    latex_unzip_path = os.path.join(latex_dir, gen_time_str())
+    if res.status_code == 200:
+        with open(latex_zip_path, "wb") as f: f.write(res.content)
+    else:
+        raise RuntimeError(format("[ERROR] status code: %d, body: %s" % (res.status_code, res.text)))
+
+    import zipfile
+    with zipfile.ZipFile(latex_zip_path, 'r') as zip_ref:
+        zip_ref.extractall(latex_unzip_path)
+
+
+    return latex_unzip_path
+
+
+
 
 def 解析PDF_DOC2X_单文件(fp, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, DOC2X_API_KEY, user_request):
 
-    def refresh_key(doc2x_api_key):
-        import requests, json
-        url = "https://api.doc2x.noedgeai.com/api/token/refresh"
-        res = requests.post(
-            url,
-            headers={"Authorization": "Bearer " + doc2x_api_key}
-        )
-        res_json = []
-        if res.status_code == 200:
-            decoded = res.content.decode("utf-8")
-            res_json = json.loads(decoded)
-            doc2x_api_key = res_json['data']['token']
-        else:
-            raise RuntimeError(format("[ERROR] status code: %d, body: %s" % (res.status_code, res.text)))
-        return doc2x_api_key
 
     def pdf2markdown(filepath):
         import requests, json, os

@@ -41,6 +41,7 @@ def get_crazy_functions():
     from crazy_functions.Latex_Function import Latex翻译中文并重新编译PDF
     from crazy_functions.Latex_Function import PDF翻译中文并重新编译PDF
     from crazy_functions.Latex_Function_Wrap import Arxiv_Localize
+    from crazy_functions.Latex_Function_Wrap import PDF_Localize
 
 
     function_plugins = {
@@ -333,7 +334,9 @@ def get_crazy_functions():
                             r"例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
                             r'If the term "agent" is used in this section, it should be translated to "智能体". ',
             "Info": "PDF翻译中文，并重新编译PDF | 输入参数为路径",
-            "Function": HotReload(PDF翻译中文并重新编译PDF)
+            "Function": None,
+            "Class": PDF_Localize
+
         }
     }
 
