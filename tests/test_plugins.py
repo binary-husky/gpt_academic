@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     # plugin_test(plugin='crazy_functions.Latex全文润色->Latex英文润色', main_input="crazy_functions/test_project/latex/attention")
 
-    # plugin_test(plugin='crazy_functions.批量Markdown翻译->Markdown中译英', main_input="README.md")
+    # plugin_test(plugin='crazy_functions.Markdown_Translate->Markdown中译英', main_input="README.md")
 
     # plugin_test(plugin='crazy_functions.PDF_Translate->批量翻译PDF文档', main_input='crazy_functions/test_project/pdf_and_word/aaai.pdf')
 
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     # plugin_test(plugin='crazy_functions.数学动画生成manim->动画生成', main_input="A ball split into 2, and then split into 4, and finally split into 8.")
 
     # for lang in ["English", "French", "Japanese", "Korean", "Russian", "Italian", "German", "Portuguese", "Arabic"]:
-    #     plugin_test(plugin='crazy_functions.批量Markdown翻译->Markdown翻译指定语言', main_input="README.md", advanced_arg={"advanced_arg": lang})
+    #     plugin_test(plugin='crazy_functions.Markdown_Translate->Markdown翻译指定语言', main_input="README.md", advanced_arg={"advanced_arg": lang})
 
     # plugin_test(plugin='crazy_functions.知识库文件注入->知识库文件注入', main_input="./")
 

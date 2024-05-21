@@ -1,12 +1,14 @@
 import os, json, base64
 from pydantic import BaseModel, Field
 from textwrap import dedent
+from typing import List
 
-class ArgProperty(BaseModel):
+class ArgProperty(BaseModel): # PLUGIN_ARG_MENU
     title: str = Field(description="The title", default="")
     description: str = Field(description="The description", default="")
     default_value: str|float = Field(description="The default value", default="")
     type: str = Field(description="The type", default="")
+    options: List[str] = Field(default=[], description="List of options available for the argument")
 
 class GptAcademicPluginTemplate():
     def __init__(self):
@@ -40,8 +42,6 @@ class GptAcademicPluginTemplate():
         if len(define_arg_selection.keys()) > 8:
             raise ValueError("You can only have up to 8 arguments in the define_arg_selection")
         if "main_input" not in define_arg_selection:
-            raise ValueError("You must have a 'main_input' in the define_arg_selection")
-        if "advanced_arg" not in define_arg_selection:
             raise ValueError("You must have a 'main_input' in the define_arg_selection")
 
         DEFINE_ARG_INPUT_INTERFACE = json.dumps(define_arg_selection)

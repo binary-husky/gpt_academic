@@ -4,7 +4,7 @@ from toolbox import promote_file_to_downloadzone
 from toolbox import write_history_to_file, promote_file_to_downloadzone
 from toolbox import get_conf
 from toolbox import ProxyNetworkActivate
-from colorful import *
+from shared_utils.colorful import *
 import requests
 import random
 import copy
@@ -72,7 +72,7 @@ def produce_report_markdown(gpt_response_collection, meta, paper_meta_info, chat
     generated_conclusion_files.append(res_path)
     return res_path
 
-def translate_pdf(article_dict, llm_kwargs, chatbot, fp, generated_conclusion_files, TOKEN_LIMIT_PER_FRAGMENT, DST_LANG):
+def translate_pdf(article_dict, llm_kwargs, chatbot, fp, generated_conclusion_files, TOKEN_LIMIT_PER_FRAGMENT, DST_LANG, plugin_kwargs={}):
     from crazy_functions.pdf_fns.report_gen_html import construct_html
     from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit
     from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
@@ -138,7 +138,7 @@ def translate_pdf(article_dict, llm_kwargs, chatbot, fp, generated_conclusion_fi
         chatbot=chatbot,
         history_array=[meta for _ in inputs_array],
         sys_prompt_array=[
-            "请你作为一个学术翻译，负责把学术论文准确翻译成中文。注意文章中的每一句话都要翻译。" for _ in inputs_array],
+            "请你作为一个学术翻译，负责把学术论文准确翻译成中文。注意文章中的每一句话都要翻译。" + plugin_kwargs.get("additional_prompt", "") for _ in inputs_array],
     )
     # -=-=-=-=-=-=-=-= 写出Markdown文件 -=-=-=-=-=-=-=-=
     produce_report_markdown(gpt_response_collection, meta, paper_meta_info, chatbot, fp, generated_conclusion_files)

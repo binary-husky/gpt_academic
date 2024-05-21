@@ -9,9 +9,10 @@ def define_gui_advanced_plugin_class(plugins):
             for u in range(8):
                 with gr.Row():
                     gr.Textbox(show_label=True, label="T1", placeholder="请输入", lines=1, visible=False, elem_id=f"plugin_arg_txt_{u}").style(container=False)
-            # for u in range(8):
-            #     with gr.Row():
-            #         gr.Dropdown(label="T1", value="请选择", visible=False, elem_id=f"plugin_arg_drop_{u}").style(container=False)
+            for u in range(8):
+                with gr.Row(): # PLUGIN_ARG_MENU
+                    gr.Dropdown(label="T1", value="请选择", choices=[], visible=True, elem_id=f"plugin_arg_drop_{u}", interactive=True)
+
             with gr.Row():
                 # 这个隐藏textbox负责装入当前弹出插件的属性
                 gr.Textbox(show_label=False, placeholder="请输入", lines=1, visible=False,

@@ -2,7 +2,7 @@ import importlib
 import time
 import os
 from functools import lru_cache
-from colorful import print亮红, print亮绿, print亮蓝
+from shared_utils.colorful import print亮红, print亮绿, print亮蓝
 
 pj = os.path.join
 default_user_name = 'default_user'

@@ -349,7 +349,7 @@ def read_and_clean_pdf_text(fp):
     import fitz, copy
     import re
     import numpy as np
-    from colorful import print亮黄, print亮绿
+    from shared_utils.colorful import print亮黄, print亮绿
     fc = 0  # Index 0 文本
     fs = 1  # Index 1 字体
     fb = 2  # Index 2 框框

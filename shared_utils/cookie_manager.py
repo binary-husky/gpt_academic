@@ -90,23 +90,23 @@ def make_history_cache():
 
 
 
-"""
-with gr.Row():
-    txt = gr.Textbox(show_label=False, placeholder="Input question here.", elem_id='user_input_main').style(container=False)
-    txtx = gr.Textbox(show_label=False, placeholder="Input question here.", elem_id='user_input_main').style(container=False)
-with gr.Row():
-    btn_value = "Test"
-    elem_id = "TestCase"
-    variant = "primary"
-    input_list = [txt, txtx]
-    output_list = [txt, txtx]
-    input_name_list = ["txt(input)", "txtx(input)"]
-    output_name_list = ["txt", "txtx"]
-    js_callback = """(txt, txtx)=>{console.log(txt); console.log(txtx);}"""
-    def function(txt, txtx):
-        return "booo", "goooo"
-    create_button_with_javascript_callback(btn_value, elem_id, variant, js_callback, input_list, output_list, function, input_name_list, output_name_list)
-"""
+# """
+# with gr.Row():
+#     txt = gr.Textbox(show_label=False, placeholder="Input question here.", elem_id='user_input_main').style(container=False)
+#     txtx = gr.Textbox(show_label=False, placeholder="Input question here.", elem_id='user_input_main').style(container=False)
+# with gr.Row():
+#     btn_value = "Test"
+#     elem_id = "TestCase"
+#     variant = "primary"
+#     input_list = [txt, txtx]
+#     output_list = [txt, txtx]
+#     input_name_list = ["txt(input)", "txtx(input)"]
+#     output_name_list = ["txt", "txtx"]
+#     js_callback = """(txt, txtx)=>{console.log(txt); console.log(txtx);}"""
+#     def function(txt, txtx):
+#         return "booo", "goooo"
+#     create_button_with_javascript_callback(btn_value, elem_id, variant, js_callback, input_list, output_list, function, input_name_list, output_name_list)
+# """
 def create_button_with_javascript_callback(btn_value, elem_id, variant, js_callback, input_list, output_list, function, input_name_list, output_name_list):
     import gradio as gr
     middle_ware_component = gr.Textbox(visible=False, elem_id=elem_id+'_buffer')

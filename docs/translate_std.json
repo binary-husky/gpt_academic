@@ -13,7 +13,7 @@
     "代码重写为全英文_多线程": "RewriteCodeToEnglish_MultiThreaded",
     "解析一个CSharp项目": "ParsingCSharpProject",
     "删除所有本地对话历史记录": "DeleteAllLocalConversationHistoryRecords",
-    "批量Markdown翻译": "BatchTranslateMarkdown",
+    "Markdown_Translate": "BatchTranslateMarkdown",
     "连接bing搜索回答问题": "ConnectBingSearchAnswerQuestion",
     "Langchain知识库": "LangchainKnowledgeBase",
     "Latex输出PDF": "OutputPDFFromLatex",

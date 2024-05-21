@@ -1551,10 +1551,16 @@ async function generate_menu(guiBase64String, btnName){
     hide_all_elem();
     // 根据 gui_args, 使得对应参数项显现
     let text_cnt = 0;
+    let dropdown_cnt = 0;
+    // PLUGIN_ARG_MENU
     for (const key in gui_args) {
         if (gui_args.hasOwnProperty(key)) {
-            const component_name = "plugin_arg_txt_" + text_cnt;
-            if (gui_args[key].type=='string'){
+
+            ///////////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////    Textbox   ////////////////////////////////////
+            ///////////////////////////////////////////////////////////////////////////////////////////
+            if (gui_args[key].type=='string'){ // PLUGIN_ARG_MENU
+                const component_name = "plugin_arg_txt_" + text_cnt;
                 push_data_to_gradio_component({
                     visible: true,
                     label: gui_args[key].title + "(" + gui_args[key].description +  ")",
@@ -1579,6 +1585,26 @@ async function generate_menu(guiBase64String, btnName){
                 document.getElementById(component_name).parentNode.parentNode.style.display = '';
                 text_cnt += 1;
             }
+
+            ///////////////////////////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////    Dropdown   ////////////////////////////////////
+            ///////////////////////////////////////////////////////////////////////////////////////////
+            if (gui_args[key].type=='dropdown'){ // PLUGIN_ARG_MENU
+                const component_name = "plugin_arg_drop_" + dropdown_cnt;
+                push_data_to_gradio_component({
+                    visible: true,
+                    choices: gui_args[key].options,
+                    label: gui_args[key].title + "(" + gui_args[key].description +  ")",
+                    // label: gui_args[key].title,
+                    placeholder: gui_args[key].description,
+                    __type__: 'update'
+                }, component_name, "obj");
+                push_data_to_gradio_component(gui_args[key].default_value, component_name, "obj");
+                document.getElementById(component_name).parentNode.style.display = '';
+                dropdown_cnt += 1;
+            }
+
+
         }
     }
 }
@@ -1599,14 +1625,23 @@ async function execute_current_pop_up_plugin(){
     let text_cnt = 0;
     for (const key in gui_args) {
         if (gui_args.hasOwnProperty(key)) {
-            if (gui_args[key].type=='string'){
+            if (gui_args[key].type=='string'){ // PLUGIN_ARG_MENU
                 corrisponding_elem_id = "plugin_arg_txt_"+text_cnt
                 gui_args[key].user_confirmed_value = await get_data_from_gradio_component(corrisponding_elem_id);
                 text_cnt += 1;
             }
         }
     }
-
+    let dropdown_cnt = 0;
+    for (const key in gui_args) {
+        if (gui_args.hasOwnProperty(key)) {
+            if (gui_args[key].type=='dropdown'){ // PLUGIN_ARG_MENU
+                corrisponding_elem_id = "plugin_arg_drop_"+dropdown_cnt
+                gui_args[key].user_confirmed_value = await get_data_from_gradio_component(corrisponding_elem_id);
+                dropdown_cnt += 1;
+            }
+        }
+    }
     // close menu
     push_data_to_gradio_component({
         visible: false,
@@ -1621,6 +1656,7 @@ async function execute_current_pop_up_plugin(){
 }
 
 function hide_all_elem(){
+     // PLUGIN_ARG_MENU
     for (text_cnt = 0; text_cnt < 8; text_cnt++){
         push_data_to_gradio_component({
             visible: false,
@@ -1629,9 +1665,19 @@ function hide_all_elem(){
         }, "plugin_arg_txt_"+text_cnt, "obj");
         document.getElementById("plugin_arg_txt_"+text_cnt).parentNode.parentNode.style.display = 'none';
     }
+    for (dropdown_cnt = 0; dropdown_cnt < 8; dropdown_cnt++){
+        push_data_to_gradio_component({
+            visible: false,
+            choices: [],
+            label: "",
+            __type__: 'update'
+        }, "plugin_arg_drop_"+dropdown_cnt, "obj");
+        document.getElementById("plugin_arg_drop_"+dropdown_cnt).parentNode.style.display = 'none';
+    }
 }
 
 function close_current_pop_up_plugin(){
+     // PLUGIN_ARG_MENU
     push_data_to_gradio_component({
         visible: false,
         __type__: 'update'
@@ -1639,6 +1685,7 @@ function close_current_pop_up_plugin(){
     hide_all_elem();
 }
 
+// 生成高级插件的选择菜单
 advanced_plugin_init_code_lib = {}
 function register_advanced_plugin_init_code(key, code){
     advanced_plugin_init_code_lib[key] = code;

@@ -39,7 +39,7 @@
     "载入对话历史存档": "LoadConversationHistoryArchive",
     "删除所有本地对话历史记录": "DeleteAllLocalConversationHistoryRecords",
     "Markdown英译中": "MarkdownEnglishToChinese",
-    "批量Markdown翻译": "BatchMarkdownTranslation",
+    "Markdown_Translate": "BatchMarkdownTranslation",
     "批量总结PDF文档": "BatchSummarizePDFDocuments",
     "批量总结PDF文档pdfminer": "BatchSummarizePDFDocumentsPdfminer",
     "批量翻译PDF文档": "BatchTranslatePDFDocuments",

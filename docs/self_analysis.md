@@ -25,7 +25,7 @@
 | crazy_functions\对话历史存档.py | 将每次对话记录写入Markdown格式的文件中 |
 | crazy_functions\总结word文档.py | 对输入的word文档进行摘要生成 |
 | crazy_functions\总结音视频.py | 对输入的音视频文件进行摘要生成 |
-| crazy_functions\批量Markdown翻译.py | 将指定目录下的Markdown文件进行中英文翻译 |
+| crazy_functions\Markdown_Translate.py | 将指定目录下的Markdown文件进行中英文翻译 |
 | crazy_functions\批量总结PDF文档.py | 对PDF文件进行切割和摘要生成 |
 | crazy_functions\批量总结PDF文档pdfminer.py | 对PDF文件进行文本内容的提取和摘要生成 |
 | crazy_functions\PDF_Translate.py | 将指定目录下的PDF文件进行中英文翻译 |
@@ -175,9 +175,9 @@ toolbox.py是一个工具类库，其中主要包含了一些函数装饰器和�
 
 该程序文件包括两个函数：split_audio_file()和AnalyAudio()，并且导入了一些必要的库并定义了一些工具函数。split_audio_file用于将音频文件分割成多个时长相等的片段，返回一个包含所有切割音频片段文件路径的列表，而AnalyAudio用来分析音频文件，通过调用whisper模型进行音频转文字并使用GPT模型对音频内容进行概述，最终将所有总结结果写入结果文件中。
 
-## [21/48] 请对下面的程序文件做一个概述: crazy_functions\批量Markdown翻译.py
+## [21/48] 请对下面的程序文件做一个概述: crazy_functions\Markdown_Translate.py
 
-该程序文件名为`批量Markdown翻译.py`，包含了以下功能：读取Markdown文件，将长文本分离开来，将Markdown文件进行翻译（英译中和中译英），整理结果并退出。程序使用了多线程以提高效率。程序使用了`tiktoken`依赖库，可能需要额外安装。文件中还有一些其他的函数和类，但与文件名所描述的功能无关。
+该程序文件名为`Markdown_Translate.py`，包含了以下功能：读取Markdown文件，将长文本分离开来，将Markdown文件进行翻译（英译中和中译英），整理结果并退出。程序使用了多线程以提高效率。程序使用了`tiktoken`依赖库，可能需要额外安装。文件中还有一些其他的函数和类，但与文件名所描述的功能无关。
 
 ## [22/48] 请对下面的程序文件做一个概述: crazy_functions\批量总结PDF文档.py
 
@@ -331,7 +331,7 @@ check_proxy.py, colorful.py, config.py, config_private.py, core_functional.py, c
 这些程序源文件提供了基础的文本和语言处理功能、工具函数和高级插件，使 Chatbot 能够处理各种复杂的学术文本问题，包括润色、翻译、搜索、下载、解析等。
 
 ## 用一张Markdown表格简要描述以下文件的功能：
-crazy_functions\代码重写为全英文_多线程.py, crazy_functions\图片生成.py, crazy_functions\对话历史存档.py, crazy_functions\总结word文档.py, crazy_functions\总结音视频.py, crazy_functions\批量Markdown翻译.py, crazy_functions\批量总结PDF文档.py, crazy_functions\批量总结PDF文档pdfminer.py, crazy_functions\PDF_Translate.py, crazy_functions\理解PDF文档内容.py, crazy_functions\生成函数注释.py, crazy_functions\联网的ChatGPT.py, crazy_functions\解析JupyterNotebook.py, crazy_functions\解析项目源代码.py, crazy_functions\询问多个大语言模型.py, crazy_functions\读文章写摘要.py。根据以上分析，用一句话概括程序的整体功能。
+crazy_functions\代码重写为全英文_多线程.py, crazy_functions\图片生成.py, crazy_functions\对话历史存档.py, crazy_functions\总结word文档.py, crazy_functions\总结音视频.py, crazy_functions\Markdown_Translate.py, crazy_functions\批量总结PDF文档.py, crazy_functions\批量总结PDF文档pdfminer.py, crazy_functions\PDF_Translate.py, crazy_functions\理解PDF文档内容.py, crazy_functions\生成函数注释.py, crazy_functions\联网的ChatGPT.py, crazy_functions\解析JupyterNotebook.py, crazy_functions\解析项目源代码.py, crazy_functions\询问多个大语言模型.py, crazy_functions\读文章写摘要.py。根据以上分析，用一句话概括程序的整体功能。
 
 | 文件名 | 功能简述 |
 | --- | --- |
@@ -340,7 +340,7 @@ crazy_functions\代码重写为全英文_多线程.py, crazy_functions\图片生
 | 对话历史存档.py | 将每次对话记录写入Markdown格式的文件中 |
 | 总结word文档.py | 对输入的word文档进行摘要生成 |
 | 总结音视频.py | 对输入的音视频文件进行摘要生成 |
-| 批量Markdown翻译.py | 将指定目录下的Markdown文件进行中英文翻译 |
+| Markdown_Translate.py | 将指定目录下的Markdown文件进行中英文翻译 |
 | 批量总结PDF文档.py | 对PDF文件进行切割和摘要生成 |
 | 批量总结PDF文档pdfminer.py | 对PDF文件进行文本内容的提取和摘要生成 |
 | PDF_Translate.py | 将指定目录下的PDF文件进行中英文翻译 |

@@ -15,13 +15,13 @@ import os
 
 def get_plugin_handle(plugin_name):
     """
-    e.g. plugin_name = 'crazy_functions.批量Markdown翻译->Markdown翻译指定语言'
+    e.g. plugin_name = 'crazy_functions.Markdown_Translate->Markdown翻译指定语言'
     """
     import importlib
 
     assert (
         "->" in plugin_name
-    ), "Example of plugin_name: crazy_functions.批量Markdown翻译->Markdown翻译指定语言"
+    ), "Example of plugin_name: crazy_functions.Markdown_Translate->Markdown翻译指定语言"
     module, fn_name = plugin_name.split("->")
     f_hot_reload = getattr(importlib.import_module(module, fn_name), fn_name)
     return f_hot_reload

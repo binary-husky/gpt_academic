@@ -71,7 +71,7 @@ def patch_and_restart(path):
     import sys
     import time
     import glob
-    from colorful import print亮黄, print亮绿, print亮红
+    from shared_utils.colorful import print亮黄, print亮绿, print亮红
     # if not using config_private, move origin config.py as config_private.py
     if not os.path.exists('config_private.py'):
         print亮黄('由于您没有设置config_private.py私密配置，现将您的现有配置移动至config_private.py以防止配置丢失，',
@@ -124,7 +124,7 @@ def auto_update(raise_error=False):
             current_version = f.read()
             current_version = json.loads(current_version)['version']
         if (remote_version - current_version) >= 0.01-1e-5:
-            from colorful import print亮黄
+            from shared_utils.colorful import print亮黄
             print亮黄(f'\n新版本可用。新版本:{remote_version}，当前版本:{current_version}。{new_feature}')
             print('（1）Github更新地址:\nhttps://github.com/binary-husky/chatgpt_academic\n')
             user_instruction = input('（2）是否一键更新代码（Y+回车=确认，输入其他/无输入+回车=不更新）？')

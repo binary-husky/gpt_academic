@@ -25,14 +25,14 @@ def get_crazy_functions():
     from crazy_functions.对话历史存档 import 载入对话历史存档
     from crazy_functions.对话历史存档 import 删除所有本地对话历史记录
     from crazy_functions.辅助功能 import 清除缓存
-    from crazy_functions.批量Markdown翻译 import Markdown英译中
+    from crazy_functions.Markdown_Translate import Markdown英译中
     from crazy_functions.批量总结PDF文档 import 批量总结PDF文档
     from crazy_functions.PDF_Translate import 批量翻译PDF文档
     from crazy_functions.谷歌检索小助手 import 谷歌检索小助手
     from crazy_functions.理解PDF文档内容 import 理解PDF文档内容标准文件输入
     from crazy_functions.Latex全文润色 import Latex中文润色
     from crazy_functions.Latex全文润色 import Latex英文纠错
-    from crazy_functions.批量Markdown翻译 import Markdown中译英
+    from crazy_functions.Markdown_Translate import Markdown中译英
     from crazy_functions.虚空终端 import 虚空终端
     from crazy_functions.生成多种Mermaid图表 import 生成多种Mermaid图表
 
@@ -209,7 +209,7 @@ def get_crazy_functions():
         "精准翻译PDF论文": {
             "Group": "学术",
             "Color": "stop",
-            "AsButton": False,
+            "AsButton": True,
             "Info": "精准翻译PDF论文为中文 | 输入参数为路径",
             "Function": None,
             "Class": PDF_Tran,  # 新一代插件都会写成 class
@@ -461,7 +461,7 @@ def get_crazy_functions():
         print("Load function plugin failed")
 
     try:
-        from crazy_functions.批量Markdown翻译 import Markdown翻译指定语言
+        from crazy_functions.Markdown_Translate import Markdown翻译指定语言
 
         function_plugins.update(
             {
