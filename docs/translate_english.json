@@ -1668,7 +1668,7 @@
     "Markdown翻译指定语言": "TranslateMarkdownToSpecifiedLanguage",
     "Langchain知识库": "LangchainKnowledgeBase",
     "Latex英文纠错加PDF对比": "CorrectEnglishInLatexWithPDFComparison",
-    "Latex输出PDF": "OutputPDFFromLatex",
+    "Latex_Function": "OutputPDFFromLatex",
     "Latex翻译中文并重新编译PDF": "TranslateChineseToEnglishInLatexAndRecompilePDF",
     "sprint亮靛": "SprintIndigo",
     "寻找Latex主文件": "FindLatexMainFile",

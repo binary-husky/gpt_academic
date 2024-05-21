@@ -7,7 +7,7 @@ class ArgProperty(BaseModel): # PLUGIN_ARG_MENU
     title: str = Field(description="The title", default="")
     description: str = Field(description="The description", default="")
     default_value: str|float = Field(description="The default value", default="")
-    type: str = Field(description="The type", default="")
+    type: str = Field(description="The type", default="")   # currently we support ['string', 'dropdown']
     options: List[str] = Field(default=[], description="List of options available for the argument")
 
 class GptAcademicPluginTemplate():

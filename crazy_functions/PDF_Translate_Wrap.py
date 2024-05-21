@@ -7,6 +7,9 @@ class PDF_Tran(GptAcademicPluginTemplate):
         pass
 
     def define_arg_selection_menu(self):
+        """
+        定义插件的二级选项菜单
+        """
         gui_definition = {
             "main_input":
                 ArgProperty(title="PDF文件路径", description="请上传文件后，再点击该插件", default_value="", type="string").model_dump_json(), # 主输入，自动从输入框同步

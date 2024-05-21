@@ -16,7 +16,7 @@
     "Markdown_Translate": "BatchTranslateMarkdown",
     "连接bing搜索回答问题": "ConnectBingSearchAnswerQuestion",
     "Langchain知识库": "LangchainKnowledgeBase",
-    "Latex输出PDF": "OutputPDFFromLatex",
+    "Latex_Function": "OutputPDFFromLatex",
     "把字符太少的块清除为回车": "ClearBlocksWithTooFewCharactersToNewline",
     "Latex精细分解与转化": "DecomposeAndConvertLatex",
     "解析一个C项目的头文件": "ParseCProjectHeaderFiles",

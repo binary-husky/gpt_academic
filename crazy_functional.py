@@ -35,8 +35,12 @@ def get_crazy_functions():
     from crazy_functions.Markdown_Translate import Markdown中译英
     from crazy_functions.虚空终端 import 虚空终端
     from crazy_functions.生成多种Mermaid图表 import 生成多种Mermaid图表
-
     from crazy_functions.PDF_Translate_Wrap import PDF_Tran
+    from crazy_functions.Latex_Function import Latex英文纠错加PDF对比
+    from crazy_functions.Latex_Function import Latex翻译中文并重新编译PDF
+    from crazy_functions.Latex_Function import PDF翻译中文并重新编译PDF
+    from crazy_functions.Latex_Function_Wrap import Arxiv_Localize
+
 
     function_plugins = {
         "虚空终端": {
@@ -287,7 +291,50 @@ def get_crazy_functions():
             "Info": "批量将Markdown文件中文翻译为英文 | 输入参数为路径或上传压缩包",
             "Function": HotReload(Markdown中译英),
         },
+        "Latex英文纠错+高亮修正位置 [需Latex]": {
+            "Group": "学术",
+            "Color": "stop",
+            "AsButton": False,
+            "AdvancedArgs": True,
+            "ArgsReminder": "如果有必要, 请在此处追加更细致的矫错指令（使用英文）。",
+            "Function": HotReload(Latex英文纠错加PDF对比),
+        },
+        "Arxiv论文精细翻译（输入arxivID）[需Latex]": {
+            "Group": "学术",
+            "Color": "stop",
+            "AsButton": False,
+            "AdvancedArgs": True,
+            "ArgsReminder": r"如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "
+                            r"例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
+                            r'If the term "agent" is used in this section, it should be translated to "智能体". ',
+            "Info": "Arixv论文精细翻译 | 输入参数arxiv论文的ID，比如1812.10695",
+            "Function": None,
+            "Class": Arxiv_Localize,
+        },
+        "本地Latex论文精细翻译（上传Latex项目）[需Latex]": {
+            "Group": "学术",
+            "Color": "stop",
+            "AsButton": False,
+            "AdvancedArgs": True,
+            "ArgsReminder": r"如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "
+                            r"例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
+                            r'If the term "agent" is used in this section, it should be translated to "智能体". ',
+            "Info": "本地Latex论文精细翻译 | 输入参数是路径",
+            "Function": HotReload(Latex翻译中文并重新编译PDF),
+        },
+        "PDF翻译中文并重新编译PDF（上传PDF）[需Latex]": {
+            "Group": "学术",
+            "Color": "stop",
+            "AsButton": False,
+            "AdvancedArgs": True,
+            "ArgsReminder": r"如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "
+                            r"例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
+                            r'If the term "agent" is used in this section, it should be translated to "智能体". ',
+            "Info": "PDF翻译中文，并重新编译PDF | 输入参数为路径",
+            "Function": HotReload(PDF翻译中文并重新编译PDF)
+        }
     }
+
 
     # -=--=- 尚未充分测试的实验性插件 & 需要额外依赖的插件 -=--=-
     try:
@@ -534,59 +581,6 @@ def get_crazy_functions():
         print(trimmed_format_exc())
         print("Load function plugin failed")
 
-    try:
-        from crazy_functions.Latex输出PDF import Latex英文纠错加PDF对比
-        from crazy_functions.Latex输出PDF import Latex翻译中文并重新编译PDF
-        from crazy_functions.Latex输出PDF import PDF翻译中文并重新编译PDF
-
-        function_plugins.update(
-            {
-                "Latex英文纠错+高亮修正位置 [需Latex]": {
-                    "Group": "学术",
-                    "Color": "stop",
-                    "AsButton": False,
-                    "AdvancedArgs": True,
-                    "ArgsReminder": "如果有必要, 请在此处追加更细致的矫错指令（使用英文）。",
-                    "Function": HotReload(Latex英文纠错加PDF对比),
-                },
-                "Arxiv论文精细翻译（输入arxivID）[需Latex]": {
-                    "Group": "学术",
-                    "Color": "stop",
-                    "AsButton": False,
-                    "AdvancedArgs": True,
-                    "ArgsReminder": r"如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "
-                                    r"例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
-                                    r'If the term "agent" is used in this section, it should be translated to "智能体". ',
-                    "Info": "Arixv论文精细翻译 | 输入参数arxiv论文的ID，比如1812.10695",
-                    "Function": HotReload(Latex翻译中文并重新编译PDF),
-                },
-                "本地Latex论文精细翻译（上传Latex项目）[需Latex]": {
-                    "Group": "学术",
-                    "Color": "stop",
-                    "AsButton": False,
-                    "AdvancedArgs": True,
-                    "ArgsReminder": r"如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "
-                                    r"例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
-                                    r'If the term "agent" is used in this section, it should be translated to "智能体". ',
-                    "Info": "本地Latex论文精细翻译 | 输入参数是路径",
-                    "Function": HotReload(Latex翻译中文并重新编译PDF),
-                },
-                "PDF翻译中文并重新编译PDF（上传PDF）[需Latex]": {
-                    "Group": "学术",
-                    "Color": "stop",
-                    "AsButton": False,
-                    "AdvancedArgs": True,
-                    "ArgsReminder": r"如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "
-                                    r"例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
-                                    r'If the term "agent" is used in this section, it should be translated to "智能体". ',
-                    "Info": "PDF翻译中文，并重新编译PDF | 输入参数为路径",
-                    "Function": HotReload(PDF翻译中文并重新编译PDF)
-                }
-            }
-        )
-    except:
-        print(trimmed_format_exc())
-        print("Load function plugin failed")
 
     try:
         from toolbox import get_conf
