@@ -93,7 +93,7 @@
 
 
 
-## 二、背后的原理
+## 二、背后的原理（需要JavaScript的前置知识）
 
 
 ### (I) 首先介绍三个Gradio官方没有的重要前端函数
@@ -128,7 +128,13 @@
     push_data_to_gradio_component({ visible: false, __type__: 'update' }, "plugin_arg_menu", "obj");
 
     // 修改组件label
-    push_data_to_gradio_component({label: '当前模型：' + getCookie("js_md_dropdown_cookie"), __type__: 'update'}, "gpt-chatbot", "obj")
+    push_data_to_gradio_component({ label: '新label的值', __type__: 'update' }, "gpt-chatbot", "obj")
+
+    // 第一个参数是value，
+    //     - 可以是字符串（调整textbox的文本，按钮的文本）；
+    //     - 还可以是 { visible: false, __type__: 'update' }  这样的字典（调整visible, label, choices）
+    // 第二个参数是elem_id
+    // 第三个参数是"string" 或者 "obj"
     ```
 
 
