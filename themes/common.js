@@ -1695,7 +1695,11 @@ function run_advanced_plugin_launch_code(key){
     generate_menu(advanced_plugin_init_code_lib[key], key);
 }
 function on_flex_button_click(key){
-    run_advanced_plugin_launch_code(key);
+    if (advanced_plugin_init_code_lib.hasOwnProperty(key)){
+        run_advanced_plugin_launch_code(key);
+    }else{
+        document.getElementById("old_callback_btn_for_plugin_exe").click();
+    }
 }
 
 

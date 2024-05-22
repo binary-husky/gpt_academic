@@ -260,18 +260,19 @@ def main():
             None,
             _js=js_code_for_css_changing
         )
+
+
+        switchy_bt.click(None, [switchy_bt], None, _js="(switchy_bt)=>on_flex_button_click(switchy_bt)")
         # 随变按钮的回调函数注册
         def route(request: gr.Request, k, *args, **kwargs):
-            if k in [r"点击这里搜索插件列表", r"请先从插件列表中选择"]: return
-            if plugins[k].get("Function", None):
-                yield from ArgsGeneralWrapper(plugins[k]["Function"])(request, *args, **kwargs)
-
-        click_handle = switchy_bt.click(route, [switchy_bt, *input_combo], output_combo)
-        switchy_bt.click(None, [switchy_bt], None, _js="(switchy_bt)=>on_flex_button_click(switchy_bt)")
-
-        click_handle.then(on_report_generated, [cookies, file_upload, chatbot], [cookies, file_upload, chatbot]).then(None, [switchy_bt], None, _js=r"(fn)=>on_plugin_exe_complete(fn)")
-        cancel_handles.append(click_handle)
-
+            if k not in [r"点击这里搜索插件列表", r"请先从插件列表中选择"]:
+                if plugins[k].get("Function", None):
+                    yield from ArgsGeneralWrapper(plugins[k]["Function"])(request, *args, **kwargs)
+        # 旧插件的高级参数区确认按钮（隐藏）
+        old_plugin_callback = gr.Button(r"未选定任何插件", variant="secondary", visible=False, elem_id="old_callback_btn_for_plugin_exe")
+        click_handle_ng = old_plugin_callback.click(route, [switchy_bt, *input_combo], output_combo)
+        click_handle_ng.then(on_report_generated, [cookies, file_upload, chatbot], [cookies, file_upload, chatbot]).then(None, [switchy_bt], None, _js=r"(fn)=>on_plugin_exe_complete(fn)")
+        cancel_handles.append(click_handle_ng)
         # 新一代插件的高级参数区确认按钮（隐藏）
         click_handle_ng = new_plugin_callback.click(route_switchy_bt_with_arg, [
                 gr.State(["new_plugin_callback", "usr_confirmed_arg"] + input_combo_order),
@@ -279,7 +280,6 @@ def main():
             ], output_combo)
         click_handle_ng.then(on_report_generated, [cookies, file_upload, chatbot], [cookies, file_upload, chatbot]).then(None, [switchy_bt], None, _js=r"(fn)=>on_plugin_exe_complete(fn)")
         cancel_handles.append(click_handle_ng)
-
         # 终止按钮的回调函数注册
         stopBtn.click(fn=None, inputs=None, outputs=None, cancels=cancel_handles)
         stopBtn2.click(fn=None, inputs=None, outputs=None, cancels=cancel_handles)

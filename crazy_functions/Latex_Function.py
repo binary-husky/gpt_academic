@@ -466,94 +466,77 @@ def PDF翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot, h
     yield from update_ui(chatbot=chatbot, history=history)
     repeat, project_folder = check_repeat_upload(file_manifest[0], hash_tag)
 
-    except_flag = False
-
     if repeat:
         yield from update_ui_lastest_msg(f"发现重复上传，请查收结果（压缩包）...", chatbot=chatbot, history=history)
-
         try:
-            trans_html_file = [f for f in glob.glob(f'{project_folder}/**/*.trans.html', recursive=True)][0]
-            promote_file_to_downloadzone(trans_html_file, rename_file=None, chatbot=chatbot)
-
             translate_pdf = [f for f in glob.glob(f'{project_folder}/**/merge_translate_zh.pdf', recursive=True)][0]
             promote_file_to_downloadzone(translate_pdf, rename_file=None, chatbot=chatbot)
-
             comparison_pdf = [f for f in glob.glob(f'{project_folder}/**/comparison.pdf', recursive=True)][0]
             promote_file_to_downloadzone(comparison_pdf, rename_file=None, chatbot=chatbot)
-
             zip_res = zip_result(project_folder)
             promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
-
-            return True
-
+            return
         except:
             report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"发现重复上传，但是无法找到相关文件")
             yield from update_ui(chatbot=chatbot, history=history)
-
-            chatbot.append([f"没有相关文件", '尝试重新翻译PDF...'])
-            yield from update_ui(chatbot=chatbot, history=history)
-
-            except_flag = True
-
-
-    elif not repeat or except_flag:
+    else:
         yield from update_ui_lastest_msg(f"未发现重复上传", chatbot=chatbot, history=history)
 
-        # <-------------- convert pdf into tex ------------->
-        chatbot.append([f"解析项目: {txt}", "正在将PDF转换为tex项目，请耐心等待..."])
+    # <-------------- convert pdf into tex ------------->
+    chatbot.append([f"解析项目: {txt}", "正在将PDF转换为tex项目，请耐心等待..."])
+    yield from update_ui(chatbot=chatbot, history=history)
+    project_folder = pdf2tex_project(file_manifest[0], plugin_kwargs)
+    if project_folder is None:
+        report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"PDF转换为tex项目失败")
         yield from update_ui(chatbot=chatbot, history=history)
-        project_folder = pdf2tex_project(file_manifest[0], plugin_kwargs)
-        if project_folder is None:
-            report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"PDF转换为tex项目失败")
-            yield from update_ui(chatbot=chatbot, history=history)
-            return False
+        return False
 
-        # <-------------- translate latex file into Chinese ------------->
-        yield from update_ui_lastest_msg("正在tex项目将翻译为中文...", chatbot=chatbot, history=history)
-        file_manifest = [f for f in glob.glob(f'{project_folder}/**/*.tex', recursive=True)]
-        if len(file_manifest) == 0:
-            report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"找不到任何.tex文件: {txt}")
-            yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
-            return
+    # <-------------- translate latex file into Chinese ------------->
+    yield from update_ui_lastest_msg("正在tex项目将翻译为中文...", chatbot=chatbot, history=history)
+    file_manifest = [f for f in glob.glob(f'{project_folder}/**/*.tex', recursive=True)]
+    if len(file_manifest) == 0:
+        report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"找不到任何.tex文件: {txt}")
+        yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
+        return
 
-        # <-------------- if is a zip/tar file ------------->
-        project_folder = desend_to_extracted_folder_if_exist(project_folder)
+    # <-------------- if is a zip/tar file ------------->
+    project_folder = desend_to_extracted_folder_if_exist(project_folder)
 
-        # <-------------- move latex project away from temp folder ------------->
-        project_folder = move_project(project_folder)
+    # <-------------- move latex project away from temp folder ------------->
+    project_folder = move_project(project_folder)
 
-        # <-------------- set a hash tag for repeat-checking ------------->
-        with open(pj(project_folder, hash_tag + '.tag'), 'w') as f:
-            f.write(hash_tag)
-            f.close()
+    # <-------------- set a hash tag for repeat-checking ------------->
+    with open(pj(project_folder, hash_tag + '.tag'), 'w') as f:
+        f.write(hash_tag)
+        f.close()
 
 
-        # <-------------- if merge_translate_zh is already generated, skip gpt req ------------->
-        if not os.path.exists(project_folder + '/merge_translate_zh.tex'):
-            yield from Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
-                                        chatbot, history, system_prompt, mode='translate_zh',
-                                        switch_prompt=_switch_prompt_)
+    # <-------------- if merge_translate_zh is already generated, skip gpt req ------------->
+    if not os.path.exists(project_folder + '/merge_translate_zh.tex'):
+        yield from Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
+                                    chatbot, history, system_prompt, mode='translate_zh',
+                                    switch_prompt=_switch_prompt_)
 
-        # <-------------- compile PDF ------------->
-        yield from update_ui_lastest_msg("正在将翻译好的项目tex项目编译为PDF...", chatbot=chatbot, history=history)
-        success = yield from 编译Latex(chatbot, history, main_file_original='merge',
-                                    main_file_modified='merge_translate_zh', mode='translate_zh',
-                                    work_folder_original=project_folder, work_folder_modified=project_folder,
-                                    work_folder=project_folder)
+    # <-------------- compile PDF ------------->
+    yield from update_ui_lastest_msg("正在将翻译好的项目tex项目编译为PDF...", chatbot=chatbot, history=history)
+    success = yield from 编译Latex(chatbot, history, main_file_original='merge',
+                                main_file_modified='merge_translate_zh', mode='translate_zh',
+                                work_folder_original=project_folder, work_folder_modified=project_folder,
+                                work_folder=project_folder)
 
-        # <-------------- zip PDF ------------->
-        zip_res = zip_result(project_folder)
-        if success:
-            chatbot.append((f"成功啦", '请查收结果（压缩包）...'))
-            yield from update_ui(chatbot=chatbot, history=history);
-            time.sleep(1)  # 刷新界面
-            promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
-        else:
-            chatbot.append((f"失败了",
-                            '虽然PDF生成失败了, 但请查收结果（压缩包）, 内含已经翻译的Tex文档, 您可以到Github Issue区, 用该压缩包进行反馈。如系统是Linux，请检查系统字体（见Github wiki） ...'))
-            yield from update_ui(chatbot=chatbot, history=history);
-            time.sleep(1)  # 刷新界面
-            promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
+    # <-------------- zip PDF ------------->
+    zip_res = zip_result(project_folder)
+    if success:
+        chatbot.append((f"成功啦", '请查收结果（压缩包）...'))
+        yield from update_ui(chatbot=chatbot, history=history);
+        time.sleep(1)  # 刷新界面
+        promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
+    else:
+        chatbot.append((f"失败了",
+                        '虽然PDF生成失败了, 但请查收结果（压缩包）, 内含已经翻译的Tex文档, 您可以到Github Issue区, 用该压缩包进行反馈。如系统是Linux，请检查系统字体（见Github wiki） ...'))
+        yield from update_ui(chatbot=chatbot, history=history);
+        time.sleep(1)  # 刷新界面
+        promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
 
-        # <-------------- we are done ------------->
-        return success
+    # <-------------- we are done ------------->
+    return success
