@@ -13,6 +13,11 @@ class Arxiv_Localize(GptAcademicPluginTemplate):
     def define_arg_selection_menu(self):
         """
         定义插件的二级选项菜单
+
+        第一个参数，名称`main_input`，参数`type`声明这是一个文本框，文本框上方显示`title`，文本框内部显示`description`，`default_value`为默认值；
+        第二个参数，名称`advanced_arg`，参数`type`声明这是一个文本框，文本框上方显示`title`，文本框内部显示`description`，`default_value`为默认值；
+        第三个参数，名称`allow_cache`，参数`type`声明这是一个下拉菜单，下拉菜单上方显示`title`+`description`，下拉菜单的选项为`options`，`default_value`为下拉菜单默认值；
+
         """
         gui_definition = {
             "main_input":
