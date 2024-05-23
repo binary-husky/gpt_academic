@@ -134,7 +134,7 @@ DASHSCOPE_API_KEY = "" # 阿里灵积云API_KEY
 # 百度千帆（LLM_MODEL="qianfan"）
 BAIDU_CLOUD_API_KEY = ''
 BAIDU_CLOUD_SECRET_KEY = ''
-BAIDU_CLOUD_QIANFAN_MODEL = 'ERNIE-Bot'    # 可选 "ERNIE-Bot-4"(文心大模型4.0), "ERNIE-Bot"(文心一言), "ERNIE-Bot-turbo", "BLOOMZ-7B", "Llama-2-70B-Chat", "Llama-2-13B-Chat", "Llama-2-7B-Chat"
+BAIDU_CLOUD_QIANFAN_MODEL = 'ERNIE-Bot'    # 可选 "ERNIE-Bot-4"(文心大模型4.0), "ERNIE-Bot"(文心一言), "ERNIE-Bot-turbo", "BLOOMZ-7B", "Llama-2-70B-Chat", "Llama-2-13B-Chat", "Llama-2-7B-Chat", "ERNIE-Speed-128K", "ERNIE-Speed-8K", "ERNIE-Lite-8K"
 
 
 # 如果使用ChatGLM2微调模型，请把 LLM_MODEL="chatglmft"，并在此处指定模型路径
