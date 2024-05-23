@@ -174,8 +174,6 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
         from core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
-    raw_input = inputs
-    # logging.info(f'[raw_input] {raw_input}')
     chatbot.append((inputs, ""))
     yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
 
@@ -389,8 +387,6 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         "top_p": llm_kwargs['top_p'],  # 1.0,
         "n": 1,
         "stream": stream,
-        "presence_penalty": 0,
-        "frequency_penalty": 0,
     }
     try:
         print(f" {llm_kwargs['llm_model']} : {conversation_cnt} : {inputs[:100]} ..........")
