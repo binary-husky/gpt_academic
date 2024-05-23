@@ -1,4 +1,5 @@
 from toolbox import CatchException, update_ui, promote_file_to_downloadzone, get_log_folder, get_user
+from crazy_functions.plugin_template.plugin_class_template import GptAcademicPluginTemplate, ArgProperty
 import re
 
 f_prefix = 'GPT-Academic对话存档'
@@ -79,10 +80,41 @@ def 对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
     system_prompt   给gpt的静默提醒
     user_request    当前用户的请求信息（IP地址等）
     """
+    file_name = plugin_kwargs.get("file_name", None)
+    if (file_name is not None) and (file_name != "") and (not file_name.endswith('.html')): file_name += '.html'
+    else: file_name = None
 
-    chatbot.append(("保存当前对话",
-        f"[Local Message] {write_chat_to_file(chatbot, history)}，您可以调用下拉菜单中的“载入对话历史存档”还原当下的对话。"))
+    chatbot.append((None, f"[Local Message] {write_chat_to_file(chatbot, history, file_name)}，您可以调用下拉菜单中的“载入对话历史存档”还原当下的对话。"))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
+
+
+class Conversation_To_File_Wrap(GptAcademicPluginTemplate):
+    def __init__(self):
+        """
+        请注意`execute`会执行在不同的线程中，因此您在定义和使用类变量时，应当慎之又慎！
+        """
+        pass
+
+    def define_arg_selection_menu(self):
+        """
+        定义插件的二级选项菜单
+
+        第一个参数，名称`file_name`，参数`type`声明这是一个文本框，文本框上方显示`title`，文本框内部显示`description`，`default_value`为默认值；
+        """
+        gui_definition = {
+            "file_name": ArgProperty(title="保存文件名", description="输入对话存档文件名，留空则使用时间作为文件名", default_value="", type="string").model_dump_json(), # 主输入，自动从输入框同步
+        }
+        return gui_definition
+
+    def execute(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
+        """
+        执行插件
+        """
+        yield from 对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request)
+
+
+
+
 
 def hide_cwd(str):
     import os

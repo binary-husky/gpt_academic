@@ -4,8 +4,8 @@ from toolbox import format_io, find_free_port, on_file_uploaded, on_report_gener
 
 def define_gui_advanced_plugin_class(plugins):
     # 定义新一代插件的高级参数区
-    with gr.Floating(init_x="40%", init_y="20%", visible=False, width="30%", drag="top", elem_id="plugin_arg_menu"):
-        with gr.Accordion("请选择并确认插件参数！", open=True, elem_id="plugin_arg_panel"):
+    with gr.Floating(init_x="50%", init_y="50%", visible=False, width="30%", drag="top", elem_id="plugin_arg_menu"):
+        with gr.Accordion("选择插件参数", open=True, elem_id="plugin_arg_panel"):
             for u in range(8):
                 with gr.Row():
                     gr.Textbox(show_label=True, label="T1", placeholder="请输入", lines=1, visible=False, elem_id=f"plugin_arg_txt_{u}").style(container=False)

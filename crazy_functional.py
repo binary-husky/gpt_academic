@@ -22,9 +22,9 @@ def get_crazy_functions():
     from crazy_functions.解析项目源代码 import 解析一个CSharp项目
     from crazy_functions.总结word文档 import 总结word文档
     from crazy_functions.解析JupyterNotebook import 解析ipynb文件
-    from crazy_functions.对话历史存档 import 对话历史存档
-    from crazy_functions.对话历史存档 import 载入对话历史存档
-    from crazy_functions.对话历史存档 import 删除所有本地对话历史记录
+    from crazy_functions.Conversation_To_File import 载入对话历史存档
+    from crazy_functions.Conversation_To_File import Conversation_To_File_Wrap
+    from crazy_functions.Conversation_To_File import 删除所有本地对话历史记录
     from crazy_functions.辅助功能 import 清除缓存
     from crazy_functions.Markdown_Translate import Markdown英译中
     from crazy_functions.批量总结PDF文档 import 批量总结PDF文档
@@ -198,7 +198,9 @@ def get_crazy_functions():
             "Group": "对话",
             "AsButton": True,
             "Info": "保存当前的对话 | 不需要输入参数",
-            "Function": HotReload(对话历史存档),
+            # "Function": HotReload(Conversation_To_File),
+            "Function": None,
+            "Class": Conversation_To_File_Wrap
         },
         "[多线程Demo]解析此项目本身（源码自译解）": {
             "Group": "对话|编程",

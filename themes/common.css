@@ -1,3 +1,9 @@
+#plugin_arg_menu {
+    transform: translate(-50%, -50%);
+    border: dashed;
+}
+
+
 /* hide remove all button */
 .remove-all.svelte-aqlk7e.svelte-aqlk7e.svelte-aqlk7e {
     visibility: hidden;

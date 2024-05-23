@@ -294,7 +294,7 @@ def Latex英文纠错加PDF对比(txt, llm_kwargs, plugin_kwargs, chatbot, histo
         promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
     else:
         chatbot.append((f"失败了",
-                        '虽然PDF生成失败了, 但请查收结果（压缩包）, 内含已经翻译的Tex文档, 也是可读的, 您可以到Github Issue区, 用该压缩包+对话历史存档进行反馈 ...'))
+                        '虽然PDF生成失败了, 但请查收结果（压缩包）, 内含已经翻译的Tex文档, 也是可读的, 您可以到Github Issue区, 用该压缩包+Conversation_To_File进行反馈 ...'))
         yield from update_ui(chatbot=chatbot, history=history);
         time.sleep(1)  # 刷新界面
         promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)

@@ -22,7 +22,7 @@
 | crazy_functions\下载arxiv论文翻译摘要.py | 下载 `arxiv` 论文的 PDF 文件，并提取摘要和翻译 |
 | crazy_functions\代码重写为全英文_多线程.py | 将Python源代码文件中的中文内容转化为英文 |
 | crazy_functions\图片生成.py | 根据激励文本使用GPT模型生成相应的图像 |
-| crazy_functions\对话历史存档.py | 将每次对话记录写入Markdown格式的文件中 |
+| crazy_functions\Conversation_To_File.py | 将每次对话记录写入Markdown格式的文件中 |
 | crazy_functions\总结word文档.py | 对输入的word文档进行摘要生成 |
 | crazy_functions\总结音视频.py | 对输入的音视频文件进行摘要生成 |
 | crazy_functions\Markdown_Translate.py | 将指定目录下的Markdown文件进行中英文翻译 |
@@ -155,9 +155,9 @@ toolbox.py是一个工具类库，其中主要包含了一些函数装饰器和�
 
 该程序文件提供了一个用于生成图像的函数`图片生成`。函数实现的过程中，会调用`gen_image`函数来生成图像，并返回图像生成的网址和本地文件地址。函数有多个参数，包括`prompt`(激励文本)、`llm_kwargs`(GPT模型的参数)、`plugin_kwargs`(插件模型的参数)等。函数核心代码使用了`requests`库向OpenAI API请求图像，并做了简单的处理和保存。函数还更新了交互界面，清空聊天历史并显示正在生成图像的消息和最终的图像网址和预览。
 
-## [18/48] 请对下面的程序文件做一个概述: crazy_functions\对话历史存档.py
+## [18/48] 请对下面的程序文件做一个概述: crazy_functions\Conversation_To_File.py
 
-这个文件是名为crazy_functions\对话历史存档.py的Python程序文件，包含了4个函数：
+这个文件是名为crazy_functions\Conversation_To_File.py的Python程序文件，包含了4个函数：
 
 1. write_chat_to_file(chatbot, history=None, file_name=None)：用来将对话记录以Markdown格式写入文件中，并且生成文件名，如果没指定文件名则用当前时间。写入完成后将文件路径打印出来。
 
@@ -165,7 +165,7 @@ toolbox.py是一个工具类库，其中主要包含了一些函数装饰器和�
 
 3. read_file_to_chat(chatbot, history, file_name)：从传入的文件中读取内容，解析出对话历史记录并更新聊天显示框。
 
-4. 对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request)：一个主要函数，用于保存当前对话记录并提醒用户。如果用户希望加载历史记录，则调用read_file_to_chat()来更新聊天显示框。如果用户希望删除历史记录，调用删除所有本地对话历史记录()函数完成删除操作。
+4. Conversation_To_File(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request)：一个主要函数，用于保存当前对话记录并提醒用户。如果用户希望加载历史记录，则调用read_file_to_chat()来更新聊天显示框。如果用户希望删除历史记录，调用删除所有本地对话历史记录()函数完成删除操作。
 
 ## [19/48] 请对下面的程序文件做一个概述: crazy_functions\总结word文档.py
 
@@ -331,13 +331,13 @@ check_proxy.py, colorful.py, config.py, config_private.py, core_functional.py, c
 这些程序源文件提供了基础的文本和语言处理功能、工具函数和高级插件，使 Chatbot 能够处理各种复杂的学术文本问题，包括润色、翻译、搜索、下载、解析等。
 
 ## 用一张Markdown表格简要描述以下文件的功能：
-crazy_functions\代码重写为全英文_多线程.py, crazy_functions\图片生成.py, crazy_functions\对话历史存档.py, crazy_functions\总结word文档.py, crazy_functions\总结音视频.py, crazy_functions\Markdown_Translate.py, crazy_functions\批量总结PDF文档.py, crazy_functions\批量总结PDF文档pdfminer.py, crazy_functions\PDF_Translate.py, crazy_functions\理解PDF文档内容.py, crazy_functions\生成函数注释.py, crazy_functions\联网的ChatGPT.py, crazy_functions\解析JupyterNotebook.py, crazy_functions\解析项目源代码.py, crazy_functions\询问多个大语言模型.py, crazy_functions\读文章写摘要.py。根据以上分析，用一句话概括程序的整体功能。
+crazy_functions\代码重写为全英文_多线程.py, crazy_functions\图片生成.py, crazy_functions\Conversation_To_File.py, crazy_functions\总结word文档.py, crazy_functions\总结音视频.py, crazy_functions\Markdown_Translate.py, crazy_functions\批量总结PDF文档.py, crazy_functions\批量总结PDF文档pdfminer.py, crazy_functions\PDF_Translate.py, crazy_functions\理解PDF文档内容.py, crazy_functions\生成函数注释.py, crazy_functions\联网的ChatGPT.py, crazy_functions\解析JupyterNotebook.py, crazy_functions\解析项目源代码.py, crazy_functions\询问多个大语言模型.py, crazy_functions\读文章写摘要.py。根据以上分析，用一句话概括程序的整体功能。
 
 | 文件名 | 功能简述 |
 | --- | --- |
 | 代码重写为全英文_多线程.py | 将Python源代码文件中的中文内容转化为英文 |
 | 图片生成.py | 根据激励文本使用GPT模型生成相应的图像 |
-| 对话历史存档.py | 将每次对话记录写入Markdown格式的文件中 |
+| Conversation_To_File.py | 将每次对话记录写入Markdown格式的文件中 |
 | 总结word文档.py | 对输入的word文档进行摘要生成 |
 | 总结音视频.py | 对输入的音视频文件进行摘要生成 |
 | Markdown_Translate.py | 将指定目录下的Markdown文件进行中英文翻译 |
