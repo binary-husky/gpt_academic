@@ -222,11 +222,12 @@ def main():
                 plugins[k]["JsMenu"] = plugins[k]["Class"]().get_js_code_for_generating_menu(k)
                 register_advanced_plugin_init_code_arr += """register_advanced_plugin_init_code("{k}","{gui_js}");""".format(k=k, gui_js=plugins[k]["JsMenu"])
             if not plugins[k].get("AsButton", True): continue
-            if plugins[k].get("Function", None):
+            if plugins[k].get("Class", None) is None:
+                assert plugins[k].get("Function", None) is not None
                 click_handle = plugins[k]["Button"].click(ArgsGeneralWrapper(plugins[k]["Function"]), [*input_combo], output_combo)
                 click_handle.then(on_report_generated, [cookies, file_upload, chatbot], [cookies, file_upload, chatbot]).then(None, [plugins[k]["Button"]], None, _js=r"(fn)=>on_plugin_exe_complete(fn)")
                 cancel_handles.append(click_handle)
-            elif "Class" in plugins[k]:
+            else:
                 click_handle = plugins[k]["Button"].click(None, inputs=[], outputs=None, _js=f"""()=>run_advanced_plugin_launch_code("{k}")""")
 
         # 函数插件-下拉菜单与随变按钮的互动
@@ -266,7 +267,8 @@ def main():
         # 随变按钮的回调函数注册
         def route(request: gr.Request, k, *args, **kwargs):
             if k not in [r"点击这里搜索插件列表", r"请先从插件列表中选择"]:
-                if plugins[k].get("Function", None):
+                if plugins[k].get("Class", None) is None:
+                    assert plugins[k].get("Function", None) is not None
                     yield from ArgsGeneralWrapper(plugins[k]["Function"])(request, *args, **kwargs)
         # 旧插件的高级参数区确认按钮（隐藏）
         old_plugin_callback = gr.Button(r"未选定任何插件", variant="secondary", visible=False, elem_id="old_callback_btn_for_plugin_exe")

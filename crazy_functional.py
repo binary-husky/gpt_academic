@@ -23,6 +23,7 @@ def get_crazy_functions():
     from crazy_functions.总结word文档 import 总结word文档
     from crazy_functions.解析JupyterNotebook import 解析ipynb文件
     from crazy_functions.Conversation_To_File import 载入对话历史存档
+    from crazy_functions.Conversation_To_File import 对话历史存档
     from crazy_functions.Conversation_To_File import Conversation_To_File_Wrap
     from crazy_functions.Conversation_To_File import 删除所有本地对话历史记录
     from crazy_functions.辅助功能 import 清除缓存
@@ -198,9 +199,8 @@ def get_crazy_functions():
             "Group": "对话",
             "AsButton": True,
             "Info": "保存当前的对话 | 不需要输入参数",
-            # "Function": HotReload(Conversation_To_File),
-            "Function": None,
-            "Class": Conversation_To_File_Wrap
+            "Function": HotReload(对话历史存档),    # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
+            "Class": Conversation_To_File_Wrap     # 新一代插件需要注册Class
         },
         "[多线程Demo]解析此项目本身（源码自译解）": {
             "Group": "对话|编程",
@@ -213,15 +213,15 @@ def get_crazy_functions():
             "AsButton": True,
             "Info": "查看历史上的今天事件 (这是一个面向开发者的插件Demo) | 不需要输入参数",
             "Function": None,
-            "Class": Demo_Wrap,
+            "Class": Demo_Wrap, # 新一代插件需要注册Class
         },
         "精准翻译PDF论文": {
             "Group": "学术",
             "Color": "stop",
             "AsButton": True,
             "Info": "精准翻译PDF论文为中文 | 输入参数为路径",
-            "Function": None,
-            "Class": PDF_Tran,  # 新一代插件都会写成 class
+            "Function": HotReload(批量翻译PDF文档), # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
+            "Class": PDF_Tran,  # 新一代插件需要注册Class
         },
         "询问多个GPT模型": {
             "Group": "对话",
@@ -313,8 +313,8 @@ def get_crazy_functions():
                             r"例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
                             r'If the term "agent" is used in this section, it should be translated to "智能体". ',
             "Info": "Arixv论文精细翻译 | 输入参数arxiv论文的ID，比如1812.10695",
-            "Function": None,
-            "Class": Arxiv_Localize,
+            "Function": HotReload(Latex翻译中文并重新编译PDF),  # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
+            "Class": Arxiv_Localize,    # 新一代插件需要注册Class
         },
         "本地Latex论文精细翻译（上传Latex项目）[需Latex]": {
             "Group": "学术",
@@ -336,9 +336,8 @@ def get_crazy_functions():
                             r"例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
                             r'If the term "agent" is used in this section, it should be translated to "智能体". ',
             "Info": "PDF翻译中文，并重新编译PDF | 输入参数为路径",
-            "Function": None,
-            "Class": PDF_Localize
-
+            "Function": HotReload(PDF翻译中文并重新编译PDF),   # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
+            "Class": PDF_Localize   # 新一代插件需要注册Class
         }
     }
 
