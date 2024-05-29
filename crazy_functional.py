@@ -35,6 +35,8 @@ def get_crazy_functions():
     from crazy_functions.批量Markdown翻译 import Markdown中译英
     from crazy_functions.虚空终端 import 虚空终端
     from crazy_functions.生成多种Mermaid图表 import 生成多种Mermaid图表
+    from crazy_functions.pdfMinerPlus import pdfMinerPlus
+
 
     function_plugins = {
         "虚空终端": {
@@ -223,7 +225,16 @@ def get_crazy_functions():
             "AsButton": False,  # 加入下拉菜单中
             "Info": "批量总结PDF文档的内容 | 输入参数为路径",
             "Function": HotReload(批量总结PDF文档),
-        },
+        },        
+        "pdfMinerPlus": {
+            "Group": "学术",
+            "Color": "stop",
+            "AsButton": True,
+            "Function": HotReload(pdfMinerPlus),
+            "Info": "批量提问PDF文档的内容",
+            "AdvancedArgs": True,  
+            "ArgsReminder": "",  
+        }, 
         "谷歌学术检索助手（输入谷歌学术搜索页url）": {
             "Group": "学术",
             "Color": "stop",
