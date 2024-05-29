@@ -562,7 +562,7 @@ def on_report_generated(cookies:dict, files:List[str], chatbot:ChatBotWithCookie
         file_links += (
             f'<br/><a href="file={os.path.abspath(f)}" target="_blank">{f}</a>'
         )
-    chatbot.append(["报告如何远程获取？", f"报告已经添加到右侧“文件上传区”（可能处于折叠状态），请查收。{file_links}"])
+    chatbot.append(["报告如何远程获取？", f"报告已经添加到右侧“文件下载区”（可能处于折叠状态），请查收。{file_links}"])
     return cookies, report_files, chatbot
 
 
