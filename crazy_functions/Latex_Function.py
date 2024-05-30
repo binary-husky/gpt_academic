@@ -461,26 +461,26 @@ def PDF翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot, h
 
     hash_tag = map_file_to_sha256(file_manifest[0])
 
-    # <-------------- check repeated pdf ------------->
-    chatbot.append([f"检查PDF是否被重复上传", "正在检查..."])
-    yield from update_ui(chatbot=chatbot, history=history)
-    repeat, project_folder = check_repeat_upload(file_manifest[0], hash_tag)
+    # # <-------------- check repeated pdf ------------->
+    # chatbot.append([f"检查PDF是否被重复上传", "正在检查..."])
+    # yield from update_ui(chatbot=chatbot, history=history)
+    # repeat, project_folder = check_repeat_upload(file_manifest[0], hash_tag)
 
-    if repeat:
-        yield from update_ui_lastest_msg(f"发现重复上传，请查收结果（压缩包）...", chatbot=chatbot, history=history)
-        try:
-            translate_pdf = [f for f in glob.glob(f'{project_folder}/**/merge_translate_zh.pdf', recursive=True)][0]
-            promote_file_to_downloadzone(translate_pdf, rename_file=None, chatbot=chatbot)
-            comparison_pdf = [f for f in glob.glob(f'{project_folder}/**/comparison.pdf', recursive=True)][0]
-            promote_file_to_downloadzone(comparison_pdf, rename_file=None, chatbot=chatbot)
-            zip_res = zip_result(project_folder)
-            promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
-            return
-        except:
-            report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"发现重复上传，但是无法找到相关文件")
-            yield from update_ui(chatbot=chatbot, history=history)
-    else:
-        yield from update_ui_lastest_msg(f"未发现重复上传", chatbot=chatbot, history=history)
+    # if repeat:
+    #     yield from update_ui_lastest_msg(f"发现重复上传，请查收结果（压缩包）...", chatbot=chatbot, history=history)
+    #     try:
+    #         translate_pdf = [f for f in glob.glob(f'{project_folder}/**/merge_translate_zh.pdf', recursive=True)][0]
+    #         promote_file_to_downloadzone(translate_pdf, rename_file=None, chatbot=chatbot)
+    #         comparison_pdf = [f for f in glob.glob(f'{project_folder}/**/comparison.pdf', recursive=True)][0]
+    #         promote_file_to_downloadzone(comparison_pdf, rename_file=None, chatbot=chatbot)
+    #         zip_res = zip_result(project_folder)
+    #         promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
+    #         return
+    #     except:
+    #         report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"发现重复上传，但是无法找到相关文件")
+    #         yield from update_ui(chatbot=chatbot, history=history)
+    # else:
+    #     yield from update_ui_lastest_msg(f"未发现重复上传", chatbot=chatbot, history=history)
 
     # <-------------- convert pdf into tex ------------->
     chatbot.append([f"解析项目: {txt}", "正在将PDF转换为tex项目，请耐心等待..."])
