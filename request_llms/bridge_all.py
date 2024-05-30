@@ -940,6 +940,36 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
             "token_cnt": get_token_num_gpt35,
         },
     })
+# -=-=-=-=-=-=- one-api-version 对齐支持 -=-=-=-=-=-=-
+for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-version-")]:
+    # 为了更灵活地接入one-api多模型管理界面，设计了此接口，例子：AVAIL_LLM_MODELS = ["one-api-version-gpt-4o(max_token=32000)"]
+    # 其中
+    #   "one-api-version-"          是前缀（必要）
+    #   "gpt-4o"      是模型名（必要）
+    #   "(max_token=32000)"  是配置（非必要）
+    try:
+        _, max_token_tmp = read_one_api_model_name(model)
+    except:
+        print(f"one-api-version模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
+        continue
+    try:
+        from .oai_version_std import generate_message_version
+        one_api_version_noui, one_api_version_ui = get_predict_function(
+            api_key_conf_name="API_KEY", max_output_token=4000, disable_proxy=False, encode_call=generate_message_version
+            )
+        model_info.update({
+            model: {
+                "fn_with_ui": one_api_version_ui,
+                "fn_without_ui": one_api_version_noui,
+                "can_multi_thread": True,
+                "endpoint": openai_endpoint,
+                "max_token": max_token_tmp,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+        })
+    except:
+        print(trimmed_format_exc())
 # -=-=-=-=-=-=- vllm 对齐支持 -=-=-=-=-=-=-
 for model in [m for m in AVAIL_LLM_MODELS if m.startswith("vllm-")]:
     # 为了更灵活地接入vllm多模型管理界面，设计了此接口，例子：AVAIL_LLM_MODELS = ["vllm-/home/hmp/llm/cache/Qwen1___5-32B-Chat(max_token=6666)"]
