@@ -125,3 +125,20 @@
     border-width: thin;
     border-top-width: 0;
 }
+
+.floating-component #plugin_arg_panel {
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border: solid;
+    border-width: thin;
+    border-top-width: 0;
+}
+
+.floating-component #edit-panel {
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border: solid;
+    border-width: thin;
+    border-top-width: 0;
+}
+
