@@ -39,16 +39,16 @@ def generate_message_version(
         {"role": "system", "content": [{"type": "text", "text": system_prompt}]}
     ]
 
-    def make_media_input(inputs, image_paths):
-        for image_path in image_paths:
-            inputs = (
-                inputs
-                + f'<br/><br/><div align="center"><img src="file={os.path.abspath(image_path)}"></div>'
-            )
-        return inputs
+    # def make_media_input(inputs, image_paths):
+    #     for image_path in image_paths:
+    #         inputs = (
+    #             inputs
+    #             + f'<br/><br/><div align="center"><img src="file={os.path.abspath(image_path)}"></div>'
+    #         )
+    #     return inputs
 
-    if have_recent_file and chatbot != None:
-        chatbot.append((make_media_input(input, image_paths), ""))
+    # if have_recent_file and chatbot != None:
+    #     chatbot.append((make_media_input(input, image_paths), ""))
     if conversation_cnt:
         for index in range(0, 2 * conversation_cnt, 2):
             what_i_have_asked = {}
