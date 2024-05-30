@@ -703,7 +703,7 @@ if any(item in qwen_models for item in AVAIL_LLM_MODELS):
     except:
         print(trimmed_format_exc())
 # -=-=-=-=-=-=- 零一万物模型 -=-=-=-=-=-=-
-yi_models = ["yi-34b-chat-0205","yi-34b-chat-200k","yi-large","yi-medium","yi-spark","yi-large-turbo","yi-large-preview"]
+yi_models = ["yi-34b-chat-0205","yi-34b-chat-200k","yi-large","yi-medium","yi-spark","yi-large-turbo","yi-large-preview","yi-vision"]
 if any(item in yi_models for item in AVAIL_LLM_MODELS):
     try:
         yimodel_4k_noui, yimodel_4k_ui = get_predict_function(
@@ -715,6 +715,23 @@ if any(item in yi_models for item in AVAIL_LLM_MODELS):
         yimodel_200k_noui, yimodel_200k_ui = get_predict_function(
             api_key_conf_name="YIMODEL_API_KEY", max_output_token=4096, disable_proxy=False
             )
+        if "yi-vision" in AVAIL_LLM_MODELS:
+            from .bridge_yi_version import yi_version_generate_message_version
+            yimodel_version_noui, yimodel_version_ui = get_predict_function(
+                api_key_conf_name="YIMODEL_API_KEY", max_output_token=600, disable_proxy=False, encode_call=yi_version_generate_message_version
+                )
+            model_info.update({
+                "yi-vision": {
+                    "fn_with_ui": yimodel_version_ui,
+                    "fn_without_ui": yimodel_version_noui,
+                    "can_multi_thread": True,
+                    "endpoint": yimodel_endpoint,
+                    "max_token": 4000,
+                    "tokenizer": tokenizer_gpt35,
+                    "token_cnt": get_token_num_gpt35,
+                }
+            })
+            
         model_info.update({
             "yi-34b-chat-0205": {
                 "fn_with_ui": yimodel_4k_ui,

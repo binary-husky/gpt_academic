@@ -50,7 +50,7 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
 #   "moss", "llama2", "chatglm_onnx", "internlm", "jittorllms_pangualpha", "jittorllms_llama",
 #   "deepseek-chat" ,"deepseek-coder",
 #   "llama3-8b-8192", "gemma-7b-it", "mixtral-8x7b-32768", "llama3-70b-8192",
-#   "yi-34b-chat-0205","yi-34b-chat-200k","yi-large","yi-medium","yi-spark","yi-large-turbo","yi-large-preview",
+#   "yi-34b-chat-0205","yi-34b-chat-200k","yi-large","yi-medium","yi-spark","yi-large-turbo","yi-large-preview","yi-vision"
 # ]
 # --- --- --- ---
 # 此外，您还可以在接入one-api/vllm/ollama时，
