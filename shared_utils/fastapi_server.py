@@ -160,11 +160,14 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
                         temp_file_name = str(uuid.uuid4().hex)
                         temp_file = os.path.join(temp_folder, f'{temp_file_name}.mp3')
                         await tts.save(temp_file)
-                        mp3_audio = AudioSegment.from_file(temp_file, format="mp3")
-                        mp3_audio.export(temp_file, format="wav")
-                        with open(temp_file, 'rb') as wav_file: t = wav_file.read()
-                        os.remove(temp_file)
-                        return Response(content=t)
+                        try:
+                            mp3_audio = AudioSegment.from_file(temp_file, format="mp3")
+                            mp3_audio.export(temp_file, format="wav")
+                            with open(temp_file, 'rb') as wav_file: t = wav_file.read()
+                            os.remove(temp_file)
+                            return Response(content=t)
+                        except:
+                            raise RuntimeError("ffmpeg未安装，无法处理EdgeTTS音频。安装方法见`https://github.com/jiaaro/pydub#getting-ffmpeg-set-up`")
                     if TTS_TYPE == "LOCAL_SOVITS_API":
                         # Forward the request to the target service
                         TARGET_URL = get_conf("GPT_SOVITS_URL")
