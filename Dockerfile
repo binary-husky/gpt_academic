@@ -16,6 +16,10 @@ RUN echo '[global]' > /etc/pip.conf && \
 WORKDIR /gpt
 
 
+# TTS相关功能
+RUN apt update && apt install ffmpeg -y
+
+
 # 安装大部分依赖，利用Docker缓存加速以后的构建 （以下三行，可以删除）
 COPY requirements.txt ./
 RUN pip3 install -r requirements.txt
