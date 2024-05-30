@@ -716,7 +716,7 @@ if any(item in yi_models for item in AVAIL_LLM_MODELS):
             api_key_conf_name="YIMODEL_API_KEY", max_output_token=4096, disable_proxy=False
             )
         if "yi-vision" in AVAIL_LLM_MODELS:
-            from .bridge_yi_version import yi_version_generate_message_version
+            from .bridge_yi_vision import yi_version_generate_message_version
             yimodel_version_noui, yimodel_version_ui = get_predict_function(
                 api_key_conf_name="YIMODEL_API_KEY", max_output_token=600, disable_proxy=False, encode_call=yi_version_generate_message_version
                 )
@@ -1005,20 +1005,20 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
             "token_cnt": get_token_num_gpt35,
         },
     })
-# -=-=-=-=-=-=- one-api-version 对齐支持 -=-=-=-=-=-=-
-for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-version-")]:
-    # 为了更灵活地接入one-api多模型管理界面中的多模态模型，设计了此接口，例子：AVAIL_LLM_MODELS = ["one-api-version-gpt-4o(max_token=32000)"]
+# -=-=-=-=-=-=- one-api-vision 对齐支持 -=-=-=-=-=-=-
+for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-vision-")]:
+    # 为了更灵活地接入one-api多模型管理界面中的多模态模型，设计了此接口，例子：AVAIL_LLM_MODELS = ["one-api-vision-gpt-4o(max_token=32000)"]
     # 其中
-    #   "one-api-version-"          是前缀（必要）
+    #   "one-api-vision-"          是前缀（必要）
     #   "gpt-4o"      是模型名（必要）
     #   "(max_token=32000)"  是配置（非必要）
     try:
         _, max_token_tmp = read_one_api_model_name(model)
     except:
-        print(f"one-api-version模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
+        print(f"one-api-vision模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
         continue
     try:
-        from .oai_version_std import generate_message_version
+        from .oai_vision_std import generate_message_version
         one_api_version_noui, one_api_version_ui = get_predict_function(
             api_key_conf_name="API_KEY", max_output_token=4000, disable_proxy=False, encode_call=generate_message_version
             )

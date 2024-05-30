@@ -1,5 +1,5 @@
 from toolbox import encode_image, every_image_file_in_path ,read_one_api_model_name
-from .oai_version_std import multiple_picture_types
+from .oai_vision_std import multiple_picture_types
 
 timeout_bot_msg = (
     "[Local Message] Request timeout. Network error. Please check proxy settings in config.py."
@@ -71,9 +71,9 @@ def yi_version_generate_message_version(
     # 开始整理headers与message
     api_key = f"Bearer {key}"
     headers = {"Content-Type": "application/json", "Authorization": api_key}
-    if model.startswith("one-api-version-"):
+    if model.startswith("one-api-vision-"):
         model,_ = read_one_api_model_name(model)
-        model = model.replace("one-api-version-", "")
+        model = model.replace("one-api-vision-", "")
     playload = {
         "model": model,
         "messages": messages,

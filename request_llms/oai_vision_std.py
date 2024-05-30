@@ -88,9 +88,9 @@ def generate_message_version(
     # 开始整理headers与message
     api_key = f"Bearer {key}"
     headers = {"Content-Type": "application/json", "Authorization": api_key}
-    if model.startswith("one-api-version-"):
+    if model.startswith("one-api-vision-"):
         model,_ = read_one_api_model_name(model)
-        model = model.replace("one-api-version-", "")
+        model = model.replace("one-api-vision-", "")
     playload = {
         "model": model,
         "messages": messages,

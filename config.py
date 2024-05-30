@@ -56,8 +56,8 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
 # 此外，您还可以在接入one-api/vllm/ollama时，
 # 使用"one-api-*","vllm-*","ollama-*"前缀直接使用非标准方式接入的模型，例如
 # AVAIL_LLM_MODELS = ["one-api-claude-3-sonnet-20240229(max_token=100000)", "ollama-phi3(max_token=4096)"]
-# 在接入多模态模型时，可以使用"one-api-version-*"前缀接入，例如
-# AVAIL_LLM_MODELS = ["one-api-version-gpt-4o(max_token=32000)"]
+# 在接入多模态模型时，可以使用"one-api-vision-*"前缀接入，例如
+# AVAIL_LLM_MODELS = ["one-api-vision-gpt-4o(max_token=32000)"]
 # --- --- --- ---
 
 
