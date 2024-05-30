@@ -73,6 +73,7 @@ ollama_endpoint = "http://localhost:11434/api/chat"
 yimodel_endpoint = "https://api.lingyiwanwu.com/v1/chat/completions"
 deepseekapi_endpoint = "https://api.deepseek.com/v1/chat/completions"
 qwenapi_endpoint = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
+groq_endpoint = "https://api.groq.com/openai/v1/chat/completions"
 
 if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
 azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
@@ -95,6 +96,7 @@ if ollama_endpoint in API_URL_REDIRECT: ollama_endpoint = API_URL_REDIRECT[ollam
 if yimodel_endpoint in API_URL_REDIRECT: yimodel_endpoint = API_URL_REDIRECT[yimodel_endpoint]
 if deepseekapi_endpoint in API_URL_REDIRECT: deepseekapi_endpoint = API_URL_REDIRECT[deepseekapi_endpoint]
 if qwenapi_endpoint in API_URL_REDIRECT: qwenapi_endpoint = API_URL_REDIRECT[qwenapi_endpoint]
+if groq_endpoint in API_URL_REDIRECT: groq_endpoint = API_URL_REDIRECT[groq_endpoint]
 
 # 获取tokenizer
 tokenizer_gpt35 = LazyloadTiktoken("gpt-3.5-turbo")
@@ -917,6 +919,52 @@ if "deepseek-chat" in AVAIL_LLM_MODELS or "deepseek-coder" in AVAIL_LLM_MODELS:
         })
     except:
         print(trimmed_format_exc())
+# -=-=-=-=-=-=- groq -=-=-=-=-=-=-
+groq_models = ["llama3-8b-8192", "gemma-7b-it", "mixtral-8x7b-32768", "llama3-70b-8192"]
+if any(item in groq_models for item in AVAIL_LLM_MODELS):
+    try:
+        groq_8k_noui, groq_8k_ui = get_predict_function(
+            api_key_conf_name="GROQ_API_KEY", max_output_token=8192, disable_proxy=False
+            )
+        groq_32k_noui, groq_32k_ui = get_predict_function(
+            api_key_conf_name="GROQ_API_KEY", max_output_token=32768, disable_proxy=False
+            )
+        model_info.update({
+            "llama3-8b-8192": {
+                "fn_with_ui": groq_8k_ui,
+                "fn_without_ui": groq_8k_noui,
+                "endpoint": groq_endpoint,
+                "max_token": 8192,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "gemma-7b-it": {
+                "fn_with_ui": groq_8k_ui,
+                "fn_without_ui": groq_8k_noui,
+                "endpoint": groq_endpoint,
+                "max_token": 8192,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "mixtral-8x7b-32768": {
+                "fn_with_ui": groq_32k_ui,
+                "fn_without_ui": groq_32k_noui,
+                "endpoint": groq_endpoint,
+                "max_token": 32768,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "llama3-70b-8192": {
+                "fn_with_ui": groq_8k_ui,
+                "fn_without_ui": groq_8k_noui,
+                "endpoint": groq_endpoint,
+                "max_token": 8192,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+        })
+    except:
+        print(trimmed_format_exc())
 # -=-=-=-=-=-=- one-api 对齐支持 -=-=-=-=-=-=-
 for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
     # 为了更灵活地接入one-api多模型管理界面，设计了此接口，例子：AVAIL_LLM_MODELS = ["one-api-mixtral-8x7b(max_token=6666)"]
@@ -942,7 +990,7 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
     })
 # -=-=-=-=-=-=- one-api-version 对齐支持 -=-=-=-=-=-=-
 for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-version-")]:
-    # 为了更灵活地接入one-api多模型管理界面，设计了此接口，例子：AVAIL_LLM_MODELS = ["one-api-version-gpt-4o(max_token=32000)"]
+    # 为了更灵活地接入one-api多模型管理界面中的多模态模型，设计了此接口，例子：AVAIL_LLM_MODELS = ["one-api-version-gpt-4o(max_token=32000)"]
     # 其中
     #   "one-api-version-"          是前缀（必要）
     #   "gpt-4o"      是模型名（必要）

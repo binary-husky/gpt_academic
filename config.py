@@ -49,12 +49,15 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
 #   "claude-3-haiku-20240307","claude-3-sonnet-20240229","claude-3-opus-20240229", "claude-2.1", "claude-instant-1.2",
 #   "moss", "llama2", "chatglm_onnx", "internlm", "jittorllms_pangualpha", "jittorllms_llama",
 #   "deepseek-chat" ,"deepseek-coder",
+#   "llama3-8b-8192", "gemma-7b-it", "mixtral-8x7b-32768", "llama3-70b-8192",
 #   "yi-34b-chat-0205","yi-34b-chat-200k","yi-large","yi-medium","yi-spark","yi-large-turbo","yi-large-preview",
 # ]
 # --- --- --- ---
 # 此外，您还可以在接入one-api/vllm/ollama时，
 # 使用"one-api-*","vllm-*","ollama-*"前缀直接使用非标准方式接入的模型，例如
 # AVAIL_LLM_MODELS = ["one-api-claude-3-sonnet-20240229(max_token=100000)", "ollama-phi3(max_token=4096)"]
+# 在接入多模态模型时，可以使用"one-api-version-*"前缀接入，例如
+# AVAIL_LLM_MODELS = ["one-api-version-gpt-4o(max_token=32000)"]
 # --- --- --- ---
 
 
@@ -229,12 +232,18 @@ MOONSHOT_API_KEY = ""
 # 零一万物(Yi Model) API KEY
 YIMODEL_API_KEY = ""
 
+
 # 深度求索(DeepSeek) API KEY，默认请求地址为"https://api.deepseek.com/v1/chat/completions"
 DEEPSEEK_API_KEY = ""
+
 
 # Mathpix 拥有执行PDF的OCR功能，但是需要注册账号
 MATHPIX_APPID = ""
 MATHPIX_APPKEY = ""
+
+
+# Groq API KEY，默认请求地址为"https://api.groq.com/openai/v1/chat/completions"
+GROQ_API_KEY = ""
 
 
 # DOC2X的PDF解析服务，注册账号并获取API KEY: https://doc2x.noedgeai.com/login
