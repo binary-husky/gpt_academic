@@ -1,6 +1,7 @@
 from toolbox import CatchException, update_ui, report_exception
 from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-import datetime
+from crazy_functions.plugin_template.plugin_class_template import GptAcademicPluginTemplate
+from crazy_functions.plugin_template.plugin_class_template import ArgProperty
 
 #以下是每类图表的PROMPT
 SELECT_PROMPT = """
@@ -20,19 +21,21 @@ SELECT_PROMPT = """
 #没有思维导图!!!测试发现模型始终会优先选择思维导图
 #流程图
 PROMPT_1 = """
-请你给出围绕“{subject}”的逻辑关系图，使用mermaid语法，mermaid语法举例：
+请你给出围绕“{subject}”的逻辑关系图，使用mermaid语法，注意需要使用双引号将内容括起来。
+mermaid语法举例：
 ```mermaid
 graph TD
-    P(编程) --> L1(Python)
-    P(编程) --> L2(C)
-    P(编程) --> L3(C++)
-    P(编程) --> L4(Javascipt)
-    P(编程) --> L5(PHP)
+    P("编程") --> L1("Python")
+    P("编程") --> L2("C")
+    P("编程") --> L3("C++")
+    P("编程") --> L4("Javascipt")
+    P("编程") --> L5("PHP")
 ```
 """
 #序列图
 PROMPT_2 = """
-请你给出围绕“{subject}”的序列图，使用mermaid语法，mermaid语法举例：
+请你给出围绕“{subject}”的序列图，使用mermaid语法。
+mermaid语法举例：
 ```mermaid
 sequenceDiagram
     participant A as 用户
@@ -45,7 +48,8 @@ sequenceDiagram
 """
 #类图
 PROMPT_3 = """
-请你给出围绕“{subject}”的类图，使用mermaid语法，mermaid语法举例：
+请你给出围绕“{subject}”的类图，使用mermaid语法。
+mermaid语法举例：
 ```mermaid
 classDiagram
     Class01 <|-- AveryLongClass : Cool
@@ -65,7 +69,8 @@ classDiagram
 """
 #饼图
 PROMPT_4 = """
-请你给出围绕“{subject}”的饼图，使用mermaid语法，mermaid语法举例：
+请你给出围绕“{subject}”的饼图，使用mermaid语法，注意需要使用双引号将内容括起来。
+mermaid语法举例：
 ```mermaid
 pie title Pets adopted by volunteers
     "狗" : 386
@@ -75,36 +80,39 @@ pie title Pets adopted by volunteers
 """
 #甘特图
 PROMPT_5 = """
-请你给出围绕“{subject}”的甘特图，使用mermaid语法，mermaid语法举例：
+请你给出围绕“{subject}”的甘特图，使用mermaid语法，注意需要使用双引号将内容括起来。
+mermaid语法举例：
 ```mermaid
 gantt
-    title 项目开发流程
+    title "项目开发流程"
     dateFormat  YYYY-MM-DD
-    section 设计
-    需求分析 :done, des1, 2024-01-06,2024-01-08
-    原型设计 :active, des2, 2024-01-09, 3d
-    UI设计 : des3, after des2, 5d
-    section 开发
-    前端开发 :2024-01-20, 10d
-    后端开发 :2024-01-20, 10d
+    section "设计"
+    "需求分析" :done, des1, 2024-01-06,2024-01-08
+    "原型设计" :active, des2, 2024-01-09, 3d
+    "UI设计" : des3, after des2, 5d
+    section "开发"
+    "前端开发" :2024-01-20, 10d
+    "后端开发" :2024-01-20, 10d
 ```
 """
 #状态图
 PROMPT_6 = """
-请你给出围绕“{subject}”的状态图，使用mermaid语法，mermaid语法举例：
+请你给出围绕“{subject}”的状态图，使用mermaid语法，注意需要使用双引号将内容括起来。
+mermaid语法举例：
 ```mermaid
 stateDiagram-v2
-   [*] --> Still
-    Still --> [*]
-    Still --> Moving
-    Moving --> Still
-    Moving --> Crash
-    Crash --> [*]
+   [*] --> "Still"
+    "Still" --> [*]
+    "Still" --> "Moving"
+    "Moving" --> "Still"
+    "Moving" --> "Crash"
+    "Crash" --> [*]
 ```
 """
 #实体关系图
 PROMPT_7 = """
-请你给出围绕“{subject}”的实体关系图，使用mermaid语法，mermaid语法举例：
+请你给出围绕“{subject}”的实体关系图，使用mermaid语法。
+mermaid语法举例：
 ```mermaid
 erDiagram
     CUSTOMER ||--o{ ORDER : places
@@ -126,38 +134,48 @@ erDiagram
 """
 #象限提示图
 PROMPT_8 = """
-请你给出围绕“{subject}”的象限图，使用mermaid语法，mermaid语法举例：
+请你给出围绕“{subject}”的象限图，使用mermaid语法，注意需要使用双引号将内容括起来。
+mermaid语法举例：
 ```mermaid
 graph LR
-    A[Hard skill] --> B(Programming)
-    A[Hard skill] --> C(Design)
-    D[Soft skill] --> E(Coordination)
-    D[Soft skill] --> F(Communication)
+    A["Hard skill"] --> B("Programming")
+    A["Hard skill"] --> C("Design")
+    D["Soft skill"] --> E("Coordination")
+    D["Soft skill"] --> F("Communication")
 ```
 """
 #思维导图
 PROMPT_9 = """
 {subject}
 ==========
-请给出上方内容的思维导图，充分考虑其之间的逻辑，使用mermaid语法，mermaid语法举例：
+请给出上方内容的思维导图，充分考虑其之间的逻辑，使用mermaid语法，注意需要使用双引号将内容括起来。
+mermaid语法举例：
 ```mermaid
 mindmap
   root((mindmap))
-    Origins
-      Long history
+    ("Origins")
+      ("Long history")
       ::icon(fa fa-book)
-      Popularisation
-        British popular psychology author Tony Buzan
-    Research
-      On effectiveness<br/>and features
-      On Automatic creation
-        Uses
-            Creative techniques
-            Strategic planning
-            Argument mapping
-    Tools
-      Pen and paper
-      Mermaid
+      ("Popularisation")
+        ("British popular psychology author Tony Buzan")
+        ::icon(fa fa-user)
+    ("Research")
+      ("On effectiveness<br/>and features")
+      ::icon(fa fa-search)
+      ("On Automatic creation")
+      ::icon(fa fa-robot)
+        ("Uses")
+            ("Creative techniques")
+            ::icon(fa fa-lightbulb-o)
+            ("Strategic planning")
+            ::icon(fa fa-flag)
+            ("Argument mapping")
+            ::icon(fa fa-comments)
+    ("Tools")
+      ("Pen and paper")
+      ::icon(fa fa-pencil)
+      ("Mermaid")
+      ::icon(fa fa-code)
 ```
 """
 
