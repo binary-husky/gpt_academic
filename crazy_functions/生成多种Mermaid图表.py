@@ -221,7 +221,7 @@ def 解析历史输入(history, llm_kwargs, file_manifest, chatbot, plugin_kwarg
         results.append(gpt_say)
         last_iteration_result = gpt_say
     ############################## <第 2 步，根据整理的摘要选择图表类型> ##################################
-    gpt_say = plugin_kwargs  # 将图表类型参数赋值为插件参数
+    gpt_say = str(plugin_kwargs)  # 将图表类型参数赋值为插件参数
     results_txt = "\n".join(results)  # 合并摘要
     if gpt_say not in [
         "1",
@@ -426,7 +426,7 @@ class Mermaid_Gen(GptAcademicPluginTemplate):
             "象限提示图",
             "思维导图",
         ]
-        plugin_kwargs = options.index(plugin_kwargs)
+        plugin_kwargs = options.index(plugin_kwargs['Type_of_Mermaid'])
         yield from 生成多种Mermaid图表(
             txt,
             llm_kwargs,
