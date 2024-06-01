@@ -41,6 +41,8 @@ def define_gui_advanced_plugin_class(plugins):
                         arg_confirm.update({arg_name: str(usr_confirmed_arg_dict[arg_name]['user_confirmed_value'])})
                     plugin_obj = plugins[which_plugin]["Class"]
                     arguments['plugin_advanced_arg'] = arg_confirm
+                    if arg_confirm.get('main_input', None) is not None:
+                        arguments['txt'] = arg_confirm['main_input']
                     yield from ArgsGeneralWrapper(plugin_obj.execute)(request, *arguments.values())
     return invisible_callback_btn_for_plugin_exe, route_switchy_bt_with_arg, usr_confirmed_arg
 
