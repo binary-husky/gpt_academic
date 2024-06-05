@@ -195,12 +195,20 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
     fastapi_app = FastAPI(lifespan=app_lifespan)
     fastapi_app.mount(CUSTOM_PATH, gradio_app)
 
-    # --- --- favicon --- ---
+    # --- --- favicon and block fastapi api reference routes --- ---
+    from starlette.responses import JSONResponse
     if CUSTOM_PATH != '/':
         from fastapi.responses import FileResponse
         @fastapi_app.get("/favicon.ico")
         async def favicon():
             return FileResponse(app_block.favicon_path)
+
+        @fastapi_app.middleware("http")
+        async def middleware(request: Request, call_next):
+            if request.scope['path'] == "/docs" or request.scope['path'] == "/redoc" or request.scope['path'] == "/openapi.json":
+                return JSONResponse(status_code=404, content={"message": "Not Found"})
+            response = await call_next(request)
+            return response
 
     # --- --- uvicorn.Config --- ---
     ssl_keyfile = None if SSL_KEYFILE == "" else SSL_KEYFILE
@@ -217,7 +225,7 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
     )
     server = Server(config)
     url_host_name = "localhost" if server_name == "0.0.0.0" else server_name
-    if ssl_keyfile is not None:
+    if ssl_keyfile is not None:    
         if ssl_certfile is None:
             raise ValueError(
                 "ssl_certfile must be provided if ssl_keyfile is provided."
