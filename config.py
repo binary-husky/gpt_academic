@@ -234,7 +234,7 @@ YIMODEL_API_KEY = ""
 DEEPSEEK_API_KEY = ""
 
 
-# 紫东太初
+# 紫东太初大模型 https://ai-maas.wair.ac.cn
 TAICHU_API_KEY = ""
 
 
