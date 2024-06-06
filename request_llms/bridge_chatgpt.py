@@ -50,7 +50,8 @@ def make_multimodal_input(inputs, image_paths):
 
 def reverse_base64_from_input(inputs):
     # 定义一个正则表达式来匹配 Base64 字符串（假设格式为 base64="<Base64编码>"）
-    pattern = re.compile(r'base64="([^"]+)"')
+    # pattern = re.compile(r'base64="([^"]+)"></div>')
+    pattern = re.compile(r'<br/><br/><div align="center"><img[^<>]+base64="([^"]+)"></div>')
     # 使用 findall 方法查找所有匹配的 Base64 字符串
     base64_strings = pattern.findall(inputs)
     # 返回反转后的 Base64 字符串列表
@@ -80,6 +81,14 @@ def append_image_if_contain_base64(inputs):
                 }
             })
         return res
+
+def remove_image_if_contain_base64(inputs):
+    if not contain_base64(inputs):
+        return inputs
+    else:
+        pattern = re.compile(r'<br/><br/><div align="center"><img[^><]+></div>')
+        inputs = re.sub(pattern, '', inputs)
+        return inputs
 
 def decode_chunk(chunk):
     # 提前读取一些信息 （用于判断异常）
@@ -408,10 +417,10 @@ def generate_payload(inputs:str, llm_kwargs:dict, history:list, system_prompt:st
             for index in range(0, 2*conversation_cnt, 2):
                 what_i_have_asked = {}
                 what_i_have_asked["role"] = "user"
-                what_i_have_asked["content"] = history[index]
+                what_i_have_asked["content"] = remove_image_if_contain_base64(history[index])
                 what_gpt_answer = {}
                 what_gpt_answer["role"] = "assistant"
-                what_gpt_answer["content"] = history[index+1]
+                what_gpt_answer["content"] = remove_image_if_contain_base64(history[index+1])
                 if what_i_have_asked["content"] != "":
                     if what_gpt_answer["content"] == "": continue
                     if what_gpt_answer["content"] == timeout_bot_msg: continue
