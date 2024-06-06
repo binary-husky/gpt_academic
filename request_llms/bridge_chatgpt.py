@@ -1,5 +1,3 @@
-# 借鉴了 https://github.com/GaiZhenbiao/ChuanhuChatGPT 项目
-
 """
     该文件中主要包含三个函数
 
@@ -11,19 +9,19 @@
 """
 
 import json
+import os
+import re
 import time
-import gradio as gr
 import logging
 import traceback
 import requests
-import importlib
 import random
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
 from toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history
 from toolbox import trimmed_format_exc, is_the_upload_folder, read_one_api_model_name, log_chat
-from toolbox import ChatBotWithCookies
+from toolbox import ChatBotWithCookies, have_any_recent_upload_image_files, encode_image
 proxies, TIMEOUT_SECONDS, MAX_RETRY, API_ORG, AZURE_CFG_ARRAY = \
     get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'API_ORG', 'AZURE_CFG_ARRAY')
 
@@ -40,6 +38,48 @@ def get_full_error(chunk, stream_response):
         except:
             break
     return chunk
+
+def make_multimodal_input(inputs, image_paths):
+    image_base64_array = []
+    for image_path in image_paths:
+        path = os.path.abspath(image_path)
+        base64 = encode_image(path)
+        inputs = inputs + f'<br/><br/><div align="center"><img src="file={path}" base64="{base64}"></div>'
+        image_base64_array.append(base64)
+    return inputs, image_base64_array
+
+def reverse_base64_from_input(inputs):
+    # 定义一个正则表达式来匹配 Base64 字符串（假设格式为 base64="<Base64编码>"）
+    pattern = re.compile(r'base64="([^"]+)"')
+    # 使用 findall 方法查找所有匹配的 Base64 字符串
+    base64_strings = pattern.findall(inputs)
+    # 返回反转后的 Base64 字符串列表
+    return base64_strings
+
+def contain_base64(inputs):
+    base64_strings = reverse_base64_from_input(inputs)
+    return len(base64_strings) > 0
+
+def append_image_if_contain_base64(inputs):
+    if not contain_base64(inputs):
+        return inputs
+    else:
+        image_base64_array = reverse_base64_from_input(inputs)
+        pattern = re.compile(r'<br/><br/><div align="center"><img[^><]+></div>')
+        inputs = re.sub(pattern, '', inputs)
+        res = []
+        res.append({
+            "type": "text",
+            "text": inputs
+        })
+        for image_base64 in image_base64_array:
+            res.append({
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{image_base64}"
+                }
+            })
+        return res
 
 def decode_chunk(chunk):
     # 提前读取一些信息 （用于判断异常）
@@ -159,6 +199,7 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
     chatbot 为WebUI中显示的对话列表，修改它，然后yeild出去，可以直接修改对话界面内容
     additional_fn代表点击的哪个按钮，按钮见functional.py
     """
+    from .bridge_all import model_info
     if is_any_api_key(inputs):
         chatbot._cookies['api_key'] = inputs
         chatbot.append(("输入已识别为openai的api_key", what_keys(inputs)))
@@ -174,7 +215,17 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
         from core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
-    chatbot.append((inputs, ""))
+    # 多模态模型
+    has_multimodal_capacity = model_info[llm_kwargs['llm_model']].get('has_multimodal_capacity', False)
+    if has_multimodal_capacity:
+        has_recent_image_upload, image_paths = have_any_recent_upload_image_files(chatbot, pop=True)
+    else:
+        has_recent_image_upload, image_paths = False, []
+    if has_recent_image_upload:
+        _inputs, image_base64_array = make_multimodal_input(inputs, image_paths)
+    else:
+        _inputs, image_base64_array = inputs, []
+    chatbot.append((_inputs, ""))
     yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
 
     # check mis-behavior
@@ -184,7 +235,7 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
         time.sleep(2)
 
     try:
-        headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt, stream)
+        headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt, image_base64_array, has_multimodal_capacity, stream)
     except RuntimeError as e:
         chatbot[-1] = (inputs, f"您提供的api-key不满足要求，不包含任何可用于{llm_kwargs['llm_model']}的api-key。您可能选择了错误的模型或请求源。")
         yield from update_ui(chatbot=chatbot, history=history, msg="api-key不满足要求") # 刷新界面
@@ -192,7 +243,6 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
 
     # 检查endpoint是否合法
     try:
-        from .bridge_all import model_info
         endpoint = verify_endpoint(model_info[llm_kwargs['llm_model']]['endpoint'])
     except:
         tb_str = '```\n' + trimmed_format_exc() + '```'
@@ -200,7 +250,11 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
         yield from update_ui(chatbot=chatbot, history=history, msg="Endpoint不满足要求") # 刷新界面
         return
 
-    history.append(inputs); history.append("")
+    # 加入历史
+    if has_recent_image_upload:
+        history.extend([_inputs, ""])
+    else:
+        history.extend([inputs, ""])
 
     retry = 0
     while True:
@@ -314,7 +368,7 @@ def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
         chatbot[-1] = (chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str} \n\n{regular_txt_to_markdown(chunk_decoded)}")
     return chatbot, history
 
-def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
+def generate_payload(inputs:str, llm_kwargs:dict, history:list, system_prompt:str, image_base64_array:list=[], has_multimodal_capacity:bool=False, stream:bool=True):
     """
     整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
     """
@@ -337,29 +391,74 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
             azure_api_key_unshared = AZURE_CFG_ARRAY[llm_kwargs['llm_model']]["AZURE_API_KEY"]
             headers.update({"api-key": azure_api_key_unshared})
 
-    conversation_cnt = len(history) // 2
+    if has_multimodal_capacity:
+        # 当以下条件满足时，启用多模态能力：
+        # 1. 模型本身是多模态模型（has_multimodal_capacity）
+        # 2. 输入包含图像（len(image_base64_array) > 0）
+        # 3. 历史输入包含图像（ any([contain_base64(h) for h in history]) ）
+        enable_multimodal_capacity = (len(image_base64_array) > 0) or any([contain_base64(h) for h in history])
+    else:
+        enable_multimodal_capacity = False
 
-    messages = [{"role": "system", "content": system_prompt}]
-    if conversation_cnt:
-        for index in range(0, 2*conversation_cnt, 2):
-            what_i_have_asked = {}
-            what_i_have_asked["role"] = "user"
-            what_i_have_asked["content"] = history[index]
-            what_gpt_answer = {}
-            what_gpt_answer["role"] = "assistant"
-            what_gpt_answer["content"] = history[index+1]
-            if what_i_have_asked["content"] != "":
-                if what_gpt_answer["content"] == "": continue
-                if what_gpt_answer["content"] == timeout_bot_msg: continue
-                messages.append(what_i_have_asked)
-                messages.append(what_gpt_answer)
-            else:
-                messages[-1]['content'] = what_gpt_answer['content']
+    if not enable_multimodal_capacity:
+        # 不使用多模态能力
+        conversation_cnt = len(history) // 2
+        messages = [{"role": "system", "content": system_prompt}]
+        if conversation_cnt:
+            for index in range(0, 2*conversation_cnt, 2):
+                what_i_have_asked = {}
+                what_i_have_asked["role"] = "user"
+                what_i_have_asked["content"] = history[index]
+                what_gpt_answer = {}
+                what_gpt_answer["role"] = "assistant"
+                what_gpt_answer["content"] = history[index+1]
+                if what_i_have_asked["content"] != "":
+                    if what_gpt_answer["content"] == "": continue
+                    if what_gpt_answer["content"] == timeout_bot_msg: continue
+                    messages.append(what_i_have_asked)
+                    messages.append(what_gpt_answer)
+                else:
+                    messages[-1]['content'] = what_gpt_answer['content']
+        what_i_ask_now = {}
+        what_i_ask_now["role"] = "user"
+        what_i_ask_now["content"] = inputs
+        messages.append(what_i_ask_now)
+    else:
+        # 多模态能力
+        conversation_cnt = len(history) // 2
+        messages = [{"role": "system", "content": system_prompt}]
+        if conversation_cnt:
+            for index in range(0, 2*conversation_cnt, 2):
+                what_i_have_asked = {}
+                what_i_have_asked["role"] = "user"
+                what_i_have_asked["content"] = append_image_if_contain_base64(history[index])
+                what_gpt_answer = {}
+                what_gpt_answer["role"] = "assistant"
+                what_gpt_answer["content"] = append_image_if_contain_base64(history[index+1])
+                if what_i_have_asked["content"] != "":
+                    if what_gpt_answer["content"] == "": continue
+                    if what_gpt_answer["content"] == timeout_bot_msg: continue
+                    messages.append(what_i_have_asked)
+                    messages.append(what_gpt_answer)
+                else:
+                    messages[-1]['content'] = what_gpt_answer['content']
+        what_i_ask_now = {}
+        what_i_ask_now["role"] = "user"
+        what_i_ask_now["content"] = []
+        what_i_ask_now["content"].append({
+            "type": "text",
+            "text": inputs
+        })
+        for image_base64 in image_base64_array:
+            what_i_ask_now["content"].append({
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{image_base64}"
+                }
+            })
+        messages.append(what_i_ask_now)
 
-    what_i_ask_now = {}
-    what_i_ask_now["role"] = "user"
-    what_i_ask_now["content"] = inputs
-    messages.append(what_i_ask_now)
+
     model = llm_kwargs['llm_model']
     if llm_kwargs['llm_model'].startswith('api2d-'):
         model = llm_kwargs['llm_model'][len('api2d-'):]

@@ -183,6 +183,7 @@ model_info = {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
         "endpoint": openai_endpoint,
+        "has_multimodal_capacity": True,
         "max_token": 128000,
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
@@ -191,6 +192,7 @@ model_info = {
     "gpt-4o-2024-05-13": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
+        "has_multimodal_capacity": True,
         "endpoint": openai_endpoint,
         "max_token": 128000,
         "tokenizer": tokenizer_gpt4,
@@ -227,6 +229,7 @@ model_info = {
     "gpt-4-turbo": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
+        "has_multimodal_capacity": True,
         "endpoint": openai_endpoint,
         "max_token": 128000,
         "tokenizer": tokenizer_gpt4,
@@ -236,6 +239,7 @@ model_info = {
     "gpt-4-turbo-2024-04-09": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
+        "has_multimodal_capacity": True,
         "endpoint": openai_endpoint,
         "max_token": 128000,
         "tokenizer": tokenizer_gpt4,
@@ -900,21 +904,31 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
     #   "mixtral-8x7b"      是模型名（必要）
     #   "(max_token=6666)"  是配置（非必要）
     try:
-        _, max_token_tmp = read_one_api_model_name(model)
+        origin_model_name, max_token_tmp = read_one_api_model_name(model)
+        # 如果是已知模型，则尝试获取其信息
+        original_model_info = model_info.get(origin_model_name.replace("one-api-", "", 1), None)
     except:
         print(f"one-api模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
         continue
-    model_info.update({
-        model: {
-            "fn_with_ui": chatgpt_ui,
-            "fn_without_ui": chatgpt_noui,
-            "can_multi_thread": True,
-            "endpoint": openai_endpoint,
-            "max_token": max_token_tmp,
-            "tokenizer": tokenizer_gpt35,
-            "token_cnt": get_token_num_gpt35,
-        },
-    })
+    this_model_info = {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "can_multi_thread": True,
+        "endpoint": openai_endpoint,
+        "max_token": max_token_tmp,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    }
+
+    # 同步已知模型的其他信息
+    attribute = "has_multimodal_capacity"
+    if original_model_info is not None and original_model_info.get(attribute, None) is not None: this_model_info.update({attribute: original_model_info.get(attribute, None)})
+    # attribute = "attribute2"
+    # if original_model_info is not None and original_model_info.get(attribute, None) is not None: this_model_info.update({attribute: original_model_info.get(attribute, None)})
+    # attribute = "attribute3"
+    # if original_model_info is not None and original_model_info.get(attribute, None) is not None: this_model_info.update({attribute: original_model_info.get(attribute, None)})
+    model_info.update({model: this_model_info})
+
 # -=-=-=-=-=-=- vllm 对齐支持 -=-=-=-=-=-=-
 for model in [m for m in AVAIL_LLM_MODELS if m.startswith("vllm-")]:
     # 为了更灵活地接入vllm多模型管理界面，设计了此接口，例子：AVAIL_LLM_MODELS = ["vllm-/home/hmp/llm/cache/Qwen1___5-32B-Chat(max_token=6666)"]

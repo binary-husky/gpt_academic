@@ -27,10 +27,8 @@ timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check 
 
 
 def report_invalid_key(key):
-    if get_conf("BLOCK_INVALID_APIKEY"):
-        # 实验性功能，自动检测并屏蔽失效的KEY，请勿使用
-        from request_llms.key_manager import ApiKeyManager
-        api_key = ApiKeyManager().add_key_to_blacklist(key)
+    # 弃用功能
+    return
 
 def get_full_error(chunk, stream_response):
     """

@@ -903,15 +903,18 @@ def get_pictures_list(path):
     return file_manifest
 
 
-def have_any_recent_upload_image_files(chatbot:ChatBotWithCookies):
+def have_any_recent_upload_image_files(chatbot:ChatBotWithCookies, pop:bool=False):
     _5min = 5 * 60
     if chatbot is None:
         return False, None  # chatbot is None
-    most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
+    if pop:
+        most_recent_uploaded = chatbot._cookies.pop("most_recent_uploaded", None)
+    else:
+        most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
+    # most_recent_uploaded 是一个放置最新上传图像的路径
     if not most_recent_uploaded:
         return False, None  # most_recent_uploaded is None
     if time.time() - most_recent_uploaded["time"] < _5min:
-        most_recent_uploaded = chatbot._cookies.get("most_recent_uploaded", None)
         path = most_recent_uploaded["path"]
         file_manifest = get_pictures_list(path)
         if len(file_manifest) == 0:
