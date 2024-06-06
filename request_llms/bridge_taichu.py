@@ -4,8 +4,8 @@ from toolbox import update_ui, get_conf, update_ui_lastest_msg, log_chat
 from toolbox import check_packages, report_exception, have_any_recent_upload_image_files
 from toolbox import ChatBotWithCookies
 
-model_name = 'Taichu-2.0'
-taichu_default_model = 'taichu_llm'
+# model_name = 'Taichu-2.0'
+# taichu_default_model = 'taichu_llm'
 
 def validate_key():
     TAICHU_API_KEY = get_conf("TAICHU_API_KEY")
@@ -21,8 +21,8 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], 
     watch_dog_patience = 5
     response = ""
 
-    if llm_kwargs["llm_model"] == "taichu":
-        llm_kwargs["llm_model"] = taichu_default_model
+    # if llm_kwargs["llm_model"] == "taichu":
+    #     llm_kwargs["llm_model"] = "taichu"
 
     if validate_key() is False:
         raise RuntimeError('请配置 TAICHU_API_KEY')
@@ -58,8 +58,8 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
         chatbot[-1] = [inputs, ""]
         yield from update_ui(chatbot=chatbot, history=history)
 
-    if llm_kwargs["llm_model"] == "taichu":
-        llm_kwargs["llm_model"] = taichu_default_model
+    # if llm_kwargs["llm_model"] == "taichu":
+    #     llm_kwargs["llm_model"] = taichu_default_model
 
     # 开始接收回复
     from .com_taichu import TaichuChatInit
