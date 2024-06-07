@@ -159,10 +159,10 @@ def 解析PDF_DOC2X_单文件(fp, project_folder, llm_kwargs, plugin_kwargs, cha
             file_name = '在线预览翻译（原文）' + gen_time_str() + '.html'
             preview_fp = os.path.join(ex_folder, file_name)
             from shared_utils.advanced_markdown_format import markdown_convertion_for_file
-            with open(generated_fp, "r", encoding="utf-8") as f:
-                md = f.read()
-                # Markdown中使用不标准的表格，需要在表格前加上一个emoji，以便公式渲染
-                md = re.sub(r'^<table>', r'😃<table>', md, flags=re.MULTILINE)
+            # with open(generated_fp, "r", encoding="utf-8") as f:
+            #     md = f.read()
+            #     # Markdown中使用不标准的表格，需要在表格前加上一个emoji，以便公式渲染
+            #     md = re.sub(r'^<table>', r'.<table>', md, flags=re.MULTILINE)
             html = markdown_convertion_for_file(md)
             with open(preview_fp, "w", encoding="utf-8") as f: f.write(html)
             chatbot.append([None, f"生成在线预览：{generate_file_link([preview_fp])}"])
@@ -182,7 +182,7 @@ def 解析PDF_DOC2X_单文件(fp, project_folder, llm_kwargs, plugin_kwargs, cha
             with open(generated_fp, 'r', encoding='utf8') as f: content = f.read()
             content = content.replace('```markdown', '\n').replace('```', '\n')
             # Markdown中使用不标准的表格，需要在表格前加上一个emoji，以便公式渲染
-            content = re.sub(r'^<table>', r'😃<table>', content, flags=re.MULTILINE)
+            # content = re.sub(r'^<table>', r'.<table>', content, flags=re.MULTILINE)
             with open(generated_fp, 'w', encoding='utf8') as f: f.write(content)
             # 生成在线预览html
             file_name = '在线预览翻译' + gen_time_str() + '.html'
