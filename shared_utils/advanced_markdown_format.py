@@ -218,13 +218,29 @@ def fix_dollar_sticking_bug(txt):
     single_stack_height = 0
     double_stack_height = 0
     while True:
-        index = txt.find('$')
-        if index == -1:
-            txt_result += txt
-            return txt_result
-        # still has $
-        # how many dollar
         while True:
+            # still has $
+            # how many dollar
+            index = txt.find('$')
+
+            if index == -1:
+                txt_result += txt
+                return txt_result
+
+            if single_stack_height > 0:
+                if txt[:(index+1)].find('\n') > 0 or txt[:(index+1)].find('<td>') > 0 or txt[:(index+1)].find('</td>') > 0:
+                    print('公式之中出现了异常换行 unexpect new line in equation')
+                    single_stack_height = 0
+                    txt_result += ' $'
+                    continue
+
+            if double_stack_height > 0:
+                if txt[:(index+1)].find('\n\n') > 0:
+                    print('公式之中出现了异常换行 unexpect new line in equation')
+                    double_stack_height = 0
+                    txt_result += '$$'
+                    continue
+
             is_double = (txt[index+1] == '$')
             if is_double:
                 if single_stack_height != 0:
@@ -239,11 +255,15 @@ def fix_dollar_sticking_bug(txt):
                 txt = txt[(index+2):]
             else:
                 if double_stack_height != 0:
+                    print(txt[:(index)])
                     print('Fatal')
                 if single_stack_height == 0:
                     single_stack_height = 1
                 else:
                     single_stack_height = 0
+                    print(txt[:(index)])
+                    import time
+                    # time.sleep(0.1)
                 txt_result += txt[:(index+1)]
                 txt = txt[(index+1):]
             break
@@ -274,9 +294,10 @@ def markdown_convertion_for_file(txt):
 
     find_equation_pattern = r'<script type="math/tex(?:.*?)>(.*?)</script>'
     txt = fix_markdown_indent(txt)
+    convert_stage_1 = fix_dollar_sticking_bug(txt)
     # convert everything to html format
-    convert_stage_1 = markdown.markdown(
-        text=txt,
+    convert_stage_2 = markdown.markdown(
+        text=convert_stage_1,
         extensions=[
             "sane_lists",
             "tables",
@@ -288,16 +309,15 @@ def markdown_convertion_for_file(txt):
     )
 
 
-    convert_stage_1 = fix_dollar_sticking_bug(convert_stage_1)
     def repl_fn(match):
         content = match.group(2)
         return f'<script type="math/tex">{content}</script>'
 
     pattern = "|".join([pattern for pattern, property in mathpatterns.items() if not property["allow_multi_lines"]])
     pattern = re.compile(pattern, flags=re.ASCII)
-    convert_stage_2 = pattern.sub(repl_fn, convert_stage_1)
+    convert_stage_3 = pattern.sub(repl_fn, convert_stage_2)
 
-    convert_stage_4 = markdown_bug_hunt(convert_stage_2)
+    convert_stage_4 = markdown_bug_hunt(convert_stage_3)
 
     # 2. convert to rendered equation
     convert_stage_5, n = re.subn(
