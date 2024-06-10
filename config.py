@@ -41,6 +41,7 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
 # --- --- --- ---
 # P.S. 其他可用的模型还包括
 # AVAIL_LLM_MODELS = [
+#   "glm-4-0520", "glm-4-air", "glm-4-airx", "glm-4-flash",
 #   "qianfan", "deepseekcoder",
 #   "spark", "sparkv2", "sparkv3", "sparkv3.5",
 #   "qwen-turbo", "qwen-plus", "qwen-max", "qwen-local",

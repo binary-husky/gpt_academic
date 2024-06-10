@@ -965,7 +965,7 @@ async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout, tts) {
     if (getCookie("js_md_dropdown_cookie")) {
         const cached_model = getCookie("js_md_dropdown_cookie");
         var model_sel = await get_gradio_component("elem_model_sel");
-        // deterine whether the cached model is in the choices
+        // determine whether the cached model is in the choices
         if (model_sel.props.choices.includes(cached_model)){
             // change dropdown
             gpt_academic_gradio_saveload("load", "elem_model_sel", "js_md_dropdown_cookie", null, "str");
