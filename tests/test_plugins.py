@@ -18,11 +18,13 @@ validate_path()  # 返回项目根路径
 if __name__ == "__main__":
     from tests.test_utils import plugin_test
 
+    plugin_test(plugin='crazy_functions.Internet_GPT->连接网络回答问题', main_input="谁是应急食品？")
+
     # plugin_test(plugin='crazy_functions.函数动态生成->函数动态生成', main_input='交换图像的蓝色通道和红色通道', advanced_arg={"file_path_arg": "./build/ants.jpg"})
 
     # plugin_test(plugin='crazy_functions.Latex_Function->Latex翻译中文并重新编译PDF', main_input="2307.07522")
 
-    plugin_test(plugin='crazy_functions.PDF_Translate->批量翻译PDF文档', main_input='build/pdf/t1.pdf')
+    # plugin_test(plugin='crazy_functions.PDF_Translate->批量翻译PDF文档', main_input='build/pdf/t1.pdf')
 
     # plugin_test(
     #     plugin="crazy_functions.Latex_Function->Latex翻译中文并重新编译PDF",
