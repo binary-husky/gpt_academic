@@ -37,8 +37,8 @@ def searxng_request(query, proxies, categories='general', searxng_url=None):
         json_result = response.json()
         for result in json_result['results']:
             item = {
-                "title": result["title"],
-                "content": result["content"],
+                "title": result.get("title", ""),
+                "content": result.get("content", ""),
                 "link": result["url"],
             }
             results.append(item)
@@ -80,8 +80,7 @@ def scrape_text(url, proxies) -> str:
 def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
 
     history = []    # 清空历史，以免输入溢出
-    chatbot.append((f"请结合互联网信息回答以下问题：{txt}",
-                    "[Local Message] 请注意，您正在调用一个[函数插件]的模板，该模板可以实现ChatGPT联网信息综合。该函数面向希望实现更多有趣功能的开发者，它可以作为创建新功能函数的模板。您若希望分享新的功能模组，请不吝PR！"))
+    chatbot.append((f"请结合互联网信息回答以下问题：{txt}", None))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # ------------- < 第1步：爬取搜索引擎的结果 > -------------
@@ -98,10 +97,12 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         return
     # ------------- < 第2步：依次访问网页 > -------------
     max_search_result = 5   # 最多收纳多少个网页的结果
+    chatbot.append([f"联网检索中 ...", None])
     for index, url in enumerate(urls[:max_search_result]):
         res = scrape_text(url['link'], proxies)
         history.extend([f"第{index}份搜索结果：", res])
-        chatbot.append([f"第{index}份搜索结果：", res[:500]+"......"])
+        res_squeeze = res.replace('\n', '...')
+        chatbot[-1] = [f"第{index}份搜索结果：\n\n" + res_squeeze[:500] + "......", None]
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # ------------- < 第3步：ChatGPT综合 > -------------
