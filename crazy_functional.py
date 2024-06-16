@@ -43,7 +43,8 @@ def get_crazy_functions():
     from crazy_functions.Latex_Function import PDF翻译中文并重新编译PDF
     from crazy_functions.Latex_Function_Wrap import Arxiv_Localize
     from crazy_functions.Latex_Function_Wrap import PDF_Localize
-
+    from crazy_functions.Internet_GPT import 连接网络回答问题
+    from crazy_functions.Internet_GPT_Wrap import NetworkGPT_Wrap
 
     function_plugins = {
         "虚空终端": {
@@ -196,6 +197,7 @@ def get_crazy_functions():
         },
         "保存当前的对话": {
             "Group": "对话",
+            "Color": "stop",
             "AsButton": True,
             "Info": "保存当前的对话 | 不需要输入参数",
             "Function": HotReload(对话历史存档),    # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
@@ -203,13 +205,23 @@ def get_crazy_functions():
         },
         "[多线程Demo]解析此项目本身（源码自译解）": {
             "Group": "对话|编程",
+            "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
             "Info": "多线程解析并翻译此项目的源码 | 不需要输入参数",
             "Function": HotReload(解析项目本身),
         },
+        "查互联网后回答": {
+            "Group": "对话",
+            "Color": "stop",
+            "AsButton": True,  # 加入下拉菜单中
+            # "Info": "连接网络回答问题（需要访问谷歌）| 输入参数是一个问题",
+            "Function": HotReload(连接网络回答问题),
+            "Class": NetworkGPT_Wrap     # 新一代插件需要注册Class
+        },
         "历史上的今天": {
             "Group": "对话",
-            "AsButton": True,
+            "Color": "stop",
+            "AsButton": False,
             "Info": "查看历史上的今天事件 (这是一个面向开发者的插件Demo) | 不需要输入参数",
             "Function": None,
             "Class": Demo_Wrap, # 新一代插件需要注册Class
@@ -360,36 +372,36 @@ def get_crazy_functions():
         print(trimmed_format_exc())
         print("Load function plugin failed")
 
-    try:
-        from crazy_functions.联网的ChatGPT import 连接网络回答问题
+    # try:
+    #     from crazy_functions.联网的ChatGPT import 连接网络回答问题
 
-        function_plugins.update(
-            {
-                "连接网络回答问题（输入问题后点击该插件，需要访问谷歌）": {
-                    "Group": "对话",
-                    "Color": "stop",
-                    "AsButton": False,  # 加入下拉菜单中
-                    # "Info": "连接网络回答问题（需要访问谷歌）| 输入参数是一个问题",
-                    "Function": HotReload(连接网络回答问题),
-                }
-            }
-        )
-        from crazy_functions.联网的ChatGPT_bing版 import 连接bing搜索回答问题
+    #     function_plugins.update(
+    #         {
+    #             "连接网络回答问题（输入问题后点击该插件，需要访问谷歌）": {
+    #                 "Group": "对话",
+    #                 "Color": "stop",
+    #                 "AsButton": False,  # 加入下拉菜单中
+    #                 # "Info": "连接网络回答问题（需要访问谷歌）| 输入参数是一个问题",
+    #                 "Function": HotReload(连接网络回答问题),
+    #             }
+    #         }
+    #     )
+    #     from crazy_functions.联网的ChatGPT_bing版 import 连接bing搜索回答问题
 
-        function_plugins.update(
-            {
-                "连接网络回答问题（中文Bing版，输入问题后点击该插件）": {
-                    "Group": "对话",
-                    "Color": "stop",
-                    "AsButton": False,  # 加入下拉菜单中
-                    "Info": "连接网络回答问题（需要访问中文Bing）| 输入参数是一个问题",
-                    "Function": HotReload(连接bing搜索回答问题),
-                }
-            }
-        )
-    except:
-        print(trimmed_format_exc())
-        print("Load function plugin failed")
+    #     function_plugins.update(
+    #         {
+    #             "连接网络回答问题（中文Bing版，输入问题后点击该插件）": {
+    #                 "Group": "对话",
+    #                 "Color": "stop",
+    #                 "AsButton": False,  # 加入下拉菜单中
+    #                 "Info": "连接网络回答问题（需要访问中文Bing）| 输入参数是一个问题",
+    #                 "Function": HotReload(连接bing搜索回答问题),
+    #             }
+    #         }
+    #     )
+    # except:
+    #     print(trimmed_format_exc())
+    #     print("Load function plugin failed")
 
     try:
         from crazy_functions.解析项目源代码 import 解析任意code项目

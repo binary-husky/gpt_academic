@@ -269,6 +269,10 @@ GROBID_URLS = [
 ]
 
 
+# Searxng互联网检索服务
+SEARXNG_URL = "https://cloud-1.agent-matrix.com/"
+
+
 # 是否允许通过自然语言描述修改本页的配置，该功能具有一定的危险性，默认关闭
 ALLOW_RESET_CONFIG = False
 
@@ -385,6 +389,9 @@ NUM_CUSTOM_BASIC_BTN = 4
 
 
 插件在线服务配置依赖关系示意图
+│
+├── 互联网检索
+│   └── SEARXNG_URL
 │
 ├── 语音功能
 │   ├── ENABLE_AUDIO
