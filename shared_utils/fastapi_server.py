@@ -69,6 +69,7 @@ def validate_path_safety(path_or_url, user):
         raise FriendlyException(f"输入文件的路径 ({path_or_url}) 存在，但属于其他用户。请将文件上传后再执行该任务。") # return False
     return True
 
+
 def _authorize_user(path_or_url, request, gradio_app):
     from toolbox import get_conf, default_user_name
     PATH_PRIVATE_UPLOAD, PATH_LOGGING = get_conf('PATH_PRIVATE_UPLOAD', 'PATH_LOGGING')
@@ -99,7 +100,7 @@ class Server(uvicorn.Server):
         self.thread = threading.Thread(target=self.run, daemon=True)
         self.thread.start()
         while not self.started:
-            time.sleep(1e-3)
+            time.sleep(5e-2)
 
     def close(self):
         self.should_exit = True
@@ -159,6 +160,7 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
                     return "越权访问!"
             return await endpoint(path_or_url, request)
 
+    # --- --- enable TTS (text-to-speech) functionality --- ---
     TTS_TYPE = get_conf("TTS_TYPE")
     if TTS_TYPE != "DISABLE":
         # audio generation functionality
@@ -230,7 +232,7 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
 
         @fastapi_app.middleware("http")
         async def middleware(request: Request, call_next):
-            if request.scope['path'] == "/docs" or request.scope['path'] == "/redoc" or request.scope['path'] == "/openapi.json":
+            if request.scope['path'] in ["/docs", "/redoc", "/openapi.json"]:
                 return JSONResponse(status_code=404, content={"message": "Not Found"})
             response = await call_next(request)
             return response
@@ -250,7 +252,7 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
     )
     server = Server(config)
     url_host_name = "localhost" if server_name == "0.0.0.0" else server_name
-    if ssl_keyfile is not None:    
+    if ssl_keyfile is not None:
         if ssl_certfile is None:
             raise ValueError(
                 "ssl_certfile must be provided if ssl_keyfile is provided."
