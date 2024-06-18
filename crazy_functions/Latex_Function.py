@@ -271,6 +271,8 @@ def Latex英文纠错加PDF对比(txt, llm_kwargs, plugin_kwargs, chatbot, histo
     project_folder = desend_to_extracted_folder_if_exist(project_folder)
 
     # <-------------- move latex project away from temp folder ------------->
+    from shared_utils.fastapi_server import validate_path_safety
+    validate_path_safety(project_folder, chatbot.get_user())
     project_folder = move_project(project_folder, arxiv_id=None)
 
     # <-------------- if merge_translate_zh is already generated, skip gpt req ------------->
@@ -365,6 +367,8 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
     project_folder = desend_to_extracted_folder_if_exist(project_folder)
 
     # <-------------- move latex project away from temp folder ------------->
+    from shared_utils.fastapi_server import validate_path_safety
+    validate_path_safety(project_folder, chatbot.get_user())
     project_folder = move_project(project_folder, arxiv_id)
 
     # <-------------- if merge_translate_zh is already generated, skip gpt req ------------->
@@ -503,6 +507,8 @@ def PDF翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot, h
     project_folder = desend_to_extracted_folder_if_exist(project_folder)
 
     # <-------------- move latex project away from temp folder ------------->
+    from shared_utils.fastapi_server import validate_path_safety
+    validate_path_safety(project_folder, chatbot.get_user())
     project_folder = move_project(project_folder)
 
     # <-------------- set a hash tag for repeat-checking ------------->
