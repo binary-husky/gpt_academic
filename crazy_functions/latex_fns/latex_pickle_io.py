@@ -16,8 +16,12 @@ class SafeUnpickler(pickle.Unpickler):
     def find_class(self, module, name):
         # 只允许特定的类进行反序列化
         self.safe_classes = self.get_safe_classes()
-        if f'{module}.{name}' in self.safe_classes:
-            return self.safe_classes[f'{module}.{name}']
+        match_class_name = None
+        for class_name in self.safe_classes.keys():
+            if (class_name in f'{module}.{name}'):
+                match_class_name = class_name
+        if match_class_name is not None:
+            return self.safe_classes[match_class_name]
         # 如果尝试加载未授权的类，则抛出异常
         raise pickle.UnpicklingError(f"Attempted to deserialize unauthorized class '{name}' from module '{module}'")
 

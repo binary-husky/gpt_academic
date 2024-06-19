@@ -69,7 +69,6 @@ def validate_path_safety(path_or_url, user):
         raise FriendlyException(f"输入文件的路径 ({path_or_url}) 存在，但属于其他用户。请将文件上传后再执行该任务。") # return False
     return True
 
-
 def _authorize_user(path_or_url, request, gradio_app):
     from toolbox import get_conf, default_user_name
     PATH_PRIVATE_UPLOAD, PATH_LOGGING = get_conf('PATH_PRIVATE_UPLOAD', 'PATH_LOGGING')

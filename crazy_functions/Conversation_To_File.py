@@ -218,5 +218,3 @@ def 删除所有本地对话历史记录(txt, llm_kwargs, plugin_kwargs, chatbot
     chatbot.append([f"删除所有历史对话文件", f"已删除<br/>{local_history}"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
     return
-
-
