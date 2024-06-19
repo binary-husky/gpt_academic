@@ -1,9 +1,20 @@
 from toolbox import update_ui, get_conf, trimmed_format_exc, get_max_token, Singleton
+from shared_utils.char_visual_effect import scolling_visual_effect
 import threading
 import os
 import logging
 
 def input_clipping(inputs, history, max_token_limit):
+    """
+    当输入文本 + 历史文本超出最大限制时，采取措施丢弃一部分文本。
+    输入：
+        - inputs 本次请求
+        - history 历史上下文
+        - max_token_limit 最大token限制
+    输出:
+        - inputs 本次请求（经过clip）
+        - history 历史上下文（经过clip）
+    """
     import numpy as np
     from request_llms.bridge_all import model_info
     enc = model_info["gpt-3.5-turbo"]['tokenizer']
@@ -158,7 +169,7 @@ def can_multi_process(llm) -> bool:
 def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
         inputs_array, inputs_show_user_array, llm_kwargs,
         chatbot, history_array, sys_prompt_array,
-        refresh_interval=0.2, max_workers=-1, scroller_max_len=30,
+        refresh_interval=0.2, max_workers=-1, scroller_max_len=50,
         handle_token_exceed=True, show_user_at_complete=False,
         retry_times_at_unknown_error=2,
         ):
@@ -283,6 +294,8 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
     futures = [executor.submit(_req_gpt, index, inputs, history, sys_prompt) for index, inputs, history, sys_prompt in zip(
         range(len(inputs_array)), inputs_array, history_array, sys_prompt_array)]
     cnt = 0
+
+
     while True:
         # yield一次以刷新前端页面
         time.sleep(refresh_interval)
@@ -295,8 +308,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
             mutable[thread_index][1] = time.time()
         # 在前端打印些好玩的东西
         for thread_index, _ in enumerate(worker_done):
-            print_something_really_funny = "[ ...`"+mutable[thread_index][0][-scroller_max_len:].\
-                replace('\n', '').replace('`', '.').replace(' ', '.').replace('<br/>', '.....').replace('$', '.')+"`... ]"
+            print_something_really_funny = f"[ ...`{scolling_visual_effect(mutable[thread_index][0], scroller_max_len)}`... ]"
             observe_win.append(print_something_really_funny)
         # 在前端打印些好玩的东西
         stat_str = ''.join([f'`{mutable[thread_index][2]}`: {obs}\n\n'
