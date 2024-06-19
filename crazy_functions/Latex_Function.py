@@ -4,7 +4,7 @@ from functools import partial
 import glob, os, requests, time, json, tarfile
 
 pj = os.path.join
-ARXIV_CACHE_DIR = os.path.expanduser(f"~/arxiv_cache/")
+ARXIV_CACHE_DIR = get_conf("ARXIV_CACHE_DIR")
 
 
 # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- 工具函数 =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-

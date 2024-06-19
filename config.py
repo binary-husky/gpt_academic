@@ -281,15 +281,19 @@ ALLOW_RESET_CONFIG = False
 AUTOGEN_USE_DOCKER = False
 
 
-# 临时的上传文件夹位置，请勿修改
+# 临时的上传文件夹位置，请尽量不要修改
 PATH_PRIVATE_UPLOAD = "private_upload"
 
 
-# 日志文件夹的位置，请勿修改
+# 日志文件夹的位置，请尽量不要修改
 PATH_LOGGING = "gpt_log"
 
 
-# 除了连接OpenAI之外，还有哪些场合允许使用代理，请勿修改
+# 存储翻译好的arxiv论文的路径，请尽量不要修改
+ARXIV_CACHE_DIR = "gpt_log/arxiv_cache"
+
+
+# 除了连接OpenAI之外，还有哪些场合允许使用代理，请尽量不要修改
 WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid",
                      "Warmup_Modules", "Nougat_Download", "AutoGen"]
 
