@@ -1,3 +1,4 @@
+
 import importlib
 import time
 import inspect
@@ -10,6 +11,7 @@ import glob
 import logging
 import uuid
 from functools import wraps
+from textwrap import dedent
 from shared_utils.config_loader import get_conf
 from shared_utils.config_loader import set_conf
 from shared_utils.config_loader import set_multi_conf
@@ -193,8 +195,19 @@ def trimmed_format_exc():
     replace_path = "."
     return str.replace(current_path, replace_path)
 
+
 def trimmed_format_exc_markdown():
     return '\n\n```\n' + trimmed_format_exc() + '```'
+
+
+class FriendlyException(Exception):
+    def generate_error_html(self):
+        return dedent(f"""
+            <div class="center-div" style="color: crimson;text-align: center;">
+                {"<br>".join(self.args)}
+            </div>
+        """)
+
 
 def CatchException(f):
     """
@@ -206,13 +219,18 @@ def CatchException(f):
                   chatbot_with_cookie:ChatBotWithCookies, history:list, *args, **kwargs):
         try:
             yield from f(main_input, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, *args, **kwargs)
+        except FriendlyException as e:
+            if len(chatbot_with_cookie) == 0:
+                chatbot_with_cookie.clear()
+                chatbot_with_cookie.append(["插件调度异常", None])
+            chatbot_with_cookie[-1] = [chatbot_with_cookie[-1][0], e.generate_error_html()]
+            yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=f'异常')  # 刷新界面
         except Exception as e:
-            from toolbox import get_conf
             tb_str = '```\n' + trimmed_format_exc() + '```'
             if len(chatbot_with_cookie) == 0:
                 chatbot_with_cookie.clear()
                 chatbot_with_cookie.append(["插件调度异常", "异常原因"])
-            chatbot_with_cookie[-1] = (chatbot_with_cookie[-1][0], f"[Local Message] 插件调用出错: \n\n{tb_str} \n")
+            chatbot_with_cookie[-1] = [chatbot_with_cookie[-1][0], f"[Local Message] 插件调用出错: \n\n{tb_str} \n"]
             yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=f'异常 {e}')  # 刷新界面
 
     return decorated

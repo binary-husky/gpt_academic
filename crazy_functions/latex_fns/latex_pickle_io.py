@@ -8,8 +8,8 @@ class SafeUnpickler(pickle.Unpickler):
         # 定义允许的安全类
         safe_classes = {
             # 在这里添加其他安全的类
-            'LatexPaperFileGroup': LatexPaperFileGroup,
-            'LatexPaperSplit' : LatexPaperSplit,
+            'latex_actions.LatexPaperFileGroup': LatexPaperFileGroup,
+            'latex_actions.LatexPaperSplit' : LatexPaperSplit,
         }
         return safe_classes
 
