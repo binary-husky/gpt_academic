@@ -1,33 +1,44 @@
 
-def check_proxy(proxies):
+def check_proxy(proxies, return_ip=False):
     import requests
     proxies_https = proxies['https'] if proxies is not None else '无'
+    ip = None
     try:
         response = requests.get("https://ipapi.co/json/", proxies=proxies, timeout=4)
         data = response.json()
         if 'country_name' in data:
             country = data['country_name']
             result = f"代理配置 {proxies_https}, 代理所在地：{country}"
+            if 'ip' in data: ip = data['ip']
         elif 'error' in data:
-            alternative = _check_with_backup_source(proxies)
+            alternative, ip = _check_with_backup_source(proxies)
             if alternative is None:
                 result = f"代理配置 {proxies_https}, 代理所在地：未知，IP查询频率受限"
             else:
                 result = f"代理配置 {proxies_https}, 代理所在地：{alternative}"
         else:
             result = f"代理配置 {proxies_https}, 代理数据解析失败：{data}"
-        print(result)
-        return result
+        if not return_ip:
+            print(result)
+            return result
+        else:
+            return ip
     except:
         result = f"代理配置 {proxies_https}, 代理所在地查询超时，代理可能无效"
-        print(result)
-        return result
+        if not return_ip:
+            print(result)
+            return result
+        else:
+            return ip
 
 def _check_with_backup_source(proxies):
     import random, string, requests
     random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=32))
-    try: return requests.get(f"http://{random_string}.edns.ip-api.com/json", proxies=proxies, timeout=4).json()['dns']['geo']
-    except: return None
+    try:
+        res_json = requests.get(f"http://{random_string}.edns.ip-api.com/json", proxies=proxies, timeout=4).json()
+        return res_json['dns']['geo'], res_json['dns']['ip']
+    except:
+        return None, None
 
 def backup_and_download(current_version, remote_version):
     """

@@ -106,7 +106,7 @@ def main():
                         with gr.Row():
                             audio_mic = gr.Audio(source="microphone", type="numpy", elem_id="elem_audio", streaming=True, show_label=False).style(container=False)
                     with gr.Row():
-                        status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。当前模型: {LLM_MODEL} \n {proxy_info}", elem_id="state-panel")
+                        status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。支持将文件直接粘贴到输入区。", elem_id="state-panel")
 
                 with gr.Accordion("基础功能区", open=True, elem_id="basic-panel") as area_basic_fn:
                     with gr.Row():
