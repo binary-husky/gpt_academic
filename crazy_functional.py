@@ -51,6 +51,7 @@ def get_crazy_functions():
             "Group": "对话|编程|学术|智能体",
             "Color": "stop",
             "AsButton": True,
+            "Info": "使用自然语言实现您的想法",
             "Function": HotReload(虚空终端),
         },
         "解析整个Python项目": {

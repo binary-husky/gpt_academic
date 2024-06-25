@@ -84,7 +84,7 @@ def main():
     with gr.Blocks(title="GPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as app_block:
         gr.HTML(title_html)
         secret_css = gr.Textbox(visible=False, elem_id="secret_css")
-        register_advanced_plugin_init_code_arr = ""
+        register_advanced_plugin_init_arr = ""
 
         cookies, web_cookie_cache = make_cookie_cache() # 定义 后端state（cookies）、前端（web_cookie_cache）两兄弟
         with gr_L1():
@@ -147,7 +147,7 @@ def main():
                                 plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False, elem_id="advance_arg_input_legacy",
                                                                  placeholder="这里是特殊函数插件的高级参数输入区").style(container=False)
                             with gr.Row():
-                                switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary").style(size="sm")
+                                switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary", elem_id="elem_switchy_bt").style(size="sm")
                     with gr.Row():
                         with gr.Accordion("点击展开“文件下载区”。", open=False) as area_file_up:
                             file_upload = gr.Files(label="任何文件, 推荐上传压缩文件(zip, tar)", file_count="multiple", elem_id="elem_upload")
@@ -217,10 +217,25 @@ def main():
         file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt, txt2, checkboxes, cookies], [chatbot, txt, txt2, cookies]).then(None, None, None,   _js=r"()=>{toast_push('上传完毕 ...'); cancel_loading_status();}")
         file_upload_2.upload(on_file_uploaded, [file_upload_2, chatbot, txt, txt2, checkboxes, cookies], [chatbot, txt, txt2, cookies]).then(None, None, None, _js=r"()=>{toast_push('上传完毕 ...'); cancel_loading_status();}")
         # 函数插件-固定按钮区
+        def encode_plugin_info(k, plugin)->str:
+            import copy
+            from themes.theme import to_cookie_str
+            plugin_ = copy.copy(plugin)
+            plugin_.pop("Function", None)
+            plugin_.pop("Class", None)
+            plugin_.pop("Button", None)
+            plugin_["Info"] = plugin.get("Info", k)
+            if plugin.get("AdvancedArgs", False):
+                plugin_["Label"] = f"插件[{k}]的高级参数说明：" + plugin.get("ArgsReminder", f"没有提供高级参数功能说明")
+            else:
+                plugin_["Label"] = f"插件[{k}]不需要高级参数。"
+            return to_cookie_str(plugin_)
+
         for k in plugins:
+            register_advanced_plugin_init_arr += f"""register_plugin_init("{k}","{encode_plugin_info(k, plugins[k])}");"""
             if plugins[k].get("Class", None):
                 plugins[k]["JsMenu"] = plugins[k]["Class"]().get_js_code_for_generating_menu(k)
-                register_advanced_plugin_init_code_arr += """register_advanced_plugin_init_code("{k}","{gui_js}");""".format(k=k, gui_js=plugins[k]["JsMenu"])
+                register_advanced_plugin_init_arr += """register_advanced_plugin_init_code("{k}","{gui_js}");""".format(k=k, gui_js=plugins[k]["JsMenu"])
             if not plugins[k].get("AsButton", True): continue
             if plugins[k].get("Class", None) is None:
                 assert plugins[k].get("Function", None) is not None
@@ -230,21 +245,23 @@ def main():
             else:
                 click_handle = plugins[k]["Button"].click(None, inputs=[], outputs=None, _js=f"""()=>run_advanced_plugin_launch_code("{k}")""")
 
-        # 函数插件-下拉菜单与随变按钮的互动
-        def on_dropdown_changed(k):
-            variant = plugins[k]["Color"] if "Color" in plugins[k] else "secondary"
-            info = plugins[k].get("Info", k)
-            ret = {switchy_bt: gr.update(value=k, variant=variant, info_str=f'函数插件区: {info}')}
-            if plugins[k].get("AdvancedArgs", False): # 是否唤起高级插件参数区
-                ret.update({plugin_advanced_arg: gr.update(visible=True,  label=f"插件[{k}]的高级参数说明：" + plugins[k].get("ArgsReminder", [f"没有提供高级参数功能说明"]))})
-            else:
-                ret.update({plugin_advanced_arg: gr.update(visible=False, label=f"插件[{k}]不需要高级参数。")})
-            return ret
-        dropdown.select(on_dropdown_changed, [dropdown], [switchy_bt, plugin_advanced_arg] )
+        # 函数插件-下拉菜单与随变按钮的互动（旧版）
+        # def on_dropdown_changed(k):
+        #     variant = plugins[k]["Color"] if "Color" in plugins[k] else "secondary" # 选择颜色
+        #     info = plugins[k].get("Info", k)    # 获取info
+        #     ret = {switchy_bt: gr.update(value=k, variant=variant, info_str=f'函数插件区: {info}')}
+        #     if plugins[k].get("AdvancedArgs", False): # 是否唤起高级插件参数区
+        #         ret.update({plugin_advanced_arg: gr.update(visible=True,  label=f"插件[{k}]的高级参数说明：" + plugins[k].get("ArgsReminder", [f"没有提供高级参数功能说明"]))})
+        #     else:
+        #         ret.update({plugin_advanced_arg: gr.update(visible=False, label=f"插件[{k}]不需要高级参数。")})
+        #     return ret
+        # dropdown.select(on_dropdown_changed, [dropdown], [switchy_bt, plugin_advanced_arg] )
+        # 函数插件-下拉菜单与随变按钮的互动（新版-更流畅）
+        dropdown.select(None, [dropdown], None, _js=f"""(dropdown)=>run_dropdown_shift(dropdown)""")
 
         def on_md_dropdown_changed(k):
             return {chatbot: gr.update(label="当前模型："+k)}
-        md_dropdown.select(on_md_dropdown_changed, [md_dropdown], [chatbot] )
+        md_dropdown.select(on_md_dropdown_changed, [md_dropdown], [chatbot])
 
         def on_theme_dropdown_changed(theme, secret_css):
             adjust_theme, css_part1, _, adjust_dynamic_theme = load_dynamic_theme(theme)
@@ -314,7 +331,7 @@ def main():
             outputs = [web_cookie_cache, cookies, *customize_btns.values(), *predefined_btns.values()], _js=js_code_for_persistent_cookie_init)
 
         app_block.load(None, inputs=[], outputs=None, _js=f"""()=>GptAcademicJavaScriptInit("{DARK_MODE}","{INIT_SYS_PROMPT}","{ADD_WAIFU}","{LAYOUT}","{TTS_TYPE}")""")    # 配置暗色主题或亮色主题
-        app_block.load(None, inputs=[], outputs=None, _js="""()=>{REP}""".replace("REP", register_advanced_plugin_init_code_arr))
+        app_block.load(None, inputs=[], outputs=None, _js="""()=>{REP}""".replace("REP", register_advanced_plugin_init_arr))
 
     # gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def run_delayed_tasks():
