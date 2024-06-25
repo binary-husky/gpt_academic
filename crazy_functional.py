@@ -88,10 +88,18 @@ def get_crazy_functions():
             "Function": None,
             "Class": Mermaid_Gen
         },
-        "批量总结Word文档": {
+        "Arxiv论文翻译": {
             "Group": "学术",
             "Color": "stop",
             "AsButton": True,
+            "Info": "Arixv论文精细翻译 | 输入参数arxiv论文的ID，比如1812.10695",
+            "Function": HotReload(Latex翻译中文并重新编译PDF),  # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
+            "Class": Arxiv_Localize,    # 新一代插件需要注册Class
+        },
+        "批量总结Word文档": {
+            "Group": "学术",
+            "Color": "stop",
+            "AsButton": False,
             "Info": "批量总结word文档 | 输入参数为路径",
             "Function": HotReload(总结word文档),
         },
