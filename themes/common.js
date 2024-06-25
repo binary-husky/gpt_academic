@@ -1694,7 +1694,7 @@ function close_current_pop_up_plugin(){
 // 生成高级插件的选择菜单
 plugin_init_info_lib = {}
 function register_plugin_init(key, base64String){
-    console.log('x')
+    // console.log('x')
     const stringData = atob(base64String);
     let guiJsonData = JSON.parse(stringData);
     if (key in plugin_init_info_lib)
