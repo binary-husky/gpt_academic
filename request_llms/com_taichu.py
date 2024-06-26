@@ -43,7 +43,8 @@ class TaichuChatInit:
         if response.status_code == 200:
             response.encoding = 'utf-8'
             for line in response.iter_lines(decode_unicode=True):
-                delta = json.loads(line)['choices'][0]['text']
+                try: delta = json.loads(line)['data']['content']
+                except: delta = json.loads(line)['choices'][0]['text']
                 results += delta
                 yield delta, results
         else:
