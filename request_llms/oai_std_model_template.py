@@ -66,7 +66,9 @@ def decode_chunk(chunk):
     return respose, finish_reason
 
 
-def generate_message(chatbot, input, model, key, history, max_output_token, system_prompt, temperature):
+def generate_message(
+    chatbot, input, model, key, history, max_output_token, system_prompt, temperature
+):
     """
     整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
     """
@@ -76,6 +78,11 @@ def generate_message(chatbot, input, model, key, history, max_output_token, syst
 
     conversation_cnt = len(history) // 2
 
+    system_prompt = (
+        "Serve me as a writing and programming assistant."
+        if system_prompt == ""
+        else system_prompt
+    )
     messages = [{"role": "system", "content": system_prompt}]
     if conversation_cnt:
         for index in range(0, 2 * conversation_cnt, 2):
@@ -113,12 +120,12 @@ def generate_message(chatbot, input, model, key, history, max_output_token, syst
 
 
 def get_predict_function(
-        api_key_conf_name,
-        max_output_token,
-        disable_proxy = False,
-        encode_call = generate_message,
-        decode_call = decode_chunk
-    ):
+    api_key_conf_name,
+    max_output_token,
+    disable_proxy=False,
+    encode_call=generate_message,
+    decode_call=decode_chunk,
+):
     """
     为openai格式的API生成响应函数，其中传入参数：
     api_key_conf_name：
