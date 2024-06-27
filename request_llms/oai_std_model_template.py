@@ -235,9 +235,6 @@ def get_predict_function(
                 )
             if chunk:
                 try:
-                    if finish_reason == "stop":
-                        logging.info(f"[response] {result}")
-                        break
                     result += response_text
                     if not console_slience:
                         print(response_text, end="")
@@ -249,7 +246,10 @@ def get_predict_function(
                         if len(observe_window) >= 2:
                             if (time.time() - observe_window[1]) > watch_dog_patience:
                                 raise RuntimeError("用户取消了程序。")
-                except Exception as e:
+                    if finish_reason == "stop":
+                        logging.info(f"[response] {result}")
+                        break
+                except Exception:
                     chunk = get_full_error(chunk, stream_response)
                     chunk_decoded = chunk.decode()
                     error_msg = chunk_decoded
@@ -296,7 +296,7 @@ def get_predict_function(
         if is_the_upload_folder(inputs):
             chatbot[-1] = (
                 inputs,
-                f"[Local Message] 检测到操作错误！当您上传文档之后，需点击“**函数插件区**”按钮进行处理，请勿点击“提交”按钮或者“基础功能区”按钮。",
+                "[Local Message] 检测到操作错误！当您上传文档之后，需点击“**函数插件区**”按钮进行处理，请勿点击“提交”按钮或者“基础功能区”按钮。",
             )
             yield from update_ui(
                 chatbot=chatbot, history=history, msg="正常"
@@ -386,9 +386,6 @@ def get_predict_function(
                         print(chunk_decoded)
                         return
 
-                    if finish_reason == "stop":
-                        logging.info(f"[response] {gpt_replying_buffer}")
-                        break
                     status_text = f"finish_reason: {finish_reason}"
                     gpt_replying_buffer += response_text
                     # 如果这里抛出异常，一般是文本过长，详情见get_full_error的输出
@@ -397,7 +394,11 @@ def get_predict_function(
                     yield from update_ui(
                         chatbot=chatbot, history=history, msg=status_text
                     )  # 刷新界面
-                except Exception as e:
+                    if finish_reason == "stop":
+                        logging.info(f"[response] {gpt_replying_buffer}")
+                        break
+
+                except Exception:
                     yield from update_ui(
                         chatbot=chatbot, history=history, msg="Json解析不合常规"
                     )  # 刷新界面
