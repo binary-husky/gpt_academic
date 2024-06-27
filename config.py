@@ -44,6 +44,7 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
 #   "qianfan", "deepseekcoder",
 #   "spark", "sparkv2", "sparkv3", "sparkv3.5",
 #   "qwen-turbo", "qwen-plus", "qwen-max", "qwen-max-longcontext", "qwen-long", "qwen-local",
+#   "qwen2-72b-instruct","qwen2-57b-a14b-instruct","qwen2-7b-instruct","qwen1.5-110b-chat",
 #   "moonshot-v1-128k", "moonshot-v1-32k", "moonshot-v1-8k",
 #   "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo-0125", "gpt-4o-2024-05-13"
 #   "claude-3-haiku-20240307","claude-3-sonnet-20240229","claude-3-opus-20240229", "claude-2.1", "claude-instant-1.2",

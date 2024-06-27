@@ -644,7 +644,17 @@ if "qwen-local" in AVAIL_LLM_MODELS:
     except:
         print(trimmed_format_exc())
 # -=-=-=-=-=-=- 通义-在线模型 -=-=-=-=-=-=-
-qwen_models = ["qwen-turbo","qwen-plus","qwen-max","qwen-max-longcontext","qwen-long"]
+qwen_models = [
+    "qwen-turbo",
+    "qwen-plus",
+    "qwen-max",
+    "qwen-max-longcontext",
+    "qwen-long",
+    "qwen2-72b-instruct",
+    "qwen2-57b-a14b-instruct",
+    "qwen2-7b-instruct",
+    "qwen1.5-110b-chat",
+]
 if any(item in qwen_models for item in AVAIL_LLM_MODELS):
     try:
         qwen_1500_noui, qwen_1500_ui = get_predict_function(
@@ -652,6 +662,12 @@ if any(item in qwen_models for item in AVAIL_LLM_MODELS):
             )
         qwen_2000_noui, qwen_2000_ui = get_predict_function(
             api_key_conf_name="DASHSCOPE_API_KEY", max_output_token=2000, disable_proxy=False
+            )
+        qwen_6144_noui, qwen_6144_ui = get_predict_function(
+            api_key_conf_name="DASHSCOPE_API_KEY", max_output_token=6144, disable_proxy=False
+            )
+        qwen_8000_noui, qwen_8000_ui = get_predict_function(
+            api_key_conf_name="DASHSCOPE_API_KEY", max_output_token=8000, disable_proxy=False
             )
         model_info.update({
             "qwen-turbo": {
@@ -696,6 +712,42 @@ if any(item in qwen_models for item in AVAIL_LLM_MODELS):
                 "can_multi_thread": True,
                 "endpoint": qwenapi_endpoint,
                 "max_token": 1000000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "qwen2-72b-instruct": {
+                "fn_with_ui": qwen_6144_ui,
+                "fn_without_ui": qwen_6144_noui,
+                "can_multi_thread": True,
+                "endpoint": qwenapi_endpoint,
+                "max_token": 128000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "qwen2-57b-a14b-instruct": {
+                "fn_with_ui": qwen_6144_ui,
+                "fn_without_ui": qwen_6144_noui,
+                "can_multi_thread": True,
+                "endpoint": qwenapi_endpoint,
+                "max_token": 30720,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "qwen2-7b-instruct": {
+                "fn_with_ui": qwen_6144_ui,
+                "fn_without_ui": qwen_6144_noui,
+                "can_multi_thread": True,
+                "endpoint": qwenapi_endpoint,
+                "max_token": 128000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "qwen1.5-110b-chat": {
+                "fn_with_ui": qwen_8000_ui,
+                "fn_without_ui": qwen_8000_noui,
+                "can_multi_thread": True,
+                "endpoint": qwenapi_endpoint,
+                "max_token": 32000,
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
             },

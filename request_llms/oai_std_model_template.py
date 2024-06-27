@@ -140,7 +140,7 @@ def get_predict_function(
         inputs,
         llm_kwargs,
         history=[],
-        sys_prompt="",
+        sys_prompt="Serve me as a writing and programming assistant.",
         observe_window=None,
         console_slience=False,
     ):
@@ -256,7 +256,7 @@ def get_predict_function(
         plugin_kwargs,
         chatbot,
         history=[],
-        system_prompt="",
+        system_prompt="Serve me as a writing and programming assistant.",
         stream=True,
         additional_fn=None,
     ):
