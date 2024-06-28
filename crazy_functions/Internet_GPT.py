@@ -7,6 +7,11 @@ import urllib.request
 import random
 from functools import lru_cache
 from check_proxy import check_proxy
+from .prompts.Search import Search_optimizer, Search_academic_optimizer
+
+def optimizer(query, proxies, categories='general', searxng_url=None, engines=None):
+    # ------------- < 第1步：尝试进行搜索优化 > -------------
+    pass
 
 @lru_cache
 def get_auth_ip():
