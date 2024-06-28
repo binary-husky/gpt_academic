@@ -26,7 +26,7 @@ def search_optimizer(
     # ------------- < 第1步：尝试进行搜索优化 > -------------
     # * 增强优化，会尝试结合历史记录进行搜索优化
     if optimizer == 2:
-        his = ""
+        his = " "
         if len(history) == 0:
             pass
         else:
@@ -38,7 +38,7 @@ def search_optimizer(
         elif categories == "science":
             sys_prompt = Search_academic_optimizer.format(query=query, history=his, num=4)
     else:
-        his = ""
+        his = " "
         if categories == "general":
             sys_prompt = Search_optimizer.format(query=query, history=his, num=3)
         elif categories == "science":
