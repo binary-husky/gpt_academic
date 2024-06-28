@@ -30,9 +30,11 @@ def search_optimizer(
         if len(history) == 0:
             pass
         else:
-            for temp in history[:-1]:
-                his += f"Q: {temp[0]}\n"
-                his += f"A: {temp[1]}\n"
+            for i, h in enumerate(history):
+                if i % 2 == 0:
+                    his += f"Q: {h}\n"
+                else:
+                    his += f"A: {h}\n"
         if categories == "general":
             sys_prompt = Search_optimizer.format(query=query, history=his, num=4)
         elif categories == "science":
@@ -55,7 +57,7 @@ def search_optimizer(
             observe_window=mutable,
         )
     except Exception:
-        querys_json = json.dumps([query])
+        querys_json = "1234"
     #* 尝试解码优化后的搜索结果
     querys_json = re.sub(r"```json|```", "", querys_json)
     try:
@@ -226,7 +228,7 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # ------------- < 第3步：ChatGPT综合 > -------------
-    if optimizer == 0:
+    if (optimizer == 0 or optimizer == 1):
         i_say = f"从以上搜索结果中抽取信息，然后回答问题：{txt}"
         i_say, history = input_clipping(    # 裁剪输入，从最长的条目开始裁剪，防止爆token
             inputs=i_say,
@@ -243,7 +245,7 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
     #* 或者使用搜索优化器，这样可以保证后续问答能读取到有效的历史记录
     else:
-        i_say = f"从以上搜索结果中抽取与问题：{txt} 相关的信息，"
+        i_say = f"从以上搜索结果中抽取与问题：{txt} 相关的信息:"
         i_say, history = input_clipping(    # 裁剪输入，从最长的条目开始裁剪，防止爆token
             inputs=i_say,
             history=history,
