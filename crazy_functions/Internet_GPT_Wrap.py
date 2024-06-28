@@ -26,7 +26,7 @@ class NetworkGPT_Wrap(GptAcademicPluginTemplate):
             "categories":
                 ArgProperty(title="搜索分类", options=["网页", "学术论文"], default_value="网页", description="无", type="dropdown").model_dump_json(),
             "engine":
-                ArgProperty(title="选择搜索引擎", options=["bing", "google", "duckduckgo"], default_value="bing", description="无", type="dropdown").model_dump_json(),
+                ArgProperty(title="选择搜索引擎", options=["Mixed", "bing", "google", "duckduckgo"], default_value="Mixed", description="无", type="dropdown").model_dump_json(),
             "searxng_url":
                 ArgProperty(title="Searxng服务地址", description="输入Searxng的地址", default_value=get_conf("SEARXNG_URL"), type="string").model_dump_json(), # 主输入，自动从输入框同步
 

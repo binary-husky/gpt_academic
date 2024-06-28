@@ -21,8 +21,8 @@ def searxng_request(query, proxies, categories='general', searxng_url=None, engi
     else:
         url = searxng_url
 
-    if engines is None:
-        engines = 'bing'
+    if engines == "Mixed":
+        engines = None
 
     if categories == 'general':
         params = {
