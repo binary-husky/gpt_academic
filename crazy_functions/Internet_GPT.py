@@ -100,7 +100,7 @@ def scrape_text(url, proxies) -> str:
 
 @CatchException
 def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
-
+    optimizer_history = history[:-8]
     history = []    # 清空历史，以免输入溢出
     chatbot.append((f"请结合互联网信息回答以下问题：{txt}", "检索中..."))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
@@ -111,6 +111,7 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     categories = plugin_kwargs.get('categories', 'general')
     searxng_url = plugin_kwargs.get('searxng_url', None)
     engines = plugin_kwargs.get('engine', None)
+    optimizer = plugin_kwargs.get('optimizer', 0)
     urls = searxng_request(txt, proxies, categories, searxng_url, engines=engines)
     history = []
     if len(urls) == 0:
@@ -120,7 +121,7 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         return
     # ------------- < 第2步：依次访问网页 > -------------
     max_search_result = 5   # 最多收纳多少个网页的结果
-    chatbot.append([f"联网检索中 ...", None])
+    chatbot.append(["联网检索中 ...", None])
     for index, url in enumerate(urls[:max_search_result]):
         res = scrape_text(url['link'], proxies)
         prefix = f"第{index}份搜索结果 [源自{url['source'][0]}搜索] （{url['title'][:25]}）："
@@ -130,18 +131,46 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # ------------- < 第3步：ChatGPT综合 > -------------
-    i_say = f"从以上搜索结果中抽取信息，然后回答问题：{txt}"
-    i_say, history = input_clipping(    # 裁剪输入，从最长的条目开始裁剪，防止爆token
-        inputs=i_say,
-        history=history,
-        max_token_limit=min(model_info[llm_kwargs['llm_model']]['max_token']*3//4, 8192)
-    )
-    gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
-        inputs=i_say, inputs_show_user=i_say,
-        llm_kwargs=llm_kwargs, chatbot=chatbot, history=history,
-        sys_prompt="请从给定的若干条搜索结果中抽取信息，对最相关的两个搜索结果进行总结，然后回答问题。"
-    )
-    chatbot[-1] = (i_say, gpt_say)
-    history.append(i_say);history.append(gpt_say)
-    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
+    if optimizer == 0:
+        i_say = f"从以上搜索结果中抽取信息，然后回答问题：{txt}"
+        i_say, history = input_clipping(    # 裁剪输入，从最长的条目开始裁剪，防止爆token
+            inputs=i_say,
+            history=history,
+            max_token_limit=min(model_info[llm_kwargs['llm_model']]['max_token']*3//4, 8192)
+        )
+        gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
+            inputs=i_say, inputs_show_user=i_say,
+            llm_kwargs=llm_kwargs, chatbot=chatbot, history=history,
+            sys_prompt="请从给定的若干条搜索结果中抽取信息，对最相关的两个搜索结果进行总结，然后回答问题。"
+        )
+        chatbot[-1] = (i_say, gpt_say)
+        history.append(i_say);history.append(gpt_say)
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
+    #* 或者使用搜索优化器，这样可以保证后续问答能读取到有效的历史记录
+    else:
+        i_say = f"从以上搜索结果中抽取与问题：{txt} 相关的信息，"
+        i_say, history = input_clipping(    # 裁剪输入，从最长的条目开始裁剪，防止爆token
+            inputs=i_say,
+            history=history,
+            max_token_limit=min(model_info[llm_kwargs['llm_model']]['max_token']*3//4, 8192)
+        )
+        gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
+            inputs=i_say, inputs_show_user=i_say,
+            llm_kwargs=llm_kwargs, chatbot=chatbot, history=history,
+            sys_prompt="请从给定的若干条搜索结果中抽取信息，对最相关的三个搜索结果进行总结"
+        )
+        chatbot[-1] = (i_say, gpt_say)
+        history = []
+        history.append(i_say);history.append(gpt_say)
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
 
+        # ------------- < 第4步：根据综合回答问题 > -------------
+        i_say = f"请根据以上搜索结果回答问题：{txt}"
+        gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
+            inputs=i_say, inputs_show_user=i_say,
+            llm_kwargs=llm_kwargs, chatbot=chatbot, history=history,
+            sys_prompt="请根据给定的若干条搜索结果回答问题"
+        )
+        chatbot[-1] = (i_say, gpt_say)
+        history.append(i_say);history.append(gpt_say)
+        yield from update_ui(chatbot=chatbot, history=history)
