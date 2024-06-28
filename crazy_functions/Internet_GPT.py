@@ -3,15 +3,104 @@ from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, input_cl
 import requests
 from bs4 import BeautifulSoup
 from request_llms.bridge_all import model_info
-import urllib.request
 import random
 from functools import lru_cache
 from check_proxy import check_proxy
-from .prompts.Search import Search_optimizer, Search_academic_optimizer
+from request_llms.bridge_all import predict_no_ui_long_connection
+from .prompts.Internet_GPT import Search_optimizer, Search_academic_optimizer
+import time
+import re
+import json
+from itertools import zip_longest
 
-def optimizer(query, proxies, categories='general', searxng_url=None, engines=None):
+def search_optimizer(
+    query,
+    proxies,
+    history,
+    llm_kwargs,
+    optimizer=1,
+    categories="general",
+    searxng_url=None,
+    engines=None,
+):
     # ------------- < 第1步：尝试进行搜索优化 > -------------
-    pass
+    # * 增强优化，会尝试结合历史记录进行搜索优化
+    if optimizer == 2:
+        his = ""
+        if len(history) == 0:
+            pass
+        else:
+            for temp in history[:-1]:
+                his += f"Q: {temp[0]}\n"
+                his += f"A: {temp[1]}\n"
+        if categories == "general":
+            sys_prompt = Search_optimizer.format(query=query, history=his, num=4)
+        elif categories == "science":
+            sys_prompt = Search_academic_optimizer.format(query=query, history=his, num=4)
+    else:
+        his = ""
+        if categories == "general":
+            sys_prompt = Search_optimizer.format(query=query, history=his, num=3)
+        elif categories == "science":
+            sys_prompt = Search_academic_optimizer.format(query=query, history=his, num=3)
+    
+    mutable = ["", time.time(), ""]
+    llm_kwargs["temperature"] = 0.8
+    try:
+        querys_json = predict_no_ui_long_connection(
+            inputs=query,
+            llm_kwargs=llm_kwargs,
+            history=[],
+            sys_prompt=sys_prompt,
+            observe_window=mutable,
+        )
+    except Exception:
+        querys_json = json.dumps([query])
+    #* 尝试解码优化后的搜索结果
+    querys_json = re.sub(r"```json|```", "", querys_json)
+    try:
+        querys = json.loads(querys_json)
+    except Exception:
+        #* 如果解码失败,降低温度再试一次
+        try:
+            llm_kwargs["temperature"] = 0.4
+            querys_json = predict_no_ui_long_connection(
+                inputs=query,
+                llm_kwargs=llm_kwargs,
+                history=[],
+                sys_prompt=sys_prompt,
+                observe_window=mutable,
+            )
+            querys_json = re.sub(r"```json|```", "", querys_json)
+            querys = json.loads(querys_json)
+        except Exception:
+            #* 如果再次失败，直接返回原始问题
+            querys = [query]
+    links = []
+    success = 0
+    Exceptions = ""
+    for q in querys:
+        try:
+            link = searxng_request(q, proxies, categories, searxng_url, engines=engines)
+            if len(link) > 0:
+                links.append(link[:-5])
+                success += 1
+        except Exception:
+            Exceptions = Exception
+            pass
+    if success == 0:
+        raise ValueError(f"在线搜索失败！\n{Exceptions}")
+    # * 清洗搜索结果，依次放入每组第一，第二个搜索结果，并清洗重复的搜索结果
+    seen_links = set()
+    result = []
+    for tuple in zip_longest(*links, fillvalue=None):
+        for item in tuple:
+            if item is not None:
+                link = item["link"]
+                if link not in seen_links:
+                    seen_links.add(link)
+                    result.append(item)
+    return result
 
 @lru_cache
 def get_auth_ip():
@@ -112,15 +201,21 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     searxng_url = plugin_kwargs.get('searxng_url', None)
     engines = plugin_kwargs.get('engine', None)
     optimizer = plugin_kwargs.get('optimizer', 0)
-    urls = searxng_request(txt, proxies, categories, searxng_url, engines=engines)
+    if optimizer == 0:
+        urls = searxng_request(txt, proxies, categories, searxng_url, engines=engines)
+    else:
+        urls = search_optimizer(txt, proxies, optimizer_history, llm_kwargs, optimizer, categories, searxng_url, engines)
     history = []
     if len(urls) == 0:
         chatbot.append((f"结论：{txt}",
                         "[Local Message] 受到限制，无法从searxng获取信息！请尝试更换搜索引擎。"))
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
+    
     # ------------- < 第2步：依次访问网页 > -------------
     max_search_result = 5   # 最多收纳多少个网页的结果
+    if optimizer == 2:
+        max_search_result = 8
     chatbot.append(["联网检索中 ...", None])
     for index, url in enumerate(urls[:max_search_result]):
         res = scrape_text(url['link'], proxies)
