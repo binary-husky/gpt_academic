@@ -159,6 +159,15 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
                     return "越权访问!"
             return await endpoint(path_or_url, request)
 
+        from fastapi import Request, status
+        from fastapi.responses import FileResponse, RedirectResponse
+        @gradio_app.get("/academic_logout")
+        async def logout():
+            response = RedirectResponse(url=CUSTOM_PATH, status_code=status.HTTP_302_FOUND)
+            response.delete_cookie('access-token')
+            response.delete_cookie('access-token-unsecure')
+            return response
+
     # --- --- enable TTS (text-to-speech) functionality --- ---
     TTS_TYPE = get_conf("TTS_TYPE")
     if TTS_TYPE != "DISABLE":
@@ -235,6 +244,7 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
                 return JSONResponse(status_code=404, content={"message": "Not Found"})
             response = await call_next(request)
             return response
+
 
     # --- --- uvicorn.Config --- ---
     ssl_keyfile = None if SSL_KEYFILE == "" else SSL_KEYFILE
