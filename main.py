@@ -24,6 +24,20 @@ def enable_log(PATH_LOGGING):
     logging.getLogger("httpx").setLevel(logging.WARNING)
     print(f"所有对话记录将自动保存在本地目录{log_dir}, 请注意自我隐私保护哦！")
 
+def encode_plugin_info(k, plugin)->str:
+    import copy
+    from themes.theme import to_cookie_str
+    plugin_ = copy.copy(plugin)
+    plugin_.pop("Function", None)
+    plugin_.pop("Class", None)
+    plugin_.pop("Button", None)
+    plugin_["Info"] = plugin.get("Info", k)
+    if plugin.get("AdvancedArgs", False):
+        plugin_["Label"] = f"插件[{k}]的高级参数说明：" + plugin.get("ArgsReminder", f"没有提供高级参数功能说明")
+    else:
+        plugin_["Label"] = f"插件[{k}]不需要高级参数。"
+    return to_cookie_str(plugin_)
+
 def main():
     import gradio as gr
     if gr.__version__ not in ['3.32.9', '3.32.10', '3.32.11']:
@@ -217,20 +231,6 @@ def main():
         file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt, txt2, checkboxes, cookies], [chatbot, txt, txt2, cookies]).then(None, None, None,   _js=r"()=>{toast_push('上传完毕 ...'); cancel_loading_status();}")
         file_upload_2.upload(on_file_uploaded, [file_upload_2, chatbot, txt, txt2, checkboxes, cookies], [chatbot, txt, txt2, cookies]).then(None, None, None, _js=r"()=>{toast_push('上传完毕 ...'); cancel_loading_status();}")
         # 函数插件-固定按钮区
-        def encode_plugin_info(k, plugin)->str:
-            import copy
-            from themes.theme import to_cookie_str
-            plugin_ = copy.copy(plugin)
-            plugin_.pop("Function", None)
-            plugin_.pop("Class", None)
-            plugin_.pop("Button", None)
-            plugin_["Info"] = plugin.get("Info", k)
-            if plugin.get("AdvancedArgs", False):
-                plugin_["Label"] = f"插件[{k}]的高级参数说明：" + plugin.get("ArgsReminder", f"没有提供高级参数功能说明")
-            else:
-                plugin_["Label"] = f"插件[{k}]不需要高级参数。"
-            return to_cookie_str(plugin_)
-
         for k in plugins:
             register_advanced_plugin_init_arr += f"""register_plugin_init("{k}","{encode_plugin_info(k, plugins[k])}");"""
             if plugins[k].get("Class", None):
