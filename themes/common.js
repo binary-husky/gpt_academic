@@ -1754,3 +1754,10 @@ async function run_dropdown_shift(dropdown){
         }, "advance_arg_input_legacy", "obj");
     }
 }
+
+async function duplicate_in_new_window() {
+    // 获取当前页面的URL
+    var url = window.location.href;
+    // 在新标签页中打开这个URL
+    window.open(url, '_blank');
+}
