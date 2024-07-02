@@ -132,8 +132,10 @@ def main():
                             visible = True if match_group(plugin['Group'], DEFAULT_FN_GROUPS) else False
                             variant = plugins[k]["Color"] if "Color" in plugin else "secondary"
                             info = plugins[k].get("Info", k)
+                            btn_elem_id = str(hash(k))
                             plugin['Button'] = plugins[k]['Button'] = gr.Button(k, variant=variant,
-                                visible=visible, info_str=f'函数插件区: {info}').style(size="sm")
+                                visible=visible, info_str=f'函数插件区: {info}', elem_id=btn_elem_id).style(size="sm")
+                            plugin['ButtonElemId'] = btn_elem_id
                     with gr.Row():
                         with gr.Accordion("更多函数插件", open=True):
                             dropdown_fn_list = []
@@ -239,23 +241,13 @@ def main():
             if not plugins[k].get("AsButton", True): continue
             if plugins[k].get("Class", None) is None:
                 assert plugins[k].get("Function", None) is not None
-                click_handle = plugins[k]["Button"].click(ArgsGeneralWrapper(plugins[k]["Function"]), [*input_combo], output_combo)
-                click_handle.then(on_report_generated, [cookies, file_upload, chatbot], [cookies, file_upload, chatbot]).then(None, [plugins[k]["Button"]], None, _js=r"(fn)=>on_plugin_exe_complete(fn)")
-                cancel_handles.append(click_handle)
+                click_handle = plugins[k]["Button"].click(None, inputs=[], outputs=None, _js=f"""()=>run_classic_plugin_via_id("{plugins[k]["ButtonElemId"]}")""")
+                # click_handle = plugins[k]["Button"].click(ArgsGeneralWrapper(plugins[k]["Function"]), [*input_combo], output_combo)
+                # click_handle.then(on_report_generated, [cookies, file_upload, chatbot], [cookies, file_upload, chatbot]).then(None, [plugins[k]["Button"]], None, _js=r"(fn)=>on_plugin_exe_complete(fn)")
+                # cancel_handles.append(click_handle)
             else:
                 click_handle = plugins[k]["Button"].click(None, inputs=[], outputs=None, _js=f"""()=>run_advanced_plugin_launch_code("{k}")""")
 
-        # 函数插件-下拉菜单与随变按钮的互动（旧版）
-        # def on_dropdown_changed(k):
-        #     variant = plugins[k]["Color"] if "Color" in plugins[k] else "secondary" # 选择颜色
-        #     info = plugins[k].get("Info", k)    # 获取info
-        #     ret = {switchy_bt: gr.update(value=k, variant=variant, info_str=f'函数插件区: {info}')}
-        #     if plugins[k].get("AdvancedArgs", False): # 是否唤起高级插件参数区
-        #         ret.update({plugin_advanced_arg: gr.update(visible=True,  label=f"插件[{k}]的高级参数说明：" + plugins[k].get("ArgsReminder", [f"没有提供高级参数功能说明"]))})
-        #     else:
-        #         ret.update({plugin_advanced_arg: gr.update(visible=False, label=f"插件[{k}]不需要高级参数。")})
-        #     return ret
-        # dropdown.select(on_dropdown_changed, [dropdown], [switchy_bt, plugin_advanced_arg] )
         # 函数插件-下拉菜单与随变按钮的互动（新版-更流畅）
         dropdown.select(None, [dropdown], None, _js=f"""(dropdown)=>run_dropdown_shift(dropdown)""")
 
@@ -272,13 +264,7 @@ def main():
             return css_part2 + css_part1
 
         theme_handle = theme_dropdown.select(on_theme_dropdown_changed, [theme_dropdown, secret_css], [secret_css])
-        theme_handle.then(
-            None,
-            [secret_css],
-            None,
-            _js=js_code_for_css_changing
-        )
-
+        theme_handle.then(None, [secret_css], None, _js=js_code_for_css_changing)
 
         switchy_bt.click(None, [switchy_bt], None, _js="(switchy_bt)=>on_flex_button_click(switchy_bt)")
         # 随变按钮的回调函数注册
@@ -293,9 +279,10 @@ def main():
         click_handle_ng.then(on_report_generated, [cookies, file_upload, chatbot], [cookies, file_upload, chatbot]).then(None, [switchy_bt], None, _js=r"(fn)=>on_plugin_exe_complete(fn)")
         cancel_handles.append(click_handle_ng)
         # 新一代插件的高级参数区确认按钮（隐藏）
-        click_handle_ng = new_plugin_callback.click(route_switchy_bt_with_arg, [
-                gr.State(["new_plugin_callback", "usr_confirmed_arg"] + input_combo_order),
-                new_plugin_callback, usr_confirmed_arg, *input_combo
+        click_handle_ng = new_plugin_callback.click(route_switchy_bt_with_arg,
+            [
+                gr.State(["new_plugin_callback", "usr_confirmed_arg"] + input_combo_order), # 第一个参数: 指定了后续参数的名称
+                new_plugin_callback, usr_confirmed_arg, *input_combo                        # 后续参数: 真正的参数
             ], output_combo)
         click_handle_ng.then(on_report_generated, [cookies, file_upload, chatbot], [cookies, file_upload, chatbot]).then(None, [switchy_bt], None, _js=r"(fn)=>on_plugin_exe_complete(fn)")
         cancel_handles.append(click_handle_ng)

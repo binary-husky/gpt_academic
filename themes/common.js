@@ -1706,6 +1706,7 @@ function register_plugin_init(key, base64String){
     }
     plugin_init_info_lib[key].info = guiJsonData.Info;
     plugin_init_info_lib[key].color = guiJsonData.Color;
+    plugin_init_info_lib[key].elem_id = guiJsonData.ButtonElemId;
     plugin_init_info_lib[key].label = guiJsonData.Label
     plugin_init_info_lib[key].enable_advanced_arg = guiJsonData.AdvancedArgs;
     plugin_init_info_lib[key].arg_reminder = guiJsonData.ArgsReminder;
@@ -1753,4 +1754,36 @@ async function run_dropdown_shift(dropdown){
             __type__: 'update'
         }, "advance_arg_input_legacy", "obj");
     }
+}
+
+async function run_classic_plugin_via_id(plugin_elem_id){
+    // find elementid
+    for (key in plugin_init_info_lib){
+        if (plugin_init_info_lib[key].elem_id == plugin_elem_id){
+            let current_btn_name = await get_data_from_gradio_component(plugin_elem_id);
+            console.log(current_btn_name);
+
+            gui_args = {}
+            // 关闭菜单 (如果处于开启状态)
+            push_data_to_gradio_component({
+                visible: false,
+                __type__: 'update'
+            }, "plugin_arg_menu", "obj");
+            hide_all_elem();
+            // 为了与旧插件兼容，生成菜单时，自动加载旧高级参数输入区的值
+            let advance_arg_input_legacy = await get_data_from_gradio_component('advance_arg_input_legacy');
+            if (advance_arg_input_legacy.length != 0){
+                gui_args = {
+                    "advanced_arg": advance_arg_input_legacy
+                }
+            }
+            // execute the plugin
+            push_data_to_gradio_component(JSON.stringify(gui_args), "invisible_current_pop_up_plugin_arg_final", "string");
+            push_data_to_gradio_component(current_btn_name, "invisible_callback_btn_for_plugin_exe", "string");
+            document.getElementById("invisible_callback_btn_for_plugin_exe").click();
+            return;
+        }
+    }
+    // console.log('unable to find function');
+    return;
 }
