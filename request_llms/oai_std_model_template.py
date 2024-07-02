@@ -44,7 +44,8 @@ def decode_chunk(chunk):
     try:
         chunk = json.loads(chunk[6:])
     except:
-        finish_reason = "JSON_ERROR"
+        respose = "API_ERROR"
+        finish_reason = chunk
     # 错误处理部分
     if "error" in chunk:
         respose = "API_ERROR"

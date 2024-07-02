@@ -43,7 +43,7 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
 # AVAIL_LLM_MODELS = [
 #   "glm-4-0520", "glm-4-air", "glm-4-airx", "glm-4-flash",
 #   "qianfan", "deepseekcoder",
-#   "spark", "sparkv2", "sparkv3", "sparkv3.5",
+#   "spark", "sparkv2", "sparkv3", "sparkv3.5", "sparkv4",
 #   "qwen-turbo", "qwen-plus", "qwen-max", "qwen-local",
 #   "moonshot-v1-128k", "moonshot-v1-32k", "moonshot-v1-8k",
 #   "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo-0125", "gpt-4o-2024-05-13"
