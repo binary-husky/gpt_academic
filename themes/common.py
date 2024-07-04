@@ -1,3 +1,4 @@
+from functools import cache
 from toolbox import get_conf
 CODE_HIGHLIGHT, ADD_WAIFU, LAYOUT = get_conf("CODE_HIGHLIGHT", "ADD_WAIFU", "LAYOUT")
 
@@ -23,22 +24,30 @@ def minimize_js(common_js_path):
     except:
         return common_js_path
 
+@cache
 def get_common_html_javascript_code():
     js = "\n"
-    common_js_path = "themes/common.js"
-    minimized_js_path = minimize_js(common_js_path)
-    for jsf in [
-        f"file={minimized_js_path}",
-    ]:
-        js += f"""<script src="{jsf}"></script>\n"""
+    common_js_path_list = [
+        "themes/common.js",
+        "themes/theme.js",
+        "themes/init.js",
+    ]
 
-    # 添加Live2D
-    if ADD_WAIFU:
+    if ADD_WAIFU: # 添加Live2D
+        common_js_path_list += [
+            "themes/waifu_plugin/jquery.min.js",
+            "themes/waifu_plugin/jquery-ui.min.js",
+        ]
+
+    for common_js_path in common_js_path_list:
+        if '.min.' not in common_js_path:
+            minimized_js_path = minimize_js(common_js_path)
         for jsf in [
-            "file=themes/waifu_plugin/jquery.min.js",
-            "file=themes/waifu_plugin/jquery-ui.min.js",
+            f"file={minimized_js_path}",
         ]:
             js += f"""<script src="{jsf}"></script>\n"""
-    else:
+
+    if not ADD_WAIFU:
         js += """<script>window.loadLive2D = function(){};</script>\n"""
+
     return js
