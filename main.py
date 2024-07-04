@@ -127,12 +127,12 @@ def main():
                         plugin_group_sel = gr.Dropdown(choices=all_plugin_groups, label='', show_label=False, value=DEFAULT_FN_GROUPS,
                                                       multiselect=True, interactive=True, elem_classes='normal_mut_select').style(container=False)
                     with gr.Row():
-                        for k, plugin in plugins.items():
+                        for index, (k, plugin) in enumerate(plugins.items()):
                             if not plugin.get("AsButton", True): continue
                             visible = True if match_group(plugin['Group'], DEFAULT_FN_GROUPS) else False
                             variant = plugins[k]["Color"] if "Color" in plugin else "secondary"
                             info = plugins[k].get("Info", k)
-                            btn_elem_id = str(hash(k))
+                            btn_elem_id = f"plugin_btn_{index}"
                             plugin['Button'] = plugins[k]['Button'] = gr.Button(k, variant=variant,
                                 visible=visible, info_str=f'函数插件区: {info}', elem_id=btn_elem_id).style(size="sm")
                             plugin['ButtonElemId'] = btn_elem_id

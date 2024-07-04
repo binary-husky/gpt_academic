@@ -1773,9 +1773,8 @@ async function run_classic_plugin_via_id(plugin_elem_id){
             // 为了与旧插件兼容，生成菜单时，自动加载旧高级参数输入区的值
             let advance_arg_input_legacy = await get_data_from_gradio_component('advance_arg_input_legacy');
             if (advance_arg_input_legacy.length != 0){
-                gui_args = {
-                    "advanced_arg": advance_arg_input_legacy
-                }
+                gui_args["advanced_arg"] = {};
+                gui_args["advanced_arg"].user_confirmed_value = advance_arg_input_legacy;
             }
             // execute the plugin
             push_data_to_gradio_component(JSON.stringify(gui_args), "invisible_current_pop_up_plugin_arg_final", "string");
