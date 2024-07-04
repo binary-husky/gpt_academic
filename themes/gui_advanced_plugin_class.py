@@ -31,18 +31,27 @@ def define_gui_advanced_plugin_class(plugins):
                 invisible_callback_btn_for_plugin_exe = gr.Button(r"未选定任何插件", variant="secondary", visible=False, elem_id="invisible_callback_btn_for_plugin_exe").style(size="sm")
                 # 随变按钮的回调函数注册
                 def route_switchy_bt_with_arg(request: gr.Request, input_order, *arg):
-                    arguments = {k:v for k,v in zip(input_order, arg)}
-                    which_plugin = arguments.pop('new_plugin_callback')
+                    arguments = {k:v for k,v in zip(input_order, arg)}      # 重新梳理输入参数，转化为kwargs字典
+                    which_plugin = arguments.pop('new_plugin_callback')     # 获取需要执行的插件名称
                     if which_plugin in [r"未选定任何插件"]: return
-                    usr_confirmed_arg = arguments.pop('usr_confirmed_arg')
+                    usr_confirmed_arg = arguments.pop('usr_confirmed_arg')  # 获取插件参数
                     arg_confirm: dict = {}
-                    usr_confirmed_arg_dict = json.loads(usr_confirmed_arg)
+                    usr_confirmed_arg_dict = json.loads(usr_confirmed_arg)  # 读取插件参数
                     for arg_name in usr_confirmed_arg_dict:
                         arg_confirm.update({arg_name: str(usr_confirmed_arg_dict[arg_name]['user_confirmed_value'])})
-                    plugin_obj = plugins[which_plugin]["Class"]
-                    arguments['plugin_advanced_arg'] = arg_confirm
-                    if arg_confirm.get('main_input', None) is not None:
+
+                    if plugins[which_plugin].get("Class", None) is not None:  # 获取插件执行函数
+                        plugin_obj = plugins[which_plugin]["Class"]
+                        plugin_exe = plugin_obj.execute
+                    else:
+                        plugin_exe = plugins[which_plugin]["Function"]
+
+                    arguments['plugin_advanced_arg'] = arg_confirm          # 更新高级参数输入区的参数
+                    if arg_confirm.get('main_input', None) is not None:     # 更新主输入区的参数
                         arguments['txt'] = arg_confirm['main_input']
-                    yield from ArgsGeneralWrapper(plugin_obj.execute)(request, *arguments.values())
+
+                    # 万事俱备，开始执行
+                    yield from ArgsGeneralWrapper(plugin_exe)(request, *arguments.values())
+
     return invisible_callback_btn_for_plugin_exe, route_switchy_bt_with_arg, usr_confirmed_arg
 
