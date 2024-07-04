@@ -44,7 +44,7 @@ def decode_chunk(chunk):
     try:
         chunk = json.loads(chunk[6:])
     except:
-        respose = "API_ERROR"
+        respose = ""
         finish_reason = chunk
     # 错误处理部分
     if "error" in chunk:
@@ -200,10 +200,13 @@ def get_predict_function(
 
         stream_response = response.iter_lines()
         result = ""
+        finish_reason = ""
         while True:
             try:
                 chunk = next(stream_response)
             except StopIteration:
+                if result == "":
+                    raise RuntimeError(f"获得空的回复，可能原因:{finish_reason}")
                 break
             except requests.exceptions.ConnectionError:
                 chunk = next(stream_response)  # 失败了，重试一次？再失败就没办法了。
@@ -351,6 +354,10 @@ def get_predict_function(
             response_text, finish_reason = decode_chunk(chunk)
             # 返回的数据流第一次为空，继续等待
             if response_text == "" and finish_reason != "False":
+                status_text = f"finish_reason: {finish_reason}"
+                yield from update_ui(
+                    chatbot=chatbot, history=history, msg=status_text
+                )
                 continue
             if chunk:
                 try:
