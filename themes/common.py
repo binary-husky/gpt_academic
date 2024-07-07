@@ -1,4 +1,4 @@
-from functools import cache
+from functools import lru_cache
 from toolbox import get_conf
 CODE_HIGHLIGHT, ADD_WAIFU, LAYOUT = get_conf("CODE_HIGHLIGHT", "ADD_WAIFU", "LAYOUT")
 
@@ -24,7 +24,7 @@ def minimize_js(common_js_path):
     except:
         return common_js_path
 
-@cache
+@lru_cache
 def get_common_html_javascript_code():
     js = "\n"
     common_js_path_list = [
