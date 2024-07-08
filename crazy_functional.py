@@ -439,7 +439,7 @@ def get_crazy_functions():
                 "询问多个GPT模型（手动指定询问哪些模型）": {
                     "Group": "对话",
                     "Color": "stop",
-                    "AsButton": True,
+                    "AsButton": False,
                     "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
                     "ArgsReminder": "支持任意数量的llm接口，用&符号分隔。例如chatglm&gpt-3.5-turbo&gpt-4",  # 高级参数输入区的显示提示
                     "Function": HotReload(同时问询_指定模型),
