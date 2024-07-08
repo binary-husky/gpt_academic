@@ -42,10 +42,10 @@ def get_common_html_javascript_code():
     for common_js_path in common_js_path_list:
         if '.min.' not in common_js_path:
             minimized_js_path = minimize_js(common_js_path)
-        for jsf in [
-            f"file={minimized_js_path}",
-        ]:
-            js += f"""<script src="{jsf}"></script>\n"""
+        else:
+            minimized_js_path = common_js_path
+        jsf = f"file={minimized_js_path}"
+        js += f"""<script src="{jsf}"></script>\n"""
 
     if not ADD_WAIFU:
         js += """<script>window.loadLive2D = function(){};</script>\n"""
