@@ -92,7 +92,7 @@ class MiniGame_ResumeStory(GptAcademicGameBaseState):
 
     def generate_story_image(self, story_paragraph):
         try:
-            from crazy_functions.图片生成 import gen_image
+            from crazy_functions.Image_Generate import gen_image
             prompt_ = predict_no_ui_long_connection(inputs=story_paragraph, llm_kwargs=self.llm_kwargs, history=[], sys_prompt='你需要根据用户给出的小说段落，进行简短的环境描写。要求：80字以内。')
             image_url, image_path = gen_image(self.llm_kwargs, prompt_, '512x512', model="dall-e-2", quality='standard', style='natural')
             return f'<br/><div align="center"><img src="file={image_path}"></div>'

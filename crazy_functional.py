@@ -45,6 +45,8 @@ def get_crazy_functions():
     from crazy_functions.Latex_Function_Wrap import PDF_Localize
     from crazy_functions.Internet_GPT import 连接网络回答问题
     from crazy_functions.Internet_GPT_Wrap import NetworkGPT_Wrap
+    from crazy_functions.Image_Generate import 图片生成_DALLE2, 图片生成_DALLE3, 图片修改_DALLE2
+    from crazy_functions.Image_Generate_Wrap import ImageGen_Wrap
 
     function_plugins = {
         "虚空终端": {
@@ -324,7 +326,7 @@ def get_crazy_functions():
             "ArgsReminder": "如果有必要, 请在此处追加更细致的矫错指令（使用英文）。",
             "Function": HotReload(Latex英文纠错加PDF对比),
         },
-        "Arxiv论文精细翻译（输入arxivID）[需Latex]": {
+        "📚Arxiv论文精细翻译（输入arxivID）[需Latex]": {
             "Group": "学术",
             "Color": "stop",
             "AsButton": False,
@@ -336,7 +338,7 @@ def get_crazy_functions():
             "Function": HotReload(Latex翻译中文并重新编译PDF),  # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
             "Class": Arxiv_Localize,    # 新一代插件需要注册Class
         },
-        "本地Latex论文精细翻译（上传Latex项目）[需Latex]": {
+        "📚本地Latex论文精细翻译（上传Latex项目）[需Latex]": {
             "Group": "学术",
             "Color": "stop",
             "AsButton": False,
@@ -360,6 +362,39 @@ def get_crazy_functions():
             "Class": PDF_Localize   # 新一代插件需要注册Class
         }
     }
+
+    function_plugins.update(
+        {
+            "🎨图片生成（DALLE2/DALLE3, 使用前切换到GPT系列模型）": {
+                "Group": "对话",
+                "Color": "stop",
+                "AsButton": False,
+                "Info": "使用 DALLE2/DALLE3 生成图片 | 输入参数字符串，提供图像的内容",
+                "Function": HotReload(图片生成_DALLE2),   # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
+                "Class": ImageGen_Wrap  # 新一代插件需要注册Class
+            },
+        }
+    )
+
+    function_plugins.update(
+        {
+            "🎨图片修改_DALLE2 （使用前请切换模型到GPT系列）": {
+                "Group": "对话",
+                "Color": "stop",
+                "AsButton": False,
+                "AdvancedArgs": False,  # 调用时，唤起高级参数输入区（默认False）
+                # "Info": "使用DALLE2修改图片 | 输入参数字符串，提供图像的内容",
+                "Function": HotReload(图片修改_DALLE2),
+            },
+        }
+    )
+
+
+
+
+
+
+
 
 
     # -=--=- 尚未充分测试的实验性插件 & 需要额外依赖的插件 -=--=-
@@ -450,50 +485,7 @@ def get_crazy_functions():
         print(trimmed_format_exc())
         print("Load function plugin failed")
 
-    try:
-        from crazy_functions.图片生成 import 图片生成_DALLE2, 图片生成_DALLE3, 图片修改_DALLE2
 
-        function_plugins.update(
-            {
-                "图片生成_DALLE2 （先切换模型到gpt-*）": {
-                    "Group": "对话",
-                    "Color": "stop",
-                    "AsButton": False,
-                    "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-                    "ArgsReminder": "在这里输入分辨率, 如1024x1024（默认），支持 256x256, 512x512, 1024x1024",  # 高级参数输入区的显示提示
-                    "Info": "使用DALLE2生成图片 | 输入参数字符串，提供图像的内容",
-                    "Function": HotReload(图片生成_DALLE2),
-                },
-            }
-        )
-        function_plugins.update(
-            {
-                "图片生成_DALLE3 （先切换模型到gpt-*）": {
-                    "Group": "对话",
-                    "Color": "stop",
-                    "AsButton": False,
-                    "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-                    "ArgsReminder": "在这里输入自定义参数「分辨率-质量(可选)-风格(可选)」, 参数示例「1024x1024-hd-vivid」 || 分辨率支持 「1024x1024」(默认) /「1792x1024」/「1024x1792」 || 质量支持 「-standard」(默认) /「-hd」 || 风格支持 「-vivid」(默认) /「-natural」",  # 高级参数输入区的显示提示
-                    "Info": "使用DALLE3生成图片 | 输入参数字符串，提供图像的内容",
-                    "Function": HotReload(图片生成_DALLE3),
-                },
-            }
-        )
-        function_plugins.update(
-            {
-                "图片修改_DALLE2 （先切换模型到gpt-*）": {
-                    "Group": "对话",
-                    "Color": "stop",
-                    "AsButton": False,
-                    "AdvancedArgs": False,  # 调用时，唤起高级参数输入区（默认False）
-                    # "Info": "使用DALLE2修改图片 | 输入参数字符串，提供图像的内容",
-                    "Function": HotReload(图片修改_DALLE2),
-                },
-            }
-        )
-    except:
-        print(trimmed_format_exc())
-        print("Load function plugin failed")
 
     try:
         from crazy_functions.总结音视频 import 总结音视频
