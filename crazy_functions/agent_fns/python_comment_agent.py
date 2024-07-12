@@ -170,7 +170,6 @@ class PythonCodeComment():
         if line_no is not None:
             return line_no
         else:
-            raise RuntimeError
             return end
 
     def _get_next_window(self):
@@ -322,8 +321,8 @@ class PythonCodeComment():
 
         return revised
 
-    def begin_comment_source_code(self, chatbot, history):
-        from toolbox import update_ui_lastest_msg
+    def begin_comment_source_code(self, chatbot=None, history=None):
+        # from toolbox import update_ui_lastest_msg
         assert self.path is not None
         assert '.py' in self.path   # must be python source code
         # write_target = self.path + '.revised.py'
@@ -332,9 +331,9 @@ class PythonCodeComment():
         # with open(self.path + '.revised.py', 'w+', encoding='utf8') as f:
         while True:
             try:
-                yield from update_ui_lastest_msg(f"({self.file_basename}) 正在读取下一段代码片段:\n", chatbot=chatbot, history=history, delay=0)
+                # yield from update_ui_lastest_msg(f"({self.file_basename}) 正在读取下一段代码片段:\n", chatbot=chatbot, history=history, delay=0)
                 next_batch, line_no_start, line_no_end = self.get_next_batch()
-                yield from update_ui_lastest_msg(f"({self.file_basename}) 处理代码片段:\n\n{next_batch}", chatbot=chatbot, history=history, delay=0)
+                # yield from update_ui_lastest_msg(f"({self.file_basename}) 处理代码片段:\n\n{next_batch}", chatbot=chatbot, history=history, delay=0)
                 
                 hint = None
                 MAX_ATTEMPT = 2

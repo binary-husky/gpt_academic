@@ -1,5 +1,5 @@
-import os, copy
-from toolbox import CatchException, report_exception, update_ui, zip_result, promote_file_to_downloadzone, update_ui_lastest_msg
+import os, copy, time
+from toolbox import CatchException, report_exception, update_ui, zip_result, promote_file_to_downloadzone, update_ui_lastest_msg, get_conf
 from shared_utils.fastapi_server import validate_path_safety
 from crazy_functions.crazy_utils import input_clipping
 from crazy_functions.crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
@@ -28,7 +28,7 @@ def 注释源代码(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
         with open(fp, 'r', encoding='utf-8', errors='replace') as f:
             file_content = f.read()
         prefix = ""
-        i_say = prefix + f'Please analyse the following source code at {os.path.relpath(fp, project_folder)}, the code is:\n```{file_content}```'
+        i_say = prefix + f'Please conclude the following source code at {os.path.relpath(fp, project_folder)} with only one sentence, the code is:\n```{file_content}```'
         i_say_show_user = prefix + f'[{index}/{len(file_manifest)}] 请用一句话对下面的程序文件做一个整体概述: {fp}'
         # 装载请求内容
         MAX_TOKEN_SINGLE_FILE = 2560
@@ -49,21 +49,38 @@ def 注释源代码(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
     )
 
     # <第二步，逐个文件分析，生成带注释文件>
-    chatbot.append([None, f"正在处理:"])
-    for i_say, gpt_say, fp in zip(gpt_response_collection[0::2], gpt_response_collection[1::2], file_manifest):
-        with open(fp, 'r', encoding='utf-8', errors='replace') as f:
-            file_content = f.read()
-        yield from update_ui_lastest_msg(f"正在处理: {fp}", chatbot=chatbot, history=history, delay=0)
+    from concurrent.futures import ThreadPoolExecutor
+    executor = ThreadPoolExecutor(max_workers=get_conf('DEFAULT_WORKER_NUM'))
+    def _task_multi_threading(i_say, gpt_say, fp, file_tree_struct):
         pcc = PythonCodeComment(llm_kwargs, language='English')
         pcc.read_file(path=fp, brief=gpt_say)
-        revised_path, revised_content = yield from pcc.begin_comment_source_code(chatbot, history)
+        revised_path, revised_content = pcc.begin_comment_source_code(None, None)
         file_tree_struct.manifest[fp].revised_path = revised_path
         file_tree_struct.manifest[fp].revised_content = revised_content
-    
-    # <第三步，将结果写回源文件>
-    for i_say, gpt_say, fp in zip(gpt_response_collection[0::2], gpt_response_collection[1::2], file_manifest):
+        # <将结果写回源文件>
         with open(fp, 'w', encoding='utf-8') as f:
             f.write(file_tree_struct.manifest[fp].revised_content)
+
+    chatbot.append([None, f"正在处理:"])
+    futures = []
+    for i_say, gpt_say, fp in zip(gpt_response_collection[0::2], gpt_response_collection[1::2], file_manifest):
+        future = executor.submit(_task_multi_threading, i_say, gpt_say, fp, file_tree_struct)
+        futures.append(future)
+
+    cnt = 0
+    while True:
+        # yield一次以刷新前端页面
+        cnt += 1
+        time.sleep(3)
+        worker_done = [h.done() for h in futures]
+        remain = len(worker_done) - sum(worker_done)
+        yield from update_ui_lastest_msg(f"剩余源文件数量: {remain}." + ''.join(['.']*(cnt % 10+1)), chatbot=chatbot, history=history, delay=0)
+
+        # 更好的UI视觉效果
+        yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
+        if all(worker_done):
+            executor.shutdown()
+            break
 
     # <第四步，压缩结果>
     zip_res = zip_result(project_folder)
