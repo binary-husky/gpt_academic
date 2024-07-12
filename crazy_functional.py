@@ -5,21 +5,21 @@ from toolbox import trimmed_format_exc
 def get_crazy_functions():
     from crazy_functions.读文章写摘要 import 读文章写摘要
     from crazy_functions.生成函数注释 import 批量生成函数注释
-    from crazy_functions.解析项目源代码 import 解析项目本身
-    from crazy_functions.解析项目源代码 import 解析一个Python项目
-    from crazy_functions.解析项目源代码 import 解析一个Matlab项目
-    from crazy_functions.解析项目源代码 import 解析一个C项目的头文件
-    from crazy_functions.解析项目源代码 import 解析一个C项目
-    from crazy_functions.解析项目源代码 import 解析一个Golang项目
-    from crazy_functions.解析项目源代码 import 解析一个Rust项目
-    from crazy_functions.解析项目源代码 import 解析一个Java项目
-    from crazy_functions.解析项目源代码 import 解析一个前端项目
+    from crazy_functions.SourceCode_Analyse import 解析项目本身
+    from crazy_functions.SourceCode_Analyse import 解析一个Python项目
+    from crazy_functions.SourceCode_Analyse import 解析一个Matlab项目
+    from crazy_functions.SourceCode_Analyse import 解析一个C项目的头文件
+    from crazy_functions.SourceCode_Analyse import 解析一个C项目
+    from crazy_functions.SourceCode_Analyse import 解析一个Golang项目
+    from crazy_functions.SourceCode_Analyse import 解析一个Rust项目
+    from crazy_functions.SourceCode_Analyse import 解析一个Java项目
+    from crazy_functions.SourceCode_Analyse import 解析一个前端项目
     from crazy_functions.高级功能函数模板 import 高阶功能模板函数
     from crazy_functions.高级功能函数模板 import Demo_Wrap
     from crazy_functions.Latex全文润色 import Latex英文润色
     from crazy_functions.询问多个大语言模型 import 同时问询
-    from crazy_functions.解析项目源代码 import 解析一个Lua项目
-    from crazy_functions.解析项目源代码 import 解析一个CSharp项目
+    from crazy_functions.SourceCode_Analyse import 解析一个Lua项目
+    from crazy_functions.SourceCode_Analyse import 解析一个CSharp项目
     from crazy_functions.总结word文档 import 总结word文档
     from crazy_functions.解析JupyterNotebook import 解析ipynb文件
     from crazy_functions.Conversation_To_File import 载入对话历史存档
@@ -448,7 +448,7 @@ def get_crazy_functions():
     #     print("Load function plugin failed")
 
     try:
-        from crazy_functions.解析项目源代码 import 解析任意code项目
+        from crazy_functions.SourceCode_Analyse import 解析任意code项目
 
         function_plugins.update(
             {

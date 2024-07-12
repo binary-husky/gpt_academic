@@ -1,10 +1,9 @@
-import init_test
-
 from toolbox import CatchException, update_ui
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from request_llms.bridge_all import predict_no_ui_long_connection
 import datetime
 import re
+import os
 from textwrap import dedent
 # TODO: 解决缩进问题
 
@@ -59,14 +58,14 @@ OUTPUT:
 
 
 revise_funtion_prompt = '''
-You need to read the following code, and revise the code according to following instructions:
+You need to read the following code, and revise the source code ({FILE_BASENAME}) according to following instructions:
 1. You should analyze the purpose of the functions (if there are any).
 2. You need to add docstring for the provided functions (if there are any).
 
 Be aware:
 1. You must NOT modify the indent of code.
-2. You are NOT authorized to change or translate non-comment code, and you are NOT authorized to add empty lines either.
-3. Use English to add comments and docstrings. Do NOT translate Chinese that is already in the code.
+2. You are NOT authorized to change or translate non-comment code, and you are NOT authorized to add empty lines either, toggle qu.
+3. Use {LANG} to add comments and docstrings. Do NOT translate Chinese that is already in the code.
 
 ------------------ Example ------------------
 INPUT:
@@ -105,23 +104,30 @@ def zip_result(folder):
 ------------------ End of Example ------------------
 
 
------------------- the real INPUT you need to process NOW ------------------
+------------------ the real INPUT you need to process NOW ({FILE_BASENAME}) ------------------
 ```
 {THE_CODE}
 ```
 {INDENT_REMINDER}
+{BRIEF_REMINDER}
+{HINT_REMINDER}
 '''
 
 
-class ContextWindowManager():
 
-    def __init__(self, llm_kwargs) -> None:
+class PythonCodeComment():
+
+    def __init__(self, llm_kwargs, language) -> None:
         self.full_context = []
         self.full_context_with_line_no = []
         self.current_page_start = 0
         self.page_limit = 100 # 100 lines of code each page
         self.ignore_limit = 20
         self.llm_kwargs = llm_kwargs
+        self.language = language
+        self.path = None
+        self.file_basename = None
+        self.file_brief = ""
 
     def generate_tagged_code_from_full_context(self):
         for i, code in enumerate(self.full_context):
@@ -131,11 +137,13 @@ class ContextWindowManager():
             self.full_context_with_line_no.append(f"{result} | {code}")
         return self.full_context_with_line_no
 
-    def read_file(self, path):
+    def read_file(self, path, brief):
         with open(path, 'r', encoding='utf8') as f:
             self.full_context = f.readlines()
+        self.file_basename = os.path.basename(path)
+        self.file_brief = brief
         self.full_context_with_line_no = self.generate_tagged_code_from_full_context()
-
+        self.path = path
 
     def find_next_function_begin(self, tagged_code:list, begin_and_end):
         begin, end = begin_and_end
@@ -231,19 +239,30 @@ class ContextWindowManager():
 
         if margin:
             text = re.sub(r'(?m)^' + margin, '', text)
-        return text, len(margin)
+            return text, len(margin)
+        else:
+            return text, 0
 
     def get_next_batch(self):
         current_page_start, future_page_start = self._get_next_window()
-        return self.full_context[current_page_start: future_page_start], current_page_start, future_page_start
+        return ''.join(self.full_context[current_page_start: future_page_start]), current_page_start, future_page_start
 
-    def tag_code(self, fn):
-        code = ''.join(fn)
+    def tag_code(self, fn, hint):
+        code = fn
         _, n_indent = self.dedent(code)
         indent_reminder = "" if n_indent == 0 else "(Reminder: as you can see, this piece of code has indent made up with {n_indent} whitespace, please preseve them in the OUTPUT.)"
+        brief_reminder = "" if self.file_brief == "" else f"({self.file_basename} abstract: {self.file_brief})"
+        hint_reminder = "" if hint is None else f"(Reminder: do not ignore or modify code such as `{hint}`, provide complete code in the OUTPUT.)"
         self.llm_kwargs['temperature'] = 0
         result = predict_no_ui_long_connection(
-            inputs=revise_funtion_prompt.format(THE_CODE=code, INDENT_REMINDER=indent_reminder),
+            inputs=revise_funtion_prompt.format(
+                LANG=self.language, 
+                FILE_BASENAME=self.file_basename, 
+                THE_CODE=code, 
+                INDENT_REMINDER=indent_reminder, 
+                BRIEF_REMINDER=brief_reminder,
+                HINT_REMINDER=hint_reminder
+            ),
             llm_kwargs=self.llm_kwargs,
             history=[],
             sys_prompt="",
@@ -303,40 +322,58 @@ class ContextWindowManager():
 
         return revised
 
+    def begin_comment_source_code(self, chatbot, history):
+        from toolbox import update_ui_lastest_msg
+        assert self.path is not None
+        assert '.py' in self.path   # must be python source code
+        # write_target = self.path + '.revised.py'
 
-from toolbox import get_plugin_default_kwargs
-llm_kwargs = get_plugin_default_kwargs()["llm_kwargs"]
-cwm = ContextWindowManager(llm_kwargs)
-cwm.read_file(path="./test.py")
-output_buf = ""
-with open('temp.py', 'w+', encoding='utf8') as f:
-    while True:
-        try:
-            next_batch, line_no_start, line_no_end = cwm.get_next_batch()
-            result = cwm.tag_code(next_batch)
-            f.write(result)
-            output_buf += result
-        except StopIteration:
-            next_batch, line_no_start, line_no_end = [], -1, -1
-            break
-        print('-------------------------------------------')
-        print(''.join(next_batch))
-        print('-------------------------------------------')
+        write_content = ""
+        # with open(self.path + '.revised.py', 'w+', encoding='utf8') as f:
+        while True:
+            try:
+                yield from update_ui_lastest_msg(f"({self.file_basename}) 正在读取下一段代码片段:\n", chatbot=chatbot, history=history, delay=0)
+                next_batch, line_no_start, line_no_end = self.get_next_batch()
+                yield from update_ui_lastest_msg(f"({self.file_basename}) 处理代码片段:\n\n{next_batch}", chatbot=chatbot, history=history, delay=0)
+                
+                hint = None
+                MAX_ATTEMPT = 2
+                for attempt in range(MAX_ATTEMPT):
+                    result = self.tag_code(next_batch, hint)
+                    try:
+                        successful, hint = self.verify_successful(next_batch, result)
+                    except Exception as e:
+                        print('ignored exception:\n' + str(e))
+                        break
+                    if successful:
+                        break
+                    if attempt == MAX_ATTEMPT - 1:
+                        # cannot deal with this, give up
+                        result = next_batch
+                        break
 
+                # f.write(result)
+                write_content += result
+            except StopIteration:
+                next_batch, line_no_start, line_no_end = [], -1, -1
+                return None, write_content
 
-print(cwm)
+    def verify_successful(self, original, revised):
+        """ Determine whether the revised code contains every line that already exists
+        """
+        from crazy_functions.ast_fns.comment_remove import remove_python_comments
+        original = remove_python_comments(original)
+        original_lines = original.split('\n')
+        revised_lines = revised.split('\n')
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        for l in original_lines:
+            l = l.strip()
+            if '\'' in l or '\"' in l: continue  # ast sometimes toggle " to '
+            found = False
+            for lt in revised_lines:
+                if l in lt:
+                    found = True
+                    break
+            if not found:
+                return False, l
+        return True, None

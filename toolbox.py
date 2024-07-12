@@ -220,9 +220,10 @@ def CatchException(f):
         try:
             yield from f(main_input, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, *args, **kwargs)
         except FriendlyException as e:
+            tb_str = '```\n' + trimmed_format_exc() + '```'
             if len(chatbot_with_cookie) == 0:
                 chatbot_with_cookie.clear()
-                chatbot_with_cookie.append(["插件调度异常", None])
+                chatbot_with_cookie.append(["插件调度异常:\n" + tb_str, None])
             chatbot_with_cookie[-1] = [chatbot_with_cookie[-1][0], e.generate_error_html()]
             yield from update_ui(chatbot=chatbot_with_cookie, history=history, msg=f'异常')  # 刷新界面
         except Exception as e:

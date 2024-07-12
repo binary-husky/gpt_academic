@@ -57,7 +57,7 @@ def validate_path_safety(path_or_url, user):
         sensitive_path = PATH_LOGGING
     elif path_or_url.startswith(PATH_PRIVATE_UPLOAD):   # 用户的上传目录（按用户划分）
         sensitive_path = PATH_PRIVATE_UPLOAD
-    elif path_or_url.startswith('tests'):   # 一个常用的测试目录
+    elif path_or_url.startswith('tests') or path_or_url.startswith('build'):   # 一个常用的测试目录
         return True
     else:
         raise FriendlyException(f"输入文件的路径 ({path_or_url}) 存在，但位置非法。请将文件上传后再执行该任务。") # return False
