@@ -50,13 +50,6 @@ def get_crazy_functions():
     from crazy_functions.SourceCode_Comment import 注释Python项目
 
     function_plugins = {
-        "注释Python项目": {
-            "Group": "对话|编程|学术|智能体",
-            "Color": "stop",
-            "AsButton": True,
-            "Info": "注释Python项目",
-            "Function": HotReload(注释Python项目),
-        },
         "虚空终端": {
             "Group": "对话|编程|学术|智能体",
             "Color": "stop",
@@ -70,6 +63,13 @@ def get_crazy_functions():
             "AsButton": True,
             "Info": "解析一个Python项目的所有源文件(.py) | 输入参数为路径",
             "Function": HotReload(解析一个Python项目),
+        },
+        "注释Python项目": {
+            "Group": "编程",
+            "Color": "stop",
+            "AsButton": False,
+            "Info": "上传一系列python源文件(或者压缩包), 为这些代码添加docstring | 输入参数为路径",
+            "Function": HotReload(注释Python项目),
         },
         "载入对话历史存档（先上传存档或输入路径）": {
             "Group": "对话",
