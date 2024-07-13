@@ -23,7 +23,7 @@ def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
             file_content = f.read()
         prefix = "接下来请你逐文件分析下面的工程" if index==0 else ""
         i_say = prefix + f'请对下面的程序文件做一个概述文件名是{os.path.relpath(fp, project_folder)}，文件代码是 ```{file_content}```'
-        i_say_show_user = prefix + f'[{index}/{len(file_manifest)}] 请对下面的程序文件做一个概述: {fp}'
+        i_say_show_user = prefix + f'[{index+1}/{len(file_manifest)}] 请对下面的程序文件做一个概述: {fp}'
         # 装载请求内容
         inputs_array.append(i_say)
         inputs_show_user_array.append(i_say_show_user)

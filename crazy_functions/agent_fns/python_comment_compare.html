@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+    <style>ADVANCED_CSS</style>
     <meta charset="UTF-8">
     <title>源文件对比</title>
     <style>
@@ -14,12 +15,13 @@
         }
         .container {
             display: flex;
-            width: 80%;
+            width: 95%;
+            height: -webkit-fill-available;
         }
         .code-container {
             flex: 1;
-            margin: 3px;
-            padding: 3px;
+            margin: 0px;
+            padding: 0px;
             border: 1px solid #ccc;
             background-color: #f9f9f9;
             overflow: auto;
@@ -33,14 +35,10 @@
 <body>
 <div class="container">
 <div class="code-container">
-<pre>
 REPLACE_CODE_FILE_LEFT
-</pre>
 </div>
 <div class="code-container">
-<pre>
 REPLACE_CODE_FILE_RIGHT
-</pre>
 </div>
 </div>
 </body>

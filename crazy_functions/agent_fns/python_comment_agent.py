@@ -285,6 +285,17 @@ class PythonCodeComment():
             return code_block
         else:
             return code
+        
+    def get_markdown_block_in_html(self, html):
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(html, 'lxml')
+        found_list = soup.find_all("div", class_="markdown-body")
+        if found_list:
+            res = found_list[0]
+            return res.prettify()
+        else:
+            return None
+
 
     def sync_and_patch(self, original, revised):
         """Ensure the number of pre-string empty lines in revised matches those in original."""

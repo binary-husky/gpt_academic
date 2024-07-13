@@ -6,6 +6,7 @@ from crazy_functions.crazy_utils import request_gpt_model_multi_threads_with_ver
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from crazy_functions.agent_fns.python_comment_agent import PythonCodeComment
 from crazy_functions.diagram_fns.file_tree import FileNode
+from shared_utils.advanced_markdown_format import markdown_convertion_for_file
 
 def 注释源代码(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
 
@@ -29,7 +30,7 @@ def 注释源代码(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
             file_content = f.read()
         prefix = ""
         i_say = prefix + f'Please conclude the following source code at {os.path.relpath(fp, project_folder)} with only one sentence, the code is:\n```{file_content}```'
-        i_say_show_user = prefix + f'[{index}/{len(file_manifest)}] 请用一句话对下面的程序文件做一个整体概述: {fp}'
+        i_say_show_user = prefix + f'[{index+1}/{len(file_manifest)}] 请用一句话对下面的程序文件做一个整体概述: {fp}'
         # 装载请求内容
         MAX_TOKEN_SINGLE_FILE = 2560
         i_say, _ = input_clipping(inputs=i_say, history=[], max_token_limit=MAX_TOKEN_SINGLE_FILE)
@@ -63,13 +64,16 @@ def 注释源代码(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
         # <生成对比html>
         with open("crazy_functions/agent_fns/python_comment_compare.html", 'r', encoding='utf-8') as f:
             html_template = f.read()
-        html_template = html_template.replace("REPLACE_CODE_FILE_LEFT", pcc.original_content)
-        html_template = html_template.replace("REPLACE_CODE_FILE_RIGHT", revised_content)
+        warp = lambda x: "```python\n\n" + x + "\n\n```"
+        from themes.theme import advanced_css
+        html_template = html_template.replace("ADVANCED_CSS", advanced_css)
+        html_template = html_template.replace("REPLACE_CODE_FILE_LEFT", pcc.get_markdown_block_in_html(markdown_convertion_for_file(warp(pcc.original_content))))
+        html_template = html_template.replace("REPLACE_CODE_FILE_RIGHT", pcc.get_markdown_block_in_html(markdown_convertion_for_file(warp(revised_content))))
         compare_html_path = fp + '.compare.html'
         file_tree_struct.manifest[fp].compare_html = compare_html_path
         with open(compare_html_path, 'w', encoding='utf-8') as f:
             f.write(html_template)
-
+        print('done 1')
 
     chatbot.append([None, f"正在处理:"])
     futures = []
