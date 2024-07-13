@@ -567,8 +567,6 @@ def generate_file_link(report_files:List[str]):
     return file_links
 
 
-
-
 def on_report_generated(cookies:dict, files:List[str], chatbot:ChatBotWithCookies):
     if "files_to_promote" in cookies:
         report_files = cookies["files_to_promote"]

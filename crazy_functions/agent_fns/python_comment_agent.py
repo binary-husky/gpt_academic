@@ -118,6 +118,7 @@ def zip_result(folder):
 class PythonCodeComment():
 
     def __init__(self, llm_kwargs, language) -> None:
+        self.original_content = ""
         self.full_context = []
         self.full_context_with_line_no = []
         self.current_page_start = 0
@@ -140,6 +141,7 @@ class PythonCodeComment():
     def read_file(self, path, brief):
         with open(path, 'r', encoding='utf8') as f:
             self.full_context = f.readlines()
+        self.original_content = ''.join(self.full_context)
         self.file_basename = os.path.basename(path)
         self.file_brief = brief
         self.full_context_with_line_no = self.generate_tagged_code_from_full_context()

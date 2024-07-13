@@ -1,5 +1,5 @@
 import os, copy, time
-from toolbox import CatchException, report_exception, update_ui, zip_result, promote_file_to_downloadzone, update_ui_lastest_msg, get_conf
+from toolbox import CatchException, report_exception, update_ui, zip_result, promote_file_to_downloadzone, update_ui_lastest_msg, get_conf, generate_file_link
 from shared_utils.fastapi_server import validate_path_safety
 from crazy_functions.crazy_utils import input_clipping
 from crazy_functions.crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
@@ -60,6 +60,16 @@ def 注释源代码(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
         # <将结果写回源文件>
         with open(fp, 'w', encoding='utf-8') as f:
             f.write(file_tree_struct.manifest[fp].revised_content)
+        # <生成对比html>
+        with open("crazy_functions/agent_fns/python_comment_compare.html", 'r', encoding='utf-8') as f:
+            html_template = f.read()
+        html_template = html_template.replace("REPLACE_CODE_FILE_LEFT", pcc.original_content)
+        html_template = html_template.replace("REPLACE_CODE_FILE_RIGHT", revised_content)
+        compare_html_path = fp + '.compare.html'
+        file_tree_struct.manifest[fp].compare_html = compare_html_path
+        with open(compare_html_path, 'w', encoding='utf-8') as f:
+            f.write(html_template)
+
 
     chatbot.append([None, f"正在处理:"])
     futures = []
@@ -69,14 +79,25 @@ def 注释源代码(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
 
     cnt = 0
     while True:
-        # yield一次以刷新前端页面
         cnt += 1
         time.sleep(3)
         worker_done = [h.done() for h in futures]
         remain = len(worker_done) - sum(worker_done)
-        yield from update_ui_lastest_msg(f"剩余源文件数量: {remain}." + ''.join(['.']*(cnt % 10+1)), chatbot=chatbot, history=history, delay=0)
 
-        # 更好的UI视觉效果
+        # <展示已经完成的部分>
+        preview_html_list = []
+        for done, fp in zip(worker_done, file_manifest):
+            if not done: continue
+            preview_html_list.append(file_tree_struct.manifest[fp].compare_html)
+        file_links = generate_file_link(preview_html_list)
+
+        yield from update_ui_lastest_msg(
+            f"剩余源文件数量: {remain}.\n\n" + 
+            f"已完成的文件: {sum(worker_done)}.\n\n" + 
+            file_links +
+            "\n\n" +
+            ''.join(['.']*(cnt % 10 + 1)
+        ), chatbot=chatbot, history=history, delay=0)
         yield from update_ui(chatbot=chatbot, history=[]) # 刷新界面
         if all(worker_done):
             executor.shutdown()

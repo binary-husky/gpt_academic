@@ -47,8 +47,16 @@ def get_crazy_functions():
     from crazy_functions.Internet_GPT_Wrap import NetworkGPT_Wrap
     from crazy_functions.Image_Generate import 图片生成_DALLE2, 图片生成_DALLE3, 图片修改_DALLE2
     from crazy_functions.Image_Generate_Wrap import ImageGen_Wrap
+    from crazy_functions.SourceCode_Comment import 注释Python项目
 
     function_plugins = {
+        "注释Python项目": {
+            "Group": "对话|编程|学术|智能体",
+            "Color": "stop",
+            "AsButton": True,
+            "Info": "注释Python项目",
+            "Function": HotReload(注释Python项目),
+        },
         "虚空终端": {
             "Group": "对话|编程|学术|智能体",
             "Color": "stop",
