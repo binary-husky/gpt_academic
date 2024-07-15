@@ -30,6 +30,7 @@ def get_common_html_javascript_code():
     common_js_path_list = [
         "themes/common.js",
         "themes/theme.js",
+        "themes/tts.js",
         "themes/init.js",
     ]
 

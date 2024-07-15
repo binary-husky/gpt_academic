@@ -112,10 +112,12 @@ def main():
                 with gr.Accordion("输入区", open=True, elem_id="input-panel") as area_input_primary:
                     with gr.Row():
                         txt = gr.Textbox(show_label=False, placeholder="Input question here.", elem_id='user_input_main').style(container=False)
-                        txt.submit(None, None, None, _js="""click_real_submit_btn""")
                     with gr.Row():
-                        advanced_submit_btn = gr.Button("提交", elem_id="elem_submit_fake_1", variant="primary")
-                        advanced_submit_btn.click(None, None, None, _js="""click_real_submit_btn""")
+                        multiplex_submit_btn = gr.Button("提交", elem_id="elem_submit_visible", variant="primary")
+                        multiplex_sel = gr.Dropdown(
+                            choices=["常规对话", "多模型对话", "智能上下文", "智能召回 RAG"], value="常规对话",
+                            interactive=True, label='', show_label=False,
+                            elem_classes='normal_mut_select').style(container=False)
                         submit_btn = gr.Button("提交", elem_id="elem_submit", variant="primary", visible=False)
                     with gr.Row():
                         resetBtn = gr.Button("重置", elem_id="elem_reset", variant="secondary"); resetBtn.style(size="sm")
@@ -212,7 +214,14 @@ def main():
         input_combo_order = ["cookies", "max_length_sl", "md_dropdown", "txt", "txt2", "top_p", "temperature", "chatbot", "history", "system_prompt", "plugin_advanced_arg"]
         output_combo = [cookies, chatbot, history, status]
         predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=[*input_combo, gr.State(True)], outputs=output_combo)
+        
         # 提交按钮、重置按钮
+        multiplex_submit_btn.click(
+            None, [multiplex_sel], None, _js="""(multiplex_sel)=>multiplex_function_begin(multiplex_sel)""")
+        txt.submit(
+            None, [multiplex_sel], None, _js="""(multiplex_sel)=>multiplex_function_begin(multiplex_sel)""")
+        multiplex_sel.select(
+            None, [multiplex_sel], None, _js=f"""(multiplex_sel)=>run_multiplex_shift(multiplex_sel)""")
         cancel_handles.append(submit_btn.click(**predict_args))
         resetBtn.click(None, None, [chatbot, history, status], _js=js_code_reset)   # 先在前端快速清除chatbot&status
         resetBtn2.click(None, None, [chatbot, history, status], _js=js_code_reset)  # 先在前端快速清除chatbot&status
@@ -235,7 +244,6 @@ def main():
         file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt, txt2, checkboxes, cookies], [chatbot, txt, txt2, cookies]).then(None, None, None,   _js=r"()=>{toast_push('上传完毕 ...'); cancel_loading_status();}")
         file_upload_2.upload(on_file_uploaded, [file_upload_2, chatbot, txt, txt2, checkboxes, cookies], [chatbot, txt, txt2, cookies]).then(None, None, None, _js=r"()=>{toast_push('上传完毕 ...'); cancel_loading_status();}")
         # 函数插件-固定按钮区
-
         for k in plugins:
             register_advanced_plugin_init_arr += f"""register_plugin_init("{k}","{encode_plugin_info(k, plugins[k])}");"""
             if plugins[k].get("Class", None):
