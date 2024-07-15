@@ -2,11 +2,17 @@ async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout, tts) {
     // 第一部分，布局初始化
     audio_fn_init();
     minor_ui_adjustment();
+    
+    // 加载欢迎页面
+    const welcomeMessage = new WelcomeMessage();
+    welcomeMessage.begin_render();
     chatbotIndicator = gradioApp().querySelector('#gpt-chatbot > div.wrap');
     var chatbotObserver = new MutationObserver(() => {
         chatbotContentChanged(1);
+        welcomeMessage.update();
     });
     chatbotObserver.observe(chatbotIndicator, { attributes: true, childList: true, subtree: true });
+    
     if (layout === "LEFT-RIGHT") { chatbotAutoHeight(); }
     if (layout === "LEFT-RIGHT") { limit_scroll_position(); }
 
@@ -122,4 +128,5 @@ async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout, tts) {
 
     // 主题加载（恢复到上次）
     change_theme("", "")
+
 }

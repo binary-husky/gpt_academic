@@ -142,3 +142,33 @@
     border-top-width: 0;
 }
 
+
+.welcome-card-container {
+    text-align: center;
+    margin: 0 auto;
+    display: flex;
+    position: absolute;
+    width: inherit;
+    padding: 50px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+
+.welcome-card {
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 10px;
+    flex: 0 0 calc(30% - 10px);
+}
+
+.welcome-card-title {
+    font-size: 40px;
+    padding: 20px;
+    margin: 10px;
+    flex: 0 0 calc(90%);
+}
