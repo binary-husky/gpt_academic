@@ -112,8 +112,11 @@ def main():
                 with gr.Accordion("输入区", open=True, elem_id="input-panel") as area_input_primary:
                     with gr.Row():
                         txt = gr.Textbox(show_label=False, placeholder="Input question here.", elem_id='user_input_main').style(container=False)
+                        txt.submit(None, None, None, _js="""click_real_submit_btn""")
                     with gr.Row():
-                        submitBtn = gr.Button("提交", elem_id="elem_submit", variant="primary")
+                        advanced_submit_btn = gr.Button("提交", elem_id="elem_submit_fake_1", variant="primary")
+                        advanced_submit_btn.click(None, None, None, _js="""click_real_submit_btn""")
+                        submit_btn = gr.Button("提交", elem_id="elem_submit", variant="primary", visible=False)
                     with gr.Row():
                         resetBtn = gr.Button("重置", elem_id="elem_reset", variant="secondary"); resetBtn.style(size="sm")
                         stopBtn = gr.Button("停止", elem_id="elem_stop", variant="secondary"); stopBtn.style(size="sm")
@@ -177,7 +180,7 @@ def main():
 
         # 浮动菜单定义
         from themes.gui_floating_menu import define_gui_floating_menu
-        area_input_secondary, txt2, area_customize, submitBtn2, resetBtn2, clearBtn2, stopBtn2 = \
+        area_input_secondary, txt2, area_customize, _, resetBtn2, clearBtn2, stopBtn2 = \
             define_gui_floating_menu(customize_btns, functional, predefined_btns, cookies, web_cookie_cache)
 
         # 插件二级菜单的实现
@@ -210,10 +213,7 @@ def main():
         output_combo = [cookies, chatbot, history, status]
         predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=[*input_combo, gr.State(True)], outputs=output_combo)
         # 提交按钮、重置按钮
-        cancel_handles.append(txt.submit(**predict_args))
-        cancel_handles.append(txt2.submit(**predict_args))
-        cancel_handles.append(submitBtn.click(**predict_args))
-        cancel_handles.append(submitBtn2.click(**predict_args))
+        cancel_handles.append(submit_btn.click(**predict_args))
         resetBtn.click(None, None, [chatbot, history, status], _js=js_code_reset)   # 先在前端快速清除chatbot&status
         resetBtn2.click(None, None, [chatbot, history, status], _js=js_code_reset)  # 先在前端快速清除chatbot&status
         reset_server_side_args = (lambda history: ([], [], "已重置", json.dumps(history)), [history], [chatbot, history, status, history_cache])
@@ -222,10 +222,7 @@ def main():
         clearBtn.click(None, None, [txt, txt2], _js=js_code_clear)
         clearBtn2.click(None, None, [txt, txt2], _js=js_code_clear)
         if AUTO_CLEAR_TXT:
-            submitBtn.click(None, None, [txt, txt2], _js=js_code_clear)
-            submitBtn2.click(None, None, [txt, txt2], _js=js_code_clear)
-            txt.submit(None, None, [txt, txt2], _js=js_code_clear)
-            txt2.submit(None, None, [txt, txt2], _js=js_code_clear)
+            submit_btn.click(None, None, [txt, txt2], _js=js_code_clear)
         # 基础功能区的回调函数注册
         for k in functional:
             if ("Visible" in functional[k]) and (not functional[k]["Visible"]): continue

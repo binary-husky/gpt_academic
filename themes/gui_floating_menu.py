@@ -8,8 +8,10 @@ def define_gui_floating_menu(customize_btns, functional, predefined_btns, cookie
                 with gr.Column(scale=10):
                     txt2 = gr.Textbox(show_label=False, placeholder="Input question here.",
                                     elem_id='user_input_float', lines=8, label="输入区2").style(container=False)
+                    txt2.submit(None, None, None, _js="""click_real_submit_btn""")
                 with gr.Column(scale=1, min_width=40):
                     submitBtn2 = gr.Button("提交", variant="primary"); submitBtn2.style(size="sm")
+                    submitBtn2.click(None, None, None, _js="""click_real_submit_btn""")
                     resetBtn2 = gr.Button("重置", variant="secondary"); resetBtn2.style(size="sm")
                     stopBtn2 = gr.Button("停止", variant="secondary"); stopBtn2.style(size="sm")
                     clearBtn2 = gr.Button("清除", elem_id="elem_clear2", variant="secondary", visible=False); clearBtn2.style(size="sm")

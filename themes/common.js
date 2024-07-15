@@ -1671,3 +1671,8 @@ async function run_classic_plugin_via_id(plugin_elem_id){
     // console.log('unable to find function');
     return;
 }
+
+
+async function click_real_submit_btn() {
+    document.getElementById("elem_submit").click();
+}
