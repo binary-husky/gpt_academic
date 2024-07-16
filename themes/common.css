@@ -168,7 +168,7 @@
 
 .welcome-card {
     border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 0px 6px 3px #e5e7eb6b;
     padding: 15px;
     margin: 10px;
     flex: 0 0 calc(30% - 10px);
@@ -195,4 +195,12 @@
 
 .welcome-svg {
     padding-right: 10px;
+}
+
+.welcome-title-text {
+    text-wrap: nowrap;
+}
+
+.welcome-content {
+    text-wrap: balance;
 }

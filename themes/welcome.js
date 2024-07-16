@@ -111,13 +111,14 @@ class WelcomeMessage {
                 // 创建标题
                 const text = document.createElement('a');
                 text.textContent = message.title;
-                // var text = document.createTextNode(message.title);
+                text.classList.add('welcome-title-text');
                 text.href = message.url;
                 text.target = "_blank";
                 title.appendChild(text)
 
             // 创建内容
-            const content = document.createElement('p');
+            const content = document.createElement('div');
+            content.classList.add('welcome-content');
             content.textContent = message.content;
 
 
