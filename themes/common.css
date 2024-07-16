@@ -155,20 +155,44 @@
     transform: translate(-50%, -50%);
     flex-wrap: wrap;
     justify-content: center;
+    transition: opacity 1s ease-in-out;
+    opacity: 0;
 }
 
+.welcome-card-container.show {
+    opacity: 1;
+}
+.welcome-card-container.hide {
+    opacity: 0;
+}
 
 .welcome-card {
     border-radius: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    padding: 20px;
+    padding: 15px;
     margin: 10px;
     flex: 0 0 calc(30% - 10px);
 }
 
-.welcome-card-title {
+.welcome-title {
     font-size: 40px;
     padding: 20px;
     margin: 10px;
     flex: 0 0 calc(90%);
+}
+
+.welcome-card-title {
+    font-size: 20px;
+    margin: 2px;
+    flex: 0 0 calc(95%);
+    padding-bottom: 8px;
+    padding-top: 8px;
+    padding-right: 8px;
+    padding-left: 8px;
+    display: flex;
+    justify-content: center;
+}
+
+.welcome-svg {
+    padding-right: 10px;
 }

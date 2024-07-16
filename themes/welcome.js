@@ -2,28 +2,52 @@ class WelcomeMessage {
     constructor() {
         this.static_welcome_message = [
             {
-                title: "论文翻译与润色",
-                content: "跨越学术交流语言障碍。"
+                title: "环境配置教程",
+                content: "释放任意大语言模型的学术应用潜力。",
+                svg: "file=themes/svg/1.svg",
+                url: "https://github.com/binary-husky/gpt_academic",
             },
             {
-                title: "PDF翻译",
-                content: "这是一个可以翻译PDF内容的工具。"
+                title: "Arxiv论文一键翻译",
+                content: "最优英文转中文的学术论文阅读体验。",
+                svg: "file=themes/svg/1.svg",
+                url: "https://github.com/binary-husky/gpt_academic",
             },
             {
-                title: "推荐配置",
-                content: "这是一个根据你的需求推荐最佳配置的工具。"
+                title: "多模态模型",
+                content: "试试将截屏直接粘贴到输入框中，随后使用多模态模型提问。",
+                svg: "file=themes/svg/1.svg",
+                url: "https://github.com/binary-husky/gpt_academic",
             },
             {
-                title: "论文翻译与润色",
-                content: "跨越学术交流语言障碍。"
+                title: "文档与源码批处理",
+                content: "您可以将任意文件拖入「此处」，随后调用对应插件功能。",
+                svg: "file=themes/svg/1.svg",
+                url: "https://github.com/binary-husky/gpt_academic",
             },
             {
-                title: "PDF翻译",
-                content: "这是一个可以翻译PDF内容的工具。"
+                title: "图表与脑图绘制",
+                content: "输入一段语料，然后点击「总结绘制脑图」。",
+                svg: "file=themes/svg/1.svg",
+                url: "https://github.com/binary-husky/gpt_academic",
             },
             {
-                title: "推荐配置",
-                content: "这是一个根据你的需求推荐最佳配置的工具。"
+                title: "虚空终端",
+                content: "点击右侧插件区的「虚空终端」插件，然后直接输入您的想法。",
+                svg: "file=themes/svg/1.svg",
+                url: "https://github.com/binary-husky/gpt_academic",
+            },
+            {
+                title: "DALLE图像生成",
+                content: "接入DALLE生成插画或者项目Logo。",
+                svg: "file=themes/svg/1.svg",
+                url: "https://github.com/binary-husky/gpt_academic",
+            },
+            {
+                title: "TTS语音克隆",
+                content: "借助SoVits，以你喜爱的角色的声音回答问题。",
+                svg: "file=themes/svg/1.svg",
+                url: "https://github.com/binary-husky/gpt_academic",
             }
         ];
         this.visible = false;
@@ -32,7 +56,7 @@ class WelcomeMessage {
 
     begin_render() {
         this.update();
-        setInterval(() => { this.update() }, 2000); // 每2000毫秒执行一次
+        setInterval(() => { this.update() }, 5000); // 每5000毫秒执行一次
     }
 
     async update() {
@@ -62,7 +86,7 @@ class WelcomeMessage {
         
         // 创建主标题
         const major_title = document.createElement('div');
-        major_title.classList.add('welcome-card-title');
+        major_title.classList.add('welcome-title');
         major_title.textContent = "欢迎使用GPT-Academic";
         // major_title.style.paddingBottom = '5px'
         welcome_card_container.appendChild(major_title)
@@ -72,15 +96,30 @@ class WelcomeMessage {
             const card = document.createElement('div');
             card.classList.add('welcome-card');
 
+
+
             // 创建标题
-            const title = document.createElement('p');
-            title.textContent = message.title;
-            title.style.fontSize = '20px'
-            title.style.paddingBottom = '5px'
+            const title = document.createElement('div');
+            title.classList.add('welcome-card-title');
+                // 创建图标
+                const svg = document.createElement('img');
+                svg.classList.add('welcome-svg');
+                svg.src = message.svg;
+                svg.style.height = '30px';
+                title.appendChild(svg);
+
+                // 创建标题
+                const text = document.createElement('a');
+                text.textContent = message.title;
+                // var text = document.createTextNode(message.title);
+                text.href = message.url;
+                text.target = "_blank";
+                title.appendChild(text)
 
             // 创建内容
             const content = document.createElement('p');
             content.textContent = message.content;
+
 
             // 将标题和内容添加到卡片 div 中
             card.appendChild(title);
@@ -89,13 +128,24 @@ class WelcomeMessage {
         });
 
         elem_chatbot.appendChild(welcome_card_container);
+    
+        // 添加显示动画
+        requestAnimationFrame(() => {
+            welcome_card_container.classList.add('show');
+        });
     }
 
     async removeWelcome() {
         // remove welcome-card-container
         const elem_chatbot = document.getElementById('gpt-chatbot');
         const welcome_card_container = document.getElementsByClassName('welcome-card-container')[0];
-        elem_chatbot.removeChild(welcome_card_container);
+        // 添加隐藏动画
+        welcome_card_container.classList.add('hide');
+
+        // 等待动画结束后再移除元素
+        welcome_card_container.addEventListener('transitionend', () => {
+            elem_chatbot.removeChild(welcome_card_container);
+        }, { once: true });
     }
 
     async isChatbotEmpty() {
