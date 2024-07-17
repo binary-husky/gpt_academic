@@ -54,18 +54,21 @@ class WelcomeMessage {
         this.max_welcome_card_num = 6;
         this.card_array = [];
         this.static_welcome_message_previous = [];
+        this.reflesh_time_interval = 15*1000;
     }
 
     begin_render() {
         this.update();
-        this.startRefleshCards();
     }
 
     async startRefleshCards() {
+        await new Promise(r => setTimeout(r, this.reflesh_time_interval));
         await this.reflesh_cards();
-        setTimeout(() => {
-            this.startRefleshCards.call(this);
-        }, 15000);
+        if (this.visible){
+            setTimeout(() => {
+                this.startRefleshCards.call(this);
+            }, 1);
+        }
     }
     
     async reflesh_cards() {
@@ -110,8 +113,8 @@ class WelcomeMessage {
         
                 card.classList.add('hide');
         
-                // 等待 500 毫秒
-                await new Promise(r => setTimeout(r, 250));
+                // 等待 250 毫秒
+                await new Promise(r => setTimeout(r, 200));
             }
         })();
     }
@@ -135,19 +138,23 @@ class WelcomeMessage {
     }
     
     async update() {
-        console.log('update')
+        // console.log('update')
         if (!await this.isChatbotEmpty()) {
             if (this.visible) {
                 this.removeWelcome();
                 this.visible = false;
+                this.card_array = [];
+                this.static_welcome_message_previous = [];
             }
             return; 
         }
         if (this.visible){
             return;
         }
+        // console.log("welcome");
         this.showWelcome();
         this.visible = true;
+        this.startRefleshCards();
     }
 
     showCard(message) {

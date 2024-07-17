@@ -172,7 +172,7 @@
     padding: 15px;
     margin: 10px;
     flex: 0 0 calc(30% - 10px);
-    transition: opacity 0.5s ease-in-out;
+    transition: opacity 0.2s ease-in-out;
     opacity: 1;
 }
 
