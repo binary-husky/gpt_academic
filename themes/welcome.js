@@ -10,7 +10,7 @@ class WelcomeMessage {
             {
                 title: "Arxiv论文一键翻译",
                 content: "无缝切换学术阅读语言，最优英文转中文的学术论文阅读体验。",
-                svg: "file=themes/svg/arxiv-00aeff.svg",
+                svg: "file=themes/svg/1.svg",
                 url: "https://github.com/binary-husky/gpt_academic",
             },
             {
