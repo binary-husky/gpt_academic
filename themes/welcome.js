@@ -45,13 +45,13 @@ class WelcomeMessage {
             },
             {
                 title: "TTS语音克隆",
-                content: "借助SoVits，以你喜爱的角色的声音回答问题。",
+                content: "借助SoVits，以您喜爱的角色的声音回答问题。",
                 svg: "file=themes/svg/MPIS-TTS-00aeff.svg",
                 url: "https://github.com/binary-husky/gpt_academic",
             },
             {
                 title: "中英文论文Latex全文润色",
-                content: "在“上传文件”区上传待润色latex源码，然后在“更多函数插件”下方输入框输入“润色”选择所需插件，最后点击所选择插件即可",
+                content: "上传待润色latex源码，让大语言模型帮您改论文。",
                 svg: "file=themes/svg/ic-polish.svg",
                 url: "https://github.com/binary-husky/gpt_academic",
             }
@@ -199,7 +199,7 @@ class WelcomeMessage {
 
     async showWelcome() {
 
-        // 首先，找到你想要添加子元素的父元素
+        // 首先，找到想要添加子元素的父元素
         const elem_chatbot = document.getElementById('gpt-chatbot');
 
         // 创建一个新的div元素
