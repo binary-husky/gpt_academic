@@ -165,7 +165,7 @@ def main():
                                 if not plugin.get("AsButton", True): dropdown_fn_list.append(k)     # 排除已经是按钮的插件
                                 elif plugin.get('AdvancedArgs', False): dropdown_fn_list.append(k)  # 对于需要高级参数的插件，亦在下拉菜单中显示
                             with gr.Row():
-                                dropdown = gr.Dropdown(dropdown_fn_list, value=r"点击这里搜索插件列表", label="", show_label=False).style(container=False)
+                                dropdown = gr.Dropdown(dropdown_fn_list, value=r"点击这里输入「关键词」搜索插件", label="", show_label=False).style(container=False)
                             with gr.Row():
                                 plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False, elem_id="advance_arg_input_legacy",
                                                                  placeholder="这里是特殊函数插件的高级参数输入区").style(container=False)

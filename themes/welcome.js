@@ -51,14 +51,89 @@ class WelcomeMessage {
             }
         ];
         this.visible = false;
-
+        this.max_welcome_card_num = 6;
+        this.card_array = [];
+        this.static_welcome_message_previous = [];
     }
 
     begin_render() {
         this.update();
-        setInterval(() => { this.update() }, 5000); // 每5000毫秒执行一次
+        this.startRefleshCards();
     }
 
+    async startRefleshCards() {
+        await this.reflesh_cards();
+        setTimeout(() => {
+            this.startRefleshCards.call(this);
+        }, 15000);
+    }
+    
+    async reflesh_cards() {
+        if (!this.visible){
+            return;
+        }
+
+        // re-rank this.static_welcome_message randomly
+        this.static_welcome_message_temp = this.shuffle(this.static_welcome_message);
+
+        // find items that in this.static_welcome_message_temp but not in this.static_welcome_message_previous
+        const not_shown_previously = this.static_welcome_message_temp.filter(item => !this.static_welcome_message_previous.includes(item));
+        const already_shown_previously = this.static_welcome_message_temp.filter(item => this.static_welcome_message_previous.includes(item));
+
+        // combine two lists
+        this.static_welcome_message_previous = not_shown_previously.concat(already_shown_previously);
+
+        (async () => {
+            // 使用 for...of 循环来处理异步操作
+            for (let index = 0; index < this.card_array.length; index++) {
+                if (index >= this.max_welcome_card_num) {
+                    break;
+                }
+        
+                const card = this.card_array[index];
+        
+                // 等待动画结束
+                card.addEventListener('transitionend', () => {
+                    // 更新卡片信息
+                    const message = this.static_welcome_message_previous[index];
+                    const title = card.getElementsByClassName('welcome-card-title')[0];
+                    const content = card.getElementsByClassName('welcome-content')[0];
+                    const svg = card.getElementsByClassName('welcome-svg')[0];
+                    const text = card.getElementsByClassName('welcome-title-text')[0];
+                    svg.src = message.svg;
+                    text.textContent = message.title;
+                    text.href = message.url;
+                    content.textContent = message.content;
+                    card.classList.remove('hide');
+                    card.classList.add('show');
+                }, { once: true });
+        
+                card.classList.add('hide');
+        
+                // 等待 500 毫秒
+                await new Promise(r => setTimeout(r, 250));
+            }
+        })();
+    }
+
+    shuffle(array) {
+        var currentIndex = array.length,  randomIndex;
+      
+        // While there remain elements to shuffle...
+        while (currentIndex != 0) {
+      
+          // Pick a remaining element...
+          randomIndex = Math.floor(Math.random() * currentIndex);
+          currentIndex--;
+      
+          // And swap it with the current element.
+          [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex], array[currentIndex]];
+        }
+      
+        return array;
+    }
+    
     async update() {
         console.log('update')
         if (!await this.isChatbotEmpty()) {
@@ -75,6 +150,40 @@ class WelcomeMessage {
         this.visible = true;
     }
 
+    showCard(message) {
+        const card = document.createElement('div');
+        card.classList.add('welcome-card');
+
+        // 创建标题
+        const title = document.createElement('div');
+        title.classList.add('welcome-card-title');
+
+            // 创建图标
+            const svg = document.createElement('img');
+            svg.classList.add('welcome-svg');
+            svg.src = message.svg;
+            svg.style.height = '30px';
+            title.appendChild(svg);
+
+            // 创建标题
+            const text = document.createElement('a');
+            text.textContent = message.title;
+            text.classList.add('welcome-title-text');
+            text.href = message.url;
+            text.target = "_blank";
+            title.appendChild(text)
+
+        // 创建内容
+        const content = document.createElement('div');
+        content.classList.add('welcome-content');
+        content.textContent = message.content;
+
+        // 将标题和内容添加到卡片 div 中
+        card.appendChild(title);
+        card.appendChild(content);
+        return card;
+    }
+
     async showWelcome() {
 
         // 首先，找到你想要添加子元素的父元素
@@ -88,43 +197,16 @@ class WelcomeMessage {
         const major_title = document.createElement('div');
         major_title.classList.add('welcome-title');
         major_title.textContent = "欢迎使用GPT-Academic";
-        // major_title.style.paddingBottom = '5px'
         welcome_card_container.appendChild(major_title)
 
         // 创建卡片
-        this.static_welcome_message.forEach(function (message) {
-            const card = document.createElement('div');
-            card.classList.add('welcome-card');
-
-
-
-            // 创建标题
-            const title = document.createElement('div');
-            title.classList.add('welcome-card-title');
-                // 创建图标
-                const svg = document.createElement('img');
-                svg.classList.add('welcome-svg');
-                svg.src = message.svg;
-                svg.style.height = '30px';
-                title.appendChild(svg);
-
-                // 创建标题
-                const text = document.createElement('a');
-                text.textContent = message.title;
-                text.classList.add('welcome-title-text');
-                text.href = message.url;
-                text.target = "_blank";
-                title.appendChild(text)
-
-            // 创建内容
-            const content = document.createElement('div');
-            content.classList.add('welcome-content');
-            content.textContent = message.content;
-
-
-            // 将标题和内容添加到卡片 div 中
-            card.appendChild(title);
-            card.appendChild(content);
+        this.static_welcome_message.forEach((message, index) => {
+            if (index >= this.max_welcome_card_num) {
+                return;
+            }
+            this.static_welcome_message_previous.push(message);
+            const card = this.showCard(message);
+            this.card_array.push(card);
             welcome_card_container.appendChild(card);
         });
 

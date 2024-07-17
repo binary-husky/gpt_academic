@@ -172,6 +172,16 @@
     padding: 15px;
     margin: 10px;
     flex: 0 0 calc(30% - 10px);
+    transition: opacity 0.5s ease-in-out;
+    opacity: 1;
+}
+
+.welcome-card.show {
+    opacity: 1;
+}
+
+.welcome-card.hide {
+    opacity: 0;
 }
 
 .welcome-title {
