@@ -10,7 +10,7 @@ class WelcomeMessage {
             {
                 title: "Arxiv论文一键翻译",
                 content: "无缝切换学术阅读语言，最优英文转中文的学术论文阅读体验。",
-                svg: "file=themes/svg/1.svg",
+                svg: "file=themes/svg/arxiv-00aeff.svg",
                 url: "https://github.com/binary-husky/gpt_academic",
             },
             {
@@ -47,6 +47,12 @@ class WelcomeMessage {
                 title: "TTS语音克隆",
                 content: "借助SoVits，以你喜爱的角色的声音回答问题。",
                 svg: "file=themes/svg/MPIS-TTS-00aeff.svg",
+                url: "https://github.com/binary-husky/gpt_academic",
+            },
+            {
+                title: "中英文论文Latex全文润色",
+                content: "在“上传文件”区上传待润色latex源码，然后在“更多函数插件”下方输入框输入“润色”选择所需插件，最后点击所选择插件即可",
+                svg: "file=themes/svg/ic-polish.svg",
                 url: "https://github.com/binary-husky/gpt_academic",
             }
         ];
