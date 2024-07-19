@@ -2,6 +2,7 @@ async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout, tts) {
     // 第一部分，布局初始化
     audio_fn_init();
     minor_ui_adjustment();
+    ButtonWithDropdown_init();
     
     // 加载欢迎页面
     const welcomeMessage = new WelcomeMessage();
