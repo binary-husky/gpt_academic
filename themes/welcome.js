@@ -112,7 +112,7 @@ class WelcomeMessage {
                     // 更新卡片信息
                     const message = this.static_welcome_message_previous[index];
                     const title = card.getElementsByClassName('welcome-card-title')[0];
-                    const content = card.getElementsByClassName('welcome-content')[0];
+                    const content = card.getElementsByClassName('welcome-content-c')[0];
                     const svg = card.getElementsByClassName('welcome-svg')[0];
                     const text = card.getElementsByClassName('welcome-title-text')[0];
                     svg.src = message.svg;
@@ -195,7 +195,10 @@ class WelcomeMessage {
         // 创建内容
         const content = document.createElement('div');
         content.classList.add('welcome-content');
-        content.textContent = message.content;
+            const content_c = document.createElement('div');
+            content_c.classList.add('welcome-content-c');
+            content_c.textContent = message.content;
+            content.appendChild(content_c);
 
         // 将标题和内容添加到卡片 div 中
         card.appendChild(title);
@@ -243,7 +246,6 @@ class WelcomeMessage {
         const welcome_card_container = document.getElementsByClassName('welcome-card-container')[0];
         // 添加隐藏动画
         welcome_card_container.classList.add('hide');
-
         // 等待动画结束后再移除元素
         welcome_card_container.addEventListener('transitionend', () => {
             elem_chatbot.removeChild(welcome_card_container);

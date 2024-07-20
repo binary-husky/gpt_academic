@@ -158,39 +158,33 @@
     transition: opacity 1s ease-in-out;
     opacity: 0;
 }
-
 .welcome-card-container.show {
     opacity: 1;
 }
 .welcome-card-container.hide {
     opacity: 0;
 }
-
 .welcome-card {
     border-radius: 10px;
     box-shadow: 0px 0px 6px 3px #e5e7eb6b;
     padding: 15px;
     margin: 10px;
-    flex: 0 0 calc(30% - 10px);
-    transition: opacity 0.2s ease-in-out;
+    flex: 1 0 calc(30% - 5px);
+    transition: opacity 0.1s ease-in-out;
     opacity: 1;
 }
-
 .welcome-card.show {
     opacity: 1;
 }
-
 .welcome-card.hide {
     opacity: 0;
 }
-
 .welcome-title {
     font-size: 40px;
     padding: 20px;
     margin: 10px;
     flex: 0 0 calc(90%);
 }
-
 .welcome-card-title {
     font-size: 20px;
     margin: 2px;
@@ -202,7 +196,6 @@
     display: flex;
     justify-content: center;
 }
-
 .welcome-svg {
     padding-right: 10px;
 }
@@ -210,9 +203,11 @@
 .welcome-title-text {
     text-wrap: nowrap;
 }
-
 .welcome-content {
     text-wrap: balance;
+    height: 55px;
+    display: flex;
+    align-items: center;
 }
 
 
