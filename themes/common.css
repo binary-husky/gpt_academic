@@ -214,3 +214,64 @@
 .welcome-content {
     text-wrap: balance;
 }
+
+
+#gpt-submit-row {
+    display: flex;
+    gap: 0 !important;
+    border-radius: var(--button-large-radius);
+    border: var(--button-border-width) solid var(--button-primary-border-color);
+    /* background: var(--button-primary-background-fill); */
+    background: var(--button-primary-background-fill-hover);
+    color: var(--button-primary-text-color);
+    box-shadow: var(--button-shadow);
+    transition: var(--button-transition);
+    display: flex;
+}
+#gpt-submit-row:hover {
+    border-color: var(--button-primary-border-color-hover);
+    /* background: var(--button-primary-background-fill-hover); */
+    /* color: var(--button-primary-text-color-hover); */
+}
+#gpt-submit-row button#elem_submit_visible {
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+    box-shadow: none !important;
+    flex-grow: 1;
+}
+#gpt-submit-row #gpt-submit-dropdown {
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+    border-left: 0.5px solid #FFFFFF88 !important;
+    display: flex;
+    overflow: unset !important;
+    max-width: 40px !important;
+    min-width: 40px !important;
+}
+#gpt-submit-row #gpt-submit-dropdown input {
+    pointer-events: none;
+    opacity: 0; /* 隐藏输入框 */
+    width: 0;
+    margin-inline: 0;
+    cursor: pointer;
+}
+#gpt-submit-row #gpt-submit-dropdown label {
+    display: flex;
+    width: 0;
+}
+#gpt-submit-row #gpt-submit-dropdown label div.wrap {
+    background: none;
+    box-shadow: none;
+    border: none;
+}
+#gpt-submit-row #gpt-submit-dropdown label div.wrap div.wrap-inner {
+    background: none;
+    padding-inline: 0;
+    height: 100%;
+}
+#gpt-submit-row #gpt-submit-dropdown svg.dropdown-arrow {
+    transform: scale(2) translate(4.5px, -0.3px);
+}
+#gpt-submit-row #gpt-submit-dropdown > *:hover {
+    cursor: context-menu;
+}

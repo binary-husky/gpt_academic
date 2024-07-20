@@ -796,6 +796,26 @@ function minor_ui_adjustment() {
     }, 200); // 每50毫秒执行一次
 }
 
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+//  对提交按钮的下拉选框做的变化
+// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+function ButtonWithDropdown_init() {
+    let submitButton = document.querySelector('button#elem_submit_visible');
+    let submitDropdown = document.querySelector('#gpt-submit-dropdown');
+    function updateDropdownWidth() {
+        if (submitButton) {
+            let setWidth = submitButton.clientWidth + submitDropdown.clientWidth;
+            let setLeft = -1 * submitButton.clientWidth;
+            document.getElementById('submit-dropdown-style')?.remove();
+            const styleElement = document.createElement('style');
+            styleElement.id = 'submit-dropdown-style';
+            styleElement.innerHTML = `#gpt-submit-dropdown ul.options { width: ${setWidth}px; left: ${setLeft}px; }`;
+            document.head.appendChild(styleElement);
+        }
+    }
+    window.addEventListener('resize', updateDropdownWidth);
+    updateDropdownWidth();
+}
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //  第 6 部分: 避免滑动
