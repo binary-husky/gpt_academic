@@ -112,8 +112,18 @@ def main():
                 with gr.Accordion("输入区", open=True, elem_id="input-panel") as area_input_primary:
                     with gr.Row():
                         txt = gr.Textbox(show_label=False, placeholder="Input question here.", elem_id='user_input_main').style(container=False)
-                    with gr.Row():
-                        submitBtn = gr.Button("提交", elem_id="elem_submit", variant="primary")
+                    with gr.Row(elem_id="gpt-submit-row"):
+                        multiplex_submit_btn = gr.Button("提交", elem_id="elem_submit_visible", variant="primary")
+                        multiplex_sel = gr.Dropdown(
+                            choices=[
+                                "常规对话", 
+                                "多模型对话", 
+                                # "智能上下文", 
+                                # "智能召回 RAG",
+                            ], value="常规对话",
+                            interactive=True, label='', show_label=False,
+                            elem_classes='normal_mut_select', elem_id="gpt-submit-dropdown").style(container=False)
+                        submit_btn = gr.Button("提交", elem_id="elem_submit", variant="primary", visible=False)
                     with gr.Row():
                         resetBtn = gr.Button("重置", elem_id="elem_reset", variant="secondary"); resetBtn.style(size="sm")
                         stopBtn = gr.Button("停止", elem_id="elem_stop", variant="secondary"); stopBtn.style(size="sm")
@@ -160,7 +170,7 @@ def main():
                                 if not plugin.get("AsButton", True): dropdown_fn_list.append(k)     # 排除已经是按钮的插件
                                 elif plugin.get('AdvancedArgs', False): dropdown_fn_list.append(k)  # 对于需要高级参数的插件，亦在下拉菜单中显示
                             with gr.Row():
-                                dropdown = gr.Dropdown(dropdown_fn_list, value=r"点击这里搜索插件列表", label="", show_label=False).style(container=False)
+                                dropdown = gr.Dropdown(dropdown_fn_list, value=r"点击这里输入「关键词」搜索插件", label="", show_label=False).style(container=False)
                             with gr.Row():
                                 plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False, elem_id="advance_arg_input_legacy",
                                                                  placeholder="这里是特殊函数插件的高级参数输入区").style(container=False)
@@ -177,7 +187,7 @@ def main():
 
         # 浮动菜单定义
         from themes.gui_floating_menu import define_gui_floating_menu
-        area_input_secondary, txt2, area_customize, submitBtn2, resetBtn2, clearBtn2, stopBtn2 = \
+        area_input_secondary, txt2, area_customize, _, resetBtn2, clearBtn2, stopBtn2 = \
             define_gui_floating_menu(customize_btns, functional, predefined_btns, cookies, web_cookie_cache)
 
         # 插件二级菜单的实现
@@ -209,11 +219,15 @@ def main():
         input_combo_order = ["cookies", "max_length_sl", "md_dropdown", "txt", "txt2", "top_p", "temperature", "chatbot", "history", "system_prompt", "plugin_advanced_arg"]
         output_combo = [cookies, chatbot, history, status]
         predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=[*input_combo, gr.State(True)], outputs=output_combo)
+        
         # 提交按钮、重置按钮
-        cancel_handles.append(txt.submit(**predict_args))
-        cancel_handles.append(txt2.submit(**predict_args))
-        cancel_handles.append(submitBtn.click(**predict_args))
-        cancel_handles.append(submitBtn2.click(**predict_args))
+        multiplex_submit_btn.click(
+            None, [multiplex_sel], None, _js="""(multiplex_sel)=>multiplex_function_begin(multiplex_sel)""")
+        txt.submit(
+            None, [multiplex_sel], None, _js="""(multiplex_sel)=>multiplex_function_begin(multiplex_sel)""")
+        multiplex_sel.select(
+            None, [multiplex_sel], None, _js=f"""(multiplex_sel)=>run_multiplex_shift(multiplex_sel)""")
+        cancel_handles.append(submit_btn.click(**predict_args))
         resetBtn.click(None, None, [chatbot, history, status], _js=js_code_reset)   # 先在前端快速清除chatbot&status
         resetBtn2.click(None, None, [chatbot, history, status], _js=js_code_reset)  # 先在前端快速清除chatbot&status
         reset_server_side_args = (lambda history: ([], [], "已重置", json.dumps(history)), [history], [chatbot, history, status, history_cache])
@@ -222,10 +236,7 @@ def main():
         clearBtn.click(None, None, [txt, txt2], _js=js_code_clear)
         clearBtn2.click(None, None, [txt, txt2], _js=js_code_clear)
         if AUTO_CLEAR_TXT:
-            submitBtn.click(None, None, [txt, txt2], _js=js_code_clear)
-            submitBtn2.click(None, None, [txt, txt2], _js=js_code_clear)
-            txt.submit(None, None, [txt, txt2], _js=js_code_clear)
-            txt2.submit(None, None, [txt, txt2], _js=js_code_clear)
+            submit_btn.click(None, None, [txt, txt2], _js=js_code_clear)
         # 基础功能区的回调函数注册
         for k in functional:
             if ("Visible" in functional[k]) and (not functional[k]["Visible"]): continue
@@ -238,7 +249,6 @@ def main():
         file_upload.upload(on_file_uploaded, [file_upload, chatbot, txt, txt2, checkboxes, cookies], [chatbot, txt, txt2, cookies]).then(None, None, None,   _js=r"()=>{toast_push('上传完毕 ...'); cancel_loading_status();}")
         file_upload_2.upload(on_file_uploaded, [file_upload_2, chatbot, txt, txt2, checkboxes, cookies], [chatbot, txt, txt2, cookies]).then(None, None, None, _js=r"()=>{toast_push('上传完毕 ...'); cancel_loading_status();}")
         # 函数插件-固定按钮区
-
         for k in plugins:
             register_advanced_plugin_init_arr += f"""register_plugin_init("{k}","{encode_plugin_info(k, plugins[k])}");"""
             if plugins[k].get("Class", None):
