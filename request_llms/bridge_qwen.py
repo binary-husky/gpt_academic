@@ -1,7 +1,7 @@
 import time
 import os
 from toolbox import update_ui, get_conf, update_ui_lastest_msg
-from toolbox import check_packages, report_exception
+from toolbox import check_packages, report_exception, log_chat
 
 model_name = 'Qwen'
 
@@ -59,6 +59,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         chatbot[-1] = (inputs, response)
         yield from update_ui(chatbot=chatbot, history=history)
 
+    log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=response)
     # 总结输出
     if response == f"[Local Message] 等待{model_name}响应中 ...":
         response = f"[Local Message] {model_name}响应异常 ..."

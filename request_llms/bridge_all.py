@@ -860,6 +860,15 @@ if "sparkv3" in AVAIL_LLM_MODELS or "sparkv3.5" in AVAIL_LLM_MODELS:   # 讯飞�
                 "max_token": 4096,
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
+            },
+            "sparkv4":{
+                "fn_with_ui": spark_ui,
+                "fn_without_ui": spark_noui,
+                "can_multi_thread": True,
+                "endpoint": None,
+                "max_token": 4096,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
             }
         })
     except:

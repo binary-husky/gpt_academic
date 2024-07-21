@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <style>ADVANCED_CSS</style>
+    <meta charset="UTF-8">
+    <title>源文件对比</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            width: 95%;
+            height: -webkit-fill-available;
+        }
+        .code-container {
+            flex: 1;
+            margin: 0px;
+            padding: 0px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            overflow: auto;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+<div class="code-container">
+REPLACE_CODE_FILE_LEFT
+</div>
+<div class="code-container">
+REPLACE_CODE_FILE_RIGHT
+</div>
+</div>
+</body>
+</html>

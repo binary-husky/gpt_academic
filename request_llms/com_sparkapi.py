@@ -67,6 +67,7 @@ class SparkRequestInstance():
         self.gpt_url_v3 = "ws://spark-api.xf-yun.com/v3.1/chat"
         self.gpt_url_v35 = "wss://spark-api.xf-yun.com/v3.5/chat"
         self.gpt_url_img = "wss://spark-api.cn-huabei-1.xf-yun.com/v2.1/image"
+        self.gpt_url_v4 = "wss://spark-api.xf-yun.com/v4.0/chat"
 
         self.time_to_yield_event = threading.Event()
         self.time_to_exit_event = threading.Event()
@@ -94,6 +95,8 @@ class SparkRequestInstance():
             gpt_url = self.gpt_url_v3
         elif llm_kwargs['llm_model'] == 'sparkv3.5':
             gpt_url = self.gpt_url_v35
+        elif llm_kwargs['llm_model'] == 'sparkv4':
+            gpt_url = self.gpt_url_v4
         else:
             gpt_url = self.gpt_url
         file_manifest = []
@@ -194,6 +197,7 @@ def gen_params(appid, inputs, llm_kwargs, history, system_prompt, file_manifest)
         "sparkv2": "generalv2",
         "sparkv3": "generalv3",
         "sparkv3.5": "generalv3.5",
+        "sparkv4": "4.0Ultra"
     }
     domains_select = domains[llm_kwargs['llm_model']]
     if file_manifest: domains_select = 'image'

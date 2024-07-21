@@ -57,7 +57,7 @@ def validate_path_safety(path_or_url, user):
         sensitive_path = PATH_LOGGING
     elif path_or_url.startswith(PATH_PRIVATE_UPLOAD):   # 用户的上传目录（按用户划分）
         sensitive_path = PATH_PRIVATE_UPLOAD
-    elif path_or_url.startswith('tests'):   # 一个常用的测试目录
+    elif path_or_url.startswith('tests') or path_or_url.startswith('build'):   # 一个常用的测试目录
         return True
     else:
         raise FriendlyException(f"输入文件的路径 ({path_or_url}) 存在，但位置非法。请将文件上传后再执行该任务。") # return False
@@ -159,6 +159,15 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
                     return "越权访问!"
             return await endpoint(path_or_url, request)
 
+        from fastapi import Request, status
+        from fastapi.responses import FileResponse, RedirectResponse
+        @gradio_app.get("/academic_logout")
+        async def logout():
+            response = RedirectResponse(url=CUSTOM_PATH, status_code=status.HTTP_302_FOUND)
+            response.delete_cookie('access-token')
+            response.delete_cookie('access-token-unsecure')
+            return response
+
     # --- --- enable TTS (text-to-speech) functionality --- ---
     TTS_TYPE = get_conf("TTS_TYPE")
     if TTS_TYPE != "DISABLE":
@@ -235,6 +244,7 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
                 return JSONResponse(status_code=404, content={"message": "Not Found"})
             response = await call_next(request)
             return response
+
 
     # --- --- uvicorn.Config --- ---
     ssl_keyfile = None if SSL_KEYFILE == "" else SSL_KEYFILE
