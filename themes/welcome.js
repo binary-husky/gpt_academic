@@ -106,7 +106,9 @@ class WelcomeMessage {
                 }
         
                 const card = this.card_array[index];
-        
+                card.classList.remove('hide');
+                card.classList.remove('show');
+
                 // 等待动画结束
                 card.addEventListener('transitionend', () => {
                     // 更新卡片信息
@@ -120,7 +122,13 @@ class WelcomeMessage {
                     text.href = message.url;
                     content.textContent = message.content;
                     card.classList.remove('hide');
+
+                    // 等待动画结束
+                    card.addEventListener('transitionend', () => {
+                        card.classList.remove('show');
+                    }, { once: true });
                     card.classList.add('show');
+
                 }, { once: true });
         
                 card.classList.add('hide');
