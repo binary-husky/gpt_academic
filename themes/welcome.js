@@ -152,7 +152,8 @@ class WelcomeMessage {
     async update() {
         console.log('update')
         var page_width = document.documentElement.clientWidth;
-        if (!await this.isChatbotEmpty() || page_width < 1100) {
+        const width_to_hide_welcome = 1200;
+        if (!await this.isChatbotEmpty() || page_width < width_to_hide_welcome) {
             if (this.visible) {
                 this.removeWelcome();
                 this.visible = false;
