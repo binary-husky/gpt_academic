@@ -2,7 +2,7 @@ import os
 from textwrap import indent
 
 class FileNode:
-    def __init__(self, name):
+    def __init__(self, name, build_manifest=False):
         self.name = name
         self.children = []
         self.is_leaf = False
@@ -10,6 +10,8 @@ class FileNode:
         self.parenting_ship = []
         self.comment = ""
         self.comment_maxlen_show = 50
+        self.build_manifest = build_manifest
+        self.manifest = {}
 
     @staticmethod
     def add_linebreaks_at_spaces(string, interval=10):
@@ -29,6 +31,7 @@ class FileNode:
         level = 1
         if directory_names == "":
             new_node = FileNode(file_name)
+            self.manifest[file_path] = new_node
             current_node.children.append(new_node)
             new_node.is_leaf = True
             new_node.comment = self.sanitize_comment(file_comment)
@@ -50,6 +53,7 @@ class FileNode:
                     new_node.level = level - 1
                     current_node = new_node
             term = FileNode(file_name)
+            self.manifest[file_path] = term
             term.level = level
             term.comment = self.sanitize_comment(file_comment)
             term.is_leaf = True

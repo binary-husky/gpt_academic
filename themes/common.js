@@ -1,3 +1,6 @@
+// 标志位
+enable_tts = false;
+
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //  第 1 部分: 工具函数
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -914,131 +917,6 @@ function gpt_academic_gradio_saveload(
     }
 }
 
-enable_tts = false;
-async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout, tts) {
-    // 第一部分，布局初始化
-    audio_fn_init();
-    minor_ui_adjustment();
-    chatbotIndicator = gradioApp().querySelector('#gpt-chatbot > div.wrap');
-    var chatbotObserver = new MutationObserver(() => {
-        chatbotContentChanged(1);
-    });
-    chatbotObserver.observe(chatbotIndicator, { attributes: true, childList: true, subtree: true });
-    if (layout === "LEFT-RIGHT") { chatbotAutoHeight(); }
-    if (layout === "LEFT-RIGHT") { limit_scroll_position(); }
-
-    // 第二部分，读取Cookie，初始话界面
-    let searchString = "";
-    let bool_value = "";
-    //  darkmode 深色模式
-    if (getCookie("js_darkmode_cookie")) {
-        dark = getCookie("js_darkmode_cookie")
-    }
-    dark = dark == "True";
-    if (document.querySelectorAll('.dark').length) {
-        if (!dark) {
-            document.querySelectorAll('.dark').forEach(el => el.classList.remove('dark'));
-        }
-    } else {
-        if (dark) {
-            document.querySelector('body').classList.add('dark');
-        }
-    }
-
-    //  自动朗读
-    if (tts != "DISABLE"){
-        enable_tts = true;
-        if (getCookie("js_auto_read_cookie")) {
-            auto_read_tts = getCookie("js_auto_read_cookie")
-            auto_read_tts = auto_read_tts == "True";
-            if (auto_read_tts) {
-                allow_auto_read_tts_flag = true;
-            }
-        }
-    }
-
-    // SysPrompt 系统静默提示词
-    gpt_academic_gradio_saveload("load", "elem_prompt", "js_system_prompt_cookie", null, "str");
-    // Temperature 大模型温度参数
-    gpt_academic_gradio_saveload("load", "elem_temperature", "js_temperature_cookie", null, "float");
-    // md_dropdown 大模型类型选择
-    if (getCookie("js_md_dropdown_cookie")) {
-        const cached_model = getCookie("js_md_dropdown_cookie");
-        var model_sel = await get_gradio_component("elem_model_sel");
-        // determine whether the cached model is in the choices
-        if (model_sel.props.choices.includes(cached_model)){
-            // change dropdown
-            gpt_academic_gradio_saveload("load", "elem_model_sel", "js_md_dropdown_cookie", null, "str");
-            // 连锁修改chatbot的label
-            push_data_to_gradio_component({
-                label: '当前模型：' + getCookie("js_md_dropdown_cookie"),
-                __type__: 'update'
-            }, "gpt-chatbot", "obj")
-        }
-    }
-
-
-
-    // clearButton 自动清除按钮
-    if (getCookie("js_clearbtn_show_cookie")) {
-        // have cookie
-        bool_value = getCookie("js_clearbtn_show_cookie")
-        bool_value = bool_value == "True";
-        searchString = "输入清除键";
-
-        if (bool_value) {
-            // make btns appear
-            let clearButton = document.getElementById("elem_clear"); clearButton.style.display = "block";
-            let clearButton2 = document.getElementById("elem_clear2"); clearButton2.style.display = "block";
-            // deal with checkboxes
-            let arr_with_clear_btn = update_array(
-                await get_data_from_gradio_component('cbs'), "输入清除键", "add"
-            )
-            push_data_to_gradio_component(arr_with_clear_btn, "cbs", "no_conversion");
-        } else {
-            // make btns disappear
-            let clearButton = document.getElementById("elem_clear"); clearButton.style.display = "none";
-            let clearButton2 = document.getElementById("elem_clear2"); clearButton2.style.display = "none";
-            // deal with checkboxes
-            let arr_without_clear_btn = update_array(
-                await get_data_from_gradio_component('cbs'), "输入清除键", "remove"
-            )
-            push_data_to_gradio_component(arr_without_clear_btn, "cbs", "no_conversion");
-        }
-    }
-
-    // live2d 显示
-    if (getCookie("js_live2d_show_cookie")) {
-        // have cookie
-        searchString = "添加Live2D形象";
-        bool_value = getCookie("js_live2d_show_cookie");
-        bool_value = bool_value == "True";
-        if (bool_value) {
-            loadLive2D();
-            let arr_with_live2d = update_array(
-                await get_data_from_gradio_component('cbsc'), "添加Live2D形象", "add"
-            )
-            push_data_to_gradio_component(arr_with_live2d, "cbsc", "no_conversion");
-        } else {
-            try {
-                $('.waifu').hide();
-                let arr_without_live2d = update_array(
-                    await get_data_from_gradio_component('cbsc'), "添加Live2D形象", "remove"
-                )
-                push_data_to_gradio_component(arr_without_live2d, "cbsc", "no_conversion");
-            } catch (error) {
-            }
-        }
-    } else {
-        // do not have cookie
-        if (live2d) {
-            loadLive2D();
-        } else {
-        }
-    }
-
-}
-
 
 function reset_conversation(a, b) {
     // console.log("js_code_reset");
@@ -1706,6 +1584,7 @@ function register_plugin_init(key, base64String){
     }
     plugin_init_info_lib[key].info = guiJsonData.Info;
     plugin_init_info_lib[key].color = guiJsonData.Color;
+    plugin_init_info_lib[key].elem_id = guiJsonData.ButtonElemId;
     plugin_init_info_lib[key].label = guiJsonData.Label
     plugin_init_info_lib[key].enable_advanced_arg = guiJsonData.AdvancedArgs;
     plugin_init_info_lib[key].arg_reminder = guiJsonData.ArgsReminder;
@@ -1753,4 +1632,42 @@ async function run_dropdown_shift(dropdown){
             __type__: 'update'
         }, "advance_arg_input_legacy", "obj");
     }
+}
+
+async function duplicate_in_new_window() {
+    // 获取当前页面的URL
+    var url = window.location.href;
+    // 在新标签页中打开这个URL
+    window.open(url, '_blank');
+}
+
+async function run_classic_plugin_via_id(plugin_elem_id){
+    // find elementid
+    for (key in plugin_init_info_lib){
+        if (plugin_init_info_lib[key].elem_id == plugin_elem_id){
+            let current_btn_name = await get_data_from_gradio_component(plugin_elem_id);
+            console.log(current_btn_name);
+
+            gui_args = {}
+            // 关闭菜单 (如果处于开启状态)
+            push_data_to_gradio_component({
+                visible: false,
+                __type__: 'update'
+            }, "plugin_arg_menu", "obj");
+            hide_all_elem();
+            // 为了与旧插件兼容，生成菜单时，自动加载旧高级参数输入区的值
+            let advance_arg_input_legacy = await get_data_from_gradio_component('advance_arg_input_legacy');
+            if (advance_arg_input_legacy.length != 0){
+                gui_args["advanced_arg"] = {};
+                gui_args["advanced_arg"].user_confirmed_value = advance_arg_input_legacy;
+            }
+            // execute the plugin
+            push_data_to_gradio_component(JSON.stringify(gui_args), "invisible_current_pop_up_plugin_arg_final", "string");
+            push_data_to_gradio_component(current_btn_name, "invisible_callback_btn_for_plugin_exe", "string");
+            document.getElementById("invisible_callback_btn_for_plugin_exe").click();
+            return;
+        }
+    }
+    // console.log('unable to find function');
+    return;
 }

@@ -29,6 +29,10 @@ def define_gui_toolbar(AVAIL_LLM_MODELS, LLM_MODEL, INIT_SYS_PROMPT, THEME, AVAI
                 checkboxes_2 = gr.CheckboxGroup(opt, value=value, label="显示/隐藏自定义菜单", elem_id='cbsc').style(container=False)
                 dark_mode_btn = gr.Button("切换界面明暗 ☀", variant="secondary").style(size="sm")
                 dark_mode_btn.click(None, None, None, _js=js_code_for_toggle_darkmode)
+                open_new_tab = gr.Button("打开新对话", variant="secondary").style(size="sm")
+                open_new_tab.click(None, None, None, _js=f"""()=>duplicate_in_new_window()""")
+
+
             with gr.Tab("帮助", elem_id="interact-panel"):
                 gr.Markdown(help_menu_description)
     return checkboxes, checkboxes_2, max_length_sl, theme_dropdown, system_prompt, file_upload_2, md_dropdown, top_p, temperature

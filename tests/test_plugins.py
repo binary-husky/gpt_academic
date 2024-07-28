@@ -2,23 +2,16 @@
 对项目中的各个插件进行测试。运行方法：直接运行 python tests/test_plugins.py
 """
 
-
+import init_test
 import os, sys
 
 
-def validate_path():
-    dir_name = os.path.dirname(__file__)
-    root_dir_assume = os.path.abspath(dir_name + "/..")
-    os.chdir(root_dir_assume)
-    sys.path.append(root_dir_assume)
-
-
-validate_path()  # 返回项目根路径
-
 if __name__ == "__main__":
-    from tests.test_utils import plugin_test
+    from test_utils import plugin_test
 
-    plugin_test(plugin='crazy_functions.Internet_GPT->连接网络回答问题', main_input="谁是应急食品？")
+    plugin_test(plugin='crazy_functions.SourceCode_Comment->注释Python项目', main_input="build/test/python_comment")
+
+    # plugin_test(plugin='crazy_functions.Internet_GPT->连接网络回答问题', main_input="谁是应急食品？")
 
     # plugin_test(plugin='crazy_functions.函数动态生成->函数动态生成', main_input='交换图像的蓝色通道和红色通道', advanced_arg={"file_path_arg": "./build/ants.jpg"})
 
@@ -39,9 +32,9 @@ if __name__ == "__main__":
 
     # plugin_test(plugin='crazy_functions.命令行助手->命令行助手', main_input='查看当前的docker容器列表')
 
-    # plugin_test(plugin='crazy_functions.解析项目源代码->解析一个Python项目', main_input="crazy_functions/test_project/python/dqn")
+    # plugin_test(plugin='crazy_functions.SourceCode_Analyse->解析一个Python项目', main_input="crazy_functions/test_project/python/dqn")
 
-    # plugin_test(plugin='crazy_functions.解析项目源代码->解析一个C项目', main_input="crazy_functions/test_project/cpp/cppipc")
+    # plugin_test(plugin='crazy_functions.SourceCode_Analyse->解析一个C项目', main_input="crazy_functions/test_project/cpp/cppipc")
 
     # plugin_test(plugin='crazy_functions.Latex全文润色->Latex英文润色', main_input="crazy_functions/test_project/latex/attention")
 
