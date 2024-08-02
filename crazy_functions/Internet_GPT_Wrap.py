@@ -26,7 +26,7 @@ class NetworkGPT_Wrap(GptAcademicPluginTemplate):
             "categories":
                 ArgProperty(title="搜索分类", options=["网页", "学术论文"], default_value="网页", description="无", type="dropdown").model_dump_json(),
             "engine":
-                ArgProperty(title="选择搜索引擎", options=["Mixed", "bing", "google", "duckduckgo"], default_value="Mixed", description="无", type="dropdown").model_dump_json(),
+                ArgProperty(title="选择搜索引擎", options=["Mixed", "bing", "google", "duckduckgo"], default_value="google", description="无", type="dropdown").model_dump_json(),
             "optimizer":
                 ArgProperty(title="搜索优化", options=["关闭", "开启", "开启(增强)"], default_value="关闭", description="是否使用搜索增强。注意这可能会消耗较多token", type="dropdown").model_dump_json(),
             "searxng_url":
@@ -41,7 +41,5 @@ class NetworkGPT_Wrap(GptAcademicPluginTemplate):
         """
         if plugin_kwargs["categories"] == "网页": plugin_kwargs["categories"] = "general"
         if plugin_kwargs["categories"] == "学术论文": plugin_kwargs["categories"] = "science"
-        optimizer_options=["关闭", "开启", "开启(增强)"]
-        plugin_kwargs["optimizer"] = optimizer_options.index(plugin_kwargs["optimizer"])
         yield from 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request)
 

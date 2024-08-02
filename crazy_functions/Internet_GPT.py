@@ -1,17 +1,17 @@
-from toolbox import CatchException, update_ui, get_conf
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, input_clipping
 import requests
-from bs4 import BeautifulSoup
-from request_llms.bridge_all import model_info
 import random
-from functools import lru_cache
-from check_proxy import check_proxy
-from request_llms.bridge_all import predict_no_ui_long_connection
-from .prompts.Internet_GPT import Search_optimizer, Search_academic_optimizer
 import time
 import re
 import json
+from bs4 import BeautifulSoup
+from functools import lru_cache
 from itertools import zip_longest
+from check_proxy import check_proxy
+from toolbox import CatchException, update_ui, get_conf
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, input_clipping
+from request_llms.bridge_all import model_info
+from request_llms.bridge_all import predict_no_ui_long_connection
+from crazy_functions.prompts.internet import SearchOptimizerPrompt, SearchAcademicOptimizerPrompt
 
 def search_optimizer(
     query,
@@ -36,15 +36,15 @@ def search_optimizer(
                 else:
                     his += f"A: {h}\n"
         if categories == "general":
-            sys_prompt = Search_optimizer.format(query=query, history=his, num=4)
+            sys_prompt = SearchOptimizerPrompt.format(query=query, history=his, num=4)
         elif categories == "science":
-            sys_prompt = Search_academic_optimizer.format(query=query, history=his, num=4)
+            sys_prompt = SearchAcademicOptimizerPrompt.format(query=query, history=his, num=4)
     else:
         his = " "
         if categories == "general":
-            sys_prompt = Search_optimizer.format(query=query, history=his, num=3)
+            sys_prompt = SearchOptimizerPrompt.format(query=query, history=his, num=3)
         elif categories == "science":
-            sys_prompt = Search_academic_optimizer.format(query=query, history=his, num=3)
+            sys_prompt = SearchAcademicOptimizerPrompt.format(query=query, history=his, num=3)
     
     mutable = ["", time.time(), ""]
     llm_kwargs["temperature"] = 0.8
@@ -104,12 +104,14 @@ def search_optimizer(
                     result.append(item)
     return result
 
+
 @lru_cache
 def get_auth_ip():
     ip = check_proxy(None, return_ip=True)
     if ip is None:
         return '114.114.114.' + str(random.randint(1, 10))
     return ip
+
 
 def searxng_request(query, proxies, categories='general', searxng_url=None, engines=None):
     if searxng_url is None:
@@ -162,6 +164,7 @@ def searxng_request(query, proxies, categories='general', searxng_url=None, engi
         else:
             raise ValueError("在线搜索失败，状态码: " + str(response.status_code) + '\t' + response.content.decode('utf-8'))
 
+
 def scrape_text(url, proxies) -> str:
     """Scrape text from a webpage
 
@@ -189,6 +192,7 @@ def scrape_text(url, proxies) -> str:
     text = "\n".join(chunk for chunk in chunks if chunk)
     return text
 
+
 @CatchException
 def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     optimizer_history = history[:-8]
@@ -202,8 +206,8 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     categories = plugin_kwargs.get('categories', 'general')
     searxng_url = plugin_kwargs.get('searxng_url', None)
     engines = plugin_kwargs.get('engine', None)
-    optimizer = plugin_kwargs.get('optimizer', 0)
-    if optimizer == 0:
+    optimizer = plugin_kwargs.get('optimizer', "关闭")
+    if optimizer == "关闭":
         urls = searxng_request(txt, proxies, categories, searxng_url, engines=engines)
     else:
         urls = search_optimizer(txt, proxies, optimizer_history, llm_kwargs, optimizer, categories, searxng_url, engines)
@@ -213,10 +217,10 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
                         "[Local Message] 受到限制，无法从searxng获取信息！请尝试更换搜索引擎。"))
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
-    
+
     # ------------- < 第2步：依次访问网页 > -------------
     max_search_result = 5   # 最多收纳多少个网页的结果
-    if optimizer == 2:
+    if optimizer == "开启(增强)":
         max_search_result = 8
     chatbot.append(["联网检索中 ...", None])
     for index, url in enumerate(urls[:max_search_result]):
@@ -228,7 +232,7 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # ------------- < 第3步：ChatGPT综合 > -------------
-    if (optimizer == 0 or optimizer == 1):
+    if (optimizer != "开启(增强)"):
         i_say = f"从以上搜索结果中抽取信息，然后回答问题：{txt}"
         i_say, history = input_clipping(    # 裁剪输入，从最长的条目开始裁剪，防止爆token
             inputs=i_say,
@@ -243,6 +247,7 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         chatbot[-1] = (i_say, gpt_say)
         history.append(i_say);history.append(gpt_say)
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 界面更新
+
     #* 或者使用搜索优化器，这样可以保证后续问答能读取到有效的历史记录
     else:
         i_say = f"从以上搜索结果中抽取与问题：{txt} 相关的信息:"
