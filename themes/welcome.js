@@ -67,6 +67,17 @@ class WelcomeMessage {
         this.card_array = [];
         this.static_welcome_message_previous = [];
         this.reflesh_time_interval = 15*1000;
+
+
+        const reflesh_render_status = () => {
+            for (let index = 0; index < this.card_array.length; index++) {
+                const card = this.card_array[index];
+                card.classList.remove('hide');
+                card.classList.remove('show');
+            }
+        };
+        const pageFocusHandler = new PageFocusHandler();
+        pageFocusHandler.addFocusCallback(reflesh_render_status);
     }
 
     begin_render() {
@@ -106,8 +117,12 @@ class WelcomeMessage {
                 }
         
                 const card = this.card_array[index];
-                card.classList.remove('hide');
-                card.classList.remove('show');
+                // 已经包含了 hide 属性？
+                if (card.classList.contains('hide') || card.classList.contains('show')) {
+                    card.classList.remove('hide');
+                    card.classList.remove('show');
+                    continue;
+                }
 
                 // 等待动画结束
                 card.addEventListener('transitionend', () => {
@@ -158,7 +173,7 @@ class WelcomeMessage {
     }
     
     async update() {
-        console.log('update')
+        // console.log('update')
         var page_width = document.documentElement.clientWidth;
         const width_to_hide_welcome = 1200;
         if (!await this.isChatbotEmpty() || page_width < width_to_hide_welcome) {
@@ -268,4 +283,35 @@ class WelcomeMessage {
 
 
 }
+
+
+
+
+class PageFocusHandler {
+    constructor() {
+      this.hasReturned = false;
+      this.focusCallbacks = [];
+  
+      // Bind the focus and blur event handlers
+      window.addEventListener('visibilitychange', this.handleFocus.bind(this));
+    }
+  
+    // Method to handle the focus event
+    handleFocus() {
+      if (this.hasReturned) {
+        this.focusCallbacks.forEach(callback => callback());
+      }
+      this.hasReturned = true;
+    }
+  
+    // Method to add a custom callback function
+    addFocusCallback(callback) {
+      if (typeof callback === 'function') {
+        this.focusCallbacks.push(callback);
+      } else {
+        throw new Error('Callback must be a function');
+      }
+    }
+}
+
 
