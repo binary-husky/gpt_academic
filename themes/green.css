@@ -1,7 +1,7 @@
 :root {
     --chatbot-color-light: #000000;
     --chatbot-color-dark: #FFFFFF;
-    --chatbot-background-color-light: #F3F3F3;
+    --chatbot-background-color-light: #FFFFFF;
     --chatbot-background-color-dark: #121111;
     --message-user-background-color-light: #95EC69;
     --message-user-background-color-dark: #26B561;
@@ -196,7 +196,7 @@ footer {
     transition: opacity 0.3s ease-in-out;
 }
 textarea.svelte-1pie7s6 {
-    background: #e7e6e6 !important;
+    background: #f1f1f1 !important;
     width: 100% !important;
 }
 
