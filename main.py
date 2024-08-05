@@ -1,4 +1,12 @@
-import os, json; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
+import os
+import json
+import agentops
+from dotenv import load_dotenv
+
+os.environ['no_proxy'] = '*'  # 避免代理网络产生意外污染
+
+load_dotenv()  # Load environment variables
+agentops.init(os.getenv('AGENTOPS_API_KEY'))  # Initialize AgentOps
 
 help_menu_description = \
 """Github源代码开源和更新[地址🚀](https://github.com/binary-husky/gpt_academic),
@@ -13,17 +21,20 @@ help_menu_description = \
 </br></br>如何语音对话: 请阅读Wiki
 </br></br>如何临时更换API_KEY: 在输入区输入临时API_KEY后提交（网页刷新后失效）"""
 
+@agentops.record_function('enable_log')
 def enable_log(PATH_LOGGING):
     import logging
     admin_log_path = os.path.join(PATH_LOGGING, "admin")
     os.makedirs(admin_log_path, exist_ok=True)
     log_dir = os.path.join(admin_log_path, "chat_secrets.log")
-    try:logging.basicConfig(filename=log_dir, level=logging.INFO, encoding="utf-8", format="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-    except:logging.basicConfig(filename=log_dir, level=logging.INFO,  format="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-    # Disable logging output from the 'httpx' logger
+    try:
+        logging.basicConfig(filename=log_dir, level=logging.INFO, encoding="utf-8", format="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+    except:
+        logging.basicConfig(filename=log_dir, level=logging.INFO,  format="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
     logging.getLogger("httpx").setLevel(logging.WARNING)
     print(f"所有对话记录将自动保存在本地目录{log_dir}, 请注意自我隐私保护哦！")
 
+@agentops.record_function('encode_plugin_info')
 def encode_plugin_info(k, plugin)->str:
     import copy
     from themes.theme import to_cookie_str
@@ -38,6 +49,7 @@ def encode_plugin_info(k, plugin)->str:
         plugin_["Label"] = f"插件[{k}]不需要高级参数。"
     return to_cookie_str(plugin_)
 
+@agentops.record_function('main')
 def main():
     import gradio as gr
     if gr.__version__ not in ['3.32.9', '3.32.10', '3.32.11']:
@@ -97,17 +109,18 @@ def main():
     customize_btns = {}
     predefined_btns = {}
     from shared_utils.cookie_manager import make_cookie_cache, make_history_cache
+
     with gr.Blocks(title="GPT 学术优化", theme=set_theme, analytics_enabled=False, css=advanced_css) as app_block:
         gr.HTML(title_html)
         secret_css = gr.Textbox(visible=False, elem_id="secret_css")
         register_advanced_plugin_init_arr = ""
 
-        cookies, web_cookie_cache = make_cookie_cache() # 定义 后端state（cookies）、前端（web_cookie_cache）两兄弟
+        cookies, web_cookie_cache = make_cookie_cache()  # 定义 后端state（cookies）、前端（web_cookie_cache）两兄弟
         with gr_L1():
             with gr_L2(scale=2, elem_id="gpt-chat"):
                 chatbot = gr.Chatbot(label=f"当前模型：{LLM_MODEL}", elem_id="gpt-chatbot")
                 if LAYOUT == "TOP-DOWN":  chatbot.style(height=CHATBOT_HEIGHT)
-                history, history_cache, history_cache_update = make_history_cache() # 定义 后端state（history）、前端（history_cache）、后端setter（history_cache_update）三兄弟
+                history, history_cache, history_cache_update = make_history_cache()  # 定义 后端state（history）、前端（history_cache）、后端setter（history_cache_update）三兄弟
             with gr_L2(scale=1, elem_id="gpt-panel"):
                 with gr.Accordion("输入区", open=True, elem_id="input-panel") as area_input_primary:
                     with gr.Row():
@@ -148,7 +161,7 @@ def main():
                             predefined_btns.update({k: functional[k]["Button"]})
                 with gr.Accordion("函数插件区", open=True, elem_id="plugin-panel") as area_crazy_fn:
                     with gr.Row():
-                        gr.Markdown("<small>插件可读取“输入区”文本/路径作为参数（上传文件自动修正路径）</small>")
+                        gr.Markdown ("<small>插件可读取"输入区"文本/路径作为参数（上传文件自动修正路径）</small>")
                     with gr.Row(elem_id="input-plugin-group"):
                         plugin_group_sel = gr.Dropdown(choices=all_plugin_groups, label='', show_label=False, value=DEFAULT_FN_GROUPS,
                                                       multiselect=True, interactive=True, elem_classes='normal_mut_select').style(container=False)
@@ -177,9 +190,10 @@ def main():
                             with gr.Row():
                                 switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary", elem_id="elem_switchy_bt").style(size="sm")
                     with gr.Row():
-                        with gr.Accordion("点击展开“文件下载区”。", open=False) as area_file_up:
+                        with gr.Accordion("点击展开"文件下载区"。", open=False)as area_file_up:
                             file_upload = gr.Files(label="任何文件, 推荐上传压缩文件(zip, tar)", file_count="multiple", elem_id="elem_upload")
 
+        # 左上角工具栏定义
         # 左上角工具栏定义
         from themes.gui_toolbar import define_gui_toolbar
         checkboxes, checkboxes_2, max_length_sl, theme_dropdown, system_prompt, file_upload_2, md_dropdown, top_p, temperature = \
@@ -196,6 +210,7 @@ def main():
             define_gui_advanced_plugin_class(plugins)
 
         # 功能区显示开关与功能区的互动
+        @agentops.record_function('fn_area_visibility')
         def fn_area_visibility(a):
             ret = {}
             ret.update({area_input_primary: gr.update(visible=("浮动输入区" not in a))})
@@ -207,6 +222,7 @@ def main():
         checkboxes.select(None, [checkboxes], None, _js=js_code_show_or_hide)
 
         # 功能区显示开关与功能区的互动
+        @agentops.record_function('fn_area_visibility_2')
         def fn_area_visibility_2(a):
             ret = {}
             ret.update({area_customize: gr.update(visible=("自定义菜单" in a))})
@@ -265,11 +281,13 @@ def main():
         dropdown.select(None, [dropdown], None, _js=f"""(dropdown)=>run_dropdown_shift(dropdown)""")
 
         # 模型切换时的回调
+        @agentops.record_function('on_md_dropdown_changed')
         def on_md_dropdown_changed(k):
             return {chatbot: gr.update(label="当前模型："+k)}
         md_dropdown.select(on_md_dropdown_changed, [md_dropdown], [chatbot])
 
         # 主题修改
+        @agentops.record_function('on_theme_dropdown_changed')
         def on_theme_dropdown_changed(theme, secret_css):
             adjust_theme, css_part1, _, adjust_dynamic_theme = load_dynamic_theme(theme)
             if adjust_dynamic_theme:
@@ -282,6 +300,7 @@ def main():
 
         switchy_bt.click(None, [switchy_bt], None, _js="(switchy_bt)=>on_flex_button_click(switchy_bt)")
         # 随变按钮的回调函数注册
+        @agentops.record_function('route')
         def route(request: gr.Request, k, *args, **kwargs):
             if k not in [r"点击这里搜索插件列表", r"请先从插件列表中选择"]:
                 if plugins[k].get("Class", None) is None:
@@ -304,6 +323,7 @@ def main():
         stopBtn.click(fn=None, inputs=None, outputs=None, cancels=cancel_handles)
         stopBtn2.click(fn=None, inputs=None, outputs=None, cancels=cancel_handles)
         plugins_as_btn = {name:plugin for name, plugin in plugins.items() if plugin.get('Button', None)}
+        @agentops.record_function('on_group_change')
         def on_group_change(group_list):
             btn_list = []
             fns_list = []
@@ -321,6 +341,7 @@ def main():
         if ENABLE_AUDIO:
             from crazy_functions.live_audio.audio_io import RealtimeAudioDistribution
             rad = RealtimeAudioDistribution()
+            @agentops.record_function('deal_audio')
             def deal_audio(audio, cookies):
                 rad.feed(cookies['uuid'].hex, audio)
             audio_mic.stream(deal_audio, inputs=[audio_mic, cookies])
@@ -337,6 +358,7 @@ def main():
         app_block.load(None, inputs=[], outputs=None, _js="""()=>{REP}""".replace("REP", register_advanced_plugin_init_arr))
 
     # Gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
+    @agentops.record_function('run_delayed_tasks')
     def run_delayed_tasks():
         import threading, webbrowser, time
         print(f"如果浏览器没有自动打开，请复制并转到以下URL：")
@@ -362,3 +384,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# End of program
+agentops.end_session('Success')
