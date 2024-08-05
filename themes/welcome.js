@@ -60,7 +60,13 @@ class WelcomeMessage {
                 content: "上传需要润色的latex论文，让大语言模型帮您改论文。",
                 svg: "file=themes/svg/polish.svg",
                 url: "https://github.com/binary-husky/gpt_academic",
-            }
+            },
+            {
+                title: "常见问题与指南",
+                content: "查看项目Wiki文档，解决常见疑问。",
+                svg: "file=themes/svg/check.svg",
+                url: "https://github.com/binary-husky/gpt_academic/wiki",
+            },
         ];
         this.visible = false;
         this.max_welcome_card_num = 6;
