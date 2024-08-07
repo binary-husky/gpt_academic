@@ -7,7 +7,7 @@ import os
 import re
 import requests
 from typing import List, Dict, Tuple
-from toolbox import get_conf, encode_image, get_pictures_list, to_markdown_tabs
+from toolbox import get_conf, update_ui, encode_image, get_pictures_list, to_markdown_tabs
 
 proxies, TIMEOUT_SECONDS = get_conf("proxies", "TIMEOUT_SECONDS")
 
@@ -112,6 +112,18 @@ def html_local_img(__file, layout="left", max_width=None, max_height=None, md=Tr
     return a
 
 
+def reverse_base64_from_input(inputs):
+    # 定义一个正则表达式来匹配 Base64 字符串（假设格式为 base64="<Base64编码>"）
+    # pattern = re.compile(r'base64="([^"]+)"></div>')
+    pattern = re.compile(r'<br/><br/><div align="center"><img[^<>]+base64="([^"]+)"></div>')
+    # 使用 findall 方法查找所有匹配的 Base64 字符串
+    base64_strings = pattern.findall(inputs)
+    # 返回反转后的 Base64 字符串列表
+    return base64_strings
+
+def contain_base64(inputs):
+    base64_strings = reverse_base64_from_input(inputs)
+    return len(base64_strings) > 0
 
 class GoogleChatInit:
     def __init__(self, llm_kwargs):
@@ -119,9 +131,9 @@ class GoogleChatInit:
         endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
         self.url_gemini = endpoint + "/%m:streamGenerateContent?key=%k"
 
-    def generate_chat(self, inputs, llm_kwargs, history, system_prompt):
+    def generate_chat(self, inputs, llm_kwargs, history, system_prompt, image_base64_array, has_multimodal_capacity):
         headers, payload = self.generate_message_payload(
-            inputs, llm_kwargs, history, system_prompt
+            inputs, llm_kwargs, history, system_prompt, image_base64_array, has_multimodal_capacity
         )
         response = requests.post(
             url=self.url_gemini,
@@ -133,13 +145,17 @@ class GoogleChatInit:
         )
         return response.iter_lines()
 
-    def __conversation_user(self, user_input, llm_kwargs):
+    def __conversation_user(self, user_input, llm_kwargs, enable_multimodal_capacity):
         what_i_have_asked = {"role": "user", "parts": []}
-        if "vision" not in self.url_gemini:
+        # 多模态支持
+        from .bridge_all import model_info
+            
+        if enable_multimodal_capacity:
+            input_, encode_img = input_encode_handler(user_input, llm_kwargs=llm_kwargs)
+        else:
             input_ = user_input
             encode_img = []
-        else:
-            input_, encode_img = input_encode_handler(user_input, llm_kwargs=llm_kwargs)
+
         what_i_have_asked["parts"].append({"text": input_})
         if encode_img:
             for data in encode_img:
@@ -153,12 +169,12 @@ class GoogleChatInit:
                 )
         return what_i_have_asked
 
-    def __conversation_history(self, history, llm_kwargs):
+    def __conversation_history(self, history, llm_kwargs, enable_multimodal_capacity):
         messages = []
         conversation_cnt = len(history) // 2
         if conversation_cnt:
             for index in range(0, 2 * conversation_cnt, 2):
-                what_i_have_asked = self.__conversation_user(history[index], llm_kwargs)
+                what_i_have_asked = self.__conversation_user(history[index], llm_kwargs, enable_multimodal_capacity)
                 what_gpt_answer = {
                     "role": "model",
                     "parts": [{"text": history[index + 1]}],
@@ -168,7 +184,7 @@ class GoogleChatInit:
         return messages
 
     def generate_message_payload(
-        self, inputs, llm_kwargs, history, system_prompt
+        self, inputs, llm_kwargs, history, system_prompt, image_base64_array:list=[], has_multimodal_capacity:bool=False
     ) -> Tuple[Dict, Dict]:
         messages = [
             # {"role": "system", "parts": [{"text": system_prompt}]},  # gemini 不允许对话轮次为偶数，所以这个没有用，看后续支持吧。。。
@@ -179,11 +195,22 @@ class GoogleChatInit:
             "%m", llm_kwargs["llm_model"]
         ).replace("%k", get_conf("GEMINI_API_KEY"))
         header = {"Content-Type": "application/json"}
-        if "vision" not in self.url_gemini:  # 不是vision 才处理history
+
+        if has_multimodal_capacity:
+            # 当以下条件满足时，启用多模态能力：
+            # 1. 模型本身是多模态模型（has_multimodal_capacity）
+            # 2. 输入包含图像（len(image_base64_array) > 0）
+            # 3. 历史输入包含图像（ any([contain_base64(h) for h in history]) ）
+            enable_multimodal_capacity = (len(image_base64_array) > 0) or any([contain_base64(h) for h in history])
+        else:
+            enable_multimodal_capacity = False
+        
+        if not enable_multimodal_capacity:
             messages.extend(
-                self.__conversation_history(history, llm_kwargs)
+                self.__conversation_history(history, llm_kwargs, enable_multimodal_capacity)
             )  # 处理 history
-        messages.append(self.__conversation_user(inputs, llm_kwargs))  # 处理用户对话
+            
+        messages.append(self.__conversation_user(inputs, llm_kwargs, enable_multimodal_capacity))  # 处理用户对话
         payload = {
             "contents": messages,
             "generationConfig": {
@@ -194,6 +221,7 @@ class GoogleChatInit:
                 "topK": 10,
             },
         }
+
         return header, payload
 
 
