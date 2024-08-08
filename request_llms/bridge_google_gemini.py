@@ -15,8 +15,8 @@ timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check 
                   '网络错误，检查代理服务器是否可用，以及代理设置的格式是否正确，格式须是[协议]://[地址]:[端口]，缺一不可。'
 
 
-def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=None,
-                                  console_slience=False):
+def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], sys_prompt:str="", observe_window:list=[],
+                                  console_slience:bool=False):
     # 检查API_KEY
     if get_conf("GEMINI_API_KEY") == "":
         raise ValueError(f"请配置 GEMINI_API_KEY。")
@@ -68,8 +68,8 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
         from core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
-    # 多模态模型
-    # 灵感源自ChatGPT部分实现
+    # multimodal capacity
+    # inspired by codes in bridge_chatgpt
     has_multimodal_capacity = model_info[llm_kwargs['llm_model']].get('has_multimodal_capacity', False)
     if has_multimodal_capacity:
         has_recent_image_upload, image_paths = have_any_recent_upload_image_files(chatbot, pop=True)

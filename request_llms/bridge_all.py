@@ -407,24 +407,15 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
-    # Note: now gemini-pro refers to gemini-1.0-pro.
+    # Gemini
+    # Note: now gemini-pro is an alias of gemini-1.0-pro.
+    # Warning: gemini-pro-vision has been deprecated.
+    # Support for gemini-pro-vision has been removed.
     "gemini-pro": {
         "fn_with_ui": genai_ui,
         "fn_without_ui": genai_noui,
         "endpoint": gemini_endpoint,
         "has_multimodal_capacity": False,
-        "max_token": 1024 * 32,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-    # Warning: gemini-pro-vision has been deprecated.
-    # It has been kept here just for compatibility and should be removed soon.
-    # Users should try to use gemini-1.5-flash instead.
-    "gemini-pro-vision": {
-        "fn_with_ui": genai_ui,
-        "fn_without_ui": genai_noui,
-        "endpoint": gemini_endpoint,
-        "has_multimodal_capacity": True,
         "max_token": 1024 * 32,
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,

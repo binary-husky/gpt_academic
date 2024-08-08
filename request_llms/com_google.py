@@ -113,12 +113,8 @@ def html_local_img(__file, layout="left", max_width=None, max_height=None, md=Tr
 
 
 def reverse_base64_from_input(inputs):
-    # 定义一个正则表达式来匹配 Base64 字符串（假设格式为 base64="<Base64编码>"）
-    # pattern = re.compile(r'base64="([^"]+)"></div>')
     pattern = re.compile(r'<br/><br/><div align="center"><img[^<>]+base64="([^"]+)"></div>')
-    # 使用 findall 方法查找所有匹配的 Base64 字符串
     base64_strings = pattern.findall(inputs)
-    # 返回反转后的 Base64 字符串列表
     return base64_strings
 
 def contain_base64(inputs):
@@ -131,7 +127,7 @@ class GoogleChatInit:
         endpoint = model_info[llm_kwargs['llm_model']]['endpoint']
         self.url_gemini = endpoint + "/%m:streamGenerateContent?key=%k"
 
-    def generate_chat(self, inputs, llm_kwargs, history, system_prompt, image_base64_array, has_multimodal_capacity):
+    def generate_chat(self, inputs, llm_kwargs, history, system_prompt, image_base64_array:list=[], has_multimodal_capacity:bool=False):
         headers, payload = self.generate_message_payload(
             inputs, llm_kwargs, history, system_prompt, image_base64_array, has_multimodal_capacity
         )
@@ -147,7 +143,6 @@ class GoogleChatInit:
 
     def __conversation_user(self, user_input, llm_kwargs, enable_multimodal_capacity):
         what_i_have_asked = {"role": "user", "parts": []}
-        # 多模态支持
         from .bridge_all import model_info
             
         if enable_multimodal_capacity:
@@ -197,10 +192,6 @@ class GoogleChatInit:
         header = {"Content-Type": "application/json"}
 
         if has_multimodal_capacity:
-            # 当以下条件满足时，启用多模态能力：
-            # 1. 模型本身是多模态模型（has_multimodal_capacity）
-            # 2. 输入包含图像（len(image_base64_array) > 0）
-            # 3. 历史输入包含图像（ any([contain_base64(h) for h in history]) ）
             enable_multimodal_capacity = (len(image_base64_array) > 0) or any([contain_base64(h) for h in history])
         else:
             enable_multimodal_capacity = False
@@ -214,7 +205,7 @@ class GoogleChatInit:
         payload = {
             "contents": messages,
             "generationConfig": {
-                # "maxOutputTokens": 800,
+                # "maxOutputTokens": llm_kwargs.get("max_token", 1024),
                 "stopSequences": str(llm_kwargs.get("stop", "")).split(" "),
                 "temperature": llm_kwargs.get("temperature", 1),
                 "topP": llm_kwargs.get("top_p", 0.8),
