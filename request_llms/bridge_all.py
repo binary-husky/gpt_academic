@@ -418,7 +418,7 @@ model_info = {
         "token_cnt": get_token_num_gpt35,
     },
     # Warning: gemini-pro-vision has been deprecated.
-    # It has benn kept here just for compatibility and should be removed soon.
+    # It has been kept here just for compatibility and should be removed soon.
     # Users should try to use gemini-1.5-flash instead.
     "gemini-pro-vision": {
         "fn_with_ui": genai_ui,
