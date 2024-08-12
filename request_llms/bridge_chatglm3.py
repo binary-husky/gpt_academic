@@ -18,7 +18,7 @@ class GetGLM3Handle(LocalLLMHandle):
 
     def load_model_and_tokenizer(self):
         # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行
-        from transformers import AutoModel, AutoTokenizer
+        from transformers import AutoModel, AutoTokenizer, BitsAndBytesConfig
         import os, glob
         import os
         import platform
@@ -45,15 +45,13 @@ class GetGLM3Handle(LocalLLMHandle):
                 chatglm_model = AutoModel.from_pretrained(
                     pretrained_model_name_or_path=_model_name_,
                     trust_remote_code=True,
-                    device="cuda",
-                    load_in_4bit=True,
+                    quantization_config=BitsAndBytesConfig(load_in_4bit=True),
                 )
             elif LOCAL_MODEL_QUANT == "INT8":  # INT8
                 chatglm_model = AutoModel.from_pretrained(
                     pretrained_model_name_or_path=_model_name_,
                     trust_remote_code=True,
-                    device="cuda",
-                    load_in_8bit=True,
+                    quantization_config=BitsAndBytesConfig(load_in_8bit=True),
                 )
             else:
                 chatglm_model = AutoModel.from_pretrained(
