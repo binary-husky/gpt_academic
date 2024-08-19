@@ -8,7 +8,7 @@ class WelcomeMessage {
                 url: "https://github.com/binary-husky/gpt_academic/wiki/%E9%A1%B9%E7%9B%AE%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E",
             },
             {
-                title: "Arxiv论文一键翻译",
+                title: "Arxiv论文翻译",
                 content: "无缝切换学术阅读语言，最优英文转中文的学术论文阅读体验。",
                 svg: "file=themes/svg/arxiv.svg",
                 url: "https://www.bilibili.com/video/BV1dz4y1v77A/",
@@ -67,6 +67,18 @@ class WelcomeMessage {
                 svg: "file=themes/svg/check.svg",
                 url: "https://github.com/binary-husky/gpt_academic/wiki",
             },
+            {
+                title: "接入更多新模型",
+                content: "模型迭代日新月异，一起动手接入更多新的在线或本地大模型吧。",
+                svg: "file=themes/svg/box.svg",
+                url: "https://github.com/binary-husky/gpt_academic/blob/master/request_llms/README.md",
+            },
+            {
+                title: "联动VLLM等服务",
+                content: "借助VLLM和OneApi等第三方服务高效地部署和运行大模型。",
+                svg: "file=themes/svg/location.svg",
+                url: "https://github.com/binary-husky/gpt_academic/wiki/如何更便捷地接入one-api",
+            },
         ];
         this.visible = false;
         this.max_welcome_card_num = 6;
@@ -99,7 +111,7 @@ class WelcomeMessage {
             }, 1);
         }
     }
-    
+
     async reflesh_cards() {
         if (!this.visible){
             return;
@@ -121,7 +133,7 @@ class WelcomeMessage {
                 if (index >= this.max_welcome_card_num) {
                     break;
                 }
-        
+
                 const card = this.card_array[index];
                 // 已经包含了 hide 属性？
                 if (card.classList.contains('hide') || card.classList.contains('show')) {
@@ -151,9 +163,9 @@ class WelcomeMessage {
                     card.classList.add('show');
 
                 }, { once: true });
-        
+
                 card.classList.add('hide');
-        
+
                 // 等待 250 毫秒
                 await new Promise(r => setTimeout(r, 200));
             }
@@ -162,22 +174,22 @@ class WelcomeMessage {
 
     shuffle(array) {
         var currentIndex = array.length,  randomIndex;
-      
+
         // While there remain elements to shuffle...
         while (currentIndex != 0) {
-      
+
           // Pick a remaining element...
           randomIndex = Math.floor(Math.random() * currentIndex);
           currentIndex--;
-      
+
           // And swap it with the current element.
           [array[currentIndex], array[randomIndex]] = [
             array[randomIndex], array[currentIndex]];
         }
-      
+
         return array;
     }
-    
+
     async update() {
         // console.log('update')
         var page_width = document.documentElement.clientWidth;
@@ -189,7 +201,7 @@ class WelcomeMessage {
                 this.card_array = [];
                 this.static_welcome_message_previous = [];
             }
-            return; 
+            return;
         }
         if (this.visible){
             return;
@@ -245,7 +257,7 @@ class WelcomeMessage {
         // 创建一个新的div元素
         const welcome_card_container = document.createElement('div');
         welcome_card_container.classList.add('welcome-card-container');
-        
+
         // 创建主标题
         const major_title = document.createElement('div');
         major_title.classList.add('welcome-title');
@@ -264,7 +276,7 @@ class WelcomeMessage {
         });
 
         elem_chatbot.appendChild(welcome_card_container);
-    
+
         // 添加显示动画
         requestAnimationFrame(() => {
             welcome_card_container.classList.add('show');
@@ -297,11 +309,11 @@ class PageFocusHandler {
     constructor() {
       this.hasReturned = false;
       this.focusCallbacks = [];
-  
+
       // Bind the focus and blur event handlers
       window.addEventListener('visibilitychange', this.handleFocus.bind(this));
     }
-  
+
     // Method to handle the focus event
     handleFocus() {
       if (this.hasReturned) {
@@ -309,7 +321,7 @@ class PageFocusHandler {
       }
       this.hasReturned = true;
     }
-  
+
     // Method to add a custom callback function
     addFocusCallback(callback) {
       if (typeof callback === 'function') {
