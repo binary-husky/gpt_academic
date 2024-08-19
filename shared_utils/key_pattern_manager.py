@@ -8,13 +8,20 @@ from shared_utils.config_loader import get_conf as get_conf
 pj = os.path.join
 default_user_name = 'default_user'
 
-
+# match openai keys
+openai_regex = re.compile(
+    r"sk-[a-zA-Z0-9_-]{48}$|" +
+    r"sk-[a-zA-Z0-9_-]{92}$|" +
+    r"sk-proj-[a-zA-Z0-9_-]{48}$|"+
+    r"sk-proj-[a-zA-Z0-9_-]{124}$|"+
+    r"sess-[a-zA-Z0-9]{40}$"
+)
 def is_openai_api_key(key):
     CUSTOM_API_KEY_PATTERN = get_conf('CUSTOM_API_KEY_PATTERN')
     if len(CUSTOM_API_KEY_PATTERN) != 0:
         API_MATCH_ORIGINAL = re.match(CUSTOM_API_KEY_PATTERN, key)
     else:
-        API_MATCH_ORIGINAL = re.match(r"sk-[a-zA-Z0-9]{48}$|sk-proj-[a-zA-Z0-9]{48}$|sess-[a-zA-Z0-9]{40}$", key)
+        API_MATCH_ORIGINAL = openai_regex.match(key)
     return bool(API_MATCH_ORIGINAL)
 
 
