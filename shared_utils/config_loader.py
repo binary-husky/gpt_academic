@@ -88,7 +88,7 @@ def read_single_conf_with_lru_cache(arg):
         if is_any_api_key(r):
             print亮绿(f"[API_KEY] 您的 API_KEY 是: {r[:15]}*** API_KEY 导入成功")
         else:
-            print亮红("[API_KEY] 您的 API_KEY 不满足任何一种已知的密钥格式，请在config文件中修改API密钥之后再运行。")
+            print亮红(f"[API_KEY] 您的 API_KEY（{r[:15]}***）不满足任何一种已知的密钥格式，请在config文件中修改API密钥之后再运行（详见`https://github.com/binary-husky/gpt_academic/wiki/api_key`）。")
     if arg == 'proxies':
         if not read_single_conf_with_lru_cache('USE_PROXY'): r = None # 检查USE_PROXY，防止proxies单独起作用
         if r is None:
