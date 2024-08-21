@@ -296,7 +296,7 @@ ARXIV_CACHE_DIR = "gpt_log/arxiv_cache"
 
 # 除了连接OpenAI之外，还有哪些场合允许使用代理，请尽量不要修改
 WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid",
-                     "Warmup_Modules", "Nougat_Download", "AutoGen"]
+                     "Warmup_Modules", "Nougat_Download", "AutoGen", "Connect_OpenAI_Embedding"]
 
 
 # 启用插件热加载
