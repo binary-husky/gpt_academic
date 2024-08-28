@@ -100,16 +100,19 @@ def ArgsGeneralWrapper(f):
             user_name = request.username
         else:
             user_name = default_user_name
+        embed_model = get_conf("EMBEDDING_MODEL")
         cookies.update({
             'top_p': top_p,
             'api_key': cookies['api_key'],
             'llm_model': llm_model,
+            'embed_model': embed_model,
             'temperature': temperature,
             'user_name': user_name,
         })
         llm_kwargs = {
             'api_key': cookies['api_key'],
             'llm_model': llm_model,
+            'embed_model': embed_model,
             'top_p': top_p,
             'max_length': max_length,
             'temperature': temperature,
@@ -621,9 +624,12 @@ def load_chat_cookies():
                 }
             }
         )
+
+    EMBEDDING_MODEL = get_conf("EMBEDDING_MODEL")
     return {
         "api_key": API_KEY,
         "llm_model": LLM_MODEL,
+        "embed_model": EMBEDDING_MODEL,
         "customize_fn_overwrite": customize_fn_overwrite_,
     }
 
