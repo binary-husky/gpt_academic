@@ -1354,6 +1354,11 @@ async function multiplex_function_begin(multiplex_sel) {
         call_plugin_via_name(_align_name_in_crazy_function_py);
         return;
     }
+    if (multiplex_sel === "智能召回 RAG") {
+        let _align_name_in_crazy_function_py = "Rag智能召回";
+        call_plugin_via_name(_align_name_in_crazy_function_py);
+        return;
+    }
 }
 async function run_multiplex_shift(multiplex_sel){
     let key = multiplex_sel;

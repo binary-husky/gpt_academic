@@ -8,13 +8,20 @@ from shared_utils.config_loader import get_conf as get_conf
 pj = os.path.join
 default_user_name = 'default_user'
 
-
+# match openai keys
+openai_regex = re.compile(
+    r"sk-[a-zA-Z0-9_-]{48}$|" +
+    r"sk-[a-zA-Z0-9_-]{92}$|" +
+    r"sk-proj-[a-zA-Z0-9_-]{48}$|"+
+    r"sk-proj-[a-zA-Z0-9_-]{124}$|"+
+    r"sess-[a-zA-Z0-9]{40}$"
+)
 def is_openai_api_key(key):
     CUSTOM_API_KEY_PATTERN = get_conf('CUSTOM_API_KEY_PATTERN')
     if len(CUSTOM_API_KEY_PATTERN) != 0:
         API_MATCH_ORIGINAL = re.match(CUSTOM_API_KEY_PATTERN, key)
     else:
-        API_MATCH_ORIGINAL = re.match(r"sk-[a-zA-Z0-9]{48}$|sk-proj-[a-zA-Z0-9]{48}$|sess-[a-zA-Z0-9]{40}$", key)
+        API_MATCH_ORIGINAL = openai_regex.match(key)
     return bool(API_MATCH_ORIGINAL)
 
 
@@ -85,6 +92,22 @@ def select_api_key(keys, llm_model):
 
     if len(avail_key_list) == 0:
         raise RuntimeError(f"您提供的api-key不满足要求，不包含任何可用于{llm_model}的api-key。您可能选择了错误的模型或请求源（左上角更换模型菜单中可切换openai,azure,claude,cohere等请求源）。")
+
+    api_key = random.choice(avail_key_list) # 随机负载均衡
+    return api_key
+
+
+def select_api_key_for_embed_models(keys, llm_model):
+    import random
+    avail_key_list = []
+    key_list = keys.split(',')
+
+    if llm_model.startswith('text-embedding-'):
+        for k in key_list:
+            if is_openai_api_key(k): avail_key_list.append(k)
+
+    if len(avail_key_list) == 0:
+        raise RuntimeError(f"您提供的api-key不满足要求，不包含任何可用于{llm_model}的api-key。您可能选择了错误的模型或请求源。")
 
     api_key = random.choice(avail_key_list) # 随机负载均衡
     return api_key

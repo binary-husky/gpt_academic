@@ -106,5 +106,7 @@
     "解析PDF_DOC2X_转Latex": "ParsePDF_DOC2X_toLatex",
     "解析PDF_基于DOC2X": "ParsePDF_basedDOC2X",
     "解析PDF_简单拆解": "ParsePDF_simpleDecomposition",
-    "解析PDF_DOC2X_单文件": "ParsePDF_DOC2X_singleFile"
+    "解析PDF_DOC2X_单文件": "ParsePDF_DOC2X_singleFile",
+    "注释Python项目": "CommentPythonProject",
+    "注释源代码": "CommentSourceCode"
 }

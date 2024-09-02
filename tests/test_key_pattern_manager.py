@@ -21,10 +21,32 @@ class TestKeyPatternManager(unittest.TestCase):
         key = "sx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
         self.assertFalse(is_openai_api_key(key))
 
-        key = "sess-wg61ZafYHpNz7FFwIH7HGZlbVqUVaeV5tatHCWpl"
+        key = "sess-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
         self.assertTrue(is_openai_api_key(key))
 
-        key = "sess-wg61ZafYHpNz7FFwIH7HGZlbVqUVa5tatHCWpl"
+        key = "sess-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        self.assertFalse(is_openai_api_key(key))
+
+        key = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_xxxxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxx"
+        self.assertTrue(is_openai_api_key(key))
+        key = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxx_xxxxxxxxxxxx_xxxxx-xxxxxxxxxxxxxxxxxxxx"
+        self.assertTrue(is_openai_api_key(key))
+        key = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-xxx-xxxxxxxxxxxxxxx_xxxxxxxxxxxx_xxxxx-xxxxxx-xxxxxxxxxxxxx"
+        self.assertTrue(is_openai_api_key(key))
+        key = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-xxx-xxxxxxxxxxxxxxx_xxxxxxxxxxxx_xxxxx-xxxxxxxxxxxxxxxxxx"
+        self.assertFalse(is_openai_api_key(key))
+        key = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-xxx-xxxxxxxxxxxxxxx_xxxxxxxxxxxx_xxxxx-xxxxxxxxxxxxxxxxxxxxx"
+        self.assertFalse(is_openai_api_key(key))
+
+        key = "sk-proj-xx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxx-xxxxxxxx"
+        self.assertTrue(is_openai_api_key(key))
+        key = "sk-proj-xx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_xxxxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxx-xxxxxxxx"
+        self.assertTrue(is_openai_api_key(key))
+        key = "sk-proj-xx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_xxxxxxxxxxxx_xxxxxxxxxxxxxxxxxx-xxxxxxxx"
+        self.assertFalse(is_openai_api_key(key))
+        key = "sk-proj-xx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_xxxxxxxxxxxx_xxxxxxxxxxxxxxxxxx-xxxxxxxxxxxxx"
+        self.assertFalse(is_openai_api_key(key))
+        key = "sk-proj-xx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_xxxxxxxxxxxx_xxxxxxxxxxxxxxxxxx-xxx啊xxxxxxx"
         self.assertFalse(is_openai_api_key(key))
 
 
