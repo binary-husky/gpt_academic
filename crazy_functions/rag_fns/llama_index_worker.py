@@ -59,6 +59,11 @@ class SaveLoad():
     def create_new_vs(self):
         return GptacVectorStoreIndex.default_vector_store(embed_model=self.embed_model)
 
+    def purge(self):
+        import shutil
+        shutil.rmtree(self.checkpoint_dir, ignore_errors=True)
+        self.vs_index = self.create_new_vs()
+
 
 class LlamaIndexRagWorker(SaveLoad):
     def __init__(self, user_name, llm_kwargs, auto_load_checkpoint=True, checkpoint_dir=None) -> None:

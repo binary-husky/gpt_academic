@@ -4,10 +4,14 @@ from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_
 
 VECTOR_STORE_TYPE = "Milvus"
 
+if VECTOR_STORE_TYPE == "Milvus":
+    try:
+        from crazy_functions.rag_fns.milvus_worker import MilvusRagWorker as LlamaIndexRagWorker
+    except:
+        VECTOR_STORE_TYPE = "Simple"
+
 if VECTOR_STORE_TYPE == "Simple":
     from crazy_functions.rag_fns.llama_index_worker import LlamaIndexRagWorker
-if VECTOR_STORE_TYPE == "Milvus":
-    from crazy_functions.rag_fns.milvus_worker import MilvusRagWorker as LlamaIndexRagWorker
 
 
 RAG_WORKER_REGISTER = {}
