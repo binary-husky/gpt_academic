@@ -1,7 +1,14 @@
 from toolbox import CatchException, update_ui, get_conf, get_log_folder, update_ui_lastest_msg
 from crazy_functions.crazy_utils import input_clipping
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-from crazy_functions.rag_fns.llama_index_worker import LlamaIndexRagWorker
+
+VECTOR_STORE_TYPE = "Milvus"
+
+if VECTOR_STORE_TYPE == "Simple":
+    from crazy_functions.rag_fns.llama_index_worker import LlamaIndexRagWorker
+if VECTOR_STORE_TYPE == "Milvus":
+    from crazy_functions.rag_fns.milvus_worker import MilvusRagWorker as LlamaIndexRagWorker
+
 
 RAG_WORKER_REGISTER = {}
 

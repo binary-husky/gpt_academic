@@ -1,1 +1,10 @@
 RAG忘了触发保存了！
+
+
+刘博寅： 用llama index 实现 RAG 文档向量化
+    RAG代码参考：
+        crazy_functions/rag_fns/llama_index_worker.py
+        crazy_functions/rag_fns/milvus_worker.py
+        crazy_functions/rag_fns/vector_store_index.py
+    读取文件的代码参考（使用glob）：
+        crazy_functions/SourceCode_Analyse.py

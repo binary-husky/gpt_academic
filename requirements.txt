@@ -7,7 +7,9 @@ tiktoken>=0.3.3
 requests[socks]
 pydantic==2.5.2
 llama-index==0.10.47
-protobuf==3.18
+llama-index-vector-stores-milvus==0.1.16
+pymilvus==2.4.2
+protobuf==3.20
 transformers>=4.27.1,<4.42
 scipdf_parser>=0.52
 anthropic>=0.18.1

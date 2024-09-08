@@ -1,4 +1,7 @@
 import llama_index
+import os
+import atexit
+from typing import List
 from llama_index.core import Document
 from llama_index.core.schema import TextNode
 from request_llms.embed_models.openai_embed import OpenAiEmbeddingModel
@@ -38,6 +41,7 @@ class SaveLoad():
         return True
 
     def save_to_checkpoint(self, checkpoint_dir=None):
+        print(f'saving vector store to: {checkpoint_dir}')
         if checkpoint_dir is None: checkpoint_dir = self.checkpoint_dir
         self.vs_index.storage_context.persist(persist_dir=checkpoint_dir)
 
@@ -65,7 +69,8 @@ class LlamaIndexRagWorker(SaveLoad):
         if auto_load_checkpoint:
             self.vs_index = self.load_from_checkpoint(checkpoint_dir)
         else:
-            self.vs_index = self.create_new_vs()
+            self.vs_index = self.create_new_vs(checkpoint_dir)
+        atexit.register(lambda: self.save_to_checkpoint(checkpoint_dir))
 
     def assign_embedding_model(self):
         pass
@@ -117,6 +122,3 @@ class LlamaIndexRagWorker(SaveLoad):
         buf = "\n".join(([f"(No.{i+1} | score {n.score:.3f}): {n.text}" for i, n in enumerate(nodes)]))
         if self.debug_mode: print(buf)
         return buf
-
-
-
