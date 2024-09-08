@@ -62,18 +62,31 @@ class MilvusSaveLoad():
         else:
             return self.create_new_vs(checkpoint_dir)
 
-    def create_new_vs(self, checkpoint_dir):
+    def create_new_vs(self, checkpoint_dir, overwrite=False):
         vector_store = MilvusVectorStore(
             uri=os.path.join(checkpoint_dir, "milvus_demo.db"), 
-            dim=self.embed_model.embedding_dimension()
+            dim=self.embed_model.embedding_dimension(),
+            overwrite=overwrite
         )
         storage_context = StorageContext.from_defaults(vector_store=vector_store)
         index = GptacVectorStoreIndex.default_vector_store(storage_context=storage_context, embed_model=self.embed_model)
         return index
 
+    def purge(self):
+        self.vs_index = self.create_new_vs(self.checkpoint_dir, overwrite=True)
 
-class MilvusRagWorker(LlamaIndexRagWorker):
+class MilvusRagWorker(MilvusSaveLoad, LlamaIndexRagWorker):
 
+    def __init__(self, user_name, llm_kwargs, auto_load_checkpoint=True, checkpoint_dir=None) -> None:
+        self.debug_mode = True
+        self.embed_model = OpenAiEmbeddingModel(llm_kwargs)
+        self.user_name = user_name
+        self.checkpoint_dir = checkpoint_dir
+        if auto_load_checkpoint:
+            self.vs_index = self.load_from_checkpoint(checkpoint_dir)
+        else:
+            self.vs_index = self.create_new_vs(checkpoint_dir)
+        atexit.register(lambda: self.save_to_checkpoint(checkpoint_dir))
 
     def inspect_vector_store(self):
         # This function is for debugging
