@@ -5,6 +5,7 @@ from toolbox import trimmed_format_exc
 def get_crazy_functions():
     from crazy_functions.读文章写摘要 import 读文章写摘要
     from crazy_functions.生成函数注释 import 批量生成函数注释
+    from crazy_functions.Rag_Interface import Rag问答
     from crazy_functions.SourceCode_Analyse import 解析项目本身
     from crazy_functions.SourceCode_Analyse import 解析一个Python项目
     from crazy_functions.SourceCode_Analyse import 解析一个Matlab项目
@@ -50,6 +51,13 @@ def get_crazy_functions():
     from crazy_functions.SourceCode_Comment import 注释Python项目
 
     function_plugins = {
+        "Rag智能召回": {
+            "Group": "对话",
+            "Color": "stop",
+            "AsButton": False,
+            "Info": "将问答数据记录到向量库中，作为长期参考。",
+            "Function": HotReload(Rag问答),
+        },
         "虚空终端": {
             "Group": "对话|编程|学术|智能体",
             "Color": "stop",
