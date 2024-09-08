@@ -178,7 +178,7 @@ def update_ui(chatbot:ChatBotWithCookies, history, msg="正常", **kwargs):  # �
     yield cookies, chatbot_gr, history, msg
 
 
-def update_ui_lastest_msg(lastmsg:str, chatbot:ChatBotWithCookies, history:list, delay=1):  # 刷新界面
+def update_ui_lastest_msg(lastmsg:str, chatbot:ChatBotWithCookies, history:list, delay=1, msg="正常"):  # 刷新界面
     """
     刷新用户界面
     """
@@ -186,7 +186,7 @@ def update_ui_lastest_msg(lastmsg:str, chatbot:ChatBotWithCookies, history:list,
         chatbot.append(["update_ui_last_msg", lastmsg])
     chatbot[-1] = list(chatbot[-1])
     chatbot[-1][-1] = lastmsg
-    yield from update_ui(chatbot=chatbot, history=history)
+    yield from update_ui(chatbot=chatbot, history=history, msg=msg)
     time.sleep(delay)
 
 

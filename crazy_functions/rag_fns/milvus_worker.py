@@ -11,6 +11,9 @@ from crazy_functions.rag_fns.vector_store_index import GptacVectorStoreIndex
 from llama_index.core.ingestion import run_transformations
 from llama_index.core import PromptTemplate
 from llama_index.core.response_synthesizers import TreeSummarize
+from llama_index.core import StorageContext
+from llama_index.vector_stores.milvus import MilvusVectorStore
+from crazy_functions.rag_fns.llama_index_worker import LlamaIndexRagWorker
 
 DEFAULT_QUERY_GENERATION_PROMPT = """\
 Now, you have context information as below:
@@ -31,7 +34,7 @@ QUESTION_ANSWER_RECORD = """\
 """
 
 
-class SaveLoad():
+class MilvusSaveLoad():
 
     def does_checkpoint_exist(self, checkpoint_dir=None):
         import os, glob
@@ -42,8 +45,8 @@ class SaveLoad():
 
     def save_to_checkpoint(self, checkpoint_dir=None):
         print(f'saving vector store to: {checkpoint_dir}')
-        if checkpoint_dir is None: checkpoint_dir = self.checkpoint_dir
-        self.vs_index.storage_context.persist(persist_dir=checkpoint_dir)
+        # if checkpoint_dir is None: checkpoint_dir = self.checkpoint_dir
+        # self.vs_index.storage_context.persist(persist_dir=checkpoint_dir)
 
     def load_from_checkpoint(self, checkpoint_dir=None):
         if checkpoint_dir is None: checkpoint_dir = self.checkpoint_dir
@@ -51,16 +54,29 @@ class SaveLoad():
             print('loading checkpoint from disk')
             from llama_index.core import StorageContext, load_index_from_storage
             storage_context = StorageContext.from_defaults(persist_dir=checkpoint_dir)
-            self.vs_index = load_index_from_storage(storage_context, embed_model=self.embed_model)
-            return self.vs_index
+            try:
+                self.vs_index = load_index_from_storage(storage_context, embed_model=self.embed_model)
+                return self.vs_index
+            except:
+                return self.create_new_vs(checkpoint_dir)
         else:
-            return self.create_new_vs()
+            return self.create_new_vs(checkpoint_dir)
 
-    def create_new_vs(self):
-        return GptacVectorStoreIndex.default_vector_store(embed_model=self.embed_model)
+    def create_new_vs(self, checkpoint_dir, overwrite=False):
+        vector_store = MilvusVectorStore(
+            uri=os.path.join(checkpoint_dir, "milvus_demo.db"), 
+            dim=self.embed_model.embedding_dimension(),
+            overwrite=overwrite
+        )
+        storage_context = StorageContext.from_defaults(vector_store=vector_store)
+        index = GptacVectorStoreIndex.default_vector_store(storage_context=storage_context, embed_model=self.embed_model)
+        return index
 
+    def purge(self):
+        self.vs_index = self.create_new_vs(self.checkpoint_dir, overwrite=True)
 
-class LlamaIndexRagWorker(SaveLoad):
+class MilvusRagWorker(MilvusSaveLoad, LlamaIndexRagWorker):
+
     def __init__(self, user_name, llm_kwargs, auto_load_checkpoint=True, checkpoint_dir=None) -> None:
         self.debug_mode = True
         self.embed_model = OpenAiEmbeddingModel(llm_kwargs)
@@ -72,53 +88,20 @@ class LlamaIndexRagWorker(SaveLoad):
             self.vs_index = self.create_new_vs(checkpoint_dir)
         atexit.register(lambda: self.save_to_checkpoint(checkpoint_dir))
 
-    def assign_embedding_model(self):
-        pass
-
     def inspect_vector_store(self):
         # This function is for debugging
-        self.vs_index.storage_context.index_store.to_dict()
-        docstore = self.vs_index.storage_context.docstore.docs
-        vector_store_preview = "\n".join([ f"{_id} | {tn.text}" for _id, tn in docstore.items() ])
+        try:
+            self.vs_index.storage_context.index_store.to_dict()
+            docstore = self.vs_index.storage_context.docstore.docs
+            if not docstore.items():
+                raise ValueError("cannot inspect")
+            vector_store_preview = "\n".join([ f"{_id} | {tn.text}" for _id, tn in docstore.items() ])
+        except:
+            dummy_retrieve_res: List["NodeWithScore"] = self.vs_index.as_retriever().retrieve(' ')
+            vector_store_preview = "\n".join(
+                [f"{node.id_} | {node.text}" for node in dummy_retrieve_res]
+            )
         print('\n++ --------inspect_vector_store begin--------')
         print(vector_store_preview)
         print('oo --------inspect_vector_store end--------')
         return vector_store_preview
-
-    def add_documents_to_vector_store(self, document_list):
-        documents = [Document(text=t) for t in document_list]
-        documents_nodes = run_transformations(
-                        documents,  # type: ignore
-                        self.vs_index._transformations,
-                        show_progress=True
-                    )
-        self.vs_index.insert_nodes(documents_nodes)
-        if self.debug_mode: self.inspect_vector_store()
-
-    def add_text_to_vector_store(self, text):
-        node = TextNode(text=text)
-        documents_nodes = run_transformations(
-                        [node],
-                        self.vs_index._transformations,
-                        show_progress=True
-                    )
-        self.vs_index.insert_nodes(documents_nodes)
-        if self.debug_mode: self.inspect_vector_store()
-
-    def remember_qa(self, question, answer):
-        formatted_str = QUESTION_ANSWER_RECORD.format(question=question, answer=answer)
-        self.add_text_to_vector_store(formatted_str)
-
-    def retrieve_from_store_with_query(self, query):
-        if self.debug_mode: self.inspect_vector_store()
-        retriever = self.vs_index.as_retriever()
-        return retriever.retrieve(query)
-
-    def build_prompt(self, query, nodes):
-        context_str = self.generate_node_array_preview(nodes)
-        return DEFAULT_QUERY_GENERATION_PROMPT.format(context_str=context_str, query_str=query)
-        
-    def generate_node_array_preview(self, nodes):
-        buf = "\n".join(([f"(No.{i+1} | score {n.score:.3f}): {n.text}" for i, n in enumerate(nodes)]))
-        if self.debug_mode: print(buf)
-        return buf

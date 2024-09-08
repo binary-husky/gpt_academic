@@ -71,7 +71,13 @@ class OpenAiEmbeddingModel(EmbeddingModel):
             embedding = res.data[0].embedding
         return embedding
 
-    def embedding_dimension(self, llm_kwargs):
+    def embedding_dimension(self, llm_kwargs=None):
+        # load kwargs
+        if llm_kwargs is None:
+            llm_kwargs = self.llm_kwargs
+        if llm_kwargs is None:
+            raise RuntimeError("llm_kwargs is not provided!")
+
         from .bridge_all_embed import embed_model_info
         return embed_model_info[llm_kwargs['embed_model']]['embed_dimension']
 

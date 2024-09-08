@@ -1,7 +1,14 @@
 from toolbox import CatchException, update_ui, get_conf, get_log_folder, update_ui_lastest_msg
 from crazy_functions.crazy_utils import input_clipping
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-from crazy_functions.rag_fns.llama_index_worker import LlamaIndexRagWorker
+
+VECTOR_STORE_TYPE = "Milvus"
+
+if VECTOR_STORE_TYPE == "Simple":
+    from crazy_functions.rag_fns.llama_index_worker import LlamaIndexRagWorker
+if VECTOR_STORE_TYPE == "Milvus":
+    from crazy_functions.rag_fns.milvus_worker import MilvusRagWorker as LlamaIndexRagWorker
+
 
 RAG_WORKER_REGISTER = {}
 
@@ -14,16 +21,25 @@ def Rag问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, u
 
     # 1. we retrieve rag worker from global context
     user_name = chatbot.get_user()
+    checkpoint_dir = get_log_folder(user_name, plugin_name='experimental_rag')
     if user_name in RAG_WORKER_REGISTER:
         rag_worker = RAG_WORKER_REGISTER[user_name]
     else:
         rag_worker = RAG_WORKER_REGISTER[user_name] = LlamaIndexRagWorker(
             user_name, 
             llm_kwargs, 
-            checkpoint_dir=get_log_folder(user_name, plugin_name='experimental_rag'), 
+            checkpoint_dir=checkpoint_dir, 
             auto_load_checkpoint=True)
+    current_context = f"{VECTOR_STORE_TYPE} @ {checkpoint_dir}"
+    tip = "提示：输入“清空向量数据库”可以清空RAG向量数据库"
+    if txt == "清空向量数据库":
+        chatbot.append([txt, f'正在清空 ({current_context}) ...'])
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+        rag_worker.purge()
+        yield from update_ui_lastest_msg('已清空', chatbot, history, delay=0) # 刷新界面
+        return
 
-    chatbot.append([txt, '正在召回知识 ...'])
+    chatbot.append([txt, f'正在召回知识 ({current_context}) ...'])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # 2. clip history to reduce token consumption
@@ -68,8 +84,8 @@ def Rag问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, u
     )
 
     # 5. remember what has been asked / answered
-    yield from update_ui_lastest_msg(model_say + '</br></br>' + '对话记忆中, 请稍等 ...', chatbot, history, delay=0.5) # 刷新界面
+    yield from update_ui_lastest_msg(model_say + '</br></br>' + f'对话记忆中, 请稍等 ({current_context}) ...', chatbot, history, delay=0.5) # 刷新界面
     rag_worker.remember_qa(i_say_to_remember, model_say)
     history.extend([i_say, model_say])
 
-    yield from update_ui_lastest_msg(model_say, chatbot, history, delay=0) # 刷新界面
+    yield from update_ui_lastest_msg(model_say, chatbot, history, delay=0, msg=tip) # 刷新界面
