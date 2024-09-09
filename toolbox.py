@@ -100,16 +100,19 @@ def ArgsGeneralWrapper(f):
             user_name = request.username
         else:
             user_name = default_user_name
+        embed_model = get_conf("EMBEDDING_MODEL")
         cookies.update({
             'top_p': top_p,
             'api_key': cookies['api_key'],
             'llm_model': llm_model,
+            'embed_model': embed_model,
             'temperature': temperature,
             'user_name': user_name,
         })
         llm_kwargs = {
             'api_key': cookies['api_key'],
             'llm_model': llm_model,
+            'embed_model': embed_model,
             'top_p': top_p,
             'max_length': max_length,
             'temperature': temperature,
@@ -175,7 +178,7 @@ def update_ui(chatbot:ChatBotWithCookies, history, msg="正常", **kwargs):  # �
     yield cookies, chatbot_gr, history, msg
 
 
-def update_ui_lastest_msg(lastmsg:str, chatbot:ChatBotWithCookies, history:list, delay=1):  # 刷新界面
+def update_ui_lastest_msg(lastmsg:str, chatbot:ChatBotWithCookies, history:list, delay=1, msg="正常"):  # 刷新界面
     """
     刷新用户界面
     """
@@ -183,7 +186,7 @@ def update_ui_lastest_msg(lastmsg:str, chatbot:ChatBotWithCookies, history:list,
         chatbot.append(["update_ui_last_msg", lastmsg])
     chatbot[-1] = list(chatbot[-1])
     chatbot[-1][-1] = lastmsg
-    yield from update_ui(chatbot=chatbot, history=history)
+    yield from update_ui(chatbot=chatbot, history=history, msg=msg)
     time.sleep(delay)
 
 
@@ -621,9 +624,12 @@ def load_chat_cookies():
                 }
             }
         )
+
+    EMBEDDING_MODEL = get_conf("EMBEDDING_MODEL")
     return {
         "api_key": API_KEY,
         "llm_model": LLM_MODEL,
+        "embed_model": EMBEDDING_MODEL,
         "customize_fn_overwrite": customize_fn_overwrite_,
     }
 

@@ -118,8 +118,8 @@ def main():
                             choices=[
                                 "常规对话", 
                                 "多模型对话", 
+                                "智能召回 RAG",
                                 # "智能上下文", 
-                                # "智能召回 RAG",
                             ], value="常规对话",
                             interactive=True, label='', show_label=False,
                             elem_classes='normal_mut_select', elem_id="gpt-submit-dropdown").style(container=False)

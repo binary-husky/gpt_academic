@@ -38,6 +38,9 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-4v", "glm-3-turbo",
                     "gemini-1.5-pro", "chatglm3"
                     ]
+
+EMBEDDING_MODEL = "text-embedding-3-small"
+
 # --- --- --- ---
 # P.S. 其他可用的模型还包括
 # AVAIL_LLM_MODELS = [
@@ -296,7 +299,7 @@ ARXIV_CACHE_DIR = "gpt_log/arxiv_cache"
 
 # 除了连接OpenAI之外，还有哪些场合允许使用代理，请尽量不要修改
 WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid",
-                     "Warmup_Modules", "Nougat_Download", "AutoGen"]
+                     "Warmup_Modules", "Nougat_Download", "AutoGen", "Connect_OpenAI_Embedding"]
 
 
 # 启用插件热加载

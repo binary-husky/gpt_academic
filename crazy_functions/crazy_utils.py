@@ -4,7 +4,7 @@ import threading
 import os
 import logging
 
-def input_clipping(inputs, history, max_token_limit):
+def input_clipping(inputs, history, max_token_limit, return_clip_flags=False):
     """
     当输入文本 + 历史文本超出最大限制时，采取措施丢弃一部分文本。
     输入：
@@ -20,17 +20,20 @@ def input_clipping(inputs, history, max_token_limit):
     enc = model_info["gpt-3.5-turbo"]['tokenizer']
     def get_token_num(txt): return len(enc.encode(txt, disallowed_special=()))
 
+
     mode = 'input-and-history'
     # 当 输入部分的token占比 小于 全文的一半时，只裁剪历史
     input_token_num = get_token_num(inputs)
+    original_input_len = len(inputs)
     if input_token_num < max_token_limit//2:
         mode = 'only-history'
         max_token_limit = max_token_limit - input_token_num
 
     everything = [inputs] if mode == 'input-and-history' else ['']
     everything.extend(history)
-    n_token = get_token_num('\n'.join(everything))
+    full_token_num = n_token = get_token_num('\n'.join(everything))
     everything_token = [get_token_num(e) for e in everything]
+    everything_token_num = sum(everything_token)
     delta = max(everything_token) // 16 # 截断时的颗粒度
 
     while n_token > max_token_limit:
@@ -43,10 +46,24 @@ def input_clipping(inputs, history, max_token_limit):
 
     if mode == 'input-and-history':
         inputs = everything[0]
+        full_token_num = everything_token_num
     else:
-        pass
+        full_token_num = everything_token_num + input_token_num
+
     history = everything[1:]
-    return inputs, history
+
+    flags = {
+        "mode": mode,
+        "original_input_token_num": input_token_num,
+        "original_full_token_num": full_token_num,
+        "original_input_len": original_input_len,
+        "clipped_input_len": len(inputs),
+    }
+
+    if not return_clip_flags:
+        return inputs, history
+    else:
+        return inputs, history, flags
 
 def request_gpt_model_in_new_thread_with_ui_alive(
         inputs, inputs_show_user, llm_kwargs,
