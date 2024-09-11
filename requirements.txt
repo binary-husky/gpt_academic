@@ -28,6 +28,7 @@ edge-tts
 pymupdf
 openai
 rjsmin
+loguru
 arxiv
 numpy
 rich

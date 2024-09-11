@@ -1,3 +1,4 @@
+from loguru import logger
 
 def check_proxy(proxies, return_ip=False):
     import requests
@@ -19,14 +20,14 @@ def check_proxy(proxies, return_ip=False):
         else:
             result = f"代理配置 {proxies_https}, 代理数据解析失败：{data}"
         if not return_ip:
-            print(result)
+            logger.warning(result)
             return result
         else:
             return ip
     except:
         result = f"代理配置 {proxies_https}, 代理所在地查询超时，代理可能无效"
         if not return_ip:
-            print(result)
+            logger.warning(result)
             return result
         else:
             return ip
@@ -148,9 +149,9 @@ def auto_update(raise_error=False):
                     if raise_error:
                         from toolbox import trimmed_format_exc
                         msg += trimmed_format_exc()
-                    print(msg)
+                    logger.warning(msg)
             else:
-                print('自动更新程序：已禁用')
+                logger.info('自动更新程序：已禁用')
                 return
         else:
             return
@@ -159,10 +160,10 @@ def auto_update(raise_error=False):
         if raise_error:
             from toolbox import trimmed_format_exc
             msg += trimmed_format_exc()
-        print(msg)
+        logger.info(msg)
 
 def warm_up_modules():
-    print('正在执行一些模块的预热 ...')
+    logger.info('正在执行一些模块的预热 ...')
     from toolbox import ProxyNetworkActivate
     from request_llms.bridge_all import model_info
     with ProxyNetworkActivate("Warmup_Modules"):
@@ -172,7 +173,7 @@ def warm_up_modules():
         enc.encode("模块预热", disallowed_special=())
 
 def warm_up_vectordb():
-    print('正在执行一些模块的预热 ...')
+    logger.info('正在执行一些模块的预热 ...')
     from toolbox import ProxyNetworkActivate
     with ProxyNetworkActivate("Warmup_Modules"):
         import nltk
