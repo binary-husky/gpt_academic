@@ -1,5 +1,6 @@
-import time, logging, json, sys, struct
+import time, json, sys, struct
 import numpy as np
+from loguru import logger as logging
 from scipy.io.wavfile import WAVE_FORMAT
 
 def write_numpy_to_wave(filename, rate, data, add_header=False):

@@ -12,7 +12,6 @@ import json
 import os
 import re
 import time
-import logging
 import traceback
 import requests
 import random
@@ -317,7 +316,6 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
                     # 前者是API2D的结束条件，后者是OPENAI的结束条件
                     if ('data: [DONE]' in chunk_decoded) or (len(chunkjson['choices'][0]["delta"]) == 0):
                         # 判定为数据流的结束，gpt_replying_buffer也写完了
-                        # logging.info(f'[response] {gpt_replying_buffer}')
                         log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
                         break
                     # 处理数据流的主体
@@ -486,7 +484,6 @@ def generate_payload(inputs:str, llm_kwargs:dict, history:list, system_prompt:st
             "gpt-3.5-turbo-16k-0613",
             "gpt-3.5-turbo-0301",
         ])
-        logging.info("Random select model:" + model)
 
     payload = {
         "model": model,

@@ -8,15 +8,14 @@
     2. predict_no_ui_long_connection：支持多线程
 """
 
+import os
 import json
 import time
-import logging
 import requests
 import base64
-import os
 import glob
 from toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history, trimmed_format_exc, is_the_upload_folder, \
-    update_ui_lastest_msg, get_max_token, encode_image, have_any_recent_upload_image_files
+    update_ui_lastest_msg, get_max_token, encode_image, have_any_recent_upload_image_files, log_chat
 
 
 proxies, TIMEOUT_SECONDS, MAX_RETRY, API_ORG, AZURE_CFG_ARRAY = \
@@ -100,7 +99,6 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
     raw_input = inputs
-    logging.info(f'[raw_input] {raw_input}')
     def make_media_input(inputs, image_paths):
         for image_path in image_paths:
             inputs = inputs + f'<br/><br/><div align="center"><img src="file={os.path.abspath(image_path)}"></div>'
@@ -185,7 +183,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                         # 判定为数据流的结束，gpt_replying_buffer也写完了
                         lastmsg = chatbot[-1][-1] + f"\n\n\n\n「{llm_kwargs['llm_model']}调用结束，该模型不具备上下文对话能力，如需追问，请及时切换模型。」"
                         yield from update_ui_lastest_msg(lastmsg, chatbot, history, delay=1)
-                        logging.info(f'[response] {gpt_replying_buffer}')
+                        log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
                         break
                     # 处理数据流的主体
                     status_text = f"finish_reason: {chunkjson['choices'][0].get('finish_reason', 'null')}"

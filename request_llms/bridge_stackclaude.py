@@ -1,12 +1,13 @@
+import time
+import asyncio
+import threading
+import importlib
+
 from .bridge_newbingfree import preprocess_newbing_out, preprocess_newbing_out_simple
 from multiprocessing import Process, Pipe
 from toolbox import update_ui, get_conf, trimmed_format_exc
-import threading
-import importlib
-import logging
-import time
+from loguru import logger as logging
 from toolbox import get_conf
-import asyncio
 
 load_message = "正在加载Claude组件，请稍候..."
 

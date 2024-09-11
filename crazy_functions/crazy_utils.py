@@ -1,5 +1,4 @@
 import os
-import logging
 import threading
 from loguru import logger
 from shared_utils.char_visual_effect import scolling_visual_effect
@@ -596,7 +595,7 @@ class nougat_interface():
     def nougat_with_timeout(self, command, cwd, timeout=3600):
         import subprocess
         from toolbox import ProxyNetworkActivate
-        logging.info(f'正在执行命令 {command}')
+        logger.info(f'正在执行命令 {command}')
         with ProxyNetworkActivate("Nougat_Download"):
             process = subprocess.Popen(command, shell=False, cwd=cwd, env=os.environ)
         try:

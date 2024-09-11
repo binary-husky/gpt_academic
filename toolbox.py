@@ -8,7 +8,6 @@ import base64
 import gradio
 import shutil
 import glob
-import logging
 import uuid
 from loguru import logger
 from functools import wraps
@@ -1034,10 +1033,20 @@ def log_chat(llm_model: str, input_str: str, output_str: str):
     try:
         if output_str and input_str and llm_model:
             uid = str(uuid.uuid4().hex)
-            logging.info(f"[Model({uid})] {llm_model}")
             input_str = input_str.rstrip('\n')
-            logging.info(f"[Query({uid})]\n{input_str}")
             output_str = output_str.rstrip('\n')
-            logging.info(f"[Response({uid})]\n{output_str}\n\n")
+            logger.bind(chat_msg=True).info(dedent(
+            """
+            ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+            [UID]
+            {uid}
+            [Model]
+            {llm_model}
+            [Query]
+            {input_str}
+            [Response]
+            {output_str}
+            ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+            """).format(uid=uid, llm_model=llm_model, input_str=input_str, output_str=output_str))
     except:
         logger.error(trimmed_format_exc())

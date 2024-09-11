@@ -59,11 +59,8 @@ def setup_logging(PATH_LOGGING):
 
     logger.warning(f"所有对话记录将自动保存在本地目录{sensitive_log_path}, 请注意自我隐私保护哦！")
 
-    logger.bind(chat_msg=True).info("This message is logged to the file!")
 
-
-
-
+# logger.bind(chat_msg=True).info("This message is logged to the file!")
 # logger.debug(f"debug message")
 # logger.info(f"info message")
 # logger.success(f"success message")
