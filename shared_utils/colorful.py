@@ -61,7 +61,6 @@ def sprint亮紫(*kw):
 def sprint亮靛(*kw):
     return "\033[1;36m"+' '.join(kw)+"\033[0m"
 
-
 def log红(*kw,**kargs):
     logger.opt(depth=1).info(sprint红(*kw))
 def log绿(*kw,**kargs):
