@@ -1,6 +1,6 @@
 from toolbox import update_ui, trimmed_format_exc, promote_file_to_downloadzone, get_log_folder
 from toolbox import CatchException, report_exception, write_history_to_file, zip_folder
-
+from loguru import logger
 
 class PaperFileGroup():
     def __init__(self):
@@ -33,7 +33,7 @@ class PaperFileGroup():
                     self.sp_file_index.append(index)
                     self.sp_file_tag.append(self.file_paths[index] + f".part-{j}.tex")
 
-        print('Segmentation: done')
+        logger.info('Segmentation: done')
     def merge_result(self):
         self.file_result = ["" for _ in range(len(self.file_paths))]
         for r, k in zip(self.sp_file_result, self.sp_file_index):
@@ -122,7 +122,7 @@ def 多文件润色(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
         pfg.write_result()
         pfg.zip_result()
     except:
-        print(trimmed_format_exc())
+        logger.error(trimmed_format_exc())
 
     #  <-------- 整理结果，退出 ---------->
     create_report_file_name = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + f"-chatgpt.polish.md"

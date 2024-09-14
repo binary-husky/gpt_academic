@@ -1,6 +1,6 @@
 from toolbox import update_ui, promote_file_to_downloadzone
 from toolbox import CatchException, report_exception, write_history_to_file
-fast_debug = False
+from loguru import logger
 
 class PaperFileGroup():
     def __init__(self):
@@ -33,7 +33,7 @@ class PaperFileGroup():
                     self.sp_file_index.append(index)
                     self.sp_file_tag.append(self.file_paths[index] + f".part-{j}.tex")
 
-        print('Segmentation: done')
+        logger.info('Segmentation: done')
 
 def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, language='en'):
     import time, os, re
