@@ -447,7 +447,7 @@ def generate_payload(inputs:str, llm_kwargs:dict, history:list, system_prompt:st
     openai_disable_system_prompt = model_info[llm_kwargs['llm_model']].get('openai_disable_system_prompt', False)
 
     if openai_disable_system_prompt:
-        messages = []
+        messages = [{"role": "user", "content": system_prompt}]
     else:
         messages = [{"role": "system", "content": system_prompt}]
 
