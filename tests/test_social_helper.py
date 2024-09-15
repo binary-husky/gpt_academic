@@ -8,4 +8,4 @@ import os, sys
 
 if __name__ == "__main__":
     from test_utils import plugin_test
-    plugin_test(plugin='crazy_functions.Social_Helper->I人助手', main_input="|")
+    plugin_test(plugin='crazy_functions.Social_Helper->I人助手', main_input="add-friend:a，我的师兄")
