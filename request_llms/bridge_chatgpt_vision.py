@@ -14,6 +14,7 @@ import time
 import requests
 import base64
 import glob
+from loguru import logger
 from toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history, trimmed_format_exc, is_the_upload_folder, \
     update_ui_lastest_msg, get_max_token, encode_image, have_any_recent_upload_image_files, log_chat
 
@@ -208,7 +209,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     error_msg = chunk_decoded
                     chatbot, history = handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg, api_key)
                     yield from update_ui(chatbot=chatbot, history=history, msg="Json异常" + error_msg) # 刷新界面
-                    print(error_msg)
+                    logger.error(error_msg)
                     return
 
 def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg, api_key=""):
@@ -299,10 +300,7 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, image_paths):
         "presence_penalty": 0,
         "frequency_penalty": 0,
     }
-    try:
-        print(f" {llm_kwargs['llm_model']} : {inputs[:100]} ..........")
-    except:
-        print('输入中可能存在乱码。')
+
     return headers, payload, api_key
 
 

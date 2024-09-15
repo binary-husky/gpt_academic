@@ -1,13 +1,12 @@
+from loguru import logger
 from toolbox import update_ui
 from toolbox import CatchException, report_exception
-from .crazy_utils import read_and_clean_pdf_text
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-fast_debug = False
+from crazy_functions.crazy_utils import read_and_clean_pdf_text
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 
 
 def 解析PDF(file_name, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
-    import tiktoken
-    print('begin analysis on:', file_name)
+    logger.info('begin analysis on:', file_name)
 
     ############################## <第 0 步，切割PDF> ##################################
     # 递归地切割PDF文件，每一块（尽量是完整的一个section，比如introduction，experiment等，必要时再进行切割）
@@ -36,7 +35,7 @@ def 解析PDF(file_name, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     last_iteration_result = paper_meta  # 初始值是摘要
     MAX_WORD_TOTAL = 4096
     n_fragment = len(paper_fragments)
-    if n_fragment >= 20: print('文章极长，不能达到预期效果')
+    if n_fragment >= 20: logger.warning('文章极长，不能达到预期效果')
     for i in range(n_fragment):
         NUM_OF_WORD = MAX_WORD_TOTAL // n_fragment
         i_say = f"Read this section, recapitulate the content of this section with less than {NUM_OF_WORD} words: {paper_fragments[i]}"
@@ -57,7 +56,7 @@ def 解析PDF(file_name, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     chatbot.append([i_say_show_user, gpt_say])
 
     ############################## <第 4 步，设置一个token上限，防止回答时Token溢出> ##################################
-    from .crazy_utils import input_clipping
+    from crazy_functions.crazy_utils import input_clipping
     _, final_results = input_clipping("", final_results, max_token_limit=3200)
     yield from update_ui(chatbot=chatbot, history=final_results) # 注意这里的历史记录被替代了
 

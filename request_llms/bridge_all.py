@@ -1022,7 +1022,7 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
         # 如果是已知模型，则尝试获取其信息
         original_model_info = model_info.get(origin_model_name.replace("one-api-", "", 1), None)
     except:
-        print(f"one-api模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
+        logger.error(f"one-api模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
         continue
     this_model_info = {
         "fn_with_ui": chatgpt_ui,
@@ -1053,7 +1053,7 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("vllm-")]:
     try:
         _, max_token_tmp = read_one_api_model_name(model)
     except:
-        print(f"vllm模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
+        logger.error(f"vllm模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
         continue
     model_info.update({
         model: {
@@ -1080,7 +1080,7 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("ollama-")]:
     try:
         _, max_token_tmp = read_one_api_model_name(model)
     except:
-        print(f"ollama模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
+        logger.error(f"ollama模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
         continue
     model_info.update({
         model: {

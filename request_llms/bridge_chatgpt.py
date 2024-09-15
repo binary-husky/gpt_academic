@@ -16,6 +16,8 @@ import traceback
 import requests
 import random
 
+from loguru import logger
+
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
 from toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history
@@ -146,7 +148,7 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], 
             retry += 1
             traceback.print_exc()
             if retry > MAX_RETRY: raise TimeoutError
-            if MAX_RETRY!=0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
+            if MAX_RETRY!=0: logger.error(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
 
     stream_response = response.iter_lines()
     result = ''
@@ -179,7 +181,7 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], 
         if (not has_content) and (not has_role): continue # raise RuntimeError("发现不标准的第三方接口："+delta)
         if has_content: # has_role = True/False
             result += delta["content"]
-            if not console_slience: print(delta["content"], end='')
+            if not console_slience: logger.info(delta["content"], end='')
             if observe_window is not None:
                 # 观测窗，把已经获取的数据显示出去
                 if len(observe_window) >= 1:
@@ -342,7 +344,7 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
                     error_msg = chunk_decoded
                     chatbot, history = handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
                     yield from update_ui(chatbot=chatbot, history=history, msg="Json异常" + error_msg) # 刷新界面
-                    print(error_msg)
+                    logger.error(error_msg)
                     return
 
 def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg):
@@ -493,10 +495,7 @@ def generate_payload(inputs:str, llm_kwargs:dict, history:list, system_prompt:st
         "n": 1,
         "stream": stream,
     }
-    # try:
-    #     print(f" {llm_kwargs['llm_model']} : {conversation_cnt} : {inputs[:100]} ..........")
-    # except:
-    #     print('输入中可能存在乱码。')
+
     return headers,payload
 
 

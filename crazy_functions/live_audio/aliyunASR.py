@@ -107,18 +107,14 @@ def is_speaker_speaking(vad, data, sample_rate):
 class AliyunASR():
 
     def test_on_sentence_begin(self, message, *args):
-        # print("test_on_sentence_begin:{}".format(message))
         pass
 
     def test_on_sentence_end(self, message, *args):
-        # print("test_on_sentence_end:{}".format(message))
         message = json.loads(message)
         self.parsed_sentence = message['payload']['result']
         self.event_on_entence_end.set()
-        # print(self.parsed_sentence)
 
     def test_on_start(self, message, *args):
-        # print("test_on_start:{}".format(message))
         pass
 
     def test_on_error(self, message, *args):
@@ -130,13 +126,11 @@ class AliyunASR():
         pass
 
     def test_on_result_chg(self, message, *args):
-        # print("test_on_chg:{}".format(message))
         message = json.loads(message)
         self.parsed_text = message['payload']['result']
         self.event_on_result_chg.set()
 
     def test_on_completed(self, message, *args):
-        # print("on_completed:args=>{} message=>{}".format(args, message))
         pass
 
     def audio_convertion_thread(self, uuid):
@@ -249,14 +243,14 @@ class AliyunASR():
 
         try:
             response = client.do_action_with_exception(request)
-            print(response)
+            logging.info(response)
             jss = json.loads(response)
             if 'Token' in jss and 'Id' in jss['Token']:
                 token = jss['Token']['Id']
                 expireTime = jss['Token']['ExpireTime']
-                print("token = " + token)
-                print("expireTime = " + str(expireTime))
+                logging.info("token = " + token)
+                logging.info("expireTime = " + str(expireTime))
         except Exception as e:
-            print(e)
+            logging.error(e)
 
         return token

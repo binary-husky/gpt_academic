@@ -218,5 +218,3 @@ class GoogleChatInit:
 
 if __name__ == "__main__":
     google = GoogleChatInit()
-    # print(gootle.generate_message_payload('你好呀', {},  ['123123', '3123123'], ''))
-    # gootle.input_encode_handle('123123[123123](./123123), ![53425](./asfafa/fff.jpg)')

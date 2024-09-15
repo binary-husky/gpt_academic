@@ -2,6 +2,7 @@ import llama_index
 import os
 import atexit
 from typing import List
+from loguru import logger
 from llama_index.core import Document
 from llama_index.core.schema import TextNode
 from request_llms.embed_models.openai_embed import OpenAiEmbeddingModel
@@ -44,14 +45,14 @@ class MilvusSaveLoad():
         return True
 
     def save_to_checkpoint(self, checkpoint_dir=None):
-        print(f'saving vector store to: {checkpoint_dir}')
+        logger.info(f'saving vector store to: {checkpoint_dir}')
         # if checkpoint_dir is None: checkpoint_dir = self.checkpoint_dir
         # self.vs_index.storage_context.persist(persist_dir=checkpoint_dir)
 
     def load_from_checkpoint(self, checkpoint_dir=None):
         if checkpoint_dir is None: checkpoint_dir = self.checkpoint_dir
         if self.does_checkpoint_exist(checkpoint_dir=checkpoint_dir):
-            print('loading checkpoint from disk')
+            logger.info('loading checkpoint from disk')
             from llama_index.core import StorageContext, load_index_from_storage
             storage_context = StorageContext.from_defaults(persist_dir=checkpoint_dir)
             try:
@@ -101,7 +102,7 @@ class MilvusRagWorker(MilvusSaveLoad, LlamaIndexRagWorker):
             vector_store_preview = "\n".join(
                 [f"{node.id_} | {node.text}" for node in dummy_retrieve_res]
             )
-        print('\n++ --------inspect_vector_store begin--------')
-        print(vector_store_preview)
-        print('oo --------inspect_vector_store end--------')
+        logger.info('\n++ --------inspect_vector_store begin--------')
+        logger.info(vector_store_preview)
+        logger.info('oo --------inspect_vector_store end--------')
         return vector_store_preview

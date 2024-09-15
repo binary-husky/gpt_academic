@@ -16,8 +16,8 @@ Testing:
 
 from toolbox import CatchException, update_ui, gen_time_str, trimmed_format_exc, is_the_upload_folder
 from toolbox import promote_file_to_downloadzone, get_log_folder, update_ui_lastest_msg
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, get_plugin_arg
-from .crazy_utils import input_clipping, try_install_deps
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, get_plugin_arg
+from crazy_functions.crazy_utils import input_clipping, try_install_deps
 from crazy_functions.gen_fns.gen_fns_shared import is_function_successfully_generated
 from crazy_functions.gen_fns.gen_fns_shared import get_class_name
 from crazy_functions.gen_fns.gen_fns_shared import subprocess_worker

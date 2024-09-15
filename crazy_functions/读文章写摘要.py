@@ -1,12 +1,11 @@
 from toolbox import update_ui
 from toolbox import CatchException, report_exception
 from toolbox import write_history_to_file, promote_file_to_downloadzone
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 
 
 def 解析Paper(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
     import time, glob, os
-    print('begin analysis on:', file_manifest)
     for index, fp in enumerate(file_manifest):
         with open(fp, 'r', encoding='utf-8', errors='replace') as f:
             file_content = f.read()

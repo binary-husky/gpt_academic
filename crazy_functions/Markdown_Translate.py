@@ -52,7 +52,7 @@ class PaperFileGroup():
         return manifest
 
 def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, language='en'):
-    from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
+    from crazy_functions.crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 
     #  <-------- 读取Markdown文件，删除其中的所有注释 ---------->
     pfg = PaperFileGroup()
