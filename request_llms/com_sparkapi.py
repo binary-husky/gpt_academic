@@ -1,17 +1,18 @@
-from toolbox import get_conf, get_pictures_list, encode_image
 import base64
 import datetime
 import hashlib
 import hmac
 import json
-from urllib.parse import urlparse
 import ssl
+import websocket
+import threading
+from toolbox import get_conf, get_pictures_list, encode_image
+from loguru import logger
+from urllib.parse import urlparse
 from datetime import datetime
 from time import mktime
 from urllib.parse import urlencode
 from wsgiref.handlers import format_date_time
-import websocket
-import threading, time
 
 timeout_bot_msg = '[Local Message] Request timeout. Network error.'
 
@@ -104,7 +105,7 @@ class SparkRequestInstance():
             if llm_kwargs['most_recent_uploaded'].get('path'):
                 file_manifest = get_pictures_list(llm_kwargs['most_recent_uploaded']['path'])
                 if len(file_manifest) > 0:
-                    print('正在使用讯飞图片理解API')
+                    logger.info('正在使用讯飞图片理解API')
                     gpt_url = self.gpt_url_img
         wsParam = Ws_Param(self.appid, self.api_key, self.api_secret, gpt_url)
         websocket.enableTrace(False)
@@ -123,7 +124,7 @@ class SparkRequestInstance():
             data = json.loads(message)
             code = data['header']['code']
             if code != 0:
-                print(f'请求错误: {code}, {data}')
+                logger.error(f'请求错误: {code}, {data}')
                 self.result_buf += str(data)
                 ws.close()
                 self.time_to_exit_event.set()
@@ -140,7 +141,7 @@ class SparkRequestInstance():
 
         # 收到websocket错误的处理
         def on_error(ws, error):
-            print("error:", error)
+            logger.error("error:", error)
             self.time_to_exit_event.set()
 
         # 收到websocket关闭的处理

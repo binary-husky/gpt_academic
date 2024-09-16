@@ -13,11 +13,9 @@
 import json
 import time
 import gradio as gr
-import logging
 import traceback
 import requests
-import importlib
-import random
+from loguru import logger
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
@@ -98,7 +96,7 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], 
             retry += 1
             traceback.print_exc()
             if retry > MAX_RETRY: raise TimeoutError
-            if MAX_RETRY!=0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
+            if MAX_RETRY!=0: logger.error(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
 
     stream_response = response.iter_lines()
     result = ''
@@ -113,7 +111,7 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], 
         if chunkjson['event_type'] == 'stream-start': continue
         if chunkjson['event_type'] == 'text-generation':
             result += chunkjson["text"]
-            if not console_slience: print(chunkjson["text"], end='')
+            if not console_slience: logger.info(chunkjson["text"], end='')
             if observe_window is not None:
                 # 观测窗，把已经获取的数据显示出去
                 if len(observe_window) >= 1:
@@ -153,7 +151,7 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
     raw_input = inputs
-    # logging.info(f'[raw_input] {raw_input}')
+    # logger.info(f'[raw_input] {raw_input}')
     chatbot.append((inputs, ""))
     yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
 
@@ -237,7 +235,7 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
                     error_msg = chunk_decoded
                     chatbot, history = handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
                     yield from update_ui(chatbot=chatbot, history=history, msg="Json异常" + error_msg) # 刷新界面
-                    print(error_msg)
+                    logger.error(error_msg)
                     return
 
 def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg):

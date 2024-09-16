@@ -1,15 +1,17 @@
+import os
+import re
+import shutil
+import numpy as np
+from loguru import logger
 from toolbox import update_ui, update_ui_lastest_msg, get_log_folder
 from toolbox import get_conf, promote_file_to_downloadzone
-from .latex_toolbox import PRESERVE, TRANSFORM
-from .latex_toolbox import set_forbidden_text, set_forbidden_text_begin_end, set_forbidden_text_careful_brace
-from .latex_toolbox import reverse_forbidden_text_careful_brace, reverse_forbidden_text, convert_to_linklist, post_process
-from .latex_toolbox import fix_content, find_main_tex_file, merge_tex_files, compile_latex_with_timeout
-from .latex_toolbox import find_title_and_abs
-from .latex_pickle_io import objdump, objload
+from crazy_functions.latex_fns.latex_toolbox import PRESERVE, TRANSFORM
+from crazy_functions.latex_fns.latex_toolbox import set_forbidden_text, set_forbidden_text_begin_end, set_forbidden_text_careful_brace
+from crazy_functions.latex_fns.latex_toolbox import reverse_forbidden_text_careful_brace, reverse_forbidden_text, convert_to_linklist, post_process
+from crazy_functions.latex_fns.latex_toolbox import fix_content, find_main_tex_file, merge_tex_files, compile_latex_with_timeout
+from crazy_functions.latex_fns.latex_toolbox import find_title_and_abs
+from crazy_functions.latex_fns.latex_pickle_io import objdump, objload
 
-import os, shutil
-import re
-import numpy as np
 
 pj = os.path.join
 
@@ -323,7 +325,7 @@ def remove_buggy_lines(file_path, log_path, tex_name, tex_name_pure, n_fix, work
         buggy_lines = [int(l) for l in buggy_lines]
         buggy_lines = sorted(buggy_lines)
         buggy_line = buggy_lines[0]-1
-        print("reversing tex line that has errors", buggy_line)
+        logger.warning("reversing tex line that has errors", buggy_line)
 
         # 重组，逆转出错的段落
         if buggy_line not in fixed_line:
@@ -337,7 +339,7 @@ def remove_buggy_lines(file_path, log_path, tex_name, tex_name_pure, n_fix, work
 
         return True, f"{tex_name_pure}_fix_{n_fix}", buggy_lines
     except:
-        print("Fatal error occurred, but we cannot identify error, please download zip, read latex log, and compile manually.")
+        logger.error("Fatal error occurred, but we cannot identify error, please download zip, read latex log, and compile manually.")
         return False, -1, [-1]
 
 
@@ -380,7 +382,7 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
 
             if mode!='translate_zh':
                 yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 使用latexdiff生成论文转化前后对比 ...', chatbot, history) # 刷新Gradio前端界面
-                print(    f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
+                logger.info(    f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
                 ok = compile_latex_with_timeout(f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex', os.getcwd())
 
                 yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 正在编译对比PDF ...', chatbot, history)   # 刷新Gradio前端界面
@@ -419,7 +421,7 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
                         shutil.copyfile(concat_pdf, pj(work_folder, '..', 'translation', 'comparison.pdf'))
                     promote_file_to_downloadzone(concat_pdf, rename_file=None, chatbot=chatbot)  # promote file to web UI
                 except Exception as e:
-                    print(e)
+                    logger.error(e)
                     pass
             return True # 成功啦
         else:
@@ -465,4 +467,4 @@ def write_html(sp_file_contents, sp_file_result, chatbot, project_folder):
         promote_file_to_downloadzone(file=res, chatbot=chatbot)
     except:
         from toolbox import trimmed_format_exc
-        print('writing html result failed:', trimmed_format_exc())
+        logger.error('writing html result failed:', trimmed_format_exc())

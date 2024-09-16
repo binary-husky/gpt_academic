@@ -1,17 +1,19 @@
+import re, requests, unicodedata, os
 from toolbox import update_ui, get_log_folder
 from toolbox import write_history_to_file, promote_file_to_downloadzone
 from toolbox import CatchException, report_exception, get_conf
-import re, requests, unicodedata, os
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from loguru import logger
+
 def download_arxiv_(url_pdf):
     if 'arxiv.org' not in url_pdf:
         if ('.' in url_pdf) and ('/' not in url_pdf):
             new_url = 'https://arxiv.org/abs/'+url_pdf
-            print('下载编号：', url_pdf, '自动定位：', new_url)
+            logger.info('下载编号：', url_pdf, '自动定位：', new_url)
             # download_arxiv_(new_url)
             return download_arxiv_(new_url)
         else:
-            print('不能识别的URL！')
+            logger.info('不能识别的URL！')
             return None
     if 'abs' in url_pdf:
         url_pdf = url_pdf.replace('abs', 'pdf')
@@ -42,15 +44,12 @@ def download_arxiv_(url_pdf):
     requests_pdf_url = url_pdf
     file_path = download_dir+title_str
 
-    print('下载中')
+    logger.info('下载中')
     proxies = get_conf('proxies')
     r = requests.get(requests_pdf_url, proxies=proxies)
     with open(file_path, 'wb+') as f:
         f.write(r.content)
-    print('下载完成')
-
-    # print('输出下载命令：','aria2c -o \"%s\" %s'%(title_str,url_pdf))
-    # subprocess.call('aria2c --all-proxy=\"172.18.116.150:11084\" -o \"%s\" %s'%(download_dir+title_str,url_pdf), shell=True)
+    logger.info('下载完成')
 
     x = "%s  %s %s.bib" % (paper_id, other_info['year'], other_info['authors'])
     x = x.replace('?', '？')\
@@ -63,19 +62,9 @@ def download_arxiv_(url_pdf):
 
 
 def get_name(_url_):
-    import os
     from bs4 import BeautifulSoup
-    print('正在获取文献名！')
-    print(_url_)
-
-    # arxiv_recall = {}
-    # if os.path.exists('./arxiv_recall.pkl'):
-    #     with open('./arxiv_recall.pkl', 'rb') as f:
-    #         arxiv_recall = pickle.load(f)
-
-    # if _url_ in arxiv_recall:
-    #     print('在缓存中')
-    #     return arxiv_recall[_url_]
+    logger.info('正在获取文献名！')
+    logger.info(_url_)
 
     proxies = get_conf('proxies')
     res = requests.get(_url_, proxies=proxies)
@@ -92,7 +81,7 @@ def get_name(_url_):
         other_details['abstract'] = abstract
     except:
         other_details['year'] = ''
-        print('年份获取失败')
+        logger.info('年份获取失败')
 
     # get author
     try:
@@ -101,7 +90,7 @@ def get_name(_url_):
         other_details['authors'] = authors
     except:
         other_details['authors'] = ''
-        print('authors获取失败')
+        logger.info('authors获取失败')
 
     # get comment
     try:
@@ -116,11 +105,11 @@ def get_name(_url_):
             other_details['comment'] = ''
     except:
         other_details['comment'] = ''
-        print('年份获取失败')
+        logger.info('年份获取失败')
 
     title_str = BeautifulSoup(
         res.text, 'html.parser').find('title').contents[0]
-    print('获取成功：', title_str)
+    logger.info('获取成功：', title_str)
     # arxiv_recall[_url_] = (title_str+'.pdf', other_details)
     # with open('./arxiv_recall.pkl', 'wb') as f:
     #     pickle.dump(arxiv_recall, f)

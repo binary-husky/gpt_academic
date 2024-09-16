@@ -13,11 +13,11 @@
 import json
 import time
 import gradio as gr
-import logging
 import traceback
 import requests
 import importlib
 import random
+from loguru import logger
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
@@ -81,7 +81,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
             retry += 1
             traceback.print_exc()
             if retry > MAX_RETRY: raise TimeoutError
-            if MAX_RETRY!=0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
+            if MAX_RETRY!=0: logger.error(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
 
     stream_response = response.iter_lines()
     result = ''
@@ -96,10 +96,10 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
             try:
                 if is_last_chunk:
                     # 判定为数据流的结束，gpt_replying_buffer也写完了
-                    logging.info(f'[response] {result}')
+                    logger.info(f'[response] {result}')
                     break
                 result += chunkjson['message']["content"]
-                if not console_slience: print(chunkjson['message']["content"], end='')
+                if not console_slience: logger.info(chunkjson['message']["content"], end='')
                 if observe_window is not None:
                     # 观测窗，把已经获取的数据显示出去
                     if len(observe_window) >= 1:
@@ -112,7 +112,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
                 chunk = get_full_error(chunk, stream_response)
                 chunk_decoded = chunk.decode()
                 error_msg = chunk_decoded
-                print(error_msg)
+                logger.error(error_msg)
                 raise RuntimeError("Json解析不合常规")
     return result
 
@@ -134,7 +134,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
     raw_input = inputs
-    logging.info(f'[raw_input] {raw_input}')
+    logger.info(f'[raw_input] {raw_input}')
     chatbot.append((inputs, ""))
     yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
 
@@ -183,7 +183,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                 try:
                     if is_last_chunk:
                         # 判定为数据流的结束，gpt_replying_buffer也写完了
-                        logging.info(f'[response] {gpt_replying_buffer}')
+                        logger.info(f'[response] {gpt_replying_buffer}')
                         break
                     # 处理数据流的主体
                     try:
@@ -202,7 +202,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     error_msg = chunk_decoded
                     chatbot, history = handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
                     yield from update_ui(chatbot=chatbot, history=history, msg="Json异常" + error_msg) # 刷新界面
-                    print(error_msg)
+                    logger.error(error_msg)
                     return
 
 def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg):
@@ -265,8 +265,5 @@ def generate_payload(inputs, llm_kwargs, history, system_prompt, stream):
         "messages": messages,
         "options": options,
     }
-    try:
-        print(f" {llm_kwargs['llm_model']} : {conversation_cnt} : {inputs[:100]} ..........")
-    except:
-        print('输入中可能存在乱码。')
+
     return headers,payload

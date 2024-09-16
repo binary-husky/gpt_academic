@@ -1,16 +1,17 @@
 # From project chatglm-langchain
 
-import threading
-from toolbox import Singleton
 import os
-import shutil
 import os
 import uuid
 import tqdm
+import shutil
+import threading
+import numpy as np
+from toolbox import Singleton
+from loguru import logger
 from langchain.vectorstores import FAISS
 from langchain.docstore.document import Document
 from typing import List, Tuple
-import numpy as np
 from crazy_functions.vector_fns.general_file_loader import load_file
 
 embedding_model_dict = {
@@ -150,17 +151,17 @@ class LocalDocQA:
         failed_files = []
         if isinstance(filepath, str):
             if not os.path.exists(filepath):
-                print("路径不存在")
+                logger.error("路径不存在")
                 return None
             elif os.path.isfile(filepath):
                 file = os.path.split(filepath)[-1]
                 try:
                     docs = load_file(filepath, SENTENCE_SIZE)
-                    print(f"{file} 已成功加载")
+                    logger.info(f"{file} 已成功加载")
                     loaded_files.append(filepath)
                 except Exception as e:
-                    print(e)
-                    print(f"{file} 未能成功加载")
+                    logger.error(e)
+                    logger.error(f"{file} 未能成功加载")
                     return None
             elif os.path.isdir(filepath):
                 docs = []
@@ -170,23 +171,23 @@ class LocalDocQA:
                         docs += load_file(fullfilepath, SENTENCE_SIZE)
                         loaded_files.append(fullfilepath)
                     except Exception as e:
-                        print(e)
+                        logger.error(e)
                         failed_files.append(file)
 
                 if len(failed_files) > 0:
-                    print("以下文件未能成功加载：")
+                    logger.error("以下文件未能成功加载：")
                     for file in failed_files:
-                        print(f"{file}\n")
+                        logger.error(f"{file}\n")
 
         else:
             docs = []
             for file in filepath:
                 docs += load_file(file, SENTENCE_SIZE)
-                print(f"{file} 已成功加载")
+                logger.info(f"{file} 已成功加载")
                 loaded_files.append(file)
 
         if len(docs) > 0:
-            print("文件加载完毕，正在生成向量库")
+            logger.info("文件加载完毕，正在生成向量库")
             if vs_path and os.path.isdir(vs_path):
                 try:
                     self.vector_store = FAISS.load_local(vs_path, text2vec)
@@ -233,7 +234,7 @@ class LocalDocQA:
         prompt += "\n\n".join([f"({k}): " + doc.page_content for k, doc in enumerate(related_docs_with_score)])
         prompt += "\n\n---\n\n"
         prompt = prompt.encode('utf-8', 'ignore').decode()   # avoid reading non-utf8 chars
-        # print(prompt)
+        # logger.info(prompt)
         response = {"query": query, "source_documents": related_docs_with_score}
         return response, prompt
 
@@ -262,7 +263,7 @@ def construct_vector_store(vs_id, vs_path, files, sentence_size, history, one_co
     else:
         pass
         # file_status = "文件未成功加载，请重新上传文件"
-    # print(file_status)
+    # logger.info(file_status)
     return local_doc_qa, vs_path
 
 @Singleton
@@ -278,7 +279,7 @@ class knowledge_archive_interface():
         if self.text2vec_large_chinese is None:
             # < -------------------预热文本向量化模组--------------- >
             from toolbox import ProxyNetworkActivate
-            print('Checking Text2vec ...')
+            logger.info('Checking Text2vec ...')
             from langchain.embeddings.huggingface import HuggingFaceEmbeddings
             with ProxyNetworkActivate('Download_LLM'):    # 临时地激活代理网络
                 self.text2vec_large_chinese = HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")

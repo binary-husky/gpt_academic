@@ -1,4 +1,5 @@
 import os
+from loguru import logger
 from toolbox import CatchException, update_ui, gen_time_str, promote_file_to_downloadzone
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from crazy_functions.crazy_utils import input_clipping
@@ -34,10 +35,10 @@ def eval_manim(code):
         return f'gpt_log/{time_str}.mp4'
     except subprocess.CalledProcessError as e:
         output = e.output.decode()
-        print(f"Command returned non-zero exit status {e.returncode}: {output}.")
+        logger.error(f"Command returned non-zero exit status {e.returncode}: {output}.")
         return f"Evaluating python script failed: {e.output}."
     except:
-        print('generating mp4 failed')
+        logger.error('generating mp4 failed')
         return "Generating mp4 failed."
 
 

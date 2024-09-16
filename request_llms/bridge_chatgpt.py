@@ -12,10 +12,11 @@ import json
 import os
 import re
 import time
-import logging
 import traceback
 import requests
 import random
+
+from loguru import logger
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
@@ -152,7 +153,7 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], 
             retry += 1
             traceback.print_exc()
             if retry > MAX_RETRY: raise TimeoutError
-            if MAX_RETRY!=0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
+            if MAX_RETRY!=0: logger.error(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
 
     if not stream:
         # 该分支仅适用于不支持stream的o1模型，其他情形一律不适用
@@ -191,7 +192,7 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], 
         if (not has_content) and (not has_role): continue # raise RuntimeError("发现不标准的第三方接口："+delta)
         if has_content: # has_role = True/False
             result += delta["content"]
-            if not console_slience: print(delta["content"], end='')
+            if not console_slience: logger.info(delta["content"], end='')
             if observe_window is not None:
                 # 观测窗，把已经获取的数据显示出去
                 if len(observe_window) >= 1:
@@ -337,7 +338,6 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
                     # 前者是API2D的结束条件，后者是OPENAI的结束条件
                     if ('data: [DONE]' in chunk_decoded) or (len(chunkjson['choices'][0]["delta"]) == 0):
                         # 判定为数据流的结束，gpt_replying_buffer也写完了
-                        # logging.info(f'[response] {gpt_replying_buffer}')
                         log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
                         break
                     # 处理数据流的主体
@@ -364,7 +364,7 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
                     error_msg = chunk_decoded
                     chatbot, history = handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
                     yield from update_ui(chatbot=chatbot, history=history, msg="Json解析异常" + error_msg) # 刷新界面
-                    print(error_msg)
+                    logger.error(error_msg)
                     return
         return  # return from stream-branch
 
@@ -524,7 +524,6 @@ def generate_payload(inputs:str, llm_kwargs:dict, history:list, system_prompt:st
             "gpt-3.5-turbo-16k-0613",
             "gpt-3.5-turbo-0301",
         ])
-        logging.info("Random select model:" + model)
 
     payload = {
         "model": model,
@@ -534,10 +533,7 @@ def generate_payload(inputs:str, llm_kwargs:dict, history:list, system_prompt:st
         "n": 1,
         "stream": stream,
     }
-    # try:
-    #     print(f" {llm_kwargs['llm_model']} : {conversation_cnt} : {inputs[:100]} ..........")
-    # except:
-    #     print('输入中可能存在乱码。')
+
     return headers,payload
 
 
