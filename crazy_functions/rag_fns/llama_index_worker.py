@@ -1,16 +1,12 @@
-import llama_index
-import os
 import atexit
 from typing import List
+
 from llama_index.core import Document
-from llama_index.core.schema import TextNode
-from request_llms.embed_models.openai_embed import OpenAiEmbeddingModel
-from shared_utils.connect_void_terminal import get_chat_default_kwargs
-from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
-from crazy_functions.rag_fns.vector_store_index import GptacVectorStoreIndex
 from llama_index.core.ingestion import run_transformations
-from llama_index.core import PromptTemplate
-from llama_index.core.response_synthesizers import TreeSummarize
+from llama_index.core.schema import TextNode
+
+from crazy_functions.rag_fns.vector_store_index import GptacVectorStoreIndex
+from request_llms.embed_models.openai_embed import OpenAiEmbeddingModel
 
 DEFAULT_QUERY_GENERATION_PROMPT = """\
 Now, you have context information as below:
@@ -74,7 +70,7 @@ class LlamaIndexRagWorker(SaveLoad):
         if auto_load_checkpoint:
             self.vs_index = self.load_from_checkpoint(checkpoint_dir)
         else:
-            self.vs_index = self.create_new_vs(checkpoint_dir)
+            self.vs_index = self.create_new_vs()
         atexit.register(lambda: self.save_to_checkpoint(checkpoint_dir))
 
     def assign_embedding_model(self):
@@ -84,46 +80,59 @@ class LlamaIndexRagWorker(SaveLoad):
         # This function is for debugging
         self.vs_index.storage_context.index_store.to_dict()
         docstore = self.vs_index.storage_context.docstore.docs
-        vector_store_preview = "\n".join([ f"{_id} | {tn.text}" for _id, tn in docstore.items() ])
+        vector_store_preview = "\n".join([f"{_id} | {tn.text}" for _id, tn in docstore.items()])
         print('\n++ --------inspect_vector_store begin--------')
         print(vector_store_preview)
         print('oo --------inspect_vector_store end--------')
         return vector_store_preview
 
-    def add_documents_to_vector_store(self, document_list):
-        documents = [Document(text=t) for t in document_list]
+    def add_documents_to_vector_store(self, document_list: List[Document]):
+        """
+        Adds a list of Document objects to the vector store after processing.
+        """
+        documents = document_list
         documents_nodes = run_transformations(
-                        documents,  # type: ignore
-                        self.vs_index._transformations,
-                        show_progress=True
-                    )
+            documents,  # type: ignore
+            self.vs_index._transformations,
+            show_progress=True
+        )
         self.vs_index.insert_nodes(documents_nodes)
-        if self.debug_mode: self.inspect_vector_store()
+        if self.debug_mode:
+            self.inspect_vector_store()
 
-    def add_text_to_vector_store(self, text):
+    def add_text_to_vector_store(self, text: str):
         node = TextNode(text=text)
         documents_nodes = run_transformations(
-                        [node],
-                        self.vs_index._transformations,
-                        show_progress=True
-                    )
+            [node],
+            self.vs_index._transformations,
+            show_progress=True
+        )
         self.vs_index.insert_nodes(documents_nodes)
-        if self.debug_mode: self.inspect_vector_store()
+        if self.debug_mode:
+            self.inspect_vector_store()
 
     def remember_qa(self, question, answer):
         formatted_str = QUESTION_ANSWER_RECORD.format(question=question, answer=answer)
         self.add_text_to_vector_store(formatted_str)
 
     def retrieve_from_store_with_query(self, query):
-        if self.debug_mode: self.inspect_vector_store()
+        if self.debug_mode:
+            self.inspect_vector_store()
         retriever = self.vs_index.as_retriever()
         return retriever.retrieve(query)
 
     def build_prompt(self, query, nodes):
         context_str = self.generate_node_array_preview(nodes)
         return DEFAULT_QUERY_GENERATION_PROMPT.format(context_str=context_str, query_str=query)
-        
+
     def generate_node_array_preview(self, nodes):
-        buf = "\n".join(([f"(No.{i+1} | score {n.score:.3f}): {n.text}" for i, n in enumerate(nodes)]))
-        if self.debug_mode: print(buf)
+        buf = "\n".join([f"(No.{i+1} | score {n.score:.3f}): {n.text}" for i, n in enumerate(nodes)])
+        if self.debug_mode:
+            print(buf)
         return buf
+
+    def purge_vector_store(self):
+        """
+        Purges the current vector store and creates a new one.
+        """
+        self.purge()
