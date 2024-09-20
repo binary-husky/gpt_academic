@@ -138,7 +138,7 @@ def get_core_functions():
 
 
         "参考文献转Bib": {
-            "Prefix":   r"Here are some bibliography items, please transform them into bibtex style."
+            "Prefix":   r"Here are some bibliography items, please transform them into biber style."
                         r"Note that, reference styles maybe more than one kind, you should transform each item correctly."
                         r"Items need to be transformed:" + "\n\n",
             "Visible":  False,

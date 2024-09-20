@@ -359,24 +359,24 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
 
         # https://stackoverflow.com/questions/738755/dont-make-me-manually-abort-a-latex-compile-when-theres-an-error
         yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 编译原始PDF ...', chatbot, history)   # 刷新Gradio前端界面
-        ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex', work_folder_original)
+        ok = compile_latex_with_timeout(f'xelatex -interaction=batchmode -file-line-error {main_file_original}.tex', work_folder_original)
 
         yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 编译转化后的PDF ...', chatbot, history)   # 刷新Gradio前端界面
-        ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex', work_folder_modified)
+        ok = compile_latex_with_timeout(f'xelatex -interaction=batchmode -file-line-error {main_file_modified}.tex', work_folder_modified)
 
         if ok and os.path.exists(pj(work_folder_modified, f'{main_file_modified}.pdf')):
             # 只有第二步成功，才能继续下面的步骤
             yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 编译BibTex ...', chatbot, history)    # 刷新Gradio前端界面
             if not os.path.exists(pj(work_folder_original, f'{main_file_original}.bbl')):
-                ok = compile_latex_with_timeout(f'bibtex  {main_file_original}.aux', work_folder_original)
+                ok = compile_latex_with_timeout(f'biber  {main_file_original}.aux', work_folder_original)
             if not os.path.exists(pj(work_folder_modified, f'{main_file_modified}.bbl')):
-                ok = compile_latex_with_timeout(f'bibtex  {main_file_modified}.aux', work_folder_modified)
+                ok = compile_latex_with_timeout(f'biber  {main_file_modified}.aux', work_folder_modified)
 
             yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 编译文献交叉引用 ...', chatbot, history)  # 刷新Gradio前端界面
-            ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex', work_folder_original)
-            ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex', work_folder_modified)
-            ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex', work_folder_original)
-            ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex', work_folder_modified)
+            ok = compile_latex_with_timeout(f'xelatex -interaction=batchmode -file-line-error {main_file_original}.tex', work_folder_original)
+            ok = compile_latex_with_timeout(f'xelatex -interaction=batchmode -file-line-error {main_file_modified}.tex', work_folder_modified)
+            ok = compile_latex_with_timeout(f'xelatex -interaction=batchmode -file-line-error {main_file_original}.tex', work_folder_original)
+            ok = compile_latex_with_timeout(f'xelatex -interaction=batchmode -file-line-error {main_file_modified}.tex', work_folder_modified)
 
             if mode!='translate_zh':
                 yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 使用latexdiff生成论文转化前后对比 ...', chatbot, history) # 刷新Gradio前端界面
@@ -384,10 +384,10 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
                 ok = compile_latex_with_timeout(f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex', os.getcwd())
 
                 yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 正在编译对比PDF ...', chatbot, history)   # 刷新Gradio前端界面
-                ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex', work_folder)
-                ok = compile_latex_with_timeout(f'bibtex    merge_diff.aux', work_folder)
-                ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex', work_folder)
-                ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex', work_folder)
+                ok = compile_latex_with_timeout(f'xelatex  -interaction=batchmode -file-line-error merge_diff.tex', work_folder)
+                ok = compile_latex_with_timeout(f'biber    merge_diff.aux', work_folder)
+                ok = compile_latex_with_timeout(f'xelatex  -interaction=batchmode -file-line-error merge_diff.tex', work_folder)
+                ok = compile_latex_with_timeout(f'xelatex  -interaction=batchmode -file-line-error merge_diff.tex', work_folder)
 
         # <---------- 检查结果 ----------->
         results_ = ""
