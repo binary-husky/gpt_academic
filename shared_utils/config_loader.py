@@ -94,7 +94,7 @@ def read_single_conf_with_lru_cache(arg):
         if r is None:
             log亮红('[PROXY] 网络代理状态：未配置。无代理状态下很可能无法访问OpenAI家族的模型。建议：检查USE_PROXY选项是否修改。')
         else:
-            log亮绿('[PROXY] 网络代理状态：已配置。配置信息如下：', r)
+            log亮绿('[PROXY] 网络代理状态：已配置。配置信息如下：', str(r))
             assert isinstance(r, dict), 'proxies格式错误，请注意proxies选项的格式，不要遗漏括号。'
     return r
 
