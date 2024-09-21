@@ -16,7 +16,10 @@ import logging
 import traceback
 import requests
 import random
-from proxy_utils import should_use_proxy
+from proxy_utils import selective_proxy_post
+
+# 应用装饰器到 requests.post
+requests.post = selective_proxy_post(requests.post)
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
@@ -147,13 +150,8 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], 
         try:
             # make a POST request to the API endpoint, stream=False
             endpoint = verify_endpoint(model_info[llm_kwargs['llm_model']]['endpoint'])
-            if should_use_proxy(endpoint):
-                response = requests.post(endpoint, headers=headers, proxies=proxies,
-                                        json=payload, stream=stream, timeout=TIMEOUT_SECONDS); break
-            else:
-                response = requests.post(endpoint, headers=headers,
-                                        json=payload, stream=stream, timeout=TIMEOUT_SECONDS); break
-                                    
+            response = requests.post(endpoint, headers=headers, proxies=proxies,
+                                    json=payload, stream=stream, timeout=TIMEOUT_SECONDS); break
         except requests.exceptions.ReadTimeout as e:
             retry += 1
             traceback.print_exc()
@@ -290,12 +288,8 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
     while True:
         try:
             # make a POST request to the API endpoint, stream=True
-            if should_use_proxy(endpoint):
-                response = requests.post(endpoint, headers=headers, proxies=proxies,
-                                        json=payload, stream=stream, timeout=TIMEOUT_SECONDS); break
-            else:
-                response = requests.post(endpoint, headers=headers,
-                                        json=payload, stream=stream, timeout=TIMEOUT_SECONDS); break
+            response = requests.post(endpoint, headers=headers, proxies=proxies,
+                                    json=payload, stream=stream, timeout=TIMEOUT_SECONDS); break            
         except:
             retry += 1
             chatbot[-1] = ((chatbot[-1][0], timeout_bot_msg))

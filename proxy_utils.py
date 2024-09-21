@@ -1,11 +1,12 @@
 # proxy_utils.py
 
+import functools
 import ipaddress
 from urllib.parse import urlparse
 from toolbox import get_conf
 
 # 从配置中读取 NO_PROXY_URLS
-NO_PROXY_URLS = get_conf('NO_PROXY_URLS') or [] 
+NO_PROXY_URLS = get_conf('NO_PROXY_URLS')
 
 def is_private_ip(ip_address):
     """
@@ -81,3 +82,22 @@ def should_use_proxy(url):
         # 如果解析URL或其他错误，默认使用代理
         return True
 
+def selective_proxy_post(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        # requests.post 总是期望 URL 作为第一个位置参数
+        if not args:
+            # 如果没有提供位置参数（这种情况实际上会导致原始 requests.post 抛出错误），
+            # 我们直接调用原函数，让它自己处理错误
+            return func(*args, **kwargs)
+
+        url = args[0]
+        if should_use_proxy(url):
+            # 如果应该使用代理，保持现有的 proxies 设置（如果有的话）
+            return func(*args, **kwargs)
+        else:
+            # 如果不应该使用代理，强制设置 proxies 为 None
+            kwargs['proxies'] = None
+            return func(*args, **kwargs)
+
+    return wrapper
