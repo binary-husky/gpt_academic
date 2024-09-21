@@ -82,7 +82,7 @@ def should_use_proxy(url):
         # 如果解析URL或其他错误，默认使用代理
         return True
 
-def selective_proxy_post(func):
+def selective_proxy(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         # requests.post 总是期望 URL 作为第一个位置参数

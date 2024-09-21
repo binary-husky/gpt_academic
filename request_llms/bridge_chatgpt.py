@@ -19,7 +19,7 @@ import random
 from proxy_utils import selective_proxy_post
 
 # 应用装饰器到 requests.post
-requests.post = selective_proxy_post(requests.post)
+requests.post = selective_proxy(requests.post)
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
