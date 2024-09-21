@@ -181,8 +181,8 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], 
                 raise RuntimeError("OpenAI拒绝了请求：" + error_msg)
         if ('data: [DONE]' in chunk_decoded): break # api2d 正常完成
         # 提前读取一些信息 （用于判断异常）
-        if has_choices and not choice_valid:
-            # 一些垃圾第三方接口的出现这样的错误
+        if (has_choices and not choice_valid) or ('OPENROUTER PROCESSING' in chunk_decoded):
+            # 一些垃圾第三方接口的出现这样的错误，openrouter的特殊处理
             continue
         json_data = chunkjson['choices'][0]
         delta = json_data["delta"]
