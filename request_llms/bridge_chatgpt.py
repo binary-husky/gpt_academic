@@ -16,7 +16,7 @@ import logging
 import traceback
 import requests
 import random
-from proxy_utils import selective_proxy_post
+from proxy_utils import selective_proxy
 
 # 应用装饰器到 requests.post
 requests.post = selective_proxy(requests.post)
