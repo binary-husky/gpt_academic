@@ -32,3 +32,9 @@ def read_one_api_model_name(model: str):
     else:
         max_token_tmp = 4096
     return model, max_token_tmp
+
+def read_openrouter_model_name(model: str):
+    """return real model name.
+    """
+    model_orign = re.sub("openrouter-", "", model)  # 从原字符串中删除 "(max_token=...)"
+    return model_orign

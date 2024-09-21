@@ -11,7 +11,7 @@
 import tiktoken, copy, re
 from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor
-from toolbox import get_conf, trimmed_format_exc, apply_gpt_academic_string_mask, read_one_api_model_name
+from toolbox import get_conf, trimmed_format_exc, apply_gpt_academic_string_mask, read_one_api_model_name, read_openrouter_model_name
 
 from .bridge_chatgpt import predict_no_ui_long_connection as chatgpt_noui
 from .bridge_chatgpt import predict as chatgpt_ui
@@ -1119,6 +1119,35 @@ if len(AZURE_CFG_ARRAY) > 0:
         if azure_model_name not in AVAIL_LLM_MODELS:
             AVAIL_LLM_MODELS += [azure_model_name]
 
+# -=-=-=-=-=-=- Openrouter模型对齐支持 -=-=-=-=-=-=-
+# 为了更灵活地接入Openrouter路由，设计了此接口
+for model in [m for m in AVAIL_LLM_MODELS if m.startswith("openrouter-")]:
+    from .bridge_openrouter import predict_no_ui_long_connection as openrouter_noui
+    from .bridge_openrouter import predict as openrouter_ui
+    break
+for model in [m for m in AVAIL_LLM_MODELS if m.startswith("openrouter-")]:
+    # try:
+    #     model = read_openrouter_model_name(model)
+    # except:
+    #     print(f"Openrouter模型 {model} 的配置方法错误，请检查配置文件。（注意：在原模型名称上加上openrouter-前缀）")
+    #     continue
+    model_info.update({
+        model: {
+            "fn_with_ui": openrouter_ui,
+            "fn_without_ui": openrouter_noui,
+            # 以下参数参考gpt-4o-mini的配置, 请根据实际情况修改
+            "endpoint": openai_endpoint,
+            "has_multimodal_capacity": True,
+            "max_token": 128000,
+            "tokenizer": tokenizer_gpt4,
+            "token_cnt": get_token_num_gpt4,
+        },
+    })
+    # 更新一下llm_kwargs的参数，否则会出现参数不匹配的问题
+    
+
+
+
 
 # -=-=-=-=-=-=--=-=-=-=-=-=--=-=-=-=-=-=--=-=-=-=-=-=-=-=
 # -=-=-=-=-=-=-=-=-=- ☝️ 以上是模型路由 -=-=-=-=-=-=-=-=-=
@@ -1259,10 +1288,12 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot,
 
     inputs = apply_gpt_academic_string_mask(inputs, mode="show_llm")
 
-    method = model_info[llm_kwargs['llm_model']]["fn_with_ui"]  # 如果这里报错，检查config中的AVAIL_LLM_MODELS选项
+    method = model_info[llm_kwargs['llm_model']]["fn_with_ui"]  # 如果这里报错，检查config中的AVAIL_LLM_MODELS选项，如果用openrouter模型，请在名称加前缀openrouter-。
 
     if additional_fn: # 根据基础功能区 ModelOverride 参数调整模型类型
         llm_kwargs, additional_fn, method = execute_model_override(llm_kwargs, additional_fn, method)
 
+    # 更新一下llm_kwargs的参数，否则会出现参数不匹配的问题
+    # llm_kwargs['llm_model'] = read_openrouter_model_name(llm_kwargs.get('llm_model'))
     yield from method(inputs, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, stream, additional_fn)
 
