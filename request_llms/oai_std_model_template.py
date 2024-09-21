@@ -224,7 +224,7 @@ def get_predict_function(
                 try:
                     if finish_reason == "stop":
                         if not console_slience:
-                            logger.info(f"[response] {result}")
+                            print(f"[response] {result}")
                         break
                     result += response_text
                     if observe_window is not None:

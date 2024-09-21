@@ -192,7 +192,7 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], 
         if (not has_content) and (not has_role): continue # raise RuntimeError("发现不标准的第三方接口："+delta)
         if has_content: # has_role = True/False
             result += delta["content"]
-            if not console_slience: logger.info(delta["content"], end='')
+            if not console_slience: print(delta["content"], end='')
             if observe_window is not None:
                 # 观测窗，把已经获取的数据显示出去
                 if len(observe_window) >= 1:

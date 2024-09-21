@@ -111,7 +111,7 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], 
         if chunkjson['event_type'] == 'stream-start': continue
         if chunkjson['event_type'] == 'text-generation':
             result += chunkjson["text"]
-            if not console_slience: logger.info(chunkjson["text"], end='')
+            if not console_slience: print(chunkjson["text"], end='')
             if observe_window is not None:
                 # 观测窗，把已经获取的数据显示出去
                 if len(observe_window) >= 1:

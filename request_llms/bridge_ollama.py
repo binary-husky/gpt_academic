@@ -99,7 +99,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
                     logger.info(f'[response] {result}')
                     break
                 result += chunkjson['message']["content"]
-                if not console_slience: logger.info(chunkjson['message']["content"], end='')
+                if not console_slience: print(chunkjson['message']["content"], end='')
                 if observe_window is not None:
                     # 观测窗，把已经获取的数据显示出去
                     if len(observe_window) >= 1:
