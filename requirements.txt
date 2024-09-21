@@ -6,7 +6,7 @@ zhipuai==2.0.1
 tiktoken>=0.3.3
 requests[socks]
 pydantic==2.5.2
-llama-index==0.10
+llama-index~=0.10
 protobuf==3.20
 transformers>=4.27.1,<4.42
 scipdf_parser>=0.52
