@@ -8,9 +8,17 @@
 > 2023.11.7: When installing dependencies, please select the **specified versions** in the `requirements.txt` file. Installation command: `pip install -r requirements.txt`.
 
 
-# <div align=center><img src="logo.png" width="40"> GPT Academic Optimization</div>
+# <div align=center><img src="logo.png" width="40"> GPT Academic</div>
 
-**If you like this project, please give it a Star.**
+<div align="center">
+    
+[简体中文](README.md) | **English** | [日本語](docs/README.Japanese.md) | [한국어](docs/README.Korean.md) | [Русский](docs/README.Russian.md) | [Français](docs/README.French.md)
+
+</div>
+
+
+**If you like this project, please give it a ⭐. If you have invented useful shortcut keys or plugins, please feel free to send Pull Requests!**
+
 To translate this project to arbitrary language with GPT, read and run [`multi_language.py`](multi_language.py) (experimental).
 
 > **Note**
