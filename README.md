@@ -46,7 +46,7 @@
 
 **如果喜欢这个项目，请给它一个⭐；如果您发明了好用的快捷键或插件，欢迎发Pull Requests！**
 
-If you like this project, please give it a Star. If you have invented useful shortcut keys or plugins, please feel free to send Pull Requests! All translations have been provided by the project itself. To translate this project to arbitrary language with GPT, read and run [`multi_language.py`](multi_language.py) (experimental).
+所有翻译均由项目本身提供。要使用GPT将此项目翻译成任意语言，请读取并运行[`multi_language.py`](multi_languages.py)（实验性）。
 <br>
 
 > [!NOTE]
