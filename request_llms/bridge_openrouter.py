@@ -363,7 +363,7 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
                     error_msg = chunk_decoded
                     chatbot, history = handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
                     yield from update_ui(chatbot=chatbot, history=history, msg="Json解析异常" + error_msg) # 刷新界面
-                    print(error_msg)
+                    logger.error(error_msg)
                     return
         return  # return from stream-branch
 
@@ -535,10 +535,7 @@ def generate_payload(inputs:str, llm_kwargs:dict, history:list, system_prompt:st
         "n": 1,
         "stream": stream,
     }
-    # try:
-    #     print(f" {llm_kwargs['llm_model']} : {conversation_cnt} : {inputs[:100]} ..........")
-    # except:
-    #     print('输入中可能存在乱码。')
+
     return headers,payload
 
 
