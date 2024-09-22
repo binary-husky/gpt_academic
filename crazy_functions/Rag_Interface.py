@@ -1,4 +1,4 @@
-import os
+import os,glob
 from typing import List
 
 from llama_index.core import Document
@@ -64,6 +64,7 @@ def handle_document_upload(files: List[str], llm_kwargs, plugin_kwargs, chatbot,
 
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
+# Main Q&A function with document upload support
 @CatchException
 def Rag问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     """
@@ -80,7 +81,6 @@ def Rag问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, u
     """
     # Define commands
     CLEAR_VECTOR_DB_CMD = "清空向量数据库"
-    UPLOAD_DOCUMENT_CMD = "上传文档"
 
     # 1. Retrieve RAG worker from global context
     user_name = chatbot.get_user()
@@ -100,13 +100,14 @@ def Rag问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, u
     tip = "提示：输入“清空向量数据库”可以清空RAG向量数据库"
 
     # 2. Handle special commands
-    if txt.startswith(UPLOAD_DOCUMENT_CMD):
+    if os.path.exists(txt):
+        project_folder = txt
+        validate_path_safety(project_folder, chatbot.get_user())
         # Extract file paths from the user input
         # Assuming the user inputs file paths separated by commas after the command
-        file_paths = txt[len(UPLOAD_DOCUMENT_CMD):].strip().split(',')
-        file_paths = [path.strip() for path in file_paths if path.strip()]
+        file_paths =  [f for f in glob.glob(f'{project_folder}/**/*', recursive=True)]
 
-        if not file_paths:
+        if not txt:
             report_exception(chatbot, history, a="上传文档", b="未提供任何文件路径。")
             yield from update_ui(chatbot=chatbot, history=history)
             return
@@ -126,7 +127,7 @@ def Rag问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, u
 
     # 3. Normal Q&A processing
     chatbot.append([txt, f'正在召回知识 ({current_context}) ...'])
-    yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
+    # yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
     # 4. Clip history to reduce token consumption
     txt_origin = txt
