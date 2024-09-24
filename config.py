@@ -35,9 +35,8 @@ else:
 #NO_PROXY_URLS = [
 #    'example.com',           # Entire domain and all subdomains
 #    '.internal.example.com', # Specific subdomain and all its subdomains
-#    'http://specific.example.com', # Specific URL
+#    'https://my-api.anthropic.io', # Specific URL
 #    '192.168.1.0/24',        # IP range in CIDR notation
-#    '10.0.0.0/8',            # Another IP range
 #    '2001:db8::/32',         # IPv6 range
 #    '*.example.org',         # Wildcard domain
 #]
