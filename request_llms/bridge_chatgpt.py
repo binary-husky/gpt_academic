@@ -238,7 +238,11 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
     if additional_fn is not None:
         from core_functional import handle_core_functionality
         inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
-
+    
+    # Add max_tokens to llm_kwargs if it's not already present
+    if 'max_tokens' not in llm_kwargs:
+        llm_kwargs['max_tokens'] = 1024 * 4  # You can adjust this default value as needed
+            
     # 多模态模型
     has_multimodal_capacity = model_info[llm_kwargs['llm_model']].get('has_multimodal_capacity', False)
     if has_multimodal_capacity:
@@ -289,13 +293,18 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
         try:
             # make a POST request to the API endpoint, stream=True
             response = requests.post(endpoint, headers=headers, proxies=proxies,
-                                    json=payload, stream=stream, timeout=TIMEOUT_SECONDS); break            
-        except:
+                                    json=payload, stream=stream, timeout=TIMEOUT_SECONDS)
+            response.raise_for_status()  # Raise an exception for bad status codes
+            break
+        except requests.exceptions.RequestException as e:
             retry += 1
-            chatbot[-1] = ((chatbot[-1][0], timeout_bot_msg))
+            error_msg = f"API request failed: {str(e)}"
+            chatbot[-1] = ((chatbot[-1][0], error_msg))
             retry_msg = f"，正在重试 ({retry}/{MAX_RETRY}) ……" if MAX_RETRY > 0 else ""
-            yield from update_ui(chatbot=chatbot, history=history, msg="请求超时"+retry_msg) # 刷新界面
-            if retry > MAX_RETRY: raise TimeoutError
+            yield from update_ui(chatbot=chatbot, history=history, msg="请求失败"+retry_msg) # 刷新界面
+            if retry > MAX_RETRY:
+                raise Exception(f"Max retries reached. Last error: {error_msg}")
+
 
 
     if not stream:
@@ -533,6 +542,7 @@ def generate_payload(inputs:str, llm_kwargs:dict, history:list, system_prompt:st
     payload = {
         "model": model,
         "messages": messages,
+        "max_tokens": llm_kwargs.get('max_tokens', 1024 * 4),  # You can adjust this default value as needed
         "temperature": llm_kwargs['temperature'],  # 1.0,
         "top_p": llm_kwargs['top_p'],  # 1.0,
         "n": 1,
