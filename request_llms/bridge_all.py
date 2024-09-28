@@ -1116,6 +1116,24 @@ if len(AZURE_CFG_ARRAY) > 0:
         if azure_model_name not in AVAIL_LLM_MODELS:
             AVAIL_LLM_MODELS += [azure_model_name]
 
+# -=-=-=-=-=-=- Openrouter模型对齐支持 -=-=-=-=-=-=-
+# 为了更灵活地接入Openrouter路由，设计了此接口
+for model in [m for m in AVAIL_LLM_MODELS if m.startswith("openrouter-")]:
+    from request_llms.bridge_openrouter import predict_no_ui_long_connection as openrouter_noui
+    from request_llms.bridge_openrouter import predict as openrouter_ui
+    model_info.update({
+        model: {
+            "fn_with_ui": openrouter_ui,
+            "fn_without_ui": openrouter_noui,
+            # 以下参数参考gpt-4o-mini的配置, 请根据实际情况修改
+            "endpoint": openai_endpoint,
+            "has_multimodal_capacity": True,
+            "max_token": 128000,
+            "tokenizer": tokenizer_gpt4,
+            "token_cnt": get_token_num_gpt4,
+        },
+    })
+
 
 # -=-=-=-=-=-=--=-=-=-=-=-=--=-=-=-=-=-=--=-=-=-=-=-=-=-=
 # -=-=-=-=-=-=-=-=-=- ☝️ 以上是模型路由 -=-=-=-=-=-=-=-=-=
@@ -1261,5 +1279,6 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot,
     if additional_fn: # 根据基础功能区 ModelOverride 参数调整模型类型
         llm_kwargs, additional_fn, method = execute_model_override(llm_kwargs, additional_fn, method)
 
+    # 更新一下llm_kwargs的参数，否则会出现参数不匹配的问题
     yield from method(inputs, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, stream, additional_fn)
 
