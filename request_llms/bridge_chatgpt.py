@@ -347,11 +347,13 @@ def predict(inputs: str, llm_kwargs: dict, plugin_kwargs: dict, chatbot: ChatBot
                     yield from update_ui(chatbot=chatbot, history=history, msg=error_msg)
                     return
 
+        # After the stream is complete, update with a completion message
+        yield from update_ui(chatbot=chatbot, history=history, msg="响应已完成")
+
         # If no content was added to the buffer, update with a default response
         if not gpt_replying_buffer.strip():
             chatbot[-1] = (inputs, "未能获取有效响应。请稍后再试。")
             yield from update_ui(chatbot=chatbot, history=history, msg="未能获取有效响应")
-
     return
 
 def handle_o1_model_special(response, inputs, llm_kwargs, chatbot, history):

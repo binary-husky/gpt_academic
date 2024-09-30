@@ -238,6 +238,10 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                 print(error_msg)
                 raise RuntimeError("Json解析不合常规")
 
+    # 在流式处理完成后，更新UI以表示响应已完成
+    yield from update_ui(chatbot=chatbot, history=history, msg="响应已完成")
+    return
+
 def multiple_picture_types(image_paths):
     """
     根据图片类型返回image/jpeg, image/png, image/gif, image/webp，无法判断则返回image/jpeg
