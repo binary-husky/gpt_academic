@@ -11,7 +11,7 @@ def not_chat_log_filter(record):
 
 def formatter_with_clip(record):
     # Note this function returns the string to be formatted, not the actual message to be logged
-    record["extra"]["serialized"] = "555555"
+    # record["extra"]["serialized"] = "555555"
     max_len = 12
     record['function_x'] = record['function'].center(max_len)
     if len(record['function_x']) > max_len:
