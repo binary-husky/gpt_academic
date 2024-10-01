@@ -244,7 +244,7 @@ def Latex英文纠错加PDF对比(txt, llm_kwargs, plugin_kwargs, chatbot, histo
     # <-------------- check deps ------------->
     try:
         import glob, os, time, subprocess
-        subprocess.Popen(['xelatex', '-version'])
+        subprocess.Popen(['pdflatex', '-version'])
         from .latex_fns.latex_actions import Latex精细分解与转化, 编译Latex
     except Exception as e:
         chatbot.append([f"解析项目: {txt}",
@@ -326,7 +326,7 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
     # <-------------- check deps ------------->
     try:
         import glob, os, time, subprocess
-        subprocess.Popen(['xelatex', '-version'])
+        subprocess.Popen(['pdflatex', '-version'])
         from .latex_fns.latex_actions import Latex精细分解与转化, 编译Latex
     except Exception as e:
         chatbot.append([f"解析项目: {txt}",
@@ -422,7 +422,7 @@ def PDF翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot, h
     # <-------------- check deps ------------->
     try:
         import glob, os, time, subprocess
-        subprocess.Popen(['xelatex', '-version'])
+        subprocess.Popen(['pdflatex', '-version'])
         from .latex_fns.latex_actions import Latex精细分解与转化, 编译Latex
     except Exception as e:
         chatbot.append([f"解析项目: {txt}",
