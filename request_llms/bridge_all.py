@@ -1,1284 +1,547 @@
-
 """
-    该文件中主要包含2个函数，是所有LLM的通用接口，它们会继续向下调用更底层的LLM模型，处理多模型并行等细节
+    该文件中主要包含三个函数
 
-    不具备多线程能力的函数：正常对话时使用，具备完备的交互功能，不可多线程
-    1. predict(...)
+    不具备多线程能力的函数：
+    1. predict: 正常对话时使用，具备完备的交互功能，不可多线程
 
-    具备多线程调用能力的函数：在函数插件中被调用，灵活而简洁
-    2. predict_no_ui_long_connection(...)
+    具备多线程调用能力的函数
+    2. predict_no_ui_long_connection：支持多线程
 """
-import tiktoken, copy, re
+
+import json
+import os
+import re
+import time
+import traceback
+import requests
+import random
+
 from loguru import logger
-from functools import lru_cache
-from concurrent.futures import ThreadPoolExecutor
-from toolbox import get_conf, trimmed_format_exc, apply_gpt_academic_string_mask, read_one_api_model_name
 
-from .bridge_chatgpt import predict_no_ui_long_connection as chatgpt_noui
-from .bridge_chatgpt import predict as chatgpt_ui
+# config_private.py放自己的秘密如API和代理网址
+# 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
+from toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history
+from toolbox import trimmed_format_exc, is_the_upload_folder, read_one_api_model_name, log_chat
+from toolbox import ChatBotWithCookies, have_any_recent_upload_image_files, encode_image
+proxies, TIMEOUT_SECONDS, MAX_RETRY, API_ORG, AZURE_CFG_ARRAY = \
+    get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'API_ORG', 'AZURE_CFG_ARRAY')
 
-from .bridge_chatgpt_vision import predict_no_ui_long_connection as chatgpt_vision_noui
-from .bridge_chatgpt_vision import predict as chatgpt_vision_ui
+timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check proxy settings in config.py.' + \
+                  '网络错误，检查代理服务器是否可用，以及代理设置的格式是否正确，格式须是[协议]://[地址]:[端口]，缺一不可。'
 
-from .bridge_chatglm import predict_no_ui_long_connection as chatglm_noui
-from .bridge_chatglm import predict as chatglm_ui
-
-from .bridge_chatglm3 import predict_no_ui_long_connection as chatglm3_noui
-from .bridge_chatglm3 import predict as chatglm3_ui
-
-from .bridge_qianfan import predict_no_ui_long_connection as qianfan_noui
-from .bridge_qianfan import predict as qianfan_ui
-
-from .bridge_google_gemini import predict as genai_ui
-from .bridge_google_gemini import predict_no_ui_long_connection  as genai_noui
-
-from .bridge_zhipu import predict_no_ui_long_connection as zhipu_noui
-from .bridge_zhipu import predict as zhipu_ui
-
-from .bridge_taichu import predict_no_ui_long_connection as taichu_noui
-from .bridge_taichu import predict as taichu_ui
-
-from .bridge_cohere import predict as cohere_ui
-from .bridge_cohere import predict_no_ui_long_connection as cohere_noui
-
-from .oai_std_model_template import get_predict_function
-
-colors = ['#FF00FF', '#00FFFF', '#FF0000', '#990099', '#009999', '#990044']
-
-class LazyloadTiktoken(object):
-    def __init__(self, model):
-        self.model = model
-
-    @staticmethod
-    @lru_cache(maxsize=128)
-    def get_encoder(model):
-        logger.info('正在加载tokenizer，如果是第一次运行，可能需要一点时间下载参数')
-        tmp = tiktoken.encoding_for_model(model)
-        logger.info('加载tokenizer完毕')
-        return tmp
-
-    def encode(self, *args, **kwargs):
-        encoder = self.get_encoder(self.model)
-        return encoder.encode(*args, **kwargs)
-
-    def decode(self, *args, **kwargs):
-        encoder = self.get_encoder(self.model)
-        return encoder.decode(*args, **kwargs)
-
-# Endpoint 重定向
-API_URL_REDIRECT, AZURE_ENDPOINT, AZURE_ENGINE = get_conf("API_URL_REDIRECT", "AZURE_ENDPOINT", "AZURE_ENGINE")
-openai_endpoint = "https://api.openai.com/v1/chat/completions"
-api2d_endpoint = "https://openai.api2d.net/v1/chat/completions"
-newbing_endpoint = "wss://sydney.bing.com/sydney/ChatHub"
-gemini_endpoint = "https://generativelanguage.googleapis.com/v1beta/models"
-claude_endpoint = "https://api.anthropic.com/v1/messages"
-cohere_endpoint = "https://api.cohere.ai/v1/chat"
-ollama_endpoint = "http://localhost:11434/api/chat"
-yimodel_endpoint = "https://api.lingyiwanwu.com/v1/chat/completions"
-deepseekapi_endpoint = "https://api.deepseek.com/v1/chat/completions"
-
-if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
-azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
-# 兼容旧版的配置
-try:
-    API_URL = get_conf("API_URL")
-    if API_URL != "https://api.openai.com/v1/chat/completions":
-        openai_endpoint = API_URL
-        logger.warning("警告！API_URL配置选项将被弃用，请更换为API_URL_REDIRECT配置")
-except:
-    pass
-# 新版配置
-if openai_endpoint in API_URL_REDIRECT: openai_endpoint = API_URL_REDIRECT[openai_endpoint]
-if api2d_endpoint in API_URL_REDIRECT: api2d_endpoint = API_URL_REDIRECT[api2d_endpoint]
-if newbing_endpoint in API_URL_REDIRECT: newbing_endpoint = API_URL_REDIRECT[newbing_endpoint]
-if gemini_endpoint in API_URL_REDIRECT: gemini_endpoint = API_URL_REDIRECT[gemini_endpoint]
-if claude_endpoint in API_URL_REDIRECT: claude_endpoint = API_URL_REDIRECT[claude_endpoint]
-if cohere_endpoint in API_URL_REDIRECT: cohere_endpoint = API_URL_REDIRECT[cohere_endpoint]
-if ollama_endpoint in API_URL_REDIRECT: ollama_endpoint = API_URL_REDIRECT[ollama_endpoint]
-if yimodel_endpoint in API_URL_REDIRECT: yimodel_endpoint = API_URL_REDIRECT[yimodel_endpoint]
-if deepseekapi_endpoint in API_URL_REDIRECT: deepseekapi_endpoint = API_URL_REDIRECT[deepseekapi_endpoint]
-
-# 获取tokenizer
-tokenizer_gpt35 = LazyloadTiktoken("gpt-3.5-turbo")
-tokenizer_gpt4 = LazyloadTiktoken("gpt-4")
-get_token_num_gpt35 = lambda txt: len(tokenizer_gpt35.encode(txt, disallowed_special=()))
-get_token_num_gpt4 = lambda txt: len(tokenizer_gpt4.encode(txt, disallowed_special=()))
-
-
-# 开始初始化模型
-AVAIL_LLM_MODELS, LLM_MODEL = get_conf("AVAIL_LLM_MODELS", "LLM_MODEL")
-AVAIL_LLM_MODELS = AVAIL_LLM_MODELS + [LLM_MODEL]
-# -=-=-=-=-=-=- 以下这部分是最早加入的最稳定的模型 -=-=-=-=-=-=-
-model_info = {
-    # openai
-    "gpt-3.5-turbo": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": openai_endpoint,
-        "max_token": 16385,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-
-    "taichu": {
-        "fn_with_ui": taichu_ui,
-        "fn_without_ui": taichu_noui,
-        "endpoint": openai_endpoint,
-        "max_token": 4096,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-
-    "gpt-3.5-turbo-16k": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": openai_endpoint,
-        "max_token": 16385,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-
-    "gpt-3.5-turbo-0613": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": openai_endpoint,
-        "max_token": 4096,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-
-    "gpt-3.5-turbo-16k-0613": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": openai_endpoint,
-        "max_token": 16385,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-
-    "gpt-3.5-turbo-1106": { #16k
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": openai_endpoint,
-        "max_token": 16385,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-
-    "gpt-3.5-turbo-0125": { #16k
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": openai_endpoint,
-        "max_token": 16385,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-
-    "gpt-4": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": openai_endpoint,
-        "max_token": 8192,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
-    },
-
-    "gpt-4-32k": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": openai_endpoint,
-        "max_token": 32768,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
-    },
-
-    "gpt-4o": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": openai_endpoint,
-        "has_multimodal_capacity": True,
-        "max_token": 128000,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
-    },
-
-    "gpt-4o-mini": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": openai_endpoint,
-        "has_multimodal_capacity": True,
-        "max_token": 128000,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
-    },
-
-    "gpt-4o-2024-05-13": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "has_multimodal_capacity": True,
-        "endpoint": openai_endpoint,
-        "max_token": 128000,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
-    },
-
-    "gpt-4-turbo-preview": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": openai_endpoint,
-        "max_token": 128000,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
-    },
-
-    "gpt-4-1106-preview": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": openai_endpoint,
-        "max_token": 128000,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
-    },
-
-    "gpt-4-0125-preview": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": openai_endpoint,
-        "max_token": 128000,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
-    },
-
-    "o1-preview": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": openai_endpoint,
-        "max_token": 128000,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
-    },
-    "o1-mini": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": openai_endpoint,
-        "max_token": 128000,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
-    },
-
-    "gpt-4-turbo": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "has_multimodal_capacity": True,
-        "endpoint": openai_endpoint,
-        "max_token": 128000,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
-    },
-
-    "gpt-4-turbo-2024-04-09": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "has_multimodal_capacity": True,
-        "endpoint": openai_endpoint,
-        "max_token": 128000,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
-    },
-
-    "gpt-3.5-random": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": openai_endpoint,
-        "max_token": 4096,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
-    },
-
-    "gpt-4-vision-preview": {
-        "fn_with_ui": chatgpt_vision_ui,
-        "fn_without_ui": chatgpt_vision_noui,
-        "endpoint": openai_endpoint,
-        "max_token": 4096,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
-    },
-
-
-    # azure openai
-    "azure-gpt-3.5":{
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": azure_endpoint,
-        "max_token": 4096,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-
-    "azure-gpt-4":{
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": azure_endpoint,
-        "max_token": 8192,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
-    },
-
-    # 智谱AI
-    "glm-4": {
-        "fn_with_ui": zhipu_ui,
-        "fn_without_ui": zhipu_noui,
-        "endpoint": None,
-        "max_token": 10124 * 8,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-    "glm-4-0520": {
-        "fn_with_ui": zhipu_ui,
-        "fn_without_ui": zhipu_noui,
-        "endpoint": None,
-        "max_token": 10124 * 8,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-    "glm-4-air": {
-        "fn_with_ui": zhipu_ui,
-        "fn_without_ui": zhipu_noui,
-        "endpoint": None,
-        "max_token": 10124 * 8,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-    "glm-4-airx": {
-        "fn_with_ui": zhipu_ui,
-        "fn_without_ui": zhipu_noui,
-        "endpoint": None,
-        "max_token": 10124 * 8,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-    "glm-4-flash": {
-         "fn_with_ui": zhipu_ui,
-        "fn_without_ui": zhipu_noui,
-        "endpoint": None,
-        "max_token": 10124 * 8,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,       
-    },
-    "glm-4v": {
-        "fn_with_ui": zhipu_ui,
-        "fn_without_ui": zhipu_noui,
-        "endpoint": None,
-        "max_token": 1000,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-    "glm-3-turbo": {
-        "fn_with_ui": zhipu_ui,
-        "fn_without_ui": zhipu_noui,
-        "endpoint": None,
-        "max_token": 10124 * 4,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-
-    # api_2d (此后不需要在此处添加api2d的接口了，因为下面的代码会自动添加)
-    "api2d-gpt-4": {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "endpoint": api2d_endpoint,
-        "max_token": 8192,
-        "tokenizer": tokenizer_gpt4,
-        "token_cnt": get_token_num_gpt4,
-    },
-
-    # 将 chatglm 直接对齐到 chatglm2
-    "chatglm": {
-        "fn_with_ui": chatglm_ui,
-        "fn_without_ui": chatglm_noui,
-        "endpoint": None,
-        "max_token": 1024,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-    "chatglm2": {
-        "fn_with_ui": chatglm_ui,
-        "fn_without_ui": chatglm_noui,
-        "endpoint": None,
-        "max_token": 1024,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-    "chatglm3": {
-        "fn_with_ui": chatglm3_ui,
-        "fn_without_ui": chatglm3_noui,
-        "endpoint": None,
-        "max_token": 8192,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-    "qianfan": {
-        "fn_with_ui": qianfan_ui,
-        "fn_without_ui": qianfan_noui,
-        "endpoint": None,
-        "max_token": 2000,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-    # Gemini
-    # Note: now gemini-pro is an alias of gemini-1.0-pro.
-    # Warning: gemini-pro-vision has been deprecated.
-    # Support for gemini-pro-vision has been removed.
-    "gemini-pro": {
-        "fn_with_ui": genai_ui,
-        "fn_without_ui": genai_noui,
-        "endpoint": gemini_endpoint,
-        "has_multimodal_capacity": False,
-        "max_token": 1024 * 32,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-    "gemini-1.0-pro": {
-        "fn_with_ui": genai_ui,
-        "fn_without_ui": genai_noui,
-        "endpoint": gemini_endpoint,
-        "has_multimodal_capacity": False,
-        "max_token": 1024 * 32,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-    "gemini-1.5-pro": {
-        "fn_with_ui": genai_ui,
-        "fn_without_ui": genai_noui,
-        "endpoint": gemini_endpoint,
-        "has_multimodal_capacity": True,
-        "max_token": 1024 * 204800,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-    "gemini-1.5-flash": {
-        "fn_with_ui": genai_ui,
-        "fn_without_ui": genai_noui,
-        "endpoint": gemini_endpoint,
-        "has_multimodal_capacity": True,
-        "max_token": 1024 * 204800,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-
-    # cohere
-    "cohere-command-r-plus": {
-        "fn_with_ui": cohere_ui,
-        "fn_without_ui": cohere_noui,
-        "can_multi_thread": True,
-        "endpoint": cohere_endpoint,
-        "max_token": 1024 * 4,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-
-}
-# -=-=-=-=-=-=- 月之暗面 -=-=-=-=-=-=-
-from request_llms.bridge_moonshot import predict as moonshot_ui
-from request_llms.bridge_moonshot import predict_no_ui_long_connection as moonshot_no_ui
-model_info.update({
-    "moonshot-v1-8k": {
-        "fn_with_ui": moonshot_ui,
-        "fn_without_ui": moonshot_no_ui,
-        "can_multi_thread": True,
-        "endpoint": None,
-        "max_token": 1024 * 8,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-    "moonshot-v1-32k": {
-        "fn_with_ui": moonshot_ui,
-        "fn_without_ui": moonshot_no_ui,
-        "can_multi_thread": True,
-        "endpoint": None,
-        "max_token": 1024 * 32,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    },
-    "moonshot-v1-128k": {
-        "fn_with_ui": moonshot_ui,
-        "fn_without_ui": moonshot_no_ui,
-        "can_multi_thread": True,
-        "endpoint": None,
-        "max_token": 1024 * 128,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    }
-})
-# -=-=-=-=-=-=- api2d 对齐支持 -=-=-=-=-=-=-
-for model in AVAIL_LLM_MODELS:
-    if model.startswith('api2d-') and (model.replace('api2d-','') in model_info.keys()):
-        mi = copy.deepcopy(model_info[model.replace('api2d-','')])
-        mi.update({"endpoint": api2d_endpoint})
-        model_info.update({model: mi})
-
-# -=-=-=-=-=-=- azure 对齐支持 -=-=-=-=-=-=-
-for model in AVAIL_LLM_MODELS:
-    if model.startswith('azure-') and (model.replace('azure-','') in model_info.keys()):
-        mi = copy.deepcopy(model_info[model.replace('azure-','')])
-        mi.update({"endpoint": azure_endpoint})
-        model_info.update({model: mi})
-
-# -=-=-=-=-=-=- 以下部分是新加入的模型，可能附带额外依赖 -=-=-=-=-=-=-
-# claude家族
-claude_models = ["claude-instant-1.2","claude-2.0","claude-2.1","claude-3-haiku-20240307","claude-3-sonnet-20240229","claude-3-opus-20240229","claude-3-5-sonnet-20240620"]
-if any(item in claude_models for item in AVAIL_LLM_MODELS):
-    from .bridge_claude import predict_no_ui_long_connection as claude_noui
-    from .bridge_claude import predict as claude_ui
-    model_info.update({
-        "claude-instant-1.2": {
-            "fn_with_ui": claude_ui,
-            "fn_without_ui": claude_noui,
-            "endpoint": claude_endpoint,
-            "max_token": 100000,
-            "tokenizer": tokenizer_gpt35,
-            "token_cnt": get_token_num_gpt35,
-        },
-    })
-    model_info.update({
-        "claude-2.0": {
-            "fn_with_ui": claude_ui,
-            "fn_without_ui": claude_noui,
-            "endpoint": claude_endpoint,
-            "max_token": 100000,
-            "tokenizer": tokenizer_gpt35,
-            "token_cnt": get_token_num_gpt35,
-        },
-    })
-    model_info.update({
-        "claude-2.1": {
-            "fn_with_ui": claude_ui,
-            "fn_without_ui": claude_noui,
-            "endpoint": claude_endpoint,
-            "max_token": 200000,
-            "tokenizer": tokenizer_gpt35,
-            "token_cnt": get_token_num_gpt35,
-        },
-    })
-    model_info.update({
-        "claude-3-haiku-20240307": {
-            "fn_with_ui": claude_ui,
-            "fn_without_ui": claude_noui,
-            "endpoint": claude_endpoint,
-            "max_token": 200000,
-            "tokenizer": tokenizer_gpt35,
-            "token_cnt": get_token_num_gpt35,
-        },
-    })
-    model_info.update({
-        "claude-3-sonnet-20240229": {
-            "fn_with_ui": claude_ui,
-            "fn_without_ui": claude_noui,
-            "endpoint": claude_endpoint,
-            "max_token": 200000,
-            "tokenizer": tokenizer_gpt35,
-            "token_cnt": get_token_num_gpt35,
-        },
-    })
-    model_info.update({
-        "claude-3-opus-20240229": {
-            "fn_with_ui": claude_ui,
-            "fn_without_ui": claude_noui,
-            "endpoint": claude_endpoint,
-            "max_token": 200000,
-            "tokenizer": tokenizer_gpt35,
-            "token_cnt": get_token_num_gpt35,
-        },
-    })
-    model_info.update({
-        "claude-3-5-sonnet-20240620": {
-            "fn_with_ui": claude_ui,
-            "fn_without_ui": claude_noui,
-            "endpoint": claude_endpoint,
-            "max_token": 200000,
-            "tokenizer": tokenizer_gpt35,
-            "token_cnt": get_token_num_gpt35,
-        },
-    })    
-if "jittorllms_rwkv" in AVAIL_LLM_MODELS:
-    from .bridge_jittorllms_rwkv import predict_no_ui_long_connection as rwkv_noui
-    from .bridge_jittorllms_rwkv import predict as rwkv_ui
-    model_info.update({
-        "jittorllms_rwkv": {
-            "fn_with_ui": rwkv_ui,
-            "fn_without_ui": rwkv_noui,
-            "endpoint": None,
-            "max_token": 1024,
-            "tokenizer": tokenizer_gpt35,
-            "token_cnt": get_token_num_gpt35,
-        },
-    })
-if "jittorllms_llama" in AVAIL_LLM_MODELS:
-    from .bridge_jittorllms_llama import predict_no_ui_long_connection as llama_noui
-    from .bridge_jittorllms_llama import predict as llama_ui
-    model_info.update({
-        "jittorllms_llama": {
-            "fn_with_ui": llama_ui,
-            "fn_without_ui": llama_noui,
-            "endpoint": None,
-            "max_token": 1024,
-            "tokenizer": tokenizer_gpt35,
-            "token_cnt": get_token_num_gpt35,
-        },
-    })
-if "jittorllms_pangualpha" in AVAIL_LLM_MODELS:
-    from .bridge_jittorllms_pangualpha import predict_no_ui_long_connection as pangualpha_noui
-    from .bridge_jittorllms_pangualpha import predict as pangualpha_ui
-    model_info.update({
-        "jittorllms_pangualpha": {
-            "fn_with_ui": pangualpha_ui,
-            "fn_without_ui": pangualpha_noui,
-            "endpoint": None,
-            "max_token": 1024,
-            "tokenizer": tokenizer_gpt35,
-            "token_cnt": get_token_num_gpt35,
-        },
-    })
-if "moss" in AVAIL_LLM_MODELS:
-    from .bridge_moss import predict_no_ui_long_connection as moss_noui
-    from .bridge_moss import predict as moss_ui
-    model_info.update({
-        "moss": {
-            "fn_with_ui": moss_ui,
-            "fn_without_ui": moss_noui,
-            "endpoint": None,
-            "max_token": 1024,
-            "tokenizer": tokenizer_gpt35,
-            "token_cnt": get_token_num_gpt35,
-        },
-    })
-if "stack-claude" in AVAIL_LLM_MODELS:
-    from .bridge_stackclaude import predict_no_ui_long_connection as claude_noui
-    from .bridge_stackclaude import predict as claude_ui
-    model_info.update({
-        "stack-claude": {
-            "fn_with_ui": claude_ui,
-            "fn_without_ui": claude_noui,
-            "endpoint": None,
-            "max_token": 8192,
-            "tokenizer": tokenizer_gpt35,
-            "token_cnt": get_token_num_gpt35,
-        }
-    })
-if "newbing" in AVAIL_LLM_MODELS:   # same with newbing-free
-    try:
-        from .bridge_newbingfree import predict_no_ui_long_connection as newbingfree_noui
-        from .bridge_newbingfree import predict as newbingfree_ui
-        model_info.update({
-            "newbing": {
-                "fn_with_ui": newbingfree_ui,
-                "fn_without_ui": newbingfree_noui,
-                "endpoint": newbing_endpoint,
-                "max_token": 4096,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            }
-        })
-    except:
-        logger.error(trimmed_format_exc())
-if "chatglmft" in AVAIL_LLM_MODELS:   # same with newbing-free
-    try:
-        from .bridge_chatglmft import predict_no_ui_long_connection as chatglmft_noui
-        from .bridge_chatglmft import predict as chatglmft_ui
-        model_info.update({
-            "chatglmft": {
-                "fn_with_ui": chatglmft_ui,
-                "fn_without_ui": chatglmft_noui,
-                "endpoint": None,
-                "max_token": 4096,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            }
-        })
-    except:
-        logger.error(trimmed_format_exc())
-# -=-=-=-=-=-=- 上海AI-LAB书生大模型 -=-=-=-=-=-=-
-if "internlm" in AVAIL_LLM_MODELS:
-    try:
-        from .bridge_internlm import predict_no_ui_long_connection as internlm_noui
-        from .bridge_internlm import predict as internlm_ui
-        model_info.update({
-            "internlm": {
-                "fn_with_ui": internlm_ui,
-                "fn_without_ui": internlm_noui,
-                "endpoint": None,
-                "max_token": 4096,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            }
-        })
-    except:
-        logger.error(trimmed_format_exc())
-if "chatglm_onnx" in AVAIL_LLM_MODELS:
-    try:
-        from .bridge_chatglmonnx import predict_no_ui_long_connection as chatglm_onnx_noui
-        from .bridge_chatglmonnx import predict as chatglm_onnx_ui
-        model_info.update({
-            "chatglm_onnx": {
-                "fn_with_ui": chatglm_onnx_ui,
-                "fn_without_ui": chatglm_onnx_noui,
-                "endpoint": None,
-                "max_token": 4096,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            }
-        })
-    except:
-        logger.error(trimmed_format_exc())
-# -=-=-=-=-=-=- 通义-本地模型 -=-=-=-=-=-=-
-if "qwen-local" in AVAIL_LLM_MODELS:
-    try:
-        from .bridge_qwen_local import predict_no_ui_long_connection as qwen_local_noui
-        from .bridge_qwen_local import predict as qwen_local_ui
-        model_info.update({
-            "qwen-local": {
-                "fn_with_ui": qwen_local_ui,
-                "fn_without_ui": qwen_local_noui,
-                "can_multi_thread": False,
-                "endpoint": None,
-                "max_token": 4096,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            }
-        })
-    except:
-        logger.error(trimmed_format_exc())
-# -=-=-=-=-=-=- 通义-在线模型 -=-=-=-=-=-=-
-if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-max" in AVAIL_LLM_MODELS:   # zhipuai
-    try:
-        from .bridge_qwen import predict_no_ui_long_connection as qwen_noui
-        from .bridge_qwen import predict as qwen_ui
-        model_info.update({
-            "qwen-turbo": {
-                "fn_with_ui": qwen_ui,
-                "fn_without_ui": qwen_noui,
-                "can_multi_thread": True,
-                "endpoint": None,
-                "max_token": 6144,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            },
-            "qwen-plus": {
-                "fn_with_ui": qwen_ui,
-                "fn_without_ui": qwen_noui,
-                "can_multi_thread": True,
-                "endpoint": None,
-                "max_token": 30720,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            },
-            "qwen-max": {
-                "fn_with_ui": qwen_ui,
-                "fn_without_ui": qwen_noui,
-                "can_multi_thread": True,
-                "endpoint": None,
-                "max_token": 28672,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            }
-        })
-    except:
-        logger.error(trimmed_format_exc())
-# -=-=-=-=-=-=- 零一万物模型 -=-=-=-=-=-=-
-yi_models = ["yi-34b-chat-0205","yi-34b-chat-200k","yi-large","yi-medium","yi-spark","yi-large-turbo","yi-large-preview"]
-if any(item in yi_models for item in AVAIL_LLM_MODELS):
-    try:
-        yimodel_4k_noui, yimodel_4k_ui = get_predict_function(
-            api_key_conf_name="YIMODEL_API_KEY", max_output_token=600, disable_proxy=False
-            )
-        yimodel_16k_noui, yimodel_16k_ui = get_predict_function(
-            api_key_conf_name="YIMODEL_API_KEY", max_output_token=4000, disable_proxy=False
-            )
-        yimodel_200k_noui, yimodel_200k_ui = get_predict_function(
-            api_key_conf_name="YIMODEL_API_KEY", max_output_token=4096, disable_proxy=False
-            )
-        model_info.update({
-            "yi-34b-chat-0205": {
-                "fn_with_ui": yimodel_4k_ui,
-                "fn_without_ui": yimodel_4k_noui,
-                "can_multi_thread": False,  # 目前来说，默认情况下并发量极低，因此禁用
-                "endpoint": yimodel_endpoint,
-                "max_token": 4000,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            },
-            "yi-34b-chat-200k": {
-                "fn_with_ui": yimodel_200k_ui,
-                "fn_without_ui": yimodel_200k_noui,
-                "can_multi_thread": False,  # 目前来说，默认情况下并发量极低，因此禁用
-                "endpoint": yimodel_endpoint,
-                "max_token": 200000,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            },
-            "yi-large": {
-                "fn_with_ui": yimodel_16k_ui,
-                "fn_without_ui": yimodel_16k_noui,
-                "can_multi_thread": False,  # 目前来说，默认情况下并发量极低，因此禁用
-                "endpoint": yimodel_endpoint,
-                "max_token": 16000,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            },
-            "yi-medium": {
-                "fn_with_ui": yimodel_16k_ui,
-                "fn_without_ui": yimodel_16k_noui,
-                "can_multi_thread": True,  # 这个并发量稍微大一点
-                "endpoint": yimodel_endpoint,
-                "max_token": 16000,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            },
-            "yi-spark": {
-                "fn_with_ui": yimodel_16k_ui,
-                "fn_without_ui": yimodel_16k_noui,
-                "can_multi_thread": True,  # 这个并发量稍微大一点
-                "endpoint": yimodel_endpoint,
-                "max_token": 16000,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            },
-            "yi-large-turbo": {
-                "fn_with_ui": yimodel_16k_ui,
-                "fn_without_ui": yimodel_16k_noui,
-                "can_multi_thread": False,  # 目前来说，默认情况下并发量极低，因此禁用
-                "endpoint": yimodel_endpoint,
-                "max_token": 16000,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            },
-            "yi-large-preview": {
-                "fn_with_ui": yimodel_16k_ui,
-                "fn_without_ui": yimodel_16k_noui,
-                "can_multi_thread": False,  # 目前来说，默认情况下并发量极低，因此禁用
-                "endpoint": yimodel_endpoint,
-                "max_token": 16000,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            },
-        })
-    except:
-        logger.error(trimmed_format_exc())
-# -=-=-=-=-=-=- 讯飞星火认知大模型 -=-=-=-=-=-=-
-if "spark" in AVAIL_LLM_MODELS:
-    try:
-        from .bridge_spark import predict_no_ui_long_connection as spark_noui
-        from .bridge_spark import predict as spark_ui
-        model_info.update({
-            "spark": {
-                "fn_with_ui": spark_ui,
-                "fn_without_ui": spark_noui,
-                "can_multi_thread": True,
-                "endpoint": None,
-                "max_token": 4096,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            }
-        })
-    except:
-        logger.error(trimmed_format_exc())
-if "sparkv2" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
-    try:
-        from .bridge_spark import predict_no_ui_long_connection as spark_noui
-        from .bridge_spark import predict as spark_ui
-        model_info.update({
-            "sparkv2": {
-                "fn_with_ui": spark_ui,
-                "fn_without_ui": spark_noui,
-                "can_multi_thread": True,
-                "endpoint": None,
-                "max_token": 4096,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            }
-        })
-    except:
-        logger.error(trimmed_format_exc())
-if any(x in AVAIL_LLM_MODELS for x in ("sparkv3", "sparkv3.5", "sparkv4")):   # 讯飞星火认知大模型
-    try:
-        from .bridge_spark import predict_no_ui_long_connection as spark_noui
-        from .bridge_spark import predict as spark_ui
-        model_info.update({
-            "sparkv3": {
-                "fn_with_ui": spark_ui,
-                "fn_without_ui": spark_noui,
-                "can_multi_thread": True,
-                "endpoint": None,
-                "max_token": 4096,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            },
-            "sparkv3.5": {
-                "fn_with_ui": spark_ui,
-                "fn_without_ui": spark_noui,
-                "can_multi_thread": True,
-                "endpoint": None,
-                "max_token": 4096,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            },
-            "sparkv4":{
-                "fn_with_ui": spark_ui,
-                "fn_without_ui": spark_noui,
-                "can_multi_thread": True,
-                "endpoint": None,
-                "max_token": 4096,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            }
-        })
-    except:
-        logger.error(trimmed_format_exc())
-if "llama2" in AVAIL_LLM_MODELS:   # llama2
-    try:
-        from .bridge_llama2 import predict_no_ui_long_connection as llama2_noui
-        from .bridge_llama2 import predict as llama2_ui
-        model_info.update({
-            "llama2": {
-                "fn_with_ui": llama2_ui,
-                "fn_without_ui": llama2_noui,
-                "endpoint": None,
-                "max_token": 4096,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            }
-        })
-    except:
-        logger.error(trimmed_format_exc())
-# -=-=-=-=-=-=- 智谱 -=-=-=-=-=-=-
-if "zhipuai" in AVAIL_LLM_MODELS:   # zhipuai 是glm-4的别名，向后兼容配置
-    try:
-        model_info.update({
-            "zhipuai": {
-                "fn_with_ui": zhipu_ui,
-                "fn_without_ui": zhipu_noui,
-                "endpoint": None,
-                "max_token": 10124 * 8,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            },
-        })
-    except:
-        logger.error(trimmed_format_exc())
-# -=-=-=-=-=-=- 幻方-深度求索大模型 -=-=-=-=-=-=-
-if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
-    try:
-        from .bridge_deepseekcoder import predict_no_ui_long_connection as deepseekcoder_noui
-        from .bridge_deepseekcoder import predict as deepseekcoder_ui
-        model_info.update({
-            "deepseekcoder": {
-                "fn_with_ui": deepseekcoder_ui,
-                "fn_without_ui": deepseekcoder_noui,
-                "endpoint": None,
-                "max_token": 2048,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            }
-        })
-    except:
-        logger.error(trimmed_format_exc())
-# -=-=-=-=-=-=- 幻方-深度求索大模型在线API -=-=-=-=-=-=-
-if "deepseek-chat" in AVAIL_LLM_MODELS or "deepseek-coder" in AVAIL_LLM_MODELS:
-    try:
-        deepseekapi_noui, deepseekapi_ui = get_predict_function(
-            api_key_conf_name="DEEPSEEK_API_KEY", max_output_token=4096, disable_proxy=False
-            )
-        model_info.update({
-            "deepseek-chat":{
-                "fn_with_ui": deepseekapi_ui,
-                "fn_without_ui": deepseekapi_noui,
-                "endpoint": deepseekapi_endpoint,
-                "can_multi_thread": True,
-                "max_token": 32000,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            },
-            "deepseek-coder":{
-                "fn_with_ui": deepseekapi_ui,
-                "fn_without_ui": deepseekapi_noui,
-                "endpoint": deepseekapi_endpoint,
-                "can_multi_thread": True,
-                "max_token": 16000,
-                "tokenizer": tokenizer_gpt35,
-                "token_cnt": get_token_num_gpt35,
-            },
-        })
-    except:
-        logger.error(trimmed_format_exc())
-# -=-=-=-=-=-=- one-api 对齐支持 -=-=-=-=-=-=-
-for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
-    # 为了更灵活地接入one-api多模型管理界面，设计了此接口，例子：AVAIL_LLM_MODELS = ["one-api-mixtral-8x7b(max_token=6666)"]
-    # 其中
-    #   "one-api-"          是前缀（必要）
-    #   "mixtral-8x7b"      是模型名（必要）
-    #   "(max_token=6666)"  是配置（非必要）
-    try:
-        origin_model_name, max_token_tmp = read_one_api_model_name(model)
-        # 如果是已知模型，则尝试获取其信息
-        original_model_info = model_info.get(origin_model_name.replace("one-api-", "", 1), None)
-    except:
-        logger.error(f"one-api模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
-        continue
-    this_model_info = {
-        "fn_with_ui": chatgpt_ui,
-        "fn_without_ui": chatgpt_noui,
-        "can_multi_thread": True,
-        "endpoint": openai_endpoint,
-        "max_token": max_token_tmp,
-        "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,
-    }
-
-    # 同步已知模型的其他信息
-    attribute = "has_multimodal_capacity"
-    if original_model_info is not None and original_model_info.get(attribute, None) is not None: this_model_info.update({attribute: original_model_info.get(attribute, None)})
-    # attribute = "attribute2"
-    # if original_model_info is not None and original_model_info.get(attribute, None) is not None: this_model_info.update({attribute: original_model_info.get(attribute, None)})
-    # attribute = "attribute3"
-    # if original_model_info is not None and original_model_info.get(attribute, None) is not None: this_model_info.update({attribute: original_model_info.get(attribute, None)})
-    model_info.update({model: this_model_info})
-
-# -=-=-=-=-=-=- vllm 对齐支持 -=-=-=-=-=-=-
-for model in [m for m in AVAIL_LLM_MODELS if m.startswith("vllm-")]:
-    # 为了更灵活地接入vllm多模型管理界面，设计了此接口，例子：AVAIL_LLM_MODELS = ["vllm-/home/hmp/llm/cache/Qwen1___5-32B-Chat(max_token=6666)"]
-    # 其中
-    #   "vllm-"             是前缀（必要）
-    #   "mixtral-8x7b"      是模型名（必要）
-    #   "(max_token=6666)"  是配置（非必要）
-    try:
-        _, max_token_tmp = read_one_api_model_name(model)
-    except:
-        logger.error(f"vllm模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
-        continue
-    model_info.update({
-        model: {
-            "fn_with_ui": chatgpt_ui,
-            "fn_without_ui": chatgpt_noui,
-            "can_multi_thread": True,
-            "endpoint": openai_endpoint,
-            "max_token": max_token_tmp,
-            "tokenizer": tokenizer_gpt35,
-            "token_cnt": get_token_num_gpt35,
-        },
-    })
-# -=-=-=-=-=-=- ollama 对齐支持 -=-=-=-=-=-=-
-for model in [m for m in AVAIL_LLM_MODELS if m.startswith("ollama-")]:
-    from .bridge_ollama import predict_no_ui_long_connection as ollama_noui
-    from .bridge_ollama import predict as ollama_ui
-    break
-for model in [m for m in AVAIL_LLM_MODELS if m.startswith("ollama-")]:
-    # 为了更灵活地接入ollama多模型管理界面，设计了此接口，例子：AVAIL_LLM_MODELS = ["ollama-phi3(max_token=6666)"]
-    # 其中
-    #   "ollama-"           是前缀（必要）
-    #   "phi3"            是模型名（必要）
-    #   "(max_token=6666)"  是配置（非必要）
-    try:
-        _, max_token_tmp = read_one_api_model_name(model)
-    except:
-        logger.error(f"ollama模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
-        continue
-    model_info.update({
-        model: {
-            "fn_with_ui": ollama_ui,
-            "fn_without_ui": ollama_noui,
-            "endpoint": ollama_endpoint,
-            "max_token": max_token_tmp,
-            "tokenizer": tokenizer_gpt35,
-            "token_cnt": get_token_num_gpt35,
-        },
-    })
-
-# -=-=-=-=-=-=- azure模型对齐支持 -=-=-=-=-=-=-
-AZURE_CFG_ARRAY = get_conf("AZURE_CFG_ARRAY") # <-- 用于定义和切换多个azure模型 -->
-if len(AZURE_CFG_ARRAY) > 0:
-    for azure_model_name, azure_cfg_dict in AZURE_CFG_ARRAY.items():
-        # 可能会覆盖之前的配置，但这是意料之中的
-        if not azure_model_name.startswith('azure'):
-            raise ValueError("AZURE_CFG_ARRAY中配置的模型必须以azure开头")
-        endpoint_ = azure_cfg_dict["AZURE_ENDPOINT"] + \
-            f'openai/deployments/{azure_cfg_dict["AZURE_ENGINE"]}/chat/completions?api-version=2023-05-15'
-        model_info.update({
-            azure_model_name: {
-                "fn_with_ui": chatgpt_ui,
-                "fn_without_ui": chatgpt_noui,
-                "endpoint": endpoint_,
-                "azure_api_key": azure_cfg_dict["AZURE_API_KEY"],
-                "max_token": azure_cfg_dict["AZURE_MODEL_MAX_TOKEN"],
-                "tokenizer": tokenizer_gpt35,   # tokenizer只用于粗估token数量
-                "token_cnt": get_token_num_gpt35,
-            }
-        })
-        if azure_model_name not in AVAIL_LLM_MODELS:
-            AVAIL_LLM_MODELS += [azure_model_name]
-
-# -=-=-=-=-=-=- Openrouter模型对齐支持 -=-=-=-=-=-=-
-# 为了更灵活地接入Openrouter路由，设计了此接口
-for model in [m for m in AVAIL_LLM_MODELS if m.startswith("openrouter-")]:
-    from request_llms.bridge_openrouter import predict_no_ui_long_connection as openrouter_noui
-    from request_llms.bridge_openrouter import predict as openrouter_ui
-    model_info.update({
-        model: {
-            "fn_with_ui": openrouter_ui,
-            "fn_without_ui": openrouter_noui,
-            # 以下参数参考gpt-4o-mini的配置, 请根据实际情况修改
-            "endpoint": openai_endpoint,
-            "has_multimodal_capacity": True,
-            "max_token": 128000,
-            "tokenizer": tokenizer_gpt4,
-            "token_cnt": get_token_num_gpt4,
-        },
-    })
-
-
-# -=-=-=-=-=-=--=-=-=-=-=-=--=-=-=-=-=-=--=-=-=-=-=-=-=-=
-# -=-=-=-=-=-=-=-=-=- ☝️ 以上是模型路由 -=-=-=-=-=-=-=-=-=
-# -=-=-=-=-=-=--=-=-=-=-=-=--=-=-=-=-=-=--=-=-=-=-=-=-=-=
-
-# -=-=-=-=-=-=--=-=-=-=-=-=--=-=-=-=-=-=--=-=-=-=-=-=-=-=
-# -=-=-=-=-=-=-= 👇 以下是多模型路由切换函数 -=-=-=-=-=-=-=
-# -=-=-=-=-=-=--=-=-=-=-=-=--=-=-=-=-=-=--=-=-=-=-=-=-=-=
-
-
-def LLM_CATCH_EXCEPTION(f):
+def get_full_error(chunk, stream_response):
     """
-    装饰器函数，将错误显示出来
+        获取完整的从Openai返回的报错
     """
-    def decorated(inputs:str, llm_kwargs:dict, history:list, sys_prompt:str, observe_window:list, console_slience:bool):
+    while True:
         try:
-            return f(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience)
-        except Exception as e:
-            tb_str = '\n```\n' + trimmed_format_exc() + '\n```\n'
-            observe_window[0] = tb_str
-            return tb_str
-    return decorated
+            chunk += next(stream_response)
+        except:
+            break
+    return chunk
 
+def make_multimodal_input(inputs, image_paths):
+    image_base64_array = []
+    for image_path in image_paths:
+        path = os.path.abspath(image_path)
+        base64 = encode_image(path)
+        inputs = inputs + f'<br/><br/><div align="center"><img src="file={path}" base64="{base64}"></div>'
+        image_base64_array.append(base64)
+    return inputs, image_base64_array
 
-def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list, sys_prompt:str, observe_window:list=[], console_slience:bool=False):
+def reverse_base64_from_input(inputs):
+    # 定义一个正则表达式来匹配 Base64 字符串（假设格式为 base64="<Base64编码>"）
+    # pattern = re.compile(r'base64="([^"]+)"></div>')
+    pattern = re.compile(r'<br/><br/><div align="center"><img[^<>]+base64="([^"]+)"></div>')
+    # 使用 findall 方法查找所有匹配的 Base64 字符串
+    base64_strings = pattern.findall(inputs)
+    # 返回反转后的 Base64 字符串列表
+    return base64_strings
+
+def contain_base64(inputs):
+    base64_strings = reverse_base64_from_input(inputs)
+    return len(base64_strings) > 0
+
+def append_image_if_contain_base64(inputs):
+    if not contain_base64(inputs):
+        return inputs
+    else:
+        image_base64_array = reverse_base64_from_input(inputs)
+        pattern = re.compile(r'<br/><br/><div align="center"><img[^><]+></div>')
+        inputs = re.sub(pattern, '', inputs)
+        res = []
+        res.append({
+            "type": "text",
+            "text": inputs
+        })
+        for image_base64 in image_base64_array:
+            res.append({
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{image_base64}"
+                }
+            })
+        return res
+
+def remove_image_if_contain_base64(inputs):
+    if not contain_base64(inputs):
+        return inputs
+    else:
+        pattern = re.compile(r'<br/><br/><div align="center"><img[^><]+></div>')
+        inputs = re.sub(pattern, '', inputs)
+        return inputs
+
+def decode_chunk(chunk):
+    # 提前读取一些信息 （用于判断异常）
+    chunk_decoded = chunk.decode()
+    chunkjson = None
+    has_choices = False
+    choice_valid = False
+    has_content = False
+    has_role = False
+    try:
+        chunkjson = json.loads(chunk_decoded[6:])
+        has_choices = 'choices' in chunkjson
+        if has_choices: choice_valid = (len(chunkjson['choices']) > 0)
+        if has_choices and choice_valid: has_content = ("content" in chunkjson['choices'][0]["delta"])
+        if has_content: has_content = (chunkjson['choices'][0]["delta"]["content"] is not None)
+        if has_choices and choice_valid: has_role = "role" in chunkjson['choices'][0]["delta"]
+    except:
+        pass
+    return chunk_decoded, chunkjson, has_choices, choice_valid, has_content, has_role
+
+from functools import lru_cache
+@lru_cache(maxsize=32)
+def verify_endpoint(endpoint):
     """
-    发送至LLM，等待回复，一次性完成，不显示中间过程。但内部（尽可能地）用stream的方法避免中途网线被掐。
+        检查endpoint是否可用
+    """
+    if "你亲手写的api名称" in endpoint:
+        raise ValueError("Endpoint不正确, 请检查AZURE_ENDPOINT的配置! 当前的Endpoint为:" + endpoint)
+    return endpoint
+
+def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], sys_prompt:str="", observe_window:list=None, console_slience:bool=False):
+    """
+    发送至chatGPT，等待回复，一次性完成，不显示中间过程。但内部用stream的方法避免中途网线被掐。
     inputs：
         是本次问询的输入
     sys_prompt:
         系统静默prompt
     llm_kwargs：
-        LLM的内部调优参数
+        chatGPT的内部调优参数
     history：
         是之前的对话列表
     observe_window = None：
         用于负责跨越线程传递已经输出的部分，大部分时候仅仅为了fancy的视觉效果，留空即可。observe_window[0]：观测窗。observe_window[1]：看门狗
     """
-    import threading, time, copy
+    from request_llms.bridge_all import model_info
 
-    inputs = apply_gpt_academic_string_mask(inputs, mode="show_llm")
-    model = llm_kwargs['llm_model']
-    n_model = 1
-    if '&' not in model:
-        # 如果只询问“一个”大语言模型（多数情况）：
-        method = model_info[model]["fn_without_ui"]
-        return method(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience)
-    else:
-        # 如果同时询问“多个”大语言模型，这个稍微啰嗦一点，但思路相同，您不必读这个else分支
-        executor = ThreadPoolExecutor(max_workers=4)
-        models = model.split('&')
-        n_model = len(models)
+    watch_dog_patience = 5 # 看门狗的耐心, 设置5秒即可
 
-        window_len = len(observe_window)
-        assert window_len==3
-        window_mutex = [["", time.time(), ""] for _ in range(n_model)] + [True]
+    if model_info[llm_kwargs['llm_model']].get('openai_disable_stream', False): stream = False
+    else: stream = True
 
-        futures = []
-        for i in range(n_model):
-            model = models[i]
-            method = model_info[model]["fn_without_ui"]
-            llm_kwargs_feedin = copy.deepcopy(llm_kwargs)
-            llm_kwargs_feedin['llm_model'] = model
-            future = executor.submit(LLM_CATCH_EXCEPTION(method), inputs, llm_kwargs_feedin, history, sys_prompt, window_mutex[i], console_slience)
-            futures.append(future)
+    headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt=sys_prompt, stream=stream)
+    retry = 0
+    while True:
+        try:
+            # make a POST request to the API endpoint, stream=False
+            endpoint = verify_endpoint(model_info[llm_kwargs['llm_model']]['endpoint'])
+            response = requests.post(endpoint, headers=headers, proxies=proxies,
+                                    json=payload, stream=stream, timeout=TIMEOUT_SECONDS); break
+        except requests.exceptions.ReadTimeout as e:
+            retry += 1
+            traceback.print_exc()
+            if retry > MAX_RETRY: raise TimeoutError
+            if MAX_RETRY!=0: logger.error(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
 
-        def mutex_manager(window_mutex, observe_window):
-            while True:
-                time.sleep(0.25)
-                if not window_mutex[-1]: break
-                # 看门狗（watchdog）
-                for i in range(n_model):
-                    window_mutex[i][1] = observe_window[1]
-                # 观察窗（window）
-                chat_string = []
-                for i in range(n_model):
-                    color = colors[i%len(colors)]
-                    chat_string.append( f"【{str(models[i])} 说】: <font color=\"{color}\"> {window_mutex[i][0]} </font>" )
-                res = '<br/><br/>\n\n---\n\n'.join(chat_string)
-                # # # # # # # # # # #
-                observe_window[0] = res
+    if not stream:
+        # 该分支仅适用于不支持stream的o1模型，其他情形一律不适用
+        chunkjson = json.loads(response.content.decode())
+        gpt_replying_buffer = chunkjson['choices'][0]["message"]["content"]
+        return gpt_replying_buffer
 
-        t_model = threading.Thread(target=mutex_manager, args=(window_mutex, observe_window), daemon=True)
-        t_model.start()
+    stream_response = response.iter_lines()
+    result = ''
+    json_data = None
+    while True:
+        try: chunk = next(stream_response)
+        except StopIteration:
+            break
+        except requests.exceptions.ConnectionError:
+            chunk = next(stream_response) # 失败了，重试一次？再失败就没办法了。
+        chunk_decoded, chunkjson, has_choices, choice_valid, has_content, has_role = decode_chunk(chunk)
+        if len(chunk_decoded)==0: continue
+        if not chunk_decoded.startswith('data:'):
+            error_msg = get_full_error(chunk, stream_response).decode()
+            if "reduce the length" in error_msg:
+                raise ConnectionAbortedError("OpenAI拒绝了请求:" + error_msg)
+            elif """type":"upstream_error","param":"307""" in error_msg:
+                raise ConnectionAbortedError("正常结束，但显示Token不足，导致输出不完整，请削减单次输入的文本量。")
+            else:
+                raise RuntimeError("OpenAI拒绝了请求：" + error_msg)
+        if ('data: [DONE]' in chunk_decoded): break # api2d 正常完成
+        # 提前读取一些信息 （用于判断异常）
+        if has_choices and not choice_valid:
+            # 一些垃圾第三方接口的出现这样的错误
+            continue
+        json_data = chunkjson['choices'][0]
+        delta = json_data["delta"]
+        if len(delta) == 0: break
+        if (not has_content) and has_role: continue
+        if (not has_content) and (not has_role): continue # raise RuntimeError("发现不标准的第三方接口："+delta)
+        if has_content: # has_role = True/False
+            result += delta["content"]
+            if not console_slience: print(delta["content"], end='')
+            if observe_window is not None:
+                # 观测窗，把已经获取的数据显示出去
+                if len(observe_window) >= 1:
+                    observe_window[0] += delta["content"]
+                # 看门狗，如果超过期限没有喂狗，则终止
+                if len(observe_window) >= 2:
+                    if (time.time()-observe_window[1]) > watch_dog_patience:
+                        raise RuntimeError("用户取消了程序。")
+        else: raise RuntimeError("意外Json结构："+delta)
+    if json_data and json_data['finish_reason'] == 'content_filter':
+        raise RuntimeError("由于提问含不合规内容被Azure过滤。")
+    if json_data and json_data['finish_reason'] == 'length':
+        raise ConnectionAbortedError("正常结束，但显示Token不足，导致输出不完整，请削减单次输入的文本量。")
+    return result
 
-        return_string_collect = []
-        while True:
-            worker_done = [h.done() for h in futures]
-            if all(worker_done):
-                executor.shutdown()
-                break
-            time.sleep(1)
 
-        for i, future in enumerate(futures):  # wait and get
-            color = colors[i%len(colors)]
-            return_string_collect.append( f"【{str(models[i])} 说】: <font color=\"{color}\"> {future.result()} </font>" )
-
-        window_mutex[-1] = False # stop mutex thread
-        res = '<br/><br/>\n\n---\n\n'.join(return_string_collect)
-        return res
-
-# 根据基础功能区 ModelOverride 参数调整模型类型，用于 `predict` 中
-import importlib
-import core_functional
-def execute_model_override(llm_kwargs, additional_fn, method):
-    functional = core_functional.get_core_functions()
-    if (additional_fn in functional) and 'ModelOverride' in functional[additional_fn]:
-        # 热更新Prompt & ModelOverride
-        importlib.reload(core_functional)
-        functional = core_functional.get_core_functions()
-        model_override = functional[additional_fn]['ModelOverride']
-        if model_override not in model_info:
-            raise ValueError(f"模型覆盖参数 '{model_override}' 指向一个暂不支持的模型，请检查配置文件。")
-        method = model_info[model_override]["fn_with_ui"]
-        llm_kwargs['llm_model'] = model_override
-        return llm_kwargs, additional_fn, method
-    # 默认返回原参数
-    return llm_kwargs, additional_fn, method
-
-def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot,
+def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWithCookies,
             history:list=[], system_prompt:str='', stream:bool=True, additional_fn:str=None):
     """
-    发送至LLM，流式获取输出。
+    发送至chatGPT，流式获取输出。
     用于基础的对话功能。
-
-    完整参数列表：
-        predict(
-            inputs:str,                     # 是本次问询的输入
-            llm_kwargs:dict,                # 是LLM的内部调优参数
-            plugin_kwargs:dict,             # 是插件的内部参数
-            chatbot:ChatBotWithCookies,     # 原样传递，负责向用户前端展示对话，兼顾前端状态的功能
-            history:list=[],                # 是之前的对话列表
-            system_prompt:str='',           # 系统静默prompt
-            stream:bool=True,               # 是否流式输出（已弃用）
-            additional_fn:str=None          # 基础功能区按钮的附加功能
-        ):
+    inputs 是本次问询的输入
+    top_p, temperature是chatGPT的内部调优参数
+    history 是之前的对话列表（注意无论是inputs还是history，内容太长了都会触发token数量溢出的错误）
+    chatbot 为WebUI中显示的对话列表，修改它，然后yeild出去，可以直接修改对话界面内容
+    additional_fn代表点击的哪个按钮，按钮见functional.py
     """
+    from request_llms.bridge_all import model_info
+    if is_any_api_key(inputs):
+        chatbot._cookies['api_key'] = inputs
+        chatbot.append(("输入已识别为openai的api_key", what_keys(inputs)))
+        yield from update_ui(chatbot=chatbot, history=history, msg="api_key已导入") # 刷新界面
+        return
+    elif not is_any_api_key(chatbot._cookies['api_key']):
+        chatbot.append((inputs, "缺少api_key。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。"))
+        yield from update_ui(chatbot=chatbot, history=history, msg="缺少api_key") # 刷新界面
+        return
 
-    inputs = apply_gpt_academic_string_mask(inputs, mode="show_llm")
+    user_input = inputs
+    if additional_fn is not None:
+        from core_functional import handle_core_functionality
+        inputs, history = handle_core_functionality(additional_fn, inputs, history, chatbot)
 
-    method = model_info[llm_kwargs['llm_model']]["fn_with_ui"]  # 如果这里报错，检查config中的AVAIL_LLM_MODELS选项
+    # 多模态模型
+    has_multimodal_capacity = model_info[llm_kwargs['llm_model']].get('has_multimodal_capacity', False)
+    if has_multimodal_capacity:
+        has_recent_image_upload, image_paths = have_any_recent_upload_image_files(chatbot, pop=True)
+    else:
+        has_recent_image_upload, image_paths = False, []
+    if has_recent_image_upload:
+        _inputs, image_base64_array = make_multimodal_input(inputs, image_paths)
+    else:
+        _inputs, image_base64_array = inputs, []
+    chatbot.append((_inputs, ""))
+    yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
 
-    if additional_fn: # 根据基础功能区 ModelOverride 参数调整模型类型
-        llm_kwargs, additional_fn, method = execute_model_override(llm_kwargs, additional_fn, method)
+    # 禁用stream的特殊模型处理
+    if model_info[llm_kwargs['llm_model']].get('openai_disable_stream', False): stream = False
+    else: stream = True
 
-    # 更新一下llm_kwargs的参数，否则会出现参数不匹配的问题
-    yield from method(inputs, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, stream, additional_fn)
+    # check mis-behavior
+    if is_the_upload_folder(user_input):
+        chatbot[-1] = (inputs, f"[Local Message] 检测到操作错误！当您上传文档之后，需点击“**函数插件区**”按钮进行处理，请勿点击“提交”按钮或者“基础功能区”按钮。")
+        yield from update_ui(chatbot=chatbot, history=history, msg="正常") # 刷新界面
+        time.sleep(2)
+
+    try:
+        headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt, image_base64_array, has_multimodal_capacity, stream)
+    except RuntimeError as e:
+        chatbot[-1] = (inputs, f"您提供的api-key不满足要求，不包含任何可用于{llm_kwargs['llm_model']}的api-key。您可能选择了错误的模型或请求源。")
+        yield from update_ui(chatbot=chatbot, history=history, msg="api-key不满足要求") # 刷新界面
+        return
+
+    # 检查endpoint是否合法
+    try:
+        endpoint = verify_endpoint(model_info[llm_kwargs['llm_model']]['endpoint'])
+    except:
+        tb_str = '```\n' + trimmed_format_exc() + '```'
+        chatbot[-1] = (inputs, tb_str)
+        yield from update_ui(chatbot=chatbot, history=history, msg="Endpoint不满足要求") # 刷新界面
+        return
+
+    # 加入历史
+    if has_recent_image_upload:
+        history.extend([_inputs, ""])
+    else:
+        history.extend([inputs, ""])
+
+    retry = 0
+    while True:
+        try:
+            # make a POST request to the API endpoint, stream=True
+            response = requests.post(endpoint, headers=headers, proxies=proxies,
+                                    json=payload, stream=stream, timeout=TIMEOUT_SECONDS);break
+        except:
+            retry += 1
+            chatbot[-1] = ((chatbot[-1][0], timeout_bot_msg))
+            retry_msg = f"，正在重试 ({retry}/{MAX_RETRY}) ……" if MAX_RETRY > 0 else ""
+            yield from update_ui(chatbot=chatbot, history=history, msg="请求超时"+retry_msg) # 刷新界面
+            if retry > MAX_RETRY: raise TimeoutError
+
+
+    if not stream:
+        # 该分支仅适用于不支持stream的o1模型，其他情形一律不适用
+        yield from handle_o1_model_special(response, inputs, llm_kwargs, chatbot, history)
+        return
+
+    if stream:
+        gpt_replying_buffer = ""
+        is_head_of_the_stream = True
+        stream_response =  response.iter_lines()
+        while True:
+            try:
+                chunk = next(stream_response)
+            except StopIteration:
+                # 非OpenAI官方接口的出现这样的报错，OpenAI和API2D不会走这里
+                chunk_decoded = chunk.decode()
+                error_msg = chunk_decoded
+                # 首先排除一个one-api没有done数据包的第三方Bug情形
+                if len(gpt_replying_buffer.strip()) > 0 and len(error_msg) == 0:
+                    yield from update_ui(chatbot=chatbot, history=history, msg="检测到有缺陷的非OpenAI官方接口，建议选择更稳定的接口。")
+                    break
+                # 其他情况，直接返回报错
+                chatbot, history = handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
+                yield from update_ui(chatbot=chatbot, history=history, msg="非OpenAI官方接口返回了错误:" + chunk.decode()) # 刷新界面
+                return
+
+            # 提前读取一些信息 （用于判断异常）
+            chunk_decoded, chunkjson, has_choices, choice_valid, has_content, has_role = decode_chunk(chunk)
+
+            if is_head_of_the_stream and (r'"object":"error"' not in chunk_decoded) and (r"content" not in chunk_decoded):
+                # 数据流的第一帧不携带content
+                is_head_of_the_stream = False; continue
+
+            if chunk:
+                try:
+                    if has_choices and not choice_valid:
+                        # 一些垃圾第三方接口的出现这样的错误
+                        continue
+                    if ('data: [DONE]' not in chunk_decoded) and len(chunk_decoded) > 0 and (chunkjson is None):
+                        # 传递进来一些奇怪的东西
+                        raise ValueError(f'无法读取以下数据，请检查配置。\n\n{chunk_decoded}')
+                    # 前者是API2D的结束条件，后者是OPENAI的结束条件
+                    if ('data: [DONE]' in chunk_decoded) or (len(chunkjson['choices'][0]["delta"]) == 0):
+                        # 判定为数据流的结束，gpt_replying_buffer也写完了
+                        log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
+                        break
+                    # 处理数据流的主体
+                    status_text = f"finish_reason: {chunkjson['choices'][0].get('finish_reason', 'null')}"
+                    # 如果这里抛出异常，一般是文本过长，详情见get_full_error的输出
+                    if has_content:
+                        # 正常情况
+                        gpt_replying_buffer = gpt_replying_buffer + chunkjson['choices'][0]["delta"]["content"]
+                    elif has_role:
+                        # 一些第三方接口的出现这样的错误，兼容一下吧
+                        continue
+                    else:
+                        # 至此已经超出了正常接口应该进入的范围，一些垃圾第三方接口会出现这样的错误
+                        if chunkjson['choices'][0]["delta"]["content"] is None: continue # 一些垃圾第三方接口出现这样的错误，兼容一下吧
+                        gpt_replying_buffer = gpt_replying_buffer + chunkjson['choices'][0]["delta"]["content"]
+
+                    history[-1] = gpt_replying_buffer
+                    chatbot[-1] = (history[-2], history[-1])
+                    yield from update_ui(chatbot=chatbot, history=history, msg=status_text) # 刷新界面
+                except Exception as e:
+                    yield from update_ui(chatbot=chatbot, history=history, msg="Json解析不合常规") # 刷新界面
+                    chunk = get_full_error(chunk, stream_response)
+                    chunk_decoded = chunk.decode()
+                    error_msg = chunk_decoded
+                    chatbot, history = handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
+                    yield from update_ui(chatbot=chatbot, history=history, msg="Json解析异常" + error_msg) # 刷新界面
+                    logger.error(error_msg)
+                    return
+        return  # return from stream-branch
+
+def handle_o1_model_special(response, inputs, llm_kwargs, chatbot, history):
+    try:
+        chunkjson = json.loads(response.content.decode())
+        gpt_replying_buffer = chunkjson['choices'][0]["message"]["content"]
+        log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
+        history[-1] = gpt_replying_buffer
+        chatbot[-1] = (history[-2], history[-1])
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+    except Exception as e:
+        yield from update_ui(chatbot=chatbot, history=history, msg="Json解析异常" + response.text) # 刷新界面
+
+def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg):
+    from request_llms.bridge_all import model_info
+    openai_website = ' 请登录OpenAI查看详情 https://platform.openai.com/signup'
+    if "reduce the length" in error_msg:
+        if len(history) >= 2: history[-1] = ""; history[-2] = "" # 清除当前溢出的输入：history[-2] 是本次输入, history[-1] 是本次输出
+        history = clip_history(inputs=inputs, history=history, tokenizer=model_info[llm_kwargs['llm_model']]['tokenizer'],
+                                               max_token_limit=(model_info[llm_kwargs['llm_model']]['max_token'])) # history至少释放二分之一
+        chatbot[-1] = (chatbot[-1][0], "[Local Message] Reduce the length. 本次输入过长, 或历史数据过长. 历史缓存数据已部分释放, 您可以请再次尝试. (若再次失败则更可能是因为输入过长.)")
+    elif "does not exist" in error_msg:
+        chatbot[-1] = (chatbot[-1][0], f"[Local Message] Model {llm_kwargs['llm_model']} does not exist. 模型不存在, 或者您没有获得体验资格.")
+    elif "Incorrect API key" in error_msg:
+        chatbot[-1] = (chatbot[-1][0], "[Local Message] Incorrect API key. OpenAI以提供了不正确的API_KEY为由, 拒绝服务. " + openai_website)
+    elif "exceeded your current quota" in error_msg:
+        chatbot[-1] = (chatbot[-1][0], "[Local Message] You exceeded your current quota. OpenAI以账户额度不足为由, 拒绝服务." + openai_website)
+    elif "account is not active" in error_msg:
+        chatbot[-1] = (chatbot[-1][0], "[Local Message] Your account is not active. OpenAI以账户失效为由, 拒绝服务." + openai_website)
+    elif "associated with a deactivated account" in error_msg:
+        chatbot[-1] = (chatbot[-1][0], "[Local Message] You are associated with a deactivated account. OpenAI以账户失效为由, 拒绝服务." + openai_website)
+    elif "API key has been deactivated" in error_msg:
+        chatbot[-1] = (chatbot[-1][0], "[Local Message] API key has been deactivated. OpenAI以账户失效为由, 拒绝服务." + openai_website)
+    elif "bad forward key" in error_msg:
+        chatbot[-1] = (chatbot[-1][0], "[Local Message] Bad forward key. API2D账户额度不足.")
+    elif "Not enough point" in error_msg:
+        chatbot[-1] = (chatbot[-1][0], "[Local Message] Not enough point. API2D账户点数不足.")
+    else:
+        from toolbox import regular_txt_to_markdown
+        tb_str = '```\n' + trimmed_format_exc() + '```'
+        chatbot[-1] = (chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str} \n\n{regular_txt_to_markdown(chunk_decoded)}")
+    return chatbot, history
+
+def generate_payload(inputs: str, llm_kwargs: dict, history: list, system_prompt: str, image_base64_array: list = [], has_multimodal_capacity: bool = False, stream: bool = True):
+    from request_llms.bridge_all import model_info
+    """
+    整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
+    """
+    from request_llms.bridge_all import model_info
+
+    if not is_any_api_key(llm_kwargs['api_key']):
+        raise AssertionError("你提供了错误的API_KEY。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。")
+
+    if llm_kwargs['llm_model'].startswith('vllm-'):
+        api_key = 'no-api-key'
+    else:
+        api_key = select_api_key(llm_kwargs['api_key'], llm_kwargs['llm_model'])
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}"
+    }
+    if API_ORG.startswith('org-'): headers.update({"OpenAI-Organization": API_ORG})
+    if llm_kwargs['llm_model'].startswith('azure-'):
+        headers.update({"api-key": api_key})
+        if llm_kwargs['llm_model'] in AZURE_CFG_ARRAY.keys():
+            azure_api_key_unshared = AZURE_CFG_ARRAY[llm_kwargs['llm_model']]["AZURE_API_KEY"]
+            headers.update({"api-key": azure_api_key_unshared})
+
+    if has_multimodal_capacity:
+        # 当以下条件满足时，启用多模态能力：
+        # 1. 模型本身是多模态模型（has_multimodal_capacity）
+        # 2. 输入包含图像（len(image_base64_array) > 0）
+        # 3. 历史输入包含图像（ any([contain_base64(h) for h in history]) ）
+        enable_multimodal_capacity = (len(image_base64_array) > 0) or any([contain_base64(h) for h in history])
+    else:
+        enable_multimodal_capacity = False
+
+    conversation_cnt = len(history) // 2
+    openai_disable_system_prompt = model_info[llm_kwargs['llm_model']].get('openai_disable_system_prompt', False)
+
+    # 判断当前模型是否支持 system 角色
+    if model_info[llm_kwargs['llm_model']].get('supports_system_role', True):
+        if openai_disable_system_prompt:
+            messages = [{"role": "user", "content": system_prompt}]
+        else:
+            messages = [{"role": "system", "content": system_prompt}]
+    else:
+        # 对于不支持 system 角色的模型，将 system prompt 作为 user 消息
+        messages = [{"role": "user", "content": system_prompt}]
+
+
+    if not enable_multimodal_capacity:
+        if conversation_cnt:
+            for index in range(0, 2 * conversation_cnt, 2):
+                user_msg = {
+                    "role": "user",
+                    "content": remove_image_if_contain_base64(history[index])
+                }
+                assistant_msg = {
+                    "role": "assistant",
+                    "content": remove_image_if_contain_base64(history[index + 1])
+                }
+                if user_msg["content"].strip():
+                    if assistant_msg["content"].strip() and assistant_msg["content"] != timeout_bot_msg:
+                        messages.append(user_msg)
+                        messages.append(assistant_msg)
+                    else:
+                        continue
+        current_user_msg = {
+            "role": "user",
+            "content": inputs
+        }
+        messages.append(current_user_msg)
+    else:
+        # 多模态能力
+        if conversation_cnt:
+            for index in range(0, 2*conversation_cnt, 2):
+                what_i_have_asked = {}
+                what_i_have_asked["role"] = "user"
+                what_i_have_asked["content"] = append_image_if_contain_base64(history[index])
+                what_gpt_answer = {}
+                what_gpt_answer["role"] = "assistant"
+                what_gpt_answer["content"] = append_image_if_contain_base64(history[index+1])
+                if what_i_have_asked["content"] != "":
+                    if what_gpt_answer["content"] == "": continue
+                    if what_gpt_answer["content"] == timeout_bot_msg: continue
+                    messages.append(what_i_have_asked)
+                    messages.append(what_gpt_answer)
+                else:
+                    messages[-1]['content'] = what_gpt_answer['content']
+        what_i_ask_now = {}
+        what_i_ask_now["role"] = "user"
+        what_i_ask_now["content"] = []
+        what_i_ask_now["content"].append({
+            "type": "text",
+            "text": inputs
+        })
+        for image_base64 in image_base64_array:
+            what_i_ask_now["content"].append({
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{image_base64}"
+                }
+            })
+        messages.append(what_i_ask_now)
+
+
+    model = llm_kwargs['llm_model']
+    if llm_kwargs['llm_model'].startswith('api2d-'):
+        model = llm_kwargs['llm_model'][len('api2d-'):]
+    if llm_kwargs['llm_model'].startswith('one-api-'):
+        model = llm_kwargs['llm_model'][len('one-api-'):]
+        model, _ = read_one_api_model_name(model)
+    if llm_kwargs['llm_model'].startswith('vllm-'):
+        model = llm_kwargs['llm_model'][len('vllm-'):]
+        model, _ = read_one_api_model_name(model)
+    if model == "gpt-3.5-random": # 随机选择, 绕过openai访问频率限制
+        model = random.choice([
+            "gpt-3.5-turbo",
+            "gpt-3.5-turbo-16k",
+            "gpt-3.5-turbo-1106",
+            "gpt-3.5-turbo-0613",
+            "gpt-3.5-turbo-16k-0613",
+            "gpt-3.5-turbo-0301",
+        ])
+
+    payload = {
+        "model": model,
+        "messages": messages,
+        "temperature": llm_kwargs['temperature'],  # 1.0,
+        "top_p": llm_kwargs['top_p'],  # 1.0,
+        "n": 1,
+        "stream": stream,
+    }
+
+    return headers,payload
+
 
