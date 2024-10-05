@@ -108,5 +108,22 @@
     "解析PDF_简单拆解": "ParsePDF_simpleDecomposition",
     "解析PDF_DOC2X_单文件": "ParsePDF_DOC2X_singleFile",
     "注释Python项目": "CommentPythonProject",
-    "注释源代码": "CommentSourceCode"
+    "注释源代码": "CommentSourceCode",
+    "log亮黄": "log_yellow",
+    "log亮绿": "log_green",
+    "log亮红": "log_red",
+    "log亮紫": "log_purple",
+    "log亮蓝": "log_blue",
+    "Rag问答": "RagQA",
+    "sprint红": "sprint_red",
+    "sprint绿": "sprint_green",
+    "sprint黄": "sprint_yellow",
+    "sprint蓝": "sprint_blue",
+    "sprint紫": "sprint_purple",
+    "sprint靛": "sprint_indigo",
+    "sprint亮红": "sprint_bright_red",
+    "sprint亮绿": "sprint_bright_green",
+    "sprint亮黄": "sprint_bright_yellow",
+    "sprint亮蓝": "sprint_bright_blue",
+    "sprint亮紫": "sprint_bright_purple"
 }

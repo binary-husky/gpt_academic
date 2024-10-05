@@ -64,7 +64,7 @@ def parseNotebook(filename, enable_markdown=1):
 
 
 def ipynb解释(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
-    from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
+    from crazy_functions.crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     enable_markdown = plugin_kwargs.get("advanced_arg", "1")

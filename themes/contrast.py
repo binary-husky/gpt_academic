@@ -1,6 +1,7 @@
 import os
 import gradio as gr
 from toolbox import get_conf
+from loguru import logger
 
 CODE_HIGHLIGHT, ADD_WAIFU, LAYOUT = get_conf("CODE_HIGHLIGHT", "ADD_WAIFU", "LAYOUT")
 theme_dir = os.path.dirname(__file__)
@@ -85,7 +86,7 @@ def adjust_theme():
         )
     except:
         set_theme = None
-        print("gradio版本较旧, 不能自定义字体和颜色")
+        logger.error("gradio版本较旧, 不能自定义字体和颜色")
     return set_theme
 
 

@@ -1,5 +1,5 @@
 from toolbox import CatchException, update_ui
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, input_clipping
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, input_clipping
 import requests
 from bs4 import BeautifulSoup
 from request_llms.bridge_all import model_info
@@ -23,8 +23,8 @@ def google(query, proxies):
             item = {'title': title, 'link': link}
             results.append(item)
 
-    for r in results:
-        print(r['link'])
+    # for r in results:
+    #     print(r['link'])
     return results
 
 def scrape_text(url, proxies) -> str:

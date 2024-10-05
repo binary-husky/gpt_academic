@@ -1,4 +1,5 @@
 import atexit
+from loguru import logger
 from typing import List
 
 from llama_index.core import Document
@@ -37,14 +38,14 @@ class SaveLoad():
         return True
 
     def save_to_checkpoint(self, checkpoint_dir=None):
-        print(f'saving vector store to: {checkpoint_dir}')
+        logger.info(f'saving vector store to: {checkpoint_dir}')
         if checkpoint_dir is None: checkpoint_dir = self.checkpoint_dir
         self.vs_index.storage_context.persist(persist_dir=checkpoint_dir)
 
     def load_from_checkpoint(self, checkpoint_dir=None):
         if checkpoint_dir is None: checkpoint_dir = self.checkpoint_dir
         if self.does_checkpoint_exist(checkpoint_dir=checkpoint_dir):
-            print('loading checkpoint from disk')
+            logger.info('loading checkpoint from disk')
             from llama_index.core import StorageContext, load_index_from_storage
             storage_context = StorageContext.from_defaults(persist_dir=checkpoint_dir)
             self.vs_index = load_index_from_storage(storage_context, embed_model=self.embed_model)
@@ -80,10 +81,10 @@ class LlamaIndexRagWorker(SaveLoad):
         # This function is for debugging
         self.vs_index.storage_context.index_store.to_dict()
         docstore = self.vs_index.storage_context.docstore.docs
-        vector_store_preview = "\n".join([f"{_id} | {tn.text}" for _id, tn in docstore.items()])
-        print('\n++ --------inspect_vector_store begin--------')
-        print(vector_store_preview)
-        print('oo --------inspect_vector_store end--------')
+        vector_store_preview = "\n".join([ f"{_id} | {tn.text}" for _id, tn in docstore.items() ])
+        logger.info('\n++ --------inspect_vector_store begin--------')
+        logger.info(vector_store_preview)
+        logger.info('oo --------inspect_vector_store end--------')
         return vector_store_preview
 
     def add_documents_to_vector_store(self, document_list: List[Document]):
@@ -126,9 +127,8 @@ class LlamaIndexRagWorker(SaveLoad):
         return DEFAULT_QUERY_GENERATION_PROMPT.format(context_str=context_str, query_str=query)
 
     def generate_node_array_preview(self, nodes):
-        buf = "\n".join([f"(No.{i+1} | score {n.score:.3f}): {n.text}" for i, n in enumerate(nodes)])
-        if self.debug_mode:
-            print(buf)
+        buf = "\n".join(([f"(No.{i+1} | score {n.score:.3f}): {n.text}" for i, n in enumerate(nodes)]))
+        if self.debug_mode: logger.info(buf)
         return buf
 
     def purge_vector_store(self):

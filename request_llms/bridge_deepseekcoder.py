@@ -1,12 +1,13 @@
 model_name = "deepseek-coder-6.7b-instruct"
 cmd_to_install = "未知" # "`pip install -r request_llms/requirements_qwen.txt`"
 
-import os
 from toolbox import ProxyNetworkActivate
 from toolbox import get_conf
-from .local_llm_class import LocalLLMHandle, get_local_llm_predict_fns
+from request_llms.local_llm_class import LocalLLMHandle, get_local_llm_predict_fns
 from threading import Thread
+from loguru import logger
 import torch
+import os
 
 def download_huggingface_model(model_name, max_retry, local_dir):
     from huggingface_hub import snapshot_download
@@ -15,7 +16,7 @@ def download_huggingface_model(model_name, max_retry, local_dir):
             snapshot_download(repo_id=model_name, local_dir=local_dir, resume_download=True)
             break
         except Exception as e:
-            print(f'\n\n下载失败，重试第{i}次中...\n\n')
+            logger.error(f'\n\n下载失败，重试第{i}次中...\n\n')
     return local_dir
 # ------------------------------------------------------------------------------------------------------------------------
 # 🔌💻 Local Model
@@ -112,7 +113,6 @@ class GetCoderLMHandle(LocalLLMHandle):
         generated_text = ""
         for new_text in self._streamer:
             generated_text += new_text
-            # print(generated_text)
             yield generated_text
 
 

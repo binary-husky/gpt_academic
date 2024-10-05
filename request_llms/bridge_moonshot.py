@@ -5,7 +5,6 @@
 import json
 import os
 import time
-import logging
 
 from toolbox import get_conf, update_ui, log_chat
 from toolbox import ChatBotWithCookies

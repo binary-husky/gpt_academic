@@ -1,7 +1,7 @@
-from toolbox import get_conf
-import threading
-import logging
 import os
+import threading
+from toolbox import get_conf
+from loguru import logger as logging
 
 timeout_bot_msg = '[Local Message] Request timeout. Network error.'
 #os.environ['VOLC_ACCESSKEY'] = ''

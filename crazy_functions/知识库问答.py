@@ -1,6 +1,6 @@
 from toolbox import CatchException, update_ui, ProxyNetworkActivate, update_ui_lastest_msg, get_log_folder, get_user
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, get_files_from_everything
-
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, get_files_from_everything
+from loguru import logger
 install_msg ="""
 
 1. python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
@@ -40,7 +40,7 @@ def 知识库文件注入(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     except Exception as e:
         chatbot.append(["依赖不足", f"{str(e)}\n\n导入依赖失败。请用以下命令安装" + install_msg])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-        # from .crazy_utils import try_install_deps
+        # from crazy_functions.crazy_utils import try_install_deps
         # try_install_deps(['zh_langchain==0.2.1', 'pypinyin'], reload_m=['pypinyin', 'zh_langchain'])
         # yield from update_ui_lastest_msg("安装完成，您可以再次重试。", chatbot, history)
         return
@@ -60,7 +60,7 @@ def 知识库文件注入(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     # < -------------------预热文本向量化模组--------------- >
     chatbot.append(['<br/>'.join(file_manifest), "正在预热文本向量化模组, 如果是第一次运行, 将消耗较长时间下载中文向量化模型..."])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-    print('Checking Text2vec ...')
+    logger.info('Checking Text2vec ...')
     from langchain.embeddings.huggingface import HuggingFaceEmbeddings
     with ProxyNetworkActivate('Download_LLM'):    # 临时地激活代理网络
         HuggingFaceEmbeddings(model_name="GanymedeNil/text2vec-large-chinese")
@@ -68,7 +68,7 @@ def 知识库文件注入(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     # < -------------------构建知识库--------------- >
     chatbot.append(['<br/>'.join(file_manifest), "正在构建知识库..."])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-    print('Establishing knowledge archive ...')
+    logger.info('Establishing knowledge archive ...')
     with ProxyNetworkActivate('Download_LLM'):    # 临时地激活代理网络
         kai = knowledge_archive_interface()
         vs_path = get_log_folder(user=get_user(chatbot), plugin_name='vec_store')
@@ -93,7 +93,7 @@ def 读取知识库作答(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     except Exception as e:
         chatbot.append(["依赖不足", f"{str(e)}\n\n导入依赖失败。请用以下命令安装" + install_msg])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-        # from .crazy_utils import try_install_deps
+        # from crazy_functions.crazy_utils import try_install_deps
         # try_install_deps(['zh_langchain==0.2.1', 'pypinyin'], reload_m=['pypinyin', 'zh_langchain'])
         # yield from update_ui_lastest_msg("安装完成，您可以再次重试。", chatbot, history)
         return

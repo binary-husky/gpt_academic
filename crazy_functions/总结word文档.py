@@ -1,7 +1,7 @@
 from toolbox import update_ui
 from toolbox import CatchException, report_exception
 from toolbox import write_history_to_file, promote_file_to_downloadzone
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 fast_debug = False
 
 
