@@ -4,7 +4,7 @@
 # @Descr   : 兼容最新的智谱Ai
 from toolbox import get_conf
 from toolbox import get_conf, encode_image, get_pictures_list
-import logging, os, requests
+import requests
 import json
 class TaichuChatInit:
     def __init__(self): ...

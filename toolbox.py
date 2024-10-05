@@ -8,8 +8,8 @@ import base64
 import gradio
 import shutil
 import glob
-import logging
 import uuid
+from loguru import logger
 from functools import wraps
 from textwrap import dedent
 from shared_utils.config_loader import get_conf
@@ -673,7 +673,7 @@ def run_gradio_in_subpath(demo, auth, port, custom_path):
         if path == "/":
             return True
         if len(path) == 0:
-            print(
+            logger.info(
                 "ilegal custom path: {}\npath must not be empty\ndeploy on root url".format(
                     path
                 )
@@ -681,10 +681,10 @@ def run_gradio_in_subpath(demo, auth, port, custom_path):
             return False
         if path[0] == "/":
             if path[1] != "/":
-                print("deploy on sub-path {}".format(path))
+                logger.info("deploy on sub-path {}".format(path))
                 return True
             return False
-        print(
+        logger.info(
             "ilegal custom path: {}\npath should begin with '/'\ndeploy on root url".format(
                 path
             )
@@ -787,12 +787,12 @@ def zip_folder(source_folder, dest_folder, zip_name):
 
     # Make sure the source folder exists
     if not os.path.exists(source_folder):
-        print(f"{source_folder} does not exist")
+        logger.info(f"{source_folder} does not exist")
         return
 
     # Make sure the destination folder exists
     if not os.path.exists(dest_folder):
-        print(f"{dest_folder} does not exist")
+        logger.info(f"{dest_folder} does not exist")
         return
 
     # Create the name for the zip file
@@ -811,7 +811,7 @@ def zip_folder(source_folder, dest_folder, zip_name):
         os.rename(zip_file, pj(dest_folder, os.path.basename(zip_file)))
         zip_file = pj(dest_folder, os.path.basename(zip_file))
 
-    print(f"Zip file created at {zip_file}")
+    logger.info(f"Zip file created at {zip_file}")
 
 
 def zip_result(folder):
@@ -1033,10 +1033,20 @@ def log_chat(llm_model: str, input_str: str, output_str: str):
     try:
         if output_str and input_str and llm_model:
             uid = str(uuid.uuid4().hex)
-            logging.info(f"[Model({uid})] {llm_model}")
             input_str = input_str.rstrip('\n')
-            logging.info(f"[Query({uid})]\n{input_str}")
             output_str = output_str.rstrip('\n')
-            logging.info(f"[Response({uid})]\n{output_str}\n\n")
+            logger.bind(chat_msg=True).info(dedent(
+            """
+            ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+            [UID]
+            {uid}
+            [Model]
+            {llm_model}
+            [Query]
+            {input_str}
+            [Response]
+            {output_str}
+            ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+            """).format(uid=uid, llm_model=llm_model, input_str=input_str, output_str=output_str))
     except:
-        print(trimmed_format_exc())
+        logger.error(trimmed_format_exc())

@@ -2,7 +2,7 @@ import importlib
 import time
 import os
 from functools import lru_cache
-from shared_utils.colorful import print亮红, print亮绿, print亮蓝
+from shared_utils.colorful import log亮红, log亮绿, log亮蓝
 
 pj = os.path.join
 default_user_name = 'default_user'
@@ -30,13 +30,13 @@ def read_env_variable(arg, default_value):
         env_arg = os.environ[arg]
     else:
         raise KeyError
-    print(f"[ENV_VAR] 尝试加载{arg}，默认值：{default_value} --> 修正值：{env_arg}")
+    log亮绿(f"[ENV_VAR] 尝试加载{arg}，默认值：{default_value} --> 修正值：{env_arg}")
     try:
         if isinstance(default_value, bool):
             env_arg = env_arg.strip()
             if env_arg == 'True': r = True
             elif env_arg == 'False': r = False
-            else: print('Enter True or False, but have:', env_arg); r = default_value
+            else: log亮红('Expect `True` or `False`, but have:', env_arg); r = default_value
         elif isinstance(default_value, int):
             r = int(env_arg)
         elif isinstance(default_value, float):
@@ -51,13 +51,13 @@ def read_env_variable(arg, default_value):
             assert arg == "proxies"
             r = eval(env_arg)
         else:
-            print亮红(f"[ENV_VAR] 环境变量{arg}不支持通过环境变量设置! ")
+            log亮红(f"[ENV_VAR] 环境变量{arg}不支持通过环境变量设置! ")
             raise KeyError
     except:
-        print亮红(f"[ENV_VAR] 环境变量{arg}加载失败! ")
+        log亮红(f"[ENV_VAR] 环境变量{arg}加载失败! ")
         raise KeyError(f"[ENV_VAR] 环境变量{arg}加载失败! ")
 
-    print亮绿(f"[ENV_VAR] 成功读取环境变量{arg}")
+    log亮绿(f"[ENV_VAR] 成功读取环境变量{arg}")
     return r
 
 
@@ -80,21 +80,21 @@ def read_single_conf_with_lru_cache(arg):
     if arg == 'API_URL_REDIRECT':
         oai_rd = r.get("https://api.openai.com/v1/chat/completions", None) # API_URL_REDIRECT填写格式是错误的，请阅读`https://github.com/binary-husky/gpt_academic/wiki/项目配置说明`
         if oai_rd and not oai_rd.endswith('/completions'):
-            print亮红("\n\n[API_URL_REDIRECT] API_URL_REDIRECT填错了。请阅读`https://github.com/binary-husky/gpt_academic/wiki/项目配置说明`。如果您确信自己没填错，无视此消息即可。")
+            log亮红("\n\n[API_URL_REDIRECT] API_URL_REDIRECT填错了。请阅读`https://github.com/binary-husky/gpt_academic/wiki/项目配置说明`。如果您确信自己没填错，无视此消息即可。")
             time.sleep(5)
     if arg == 'API_KEY':
-        print亮蓝(f"[API_KEY] 本项目现已支持OpenAI和Azure的api-key。也支持同时填写多个api-key，如API_KEY=\"openai-key1,openai-key2,azure-key3\"")
-        print亮蓝(f"[API_KEY] 您既可以在config.py中修改api-key(s)，也可以在问题输入区输入临时的api-key(s)，然后回车键提交后即可生效。")
+        log亮蓝(f"[API_KEY] 本项目现已支持OpenAI和Azure的api-key。也支持同时填写多个api-key，如API_KEY=\"openai-key1,openai-key2,azure-key3\"")
+        log亮蓝(f"[API_KEY] 您既可以在config.py中修改api-key(s)，也可以在问题输入区输入临时的api-key(s)，然后回车键提交后即可生效。")
         if is_any_api_key(r):
-            print亮绿(f"[API_KEY] 您的 API_KEY 是: {r[:15]}*** API_KEY 导入成功")
+            log亮绿(f"[API_KEY] 您的 API_KEY 是: {r[:15]}*** API_KEY 导入成功")
         else:
-            print亮红(f"[API_KEY] 您的 API_KEY（{r[:15]}***）不满足任何一种已知的密钥格式，请在config文件中修改API密钥之后再运行（详见`https://github.com/binary-husky/gpt_academic/wiki/api_key`）。")
+            log亮红(f"[API_KEY] 您的 API_KEY（{r[:15]}***）不满足任何一种已知的密钥格式，请在config文件中修改API密钥之后再运行（详见`https://github.com/binary-husky/gpt_academic/wiki/api_key`）。")
     if arg == 'proxies':
         if not read_single_conf_with_lru_cache('USE_PROXY'): r = None # 检查USE_PROXY，防止proxies单独起作用
         if r is None:
-            print亮红('[PROXY] 网络代理状态：未配置。无代理状态下很可能无法访问OpenAI家族的模型。建议：检查USE_PROXY选项是否修改。')
+            log亮红('[PROXY] 网络代理状态：未配置。无代理状态下很可能无法访问OpenAI家族的模型。建议：检查USE_PROXY选项是否修改。')
         else:
-            print亮绿('[PROXY] 网络代理状态：已配置。配置信息如下：', r)
+            log亮绿('[PROXY] 网络代理状态：已配置。配置信息如下：', str(r))
             assert isinstance(r, dict), 'proxies格式错误，请注意proxies选项的格式，不要遗漏括号。'
     return r
 

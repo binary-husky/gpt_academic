@@ -1,11 +1,13 @@
 from toolbox import update_ui
 from toolbox import CatchException, get_conf, markdown_convertion
+from request_llms.bridge_all import predict_no_ui_long_connection
 from crazy_functions.crazy_utils import input_clipping
 from crazy_functions.agent_fns.watchdog import WatchDog
-from request_llms.bridge_all import predict_no_ui_long_connection
+from crazy_functions.live_audio.aliyunASR import AliyunASR
+from loguru import logger
+
 import threading, time
 import numpy as np
-from .live_audio.aliyunASR import AliyunASR
 import json
 import re
 
@@ -42,9 +44,9 @@ class AsyncGptTask():
             gpt_say_partial = predict_no_ui_long_connection(inputs=i_say, llm_kwargs=llm_kwargs, history=history, sys_prompt=sys_prompt,
                                                             observe_window=observe_window[index], console_slience=True)
         except ConnectionAbortedError as token_exceed_err:
-            print('至少一个线程任务Token溢出而失败', e)
+            logger.error('至少一个线程任务Token溢出而失败', e)
         except Exception as e:
-            print('至少一个线程任务意外失败', e)
+            logger.error('至少一个线程任务意外失败', e)
 
     def add_async_gpt_task(self, i_say, chatbot_index, llm_kwargs, history, system_prompt):
         self.observe_future.append([""])

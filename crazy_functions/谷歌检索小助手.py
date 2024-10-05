@@ -1,4 +1,4 @@
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from toolbox import CatchException, report_exception, promote_file_to_downloadzone
 from toolbox import update_ui, update_ui_lastest_msg, disable_auto_promotion, write_history_to_file
 import logging

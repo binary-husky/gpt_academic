@@ -1,7 +1,6 @@
 from http import HTTPStatus
 from toolbox import get_conf
 import threading
-import logging
 
 timeout_bot_msg = '[Local Message] Request timeout. Network error.'
 

@@ -1,5 +1,6 @@
 from toolbox import HotReload  # HotReload 的意思是热更新，修改函数插件后，不需要重启程序，代码直接生效
 from toolbox import trimmed_format_exc
+from loguru import logger
 
 
 def get_crazy_functions():
@@ -429,8 +430,8 @@ def get_crazy_functions():
             }
         )
     except:
-        print(trimmed_format_exc())
-        print("Load function plugin failed")
+        logger.error(trimmed_format_exc())
+        logger.error("Load function plugin failed")
 
     # try:
     #     from crazy_functions.联网的ChatGPT import 连接网络回答问题
@@ -460,8 +461,8 @@ def get_crazy_functions():
     #         }
     #     )
     # except:
-    #     print(trimmed_format_exc())
-    #     print("Load function plugin failed")
+    #     logger.error(trimmed_format_exc())
+    #     logger.error("Load function plugin failed")
 
     try:
         from crazy_functions.SourceCode_Analyse import 解析任意code项目
@@ -479,8 +480,8 @@ def get_crazy_functions():
             }
         )
     except:
-        print(trimmed_format_exc())
-        print("Load function plugin failed")
+        logger.error(trimmed_format_exc())
+        logger.error("Load function plugin failed")
 
     try:
         from crazy_functions.询问多个大语言模型 import 同时问询_指定模型
@@ -498,8 +499,8 @@ def get_crazy_functions():
             }
         )
     except:
-        print(trimmed_format_exc())
-        print("Load function plugin failed")
+        logger.error(trimmed_format_exc())
+        logger.error("Load function plugin failed")
 
 
 
@@ -520,8 +521,8 @@ def get_crazy_functions():
             }
         )
     except:
-        print(trimmed_format_exc())
-        print("Load function plugin failed")
+        logger.error(trimmed_format_exc())
+        logger.error("Load function plugin failed")
 
     try:
         from crazy_functions.数学动画生成manim import 动画生成
@@ -538,8 +539,8 @@ def get_crazy_functions():
             }
         )
     except:
-        print(trimmed_format_exc())
-        print("Load function plugin failed")
+        logger.error(trimmed_format_exc())
+        logger.error("Load function plugin failed")
 
     try:
         from crazy_functions.Markdown_Translate import Markdown翻译指定语言
@@ -557,8 +558,8 @@ def get_crazy_functions():
             }
         )
     except:
-        print(trimmed_format_exc())
-        print("Load function plugin failed")
+        logger.error(trimmed_format_exc())
+        logger.error("Load function plugin failed")
 
     try:
         from crazy_functions.知识库问答 import 知识库文件注入
@@ -576,8 +577,8 @@ def get_crazy_functions():
             }
         )
     except:
-        print(trimmed_format_exc())
-        print("Load function plugin failed")
+        logger.error(trimmed_format_exc())
+        logger.error("Load function plugin failed")
 
     try:
         from crazy_functions.知识库问答 import 读取知识库作答
@@ -595,8 +596,8 @@ def get_crazy_functions():
             }
         )
     except:
-        print(trimmed_format_exc())
-        print("Load function plugin failed")
+        logger.error(trimmed_format_exc())
+        logger.error("Load function plugin failed")
 
     try:
         from crazy_functions.交互功能函数模板 import 交互功能模板函数
@@ -612,8 +613,8 @@ def get_crazy_functions():
             }
         )
     except:
-        print(trimmed_format_exc())
-        print("Load function plugin failed")
+        logger.error(trimmed_format_exc())
+        logger.error("Load function plugin failed")
 
 
     try:
@@ -635,8 +636,8 @@ def get_crazy_functions():
                 }
             )
     except:
-        print(trimmed_format_exc())
-        print("Load function plugin failed")
+        logger.error(trimmed_format_exc())
+        logger.error("Load function plugin failed")
 
     try:
         from crazy_functions.批量翻译PDF文档_NOUGAT import 批量翻译PDF文档
@@ -652,8 +653,8 @@ def get_crazy_functions():
             }
         )
     except:
-        print(trimmed_format_exc())
-        print("Load function plugin failed")
+        logger.error(trimmed_format_exc())
+        logger.error("Load function plugin failed")
 
     try:
         from crazy_functions.函数动态生成 import 函数动态生成
@@ -669,8 +670,8 @@ def get_crazy_functions():
             }
         )
     except:
-        print(trimmed_format_exc())
-        print("Load function plugin failed")
+        logger.error(trimmed_format_exc())
+        logger.error("Load function plugin failed")
 
     try:
         from crazy_functions.多智能体 import 多智能体终端
@@ -686,8 +687,8 @@ def get_crazy_functions():
             }
         )
     except:
-        print(trimmed_format_exc())
-        print("Load function plugin failed")
+        logger.error(trimmed_format_exc())
+        logger.error("Load function plugin failed")
 
     try:
         from crazy_functions.互动小游戏 import 随机小游戏
@@ -703,8 +704,8 @@ def get_crazy_functions():
             }
         )
     except:
-        print(trimmed_format_exc())
-        print("Load function plugin failed")
+        logger.error(trimmed_format_exc())
+        logger.error("Load function plugin failed")
 
     # try:
     #     from crazy_functions.高级功能函数模板 import 测试图表渲染
@@ -717,7 +718,7 @@ def get_crazy_functions():
     #         }
     #     })
     # except:
-    #     print(trimmed_format_exc())
+    #     logger.error(trimmed_format_exc())
     #     print('Load function plugin failed')
 
     # try:

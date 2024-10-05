@@ -2,6 +2,8 @@ import markdown
 import re
 import os
 import math
+
+from loguru import logger
 from textwrap import dedent
 from functools import lru_cache
 from pymdownx.superfences import fence_code_format
@@ -227,14 +229,14 @@ def fix_dollar_sticking_bug(txt):
 
             if single_stack_height > 0:
                 if txt[:(index+1)].find('\n') > 0 or txt[:(index+1)].find('<td>') > 0 or txt[:(index+1)].find('</td>') > 0:
-                    print('公式之中出现了异常 (Unexpect element in equation)')
+                    logger.error('公式之中出现了异常 (Unexpect element in equation)')
                     single_stack_height = 0
                     txt_result += ' $'
                     continue
 
             if double_stack_height > 0:
                 if txt[:(index+1)].find('\n\n') > 0:
-                    print('公式之中出现了异常 (Unexpect element in equation)')
+                    logger.error('公式之中出现了异常 (Unexpect element in equation)')
                     double_stack_height = 0
                     txt_result += '$$'
                     continue
@@ -253,13 +255,13 @@ def fix_dollar_sticking_bug(txt):
                 txt = txt[(index+2):]
             else:
                 if double_stack_height != 0:
-                    # print(txt[:(index)])
-                    print('发现异常嵌套公式')
+                    # logger.info(txt[:(index)])
+                    logger.info('发现异常嵌套公式')
                 if single_stack_height == 0:
                     single_stack_height = 1
                 else:
                     single_stack_height = 0
-                    # print(txt[:(index)])
+                    # logger.info(txt[:(index)])
                 txt_result += txt[:(index+1)]
                 txt = txt[(index+1):]
             break
