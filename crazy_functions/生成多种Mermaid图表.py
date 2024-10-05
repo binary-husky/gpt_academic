@@ -1,5 +1,5 @@
 from toolbox import CatchException, update_ui, report_exception
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from crazy_functions.plugin_template.plugin_class_template import (
     GptAcademicPluginTemplate,
 )
@@ -201,8 +201,7 @@ def 解析历史输入(history, llm_kwargs, file_manifest, chatbot, plugin_kwarg
     MAX_WORD_TOTAL = 4096
     n_txt = len(txt)
     last_iteration_result = "从以下文本中提取摘要。"
-    if n_txt >= 20:
-        print("文章极长，不能达到预期效果")
+
     for i in range(n_txt):
         NUM_OF_WORD = MAX_WORD_TOTAL // n_txt
         i_say = f"Read this section, recapitulate the content of this section with less than {NUM_OF_WORD} words in Chinese: {txt[i]}"

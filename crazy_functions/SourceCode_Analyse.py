@@ -5,8 +5,8 @@ from crazy_functions.crazy_utils import input_clipping
 
 def 解析源代码新(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
     import os, copy
-    from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
-    from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+    from crazy_functions.crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
+    from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 
     summary_batch_isolation = True
     inputs_array = []

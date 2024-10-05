@@ -1,5 +1,6 @@
 import platform
 from sys import stdout
+from loguru import logger
 
 if platform.system()=="Linux":
     pass
@@ -59,3 +60,29 @@ def sprint亮紫(*kw):
     return "\033[1;35m"+' '.join(kw)+"\033[0m"
 def sprint亮靛(*kw):
     return "\033[1;36m"+' '.join(kw)+"\033[0m"
+
+def log红(*kw,**kargs):
+    logger.opt(depth=1).info(sprint红(*kw))
+def log绿(*kw,**kargs):
+    logger.opt(depth=1).info(sprint绿(*kw))
+def log黄(*kw,**kargs):
+    logger.opt(depth=1).info(sprint黄(*kw))
+def log蓝(*kw,**kargs):
+    logger.opt(depth=1).info(sprint蓝(*kw))
+def log紫(*kw,**kargs):
+    logger.opt(depth=1).info(sprint紫(*kw))
+def log靛(*kw,**kargs):
+    logger.opt(depth=1).info(sprint靛(*kw))
+
+def log亮红(*kw,**kargs):
+    logger.opt(depth=1).info(sprint亮红(*kw))
+def log亮绿(*kw,**kargs):
+    logger.opt(depth=1).info(sprint亮绿(*kw))
+def log亮黄(*kw,**kargs):
+    logger.opt(depth=1).info(sprint亮黄(*kw))
+def log亮蓝(*kw,**kargs):
+    logger.opt(depth=1).info(sprint亮蓝(*kw))
+def log亮紫(*kw,**kargs):
+    logger.opt(depth=1).info(sprint亮紫(*kw))
+def log亮靛(*kw,**kargs):
+    logger.opt(depth=1).info(sprint亮靛(*kw))

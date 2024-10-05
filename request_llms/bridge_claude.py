@@ -9,12 +9,12 @@
     具备多线程调用能力的函数
     2. predict_no_ui_long_connection：支持多线程
 """
-import logging
 import os
 import time
 import traceback
 import json
 import requests
+from loguru import logger
 from toolbox import get_conf, update_ui, trimmed_format_exc, encode_image, every_image_file_in_path, log_chat
 from proxy_utils import selective_proxy
 
@@ -106,7 +106,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
             retry += 1
             traceback.print_exc()
             if retry > MAX_RETRY: raise TimeoutError
-            if MAX_RETRY!=0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
+            if MAX_RETRY!=0: logger.error(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
     stream_response = response.iter_lines()
     result = ''
     while True:
@@ -121,12 +121,11 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
                 if need_to_pass:
                     pass
                 elif is_last_chunk:
-                    # logging.info(f'[response] {result}')
+                    # logger.info(f'[response] {result}')
                     break
                 else:
                     if chunkjson and chunkjson['type'] == 'content_block_delta':
                         result += chunkjson['delta']['text']
-                        print(chunkjson['delta']['text'], end='')
                         if observe_window is not None:
                             # 观测窗，把已经获取的数据显示出去
                             if len(observe_window) >= 1:
@@ -139,7 +138,7 @@ def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="",
                 chunk = get_full_error(chunk, stream_response)
                 chunk_decoded = chunk.decode()
                 error_msg = chunk_decoded
-                print(error_msg)
+                logger.error(error_msg)
                 raise RuntimeError("Json解析不合常规")
 
     return result
@@ -205,7 +204,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             retry += 1
             traceback.print_exc()
             if retry > MAX_RETRY: raise TimeoutError
-            if MAX_RETRY!=0: print(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
+            if MAX_RETRY!=0: logger.error(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
     stream_response = response.iter_lines()
     gpt_replying_buffer = ""
 
@@ -222,7 +221,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     pass
                 elif is_last_chunk:
                     log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
-                    # logging.info(f'[response] {gpt_replying_buffer}')
+                    # logger.info(f'[response] {gpt_replying_buffer}')
                     break
                 else:
                     if chunkjson and chunkjson['type'] == 'content_block_delta':
@@ -235,7 +234,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                 chunk = get_full_error(chunk, stream_response)
                 chunk_decoded = chunk.decode()
                 error_msg = chunk_decoded
-                print(error_msg)
+                logger.error(error_msg)
                 raise RuntimeError("Json解析不合常规")
 
     # 在流式处理完成后，更新UI以表示响应已完成

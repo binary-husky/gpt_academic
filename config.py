@@ -69,9 +69,9 @@ EMBEDDING_MODEL = "text-embedding-3-small"
 #   "yi-34b-chat-0205","yi-34b-chat-200k","yi-large","yi-medium","yi-spark","yi-large-turbo","yi-large-preview",
 # ]
 # --- --- --- ---
-# 此外，您还可以在接入one-api/vllm/ollama时，
-# 使用"one-api-*","vllm-*","ollama-*"前缀直接使用非标准方式接入的模型，例如
-# AVAIL_LLM_MODELS = ["one-api-claude-3-sonnet-20240229(max_token=100000)", "ollama-phi3(max_token=4096)"]
+# 此外，您还可以在接入one-api/vllm/ollama/Openroute时，
+# 使用"one-api-*","vllm-*","ollama-*","openrouter-*"前缀直接使用非标准方式接入的模型，例如
+# AVAIL_LLM_MODELS = ["one-api-claude-3-sonnet-20240229(max_token=100000)", "ollama-phi3(max_token=4096)","openrouter-openai/gpt-4o-mini","openrouter-openai/chatgpt-4o-latest"]
 # --- --- --- ---
 
 

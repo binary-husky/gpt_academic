@@ -6,13 +6,14 @@
 """
 
 
+import time
 from toolbox import CatchException, update_ui, gen_time_str, trimmed_format_exc, ProxyNetworkActivate
 from toolbox import get_conf, select_api_key, update_ui_lastest_msg, Singleton
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, get_plugin_arg
 from crazy_functions.crazy_utils import input_clipping, try_install_deps
 from crazy_functions.agent_fns.persistent import GradioMultiuserManagerForPersistentClasses
 from crazy_functions.agent_fns.auto_agent import AutoGenMath
-import time
+from loguru import logger
 
 def remove_model_prefix(llm):
     if llm.startswith('api2d-'): llm = llm.replace('api2d-', '')
@@ -80,12 +81,12 @@ def 多智能体终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
     persistent_key = f"{user_uuid}->多智能体终端"
     if persistent_class_multi_user_manager.already_alive(persistent_key):
         # 当已经存在一个正在运行的多智能体终端时，直接将用户输入传递给它，而不是再次启动一个新的多智能体终端
-        print('[debug] feed new user input')
+        logger.info('[debug] feed new user input')
         executor = persistent_class_multi_user_manager.get(persistent_key)
         exit_reason = yield from executor.main_process_ui_control(txt, create_or_resume="resume")
     else:
         # 运行多智能体终端 (首次)
-        print('[debug] create new executor instance')
+        logger.info('[debug] create new executor instance')
         history = []
         chatbot.append(["正在启动: 多智能体终端", "插件动态生成, 执行开始, 作者 Microsoft & Binary-Husky."])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面

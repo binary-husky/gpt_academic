@@ -1,10 +1,12 @@
-from toolbox import CatchException, update_ui
-from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-from request_llms.bridge_all import predict_no_ui_long_connection
 import datetime
 import re
 import os
+from loguru import logger
 from textwrap import dedent
+from toolbox import CatchException, update_ui
+from request_llms.bridge_all import predict_no_ui_long_connection
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+
 # TODO: 解决缩进问题
 
 find_function_end_prompt = '''
@@ -355,7 +357,7 @@ class PythonCodeComment():
                     try:
                         successful, hint = self.verify_successful(next_batch, result)
                     except Exception as e:
-                        print('ignored exception:\n' + str(e))
+                        logger.error('ignored exception:\n' + str(e))
                         break
                     if successful:
                         break

@@ -1,4 +1,5 @@
 from crazy_functions.agent_fns.pipe import PluginMultiprocessManager, PipeCom
+from loguru import logger
 
 class EchoDemo(PluginMultiprocessManager):
     def subprocess_worker(self, child_conn):
@@ -16,4 +17,4 @@ class EchoDemo(PluginMultiprocessManager):
             elif msg.cmd == "terminate":
                 self.child_conn.send(PipeCom("done", ""))
                 break
-        print('[debug] subprocess_worker terminated')
+        logger.info('[debug] subprocess_worker terminated')

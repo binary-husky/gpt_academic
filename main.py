@@ -13,16 +13,10 @@ help_menu_description = \
 </br></br>如何语音对话: 请阅读Wiki
 </br></br>如何临时更换API_KEY: 在输入区输入临时API_KEY后提交（网页刷新后失效）"""
 
+from loguru import logger
 def enable_log(PATH_LOGGING):
-    import logging
-    admin_log_path = os.path.join(PATH_LOGGING, "admin")
-    os.makedirs(admin_log_path, exist_ok=True)
-    log_dir = os.path.join(admin_log_path, "chat_secrets.log")
-    try:logging.basicConfig(filename=log_dir, level=logging.INFO, encoding="utf-8", format="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-    except:logging.basicConfig(filename=log_dir, level=logging.INFO,  format="%(asctime)s %(levelname)-8s %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-    # Disable logging output from the 'httpx' logger
-    logging.getLogger("httpx").setLevel(logging.WARNING)
-    print(f"所有对话记录将自动保存在本地目录{log_dir}, 请注意自我隐私保护哦！")
+    from shared_utils.logging import setup_logging
+    setup_logging(PATH_LOGGING)
 
 def encode_plugin_info(k, plugin)->str:
     import copy
@@ -42,8 +36,15 @@ def main():
     import gradio as gr
     if gr.__version__ not in ['3.32.9', '3.32.10', '3.32.11']:
         raise ModuleNotFoundError("使用项目内置Gradio获取最优体验! 请运行 `pip install -r requirements.txt` 指令安装内置Gradio及其他依赖, 详情信息见requirements.txt.")
-    from request_llms.bridge_all import predict
+    
+    # 一些基础工具
     from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, DummyWith
+
+    # 对话、日志记录
+    enable_log(get_conf("PATH_LOGGING"))
+
+    # 对话句柄
+    from request_llms.bridge_all import predict
 
     # 读取配置
     proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION = get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION')
@@ -61,8 +62,6 @@ def main():
     from themes.theme import load_dynamic_theme, to_cookie_str, from_cookie_str, assign_user_uuid
     title_html = f"<h1 align=\"center\">GPT 学术优化 {get_current_version()}</h1>{theme_declaration}"
 
-    # 对话、日志记录
-    enable_log(PATH_LOGGING)
 
     # 一些普通功能模块
     from core_functional import get_core_functions
@@ -339,9 +338,9 @@ def main():
     # Gradio的inbrowser触发不太稳定，回滚代码到原始的浏览器打开函数
     def run_delayed_tasks():
         import threading, webbrowser, time
-        print(f"如果浏览器没有自动打开，请复制并转到以下URL：")
-        if DARK_MODE:   print(f"\t「暗色主题已启用（支持动态切换主题）」: http://localhost:{PORT}")
-        else:           print(f"\t「亮色主题已启用（支持动态切换主题）」: http://localhost:{PORT}")
+        logger.info(f"如果浏览器没有自动打开，请复制并转到以下URL：")
+        if DARK_MODE:   logger.info(f"\t「暗色主题已启用（支持动态切换主题）」: http://localhost:{PORT}")
+        else:           logger.info(f"\t「亮色主题已启用（支持动态切换主题）」: http://localhost:{PORT}")
 
         def auto_updates(): time.sleep(0); auto_update()
         def open_browser(): time.sleep(2); webbrowser.open_new_tab(f"http://localhost:{PORT}")

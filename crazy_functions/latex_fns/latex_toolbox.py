@@ -1,6 +1,8 @@
-import os, shutil
+import os
 import re
+import shutil
 import numpy as np
+from loguru import logger
 
 PRESERVE = 0
 TRANSFORM = 1
@@ -55,7 +57,7 @@ def post_process(root):
                     str_stack.append("{")
                 elif c == "}":
                     if len(str_stack) == 1:
-                        print("stack fix")
+                        logger.warning("fixing brace error")
                         return i
                     str_stack.pop(-1)
                 else:
@@ -601,7 +603,7 @@ def compile_latex_with_timeout(command, cwd, timeout=60):
     except subprocess.TimeoutExpired:
         process.kill()
         stdout, stderr = process.communicate()
-        print("Process timed out!")
+        logger.error("Process timed out (compile_latex_with_timeout)!")
         return False
     return True
 

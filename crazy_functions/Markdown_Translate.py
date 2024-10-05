@@ -1,4 +1,5 @@
-import glob, shutil, os, re, logging
+import glob, shutil, os, re
+from loguru import logger
 from toolbox import update_ui, trimmed_format_exc, gen_time_str
 from toolbox import CatchException, report_exception, get_log_folder
 from toolbox import write_history_to_file, promote_file_to_downloadzone
@@ -34,7 +35,7 @@ class PaperFileGroup():
                     self.sp_file_contents.append(segment)
                     self.sp_file_index.append(index)
                     self.sp_file_tag.append(self.file_paths[index] + f".part-{j}.md")
-        logging.info('Segmentation: done')
+        logger.info('Segmentation: done')
 
     def merge_result(self):
         self.file_result = ["" for _ in range(len(self.file_paths))]
@@ -51,7 +52,7 @@ class PaperFileGroup():
         return manifest
 
 def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, language='en'):
-    from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
+    from crazy_functions.crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 
     #  <-------- 读取Markdown文件，删除其中的所有注释 ---------->
     pfg = PaperFileGroup()
@@ -106,7 +107,7 @@ def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
                 expected_f_name = plugin_kwargs['markdown_expected_output_path']
                 shutil.copyfile(output_file, expected_f_name)
     except:
-        logging.error(trimmed_format_exc())
+        logger.error(trimmed_format_exc())
 
     #  <-------- 整理结果，退出 ---------->
     create_report_file_name = gen_time_str() + f"-chatgpt.md"
@@ -126,7 +127,7 @@ def get_files_from_everything(txt, preference=''):
         proxies = get_conf('proxies')
         # 网络的远程文件
         if preference == 'Github':
-            logging.info('正在从github下载资源 ...')
+            logger.info('正在从github下载资源 ...')
             if not txt.endswith('.md'):
                 # Make a request to the GitHub API to retrieve the repository information
                 url = txt.replace("https://github.com/", "https://api.github.com/repos/") + '/readme'

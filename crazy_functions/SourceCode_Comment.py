@@ -73,7 +73,7 @@ def 注释源代码(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
         file_tree_struct.manifest[fp].compare_html = compare_html_path
         with open(compare_html_path, 'w', encoding='utf-8') as f:
             f.write(html_template)
-        print('done 1')
+        # print('done 1')
 
     chatbot.append([None, f"正在处理:"])
     futures = []

@@ -24,8 +24,8 @@ class Actor(BaseModel):
     film_names: List[str] = Field(description="list of names of films they starred in")
 """
 
-import json, re, logging
-
+import json, re
+from loguru import logger as logging
 
 PYDANTIC_FORMAT_INSTRUCTIONS = """The output should be formatted as a JSON instance that conforms to the JSON schema below.
 

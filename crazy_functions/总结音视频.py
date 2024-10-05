@@ -1,5 +1,5 @@
 from toolbox import CatchException, report_exception, select_api_key, update_ui, get_conf
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 from toolbox import write_history_to_file, promote_file_to_downloadzone, get_log_folder
 
 def split_audio_file(filename, split_duration=1000):
