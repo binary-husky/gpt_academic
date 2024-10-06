@@ -18,6 +18,12 @@ jobs:
       packages: write
 
     steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -40,5 +46,6 @@ jobs:
           context: .
           push: true
           file: docs/GithubAction+NoLocal
+          platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

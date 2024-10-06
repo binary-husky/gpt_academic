@@ -3,33 +3,21 @@
 # - 2 构建 docker build -t gpt-academic-nolocal-latex -f docs/GithubAction+NoLocal+Latex .
 # - 3 运行 docker run -v /home/fuqingxu/arxiv_cache:/root/arxiv_cache --rm -it --net=host gpt-academic-nolocal-latex
 
-FROM fuqingxu/python311_texlive_ctex:latest
-ENV PATH "$PATH:/usr/local/texlive/2022/bin/x86_64-linux"
-ENV PATH "$PATH:/usr/local/texlive/2023/bin/x86_64-linux"
-ENV PATH "$PATH:/usr/local/texlive/2024/bin/x86_64-linux"
-ENV PATH "$PATH:/usr/local/texlive/2025/bin/x86_64-linux"
-ENV PATH "$PATH:/usr/local/texlive/2026/bin/x86_64-linux"
-
-# 指定路径
+FROM menghuan1918/python3_11_uv_texlive:latest
+ENV DEBIAN_FRONTEND=noninteractive
+SHELL ["/bin/bash", "-c"]
 WORKDIR /gpt
-
-RUN pip3 install openai numpy arxiv rich
-RUN pip3 install colorama Markdown pygments pymupdf
-RUN pip3 install python-docx pdfminer
-RUN pip3 install nougat-ocr
-
+RUN uv venv --seed \
+    && source venv/bin/activate \
+    && uv pip install openai numpy arxiv rich colorama Markdown pygments pymupdf python-docx pdfminer nougat-ocr
 # 装载项目文件
 COPY . .
 
-
 # 安装依赖
-RUN pip3 install -r requirements.txt
-
-# edge-tts需要的依赖
-RUN apt update && apt install ffmpeg -y
+RUN uv pip install -r requirements.txt
 
 # 可选步骤，用于预热模块
 RUN python3  -c 'from check_proxy import warm_up_modules; warm_up_modules()'
 
 # 启动
-CMD ["python3", "-u", "main.py"]
+CMD ["venv/bin/python3", "-u", "main.py"]
