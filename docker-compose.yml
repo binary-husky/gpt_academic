@@ -196,7 +196,7 @@ services:
 
     # 启动命令
     command: >
-      bash -c "python3 -u main.py"
+      bash -c ".venv/bin/python3 -u main.py"
 
 
 ## ===================================================
