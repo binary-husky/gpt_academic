@@ -7,7 +7,8 @@ FROM menghuan1918/python3_11_uv_texlive:latest
 ENV DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-c"]
 WORKDIR /gpt
-RUN uv venv --seed \
+RUN source ~/.bashrc \
+    && uv venv --seed \
     && source venv/bin/activate \
     && uv pip install openai numpy arxiv rich colorama Markdown pygments pymupdf python-docx pdfminer nougat-ocr
 # 装载项目文件
