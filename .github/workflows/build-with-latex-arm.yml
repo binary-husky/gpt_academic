@@ -39,19 +39,18 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      - name: Build Docker image as tar file
+      - name: Build Docker image and export as tar
         run: |
-          docker buildx build --output type=tar,dest=image.tar --platform linux/arm64,linux/amd64 ./docs/GithubAction+NoLocal+Latex
-
-      - name: De-tar the image file
-        run: |
-          mkdir -p output
-          tar -xf ./docs/image.tar -C output
+          docker buildx build \
+            --platform linux/arm64,linux/amd64 \
+            -f docs/GithubAction+NoLocal+Latex \
+            --output type=tar,dest=image.tar \
+            .
+      
+      - name: Extract tar file
+        run: tar -xf image.tar -C extracted
 
       - name: Push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: output
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+        run: |
+          docker load --input image.tar
+          docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tags }}
