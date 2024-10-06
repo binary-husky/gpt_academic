@@ -92,7 +92,6 @@ def remove_image_if_contain_base64(inputs):
         return inputs
 
 def decode_chunk(chunk):
-    # 提前读取一些信息 （用于判断异常）
     chunk_decoded = chunk.decode()
     chunkjson = None
     has_choices = False
@@ -100,14 +99,23 @@ def decode_chunk(chunk):
     has_content = False
     has_role = False
     try:
-        chunkjson = json.loads(chunk_decoded[6:])
-        has_choices = 'choices' in chunkjson
-        if has_choices: choice_valid = (len(chunkjson['choices']) > 0)
-        if has_choices and choice_valid: has_content = ("content" in chunkjson['choices'][0]["delta"])
-        if has_content: has_content = (chunkjson['choices'][0]["delta"]["content"] is not None)
-        if has_choices and choice_valid: has_role = "role" in chunkjson['choices'][0]["delta"]
-    except:
-        pass
+        if chunk_decoded.startswith('data:'):
+            data = chunk_decoded[5:].strip()
+            if data == '[DONE]':
+                return chunk_decoded, None, False, False, False, False
+            chunkjson = json.loads(data)
+            has_choices = 'choices' in chunkjson
+            if has_choices:
+                choice_valid = len(chunkjson['choices']) > 0
+                if choice_valid:
+                    has_content = "content" in chunkjson['choices'][0].get("delta", {})
+                    if has_content:
+                        has_content = chunkjson['choices'][0]["delta"]["content"] is not None
+                    has_role = "role" in chunkjson['choices'][0].get("delta", {})
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON解析错误: {e} - 内容: {chunk_decoded}")
+    except Exception as e:
+        logger.error(f"未知错误: {e} - 内容: {chunk_decoded}")
     return chunk_decoded, chunkjson, has_choices, choice_valid, has_content, has_role
 
 from functools import lru_cache
@@ -120,7 +128,6 @@ def verify_endpoint(endpoint):
         raise ValueError("Endpoint不正确, 请检查AZURE_ENDPOINT的配置! 当前的Endpoint为:" + endpoint)
     return endpoint
 
-def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], sys_prompt:str="", observe_window:list=None, console_slience:bool=False):
     """
     发送至chatGPT，等待回复，一次性完成，不显示中间过程。但内部用stream的方法避免中途网线被掐。
     inputs：
@@ -134,81 +141,145 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], 
     observe_window = None：
         用于负责跨越线程传递已经输出的部分，大部分时候仅仅为了fancy的视觉效果，留空即可。observe_window[0]：观测窗。observe_window[1]：看门狗
     """
+def predict_no_ui_long_connection(inputs: str, llm_kwargs: dict, history: list = [], sys_prompt: str = "", observe_window: list = None, console_slience: bool = False, chatbot: ChatBotWithCookies = None):
     from request_llms.bridge_all import model_info
 
-    watch_dog_patience = 5 # 看门狗的耐心, 设置5秒即可
+    watch_dog_patience = 5  # 看门狗的耐心, 设置5秒即可
 
-    if model_info[llm_kwargs['llm_model']].get('openai_disable_stream', False): stream = False
-    else: stream = True
+    if model_info[llm_kwargs['llm_model']].get('openai_disable_stream', False):
+        stream = False
+    else:
+        stream = True
 
     headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt=sys_prompt, stream=stream)
+    logger.info(f"Headers: {headers}")
+    logger.info(f"Payload: {payload}")
     retry = 0
     while True:
         try:
             # make a POST request to the API endpoint, stream=False
             endpoint = verify_endpoint(model_info[llm_kwargs['llm_model']]['endpoint'])
+            logger.info(f"Sending request to endpoint: {endpoint}")
             response = requests.post(endpoint, headers=headers, proxies=proxies,
-                                    json=payload, stream=stream, timeout=TIMEOUT_SECONDS); break
+                                     json=payload, stream=stream, timeout=TIMEOUT_SECONDS)
+            logger.info(f"Received response with status code: {response.status_code}")
+            break
         except requests.exceptions.ReadTimeout as e:
             retry += 1
+            logger.error(f"请求超时，正在重试 ({retry}/{MAX_RETRY}) ……")
             traceback.print_exc()
-            if retry > MAX_RETRY: raise TimeoutError
-            if MAX_RETRY!=0: logger.error(f'请求超时，正在重试 ({retry}/{MAX_RETRY}) ……')
+            if retry > MAX_RETRY:
+                raise TimeoutError("请求超时，达到最大重试次数。")
+            time.sleep(1)  # 可以添加延迟以避免频繁重试
 
     if not stream:
-        # 该分支仅适用于不支持stream的o1模型，其他情形一律不适用
-        chunkjson = json.loads(response.content.decode())
-        gpt_replying_buffer = chunkjson['choices'][0]["message"]["content"]
-        return gpt_replying_buffer
+        # 处理不依赖于 chatbot 的情况
+        try:
+            chunkjson = json.loads(response.content.decode())
+            logger.debug(f"O1 Model Response: {chunkjson}")  # 记录完整响应
+            gpt_replying_buffer = chunkjson['choices'][0]["message"]["content"]
+            log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
+            history[-1] = gpt_replying_buffer
+            yield gpt_replying_buffer
+        except Exception as e:
+            logger.error(f"O1 Model Parsing Error: {e}")
+            yield "Json解析异常: " + response.text
+        return
 
+    # 处理流式响应
     stream_response = response.iter_lines()
     result = ''
     json_data = None
     while True:
-        try: chunk = next(stream_response)
+        try:
+            chunk = next(stream_response)
+            logger.debug(f"Received chunk: {chunk}")
         except StopIteration:
+            logger.info("Stream已结束。")
             break
         except requests.exceptions.ConnectionError:
-            chunk = next(stream_response) # 失败了，重试一次？再失败就没办法了。
+            logger.error("Stream连接错误，尝试再次获取chunk。")
+            try:
+                chunk = next(stream_response)
+            except StopIteration:
+                logger.info("Stream已结束在ConnectionError后。")
+                break
+            except Exception as e:
+                logger.error(f"再获取chunk时发生错误: {e}")
+                break
+
         chunk_decoded, chunkjson, has_choices, choice_valid, has_content, has_role = decode_chunk(chunk)
-        if len(chunk_decoded)==0: continue
+        logger.debug(f"Decoded Chunk: {chunk_decoded}")
+
+        if len(chunk_decoded) == 0:
+            continue
         if not chunk_decoded.startswith('data:'):
             error_msg = get_full_error(chunk, stream_response).decode()
+            logger.error(f"错误消息: {error_msg}")
             if "reduce the length" in error_msg:
-                raise ConnectionAbortedError("OpenAI拒绝了请求:" + error_msg)
+                raise ConnectionAbortedError("OpenAI拒绝了请求: " + error_msg)
             elif """type":"upstream_error","param":"307""" in error_msg:
                 raise ConnectionAbortedError("正常结束，但显示Token不足，导致输出不完整，请削减单次输入的文本量。")
             else:
                 raise RuntimeError("OpenAI拒绝了请求：" + error_msg)
-        if ('data: [DONE]' in chunk_decoded): break # api2d 正常完成
+        if 'data: [DONE]' in chunk_decoded:
+            logger.info("Stream [DONE] 信号接收。")
+            break  # api2d 正常完成
+
         # 提前读取一些信息 （用于判断异常）
         if has_choices and not choice_valid:
-            # 一些垃圾第三方接口的出现这样的错误
+            logger.warning("收到无效的choices，继续接收下一个chunk。")
             continue
-        json_data = chunkjson['choices'][0]
-        delta = json_data["delta"]
-        if len(delta) == 0: break
-        if (not has_content) and has_role: continue
-        if (not has_content) and (not has_role): continue # raise RuntimeError("发现不标准的第三方接口："+delta)
-        if has_content: # has_role = True/False
-            result += delta["content"]
-            if not console_slience: print(delta["content"], end='')
-            if observe_window is not None:
-                # 观测窗，把已经获取的数据显示出去
-                if len(observe_window) >= 1:
+        if chunkjson is not None:
+            json_data = chunkjson['choices'][0]
+            delta = json_data.get("delta", {})
+            if not delta:
+                logger.warning("Delta为空，继续接收下一个chunk。")
+                continue
+            if len(delta) == 0:
+                break
+            if not has_content and has_role:
+                continue
+            if not has_content and not has_role:
+                continue  # 或者记录异常
+            if has_content:
+                result += delta.get("content", "")
+                if not console_slience:
+                    print(delta["content"], end='')
+                if observe_window is not None and len(observe_window) >= 1:
                     observe_window[0] += delta["content"]
-                # 看门狗，如果超过期限没有喂狗，则终止
-                if len(observe_window) >= 2:
-                    if (time.time()-observe_window[1]) > watch_dog_patience:
+                if observe_window is not None and len(observe_window) >= 2:
+                    if (time.time() - observe_window[1]) > watch_dog_patience:
                         raise RuntimeError("用户取消了程序。")
-        else: raise RuntimeError("意外Json结构："+delta)
+            else:
+                logger.error(f"意外的Json结构: {delta}")
+                raise RuntimeError("意外的Json结构：" + str(delta))
+        else:
+            logger.error("chunkjson 为 None。")
+            continue
+
     finish_reason = json_data.get('finish_reason') if json_data else None
+    logger.info(f"Finish Reason: {finish_reason}")
     if finish_reason == 'content_filter':
         raise RuntimeError("由于提问含不合规内容被过滤。")
     if finish_reason == 'length':
         raise ConnectionAbortedError("正常结束，但显示Token不足，导致输出不完整，请削减单次输入的文本量。")
     return result
 
+
+def handle_o1_model_special_no_ui(response, inputs, llm_kwargs, history):
+    try:
+        chunkjson = json.loads(response.content.decode())
+        logger.debug(f"O1 Model Response: {chunkjson}")  # 记录完整响应
+        gpt_replying_buffer = chunkjson['choices'][0]["message"]["content"]
+        log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
+        history[-1] = gpt_replying_buffer
+        # 不调用 update_ui，直接返回结果
+        yield gpt_replying_buffer
+    except Exception as e:
+        logger.error(f"O1 Model Parsing Error: {e}")
+        yield "Json解析异常: " + response.text
+        
 
 def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWithCookies,
             history:list=[], system_prompt:str='', stream:bool=True, additional_fn:str=None):
@@ -372,13 +443,15 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
 def handle_o1_model_special(response, inputs, llm_kwargs, chatbot, history):
     try:
         chunkjson = json.loads(response.content.decode())
+        logger.debug(f"O1 Model Response: {chunkjson}")  # 记录完整响应
         gpt_replying_buffer = chunkjson['choices'][0]["message"]["content"]
         log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
         history[-1] = gpt_replying_buffer
         chatbot[-1] = (history[-2], history[-1])
-        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+        yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
     except Exception as e:
-        yield from update_ui(chatbot=chatbot, history=history, msg="Json解析异常" + response.text) # 刷新界面
+        logger.error(f"O1 Model Parsing Error: {e}")
+        yield from update_ui(chatbot=chatbot, history=history, msg="Json解析异常" + response.text)  # 刷新界面
 
 def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg):
     from request_llms.bridge_all import model_info
@@ -415,8 +488,6 @@ def generate_payload(inputs: str, llm_kwargs: dict, history: list, system_prompt
     """
     整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
     """
-    from request_llms.bridge_all import model_info
-
     if not is_any_api_key(llm_kwargs['api_key']):
         raise AssertionError("你提供了错误的API_KEY。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。")
 
@@ -437,10 +508,6 @@ def generate_payload(inputs: str, llm_kwargs: dict, history: list, system_prompt
             headers.update({"api-key": azure_api_key_unshared})
 
     if has_multimodal_capacity:
-        # 当以下条件满足时，启用多模态能力：
-        # 1. 模型本身是多模态模型（has_multimodal_capacity）
-        # 2. 输入包含图像（len(image_base64_array) > 0）
-        # 3. 历史输入包含图像（ any([contain_base64(h) for h in history]) ）
         enable_multimodal_capacity = (len(image_base64_array) > 0) or any([contain_base64(h) for h in history])
     else:
         enable_multimodal_capacity = False
@@ -458,7 +525,6 @@ def generate_payload(inputs: str, llm_kwargs: dict, history: list, system_prompt
         # 对于不支持 system 角色的模型，将 system prompt 作为 user 消息
         messages = [{"role": "user", "content": system_prompt}]
 
-
     if not enable_multimodal_capacity:
         if conversation_cnt:
             for index in range(0, 2 * conversation_cnt, 2):
@@ -474,8 +540,6 @@ def generate_payload(inputs: str, llm_kwargs: dict, history: list, system_prompt
                     if assistant_msg["content"].strip() and assistant_msg["content"] != timeout_bot_msg:
                         messages.append(user_msg)
                         messages.append(assistant_msg)
-                    else:
-                        continue
         current_user_msg = {
             "role": "user",
             "content": inputs
@@ -484,23 +548,25 @@ def generate_payload(inputs: str, llm_kwargs: dict, history: list, system_prompt
     else:
         # 多模态能力
         if conversation_cnt:
-            for index in range(0, 2*conversation_cnt, 2):
-                what_i_have_asked = {}
-                what_i_have_asked["role"] = "user"
-                what_i_have_asked["content"] = append_image_if_contain_base64(history[index])
-                what_gpt_answer = {}
-                what_gpt_answer["role"] = "assistant"
-                what_gpt_answer["content"] = append_image_if_contain_base64(history[index+1])
-                if what_i_have_asked["content"] != "":
-                    if what_gpt_answer["content"] == "": continue
-                    if what_gpt_answer["content"] == timeout_bot_msg: continue
-                    messages.append(what_i_have_asked)
-                    messages.append(what_gpt_answer)
+            for index in range(0, 2 * conversation_cnt, 2):
+                what_i_have_asked = {
+                    "role": "user",
+                    "content": append_image_if_contain_base64(history[index])
+                }
+                what_gpt_answer = {
+                    "role": "assistant",
+                    "content": append_image_if_contain_base64(history[index + 1])
+                }
+                if what_i_have_asked["content"]:
+                    if what_gpt_answer["content"] and what_gpt_answer["content"] != timeout_bot_msg:
+                        messages.append(what_i_have_asked)
+                        messages.append(what_gpt_answer)
                 else:
                     messages[-1]['content'] = what_gpt_answer['content']
-        what_i_ask_now = {}
-        what_i_ask_now["role"] = "user"
-        what_i_ask_now["content"] = []
+        what_i_ask_now = {
+            "role": "user",
+            "content": []
+        }
         what_i_ask_now["content"].append({
             "type": "text",
             "text": inputs
@@ -514,7 +580,6 @@ def generate_payload(inputs: str, llm_kwargs: dict, history: list, system_prompt
             })
         messages.append(what_i_ask_now)
 
-
     model = llm_kwargs['llm_model']
     if llm_kwargs['llm_model'].startswith('api2d-'):
         model = llm_kwargs['llm_model'][len('api2d-'):]
@@ -524,7 +589,7 @@ def generate_payload(inputs: str, llm_kwargs: dict, history: list, system_prompt
     if llm_kwargs['llm_model'].startswith('vllm-'):
         model = llm_kwargs['llm_model'][len('vllm-'):]
         model, _ = read_one_api_model_name(model)
-    if model == "gpt-3.5-random": # 随机选择, 绕过openai访问频率限制
+    if model == "gpt-3.5-random":  # 随机选择, 绕过openai访问频率限制
         model = random.choice([
             "gpt-3.5-turbo",
             "gpt-3.5-turbo-16k",
@@ -543,6 +608,5 @@ def generate_payload(inputs: str, llm_kwargs: dict, history: list, system_prompt
         "stream": stream,
     }
 
-    return headers,payload
-
-
+    logger.debug(f"Generated Payload: {payload}")  # 添加日志以验证payload格式
+    return headers, payload
