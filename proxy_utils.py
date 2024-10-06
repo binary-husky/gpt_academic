@@ -5,8 +5,7 @@ import ipaddress
 from urllib.parse import urlparse
 from toolbox import get_conf
 
-# 从配置中读取 NO_PROXY_URLS
-NO_PROXY_URLS = get_conf('NO_PROXY_URLS')
+PROXY_BYPASS_PATTERNS = get_conf('PROXY_BYPASS_PATTERNS')
 
 def is_private_ip(ip_address):
     """
@@ -35,7 +34,7 @@ def should_use_proxy(url):
     """
     决定是否应该对给定的URL使用代理。
     判断依据：
-    1. URL是否在NO_PROXY_URLS列表中匹配。
+    1. URL是否在PROXY_BYPASS_PATTERNS列表中匹配。
     2. URL的主机名是否为私有IP。
     3. URL的主机名是否为localhost或环回地址。
     如果不满足上述条件，则使用代理。
@@ -59,8 +58,8 @@ def should_use_proxy(url):
         except ValueError:
             pass  # 如果不是有效的IP地址，继续其他判断
 
-        # 检查主机名是否匹配NO_PROXY_URLS中的任何模式
-        for pattern in NO_PROXY_URLS:
+        # 检查主机名是否匹配PROXY_BYPASS_PATTERNS中的任何模式
+        for pattern in PROXY_BYPASS_PATTERNS:
             # 精确匹配
             if hostname == pattern:
                 return False
