@@ -1,9 +1,9 @@
 from toolbox import CatchException, report_exception, get_log_folder, gen_time_str
 from toolbox import update_ui, promote_file_to_downloadzone, update_ui_lastest_msg, disable_auto_promotion
 from toolbox import write_history_to_file, promote_file_to_downloadzone
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
-from .crazy_utils import read_and_clean_pdf_text
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from crazy_functions.crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
+from crazy_functions.crazy_utils import read_and_clean_pdf_text
 from .pdf_fns.parse_pdf import parse_pdf, get_avail_grobid_url, translate_pdf
 from shared_utils.colorful import *
 import copy
@@ -60,7 +60,7 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     # 清空历史，以免输入溢出
     history = []
 
-    from .crazy_utils import get_files_from_everything
+    from crazy_functions.crazy_utils import get_files_from_everything
     success, file_manifest, project_folder = get_files_from_everything(txt, type='.pdf')
     if len(file_manifest) > 0:
         # 尝试导入依赖，如果缺少依赖，则给出安装建议

@@ -5,7 +5,8 @@
 from toolbox import get_conf
 from zhipuai import ZhipuAI
 from toolbox import get_conf, encode_image, get_pictures_list
-import logging, os
+from loguru import logger
+import os
 
 
 def input_encode_handler(inputs:str, llm_kwargs:dict):
@@ -24,7 +25,7 @@ class ZhipuChatInit:
     def __init__(self):
         ZHIPUAI_API_KEY, ZHIPUAI_MODEL = get_conf("ZHIPUAI_API_KEY", "ZHIPUAI_MODEL")
         if len(ZHIPUAI_MODEL) > 0:
-            logging.error('ZHIPUAI_MODEL 配置项选项已经弃用，请在LLM_MODEL中配置')
+            logger.error('ZHIPUAI_MODEL 配置项选项已经弃用，请在LLM_MODEL中配置')
         self.zhipu_bro = ZhipuAI(api_key=ZHIPUAI_API_KEY)
         self.model = ''
 
@@ -37,8 +38,7 @@ class ZhipuChatInit:
             what_i_have_asked['content'].append({"type": 'text', "text": user_input})
             if encode_img:
                 if len(encode_img) > 1:
-                    logging.warning("glm-4v只支持一张图片,将只取第一张图片进行处理")
-                    print("glm-4v只支持一张图片,将只取第一张图片进行处理")
+                    logger.warning("glm-4v只支持一张图片,将只取第一张图片进行处理")
                 img_d = {"type": "image_url",
                             "image_url": {
                                 "url": encode_img[0]['data']

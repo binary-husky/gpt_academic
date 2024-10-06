@@ -1,4 +1,5 @@
 import threading, time
+from loguru import logger
 
 class WatchDog():
     def __init__(self, timeout, bark_fn, interval=3, msg="") -> None:
@@ -13,7 +14,7 @@ class WatchDog():
         while True:
             if self.kill_dog: break
             if time.time() - self.last_feed > self.timeout:
-                if len(self.msg) > 0: print(self.msg)
+                if len(self.msg) > 0: logger.info(self.msg)
                 self.bark_fn()
                 break
             time.sleep(self.interval)

@@ -1,5 +1,6 @@
 import os
 from textwrap import indent
+from loguru import logger
 
 class FileNode:
     def __init__(self, name, build_manifest=False):
@@ -60,7 +61,7 @@ class FileNode:
             current_node.children.append(term)
 
     def print_files_recursively(self, level=0, code="R0"):
-        print('    '*level + self.name + ' ' + str(self.is_leaf) + ' ' + str(self.level))
+        logger.info('    '*level + self.name + ' ' + str(self.is_leaf) + ' ' + str(self.level))
         for j, child in enumerate(self.children):
             child.print_files_recursively(level=level+1, code=code+str(j))
             self.parenting_ship.extend(child.parenting_ship)
@@ -123,4 +124,4 @@ if __name__ == "__main__":
         "用于加载和分割文件中的文本的通用文件加载器用于加载和分割文件中的文本的通用文件加载器用于加载和分割文件中的文本的通用文件加载器",
         "包含了用于构建和管理向量数据库的函数和类包含了用于构建和管理向量数据库的函数和类包含了用于构建和管理向量数据库的函数和类",
     ]
-    print(build_file_tree_mermaid_diagram(file_manifest, file_comments, "项目文件树"))
+    logger.info(build_file_tree_mermaid_diagram(file_manifest, file_comments, "项目文件树"))

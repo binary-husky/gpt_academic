@@ -4,7 +4,7 @@ We currently support fastapi in order to solve sub-path deploy issue.
 
 1. change CUSTOM_PATH setting in `config.py`
 
-``` sh
+```sh
 nano config.py
 ```
 
@@ -35,9 +35,8 @@ if __name__ == "__main__":
     main()
 ```
 
-
 3. Go!
 
-``` sh
+```sh
 python main.py
 ```

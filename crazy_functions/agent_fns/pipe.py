@@ -1,5 +1,6 @@
 from toolbox import get_log_folder, update_ui, gen_time_str, get_conf, promote_file_to_downloadzone
 from crazy_functions.agent_fns.watchdog import WatchDog
+from loguru import logger
 import time, os
 
 class PipeCom:
@@ -47,7 +48,7 @@ class PluginMultiprocessManager:
     def terminate(self):
         self.p.terminate()
         self.alive = False
-        print("[debug] instance terminated")
+        logger.info("[debug] instance terminated")
 
     def subprocess_worker(self, child_conn):
         # ⭐⭐ run in subprocess

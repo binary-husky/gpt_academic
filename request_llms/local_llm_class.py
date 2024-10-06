@@ -5,6 +5,7 @@ from toolbox import ChatBotWithCookies
 from multiprocessing import Process, Pipe
 from contextlib import redirect_stdout
 from request_llms.queued_pipe import create_queue_pipe
+from loguru import logger
 
 class ThreadLock(object):
     def __init__(self):
@@ -51,7 +52,7 @@ def reset_tqdm_output():
             getattr(sys.stdout, 'flush', lambda: None)()
 
         def fp_write(s):
-            print(s)
+            logger.info(s)
         last_len = [0]
 
         def print_status(s):
@@ -199,7 +200,7 @@ class LocalLLMHandle(Process):
                 if res.startswith(self.std_tag):
                     new_output = res[len(self.std_tag):]
                     std_out = std_out[:std_out_clip_len]
-                    print(new_output, end='')
+                    logger.info(new_output, end='')
                     std_out = new_output + std_out
                     yield self.std_tag + '\n```\n' + std_out + '\n```\n'
                 elif res == '[Finish]':

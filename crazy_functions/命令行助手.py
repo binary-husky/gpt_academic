@@ -1,6 +1,6 @@
 from toolbox import CatchException, update_ui, gen_time_str
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-from .crazy_utils import input_clipping
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from crazy_functions.crazy_utils import input_clipping
 import copy, json
 
 @CatchException

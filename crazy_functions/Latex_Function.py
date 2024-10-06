@@ -1,6 +1,8 @@
 from toolbox import update_ui, trimmed_format_exc, get_conf, get_log_folder, promote_file_to_downloadzone, check_repeat_upload, map_file_to_sha256
 from toolbox import CatchException, report_exception, update_ui_lastest_msg, zip_result, gen_time_str
 from functools import partial
+from loguru import logger
+
 import glob, os, requests, time, json, tarfile
 
 pj = os.path.join
@@ -178,7 +180,7 @@ def pdf2tex_project(pdf_file_path, plugin_kwargs):
 
         if response.ok:
             pdf_id = response.json()["pdf_id"]
-            print(f"PDF processing initiated. PDF ID: {pdf_id}")
+            logger.info(f"PDF processing initiated. PDF ID: {pdf_id}")
 
             # Step 2: Check processing status
             while True:
@@ -186,12 +188,12 @@ def pdf2tex_project(pdf_file_path, plugin_kwargs):
                 conversion_data = conversion_response.json()
 
                 if conversion_data["status"] == "completed":
-                    print("PDF processing completed.")
+                    logger.info("PDF processing completed.")
                     break
                 elif conversion_data["status"] == "error":
-                    print("Error occurred during processing.")
+                    logger.info("Error occurred during processing.")
                 else:
-                    print(f"Processing status: {conversion_data['status']}")
+                    logger.info(f"Processing status: {conversion_data['status']}")
                     time.sleep(5)  # wait for a few seconds before checking again
 
             # Step 3: Save results to local files
@@ -206,7 +208,7 @@ def pdf2tex_project(pdf_file_path, plugin_kwargs):
             output_path = os.path.join(output_dir, output_name)
             with open(output_path, "wb") as output_file:
                 output_file.write(response.content)
-            print(f"tex.zip file saved at: {output_path}")
+            logger.info(f"tex.zip file saved at: {output_path}")
 
             import zipfile
             unzip_dir = os.path.join(output_dir, file_name_wo_dot)
@@ -216,7 +218,7 @@ def pdf2tex_project(pdf_file_path, plugin_kwargs):
             return unzip_dir
 
         else:
-            print(f"Error sending PDF for processing. Status code: {response.status_code}")
+            logger.error(f"Error sending PDF for processing. Status code: {response.status_code}")
             return None
     else:
         from crazy_functions.pdf_fns.parse_pdf_via_doc2x import 解析PDF_DOC2X_转Latex
