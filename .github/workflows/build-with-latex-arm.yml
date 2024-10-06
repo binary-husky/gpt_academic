@@ -1,4 +1,3 @@
-# https://docs.github.com/en/actions/publishing-packages/publishing-docker-images#publishing-images-to-github-packages
 name: build-with-latex-arm
 
 on:
@@ -40,12 +39,19 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      - name: Build and push Docker image
+      - name: Build Docker image as tar file
+        run: |
+          docker buildx build --output type=tar,dest=image.tar --platform linux/arm64,linux/amd64 .
+
+      - name: De-tar the image file
+        run: |
+          mkdir -p output
+          tar -xf image.tar -C output
+
+      - name: Push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: output
           push: true
-          platforms: linux/arm64,linux/amd64
-          file: docs/GithubAction+NoLocal+Latex
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
