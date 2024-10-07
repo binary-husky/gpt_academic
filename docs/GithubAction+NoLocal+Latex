@@ -8,11 +8,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-c"]
 WORKDIR /gpt
 COPY . .
-RUN pip3 install openai numpy arxiv rich colorama Markdown pygments pymupdf python-docx pdfminer\
-    && pip3 install -r requirements.txt
+RUN /root/.cargo/bin/uv venv --seed \
+    && source .venv/bin/activate \
+    && /root/.cargo/bin/uv pip install openai numpy arxiv rich colorama Markdown pygments pymupdf python-docx pdfminer\
+    && /root/.cargo/bin/uv pip install -r requirements.txt
 
 # 可选步骤，用于预热模块
-RUN python3 -c 'from check_proxy import warm_up_modules; warm_up_modules()'
+RUN .venv/bin/python3 -c 'from check_proxy import warm_up_modules; warm_up_modules()'
 
 # 启动
-CMD ["python3", "-u", "main.py"]
+CMD [".venv/bin/python3", "-u", "main.py"]
