@@ -194,7 +194,7 @@ services:
     # 「WEB_PORT暴露方法1: 适用于Linux」与宿主的网络融合
     network_mode: "host"
 
-    # 启动命令
+    # 启动命令，由于使用了uv进行加速构建，因此需要指定python3的路径
     command: >
       bash -c ".venv/bin/python3 -u main.py"
 
