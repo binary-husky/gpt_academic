@@ -8,9 +8,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-c"]
 WORKDIR /gpt
 COPY . .
-RUN echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.bashrc \
-    && source ~/.bashrc \
-    && uv venv --seed \
+RUN uv venv --seed \
     && source .venv/bin/activate \
     && uv pip install openai numpy arxiv rich colorama Markdown pygments pymupdf python-docx pdfminer\
     && uv pip install -r requirements.txt
