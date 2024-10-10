@@ -59,7 +59,7 @@ class SaveLoad():
     def purge(self):
         import shutil
         shutil.rmtree(self.checkpoint_dir, ignore_errors=True)
-        self.vs_index = self.create_new_vs()
+        self.vs_index = self.create_new_vs(self.checkpoint_dir)
 
 
 class LlamaIndexRagWorker(SaveLoad):

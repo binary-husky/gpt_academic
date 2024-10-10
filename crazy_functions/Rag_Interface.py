@@ -56,9 +56,15 @@ def handle_document_upload(files: List[str], llm_kwargs, plugin_kwargs, chatbot,
         try:
             validate_path_safety(file_path, user_name)
             text = extract_text(file_path)
-            document = Document(text=text, metadata={"source": file_path})
-            rag_worker.add_documents_to_vector_store([document])
-            chatbot.append([f"上传文件: {os.path.basename(file_path)}", "文件已成功添加到知识库。"])
+            if text is None:
+                chatbot.append(
+                    [f"上传文件: {os.path.basename(file_path)}", "文件解析失败，无法提取文本内容，请更换文件。"])
+            else:
+                chatbot.append(
+                    [f"上传文件: {os.path.basename(file_path)}", f"上传文件前50个字符为:{text[:50]}。"])
+                document = Document(text=text, metadata={"source": file_path})
+                rag_worker.add_documents_to_vector_store([document])
+                chatbot.append([f"上传文件: {os.path.basename(file_path)}", "文件已成功添加到知识库。"])
         except Exception as e:
             report_exception(chatbot, history, a=f"处理文件: {file_path}", b=str(e))
 
@@ -100,18 +106,12 @@ def Rag问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, u
     tip = "提示：输入“清空向量数据库”可以清空RAG向量数据库"
 
     # 2. Handle special commands
-    if os.path.exists(txt):
+    if os.path.exists(txt) and os.path.isdir(txt):
         project_folder = txt
         validate_path_safety(project_folder, chatbot.get_user())
         # Extract file paths from the user input
         # Assuming the user inputs file paths separated by commas after the command
         file_paths =  [f for f in glob.glob(f'{project_folder}/**/*', recursive=True)]
-
-        if not txt:
-            report_exception(chatbot, history, a="上传文档", b="未提供任何文件路径。")
-            yield from update_ui(chatbot=chatbot, history=history)
-            return
-
         chatbot.append([txt, f'正在处理上传的文档 ({current_context}) ...'])
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
@@ -125,9 +125,12 @@ def Rag问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, u
         yield from update_ui_lastest_msg('已清空', chatbot, history, delay=0)  # 刷新界面
         return
 
+    else:
+        report_exception(chatbot, history, a=f"上传文件路径错误: {txt}", b="请检查并提供正确路径。")
+
     # 3. Normal Q&A processing
     chatbot.append([txt, f'正在召回知识 ({current_context}) ...'])
-    # yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
+    yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
     # 4. Clip history to reduce token consumption
     txt_origin = txt
