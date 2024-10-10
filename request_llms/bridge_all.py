@@ -256,6 +256,8 @@ model_info = {
         "max_token": 128000,
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
+        "supports_system_role": False,    # 不支持 'system' 角色
+        "openai_disable_stream": True,      # 不支持流式输出
     },
     "o1-mini": {
         "fn_with_ui": chatgpt_ui,
@@ -264,6 +266,8 @@ model_info = {
         "max_token": 128000,
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
+        "supports_system_role": False,    # 不支持 'system' 角色
+        "openai_disable_stream": True,      # 不支持流式输出
     },
 
     "gpt-4-turbo": {
