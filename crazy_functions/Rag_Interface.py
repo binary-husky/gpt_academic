@@ -74,7 +74,7 @@ def Rag问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, u
     if VECTOR_STORE_TYPE == "Simple":
         from crazy_functions.rag_fns.llama_index_worker import LlamaIndexRagWorker
 
-    # 1. Retrieve RAG worker from global context
+    # 1. we retrieve rag worker from global context
     user_name = chatbot.get_user()
     checkpoint_dir = get_log_folder(user_name, plugin_name='experimental_rag')
 
