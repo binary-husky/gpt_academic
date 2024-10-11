@@ -7,20 +7,8 @@ from crazy_functions.crazy_utils import input_clipping, request_gpt_model_in_new
 from toolbox import CatchException, update_ui, get_log_folder, update_ui_lastest_msg
 from toolbox import report_exception
 from crazy_functions.rag_fns.rag_file_support import extract_text
-VECTOR_STORE_TYPE = "Milvus"
-
-if VECTOR_STORE_TYPE == "Milvus":
-    try:
-        from crazy_functions.rag_fns.milvus_worker import MilvusRagWorker as LlamaIndexRagWorker
-    except:
-        VECTOR_STORE_TYPE = "Simple"
-
-if VECTOR_STORE_TYPE == "Simple":
-    from crazy_functions.rag_fns.llama_index_worker import LlamaIndexRagWorker
-
 
 RAG_WORKER_REGISTER = {}
-
 MAX_HISTORY_ROUND = 5
 MAX_CONTEXT_TOKEN_LIMIT = 4096
 REMEMBER_PREVIEW = 1000
@@ -85,6 +73,17 @@ def Rag问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, u
         system_prompt: System prompt.
         user_request: User request.
     """
+    # import vector store lib
+    VECTOR_STORE_TYPE = "Milvus"
+
+    if VECTOR_STORE_TYPE == "Milvus":
+        try:
+            from crazy_functions.rag_fns.milvus_worker import MilvusRagWorker as LlamaIndexRagWorker
+        except:
+            VECTOR_STORE_TYPE = "Simple"
+
+    if VECTOR_STORE_TYPE == "Simple":
+        from crazy_functions.rag_fns.llama_index_worker import LlamaIndexRagWorker
     # Define commands
     CLEAR_VECTOR_DB_CMD = "清空向量数据库"
 
