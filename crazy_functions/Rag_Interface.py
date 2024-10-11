@@ -3,10 +3,12 @@ from typing import List
 
 from llama_index.core import Document
 from shared_utils.fastapi_server import validate_path_safety
-from crazy_functions.crazy_utils import input_clipping, request_gpt_model_in_new_thread_with_ui_alive
-from toolbox import CatchException, update_ui, get_log_folder, update_ui_lastest_msg
+
 from toolbox import report_exception
 from crazy_functions.rag_fns.rag_file_support import extract_text
+from toolbox import CatchException, update_ui, get_conf, get_log_folder, update_ui_lastest_msg
+from crazy_functions.crazy_utils import input_clipping
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 
 RAG_WORKER_REGISTER = {}
 MAX_HISTORY_ROUND = 5
@@ -61,21 +63,9 @@ def handle_document_upload(files: List[str], llm_kwargs, plugin_kwargs, chatbot,
 # Main Q&A function with document upload support
 @CatchException
 def Rag问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
-    """
-    Handles RAG-based Q&A, including special commands and document uploads.
 
-    Args:
-        txt (str): User input text.
-        llm_kwargs: Language model keyword arguments.
-        plugin_kwargs: Plugin keyword arguments.
-        chatbot: Chatbot instance.
-        history: Chat history.
-        system_prompt: System prompt.
-        user_request: User request.
-    """
     # import vector store lib
     VECTOR_STORE_TYPE = "Milvus"
-
     if VECTOR_STORE_TYPE == "Milvus":
         try:
             from crazy_functions.rag_fns.milvus_worker import MilvusRagWorker as LlamaIndexRagWorker
@@ -85,7 +75,6 @@ def Rag问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, u
     if VECTOR_STORE_TYPE == "Simple":
         from crazy_functions.rag_fns.llama_index_worker import LlamaIndexRagWorker
     # Define commands
-    CLEAR_VECTOR_DB_CMD = "清空向量数据库"
 
     # 1. Retrieve RAG worker from global context
     user_name = chatbot.get_user()
@@ -117,7 +106,7 @@ def Rag问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, u
         yield from handle_document_upload(file_paths, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request)
         return
 
-    elif txt == CLEAR_VECTOR_DB_CMD:
+    elif txt == "清空向量数据库":
         chatbot.append([txt, f'正在清空 ({current_context}) ...'])
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
         rag_worker.purge_vector_store()
