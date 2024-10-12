@@ -5,7 +5,7 @@ from llama_index.core import Document
 from shared_utils.fastapi_server import validate_path_safety
 
 from toolbox import report_exception
-from crazy_functions.rag_fns.rag_file_support import extract_text
+from crazy_functions.rag_fns.rag_file_support import extract_text, supports_format
 from toolbox import CatchException, update_ui, get_conf, get_log_folder, update_ui_lastest_msg
 from crazy_functions.crazy_utils import input_clipping
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
@@ -48,7 +48,7 @@ def handle_document_upload(files: List[str], llm_kwargs, plugin_kwargs, chatbot,
             text = extract_text(file_path)
             if text is None:
                 chatbot.append(
-                    [f"上传文件: {os.path.basename(file_path)}", "文件解析失败，无法提取文本内容，请更换文件。"])
+                    [f"上传文件: {os.path.basename(file_path)}", f"文件解析失败，无法提取文本内容，请更换文件。失败原因可能为：1.文档格式过于复杂；2. 不支持的文件格式，支持的文件格式后缀有:" + ", ".join(supports_format)])
             else:
                 chatbot.append(
                     [f"上传文件: {os.path.basename(file_path)}", f"上传文件前50个字符为:{text[:50]}。"])
