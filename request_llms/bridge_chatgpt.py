@@ -202,9 +202,10 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], 
                     if (time.time()-observe_window[1]) > watch_dog_patience:
                         raise RuntimeError("用户取消了程序。")
         else: raise RuntimeError("意外Json结构："+delta)
-    if json_data and json_data['finish_reason'] == 'content_filter':
-        raise RuntimeError("由于提问含不合规内容被Azure过滤。")
-    if json_data and json_data['finish_reason'] == 'length':
+    finish_reason = json_data.get('finish_reason') if json_data else None
+    if finish_reason == 'content_filter':
+        raise RuntimeError("由于提问含不合规内容被过滤。")
+    if finish_reason == 'length':
         raise ConnectionAbortedError("正常结束，但显示Token不足，导致输出不完整，请削减单次输入的文本量。")
     return result
 
@@ -409,7 +410,8 @@ def handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
         chatbot[-1] = (chatbot[-1][0], f"[Local Message] 异常 \n\n{tb_str} \n\n{regular_txt_to_markdown(chunk_decoded)}")
     return chatbot, history
 
-def generate_payload(inputs:str, llm_kwargs:dict, history:list, system_prompt:str, image_base64_array:list=[], has_multimodal_capacity:bool=False, stream:bool=True):
+def generate_payload(inputs: str, llm_kwargs: dict, history: list, system_prompt: str, image_base64_array: list = [], has_multimodal_capacity: bool = False, stream: bool = True):
+    from request_llms.bridge_all import model_info
     """
     整合所有信息，选择LLM模型，生成http请求，为发送请求做准备
     """
@@ -446,32 +448,39 @@ def generate_payload(inputs:str, llm_kwargs:dict, history:list, system_prompt:st
     conversation_cnt = len(history) // 2
     openai_disable_system_prompt = model_info[llm_kwargs['llm_model']].get('openai_disable_system_prompt', False)
 
-    if openai_disable_system_prompt:
-        messages = [{"role": "user", "content": system_prompt}]
+    # 判断当前模型是否支持 system 角色
+    if model_info[llm_kwargs['llm_model']].get('supports_system_role', True):
+        if openai_disable_system_prompt:
+            messages = [{"role": "user", "content": system_prompt}]
+        else:
+            messages = [{"role": "system", "content": system_prompt}]
     else:
-        messages = [{"role": "system", "content": system_prompt}]
+        # 对于不支持 system 角色的模型，将 system prompt 作为 user 消息
+        messages = [{"role": "user", "content": system_prompt}]
+
 
     if not enable_multimodal_capacity:
-        # 不使用多模态能力
         if conversation_cnt:
-            for index in range(0, 2*conversation_cnt, 2):
-                what_i_have_asked = {}
-                what_i_have_asked["role"] = "user"
-                what_i_have_asked["content"] = remove_image_if_contain_base64(history[index])
-                what_gpt_answer = {}
-                what_gpt_answer["role"] = "assistant"
-                what_gpt_answer["content"] = remove_image_if_contain_base64(history[index+1])
-                if what_i_have_asked["content"] != "":
-                    if what_gpt_answer["content"] == "": continue
-                    if what_gpt_answer["content"] == timeout_bot_msg: continue
-                    messages.append(what_i_have_asked)
-                    messages.append(what_gpt_answer)
-                else:
-                    messages[-1]['content'] = what_gpt_answer['content']
-        what_i_ask_now = {}
-        what_i_ask_now["role"] = "user"
-        what_i_ask_now["content"] = inputs
-        messages.append(what_i_ask_now)
+            for index in range(0, 2 * conversation_cnt, 2):
+                user_msg = {
+                    "role": "user",
+                    "content": remove_image_if_contain_base64(history[index])
+                }
+                assistant_msg = {
+                    "role": "assistant",
+                    "content": remove_image_if_contain_base64(history[index + 1])
+                }
+                if user_msg["content"].strip():
+                    if assistant_msg["content"].strip() and assistant_msg["content"] != timeout_bot_msg:
+                        messages.append(user_msg)
+                        messages.append(assistant_msg)
+                    else:
+                        continue
+        current_user_msg = {
+            "role": "user",
+            "content": inputs
+        }
+        messages.append(current_user_msg)
     else:
         # 多模态能力
         if conversation_cnt:
