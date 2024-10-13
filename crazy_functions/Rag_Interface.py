@@ -1,12 +1,9 @@
-import os,glob
+import os, glob
+
 from typing import List
-
-from llama_index.core import Document
-from shared_utils.fastapi_server import validate_path_safety
-
 from toolbox import report_exception
-from crazy_functions.rag_fns.rag_file_support import extract_text, supports_format
 from toolbox import CatchException, update_ui, get_conf, get_log_folder, update_ui_lastest_msg
+from shared_utils.fastapi_server import validate_path_safety
 from crazy_functions.crazy_utils import input_clipping
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 
@@ -29,6 +26,8 @@ def handle_document_upload(files: List[str], llm_kwargs, plugin_kwargs, chatbot,
         system_prompt: System prompt.
         user_request: User request.
     """
+    from llama_index.core import Document
+    from crazy_functions.rag_fns.rag_file_support import extract_text, supports_format
     user_name = chatbot.get_user()
     checkpoint_dir = get_log_folder(user_name, plugin_name='experimental_rag')
 
