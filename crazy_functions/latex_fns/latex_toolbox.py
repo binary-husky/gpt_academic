@@ -645,8 +645,9 @@ def run_in_subprocess(func):
 
 def _merge_pdfs(pdf1_path, pdf2_path, output_path):
     import PyPDF2  # PyPDF2这个库有严重的内存泄露问题，把它放到子进程中运行，从而方便内存的释放
+    from PyPDF2.generic import NameObject, TextStringObject, ArrayObject, FloatObject, NumberObject
 
-    Percent = 0.95
+    Percent = 1
     # raise RuntimeError('PyPDF2 has a serious memory leak problem, please use other tools to merge PDF files.')
     # Open the first PDF file
     with open(pdf1_path, "rb") as pdf1_file:
@@ -687,6 +688,130 @@ def _merge_pdfs(pdf1_path, pdf2_path, output_path):
                     ),
                     0,
                 )
+                if "/Annots" in page1:
+                    page1_annot_id = [annot.idnum for annot in page1["/Annots"]]
+                else:
+                    page1_annot_id = []
+
+                if "/Annots" in page2:
+                    page2_annot_id = [annot.idnum for annot in page2["/Annots"]]
+                else:
+                    page2_annot_id = []
+                if "/Annots" in new_page:
+                    annotations = new_page["/Annots"]
+                    for i, annot in enumerate(annotations):
+                        annot_obj = annot.get_object()
+
+                        # 检查注释类型是否是链接（/Link）
+                        if annot_obj.get("/Subtype") == "/Link":
+                            # 检查是否为内部链接跳转（/GoTo）或外部URI链接（/URI）
+                            action = annot_obj.get("/A")
+                            if action:
+
+                                if "/S" in action and action["/S"] == "/GoTo":
+                                    # 内部链接：跳转到文档中的某个页面
+                                    dest = action.get("/D")  # 目标页或目标位置
+                                    if dest and annot.idnum in page2_annot_id:
+                                        # 获取原始文件中跳转信息，包括跳转页面
+                                        destination = pdf2_reader.named_destinations[
+                                            dest
+                                        ]
+                                        page_number = (
+                                            pdf2_reader.get_destination_page_number(
+                                                destination
+                                            )
+                                        )
+                                        # 更新跳转信息，跳转到对应的页面和，指定坐标 (100, 150)，缩放比例为 100%
+                                        # “/D”:[10,'/XYZ',100,100,0]
+                                        annot_obj["/A"].update(
+                                            {
+                                                NameObject("/D"): ArrayObject(
+                                                    [
+                                                        NumberObject(page_number),
+                                                        destination.dest_array[1],
+                                                        FloatObject(
+                                                            destination.dest_array[2]
+                                                            + int(
+                                                                page1.mediaBox.getWidth()
+                                                            )
+                                                        ),
+                                                        destination.dest_array[3],
+                                                        destination.dest_array[4],
+                                                    ]
+                                                )  # 确保键和值是 PdfObject
+                                            }
+                                        )
+                                        rect = annot_obj.get("/Rect")
+                                        # 更新点击坐标
+                                        rect = ArrayObject(
+                                            [
+                                                FloatObject(
+                                                    rect[0]
+                                                    + int(page1.mediaBox.getWidth())
+                                                ),
+                                                rect[1],
+                                                FloatObject(
+                                                    rect[2]
+                                                    + int(page1.mediaBox.getWidth())
+                                                ),
+                                                rect[3],
+                                            ]
+                                        )
+                                        annot_obj.update(
+                                            {
+                                                NameObject(
+                                                    "/Rect"
+                                                ): rect  # 确保键和值是 PdfObject
+                                            }
+                                        )
+                                    if dest and annot.idnum in page1_annot_id:
+                                        # 获取原始文件中跳转信息，包括跳转页面
+                                        destination = pdf1_reader.named_destinations[
+                                            dest
+                                        ]
+                                        page_number = (
+                                            pdf1_reader.get_destination_page_number(
+                                                destination
+                                            )
+                                        )
+                                        # 更新跳转信息，跳转到对应的页面和，指定坐标 (100, 150)，缩放比例为 100%
+                                        # “/D”:[10,'/XYZ',100,100,0]
+                                        annot_obj["/A"].update(
+                                            {
+                                                NameObject("/D"): ArrayObject(
+                                                    [
+                                                        NumberObject(page_number),
+                                                        destination.dest_array[1],
+                                                        FloatObject(
+                                                            destination.dest_array[2]
+                                                        ),
+                                                        destination.dest_array[3],
+                                                        destination.dest_array[4],
+                                                    ]
+                                                )  # 确保键和值是 PdfObject
+                                            }
+                                        )
+                                        rect = annot_obj.get("/Rect")
+                                        rect = ArrayObject(
+                                            [
+                                                FloatObject(rect[0]),
+                                                rect[1],
+                                                FloatObject(rect[2]),
+                                                rect[3],
+                                            ]
+                                        )
+                                        annot_obj.update(
+                                            {
+                                                NameObject(
+                                                    "/Rect"
+                                                ): rect  # 确保键和值是 PdfObject
+                                            }
+                                        )
+
+                                elif "/S" in action and action["/S"] == "/URI":
+                                    # 外部链接：跳转到某个URI
+                                    uri = action.get("/URI")
+
                 output_writer.addPage(new_page)
             # Save the merged PDF file
             with open(output_path, "wb") as output_file:
