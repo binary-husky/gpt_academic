@@ -11,19 +11,17 @@ RAG_WORKER_REGISTER = {}
 MAX_HISTORY_ROUND = 5
 MAX_CONTEXT_TOKEN_LIMIT = 4096
 REMEMBER_PREVIEW = 1000
-# Main Q&A function with document upload support
-@CatchException
-def Rag问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
 
-    # import vector store lib
-    VECTOR_STORE_TYPE = "Milvus"
-    if VECTOR_STORE_TYPE == "Milvus":
-        try:
-            from crazy_functions.rag_fns.milvus_worker import MilvusRagWorker as LlamaIndexRagWorker
-        except:
-            VECTOR_STORE_TYPE = "Simple"
-    if VECTOR_STORE_TYPE == "Simple":
-        from crazy_functions.rag_fns.llama_index_worker import LlamaIndexRagWorker
+# import vector store lib
+VECTOR_STORE_TYPE = "Milvus"
+if VECTOR_STORE_TYPE == "Milvus":
+    try:
+        from crazy_functions.rag_fns.milvus_worker import MilvusRagWorker as LlamaIndexRagWorker
+    except:
+        VECTOR_STORE_TYPE = "Simple"
+if VECTOR_STORE_TYPE == "Simple":
+    from crazy_functions.rag_fns.llama_index_worker import LlamaIndexRagWorker
+
 @CatchException
 def handle_document_upload(files: List[str], llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     """
@@ -71,6 +69,9 @@ def handle_document_upload(files: List[str], llm_kwargs, plugin_kwargs, chatbot,
 
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
+# Main Q&A function with document upload support
+@CatchException
+def Rag问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
 
     # 1. we retrieve rag worker from global context
     user_name = chatbot.get_user()
