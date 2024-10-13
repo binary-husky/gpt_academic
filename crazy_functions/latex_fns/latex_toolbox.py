@@ -644,6 +644,15 @@ def run_in_subprocess(func):
 
 
 def _merge_pdfs(pdf1_path, pdf2_path, output_path):
+    try:
+        logger.info("Merging PDFs using _merge_pdfs_ng")
+        _merge_pdfs_ng(pdf1_path, pdf2_path, output_path)
+    except:
+        logger.info("Merging PDFs using _merge_pdfs_legacy")
+        _merge_pdfs_legacy(pdf1_path, pdf2_path, output_path)
+
+
+def _merge_pdfs_ng(pdf1_path, pdf2_path, output_path):
     import PyPDF2  # PyPDF2这个库有严重的内存泄露问题，把它放到子进程中运行，从而方便内存的释放
     from PyPDF2.generic import NameObject, TextStringObject, ArrayObject, FloatObject, NumberObject
 
@@ -812,6 +821,57 @@ def _merge_pdfs(pdf1_path, pdf2_path, output_path):
                                     # 外部链接：跳转到某个URI
                                     uri = action.get("/URI")
 
+                output_writer.addPage(new_page)
+            # Save the merged PDF file
+            with open(output_path, "wb") as output_file:
+                output_writer.write(output_file)
+
+
+
+def _merge_pdfs_legacy(pdf1_path, pdf2_path, output_path):
+    import PyPDF2  # PyPDF2这个库有严重的内存泄露问题，把它放到子进程中运行，从而方便内存的释放
+
+    Percent = 0.95
+    # raise RuntimeError('PyPDF2 has a serious memory leak problem, please use other tools to merge PDF files.')
+    # Open the first PDF file
+    with open(pdf1_path, "rb") as pdf1_file:
+        pdf1_reader = PyPDF2.PdfFileReader(pdf1_file)
+        # Open the second PDF file
+        with open(pdf2_path, "rb") as pdf2_file:
+            pdf2_reader = PyPDF2.PdfFileReader(pdf2_file)
+            # Create a new PDF file to store the merged pages
+            output_writer = PyPDF2.PdfFileWriter()
+            # Determine the number of pages in each PDF file
+            num_pages = max(pdf1_reader.numPages, pdf2_reader.numPages)
+            # Merge the pages from the two PDF files
+            for page_num in range(num_pages):
+                # Add the page from the first PDF file
+                if page_num < pdf1_reader.numPages:
+                    page1 = pdf1_reader.getPage(page_num)
+                else:
+                    page1 = PyPDF2.PageObject.createBlankPage(pdf1_reader)
+                # Add the page from the second PDF file
+                if page_num < pdf2_reader.numPages:
+                    page2 = pdf2_reader.getPage(page_num)
+                else:
+                    page2 = PyPDF2.PageObject.createBlankPage(pdf1_reader)
+                # Create a new empty page with double width
+                new_page = PyPDF2.PageObject.createBlankPage(
+                    width=int(
+                        int(page1.mediaBox.getWidth())
+                        + int(page2.mediaBox.getWidth()) * Percent
+                    ),
+                    height=max(page1.mediaBox.getHeight(), page2.mediaBox.getHeight()),
+                )
+                new_page.mergeTranslatedPage(page1, 0, 0)
+                new_page.mergeTranslatedPage(
+                    page2,
+                    int(
+                        int(page1.mediaBox.getWidth())
+                        - int(page2.mediaBox.getWidth()) * (1 - Percent)
+                    ),
+                    0,
+                )
                 output_writer.addPage(new_page)
             # Save the merged PDF file
             with open(output_path, "wb") as output_file:
