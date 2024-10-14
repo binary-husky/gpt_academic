@@ -1,11 +1,9 @@
 import os,glob
 from typing import List
 
-from llama_index.core import Document
 from shared_utils.fastapi_server import validate_path_safety
 
 from toolbox import report_exception
-from crazy_functions.rag_fns.rag_file_support import extract_text, supports_format
 from toolbox import CatchException, update_ui, get_conf, get_log_folder, update_ui_lastest_msg
 from crazy_functions.crazy_utils import input_clipping
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
@@ -20,9 +18,10 @@ def handle_document_upload(files: List[str], llm_kwargs, plugin_kwargs, chatbot,
     """
     Handles document uploads by extracting text and adding it to the vector store.
     """
+    from llama_index.core import Document
+    from crazy_functions.rag_fns.rag_file_support import extract_text, supports_format
     user_name = chatbot.get_user()
     checkpoint_dir = get_log_folder(user_name, plugin_name='experimental_rag')
-
 
     for file_path in files:
         try:
@@ -41,6 +40,8 @@ def handle_document_upload(files: List[str], llm_kwargs, plugin_kwargs, chatbot,
             report_exception(chatbot, history, a=f"处理文件: {file_path}", b=str(e))
 
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
+
+
 
 # Main Q&A function with document upload support
 @CatchException
