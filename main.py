@@ -1,5 +1,10 @@
 import os, json; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 
+from proxy_utils import apply_proxy_control
+
+# 基于PROXY_BYPASS_PATTERNS的全局代理灵活控制：
+apply_proxy_control()
+
 help_menu_description = \
 """Github源代码开源和更新[地址🚀](https://github.com/binary-husky/gpt_academic),
 感谢热情的[开发者们❤️](https://github.com/binary-husky/gpt_academic/graphs/contributors).

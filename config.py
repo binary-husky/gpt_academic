@@ -30,6 +30,17 @@ if USE_PROXY:
 else:
     proxies = None
 
+# 用户可以在此列表中添加不需要代理的URL、域名、IP 地址范围和通配符模式:
+#PROXY_BYPASS_PATTERNS = [
+#    'example.com',           # Entire domain and all subdomains
+#    '.internal.example.com', # Specific subdomain and all its subdomains
+#    'https://my-api.anthropic.io', # Specific URL
+#    '192.168.1.0/24',        # IP range in CIDR notation
+#    '2001:db8::/32',         # IPv6 range
+#    '*.example.org',         # Wildcard domain
+#]
+PROXY_BYPASS_PATTERNS = []
+
 # [step 3]>> 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
 LLM_MODEL = "gpt-3.5-turbo-16k" # 可选 ↓↓↓
 AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-preview",
