@@ -256,6 +256,8 @@ model_info = {
         "max_token": 128000,
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
+        "openai_disable_system_prompt": True,
+        "openai_disable_stream": True,
     },
     "o1-mini": {
         "fn_with_ui": chatgpt_ui,
@@ -264,6 +266,8 @@ model_info = {
         "max_token": 128000,
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
+        "openai_disable_system_prompt": True,
+        "openai_disable_stream": True,
     },
 
     "gpt-4-turbo": {
