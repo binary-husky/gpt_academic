@@ -15,11 +15,11 @@ RUN /root/.cargo/bin/uv venv --seed \
     && /root/.cargo/bin/uv clean
 
 # 对齐python3
-RUN rm /usr/bin/python3 && ln -s /root/.cargo/bin/python3 /usr/bin/python3
-RUN rm /usr/bin/python && ln -s /root/.cargo/bin/python3 /usr/bin/python
+RUN rm -f /usr/bin/python3 && ln -s /gpt/.venv/bin/python /usr/bin/python3
+RUN rm -f /usr/bin/python && ln -s /gpt/.venv/bin/python /usr/bin/python
 
 # 可选步骤，用于预热模块
-RUN .venv/bin/python3 -c 'from check_proxy import warm_up_modules; warm_up_modules()'
+RUN python3 -c 'from check_proxy import warm_up_modules; warm_up_modules()'
 
 # 启动
-CMD [".venv/bin/python3", "-u", "main.py"]
+CMD ["python3", "-u", "main.py"]
