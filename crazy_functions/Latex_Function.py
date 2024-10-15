@@ -145,8 +145,8 @@ def arxiv_download(chatbot, history, txt, allow_cache=True):
     # <-------------- download arxiv source file ------------->
 
     def fix_url_and_download():
-        for url_tar in [url_.replace('/abs/', '/e-print/'), url_.replace('/abs/', '/src/')]:
-        # for url_tar in [url_.replace('/abs/', '/src/'), url_.replace('/abs/', '/e-print/')]:
+        # for url_tar in [url_.replace('/abs/', '/e-print/'), url_.replace('/abs/', '/src/')]:
+        for url_tar in [url_.replace('/abs/', '/src/'), url_.replace('/abs/', '/e-print/')]:
             proxies = get_conf('proxies')
             r = requests.get(url_tar, proxies=proxies)
             if r.status_code == 200:
