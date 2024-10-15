@@ -1285,4 +1285,3 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot,
 
     # 更新一下llm_kwargs的参数，否则会出现参数不匹配的问题
     yield from method(inputs, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, stream, additional_fn)
-
