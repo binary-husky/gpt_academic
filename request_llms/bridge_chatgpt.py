@@ -202,11 +202,13 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], 
                     if (time.time()-observe_window[1]) > watch_dog_patience:
                         raise RuntimeError("用户取消了程序。")
         else: raise RuntimeError("意外Json结构："+delta)
-    finish_reason = json_data.get('finish_reason') if json_data else None
+
+    finish_reason = json_data.get('finish_reason', None) if json_data else None
     if finish_reason == 'content_filter':
         raise RuntimeError("由于提问含不合规内容被过滤。")
     if finish_reason == 'length':
         raise ConnectionAbortedError("正常结束，但显示Token不足，导致输出不完整，请削减单次输入的文本量。")
+
     return result
 
 
