@@ -138,25 +138,43 @@ def arxiv_download(chatbot, history, txt, allow_cache=True):
     cached_translation_pdf = check_cached_translation_pdf(arxiv_id)
     if cached_translation_pdf and allow_cache: return cached_translation_pdf, arxiv_id
 
-    url_tar = url_.replace('/abs/', '/e-print/')
-    translation_dir = pj(ARXIV_CACHE_DIR, arxiv_id, 'e-print')
     extract_dst = pj(ARXIV_CACHE_DIR, arxiv_id, 'extract')
-    os.makedirs(translation_dir, exist_ok=True)
-
-    # <-------------- download arxiv source file ------------->
+    translation_dir = pj(ARXIV_CACHE_DIR, arxiv_id, 'e-print')
     dst = pj(translation_dir, arxiv_id + '.tar')
-    if os.path.exists(dst):
-        yield from update_ui_lastest_msg("调用缓存", chatbot=chatbot, history=history)  # 刷新界面
+    os.makedirs(translation_dir, exist_ok=True)
+    # <-------------- download arxiv source file ------------->
+
+    def fix_url_and_download():
+        for url_tar in [url_.replace('/abs/', '/e-print/'), url_.replace('/abs/', '/src/')]:
+        # for url_tar in [url_.replace('/abs/', '/src/'), url_.replace('/abs/', '/e-print/')]:
+            proxies = get_conf('proxies')
+            r = requests.get(url_tar, proxies=proxies)
+            if r.status_code == 200:
+                with open(dst, 'wb+') as f:
+                    f.write(r.content)
+                return True
+        return False
+
+    if os.path.exists(dst) and allow_cache:
+        yield from update_ui_lastest_msg(f"调用缓存 {arxiv_id}", chatbot=chatbot, history=history)  # 刷新界面
+        success = True
     else:
-        yield from update_ui_lastest_msg("开始下载", chatbot=chatbot, history=history)  # 刷新界面
-        proxies = get_conf('proxies')
-        r = requests.get(url_tar, proxies=proxies)
-        with open(dst, 'wb+') as f:
-            f.write(r.content)
+        yield from update_ui_lastest_msg(f"开始下载 {arxiv_id}", chatbot=chatbot, history=history)  # 刷新界面
+        success = fix_url_and_download()
+        yield from update_ui_lastest_msg(f"下载完成 {arxiv_id}", chatbot=chatbot, history=history)  # 刷新界面
+
+
+    if not success:
+        yield from update_ui_lastest_msg(f"下载失败 {arxiv_id}", chatbot=chatbot, history=history)
+        raise tarfile.ReadError(f"论文下载失败 {arxiv_id}")
+
     # <-------------- extract file ------------->
-    yield from update_ui_lastest_msg("下载完成", chatbot=chatbot, history=history)  # 刷新界面
     from toolbox import extract_archive
-    extract_archive(file_path=dst, dest_dir=extract_dst)
+    try:
+        extract_archive(file_path=dst, dest_dir=extract_dst)
+    except tarfile.ReadError:
+        os.remove(dst)
+        raise tarfile.ReadError(f"论文下载失败")
     return extract_dst, arxiv_id
 
 
