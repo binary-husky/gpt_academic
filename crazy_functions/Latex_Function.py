@@ -108,7 +108,31 @@ def arxiv_download(chatbot, history, txt, allow_cache=True):
             return True
         except ValueError:
             return False
+    def download_file_withprocess(url, filename):
+        from tqdm import tqdm
 
+        # 发送请求获取文件
+        proxies = get_conf('proxies')
+        headers = {
+            'User-Agent': 'Lynx'
+        }
+        response = requests.get(url, headers=headers, proxies=proxies, stream=True) # 增加stream=True参数
+        
+        total_size = int(response.headers.get('content-length', 0))  # 获取文件总大小
+        block_size = 1024  # 每次下载的块大小
+
+        # 使用 tqdm 创建进度条
+        with open(filename, 'wb') as file, tqdm(
+            desc=filename,
+            total=total_size,
+            unit='iB',
+            unit_scale=True,
+            unit_divisor=1024,
+        ) as bar:
+            for data in response.iter_content(block_size):
+                file.write(data)  # 写入文件
+                bar.update(len(data))  # 更新进度条
+                
     if txt.startswith('https://arxiv.org/pdf/'):
         arxiv_id = txt.split('/')[-1]   # 2402.14207v2.pdf
         txt = arxiv_id.split('v')[0]  # 2402.14207
@@ -149,10 +173,11 @@ def arxiv_download(chatbot, history, txt, allow_cache=True):
         yield from update_ui_lastest_msg("调用缓存", chatbot=chatbot, history=history)  # 刷新界面
     else:
         yield from update_ui_lastest_msg("开始下载", chatbot=chatbot, history=history)  # 刷新界面
-        proxies = get_conf('proxies')
-        r = requests.get(url_tar, proxies=proxies)
-        with open(dst, 'wb+') as f:
-            f.write(r.content)
+        # proxies = get_conf('proxies')
+        # r = requests.get(url_tar, proxies=proxies)
+        # with open(dst, 'wb+') as f:
+        #     f.write(r.content)
+        download_file_withprocess(url=url_tar, filename=dst)
     # <-------------- extract file ------------->
     yield from update_ui_lastest_msg("下载完成", chatbot=chatbot, history=history)  # 刷新界面
     from toolbox import extract_archive
