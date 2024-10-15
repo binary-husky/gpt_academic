@@ -712,134 +712,137 @@ def _merge_pdfs_ng(pdf1_path, pdf2_path, output_path):
                                     # 内部链接：跳转到文档中的某个页面
                                     dest = action.get("/D")  # 目标页或目标位置
                                     # if dest and annot.idnum in page2_annot_id:
-                                    if dest in pdf2_reader.named_destinations:
-                                        # 获取原始文件中跳转信息，包括跳转页面
-                                        destination = pdf2_reader.named_destinations[
-                                            dest
-                                        ]
-                                        page_number = (
-                                            pdf2_reader.get_destination_page_number(
-                                                destination
-                                            )
-                                        )
-                                        # 更新跳转信息，跳转到对应的页面和，指定坐标 (100, 150)，缩放比例为 100%
-                                        # “/D”:[10,'/XYZ',100,100,0]
-                                        if destination.dest_array[1] == "/XYZ":
-                                            annot_obj["/A"].update(
-                                                {
-                                                    NameObject("/D"): ArrayObject(
-                                                        [
-                                                            NumberObject(page_number),
-                                                            destination.dest_array[1],
-                                                            FloatObject(
-                                                                destination.dest_array[
-                                                                    2
-                                                                ]
-                                                                + int(
-                                                                    page1.mediaBox.getWidth()
-                                                                )
-                                                            ),
-                                                            destination.dest_array[3],
-                                                            destination.dest_array[4],
-                                                        ]
-                                                    )  # 确保键和值是 PdfObject
-                                                }
-                                            )
-                                        else:
-                                            annot_obj["/A"].update(
-                                                {
-                                                    NameObject("/D"): ArrayObject(
-                                                        [
-                                                            NumberObject(page_number),
-                                                            destination.dest_array[1],
-                                                        ]
-                                                    )  # 确保键和值是 PdfObject
-                                                }
-                                            )
-
-                                        rect = annot_obj.get("/Rect")
-                                        # 更新点击坐标
-                                        rect = ArrayObject(
-                                            [
-                                                FloatObject(
-                                                    rect[0]
-                                                    + int(page1.mediaBox.getWidth())
-                                                ),
-                                                rect[1],
-                                                FloatObject(
-                                                    rect[2]
-                                                    + int(page1.mediaBox.getWidth())
-                                                ),
-                                                rect[3],
+                                    # if dest in pdf2_reader.named_destinations:
+                                    if dest and page2.annotations:
+                                        if annot in page2.annotations:
+                                            # 获取原始文件中跳转信息，包括跳转页面
+                                            destination = pdf2_reader.named_destinations[
+                                                dest
                                             ]
-                                        )
-                                        annot_obj.update(
-                                            {
-                                                NameObject(
-                                                    "/Rect"
-                                                ): rect  # 确保键和值是 PdfObject
-                                            }
-                                        )
+                                            page_number = (
+                                                pdf2_reader.get_destination_page_number(
+                                                    destination
+                                                )
+                                            )
+                                            # 更新跳转信息，跳转到对应的页面和，指定坐标 (100, 150)，缩放比例为 100%
+                                            # “/D”:[10,'/XYZ',100,100,0]
+                                            if destination.dest_array[1] == "/XYZ":
+                                                annot_obj["/A"].update(
+                                                    {
+                                                        NameObject("/D"): ArrayObject(
+                                                            [
+                                                                NumberObject(page_number),
+                                                                destination.dest_array[1],
+                                                                FloatObject(
+                                                                    destination.dest_array[
+                                                                        2
+                                                                    ]
+                                                                    + int(
+                                                                        page1.mediaBox.getWidth()
+                                                                    )
+                                                                ),
+                                                                destination.dest_array[3],
+                                                                destination.dest_array[4],
+                                                            ]
+                                                        )  # 确保键和值是 PdfObject
+                                                    }
+                                                )
+                                            else:
+                                                annot_obj["/A"].update(
+                                                    {
+                                                        NameObject("/D"): ArrayObject(
+                                                            [
+                                                                NumberObject(page_number),
+                                                                destination.dest_array[1],
+                                                            ]
+                                                        )  # 确保键和值是 PdfObject
+                                                    }
+                                                )
+
+                                            rect = annot_obj.get("/Rect")
+                                            # 更新点击坐标
+                                            rect = ArrayObject(
+                                                [
+                                                    FloatObject(
+                                                        rect[0]
+                                                        + int(page1.mediaBox.getWidth())
+                                                    ),
+                                                    rect[1],
+                                                    FloatObject(
+                                                        rect[2]
+                                                        + int(page1.mediaBox.getWidth())
+                                                    ),
+                                                    rect[3],
+                                                ]
+                                            )
+                                            annot_obj.update(
+                                                {
+                                                    NameObject(
+                                                        "/Rect"
+                                                    ): rect  # 确保键和值是 PdfObject
+                                                }
+                                            )
                                     # if dest and annot.idnum in page1_annot_id:
-                                    if dest in pdf1_reader.named_destinations:
-
-                                        # 获取原始文件中跳转信息，包括跳转页面
-                                        destination = pdf1_reader.named_destinations[
-                                            dest
-                                        ]
-                                        page_number = (
-                                            pdf1_reader.get_destination_page_number(
-                                                destination
-                                            )
-                                        )
-                                        # 更新跳转信息，跳转到对应的页面和，指定坐标 (100, 150)，缩放比例为 100%
-                                        # “/D”:[10,'/XYZ',100,100,0]
-                                        if destination.dest_array[1] == "/XYZ":
-                                            annot_obj["/A"].update(
-                                                {
-                                                    NameObject("/D"): ArrayObject(
-                                                        [
-                                                            NumberObject(page_number),
-                                                            destination.dest_array[1],
-                                                            FloatObject(
-                                                                destination.dest_array[
-                                                                    2
-                                                                ]
-                                                            ),
-                                                            destination.dest_array[3],
-                                                            destination.dest_array[4],
-                                                        ]
-                                                    )  # 确保键和值是 PdfObject
-                                                }
-                                            )
-                                        else:
-                                            annot_obj["/A"].update(
-                                                {
-                                                    NameObject("/D"): ArrayObject(
-                                                        [
-                                                            NumberObject(page_number),
-                                                            destination.dest_array[1],
-                                                        ]
-                                                    )  # 确保键和值是 PdfObject
-                                                }
-                                            )
-
-                                        rect = annot_obj.get("/Rect")
-                                        rect = ArrayObject(
-                                            [
-                                                FloatObject(rect[0]),
-                                                rect[1],
-                                                FloatObject(rect[2]),
-                                                rect[3],
+                                    # if dest in pdf1_reader.named_destinations:
+                                    if dest and page1.annotations:
+                                        if annot in page1.annotations:
+                                            # 获取原始文件中跳转信息，包括跳转页面
+                                            destination = pdf1_reader.named_destinations[
+                                                dest
                                             ]
-                                        )
-                                        annot_obj.update(
-                                            {
-                                                NameObject(
-                                                    "/Rect"
-                                                ): rect  # 确保键和值是 PdfObject
-                                            }
-                                        )
+                                            page_number = (
+                                                pdf1_reader.get_destination_page_number(
+                                                    destination
+                                                )
+                                            )
+                                            # 更新跳转信息，跳转到对应的页面和，指定坐标 (100, 150)，缩放比例为 100%
+                                            # “/D”:[10,'/XYZ',100,100,0]
+                                            if destination.dest_array[1] == "/XYZ":
+                                                annot_obj["/A"].update(
+                                                    {
+                                                        NameObject("/D"): ArrayObject(
+                                                            [
+                                                                NumberObject(page_number),
+                                                                destination.dest_array[1],
+                                                                FloatObject(
+                                                                    destination.dest_array[
+                                                                        2
+                                                                    ]
+                                                                ),
+                                                                destination.dest_array[3],
+                                                                destination.dest_array[4],
+                                                            ]
+                                                        )  # 确保键和值是 PdfObject
+                                                    }
+                                                )
+                                            else:
+                                                annot_obj["/A"].update(
+                                                    {
+                                                        NameObject("/D"): ArrayObject(
+                                                            [
+                                                                NumberObject(page_number),
+                                                                destination.dest_array[1],
+                                                            ]
+                                                        )  # 确保键和值是 PdfObject
+                                                    }
+                                                )
+
+                                            rect = annot_obj.get("/Rect")
+                                            rect = ArrayObject(
+                                                [
+                                                    FloatObject(rect[0]),
+                                                    rect[1],
+                                                    FloatObject(rect[2]),
+                                                    rect[3],
+                                                ]
+                                            )
+                                            annot_obj.update(
+                                                {
+                                                    NameObject(
+                                                        "/Rect"
+                                                    ): rect  # 确保键和值是 PdfObject
+                                                }
+                                            )
 
                                 elif "/S" in action and action["/S"] == "/URI":
                                     # 外部链接：跳转到某个URI
