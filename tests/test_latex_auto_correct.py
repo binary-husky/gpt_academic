@@ -20,4 +20,7 @@ if __name__ == "__main__":
 
 
     # plugin_test(plugin='crazy_functions.Latex_Function->Latex翻译中文并重新编译PDF', main_input="2203.01927")
-    plugin_test(plugin='crazy_functions.Latex_Function->Latex翻译中文并重新编译PDF', main_input="gpt_log/arxiv_cache/2203.01927/workfolder")
+    # plugin_test(plugin='crazy_functions.Latex_Function->Latex翻译中文并重新编译PDF', main_input="gpt_log/arxiv_cache/2203.01927/workfolder")
+    # plugin_test(plugin='crazy_functions.Latex_Function->Latex翻译中文并重新编译PDF', main_input="2410.05779")
+    plugin_test(plugin='crazy_functions.Latex_Function->Latex翻译中文并重新编译PDF', main_input="gpt_log/default_user/workfolder")
+
