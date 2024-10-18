@@ -364,6 +364,24 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
             chatbot=chatbot, history=history)
         return
 
+    # allow_cloud_io = True
+    # arxiv_id = "2203.01927"
+    # if allow_cloud_io and arxiv_id:
+    #     # 如果用户允许，我们将arxiv论文PDF上传到云端
+    #     for file_path in chatbot._cookies.get("files_to_promote", []):
+    #         if file_path.endswith('comparison.pdf'):
+    #             def compute_hash(file_path):
+    #                 return map_file_to_sha256(file_path)
+    #             with open(file_path, 'rb') as f:
+    #                 import requests
+    #                 url = 'https://cloud-2.agent-matrix.com/upload'
+    #                 files = {'file': (file_path, f, 'application/octet-stream')}
+    #                 data = {
+    #                     'arxiv_id': arxiv_id,
+    #                     'file_hash': compute_hash(file_path),
+    #                 }
+    #                 resp = requests.get(url=url, files=files, data=data, timeout=10)
+
     if txt.endswith('.pdf'):
         report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"发现已经存在翻译好的PDF文档")
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
@@ -406,14 +424,34 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
     # <-------------- zip PDF ------------->
     zip_res = zip_result(project_folder)
     if success:
+        allow_cloud_io = True
+        arxiv_id = "2203.01927"
+        if allow_cloud_io and arxiv_id:
+            # 如果用户允许，我们将arxiv论文PDF上传到云端
+            for file_path in chatbot._cookies.get("files_to_promote", []):
+                if file_path.endswith('translate_zh.pdf') or file_path.endswith('comparison.pdf'):
+                    def compute_hash(file_path):
+                        return map_file_to_sha256(file_path)
+                    with open(file_path, 'rb') as f:
+                        import requests
+                        url = 'https://cloud-2.agent-matrix.com/upload'
+                        files = {'file': (file_path, f, 'application/octet-stream')}
+                        data = {
+                            'arxiv_id': arxiv_id,
+                            'file_hash': compute_hash(file_path),
+                        }
+                        resp = requests.post(url=url, files=files, data=data, timeout=10)
+
+
         chatbot.append((f"成功啦", '请查收结果（压缩包）...'))
-        yield from update_ui(chatbot=chatbot, history=history);
+        yield from update_ui(chatbot=chatbot, history=history)
         time.sleep(1)  # 刷新界面
         promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
+
     else:
         chatbot.append((f"失败了",
                         '虽然PDF生成失败了, 但请查收结果（压缩包）, 内含已经翻译的Tex文档, 您可以到Github Issue区, 用该压缩包进行反馈。如系统是Linux，请检查系统字体（见Github wiki） ...'))
-        yield from update_ui(chatbot=chatbot, history=history);
+        yield from update_ui(chatbot=chatbot, history=history)
         time.sleep(1)  # 刷新界面
         promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
 

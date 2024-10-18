@@ -423,6 +423,9 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
                 except Exception as e:
                     logger.error(e)
                     pass
+
+
+
             return True # 成功啦
         else:
             if n_fix>=max_try: break
