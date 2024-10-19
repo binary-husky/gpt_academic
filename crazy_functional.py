@@ -34,7 +34,6 @@ def get_crazy_functions():
     from crazy_functions.谷歌检索小助手 import 谷歌检索小助手
     from crazy_functions.理解PDF文档内容 import 理解PDF文档内容标准文件输入
     from crazy_functions.Latex全文润色 import Latex中文润色
-    from crazy_functions.Arxiv_论文对话 import Arxiv_论文对话
     from crazy_functions.Latex全文润色 import Latex英文纠错
     from crazy_functions.Markdown_Translate import Markdown中译英
     from crazy_functions.虚空终端 import 虚空终端

@@ -67,9 +67,11 @@ def 总结文件(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     import glob, os
 
     # 基本信息：功能、贡献者
+    supports_format = ["pdf", "docx", "txt", "md"]  # 假设支持的文件格式
     chatbot.append([
         "函数插件功能？",
-        f"批量总结各类文件。函数插件贡献者: JasonGuo1 and BoyinLiu。支持的文件类型包括：{",".join(supports_format)}。"])
+        f"批量总结各类文件。函数插件贡献者: JasonGuo1 and BoyinLiu。支持的文件类型包括：{', '.join(supports_format)}。"
+    ])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # 清空历史，以免输入溢出
