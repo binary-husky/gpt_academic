@@ -21,7 +21,7 @@ def get_crazy_functions():
     from crazy_functions.询问多个大语言模型 import 同时问询
     from crazy_functions.SourceCode_Analyse import 解析一个Lua项目
     from crazy_functions.SourceCode_Analyse import 解析一个CSharp项目
-    from crazy_functions.总结word文档 import 总结word文档
+    from crazy_functions.总结文档 import 总结文件
     from crazy_functions.解析JupyterNotebook import 解析ipynb文件
     from crazy_functions.Conversation_To_File import 载入对话历史存档
     from crazy_functions.Conversation_To_File import 对话历史存档
@@ -34,6 +34,7 @@ def get_crazy_functions():
     from crazy_functions.谷歌检索小助手 import 谷歌检索小助手
     from crazy_functions.理解PDF文档内容 import 理解PDF文档内容标准文件输入
     from crazy_functions.Latex全文润色 import Latex中文润色
+    from crazy_functions.Arxiv_论文对话 import Arxiv_论文对话
     from crazy_functions.Latex全文润色 import Latex英文纠错
     from crazy_functions.Markdown_Translate import Markdown中译英
     from crazy_functions.虚空终端 import 虚空终端
@@ -108,12 +109,12 @@ def get_crazy_functions():
             "Function": HotReload(Latex翻译中文并重新编译PDF),  # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
             "Class": Arxiv_Localize,    # 新一代插件需要注册Class
         },
-        "批量总结Word文档": {
+        "批量总结文档": {
             "Group": "学术",
             "Color": "stop",
             "AsButton": False,
             "Info": "批量总结word文档 | 输入参数为路径",
-            "Function": HotReload(总结word文档),
+            "Function": HotReload(总结文件),
         },
         "解析整个Matlab项目": {
             "Group": "编程",
@@ -346,6 +347,18 @@ def get_crazy_functions():
             "Info": "Arixv论文精细翻译 | 输入参数arxiv论文的ID，比如1812.10695",
             "Function": HotReload(Latex翻译中文并重新编译PDF),  # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
             "Class": Arxiv_Localize,    # 新一代插件需要注册Class
+        },
+        "📚Arxiv论文交互对话（输入arxivID）": {
+            "Group": "学术",
+            "Color": "stop",
+            "AsButton": False,
+            "AdvancedArgs": True,
+            "ArgsReminder": r"如果有必要, 请在此处给出自定义翻译命令, 解决部分词汇翻译不准确的问题。 "
+                            r"例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
+                            r'If the term "agent" is used in this section, it should be translated to "智能体". ',
+            "Info": "Arixv论文精细翻译 | 输入参数arxiv论文的ID，比如1812.10695",
+            "Function": HotReload(Arxiv_论文对话),  # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
+            "Class": Arxiv_Localize,  # 新一代插件需要注册Class
         },
         "📚本地Latex论文精细翻译（上传Latex项目）[需Latex]": {
             "Group": "学术",
