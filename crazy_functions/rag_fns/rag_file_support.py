@@ -34,17 +34,6 @@ def extract_text(file_path):
     # 使用 SimpleDirectoryReader 处理它支持的文件格式
     if ext in ['.docx', '.doc']:
         return read_docx_doc(file_path)
-    else:
-        # 尝试读取文件为纯文本
-        try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                return f.read()
-        except UnicodeDecodeError:
-            # 如果遇到解码错误，说明文件不是纯文本
-            print(f"Error: {file_path} is not a valid text file.")
-        except Exception as e:
-            # 捕获其他可能的异常
-            print(f"Error reading file {file_path}: {e}")
     try:
         reader = SimpleDirectoryReader(input_files=[file_path])
         documents = reader.load_data()

@@ -15,6 +15,8 @@ def 文档总结(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatb
         file_content = extract_text(fp)
         # private_upload里面的文件名在解压zip后容易出现乱码（rar和7z格式正常），故可以只分析文章内容，不输入文件名
         if file_content==None:
+            chatbot.append(
+                [f"上传文件: {os.path.basename(fp)}", f"此文件解析失败，无法提取文本内容。失败原因可能为：1.文档格式过于复杂；2. 不支持的文件格式，支持的文件格式后缀有:" + ", ".join(supports_format)+ "等其他文本格式类型文件。"])
             continue
         from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit
         from request_llms.bridge_all import model_info
@@ -55,13 +57,11 @@ def 文档总结(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatb
 
         res = write_history_to_file(history)
         promote_file_to_downloadzone(res, chatbot=chatbot)
-        chatbot.append(("完成了吗？", res))
+        chatbot.append((f"路径{fp}文件解读完成了吗？", "解读完成，存储路径为"+res))
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     res = write_history_to_file(history)
     promote_file_to_downloadzone(res, chatbot=chatbot)
-    chatbot.append(("所有文件都总结完成了吗？", res))
-    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
 
 @CatchException
