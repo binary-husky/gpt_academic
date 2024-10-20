@@ -14,6 +14,8 @@ def 文档总结(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatb
     for index, fp in enumerate(file_manifest):
         file_content = extract_text(fp)
         # private_upload里面的文件名在解压zip后容易出现乱码（rar和7z格式正常），故可以只分析文章内容，不输入文件名
+        if file_content==None:
+            continue
         from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit
         from request_llms.bridge_all import model_info
         max_token = model_info[llm_kwargs['llm_model']]['max_token']
@@ -21,8 +23,8 @@ def 文档总结(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatb
         paper_fragments = breakdown_text_to_satisfy_token_limit(txt=file_content, limit=TOKEN_LIMIT_PER_FRAGMENT, llm_model=llm_kwargs['llm_model'])
         this_paper_history = []
         for i, paper_frag in enumerate(paper_fragments):
-            i_say = f'请对下面的内容用中文做概述，文件名是{os.path.relpath(fp, project_folder)}，内容是 ```{paper_frag}```'
-            i_say_show_user = f'请对下面的内容片段做概述: {os.path.abspath(fp)}的第{i+1}/{len(paper_fragments)}个片段。'
+            i_say = f'请对下面的内容用中文做概述，文件名是{os.path.relpath(fp, project_folder)}，做概述时请注意以下要求：{plugin_kwargs['advanced_arg']}：内容是 ```{paper_frag}```'
+            i_say_show_user = f'请对下面的内容片段做概述，做概述时请注意以下要求：{plugin_kwargs['advanced_arg']}: {os.path.abspath(fp)}的第{i+1}/{len(paper_fragments)}个片段。'
             gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
                 inputs=i_say,
                 inputs_show_user=i_say_show_user,
@@ -38,7 +40,7 @@ def 文档总结(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatb
 
         # 已经对该文章的所有片段总结完毕，如果文章被切分了，
         if len(paper_fragments) > 1:
-            i_say = f"根据以上的对话，总结文件{os.path.abspath(fp)}的主要内容。"
+            i_say = f"根据以上的对话，总结时请注意以下要求：{plugin_kwargs['advanced_arg']}，总结文件{os.path.abspath(fp)}的主要内容。"
             gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
                 inputs=i_say,
                 inputs_show_user=i_say,
@@ -67,7 +69,6 @@ def 总结文件(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     import glob, os
 
     # 基本信息：功能、贡献者
-    supports_format = ["pdf", "docx", "txt", "md"]  # 假设支持的文件格式
     chatbot.append([
         "函数插件功能？",
         f"批量总结各类文件。函数插件贡献者: JasonGuo1 and BoyinLiu。支持的文件类型包括：{', '.join(supports_format)}。"
@@ -87,10 +88,8 @@ def 总结文件(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
         return
 
     # 搜索需要处理的文件清单
-    file_manifest = []
 
-    for ext in supports_format:
-        file_manifest += [f for f in glob.glob(f'{project_folder}/**/*{ext}', recursive=True)]
+    file_manifest = [f for f in glob.glob(f'{project_folder}/**', recursive=True) if os.path.isfile(f)]
 
     # 如果没找到任何文件
     if len(file_manifest) == 0:
