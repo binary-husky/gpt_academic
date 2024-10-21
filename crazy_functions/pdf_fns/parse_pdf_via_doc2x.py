@@ -4,7 +4,9 @@ from toolbox import promote_file_to_downloadzone, extract_archive
 from toolbox import generate_file_link, zip_folder
 from crazy_functions.crazy_utils import get_files_from_everything
 from shared_utils.colorful import *
+from loguru import logger
 import os
+import time
 
 def refresh_key(doc2x_api_key):
     import requests, json
@@ -22,105 +24,140 @@ def refresh_key(doc2x_api_key):
         raise RuntimeError(format("[ERROR] status code: %d, body: %s" % (res.status_code, res.text)))
     return doc2x_api_key
 
+
+
 def 解析PDF_DOC2X_转Latex(pdf_file_path):
+    zip_file_path, unzipped_folder = 解析PDF_DOC2X(pdf_file_path, format='tex')
+    return unzipped_folder
+
+
+def 解析PDF_DOC2X(pdf_file_path, format='tex'):
+    """
+        format: 'tex', 'md', 'docx'
+    """
     import requests, json, os
     DOC2X_API_KEY = get_conf('DOC2X_API_KEY')
     latex_dir = get_log_folder(plugin_name="pdf_ocr_latex")
+    markdown_dir = get_log_folder(plugin_name="pdf_ocr")
     doc2x_api_key = DOC2X_API_KEY
-    if doc2x_api_key.startswith('sk-'):
-        url = "https://api.doc2x.noedgeai.com/api/v1/pdf"
-    else:
-        doc2x_api_key = refresh_key(doc2x_api_key)
-        url = "https://api.doc2x.noedgeai.com/api/platform/pdf"
 
+
+    # < ------ 第1步：上传 ------ >
+    logger.info("Doc2x 第1步：上传")
+    with open(pdf_file_path, 'rb') as file:
+        res = requests.post(
+            "https://v2.doc2x.noedgeai.com/api/v2/parse/pdf",
+            headers={"Authorization": "Bearer " + doc2x_api_key},
+            data=file
+        )
+    # res_json = []
+    if res.status_code == 200:
+        res_json = res.json()
+    else:
+        raise RuntimeError(f"Doc2x return an error: {res.json()}")
+    uuid = res_json['data']['uid']
+
+    # < ------ 第2步：轮询等待 ------ >
+    logger.info("Doc2x 第2步：轮询等待")
+    params = {'uid': uuid}
+    while True:
+        res = requests.get(
+            'https://v2.doc2x.noedgeai.com/api/v2/parse/status',
+            headers={"Authorization": "Bearer " + doc2x_api_key},
+            params=params
+        )
+        res_json = res.json()
+        if res_json['data']['status'] == "success":
+            break
+        elif res_json['data']['status'] == "processing":
+            time.sleep(3)
+            logger.info(f"Doc2x is processing at {res_json['data']['progress']}%")
+        elif res_json['data']['status'] == "failed":
+            raise RuntimeError(f"Doc2x return an error: {res_json}")
+
+
+    # < ------ 第3步：提交转化 ------ >
+    logger.info("Doc2x 第3步：提交转化")
+    data = {
+        "uid": uuid,
+        "to": format,
+        "formula_mode": "dollar",
+        "filename": "output"
+    }
     res = requests.post(
-        url,
-        files={"file": open(pdf_file_path, "rb")},
-        data={"ocr": "1"},
-        headers={"Authorization": "Bearer " + doc2x_api_key}
+        'https://v2.doc2x.noedgeai.com/api/v2/convert/parse',
+        headers={"Authorization": "Bearer " + doc2x_api_key},
+        json=data
     )
-    res_json = []
     if res.status_code == 200:
-        decoded = res.content.decode("utf-8")
-        for z_decoded in decoded.split('\n'):
-            if len(z_decoded) == 0: continue
-            assert z_decoded.startswith("data: ")
-            z_decoded = z_decoded[len("data: "):]
-            decoded_json = json.loads(z_decoded)
-            res_json.append(decoded_json)
+        res_json = res.json()
     else:
-        raise RuntimeError(format("[ERROR] status code: %d, body: %s" % (res.status_code, res.text)))
+        raise RuntimeError(f"Doc2x return an error: {res.json()}")
 
-    uuid = res_json[0]['uuid']
-    to = "latex" # latex, md, docx
-    url = "https://api.doc2x.noedgeai.com/api/export"+"?request_id="+uuid+"&to="+to
 
-    res = requests.get(url, headers={"Authorization": "Bearer " + doc2x_api_key})
-    latex_zip_path = os.path.join(latex_dir, gen_time_str() + '.zip')
-    latex_unzip_path = os.path.join(latex_dir, gen_time_str())
-    if res.status_code == 200:
-        with open(latex_zip_path, "wb") as f: f.write(res.content)
-    else:
-        raise RuntimeError(format("[ERROR] status code: %d, body: %s" % (res.status_code, res.text)))
+    # < ------ 第4步：等待结果 ------ >
+    logger.info("Doc2x 第4步：等待结果")
+    params = {'uid': uuid}
+    while True:
+        res = requests.get(
+            'https://v2.doc2x.noedgeai.com/api/v2/convert/parse/result',
+            headers={"Authorization": "Bearer " + doc2x_api_key},
+            params=params
+        )
+        res_json = res.json()
+        if res_json['data']['status'] == "success":
+            break
+        elif res_json['data']['status'] == "processing":
+            time.sleep(3)
+            logger.info(f"Doc2x still processing")
+        elif res_json['data']['status'] == "failed":
+            raise RuntimeError(f"Doc2x return an error: {res_json}")
 
+
+    # < ------ 第5步：最后的处理 ------ >
+    logger.info("Doc2x 第5步：最后的处理")
+
+    if format=='tex':
+        target_path = latex_dir
+    if format=='md':
+        target_path = markdown_dir
+    os.makedirs(target_path, exist_ok=True)
+
+    max_attempt = 3
+    # < ------ 下载 ------ >
+    for attempt in range(max_attempt):
+        try:
+            result_url = res_json['data']['url']
+            res = requests.get(result_url)
+            zip_path = os.path.join(target_path, gen_time_str() + '.zip')
+            unzip_path = os.path.join(target_path, gen_time_str())
+            if res.status_code == 200:
+                with open(zip_path, "wb") as f: f.write(res.content)
+            else:
+                raise RuntimeError(f"Doc2x return an error: {res.json()}")
+        except Exception as e:
+            if attempt < max_attempt - 1:
+                logger.error(f"Failed to download latex file, retrying... {e}")
+                time.sleep(3)
+                continue
+            else:
+                raise e
+
+    # < ------ 解压 ------ >
     import zipfile
-    with zipfile.ZipFile(latex_zip_path, 'r') as zip_ref:
-        zip_ref.extractall(latex_unzip_path)
-
-
-    return latex_unzip_path
-
-
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        zip_ref.extractall(unzip_path)
+    return zip_path, unzip_path
 
 
 def 解析PDF_DOC2X_单文件(fp, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, DOC2X_API_KEY, user_request):
 
-
     def pdf2markdown(filepath):
-        import requests, json, os
-        markdown_dir = get_log_folder(plugin_name="pdf_ocr")
-        doc2x_api_key = DOC2X_API_KEY
-        if doc2x_api_key.startswith('sk-'):
-            url = "https://api.doc2x.noedgeai.com/api/v1/pdf"
-        else:
-            doc2x_api_key = refresh_key(doc2x_api_key)
-            url = "https://api.doc2x.noedgeai.com/api/platform/pdf"
-
-        chatbot.append((None, "加载PDF文件，发送至DOC2X解析..."))
+        chatbot.append((None, f"Doc2x 解析中"))
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
-        res = requests.post(
-            url,
-            files={"file": open(filepath, "rb")},
-            data={"ocr": "1"},
-            headers={"Authorization": "Bearer " + doc2x_api_key}
-        )
-        res_json = []
-        if res.status_code == 200:
-            decoded = res.content.decode("utf-8")
-            for z_decoded in decoded.split('\n'):
-                if len(z_decoded) == 0: continue
-                assert z_decoded.startswith("data: ")
-                z_decoded = z_decoded[len("data: "):]
-                decoded_json = json.loads(z_decoded)
-                res_json.append(decoded_json)
-            if 'limit exceeded' in decoded_json.get('status', ''):
-                raise RuntimeError("Doc2x API 页数受限，请联系 Doc2x 方面，并更换新的 API 秘钥。")
-        else:
-            raise RuntimeError(format("[ERROR] status code: %d, body: %s" % (res.status_code, res.text)))
-        uuid = res_json[0]['uuid']
-        to = "md" # latex, md, docx
-        url = "https://api.doc2x.noedgeai.com/api/export"+"?request_id="+uuid+"&to="+to
+        md_zip_path, unzipped_folder = 解析PDF_DOC2X(filepath, format='md')
 
-        chatbot.append((None, f"读取解析: {url} ..."))
-        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-
-        res = requests.get(url, headers={"Authorization": "Bearer " + doc2x_api_key})
-        md_zip_path = os.path.join(markdown_dir, gen_time_str() + '.zip')
-        if res.status_code == 200:
-            with open(md_zip_path, "wb") as f: f.write(res.content)
-        else:
-            raise RuntimeError(format("[ERROR] status code: %d, body: %s" % (res.status_code, res.text)))
         promote_file_to_downloadzone(md_zip_path, chatbot=chatbot)
         chatbot.append((None, f"完成解析 {md_zip_path} ..."))
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
