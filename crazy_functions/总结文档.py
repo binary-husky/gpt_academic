@@ -25,8 +25,8 @@ def 文档总结(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatb
         paper_fragments = breakdown_text_to_satisfy_token_limit(txt=file_content, limit=TOKEN_LIMIT_PER_FRAGMENT, llm_model=llm_kwargs['llm_model'])
         this_paper_history = []
         for i, paper_frag in enumerate(paper_fragments):
-            i_say = f'请对下面的内容用中文做概述，文件名是{os.path.relpath(fp, project_folder)}，做概述时请注意以下要求：{plugin_kwargs['advanced_arg']}：内容是 ```{paper_frag}```'
-            i_say_show_user = f'请对下面的内容片段做概述，做概述时请注意以下要求：{plugin_kwargs['advanced_arg']}: {os.path.abspath(fp)}的第{i+1}/{len(paper_fragments)}个片段。'
+            i_say = f'请对下面的内容用中文做概述，文件名是{os.path.relpath(fp, project_folder)}，做概述时请优先满足以下要求：{plugin_kwargs['advanced_arg']}：内容是 ```{paper_frag}```'
+            i_say_show_user = f'请对下面的内容片段做概述，做概述时请优先满足以下要求：{plugin_kwargs['advanced_arg']}: {os.path.abspath(fp)}的第{i+1}/{len(paper_fragments)}个片段。'
             gpt_say = yield from request_gpt_model_in_new_thread_with_ui_alive(
                 inputs=i_say,
                 inputs_show_user=i_say_show_user,
