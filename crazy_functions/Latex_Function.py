@@ -3,7 +3,7 @@ from toolbox import CatchException, report_exception, update_ui_lastest_msg, zip
 from functools import partial
 from loguru import logger
 
-import glob, os, requests, time, json, tarfile
+import glob, os, requests, time, json, tarfile, threading
 
 pj = os.path.join
 ARXIV_CACHE_DIR = get_conf("ARXIV_CACHE_DIR")
@@ -338,10 +338,16 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
     # <-------------- more requirements ------------->
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     more_req = plugin_kwargs.get("advanced_arg", "")
-    no_cache = more_req.startswith("--no-cache")
-    if no_cache: more_req.lstrip("--no-cache")
+
+    no_cache = ("--no-cache" in more_req)
+    if no_cache: more_req = more_req.replace("--no-cache", "").strip()
+
+    allow_gptac_cloud_io = ("--allow-cloudio" in more_req)  # 从云端下载翻译结果，以及上传翻译结果到云端
+    if allow_gptac_cloud_io: more_req = more_req.replace("--allow-cloudio", "").strip()
+
     allow_cache = not no_cache
     _switch_prompt_ = partial(switch_prompt, more_requirement=more_req)
+
 
     # <-------------- check deps ------------->
     try:
@@ -368,6 +374,20 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
         report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"发现已经存在翻译好的PDF文档")
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
         return
+
+    # #################################################################
+    if allow_gptac_cloud_io and arxiv_id:
+        # 访问 GPTAC学术云，查询云端是否存在该论文的翻译版本
+        from crazy_functions.latex_fns.latex_actions import check_gptac_cloud
+        success, downloaded = check_gptac_cloud(arxiv_id, chatbot)
+        if success:
+            chatbot.append([
+                f"检测到GPTAC云端存在翻译版本, 如果不满意翻译结果, 请禁用云端分享, 然后重新执行。", 
+                None
+            ])
+            yield from update_ui(chatbot=chatbot, history=history)
+            return
+    #################################################################
 
     if os.path.exists(txt):
         project_folder = txt
@@ -406,14 +426,21 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
     # <-------------- zip PDF ------------->
     zip_res = zip_result(project_folder)
     if success:
+        if allow_gptac_cloud_io and arxiv_id:
+            # 如果用户允许，我们将翻译好的arxiv论文PDF上传到GPTAC学术云
+            from crazy_functions.latex_fns.latex_actions import upload_to_gptac_cloud_if_user_allow
+            threading.Thread(target=upload_to_gptac_cloud_if_user_allow, 
+                args=(chatbot, arxiv_id), daemon=True).start()
+
         chatbot.append((f"成功啦", '请查收结果（压缩包）...'))
-        yield from update_ui(chatbot=chatbot, history=history);
+        yield from update_ui(chatbot=chatbot, history=history)
         time.sleep(1)  # 刷新界面
         promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
+
     else:
         chatbot.append((f"失败了",
                         '虽然PDF生成失败了, 但请查收结果（压缩包）, 内含已经翻译的Tex文档, 您可以到Github Issue区, 用该压缩包进行反馈。如系统是Linux，请检查系统字体（见Github wiki） ...'))
-        yield from update_ui(chatbot=chatbot, history=history);
+        yield from update_ui(chatbot=chatbot, history=history)
         time.sleep(1)  # 刷新界面
         promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
 
