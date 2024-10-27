@@ -12,16 +12,16 @@ WORKDIR /gpt
 COPY requirements.txt .
 
 # 安装依赖
-RUN if [ "$(uname -m)" = "x86_64" ]; then \
+RUN pip install --break-system-packages openai numpy arxiv rich colorama Markdown pygments pymupdf python-docx pdfminer \
+    && pip install --break-system-packages -r requirements.txt \
+    && if [ "$(uname -m)" = "x86_64" ]; then \
     pip install --break-system-packages nougat-ocr; \
     fi \
-    && pip install --break-system-packages openai numpy arxiv rich colorama Markdown pygments pymupdf python-docx pdfminer \
-    && pip install --break-system-packages -r requirements.txt \
     && pip cache purge \
     && rm -rf /root/.cache/pip/*
 
 # 创建非root用户
-RUN useradd -m -u 1000 gptuser && chown -R gptuser /gpt
+RUN useradd -m gptuser && chown -R gptuser /gpt
 USER gptuser
 
 # 最后才复制代码文件,这样代码更新时只需重建最后几层，可以大幅减少docker pull所需的大小
