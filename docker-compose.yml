@@ -180,6 +180,7 @@ version: '3'
 services:
   gpt_academic_with_latex:
     image: ghcr.io/binary-husky/gpt_academic_with_latex:master  # (Auto Built by Dockerfile: docs/GithubAction+NoLocal+Latex)
+    # 对于ARM64设备，请将以上镜像名称替换为 ghcr.io/binary-husky/gpt_academic_with_latex_arm:master
     environment:
       # 请查阅 `config.py` 以查看所有的配置信息
       API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                              '
