@@ -46,6 +46,6 @@ jobs:
           context: .
           push: true
           platforms: linux/arm64
-          file: docs/GithubAction+NoLocal+Latex+Arm
+          file: docs/GithubAction+NoLocal+Latex
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

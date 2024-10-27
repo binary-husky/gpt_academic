@@ -1,35 +1,34 @@
-# 此Dockerfile适用于“无本地模型”的环境构建，如果需要使用chatglm等本地模型，请参考 docs/Dockerfile+ChatGLM
+# 此Dockerfile适用于"无本地模型"的环境构建，如果需要使用chatglm等本地模型，请参考 docs/Dockerfile+ChatGLM
 # - 1 修改 `config.py`
 # - 2 构建 docker build -t gpt-academic-nolocal-latex -f docs/GithubAction+NoLocal+Latex .
 # - 3 运行 docker run -v /home/fuqingxu/arxiv_cache:/root/arxiv_cache --rm -it --net=host gpt-academic-nolocal-latex
 
-FROM fuqingxu/python311_texlive_ctex:latest
-ENV PATH "$PATH:/usr/local/texlive/2022/bin/x86_64-linux"
-ENV PATH "$PATH:/usr/local/texlive/2023/bin/x86_64-linux"
-ENV PATH "$PATH:/usr/local/texlive/2024/bin/x86_64-linux"
-ENV PATH "$PATH:/usr/local/texlive/2025/bin/x86_64-linux"
-ENV PATH "$PATH:/usr/local/texlive/2026/bin/x86_64-linux"
-
-# 指定路径
+FROM menghuan1918/ubuntu_uv_ctex:latest
+ENV DEBIAN_FRONTEND=noninteractive
+SHELL ["/bin/bash", "-c"]
 WORKDIR /gpt
 
-RUN pip3 install openai numpy arxiv rich
-RUN pip3 install colorama Markdown pygments pymupdf
-RUN pip3 install python-docx pdfminer
-RUN pip3 install nougat-ocr
-
-# 装载项目文件
-COPY . .
-
+# 先复制依赖文件
+COPY requirements.txt .
 
 # 安装依赖
-RUN pip3 install -r requirements.txt
+RUN pip install --break-system-packages openai numpy arxiv rich colorama Markdown pygments pymupdf python-docx pdfminer \
+    && pip install --break-system-packages -r requirements.txt \
+    && if [ "$(uname -m)" = "x86_64" ]; then \
+    pip install --break-system-packages nougat-ocr; \
+    fi \
+    && pip cache purge \
+    && rm -rf /root/.cache/pip/*
 
-# edge-tts需要的依赖
-RUN apt update && apt install ffmpeg -y
+# 创建非root用户
+RUN useradd -m gptuser && chown -R gptuser /gpt
+USER gptuser
+
+# 最后才复制代码文件,这样代码更新时只需重建最后几层，可以大幅减少docker pull所需的大小
+COPY --chown=gptuser:gptuser . .
 
 # 可选步骤，用于预热模块
-RUN python3  -c 'from check_proxy import warm_up_modules; warm_up_modules()'
+RUN python3 -c 'from check_proxy import warm_up_modules; warm_up_modules()'
 
 # 启动
 CMD ["python3", "-u", "main.py"]
