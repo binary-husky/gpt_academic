@@ -497,6 +497,10 @@ def upload_to_gptac_cloud_if_user_allow(chatbot, arxiv_id):
                     data = {
                         'arxiv_id': arxiv_id,
                         'file_hash': map_file_to_sha256(file_path),
+                        'language': 'zh',
+                        'trans_prompt': 'to_be_implemented',
+                        'llm_model': 'to_be_implemented',
+                        'llm_model_param': 'to_be_implemented',
                     }
                     resp = requests.post(url=url, files=files, data=data, timeout=30)
                 logger.info(f'Uploading terminate ({resp.status_code})`: {file_path}')
