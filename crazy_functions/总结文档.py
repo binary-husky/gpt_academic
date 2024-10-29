@@ -2,13 +2,13 @@ from toolbox import update_ui
 from toolbox import CatchException, report_exception
 from toolbox import write_history_to_file, promote_file_to_downloadzone
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-from crazy_functions.rag_fns.rag_file_support import extract_text, supports_format
 
 fast_debug = False
 
 
 def 文档总结(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
     import time, os
+    from crazy_functions.rag_fns.rag_file_support import extract_text, supports_format
     # pip install python-docx 用于docx格式，跨平台
     # pip install pywin32 用于doc格式，仅支持Win平台
     for index, fp in enumerate(file_manifest):
