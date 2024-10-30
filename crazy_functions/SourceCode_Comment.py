@@ -7,6 +7,7 @@ from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_
 from crazy_functions.agent_fns.python_comment_agent import PythonCodeComment
 from crazy_functions.diagram_fns.file_tree import FileNode
 from shared_utils.advanced_markdown_format import markdown_convertion_for_file
+from loguru import logger
 
 def 注释源代码(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
 
@@ -92,7 +93,10 @@ def 注释源代码(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
         preview_html_list = []
         for done, fp in zip(worker_done, file_manifest):
             if not done: continue
-            preview_html_list.append(file_tree_struct.manifest[fp].compare_html)
+            if hasattr(file_tree_struct.manifest[fp], 'compare_html'):
+                preview_html_list.append(file_tree_struct.manifest[fp].compare_html)
+            else:
+                logger.error(f"文件: {fp} 的注释结果未能成功")
         file_links = generate_file_link(preview_html_list)
 
         yield from update_ui_lastest_msg(
