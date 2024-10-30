@@ -1,39 +1,47 @@
-import ast
+import token
+import tokenize
+import copy
+import io
 
-class CommentRemover(ast.NodeTransformer):
-    def visit_FunctionDef(self, node):
-        # 移除函数的文档字符串
-        if (node.body and isinstance(node.body[0], ast.Expr) and
-                isinstance(node.body[0].value, ast.Str)):
-            node.body = node.body[1:]
-        self.generic_visit(node)
-        return node
 
-    def visit_ClassDef(self, node):
-        # 移除类的文档字符串
-        if (node.body and isinstance(node.body[0], ast.Expr) and
-                isinstance(node.body[0].value, ast.Str)):
-            node.body = node.body[1:]
-        self.generic_visit(node)
-        return node
+def remove_python_comments(input_source: str) -> str:
+    source_flag = copy.copy(input_source)
+    source = io.StringIO(input_source)
+    ls = input_source.split('\n')
+    prev_toktype = token.INDENT
+    readline = source.readline
 
-    def visit_Module(self, node):
-        # 移除模块的文档字符串
-        if (node.body and isinstance(node.body[0], ast.Expr) and
-                isinstance(node.body[0].value, ast.Str)):
-            node.body = node.body[1:]
-        self.generic_visit(node)
-        return node
-    
+    def get_char_index(lineno, col):
+        # find the index of the char in the source code
+        if lineno == 1:
+            return len('\n'.join(ls[:(lineno-1)])) + col
+        else:
+            return len('\n'.join(ls[:(lineno-1)])) + col + 1
 
-def remove_python_comments(source_code):
-    # 解析源代码为 AST
-    tree = ast.parse(source_code)
-    # 移除注释
-    transformer = CommentRemover()
-    tree = transformer.visit(tree)
-    # 将处理后的 AST 转换回源代码
-    return ast.unparse(tree)
+    def replace_char_between(start_lineno, start_col, end_lineno, end_col, source, replace_char, ls):
+        # replace char between start_lineno, start_col and end_lineno, end_col with replace_char, but keep '\n' and ' '
+        b = get_char_index(start_lineno, start_col)
+        e = get_char_index(end_lineno, end_col)
+        for i in range(b, e):
+            if source[i] == '\n':
+                source = source[:i] + '\n' + source[i+1:]
+            elif source[i] == ' ':
+                source = source[:i] + ' ' + source[i+1:]
+            else:
+                source = source[:i] + replace_char + source[i+1:]
+        return source
+
+    tokgen = tokenize.generate_tokens(readline)
+    for toktype, ttext, (slineno, scol), (elineno, ecol), ltext in tokgen:
+        if toktype == token.STRING and (prev_toktype == token.INDENT):
+            source_flag = replace_char_between(slineno, scol, elineno, ecol, source_flag, ' ', ls)
+        elif toktype == token.STRING and (prev_toktype == token.NEWLINE):
+            source_flag = replace_char_between(slineno, scol, elineno, ecol, source_flag, ' ', ls)
+        elif toktype == tokenize.COMMENT:
+            source_flag = replace_char_between(slineno, scol, elineno, ecol, source_flag, ' ', ls)
+        prev_toktype = toktype
+    return source_flag
+
 
 # 示例使用
 if __name__ == "__main__":
