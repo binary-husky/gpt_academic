@@ -31,8 +31,7 @@ class Arxiv_Localize(GptAcademicPluginTemplate):
             "allow_cache":
                 ArgProperty(title="是否允许从缓存中调取结果", options=["允许缓存", "从头执行"], default_value="允许缓存", description="无", type="dropdown").model_dump_json(),
             "allow_cloudio":
-                ArgProperty(title="是否允许向GPTAC学术云共享翻译结果", options=["允许", "禁止"], default_value="禁止", description="人人为我，我为人人", type="dropdown").model_dump_json(),
-
+                ArgProperty(title="是否允许从GPTAC学术云下载(或者上传)翻译结果(仅针对Arxiv论文)", options=["允许", "禁止"], default_value="禁止", description="共享文献，互助互利", type="dropdown").model_dump_json(),
         }
         return gui_definition
 
