@@ -52,7 +52,7 @@ class BatchDocumentSummarizer:
                          f'文件内容是 ```{frag.content}```')
                 i_say_show_user = (f'正在处理 {frag.rel_path} (片段 {frag.fragment_index + 1}/{frag.total_fragments})')
             else:
-                i_say = (f'请对下面的内容用中文做概述，文件名是{os.path.basename(frag.file_path)}，'
+                i_say = (f'请对下面的内容用中文做总结，不超过500字，文件名是{os.path.basename(frag.file_path)}，'
                          f'内容是 ```{frag.content}```')
                 i_say_show_user = f'正在处理 {frag.rel_path} (片段 {frag.fragment_index + 1}/{frag.total_fragments})'
 
