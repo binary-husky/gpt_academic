@@ -3,12 +3,12 @@ from toolbox import CatchException, report_exception
 from toolbox import write_history_to_file, promote_file_to_downloadzone
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 
-fast_debug = False
-
 
 def 文档总结(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
     import time, os
     from crazy_functions.rag_fns.rag_file_support import extract_text, supports_format
+    from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit
+    from request_llms.bridge_all import model_info
     # pip install python-docx 用于docx格式，跨平台
     # pip install pywin32 用于doc格式，仅支持Win平台
     for index, fp in enumerate(file_manifest):
@@ -18,8 +18,6 @@ def 文档总结(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatb
             chatbot.append(
                 [f"上传文件: {os.path.basename(fp)}", f"此文件解析失败，无法提取文本内容。失败原因可能为：1.文档格式过于复杂；2. 不支持的文件格式，支持的文件格式后缀有:" + ", ".join(supports_format)+ "等其他文本格式类型文件。"])
             continue
-        from crazy_functions.pdf_fns.breakdown_txt import breakdown_text_to_satisfy_token_limit
-        from request_llms.bridge_all import model_info
         max_token = model_info[llm_kwargs['llm_model']]['max_token']
         TOKEN_LIMIT_PER_FRAGMENT = max_token * 3 // 4
         paper_fragments = breakdown_text_to_satisfy_token_limit(txt=file_content, limit=TOKEN_LIMIT_PER_FRAGMENT, llm_model=llm_kwargs['llm_model'])
@@ -57,7 +55,7 @@ def 文档总结(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatb
 
         res = write_history_to_file(history)
         promote_file_to_downloadzone(res, chatbot=chatbot)
-        chatbot.append((f"路径{fp}文件解读完成了吗？", "解读完成，存储路径为"+res))
+        chatbot.append([f"路径{fp}文件解读完成，存储路径 {res}", None])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     res = write_history_to_file(history)
@@ -70,7 +68,7 @@ def 总结文件(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
 
     # 基本信息：功能、贡献者
     chatbot.append([
-        "函数插件功能？",
+        "函数插件功能:",
         f"批量总结各类文件。函数插件贡献者: JasonGuo1 and BoyinLiu。支持的文件类型包括：{', '.join(supports_format)}。"
     ])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面

@@ -114,7 +114,6 @@ def get_crazy_functions():
             "Group": "学术",
             "Color": "stop",
             "AsButton": False,
-            "AdvancedArgs": True,
             "Info": "批量总结word文档 | 输入参数为路径",
             "Function": HotReload(总结文件),
         },
