@@ -21,7 +21,6 @@ def get_crazy_functions():
     from crazy_functions.询问多个大语言模型 import 同时问询
     from crazy_functions.SourceCode_Analyse import 解析一个Lua项目
     from crazy_functions.SourceCode_Analyse import 解析一个CSharp项目
-    from crazy_functions.总结word文档 import 总结word文档
     from crazy_functions.解析JupyterNotebook import 解析ipynb文件
     from crazy_functions.Conversation_To_File import 载入对话历史存档
     from crazy_functions.Conversation_To_File import 对话历史存档
@@ -240,7 +239,7 @@ def get_crazy_functions():
             "AsButton": True,  # 加入下拉菜单中
             # "Info": "连接网络回答问题（需要访问谷歌）| 输入参数是一个问题",
             "Function": HotReload(连接网络回答问题),
-            # "Class": NetworkGPT_Wrap     # 新一代插件需要注册Class
+            "Class": NetworkGPT_Wrap     # 新一代插件需要注册Class
         },
         "历史上的今天": {
             "Group": "对话",
