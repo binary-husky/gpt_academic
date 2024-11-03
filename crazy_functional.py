@@ -21,7 +21,7 @@ def get_crazy_functions():
     from crazy_functions.询问多个大语言模型 import 同时问询
     from crazy_functions.SourceCode_Analyse import 解析一个Lua项目
     from crazy_functions.SourceCode_Analyse import 解析一个CSharp项目
-    from crazy_functions.总结word文档 import 总结word文档
+    from crazy_functions.总结文档 import 总结文件
     from crazy_functions.解析JupyterNotebook import 解析ipynb文件
     from crazy_functions.Conversation_To_File import 载入对话历史存档
     from crazy_functions.Conversation_To_File import 对话历史存档
@@ -110,12 +110,13 @@ def get_crazy_functions():
             "Function": HotReload(Latex翻译中文并重新编译PDF),  # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
             "Class": Arxiv_Localize,    # 新一代插件需要注册Class
         },
-        "批量总结Word文档": {
+        "批量总结文档": {
             "Group": "学术",
             "Color": "stop",
             "AsButton": False,
+            "AdvancedArgs": True,
             "Info": "批量总结word文档 | 输入参数为路径",
-            "Function": HotReload(总结word文档),
+            "Function": HotReload(总结文件),
         },
         "解析整个Matlab项目": {
             "Group": "编程",
