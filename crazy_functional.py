@@ -28,6 +28,7 @@ def get_crazy_functions():
     from crazy_functions.Conversation_To_File import Conversation_To_File_Wrap
     from crazy_functions.Conversation_To_File import 删除所有本地对话历史记录
     from crazy_functions.辅助功能 import 清除缓存
+    from crazy_functions.批量文件询问 import 批量文件询问
     from crazy_functions.Markdown_Translate import Markdown英译中
     from crazy_functions.批量总结PDF文档 import 批量总结PDF文档
     from crazy_functions.PDF_Translate import 批量翻译PDF文档
@@ -110,12 +111,13 @@ def get_crazy_functions():
             "Function": HotReload(Latex翻译中文并重新编译PDF),  # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
             "Class": Arxiv_Localize,    # 新一代插件需要注册Class
         },
-        "批量总结Word文档": {
+        "批量文件询问": {
             "Group": "学术",
             "Color": "stop",
             "AsButton": False,
-            "Info": "批量总结word文档 | 输入参数为路径",
-            "Function": HotReload(总结word文档),
+            "AdvancedArgs": True,
+            "Info": "通过在高级参数区写入prompt，可自定义询问逻辑，默认情况下为总结逻辑 | 输入参数为路径",
+            "Function": HotReload(批量文件询问),
         },
         "解析整个Matlab项目": {
             "Group": "编程",
@@ -238,7 +240,7 @@ def get_crazy_functions():
             "AsButton": True,  # 加入下拉菜单中
             # "Info": "连接网络回答问题（需要访问谷歌）| 输入参数是一个问题",
             "Function": HotReload(连接网络回答问题),
-            "Class": NetworkGPT_Wrap     # 新一代插件需要注册Class
+            # "Class": NetworkGPT_Wrap     # 新一代插件需要注册Class
         },
         "历史上的今天": {
             "Group": "对话",
