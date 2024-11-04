@@ -355,8 +355,8 @@ class BatchDocumentSummarizer:
             if len(summaries) > 1:  # 多片段文件需要生成整体总结
                 sorted_summaries = sorted(summaries, key=lambda x: x['index'])
                 if self.plugin_kwargs.get("advanced_arg"):
-                    i_say = (f"根据以下内容，按要求：{self.plugin_kwargs['advanced_arg']}，"
-                             f"总结文件 {os.path.basename(rel_path)} 的主要内容。")
+
+                    i_say = f'请按照用户要求对文件内容进行处理，用户要求为：{self.plugin_kwargs["advanced_arg"]}：'
                 else:
                     i_say = f"请总结文件 {os.path.basename(rel_path)} 的主要内容，不超过500字。"
 
@@ -364,11 +364,11 @@ class BatchDocumentSummarizer:
                     summary_texts = [s['summary'] for s in sorted_summaries]
                     response_collection = yield from request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                         inputs_array=[i_say],
-                        inputs_show_user_array=[f"生成 {rel_path} 的总结"],
+                        inputs_show_user_array=[f"生成 {rel_path} 的处理结果"],
                         llm_kwargs=self.llm_kwargs,
                         chatbot=self.chatbot,
                         history_array=[summary_texts],
-                        sys_prompt_array=["总结文件内容。"],
+                        sys_prompt_array=["你是一个优秀的助手，"],
                     )
                     self.file_summaries_map[rel_path] = response_collection[1]
                 except Exception as e:
