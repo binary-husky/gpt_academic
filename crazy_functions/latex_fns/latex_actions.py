@@ -3,7 +3,7 @@ import re
 import shutil
 import numpy as np
 from loguru import logger
-from toolbox import update_ui, update_ui_lastest_msg, get_log_folder
+from toolbox import update_ui, update_ui_lastest_msg, get_log_folder, gen_time_str
 from toolbox import get_conf, promote_file_to_downloadzone
 from crazy_functions.latex_fns.latex_toolbox import PRESERVE, TRANSFORM
 from crazy_functions.latex_fns.latex_toolbox import set_forbidden_text, set_forbidden_text_begin_end, set_forbidden_text_careful_brace
@@ -468,3 +468,70 @@ def write_html(sp_file_contents, sp_file_result, chatbot, project_folder):
     except:
         from toolbox import trimmed_format_exc
         logger.error('writing html result failed:', trimmed_format_exc())
+
+
+def upload_to_gptac_cloud_if_user_allow(chatbot, arxiv_id):
+    try:
+        # 如果用户允许，我们将arxiv论文PDF上传到GPTAC学术云
+        from toolbox import map_file_to_sha256
+        # 检查是否顺利，如果没有生成预期的文件，则跳过
+        is_result_good = False
+        for file_path in chatbot._cookies.get("files_to_promote", []):
+            if file_path.endswith('translate_zh.pdf'):
+                is_result_good = True
+        if not is_result_good:
+            return
+        # 上传文件
+        for file_path in chatbot._cookies.get("files_to_promote", []):
+            align_name = None
+            # normalized name
+            for name in ['translate_zh.pdf', 'comparison.pdf']:
+                if file_path.endswith(name): align_name = name
+            # if match any align name
+            if align_name:
+                logger.info(f'Uploading to GPTAC cloud as the user has set `allow_cloud_io`: {file_path}')
+                with open(file_path, 'rb') as f:
+                    import requests
+                    url = 'https://cloud-2.agent-matrix.com/arxiv_tf_paper_normal_upload'
+                    files = {'file': (align_name, f, 'application/octet-stream')}
+                    data = {
+                        'arxiv_id': arxiv_id,
+                        'file_hash': map_file_to_sha256(file_path),
+                        'language': 'zh',
+                        'trans_prompt': 'to_be_implemented',
+                        'llm_model': 'to_be_implemented',
+                        'llm_model_param': 'to_be_implemented',
+                    }
+                    resp = requests.post(url=url, files=files, data=data, timeout=30)
+                logger.info(f'Uploading terminate ({resp.status_code})`: {file_path}')
+    except:
+        # 如果上传失败，不会中断程序，因为这是次要功能
+        pass
+
+def check_gptac_cloud(arxiv_id, chatbot):
+    import requests
+    success = False
+    downloaded = []
+    try:
+        for pdf_target in ['translate_zh.pdf', 'comparison.pdf']:
+            url = 'https://cloud-2.agent-matrix.com/arxiv_tf_paper_normal_exist'
+            data = {
+                'arxiv_id': arxiv_id,
+                'name': pdf_target,
+            }
+            resp = requests.post(url=url, data=data)
+            cache_hit_result = resp.text.strip('"')
+            if cache_hit_result.startswith("http"):
+                url = cache_hit_result
+                logger.info(f'Downloading from GPTAC cloud: {url}')
+                resp = requests.get(url=url, timeout=30)
+                target = os.path.join(get_log_folder(plugin_name='gptac_cloud'), gen_time_str(), pdf_target)
+                os.makedirs(os.path.dirname(target), exist_ok=True)
+                with open(target, 'wb') as f:
+                    f.write(resp.content)
+                new_path = promote_file_to_downloadzone(target, chatbot=chatbot)
+                success = True
+                downloaded.append(new_path)
+    except:
+        pass
+    return success, downloaded

@@ -49,6 +49,7 @@ def get_crazy_functions():
     from crazy_functions.Image_Generate import 图片生成_DALLE2, 图片生成_DALLE3, 图片修改_DALLE2
     from crazy_functions.Image_Generate_Wrap import ImageGen_Wrap
     from crazy_functions.SourceCode_Comment import 注释Python项目
+    from crazy_functions.SourceCode_Comment_Wrap import SourceCodeComment_Wrap
 
     function_plugins = {
         "虚空终端": {
@@ -71,6 +72,7 @@ def get_crazy_functions():
             "AsButton": False,
             "Info": "上传一系列python源文件(或者压缩包), 为这些代码添加docstring | 输入参数为路径",
             "Function": HotReload(注释Python项目),
+            "Class": SourceCodeComment_Wrap,
         },
         "载入对话历史存档（先上传存档或输入路径）": {
             "Group": "对话",
