@@ -378,32 +378,35 @@ class BatchDocumentSummarizer:
                 self.file_summaries_map[rel_path] = summaries[0]['summary']
 
         # 4. 生成最终总结
-        try:
-            # 收集所有文件的总结用于生成最终总结
-            file_summaries_for_final = []
-            for rel_path, summary in self.file_summaries_map.items():
-                file_summaries_for_final.append(f"文件 {rel_path} 的总结：\n{summary}")
+        if total_files ==1:
+            return "文件数为1，此时不调用总结模块"
+        else:
+            try:
+                # 收集所有文件的总结用于生成最终总结
+                file_summaries_for_final = []
+                for rel_path, summary in self.file_summaries_map.items():
+                    file_summaries_for_final.append(f"文件 {rel_path} 的总结：\n{summary}")
 
-            if self.plugin_kwargs.get("advanced_arg"):
-                final_summary_prompt = ("根据以下所有文件的总结内容，按要求进行综合处理：" +
-                                        self.plugin_kwargs['advanced_arg'])
-            else:
-                final_summary_prompt = "请根据以下所有文件的总结内容，生成最终的总结报告。"
+                if self.plugin_kwargs.get("advanced_arg"):
+                    final_summary_prompt = ("根据以下所有文件的总结内容，按要求进行综合处理：" +
+                                            self.plugin_kwargs['advanced_arg'])
+                else:
+                    final_summary_prompt = "请根据以下所有文件的总结内容，生成最终的总结报告。"
 
-            response_collection = yield from request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
-                inputs_array=[final_summary_prompt],
-                inputs_show_user_array=["生成最终总结报告"],
-                llm_kwargs=self.llm_kwargs,
-                chatbot=self.chatbot,
-                history_array=[file_summaries_for_final],
-                sys_prompt_array=["总结所有文件内容。"],
-                max_workers=1
-            )
+                response_collection = yield from request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
+                    inputs_array=[final_summary_prompt],
+                    inputs_show_user_array=["生成最终总结报告"],
+                    llm_kwargs=self.llm_kwargs,
+                    chatbot=self.chatbot,
+                    history_array=[file_summaries_for_final],
+                    sys_prompt_array=["总结所有文件内容。"],
+                    max_workers=1
+                )
 
-            return response_collection[1] if len(response_collection) > 1 else "生成总结失败"
-        except Exception as e:
-            self.chatbot.append(["错误", f"最终总结生成失败：{str(e)}"])
-            return "生成总结失败"
+                return response_collection[1] if len(response_collection) > 1 else "生成总结失败"
+            except Exception as e:
+                self.chatbot.append(["错误", f"最终总结生成失败：{str(e)}"])
+                return "生成总结失败"
 
     def save_results(self, final_summary: str):
         """保存结果到文件"""
