@@ -8,6 +8,7 @@ import gradio
 import shutil
 import glob
 from shared_utils.config_loader import get_conf
+from loguru import logger
 
 def html_local_file(file):
     base_path = os.path.dirname(__file__)  # 项目目录
@@ -100,7 +101,7 @@ def extract_archive(file_path, dest_dir):
         with zipfile.ZipFile(file_path, "r") as zipobj:
             zipobj._extract_member = lambda a,b,c: zip_extract_member_new(zipobj, a,b,c)    # 修复中文乱码的问题
             zipobj.extractall(path=dest_dir)
-            print("Successfully extracted zip archive to {}".format(dest_dir))
+            logger.info("Successfully extracted zip archive to {}".format(dest_dir))
 
     elif file_extension in [".tar", ".gz", ".bz2"]:
         with tarfile.open(file_path, "r:*") as tarobj:
@@ -113,7 +114,7 @@ def extract_archive(file_path, dest_dir):
                     raise Exception(f"Attempted Path Traversal in {member.name}")
 
             tarobj.extractall(path=dest_dir)
-            print("Successfully extracted tar archive to {}".format(dest_dir))
+            logger.info("Successfully extracted tar archive to {}".format(dest_dir))
 
     # 第三方库，需要预先pip install rarfile
     # 此外，Windows上还需要安装winrar软件，配置其Path环境变量，如"C:\Program Files\WinRAR"才可以
@@ -123,9 +124,9 @@ def extract_archive(file_path, dest_dir):
 
             with rarfile.RarFile(file_path) as rf:
                 rf.extractall(path=dest_dir)
-                print("Successfully extracted rar archive to {}".format(dest_dir))
+                logger.info("Successfully extracted rar archive to {}".format(dest_dir))
         except:
-            print("Rar format requires additional dependencies to install")
+            logger.info("Rar format requires additional dependencies to install")
             return "\n\n解压失败! 需要安装pip install rarfile来解压rar文件。建议：使用zip压缩格式。"
 
     # 第三方库，需要预先pip install py7zr
@@ -135,9 +136,9 @@ def extract_archive(file_path, dest_dir):
 
             with py7zr.SevenZipFile(file_path, mode="r") as f:
                 f.extractall(path=dest_dir)
-                print("Successfully extracted 7z archive to {}".format(dest_dir))
+                logger.info("Successfully extracted 7z archive to {}".format(dest_dir))
         except:
-            print("7z format requires additional dependencies to install")
+            logger.info("7z format requires additional dependencies to install")
             return "\n\n解压失败! 需要安装pip install py7zr来解压7z文件"
     else:
         return ""

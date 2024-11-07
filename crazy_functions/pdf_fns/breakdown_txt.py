@@ -1,4 +1,5 @@
 from crazy_functions.ipc_fns.mp import run_in_subprocess_with_timeout
+from loguru import logger
 
 def force_breakdown(txt, limit, get_token_fn):
     """ 当无法用标点、空行分割时，我们用最暴力的方法切割
@@ -76,7 +77,7 @@ def cut(limit, get_token_fn, txt_tocut, must_break_at_empty_line, break_anyway=F
             remain_txt_to_cut = post
             remain_txt_to_cut, remain_txt_to_cut_storage = maintain_storage(remain_txt_to_cut, remain_txt_to_cut_storage)
             process = fin_len/total_len
-            print(f'正在文本切分 {int(process*100)}%')
+            logger.info(f'正在文本切分 {int(process*100)}%')
             if len(remain_txt_to_cut.strip()) == 0:
                 break
     return res
@@ -119,7 +120,7 @@ if __name__ == '__main__':
     for i in range(5):
         file_content += file_content
 
-    print(len(file_content))
+    logger.info(len(file_content))
     TOKEN_LIMIT_PER_FRAGMENT = 2500
     res = breakdown_text_to_satisfy_token_limit(file_content, TOKEN_LIMIT_PER_FRAGMENT)
 

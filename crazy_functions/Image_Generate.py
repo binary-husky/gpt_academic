@@ -30,7 +30,7 @@ def gen_image(llm_kwargs, prompt, resolution="1024x1024", model="dall-e-2", qual
     if style is not None:
         data['style'] = style
     response = requests.post(url, headers=headers, json=data, proxies=proxies)
-    print(response.content)
+    # logger.info(response.content)
     try:
         image_url = json.loads(response.content.decode('utf8'))['data'][0]['url']
     except:
@@ -76,7 +76,7 @@ def edit_image(llm_kwargs, prompt, image_path, resolution="1024x1024", model="da
         }
 
     response = requests.post(url, headers=headers, files=files, proxies=proxies)
-    print(response.content)
+    # logger.info(response.content)
     try:
         image_url = json.loads(response.content.decode('utf8'))['data'][0]['url']
     except:

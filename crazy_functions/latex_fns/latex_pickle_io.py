@@ -6,12 +6,16 @@ class SafeUnpickler(pickle.Unpickler):
     def get_safe_classes(self):
         from crazy_functions.latex_fns.latex_actions import LatexPaperFileGroup, LatexPaperSplit
         from crazy_functions.latex_fns.latex_toolbox import LinkedListNode
+        from numpy.core.multiarray import scalar
+        from numpy import dtype
         # 定义允许的安全类
         safe_classes = {
             # 在这里添加其他安全的类
             'LatexPaperFileGroup': LatexPaperFileGroup,
             'LatexPaperSplit': LatexPaperSplit,
             'LinkedListNode': LinkedListNode,
+            'scalar': scalar,
+            'dtype': dtype,
         }
         return safe_classes
 
@@ -22,8 +26,6 @@ class SafeUnpickler(pickle.Unpickler):
         for class_name in self.safe_classes.keys():
             if (class_name in f'{module}.{name}'):
                 match_class_name = class_name
-        if module == 'numpy' or module.startswith('numpy.'):
-            return super().find_class(module, name)
         if match_class_name is not None:
             return self.safe_classes[match_class_name]
         # 如果尝试加载未授权的类，则抛出异常

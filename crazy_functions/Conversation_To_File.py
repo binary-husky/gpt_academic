@@ -171,7 +171,7 @@ def 载入对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     system_prompt   给gpt的静默提醒
     user_request    当前用户的请求信息（IP地址等）
     """
-    from .crazy_utils import get_files_from_everything
+    from crazy_functions.crazy_utils import get_files_from_everything
     success, file_manifest, _ = get_files_from_everything(txt, type='.html')
 
     if not success:

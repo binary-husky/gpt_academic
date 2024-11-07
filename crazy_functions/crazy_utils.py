@@ -1,8 +1,8 @@
-from toolbox import update_ui, get_conf, trimmed_format_exc, get_max_token, Singleton
-from shared_utils.char_visual_effect import scolling_visual_effect
-import threading
 import os
-import logging
+import threading
+from loguru import logger
+from shared_utils.char_visual_effect import scolling_visual_effect
+from toolbox import update_ui, get_conf, trimmed_format_exc, get_max_token, Singleton
 
 def input_clipping(inputs, history, max_token_limit, return_clip_flags=False):
     """
@@ -133,7 +133,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
             except:
                 # 【第三种情况】：其他错误：重试几次
                 tb_str = '```\n' + trimmed_format_exc() + '```'
-                print(tb_str)
+                logger.error(tb_str)
                 mutable[0] += f"[Local Message] 警告，在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                 if retry_op > 0:
                     retry_op -= 1
@@ -283,7 +283,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                 # 【第三种情况】：其他错误
                 if detect_timeout(): raise RuntimeError("检测到程序终止。")
                 tb_str = '```\n' + trimmed_format_exc() + '```'
-                print(tb_str)
+                logger.error(tb_str)
                 gpt_say += f"[Local Message] 警告，线程{index}在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                 if len(mutable[index][0]) > 0: gpt_say += "此线程失败前收到的回答：\n\n" + mutable[index][0]
                 if retry_op > 0:
@@ -378,7 +378,7 @@ def read_and_clean_pdf_text(fp):
     import fitz, copy
     import re
     import numpy as np
-    from shared_utils.colorful import print亮黄, print亮绿
+    # from shared_utils.colorful import print亮黄, print亮绿
     fc = 0  # Index 0 文本
     fs = 1  # Index 1 字体
     fb = 2  # Index 2 框框
@@ -595,7 +595,7 @@ class nougat_interface():
     def nougat_with_timeout(self, command, cwd, timeout=3600):
         import subprocess
         from toolbox import ProxyNetworkActivate
-        logging.info(f'正在执行命令 {command}')
+        logger.info(f'正在执行命令 {command}')
         with ProxyNetworkActivate("Nougat_Download"):
             process = subprocess.Popen(command, shell=False, cwd=cwd, env=os.environ)
         try:
@@ -603,7 +603,7 @@ class nougat_interface():
         except subprocess.TimeoutExpired:
             process.kill()
             stdout, stderr = process.communicate()
-            print("Process timed out!")
+            logger.error("Process timed out!")
             return False
         return True
 

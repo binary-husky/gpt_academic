@@ -1,16 +1,18 @@
+from loguru import logger
+
 from toolbox import update_ui, promote_file_to_downloadzone, gen_time_str
 from toolbox import CatchException, report_exception
 from toolbox import write_history_to_file, promote_file_to_downloadzone
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-from .crazy_utils import read_and_clean_pdf_text
-from .crazy_utils import input_clipping
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from crazy_functions.crazy_utils import read_and_clean_pdf_text
+from crazy_functions.crazy_utils import input_clipping
 
 
 
 def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
     file_write_buffer = []
     for file_name in file_manifest:
-        print('begin analysis on:', file_name)
+        logger.info('begin analysis on:', file_name)
         ############################## <第 0 步，切割PDF> ##################################
         # 递归地切割PDF文件，每一块（尽量是完整的一个section，比如introduction，experiment等，必要时再进行切割）
         # 的长度必须小于 2500 个 Token
@@ -38,7 +40,7 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
         last_iteration_result = paper_meta  # 初始值是摘要
         MAX_WORD_TOTAL = 4096 * 0.7
         n_fragment = len(paper_fragments)
-        if n_fragment >= 20: print('文章极长，不能达到预期效果')
+        if n_fragment >= 20: logger.warning('文章极长，不能达到预期效果')
         for i in range(n_fragment):
             NUM_OF_WORD = MAX_WORD_TOTAL // n_fragment
             i_say = f"Read this section, recapitulate the content of this section with less than {NUM_OF_WORD} Chinese characters: {paper_fragments[i]}"

@@ -15,7 +15,6 @@ import time
 import traceback
 import requests
 import random
-
 from loguru import logger
 
 # config_private.py放自己的秘密如API和代理网址
@@ -182,8 +181,8 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], 
                 raise RuntimeError("OpenAI拒绝了请求：" + error_msg)
         if ('data: [DONE]' in chunk_decoded): break # api2d 正常完成
         # 提前读取一些信息 （用于判断异常）
-        if has_choices and not choice_valid:
-            # 一些垃圾第三方接口的出现这样的错误
+        if (has_choices and not choice_valid) or ('OPENROUTER PROCESSING' in chunk_decoded):
+            # 一些垃圾第三方接口的出现这样的错误，openrouter的特殊处理
             continue
         json_data = chunkjson['choices'][0]
         delta = json_data["delta"]
@@ -202,13 +201,10 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], 
                     if (time.time()-observe_window[1]) > watch_dog_patience:
                         raise RuntimeError("用户取消了程序。")
         else: raise RuntimeError("意外Json结构："+delta)
-
-    finish_reason = json_data.get('finish_reason', None) if json_data else None
-    if finish_reason == 'content_filter':
-        raise RuntimeError("由于提问含不合规内容被过滤。")
-    if finish_reason == 'length':
+    if json_data and json_data['finish_reason'] == 'content_filter':
+        raise RuntimeError("由于提问含不合规内容被Azure过滤。")
+    if json_data and json_data['finish_reason'] == 'length':
         raise ConnectionAbortedError("正常结束，但显示Token不足，导致输出不完整，请削减单次输入的文本量。")
-
     return result
 
 
@@ -332,8 +328,8 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
 
             if chunk:
                 try:
-                    if has_choices and not choice_valid:
-                        # 一些垃圾第三方接口的出现这样的错误
+                    if (has_choices and not choice_valid) or ('OPENROUTER PROCESSING' in chunk_decoded):
+                        # 一些垃圾第三方接口的出现这样的错误, 或者OPENROUTER的特殊处理,因为OPENROUTER的数据流未连接到模型时会出现OPENROUTER PROCESSING
                         continue
                     if ('data: [DONE]' not in chunk_decoded) and len(chunk_decoded) > 0 and (chunkjson is None):
                         # 传递进来一些奇怪的东西
@@ -518,6 +514,9 @@ def generate_payload(inputs:str, llm_kwargs:dict, history:list, system_prompt:st
     if llm_kwargs['llm_model'].startswith('vllm-'):
         model = llm_kwargs['llm_model'][len('vllm-'):]
         model, _ = read_one_api_model_name(model)
+    if llm_kwargs['llm_model'].startswith('openrouter-'):
+        model = llm_kwargs['llm_model'][len('openrouter-'):]
+        model= read_one_api_model_name(model)
     if model == "gpt-3.5-random": # 随机选择, 绕过openai访问频率限制
         model = random.choice([
             "gpt-3.5-turbo",
@@ -538,4 +537,5 @@ def generate_payload(inputs:str, llm_kwargs:dict, history:list, system_prompt:st
     }
 
     return headers,payload
+
 

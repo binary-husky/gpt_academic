@@ -65,10 +65,10 @@ class GetInternlmHandle(LocalLLMHandle):
 
     def llm_stream_generator(self, **kwargs):
         import torch
-        import logging
         import copy
         import warnings
         import torch.nn as nn
+        from loguru import logger as logging 
         from transformers.generation.utils import LogitsProcessorList, StoppingCriteriaList, GenerationConfig
 
         # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行
@@ -119,7 +119,7 @@ class GetInternlmHandle(LocalLLMHandle):
         elif generation_config.max_new_tokens is not None:
             generation_config.max_length = generation_config.max_new_tokens + input_ids_seq_length
             if not has_default_max_length:
-                logging.warn(
+                logging.warning(
                     f"Both `max_new_tokens` (={generation_config.max_new_tokens}) and `max_length`(="
                     f"{generation_config.max_length}) seem to have been set. `max_new_tokens` will take precedence. "
                     "Please refer to the documentation for more information. "

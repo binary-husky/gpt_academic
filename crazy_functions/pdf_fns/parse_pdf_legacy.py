@@ -5,6 +5,7 @@ from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_
 from crazy_functions.crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
 from crazy_functions.crazy_utils import read_and_clean_pdf_text
 from shared_utils.colorful import *
+from loguru import logger
 import os
 
 def 解析PDF_简单拆解(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
@@ -93,7 +94,7 @@ def 解析PDF_简单拆解(file_manifest, project_folder, llm_kwargs, plugin_kwa
             generated_html_files.append(ch.save_file(create_report_file_name))
         except:
             from toolbox import trimmed_format_exc
-            print('writing html result failed:', trimmed_format_exc())
+            logger.error('writing html result failed:', trimmed_format_exc())
 
     # 准备文件的下载
     for pdf_path in generated_conclusion_files:

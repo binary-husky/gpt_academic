@@ -30,6 +30,8 @@ class Arxiv_Localize(GptAcademicPluginTemplate):
                             default_value="", type="string").model_dump_json(), # 高级参数输入区，自动同步
             "allow_cache":
                 ArgProperty(title="是否允许从缓存中调取结果", options=["允许缓存", "从头执行"], default_value="允许缓存", description="无", type="dropdown").model_dump_json(),
+            "allow_cloudio":
+                ArgProperty(title="是否允许从GPTAC学术云下载(或者上传)翻译结果(仅针对Arxiv论文)", options=["允许", "禁止"], default_value="禁止", description="共享文献，互助互利", type="dropdown").model_dump_json(),
         }
         return gui_definition
 
@@ -38,9 +40,14 @@ class Arxiv_Localize(GptAcademicPluginTemplate):
         执行插件
         """
         allow_cache = plugin_kwargs["allow_cache"]
+        allow_cloudio = plugin_kwargs["allow_cloudio"]
         advanced_arg = plugin_kwargs["advanced_arg"]
 
         if allow_cache == "从头执行": plugin_kwargs["advanced_arg"] = "--no-cache " + plugin_kwargs["advanced_arg"]
+
+        # 从云端下载翻译结果，以及上传翻译结果到云端；人人为我，我为人人。
+        if allow_cloudio == "允许": plugin_kwargs["advanced_arg"] = "--allow-cloudio " + plugin_kwargs["advanced_arg"]
+
         yield from Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request)
 
 

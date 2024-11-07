@@ -1,15 +1,17 @@
-from toolbox import update_ui, update_ui_lastest_msg, get_log_folder
-from toolbox import get_conf, promote_file_to_downloadzone
-from .latex_toolbox import PRESERVE, TRANSFORM
-from .latex_toolbox import set_forbidden_text, set_forbidden_text_begin_end, set_forbidden_text_careful_brace
-from .latex_toolbox import reverse_forbidden_text_careful_brace, reverse_forbidden_text, convert_to_linklist, post_process
-from .latex_toolbox import fix_content, find_main_tex_file, merge_tex_files, compile_latex_with_timeout
-from .latex_toolbox import find_title_and_abs
-from .latex_pickle_io import objdump, objload
-
-import os, shutil
+import os
 import re
+import shutil
 import numpy as np
+from loguru import logger
+from toolbox import update_ui, update_ui_lastest_msg, get_log_folder, gen_time_str
+from toolbox import get_conf, promote_file_to_downloadzone
+from crazy_functions.latex_fns.latex_toolbox import PRESERVE, TRANSFORM
+from crazy_functions.latex_fns.latex_toolbox import set_forbidden_text, set_forbidden_text_begin_end, set_forbidden_text_careful_brace
+from crazy_functions.latex_fns.latex_toolbox import reverse_forbidden_text_careful_brace, reverse_forbidden_text, convert_to_linklist, post_process
+from crazy_functions.latex_fns.latex_toolbox import fix_content, find_main_tex_file, merge_tex_files, compile_latex_with_timeout
+from crazy_functions.latex_fns.latex_toolbox import find_title_and_abs
+from crazy_functions.latex_fns.latex_pickle_io import objdump, objload
+
 
 pj = os.path.join
 
@@ -323,7 +325,7 @@ def remove_buggy_lines(file_path, log_path, tex_name, tex_name_pure, n_fix, work
         buggy_lines = [int(l) for l in buggy_lines]
         buggy_lines = sorted(buggy_lines)
         buggy_line = buggy_lines[0]-1
-        print("reversing tex line that has errors", buggy_line)
+        logger.warning("reversing tex line that has errors", buggy_line)
 
         # 重组，逆转出错的段落
         if buggy_line not in fixed_line:
@@ -337,7 +339,7 @@ def remove_buggy_lines(file_path, log_path, tex_name, tex_name_pure, n_fix, work
 
         return True, f"{tex_name_pure}_fix_{n_fix}", buggy_lines
     except:
-        print("Fatal error occurred, but we cannot identify error, please download zip, read latex log, and compile manually.")
+        logger.error("Fatal error occurred, but we cannot identify error, please download zip, read latex log, and compile manually.")
         return False, -1, [-1]
 
 
@@ -380,7 +382,7 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
 
             if mode!='translate_zh':
                 yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 使用latexdiff生成论文转化前后对比 ...', chatbot, history) # 刷新Gradio前端界面
-                print(    f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
+                logger.info(    f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex')
                 ok = compile_latex_with_timeout(f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex', os.getcwd())
 
                 yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 正在编译对比PDF ...', chatbot, history)   # 刷新Gradio前端界面
@@ -419,7 +421,7 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
                         shutil.copyfile(concat_pdf, pj(work_folder, '..', 'translation', 'comparison.pdf'))
                     promote_file_to_downloadzone(concat_pdf, rename_file=None, chatbot=chatbot)  # promote file to web UI
                 except Exception as e:
-                    print(e)
+                    logger.error(e)
                     pass
             return True # 成功啦
         else:
@@ -465,4 +467,71 @@ def write_html(sp_file_contents, sp_file_result, chatbot, project_folder):
         promote_file_to_downloadzone(file=res, chatbot=chatbot)
     except:
         from toolbox import trimmed_format_exc
-        print('writing html result failed:', trimmed_format_exc())
+        logger.error('writing html result failed:', trimmed_format_exc())
+
+
+def upload_to_gptac_cloud_if_user_allow(chatbot, arxiv_id):
+    try:
+        # 如果用户允许，我们将arxiv论文PDF上传到GPTAC学术云
+        from toolbox import map_file_to_sha256
+        # 检查是否顺利，如果没有生成预期的文件，则跳过
+        is_result_good = False
+        for file_path in chatbot._cookies.get("files_to_promote", []):
+            if file_path.endswith('translate_zh.pdf'):
+                is_result_good = True
+        if not is_result_good:
+            return
+        # 上传文件
+        for file_path in chatbot._cookies.get("files_to_promote", []):
+            align_name = None
+            # normalized name
+            for name in ['translate_zh.pdf', 'comparison.pdf']:
+                if file_path.endswith(name): align_name = name
+            # if match any align name
+            if align_name:
+                logger.info(f'Uploading to GPTAC cloud as the user has set `allow_cloud_io`: {file_path}')
+                with open(file_path, 'rb') as f:
+                    import requests
+                    url = 'https://cloud-2.agent-matrix.com/arxiv_tf_paper_normal_upload'
+                    files = {'file': (align_name, f, 'application/octet-stream')}
+                    data = {
+                        'arxiv_id': arxiv_id,
+                        'file_hash': map_file_to_sha256(file_path),
+                        'language': 'zh',
+                        'trans_prompt': 'to_be_implemented',
+                        'llm_model': 'to_be_implemented',
+                        'llm_model_param': 'to_be_implemented',
+                    }
+                    resp = requests.post(url=url, files=files, data=data, timeout=30)
+                logger.info(f'Uploading terminate ({resp.status_code})`: {file_path}')
+    except:
+        # 如果上传失败，不会中断程序，因为这是次要功能
+        pass
+
+def check_gptac_cloud(arxiv_id, chatbot):
+    import requests
+    success = False
+    downloaded = []
+    try:
+        for pdf_target in ['translate_zh.pdf', 'comparison.pdf']:
+            url = 'https://cloud-2.agent-matrix.com/arxiv_tf_paper_normal_exist'
+            data = {
+                'arxiv_id': arxiv_id,
+                'name': pdf_target,
+            }
+            resp = requests.post(url=url, data=data)
+            cache_hit_result = resp.text.strip('"')
+            if cache_hit_result.startswith("http"):
+                url = cache_hit_result
+                logger.info(f'Downloading from GPTAC cloud: {url}')
+                resp = requests.get(url=url, timeout=30)
+                target = os.path.join(get_log_folder(plugin_name='gptac_cloud'), gen_time_str(), pdf_target)
+                os.makedirs(os.path.dirname(target), exist_ok=True)
+                with open(target, 'wb') as f:
+                    f.write(resp.content)
+                new_path = promote_file_to_downloadzone(target, chatbot=chatbot)
+                success = True
+                downloaded.append(new_path)
+    except:
+        pass
+    return success, downloaded

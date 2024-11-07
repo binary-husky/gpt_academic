@@ -1,7 +1,9 @@
 from toolbox import update_ui, trimmed_format_exc, get_conf, get_log_folder, promote_file_to_downloadzone, check_repeat_upload, map_file_to_sha256
 from toolbox import CatchException, report_exception, update_ui_lastest_msg, zip_result, gen_time_str
 from functools import partial
-import glob, os, requests, time, json, tarfile
+from loguru import logger
+
+import glob, os, requests, time, json, tarfile, threading
 
 pj = os.path.join
 ARXIV_CACHE_DIR = get_conf("ARXIV_CACHE_DIR")
@@ -136,25 +138,43 @@ def arxiv_download(chatbot, history, txt, allow_cache=True):
     cached_translation_pdf = check_cached_translation_pdf(arxiv_id)
     if cached_translation_pdf and allow_cache: return cached_translation_pdf, arxiv_id
 
-    url_tar = url_.replace('/abs/', '/e-print/')
-    translation_dir = pj(ARXIV_CACHE_DIR, arxiv_id, 'e-print')
     extract_dst = pj(ARXIV_CACHE_DIR, arxiv_id, 'extract')
-    os.makedirs(translation_dir, exist_ok=True)
-
-    # <-------------- download arxiv source file ------------->
+    translation_dir = pj(ARXIV_CACHE_DIR, arxiv_id, 'e-print')
     dst = pj(translation_dir, arxiv_id + '.tar')
-    if os.path.exists(dst):
-        yield from update_ui_lastest_msg("调用缓存", chatbot=chatbot, history=history)  # 刷新界面
+    os.makedirs(translation_dir, exist_ok=True)
+    # <-------------- download arxiv source file ------------->
+
+    def fix_url_and_download():
+        # for url_tar in [url_.replace('/abs/', '/e-print/'), url_.replace('/abs/', '/src/')]:
+        for url_tar in [url_.replace('/abs/', '/src/'), url_.replace('/abs/', '/e-print/')]:
+            proxies = get_conf('proxies')
+            r = requests.get(url_tar, proxies=proxies)
+            if r.status_code == 200:
+                with open(dst, 'wb+') as f:
+                    f.write(r.content)
+                return True
+        return False
+
+    if os.path.exists(dst) and allow_cache:
+        yield from update_ui_lastest_msg(f"调用缓存 {arxiv_id}", chatbot=chatbot, history=history)  # 刷新界面
+        success = True
     else:
-        yield from update_ui_lastest_msg("开始下载", chatbot=chatbot, history=history)  # 刷新界面
-        proxies = get_conf('proxies')
-        r = requests.get(url_tar, proxies=proxies)
-        with open(dst, 'wb+') as f:
-            f.write(r.content)
+        yield from update_ui_lastest_msg(f"开始下载 {arxiv_id}", chatbot=chatbot, history=history)  # 刷新界面
+        success = fix_url_and_download()
+        yield from update_ui_lastest_msg(f"下载完成 {arxiv_id}", chatbot=chatbot, history=history)  # 刷新界面
+
+
+    if not success:
+        yield from update_ui_lastest_msg(f"下载失败 {arxiv_id}", chatbot=chatbot, history=history)
+        raise tarfile.ReadError(f"论文下载失败 {arxiv_id}")
+
     # <-------------- extract file ------------->
-    yield from update_ui_lastest_msg("下载完成", chatbot=chatbot, history=history)  # 刷新界面
     from toolbox import extract_archive
-    extract_archive(file_path=dst, dest_dir=extract_dst)
+    try:
+        extract_archive(file_path=dst, dest_dir=extract_dst)
+    except tarfile.ReadError:
+        os.remove(dst)
+        raise tarfile.ReadError(f"论文下载失败")
     return extract_dst, arxiv_id
 
 
@@ -178,7 +198,7 @@ def pdf2tex_project(pdf_file_path, plugin_kwargs):
 
         if response.ok:
             pdf_id = response.json()["pdf_id"]
-            print(f"PDF processing initiated. PDF ID: {pdf_id}")
+            logger.info(f"PDF processing initiated. PDF ID: {pdf_id}")
 
             # Step 2: Check processing status
             while True:
@@ -186,12 +206,12 @@ def pdf2tex_project(pdf_file_path, plugin_kwargs):
                 conversion_data = conversion_response.json()
 
                 if conversion_data["status"] == "completed":
-                    print("PDF processing completed.")
+                    logger.info("PDF processing completed.")
                     break
                 elif conversion_data["status"] == "error":
-                    print("Error occurred during processing.")
+                    logger.info("Error occurred during processing.")
                 else:
-                    print(f"Processing status: {conversion_data['status']}")
+                    logger.info(f"Processing status: {conversion_data['status']}")
                     time.sleep(5)  # wait for a few seconds before checking again
 
             # Step 3: Save results to local files
@@ -206,7 +226,7 @@ def pdf2tex_project(pdf_file_path, plugin_kwargs):
             output_path = os.path.join(output_dir, output_name)
             with open(output_path, "wb") as output_file:
                 output_file.write(response.content)
-            print(f"tex.zip file saved at: {output_path}")
+            logger.info(f"tex.zip file saved at: {output_path}")
 
             import zipfile
             unzip_dir = os.path.join(output_dir, file_name_wo_dot)
@@ -216,7 +236,7 @@ def pdf2tex_project(pdf_file_path, plugin_kwargs):
             return unzip_dir
 
         else:
-            print(f"Error sending PDF for processing. Status code: {response.status_code}")
+            logger.error(f"Error sending PDF for processing. Status code: {response.status_code}")
             return None
     else:
         from crazy_functions.pdf_fns.parse_pdf_via_doc2x import 解析PDF_DOC2X_转Latex
@@ -318,10 +338,16 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
     # <-------------- more requirements ------------->
     if ("advanced_arg" in plugin_kwargs) and (plugin_kwargs["advanced_arg"] == ""): plugin_kwargs.pop("advanced_arg")
     more_req = plugin_kwargs.get("advanced_arg", "")
-    no_cache = more_req.startswith("--no-cache")
-    if no_cache: more_req.lstrip("--no-cache")
+
+    no_cache = ("--no-cache" in more_req)
+    if no_cache: more_req = more_req.replace("--no-cache", "").strip()
+
+    allow_gptac_cloud_io = ("--allow-cloudio" in more_req)  # 从云端下载翻译结果，以及上传翻译结果到云端
+    if allow_gptac_cloud_io: more_req = more_req.replace("--allow-cloudio", "").strip()
+
     allow_cache = not no_cache
     _switch_prompt_ = partial(switch_prompt, more_requirement=more_req)
+
 
     # <-------------- check deps ------------->
     try:
@@ -348,6 +374,20 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
         report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"发现已经存在翻译好的PDF文档")
         yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
         return
+
+    # #################################################################
+    if allow_gptac_cloud_io and arxiv_id:
+        # 访问 GPTAC学术云，查询云端是否存在该论文的翻译版本
+        from crazy_functions.latex_fns.latex_actions import check_gptac_cloud
+        success, downloaded = check_gptac_cloud(arxiv_id, chatbot)
+        if success:
+            chatbot.append([
+                f"检测到GPTAC云端存在翻译版本, 如果不满意翻译结果, 请禁用云端分享, 然后重新执行。", 
+                None
+            ])
+            yield from update_ui(chatbot=chatbot, history=history)
+            return
+    #################################################################
 
     if os.path.exists(txt):
         project_folder = txt
@@ -386,14 +426,21 @@ def Latex翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot,
     # <-------------- zip PDF ------------->
     zip_res = zip_result(project_folder)
     if success:
+        if allow_gptac_cloud_io and arxiv_id:
+            # 如果用户允许，我们将翻译好的arxiv论文PDF上传到GPTAC学术云
+            from crazy_functions.latex_fns.latex_actions import upload_to_gptac_cloud_if_user_allow
+            threading.Thread(target=upload_to_gptac_cloud_if_user_allow, 
+                args=(chatbot, arxiv_id), daemon=True).start()
+
         chatbot.append((f"成功啦", '请查收结果（压缩包）...'))
-        yield from update_ui(chatbot=chatbot, history=history);
+        yield from update_ui(chatbot=chatbot, history=history)
         time.sleep(1)  # 刷新界面
         promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
+
     else:
         chatbot.append((f"失败了",
                         '虽然PDF生成失败了, 但请查收结果（压缩包）, 内含已经翻译的Tex文档, 您可以到Github Issue区, 用该压缩包进行反馈。如系统是Linux，请检查系统字体（见Github wiki） ...'))
-        yield from update_ui(chatbot=chatbot, history=history);
+        yield from update_ui(chatbot=chatbot, history=history)
         time.sleep(1)  # 刷新界面
         promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
 

@@ -9,6 +9,7 @@
     2. predict_no_ui_long_connection(...)
 """
 import tiktoken, copy, re
+from loguru import logger
 from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor
 from toolbox import get_conf, trimmed_format_exc, apply_gpt_academic_string_mask, read_one_api_model_name
@@ -51,9 +52,9 @@ class LazyloadTiktoken(object):
     @staticmethod
     @lru_cache(maxsize=128)
     def get_encoder(model):
-        print('正在加载tokenizer，如果是第一次运行，可能需要一点时间下载参数')
+        logger.info('正在加载tokenizer，如果是第一次运行，可能需要一点时间下载参数')
         tmp = tiktoken.encoding_for_model(model)
-        print('加载tokenizer完毕')
+        logger.info('加载tokenizer完毕')
         return tmp
 
     def encode(self, *args, **kwargs):
@@ -83,7 +84,7 @@ try:
     API_URL = get_conf("API_URL")
     if API_URL != "https://api.openai.com/v1/chat/completions":
         openai_endpoint = API_URL
-        print("警告！API_URL配置选项将被弃用，请更换为API_URL_REDIRECT配置")
+        logger.warning("警告！API_URL配置选项将被弃用，请更换为API_URL_REDIRECT配置")
 except:
     pass
 # 新版配置
@@ -381,6 +382,14 @@ model_info = {
         "fn_without_ui": zhipu_noui,
         "endpoint": None,
         "max_token": 10124 * 4,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+    "glm-4-plus":{
+        "fn_with_ui": zhipu_ui,
+        "fn_without_ui": zhipu_noui,
+        "endpoint": None,
+        "max_token": 10124 * 8,
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
@@ -683,7 +692,7 @@ if "newbing" in AVAIL_LLM_MODELS:   # same with newbing-free
             }
         })
     except:
-        print(trimmed_format_exc())
+        logger.error(trimmed_format_exc())
 if "chatglmft" in AVAIL_LLM_MODELS:   # same with newbing-free
     try:
         from .bridge_chatglmft import predict_no_ui_long_connection as chatglmft_noui
@@ -699,7 +708,7 @@ if "chatglmft" in AVAIL_LLM_MODELS:   # same with newbing-free
             }
         })
     except:
-        print(trimmed_format_exc())
+        logger.error(trimmed_format_exc())
 # -=-=-=-=-=-=- 上海AI-LAB书生大模型 -=-=-=-=-=-=-
 if "internlm" in AVAIL_LLM_MODELS:
     try:
@@ -716,7 +725,7 @@ if "internlm" in AVAIL_LLM_MODELS:
             }
         })
     except:
-        print(trimmed_format_exc())
+        logger.error(trimmed_format_exc())
 if "chatglm_onnx" in AVAIL_LLM_MODELS:
     try:
         from .bridge_chatglmonnx import predict_no_ui_long_connection as chatglm_onnx_noui
@@ -732,7 +741,7 @@ if "chatglm_onnx" in AVAIL_LLM_MODELS:
             }
         })
     except:
-        print(trimmed_format_exc())
+        logger.error(trimmed_format_exc())
 # -=-=-=-=-=-=- 通义-本地模型 -=-=-=-=-=-=-
 if "qwen-local" in AVAIL_LLM_MODELS:
     try:
@@ -750,7 +759,7 @@ if "qwen-local" in AVAIL_LLM_MODELS:
             }
         })
     except:
-        print(trimmed_format_exc())
+        logger.error(trimmed_format_exc())
 # -=-=-=-=-=-=- 通义-在线模型 -=-=-=-=-=-=-
 if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-max" in AVAIL_LLM_MODELS:   # zhipuai
     try:
@@ -786,7 +795,7 @@ if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-
             }
         })
     except:
-        print(trimmed_format_exc())
+        logger.error(trimmed_format_exc())
 # -=-=-=-=-=-=- 零一万物模型 -=-=-=-=-=-=-
 yi_models = ["yi-34b-chat-0205","yi-34b-chat-200k","yi-large","yi-medium","yi-spark","yi-large-turbo","yi-large-preview"]
 if any(item in yi_models for item in AVAIL_LLM_MODELS):
@@ -866,7 +875,7 @@ if any(item in yi_models for item in AVAIL_LLM_MODELS):
             },
         })
     except:
-        print(trimmed_format_exc())
+        logger.error(trimmed_format_exc())
 # -=-=-=-=-=-=- 讯飞星火认知大模型 -=-=-=-=-=-=-
 if "spark" in AVAIL_LLM_MODELS:
     try:
@@ -884,7 +893,7 @@ if "spark" in AVAIL_LLM_MODELS:
             }
         })
     except:
-        print(trimmed_format_exc())
+        logger.error(trimmed_format_exc())
 if "sparkv2" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
     try:
         from .bridge_spark import predict_no_ui_long_connection as spark_noui
@@ -901,7 +910,7 @@ if "sparkv2" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
             }
         })
     except:
-        print(trimmed_format_exc())
+        logger.error(trimmed_format_exc())
 if any(x in AVAIL_LLM_MODELS for x in ("sparkv3", "sparkv3.5", "sparkv4")):   # 讯飞星火认知大模型
     try:
         from .bridge_spark import predict_no_ui_long_connection as spark_noui
@@ -936,7 +945,7 @@ if any(x in AVAIL_LLM_MODELS for x in ("sparkv3", "sparkv3.5", "sparkv4")):   # 
             }
         })
     except:
-        print(trimmed_format_exc())
+        logger.error(trimmed_format_exc())
 if "llama2" in AVAIL_LLM_MODELS:   # llama2
     try:
         from .bridge_llama2 import predict_no_ui_long_connection as llama2_noui
@@ -952,7 +961,7 @@ if "llama2" in AVAIL_LLM_MODELS:   # llama2
             }
         })
     except:
-        print(trimmed_format_exc())
+        logger.error(trimmed_format_exc())
 # -=-=-=-=-=-=- 智谱 -=-=-=-=-=-=-
 if "zhipuai" in AVAIL_LLM_MODELS:   # zhipuai 是glm-4的别名，向后兼容配置
     try:
@@ -967,7 +976,7 @@ if "zhipuai" in AVAIL_LLM_MODELS:   # zhipuai 是glm-4的别名，向后兼容�
             },
         })
     except:
-        print(trimmed_format_exc())
+        logger.error(trimmed_format_exc())
 # -=-=-=-=-=-=- 幻方-深度求索大模型 -=-=-=-=-=-=-
 if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
     try:
@@ -984,7 +993,7 @@ if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
             }
         })
     except:
-        print(trimmed_format_exc())
+        logger.error(trimmed_format_exc())
 # -=-=-=-=-=-=- 幻方-深度求索大模型在线API -=-=-=-=-=-=-
 if "deepseek-chat" in AVAIL_LLM_MODELS or "deepseek-coder" in AVAIL_LLM_MODELS:
     try:
@@ -1012,7 +1021,7 @@ if "deepseek-chat" in AVAIL_LLM_MODELS or "deepseek-coder" in AVAIL_LLM_MODELS:
             },
         })
     except:
-        print(trimmed_format_exc())
+        logger.error(trimmed_format_exc())
 # -=-=-=-=-=-=- one-api 对齐支持 -=-=-=-=-=-=-
 for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
     # 为了更灵活地接入one-api多模型管理界面，设计了此接口，例子：AVAIL_LLM_MODELS = ["one-api-mixtral-8x7b(max_token=6666)"]
@@ -1025,7 +1034,7 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
         # 如果是已知模型，则尝试获取其信息
         original_model_info = model_info.get(origin_model_name.replace("one-api-", "", 1), None)
     except:
-        print(f"one-api模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
+        logger.error(f"one-api模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
         continue
     this_model_info = {
         "fn_with_ui": chatgpt_ui,
@@ -1056,7 +1065,7 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("vllm-")]:
     try:
         _, max_token_tmp = read_one_api_model_name(model)
     except:
-        print(f"vllm模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
+        logger.error(f"vllm模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
         continue
     model_info.update({
         model: {
@@ -1083,7 +1092,7 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("ollama-")]:
     try:
         _, max_token_tmp = read_one_api_model_name(model)
     except:
-        print(f"ollama模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
+        logger.error(f"ollama模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
         continue
     model_info.update({
         model: {
@@ -1118,6 +1127,24 @@ if len(AZURE_CFG_ARRAY) > 0:
         })
         if azure_model_name not in AVAIL_LLM_MODELS:
             AVAIL_LLM_MODELS += [azure_model_name]
+
+# -=-=-=-=-=-=- Openrouter模型对齐支持 -=-=-=-=-=-=-
+# 为了更灵活地接入Openrouter路由，设计了此接口
+for model in [m for m in AVAIL_LLM_MODELS if m.startswith("openrouter-")]:
+    from request_llms.bridge_openrouter import predict_no_ui_long_connection as openrouter_noui
+    from request_llms.bridge_openrouter import predict as openrouter_ui
+    model_info.update({
+        model: {
+            "fn_with_ui": openrouter_ui,
+            "fn_without_ui": openrouter_noui,
+            # 以下参数参考gpt-4o-mini的配置, 请根据实际情况修改
+            "endpoint": openai_endpoint,
+            "has_multimodal_capacity": True,
+            "max_token": 128000,
+            "tokenizer": tokenizer_gpt4,
+            "token_cnt": get_token_num_gpt4,
+        },
+    })
 
 
 # -=-=-=-=-=-=--=-=-=-=-=-=--=-=-=-=-=-=--=-=-=-=-=-=-=-=
@@ -1264,5 +1291,5 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot,
     if additional_fn: # 根据基础功能区 ModelOverride 参数调整模型类型
         llm_kwargs, additional_fn, method = execute_model_override(llm_kwargs, additional_fn, method)
 
+    # 更新一下llm_kwargs的参数，否则会出现参数不匹配的问题
     yield from method(inputs, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, stream, additional_fn)
-
