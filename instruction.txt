@@ -1,0 +1,192 @@
+
+1、GPT Academic 项目结构
+.
+├── Dockerfile
+├── LICENSE
+├── README.md
+├── check_proxy.py
+├── config.py
+├── config_private.py
+├── core_functional.py
+├── crazy_functional.py
+├── crazy_functions
+│         ├── Arxiv_论文对话.py
+│         ├── Conversation_To_File.py
+│         ├── Image_Generate.py
+│         ├── Image_Generate_Wrap.py
+│         ├── Internet_GPT.py
+│         ├── Internet_GPT_Wrap.py
+│         ├── Latex_Function.py
+│         ├── Latex_Function_Wrap.py
+│         ├── Latex全文润色.py
+│         ├── Latex全文翻译.py
+│         ├── Markdown_Translate.py
+│         ├── PDF_Translate.py
+│         ├── PDF_Translate_Wrap.py
+│         ├── Rag_Interface.py
+│         ├── Social_Helper.py
+│         ├── SourceCode_Analyse.py
+│         ├── SourceCode_Comment.py
+│         ├── SourceCode_Comment_Wrap.py
+│         ├── __init__.py
+│         │         ├── auto_agent.py
+│         │         ├── echo_agent.py
+│         │         ├── general.py
+│         │         ├── persistent.py
+│         │         ├── pipe.py
+│         │         ├── python_comment_agent.py
+│         │         ├── python_comment_compare.html
+│         │         └── watchdog.py
+│         ├── ast_fns
+│         │         └── comment_remove.py
+│         ├── chatglm微调工具.py
+│         ├── crazy_utils.py
+│         ├── diagram_fns
+│         │         └── file_tree.py
+│         ├── game_fns
+│         │         ├── game_ascii_art.py
+│         │         ├── game_interactive_story.py
+│         │         └── game_utils.py
+│         ├── gen_fns
+│         │         └── gen_fns_shared.py
+│         ├── ipc_fns
+│         │         └── mp.py
+│         ├── json_fns
+│         │         ├── pydantic_io.py
+│         │         └── select_tool.py
+│         ├── latex_fns
+│         │         ├── latex_actions.py
+│         │         ├── latex_pickle_io.py
+│         │         └── latex_toolbox.py
+│         ├── live_audio
+│         │         ├── aliyunASR.py
+│         │         └── audio_io.py
+│         ├── multi_stage
+│         │         └── multi_stage_utils.py
+│         ├── rag_essay_fns
+│         │         └── multi_stage_utils.py
+│         ├── pdf_fns
+│         │         ├── breakdown_txt.py
+│         │         ├── parse_pdf.py
+│         │         ├── parse_pdf_grobid.py
+│         │         ├── parse_pdf_legacy.py
+│         │         ├── parse_pdf_via_doc2x.py
+│         │         ├── parse_word.py
+│         │         ├── report_gen_html.py
+│         │         ├── report_template.html
+│         │         └── report_template_v2.html
+│         ├── plugin_template
+│         │         └── plugin_class_template.py
+│         ├── prompts
+│         │         └── internet.py
+│         ├── rag_fns
+│         │         ├── llama_index_worker.py
+│         │         ├── milvus_worker.py
+│         │         ├── rag_file_support.py
+│         │         └── vector_store_index.py
+│         ├── vector_fns
+│         │         ├── __init__.py
+│         │         ├── general_file_loader.py
+│         │         └── vector_database.py
+│         ├── vt_fns
+│         │         ├── vt_call_plugin.py
+│         │         ├── vt_modify_config.py
+│         │         └── vt_state.py
+│         ├── 下载arxiv论文翻译摘要.py
+│         ├── 互动小游戏.py
+│         ├── 交互功能函数模板.py
+│         ├── 函数动态生成.py
+│         ├── 命令行助手.py
+│         ├── 多智能体.py
+│         ├── 总结word文档.py
+│         ├── 总结音视频.py
+│         ├── 批量总结PDF文档.py
+│         ├── 批量总结PDF文档pdfminer.py
+│         ├── 批量翻译PDF文档_NOUGAT.py
+│         ├── 数学动画生成manim.py
+│         ├── 理解PDF文档内容.py
+│         ├── 生成函数注释.py
+│         ├── 生成多种Mermaid图表.py
+│         ├── 知识库问答.py
+│         ├── 联网的ChatGPT.py
+│         ├── 联网的ChatGPT_bing版.py
+│         ├── 虚空终端.py
+│         ├── 解析JupyterNotebook.py
+│         ├── 询问多个大语言模型.py
+│         ├── 语音助手.py
+│         ├── 读文章写摘要.py
+│         ├── 谷歌检索小助手.py
+│         ├── 辅助功能.py
+│         └── 高级功能函数模板.py
+├── docker-compose.yml
+├── instruction.txt
+├── main.py
+├── multi_language.py
+├── requirements.txt
+├── shared_utils
+│         ├── advanced_markdown_format.py
+│         ├── char_visual_effect.py
+│         ├── colorful.py
+│         ├── config_loader.py
+│         ├── connect_void_terminal.py
+│         ├── cookie_manager.py
+│         ├── fastapi_server.py
+│         ├── handle_upload.py
+│         ├── key_pattern_manager.py
+│         ├── logging.py
+│         ├── map_names.py
+│         └── text_mask.py
+├── toolbox.py
+└── version
+
+2、light_rag的实现方案路径为crazy_functions/rag_fns/LightRAG，主要功能实现文件为operate.py，rag使用到的其他文件为prompt.py、base.py、storage.py、utils.py，请参考实现方案实现插件功能。light_rag的使用案例可以参考crazy_functions/rag_fns/LightRAG/examples路径下的lightrag_hf_demo.py、lightrag_lmdeploy_demo.py：
+路径目录结构为
+
+├── README.md
+├── examples
+│   ├── batch_eval.py
+│   ├── generate_query.py
+│   ├── graph_visual_with_html.py
+│   ├── graph_visual_with_neo4j.py
+│   ├── lightrag_azure_openai_demo.py
+│   ├── lightrag_bedrock_demo.py
+│   ├── lightrag_hf_demo.py
+│   ├── lightrag_ollama_demo.py
+│   ├── lightrag_openai_compatible_demo.py
+│   ├── lightrag_openai_demo.py
+│   └── vram_management_demo.py
+├── lightrag
+│   ├── __init__.py
+│   ├── base.py
+│   ├── lightrag.py
+│   ├── llm.py
+│   ├── operate.py
+│   ├── prompt.py
+│   ├── storage.py
+│   └── utils.py
+├── reproduce
+│   ├── Step_0.py
+│   ├── Step_1.py
+│   ├── Step_1_openai_compatible.py
+│   ├── Step_2.py
+│   ├── Step_3.py
+│   └── Step_3_openai_compatible.py
+├── requirements.txt
+└── setup.py
+
+
+3、我需要开发一个rag插件，请帮我实现一个插件，插件的名称是rag论文总结，插件主入口在crazy_functions/Arxiv_论文对话.py中的Rag论文对话函数，插件的功能步骤分为文件处理和RAG两个步骤
+    文件处理步骤流程和要求按顺序如下，请参考gpt_academic已实现的功能复用现有函数即可：
+        a. 支持从 arXiv 下载论文源码、检查本地项目路径、扫描 .tex 文件，此步骤可参考crazy_functions/Latex_Function.py。
+        b、在项目中找到主要的 LaTeX 文件，将多个 TEX 文件合并成一个大的 TEX 文件，便于统一处理，此步骤可参考crazy_functions/Latex_Function.py。
+        c、将合并后的文档进行精细切分，包括读取标题和摘要，此步骤可参考crazy_functions/Latex_Function.py。
+        d、将文档按照 token 限制（1024）进行进一步分段，此步骤可参考crazy_functions/Latex_Function.py。
+    
+3、对于RAG，我希望采用light_rag的方案，参考已有方案其主要的功能实现是：
+主要功能包括：
+    e 参考- `chunking_by_token_size`，利用`_handle_entity_relation_summary`函数对d步骤生成的文本块进行实体或关系的摘要。
+    f 利用`_handle_single_entity_extraction` 和 `_handle_single_relationship_extraction`：从记录中提取单个实体或关系信息。
+    g `_merge_nodes_then_upsert` 和 `_merge_edges_then_upsert`：合并并插入节点或边。
+    h `extract_entities`：处理多个文本块，提取实体和关系，并存储在知识图谱和向量数据库中。
+    i `local_query`：根据查询提取关键词并生成响应。
+
