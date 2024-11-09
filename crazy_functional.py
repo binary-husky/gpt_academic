@@ -21,13 +21,13 @@ def get_crazy_functions():
     from crazy_functions.询问多个大语言模型 import 同时问询
     from crazy_functions.SourceCode_Analyse import 解析一个Lua项目
     from crazy_functions.SourceCode_Analyse import 解析一个CSharp项目
-    from crazy_functions.总结word文档 import 总结word文档
     from crazy_functions.解析JupyterNotebook import 解析ipynb文件
     from crazy_functions.Conversation_To_File import 载入对话历史存档
     from crazy_functions.Conversation_To_File import 对话历史存档
     from crazy_functions.Conversation_To_File import Conversation_To_File_Wrap
     from crazy_functions.Conversation_To_File import 删除所有本地对话历史记录
     from crazy_functions.辅助功能 import 清除缓存
+    from crazy_functions.批量文件询问 import 批量文件询问
     from crazy_functions.Markdown_Translate import Markdown英译中
     from crazy_functions.批量总结PDF文档 import 批量总结PDF文档
     from crazy_functions.PDF_Translate import 批量翻译PDF文档
@@ -110,12 +110,13 @@ def get_crazy_functions():
             "Function": HotReload(Latex翻译中文并重新编译PDF),  # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
             "Class": Arxiv_Localize,    # 新一代插件需要注册Class
         },
-        "批量总结Word文档": {
+        "批量文件询问": {
             "Group": "学术",
             "Color": "stop",
             "AsButton": False,
-            "Info": "批量总结word文档 | 输入参数为路径",
-            "Function": HotReload(总结word文档),
+            "AdvancedArgs": True,
+            "Info": "通过在高级参数区写入prompt，可自定义询问逻辑，默认情况下为总结逻辑 | 输入参数为路径",
+            "Function": HotReload(批量文件询问),
         },
         "解析整个Matlab项目": {
             "Group": "编程",
