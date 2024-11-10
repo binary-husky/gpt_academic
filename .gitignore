@@ -161,3 +161,4 @@ temp.*
 objdump*
 *.min.*.js
 TODO
+*.cursorrules

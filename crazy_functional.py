@@ -15,6 +15,7 @@ def get_crazy_functions():
     from crazy_functions.SourceCode_Analyse import 解析一个Rust项目
     from crazy_functions.SourceCode_Analyse import 解析一个Java项目
     from crazy_functions.SourceCode_Analyse import 解析一个前端项目
+    from crazy_functions.Arxiv_论文对话 import Rag论文对话
     from crazy_functions.高级功能函数模板 import 高阶功能模板函数
     from crazy_functions.高级功能函数模板 import Demo_Wrap
     from crazy_functions.Latex全文润色 import Latex英文润色
@@ -27,7 +28,6 @@ def get_crazy_functions():
     from crazy_functions.Conversation_To_File import Conversation_To_File_Wrap
     from crazy_functions.Conversation_To_File import 删除所有本地对话历史记录
     from crazy_functions.辅助功能 import 清除缓存
-    from crazy_functions.批量文件询问 import 批量文件询问
     from crazy_functions.Markdown_Translate import Markdown英译中
     from crazy_functions.批量总结PDF文档 import 批量总结PDF文档
     from crazy_functions.PDF_Translate import 批量翻译PDF文档
@@ -59,48 +59,12 @@ def get_crazy_functions():
             "Info": "使用自然语言实现您的想法",
             "Function": HotReload(虚空终端),
         },
-        "解析整个Python项目": {
-            "Group": "编程",
-            "Color": "stop",
-            "AsButton": True,
-            "Info": "解析一个Python项目的所有源文件(.py) | 输入参数为路径",
-            "Function": HotReload(解析一个Python项目),
-        },
-        "注释Python项目": {
-            "Group": "编程",
-            "Color": "stop",
-            "AsButton": False,
-            "Info": "上传一系列python源文件(或者压缩包), 为这些代码添加docstring | 输入参数为路径",
-            "Function": HotReload(注释Python项目),
-            "Class": SourceCodeComment_Wrap,
-        },
-        "载入对话历史存档（先上传存档或输入路径）": {
-            "Group": "对话",
-            "Color": "stop",
-            "AsButton": False,
-            "Info": "载入对话历史存档 | 输入参数为路径",
-            "Function": HotReload(载入对话历史存档),
-        },
-        "删除所有本地对话历史记录（谨慎操作）": {
-            "Group": "对话",
-            "AsButton": False,
-            "Info": "删除所有本地对话历史记录，谨慎操作 | 不需要输入参数",
-            "Function": HotReload(删除所有本地对话历史记录),
-        },
         "清除所有缓存文件（谨慎操作）": {
             "Group": "对话",
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
             "Info": "清除所有缓存文件，谨慎操作 | 不需要输入参数",
             "Function": HotReload(清除缓存),
-        },
-        "生成多种Mermaid图表(从当前对话或路径(.pdf/.md/.docx)中生产图表）": {
-            "Group": "对话",
-            "Color": "stop",
-            "AsButton": False,
-            "Info" : "基于当前对话或文件生成多种Mermaid图表,图表类型由模型判断",
-            "Function": None,
-            "Class": Mermaid_Gen
         },
         "Arxiv论文翻译": {
             "Group": "学术",
@@ -110,92 +74,12 @@ def get_crazy_functions():
             "Function": HotReload(Latex翻译中文并重新编译PDF),  # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
             "Class": Arxiv_Localize,    # 新一代插件需要注册Class
         },
-        "批量文件询问": {
+        "Rag论文对话": {
             "Group": "学术",
             "Color": "stop",
             "AsButton": False,
-            "AdvancedArgs": True,
-            "Info": "通过在高级参数区写入prompt，可自定义询问逻辑，默认情况下为总结逻辑 | 输入参数为路径",
-            "Function": HotReload(批量文件询问),
-        },
-        "解析整个Matlab项目": {
-            "Group": "编程",
-            "Color": "stop",
-            "AsButton": False,
-            "Info": "解析一个Matlab项目的所有源文件(.m) | 输入参数为路径",
-            "Function": HotReload(解析一个Matlab项目),
-        },
-        "解析整个C++项目头文件": {
-            "Group": "编程",
-            "Color": "stop",
-            "AsButton": False,  # 加入下拉菜单中
-            "Info": "解析一个C++项目的所有头文件(.h/.hpp) | 输入参数为路径",
-            "Function": HotReload(解析一个C项目的头文件),
-        },
-        "解析整个C++项目（.cpp/.hpp/.c/.h）": {
-            "Group": "编程",
-            "Color": "stop",
-            "AsButton": False,  # 加入下拉菜单中
-            "Info": "解析一个C++项目的所有源文件（.cpp/.hpp/.c/.h）| 输入参数为路径",
-            "Function": HotReload(解析一个C项目),
-        },
-        "解析整个Go项目": {
-            "Group": "编程",
-            "Color": "stop",
-            "AsButton": False,  # 加入下拉菜单中
-            "Info": "解析一个Go项目的所有源文件 | 输入参数为路径",
-            "Function": HotReload(解析一个Golang项目),
-        },
-        "解析整个Rust项目": {
-            "Group": "编程",
-            "Color": "stop",
-            "AsButton": False,  # 加入下拉菜单中
-            "Info": "解析一个Rust项目的所有源文件 | 输入参数为路径",
-            "Function": HotReload(解析一个Rust项目),
-        },
-        "解析整个Java项目": {
-            "Group": "编程",
-            "Color": "stop",
-            "AsButton": False,  # 加入下拉菜单中
-            "Info": "解析一个Java项目的所有源文件 | 输入参数为路径",
-            "Function": HotReload(解析一个Java项目),
-        },
-        "解析整个前端项目（js,ts,css等）": {
-            "Group": "编程",
-            "Color": "stop",
-            "AsButton": False,  # 加入下拉菜单中
-            "Info": "解析一个前端项目的所有源文件（js,ts,css等） | 输入参数为路径",
-            "Function": HotReload(解析一个前端项目),
-        },
-        "解析整个Lua项目": {
-            "Group": "编程",
-            "Color": "stop",
-            "AsButton": False,  # 加入下拉菜单中
-            "Info": "解析一个Lua项目的所有源文件 | 输入参数为路径",
-            "Function": HotReload(解析一个Lua项目),
-        },
-        "解析整个CSharp项目": {
-            "Group": "编程",
-            "Color": "stop",
-            "AsButton": False,  # 加入下拉菜单中
-            "Info": "解析一个CSharp项目的所有源文件 | 输入参数为路径",
-            "Function": HotReload(解析一个CSharp项目),
-        },
-        "解析Jupyter Notebook文件": {
-            "Group": "编程",
-            "Color": "stop",
-            "AsButton": False,
-            "Info": "解析Jupyter Notebook文件 | 输入参数为路径",
-            "Function": HotReload(解析ipynb文件),
-            "AdvancedArgs": True,  # 调用时，唤起高级参数输入区（默认False）
-            "ArgsReminder": "若输入0，则不解析notebook中的Markdown块",  # 高级参数输入区的显示提示
-        },
-        "读Tex论文写摘要": {
-            "Group": "学术",
-            "Color": "stop",
-            "AsButton": False,
-            "Info": "读取Tex论文并写摘要 | 输入参数为路径",
-            "Function": HotReload(读文章写摘要),
+            "Info": "Arixv论文精细翻译 | 输入参数arxiv论文的ID，比如1812.10695",
+            "Function": HotReload(Rag论文对话),  # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
         },
         "翻译README或MD": {
             "Group": "编程",

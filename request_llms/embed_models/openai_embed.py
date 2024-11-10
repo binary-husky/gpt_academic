@@ -1,4 +1,3 @@
-from llama_index.embeddings.openai import OpenAIEmbedding
 from openai import OpenAI
 from toolbox import get_conf
 from toolbox import CatchException, update_ui, get_conf, select_api_key, get_log_folder, ProxyNetworkActivate

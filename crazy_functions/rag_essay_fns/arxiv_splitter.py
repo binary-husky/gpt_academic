@@ -20,9 +20,7 @@ class ArxivFragment:
     segment_type: str
     title: str
     abstract: str
-    section: str  # 保存完整的section层级路径，如 "Introduction" 或 "Methods-Data Processing"
-    section_type: str  # 新增：标识片段类型，如 "abstract", "section", "subsection" 等
-    section_level: int  # 新增：section的层级深度，abstract为0，main section为1，subsection为2，等等
+    section: str
     is_appendix: bool
 
 
@@ -116,6 +114,100 @@ class SmartArxivSplitter:
 
         return result
 
+    def _smart_split(self, content: str) -> List[Tuple[str, str, bool]]:
+        """智能分割TEX内容，确保在字符范围内并保持语义完整性"""
+        content = self._preprocess_content(content)
+        segments = []
+        current_buffer = []
+        current_length = 0
+        current_section = "Unknown Section"
+        is_appendix = False
+
+        # 保护特殊环境
+        protected_blocks = {}
+        content = self._protect_special_environments(content, protected_blocks)
+
+        # 按段落分割
+        paragraphs = re.split(r'\n\s*\n', content)
+
+        for para in paragraphs:
+            para = para.strip()
+            if not para:
+                continue
+
+            # 恢复特殊环境
+            para = self._restore_special_environments(para, protected_blocks)
+
+            # 更新章节信息
+            section_info = self._get_section_info(para, content)
+            if section_info:
+                current_section, is_appendix = section_info
+
+            # 判断是否是特殊环境
+            if self._is_special_environment(para):
+                # 处理当前缓冲区
+                if current_buffer:
+                    segments.append((
+                        '\n'.join(current_buffer),
+                        current_section,
+                        is_appendix
+                    ))
+                    current_buffer = []
+                    current_length = 0
+
+                # 添加特殊环境作为独立片段
+                segments.append((para, current_section, is_appendix))
+                continue
+
+            # 处理普通段落
+            sentences = self._split_into_sentences(para)
+            for sentence in sentences:
+                sentence = sentence.strip()
+                if not sentence:
+                    continue
+
+                sent_length = len(sentence)
+                new_length = current_length + sent_length + (1 if current_buffer else 0)
+
+                if new_length <= self.max_chars:
+                    current_buffer.append(sentence)
+                    current_length = new_length
+                else:
+                    # 如果当前缓冲区达到最小长度要求
+                    if current_length >= self.min_chars:
+                        segments.append((
+                            '\n'.join(current_buffer),
+                            current_section,
+                            is_appendix
+                        ))
+                        current_buffer = [sentence]
+                        current_length = sent_length
+                    else:
+                        # 尝试将过长的句子分割
+                        split_sentences = self._split_long_sentence(sentence)
+                        for split_sent in split_sentences:
+                            if current_length + len(split_sent) <= self.max_chars:
+                                current_buffer.append(split_sent)
+                                current_length += len(split_sent) + 1
+                            else:
+                                segments.append((
+                                    '\n'.join(current_buffer),
+                                    current_section,
+                                    is_appendix
+                                ))
+                                current_buffer = [split_sent]
+                                current_length = len(split_sent)
+
+        # 处理剩余的缓冲区
+        if current_buffer:
+            segments.append((
+                '\n'.join(current_buffer),
+                current_section,
+                is_appendix
+            ))
+
+        return segments
+
     def _split_into_sentences(self, text: str) -> List[str]:
         """将文本分割成句子"""
         return re.split(r'(?<=[.!?。！？])\s+', text)
@@ -194,7 +286,7 @@ class SmartArxivSplitter:
         content = re.sub(r'\\(label|ref|cite)\{[^}]*\}', '', content)
         return content.strip()
 
-    def process_paper(self, arxiv_id_or_url: str) -> Generator[ArxivFragment, None, None]:
+    def process(self, arxiv_id_or_url: str) -> Generator[ArxivFragment, None, None]:
         """处理单篇arxiv论文"""
         try:
             arxiv_id = self._normalize_arxiv_id(arxiv_id_or_url)
@@ -318,31 +410,16 @@ class SmartArxivSplitter:
 
         return title.strip(), abstract.strip()
 
-    def _get_section_info(self, para: str, content: str) -> Optional[Tuple[str, str, int, bool]]:
-        """获取段落所属的章节信息，返回(section_path, section_type, level, is_appendix)"""
-        current_path = []
-        section_type = "content"
-        level = 0
+    def _get_section_info(self, para: str, content: str) -> Optional[Tuple[str, bool]]:
+        """获取段落所属的章节信息"""
+        section = "Unknown Section"
         is_appendix = False
-
-        # 定义section层级的正则模式
-        section_patterns = {
-            r'\\chapter\{([^}]+)\}': 1,
-            r'\\section\{([^}]+)\}': 1,
-            r'\\subsection\{([^}]+)\}': 2,
-            r'\\subsubsection\{([^}]+)\}': 3
-        }
 
         # 查找所有章节标记
         all_sections = []
-        for pattern, sec_level in section_patterns.items():
+        for pattern in self.section_patterns:
             for match in re.finditer(pattern, content):
-                all_sections.append((match.start(), match.group(1), sec_level))
-
-        # 检查是否是摘要
-        abstract_match = re.search(r'\\begin{abstract}.*?' + re.escape(para), content, re.DOTALL)
-        if abstract_match:
-            return "Abstract", "abstract", 0, False
+                all_sections.append((match.start(), match.group(2)))
 
         # 查找appendix标记
         appendix_pos = content.find(r'\appendix')
@@ -350,118 +427,19 @@ class SmartArxivSplitter:
         # 确定当前章节
         para_pos = content.find(para)
         if para_pos >= 0:
-            is_appendix = appendix_pos >= 0 and para_pos > appendix_pos
-            current_sections = []
-            current_level = 0
-
-            # 按位置排序所有section标记
-            for sec_pos, sec_title, sec_level in sorted(all_sections):
+            current_section = None
+            for sec_pos, sec_title in sorted(all_sections):
                 if sec_pos > para_pos:
                     break
-                # 如果遇到更高层级的section，清除所有更低层级的section
-                if sec_level <= current_level:
-                    current_sections = [s for s in current_sections if s[1] < sec_level]
-                current_sections.append((sec_title, sec_level))
-                current_level = sec_level
+                current_section = sec_title
 
-            # 构建section路径
-            if current_sections:
-                current_path = [s[0] for s in sorted(current_sections, key=lambda x: x[1])]
-                section_path = "-".join(current_path)
-                level = max(s[1] for s in current_sections)
-                section_type = "section" if level == 1 else "subsection"
-                return section_path, section_type, level, is_appendix
+            if current_section:
+                section = current_section
+                is_appendix = appendix_pos >= 0 and para_pos > appendix_pos
 
-        return "Unknown Section", "content", 0, is_appendix
+            return section, is_appendix
 
-    def _smart_split(self, content: str) -> List[Tuple[str, str, str, int, bool]]:
-        """智能分割TEX内容，确保在字符范围内并保持语义完整性"""
-        content = self._preprocess_content(content)
-        segments = []
-        current_buffer = []
-        current_length = 0
-        current_section_info = ("Unknown Section", "content", 0, False)
-
-        # 保护特殊环境
-        protected_blocks = {}
-        content = self._protect_special_environments(content, protected_blocks)
-
-        # 按段落分割
-        paragraphs = re.split(r'\n\s*\n', content)
-
-        for para in paragraphs:
-            para = para.strip()
-            if not para:
-                continue
-
-            # 恢复特殊环境
-            para = self._restore_special_environments(para, protected_blocks)
-
-            # 更新章节信息
-            section_info = self._get_section_info(para, content)
-            if section_info:
-                current_section_info = section_info
-
-            # 判断是否是特殊环境
-            if self._is_special_environment(para):
-                # 处理当前缓冲区
-                if current_buffer:
-                    segments.append((
-                        '\n'.join(current_buffer),
-                        *current_section_info
-                    ))
-                    current_buffer = []
-                    current_length = 0
-
-                # 添加特殊环境作为独立片段
-                segments.append((para, *current_section_info))
-                continue
-
-            # 处理普通段落
-            sentences = self._split_into_sentences(para)
-            for sentence in sentences:
-                sentence = sentence.strip()
-                if not sentence:
-                    continue
-
-                sent_length = len(sentence)
-                new_length = current_length + sent_length + (1 if current_buffer else 0)
-
-                if new_length <= self.max_chars:
-                    current_buffer.append(sentence)
-                    current_length = new_length
-                else:
-                    # 如果当前缓冲区达到最小长度要求
-                    if current_length >= self.min_chars:
-                        segments.append((
-                            '\n'.join(current_buffer),
-                            *current_section_info
-                        ))
-                        current_buffer = [sentence]
-                        current_length = sent_length
-                    else:
-                        # 尝试将过长的句子分割
-                        split_sentences = self._split_long_sentence(sentence)
-                        for split_sent in split_sentences:
-                            if current_length + len(split_sent) <= self.max_chars:
-                                current_buffer.append(split_sent)
-                                current_length += len(split_sent) + 1
-                            else:
-                                segments.append((
-                                    '\n'.join(current_buffer),
-                                    *current_section_info
-                                ))
-                                current_buffer = [split_sent]
-                                current_length = len(split_sent)
-
-        # 处理剩余的缓冲区
-        if current_buffer:
-            segments.append((
-                '\n'.join(current_buffer),
-                *current_section_info
-            ))
-
-        return segments
+        return None
 
     def _process_single_tex(self, file_path: str) -> List[ArxivFragment]:
         """处理单个TEX文件"""
@@ -481,12 +459,12 @@ class SmartArxivSplitter:
             segments = self._smart_split(content)
             fragments = []
 
-            for i, (segment_content, section_path, section_type, level, is_appendix) in enumerate(segments):
+            for i, (segment_content, section, is_appendix) in enumerate(segments):
                 if segment_content.strip():
                     segment_type = 'text'
                     for env_type, patterns in self.special_envs.items():
                         if any(re.search(pattern, segment_content, re.DOTALL)
-                                for pattern in patterns):
+                               for pattern in patterns):
                             segment_type = env_type
                             break
 
@@ -499,9 +477,7 @@ class SmartArxivSplitter:
                         segment_type=segment_type,
                         title=title,
                         abstract=abstract,
-                        section=section_path,
-                        section_type=section_type,
-                        section_level=level,
+                        section=section,
                         is_appendix=is_appendix
                     ))
 
@@ -510,7 +486,6 @@ class SmartArxivSplitter:
         except Exception as e:
             logging.error(f"Error processing file {file_path}: {e}")
             return []
-
 
 def main():
     """使用示例"""
@@ -521,10 +496,11 @@ def main():
     )
 
     # 处理论文
-    for fragment in splitter.process_paper("2411.03663"):
+    for fragment in splitter.process("2411.03663"):
         print(f"Segment {fragment.segment_index + 1}/{fragment.total_segments}")
         print(f"Length: {len(fragment.content)}")
         print(f"Section: {fragment.section}")
+        print(f"Title: {fragment.file_path}")
 
         print(fragment.content)
         print("-" * 80)

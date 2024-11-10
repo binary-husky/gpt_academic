@@ -1,6 +1,7 @@
+import os.path
+
 from toolbox import CatchException, update_ui
 from crazy_functions.rag_essay_fns.paper_processing import ArxivPaperProcessor
-from crazy_functions.rag_essay_fns.rag_handler import RagHandler
 import asyncio
 
 @CatchException
@@ -9,7 +10,24 @@ def Rag论文对话(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     txt: 用户输入，通常是arxiv论文链接
     功能：RAG论文总结和对话
     """
-    # 初始化处理器
+    if_project, if_arxiv = False, False
+    if os.path.exists(txt):
+        from crazy_functions.rag_essay_fns.document_splitter import SmartDocumentSplitter
+        splitter = SmartDocumentSplitter(
+            char_range=(1000, 1200),
+            max_workers=32  # 可选，默认会根据CPU核心数自动设置
+        )
+        if_project = True
+    else:
+        from crazy_functions.rag_essay_fns.arxiv_splitter import SmartArxivSplitter
+        splitter = SmartArxivSplitter(
+            char_range=(1000, 1200),
+            root_dir="gpt_log/arxiv_cache"
+        )
+        if_arxiv = True
+    for fragment in splitter.process(txt):
+        pass
+        # 初始化处理器
     processor = ArxivPaperProcessor()
     rag_handler = RagHandler()
 

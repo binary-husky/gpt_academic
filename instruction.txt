@@ -102,6 +102,7 @@
 │         ├── 总结音视频.py
 │         ├── 批量总结PDF文档.py
 │         ├── 批量总结PDF文档pdfminer.py
+│         ├── 批量文件询问.py
 │         ├── 批量翻译PDF文档_NOUGAT.py
 │         ├── 数学动画生成manim.py
 │         ├── 理解PDF文档内容.py
@@ -175,16 +176,39 @@
 └── setup.py
 
 
-3、我需要开发一个rag插件，请帮我实现一个插件，插件的名称是rag论文总结，插件主入口在crazy_functions/Arxiv_论文对话.py中的Rag论文对话函数，插件的功能步骤分为文件处理和RAG两个步骤
-    文件处理步骤流程和要求按顺序如下，请参考gpt_academic已实现的功能复用现有函数即可：
-        a. 支持从 arXiv 下载论文源码、检查本地项目路径、扫描 .tex 文件，此步骤可参考crazy_functions/Latex_Function.py。
-        b、在项目中找到主要的 LaTeX 文件，将多个 TEX 文件合并成一个大的 TEX 文件，便于统一处理，此步骤可参考crazy_functions/Latex_Function.py。
-        c、将合并后的文档进行精细切分，包括读取标题和摘要，此步骤可参考crazy_functions/Latex_Function.py。
-        d、将文档按照 token 限制（1024）进行进一步分段，此步骤可参考crazy_functions/Latex_Function.py。
+3、我需要开发一个rag插件，请帮我实现一个插件，插件的名称是rag论文总结，插件主入口在crazy_functions/Arxiv_论文对话.py中的Rag论文对话函数，插件的功能步骤分为文件处理和RAG两个步骤,以下是具体的一些要求：
+I. 函数头如下：
+@CatchException
+def rag论文对话(txt: str, llm_kwargs: Dict, plugin_kwargs: Dict, chatbot: List,
+                 history: List, system_prompt: str, user_request: str):
+II. 函数返回可参考crazy_functions/批量文件询问.py中的“批量文件询问”函数，主要采用yield方式
     
 3、对于RAG，我希望采用light_rag的方案，参考已有方案其主要的功能实现是：
 主要功能包括：
-    e 参考- `chunking_by_token_size`，利用`_handle_entity_relation_summary`函数对d步骤生成的文本块进行实体或关系的摘要。
+    a. 分别为project和arxiv创建rag_handler，project类的fragment类内容为
+ @dataclass
+class DocFragment:
+    """文本片段数据类"""
+    file_path: str           # 原始文件路径
+    content: str            # 片段内容
+    segment_index: int      # 片段序号
+    total_segments: int     # 总片段数
+    rel_path: str          # 相对路径
+ arxiv的fragment内容为：
+ @dataclass
+class ArxivFragment:
+    """Arxiv论文片段数据类"""
+    file_path: str
+    content: str
+    segment_index: int
+    total_segments: int
+    rel_path: str
+    segment_type: str
+    title: str
+    abstract: str
+    section: str
+    is_appendix: bool
+    b 如果目录下不存在抽取好的实体或关系的摘要，利用`_handle_entity_relation_summary`函数对d步骤生成的文本块进行实体或关系的摘要，并将其存储在project或者arxiv的路径下,路径为获取fragment.file_path的前三级目录（按照“/”区分每一级），如果原目录存在抽取好的，请直接使用，不再重复抽取。
     f 利用`_handle_single_entity_extraction` 和 `_handle_single_relationship_extraction`：从记录中提取单个实体或关系信息。
     g `_merge_nodes_then_upsert` 和 `_merge_edges_then_upsert`：合并并插入节点或边。
     h `extract_entities`：处理多个文本块，提取实体和关系，并存储在知识图谱和向量数据库中。

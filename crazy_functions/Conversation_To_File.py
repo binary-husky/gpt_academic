@@ -152,8 +152,6 @@ class Conversation_To_File_Wrap(GptAcademicPluginTemplate):
 
 
 
-
-
 def hide_cwd(str):
     import os
     current_path = os.getcwd()

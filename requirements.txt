@@ -12,12 +12,14 @@ transformers>=4.27.1,<4.42
 scipdf_parser>=0.52
 spacy==3.7.4
 anthropic>=0.18.1
+sentence-transformers
 python-markdown-math
 pymdown-extensions
 websocket-client
 beautifulsoup4
 prompt_toolkit
 latex2mathml
+scikit-learn
 python-docx
 mdtex2html
 dashscope

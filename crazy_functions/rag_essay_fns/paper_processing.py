@@ -1,7 +1,6 @@
 from typing import Tuple, Optional, Generator, List
 from toolbox import update_ui, update_ui_lastest_msg, get_conf
 import os, tarfile, requests, time, re
-
 class ArxivPaperProcessor:
     """Arxiv论文处理器类"""
     
