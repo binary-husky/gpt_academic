@@ -216,7 +216,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                 if need_to_pass:
                     pass
                 elif is_last_chunk:
-                    log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
+                    log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer, user_name=chatbot.get_user())
                     # logger.info(f'[response] {gpt_replying_buffer}')
                     break
                 else:

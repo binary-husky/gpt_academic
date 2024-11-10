@@ -68,5 +68,5 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
         chatbot[-1] = [inputs, response]
         yield from update_ui(chatbot=chatbot, history=history)
     history.extend([inputs, response])
-    log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=response)
+    log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=response, user_name=chatbot.get_user())
     yield from update_ui(chatbot=chatbot, history=history)

@@ -184,7 +184,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                         # 判定为数据流的结束，gpt_replying_buffer也写完了
                         lastmsg = chatbot[-1][-1] + f"\n\n\n\n「{llm_kwargs['llm_model']}调用结束，该模型不具备上下文对话能力，如需追问，请及时切换模型。」"
                         yield from update_ui_lastest_msg(lastmsg, chatbot, history, delay=1)
-                        log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
+                        log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer, user_name=chatbot.get_user())
                         break
                     # 处理数据流的主体
                     status_text = f"finish_reason: {chunkjson['choices'][0].get('finish_reason', 'null')}"
