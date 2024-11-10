@@ -50,8 +50,16 @@ def get_crazy_functions():
     from crazy_functions.Image_Generate_Wrap import ImageGen_Wrap
     from crazy_functions.SourceCode_Comment import 注释Python项目
     from crazy_functions.SourceCode_Comment_Wrap import SourceCodeComment_Wrap
+    from crazy_functions.VideoResource_GPT import 多媒体任务
 
     function_plugins = {
+        "多媒体智能体": {
+            "Group": "智能体",
+            "Color": "stop",
+            "AsButton": True,
+            "Info": "【仅测试】多媒体任务",
+            "Function": HotReload(多媒体任务),
+        },
         "虚空终端": {
             "Group": "对话|编程|学术|智能体",
             "Color": "stop",

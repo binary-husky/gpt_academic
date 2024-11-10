@@ -161,3 +161,6 @@ temp.*
 objdump*
 *.min.*.js
 TODO
+
+experimental_mods
+search_results
