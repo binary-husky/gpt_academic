@@ -104,17 +104,27 @@ def extract_archive(file_path, dest_dir):
             logger.info("Successfully extracted zip archive to {}".format(dest_dir))
 
     elif file_extension in [".tar", ".gz", ".bz2"]:
-        with tarfile.open(file_path, "r:*") as tarobj:
-            # 清理提取路径，移除任何不安全的元素
-            for member in tarobj.getmembers():
-                member_path = os.path.normpath(member.name)
-                full_path = os.path.join(dest_dir, member_path)
-                full_path = os.path.abspath(full_path)
-                if not full_path.startswith(os.path.abspath(dest_dir) + os.sep):
-                    raise Exception(f"Attempted Path Traversal in {member.name}")
+        try:
+            with tarfile.open(file_path, "r:*") as tarobj:
+                # 清理提取路径，移除任何不安全的元素
+                for member in tarobj.getmembers():
+                    member_path = os.path.normpath(member.name)
+                    full_path = os.path.join(dest_dir, member_path)
+                    full_path = os.path.abspath(full_path)
+                    if not full_path.startswith(os.path.abspath(dest_dir) + os.sep):
+                        raise Exception(f"Attempted Path Traversal in {member.name}")
 
-            tarobj.extractall(path=dest_dir)
-            logger.info("Successfully extracted tar archive to {}".format(dest_dir))
+                tarobj.extractall(path=dest_dir)
+                logger.info("Successfully extracted tar archive to {}".format(dest_dir))
+        except tarfile.ReadError as e:
+            if file_extension == ".gz":
+                # 一些特别奇葩的项目，是一个gz文件，里面不是tar，只有一个tex文件
+                import gzip
+                with gzip.open(file_path, 'rb') as f_in:
+                    with open(os.path.join(dest_dir, 'main.tex'), 'wb') as f_out:
+                        f_out.write(f_in.read())
+            else:
+                raise e
 
     # 第三方库，需要预先pip install rarfile
     # 此外，Windows上还需要安装winrar软件，配置其Path环境变量，如"C:\Program Files\WinRAR"才可以
