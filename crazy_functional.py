@@ -17,7 +17,7 @@ def get_crazy_functions():
     from crazy_functions.SourceCode_Analyse import 解析一个前端项目
     from crazy_functions.高级功能函数模板 import 高阶功能模板函数
     from crazy_functions.高级功能函数模板 import Demo_Wrap
-    from crazy_functions.Latex全文润色 import Latex英文润色
+    from crazy_functions.Latex_Project_Polish import Latex英文润色
     from crazy_functions.询问多个大语言模型 import 同时问询
     from crazy_functions.SourceCode_Analyse import 解析一个Lua项目
     from crazy_functions.SourceCode_Analyse import 解析一个CSharp项目
@@ -33,8 +33,8 @@ def get_crazy_functions():
     from crazy_functions.PDF_Translate import 批量翻译PDF文档
     from crazy_functions.谷歌检索小助手 import 谷歌检索小助手
     from crazy_functions.理解PDF文档内容 import 理解PDF文档内容标准文件输入
-    from crazy_functions.Latex全文润色 import Latex中文润色
-    from crazy_functions.Latex全文润色 import Latex英文纠错
+    from crazy_functions.Latex_Project_Polish import Latex中文润色
+    from crazy_functions.Latex_Project_Polish import Latex英文纠错
     from crazy_functions.Markdown_Translate import Markdown中译英
     from crazy_functions.虚空终端 import 虚空终端
     from crazy_functions.生成多种Mermaid图表 import Mermaid_Gen
@@ -740,19 +740,6 @@ def get_crazy_functions():
     #     logger.error(trimmed_format_exc())
     #     print('Load function plugin failed')
 
-    # try:
-    #     from crazy_functions.chatglm微调工具 import 微调数据集生成
-    #     function_plugins.update({
-    #         "黑盒模型学习: 微调数据集生成 (先上传数据集)": {
-    #             "Color": "stop",
-    #             "AsButton": False,
-    #             "AdvancedArgs": True,
-    #             "ArgsReminder": "针对数据集输入（如 绿帽子*深蓝色衬衫*黑色运动裤）给出指令，例如您可以将以下命令复制到下方: --llm_to_learn=azure-gpt-3.5 --prompt_prefix='根据下面的服装类型提示，想象一个穿着者，对这个人外貌、身处的环境、内心世界、过去经历进行描写。要求：100字以内，用第二人称。' --system_prompt=''",
-    #             "Function": HotReload(微调数据集生成)
-    #         }
-    #     })
-    # except:
-    #     print('Load function plugin failed')
 
     """
     设置默认值:

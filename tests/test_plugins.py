@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
     # plugin_test(plugin='crazy_functions.SourceCode_Analyse->解析一个C项目', main_input="crazy_functions/test_project/cpp/cppipc")
 
-    # plugin_test(plugin='crazy_functions.Latex全文润色->Latex英文润色', main_input="crazy_functions/test_project/latex/attention")
+    # plugin_test(plugin='crazy_functions.Latex_Project_Polish->Latex英文润色', main_input="crazy_functions/test_project/latex/attention")
 
     # plugin_test(plugin='crazy_functions.Markdown_Translate->Markdown中译英', main_input="README.md")
 
@@ -65,8 +65,3 @@ if __name__ == "__main__":
 
     # plugin_test(plugin='crazy_functions.Latex_Function->Latex翻译中文并重新编译PDF', main_input="2210.03629")
 
-    # advanced_arg = {"advanced_arg":"--llm_to_learn=gpt-3.5-turbo --prompt_prefix='根据下面的服装类型提示，想象一个穿着者，对这个人外貌、身处的环境、内心世界、人设进行描写。要求：100字以内，用第二人称。' --system_prompt=''" }
-    # plugin_test(plugin='crazy_functions.chatglm微调工具->微调数据集生成', main_input='build/dev.json', advanced_arg=advanced_arg)
-
-    # advanced_arg = {"advanced_arg":"--pre_seq_len=128 --learning_rate=2e-2 --num_gpus=1 --json_dataset='t_code.json' --ptuning_directory='/home/hmp/ChatGLM2-6B/ptuning'     " }
-    # plugin_test(plugin='crazy_functions.chatglm微调工具->启动微调', main_input='build/dev.json', advanced_arg=advanced_arg)
