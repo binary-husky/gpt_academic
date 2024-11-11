@@ -149,6 +149,19 @@
         DEFINE_ARG_INPUT_INTERFACE = json.dumps(define_arg_selection)
         return base64.b64encode(DEFINE_ARG_INPUT_INTERFACE.encode('utf-8')).decode('utf-8')
     ```
+1-2. 预留4个动态插件按钮（常规状态隐藏）
+
+点击 “+插件按钮”：跳转到插件市场
+
+点击 加载插件：
+    - 下载文件
+    - 注册 exe_dynamic_plugin开始执行
+    - 执行浏览器js函数
+
+点击动态插件按钮
+    - js： 检查register_advanced_plugin_init_code_arr，如果为空，提示
+    - 如果非空，先跳二级菜单，设定诸元后，执行一个隐藏的按钮 -- 关联 exe_dynamic_plugin
+    - exe_dynamic_plugin开始执行
 
 
 2. 用户加载阶段（主javascript程序`common.js`中），浏览器加载`register_advanced_plugin_init_code_arr`，存入本地的字典`advanced_plugin_init_code_lib`：
