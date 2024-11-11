@@ -1,5 +1,5 @@
 {
   "version": 3.90,
   "show_feature": true,
-  "new_feature": "增加RAG组件 <-> 升级多合一主提交键"
+  "new_feature": "支持chatgpt-4o-latest <-> 增加RAG组件 <-> 升级多合一主提交键"
 }
