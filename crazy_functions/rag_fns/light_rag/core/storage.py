@@ -13,18 +13,19 @@ from crazy_functions.rag_fns.llama_index_worker import LlamaIndexRagWorker
 
 T = TypeVar('T')
 
-@dataclass 
+
+@dataclass
 class StorageBase:
     """Base class for all storage implementations"""
     namespace: str
     working_dir: str
-    
+
     async def index_done_callback(self):
         """Hook called after indexing operations"""
         pass
-    
+
     async def query_done_callback(self):
-        """Hook called after query operations"""  
+        """Hook called after query operations"""
         pass
 
 
@@ -32,37 +33,37 @@ class StorageBase:
 class JsonKVStorage(StorageBase, Generic[T]):
     """
     Key-Value storage using JSON files
-    
+
     Attributes:
         namespace (str): Storage namespace
         working_dir (str): Working directory for storage files
         _file_name (str): JSON file path
         _data (Dict[str, T]): In-memory storage
     """
-    
+
     def __post_init__(self):
         """Initialize storage file and load data"""
-        self._file_name = os.path.join(self.working_dir, f"kv_{self.namespace}.json")
+        self._file_name = os.path.join(self.working_dir, f"kv_store_{self.namespace}.json")
         self._data: Dict[str, T] = {}
         self.load()
-        
+
     def load(self):
         """Load data from JSON file"""
         if os.path.exists(self._file_name):
             with open(self._file_name, 'r', encoding='utf-8') as f:
                 self._data = json.load(f)
                 logger.info(f"Loaded {len(self._data)} items from {self._file_name}")
-                
+
     async def save(self):
         """Save data to JSON file"""
         os.makedirs(os.path.dirname(self._file_name), exist_ok=True)
         with open(self._file_name, 'w', encoding='utf-8') as f:
             json.dump(self._data, f, ensure_ascii=False, indent=2)
-            
+
     async def get_by_id(self, id: str) -> Optional[T]:
         """Get item by ID"""
         return self._data.get(id)
-        
+
     async def get_by_ids(self, ids: List[str], fields: Optional[Set[str]] = None) -> List[Optional[T]]:
         """Get multiple items by IDs with optional field filtering"""
         if fields is None:
@@ -70,16 +71,16 @@ class JsonKVStorage(StorageBase, Generic[T]):
         return [{k: v for k, v in self._data[id].items() if k in fields}
                 if id in self._data else None
                 for id in ids]
-                
+
     async def filter_keys(self, keys: List[str]) -> Set[str]:
         """Return keys that don't exist in storage"""
         return set(k for k in keys if k not in self._data)
-        
+
     async def upsert(self, data: Dict[str, T]):
         """Insert or update items"""
         self._data.update(data)
         await self.save()
-        
+
     async def drop(self):
         """Clear all data"""
         self._data = {}
@@ -95,148 +96,225 @@ class JsonKVStorage(StorageBase, Generic[T]):
         await self.save()
 
 
+
 @dataclass
 class VectorStorage(StorageBase):
     """
-    Vector storage using LlamaIndex
-    
+    Vector storage using LlamaIndexRagWorker
+
     Attributes:
-        namespace (str): Storage namespace
+        namespace (str): Storage namespace (e.g., 'entities', 'relationships', 'chunks')
         working_dir (str): Working directory for storage files
         llm_kwargs (dict): LLM configuration
         embedding_func (OpenAiEmbeddingModel): Embedding function
-        meta_fields (Set[str]): Additional fields to store
-        cosine_better_than_threshold (float): Similarity threshold
+        meta_fields (Set[str]): Additional metadata fields to store
     """
     llm_kwargs: dict
     embedding_func: OpenAiEmbeddingModel
     meta_fields: Set[str] = field(default_factory=set)
-    cosine_better_than_threshold: float = 0.2
-    
+
     def __post_init__(self):
         """Initialize LlamaIndex worker"""
-        checkpoint_dir = os.path.join(self.working_dir, f"vector_{self.namespace}")
+        # 使用正确的文件命名格式
+        self._vector_file = os.path.join(self.working_dir, f"vdb_{self.namespace}.json")
+
+        # 设置检查点目录
+        checkpoint_dir = os.path.join(self.working_dir, f"vector_{self.namespace}_checkpoint")
+        os.makedirs(checkpoint_dir, exist_ok=True)
+
+        # 初始化向量存储
         self.vector_store = LlamaIndexRagWorker(
             user_name=self.namespace,
             llm_kwargs=self.llm_kwargs,
             checkpoint_dir=checkpoint_dir,
-            auto_load_checkpoint=True  # 自动加载检查点
+            auto_load_checkpoint=True
         )
-        
-    async def query(self, query: str, top_k: int = 5) -> List[dict]:
+        logger.info(f"Initialized vector storage for {self.namespace}")
+
+    async def query(self, query: str, top_k: int = 5, metadata_filters: Optional[Dict[str, Any]] = None) -> List[dict]:
         """
-        Query vectors by similarity
-        
+        Query vectors by similarity with optional metadata filtering
+
         Args:
             query: Query text
-            top_k: Maximum number of results
-            
+            top_k: Maximum number of results to return
+            metadata_filters: Optional metadata filters
+
         Returns:
             List of similar documents with scores
         """
-        nodes = self.vector_store.retrieve_from_store_with_query(query)
-        results = [{
-            "id": node.node_id,
-            "text": node.text,
-            "score": node.score,
-            **{k: getattr(node, k) for k in self.meta_fields if hasattr(node, k)}
-        } for node in nodes[:top_k]]
-        return [r for r in results if r.get('score', 0) > self.cosine_better_than_threshold]
-    
+        try:
+            if metadata_filters:
+                nodes = self.vector_store.retrieve_with_metadata_filter(query, metadata_filters, top_k)
+            else:
+                nodes = self.vector_store.retrieve_from_store_with_query(query)[:top_k]
+
+            results = []
+            for node in nodes:
+                result = {
+                    "id": node.node_id,
+                    "text": node.text,
+                    "score": node.score if hasattr(node, 'score') else 0.0,
+                }
+                # Add metadata fields if they exist and are in meta_fields
+                if hasattr(node, 'metadata'):
+                    result.update({
+                        k: node.metadata[k]
+                        for k in self.meta_fields
+                        if k in node.metadata
+                    })
+                results.append(result)
+
+            return results
+
+        except Exception as e:
+            logger.error(f"Error in vector query: {e}")
+            raise
+
     async def upsert(self, data: Dict[str, dict]):
         """
         Insert or update vectors
-        
+
         Args:
-            data: Dictionary of documents to insert/update
+            data: Dictionary of documents to insert/update with format:
+                  {id: {"content": text, "metadata": dict}}
         """
-        for id, item in data.items():
-            content = item["content"]
-            metadata = {k: item[k] for k in self.meta_fields if k in item}
-            self.vector_store.add_text_with_metadata(content, metadata=metadata)
-            
+        try:
+            for doc_id, item in data.items():
+                content = item["content"]
+                # 提取元数据
+                metadata = {
+                    k: item[k]
+                    for k in self.meta_fields
+                    if k in item
+                }
+                # 添加文档ID到元数据
+                metadata["doc_id"] = doc_id
+
+                # 添加到向量存储
+                self.vector_store.add_text_with_metadata(content, metadata)
+
+            # 导出向量数据到json文件
+            self.vector_store.export_nodes(
+                self._vector_file,
+                format="json",
+                include_embeddings=True
+            )
+
+        except Exception as e:
+            logger.error(f"Error in vector upsert: {e}")
+            raise
+
+    async def save(self):
+        """Save vector store to checkpoint and export data"""
+        try:
+            # 保存检查点
+            self.vector_store.save_to_checkpoint()
+
+            # 导出向量数据
+            self.vector_store.export_nodes(
+                self._vector_file,
+                format="json",
+                include_embeddings=True
+            )
+        except Exception as e:
+            logger.error(f"Error saving vector storage: {e}")
+            raise
+
     async def index_done_callback(self):
         """Save after indexing"""
-        self.vector_store.save_to_checkpoint()
+        await self.save()
+
+    def get_statistics(self) -> Dict[str, Any]:
+        """Get vector store statistics"""
+        return self.vector_store.get_statistics()
 
 
 @dataclass
 class NetworkStorage(StorageBase):
     """
     Graph storage using NetworkX
-    
+
     Attributes:
         namespace (str): Storage namespace
         working_dir (str): Working directory for storage files
     """
-    
+
     def __post_init__(self):
         """Initialize graph and storage file"""
         self._file_name = os.path.join(self.working_dir, f"graph_{self.namespace}.graphml")
         self._graph = self._load_graph() or nx.Graph()
-        
+        logger.info(f"Initialized graph storage for {self.namespace}")
+
     def _load_graph(self) -> Optional[nx.Graph]:
         """Load graph from GraphML file"""
         if os.path.exists(self._file_name):
             try:
-                return nx.read_graphml(self._file_name)
+                graph = nx.read_graphml(self._file_name)
+                logger.info(f"Loaded graph with {graph.number_of_nodes()} nodes and {graph.number_of_edges()} edges")
+                return graph
             except Exception as e:
                 logger.error(f"Error loading graph from {self._file_name}: {e}")
                 return None
         return None
-        
+
     async def save_graph(self):
         """Save graph to GraphML file"""
-        os.makedirs(os.path.dirname(self._file_name), exist_ok=True)
-        logger.info(f"Saving graph with {self._graph.number_of_nodes()} nodes, {self._graph.number_of_edges()} edges")
-        nx.write_graphml(self._graph, self._file_name)
-        
+        try:
+            os.makedirs(os.path.dirname(self._file_name), exist_ok=True)
+            logger.info(
+                f"Saving graph with {self._graph.number_of_nodes()} nodes, {self._graph.number_of_edges()} edges")
+            nx.write_graphml(self._graph, self._file_name)
+        except Exception as e:
+            logger.error(f"Error saving graph: {e}")
+            raise
+
     async def has_node(self, node_id: str) -> bool:
         """Check if node exists"""
         return self._graph.has_node(node_id)
-        
+
     async def has_edge(self, source_id: str, target_id: str) -> bool:
         """Check if edge exists"""
         return self._graph.has_edge(source_id, target_id)
-        
+
     async def get_node(self, node_id: str) -> Optional[dict]:
         """Get node attributes"""
         if not self._graph.has_node(node_id):
             return None
         return dict(self._graph.nodes[node_id])
-        
+
     async def get_edge(self, source_id: str, target_id: str) -> Optional[dict]:
         """Get edge attributes"""
         if not self._graph.has_edge(source_id, target_id):
             return None
         return dict(self._graph.edges[source_id, target_id])
-        
+
     async def node_degree(self, node_id: str) -> int:
         """Get node degree"""
         return self._graph.degree(node_id)
-        
+
     async def edge_degree(self, source_id: str, target_id: str) -> int:
         """Get sum of degrees of edge endpoints"""
         return self._graph.degree(source_id) + self._graph.degree(target_id)
-        
+
     async def get_node_edges(self, source_id: str) -> Optional[List[Tuple[str, str]]]:
         """Get all edges connected to node"""
         if not self._graph.has_node(source_id):
             return None
         return list(self._graph.edges(source_id))
-        
+
     async def upsert_node(self, node_id: str, node_data: Dict[str, str]):
         """Insert or update node"""
-        # Clean and normalize node data
         cleaned_data = {k: html.escape(str(v).upper().strip()) for k, v in node_data.items()}
         self._graph.add_node(node_id, **cleaned_data)
-        
+        await self.save_graph()
+
     async def upsert_edge(self, source_id: str, target_id: str, edge_data: Dict[str, str]):
         """Insert or update edge"""
-        # Clean and normalize edge data
         cleaned_data = {k: html.escape(str(v).strip()) for k, v in edge_data.items()}
         self._graph.add_edge(source_id, target_id, **cleaned_data)
-        
+        await self.save_graph()
+
     async def index_done_callback(self):
         """Save after indexing"""
         await self.save_graph()
@@ -245,47 +323,47 @@ class NetworkStorage(StorageBase):
         """Get the largest connected component of the graph"""
         if not self._graph:
             return nx.Graph()
-        
+
         components = list(nx.connected_components(self._graph))
         if not components:
             return nx.Graph()
-            
+
         largest_component = max(components, key=len)
         return self._graph.subgraph(largest_component).copy()
-        
-    async def embed_nodes(self, algorithm: str, **kwargs) -> Tuple[np.ndarray, List[str]]:
-        """
-        Embed nodes using specified algorithm
-        
-        Args:
-            algorithm: Node embedding algorithm name
-            **kwargs: Additional algorithm parameters
-            
-        Returns:
-            Tuple of (node embeddings, node IDs)
-        """
+
+    async def embed_nodes(
+            self,
+            algorithm: str = "node2vec",
+            dimensions: int = 128,
+            walk_length: int = 30,
+            num_walks: int = 200,
+            workers: int = 4,
+            window: int = 10,
+            min_count: int = 1,
+            **kwargs
+    ) -> Tuple[np.ndarray, List[str]]:
+        """Generate node embeddings using specified algorithm"""
         if algorithm == "node2vec":
             from node2vec import Node2Vec
-            
-            # Create node2vec model
-            node2vec = Node2Vec(
+
+            # Create and train node2vec model
+            n2v = Node2Vec(
                 self._graph,
-                dimensions=kwargs.get('dimensions', 128),
-                walk_length=kwargs.get('walk_length', 30),
-                num_walks=kwargs.get('num_walks', 200),
-                workers=kwargs.get('workers', 4)
+                dimensions=dimensions,
+                walk_length=walk_length,
+                num_walks=num_walks,
+                workers=workers
             )
-            
-            # Train model
-            model = node2vec.fit(
-                window=kwargs.get('window', 10),
-                min_count=kwargs.get('min_count', 1)
+
+            model = n2v.fit(
+                window=window,
+                min_count=min_count
             )
-            
-            # Get embeddings
+
+            # Get embeddings for all nodes
             node_ids = list(self._graph.nodes())
             embeddings = np.array([model.wv[node] for node in node_ids])
-            
+
             return embeddings, node_ids
-        else:
-            raise ValueError(f"Unsupported embedding algorithm: {algorithm}")
+
+        raise ValueError(f"Unsupported embedding algorithm: {algorithm}")

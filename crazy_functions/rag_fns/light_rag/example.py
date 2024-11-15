@@ -23,25 +23,29 @@ class ExtractionExample:
     def __init__(self):
         """Initialize RAG system components"""
         # 设置工作目录
-        self.working_dir = f"private_upload/default_user/rag_cache_{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}"
+        self.working_dir = f"crazy_functions/rag_fns/LightRAG/rag_cache_{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}"
         os.makedirs(self.working_dir, exist_ok=True)
         logger.info(f"Working directory: {self.working_dir}")
 
         # 初始化embedding
-        self.llm_kwargs = {'api_key': os.getenv("one_api_key"), 'client_ip': '127.0.0.1',
-                  'embed_model': 'text-embedding-3-small', 'llm_model': 'one-api-Qwen2.5-72B-Instruct',
-                  'max_length': 4096, 'most_recent_uploaded': None, 'temperature': 1, 'top_p': 1}
+        self.llm_kwargs = {
+            'api_key': os.getenv("one_api_key"),
+            'client_ip': '127.0.0.1',
+            'embed_model': 'text-embedding-3-small',
+            'llm_model': 'one-api-Qwen2.5-72B-Instruct',
+            'max_length': 4096,
+            'most_recent_uploaded': None,
+            'temperature': 1,
+            'top_p': 1
+        }
         self.embedding_func = OpenAiEmbeddingModel(self.llm_kwargs)
 
         # 初始化提示模板和抽取器
         self.prompt_templates = PromptTemplates()
         self.extractor = EntityRelationExtractor(
             prompt_templates=self.prompt_templates,
-            required_prompts = {
-            'entity_extraction'
-        },
+            required_prompts={'entity_extraction'},
             entity_extract_max_gleaning=1
-
         )
 
         # 初始化存储系统
@@ -63,18 +67,33 @@ class ExtractionExample:
             working_dir=self.working_dir
         )
 
-        # 向量存储 - 用于相似度检索
-        self.vector_store = VectorStorage(
-            namespace="vectors",
+        # 向量存储 - 用于实体、关系和文本块的向量表示
+        self.entities_vdb = VectorStorage(
+            namespace="entities",
             working_dir=self.working_dir,
             llm_kwargs=self.llm_kwargs,
             embedding_func=self.embedding_func,
             meta_fields={"entity_name", "entity_type"}
         )
 
+        self.relationships_vdb = VectorStorage(
+            namespace="relationships",
+            working_dir=self.working_dir,
+            llm_kwargs=self.llm_kwargs,
+            embedding_func=self.embedding_func,
+            meta_fields={"src_id", "tgt_id"}
+        )
+
+        self.chunks_vdb = VectorStorage(
+            namespace="chunks",
+            working_dir=self.working_dir,
+            llm_kwargs=self.llm_kwargs,
+            embedding_func=self.embedding_func
+        )
+
         # 图存储 - 用于实体关系
         self.graph_store = NetworkStorage(
-            namespace="graph",
+            namespace="chunk_entity_relation",
             working_dir=self.working_dir
         )
 
@@ -152,7 +171,7 @@ class ExtractionExample:
         try:
             # 向量存储
             logger.info("Adding chunks to vector store...")
-            await self.vector_store.upsert(chunks)
+            await self.chunks_vdb.upsert(chunks)
 
             # 初始化对话历史
             self.conversation_history = {chunk_key: [] for chunk_key in chunks.keys()}
@@ -178,14 +197,32 @@ class ExtractionExample:
             # 获取结果
             nodes, edges = self.extractor.get_results()
 
-            # 存储到图数据库
-            logger.info("Storing extracted information in graph database...")
+            # 存储实体到向量数据库和图数据库
             for node_name, node_instances in nodes.items():
                 for node in node_instances:
+                    # 存储到向量数据库
+                    await self.entities_vdb.upsert({
+                        f"entity_{node_name}": {
+                            "content": f"{node_name}: {node['description']}",
+                            "entity_name": node_name,
+                            "entity_type": node['entity_type']
+                        }
+                    })
+                    # 存储到图数据库
                     await self.graph_store.upsert_node(node_name, node)
 
+            # 存储关系到向量数据库和图数据库
             for (src, tgt), edge_instances in edges.items():
                 for edge in edge_instances:
+                    # 存储到向量数据库
+                    await self.relationships_vdb.upsert({
+                        f"rel_{src}_{tgt}": {
+                            "content": f"{edge['description']} | {edge['keywords']}",
+                            "src_id": src,
+                            "tgt_id": tgt
+                        }
+                    })
+                    # 存储到图数据库
                     await self.graph_store.upsert_edge(src, tgt, edge)
 
             return nodes, edges
@@ -197,26 +234,39 @@ class ExtractionExample:
     async def query_knowledge_base(self, query: str, top_k: int = 5):
         """Query the knowledge base using various methods"""
         try:
-            # 向量相似度搜索
-            vector_results = await self.vector_store.query(query, top_k=top_k)
+            # 向量相似度搜索 - 文本块
+            chunk_results = await self.chunks_vdb.query(query, top_k=top_k)
+
+            # 向量相似度搜索 - 实体
+            entity_results = await self.entities_vdb.query(query, top_k=top_k)
 
             # 获取相关文本块
-            chunk_ids = [r["id"] for r in vector_results]
+            chunk_ids = [r["id"] for r in chunk_results]
             chunks = await self.text_chunks.get_by_ids(chunk_ids)
 
-            # 获取相关实体
-            # 假设query中包含实体名称
-            relevant_nodes = []
-            for word in query.split():
-                if await self.graph_store.has_node(word.upper()):
-                    node_data = await self.graph_store.get_node(word.upper())
-                    if node_data:
-                        relevant_nodes.append(node_data)
+            # 获取实体相关的图结构信息
+            relevant_edges = []
+            for entity in entity_results:
+                if "entity_name" in entity:
+                    entity_name = entity["entity_name"]
+                    if await self.graph_store.has_node(entity_name):
+                        edges = await self.graph_store.get_node_edges(entity_name)
+                        if edges:
+                            edge_data = []
+                            for edge in edges:
+                                edge_info = await self.graph_store.get_edge(edge[0], edge[1])
+                                if edge_info:
+                                    edge_data.append({
+                                        "source": edge[0],
+                                        "target": edge[1],
+                                        "data": edge_info
+                                    })
+                            relevant_edges.extend(edge_data)
 
             return {
-                "vector_results": vector_results,
-                "text_chunks": chunks,
-                "relevant_entities": relevant_nodes
+                "chunks": chunks,
+                "entities": entity_results,
+                "relationships": relevant_edges
             }
 
         except Exception as e:
@@ -228,30 +278,27 @@ class ExtractionExample:
         os.makedirs(export_dir, exist_ok=True)
 
         try:
-            # 导出向量存储
-            self.vector_store.vector_store.export_nodes(
-                os.path.join(export_dir, "vector_nodes.json"),
-                include_embeddings=True
-            )
-
-            # 导出图数据统计
-            graph_stats = {
-                "total_nodes": len(list(self.graph_store._graph.nodes())),
-                "total_edges": len(list(self.graph_store._graph.edges())),
-                "node_degrees": dict(self.graph_store._graph.degree()),
-                "largest_component_size": len(self.graph_store.get_largest_connected_component())
-            }
-
-            with open(os.path.join(export_dir, "graph_stats.json"), "w") as f:
-                json.dump(graph_stats, f, indent=2)
-
-            # 导出存储统计
+            # 导出统计信息
             storage_stats = {
-                "chunks": len(self.text_chunks._data),
-                "docs": len(self.full_docs._data),
-                "vector_store": self.vector_store.vector_store.get_statistics()
+                "chunks": {
+                    "total": len(self.text_chunks._data),
+                    "vector_stats": self.chunks_vdb.get_statistics()
+                },
+                "entities": {
+                    "vector_stats": self.entities_vdb.get_statistics()
+                },
+                "relationships": {
+                    "vector_stats": self.relationships_vdb.get_statistics()
+                },
+                "graph": {
+                    "total_nodes": len(list(self.graph_store._graph.nodes())),
+                    "total_edges": len(list(self.graph_store._graph.edges())),
+                    "node_degrees": dict(self.graph_store._graph.degree()),
+                    "largest_component_size": len(self.graph_store.get_largest_connected_component())
+                }
             }
 
+            # 导出统计
             with open(os.path.join(export_dir, "storage_stats.json"), "w") as f:
                 json.dump(storage_stats, f, indent=2)
 
@@ -299,19 +346,6 @@ async def main():
         the company's commitment to innovation and sustainability. The new iPhone 
         features groundbreaking AI capabilities.
         """,
-
-        # "business_news": """
-        # Microsoft and OpenAI expanded their partnership today.
-        # Satya Nadella emphasized the importance of AI development while
-        # Sam Altman discussed the future of large language models. The collaboration
-        # aims to accelerate AI research and deployment.
-        # """,
-        #
-        # "science_paper": """
-        # Researchers at DeepMind published a breakthrough paper on quantum computing.
-        # The team demonstrated novel approaches to quantum error correction.
-        # Dr. Sarah Johnson led the research, collaborating with Google's quantum lab.
-        # """
     }
 
     try:

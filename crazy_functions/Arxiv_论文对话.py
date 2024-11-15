@@ -1,8 +1,8 @@
 import os.path
 
 from toolbox import CatchException, update_ui
-from crazy_functions.rag_essay_fns.paper_processing import ArxivPaperProcessor
-import asyncio
+from crazy_functions.rag_fns.arxiv_fns.paper_processing import ArxivPaperProcessor
+
 
 @CatchException
 def Rag论文对话(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
@@ -12,14 +12,14 @@ def Rag论文对话(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     """
     if_project, if_arxiv = False, False
     if os.path.exists(txt):
-        from crazy_functions.rag_essay_fns.document_splitter import SmartDocumentSplitter
+        from crazy_functions.rag_fns.doc_fns.document_splitter import SmartDocumentSplitter
         splitter = SmartDocumentSplitter(
             char_range=(1000, 1200),
             max_workers=32  # 可选，默认会根据CPU核心数自动设置
         )
         if_project = True
     else:
-        from crazy_functions.rag_essay_fns.arxiv_splitter import SmartArxivSplitter
+        from crazy_functions.rag_fns.arxiv_fns.arxiv_splitter import SmartArxivSplitter
         splitter = SmartArxivSplitter(
             char_range=(1000, 1200),
             root_dir="gpt_log/arxiv_cache"
@@ -61,23 +61,3 @@ def Rag论文对话(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     yield from update_ui(chatbot=chatbot, history=history)
     
     # 交互式问答
-    chatbot.append(["知识图谱构建完成", "您可以开始提问了。支持以下类型的问题：\n1. 论文的具体内容\n2. 研究方法的细节\n3. 实验结果分析\n4. 与其他工作的比较"])
-    yield from update_ui(chatbot=chatbot, history=history)
-    
-    # 等待用户提问并回答
-    while True:
-        question = yield from wait_user_input()
-        if not question:
-            break
-            
-        # 根据问题类型选择不同的查询模式
-        if "比较" in question or "关系" in question:
-            mode = "global"  # 使用全局模式处理比较类问题
-        elif "具体" in question or "细节" in question:
-            mode = "local"   # 使用局部模式处理细节问题
-        else:
-            mode = "hybrid"  # 默认使用混合模式
-            
-        response = rag_handler.query(question, mode=mode)
-        chatbot.append([question, response])
-        yield from update_ui(chatbot=chatbot, history=history)
