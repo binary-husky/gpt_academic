@@ -1349,16 +1349,9 @@ async function multiplex_function_begin(multiplex_sel) {
         click_real_submit_btn();
         return;
     }
-    if (multiplex_sel === "多模型对话") {
-        let _align_name_in_crazy_function_py = "询问多个GPT模型";
-        call_plugin_via_name(_align_name_in_crazy_function_py);
-        return;
-    }
-    if (multiplex_sel === "智能召回 RAG") {
-        let _align_name_in_crazy_function_py = "Rag智能召回";
-        call_plugin_via_name(_align_name_in_crazy_function_py);
-        return;
-    }
+
+    // do not delete `REPLACE_EXTENDED_MULTIPLEX_FUNCTIONS_HERE`! It will be read and replaced by Python code.
+    // REPLACE_EXTENDED_MULTIPLEX_FUNCTIONS_HERE
 }
 async function run_multiplex_shift(multiplex_sel){
     let key = multiplex_sel;

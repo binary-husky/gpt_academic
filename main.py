@@ -68,7 +68,7 @@ def main():
     functional = get_core_functions()
 
     # 高级函数插件
-    from crazy_functional import get_crazy_functions
+    from crazy_functional import get_crazy_functions, get_multiplex_button_functions
     DEFAULT_FN_GROUPS = get_conf('DEFAULT_FN_GROUPS')
     plugins = get_crazy_functions()
     all_plugin_groups = list(set([g for _, plugin in plugins.items() for g in plugin['Group'].split('|')]))
@@ -114,12 +114,7 @@ def main():
                     with gr.Row(elem_id="gpt-submit-row"):
                         multiplex_submit_btn = gr.Button("提交", elem_id="elem_submit_visible", variant="primary")
                         multiplex_sel = gr.Dropdown(
-                            choices=[
-                                "常规对话", 
-                                "多模型对话", 
-                                "智能召回 RAG",
-                                # "智能上下文", 
-                            ], value="常规对话",
+                            choices=get_multiplex_button_functions().keys(), value="常规对话",
                             interactive=True, label='', show_label=False,
                             elem_classes='normal_mut_select', elem_id="gpt-submit-dropdown").style(container=False)
                         submit_btn = gr.Button("提交", elem_id="elem_submit", variant="primary", visible=False)

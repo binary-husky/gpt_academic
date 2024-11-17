@@ -2,7 +2,6 @@ from toolbox import HotReload  # HotReload 的意思是热更新，修改函数�
 from toolbox import trimmed_format_exc
 from loguru import logger
 
-
 def get_crazy_functions():
     from crazy_functions.读文章写摘要 import 读文章写摘要
     from crazy_functions.生成函数注释 import 批量生成函数注释
@@ -728,12 +727,6 @@ def get_crazy_functions():
         logger.error("Load function plugin failed")
 
 
-    
-
-
-
-
-
     # try:
     #     from crazy_functions.高级功能函数模板 import 测试图表渲染
     #     function_plugins.update({
@@ -748,19 +741,6 @@ def get_crazy_functions():
     #     logger.error(trimmed_format_exc())
     #     print('Load function plugin failed')
 
-    # try:
-    #     from crazy_functions.chatglm微调工具 import 微调数据集生成
-    #     function_plugins.update({
-    #         "黑盒模型学习: 微调数据集生成 (先上传数据集)": {
-    #             "Color": "stop",
-    #             "AsButton": False,
-    #             "AdvancedArgs": True,
-    #             "ArgsReminder": "针对数据集输入（如 绿帽子*深蓝色衬衫*黑色运动裤）给出指令，例如您可以将以下命令复制到下方: --llm_to_learn=azure-gpt-3.5 --prompt_prefix='根据下面的服装类型提示，想象一个穿着者，对这个人外貌、身处的环境、内心世界、过去经历进行描写。要求：100字以内，用第二人称。' --system_prompt=''",
-    #             "Function": HotReload(微调数据集生成)
-    #         }
-    #     })
-    # except:
-    #     print('Load function plugin failed')
 
     """
     设置默认值:
@@ -780,3 +760,23 @@ def get_crazy_functions():
             function_plugins[name]["Color"] = "secondary"
 
     return function_plugins
+
+
+
+
+def get_multiplex_button_functions():
+    """多路复用主提交按钮的功能映射
+    """
+    return {
+        "常规对话":
+            "",
+
+        "多模型对话": 
+            "询问多个GPT模型", # 映射到上面的 `询问多个GPT模型` 插件
+
+        "智能召回 RAG": 
+            "Rag智能召回", # 映射到上面的 `Rag智能召回` 插件
+
+        "多媒体查询": 
+            "多媒体智能体", # 映射到上面的 `多媒体智能体` 插件
+    }

@@ -2,6 +2,25 @@ from functools import lru_cache
 from toolbox import get_conf
 CODE_HIGHLIGHT, ADD_WAIFU, LAYOUT = get_conf("CODE_HIGHLIGHT", "ADD_WAIFU", "LAYOUT")
 
+def inject_mutex_button_code(js_content):
+    from crazy_functional import get_multiplex_button_functions
+    fns = get_multiplex_button_functions()
+
+    template = """
+    if (multiplex_sel === "{x}") {
+        let _align_name_in_crazy_function_py = "{y}";
+        call_plugin_via_name(_align_name_in_crazy_function_py);
+        return;
+    }
+    """
+
+    replacement = ""
+    for fn in fns.keys():
+        if fn == "常规对话": continue
+        replacement += template.replace("{x}", fn).replace("{y}", fns[fn])
+    js_content = js_content.replace("// REPLACE_EXTENDED_MULTIPLEX_FUNCTIONS_HERE", replacement)
+    return js_content
+
 def minimize_js(common_js_path):
     try:
         import rjsmin, hashlib, glob, os
@@ -12,6 +31,8 @@ def minimize_js(common_js_path):
         c_jsmin = rjsmin.jsmin
         with open(common_js_path, "r") as f:
             js_content = f.read()
+        if common_js_path == "themes/common.js":
+            js_content = inject_mutex_button_code(js_content)
         minimized_js_content = c_jsmin(js_content)
         # compute sha256 hash of minimized js content
         sha_hash = hashlib.sha256(minimized_js_content.encode()).hexdigest()[:8]
