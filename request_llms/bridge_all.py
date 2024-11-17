@@ -212,6 +212,16 @@ model_info = {
         "token_cnt": get_token_num_gpt4,
     },
 
+    "chatgpt-4o-latest": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": openai_endpoint,
+        "has_multimodal_capacity": True,
+        "max_token": 128000,
+        "tokenizer": tokenizer_gpt4,
+        "token_cnt": get_token_num_gpt4,
+    },
+
     "gpt-4o-2024-05-13": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,

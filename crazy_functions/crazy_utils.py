@@ -169,6 +169,7 @@ def can_multi_process(llm) -> bool:
     def default_condition(llm) -> bool:
         # legacy condition
         if llm.startswith('gpt-'): return True
+        if llm.startswith('chatgpt-'): return True
         if llm.startswith('api2d-'): return True
         if llm.startswith('azure-'): return True
         if llm.startswith('spark'): return True

@@ -16,7 +16,7 @@ def get_crazy_functions():
     from crazy_functions.SourceCode_Analyse import 解析一个前端项目
     from crazy_functions.高级功能函数模板 import 高阶功能模板函数
     from crazy_functions.高级功能函数模板 import Demo_Wrap
-    from crazy_functions.Latex全文润色 import Latex英文润色
+    from crazy_functions.Latex_Project_Polish import Latex英文润色
     from crazy_functions.询问多个大语言模型 import 同时问询
     from crazy_functions.SourceCode_Analyse import 解析一个Lua项目
     from crazy_functions.SourceCode_Analyse import 解析一个CSharp项目
@@ -32,8 +32,8 @@ def get_crazy_functions():
     from crazy_functions.PDF_Translate import 批量翻译PDF文档
     from crazy_functions.谷歌检索小助手 import 谷歌检索小助手
     from crazy_functions.理解PDF文档内容 import 理解PDF文档内容标准文件输入
-    from crazy_functions.Latex全文润色 import Latex中文润色
-    from crazy_functions.Latex全文润色 import Latex英文纠错
+    from crazy_functions.Latex_Project_Polish import Latex中文润色
+    from crazy_functions.Latex_Project_Polish import Latex英文纠错
     from crazy_functions.Markdown_Translate import Markdown中译英
     from crazy_functions.虚空终端 import 虚空终端
     from crazy_functions.生成多种Mermaid图表 import Mermaid_Gen
