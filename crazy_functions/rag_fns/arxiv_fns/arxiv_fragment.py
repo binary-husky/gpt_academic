@@ -14,6 +14,7 @@ class ArxivFragment:
     section: str  # 所属章节
     is_appendix: bool  # 是否是附录
     importance: float = 1.0  # 重要性得分
+    arxiv_id: str = ""  # 添加 arxiv_id 属性
 
     @staticmethod
     def merge_segments(seg1: 'ArxivFragment', seg2: 'ArxivFragment') -> 'ArxivFragment':

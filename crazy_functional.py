@@ -619,23 +619,6 @@ def get_crazy_functions():
         logger.error(trimmed_format_exc())
         logger.error("Load function plugin failed")
 
-    try:
-        from crazy_functions.Arxiv_论文对话 import Arxiv论文对话
-
-        function_plugins.update(
-            {
-                "Arxiv论文对话": {
-                    "Group": "对话",
-                    "Color": "stop",
-                    "AsButton": False,
-                    "Info": "将问答数据记录到向量库中，作为长期参考。",
-                    "Function": HotReload(Arxiv论文对话),
-                },
-            }
-        )
-    except:
-        logger.error(trimmed_format_exc())
-        logger.error("Load function plugin failed")
 
     
 
