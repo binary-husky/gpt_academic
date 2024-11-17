@@ -15,7 +15,7 @@ def get_crazy_functions():
     from crazy_functions.SourceCode_Analyse import 解析一个Rust项目
     from crazy_functions.SourceCode_Analyse import 解析一个Java项目
     from crazy_functions.SourceCode_Analyse import 解析一个前端项目
-    from crazy_functions.Arxiv_论文对话 import Rag论文对话
+    from crazy_functions.Arxiv_论文对话 import Arxiv论文对话
     from crazy_functions.高级功能函数模板 import 高阶功能模板函数
     from crazy_functions.高级功能函数模板 import Demo_Wrap
     from crazy_functions.Latex全文润色 import Latex英文润色
@@ -31,6 +31,8 @@ def get_crazy_functions():
     from crazy_functions.Markdown_Translate import Markdown英译中
     from crazy_functions.批量总结PDF文档 import 批量总结PDF文档
     from crazy_functions.PDF_Translate import 批量翻译PDF文档
+    from crazy_functions.批量文件询问 import 批量文件询问
+
     from crazy_functions.谷歌检索小助手 import 谷歌检索小助手
     from crazy_functions.理解PDF文档内容 import 理解PDF文档内容标准文件输入
     from crazy_functions.Latex全文润色 import Latex中文润色
@@ -74,12 +76,25 @@ def get_crazy_functions():
             "Function": HotReload(Latex翻译中文并重新编译PDF),  # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
             "Class": Arxiv_Localize,    # 新一代插件需要注册Class
         },
-        "Rag论文对话": {
+        "批量文件询问": {
             "Group": "学术",
             "Color": "stop",
             "AsButton": False,
-            "Info": "Arixv论文精细翻译 | 输入参数arxiv论文的ID，比如1812.10695",
-            "Function": HotReload(Rag论文对话),  # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
+            "AdvancedArgs": True,
+            "Info": "通过在高级参数区写入prompt，可自定义询问逻辑，默认情况下为总结逻辑 | 输入参数为路径",
+            "ArgsReminder": r"1、请不要更改上方输入框中以“private_upload/...”开头的路径。 "
+                            r"2、请在下方高级参数区中输入你的prompt，文档中的内容将被添加你的prompt后。3、示例：“请总结下面的内容：”，此时，文档内容将添加在“：”后 ",
+            "Function": HotReload(批量文件询问),
+        },
+        "Arxiv论文对话": {
+            "Group": "学术",
+            "Color": "stop",
+            "AsButton": False,
+            "AdvancedArgs": True,
+            "Info": "通过在高级参数区写入prompt，可自定义询问逻辑，默认情况下为总结逻辑 | 输入参数为路径",
+            "ArgsReminder": r"1、请不要更改上方输入框中以“private_upload/...”开头的路径。 "
+                            r"2、请在下方高级参数区中输入你的prompt，文档中的内容将被添加你的prompt后。3、示例：“这篇文章的方法是什么：” ",
+            "Function": HotReload(Arxiv论文对话),
         },
         "翻译README或MD": {
             "Group": "编程",
@@ -604,6 +619,23 @@ def get_crazy_functions():
         logger.error(trimmed_format_exc())
         logger.error("Load function plugin failed")
 
+    try:
+        from crazy_functions.Arxiv_论文对话 import Arxiv论文对话
+
+        function_plugins.update(
+            {
+                "Arxiv论文对话": {
+                    "Group": "对话",
+                    "Color": "stop",
+                    "AsButton": False,
+                    "Info": "将问答数据记录到向量库中，作为长期参考。",
+                    "Function": HotReload(Arxiv论文对话),
+                },
+            }
+        )
+    except:
+        logger.error(trimmed_format_exc())
+        logger.error("Load function plugin failed")
 
     
 
