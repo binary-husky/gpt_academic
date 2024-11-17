@@ -308,7 +308,7 @@ PLUGIN_HOT_RELOAD = False
 
 # 自定义按钮的最大数量限制
 NUM_CUSTOM_BASIC_BTN = 4
-
+DAAS_SERVER_URL = "http://localhost:48000/stream"
 
 
 """

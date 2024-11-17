@@ -64,7 +64,7 @@ def download_video(bvid, user_name, chatbot, history):
 
     # download audio
     chatbot.append((None, "下载音频, 请稍等...")); yield from update_ui(chatbot=chatbot, history=history)
-    downloaded_files = download_bilibili(bvid, only_audio=True, user_name=user_name)
+    downloaded_files = yield from download_bilibili(bvid, only_audio=True, user_name=user_name, chatbot=chatbot, history=history)
 
     # preview
     preview_list = [promote_file_to_downloadzone(fp) for fp in downloaded_files]
@@ -81,7 +81,7 @@ def download_video(bvid, user_name, chatbot, history):
 
     # download video
     chatbot.append((None, "下载视频, 请稍等...")); yield from update_ui(chatbot=chatbot, history=history)
-    downloaded_files_part2 = download_bilibili(bvid, only_audio=False, user_name=user_name)
+    downloaded_files_part2 = yield from download_bilibili(bvid, only_audio=False, user_name=user_name, chatbot=chatbot, history=history)
 
     # preview
     preview_list = [promote_file_to_downloadzone(fp) for fp in downloaded_files_part2]
