@@ -30,31 +30,19 @@ class VideoResource(BaseModel):
 
 
 def get_video_resource(search_keyword):
-    from experimental_mods.get_search_kw_api_stop import search_videos
-
-    # Default parameters for video search
-    csrf_token = '40a227fcf12c380d7d3c81af2cd8c5e8'  # Using default from main()
-    search_type = 'default'
-    max_pages = 1
-    output_path = 'search_results'
-    config_path = 'experimental_mods/config.json'
+    from crazy_functions.media_fns.get_media import search_videos
 
     # Search for videos and return the first result
     videos = search_videos(
-        keyword=search_keyword,
-        csrf_token=csrf_token,
-        search_type=search_type,
-        max_pages=max_pages,
-        output_path=output_path,
-        config_path=config_path,
-        early_stop=True
+        search_keyword
     )
 
     # Return the first video if results exist, otherwise return None
     return videos
 
 def download_video(bvid, user_name, chatbot, history):
-    from experimental_mods.get_bilibili_resource import download_bilibili
+    # from experimental_mods.get_bilibili_resource import download_bilibili
+    from crazy_functions.media_fns.get_media import download_video
     # pause a while
     tic_time = 8
     for i in range(tic_time):
@@ -64,7 +52,7 @@ def download_video(bvid, user_name, chatbot, history):
 
     # download audio
     chatbot.append((None, "下载音频, 请稍等...")); yield from update_ui(chatbot=chatbot, history=history)
-    downloaded_files = yield from download_bilibili(bvid, only_audio=True, user_name=user_name, chatbot=chatbot, history=history)
+    downloaded_files = yield from download_video(bvid, only_audio=True, user_name=user_name, chatbot=chatbot, history=history)
 
     # preview
     preview_list = [promote_file_to_downloadzone(fp) for fp in downloaded_files]
@@ -81,7 +69,7 @@ def download_video(bvid, user_name, chatbot, history):
 
     # download video
     chatbot.append((None, "下载视频, 请稍等...")); yield from update_ui(chatbot=chatbot, history=history)
-    downloaded_files_part2 = yield from download_bilibili(bvid, only_audio=False, user_name=user_name, chatbot=chatbot, history=history)
+    downloaded_files_part2 = yield from download_video(bvid, only_audio=False, user_name=user_name, chatbot=chatbot, history=history)
 
     # preview
     preview_list = [promote_file_to_downloadzone(fp) for fp in downloaded_files_part2]

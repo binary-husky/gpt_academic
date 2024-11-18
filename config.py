@@ -308,7 +308,11 @@ PLUGIN_HOT_RELOAD = False
 
 # 自定义按钮的最大数量限制
 NUM_CUSTOM_BASIC_BTN = 4
-DAAS_SERVER_URL = "http://localhost:48000/stream"
+
+
+# 媒体智能体的服务地址（这是一个huggingface空间，请前往huggingface复制该空间，然后把自己新的空间地址填在这里）
+DAAS_SERVER_URL = "https://hamercity-bbdown.hf.space/stream"
+
 
 
 """
