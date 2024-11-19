@@ -29,7 +29,7 @@ def minimize_js(common_js_path):
             os.remove(old_min_js)
         # use rjsmin to minimize `common_js_path`
         c_jsmin = rjsmin.jsmin
-        with open(common_js_path, "r") as f:
+        with open(common_js_path, "r", encoding='utf-8') as f:
             js_content = f.read()
         if common_js_path == "themes/common.js":
             js_content = inject_mutex_button_code(js_content)
@@ -38,7 +38,7 @@ def minimize_js(common_js_path):
         sha_hash = hashlib.sha256(minimized_js_content.encode()).hexdigest()[:8]
         minimized_js_path = common_js_path + '.min.' + sha_hash + '.js'
         # save to minimized js file
-        with open(minimized_js_path, "w") as f:
+        with open(minimized_js_path, "w", encoding='utf-8') as f:
             f.write(minimized_js_content)
         # return minimized js file path
         return minimized_js_path

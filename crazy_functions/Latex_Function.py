@@ -559,7 +559,7 @@ def PDF翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot, h
     project_folder = move_project(project_folder)
 
     # <-------------- set a hash tag for repeat-checking ------------->
-    with open(pj(project_folder, hash_tag + '.tag'), 'w') as f:
+    with open(pj(project_folder, hash_tag + '.tag'), 'w', encoding='utf8') as f:
         f.write(hash_tag)
         f.close()
 
