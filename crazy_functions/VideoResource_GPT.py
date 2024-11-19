@@ -20,7 +20,6 @@ from pydantic import BaseModel, Field
 class Query(BaseModel):
     search_keyword: str = Field(description="search query for video resource")
 
-# {'title': '【麦笛奈Martine】天文馆的猫 | Diffsinger Lynxnet版本中文试听【Cover 泠鸢·折纸信笺】', 'author': '灰条纹的灰猫君', 'author_id': 2083633, 'bvid': 'BV1LSSHYXEtv', '播放量': 75, '弹幕': 0, '评论': 7, '点赞': 5, '发布时间': '2024-10-31 22:10:08', '视频时长': '4:40', 'tag': '虚拟歌姬,鸟蛋,冷鸟,女声翻唱,泠鸢yousa,虚拟主播,虚拟UP主,VTuber,Diffsinger,虚拟歌手分享官,虚拟之声创作计划·2024第三期', 'description': '翻唱：麦笛奈Martine\n调混：灰条纹的灰猫君\nQ版曲绘：西柚Kanno\n原曲：Av847726911\n原唱：泠鸢\n\n滑铲——月更！\n万圣节快乐！今天是和喵星发电报的可爱猫猫~'}
 
 class VideoResource(BaseModel):
     thought: str = Field(description="analysis of the search results based on the user's query")
