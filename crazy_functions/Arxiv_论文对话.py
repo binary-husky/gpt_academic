@@ -163,10 +163,7 @@ class ArxivRagWorker:
         try:
             text = (
                 f"Paper Title: {fragment.title}\n"
-                f"Abstract: {fragment.abstract}\n"
-                f"ArXiv ID: {fragment.arxiv_id}\n"
                 f"Section: {fragment.current_section}\n"
-                f"Section Tree: {fragment.section_tree}\n"
                 f"Content: {fragment.content}\n"
                 f"Bibliography: {fragment.bibliography}\n"
                 f"Type: FRAGMENT"
@@ -179,24 +176,6 @@ class ArxivRagWorker:
         except Exception as e:
             logger.error(f"Error processing fragment {index}: {str(e)}")
             raise        """处理单个论文片段"""
-        try:
-            text = (
-                f"Paper Title: {fragment.title}\n"
-                f"Abstract: {fragment.abstract}\n"
-                f"ArXiv ID: {fragment.arxiv_id}\n"
-                f"Section: {fragment.current_section}\n"
-                f"Section Tree: {fragment.section_tree}\n"
-                f"Content: {fragment.content}\n"
-                f"Bibliography: {fragment.bibliography}\n"
-                f"Type: FRAGMENT"
-            )
-            logger.info(f"Processing fragment {index} for paper {fragment.arxiv_id}")
-            self.rag_worker.add_text_to_vector_store(text)
-            logger.info(f"Successfully added fragment {index} to vector store")
-
-        except Exception as e:
-            logger.error(f"Error processing fragment {index}: {str(e)}")
-            raise
 
     async def process_paper(self, arxiv_id: str) -> bool:
         """处理论文主函数"""
@@ -362,9 +341,9 @@ def Arxiv论文对话(txt: str, llm_kwargs: Dict, plugin_kwargs: Dict, chatbot: 
             if success:
                 arxiv_id = worker._normalize_arxiv_id(txt)
                 success = loop.run_until_complete(worker.wait_for_paper(arxiv_id))
-                if success:
-                    # 执行自动分析
-                    yield from worker.auto_analyze_paper(chatbot, history, system_prompt)
+                # if success:
+                #     # 执行自动分析
+                #     yield from worker.auto_analyze_paper(chatbot, history, system_prompt)
         finally:
             loop.close()
 
@@ -379,11 +358,11 @@ def Arxiv论文对话(txt: str, llm_kwargs: Dict, plugin_kwargs: Dict, chatbot: 
     # 处理用户询问的情况
     # 获取用户询问指令
     user_query = plugin_kwargs.get("advanced_arg", "What is the main research question or problem addressed in this paper?")
-    user_query = "What is the main research question or problem addressed in this paper about graph attention network?"
-    # if not user_query:
-    #     chatbot.append((txt, "请提供您的问题。"))
-    #     yield from update_ui(chatbot=chatbot, history=history)
-    #     return
+    if not user_query:
+        user_query = "What is the main research question or problem addressed in this paper about graph attention network?"
+        # chatbot.append((txt, "请提供您的问题。"))
+        # yield from update_ui(chatbot=chatbot, history=history)
+        # return
 
     # 处理历史对话长度
     if len(history) > MAX_HISTORY_ROUND * 2:
@@ -428,7 +407,7 @@ def Arxiv论文对话(txt: str, llm_kwargs: Dict, plugin_kwargs: Dict, chatbot: 
     )
 
     # 记忆问答对
-    worker.remember_qa(query_to_remember, response)
+    # worker.remember_qa(query_to_remember, response)
     history.extend([user_query, response])
 
     yield from update_ui(chatbot=chatbot, history=history)
