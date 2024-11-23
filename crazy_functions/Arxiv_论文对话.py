@@ -51,10 +51,7 @@ class ArxivRagWorker:
 
         # 初始化基础存储目录
         self.base_dir = Path(get_log_folder(user_name, plugin_name='rag_cache'))
-        if os.path.exists(self.base_dir):
-            self.loading = True
-        else:
-            self.loading = False
+
         # 如果提供了 arxiv_id,创建针对该论文的子目录
         if self.arxiv_id:
             self.checkpoint_dir = self.base_dir / self.arxiv_id
@@ -67,6 +64,10 @@ class ArxivRagWorker:
             self.fragment_store_dir = self.base_dir / "fragments"
 
         # 创建必要的目录
+        if os.path.exists(self.vector_store_dir):
+            self.loading = True
+        else:
+            self.loading = False
         self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
         self.vector_store_dir.mkdir(parents=True, exist_ok=True)
         self.fragment_store_dir.mkdir(parents=True, exist_ok=True)
@@ -399,11 +400,11 @@ def Arxiv论文对话(txt: str, llm_kwargs: Dict, plugin_kwargs: Dict, chatbot: 
     # 处理用户询问的情况
     # 获取用户询问指令
     user_query = plugin_kwargs.get("advanced_arg", "What is the main research question or problem addressed in this paper?")
-    # user_query = "What is the main research question or problem addressed in this paper about graph attention network?"
-    if not user_query:
-        chatbot.append((txt, "请提供您的问题。"))
-        yield from update_ui(chatbot=chatbot, history=history)
-        return
+    user_query = "What is the main research question or problem addressed in this paper about graph attention network?"
+    # if not user_query:
+    #     chatbot.append((txt, "请提供您的问题。"))
+    #     yield from update_ui(chatbot=chatbot, history=history)
+    #     return
 
     # 处理历史对话长度
     if len(history) > MAX_HISTORY_ROUND * 2:
