@@ -90,7 +90,6 @@ class ArxivRagWorker:
         # 初始化arxiv splitter
         # 初始化 arxiv splitter
         self.arxiv_splitter = ArxivSplitter(
-            char_range=(1000, 1200),
             root_dir=str(self.checkpoint_dir / "arxiv_cache")
         )
         # 初始化处理队列和线程池
