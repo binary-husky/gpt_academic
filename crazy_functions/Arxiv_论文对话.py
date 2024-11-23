@@ -11,7 +11,7 @@ import aiohttp
 from shared_utils.fastapi_server import validate_path_safety
 from toolbox import CatchException, update_ui, get_conf, get_log_folder, update_ui_lastest_msg
 from crazy_functions.rag_fns.arxiv_fns.arxiv_splitter import ArxivSplitter, save_fragments_to_file
-from crazy_functions.rag_fns.arxiv_fns.arxiv_fragment import ArxivFragment as Fragment
+from crazy_functions.rag_fns.arxiv_fns.section_fragment import SectionFragment as Fragment
 
 from crazy_functions.rag_fns.llama_index_worker import LlamaIndexRagWorker
 from crazy_functions.crazy_utils import input_clipping
@@ -124,12 +124,14 @@ class ArxivRagWorker:
             "title": fragments[0].title,
             "abstract": fragments[0].abstract,
             "arxiv_id": fragments[0].arxiv_id,
+            "section_tree": fragments[0].section_tree,
         }
 
         overview_text = (
             f"Paper Title: {overview['title']}\n"
             f"ArXiv ID: {overview['arxiv_id']}\n"
             f"Abstract: {overview['abstract']}\n"
+            f"Section Tree:{overview['section_tree']}\n"
             f"Type: OVERVIEW"
         )
 
@@ -161,10 +163,12 @@ class ArxivRagWorker:
         try:
             text = (
                 f"Paper Title: {fragment.title}\n"
+                f"Abstract: {fragment.abstract}\n"
                 f"ArXiv ID: {fragment.arxiv_id}\n"
-                f"Section: {fragment.section}\n"
-                f"Fragment Index: {index}\n"
+                f"Section: {fragment.current_section}\n"
+                f"Section Tree: {fragment.section_tree}\n"
                 f"Content: {fragment.content}\n"
+                f"Bibliography: {fragment.bibliography}\n"
                 f"Type: FRAGMENT"
             )
 
@@ -179,13 +183,14 @@ class ArxivRagWorker:
         try:
             text = (
                 f"Paper Title: {fragment.title}\n"
+                f"Abstract: {fragment.abstract}\n"
                 f"ArXiv ID: {fragment.arxiv_id}\n"
-                f"Section: {fragment.section}\n"
-                f"Fragment Index: {index}\n"
+                f"Section: {fragment.current_section}\n"
+                f"Section Tree: {fragment.section_tree}\n"
                 f"Content: {fragment.content}\n"
+                f"Bibliography: {fragment.bibliography}\n"
                 f"Type: FRAGMENT"
             )
-
             logger.info(f"Processing fragment {index} for paper {fragment.arxiv_id}")
             self.rag_worker.add_text_to_vector_store(text)
             logger.info(f"Successfully added fragment {index} to vector store")

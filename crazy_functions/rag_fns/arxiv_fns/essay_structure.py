@@ -5,75 +5,28 @@ This module provides functionality for parsing and extracting structured informa
 including metadata, document structure, and content. It uses modular design and clean architecture principles.
 """
 
-
 import re
 from abc import ABC, abstractmethod
-from enum import Enum
 import logging
+from dataclasses import dataclass, field
+from typing import List, Optional, Dict
+from copy import deepcopy
+from crazy_functions.rag_fns.arxiv_fns.latex_cleaner import clean_latex_commands
+from crazy_functions.rag_fns.arxiv_fns.section_extractor import Section, SectionLevel, EnhancedSectionExtractor
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-from dataclasses import dataclass, field
-from typing import List, Optional, Dict
-from enum import Enum
-import logging
-from copy import deepcopy
-from crazy_functions.rag_fns.arxiv_fns.latex_cleaner import clean_latex_commands
 
-logger = logging.getLogger(__name__)
-
-
-class SectionLevel(Enum):
-    CHAPTER = 0
-    SECTION = 1
-    SUBSECTION = 2
-    SUBSUBSECTION = 3
-    PARAGRAPH = 4
-    SUBPARAGRAPH = 5
-
-
-@dataclass
-class Section:
-    level: SectionLevel
-    title: str
-    content: str = ''
-    subsections: List['Section'] = field(default_factory=list)
-
-    def merge(self, other: 'Section') -> 'Section':
-        """Merge this section with another section."""
-        if self.title != other.title or self.level != other.level:
-            raise ValueError("Can only merge sections with same title and level")
-
-        merged = deepcopy(self)
-        merged.content = self._merge_content(self.content, other.content)
-
-        # Create subsections lookup for efficient merging
-        subsections_map = {s.title: s for s in merged.subsections}
-
-        for other_subsection in other.subsections:
-            if other_subsection.title in subsections_map:
-                # Merge existing subsection
-                idx = next(i for i, s in enumerate(merged.subsections)
-                           if s.title == other_subsection.title)
-                merged.subsections[idx] = merged.subsections[idx].merge(other_subsection)
-            else:
-                # Add new subsection
-                merged.subsections.append(deepcopy(other_subsection))
-
-        return merged
-
-    @staticmethod
-    def _merge_content(content1: str, content2: str) -> str:
-        """Merge content strings intelligently."""
-        if not content1:
-            return content2
-        if not content2:
-            return content1
-        # Combine non-empty contents with a separator
-        return f"{content1}\n\n{content2}"
-
+def read_tex_file(file_path):
+    encodings = ['utf-8', 'latin1', 'gbk', 'gb2312', 'ascii']
+    for encoding in encodings:
+        try:
+            with open(file_path, 'r', encoding=encoding) as f:
+                return f.read()
+        except UnicodeDecodeError:
+            continue
 
 @dataclass
 class DocumentStructure:
@@ -114,7 +67,7 @@ class DocumentStructure:
                 if other_section.title in sections_map:
                     # Merge existing section
                     idx = next(i for i, s in enumerate(merged.toc)
-                               if s.title == other_section.title)
+                             if s.title == other_section.title)
                     merged.toc[idx] = merged.toc[idx].merge(other_section)
                 else:
                     # Add new section
@@ -132,11 +85,69 @@ class DocumentStructure:
         # Combine non-empty abstracts with a separator
         return f"{abstract1}\n\n{abstract2}"
 
+    def generate_toc_tree(self, indent_char: str = "  ", abstract_preview_length: int = 0) -> str:
+        """
+        Generate a tree-like string representation of the table of contents including abstract.
 
+        Args:
+            indent_char: Character(s) used for indentation. Default is two spaces.
+            abstract_preview_length: Maximum length of abstract preview. Default is 200 characters.
 
+        Returns:
+            str: A formatted string showing the hierarchical document structure with abstract
+        """
 
+        def _format_section(section: Section, level: int = 0) -> str:
+            # Create the current section line with proper indentation
+            current_line = f"{indent_char * level}{'•' if level > 0 else '○'} {section.title}\n"
 
+            # Recursively process subsections
+            subsections = ""
+            if section.subsections:
+                subsections = "".join(_format_section(subsec, level + 1)
+                                      for subsec in section.subsections)
 
+            return current_line + subsections
+
+        result = []
+
+        # Add document title if it exists
+        if self.title:
+            result.append(f"《{self.title}》\n")
+
+        # Add abstract if it exists
+        if self.abstract:
+            result.append("\n□ Abstract:")
+            # Format abstract content with word wrap
+            abstract_preview = self.abstract[:abstract_preview_length]
+            if len(self.abstract) > abstract_preview_length:
+                abstract_preview += "..."
+
+            # Split abstract into lines and indent them
+            wrapped_lines = []
+            current_line = ""
+            for word in abstract_preview.split():
+                if len(current_line) + len(word) + 1 <= 80:  # 80 characters per line
+                    current_line = (current_line + " " + word).strip()
+                else:
+                    wrapped_lines.append(current_line)
+                    current_line = word
+            if current_line:
+                wrapped_lines.append(current_line)
+
+            # Add formatted abstract lines
+            for line in wrapped_lines:
+                result.append(f"\n{indent_char}{line}")
+            result.append("\n")  # Add extra newline after abstract
+
+        # Add table of contents header if there are sections
+        if self.toc:
+            result.append("\n◈ Table of Contents:\n")
+
+            # Add all top-level sections and their subsections
+            result.extend(_format_section(section, 0) for section in self.toc)
+
+        return "".join(result)
 class BaseExtractor(ABC):
     """Base class for LaTeX content extractors."""
 
@@ -144,7 +155,6 @@ class BaseExtractor(ABC):
     def extract(self, content: str) -> str:
         """Extract specific content from LaTeX document."""
         pass
-
 
 class TitleExtractor(BaseExtractor):
     """Extracts title from LaTeX document."""
@@ -169,7 +179,6 @@ class TitleExtractor(BaseExtractor):
                     return clean_latex_commands(title)
         return ''
 
-
 class AbstractExtractor(BaseExtractor):
     """Extracts abstract from LaTeX document."""
 
@@ -193,70 +202,13 @@ class AbstractExtractor(BaseExtractor):
                     return clean_latex_commands(abstract)
         return ''
 
-
-class SectionExtractor:
-    """Extracts document structure including sections and their content."""
-
-    def __init__(self):
-        self.section_pattern = self._compile_section_pattern()
-
-    def _compile_section_pattern(self) -> str:
-        """Create pattern for matching section commands."""
-        section_types = '|'.join(level.name.lower() for level in SectionLevel)
-        return fr'\\({section_types})\*?(?:\[.*?\])?\{{(.*?)\}}'
-
-    def extract(self, content: str) -> List[Section]:
-        """Extract sections and build document hierarchy."""
-        sections = []
-        section_stack = []
-        matches = list(re.finditer(self.section_pattern, content, re.IGNORECASE))
-
-        for i, match in enumerate(matches):
-            cmd_type = match.group(1).lower()
-            section_title = match.group(2)
-            level = SectionLevel[cmd_type.upper()]
-
-            content = self._extract_section_content(content, match,
-                                                    matches[i + 1] if i < len(matches) - 1 else None)
-
-            new_section = Section(
-                level=level,
-                title=clean_latex_commands(section_title),
-                content=clean_latex_commands(content)
-            )
-
-            self._update_section_hierarchy(sections, section_stack, new_section)
-
-        return sections
-
-    def _extract_section_content(self, content: str, current_match: re.Match,
-                                 next_match: Optional[re.Match]) -> str:
-        """Extract content between current section and next section."""
-        start_pos = current_match.end()
-        end_pos = next_match.start() if next_match else len(content)
-        return content[start_pos:end_pos].strip()
-
-    def _update_section_hierarchy(self, sections: List[Section],
-                                  stack: List[Section], new_section: Section):
-        """Update section hierarchy based on section levels."""
-        while stack and stack[-1].level.value >= new_section.level.value:
-            stack.pop()
-
-        if stack:
-            stack[-1].subsections.append(new_section)
-        else:
-            sections.append(new_section)
-
-        stack.append(new_section)
-
-
 class EssayStructureParser:
     """Main class for parsing LaTeX documents."""
 
     def __init__(self):
         self.title_extractor = TitleExtractor()
         self.abstract_extractor = AbstractExtractor()
-        self.section_extractor = SectionExtractor()
+        self.section_extractor = EnhancedSectionExtractor()  # Using the enhanced extractor
 
     def parse(self, content: str) -> DocumentStructure:
         """Parse LaTeX document and extract structured information."""
@@ -276,16 +228,7 @@ class EssayStructureParser:
         """Preprocess LaTeX content for parsing."""
         # Remove comments
         content = re.sub(r'(?<!\\)%.*$', '', content, flags=re.MULTILINE)
-
-        # # Handle input/include commands
-        # content = re.sub(r'\\(?:input|include){.*?}', '', content)
-        #
-        # # Normalize newlines and whitespace
-        # content = re.sub(r'\r\n?', '\n', content)
-        # content = re.sub(r'\n\s*\n', '\n', content)
-
         return content
-
 
 def pretty_print_structure(doc: DocumentStructure, max_content_length: int = 100):
     """Print document structure in a readable format."""
@@ -306,51 +249,32 @@ def pretty_print_structure(doc: DocumentStructure, max_content_length: int = 100
     for section in doc.toc:
         print_section(section)
 
-
 # Example usage:
 if __name__ == "__main__":
-    # Sample main.tex
-    main_tex = r"""
-    \documentclass{article}
-    \title{Research Paper}
-    \begin{document}
-    \begin{abstract}
-    Main abstract introducing the research.
-    \end{abstract}
-    \section{Introduction}
-    Overview of the topic...
-    \section{Background}
-    Part 1 of background...
-    \end{document}
-    """
 
-    # Sample background.tex
-    background_tex = r"""
-    \section{Background}
-    Part 2 of background...
-    \subsection{Related Work}
-    Discussion of related work...
-    \section{Methodology}
-    Research methods...
-    """
 
-    # Parse both files
-    parser = EssayStructureParser()  # Assuming LaTeXParser class from previous code
+    # Test with a file
+    file_path = 'test_cache/2411.03663/neurips_2024.tex'
+    main_tex = read_tex_file(file_path)
+
+    # Parse main file
+    parser = EssayStructureParser()
     main_doc = parser.parse(main_tex)
-    background_doc = parser.parse(background_tex)
 
-    # Merge documents using smart strategy
-    merged_doc = main_doc.merge(background_doc)
+    # Merge other documents
+    file_path_list = [
+        "test_cache/2411.03663/1_intro.tex",
+        "test_cache/2411.03663/0_abstract.tex",
+        "test_cache/2411.03663/2_pre.tex",
+        "test_cache/2411.03663/3_method.tex",
+        "test_cache/2411.03663/4_experiment.tex",
+        "test_cache/2411.03663/5_related_work.tex",
+        "test_cache/2411.03663/6_conclu.tex"
+    ]
+    for file_path in file_path_list:
+        tex_content = read_tex_file(file_path)
+        additional_doc = parser.parse(tex_content)
+        main_doc = main_doc.merge(additional_doc)
 
-    # Example of how sections are merged:
-    print("Original Background section content:",
-          [s for s in main_doc.toc if s.title == "Background"][0].content)
-    print("\nMerged Background section content:",
-          [s for s in merged_doc.toc if s.title == "Background"][0].content)
-    print("\nMerged structure:")
-    pretty_print_structure(merged_doc)  # Assuming pretty_print_structure from previous code
-
-    # Example of appending sections
-    appended_doc = main_doc.merge(background_doc, strategy='append')
-    print("\nAppended structure (may have duplicate sections):")
-    pretty_print_structure(appended_doc)
+    tree= main_doc.generate_toc_tree()
+    pretty_print_structure(main_doc)

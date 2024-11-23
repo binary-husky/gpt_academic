@@ -44,6 +44,9 @@ class LatexConfig:
         # Document setup
         'documentclass', 'usepackage', 'input', 'include', 'includeonly',
         'bibliography', 'bibliographystyle', 'frontmatter', 'mainmatter',
+        'newtheorem', 'theoremstyle', 'proof', 'proofname', 'qed',
+        'newcommand', 'renewcommand', 'providecommand', 'DeclareMathOperator',
+        'newenvironment',
         # Layout and spacing
         'pagestyle', 'thispagestyle', 'vspace', 'hspace', 'vfill', 'hfill',
         'newpage', 'clearpage', 'pagebreak', 'linebreak', 'newline',
@@ -126,12 +129,12 @@ class LatexCleaner:
             cmd = match.group(1).rstrip('*')  # Handle starred versions
             content = match.group(2)
 
-            # Keep math content intact
+            # For these delimiters, return the original math content
             if cmd in {'[', ']', '(', ')', '$'} or cmd in self.config.inline_math_delimiters:
-                return content
+                return match.group(0)
 
-            return content if cmd in self.config.preserve_commands else ' '
-
+            # For preserved commands return content, otherwise return space
+            return match.group(0) if cmd in self.config.preserve_commands else ' '
         # Handle commands with arguments
         text = re.sub(r'\\(\w+)\*?(?:\[.*?\])?{(.*?)}', handle_command, text)
 
@@ -139,7 +142,7 @@ class LatexCleaner:
         text = self._preserve_inline_math(text)
 
         # Remove remaining standalone commands
-        return re.sub(r'\\[a-zA-Z]+\*?(?:\[\])?', '', text)
+        return text
 
     def _preserve_inline_math(self, text: str) -> str:
         """Preserve inline math content."""
@@ -168,7 +171,7 @@ class LatexCleaner:
     def clean_text(self, text: str) -> str:
         """Clean LaTeX text while preserving meaningful content."""
         if not text:
-            raise ValueError("Input text cannot be empty")
+            return ""
 
         try:
             # Remove comments not inside environments
@@ -206,15 +209,32 @@ if __name__ == "__main__":
     \begin{equation}
     F = ma
     \end{equation}
+    \label{sec:intro}
     """)
     print(text)
 
     # Custom configuration
     config = LatexConfig(
-        preserve_envs={'equation', 'theorem'},
+        preserve_envs={},
         preserve_commands={'textbf', 'emph'},
         latex_chars={'~': ' ', '\\&': '&'}
     )
+
+
+    def read_tex_file(file_path):
+        try:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                content = file.read()
+            return content
+        except FileNotFoundError:
+            return "文件未找到，请检查路径是否正确。"
+        except Exception as e:
+            return f"读取文件时发生错误: {e}"
+
+
+    # 使用函数
+    file_path = 'test_cache/2411.03663/neurips_2024.tex'
+    content = read_tex_file(file_path)
     cleaner = LatexCleaner(config)
-    text = cleaner.clean_text(r"\textbf{Custom} cleaning")
+    text = cleaner.clean_text(content)
     print(text)
