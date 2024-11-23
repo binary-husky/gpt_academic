@@ -65,9 +65,9 @@ def save_fragments_to_file(fragments: List[SectionFragment], output_dir: str = "
                 f.write(f"\n### Abstract\n{fragments[0].abstract}\n")
 
         # Write section tree if available
-        if fragments and fragments[0].section_tree:
+        if fragments and fragments[0].catalogs:
             f.write("\n## Section Tree\n")
-            f.write(fragments[0].section_tree)
+            f.write(fragments[0].catalogs)
 
         # Generate table of contents
         f.write("\n## Table of Contents\n")
@@ -689,7 +689,7 @@ class ArxivSplitter:
         try:
             return all([
                 fragment.title.strip(),
-                fragment.section_tree.strip(),
+                fragment.catalogs.strip(),
                 fragment.current_section.strip(),
                 fragment.content.strip() or fragment.bibliography.strip()
             ])

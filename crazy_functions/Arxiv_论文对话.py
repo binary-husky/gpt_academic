@@ -176,7 +176,7 @@ class ArxivRagWorker:
                 f"Paper Title: {first_fragment.title}\n"
                 f"ArXiv ID: {first_fragment.arxiv_id}\n"
                 f"Abstract: {first_fragment.abstract}\n"
-                f"Section Tree:{first_fragment.section_tree}\n"
+                f"Table of contents:{first_fragment.catalogs}\n"
                 f"Type: OVERVIEW"
             )
         }
