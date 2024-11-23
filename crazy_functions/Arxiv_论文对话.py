@@ -140,11 +140,31 @@ class ArxivRagWorker:
             self.rag_worker.add_text_to_vector_store(overview_text)
             logger.info(f"Added paper overview for {overview['arxiv_id']}")
 
-            # 并行处理其余片段
-            tasks = []
-            for i, fragment in enumerate(fragments):
-                tasks.append(self._process_single_fragment(fragment, i))
-            await asyncio.gather(*tasks)
+            # 创建线程池
+            with ThreadPoolExecutor(max_workers=10) as executor:
+                # 使用 asyncio.gather 收集所有任务
+                loop = asyncio.get_event_loop()
+                tasks = [
+                    loop.run_in_executor(
+                        executor,
+                        self._process_single_fragment,
+                        fragment,
+                        i
+                    )
+                    for i, fragment in enumerate(fragments)
+                ]
+
+                # 等待所有任务完成
+                results = await asyncio.gather(*tasks, return_exceptions=True)
+
+                # 处理结果和异常
+                for i, result in enumerate(results):
+                    if isinstance(result, Exception):
+                        logger.error(f"Error processing fragment {i}: {result}")
+                    else:
+                        # 处理成功的结果
+                        pass
+
             logger.info(f"Processed {len(fragments)} fragments successfully")
 
 
