@@ -1,84 +1,7 @@
 class WelcomeMessage {
     constructor() {
         this.static_welcome_message = [
-            {
-                title: "环境配置教程",
-                content: "配置模型和插件，释放大语言模型的学术应用潜力。",
-                svg: "file=themes/svg/conf.svg",
-                url: "https://github.com/binary-husky/gpt_academic/wiki/%E9%A1%B9%E7%9B%AE%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E",
-            },
-            {
-                title: "Arxiv论文翻译",
-                content: "无缝切换学术阅读语言，最优英文转中文的学术论文阅读体验。",
-                svg: "file=themes/svg/arxiv.svg",
-                url: "https://www.bilibili.com/video/BV1dz4y1v77A/",
-            },
-            {
-                title: "多模态模型",
-                content: "试试将截屏直接粘贴到输入框中，随后使用多模态模型提问。",
-                svg: "file=themes/svg/mm.svg",
-                url: "https://github.com/binary-husky/gpt_academic",
-            },
-            {
-                title: "文档与源码批处理",
-                content: "您可以将任意文件拖入「此处」，随后调用对应插件功能。",
-                svg: "file=themes/svg/doc.svg",
-                url: "https://github.com/binary-husky/gpt_academic",
-            },
-            {
-                title: "图表与脑图绘制",
-                content: "试试输入一段语料，然后点击「总结绘制脑图」。",
-                svg: "file=themes/svg/brain.svg",
-                url: "https://www.bilibili.com/video/BV18c41147H9/",
-            },
-            {
-                title: "虚空终端",
-                content: "点击右侧插件区的「虚空终端」插件，然后直接输入您的想法。",
-                svg: "file=themes/svg/vt.svg",
-                url: "https://github.com/binary-husky/gpt_academic",
-            },
-            {
-                title: "DALLE图像生成",
-                content: "接入DALLE生成插画或者项目Logo，辅助头脑风暴并激发灵感。",
-                svg: "file=themes/svg/img.svg",
-                url: "https://github.com/binary-husky/gpt_academic",
-            },
-            {
-                title: "TTS语音克隆",
-                content: "借助SoVits，以您喜爱的角色的声音回答问题。",
-                svg: "file=themes/svg/tts.svg",
-                url: "https://www.bilibili.com/video/BV1Rp421S7tF/",
-            },
-            {
-                title: "实时语音对话",
-                content: "配置实时语音对话功能，无须任何激活词，我将一直倾听。",
-                svg: "file=themes/svg/default.svg",
-                url: "https://github.com/binary-husky/gpt_academic/blob/master/docs/use_audio.md",
-            },
-            {
-                title: "Latex全文润色",
-                content: "上传需要润色的latex论文，让大语言模型帮您改论文。",
-                svg: "file=themes/svg/polish.svg",
-                url: "https://github.com/binary-husky/gpt_academic",
-            },
-            {
-                title: "常见问题与指南",
-                content: "查看项目Wiki文档，解决常见疑问。",
-                svg: "file=themes/svg/check.svg",
-                url: "https://github.com/binary-husky/gpt_academic/wiki",
-            },
-            {
-                title: "接入更多新模型",
-                content: "模型迭代日新月异，一起动手接入更多新的在线或本地大模型吧。",
-                svg: "file=themes/svg/box.svg",
-                url: "https://github.com/binary-husky/gpt_academic/blob/master/request_llms/README.md",
-            },
-            {
-                title: "联动VLLM等服务",
-                content: "借助VLLM和OneApi等第三方服务高效地部署和运行大模型。",
-                svg: "file=themes/svg/location.svg",
-                url: "https://github.com/binary-husky/gpt_academic/wiki/如何更便捷地接入one-api",
-            },
+
         ];
         this.visible = false;
         this.max_welcome_card_num = 6;
@@ -261,7 +184,7 @@ class WelcomeMessage {
         // 创建主标题
         const major_title = document.createElement('div');
         major_title.classList.add('welcome-title');
-        major_title.textContent = "欢迎使用GPT-Academic";
+        major_title.textContent = "欢迎使用";
         welcome_card_container.appendChild(major_title)
 
         // 创建卡片
