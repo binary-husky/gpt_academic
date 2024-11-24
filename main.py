@@ -112,12 +112,12 @@ def main():
                     with gr.Row():
                         txt = gr.Textbox(show_label=False, placeholder="Input question here.", elem_id='user_input_main').style(container=False)
                     with gr.Row(elem_id="gpt-submit-row"):
-                        multiplex_submit_btn = gr.Button("提交", elem_id="elem_submit_visible", variant="primary")
+                        multiplex_submit_btn = gr.Button("蚂小财测试", elem_id="elem_submit_visible", variant="primary")
                         multiplex_sel = gr.Dropdown(
-                            choices=get_multiplex_button_functions().keys(), value="常规对话",
+                            choices=get_multiplex_button_functions().keys(), value="蚂小财测试",
                             interactive=True, label='', show_label=False,
                             elem_classes='normal_mut_select', elem_id="gpt-submit-dropdown").style(container=False)
-                        submit_btn = gr.Button("提交", elem_id="elem_submit", variant="primary", visible=False)
+                        submit_btn = gr.Button("蚂小财测试", elem_id="elem_submit", variant="primary", visible=False)
                     with gr.Row():
                         resetBtn = gr.Button("重置", elem_id="elem_reset", variant="secondary"); resetBtn.style(size="sm")
                         stopBtn = gr.Button("停止", elem_id="elem_stop", variant="secondary"); stopBtn.style(size="sm")

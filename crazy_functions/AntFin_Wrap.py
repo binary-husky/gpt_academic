@@ -1,7 +1,7 @@
 
 from toolbox import get_conf, update_ui
-from crazy_functions.AntFin import 图片生成_DALLE2, 图片生成_DALLE3, 图片修改_DALLE2
 from crazy_functions.plugin_template.plugin_class_template import GptAcademicPluginTemplate, ArgProperty
+from crazy_functions.AntFin import AntFinTest
 
 
 class ImageGen_Wrap(GptAcademicPluginTemplate):
@@ -38,19 +38,6 @@ class ImageGen_Wrap(GptAcademicPluginTemplate):
         """
         执行插件
         """
-        # 分辨率
-        resolution = plugin_kwargs["resolution"].replace("(限DALLE2)", "").replace("(限DALLE3)", "")
+        yield from AntFinTest(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request)
 
-        if plugin_kwargs["model_name"] == "DALLE2":
-            plugin_kwargs["advanced_arg"] = resolution
-            yield from 图片生成_DALLE2(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request)
 
-        elif plugin_kwargs["model_name"] == "DALLE3":
-            quality = plugin_kwargs["quality (仅DALLE3生效)"]
-            style = plugin_kwargs["style (仅DALLE3生效)"]
-            plugin_kwargs["advanced_arg"] = f"{resolution}-{quality}-{style}"
-            yield from 图片生成_DALLE3(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request)
-
-        else:
-            chatbot.append([None, "抱歉，找不到该模型"])
-            yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
