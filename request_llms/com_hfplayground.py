@@ -6,7 +6,7 @@ from loguru import logger
 import os
 
 proxies=get_conf("proxies")
-proxies={k+"://":v for k,v in proxies.items()}
+proxies={k+"://":v for k,v in proxies.items()} if proxies is not None else None
 
 def input_encode_handler(inputs:str, llm_kwargs:dict):
     if llm_kwargs["most_recent_uploaded"].get("path"):
