@@ -36,7 +36,7 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
                     "gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-4-turbo-2024-04-09",
                     "gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-4v", "glm-3-turbo",
-                    "gemini-1.5-pro", "chatglm3"
+                    "gemini-1.5-pro", "chatglm3","Qwen/Qwen2.5-72B-Instruct","meta-llama/Meta-Llama-3-70B-Instruct"
                     ]
 
 EMBEDDING_MODEL = "text-embedding-3-small"

@@ -14,13 +14,14 @@ validate_path()  # validate path so you can run from base directory
 
 if "在线模型":
     if __name__ == "__main__":
-        from request_llms.bridge_taichu import predict_no_ui_long_connection
+        from request_llms.bridge_hf import predict_no_ui_long_connection
+        # from request_llms.bridge_taichu import predict_no_ui_long_connection
         # from request_llms.bridge_cohere import predict_no_ui_long_connection
         # from request_llms.bridge_spark import predict_no_ui_long_connection
         # from request_llms.bridge_zhipu import predict_no_ui_long_connection
         # from request_llms.bridge_chatglm3 import predict_no_ui_long_connection
         llm_kwargs = {
-            "llm_model": "taichu",
+            "llm_model": "Qwen/Qwen2.5-72B-Instruct",
             "max_length": 4096,
             "top_p": 1,
             "temperature": 1,
