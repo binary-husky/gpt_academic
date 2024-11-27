@@ -625,7 +625,7 @@ class ArxivSplitter:
         base_fragment_template = {
             'title': doc_structure.title,
             'abstract': doc_structure.abstract,
-            'section_tree': section_tree,
+            'catalogs': section_tree,
             'arxiv_id': arxiv_id
         }
 
