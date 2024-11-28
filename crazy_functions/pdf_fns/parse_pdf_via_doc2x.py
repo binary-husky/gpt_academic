@@ -1,24 +1,40 @@
 from toolbox import get_log_folder, gen_time_str, get_conf
 from toolbox import update_ui, promote_file_to_downloadzone
-from toolbox import promote_file_to_downloadzone, extract_archive
+from toolbox import extract_archive
 from toolbox import generate_file_link, zip_folder
 from crazy_functions.crazy_utils import get_files_from_everything
 from shared_utils.colorful import *
 from loguru import logger
 import os
+import requests
 import time
+import json
 
 
-def 状态检查(code: str, meg: str, trace_id: str):
-    trace_id = trace_id or "Failed to get trace_id"
+def 状态检查(response, uid=""):
+    """
+    Check the status of Doc2x API response
+    Args:
+        response_data: Response object from Doc2x API
+    """
+    response_json = response.json()
+    response_data = response_json.get("data", {})
+    code = response_data.get("code", "Unknown")
+    meg = response_data.get("message", "")
+    trace_id = response.headers.get("trace-id", "Failed to get trace-id")
+    if response.status_code != 200:
+        raise RuntimeError(
+            f"Doc2x return an error:\nTrace ID: {trace_id} {uid}\n{response.status_code} - {response_json}"
+        )
     if code in ["parse_page_limit_exceeded", "parse_concurrency_limit"]:
         raise RuntimeError(
-            f"Reached the limit of Doc2x:\nTrace ID: {trace_id}\n{code} - {meg}"
+            f"Reached the limit of Doc2x:\nTrace ID: {trace_id} {uid}\n{code} - {meg}"
         )
     if code not in ["ok", "success"]:
         raise RuntimeError(
-            f"Doc2x return an error:\nTrace ID: {trace_id}\n{code} - {meg}"
+            f"Doc2x return an error:\nTrace ID: {trace_id} {uid}\n{code} - {meg}"
         )
+    return response_data
 
 
 def 解析PDF_DOC2X_转Latex(pdf_file_path):
@@ -30,30 +46,29 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
     """
     format: 'tex', 'md', 'docx'
     """
-    import requests, json, os
 
     DOC2X_API_KEY = get_conf("DOC2X_API_KEY")
     latex_dir = get_log_folder(plugin_name="pdf_ocr_latex")
     markdown_dir = get_log_folder(plugin_name="pdf_ocr")
     doc2x_api_key = DOC2X_API_KEY
 
-    # < ------ 第1步：上传 ------ >
-    logger.info("Doc2x 第1步：上传")
+    # < ------ 第1步：预上传获取URL，然后上传文件 ------ >
+    logger.info("Doc2x 上传文件：预上传获取URL")
+    res = requests.post(
+        "https://v2.doc2x.noedgeai.com/api/v2/parse/preupload",
+        headers={"Authorization": "Bearer " + doc2x_api_key},
+    )
+    res_data = 状态检查(res)
+    upload_url = res_data["url"]
+    uuid = res_data["uid"]
+
+    logger.info("Doc2x 上传文件：上传文件")
     with open(pdf_file_path, "rb") as file:
-        res = requests.post(
-            "https://v2.doc2x.noedgeai.com/api/v2/parse/pdf",
-            headers={"Authorization": "Bearer " + doc2x_api_key},
-            data=file,
-        )
-    # res_json = []
-    if res.status_code == 200:
-        res_json = res.json()
-    else:
-        raise RuntimeError(f"Doc2x return an error: {res.json()}")
-    uuid = res_json["data"]["uid"]
+        res = requests.put(upload_url, data=file)
+    res.raise_for_status()
 
     # < ------ 第2步：轮询等待 ------ >
-    logger.info("Doc2x 第2步：轮询等待")
+    logger.info("Doc2x 处理文件中：轮询等待")
     params = {"uid": uuid}
     while True:
         res = requests.get(
@@ -61,14 +76,14 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
             headers={"Authorization": "Bearer " + doc2x_api_key},
             params=params,
         )
-        res_json = res.json()
-        if res_json["data"]["status"] == "success":
+        res_data = 状态检查(res)
+        if res_data["status"] == "success":
             break
-        elif res_json["data"]["status"] == "processing":
-            time.sleep(3)
-            logger.info(f"Doc2x is processing at {res_json['data']['progress']}%")
-        elif res_json["data"]["status"] == "failed":
-            raise RuntimeError(f"Doc2x return an error: {res_json}")
+        elif res_data["status"] == "processing":
+            time.sleep(5)
+            logger.info(f"Doc2x is processing at {res_data['progress']}%")
+        else:
+            raise RuntimeError(f"Doc2x return an error: {res_data}")
 
     # < ------ 第3步：提交转化 ------ >
     logger.info("Doc2x 第3步：提交转化")
@@ -78,10 +93,7 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
         headers={"Authorization": "Bearer " + doc2x_api_key},
         json=data,
     )
-    if res.status_code == 200:
-        res_json = res.json()
-    else:
-        raise RuntimeError(f"Doc2x return an error: {res.json()}")
+    状态检查(res, uid=f"uid: {uuid}")
 
     # < ------ 第4步：等待结果 ------ >
     logger.info("Doc2x 第4步：等待结果")
@@ -92,14 +104,12 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
             headers={"Authorization": "Bearer " + doc2x_api_key},
             params=params,
         )
-        res_json = res.json()
-        if res_json["data"]["status"] == "success":
+        res_data = 状态检查(res, uid=f"uid: {uuid}")
+        if res_data["status"] == "success":
             break
-        elif res_json["data"]["status"] == "processing":
+        elif res_data["status"] == "processing":
             time.sleep(3)
-            logger.info(f"Doc2x still processing")
-        elif res_json["data"]["status"] == "failed":
-            raise RuntimeError(f"Doc2x return an error: {res_json}")
+            logger.info("Doc2x still processing to convert file")
 
     # < ------ 第5步：最后的处理 ------ >
     logger.info("Doc2x 第5步：最后的处理")
