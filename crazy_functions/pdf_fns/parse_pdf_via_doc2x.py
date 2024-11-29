@@ -19,8 +19,8 @@ def 状态检查(response, uid=""):
     """
     response_json = response.json()
     response_data = response_json.get("data", {})
-    code = response_data.get("code", "Unknown")
-    meg = response_data.get("message", "")
+    code = response_json.get("code", "Unknown")
+    meg = response_data.get("message", response_json)
     trace_id = response.headers.get("trace-id", "Failed to get trace-id")
     if response.status_code != 200:
         raise RuntimeError(
@@ -57,6 +57,7 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
     res = requests.post(
         "https://v2.doc2x.noedgeai.com/api/v2/parse/preupload",
         headers={"Authorization": "Bearer " + doc2x_api_key},
+        timeout=15,
     )
     res_data = 状态检查(res)
     upload_url = res_data["url"]
@@ -64,7 +65,7 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
 
     logger.info("Doc2x 上传文件：上传文件")
     with open(pdf_file_path, "rb") as file:
-        res = requests.put(upload_url, data=file)
+        res = requests.put(upload_url, data=file, timeout=60)
     res.raise_for_status()
 
     # < ------ 第2步：轮询等待 ------ >
@@ -77,6 +78,7 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
             "https://v2.doc2x.noedgeai.com/api/v2/parse/status",
             headers={"Authorization": "Bearer " + doc2x_api_key},
             params=params,
+            timeout=15,
         )
         res_data = 状态检查(res)
         if res_data["status"] == "success":
@@ -97,6 +99,7 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
         "https://v2.doc2x.noedgeai.com/api/v2/convert/parse",
         headers={"Authorization": "Bearer " + doc2x_api_key},
         json=data,
+        timeout=15,
     )
     状态检查(res, uid=f"uid: {uuid}")
 
@@ -110,6 +113,7 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
             "https://v2.doc2x.noedgeai.com/api/v2/convert/parse/result",
             headers={"Authorization": "Bearer " + doc2x_api_key},
             params=params,
+            timeout=15,
         )
         res_data = 状态检查(res, uid=f"uid: {uuid}")
         if res_data["status"] == "success":
@@ -122,7 +126,7 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
         raise RuntimeError("Doc2x conversion timeout after maximum attempts")
 
     # < ------ 第5步：最后的处理 ------ >
-    logger.info("Doc2x 第5步：最后的处理")
+    logger.info("Doc2x 第5步：下载转换后的文件")
 
     if format == "tex":
         target_path = latex_dir
@@ -135,7 +139,7 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
     for attempt in range(max_attempt):
         try:
             result_url = res_data["url"]
-            res = requests.get(result_url)
+            res = requests.get(result_url, timeout=60)
             zip_path = os.path.join(target_path, gen_time_str() + ".zip")
             unzip_path = os.path.join(target_path, gen_time_str())
             if res.status_code == 200:
@@ -145,7 +149,7 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
                 raise RuntimeError(f"Doc2x return an error: {res.json()}")
         except Exception as e:
             if attempt < max_attempt - 1:
-                logger.error(f"Failed to download latex file, retrying... {e}")
+                logger.error(f"Failed to download uid = {uuid} file, retrying... {e}")
                 time.sleep(3)
                 continue
             else:

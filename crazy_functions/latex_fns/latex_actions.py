@@ -367,7 +367,14 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
     # 确定使用的编译器
     compiler = 'pdflatex'
     if check_if_need_xelatex(pj(work_folder_modified, f'{main_file_modified}.tex')):
-        compiler = 'xelatex'
+        logger.info("检测到宏包需要xelatex编译，切换至xelatex编译")
+        # Check if xelatex is installed
+        try:
+            import subprocess
+            subprocess.run(['xelatex', '--version'], capture_output=True, check=True)
+            compiler = 'xelatex'
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            raise RuntimeError("检测到需要使用xelatex编译，但系统中未安装xelatex。请先安装texlive或其他提供xelatex的LaTeX发行版。")
 
     while True:
         import os
