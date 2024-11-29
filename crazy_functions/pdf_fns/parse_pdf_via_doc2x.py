@@ -8,7 +8,42 @@ from loguru import logger
 import os
 import requests
 import time
-import json
+
+
+def retry_request(max_retries=3, delay=3):
+    """
+    Decorator for retrying HTTP requests
+    Args:
+        max_retries: Maximum number of retry attempts
+        delay: Delay between retries in seconds
+    """
+
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            for attempt in range(max_retries):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    if attempt < max_retries - 1:
+                        logger.error(
+                            f"Request failed, retrying... ({attempt + 1}/{max_retries}) Error: {e}"
+                        )
+                        time.sleep(delay)
+                        continue
+                    raise e
+            return None
+
+        return wrapper
+
+    return decorator
+
+
+@retry_request()
+def make_request(method, url, **kwargs):
+    """
+    Make HTTP request with retry mechanism
+    """
+    return requests.request(method, url, **kwargs)
 
 
 def 状态检查(response, uid=""):
@@ -54,7 +89,8 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
 
     # < ------ 第1步：预上传获取URL，然后上传文件 ------ >
     logger.info("Doc2x 上传文件：预上传获取URL")
-    res = requests.post(
+    res = make_request(
+        "POST",
         "https://v2.doc2x.noedgeai.com/api/v2/parse/preupload",
         headers={"Authorization": "Bearer " + doc2x_api_key},
         timeout=15,
@@ -65,7 +101,7 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
 
     logger.info("Doc2x 上传文件：上传文件")
     with open(pdf_file_path, "rb") as file:
-        res = requests.put(upload_url, data=file, timeout=60)
+        res = make_request("PUT", upload_url, data=file, timeout=60)
     res.raise_for_status()
 
     # < ------ 第2步：轮询等待 ------ >
@@ -74,7 +110,8 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
     max_attempts = 60
     attempt = 0
     while attempt < max_attempts:
-        res = requests.get(
+        res = make_request(
+            "GET",
             "https://v2.doc2x.noedgeai.com/api/v2/parse/status",
             headers={"Authorization": "Bearer " + doc2x_api_key},
             params=params,
@@ -95,7 +132,8 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
     # < ------ 第3步：提交转化 ------ >
     logger.info("Doc2x 第3步：提交转化")
     data = {"uid": uuid, "to": format, "formula_mode": "dollar", "filename": "output"}
-    res = requests.post(
+    res = make_request(
+        "POST",
         "https://v2.doc2x.noedgeai.com/api/v2/convert/parse",
         headers={"Authorization": "Bearer " + doc2x_api_key},
         json=data,
@@ -109,7 +147,8 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
     max_attempts = 36
     attempt = 0
     while attempt < max_attempts:
-        res = requests.get(
+        res = make_request(
+            "GET",
             "https://v2.doc2x.noedgeai.com/api/v2/convert/parse/result",
             headers={"Authorization": "Bearer " + doc2x_api_key},
             params=params,
@@ -139,7 +178,7 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
     for attempt in range(max_attempt):
         try:
             result_url = res_data["url"]
-            res = requests.get(result_url, timeout=60)
+            res = make_request("GET", result_url, timeout=60)
             zip_path = os.path.join(target_path, gen_time_str() + ".zip")
             unzip_path = os.path.join(target_path, gen_time_str())
             if res.status_code == 200:
