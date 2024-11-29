@@ -26,6 +26,9 @@ from .bridge_chatglm import predict as chatglm_ui
 from .bridge_chatglm3 import predict_no_ui_long_connection as chatglm3_noui
 from .bridge_chatglm3 import predict as chatglm3_ui
 
+from .bridge_chatglm4 import predict_no_ui_long_connection as chatglm4_noui
+from .bridge_chatglm4 import predict as chatglm4_ui
+
 from .bridge_qianfan import predict_no_ui_long_connection as qianfan_noui
 from .bridge_qianfan import predict as qianfan_ui
 
@@ -414,6 +417,7 @@ model_info = {
         "token_cnt": get_token_num_gpt4,
     },
 
+    # ChatGLM本地模型
     # 将 chatglm 直接对齐到 chatglm2
     "chatglm": {
         "fn_with_ui": chatglm_ui,
@@ -434,6 +438,14 @@ model_info = {
     "chatglm3": {
         "fn_with_ui": chatglm3_ui,
         "fn_without_ui": chatglm3_noui,
+        "endpoint": None,
+        "max_token": 8192,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+    "chatglm4": {
+        "fn_with_ui": chatglm4_ui,
+        "fn_without_ui": chatglm4_noui,
         "endpoint": None,
         "max_token": 8192,
         "tokenizer": tokenizer_gpt35,
