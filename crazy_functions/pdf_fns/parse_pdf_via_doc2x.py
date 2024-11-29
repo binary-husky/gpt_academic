@@ -70,7 +70,9 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
     # < ------ 第2步：轮询等待 ------ >
     logger.info("Doc2x 处理文件中：轮询等待")
     params = {"uid": uuid}
-    while True:
+    max_attempts = 60
+    attempt = 0
+    while attempt < max_attempts:
         res = requests.get(
             "https://v2.doc2x.noedgeai.com/api/v2/parse/status",
             headers={"Authorization": "Bearer " + doc2x_api_key},
@@ -82,8 +84,11 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
         elif res_data["status"] == "processing":
             time.sleep(5)
             logger.info(f"Doc2x is processing at {res_data['progress']}%")
+            attempt += 1
         else:
             raise RuntimeError(f"Doc2x return an error: {res_data}")
+    if attempt >= max_attempts:
+        raise RuntimeError("Doc2x processing timeout after maximum attempts")
 
     # < ------ 第3步：提交转化 ------ >
     logger.info("Doc2x 第3步：提交转化")
@@ -98,7 +103,9 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
     # < ------ 第4步：等待结果 ------ >
     logger.info("Doc2x 第4步：等待结果")
     params = {"uid": uuid}
-    while True:
+    max_attempts = 36
+    attempt = 0
+    while attempt < max_attempts:
         res = requests.get(
             "https://v2.doc2x.noedgeai.com/api/v2/convert/parse/result",
             headers={"Authorization": "Bearer " + doc2x_api_key},
@@ -110,6 +117,9 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
         elif res_data["status"] == "processing":
             time.sleep(3)
             logger.info("Doc2x still processing to convert file")
+            attempt += 1
+    if attempt >= max_attempts:
+        raise RuntimeError("Doc2x conversion timeout after maximum attempts")
 
     # < ------ 第5步：最后的处理 ------ >
     logger.info("Doc2x 第5步：最后的处理")
@@ -124,7 +134,7 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
     # < ------ 下载 ------ >
     for attempt in range(max_attempt):
         try:
-            result_url = res_json["data"]["url"]
+            result_url = res_data["url"]
             res = requests.get(result_url)
             zip_path = os.path.join(target_path, gen_time_str() + ".zip")
             unzip_path = os.path.join(target_path, gen_time_str())
