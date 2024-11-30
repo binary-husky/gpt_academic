@@ -55,6 +55,7 @@ EMBEDDING_MODEL = "text-embedding-3-small"
 #   "deepseek-chat" ,"deepseek-coder",
 #   "gemini-1.5-flash",
 #   "yi-34b-chat-0205","yi-34b-chat-200k","yi-large","yi-medium","yi-spark","yi-large-turbo","yi-large-preview",
+#   "grok-beta",
 # ]
 # --- --- --- ---
 # 此外，您还可以在接入one-api/vllm/ollama/Openroute时，
@@ -234,7 +235,6 @@ MOONSHOT_API_KEY = ""
 # 零一万物(Yi Model) API KEY
 YIMODEL_API_KEY = ""
 
-
 # 深度求索(DeepSeek) API KEY，默认请求地址为"https://api.deepseek.com/v1/chat/completions"
 DEEPSEEK_API_KEY = ""
 
@@ -242,6 +242,8 @@ DEEPSEEK_API_KEY = ""
 # 紫东太初大模型 https://ai-maas.wair.ac.cn
 TAICHU_API_KEY = ""
 
+# Grok API KEY
+GROK_API_KEY = ""
 
 # Mathpix 拥有执行PDF的OCR功能，但是需要注册账号
 MATHPIX_APPID = ""
