@@ -55,7 +55,7 @@ class ArxivRagWorker:
 
 
         # 初始化基础目录
-        self.base_dir = Path(get_log_folder(user_name, plugin_name='rag_cache'))
+        self.base_dir = Path(get_log_folder( plugin_name='arxiv_rag_cache'))
         self._setup_directories()
 
         # 初始化处理状态
