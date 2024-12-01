@@ -414,6 +414,7 @@ def Arxiv论文对话(txt: str, llm_kwargs: Dict, plugin_kwargs: Dict, chatbot: 
         web_port: Web端口
     """
     # 初始化时，提示用户需要 arxiv ID/URL
+    from toolbox import promote_file_to_downloadzone
     if len(history) == 0 and not txt.lower().strip().startswith(('https://arxiv.org', 'arxiv.org', '0', '1', '2')):
         chatbot.append((txt, "请先提供Arxiv论文链接或ID。"))
         yield from update_ui(chatbot=chatbot, history=history)
@@ -421,14 +422,16 @@ def Arxiv论文对话(txt: str, llm_kwargs: Dict, plugin_kwargs: Dict, chatbot: 
 
     user_name = chatbot.get_user()
     arxiv_worker = ArxivRagWorker(user_name, llm_kwargs, arxiv_id=txt)
+    arxiv_id = arxiv_worker.arxiv_id
 
     # 处理新论文的情况
     if txt.lower().strip().startswith(('https://arxiv.org', 'arxiv.org', '0', '1', '2')) and not arxiv_worker.loading:
         chatbot.append((txt, "正在处理论文，请稍等..."))
         yield from update_ui(chatbot=chatbot, history=history)
-        arxiv_id = arxiv_worker.arxiv_id
-        fragments, formatted_content, output_dir = process_arxiv_sync(arxiv_worker.arxiv_splitter,                                                                  arxiv_worker.arxiv_id)
-        chatbot.append(["论文下载成功，接下来将编码论文，预计等待两分钟，请耐心等待，论文内容如下：", formatted_content])
+        fragments, formatted_content, fragment_output_dir = process_arxiv_sync(arxiv_worker.arxiv_splitter, arxiv_id)
+        promote_file_to_downloadzone(fragment_output_dir, chatbot=chatbot)
+        chatbot.append(["论文下载成功，接下来将编码论文，预计等待两分钟，请耐心等待，等待过程中，可以查看论文：", formatted_content])
+        yield from update_ui(chatbot=chatbot, history=history)
         try:
             # 创建新的事件循环
             loop = asyncio.new_event_loop()
@@ -471,8 +474,15 @@ def Arxiv论文对话(txt: str, llm_kwargs: Dict, plugin_kwargs: Dict, chatbot: 
     # 获取用户询问指令
     user_query = plugin_kwargs.get("advanced_arg",
                                    "What is the main research question or problem addressed in this paper?")
+    if len(history)<2:
+        fragments, formatted_content, fragment_output_files = process_arxiv_sync(arxiv_worker.arxiv_splitter, arxiv_id)
+        for file in fragment_output_files:
+            promote_file_to_downloadzone(file, chatbot=chatbot)
+        chatbot.append(["论文的文字内容为：", formatted_content])
+        chatbot.append(["处理完成", f"论文文字内容已保存至下载区"])
+        yield from update_ui(chatbot=chatbot, history=history)
     if not user_query:
-        user_query = "What is the main research question or problem addressed in this paper about graph attention network?"
+        user_query = "What is the main research question or problem addressed in this paper?"
         # chatbot.append((txt, "请提供您的问题。"))
         # yield from update_ui(chatbot=chatbot, history=history)
         # return

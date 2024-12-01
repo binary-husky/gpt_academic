@@ -734,7 +734,7 @@ class ArxivSplitter:
         return content.strip()
 
 
-def process_arxiv_sync(splitter: ArxivSplitter, arxiv_id: str) -> tuple[List[SectionFragment], str, Path]:
+def process_arxiv_sync(splitter: ArxivSplitter, arxiv_id: str) -> tuple[List[SectionFragment], str, List[Path]]:
     """
     同步处理 ArXiv 文档并返回分割后的片段
 
@@ -746,19 +746,24 @@ def process_arxiv_sync(splitter: ArxivSplitter, arxiv_id: str) -> tuple[List[Sec
         list: 分割后的文档片段列表
     """
     try:
+        from crazy_functions.doc_fns.tex_html_formatter import PaperHtmlFormatter
         # 创建一个异步函数来执行异步操作
         async def _process():
             return await splitter.process(arxiv_id)
 
         # 使用 asyncio.run() 运行异步函数
+        output_files=[]
         fragments = asyncio.run(_process())
-
+        file_save_path = splitter.root_dir / "arxiv_fragments"
         # 保存片段到文件
-        output_dir = save_fragments_to_file(
-            fragments,
-            output_dir=splitter.root_dir / "arxiv_fragments"
-        )
-        print(f"Output saved to: {output_dir}")
+        try:
+            md_output_dir = save_fragments_to_file(
+                fragments,
+                output_dir = file_save_path
+            )
+            output_files.append(md_output_dir)
+        except:
+            pass
         # 创建论文格式化器
         formatter = PaperContentFormatter()
 
@@ -775,7 +780,14 @@ def process_arxiv_sync(splitter: ArxivSplitter, arxiv_id: str) -> tuple[List[Sec
 
         # 格式化内容
         formatted_content = formatter.format(fragments, metadata)
-        return fragments, formatted_content, output_dir
+
+        try:
+            html_formatter = PaperHtmlFormatter(fragments, file_save_path)
+            html_output_dir = html_formatter.save_html()
+            output_files.append(html_output_dir)
+        except:
+            pass
+        return fragments, formatted_content, output_files
 
     except Exception as e:
         print(f"✗ Processing failed for {arxiv_id}: {str(e)}")
@@ -821,4 +833,4 @@ def test_arxiv_splitter():
 
 
 if __name__ == "__main__":
-    asyncio.run(test_arxiv_splitter())
+    test_arxiv_splitter()

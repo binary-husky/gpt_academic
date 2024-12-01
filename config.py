@@ -39,7 +39,7 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
                     "gemini-1.5-pro", "chatglm3"
                     ]
 
-EMBEDDING_MODEL = "netease-youdao/bce-embedding-base_v1"
+EMBEDDING_MODEL = "text-embedding-3-small"
 
 # --- --- --- ---
 # P.S. 其他可用的模型还包括
