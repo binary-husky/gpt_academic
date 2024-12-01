@@ -29,7 +29,17 @@ graph TD
     E --> B
     D --> F[Save Image and Code]
     F --> B
+
+
+
 ```
+
+<details>
+<summary><b>My section header in bold</b></summary>
+
+Any folded content here. It requires an empty line just above it.
+
+</details>
 
 """
 def validate_path():
@@ -44,8 +54,8 @@ def validate_path():
 validate_path()  # validate path so you can run from base directory
 from toolbox import markdown_convertion
 from shared_utils.advanced_markdown_format import markdown_convertion_for_file
-with open("gpt_log/default_user/shared/2024-04-22-01-27-43.zip.extract/translated_markdown.md", "r", encoding="utf-8") as f:
-    md = f.read()
+# with open("gpt_log/default_user/shared/2024-04-22-01-27-43.zip.extract/translated_markdown.md", "r", encoding="utf-8") as f:
+    # md = f.read()
 html = markdown_convertion_for_file(md)
 # print(html)
 with open("test.html", "w", encoding="utf-8") as f:

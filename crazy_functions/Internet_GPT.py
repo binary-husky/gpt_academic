@@ -115,7 +115,8 @@ def get_auth_ip():
 
 def searxng_request(query, proxies, categories='general', searxng_url=None, engines=None):
     if searxng_url is None:
-        url = get_conf("SEARXNG_URL")
+        urls = get_conf("SEARXNG_URLS")
+        url = random.choice(urls)
     else:
         url = searxng_url
 
