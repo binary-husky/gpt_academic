@@ -1,9 +1,11 @@
-import re
-import os
 import logging
+import os
+import re
 from pathlib import Path
-from typing import List, Tuple, Dict, Set, Optional, Callable
+from typing import List, Set, Optional
+
 from crazy_functions.rag_fns.arxiv_fns.latex_patterns import LaTeXPatterns
+
 
 class TexUtils:
     """TeX文档处理器类"""
@@ -20,9 +22,6 @@ class TexUtils:
         # 初始化LaTeX环境和命令模式
         self._init_patterns()
         self.latex_only_patterns = LaTeXPatterns.latex_only_patterns
-
-
-
 
     def _init_patterns(self):
         """初始化LaTeX模式匹配规则"""
@@ -234,6 +233,7 @@ class TexUtils:
                 processed_refs.append("\n".join(ref_lines))
 
         return processed_refs
+
     def _extract_inline_references(self, content: str) -> str:
         """
         从tex文件内容中提取直接写在文件中的参考文献
@@ -255,6 +255,7 @@ class TexUtils:
             return content[start_match.start():end_match.end()]
 
         return ""
+
     def _preprocess_content(self, content: str) -> str:
         """预处理TeX内容"""
         # 移除注释
@@ -263,9 +264,3 @@ class TexUtils:
         # content = re.sub(r'\s+', ' ', content)
         content = re.sub(r'\n\s*\n', '\n\n', content)
         return content.strip()
-
-
-
-
-
-

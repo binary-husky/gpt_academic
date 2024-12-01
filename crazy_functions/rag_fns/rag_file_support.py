@@ -1,8 +1,8 @@
-import os
 from llama_index.core import SimpleDirectoryReader
 
-supports_format = ['.csv', '.docx','.doc', '.epub', '.ipynb',  '.mbox', '.md', '.pdf',  '.txt', '.ppt',
-                   '.pptm', '.pptx','.py', '.xls', '.xlsx', '.html', '.json', '.xml', '.yaml', '.yml' ,'.m']
+supports_format = ['.csv', '.docx', '.doc', '.epub', '.ipynb', '.mbox', '.md', '.pdf', '.txt', '.ppt',
+                   '.pptm', '.pptx', '.py', '.xls', '.xlsx', '.html', '.json', '.xml', '.yaml', '.yml', '.m']
+
 
 def read_docx_doc(file_path):
     if file_path.split(".")[-1] == "docx":
@@ -25,8 +25,10 @@ def read_docx_doc(file_path):
             raise RuntimeError('请先将.doc文档转换为.docx文档。')
     return file_content
 
+
 # 修改后的 extract_text 函数，结合 SimpleDirectoryReader 和自定义解析逻辑
 import os
+
 
 def extract_text(file_path):
     _, ext = os.path.splitext(file_path.lower())

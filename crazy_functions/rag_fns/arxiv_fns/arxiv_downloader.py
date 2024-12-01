@@ -1,12 +1,14 @@
 import logging
-import requests
 import tarfile
 from pathlib import Path
 from typing import Optional, Dict
 
+import requests
+
+
 class ArxivDownloader:
     """用于下载arXiv论文源码的下载器"""
-    
+
     def __init__(self, root_dir: str = "./papers", proxies: Optional[Dict[str, str]] = None):
         """
         初始化下载器
@@ -18,13 +20,13 @@ class ArxivDownloader:
         self.root_dir = Path(root_dir)
         self.root_dir.mkdir(exist_ok=True)
         self.proxies = proxies
-        
+
         # 配置日志
         logging.basicConfig(
             level=logging.INFO,
             format='%(asctime)s - %(levelname)s - %(message)s'
         )
-        
+
     def _download_and_extract(self, arxiv_id: str) -> str:
         """
         下载并解压arxiv论文源码
@@ -40,19 +42,19 @@ class ArxivDownloader:
         """
         paper_dir = self.root_dir / arxiv_id
         tar_path = paper_dir / f"{arxiv_id}.tar.gz"
-        
+
         # 检查缓存
         if paper_dir.exists() and any(paper_dir.iterdir()):
             logging.info(f"Using cached version for {arxiv_id}")
             return str(paper_dir)
-            
+
         paper_dir.mkdir(exist_ok=True)
-        
+
         urls = [
             f"https://arxiv.org/src/{arxiv_id}",
             f"https://arxiv.org/e-print/{arxiv_id}"
         ]
-        
+
         for url in urls:
             try:
                 logging.info(f"Downloading from {url}")
@@ -65,9 +67,9 @@ class ArxivDownloader:
             except Exception as e:
                 logging.warning(f"Download failed for {url}: {e}")
                 continue
-                
+
         raise RuntimeError(f"Failed to download paper {arxiv_id}")
-        
+
     def download_paper(self, arxiv_id: str) -> str:
         """
         下载指定的arXiv论文
@@ -80,6 +82,7 @@ class ArxivDownloader:
         """
         return self._download_and_extract(arxiv_id)
 
+
 def main():
     """测试下载功能"""
     # 配置代理（如果需要）
@@ -87,16 +90,16 @@ def main():
         "http": "http://your-proxy:port",
         "https": "https://your-proxy:port"
     }
-    
+
     # 创建下载器实例（如果不需要代理，可以不传入proxies参数）
     downloader = ArxivDownloader(root_dir="./downloaded_papers", proxies=None)
-    
+
     # 测试下载一篇论文（这里使用一个示例ID）
     try:
         paper_id = "2103.00020"  # 这是一个示例ID
         paper_dir = downloader.download_paper(paper_id)
         print(f"Successfully downloaded paper to: {paper_dir}")
-        
+
         # 检查下载的文件
         paper_path = Path(paper_dir)
         if paper_path.exists():
@@ -106,6 +109,7 @@ def main():
                     print(f"- {file.relative_to(paper_path)}")
     except Exception as e:
         print(f"Error downloading paper: {e}")
+
 
 if __name__ == "__main__":
     main()

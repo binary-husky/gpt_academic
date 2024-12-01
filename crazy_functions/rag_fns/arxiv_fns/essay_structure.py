@@ -5,14 +5,15 @@ This module provides functionality for parsing and extracting structured informa
 including metadata, document structure, and content. It uses modular design and clean architecture principles.
 """
 
+import logging
 import re
 from abc import ABC, abstractmethod
-import logging
-from dataclasses import dataclass, field
-from typing import List, Optional, Dict
 from copy import deepcopy
+from dataclasses import dataclass, field
+from typing import List, Dict
+
 from crazy_functions.rag_fns.arxiv_fns.latex_cleaner import clean_latex_commands
-from crazy_functions.rag_fns.arxiv_fns.section_extractor import Section, SectionLevel, EnhancedSectionExtractor
+from crazy_functions.rag_fns.arxiv_fns.section_extractor import Section, EnhancedSectionExtractor
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -27,6 +28,7 @@ def read_tex_file(file_path):
                 return f.read()
         except UnicodeDecodeError:
             continue
+
 
 @dataclass
 class DocumentStructure:
@@ -68,7 +70,7 @@ class DocumentStructure:
                 if other_section.title in sections_map:
                     # Merge existing section
                     idx = next(i for i, s in enumerate(merged.toc)
-                             if s.title == other_section.title)
+                               if s.title == other_section.title)
                     merged.toc[idx] = merged.toc[idx].merge(other_section)
                 else:
                     # Add new section
@@ -149,6 +151,8 @@ class DocumentStructure:
             result.extend(_format_section(section, 0) for section in self.toc)
 
         return "".join(result)
+
+
 class BaseExtractor(ABC):
     """Base class for LaTeX content extractors."""
 
@@ -156,6 +160,7 @@ class BaseExtractor(ABC):
     def extract(self, content: str) -> str:
         """Extract specific content from LaTeX document."""
         pass
+
 
 class TitleExtractor(BaseExtractor):
     """Extracts title from LaTeX document."""
@@ -180,6 +185,7 @@ class TitleExtractor(BaseExtractor):
                     return clean_latex_commands(title)
         return ''
 
+
 class AbstractExtractor(BaseExtractor):
     """Extracts abstract from LaTeX document."""
 
@@ -202,6 +208,7 @@ class AbstractExtractor(BaseExtractor):
                 if abstract:
                     return clean_latex_commands(abstract)
         return ''
+
 
 class EssayStructureParser:
     """Main class for parsing LaTeX documents."""
@@ -231,6 +238,7 @@ class EssayStructureParser:
         content = re.sub(r'(?<!\\)%.*$', '', content, flags=re.MULTILINE)
         return content
 
+
 def pretty_print_structure(doc: DocumentStructure, max_content_length: int = 100):
     """Print document structure in a readable format."""
     print(f"Title: {doc.title}\n")
@@ -250,9 +258,9 @@ def pretty_print_structure(doc: DocumentStructure, max_content_length: int = 100
     for section in doc.toc:
         print_section(section)
 
+
 # Example usage:
 if __name__ == "__main__":
-
 
     # Test with a file
     file_path = 'test_cache/2411.03663/neurips_2024.tex'
@@ -278,5 +286,5 @@ if __name__ == "__main__":
         additional_doc = parser.parse(tex_content)
         main_doc = main_doc.merge(additional_doc)
 
-    tree= main_doc.generate_toc_tree()
+    tree = main_doc.generate_toc_tree()
     pretty_print_structure(main_doc)

@@ -1,4 +1,5 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+
 
 @dataclass
 class LaTeXPatterns:
@@ -142,124 +143,124 @@ class LaTeXPatterns:
     ]
 
     metadata_patterns = {
-    # 标题相关
-    'title': [
-        r'\\title\{([^}]+)\}',
-        r'\\Title\{([^}]+)\}',
-        r'\\doctitle\{([^}]+)\}',
-        r'\\subtitle\{([^}]+)\}',
-        r'\\chapter\*?\{([^}]+)\}',  # 第一章可能作为标题
-        r'\\maketitle\s*\\section\*?\{([^}]+)\}'  # 第一节可能作为标题
-    ],
+        # 标题相关
+        'title': [
+            r'\\title\{([^}]+)\}',
+            r'\\Title\{([^}]+)\}',
+            r'\\doctitle\{([^}]+)\}',
+            r'\\subtitle\{([^}]+)\}',
+            r'\\chapter\*?\{([^}]+)\}',  # 第一章可能作为标题
+            r'\\maketitle\s*\\section\*?\{([^}]+)\}'  # 第一节可能作为标题
+        ],
 
-    # 摘要相关
-    'abstract': [
-        r'\\begin{abstract}(.*?)\\end{abstract}',
-        r'\\abstract\{([^}]+)\}',
-        r'\\begin{摘要}(.*?)\\end{摘要}',
-        r'\\begin{Summary}(.*?)\\end{Summary}',
-        r'\\begin{synopsis}(.*?)\\end{synopsis}',
-        r'\\begin{abstracten}(.*?)\\end{abstracten}'  # 英文摘要
-    ],
+        # 摘要相关
+        'abstract': [
+            r'\\begin{abstract}(.*?)\\end{abstract}',
+            r'\\abstract\{([^}]+)\}',
+            r'\\begin{摘要}(.*?)\\end{摘要}',
+            r'\\begin{Summary}(.*?)\\end{Summary}',
+            r'\\begin{synopsis}(.*?)\\end{synopsis}',
+            r'\\begin{abstracten}(.*?)\\end{abstracten}'  # 英文摘要
+        ],
 
-    # 作者信息
-    'author': [
-        r'\\author\{([^}]+)\}',
-        r'\\Author\{([^}]+)\}',
-        r'\\authorinfo\{([^}]+)\}',
-        r'\\authors\{([^}]+)\}',
-        r'\\author\[([^]]+)\]\{([^}]+)\}',  # 带附加信息的作者
-        r'\\begin{authors}(.*?)\\end{authors}'
-    ],
+        # 作者信息
+        'author': [
+            r'\\author\{([^}]+)\}',
+            r'\\Author\{([^}]+)\}',
+            r'\\authorinfo\{([^}]+)\}',
+            r'\\authors\{([^}]+)\}',
+            r'\\author\[([^]]+)\]\{([^}]+)\}',  # 带附加信息的作者
+            r'\\begin{authors}(.*?)\\end{authors}'
+        ],
 
-    # 日期相关
-    'date': [
-        r'\\date\{([^}]+)\}',
-        r'\\Date\{([^}]+)\}',
-        r'\\submitdate\{([^}]+)\}',
-        r'\\publishdate\{([^}]+)\}',
-        r'\\revisiondate\{([^}]+)\}'
-    ],
+        # 日期相关
+        'date': [
+            r'\\date\{([^}]+)\}',
+            r'\\Date\{([^}]+)\}',
+            r'\\submitdate\{([^}]+)\}',
+            r'\\publishdate\{([^}]+)\}',
+            r'\\revisiondate\{([^}]+)\}'
+        ],
 
-    # 关键词
-    'keywords': [
-        r'\\keywords\{([^}]+)\}',
-        r'\\Keywords\{([^}]+)\}',
-        r'\\begin{keywords}(.*?)\\end{keywords}',
-        r'\\key\{([^}]+)\}',
-        r'\\begin{关键词}(.*?)\\end{关键词}'
-    ],
+        # 关键词
+        'keywords': [
+            r'\\keywords\{([^}]+)\}',
+            r'\\Keywords\{([^}]+)\}',
+            r'\\begin{keywords}(.*?)\\end{keywords}',
+            r'\\key\{([^}]+)\}',
+            r'\\begin{关键词}(.*?)\\end{关键词}'
+        ],
 
-    # 机构/单位
-    'institution': [
-        r'\\institute\{([^}]+)\}',
-        r'\\institution\{([^}]+)\}',
-        r'\\affiliation\{([^}]+)\}',
-        r'\\organization\{([^}]+)\}',
-        r'\\department\{([^}]+)\}'
-    ],
+        # 机构/单位
+        'institution': [
+            r'\\institute\{([^}]+)\}',
+            r'\\institution\{([^}]+)\}',
+            r'\\affiliation\{([^}]+)\}',
+            r'\\organization\{([^}]+)\}',
+            r'\\department\{([^}]+)\}'
+        ],
 
-    # 学科/主题
-    'subject': [
-        r'\\subject\{([^}]+)\}',
-        r'\\Subject\{([^}]+)\}',
-        r'\\field\{([^}]+)\}',
-        r'\\discipline\{([^}]+)\}'
-    ],
+        # 学科/主题
+        'subject': [
+            r'\\subject\{([^}]+)\}',
+            r'\\Subject\{([^}]+)\}',
+            r'\\field\{([^}]+)\}',
+            r'\\discipline\{([^}]+)\}'
+        ],
 
-    # 版本信息
-    'version': [
-        r'\\version\{([^}]+)\}',
-        r'\\revision\{([^}]+)\}',
-        r'\\release\{([^}]+)\}'
-    ],
+        # 版本信息
+        'version': [
+            r'\\version\{([^}]+)\}',
+            r'\\revision\{([^}]+)\}',
+            r'\\release\{([^}]+)\}'
+        ],
 
-    # 许可证/版权
-    'license': [
-        r'\\license\{([^}]+)\}',
-        r'\\copyright\{([^}]+)\}',
-        r'\\begin{license}(.*?)\\end{license}'
-    ],
+        # 许可证/版权
+        'license': [
+            r'\\license\{([^}]+)\}',
+            r'\\copyright\{([^}]+)\}',
+            r'\\begin{license}(.*?)\\end{license}'
+        ],
 
-    # 联系方式
-    'contact': [
-        r'\\email\{([^}]+)\}',
-        r'\\phone\{([^}]+)\}',
-        r'\\address\{([^}]+)\}',
-        r'\\contact\{([^}]+)\}'
-    ],
+        # 联系方式
+        'contact': [
+            r'\\email\{([^}]+)\}',
+            r'\\phone\{([^}]+)\}',
+            r'\\address\{([^}]+)\}',
+            r'\\contact\{([^}]+)\}'
+        ],
 
-    # 致谢
-    'acknowledgments': [
-        r'\\begin{acknowledgments}(.*?)\\end{acknowledgments}',
-        r'\\acknowledgments\{([^}]+)\}',
-        r'\\thanks\{([^}]+)\}',
-        r'\\begin{致谢}(.*?)\\end{致谢}'
-    ],
+        # 致谢
+        'acknowledgments': [
+            r'\\begin{acknowledgments}(.*?)\\end{acknowledgments}',
+            r'\\acknowledgments\{([^}]+)\}',
+            r'\\thanks\{([^}]+)\}',
+            r'\\begin{致谢}(.*?)\\end{致谢}'
+        ],
 
-    # 项目/基金
-    'funding': [
-        r'\\funding\{([^}]+)\}',
-        r'\\grant\{([^}]+)\}',
-        r'\\project\{([^}]+)\}',
-        r'\\support\{([^}]+)\}'
-    ],
+        # 项目/基金
+        'funding': [
+            r'\\funding\{([^}]+)\}',
+            r'\\grant\{([^}]+)\}',
+            r'\\project\{([^}]+)\}',
+            r'\\support\{([^}]+)\}'
+        ],
 
-    # 分类号/编号
-    'classification': [
-        r'\\classification\{([^}]+)\}',
-        r'\\serialnumber\{([^}]+)\}',
-        r'\\id\{([^}]+)\}',
-        r'\\doi\{([^}]+)\}'
-    ],
+        # 分类号/编号
+        'classification': [
+            r'\\classification\{([^}]+)\}',
+            r'\\serialnumber\{([^}]+)\}',
+            r'\\id\{([^}]+)\}',
+            r'\\doi\{([^}]+)\}'
+        ],
 
-    # 语言
-    'language': [
-        r'\\documentlanguage\{([^}]+)\}',
-        r'\\lang\{([^}]+)\}',
-        r'\\language\{([^}]+)\}'
-    ]
-}
+        # 语言
+        'language': [
+            r'\\documentlanguage\{([^}]+)\}',
+            r'\\lang\{([^}]+)\}',
+            r'\\language\{([^}]+)\}'
+        ]
+    }
     latex_only_patterns = {
         # 文档类和包引入
         r'\\documentclass(\[.*?\])?\{.*?\}',

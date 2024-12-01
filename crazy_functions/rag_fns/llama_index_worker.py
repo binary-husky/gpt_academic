@@ -1,17 +1,13 @@
-import llama_index
-import os
 import atexit
-from loguru import logger
-from typing import List
+import os
+
 from llama_index.core import Document
-from llama_index.core.schema import TextNode
-from request_llms.embed_models.openai_embed import OpenAiEmbeddingModel
-from shared_utils.connect_void_terminal import get_chat_default_kwargs
-from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
-from crazy_functions.rag_fns.vector_store_index import GptacVectorStoreIndex
 from llama_index.core.ingestion import run_transformations
-from llama_index.core import PromptTemplate
-from llama_index.core.response_synthesizers import TreeSummarize
+from llama_index.core.schema import TextNode
+from loguru import logger
+
+from crazy_functions.rag_fns.vector_store_index import GptacVectorStoreIndex
+from request_llms.embed_models.openai_embed import OpenAiEmbeddingModel
 
 DEFAULT_QUERY_GENERATION_PROMPT = """\
 Now, you have context information as below:
@@ -126,7 +122,6 @@ class LlamaIndexRagWorker(SaveLoad):
         except Exception as e:
             logger.error(f"Error saving checkpoint: {str(e)}")
             raise
-
 
     def assign_embedding_model(self):
         pass

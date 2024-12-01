@@ -1,14 +1,14 @@
-import re
-from typing import List, Dict, Tuple, Optional, Set
-from enum import Enum
-from dataclasses import dataclass, field
-from copy import deepcopy
-
 import logging
+import re
+from copy import deepcopy
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import List, Dict, Tuple
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class SectionLevel(Enum):
@@ -39,6 +39,7 @@ class SectionLevel(Enum):
             return NotImplemented
         return self.value >= other.value
 
+
 @dataclass
 class Section:
     level: SectionLevel
@@ -46,6 +47,7 @@ class Section:
     content: str = ''
     bibliography: str = ''
     subsections: List['Section'] = field(default_factory=list)
+
     def merge(self, other: 'Section') -> 'Section':
         """Merge this section with another section."""
         if self.title != other.title or self.level != other.level:
@@ -78,6 +80,8 @@ class Section:
             return content1
         # Combine non-empty contents with a separator
         return f"{content1}\n\n{content2}"
+
+
 @dataclass
 class LatexEnvironment:
     """表示LaTeX环境的数据类"""
