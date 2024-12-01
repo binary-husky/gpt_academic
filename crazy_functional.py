@@ -91,9 +91,9 @@ def get_crazy_functions():
             "Color": "stop",
             "AsButton": False,
             "AdvancedArgs": True,
-            "Info": "通过在高级参数区写入prompt，可自定义询问逻辑，默认情况下为总结逻辑 | 输入参数为路径",
-            "ArgsReminder": r"1、请不要更改上方输入框中以“private_upload/...”开头的路径。 "
-                            r"2、请在下方高级参数区中输入你的prompt，文档中的内容将被添加你的prompt后。3、示例：“这篇文章的方法是什么：” ",
+            "Info": "在输入区中输入论文ID，在高级参数区中输入问题",
+            "ArgsReminder": r"1、请在输入区中输入arxiv ID。 "
+                            r"2、请在下方高级参数区中输入你的问题，示例：“这篇文章的方法是什么，请用中文回答我” ",
             "Function": HotReload(Arxiv论文对话),
         },
         "翻译README或MD": {

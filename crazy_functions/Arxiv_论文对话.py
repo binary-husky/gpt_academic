@@ -428,9 +428,10 @@ def Arxiv论文对话(txt: str, llm_kwargs: Dict, plugin_kwargs: Dict, chatbot: 
     if txt.lower().strip().startswith(('https://arxiv.org', 'arxiv.org', '0', '1', '2')) and not arxiv_worker.loading:
         chatbot.append((txt, "正在处理论文，请稍等..."))
         yield from update_ui(chatbot=chatbot, history=history)
-        fragments, formatted_content, fragment_output_dir = process_arxiv_sync(arxiv_worker.arxiv_splitter, arxiv_id)
-        promote_file_to_downloadzone(fragment_output_dir, chatbot=chatbot)
-        chatbot.append(["论文下载成功，接下来将编码论文，预计等待两分钟，请耐心等待，等待过程中，可以查看论文：", formatted_content])
+        fragments, formatted_content, fragment_output_files = process_arxiv_sync(arxiv_worker.arxiv_splitter, arxiv_id)
+        for file in fragment_output_files:
+            promote_file_to_downloadzone(file, chatbot=chatbot)
+        chatbot.append(["论文文字内容已保存至下载区，接下来将进行论文编码，请耐心等待三分钟，论文的文字内容为：", formatted_content])
         yield from update_ui(chatbot=chatbot, history=history)
         try:
             # 创建新的事件循环
@@ -478,8 +479,7 @@ def Arxiv论文对话(txt: str, llm_kwargs: Dict, plugin_kwargs: Dict, chatbot: 
         fragments, formatted_content, fragment_output_files = process_arxiv_sync(arxiv_worker.arxiv_splitter, arxiv_id)
         for file in fragment_output_files:
             promote_file_to_downloadzone(file, chatbot=chatbot)
-        chatbot.append(["论文的文字内容为：", formatted_content])
-        chatbot.append(["处理完成", f"论文文字内容已保存至下载区"])
+        chatbot.append(["论文文字内容已保存至下载区，论文的文字内容为：", formatted_content])
         yield from update_ui(chatbot=chatbot, history=history)
     if not user_query:
         user_query = "What is the main research question or problem addressed in this paper?"
