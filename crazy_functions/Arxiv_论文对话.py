@@ -22,7 +22,7 @@ MAX_HISTORY_ROUND = 5  # 最大历史对话轮数
 MAX_CONTEXT_TOKEN_LIMIT = 4096  # 上下文最大token数
 REMEMBER_PREVIEW = 1000  # 记忆预览长度
 VECTOR_STORE_TYPE = "Simple"  # 向量存储类型：Simple或Milvus
-MAX_CONCURRENT_PAPERS = 5  # 最大并行处理论文数
+MAX_CONCURRENT_PAPERS = 20  # 最大并行处理论文数
 MAX_WORKERS = 3  # 最大工作线程数
 
 # 配置日志

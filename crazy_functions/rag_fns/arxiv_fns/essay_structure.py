@@ -269,7 +269,8 @@ if __name__ == "__main__":
         "test_cache/2411.03663/3_method.tex",
         "test_cache/2411.03663/4_experiment.tex",
         "test_cache/2411.03663/5_related_work.tex",
-        "test_cache/2411.03663/6_conclu.tex"
+        "test_cache/2411.03663/6_conclu.tex",
+        "test_cache/2411.03663/reference.bib"
     ]
     for file_path in file_path_list:
         tex_content = read_tex_file(file_path)
