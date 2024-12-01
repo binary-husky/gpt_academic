@@ -31,6 +31,7 @@ def read_tex_file(file_path):
 @dataclass
 class DocumentStructure:
     title: str = ''
+    authors: str = ''
     abstract: str = ''
     toc: List[Section] = field(default_factory=list)
     metadata: Dict[str, str] = field(default_factory=dict)

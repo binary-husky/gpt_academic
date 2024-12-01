@@ -15,6 +15,7 @@ from crazy_functions.rag_fns.arxiv_fns.tex_utils import TexUtils
 from crazy_functions.rag_fns.arxiv_fns.section_fragment import SectionFragment
 from crazy_functions.rag_fns.arxiv_fns.essay_structure import EssayStructureParser, DocumentStructure, read_tex_file
 from crazy_functions.rag_fns.arxiv_fns.section_extractor import Section
+from crazy_functions.rag_fns.arxiv_fns.author_extractor import LatexAuthorExtractor
 
 
 def save_fragments_to_file(fragments: List[SectionFragment], output_dir: str = "fragment_outputs") -> Path:
@@ -38,7 +39,7 @@ def save_fragments_to_file(fragments: List[SectionFragment], output_dir: str = "
     output_path.mkdir(parents=True, exist_ok=True)
 
     # Generate filename
-    filename = f"fragments_{timestamp}.md"
+    filename = f"paper_latex_content_{timestamp}.md"
     file_path = output_path / filename
 
     # Group fragments by section
@@ -61,13 +62,17 @@ def save_fragments_to_file(fragments: List[SectionFragment], output_dir: str = "
             f.write("\n## Paper Information\n")
             if fragments[0].title:
                 f.write(f"### Title\n{fragments[0].title}\n")
+            if fragments[0].authors:
+                f.write(f"\n### Authors\n{fragments[0].authors}\n")
             if fragments[0].abstract:
                 f.write(f"\n### Abstract\n{fragments[0].abstract}\n")
 
         # Write section tree if available
         if fragments and fragments[0].catalogs:
             f.write("\n## Section Tree\n")
+            f.write("```\n")  # 添加代码块开始标记
             f.write(fragments[0].catalogs)
+            f.write("\n```")  # 添加代码块结束标记
 
         # Generate table of contents
         f.write("\n## Table of Contents\n")
@@ -98,9 +103,12 @@ def save_fragments_to_file(fragments: List[SectionFragment], output_dir: str = "
 
                 # Content
                 f.write("\n**Content:**\n")
-                f.write("```tex\n")
+                # f.write("```tex\n")
+                # f.write(fragment.content)
+                # f.write("\n```\n")
+                f.write("\n")
                 f.write(fragment.content)
-                f.write("\n```\n")
+                f.write("\n")
 
                 # Bibliography if exists
                 if fragment.bibliography:
@@ -562,6 +570,11 @@ class ArxivSplitter:
             if not main_tex:
                 raise RuntimeError(f"No main TeX file found in {paper_dir}")
 
+            # 读取主 TeX 文件内容
+            main_tex_content = read_tex_file(main_tex)
+
+
+
             # Get all related TeX files and references
             tex_files = self.tex_processor.resolve_includes(main_tex)
             ref_bib = self.tex_processor.resolve_references(main_tex, paper_dir)
@@ -571,6 +584,11 @@ class ArxivSplitter:
 
             # Reset document structure for new processing
             self.document_structure = DocumentStructure()
+
+            # 提取作者信息
+            author_extractor = LatexAuthorExtractor()
+            authors = author_extractor.extract_authors(main_tex_content)
+            self.document_structure.authors = authors  # 保存到文档结构中
 
             # Process each TeX file
             for file_path in tex_files:
@@ -624,6 +642,7 @@ class ArxivSplitter:
         # Create a base template for all fragments to avoid repetitive assignments
         base_fragment_template = {
             'title': doc_structure.title,
+            'authors': doc_structure.authors,
             'abstract': doc_structure.abstract,
             'catalogs': section_tree,
             'arxiv_id': arxiv_id
@@ -723,6 +742,7 @@ class ArxivSplitter:
         return content.strip()
 
 
+
 async def test_arxiv_splitter():
     """测试ArXiv分割器的功能"""
 
@@ -754,12 +774,12 @@ async def test_arxiv_splitter():
             # 保存fragments
             output_dir = save_fragments_to_file(fragments,output_dir="crazy_functions/rag_fns/arxiv_fns/gpt_log")
             print(f"Output saved to: {output_dir}")
-            # 内容检查
-            for fragment in fragments:
-                # 长度检查
-
-                print((fragment.content))
-                print(len(fragment.content))
+            # # 内容检查
+            # for fragment in fragments:
+            #     # 长度检查
+            #
+            #     print((fragment.content))
+            #     print(len(fragment.content))
                 # 类型检查
 
 

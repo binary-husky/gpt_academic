@@ -3,7 +3,8 @@ from dataclasses import dataclass
 @dataclass
 class SectionFragment:
     """Arxiv论文片段数据类"""
-    title: str  # 文件路径
+    title: str  # 论文标题
+    authors: str
     abstract: str  # 论文摘要
     catalogs: str # 文章各章节的目录结构
     arxiv_id: str = ""  # 添加 arxiv_id 属性
