@@ -311,7 +311,7 @@ NUM_CUSTOM_BASIC_BTN = 4
 
 
 # 媒体智能体的服务地址（这是一个huggingface空间，请前往huggingface复制该空间，然后把自己新的空间地址填在这里）
-DAAS_SERVER_URL = "https://hamercity-bbdown.hf.space/stream"
+DAAS_SERVER_URLS = [ "https://hamercity-bbdown.hf.space/stream" ] + [ f"https://hamercity-bbdown-{x}.hf.space/stream" for x in range(1, 3) ]
 
 
 
