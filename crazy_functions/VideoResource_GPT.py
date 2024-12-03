@@ -108,19 +108,7 @@ def 多媒体任务(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
     if "跳过联网搜索" not in user_wish:
         # 结构化生成
-        rf_req = dedent(f"""
-        The user wish to get the following resource:
-            {user_wish}
-        You task is to help the user to search it on google.
-        Generate search keywords (less than 7 keywords).
-        """)
-        gpt_json_io = GptJsonIO(Query)
-        inputs = rf_req + gpt_json_io.format_instructions
-        run_gpt_fn = lambda inputs, sys_prompt: predict_no_ui_long_connection(inputs=inputs, llm_kwargs=llm_kwargs, history=[], sys_prompt=sys_prompt, observe_window=[])
-        analyze_res = run_gpt_fn(inputs, "")
-        logger.info(analyze_res)
-        query: Query = gpt_json_io.generate_output_auto_repair(analyze_res, run_gpt_fn)
-        internet_search_keyword = query.search_keyword
+        internet_search_keyword = user_wish
 
         yield from update_ui_lastest_msg(lastmsg=f"发起互联网检索: {internet_search_keyword} ...", chatbot=chatbot, history=[], delay=1)
         from crazy_functions.Internet_GPT import internet_search_with_analysis_prompt
