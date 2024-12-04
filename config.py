@@ -273,7 +273,7 @@ GROBID_URLS = [
 ]
 
 
-# Searxng互联网检索服务
+# Searxng互联网检索服务（这是一个huggingface空间，请前往huggingface复制该空间，然后把自己新的空间地址填在这里）
 SEARXNG_URLS = [ f"https://hamercity-ai-search-{x}.hf.space/" for x in range(1, 9) ]
 
 
