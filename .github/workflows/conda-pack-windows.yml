@@ -45,10 +45,10 @@ jobs:
     - name: Pack workspace and environment
       shell: bash -l {0}
       run: |
-      conda activate gpt
-      conda pack -n gpt -o gpt.tar.gz
-      cd temp_workspace
-      tar -czf ../workspace.tar.gz *
+        conda activate gpt
+        conda pack -n gpt -o gpt.tar.gz
+        cd temp_workspace
+        tar -czf ../workspace.tar.gz *
       
     - name: Upload packed files
       uses: actions/upload-artifact@v2
