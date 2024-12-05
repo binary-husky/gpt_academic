@@ -27,7 +27,8 @@ jobs:
       shell: bash -l {0}
       run: |
         conda activate gpt
-        pip install -r requirements.txt
+        pip install uv
+        uv pip install -r requirements.txt
         
     - name: Install conda-pack
       shell: bash -l {0}
@@ -45,9 +46,9 @@ jobs:
       shell: pwsh
       run: |
         mkdir workspace
-        cp -r * workspace/ 2>$null
-        rm -rf workspace/.git*
-        mv gpt.tar.gz workspace/
+        Get-ChildItem -Exclude "workspace" | Copy-Item -Destination workspace -Recurse
+        Remove-Item -Path workspace/.git* -Recurse -Force -ErrorAction SilentlyContinue
+        Move-Item gpt.tar.gz workspace/
         Compress-Archive -Path "workspace\*" -DestinationPath "workspace_with_env.zip"
     
     - name: Upload packed files
