@@ -9,10 +9,10 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       
     - name: Setup Miniconda
-      uses: conda-incubator/setup-miniconda@v2
+      uses: conda-incubator/setup-miniconda@v3
       with:
         auto-activate-base: true
         activate-environment: ""
@@ -51,7 +51,7 @@ jobs:
         tar -czf ../workspace.tar.gz *
       
     - name: Upload packed files
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: gpt-academic-package
         path: |
