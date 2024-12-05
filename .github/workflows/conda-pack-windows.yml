@@ -48,7 +48,7 @@ jobs:
         cp -r * workspace/ 2>/dev/null || :
         rm -rf workspace/.git*
         mv gpt.tar.gz workspace/
-        zip -r workspace_with_env.zip workspace/*
+        Compress-Archive -Path "workspace\*" -DestinationPath "workspace_with_env.zip"
     
     - name: Upload packed files
       uses: actions/upload-artifact@v4
