@@ -1,0 +1,59 @@
+name: Create Conda Environment Package
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      
+    - name: Setup Miniconda
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        auto-activate-base: true
+        activate-environment: ""
+        
+    - name: Create new Conda environment
+      shell: bash -l {0}
+      run: |
+        conda create -n gpt python=3.11 -y
+        conda activate gpt
+        
+    - name: Copy files (excluding .git)
+      shell: bash -l {0}
+      run: |
+        mkdir temp_workspace
+        cp -r * temp_workspace/ 2>/dev/null || :
+        rm -rf temp_workspace/.git* || :
+        
+    - name: Install requirements
+      shell: bash -l {0}
+      run: |
+        conda activate gpt
+        pip install -r requirements.txt
+        
+    - name: Install conda-pack
+      shell: bash -l {0}
+      run: |
+        conda activate gpt
+        conda install conda-pack -y
+        
+    - name: Pack workspace and environment
+      shell: bash -l {0}
+      run: |
+      conda activate gpt
+      conda pack -n gpt -o gpt.tar.gz
+      cd temp_workspace
+      tar -czf ../workspace.tar.gz *
+      
+    - name: Upload packed files
+      uses: actions/upload-artifact@v2
+      with:
+      name: gpt-academic-package
+      path: |
+        gpt.tar.gz
+        workspace.tar.gz
