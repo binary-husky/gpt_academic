@@ -42,18 +42,21 @@ jobs:
         conda activate gpt
         conda install conda-pack -y
         
-    - name: Pack workspace and environment
+    - name: Activate conda environment and pack conda
       shell: bash -l {0}
       run: |
         conda activate gpt
-        conda pack -n gpt -o gpt.tar.gz
-        cd temp_workspace
-        tar -czf ../workspace.tar.gz *
+        mkdir -p temp_workspace
+        conda pack -n gpt -o temp_workspace/gpt.tar.gz
       
+    - name: Pack workspace
+      shell: bash -l {0}
+      run: |
+        cd temp_workspace
+        tar -czf workspace_with_env.tar.gz *
+    
     - name: Upload packed files
       uses: actions/upload-artifact@v4
       with:
         name: gpt-academic-package
-        path: |
-          gpt.tar.gz
-          workspace.tar.gz
+        path: temp_workspace/workspace_with_env.tar.gz
