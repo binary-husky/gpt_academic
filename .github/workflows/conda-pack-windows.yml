@@ -53,7 +53,7 @@ jobs:
     - name: Upload packed files
       uses: actions/upload-artifact@v2
       with:
-      name: gpt-academic-package
-      path: |
-        gpt.tar.gz
-        workspace.tar.gz
+        name: gpt-academic-package
+        path: |
+          gpt.tar.gz
+          workspace.tar.gz
