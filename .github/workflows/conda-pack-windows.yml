@@ -42,10 +42,10 @@ jobs:
         conda pack -n gpt -o gpt.tar.gz
       
     - name: Create workspace zip
-      shell: bash -l {0}
+      shell: pwsh
       run: |
         mkdir workspace
-        cp -r * workspace/ 2>/dev/null || :
+        cp -r * workspace/ 2>$null
         rm -rf workspace/.git*
         mv gpt.tar.gz workspace/
         Compress-Archive -Path "workspace\*" -DestinationPath "workspace_with_env.zip"
