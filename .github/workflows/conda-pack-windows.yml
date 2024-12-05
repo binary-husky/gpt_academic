@@ -48,7 +48,7 @@ jobs:
         mkdir workspace
         Get-ChildItem -Exclude "workspace" | Copy-Item -Destination workspace -Recurse
         Remove-Item -Path workspace/.git* -Recurse -Force -ErrorAction SilentlyContinue
-        Move-Item gpt.tar.gz workspace/
+        Copy-Item gpt.tar.gz workspace/ -Force
         Compress-Archive -Path "workspace\*" -DestinationPath "workspace_with_env.zip"
     
     - name: Upload packed files
