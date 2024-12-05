@@ -274,7 +274,7 @@ GROBID_URLS = [
 
 
 # Searxng互联网检索服务（这是一个huggingface空间，请前往huggingface复制该空间，然后把自己新的空间地址填在这里）
-SEARXNG_URLS = [ f"https://hamercity-ai-search-{x}.hf.space/" for x in range(1, 9) ]
+SEARXNG_URLS = [ f"https://kaletianlre-beardvs{i}dd.hf.space/" for i in range(1,5) ]
 
 
 # 是否允许通过自然语言描述修改本页的配置，该功能具有一定的危险性，默认关闭
@@ -311,7 +311,7 @@ NUM_CUSTOM_BASIC_BTN = 4
 
 
 # 媒体智能体的服务地址（这是一个huggingface空间，请前往huggingface复制该空间，然后把自己新的空间地址填在这里）
-DAAS_SERVER_URLS = [ "https://hamercity-bbdown.hf.space/stream" ] + [ f"https://hamercity-bbdown-{x}.hf.space/stream" for x in range(1, 3) ]
+DAAS_SERVER_URLS = [ f"https://niuziniu-biligpt{i}.hf.space/stream" for i in range(1,5) ]
 
 
 
