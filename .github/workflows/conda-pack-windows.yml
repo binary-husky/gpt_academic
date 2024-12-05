@@ -27,8 +27,7 @@ jobs:
       shell: bash -l {0}
       run: |
         conda activate gpt
-        pip install uv
-        uv pip install -r requirements.txt
+        pip install -r requirements.txt
         
     - name: Install conda-pack
       shell: bash -l {0}
@@ -49,10 +48,9 @@ jobs:
         Get-ChildItem -Exclude "workspace" | Copy-Item -Destination workspace -Recurse
         Remove-Item -Path workspace/.git* -Recurse -Force -ErrorAction SilentlyContinue
         Copy-Item gpt.tar.gz workspace/ -Force
-        Compress-Archive -Path "workspace\*" -DestinationPath "workspace_with_env.zip"
     
     - name: Upload packed files
       uses: actions/upload-artifact@v4
       with:
         name: gpt-academic-package
-        path: workspace_with_env.zip
+        path: workspace
