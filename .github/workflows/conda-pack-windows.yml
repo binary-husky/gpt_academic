@@ -23,13 +23,6 @@ jobs:
         conda create -n gpt python=3.11 -y
         conda activate gpt
         
-    - name: Copy files (excluding .git)
-      shell: bash -l {0}
-      run: |
-        mkdir temp_workspace
-        cp -r * temp_workspace/ 2>/dev/null || :
-        rm -rf temp_workspace/.git* || :
-        
     - name: Install requirements
       shell: bash -l {0}
       run: |
@@ -42,21 +35,23 @@ jobs:
         conda activate gpt
         conda install conda-pack -y
         
-    - name: Activate conda environment and pack conda
+    - name: Pack conda environment
       shell: bash -l {0}
       run: |
         conda activate gpt
-        mkdir -p temp_workspace
-        conda pack -n gpt -o temp_workspace/gpt.tar.gz
+        conda pack -n gpt -o gpt.tar.gz
       
-    - name: Pack workspace
+    - name: Create workspace zip
       shell: bash -l {0}
       run: |
-        cd temp_workspace
-        tar -czf workspace_with_env.tar.gz *
+        mkdir workspace
+        cp -r * workspace/ 2>/dev/null || :
+        rm -rf workspace/.git*
+        mv gpt.tar.gz workspace/
+        zip -r workspace_with_env.zip workspace/*
     
     - name: Upload packed files
       uses: actions/upload-artifact@v4
       with:
         name: gpt-academic-package
-        path: temp_workspace/workspace_with_env.tar.gz
+        path: workspace_with_env.zip
