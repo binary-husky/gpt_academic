@@ -1,6 +1,6 @@
 from toolbox import get_log_folder, gen_time_str, get_conf
 from toolbox import update_ui, promote_file_to_downloadzone
-from toolbox import extract_archive
+from toolbox import promote_file_to_downloadzone, extract_archive
 from toolbox import generate_file_link, zip_folder
 from crazy_functions.crazy_utils import get_files_from_everything
 from shared_utils.colorful import *
@@ -46,7 +46,7 @@ def make_request(method, url, **kwargs):
     return requests.request(method, url, **kwargs)
 
 
-def 状态检查(response, uid=""):
+def doc2x_api_response_status(response, uid=""):
     """
     Check the status of Doc2x API response
     Args:
@@ -95,7 +95,7 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
         headers={"Authorization": "Bearer " + doc2x_api_key},
         timeout=15,
     )
-    res_data = 状态检查(res)
+    res_data = doc2x_api_response_status(res)
     upload_url = res_data["url"]
     uuid = res_data["uid"]
 
@@ -117,7 +117,7 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
             params=params,
             timeout=15,
         )
-        res_data = 状态检查(res)
+        res_data = doc2x_api_response_status(res)
         if res_data["status"] == "success":
             break
         elif res_data["status"] == "processing":
@@ -131,7 +131,12 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
 
     # < ------ 第3步：提交转化 ------ >
     logger.info("Doc2x 第3步：提交转化")
-    data = {"uid": uuid, "to": format, "formula_mode": "dollar", "filename": "output"}
+    data = {
+        "uid": uuid,
+        "to": format,
+        "formula_mode": "dollar",
+        "filename": "output"
+    }
     res = make_request(
         "POST",
         "https://v2.doc2x.noedgeai.com/api/v2/convert/parse",
@@ -139,7 +144,7 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
         json=data,
         timeout=15,
     )
-    状态检查(res, uid=f"uid: {uuid}")
+    doc2x_api_response_status(res, uid=f"uid: {uuid}")
 
     # < ------ 第4步：等待结果 ------ >
     logger.info("Doc2x 第4步：等待结果")
@@ -154,7 +159,7 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
             params=params,
             timeout=15,
         )
-        res_data = 状态检查(res, uid=f"uid: {uuid}")
+        res_data = doc2x_api_response_status(res, uid=f"uid: {uuid}")
         if res_data["status"] == "success":
             break
         elif res_data["status"] == "processing":
@@ -196,7 +201,6 @@ def 解析PDF_DOC2X(pdf_file_path, format="tex"):
 
     # < ------ 解压 ------ >
     import zipfile
-
     with zipfile.ZipFile(zip_path, "r") as zip_ref:
         zip_ref.extractall(unzip_path)
     return zip_path, unzip_path

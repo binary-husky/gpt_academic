@@ -343,6 +343,7 @@ def remove_buggy_lines(file_path, log_path, tex_name, tex_name_pure, n_fix, work
         logger.error("Fatal error occurred, but we cannot identify error, please download zip, read latex log, and compile manually.")
         return False, -1, [-1]
 
+
 def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_folder_original, work_folder_modified, work_folder, mode='default'):
     import os, time
     n_fix = 1
@@ -357,13 +358,23 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
             with open(tex_path, 'r', encoding='utf-8', errors='replace') as f:
                 content = f.read(5000)
                 # 检查是否有使用xelatex的宏包
-                return any(pkg in content for pkg in ['fontspec', 'xeCJK', 'xetex', 'unicode-math', 'xltxtra', 'xunicode'])
+                need_xelatex = any(
+                    pkg in content 
+                    for pkg in ['fontspec', 'xeCJK', 'xetex', 'unicode-math', 'xltxtra', 'xunicode']
+                )
+                if need_xelatex:
+                    logger.info(f"检测到宏包需要xelatex编译, 切换至xelatex编译")
+                else:
+                    logger.info(f"未检测到宏包需要xelatex编译, 使用pdflatex编译")
+                return need_xelatex
         except Exception:
             return False
 
     # 根据编译器类型返回编译命令
     def get_compile_command(compiler, filename):
-        return f'{compiler} -interaction=batchmode -file-line-error {filename}.tex'
+        compile_command = f'{compiler} -interaction=batchmode -file-line-error {filename}.tex'
+        logger.info('Latex 编译指令: ', compile_command)
+        return compile_command
 
     # 确定使用的编译器
     compiler = 'pdflatex'
