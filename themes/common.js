@@ -1072,7 +1072,7 @@ function reset_conversation(a, b) {
     setCookie("js_previous_chat_cookie", a, 1);
     b = btoa(unescape(encodeURIComponent(JSON.stringify(b))));
     setCookie("js_previous_history_cookie", b, 1);
-    gen_restore_btn();
+    // gen_restore_btn();
     return [[], [], "已重置"];
 }
 
