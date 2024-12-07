@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from functools import lru_cache
 from itertools import zip_longest
 from check_proxy import check_proxy
-from toolbox import CatchException, update_ui, get_conf
+from toolbox import CatchException, update_ui, get_conf, update_ui_lastest_msg
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive, input_clipping
 from request_llms.bridge_all import model_info
 from request_llms.bridge_all import predict_no_ui_long_connection
@@ -115,7 +115,8 @@ def get_auth_ip():
 
 def searxng_request(query, proxies, categories='general', searxng_url=None, engines=None):
     if searxng_url is None:
-        url = get_conf("SEARXNG_URL")
+        urls = get_conf("SEARXNG_URLS")
+        url = random.choice(urls)
     else:
         url = searxng_url
 
@@ -192,6 +193,38 @@ def scrape_text(url, proxies) -> str:
     text = "\n".join(chunk for chunk in chunks if chunk)
     return text
 
+def internet_search_with_analysis_prompt(prompt, analysis_prompt, llm_kwargs, chatbot):
+    from toolbox import get_conf
+    proxies = get_conf('proxies')
+    categories = 'general'
+    searxng_url = None  # 使用默认的searxng_url
+    engines = None  # 使用默认的搜索引擎
+    yield from update_ui_lastest_msg(lastmsg=f"检索中: {prompt} ...", chatbot=chatbot, history=[], delay=1)
+    urls = searxng_request(prompt, proxies, categories, searxng_url, engines=engines)
+    yield from update_ui_lastest_msg(lastmsg=f"依次访问搜索到的网站 ...", chatbot=chatbot, history=[], delay=1)
+    if len(urls) == 0:
+        return None
+    max_search_result = 5   # 最多收纳多少个网页的结果
+    history = []
+    for index, url in enumerate(urls[:max_search_result]):
+        yield from update_ui_lastest_msg(lastmsg=f"依次访问搜索到的网站: {url['link']} ...", chatbot=chatbot, history=[], delay=1)
+        res = scrape_text(url['link'], proxies)
+        prefix = f"第{index}份搜索结果 [源自{url['source'][0]}搜索] （{url['title'][:25]}）："
+        history.extend([prefix, res])
+    i_say = f"从以上搜索结果中抽取信息，然后回答问题：{prompt} {analysis_prompt}"
+    i_say, history = input_clipping( # 裁剪输入，从最长的条目开始裁剪，防止爆token
+        inputs=i_say,
+        history=history,
+        max_token_limit=8192
+    )
+    gpt_say = predict_no_ui_long_connection(
+        inputs=i_say,
+        llm_kwargs=llm_kwargs,
+        history=history,
+        sys_prompt="请从搜索结果中抽取信息，对最相关的两个搜索结果进行总结，然后回答问题。",
+        console_slience=False,
+    )
+    return gpt_say
 
 @CatchException
 def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):

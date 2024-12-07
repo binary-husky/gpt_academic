@@ -26,7 +26,7 @@ class GetLlamaHandle(LocalLLMHandle):
         import platform
         huggingface_token, device = get_conf('HUGGINGFACE_ACCESS_TOKEN', 'LOCAL_MODEL_DEVICE')
         assert len(huggingface_token) != 0, "没有填写 HUGGINGFACE_ACCESS_TOKEN"
-        with open(os.path.expanduser('~/.cache/huggingface/token'), 'w') as f:
+        with open(os.path.expanduser('~/.cache/huggingface/token'), 'w', encoding='utf8') as f:
             f.write(huggingface_token)
         model_id = 'meta-llama/Llama-2-7b-chat-hf'
         with ProxyNetworkActivate('Download_LLM'):

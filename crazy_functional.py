@@ -55,7 +55,7 @@ def get_crazy_functions():
         "多媒体智能体": {
             "Group": "智能体",
             "Color": "stop",
-            "AsButton": True,
+            "AsButton": False,
             "Info": "【仅测试】多媒体任务",
             "Function": HotReload(多媒体任务),
         },

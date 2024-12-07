@@ -84,7 +84,7 @@ class WelcomeMessage {
         this.max_welcome_card_num = 6;
         this.card_array = [];
         this.static_welcome_message_previous = [];
-        this.reflesh_time_interval = 15*1000;
+        this.reflesh_time_interval = 15 * 1000;
 
 
         const reflesh_render_status = () => {
@@ -105,7 +105,7 @@ class WelcomeMessage {
     async startRefleshCards() {
         await new Promise(r => setTimeout(r, this.reflesh_time_interval));
         await this.reflesh_cards();
-        if (this.visible){
+        if (this.visible) {
             setTimeout(() => {
                 this.startRefleshCards.call(this);
             }, 1);
@@ -113,7 +113,7 @@ class WelcomeMessage {
     }
 
     async reflesh_cards() {
-        if (!this.visible){
+        if (!this.visible) {
             return;
         }
 
@@ -173,18 +173,18 @@ class WelcomeMessage {
     }
 
     shuffle(array) {
-        var currentIndex = array.length,  randomIndex;
+        var currentIndex = array.length, randomIndex;
 
         // While there remain elements to shuffle...
         while (currentIndex != 0) {
 
-          // Pick a remaining element...
-          randomIndex = Math.floor(Math.random() * currentIndex);
-          currentIndex--;
+            // Pick a remaining element...
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
 
-          // And swap it with the current element.
-          [array[currentIndex], array[randomIndex]] = [
-            array[randomIndex], array[currentIndex]];
+            // And swap it with the current element.
+            [array[currentIndex], array[randomIndex]] = [
+                array[randomIndex], array[currentIndex]];
         }
 
         return array;
@@ -193,7 +193,7 @@ class WelcomeMessage {
     async update() {
         // console.log('update')
         var page_width = document.documentElement.clientWidth;
-        const width_to_hide_welcome = 1200;
+        const width_to_hide_welcome = 1000;
         if (!await this.isChatbotEmpty() || page_width < width_to_hide_welcome) {
             if (this.visible) {
                 this.removeWelcome();
@@ -203,7 +203,7 @@ class WelcomeMessage {
             }
             return;
         }
-        if (this.visible){
+        if (this.visible) {
             return;
         }
         // console.log("welcome");
@@ -220,28 +220,28 @@ class WelcomeMessage {
         const title = document.createElement('div');
         title.classList.add('welcome-card-title');
 
-            // 创建图标
-            const svg = document.createElement('img');
-            svg.classList.add('welcome-svg');
-            svg.src = message.svg;
-            svg.style.height = '30px';
-            title.appendChild(svg);
+        // 创建图标
+        const svg = document.createElement('img');
+        svg.classList.add('welcome-svg');
+        svg.src = message.svg;
+        svg.style.height = '30px';
+        title.appendChild(svg);
 
-            // 创建标题
-            const text = document.createElement('a');
-            text.textContent = message.title;
-            text.classList.add('welcome-title-text');
-            text.href = message.url;
-            text.target = "_blank";
-            title.appendChild(text)
+        // 创建标题
+        const text = document.createElement('a');
+        text.textContent = message.title;
+        text.classList.add('welcome-title-text');
+        text.href = message.url;
+        text.target = "_blank";
+        title.appendChild(text)
 
         // 创建内容
         const content = document.createElement('div');
         content.classList.add('welcome-content');
-            const content_c = document.createElement('div');
-            content_c.classList.add('welcome-content-c');
-            content_c.textContent = message.content;
-            content.appendChild(content_c);
+        const content_c = document.createElement('div');
+        content_c.classList.add('welcome-content-c');
+        content_c.textContent = message.content;
+        content.appendChild(content_c);
 
         // 将标题和内容添加到卡片 div 中
         card.appendChild(title);
@@ -307,28 +307,28 @@ class WelcomeMessage {
 
 class PageFocusHandler {
     constructor() {
-      this.hasReturned = false;
-      this.focusCallbacks = [];
+        this.hasReturned = false;
+        this.focusCallbacks = [];
 
-      // Bind the focus and blur event handlers
-      window.addEventListener('visibilitychange', this.handleFocus.bind(this));
+        // Bind the focus and blur event handlers
+        window.addEventListener('visibilitychange', this.handleFocus.bind(this));
     }
 
     // Method to handle the focus event
     handleFocus() {
-      if (this.hasReturned) {
-        this.focusCallbacks.forEach(callback => callback());
-      }
-      this.hasReturned = true;
+        if (this.hasReturned) {
+            this.focusCallbacks.forEach(callback => callback());
+        }
+        this.hasReturned = true;
     }
 
     // Method to add a custom callback function
     addFocusCallback(callback) {
-      if (typeof callback === 'function') {
-        this.focusCallbacks.push(callback);
-      } else {
-        throw new Error('Callback must be a function');
-      }
+        if (typeof callback === 'function') {
+            this.focusCallbacks.push(callback);
+        } else {
+            throw new Error('Callback must be a function');
+        }
     }
 }
 

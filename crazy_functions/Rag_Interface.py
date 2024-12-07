@@ -95,9 +95,6 @@ def Rag问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, u
         yield from update_ui_lastest_msg('已清空', chatbot, history, delay=0)  # 刷新界面
         return
 
-    else:
-        report_exception(chatbot, history, a=f"上传文件路径错误: {txt}", b="请检查并提供正确路径。")
-
     # 3. Normal Q&A processing
     chatbot.append([txt, f'正在召回知识 ({current_context}) ...'])
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
