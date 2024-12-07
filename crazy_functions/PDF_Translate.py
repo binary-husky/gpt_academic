@@ -47,7 +47,7 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
                 yield from 解析PDF_基于DOC2X(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, DOC2X_API_KEY, user_request)
                 return
             except:
-                chatbot.append([None, f"DOC2X服务不可用，现在将执行效果稍差的旧版代码。{trimmed_format_exc_markdown()}"])
+                chatbot.append([None, f"DOC2X服务不可用，请检查报错详细。{trimmed_format_exc_markdown()}"])
                 yield from update_ui(chatbot=chatbot, history=history)
 
     if method == "GROBID":

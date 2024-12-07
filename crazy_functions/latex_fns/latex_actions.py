@@ -300,7 +300,8 @@ def Latex精细分解与转化(file_manifest, project_folder, llm_kwargs, plugin
     write_html(pfg.sp_file_contents, pfg.sp_file_result, chatbot=chatbot, project_folder=project_folder)
 
     #  <-------- 写出文件 ---------->
-    msg = f"当前大语言模型: {llm_kwargs['llm_model']}，当前语言模型温度设定: {llm_kwargs['temperature']}。"
+    model_name = llm_kwargs['llm_model'].replace('_', '\\_')  # 替换LLM模型名称中的下划线为转义字符
+    msg = f"当前大语言模型: {model_name}，当前语言模型温度设定: {llm_kwargs['temperature']}。"
     final_tex = lps.merge_result(pfg.file_result, mode, msg)
     objdump((lps, pfg.file_result, mode, msg), file=pj(project_folder,'merge_result.pkl'))
 
@@ -342,7 +343,6 @@ def remove_buggy_lines(file_path, log_path, tex_name, tex_name_pure, n_fix, work
         logger.error("Fatal error occurred, but we cannot identify error, please download zip, read latex log, and compile manually.")
         return False, -1, [-1]
 
-
 def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_folder_original, work_folder_modified, work_folder, mode='default'):
     import os, time
     n_fix = 1
@@ -351,6 +351,31 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
     chatbot.append([f"正在编译PDF文档", f'编译已经开始。当前工作路径为{work_folder}，如果程序停顿5分钟以上，请直接去该路径下取回翻译结果，或者重启之后再度尝试 ...']); yield from update_ui(chatbot=chatbot, history=history)
     chatbot.append([f"正在编译PDF文档", '...']); yield from update_ui(chatbot=chatbot, history=history); time.sleep(1); chatbot[-1] = list(chatbot[-1]) # 刷新界面
     yield from update_ui_lastest_msg('编译已经开始...', chatbot, history)   # 刷新Gradio前端界面
+    # 检查是否需要使用xelatex
+    def check_if_need_xelatex(tex_path):
+        try:
+            with open(tex_path, 'r', encoding='utf-8', errors='replace') as f:
+                content = f.read(5000)
+                # 检查是否有使用xelatex的宏包
+                return any(pkg in content for pkg in ['fontspec', 'xeCJK', 'xetex', 'unicode-math', 'xltxtra', 'xunicode'])
+        except Exception:
+            return False
+
+    # 根据编译器类型返回编译命令
+    def get_compile_command(compiler, filename):
+        return f'{compiler} -interaction=batchmode -file-line-error {filename}.tex'
+
+    # 确定使用的编译器
+    compiler = 'pdflatex'
+    if check_if_need_xelatex(pj(work_folder_modified, f'{main_file_modified}.tex')):
+        logger.info("检测到宏包需要xelatex编译，切换至xelatex编译")
+        # Check if xelatex is installed
+        try:
+            import subprocess
+            subprocess.run(['xelatex', '--version'], capture_output=True, check=True)
+            compiler = 'xelatex'
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            raise RuntimeError("检测到需要使用xelatex编译，但系统中未安装xelatex。请先安装texlive或其他提供xelatex的LaTeX发行版。")
 
     while True:
         import os
@@ -361,10 +386,10 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
 
         # https://stackoverflow.com/questions/738755/dont-make-me-manually-abort-a-latex-compile-when-theres-an-error
         yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 编译原始PDF ...', chatbot, history)   # 刷新Gradio前端界面
-        ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex', work_folder_original)
+        ok = compile_latex_with_timeout(get_compile_command(compiler, main_file_original), work_folder_original)
 
         yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 编译转化后的PDF ...', chatbot, history)   # 刷新Gradio前端界面
-        ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex', work_folder_modified)
+        ok = compile_latex_with_timeout(get_compile_command(compiler, main_file_modified), work_folder_modified)
 
         if ok and os.path.exists(pj(work_folder_modified, f'{main_file_modified}.pdf')):
             # 只有第二步成功，才能继续下面的步骤
@@ -375,10 +400,10 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
                 ok = compile_latex_with_timeout(f'bibtex  {main_file_modified}.aux', work_folder_modified)
 
             yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 编译文献交叉引用 ...', chatbot, history)  # 刷新Gradio前端界面
-            ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex', work_folder_original)
-            ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex', work_folder_modified)
-            ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_original}.tex', work_folder_original)
-            ok = compile_latex_with_timeout(f'pdflatex -interaction=batchmode -file-line-error {main_file_modified}.tex', work_folder_modified)
+            ok = compile_latex_with_timeout(get_compile_command(compiler, main_file_original), work_folder_original)
+            ok = compile_latex_with_timeout(get_compile_command(compiler, main_file_modified), work_folder_modified)
+            ok = compile_latex_with_timeout(get_compile_command(compiler, main_file_original), work_folder_original)
+            ok = compile_latex_with_timeout(get_compile_command(compiler, main_file_modified), work_folder_modified)
 
             if mode!='translate_zh':
                 yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 使用latexdiff生成论文转化前后对比 ...', chatbot, history) # 刷新Gradio前端界面
@@ -386,10 +411,10 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
                 ok = compile_latex_with_timeout(f'latexdiff --encoding=utf8 --append-safecmd=subfile {work_folder_original}/{main_file_original}.tex  {work_folder_modified}/{main_file_modified}.tex --flatten > {work_folder}/merge_diff.tex', os.getcwd())
 
                 yield from update_ui_lastest_msg(f'尝试第 {n_fix}/{max_try} 次编译, 正在编译对比PDF ...', chatbot, history)   # 刷新Gradio前端界面
-                ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex', work_folder)
+                ok = compile_latex_with_timeout(get_compile_command(compiler, 'merge_diff'), work_folder)
                 ok = compile_latex_with_timeout(f'bibtex    merge_diff.aux', work_folder)
-                ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex', work_folder)
-                ok = compile_latex_with_timeout(f'pdflatex  -interaction=batchmode -file-line-error merge_diff.tex', work_folder)
+                ok = compile_latex_with_timeout(get_compile_command(compiler, 'merge_diff'), work_folder)
+                ok = compile_latex_with_timeout(get_compile_command(compiler, 'merge_diff'), work_folder)
 
         # <---------- 检查结果 ----------->
         results_ = ""
