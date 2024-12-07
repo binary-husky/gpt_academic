@@ -36,7 +36,8 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
                     "gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-4-turbo-2024-04-09",
                     "gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-4v", "glm-3-turbo",
-                    "gemini-1.5-pro", "chatglm3"
+                    "gemini-1.5-pro", "chatglm3", "HF:Qwen/Qwen2.5-72B-Instruct",
+                    "HF:meta-llama/Meta-Llama-3-70B-Instruct"
                     ]
 
 EMBEDDING_MODEL = "text-embedding-3-small"
@@ -55,6 +56,7 @@ EMBEDDING_MODEL = "text-embedding-3-small"
 #   "deepseek-chat" ,"deepseek-coder",
 #   "gemini-1.5-flash",
 #   "yi-34b-chat-0205","yi-34b-chat-200k","yi-large","yi-medium","yi-spark","yi-large-turbo","yi-large-preview",
+#   Hugging Face Playground中的模型，可自行添加，模型名字前需加"HF:"
 # ]
 # --- --- --- ---
 # 此外，您还可以在接入one-api/vllm/ollama/Openroute时，
@@ -259,8 +261,7 @@ CUSTOM_API_KEY_PATTERN = ""
 # Google Gemini API-Key
 GEMINI_API_KEY = ''
 
-
-# HUGGINGFACE的TOKEN，下载LLAMA时起作用 https://huggingface.co/docs/hub/security-tokens
+# HUGGINGFACE的TOKEN，使用Playground及下载LLAMA时起作用 https://huggingface.co/docs/hub/security-tokens
 HUGGINGFACE_ACCESS_TOKEN = "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"
 
 

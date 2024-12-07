@@ -35,6 +35,9 @@ from .bridge_google_gemini import predict_no_ui_long_connection  as genai_noui
 from .bridge_zhipu import predict_no_ui_long_connection as zhipu_noui
 from .bridge_zhipu import predict as zhipu_ui
 
+from .bridge_hf import predict_no_ui_long_connection as hf_noui
+from .bridge_hf import predict as hf_ui
+
 from .bridge_taichu import predict_no_ui_long_connection as taichu_noui
 from .bridge_taichu import predict as taichu_ui
 
@@ -987,6 +990,37 @@ if "zhipuai" in AVAIL_LLM_MODELS:   # zhipuai 是glm-4的别名，向后兼容�
         })
     except:
         logger.error(trimmed_format_exc())
+# -=-=-=-=-=-=- Hugging Face Playground -=-=-=-=-=-=-
+if any("HF:" in x for x in AVAIL_LLM_MODELS):
+    try:
+        for x in AVAIL_LLM_MODELS:
+            if x == "HF:Qwen/Qwen2.5-72B-Instruct" or x == 'HF:meta-llama/Meta-Llama-3-70B-Instruct':
+                model_info.update({
+                    x: {
+                        "fn_with_ui": hf_ui,
+                        "fn_without_ui": hf_noui,
+                        "endpoint": None,
+                        "max_token": 8192,
+                        'can_multi_thread': True,
+                        "tokenizer": tokenizer_gpt35,
+                        "token_cnt": get_token_num_gpt35,
+                    },
+                })
+            elif "HF:" in x:  # 默认max_token=8192
+                model_info.update({
+                    x: {
+                        "fn_with_ui": hf_ui,
+                        "fn_without_ui": hf_noui,
+                        "endpoint": None,
+                        "max_token": 8192,
+                        'can_multi_thread': True,
+                        "tokenizer": tokenizer_gpt35,
+                        "token_cnt": get_token_num_gpt35,
+                    },
+                })
+    except:
+        logger.error(trimmed_format_exc())
+
 # -=-=-=-=-=-=- 幻方-深度求索大模型 -=-=-=-=-=-=-
 if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
     try:
