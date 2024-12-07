@@ -23,39 +23,33 @@ class GetGLM3Handle(LocalLLMHandle):
         import os
         import platform
 
-        LOCAL_MODEL_QUANT, device = get_conf("LOCAL_MODEL_QUANT", "LOCAL_MODEL_DEVICE")
-        _model_name_ = "THUDM/chatglm3-6b"
-        # if LOCAL_MODEL_QUANT == "INT4":  # INT4
-        #     _model_name_ = "THUDM/chatglm3-6b-int4"
-        # elif LOCAL_MODEL_QUANT == "INT8":  # INT8
-        #     _model_name_ = "THUDM/chatglm3-6b-int8"
-        # else:
-        #     _model_name_ = "THUDM/chatglm3-6b"  # FP16
+        LOCAL_MODEL_PATH, LOCAL_MODEL_QUANT, device = get_conf("CHATGLM_LOCAL_MODEL_PATH", "LOCAL_MODEL_QUANT", "LOCAL_MODEL_DEVICE")
+        model_path = LOCAL_MODEL_PATH
         with ProxyNetworkActivate("Download_LLM"):
             chatglm_tokenizer = AutoTokenizer.from_pretrained(
-                _model_name_, trust_remote_code=True
+                model_path, trust_remote_code=True
             )
             if device == "cpu":
                 chatglm_model = AutoModel.from_pretrained(
-                    _model_name_,
+                    model_path,
                     trust_remote_code=True,
                     device="cpu",
                 ).float()
             elif LOCAL_MODEL_QUANT == "INT4":  # INT4
                 chatglm_model = AutoModel.from_pretrained(
-                    pretrained_model_name_or_path=_model_name_,
+                    pretrained_model_name_or_path=model_path,
                     trust_remote_code=True,
                     quantization_config=BitsAndBytesConfig(load_in_4bit=True),
                 )
             elif LOCAL_MODEL_QUANT == "INT8":  # INT8
                 chatglm_model = AutoModel.from_pretrained(
-                    pretrained_model_name_or_path=_model_name_,
+                    pretrained_model_name_or_path=model_path,
                     trust_remote_code=True,
                     quantization_config=BitsAndBytesConfig(load_in_8bit=True),
                 )
             else:
                 chatglm_model = AutoModel.from_pretrained(
-                    pretrained_model_name_or_path=_model_name_,
+                    pretrained_model_name_or_path=model_path,
                     trust_remote_code=True,
                     device="cuda",
                 )
