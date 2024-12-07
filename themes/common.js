@@ -318,7 +318,7 @@ function addCopyButton(botElement, index, is_last_in_arr) {
         }
     });
 
-    if (enable_tts){
+    if (enable_tts) {
         var audioButton = document.createElement('button');
         audioButton.classList.add('audio-toggle-btn');
         audioButton.innerHTML = audioIcon;
@@ -346,7 +346,7 @@ function addCopyButton(botElement, index, is_last_in_arr) {
     var messageBtnColumn = document.createElement('div');
     messageBtnColumn.classList.add('message-btn-row');
     messageBtnColumn.appendChild(copyButton);
-    if (enable_tts){
+    if (enable_tts) {
         messageBtnColumn.appendChild(audioButton);
     }
     botElement.appendChild(messageBtnColumn);
@@ -391,6 +391,8 @@ function chatbotContentChanged(attempt = 1, force = false) {
 
                 // Now pass both the message element and the is_last_in_arr boolean to addCopyButton
                 addCopyButton(message, index, is_last_in_arr);
+
+                save_conversation_history();
             });
             // gradioApp().querySelectorAll('#gpt-chatbot .message-wrap .message.bot').forEach(addCopyButton);
         }, i === 0 ? 0 : 200);
@@ -854,8 +856,7 @@ function limit_scroll_position() {
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 function loadLive2D() {
-    if (document.querySelector(".waifu") )
-    {
+    if (document.querySelector(".waifu")) {
         $('.waifu').show();
     } else {
         try {
@@ -937,22 +938,140 @@ function gpt_academic_gradio_saveload(
     }
 }
 
+function update_conversation_metadata() {
+    // Create a conversation UUID and timestamp
+    const conversationId = crypto.randomUUID();
+    const timestamp = new Date().toISOString();
+    const conversationData = {
+        id: conversationId,
+        timestamp: timestamp
+    };
+    // Save to cookie
+    setCookie("conversation_metadata", JSON.stringify(conversationData), 2);
+    // read from cookie
+    let conversation_metadata = getCookie("conversation_metadata");
+    console.log("conversation_metadata", conversation_metadata);
+}
+
+// // Example schema for conversation data structure
+// const example_conversation = {
+//     metadata: {
+//         id: "550e8400-e29b-41d4-a716-446655440000", 
+//         timestamp: "2024-03-29T12:34:56.789Z"
+//     },
+//     conversation: [
+//         ["user", "Hello, how are you?"],
+//         ["assistant", "I'm doing well, thank you for asking! How can I help you today?"],
+//         ["user", "What is the weather like?"],
+//         ["assistant", "I don't have access to real-time weather information. You would need to check a weather service or look outside to know the current weather conditions."]
+//     ],
+//     preview: "A conversation about greetings and weather"
+// }
+
+// Helper function to generate conversation preview
+function generatePreview(conversation, maxLength = 100) {
+    if (!conversation || conversation.length === 0) return "";
+    // Join all messages with dash separator
+    const preview = conversation.join("\n");
+    if (preview.length <= maxLength) return preview;
+    return preview.substring(0, maxLength) + "...";
+}
+
+async function save_conversation_history() {
+    // 505030475
+    let chatbot = await get_data_from_gradio_component('gpt-chatbot');
+    let history = await get_data_from_gradio_component('history-ng');
+    let conversation_metadata = getCookie("conversation_metadata");
+    conversation_metadata = JSON.parse(conversation_metadata);
+    // console.log("conversation_metadata", conversation_metadata);
+    let conversation = {
+        timestamp: conversation_metadata.timestamp,
+        id: conversation_metadata.id,
+        metadata: conversation_metadata,
+        conversation: chatbot,
+        history: history,
+        preview: generatePreview(JSON.parse(history))
+    };
+
+    // Get existing conversation history from local storage
+    let conversation_history = [];
+    try {
+        const stored = localStorage.getItem('conversation_history');
+        if (stored) {
+            conversation_history = JSON.parse(stored);
+        }
+    } catch (e) {
+        // console.error('Error reading conversation history from localStorage:', e);
+    }
+
+    // Find existing conversation with same ID
+    const existingIndex = conversation_history.findIndex(c => c.id === conversation.id);
+
+    if (existingIndex >= 0) {
+        // Update existing conversation
+        conversation_history[existingIndex] = conversation;
+    } else {
+        // Add new conversation
+        conversation_history.push(conversation);
+    }
+
+    // Sort conversations by timestamp, newest first
+    conversation_history.sort((a, b) => {
+        const timeA = new Date(a.timestamp).getTime();
+        const timeB = new Date(b.timestamp).getTime();
+        return timeB - timeA;
+    });
+
+    // Save back to local storage
+    try {
+        localStorage.setItem('conversation_history', JSON.stringify(conversation_history));
+        const LOCAL_STORAGE_UPDATED = "gptac_conversation_history_updated";
+        window.dispatchEvent(
+            new CustomEvent(LOCAL_STORAGE_UPDATED, {
+                detail: conversation_history
+            })
+        );
+    } catch (e) {
+        console.error('Error saving conversation history to localStorage:', e);
+    }
+}
+
+function restore_chat_from_local_storage(event) {
+    let conversation = event.detail;
+    push_data_to_gradio_component(conversation.conversation, "gpt-chatbot", "obj");
+    push_data_to_gradio_component(conversation.history, "history-ng", "obj");
+    console.log("restore_chat_from_local_storage", conversation);
+}
+
+
+function clear_conversation(a, b, c) {
+    update_conversation_metadata();
+    let stopButton = document.getElementById("elem_stop");
+    stopButton.click();
+    // console.log("clear_conversation");
+    return reset_conversation(a, b);
+}
 
 function reset_conversation(a, b) {
     // console.log("js_code_reset");
     a = btoa(unescape(encodeURIComponent(JSON.stringify(a))));
     setCookie("js_previous_chat_cookie", a, 1);
+    b = btoa(unescape(encodeURIComponent(JSON.stringify(b))));
+    setCookie("js_previous_history_cookie", b, 1);
     gen_restore_btn();
     return [[], [], "已重置"];
 }
 
 // clear -> 将 history 缓存至 history_cache -> 点击复原 -> restore_previous_chat() -> 触发elem_update_history -> 读取 history_cache
 function restore_previous_chat() {
-    console.log("restore_previous_chat");
+    // console.log("restore_previous_chat");
     let chat = getCookie("js_previous_chat_cookie");
     chat = JSON.parse(decodeURIComponent(escape(atob(chat))));
     push_data_to_gradio_component(chat, "gpt-chatbot", "obj");
-    document.querySelector("#elem_update_history").click(); // in order to call set_history_gr_state, and send history state to server
+    let history = getCookie("js_previous_history_cookie");
+    history = JSON.parse(decodeURIComponent(escape(atob(history))));
+    push_data_to_gradio_component(history, "history-ng", "obj");
+    // document.querySelector("#elem_update_history").click(); // in order to call set_history_gr_state, and send history state to server
 }
 
 function gen_restore_btn() {
@@ -1010,8 +1129,7 @@ function gen_restore_btn() {
     `;
 
     // only add when not exist
-    if (!document.getElementById('recvButtonStyle'))
-    {
+    if (!document.getElementById('recvButtonStyle')) {
         document.head.appendChild(styleSheet);
     }
 
@@ -1033,8 +1151,7 @@ function gen_restore_btn() {
         document.body.removeChild(this);
     });
     // only add when not exist
-    if (!document.getElementById('recvButton'))
-    {
+    if (!document.getElementById('recvButton')) {
         document.body.appendChild(button);
     }
 
@@ -1043,7 +1160,7 @@ function gen_restore_btn() {
 }
 
 async function on_plugin_exe_complete(fn_name) {
-    console.log(fn_name);
+    // console.log(fn_name);
     if (fn_name === "保存当前的对话") {
         // get chat profile path
         let chatbot = await get_data_from_gradio_component('gpt-chatbot');
@@ -1070,7 +1187,7 @@ async function on_plugin_exe_complete(fn_name) {
 }
 
 
-async function generate_menu(guiBase64String, btnName){
+async function generate_menu(guiBase64String, btnName) {
     // assign the button and menu data
     push_data_to_gradio_component(guiBase64String, "invisible_current_pop_up_plugin_arg", "string");
     push_data_to_gradio_component(btnName, "invisible_callback_btn_for_plugin_exe", "string");
@@ -1104,22 +1221,22 @@ async function generate_menu(guiBase64String, btnName){
             ///////////////////////////////////////////////////////////////////////////////////////////
             ////////////////////////////////////    Textbox   ////////////////////////////////////
             ///////////////////////////////////////////////////////////////////////////////////////////
-            if (gui_args[key].type=='string'){ // PLUGIN_ARG_MENU
+            if (gui_args[key].type == 'string') { // PLUGIN_ARG_MENU
                 const component_name = "plugin_arg_txt_" + text_cnt;
                 push_data_to_gradio_component({
                     visible: true,
-                    label: gui_args[key].title + "(" + gui_args[key].description +  ")",
+                    label: gui_args[key].title + "(" + gui_args[key].description + ")",
                     // label: gui_args[key].title,
                     placeholder: gui_args[key].description,
                     __type__: 'update'
                 }, component_name, "obj");
-                if (key === "main_input"){
+                if (key === "main_input") {
                     // 为了与旧插件兼容，生成菜单时，自动加载输入栏的值
                     let current_main_input = await get_data_from_gradio_component('user_input_main');
                     let current_main_input_2 = await get_data_from_gradio_component('user_input_float');
                     push_data_to_gradio_component(current_main_input + current_main_input_2, component_name, "obj");
                 }
-                else if (key === "advanced_arg"){
+                else if (key === "advanced_arg") {
                     // 为了与旧插件兼容，生成菜单时，自动加载旧高级参数输入区的值
                     let advance_arg_input_legacy = await get_data_from_gradio_component('advance_arg_input_legacy');
                     push_data_to_gradio_component(advance_arg_input_legacy, component_name, "obj");
@@ -1134,12 +1251,12 @@ async function generate_menu(guiBase64String, btnName){
             ///////////////////////////////////////////////////////////////////////////////////////////
             ////////////////////////////////////    Dropdown   ////////////////////////////////////
             ///////////////////////////////////////////////////////////////////////////////////////////
-            if (gui_args[key].type=='dropdown'){ // PLUGIN_ARG_MENU
+            if (gui_args[key].type == 'dropdown') { // PLUGIN_ARG_MENU
                 const component_name = "plugin_arg_drop_" + dropdown_cnt;
                 push_data_to_gradio_component({
                     visible: true,
                     choices: gui_args[key].options,
-                    label: gui_args[key].title + "(" + gui_args[key].description +  ")",
+                    label: gui_args[key].title + "(" + gui_args[key].description + ")",
                     // label: gui_args[key].title,
                     placeholder: gui_args[key].description,
                     __type__: 'update'
@@ -1154,7 +1271,7 @@ async function generate_menu(guiBase64String, btnName){
     }
 }
 
-async function execute_current_pop_up_plugin(){
+async function execute_current_pop_up_plugin() {
     let guiBase64String = await get_data_from_gradio_component('invisible_current_pop_up_plugin_arg');
     const stringData = atob(guiBase64String);
     let guiJsonData = JSON.parse(stringData);
@@ -1170,8 +1287,8 @@ async function execute_current_pop_up_plugin(){
     let text_cnt = 0;
     for (const key in gui_args) {
         if (gui_args.hasOwnProperty(key)) {
-            if (gui_args[key].type=='string'){ // PLUGIN_ARG_MENU
-                corrisponding_elem_id = "plugin_arg_txt_"+text_cnt
+            if (gui_args[key].type == 'string') { // PLUGIN_ARG_MENU
+                corrisponding_elem_id = "plugin_arg_txt_" + text_cnt
                 gui_args[key].user_confirmed_value = await get_data_from_gradio_component(corrisponding_elem_id);
                 text_cnt += 1;
             }
@@ -1180,8 +1297,8 @@ async function execute_current_pop_up_plugin(){
     let dropdown_cnt = 0;
     for (const key in gui_args) {
         if (gui_args.hasOwnProperty(key)) {
-            if (gui_args[key].type=='dropdown'){ // PLUGIN_ARG_MENU
-                corrisponding_elem_id = "plugin_arg_drop_"+dropdown_cnt
+            if (gui_args[key].type == 'dropdown') { // PLUGIN_ARG_MENU
+                corrisponding_elem_id = "plugin_arg_drop_" + dropdown_cnt
                 gui_args[key].user_confirmed_value = await get_data_from_gradio_component(corrisponding_elem_id);
                 dropdown_cnt += 1;
             }
@@ -1200,29 +1317,29 @@ async function execute_current_pop_up_plugin(){
 
 }
 
-function hide_all_elem(){
-     // PLUGIN_ARG_MENU
-    for (text_cnt = 0; text_cnt < 8; text_cnt++){
+function hide_all_elem() {
+    // PLUGIN_ARG_MENU
+    for (text_cnt = 0; text_cnt < 8; text_cnt++) {
         push_data_to_gradio_component({
             visible: false,
             label: "",
             __type__: 'update'
-        }, "plugin_arg_txt_"+text_cnt, "obj");
-        document.getElementById("plugin_arg_txt_"+text_cnt).parentNode.parentNode.style.display = 'none';
+        }, "plugin_arg_txt_" + text_cnt, "obj");
+        document.getElementById("plugin_arg_txt_" + text_cnt).parentNode.parentNode.style.display = 'none';
     }
-    for (dropdown_cnt = 0; dropdown_cnt < 8; dropdown_cnt++){
+    for (dropdown_cnt = 0; dropdown_cnt < 8; dropdown_cnt++) {
         push_data_to_gradio_component({
             visible: false,
             choices: [],
             label: "",
             __type__: 'update'
-        }, "plugin_arg_drop_"+dropdown_cnt, "obj");
-        document.getElementById("plugin_arg_drop_"+dropdown_cnt).parentNode.style.display = 'none';
+        }, "plugin_arg_drop_" + dropdown_cnt, "obj");
+        document.getElementById("plugin_arg_drop_" + dropdown_cnt).parentNode.style.display = 'none';
     }
 }
 
-function close_current_pop_up_plugin(){
-     // PLUGIN_ARG_MENU
+function close_current_pop_up_plugin() {
+    // PLUGIN_ARG_MENU
     push_data_to_gradio_component({
         visible: false,
         __type__: 'update'
@@ -1233,15 +1350,13 @@ function close_current_pop_up_plugin(){
 
 // 生成高级插件的选择菜单
 plugin_init_info_lib = {}
-function register_plugin_init(key, base64String){
+function register_plugin_init(key, base64String) {
     // console.log('x')
     const stringData = atob(base64String);
     let guiJsonData = JSON.parse(stringData);
-    if (key in plugin_init_info_lib)
-    {
+    if (key in plugin_init_info_lib) {
     }
-    else
-    {
+    else {
         plugin_init_info_lib[key] = {};
     }
     plugin_init_info_lib[key].info = guiJsonData.Info;
@@ -1251,28 +1366,26 @@ function register_plugin_init(key, base64String){
     plugin_init_info_lib[key].enable_advanced_arg = guiJsonData.AdvancedArgs;
     plugin_init_info_lib[key].arg_reminder = guiJsonData.ArgsReminder;
 }
-function register_advanced_plugin_init_code(key, code){
-    if (key in plugin_init_info_lib)
-    {
+function register_advanced_plugin_init_code(key, code) {
+    if (key in plugin_init_info_lib) {
     }
-    else
-    {
+    else {
         plugin_init_info_lib[key] = {};
     }
     plugin_init_info_lib[key].secondary_menu_code = code;
 }
-function run_advanced_plugin_launch_code(key){
+function run_advanced_plugin_launch_code(key) {
     // convert js code string to function
     generate_menu(plugin_init_info_lib[key].secondary_menu_code, key);
 }
-function on_flex_button_click(key){
-    if (plugin_init_info_lib.hasOwnProperty(key) && plugin_init_info_lib[key].hasOwnProperty('secondary_menu_code')){
+function on_flex_button_click(key) {
+    if (plugin_init_info_lib.hasOwnProperty(key) && plugin_init_info_lib[key].hasOwnProperty('secondary_menu_code')) {
         run_advanced_plugin_launch_code(key);
-    }else{
+    } else {
         document.getElementById("old_callback_btn_for_plugin_exe").click();
     }
 }
-async function run_dropdown_shift(dropdown){
+async function run_dropdown_shift(dropdown) {
     let key = dropdown;
     push_data_to_gradio_component({
         value: key,
@@ -1281,7 +1394,7 @@ async function run_dropdown_shift(dropdown){
         __type__: 'update'
     }, "elem_switchy_bt", "obj");
 
-    if (plugin_init_info_lib[key].enable_advanced_arg){
+    if (plugin_init_info_lib[key].enable_advanced_arg) {
         push_data_to_gradio_component({
             visible: true,
             label: plugin_init_info_lib[key].label,
@@ -1303,9 +1416,9 @@ async function duplicate_in_new_window() {
     window.open(url, '_blank');
 }
 
-async function run_classic_plugin_via_id(plugin_elem_id){
-    for (key in plugin_init_info_lib){
-        if (plugin_init_info_lib[key].elem_id == plugin_elem_id){
+async function run_classic_plugin_via_id(plugin_elem_id) {
+    for (key in plugin_init_info_lib) {
+        if (plugin_init_info_lib[key].elem_id == plugin_elem_id) {
             // 获取按钮名称
             let current_btn_name = await get_data_from_gradio_component(plugin_elem_id);
             // 执行
@@ -1326,7 +1439,7 @@ async function call_plugin_via_name(current_btn_name) {
     hide_all_elem();
     // 为了与旧插件兼容，生成菜单时，自动加载旧高级参数输入区的值
     let advance_arg_input_legacy = await get_data_from_gradio_component('advance_arg_input_legacy');
-    if (advance_arg_input_legacy.length != 0){
+    if (advance_arg_input_legacy.length != 0) {
         gui_args["advanced_arg"] = {};
         gui_args["advanced_arg"].user_confirmed_value = advance_arg_input_legacy;
     }
@@ -1353,7 +1466,7 @@ async function multiplex_function_begin(multiplex_sel) {
     // do not delete `REPLACE_EXTENDED_MULTIPLEX_FUNCTIONS_HERE`! It will be read and replaced by Python code.
     // REPLACE_EXTENDED_MULTIPLEX_FUNCTIONS_HERE
 }
-async function run_multiplex_shift(multiplex_sel){
+async function run_multiplex_shift(multiplex_sel) {
     let key = multiplex_sel;
     if (multiplex_sel === "常规对话") {
         key = "提交";

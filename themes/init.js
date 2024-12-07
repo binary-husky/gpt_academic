@@ -3,6 +3,8 @@ async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout, tts) {
     audio_fn_init();
     minor_ui_adjustment();
     ButtonWithDropdown_init();
+    update_conversation_metadata();
+    window.addEventListener("gptac_restore_chat_from_local_storage", restore_chat_from_local_storage);
     
     // 加载欢迎页面
     const welcomeMessage = new WelcomeMessage();

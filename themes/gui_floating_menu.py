@@ -1,7 +1,7 @@
 import gradio as gr
 
 def define_gui_floating_menu(customize_btns, functional, predefined_btns, cookies, web_cookie_cache):
-    with gr.Floating(init_x="20%", init_y="50%", visible=False, width="40%", drag="top") as area_input_secondary:
+    with gr.Floating(init_x="20%", init_y="50%", visible=False, width="40%", drag="top", elem_id="f_area_input_secondary") as area_input_secondary:
         with gr.Accordion("浮动输入区", open=True, elem_id="input-panel2"):
             with gr.Row() as row:
                 row.style(equal_height=True)
@@ -17,7 +17,7 @@ def define_gui_floating_menu(customize_btns, functional, predefined_btns, cookie
                     clearBtn2 = gr.Button("清除", elem_id="elem_clear2", variant="secondary", visible=False); clearBtn2.style(size="sm")
 
 
-    with gr.Floating(init_x="20%", init_y="50%", visible=False, width="40%", drag="top") as area_customize:
+    with gr.Floating(init_x="20%", init_y="50%", visible=False, width="40%", drag="top", elem_id="f_area_customize") as area_customize:
         with gr.Accordion("自定义菜单", open=True, elem_id="edit-panel"):
             with gr.Row() as row:
                 with gr.Column(scale=10):
