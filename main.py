@@ -186,7 +186,7 @@ def main():
             define_gui_floating_menu(customize_btns, functional, predefined_btns, cookies, web_cookie_cache)
         
         # 浮动时间线定义
-        gr.Spark(label="", value="")
+        gr.Spark()
 
         # 插件二级菜单的实现
         from themes.gui_advanced_plugin_class import define_gui_advanced_plugin_class
