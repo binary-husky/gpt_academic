@@ -109,7 +109,7 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
             gpt_replying_buffer += paraphrase['text']    # 使用 json 解析库进行处理
             chatbot[-1] = (inputs, gpt_replying_buffer)
             history[-1] = gpt_replying_buffer
-            log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
+            log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer, user_name=chatbot.get_user())
             yield from update_ui(chatbot=chatbot, history=history)
         if error_match:
             history = history[-2]  # 错误的不纳入对话
