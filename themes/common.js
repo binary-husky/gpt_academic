@@ -1041,6 +1041,20 @@ function restore_chat_from_local_storage(event) {
     push_data_to_gradio_component(conversation.conversation, "gpt-chatbot", "obj");
     push_data_to_gradio_component(conversation.history, "history-ng", "obj");
     console.log("restore_chat_from_local_storage", conversation);
+
+    // Create a conversation UUID and timestamp
+    const conversationId = conversation.id;
+    const timestamp = conversation.timestamp;
+    const conversationData = {
+        id: conversationId,
+        timestamp: timestamp
+    };
+    // Save to cookie
+    setCookie("conversation_metadata", JSON.stringify(conversationData), 2);
+    // read from cookie
+    let conversation_metadata = getCookie("conversation_metadata");
+    console.log("conversation_metadata", conversation_metadata);
+
 }
 
 
@@ -1058,7 +1072,7 @@ function reset_conversation(a, b) {
     setCookie("js_previous_chat_cookie", a, 1);
     b = btoa(unescape(encodeURIComponent(JSON.stringify(b))));
     setCookie("js_previous_history_cookie", b, 1);
-    // gen_restore_btn();
+    gen_restore_btn();
     return [[], [], "已重置"];
 }
 
