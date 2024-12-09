@@ -35,9 +35,9 @@ def define_gui_floating_menu(customize_btns, functional, predefined_btns, cookie
                     # update btn
                     h = basic_fn_confirm.click(assign_btn, [web_cookie_cache, cookies, basic_btn_dropdown, basic_fn_title, basic_fn_prefix, basic_fn_suffix],
                                             [web_cookie_cache, cookies, *customize_btns.values(), *predefined_btns.values()])
-                    h.then(None, [web_cookie_cache], None, _js="""(web_cookie_cache)=>{setCookie("web_cookie_cache", web_cookie_cache, 365);}""")
+                    h.then(None, [web_cookie_cache], None, _js="""(web_cookie_cache)=>{localStorage.setItem("web_cookie_cache", web_cookie_cache);}""")
                     # clean up btn
                     h2 = basic_fn_clean.click(assign_btn, [web_cookie_cache, cookies, basic_btn_dropdown, basic_fn_title, basic_fn_prefix, basic_fn_suffix, gr.State(True)],
                                             [web_cookie_cache, cookies, *customize_btns.values(), *predefined_btns.values()])
-                    h2.then(None, [web_cookie_cache], None, _js="""(web_cookie_cache)=>{setCookie("web_cookie_cache", web_cookie_cache, 365);}""")
+                    h2.then(None, [web_cookie_cache], None, _js="""(web_cookie_cache)=>{localStorage.setItem("web_cookie_cache", web_cookie_cache);}""")
     return area_input_secondary, txt2, area_customize, submitBtn2, resetBtn2, clearBtn2, stopBtn2

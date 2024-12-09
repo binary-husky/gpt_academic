@@ -923,12 +923,12 @@ function gpt_academic_gradio_saveload(
     if (save_or_load === "load") {
         let value = getCookie(cookie_key);
         if (value) {
-            console.log('加载cookie', elem_id, value)
+            // console.log('加载cookie', elem_id, value)
             push_data_to_gradio_component(value, elem_id, load_type);
         }
         else {
             if (load_default) {
-                console.log('加载cookie的默认值', elem_id, load_default_value)
+                // console.log('加载cookie的默认值', elem_id, load_default_value)
                 push_data_to_gradio_component(load_default_value, elem_id, load_type);
             }
         }
@@ -950,7 +950,7 @@ function update_conversation_metadata() {
     setCookie("conversation_metadata", JSON.stringify(conversationData), 2);
     // read from cookie
     let conversation_metadata = getCookie("conversation_metadata");
-    console.log("conversation_metadata", conversation_metadata);
+    // console.log("conversation_metadata", conversation_metadata);
 }
 
 // // Example schema for conversation data structure
@@ -1040,7 +1040,7 @@ function restore_chat_from_local_storage(event) {
     let conversation = event.detail;
     push_data_to_gradio_component(conversation.conversation, "gpt-chatbot", "obj");
     push_data_to_gradio_component(conversation.history, "history-ng", "obj");
-    console.log("restore_chat_from_local_storage", conversation);
+    // console.log("restore_chat_from_local_storage", conversation);
 
     // Create a conversation UUID and timestamp
     const conversationId = conversation.id;
@@ -1053,7 +1053,7 @@ function restore_chat_from_local_storage(event) {
     setCookie("conversation_metadata", JSON.stringify(conversationData), 2);
     // read from cookie
     let conversation_metadata = getCookie("conversation_metadata");
-    console.log("conversation_metadata", conversation_metadata);
+    // console.log("conversation_metadata", conversation_metadata);
 
 }
 
@@ -1193,8 +1193,8 @@ async function on_plugin_exe_complete(fn_name) {
         }
         let href = get_href(may_have_chat_profile_info);
         if (href) {
-            const cleanedHref = href.replace('file=', ''); // /home/fuqingxu/chatgpt_academic/gpt_log/default_user/chat_history/GPT-Academic对话存档2024-04-12-00-35-06.html
-            console.log(cleanedHref);
+            const cleanedHref = href.replace('file=', ''); // gpt_log/default_user/chat_history/GPT-Academic对话存档2024-04-12-00-35-06.html
+            // console.log(cleanedHref);
         }
 
     }
@@ -1491,4 +1491,9 @@ async function run_multiplex_shift(multiplex_sel) {
         value: key,
         __type__: 'update'
     }, "elem_submit_visible", "obj");
+}
+
+
+async function persistent_cookie_init(web_cookie_cache, cookie) {
+    return [localStorage.getItem('web_cookie_cache'), cookie];
 }

@@ -87,12 +87,6 @@ js_code_for_toggle_darkmode = """() => {
 }"""
 
 
-js_code_for_persistent_cookie_init = """(web_cookie_cache, cookie) => {
-    return [getCookie("web_cookie_cache"), cookie];
-}
-"""
-
-
 js_code_clear = """
 (a,b)=>{
     return ["", ""];
