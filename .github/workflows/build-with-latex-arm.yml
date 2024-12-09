@@ -7,7 +7,7 @@ on:
       - "master"
 
 env:
-  REGISTRY: ghcr.io
+  REGISTRY: ${{ secrets.REGISTRY }}
   IMAGE_NAME: ${{ github.repository }}_with_latex_arm
 
 jobs:
