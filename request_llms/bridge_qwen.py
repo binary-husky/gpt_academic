@@ -59,7 +59,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
         chatbot[-1] = (inputs, response)
         yield from update_ui(chatbot=chatbot, history=history)
 
-    log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=response)
+    log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=response, user_name=chatbot.get_user())
     # 总结输出
     if response == f"[Local Message] 等待{model_name}响应中 ...":
         response = f"[Local Message] {model_name}响应异常 ..."

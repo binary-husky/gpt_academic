@@ -337,7 +337,7 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
                     # 前者是API2D的结束条件，后者是OPENAI的结束条件
                     if ('data: [DONE]' in chunk_decoded) or (len(chunkjson['choices'][0]["delta"]) == 0):
                         # 判定为数据流的结束，gpt_replying_buffer也写完了
-                        log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
+                        log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer, user_name=chatbot.get_user())
                         break
                     # 处理数据流的主体
                     status_text = f"finish_reason: {chunkjson['choices'][0].get('finish_reason', 'null')}"
@@ -371,7 +371,7 @@ def handle_o1_model_special(response, inputs, llm_kwargs, chatbot, history):
     try:
         chunkjson = json.loads(response.content.decode())
         gpt_replying_buffer = chunkjson['choices'][0]["message"]["content"]
-        log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
+        log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer, user_name=chatbot.get_user())
         history[-1] = gpt_replying_buffer
         chatbot[-1] = (history[-2], history[-1])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面

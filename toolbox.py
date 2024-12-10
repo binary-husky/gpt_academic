@@ -1029,7 +1029,7 @@ def check_repeat_upload(new_pdf_path, pdf_hash):
     # 如果所有页的内容都相同，返回 True
     return False, None
 
-def log_chat(llm_model: str, input_str: str, output_str: str):
+def log_chat(llm_model: str, input_str: str, output_str: str, user_name: str=default_user_name):
     try:
         if output_str and input_str and llm_model:
             uid = str(uuid.uuid4().hex)
@@ -1038,8 +1038,8 @@ def log_chat(llm_model: str, input_str: str, output_str: str):
             logger.bind(chat_msg=True).info(dedent(
             """
             ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-            [UID]
-            {uid}
+            [UID/USER]
+            {uid}/{user_name}
             [Model]
             {llm_model}
             [Query]
@@ -1047,6 +1047,6 @@ def log_chat(llm_model: str, input_str: str, output_str: str):
             [Response]
             {output_str}
             ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-            """).format(uid=uid, llm_model=llm_model, input_str=input_str, output_str=output_str))
+            """).format(uid=uid, user_name=user_name, llm_model=llm_model, input_str=input_str, output_str=output_str))
     except:
         logger.error(trimmed_format_exc())
