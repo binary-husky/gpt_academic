@@ -1,17 +1,18 @@
-import os, json; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
+import os, json;
+from init_task import init_task
+
+os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 
 help_menu_description = \
-"""Github源代码开源和更新[地址🚀](https://github.com/binary-husky/gpt_academic),
-感谢热情的[开发者们❤️](https://github.com/binary-husky/gpt_academic/graphs/contributors).
-</br></br>常见问题请查阅[项目Wiki](https://github.com/binary-husky/gpt_academic/wiki),
-如遇到Bug请前往[Bug反馈](https://github.com/binary-husky/gpt_academic/issues).
-</br></br>普通对话使用说明: 1. 输入问题; 2. 点击提交
-</br></br>基础功能区使用说明: 1. 输入文本; 2. 点击任意基础功能区按钮
-</br></br>函数插件区使用说明: 1. 输入路径/问题, 或者上传文件; 2. 点击任意函数插件区按钮
-</br></br>虚空终端使用说明: 点击虚空终端, 然后根据提示输入指令, 再次点击虚空终端
-</br></br>如何保存对话: 点击保存当前的对话按钮
-</br></br>如何语音对话: 请阅读Wiki
-</br></br>如何临时更换API_KEY: 在输入区输入临时API_KEY后提交（网页刷新后失效）"""
+    """
+    CopyRight © 2024 [binaryYuki??](https://github.com/binaryYuki) All Rights Reserved.
+    </br></br>普通对话使用说明: 1. 输入问题; 2. 点击提交
+    </br></br>基础功能区使用说明: 1. 输入文本; 2. 点击任意基础功能区按钮
+    </br></br>函数插件区使用说明: 1. 输入路径/问题, 或者上传文件; 2. 点击任意函数插件区按钮
+    </br></br>虚空终端使用说明: 点击虚空终端, 然后根据提示输入指令, 再次点击虚空终端
+    </br></br>如何保存对话: 点击保存当前的对话按钮
+    </br></br>如何语音对话: 请阅读Wiki
+    </br></br>如何临时更换API_KEY: 在输入区输入临时API_KEY后提交（网页刷新后失效）"""
 
 from loguru import logger
 def enable_log(PATH_LOGGING):
@@ -34,8 +35,9 @@ def encode_plugin_info(k, plugin)->str:
 
 def main():
     import gradio as gr
-    if gr.__version__ not in ['3.32.9', '3.32.10', '3.32.11']:
-        raise ModuleNotFoundError("使用项目内置Gradio获取最优体验! 请运行 `pip install -r requirements.txt` 指令安装内置Gradio及其他依赖, 详情信息见requirements.txt.")
+    # print(f"Gradio Version: {gr.__version__}")
+    # if gr.__version__ not in ['3.32.9', '3.32.10', '3.32.11']:
+    #     raise ModuleNotFoundError("使用项目内置Gradio获取最优体验! 请运行 `pip install -r requirements.txt` 指令安装内置Gradio及其他依赖, 详情信息见requirements.txt.")
 
     # 一些基础工具
     from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, DummyWith
@@ -60,7 +62,11 @@ def main():
     from themes.theme import adjust_theme, advanced_css, theme_declaration, js_code_clear, js_code_reset, js_code_show_or_hide, js_code_show_or_hide_group2
     from themes.theme import js_code_for_toggle_darkmode, js_code_for_persistent_cookie_init
     from themes.theme import load_dynamic_theme, to_cookie_str, from_cookie_str, assign_user_uuid
-    title_html = f"<h1 align=\"center\">GPT 学术优化 {get_current_version()}</h1>{theme_declaration}"
+    title_html = f"""
+                <h1 align="center">GPT Academic {get_current_version()}</h1>
+                <h5 align="center">binaryYuki's Edition</h5>
+                {theme_declaration}
+                """
 
 
     # 一些普通功能模块
@@ -145,7 +151,7 @@ def main():
                         gr.Markdown("<small>插件可读取“输入区”文本/路径作为参数（上传文件自动修正路径）</small>")
                     with gr.Row(elem_id="input-plugin-group"):
                         plugin_group_sel = gr.Dropdown(choices=all_plugin_groups, label='', show_label=False, value=DEFAULT_FN_GROUPS,
-                                                      multiselect=True, interactive=True, elem_classes='normal_mut_select').style(container=False)
+                                                       multiselect=True, interactive=True, elem_classes='normal_mut_select').style(container=False)
                     with gr.Row():
                         for index, (k, plugin) in enumerate(plugins.items()):
                             if not plugin.get("AsButton", True): continue
@@ -154,7 +160,7 @@ def main():
                             info = plugins[k].get("Info", k)
                             btn_elem_id = f"plugin_btn_{index}"
                             plugin['Button'] = plugins[k]['Button'] = gr.Button(k, variant=variant,
-                                visible=visible, info_str=f'函数插件区: {info}', elem_id=btn_elem_id).style(size="sm")
+                                                                                visible=visible, info_str=f'函数插件区: {info}', elem_id=btn_elem_id).style(size="sm")
                             plugin['ButtonElemId'] = btn_elem_id
                     with gr.Row():
                         with gr.Accordion("更多函数插件", open=True):
@@ -213,7 +219,7 @@ def main():
         input_combo_order = ["cookies", "max_length_sl", "md_dropdown", "txt", "txt2", "top_p", "temperature", "chatbot", "history", "system_prompt", "plugin_advanced_arg"]
         output_combo = [cookies, chatbot, history, status]
         predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=[*input_combo, gr.State(True)], outputs=output_combo)
-        
+
         # 提交按钮、重置按钮
         multiplex_submit_btn.click(
             None, [multiplex_sel], None, _js="""(multiplex_sel)=>multiplex_function_begin(multiplex_sel)""")
@@ -288,10 +294,10 @@ def main():
         cancel_handles.append(click_handle_ng)
         # 新一代插件的高级参数区确认按钮（隐藏）
         click_handle_ng = new_plugin_callback.click(route_switchy_bt_with_arg,
-            [
-                gr.State(["new_plugin_callback", "usr_confirmed_arg"] + input_combo_order), # 第一个参数: 指定了后续参数的名称
-                new_plugin_callback, usr_confirmed_arg, *input_combo                        # 后续参数: 真正的参数
-            ], output_combo)
+                                                    [
+                                                        gr.State(["new_plugin_callback", "usr_confirmed_arg"] + input_combo_order), # 第一个参数: 指定了后续参数的名称
+                                                        new_plugin_callback, usr_confirmed_arg, *input_combo                        # 后续参数: 真正的参数
+                                                    ], output_combo)
         click_handle_ng.then(on_report_generated, [cookies, file_upload, chatbot], [cookies, file_upload, chatbot]).then(None, [switchy_bt], None, _js=r"(fn)=>on_plugin_exe_complete(fn)")
         cancel_handles.append(click_handle_ng)
         # 终止按钮的回调函数注册
@@ -326,7 +332,7 @@ def main():
         from shared_utils.cookie_manager import load_web_cookie_cache__fn_builder
         load_web_cookie_cache = load_web_cookie_cache__fn_builder(customize_btns, cookies, predefined_btns)
         app_block.load(load_web_cookie_cache, inputs = [web_cookie_cache, cookies],
-            outputs = [web_cookie_cache, cookies, *customize_btns.values(), *predefined_btns.values()], _js=js_code_for_persistent_cookie_init)
+                       outputs = [web_cookie_cache, cookies, *customize_btns.values(), *predefined_btns.values()], _js=js_code_for_persistent_cookie_init)
         app_block.load(None, inputs=[], outputs=None, _js=f"""()=>GptAcademicJavaScriptInit("{DARK_MODE}","{INIT_SYS_PROMPT}","{ADD_WAIFU}","{LAYOUT}","{TTS_TYPE}")""")    # 配置暗色主题或亮色主题
         app_block.load(None, inputs=[], outputs=None, _js="""()=>{REP}""".replace("REP", register_advanced_plugin_init_arr))
 
@@ -355,4 +361,5 @@ def main():
 
 
 if __name__ == "__main__":
+    init_task()
     main()
