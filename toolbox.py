@@ -494,6 +494,22 @@ def to_markdown_tabs(head: list, tabs: list, alignment=":---:", column=False, om
 
     return tabs_list
 
+def validate_file_size(files, max_size_mb=500):
+    """
+    验证文件大小是否在允许范围内。
+    :param files: 文件的完整路径的列表
+    :param max_size_mb: 最大文件大小，单位为MB（默认500MB）
+    :return: True 如果文件大小有效，否则抛出异常
+    """
+    # 获取文件大小（字节）
+    total_size = 0
+    max_size_bytes = max_size_mb * 1024 * 1024
+    for file in files:
+        total_size  += os.path.getsize(file.name)
+        if total_size > max_size_bytes:
+            raise ValueError(f"File size exceeds the allowed limit of {max_size_mb} MB. "
+                            f"Current size: {total_size / (1024 * 1024):.2f} MB")
+    return True
 
 def on_file_uploaded(
     request: gradio.Request, files:List[str], chatbot:ChatBotWithCookies,
@@ -505,6 +521,7 @@ def on_file_uploaded(
     if len(files) == 0:
         return chatbot, txt
 
+    validate_file_size(files, max_size_mb=500)
     # 创建工作路径
     user_name = default_user_name if not request.username else request.username
     time_tag = gen_time_str()
