@@ -179,7 +179,7 @@ def 解析PDF_DOC2X_单文件(fp, project_folder, llm_kwargs, plugin_kwargs, cha
         )
 
         # edit markdown files
-        success, file_manifest, project_folder = get_files_from_everything(ex_folder, type='.md')
+        success, file_manifest, project_folder = get_files_from_everything(ex_folder, type='.md', chatbot=chatbot)
         for generated_fp in file_manifest:
             # 修正一些公式问题
             with open(generated_fp, 'r', encoding='utf8') as f:

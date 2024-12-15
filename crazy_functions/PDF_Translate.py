@@ -26,7 +26,7 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
 
     # 清空历史，以免输入溢出
     history = []
-    success, file_manifest, project_folder = get_files_from_everything(txt, type='.pdf')
+    success, file_manifest, project_folder = get_files_from_everything(txt, type='.pdf', chatbot=chatbot)
 
     # 检测输入参数，如没有给定输入参数，直接退出
     if (not success) and txt == "": txt = '空空如也的输入栏。提示：请先上传文件（把PDF文件拖入对话）。'
