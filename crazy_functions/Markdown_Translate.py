@@ -1,5 +1,6 @@
 import glob, shutil, os, re
 from loguru import logger
+from shared_utils.fastapi_server import validate_path_safety
 from toolbox import update_ui, trimmed_format_exc, gen_time_str
 from toolbox import CatchException, report_exception, get_log_folder
 from toolbox import write_history_to_file, promote_file_to_downloadzone
@@ -118,7 +119,7 @@ def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
 
-def get_files_from_everything(txt, preference=''):
+def get_files_from_everything(txt, preference='', chatbox=None):
     if txt == "": return False, None, None
     success = True
     if txt.startswith('http'):
@@ -146,9 +147,11 @@ def get_files_from_everything(txt, preference=''):
         # 直接给定文件
         file_manifest = [txt]
         project_folder = os.path.dirname(txt)
+        validate_path_safety(project_folder, chatbot.get_user())
     elif os.path.exists(txt):
         # 本地路径，递归搜索
         project_folder = txt
+        validate_path_safety(project_folder, chatbot.get_user())
         file_manifest = [f for f in glob.glob(f'{project_folder}/**/*.md', recursive=True)]
     else:
         project_folder = None
@@ -177,7 +180,7 @@ def Markdown英译中(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
         return
     history = []    # 清空历史，以免输入溢出
 
-    success, file_manifest, project_folder = get_files_from_everything(txt, preference="Github")
+    success, file_manifest, project_folder = get_files_from_everything(txt, preference="Github", chatbox=chatbot)
 
     if not success:
         # 什么都没有

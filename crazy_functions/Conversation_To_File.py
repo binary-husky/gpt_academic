@@ -172,7 +172,7 @@ def 载入对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     user_request    当前用户的请求信息（IP地址等）
     """
     from crazy_functions.crazy_utils import get_files_from_everything
-    success, file_manifest, _ = get_files_from_everything(txt, type='.html')
+    success, file_manifest, _ = get_files_from_everything(txt, type='.html',chatbot=chatbot)
 
     if not success:
         if txt == "": txt = '空空如也的输入栏'
