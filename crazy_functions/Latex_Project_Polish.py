@@ -1,3 +1,4 @@
+from shared_utils.fastapi_server import validate_path_safety
 from toolbox import update_ui, trimmed_format_exc, promote_file_to_downloadzone, get_log_folder
 from toolbox import CatchException, report_exception, write_history_to_file, zip_folder
 from loguru import logger
@@ -155,6 +156,7 @@ def Latex英文润色(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
     import glob, os
     if os.path.exists(txt):
         project_folder = txt
+        validate_path_safety(project_folder, chatbot.get_user())
     else:
         if txt == "": txt = '空空如也的输入栏'
         report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
@@ -193,6 +195,7 @@ def Latex中文润色(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
     import glob, os
     if os.path.exists(txt):
         project_folder = txt
+        validate_path_safety(project_folder, chatbot.get_user())
     else:
         if txt == "": txt = '空空如也的输入栏'
         report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")
@@ -229,6 +232,7 @@ def Latex英文纠错(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
     import glob, os
     if os.path.exists(txt):
         project_folder = txt
+        validate_path_safety(project_folder, chatbot.get_user())
     else:
         if txt == "": txt = '空空如也的输入栏'
         report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")

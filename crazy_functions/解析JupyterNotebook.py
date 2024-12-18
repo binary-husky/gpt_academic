@@ -126,6 +126,8 @@ def 解析ipynb文件(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
     import os
     if os.path.exists(txt):
         project_folder = txt
+        from shared_utils.fastapi_server import validate_path_safety
+        validate_path_safety(project_folder, chatbot.get_user())
     else:
         if txt == "":
             txt = '空空如也的输入栏'
