@@ -96,6 +96,9 @@ class WelcomeMessage {
         };
         const pageFocusHandler = new PageFocusHandler();
         pageFocusHandler.addFocusCallback(reflesh_render_status);
+
+        // call update when page size change, call this.update when page size change
+        window.addEventListener('resize', this.update.bind(this));
     }
 
     begin_render() {
@@ -207,9 +210,8 @@ class WelcomeMessage {
         const width_to_hide_welcome = 1200;
         if (!await this.isChatbotEmpty() || page_width < width_to_hide_welcome || welcome_card_overflow) {
             if (this.visible) {
-                // console.log("remove welcome");
-                this.removeWelcome();
-                this.visible = false;
+                console.log("remove welcome");
+                this.removeWelcome(); this.visible = false; // this two lines must always be together
                 this.card_array = [];
                 this.static_welcome_message_previous = [];
             }
@@ -218,9 +220,8 @@ class WelcomeMessage {
         if (this.visible) {
             return;
         }
-        // console.log("welcome");
-        this.showWelcome();
-        this.visible = true;
+        console.log("show welcome");
+        this.showWelcome(); this.visible = true; // this two lines must always be together
         this.startRefleshCards();
     }
 
