@@ -1,4 +1,7 @@
 > [!IMPORTANT]
+> `frontier开发分支`最新动态(2024.12.9): 更新对话时间线功能，优化xelatex论文翻译  
+> `wiki文档`最新动态(2024.12.5): 更新ollama接入指南  
+>
 > 2024.10.10: 突发停电，紧急恢复了提供[whl包](https://drive.google.com/file/d/19U_hsLoMrjOlQSzYS3pzWX9fTzyusArP/view?usp=sharing)的文件服务器  
 > 2024.10.8: 版本3.90加入对llama-index的初步支持，版本3.80加入插件二级菜单功能（详见wiki）  
 > 2024.5.1: 加入Doc2x翻译PDF论文的功能，[查看详情](https://github.com/binary-husky/gpt_academic/wiki/Doc2x)  
