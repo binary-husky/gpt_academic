@@ -192,10 +192,22 @@ class WelcomeMessage {
 
     async update() {
         // console.log('update')
+        const elem_chatbot = document.getElementById('gpt-chatbot');
+        const chatbot_top = elem_chatbot.getBoundingClientRect().top;
+        const welcome_card_container = document.getElementsByClassName('welcome-card-container')[0];
+        let welcome_card_overflow = false;
+        if (welcome_card_container) {
+            const welcome_card_top = welcome_card_container.getBoundingClientRect().top;
+            if (welcome_card_top < chatbot_top) {
+                welcome_card_overflow = true;
+                // console.log("welcome_card_overflow");
+            }
+        }
         var page_width = document.documentElement.clientWidth;
         const width_to_hide_welcome = 1200;
-        if (!await this.isChatbotEmpty() || page_width < width_to_hide_welcome) {
+        if (!await this.isChatbotEmpty() || page_width < width_to_hide_welcome || welcome_card_overflow) {
             if (this.visible) {
+                // console.log("remove welcome");
                 this.removeWelcome();
                 this.visible = false;
                 this.card_array = [];
