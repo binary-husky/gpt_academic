@@ -223,7 +223,7 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
                         chatbot[-1] = (history[-2], history[-1])
                         yield from update_ui(chatbot=chatbot, history=history, msg="正常") # 刷新界面
                     if chunkjson['event_type'] == 'stream-end':
-                        log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
+                        log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer, user_name=chatbot.get_user())
                         history[-1] = gpt_replying_buffer
                         chatbot[-1] = (history[-2], history[-1])
                         yield from update_ui(chatbot=chatbot, history=history, msg="正常") # 刷新界面
