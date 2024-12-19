@@ -1,7 +1,8 @@
-import os, json;
+import os
+import json
 from init_task import init_task
 
-os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
+os.environ['no_proxy'] = '*'  # 避免代理网络产生意外污染
 
 help_menu_description = \
     """
@@ -15,7 +16,12 @@ help_menu_description = \
     </br></br>如何临时更换API_KEY: 在输入区输入临时API_KEY后提交（网页刷新后失效）"""
 
 from loguru import logger
+
+
 def enable_log(PATH_LOGGING):
+    """
+    启用日志记录
+    """
     from shared_utils.logging import setup_logging
     setup_logging(PATH_LOGGING)
 
@@ -40,7 +46,8 @@ def main():
     #     raise ModuleNotFoundError("使用项目内置Gradio获取最优体验! 请运行 `pip install -r requirements.txt` 指令安装内置Gradio及其他依赖, 详情信息见requirements.txt.")
 
     # 一些基础工具
-    from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, DummyWith
+    from toolbox import format_io, find_free_port, on_file_uploaded, on_report_generated, get_conf, ArgsGeneralWrapper, \
+        DummyWith
 
     # 对话、日志记录
     enable_log(get_conf("PATH_LOGGING"))
@@ -49,9 +56,15 @@ def main():
     from request_llms.bridge_all import predict
 
     # 读取配置
-    proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION = get_conf('proxies', 'WEB_PORT', 'LLM_MODEL', 'CONCURRENT_COUNT', 'AUTHENTICATION')
-    CHATBOT_HEIGHT, LAYOUT, AVAIL_LLM_MODELS, AUTO_CLEAR_TXT = get_conf('CHATBOT_HEIGHT', 'LAYOUT', 'AVAIL_LLM_MODELS', 'AUTO_CLEAR_TXT')
-    ENABLE_AUDIO, AUTO_CLEAR_TXT, PATH_LOGGING, AVAIL_THEMES, THEME, ADD_WAIFU = get_conf('ENABLE_AUDIO', 'AUTO_CLEAR_TXT', 'PATH_LOGGING', 'AVAIL_THEMES', 'THEME', 'ADD_WAIFU')
+    proxies, WEB_PORT, LLM_MODEL, CONCURRENT_COUNT, AUTHENTICATION = get_conf('proxies', 'WEB_PORT', 'LLM_MODEL',
+                                                                              'CONCURRENT_COUNT', 'AUTHENTICATION')
+    CHATBOT_HEIGHT, LAYOUT, AVAIL_LLM_MODELS, AUTO_CLEAR_TXT = get_conf('CHATBOT_HEIGHT', 'LAYOUT', 'AVAIL_LLM_MODELS',
+                                                                        'AUTO_CLEAR_TXT')
+    ENABLE_AUDIO, AUTO_CLEAR_TXT, PATH_LOGGING, AVAIL_THEMES, THEME, ADD_WAIFU = get_conf('ENABLE_AUDIO',
+                                                                                          'AUTO_CLEAR_TXT',
+                                                                                          'PATH_LOGGING',
+                                                                                          'AVAIL_THEMES', 'THEME',
+                                                                                          'ADD_WAIFU')
     NUM_CUSTOM_BASIC_BTN, SSL_KEYFILE, SSL_CERTFILE = get_conf('NUM_CUSTOM_BASIC_BTN', 'SSL_KEYFILE', 'SSL_CERTFILE')
     DARK_MODE, INIT_SYS_PROMPT, ADD_WAIFU, TTS_TYPE = get_conf('DARK_MODE', 'INIT_SYS_PROMPT', 'ADD_WAIFU', 'TTS_TYPE')
     if LLM_MODEL not in AVAIL_LLM_MODELS: AVAIL_LLM_MODELS += [LLM_MODEL]
@@ -116,7 +129,8 @@ def main():
             with gr_L2(scale=1, elem_id="gpt-panel"):
                 with gr.Accordion("输入区", open=True, elem_id="input-panel") as area_input_primary:
                     with gr.Row():
-                        txt = gr.Textbox(show_label=False, placeholder="Input question here.", elem_id='user_input_main').style(container=False)
+                        txt = gr.Textbox(show_label=False, placeholder="Input question here.",
+                                         elem_id='user_input_main').style(container=False)
                     with gr.Row(elem_id="gpt-submit-row"):
                         multiplex_submit_btn = gr.Button("提交", elem_id="elem_submit_visible", variant="primary")
                         multiplex_sel = gr.Dropdown(
@@ -125,14 +139,19 @@ def main():
                             elem_classes='normal_mut_select', elem_id="gpt-submit-dropdown").style(container=False)
                         submit_btn = gr.Button("提交", elem_id="elem_submit", variant="primary", visible=False)
                     with gr.Row():
-                        resetBtn = gr.Button("重置", elem_id="elem_reset", variant="secondary"); resetBtn.style(size="sm")
-                        stopBtn = gr.Button("停止", elem_id="elem_stop", variant="secondary"); stopBtn.style(size="sm")
-                        clearBtn = gr.Button("清除", elem_id="elem_clear", variant="secondary", visible=False); clearBtn.style(size="sm")
+                        resetBtn = gr.Button("重置", elem_id="elem_reset", variant="secondary")
+                        resetBtn.style(size="sm")
+                        stopBtn = gr.Button("停止", elem_id="elem_stop", variant="secondary")
+                        stopBtn.style(size="sm")
+                        clearBtn = gr.Button("清除", elem_id="elem_clear", variant="secondary", visible=False)
+                        clearBtn.style(size="sm")
                     if ENABLE_AUDIO:
                         with gr.Row():
-                            audio_mic = gr.Audio(source="microphone", type="numpy", elem_id="elem_audio", streaming=True, show_label=False).style(container=False)
+                            audio_mic = gr.Audio(source="microphone", type="numpy", elem_id="elem_audio",
+                                                 streaming=True, show_label=False).style(container=False)
                     with gr.Row():
-                        status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。支持将文件直接粘贴到输入区。", elem_id="state-panel")
+                        status = gr.Markdown(f"Tip: 按Enter提交, 按Shift+Enter换行。支持将文件直接粘贴到输入区。",
+                                             elem_id="state-panel")
 
                 with gr.Accordion("基础功能区", open=True, elem_id="basic-panel") as area_basic_fn:
                     with gr.Row():
@@ -160,31 +179,41 @@ def main():
                             info = plugins[k].get("Info", k)
                             btn_elem_id = f"plugin_btn_{index}"
                             plugin['Button'] = plugins[k]['Button'] = gr.Button(k, variant=variant,
-                                                                                visible=visible, info_str=f'函数插件区: {info}', elem_id=btn_elem_id).style(size="sm")
+                                                                                visible=visible,
+                                                                                info_str=f'函数插件区: {info}',
+                                                                                elem_id=btn_elem_id).style(size="sm")
                             plugin['ButtonElemId'] = btn_elem_id
                     with gr.Row():
                         with gr.Accordion("更多函数插件", open=True):
                             dropdown_fn_list = []
                             for k, plugin in plugins.items():
                                 if not match_group(plugin['Group'], DEFAULT_FN_GROUPS): continue
-                                if not plugin.get("AsButton", True): dropdown_fn_list.append(k)     # 排除已经是按钮的插件
-                                elif plugin.get('AdvancedArgs', False): dropdown_fn_list.append(k)  # 对于需要高级参数的插件，亦在下拉菜单中显示
+                                if not plugin.get("AsButton", True):
+                                    dropdown_fn_list.append(k)  # 排除已经是按钮的插件
+                                elif plugin.get('AdvancedArgs', False):
+                                    dropdown_fn_list.append(k)  # 对于需要高级参数的插件，亦在下拉菜单中显示
                             with gr.Row():
-                                dropdown = gr.Dropdown(dropdown_fn_list, value=r"点击这里输入「关键词」搜索插件", label="", show_label=False).style(container=False)
+                                dropdown = gr.Dropdown(dropdown_fn_list, value=r"点击这里输入「关键词」搜索插件",
+                                                       label="", show_label=False).style(container=False)
                             with gr.Row():
-                                plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False, elem_id="advance_arg_input_legacy",
-                                                                 placeholder="这里是特殊函数插件的高级参数输入区").style(container=False)
+                                plugin_advanced_arg = gr.Textbox(show_label=True, label="高级参数输入区", visible=False,
+                                                                 elem_id="advance_arg_input_legacy",
+                                                                 placeholder="这里是特殊函数插件的高级参数输入区").style(
+                                    container=False)
                             with gr.Row():
-                                switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary", elem_id="elem_switchy_bt").style(size="sm")
+                                switchy_bt = gr.Button(r"请先从插件列表中选择", variant="secondary",
+                                                       elem_id="elem_switchy_bt").style(size="sm")
                     with gr.Row():
                         with gr.Accordion("点击展开“文件下载区”。", open=False) as area_file_up:
-                            file_upload = gr.Files(label="任何文件, 推荐上传压缩文件(zip, tar)", file_count="multiple", elem_id="elem_upload")
+                            file_upload = gr.Files(label="任何文件, 推荐上传压缩文件(zip, tar)", file_count="multiple",
+                                                   elem_id="elem_upload")
 
 
         # 左上角工具栏定义
         from themes.gui_toolbar import define_gui_toolbar
         checkboxes, checkboxes_2, max_length_sl, theme_dropdown, system_prompt, file_upload_2, md_dropdown, top_p, temperature = \
-            define_gui_toolbar(AVAIL_LLM_MODELS, LLM_MODEL, INIT_SYS_PROMPT, THEME, AVAIL_THEMES, ADD_WAIFU, help_menu_description, js_code_for_toggle_darkmode)
+            define_gui_toolbar(AVAIL_LLM_MODELS, LLM_MODEL, INIT_SYS_PROMPT, THEME, AVAIL_THEMES, ADD_WAIFU,
+                               help_menu_description, js_code_for_toggle_darkmode)
 
         # 浮动菜单定义
         from themes.gui_floating_menu import define_gui_floating_menu
@@ -207,7 +236,10 @@ def main():
             ret.update({plugin_advanced_arg: gr.update(visible=("插件参数区" in a))})
             if "浮动输入区" in a: ret.update({txt: gr.update(value="")})
             return ret
-        checkboxes.select(fn_area_visibility, [checkboxes], [area_basic_fn, area_crazy_fn, area_input_primary, area_input_secondary, txt, txt2, plugin_advanced_arg] )
+
+        checkboxes.select(fn_area_visibility, [checkboxes],
+                          [area_basic_fn, area_crazy_fn, area_input_primary, area_input_secondary, txt, txt2,
+                           plugin_advanced_arg])
         checkboxes.select(None, [checkboxes], None, _js=js_code_show_or_hide)
 
         # 功能区显示开关与功能区的互动
@@ -215,12 +247,15 @@ def main():
             ret = {}
             ret.update({area_customize: gr.update(visible=("自定义菜单" in a))})
             return ret
-        checkboxes_2.select(fn_area_visibility_2, [checkboxes_2], [area_customize] )
+
+        checkboxes_2.select(fn_area_visibility_2, [checkboxes_2], [area_customize])
         checkboxes_2.select(None, [checkboxes_2], None, _js=js_code_show_or_hide_group2)
 
         # 整理反复出现的控件句柄组合
-        input_combo = [cookies, max_length_sl, md_dropdown, txt, txt2, top_p, temperature, chatbot, history, system_prompt, plugin_advanced_arg]
-        input_combo_order = ["cookies", "max_length_sl", "md_dropdown", "txt", "txt2", "top_p", "temperature", "chatbot", "history", "system_prompt", "plugin_advanced_arg"]
+        input_combo = [cookies, max_length_sl, md_dropdown, txt, txt2, top_p, temperature, chatbot, history,
+                       system_prompt, plugin_advanced_arg]
+        input_combo_order = ["cookies", "max_length_sl", "md_dropdown", "txt", "txt2", "top_p", "temperature",
+                             "chatbot", "history", "system_prompt", "plugin_advanced_arg"]
         output_combo = [cookies, chatbot, history, status]
         predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=[*input_combo, gr.State(True)], outputs=output_combo)
 
@@ -285,6 +320,7 @@ def main():
         theme_handle.then(None, [theme_dropdown, secret_css], None, _js="""change_theme""")
 
         switchy_bt.click(None, [switchy_bt], None, _js="(switchy_bt)=>on_flex_button_click(switchy_bt)")
+
         # 随变按钮的回调函数注册
         def route(request: gr.Request, k, *args, **kwargs):
             if k not in [r"点击这里搜索插件列表", r"请先从插件列表中选择"]:
