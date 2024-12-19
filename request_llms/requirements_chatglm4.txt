@@ -1,0 +1,7 @@
+protobuf
+cpm_kernels
+torch>=1.10
+transformers>=4.44
+mdtex2html
+sentencepiece
+accelerate

@@ -87,21 +87,6 @@ js_code_for_toggle_darkmode = """() => {
 }"""
 
 
-js_code_for_persistent_cookie_init = """(web_cookie_cache, cookie) => {
-    return [getCookie("web_cookie_cache"), cookie];
-}
-"""
-
-# 详见 themes/common.js
-js_code_reset = """
-(a,b,c)=>{
-    let stopButton = document.getElementById("elem_stop");
-    stopButton.click();
-    return reset_conversation(a,b);
-}
-"""
-
-
 js_code_clear = """
 (a,b)=>{
     return ["", ""];

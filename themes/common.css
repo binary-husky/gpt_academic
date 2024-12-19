@@ -271,3 +271,8 @@
 #gpt-submit-row #gpt-submit-dropdown > *:hover {
     cursor: context-menu;
 }
+
+.tooltip.svelte-p2nen8.svelte-p2nen8 {
+    box-shadow: 10px 10px 15px rgba(0, 0, 0, 0.5);
+    left: 10px;
+}

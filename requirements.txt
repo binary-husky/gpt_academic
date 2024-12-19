@@ -1,4 +1,4 @@
-https://public.agent-matrix.com/publish/gradio-3.32.11-py3-none-any.whl
+https://public.agent-matrix.com/publish/gradio-3.32.12-py3-none-any.whl
 fastapi==0.110
 gradio-client==0.8
 pypdf2==2.12.1
@@ -25,7 +25,7 @@ pyautogen
 colorama
 Markdown
 pygments
-edge-tts
+edge-tts>=7.0.0
 pymupdf
 openai
 rjsmin

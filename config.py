@@ -36,7 +36,7 @@ AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-p
                     "gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "gpt-4-turbo-2024-04-09",
                     "gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-4v", "glm-3-turbo",
-                    "gemini-1.5-pro", "chatglm3"
+                    "gemini-1.5-pro", "chatglm3", "chatglm4"
                     ]
 
 EMBEDDING_MODEL = "text-embedding-3-small"
@@ -55,6 +55,7 @@ EMBEDDING_MODEL = "text-embedding-3-small"
 #   "deepseek-chat" ,"deepseek-coder",
 #   "gemini-1.5-flash",
 #   "yi-34b-chat-0205","yi-34b-chat-200k","yi-large","yi-medium","yi-spark","yi-large-turbo","yi-large-preview",
+#   "grok-beta",
 # ]
 # --- --- --- ---
 # 此外，您还可以在接入one-api/vllm/ollama/Openroute时，
@@ -141,6 +142,9 @@ BAIDU_CLOUD_API_KEY = ''
 BAIDU_CLOUD_SECRET_KEY = ''
 BAIDU_CLOUD_QIANFAN_MODEL = 'ERNIE-Bot'    # 可选 "ERNIE-Bot-4"(文心大模型4.0), "ERNIE-Bot"(文心一言), "ERNIE-Bot-turbo", "BLOOMZ-7B", "Llama-2-70B-Chat", "Llama-2-13B-Chat", "Llama-2-7B-Chat", "ERNIE-Speed-128K", "ERNIE-Speed-8K", "ERNIE-Lite-8K"
 
+
+# 如果使用ChatGLM3或ChatGLM4本地模型，请把 LLM_MODEL="chatglm3" 或LLM_MODEL="chatglm4"，并在此处指定模型路径
+CHATGLM_LOCAL_MODEL_PATH = "THUDM/glm-4-9b-chat" # 例如"/home/hmp/ChatGLM3-6B/"
 
 # 如果使用ChatGLM2微调模型，请把 LLM_MODEL="chatglmft"，并在此处指定模型路径
 CHATGLM_PTUNING_CHECKPOINT = "" # 例如"/home/hmp/ChatGLM2-6B/ptuning/output/6b-pt-128-1e-2/checkpoint-100"
@@ -234,7 +238,6 @@ MOONSHOT_API_KEY = ""
 # 零一万物(Yi Model) API KEY
 YIMODEL_API_KEY = ""
 
-
 # 深度求索(DeepSeek) API KEY，默认请求地址为"https://api.deepseek.com/v1/chat/completions"
 DEEPSEEK_API_KEY = ""
 
@@ -242,6 +245,8 @@ DEEPSEEK_API_KEY = ""
 # 紫东太初大模型 https://ai-maas.wair.ac.cn
 TAICHU_API_KEY = ""
 
+# Grok API KEY
+GROK_API_KEY = ""
 
 # Mathpix 拥有执行PDF的OCR功能，但是需要注册账号
 MATHPIX_APPID = ""
@@ -373,6 +378,7 @@ DAAS_SERVER_URLS = [ f"https://niuziniu-biligpt{i}.hf.space/stream" for i in ran
 
 本地大模型示意图
 │
+├── "chatglm4"
 ├── "chatglm3"
 ├── "chatglm"
 ├── "chatglm_onnx"

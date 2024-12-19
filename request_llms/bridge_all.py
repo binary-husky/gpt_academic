@@ -26,6 +26,9 @@ from .bridge_chatglm import predict as chatglm_ui
 from .bridge_chatglm3 import predict_no_ui_long_connection as chatglm3_noui
 from .bridge_chatglm3 import predict as chatglm3_ui
 
+from .bridge_chatglm4 import predict_no_ui_long_connection as chatglm4_noui
+from .bridge_chatglm4 import predict as chatglm4_ui
+
 from .bridge_qianfan import predict_no_ui_long_connection as qianfan_noui
 from .bridge_qianfan import predict as qianfan_ui
 
@@ -76,6 +79,7 @@ cohere_endpoint = "https://api.cohere.ai/v1/chat"
 ollama_endpoint = "http://localhost:11434/api/chat"
 yimodel_endpoint = "https://api.lingyiwanwu.com/v1/chat/completions"
 deepseekapi_endpoint = "https://api.deepseek.com/v1/chat/completions"
+grok_model_endpoint = "https://api.x.ai/v1/chat/completions"
 
 if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
 azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
@@ -97,6 +101,7 @@ if cohere_endpoint in API_URL_REDIRECT: cohere_endpoint = API_URL_REDIRECT[coher
 if ollama_endpoint in API_URL_REDIRECT: ollama_endpoint = API_URL_REDIRECT[ollama_endpoint]
 if yimodel_endpoint in API_URL_REDIRECT: yimodel_endpoint = API_URL_REDIRECT[yimodel_endpoint]
 if deepseekapi_endpoint in API_URL_REDIRECT: deepseekapi_endpoint = API_URL_REDIRECT[deepseekapi_endpoint]
+if grok_model_endpoint in API_URL_REDIRECT: grok_model_endpoint = API_URL_REDIRECT[grok_model_endpoint]
 
 # 获取tokenizer
 tokenizer_gpt35 = LazyloadTiktoken("gpt-3.5-turbo")
@@ -414,6 +419,7 @@ model_info = {
         "token_cnt": get_token_num_gpt4,
     },
 
+    # ChatGLM本地模型
     # 将 chatglm 直接对齐到 chatglm2
     "chatglm": {
         "fn_with_ui": chatglm_ui,
@@ -434,6 +440,14 @@ model_info = {
     "chatglm3": {
         "fn_with_ui": chatglm3_ui,
         "fn_without_ui": chatglm3_noui,
+        "endpoint": None,
+        "max_token": 8192,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
+    "chatglm4": {
+        "fn_with_ui": chatglm4_ui,
+        "fn_without_ui": chatglm4_noui,
         "endpoint": None,
         "max_token": 8192,
         "tokenizer": tokenizer_gpt35,
@@ -886,6 +900,31 @@ if any(item in yi_models for item in AVAIL_LLM_MODELS):
         })
     except:
         logger.error(trimmed_format_exc())
+
+
+# -=-=-=-=-=-=- Grok model from x.ai -=-=-=-=-=-=-
+grok_models = ["grok-beta"]
+if any(item in grok_models for item in AVAIL_LLM_MODELS):
+    try:
+        grok_beta_128k_noui, grok_beta_128k_ui = get_predict_function(
+            api_key_conf_name="GROK_API_KEY", max_output_token=8192, disable_proxy=False
+            )
+        
+        model_info.update({
+            "grok-beta": {
+                "fn_with_ui": grok_beta_128k_ui,
+                "fn_without_ui": grok_beta_128k_noui,
+                "can_multi_thread": True,  
+                "endpoint": grok_model_endpoint,
+                "max_token": 128000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            
+        })
+    except:
+        logger.error(trimmed_format_exc())
+
 # -=-=-=-=-=-=- 讯飞星火认知大模型 -=-=-=-=-=-=-
 if "spark" in AVAIL_LLM_MODELS:
     try:

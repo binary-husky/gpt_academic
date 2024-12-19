@@ -8,6 +8,7 @@ import base64
 import gradio
 import shutil
 import glob
+import json
 import uuid
 from loguru import logger
 from functools import wraps
@@ -92,8 +93,9 @@ def ArgsGeneralWrapper(f):
     """
     def decorated(request: gradio.Request, cookies:dict, max_length:int, llm_model:str,
                   txt:str, txt2:str, top_p:float, temperature:float, chatbot:list,
-                  history:list, system_prompt:str, plugin_advanced_arg:dict, *args):
+                  json_history:str, system_prompt:str, plugin_advanced_arg:dict, *args):
         txt_passon = txt
+        history = json.loads(json_history) if json_history else []
         if txt == "" and txt2 != "": txt_passon = txt2
         # 引入一个有cookie的chatbot
         if request.username is not None:
@@ -148,10 +150,11 @@ def ArgsGeneralWrapper(f):
     return decorated
 
 
-def update_ui(chatbot:ChatBotWithCookies, history, msg="正常", **kwargs):  # 刷新界面
+def update_ui(chatbot:ChatBotWithCookies, history:list, msg:str="正常", **kwargs):  # 刷新界面
     """
     刷新用户界面
     """
+    assert isinstance(history, list), "history必须是一个list"
     assert isinstance(
         chatbot, ChatBotWithCookies
     ), "在传递chatbot的过程中不要将其丢弃。必要时, 可用clear将其清空, 然后用for+append循环重新赋值。"
@@ -175,10 +178,11 @@ def update_ui(chatbot:ChatBotWithCookies, history, msg="正常", **kwargs):  # �
     else:
         chatbot_gr = chatbot
 
-    yield cookies, chatbot_gr, history, msg
+    json_history = json.dumps(history, ensure_ascii=False)
+    yield cookies, chatbot_gr, json_history, msg
 
 
-def update_ui_lastest_msg(lastmsg:str, chatbot:ChatBotWithCookies, history:list, delay=1, msg="正常"):  # 刷新界面
+def update_ui_lastest_msg(lastmsg:str, chatbot:ChatBotWithCookies, history:list, delay:float=1, msg:str="正常"):  # 刷新界面
     """
     刷新用户界面
     """
