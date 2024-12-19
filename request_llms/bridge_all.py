@@ -274,11 +274,34 @@ model_info = {
         "openai_disable_system_prompt": True,
         "openai_disable_stream": True,
     },
+
     "o1-mini": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
         "endpoint": openai_endpoint,
         "max_token": 128000,
+        "tokenizer": tokenizer_gpt4,
+        "token_cnt": get_token_num_gpt4,
+        "openai_disable_system_prompt": True,
+        "openai_disable_stream": True,
+    },
+
+    "o1-2024-12-17": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": openai_endpoint,
+        "max_token": 200000,
+        "tokenizer": tokenizer_gpt4,
+        "token_cnt": get_token_num_gpt4,
+        "openai_disable_system_prompt": True,
+        "openai_disable_stream": True,
+    },
+
+    "o1": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "endpoint": openai_endpoint,
+        "max_token": 200000,
         "tokenizer": tokenizer_gpt4,
         "token_cnt": get_token_num_gpt4,
         "openai_disable_system_prompt": True,
