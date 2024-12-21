@@ -39,6 +39,8 @@ def 批量生成函数注释(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     import glob, os
     if os.path.exists(txt):
         project_folder = txt
+        from shared_utils.fastapi_server import validate_path_safety
+        validate_path_safety(project_folder, chatbot.get_user())
     else:
         if txt == "": txt = '空空如也的输入栏'
         report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"找不到本地项目或无权访问: {txt}")

@@ -27,10 +27,10 @@ def extract_text_from_files(txt, chatbot, history):
         return False, final_result, page_one, file_manifest, excption   #如输入区内容不是文件则直接返回输入区内容
 
     #查找输入区内容中的文件
-    file_pdf,pdf_manifest,folder_pdf = get_files_from_everything(txt, '.pdf')
-    file_md,md_manifest,folder_md = get_files_from_everything(txt, '.md')
-    file_word,word_manifest,folder_word = get_files_from_everything(txt, '.docx')
-    file_doc,doc_manifest,folder_doc = get_files_from_everything(txt, '.doc')
+    file_pdf,pdf_manifest,folder_pdf = get_files_from_everything(txt, '.pdf', chatbot=chatbot)
+    file_md,md_manifest,folder_md = get_files_from_everything(txt, '.md', chatbot=chatbot)
+    file_word,word_manifest,folder_word = get_files_from_everything(txt, '.docx', chatbot=chatbot)
+    file_doc,doc_manifest,folder_doc = get_files_from_everything(txt, '.doc', chatbot=chatbot)
 
     if file_doc:
         excption = "word"

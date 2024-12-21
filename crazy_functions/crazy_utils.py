@@ -2,6 +2,7 @@ import os
 import threading
 from loguru import logger
 from shared_utils.char_visual_effect import scolling_visual_effect
+from shared_utils.fastapi_server import validate_path_safety
 from toolbox import update_ui, get_conf, trimmed_format_exc, get_max_token, Singleton
 
 def input_clipping(inputs, history, max_token_limit, return_clip_flags=False):
@@ -539,7 +540,7 @@ def read_and_clean_pdf_text(fp):
     return meta_txt, page_one_meta
 
 
-def get_files_from_everything(txt, type): # type='.md'
+def get_files_from_everything(txt, type, chatbot=None): # type='.md'
     """
     这个函数是用来获取指定目录下所有指定类型（如.md）的文件，并且对于网络上的文件，也可以获取它。
     下面是对每个参数和返回值的说明：
@@ -551,6 +552,7 @@ def get_files_from_everything(txt, type): # type='.md'
     - file_manifest: 文件路径列表，里面包含以指定类型为后缀名的所有文件的绝对路径。
     - project_folder: 字符串，表示文件所在的文件夹路径。如果是网络上的文件，就是临时文件夹的路径。
     该函数详细注释已添加，请确认是否满足您的需要。
+    - chatbot 带Cookies的Chatbot类，为实现更多强大的功能做基础
     """
     import glob, os
 
@@ -573,9 +575,13 @@ def get_files_from_everything(txt, type): # type='.md'
         # 直接给定文件
         file_manifest = [txt]
         project_folder = os.path.dirname(txt)
+        if chatbot is not None:
+            validate_path_safety(project_folder, chatbot.get_user())
     elif os.path.exists(txt):
         # 本地路径，递归搜索
         project_folder = txt
+        if chatbot is not None:
+            validate_path_safety(project_folder, chatbot.get_user())
         file_manifest = [f for f in glob.glob(f'{project_folder}/**/*'+type, recursive=True)]
         if len(file_manifest) == 0:
             success = False
