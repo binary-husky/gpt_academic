@@ -940,17 +940,17 @@ function gpt_academic_gradio_saveload(
 
 function update_conversation_metadata() {
     // Create a conversation UUID and timestamp
-    const conversationId = crypto.randomUUID();
-    const timestamp = new Date().toISOString();
-    const conversationData = {
-        id: conversationId,
-        timestamp: timestamp
-    };
-    // Save to cookie
-    setCookie("conversation_metadata", JSON.stringify(conversationData), 2);
-    // read from cookie
-    let conversation_metadata = getCookie("conversation_metadata");
-    // console.log("conversation_metadata", conversation_metadata);
+    try {
+        const conversationId = crypto.randomUUID();
+        const timestamp = new Date().toISOString();
+        const conversationData = {
+            id: conversationId,
+            timestamp: timestamp
+        };
+        setCookie("conversation_metadata", JSON.stringify(conversationData), 2);
+    } catch (e) {
+        console.error('Error in updating conversation metadata:', e);
+    }
 }
 
 
@@ -970,16 +970,23 @@ async function save_conversation_history() {
     let chatbot = await get_data_from_gradio_component('gpt-chatbot');
     let history = await get_data_from_gradio_component('history-ng');
     let conversation_metadata = getCookie("conversation_metadata");
-    conversation_metadata = JSON.parse(conversation_metadata);
-    // console.log("conversation_metadata", conversation_metadata);
-    let conversation = {
-        timestamp: conversation_metadata.timestamp,
-        id: conversation_metadata.id,
-        metadata: conversation_metadata,
-        conversation: chatbot,
-        history: history,
-        preview: generatePreview(JSON.parse(history), conversation_metadata.timestamp)
-    };
+    let conversation = {};
+    try {
+        conversation_metadata = JSON.parse(conversation_metadata);
+        conversation = {
+            timestamp: conversation_metadata.timestamp,
+            id: conversation_metadata.id,
+            metadata: conversation_metadata,
+            conversation: chatbot,
+            history: history,
+            preview: generatePreview(JSON.parse(history), conversation_metadata.timestamp)
+        };
+    } catch (e) {
+        console.log(history);
+        console.error('Conversation metadata parse error');
+        update_conversation_metadata();
+        return;
+    }
 
     // Get existing conversation history from local storage
     let conversation_history = [];

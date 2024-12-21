@@ -178,6 +178,7 @@ def update_ui(chatbot:ChatBotWithCookies, history:list, msg:str="正常", **kwar
     else:
         chatbot_gr = chatbot
 
+    history = [str(history_item) for history_item in history] # ensure all items are string
     json_history = json.dumps(history, ensure_ascii=False)
     yield cookies, chatbot_gr, json_history, msg
 
