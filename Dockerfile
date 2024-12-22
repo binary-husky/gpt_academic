@@ -15,6 +15,7 @@ RUN echo '[global]' > /etc/pip.conf && \
 # 语音输出功能（以下两行，第一行更换阿里源，第二行安装ffmpeg，都可以删除）
 RUN UBUNTU_VERSION=$(awk -F= '/^VERSION_CODENAME=/{print $2}' /etc/os-release); echo "deb https://mirrors.aliyun.com/debian/ $UBUNTU_VERSION main non-free contrib" > /etc/apt/sources.list; apt-get update
 RUN apt-get install ffmpeg -y
+RUN apt-get clean
 
 
 # 进入工作路径（必要）
@@ -33,6 +34,7 @@ RUN pip3 install -r requirements.txt
 
 # 非必要步骤，用于预热模块（可以删除）
 RUN python3  -c 'from check_proxy import warm_up_modules; warm_up_modules()'
+RUN python3 -m pip cache purge
 
 
 # 启动（必要）

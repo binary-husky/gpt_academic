@@ -7,6 +7,7 @@ RUN apt-get install -y git python python3 python-dev python3-dev --fix-missing
 
 # edge-tts需要的依赖，某些pip包所需的依赖
 RUN apt update && apt install ffmpeg build-essential -y
+RUN apt-get clean
 
 # use python3 as the system default python
 RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.8
@@ -22,6 +23,7 @@ RUN python3 -m pip install -r request_llms/requirements_moss.txt
 RUN python3 -m pip install -r request_llms/requirements_qwen.txt
 RUN python3 -m pip install -r request_llms/requirements_chatglm.txt
 RUN python3 -m pip install -r request_llms/requirements_newbing.txt
+RUN python3 -m pip cache purge
 
 
 # 预热Tiktoken模块

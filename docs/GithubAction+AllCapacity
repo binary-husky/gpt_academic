@@ -5,6 +5,7 @@ FROM fuqingxu/11.3.1-runtime-ubuntu20.04-with-texlive:latest
 
 # edge-tts需要的依赖，某些pip包所需的依赖
 RUN apt update && apt install ffmpeg build-essential -y
+RUN apt-get clean
 
 # use python3 as the system default python
 WORKDIR /gpt
@@ -30,7 +31,7 @@ RUN python3 -m pip install -r request_llms/requirements_qwen.txt
 RUN python3 -m pip install -r request_llms/requirements_chatglm.txt
 RUN python3 -m pip install -r request_llms/requirements_newbing.txt
 RUN python3 -m pip install nougat-ocr
-
+RUN python3 -m pip cache purge
 
 # 预热Tiktoken模块
 RUN python3  -c 'from check_proxy import warm_up_modules; warm_up_modules()'
