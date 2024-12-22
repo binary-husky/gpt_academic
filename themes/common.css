@@ -155,7 +155,7 @@
     transform: translate(-50%, -50%);
     flex-wrap: wrap;
     justify-content: center;
-    transition: opacity 1s ease-in-out;
+    transition: opacity 0.6s ease-in-out;
     opacity: 0;
 }
 .welcome-card-container.show {

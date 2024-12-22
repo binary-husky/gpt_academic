@@ -145,8 +145,10 @@ class WelcomeMessage {
                     continue;
                 }
 
-                // 等待动画结束
-                card.addEventListener('transitionend', () => {
+
+                card.classList.add('hide');
+                const timeout = 100; // 与CSS中transition的时间保持一致(0.1s)
+                setTimeout(() => {
                     // 更新卡片信息
                     const message = this.static_welcome_message_previous[index];
                     const title = card.getElementsByClassName('welcome-card-title')[0];
@@ -158,16 +160,14 @@ class WelcomeMessage {
                     text.href = message.url;
                     content.textContent = message.content;
                     card.classList.remove('hide');
-
                     // 等待动画结束
-                    card.addEventListener('transitionend', () => {
-                        card.classList.remove('show');
-                    }, { once: true });
                     card.classList.add('show');
+                    const timeout = 100; // 与CSS中transition的时间保持一致(0.1s)
+                    setTimeout(() => {
+                        card.classList.remove('show');
+                    }, timeout);
+                }, timeout);
 
-                }, { once: true });
-
-                card.classList.add('hide');
 
                 // 等待 250 毫秒
                 await new Promise(r => setTimeout(r, 200));
@@ -306,6 +306,12 @@ class WelcomeMessage {
         welcome_card_container.addEventListener('transitionend', () => {
             elem_chatbot.removeChild(welcome_card_container);
         }, { once: true });
+        const timeout = 600; // 与CSS中transition的时间保持一致(1s)
+        setTimeout(() => {
+            if (welcome_card_container.parentNode) {
+                elem_chatbot.removeChild(welcome_card_container);
+            }
+        }, timeout);
     }
 
     async isChatbotEmpty() {
