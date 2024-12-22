@@ -938,10 +938,27 @@ function gpt_academic_gradio_saveload(
     }
 }
 
+function generateUUID() {
+    // Generate a random number and convert it to a hexadecimal string
+    function randomHexDigit() {
+        return Math.floor((1 + Math.random()) * 0x10000).toString(16).slice(1);
+    }
+
+    // Construct the UUID using the randomHexDigit function
+    return (
+        randomHexDigit() + randomHexDigit() + '-' +
+        randomHexDigit() + '-' +
+        '4' + randomHexDigit().slice(0, 3) + '-' + // Version 4 UUID
+        ((Math.floor(Math.random() * 4) + 8).toString(16)) + randomHexDigit().slice(0, 3) + '-' +
+        randomHexDigit() + randomHexDigit() + randomHexDigit()
+    );
+}
+
 function update_conversation_metadata() {
     // Create a conversation UUID and timestamp
     try {
-        const conversationId = crypto.randomUUID();
+        const conversationId = generateUUID();
+        console.log('Create conversation ID:', conversationId);
         const timestamp = new Date().toISOString();
         const conversationData = {
             id: conversationId,
