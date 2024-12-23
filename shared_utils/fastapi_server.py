@@ -51,7 +51,7 @@ def validate_path_safety(path_or_url, user):
     from toolbox import get_conf, default_user_name
     from toolbox import FriendlyException
     PATH_PRIVATE_UPLOAD, PATH_LOGGING = get_conf('PATH_PRIVATE_UPLOAD', 'PATH_LOGGING')
-    sensitive_path = None
+    sensitive_path = None   # 必须不能包含 '/'，即不能是多级路径
     path_or_url = os.path.relpath(path_or_url)
     if path_or_url.startswith(PATH_LOGGING):    # 日志文件（按用户划分）
         sensitive_path = PATH_LOGGING

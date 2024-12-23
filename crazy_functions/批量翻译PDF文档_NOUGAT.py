@@ -61,7 +61,7 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     history = []
 
     from crazy_functions.crazy_utils import get_files_from_everything
-    success, file_manifest, project_folder = get_files_from_everything(txt, type='.pdf')
+    success, file_manifest, project_folder = get_files_from_everything(txt, type='.pdf', chatbot=chatbot)
     if len(file_manifest) > 0:
         # 尝试导入依赖，如果缺少依赖，则给出安装建议
         try:
@@ -73,7 +73,7 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
                              b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade nougat-ocr tiktoken```。")
             yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
             return
-    success_mmd, file_manifest_mmd, _ = get_files_from_everything(txt, type='.mmd')
+    success_mmd, file_manifest_mmd, _ = get_files_from_everything(txt, type='.mmd', chatbot=chatbot)
     success = success or success_mmd
     file_manifest += file_manifest_mmd
     chatbot.append(["文件列表：", ", ".join([e.split('/')[-1] for e in file_manifest])]);

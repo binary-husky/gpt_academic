@@ -87,6 +87,8 @@ def 理解PDF文档内容标准文件输入(txt, llm_kwargs, plugin_kwargs, chat
     # 检测输入参数，如没有给定输入参数，直接退出
     if os.path.exists(txt):
         project_folder = txt
+        from shared_utils.fastapi_server import validate_path_safety
+        validate_path_safety(project_folder, chatbot.get_user())
     else:
         if txt == "":
             txt = '空空如也的输入栏'

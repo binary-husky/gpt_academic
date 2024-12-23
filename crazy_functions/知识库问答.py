@@ -49,7 +49,7 @@ def 知识库文件注入(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     file_manifest = []
     spl = ["txt", "doc", "docx", "email", "epub", "html", "json", "md", "msg", "pdf", "ppt", "pptx", "rtf"]
     for sp in spl:
-        _, file_manifest_tmp, _ = get_files_from_everything(txt, type=f'.{sp}')
+        _, file_manifest_tmp, _ = get_files_from_everything(txt, type=f'.{sp}', chatbot=chatbot)
         file_manifest += file_manifest_tmp
 
     if len(file_manifest) == 0:
