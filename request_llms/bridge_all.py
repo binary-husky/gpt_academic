@@ -273,6 +273,7 @@ model_info = {
         "token_cnt": get_token_num_gpt4,
         "openai_disable_system_prompt": True,
         "openai_disable_stream": True,
+        "openai_force_temperature_one": True,
     },
 
     "o1-mini": {
@@ -284,6 +285,7 @@ model_info = {
         "token_cnt": get_token_num_gpt4,
         "openai_disable_system_prompt": True,
         "openai_disable_stream": True,
+        "openai_force_temperature_one": True,
     },
 
     "o1-2024-12-17": {
@@ -295,6 +297,7 @@ model_info = {
         "token_cnt": get_token_num_gpt4,
         "openai_disable_system_prompt": True,
         "openai_disable_stream": True,
+        "openai_force_temperature_one": True,
     },
 
     "o1": {
@@ -306,6 +309,7 @@ model_info = {
         "token_cnt": get_token_num_gpt4,
         "openai_disable_system_prompt": True,
         "openai_disable_stream": True,
+        "openai_force_temperature_one": True,
     },
 
     "gpt-4-turbo": {

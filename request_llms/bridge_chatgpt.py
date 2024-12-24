@@ -351,7 +351,7 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
                         raise ValueError(f'无法读取以下数据，请检查配置。\n\n{chunk_decoded}')
                     # 前者是API2D & One-API的结束条件，后者是OPENAI的结束条件
                     one_api_terminate = ('data: [DONE]' in chunk_decoded)
-                    openai_terminate = (len(chunkjson['choices'][0]["delta"]) == 0)
+                    openai_terminate = (has_choices) and (len(chunkjson['choices'][0]["delta"]) == 0)
                     if one_api_terminate or openai_terminate:
                         is_termination_certain = False
                         if one_api_terminate: is_termination_certain = True # 抓取符合规范的结束条件
@@ -563,6 +563,8 @@ def generate_payload(inputs:str, llm_kwargs:dict, history:list, system_prompt:st
         "n": 1,
         "stream": stream,
     }
-
+    openai_force_temperature_one = model_info[llm_kwargs['llm_model']].get('openai_force_temperature_one', False)
+    if openai_force_temperature_one:
+        payload.pop('temperature')
     return headers,payload
 
