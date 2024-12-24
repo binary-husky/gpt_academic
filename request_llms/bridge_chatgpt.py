@@ -190,7 +190,7 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], 
 
         if len(delta) == 0:
             is_termination_certain = False
-            if (chunkjson['choices'][0].get('finish_reason', 'null') == 'stop'): is_termination_certain = True
+            if (has_choices) and (chunkjson['choices'][0].get('finish_reason', 'null') == 'stop'): is_termination_certain = True
             if is_termination_certain: break
             else: continue # 对于不符合规范的狗屎接口，这里需要继续
 
@@ -324,14 +324,14 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
                 error_msg = chunk_decoded
                 # 首先排除一个one-api没有done数据包的第三方Bug情形
                 if len(gpt_replying_buffer.strip()) > 0 and len(error_msg) == 0:
-                    yield from update_ui(chatbot=chatbot, history=history, msg="检测到有缺陷的非OpenAI官方接口，建议选择更稳定的接口。")
+                    yield from update_ui(chatbot=chatbot, history=history, msg="检测到有缺陷的接口，建议选择更稳定的接口。")
                     if not reach_termination:
                         reach_termination = True
                         log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
                     break
                 # 其他情况，直接返回报错
                 chatbot, history = handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
-                yield from update_ui(chatbot=chatbot, history=history, msg="非OpenAI官方接口返回了错误:" + chunk.decode()) # 刷新界面
+                yield from update_ui(chatbot=chatbot, history=history, msg="接口返回了错误:" + chunk.decode()) # 刷新界面
                 return
 
             # 提前读取一些信息 （用于判断异常）
@@ -340,6 +340,8 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
             if is_head_of_the_stream and (r'"object":"error"' not in chunk_decoded) and (r"content" not in chunk_decoded):
                 # 数据流的第一帧不携带content
                 is_head_of_the_stream = False; continue
+
+            if "error" in chunk_decoded: logger.error(f"接口返回了未知错误: {chunk_decoded}")
 
             if chunk:
                 try:
@@ -355,7 +357,7 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
                     if one_api_terminate or openai_terminate:
                         is_termination_certain = False
                         if one_api_terminate: is_termination_certain = True # 抓取符合规范的结束条件
-                        if (chunkjson['choices'][0].get('finish_reason', 'null') == 'stop'): is_termination_certain = True # 抓取符合规范的结束条件
+                        elif (has_choices) and (chunkjson['choices'][0].get('finish_reason', 'null') == 'stop'): is_termination_certain = True # 抓取符合规范的结束条件
                         if is_termination_certain:
                             reach_termination = True
                             log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
@@ -395,7 +397,7 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
                     logger.error(error_msg)
                     yield from update_ui(chatbot=chatbot, history=history, msg="Json解析异常" + error_msg) # 刷新界面
                     return
-        yield from update_ui(chatbot=chatbot, history=history, msg=status_text) # 刷新界面
+        yield from update_ui(chatbot=chatbot, history=history, msg="完成") # 刷新界面
         return  # return from stream-branch
 
 def handle_o1_model_special(response, inputs, llm_kwargs, chatbot, history):
