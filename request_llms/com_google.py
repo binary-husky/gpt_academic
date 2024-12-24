@@ -202,16 +202,29 @@ class GoogleChatInit:
             )  # 处理 history
             
         messages.append(self.__conversation_user(inputs, llm_kwargs, enable_multimodal_capacity))  # 处理用户对话
-        payload = {
-            "contents": messages,
-            "generationConfig": {
-                # "maxOutputTokens": llm_kwargs.get("max_token", 1024),
-                "stopSequences": str(llm_kwargs.get("stop", "")).split(" "),
-                "temperature": llm_kwargs.get("temperature", 1),
-                "topP": llm_kwargs.get("top_p", 0.8),
-                "topK": 10,
-            },
-        }
+        stop_sequences = str(llm_kwargs.get("stop", "")).split(" ")
+        # 过滤空字符串并确保至少有一个停止序列
+        stop_sequences = [s for s in stop_sequences if s]
+        if not stop_sequences:
+            payload = {
+                "contents": messages,
+                "generationConfig": {
+                    "temperature": llm_kwargs.get("temperature", 1),
+                    "topP": llm_kwargs.get("top_p", 0.8),
+                    "topK": 10,
+                },
+            }
+        else:
+            payload = {
+                "contents": messages,
+                "generationConfig": {
+                    # "maxOutputTokens": llm_kwargs.get("max_token", 1024),
+                    "stopSequences": stop_sequences,
+                    "temperature": llm_kwargs.get("temperature", 1),
+                    "topP": llm_kwargs.get("top_p", 0.8),
+                    "topK": 10,
+                },
+            }
 
         return header, payload
 
