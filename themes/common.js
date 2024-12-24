@@ -1070,23 +1070,28 @@ function restore_chat_from_local_storage(event) {
 }
 
 
-function clear_conversation(a, b, c) {
-    update_conversation_metadata();
-    let stopButton = document.getElementById("elem_stop");
-    stopButton.click();
-    // console.log("clear_conversation");
-    return reset_conversation(a, b);
-}
-
 
 function reset_conversation(a, b) {
     // console.log("js_code_reset");
     a = btoa(unescape(encodeURIComponent(JSON.stringify(a))));
-    setCookie("js_previous_chat_cookie", a, 1);
+    localStorage.setItem("js_previous_chat_cookie", a);
     b = btoa(unescape(encodeURIComponent(JSON.stringify(b))));
-    setCookie("js_previous_history_cookie", b, 1);
+    localStorage.setItem("js_previous_history_cookie", b);
     // gen_restore_btn();
     return [[], [], "已重置"];
+}
+
+
+// clear -> 将 history 缓存至 history_cache -> 点击复原 -> restore_previous_chat() -> 触发elem_update_history -> 读取 history_cache
+function restore_previous_chat() {
+    // console.log("restore_previous_chat");
+    let chat = localStorage.getItem("js_previous_chat_cookie");
+    chat = JSON.parse(decodeURIComponent(escape(atob(chat))));
+    push_data_to_gradio_component(chat, "gpt-chatbot", "obj");
+    let history = localStorage.getItem("js_previous_history_cookie");
+    history = JSON.parse(decodeURIComponent(escape(atob(history))));
+    push_data_to_gradio_component(history, "history-ng", "obj");
+    // document.querySelector("#elem_update_history").click(); // in order to call set_history_gr_state, and send history state to server
 }
 
 

@@ -1,5 +1,13 @@
+function remove_legacy_cookie() {
+    setCookie("web_cookie_cache", "", -1);
+    setCookie("js_previous_chat_cookie", "", -1);
+    setCookie("js_previous_history_cookie", "", -1);
+}
+
+
 async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout, tts) {
     // 第一部分，布局初始化
+    remove_legacy_cookie();
     audio_fn_init();
     minor_ui_adjustment();
     ButtonWithDropdown_init();
