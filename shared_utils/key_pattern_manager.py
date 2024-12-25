@@ -28,7 +28,7 @@ def is_openai_api_key(key):
 
 
 def is_azure_api_key(key):
-    API_MATCH_AZURE = re.match(r"^[a-zA-Z0-9]{32}$|^[a-zA-Z0-9]{80}", key)
+    API_MATCH_AZURE = re.match(r"^[a-zA-Z0-9]{32}$|^[a-zA-Z0-9]{84}", key)
     return bool(API_MATCH_AZURE)
 
 
@@ -103,8 +103,7 @@ def select_api_key(keys, llm_model):
             if is_openroute_api_key(k): avail_key_list.append(k)
 
     if len(avail_key_list) == 0:
-        raise RuntimeError(
-            f"您提供的api-key不满足要求，不包含任何可用于{llm_model}的api-key。您可能选择了错误的模型或请求源（左上角更换模型菜单中可切换openai,azure,claude,cohere等请求源）。")
+        raise RuntimeError(f"您提供的api-key不满足要求，不包含任何可用于{llm_model}的api-key。您可能选择了错误的模型或请求源（左上角更换模型菜单中可切换openai,azure,claude,cohere等请求源）。")
 
     api_key = random.choice(avail_key_list)  # 随机负载均衡
     return api_key
@@ -120,8 +119,7 @@ def select_api_key_for_embed_models(keys, llm_model):
             if is_openai_api_key(k): avail_key_list.append(k)
 
     if len(avail_key_list) == 0:
-        raise RuntimeError(
-            f"您提供的api-key不满足要求，不包含任何可用于{llm_model}的api-key。您可能选择了错误的模型或请求源。")
+        raise RuntimeError(f"您提供的api-key不满足要求，不包含任何可用于{llm_model}的api-key。您可能选择了错误的模型或请求源。")
 
     api_key = random.choice(avail_key_list)  # 随机负载均衡
     return api_key
