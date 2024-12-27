@@ -1,4 +1,4 @@
-import os, json; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
+import os; os.environ['no_proxy'] = '*' # 避免代理网络产生意外污染
 
 help_menu_description = \
 """Github源代码开源和更新[地址🚀](https://github.com/binary-husky/gpt_academic),

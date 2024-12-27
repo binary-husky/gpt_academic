@@ -23,8 +23,13 @@ from loguru import logger
 from toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history
 from toolbox import trimmed_format_exc, is_the_upload_folder, read_one_api_model_name, log_chat
 from toolbox import ChatBotWithCookies, have_any_recent_upload_image_files, encode_image
-proxies, TIMEOUT_SECONDS, MAX_RETRY, API_ORG, AZURE_CFG_ARRAY = \
-    get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'API_ORG', 'AZURE_CFG_ARRAY')
+proxies, WHEN_TO_USE_PROXY, TIMEOUT_SECONDS, MAX_RETRY, API_ORG, AZURE_CFG_ARRAY = \
+    get_conf('proxies', 'WHEN_TO_USE_PROXY', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'API_ORG', 'AZURE_CFG_ARRAY')
+
+if "Connect_OpenAI" not in WHEN_TO_USE_PROXY:
+    if proxies is not None:
+        logger.error("虽然您配置了代理设置，但不会在连接OpenAI的过程中起作用，请检查WHEN_TO_USE_PROXY配置。")
+        proxies = None
 
 timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check proxy settings in config.py.' + \
                   '网络错误，检查代理服务器是否可用，以及代理设置的格式是否正确，格式须是[协议]://[地址]:[端口]，缺一不可。'
@@ -180,14 +185,20 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], 
                 raise ConnectionAbortedError("正常结束，但显示Token不足，导致输出不完整，请削减单次输入的文本量。")
             else:
                 raise RuntimeError("OpenAI拒绝了请求：" + error_msg)
-        if ('data: [DONE]' in chunk_decoded): break # api2d 正常完成
+        if ('data: [DONE]' in chunk_decoded): break # api2d & one-api 正常完成
         # 提前读取一些信息 （用于判断异常）
         if has_choices and not choice_valid:
             # 一些垃圾第三方接口的出现这样的错误
             continue
         json_data = chunkjson['choices'][0]
         delta = json_data["delta"]
-        if len(delta) == 0: break
+
+        if len(delta) == 0:
+            is_termination_certain = False
+            if (has_choices) and (chunkjson['choices'][0].get('finish_reason', 'null') == 'stop'): is_termination_certain = True
+            if is_termination_certain: break
+            else: continue # 对于不符合规范的狗屎接口，这里需要继续
+
         if (not has_content) and has_role: continue
         if (not has_content) and (not has_role): continue # raise RuntimeError("发现不标准的第三方接口："+delta)
         if has_content: # has_role = True/False
@@ -285,6 +296,8 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
         history.extend([inputs, ""])
 
     retry = 0
+    previous_ui_reflesh_time = 0
+    ui_reflesh_min_interval = 0.0
     while True:
         try:
             # make a POST request to the API endpoint, stream=True
@@ -297,13 +310,13 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
             yield from update_ui(chatbot=chatbot, history=history, msg="请求超时"+retry_msg) # 刷新界面
             if retry > MAX_RETRY: raise TimeoutError
 
-
     if not stream:
         # 该分支仅适用于不支持stream的o1模型，其他情形一律不适用
         yield from handle_o1_model_special(response, inputs, llm_kwargs, chatbot, history)
         return
 
     if stream:
+        reach_termination = False   # 处理一些 new-api 的奇葩异常
         gpt_replying_buffer = ""
         is_head_of_the_stream = True
         stream_response =  response.iter_lines()
@@ -316,11 +329,14 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
                 error_msg = chunk_decoded
                 # 首先排除一个one-api没有done数据包的第三方Bug情形
                 if len(gpt_replying_buffer.strip()) > 0 and len(error_msg) == 0:
-                    yield from update_ui(chatbot=chatbot, history=history, msg="检测到有缺陷的非OpenAI官方接口，建议选择更稳定的接口。")
+                    yield from update_ui(chatbot=chatbot, history=history, msg="检测到有缺陷的接口，建议选择更稳定的接口。")
+                    if not reach_termination:
+                        reach_termination = True
+                        log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
                     break
                 # 其他情况，直接返回报错
                 chatbot, history = handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
-                yield from update_ui(chatbot=chatbot, history=history, msg="非OpenAI官方接口返回了错误:" + chunk.decode()) # 刷新界面
+                yield from update_ui(chatbot=chatbot, history=history, msg="接口返回了错误:" + chunk.decode()) # 刷新界面
                 return
 
             # 提前读取一些信息 （用于判断异常）
@@ -330,6 +346,8 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
                 # 数据流的第一帧不携带content
                 is_head_of_the_stream = False; continue
 
+            if "error" in chunk_decoded: logger.error(f"接口返回了未知错误: {chunk_decoded}")
+
             if chunk:
                 try:
                     if has_choices and not choice_valid:
@@ -338,14 +356,25 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
                     if ('data: [DONE]' not in chunk_decoded) and len(chunk_decoded) > 0 and (chunkjson is None):
                         # 传递进来一些奇怪的东西
                         raise ValueError(f'无法读取以下数据，请检查配置。\n\n{chunk_decoded}')
-                    # 前者是API2D的结束条件，后者是OPENAI的结束条件
-                    if ('data: [DONE]' in chunk_decoded) or (len(chunkjson['choices'][0]["delta"]) == 0):
-                        # 判定为数据流的结束，gpt_replying_buffer也写完了
-                        log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
-                        break
+                    # 前者是API2D & One-API的结束条件，后者是OPENAI的结束条件
+                    one_api_terminate = ('data: [DONE]' in chunk_decoded)
+                    openai_terminate = (has_choices) and (len(chunkjson['choices'][0]["delta"]) == 0)
+                    if one_api_terminate or openai_terminate:
+                        is_termination_certain = False
+                        if one_api_terminate: is_termination_certain = True # 抓取符合规范的结束条件
+                        elif (has_choices) and (chunkjson['choices'][0].get('finish_reason', 'null') == 'stop'): is_termination_certain = True # 抓取符合规范的结束条件
+                        if is_termination_certain:
+                            reach_termination = True
+                            log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
+                            break # 对于符合规范的接口，这里可以break
+                        else:
+                            continue # 对于不符合规范的狗屎接口，这里需要继续
+                    # 到这里，我们已经可以假定必须包含choice了
+                    try:
+                        status_text = f"finish_reason: {chunkjson['choices'][0].get('finish_reason', 'null')}"
+                    except:
+                        logger.error(f"一些垃圾第三方接口出现这样的错误，兼容一下吧: {chunk_decoded}")
                     # 处理数据流的主体
-                    status_text = f"finish_reason: {chunkjson['choices'][0].get('finish_reason', 'null')}"
-                    # 如果这里抛出异常，一般是文本过长，详情见get_full_error的输出
                     if has_content:
                         # 正常情况
                         gpt_replying_buffer = gpt_replying_buffer + chunkjson['choices'][0]["delta"]["content"]
@@ -354,21 +383,26 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
                         continue
                     else:
                         # 至此已经超出了正常接口应该进入的范围，一些垃圾第三方接口会出现这样的错误
-                        if chunkjson['choices'][0]["delta"]["content"] is None: continue # 一些垃圾第三方接口出现这样的错误，兼容一下吧
+                        if chunkjson['choices'][0]["delta"].get("content", None) is None:
+                            logger.error(f"一些垃圾第三方接口出现这样的错误，兼容一下吧: {chunk_decoded}")
+                            continue
                         gpt_replying_buffer = gpt_replying_buffer + chunkjson['choices'][0]["delta"]["content"]
 
                     history[-1] = gpt_replying_buffer
                     chatbot[-1] = (history[-2], history[-1])
-                    yield from update_ui(chatbot=chatbot, history=history, msg=status_text) # 刷新界面
+                    if time.time() - previous_ui_reflesh_time > ui_reflesh_min_interval:
+                        yield from update_ui(chatbot=chatbot, history=history, msg=status_text) # 刷新界面
+                        previous_ui_reflesh_time = time.time()
                 except Exception as e:
                     yield from update_ui(chatbot=chatbot, history=history, msg="Json解析不合常规") # 刷新界面
                     chunk = get_full_error(chunk, stream_response)
                     chunk_decoded = chunk.decode()
                     error_msg = chunk_decoded
                     chatbot, history = handle_error(inputs, llm_kwargs, chatbot, history, chunk_decoded, error_msg)
-                    yield from update_ui(chatbot=chatbot, history=history, msg="Json解析异常" + error_msg) # 刷新界面
                     logger.error(error_msg)
+                    yield from update_ui(chatbot=chatbot, history=history, msg="Json解析异常" + error_msg) # 刷新界面
                     return
+        yield from update_ui(chatbot=chatbot, history=history, msg="完成") # 刷新界面
         return  # return from stream-branch
 
 def handle_o1_model_special(response, inputs, llm_kwargs, chatbot, history):
@@ -536,6 +570,8 @@ def generate_payload(inputs:str, llm_kwargs:dict, history:list, system_prompt:st
         "n": 1,
         "stream": stream,
     }
-
+    openai_force_temperature_one = model_info[llm_kwargs['llm_model']].get('openai_force_temperature_one', False)
+    if openai_force_temperature_one:
+        payload.pop('temperature')
     return headers,payload
 
