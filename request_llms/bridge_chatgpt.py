@@ -23,8 +23,13 @@ from loguru import logger
 from toolbox import get_conf, update_ui, is_any_api_key, select_api_key, what_keys, clip_history
 from toolbox import trimmed_format_exc, is_the_upload_folder, read_one_api_model_name, log_chat
 from toolbox import ChatBotWithCookies, have_any_recent_upload_image_files, encode_image
-proxies, TIMEOUT_SECONDS, MAX_RETRY, API_ORG, AZURE_CFG_ARRAY = \
-    get_conf('proxies', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'API_ORG', 'AZURE_CFG_ARRAY')
+proxies, WHEN_TO_USE_PROXY, TIMEOUT_SECONDS, MAX_RETRY, API_ORG, AZURE_CFG_ARRAY = \
+    get_conf('proxies', 'WHEN_TO_USE_PROXY', 'TIMEOUT_SECONDS', 'MAX_RETRY', 'API_ORG', 'AZURE_CFG_ARRAY')
+
+if "Connect_OpenAI" not in WHEN_TO_USE_PROXY:
+    if proxies is not None:
+        logger.error("虽然您配置了代理设置，但不会在连接OpenAI的过程中起作用，请检查WHEN_TO_USE_PROXY配置。")
+        proxies = None
 
 timeout_bot_msg = '[Local Message] Request timeout. Network error. Please check proxy settings in config.py.' + \
                   '网络错误，检查代理服务器是否可用，以及代理设置的格式是否正确，格式须是[协议]://[地址]:[端口]，缺一不可。'
@@ -292,7 +297,7 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
 
     retry = 0
     previous_ui_reflesh_time = 0
-    ui_reflesh_min_interval = 0.1
+    ui_reflesh_min_interval = 0.0
     while True:
         try:
             # make a POST request to the API endpoint, stream=True
