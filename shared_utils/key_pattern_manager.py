@@ -82,7 +82,7 @@ def select_api_key(keys, llm_model):
     key_list = keys.split(',')
 
     if llm_model.startswith('gpt-') or llm_model.startswith('chatgpt-') or \
-            llm_model.startswith('one-api-') or llm_model == 'o1' or llm_model.startswith('o1-'):
+       llm_model.startswith('one-api-') or llm_model == 'o1' or llm_model.startswith('o1-'):
         for k in key_list:
             if is_openai_api_key(k): avail_key_list.append(k)
 
