@@ -1070,6 +1070,14 @@ function restore_chat_from_local_storage(event) {
 }
 
 
+function clear_conversation(a, b, c) {
+    update_conversation_metadata();
+    let stopButton = document.getElementById("elem_stop");
+    stopButton.click();
+    // console.log("clear_conversation");
+    return reset_conversation(a, b);
+}
+
 
 function reset_conversation(a, b) {
     // console.log("js_code_reset");
