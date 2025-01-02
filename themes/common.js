@@ -1034,7 +1034,7 @@ async function save_conversation_history() {
         return timeB - timeA;
     });
 
-    const max_chat_preserve = 4;
+    const max_chat_preserve = 10;
 
     if (conversation_history.length >= max_chat_preserve + 1) {
         toast_push('对话时间线记录已满，正在移除最早的对话记录。您也可以点击左侧的记录点进行手动清理。', 3000);
