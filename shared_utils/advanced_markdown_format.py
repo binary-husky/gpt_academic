@@ -2,6 +2,7 @@ import markdown
 import re
 import os
 import math
+import html
 
 from loguru import logger
 from textwrap import dedent
@@ -421,6 +422,14 @@ def special_render_issues_for_mermaid(text):
     return text
 
 
+def contain_html_tag(text):
+    """
+    判断文本中是否包含HTML标签。
+    """
+    pattern = r'</?([a-zA-Z0-9_]{3,16})>|<script\s+[^>]*src=["\']([^"\']+)["\'][^>]*>'
+    return re.search(pattern, text) is not None
+
+
 def compat_non_markdown_input(text):
     """
     改善非markdown输入的显示效果，例如将空格转换为&nbsp;，将换行符转换为</br>等。
@@ -429,9 +438,10 @@ def compat_non_markdown_input(text):
         # careful input：markdown输入
         text = special_render_issues_for_mermaid(text)  # 处理特殊的渲染问题
         return text
-    elif "</div>" in text:
+    elif ("<" in text) and (">" in text) and contain_html_tag(text):
         # careful input：html输入
-        return text
+        escaped_text = html.escape(text)
+        return escaped_text
     else:
         # whatever input：非markdown输入
         lines = text.split("\n")
