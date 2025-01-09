@@ -385,6 +385,24 @@ def markdown_convertion(txt):
         )
 
 
+def code_block_title_replace_format(match):
+    lang = match.group(1)
+    filename = match.group(2)
+    return f"```{lang} {{title=\"{filename}\"}}\n"
+
+
+def get_last_backticks_indent(text):
+    # 从后向前查找最后一个 ``` 
+    lines = text.splitlines()
+    for line in reversed(lines):
+        if '```' in line:
+            # 计算前面的空格数量
+            indent = len(line) - len(line.lstrip())
+            return indent
+    return 0 # 如果没找到返回0
+
+
+@lru_cache(maxsize=16)  # 使用lru缓存
 def close_up_code_segment_during_stream(gpt_reply):
     """
     在gpt输出代码的中途（输出了前面的```，但还没输出完后面的```），补上后面的```
@@ -398,6 +416,12 @@ def close_up_code_segment_during_stream(gpt_reply):
     """
     if "```" not in gpt_reply:
         return gpt_reply
+
+    # replace [```python:warp.py] to [```python {title="warp.py"}]
+    pattern = re.compile(r"```([a-z]{1,12}):([^:\n]{1,35}\.([a-zA-Z^:\n]{1,3}))\n")
+    if pattern.search(gpt_reply):
+        gpt_reply = pattern.sub(code_block_title_replace_format, gpt_reply)
+
     if gpt_reply.endswith("```"):
         return gpt_reply
 
@@ -405,7 +429,11 @@ def close_up_code_segment_during_stream(gpt_reply):
     segments = gpt_reply.split("```")
     n_mark = len(segments) - 1
     if n_mark % 2 == 1:
-        return gpt_reply + "\n```"  # 输出代码片段中！
+        try:
+            num_padding = get_last_backticks_indent(gpt_reply)
+        except:
+            num_padding = 0
+        return gpt_reply + "\n" + " "*num_padding + "```"  # 输出代码片段中！
     else:
         return gpt_reply
 

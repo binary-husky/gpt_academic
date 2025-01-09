@@ -13,7 +13,7 @@ scipdf_parser>=0.52
 spacy==3.7.4
 anthropic>=0.18.1
 python-markdown-math
-pymdown-extensions
+pymdown-extensions>=10.14
 websocket-client
 beautifulsoup4
 prompt_toolkit
