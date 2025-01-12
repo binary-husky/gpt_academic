@@ -632,6 +632,80 @@ class nougat_interface():
         return res[0]
 
 
+@Singleton
+class mineru_interface():
+    def __init__(self):
+        self.threadLock = threading.Lock()
+
+    def mineru_with_timeout(self, command, cwd, timeout=3600, conda_env="mineru", conda_init="/home/jiang/anaconda3/etc/profile.d/conda.sh"):
+        import subprocess
+        from toolbox import ProxyNetworkActivate
+        logger.info(f"正在执行命令 {command} 在 Conda 环境 '{conda_env}' 中")
+
+        import shlex
+        # 确保命令中的参数安全（转义空格等特殊字符）
+        safe_command = ' '.join([shlex.quote(arg) for arg in command])
+        print('safe_command', safe_command)
+
+        # 构造激活 Conda 环境的命令
+        activate_command = (
+            f"source {conda_init} && "
+            f"conda activate {conda_env} && "
+            f"CUDA_VISIBLE_DEVICES=1 {safe_command}"
+        )
+
+        try:
+            with ProxyNetworkActivate("MinerU"):
+                process = subprocess.Popen(
+                    activate_command,
+                    shell=True,
+                    cwd=cwd,
+                    env=os.environ,
+                    executable="/bin/bash"  # 指定使用 Bash 执行命令
+                )
+                stdout, stderr = process.communicate(timeout=timeout)
+
+        except subprocess.TimeoutExpired:
+            process.kill()
+            stdout, stderr = process.communicate()
+            logger.error("Process timed out!")
+            return False
+
+        # 检查返回码
+        if process.returncode != 0:
+            logger.error(f"Command failed with return code {process.returncode}: {stderr.decode()}")
+            return False
+        return True
+
+
+    def mineru_parse_pdf(self, fp, chatbot, history):
+        from toolbox import update_ui_lastest_msg
+
+        yield from update_ui_lastest_msg("正在解析论文, 请稍候。进度：正在排队, 等待线程锁...",
+                                         chatbot=chatbot, history=history, delay=0)
+        self.threadLock.acquire()
+        import glob, threading, os
+        from toolbox import get_log_folder, gen_time_str
+        dst = os.path.join(get_log_folder(plugin_name='mineru'), gen_time_str())
+        os.makedirs(dst)
+
+        yield from update_ui_lastest_msg("正在解析论文, 请稍候。进度：正在加载MinerU... ",
+                                         chatbot=chatbot, history=history, delay=0)
+        command = ['magic-pdf', '-p', os.path.abspath(fp), '-o', os.path.abspath(dst), ]
+        self.mineru_with_timeout(command, cwd=os.getcwd(), timeout=3600)
+
+        pdf_name = os.path.basename(fp)
+        # 去掉后缀
+        name_without_ext = os.path.splitext(pdf_name)[0]
+
+        res = glob.glob(os.path.join(dst, name_without_ext, 'auto', '*.md'))
+
+        if len(res) == 0:
+            self.threadLock.release()
+            raise RuntimeError("MinerU解析论文失败。")
+        self.threadLock.release()
+        return res[0]
+
 
 
 def try_install_deps(deps, reload_m=[]):

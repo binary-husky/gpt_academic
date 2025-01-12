@@ -50,6 +50,7 @@ def get_crazy_functions():
     from crazy_functions.SourceCode_Comment import 注释Python项目
     from crazy_functions.SourceCode_Comment_Wrap import SourceCodeComment_Wrap
     from crazy_functions.VideoResource_GPT import 多媒体任务
+    from crazy_functions.PDF_Convert import 解析PDF文档
 
     function_plugins = {
         "多媒体智能体": {
@@ -378,6 +379,14 @@ def get_crazy_functions():
             "Info": "PDF翻译中文，并重新编译PDF | 输入参数为路径",
             "Function": HotReload(PDF翻译中文并重新编译PDF),   # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
             "Class": PDF_Localize   # 新一代插件需要注册Class
+        },
+        "解析PDF文档": {
+            "Group": "学术",
+            "Color": "stop",
+            "AsButton": False,
+            "AdvancedArgs": True,
+            "Info": "PDF解析",
+            "Function": HotReload(解析PDF文档),  # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
         }
     }
 
