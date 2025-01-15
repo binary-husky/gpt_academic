@@ -458,6 +458,11 @@ def contain_html_tag(text):
     return re.search(pattern, text) is not None
 
 
+def contain_image(text):
+    pattern = r'<br/><br/><div align="center"><img src="file=(.*?)" base64="(.*?)"></div>'
+    return re.search(pattern, text) is not None
+
+
 def compat_non_markdown_input(text):
     """
     改善非markdown输入的显示效果，例如将空格转换为&nbsp;，将换行符转换为</br>等。
@@ -468,8 +473,11 @@ def compat_non_markdown_input(text):
         return text
     elif ("<" in text) and (">" in text) and contain_html_tag(text):
         # careful input：html输入
-        escaped_text = html.escape(text)
-        return escaped_text
+        if contain_image(text):
+            return text
+        else:
+            escaped_text = html.escape(text)
+            return escaped_text
     else:
         # whatever input：非markdown输入
         lines = text.split("\n")
