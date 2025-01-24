@@ -40,8 +40,8 @@ def decode_chunk(chunk):
     """
     chunk = chunk.decode()
     respose = ""
-    finish_reason = "False"
     reasoning_content = ""
+    finish_reason = "False"
     try:
         chunk = json.loads(chunk[6:])
     except:
@@ -63,15 +63,15 @@ def decode_chunk(chunk):
     except:
         pass
     try:
-        finish_reason = chunk["choices"][0]["finish_reason"]
-    except:
-        pass
-    try:
         if chunk["choices"][0]["delta"]["reasoning_content"] is not None:
             reasoning_content = chunk["choices"][0]["delta"]["reasoning_content"]
     except:
         pass
-    return respose, finish_reason, reasoning_content
+    try:
+        finish_reason = chunk["choices"][0]["finish_reason"]
+    except:
+        pass
+    return respose, reasoning_content, finish_reason
 
 
 def generate_message(input, model, key, history, max_output_token, system_prompt, temperature):
@@ -211,10 +211,7 @@ def get_predict_function(
                 break
             except requests.exceptions.ConnectionError:
                 chunk = next(stream_response)  # 失败了，重试一次？再失败就没办法了。
-            if reasoning:
-                response_text, finish_reason, reasoning_content = decode_chunk(chunk)
-            else:
-                response_text, finish_reason = decode_chunk(chunk)
+            response_text, reasoning_content, finish_reason = decode_chunk(chunk)
             # 返回的数据流第一次为空，继续等待
             if response_text == "" and (reasoning == False or reasoning_content == "") and finish_reason != "False":
                 continue
@@ -353,10 +350,7 @@ def get_predict_function(
                 break
             except requests.exceptions.ConnectionError:
                 chunk = next(stream_response)  # 失败了，重试一次？再失败就没办法了。
-            if reasoning:
-                response_text, finish_reason, reasoning_content = decode_chunk(chunk)
-            else:    
-                response_text, finish_reason = decode_chunk(chunk)
+            response_text, reasoning_content, finish_reason = decode_chunk(chunk)
             # 返回的数据流第一次为空，继续等待
             if response_text == "" and (reasoning == False or reasoning_content == "") and finish_reason != "False":
                 status_text = f"finish_reason: {finish_reason}"
