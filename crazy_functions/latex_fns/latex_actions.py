@@ -100,7 +100,8 @@ class LatexPaperSplit():
         
         残存BUG: 未考虑\\\\[length]"""
         text = text.replace('\\\\', ' ')
-        return re.sub(r'\s+', ' ', text)
+        pattern = re.compile(r'\s+')
+        return re.sub(pattern, ' ', text)
 
     def read_title_and_abstract(self, txt: str):
         try:

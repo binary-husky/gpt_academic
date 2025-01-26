@@ -333,7 +333,8 @@ def find_main_tex_file(file_manifest, mode):
 
 def rm_comments_inline(content: str):
     """删除掉所有行内注释"""
-    return re.sub(r"(?<!\\)%.*\n[ \t\r\f\v]*", "", content)
+    pattern = re.compile(r"(?<!\\)%.*\n[ \t\r\f\v]*")
+    return re.sub(pattern, "", content)
 
 
 def rm_comments_block(content: str):
