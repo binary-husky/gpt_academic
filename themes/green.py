@@ -10,6 +10,14 @@ theme_dir = os.path.dirname(__file__)
 def adjust_theme():
     try:
         set_theme = gr.themes.Soft(
+            font=[
+                "Helvetica",
+                "Microsoft YaHei",
+                "ui-sans-serif",
+                "sans-serif",
+                "system-ui",
+            ],
+            font_mono=["ui-monospace", "Consolas", "monospace"],
             primary_hue=gr.themes.Color(
                 c50="#EBFAF2",
                 c100="#CFF3E1",

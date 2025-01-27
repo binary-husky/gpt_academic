@@ -1,7 +1,7 @@
 > [!IMPORTANT]
+> `master主分支`最新动态(2025.1.28): 增加字体自定义功能  
 > `frontier开发分支`最新动态(2024.12.9): 更新对话时间线功能，优化xelatex论文翻译  
 > `wiki文档`最新动态(2024.12.5): 更新ollama接入指南  
-> `master主分支`最新动态(2024.12.19): 更新3.91版本，更新release页一键安装脚本  
 >
 > 2024.10.10: 突发停电，紧急恢复了提供[whl包](https://drive.google.com/drive/folders/14kR-3V-lIbvGxri4AHc8TpiA1fqsw7SK?usp=sharing)的文件服务器  
 > 2024.10.8: 版本3.90加入对llama-index的初步支持，版本3.80加入插件二级菜单功能（详见wiki）  

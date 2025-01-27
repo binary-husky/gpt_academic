@@ -85,6 +85,30 @@ DEFAULT_WORKER_NUM = 3
 THEME = "Default"
 AVAIL_THEMES = ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast", "Gstaff/Xkcd", "NoCrypt/Miku"]
 
+FONT = "Theme-Default-Font"
+AVAIL_FONTS = [
+    "默认值(Theme-Default-Font)", 
+    "宋体(SimSun)",  
+    "黑体(SimHei)",  
+    "楷体(KaiTi)",  
+    "仿宋(FangSong)",  
+    "华文细黑(STHeiti Light)",
+    "华文楷体(STKaiti)",  
+    "华文仿宋(STFangsong)",  
+    "华文宋体(STSong)",  
+    "华文中宋(STZhongsong)",  
+    "华文新魏(STXinwei)",  
+    "华文隶书(STLiti)", 
+    "思源宋体(Source Han Serif CN VF@https://chinese-fonts-cdn.deno.dev/packages/syst/dist/SourceHanSerifCN/result.css)",
+    "月星楷(Moon Stars Kai HW@https://chinese-fonts-cdn.deno.dev/packages/moon-stars-kai/dist/MoonStarsKaiHW-Regular/result.css)",
+    "珠圆体(MaokenZhuyuanTi@https://chinese-fonts-cdn.deno.dev/packages/mkzyt/dist/猫啃珠圆体/result.css)",
+    "平方萌萌哒(PING FANG MENG MNEG DA@https://chinese-fonts-cdn.deno.dev/packages/pfmmd/dist/平方萌萌哒/result.css)",
+    "Helvetica",
+    "ui-sans-serif",
+    "sans-serif",
+    "system-ui"
+]
+
 
 # 默认的系统提示词（system prompt）
 INIT_SYS_PROMPT = "Serve me as a writing and programming assistant."

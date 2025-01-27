@@ -1,8 +1,15 @@
+:root {
+    --gpt-academic-message-font-size: 15px;
+}
+
+.message {
+    font-size: var(--gpt-academic-message-font-size) !important;
+}
+
 #plugin_arg_menu {
     transform: translate(-50%, -50%);
     border: dashed;
 }
-
 
 /* hide remove all button */
 .remove-all.svelte-aqlk7e.svelte-aqlk7e.svelte-aqlk7e {
@@ -207,6 +214,7 @@
 .welcome-content {
     text-wrap: balance;
     height: 55px;
+    font-size: 13px;
     display: flex;
     align-items: center;
 }
@@ -275,4 +283,13 @@
 .tooltip.svelte-p2nen8.svelte-p2nen8 {
     box-shadow: 10px 10px 15px rgba(0, 0, 0, 0.5);
     left: 10px;
+}
+
+#elem_fontsize,
+#elem_top_p,
+#elem_temperature,
+#elem_max_length_sl,
+#elem_prompt {
+    /* 左右为0；顶部为0，底部为2px */
+    padding: 0 0 4px 0;
 }
