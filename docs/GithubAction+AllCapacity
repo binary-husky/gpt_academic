@@ -5,6 +5,9 @@ FROM fuqingxu/11.3.1-runtime-ubuntu20.04-with-texlive:latest
 
 # edge-tts需要的依赖，某些pip包所需的依赖
 RUN apt update && apt install ffmpeg build-essential -y
+RUN apt-get install -y fontconfig
+RUN ln -s /usr/local/texlive/2023/texmf-dist/fonts/truetype /usr/share/fonts/truetype/texlive
+RUN fc-cache -fv
 RUN apt-get clean
 
 # use python3 as the system default python

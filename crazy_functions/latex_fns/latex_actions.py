@@ -373,7 +373,7 @@ def 编译Latex(chatbot, history, main_file_original, main_file_modified, work_f
     # 根据编译器类型返回编译命令
     def get_compile_command(compiler, filename):
         compile_command = f'{compiler} -interaction=batchmode -file-line-error {filename}.tex'
-        logger.info('Latex 编译指令: ', compile_command)
+        logger.info('Latex 编译指令: ' + compile_command)
         return compile_command
 
     # 确定使用的编译器

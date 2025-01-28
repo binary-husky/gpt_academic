@@ -1,5 +1,5 @@
 {
-  "version": 3.91,
+  "version": 3.92,
   "show_feature": true,
-  "new_feature": "优化前端并修复TTS的BUG <-> 添加时间线回溯功能 <-> 支持chatgpt-4o-latest <-> 增加RAG组件 <-> 升级多合一主提交键"
+  "new_feature": "字体和字体大小自定义 <-> 优化前端并修复TTS的BUG <-> 添加时间线回溯功能 <-> 支持chatgpt-4o-latest <-> 增加RAG组件 <-> 升级多合一主提交键"
 }
