@@ -203,6 +203,7 @@ class WelcomeMessage {
         const elem_chatbot = document.getElementById('gpt-chatbot');
         const chatbot_top = elem_chatbot.getBoundingClientRect().top;
         const welcome_card_container = document.getElementsByClassName('welcome-card-container')[0];
+
         // detect if welcome card overflow
         let welcome_card_overflow = false;
         if (welcome_card_container) {

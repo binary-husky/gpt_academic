@@ -32,7 +32,6 @@
     visibility: hidden;
 }
 
-
 /* height of the upload box */
 .wrap.svelte-xwlu1w {
     min-height: var(--size-32);
@@ -283,6 +282,18 @@
 .tooltip.svelte-p2nen8.svelte-p2nen8 {
     box-shadow: 10px 10px 15px rgba(0, 0, 0, 0.5);
     left: 10px;
+}
+
+#tooltip .hidden {
+    /* display: none; */
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+#tooltip .visible {
+    /* display: block; */
+    opacity: 1;
+    transition: opacity 0.5s ease;
 }
 
 #elem_fontsize,

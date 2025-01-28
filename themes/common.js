@@ -750,10 +750,24 @@ function minor_ui_adjustment() {
     var bar_btn_width = [];
     // 自动隐藏超出范围的toolbar按钮
     function auto_hide_toolbar() {
-        var qq = document.getElementById('tooltip');
-        var tab_nav = qq.getElementsByClassName('tab-nav');
+        // if chatbot hit upper page boarder, hide all
+        const elem_chatbot = document.getElementById('gpt-chatbot');
+        const chatbot_top = elem_chatbot.getBoundingClientRect().top;
+        var tooltip = document.getElementById('tooltip');
+        var tab_nav = tooltip.getElementsByClassName('tab-nav')[0];
+
+        // 20 px 大概是一个字的高度
+        if (chatbot_top < 20) {
+            // tab_nav.style.display = 'none';
+            if (tab_nav.classList.contains('visible')) {tab_nav.classList.remove('visible');}
+            if (!tab_nav.classList.contains('hidden')) {tab_nav.classList.add('hidden');}
+            return;
+        }
+        if (tab_nav.classList.contains('hidden')) {tab_nav.classList.remove('hidden');}
+        if (!tab_nav.classList.contains('visible')) {tab_nav.classList.add('visible');}
+        // tab_nav.style.display = '';
         if (tab_nav.length == 0) { return; }
-        var btn_list = tab_nav[0].getElementsByTagName('button')
+        var btn_list = tab_nav.getElementsByTagName('button')
         if (btn_list.length == 0) { return; }
         // 获取页面宽度
         var page_width = document.documentElement.clientWidth;
