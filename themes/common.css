@@ -103,13 +103,9 @@
     min-width: min(80px, 100%);
 }
 
-
-#cbs {
-    background-color: var(--block-background-fill) !important;
-}
-
+#cbs,
 #cbsc {
-    background-color: var(--block-background-fill) !important;
+    background-color: rgba(var(--block-background-fill), 0.5) !important;
 }
 
 #interact-panel .form {
@@ -303,4 +299,15 @@
 #elem_prompt {
     /* 左右为0；顶部为0，底部为2px */
     padding: 0 0 4px 0;
+    backdrop-filter: blur(10px);
+    background-color: rgba(var(--block-background-fill), 0.5);
+}
+
+
+#tooltip #cbs,
+#tooltip #cbsc,
+#tooltip .svelte-b6y5bg,
+#tooltip .tabitem {
+    backdrop-filter: blur(10px);
+    background-color: rgba(var(--block-background-fill), 0.5);
 }
