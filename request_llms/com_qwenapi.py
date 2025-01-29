@@ -24,18 +24,13 @@ class QwenRequestInstance():
     def generate(self, inputs, llm_kwargs, history, system_prompt):
         # import _thread as thread
         from dashscope import Generation
-        QWEN_MODEL = {
-            'qwen-turbo': Generation.Models.qwen_turbo,
-            'qwen-plus': Generation.Models.qwen_plus,
-            'qwen-max': Generation.Models.qwen_max,
-        }[llm_kwargs['llm_model']]
         top_p = llm_kwargs.get('top_p', 0.8)
         if top_p == 0: top_p += 1e-5
         if top_p == 1: top_p -= 1e-5
 
         self.result_buf = ""
         responses = Generation.call(
-            model=QWEN_MODEL,
+            model=llm_kwargs['llm_model'],
             messages=generate_message_payload(inputs, llm_kwargs, history, system_prompt),
             top_p=top_p,
             temperature=llm_kwargs.get('temperature', 1.0),

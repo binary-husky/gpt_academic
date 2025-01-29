@@ -812,7 +812,8 @@ if "qwen-local" in AVAIL_LLM_MODELS:
     except:
         logger.error(trimmed_format_exc())
 # -=-=-=-=-=-=- 通义-在线模型 -=-=-=-=-=-=-
-if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-max" in AVAIL_LLM_MODELS:   # zhipuai
+qwen_models = ["qwen-max-latest", "qwen-max-2025-01-25","qwen-max","qwen-turbo","qwen-plus"]
+if any(item in qwen_models for item in AVAIL_LLM_MODELS):
     try:
         from .bridge_qwen import predict_no_ui_long_connection as qwen_noui
         from .bridge_qwen import predict as qwen_ui
@@ -822,7 +823,7 @@ if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-
                 "fn_without_ui": qwen_noui,
                 "can_multi_thread": True,
                 "endpoint": None,
-                "max_token": 6144,
+                "max_token": 100000,
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
             },
@@ -831,7 +832,7 @@ if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-
                 "fn_without_ui": qwen_noui,
                 "can_multi_thread": True,
                 "endpoint": None,
-                "max_token": 30720,
+                "max_token": 129024,
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
             },
@@ -840,7 +841,25 @@ if "qwen-turbo" in AVAIL_LLM_MODELS or "qwen-plus" in AVAIL_LLM_MODELS or "qwen-
                 "fn_without_ui": qwen_noui,
                 "can_multi_thread": True,
                 "endpoint": None,
-                "max_token": 28672,
+                "max_token": 30720,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "qwen-max-latest": {
+                "fn_with_ui": qwen_ui,
+                "fn_without_ui": qwen_noui,
+                "can_multi_thread": True,
+                "endpoint": None,
+                "max_token": 30720,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "qwen-max-2025-01-25": {
+                "fn_with_ui": qwen_ui,
+                "fn_without_ui": qwen_noui,
+                "can_multi_thread": True,
+                "endpoint": None,
+                "max_token": 30720,
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
             }
@@ -1361,6 +1380,11 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot,
     """
 
     inputs = apply_gpt_academic_string_mask(inputs, mode="show_llm")
+
+    if llm_kwargs['llm_model'] not in model_info:
+        from toolbox import update_ui
+        chatbot.append([inputs, f"很抱歉，模型 '{llm_kwargs['llm_model']}' 暂不支持<br/>(1) 检查config中的AVAIL_LLM_MODELS选项<br/>(2) 检查request_llms/bridge_all.py中的模型路由"])
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     method = model_info[llm_kwargs['llm_model']]["fn_with_ui"]  # 如果这里报错，检查config中的AVAIL_LLM_MODELS选项
 
