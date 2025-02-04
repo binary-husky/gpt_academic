@@ -156,6 +156,7 @@ def get_predict_function(
         observe_window = None：
             用于负责跨越线程传递已经输出的部分，大部分时候仅仅为了fancy的视觉效果，留空即可。observe_window[0]：观测窗。observe_window[1]：看门狗
         """
+        from .bridge_all import model_info
         watch_dog_patience = 5  # 看门狗的耐心，设置5秒不准咬人(咬的也不是人
         if len(APIKEY) == 0:
             raise RuntimeError(f"APIKEY为空,请检查配置文件的{APIKEY}")
@@ -170,11 +171,9 @@ def get_predict_function(
             system_prompt=sys_prompt,
             temperature=llm_kwargs["temperature"],
         )
-        
-        from .bridge_all import model_info
-        
+
         reasoning = model_info[llm_kwargs['llm_model']].get('enable_reasoning', False)
-        
+
         retry = 0
         while True:
             try:
@@ -248,7 +247,9 @@ def get_predict_function(
                     logger.error(error_msg)
                     raise RuntimeError("Json解析不合常规")
         if reasoning:
-            return '\n'.join(map(lambda x: '> ' + x, resoning_buffer.split('\n'))) + '\n\n' + result
+            # reasoning 的部分加上框 (>)
+            return '\n'.join(map(lambda x: '> ' + x, resoning_buffer.split('\n'))) + \
+                   '\n\n' + result
         return result
 
     def predict(
@@ -270,6 +271,7 @@ def get_predict_function(
         chatbot 为WebUI中显示的对话列表，修改它，然后yeild出去，可以直接修改对话界面内容
         additional_fn代表点击的哪个按钮，按钮见functional.py
         """
+        from .bridge_all import model_info
         if len(APIKEY) == 0:
             raise RuntimeError(f"APIKEY为空,请检查配置文件的{APIKEY}")
         if inputs == "":
@@ -306,8 +308,6 @@ def get_predict_function(
             system_prompt=system_prompt,
             temperature=llm_kwargs["temperature"],
         )
-        
-        from .bridge_all import model_info
         
         reasoning = model_info[llm_kwargs['llm_model']].get('enable_reasoning', False)
 

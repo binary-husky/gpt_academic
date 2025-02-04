@@ -2,12 +2,19 @@ class WelcomeMessage {
     constructor() {
         this.static_welcome_message = [
             {
-                title: "环境配置教程",
-                content: "配置模型和插件，释放大语言模型的学术应用潜力。",
-                svg: "file=themes/svg/conf.svg",
+                title: "改变主题外观",
+                content: "点击「界面外观」，然后「更换UI主题」或「切换界面明暗」。",
+                svg: "file=themes/svg/theme.svg",
                 url: "https://github.com/binary-husky/gpt_academic/wiki/%E9%A1%B9%E7%9B%AE%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E",
             },
             {
+                title: "修改回答语言偏好",    
+                content: "点击「更改模型」，删除「System prompt」并输入「用某语言回答」。",
+                svg: "file=themes/svg/prompt.svg",
+                url: "https://github.com/binary-husky/gpt_academic",
+            },
+            {
+                title: "Arxiv论文一键翻译",
                 title: "Arxiv论文翻译",
                 content: "无缝切换学术阅读语言，最优英文转中文的学术论文阅读体验。",
                 svg: "file=themes/svg/arxiv.svg",
@@ -17,6 +24,12 @@ class WelcomeMessage {
                 title: "多模态模型",
                 content: "试试将截屏直接粘贴到输入框中，随后使用多模态模型提问。",
                 svg: "file=themes/svg/mm.svg",
+                url: "https://github.com/binary-husky/gpt_academic",
+            },
+            {
+                title: "获取多个模型的答案",
+                content: "输入问题后点击「询问多个GPT模型」，消耗算子低于单词询问gpt-4o。",
+                svg: "file=themes/svg/model_multiple.svg",
                 url: "https://github.com/binary-husky/gpt_academic",
             },
             {
@@ -52,7 +65,13 @@ class WelcomeMessage {
             {
                 title: "实时语音对话",
                 content: "配置实时语音对话功能，无须任何激活词，我将一直倾听。",
-                svg: "file=themes/svg/default.svg",
+                svg: "file=themes/svg/voice.svg",
+                url: "https://github.com/binary-husky/gpt_academic/blob/master/docs/use_audio.md",
+            },
+            {
+                title: "联网回答问题",
+                content: "输入问题后，点击右侧插件区的「查互联网后回答」插件。",
+                svg: "file=themes/svg/Internet.svg",
                 url: "https://github.com/binary-husky/gpt_academic/blob/master/docs/use_audio.md",
             },
             {
@@ -85,6 +104,7 @@ class WelcomeMessage {
         this.card_array = [];
         this.static_welcome_message_previous = [];
         this.reflesh_time_interval = 15 * 1000;
+        this.update_time_interval = 2 * 1000;
         this.major_title = "欢迎使用GPT-Academic";
 
         const reflesh_render_status = () => {
@@ -101,9 +121,16 @@ class WelcomeMessage {
         window.addEventListener('resize', this.update.bind(this));
         // add a loop to reflesh cards
         this.startRefleshCards();
+        this.startAutoUpdate();
     }
 
     begin_render() {
+        this.update();
+    }
+
+    async startAutoUpdate() {
+        // sleep certain time
+        await new Promise(r => setTimeout(r, this.update_time_interval));
         this.update();
     }
 
@@ -134,6 +161,7 @@ class WelcomeMessage {
 
         // combine two lists
         this.static_welcome_message_previous = not_shown_previously.concat(already_shown_previously);
+        this.static_welcome_message_previous = this.static_welcome_message_previous.slice(0, this.max_welcome_card_num);
 
         (async () => {
             // 使用 for...of 循环来处理异步操作
@@ -198,12 +226,11 @@ class WelcomeMessage {
         return array;
     }
 
-    async update() {
+    async can_display() {
         // update the card visibility
         const elem_chatbot = document.getElementById('gpt-chatbot');
         const chatbot_top = elem_chatbot.getBoundingClientRect().top;
         const welcome_card_container = document.getElementsByClassName('welcome-card-container')[0];
-
         // detect if welcome card overflow
         let welcome_card_overflow = false;
         if (welcome_card_container) {
@@ -215,22 +242,22 @@ class WelcomeMessage {
         var page_width = document.documentElement.clientWidth;
         const width_to_hide_welcome = 1200;
         if (!await this.isChatbotEmpty() || page_width < width_to_hide_welcome || welcome_card_overflow) {
-            // overflow !
-            if (this.visible) {
-                // console.log("remove welcome");
-                this.removeWelcome();
-                this.card_array = [];
-                this.static_welcome_message_previous = [];
-            }
+            // cannot display
+            return false;
+        }
+        return true;
+    }
+
+    async update() {
+        const can_display = await this.can_display();
+        if (can_display && !this.visible) {
+            this.showWelcome();
             return;
         }
-        if (this.visible) {
-            // console.log("already visible");
+        if (!can_display && this.visible) {
+            this.removeWelcome();
             return;
         }
-        // not overflow, not yet shown, then create and display welcome card
-        // console.log("show welcome");
-        this.showWelcome();
     }
 
     showCard(message) {
@@ -297,6 +324,16 @@ class WelcomeMessage {
         });
 
         elem_chatbot.appendChild(welcome_card_container);
+        const can_display = await this.can_display();
+        if (!can_display) {
+            // undo
+            this.visible = false;
+            this.card_array = [];
+            this.static_welcome_message_previous = [];
+            elem_chatbot.removeChild(welcome_card_container);
+            await new Promise(r => setTimeout(r, this.update_time_interval / 2));
+            return;
+        }
 
         // 添加显示动画
         requestAnimationFrame(() => {
@@ -313,6 +350,8 @@ class WelcomeMessage {
         welcome_card_container.classList.add('hide');
         welcome_card_container.addEventListener('transitionend', () => {
             elem_chatbot.removeChild(welcome_card_container);
+            this.card_array = [];
+            this.static_welcome_message_previous = [];
         }, { once: true });
         // add a fail safe timeout
         const timeout = 600; // 与 CSS 中 transition 的时间保持一致(1s)
