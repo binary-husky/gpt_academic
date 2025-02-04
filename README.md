@@ -1,11 +1,11 @@
 > [!IMPORTANT]
-> `master主分支`最新动态(2025.2.4): 增加deepseek-r1支持；增加字体自定义功能  
-> `master主分支`最新动态(2025.2.2): 三分钟快速接入最强qwen2.5-max[视频](https://www.bilibili.com/video/BV1LeFuerEG4)  
+> `master主分支`最新动态(2025.2.4): 增加deepseek-r1支持  
 > `frontier开发分支`最新动态(2024.12.9): 更新对话时间线功能，优化xelatex论文翻译  
 > `wiki文档`最新动态(2024.12.5): 更新ollama接入指南  
 >
+> 2025.2.2: 三分钟快速接入最强qwen2.5-max[视频](https://www.bilibili.com/video/BV1LeFuerEG4)  
+> 2025.2.1: 支持自定义字体  
 > 2024.10.10: 突发停电，紧急恢复了提供[whl包](https://drive.google.com/drive/folders/14kR-3V-lIbvGxri4AHc8TpiA1fqsw7SK?usp=sharing)的文件服务器  
-> 2024.10.8: 版本3.90加入对llama-index的初步支持，版本3.80加入插件二级菜单功能（详见wiki）  
 > 2024.5.1: 加入Doc2x翻译PDF论文的功能，[查看详情](https://github.com/binary-husky/gpt_academic/wiki/Doc2x)  
 > 2024.3.11: 全力支持Qwen、GLM、DeepseekCoder等中文大语言模型！ SoVits语音克隆模块，[查看详情](https://www.bilibili.com/video/BV1Rp421S7tF/) 
 > 2024.1.17: 安装依赖时，请选择`requirements.txt`中**指定的版本**。 安装命令：`pip install -r requirements.txt`。本项目完全开源免费，您可通过订阅[在线服务](https://github.com/binary-husky/gpt_academic/wiki/online)的方式鼓励本项目的发展。
@@ -129,20 +129,20 @@ Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼�
 
 ```mermaid
 flowchart TD
-    A{"安装方法"} --> W1("I. 🔑直接运行 (Windows, Linux or MacOS)")
-    W1 --> W11["1. Python pip包管理依赖"]
-    W1 --> W12["2. Anaconda包管理依赖（推荐⭐）"]
+    A{"安装方法"} --> W1("I 🔑直接运行 (Windows, Linux or MacOS)")
+    W1 --> W11["1 Python pip包管理依赖"]
+    W1 --> W12["2 Anaconda包管理依赖（推荐⭐）"]
 
-    A --> W2["II. 🐳使用Docker (Windows, Linux or MacOS)"]
+    A --> W2["II 🐳使用Docker (Windows, Linux or MacOS)"]
 
-    W2 --> k1["1. 部署项目全部能力的大镜像（推荐⭐）"]
-    W2 --> k2["2. 仅在线模型（GPT, GLM4等）镜像"]
-    W2 --> k3["3. 在线模型 + Latex的大镜像"]
+    W2 --> k1["1 部署项目全部能力的大镜像（推荐⭐）"]
+    W2 --> k2["2 仅在线模型（GPT, GLM4等）镜像"]
+    W2 --> k3["3 在线模型 + Latex的大镜像"]
 
-    A --> W4["IV. 🚀其他部署方法"]
-    W4 --> C1["1. Windows/MacOS 一键安装运行脚本（推荐⭐）"]
-    W4 --> C2["2. Huggingface, Sealos远程部署"]
-    W4 --> C4["3. ... 其他 ..."]
+    A --> W4["IV 🚀其他部署方法"]
+    W4 --> C1["1 Windows/MacOS 一键安装运行脚本（推荐⭐）"]
+    W4 --> C2["2 Huggingface, Sealos远程部署"]
+    W4 --> C4["3 其他 ..."]
 ```
 
 ### 安装方法I：直接运行 (Windows, Linux or MacOS)
