@@ -2,19 +2,12 @@ class WelcomeMessage {
     constructor() {
         this.static_welcome_message = [
             {
-                title: "改变主题外观",
-                content: "点击「界面外观」，然后「更换UI主题」或「切换界面明暗」。",
-                svg: "file=themes/svg/theme.svg",
+                title: "环境配置教程",
+                content: "配置模型和插件，释放大语言模型的学术应用潜力。",
+                svg: "file=themes/svg/conf.svg",
                 url: "https://github.com/binary-husky/gpt_academic/wiki/%E9%A1%B9%E7%9B%AE%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E",
             },
             {
-                title: "修改回答语言偏好",    
-                content: "点击「更改模型」，删除「System prompt」并输入「用某语言回答」。",
-                svg: "file=themes/svg/prompt.svg",
-                url: "https://github.com/binary-husky/gpt_academic",
-            },
-            {
-                title: "Arxiv论文一键翻译",
                 title: "Arxiv论文翻译",
                 content: "无缝切换学术阅读语言，最优英文转中文的学术论文阅读体验。",
                 svg: "file=themes/svg/arxiv.svg",
@@ -24,12 +17,6 @@ class WelcomeMessage {
                 title: "多模态模型",
                 content: "试试将截屏直接粘贴到输入框中，随后使用多模态模型提问。",
                 svg: "file=themes/svg/mm.svg",
-                url: "https://github.com/binary-husky/gpt_academic",
-            },
-            {
-                title: "获取多个模型的答案",
-                content: "输入问题后点击「询问多个GPT模型」，消耗算子低于单词询问gpt-4o。",
-                svg: "file=themes/svg/model_multiple.svg",
                 url: "https://github.com/binary-husky/gpt_academic",
             },
             {
@@ -65,13 +52,7 @@ class WelcomeMessage {
             {
                 title: "实时语音对话",
                 content: "配置实时语音对话功能，无须任何激活词，我将一直倾听。",
-                svg: "file=themes/svg/voice.svg",
-                url: "https://github.com/binary-husky/gpt_academic/blob/master/docs/use_audio.md",
-            },
-            {
-                title: "联网回答问题",
-                content: "输入问题后，点击右侧插件区的「查互联网后回答」插件。",
-                svg: "file=themes/svg/Internet.svg",
+                svg: "file=themes/svg/default.svg",
                 url: "https://github.com/binary-husky/gpt_academic/blob/master/docs/use_audio.md",
             },
             {

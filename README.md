@@ -1,5 +1,6 @@
 > [!IMPORTANT]
 > `master主分支`最新动态(2025.2.4): 增加deepseek-r1支持；增加字体自定义功能  
+> `master主分支`最新动态(2025.2.2): 三分钟快速接入最强qwen2.5-max[视频](https://www.bilibili.com/video/BV1LeFuerEG4)  
 > `frontier开发分支`最新动态(2024.12.9): 更新对话时间线功能，优化xelatex论文翻译  
 > `wiki文档`最新动态(2024.12.5): 更新ollama接入指南  
 >
