@@ -48,22 +48,7 @@ AVAIL_LLM_MODELS = ["qwen-max", "o1-mini", "o1-mini-2024-09-12", "o1", "o1-2024-
                     "gemini-1.5-pro", "chatglm3", "chatglm4",
                     "deepseek-chat", "deepseek-coder", "deepseek-reasoner",
                     "deepseek-ai/DeepSeek-R1","deepseek-ai/DeepSeek-V3",
-                    "deepseek-ai/DeepSeek-R1-Distill-Llama-70B","deepseek-ai/DeepSeek-R1-Distill-Llama-8B",
-                    "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B","deepseek-ai/DeepSeek-R1-Distill-Qwen-14B","deepseek-ai/DeepSeek-R1-Distill-Qwen-7B","deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
-                    "Pro/deepseek-ai/DeepSeek-R1-Distill-Llama-8B","Pro/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B","Pro/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
-                    "meta-llama/Llama-3.3-70B-Instruct",
-                    "deepseek-ai/DeepSeek-V2.5",
-                    "Qwen/Qwen2.5-72B-Instruct-128K","Qwen/Qwen2.5-72B-Instruct","Qwen/Qwen2.5-32B-Instruct","Qwen/Qwen2.5-14B-Instruct","Qwen/Qwen2.5-7B-Instruct",
-                    "Qwen/Qwen2.5-Coder-32B-Instruct","Qwen/Qwen2.5-Coder-7B-Instruct",
-                    "Qwen/QwQ-32B-Preview",
-                    "TeleAI/TeleChat2",
-                    "01-ai/Yi-1.5-34B-Chat-16K","01-ai/Yi-1.5-9B-Chat-16K","01-ai/Yi-1.5-6B-Chat",
-                    "THUDM/glm-4-9b-chat",
-                    "Vendor-A/Qwen/Qwen2.5-72B-Instruct",
-                    "google/gemma-2-27b-it","google/gemma-2-9b-it","Pro/google/gemma-2-9b-it",
-                    "Pro/Qwen/Qwen2.5-7B-Instruct","Pro/Qwen/Qwen2-7B-Instruct","Pro/Qwen/Qwen2-1.5B-Instruct",
-                    "THUDM/glm-4-9b-chat","Pro/THUDM/chatglm3-6b","Pro/THUDM/glm-4-9b-chat",
-                    "meta-llama/Meta-Llama-3.1-405B-Instruct","meta-llama/Meta-Llama-3.1-70B-Instruct","meta-llama/Meta-Llama-3.1-8B-Instruct"
+                    "Qwen/Qwen2.5-32B-Instruct","Qwen/Qwen2.5-14B-Instruct","Qwen/Qwen2.5-7B-Instruct"
                     ]
 
 EMBEDDING_MODEL = "text-embedding-3-small"
@@ -89,7 +74,12 @@ EMBEDDING_MODEL = "text-embedding-3-small"
 # 使用"one-api-*","vllm-*","ollama-*","openrouter-*"前缀直接使用非标准方式接入的模型，例如
 # AVAIL_LLM_MODELS = ["one-api-claude-3-sonnet-20240229(max_token=100000)", "ollama-phi3(max_token=4096)","openrouter-openai/gpt-4o-mini","openrouter-openai/chatgpt-4o-latest"]
 # --- --- --- ---
-
+# 硅基智能(Siliconflow) API 可以通过 https://cloud.siliconflow.cn/models 或 https://docs.siliconflow.cn/api-reference/chat-completions/chat-completions 获取模型名称，并放置在AVAIL_LLM_MODELS列表中。
+# AVAIL_LLM_MODELS = [
+#                       "deepseek-ai/DeepSeek-R1","deepseek-ai/DeepSeek-V3",
+#                       "Qwen/Qwen2.5-32B-Instruct","Qwen/Qwen2.5-14B-Instruct","Qwen/Qwen2.5-7B-Instruct"
+# ]
+# --- --- --- ---
 
 # --------------- 以下配置可以优化体验 ---------------
 
