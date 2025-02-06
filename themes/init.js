@@ -128,6 +128,14 @@ function gpt_academic_change_chatbot_font(fontfamily, fontsize, fontcolor) {
     }
 }
 
+function footer_show_hide(show) {
+    if (show) {
+        document.querySelector('footer').style.display = '';
+    } else {
+        document.querySelector('footer').style.display = 'none';
+    }
+}
+
 async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout, tts) {
     // 第一部分，布局初始化
     remove_legacy_cookie();
@@ -179,6 +187,7 @@ async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout, tts) {
             }
         }
     }
+
     // 字体
     gpt_academic_gradio_saveload("load", "elem_fontfamily", "js_fontfamily", null, "str");
     gpt_academic_change_chatbot_font(getCookie("js_fontfamily"), null, null);
@@ -205,7 +214,93 @@ async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout, tts) {
     }
 
 
-
+    if (getCookie("js_show_title")) {
+        // have cookie
+        bool_value = getCookie("js_show_title")
+        bool_value = bool_value == "True";
+        searchString = "主标题";
+        tool_bar_group = "cbsc";
+        const true_function = function () {
+            document.querySelector('.prose.svelte-1ybaih5 h1').style.display = '';
+        }
+        const false_function = function () {
+            document.querySelector('.prose.svelte-1ybaih5 h1').style.display = 'none';
+        }
+        if (bool_value) {
+            // make btns appear
+            true_function();
+            // deal with checkboxes
+            let arr_with_clear_btn = update_array(
+                await get_data_from_gradio_component(tool_bar_group), searchString, "add"
+            )
+            push_data_to_gradio_component(arr_with_clear_btn, tool_bar_group, "no_conversion");
+        } else {
+            false_function();
+            // deal with checkboxes
+            let arr_without_clear_btn = update_array(
+                await get_data_from_gradio_component(tool_bar_group), searchString, "remove"
+            )
+            push_data_to_gradio_component(arr_without_clear_btn, tool_bar_group, "no_conversion");
+        }
+    }
+    if (getCookie("js_show_subtitle")) {
+        // have cookie
+        bool_value = getCookie("js_show_subtitle")
+        bool_value = bool_value == "True";
+        searchString = "副标题";
+        tool_bar_group = "cbsc";
+        const true_function = function () {
+            element = document.querySelector('.prose.svelte-1ybaih5 h2');
+            if (element) element.style.display = '';
+            element = document.querySelector('.prose.svelte-1ybaih5 h6');
+            if (element) element.style.display = '';
+        }
+        const false_function = function () {
+            element = document.querySelector('.prose.svelte-1ybaih5 h2');
+            if (element) element.style.display = 'none';
+            element = document.querySelector('.prose.svelte-1ybaih5 h6');
+            if (element) element.style.display = 'none';
+        }
+        if (bool_value) {
+            // make btns appear
+            true_function();
+            // deal with checkboxes
+            let arr_with_clear_btn = update_array(
+                await get_data_from_gradio_component(tool_bar_group), searchString, "add"
+            )
+            push_data_to_gradio_component(arr_with_clear_btn, tool_bar_group, "no_conversion");
+        } else {
+            false_function();
+            // deal with checkboxes
+            let arr_without_clear_btn = update_array(
+                await get_data_from_gradio_component(tool_bar_group), searchString, "remove"
+            )
+            push_data_to_gradio_component(arr_without_clear_btn, tool_bar_group, "no_conversion");
+        }
+    }
+    if (getCookie("js_show_footer")) {
+        // have cookie
+        bool_value = getCookie("js_show_footer")
+        searchString = "显示logo";
+        tool_bar_group = "cbsc";
+        bool_value = bool_value == "True";
+        if (bool_value) {
+            // make btns appear
+            footer_show_hide(true);
+            // deal with checkboxes
+            let arr_with_clear_btn = update_array(
+                await get_data_from_gradio_component(tool_bar_group), searchString, "add"
+            )
+            push_data_to_gradio_component(arr_with_clear_btn, tool_bar_group, "no_conversion");
+        } else {
+            footer_show_hide(false);
+            // deal with checkboxes
+            let arr_without_clear_btn = update_array(
+                await get_data_from_gradio_component(tool_bar_group), searchString, "remove"
+            )
+            push_data_to_gradio_component(arr_without_clear_btn, tool_bar_group, "no_conversion");
+        }
+    }
     // clearButton 自动清除按钮
     if (getCookie("js_clearbtn_show_cookie")) {
         // have cookie
@@ -219,7 +314,7 @@ async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout, tts) {
             let clearButton2 = document.getElementById("elem_clear2"); clearButton2.style.display = "block";
             // deal with checkboxes
             let arr_with_clear_btn = update_array(
-                await get_data_from_gradio_component('cbs'), "输入清除键", "add"
+                await get_data_from_gradio_component("cbs"), "输入清除键", "add"
             )
             push_data_to_gradio_component(arr_with_clear_btn, "cbs", "no_conversion");
         } else {
@@ -228,7 +323,7 @@ async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout, tts) {
             let clearButton2 = document.getElementById("elem_clear2"); clearButton2.style.display = "none";
             // deal with checkboxes
             let arr_without_clear_btn = update_array(
-                await get_data_from_gradio_component('cbs'), "输入清除键", "remove"
+                await get_data_from_gradio_component("cbs"), "输入清除键", "remove"
             )
             push_data_to_gradio_component(arr_without_clear_btn, "cbs", "no_conversion");
         }
@@ -267,4 +362,48 @@ async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout, tts) {
     // 主题加载（恢复到上次）
     change_theme("", "")
 
+}
+
+
+
+function apply_checkbox_change_for_group2(display_panel_arr) {
+    setTimeout(() => {
+        display_panel_arr = get_checkbox_selected_items("cbsc");
+
+        let searchString = "添加Live2D形象";
+        if (display_panel_arr.includes(searchString)) {
+            setCookie("js_live2d_show_cookie", "True", 365);
+            loadLive2D();
+        } else {
+            try {
+                setCookie("js_live2d_show_cookie", "False", 365);
+                $('.waifu').hide();
+            } catch (e) {
+            }
+        }
+
+
+        function handleDisplay(searchString, key, displayElement, showFn, hideFn) {
+            if (display_panel_arr.includes(searchString)) {
+                setCookie(key, "True", 365);
+                if (showFn) showFn();
+                if (displayElement) displayElement.style.display = '';
+            } else {
+                setCookie(key, "False", 365);
+                if (hideFn) hideFn();
+                if (displayElement) displayElement.style.display = 'none';
+            }
+        }
+
+        // 主标题
+        const mainTitle = document.querySelector('.prose.svelte-1ybaih5 h1');
+        handleDisplay("主标题", "js_show_title", mainTitle, null, null);
+
+        // 副标题
+        const subTitle = document.querySelector('.prose.svelte-1ybaih5 h2');
+        handleDisplay("副标题", "js_show_subtitle", subTitle, null, null);
+
+        // 显示logo
+        handleDisplay("显示logo", "js_show_footer", null, () => footer_show_hide(true), () => footer_show_hide(false));
+    }, 50);
 }
