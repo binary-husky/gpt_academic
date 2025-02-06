@@ -250,10 +250,16 @@ async function GptAcademicJavaScriptInit(dark, prompt, live2d, layout, tts) {
         searchString = "副标题";
         tool_bar_group = "cbsc";
         const true_function = function () {
-            document.querySelector('.prose.svelte-1ybaih5 h2').style.display = '';
+            element = document.querySelector('.prose.svelte-1ybaih5 h2');
+            if (element) element.style.display = '';
+            element = document.querySelector('.prose.svelte-1ybaih5 h6');
+            if (element) element.style.display = '';
         }
         const false_function = function () {
-            document.querySelector('.prose.svelte-1ybaih5 h2').style.display = 'none';
+            element = document.querySelector('.prose.svelte-1ybaih5 h2');
+            if (element) element.style.display = 'none';
+            element = document.querySelector('.prose.svelte-1ybaih5 h6');
+            if (element) element.style.display = 'none';
         }
         if (bool_value) {
             // make btns appear
