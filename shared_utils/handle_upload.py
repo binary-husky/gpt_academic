@@ -111,6 +111,8 @@ def extract_archive(file_path, dest_dir):
                     member_path = os.path.normpath(member.name)
                     full_path = os.path.join(dest_dir, member_path)
                     full_path = os.path.abspath(full_path)
+                    if member.islnk() or member.issym():
+                        raise Exception(f"Attempted Symlink in {member.name}")
                     if not full_path.startswith(os.path.abspath(dest_dir) + os.sep):
                         raise Exception(f"Attempted Path Traversal in {member.name}")
 
