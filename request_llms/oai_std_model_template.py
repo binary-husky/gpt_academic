@@ -252,9 +252,9 @@ def get_predict_function(
                     logger.error(error_msg)
                     raise RuntimeError("Json解析不合常规")
         if reasoning:
-            return f'''<div style="padding: 1em; line-height: 1.5; text-wrap: wrap; opacity: 0.8">
-            {''.join([f'<p style="margin: 1.25em 0;">{line}</p>' for line in reasoning_buffer.split('\n')])}
-            </div>\n\n''' + result
+            style = 'padding: 1em; line-height: 1.5; text-wrap: wrap; opacity: 0.8'
+            paragraphs = ''.join([f'<p style="margin: 1.25em 0;">{line}</p>' for line in reasoning_buffer.split('\n')])
+            return f'''<div style="{style}">{paragraphs}</div>\n\n''' + result
         return result
 
     def predict(
@@ -390,9 +390,9 @@ def get_predict_function(
                     if reasoning:
                         gpt_replying_buffer += response_text
                         gpt_reasoning_buffer += reasoning_content
-                        history[-1] = f'''<div style="padding: 1em; line-height: 1.5; text-wrap: wrap; opacity: 0.8">
-                        {''.join([f'<p style="margin: 1.25em 0;">{line}</p>' for line in gpt_reasoning_buffer.split('\n')])}
-                        </div>\n\n''' + gpt_replying_buffer
+                        style = 'padding: 1em; line-height: 1.5; text-wrap: wrap; opacity: 0.8'
+                        paragraphs = ''.join([f'<p style="margin: 1.25em 0;">{line}</p>' for line in gpt_reasoning_buffer.split('\n')])
+                        history[-1] = f'<div style="{style}">{paragraphs}</div>\n\n' + gpt_replying_buffer
                     else:
                         gpt_replying_buffer += response_text
                         # 如果这里抛出异常，一般是文本过长，详情见get_full_error的输出
