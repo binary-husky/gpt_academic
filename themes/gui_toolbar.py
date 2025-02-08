@@ -26,8 +26,8 @@ def define_gui_toolbar(AVAIL_LLM_MODELS, LLM_MODEL, INIT_SYS_PROMPT, THEME, AVAI
                 fontfamily_dropdown = gr.Dropdown(AVAIL_FONTS, value=get_conf("FONT"), elem_id="elem_fontfamily", label="更换字体类型").style(container=False)
                 fontsize_slider = gr.Slider(minimum=5, maximum=25, value=15, step=1, interactive=True, label="字体大小(默认15)", elem_id="elem_fontsize")
                 checkboxes = gr.CheckboxGroup(["基础功能区", "函数插件区", "浮动输入区", "输入清除键", "插件参数区"], value=["基础功能区", "函数插件区"], label="显示/隐藏功能区", elem_id='cbs').style(container=False)
-                opt = ["自定义菜单"]
-                value=[]
+                opt = ["自定义菜单", "主标题", "副标题", "显示logo"]
+                value=["主标题", "副标题", "显示logo"]
                 if ADD_WAIFU: opt += ["添加Live2D形象"]; value += ["添加Live2D形象"]
                 checkboxes_2 = gr.CheckboxGroup(opt, value=value, label="显示/隐藏自定义菜单", elem_id='cbsc').style(container=False)
                 dark_mode_btn = gr.Button("切换界面明暗 ☀", variant="secondary").style(size="sm")

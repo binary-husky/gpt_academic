@@ -141,23 +141,3 @@ setTimeout(() => {
 }
 """
 
-
-
-js_code_show_or_hide_group2 = """
-(display_panel_arr)=>{
-setTimeout(() => {
-    display_panel_arr = get_checkbox_selected_items("cbsc");
-
-    let searchString = "添加Live2D形象";
-    let ele = "none";
-    if (display_panel_arr.includes(searchString)) {
-        setCookie("js_live2d_show_cookie", "True", 365);
-        loadLive2D();
-    } else {
-        setCookie("js_live2d_show_cookie", "False", 365);
-        $('.waifu').hide();
-    }
-
-}, 50);
-}
-"""

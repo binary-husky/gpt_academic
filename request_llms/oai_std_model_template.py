@@ -1,16 +1,13 @@
 import json
 import time
 import traceback
+
 import requests
 from loguru import logger
 
 # config_private.py放自己的秘密如API和代理网址
 # 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
-from toolbox import (
-    get_conf,
-    update_ui,
-    is_the_upload_folder,
-)
+from toolbox import get_conf, is_the_upload_folder, update_ui
 
 proxies, TIMEOUT_SECONDS, MAX_RETRY = get_conf(
     "proxies", "TIMEOUT_SECONDS", "MAX_RETRY"
@@ -42,11 +39,19 @@ def decode_chunk(chunk):
     response = ""
     reasoning_content = ""
     finish_reason = "False"
+
+    # 考虑返回类型是 text/json 和 text/event-stream 两种
+    if chunk.startswith("data: "):
+        chunk = chunk[6:]
+    else:
+        chunk = chunk
+    
     try:
-        chunk = json.loads(chunk[6:])
+        chunk = json.loads(chunk)
     except:
         response = ""
         finish_reason = chunk
+
     # 错误处理部分
     if "error" in chunk:
         response = "API_ERROR"
@@ -55,7 +60,7 @@ def decode_chunk(chunk):
             finish_reason = chunk["error"]["code"]
         except:
             finish_reason = "API_ERROR"
-        return response, finish_reason
+        return response, reasoning_content, finish_reason
 
     try:
         if chunk["choices"][0]["delta"]["content"] is not None:
@@ -247,9 +252,9 @@ def get_predict_function(
                     logger.error(error_msg)
                     raise RuntimeError("Json解析不合常规")
         if reasoning:
-            # reasoning 的部分加上框 (>)
-            return '\n'.join(map(lambda x: '> ' + x, reasoning_buffer.split('\n'))) + \
-                   '\n\n' + result
+            return f'''<div style="padding: 1em; line-height: 1.5; text-wrap: wrap; opacity: 0.8">
+            {''.join([f'<p style="margin: 1.25em 0;">{line}</p>' for line in reasoning_buffer.split('\n')])}
+            </div>\n\n''' + result
         return result
 
     def predict(
@@ -367,7 +372,7 @@ def get_predict_function(
                         chunk_decoded = chunk.decode()
                         chatbot[-1] = (
                             chatbot[-1][0],
-                            "[Local Message] {finish_reason},获得以下报错信息：\n"
+                            f"[Local Message] {finish_reason},获得以下报错信息：\n"
                             + chunk_decoded,
                         )
                         yield from update_ui(
@@ -385,7 +390,9 @@ def get_predict_function(
                     if reasoning:
                         gpt_replying_buffer += response_text
                         gpt_reasoning_buffer += reasoning_content
-                        history[-1] = '\n'.join(map(lambda x: '> ' + x, gpt_reasoning_buffer.split('\n'))) + '\n\n' + gpt_replying_buffer
+                        history[-1] = f'''<div style="padding: 1em; line-height: 1.5; text-wrap: wrap; opacity: 0.8">
+                        {''.join([f'<p style="margin: 1.25em 0;">{line}</p>' for line in gpt_reasoning_buffer.split('\n')])}
+                        </div>\n\n''' + gpt_replying_buffer
                     else:
                         gpt_replying_buffer += response_text
                         # 如果这里抛出异常，一般是文本过长，详情见get_full_error的输出

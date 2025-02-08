@@ -512,7 +512,7 @@ def generate_payload(inputs:str, llm_kwargs:dict, history:list, system_prompt:st
         model, _ = read_one_api_model_name(model)
     if llm_kwargs['llm_model'].startswith('openrouter-'):
         model = llm_kwargs['llm_model'][len('openrouter-'):]
-        model= read_one_api_model_name(model)
+        model, _= read_one_api_model_name(model)
     if model == "gpt-3.5-random": # 随机选择, 绕过openai访问频率限制
         model = random.choice([
             "gpt-3.5-turbo",
