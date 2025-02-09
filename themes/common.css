@@ -311,3 +311,15 @@
     backdrop-filter: blur(10px);
     background-color: rgba(var(--block-background-fill), 0.5);
 }
+
+
+.reasoning_process {
+    font-size: smaller;
+    font-style: italic;
+    margin: 0px;
+    padding: 1em;
+    line-height: 1.5;
+    text-wrap: wrap;
+    opacity: 0.8;
+}
+

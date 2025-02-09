@@ -1072,7 +1072,7 @@ if "zhipuai" in AVAIL_LLM_MODELS:   # zhipuai 是glm-4的别名，向后兼容�
         })
     except:
         logger.error(trimmed_format_exc())
-# -=-=-=-=-=-=- 幻方-深度求索大模型 -=-=-=-=-=-=-
+# -=-=-=-=-=-=- 幻方-深度求索本地大模型 -=-=-=-=-=-=-
 if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
     try:
         from .bridge_deepseekcoder import predict_no_ui_long_connection as deepseekcoder_noui

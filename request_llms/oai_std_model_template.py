@@ -1,13 +1,10 @@
 import json
 import time
 import traceback
-
 import requests
-from loguru import logger
 
-# config_private.py放自己的秘密如API和代理网址
-# 读取时首先看是否存在私密的config_private配置文件（不受git管控），如果有，则覆盖原config文件
-from toolbox import get_conf, is_the_upload_folder, update_ui
+from loguru import logger
+from toolbox import get_conf, is_the_upload_folder, update_ui, update_ui_lastest_msg
 
 proxies, TIMEOUT_SECONDS, MAX_RETRY = get_conf(
     "proxies", "TIMEOUT_SECONDS", "MAX_RETRY"
@@ -76,7 +73,7 @@ def decode_chunk(chunk):
         finish_reason = chunk["choices"][0]["finish_reason"]
     except:
         pass
-    return response, reasoning_content, finish_reason
+    return response, reasoning_content, finish_reason, str(chunk)
 
 
 def generate_message(input, model, key, history, max_output_token, system_prompt, temperature):
@@ -162,7 +159,7 @@ def get_predict_function(
             用于负责跨越线程传递已经输出的部分，大部分时候仅仅为了fancy的视觉效果，留空即可。observe_window[0]：观测窗。observe_window[1]：看门狗
         """
         from .bridge_all import model_info
-        watch_dog_patience = 5  # 看门狗的耐心，设置5秒不准咬人(咬的也不是人
+        watch_dog_patience = 5  # 看门狗的耐心，设置5秒不准咬人 (咬的也不是人)
         if len(APIKEY) == 0:
             raise RuntimeError(f"APIKEY为空,请检查配置文件的{APIKEY}")
         if inputs == "":
@@ -215,7 +212,7 @@ def get_predict_function(
                 break
             except requests.exceptions.ConnectionError:
                 chunk = next(stream_response)  # 失败了，重试一次？再失败就没办法了。
-            response_text, reasoning_content, finish_reason = decode_chunk(chunk)
+            response_text, reasoning_content, finish_reason, decoded_chunk = decode_chunk(chunk)
             # 返回的数据流第一次为空，继续等待
             if response_text == "" and (reasoning == False or reasoning_content == "") and finish_reason != "False":
                 continue
@@ -252,9 +249,8 @@ def get_predict_function(
                     logger.error(error_msg)
                     raise RuntimeError("Json解析不合常规")
         if reasoning:
-            style = 'padding: 1em; line-height: 1.5; text-wrap: wrap; opacity: 0.8'
             paragraphs = ''.join([f'<p style="margin: 1.25em 0;">{line}</p>' for line in reasoning_buffer.split('\n')])
-            return f'''<div style="{style}">{paragraphs}</div>\n\n''' + result
+            return f'''<div class="reasoning_process" >{paragraphs}</div>\n\n''' + result
         return result
 
     def predict(
@@ -348,14 +344,21 @@ def get_predict_function(
             gpt_reasoning_buffer = ""
 
         stream_response = response.iter_lines()
+        wait_counter = 0
         while True:
             try:
                 chunk = next(stream_response)
             except StopIteration:
+                if wait_counter != 0 and gpt_replying_buffer == "":
+                    yield from update_ui_lastest_msg(lastmsg="模型调用失败 ...", chatbot=chatbot, history=history, msg="failed")
                 break
             except requests.exceptions.ConnectionError:
                 chunk = next(stream_response)  # 失败了，重试一次？再失败就没办法了。
-            response_text, reasoning_content, finish_reason = decode_chunk(chunk)
+            response_text, reasoning_content, finish_reason, decoded_chunk = decode_chunk(chunk)
+            if decoded_chunk == ': keep-alive':
+                wait_counter += 1
+                yield from update_ui_lastest_msg(lastmsg="等待中 " + "".join(["."] * (wait_counter%10)), chatbot=chatbot, history=history, msg="waiting ...")
+                continue
             # 返回的数据流第一次为空，继续等待
             if response_text == "" and (reasoning == False or reasoning_content == "") and finish_reason != "False":
                 status_text = f"finish_reason: {finish_reason}"
@@ -372,7 +375,7 @@ def get_predict_function(
                         chunk_decoded = chunk.decode()
                         chatbot[-1] = (
                             chatbot[-1][0],
-                            f"[Local Message] {finish_reason},获得以下报错信息：\n"
+                            f"[Local Message] {finish_reason}, 获得以下报错信息：\n"
                             + chunk_decoded,
                         )
                         yield from update_ui(
@@ -390,9 +393,8 @@ def get_predict_function(
                     if reasoning:
                         gpt_replying_buffer += response_text
                         gpt_reasoning_buffer += reasoning_content
-                        style = 'padding: 1em; line-height: 1.5; text-wrap: wrap; opacity: 0.8'
                         paragraphs = ''.join([f'<p style="margin: 1.25em 0;">{line}</p>' for line in gpt_reasoning_buffer.split('\n')])
-                        history[-1] = f'<div style="{style}">{paragraphs}</div>\n\n' + gpt_replying_buffer
+                        history[-1] = f'<div class="reasoning_process">{paragraphs}</div>\n\n---\n\n' + gpt_replying_buffer
                     else:
                         gpt_replying_buffer += response_text
                         # 如果这里抛出异常，一般是文本过长，详情见get_full_error的输出
