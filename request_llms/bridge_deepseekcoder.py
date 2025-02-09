@@ -6,7 +6,6 @@ from toolbox import get_conf
 from request_llms.local_llm_class import LocalLLMHandle, get_local_llm_predict_fns
 from threading import Thread
 from loguru import logger
-import torch
 import os
 
 def download_huggingface_model(model_name, max_retry, local_dir):
@@ -29,6 +28,7 @@ class GetCoderLMHandle(LocalLLMHandle):
         self.cmd_to_install = cmd_to_install
 
     def load_model_and_tokenizer(self):
+        import torch
         # 🏃‍♂️🏃‍♂️🏃‍♂️ 子进程执行
         with ProxyNetworkActivate('Download_LLM'):
             from transformers import AutoTokenizer, AutoModelForCausalLM, TextIteratorStreamer

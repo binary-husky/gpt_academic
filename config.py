@@ -81,7 +81,7 @@ API_URL_REDIRECT = {}
 
 # 多线程函数插件中，默认允许多少路线程同时访问OpenAI。Free trial users的限制是每分钟3次，Pay-as-you-go users的限制是每分钟3500次
 # 一言以蔽之：免费（5刀）用户填3，OpenAI绑了信用卡的用户可以填 16 或者更高。提高限制请查询：https://platform.openai.com/docs/guides/rate-limits/overview
-DEFAULT_WORKER_NUM = 3
+DEFAULT_WORKER_NUM = 8
 
 
 # 色彩主题, 可选 ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast"]
@@ -103,6 +103,7 @@ AVAIL_FONTS = [
     "华文中宋(STZhongsong)",  
     "华文新魏(STXinwei)",  
     "华文隶书(STLiti)", 
+    # 备注：以下字体需要网络支持，您可以自定义任意您喜欢的字体，如下所示，需要满足的格式为 "字体昵称(字体英文真名@字体css下载链接)" 
     "思源宋体(Source Han Serif CN VF@https://chinese-fonts-cdn.deno.dev/packages/syst/dist/SourceHanSerifCN/result.css)",
     "月星楷(Moon Stars Kai HW@https://chinese-fonts-cdn.deno.dev/packages/moon-stars-kai/dist/MoonStarsKaiHW-Regular/result.css)",
     "珠圆体(MaokenZhuyuanTi@https://chinese-fonts-cdn.deno.dev/packages/mkzyt/dist/猫啃珠圆体/result.css)",
