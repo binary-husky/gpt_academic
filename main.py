@@ -57,7 +57,7 @@ def main():
     # 如果WEB_PORT是-1, 则随机选取WEB端口
     PORT = find_free_port() if WEB_PORT <= 0 else WEB_PORT
     from check_proxy import get_current_version
-    from themes.theme import adjust_theme, advanced_css, theme_declaration, js_code_clear, js_code_show_or_hide, js_code_show_or_hide_group2
+    from themes.theme import adjust_theme, advanced_css, theme_declaration, js_code_clear, js_code_show_or_hide
     from themes.theme import js_code_for_toggle_darkmode
     from themes.theme import load_dynamic_theme, to_cookie_str, from_cookie_str, assign_user_uuid
     title_html = f"<h1 align=\"center\">GPT 学术优化 {get_current_version()}</h1>{theme_declaration}"
@@ -210,14 +210,14 @@ def main():
             ret.update({area_customize: gr.update(visible=("自定义菜单" in a))})
             return ret
         checkboxes_2.select(fn_area_visibility_2, [checkboxes_2], [area_customize] )
-        checkboxes_2.select(None, [checkboxes_2], None, _js=js_code_show_or_hide_group2)
+        checkboxes_2.select(None, [checkboxes_2], None, _js="""apply_checkbox_change_for_group2""")
 
         # 整理反复出现的控件句柄组合
         input_combo = [cookies, max_length_sl, md_dropdown, txt, txt2, top_p, temperature, chatbot, history, system_prompt, plugin_advanced_arg]
         input_combo_order = ["cookies", "max_length_sl", "md_dropdown", "txt", "txt2", "top_p", "temperature", "chatbot", "history", "system_prompt", "plugin_advanced_arg"]
         output_combo = [cookies, chatbot, history, status]
         predict_args = dict(fn=ArgsGeneralWrapper(predict), inputs=[*input_combo, gr.State(True)], outputs=output_combo)
-        
+
         # 提交按钮、重置按钮
         multiplex_submit_btn.click(
             None, [multiplex_sel], None, _js="""(multiplex_sel)=>multiplex_function_begin(multiplex_sel)""")
