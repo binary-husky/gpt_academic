@@ -175,10 +175,17 @@ def scrape_text(url, proxies) -> str:
     Returns:
         str: The scraped text
     """
+    from loguru import logger
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36',
         'Content-Type': 'text/plain',
     }
+
+    # 首先采用Jina进行文本提取
+    if get_conf("JINA_API_KEY"):
+        try: return jina_scrape_text(url)
+        except: logger.debug("Jina API 请求失败，回到旧方法")
+
     try:
         response = requests.get(url, headers=headers, proxies=proxies, timeout=8)
         if response.encoding == "ISO-8859-1": response.encoding = response.apparent_encoding
@@ -192,6 +199,24 @@ def scrape_text(url, proxies) -> str:
     chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
     text = "\n".join(chunk for chunk in chunks if chunk)
     return text
+
+
+def jina_scrape_text(url) -> str:
+    "jina_39727421c8fa4e4fa9bd698e5211feaaDyGeVFESNrRaepWiLT0wmHYJSh-d"
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.61 Safari/537.36',
+        'Content-Type': 'text/plain',
+        "X-Retain-Images": "none",
+        "Authorization": f'Bearer {get_conf("JINA_API_KEY")}'
+    }
+    response = requests.get("https://r.jina.ai/" + url, headers=headers, proxies=None, timeout=8)
+    if response.status_code != 200:
+        raise ValueError("Jina API 请求失败，开始尝试旧方法！" + response.text)
+    if response.encoding == "ISO-8859-1": response.encoding = response.apparent_encoding
+    result = response.text
+    result = result.replace("\\[", "[").replace("\\]", "]").replace("\\(", "(").replace("\\)", ")")
+    return response.text
+
 
 def internet_search_with_analysis_prompt(prompt, analysis_prompt, llm_kwargs, chatbot):
     from toolbox import get_conf
@@ -246,23 +271,52 @@ def 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         urls = search_optimizer(txt, proxies, optimizer_history, llm_kwargs, optimizer, categories, searxng_url, engines)
     history = []
     if len(urls) == 0:
-        chatbot.append((f"结论：{txt}",
-                        "[Local Message] 受到限制，无法从searxng获取信息！请尝试更换搜索引擎。"))
+        chatbot.append((f"结论：{txt}", "[Local Message] 受到限制，无法从searxng获取信息！请尝试更换搜索引擎。"))
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
 
     # ------------- < 第2步：依次访问网页 > -------------
+    from concurrent.futures import ThreadPoolExecutor
+    from textwrap import dedent
     max_search_result = 5   # 最多收纳多少个网页的结果
     if optimizer == "开启(增强)":
         max_search_result = 8
-    chatbot.append(["联网检索中 ...", None])
-    for index, url in enumerate(urls[:max_search_result]):
-        res = scrape_text(url['link'], proxies)
-        prefix = f"第{index}份搜索结果 [源自{url['source'][0]}搜索] （{url['title'][:25]}）："
-        history.extend([prefix, res])
-        res_squeeze = res.replace('\n', '...')
-        chatbot[-1] = [prefix + "\n\n" + res_squeeze[:500] + "......", None]
-        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+    template = dedent("""
+        <details>
+        <summary>{TITLE}</summary>
+        <div class="search_result">{URL}</div>
+        <div class="search_result">{CONTENT}</div>
+        </details>
+    """)
+
+    buffer = ""
+
+    # 创建线程池
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        # 提交任务到线程池
+        futures = []
+        for index, url in enumerate(urls[:max_search_result]):
+            future = executor.submit(scrape_text, url['link'], proxies)
+            futures.append((index, future, url))
+
+        # 处理完成的任务
+        for index, future, url in futures:
+            # 开始
+            prefix = f"正在加载 第{index+1}份搜索结果 [源自{url['source'][0]}搜索] （{url['title'][:25]}）："
+            string_structure = template.format(TITLE=prefix, URL=url['link'], CONTENT="正在加载，请稍后 ......")
+            yield from update_ui_lastest_msg(lastmsg=(buffer + string_structure), chatbot=chatbot, history=history, delay=0.1)  # 刷新界面
+
+            # 获取结果
+            res = future.result()
+
+            # 显示结果
+            prefix = f"第{index+1}份搜索结果 [源自{url['source'][0]}搜索] （{url['title'][:25]}）："
+            string_structure = template.format(TITLE=prefix, URL=url['link'], CONTENT=res[:1000] + "......")
+            buffer += string_structure
+
+            # 更新历史
+            history.extend([prefix, res])
+            yield from update_ui_lastest_msg(lastmsg=buffer, chatbot=chatbot, history=history, delay=0.1)  # 刷新界面
 
     # ------------- < 第3步：ChatGPT综合 > -------------
     if (optimizer != "开启(增强)"):
