@@ -48,8 +48,6 @@ if __name__ == "__main__":
 
     # plugin_test(plugin='crazy_functions.下载arxiv论文翻译摘要->下载arxiv论文并翻译摘要', main_input="1812.10695")
 
-    # plugin_test(plugin='crazy_functions.联网的ChatGPT->连接网络回答问题', main_input="谁是应急食品？")
-
     # plugin_test(plugin='crazy_functions.解析JupyterNotebook->解析ipynb文件', main_input="crazy_functions/test_samples")
 
     # plugin_test(plugin='crazy_functions.数学动画生成manim->动画生成', main_input="A ball split into 2, and then split into 4, and finally split into 8.")

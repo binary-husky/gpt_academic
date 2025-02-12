@@ -38,11 +38,12 @@ class NetworkGPT_Wrap(GptAcademicPluginTemplate):
         }
         return gui_definition
 
-    def execute(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
+    def execute(txt, llm_kwargs, plugin_kwargs:dict, chatbot, history, system_prompt, user_request):
         """
         执行插件
         """
-        if plugin_kwargs["categories"] == "网页": plugin_kwargs["categories"] = "general"
-        if plugin_kwargs["categories"] == "学术论文": plugin_kwargs["categories"] = "science"
+        if plugin_kwargs.get("categories", None) == "网页": plugin_kwargs["categories"] = "general"
+        elif plugin_kwargs.get("categories", None) == "学术论文": plugin_kwargs["categories"] = "science"
+        else: plugin_kwargs["categories"] = "general"
         yield from 连接网络回答问题(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request)
 

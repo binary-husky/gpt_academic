@@ -434,36 +434,6 @@ def get_crazy_functions():
         logger.error(trimmed_format_exc())
         logger.error("Load function plugin failed")
 
-    # try:
-    #     from crazy_functions.联网的ChatGPT import 连接网络回答问题
-
-    #     function_plugins.update(
-    #         {
-    #             "连接网络回答问题（输入问题后点击该插件，需要访问谷歌）": {
-    #                 "Group": "对话",
-    #                 "Color": "stop",
-    #                 "AsButton": False,  # 加入下拉菜单中
-    #                 # "Info": "连接网络回答问题（需要访问谷歌）| 输入参数是一个问题",
-    #                 "Function": HotReload(连接网络回答问题),
-    #             }
-    #         }
-    #     )
-    #     from crazy_functions.联网的ChatGPT_bing版 import 连接bing搜索回答问题
-
-    #     function_plugins.update(
-    #         {
-    #             "连接网络回答问题（中文Bing版，输入问题后点击该插件）": {
-    #                 "Group": "对话",
-    #                 "Color": "stop",
-    #                 "AsButton": False,  # 加入下拉菜单中
-    #                 "Info": "连接网络回答问题（需要访问中文Bing）| 输入参数是一个问题",
-    #                 "Function": HotReload(连接bing搜索回答问题),
-    #             }
-    #         }
-    #     )
-    # except:
-    #     logger.error(trimmed_format_exc())
-    #     logger.error("Load function plugin failed")
 
     try:
         from crazy_functions.SourceCode_Analyse import 解析任意code项目
@@ -770,6 +740,9 @@ def get_multiplex_button_functions():
     return {
         "常规对话":
             "",
+
+        "查互联网后回答":
+            "查互联网后回答",
 
         "多模型对话": 
             "询问多个GPT模型", # 映射到上面的 `询问多个GPT模型` 插件

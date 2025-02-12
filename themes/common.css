@@ -323,3 +323,12 @@
     opacity: 0.8;
 }
 
+.search_result {
+    font-size: smaller;
+    font-style: italic;
+    margin: 0px;
+    padding: 1em;
+    line-height: 1.5;
+    text-wrap: wrap;
+    opacity: 0.8;
+}
