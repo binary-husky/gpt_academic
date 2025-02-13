@@ -53,3 +53,5 @@ if "本地模型":
         )
         print("final result:", result)
 
+
+# Automated edit: [Edited] Add docstring to improve documentation
