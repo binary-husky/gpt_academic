@@ -1,5 +1,5 @@
 > [!IMPORTANT]
-> `master主分支`最新动态(2025.2.4): 增加deepseek-r1支持  
+> `master主分支`最新动态(2025.2.13): 联网组件支持Jina的api / 增加deepseek-r1支持  
 > `frontier开发分支`最新动态(2024.12.9): 更新对话时间线功能，优化xelatex论文翻译  
 > `wiki文档`最新动态(2024.12.5): 更新ollama接入指南  
 >

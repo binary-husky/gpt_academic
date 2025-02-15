@@ -354,6 +354,8 @@ NUM_CUSTOM_BASIC_BTN = 4
 DAAS_SERVER_URLS = [ f"https://niuziniu-biligpt{i}.hf.space/stream" for i in range(1,5) ]
 
 
+# 在互联网搜索组件中，负责将搜索结果整理成干净的Markdown
+JINA_API_KEY = ""
 
 """
 --------------- 配置关联关系说明 ---------------
