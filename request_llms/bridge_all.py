@@ -1129,14 +1129,11 @@ if "deepseek-chat" in AVAIL_LLM_MODELS or "deepseek-coder" in AVAIL_LLM_MODELS o
         })
     except:
         logger.error(trimmed_format_exc())
-# -=-=-=-=-=-=- 火山引擎deepseek大模型在线API -=-=-=-=-=-=-
-if "volcengine" in AVAIL_LLM_MODELS or "" in AVAIL_LLM_MODELS:
+# -=-=-=-=-=-=- 火山引擎大模型在线API -=-=-=-=-=-=-
+if "volcengine" in AVAIL_LLM_MODELS:
     from .bridge_volcengine import predict_no_ui_long_connection as volcengine_noui
     from .bridge_volcengine import predict as volcengine_ui
     try:
-        # volcengineapi_noui, volcengineapi_ui = get_predict_function(
-        #     api_key_conf_name="ARK_API_KEY", max_output_token=4096, disable_proxy=False
-        # )
         model_info.update({
             "volcengine":{
                 "fn_with_ui": volcengine_ui,
