@@ -16,6 +16,12 @@ DASHSCOPE_API_KEY = "" # 阿里灵积云API_KEY
 # [step 1-3]>> ( 接入 deepseek-reasoner, 即 deepseek-r1 ) 深度求索(DeepSeek) API KEY，默认请求地址为"https://api.deepseek.com/v1/chat/completions"
 DEEPSEEK_API_KEY = ""
 
+# [step 1-4]>> ( 接入火山引擎的在线大模型)，api-key获取地址 https://console.volcengine.com/ark/region:ark+cn-beijing/endpoint
+ARK_API_ID = "" # 火山引擎API_ID
+ARK_API_KEY = "" # 火山引擎API KEY
+ARK_API_URL = "https://ark.cn-beijing.volces.com/api/v3" # 火山引擎大模型默认的API URL
+
+
 # [step 2]>> 改为True应用代理。如果使用本地或无地域限制的大模型时，此处不修改；如果直接在海外服务器部署，此处不修改
 USE_PROXY = False
 if USE_PROXY:
@@ -43,7 +49,8 @@ AVAIL_LLM_MODELS = ["qwen-max", "o1-mini", "o1-mini-2024-09-12", "o1", "o1-2024-
                     "gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-4v", "glm-3-turbo",
                     "gemini-1.5-pro", "chatglm3", "chatglm4",
-                    "deepseek-chat", "deepseek-coder", "deepseek-reasoner"
+                    "deepseek-chat", "deepseek-coder", "deepseek-reasoner",
+                    "volcengine",
                     ]
 
 EMBEDDING_MODEL = "text-embedding-3-small"
