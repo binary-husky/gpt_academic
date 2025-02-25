@@ -80,6 +80,7 @@ ollama_endpoint = "http://localhost:11434/api/chat"
 yimodel_endpoint = "https://api.lingyiwanwu.com/v1/chat/completions"
 deepseekapi_endpoint = "https://api.deepseek.com/v1/chat/completions"
 grok_model_endpoint = "https://api.x.ai/v1/chat/completions"
+volcengine_endpoint = "https://ark.cn-beijing.volces.com/api/v3"
 
 if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
 azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
@@ -102,6 +103,7 @@ if ollama_endpoint in API_URL_REDIRECT: ollama_endpoint = API_URL_REDIRECT[ollam
 if yimodel_endpoint in API_URL_REDIRECT: yimodel_endpoint = API_URL_REDIRECT[yimodel_endpoint]
 if deepseekapi_endpoint in API_URL_REDIRECT: deepseekapi_endpoint = API_URL_REDIRECT[deepseekapi_endpoint]
 if grok_model_endpoint in API_URL_REDIRECT: grok_model_endpoint = API_URL_REDIRECT[grok_model_endpoint]
+if volcengine_endpoint in API_URL_REDIRECT: volcengine_endpoint = API_URL_REDIRECT[volcengine_endpoint]
 
 # 获取tokenizer
 tokenizer_gpt35 = LazyloadTiktoken("gpt-3.5-turbo")
@@ -1123,6 +1125,27 @@ if "deepseek-chat" in AVAIL_LLM_MODELS or "deepseek-coder" in AVAIL_LLM_MODELS o
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
                 "enable_reasoning": True
+            },
+        })
+    except:
+        logger.error(trimmed_format_exc())
+# -=-=-=-=-=-=- 火山引擎deepseek大模型在线API -=-=-=-=-=-=-
+if "volcengine" in AVAIL_LLM_MODELS or "" in AVAIL_LLM_MODELS:
+    from .bridge_volcengine import predict_no_ui_long_connection as volcengine_noui
+    from .bridge_volcengine import predict as volcengine_ui
+    try:
+        # volcengineapi_noui, volcengineapi_ui = get_predict_function(
+        #     api_key_conf_name="ARK_API_KEY", max_output_token=4096, disable_proxy=False
+        # )
+        model_info.update({
+            "volcengine":{
+                "fn_with_ui": volcengine_ui,
+                "fn_without_ui": volcengine_noui,
+                "endpoint": volcengine_endpoint,
+                "can_multi_thread": True,
+                "max_token": 64000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
             },
         })
     except:
