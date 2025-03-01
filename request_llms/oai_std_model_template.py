@@ -4,7 +4,7 @@ import traceback
 import requests
 
 from loguru import logger
-from toolbox import get_conf, is_the_upload_folder, update_ui, update_ui_lastest_msg
+from toolbox import get_conf, is_the_upload_folder, update_ui, update_ui_latest_msg
 
 proxies, TIMEOUT_SECONDS, MAX_RETRY = get_conf(
     "proxies", "TIMEOUT_SECONDS", "MAX_RETRY"
@@ -350,14 +350,14 @@ def get_predict_function(
                 chunk = next(stream_response)
             except StopIteration:
                 if wait_counter != 0 and gpt_replying_buffer == "":
-                    yield from update_ui_lastest_msg(lastmsg="模型调用失败 ...", chatbot=chatbot, history=history, msg="failed")
+                    yield from update_ui_latest_msg(lastmsg="模型调用失败 ...", chatbot=chatbot, history=history, msg="failed")
                 break
             except requests.exceptions.ConnectionError:
                 chunk = next(stream_response)  # 失败了，重试一次？再失败就没办法了。
             response_text, reasoning_content, finish_reason, decoded_chunk = decode_chunk(chunk)
             if decoded_chunk == ': keep-alive':
                 wait_counter += 1
-                yield from update_ui_lastest_msg(lastmsg="等待中 " + "".join(["."] * (wait_counter%10)), chatbot=chatbot, history=history, msg="waiting ...")
+                yield from update_ui_latest_msg(lastmsg="等待中 " + "".join(["."] * (wait_counter%10)), chatbot=chatbot, history=history, msg="waiting ...")
                 continue
             # 返回的数据流第一次为空，继续等待
             if response_text == "" and (reasoning == False or reasoning_content == "") and finish_reason != "False":

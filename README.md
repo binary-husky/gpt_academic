@@ -1,5 +1,5 @@
 > [!IMPORTANT]
-> `master主分支`最新动态(2025.2.13): 联网组件支持Jina的api / 增加deepseek-r1支持  
+> `master主分支`最新动态(2025.3.2): 修复大量代码typo / 联网组件支持Jina的api / 增加deepseek-r1支持  
 > `frontier开发分支`最新动态(2024.12.9): 更新对话时间线功能，优化xelatex论文翻译  
 > `wiki文档`最新动态(2024.12.5): 更新ollama接入指南  
 >
@@ -8,7 +8,7 @@
 > 2024.10.10: 突发停电，紧急恢复了提供[whl包](https://drive.google.com/drive/folders/14kR-3V-lIbvGxri4AHc8TpiA1fqsw7SK?usp=sharing)的文件服务器  
 > 2024.5.1: 加入Doc2x翻译PDF论文的功能，[查看详情](https://github.com/binary-husky/gpt_academic/wiki/Doc2x)  
 > 2024.3.11: 全力支持Qwen、GLM、DeepseekCoder等中文大语言模型！ SoVits语音克隆模块，[查看详情](https://www.bilibili.com/video/BV1Rp421S7tF/) 
-> 2024.1.17: 安装依赖时，请选择`requirements.txt`中**指定的版本**。 安装命令：`pip install -r requirements.txt`。本项目完全开源免费，您可通过订阅[在线服务](https://github.com/binary-husky/gpt_academic/wiki/online)的方式鼓励本项目的发展。
+> 2024.1.17: 安装依赖时，请选择`requirements.txt`中**指定的版本**。 安装命令：`pip install -r requirements.txt`。
 
 <br>
 
@@ -428,7 +428,6 @@ timeline LR
 1. `master` 分支: 主分支，稳定版
 2. `frontier` 分支: 开发分支，测试版
 3. 如何[接入其他大模型](request_llms/README.md)
-4. 访问GPT-Academic的[在线服务并支持我们](https://github.com/binary-husky/gpt_academic/wiki/online)
 
 ### V：参考与学习
 

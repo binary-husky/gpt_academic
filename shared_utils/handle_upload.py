@@ -88,6 +88,32 @@ def zip_extract_member_new(self, member, targetpath, pwd):
     return targetpath
 
 
+
+def safe_extract_rar(file_path, dest_dir):
+    import rarfile
+    import posixpath
+    with rarfile.RarFile(file_path) as rf:
+        os.makedirs(dest_dir, exist_ok=True)
+        base_path = os.path.abspath(dest_dir)
+        for file_info in rf.infolist():
+            orig_filename = file_info.filename
+            filename = posixpath.normpath(orig_filename).lstrip('/')
+            # 路径遍历防护
+            if '..' in filename or filename.startswith('../'):
+                raise Exception(f"Attempted Path Traversal in {orig_filename}")
+            # 符号链接防护
+            if hasattr(file_info, 'is_symlink') and file_info.is_symlink():
+                raise Exception(f"Attempted Symlink in {orig_filename}")
+            # 构造完整目标路径
+            target_path = os.path.join(base_path, filename)
+            final_path = os.path.normpath(target_path)
+            # 最终路径校验
+            if not final_path.startswith(base_path):
+                raise Exception(f"Attempted Path Traversal in {orig_filename}")
+        rf.extractall(dest_dir)
+
+
+
 def extract_archive(file_path, dest_dir):
     import zipfile
     import tarfile
@@ -132,14 +158,11 @@ def extract_archive(file_path, dest_dir):
     # 此外，Windows上还需要安装winrar软件，配置其Path环境变量，如"C:\Program Files\WinRAR"才可以
     elif file_extension == ".rar":
         try:
-            import rarfile
-
-            with rarfile.RarFile(file_path) as rf:
-                rf.extractall(path=dest_dir)
-                logger.info("Successfully extracted rar archive to {}".format(dest_dir))
+            import rarfile  # 用来检查rarfile是否安装，不要删除
+            safe_extract_rar(file_path, dest_dir)
         except:
             logger.info("Rar format requires additional dependencies to install")
-            return "\n\n解压失败! 需要安装pip install rarfile来解压rar文件。建议：使用zip压缩格式。"
+            return "<br/><br/>解压失败! 需要安装pip install rarfile来解压rar文件。建议：使用zip压缩格式。"
 
     # 第三方库，需要预先pip install py7zr
     elif file_extension == ".7z":
@@ -151,7 +174,7 @@ def extract_archive(file_path, dest_dir):
                 logger.info("Successfully extracted 7z archive to {}".format(dest_dir))
         except:
             logger.info("7z format requires additional dependencies to install")
-            return "\n\n解压失败! 需要安装pip install py7zr来解压7z文件"
+            return "<br/><br/>解压失败! 需要安装pip install py7zr来解压7z文件"
     else:
         return ""
     return ""

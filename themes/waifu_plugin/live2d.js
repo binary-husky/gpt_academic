@@ -598,7 +598,7 @@ function(t) {
 	default.VIEW_LOGICAL_MAX_BOTTOM, w.
 	default.VIEW_LOGICAL_MAX_TOP), B.setMaxScale(w.
 	default.VIEW_MAX_SCALE), B.setMinScale(w.
-	default.VIEW_MIN_SCALE), U = new M.L2DMatrix44, U.multScale(1, i / e), G = new M.L2DMatrix44, G.multTranslate(-i / 2, -e / 2), G.multScale(2 / i, -2 / i), F = v(), (0, D.setContext)(F), !F) return console.error("Failed to create WebGL context."), void(window.WebGLRenderingContext && console.error("Your browser don't support WebGL, check https://get.webgl.org/ for futher information."));
+	default.VIEW_MIN_SCALE), U = new M.L2DMatrix44, U.multScale(1, i / e), G = new M.L2DMatrix44, G.multTranslate(-i / 2, -e / 2), G.multScale(2 / i, -2 / i), F = v(), (0, D.setContext)(F), !F) return console.error("Failed to create WebGL context."), void(window.WebGLRenderingContext && console.error("Your browser don't support WebGL, check https://get.webgl.org/ for further information."));
 		window.Live2D.setGL(F), F.clearColor(0, 0, 0, 0), a(t), s()
 	}
 	function s() {
