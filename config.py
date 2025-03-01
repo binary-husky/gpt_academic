@@ -43,7 +43,7 @@ AVAIL_LLM_MODELS = ["qwen-max", "o1-mini", "o1-mini-2024-09-12", "o1", "o1-2024-
                     "gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-4v", "glm-3-turbo",
                     "gemini-1.5-pro", "chatglm3", "chatglm4",
-                    "deepseek-chat", "deepseek-coder", "deepseek-reasoner"
+                    "deepseek-chat", "deepseek-coder", "deepseek-reasoner", "volcengine-deepseek-r1-250120",
                     ]
 
 EMBEDDING_MODEL = "text-embedding-3-small"
@@ -265,6 +265,10 @@ MOONSHOT_API_KEY = ""
 
 # 零一万物(Yi Model) API KEY
 YIMODEL_API_KEY = ""
+
+
+# 接入火山引擎的在线大模型)，api-key获取地址 https://console.volcengine.com/ark/region:ark+cn-beijing/endpoint
+ARK_API_KEY = "00000000-0000-0000-0000-000000000000" # 火山引擎 API KEY
 
 
 # 紫东太初大模型 https://ai-maas.wair.ac.cn
