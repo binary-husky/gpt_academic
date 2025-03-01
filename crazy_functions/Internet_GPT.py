@@ -49,7 +49,7 @@ def search_optimizer(
     mutable = ["", time.time(), ""]
     llm_kwargs["temperature"] = 0.8
     try:
-        queries_json = predict_no_ui_long_connection(
+        query_json = predict_no_ui_long_connection(
             inputs=query,
             llm_kwargs=llm_kwargs,
             history=[],
@@ -57,24 +57,24 @@ def search_optimizer(
             observe_window=mutable,
         )
     except Exception:
-        queries_json = "1234"
+        query_json = "null"
     #* 尝试解码优化后的搜索结果
-    queries_json = re.sub(r"```json|```", "", queries_json)
+    query_json = re.sub(r"```json|```", "", query_json)
     try:
-        queries = json.loads(queries_json)
+        queries = json.loads(query_json)
     except Exception:
         #* 如果解码失败,降低温度再试一次
         try:
             llm_kwargs["temperature"] = 0.4
-            queries_json = predict_no_ui_long_connection(
+            query_json = predict_no_ui_long_connection(
                 inputs=query,
                 llm_kwargs=llm_kwargs,
                 history=[],
                 sys_prompt=sys_prompt,
                 observe_window=mutable,
             )
-            queries_json = re.sub(r"```json|```", "", queries_json)
-            queries = json.loads(queries_json)
+            query_json = re.sub(r"```json|```", "", query_json)
+            queries = json.loads(query_json)
         except Exception:
             #* 如果再次失败，直接返回原始问题
             queries = [query]
