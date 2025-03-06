@@ -49,7 +49,7 @@ AVAIL_LLM_MODELS = ["qwen-max", "o1-mini", "o1-mini-2024-09-12", "o1", "o1-2024-
                     "deepseek-chat", "deepseek-coder", "deepseek-reasoner",
                     "deepseek-ai/DeepSeek-R1","deepseek-ai/DeepSeek-V3",
                     "Qwen/Qwen2.5-32B-Instruct","Qwen/Qwen2.5-14B-Instruct","Qwen/Qwen2.5-7B-Instruct",
-                    "volcengine-deepseek-r1-250120"， "volcengine-deepseek-v3-241226"
+                    "volcengine-deepseek-r1-250120", "volcengine-deepseek-v3-241226"
                    ]
 
 EMBEDDING_MODEL = "text-embedding-3-small"
