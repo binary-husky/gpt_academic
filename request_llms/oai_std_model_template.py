@@ -4,7 +4,7 @@ import traceback
 import requests
 
 from loguru import logger
-from toolbox import get_conf, is_the_upload_folder, update_ui, update_ui_lastest_msg
+from toolbox import get_conf, is_the_upload_folder, update_ui, update_ui_latest_msg
 
 proxies, TIMEOUT_SECONDS, MAX_RETRY = get_conf(
     "proxies", "TIMEOUT_SECONDS", "MAX_RETRY"
@@ -57,7 +57,7 @@ def decode_chunk(chunk):
             finish_reason = chunk["error"]["code"]
         except:
             finish_reason = "API_ERROR"
-        return response, reasoning_content, finish_reason
+        return response, reasoning_content, finish_reason, str(chunk)
 
     try:
         if chunk["choices"][0]["delta"]["content"] is not None:
@@ -122,7 +122,8 @@ def generate_message(input, model, key, history, max_output_token, system_prompt
 def get_predict_function(
         api_key_conf_name,
         max_output_token,
-        disable_proxy = False
+        disable_proxy = False,
+        model_remove_prefix = [],
     ):
     """
     为openai格式的API生成响应函数，其中传入参数：
@@ -136,6 +137,16 @@ def get_predict_function(
     """
 
     APIKEY = get_conf(api_key_conf_name)
+
+    def remove_prefix(model_name):
+        # 去除模型名字的前缀，输入 volcengine-deepseek-r1-250120 会返回 deepseek-r1-250120
+        if not model_remove_prefix:
+            return model_name
+        model_without_prefix = model_name
+        for prefix in model_remove_prefix:
+            if model_without_prefix.startswith(prefix):
+                model_without_prefix = model_without_prefix[len(prefix):]
+        return model_without_prefix
 
     def predict_no_ui_long_connection(
         inputs,
@@ -164,9 +175,11 @@ def get_predict_function(
             raise RuntimeError(f"APIKEY为空,请检查配置文件的{APIKEY}")
         if inputs == "":
             inputs = "你好👋"
+
+
         headers, payload = generate_message(
             input=inputs,
-            model=llm_kwargs["llm_model"],
+            model=remove_prefix(llm_kwargs["llm_model"]),
             key=APIKEY,
             history=history,
             max_output_token=max_output_token,
@@ -302,7 +315,7 @@ def get_predict_function(
 
         headers, payload = generate_message(
             input=inputs,
-            model=llm_kwargs["llm_model"],
+            model=remove_prefix(llm_kwargs["llm_model"]),
             key=APIKEY,
             history=history,
             max_output_token=max_output_token,
@@ -350,14 +363,14 @@ def get_predict_function(
                 chunk = next(stream_response)
             except StopIteration:
                 if wait_counter != 0 and gpt_replying_buffer == "":
-                    yield from update_ui_lastest_msg(lastmsg="模型调用失败 ...", chatbot=chatbot, history=history, msg="failed")
+                    yield from update_ui_latest_msg(lastmsg="模型调用失败 ...", chatbot=chatbot, history=history, msg="failed")
                 break
             except requests.exceptions.ConnectionError:
                 chunk = next(stream_response)  # 失败了，重试一次？再失败就没办法了。
             response_text, reasoning_content, finish_reason, decoded_chunk = decode_chunk(chunk)
             if decoded_chunk == ': keep-alive':
                 wait_counter += 1
-                yield from update_ui_lastest_msg(lastmsg="等待中 " + "".join(["."] * (wait_counter%10)), chatbot=chatbot, history=history, msg="waiting ...")
+                yield from update_ui_latest_msg(lastmsg="等待中 " + "".join(["."] * (wait_counter%10)), chatbot=chatbot, history=history, msg="waiting ...")
                 continue
             # 返回的数据流第一次为空，继续等待
             if response_text == "" and (reasoning == False or reasoning_content == "") and finish_reason != "False":

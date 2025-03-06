@@ -81,6 +81,7 @@ yimodel_endpoint = "https://api.lingyiwanwu.com/v1/chat/completions"
 deepseekapi_endpoint = "https://api.deepseek.com/v1/chat/completions"
 grok_model_endpoint = "https://api.x.ai/v1/chat/completions"
 siliconflow_endpoint = "https://api.siliconflow.cn/v1/chat/completions"
+volcengine_endpoint = "https://ark.cn-beijing.volces.com/api/v3/chat/completions"
 
 if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
 azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
@@ -104,7 +105,7 @@ if yimodel_endpoint in API_URL_REDIRECT: yimodel_endpoint = API_URL_REDIRECT[yim
 if deepseekapi_endpoint in API_URL_REDIRECT: deepseekapi_endpoint = API_URL_REDIRECT[deepseekapi_endpoint]
 if grok_model_endpoint in API_URL_REDIRECT: grok_model_endpoint = API_URL_REDIRECT[grok_model_endpoint]
 if siliconflow_endpoint in API_URL_REDIRECT: siliconflow_endpoint = API_URL_REDIRECT[siliconflow_endpoint]
-
+if volcengine_endpoint in API_URL_REDIRECT: volcengine_endpoint = API_URL_REDIRECT[volcengine_endpoint]
 
 # 获取tokenizer
 tokenizer_gpt35 = LazyloadTiktoken("gpt-3.5-turbo")
@@ -957,7 +958,7 @@ if any(item in grok_models for item in AVAIL_LLM_MODELS):
     try:
         grok_beta_128k_noui, grok_beta_128k_ui = get_predict_function(
             api_key_conf_name="GROK_API_KEY", max_output_token=8192, disable_proxy=False
-            )
+        )
         
         model_info.update({
             "grok-beta": {
@@ -1092,8 +1093,10 @@ if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
         })
     except:
         logger.error(trimmed_format_exc())
+
 # -=-=-=-=-=-=- 幻方-深度求索大模型在线API -=-=-=-=-=-=-
-if "deepseek-chat" in AVAIL_LLM_MODELS or "deepseek-coder" in AVAIL_LLM_MODELS or "deepseek-reasoner" in AVAIL_LLM_MODELS:
+claude_models = ["deepseek-chat", "deepseek-coder", "deepseek-reasoner"]
+if any(item in claude_models for item in AVAIL_LLM_MODELS):
     try:
         deepseekapi_noui, deepseekapi_ui = get_predict_function(
             api_key_conf_name="DEEPSEEK_API_KEY", max_output_token=4096, disable_proxy=False
@@ -1130,6 +1133,60 @@ if "deepseek-chat" in AVAIL_LLM_MODELS or "deepseek-coder" in AVAIL_LLM_MODELS o
         })
     except:
         logger.error(trimmed_format_exc())
+
+# -=-=-=-=-=-=- 火山引擎 对齐支持 -=-=-=-=-=-=-
+for model in [m for m in AVAIL_LLM_MODELS if m.startswith("volcengine-")]:
+    # 为了更灵活地接入volcengine多模型管理界面，设计了此接口，例子：AVAIL_LLM_MODELS = ["volcengine-deepseek-r1-250120(max_token=6666)"]
+    # 其中
+    #   "volcengine-"          是前缀（必要）
+    #   "deepseek-r1-250120"   是模型名（必要）
+    #   "(max_token=6666)"     是配置（非必要）
+    model_info_extend = model_info
+    model_info_extend.update({
+        "deepseek-r1-250120": {
+            "max_token": 16384,
+            "enable_reasoning": True,
+            "can_multi_thread": True,
+            "endpoint": volcengine_endpoint,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+        "deepseek-v3-241226": {
+            "max_token": 16384,
+            "enable_reasoning": False,
+            "can_multi_thread": True,
+            "endpoint": volcengine_endpoint,
+            "tokenizer": tokenizer_gpt35,
+            "token_cnt": get_token_num_gpt35,
+        },
+    })
+    try:
+        origin_model_name, max_token_tmp = read_one_api_model_name(model)
+        # 如果是已知模型，则尝试获取其信息
+        original_model_info = model_info_extend.get(origin_model_name.replace("volcengine-", "", 1), None)
+    except:
+        logger.error(f"volcengine模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
+        continue
+
+    volcengine_noui, volcengine_ui = get_predict_function(api_key_conf_name="ARK_API_KEY", max_output_token=8192, disable_proxy=True, model_remove_prefix = ["volcengine-"])
+
+    this_model_info = {
+        "fn_with_ui": volcengine_ui,
+        "fn_without_ui": volcengine_noui,
+        "endpoint": volcengine_endpoint,
+        "can_multi_thread": True,
+        "max_token": 64000,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    }
+
+    # 同步已知模型的其他信息
+    attribute = "has_multimodal_capacity"
+    if original_model_info is not None and original_model_info.get(attribute, None) is not None: this_model_info.update({attribute: original_model_info.get(attribute, None)})
+    attribute = "enable_reasoning"
+    if original_model_info is not None and original_model_info.get(attribute, None) is not None: this_model_info.update({attribute: original_model_info.get(attribute, None)})
+    model_info.update({model: this_model_info})
+
 # -=-=-=-=-=-=- one-api 对齐支持 -=-=-=-=-=-=-
 for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
     # 为了更灵活地接入one-api多模型管理界面，设计了此接口，例子：AVAIL_LLM_MODELS = ["one-api-mixtral-8x7b(max_token=6666)"]
@@ -1333,9 +1390,9 @@ def LLM_CATCH_EXCEPTION(f):
     """
     装饰器函数，将错误显示出来
     """
-    def decorated(inputs:str, llm_kwargs:dict, history:list, sys_prompt:str, observe_window:list, console_slience:bool):
+    def decorated(inputs:str, llm_kwargs:dict, history:list, sys_prompt:str, observe_window:list, console_silence:bool):
         try:
-            return f(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience)
+            return f(inputs, llm_kwargs, history, sys_prompt, observe_window, console_silence)
         except Exception as e:
             tb_str = '\n```\n' + trimmed_format_exc() + '\n```\n'
             observe_window[0] = tb_str
@@ -1343,7 +1400,7 @@ def LLM_CATCH_EXCEPTION(f):
     return decorated
 
 
-def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list, sys_prompt:str, observe_window:list=[], console_slience:bool=False):
+def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list, sys_prompt:str, observe_window:list=[], console_silence:bool=False):
     """
     发送至LLM，等待回复，一次性完成，不显示中间过程。但内部（尽可能地）用stream的方法避免中途网线被掐。
     inputs：
@@ -1365,7 +1422,7 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list, sys
     if '&' not in model:
         # 如果只询问“一个”大语言模型（多数情况）：
         method = model_info[model]["fn_without_ui"]
-        return method(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience)
+        return method(inputs, llm_kwargs, history, sys_prompt, observe_window, console_silence)
     else:
         # 如果同时询问“多个”大语言模型，这个稍微啰嗦一点，但思路相同，您不必读这个else分支
         executor = ThreadPoolExecutor(max_workers=4)
@@ -1382,7 +1439,7 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list, sys
             method = model_info[model]["fn_without_ui"]
             llm_kwargs_feedin = copy.deepcopy(llm_kwargs)
             llm_kwargs_feedin['llm_model'] = model
-            future = executor.submit(LLM_CATCH_EXCEPTION(method), inputs, llm_kwargs_feedin, history, sys_prompt, window_mutex[i], console_slience)
+            future = executor.submit(LLM_CATCH_EXCEPTION(method), inputs, llm_kwargs_feedin, history, sys_prompt, window_mutex[i], console_silence)
             futures.append(future)
 
         def mutex_manager(window_mutex, observe_window):
