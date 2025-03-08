@@ -3,7 +3,8 @@ import re
 import os
 import math
 import html
-
+import base64
+import gzip
 from loguru import logger
 from textwrap import dedent
 from functools import lru_cache
@@ -325,6 +326,14 @@ def markdown_convertion_for_file(txt):
     # cat them together
     return pre + convert_stage_5 + suf
 
+def compress_string(s):
+    compress_string = gzip.compress(s.encode('utf-8'))
+    return base64.b64encode(compress_string).decode()
+
+def decompress_string(s):
+    decoded_string = base64.b64decode(s)
+    return gzip.decompress(decoded_string).decode('utf-8')
+
 @lru_cache(maxsize=128)  # 使用 lru缓存 加快转换速度
 def markdown_convertion(txt):
     """
@@ -336,6 +345,12 @@ def markdown_convertion(txt):
         # print('警告，输入了已经经过转化的字符串，二次转化可能出问题')
         return txt  # 已经被转化过，不需要再次转化
 
+    # 在文本中插入一个base64编码的原始文本，以便在复制时能够获得原始文本
+    raw_text_encoded = compress_string(txt)
+    raw_text_node = f'<div class="raw_text">{raw_text_encoded}</div>'
+    suf = raw_text_node + "</div>"
+
+    # 用于查找数学公式的正则表达式
     find_equation_pattern = r'<script type="math/tex(?:.*?)>(.*?)</script>'
 
     txt = fix_markdown_indent(txt)
@@ -493,6 +508,7 @@ def simple_markdown_convertion(text):
     suf = "</div>"
     if text.startswith(pre) and text.endswith(suf):
         return text  # 已经被转化过，不需要再次转化
+
     text = compat_non_markdown_input(text)    # 兼容非markdown输入
     text = markdown.markdown(
         text,
