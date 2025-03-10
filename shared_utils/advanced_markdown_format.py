@@ -347,7 +347,7 @@ def markdown_convertion(txt):
 
     # 在文本中插入一个base64编码的原始文本，以便在复制时能够获得原始文本
     raw_text_encoded = compress_string(txt)
-    raw_text_node = f'<div class="raw_text">{raw_text_encoded}</div>'
+    raw_text_node = f'<div class="raw_text" style="display:none">{raw_text_encoded}</div>'
     suf = raw_text_node + "</div>"
 
     # 用于查找数学公式的正则表达式
