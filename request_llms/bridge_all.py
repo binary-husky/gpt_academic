@@ -80,6 +80,7 @@ ollama_endpoint = "http://localhost:11434/api/chat"
 yimodel_endpoint = "https://api.lingyiwanwu.com/v1/chat/completions"
 deepseekapi_endpoint = "https://api.deepseek.com/v1/chat/completions"
 grok_model_endpoint = "https://api.x.ai/v1/chat/completions"
+siliconflow_endpoint = "https://api.siliconflow.cn/v1/chat/completions"
 volcengine_endpoint = "https://ark.cn-beijing.volces.com/api/v3/chat/completions"
 
 if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
@@ -103,6 +104,7 @@ if ollama_endpoint in API_URL_REDIRECT: ollama_endpoint = API_URL_REDIRECT[ollam
 if yimodel_endpoint in API_URL_REDIRECT: yimodel_endpoint = API_URL_REDIRECT[yimodel_endpoint]
 if deepseekapi_endpoint in API_URL_REDIRECT: deepseekapi_endpoint = API_URL_REDIRECT[deepseekapi_endpoint]
 if grok_model_endpoint in API_URL_REDIRECT: grok_model_endpoint = API_URL_REDIRECT[grok_model_endpoint]
+if siliconflow_endpoint in API_URL_REDIRECT: siliconflow_endpoint = API_URL_REDIRECT[siliconflow_endpoint]
 if volcengine_endpoint in API_URL_REDIRECT: volcengine_endpoint = API_URL_REDIRECT[volcengine_endpoint]
 
 # 获取tokenizer
@@ -1308,6 +1310,71 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("openrouter-")]:
             "token_cnt": get_token_num_gpt4,
         },
     })
+
+
+# -=-=-=-=-=-=- 硅基智能SiliconFlow在线API -=-=-=-=-=-=-
+siliconflow_models = [
+    "deepseek-ai/DeepSeek-R1", "Pro/deepseek-ai/DeepSeek-R1", "deepseek-ai/DeepSeek-V3", "Pro/deepseek-ai/DeepSeek-V3",
+    "deepseek-ai/DeepSeek-R1-Distill-Llama-70B", "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B", "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B", 
+    "deepseek-ai/DeepSeek-R1-Distill-Llama-8B", "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B", "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
+    "Pro/deepseek-ai/DeepSeek-R1-Distill-Llama-8B","Pro/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B","Pro/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
+    "meta-llama/Llama-3.3-70B-Instruct","AIDC-AI/Marco-o1","deepseek-ai/DeepSeek-V2.5",
+    "Qwen/Qwen2.5-72B-Instruct-128K","Qwen/Qwen2.5-72B-Instruct","Qwen/Qwen2.5-32B-Instruct","Qwen/Qwen2.5-14B-Instruct","Qwen/Qwen2.5-7B-Instruct",
+    "Qwen/Qwen2.5-Coder-32B-Instruct","Qwen/Qwen2.5-Coder-7B-Instruct",
+    "Qwen/Qwen2-7B-Instruct","Qwen/Qwen2-1.5B-Instruct","Qwen/QwQ-32B-Preview",
+    "TeleAI/TeleChat2",
+    "01-ai/Yi-1.5-34B-Chat-16K","01-ai/Yi-1.5-9B-Chat-16K","01-ai/Yi-1.5-6B-Chat",
+    "THUDM/glm-4-9b-chat","Vendor-A/Qwen/Qwen2.5-72B-Instruct",
+    "internlm/internlm2_5-7b-chat","internlm/internlm2_5-20b-chat",
+    "nvidia/Llama-3.1-Nemotron-70B-Instruct",
+    "meta-llama/Meta-Llama-3.1-405B-Instruct","meta-llama/Meta-Llama-3.1-70B-Instruct","meta-llama/Meta-Llama-3.1-8B-Instruct",
+    "google/gemma-2-27b-it","google/gemma-2-9b-it",
+    "Pro/Qwen/Qwen2.5-7B-Instruct","Pro/Qwen/Qwen2-7B-Instruct","Pro/Qwen/Qwen2-1.5B-Instruct",
+    "Pro/THUDM/chatglm3-6b","Pro/THUDM/glm-4-9b-chat",
+    "Pro/meta-llama/Meta-Llama-3.1-8B-Instruct",
+    "Pro/google/gemma-2-9b-it",
+]
+
+if any(item in siliconflow_models for item in AVAIL_LLM_MODELS):
+    try:
+        siliconflow_noui, siliconflow_ui = get_predict_function(
+            api_key_conf_name="SILICONFLOW_API_KEY",
+            max_output_token=4096,
+            disable_proxy=False,
+        )
+        for item in (set(siliconflow_models) & set(AVAIL_LLM_MODELS)):
+            if "DeepSeek-R1" in item:
+                model_info.update(
+                    {
+                        item: {
+                            "fn_with_ui": siliconflow_ui,
+                            "fn_without_ui": siliconflow_noui,
+                            "endpoint": siliconflow_endpoint,
+                            "can_multi_thread": True,
+                            "max_token": 8000,
+                            "tokenizer": tokenizer_gpt35,
+                            "token_cnt": get_token_num_gpt35,
+                            "enable_reasoning": True,
+                        },
+                    }
+                )
+            else:
+                model_info.update(
+                    {
+                        item: {
+                            "fn_with_ui": siliconflow_ui,
+                            "fn_without_ui": siliconflow_noui,
+                            "endpoint": siliconflow_endpoint,
+                            "can_multi_thread": True,
+                            "max_token": 8000,
+                            "tokenizer": tokenizer_gpt35,
+                            "token_cnt": get_token_num_gpt35,
+                        },
+                    }
+                )
+    except:
+        logger.error(trimmed_format_exc())
+
 
 
 # -=-=-=-=-=-=--=-=-=-=-=-=--=-=-=-=-=-=--=-=-=-=-=-=-=-=
