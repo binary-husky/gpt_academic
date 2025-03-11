@@ -332,3 +332,7 @@
     text-wrap: wrap;
     opacity: 0.8;
 }
+
+.raw_text {
+    display: none;
+}

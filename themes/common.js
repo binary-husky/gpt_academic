@@ -259,7 +259,24 @@ function cancel_loading_status() {
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //  第 2 部分: 复制按钮
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+// 解压缩函数
+function decompressString(compressedString) {
+    // 第1步：Base64解码
+    const binaryString = atob(compressedString);
 
+    // 第2步：将二进制字符串转换为Uint8Array
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+
+    // 第3步：使用DecompressionStream (基于Web Streams API)进行gzip解压缩
+    const ds = new DecompressionStream('gzip');
+    const decompressedStream = new Response(new Blob([bytes])).body.pipeThrough(ds);
+
+    // 第4步：获取解压后的数据并转换为字符串
+    return new Response(decompressedStream).text();
+}
 
 var allow_auto_read_continously = true;
 var allow_auto_read_tts_flag = false;
@@ -283,19 +300,56 @@ function addCopyButton(botElement, index, is_last_in_arr) {
         return;
     }
 
-    var copyButton = document.createElement('button');
-    copyButton.classList.add('copy-bot-btn');
-    copyButton.setAttribute('aria-label', 'Copy');
-    copyButton.innerHTML = copyIcon;
-    copyButton.addEventListener('click', async () => {
-        const textToCopy = botElement.innerText;
+    // var copyButton = document.createElement('button');
+    // copyButton.classList.add('copy-bot-btn');
+    // copyButton.setAttribute('aria-label', 'Copy');
+    // copyButton.innerHTML = copyIcon;
+    // copyButton.addEventListener('click', async () => {
+    //     const textToCopy = botElement.innerText;
+    //     try {
+    //         // push_text_to_audio(textToCopy).catch(console.error);
+    //         if ("clipboard" in navigator) {
+    //             await navigator.clipboard.writeText(textToCopy);
+    //             copyButton.innerHTML = copiedIcon;
+    //             setTimeout(() => {
+    //                 copyButton.innerHTML = copyIcon;
+    //             }, 1500);
+    //         } else {
+    //             const textArea = document.createElement("textarea");
+    //             textArea.value = textToCopy;
+    //             document.body.appendChild(textArea);
+    //             textArea.select();
+    //             try {
+    //                 document.execCommand('copy');
+    //                 copyButton.innerHTML = copiedIcon;
+    //                 setTimeout(() => {
+    //                     copyButton.innerHTML = copyIcon;
+    //                 }, 1500);
+    //             } catch (error) {
+    //                 console.error("Copy failed: ", error);
+    //             }
+    //             document.body.removeChild(textArea);
+    //         }
+    //     } catch (error) {
+    //         console.error("Copy failed: ", error);
+    //     }
+    // });
+
+    // 原始文本拷贝
+    var copyButtonOrig = document.createElement('button');
+    copyButtonOrig.classList.add('copy-bot-btn');
+    copyButtonOrig.setAttribute('aria-label', 'Copy');
+    copyButtonOrig.innerHTML = copyIcon;
+    copyButtonOrig.addEventListener('click', async () => {
         try {
+            const base64gzipcode = botElement.getElementsByClassName('raw_text')[0].innerText;
+            const textToCopy = await decompressString(base64gzipcode);
             // push_text_to_audio(textToCopy).catch(console.error);
             if ("clipboard" in navigator) {
                 await navigator.clipboard.writeText(textToCopy);
-                copyButton.innerHTML = copiedIcon;
+                copyButtonOrig.innerHTML = copiedIcon;
                 setTimeout(() => {
-                    copyButton.innerHTML = copyIcon;
+                    copyButtonOrig.innerHTML = copyIcon;
                 }, 1500);
             } else {
                 const textArea = document.createElement("textarea");
@@ -304,9 +358,9 @@ function addCopyButton(botElement, index, is_last_in_arr) {
                 textArea.select();
                 try {
                     document.execCommand('copy');
-                    copyButton.innerHTML = copiedIcon;
+                    copyButtonOrig.innerHTML = copiedIcon;
                     setTimeout(() => {
-                        copyButton.innerHTML = copyIcon;
+                        copyButtonOrig.innerHTML = copyIcon;
                     }, 1500);
                 } catch (error) {
                     console.error("Copy failed: ", error);
@@ -345,7 +399,8 @@ function addCopyButton(botElement, index, is_last_in_arr) {
 
     var messageBtnColumn = document.createElement('div');
     messageBtnColumn.classList.add('message-btn-row');
-    messageBtnColumn.appendChild(copyButton);
+    // messageBtnColumn.appendChild(copyButton);
+    messageBtnColumn.appendChild(copyButtonOrig);
     if (enable_tts) {
         messageBtnColumn.appendChild(audioButton);
     }
