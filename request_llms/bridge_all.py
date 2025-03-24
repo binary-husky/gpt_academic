@@ -530,6 +530,15 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
+    "gemini-2.0-flash": {
+        "fn_with_ui": genai_ui,
+        "fn_without_ui": genai_noui,
+        "endpoint": gemini_endpoint,
+        "has_multimodal_capacity": True,
+        "max_token": 1024 * 204800,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
 
     # cohere
     "cohere-command-r-plus": {
