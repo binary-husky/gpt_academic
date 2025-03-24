@@ -368,12 +368,12 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
                             log_chat(llm_model=llm_kwargs["llm_model"], input_str=inputs, output_str=gpt_replying_buffer)
                             break # 对于符合规范的接口，这里可以break
                         else:
-                            continue # 对于不符合规范的狗屎接口，这里需要继续
+                            continue # 对于不符合规范的接口，这里需要继续
                     # 到这里，我们已经可以假定必须包含choice了
                     try:
                         status_text = f"finish_reason: {chunkjson['choices'][0].get('finish_reason', 'null')}"
                     except:
-                        logger.error(f"一些垃圾第三方接口出现这样的错误，兼容一下吧: {chunk_decoded}")
+                        logger.error(f"一些第三方接口出现这样的错误，兼容一下吧: {chunk_decoded}")
                     # 处理数据流的主体
                     if has_content:
                         # 正常情况
@@ -382,9 +382,9 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
                         # 一些第三方接口的出现这样的错误，兼容一下吧
                         continue
                     else:
-                        # 至此已经超出了正常接口应该进入的范围，一些垃圾第三方接口会出现这样的错误
+                        # 至此已经超出了正常接口应该进入的范围，一些第三方接口会出现这样的错误
                         if chunkjson['choices'][0]["delta"].get("content", None) is None:
-                            logger.error(f"一些垃圾第三方接口出现这样的错误，兼容一下吧: {chunk_decoded}")
+                            logger.error(f"一些第三方接口出现这样的错误，兼容一下吧: {chunk_decoded}")
                             continue
                         gpt_replying_buffer = gpt_replying_buffer + chunkjson['choices'][0]["delta"]["content"]
 

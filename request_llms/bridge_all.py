@@ -815,7 +815,7 @@ if "qwen-local" in AVAIL_LLM_MODELS:
         logger.error(trimmed_format_exc())
 
 # -=-=-=-=-=-=- 阿里云百炼（通义）-在线模型 -=-=-=-=-=-=-
-qwen_models = ["qwen-max-latest", "qwen-max-2025-01-25","qwen-max","qwen-turbo","qwen-plus","deepseek-r1","deepseek-v3"]
+qwen_models = ["qwen-max-latest", "qwen-max-2025-01-25","qwen-max","qwen-turbo","qwen-plus","dashscope-deepseek-r1","dashscope-deepseek-v3"]
 if any(item in qwen_models for item in AVAIL_LLM_MODELS):
     try:
         from .bridge_qwen import predict_no_ui_long_connection as qwen_noui
@@ -866,7 +866,7 @@ if any(item in qwen_models for item in AVAIL_LLM_MODELS):
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
             },
-            "deepseek-r1": {
+            "dashscope-deepseek-r1": {
                 "fn_with_ui": qwen_ui,
                 "fn_without_ui": qwen_noui,
                 "enable_reasoning": True,
@@ -876,7 +876,7 @@ if any(item in qwen_models for item in AVAIL_LLM_MODELS):
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
             },
-            "deepseek-v3": {
+            "dashscope-deepseek-v3": {
                 "fn_with_ui": qwen_ui,
                 "fn_without_ui": qwen_noui,
                 "can_multi_thread": True,

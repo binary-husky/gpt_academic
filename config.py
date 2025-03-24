@@ -45,7 +45,7 @@ AVAIL_LLM_MODELS = ["qwen-max", "o1-mini", "o1-mini-2024-09-12", "o1", "o1-2024-
                     "gemini-1.5-pro", "chatglm3", "chatglm4",
                     "deepseek-chat", "deepseek-coder", "deepseek-reasoner", 
                     "volcengine-deepseek-r1-250120", "volcengine-deepseek-v3-241226",
-                    "deepseek-r1","deepseek-v3",
+                    "dashscope-deepseek-r1", "dashscope-deepseek-v3",
                     ]
 
 EMBEDDING_MODEL = "text-embedding-3-small"
