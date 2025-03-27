@@ -46,11 +46,13 @@ AVAIL_LLM_MODELS = ["qwen-max", "o1-mini", "o1-mini-2024-09-12", "o1", "o1-2024-
                     "gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-4v", "glm-3-turbo",
                     "gemini-1.5-pro", "chatglm3", "chatglm4",
+
                     "deepseek-chat", "deepseek-coder", "deepseek-reasoner",
                     "deepseek-ai/DeepSeek-R1","deepseek-ai/DeepSeek-V3",
                     "Qwen/Qwen2.5-32B-Instruct","Qwen/Qwen2.5-14B-Instruct","Qwen/Qwen2.5-7B-Instruct",
-                    "volcengine-deepseek-r1-250120", "volcengine-deepseek-v3-241226"
-                   ]
+                    "volcengine-deepseek-r1-250120", "volcengine-deepseek-v3-241226",
+                    "dashscope-deepseek-r1", "dashscope-deepseek-v3",
+                    ]
 
 EMBEDDING_MODEL = "text-embedding-3-small"
 
