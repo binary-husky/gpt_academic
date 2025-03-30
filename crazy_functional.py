@@ -649,7 +649,7 @@ def get_crazy_functions():
 
         function_plugins.update(
             {
-                "AutoGen多智能体终端（仅供测试）": {
+                "AG2多智能体终端（仅供测试）": {
                     "Group": "智能体",
                     "Color": "stop",
                     "AsButton": False,
