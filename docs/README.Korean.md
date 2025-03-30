@@ -51,7 +51,7 @@ LaTeX 논문 일괄 교정 | [플러그인] Grammarly를 모사하여 LaTeX 논�
 ⭐Arxiv 논문 세심한 번역 ([Docker](https://github.com/binary-husky/gpt_academic/pkgs/container/gpt_academic_with_latex)) | [플러그인] [arxiv 논문을 고품질 번역으로](https://www.bilibili.com/video/BV1dz4y1v77A/) 번역하는 최고의 도구
 ⭐[실시간 음성 대화 입력](https://github.com/binary-husky/gpt_academic/blob/master/docs/use_audio.md) | [플러그인] 비동기적으로 [오디오를 모니터링](https://www.bilibili.com/video/BV1AV4y187Uy/)하여 문장을 자동으로 분절하고 대답 시기를 자동으로 찾습니다.
 수식/이미지/표 표시 | [tex 형식 및 렌더링 형식](https://user-images.githubusercontent.com/96192199/230598842-1d7fcddd-815d-40ee-af60-baf488a199df.png)의 수식을 동시에 표시하며, 수식 및 코드 하이라이트 지원
-⭐AutoGen multi-agent 플러그인 | [플러그인] Microsoft AutoGen을 활용하여 여러 개의 에이전트가 지능적으로 발생하는 가능성을 탐색하세요!
+⭐AG2 multi-agent 플러그인 | [플러그인] AG2 (Formerly AutoGen)을 활용하여 여러 개의 에이전트가 지능적으로 발생하는 가능성을 탐색하세요!
 다크 모드 주제 지원 | 브라우저의 URL 뒤에 ```/?__theme=dark```를 추가하여 다크 모드로 전환하세요.
 [다양한 LLM 모델](https://www.bilibili.com/video/BV1wT411p7yf) 지원 | GPT3.5, GPT4, [Tsinghua ChatGLM2](https://github.com/THUDM/ChatGLM2-6B), [Fudan MOSS](https://github.com/OpenLMLab/MOSS)을 함께 사용하는 느낌은 좋을 것입니다, 그렇지 않습니까?
 ⭐ChatGLM2 fine-tuned 모델 | ChatGLM2 fine-tuned 모델 로드를 지원하며, ChatGLM2 fine-tuned 보조 플러그인 제공
@@ -290,8 +290,8 @@ Please visit the [cloud server remote deployment wiki](https://github.com/binary
 
 
 ### II: 버전:
-- 버전 3.70 (예정): AutoGen 플러그인 테마 개선 및 다른 테마 플러그인 디자인
-- 버전 3.60: AutoGen을 새로운 세대 플러그인의 기반으로 도입
+- 버전 3.70 (예정): AG2 (Formerly AutoGen) 플러그인 테마 개선 및 다른 테마 플러그인 디자인
+- 버전 3.60: AG2 (Formerly AutoGen)을 새로운 세대 플러그인의 기반으로 도입
 - 버전 3.57: GLM3, Starfire v3, 文心一言 v4 지원, 로컬 모델의 동시성 버그 수정
 - 버전 3.56: 동적으로 기본 기능 버튼 추가, 새로운 보고서 PDF 요약 페이지
 - 버전 3.55: 프론트 엔드 인터페이스 리팩토링, 화면 따라다니는 윈도우 및 메뉴 바 도입

@@ -48,7 +48,7 @@ Internetinformationsaggregation + GPT | [Plugin] Ermöglicht es GPT, Fragen durc
 ⭐Feine Übersetzung von Arxiv-Artikeln ([Docker](https://github.com/binary-husky/gpt_academic/pkgs/container/gpt_academic_with_latex)) | [Plugin] Übersetzt Arxiv-Artikel [mit hoher Qualität](https://www.bilibili.com/video/BV1dz4y1v77A/) mit einem Klick - das beste Übersetzungstool für wissenschaftliche Artikel
 ⭐[Echtzeit-Spracheingabe](https://github.com/binary-husky/gpt_academic/blob/master/docs/use_audio.md) | [Plugin] [Asynchrones Lauschen auf Audio-Eingabe](https://www.bilibili.com/video/BV1AV4y187Uy/), automatisches Zerschneiden des Textes, automatische Suche nach dem richtigen Zeitpunkt zur Beantwortung
 Darstellen von Formeln/Bildern/Tabellen | Zeigt Formeln sowohl in [TEX-](https://user-images.githubusercontent.com/96192199/230598842-1d7fcddd-815d-40ee-af60-baf488a199df.png)- als auch in gerenderten Formen an, unterstützt Formeln und Code-Hervorhebung
-⭐AutoGen Multi-Agent Plugin | [Plugin] Erforscht die Möglichkeiten des emergenten Verhaltens von Multi-Agent-Systemen mit Microsoft AutoGen!
+⭐AG2 (Formerly AutoGen) Multi-Agent Plugin | [Plugin] Erforscht die Möglichkeiten des emergenten Verhaltens von Multi-Agent-Systemen mit AG2 (Formerly AutoGen)!
 Start im Dark-Theme | Um das Dark-Theme zu aktivieren, fügen Sie ```/?__theme=dark``` am Ende der URL im Browser hinzu
 [Mehrsprachige LLM-Modelle](https://www.bilibili.com/video/BV1wT411p7yf) unterstützt | Es ist sicherlich beeindruckend, von GPT3.5, GPT4, [ChatGLM2 der Tsinghua University](https://github.com/THUDM/ChatGLM2-6B), [MOSS der Fudan University](https://github.com/OpenLMLab/MOSS) bedient zu werden, oder?
 ⭐ChatGLM2 Feinabstimmungsmodell | Unterstützt das Laden von ChatGLM2-Feinabstimmungsmodellen und bietet Unterstützung für ChatGLM2-Feinabstimmungsassistenten
@@ -289,8 +289,8 @@ Tipp: Wenn kein Dateiname angegeben ist, können Sie direkt auf "Dialoghistorie 
 
 
 ### II: Versionen:
-- Version 3.70 (ausstehend): Optimierung des AutoGen-Plugin-Themas und Entwicklung einer Reihe von abgeleiteten Plugins
-- Version 3.60: Einführung von AutoGen als Grundlage für neue Plugin-Generation
+- Version 3.70 (ausstehend): Optimierung des AG2-Plugin-Themas und Entwicklung einer Reihe von abgeleiteten Plugins
+- Version 3.60: Einführung von AG2 (Formerly AutoGen) als Grundlage für neue Plugin-Generation
 - Version 3.57: Unterstützung von GLM3, SparkV3, WenxinYiyanV4, Behebung von Problemen bei gleichzeitiger Verwendung von lokalen Modellen
 - Version 3.56: Dynamische Hinzufügung von Basisfunktionsbuttons, neue Übersichtsseite für PDFs
 - Version 3.55: Überarbeitung der Benutzeroberfläche, Hinzufügung von Schwebefenstern und Menüleiste
