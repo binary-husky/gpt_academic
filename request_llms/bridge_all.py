@@ -530,6 +530,15 @@ model_info = {
         "tokenizer": tokenizer_gpt35,
         "token_cnt": get_token_num_gpt35,
     },
+    "gemini-2.0-flash": {
+        "fn_with_ui": genai_ui,
+        "fn_without_ui": genai_noui,
+        "endpoint": gemini_endpoint,
+        "has_multimodal_capacity": True,
+        "max_token": 1024 * 204800,
+        "tokenizer": tokenizer_gpt35,
+        "token_cnt": get_token_num_gpt35,
+    },
 
     # cohere
     "cohere-command-r-plus": {
@@ -813,8 +822,9 @@ if "qwen-local" in AVAIL_LLM_MODELS:
         })
     except:
         logger.error(trimmed_format_exc())
-# -=-=-=-=-=-=- 通义-在线模型 -=-=-=-=-=-=-
-qwen_models = ["qwen-max-latest", "qwen-max-2025-01-25","qwen-max","qwen-turbo","qwen-plus"]
+
+# -=-=-=-=-=-=- 阿里云百炼（通义）-在线模型 -=-=-=-=-=-=-
+qwen_models = ["qwen-max-latest", "qwen-max-2025-01-25","qwen-max","qwen-turbo","qwen-plus","dashscope-deepseek-r1","dashscope-deepseek-v3"]
 if any(item in qwen_models for item in AVAIL_LLM_MODELS):
     try:
         from .bridge_qwen import predict_no_ui_long_connection as qwen_noui
@@ -864,10 +874,30 @@ if any(item in qwen_models for item in AVAIL_LLM_MODELS):
                 "max_token": 30720,
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
+            },
+            "dashscope-deepseek-r1": {
+                "fn_with_ui": qwen_ui,
+                "fn_without_ui": qwen_noui,
+                "enable_reasoning": True,
+                "can_multi_thread": True,
+                "endpoint": None,
+                "max_token": 57344,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "dashscope-deepseek-v3": {
+                "fn_with_ui": qwen_ui,
+                "fn_without_ui": qwen_noui,
+                "can_multi_thread": True,
+                "endpoint": None,
+                "max_token": 57344,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
             }
         })
     except:
         logger.error(trimmed_format_exc())
+
 # -=-=-=-=-=-=- 零一万物模型 -=-=-=-=-=-=-
 yi_models = ["yi-34b-chat-0205","yi-34b-chat-200k","yi-large","yi-medium","yi-spark","yi-large-turbo","yi-large-preview"]
 if any(item in yi_models for item in AVAIL_LLM_MODELS):
