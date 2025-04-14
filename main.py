@@ -184,7 +184,7 @@ def main():
         from themes.gui_floating_menu import define_gui_floating_menu
         area_input_secondary, txt2, area_customize, _, resetBtn2, clearBtn2, stopBtn2 = \
             define_gui_floating_menu(customize_btns, functional, predefined_btns, cookies, web_cookie_cache)
-        
+
         # 浮动时间线定义
         gr.Spark()
 

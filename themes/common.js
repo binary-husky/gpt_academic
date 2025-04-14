@@ -289,7 +289,7 @@ function addCopyButton(botElement, index, is_last_in_arr) {
     const audioIcon = '<span><svg t="1713628577799" fill="currentColor" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4587" width=".9em" height=".9em"><path d="M113.7664 540.4672c0-219.9552 178.2784-398.2336 398.2336-398.2336S910.2336 320.512 910.2336 540.4672v284.4672c0 31.4368-25.4976 56.9344-56.9344 56.9344h-56.9344c-31.4368 0-56.9344-25.4976-56.9344-56.9344V597.2992c0-31.4368 25.4976-56.9344 56.9344-56.9344h56.9344c0-188.5184-152.7808-341.2992-341.2992-341.2992S170.7008 351.9488 170.7008 540.4672h56.9344c31.4368 0 56.9344 25.4976 56.9344 56.9344v227.5328c0 31.4368-25.4976 56.9344-56.9344 56.9344h-56.9344c-31.4368 0-56.9344-25.4976-56.9344-56.9344V540.4672z" p-id="4588"></path></svg></span>';
     // const cancelAudioIcon = '<span><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height=".8em" width=".8em" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></span>';
 
-    // 此功能没准备好
+    // audio functionality
     if (allow_auto_read_continously && is_last_in_arr && allow_auto_read_tts_flag) {
         process_latest_text_output(botElement.innerText, index);
     }
@@ -299,41 +299,6 @@ function addCopyButton(botElement, index, is_last_in_arr) {
         // if .message-btn-column exists
         return;
     }
-
-    // var copyButton = document.createElement('button');
-    // copyButton.classList.add('copy-bot-btn');
-    // copyButton.setAttribute('aria-label', 'Copy');
-    // copyButton.innerHTML = copyIcon;
-    // copyButton.addEventListener('click', async () => {
-    //     const textToCopy = botElement.innerText;
-    //     try {
-    //         // push_text_to_audio(textToCopy).catch(console.error);
-    //         if ("clipboard" in navigator) {
-    //             await navigator.clipboard.writeText(textToCopy);
-    //             copyButton.innerHTML = copiedIcon;
-    //             setTimeout(() => {
-    //                 copyButton.innerHTML = copyIcon;
-    //             }, 1500);
-    //         } else {
-    //             const textArea = document.createElement("textarea");
-    //             textArea.value = textToCopy;
-    //             document.body.appendChild(textArea);
-    //             textArea.select();
-    //             try {
-    //                 document.execCommand('copy');
-    //                 copyButton.innerHTML = copiedIcon;
-    //                 setTimeout(() => {
-    //                     copyButton.innerHTML = copyIcon;
-    //                 }, 1500);
-    //             } catch (error) {
-    //                 console.error("Copy failed: ", error);
-    //             }
-    //             document.body.removeChild(textArea);
-    //         }
-    //     } catch (error) {
-    //         console.error("Copy failed: ", error);
-    //     }
-    // });
 
     // 原始文本拷贝
     var copyButtonOrig = document.createElement('button');
@@ -436,7 +401,6 @@ function do_something_but_not_too_frequently(min_interval, func) {
 
 
 function chatbotContentChanged(attempt = 1, force = false) {
-    // https://github.com/GaiZhenbiao/ChuanhuChatGPT/tree/main/web_assets/javascript
     for (var i = 0; i < attempt; i++) {
         setTimeout(() => {
             const messages = gradioApp().querySelectorAll('#gpt-chatbot .message-wrap .message.bot');
@@ -446,6 +410,9 @@ function chatbotContentChanged(attempt = 1, force = false) {
 
                 // Now pass both the message element and the is_last_in_arr boolean to addCopyButton
                 addCopyButton(message, index, is_last_in_arr);
+
+                // if last message, add stop btn link
+                addStopButton(message, index, is_last_in_arr);
 
                 // save_conversation_history
                 save_conversation_history_slow_down();
@@ -457,6 +424,79 @@ function chatbotContentChanged(attempt = 1, force = false) {
 
 }
 
+function addStopButton(botElement, index, is_last_in_arr) {
+    function is_generating() {
+        var statePanelElement = document.getElementById("state-panel");
+        var generatingElement = statePanelElement.querySelector(".generating");
+        if (generatingElement) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    function on_stop_btn_click() {
+        let stopButton = document.getElementById("elem_stop");
+        stopButton.click();
+    }
+    function remove_stop_generate_btn(messageTailElement) {
+        // remove all child elements of messageTailElement
+        while (messageTailElement.firstChild) {
+            messageTailElement.removeChild(messageTailElement.firstChild);
+        }
+        messageTailElement.style.display = 'none';
+        messageTailElement.classList.add('removed');
+    }
+    function add_stop_generate_btn() {
+        // write here: add a beautiful stop btn `bottomElement` as child, when clicked execute on_stop_btn_click
+        console.log("get_gradio_component")
+        const bottomElement = document.createElement('button');
+        bottomElement.className = 'ant-btn ant-btn-primary';
+        bottomElement.innerHTML = `
+            <span class="ant-btn-icon">
+                <svg viewBox="64 64 896 896" focusable="false" data-icon="sync" width="1em" height="1em" fill="currentColor" aria-hidden="true" class="anticon anticon-sync anticon-spin">
+                <path d="M168 504.2c1-43.7 10-86.1 26.9-126 17.3-41 42.1-77.7 73.7-109.4S337 212.3 378 195c42.4-17.9 87.4-27 133.9-27s91.5 9.1 133.8 27A341.5 341.5 0 01755 268.8c9.9 9.9 19.2 20.4 27.8 31.4l-60.2 47a8 8 0 003 14.1l175.7 43c5 1.2 9.9-2.6 9.9-7.7l.8-180.9c0-6.7-7.7-10.5-12.9-6.3l-56.4 44.1C765.8 155.1 646.2 92 511.8 92 282.7 92 96.3 275.6 92 503.8a8 8 0 008 8.2h60c4.4 0 7.9-3.5 8-7.8zm756 7.8h-60c-4.4 0-7.9 3.5-8 7.8-1 43.7-10 86.1-26.9 126-17.3 41-42.1 77.8-73.7 109.4A342.45 342.45 0 01512.1 856a342.24 342.24 0 01-243.2-100.8c-9.9-9.9-19.2-20.4-27.8-31.4l60.2-47a8 8 0 00-3-14.1l-175.7-43c-5-1.2-9.9 2.6-9.9 7.7l-.7 181c0 6.7 7.7 10.5 12.9 6.3l56.4-44.1C258.2 868.9 377.8 932 512.2 932c229.2 0 415.5-183.7 419.8-411.8a8 8 0 00-8-8.2z"></path>
+                </svg>
+            </span>
+            <span>终止</span>
+        `;
+        bottomElement.classList.add('message_tail_stop');
+        bottomElement.addEventListener('click', on_stop_btn_click);
+        messageTailElement.appendChild(bottomElement);
+    }
+
+    // find a sub element of class `message_tail`
+    const messageTailElement = botElement.querySelector('.message_tail');
+    // if not is_last_in_arr, hide this elem (display none)
+    if (!messageTailElement) {
+        return;
+    }
+    if (messageTailElement.classList.contains('removed')) {
+        return;
+    }
+    if (!is_last_in_arr) {
+        remove_stop_generate_btn(messageTailElement);
+        return;
+    }
+    messageTailElement.style.display = 'flex';
+    const messageTailStopElem = messageTailElement.querySelector('.message_tail_stop');
+    if(!is_generating()) {
+        setTimeout(() => {
+            if(!is_generating()) {
+                remove_stop_generate_btn(messageTailElement);
+                return;
+            } else {
+                if (!messageTailStopElem) {
+                    add_stop_generate_btn()
+                }
+            }
+        }, 500);
+    } else {
+        if (!messageTailStopElem) {
+            add_stop_generate_btn()
+        }
+    }
+
+}
 
 
 // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
