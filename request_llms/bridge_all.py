@@ -1409,44 +1409,27 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("siliconflow-")]:
     try:
         siliconflow_noui, siliconflow_ui = get_predict_function(
             api_key_conf_name="SILICONFLOW_API_KEY",
-            max_output_token=8192,
+            # max_tokens 的说明：https://docs.siliconflow.cn/cn/faqs/misc
+            max_output_token=4096,
             disable_proxy=False,
             # 去除前缀
             model_remove_prefix = ["siliconflow-"]
         )
         # 判断是否具有推理能力
         enable_reasoning = any(item in model for item in inference_model_series)
-        if enable_reasoning:
-            model_info.update(
-                {
-                    model: {
-                        "fn_with_ui": siliconflow_ui,
-                        "fn_without_ui": siliconflow_noui,
-                        "endpoint": siliconflow_endpoint,
-                        "can_multi_thread": True,
-                        "max_token": 32000,
-                        "tokenizer": tokenizer_gpt35,
-                        "token_cnt": get_token_num_gpt35,
-                        "enable_reasoning": True,
-                    },
-                }
-            )
-            logger.info(f" siliconflow模型 {model} 已加载")
-        else:
-            model_info.update(
-                {
-                    model: {
-                        "fn_with_ui": siliconflow_ui,
-                        "fn_without_ui": siliconflow_noui,
-                        "endpoint": siliconflow_endpoint,
-                        "can_multi_thread": True,
-                        "max_token": 32000,
-                        "tokenizer": tokenizer_gpt35,
-                        "token_cnt": get_token_num_gpt35,
-                    },
-                }
-            ) 
-            logger.info(f" siliconflow模型 {model} 已加载")
+        model_info.update(
+            {
+                model: {
+                    "fn_with_ui": siliconflow_ui,
+                    "fn_without_ui": siliconflow_noui,
+                    "endpoint": siliconflow_endpoint,
+                    "can_multi_thread": True,
+                    "enable_reasoning": enable_reasoning,
+                },
+            }
+        )
+        logger.info(f" siliconflow 模型 {model} 已加载")
+        
     except:
         logger.error(trimmed_format_exc())
 
