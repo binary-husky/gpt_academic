@@ -336,3 +336,73 @@
 .raw_text {
     display: none;
 }
+
+.message_tail {
+    justify-content: center;
+    align-items: center;
+}
+.message_tail_stop {
+    border: dotted !important;
+    margin-top: 5px !important;
+    padding-left: 8px !important;
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+    padding-right: 12px !important;
+}
+
+/* ant 开始 */
+
+/* 通用按钮样式 */
+.ant-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+/* 按钮颜色和状态 */
+.ant-btn-primary {
+    background-color: #1890ff;
+    color: white;
+    border: none;
+}
+
+.ant-btn-primary:hover {
+    background-color: #40a9ff;
+}
+
+.ant-btn-loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+/* 图标样式 */
+.ant-btn-icon {
+    display: inline-flex;
+    margin-right: 8px;
+}
+
+.anticon {
+    width: 1em;
+    height: 1em;
+    fill: currentColor;
+}
+
+.anticon-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* 动画效果 */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
