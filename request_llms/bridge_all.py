@@ -1343,65 +1343,41 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("openrouter-")]:
 
 
 # -=-=-=-=-=-=- 硅基智能SiliconFlow在线API -=-=-=-=-=-=-
-siliconflow_models = [
-    "deepseek-ai/DeepSeek-R1", "Pro/deepseek-ai/DeepSeek-R1", "deepseek-ai/DeepSeek-V3", "Pro/deepseek-ai/DeepSeek-V3",
-    "deepseek-ai/DeepSeek-R1-Distill-Llama-70B", "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B", "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B", 
-    "deepseek-ai/DeepSeek-R1-Distill-Llama-8B", "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B", "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
-    "Pro/deepseek-ai/DeepSeek-R1-Distill-Llama-8B","Pro/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B","Pro/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
-    "meta-llama/Llama-3.3-70B-Instruct","AIDC-AI/Marco-o1","deepseek-ai/DeepSeek-V2.5",
-    "Qwen/Qwen2.5-72B-Instruct-128K","Qwen/Qwen2.5-72B-Instruct","Qwen/Qwen2.5-32B-Instruct","Qwen/Qwen2.5-14B-Instruct","Qwen/Qwen2.5-7B-Instruct",
-    "Qwen/Qwen2.5-Coder-32B-Instruct","Qwen/Qwen2.5-Coder-7B-Instruct",
-    "Qwen/Qwen2-7B-Instruct","Qwen/Qwen2-1.5B-Instruct","Qwen/QwQ-32B-Preview",
-    "TeleAI/TeleChat2",
-    "01-ai/Yi-1.5-34B-Chat-16K","01-ai/Yi-1.5-9B-Chat-16K","01-ai/Yi-1.5-6B-Chat",
-    "THUDM/glm-4-9b-chat","Vendor-A/Qwen/Qwen2.5-72B-Instruct",
-    "internlm/internlm2_5-7b-chat","internlm/internlm2_5-20b-chat",
-    "nvidia/Llama-3.1-Nemotron-70B-Instruct",
-    "meta-llama/Meta-Llama-3.1-405B-Instruct","meta-llama/Meta-Llama-3.1-70B-Instruct","meta-llama/Meta-Llama-3.1-8B-Instruct",
-    "google/gemma-2-27b-it","google/gemma-2-9b-it",
-    "Pro/Qwen/Qwen2.5-7B-Instruct","Pro/Qwen/Qwen2-7B-Instruct","Pro/Qwen/Qwen2-1.5B-Instruct",
-    "Pro/THUDM/chatglm3-6b","Pro/THUDM/glm-4-9b-chat",
-    "Pro/meta-llama/Meta-Llama-3.1-8B-Instruct",
-    "Pro/google/gemma-2-9b-it",
+# 支持推理的模型系列，非完整模型名称
+inference_model_series = [
+    "THUDM/GLM-Z1", "deepseek-ai/DeepSeek-R1", "Qwen/QwQ-32B"
 ]
-
-if any(item in siliconflow_models for item in AVAIL_LLM_MODELS):
+for model in [m for m in AVAIL_LLM_MODELS if m.startswith("siliconflow-")]:
+    # 模型名称的格式为：
+    #   "siliconflow-<model_name>"  
+    # 其中：
+    #   "siliconflow-"              是前缀（必要），在实际请求中，会将其去掉。
+    #   "deepseek-ai/DeepSeek-R1"   是硅基智能提供的模型名（必要）。
+    
     try:
         siliconflow_noui, siliconflow_ui = get_predict_function(
             api_key_conf_name="SILICONFLOW_API_KEY",
-            max_output_token=4096,
+            max_output_token=8192,
             disable_proxy=False,
+            # 去除前缀
+            model_remove_prefix = ["siliconflow-"]
         )
-        for item in (set(siliconflow_models) & set(AVAIL_LLM_MODELS)):
-            if "DeepSeek-R1" in item:
-                model_info.update(
-                    {
-                        item: {
-                            "fn_with_ui": siliconflow_ui,
-                            "fn_without_ui": siliconflow_noui,
-                            "endpoint": siliconflow_endpoint,
-                            "can_multi_thread": True,
-                            "max_token": 8000,
-                            "tokenizer": tokenizer_gpt35,
-                            "token_cnt": get_token_num_gpt35,
-                            "enable_reasoning": True,
-                        },
-                    }
-                )
-            else:
-                model_info.update(
-                    {
-                        item: {
-                            "fn_with_ui": siliconflow_ui,
-                            "fn_without_ui": siliconflow_noui,
-                            "endpoint": siliconflow_endpoint,
-                            "can_multi_thread": True,
-                            "max_token": 8000,
-                            "tokenizer": tokenizer_gpt35,
-                            "token_cnt": get_token_num_gpt35,
-                        },
-                    }
-                )
+        # 判断是否具有推理能力
+        enable_reasoning = any(item in model for item in inference_model_series)
+        model_info.update(
+            {
+                model: {
+                    "fn_with_ui": siliconflow_ui,
+                    "fn_without_ui": siliconflow_noui,
+                    "endpoint": siliconflow_endpoint,
+                    "can_multi_thread": True,
+                    "max_token": 32000,
+                    "tokenizer": tokenizer_gpt35,
+                    "token_cnt": get_token_num_gpt35,
+                    "enable_reasoning": enable_reasoning,
+                },
+            }
+        )
     except:
         logger.error(trimmed_format_exc())
 
