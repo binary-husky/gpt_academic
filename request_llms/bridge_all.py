@@ -1416,20 +1416,37 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("siliconflow-")]:
         )
         # 判断是否具有推理能力
         enable_reasoning = any(item in model for item in inference_model_series)
-        model_info.update(
-            {
-                model: {
-                    "fn_with_ui": siliconflow_ui,
-                    "fn_without_ui": siliconflow_noui,
-                    "endpoint": siliconflow_endpoint,
-                    "can_multi_thread": True,
-                    "max_token": 32000,
-                    "tokenizer": tokenizer_gpt35,
-                    "token_cnt": get_token_num_gpt35,
-                    "enable_reasoning": enable_reasoning,
-                },
-            }
-        )
+        if enable_reasoning:
+            model_info.update(
+                {
+                    model: {
+                        "fn_with_ui": siliconflow_ui,
+                        "fn_without_ui": siliconflow_noui,
+                        "endpoint": siliconflow_endpoint,
+                        "can_multi_thread": True,
+                        "max_token": 32000,
+                        "tokenizer": tokenizer_gpt35,
+                        "token_cnt": get_token_num_gpt35,
+                        "enable_reasoning": True,
+                    },
+                }
+            )
+            logger.info(f" siliconflow模型 {model} 已加载")
+        else:
+            model_info.update(
+                {
+                    model: {
+                        "fn_with_ui": siliconflow_ui,
+                        "fn_without_ui": siliconflow_noui,
+                        "endpoint": siliconflow_endpoint,
+                        "can_multi_thread": True,
+                        "max_token": 32000,
+                        "tokenizer": tokenizer_gpt35,
+                        "token_cnt": get_token_num_gpt35,
+                    },
+                }
+            ) 
+            logger.info(f" siliconflow模型 {model} 已加载")
     except:
         logger.error(trimmed_format_exc())
 
