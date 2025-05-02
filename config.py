@@ -7,11 +7,11 @@
     Configuration reading priority: environment variable > config_private.py > config.py
 """
 
-# [step 1-1]>> ( 接入GPT等模型 ) API_KEY = "sk-123456789xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx123456789"。极少数情况下，还需要填写组织（格式如org-123456789abcdefghijklmno的），请向下翻，找 API_ORG 设置项
+# [step 1-1]>> ( 接入OpenAI模型家族 ) API_KEY = "sk-123456789xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx123456789"。极少数情况下，还需要填写组织（格式如org-123456789abcdefghijklmno的），请向下翻，找 API_ORG 设置项
 API_KEY = "在此处填写APIKEY"    # 可同时填写多个API-KEY，用英文逗号分割，例如API_KEY = "sk-openaikey1,sk-openaikey2,fkxxxx-api2dkey3,azure-apikey4"
 
-# [step 1-2]>> ( 接入通义 qwen-max ) 接入通义千问在线大模型，api-key获取地址 https://dashscope.console.aliyun.com/
-DASHSCOPE_API_KEY = "" # 阿里灵积云API_KEY
+# [step 1-2]>> ( 强烈推荐！接入通义家族 & 大模型服务平台百炼 ) 接入通义千问在线大模型，api-key获取地址 https://dashscope.console.aliyun.com/
+DASHSCOPE_API_KEY = "" # 阿里灵积云API_KEY（用于接入qwen-max，dashscope-qwen3-14b，dashscope-deepseek-r1等）
 
 # [step 1-3]>> ( 接入 deepseek-reasoner, 即 deepseek-r1 ) 深度求索(DeepSeek) API KEY，默认请求地址为"https://api.deepseek.com/v1/chat/completions"
 DEEPSEEK_API_KEY = ""
@@ -52,6 +52,7 @@ AVAIL_LLM_MODELS = ["qwen-max", "o1-mini", "o1-mini-2024-09-12", "o1", "o1-2024-
                     "siliconflow-Qwen/Qwen2.5-32B-Instruct","siliconflow-Qwen/Qwen2.5-14B-Instruct"
                     "volcengine-deepseek-r1-250120", "volcengine-deepseek-v3-241226",
                     "dashscope-deepseek-r1", "dashscope-deepseek-v3",
+                    "dashscope-qwen3-14b", "dashscope-qwen3-235b-a22b", "dashscope-qwen3-32b",
                     ]
 
 EMBEDDING_MODEL = "text-embedding-3-small"
