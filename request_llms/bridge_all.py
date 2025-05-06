@@ -869,7 +869,10 @@ if "qwen-local" in AVAIL_LLM_MODELS:
         logger.error(trimmed_format_exc())
 
 # -=-=-=-=-=-=- 阿里云百炼（通义）-在线模型 -=-=-=-=-=-=-
-qwen_models = ["qwen-max-latest", "qwen-max-2025-01-25","qwen-max","qwen-turbo","qwen-plus","dashscope-deepseek-r1","dashscope-deepseek-v3"]
+qwen_models = ["qwen-max-latest", "qwen-max-2025-01-25","qwen-max","qwen-turbo","qwen-plus",
+               "dashscope-deepseek-r1","dashscope-deepseek-v3",
+               "dashscope-qwen3-14b", "dashscope-qwen3-235b-a22b", "dashscope-qwen3-qwen3-32b",
+               ]
 if any(item in qwen_models for item in AVAIL_LLM_MODELS):
     try:
         from .bridge_qwen import predict_no_ui_long_connection as qwen_noui
@@ -936,6 +939,34 @@ if any(item in qwen_models for item in AVAIL_LLM_MODELS):
                 "can_multi_thread": True,
                 "endpoint": None,
                 "max_token": 57344,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "dashscope-qwen3-14b": {
+                "fn_with_ui": qwen_ui,
+                "fn_without_ui": qwen_noui,
+                "enable_reasoning": True,
+                "can_multi_thread": True,
+                "endpoint": None,
+                "max_token": 129024,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "dashscope-qwen3-235b-a22b": {
+                "fn_with_ui": qwen_ui,
+                "fn_without_ui": qwen_noui,
+                "can_multi_thread": True,
+                "endpoint": None,
+                "max_token": 129024,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "dashscope-qwen3-32b": {
+                "fn_with_ui": qwen_ui,
+                "fn_without_ui": qwen_noui,
+                "can_multi_thread": True,
+                "endpoint": None,
+                "max_token": 129024,
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
             }
