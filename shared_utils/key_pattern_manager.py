@@ -82,6 +82,14 @@ def what_keys(keys):
 
     return f"检测到： OpenAI Key {avail_key_list['OpenAI Key']} 个, Azure Key {avail_key_list['Azure Key']} 个, API2D Key {avail_key_list['API2D Key']} 个"
 
+def is_o_family_for_openai(llm_model):
+    if not llm_model.startswith('o'):
+        return False
+    if llm_model in ['o1', 'o2', 'o3', 'o4', 'o5', 'o6', 'o7', 'o8']:
+        return True
+    if llm_model[:3] in ['o1-', 'o2-', 'o3-', 'o4-', 'o5-', 'o6-', 'o7-', 'o8-']:
+        return True
+    return False
 
 def select_api_key(keys, llm_model):
     import random
@@ -89,7 +97,7 @@ def select_api_key(keys, llm_model):
     key_list = keys.split(',')
 
     if llm_model.startswith('gpt-') or llm_model.startswith('chatgpt-') or \
-       llm_model.startswith('one-api-') or llm_model == 'o1' or llm_model.startswith('o1-'):
+       llm_model.startswith('one-api-') or is_o_family_for_openai(llm_model):
         for k in key_list:
             if is_openai_api_key(k): avail_key_list.append(k)
 
