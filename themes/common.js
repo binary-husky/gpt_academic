@@ -1184,6 +1184,15 @@ async function clear_conversation(a, b, c) {
     update_conversation_metadata();
     let stopButton = document.getElementById("elem_stop");
     stopButton.click();
+    // Save back to local storage
+    try {
+        const EVENT_NAME = "gptac_reset_btn_clicked";
+        window.dispatchEvent(
+            new CustomEvent(EVENT_NAME, {
+                detail: ""
+            })
+        );
+    } catch (e) {}
     return reset_conversation(a, b);
 }
 
