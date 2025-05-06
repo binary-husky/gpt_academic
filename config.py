@@ -318,7 +318,7 @@ SEARXNG_URLS = [ f"https://kaletianlre-beardvs{i}dd.hf.space/" for i in range(1,
 ALLOW_RESET_CONFIG = False
 
 
-# 在使用AutoGen插件时，是否使用Docker容器运行代码
+# 在使用AG2插件时，是否使用Docker容器运行代码
 AUTOGEN_USE_DOCKER = False
 
 

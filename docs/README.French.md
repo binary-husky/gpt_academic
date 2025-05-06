@@ -46,7 +46,7 @@ Agrégation d'informations sur Internet + GPT | [Plugin] Obtenez les information
 ⭐Traduction détaillée des articles Arxiv ([Docker](https://github.com/binary-husky/gpt_academic/pkgs/container/gpt_academic_with_latex)) | [Plugin] Traduction de haute qualité d'articles Arxiv en un clic, le meilleur outil de traduction d'articles à ce jour
 ⭐[Saisie orale en temps réel](https://github.com/binary-husky/gpt_academic/blob/master/docs/use_audio.md) | [Plugin] Écoute asynchrone de l'audio, découpage automatique et recherche automatique du meilleur moment pour répondre
 Affichage des formules, images, tableaux | Affichage simultané de la forme [TeX et rendue](https://user-images.githubusercontent.com/96192199/230598842-1d7fcddd-815d-40ee-af60-baf488a199df.png) des formules, prise en charge de la mise en évidence des formules et du code
-⭐Plugin AutoGen multi-agents | [Plugin] Explorez les émergences intelligentes à plusieurs agents avec Microsoft AutoGen !
+⭐Plugin AG2 multi-agents | [Plugin] Explorez les émergences intelligentes à plusieurs agents avec AG2 (Formerly AutoGen) !
 Activation du [thème sombre](https://github.com/binary-husky/gpt_academic/issues/173) | Ajouter ```/?__theme=dark``` à l'URL du navigateur pour basculer vers le thème sombre
 Prise en charge de plusieurs modèles LLM | Expérimentez avec GPT 3.5, GPT4, [ChatGLM2 de Tsinghua](https://github.com/THUDM/ChatGLM2-6B), [MOSS de Fudan](https://github.com/OpenLMLab/MOSS) simultanément !
 ⭐Modèle ChatGLM2 fine-tuned | Chargez et utilisez un modèle fine-tuned de ChatGLM2, disponible avec un plugin d'assistance
@@ -281,8 +281,8 @@ Astuce: Si aucun fichier n'est spécifié, cliquez directement sur `Charger les 
 
 
 ### II: Versions:
-- version 3.70(tâche à accomplir) : Optimisation de la fonction AutoGen et création d'une série de plugins dérivés
-- version 3.60 : Introduction d'AutoGen comme base des nouveaux plugins
+- version 3.70(tâche à accomplir) : Optimisation de la fonction AG2 (Formerly AutoGen) et création d'une série de plugins dérivés
+- version 3.60 : Introduction d'AG2 (Formerly AutoGen) comme base des nouveaux plugins
 - version 3.57 : Prise en charge de GLM3, Starlight v3, Zen v4 et correction de l'incompatibilité des modèles locaux
 - version 3.56 : Possibilité d'ajouter dynamiquement des boutons de fonction de base et nouvelle page de synthèse des PDF
 - version 3.55: Refonte de l'interface utilisateur avec fenêtres flottantes et barre de menu

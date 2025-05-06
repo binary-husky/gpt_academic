@@ -64,7 +64,7 @@ Read this in [English](docs/README.English.md) | [日本語](docs/README.Japanes
 ⭐支持mermaid图像渲染 | 支持让GPT生成[流程图](https://www.bilibili.com/video/BV18c41147H9/)、状态转移图、甘特图、饼状图、GitGraph等等（3.7版本）
 ⭐Arxiv论文精细翻译 ([Docker](https://github.com/binary-husky/gpt_academic/pkgs/container/gpt_academic_with_latex)) | [插件] 一键[以超高质量翻译arxiv论文](https://www.bilibili.com/video/BV1dz4y1v77A/)，目前最好的论文翻译工具
 ⭐[实时语音对话输入](https://github.com/binary-husky/gpt_academic/blob/master/docs/use_audio.md) | [插件] 异步[监听音频](https://www.bilibili.com/video/BV1AV4y187Uy/)，自动断句，自动寻找回答时机
-⭐AutoGen多智能体插件 | [插件] 借助微软AutoGen，探索多Agent的智能涌现可能！
+⭐AG2多智能体插件 | [插件] 借助AG2(前身为 AutoGen)，探索多Agent的智能涌现可能！
 ⭐虚空终端插件 | [插件] 能够使用自然语言直接调度本项目其他插件
 润色、翻译、代码解释 | 一键润色、翻译、查找论文语法错误、解释代码
 [自定义快捷键](https://www.bilibili.com/video/BV14s4y1E7jN) | 支持自定义快捷键
@@ -358,9 +358,9 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 
 
 ### II：版本:
-- version 3.80(TODO): 优化AutoGen插件主题并设计一系列衍生插件
+- version 3.80(TODO): 优化AG2(前身为 AutoGen)插件主题并设计一系列衍生插件
 - version 3.70: 引入Mermaid绘图，实现GPT画脑图等功能   
-- version 3.60: 引入AutoGen作为新一代插件的基石
+- version 3.60: 引入AG2(前身为 AutoGen)作为新一代插件的基石
 - version 3.57: 支持GLM3，星火v3，文心一言v4，修复本地模型的并发BUG
 - version 3.56: 支持动态追加基础功能按钮，新汇报PDF汇总页面
 - version 3.55: 重构前端界面，引入悬浮窗口与菜单栏
@@ -411,9 +411,9 @@ timeline LR
         3.55: 动态代码解释器: 重构前端界面: 引入悬浮窗口与菜单栏
         3.56: 动态追加基础功能按钮: 新汇报PDF汇总页面
         3.57: GLM3, 星火v3: 支持文心一言v4: 修复本地模型的并发BUG
-        3.60: 引入AutoGen
+        3.60: 引入AG2(前身为 AutoGen)
         3.70: 引入Mermaid绘图: 实现GPT画脑图等功能
-        3.80(TODO): 优化AutoGen插件主题: 设计衍生插件
+        3.80(TODO): 优化AG2(前身为 AutoGen)插件主题: 设计衍生插件
 
 ```
 

@@ -46,7 +46,7 @@ Internet Information Aggregation + GPT | [Plugin] One-click to let GPT retrieve 
 ⭐Arxiv Paper Fine Translation ([Docker](https://github.com/binary-husky/gpt_academic/pkgs/container/gpt_academic_with_latex)) | [Plugin] One-click [high-quality translation of arxiv papers](https://www.bilibili.com/video/BV1dz4y1v77A/), the best paper translation tool at present
 ⭐[Real-time Speech Input](https://github.com/binary-husky/gpt_academic/blob/master/docs/use_audio.md) | [Plugin] Asynchronously [listen to audio](https://www.bilibili.com/video/BV1AV4y187Uy/), automatically segment sentences, and automatically find the best time to answer
 Formula/Image/Table Display | Can simultaneously display formulas in [TeX form and rendered form](https://user-images.githubusercontent.com/96192199/230598842-1d7fcddd-815d-40ee-af60-baf488a199df.png), support formula and code highlighting
-⭐AutoGen Multi-Agent Plugin | [Plugin] Explore the emergence of multi-agent intelligence with Microsoft AutoGen!
+⭐AG2 Multi-Agent Plugin | [Plugin] Explore the emergence of multi-agent intelligence with AG2 (Formerly AutoGen)!
 Start Dark [Theme](https://github.com/binary-husky/gpt_academic/issues/173) | Add ```/?__theme=dark``` to the end of the browser URL to switch to the dark theme
 [More LLM Model Support](https://www.bilibili.com/video/BV1wT411p7yf) | It must be great to be served by GPT3.5, GPT4, [THU ChatGLM2](https://github.com/THUDM/ChatGLM2-6B), and [Fudan MOSS](https://github.com/OpenLMLab/MOSS) at the same time, right?
 ⭐ChatGLM2 Fine-tuning Model | Support for loading ChatGLM2 fine-tuning models and providing ChatGLM2 fine-tuning assistant plugins
@@ -284,8 +284,8 @@ Tip: Clicking `Load conversation history archive` without specifying a file allo
 
 
 ### II: Versions:
-- version 3.70 (todo): Optimize the AutoGen plugin theme and design a series of derivative plugins
-- version 3.60: Introduce AutoGen as the cornerstone of the new generation of plugins
+- version 3.70 (todo): Optimize the AG2 (Formerly AutoGen) plugin theme and design a series of derivative plugins
+- version 3.60: Introduce AG2 (Formerly AutoGen) as the cornerstone of the new generation of plugins
 - version 3.57: Support GLM3, Spark v3, Wenxin Quote v4, and fix concurrency bugs in local models
 - version 3.56: Support dynamically adding basic functional buttons and a new summary PDF page
 - version 3.55: Refactor the frontend interface and introduce floating windows and a menu bar
