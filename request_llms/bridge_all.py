@@ -1255,7 +1255,7 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("volcengine-")]:
             "tokenizer": tokenizer_gpt35,
             "token_cnt": get_token_num_gpt35,
         },
-        "deepseek-v3-241226": {
+        "deepseek-v3-250324": {
             "max_token": 16384,
             "enable_reasoning": False,
             "can_multi_thread": True,
