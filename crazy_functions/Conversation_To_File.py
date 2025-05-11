@@ -1,6 +1,7 @@
 from toolbox import CatchException, update_ui, promote_file_to_downloadzone, get_log_folder, get_user
 from crazy_functions.plugin_template.plugin_class_template import GptAcademicPluginTemplate, ArgProperty
 import re
+import html
 
 f_prefix = 'GPT-Academic对话存档'
 
@@ -57,11 +58,14 @@ def write_chat_to_file(chatbot, history=None, file_name=None):
             if answer is None: answer = ""
             try: answer = str(answer)
             except: answer = ""
+            question = html.escape(question)
+            answer = html.escape(answer)
             CHAT_PREVIEW_BUF += qa_from.format(QUESTION=question, ANSWER=answer)
 
         HISTORY_PREVIEW_BUF = ""
         for h in history:
-            HISTORY_PREVIEW_BUF += history_from.format(ENTRY=h)
+            h_escaped = html.escape(str(h))
+            HISTORY_PREVIEW_BUF += history_from.format(ENTRY=h_escaped)
         html_content = form.format(CHAT_PREVIEW=CHAT_PREVIEW_BUF, HISTORY_PREVIEW=HISTORY_PREVIEW_BUF, CSS=advanced_css)
         f.write(html_content)
 
@@ -122,7 +126,7 @@ def 对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
     if (file_name is not None) and (file_name != "") and (not file_name.endswith('.html')): file_name += '.html'
     else: file_name = None
 
-    chatbot.append((None, f"[Local Message] {write_chat_to_file(chatbot, history, file_name)}，您可以调用下拉菜单中的“载入对话历史存档”还原当下的对话。"))
+    chatbot.append((None, f"[Local Message] {write_chat_to_file(chatbot, history, file_name)}，您可以调用下拉菜单中的“载入对话历史存档“还原当下的对话。"))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
 
 
