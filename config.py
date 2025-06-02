@@ -354,6 +354,17 @@ DAAS_SERVER_URLS = [ f"https://niuziniu-biligpt{i}.hf.space/stream" for i in ran
 # 在互联网搜索组件中，负责将搜索结果整理成干净的Markdown
 JINA_API_KEY = ""
 
+
+# 是否自动裁剪上下文长度（是否启动，默认不启动）
+AUTO_CONTEXT_CLIP_ENABLE = False
+# 目标裁剪上下文的token长度（如果超过这个长度，则会自动裁剪）
+AUTO_CONTEXT_CLIP_TRIGGER_TOKEN_LEN = 30*1000
+# 无条件丢弃x以上的轮数
+AUTO_CONTEXT_MAX_ROUND = 64
+# 在裁剪上下文时，倒数第x次对话能“最多”保留的上下文token的比例占 AUTO_CONTEXT_CLIP_TRIGGER_TOKEN_LEN 的多少
+AUTO_CONTEXT_MAX_CLIP_RATIO = [0.80, 0.60, 0.45, 0.25, 0.20, 0.18, 0.16, 0.14, 0.12, 0.10, 0.08, 0.07, 0.06, 0.05, 0.04, 0.03, 0.02, 0.01]
+
+
 """
 --------------- 配置关联关系说明 ---------------
 
