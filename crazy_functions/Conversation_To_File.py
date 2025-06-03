@@ -1,16 +1,20 @@
-from toolbox import CatchException, update_ui, promote_file_to_downloadzone, get_log_folder, get_user
-from crazy_functions.plugin_template.plugin_class_template import GptAcademicPluginTemplate, ArgProperty
 import re
+from toolbox import CatchException, update_ui, promote_file_to_downloadzone, get_log_folder, get_user, update_ui_latest_msg
+from crazy_functions.plugin_template.plugin_class_template import GptAcademicPluginTemplate, ArgProperty
+from loguru import logger
 
 f_prefix = 'GPT-Academic对话存档'
 
-def write_chat_to_file(chatbot, history=None, file_name=None):
+def write_chat_to_file_legacy(chatbot, history=None, file_name=None):
     """
     将对话记录history以Markdown格式写入文件中。如果没有指定文件名，则使用当前时间生成文件名。
     """
     import os
     import time
     from themes.theme import advanced_css
+
+    if (file_name is not None) and (file_name != "") and (not file_name.endswith('.html')): file_name += '.html'
+    else: file_name = None
 
     if file_name is None:
         file_name = f_prefix + time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()) + '.html'
@@ -68,6 +72,147 @@ def write_chat_to_file(chatbot, history=None, file_name=None):
     promote_file_to_downloadzone(fp, rename_file=file_name, chatbot=chatbot)
     return '对话历史写入：' + fp
 
+def write_chat_to_file(chatbot, history=None, file_name=None):
+    """
+    将对话记录history以多种格式（HTML、Word、Markdown）写入文件中。如果没有指定文件名，则使用当前时间生成文件名。
+    
+    Args:
+        chatbot: 聊天机器人对象，包含对话内容
+        history: 对话历史记录
+        file_name: 指定的文件名，如果为None则使用时间戳
+        
+    Returns:
+        str: 提示信息，包含文件保存路径
+    """
+    import os
+    import time
+    import asyncio
+    import aiofiles
+    from toolbox import promote_file_to_downloadzone
+    from crazy_functions.doc_fns.conversation_doc.excel_doc import save_chat_tables
+    from crazy_functions.doc_fns.conversation_doc.html_doc import HtmlFormatter
+    from crazy_functions.doc_fns.conversation_doc.markdown_doc import MarkdownFormatter
+    from crazy_functions.doc_fns.conversation_doc.word_doc import WordFormatter
+    from crazy_functions.doc_fns.conversation_doc.txt_doc import TxtFormatter
+    from crazy_functions.doc_fns.conversation_doc.word2pdf import WordToPdfConverter
+
+    async def save_html():
+        try:
+            html_formatter = HtmlFormatter(chatbot, history)
+            html_content = html_formatter.create_document()
+            html_file = os.path.join(save_dir, base_name + '.html')
+            async with aiofiles.open(html_file, 'w', encoding='utf8') as f:
+                await f.write(html_content)
+            return html_file
+        except Exception as e:
+            print(f"保存HTML格式失败: {str(e)}")
+            return None
+
+    async def save_word():
+        try:
+            word_formatter = WordFormatter()
+            doc = word_formatter.create_document(history)
+            docx_file = os.path.join(save_dir, base_name + '.docx')
+            # 由于python-docx不支持异步，使用线程池执行
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(None, doc.save, docx_file)
+            return docx_file
+        except Exception as e:
+            print(f"保存Word格式失败: {str(e)}")
+            return None
+    async def save_pdf(docx_file):
+        try:
+            if docx_file:
+                # 获取文件名和保存路径
+                pdf_file = os.path.join(save_dir, base_name + '.pdf')
+                
+                # 在线程池中执行转换
+                loop = asyncio.get_event_loop()
+                pdf_file = await loop.run_in_executor(
+                    None, 
+                    WordToPdfConverter.convert_to_pdf,
+                    docx_file
+                    # save_dir
+                )
+                
+                return pdf_file
+                
+        except Exception as e:
+            print(f"保存PDF格式失败: {str(e)}")
+            return None
+
+    async def save_markdown():
+        try:
+            md_formatter = MarkdownFormatter()
+            md_content = md_formatter.create_document(history)
+            md_file = os.path.join(save_dir, base_name + '.md')
+            async with aiofiles.open(md_file, 'w', encoding='utf8') as f:
+                await f.write(md_content)
+            return md_file
+        except Exception as e:
+            print(f"保存Markdown格式失败: {str(e)}")
+            return None
+
+    async def save_txt():
+        try:
+            txt_formatter = TxtFormatter()
+            txt_content = txt_formatter.create_document(history)
+            txt_file = os.path.join(save_dir, base_name + '.txt')
+            async with aiofiles.open(txt_file, 'w', encoding='utf8') as f:
+                await f.write(txt_content)
+            return txt_file
+        except Exception as e:
+            print(f"保存TXT格式失败: {str(e)}")
+            return None
+
+    async def main():
+        # 并发执行所有保存任务
+        html_task = asyncio.create_task(save_html())
+        word_task = asyncio.create_task(save_word())
+        md_task = asyncio.create_task(save_markdown())
+        txt_task = asyncio.create_task(save_txt())
+        
+        # 等待所有任务完成
+        html_file = await html_task
+        docx_file = await word_task
+        md_file = await md_task
+        txt_file = await txt_task
+        
+        # PDF转换需要等待word文件生成完成
+        pdf_file = await save_pdf(docx_file)
+        # 收集所有成功生成的文件
+        result_files = [f for f in [html_file, docx_file, md_file, txt_file, pdf_file] if f]
+        
+        # 保存Excel表格
+        excel_files = save_chat_tables(history, save_dir, base_name)
+        result_files.extend(excel_files)
+        
+        return result_files
+
+    # 生成时间戳
+    timestamp = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+    
+    # 获取保存目录
+    save_dir = get_log_folder(get_user(chatbot), plugin_name='chat_history')
+    
+    # 处理文件名
+    base_name = file_name if file_name else f"聊天记录_{timestamp}"
+    
+    # 运行异步任务
+    result_files = asyncio.run(main())
+    
+    # 将生成的文件添加到下载区
+    for file in result_files:
+        promote_file_to_downloadzone(file, rename_file=os.path.basename(file), chatbot=chatbot)
+    
+    # 如果没有成功保存任何文件，返回错误信息
+    if not result_files:
+        return "保存对话记录失败，请检查错误日志"
+    
+    ext_list = [os.path.splitext(f)[1] for f in result_files]
+    # 返回成功信息和文件路径
+    return f"对话历史已保存至以下格式文件：" + "、".join(ext_list)
+
 def gen_file_preview(file_name):
     try:
         with open(file_name, 'r', encoding='utf8') as f:
@@ -119,12 +264,21 @@ def 对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
     user_request    当前用户的请求信息（IP地址等）
     """
     file_name = plugin_kwargs.get("file_name", None)
-    if (file_name is not None) and (file_name != "") and (not file_name.endswith('.html')): file_name += '.html'
-    else: file_name = None
 
-    chatbot.append((None, f"[Local Message] {write_chat_to_file(chatbot, history, file_name)}，您可以调用下拉菜单中的“载入对话历史存档”还原当下的对话。"))
-    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求gpt需要一段时间，我们先及时地做一次界面更新
-
+    chatbot.append((None, f"[Local Message] {write_chat_to_file_legacy(chatbot, history, file_name)}，您可以调用下拉菜单中的“载入对话历史存档”还原当下的对话。"))
+    try:
+        chatbot.append((None, f"[Local Message] 正在尝试生成pdf以及word格式的对话存档，请稍等..."))
+        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面 # 由于请求需要一段时间，我们先及时地做一次界面更新
+        lastmsg = f"[Local Message] {write_chat_to_file(chatbot, history, file_name)}。" \
+              f"您可以调用下拉菜单中的“载入对话历史会话”还原当下的对话，请注意，目前只支持html格式载入历史。" \
+              f"当模型回答中存在表格，将提取表格内容存储为Excel的xlsx格式，如果你提供一些数据,然后输入指令要求模型帮你整理为表格" \
+              f"（如“请帮我将下面的数据整理为表格：”），再利用此插件就可以获取到Excel表格。"
+        yield from update_ui_latest_msg(lastmsg, chatbot, history) # 刷新界面 # 由于请求需要一段时间，我们先及时地做一次界面更新
+    except Exception as e:
+        logger.exception(f"已完成对话存档（pdf和word格式的对话存档生成未成功）。{str(e)}")
+        lastmsg = "已完成对话存档（pdf和word格式的对话存档生成未成功）。"
+        yield from update_ui_latest_msg(lastmsg, chatbot, history) # 刷新界面 # 由于请求需要一段时间，我们先及时地做一次界面更新
+    return
 
 class Conversation_To_File_Wrap(GptAcademicPluginTemplate):
     def __init__(self):
