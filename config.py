@@ -16,6 +16,9 @@ DASHSCOPE_API_KEY = "" # 阿里灵积云API_KEY（用于接入qwen-max，dashsco
 # [step 1-3]>> ( 接入 deepseek-reasoner, 即 deepseek-r1 ) 深度求索(DeepSeek) API KEY，默认请求地址为"https://api.deepseek.com/v1/chat/completions"
 DEEPSEEK_API_KEY = ""
 
+# [step 1-4]>> ( 接入 硅基智能API ) 硅基智能(Siliconflow) API KEY，默认请求地址为"https://api.siliconflow.cn/v1/chat/completions"
+SILICONFLOW_API_KEY = ""
+
 # [step 2]>> 改为True应用代理。如果使用本地或无地域限制的大模型时，此处不修改；如果直接在海外服务器部署，此处不修改
 USE_PROXY = False
 if USE_PROXY:
@@ -29,7 +32,7 @@ if USE_PROXY:
     """
     proxies = {
         #          [协议]://  [地址]  :[端口]
-        "http":  "socks5h://localhost:11284",  # 再例如  "http":  "http://127.0.0.1:7890",
+        "http": "socks5h://localhost:11284",  # 再例如  "http":  "http://127.0.0.1:7890",
         "https": "socks5h://localhost:11284",  # 再例如  "https": "http://127.0.0.1:7890",
     }
 else:
@@ -43,7 +46,10 @@ AVAIL_LLM_MODELS = ["qwen-max", "o1-mini", "o1-mini-2024-09-12", "o1", "o1-2024-
                     "gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-4v", "glm-3-turbo",
                     "gemini-1.5-pro", "chatglm3", "chatglm4",
-                    "deepseek-chat", "deepseek-coder", "deepseek-reasoner", 
+
+                    "deepseek-chat", "deepseek-coder", "deepseek-reasoner",
+                    "siliconflow-deepseek-ai/DeepSeek-R1","siliconflow-deepseek-ai/DeepSeek-V3", "siliconflow-Qwen/QwQ-32B",
+                    "siliconflow-Qwen/Qwen2.5-32B-Instruct","siliconflow-Qwen/Qwen2.5-14B-Instruct"
                     "volcengine-deepseek-r1-250120", "volcengine-deepseek-v3-241226",
                     "dashscope-deepseek-r1", "dashscope-deepseek-v3",
                     "dashscope-qwen3-14b", "dashscope-qwen3-235b-a22b", "dashscope-qwen3-32b",
@@ -72,7 +78,14 @@ EMBEDDING_MODEL = "text-embedding-3-small"
 # 使用"one-api-*","vllm-*","ollama-*","openrouter-*"前缀直接使用非标准方式接入的模型，例如
 # AVAIL_LLM_MODELS = ["one-api-claude-3-sonnet-20240229(max_token=100000)", "ollama-phi3(max_token=4096)","openrouter-openai/gpt-4o-mini","openrouter-openai/chatgpt-4o-latest"]
 # --- --- --- ---
-
+# 硅基智能(Siliconflow) API 可以通过 https://cloud.siliconflow.cn/models 或 https://docs.siliconflow.cn/api-reference/chat-completions/chat-completions 获取模型名称
+# 在模型名称前添加"siliconflow-"前缀，并放置在AVAIL_LLM_MODELS列表中。
+# AVAIL_LLM_MODELS = [
+#                       "siliconflow-deepseek-ai/DeepSeek-R1","siliconflow-deepseek-ai/DeepSeek-V3", "siliconflow-Qwen/QwQ-32B",
+#                       "siliconflow-Qwen/Qwen2.5-32B-Instruct","siliconflow-Qwen/Qwen2.5-14B-Instruct","siliconflow-Qwen/Qwen2.5-7B-Instruct",
+#                       "siliconflow-THUDM/GLM-Z1-32B-0414"
+# ]
+# --- --- --- ---
 
 # --------------- 以下配置可以优化体验 ---------------
 
