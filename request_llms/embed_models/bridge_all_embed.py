@@ -8,13 +8,10 @@ API_URL_REDIRECT, AZURE_ENDPOINT, AZURE_ENGINE = get_conf("API_URL_REDIRECT", "A
 openai_endpoint = "https://api.openai.com/v1/chat/completions"
 if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
 azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
-
-
 if openai_endpoint in API_URL_REDIRECT: openai_endpoint = API_URL_REDIRECT[openai_endpoint]
-
 openai_embed_endpoint = openai_endpoint.replace("chat/completions", "embeddings")
 
-from .openai_embed import OpenAiEmbeddingModel
+from request_llms.embed_models.openai_embed import OpenAiEmbeddingModel
 
 embed_model_info = {
     # text-embedding-3-small    Increased performance over 2nd generation ada embedding model  |  1,536
