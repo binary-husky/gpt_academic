@@ -1,5 +1,4 @@
 import os
-from llama_index.core import SimpleDirectoryReader
 
 supports_format = ['.csv', '.docx', '.epub', '.ipynb',  '.mbox', '.md', '.pdf',  '.txt', '.ppt',
                    '.pptm', '.pptx']
@@ -7,6 +6,7 @@ supports_format = ['.csv', '.docx', '.epub', '.ipynb',  '.mbox', '.md', '.pdf', 
 
 # 修改后的 extract_text 函数，结合 SimpleDirectoryReader 和自定义解析逻辑
 def extract_text(file_path):
+    from llama_index.core import SimpleDirectoryReader
     _, ext = os.path.splitext(file_path.lower())
 
     # 使用 SimpleDirectoryReader 处理它支持的文件格式
