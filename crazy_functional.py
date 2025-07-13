@@ -706,6 +706,44 @@ def get_crazy_functions():
         logger.error(trimmed_format_exc())
         logger.error("Load function plugin failed")
 
+    try:
+        from crazy_functions.Document_Optimize import 自定义智能文档处理
+        function_plugins.update(
+            {
+                "一键处理文档（支持自定义全文润色、降重等）": {
+                    "Group": "学术",
+                    "Color": "stop",
+                    "AsButton": False,
+                    "AdvancedArgs": True,
+                    "ArgsReminder": "请输入处理指令和要求（可以详细描述），如：请帮我润色文本，要求幽默点。默认调用润色指令。",
+                    "Info": "保留文档结构，智能处理文档内容 | 输入参数为文件路径",
+                    "Function": HotReload(自定义智能文档处理)
+                },
+            }
+        )
+    except:
+        logger.error(trimmed_format_exc())
+        logger.error("Load function plugin failed")
+
+
+
+    try:
+        from crazy_functions.Paper_Reading import 快速论文解读
+        function_plugins.update(
+            {
+                "速读论文": {
+                    "Group": "学术",
+                    "Color": "stop",
+                    "AsButton": False,
+                    "Info": "上传一篇论文进行快速分析和解读 |  输入参数为论文路径或DOI/arXiv ID",
+                    "Function": HotReload(快速论文解读),
+                },
+            }
+        )
+    except:
+        logger.error(trimmed_format_exc())
+        logger.error("Load function plugin failed")
+
 
     # try:
     #     from crazy_functions.高级功能函数模板 import 测试图表渲染
