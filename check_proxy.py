@@ -254,13 +254,20 @@ def try_warm_up_vectordb():
     nltk.data.path.append(target)
     try:
         # 尝试加载 punkt
+        logger.info(f'nltk模块预热')
         nltk.data.find('tokenizers/punkt')
+        nltk.data.find('tokenizers/punkt_tab')
+        nltk.data.find('taggers/averaged_perceptron_tagger_eng')
         logger.info('nltk模块预热完成（读取本地缓存）')
     except:
         # 如果找不到，则尝试下载
         try:
             logger.info(f'模块预热: nltk punkt (从 Github 下载部分文件到 {target})')
-            nltk.download('punkt', download_dir=target)
+            from shared_utils.nltk_downloader import Downloader
+            _downloader = Downloader()
+            _downloader.download('punkt', download_dir=target)
+            _downloader.download('punkt_tab', download_dir=target)
+            _downloader.download('averaged_perceptron_tagger_eng', download_dir=target)
             logger.info('nltk模块预热完成')
         except Exception:
             logger.exception('模块预热: nltk punkt 失败，可能需要手动安装 nltk punkt')
