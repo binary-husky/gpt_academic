@@ -1554,110 +1554,19 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot,
             additional_fn:str=None          # 基础功能区按钮的附加功能
         ):
     """
-    import os
-    import re
-    from toolbox import update_ui
 
     inputs = apply_gpt_academic_string_mask(inputs, mode="show_llm")
 
     if llm_kwargs['llm_model'] not in model_info:
+        from toolbox import update_ui
         chatbot.append([inputs, f"很抱歉，模型 '{llm_kwargs['llm_model']}' 暂不支持<br/>(1) 检查config中的AVAIL_LLM_MODELS选项<br/>(2) 检查request_llms/bridge_all.py中的模型路由"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-        return
 
     method = model_info[llm_kwargs['llm_model']]["fn_with_ui"]  # 如果这里报错，检查config中的AVAIL_LLM_MODELS选项
 
     if additional_fn: # 根据基础功能区 ModelOverride 参数调整模型类型
         llm_kwargs, additional_fn, method = execute_model_override(llm_kwargs, additional_fn, method)
 
-    # 检查是否为URL或文件路径
-    def is_url(text):
-        from urllib.parse import urlparse
-        try:
-            text = text.strip(',.!?，。！？ \t\n\r')
-            words = text.split()
-            if len(words) != 1:
-                return False
-            result = urlparse(text)
-            return all([result.scheme, result.netloc])
-        except:
-            return False
-
-    def extract_file_path(text):
-        # 匹配以 private_upload 开头，包含时间戳格式的路径
-        pattern = r'(private_upload/[^\s]+?/\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2})'
-        match = re.search(pattern, text)
-        if match and os.path.exists(match.group(1)):
-            return match.group(1)
-        return None
-
-    if is_url(inputs):
-        # 处理URL
-        try:
-            from crazy_functions.doc_fns.read_fns.web_reader import WebTextExtractor, WebExtractorConfig
-            extractor = WebTextExtractor(WebExtractorConfig())
-            
-            # 添加正在处理的提示信息
-            chatbot.append(["提示", "正在提取网页内容，请稍作等待..."])
-            yield from update_ui(chatbot=chatbot, history=history)
-            
-            web_content = extractor.extract_text(inputs)
-            
-            # 移除提示信息
-            chatbot.pop()
-            
-            # 显示提取的内容
-            chatbot.append([f"网页{inputs}的文本内容如下：", web_content])
-            history.extend([f"网页{inputs}的文本内容如下：", web_content])
-            yield from update_ui(chatbot=chatbot, history=history)
-            return
-        except Exception as e:
-            # 如果出错，移除提示信息（如果存在）
-            if len(chatbot) > 0 and chatbot[-1][0] == "提示":
-                chatbot.pop()
-            chatbot.append([inputs, f"网页内容提取失败: {str(e)}"])
-            yield from update_ui(chatbot=chatbot, history=history)
-            return
-    else:
-        # 检查是否包含文件路径
-        file_path = extract_file_path(inputs)
-        if os.path.exists(inputs):
-            # 处理普通文件路径
-            try:
-                from crazy_functions.doc_fns.text_content_loader import TextContentLoader
-                loader = TextContentLoader(chatbot, history)
-                yield from loader.execute(inputs)
-                return
-            except Exception as e:
-                chatbot.append([inputs, f"文件读取失败: {str(e)}"])
-                yield from update_ui(chatbot=chatbot, history=history)
-                return
-        elif file_path:
-            try:
-                from crazy_functions.doc_fns.text_content_loader import TextContentLoader
-                loader = TextContentLoader(chatbot, history)
-                # 先读取文件内容
-                content_generator = loader.execute(file_path)
-                # 消费生成器获取文件内容
-                for _ in content_generator:
-                    pass
-                
-                # 构建新的输入，包含用户的原始问题和文件引用
-                original_question = inputs.replace(file_path, '').strip()
-                if not original_question:
-                    original_question = f"请分析上述文件内容"
-                else:
-                    original_question = f"基于上述文件内容，{original_question}"
-                
-                # 使用最新的历史记录（包含文件内容）继续对话
-                yield from method(original_question, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, stream, additional_fn)
-                return
-            except Exception as e:
-                chatbot.append([inputs, f"文件处理失败: {str(e)}"])
-                yield from update_ui(chatbot=chatbot, history=history)
-                return
-
-    # 兼容原有的URL和文件处理逻辑
     if start_with_url(inputs):
         yield from load_web_content(inputs, chatbot, history)
         return
