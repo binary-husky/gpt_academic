@@ -46,7 +46,7 @@ LaTeX論文の一括校正 | [プラグイン] Grammarlyのように、LaTeX論�
 ⭐Arxiv論文の詳細な翻訳 ([Docker](https://github.com/binary-husky/gpt_academic/pkgs/container/gpt_academic_with_latex)) | [プラグイン] arxiv論文を超高品質で翻訳します。最高の論文翻訳ツールです
 ⭐[リアルタイム音声入力](https://github.com/binary-husky/gpt_academic/blob/master/docs/use_audio.md) | [プラグイン] 非同期[音声をリッスン(https://www.bilibili.com/video/BV1AV4y187Uy/)し、自動で文章を区切り、回答のタイミングを自動で探します
 公式/画像/表の表示 | 公式の[tex形式とレンダリング形式](https://user-images.githubusercontent.com/96192199/230598842-1d7fcddd-815d-40ee-af60-baf488a199df.png)を同時に表示し、公式とコードのハイライトをサポートします
-⭐AutoGenマルチエージェントプラグイン | [プラグイン] Microsoft AutoGenを利用して、マルチエージェントのインテリジェントなエマージェンスを探索します
+⭐AG2マルチエージェントプラグイン | [プラグイン] AG2 (Formerly AutoGen)を利用して、マルチエージェントのインテリジェントなエマージェンスを探索します
 ダーク[テーマ](https://github.com/binary-husky/gpt_academic/issues/173)を起動 | ブラウザのURLに```/?__theme=dark```を追加すると、ダークテーマに切り替えられます
 [複数のLLMモデル](https://www.bilibili.com/video/BV1wT411p7yf)のサポート | GPT3.5、GPT4、[Tsinghua ChatGLM2](https://github.com/THUDM/ChatGLM2-6B)、[Fudan MOSS](https://github.com/OpenLMLab/MOSS)などを同時に使えるのは最高の感じですよね？
 ⭐ChatGLM2ファインチューニングモデル | ChatGLM2ファインチューニングモデルをロードして使用することができ、ChatGLM2ファインチューニングの補助プラグインが用意されています
@@ -270,8 +270,8 @@ Python環境に詳しくないWindowsユーザーは、[リリース](https://gi
 
 
 ### II：バージョン:
-- version 3.70（todo）: AutoGenプラグインのテーマを最適化し、一連の派生プラグインを設計する
-- version 3.60: AutoGenを次世代プラグインの基盤として導入
+- version 3.70（todo）: AG2 (Formerly AutoGen)プラグインのテーマを最適化し、一連の派生プラグインを設計する
+- version 3.60: AG2 (Formerly AutoGen)を次世代プラグインの基盤として導入
 - version 3.57: GLM3、星火v3、文心一言v4をサポート、ローカルモデルの並行バグを修正
 - version 3.56: 基本機能ボタンを動的に追加、新しい報告書PDF集約ページ
 - version 3.55: フロントエンドのデザインを再構築し、浮動ウィンドウとメニューバーを導入
