@@ -80,6 +80,7 @@ ollama_endpoint = "http://localhost:11434/api/chat"
 yimodel_endpoint = "https://api.lingyiwanwu.com/v1/chat/completions"
 deepseekapi_endpoint = "https://api.deepseek.com/v1/chat/completions"
 grok_model_endpoint = "https://api.x.ai/v1/chat/completions"
+siliconflow_endpoint = "https://api.siliconflow.cn/v1/chat/completions"
 volcengine_endpoint = "https://ark.cn-beijing.volces.com/api/v3/chat/completions"
 
 if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
@@ -103,6 +104,7 @@ if ollama_endpoint in API_URL_REDIRECT: ollama_endpoint = API_URL_REDIRECT[ollam
 if yimodel_endpoint in API_URL_REDIRECT: yimodel_endpoint = API_URL_REDIRECT[yimodel_endpoint]
 if deepseekapi_endpoint in API_URL_REDIRECT: deepseekapi_endpoint = API_URL_REDIRECT[deepseekapi_endpoint]
 if grok_model_endpoint in API_URL_REDIRECT: grok_model_endpoint = API_URL_REDIRECT[grok_model_endpoint]
+if siliconflow_endpoint in API_URL_REDIRECT: siliconflow_endpoint = API_URL_REDIRECT[siliconflow_endpoint]
 if volcengine_endpoint in API_URL_REDIRECT: volcengine_endpoint = API_URL_REDIRECT[volcengine_endpoint]
 
 # 获取tokenizer
@@ -306,6 +308,58 @@ model_info = {
     "o1": {
         "fn_with_ui": chatgpt_ui,
         "fn_without_ui": chatgpt_noui,
+        "endpoint": openai_endpoint,
+        "max_token": 200000,
+        "tokenizer": tokenizer_gpt4,
+        "token_cnt": get_token_num_gpt4,
+        "openai_disable_system_prompt": True,
+        "openai_disable_stream": True,
+        "openai_force_temperature_one": True,
+    },
+    
+    "o4-mini": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "has_multimodal_capacity": True,
+        "endpoint": openai_endpoint,
+        "max_token": 200000,
+        "tokenizer": tokenizer_gpt4,
+        "token_cnt": get_token_num_gpt4,
+        "openai_disable_system_prompt": True,
+        "openai_disable_stream": True,
+        "openai_force_temperature_one": True,
+    },
+    
+    "gpt-4.1": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "has_multimodal_capacity": True,
+        "endpoint": openai_endpoint,
+        "max_token": 200000,
+        "tokenizer": tokenizer_gpt4,
+        "token_cnt": get_token_num_gpt4,
+        "openai_disable_system_prompt": True,
+        "openai_disable_stream": True,
+        "openai_force_temperature_one": True,
+    },
+    
+    "gpt-4.1-mini": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "has_multimodal_capacity": True,
+        "endpoint": openai_endpoint,
+        "max_token": 200000,
+        "tokenizer": tokenizer_gpt4,
+        "token_cnt": get_token_num_gpt4,
+        "openai_disable_system_prompt": True,
+        "openai_disable_stream": True,
+        "openai_force_temperature_one": True,
+    },
+    
+    "gpt-4.1-nano": {
+        "fn_with_ui": chatgpt_ui,
+        "fn_without_ui": chatgpt_noui,
+        "has_multimodal_capacity": True,
         "endpoint": openai_endpoint,
         "max_token": 200000,
         "tokenizer": tokenizer_gpt4,
@@ -1414,6 +1468,47 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("openrouter-")]:
             "token_cnt": get_token_num_gpt4,
         },
     })
+
+
+# -=-=-=-=-=-=- 硅基智能SiliconFlow在线API -=-=-=-=-=-=-
+# 支持推理的模型系列，非完整模型名称
+inference_model_series = [
+    "THUDM/GLM-Z1", "deepseek-ai/DeepSeek-R1", "Qwen/QwQ-32B"
+]
+for model in [m for m in AVAIL_LLM_MODELS if m.startswith("siliconflow-")]:
+    # 模型名称的格式为：
+    #   "siliconflow-<model_name>"  
+    # 其中：
+    #   "siliconflow-"              是前缀（必要），在实际请求中，会将其去掉。
+    #   "deepseek-ai/DeepSeek-R1"   是硅基智能提供的模型名（必要）。
+    
+    try:
+        siliconflow_noui, siliconflow_ui = get_predict_function(
+            api_key_conf_name="SILICONFLOW_API_KEY",
+            # max_tokens 的说明：https://docs.siliconflow.cn/cn/faqs/misc
+            max_output_token=4096,
+            disable_proxy=False,
+            # 去除前缀
+            model_remove_prefix = ["siliconflow-"]
+        )
+        # 判断是否具有推理能力
+        enable_reasoning = any(item in model for item in inference_model_series)
+        model_info.update(
+            {
+                model: {
+                    "fn_with_ui": siliconflow_ui,
+                    "fn_without_ui": siliconflow_noui,
+                    "endpoint": siliconflow_endpoint,
+                    "can_multi_thread": True,
+                    "enable_reasoning": enable_reasoning,
+                },
+            }
+        )
+        logger.info(f" siliconflow 模型 {model} 已加载")
+        
+    except:
+        logger.error(trimmed_format_exc())
+
 
 
 # -=-=-=-=-=-=--=-=-=-=-=-=--=-=-=-=-=-=--=-=-=-=-=-=-=-=
