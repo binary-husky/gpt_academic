@@ -24,7 +24,8 @@ WORKDIR /gpt
 # 安装大部分依赖，利用Docker缓存加速以后的构建 （以下两行，可以删除）
 COPY requirements.txt ./
 RUN uv venv --python=3.12 && uv pip install --verbose -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
-RUN uv venv --python=3.12 && uv pip install aliyun-python-sdk-core==2.13.3 pyOpenSSL webrtcvad scipy git+https://github.com/aliyun/alibabacloud-nls-python-sdk.git
+RUN uv venv --python=3.12 && uv pip install aliyun-python-sdk-core==2.13.3 pyOpenSSL webrtcvad scipy RUN uv pip install alibabacloud-nls-python-sdk -i https://mirrors.aliyun.com/pypi/simple/
+
 ENV PATH="/gpt/.venv/bin:$PATH"
 RUN python -c 'import loguru'
 
@@ -39,6 +40,3 @@ ENV CGO_ENABLED=0
 
 # 启动（必要）
 CMD ["bash", "-c", "python main.py"]
-
-# 启动
-CMD ["python3", "-u", "main.py"]

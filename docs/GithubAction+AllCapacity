@@ -1,43 +1,56 @@
-# docker build -t gpt-academic-all-capacity -f docs/GithubAction+AllCapacity  --network=host --build-arg http_proxy=http://localhost:10881 --build-arg https_proxy=http://localhost:10881 .
+# 此Dockerfile适用于“无本地模型”的迷你运行环境构建
+# 如果需要使用chatglm等本地模型或者latex运行依赖，请参考 docker-compose.yml
+# - 如何构建: 先修改 `config.py`， 然后 `docker build -t gpt-academic . `
+# - 如何运行(Linux下): `docker run --rm -it --net=host gpt-academic `
+# - 如何运行(其他操作系统，选择任意一个固定端口50923): `docker run --rm -it -e WEB_PORT=50923 -p 50923:50923 gpt-academic `
 
-# 从NVIDIA源，从而支持显卡（检查宿主的nvidia-smi中的cuda版本必须>=11.3）
-FROM fuqingxu/11.3.1-runtime-ubuntu20.04-with-texlive:latest
 
-# edge-tts需要的依赖，某些pip包所需的依赖
-RUN apt update && apt install ffmpeg build-essential -y
-RUN apt-get install -y fontconfig
+FROM fuqingxu/11.3.1-runtime-ubuntu20.04-with-texlive:latest AS texlive
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm
+
+
+# 非必要步骤，更换pip源 （以下三行，可以删除）
+RUN echo '[global]' > /etc/pip.conf && \
+    echo 'index-url = https://mirrors.aliyun.com/pypi/simple/' >> /etc/pip.conf && \
+    echo 'trusted-host = mirrors.aliyun.com' >> /etc/pip.conf
+
+# 语音输出功能（以下1,2行更换阿里源，第3,4行安装ffmpeg，都可以删除）
+RUN sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debian.sources && \
+    sed -i 's/security.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debian.sources && \
+    apt-get update
+RUN apt-get install ffmpeg fontconfig build-essential -y
+
 RUN ln -s /usr/local/texlive/2023/texmf-dist/fonts/truetype /usr/share/fonts/truetype/texlive
 RUN fc-cache -fv
 RUN apt-get clean
+COPY --from=texlive /usr/local/texlive /usr/local/texlive
 
-# use python3 as the system default python
+# 进入工作路径（必要）
 WORKDIR /gpt
-RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.8
-# 下载pytorch
-RUN python3 -m pip install torch --extra-index-url https://download.pytorch.org/whl/cu113
-# 准备pip依赖
-RUN python3 -m pip install openai numpy arxiv rich
-RUN python3 -m pip install colorama Markdown pygments pymupdf
-RUN python3 -m pip install python-docx moviepy pdfminer
-RUN python3 -m pip install zh_langchain==0.2.1 pypinyin
-RUN python3 -m pip install rarfile py7zr
-RUN python3 -m pip install aliyun-python-sdk-core==2.13.3 pyOpenSSL webrtcvad scipy git+https://github.com/aliyun/alibabacloud-nls-python-sdk.git
-# 下载分支
-WORKDIR /gpt
-RUN git clone --depth=1 https://github.com/binary-husky/gpt_academic.git
-WORKDIR /gpt/gpt_academic
-RUN git clone --depth=1 https://github.com/OpenLMLab/MOSS.git request_llms/moss
 
-RUN python3 -m pip install -r requirements.txt
-RUN python3 -m pip install -r request_llms/requirements_moss.txt
-RUN python3 -m pip install -r request_llms/requirements_qwen.txt
-RUN python3 -m pip install -r request_llms/requirements_chatglm.txt
-RUN python3 -m pip install -r request_llms/requirements_newbing.txt
-RUN python3 -m pip install nougat-ocr
-RUN python3 -m pip cache purge
+# 安装大部分依赖，利用缓存加速以后的构建
+COPY requirements.txt ./
+RUN uv venv --python=3.12
+RUN uv pip install --verbose -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
+RUN uv pip install torch --verbose --index-url https://download.pytorch.org/whl/cpu
+RUN uv pip install openai numpy arxiv rich colorama Markdown pygments pymupdf python-docx moviepy pdfminer zh_langchain==0.2.1 pypinyin rarfile py7zr nougat-ocr -i https://mirrors.aliyun.com/pypi/simple/
+RUN uv pip install aliyun-python-sdk-core==2.13.3 pyOpenSSL webrtcvad scipy -i https://mirrors.aliyun.com/pypi/simple/
+RUN uv pip install alibabacloud-nls-python-sdk -i https://mirrors.aliyun.com/pypi/simple/
+ENV PATH="/gpt/.venv/bin:$PATH"
 
-# 预热Tiktoken模块
-RUN python3  -c 'from check_proxy import warm_up_modules; warm_up_modules()'
+# 装载项目文件，安装剩余依赖（必要）
+COPY . .
 
-# 启动
-CMD ["python3", "-u", "main.py"]
+RUN uv pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
+
+# # 非必要步骤，用于预热模块（可以删除）
+RUN python -c 'from check_proxy import warm_up_modules; warm_up_modules()'
+
+ENV CGO_ENABLED=0
+ENV PATH "/usr/local/texlive/2023/bin/x86_64-linux:$PATH"
+ENV PATH "/usr/local/texlive/2024/bin/x86_64-linux:$PATH"
+ENV PATH "/usr/local/texlive/2025/bin/x86_64-linux:$PATH"
+ENV PATH "/usr/local/texlive/2026/bin/x86_64-linux:$PATH"
+
+# 启动（必要）
+CMD ["bash", "-c", "python main.py"]

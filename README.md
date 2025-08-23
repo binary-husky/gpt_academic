@@ -1,8 +1,6 @@
 > [!IMPORTANT]
-> `master主分支`最新动态(2025.7.31): 新GUI前端，Coming Soon
-> `master主分支`最新动态(2025.3.2): 修复大量代码typo / 联网组件支持Jina的api / 增加deepseek-r1支持  
-> `frontier开发分支`最新动态(2024.12.9): 更新对话时间线功能，优化xelatex论文翻译  
-> `wiki文档`最新动态(2024.12.5): 更新ollama接入指南  
+> `master主分支`最新动态(2025.8.23): Dockerfile构建效率大幅优化  
+> `master主分支`最新动态(2025.7.31): 新GUI前端，Coming Soon  
 >
 > 2025.2.2: 三分钟快速接入最强qwen2.5-max[视频](https://www.bilibili.com/video/BV1LeFuerEG4)  
 > 2025.2.1: 支持自定义字体  
