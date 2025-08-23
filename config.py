@@ -43,7 +43,7 @@ AVAIL_LLM_MODELS = ["qwen-max", "o1-mini", "o1-mini-2024-09-12", "o1", "o1-2024-
                     "gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
                     "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-4v", "glm-3-turbo",
                     "gemini-1.5-pro", "chatglm3", "chatglm4",
-                    "deepseek-chat", "deepseek-coder", "deepseek-reasoner", 
+                    "deepseek-chat", "deepseek-coder", "deepseek-reasoner",
                     "volcengine-deepseek-r1-250120", "volcengine-deepseek-v3-241226",
                     "dashscope-deepseek-r1", "dashscope-deepseek-v3",
                     "dashscope-qwen3-14b", "dashscope-qwen3-235b-a22b", "dashscope-qwen3-32b",
@@ -94,19 +94,19 @@ AVAIL_THEMES = ["Default", "Chuanhu-Small-and-Beautiful", "High-Contrast", "Gsta
 
 FONT = "Theme-Default-Font"
 AVAIL_FONTS = [
-    "默认值(Theme-Default-Font)", 
-    "宋体(SimSun)",  
-    "黑体(SimHei)",  
-    "楷体(KaiTi)",  
-    "仿宋(FangSong)",  
+    "默认值(Theme-Default-Font)",
+    "宋体(SimSun)",
+    "黑体(SimHei)",
+    "楷体(KaiTi)",
+    "仿宋(FangSong)",
     "华文细黑(STHeiti Light)",
-    "华文楷体(STKaiti)",  
-    "华文仿宋(STFangsong)",  
-    "华文宋体(STSong)",  
-    "华文中宋(STZhongsong)",  
-    "华文新魏(STXinwei)",  
-    "华文隶书(STLiti)", 
-    # 备注：以下字体需要网络支持，您可以自定义任意您喜欢的字体，如下所示，需要满足的格式为 "字体昵称(字体英文真名@字体css下载链接)" 
+    "华文楷体(STKaiti)",
+    "华文仿宋(STFangsong)",
+    "华文宋体(STSong)",
+    "华文中宋(STZhongsong)",
+    "华文新魏(STXinwei)",
+    "华文隶书(STLiti)",
+    # 备注：以下字体需要网络支持，您可以自定义任意您喜欢的字体，如下所示，需要满足的格式为 "字体昵称(字体英文真名@字体css下载链接)"
     "思源宋体(Source Han Serif CN VF@https://chinese-fonts-cdn.deno.dev/packages/syst/dist/SourceHanSerifCN/result.css)",
     "月星楷(Moon Stars Kai HW@https://chinese-fonts-cdn.deno.dev/packages/moon-stars-kai/dist/MoonStarsKaiHW-Regular/result.css)",
     "珠圆体(MaokenZhuyuanTi@https://chinese-fonts-cdn.deno.dev/packages/mkzyt/dist/猫啃珠圆体/result.css)",
@@ -353,6 +353,10 @@ DAAS_SERVER_URLS = [ f"https://niuziniu-biligpt{i}.hf.space/stream" for i in ran
 
 # 在互联网搜索组件中，负责将搜索结果整理成干净的Markdown
 JINA_API_KEY = ""
+
+
+# SEMANTIC SCHOLAR API KEY
+SEMANTIC_SCHOLAR_KEY = ""
 
 
 # 是否自动裁剪上下文长度（是否启动，默认不启动）

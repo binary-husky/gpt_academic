@@ -456,7 +456,7 @@ model_info = {
         "endpoint": None,
         "max_token": 10124 * 8,
         "tokenizer": tokenizer_gpt35,
-        "token_cnt": get_token_num_gpt35,       
+        "token_cnt": get_token_num_gpt35,
     },
     "glm-4v": {
         "fn_with_ui": zhipu_ui,
@@ -718,7 +718,7 @@ if any(item in claude_models for item in AVAIL_LLM_MODELS):
             "tokenizer": tokenizer_gpt35,
             "token_cnt": get_token_num_gpt35,
         },
-    })    
+    })
 if "jittorllms_rwkv" in AVAIL_LLM_MODELS:
     from .bridge_jittorllms_rwkv import predict_no_ui_long_connection as rwkv_noui
     from .bridge_jittorllms_rwkv import predict as rwkv_ui
@@ -1063,18 +1063,18 @@ if any(item in grok_models for item in AVAIL_LLM_MODELS):
         grok_beta_128k_noui, grok_beta_128k_ui = get_predict_function(
             api_key_conf_name="GROK_API_KEY", max_output_token=8192, disable_proxy=False
         )
-        
+
         model_info.update({
             "grok-beta": {
                 "fn_with_ui": grok_beta_128k_ui,
                 "fn_without_ui": grok_beta_128k_noui,
-                "can_multi_thread": True,  
+                "can_multi_thread": True,
                 "endpoint": grok_model_endpoint,
                 "max_token": 128000,
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
             },
-            
+
         })
     except:
         logger.error(trimmed_format_exc())
@@ -1519,6 +1519,8 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list, sys
 # 根据基础功能区 ModelOverride 参数调整模型类型，用于 `predict` 中
 import importlib
 import core_functional
+from shared_utils.doc_loader_dynamic import start_with_url, load_web_content, contain_uploaded_files, load_uploaded_files
+
 def execute_model_override(llm_kwargs, additional_fn, method):
     functional = core_functional.get_core_functions()
     if (additional_fn in functional) and 'ModelOverride' in functional[additional_fn]:
@@ -1564,6 +1566,13 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot,
 
     if additional_fn: # 根据基础功能区 ModelOverride 参数调整模型类型
         llm_kwargs, additional_fn, method = execute_model_override(llm_kwargs, additional_fn, method)
+
+    if start_with_url(inputs):
+        yield from load_web_content(inputs, chatbot, history)
+        return
+
+    if contain_uploaded_files(inputs):
+        inputs = yield from load_uploaded_files(inputs, method, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, stream, additional_fn)
 
     # 更新一下llm_kwargs的参数，否则会出现参数不匹配的问题
     yield from method(inputs, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, stream, additional_fn)

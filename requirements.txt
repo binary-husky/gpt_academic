@@ -21,8 +21,8 @@ latex2mathml
 python-docx
 mdtex2html
 dashscope
-pyautogen
 colorama
+docx2pdf
 Markdown
 pygments
 edge-tts>=7.0.0

@@ -230,6 +230,48 @@ def warm_up_modules():
         enc.encode("模块预热", disallowed_special=())
         enc = model_info["gpt-4"]['tokenizer']
         enc.encode("模块预热", disallowed_special=())
+        try_warm_up_vectordb()
+
+
+# def try_warm_up_vectordb():
+#     try:
+#         import os
+#         import nltk
+#         target = os.path.expanduser('~/nltk_data')
+#         logger.info(f'模块预热: nltk punkt (从Github下载部分文件到 {target})')
+#         nltk.data.path.append(target)
+#         nltk.download('punkt', download_dir=target)
+#         logger.info('模块预热完成: nltk punkt')
+#     except:
+#         logger.exception('模块预热: nltk punkt 失败，可能需要手动安装 nltk punkt')
+#         logger.error('模块预热: nltk punkt 失败，可能需要手动安装 nltk punkt')
+
+
+def try_warm_up_vectordb():
+    import os
+    import nltk
+    target = os.path.expanduser('~/nltk_data')
+    nltk.data.path.append(target)
+    try:
+        # 尝试加载 punkt
+        logger.info(f'nltk模块预热')
+        nltk.data.find('tokenizers/punkt')
+        nltk.data.find('tokenizers/punkt_tab')
+        nltk.data.find('taggers/averaged_perceptron_tagger_eng')
+        logger.info('nltk模块预热完成（读取本地缓存）')
+    except:
+        # 如果找不到，则尝试下载
+        try:
+            logger.info(f'模块预热: nltk punkt (从 Github 下载部分文件到 {target})')
+            from shared_utils.nltk_downloader import Downloader
+            _downloader = Downloader()
+            _downloader.download('punkt', download_dir=target)
+            _downloader.download('punkt_tab', download_dir=target)
+            _downloader.download('averaged_perceptron_tagger_eng', download_dir=target)
+            logger.info('nltk模块预热完成')
+        except Exception:
+            logger.exception('模块预热: nltk punkt 失败，可能需要手动安装 nltk punkt')
+
 
 def warm_up_vectordb():
     """

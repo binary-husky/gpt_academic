@@ -11,7 +11,7 @@ RUN echo '[global]' > /etc/pip.conf && \
     echo 'index-url = https://mirrors.aliyun.com/pypi/simple/' >> /etc/pip.conf && \
     echo 'trusted-host = mirrors.aliyun.com' >> /etc/pip.conf
 
-# 语音输出功能（以下1,2行更换阿里源，第3,4行安装ffmpeg，都可以删除） 
+# 语音输出功能（以下1,2行更换阿里源，第3,4行安装ffmpeg，都可以删除）
 RUN sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debian.sources && \
     sed -i 's/security.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list.d/debian.sources && \
     apt-get update
@@ -33,6 +33,8 @@ RUN uv venv --python=3.12 && uv pip install -r requirements.txt -i https://mirro
 
 # # 非必要步骤，用于预热模块（可以删除）
 RUN python -c 'from check_proxy import warm_up_modules; warm_up_modules()'
+
+ENV CGO_ENABLED=0
 
 # 启动（必要）
 CMD ["bash", "-c", "python main.py"]
