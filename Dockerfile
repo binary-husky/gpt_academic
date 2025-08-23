@@ -29,7 +29,7 @@ RUN python -c 'import loguru'
 
 # 装载项目文件，安装剩余依赖（必要）
 COPY . .
-RUN uv venv --python=3.12 && uv pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
+RUN uv pip install -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 
 # # 非必要步骤，用于预热模块（可以删除）
 RUN python -c 'from check_proxy import warm_up_modules; warm_up_modules()'
