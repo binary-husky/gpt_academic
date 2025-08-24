@@ -43,7 +43,7 @@ def 解析Paper(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbo
 
 
 @CatchException
-def 读文章写摘要(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
+def Paper_Abstract_Writer(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     history = []    # 清空历史，以免输入溢出
     import glob, os
     if os.path.exists(txt):

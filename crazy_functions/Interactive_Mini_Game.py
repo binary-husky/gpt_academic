@@ -16,7 +16,7 @@ def 随机小游戏(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system_
                            llm_kwargs,
                            cls,
                            plugin_name='MiniGame_ResumeStory',
-                           callback_fn='crazy_functions.互动小游戏->随机小游戏',
+                           callback_fn='crazy_functions.Interactive_Mini_Game->随机小游戏',
                            lock_plugin=True
                            )
     yield from state.continue_game(prompt, chatbot, history)
@@ -34,7 +34,7 @@ def 随机小游戏1(prompt, llm_kwargs, plugin_kwargs, chatbot, history, system
                            llm_kwargs,
                            cls,
                            plugin_name='MiniGame_ASCII_Art',
-                           callback_fn='crazy_functions.互动小游戏->随机小游戏1',
+                           callback_fn='crazy_functions.Interactive_Mini_Game->随机小游戏1',
                            lock_plugin=True
                            )
     yield from state.continue_game(prompt, chatbot, history)

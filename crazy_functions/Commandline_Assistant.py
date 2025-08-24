@@ -4,7 +4,7 @@ from crazy_functions.crazy_utils import input_clipping
 import copy, json
 
 @CatchException
-def 命令行助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
+def Commandline_Assistant(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     """
     txt             输入栏用户输入的文本, 例如需要翻译的一段话, 再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数, 如温度和top_p等, 一般原样传递下去就行

@@ -103,13 +103,13 @@ do not have too much repetitive information, numerical values using the original
 
 
 @CatchException
-def 批量总结PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
+def PDF_Summary(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     import glob, os
 
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
-        "批量总结PDF文档。函数插件贡献者: ValeriaWong，Eralien"])
+        "PDF_Summary。函数插件贡献者: ValeriaWong，Eralien"])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # 尝试导入依赖，如果缺少依赖，则给出安装建议

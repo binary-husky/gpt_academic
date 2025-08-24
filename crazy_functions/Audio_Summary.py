@@ -132,13 +132,13 @@ def AnalyAudio(parse_prompt, file_manifest, llm_kwargs, chatbot, history):
 
 
 @CatchException
-def 总结音视频(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, WEB_PORT):
+def Audio_Summary(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, WEB_PORT):
     import glob, os
 
     # 基本信息：功能、贡献者
     chatbot.append([
         "函数插件功能？",
-        "总结音视频内容，函数插件贡献者: dalvqw & BinaryHusky"])
+        "Audio_Summary内容，函数插件贡献者: dalvqw & BinaryHusky"])
     yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
 
     try:

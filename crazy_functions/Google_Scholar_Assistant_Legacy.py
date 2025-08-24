@@ -132,7 +132,7 @@ def get_meta_information(url, chatbot, history):
     return profile
 
 @CatchException
-def 谷歌检索小助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
+def Google_Scholar_Assistant_Legacy(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     disable_auto_promotion(chatbot=chatbot)
     # 基本信息：功能、贡献者
     chatbot.append([

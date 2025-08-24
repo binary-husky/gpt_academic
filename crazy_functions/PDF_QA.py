@@ -62,7 +62,7 @@ def 解析PDF(file_name, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
 
 
 @CatchException
-def 理解PDF文档内容标准文件输入(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
+def PDF_QA标准文件输入(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     import glob, os
 
     # 基本信息：功能、贡献者

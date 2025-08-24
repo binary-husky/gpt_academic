@@ -4,7 +4,7 @@ from toolbox import CatchException, report_exception
 from toolbox import write_history_to_file, promote_file_to_downloadzone
 from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
 
-def 生成函数注释(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
+def Program_Comment_Gen(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
     import time, os
     logger.info('begin analysis on:', file_manifest)
     for index, fp in enumerate(file_manifest):
@@ -34,7 +34,7 @@ def 生成函数注释(file_manifest, project_folder, llm_kwargs, plugin_kwargs,
 
 
 @CatchException
-def 批量生成函数注释(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
+def 批量Program_Comment_Gen(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     history = []    # 清空历史，以免输入溢出
     import glob, os
     if os.path.exists(txt):
@@ -51,4 +51,4 @@ def 批量生成函数注释(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         report_exception(chatbot, history, a = f"解析项目: {txt}", b = f"找不到任何.tex文件: {txt}")
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
-    yield from 生成函数注释(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt)
+    yield from Program_Comment_Gen(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt)

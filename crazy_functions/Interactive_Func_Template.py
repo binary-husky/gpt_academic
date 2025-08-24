@@ -13,13 +13,13 @@ def 交互功能模板函数(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     user_request    当前用户的请求信息（IP地址等）
     """
     history = []    # 清空历史，以免输入溢出
-    chatbot.append(("这是什么功能？", "交互功能函数模板。在执行完成之后, 可以将自身的状态存储到cookie中, 等待用户的再次调用。"))
+    chatbot.append(("这是什么功能？", "Interactive_Func_Template。在执行完成之后, 可以将自身的状态存储到cookie中, 等待用户的再次调用。"))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     state = chatbot._cookies.get('plugin_state_0001', None) # 初始化插件状态
 
     if state is None:
-        chatbot._cookies['lock_plugin'] = 'crazy_functions.交互功能函数模板->交互功能模板函数'      # 赋予插件锁定 锁定插件回调路径，当下一次用户提交时，会直接转到该函数
+        chatbot._cookies['lock_plugin'] = 'crazy_functions.Interactive_Func_Template->交互功能模板函数'      # 赋予插件锁定 锁定插件回调路径，当下一次用户提交时，会直接转到该函数
         chatbot._cookies['plugin_state_0001'] = 'wait_user_keyword'                              # 赋予插件状态
 
         chatbot.append(("第一次调用：", "请输入关键词, 我将为您查找相关壁纸, 建议使用英文单词, 插件锁定中，请直接提交即可。"))

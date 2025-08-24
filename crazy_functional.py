@@ -3,8 +3,8 @@ from toolbox import trimmed_format_exc
 from loguru import logger
 
 def get_crazy_functions():
-    from crazy_functions.读文章写摘要 import 读文章写摘要
-    from crazy_functions.生成函数注释 import 批量生成函数注释
+    from crazy_functions.Paper_Abstract_Writer import Paper_Abstract_Writer
+    from crazy_functions.Program_Comment_Gen import 批量Program_Comment_Gen
     from crazy_functions.SourceCode_Analyse import 解析项目本身
     from crazy_functions.SourceCode_Analyse import 解析一个Python项目
     from crazy_functions.SourceCode_Analyse import 解析一个Matlab项目
@@ -17,26 +17,26 @@ def get_crazy_functions():
     from crazy_functions.高级功能函数模板 import 高阶功能模板函数
     from crazy_functions.高级功能函数模板 import Demo_Wrap
     from crazy_functions.Latex_Project_Polish import Latex英文润色
-    from crazy_functions.询问多个大语言模型 import 同时问询
+    from crazy_functions.Multi_LLM_Query import 同时问询
     from crazy_functions.SourceCode_Analyse import 解析一个Lua项目
     from crazy_functions.SourceCode_Analyse import 解析一个CSharp项目
-    from crazy_functions.总结word文档 import 总结word文档
-    from crazy_functions.解析JupyterNotebook import 解析ipynb文件
+    from crazy_functions.Word_Summary import Word_Summary
+    from crazy_functions.SourceCode_Analyse_JupyterNotebook import 解析ipynb文件
     from crazy_functions.Conversation_To_File import 载入对话历史存档
     from crazy_functions.Conversation_To_File import 对话历史存档
     from crazy_functions.Conversation_To_File import Conversation_To_File_Wrap
     from crazy_functions.Conversation_To_File import 删除所有本地对话历史记录
-    from crazy_functions.辅助功能 import 清除缓存
+    from crazy_functions.Helpers import 清除缓存
     from crazy_functions.Markdown_Translate import Markdown英译中
-    from crazy_functions.批量总结PDF文档 import 批量总结PDF文档
+    from crazy_functions.PDF_Summary import PDF_Summary
     from crazy_functions.PDF_Translate import 批量翻译PDF文档
-    from crazy_functions.谷歌检索小助手 import 谷歌检索小助手
-    from crazy_functions.理解PDF文档内容 import 理解PDF文档内容标准文件输入
+    from crazy_functions.Google_Scholar_Assistant_Legacy import Google_Scholar_Assistant_Legacy
+    from crazy_functions.PDF_QA import PDF_QA标准文件输入
     from crazy_functions.Latex_Project_Polish import Latex中文润色
     from crazy_functions.Latex_Project_Polish import Latex英文纠错
     from crazy_functions.Markdown_Translate import Markdown中译英
-    from crazy_functions.虚空终端 import 虚空终端
-    from crazy_functions.生成多种Mermaid图表 import Mermaid_Gen
+    from crazy_functions.Void_Terminal import Void_Terminal
+    from crazy_functions.Mermaid_Figure_Gen import Mermaid_Gen
     from crazy_functions.PDF_Translate_Wrap import PDF_Tran
     from crazy_functions.Latex_Function import Latex英文纠错加PDF对比
     from crazy_functions.Latex_Function import Latex翻译中文并重新编译PDF
@@ -67,7 +67,7 @@ def get_crazy_functions():
             "Color": "stop",
             "AsButton": True,
             "Info": "使用自然语言实现您的想法",
-            "Function": HotReload(虚空终端),
+            "Function": HotReload(Void_Terminal),
         },
         "解析整个Python项目": {
             "Group": "编程",
@@ -125,7 +125,7 @@ def get_crazy_functions():
             "Color": "stop",
             "AsButton": False,
             "Info": "批量总结word文档 | 输入参数为路径",
-            "Function": HotReload(总结word文档),
+            "Function": HotReload(Word_Summary),
         },
         "解析整个Matlab项目": {
             "Group": "编程",
@@ -204,7 +204,7 @@ def get_crazy_functions():
             "Color": "stop",
             "AsButton": False,
             "Info": "读取Tex论文并写摘要 | 输入参数为路径",
-            "Function": HotReload(读文章写摘要),
+            "Function": HotReload(Paper_Abstract_Writer),
         },
         "翻译README或MD": {
             "Group": "编程",
@@ -225,14 +225,14 @@ def get_crazy_functions():
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
             "Info": "批量生成函数的注释 | 输入参数为路径",
-            "Function": HotReload(批量生成函数注释),
+            "Function": HotReload(批量Program_Comment_Gen),
         },
         "保存当前的对话": {
             "Group": "对话",
             "Color": "stop",
             "AsButton": True,
             "Info": "保存当前的对话 | 不需要输入参数",
-            "Function": HotReload(对话历史存档),    # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
+            "Function": HotReload(对话历史存档),    # 当注册Class后，Function旧接口仅会在“Void_Terminal”中起作用
             "Class": Conversation_To_File_Wrap     # 新一代插件需要注册Class
         },
         "[多线程Demo]解析此项目本身（源码自译解）": {
@@ -258,12 +258,12 @@ def get_crazy_functions():
             "Function": None,
             "Class": Demo_Wrap, # 新一代插件需要注册Class
         },
-        "精准翻译PDF论文": {
+        "PDF论文翻译": {
             "Group": "学术",
             "Color": "stop",
             "AsButton": True,
             "Info": "精准翻译PDF论文为中文 | 输入参数为路径",
-            "Function": HotReload(批量翻译PDF文档), # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
+            "Function": HotReload(批量翻译PDF文档), # 当注册Class后，Function旧接口仅会在“Void_Terminal”中起作用
             "Class": PDF_Tran,  # 新一代插件需要注册Class
         },
         "询问多个GPT模型": {
@@ -277,21 +277,21 @@ def get_crazy_functions():
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
             "Info": "批量总结PDF文档的内容 | 输入参数为路径",
-            "Function": HotReload(批量总结PDF文档),
+            "Function": HotReload(PDF_Summary),
         },
         "谷歌学术检索助手（输入谷歌学术搜索页url）": {
             "Group": "学术",
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
             "Info": "使用谷歌学术检索助手搜索指定URL的结果 | 输入参数为谷歌学术搜索页的URL",
-            "Function": HotReload(谷歌检索小助手),
+            "Function": HotReload(Google_Scholar_Assistant_Legacy),
         },
         "理解PDF文档内容 （模仿ChatPDF）": {
             "Group": "学术",
             "Color": "stop",
             "AsButton": False,  # 加入下拉菜单中
             "Info": "理解PDF文档的内容并进行回答 | 输入参数为路径",
-            "Function": HotReload(理解PDF文档内容标准文件输入),
+            "Function": HotReload(PDF_QA标准文件输入),
         },
         "英文Latex项目全文润色（输入路径或上传压缩包）": {
             "Group": "学术",
@@ -356,7 +356,7 @@ def get_crazy_functions():
                             r"例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
                             r'If the term "agent" is used in this section, it should be translated to "智能体". ',
             "Info": "ArXiv论文精细翻译 | 输入参数arxiv论文的ID，比如1812.10695",
-            "Function": HotReload(Latex翻译中文并重新编译PDF),  # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
+            "Function": HotReload(Latex翻译中文并重新编译PDF),  # 当注册Class后，Function旧接口仅会在“Void_Terminal”中起作用
             "Class": Arxiv_Localize,    # 新一代插件需要注册Class
         },
         "📚本地Latex论文精细翻译（上传Latex项目）[需Latex]": {
@@ -379,7 +379,7 @@ def get_crazy_functions():
                             r"例如当单词'agent'翻译不准确时, 请尝试把以下指令复制到高级参数区: "
                             r'If the term "agent" is used in this section, it should be translated to "智能体". ',
             "Info": "PDF翻译中文，并重新编译PDF | 输入参数为路径",
-            "Function": HotReload(PDF翻译中文并重新编译PDF),   # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
+            "Function": HotReload(PDF翻译中文并重新编译PDF),   # 当注册Class后，Function旧接口仅会在“Void_Terminal”中起作用
             "Class": PDF_Localize   # 新一代插件需要注册Class
         },
         "批量文件询问 (支持自定义总结各种文件)": {
@@ -400,7 +400,7 @@ def get_crazy_functions():
                 "Color": "stop",
                 "AsButton": False,
                 "Info": "使用 DALLE2/DALLE3 生成图片 | 输入参数字符串，提供图像的内容",
-                "Function": HotReload(图片生成_DALLE2),   # 当注册Class后，Function旧接口仅会在“虚空终端”中起作用
+                "Function": HotReload(图片生成_DALLE2),   # 当注册Class后，Function旧接口仅会在“Void_Terminal”中起作用
                 "Class": ImageGen_Wrap  # 新一代插件需要注册Class
             },
         }
@@ -427,7 +427,7 @@ def get_crazy_functions():
 
 
     try:
-        from crazy_functions.下载arxiv论文翻译摘要 import 下载arxiv论文并翻译摘要
+        from crazy_functions.Arxiv_Downloader import 下载arxiv论文并翻译摘要
 
         function_plugins.update(
             {
@@ -465,7 +465,7 @@ def get_crazy_functions():
         logger.error("Load function plugin failed")
 
     try:
-        from crazy_functions.询问多个大语言模型 import 同时问询_指定模型
+        from crazy_functions.Multi_LLM_Query import 同时问询_指定模型
 
         function_plugins.update(
             {
@@ -486,7 +486,7 @@ def get_crazy_functions():
 
 
     try:
-        from crazy_functions.总结音视频 import 总结音视频
+        from crazy_functions.Audio_Summary import Audio_Summary
 
         function_plugins.update(
             {
@@ -497,7 +497,7 @@ def get_crazy_functions():
                     "AdvancedArgs": True,
                     "ArgsReminder": "调用openai api 使用whisper-1模型, 目前支持的格式:mp4, m4a, wav, mpga, mpeg, mp3。此处可以输入解析提示，例如：解析为简体中文（默认）。",
                     "Info": "批量总结音频或视频 | 输入参数为路径",
-                    "Function": HotReload(总结音视频),
+                    "Function": HotReload(Audio_Summary),
                 }
             }
         )
@@ -506,7 +506,7 @@ def get_crazy_functions():
         logger.error("Load function plugin failed")
 
     try:
-        from crazy_functions.数学动画生成manim import 动画生成
+        from crazy_functions.Math_Animation_Gen import 动画生成
 
         function_plugins.update(
             {
@@ -543,7 +543,7 @@ def get_crazy_functions():
         logger.error("Load function plugin failed")
 
     try:
-        from crazy_functions.知识库问答 import 知识库文件注入
+        from crazy_functions.Vectorstore_QA import 知识库文件注入
 
         function_plugins.update(
             {
@@ -562,7 +562,7 @@ def get_crazy_functions():
         logger.error("Load function plugin failed")
 
     try:
-        from crazy_functions.知识库问答 import 读取知识库作答
+        from crazy_functions.Vectorstore_QA import 读取知识库作答
 
         function_plugins.update(
             {
@@ -581,7 +581,7 @@ def get_crazy_functions():
         logger.error("Load function plugin failed")
 
     try:
-        from crazy_functions.交互功能函数模板 import 交互功能模板函数
+        from crazy_functions.Interactive_Func_Template import 交互功能模板函数
 
         function_plugins.update(
             {
@@ -603,7 +603,7 @@ def get_crazy_functions():
 
         ENABLE_AUDIO = get_conf("ENABLE_AUDIO")
         if ENABLE_AUDIO:
-            from crazy_functions.语音助手 import 语音助手
+            from crazy_functions.Audio_Assistant import Audio_Assistant
 
             function_plugins.update(
                 {
@@ -612,7 +612,7 @@ def get_crazy_functions():
                         "Color": "stop",
                         "AsButton": True,
                         "Info": "这是一个时刻聆听着的语音对话助手 | 没有输入参数",
-                        "Function": HotReload(语音助手),
+                        "Function": HotReload(Audio_Assistant),
                     }
                 }
             )
@@ -621,7 +621,7 @@ def get_crazy_functions():
         logger.error("Load function plugin failed")
 
     try:
-        from crazy_functions.批量翻译PDF文档_NOUGAT import 批量翻译PDF文档
+        from crazy_functions.PDF_Translate_Nougat import 批量翻译PDF文档
 
         function_plugins.update(
             {
@@ -638,7 +638,7 @@ def get_crazy_functions():
         logger.error("Load function plugin failed")
 
     try:
-        from crazy_functions.函数动态生成 import 函数动态生成
+        from crazy_functions.Dynamic_Function_Generate import Dynamic_Function_Generate
 
         function_plugins.update(
             {
@@ -646,7 +646,7 @@ def get_crazy_functions():
                     "Group": "智能体",
                     "Color": "stop",
                     "AsButton": False,
-                    "Function": HotReload(函数动态生成),
+                    "Function": HotReload(Dynamic_Function_Generate),
                 }
             }
         )
@@ -655,37 +655,20 @@ def get_crazy_functions():
         logger.error("Load function plugin failed")
 
     # try:
-    #     from crazy_functions.多智能体 import 多智能体终端
+    #     from crazy_functions.Multi_Agent_Legacy import Multi_Agent_Legacy终端
     #     function_plugins.update(
     #         {
-    #             "AutoGen多智能体终端（仅供测试）": {
+    #             "AutoGenMulti_Agent_Legacy终端（仅供测试）": {
     #                 "Group": "智能体",
     #                 "Color": "stop",
     #                 "AsButton": False,
-    #                 "Function": HotReload(多智能体终端),
+    #                 "Function": HotReload(Multi_Agent_Legacy终端),
     #             }
     #         }
     #     )
     # except:
     #     logger.error(trimmed_format_exc())
     #     logger.error("Load function plugin failed")
-
-    try:
-        from crazy_functions.互动小游戏 import 随机小游戏
-
-        function_plugins.update(
-            {
-                "随机互动小游戏（仅供测试）": {
-                    "Group": "智能体",
-                    "Color": "stop",
-                    "AsButton": False,
-                    "Function": HotReload(随机小游戏),
-                }
-            }
-        )
-    except:
-        logger.error(trimmed_format_exc())
-        logger.error("Load function plugin failed")
 
     try:
         from crazy_functions.Rag_Interface import Rag问答

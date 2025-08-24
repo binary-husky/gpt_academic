@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
     # plugin_test(plugin='crazy_functions.Internet_GPT->连接网络回答问题', main_input="谁是应急食品？")
 
-    # plugin_test(plugin='crazy_functions.函数动态生成->函数动态生成', main_input='交换图像的蓝色通道和红色通道', advanced_arg={"file_path_arg": "./build/ants.jpg"})
+    # plugin_test(plugin='crazy_functions.Dynamic_Function_Generate->Dynamic_Function_Generate', main_input='交换图像的蓝色通道和红色通道', advanced_arg={"file_path_arg": "./build/ants.jpg"})
 
     # plugin_test(plugin='crazy_functions.Latex_Function->Latex翻译中文并重新编译PDF', main_input="2307.07522")
 
@@ -24,13 +24,13 @@ if __name__ == "__main__":
     #     main_input="G:/SEAFILE_LOCAL/50503047/我的资料库/学位/paperlatex/aaai/Fu_8368_with_appendix",
     # )
 
-    # plugin_test(plugin='crazy_functions.虚空终端->虚空终端', main_input='修改api-key为sk-jhoejriotherjep')
+    # plugin_test(plugin='crazy_functions.Void_Terminal->Void_Terminal', main_input='修改api-key为sk-jhoejriotherjep')
 
-    # plugin_test(plugin='crazy_functions.批量翻译PDF文档_NOUGAT->批量翻译PDF文档', main_input='crazy_functions/test_project/pdf_and_word/aaai.pdf')
+    # plugin_test(plugin='crazy_functions.PDF_Translate_Nougat->批量翻译PDF文档', main_input='crazy_functions/test_project/pdf_and_word/aaai.pdf')
 
-    # plugin_test(plugin='crazy_functions.虚空终端->虚空终端', main_input='调用插件，对C:/Users/fuqingxu/Desktop/旧文件/gpt/chatgpt_academic/crazy_functions/latex_fns中的python文件进行解析')
+    # plugin_test(plugin='crazy_functions.Void_Terminal->Void_Terminal', main_input='调用插件，对C:/Users/fuqingxu/Desktop/旧文件/gpt/chatgpt_academic/crazy_functions/latex_fns中的python文件进行解析')
 
-    # plugin_test(plugin='crazy_functions.命令行助手->命令行助手', main_input='查看当前的docker容器列表')
+    # plugin_test(plugin='crazy_functions.Commandline_Assistant->Commandline_Assistant', main_input='查看当前的docker容器列表')
 
     # plugin_test(plugin='crazy_functions.SourceCode_Analyse->解析一个Python项目', main_input="crazy_functions/test_project/python/dqn")
 
@@ -42,15 +42,15 @@ if __name__ == "__main__":
 
     # plugin_test(plugin='crazy_functions.PDF_Translate->批量翻译PDF文档', main_input='crazy_functions/test_project/pdf_and_word/aaai.pdf')
 
-    # plugin_test(plugin='crazy_functions.谷歌检索小助手->谷歌检索小助手', main_input="https://scholar.google.com/scholar?hl=en&as_sdt=0%2C5&q=auto+reinforcement+learning&btnG=")
+    # plugin_test(plugin='crazy_functions.Google_Scholar_Assistant_Legacy->Google_Scholar_Assistant_Legacy', main_input="https://scholar.google.com/scholar?hl=en&as_sdt=0%2C5&q=auto+reinforcement+learning&btnG=")
 
-    # plugin_test(plugin='crazy_functions.总结word文档->总结word文档', main_input="crazy_functions/test_project/pdf_and_word")
+    # plugin_test(plugin='crazy_functions.Word_Summary->Word_Summary', main_input="crazy_functions/test_project/pdf_and_word")
 
-    # plugin_test(plugin='crazy_functions.下载arxiv论文翻译摘要->下载arxiv论文并翻译摘要', main_input="1812.10695")
+    # plugin_test(plugin='crazy_functions.Arxiv_Downloader->下载arxiv论文并翻译摘要', main_input="1812.10695")
 
-    # plugin_test(plugin='crazy_functions.解析JupyterNotebook->解析ipynb文件', main_input="crazy_functions/test_samples")
+    # plugin_test(plugin='crazy_functions.SourceCode_Analyse_JupyterNotebook->解析ipynb文件', main_input="crazy_functions/test_samples")
 
-    # plugin_test(plugin='crazy_functions.数学动画生成manim->动画生成', main_input="A ball split into 2, and then split into 4, and finally split into 8.")
+    # plugin_test(plugin='crazy_functions.Math_Animation_Gen->动画生成', main_input="A ball split into 2, and then split into 4, and finally split into 8.")
 
     # for lang in ["English", "French", "Japanese", "Korean", "Russian", "Italian", "German", "Portuguese", "Arabic"]:
     #     plugin_test(plugin='crazy_functions.Markdown_Translate->Markdown翻译指定语言', main_input="README.md", advanced_arg={"advanced_arg": lang})

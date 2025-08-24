@@ -21,7 +21,7 @@ Please describe in natural language what you want to do.
 5. If you don't need to upload a file, you can simply repeat your command again.
 """
 explain_msg = """
-## 虚空终端插件说明:
+## Void_Terminal插件说明:
 
 1. 请用**自然语言**描述您需要做什么。例如：
     - 「请调用插件，为我翻译PDF论文，论文我刚刚放到上传区了」
@@ -104,9 +104,9 @@ def analyze_intention_with_simple_rules(txt):
 
 
 @CatchException
-def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
+def Void_Terminal(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     disable_auto_promotion(chatbot=chatbot)
-    # 获取当前虚空终端状态
+    # 获取当前Void_Terminal状态
     state = VoidTerminalState.get_state(chatbot)
     appendix_msg = ""
 
@@ -121,21 +121,21 @@ def 虚空终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
         state.set_state(chatbot=chatbot, key='has_provided_explanation', value=True)
         state.unlock_plugin(chatbot=chatbot)
         yield from update_ui(chatbot=chatbot, history=history)
-        yield from 虚空终端主路由(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request)
+        yield from Void_Terminal主路由(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request)
         return
     else:
         # 如果意图模糊，提示
         state.set_state(chatbot=chatbot, key='has_provided_explanation', value=True)
         state.lock_plugin(chatbot=chatbot)
-        chatbot.append(("虚空终端状态:", explain_msg+appendix_msg))
+        chatbot.append(("Void_Terminal状态:", explain_msg+appendix_msg))
         yield from update_ui(chatbot=chatbot, history=history)
         return
 
 
 
-def 虚空终端主路由(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
+def Void_Terminal主路由(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     history = []
-    chatbot.append(("虚空终端状态: ", f"正在执行任务: {txt}"))
+    chatbot.append(("Void_Terminal状态: ", f"正在执行任务: {txt}"))
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
     # ⭐ ⭐ ⭐ 分析用户意图

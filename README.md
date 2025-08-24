@@ -63,7 +63,6 @@ Read this in [English](docs/README.English.md) | [日本語](docs/README.Japanes
 ⭐支持mermaid图像渲染 | 支持让GPT生成[流程图](https://www.bilibili.com/video/BV18c41147H9/)、状态转移图、甘特图、饼状图、GitGraph等等（3.7版本）
 ⭐Arxiv论文精细翻译 ([Docker](https://github.com/binary-husky/gpt_academic/pkgs/container/gpt_academic_with_latex)) | [插件] 一键[以超高质量翻译arxiv论文](https://www.bilibili.com/video/BV1dz4y1v77A/)，目前最好的论文翻译工具
 ⭐[实时语音对话输入](https://github.com/binary-husky/gpt_academic/blob/master/docs/use_audio.md) | [插件] 异步[监听音频](https://www.bilibili.com/video/BV1AV4y187Uy/)，自动断句，自动寻找回答时机
-⭐AutoGen多智能体插件 | [插件] 借助微软AutoGen，探索多Agent的智能涌现可能！
 ⭐虚空终端插件 | [插件] 能够使用自然语言直接调度本项目其他插件
 润色、翻译、代码解释 | 一键润色、翻译、查找论文语法错误、解释代码
 [自定义快捷键](https://www.bilibili.com/video/BV14s4y1E7jN) | 支持自定义快捷键

@@ -19,24 +19,24 @@
 | crazy_functions\Latex全文润色.py | 对整个 Latex 项目进行润色和纠错 |
 | crazy_functions\Latex全文翻译.py | 对整个 Latex 项目进行翻译 |
 | crazy_functions\\_\_init\_\_.py | 模块初始化文件，标识 `crazy_functions` 是一个包 |
-| crazy_functions\下载arxiv论文翻译摘要.py | 下载 `arxiv` 论文的 PDF 文件，并提取摘要和翻译 |
+| crazy_functions\Arxiv_Downloader.py | 下载 `arxiv` 论文的 PDF 文件，并提取摘要和翻译 |
 | crazy_functions\代码重写为全英文_多线程.py | 将Python源代码文件中的中文内容转化为英文 |
 | crazy_functions\图片生成.py | 根据激励文本使用GPT模型生成相应的图像 |
 | crazy_functions\Conversation_To_File.py | 将每次对话记录写入Markdown格式的文件中 |
-| crazy_functions\总结word文档.py | 对输入的word文档进行摘要生成 |
-| crazy_functions\总结音视频.py | 对输入的音视频文件进行摘要生成 |
+| crazy_functions\Word_Summary.py | 对输入的word文档进行摘要生成 |
+| crazy_functions\Audio_Summary.py | 对输入的音视频文件进行摘要生成 |
 | crazy_functions\Markdown_Translate.py | 将指定目录下的Markdown文件进行中英文翻译 |
-| crazy_functions\批量总结PDF文档.py | 对PDF文件进行切割和摘要生成 |
-| crazy_functions\批量总结PDF文档pdfminer.py | 对PDF文件进行文本内容的提取和摘要生成 |
+| crazy_functions\PDF_Summary.py | 对PDF文件进行切割和摘要生成 |
+| crazy_functions\PDF_Summarypdfminer.py | 对PDF文件进行文本内容的提取和摘要生成 |
 | crazy_functions\PDF_Translate.py | 将指定目录下的PDF文件进行中英文翻译 |
-| crazy_functions\理解PDF文档内容.py | 对PDF文件进行摘要生成和问题解答 |
-| crazy_functions\生成函数注释.py | 自动生成Python函数的注释 |
-| crazy_functions\联网的ChatGPT.py | 使用网络爬虫和ChatGPT模型进行聊天回答 |
-| crazy_functions\解析JupyterNotebook.py | 对Jupyter Notebook进行代码解析 |
+| crazy_functions\PDF_QA.py | 对PDF文件进行摘要生成和问题解答 |
+| crazy_functions\Program_Comment_Gen.py | 自动生成Python函数的注释 |
+| crazy_functions\Internet_GPT_Legacy.py | 使用网络爬虫和ChatGPT模型进行聊天回答 |
+| crazy_functions\SourceCode_Analyse_JupyterNotebook.py | 对Jupyter Notebook进行代码解析 |
 | crazy_functions\解析项目源代码.py | 对指定编程语言的源代码进行解析 |
-| crazy_functions\询问多个大语言模型.py | 使用多个大语言模型对输入进行处理和回复 |
-| crazy_functions\读文章写摘要.py | 对论文进行解析和全文摘要生成 |
-| crazy_functions\谷歌检索小助手.py | 提供谷歌学术搜索页面中相关文章的元数据信息。 |
+| crazy_functions\Multi_LLM_Query.py | 使用多个大语言模型对输入进行处理和回复 |
+| crazy_functions\Paper_Abstract_Writer.py | 对论文进行解析和全文摘要生成 |
+| crazy_functions\Google_Scholar_Assistant_Legacy.py | 提供谷歌学术搜索页面中相关文章的元数据信息。 |
 | crazy_functions\高级功能函数模板.py | 使用Unsplash API发送相关图片以回复用户的输入。 |
 | request_llms\bridge_all.py | 基于不同LLM模型进行对话。 |
 | request_llms\bridge_chatglm.py | 使用ChatGLM模型生成回复，支持单线程和多线程方式。 |
@@ -120,7 +120,7 @@ toolbox.py是一个工具类库，其中主要包含了一些函数装饰器和�
 
 ## [10/48] 请对下面的程序文件做一个概述: crazy_functions\crazy_functions_test.py
 
-这个文件是一个Python测试模块，用于测试crazy_functions中的各种函数插件。这些函数包括：解析Python项目源代码、解析Cpp项目源代码、Latex全文润色、Markdown中译英、批量翻译PDF文档、谷歌检索小助手、总结word文档、下载arxiv论文并翻译摘要、联网回答问题、和解析Jupyter Notebooks。对于每个函数插件，都有一个对应的测试函数来进行测试。
+这个文件是一个Python测试模块，用于测试crazy_functions中的各种函数插件。这些函数包括：解析Python项目源代码、解析Cpp项目源代码、Latex全文润色、Markdown中译英、批量翻译PDF文档、Google_Scholar_Assistant_Legacy、Word_Summary、下载arxiv论文并翻译摘要、联网回答问题、和解析Jupyter Notebooks。对于每个函数插件，都有一个对应的测试函数来进行测试。
 
 ## [11/48] 请对下面的程序文件做一个概述: crazy_functions\crazy_utils.py
 
@@ -143,9 +143,9 @@ toolbox.py是一个工具类库，其中主要包含了一些函数装饰器和�
 
 这是一个Python模块的初始化文件（__init__.py），命名为"crazy_functions"。该模块包含了一些疯狂的函数，但该文件并没有实现这些函数，而是作为一个包（package）来导入其它的Python模块以实现这些函数。在该文件中，没有定义任何类或函数，它唯一的作用就是标识"crazy_functions"模块是一个包。
 
-## [15/48] 请对下面的程序文件做一个概述: crazy_functions\下载arxiv论文翻译摘要.py
+## [15/48] 请对下面的程序文件做一个概述: crazy_functions\Arxiv_Downloader.py
 
-这是一个 Python 程序文件，文件名为 `下载arxiv论文翻译摘要.py`。程序包含多个函数，其中 `下载arxiv论文并翻译摘要` 函数的作用是下载 `arxiv` 论文的 PDF 文件，提取摘要并使用 GPT 对其进行翻译。其他函数包括用于下载 `arxiv` 论文的 `download_arxiv_` 函数和用于获取文章信息的 `get_name` 函数，其中涉及使用第三方库如 requests, BeautifulSoup 等。该文件还包含一些用于调试和存储文件的代码段。
+这是一个 Python 程序文件，文件名为 `Arxiv_Downloader.py`。程序包含多个函数，其中 `下载arxiv论文并翻译摘要` 函数的作用是下载 `arxiv` 论文的 PDF 文件，提取摘要并使用 GPT 对其进行翻译。其他函数包括用于下载 `arxiv` 论文的 `download_arxiv_` 函数和用于获取文章信息的 `get_name` 函数，其中涉及使用第三方库如 requests, BeautifulSoup 等。该文件还包含一些用于调试和存储文件的代码段。
 
 ## [16/48] 请对下面的程序文件做一个概述: crazy_functions\代码重写为全英文_多线程.py
 
@@ -167,11 +167,11 @@ toolbox.py是一个工具类库，其中主要包含了一些函数装饰器和�
 
 4. Conversation_To_File(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request)：一个主要函数，用于保存当前对话记录并提醒用户。如果用户希望加载历史记录，则调用read_file_to_chat()来更新聊天显示框。如果用户希望删除历史记录，调用删除所有本地对话历史记录()函数完成删除操作。
 
-## [19/48] 请对下面的程序文件做一个概述: crazy_functions\总结word文档.py
+## [19/48] 请对下面的程序文件做一个概述: crazy_functions\Word_Summary.py
 
-该程序文件实现了一个总结Word文档的功能，使用Python的docx库读取docx格式的文件，使用pywin32库读取doc格式的文件。程序会先根据传入的txt参数搜索需要处理的文件，并逐个解析其中的内容，将内容拆分为指定长度的文章片段，然后使用另一个程序文件中的request_gpt_model_in_new_thread_with_ui_alive函数进行中文概述。最后将所有的总结结果写入一个文件中，并在界面上进行展示。
+该程序文件实现了一个Word_Summary的功能，使用Python的docx库读取docx格式的文件，使用pywin32库读取doc格式的文件。程序会先根据传入的txt参数搜索需要处理的文件，并逐个解析其中的内容，将内容拆分为指定长度的文章片段，然后使用另一个程序文件中的request_gpt_model_in_new_thread_with_ui_alive函数进行中文概述。最后将所有的总结结果写入一个文件中，并在界面上进行展示。
 
-## [20/48] 请对下面的程序文件做一个概述: crazy_functions\总结音视频.py
+## [20/48] 请对下面的程序文件做一个概述: crazy_functions\Audio_Summary.py
 
 该程序文件包括两个函数：split_audio_file()和AnalyAudio()，并且导入了一些必要的库并定义了一些工具函数。split_audio_file用于将音频文件分割成多个时长相等的片段，返回一个包含所有切割音频片段文件路径的列表，而AnalyAudio用来分析音频文件，通过调用whisper模型进行音频转文字并使用GPT模型对音频内容进行概述，最终将所有总结结果写入结果文件中。
 
@@ -179,31 +179,31 @@ toolbox.py是一个工具类库，其中主要包含了一些函数装饰器和�
 
 该程序文件名为`Markdown_Translate.py`，包含了以下功能：读取Markdown文件，将长文本分离开来，将Markdown文件进行翻译（英译中和中译英），整理结果并退出。程序使用了多线程以提高效率。程序使用了`tiktoken`依赖库，可能需要额外安装。文件中还有一些其他的函数和类，但与文件名所描述的功能无关。
 
-## [22/48] 请对下面的程序文件做一个概述: crazy_functions\批量总结PDF文档.py
+## [22/48] 请对下面的程序文件做一个概述: crazy_functions\PDF_Summary.py
 
-该文件是一个Python脚本，名为crazy_functions\批量总结PDF文档.py。在导入了一系列库和工具函数后，主要定义了5个函数，其中包括一个错误处理装饰器（@CatchException），用于批量总结PDF文档。该函数主要实现对PDF文档的解析，并调用模型生成中英文摘要。
+该文件是一个Python脚本，名为crazy_functions\PDF_Summary.py。在导入了一系列库和工具函数后，主要定义了5个函数，其中包括一个错误处理装饰器（@CatchException），用于PDF_Summary。该函数主要实现对PDF文档的解析，并调用模型生成中英文摘要。
 
-## [23/48] 请对下面的程序文件做一个概述: crazy_functions\批量总结PDF文档pdfminer.py
+## [23/48] 请对下面的程序文件做一个概述: crazy_functions\PDF_Summarypdfminer.py
 
-该程序文件是一个用于批量总结PDF文档的函数插件，使用了pdfminer插件和BeautifulSoup库来提取PDF文档的文本内容，对每个PDF文件分别进行处理并生成中英文摘要。同时，该程序文件还包括一些辅助工具函数和处理异常的装饰器。
+该程序文件是一个用于PDF_Summary的函数插件，使用了pdfminer插件和BeautifulSoup库来提取PDF文档的文本内容，对每个PDF文件分别进行处理并生成中英文摘要。同时，该程序文件还包括一些辅助工具函数和处理异常的装饰器。
 
 ## [24/48] 请对下面的程序文件做一个概述: crazy_functions\PDF_Translate.py
 
 这个程序文件是一个Python脚本，文件名为“PDF_Translate.py”。它主要使用了“toolbox”、“request_gpt_model_in_new_thread_with_ui_alive”、“request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency”、“colorful”等Python库和自定义的模块“crazy_utils”的一些函数。程序实现了一个批量翻译PDF文档的功能，可以自动解析PDF文件中的基础信息，递归地切割PDF文件，翻译和处理PDF论文中的所有内容，并生成相应的翻译结果文件（包括md文件和html文件）。功能比较复杂，其中需要调用多个函数和依赖库，涉及到多线程操作和UI更新。文件中有详细的注释和变量命名，代码比较清晰易读。
 
-## [25/48] 请对下面的程序文件做一个概述: crazy_functions\理解PDF文档内容.py
+## [25/48] 请对下面的程序文件做一个概述: crazy_functions\PDF_QA.py
 
-该程序文件实现了一个名为“理解PDF文档内容”的函数，该函数可以为输入的PDF文件提取摘要以及正文各部分的主要内容，并在提取过程中根据上下文关系进行学术性问题解答。该函数依赖于多个辅助函数和第三方库，并在执行过程中针对可能出现的异常进行了处理。
+该程序文件实现了一个名为“PDF_QA”的函数，该函数可以为输入的PDF文件提取摘要以及正文各部分的主要内容，并在提取过程中根据上下文关系进行学术性问题解答。该函数依赖于多个辅助函数和第三方库，并在执行过程中针对可能出现的异常进行了处理。
 
-## [26/48] 请对下面的程序文件做一个概述: crazy_functions\生成函数注释.py
+## [26/48] 请对下面的程序文件做一个概述: crazy_functions\Program_Comment_Gen.py
 
-该程序文件是一个Python模块文件，文件名为“生成函数注释.py”，定义了两个函数：一个是生成函数注释的主函数“生成函数注释”，另一个是通过装饰器实现异常捕捉的函数“批量生成函数注释”。该程序文件依赖于“toolbox”和本地“crazy_utils”模块，并且在运行时使用了多线程技术和GPT模型来生成注释。函数生成的注释结果使用Markdown表格输出并写入历史记录文件。
+该程序文件是一个Python模块文件，文件名为“Program_Comment_Gen.py”，定义了两个函数：一个是Program_Comment_Gen的主函数“Program_Comment_Gen”，另一个是通过装饰器实现异常捕捉的函数“批量Program_Comment_Gen”。该程序文件依赖于“toolbox”和本地“crazy_utils”模块，并且在运行时使用了多线程技术和GPT模型来生成注释。函数生成的注释结果使用Markdown表格输出并写入历史记录文件。
 
-## [27/48] 请对下面的程序文件做一个概述: crazy_functions\联网的ChatGPT.py
+## [27/48] 请对下面的程序文件做一个概述: crazy_functions\Internet_GPT_Legacy.py
 
-这是一个名为`联网的ChatGPT.py`的Python程序文件，其中定义了一个函数`连接网络回答问题`。该函数通过爬取搜索引擎的结果和访问网页来综合回答给定的问题，并使用ChatGPT模型完成回答。此外，该文件还包括一些工具函数，例如从网页中抓取文本和使用代理访问网页。
+这是一个名为`Internet_GPT_Legacy.py`的Python程序文件，其中定义了一个函数`连接网络回答问题`。该函数通过爬取搜索引擎的结果和访问网页来综合回答给定的问题，并使用ChatGPT模型完成回答。此外，该文件还包括一些工具函数，例如从网页中抓取文本和使用代理访问网页。
 
-## [28/48] 请对下面的程序文件做一个概述: crazy_functions\解析JupyterNotebook.py
+## [28/48] 请对下面的程序文件做一个概述: crazy_functions\SourceCode_Analyse_JupyterNotebook.py
 
 这个程序文件包含了两个函数： `parseNotebook()`和`解析ipynb文件()`，并且引入了一些工具函数和类。`parseNotebook()`函数将Jupyter Notebook文件解析为文本代码块，`解析ipynb文件()`函数则用于解析多个Jupyter Notebook文件，使用`parseNotebook()`解析每个文件和一些其他的处理。函数中使用了多线程处理输入和输出，并且将结果写入到文件中。
 
@@ -211,17 +211,17 @@ toolbox.py是一个工具类库，其中主要包含了一些函数装饰器和�
 
 这是一个源代码分析的Python代码文件，其中定义了多个函数，包括解析一个Python项目、解析一个C项目、解析一个C项目的头文件和解析一个Java项目等。其中解析源代码新函数是实际处理源代码分析并生成报告的函数。该函数首先会逐个读取传入的源代码文件，生成对应的请求内容，通过多线程发送到chatgpt进行分析。然后将结果写入文件，并进行汇总分析。最后通过调用update_ui函数刷新界面，完整实现了源代码的分析。
 
-## [30/48] 请对下面的程序文件做一个概述: crazy_functions\询问多个大语言模型.py
+## [30/48] 请对下面的程序文件做一个概述: crazy_functions\Multi_LLM_Query.py
 
 该程序文件包含两个函数：同时问询()和同时问询_指定模型()，它们的作用是使用多个大语言模型同时对用户输入进行处理，返回对应模型的回复结果。同时问询()会默认使用ChatGPT和ChatGLM两个模型，而同时问询_指定模型()则可以指定要使用的模型。该程序文件还引用了其他的模块和函数库。
 
-## [31/48] 请对下面的程序文件做一个概述: crazy_functions\读文章写摘要.py
+## [31/48] 请对下面的程序文件做一个概述: crazy_functions\Paper_Abstract_Writer.py
 
-这个程序文件是一个Python模块，文件名为crazy_functions\读文章写摘要.py。该模块包含了两个函数，其中主要函数是"读文章写摘要"函数，其实现了解析给定文件夹中的tex文件，对其中每个文件的内容进行摘要生成，并根据各论文片段的摘要，最终生成全文摘要。第二个函数是"解析Paper"函数，用于解析单篇论文文件。其中用到了一些工具函数和库，如update_ui、CatchException、report_exception、write_results_to_file等。
+这个程序文件是一个Python模块，文件名为crazy_functions\Paper_Abstract_Writer.py。该模块包含了两个函数，其中主要函数是"Paper_Abstract_Writer"函数，其实现了解析给定文件夹中的tex文件，对其中每个文件的内容进行摘要生成，并根据各论文片段的摘要，最终生成全文摘要。第二个函数是"解析Paper"函数，用于解析单篇论文文件。其中用到了一些工具函数和库，如update_ui、CatchException、report_exception、write_results_to_file等。
 
-## [32/48] 请对下面的程序文件做一个概述: crazy_functions\谷歌检索小助手.py
+## [32/48] 请对下面的程序文件做一个概述: crazy_functions\Google_Scholar_Assistant_Legacy.py
 
-该文件是一个Python模块，文件名为“谷歌检索小助手.py”。该模块包含两个函数，一个是“get_meta_information()”，用于从提供的网址中分析出所有相关的学术文献的元数据信息；另一个是“谷歌检索小助手()”，是主函数，用于分析用户提供的谷歌学术搜索页面中出现的文章，并提取相关信息。其中，“谷歌检索小助手()”函数依赖于“get_meta_information()”函数，并调用了其他一些Python模块，如“arxiv”、“math”、“bs4”等。
+该文件是一个Python模块，文件名为“Google_Scholar_Assistant_Legacy.py”。该模块包含两个函数，一个是“get_meta_information()”，用于从提供的网址中分析出所有相关的学术文献的元数据信息；另一个是“Google_Scholar_Assistant_Legacy()”，是主函数，用于分析用户提供的谷歌学术搜索页面中出现的文章，并提取相关信息。其中，“Google_Scholar_Assistant_Legacy()”函数依赖于“get_meta_information()”函数，并调用了其他一些Python模块，如“arxiv”、“math”、“bs4”等。
 
 ## [33/48] 请对下面的程序文件做一个概述: crazy_functions\高级功能函数模板.py
 
@@ -307,7 +307,7 @@ GetGLMHandle 类继承自Process类（多进程），主要功能是启动一个
 这个文件是用于对llm模型进行单元测试的Python程序。程序导入一个名为"request_llms.bridge_newbingfree"的模块，然后三次使用该模块中的predict_no_ui_long_connection()函数进行预测，并输出结果。此外，还有一些注释掉的代码段，这些代码段也是关于模型预测的。
 
 ## 用一张Markdown表格简要描述以下文件的功能：
-check_proxy.py, colorful.py, config.py, config_private.py, core_functional.py, crazy_functional.py, main.py, multi_language.py, theme.py, toolbox.py, crazy_functions\crazy_functions_test.py, crazy_functions\crazy_utils.py, crazy_functions\Latex全文润色.py, crazy_functions\Latex全文翻译.py, crazy_functions\__init__.py, crazy_functions\下载arxiv论文翻译摘要.py。根据以上分析，用一句话概括程序的整体功能。
+check_proxy.py, colorful.py, config.py, config_private.py, core_functional.py, crazy_functional.py, main.py, multi_language.py, theme.py, toolbox.py, crazy_functions\crazy_functions_test.py, crazy_functions\crazy_utils.py, crazy_functions\Latex全文润色.py, crazy_functions\Latex全文翻译.py, crazy_functions\__init__.py, crazy_functions\Arxiv_Downloader.py。根据以上分析，用一句话概括程序的整体功能。
 
 | 文件名 | 功能描述 |
 | ------ | ------ |
@@ -326,40 +326,40 @@ check_proxy.py, colorful.py, config.py, config_private.py, core_functional.py, c
 | crazy_functions\Latex全文润色.py | 对整个 Latex 项目进行润色和纠错 |
 | crazy_functions\Latex全文翻译.py | 对整个 Latex 项目进行翻译 |
 | crazy_functions\__init__.py | 模块初始化文件，标识 `crazy_functions` 是一个包 |
-| crazy_functions\下载arxiv论文翻译摘要.py | 下载 `arxiv` 论文的 PDF 文件，并提取摘要和翻译 |
+| crazy_functions\Arxiv_Downloader.py | 下载 `arxiv` 论文的 PDF 文件，并提取摘要和翻译 |
 
 这些程序源文件提供了基础的文本和语言处理功能、工具函数和高级插件，使 Chatbot 能够处理各种复杂的学术文本问题，包括润色、翻译、搜索、下载、解析等。
 
 ## 用一张Markdown表格简要描述以下文件的功能：
-crazy_functions\代码重写为全英文_多线程.py, crazy_functions\图片生成.py, crazy_functions\Conversation_To_File.py, crazy_functions\总结word文档.py, crazy_functions\总结音视频.py, crazy_functions\Markdown_Translate.py, crazy_functions\批量总结PDF文档.py, crazy_functions\批量总结PDF文档pdfminer.py, crazy_functions\PDF_Translate.py, crazy_functions\理解PDF文档内容.py, crazy_functions\生成函数注释.py, crazy_functions\联网的ChatGPT.py, crazy_functions\解析JupyterNotebook.py, crazy_functions\解析项目源代码.py, crazy_functions\询问多个大语言模型.py, crazy_functions\读文章写摘要.py。根据以上分析，用一句话概括程序的整体功能。
+crazy_functions\代码重写为全英文_多线程.py, crazy_functions\图片生成.py, crazy_functions\Conversation_To_File.py, crazy_functions\Word_Summary.py, crazy_functions\Audio_Summary.py, crazy_functions\Markdown_Translate.py, crazy_functions\PDF_Summary.py, crazy_functions\PDF_Summarypdfminer.py, crazy_functions\PDF_Translate.py, crazy_functions\PDF_QA.py, crazy_functions\Program_Comment_Gen.py, crazy_functions\Internet_GPT_Legacy.py, crazy_functions\SourceCode_Analyse_JupyterNotebook.py, crazy_functions\解析项目源代码.py, crazy_functions\Multi_LLM_Query.py, crazy_functions\Paper_Abstract_Writer.py。根据以上分析，用一句话概括程序的整体功能。
 
 | 文件名 | 功能简述 |
 | --- | --- |
 | 代码重写为全英文_多线程.py | 将Python源代码文件中的中文内容转化为英文 |
 | 图片生成.py | 根据激励文本使用GPT模型生成相应的图像 |
 | Conversation_To_File.py | 将每次对话记录写入Markdown格式的文件中 |
-| 总结word文档.py | 对输入的word文档进行摘要生成 |
-| 总结音视频.py | 对输入的音视频文件进行摘要生成 |
+| Word_Summary.py | 对输入的word文档进行摘要生成 |
+| Audio_Summary.py | 对输入的音视频文件进行摘要生成 |
 | Markdown_Translate.py | 将指定目录下的Markdown文件进行中英文翻译 |
-| 批量总结PDF文档.py | 对PDF文件进行切割和摘要生成 |
-| 批量总结PDF文档pdfminer.py | 对PDF文件进行文本内容的提取和摘要生成 |
+| PDF_Summary.py | 对PDF文件进行切割和摘要生成 |
+| PDF_Summarypdfminer.py | 对PDF文件进行文本内容的提取和摘要生成 |
 | PDF_Translate.py | 将指定目录下的PDF文件进行中英文翻译 |
-| 理解PDF文档内容.py | 对PDF文件进行摘要生成和问题解答 |
-| 生成函数注释.py | 自动生成Python函数的注释 |
-| 联网的ChatGPT.py | 使用网络爬虫和ChatGPT模型进行聊天回答 |
-| 解析JupyterNotebook.py | 对Jupyter Notebook进行代码解析 |
+| PDF_QA.py | 对PDF文件进行摘要生成和问题解答 |
+| Program_Comment_Gen.py | 自动生成Python函数的注释 |
+| Internet_GPT_Legacy.py | 使用网络爬虫和ChatGPT模型进行聊天回答 |
+| SourceCode_Analyse_JupyterNotebook.py | 对Jupyter Notebook进行代码解析 |
 | 解析项目源代码.py | 对指定编程语言的源代码进行解析 |
-| 询问多个大语言模型.py | 使用多个大语言模型对输入进行处理和回复 |
-| 读文章写摘要.py | 对论文进行解析和全文摘要生成 |
+| Multi_LLM_Query.py | 使用多个大语言模型对输入进行处理和回复 |
+| Paper_Abstract_Writer.py | 对论文进行解析和全文摘要生成 |
 
 概括程序的整体功能：提供了一系列处理文本、文件和代码的功能，使用了各类语言模型、多线程、网络请求和数据解析技术来提高效率和精度。
 
 ## 用一张Markdown表格简要描述以下文件的功能：
-crazy_functions\谷歌检索小助手.py, crazy_functions\高级功能函数模板.py, request_llms\bridge_all.py, request_llms\bridge_chatglm.py, request_llms\bridge_chatgpt.py, request_llms\bridge_jittorllms_llama.py, request_llms\bridge_jittorllms_pangualpha.py, request_llms\bridge_jittorllms_rwkv.py, request_llms\bridge_moss.py, request_llms\bridge_newbing.py, request_llms\bridge_newbingfree.py, request_llms\bridge_stackclaude.py, request_llms\bridge_tgui.py, request_llms\edge_gpt.py, request_llms\edge_gpt_free.py, request_llms\test_llms.py。根据以上分析，用一句话概括程序的整体功能。
+crazy_functions\Google_Scholar_Assistant_Legacy.py, crazy_functions\高级功能函数模板.py, request_llms\bridge_all.py, request_llms\bridge_chatglm.py, request_llms\bridge_chatgpt.py, request_llms\bridge_jittorllms_llama.py, request_llms\bridge_jittorllms_pangualpha.py, request_llms\bridge_jittorllms_rwkv.py, request_llms\bridge_moss.py, request_llms\bridge_newbing.py, request_llms\bridge_newbingfree.py, request_llms\bridge_stackclaude.py, request_llms\bridge_tgui.py, request_llms\edge_gpt.py, request_llms\edge_gpt_free.py, request_llms\test_llms.py。根据以上分析，用一句话概括程序的整体功能。
 
 | 文件名 | 功能描述 |
 | --- | --- |
-| crazy_functions\谷歌检索小助手.py | 提供谷歌学术搜索页面中相关文章的元数据信息。 |
+| crazy_functions\Google_Scholar_Assistant_Legacy.py | 提供谷歌学术搜索页面中相关文章的元数据信息。 |
 | crazy_functions\高级功能函数模板.py | 使用Unsplash API发送相关图片以回复用户的输入。 |
 | request_llms\bridge_all.py | 基于不同LLM模型进行对话。 |
 | request_llms\bridge_chatglm.py | 使用ChatGLM模型生成回复，支持单线程和多线程方式。 |

@@ -139,7 +139,7 @@ def get_recent_file_prompt_support(chatbot):
     return path
 
 @CatchException
-def 函数动态生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
+def Dynamic_Function_Generate(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     """
     txt             输入栏用户输入的文本，例如需要翻译的一段话，再例如一个包含了待处理文件的路径
     llm_kwargs      gpt模型参数，如温度和top_p等，一般原样传递下去就行
@@ -159,7 +159,7 @@ def 函数动态生成(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_
 
     # ⭐ 文件上传区是否有东西
     # 1. 如果有文件: 作为函数参数
-    # 2. 如果没有文件：需要用GPT提取参数 （太懒了，以后再写，虚空终端已经实现了类似的代码）
+    # 2. 如果没有文件：需要用GPT提取参数 （太懒了，以后再写，Void_Terminal已经实现了类似的代码）
     file_list = []
     if get_plugin_arg(plugin_kwargs, key="file_path_arg", default=False):
         file_path = get_plugin_arg(plugin_kwargs, key="file_path_arg", default=None)

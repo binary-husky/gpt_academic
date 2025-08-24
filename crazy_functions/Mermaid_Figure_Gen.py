@@ -297,7 +297,7 @@ def 解析历史输入(history, llm_kwargs, file_manifest, chatbot, plugin_kwarg
 
 
 @CatchException
-def 生成多种Mermaid图表(
+def Mermaid_Figure_Gen(
     txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port
 ):
     """
@@ -426,7 +426,7 @@ class Mermaid_Gen(GptAcademicPluginTemplate):
             "思维导图",
         ]
         plugin_kwargs = options.index(plugin_kwargs['Type_of_Mermaid'])
-        yield from 生成多种Mermaid图表(
+        yield from Mermaid_Figure_Gen(
             txt,
             llm_kwargs,
             plugin_kwargs,

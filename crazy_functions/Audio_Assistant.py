@@ -168,7 +168,7 @@ class InterviewAssistant(AliyunASR):
 
 
 @CatchException
-def 语音助手(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
+def Audio_Assistant(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
     # pip install -U openai-whisper
     chatbot.append(["对话助手函数插件：使用时，双手离开鼠标键盘吧", "音频助手, 正在听您讲话（点击“停止”键可终止程序）..."])
     yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
