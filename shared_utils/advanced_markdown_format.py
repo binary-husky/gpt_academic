@@ -347,7 +347,7 @@ def markdown_convertion(txt):
 
     # 在文本中插入一个base64编码的原始文本，以便在复制时能够获得原始文本
     raw_text_encoded = compress_string(txt)
-    raw_text_node = f'<div class="raw_text" style="display:none">{raw_text_encoded}</div><div class="message_tail" style="display:none"/>'
+    raw_text_node = f'<div class="raw_text" style="display:none">{raw_text_encoded}</div><div class="message_tail" style="display:none"></div>'
     suf = raw_text_node + "</div>"
 
     # 用于查找数学公式的正则表达式
@@ -407,7 +407,7 @@ def code_block_title_replace_format(match):
 
 
 def get_last_backticks_indent(text):
-    # 从后向前查找最后一个 ``` 
+    # 从后向前查找最后一个 ```
     lines = text.splitlines()
     for line in reversed(lines):
         if '```' in line:
