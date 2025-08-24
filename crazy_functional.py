@@ -709,22 +709,22 @@ def get_crazy_functions():
 
 
 
-    # try:
-    #     from crazy_functions.Paper_Reading import 快速论文解读
-    #     function_plugins.update(
-    #         {
-    #             "速读论文": {
-    #                 "Group": "学术",
-    #                 "Color": "stop",
-    #                 "AsButton": False,
-    #                 "Info": "上传一篇论文进行快速分析和解读 |  输入参数为论文路径或DOI/arXiv ID",
-    #                 "Function": HotReload(快速论文解读),
-    #             },
-    #         }
-    #     )
-    # except:
-    #     logger.error(trimmed_format_exc())
-    #     logger.error("Load function plugin failed")
+    try:
+        from crazy_functions.Paper_Reading import 快速论文解读
+        function_plugins.update(
+            {
+                "速读论文": {
+                    "Group": "学术",
+                    "Color": "stop",
+                    "AsButton": False,
+                    "Info": "上传一篇论文进行快速分析和解读 |  输入参数为论文路径或DOI/arXiv ID",
+                    "Function": HotReload(快速论文解读),
+                },
+            }
+        )
+    except:
+        logger.error(trimmed_format_exc())
+        logger.error("Load function plugin failed")
 
 
     # try:
