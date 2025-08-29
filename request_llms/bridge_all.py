@@ -1,4 +1,3 @@
-
 """
     该文件中主要包含2个函数，是所有LLM的通用接口，它们会继续向下调用更底层的LLM模型，处理多模型并行等细节
 
@@ -115,6 +114,12 @@ get_token_num_gpt4 = lambda txt: len(tokenizer_gpt4.encode(txt, disallowed_speci
 # 开始初始化模型
 AVAIL_LLM_MODELS, LLM_MODEL = get_conf("AVAIL_LLM_MODELS", "LLM_MODEL")
 AVAIL_LLM_MODELS = AVAIL_LLM_MODELS + [LLM_MODEL]
+
+# 获取中转渠道配置
+ZHONGZHUAN_ENABLE, ZHONGZHUAN_ENDPOINT, ZHONGZHUAN_API_KEY, ZHONGZHUAN_MODELS = get_conf(
+    "ZHONGZHUAN_ENABLE", "ZHONGZHUAN_ENDPOINT", "ZHONGZHUAN_API_KEY", "ZHONGZHUAN_MODELS"
+)
+
 # -=-=-=-=-=-=- 以下这部分是最早加入的最稳定的模型 -=-=-=-=-=-=-
 model_info = {
     # openai
@@ -1415,6 +1420,23 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("openrouter-")]:
         },
     })
 
+# -=-=-=-=-=-=- 中转渠道模型对齐支持 -=-=-=-=-=-=-
+# 为中转渠道模型创建统一的model_info配置
+if ZHONGZHUAN_ENABLE and ZHONGZHUAN_MODELS:
+    # 为每个中转渠道模型创建统一的model_info配置
+    # 注意：模型列表的合并已在config.py中处理
+    for model in ZHONGZHUAN_MODELS:
+        model_info.update({
+            model: {
+                "fn_with_ui": chatgpt_ui,
+                "fn_without_ui": chatgpt_noui,
+                "endpoint": ZHONGZHUAN_ENDPOINT,
+                "has_multimodal_capacity": True,
+                "max_token": 12800000,
+                "tokenizer": tokenizer_gpt4,
+                "token_cnt": get_token_num_gpt4,
+            }
+        })
 
 # -=-=-=-=-=-=--=-=-=-=-=-=--=-=-=-=-=-=--=-=-=-=-=-=-=-=
 # -=-=-=-=-=-=-=-=-=- ☝️ 以上是模型路由 -=-=-=-=-=-=-=-=-=
@@ -1459,11 +1481,11 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list, sys
     model = llm_kwargs['llm_model']
     n_model = 1
     if '&' not in model:
-        # 如果只询问“一个”大语言模型（多数情况）：
+        # 如果只询问"一个"大语言模型（多数情况）：
         method = model_info[model]["fn_without_ui"]
         return method(inputs, llm_kwargs, history, sys_prompt, observe_window, console_silence)
     else:
-        # 如果同时询问“多个”大语言模型，这个稍微啰嗦一点，但思路相同，您不必读这个else分支
+        # 如果同时询问"多个"大语言模型，这个稍微啰嗦一点，但思路相同，您不必读这个else分支
         executor = ThreadPoolExecutor(max_workers=4)
         models = model.split('&')
         n_model = len(models)

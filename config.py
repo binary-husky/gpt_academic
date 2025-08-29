@@ -8,6 +8,9 @@
 """
 
 # [step 1-1]>> ( 接入OpenAI模型家族 ) API_KEY = "sk-123456789xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx123456789"。极少数情况下，还需要填写组织（格式如org-123456789abcdefghijklmno的），请向下翻，找 API_ORG 设置项
+from pickle import TRUE
+
+
 API_KEY = "在此处填写APIKEY"    # 可同时填写多个API-KEY，用英文逗号分割，例如API_KEY = "sk-openaikey1,sk-openaikey2,fkxxxx-api2dkey3,azure-apikey4"
 
 # [step 1-2]>> ( 强烈推荐！接入通义家族 & 大模型服务平台百炼 ) 接入通义千问在线大模型，api-key获取地址 https://dashscope.console.aliyun.com/
@@ -15,6 +18,36 @@ DASHSCOPE_API_KEY = "" # 阿里灵积云API_KEY（用于接入qwen-max，dashsco
 
 # [step 1-3]>> ( 接入 deepseek-reasoner, 即 deepseek-r1 ) 深度求索(DeepSeek) API KEY，默认请求地址为"https://api.deepseek.com/v1/chat/completions"
 DEEPSEEK_API_KEY = ""
+
+# [step 1-4]>> ( 接入中转渠道 ) 中转渠道配置，支持采用OpenAI接口模式的中转渠道商
+ZHONGZHUAN_ENABLE =  TRUE  # 是否启用中转渠道，默认关闭
+ZHONGZHUAN_ENDPOINT = "https://test.com/v1/chat/completions"  # 中转渠道的完整API端点
+ZHONGZHUAN_API_KEY = "sk-xxxxxxxxxxxxxxx"  # 中转渠道的API KEY，如果为空则使用API_KEY
+ZHONGZHUAN_MODELS = [
+    # 中转渠道支持的模型列表，使用原始模型名称
+    "o3-mini-all",
+    "gpt-4.1",
+    "gpt-4o",
+    "gpt-4o-mini", 
+    "claude-sonnet-4-20250514-thinking",
+    "claude-sonnet-4-20250514",
+    "gemini-2.5-pro-preview-03-25",
+    # 可以添加更多模型...
+]
+# 配置说明：
+# 1. 将ZHONGZHUAN_ENABLE设置为True启用中转渠道
+# 2. 将ZHONGZHUAN_ENDPOINT设置为你的中转渠道商提供的完整API端点（包含/chat/completions）
+# 3. 将ZHONGZHUAN_API_KEY设置为你的中转渠道商提供的API KEY（可选）
+# 4. 在ZHONGZHUAN_MODELS中配置你想要使用的模型，使用原始模型名称
+# 5. 系统将自动把ZHONGZHUAN_MODELS中的模型添加到AVAIL_LLM_MODELS中，无需重复配置
+# 6. 对于同时在两个列表中的模型，将自动使用中转渠道访问
+# 
+# 示例配置：
+# ZHONGZHUAN_ENABLE = True
+# ZHONGZHUAN_ENDPOINT = "https://api.your-provider.com/v1/chat/completions"
+# ZHONGZHUAN_API_KEY = "your-api-key-here"
+# ZHONGZHUAN_MODELS = ["o3-mini-all", "gpt-4.1", "claude-sonnet-4-20250514"]
+# 然后可以直接设置LLM_MODEL = "o3-mini-all"（将通过中转渠道访问）
 
 # [step 2]>> 改为True应用代理。如果使用本地或无地域限制的大模型时，此处不修改；如果直接在海外服务器部署，此处不修改
 USE_PROXY = False
@@ -48,6 +81,14 @@ AVAIL_LLM_MODELS = ["qwen-max", "o1-mini", "o1-mini-2024-09-12", "o1", "o1-2024-
                     "dashscope-deepseek-r1", "dashscope-deepseek-v3",
                     "dashscope-qwen3-14b", "dashscope-qwen3-235b-a22b", "dashscope-qwen3-32b",
                     ]
+
+# 自动将中转渠道模型添加到可用模型列表中，避免用户重复配置
+# 对于同时在AVAIL_LLM_MODELS和ZHONGZHUAN_MODELS中的模型，将自动使用中转渠道
+if ZHONGZHUAN_ENABLE and ZHONGZHUAN_MODELS:
+    for model in ZHONGZHUAN_MODELS:
+        if model not in AVAIL_LLM_MODELS:
+            AVAIL_LLM_MODELS.append(model)
+    print(f"[中转渠道] 已启用，共{len(ZHONGZHUAN_MODELS)}个模型将通过中转渠道访问: {', '.join(ZHONGZHUAN_MODELS)}")
 
 EMBEDDING_MODEL = "text-embedding-3-small"
 
@@ -158,7 +199,7 @@ MAX_RETRY = 2
 DEFAULT_FN_GROUPS = ['对话', '编程', '学术', '智能体']
 
 
-# 定义界面上“询问多个GPT模型”插件应该使用哪些模型，请从AVAIL_LLM_MODELS中选择，并在不同模型之间用`&`间隔，例如"gpt-3.5-turbo&chatglm3&azure-gpt-4"
+# 定义界面上"询问多个GPT模型"插件应该使用哪些模型，请从AVAIL_LLM_MODELS中选择，并在不同模型之间用`&`间隔，例如"gpt-3.5-turbo&chatglm3&azure-gpt-4"
 MULTI_QUERY_LLM_MODELS = "gpt-3.5-turbo&chatglm3"
 
 
@@ -365,7 +406,7 @@ AUTO_CONTEXT_CLIP_ENABLE = False
 AUTO_CONTEXT_CLIP_TRIGGER_TOKEN_LEN = 30*1000
 # 无条件丢弃x以上的轮数
 AUTO_CONTEXT_MAX_ROUND = 64
-# 在裁剪上下文时，倒数第x次对话能“最多”保留的上下文token的比例占 AUTO_CONTEXT_CLIP_TRIGGER_TOKEN_LEN 的多少
+# 在裁剪上下文时，倒数第x次对话能"最多"保留的上下文token的比例占 AUTO_CONTEXT_CLIP_TRIGGER_TOKEN_LEN 的多少
 AUTO_CONTEXT_MAX_CLIP_RATIO = [0.80, 0.60, 0.45, 0.25, 0.20, 0.18, 0.16, 0.14, 0.12, 0.10, 0.08, 0.07, 0.06, 0.05, 0.04, 0.03, 0.02, 0.01]
 
 
@@ -471,6 +512,13 @@ AUTO_CONTEXT_MAX_CLIP_RATIO = [0.80, 0.60, 0.45, 0.25, 0.20, 0.18, 0.16, 0.14, 0
     ├── GROBID_URLS
     ├── MATHPIX_APPID
     └── MATHPIX_APPKEY
+
+
+"zhongzhuan-..." 中转渠道模型配置
+    ├── ZHONGZHUAN_ENABLE
+    ├── ZHONGZHUAN_ENDPOINT
+    ├── ZHONGZHUAN_API_KEY
+    └── ZHONGZHUAN_MODELS
 
 
 """

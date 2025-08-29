@@ -45,8 +45,17 @@ def is_cohere_api_key(key):
 
 
 def is_any_api_key(key):
-    # key 一般只包含字母、数字、下划线、逗号、中划线
-    if not re.match(r"^[a-zA-Z0-9_\-,]+$", key):
+    # 首先检查是否为中转渠道API KEY
+    try:
+        ZHONGZHUAN_ENABLE, ZHONGZHUAN_API_KEY = get_conf("ZHONGZHUAN_ENABLE", "ZHONGZHUAN_API_KEY")
+        if ZHONGZHUAN_ENABLE and ZHONGZHUAN_API_KEY and key == ZHONGZHUAN_API_KEY:
+            return True
+    except Exception:
+        pass
+    
+    # key 一般只包含字母、数字、下划线、逗号、中划线，但为了支持更多中转渠道，适当放宽限制
+    # 允许点号(.)，用于支持某些中转渠道的特殊格式
+    if not re.match(r"^[a-zA-Z0-9_\-,\.]+$", key):
         # 如果配置了 CUSTOM_API_KEY_PATTERN，再检查以下以免误杀
         if CUSTOM_API_KEY_PATTERN := get_conf('CUSTOM_API_KEY_PATTERN'):
             return bool(re.match(CUSTOM_API_KEY_PATTERN, key))
@@ -92,6 +101,22 @@ def select_api_key(keys, llm_model):
     import random
     avail_key_list = []
     key_list = keys.split(',')
+
+    # 中转渠道API KEY处理
+    try:
+        ZHONGZHUAN_ENABLE, ZHONGZHUAN_MODELS, ZHONGZHUAN_API_KEY = get_conf("ZHONGZHUAN_ENABLE", "ZHONGZHUAN_MODELS", "ZHONGZHUAN_API_KEY")
+        if ZHONGZHUAN_ENABLE and llm_model in ZHONGZHUAN_MODELS:
+            # 如果模型在中转渠道列表中，优先使用中转渠道的API KEY
+            if ZHONGZHUAN_API_KEY:
+                return ZHONGZHUAN_API_KEY
+            # 如果没有设置专门的中转渠道API KEY，则使用OpenAI格式的key（中转渠道一般采用OpenAI接口格式）
+            for k in key_list:
+                if is_openai_api_key(k): avail_key_list.append(k)
+            if len(avail_key_list) > 0:
+                return random.choice(avail_key_list)
+    except Exception:
+        # 如果获取中转渠道配置失败，继续使用原有逻辑
+        pass
 
     if llm_model.startswith('gpt-') or llm_model.startswith('chatgpt-') or \
        llm_model.startswith('one-api-') or is_o_family_for_openai(llm_model):
