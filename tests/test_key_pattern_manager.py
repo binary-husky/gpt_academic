@@ -15,7 +15,7 @@ from shared_utils.key_pattern_manager import is_openai_api_key
 
 class TestKeyPatternManager(unittest.TestCase):
     def test_is_openai_api_key_with_valid_key(self):
-        key = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        key = "REDACTED_SECRET_KEY"
         self.assertTrue(is_openai_api_key(key))
 
         key = "sx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
@@ -27,15 +27,15 @@ class TestKeyPatternManager(unittest.TestCase):
         key = "sess-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
         self.assertFalse(is_openai_api_key(key))
 
-        key = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_xxxxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxx"
+        key = "REDACTED_SECRET_KEY_xxxxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxx"
         self.assertTrue(is_openai_api_key(key))
-        key = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxx_xxxxxxxxxxxx_xxxxx-xxxxxxxxxxxxxxxxxxxx"
+        key = "REDACTED_SECRET_KEY-xxxxxxxxxxxxxxx_xxxxxxxxxxxx_xxxxx-xxxxxxxxxxxxxxxxxxxx"
         self.assertTrue(is_openai_api_key(key))
-        key = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-xxx-xxxxxxxxxxxxxxx_xxxxxxxxxxxx_xxxxx-xxxxxx-xxxxxxxxxxxxx"
+        key = "REDACTED_SECRET_KEY-xxx-xxxxxxxxxxxxxxx_xxxxxxxxxxxx_xxxxx-xxxxxx-xxxxxxxxxxxxx"
         self.assertTrue(is_openai_api_key(key))
-        key = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-xxx-xxxxxxxxxxxxxxx_xxxxxxxxxxxx_xxxxx-xxxxxxxxxxxxxxxxxx"
+        key = "REDACTED_SECRET_KEY-xxx-xxxxxxxxxxxxxxx_xxxxxxxxxxxx_xxxxx-xxxxxxxxxxxxxxxxxx"
         self.assertFalse(is_openai_api_key(key))
-        key = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-xxx-xxxxxxxxxxxxxxx_xxxxxxxxxxxx_xxxxx-xxxxxxxxxxxxxxxxxxxxx"
+        key = "REDACTED_SECRET_KEY-xxx-xxxxxxxxxxxxxxx_xxxxxxxxxxxx_xxxxx-xxxxxxxxxxxxxxxxxxxxx"
         self.assertFalse(is_openai_api_key(key))
 
         key = "sk-proj-xx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxx-xxxxxxxx"

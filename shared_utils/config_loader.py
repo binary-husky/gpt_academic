@@ -12,13 +12,13 @@ def read_env_variable(arg, default_value):
     环境变量可以是 `GPT_ACADEMIC_CONFIG`(优先)，也可以直接是`CONFIG`
     例如在windows cmd中，既可以写：
         set USE_PROXY=True
-        set API_KEY=sk-j7caBpkRoxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+        set API_KEY=REDACTED_SECRET_KEY
         set proxies={"http":"http://127.0.0.1:10085", "https":"http://127.0.0.1:10085",}
         set AVAIL_LLM_MODELS=["gpt-3.5-turbo", "chatglm"]
         set AUTHENTICATION=[("username", "password"), ("username2", "password2")]
     也可以写：
         set GPT_ACADEMIC_USE_PROXY=True
-        set GPT_ACADEMIC_API_KEY=sk-j7caBpkRoxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+        set GPT_ACADEMIC_API_KEY=REDACTED_SECRET_KEY
         set GPT_ACADEMIC_proxies={"http":"http://127.0.0.1:10085", "https":"http://127.0.0.1:10085",}
         set GPT_ACADEMIC_AVAIL_LLM_MODELS=["gpt-3.5-turbo", "chatglm"]
         set GPT_ACADEMIC_AUTHENTICATION=[("username", "password"), ("username2", "password2")]
