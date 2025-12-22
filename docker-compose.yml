@@ -33,7 +33,7 @@ services:
     image: ghcr.io/binary-husky/gpt_academic_with_all_capacity:master
     environment:
       # 请查阅 `config.py`或者 github wiki 以查看所有的配置信息
-      API_KEY:                  '  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                        '
+      API_KEY:                  '  REDACTED_SECRET_KEY                        '
       # USE_PROXY:                '  True                                                                       '
       # proxies:                  '  { "http": "http://localhost:10881", "https": "http://localhost:10881", }   '
       LLM_MODEL:                '  gpt-3.5-turbo                                                              '
@@ -84,7 +84,7 @@ services:
     image: ghcr.io/binary-husky/gpt_academic_nolocal:master # (Auto Built by Dockerfile: docs/GithubAction+NoLocal)
     environment:
       # 请查阅 `config.py` 以查看所有的配置信息
-      API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                                            '
+      API_KEY:                  '    REDACTED_SECRET_KEY                                            '
       USE_PROXY:                '    True                                                                                           '
       proxies:                  '    { "http": "socks5h://localhost:10880", "https": "socks5h://localhost:10880", }                 '
       LLM_MODEL:                '    gpt-3.5-turbo                                                                                  '
@@ -112,7 +112,7 @@ services:
     image: ghcr.io/binary-husky/gpt_academic_chatglm_moss:master  # (Auto Built by Dockerfile: docs/Dockerfile+ChatGLM)
     environment:
       # 请查阅 `config.py` 以查看所有的配置信息
-      API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                                            '
+      API_KEY:                  '    REDACTED_SECRET_KEY                                            '
       USE_PROXY:                '    True                                                                                           '
       proxies:                  '    { "http": "socks5h://localhost:10880", "https": "socks5h://localhost:10880", }                 '
       LLM_MODEL:                '    gpt-3.5-turbo                                                                                  '
@@ -149,7 +149,7 @@ services:
     image: ghcr.io/binary-husky/gpt_academic_jittorllms:master
     environment:
       # 请查阅 `config.py` 以查看所有的配置信息
-      API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx,fkxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  '
+      API_KEY:                  '    REDACTED_SECRET_KEY,fkxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx  '
       USE_PROXY:                '    True                                                                                           '
       proxies:                  '    { "http": "socks5h://localhost:10880", "https": "socks5h://localhost:10880", }                 '
       LLM_MODEL:                '    gpt-3.5-turbo                                                                                  '
@@ -183,7 +183,7 @@ services:
     # 对于ARM64设备，请将以上镜像名称替换为 ghcr.io/binary-husky/gpt_academic_with_latex_arm:master
     environment:
       # 请查阅 `config.py` 以查看所有的配置信息
-      API_KEY:                  '    sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx                              '
+      API_KEY:                  '    REDACTED_SECRET_KEY                              '
       USE_PROXY:                '    True                                                                             '
       proxies:                  '    { "http": "socks5h://localhost:10880", "https": "socks5h://localhost:10880", }   '
       LLM_MODEL:                '    gpt-3.5-turbo                                                                    '

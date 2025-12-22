@@ -26,7 +26,7 @@ curl http://localhost:8000/v1/chat/completions \
 ## 3. 配置本项目
 
 ```
-API_KEY = "sk-123456789xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx123456789"
+API_KEY = "REDACTED_SECRET_KEY"
 LLM_MODEL = "vllm-/home/hmp/llm/cache/Qwen1___5-32B-Chat(max_token=4096)"
 API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "http://localhost:8000/v1/chat/completions"}
 ```
