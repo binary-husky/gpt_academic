@@ -9,7 +9,7 @@ def start_with_url(inputs:str):
     if not ("http://" in inputs or "https://" in inputs):
         return False
     try:
-        text = text.strip(',.!?，。！？ \t\n\r')
+        text = inputs.strip(',.!?，。！？ \t\n\r')
         words = text.split()
         if len(words) != 1:
             return False
