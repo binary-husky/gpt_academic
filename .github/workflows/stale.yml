@@ -17,7 +17,7 @@ jobs:
       pull-requests: read
 
     steps:
-      - uses: actions/stale@v8
+      - uses: actions/stale@v10
         with:
           stale-issue-message: 'This issue is stale because it has been open 100 days with no activity. Remove stale label or comment or this will be closed in 7 days.'
           days-before-stale: 100
