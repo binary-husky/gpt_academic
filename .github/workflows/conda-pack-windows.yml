@@ -9,7 +9,7 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       
     - name: Setup Miniconda
       uses: conda-incubator/setup-miniconda@v3
@@ -50,7 +50,7 @@ jobs:
         Copy-Item gpt.tar.gz workspace/ -Force
     
     - name: Upload packed files
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: gpt-academic-package
         path: workspace
