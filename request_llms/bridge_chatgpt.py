@@ -241,9 +241,19 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
         yield from update_ui(chatbot=chatbot, history=history, msg="api_key已导入") # 刷新界面
         return
     elif not is_any_api_key(chatbot._cookies['api_key']):
-        chatbot.append((inputs, "缺少api_key。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。"))
-        yield from update_ui(chatbot=chatbot, history=history, msg="缺少api_key") # 刷新界面
-        return
+        # 对于中转渠道模型，额外检查中转渠道API key
+        is_zhongzhuan_valid = False
+        try:
+            ZHONGZHUAN_ENABLE, ZHONGZHUAN_MODELS, ZHONGZHUAN_API_KEY = get_conf("ZHONGZHUAN_ENABLE", "ZHONGZHUAN_MODELS", "ZHONGZHUAN_API_KEY")
+            if ZHONGZHUAN_ENABLE and llm_kwargs['llm_model'] in ZHONGZHUAN_MODELS and ZHONGZHUAN_API_KEY:
+                is_zhongzhuan_valid = is_any_api_key(ZHONGZHUAN_API_KEY)
+        except Exception:
+            pass
+        
+        if not is_zhongzhuan_valid:
+            chatbot.append((inputs, "缺少api_key。\n\n1. 临时解决方案：直接在输入区键入api_key，然后回车提交。\n\n2. 长效解决方案：在config.py中配置。"))
+            yield from update_ui(chatbot=chatbot, history=history, msg="缺少api_key") # 刷新界面
+            return
 
     user_input = inputs
     if additional_fn is not None:
@@ -269,12 +279,22 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
 
     # check mis-behavior
     if is_the_upload_folder(user_input):
-        chatbot[-1] = (inputs, f"[Local Message] 检测到操作错误！当您上传文档之后，需点击“**函数插件区**”按钮进行处理，请勿点击“提交”按钮或者“基础功能区”按钮。")
+        chatbot[-1] = (inputs, f"[Local Message] 检测到操作错误！当您上传文档之后，需点击\"**函数插件区**\"按钮进行处理，请勿点击\"提交\"按钮或者\"基础功能区\"按钮。")
         yield from update_ui(chatbot=chatbot, history=history, msg="正常") # 刷新界面
         time.sleep(2)
 
     try:
-        headers, payload = generate_payload(inputs, llm_kwargs, history, system_prompt, image_base64_array, has_multimodal_capacity, stream)
+        # 对于中转渠道模型，需要确保使用正确的API key
+        llm_kwargs_modified = llm_kwargs.copy()
+        try:
+            ZHONGZHUAN_ENABLE, ZHONGZHUAN_MODELS, ZHONGZHUAN_API_KEY = get_conf("ZHONGZHUAN_ENABLE", "ZHONGZHUAN_MODELS", "ZHONGZHUAN_API_KEY")
+            if ZHONGZHUAN_ENABLE and llm_kwargs['llm_model'] in ZHONGZHUAN_MODELS and ZHONGZHUAN_API_KEY:
+                # 确保中转渠道模型使用正确的API key
+                llm_kwargs_modified['api_key'] = ZHONGZHUAN_API_KEY
+        except Exception:
+            pass
+        
+        headers, payload = generate_payload(inputs, llm_kwargs_modified, history, system_prompt, image_base64_array, has_multimodal_capacity, stream)
     except RuntimeError as e:
         chatbot[-1] = (inputs, f"您提供的api-key不满足要求，不包含任何可用于{llm_kwargs['llm_model']}的api-key。您可能选择了错误的模型或请求源。")
         yield from update_ui(chatbot=chatbot, history=history, msg="api-key不满足要求") # 刷新界面
