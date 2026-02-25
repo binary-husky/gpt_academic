@@ -605,7 +605,7 @@ class MasterMindWebSocketServer(PythonMethod_AsyncConnectionMaintainer_Agentcraf
                     msg: UserInterfaceMsg = UserInterfaceMsg.model_validate_json(await websocket.receive_text())
                     logger.info(msg)
                     await self.maintain_connection_forever(msg, websocket, "client_id")
-                except:
+                except Exception:
                     logger.exception("Error in WebSocket connection handler")
                     await websocket.close()
             import uvicorn

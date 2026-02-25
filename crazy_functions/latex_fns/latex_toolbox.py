@@ -385,7 +385,7 @@ def merge_tex_files_(project_foler, main_file, mode):
             try:
                 with open(fp_, "r", encoding="utf-8", errors="replace") as fx:
                     c = fx.read()
-            except:
+            except Exception:
                 c = f"\n\nWarning from GPT-Academic: LaTex source file is missing!\n\n"
         else:
             raise RuntimeError(f"找不到{fp}，Tex源文件缺失！")
@@ -647,7 +647,7 @@ def _merge_pdfs(pdf1_path, pdf2_path, output_path):
     try:
         logger.info("Merging PDFs using _merge_pdfs_ng")
         _merge_pdfs_ng(pdf1_path, pdf2_path, output_path)
-    except:
+    except Exception:
         logger.info("Merging PDFs using _merge_pdfs_legacy")
         _merge_pdfs_legacy(pdf1_path, pdf2_path, output_path)
 

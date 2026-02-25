@@ -309,7 +309,7 @@ def get_reduce_token_percent(text:str):
         ratio = max_limit / current_tokens
         assert ratio > 0 and ratio < 1
         return ratio, str(int(current_tokens - max_limit))
-    except:
+    except Exception:
         return 0.5, "不详"
 
 
@@ -334,13 +334,13 @@ def write_history_to_file(
             try:
                 if type(content) != str:
                     content = str(content)
-            except:
+            except Exception:
                 continue
             if i % 2 == 0 and auto_caption:
                 f.write("## ")
             try:
                 f.write(content)
-            except:
+            except Exception:
                 # remove everything that cannot be handled by utf8
                 f.write(content.encode("utf-8", "ignore").decode())
             f.write("\n\n")
@@ -412,7 +412,7 @@ def file_already_in_downloadzone(file:str, user_path:str):
             return True
         else:
             return False
-    except:
+    except Exception:
         return False
 
 
@@ -470,7 +470,7 @@ def del_outdated_uploads(outdate_time_seconds:float, target_path_base:str=None):
         if subdirectory_time < one_hour_ago:
             try:
                 shutil.rmtree(subdirectory)
-            except:
+            except Exception:
                 pass
     return
 
@@ -1009,5 +1009,5 @@ def log_chat(llm_model: str, input_str: str, output_str: str):
             {output_str}
             ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
             """).format(uid=uid, llm_model=llm_model, input_str=input_str, output_str=output_str))
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())

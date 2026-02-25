@@ -104,7 +104,7 @@ class LatexPaperSplit():
                 self.title = title.replace('\n', ' ').replace('\\\\', ' ').replace('  ', '').replace('  ', '')
             if abstract is not None:
                 self.abstract = abstract.replace('\n', ' ').replace('\\\\', ' ').replace('  ', '').replace('  ', '')
-        except:
+        except Exception:
             pass
 
     def merge_result(self, arr, mode, msg, buggy_lines=[], buggy_line_surgery_n_lines=10):
@@ -339,7 +339,7 @@ def remove_buggy_lines(file_path, log_path, tex_name, tex_name_pure, n_fix, work
             f.write(final_tex)
 
         return True, f"{tex_name_pure}_fix_{n_fix}", buggy_lines
-    except:
+    except Exception:
         logger.error("Fatal error occurred, but we cannot identify error, please download zip, read latex log, and compile manually.")
         return False, -1, [-1]
 
@@ -501,7 +501,7 @@ def write_html(sp_file_contents, sp_file_result, chatbot, project_folder):
         res = ch.save_file(create_report_file_name)
         shutil.copyfile(res, pj(project_folder, create_report_file_name))
         promote_file_to_downloadzone(file=res, chatbot=chatbot)
-    except:
+    except Exception:
         from toolbox import trimmed_format_exc
         logger.error('writing html result failed:', trimmed_format_exc())
 
@@ -540,7 +540,7 @@ def upload_to_gptac_cloud_if_user_allow(chatbot, arxiv_id):
                     }
                     resp = requests.post(url=url, files=files, data=data, timeout=30)
                 logger.info(f'Uploading terminate ({resp.status_code})`: {file_path}')
-    except:
+    except Exception:
         # 如果上传失败，不会中断程序，因为这是次要功能
         pass
 
@@ -568,6 +568,6 @@ def check_gptac_cloud(arxiv_id, chatbot):
                 new_path = promote_file_to_downloadzone(target, chatbot=chatbot)
                 success = True
                 downloaded.append(new_path)
-    except:
+    except Exception:
         pass
     return success, downloaded

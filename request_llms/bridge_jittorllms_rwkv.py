@@ -26,7 +26,7 @@ class GetGLMHandle(Process):
             import pandas
             self.info = "依赖检测通过"
             self.success = True
-        except:
+        except Exception:
             from toolbox import trimmed_format_exc
             self.info = r"缺少jittorllms的依赖，如果要使用jittorllms，除了基础的pip依赖以外，您还需要运行`pip install -r request_llms/requirements_jittorllms.txt -i https://pypi.jittor.org/simple -I`"+\
                         r"和`git clone https://gitlink.org.cn/jittor/JittorLLMs.git --depth 1 request_llms/jittorllms`两个指令来安装jittorllms的依赖（在项目根目录运行这两个指令）。" +\
@@ -60,7 +60,7 @@ class GetGLMHandle(Process):
                     print('self.jittorllms_model = get_model(types.SimpleNamespace(**args_dict))')
                     self.jittorllms_model = get_model(types.SimpleNamespace(**args_dict))
                     print('done get model')
-            except:
+            except Exception:
                 self.child.send('[Local Message] Call jittorllms fail 不能正常加载jittorllms的参数。')
                 raise RuntimeError("不能正常加载jittorllms的参数！")
         print('load_model')
@@ -84,7 +84,7 @@ class GetGLMHandle(Process):
                 for response in self.jittorllms_model.stream_chat(query, history):
                     print(response)
                     self.child.send(response)
-            except:
+            except Exception:
                 from toolbox import trimmed_format_exc
                 print(trimmed_format_exc())
                 self.child.send('[Local Message] Call jittorllms fail.')

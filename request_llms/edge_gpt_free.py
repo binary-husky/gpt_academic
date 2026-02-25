@@ -523,7 +523,7 @@ class _ChatHub:
             msg = await self.wss.receive()
             try:
                 objects = msg.data.split(DELIMITER)
-            except:
+            except Exception:
                 continue
 
             for obj in objects:

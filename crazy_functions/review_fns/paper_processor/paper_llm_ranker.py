@@ -245,7 +245,7 @@ class PaperLLMRanker:
                     key=lambda x: getattr(x, 'citations', 0) or 0,
                     reverse=True
                 )
-            except:
+            except Exception:
                 return papers[:top_k] if papers else []
 
     def _build_enhanced_query(self, query: str, criteria: SearchCriteria) -> str:

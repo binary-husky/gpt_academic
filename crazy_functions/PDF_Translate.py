@@ -19,7 +19,7 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
         check_packages(["fitz", "tiktoken", "scipdf"])
-    except:
+    except Exception:
         chatbot.append([None, f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pymupdf tiktoken scipdf_parser```。"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return
@@ -46,7 +46,7 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
             try:
                 yield from 解析PDF_基于DOC2X(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, DOC2X_API_KEY, user_request)
                 return
-            except:
+            except Exception:
                 chatbot.append([None, f"DOC2X服务不可用，请检查报错详细。{trimmed_format_exc_markdown()}"])
                 yield from update_ui(chatbot=chatbot, history=history)
 
@@ -70,7 +70,7 @@ def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, syst
             try:
                 yield from 解析PDF_基于DOC2X(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, DOC2X_API_KEY, user_request)
                 return
-            except:
+            except Exception:
                 chatbot.append([None, f"DOC2X服务不可用，正在尝试GROBID。{trimmed_format_exc_markdown()}"])
                 yield from update_ui(chatbot=chatbot, history=history)
         grobid_url = get_avail_grobid_url()

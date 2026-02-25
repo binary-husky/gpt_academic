@@ -225,7 +225,7 @@ def gen_file_preview(file_name):
         history = history.strip('</code>')
         history = history.split("\n>>>")
         return list(filter(lambda x:x!="", history))[0][:100]
-    except:
+    except Exception:
         return ""
 
 def read_file_to_chat(chatbot, history, file_name):
@@ -344,7 +344,7 @@ def 载入对话历史存档(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
     try:
         chatbot, history = read_file_to_chat(chatbot, history, file_manifest[0])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-    except:
+    except Exception:
         chatbot.append([f"载入对话历史文件", f"对话历史文件损坏！"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return

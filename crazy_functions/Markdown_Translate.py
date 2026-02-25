@@ -106,7 +106,7 @@ def 多文件翻译(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
             if 'markdown_expected_output_path' in plugin_kwargs:
                 expected_f_name = plugin_kwargs['markdown_expected_output_path']
                 shutil.copyfile(output_file, expected_f_name)
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
 
     #  <-------- 整理结果，退出 ---------->
@@ -169,7 +169,7 @@ def Markdown英译中(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
         import tiktoken
-    except:
+    except Exception:
         report_exception(chatbot, history,
                          a=f"解析项目: {txt}",
                          b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade tiktoken```。")
@@ -208,7 +208,7 @@ def Markdown中译英(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
         import tiktoken
-    except:
+    except Exception:
         report_exception(chatbot, history,
                          a=f"解析项目: {txt}",
                          b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade tiktoken```。")
@@ -240,7 +240,7 @@ def Markdown翻译指定语言(txt, llm_kwargs, plugin_kwargs, chatbot, history,
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
         import tiktoken
-    except:
+    except Exception:
         report_exception(chatbot, history,
                          a=f"解析项目: {txt}",
                          b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade tiktoken```。")

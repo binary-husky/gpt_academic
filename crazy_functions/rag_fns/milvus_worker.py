@@ -58,7 +58,7 @@ class MilvusSaveLoad():
             try:
                 self.vs_index = load_index_from_storage(storage_context, embed_model=self.embed_model)
                 return self.vs_index
-            except:
+            except Exception:
                 return self.create_new_vs(checkpoint_dir)
         else:
             return self.create_new_vs(checkpoint_dir)
@@ -97,7 +97,7 @@ class MilvusRagWorker(MilvusSaveLoad, LlamaIndexRagWorker):
             if not docstore.items():
                 raise ValueError("cannot inspect")
             vector_store_preview = "\n".join([ f"{_id} | {tn.text}" for _id, tn in docstore.items() ])
-        except:
+        except Exception:
             dummy_retrieve_res: List["NodeWithScore"] = self.vs_index.as_retriever().retrieve(' ')
             vector_store_preview = "\n".join(
                 [f"{node.id_} | {node.text}" for node in dummy_retrieve_res]

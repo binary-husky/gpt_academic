@@ -43,7 +43,7 @@ def scrape_text(url, proxies) -> str:
     try:
         response = requests.get(url, headers=headers, proxies=proxies, timeout=8)
         if response.encoding == "ISO-8859-1": response.encoding = response.apparent_encoding
-    except:
+    except Exception:
         return "无法连接到该网页"
     soup = BeautifulSoup(response.text, "html.parser")
     for script in soup(["script", "style"]):

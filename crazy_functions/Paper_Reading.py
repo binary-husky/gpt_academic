@@ -347,7 +347,7 @@ def 快速论文解读(txt: str, llm_kwargs: Dict, plugin_kwargs: Dict, chatbot:
         # 尝试转换为字符串
         try:
             paper_file = str(paper_file)
-        except:
+        except Exception:
             report_exception(chatbot, history, a=f"类型错误", b=f"论文路径不是有效的字符串: {type(paper_file)}")
             yield from update_ui(chatbot=chatbot, history=history)
             return

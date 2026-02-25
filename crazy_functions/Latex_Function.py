@@ -75,7 +75,7 @@ def move_project(project_folder, arxiv_id=None):
         new_workfolder = f'{get_log_folder()}/{gen_time_str()}'
     try:
         shutil.rmtree(new_workfolder)
-    except:
+    except Exception:
         pass
 
     # align subfolder if there is a folder wrapper
@@ -527,7 +527,7 @@ def PDF翻译中文并重新编译PDF(txt, llm_kwargs, plugin_kwargs, chatbot, h
     #         zip_res = zip_result(project_folder)
     #         promote_file_to_downloadzone(file=zip_res, chatbot=chatbot)
     #         return
-    #     except:
+    #     except Exception:
     #         report_exception(chatbot, history, a=f"解析项目: {txt}", b=f"发现重复上传，但是无法找到相关文件")
     #         yield from update_ui(chatbot=chatbot, history=history)
     # else:

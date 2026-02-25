@@ -130,7 +130,7 @@ def request_gpt_model_in_new_thread_with_ui_alive(
                     tb_str = '```\n' + trimmed_format_exc() + '```'
                     mutable[0] += f"[Local Message] 警告，在执行过程中遭遇问题, Traceback：\n\n{tb_str}\n\n"
                     return mutable[0] # 放弃
-            except:
+            except Exception:
                 # 【第三种情况】：其他错误：重试几次
                 tb_str = '```\n' + trimmed_format_exc() + '```'
                 logger.error(tb_str)
@@ -280,7 +280,7 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                     if len(mutable[index][0]) > 0: gpt_say += "此线程失败前收到的回答：\n\n" + mutable[index][0]
                     mutable[index][2] = "输入过长已放弃"
                     return gpt_say # 放弃
-            except:
+            except Exception:
                 # 【第三种情况】：其他错误
                 if detect_timeout(): raise RuntimeError("检测到程序终止。")
                 tb_str = '```\n' + trimmed_format_exc() + '```'
@@ -440,7 +440,7 @@ def read_and_clean_pdf_text(fp):
             main_fsize = max(fsize_statistics, key=fsize_statistics.get)
             if REMOVE_FOOT_NOTE:
                 give_up_fize_threshold = main_fsize * REMOVE_FOOT_FFSIZE_PERCENT
-        except:
+        except Exception:
             raise RuntimeError(f'抱歉, 我们暂时无法解析此PDF文档: {fp}。')
         ############################## <第 3 步，切分和重新整合> ##################################
         mega_sec = []
@@ -563,7 +563,7 @@ def get_files_from_everything(txt, type): # type='.md'
         proxies = get_conf('proxies')
         try:
             r = requests.get(txt, proxies=proxies)
-        except:
+        except Exception:
             raise ConnectionRefusedError(f"无法下载资源{txt}，请检查。")
         path = os.path.join(get_log_folder(plugin_name='web_download'), gen_time_str()+type)
         with open(path, 'wb+') as f: f.write(r.content)

@@ -38,7 +38,7 @@ def gen_image(llm_kwargs, prompt, resolution="1024x1024", model="dall-e-2", qual
     # logger.info(response.content)
     try:
         image_url = json.loads(response.content.decode('utf8'))['data'][0]['url']
-    except:
+    except Exception:
         raise RuntimeError(response.content.decode())
     # 文件保存到本地
     r = requests.get(image_url, proxies=proxies)
@@ -83,7 +83,7 @@ def edit_image(llm_kwargs, prompt, image_path, resolution="1024x1024", model="da
     # logger.info(response.content)
     try:
         image_url = json.loads(response.content.decode('utf8'))['data'][0]['url']
-    except:
+    except Exception:
         raise RuntimeError(response.content.decode())
     # 文件保存到本地
     r = requests.get(image_url, proxies=proxies)
@@ -323,7 +323,7 @@ def 图片生成_NanoBanana(prompt, llm_kwargs, plugin_kwargs, chatbot, history,
         if 'session_file_storage' in chatbot._cookies:
             try:
                 image_base64_array += [base64.b64encode(open(chatbot._cookies['session_file_storage'], 'rb').read()).decode('utf-8')]
-            except:
+            except Exception:
                 logger.exception("Failed to read session_file_storage and parse to image base64.")
 
         # only keep last image if any

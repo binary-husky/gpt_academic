@@ -459,7 +459,7 @@ class BatchDocumentSummarizer:
                 file_basename=f"文档总结_{timestamp}.md"
             )
             result_files.append(result_file_md)
-        except:
+        except Exception:
             pass
 
         # 保存 HTML
@@ -470,7 +470,7 @@ class BatchDocumentSummarizer:
                 file_basename=f"文档总结_{timestamp}.html"
             )
             result_files.append(result_file_html)
-        except:
+        except Exception:
             pass
 
         # 保存 Word
@@ -483,7 +483,7 @@ class BatchDocumentSummarizer:
             )
             doc.save(result_file_docx)
             result_files.append(result_file_docx)
-        except:
+        except Exception:
             pass
 
         # 添加到下载区

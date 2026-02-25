@@ -28,7 +28,7 @@ def get_meta_information(url, chatbot, history):
     }
     try:
         session.proxies.update(proxies)
-    except:
+    except Exception:
         report_exception(chatbot, history,
                     a=f"获取代理失败 无代理状态下很可能无法访问OpenAI家族的模型及谷歌学术 建议：检查USE_PROXY选项是否修改。",
                     b=f"尝试直接连接")
@@ -51,7 +51,7 @@ def get_meta_information(url, chatbot, history):
             for result in soup.select(".gs_ri"):
                 try:
                     url = result.select_one(".gs_rt").a['href']
-                except:
+                except Exception:
                     continue
                 arxiv_id = extract_arxiv_id(url)
                 if not arxiv_id:
@@ -83,7 +83,7 @@ def get_meta_information(url, chatbot, history):
         author = result.select_one(".gs_a").text
         try:
             citation = result.select_one(".gs_fl > a[href*='cites']").text  # 引用次数是链接中的文本，直接取出来
-        except:
+        except Exception:
             citation = 'cited by 0'
         abstract = result.select_one(".gs_rs").text.strip()  # 摘要在 .gs_rs 中的文本，需要清除首尾空格
 
@@ -145,7 +145,7 @@ def Google_Scholar_Assistant_Legacy(txt, llm_kwargs, plugin_kwargs, chatbot, his
         import arxiv
         import math
         from bs4 import BeautifulSoup
-    except:
+    except Exception:
         report_exception(chatbot, history,
             a = f"解析项目: {txt}",
             b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade beautifulsoup4 arxiv```。")

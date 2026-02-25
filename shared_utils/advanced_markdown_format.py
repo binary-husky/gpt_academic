@@ -63,7 +63,7 @@ mathpatterns = {
 def tex2mathml_catch_exception(content, *args, **kwargs):
     try:
         content = tex2mathml(content, *args, **kwargs)
-    except:
+    except Exception:
         content = content
     return content
 
@@ -446,7 +446,7 @@ def close_up_code_segment_during_stream(gpt_reply):
     if n_mark % 2 == 1:
         try:
             num_padding = get_last_backticks_indent(gpt_reply)
-        except:
+        except Exception:
             num_padding = 0
         return gpt_reply + "\n" + " "*num_padding + "```"  # 输出代码片段中！
     else:

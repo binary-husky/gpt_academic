@@ -36,7 +36,7 @@ def get_full_error(chunk, stream_response):
     while True:
         try:
             chunk += next(stream_response)
-        except:
+        except Exception:
             break
     return chunk
 
@@ -48,7 +48,7 @@ def decode_chunk(chunk):
     try:
         chunkjson = json.loads(chunk_decoded)
         is_last_chunk = chunkjson.get("done", False)
-    except:
+    except Exception:
         pass
     return chunk_decoded, chunkjson, is_last_chunk
 
@@ -159,7 +159,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
             # make a POST request to the API endpoint, stream=True
             response = requests.post(endpoint, headers=headers, proxies=None,
                                     json=payload, stream=True, timeout=TIMEOUT_SECONDS);break
-        except:
+        except Exception:
             retry += 1
             chatbot[-1] = ((chatbot[-1][0], timeout_bot_msg))
             retry_msg = f"，正在重试 ({retry}/{MAX_RETRY}) ……" if MAX_RETRY > 0 else ""
@@ -190,7 +190,7 @@ def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_promp
                     # 处理数据流的主体
                     try:
                         status_text = f"finish_reason: {chunkjson['error'].get('message', 'null')}"
-                    except:
+                    except Exception:
                         status_text = "finish_reason: null"
                     gpt_replying_buffer = gpt_replying_buffer + chunkjson['message']["content"]
                     # 如果这里抛出异常，一般是文本过长，详情见get_full_error的输出

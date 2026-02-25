@@ -192,7 +192,7 @@ class LocalDocQA:
                 try:
                     self.vector_store = FAISS.load_local(vs_path, text2vec)
                     self.vector_store.add_documents(docs)
-                except:
+                except Exception:
                     self.vector_store = FAISS.from_documents(docs, text2vec)
             else:
                 self.vector_store = FAISS.from_documents(docs, text2vec)  # docs 为Document列表

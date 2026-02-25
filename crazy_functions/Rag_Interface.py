@@ -53,7 +53,7 @@ def Rag问答(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, u
     if VECTOR_STORE_TYPE == "Milvus":
         try:
             from crazy_functions.rag_fns.milvus_worker import MilvusRagWorker as LlamaIndexRagWorker
-        except:
+        except Exception:
             VECTOR_STORE_TYPE = "Simple"
     if VECTOR_STORE_TYPE == "Simple":
         from crazy_functions.rag_fns.llama_index_worker import LlamaIndexRagWorker

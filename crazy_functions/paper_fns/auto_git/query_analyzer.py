@@ -219,7 +219,7 @@ Please analyze the query and answer using only the XML tag:
                     if not isinstance(response, str):
                         try:
                             response = str(response)
-                        except:
+                        except Exception:
                             raise Exception(f"Cannot convert response {i} to string")
                     extracted_responses.append(response)
                 else:

@@ -66,7 +66,7 @@ class NewBingHandle(Process):
 
             self.info = "依赖检测通过，等待NewBing响应。注意目前不能多人同时调用NewBing接口（有线程锁），否则将导致每个人的NewBing问询历史互相渗透。调用NewBing时，会自动使用已配置的代理。"
             self.success = True
-        except:
+        except Exception:
             self.info = "缺少的依赖，如果要使用Newbing，除了基础的pip依赖以外，您还需要运行`pip install -r request_llms/requirements_newbing.txt`安装Newbing的依赖。"
             self.success = False
 
@@ -140,7 +140,7 @@ class NewBingHandle(Process):
             if (NEWBING_COOKIES is not None) and len(NEWBING_COOKIES) > 100:
                 try:
                     cookies = json.loads(NEWBING_COOKIES)
-                except:
+                except Exception:
                     self.success = False
                     tb_str = "\n```\n" + trimmed_format_exc() + "\n```\n"
                     self.child.send(f"[Local Message] NEWBING_COOKIES未填写或有格式错误。")
@@ -154,7 +154,7 @@ class NewBingHandle(Process):
                 self.newbing_model = NewbingChatbot(
                     proxy=self.proxies_https, cookies=cookies
                 )
-            except:
+            except Exception:
                 self.success = False
                 tb_str = "\n```\n" + trimmed_format_exc() + "\n```\n"
                 self.child.send(

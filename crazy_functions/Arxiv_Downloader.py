@@ -79,7 +79,7 @@ def get_name(_url_):
         other_details['year'] = year
         abstract = bs.find_all(class_='abstract mathjax')[0].text
         other_details['abstract'] = abstract
-    except:
+    except Exception:
         other_details['year'] = ''
         logger.info('年份获取失败')
 
@@ -88,7 +88,7 @@ def get_name(_url_):
         authors = bs.find_all(class_='authors')[0].text
         authors = authors.split('Authors:')[1]
         other_details['authors'] = authors
-    except:
+    except Exception:
         other_details['authors'] = ''
         logger.info('authors获取失败')
 
@@ -103,7 +103,7 @@ def get_name(_url_):
             other_details['comment'] = real_comment
         else:
             other_details['comment'] = ''
-    except:
+    except Exception:
         other_details['comment'] = ''
         logger.info('年份获取失败')
 
@@ -132,7 +132,7 @@ def 下载arxiv论文并翻译摘要(txt, llm_kwargs, plugin_kwargs, chatbot, hi
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
         import bs4
-    except:
+    except Exception:
         report_exception(chatbot, history,
             a = f"解析项目: {txt}",
             b = f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade beautifulsoup4```。")
@@ -145,7 +145,7 @@ def 下载arxiv论文并翻译摘要(txt, llm_kwargs, plugin_kwargs, chatbot, hi
     # 提取摘要，下载PDF文档
     try:
         pdf_path, info = download_arxiv_(txt)
-    except:
+    except Exception:
         report_exception(chatbot, history,
             a = f"解析项目: {txt}",
             b = f"下载pdf文件未成功")

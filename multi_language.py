@@ -228,13 +228,13 @@ def trans(word_to_translate, language, special=False):
                     raise RuntimeError
                 for a,b in zip(res_before_trans, res_after_trans):
                     translated_result[a] = b
-            except:
+            except Exception:
                 # try:
                     # res_before_trans = word_to_translate_split[(i-1)//2]
                     # res_after_trans = [s for s in result[i].split("', '")]
                 #     for a,b in zip(res_before_trans, res_after_trans):
                 #         translated_result[a] = b
-                # except:
+                # except Exception:
                 print('GPT answers with unexpected format, some words may not be translated, but you can try again later to increase translation coverage.')
                 res_before_trans = eval(result[i-1])
                 for a in res_before_trans:
@@ -286,7 +286,7 @@ def trans_json(word_to_translate, language, special=False):
         if i%2 == 1:
             try:
                 translated_result.update(json.loads(result[i]))
-            except:
+            except Exception:
                 print(result[i])
     print(result)
     return translated_result

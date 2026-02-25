@@ -89,7 +89,7 @@ class ScopusSource(DataSource):
             if "prism:coverDate" in data:
                 try:
                     year = int(data["prism:coverDate"][:4])
-                except:
+                except Exception:
                     pass
 
             # 提取DOI
@@ -100,7 +100,7 @@ class ScopusSource(DataSource):
             if citations:
                 try:
                     citations = int(citations)
-                except:
+                except Exception:
                     citations = None
 
             # 提取期刊信息

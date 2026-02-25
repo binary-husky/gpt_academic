@@ -36,7 +36,7 @@ def get_full_error(chunk, stream_response):
     while True:
         try:
             chunk += next(stream_response)
-        except:
+        except Exception:
             break
     return chunk
 
@@ -49,7 +49,7 @@ def decode_chunk(chunk):
     if chunk_decoded.startswith('data:'):
         try:
             chunkjson = json.loads(chunk_decoded[6:])
-        except:
+        except Exception:
             need_to_pass = True
             pass
     elif chunk_decoded.startswith('event:'):
@@ -60,7 +60,7 @@ def decode_chunk(chunk):
             elif event_type == 'content_block_start' or event_type == 'message_start':
                 need_to_pass = True
                 pass
-        except:
+        except Exception:
             need_to_pass = True
             pass
     else:

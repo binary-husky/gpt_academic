@@ -90,7 +90,7 @@ try:
     if API_URL != "https://api.openai.com/v1/chat/completions":
         openai_endpoint = API_URL
         logger.warning("警告！API_URL配置选项将被弃用，请更换为API_URL_REDIRECT配置")
-except:
+except Exception:
     pass
 # 新版配置
 if openai_endpoint in API_URL_REDIRECT: openai_endpoint = API_URL_REDIRECT[openai_endpoint]
@@ -798,7 +798,7 @@ if "newbing" in AVAIL_LLM_MODELS:   # same with newbing-free
                 "token_cnt": get_token_num_gpt35,
             }
         })
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
 if "chatglmft" in AVAIL_LLM_MODELS:   # same with newbing-free
     try:
@@ -814,7 +814,7 @@ if "chatglmft" in AVAIL_LLM_MODELS:   # same with newbing-free
                 "token_cnt": get_token_num_gpt35,
             }
         })
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
 # -=-=-=-=-=-=- 上海AI-LAB书生大模型 -=-=-=-=-=-=-
 if "internlm" in AVAIL_LLM_MODELS:
@@ -831,7 +831,7 @@ if "internlm" in AVAIL_LLM_MODELS:
                 "token_cnt": get_token_num_gpt35,
             }
         })
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
 if "chatglm_onnx" in AVAIL_LLM_MODELS:
     try:
@@ -847,7 +847,7 @@ if "chatglm_onnx" in AVAIL_LLM_MODELS:
                 "token_cnt": get_token_num_gpt35,
             }
         })
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
 # -=-=-=-=-=-=- 通义-本地模型 -=-=-=-=-=-=-
 if "qwen-local" in AVAIL_LLM_MODELS:
@@ -865,7 +865,7 @@ if "qwen-local" in AVAIL_LLM_MODELS:
                 "token_cnt": get_token_num_gpt35,
             }
         })
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
 
 # -=-=-=-=-=-=- 阿里云百炼（通义）-在线模型 -=-=-=-=-=-=-
@@ -971,7 +971,7 @@ if any(item in qwen_models for item in AVAIL_LLM_MODELS):
                 "token_cnt": get_token_num_gpt35,
             }
         })
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
 
 # -=-=-=-=-=-=- 零一万物模型 -=-=-=-=-=-=-
@@ -1052,7 +1052,7 @@ if any(item in yi_models for item in AVAIL_LLM_MODELS):
                 "token_cnt": get_token_num_gpt35,
             },
         })
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
 
 
@@ -1076,7 +1076,7 @@ if any(item in grok_models for item in AVAIL_LLM_MODELS):
             },
 
         })
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
 
 # -=-=-=-=-=-=- 讯飞星火认知大模型 -=-=-=-=-=-=-
@@ -1095,7 +1095,7 @@ if "spark" in AVAIL_LLM_MODELS:
                 "token_cnt": get_token_num_gpt35,
             }
         })
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
 if "sparkv2" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
     try:
@@ -1112,7 +1112,7 @@ if "sparkv2" in AVAIL_LLM_MODELS:   # 讯飞星火认知大模型
                 "token_cnt": get_token_num_gpt35,
             }
         })
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
 if any(x in AVAIL_LLM_MODELS for x in ("sparkv3", "sparkv3.5", "sparkv4")):   # 讯飞星火认知大模型
     try:
@@ -1147,7 +1147,7 @@ if any(x in AVAIL_LLM_MODELS for x in ("sparkv3", "sparkv3.5", "sparkv4")):   # 
                 "token_cnt": get_token_num_gpt35,
             }
         })
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
 if "llama2" in AVAIL_LLM_MODELS:   # llama2
     try:
@@ -1163,7 +1163,7 @@ if "llama2" in AVAIL_LLM_MODELS:   # llama2
                 "token_cnt": get_token_num_gpt35,
             }
         })
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
 # -=-=-=-=-=-=- 智谱 -=-=-=-=-=-=-
 if "zhipuai" in AVAIL_LLM_MODELS:   # zhipuai 是glm-4的别名，向后兼容配置
@@ -1178,7 +1178,7 @@ if "zhipuai" in AVAIL_LLM_MODELS:   # zhipuai 是glm-4的别名，向后兼容�
                 "token_cnt": get_token_num_gpt35,
             },
         })
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
 # -=-=-=-=-=-=- 幻方-深度求索本地大模型 -=-=-=-=-=-=-
 if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
@@ -1195,7 +1195,7 @@ if "deepseekcoder" in AVAIL_LLM_MODELS:   # deepseekcoder
                 "token_cnt": get_token_num_gpt35,
             }
         })
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
 
 # -=-=-=-=-=-=- 幻方-深度求索大模型在线API -=-=-=-=-=-=-
@@ -1235,7 +1235,7 @@ if any(item in claude_models for item in AVAIL_LLM_MODELS):
                 "enable_reasoning": True
             },
         })
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
 
 # -=-=-=-=-=-=- 火山引擎 对齐支持 -=-=-=-=-=-=-
@@ -1268,7 +1268,7 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("volcengine-")]:
         origin_model_name, max_token_tmp = read_one_api_model_name(model)
         # 如果是已知模型，则尝试获取其信息
         original_model_info = model_info_extend.get(origin_model_name.replace("volcengine-", "", 1), None)
-    except:
+    except Exception:
         logger.error(f"volcengine模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
         continue
 
@@ -1302,7 +1302,7 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("one-api-")]:
         origin_model_name, max_token_tmp = read_one_api_model_name(model)
         # 如果是已知模型，则尝试获取其信息
         original_model_info = model_info.get(origin_model_name.replace("one-api-", "", 1), None)
-    except:
+    except Exception:
         logger.error(f"one-api模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
         continue
     this_model_info = {
@@ -1333,7 +1333,7 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("vllm-")]:
     #   "(max_token=6666)"  是配置（非必要）
     try:
         _, max_token_tmp = read_one_api_model_name(model)
-    except:
+    except Exception:
         logger.error(f"vllm模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
         continue
     model_info.update({
@@ -1360,7 +1360,7 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("ollama-")]:
     #   "(max_token=6666)"  是配置（非必要）
     try:
         _, max_token_tmp = read_one_api_model_name(model)
-    except:
+    except Exception:
         logger.error(f"ollama模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
         continue
     model_info.update({

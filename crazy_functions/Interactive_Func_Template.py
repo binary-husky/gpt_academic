@@ -57,6 +57,6 @@ def get_image_page_by_keyword(keyword):
         try:
             res += image_element["data-src"]
             res += "\n"
-        except:
+        except Exception:
             pass
     return res

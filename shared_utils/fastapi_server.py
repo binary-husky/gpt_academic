@@ -224,7 +224,7 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
                             with open(temp_file, 'rb') as wav_file: t = wav_file.read()
                             os.remove(temp_file)
                             return Response(content=t)
-                        except:
+                        except Exception:
                             raise RuntimeError("ffmpeg未安装，无法处理EdgeTTS音频。安装方法见`https://github.com/jiaaro/pydub#getting-ffmpeg-set-up`")
                     if TTS_TYPE == "LOCAL_SOVITS_API":
                         # Forward the request to the target service

@@ -44,7 +44,7 @@ def extract_text_from_files(txt, chatbot, history):
     if file_pdf:
         try:    # 尝试导入依赖，如果缺少依赖，则给出安装建议
             import fitz
-        except:
+        except Exception:
             exception = "pdf"
             return False, final_result, page_one, file_manifest, exception
         for index, fp in enumerate(pdf_manifest):
@@ -71,7 +71,7 @@ def extract_text_from_files(txt, chatbot, history):
     if file_word:
         try:    # 尝试导入依赖，如果缺少依赖，则给出安装建议
             from docx import Document
-        except:
+        except Exception:
             exception = "word_pip"
             return False, final_result, page_one, file_manifest, exception
         for index, fp in enumerate(word_manifest):

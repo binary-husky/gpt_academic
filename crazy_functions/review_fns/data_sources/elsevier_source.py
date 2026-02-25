@@ -135,7 +135,7 @@ class ElsevierSource(DataSource):
             if "prism:coverDate" in entry:
                 try:
                     year = int(entry["prism:coverDate"][:4])
-                except:
+                except Exception:
                     pass
 
             # 简化venue信息
@@ -222,7 +222,7 @@ class ElsevierSource(DataSource):
             if "prism:coverDate" in ref:
                 try:
                     year = int(ref["prism:coverDate"][:4])
-                except:
+                except Exception:
                     pass
 
             return PaperMetadata(

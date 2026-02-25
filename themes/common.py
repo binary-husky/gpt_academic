@@ -42,7 +42,7 @@ def minimize_js(common_js_path):
             f.write(minimized_js_content)
         # return minimized js file path
         return minimized_js_path
-    except:
+    except Exception:
         return common_js_path
 
 @lru_cache

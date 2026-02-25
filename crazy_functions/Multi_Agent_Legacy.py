@@ -57,7 +57,7 @@ def Multi_Agent_Legacy终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         import autogen
         if get_conf("AUTOGEN_USE_DOCKER"):
             import docker
-    except:
+    except Exception:
         chatbot.append([ f"处理任务: {txt}",
             f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pyautogen docker```。"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
@@ -69,7 +69,7 @@ def Multi_Agent_Legacy终端(txt, llm_kwargs, plugin_kwargs, chatbot, history, s
         import glob, os, time, subprocess
         if get_conf("AUTOGEN_USE_DOCKER"):
             subprocess.Popen(["docker", "--version"])
-    except:
+    except Exception:
         chatbot.append([f"处理任务: {txt}", f"缺少docker运行环境！"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return

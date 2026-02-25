@@ -92,7 +92,7 @@ def 解析PDF_简单拆解(file_manifest, project_folder, llm_kwargs, plugin_kwa
                     ch.add_row(a=orig, b=trans)
             create_report_file_name = f"{os.path.basename(fp)}.trans.html"
             generated_html_files.append(ch.save_file(create_report_file_name))
-        except:
+        except Exception:
             from toolbox import trimmed_format_exc
             logger.error('writing html result failed:', trimmed_format_exc())
 

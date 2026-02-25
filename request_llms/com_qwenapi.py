@@ -56,7 +56,7 @@ class QwenRequestInstance():
                 if response.output.choices[0].finish_reason == 'stop':
                     try:
                         self.result_buf += response.output.choices[0].message.content
-                    except:
+                    except Exception:
                         pass
                     yield self.format_reasoning(self.reasoning_buf, self.result_buf)
                     break
@@ -67,7 +67,7 @@ class QwenRequestInstance():
                 else:
                     try:
                         contain_reasoning = hasattr(response.output.choices[0].message, 'reasoning_content')
-                    except:
+                    except Exception:
                         contain_reasoning = False
                     if contain_reasoning:
                         self.reasoning_buf += response.output.choices[0].message.reasoning_content
