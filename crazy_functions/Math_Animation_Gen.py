@@ -9,7 +9,7 @@ def inspect_dependency(chatbot, history):
     try:
         import manim
         return True
-    except:
+    except Exception:
         chatbot.append(["导入依赖失败", "使用该模块需要额外依赖，安装方法:```pip install manim manimgl```"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return False
@@ -37,7 +37,7 @@ def eval_manim(code):
         output = e.output.decode()
         logger.error(f"Command returned non-zero exit status {e.returncode}: {output}.")
         return f"Evaluating python script failed: {e.output}."
-    except:
+    except Exception:
         logger.error('generating mp4 failed')
         return "Generating mp4 failed."
 

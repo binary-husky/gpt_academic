@@ -128,7 +128,7 @@ class LocalLLMHandle(Process):
             self.try_to_import_special_deps()
             self.set_state("`依赖检测通过`")
             self.running = True
-        except:
+        except Exception:
             self.set_state(f"缺少{self.model_name}的依赖，如果要使用{self.model_name}，除了基础的pip依赖以外，您还需要运行{self.cmd_to_install}安装{self.model_name}的依赖。")
             self.running = False
 
@@ -142,7 +142,7 @@ class LocalLLMHandle(Process):
         try:
             with redirect_stdout(self.child):
                 self._model, self._tokenizer = self.load_model_and_tokenizer()
-        except:
+        except Exception:
             self.set_state("`加载模型失败`")
             self.running = False
             from toolbox import trimmed_format_exc
@@ -162,7 +162,7 @@ class LocalLLMHandle(Process):
                     # print('debug' + response_full)
                 self.child.send('[Finish]')
                 # 请求处理结束，开始下一个循环
-            except:
+            except Exception:
                 from toolbox import trimmed_format_exc
                 self.child.send(
                     f'[Local Message] 调用{self.model_name}失败.' + '\n```\n' + trimmed_format_exc() + '\n```\n')

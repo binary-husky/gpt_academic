@@ -36,7 +36,7 @@ def check_proxy(proxies, return_ip=False):
             return result
         else:
             return ip
-    except:
+    except Exception:
         result = f"代理配置 {proxies_https}, 代理所在地查询超时，代理可能无效"
         if not return_ip:
             logger.warning(result)
@@ -59,7 +59,7 @@ def _check_with_backup_source(proxies):
     try:
         res_json = requests.get(f"http://{random_string}.edns.ip-api.com/json", proxies=proxies, timeout=4).json()  # ⭐ 执行代理检查和备份源请求
         return res_json['dns']['geo'], res_json['dns']['ip']
-    except:
+    except Exception:
         return None, None
 
 def backup_and_download(current_version, remote_version):
@@ -138,7 +138,7 @@ def patch_and_restart(path):
     try:
         import subprocess
         subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt'])
-    except:
+    except Exception:
         log亮红('pip包依赖安装出现问题，需要手动安装新增的依赖库 `python -m pip install -r requirements.txt`，然后在用常规的`python main.py`的方式启动。')
 
     log亮绿('更新完成，您可以随时在history子文件夹下找回旧版的程序，5s之后重启')
@@ -160,7 +160,7 @@ def get_current_version():
     try:
         with open('./version', 'r', encoding='utf8') as f:
             current_version = json.loads(f.read())['version']  # ⭐ 从读取的json数据中提取版本号
-    except:
+    except Exception:
         current_version = ""
     return current_version
 
@@ -200,7 +200,7 @@ def auto_update(raise_error=False):
                 path = backup_and_download(current_version, remote_version)  # ⭐ 备份并下载文件
                 try:
                     patch_and_restart(path)  # ⭐ 执行覆盖并重启操作
-                except:
+                except Exception:
                     msg = '更新失败。'
                     if raise_error:
                         from toolbox import trimmed_format_exc
@@ -211,7 +211,7 @@ def auto_update(raise_error=False):
                 return
         else:
             return
-    except:
+    except Exception:
         msg = '自动更新程序：已禁用。建议排查：代理网络配置。'
         if raise_error:
             from toolbox import trimmed_format_exc
@@ -242,7 +242,7 @@ def warm_up_modules():
 #         nltk.data.path.append(target)
 #         nltk.download('punkt', download_dir=target)
 #         logger.info('模块预热完成: nltk punkt')
-#     except:
+#     except Exception:
 #         logger.exception('模块预热: nltk punkt 失败，可能需要手动安装 nltk punkt')
 #         logger.error('模块预热: nltk punkt 失败，可能需要手动安装 nltk punkt')
 
@@ -259,7 +259,7 @@ def try_warm_up_vectordb():
         nltk.data.find('tokenizers/punkt_tab')
         nltk.data.find('taggers/averaged_perceptron_tagger_eng')
         logger.info('nltk模块预热完成（读取本地缓存）')
-    except:
+    except Exception:
         # 如果找不到，则尝试下载
         try:
             logger.info(f'模块预热: nltk punkt (从 Github 下载部分文件到 {target})')

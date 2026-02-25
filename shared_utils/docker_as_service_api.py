@@ -19,7 +19,7 @@ def process_received(received: DockerServiceApiComModel, save_file_dir="./daas_o
     if received.server_message:
         try:
             output_manifest['server_message'] += received.server_message
-        except:
+        except Exception:
             output_manifest['server_message'] = received.server_message
     if received.server_std_err:
         output_manifest['server_std_err'] += received.server_std_err

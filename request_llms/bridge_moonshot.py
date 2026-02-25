@@ -69,7 +69,7 @@ class MoonShotInit:
         try:
             chunk_json = json.loads(chunk_decoded[6:])
             content = chunk_json['choices'][0]["delta"].get("content", "")
-        except:
+        except Exception:
             pass
         return chunk_decoded, chunk_json, content
 
@@ -141,7 +141,7 @@ def msg_handle_error(llm_kwargs, chunk_decoded):
     elif 'error' in str(chunk_decoded).lower():
         try:
             error_msg = json.dumps(json.loads(chunk_decoded[:6]), indent=4, ensure_ascii=False)
-        except:
+        except Exception:
             error_msg = chunk_decoded
     return error_msg
 

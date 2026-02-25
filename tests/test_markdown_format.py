@@ -82,7 +82,7 @@ def markdown_convertion(txt):
     def tex2mathml_catch_exception(content, *args, **kwargs):
         try:
             content = tex2mathml(content, *args, **kwargs)
-        except:
+        except Exception:
             content = content
         return content
 

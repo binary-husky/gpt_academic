@@ -121,7 +121,7 @@ def 多文件润色(file_manifest, project_folder, llm_kwargs, plugin_kwargs, ch
         pfg.merge_result()
         pfg.write_result()
         pfg.zip_result()
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
 
     #  <-------- 整理结果，退出 ---------->
@@ -145,7 +145,7 @@ def Latex英文润色(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
         import tiktoken
-    except:
+    except Exception:
         report_exception(chatbot, history,
                          a=f"解析项目: {txt}",
                          b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade tiktoken```。")
@@ -183,7 +183,7 @@ def Latex中文润色(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
         import tiktoken
-    except:
+    except Exception:
         report_exception(chatbot, history,
                          a=f"解析项目: {txt}",
                          b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade tiktoken```。")
@@ -219,7 +219,7 @@ def Latex英文纠错(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
         import tiktoken
-    except:
+    except Exception:
         report_exception(chatbot, history,
                          a=f"解析项目: {txt}",
                          b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade tiktoken```。")

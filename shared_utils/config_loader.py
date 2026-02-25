@@ -53,7 +53,7 @@ def read_env_variable(arg, default_value):
         else:
             log亮红(f"[ENV_VAR] 环境变量{arg}不支持通过环境变量设置! ")
             raise KeyError
-    except:
+    except Exception:
         log亮红(f"[ENV_VAR] 环境变量{arg}加载失败! ")
         raise KeyError(f"[ENV_VAR] 环境变量{arg}加载失败! ")
 
@@ -68,11 +68,11 @@ def read_single_conf_with_lru_cache(arg):
         # 优先级1. 获取环境变量作为配置
         default_ref = getattr(importlib.import_module('config'), arg) # 读取默认值作为数据类型转换的参考
         r = read_env_variable(arg, default_ref)
-    except:
+    except Exception:
         try:
             # 优先级2. 获取config_private中的配置
             r = getattr(importlib.import_module('config_private'), arg)
-        except:
+        except Exception:
             # 优先级3. 获取config中的配置
             r = getattr(importlib.import_module('config'), arg)
 

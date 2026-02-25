@@ -35,7 +35,7 @@ def get_full_error(chunk, stream_response):
     while True:
         try:
             chunk += next(stream_response)
-        except:
+        except Exception:
             break
     return chunk
 
@@ -105,7 +105,7 @@ def decode_chunk(chunk):
         if has_choices and choice_valid: has_content = ("content" in chunkjson['choices'][0]["delta"])
         if has_content: has_content = (chunkjson['choices'][0]["delta"]["content"] is not None)
         if has_choices and choice_valid: has_role = "role" in chunkjson['choices'][0]["delta"]
-    except:
+    except Exception:
         pass
     return chunk_decoded, chunkjson, has_choices, choice_valid, has_content, has_role
 
@@ -265,7 +265,7 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
     # 检查endpoint是否合法
     try:
         endpoint = verify_endpoint(model_info[llm_kwargs['llm_model']]['endpoint'])
-    except:
+    except Exception:
         tb_str = '```\n' + trimmed_format_exc() + '```'
         chatbot[-1] = (inputs, tb_str)
         yield from update_ui(chatbot=chatbot, history=history, msg="Endpoint不满足要求") # 刷新界面
@@ -283,7 +283,7 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
             # make a POST request to the API endpoint, stream=True
             response = requests.post(endpoint, headers=headers, proxies=proxies,
                                     json=payload, stream=stream, timeout=TIMEOUT_SECONDS);break
-        except:
+        except Exception:
             retry += 1
             chatbot[-1] = ((chatbot[-1][0], timeout_bot_msg))
             retry_msg = f"，正在重试 ({retry}/{MAX_RETRY}) ……" if MAX_RETRY > 0 else ""

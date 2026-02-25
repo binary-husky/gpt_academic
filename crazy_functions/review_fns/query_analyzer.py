@@ -183,7 +183,7 @@ class QueryAnalyzer:
                     if not isinstance(response, str):
                         try:
                             response = str(response)
-                        except:
+                        except Exception:
                             raise Exception(f"Cannot convert response {i} to string")
                     extracted_responses.append(response)
                 else:
@@ -359,7 +359,7 @@ class QueryAnalyzer:
                     if len(years) == 2:
                         start_year = int(years[0].strip())
                         end_year = int(years[1].strip())
-                except:
+                except Exception:
                     pass
 
             # 提取 latest request 判断

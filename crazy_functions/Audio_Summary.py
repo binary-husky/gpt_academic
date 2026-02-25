@@ -143,7 +143,7 @@ def Audio_Summary(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_promp
 
     try:
         from moviepy.editor import AudioFileClip
-    except:
+    except Exception:
         report_exception(chatbot, history,
                          a=f"解析项目: {txt}",
                          b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade moviepy```。")

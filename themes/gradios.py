@@ -17,7 +17,7 @@ def dynamic_set_theme(THEME):
             if THEME.startswith("huggingface-"):
                 THEME = THEME.lstrip("huggingface-")
             set_theme = set_theme.from_hub(THEME.lower())
-        except:
+        except Exception:
             logger.error("下载Gradio主题时出现异常。")
     return set_theme
 
@@ -34,7 +34,7 @@ def adjust_theme():
                 if THEME.startswith("huggingface-"):
                     THEME = THEME.lstrip("huggingface-")
                 set_theme = set_theme.from_hub(THEME.lower())
-            except:
+            except Exception:
                 logger.error("下载Gradio主题时出现异常。")
 
         from themes.common import get_common_html_javascript_code

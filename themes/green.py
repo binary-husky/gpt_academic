@@ -104,7 +104,7 @@ def adjust_theme():
         gr.routes.templates.TemplateResponse = (
             gradio_new_template_fn  # override gradio template
         )
-    except:
+    except Exception:
         set_theme = None
         logger.error("gradio版本较旧, 不能自定义字体和颜色")
     return set_theme

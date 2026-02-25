@@ -16,7 +16,7 @@ def start_with_url(inputs:str):
         from urllib.parse import urlparse
         result = urlparse(text)
         return all([result.scheme, result.netloc])
-    except:
+    except Exception:
         return False
 
 def load_web_content(inputs:str, chatbot_with_cookie, history:list):

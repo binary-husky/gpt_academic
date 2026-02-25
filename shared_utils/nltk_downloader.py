@@ -1042,7 +1042,7 @@ class Downloader:
         original_url = self._url
         try:
             self._update_index(url)
-        except:
+        except Exception:
             self._url = original_url
             raise
 
@@ -1980,7 +1980,7 @@ class DownloaderGUI:
                 width=75,
                 font="fixed",
             )
-        except:
+        except Exception:
             ShowText(self.top, "Help: NLTK Downloader", self.HELP.strip(), width=75)
 
     def about(self, *e):

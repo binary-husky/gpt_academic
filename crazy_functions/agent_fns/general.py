@@ -37,7 +37,7 @@ class AutoGenGeneral(PluginMultiprocessManager):
         # ⭐⭐ run in subprocess
         try:
             print_msg = sender.name + "\n\n---\n\n" + message["content"]
-        except:
+        except Exception:
             print_msg = sender.name + "\n\n---\n\n" + message
         self.child_conn.send(PipeCom("show", print_msg))
 

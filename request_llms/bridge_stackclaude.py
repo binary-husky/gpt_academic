@@ -80,7 +80,7 @@ try:
                     yield True, msg["text"]
                     break
 
-except:
+except Exception:
     pass
 
 """
@@ -110,7 +110,7 @@ class ClaudeHandle(Process):
 
             self.info = "依赖检测通过，等待Claude响应。注意目前不能多人同时调用Claude接口（有线程锁），否则将导致每个人的Claude问询历史互相渗透。调用Claude时，会自动使用已配置的代理。"
             self.success = True
-        except:
+        except Exception:
             self.info = "缺少的依赖，如果要使用Claude，除了基础的pip依赖以外，您还需要运行`pip install -r request_llms/requirements_slackclaude.txt`安装Claude的依赖，然后重启程序。"
             self.success = False
 
@@ -174,7 +174,7 @@ class ClaudeHandle(Process):
                     token=SLACK_CLAUDE_USER_TOKEN, proxy=self.proxies_https
                 )
                 print("Claude组件初始化成功。")
-            except:
+            except Exception:
                 self.success = False
                 tb_str = "\n```\n" + trimmed_format_exc() + "\n```\n"
                 self.child.send(f"[Local Message] 不能加载Claude组件。{tb_str}")

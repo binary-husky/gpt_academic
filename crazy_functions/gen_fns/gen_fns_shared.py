@@ -42,7 +42,7 @@ def is_function_successfully_generated(fn_path, class_name, return_dict):
         instance = some_class()
         return_dict['success'] = True
         return
-    except:
+    except Exception:
         return_dict['traceback'] = trimmed_format_exc()
         return
 
@@ -66,5 +66,5 @@ def subprocess_worker(code, file_path, return_dict):
         instance = some_class()
         return_dict['result'] = instance.run(file_path)
         return_dict['success'] = True
-    except:
+    except Exception:
         return_dict['traceback'] = trimmed_format_exc()

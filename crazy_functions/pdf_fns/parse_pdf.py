@@ -23,7 +23,7 @@ def get_avail_grobid_url():
             res = requests.get(_grobid_url+'/api/isalive')
         if res.text=='true': return _grobid_url
         else: return None
-    except:
+    except Exception:
         return None
 
 @lru_cache(maxsize=32)
@@ -35,7 +35,7 @@ def parse_pdf(pdf_path, grobid_url):
             article_dict = scipdf.parse_pdf_to_dict(pdf_path, grobid_url=grobid_url)
     except GROBID_OFFLINE_EXCEPTION:
         raise GROBID_OFFLINE_EXCEPTION("GROBID服务不可用，请修改config中的GROBID_URL，可修改成本地GROBID服务。")
-    except:
+    except Exception:
         raise RuntimeError("解析PDF失败，请检查PDF是否损坏。")
     return article_dict
 

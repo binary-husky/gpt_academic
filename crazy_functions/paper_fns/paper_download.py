@@ -99,7 +99,7 @@ def get_arxiv_paper(paper_id):
             result = next(arxiv.Client().results(search))
             if result:
                 return result
-        except:
+        except Exception:
             continue
 
         try:
@@ -108,7 +108,7 @@ def get_arxiv_paper(paper_id):
             result = next(arxiv.Client().results(search))
             if result:
                 return result
-        except:
+        except Exception:
             continue
 
     return None

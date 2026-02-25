@@ -23,7 +23,7 @@ def get_full_error(chunk, stream_response):
     while True:
         try:
             chunk += next(stream_response)
-        except:
+        except Exception:
             break
     return chunk
 
@@ -45,7 +45,7 @@ def decode_chunk(chunk):
 
     try:
         chunk = json.loads(chunk)
-    except:
+    except Exception:
         response = ""
         finish_reason = chunk
 
@@ -55,23 +55,23 @@ def decode_chunk(chunk):
         try:
             chunk = json.loads(chunk)
             finish_reason = chunk["error"]["code"]
-        except:
+        except Exception:
             finish_reason = "API_ERROR"
         return response, reasoning_content, finish_reason, str(chunk)
 
     try:
         if chunk["choices"][0]["delta"]["content"] is not None:
             response = chunk["choices"][0]["delta"]["content"]
-    except:
+    except Exception:
         pass
     try:
         if chunk["choices"][0]["delta"]["reasoning_content"] is not None:
             reasoning_content = chunk["choices"][0]["delta"]["reasoning_content"]
-    except:
+    except Exception:
         pass
     try:
         finish_reason = chunk["choices"][0]["finish_reason"]
-    except:
+    except Exception:
         pass
     return response, reasoning_content, finish_reason, str(chunk)
 
@@ -202,7 +202,7 @@ def get_predict_function(
                     timeout=TIMEOUT_SECONDS,
                 )
                 break
-            except:
+            except Exception:
                 retry += 1
                 traceback.print_exc()
                 if retry > MAX_RETRY:
@@ -340,7 +340,7 @@ def get_predict_function(
                     timeout=TIMEOUT_SECONDS,
                 )
                 break
-            except:
+            except Exception:
                 retry += 1
                 chatbot[-1] = (chatbot[-1][0], timeout_bot_msg)
                 retry_msg = (

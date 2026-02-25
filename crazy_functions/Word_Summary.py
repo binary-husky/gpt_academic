@@ -26,7 +26,7 @@ def 解析docx(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot
                 file_content = doc.Range().Text
                 doc.Close()
                 word.Quit()
-            except:
+            except Exception:
                 raise RuntimeError('请先将.doc文档转换为.docx文档。')
 
         # private_upload里面的文件名在解压zip后容易出现乱码（rar和7z格式正常），故可以只分析文章内容，不输入文件名
@@ -91,7 +91,7 @@ def Word_Summary(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
         from docx import Document
-    except:
+    except Exception:
         report_exception(chatbot, history,
                          a=f"解析项目: {txt}",
                          b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade python-docx pywin32```。")

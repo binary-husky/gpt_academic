@@ -116,7 +116,7 @@ def Latex英译中(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prom
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
         import tiktoken
-    except:
+    except Exception:
         report_exception(chatbot, history,
                          a=f"解析项目: {txt}",
                          b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade tiktoken```。")
@@ -153,7 +153,7 @@ def Latex中译英(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prom
     # 尝试导入依赖，如果缺少依赖，则给出安装建议
     try:
         import tiktoken
-    except:
+    except Exception:
         report_exception(chatbot, history,
                          a=f"解析项目: {txt}",
                          b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade tiktoken```。")

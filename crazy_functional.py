@@ -440,7 +440,7 @@ def get_crazy_functions():
                 }
             }
         )
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
         logger.error("Load function plugin failed")
 
@@ -460,7 +460,7 @@ def get_crazy_functions():
                 },
             }
         )
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
         logger.error("Load function plugin failed")
 
@@ -479,7 +479,7 @@ def get_crazy_functions():
                 },
             }
         )
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
         logger.error("Load function plugin failed")
 
@@ -501,7 +501,7 @@ def get_crazy_functions():
                 }
             }
         )
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
         logger.error("Load function plugin failed")
 
@@ -519,7 +519,7 @@ def get_crazy_functions():
                 }
             }
         )
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
         logger.error("Load function plugin failed")
 
@@ -538,7 +538,7 @@ def get_crazy_functions():
                 }
             }
         )
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
         logger.error("Load function plugin failed")
 
@@ -557,7 +557,7 @@ def get_crazy_functions():
                 }
             }
         )
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
         logger.error("Load function plugin failed")
 
@@ -576,7 +576,7 @@ def get_crazy_functions():
                 }
             }
         )
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
         logger.error("Load function plugin failed")
 
@@ -593,7 +593,7 @@ def get_crazy_functions():
                 }
             }
         )
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
         logger.error("Load function plugin failed")
 
@@ -616,7 +616,7 @@ def get_crazy_functions():
                     }
                 }
             )
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
         logger.error("Load function plugin failed")
 
@@ -633,7 +633,7 @@ def get_crazy_functions():
                 }
             }
         )
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
         logger.error("Load function plugin failed")
 
@@ -650,7 +650,7 @@ def get_crazy_functions():
                 }
             }
         )
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
         logger.error("Load function plugin failed")
 
@@ -666,7 +666,7 @@ def get_crazy_functions():
     #             }
     #         }
     #     )
-    # except:
+    # except Exception:
     #     logger.error(trimmed_format_exc())
     #     logger.error("Load function plugin failed")
 
@@ -684,7 +684,7 @@ def get_crazy_functions():
                 },
             }
         )
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
         logger.error("Load function plugin failed")
 
@@ -703,7 +703,7 @@ def get_crazy_functions():
     #             },
     #         }
     #     )
-    # except:
+    # except Exception:
     #     logger.error(trimmed_format_exc())
     #     logger.error("Load function plugin failed")
 
@@ -722,7 +722,7 @@ def get_crazy_functions():
                 },
             }
         )
-    except:
+    except Exception:
         logger.error(trimmed_format_exc())
         logger.error("Load function plugin failed")
 
@@ -737,7 +737,7 @@ def get_crazy_functions():
     #             "Function": HotReload(测试图表渲染)
     #         }
     #     })
-    # except:
+    # except Exception:
     #     logger.error(trimmed_format_exc())
     #     print('Load function plugin failed')
 

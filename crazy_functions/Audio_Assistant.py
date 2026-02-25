@@ -61,7 +61,7 @@ class AsyncGptTask():
             try:
                 chatbot[ofci] = list(chatbot[ofci])
                 chatbot[ofci][1] = markdown_convertion(of[0])
-            except:
+            except Exception:
                 self.observe_future = []
                 self.observe_future_chatbot_index = []
         return chatbot
@@ -177,7 +177,7 @@ def Audio_Assistant(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_pro
     try:
         import nls
         from scipy import io
-    except:
+    except Exception:
         chatbot.append(["导入依赖失败", "使用该模块需要额外依赖, 安装方法:```pip install --upgrade aliyun-python-sdk-core==2.13.3 pyOpenSSL webrtcvad scipy git+https://github.com/aliyun/alibabacloud-nls-python-sdk.git```"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
         return

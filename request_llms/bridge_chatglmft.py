@@ -44,7 +44,7 @@ class GetGLMFTHandle(Process):
             import sentencepiece
             self.info = "依赖检测通过"
             self.success = True
-        except:
+        except Exception:
             self.info = "缺少ChatGLMFT的依赖，如果要使用ChatGLMFT，除了基础的pip依赖以外，您还需要运行`pip install -r request_llms/requirements_chatglm.txt`安装ChatGLM的依赖。"
             self.success = False
 
@@ -117,7 +117,7 @@ class GetGLMFTHandle(Process):
                     # if self.child.poll():
                     #     command = self.child.recv()
                     #     if command == '[Terminate]': break
-            except:
+            except Exception:
                 from toolbox import trimmed_format_exc
                 self.child.send('[Local Message] Call ChatGLMFT fail.' + '\n```\n' + trimmed_format_exc() + '\n```\n')
             # 请求处理结束，开始下一个循环

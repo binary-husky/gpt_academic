@@ -25,7 +25,7 @@ class GetGLMHandle(Process):
             assert os.path.exists('request_llms/moss/models')
             self.info = "依赖检测通过"
             self.success = True
-        except:
+        except Exception:
             self.info = """
             缺少MOSS的依赖，如果要使用MOSS，除了基础的pip依赖以外，您还需要运行`pip install -r request_llms/requirements_moss.txt`和`git clone https://github.com/OpenLMLab/MOSS.git request_llms/moss`安装MOSS的依赖。
             """
@@ -114,7 +114,7 @@ class GetGLMHandle(Process):
 
         try:
             self.moss_init()
-        except:
+        except Exception:
             self.child.send('[Local Message] Call MOSS fail 不能正常加载MOSS的参数。')
             raise RuntimeError("不能正常加载MOSS的参数！")
 
@@ -150,7 +150,7 @@ class GetGLMHandle(Process):
                     self.prompt += response
                     print(response.lstrip('\n'))
                     self.child.send(response.lstrip('\n'))
-            except:
+            except Exception:
                 from toolbox import trimmed_format_exc
                 self.child.send('[Local Message] Call MOSS fail.' + '\n```\n' + trimmed_format_exc() + '\n```\n')
             # 请求处理结束，开始下一个循环

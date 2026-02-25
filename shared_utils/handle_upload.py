@@ -160,7 +160,7 @@ def extract_archive(file_path, dest_dir):
         try:
             import rarfile  # 用来检查rarfile是否安装，不要删除
             safe_extract_rar(file_path, dest_dir)
-        except:
+        except Exception:
             logger.info("Rar format requires additional dependencies to install")
             return "<br/><br/>解压失败! 需要安装pip install rarfile来解压rar文件。建议：使用zip压缩格式。"
 
@@ -172,7 +172,7 @@ def extract_archive(file_path, dest_dir):
             with py7zr.SevenZipFile(file_path, mode="r") as f:
                 f.extractall(path=dest_dir)
                 logger.info("Successfully extracted 7z archive to {}".format(dest_dir))
-        except:
+        except Exception:
             logger.info("7z format requires additional dependencies to install")
             return "<br/><br/>解压失败! 需要安装pip install py7zr来解压7z文件"
     else:

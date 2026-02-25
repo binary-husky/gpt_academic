@@ -23,7 +23,7 @@ async def test_tts():
                 mp3_audio = AudioSegment.from_file(temp_file, format="mp3")
                 mp3_audio.export(temp_file, format="wav")
                 with open(temp_file, 'rb') as wav_file: t = wav_file.read()
-            except:
+            except Exception:
                 raise RuntimeError("ffmpeg未安装，无法处理EdgeTTS音频。安装方法见`https://github.com/jiaaro/pydub#getting-ffmpeg-set-up`")
         except httpx.RequestError as e:
             raise RuntimeError(f"请求失败: {e}")

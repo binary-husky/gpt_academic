@@ -32,7 +32,7 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], 
         if match:
             try:
                 paraphrase = json.loads('{"text": "%s"}' % match.group(1))
-            except:
+            except Exception:
                 raise ValueError(f"解析GEMINI消息出错。")
             buffer = paraphrase['text']
             gpt_replying_buffer += buffer
@@ -104,7 +104,7 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot:ChatBotWith
         if match:
             try:
                 paraphrase = json.loads('{"text": "%s"}' % match.group(1))
-            except:
+            except Exception:
                 raise ValueError(f"解析GEMINI消息出错。")
             gpt_replying_buffer += paraphrase['text']    # 使用 json 解析库进行处理
             chatbot[-1] = (inputs, gpt_replying_buffer)

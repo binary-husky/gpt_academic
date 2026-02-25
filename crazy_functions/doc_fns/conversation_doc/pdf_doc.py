@@ -84,7 +84,7 @@ class PDFFormatter:
                     pdfmetrics.registerFont(TTFont('NotoSansCJK', path))
                     font_registered = True
                     break
-                except:
+                except Exception:
                     continue
 
         if not font_registered:
