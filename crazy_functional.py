@@ -506,6 +506,54 @@ def get_crazy_functions():
         logger.error("Load function plugin failed")
 
     try:
+        from toolbox import get_conf as _get_conf
+        if _get_conf("CAMB_API_KEY"):
+            from crazy_functions.CambAI_Translation import CambAI_Translation
+            from crazy_functions.CambAI_Transcription import CambAI_Transcription
+            from crazy_functions.CambAI_AudioSeparation import CambAI_AudioSeparation
+            from crazy_functions.CambAI_VoiceClone import CambAI_VoiceClone
+
+            function_plugins.update({
+                "CAMB AI 翻译": {
+                    "Group": "对话",
+                    "Color": "stop",
+                    "AsButton": False,
+                    "AdvancedArgs": True,
+                    "ArgsReminder": "请输入 '源语言代码,目标语言代码'，例如 '1,75'（英文->中文）。语言代码参考CAMB AI文档。",
+                    "Info": "使用CAMB AI进行140+语言的高质量翻译 | 输入文本或上传文件",
+                    "Function": HotReload(CambAI_Translation),
+                },
+                "CAMB AI 语音转文字": {
+                    "Group": "对话",
+                    "Color": "stop",
+                    "AsButton": False,
+                    "AdvancedArgs": True,
+                    "ArgsReminder": "请输入语言代码（整数），例如 '1' 表示英文。默认为1。",
+                    "Info": "使用CAMB AI进行语音转文字，支持说话人识别 | 输入参数为音频文件路径",
+                    "Function": HotReload(CambAI_Transcription),
+                },
+                "CAMB AI 音频分离": {
+                    "Group": "对话",
+                    "Color": "stop",
+                    "AsButton": False,
+                    "Info": "使用CAMB AI将音频分离为人声和背景音轨 | 输入参数为音频文件路径",
+                    "Function": HotReload(CambAI_AudioSeparation),
+                },
+                "CAMB AI 声音克隆": {
+                    "Group": "对话",
+                    "Color": "stop",
+                    "AsButton": False,
+                    "AdvancedArgs": True,
+                    "ArgsReminder": "请输入 '声音名称,性别代码'，例如 'MyVoice,2'。性别代码: 0=未指定, 1=男, 2=女。",
+                    "Info": "使用CAMB AI从音频样本克隆声音 | 上传10-30秒音频文件",
+                    "Function": HotReload(CambAI_VoiceClone),
+                },
+            })
+    except:
+        logger.error(trimmed_format_exc())
+        logger.error("Load CAMB AI function plugins failed")
+
+    try:
         from crazy_functions.Math_Animation_Gen import 动画生成
 
         function_plugins.update(
