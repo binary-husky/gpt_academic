@@ -226,6 +226,16 @@ def start_app(app_block, CONCURRENT_COUNT, AUTHENTICATION, PORT, SSL_KEYFILE, SS
                             return Response(content=t)
                         except:
                             raise RuntimeError("ffmpeg未安装，无法处理EdgeTTS音频。安装方法见`https://github.com/jiaaro/pydub#getting-ffmpeg-set-up`")
+                    if TTS_TYPE == "CAMB_AI":
+                        import asyncio
+                        json_data = await request.json()
+                        text = json_data.get('text', '')
+                        if not text.strip():
+                            return Response(content=b'', status_code=200)
+                        from crazy_functions.camb_ai_utils import camb_tts_generate, map_language_to_bcp47
+                        language = map_language_to_bcp47(json_data.get('text_language'))
+                        audio_bytes = await asyncio.to_thread(camb_tts_generate, text, language=language)
+                        return Response(content=audio_bytes)
                     if TTS_TYPE == "LOCAL_SOVITS_API":
                         # Forward the request to the target service
                         TARGET_URL = get_conf("GPT_SOVITS_URL")

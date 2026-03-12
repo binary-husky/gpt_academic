@@ -242,9 +242,16 @@ ALIYUN_SECRET=""    # （无需填写）
 
 
 # GPT-SOVITS 文本转语音服务的运行地址（将语言模型的生成文本朗读出来）
-TTS_TYPE = "EDGE_TTS" # EDGE_TTS / LOCAL_SOVITS_API / DISABLE
+TTS_TYPE = "EDGE_TTS" # EDGE_TTS / LOCAL_SOVITS_API / CAMB_AI / DISABLE
 GPT_SOVITS_URL = ""
 EDGE_TTS_VOICE = "zh-CN-XiaoxiaoNeural"
+
+# CAMB AI 语音服务配置
+CAMB_API_KEY = ""
+CAMB_TTS_VOICE_ID = 147320          # Default voice ID
+CAMB_TTS_MODEL = "mars-flash"       # mars-flash / mars-pro / mars-instruct
+CAMB_TTS_LANGUAGE = "en-us"         # BCP-47 language code
+CAMB_TTS_SPEED = 1.0                # 0.5-2.0
 
 
 # 接入讯飞星火大模型 https://console.xfyun.cn/services/iat
