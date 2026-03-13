@@ -26,6 +26,7 @@ GPT Academic 的核心优势之一是对多种大语言模型的广泛支持。�
 | 月之暗面 | `moonshot-v1-128k` | ⭐ | 超长上下文，适合长文档 |
 | 零一万物 | `yi-large`, `yi-medium` | ⭐ | 开源血统，性价比高 |
 | 火山引擎 | `volcengine-deepseek-r1` | ⭐ | DeepSeek 托管服务 |
+| MiniMax | `minimax-m2.5`, `minimax-m2.5-highspeed` | ⭐ | 国内直连，204K超长上下文 |
 
 ### 本地模型支持
 

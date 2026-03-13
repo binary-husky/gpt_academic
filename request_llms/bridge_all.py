@@ -80,6 +80,7 @@ ollama_endpoint = "http://localhost:11434/api/chat"
 yimodel_endpoint = "https://api.lingyiwanwu.com/v1/chat/completions"
 deepseekapi_endpoint = "https://api.deepseek.com/v1/chat/completions"
 grok_model_endpoint = "https://api.x.ai/v1/chat/completions"
+minimax_endpoint = "https://api.minimax.io/v1/chat/completions"
 volcengine_endpoint = "https://ark.cn-beijing.volces.com/api/v3/chat/completions"
 
 if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
@@ -103,6 +104,7 @@ if ollama_endpoint in API_URL_REDIRECT: ollama_endpoint = API_URL_REDIRECT[ollam
 if yimodel_endpoint in API_URL_REDIRECT: yimodel_endpoint = API_URL_REDIRECT[yimodel_endpoint]
 if deepseekapi_endpoint in API_URL_REDIRECT: deepseekapi_endpoint = API_URL_REDIRECT[deepseekapi_endpoint]
 if grok_model_endpoint in API_URL_REDIRECT: grok_model_endpoint = API_URL_REDIRECT[grok_model_endpoint]
+if minimax_endpoint in API_URL_REDIRECT: minimax_endpoint = API_URL_REDIRECT[minimax_endpoint]
 if volcengine_endpoint in API_URL_REDIRECT: volcengine_endpoint = API_URL_REDIRECT[volcengine_endpoint]
 
 # 获取tokenizer
@@ -1233,6 +1235,36 @@ if any(item in claude_models for item in AVAIL_LLM_MODELS):
                 "tokenizer": tokenizer_gpt35,
                 "token_cnt": get_token_num_gpt35,
                 "enable_reasoning": True
+            },
+        })
+    except:
+        logger.error(trimmed_format_exc())
+
+# -=-=-=-=-=-=- MiniMax大模型在线API -=-=-=-=-=-=-
+minimax_models = ["minimax-m2.5", "minimax-m2.5-highspeed"]
+if any(item in minimax_models for item in AVAIL_LLM_MODELS):
+    try:
+        minimax_noui, minimax_ui = get_predict_function(
+            api_key_conf_name="MINIMAX_API_KEY", max_output_token=4096, disable_proxy=True
+        )
+        model_info.update({
+            "minimax-m2.5":{
+                "fn_with_ui": minimax_ui,
+                "fn_without_ui": minimax_noui,
+                "endpoint": minimax_endpoint,
+                "can_multi_thread": True,
+                "max_token": 204000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
+            },
+            "minimax-m2.5-highspeed":{
+                "fn_with_ui": minimax_ui,
+                "fn_without_ui": minimax_noui,
+                "endpoint": minimax_endpoint,
+                "can_multi_thread": True,
+                "max_token": 204000,
+                "tokenizer": tokenizer_gpt35,
+                "token_cnt": get_token_num_gpt35,
             },
         })
     except:
