@@ -44,3 +44,5 @@ llama-index-embeddings-openai==0.1.10
 llama-parse==0.4.9
 mdit-py-plugins>=0.3.3
 linkify-it-py==2.0.3
+
+setuptools==81.0.0
