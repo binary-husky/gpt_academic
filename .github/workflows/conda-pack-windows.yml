@@ -12,7 +12,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Setup Miniconda
-      uses: conda-incubator/setup-miniconda@v3
+      uses: conda-incubator/setup-miniconda@fc2d68f6413eb2d87b895e92f8584b5b94a10167 # v3
       with:
         auto-activate-base: true
         activate-environment: ""
