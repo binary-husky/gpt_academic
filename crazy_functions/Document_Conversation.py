@@ -345,8 +345,8 @@ class BatchDocumentSummarizer:
         if all(not summary for summary in summaries):
             return (["所有文件处理均失败"], ["生成最终总结"], [[]])
 
-        if self.plugin_kwargs.get("advanced_arg"):
-            i_say = "根据以上所有文件的处理结果，按要求进行综合处理：" + self.plugin_kwargs['advanced_arg']
+        if self.query:
+            i_say = "根据以上所有文件的处理结果，按要求进行综合处理：" + self.query
         else:
             i_say = "请根据以上所有文件的处理结果，生成最终的总结，不超过1000字。"
 
@@ -383,9 +383,9 @@ class BatchDocumentSummarizer:
         for rel_path, summaries in file_summaries.items():
             if len(summaries) > 1:  # 多片段文件需要生成整体总结
                 sorted_summaries = sorted(summaries, key=lambda x: x['index'])
-                if self.plugin_kwargs.get("advanced_arg"):
+                if self.query:
 
-                    i_say = f'请按照用户要求对文件内容进行处理，用户要求为：{self.plugin_kwargs["advanced_arg"]}：'
+                    i_say = f'请按照用户要求对文件内容进行处理，用户要求为：{self.query}：'
                 else:
                     i_say = f"请总结文件 {os.path.basename(rel_path)} 的主要内容，不超过500字。"
 
@@ -416,9 +416,9 @@ class BatchDocumentSummarizer:
                 for rel_path, summary in self.file_summaries_map.items():
                     file_summaries_for_final.append(f"文件 {rel_path} 的总结：\n{summary}")
 
-                if self.plugin_kwargs.get("advanced_arg"):
+                if self.query:
                     final_summary_prompt = ("根据以下所有文件的总结内容，按要求进行综合处理：" +
-                                            self.plugin_kwargs['advanced_arg'])
+                                            self.query)
                 else:
                     final_summary_prompt = "请根据以下所有文件的总结内容，生成最终的总结报告。"
 
