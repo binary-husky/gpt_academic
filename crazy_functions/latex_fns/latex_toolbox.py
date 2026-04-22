@@ -592,6 +592,41 @@ def fix_content(final_tex, node_string):
     return final_tex
 
 
+def extract_user_defined_env_patterns(text):
+    """
+    Detect user-defined shorthand commands for LaTeX environments, e.g.:
+        \\def\\be{\\begin{equation}}
+        \\def\\ee{\\end{equation}}
+    Returns a list of regex patterns that can be passed to set_forbidden_text
+    to preserve the corresponding environment blocks from GPT translation.
+    """
+    begin_defs = {}  # shorthand -> env_name
+    end_defs = {}    # shorthand -> env_name
+
+    # Match \\def\\cmd{\\begin{envname}}
+    for m in re.finditer(r'\\def\\([a-zA-Z]+)\s*\{\\begin\{([^}]+)\}\}', text):
+        begin_defs[m.group(1)] = m.group(2)
+    # Match \\def\\cmd{\\end{envname}}
+    for m in re.finditer(r'\\def\\([a-zA-Z]+)\s*\{\\end\{([^}]+)\}\}', text):
+        end_defs[m.group(1)] = m.group(2)
+
+    # Match \\newcommand{\\cmd}{\\begin{envname}} and \\renewcommand variants
+    for m in re.finditer(r'\\(?:newcommand|renewcommand)\{\\([a-zA-Z]+)\}\{\\begin\{([^}]+)\}\}', text):
+        begin_defs[m.group(1)] = m.group(2)
+    for m in re.finditer(r'\\(?:newcommand|renewcommand)\{\\([a-zA-Z]+)\}\{\\end\{([^}]+)\}\}', text):
+        end_defs[m.group(1)] = m.group(2)
+
+    patterns = []
+    for begin_cmd, env_name in begin_defs.items():
+        for end_cmd, end_env_name in end_defs.items():
+            if env_name == end_env_name:
+                # Use (?![a-zA-Z]) to avoid matching longer commands that start with the same prefix
+                # e.g., \be should not match \begin
+                patterns.append(rf'\\{begin_cmd}(?![a-zA-Z])(.*?)\\{end_cmd}(?![a-zA-Z])')
+                logger.info(f"Detected custom env shorthand: \\{begin_cmd}...\\{end_cmd} -> {{{env_name}}}")
+    return patterns
+
+
 def compile_latex_with_timeout(command, cwd, timeout=60):
     import subprocess
 

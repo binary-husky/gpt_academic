@@ -9,7 +9,7 @@ from crazy_functions.latex_fns.latex_toolbox import PRESERVE, TRANSFORM
 from crazy_functions.latex_fns.latex_toolbox import set_forbidden_text, set_forbidden_text_begin_end, set_forbidden_text_careful_brace
 from crazy_functions.latex_fns.latex_toolbox import reverse_forbidden_text_careful_brace, reverse_forbidden_text, convert_to_linklist, post_process
 from crazy_functions.latex_fns.latex_toolbox import fix_content, find_main_tex_file, merge_tex_files, compile_latex_with_timeout
-from crazy_functions.latex_fns.latex_toolbox import find_title_and_abs
+from crazy_functions.latex_fns.latex_toolbox import find_title_and_abs, extract_user_defined_env_patterns
 from crazy_functions.latex_fns.latex_pickle_io import objdump, objload
 
 
@@ -48,6 +48,10 @@ def split_subprocess(txt, project_folder, return_dict, opts):
     text, mask = set_forbidden_text(text, mask, [r"\\begin\{minipage\}(.*?)\\end\{minipage\}", r"\\begin\{minipage\*\}(.*?)\\end\{minipage\*\}"], re.DOTALL)
     text, mask = set_forbidden_text(text, mask, [r"\\begin\{align\*\}(.*?)\\end\{align\*\}", r"\\begin\{align\}(.*?)\\end\{align\}"], re.DOTALL)
     text, mask = set_forbidden_text(text, mask, [r"\\begin\{equation\}(.*?)\\end\{equation\}", r"\\begin\{equation\*\}(.*?)\\end\{equation\*\}"], re.DOTALL)
+    # 吸收用户自定义的环境简写命令 (如 \def\be{\begin{equation}} \def\ee{\end{equation}})
+    custom_env_patterns = extract_user_defined_env_patterns(text)
+    if custom_env_patterns:
+        text, mask = set_forbidden_text(text, mask, custom_env_patterns, re.DOTALL)
     text, mask = set_forbidden_text(text, mask, [r"\\includepdf\[(.*?)\]\{(.*?)\}", r"\\clearpage", r"\\newpage", r"\\appendix", r"\\tableofcontents", r"\\include\{(.*?)\}"])
     text, mask = set_forbidden_text(text, mask, [r"\\vspace\{(.*?)\}", r"\\hspace\{(.*?)\}", r"\\label\{(.*?)\}", r"\\begin\{(.*?)\}", r"\\end\{(.*?)\}", r"\\item "])
     text, mask = set_forbidden_text_careful_brace(text, mask, r"\\hl\{(.*?)\}", re.DOTALL)
