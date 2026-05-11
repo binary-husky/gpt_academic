@@ -556,8 +556,9 @@ class MasterMindWebSocketServer(PythonMethod_AsyncConnectionMaintainer_Agentcraf
 
                 for file in files:
                     try:
-                        # 构建文件保存路径
-                        file_path = os.path.join(upload_dir, file.filename)
+                        # SECURITY FIX: Prevent path traversal by stripping directory components
+                        safe_filename = os.path.basename(file.filename)
+                        file_path = os.path.join(upload_dir, safe_filename)
                         total_size = 0
                         processed_size = 0
 
