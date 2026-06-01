@@ -82,7 +82,7 @@ Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼�
 [多LLM模型](https://www.bilibili.com/video/BV1wT411p7yf)支持 | 同时被GPT3.5、GPT4、[清华ChatGLM2](https://github.com/THUDM/ChatGLM2-6B)、[复旦MOSS](https://github.com/OpenLMLab/MOSS)伺候的感觉一定会很不错吧？
 更多LLM模型接入，支持[huggingface部署](https://huggingface.co/spaces/qingxu98/gpt-academic) | 加入Newbing接口(新必应)，引入清华[Jittorllms](https://github.com/Jittor/JittorLLMs)支持[LLaMA](https://github.com/facebookresearch/llama)和[盘古α](https://openi.org.cn/pangu/)
 ⭐[void-terminal](https://github.com/binary-husky/void-terminal) pip包 | 脱离GUI，在Python中直接调用本项目的所有函数插件（开发中）
-更多新功能展示 (图像生成等) …… | 见本文档结尾处 ……
+更多新功能展示（图像生成等）…… | 见本文档结尾处 ……
 </div>
 
 
@@ -200,7 +200,7 @@ git clone --depth=1 https://github.com/OpenLMLab/MOSS.git request_llms/moss  # �
 # 【可选步骤IV】支持RWKV Runner
 参考wiki：https://github.com/binary-husky/gpt_academic/wiki/%E9%80%82%E9%85%8DRWKV-Runner
 
-# 【可选步骤V】确保config.py配置文件的AVAIL_LLM_MODELS包含了期望的模型，目前支持的全部模型如下(jittorllms系列目前仅支持docker方案)：
+# 【可选步骤V】确保config.py配置文件的AVAIL_LLM_MODELS包含了期望的模型，目前支持的全部模型如下（jittorllms系列目前仅支持docker方案）：
 AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "moss"] # + ["jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
 
 # 【可选步骤VI】支持本地模型INT8,INT4量化（这里所指的模型本身不是量化版本，目前deepseek-coder支持，后面测试后会加入更多模型量化选择）
@@ -299,7 +299,7 @@ P.S. 如果需要依赖Latex的插件功能，请见Wiki。另外，您也可以
 ### I：动态
 
 1. 对话保存功能。在函数插件区调用 `保存当前的对话` 即可将当前对话保存为可读+可复原的html文件，
-另外在函数插件区（下拉菜单）调用 `载入对话历史存档` ，即可还原之前的会话。
+另外在函数插件区（下拉菜单）调用 `载入对话历史存档`，即可还原之前的会话。
 Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史html存档缓存。
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/235222390-24a9acc0-680f-49f5-bc81-2f3161f1e049.png" width="500" >
@@ -377,7 +377,7 @@ Tip：不指定文件直接点击 `载入对话历史存档` 可以查看历史h
 - version 3.44: 正式支持Azure，优化界面易用性
 - version 3.4: +arxiv论文翻译、latex论文批改功能
 - version 3.3: +互联网信息综合功能
-- version 3.2: 函数插件支持更多参数接口 (保存对话功能, 解读任意语言代码+同时询问任意的LLM组合)
+- version 3.2: 函数插件支持更多参数接口（保存对话功能，解读任意语言代码+同时询问任意的LLM组合）
 - version 3.1: 支持同时问询多个gpt模型！支持api2d，支持多个apikey负载均衡
 - version 3.0: 对chatglm和其他小型llm的支持
 - version 2.6: 重构了插件结构，提高了交互性，加入更多插件
