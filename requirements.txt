@@ -8,7 +8,7 @@ tiktoken>=0.3.3
 requests[socks]
 pydantic==2.9.2
 protobuf==3.20
-transformers>=4.27.1,<4.42
+transformers>=4.51.0
 scipdf_parser>=0.52
 spacy==3.7.4
 anthropic>=0.18.1
