@@ -1,0 +1,513 @@
+/*
+ * Code Enhancements for OpenJudge Documentation
+ * Phase 1: 代码块样式增强
+ *
+ * Features:
+ * - 行内代码样式优化
+ * - 代码块圆角和边框
+ * - 代码块标题栏样式
+ * - 行号样式优化
+ * - 代码复制按钮样式
+ * - 语法高亮微调
+ * - 长代码横向滚动指示
+ */
+
+/* ========================================
+   Inline Code Styling
+   ======================================== */
+
+article code:not(pre code),
+.prose code:not(pre code),
+.md-typeset code:not(pre code) {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.875em;
+  font-weight: 450;
+  padding: 0.2em 0.4em;
+  margin: 0 0.1em;
+  background: var(--muted, #f3f4f6);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 0.375rem;
+  color: var(--foreground, #1f2937);
+  word-break: break-word;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Inline code in links - inherit link color */
+article a code:not(pre code),
+.prose a code:not(pre code),
+.md-typeset a code:not(pre code) {
+  color: inherit;
+  background: transparent;
+  border: 1px solid;
+  border-color: color-mix(in srgb, currentColor 30%, transparent);
+}
+
+/* Fallback for browsers without color-mix support */
+@supports not (border-color: color-mix(in srgb, currentColor 30%, transparent)) {
+  article a code:not(pre code),
+  .prose a code:not(pre code),
+  .md-typeset a code:not(pre code) {
+    border-color: currentColor;
+    opacity: 0.8;
+  }
+}
+
+/* Inline code in headings */
+article h1 code, article h2 code, article h3 code,
+article h4 code, article h5 code, article h6 code,
+.prose h1 code, .prose h2 code, .prose h3 code,
+.prose h4 code, .prose h5 code, .prose h6 code {
+  font-size: 0.9em;
+}
+
+/* ========================================
+   Code Block Container
+   ======================================== */
+
+article pre,
+.prose pre,
+.md-typeset pre {
+  margin: 1.5em 0;
+  padding: 0;
+  /* Fallback for browsers without OKLCH support */
+  background: #ffffff;
+  background: var(--background, #ffffff);
+  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: var(--radius-lg, 0.5rem);
+  overflow: visible;
+  position: relative;
+}
+
+/* Code inside pre */
+article pre code,
+.prose pre code,
+.md-typeset pre code {
+  display: block;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 600px;
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-lg, 0.5rem);
+  -webkit-font-smoothing: antialiased;
+  tab-size: 2;
+}
+
+/* ========================================
+   Code Block with Title
+   ======================================== */
+
+/* Title bar for code blocks (when using title="filename.py") */
+article .highlight .filename,
+.prose .highlight .filename,
+.md-typeset .highlight .filename {
+  display: block;
+  padding: 0.5rem 1rem;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6b7280;
+  color: var(--muted-foreground, #6b7280);
+  /* Fallback for browsers without OKLCH support */
+  background: #ffffff;
+  background: var(--background, #ffffff);
+  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+  user-select: none;
+}
+
+/* Code block with data-title attribute */
+article pre[data-title]::before,
+.prose pre[data-title]::before,
+.md-typeset pre[data-title]::before {
+  content: attr(data-title);
+  display: block;
+  padding: 0.5rem 1rem;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6b7280;
+  color: var(--muted-foreground, #6b7280);
+  /* Fallback for browsers without OKLCH support */
+  background: #ffffff;
+  background: var(--background, #ffffff);
+  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+  user-select: none;
+}
+
+/* ========================================
+   Syntax Highlighting Wrapper
+   ======================================== */
+
+article .highlight,
+.prose .highlight,
+.md-typeset .highlight {
+  margin: 1.5em 0;
+  border-radius: var(--radius-lg, 0.5rem);
+  overflow: visible;
+  /* Fallback for browsers without OKLCH support */
+  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border, #e5e7eb);
+  background: #ffffff;
+  background: var(--background, #ffffff);
+}
+
+article .highlight pre,
+.prose .highlight pre,
+.md-typeset .highlight pre {
+  margin: 0;
+  border: none;
+  border-radius: var(--radius-lg, 0.5rem);
+  overflow: visible;
+}
+
+/* ========================================
+   Line Numbers
+   ======================================== */
+
+/* Line number gutter */
+article .highlight .linenos,
+article .highlight .linenodiv,
+.prose .highlight .linenos,
+.prose .highlight .linenodiv,
+.md-typeset .highlight .linenos,
+.md-typeset .highlight .linenodiv {
+  padding: 1rem 0;
+  padding-right: 1rem;
+  padding-left: 0.75rem;
+  text-align: right;
+  color: var(--muted-foreground, #9ca3af);
+  background: rgba(0, 0, 0, 0.02);
+  border-right: none;
+  user-select: none;
+  font-size: 0.75rem;
+  line-height: 1.7;
+}
+
+/* Individual line numbers */
+article .highlight .linenos span,
+article .highlight .linenodiv pre span,
+.prose .highlight .linenos span,
+.md-typeset .highlight .linenos span {
+  display: block;
+  line-height: 1.7;
+}
+
+/* Highlighted line */
+article .highlight .hll,
+.prose .highlight .hll,
+.md-typeset .highlight .hll {
+  background: rgba(255, 213, 0, 0.15);
+  display: block;
+  margin: 0 -1.25rem;
+  padding: 0 1.25rem;
+}
+
+/* ========================================
+   Code Copy Button
+   ======================================== */
+
+article .highlight .copy-button,
+article pre .copy-button,
+.prose .highlight .copy-button,
+.md-typeset .highlight .copy-button,
+button.copy-code-button,
+.code-copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6b7280;
+  color: var(--muted-foreground, #6b7280);
+  /* Fallback for browsers without OKLCH support */
+  background: #ffffff;
+  background: var(--background, #fff);
+  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 0.375rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.15s ease;
+  z-index: 10;
+}
+
+article .highlight:hover .copy-button,
+article pre:hover .copy-button,
+.prose .highlight:hover .copy-button,
+.md-typeset .highlight:hover .copy-button,
+.highlight:hover button.copy-code-button,
+pre:hover .code-copy-btn {
+  opacity: 1;
+}
+
+article .highlight .copy-button:hover,
+article pre .copy-button:hover,
+.prose .highlight .copy-button:hover,
+.md-typeset .highlight .copy-button:hover,
+button.copy-code-button:hover,
+.code-copy-btn:hover {
+  color: var(--foreground, #1f2937);
+  background: var(--muted, #f3f4f6);
+  border-color: var(--border, #d1d5db);
+}
+
+/* Copy button success state */
+article .highlight .copy-button.copied,
+article pre .copy-button.copied,
+button.copy-code-button.copied,
+.code-copy-btn.copied {
+  color: var(--success, #10b981);
+  border-color: var(--success, #10b981);
+}
+
+/* ========================================
+   Language Label
+   ======================================== */
+
+article .highlight[data-lang]::before,
+.prose .highlight[data-lang]::before,
+.md-typeset .highlight[data-lang]::before {
+  content: attr(data-lang);
+  position: absolute;
+  top: 0.5rem;
+  right: 3.5rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground, #9ca3af);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* ========================================
+   Scroll Indicator (Horizontal & Vertical)
+   ======================================== */
+
+article pre code,
+.prose pre code,
+.md-typeset pre code {
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted-foreground, #9ca3af) transparent;
+}
+
+/* Horizontal scrollbar */
+article pre code::-webkit-scrollbar,
+.prose pre code::-webkit-scrollbar,
+.md-typeset pre code::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+article pre code::-webkit-scrollbar-track,
+.prose pre code::-webkit-scrollbar-track,
+.md-typeset pre code::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+article pre code::-webkit-scrollbar-thumb,
+.prose pre code::-webkit-scrollbar-thumb,
+.md-typeset pre code::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground, #d1d5db);
+  border-radius: 3px;
+}
+
+article pre code::-webkit-scrollbar-thumb:hover,
+.prose pre code::-webkit-scrollbar-thumb:hover,
+.md-typeset pre code::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground, #9ca3af);
+}
+
+/* Scrollbar corner (when both scrollbars are present) */
+article pre code::-webkit-scrollbar-corner,
+.prose pre code::-webkit-scrollbar-corner,
+.md-typeset pre code::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ========================================
+   Dark Mode
+   ======================================== */
+
+/* Dark mode inline code */
+.dark article code:not(pre code),
+.dark .prose code:not(pre code),
+.dark .md-typeset code:not(pre code),
+.dark article code:not(pre code),
+.dark .prose code:not(pre code),
+.dark .md-typeset code:not(pre code) {
+  background: var(--muted, #1f2937);
+  border-color: var(--border, #374151);
+  color: var(--foreground, #e5e7eb);
+}
+
+/* Dark mode code blocks */
+.dark article pre,
+.dark .prose pre,
+.dark .md-typeset pre,
+.dark article .highlight,
+.dark .prose .highlight,
+.dark .md-typeset .highlight {
+  /* Fallback for browsers without OKLCH support */
+  background: #0a0a0a;
+  background: var(--background, #0a0a0a);
+  border-color: #374151;
+  border-color: var(--border, #374151);
+}
+
+/* Dark mode code color is handled by syntax-highlight.css */
+
+/* Dark mode title bar */
+.dark article .highlight .filename,
+.dark .prose .highlight .filename,
+.dark .md-typeset .highlight .filename {
+  /* Fallback for browsers without OKLCH support */
+  background: #0a0a0a;
+  background: var(--background, #0a0a0a);
+  border-bottom-color: #374151;
+  border-bottom-color: var(--border, #374151);
+  color: #9ca3af;
+  color: var(--muted-foreground, #9ca3af);
+}
+
+/* Dark mode line numbers */
+.dark article .highlight .linenos,
+.dark article .highlight .linenodiv,
+.dark .prose .highlight .linenos,
+.dark .md-typeset .highlight .linenos,
+.dark article .highlight .linenos,
+.dark article .highlight .linenodiv,
+.dark .prose .highlight .linenos,
+.dark .md-typeset .highlight .linenos {
+  background: rgba(255, 255, 255, 0.02);
+  border-right: none;
+  color: var(--muted-foreground, #6b7280);
+}
+
+/* Dark mode highlighted line */
+.dark article .highlight .hll,
+.dark .prose .highlight .hll,
+.dark .md-typeset .highlight .hll,
+.dark article .highlight .hll,
+.dark .prose .highlight .hll,
+.dark .md-typeset .highlight .hll {
+  background: rgba(255, 213, 0, 0.1);
+}
+
+/* Dark mode copy button */
+.dark article .highlight .copy-button,
+.dark article pre .copy-button,
+.dark button.copy-code-button,
+.dark .code-copy-btn {
+  /* Fallback for browsers without OKLCH support */
+  background: #1f2937;
+  background: var(--background, #1f2937);
+  border-color: #374151;
+  border-color: var(--border, #374151);
+  color: #9ca3af;
+  color: var(--muted-foreground, #9ca3af);
+}
+
+.dark article .highlight .copy-button:hover,
+.dark article pre .copy-button:hover,
+.dark button.copy-code-button:hover,
+.dark .code-copy-btn:hover {
+  /* Fallback for browsers without OKLCH support */
+  background: #374151;
+  background: var(--muted, #374151);
+  color: #e5e7eb;
+  color: var(--foreground, #e5e7eb);
+}
+
+/* Dark mode scrollbar */
+.dark article pre code::-webkit-scrollbar-thumb,
+.dark .prose pre code::-webkit-scrollbar-thumb,
+.dark .md-typeset pre code::-webkit-scrollbar-thumb,
+.dark article pre code::-webkit-scrollbar-thumb,
+.dark .prose pre code::-webkit-scrollbar-thumb,
+.dark .md-typeset pre code::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground, #4b5563);
+}
+
+/* ========================================
+   Responsive
+   ======================================== */
+
+@media (max-width: 640px) {
+  article code:not(pre code),
+  .prose code:not(pre code),
+  .md-typeset code:not(pre code) {
+    font-size: 0.8125em;
+    padding: 0.15em 0.35em;
+  }
+
+  article pre code,
+  .prose pre code,
+  .md-typeset pre code {
+    padding: 0.875rem 1rem;
+    font-size: 0.75rem;
+    max-height: 400px;
+  }
+
+  article .highlight .copy-button,
+  article pre .copy-button,
+  button.copy-code-button,
+  .code-copy-btn {
+    opacity: 1;
+    padding: 0.25rem 0.375rem;
+    font-size: 0.6875rem;
+  }
+}
+
+/* ========================================
+   Special Code Block Styles
+   ======================================== */
+
+/* Terminal/Shell style */
+article pre.terminal code,
+article .highlight.terminal pre code,
+.prose pre.terminal code {
+  color: #22c55e;
+}
+
+article pre.terminal code::before,
+article .highlight.terminal pre code::before,
+.prose pre.terminal code::before {
+  content: '$ ';
+  color: #9ca3af;
+  user-select: none;
+}
+
+/* Output style (muted) */
+article pre.output code,
+article .highlight.output pre code,
+.prose pre.output code {
+  color: var(--muted-foreground, #6b7280);
+  font-style: italic;
+}
+
+/* Diff style enhancements */
+article .highlight .gi,
+.prose .highlight .gi,
+.md-typeset .highlight .gi {
+  background: rgba(34, 197, 94, 0.15);
+  display: inline-block;
+  width: 100%;
+}
+
+article .highlight .gd,
+.prose .highlight .gd,
+.md-typeset .highlight .gd {
+  background: rgba(239, 68, 68, 0.15);
+  display: inline-block;
+  width: 100%;
+}

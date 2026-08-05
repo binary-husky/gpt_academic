@@ -1,0 +1,325 @@
+/* mkdocstrings API documentation styling */
+/* Brings structured cards, signatures, and definition lists inline with OpenJudge visuals */
+/*
+ * IMPORTANT: These selectors target the default mkdocstrings-python template classes:
+ * - .doc, .doc-object, .doc-heading, .doc-signature, .doc-contents
+ *
+ * If you've customized your mkdocstrings template or upgraded to a version with
+ * different class names, you may need to adjust these selectors.
+ *
+ * Test with: mkdocs build && check generated API pages for matching classes
+ */
+
+article .mkdocstrings,
+article .doc.doc-object {
+  display: block;
+  margin: 2.5rem 0;
+}
+
+article .mkdocstrings .doc,
+article .doc.doc-object {
+  position: relative;
+  margin: 2.25rem 0;
+  border: 1px solid var(--border, rgba(148, 163, 184, 0.32));
+  border-radius: var(--radius-xl, 1rem);
+  background: var(--card, #ffffff);
+  box-shadow: 0 24px 44px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+article .mkdocstrings .doc .doc-heading,
+article .doc.doc-object .doc-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.75rem 2rem 1.25rem;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.12), transparent);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+article .mkdocstrings .doc .doc-heading h2,
+article .mkdocstrings .doc .doc-heading h3,
+article .doc.doc-object .doc-heading h2,
+article .doc.doc-object .doc-heading h3 {
+  margin: 0;
+  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+  font-weight: 700;
+  color: var(--foreground, #0f172a);
+}
+
+article .mkdocstrings .doc .doc-heading .doc-link,
+article .doc.doc-object .doc-heading .doc-link {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--primary, #0284c7);
+  text-decoration: none;
+  opacity: 0.85;
+}
+
+article .mkdocstrings .doc .doc-heading .doc-link:hover,
+article .doc.doc-object .doc-heading .doc-link:hover {
+  text-decoration: underline;
+  opacity: 1;
+}
+
+/* Object signature */
+article .mkdocstrings .doc .doc-signature,
+article .doc.doc-object .doc-signature,
+article .mkdocstrings .doc pre.docstring-signature,
+article .doc.doc-object pre.docstring-signature {
+  margin: 0;
+  padding: 1.25rem 2rem;
+  background: rgba(15, 23, 42, 0.05);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  overflow-x: auto;
+  font-family: var(--font-mono, "JetBrains Mono", "Fira Code", monospace);
+  font-size: 0.9rem;
+}
+
+article .mkdocstrings .doc .doc-signature code,
+article .doc.doc-object .doc-signature code,
+article .mkdocstrings .doc pre.docstring-signature code,
+article .doc.doc-object pre.docstring-signature code {
+  background: transparent;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* Docstring content */
+article .mkdocstrings .doc .doc-contents,
+article .doc.doc-object .doc-contents {
+  padding: 1.75rem 2rem 2.25rem;
+  display: grid;
+  gap: 1.75rem;
+}
+
+article .mkdocstrings .doc .doc-contents > p:first-child {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--muted-foreground, #475569);
+}
+
+/* Definition lists (Parameters, Returns, etc.) */
+article .mkdocstrings dl,
+article .doc.doc-object dl {
+  margin: 0;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: var(--radius-lg, 0.75rem);
+  background: rgba(148, 163, 184, 0.08);
+  display: grid;
+  gap: 0.85rem;
+}
+
+article .mkdocstrings dl dt,
+article .doc.doc-object dl dt {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--foreground, #0f172a);
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+article .mkdocstrings dl dt .name,
+article .doc.doc-object dl dt .name {
+  padding: 0.1rem 0.45rem;
+  border-radius: 0.45rem;
+  background: rgba(14, 165, 233, 0.15);
+  color: var(--primary-foreground, #0f172a);
+}
+
+article .mkdocstrings dl dt .type,
+article .doc.doc-object dl dt .type {
+  font-size: 0.76rem;
+  color: var(--muted-foreground, #475569);
+}
+
+article .mkdocstrings dl dd,
+article .doc.doc-object dl dd {
+  margin-left: 0;
+  font-size: 0.95rem;
+  color: var(--muted-foreground, #475569);
+  line-height: 1.7;
+}
+
+article .mkdocstrings dl dd > :last-child {
+  margin-bottom: 0;
+}
+
+/* Members tables */
+article .mkdocstrings table,
+article .doc.doc-object table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0 0;
+  font-size: 0.95rem;
+}
+
+article .mkdocstrings table th,
+article .doc.doc-object table th,
+article .mkdocstrings table td,
+article .doc.doc-object table td {
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  padding: 0.65rem 0.85rem;
+  text-align: left;
+}
+
+article .mkdocstrings table tr:nth-child(even),
+article .doc.doc-object table tr:nth-child(even) {
+  background: rgba(148, 163, 184, 0.12);
+}
+
+/* Collapsible members */
+article details.doc-section,
+article .mkdocstrings details {
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: var(--radius-lg, 0.75rem);
+  background: rgba(15, 23, 42, 0.03);
+  padding: 1rem 1.35rem;
+}
+
+article details.doc-section summary,
+article .mkdocstrings details summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--foreground, #0f172a);
+}
+
+article .mkdocstrings details[open] {
+  background: rgba(14, 165, 233, 0.08);
+}
+
+/* Source buttons */
+article .mkdocstrings .doc .view-source,
+article .doc.doc-object .view-source {
+  position: absolute;
+  top: 0.85rem;
+  right: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--primary, #0284c7);
+  text-decoration: none;
+  padding: 0.45rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(14, 165, 233, 0.15);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+article .mkdocstrings .doc .view-source:hover,
+article .doc.doc-object .view-source:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3);
+}
+
+/* Dark theme adjustments */
+.dark article .mkdocstrings .doc,
+.dark article .doc.doc-object,
+.dark article .mkdocstrings .doc,
+.dark article .doc.doc-object {
+  background: rgba(15, 23, 42, 0.82);
+  border-color: rgba(148, 163, 184, 0.18);
+  box-shadow: 0 28px 60px rgba(2, 6, 23, 0.75);
+}
+
+.dark article .mkdocstrings .doc .doc-heading,
+.dark article .mkdocstrings .doc .doc-heading {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.22), transparent);
+  border-bottom-color: rgba(148, 163, 184, 0.25);
+}
+
+.dark article .mkdocstrings dl,
+.dark article .mkdocstrings dl {
+  background: rgba(148, 163, 184, 0.16);
+  border-color: rgba(148, 163, 184, 0.32);
+}
+
+.dark article .mkdocstrings dl dt,
+.dark article .mkdocstrings dl dt {
+  color: #e2e8f0;
+}
+
+.dark article .mkdocstrings dl dt .type,
+.dark article .mkdocstrings dl dt .type {
+  color: rgba(226, 232, 240, 0.74);
+}
+
+.dark article .mkdocstrings dl dd,
+.dark article .mkdocstrings dl dd {
+  color: rgba(226, 232, 240, 0.78);
+}
+
+.dark article .mkdocstrings table tr:nth-child(even),
+.dark article .mkdocstrings table tr:nth-child(even) {
+  background: rgba(148, 163, 184, 0.18);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  article .mkdocstrings .doc,
+  article .doc.doc-object {
+    margin: 1.75rem -0.75rem;
+    border-radius: var(--radius-lg, 0.75rem);
+  }
+
+  article .mkdocstrings .doc .doc-heading,
+  article .doc.doc-object .doc-heading {
+    padding: 1.5rem 1.75rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+
+  article .mkdocstrings .doc .doc-signature,
+  article .doc.doc-object .doc-signature,
+  article .mkdocstrings .doc pre.docstring-signature,
+  article .doc.doc-object pre.docstring-signature {
+    padding: 1rem 1.5rem;
+  }
+
+  article .mkdocstrings .doc .doc-contents,
+  article .doc.doc-object .doc-contents {
+    padding: 1.5rem 1.5rem 1.9rem;
+  }
+}
+
+/* ========================================
+   Fallback Styles for Generic API Docs
+   (if mkdocstrings classes are unavailable)
+   ======================================== */
+
+/* Generic API section styling - applies to any .api-doc container */
+article .api-doc,
+article [class*="api-"],
+article [class*="autodoc"] {
+  margin: 2rem 0;
+  border: 1px solid var(--border, rgba(148, 163, 184, 0.3));
+  border-radius: var(--radius-lg, 0.75rem);
+  background: var(--card, #ffffff);
+  padding: 1.5rem;
+}
+
+/* Generic function/class signature in monospace */
+article .signature,
+article [class*="sig"],
+article code.signature {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 0.9rem;
+  display: block;
+  padding: 0.75rem 1rem;
+  background: rgba(15, 23, 42, 0.05);
+  border-radius: var(--radius-md, 0.5rem);
+  overflow-x: auto;
+}
+
+.dark article .signature,
+.dark article [class*="sig"],
+.dark article .signature,
+.dark article [class*="sig"] {
+  background: rgba(148, 163, 184, 0.12);
+}

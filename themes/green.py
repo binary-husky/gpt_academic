@@ -1,10 +1,23 @@
+import os
 import gradio as gr
 from toolbox import get_conf
-CODE_HIGHLIGHT, ADD_WAIFU, LAYOUT = get_conf('CODE_HIGHLIGHT', 'ADD_WAIFU', 'LAYOUT')
+from loguru import logger
+
+CODE_HIGHLIGHT, ADD_WAIFU, LAYOUT = get_conf("CODE_HIGHLIGHT", "ADD_WAIFU", "LAYOUT")
+theme_dir = os.path.dirname(__file__)
+
 
 def adjust_theme():
     try:
         set_theme = gr.themes.Soft(
+            font=[
+                "Helvetica",
+                "Microsoft YaHei",
+                "ui-sans-serif",
+                "sans-serif",
+                "system-ui",
+            ],
+            font_mono=["ui-monospace", "Consolas", "monospace"],
             primary_hue=gr.themes.Color(
                 c50="#EBFAF2",
                 c100="#CFF3E1",
@@ -48,7 +61,6 @@ def adjust_theme():
                 c900="#2B2B2B",
                 c950="#171717",
             ),
-
             radius_size=gr.themes.sizes.radius_sm,
         ).set(
             button_primary_background_fill="*primary_500",
@@ -59,11 +71,11 @@ def adjust_theme():
             button_primary_text_color="white",
             button_primary_text_color_dark="white",
             button_secondary_background_fill="*neutral_100",
-            button_secondary_background_fill_hover="*neutral_50",
+            button_secondary_background_fill_hover="#FEFEFE",
             button_secondary_background_fill_dark="*neutral_900",
             button_secondary_text_color="*neutral_800",
             button_secondary_text_color_dark="white",
-            background_fill_primary="*neutral_50",
+            background_fill_primary="#FEFEFE",
             background_fill_primary_dark="#1F1F1F",
             block_title_text_color="*primary_500",
             block_title_background_fill_dark="*primary_900",
@@ -73,36 +85,32 @@ def adjust_theme():
             chatbot_code_background_color_dark="*neutral_950",
         )
 
-        js = ''
-        if LAYOUT=="TOP-DOWN":
-            js = ""
-        else:
-            with open('themes/common.js', 'r', encoding='utf8') as f:
-                js = f"<script>{f.read()}</script>"
+        from themes.common import get_common_html_javascript_code
+        js = get_common_html_javascript_code()
 
-        # 添加一个萌萌的看板娘
-        if ADD_WAIFU:
-            js += """
-                <script src="file=docs/waifu_plugin/jquery.min.js"></script>
-                <script src="file=docs/waifu_plugin/jquery-ui.min.js"></script>
-                <script src="file=docs/waifu_plugin/autoload.js"></script>
-            """
-        
-        with open('themes/green.js', 'r', encoding='utf8') as f:
+        with open(os.path.join(theme_dir, "green.js"), "r", encoding="utf8") as f:
             js += f"<script>{f.read()}</script>"
-        
-        gradio_original_template_fn = gr.routes.templates.TemplateResponse
+
+        if not hasattr(gr, "RawTemplateResponse"):
+            gr.RawTemplateResponse = gr.routes.templates.TemplateResponse
+        gradio_original_template_fn = gr.RawTemplateResponse
+
         def gradio_new_template_fn(*args, **kwargs):
             res = gradio_original_template_fn(*args, **kwargs)
-            res.body = res.body.replace(b'</html>', f'{js}</html>'.encode("utf8"))
+            res.body = res.body.replace(b"</html>", f"{js}</html>".encode("utf8"))
             res.init_headers()
             return res
-        gr.routes.templates.TemplateResponse = gradio_new_template_fn   # override gradio template
+
+        gr.routes.templates.TemplateResponse = (
+            gradio_new_template_fn  # override gradio template
+        )
     except:
         set_theme = None
-        print('gradio版本较旧, 不能自定义字体和颜色')
+        logger.error("gradio版本较旧, 不能自定义字体和颜色")
     return set_theme
 
 
-with open("themes/green.css", "r", encoding="utf-8") as f:
+with open(os.path.join(theme_dir, "green.css"), "r", encoding="utf-8") as f:
     advanced_css = f.read()
+with open(os.path.join(theme_dir, "common.css"), "r", encoding="utf-8") as f:
+    advanced_css += f.read()

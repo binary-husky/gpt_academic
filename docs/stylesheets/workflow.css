@@ -1,0 +1,290 @@
+/* Workflow Component Styling */
+/* A step-by-step workflow display with numbered badges and vertical connector lines */
+
+/* Workflow container */
+.workflow {
+  margin: 1.5em 0;
+  padding: 1rem 0;
+}
+
+/* Workflow title */
+.workflow-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #1f2937;
+}
+
+.dark .workflow-title,
+.dark .workflow-title {
+  color: #f3f4f6;
+}
+
+/* Workflow steps list */
+.workflow ol,
+ol.workflow-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  counter-reset: workflow-counter;
+}
+
+/* Individual step item */
+.workflow ol > li,
+ol.workflow-steps > li {
+  position: relative;
+  padding: 0 0 1.75rem 3.5rem;
+  margin: 0;
+  counter-increment: workflow-counter;
+}
+
+.workflow ol > li:last-child,
+ol.workflow-steps > li:last-child {
+  padding-bottom: 0;
+}
+
+/* Step number badge */
+.workflow ol > li::before,
+ol.workflow-steps > li::before {
+  content: counter(workflow-counter);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2rem;
+  height: 2rem;
+  background: #f9fafb;
+  border: 1.5px solid #d1d5db;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  z-index: 2;
+}
+
+.dark .workflow ol > li::before,
+.dark ol.workflow-steps > li::before,
+.dark .workflow ol > li::before,
+.dark ol.workflow-steps > li::before {
+  background: #374151;
+  border-color: #4b5563;
+  color: #d1d5db;
+}
+
+/* Vertical connector line */
+.workflow ol > li::after,
+ol.workflow-steps > li::after {
+  content: '';
+  position: absolute;
+  left: calc(1rem - 0.5px);
+  top: 2rem;
+  width: 1px;
+  height: calc(100% - 2rem);
+  background: #d1d5db;
+  z-index: 1;
+}
+
+/* Hide connector line on last item */
+.workflow ol > li:last-child::after,
+ol.workflow-steps > li:last-child::after {
+  display: none;
+}
+
+.dark .workflow ol > li::after,
+.dark ol.workflow-steps > li::after,
+.dark .workflow ol > li::after,
+.dark ol.workflow-steps > li::after {
+  background: #4b5563;
+}
+
+/* Step title */
+.workflow ol > li strong:first-child,
+ol.workflow-steps > li strong:first-child,
+.workflow-step-title {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.5rem;
+  line-height: 2rem;
+}
+
+.dark .workflow ol > li strong:first-child,
+.dark ol.workflow-steps > li strong:first-child,
+.dark .workflow-step-title,
+.dark .workflow ol > li strong:first-child,
+.dark ol.workflow-steps > li strong:first-child,
+.dark .workflow-step-title {
+  color: #f9fafb;
+}
+
+/* Step description */
+.workflow ol > li p,
+ol.workflow-steps > li p,
+.workflow-step-desc {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9375rem;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.dark .workflow ol > li p,
+.dark ol.workflow-steps > li p,
+.dark .workflow-step-desc,
+.dark .workflow ol > li p,
+.dark ol.workflow-steps > li p,
+.dark .workflow-step-desc {
+  color: #9ca3af;
+}
+
+/* Links in workflow */
+.workflow a,
+ol.workflow-steps a {
+  color: #059669;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.workflow a:hover,
+ol.workflow-steps a:hover {
+  color: #047857;
+}
+
+.dark .workflow a,
+.dark ol.workflow-steps a,
+.dark .workflow a,
+.dark ol.workflow-steps a {
+  color: #34d399;
+}
+
+.dark .workflow a:hover,
+.dark ol.workflow-steps a:hover,
+.dark .workflow a:hover,
+.dark ol.workflow-steps a:hover {
+  color: #6ee7b7;
+}
+
+/* Nested list in workflow steps */
+.workflow ol > li ul,
+ol.workflow-steps > li ul {
+  margin: 0.5rem 0 0 0;
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+
+.workflow ol > li ul li,
+ol.workflow-steps > li ul li {
+  padding: 0.25rem 0;
+  font-size: 0.9375rem;
+  color: #4b5563;
+}
+
+/* Reset nested list items - don't apply workflow counter styles */
+.workflow ol > li ul li::before,
+ol.workflow-steps > li ul li::before,
+.workflow ol > li ul li::after,
+ol.workflow-steps > li ul li::after {
+  display: none;
+  content: none;
+}
+
+.dark .workflow ol > li ul li,
+.dark ol.workflow-steps > li ul li,
+.dark .workflow ol > li ul li,
+.dark ol.workflow-steps > li ul li {
+  color: #9ca3af;
+}
+
+/* Workflow inside tabs - seamless integration */
+.tabbed-block .workflow {
+  padding: 1.5rem 1rem;
+}
+
+.tabbed-block .workflow ol,
+.tabbed-block ol.workflow-steps {
+  margin: 0;
+}
+
+.tabbed-block .workflow ol > li,
+.tabbed-block ol.workflow-steps > li {
+  padding: 0 0 1.75rem 3.5rem;
+}
+
+/* Single workflow (no tabs needed) */
+.workflow-single {
+  margin: 1.5em 0;
+  padding: 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.workflow-single .workflow-header {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #111827;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.dark .workflow-single,
+.dark .workflow-single {
+  border-color: #374151;
+}
+
+.dark .workflow-single .workflow-header,
+.dark .workflow-single .workflow-header {
+  color: #f3f4f6;
+  border-bottom-color: #374151;
+  background: #1f2937;
+}
+
+.workflow-single .workflow {
+  padding: 1.5rem 1rem 1rem;
+  margin: 0;
+}
+
+/* Compact workflow variant */
+.workflow-compact ol > li,
+ol.workflow-steps.compact > li {
+  padding: 0 0 1.25rem 3rem;
+}
+
+.workflow-compact ol > li::before,
+ol.workflow-steps.compact > li::before {
+  width: 1.75rem;
+  height: 1.75rem;
+  font-size: 0.8125rem;
+}
+
+.workflow-compact ol > li::after,
+ol.workflow-steps.compact > li::after {
+  left: calc(0.875rem - 0.5px);
+  top: 1.75rem;
+  height: calc(100% - 1.75rem);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .workflow ol > li,
+  ol.workflow-steps > li {
+    padding-left: 3rem;
+  }
+
+  .workflow ol > li::before,
+  ol.workflow-steps > li::before {
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.8125rem;
+  }
+
+  .workflow ol > li::after,
+  ol.workflow-steps > li::after {
+    left: calc(0.875rem - 0.5px);
+    top: 1.75rem;
+    height: calc(100% - 1.75rem);
+  }
+}

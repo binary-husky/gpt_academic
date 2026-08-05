@@ -1,0 +1,305 @@
+/*
+ * Syntax Highlighting Theme for OpenJudge
+ * Based on modern code editor color schemes
+ */
+
+/* ========================================
+   Light Mode Syntax Highlighting
+   ======================================== */
+
+/* Keywords: from, import, def, return, lambda, class, etc. */
+.highlight .k,  /* Keyword */
+.highlight .kn, /* Keyword.Namespace (import, from) */
+.highlight .kd, /* Keyword.Declaration (def, class) */
+.highlight .kr, /* Keyword.Reserved (return) */
+.highlight .kc, /* Keyword.Constant (True, False, None) */
+.codehilite .k,
+.codehilite .kn,
+.codehilite .kd,
+.codehilite .kr,
+.codehilite .kc {
+  color: #cf222e;
+  font-weight: 500;
+}
+
+/* Strings: "...", '...' */
+.highlight .s,  /* String */
+.highlight .s1, /* String.Single */
+.highlight .s2, /* String.Double */
+.highlight .se, /* String.Escape */
+.codehilite .s,
+.codehilite .s1,
+.codehilite .s2,
+.codehilite .se {
+  color: #0a3069;
+}
+
+/* Comments */
+.highlight .c,   /* Comment */
+.highlight .c1,  /* Comment.Single */
+.highlight .cm,  /* Comment.Multiline */
+.highlight .cp,  /* Comment.Preproc */
+.codehilite .c,
+.codehilite .c1,
+.codehilite .cm,
+.codehilite .cp {
+  color: #6e7781;
+  font-style: italic;
+}
+
+/* Function and Class Names */
+.highlight .nf, /* Name.Function */
+.highlight .nc, /* Name.Class */
+.codehilite .nf,
+.codehilite .nc {
+  color: #0550ae;
+}
+
+/* Builtin Functions: dict, bool, etc. */
+.highlight .nb, /* Name.Builtin */
+.highlight .bp, /* Name.Builtin.Pseudo */
+.codehilite .nb,
+.codehilite .bp {
+  color: #953800;
+}
+
+/* Numbers */
+.highlight .m,  /* Number */
+.highlight .mi, /* Number.Integer */
+.highlight .mf, /* Number.Float */
+.codehilite .m,
+.codehilite .mi,
+.codehilite .mf {
+  color: #0550ae;
+}
+
+/* Operators: =, ==, ->, etc. */
+.highlight .o,  /* Operator */
+.highlight .ow, /* Operator.Word (and, or, in) */
+.codehilite .o,
+.codehilite .ow {
+  color: #cf222e;
+  font-weight: 500;
+}
+
+/* Punctuation: (), [], {}, :, , */
+.highlight .p,  /* Punctuation */
+.codehilite .p {
+  color: #24292f;
+}
+
+/* Variables and Parameters */
+.highlight .n,  /* Name */
+.highlight .nv, /* Name.Variable */
+.codehilite .n,
+.codehilite .nv {
+  color: #24292f;
+}
+
+/* Decorators: @decorator */
+.highlight .nd, /* Name.Decorator */
+.codehilite .nd {
+  color: #8250df;
+}
+
+/* Module/Package Names */
+.highlight .nn, /* Name.Namespace */
+.codehilite .nn {
+  color: #24292f;
+}
+
+/* ========================================
+   Dark Mode Syntax Highlighting
+   ======================================== */
+
+.dark .highlight .k,
+.dark .highlight .kn,
+.dark .highlight .kd,
+.dark .highlight .kr,
+.dark .highlight .kc,
+.dark .codehilite .k,
+.dark .codehilite .kn,
+.dark .codehilite .kd,
+.dark .codehilite .kr,
+.dark .codehilite .kc,
+.dark .highlight .k,
+.dark .highlight .kn,
+.dark .highlight .kd,
+.dark .highlight .kr,
+.dark .highlight .kc {
+  color: #ff7b72;
+  font-weight: 500;
+}
+
+.dark .highlight .s,
+.dark .highlight .s1,
+.dark .highlight .s2,
+.dark .highlight .se,
+.dark .codehilite .s,
+.dark .codehilite .s1,
+.dark .codehilite .s2,
+.dark .codehilite .se,
+.dark .highlight .s,
+.dark .highlight .s1,
+.dark .highlight .s2,
+.dark .highlight .se {
+  color: #a5d6ff;
+}
+
+.dark .highlight .c,
+.dark .highlight .c1,
+.dark .highlight .cm,
+.dark .highlight .cp,
+.dark .codehilite .c,
+.dark .codehilite .c1,
+.dark .codehilite .cm,
+.dark .codehilite .cp,
+.dark .highlight .c,
+.dark .highlight .c1,
+.dark .highlight .cm,
+.dark .highlight .cp {
+  color: #8b949e;
+  font-style: italic;
+}
+
+.dark .highlight .nf,
+.dark .highlight .nc,
+.dark .codehilite .nf,
+.dark .codehilite .nc,
+.dark .highlight .nf,
+.dark .highlight .nc {
+  color: #d2a8ff;
+}
+
+.dark .highlight .nb,
+.dark .highlight .bp,
+.dark .codehilite .nb,
+.dark .codehilite .bp,
+.dark .highlight .nb,
+.dark .highlight .bp {
+  color: #ffa657;
+}
+
+.dark .highlight .m,
+.dark .highlight .mi,
+.dark .highlight .mf,
+.dark .codehilite .m,
+.dark .codehilite .mi,
+.dark .codehilite .mf,
+.dark .highlight .m,
+.dark .highlight .mi,
+.dark .highlight .mf {
+  color: #79c0ff;
+}
+
+.dark .highlight .o,
+.dark .highlight .ow,
+.dark .codehilite .o,
+.dark .codehilite .ow,
+.dark .highlight .o,
+.dark .highlight .ow {
+  color: #ff7b72;
+  font-weight: 500;
+}
+
+.dark .highlight .p,
+.dark .codehilite .p,
+.dark .highlight .p,
+.dark .codehilite .p {
+  color: #c9d1d9;
+}
+
+.dark .highlight .n,
+.dark .highlight .nv,
+.dark .codehilite .n,
+.dark .codehilite .nv,
+.dark .highlight .n,
+.dark .highlight .nv {
+  color: #c9d1d9;
+}
+
+.dark .highlight .nd,
+.dark .codehilite .nd,
+.dark .highlight .nd,
+.dark .codehilite .nd {
+  color: #d2a8ff;
+}
+
+.dark .highlight .nn,
+.dark .codehilite .nn,
+.dark .highlight .nn,
+.dark .codehilite .nn {
+  color: #c9d1d9;
+}
+
+/* ========================================
+   Special Highlighting
+   ======================================== */
+
+/* Highlighted lines */
+.highlight .hll,
+.codehilite .hll {
+  background-color: rgba(255, 213, 0, 0.15);
+  display: block;
+  margin: 0 -1.25rem;
+  padding: 0 1.25rem;
+}
+
+.dark .highlight .hll,
+.dark .codehilite .hll,
+.dark .highlight .hll,
+.dark .codehilite .hll {
+  background-color: rgba(255, 213, 0, 0.1);
+}
+
+/* Error highlighting */
+.highlight .err,
+.codehilite .err {
+  color: #cf222e;
+}
+
+.dark .highlight .err,
+.dark .codehilite .err,
+.dark .highlight .err,
+.dark .codehilite .err {
+  color: #ff7b72;
+}
+
+/* ========================================
+   Language-Specific Adjustments
+   ======================================== */
+
+/* Python-specific */
+.highlight .language-python .nv,
+.codehilite .language-python .nv {
+  color: #24292f;
+}
+
+.dark .highlight .language-python .nv,
+.dark .codehilite .language-python .nv,
+.dark .highlight .language-python .nv,
+.dark .codehilite .language-python .nv {
+  color: #c9d1d9;
+}
+
+/* JavaScript/TypeScript-specific */
+.highlight .language-javascript .kd,
+.highlight .language-typescript .kd,
+.codehilite .language-javascript .kd,
+.codehilite .language-typescript .kd {
+  color: #cf222e;
+  font-weight: 500;
+}
+
+/* JSON-specific */
+.highlight .language-json .nd,
+.codehilite .language-json .nd {
+  color: #0550ae;
+}
+
+.dark .highlight .language-json .nd,
+.dark .codehilite .language-json .nd,
+.dark .highlight .language-json .nd,
+.dark .codehilite .language-json .nd {
+  color: #79c0ff;
+}

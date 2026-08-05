@@ -34,7 +34,7 @@ body:
         - Others | 非最新版
     validations:
       required: true
-      
+
   - type: dropdown
     id: os
     attributes:
@@ -47,7 +47,7 @@ body:
         - Docker
     validations:
       required: true
-      
+
   - type: textarea
     id: describe
     attributes:
@@ -55,7 +55,7 @@ body:
       description: Describe the bug | 简述
     validations:
       required: true
-      
+
   - type: textarea
     id: screenshot
     attributes:
@@ -63,15 +63,9 @@ body:
       description: Screen Shot | 有帮助的截图
     validations:
       required: true
-      
+
   - type: textarea
     id: traceback
     attributes:
       label: Terminal Traceback & Material to Help Reproduce Bugs | 终端traceback（如有） + 帮助我们复现的测试材料样本（如有）
       description: Terminal Traceback & Material to Help Reproduce Bugs | 终端traceback（如有） + 帮助我们复现的测试材料样本（如有）
-
-
-
-
-
-

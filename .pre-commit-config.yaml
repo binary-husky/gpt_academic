@@ -1,0 +1,40 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-ast
+      - id: check-json
+      - id: check-merge-conflict
+      - id: detect-private-key
+
+  - repo: https://github.com/myint/autoflake
+    rev: v2.2.0
+    hooks:
+      - id: autoflake
+        args: [
+          --in-place,
+          --remove-all-unused-imports,
+          --ignore-init-module-imports
+        ]
+
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: v1.7.0
+  #   hooks:
+  #     - id: mypy
+  #       args: [
+  #         --ignore-missing-imports,
+  #         --disable-error-code=var-annotated,
+  #         --disable-error-code=union-attr,
+  #         --disable-error-code=no-redef,
+  #         --disable-error-code=assignment,
+  #         --disable-error-code=has-type,
+  #         --disable-error-code=attr-defined,
+  #         --disable-error-code=import-untyped,
+  #         --disable-error-code=truthy-function,
+  #         --follow-imports=skip,
+  #         --explicit-package-bases,
+  #       ]

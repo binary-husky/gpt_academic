@@ -1,0 +1,410 @@
+/*
+ * Tabbed Code Blocks Styling for pymdownx.tabbed alternate_style with shadcn/ui theme
+ * Override base.css styles for alternate_style: true
+ */
+
+/* ========================================
+   Override base.css tabbed-set styles for alternate_style
+   Using higher specificity selectors
+   ======================================== */
+
+/* Reset base.css flex-wrap that breaks alternate layout */
+article .tabbed-set.tabbed-alternate {
+  flex-flow: column nowrap !important;
+  display: flex !important;
+  margin: 1.5em 0 !important;
+  /* Fallback for browsers without OKLCH support */
+  border: 1px solid #e5e7eb !important;
+  border: 1px solid var(--border, #e5e7eb) !important;
+  border-radius: 0.5rem !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+  background: var(--background, #ffffff) !important;
+  box-shadow: none !important;
+}
+
+/* Special styling for Workflow tabs - no border */
+article .tabbed-set.tabbed-alternate:has(.workflow) {
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  overflow: visible !important;
+}
+
+/* Hide radio inputs */
+article .tabbed-set.tabbed-alternate > input[type="radio"] {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  display: block !important; /* Override base.css display: none */
+}
+
+/* Tab labels container */
+article .tabbed-set.tabbed-alternate > .tabbed-labels {
+  display: flex !important;
+  flex-direction: row !important;
+  background: transparent !important;
+  /* Fallback for browsers without OKLCH support */
+  border-bottom: 1px solid #e5e7eb !important;
+  border-bottom: 1px solid var(--border, #e5e7eb) !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  padding: 0.5rem 0.5rem 0 0.5rem !important;
+  padding-right: 3rem !important;
+  margin: 0 !important;
+  overflow-x: auto !important;
+  order: 1 !important;
+  position: relative !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+/* Hide scrollbar for webkit browsers */
+article .tabbed-set.tabbed-alternate > .tabbed-labels::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Tab label buttons - override base.css label styles */
+article .tabbed-set.tabbed-alternate > .tabbed-labels > label {
+  padding: 0.5rem 1rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  line-height: 1.25rem !important;
+  /* Fallback for browsers without OKLCH support */
+  color: #6b7280 !important;
+  color: var(--muted-foreground, #6b7280) !important;
+  cursor: pointer !important;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  transition: all 0.2s ease !important;
+  white-space: nowrap !important;
+  position: relative !important;
+  margin: 0 !important;
+  margin-bottom: -1px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  user-select: none !important;
+  order: unset !important;
+  flex-basis: auto !important;
+}
+
+article .tabbed-set.tabbed-alternate > .tabbed-labels > label:first-of-type {
+  margin-left: 0 !important;
+}
+
+article .tabbed-set.tabbed-alternate > .tabbed-labels > label:hover {
+  color: var(--foreground) !important;
+  background: transparent !important;
+}
+
+/* Tab content container - override base.css */
+article .tabbed-set.tabbed-alternate > .tabbed-content {
+  display: block !important;
+  position: relative !important;
+  background: transparent !important;
+  order: 2 !important;
+  flex-basis: auto !important;
+  border-top: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Ensure content flows naturally inside the border */
+article .tabbed-set.tabbed-alternate .tabbed-block {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Individual tab blocks - hide by default */
+article .tabbed-set.tabbed-alternate > .tabbed-content > .tabbed-block {
+  display: none !important;
+}
+
+/* ========================================
+   Active Tab States - CSS :checked method
+   ======================================== */
+
+/* Active label - Tab 1 */
+article .tabbed-set.tabbed-alternate > input:nth-child(1):checked ~ .tabbed-labels > label:nth-child(1) {
+  color: #14b8a6 !important;
+  background: transparent !important;
+  border-bottom-color: #14b8a6 !important;
+  box-shadow: none !important;
+}
+
+/* Active label - Tab 2 */
+article .tabbed-set.tabbed-alternate > input:nth-child(2):checked ~ .tabbed-labels > label:nth-child(2) {
+  color: #14b8a6 !important;
+  background: transparent !important;
+  border-bottom-color: #14b8a6 !important;
+  box-shadow: none !important;
+}
+
+/* Active label - Tab 3 */
+article .tabbed-set.tabbed-alternate > input:nth-child(3):checked ~ .tabbed-labels > label:nth-child(3) {
+  color: #14b8a6 !important;
+  background: transparent !important;
+  border-bottom-color: #14b8a6 !important;
+  box-shadow: none !important;
+}
+
+/* Active label - Tab 4 */
+article .tabbed-set.tabbed-alternate > input:nth-child(4):checked ~ .tabbed-labels > label:nth-child(4) {
+  color: #14b8a6 !important;
+  background: transparent !important;
+  border-bottom-color: #14b8a6 !important;
+  box-shadow: none !important;
+}
+
+/* Active label - Tab 5 */
+article .tabbed-set.tabbed-alternate > input:nth-child(5):checked ~ .tabbed-labels > label:nth-child(5) {
+  color: #14b8a6 !important;
+  background: transparent !important;
+  border-bottom-color: #14b8a6 !important;
+  box-shadow: none !important;
+}
+
+/* Active label - Tab 6 */
+article .tabbed-set.tabbed-alternate > input:nth-child(6):checked ~ .tabbed-labels > label:nth-child(6) {
+  color: #14b8a6 !important;
+  background: transparent !important;
+  border-bottom-color: #14b8a6 !important;
+  box-shadow: none !important;
+}
+
+/* Show active tab content */
+article .tabbed-set.tabbed-alternate > input:nth-child(1):checked ~ .tabbed-content > .tabbed-block:nth-child(1) {
+  display: block !important;
+}
+
+article .tabbed-set.tabbed-alternate > input:nth-child(2):checked ~ .tabbed-content > .tabbed-block:nth-child(2) {
+  display: block !important;
+}
+
+article .tabbed-set.tabbed-alternate > input:nth-child(3):checked ~ .tabbed-content > .tabbed-block:nth-child(3) {
+  display: block !important;
+}
+
+article .tabbed-set.tabbed-alternate > input:nth-child(4):checked ~ .tabbed-content > .tabbed-block:nth-child(4) {
+  display: block !important;
+}
+
+article .tabbed-set.tabbed-alternate > input:nth-child(5):checked ~ .tabbed-content > .tabbed-block:nth-child(5) {
+  display: block !important;
+}
+
+article .tabbed-set.tabbed-alternate > input:nth-child(6):checked ~ .tabbed-content > .tabbed-block:nth-child(6) {
+  display: block !important;
+}
+
+/* JS fallback method */
+article .tabbed-set.tabbed-alternate > .tabbed-content > .tabbed-block.tabbed-block--active {
+  display: block !important;
+}
+
+article .tabbed-set.tabbed-alternate > .tabbed-labels > label.tabbed-label--active,
+article .tabbed-set.tabbed-alternate > .tabbed-labels > label[data-active="true"] {
+  color: #14b8a6 !important;
+  background: transparent !important;
+  border-bottom-color: #14b8a6 !important;
+  box-shadow: none !important;
+}
+
+/* ========================================
+   Code Block Styling Inside Tabs
+   ======================================== */
+
+article .tabbed-set.tabbed-alternate .tabbed-block .highlight,
+article .tabbed-set.tabbed-alternate .tabbed-block .codehilite {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  position: relative !important;
+}
+
+article .tabbed-set.tabbed-alternate .tabbed-block pre {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  position: relative !important;
+}
+
+article .tabbed-set.tabbed-alternate .tabbed-block pre code {
+  display: block !important;
+  padding: 1rem 1.25rem !important;
+  overflow-x: auto !important;
+  font-size: 0.8125rem !important;
+  line-height: 1.7 !important;
+}
+
+/* Copy button for tabbed code blocks */
+article .tabbed-set.tabbed-alternate .tabbed-labels .copy-button {
+  position: absolute !important;
+  top: 0.625rem !important;
+  right: 0.75rem !important;
+  padding: 0.375rem 0.5rem !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  /* Fallback for browsers without OKLCH support */
+  color: #6b7280 !important;
+  color: var(--muted-foreground, #6b7280) !important;
+  background: #ffffff !important;
+  background: var(--background, #ffffff) !important;
+  border: 1px solid #e5e7eb !important;
+  border: 1px solid var(--border, #e5e7eb) !important;
+  border-radius: 0.375rem !important;
+  cursor: pointer !important;
+  opacity: 0 !important;
+  transition: all 0.15s ease !important;
+  z-index: 10 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 2rem !important;
+  height: 2rem !important;
+}
+
+article .tabbed-set.tabbed-alternate .tabbed-labels .copy-button svg {
+  width: 1rem !important;
+  height: 1rem !important;
+  display: block !important;
+}
+
+article .tabbed-set.tabbed-alternate:hover .copy-button {
+  opacity: 1 !important;
+}
+
+article .tabbed-set.tabbed-alternate .copy-button:hover {
+  color: var(--foreground, #1f2937) !important;
+  background: var(--muted, #f3f4f6) !important;
+  border-color: var(--border, #d1d5db) !important;
+}
+
+article .tabbed-set.tabbed-alternate .copy-button.copied {
+  color: var(--success, #10b981) !important;
+  border-color: var(--success, #10b981) !important;
+}
+
+/* ========================================
+   Dark Mode Support
+   ======================================== */
+
+.dark article .tabbed-set.tabbed-alternate {
+  /* Fallback for browsers without OKLCH support */
+  background: #0a0a0a !important;
+  background: var(--background, #0a0a0a) !important;
+  border: 1px solid #374151 !important;
+  border: 1px solid var(--border, #374151) !important;
+}
+
+/* Special styling for Workflow tabs in dark mode - no border */
+.dark article .tabbed-set.tabbed-alternate:has(.workflow),
+.dark article .tabbed-set.tabbed-alternate:has(.workflow) {
+  border: none !important;
+  background: transparent !important;
+}
+
+.dark article .tabbed-set.tabbed-alternate > .tabbed-labels {
+  background: transparent !important;
+  /* Fallback for browsers without OKLCH support */
+  border-bottom-color: #374151 !important;
+  border-bottom-color: var(--border, #374151) !important;
+}
+
+.dark article .tabbed-set.tabbed-alternate > .tabbed-labels > label {
+  color: var(--muted-foreground) !important;
+}
+
+.dark article .tabbed-set.tabbed-alternate > .tabbed-labels > label:hover {
+  color: var(--foreground) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark article .tabbed-set.tabbed-alternate > input:checked ~ .tabbed-labels > label.tabbed-label--active,
+.dark article .tabbed-set.tabbed-alternate > .tabbed-labels > label[data-active="true"],
+.dark article .tabbed-set.tabbed-alternate > input:nth-child(1):checked ~ .tabbed-labels > label:nth-child(1),
+.dark article .tabbed-set.tabbed-alternate > input:nth-child(2):checked ~ .tabbed-labels > label:nth-child(2),
+.dark article .tabbed-set.tabbed-alternate > input:nth-child(3):checked ~ .tabbed-labels > label:nth-child(3),
+.dark article .tabbed-set.tabbed-alternate > input:nth-child(4):checked ~ .tabbed-labels > label:nth-child(4),
+.dark article .tabbed-set.tabbed-alternate > input:nth-child(5):checked ~ .tabbed-labels > label:nth-child(5),
+.dark article .tabbed-set.tabbed-alternate > input:nth-child(6):checked ~ .tabbed-labels > label:nth-child(6) {
+  color: #2dd4bf !important;
+  background: transparent !important;
+  border-bottom-color: #2dd4bf !important;
+  box-shadow: none !important;
+}
+
+.dark article .tabbed-set.tabbed-alternate .tabbed-block pre,
+.dark article .tabbed-set.tabbed-alternate .tabbed-block pre {
+  background: transparent !important;
+  border: none !important;
+}
+
+.dark article .tabbed-set.tabbed-alternate .tabbed-block .highlight,
+.dark article .tabbed-set.tabbed-alternate .tabbed-block .codehilite,
+.dark article .tabbed-set.tabbed-alternate .tabbed-block .highlight,
+.dark article .tabbed-set.tabbed-alternate .tabbed-block .codehilite {
+  border: none !important;
+}
+
+.dark article .tabbed-set.tabbed-alternate .tabbed-labels .copy-button {
+  /* Fallback for browsers without OKLCH support */
+  background: #1f2937 !important;
+  background: var(--background, #1f2937) !important;
+  border-color: #374151 !important;
+  border-color: var(--border, #374151) !important;
+  color: #9ca3af !important;
+  color: var(--muted-foreground, #9ca3af) !important;
+}
+
+.dark article .tabbed-set.tabbed-alternate .copy-button:hover {
+  /* Fallback for browsers without OKLCH support */
+  background: #374151 !important;
+  background: var(--muted, #374151) !important;
+  color: #e5e7eb !important;
+  color: var(--foreground, #e5e7eb) !important;
+}
+
+/* ========================================
+   Responsive Design
+   ======================================== */
+
+@media (max-width: 640px) {
+  article .tabbed-set.tabbed-alternate > .tabbed-labels {
+    padding: 0.375rem 2.75rem 0 0.375rem !important;
+  }
+
+  article .tabbed-set.tabbed-alternate > .tabbed-labels > label {
+    padding: 0.375rem 0.625rem !important;
+    font-size: 0.8125rem !important;
+    margin: 0 0.125rem !important;
+  }
+
+  article .tabbed-set.tabbed-alternate .tabbed-block pre code {
+    padding: 0.875rem 1rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  article .tabbed-set.tabbed-alternate .tabbed-labels .copy-button {
+    opacity: 1 !important;
+    min-width: 1.75rem !important;
+    height: 1.75rem !important;
+    padding: 0.25rem !important;
+    top: 0.5rem !important;
+    right: 0.5rem !important;
+  }
+
+  article .tabbed-set.tabbed-alternate .tabbed-labels .copy-button svg {
+    width: 0.875rem !important;
+    height: 0.875rem !important;
+  }
+}

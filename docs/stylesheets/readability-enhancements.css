@@ -1,0 +1,253 @@
+/* Readability enhancements */
+
+/* ========================================
+   Collapsible Sections (Details/Summary)
+   ======================================== */
+
+/* Details container base styles */
+article details,
+.prose details,
+.md-typeset details {
+  margin: 1.5rem 0;
+  padding: 0;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 0.5rem;
+  background: var(--card, #ffffff);
+  overflow: hidden;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Dark mode support */
+.dark article details,
+.dark .prose details,
+.dark .md-typeset details {
+  background: var(--card, #1f2937);
+  border-color: var(--border, #374151);
+}
+
+/* Summary (clickable header) */
+article details summary,
+.prose details summary,
+.md-typeset details summary {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  background: var(--muted, #f9fafb);
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+/* Remove default marker */
+article details summary::-webkit-details-marker,
+.prose details summary::-webkit-details-marker,
+.md-typeset details summary::-webkit-details-marker {
+  display: none;
+}
+
+article details summary::marker,
+.prose details summary::marker,
+.md-typeset details summary::marker {
+  display: none;
+  content: "";
+}
+
+/* Chevron icon (using CSS pseudo-element) */
+article details summary::before,
+.prose details summary::before,
+.md-typeset details summary::before {
+  content: "";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  background-color: var(--foreground, #111827);
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 18 15 12 9 6'%3E%3C/polyline%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='9 18 15 12 9 6'%3E%3C/polyline%3E%3C/svg%3E");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Rotate chevron when open */
+article details[open] summary::before,
+.prose details[open] summary::before,
+.md-typeset details[open] summary::before {
+  transform: rotate(90deg);
+}
+
+/* Summary hover state */
+article details summary:hover,
+.prose details summary:hover,
+.md-typeset details summary:hover {
+  background: var(--accent, #f3f4f6);
+}
+
+/* Dark mode summary */
+.dark article details summary,
+.dark .prose details summary,
+.dark .md-typeset details summary {
+  background: var(--muted, #1f2937);
+}
+
+.dark article details summary::before,
+.dark .prose details summary::before,
+.dark .md-typeset details summary::before {
+  background-color: var(--foreground, #f9fafb);
+}
+
+.dark article details summary:hover,
+.dark .prose details summary:hover,
+.dark .md-typeset details summary:hover {
+  background: var(--accent, #374151);
+}
+
+/* Open state: show border under summary */
+article details[open] summary,
+.prose details[open] summary,
+.md-typeset details[open] summary {
+  border-bottom-color: var(--border, #e5e7eb);
+}
+
+.dark article details[open] summary,
+.dark .prose details[open] summary,
+.dark .md-typeset details[open] summary {
+  border-bottom-color: var(--border, #374151);
+}
+
+/* Details content area */
+article details > *:not(summary),
+.prose details > *:not(summary),
+.md-typeset details > *:not(summary) {
+  padding: 0 1rem;
+}
+
+article details > *:not(summary):first-of-type,
+.prose details > *:not(summary):first-of-type,
+.md-typeset details > *:not(summary):first-of-type {
+  padding-top: 1rem;
+}
+
+article details > *:not(summary):last-child,
+.prose details > *:not(summary):last-child,
+.md-typeset details > *:not(summary):last-child {
+  padding-bottom: 1rem;
+}
+
+/* ========================================
+   Admonition-style Details (note, tip, warning, etc.)
+   For pymdownx.details integration
+   ======================================== */
+
+/* Note style details */
+article details.note summary,
+.prose details.note summary,
+.md-typeset details.note summary {
+  background: rgba(59, 130, 246, 0.08);
+}
+
+article details.note summary::before,
+.prose details.note summary::before,
+.md-typeset details.note summary::before {
+  background-color: #3b82f6;
+}
+
+/* Tip style details */
+article details.tip summary,
+.prose details.tip summary,
+.md-typeset details.tip summary {
+  background: rgba(16, 185, 129, 0.08);
+}
+
+article details.tip summary::before,
+.prose details.tip summary::before,
+.md-typeset details.tip summary::before {
+  background-color: #10b981;
+}
+
+/* Warning style details */
+article details.warning summary,
+.prose details.warning summary,
+.md-typeset details.warning summary {
+  background: rgba(245, 158, 11, 0.08);
+}
+
+article details.warning summary::before,
+.prose details.warning summary::before,
+.md-typeset details.warning summary::before {
+  background-color: #f59e0b;
+}
+
+/* Danger style details */
+article details.danger summary,
+.prose details.danger summary,
+.md-typeset details.danger summary {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+article details.danger summary::before,
+.prose details.danger summary::before,
+.md-typeset details.danger summary::before {
+  background-color: #ef4444;
+}
+
+/* Info style details */
+article details.info summary,
+.prose details.info summary,
+.md-typeset details.info summary {
+  background: rgba(6, 182, 212, 0.08);
+}
+
+article details.info summary::before,
+.prose details.info summary::before,
+.md-typeset details.info summary::before {
+  background-color: #06b6d4;
+}
+
+/* Example style details */
+article details.example summary,
+.prose details.example summary,
+.md-typeset details.example summary {
+  background: rgba(139, 92, 246, 0.08);
+}
+
+article details.example summary::before,
+.prose details.example summary::before,
+.md-typeset details.example summary::before {
+  background-color: #8b5cf6;
+}
+
+/* ========================================
+   Focus styles for accessibility
+   ======================================== */
+
+article details summary:focus,
+.prose details summary:focus,
+.md-typeset details summary:focus {
+  outline: 2px solid var(--ring, #3b82f6);
+  outline-offset: 2px;
+}
+
+article details summary:focus:not(:focus-visible),
+.prose details summary:focus:not(:focus-visible),
+.md-typeset details summary:focus:not(:focus-visible) {
+  outline: none;
+}
+
+article details summary:focus-visible,
+.prose details summary:focus-visible,
+.md-typeset details summary:focus-visible {
+  outline: 2px solid var(--ring, #3b82f6);
+  outline-offset: 2px;
+}

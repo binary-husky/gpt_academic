@@ -1,0 +1,108 @@
+/* Mermaid diagram styling for OpenJudge docs */
+/* Aligns diagrams, adds padding, and keeps them readable across themes */
+
+article .mermaid {
+  position: relative;
+  display: block;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  border: 1px solid var(--border, rgba(148, 163, 184, 0.4));
+  border-radius: var(--radius-lg, 0.75rem);
+  background: var(--card, #ffffff);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-align: center;
+  max-width: min(100%, 68rem);
+  scrollbar-width: thin;
+}
+
+article .mermaid::-webkit-scrollbar {
+  height: 8px;
+}
+
+article .mermaid::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.45);
+}
+
+article .mermaid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+article .mermaid svg,
+article .mermaid > svg {
+  display: inline-block;
+  width: auto;
+  max-width: none;
+  color: inherit;
+}
+
+article .mermaid text {
+  font-family: var(--font-sans, "Inter", "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+  font-size: 0.95rem;
+  fill: var(--foreground, #0f172a);
+}
+
+article .mermaid .label {
+  color: var(--foreground, #0f172a);
+}
+
+article .mermaid a {
+  color: var(--primary-foreground, var(--primary, #0284c7));
+}
+
+article figure.mermaid {
+  margin: 2rem auto;
+}
+
+article figure.mermaid figcaption {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: var(--muted-foreground, #475569);
+  text-align: center;
+}
+
+/* Dark theme adjustments */
+.dark article .mermaid,
+.dark article .mermaid {
+  border-color: rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.55);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.65);
+}
+
+.dark article .mermaid text,
+.dark article .mermaid text {
+  fill: var(--muted-foreground, #e2e8f0);
+}
+
+.dark article .mermaid .label,
+.dark article .mermaid .label {
+  color: var(--muted-foreground, #e2e8f0);
+}
+
+.dark article figure.mermaid figcaption,
+.dark article figure.mermaid figcaption {
+  color: var(--muted-foreground, #cbd5f5);
+}
+
+/* Hide raw fenced code only when Mermaid successfully renders */
+/* If .mermaid exists as a sibling, the diagram rendered successfully */
+article .mermaid ~ pre code.language-mermaid,
+article .mermaid + pre code.language-mermaid {
+  display: none;
+}
+
+/* Alternative: if Mermaid wraps the pre, hide the pre entirely */
+article .mermaid pre {
+  display: none;
+}
+
+/* Responsive tweaks */
+@media (max-width: 640px) {
+  article .mermaid {
+    margin: 1.5rem -1rem;
+    padding: 1.25rem;
+    border-radius: var(--radius-md, 0.5rem);
+  }
+}

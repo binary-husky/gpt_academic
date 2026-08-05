@@ -1,0 +1,6 @@
+.venv
+.github
+.vscode
+gpt_log
+tests
+README.md

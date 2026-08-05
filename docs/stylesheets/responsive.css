@@ -1,0 +1,1006 @@
+/*
+ * Responsive Enhancements for OpenJudge Documentation
+ * Phase 5: 响应式完善
+ *
+ * Features:
+ * - 统一断点系统
+ * - 移动端导航优化
+ * - 触摸友好交互
+ * - 多设备布局适配
+ * - 响应式工具类
+ * - 打印样式优化
+ */
+
+/* ========================================
+   Breakpoint System (CSS Custom Properties)
+   ======================================== */
+
+:root {
+  /* Breakpoint values (for reference in media queries) */
+  /* --breakpoint-xs: 0px;      Mobile portrait */
+  /* --breakpoint-sm: 640px;    Mobile landscape */
+  /* --breakpoint-md: 768px;    Tablet portrait */
+  /* --breakpoint-lg: 1024px;   Tablet landscape / Small desktop */
+  /* --breakpoint-xl: 1280px;   Desktop */
+  /* --breakpoint-2xl: 1536px;  Large desktop */
+
+  /* Container max-widths */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1280px;
+  --container-2xl: 1536px;
+
+  /* Responsive spacing */
+  --spacing-mobile: 1rem;
+  --spacing-tablet: 1.5rem;
+  --spacing-desktop: 2rem;
+
+  /* Touch target minimum size */
+  --touch-target-min: 44px;
+}
+
+/* ========================================
+   Base Responsive Container
+   ======================================== */
+
+.container,
+article,
+.md-content__inner,
+.prose {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--spacing-mobile);
+  padding-right: var(--spacing-mobile);
+}
+
+@media (min-width: 640px) {
+  .container,
+  article,
+  .md-content__inner,
+  .prose {
+    padding-left: var(--spacing-tablet);
+    padding-right: var(--spacing-tablet);
+  }
+}
+
+@media (min-width: 1024px) {
+  .container,
+  article,
+  .md-content__inner,
+  .prose {
+    padding-left: var(--spacing-desktop);
+    padding-right: var(--spacing-desktop);
+    max-width: var(--container-lg);
+  }
+}
+
+@media (min-width: 1280px) {
+  .container,
+  article,
+  .md-content__inner,
+  .prose {
+    max-width: var(--container-xl);
+  }
+}
+
+/* ========================================
+   Mobile First Base Styles (< 640px)
+   ======================================== */
+
+/* Typography scaling */
+html {
+  font-size: 15px;
+}
+
+@media (min-width: 640px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+/* Mobile layout adjustments */
+@media (max-width: 639px) {
+  /* Main content full width */
+  .md-main__inner,
+  main.md-main {
+    padding: 0;
+  }
+
+  /* Reduce margins on mobile */
+  article > *,
+  .prose > *,
+  .md-typeset > * {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  /* Stack grids on mobile */
+  .grid,
+  .md-grid {
+    display: block;
+  }
+
+  .grid > *,
+  .md-grid > * {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  /* Hide TOC on mobile */
+  .md-sidebar--secondary,
+  .toc,
+  .table-of-contents {
+    display: none;
+  }
+
+  /* Full width code blocks */
+  pre,
+  .highlight,
+  .codehilite {
+    margin-left: calc(-1 * var(--spacing-mobile));
+    margin-right: calc(-1 * var(--spacing-mobile));
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  pre code {
+    padding-left: var(--spacing-mobile);
+    padding-right: var(--spacing-mobile);
+  }
+
+  /* Full width tables */
+  .table-responsive,
+  table {
+    margin-left: calc(-1 * var(--spacing-mobile));
+    margin-right: calc(-1 * var(--spacing-mobile));
+    width: calc(100% + 2 * var(--spacing-mobile));
+  }
+
+  /* Reduce heading sizes on mobile */
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.375rem; }
+  h3 { font-size: 1.125rem; }
+  h4 { font-size: 1rem; }
+}
+
+/* ========================================
+   Tablet Styles (640px - 1023px)
+   ======================================== */
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  /* Two column layout for larger tablets */
+  .md-main__inner {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  /* Sidebar takes full width on tablet portrait */
+  .md-sidebar--primary {
+    width: 100%;
+    max-width: none;
+    position: relative;
+    height: auto;
+    max-height: none;
+  }
+
+  /* Content takes full width */
+  .md-content {
+    width: 100%;
+    max-width: none;
+  }
+
+  /* Hide secondary sidebar on tablet */
+  .md-sidebar--secondary {
+    display: none;
+  }
+
+  /* Grid adjustments */
+  .grid-cols-3,
+  .md-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid-cols-4,
+  .md-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ========================================
+   Desktop Styles (1024px+)
+   ======================================== */
+
+@media (min-width: 1024px) {
+  /* Three column layout */
+  .md-main__inner {
+    display: flex;
+  }
+
+  /* Primary sidebar */
+  .md-sidebar--primary {
+    width: 240px;
+    flex-shrink: 0;
+  }
+
+  /* Main content */
+  .md-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Secondary sidebar (TOC) */
+  .md-sidebar--secondary {
+    width: 200px;
+    flex-shrink: 0;
+    display: block;
+  }
+}
+
+@media (min-width: 1280px) {
+  .md-sidebar--primary {
+    width: 280px;
+  }
+
+  .md-sidebar--secondary {
+    width: 240px;
+  }
+}
+
+/* ========================================
+   Touch Friendly Interactions
+   ======================================== */
+
+/* Ensure minimum touch target size */
+@media (hover: none) and (pointer: coarse) {
+  /* Touch devices */
+
+  a,
+  button,
+  .btn,
+  .button,
+  input[type="button"],
+  input[type="submit"],
+  .md-nav__link,
+  .tabbed-labels > label,
+  details summary {
+    min-height: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+    padding: 0.75rem 1rem;
+  }
+
+  /* Increase tap targets in navigation */
+  .md-nav__link,
+  nav.sidebar a,
+  .nav-sidebar a {
+    padding: 0.875rem 1rem;
+  }
+
+  /* Larger checkboxes */
+  input[type="checkbox"],
+  input[type="radio"] {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  /* Remove hover effects on touch - use active instead */
+  .highlight:hover,
+  .codehilite:hover,
+  pre:hover {
+    transform: none;
+    box-shadow: var(--rm-shadow-sm);
+  }
+
+  .highlight:active,
+  .codehilite:active,
+  pre:active {
+    transform: scale(0.99);
+  }
+
+  /* Show copy button always on touch devices */
+  .copy-button,
+  .md-clipboard,
+  button[data-clipboard-target] {
+    opacity: 1 !important;
+  }
+
+  /* Disable hover lift effects */
+  button:hover,
+  .button:hover,
+  .btn:hover {
+    transform: none;
+  }
+
+  button:active,
+  .button:active,
+  .btn:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Hover-capable devices */
+@media (hover: hover) and (pointer: fine) {
+  /* Enable hover effects */
+  .highlight:hover,
+  .admonition:hover,
+  .workflow ol > li:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* ========================================
+   Mobile Navigation Enhancements
+   ======================================== */
+
+/* Mobile menu toggle button */
+.mobile-menu-toggle {
+  display: none;
+  position: fixed;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: var(--primary, #3b82f6);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  cursor: pointer;
+  z-index: 1001;
+  transition: all 0.2s ease;
+}
+
+.mobile-menu-toggle:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 767px) {
+  .mobile-menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* Mobile menu icon */
+.mobile-menu-toggle .icon-menu {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.mobile-menu-toggle .icon-close {
+  display: none;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.mobile-menu-toggle.active .icon-menu {
+  display: none;
+}
+
+.mobile-menu-toggle.active .icon-close {
+  display: block;
+}
+
+/* Mobile sidebar drawer */
+@media (max-width: 767px) {
+  .md-sidebar--primary,
+  nav.sidebar,
+  .nav-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 85%;
+    max-width: 320px;
+    height: 100vh;
+    max-height: 100vh;
+    background: var(--background, #fff);
+    border-right: 1px solid var(--border, #e5e7eb);
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 1rem;
+    padding-top: 2rem;
+  }
+
+  .md-sidebar--primary.open,
+  nav.sidebar.open,
+  .nav-sidebar.open {
+    transform: translateX(0);
+  }
+
+  /* Dark mode mobile sidebar */
+  .dark .md-sidebar--primary,
+  .dark nav.sidebar,
+  .dark .md-sidebar--primary {
+    background: var(--background, #111827);
+    border-right-color: var(--border, #374151);
+  }
+}
+
+/* Mobile navigation overlay */
+.mobile-nav-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+@media (max-width: 767px) {
+  .mobile-nav-overlay {
+    display: block;
+    pointer-events: none;
+  }
+
+  .mobile-nav-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* ========================================
+   Responsive Images
+   ======================================== */
+
+article img,
+.prose img,
+.md-typeset img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Full bleed images on mobile */
+@media (max-width: 639px) {
+  article img.full-bleed,
+  .prose img.full-bleed,
+  figure.full-bleed img {
+    margin-left: calc(-1 * var(--spacing-mobile));
+    margin-right: calc(-1 * var(--spacing-mobile));
+    max-width: calc(100% + 2 * var(--spacing-mobile));
+    width: calc(100% + 2 * var(--spacing-mobile));
+    border-radius: 0;
+  }
+}
+
+/* Image grids */
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .image-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .image-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ========================================
+   Responsive Tables
+   ======================================== */
+
+/* Table wrapper for horizontal scroll */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1.5em 0;
+}
+
+/* Scroll shadow indicators */
+.table-responsive {
+  position: relative;
+}
+
+.table-responsive::before,
+.table-responsive::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 30px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 1;
+}
+
+.table-responsive::before {
+  left: 0;
+  background: linear-gradient(to right, var(--background, #fff) 0%, transparent 100%);
+}
+
+.table-responsive::after {
+  right: 0;
+  background: linear-gradient(to left, var(--background, #fff) 0%, transparent 100%);
+}
+
+/* Show shadows when scrollable */
+.table-responsive.can-scroll-left::before {
+  opacity: 1;
+}
+
+.table-responsive.can-scroll-right::after {
+  opacity: 1;
+}
+
+/* Card-style tables on mobile */
+@media (max-width: 639px) {
+  table.responsive-cards,
+  .table-cards table {
+    display: block;
+  }
+
+  table.responsive-cards thead,
+  .table-cards thead {
+    display: none;
+  }
+
+  table.responsive-cards tbody,
+  table.responsive-cards tr,
+  .table-cards tbody,
+  .table-cards tr {
+    display: block;
+  }
+
+  table.responsive-cards tr,
+  .table-cards tr {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: var(--radius-lg, 0.5rem);
+    background: var(--card, #fff);
+  }
+
+  table.responsive-cards td,
+  .table-cards td {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border: none;
+    border-bottom: 1px solid var(--border, #e5e7eb);
+  }
+
+  table.responsive-cards td:last-child,
+  .table-cards td:last-child {
+    border-bottom: none;
+  }
+
+  table.responsive-cards td::before,
+  .table-cards td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--muted-foreground, #6b7280);
+    margin-right: 1rem;
+  }
+}
+
+/* ========================================
+   Responsive Code Blocks
+   ======================================== */
+
+@media (max-width: 639px) {
+  /* Smaller font on mobile */
+  pre code,
+  .highlight code,
+  code {
+    font-size: 0.75rem;
+    line-height: 1.6;
+  }
+
+  /* Reduce padding */
+  pre code,
+  .highlight pre code {
+    padding: 0.75rem 1rem;
+  }
+
+  /* Hide line numbers on very small screens */
+  .highlight .linenos,
+  .highlight .linenodiv {
+    display: none;
+  }
+
+  /* Simpler copy button */
+  .copy-button,
+  .md-clipboard {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.6875rem;
+  }
+}
+
+/* ========================================
+   Responsive Typography
+   ======================================== */
+
+/* Fluid typography scale */
+@media (max-width: 639px) {
+  article,
+  .prose,
+  .md-typeset {
+    font-size: 0.9375rem;
+    line-height: 1.65;
+  }
+
+  article h1,
+  .prose h1,
+  .md-typeset h1 {
+    font-size: 1.625rem;
+    line-height: 1.2;
+  }
+
+  article h2,
+  .prose h2,
+  .md-typeset h2 {
+    font-size: 1.25rem;
+    margin-top: 2em;
+  }
+
+  article h3,
+  .prose h3,
+  .md-typeset h3 {
+    font-size: 1.0625rem;
+  }
+
+  /* Tighter spacing */
+  article p,
+  .prose p {
+    margin-bottom: 1em;
+  }
+
+  article ul,
+  article ol,
+  .prose ul,
+  .prose ol {
+    padding-left: 1.25rem;
+  }
+}
+
+/* ========================================
+   Responsive Admonitions & Cards
+   ======================================== */
+
+@media (max-width: 639px) {
+  article .admonition,
+  .prose .admonition,
+  .md-typeset .admonition,
+  article details,
+  .prose details {
+    margin-left: calc(-1 * var(--spacing-mobile));
+    margin-right: calc(-1 * var(--spacing-mobile));
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: 3px solid;
+    padding: 0.875rem 1rem;
+  }
+
+  article .admonition-title,
+  .prose .admonition-title,
+  article details summary {
+    margin: -0.875rem -1rem 0.75rem;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  /* Workflow adjustments */
+  .workflow ol > li,
+  ol.workflow-steps > li {
+    padding-left: 2.5rem;
+  }
+
+  .workflow ol > li::before,
+  ol.workflow-steps > li::before {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.75rem;
+  }
+
+  .workflow ol > li::after,
+  ol.workflow-steps > li::after {
+    left: calc(0.75rem - 0.5px);
+    top: 1.5rem;
+    height: calc(100% - 1.5rem);
+  }
+}
+
+/* ========================================
+   Responsive Tabs
+   ======================================== */
+
+@media (max-width: 639px) {
+  /* Scrollable tabs on mobile */
+  .tabbed-labels,
+  .tabbed-set > .tabbed-labels {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .tabbed-labels::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tabbed-labels > label,
+  .tabbed-set label {
+    flex-shrink: 0;
+    padding: 0.5rem 0.875rem;
+    font-size: 0.8125rem;
+  }
+}
+
+/* ========================================
+   Responsive Utility Classes
+   ======================================== */
+
+/* Hide on specific breakpoints */
+@media (max-width: 639px) {
+  .hide-mobile,
+  .hidden-mobile,
+  .sm\:hidden {
+    display: none !important;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 767px) {
+  .hide-tablet-portrait,
+  .md\:hidden {
+    display: none !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .hide-tablet,
+  .lg\:hidden {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .hide-desktop,
+  .hidden-desktop,
+  .xl\:hidden {
+    display: none !important;
+  }
+}
+
+/* Show on specific breakpoints */
+@media (max-width: 639px) {
+  .show-mobile,
+  .visible-mobile {
+    display: block !important;
+  }
+}
+
+@media (min-width: 640px) {
+  .show-mobile,
+  .visible-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .show-desktop,
+  .visible-desktop {
+    display: block !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .show-desktop,
+  .visible-desktop {
+    display: none !important;
+  }
+}
+
+/* Text alignment utilities */
+@media (max-width: 639px) {
+  .text-center-mobile {
+    text-align: center;
+  }
+
+  .text-left-mobile {
+    text-align: left;
+  }
+}
+
+/* Spacing utilities */
+@media (max-width: 639px) {
+  .p-mobile-0 { padding: 0 !important; }
+  .p-mobile-1 { padding: 0.25rem !important; }
+  .p-mobile-2 { padding: 0.5rem !important; }
+  .p-mobile-4 { padding: 1rem !important; }
+
+  .m-mobile-0 { margin: 0 !important; }
+  .m-mobile-auto { margin: auto !important; }
+}
+
+/* ========================================
+   Print Styles
+   ======================================== */
+
+@media print {
+  /* Hide non-essential elements */
+  nav,
+  .md-sidebar,
+  .sidebar,
+  .nav-sidebar,
+  .toc,
+  .table-of-contents,
+  .scroll-to-top,
+  .mobile-menu-toggle,
+  .mobile-nav-overlay,
+  .copy-button,
+  .md-clipboard,
+  footer,
+  .md-footer {
+    display: none !important;
+  }
+
+  /* Full width content */
+  .md-content,
+  article,
+  .prose,
+  main {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Print-friendly colors */
+  body,
+  article,
+  .prose,
+  .md-typeset {
+    color: #000 !important;
+    background: #fff !important;
+  }
+
+  /* Links show URL */
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+  }
+
+  /* Don't show URL for internal links */
+  a[href^="#"]::after,
+  a[href^="/"]::after {
+    content: "";
+  }
+
+  /* Avoid page breaks in bad places */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+
+  pre, blockquote, table, figure, .admonition {
+    page-break-inside: avoid;
+  }
+
+  /* Code blocks */
+  pre, .highlight {
+    border: 1px solid #ccc;
+    background: #f5f5f5 !important;
+    overflow-x: visible;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  /* Tables */
+  table {
+    border-collapse: collapse;
+  }
+
+  th, td {
+    border: 1px solid #ccc;
+    padding: 0.5rem;
+  }
+}
+
+/* ========================================
+   Landscape Orientation Fixes
+   ======================================== */
+
+@media (max-height: 500px) and (orientation: landscape) {
+  /* Reduce header size on short landscape screens */
+  .md-header,
+  header {
+    padding: 0.5rem 1rem;
+  }
+
+  /* Reduce scroll margin for shorter header */
+  h1[id], h2[id], h3[id], h4[id], h5[id], h6[id] {
+    scroll-margin-top: 50px;
+  }
+
+  /* Compact navigation */
+  .md-nav__link,
+  nav a {
+    padding: 0.375rem 0.75rem;
+  }
+}
+
+/* ========================================
+   High DPI / Retina Display
+   ======================================== */
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Thinner borders on retina */
+  .highlight,
+  pre,
+  table,
+  .admonition,
+  details {
+    border-width: 0.5px;
+  }
+}
+
+/* ========================================
+   Dark Mode Responsive Adjustments
+   ======================================== */
+
+@media (max-width: 639px) {
+  .dark .mobile-nav-overlay,
+  .dark .mobile-nav-overlay {
+    background: rgba(0, 0, 0, 0.7);
+  }
+
+  /* Dark mode scroll shadows */
+  .dark .table-responsive::before,
+  .dark .table-responsive::before {
+    background: linear-gradient(to right, var(--background, #111827) 0%, transparent 100%);
+  }
+
+  .dark .table-responsive::after,
+  .dark .table-responsive::after {
+    background: linear-gradient(to left, var(--background, #111827) 0%, transparent 100%);
+  }
+}
+
+/* ========================================
+   Safe Area Insets (Notch devices)
+   ======================================== */
+
+@supports (padding: max(0px)) {
+  /* Account for notch on modern phones */
+  .md-header,
+  header {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+
+  .md-sidebar--primary,
+  nav.sidebar {
+    padding-left: max(1rem, env(safe-area-inset-left));
+  }
+
+  .mobile-menu-toggle {
+    bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 0.5rem));
+    left: max(1.5rem, calc(env(safe-area-inset-left) + 0.5rem));
+  }
+
+  .scroll-to-top {
+    bottom: max(2rem, calc(env(safe-area-inset-bottom) + 0.5rem));
+    right: max(2rem, calc(env(safe-area-inset-right) + 0.5rem));
+  }
+}

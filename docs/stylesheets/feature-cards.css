@@ -1,0 +1,517 @@
+/* Feature Cards Styles */
+/* Supports dark mode and hover effects */
+
+/* Card Container */
+.card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 1rem 0;
+}
+
+.card-grid-2 {
+  composes: card-grid;
+}
+
+.card-grid-3 {
+  composes: card-grid;
+}
+
+/* Base Card Style */
+.feature-card {
+  flex: 1 1 45%;
+  min-width: 280px;
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid var(--md-default-fg-color--lightest, #e0e0e0);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.25s ease;
+  background: var(--md-default-bg-color, #fff);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  display: block;
+}
+
+.feature-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  border-color: var(--md-primary-fg-color, #4051b5);
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Three column cards */
+.feature-card-sm {
+  flex: 1 1 30%;
+  min-width: 250px;
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid var(--md-default-fg-color--lightest, #e0e0e0);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.25s ease;
+  background: var(--md-default-bg-color, #fff);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  display: block;
+}
+
+.feature-card-sm:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  border-color: var(--md-primary-fg-color, #4051b5);
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Work in Progress Card */
+.feature-card-wip {
+  flex: 1 1 30%;
+  min-width: 250px;
+  text-decoration: none;
+  color: inherit;
+  border: 1px dashed var(--md-default-fg-color--light, #b0b0b0);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.25s ease;
+  background: var(--md-default-bg-color--light, #fafafa);
+  box-shadow: none;
+  opacity: 0.65;
+  pointer-events: none;
+  cursor: default;
+}
+
+.feature-card-wip:hover {
+  transform: none;
+  box-shadow: none;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Card Header */
+.card-header {
+  display: inline-flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  margin-bottom: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.card-header h3 {
+  margin: 0 !important;
+  font-size: 16px;
+  font-weight: 600;
+  white-space: nowrap !important;
+  display: inline !important;
+  pointer-events: none;
+}
+
+.card-header-lg h3 {
+  font-size: 18px;
+}
+
+/* Card Icon */
+.card-icon {
+  height: 1.3em;
+  width: 1.3em;
+  min-width: 1.3em;
+  margin-right: 10px;
+  opacity: 0.9;
+  transition: all 0.25s ease;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.feature-card:hover .card-icon,
+.feature-card-sm:hover .card-icon,
+.feature-card-wip:hover .card-icon {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Icon Colors by Category */
+.card-icon-agent {
+  filter: invert(45%) sepia(80%) saturate(500%) hue-rotate(190deg) brightness(95%);
+}
+
+.card-icon-general {
+  filter: invert(50%) sepia(60%) saturate(400%) hue-rotate(100deg) brightness(95%);
+}
+
+.card-icon-multimodal {
+  filter: invert(40%) sepia(70%) saturate(500%) hue-rotate(250deg) brightness(95%);
+}
+
+.card-icon-math {
+  filter: invert(55%) sepia(70%) saturate(500%) hue-rotate(10deg) brightness(95%);
+}
+
+.card-icon-tool {
+  filter: invert(45%) sepia(60%) saturate(400%) hue-rotate(170deg) brightness(95%);
+}
+
+.card-icon-data {
+  filter: invert(50%) sepia(60%) saturate(450%) hue-rotate(130deg) brightness(95%);
+}
+
+.card-icon-integration {
+  filter: invert(45%) sepia(70%) saturate(450%) hue-rotate(220deg) brightness(95%);
+}
+
+/* Card Description */
+.card-desc {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.8;
+  line-height: 1.6;
+  pointer-events: none;
+}
+
+.card-desc-lg {
+  font-size: 14px;
+}
+
+/* Make all children non-interactive so clicks pass through to the link */
+.feature-card *,
+.feature-card-sm * {
+  pointer-events: none;
+}
+
+/* Badge for Work in Progress */
+.badge-wip {
+  font-size: 12px;
+  background-color: var(--md-warning-fg-color--light, #fff3cd);
+  color: var(--md-warning-fg-color, #856404);
+  padding: 2px 10px;
+  border-radius: 12px;
+  margin-left: 10px;
+  font-weight: 500;
+}
+
+/* Callout Tip - Highlighted intro section */
+.callout-tip {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.04) 0%, rgba(245, 158, 11, 0.01) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.1);
+  border-left: 3px solid rgba(245, 158, 11, 0.5);
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin: 1.5rem 0;
+  position: relative;
+}
+
+.callout-tip p {
+  margin: 0;
+  line-height: 1.7;
+  font-size: 15px;
+}
+
+.callout-tip .callout-icon {
+  height: 1.3em;
+  width: 1.3em;
+  margin-right: 10px;
+  vertical-align: middle;
+  display: inline-block;
+  opacity: 0.6;
+  filter: invert(60%) sepia(50%) saturate(400%) hue-rotate(5deg) brightness(100%);
+  flex-shrink: 0;
+}
+
+/* Dark Mode for Callout Tip */
+.dark .callout-tip {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(245, 158, 11, 0.02) 100%);
+  border-color: rgba(245, 158, 11, 0.15);
+  border-left-color: rgba(245, 158, 11, 0.6);
+}
+
+.dark .callout-tip .callout-icon {
+  filter: invert(75%) sepia(60%) saturate(500%) hue-rotate(5deg) brightness(110%);
+}
+
+/* Key Features Section */
+.key-features {
+  background: var(--md-default-bg-color, #fff);
+  border-radius: 12px;
+  padding: 8px;
+  margin: 1rem 0;
+}
+
+.key-features ul {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.key-features > ul > li {
+  margin-bottom: 12px;
+  padding: 16px 20px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.key-features > ul > li:last-child {
+  margin-bottom: 0;
+}
+
+/* Feature 1: Library - Blue */
+.key-features > ul > li:nth-child(1) {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.02) 100%);
+  border-color: rgba(59, 130, 246, 0.12);
+}
+
+.key-features > ul > li:nth-child(1):hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(59, 130, 246, 0.04) 100%);
+  border-color: rgba(59, 130, 246, 0.18);
+}
+
+/* Feature 2: Building - Green */
+.key-features > ul > li:nth-child(2) {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.02) 100%);
+  border-color: rgba(16, 185, 129, 0.12);
+}
+
+.key-features > ul > li:nth-child(2):hover {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(16, 185, 129, 0.04) 100%);
+  border-color: rgba(16, 185, 129, 0.18);
+}
+
+/* Feature 3: Integration - Purple */
+.key-features > ul > li:nth-child(3) {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(139, 92, 246, 0.02) 100%);
+  border-color: rgba(139, 92, 246, 0.12);
+}
+
+.key-features > ul > li:nth-child(3):hover {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(139, 92, 246, 0.04) 100%);
+  border-color: rgba(139, 92, 246, 0.18);
+}
+
+.key-features ul ul {
+  margin-top: 10px;
+  padding-left: 20px;
+}
+
+.key-features ul ul li {
+  margin-bottom: 6px;
+  position: relative;
+  opacity: 0.85;
+}
+
+/* Removed arrow decoration for cleaner appearance */
+/* .key-features ul ul li::before {
+  content: "›";
+  position: absolute;
+  left: -16px;
+  font-weight: bold;
+  opacity: 0.5;
+}
+
+.key-features > ul > li:nth-child(1) ul li::before {
+  color: #3b82f6;
+}
+
+.key-features > ul > li:nth-child(2) ul li::before {
+  color: #10b981;
+}
+
+.key-features > ul > li:nth-child(3) ul li::before {
+  color: #8b5cf6;
+} */
+
+/* Dark Mode Adjustments */
+.dark .feature-card,
+.dark .feature-card-sm {
+  background: rgba(30, 30, 30, 0.6);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .feature-card:hover,
+.dark .feature-card-sm:hover {
+  background: rgba(40, 40, 40, 0.8);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.dark .feature-card-wip {
+  background: rgba(30, 30, 30, 0.4);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .key-features {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Feature 1: Library - Blue (Dark Mode) */
+.dark .key-features > ul > li:nth-child(1) {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.18) 0%, rgba(59, 130, 246, 0.05) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.dark .key-features > ul > li:nth-child(1):hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.28) 0%, rgba(59, 130, 246, 0.08) 100%);
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+/* Feature 2: Building - Green (Dark Mode) */
+.dark .key-features > ul > li:nth-child(2) {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(16, 185, 129, 0.05) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.dark .key-features > ul > li:nth-child(2):hover {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.28) 0%, rgba(16, 185, 129, 0.08) 100%);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+/* Feature 3: Integration - Purple (Dark Mode) */
+.dark .key-features > ul > li:nth-child(3) {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.18) 0%, rgba(139, 92, 246, 0.05) 100%);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.dark .key-features > ul > li:nth-child(3):hover {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.28) 0%, rgba(139, 92, 246, 0.08) 100%);
+  border-color: rgba(139, 92, 246, 0.35);
+}
+
+.dark .badge-wip {
+  background-color: rgba(255, 193, 7, 0.25);
+  color: #ffc107;
+}
+
+/* Ensure text readability in dark mode */
+.dark .key-features ul ul li {
+  opacity: 0.9;
+}
+
+.dark .key-features strong,
+.dark .key-features b {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+/* Key Features Sub-point Links */
+.key-features ul ul li a.feature-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 3px 10px;
+  border-radius: 4px;
+  margin-left: 8px;
+  transition: all 0.2s ease;
+  vertical-align: baseline;
+  pointer-events: auto;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.key-features ul ul li a.feature-link .link-arrow {
+  font-size: 11px;
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+.key-features ul ul li a.feature-link:hover .link-arrow {
+  transform: translateX(2px);
+}
+
+/* Blue links for Feature 1 (Library) */
+.key-features > ul > li:nth-child(1) ul li a.feature-link {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+}
+
+.key-features > ul > li:nth-child(1) ul li a.feature-link:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
+  text-decoration: none;
+}
+
+/* Green links for Feature 2 (Building) */
+.key-features > ul > li:nth-child(2) ul li a.feature-link {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.key-features > ul > li:nth-child(2) ul li a.feature-link:hover {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.3);
+  text-decoration: none;
+}
+
+/* Purple links for Feature 3 (Integration) */
+.key-features > ul > li:nth-child(3) ul li a.feature-link {
+  color: #8b5cf6;
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+.key-features > ul > li:nth-child(3) ul li a.feature-link:hover {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.3);
+  text-decoration: none;
+}
+
+/* Dark mode adjustments for feature links */
+.dark .key-features > ul > li:nth-child(1) ul li a.feature-link {
+  color: #60a5fa;
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.25);
+}
+
+.dark .key-features > ul > li:nth-child(1) ul li a.feature-link:hover {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.dark .key-features > ul > li:nth-child(2) ul li a.feature-link {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+.dark .key-features > ul > li:nth-child(2) ul li a.feature-link:hover {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.dark .key-features > ul > li:nth-child(3) ul li a.feature-link {
+  color: #a78bfa;
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.25);
+}
+
+.dark .key-features > ul > li:nth-child(3) ul li a.feature-link:hover {
+  background: rgba(139, 92, 246, 0.25);
+  border-color: rgba(139, 92, 246, 0.4);
+}
+
+/* Card with arrow indicator */
+.feature-card::after,
+.feature-card-sm::after {
+  content: "→";
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  opacity: 0;
+  transition: all 0.25s ease;
+  color: var(--md-primary-fg-color, #4051b5);
+}
+
+.feature-card:hover::after,
+.feature-card-sm:hover::after {
+  opacity: 0.6;
+  right: 12px;
+}
+
+.feature-card,
+.feature-card-sm,
+.feature-card-wip {
+  position: relative;
+}

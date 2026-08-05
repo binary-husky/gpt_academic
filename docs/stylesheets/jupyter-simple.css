@@ -1,0 +1,258 @@
+/* Jupyter notebook presentation styles for OpenJudge docs */
+/* Applies to common nbconvert / mkdocs-jupyter markup */
+
+article .jupyter-notebook,
+article .nb-notebook,
+article .jp-Notebook,
+article .notebook {
+  display: block;
+  margin: 2.5rem 0;
+  gap: 1.5rem;
+}
+
+article .jupyter-notebook .cell,
+article .nb-notebook .cell,
+article .jp-Notebook .jp-Cell,
+article .notebook .cell,
+article .jupyter-cell,
+article .nb-cell {
+  position: relative;
+  margin: 1.75rem 0;
+  border: 1px solid var(--border, rgba(148, 163, 184, 0.35));
+  border-radius: var(--radius-lg, 0.75rem);
+  background: var(--card, #ffffff);
+  overflow: hidden;
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.08);
+}
+
+article .jupyter-notebook .cell:first-of-type,
+article .nb-notebook .cell:first-of-type,
+article .notebook .cell:first-of-type {
+  margin-top: 0;
+}
+
+/* Cell header ribbon */
+/* Support both data-type attribute and standard nbconvert class names */
+article .jupyter-notebook .cell::before,
+article .nb-notebook .cell::before,
+article .jp-Notebook .jp-Cell::before,
+article .jupyter-cell::before,
+article .nb-cell::before,
+article .cell.code_cell::before,
+article .cell.text_cell::before,
+article .cell.markdown::before {
+  content: "";
+  position: absolute;
+  top: 0.85rem;
+  left: 1rem;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted-foreground, #4b5563);
+  background: rgba(148, 163, 184, 0.16);
+  border-radius: 999px;
+}
+
+/* Markdown cells - via data-type or class */
+article .jupyter-notebook .cell[data-type="markdown"]::before,
+article .nb-notebook .cell[data-type="markdown"]::before,
+article .jupyter-cell[data-type="markdown"]::before,
+article .cell.text_cell::before,
+article .cell.markdown::before {
+  content: "Markdown";
+}
+
+/* Code cells - via data-type or class */
+article .jupyter-notebook .cell[data-type="code"]::before,
+article .nb-notebook .cell[data-type="code"]::before,
+article .jupyter-cell[data-type="code"]::before,
+article .cell.code_cell::before {
+  content: "Code";
+  color: var(--primary-foreground, #0f172a);
+  background: rgba(14, 165, 233, 0.15);
+}
+
+/* Input (code) area */
+article .cell .input,
+article .cell .input_area,
+article .jupyter-cell .input,
+article .nbinput,
+article .jp-InputArea {
+  display: grid;
+  grid-template-columns: minmax(3.5rem, auto) minmax(0, 1fr);
+  gap: 0.5rem 1rem;
+  padding: 1.5rem 1.75rem 1.1rem;
+  background: var(--muted, rgba(15, 23, 42, 0.04));
+  border-bottom: 1px solid var(--border, rgba(148, 163, 184, 0.28));
+}
+
+article .cell .input pre,
+article .nbinput pre,
+article .jp-InputArea pre {
+  margin: 0;
+  border-radius: var(--radius-md, 0.5rem);
+  background: transparent;
+  /* Inherit syntax highlighting background from Pygments or theme */
+}
+
+article .input_prompt,
+article .prompt,
+article .nbinput .prompt,
+article .jp-InputArea-prompt {
+  font-family: var(--font-mono, "JetBrains Mono", "Fira Code", monospace);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--primary, #0ea5e9);
+  padding-top: 0.25rem;
+}
+
+article .input_prompt::after,
+article .prompt.input_prompt::after,
+article .jp-InputArea-prompt::after {
+  content: " ➜";
+  opacity: 0.6;
+}
+
+/* Output area */
+article .cell .output_wrapper,
+article .cell .output,
+article .nboutput,
+article .jp-OutputArea {
+  display: block;
+  padding: 1.35rem 1.75rem;
+  background: var(--card, #ffffff);
+}
+
+article .nboutput .prompt,
+article .jp-OutputArea-prompt {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary, #0ea5e9);
+  opacity: 0.75;
+  margin-bottom: 0.75rem;
+}
+
+article .nboutput pre,
+article .jp-OutputArea pre {
+  background: rgba(15, 23, 42, 0.05);
+  border-radius: var(--radius-md, 0.5rem);
+  padding: 1rem 1.25rem;
+  margin: 0;
+}
+
+article .nboutput table,
+article .jp-OutputArea table {
+  width: 100%;
+  margin: 0.5rem 0 0;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+article .nboutput table th,
+article .jp-OutputArea table th,
+article .nboutput table td,
+article .jp-OutputArea table td {
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+/* Error outputs */
+article .nboutput.error,
+article .jp-OutputArea[data-mime-type*="error"],
+article .cell .output.stderr {
+  border-left: 3px solid #ef4444;
+  background: rgba(248, 113, 113, 0.12);
+  color: #991b1b;
+}
+
+.dark article .nboutput.error,
+.dark article .jp-OutputArea[data-mime-type*="error"],
+.dark article .cell .output.stderr,
+.dark article .nboutput.error,
+.dark article .jp-OutputArea[data-mime-type*="error"],
+.dark article .cell .output.stderr {
+  border-left-color: #fca5a5;
+  background: rgba(248, 113, 113, 0.21);
+  color: #fecaca;
+}
+
+/* Markdown cells */
+article .cell.markdown,
+article .cell.text_cell,
+article .jupyter-cell[data-type="markdown"] {
+  padding: 2.25rem 2.5rem;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.06), transparent);
+}
+
+article .cell.markdown p:last-child,
+article .cell.markdown ul:last-child,
+article .cell.markdown ol:last-child {
+  margin-bottom: 0;
+}
+
+/* Dark theme tuning */
+.dark article .jupyter-notebook .cell,
+.dark article .nb-notebook .cell,
+.dark article .jp-Notebook .jp-Cell,
+.dark article .jupyter-notebook .cell,
+.dark article .nb-notebook .cell,
+.dark article .jp-Notebook .jp-Cell {
+  background: rgba(15, 23, 42, 0.75);
+  border-color: rgba(148, 163, 184, 0.22);
+  box-shadow: 0 20px 40px rgba(2, 6, 23, 0.65);
+}
+
+.dark article .cell .input,
+.dark article .cell .input,
+.dark article .nbinput,
+.dark article .nbinput {
+  background: rgba(148, 163, 184, 0.08);
+  border-bottom-color: rgba(148, 163, 184, 0.2);
+}
+
+.dark article .nboutput pre,
+.dark article .nboutput pre,
+.dark article .jp-OutputArea pre,
+.dark article .jp-OutputArea pre {
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.dark article .cell.markdown,
+.dark article .cell.markdown,
+.dark article .jupyter-cell[data-type="markdown"],
+.dark article .jupyter-cell[data-type="markdown"] {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.18), transparent);
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  article .cell .input,
+  article .nbinput,
+  article .jp-InputArea {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 1.25rem 1.25rem 0.9rem;
+  }
+
+  article .cell .input pre,
+  article .nbinput pre,
+  article .jp-InputArea pre {
+    font-size: 0.85rem;
+  }
+
+  article .cell .output_wrapper,
+  article .nboutput,
+  article .jp-OutputArea {
+    padding: 1.15rem 1.25rem;
+  }
+
+  article .cell::before {
+    left: 1.25rem;
+    top: 0.75rem;
+  }
+}

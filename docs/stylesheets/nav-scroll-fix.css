@@ -1,0 +1,482 @@
+/*
+ * Navigation & Scroll Enhancements for OpenJudge Documentation
+ * Phase 1: 导航滚动修复
+ *
+ * Features:
+ * - 侧边栏滚动优化
+ * - 当前页面高亮
+ * - 滚动时侧边栏固定
+ * - 目录 (TOC) 滚动跟随
+ * - 平滑滚动
+ */
+
+/* ========================================
+   Global Smooth Scroll
+   ======================================== */
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ========================================
+   Sidebar Navigation
+   ======================================== */
+
+/* Sidebar container - sticky positioning */
+nav.sidebar,
+.md-sidebar,
+.nav-sidebar,
+aside.sidebar {
+  position: sticky;
+  top: 0;
+  max-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Hide scrollbar by default, show on hover */
+  scrollbar-width: none;
+  scrollbar-color: var(--muted-foreground, #d1d5db) transparent;
+}
+
+/* Show scrollbar on hover (Firefox) */
+nav.sidebar:hover,
+.md-sidebar:hover,
+.nav-sidebar:hover,
+aside.sidebar:hover {
+  scrollbar-width: thin;
+}
+
+/* Custom scrollbar for sidebar (Webkit - hidden by default) */
+nav.sidebar::-webkit-scrollbar,
+.md-sidebar::-webkit-scrollbar,
+.nav-sidebar::-webkit-scrollbar,
+aside.sidebar::-webkit-scrollbar {
+  width: 0;
+}
+
+/* Show scrollbar on hover (Webkit) */
+nav.sidebar:hover::-webkit-scrollbar,
+.md-sidebar:hover::-webkit-scrollbar,
+.nav-sidebar:hover::-webkit-scrollbar,
+aside.sidebar:hover::-webkit-scrollbar {
+  width: 4px;
+}
+
+nav.sidebar::-webkit-scrollbar-track,
+.md-sidebar::-webkit-scrollbar-track,
+.nav-sidebar::-webkit-scrollbar-track,
+aside.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+nav.sidebar::-webkit-scrollbar-thumb,
+.md-sidebar::-webkit-scrollbar-thumb,
+.nav-sidebar::-webkit-scrollbar-thumb,
+aside.sidebar::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground, #d1d5db);
+  border-radius: 2px;
+}
+
+nav.sidebar::-webkit-scrollbar-thumb:hover,
+.md-sidebar::-webkit-scrollbar-thumb:hover,
+.nav-sidebar::-webkit-scrollbar-thumb:hover,
+aside.sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground, #9ca3af);
+}
+
+/* ========================================
+   Navigation Links
+   ======================================== */
+
+/* Base nav link styles */
+nav.sidebar a,
+.md-sidebar a,
+.nav-sidebar a,
+aside.sidebar a,
+.md-nav__link {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  color: var(--muted-foreground, #6b7280);
+  text-decoration: none;
+  border-radius: 0.375rem;
+  transition: all 0.15s ease;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Hover state */
+nav.sidebar a:hover,
+.md-sidebar a:hover,
+.nav-sidebar a:hover,
+aside.sidebar a:hover,
+.md-nav__link:hover {
+  color: var(--foreground, #1f2937);
+  background: var(--muted, rgba(0, 0, 0, 0.04));
+}
+
+/* ========================================
+   Current Page Highlight
+   ======================================== */
+
+/* Active/current page indicator */
+nav.sidebar a.active,
+nav.sidebar a[aria-current="page"],
+.md-sidebar a.active,
+.md-sidebar a[aria-current="page"],
+.nav-sidebar a.active,
+.nav-sidebar a[aria-current="page"],
+aside.sidebar a.active,
+aside.sidebar a[aria-current="page"],
+.md-nav__link--active,
+.md-nav__item--active > .md-nav__link {
+  color: var(--primary, #3b82f6);
+  background: rgba(59, 130, 246, 0.1);
+  font-weight: 500;
+  position: relative;
+}
+
+/* Active indicator bar */
+nav.sidebar a.active::before,
+nav.sidebar a[aria-current="page"]::before,
+.md-sidebar a.active::before,
+.md-sidebar a[aria-current="page"]::before,
+.nav-sidebar a.active::before,
+aside.sidebar a.active::before,
+.md-nav__link--active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 1.25rem;
+  background: var(--primary, #3b82f6);
+  border-radius: 0 2px 2px 0;
+}
+
+/* ========================================
+   Table of Contents (TOC)
+   ======================================== */
+
+/* TOC container */
+.toc,
+.md-sidebar--secondary,
+.table-of-contents,
+nav.toc {
+  position: sticky;
+  top: 1rem;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+/* TOC title */
+.toc-title,
+.md-sidebar--secondary .md-nav__title,
+.table-of-contents-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground, #9ca3af);
+  margin-bottom: 0.75rem;
+  padding: 0 0.5rem;
+}
+
+/* TOC links */
+.toc a,
+.md-sidebar--secondary a,
+.table-of-contents a,
+nav.toc a {
+  display: block;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground, #6b7280);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: all 0.15s ease;
+  line-height: 1.4;
+}
+
+.toc a:hover,
+.md-sidebar--secondary a:hover,
+.table-of-contents a:hover,
+nav.toc a:hover {
+  color: var(--foreground, #1f2937);
+  border-left-color: var(--muted-foreground, #d1d5db);
+}
+
+/* Active TOC item (scroll spy) */
+.toc a.active,
+.toc a[aria-current="true"],
+.md-sidebar--secondary a.active,
+.table-of-contents a.active,
+nav.toc a.active {
+  color: var(--primary, #3b82f6);
+  border-left-color: var(--primary, #3b82f6);
+  font-weight: 500;
+}
+
+/* Nested TOC levels */
+.toc ul ul a,
+.md-sidebar--secondary .md-nav--secondary a,
+.table-of-contents ul ul a {
+  padding-left: 1rem;
+  font-size: 0.75rem;
+}
+
+.toc ul ul ul a,
+.table-of-contents ul ul ul a {
+  padding-left: 1.5rem;
+}
+
+/* ========================================
+   Scroll Progress Indicator
+   ======================================== */
+
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: var(--primary, #3b82f6);
+  z-index: 9999;
+  transition: width 0.1s ease-out;
+}
+
+/* ========================================
+   Scroll to Top Button
+   ======================================== */
+
+.scroll-to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background, #fff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 50%;
+  color: var(--muted-foreground, #6b7280);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+.scroll-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.scroll-to-top:hover {
+  color: var(--foreground, #1f2937);
+  border-color: var(--primary, #3b82f6);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ========================================
+   Header Offset for Anchor Links
+   ======================================== */
+
+/* Offset for fixed header when jumping to anchors */
+:target::before {
+  content: '';
+  display: block;
+  height: 80px;
+  margin-top: -80px;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Alternative using scroll-margin */
+h1[id], h2[id], h3[id], h4[id], h5[id], h6[id],
+[id]:target {
+  scroll-margin-top: 80px;
+}
+
+/* ========================================
+   Dark Mode
+   ======================================== */
+
+/* Dark mode scrollbar */
+.dark nav.sidebar::-webkit-scrollbar-thumb,
+.dark .md-sidebar::-webkit-scrollbar-thumb,
+.dark .nav-sidebar::-webkit-scrollbar-thumb,
+.dark aside.sidebar::-webkit-scrollbar-thumb,
+.dark nav.sidebar::-webkit-scrollbar-thumb,
+.dark .md-sidebar::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground, #4b5563);
+}
+
+/* Dark mode nav links */
+.dark nav.sidebar a,
+.dark .md-sidebar a,
+.dark .nav-sidebar a,
+.dark aside.sidebar a,
+.dark nav.sidebar a,
+.dark .md-sidebar a {
+  color: var(--muted-foreground, #9ca3af);
+}
+
+.dark nav.sidebar a:hover,
+.dark .md-sidebar a:hover,
+.dark .nav-sidebar a:hover,
+.dark aside.sidebar a:hover,
+.dark nav.sidebar a:hover,
+.dark .md-sidebar a:hover {
+  color: var(--foreground, #f3f4f6);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Dark mode active state */
+.dark nav.sidebar a.active,
+.dark nav.sidebar a[aria-current="page"],
+.dark .md-sidebar a.active,
+.dark .md-nav__link--active,
+.dark nav.sidebar a.active,
+.dark .md-sidebar a.active {
+  color: var(--primary, #60a5fa);
+  background: rgba(96, 165, 250, 0.1);
+}
+
+/* Dark mode TOC */
+.dark .toc a,
+.dark .md-sidebar--secondary a,
+.dark .table-of-contents a,
+.dark .toc a,
+.dark .md-sidebar--secondary a {
+  color: var(--muted-foreground, #9ca3af);
+}
+
+.dark .toc a:hover,
+.dark .md-sidebar--secondary a:hover,
+.dark .toc a:hover,
+.dark .md-sidebar--secondary a:hover {
+  color: var(--foreground, #f3f4f6);
+  border-left-color: var(--muted-foreground, #6b7280);
+}
+
+.dark .toc a.active,
+.dark .md-sidebar--secondary a.active,
+.dark .toc a.active,
+.dark .md-sidebar--secondary a.active {
+  color: var(--primary, #60a5fa);
+  border-left-color: var(--primary, #60a5fa);
+}
+
+/* Dark mode scroll to top */
+.dark .scroll-to-top,
+.dark .scroll-to-top {
+  background: var(--background, #1f2937);
+  border-color: var(--border, #374151);
+  color: var(--muted-foreground, #9ca3af);
+}
+
+.dark .scroll-to-top:hover,
+.dark .scroll-to-top:hover {
+  color: var(--foreground, #f3f4f6);
+  border-color: var(--primary, #60a5fa);
+}
+
+/* ========================================
+   Mobile Navigation
+   ======================================== */
+
+@media (max-width: 768px) {
+  /* Mobile sidebar - only apply custom positioning if sidebar has .mobile-drawer class */
+  nav.sidebar.mobile-drawer,
+  .md-sidebar.mobile-drawer,
+  .nav-sidebar.mobile-drawer,
+  aside.sidebar.mobile-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100vh;
+    max-height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    background: var(--background, #fff);
+    border-right: 1px solid var(--border, #e5e7eb);
+    padding: 1rem;
+  }
+
+  /* Open state for drawer navigation */
+  nav.sidebar.mobile-drawer.open,
+  .md-sidebar.mobile-drawer.open,
+  .nav-sidebar.mobile-drawer.open,
+  aside.sidebar.mobile-drawer.open {
+    transform: translateX(0);
+  }
+
+  /* Mobile TOC - hidden by default */
+  .toc,
+  .md-sidebar--secondary,
+  .table-of-contents {
+    display: none;
+  }
+
+  /* Scroll to top - smaller on mobile */
+  .scroll-to-top {
+    bottom: 1rem;
+    right: 1rem;
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  /* Reduce scroll margin for smaller header */
+  h1[id], h2[id], h3[id], h4[id], h5[id], h6[id],
+  [id]:target {
+    scroll-margin-top: 60px;
+  }
+}
+
+/* Dark mode mobile sidebar */
+@media (max-width: 768px) {
+  .dark nav.sidebar.mobile-drawer,
+  .dark .md-sidebar.mobile-drawer,
+  .dark .nav-sidebar.mobile-drawer,
+  .dark aside.sidebar.mobile-drawer,
+  .dark nav.sidebar.mobile-drawer,
+  .dark .md-sidebar.mobile-drawer {
+    background: var(--background, #111827);
+    border-right-color: var(--border, #374151);
+  }
+}
+
+/* ========================================
+   Overlay for Mobile Menu
+   ======================================== */
+
+.nav-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 999;
+}
+
+.nav-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}

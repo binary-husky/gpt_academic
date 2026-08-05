@@ -3,7 +3,7 @@
 
 ## 1. 安装额外依赖
 ```
-pip install --upgrade pyOpenSSL scipy git+https://github.com/aliyun/alibabacloud-nls-python-sdk.git
+pip install --upgrade pyOpenSSL webrtcvad scipy git+https://github.com/aliyun/alibabacloud-nls-python-sdk.git
 ```
 
 如果因为特色网络问题导致上述命令无法执行：
@@ -61,4 +61,3 @@ VI 两种音频监听模式切换时，需要刷新页面才有效。
 VII 非localhost运行+非https情况下无法打开录音功能的坑：https://blog.csdn.net/weixin_39461487/article/details/109594434
 
 ## 5.点击函数插件区“实时音频采集” 或者其他音频交互功能
-

@@ -1,0 +1,402 @@
+/* Flowchart Component Styling */
+/* Modern, card-based flowchart with dark mode support */
+
+/* ========================================
+   Flowchart Container
+   ======================================== */
+
+.flowchart-container {
+  margin: 2rem 0;
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* ========================================
+   Flowchart Box Styles
+   ======================================== */
+
+.flowchart-box {
+  position: relative;
+  padding: 1.5rem 1.75rem;
+  margin: 0;
+  width: 24rem;
+  min-width: 22rem;
+  flex-shrink: 0;
+  border-radius: 0.75rem;
+  border: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: visible;
+}
+
+.flowchart-box:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+/* Dark mode */
+.dark .flowchart-box {
+  border-color: #374151;
+  background: linear-gradient(135deg, #1f2937 0%, #1a2332 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.dark .flowchart-box:hover {
+  border-color: #4b5563;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* ========================================
+   Box Header (Title)
+   ======================================== */
+
+.flowchart-box-header {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+.dark .flowchart-box-header {
+  color: #f3f4f6;
+  border-bottom-color: #374151;
+}
+
+/* Header icon */
+.flowchart-box-header::before {
+  content: "";
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  background-color: #6b7280;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+}
+
+.dark .flowchart-box-header::before {
+  background-color: #9ca3af;
+}
+
+/* Input box icon */
+.flowchart-box.input .flowchart-box-header::before {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'%3E%3C/path%3E%3Cpolyline points='14 2 14 8 20 8'%3E%3C/polyline%3E%3C/svg%3E");
+  background-color: #3b82f6;
+}
+
+.dark .flowchart-box.input .flowchart-box-header::before {
+  background-color: #60a5fa;
+}
+
+/* Grader box icon */
+.flowchart-box.grader .flowchart-box-header::before {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  background-color: #10b981;
+}
+
+.dark .flowchart-box.grader .flowchart-box-header::before {
+  background-color: #34d399;
+}
+
+/* Output box icon */
+.flowchart-box.output .flowchart-box-header::before {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'%3E%3C/path%3E%3Cpolyline points='7 10 12 15 17 10'%3E%3C/polyline%3E%3Cline x1='12' y1='15' x2='12' y2='3'%3E%3C/line%3E%3C/svg%3E");
+  background-color: #8b5cf6;
+}
+
+.dark .flowchart-box.output .flowchart-box-header::before {
+  background-color: #a78bfa;
+}
+
+/* ========================================
+   Box Content (List Items)
+   ======================================== */
+
+.flowchart-box-content {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: visible;
+}
+
+.flowchart-box-content li {
+  position: relative;
+  padding-left: 1.75rem;
+  margin-bottom: 0.625rem;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: #4b5563;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.flowchart-box-content li:last-child {
+  margin-bottom: 0;
+}
+
+.dark .flowchart-box-content li {
+  color: #d1d5db;
+}
+
+/* List item bullet */
+.flowchart-box-content li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.5rem;
+  width: 0.375rem;
+  height: 0.375rem;
+  background: #9ca3af;
+  border-radius: 50%;
+}
+
+.dark .flowchart-box-content li::before {
+  background: #6b7280;
+}
+
+/* Label styling (e.g., "Query", "Response") */
+.flowchart-box-content li strong {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.dark .flowchart-box-content li strong {
+  color: #f9fafb;
+}
+
+/* Tag styling (e.g., "(optional)", "(required)") */
+.flowchart-box-content li em {
+  font-style: normal;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 0.125rem 0.5rem;
+  margin-left: 0.5rem;
+  border-radius: 0.25rem;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.flowchart-box-content li em.optional {
+  background: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+}
+
+.dark .flowchart-box-content li em {
+  background: rgba(96, 165, 250, 0.15);
+  color: #60a5fa;
+}
+
+.dark .flowchart-box-content li em.optional {
+  background: rgba(156, 163, 175, 0.15);
+  color: #9ca3af;
+}
+
+/* Nested list for sub-items */
+.flowchart-box-content ul {
+  margin: 0.5rem 0 0 0;
+  padding-left: 1.25rem;
+  list-style: none;
+  overflow: visible;
+}
+
+.flowchart-box-content ul li {
+  font-size: 0.875rem;
+  color: #6b7280;
+  padding-left: 1.5rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.dark .flowchart-box-content ul li {
+  color: #9ca3af;
+}
+
+.flowchart-box-content ul li::before {
+  width: 0.25rem;
+  height: 0.25rem;
+  top: 0.5rem;
+}
+
+/* ========================================
+   Arrow Connector
+   ======================================== */
+
+.flowchart-arrow {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 3rem;
+  height: auto;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.flowchart-arrow::before {
+  content: "";
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #d1d5db 0%, #9ca3af 50%, #d1d5db 100%);
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.dark .flowchart-arrow::before {
+  background: linear-gradient(90deg, #4b5563 0%, #6b7280 50%, #4b5563 100%);
+}
+
+/* Arrow icon */
+.flowchart-arrow::after {
+  content: "";
+  width: 1.5rem;
+  height: 1.5rem;
+  background-color: #6b7280;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='5' y1='12' x2='19' y2='12'%3E%3C/line%3E%3Cpolyline points='12 5 19 12 12 19'%3E%3C/polyline%3E%3C/svg%3E");
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  position: relative;
+  animation: arrow-bounce-horizontal 2s ease-in-out infinite;
+}
+
+.dark .flowchart-arrow::after {
+  background-color: #9ca3af;
+}
+
+/* Arrow bounce animation (horizontal) */
+@keyframes arrow-bounce-horizontal {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+/* ========================================
+   Responsive Design
+   ======================================== */
+
+@media (max-width: 1024px) {
+  .flowchart-container {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .flowchart-box {
+    width: 100%;
+    max-width: 42rem;
+    margin: 0 auto;
+  }
+
+  .flowchart-arrow {
+    width: auto;
+    height: 2.5rem;
+    margin: 0 auto;
+  }
+
+  .flowchart-arrow::before {
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(180deg, #d1d5db 0%, #9ca3af 50%, #d1d5db 100%);
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .dark .flowchart-arrow::before {
+    background: linear-gradient(180deg, #4b5563 0%, #6b7280 50%, #4b5563 100%);
+  }
+
+  .flowchart-arrow::after {
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='12' y1='5' x2='12' y2='19'%3E%3C/line%3E%3Cpolyline points='19 12 12 19 5 12'%3E%3C/polyline%3E%3C/svg%3E");
+    animation: arrow-bounce 2s ease-in-out infinite;
+  }
+
+  @keyframes arrow-bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(4px);
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .flowchart-box {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .flowchart-box-header {
+    font-size: 0.9375rem;
+  }
+
+  .flowchart-box-content li {
+    font-size: 0.875rem;
+  }
+
+  .flowchart-arrow {
+    height: 2rem;
+  }
+}
+
+/* ========================================
+   Special Variants
+   ======================================== */
+
+/* Highlighted box variant */
+.flowchart-box.highlight {
+  border-color: #10b981;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15), 0 1px 2px rgba(16, 185, 129, 0.1);
+}
+
+.flowchart-box.highlight:hover {
+  border-color: #059669;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2), 0 2px 4px rgba(16, 185, 129, 0.15);
+}
+
+.dark .flowchart-box.highlight {
+  border-color: #34d399;
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+  box-shadow: 0 2px 8px rgba(52, 211, 153, 0.3), 0 1px 2px rgba(52, 211, 153, 0.2);
+}
+
+.dark .flowchart-box.highlight:hover {
+  border-color: #10b981;
+  box-shadow: 0 4px 12px rgba(52, 211, 153, 0.4), 0 2px 4px rgba(52, 211, 153, 0.3);
+}
+
+/* Compact variant */
+.flowchart-box.compact {
+  padding: 1rem 1.25rem;
+}
+
+.flowchart-box.compact .flowchart-box-header {
+  font-size: 0.9375rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+}
+
+.flowchart-box.compact .flowchart-box-content li {
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}

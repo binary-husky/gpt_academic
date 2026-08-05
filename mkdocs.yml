@@ -1,0 +1,153 @@
+site_name: GPT Academic
+site_url: https://github.com/binary-husky/gpt_academic
+site_description: "GPT Academic - 为GPT/LLM提供实用化交互界面，特别优化论文阅读/润色/写作体验"
+site_author: "GPT Academic Team"
+repo_url: https://github.com/binary-husky/gpt_academic
+repo_name: binary-husky/gpt_academic
+copyright: "Copyright &copy; 2025 GPT Academic Team"
+
+theme:
+  name: shadcn
+  show_stargazers: true
+  git_enabled: false
+  nav_sort: false
+  features:
+    - content.code.copy
+    - content.code.annotate
+
+nav:
+  - 首页: index.md
+
+  - 快速开始:
+      - 安装指南: get_started/installation.md
+      - 快速上手: get_started/quickstart.md
+      - 配置详解: get_started/configuration.md
+
+  - 模型接入:
+      - 模型概览: models/overview.md
+      - OpenAI / GPT: models/openai.md
+      - Azure OpenAI: models/azure.md
+      - 中转渠道: models/transit_api.md
+      - 本地模型: models/local_models.md
+      - 自定义模型: models/custom_models.md
+
+  - 功能指南:
+      - 基础操作: features/basic_operations.md
+      - 学术功能:
+          - Arxiv论文翻译: features/academic/arxiv_translation.md
+          - PDF论文翻译: features/academic/pdf_translation.md
+          - Latex项目处理: features/academic/latex_polish.md
+          - 论文阅读助手: features/academic/paper_reading.md
+          - 批量总结PDF: features/academic/pdf_summary.md
+          - 批量总结Word: features/academic/word_summary.md
+          - PDF问答(ChatPDF): features/academic/pdf_qa.md
+          - Tex论文摘要生成: features/academic/tex_abstract.md
+          - 谷歌学术助手: features/academic/google_scholar.md
+          - Arxiv下载与摘要翻译: features/academic/arxiv_download.md
+          - Latex纠错+高亮对比: features/academic/latex_proofread.md
+          - PDF精准翻译(NOUGAT): features/academic/pdf_nougat.md
+          - 批量文件询问: features/academic/batch_file_query.md
+      - 编程功能:
+          - 源码分析: features/programming/code_analysis.md
+          - 代码注释生成: features/programming/code_comment.md
+          - Markdown翻译: features/programming/markdown_translate.md
+          - Jupyter Notebook分析: features/programming/jupyter_analysis.md
+          - 自定义源码分析: features/programming/custom_code_analysis.md
+          - 批量函数注释生成: features/programming/batch_comment_gen.md
+      - 对话功能:
+          - 联网搜索: features/conversation/internet_search.md
+          - 多模型询问: features/conversation/multi_model_query.md
+          - 图片生成: features/conversation/image_generation.md
+          - 语音助手: features/conversation/voice_assistant.md
+          - 对话保存与载入: features/conversation/conversation_save.md
+          - Mermaid图表生成: features/conversation/mermaid_gen.md
+      - 智能体:
+          - 虚空终端: features/agents/void_terminal.md
+          - 代码解释器: features/agents/code_interpreter.md
+
+  - 自定义扩展:
+      - 自定义按钮: customization/custom_buttons.md
+      - 插件开发: customization/plugin_development.md
+      - 主题定制: customization/theme_customization.md
+
+  - 部署指南:
+      - Docker部署: deployment/docker.md
+      - 云服务部署: deployment/cloud_deploy.md
+      - 反向代理: deployment/reverse_proxy.md
+
+  - 问题排查:
+      - 常见问题: troubleshooting/faq.md
+      - 网络问题: troubleshooting/network_issues.md
+      - 模型错误: troubleshooting/model_errors.md
+
+  - 参考:
+      - 配置参考: reference/config_reference.md
+      - 更新日志: reference/changelog.md
+
+plugins:
+  - search:
+      lang:
+        - en
+        - zh
+      separator: '[\s\-\.\(\)\/]+'
+      min_search_length: 2
+      prebuild_index: true
+      indexing: 'full'
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [.]
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+            show_root_full_path: false
+            members_order: source
+            show_submodules: true
+
+markdown_extensions:
+  - admonition
+  - footnotes
+  - tables
+  - extra
+  - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.progressbar
+  - pymdownx.snippets
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - shadcn.extensions.iconify
+
+extra_css:
+  - https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap
+  - stylesheets/feature-cards.css
+  - stylesheets/tabbed-code.css
+  - stylesheets/readability-enhancements.css
+  - stylesheets/code-enhancements.css
+  - stylesheets/syntax-highlight.css
+  - stylesheets/table-enhancements.css
+  - stylesheets/jupyter-simple.css
+  - stylesheets/nav-scroll-fix.css
+  - stylesheets/workflow.css
+  - stylesheets/animations.css
+  - stylesheets/mermaid.css
+  - stylesheets/mkdocstrings.css
+  - stylesheets/responsive.css
+
+extra_javascript:
+  - javascripts/tabbed-code.js
+  - javascripts/code-copy.js
+  - javascripts/search-fix.js
+  - javascripts/code-zoom.js
+  - javascripts/nav-scroll-fix.js
+  - javascripts/animations.js
+  - javascripts/responsive.js
