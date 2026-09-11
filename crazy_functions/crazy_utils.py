@@ -3,6 +3,7 @@ import threading
 from loguru import logger
 from shared_utils.char_visual_effect import scrolling_visual_effect
 from toolbox import update_ui, get_conf, trimmed_format_exc, get_max_token, Singleton
+from request_llms.codex_cli.types import CodexError
 
 def input_clipping(inputs, history, max_token_limit, return_clip_flags=False):
     """
@@ -113,6 +114,13 @@ def request_gpt_model_in_new_thread_with_ui_alive(
                     inputs=inputs, llm_kwargs=llm_kwargs,
                     history=history, sys_prompt=sys_prompt, observe_window=mutable)
                 return result
+            except CodexError as codex_error:
+                # Codex failures are structured and deliberately
+                # non-retryable.  In particular, a blocked action, timeout,
+                # cancellation, or cleanup failure must not submit a second
+                # CLI request through this legacy retry loop.
+                mutable[0] = codex_error.public_message
+                return mutable[0]
             except ConnectionAbortedError as token_exceeded_error:
                 # 【第二种情况】：Token溢出
                 if handle_token_exceed:
@@ -260,6 +268,14 @@ def request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
                 )
                 mutable[index][2] = "已成功"
                 return gpt_say
+            except CodexError as codex_error:
+                # Keep the typed Codex failure visible to the plugin without
+                # entering the API backend's generic retry path.
+                mutable[index][2] = "已失败"
+                message = codex_error.public_message
+                if mutable[index][0]:
+                    message = mutable[index][0] + "\n\n" + message
+                return message
             except ConnectionAbortedError as token_exceeded_error:
                 # 【第二种情况】：Token溢出
                 if handle_token_exceed:

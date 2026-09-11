@@ -1,0 +1,96 @@
+{
+  "source": "OpenAI Codex CLI rust-v0.153.4 exec event types, plus explicit parser-abuse cases",
+  "version": "0.153.4",
+  "confirmed_success": [
+    {
+      "type": "thread.started",
+      "thread_id": "thread_fixture"
+    },
+    {
+      "type": "turn.started"
+    },
+    {
+      "type": "item.completed",
+      "item": {
+        "id": "item_0",
+        "type": "agent_message",
+        "text": "hello"
+      }
+    },
+    {
+      "type": "turn.completed",
+      "usage": {
+        "input_tokens": 1,
+        "cached_input_tokens": 0,
+        "output_tokens": 1,
+        "reasoning_output_tokens": 0
+      }
+    }
+  ],
+  "confirmed_action_events": [
+    {
+      "type": "item.started",
+      "item": {
+        "id": "item_command",
+        "type": "command_execution",
+        "command": "echo unsafe",
+        "aggregated_output": "",
+        "exit_code": null,
+        "status": "in_progress"
+      }
+    },
+    {
+      "type": "item.completed",
+      "item": {
+        "id": "item_file",
+        "type": "file_change",
+        "changes": [
+          {
+            "path": "unsafe.txt",
+            "kind": "add"
+          }
+        ],
+        "status": "completed"
+      }
+    },
+    {
+      "type": "item.completed",
+      "item": {
+        "id": "item_mcp",
+        "type": "mcp_tool_call",
+        "server": "unsafe",
+        "tool": "do_thing",
+        "arguments": {},
+        "result": null,
+        "error": null,
+        "status": "completed"
+      }
+    }
+  ],
+  "confirmed_failures": [
+    {
+      "type": "turn.failed",
+      "error": {
+        "message": "turn failed"
+      }
+    },
+    {
+      "type": "error",
+      "message": "stream failed"
+    }
+  ],
+  "parser_abuse": [
+    {
+      "type": "item.completed",
+      "item": {
+        "id": "item_unknown",
+        "type": "future_unknown_item",
+        "value": "reject"
+      }
+    },
+    {
+      "type": "future_unknown_event",
+      "value": "reject"
+    }
+  ]
+}

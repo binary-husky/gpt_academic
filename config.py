@@ -10,6 +10,17 @@
 # [step 1-1]>> ( 接入OpenAI模型家族 ) API_KEY = "sk-123456789xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx123456789"。极少数情况下，还需要填写组织（格式如org-123456789abcdefghijklmno的），请向下翻，找 API_ORG 设置项
 API_KEY = "在此处填写APIKEY"    # 可同时填写多个API-KEY，用英文逗号分割，例如API_KEY = "sk-openaikey1,sk-openaikey2,fkxxxx-api2dkey3,azure-apikey4"
 
+# [step 1-4]>> ( 可选：复用同一系统账户已登录的本机 Codex CLI )
+# 选择 LLM_MODEL="codex-cli" 后才会读取这些设置；Codex 模式不需要填写 GPT Academic API_KEY。
+CODEX_CLI_PATH = ""
+CODEX_CLI_MODEL = ""
+CODEX_CLI_QUEUE_CAPACITY = 32
+CODEX_CLI_MIN_START_INTERVAL = 3.0
+CODEX_CLI_QUEUE_TIMEOUT = 600.0
+CODEX_CLI_REQUEST_TIMEOUT = 600.0
+CODEX_CLI_MAX_INPUT_BYTES = 262144
+CODEX_CLI_MAX_OUTPUT_BYTES = 8388608
+
 # [step 1-2]>> ( 强烈推荐！接入通义家族 & 大模型服务平台百炼 ) 接入通义千问在线大模型，api-key获取地址 https://dashscope.console.aliyun.com/
 DASHSCOPE_API_KEY = "" # 阿里灵积云API_KEY（用于接入qwen-max，dashscope-qwen3-14b，dashscope-deepseek-r1等）
 
@@ -47,6 +58,7 @@ AVAIL_LLM_MODELS = ["qwen-max", "o1-mini", "o1-mini-2024-09-12", "o1", "o1-2024-
                     "volcengine-deepseek-r1-250120", "volcengine-deepseek-v3-241226",
                     "dashscope-deepseek-r1", "dashscope-deepseek-v3",
                     "dashscope-qwen3-14b", "dashscope-qwen3-235b-a22b", "dashscope-qwen3-32b",
+                    "codex-cli",
                     ]
 
 EMBEDDING_MODEL = "text-embedding-3-small"

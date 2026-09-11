@@ -1,6 +1,10 @@
 import gradio as gr
 from toolbox import get_conf
 
+def _model_dropdown_choices(models):
+    """Keep the model ids as plain string choices for old Gradio clients."""
+    return list(models)
+
 def define_gui_toolbar(AVAIL_LLM_MODELS, LLM_MODEL, INIT_SYS_PROMPT, THEME, AVAIL_THEMES, AVAIL_FONTS, ADD_WAIFU, help_menu_description, js_code_for_toggle_darkmode):
     with gr.Floating(init_x="0%", init_y="0%", visible=True, width=None, drag="forbidden", elem_id="tooltip"):
         with gr.Row():
@@ -9,7 +13,14 @@ def define_gui_toolbar(AVAIL_LLM_MODELS, LLM_MODEL, INIT_SYS_PROMPT, THEME, AVAI
                 file_upload_2 = gr.Files(label="任何文件, 推荐上传压缩文件(zip, tar)", file_count="multiple", elem_id="elem_upload_float")
 
             with gr.Tab("更换模型", elem_id="interact-panel"):
-                md_dropdown = gr.Dropdown(AVAIL_LLM_MODELS, value=LLM_MODEL, elem_id="elem_model_sel", label="更换LLM模型/请求源").style(container=False)
+                md_dropdown = gr.Dropdown(_model_dropdown_choices(AVAIL_LLM_MODELS), value=LLM_MODEL, elem_id="elem_model_sel", label="更换LLM模型/请求源").style(container=False)
+                if "codex-cli" in AVAIL_LLM_MODELS:
+                    gr.Markdown(
+                        "`Codex CLI（本机登录）`：复用本机 Codex CLI 登录态，不需要 GPT Academic API Key。"
+                        "当前是最佳努力隔离：read-only sandbox、空临时工作目录、忽略用户配置/规则，"
+                        "并在收到 action 事件后终止请求；这些措施不能保证绝对无工具，action 事件到达前"
+                        "仍可能已经发生读取、命令或网络副作用。"
+                    )
                 top_p = gr.Slider(minimum=-0, maximum=1.0, value=1.0, step=0.01,interactive=True, label="Top-p (nucleus sampling)", elem_id="elem_top_p")
                 temperature = gr.Slider(minimum=-0, maximum=2.0, value=1.0, step=0.01, interactive=True, label="Temperature", elem_id="elem_temperature")
                 max_length_sl = gr.Slider(minimum=256, maximum=1024*32, value=4096, step=128, interactive=True, label="Local LLM MaxLength", elem_id="elem_max_length_sl")

@@ -12,13 +12,17 @@ import tiktoken, copy, re
 from loguru import logger
 from functools import lru_cache
 from concurrent.futures import ThreadPoolExecutor
-from toolbox import get_conf, trimmed_format_exc, apply_gpt_academic_string_mask, read_one_api_model_name
+from toolbox import get_conf, update_ui, trimmed_format_exc, apply_gpt_academic_string_mask, read_one_api_model_name
 
 from .bridge_chatgpt import predict_no_ui_long_connection as chatgpt_noui
 from .bridge_chatgpt import predict as chatgpt_ui
 
+from .bridge_codex_cli import predict_no_ui_long_connection as codex_cli_noui
+from .bridge_codex_cli import predict as codex_cli_ui
+
 from .bridge_chatgpt_vision import predict_no_ui_long_connection as chatgpt_vision_noui
 from .bridge_chatgpt_vision import predict as chatgpt_vision_ui
+from .codex_cli.types import CancelToken, CodexError
 
 from .bridge_chatglm import predict_no_ui_long_connection as chatglm_noui
 from .bridge_chatglm import predict as chatglm_ui
@@ -117,6 +121,20 @@ AVAIL_LLM_MODELS, LLM_MODEL = get_conf("AVAIL_LLM_MODELS", "LLM_MODEL")
 AVAIL_LLM_MODELS = AVAIL_LLM_MODELS + [LLM_MODEL]
 # -=-=-=-=-=-=- 以下这部分是最早加入的最稳定的模型 -=-=-=-=-=-=-
 model_info = {
+    # 本机 Codex CLI。它没有 API endpoint，桥接器内部通过统一调度器
+    # 复用当前系统用户已经登录的 Codex CLI。
+    "codex-cli": {
+        "fn_with_ui": codex_cli_ui,
+        "fn_without_ui": codex_cli_noui,
+        "endpoint": None,
+        "can_multi_thread": True,
+        "requires_api_key": False,
+        "friendly_name": "Codex CLI（本机登录）",
+        "max_token": 128000,
+        "tokenizer": tokenizer_gpt4,
+        "token_cnt": get_token_num_gpt4,
+    },
+
     # openai
     "gpt-3.5-turbo": {
         "fn_with_ui": chatgpt_ui,
@@ -1432,6 +1450,10 @@ def LLM_CATCH_EXCEPTION(f):
     def decorated(inputs:str, llm_kwargs:dict, history:list, sys_prompt:str, observe_window:list, console_silence:bool):
         try:
             return f(inputs, llm_kwargs, history, sys_prompt, observe_window, console_silence)
+        except CodexError:
+            # 保留 Codex 后端的结构化、不可自动重试错误；旧 API 后端仍
+            # 继续使用下面原有的 traceback 展示路径。
+            raise
         except Exception as e:
             tb_str = '\n```\n' + trimmed_format_exc() + '\n```\n'
             observe_window[0] = tb_str
@@ -1473,48 +1495,83 @@ def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list, sys
         window_mutex = [["", time.time(), ""] for _ in range(n_model)] + [True]
 
         futures = []
-        for i in range(n_model):
-            model = models[i]
-            method = model_info[model]["fn_without_ui"]
-            llm_kwargs_feedin = copy.deepcopy(llm_kwargs)
-            llm_kwargs_feedin['llm_model'] = model
-            future = executor.submit(LLM_CATCH_EXCEPTION(method), inputs, llm_kwargs_feedin, history, sys_prompt, window_mutex[i], console_silence)
-            futures.append(future)
+        cancel_tokens = []
+        t_model = None
+        try:
+            for i in range(n_model):
+                model = models[i]
+                method = model_info[model]["fn_without_ui"]
+                external_cancel_token = llm_kwargs.get("cancel_token")
+                if isinstance(external_cancel_token, CancelToken):
+                    # CancelToken owns a thread lock and cannot be deep-copied.
+                    # Keep the shared signal by identity while preserving the
+                    # old deep-copy isolation for every other llm_kwarg.
+                    copy_source = dict(llm_kwargs)
+                    copy_source.pop("cancel_token", None)
+                    llm_kwargs_feedin = copy.deepcopy(copy_source)
+                    llm_kwargs_feedin["cancel_token"] = external_cancel_token
+                else:
+                    llm_kwargs_feedin = copy.deepcopy(llm_kwargs)
+                llm_kwargs_feedin['llm_model'] = model
+                if model == "codex-cli":
+                    cancel_token = external_cancel_token
+                    if not isinstance(cancel_token, CancelToken):
+                        cancel_token = CancelToken()
+                    llm_kwargs_feedin["cancel_token"] = cancel_token
+                    cancel_tokens.append(cancel_token)
+                else:
+                    cancel_tokens.append(None)
+                future = executor.submit(LLM_CATCH_EXCEPTION(method), inputs, llm_kwargs_feedin, history, sys_prompt, window_mutex[i], console_silence)
+                futures.append(future)
 
-        def mutex_manager(window_mutex, observe_window):
+            def mutex_manager(window_mutex, observe_window):
+                while True:
+                    time.sleep(0.25)
+                    if not window_mutex[-1]: break
+                    # 看门狗（watchdog）
+                    for i in range(n_model):
+                        window_mutex[i][1] = observe_window[1]
+                    # 观察窗（window）
+                    chat_string = []
+                    for i in range(n_model):
+                        color = colors[i%len(colors)]
+                        chat_string.append( f"【{str(models[i])} 说】: <font color=\"{color}\"> {window_mutex[i][0]} </font>" )
+                    res = '<br/><br/>\n\n---\n\n'.join(chat_string)
+                    # # # # # # # # # # #
+                    observe_window[0] = res
+
+            t_model = threading.Thread(target=mutex_manager, args=(window_mutex, observe_window), daemon=True)
+            t_model.start()
+
             while True:
-                time.sleep(0.25)
-                if not window_mutex[-1]: break
-                # 看门狗（watchdog）
-                for i in range(n_model):
-                    window_mutex[i][1] = observe_window[1]
-                # 观察窗（window）
-                chat_string = []
-                for i in range(n_model):
-                    color = colors[i%len(colors)]
-                    chat_string.append( f"【{str(models[i])} 说】: <font color=\"{color}\"> {window_mutex[i][0]} </font>" )
-                res = '<br/><br/>\n\n---\n\n'.join(chat_string)
-                # # # # # # # # # # #
-                observe_window[0] = res
+                for future in futures:
+                    if future.done() and not future.cancelled():
+                        future_error = future.exception()
+                        if future_error is not None:
+                            raise future_error
+                if all(future.done() for future in futures):
+                    break
+                time.sleep(1)
 
-        t_model = threading.Thread(target=mutex_manager, args=(window_mutex, observe_window), daemon=True)
-        t_model.start()
+            return_string_collect = []
+            for i, future in enumerate(futures):  # wait and get
+                color = colors[i%len(colors)]
+                return_string_collect.append( f"【{str(models[i])} 说】: <font color=\"{color}\"> {future.result()} </font>" )
 
-        return_string_collect = []
-        while True:
-            worker_done = [h.done() for h in futures]
-            if all(worker_done):
-                executor.shutdown()
-                break
-            time.sleep(1)
-
-        for i, future in enumerate(futures):  # wait and get
-            color = colors[i%len(colors)]
-            return_string_collect.append( f"【{str(models[i])} 说】: <font color=\"{color}\"> {future.result()} </font>" )
-
-        window_mutex[-1] = False # stop mutex thread
-        res = '<br/><br/>\n\n---\n\n'.join(return_string_collect)
-        return res
+            res = '<br/><br/>\n\n---\n\n'.join(return_string_collect)
+            return res
+        finally:
+            # Stop the watchdog before cancelling workers so it cannot keep
+            # refreshing their observation windows during failure cleanup.
+            window_mutex[-1] = False
+            for cancel_token in cancel_tokens:
+                if cancel_token is not None:
+                    cancel_token.cancel()
+            for future in futures:
+                future.cancel()
+            executor.shutdown(wait=True)
+            if t_model is not None:
+                t_model.join()
 
 # 根据基础功能区 ModelOverride 参数调整模型类型，用于 `predict` 中
 import importlib
@@ -1558,7 +1615,6 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot,
     inputs = apply_gpt_academic_string_mask(inputs, mode="show_llm")
 
     if llm_kwargs['llm_model'] not in model_info:
-        from toolbox import update_ui
         chatbot.append([inputs, f"很抱歉，模型 '{llm_kwargs['llm_model']}' 暂不支持<br/>(1) 检查config中的AVAIL_LLM_MODELS选项<br/>(2) 检查request_llms/bridge_all.py中的模型路由"])
         yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
 
@@ -1572,6 +1628,12 @@ def predict(inputs:str, llm_kwargs:dict, plugin_kwargs:dict, chatbot,
         return
 
     if contain_uploaded_files(inputs):
+        if llm_kwargs['llm_model'] == "codex-cli":
+            # Do not send an uploaded path through the generic document
+            # loader: the first Codex backend is intentionally text-only.
+            chatbot.append([inputs, "[Local Message] Codex CLI 仅支持纯文本输入，不支持附件。"])
+            yield from update_ui(chatbot=chatbot, history=history, msg="unsupported_input")
+            return
         inputs = yield from load_uploaded_files(inputs, method, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, stream, additional_fn)
 
     # 更新一下llm_kwargs的参数，否则会出现参数不匹配的问题
