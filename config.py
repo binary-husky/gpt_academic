@@ -68,9 +68,9 @@ EMBEDDING_MODEL = "text-embedding-3-small"
 #   "grok-beta",
 # ]
 # --- --- --- ---
-# 此外，您还可以在接入one-api/vllm/ollama/Openroute时，
-# 使用"one-api-*","vllm-*","ollama-*","openrouter-*"前缀直接使用非标准方式接入的模型，例如
-# AVAIL_LLM_MODELS = ["one-api-claude-3-sonnet-20240229(max_token=100000)", "ollama-phi3(max_token=4096)","openrouter-openai/gpt-4o-mini","openrouter-openai/chatgpt-4o-latest"]
+# 此外，您还可以在接入one-api/vllm/ollama/OpenRouter/API-Route时，
+# 使用"one-api-*","vllm-*","ollama-*","openrouter-*","api-route-*"前缀直接使用非标准方式接入的模型，例如
+# AVAIL_LLM_MODELS = ["one-api-claude-3-sonnet-20240229(max_token=100000)", "ollama-phi3(max_token=4096)","openrouter-openai/gpt-4o-mini","api-route-gpt-4o","api-route-claude-3-7-sonnet-20250219"]
 # --- --- --- ---
 
 

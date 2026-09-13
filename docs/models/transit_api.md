@@ -13,16 +13,17 @@
 - **网络优化**：提供国内可直接访问的节点，无需配置代理
 - **成本优势**：部分服务提供更优惠的价格或免费额度
 
-常见的中转服务包括：[OpenRouter](https://openrouter.ai/)、[One-API](https://github.com/songquanpeng/one-api)、[API2D](https://api2d.com/) 等。
+常见的中转服务包括：[API Route](https://www.api-route.com)、[OpenRouter](https://openrouter.ai/)、[One-API](https://github.com/songquanpeng/one-api)、[API2D](https://api2d.com/) 等。
 
 ---
 
 ## 接入方式概览
 
-GPT Academic 提供了三种灵活的中转接入方式，您可以根据实际需求选择：
+GPT Academic 提供了多种灵活的中转接入方式，您可以根据实际需求选择：
 
 | 方式 | 适用场景 | 复杂度 |
 |-----|---------|-------|
+| **API Route 前缀** | 使用 API Route 聚合路由服务 | ⭐ 简单 |
 | **OpenRouter 前缀** | 使用 OpenRouter 服务 | ⭐ 简单 |
 | **One-API 前缀** | 自建 One-API 或类似服务 | ⭐⭐ 中等 |
 | **API_URL_REDIRECT** | 任意 OpenAI 兼容服务 | ⭐⭐ 中等 |
@@ -83,7 +84,60 @@ openrouter-{provider}/{model-name}
 
 ---
 
-## 方式二：One-API 接入
+## 方式二：API Route 接入
+
+[API Route](https://www.api-route.com) 是一个高可用多模型聚合路由服务，聚合了 OpenAI、Anthropic Claude、Google Gemini、DeepSeek 等主流大模型，提供兼容 OpenAI 的统一接口与智能路由调度。
+
+### 获取 API Key
+
+访问 [API Route 官网](https://www.api-route.com) 注册账户并在控制台创建 API Key。
+
+### 配置步骤
+
+在 `config_private.py` 中添加以下配置：
+
+```python
+# API Route API Key
+API_KEY = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# 将 API Route 模型添加到可用模型列表
+AVAIL_LLM_MODELS = [
+    "api-route-gpt-4o",
+    "api-route-gpt-4o-mini",
+    "api-route-claude-3-7-sonnet-20250219",
+    "api-route-deepseek-chat",
+    "api-route-deepseek-reasoner",
+    "api-route-gemini-2.5-flash",
+    # 添加更多平台支持的模型...
+]
+
+# 设置默认模型
+LLM_MODEL = "api-route-gpt-4o"
+```
+
+### 模型命名规则
+
+使用 API Route 时，模型名称需要遵循以下格式：
+
+```
+api-route-{model-name}
+```
+
+其中 `{model-name}` 是平台上提供的模型标识符。您可以在 [API Route 官网](https://www.api-route.com) 浏览所有可用模型，复制模型名后加上 `api-route-`（或 `apiroute-`）前缀即可使用。支持 `(max_token=...)` 动态配置与思维链推理过程展示。
+
+??? example "常用 API Route 模型示例"
+    | 模型名称 | GPT Academic 中的配置 |
+    |---------|---------------------|
+    | GPT-4o | `api-route-gpt-4o` |
+    | GPT-4o Mini | `api-route-gpt-4o-mini` |
+    | Claude 3.7 Sonnet | `api-route-claude-3-7-sonnet-20250219` |
+    | DeepSeek V3 | `api-route-deepseek-chat` |
+    | DeepSeek R1 (含思维链) | `api-route-deepseek-reasoner` |
+    | Gemini 2.5 Flash | `api-route-gemini-2.5-flash` |
+
+---
+
+## 方式三：One-API 接入
 
 [One-API](https://github.com/songquanpeng/one-api) 是一个开源的 API 管理和分发系统，支持自托管部署。如果您自己部署了 One-API 或使用基于 One-API 的第三方服务，可以通过 `one-api-` 前缀接入。
 
@@ -130,7 +184,7 @@ one-api-{模型名}(max_token={最大token数})
 
 ---
 
-## 方式三：API_URL_REDIRECT 通用重定向
+## 方式四：API_URL_REDIRECT 通用重定向
 
 对于任何提供 OpenAI 兼容接口的服务，您都可以使用 `API_URL_REDIRECT` 配置进行 URL 重定向。这是最灵活的接入方式，适用于各种第三方中转服务。
 
