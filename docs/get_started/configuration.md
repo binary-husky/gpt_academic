@@ -83,6 +83,7 @@ AVAIL_LLM_MODELS = [
     | 前缀 | 说明 | 示例 |
     |-----|------|------|
     | `openrouter-` | OpenRouter 路由服务 | `openrouter-openai/gpt-4o` |
+    | `api-route-` | API Route 聚合路由服务 | `api-route-gpt-4o` |
     | `one-api-` | One-API 兼容服务 | `one-api-gpt-4(max_token=8000)` |
     | `azure-` | Azure OpenAI 服务 | `azure-gpt-4` |
     | `ollama-` | 本地 Ollama 模型 | `ollama-llama3(max_token=4096)` |
@@ -271,7 +272,7 @@ services:
 ├── 智谱 AI (glm-*)
 │   └── ZHIPUAI_API_KEY
 │
-└── 中转服务 (one-api-*, openrouter-*)
+└── 中转服务 (one-api-*, openrouter-*, api-route-*)
     ├── API_KEY
     └── API_URL_REDIRECT
 ```

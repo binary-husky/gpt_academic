@@ -39,6 +39,10 @@ def is_openroute_api_key(key):
     API_MATCH_OPENROUTE = re.match(r"sk-or-v1-[a-zA-Z0-9]{64}$", key)
     return bool(API_MATCH_OPENROUTE)
 
+def is_api_route_key(key):
+    API_MATCH_APIROUTE = re.match(r"^sk-(dist-)?[a-zA-Z0-9_-]{20,}$", key)
+    return bool(API_MATCH_APIROUTE)
+
 def is_cohere_api_key(key):
     API_MATCH_AZURE = re.match(r"[a-zA-Z0-9]{40}$", key)
     return bool(API_MATCH_AZURE)
@@ -58,11 +62,11 @@ def is_any_api_key(key):
             if is_any_api_key(k): return True
         return False
     else:
-        return is_openai_api_key(key) or is_api2d_key(key) or is_azure_api_key(key) or is_cohere_api_key(key)
+        return is_openai_api_key(key) or is_api2d_key(key) or is_azure_api_key(key) or is_cohere_api_key(key) or is_openroute_api_key(key) or is_api_route_key(key)
 
 
 def what_keys(keys):
-    avail_key_list = {'OpenAI Key': 0, "Azure Key": 0, "API2D Key": 0}
+    avail_key_list = {'OpenAI Key': 0, "Azure Key": 0, "API2D Key": 0, "API Route Key": 0}
     key_list = keys.split(',')
 
     for k in key_list:
@@ -77,7 +81,11 @@ def what_keys(keys):
         if is_azure_api_key(k):
             avail_key_list['Azure Key'] += 1
 
-    return f"检测到： OpenAI Key {avail_key_list['OpenAI Key']} 个, Azure Key {avail_key_list['Azure Key']} 个, API2D Key {avail_key_list['API2D Key']} 个"
+    for k in key_list:
+        if is_api_route_key(k):
+            avail_key_list['API Route Key'] += 1
+
+    return f"检测到： OpenAI Key {avail_key_list['OpenAI Key']} 个, Azure Key {avail_key_list['Azure Key']} 个, API2D Key {avail_key_list['API2D Key']} 个, API Route Key {avail_key_list['API Route Key']} 个"
 
 def is_o_family_for_openai(llm_model):
     if not llm_model.startswith('o'):
@@ -113,6 +121,10 @@ def select_api_key(keys, llm_model):
     if llm_model.startswith('openrouter-'):
         for k in key_list:
             if is_openroute_api_key(k): avail_key_list.append(k)
+
+    if llm_model.startswith('api-route-') or llm_model.startswith('apiroute-'):
+        for k in key_list:
+            if is_api_route_key(k) or is_openai_api_key(k): avail_key_list.append(k)
 
     if len(avail_key_list) == 0:
         raise RuntimeError(f"您提供的api-key不满足要求，不包含任何可用于{llm_model}的api-key。您可能选择了错误的模型或请求源（左上角更换模型菜单中可切换openai,azure,claude,cohere等请求源）。")

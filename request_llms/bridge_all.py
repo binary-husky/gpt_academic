@@ -81,6 +81,7 @@ yimodel_endpoint = "https://api.lingyiwanwu.com/v1/chat/completions"
 deepseekapi_endpoint = "https://api.deepseek.com/v1/chat/completions"
 grok_model_endpoint = "https://api.x.ai/v1/chat/completions"
 volcengine_endpoint = "https://ark.cn-beijing.volces.com/api/v3/chat/completions"
+apiroute_endpoint = "https://www.api-route.com/v1/chat/completions"
 
 if not AZURE_ENDPOINT.endswith('/'): AZURE_ENDPOINT += '/'
 azure_endpoint = AZURE_ENDPOINT + f'openai/deployments/{AZURE_ENGINE}/chat/completions?api-version=2023-05-15'
@@ -104,6 +105,7 @@ if yimodel_endpoint in API_URL_REDIRECT: yimodel_endpoint = API_URL_REDIRECT[yim
 if deepseekapi_endpoint in API_URL_REDIRECT: deepseekapi_endpoint = API_URL_REDIRECT[deepseekapi_endpoint]
 if grok_model_endpoint in API_URL_REDIRECT: grok_model_endpoint = API_URL_REDIRECT[grok_model_endpoint]
 if volcengine_endpoint in API_URL_REDIRECT: volcengine_endpoint = API_URL_REDIRECT[volcengine_endpoint]
+if apiroute_endpoint in API_URL_REDIRECT: apiroute_endpoint = API_URL_REDIRECT[apiroute_endpoint]
 
 # 获取tokenizer
 tokenizer_gpt35 = LazyloadTiktoken("gpt-3.5-turbo")
@@ -1412,6 +1414,29 @@ for model in [m for m in AVAIL_LLM_MODELS if m.startswith("openrouter-")]:
             "max_token": 128000,
             "tokenizer": tokenizer_gpt4,
             "token_cnt": get_token_num_gpt4,
+        },
+    })
+
+# -=-=-=-=-=-=- API Route模型对齐支持 -=-=-=-=-=-=-
+# 为了更灵活地接入API Route多模型聚合路由服务，设计了此接口
+for model in [m for m in AVAIL_LLM_MODELS if m.startswith("api-route-") or m.startswith("apiroute-")]:
+    from request_llms.bridge_apiroute import predict_no_ui_long_connection as apiroute_noui
+    from request_llms.bridge_apiroute import predict as apiroute_ui
+    try:
+        origin_model_name, max_token_tmp = read_one_api_model_name(model)
+    except:
+        logger.error(f"API Route模型 {model} 的 max_token 配置不是整数，请检查配置文件。")
+        continue
+    model_info.update({
+        model: {
+            "fn_with_ui": apiroute_ui,
+            "fn_without_ui": apiroute_noui,
+            "endpoint": apiroute_endpoint,
+            "has_multimodal_capacity": True,
+            "max_token": max_token_tmp if max_token_tmp is not None else 128000,
+            "tokenizer": tokenizer_gpt4,
+            "token_cnt": get_token_num_gpt4,
+            "can_multi_thread": True,
         },
     })
 

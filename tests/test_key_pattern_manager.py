@@ -11,7 +11,7 @@ def validate_path():
 
 validate_path()  # validate path so you can run from base directory
 
-from shared_utils.key_pattern_manager import is_openai_api_key
+from shared_utils.key_pattern_manager import is_openai_api_key, is_api_route_key, select_api_key
 
 class TestKeyPatternManager(unittest.TestCase):
     def test_is_openai_api_key_with_valid_key(self):
@@ -58,6 +58,20 @@ class TestKeyPatternManager(unittest.TestCase):
         # Assuming you have set a custom pattern in your configuration
         key = "custom-pattern-key"
         self.assertFalse(is_openai_api_key(key))
+
+    def test_is_api_route_key(self):
+        self.assertTrue(is_api_route_key("sk-abcdefghijklmnopqrstuvwxyz123456"))
+        self.assertTrue(is_api_route_key("sk-dist-abcdefghijklmnopqrstuvwxyz123456"))
+        self.assertFalse(is_api_route_key("invalid-key"))
+        self.assertFalse(is_api_route_key("sk-short"))
+
+    def test_select_api_key_for_api_route(self):
+        keys = "sk-dist-1234567890abcdef1234567890,fk123456-12345678901234567890123456789012"
+        selected = select_api_key(keys, "api-route-gpt-4o")
+        self.assertEqual(selected, "sk-dist-1234567890abcdef1234567890")
+
+        selected_alt = select_api_key(keys, "apiroute-claude-3-7-sonnet")
+        self.assertEqual(selected_alt, "sk-dist-1234567890abcdef1234567890")
 
 if __name__ == '__main__':
     unittest.main()
