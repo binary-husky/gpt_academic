@@ -44,9 +44,9 @@ class AsyncGptTask():
             gpt_say_partial = predict_no_ui_long_connection(inputs=i_say, llm_kwargs=llm_kwargs, history=history, sys_prompt=sys_prompt,
                                                             observe_window=observe_window[index], console_silence=True)
         except ConnectionAbortedError as token_exceed_err:
-            logger.error('至少一个线程任务Token溢出而失败', e)
+            logger.error('至少一个线程任务Token溢出而失败: {}', token_exceed_err)
         except Exception as e:
-            logger.error('至少一个线程任务意外失败', e)
+            logger.error('至少一个线程任务意外失败: {}', e)
 
     def add_async_gpt_task(self, i_say, chatbot_index, llm_kwargs, history, system_prompt):
         self.observe_future.append([""])
